@@ -44,6 +44,11 @@ public class CenterOfPressureCommandCalculator
       return centerOfPressureCommand;
    }
 
+   public double getCenterOfPressureWeight()
+   {
+      return centerOfPressureWeight.getValue();
+   }
+
    public void computeCenterOfPressureCommand(FramePoint2DReadOnly desiredCoP,
                                               SideDependentList<PlaneContactStateCommand> contactStateCommands,
                                               SideDependentList<? extends FrameConvexPolygon2DReadOnly> footSupportPolygonsInSoleFrame)

@@ -48,6 +48,7 @@ import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajec
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.robotics.trajectories.yoVariables.YoFramePolynomial3D;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
@@ -66,6 +67,7 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -131,6 +133,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
    private final BagOfBalls perfectCMPTrajectory;
 
    private final YoBoolean useMomentumRecoveryModeForBalance = new YoBoolean("useMomentumRecoveryModeForBalance", registry);
+   private final YoBoolean isCoPDamped = new YoBoolean("isCoPDamped", registry);
 
    private final YoDouble yoTime;
    private final YoDouble icpErrorThresholdToAdjustTime = new YoDouble("icpErrorThresholdToAdjustTime", registry);
@@ -159,6 +162,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
 
    private final YoBoolean holdICPToCurrentCoMLocationInNextDoubleSupport = new YoBoolean("holdICPToCurrentCoMLocationInNextDoubleSupport", registry);
 
+   private final DoubleProvider icpErrorDeadband;
    private final YoDouble normalizedICPError = new YoDouble("normalizedICPError", registry);
    private final DoubleProvider maxICPErrorBeforeSingleSupportForwardX;
    private final DoubleProvider maxICPErrorBeforeSingleSupportBackwardX;
@@ -284,6 +288,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
 
       distanceToShrinkSupportPolygonWhenHoldingCurrent.set(0.08);
 
+      icpErrorDeadband = new DoubleParameter("icpErrorDeadband", registry, walkingControllerParameters.getICPControllerParameters().getICPErrorDeadband());
       maxICPErrorBeforeSingleSupportForwardX = new DoubleParameter("maxICPErrorBeforeSingleSupportForwardX",
                                                                    registry,
                                                                    walkingControllerParameters.getMaxICPErrorBeforeSingleSupportForwardX());
@@ -433,6 +438,11 @@ public class BalanceManager implements SCS2YoGraphicHolder
       this.useMomentumRecoveryModeForBalance.set(useMomentumRecoveryModeForBalance);
    }
 
+   public void setIsCoPDamped(boolean isCoPDamped)
+   {
+      this.isCoPDamped.set(isCoPDamped);
+   }
+
    public void addFootstepToPlan(Footstep footstep, FootstepTiming timing)
    {
       copTrajectoryState.addFootstep(footstep);
@@ -455,10 +465,10 @@ public class BalanceManager implements SCS2YoGraphicHolder
    {
       boolean usingStepAdjustment = stepAdjustmentController.useStepAdjustment();
 
-      if (!usingStepAdjustment)
-      {
-         return false;
-      }
+//      if (!usingStepAdjustment)
+//      {
+//         return false;
+//      }
       // FIXME For now, only compute this at the beginning of swing. Once the step is adjusted, it should likely increase, and anecdotally, we want to prevent
       // FIXME this value from "running away" as the step continues to be adjusted. In theory, this should be ok, but it looks like it isn't. More
       // FIXME experimentation is necessary. RJG 07/27/2023
@@ -469,7 +479,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
 
       double omega0 = controllerToolbox.getOmega0();
 
-      if (useAngularCapturePoint.getBooleanValue())
+      if (useAngularCapturePoint.getValue())
          capturePoint2d.set(controllerToolbox.getAngularCapturePoint());
       else
          capturePoint2d.set(controllerToolbox.getCapturePoint());
@@ -523,7 +533,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
       // use 1.0 - feedback alpha, because 0.0 feedback alpha does nothing, while 1.0 should allow no feedback.
       stepAdjustmentController.compute(yoTime.getDoubleValue(), yoDesiredCapturePoint, capturePoint2d, omega0, yoEquivalentRemainingCoP, 1.0 - feedbackAlpha);
       boolean footstepWasAdjusted = stepAdjustmentController.wasFootstepAdjusted();
-      if (footstepWasAdjusted)
+      if (footstepWasAdjusted && usingStepAdjustment)
          footstep.setPose(stepAdjustmentController.getFootstepSolution());
 
       return footstepWasAdjusted;
@@ -678,6 +688,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
       linearMomentumRateControlModuleInput.setControlHeightWithMomentum(controlHeightWithMomentum);
       linearMomentumRateControlModuleInput.setOmega0(omega0);
       linearMomentumRateControlModuleInput.setUseMomentumRecoveryMode(useMomentumRecoveryModeForBalance.getBooleanValue());
+      linearMomentumRateControlModuleInput.setIsCoPDamped(isCoPDamped.getBooleanValue());
       linearMomentumRateControlModuleInput.setUseAngularCapturePoint(useAngularCapturePoint.getBooleanValue());
       linearMomentumRateControlModuleInput.setDesiredCapturePoint(desiredCapturePoint2d);
       linearMomentumRateControlModuleInput.setDesiredCapturePointVelocity(desiredCapturePointVelocity2d);
@@ -1083,6 +1094,13 @@ public class BalanceManager implements SCS2YoGraphicHolder
       getICPError(icpError2d);
       ReferenceFrame leadingSoleZUpFrame = controllerToolbox.getReferenceFrames().getSoleZUpFrame(transferToSide);
       icpError2d.changeFrame(leadingSoleZUpFrame);
+      // apply the deadband to the error
+      double icpErrorMagnitude = icpError2d.norm();
+      if (icpErrorMagnitude < icpErrorDeadband.getValue())
+         icpError2d.setToZero();
+      else
+         icpError2d.scale((icpErrorMagnitude - icpErrorDeadband.getValue()) / icpErrorMagnitude);
+
       boolean isICPErrorToTheInside = transferToSide == RobotSide.RIGHT ? icpError2d.getY() > 0.0 : icpError2d.getY() < 0.0;
       double maxICPErrorBeforeSingleSupportX = icpError2d.getX() > 0.0 ? maxICPErrorBeforeSingleSupportForwardX.getValue()
             : maxICPErrorBeforeSingleSupportBackwardX.getValue();

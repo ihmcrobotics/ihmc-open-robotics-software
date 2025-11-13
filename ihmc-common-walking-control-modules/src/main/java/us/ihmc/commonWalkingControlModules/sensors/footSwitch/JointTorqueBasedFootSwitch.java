@@ -39,6 +39,7 @@ import java.util.List;
 
 public class JointTorqueBasedFootSwitch implements FootSwitchInterface
 {
+   private static final double GRAVITY_Z = -9.81;
    private final YoRegistry registry;
 
    private final BooleanProvider useJacobianTranspose;
@@ -103,7 +104,7 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
       wrenchDetector = new JacobianBasedBasedTouchdownDetector(foot,
                                                                rootBody,
                                                                soleFrame,
-                                                               MultiBodySystemMissingTools.computeSubTreeMass(MultiBodySystemTools.getRootBody(rootBody)),
+                                                               MultiBodySystemMissingTools.computeSubTreeMass(MultiBodySystemTools.getRootBody(rootBody)) * Math.abs(GRAVITY_Z),
                                                                contactablePlaneBody,
                                                                contactForceThresholdLow,
                                                                contactForceThresholdHigh,
@@ -349,7 +350,7 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
          footJacobian = new GeometricJacobian(pelvis, foot, soleFrame);
          gravityTorqueCalculator = new InverseDynamicsCalculator(MultiBodySystemReadOnly.toMultiBodySystemInput(legJoints));
          gravityTorqueCalculator.setConsiderJointAccelerations(false);
-         gravityTorqueCalculator.setGravitionalAcceleration(-9.81); // TODO Extract me
+         gravityTorqueCalculator.setGravitionalAcceleration(GRAVITY_Z);
 
          legJointGravityTaus = new YoDouble[6];
          for (int i = 0; i < legJointGravityTaus.length; i++)
@@ -480,9 +481,9 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
 //       hasFootHitGround.set(isPastForceThreshold.getValue() && horizontalVelocity.getValue() < horizontalVelocityThreshold.getValue()
 //                              && Math.abs(verticalVelocity.getValue()) < verticalVelocityThreshold.getValue());
          boolean validCoP = isPastCoPThresholdFiltered.getValue();
-         boolean hitGround = (isPastForceThresholdLowFiltered.getValue() && validCoP) || isPastForceThresholdHigh.getValue();
+         boolean hitGroundLow = (isPastForceThresholdLowFiltered.getValue() && validCoP && Math.abs(verticalVelocity.getValue()) < verticalVelocityThreshold.getValue()) ;
 
-         hasFootHitGround.set(hitGround && Math.abs(verticalVelocity.getValue()) < verticalVelocityThreshold.getValue());
+         hasFootHitGround.set(hitGroundLow || isPastForceThresholdHigh.getValue());
          hasFootHitGroundFiltered.update();
       }
 
