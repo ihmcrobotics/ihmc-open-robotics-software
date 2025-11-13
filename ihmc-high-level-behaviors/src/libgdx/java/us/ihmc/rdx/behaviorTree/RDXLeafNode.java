@@ -25,7 +25,6 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
    private final ImGuiFlashingText flashingDescriptionColor = new ImGuiFlashingText(ImGuiTools.RED);
    /** Used to trigger a UI notification when the action goes from !failed -> failed. */
    private boolean wasFailed = false;
-   private float offsetY = 0.0f;
 
    public RDXLeafNode(S state, RDXBehaviorTreeRootNode rootNode)
    {
@@ -72,27 +71,33 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
 
    public void renderConcurrencyGraph()
    {
-      float frameHeight = ImGui.getFrameHeight();
-      ImGui.sameLine(ImGui.getColumnWidth(), 0.0f);
-      offsetY = ImGui.getCursorScreenPosY();
-
       if (!definition.getExecuteAfterPrevious())
       {
-         RDXLeafNode<?, ?> executeAfterLeaf = getExecuteAfterLeaf();
-         if (executeAfterLeaf != null)
+         float frameHeight = ImGui.getFrameHeight();
+         float executeAfterY = Float.NaN;
+         if (definition.getExecuteAfterBeginning())
+            executeAfterY = rootNode.offsetY;
+         else
          {
+            RDXLeafNode<?, ?> executeAfterLeaf = getExecuteAfterLeaf();
+            if (executeAfterLeaf != null)
+               executeAfterY = executeAfterLeaf.offsetY + frameHeight * 0.5f;
+         }
+
+         if (!Float.isNaN(executeAfterY))
+         {
+            ImGui.sameLine(ImGui.getColumnWidth(), 0.0f);
             int color = ImGui.getColorU32(getSelected() ? ImGuiCol.Text : ImGuiCol.TextDisabled);
             int scale = ImGui.getFontSize();
             float thickness = mouseHoveringNodeLine ? 2.0f : 1.0f;
             float offsetX = ImGui.getCursorScreenPosX();
-            float executeAfterY = executeAfterLeaf.offsetY + frameHeight * 0.5f;
             ImGui.getWindowDrawList().addLine(offsetX, offsetY + frameHeight * 0.5f, offsetX, executeAfterY, color, thickness);
             ImGui.getWindowDrawList().addLine(offsetX - scale * 0.4f, executeAfterY + scale * 0.5f, offsetX, executeAfterY, color, thickness);
             ImGui.getWindowDrawList().addLine(offsetX + scale * 0.4f, executeAfterY + scale * 0.5f, offsetX, executeAfterY, color, thickness);
             ImGui.getWindowDrawList().addCircle(offsetX, offsetY + frameHeight * 0.5f, scale * 0.15f, color, 16, thickness);
+            ImGui.dummy(0.0f, frameHeight);
          }
       }
-      ImGui.dummy(0.0f, frameHeight);
    }
 
    public void renderConcurrencyRank()
