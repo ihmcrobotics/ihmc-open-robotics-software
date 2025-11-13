@@ -78,18 +78,19 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
 
       if (!definition.getExecuteAfterPrevious())
       {
-         float offsetX = ImGui.getCursorScreenPosX();
          RDXLeafNode<?, ?> executeAfterLeaf = getExecuteAfterLeaf();
-         int color = ImGui.getColorU32(getSelected() ? ImGuiCol.Text : ImGuiCol.TextDisabled);
-         int scale = ImGui.getFontSize();
-         float thickness = mouseHoveringNodeLine ? 2.0f : 1.0f;
-         float executeAfterY = executeAfterLeaf.offsetY + frameHeight * 0.5f;
-         ImGui.getWindowDrawList().addLine(offsetX, offsetY + frameHeight * 0.5f, offsetX, executeAfterY, color, thickness);
-         ImGui.getWindowDrawList().addLine(offsetX - scale * 0.4f, executeAfterY + scale * 0.5f,
-                                           offsetX, executeAfterY, color, thickness);
-         ImGui.getWindowDrawList().addLine(offsetX + scale * 0.4f, executeAfterY + scale * 0.5f,
-                                           offsetX, executeAfterY, color, thickness);
-         ImGui.getWindowDrawList().addCircle(offsetX, offsetY + frameHeight * 0.5f, scale * 0.15f, color, 16, thickness);
+         if (executeAfterLeaf != null)
+         {
+            int color = ImGui.getColorU32(getSelected() ? ImGuiCol.Text : ImGuiCol.TextDisabled);
+            int scale = ImGui.getFontSize();
+            float thickness = mouseHoveringNodeLine ? 2.0f : 1.0f;
+            float offsetX = ImGui.getCursorScreenPosX();
+            float executeAfterY = executeAfterLeaf.offsetY + frameHeight * 0.5f;
+            ImGui.getWindowDrawList().addLine(offsetX, offsetY + frameHeight * 0.5f, offsetX, executeAfterY, color, thickness);
+            ImGui.getWindowDrawList().addLine(offsetX - scale * 0.4f, executeAfterY + scale * 0.5f, offsetX, executeAfterY, color, thickness);
+            ImGui.getWindowDrawList().addLine(offsetX + scale * 0.4f, executeAfterY + scale * 0.5f, offsetX, executeAfterY, color, thickness);
+            ImGui.getWindowDrawList().addCircle(offsetX, offsetY + frameHeight * 0.5f, scale * 0.15f, color, 16, thickness);
+         }
       }
       ImGui.dummy(0.0f, frameHeight);
    }
