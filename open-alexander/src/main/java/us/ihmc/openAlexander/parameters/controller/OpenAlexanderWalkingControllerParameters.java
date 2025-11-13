@@ -50,7 +50,7 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
    private SwingTrajectoryParameters swingTrajectoryParameters;
    private OpenAlexanderSteppingParameters steppingParameters;
    private final OpenAlexanderICPControllerParameters icpControllerParameters;
-   private final AlexanderStepAdjustmentParameters stepAdjustmentParameters;
+   private final OpenAlexanderStepAdjustmentParameters stepAdjustmentParameters;
    private JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = new AlexanderJointPrivilegedConfigurationParameters();
    private final OneDoFJointPrivilegedConfigurationParameters kneePrivilegedConfigurationParameters;
    private final JointLimitParameters kneeJointLimitParameters;
@@ -104,7 +104,7 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
       swingTrajectoryParameters = new AlexanderSwingTrajectoryParameters();
       steppingParameters = new OpenAlexanderSteppingParameters(physicalProperties);
       icpControllerParameters = new OpenAlexanderICPControllerParameters();
-      stepAdjustmentParameters = new AlexanderStepAdjustmentParameters();
+      stepAdjustmentParameters = new OpenAlexanderStepAdjustmentParameters();
 
       kneePrivilegedConfigurationParameters = new OneDoFJointPrivilegedConfigurationParameters();
       kneePrivilegedConfigurationParameters.setConfigurationGain(target == RobotTarget.REAL_ROBOT ? 60.0 : 120.0);

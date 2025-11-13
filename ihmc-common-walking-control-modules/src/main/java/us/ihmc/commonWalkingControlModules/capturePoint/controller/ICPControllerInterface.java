@@ -40,4 +40,8 @@ public interface ICPControllerInterface extends SCS2YoGraphicHolder
    FrameVector2DReadOnly getExpectedControlICPVelocity();
 
    boolean useAngularMomentum();
+
+   default void setUseHighCoPDamping(boolean useHighCoPDamping)
+   {
+   }
 }

@@ -43,16 +43,16 @@ public class DynamicStateInspectorParameters
       minFractionOfStrideFromTheToe = new DoubleParameter("minFractionOfStrideFromToe" + suffix, registry, 0.5);
 
       minDistanceAlongErrorFromOutsideEdge = new DoubleParameter("minDistAlongErrorFromOutEdge" + suffix, registry, -0.025);
-      minOrthogonalDistanceFromOutsideEdge = new DoubleParameter("minOrthoDistFromOutEdge" + suffix, registry, -0.015);
+      minOrthogonalDistanceFromOutsideEdge = new DoubleParameter("minOrthoDistFromOutEdge" + suffix, registry, -0.035);
       minDistanceAlongErrorFromInsideEdge = new DoubleParameter("minDistAlongErrorFromInEdge" + suffix, registry, -0.01);
-      minOrthogonalDistanceFromInsideEdge = new DoubleParameter("minOrthoDistFromInEdge" + suffix, registry, -0.0075);
+      minOrthogonalDistanceFromInsideEdge = new DoubleParameter("minOrthoDistFromInEdge" + suffix, registry, -0.025);
 
       minNormalizedDistanceFromOutsideEdge = new DoubleParameter("minNormDistFromOutEdge" + suffix, registry, 0.35);
       minNormalizedDistanceFromInsideEdge = new DoubleParameter("minNormDistFromInEdge" + suffix, registry, 0.3);
       maxRatioOfControlDecreaseFromToeingOff = new DoubleParameter("maxRatioOfControlDecreaseFromToeingOff" + suffix, registry, 2.0);
       maxNormalizedErrorNeededForControl = new DoubleParameter("maxNormErrorNeededForControl" + suffix, registry, 1.0);
 
-      maxDistanceToMoveECMP = new DoubleParameter("maxDistanceToMoveECMP" + suffix, registry, 0.05);
+      maxDistanceToMoveECMP = new DoubleParameter("maxDistanceToMoveECMP" + suffix, registry, 0.02);
 
       parentRegistry.addChild(registry);
    }

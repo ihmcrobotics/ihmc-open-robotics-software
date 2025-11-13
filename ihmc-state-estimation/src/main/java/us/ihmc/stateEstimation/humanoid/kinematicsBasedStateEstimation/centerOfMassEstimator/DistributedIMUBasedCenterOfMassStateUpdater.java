@@ -1,12 +1,5 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.centerOfMassEstimator;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -30,15 +23,19 @@ import us.ihmc.robotics.math.filters.YoIMUMahonyFilter;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.IMUBasedPelvisRotationalStateUpdater;
-import us.ihmc.yoVariables.euclid.filters.FilteredFiniteDifferenceYoFrameVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
-import us.ihmc.yoVariables.filters.AlphaFilterTools;
-import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * This estimator takes advantage of having several IMUs distributed on the robot to refine the pose
@@ -264,7 +261,7 @@ public class DistributedIMUBasedCenterOfMassStateUpdater implements MomentumStat
             RigidBodyStateEstimator footEstimator = estimatorMap.get(trustedFoot);
 
             // Get the difference between the estimate from the kinematics and the integrated IMU measurement, and add it to the adjustment
-            tempPoint.sub(footEstimator.getBodyFrame().getTransformToRoot().getTranslation(), footEstimator.estimatedPose.getTranslation());
+            tempPoint.sub(footEstimator.getBodyFrame().getTransformToRoot().getTranslation(), footEstimator.getEstimatedPose().getTranslation());
             tempPoint.scale(scale);
             positionAdjustment.add(tempPoint);
 
@@ -447,7 +444,7 @@ public class DistributedIMUBasedCenterOfMassStateUpdater implements MomentumStat
             expectedStaticAcceleration.setMatchingFrame(gravityVector);
             expectedStaticAcceleration.negate();
 
-            // Estimate angular velocity & orientation
+            // Estimate angular velocity & orientation of the IMU using a Mahoney filter.
             linearAcceleration.setIncludingFrame(getIMUFrame(), imuSensor.getLinearAccelerationMeasurement());
             angularVelocity.setIncludingFrame(getIMUFrame(), imuSensor.getAngularVelocityMeasurement());
             northVector.setIncludingFrame(worldFrame, Axis3D.X);
@@ -509,7 +506,7 @@ public class DistributedIMUBasedCenterOfMassStateUpdater implements MomentumStat
 
       public RigidBodyTransformReadOnly getEstimatedPose()
       {
-         return estimatedPose;
+         return yoEstimatedPose;
       }
 
       public TwistReadOnly getEstimatedTwist()
