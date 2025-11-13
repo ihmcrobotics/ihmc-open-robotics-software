@@ -123,17 +123,13 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
    public void renderExecutionControlAndProgressWidgets()
    {
       if (ImGui.button(labels.get("<")))
-      {
          state.stepBackNextExecutionIndex();
-      }
       ImGuiTools.previousWidgetTooltip("Go to previous leaf");
       ImGui.sameLine();
       ImGui.text("Index: " + String.format("%03d", state.getExecutionNextIndex()));
       ImGui.sameLine();
       if (ImGui.button(labels.get(">")))
-      {
          state.stepForwardNextExecutionIndex();
-      }
       ImGuiTools.previousWidgetTooltip("Go to next leaf");
 
       ImGui.sameLine();

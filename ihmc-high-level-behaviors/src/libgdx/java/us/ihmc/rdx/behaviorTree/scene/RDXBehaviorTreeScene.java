@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiMouseButton;
+import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectState;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneState;
@@ -40,8 +41,10 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
    private final RDXPanel panel = new RDXPanel("Scene", this::renderImGuiWidgets);
 
    private final List<RDXBehaviorTreeSceneObject> objects;
+   private final ImBoolean showDetections = new ImBoolean(true);
    private final RecyclingArrayList<RDXBehaviorTreeSceneDetection> persistentDetections;
 
+   private final ImBoolean showCameraFrame = new ImBoolean(false);
    private final RigidBodyTransform cameraGraphicTransform = new RigidBodyTransform();
    private final ModelInstance cameraFrameGraphic = RDXModelBuilder.createCoordinateFrameInstance(0.2);
    private final RDX3DSituatedText cameraText = new RDX3DSituatedText();
@@ -67,10 +70,13 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
 
    public void update()
    {
-      syncedRobot.getReferenceFrames().getExperimentalCameraFrame().getTransformToDesiredFrame(cameraGraphicTransform, ReferenceFrame.getWorldFrame());
-      LibGDXTools.toLibGDX(cameraGraphicTransform, cameraFrameGraphic.transform);
-      cameraText.setTextWithoutCache("Experimental Camera");
-      cameraText.setPositionFacingCamera(baseUI.getPrimary3DPanel().getCamera3D(), cameraGraphicTransform.getTranslation());
+      if (showCameraFrame.get())
+      {
+         syncedRobot.getReferenceFrames().getExperimentalCameraFrame().getTransformToDesiredFrame(cameraGraphicTransform, ReferenceFrame.getWorldFrame());
+         LibGDXTools.toLibGDX(cameraGraphicTransform, cameraFrameGraphic.transform);
+         cameraText.setTextWithoutCache("Experimental Camera");
+         cameraText.setPositionFacingCamera(baseUI.getPrimary3DPanel().getCamera3D(), cameraGraphicTransform.getTranslation());
+      }
 
       for (RDXBehaviorTreeSceneObject object : objects)
          object.update();
@@ -90,6 +96,10 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
 
    private void renderImGuiWidgets()
    {
+      ImGuiTools.smallCheckbox(labels.get("Show camera frame"), showCameraFrame);
+      ImGui.sameLine();
+      ImGuiTools.smallCheckbox(labels.get("Show detections"), showDetections);
+      ImGui.separator();
       ImGui.text("Add virtual:");
       ImGui.indent();
       if (ImGuiTools.textWithUnderlineOnHover("Mustard") && ImGui.isMouseClicked(ImGuiMouseButton.Left))
@@ -100,6 +110,7 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
          needToInitializePlacementHeight = true;
       }
       ImGui.unindent();
+      ImGui.separator();
 
       ImGui.text("Objects:");
       ImGui.indent();
@@ -159,11 +170,20 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
 
    private void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      cameraFrameGraphic.getRenderables(renderables, pool);
-      cameraText.getRenderables(renderables, pool);
+      if (showCameraFrame.get())
+      {
+         cameraFrameGraphic.getRenderables(renderables, pool);
+         cameraText.getRenderables(renderables, pool);
+      }
 
-      for (RDXBehaviorTreeSceneDetection detection : persistentDetections)
-         detection.getRenderables(renderables, pool);
+      if (showDetections.get())
+      {
+         for (RDXBehaviorTreeSceneDetection detection : persistentDetections)
+            detection.getRenderables(renderables, pool);
+      }
+
+      for (RDXBehaviorTreeSceneObject object : objects)
+         object.getRenderables(renderables, pool);
    }
 
    @Override
