@@ -51,7 +51,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    private transient final ImVec2 lineMin = new ImVec2();
    private transient final ImVec2 indentMin = new ImVec2();
    private transient final ImVec2 lineMax = new ImVec2();
-   private boolean mouseHoveringNodeLine;
+   protected boolean mouseHoveringNodeLine;
    protected boolean anySpecificWidgetOnLineClicked = false;
    protected boolean treeWidgetExpanded = false;
    private int previousNumberOfChildren = 0;

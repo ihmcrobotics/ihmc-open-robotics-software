@@ -4,6 +4,7 @@ import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import us.ihmc.behaviors.behaviorTree.LeafNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.LeafNodeState;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiFlashingColors;
 import us.ihmc.rdx.imgui.ImGuiFlashingText;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -24,6 +25,7 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
    private final ImGuiFlashingText flashingDescriptionColor = new ImGuiFlashingText(ImGuiTools.RED);
    /** Used to trigger a UI notification when the action goes from !failed -> failed. */
    private boolean wasFailed = false;
+   private float offsetY = 0.0f;
 
    public RDXLeafNode(S state, RDXBehaviorTreeRootNode rootNode)
    {
@@ -70,13 +72,26 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
 
    public void renderConcurrencyGraph()
    {
+      float frameHeight = ImGui.getFrameHeight();
+      ImGui.sameLine(ImGui.getColumnWidth(), 0.0f);
+      offsetY = ImGui.getCursorScreenPosY();
+
       if (!definition.getExecuteAfterPrevious())
       {
          float offsetX = ImGui.getCursorScreenPosX();
-         float offsetY = ImGui.getCursorScreenPosY();
-         float frameHeight = ImGui.getFrameHeight();
-//         ImGui.getWindowDrawList().addLine(); TODO
+         RDXLeafNode<?, ?> executeAfterLeaf = getExecuteAfterLeaf();
+         int color = ImGui.getColorU32(getSelected() ? ImGuiCol.Text : ImGuiCol.TextDisabled);
+         int scale = ImGui.getFontSize();
+         float thickness = mouseHoveringNodeLine ? 2.0f : 1.0f;
+         float executeAfterY = executeAfterLeaf.offsetY + frameHeight * 0.5f;
+         ImGui.getWindowDrawList().addLine(offsetX, offsetY + frameHeight * 0.5f, offsetX, executeAfterY, color, thickness);
+         ImGui.getWindowDrawList().addLine(offsetX - scale * 0.4f, executeAfterY + scale * 0.5f,
+                                           offsetX, executeAfterY, color, thickness);
+         ImGui.getWindowDrawList().addLine(offsetX + scale * 0.4f, executeAfterY + scale * 0.5f,
+                                           offsetX, executeAfterY, color, thickness);
+         ImGui.getWindowDrawList().addCircle(offsetX, offsetY + frameHeight * 0.5f, scale * 0.15f, color, 16, thickness);
       }
+      ImGui.dummy(0.0f, frameHeight);
    }
 
    public void renderConcurrencyRank()
@@ -157,5 +172,20 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
    public int getNameColor()
    {
       return flashingDescriptionColor.getTextColor(state.getFailed());
+   }
+
+
+
+   /** @return the leaf to execute after as part of the concurrency system */
+   public RDXLeafNode getExecuteAfterLeaf()
+   {
+      if (rootNode.getIDToNodeMap().get(definition.getExecuteAfterNodeID()) instanceof RDXLeafNode executeAfterNode)
+      {
+         return executeAfterNode;
+      }
+
+      LogTools.error("Node ID not found: {}", definition.getExecuteAfterNodeID());
+
+      return null;
    }
 }
