@@ -144,7 +144,7 @@ public class RDXAbilityHand implements RDXHandInterface
          ImGui.popItemWidth();
          ImGui.sameLine();
          ImGui.pushItemWidth(ImGui.getColumnWidth());
-         scheduleExecuteVelToPos |= ImGui.inputFloat(labels.getHidden("Velocity" + i), desiredVelocities[i], 0.1f, 1.0f, "%.2f rad/s");
+         scheduleExecuteVelToPos |= ImGui.inputFloat(labels.getHidden("Velocity" + i), desiredVelocities[i], 0.1f, 1.0f, "%.2f deg/s");
          ImGui.popItemWidth();
       }
 
