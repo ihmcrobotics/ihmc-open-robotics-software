@@ -165,7 +165,7 @@ public class GpuMappingManager
 
       heightMapMessage.setSequenceId(heightMapSequenceId++);
       heightMapMessagePublisher.publish(heightMapMessage);
-      controllerHeightMapMessagePublisher.publish(heightMapMessage);
+      controllerHeightMapMessagePublisher.publish(heightMapMessageForController);
    }
 
     public void publishTerrainMap()
