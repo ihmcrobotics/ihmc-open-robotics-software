@@ -79,9 +79,13 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
             executeAfterY = rootNode.offsetY;
          else
          {
-            RDXLeafNode<?, ?> executeAfterLeaf = getExecuteAfterLeaf();
-            if (executeAfterLeaf != null)
-               executeAfterY = executeAfterLeaf.offsetY + frameHeight * 0.5f;
+            RDXBehaviorTreeNode<?, ?> nodeToPointTo = getExecuteAfterLeaf();
+            if (nodeToPointTo != null)
+            {
+               while (Float.isNaN(nodeToPointTo.offsetY)) // Handle collapsed subtrees
+                  nodeToPointTo = nodeToPointTo.getParent();
+               executeAfterY = nodeToPointTo.offsetY + frameHeight * 0.5f;
+            }
          }
 
          if (!Float.isNaN(executeAfterY))

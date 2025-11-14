@@ -124,6 +124,8 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       if (deltaChildren > 0 && deltaChildren < 5)
          treeWidgetExpanded = true;
 
+      offsetY = Float.NaN;
+
       while (!state.getLogger().getRecentMessages().isEmpty())
       {
          LogMessage message = state.getLogger().getRecentMessages().poll();
