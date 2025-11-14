@@ -180,7 +180,7 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
 
       for (SingleFootEstimator footEstimator : footEstimators)
       {
-         footEstimator.updateUntrustedFootPosition(pelvisPosition);
+         footEstimator.updateUntrustedFootPosition(pelvisPosition, useControllerDesiredCoP.getValue());
       }
       kinematicsIsUpToDate.set(false);
    }
@@ -222,7 +222,7 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
    {
       for (SingleFootEstimator footEstimator : footEstimators)
       {
-         footEstimator.updateUntrustedFootPosition(pelvisPosition);
+         footEstimator.updateUntrustedFootPosition(pelvisPosition, useControllerDesiredCoP.getValue());
       }
 
       rootJointPosition.set(pelvisPosition);
@@ -281,7 +281,7 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
       for (int i = 0; i < unTrustedFeet.size(); i++)
       {
          SingleFootEstimator footEstimator = footEstimatorMap.get(unTrustedFeet.get(i));
-         footEstimator.updateUntrustedFootPosition(pelvisPosition);
+         footEstimator.updateUntrustedFootPosition(pelvisPosition, useControllerDesiredCoP.getValue());
       }
 
       kinematicsIsUpToDate.set(false);
@@ -446,14 +446,31 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
        * @param swingingFoot   a foot in swing
        * @param pelvisPosition the current pelvis position
        */
-      private void updateUntrustedFootPosition(FramePoint3DReadOnly pelvisPosition)
+      private void updateUntrustedFootPosition(FramePoint3DReadOnly pelvisPosition, boolean useControllerDesiredCoP)
       {
          footPositionInWorld.sub(pelvisPosition, footToRootJointPosition);
 
          copPositionInWorld.set(footPositionInWorld);
 
-         copRawInFootFrame.setToZero();
-         copFilteredInFootFrame.setToZero();
+
+         if (footSwitch.hasFootHitGroundFiltered())
+         {
+            // The foot is still on the ground. This means that we still have a valid CoP, and may trust it again very soon. We shouldn't zero out the cop
+            // position, as that causes a bunch of discrete jumps as to where the filtered value is.
+            if (useControllerDesiredCoP)
+               centerOfPressureDataHolderFromController.getCenterOfPressure(tempCoP2d, foot);
+            else
+               footSwitch.getCenterOfPressure(tempCoP2d);
+            copRawInFootFrame.set(tempCoP2d);
+
+            tempCoPOffset.setIncludingFrame(soleFrame, copFilteredInFootFrame.getX(), copFilteredInFootFrame.getY(), 0.0);
+            copFilteredInFootFrame.update();
+         }
+         else
+         {
+            copRawInFootFrame.setToZero();
+            copFilteredInFootFrame.setToZero();
+         }
       }
 
       private final FrameVector3D tempFrameVector = new FrameVector3D();
