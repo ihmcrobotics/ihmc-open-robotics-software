@@ -296,7 +296,8 @@ public class DistributedIMUBasedCenterOfMassStateUpdater implements MomentumStat
             YoFrameVector3D velocityAdjustmentForFoot = velocityAdjustmentFromFoot.get(foot);
 
             // Get the difference between the estimate from the kinematics and the integrated IMU measurement, and add it to the adjustment
-            positionAdjustmentForFoot.sub(footEstimator.getBodyFrame().getTransformToRoot().getTranslation(), footEstimator.getEstimatedPose().getTranslation());
+            positionAdjustmentForFoot.sub(footEstimator.getBodyFrame().getTransformToRoot().getTranslation(),
+                                          footEstimator.getEstimatedPose().getTranslation());
             positionAdjustment.scaleAdd(scale, positionAdjustmentForFoot, positionAdjustment);
 
             // FIXME is this right? or is the sign wrong?
@@ -308,9 +309,9 @@ public class DistributedIMUBasedCenterOfMassStateUpdater implements MomentumStat
             velocityAdjustment.scaleAdd(scale, velocityAdjustmentForFoot, velocityAdjustment);
          }
 
-         if (enableCoMPositionAdjustment.getValue())
+         if (enableCoMPositionAdjustment.getValue() && !positionAdjustment.containsNaN())
             estimatedCoMPosition.add(positionAdjustment);
-         if (enableCoMVelocityAdjustment.getValue())
+         if (enableCoMVelocityAdjustment.getValue() && !velocityAdjustment.containsNaN())
             estimatedCoMVelocity.add(velocityAdjustment);
       }
 
