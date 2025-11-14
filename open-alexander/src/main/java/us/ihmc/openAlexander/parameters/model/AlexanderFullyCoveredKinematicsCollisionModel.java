@@ -96,8 +96,8 @@ public class AlexanderFullyCoveredKinematicsCollisionModel implements RobotColli
             RigidBodyBasics thigh = hipPitchJoint.getSuccessor();
             ReferenceFrame thighFrame = hipPitchJoint.getFrameAfterJoint();
 
-            FrameCapsule3D thighShape = new FrameCapsule3D(thighFrame, 0.24, 0.12);
-            thighShape.getPosition().set(0.03, robotSide.negateIfRightSide(0.03), -0.14);
+            FrameCapsule3D thighShape = new FrameCapsule3D(thighFrame, 0.24, 0.11);
+            thighShape.getPosition().set(0.02, robotSide.negateIfRightSide(0.03), -0.14);
             thighShape.getAxis().set(-0.18, 0.0, 1.0);
             collidables.add(new Collidable(thigh, collisionMask, collisionGroup, thighShape));
 
@@ -105,8 +105,8 @@ public class AlexanderFullyCoveredKinematicsCollisionModel implements RobotColli
             RigidBodyBasics shin = shinPitchJoint.getSuccessor();
             ReferenceFrame shinFrame = shinPitchJoint.getFrameAfterJoint();
 
-            FrameCapsule3D shinShape = new FrameCapsule3D(shinFrame, 0.40, 0.11);
-            shinShape.getPosition().set(0.01, 0.0, -0.18);
+            FrameCapsule3D shinShape = new FrameCapsule3D(shinFrame, 0.34, 0.10);
+            shinShape.getPosition().set(0.015, 0.0, -0.18);
             shinShape.getAxis().set(0.15, 0.0, 1.0);
             collidables.add(new Collidable(shin, collisionMask, collisionGroup, shinShape));
 
@@ -118,9 +118,9 @@ public class AlexanderFullyCoveredKinematicsCollisionModel implements RobotColli
                   RigidBodyBasics foot = ankleRoll.getSuccessor();
 
                   // Using a  box so the sole is slightly rounded allowing for continuous and smooth contact with the ground.
-                  FrameCapsule3D footShape = new FrameCapsule3D(ankleRollFrame, 0.125, 0.08);
+                  FrameCapsule3D footShape = new FrameCapsule3D(ankleRollFrame, 0.14, 0.06);
                   footShape.getAxis().set(Axis3D.X);
-                  footShape.getPosition().set(0.053, 0.0, -0.048);
+                  footShape.getPosition().set(0.05, 0.0, -0.048);
                   collidables.add(new Collidable(foot, collisionMask, collisionGroup, footShape));
                }
             }
