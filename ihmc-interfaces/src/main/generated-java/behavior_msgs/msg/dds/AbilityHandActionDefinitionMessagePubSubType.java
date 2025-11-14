@@ -15,7 +15,7 @@ public class AbilityHandActionDefinitionMessagePubSubType implements us.ihmc.pub
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "12d8ad553deef44e1481aade028e6a6511e2c120d752d019d1c7558b17884a54";
+   		return "c4b19f0d2c411ba6255086c18eda4610e5982ba87b0a4436ef80e737bca4d514";
    }
    
    @Override
@@ -56,9 +56,9 @@ public class AbilityHandActionDefinitionMessagePubSubType implements us.ihmc.pub
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += ((6) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -82,10 +82,10 @@ public class AbilityHandActionDefinitionMessagePubSubType implements us.ihmc.pub
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
       current_alignment += ((6) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -99,9 +99,9 @@ public class AbilityHandActionDefinitionMessagePubSubType implements us.ihmc.pub
       behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
       cdr.write_type_9(data.getRobotSide());
 
-      cdr.write_type_2(data.getControlMode());
+      cdr.write_type_9(data.getControlMode());
 
-      cdr.write_type_2(data.getGrip());
+      cdr.write_type_9(data.getGrip());
 
       for(int i0 = 0; i0 < data.getGoalPositions().length; ++i0)
       {
@@ -120,9 +120,9 @@ public class AbilityHandActionDefinitionMessagePubSubType implements us.ihmc.pub
       behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
       data.setRobotSide(cdr.read_type_9());
       	
-      data.setControlMode(cdr.read_type_2());
+      data.setControlMode(cdr.read_type_9());
       	
-      data.setGrip(cdr.read_type_2());
+      data.setGrip(cdr.read_type_9());
       	
       for(int i0 = 0; i0 < data.getGoalPositions().length; ++i0)
       {
@@ -145,8 +145,8 @@ public class AbilityHandActionDefinitionMessagePubSubType implements us.ihmc.pub
       ser.write_type_a("definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getDefinition());
 
       ser.write_type_9("robot_side", data.getRobotSide());
-      ser.write_type_2("control_mode", data.getControlMode());
-      ser.write_type_2("grip", data.getGrip());
+      ser.write_type_9("control_mode", data.getControlMode());
+      ser.write_type_9("grip", data.getGrip());
       ser.write_type_f("goal_positions", data.getGoalPositions());
       ser.write_type_f("goal_velocities", data.getGoalVelocities());
    }
@@ -157,8 +157,8 @@ public class AbilityHandActionDefinitionMessagePubSubType implements us.ihmc.pub
       ser.read_type_a("definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getDefinition());
 
       data.setRobotSide(ser.read_type_9("robot_side"));
-      data.setControlMode(ser.read_type_2("control_mode"));
-      data.setGrip(ser.read_type_2("grip"));
+      data.setControlMode(ser.read_type_9("control_mode"));
+      data.setGrip(ser.read_type_9("grip"));
       ser.read_type_f("goal_positions", data.getGoalPositions());
       ser.read_type_f("goal_velocities", data.getGoalVelocities());
    }

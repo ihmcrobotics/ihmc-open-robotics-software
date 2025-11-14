@@ -24,11 +24,11 @@ module behavior_msgs
         /**
          * AbilityHandManager.ControlMode ordinal
          */
-        long control_mode;
+        octet control_mode;
         /**
          * Grip to execute, if grip control mode
          */
-        long grip;
+        octet grip;
         /**
          * Goal positions for the joints
          */

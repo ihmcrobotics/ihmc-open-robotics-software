@@ -115,8 +115,8 @@ public class AbilityHandActionDefinition extends ActionNodeDefinition implements
       super.toMessage(message.getDefinition());
 
       message.setRobotSide(side.toMessage().toByte());
-      message.setControlMode(controlMode.toMessage().ordinal());
-      message.setGrip(grip.toMessage().toByte());
+      message.setControlMode(controlMode.toMessageOrdinal());
+      message.setGrip(grip.toMessageOrdinal());
       goalPositions.toMessage(message.getGoalPositions());
       goalVelocities.toMessage(message.getGoalVelocities());
    }

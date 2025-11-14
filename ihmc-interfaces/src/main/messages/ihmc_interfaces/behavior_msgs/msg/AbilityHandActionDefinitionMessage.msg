@@ -5,10 +5,10 @@ behavior_msgs/ActionNodeDefinitionMessage definition
 byte robot_side 255
 
 # AbilityHandManager.ControlMode ordinal
-int32 control_mode
+byte control_mode
 
 # Grip to execute, if grip control mode
-int32 grip
+byte grip
 
 # Goal positions for the joints
 float32[6] goal_positions

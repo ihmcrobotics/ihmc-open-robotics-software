@@ -19,7 +19,7 @@ module behavior_msgs
         /**
          * Object type (enum ordinal)
          */
-        long object_type;
+        octet object_type;
       };
     };
   };

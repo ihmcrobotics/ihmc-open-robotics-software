@@ -19,11 +19,11 @@ public class AbilityHandActionDefinitionMessage extends Packet<AbilityHandAction
    /**
             * AbilityHandManager.ControlMode ordinal
             */
-   public int control_mode_;
+   public byte control_mode_;
    /**
             * Grip to execute, if grip control mode
             */
-   public int grip_;
+   public byte grip_;
    /**
             * Goal positions for the joints
             */
@@ -98,14 +98,14 @@ public class AbilityHandActionDefinitionMessage extends Packet<AbilityHandAction
    /**
             * AbilityHandManager.ControlMode ordinal
             */
-   public void setControlMode(int control_mode)
+   public void setControlMode(byte control_mode)
    {
       control_mode_ = control_mode;
    }
    /**
             * AbilityHandManager.ControlMode ordinal
             */
-   public int getControlMode()
+   public byte getControlMode()
    {
       return control_mode_;
    }
@@ -113,14 +113,14 @@ public class AbilityHandActionDefinitionMessage extends Packet<AbilityHandAction
    /**
             * Grip to execute, if grip control mode
             */
-   public void setGrip(int grip)
+   public void setGrip(byte grip)
    {
       grip_ = grip;
    }
    /**
             * Grip to execute, if grip control mode
             */
-   public int getGrip()
+   public byte getGrip()
    {
       return grip_;
    }
