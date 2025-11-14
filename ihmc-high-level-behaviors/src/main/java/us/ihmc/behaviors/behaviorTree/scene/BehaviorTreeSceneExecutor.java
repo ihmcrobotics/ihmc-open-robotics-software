@@ -51,7 +51,7 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
       {
          IsaacROSFoundationPoseCommunicator mustardCommunicator = foundationPose.get(IsaacROSFoundationPoseObject.MUSTARD);
          mustardCommunicator.enable(true);
-//         mustardCommunicator.addResultCallback(instantDetectionQueue::add);
+         mustardCommunicator.addResultCallback(detection -> instantDetectionQueue.add(List.of(detection)));
       }
    }
 
