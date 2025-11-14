@@ -24,7 +24,7 @@ public class ContinuousHikingAPI
    public static final ROS2Topic<PoseListMessage> PLACED_GOAL_FOOTSTEPS = IHMC_ROOT.withModule(moduleName).withType(PoseListMessage.class).withSuffix("placed_goal_footsteps");
    public static final ROS2Topic<PoseListMessage> ROTATE_GOAL_FOOTSTEPS = IHMC_ROOT.withModule(moduleName).withType(PoseListMessage.class).withSuffix("rotate_goal_footsteps");
    public static final ROS2Topic<Float32> ROTATE_90_DEGREES = IHMC_ROOT.withModule(moduleName).withType(Float32.class).withSuffix("rotate_90_degrees");
-   public static final ROS2Topic<Empty> SQUARE_UP_STEP = IHMC_ROOT.withModule(moduleName).withType(Empty.class).withSuffix("rotate_goal_footsteps");
+   public static final ROS2Topic<Empty> SQUARE_UP_STEP = IHMC_ROOT.withModule(moduleName).withType(Empty.class).withSuffix("square_up_step");
 
    // Statuses supported from the Continuous Hiking Process
    public static final ROS2Topic<ContinuousWalkingStatusMessage> CONTINUOUS_WALKING_STATUS = IHMC_ROOT.withModule(moduleName).withType(ContinuousWalkingStatusMessage.class).withSuffix("status");
