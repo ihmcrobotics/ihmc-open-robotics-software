@@ -15,7 +15,7 @@ public class PersistentDetectionStatusMessagePubSubType implements us.ihmc.pubsu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "8056427588c7403fb501d01e29914d9e9697c32902d4f0d896bcc3c3ac936615";
+   		return "0f320bdc9036f03ba8aaa3d0dbd41d80d15abfc1a1e1ab7d54d2cefbf44908cb";
    }
    
    @Override
@@ -54,6 +54,7 @@ public class PersistentDetectionStatusMessagePubSubType implements us.ihmc.pubsu
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -78,6 +79,8 @@ public class PersistentDetectionStatusMessagePubSubType implements us.ihmc.pubsu
       int initial_alignment = current_alignment;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getId().length() + 1;
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getDetectionType().length() + 1;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getObjectClass().length() + 1;
 
@@ -104,6 +107,10 @@ public class PersistentDetectionStatusMessagePubSubType implements us.ihmc.pubsu
       cdr.write_type_d(data.getId());else
           throw new RuntimeException("id field exceeds the maximum length: %d > %d".formatted(data.getId().length(), 255));
 
+      if(data.getDetectionType().length() <= 255)
+      cdr.write_type_d(data.getDetectionType());else
+          throw new RuntimeException("detection_type field exceeds the maximum length: %d > %d".formatted(data.getDetectionType().length(), 255));
+
       if(data.getObjectClass().length() <= 255)
       cdr.write_type_d(data.getObjectClass());else
           throw new RuntimeException("object_class field exceeds the maximum length: %d > %d".formatted(data.getObjectClass().length(), 255));
@@ -121,6 +128,7 @@ public class PersistentDetectionStatusMessagePubSubType implements us.ihmc.pubsu
    public static void read(behavior_msgs.msg.dds.PersistentDetectionStatusMessage data, us.ihmc.idl.CDR cdr)
    {
       cdr.read_type_d(data.getId());	
+      cdr.read_type_d(data.getDetectionType());	
       cdr.read_type_d(data.getObjectClass());	
       data.setDecayingFrequency(cdr.read_type_6());
       	
@@ -137,6 +145,7 @@ public class PersistentDetectionStatusMessagePubSubType implements us.ihmc.pubsu
    public final void serialize(behavior_msgs.msg.dds.PersistentDetectionStatusMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_d("id", data.getId());
+      ser.write_type_d("detection_type", data.getDetectionType());
       ser.write_type_d("object_class", data.getObjectClass());
       ser.write_type_6("decaying_frequency", data.getDecayingFrequency());
       ser.write_type_2("history_size", data.getHistorySize());
@@ -151,6 +160,7 @@ public class PersistentDetectionStatusMessagePubSubType implements us.ihmc.pubsu
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.PersistentDetectionStatusMessage data)
    {
       ser.read_type_d("id", data.getId());
+      ser.read_type_d("detection_type", data.getDetectionType());
       ser.read_type_d("object_class", data.getObjectClass());
       data.setDecayingFrequency(ser.read_type_6("decaying_frequency"));
       data.setHistorySize(ser.read_type_2("history_size"));

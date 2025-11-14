@@ -19,6 +19,7 @@ public class PersistentDetectionMessageTool
    {
       String last4Digits = String.format("%04d", Math.abs(persistentDetection.getID().getLeastSignificantBits() % 10000));
       message.setId(last4Digits);
+      message.setDetectionType(persistentDetection.getMostRecentDetection().getClass().getSimpleName());
       message.setObjectClass(persistentDetection.getDetectedObjectClass());
       message.setDecayingFrequency(persistentDetection.getDetectionFrequencyDecaying(now));
       message.setHistorySize(persistentDetection.getHistorySize());
