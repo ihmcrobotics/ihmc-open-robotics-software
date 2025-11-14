@@ -369,6 +369,8 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
       numberOfEndEffectorsFilteredByLoad.set(0);
       numberOfEndEffectorsFilteredByVelocity.set(0);
 
+      numberOfEndEffectorsTrusted.set(filterTrustedFeetBasedOnVelocity(numberOfEndEffectorsTrusted.getIntegerValue()));
+
       if (numberOfEndEffectorsTrusted.getIntegerValue() >= optimalNumberOfTrustedFeet.getValue())
       {
          switch (slippageCompensatorMode.getEnumValue())
@@ -383,7 +385,6 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
                throw new RuntimeException("Should not get there");
          }
       }
-      numberOfEndEffectorsTrusted.set(filterTrustedFeetBasedOnVelocity(numberOfEndEffectorsTrusted.getIntegerValue()));
 
       if (imuBasedLinearStateCalculator.isEstimationEnabled())
          imuBasedLinearStateCalculator.updateLinearAccelerationMeasurement();
