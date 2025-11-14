@@ -175,6 +175,9 @@ public class StepGeneratorCommandInputManager implements Updatable
       }
       commandInputManager.clearCommands(HeightMapCommand.class);
 
+      if (continuousStepGenerator != null)
+         ticksToUpdateTheEnvironment = continuousStepGenerator.getCSGParameters().getTicksToUpdateTheEnvironment();
+
       // if the robot is standing, or we just finished a step, we should submit the newest regions
       if (latestWalkingStatus.get() == WalkingStatus.COMPLETED || latestFootstepStatusReceived.get() == FootstepStatus.COMPLETED)
          shouldSubmitNewRegions.set(true);
@@ -199,9 +202,9 @@ public class StepGeneratorCommandInputManager implements Updatable
 
             ticksSinceUpdatingTheEnvironment.set(0);
          }
-
-         ticksSinceUpdatingTheEnvironment.incrementAndGet();
       }
+
+      ticksSinceUpdatingTheEnvironment.incrementAndGet();
 
       previousWalkingStatus.set(latestWalkingStatus.get());
       previousFootstepStatusReceived.set(latestFootstepStatusReceived.get());

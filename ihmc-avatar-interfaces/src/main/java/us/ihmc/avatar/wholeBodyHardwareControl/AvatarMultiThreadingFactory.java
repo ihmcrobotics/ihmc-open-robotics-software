@@ -276,7 +276,7 @@ public class AvatarMultiThreadingFactory
          // Setup logger
          ArrayList<RegistrySendBufferBuilder> builders = new ArrayList<>();
          builders.add(new RegistrySendBufferBuilder(rootRegistry,
-                                                    estimatorThread.get().getFullRobotModel().getRootBody(),
+                                                    estimatorThread.get().getFullRobotModel().getRootJoint().subtreeList(),
                                                     estimatorThread.get().getSCS1YoGraphicsListRegistry()));
          builders.add(new RegistrySendBufferBuilder(controllerThread.get().getYoVariableRegistry(),
                                                     controllerThread.get().getSCS1YoGraphicsListRegistry(),

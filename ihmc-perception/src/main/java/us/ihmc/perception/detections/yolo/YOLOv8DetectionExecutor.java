@@ -243,6 +243,8 @@ public class YOLOv8DetectionExecutor
 
                // Get the segmented depth image
                RawImage segmentedDepth = segmenter.removeBackground(depthImage, erodedObjectMask);
+               if (segmentedDepth == null)
+                  continue;
                // Get the point cloud
                List<Point3D32> pointCloud = extractor.extractPointCloud(segmentedDepth);
                // Filter out outliers from the point cloud
