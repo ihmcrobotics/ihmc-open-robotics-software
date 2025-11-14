@@ -153,6 +153,8 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    private final YoVector2D desiredVelocity = new YoVector2D("desiredVelocity" + variableNameSuffix, registry);
    private final ExecutionTimer stepGeneratorTimer = new ExecutionTimer("stepGeneratorTimer" + variableNameSuffix, registry);
 
+   private final YoBoolean enableHeightOffsetErrorCompensation = new YoBoolean("enableHeightOffsetErrorCompensation", registry);
+
    private final FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
    private final RecyclingArrayList<FootstepDataMessage> footsteps = footstepDataListMessage.getFootstepDataList();
 
@@ -210,7 +212,7 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
                           if (!walk.getBooleanValue())
                              isWalking.set(walk.getBooleanValue());
                        });
-
+      
       setSupportFootBasedFootstepAdjustment(true);
    }
 
@@ -512,6 +514,7 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
             footstepDataListMessage.setSequenceId(currentFootstepDataListCommandID.getValue());
             footstepDataListMessage.getQueueingProperties().setSequenceId(currentFootstepDataListCommandID.getValue());
             footstepDataListMessage.getQueueingProperties().setMessageId(currentFootstepDataListCommandID.getValue());
+            footstepDataListMessage.setOffsetFootstepsHeightWithExecutionError(enableHeightOffsetErrorCompensation.getBooleanValue());
             footstepMessenger.submitFootsteps(footstepDataListMessage);
             counter = 0;
          }
@@ -1104,6 +1107,11 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    public YoRegistry getRegistry()
    {
       return registry;
+   }
+
+   public YoContinuousStepGeneratorParameters getCSGParameters()
+   {
+      return parameters;
    }
 
    private boolean isStepValid(FramePose3DReadOnly touchdownPose, FramePose3DReadOnly stancePose, RobotSide swingSide)
