@@ -96,16 +96,16 @@ public class AlexanderFullyCoveredKinematicsCollisionModel implements RobotColli
             RigidBodyBasics thigh = hipPitchJoint.getSuccessor();
             ReferenceFrame thighFrame = hipPitchJoint.getFrameAfterJoint();
 
-            FrameCapsule3D thighShape = new FrameCapsule3D(thighFrame, 0.24, 0.11);
+            FrameCapsule3D thighShape = new FrameCapsule3D(thighFrame, 0.25, 0.11);
             thighShape.getPosition().set(0.02, robotSide.negateIfRightSide(0.03), -0.14);
-            thighShape.getAxis().set(-0.18, 0.0, 1.0);
+            thighShape.getAxis().set(-0.2, 0.0, 1.0);
             collidables.add(new Collidable(thigh, collisionMask, collisionGroup, thighShape));
 
             JointBasics shinPitchJoint = RobotCollisionModel.findJoint(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH), multiBodySystem);
             RigidBodyBasics shin = shinPitchJoint.getSuccessor();
             ReferenceFrame shinFrame = shinPitchJoint.getFrameAfterJoint();
 
-            FrameCapsule3D shinShape = new FrameCapsule3D(shinFrame, 0.34, 0.10);
+            FrameCapsule3D shinShape = new FrameCapsule3D(shinFrame, 0.34, 0.105);
             shinShape.getPosition().set(0.015, 0.0, -0.18);
             shinShape.getAxis().set(0.15, 0.0, 1.0);
             collidables.add(new Collidable(shin, collisionMask, collisionGroup, shinShape));
@@ -148,7 +148,7 @@ public class AlexanderFullyCoveredKinematicsCollisionModel implements RobotColli
          {
             RigidBodyBasics forearm = elbowJoint.getSuccessor();
             ReferenceFrame elbowFrame = elbowJoint.getFrameAfterJoint();
-            FrameCapsule3D forearmShape = new FrameCapsule3D(elbowFrame, 0.38, 0.065);
+            FrameCapsule3D forearmShape = new FrameCapsule3D(elbowFrame, 0.34, 0.065);
             forearmShape.getPosition().set(-0.02, 0.0, -0.18);
             forearmShape.getAxis().set(Axis3D.Z);
             collidables.add(new Collidable(forearm, collisionMask, collisionGroup, forearmShape));

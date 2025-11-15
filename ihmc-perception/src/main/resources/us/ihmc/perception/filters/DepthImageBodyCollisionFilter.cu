@@ -199,16 +199,16 @@ extern "C" __global__ void checkBodyCollision(unsigned short* depthImage,
             return;
         }
 
-        // Ray intersection test
-        float tHit;
-        if (rayIntersectsCapsule(rayOrigin, rayDirection, topCenter, bottomCenter, radius, collisionTolerance, tHit))
-        {
-            float hitDepth = tHit; // meters
-            if (hitDepth <= depthInMeters)
-            {
-                *maskPtr = 0;
-                return;
-            }
-        }
+//         // Ray intersection test
+//         float tHit;
+//         if (rayIntersectsCapsule(rayOrigin, rayDirection, topCenter, bottomCenter, radius, collisionTolerance, tHit))
+//         {
+//             float hitDepth = tHit; // meters
+//             if (hitDepth <= depthInMeters)
+//             {
+//                 *maskPtr = 0;
+//                 return;
+//             }
+//         }
     }
 }
