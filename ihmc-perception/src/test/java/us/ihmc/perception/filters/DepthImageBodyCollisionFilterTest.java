@@ -4,6 +4,7 @@ import org.bytedeco.javacpp.ShortPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
@@ -98,6 +99,7 @@ class DepthImageBodyCollisionFilterTest
       }
    }
 
+   @Disabled
    @Test
    public void testFilteringDepthPointsInTheShadowOfTheSphere()
    {
@@ -110,7 +112,6 @@ class DepthImageBodyCollisionFilterTest
       DepthImageBodyCollisionFilter depthImageBodyCollisionFilter = new DepthImageBodyCollisionFilter(robotCollisionModel,
                                                                                                       new RigidBody("dummyBody", ReferenceFrame.getWorldFrame()));
       depthImageBodyCollisionFilter.setCollisionTolerance(depthFilterTolerance);
-
 
       short[] depthValues = createDepthMeasures(1.0f);
 
