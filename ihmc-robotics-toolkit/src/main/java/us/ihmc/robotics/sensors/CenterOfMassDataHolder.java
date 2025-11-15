@@ -141,11 +141,11 @@ public class CenterOfMassDataHolder implements CenterOfMassDataHolderReadOnly
       else if (object instanceof CenterOfMassDataHolder)
       {
          CenterOfMassDataHolder other = (CenterOfMassDataHolder) object;
-         if (hasPosition != other.hasPosition)
+         if (hasPosition ^ other.hasPosition)
             return false;
-         if (hasVelocity != other.hasVelocity)
+         if (hasVelocity ^ other.hasVelocity)
             return false;
-         if (hasAngularMomentum != other.hasAngularMomentum)
+         if (hasAngularMomentum ^ other.hasAngularMomentum)
             return false;
          if (hasCenterOfMassPosition() && !centerOfMassPosition.equals(other.centerOfMassPosition))
             return false;

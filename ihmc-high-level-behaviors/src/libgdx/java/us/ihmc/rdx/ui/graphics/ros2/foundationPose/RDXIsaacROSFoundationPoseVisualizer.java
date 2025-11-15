@@ -10,7 +10,7 @@ import imgui.ImGui;
 import imgui.ImGuiStyle;
 import imgui.flag.ImGuiTableColumnFlags;
 import imgui.flag.ImGuiTableFlags;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseObject;
 import us.ihmc.rdx.imgui.ImGuiAveragedFrequencyText;
@@ -38,7 +38,7 @@ public class RDXIsaacROSFoundationPoseVisualizer extends RDXROS2MultiTopicVisual
    private final Map<IsaacROSFoundationPoseObject, RDXIsaacROSFoundationPoseSettings> settingsMap;
    private final Map<IsaacROSFoundationPoseObject, RDXIsaacROSFoundationPoseResultVisualizer> resultVisualizers;
 
-   public RDXIsaacROSFoundationPoseVisualizer(String title, ROS2Node ros2Node, CRDTInfo crdtInfo)
+   public RDXIsaacROSFoundationPoseVisualizer(String title, ROS2Node ros2Node, ROS2PeerClockOffsetEstimator ros2ClockOffsetEstimator)
    {
       super(title);
 
@@ -51,7 +51,7 @@ public class RDXIsaacROSFoundationPoseVisualizer extends RDXROS2MultiTopicVisual
       for (IsaacROSFoundationPoseObject object : IsaacROSFoundationPoseObject.values())
       {
          resultTopics.add(object.topics.ihmcResult());
-         settingsMap.put(object, new RDXIsaacROSFoundationPoseSettings(ros2Node, crdtInfo, object));
+         settingsMap.put(object, new RDXIsaacROSFoundationPoseSettings(ros2Node, ros2ClockOffsetEstimator, object));
       }
 
       setSceneLevels(RDXSceneLevel.VIRTUAL);

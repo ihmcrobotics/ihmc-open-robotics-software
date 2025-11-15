@@ -1,6 +1,8 @@
 package us.ihmc.perception.detections.foundationPose;
 
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.perception.detections.InstantDetection;
 
 import java.util.EnumMap;
@@ -9,9 +11,11 @@ import java.util.function.Consumer;
 
 public class IsaacROSFoundationPoseCommunicatorMap extends EnumMap<IsaacROSFoundationPoseObject, IsaacROSFoundationPoseCommunicator>
 {
-   public IsaacROSFoundationPoseCommunicatorMap(CRDTInfo crdtInfo)
+   public IsaacROSFoundationPoseCommunicatorMap(ROS2PeerClockOffsetEstimator peerClockEstimator)
    {
       super(IsaacROSFoundationPoseObject.class);
+
+      CRDTInfo crdtInfo = new CRDTInfo(ROS2ActorDesignation.ROBOT, peerClockEstimator);
 
       for (IsaacROSFoundationPoseObject object : IsaacROSFoundationPoseObject.values())
          put(object, new IsaacROSFoundationPoseCommunicator(object, crdtInfo));

@@ -1,5 +1,8 @@
 # Status of a persistent detection
 
+# Last 4 digits of UUID as a string
+string id
+
 # Object class name (e.g., "bottle")
 string object_class
 
@@ -14,3 +17,6 @@ bool is_stable
 
 # Alpha filtered transform to world
 controller_msgs/RigidBodyTransformMessage transform_to_world
+
+# Alpha filtered transform to camera
+controller_msgs/RigidBodyTransformMessage transform_to_camera

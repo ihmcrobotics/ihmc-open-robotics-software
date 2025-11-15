@@ -17,7 +17,7 @@ bool joint_space_control
 bool use_predefined_joint_angles
 
 # Preset arm configuration
-int32 preset
+byte preset
 
 # Joint angles
 float64[7] joint_angles

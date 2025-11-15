@@ -48,7 +48,8 @@ public class RDXActionProgressWidgetsManager
 
       boolean containsFootsteps = false;
       boolean containsHandMovements = false;
-      boolean containsHandConfiguration = false;
+      boolean containsSakeHandConfiguration = false;
+      boolean containsAbilityHandConfiguration = false;
       for (RDXActionNode<?, ?> action : actionNodesToRender)
       {
          action.getProgressWidgets().update();
@@ -58,7 +59,9 @@ public class RDXActionProgressWidgetsManager
          if (action instanceof RDXHandPoseAction || action instanceof RDXScrewPrimitiveAction)
             containsHandMovements = true;
          if (action instanceof RDXSakeHandCommandAction)
-            containsHandConfiguration = true;
+            containsSakeHandConfiguration = true;
+         if (action instanceof RDXAbilityHandAction)
+            containsAbilityHandConfiguration = true;
       }
       boolean showPosePlots = containsFootsteps || containsHandMovements;
 
@@ -143,7 +146,7 @@ public class RDXActionProgressWidgetsManager
             ImGui.spacing();
          }
 
-         if (containsHandConfiguration)
+         if (containsSakeHandConfiguration)
          {
             widgetAligner.text("Knuckle X1 (%s):".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL));
             handleRenderingBlankBar(true);
@@ -164,6 +167,22 @@ public class RDXActionProgressWidgetsManager
             }
             ++numberOfLines;
             ImGui.spacing();
+         }
+
+         if (containsAbilityHandConfiguration)
+         {
+            for (int f = 0; f < 6; f++)
+            {
+               widgetAligner.text("Hand %d (%s):".formatted(f, EuclidCoreMissingTools.DEGREE_SYMBOL));
+               handleRenderingBlankBar(true);
+               for (int i = 0; i < actionNodesToRender.size(); i++)
+               {
+                  actionNodesToRender.get(i).getProgressWidgets().renderJointspacePositionError(2, dividedBarWidth, renderAsPlots);
+                  sameLineExceptLast(i);
+               }
+               ++numberOfLines;
+               ImGui.spacing();
+            }
          }
       }
 

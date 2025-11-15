@@ -41,7 +41,7 @@ module behavior_msgs
         /**
          * Preset arm configuration
          */
-        long preset;
+        octet preset;
         /**
          * Joint angles
          */

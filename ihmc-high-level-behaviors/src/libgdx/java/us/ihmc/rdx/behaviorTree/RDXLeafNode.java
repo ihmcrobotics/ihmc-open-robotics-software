@@ -4,6 +4,7 @@ import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import us.ihmc.behaviors.behaviorTree.LeafNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.LeafNodeState;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiFlashingColors;
 import us.ihmc.rdx.imgui.ImGuiFlashingText;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -43,6 +44,14 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
    }
 
    @Override
+   public void renderTreeViewRow()
+   {
+      renderRowBeginning();
+      renderEditableName();
+      renderConcurrencyGraph();
+   }
+
+   @Override
    public void renderRowBeginning()
    {
       super.renderRowBeginning();
@@ -58,6 +67,41 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
          rootNode.getState().setExecutionNextIndex(state.getLeafIndex());
       }
       ImGui.sameLine();
+   }
+
+   public void renderConcurrencyGraph()
+   {
+      if (!definition.getExecuteAfterPrevious())
+      {
+         float frameHeight = ImGui.getFrameHeight();
+         float executeAfterY = Float.NaN;
+         if (definition.getExecuteAfterBeginning())
+            executeAfterY = rootNode.offsetY;
+         else
+         {
+            RDXBehaviorTreeNode<?, ?> nodeToPointTo = getExecuteAfterLeaf();
+            if (nodeToPointTo != null)
+            {
+               while (Float.isNaN(nodeToPointTo.offsetY)) // Handle collapsed subtrees
+                  nodeToPointTo = nodeToPointTo.getParent();
+               executeAfterY = nodeToPointTo.offsetY + frameHeight * 0.5f;
+            }
+         }
+
+         if (!Float.isNaN(executeAfterY))
+         {
+            ImGui.sameLine(ImGui.getColumnWidth(), 0.0f);
+            int color = ImGui.getColorU32(getSelected() ? ImGuiCol.Text : ImGuiCol.TextDisabled);
+            int scale = ImGui.getFontSize();
+            float thickness = mouseHoveringNodeLine ? 2.0f : 1.0f;
+            float offsetX = ImGui.getCursorScreenPosX();
+            ImGui.getWindowDrawList().addLine(offsetX, offsetY + frameHeight * 0.5f, offsetX, executeAfterY, color, thickness);
+            ImGui.getWindowDrawList().addLine(offsetX - scale * 0.4f, executeAfterY + scale * 0.5f, offsetX, executeAfterY, color, thickness);
+            ImGui.getWindowDrawList().addLine(offsetX + scale * 0.4f, executeAfterY + scale * 0.5f, offsetX, executeAfterY, color, thickness);
+            ImGui.getWindowDrawList().addCircle(offsetX, offsetY + frameHeight * 0.5f, scale * 0.15f, color, 16, thickness);
+            ImGui.dummy(0.0f, frameHeight);
+         }
+      }
    }
 
    public void renderConcurrencyRank()
@@ -81,7 +125,7 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
 
       // Validate state in case something earlier in this UI tick messed with things.
       // This happens with the Undo non-topological changes button.
-      state.validateFields(rootNode.getState().getOrderedLeaves());
+      state.validateDefinition(rootNode.getState().getOrderedLeaves());
 
       if (ImGui.beginCombo(labels.get("Execute after"), definition.getExecuteAfterLeafName()))
       {
@@ -138,5 +182,20 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
    public int getNameColor()
    {
       return flashingDescriptionColor.getTextColor(state.getFailed());
+   }
+
+
+
+   /** @return the leaf to execute after as part of the concurrency system */
+   public RDXLeafNode getExecuteAfterLeaf()
+   {
+      if (rootNode.getIDToNodeMap().get(definition.getExecuteAfterNodeID()) instanceof RDXLeafNode executeAfterNode)
+      {
+         return executeAfterNode;
+      }
+
+      LogTools.error("Node ID not found: {}", definition.getExecuteAfterNodeID());
+
+      return null;
    }
 }
