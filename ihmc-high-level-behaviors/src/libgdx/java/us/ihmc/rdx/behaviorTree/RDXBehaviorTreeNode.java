@@ -47,11 +47,12 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    private transient RDXBehaviorTreeNode<?, ?> parent;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   protected float offsetY = 0.0f;
    private final ImBoolean selected = new ImBoolean();
    private transient final ImVec2 lineMin = new ImVec2();
    private transient final ImVec2 indentMin = new ImVec2();
    private transient final ImVec2 lineMax = new ImVec2();
-   private boolean mouseHoveringNodeLine;
+   protected boolean mouseHoveringNodeLine;
    protected boolean anySpecificWidgetOnLineClicked = false;
    protected boolean treeWidgetExpanded = false;
    private int previousNumberOfChildren = 0;
@@ -123,6 +124,8 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       if (deltaChildren > 0 && deltaChildren < 5)
          treeWidgetExpanded = true;
 
+      offsetY = Float.NaN;
+
       while (!state.getLogger().getRecentMessages().isEmpty())
       {
          LogMessage message = state.getLogger().getRecentMessages().poll();
@@ -162,6 +165,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    {
       anySpecificWidgetOnLineClicked = false;
 
+      offsetY = ImGui.getCursorScreenPosY();
       ImGui.dummy(0.0f, ImGui.getFrameHeight()); // Make the lines as tall as when they have and input box
       ImGui.sameLine(0.0f, 0.0f);
       ImGui.alignTextToFramePadding(); // Centers the node descriptions vertically in the frame height area

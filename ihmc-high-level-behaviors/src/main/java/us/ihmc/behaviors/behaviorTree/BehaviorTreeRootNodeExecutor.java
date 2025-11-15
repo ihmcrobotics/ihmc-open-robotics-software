@@ -1,6 +1,5 @@
 package us.ihmc.behaviors.behaviorTree;
 
-import gnu.trove.map.hash.TLongObjectHashMap;
 import org.apache.logging.log4j.Level;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -11,6 +10,7 @@ import us.ihmc.behaviors.behaviorTree.control.FallbackNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneExecutor;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.handsros2.abilityHand.AbilityHandROS2HardwareCommunication;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
@@ -20,7 +20,6 @@ import java.util.List;
 public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<BehaviorTreeRootNodeState, BehaviorTreeRootNodeDefinition>
       implements BehaviorTreeRootNode<BehaviorTreeNodeExecutor<?, ?>>
 {
-   private final TLongObjectHashMap<BehaviorTreeNodeExecutor<?, ?>> idToNodeMap = new TLongObjectHashMap<>();
    private final List<LeafNodeExecutor<?, ?>> orderedLeaves = new ArrayList<>();
    private final List<ActionNodeExecutor<?, ?>> orderedActions = new ArrayList<>();
    private final List<FallbackNodeExecutor> fallbackNodes = new ArrayList<>();
@@ -35,12 +34,14 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
                                        ROS2ControllerHelper ros2ControllerHelper,
                                        ROS2SyncedRobotModel syncedRobot,
                                        ControllerStatusTracker controllerStatusTracker,
+                                       AbilityHandROS2HardwareCommunication abilityHandCommunication,
                                        BehaviorTreeSceneExecutor scene)
    {
       super(new BehaviorTreeRootNodeState(id, crdtInfo, saveFileDirectory, syncedRobot.getRobotModel(), scene),
             ros2ControllerHelper,
             syncedRobot,
             controllerStatusTracker,
+            abilityHandCommunication,
             scene);
    }
 
@@ -52,24 +53,41 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       // TODO: Tick children
    }
 
+   private void updateNodeListsRecursive(BehaviorTreeNodeExecutor<?, ?> node)
+   {
+      for (BehaviorTreeNodeExecutor<?, ?> child : node.getChildren())
+      {
+         if (child instanceof LeafNodeExecutor<?, ?> leaf)
+         {
+            orderedLeaves.add(leaf);
+            if (leaf.getState().getIsExecuting())
+               currentlyExecutingLeaves.add(leaf);
+
+            if (child instanceof ActionNodeExecutor<?, ?> actionNode)
+               orderedActions.add(actionNode);
+         }
+         else if (child instanceof FallbackNodeExecutor fallbackNode)
+            fallbackNodes.add(fallbackNode);
+
+         updateNodeListsRecursive(child);
+      }
+   }
+
    @Override
    public void update()
    {
       super.update();
 
-      idToNodeMap.clear();
       orderedLeaves.clear();
       orderedActions.clear();
       fallbackNodes.clear();
       currentlyExecutingLeaves.clear();
-      updateSubtree(this);
+      updateNodeListsRecursive(this);
 
       for (LeafNodeExecutor<?, ?> leaf : orderedLeaves)
-      {
-         leaf.getState().validateFields(state.getOrderedLeaves());
-      }
+         leaf.getState().validateDefinition(state.getOrderedLeaves());
 
-      // Update concurrency ranks
+      // Update concurrency ranks TODO: Can't get rid of this until whole body IK stuff is figured out
       for (int i = 0; i < state.getOrderedLeaves().size(); i++)
       {
          state.getOrderedLeaves().get(i).setConcurrencyRank(1);
@@ -80,32 +98,16 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
             int thisExecuteAfterLeafIndex = state.getOrderedLeaves().get(i).getExecuteAfterLeafIndex();
             int executeAfterLeafIndexToCompare = state.getOrderedLeaves().get(j).getExecuteAfterLeafIndex();
             if (thisExecuteAfterLeafIndex == executeAfterLeafIndexToCompare)
-            {
                state.getOrderedLeaves().get(i).setConcurrencyRank(2);
-            }
          }
       }
 
       // Update is next for execution
       for (int i = 0; i < state.getOrderedLeaves().size(); i++)
       {
-         int executionNextIndex = state.getExecutionNextIndex();
-         if (i < executionNextIndex)
-         {
-            state.getOrderedLeaves().get(i).setIsNextForExecution(false);
-         }
-         else if (i == executionNextIndex)
-         {
-            state.getOrderedLeaves().get(i).setIsNextForExecution(true);
-         }
-         else if (state.getOrderedLeaves().get(i).getExecuteAfterLeafIndex() < executionNextIndex)
-         {
-            state.getOrderedLeaves().get(i).setIsNextForExecution(true);
-         }
-         else
-         {
-            state.getOrderedLeaves().get(i).setIsNextForExecution(false);
-         }
+         int next = state.getExecutionNextIndex();
+         int after = state.getOrderedLeaves().get(i).getExecuteAfterLeafIndex();
+         state.getOrderedLeaves().get(i).setIsNextForExecution(i >= next && after < next);
       }
 
       failedLeaves.clear();
@@ -157,9 +159,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
          fallbackNode.update();
 
          if (!fallbackNode.getFallbackLeaves().isEmpty())
-         {
             failedLeavesWithoutFallback.removeAll(fallbackNode.getTryLeaves());
-         }
       }
 
       // Handle skipping the fallback if try leaf group is successful
@@ -236,33 +236,8 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
          for (int i = 0; i < state.getOrderedLeaves().size(); i++)
          {
             state.getOrderedLeaves().get(i).setFailed(false);
+            state.getOrderedLeaves().get(i).setIsExecuting(false);
          }
-      }
-   }
-
-   private void updateSubtree(BehaviorTreeNodeExecutor<?, ?> node)
-   {
-      idToNodeMap.put(node.getState().getID(), node);
-
-      for (BehaviorTreeNodeExecutor<?, ?> child : node.getChildren())
-      {
-         if (child instanceof LeafNodeExecutor<?, ?> leaf)
-         {
-            orderedLeaves.add(leaf);
-            if (leaf.getState().getIsExecuting())
-            {
-               currentlyExecutingLeaves.add(leaf);
-            }
-
-            if (child instanceof ActionNodeExecutor<?, ?> actionNode)
-               orderedActions.add(actionNode);
-         }
-         else if (child instanceof FallbackNodeExecutor fallbackNode)
-         {
-            fallbackNodes.add(fallbackNode);
-         }
-
-         updateSubtree(child);
       }
    }
 
@@ -272,7 +247,6 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
 
       state.getLogger().info("Triggering leaf execution: %s (%s)".formatted(leafToExecute.getDefinition().getName(),
                                                                             leafToExecute.getClass().getSimpleName()));
-      leafToExecute.update();
       leafToExecute.triggerExecution();
       currentlyExecutingLeaves.add(leafToExecute);
       state.stepForwardNextExecutionIndex();
@@ -281,31 +255,23 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
    private boolean shouldExecuteNextLeaf()
    {
       if (isEndOfSequence())
-      {
          return false;
-      }
 
       LeafNodeExecutor<?, ?> nextNodeToExecute = orderedLeaves.get(state.getExecutionNextIndex());
 
-      // If a fallback sequence is up next, block if any corresponding try leaves are executing
+      // If a fallback catch is up next, block if any corresponding try leaves are executing
       for (FallbackNodeExecutor fallbackNode : fallbackNodes)
-      {
-         if (fallbackNode.getFallbackLeaves().indexOf(nextNodeToExecute) == 0) // The first fallback leaf is next
-         {
+         if (fallbackNode.getFallbackLeaves().indexOf(nextNodeToExecute) == 0) // The first fallback catch leaf is next
             for (LeafNodeExecutor<?, ?> tryLeaf : fallbackNode.getTryLeaves())
-            {
                if (tryLeaf.getState().getIsExecuting())
-               {
                   return false;
-               }
-            }
-         }
-      }
 
+      nextNodeToExecute.update(); // Make sure can execute is up to date
       if (!nextNodeToExecute.getState().getCanExecute())
       {
-         state.getLogger().error("Cannot execute leaf: %s\n%s".formatted(nextNodeToExecute.getDefinition().getName(),
-                                                                         nextNodeToExecute.getCantExecuteMessage()));
+         state.getLogger().error("Cannot execute leaf: %s: %s\n%s".formatted(nextNodeToExecute.getClass().getSimpleName(),
+                                                                             nextNodeToExecute.getDefinition().getName(),
+                                                                             nextNodeToExecute.getCantExecuteMessage()));
          state.setAutomaticExecution(false);
          return false;
       }
@@ -315,28 +281,17 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
          int executeAfterLeafIndex = nextNodeToExecute.getState().getExecuteAfterLeafIndex();
 
          if (executeAfterLeafIndex < 0) // Execute after beginning
-         {
             return true;
-         }
          else
-         {
             return !orderedLeaves.get(executeAfterLeafIndex).getState().getIsExecuting();
-         }
       }
       else
-      {
          return currentlyExecutingLeaves.isEmpty();
-      }
    }
 
    public boolean isEndOfSequence()
    {
       return state.getExecutionNextIndex() >= orderedLeaves.size();
-   }
-   
-   public TLongObjectHashMap<BehaviorTreeNodeExecutor<?, ?>> getIDToNodeMap()
-   {
-      return idToNodeMap;
    }
 
    public List<ActionNodeExecutor<?, ?>> getOrderedActions()
@@ -379,6 +334,11 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
    public ControllerStatusTracker getControllerStatusTracker()
    {
       return controllerStatusTracker;
+   }
+
+   public AbilityHandROS2HardwareCommunication getAbilityHandCommunication()
+   {
+      return abilityHandCommunication;
    }
 
    public BehaviorTreeSceneExecutor getScene()

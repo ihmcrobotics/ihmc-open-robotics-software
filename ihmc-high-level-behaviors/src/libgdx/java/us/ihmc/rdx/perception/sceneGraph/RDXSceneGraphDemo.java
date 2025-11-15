@@ -6,9 +6,7 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.property.ROS2StoredPropertySet;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.perception.BytedecoImage;
@@ -48,7 +46,6 @@ import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.sensors.zed.ZEDImageSensor;
 import us.ihmc.sensors.zed.ZEDModelData;
 import us.ihmc.sensors.zed.ROS2ZEDSVOPlaybackSensor;
-import us.ihmc.tools.IHMCCommonPaths;
 
 import static us.ihmc.zed.global.zed.SL_DEPTH_MODE_NEURAL;
 import static us.ihmc.zed.global.zed.SL_DEPTH_MODE_PERFORMANCE;
@@ -228,8 +225,7 @@ public class RDXSceneGraphDemo
 
                if (yolov8DetectionExecutor == null)
                {
-                  yolov8DetectionExecutor = new YOLOv8DetectionExecutor(new CRDTInfo(ROS2ActorDesignation.ROBOT, robotClockOffsetEstimator),
-                                                                        yoloSettingsVisualizer::isActive);
+                  yolov8DetectionExecutor = new YOLOv8DetectionExecutor(robotClockOffsetEstimator, yoloSettingsVisualizer::isActive);
                   yolov8DetectionExecutor.addDetectionConsumerCallback(detectionManager::addDetections);
                }
 

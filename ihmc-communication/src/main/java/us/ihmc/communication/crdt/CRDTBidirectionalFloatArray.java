@@ -17,9 +17,20 @@ public class CRDTBidirectionalFloatArray extends CRDTBidirectionalMutableField<f
       super(latestTimestampModifiable, new float[arraySize]);
    }
 
+   public void getValue(float[] arrayToPack)
+   {
+      System.arraycopy(getValueInternal(), 0, arrayToPack, 0, arrayToPack.length);
+   }
+   
    public float getValueReadOnly(int index)
    {
       return getValueInternal()[index];
+   }
+
+   public void setValue(float[] value)
+   {
+      System.arraycopy(value, 0, getValueInternal(), 0, value.length);
+      modify();
    }
 
    public void setValue(int index, float value)

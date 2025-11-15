@@ -27,7 +27,7 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
    /**
             * OVERRIDE (0) or QUEUE (1)
             */
-   public int execution_mode_;
+   public byte execution_mode_;
    /**
             * Is using the footstep planner or manually placing
             */
@@ -206,14 +206,14 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
    /**
             * OVERRIDE (0) or QUEUE (1)
             */
-   public void setExecutionMode(int execution_mode)
+   public void setExecutionMode(byte execution_mode)
    {
       execution_mode_ = execution_mode;
    }
    /**
             * OVERRIDE (0) or QUEUE (1)
             */
-   public int getExecutionMode()
+   public byte getExecutionMode()
    {
       return execution_mode_;
    }

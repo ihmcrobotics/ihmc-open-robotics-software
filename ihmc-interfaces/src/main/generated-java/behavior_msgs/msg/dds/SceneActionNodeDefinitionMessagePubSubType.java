@@ -15,7 +15,7 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "97035ade587241676a5084a14fc1564220b25e87077273812aca0e6b6ee3a65c";
+   		return "9a070efba9de21b00befd9c7a34ab8d28fd59a090cffac4286e39805cabcadb7";
    }
    
    @Override
@@ -54,7 +54,7 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
 
       current_alignment += behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
       return current_alignment - initial_alignment;
@@ -71,7 +71,7 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
 
       current_alignment += behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.getCdrSerializedSize(data.getDefinition(), current_alignment);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
 
@@ -81,14 +81,14 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
    public static void write(behavior_msgs.msg.dds.SceneActionNodeDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
-      cdr.write_type_2(data.getObjectType());
+      cdr.write_type_9(data.getObjectType());
 
    }
 
    public static void read(behavior_msgs.msg.dds.SceneActionNodeDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
-      data.setObjectType(cdr.read_type_2());
+      data.setObjectType(cdr.read_type_9());
       	
 
    }
@@ -98,7 +98,7 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
    {
       ser.write_type_a("definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getDefinition());
 
-      ser.write_type_2("object_type", data.getObjectType());
+      ser.write_type_9("object_type", data.getObjectType());
    }
 
    @Override
@@ -106,7 +106,7 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
    {
       ser.read_type_a("definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getDefinition());
 
-      data.setObjectType(ser.read_type_2("object_type"));
+      data.setObjectType(ser.read_type_9("object_type"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.SceneActionNodeDefinitionMessage src, behavior_msgs.msg.dds.SceneActionNodeDefinitionMessage dest)

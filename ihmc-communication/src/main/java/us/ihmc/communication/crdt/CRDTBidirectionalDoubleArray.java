@@ -16,9 +16,20 @@ public class CRDTBidirectionalDoubleArray extends CRDTBidirectionalMutableField<
       super(latestTimestampModifiable, new double[arraySize]);
    }
 
+   public void getValue(double[] arrayToPack)
+   {
+      System.arraycopy(getValueInternal(), 0, arrayToPack, 0, arrayToPack.length);
+   }
+
    public double getValueReadOnly(int index)
    {
       return getValueInternal()[index];
+   }
+
+   public void setValue(double[] value)
+   {
+      System.arraycopy(value, 0, getValueInternal(), 0, value.length);
+      modify();
    }
 
    /** Use to prevent unecessary modifications. */

@@ -22,7 +22,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.MeshDataBuilder;
 import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.rdx.RDX3DSituatedText;
-import us.ihmc.rdx.RDX3DSituatedTextData;
 import us.ihmc.rdx.RDXFocusBasedCamera;
 import us.ihmc.rdx.mesh.MeshDataBuilderMissingTools;
 import us.ihmc.rdx.mesh.RDXMeshDataInterpreter;
@@ -43,7 +42,6 @@ public class RDXROS2DetectedObjectBoundingBoxVisualizer extends RDXROS2SingleTop
    private ModelInstance markerModelInstance;
    private final MeshDataBuilder meshDataBuilder = new MeshDataBuilder();
    private final RDX3DSituatedText text;
-   private RDX3DSituatedTextData previousTextData;
    private final RDXModelInstance markerCoordinateFrameInstance;
    private final FramePose3D markerPose = new FramePose3D();
    private final FramePoint3D[] vertices3D = new FramePoint3D[8];
@@ -125,11 +123,7 @@ public class RDXROS2DetectedObjectBoundingBoxVisualizer extends RDXROS2SingleTop
 
          sensorCoordinateFrameInstance.setTransformToReferenceFrame(sensorFrame);
 
-         if (previousTextData != null)
-         {
-            previousTextData.dispose();
-         }
-         previousTextData = text.setTextWithoutCache(objectType + " %.1f".formatted(confidence));
+         text.setTextWithoutCache(objectType + " %.1f".formatted(confidence));
 
          getFrequency().ping();
       }

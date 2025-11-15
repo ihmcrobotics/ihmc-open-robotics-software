@@ -88,6 +88,8 @@ public class RDXSakeHandCommandAction extends RDXActionNode<SakeHandCommandActio
 
       ImGui.sameLine();
       gripperWidget.render(definition.getSide(), ImGui.getFrameHeight());
+
+      renderConcurrencyGraph();
    }
 
    @Override
