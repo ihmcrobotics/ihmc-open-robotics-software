@@ -537,9 +537,9 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
       csgStatusMessage.setIsInUnitVelocities(desiredVelocityProvider.isUnitVelocity());
 
       // Current walking speed values
-      csgStatusMessage.setCurrentForwardVelocity(desiredVelocityProvider.getDesiredVelocity().getX());
-      csgStatusMessage.setCurrentLateralVelocity(desiredVelocityProvider.getDesiredVelocity().getY());
-      csgStatusMessage.setCurrentTurnVelocity(desiredTurningVelocityProvider.getTurningVelocity());
+      csgStatusMessage.setCurrentForwardVelocity(desiredVelocity.getX());
+      csgStatusMessage.setCurrentLateralVelocity(desiredVelocity.getY());
+      csgStatusMessage.setCurrentTurnVelocity(desiredTurningVelocity.getDoubleValue());
 
       // Current swing parameter values
       csgStatusMessage.setCurrentSwingHeight(parameters.getSwingHeight());
