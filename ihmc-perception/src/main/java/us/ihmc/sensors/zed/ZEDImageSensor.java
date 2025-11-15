@@ -1,5 +1,6 @@
 package us.ihmc.sensors.zed;
 
+import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -21,6 +22,7 @@ import us.ihmc.zed.SL_InitParameters;
 import us.ihmc.zed.SL_PositionalTrackingParameters;
 import us.ihmc.zed.SL_Quaternion;
 import us.ihmc.zed.SL_RuntimeParameters;
+import us.ihmc.zed.SL_SpatialMappingParameters;
 import us.ihmc.zed.SL_Vector3;
 import us.ihmc.zed.library.ZEDJavaAPINativeLibrary;
 
@@ -78,9 +80,17 @@ public class ZEDImageSensor extends ImageSensor
    protected final SL_RuntimeParameters zedRuntimeParameters = new SL_RuntimeParameters();
 
    private boolean positionalTrackingEnabled = false;
+   private boolean spatialMappingEnabled = false;
    private final MutableReferenceFrame trackedSensorFrame;
    private final SL_Quaternion sensorRotation = new SL_Quaternion();
    private final SL_Vector3 sensorTranslation = new SL_Vector3();
+
+   // Spatial mapping mesh data
+   private float[] meshVertices = null;
+   private int[] meshTriangles = null;
+   private byte[] meshColors = null;
+   private int meshNumVertices = 0;
+   private int meshNumTriangles = 0;
 
    public ZEDImageSensor(int cameraID, ZEDModelData zedModel, int slInputType, int slDepthMode)
    {
@@ -174,7 +184,35 @@ public class ZEDImageSensor extends ImageSensor
          if (positionalTrackingEnabled)
          {
             SL_PositionalTrackingParameters positionalTrackingParameters = sl_get_positional_tracking_parameters(cameraID);
+            positionalTrackingParameters.enable_area_memory(true);
+            positionalTrackingParameters.enable_imu_fusion(true);
+            positionalTrackingParameters.enable_pose_smoothing(false);
+            positionalTrackingParameters.set_floor_as_origin(false);
             sl_enable_positional_tracking(cameraID, positionalTrackingParameters, "");
+         }
+
+         if (spatialMappingEnabled)
+         {
+            // Positional tracking is required for spatial mapping
+            if (!positionalTrackingEnabled)
+            {
+               LogTools.warn("Spatial mapping requires positional tracking. Enabling positional tracking automatically.");
+               SL_PositionalTrackingParameters positionalTrackingParameters = sl_get_positional_tracking_parameters(cameraID);
+               positionalTrackingParameters.enable_area_memory(true);
+               positionalTrackingParameters.enable_imu_fusion(true);
+               sl_enable_positional_tracking(cameraID, positionalTrackingParameters, "");
+               positionalTrackingEnabled = true;
+            }
+
+            SL_SpatialMappingParameters spatialMappingParameters = new SL_SpatialMappingParameters();
+            spatialMappingParameters.map_type(SL_SPATIAL_MAP_TYPE_MESH); // Mesh, not point cloud
+            spatialMappingParameters.resolution_meter(0.05f); // 5cm resolution
+            spatialMappingParameters.range_meter(0.0f); // Automatic range detection
+            spatialMappingParameters.save_texture(false); // Enable if RGB texture needed
+            spatialMappingParameters.use_chunk_only(true); // Use chunked mesh format
+            spatialMappingParameters.max_memory_usage(2048); // MB
+            spatialMappingParameters.reverse_vertex_order(false);
+            sl_enable_spatial_mapping(cameraID, spatialMappingParameters);
          }
 
          // Get camera intrinsics
@@ -314,6 +352,30 @@ public class ZEDImageSensor extends ImageSensor
                trackedSensorFrame.update(transformToWorld -> transformToWorld.set(euclidRotation, euclidTranslation));
          }
 
+         if (spatialMappingEnabled)
+         {
+            // Monitor mapping state
+            int mappingState = sl_get_spatial_mapping_state(cameraID);
+            switch (mappingState)
+            {
+               case SL_SPATIAL_MAPPING_STATE_INITIALIZING ->
+                  LogTools.debug("Spatial mapping initializing...");
+               case SL_SPATIAL_MAPPING_STATE_OK -> { /* Normal operation */ }
+               case SL_SPATIAL_MAPPING_STATE_NOT_ENOUGH_MEMORY ->
+                  LogTools.warn("Spatial mapping: Not enough memory");
+               case SL_SPATIAL_MAPPING_STATE_NOT_ENABLED ->
+                  LogTools.warn("Spatial mapping not enabled");
+               case SL_SPATIAL_MAPPING_STATE_FPS_TOO_LOW ->
+                  LogTools.warn("Spatial mapping: FPS too low");
+            }
+
+            // Extract and update mesh data periodically
+            if (grabSequenceNumber % 30 == 0) // Update mesh every 30 frames
+            {
+               updateMeshData();
+            }
+         }
+
          // Retrieve the grabbed depth image
          Pointer depthImagePointer = slMatPointers[DEPTH_IMAGE_KEY];
          returnCode = sl_retrieve_measure(cameraID, depthImagePointer, SL_MEASURE_DEPTH_U16_MM, SL_MEM_GPU, imageWidth, imageHeight, null); // TODO: Pass custream
@@ -437,9 +499,136 @@ public class ZEDImageSensor extends ImageSensor
       positionalTrackingEnabled = enable;
    }
 
+   public void enableSpatialMapping(boolean enable)
+   {
+      spatialMappingEnabled = enable;
+   }
+
+   /**
+    * Updates the mesh data from the spatial mapping system.
+    * Extracts vertices, triangles, and colors from the ZED spatial map.
+    */
+   private void updateMeshData()
+   {
+      try
+      {
+         // Extract the complete spatial map
+         sl_extract_whole_spatial_map(cameraID);
+
+         // Get mesh size information
+         int maxSubmesh = 1000;
+         int[] nbVerticesPerSubmesh = new int[maxSubmesh];
+         int[] nbTrianglesPerSubmesh = new int[maxSubmesh];
+         int[] nbSubmeshes = new int[1];
+         int[] updatedIndices = new int[maxSubmesh];
+         int[] nbVerticesTot = new int[1];
+         int[] nbTrianglesTot = new int[1];
+
+         sl_update_mesh(cameraID, nbVerticesPerSubmesh, nbTrianglesPerSubmesh, nbSubmeshes, updatedIndices, nbVerticesTot, nbTrianglesTot, maxSubmesh);
+
+         int numVertices = nbVerticesTot[0];
+         int numTriangles = nbTrianglesTot[0];
+
+         if (numVertices > 0 && numTriangles > 0)
+         {
+            // Allocate arrays for mesh data
+            float[] vertices = new float[numVertices * 3]; // x, y, z for each vertex
+            int[] triangles = new int[numTriangles * 3]; // v1, v2, v3 indices for each triangle
+            byte[] colors = new byte[numVertices * 4]; // RGBA for each vertex
+            float[] uvs = null; // Texture coordinates (not needed if save_texture is false)
+            byte[] texturePtr = null; // Texture data (not needed if save_texture is false)
+
+            // Retrieve mesh data
+            sl_retrieve_mesh(cameraID, vertices, triangles, colors, uvs, texturePtr, nbSubmeshes[0]);
+
+            // Store mesh data in fields
+            synchronized (this)
+            {
+               meshVertices = vertices;
+               meshTriangles = triangles;
+               meshColors = colors;
+               meshNumVertices = numVertices;
+               meshNumTriangles = numTriangles;
+            }
+
+            LogTools.info("Mesh updated: {} vertices, {} triangles (from {} submeshes)", numVertices, numTriangles, nbSubmeshes[0]);
+         }
+      }
+      catch (Exception e)
+      {
+         LogTools.error("Error updating mesh data: {}", e.getMessage());
+      }
+   }
+
+   /**
+    * Saves the current spatial mesh to a file.
+    * @param filePath Path to save the mesh (supports .obj, .ply, .bin formats)
+    */
+   public void saveMesh(String filePath)
+   {
+      if (!spatialMappingEnabled)
+      {
+         LogTools.warn("Spatial mapping is not enabled. Cannot save mesh.");
+         return;
+      }
+
+      sl_extract_whole_spatial_map(cameraID);
+      boolean result = sl_save_mesh(cameraID, filePath, SL_MESH_FILE_FORMAT_OBJ);
+
+      if (result)
+         LogTools.info("Mesh saved to: {}", filePath);
+      else
+         LogTools.error("Failed to save mesh to: {}", filePath);
+   }
+
+   /**
+    * @return Current mesh vertices as float array [x1,y1,z1, x2,y2,z2, ...], or null if no mesh available
+    */
+   public synchronized float[] getMeshVertices()
+   {
+      return meshVertices;
+   }
+
+   /**
+    * @return Current mesh triangles as int array [v1,v2,v3, v1,v2,v3, ...], or null if no mesh available
+    */
+   public synchronized int[] getMeshTriangles()
+   {
+      return meshTriangles;
+   }
+
+   /**
+    * @return Current mesh colors as byte array [r,g,b,a, r,g,b,a, ...], or null if no mesh available
+    */
+   public synchronized byte[] getMeshColors()
+   {
+      return meshColors;
+   }
+
+   /**
+    * @return Number of vertices in the current mesh
+    */
+   public synchronized int getMeshNumVertices()
+   {
+      return meshNumVertices;
+   }
+
+   /**
+    * @return Number of triangles in the current mesh
+    */
+   public synchronized int getMeshNumTriangles()
+   {
+      return meshNumTriangles;
+   }
+
    @Override
    public void close()
    {
+      if (spatialMappingEnabled)
+      {
+         sl_disable_spatial_mapping(cameraID);
+      }
+
       System.out.println("Closing " + getClass().getSimpleName());
       super.close();
 
