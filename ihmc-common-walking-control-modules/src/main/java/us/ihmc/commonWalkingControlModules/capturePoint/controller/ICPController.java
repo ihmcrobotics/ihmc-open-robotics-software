@@ -436,7 +436,7 @@ public class ICPController implements ICPControllerInterface
                                             feedbackGains.getFeedbackPartMaxValueParallelToMotion(),
                                             feedbackGains.getFeedbackPartMaxValueOrthogonalToMotion());
       }
-      if (!ignoreRateLimitThisTick)
+      if (!ignoreRateLimitThisTick && hasNotConvergedCounts.getIntegerValue() < 5)
          solver.setMaximumFeedbackRate(feedbackGains.getFeedbackPartMaxRate(), controlDT);
       else
          ignoreRateLimitThisTick = false;

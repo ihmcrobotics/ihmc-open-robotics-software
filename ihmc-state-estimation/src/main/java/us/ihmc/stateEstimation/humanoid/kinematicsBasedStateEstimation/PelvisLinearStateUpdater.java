@@ -630,7 +630,11 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
             highestLoadedFoot = foot;
          }
 
-         if (footLoad.getValue() < magnitudeForTrust)
+         double copDistance = footSwitches.get(foot).getCenterOfPressureDistance();
+         if (Double.isNaN(copDistance))
+            copDistance = 0.0;
+
+         if (footLoad.getValue() < magnitudeForTrust || copDistance > 0.01)
             areFeetTrusted.get(foot).set(false);
          else
             filteredNumberOfEndEffectorsTrusted++;

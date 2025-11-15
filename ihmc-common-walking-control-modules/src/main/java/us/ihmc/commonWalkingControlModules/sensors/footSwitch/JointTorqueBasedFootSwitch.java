@@ -172,6 +172,15 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
    }
 
    @Override
+   public double getCenterOfPressureDistance()
+   {
+      if (useJacobianTranspose.getValue())
+         return wrenchDetector.getCenterOfPressureDistance();
+      else
+         return Double.NaN;
+   }
+
+   @Override
    public WrenchReadOnly getMeasuredWrench()
    {
       if (useJacobianTranspose.getValue())
@@ -477,13 +486,11 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
          horizontalVelocity.set(EuclidCoreTools.norm(linearVelocity.getX(), linearVelocity.getY()));
          verticalVelocity.set(linearVelocity.getZ());
 
-//       This is the former condition that we were using, we took out the horizontal velocity because the robot in single support was shaking too much
-//       hasFootHitGround.set(isPastForceThreshold.getValue() && horizontalVelocity.getValue() < horizontalVelocityThreshold.getValue()
-//                              && Math.abs(verticalVelocity.getValue()) < verticalVelocityThreshold.getValue());
          boolean validCoP = isPastCoPThresholdFiltered.getValue();
-         boolean hitGroundLow = (isPastForceThresholdLowFiltered.getValue() && validCoP && Math.abs(verticalVelocity.getValue()) < verticalVelocityThreshold.getValue()) ;
+         boolean hitGroundLow = isPastForceThresholdLowFiltered.getValue() && validCoP;
+         boolean allowableSpeed = horizontalVelocity.getValue() < horizontalVelocityThreshold.getValue() && Math.abs(verticalVelocity.getValue()) < verticalVelocityThreshold.getValue() ;
 
-         hasFootHitGround.set(hitGroundLow || isPastForceThresholdHigh.getValue());
+         hasFootHitGround.set((hitGroundLow && allowableSpeed) || isPastForceThresholdHigh.getValue());
          hasFootHitGroundFiltered.update();
       }
 
@@ -510,6 +517,11 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
       public FramePoint2DReadOnly getCenterOfPressure()
       {
          return centerOfPressure;
+      }
+
+      public double getCenterOfPressureDistance()
+      {
+         return copDistance.getDoubleValue();
       }
    }
 }

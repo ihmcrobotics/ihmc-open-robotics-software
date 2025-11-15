@@ -55,6 +55,11 @@ public interface FootSwitchInterface extends SCS2YoGraphicHolder
    double getFootLoadPercentage();
 
    /**
+    * @return the distance of the center of pressure to the foot polygon. Negative if inside.
+    */
+   double getCenterOfPressureDistance();
+
+   /**
     * Gets the estimated center of pressure coordinates in the foot, or {@code null} if this foot
     * switch cannot estimate the center of pressure.
     */

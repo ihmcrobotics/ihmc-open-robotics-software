@@ -188,7 +188,7 @@ public class AvatarMultiThreadingFactory
       estimatorThread.set(estimatorThreadFactory.createAvatarEstimatorThread());
 
       // Hand the communication module the sensor processor
-      SensorProcessing sensorProcessing = estimatorThreadFactory.getSensorReader().getSensorProcessing();
+      SensorProcessing sensorProcessing = estimatorThread.get().getSensorReader().getSensorProcessing();
       hardwareCommunicationInterface.setSensorProcessing(sensorProcessing);
 
       // Create controller thread

@@ -298,6 +298,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          inputJointPositions.put(oneDoFJoint, rawJointPosition);
          outputJointPositions.put(oneDoFJoint, rawJointPosition);
          processedJointPositions.put(oneDoFJoint, new ArrayList<ProcessingYoVariable>());
+         jointPositionOffsets.put(oneDoFJoint, new ArrayList<>());
 
          prefix = JOINT_VELOCITY.getProcessorNamePrefix(RAW);
          suffix = JOINT_VELOCITY.getProcessorNameSuffix(jointName, -1);
@@ -305,6 +306,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          inputJointVelocities.put(oneDoFJoint, rawJointVelocity);
          outputJointVelocities.put(oneDoFJoint, rawJointVelocity);
          processedJointVelocities.put(oneDoFJoint, new ArrayList<ProcessingYoVariable>());
+         jointVelocityOffsets.put(oneDoFJoint, new ArrayList<>());
 
          prefix = JOINT_ACCELERATION.getProcessorNamePrefix(RAW);
          suffix = JOINT_ACCELERATION.getProcessorNameSuffix(jointName, -1);
@@ -2454,6 +2456,9 @@ public class SensorProcessing implements SensorOutputMapReadOnly
    public double getTotalPositionOffset(OneDoFJointReadOnly joint)
    {
       List<OffsettingProcessorVariable> processors = jointPositionOffsets.get(joint);
+      if (processors == null)
+         return 0.0;
+
       double offset = 0.0;
       for (int i = 0; i < processors.size(); i++)
          offset += processors.get(i).getOffset();
@@ -2464,6 +2469,9 @@ public class SensorProcessing implements SensorOutputMapReadOnly
    public double getTotalVelocityOffset(OneDoFJointReadOnly joint)
    {
       List<OffsettingProcessorVariable> processors = jointVelocityOffsets.get(joint);
+      if (processors == null)
+         return 0.0;
+
       double offset = 0.0;
       for (int i = 0; i < processors.size(); i++)
          offset += processors.get(i).getOffset();

@@ -176,6 +176,12 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
    }
 
    @Override
+   public double getCenterOfPressureDistance()
+   {
+      return Double.NaN;
+   }
+
+   @Override
    public FramePoint2DReadOnly getCenterOfPressure()
    {
       return null;
