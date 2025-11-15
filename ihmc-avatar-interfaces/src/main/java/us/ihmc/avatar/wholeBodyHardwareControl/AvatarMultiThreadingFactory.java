@@ -48,6 +48,7 @@ import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
+import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.tools.TimestampProvider;
@@ -186,6 +187,10 @@ public class AvatarMultiThreadingFactory
       // Create estimator thread
       estimatorThread.set(estimatorThreadFactory.createAvatarEstimatorThread());
 
+      // Hand the communication module the sensor processor
+      SensorProcessing sensorProcessing = estimatorThreadFactory.getSensorReader().getSensorProcessing();
+      hardwareCommunicationInterface.setSensorProcessing(sensorProcessing);
+
       // Create controller thread
       if (estimatorModeMapReference.hasValue())
       {
@@ -233,7 +238,6 @@ public class AvatarMultiThreadingFactory
 
       if (ikStreamingThread.hasValue())
          yoVariableServer.addRegistry(ikStreamingThread.get().getYoVariableRegistry(), ikStreamingThread.get().getSCS1YoGraphicsListRegistry());
-
 
       // Setup JVM statistics
       PeriodicThreadSchedulerFactory jvmSchedulerFactory;
