@@ -166,7 +166,8 @@ public abstract class TransferState extends WalkingState
                                                      balanceManager.getDesiredCMP(),
                                                      controllerToolbox.getFootSwitches().get(trailingLeg).getCenterOfPressure(),
                                                      balanceManager.getDesiredICP(),
-                                                     capturePoint2d);
+                                                     capturePoint2d,
+                                                     controllerToolbox.getFootSwitches().get(trailingLeg).getFootLoadPercentage());
 
          if (feetManager.okForPointToeOff(false))
          {

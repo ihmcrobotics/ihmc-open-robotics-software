@@ -224,6 +224,12 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
    }
 
    @Override
+   public double getCenterOfPressureDistance()
+   {
+      return copDistance.getDoubleValue();
+   }
+
+   @Override
    public WrenchReadOnly getMeasuredWrench()
    {
       return footWrench;
