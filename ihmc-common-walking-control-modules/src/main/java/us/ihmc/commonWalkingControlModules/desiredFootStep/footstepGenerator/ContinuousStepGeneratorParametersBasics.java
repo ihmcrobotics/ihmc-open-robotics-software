@@ -8,8 +8,8 @@ public interface ContinuousStepGeneratorParametersBasics
    public static final int DEFAULT_NUMBER_OF_FOOTSTEPS_TO_PLAN = 4;
    public static final int DEFAULT_TICKS_TO_UPDATE_ENVIRONMENT = Integer.MAX_VALUE;
    public static final int DEFAULT_NUMBER_OF_FIXED_FOOTSTEPS = 0;
-   public static final boolean DEFAULT_STEPS_ARE_ADJUSTABLE = false;
-   public static final boolean DEFAULT_SHIFT_UPCOMING_STEPS_WITH_TOUCHDOWN = false;
+   public static final boolean DEFAULT_STEPS_ARE_ADJUSTABLE = true;
+   public static final boolean DEFAULT_SHIFT_UPCOMING_STEPS_WITH_TOUCHDOWN = true;
 
    default void clear()
    {
