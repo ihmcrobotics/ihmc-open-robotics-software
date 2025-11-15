@@ -119,7 +119,7 @@ __device__ bool rayIntersectsCapsule(float3 rayOrigin,
 
     quadraticCoeffDiscriminant = sqrtf(quadraticCoeffDiscriminant);
 
-    // FIXME this only takes into account one of the possible solutions to the quadratic formula. We need to figure out what to do for the other one
+    // We only take one solution from the quadratic equation because we only need the closer one
     distanceToIntersection = (-quadraticCoeffB - quadraticCoeffDiscriminant) / (2.0 * quadraticCoeffA);
 
     // Clamp hit along finite capsule
