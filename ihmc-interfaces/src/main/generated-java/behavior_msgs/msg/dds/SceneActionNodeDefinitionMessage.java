@@ -15,7 +15,7 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
    /**
             * Object type (enum ordinal)
             */
-   public int object_type_;
+   public byte object_type_;
 
    public SceneActionNodeDefinitionMessage()
    {
@@ -47,14 +47,14 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
    /**
             * Object type (enum ordinal)
             */
-   public void setObjectType(int object_type)
+   public void setObjectType(byte object_type)
    {
       object_type_ = object_type;
    }
    /**
             * Object type (enum ordinal)
             */
-   public int getObjectType()
+   public byte getObjectType()
    {
       return object_type_;
    }

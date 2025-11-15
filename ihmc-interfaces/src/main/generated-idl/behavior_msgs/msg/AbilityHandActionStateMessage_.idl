@@ -21,6 +21,14 @@ module behavior_msgs
          * Definition
          */
         behavior_msgs::msg::dds::AbilityHandActionDefinitionMessage definition;
+        /**
+         * Current finger positions
+         */
+        float current_finger_positions[6];
+        /**
+         * Desired finger positions
+         */
+        float desired_finger_positions[6];
       };
     };
   };

@@ -21,6 +21,7 @@ public interface BehaviorTreeNode<T extends BehaviorTreeNode<T, ?, ?>,
 
    D getDefinition();
 
+   /** Update the node's state. Should not have side effects if called multiple times per tick. */
    default void update()
    {
       getState().update();

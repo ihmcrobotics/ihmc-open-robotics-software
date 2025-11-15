@@ -35,7 +35,7 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
    /**
             * Preset arm configuration
             */
-   public int preset_;
+   public byte preset_;
    /**
             * Joint angles
             */
@@ -196,14 +196,14 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
    /**
             * Preset arm configuration
             */
-   public void setPreset(int preset)
+   public void setPreset(byte preset)
    {
       preset_ = preset;
    }
    /**
             * Preset arm configuration
             */
-   public int getPreset()
+   public byte getPreset()
    {
       return preset_;
    }

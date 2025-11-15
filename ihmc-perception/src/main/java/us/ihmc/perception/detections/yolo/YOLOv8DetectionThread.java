@@ -2,8 +2,6 @@ package us.ihmc.perception.detections.yolo;
 
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import us.ihmc.commons.thread.RepeatingTaskThread;
-import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.detections.InstantDetection;
@@ -26,8 +24,7 @@ public class YOLOv8DetectionThread extends RepeatingTaskThread
    {
       super(YOLOv8DetectionThread.class.getSimpleName());
 
-      CRDTInfo crdtInfo = new CRDTInfo(ROS2ActorDesignation.ROBOT, clockOffsetEstimator);
-      yoloExecutor = new YOLOv8DetectionExecutor(crdtInfo, annotatedImageDemandSupplier);
+      yoloExecutor = new YOLOv8DetectionExecutor(clockOffsetEstimator, annotatedImageDemandSupplier);
    }
 
    public void addDetectionConsumerCallback(Consumer<List<InstantDetection>> consumer)
