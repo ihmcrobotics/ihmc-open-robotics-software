@@ -1,8 +1,12 @@
-package us.ihmc.avatar.joystickBasedJavaFXController;
+package us.ihmc.rdx.csg;
 
 import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.ControllerListener;
 import com.badlogic.gdx.controllers.Controllers;
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.graphics.g3d.RenderableProvider;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.ContinuousStepGeneratorInputMessage;
 import controller_msgs.msg.dds.ContinuousStepGeneratorParametersMessage;
 import controller_msgs.msg.dds.ContinuousStepGeneratorStatusMessage;
@@ -12,7 +16,9 @@ import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGeneratorParametersBasics;
 import us.ihmc.commons.DeadbandTools;
+import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.ros2.QueuedROS2Subscription;
 import us.ihmc.ros2.ROS2Node;
 
@@ -26,8 +32,14 @@ import us.ihmc.ros2.ROS2Node;
  *
  * @author Stefan Fasano
  */
-public class XBoxOneCSGPluginGDX
+public class RDXXBoxOneCSGPlugin extends RDXPanel implements RenderableProvider
 {
+   /**
+    * This defines the update thread rate for information being sent over ROS2. The reason this is a very low frequency is because
+    * we only have a limited amount of networking bandwidth when using WIFI.
+    */
+   private static final double THROTTLER_THREAD_HERTZ = 33.0;
+
    public static final double DEFAULT_PARAMETER_INCREMENT = 0.01;
    private static final boolean DEFAULT_USE_DEADMAN_SWITCH = true;
 
@@ -46,13 +58,18 @@ public class XBoxOneCSGPluginGDX
    private final QueuedROS2Subscription<ContinuousStepGeneratorStatusMessage> csgStatusSubscription;
    private final ContinuousStepGeneratorStatusMessage csgStatusMessage = new ContinuousStepGeneratorStatusMessage();
 
-   public XBoxOneCSGPluginGDX(DRCRobotModel robotModel, ROS2Node ros2Node)
+   private final Throttler xboxJoystickRos2Throttler;
+
+   public RDXXBoxOneCSGPlugin(DRCRobotModel robotModel, ROS2Node ros2Node)
    {
       this(robotModel, ros2Node, DEFAULT_PARAMETER_INCREMENT, DEFAULT_USE_DEADMAN_SWITCH);
    }
 
-   public XBoxOneCSGPluginGDX(DRCRobotModel robotModel, ROS2Node ros2Node, double parameterIncrement, boolean useDeadmanSwitch)
+   public RDXXBoxOneCSGPlugin(DRCRobotModel robotModel, ROS2Node ros2Node, double parameterIncrement, boolean useDeadmanSwitch)
    {
+      super("Xbox Controller CSG");
+      super.setRenderMethod(this::renderImGuiWidgets);
+
       this.parameterIncrement = parameterIncrement;
       this.useDeadmanSwitch = useDeadmanSwitch;
 
@@ -62,6 +79,8 @@ public class XBoxOneCSGPluginGDX
       csgStatusSubscription = ros2Node.createQueuedSubscription(HumanoidControllerAPI.getTopic(ContinuousStepGeneratorStatusMessage.class, robotModel.getSimpleRobotName()), 10);
 
       configureCSGParameters(csgParametersCommand, robotModel.getWalkingControllerParameters());
+
+      xboxJoystickRos2Throttler = new Throttler().setFrequency(THROTTLER_THREAD_HERTZ);
 
       controllerListener = new ControllerListener()
       {
@@ -122,7 +141,15 @@ public class XBoxOneCSGPluginGDX
       };
    }
 
-   public void update()
+   public void renderImGuiWidgets()
+   {
+      if (xboxJoystickRos2Throttler.run())
+      {
+         update();
+      }
+   }
+
+   private void update()
    {
       if (csgStatusSubscription.flushAndGetLatest(csgStatusMessage))
          setCSGCommandsToCurrentValues(csgStatusMessage);
@@ -162,6 +189,12 @@ public class XBoxOneCSGPluginGDX
       csgInputCommand.setLateralVelocity(lateralJoystickValue);
       csgInputCommand.setTurnVelocity(turningJoystickValue);
       ros2ControllerPublisherMap.publish(csgInputCommand);
+   }
+
+   @Override
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+      // Currently need this method to extend an RDX Panel, not doing anything with it yet
    }
 
    public void shutDownXboxJoystick()
