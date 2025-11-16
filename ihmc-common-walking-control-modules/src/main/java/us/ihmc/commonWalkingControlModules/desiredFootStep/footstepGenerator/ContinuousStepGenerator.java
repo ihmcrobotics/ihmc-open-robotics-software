@@ -840,7 +840,7 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
     */
    public void setMaxStepLengthBackwards(double maxStepLengthBackwards)
    {
-      parameters.setMaxStepLengthForwards(maxStepLengthBackwards);
+      parameters.setMaxStepLengthBackwards(maxStepLengthBackwards);
    }
 
    /**

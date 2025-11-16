@@ -12,8 +12,13 @@ import us.ihmc.ros2.QueuedROS2Subscription;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
 
+import java.util.function.Consumer;
+
 public class CSGROS2CommunicationHelper
 {
+   private final ROS2Node ros2Node;
+   private final String robotName;
+
    // CSG ROS Commands
    private final ContinuousStepGeneratorInputMessage csgInputCommand = new ContinuousStepGeneratorInputMessage();
    private final ContinuousStepGeneratorParametersMessage csgParametersCommand = new ContinuousStepGeneratorParametersMessage();
@@ -33,6 +38,9 @@ public class CSGROS2CommunicationHelper
 
    public CSGROS2CommunicationHelper(String robotName, ROS2Node ros2Node)
    {
+      this.ros2Node = ros2Node;
+      this.robotName = robotName;
+
       csgStatusSubscription = ros2Node.createQueuedSubscription(HumanoidControllerAPI.getTopic(ContinuousStepGeneratorStatusMessage.class, robotName), 10);
 
       ROS2Tools.createVolatileCallbackSubscription(ros2Node,
@@ -55,6 +63,11 @@ public class CSGROS2CommunicationHelper
    public void publish(ContinuousStepGeneratorParametersMessage continuousStepGeneratorParametersMessage)
    {
       csgParametersCommandPublisher.publish(continuousStepGeneratorParametersMessage);
+   }
+
+   public void addVolatileCSGStatusCallbackSubscription(Consumer<ContinuousStepGeneratorStatusMessage> callback)
+   {
+      ROS2Tools.createVolatileCallbackSubscription(ros2Node, HumanoidControllerAPI.getTopic(ContinuousStepGeneratorStatusMessage.class, robotName), callback);
    }
 
    /**
@@ -100,6 +113,24 @@ public class CSGROS2CommunicationHelper
       csgParametersCommand.setMaxStepWidth(steppingParameters.getMaxStepWidth());
       csgParametersCommand.setTurnMaxAngleInward(steppingParameters.getMaxAngleTurnInwards());
       csgParametersCommand.setTurnMaxAngleOutward(steppingParameters.getMaxAngleTurnOutwards());
+
+      // CSG status message
+      csgStatusMessage.setIsWalking(false);
+      csgStatusMessage.setIsInUnitVelocities(false);
+      csgStatusMessage.setCurrentForwardVelocity(0.0);
+      csgStatusMessage.setCurrentLateralVelocity(0.0);
+      csgStatusMessage.setCurrentTurnVelocity(0.0);
+
+      csgStatusMessage.setCurrentSwingHeight(walkingControllerParameters.getSwingTrajectoryParameters().getDefaultSwingHeight());
+      csgStatusMessage.setCurrentSwingDuration(walkingControllerParameters.getDefaultSwingTime());
+      csgStatusMessage.setCurrentTransferDuration(walkingControllerParameters.getDefaultTransferTime());
+      csgStatusMessage.setCurrentMaxStepLengthForwards(steppingParameters.getMaxStepLength());
+      csgStatusMessage.setCurrentMaxStepLengthBackwards(steppingParameters.getMaxBackwardStepLength());
+      csgStatusMessage.setCurrentMaxStepWidth(steppingParameters.getMaxStepWidth());
+      csgStatusMessage.setCurrentMinStepWidth(steppingParameters.getMinStepWidth());
+      csgStatusMessage.setCurrentDefaultStepWidth(steppingParameters.getInPlaceWidth());
+      csgStatusMessage.setCurrentTurnMaxAngleOutward(steppingParameters.getMaxAngleTurnOutwards());
+      csgStatusMessage.setCurrentTurnMaxAngleInward(steppingParameters.getMaxAngleTurnInwards());
    }
 
    public ContinuousStepGeneratorInputMessage getCSGInputCommand()
