@@ -3,23 +3,13 @@ package us.ihmc.rdx.csg;
 import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.ControllerListener;
 import com.badlogic.gdx.controllers.Controllers;
-import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.RenderableProvider;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.ContinuousStepGeneratorInputMessage;
 import controller_msgs.msg.dds.ContinuousStepGeneratorParametersMessage;
 import controller_msgs.msg.dds.ContinuousStepGeneratorStatusMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.ros2.ROS2ControllerPublisherMap;
-import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGeneratorParametersBasics;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.CSGROS2CommunicationHelper;
 import us.ihmc.commons.DeadbandTools;
 import us.ihmc.commons.thread.Throttler;
-import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.rdx.imgui.RDXPanel;
-import us.ihmc.ros2.QueuedROS2Subscription;
 import us.ihmc.ros2.ROS2Node;
 
 /**
@@ -32,53 +22,51 @@ import us.ihmc.ros2.ROS2Node;
  *
  * @author Stefan Fasano
  */
-public class RDXXBoxOneCSGPlugin extends RDXPanel implements RenderableProvider
+public class RDXXboxOneCSGPlugin
 {
    /**
     * This defines the update thread rate for information being sent over ROS2. The reason this is a very low frequency is because
     * we only have a limited amount of networking bandwidth when using WIFI.
     */
-   private static final double THROTTLER_THREAD_HERTZ = 33.0;
+   private static final double THROTTLER_THREAD_HERTZ = 10.0;
 
    public static final double DEFAULT_PARAMETER_INCREMENT = 0.01;
    private static final boolean DEFAULT_USE_DEADMAN_SWITCH = true;
 
-   private final double parameterIncrement;
-   private final boolean useDeadmanSwitch;
-
+   // Stuff related to the Xbox controller itself
    private Controller currentController;
    private final ControllerListener controllerListener;
    private boolean currentControllerConnected = false;
    private boolean controllerListenerHasBeenAdded = false;
 
-   private final ROS2ControllerPublisherMap ros2ControllerPublisherMap;
+   // CSG ROS communication helper
+   private final CSGROS2CommunicationHelper communicationHelper;
+
+   // CSG command and status messages
    private final ContinuousStepGeneratorInputMessage csgInputCommand;
    private final ContinuousStepGeneratorParametersMessage csgParametersCommand;
+   private final ContinuousStepGeneratorStatusMessage csgStatusMessage;
 
-   private final QueuedROS2Subscription<ContinuousStepGeneratorStatusMessage> csgStatusSubscription;
-   private final ContinuousStepGeneratorStatusMessage csgStatusMessage = new ContinuousStepGeneratorStatusMessage();
-
+   // Throttler for ensuring we aren't publishing too fast/often
    private final Throttler xboxJoystickRos2Throttler;
 
-   public RDXXBoxOneCSGPlugin(DRCRobotModel robotModel, ROS2Node ros2Node)
+   public RDXXboxOneCSGPlugin(DRCRobotModel robotModel, ROS2Node ros2Node)
    {
-      this(robotModel, ros2Node, DEFAULT_PARAMETER_INCREMENT, DEFAULT_USE_DEADMAN_SWITCH);
+      this(new CSGROS2CommunicationHelper(robotModel.getSimpleRobotName(), ros2Node, robotModel.getWalkingControllerParameters()));
    }
 
-   public RDXXBoxOneCSGPlugin(DRCRobotModel robotModel, ROS2Node ros2Node, double parameterIncrement, boolean useDeadmanSwitch)
+   public RDXXboxOneCSGPlugin(CSGROS2CommunicationHelper communicationHelper)
    {
-      super("Xbox Controller CSG");
-      super.setRenderMethod(this::renderImGuiWidgets);
+      this(communicationHelper, DEFAULT_PARAMETER_INCREMENT, DEFAULT_USE_DEADMAN_SWITCH);
+   }
 
-      this.parameterIncrement = parameterIncrement;
-      this.useDeadmanSwitch = useDeadmanSwitch;
+   public RDXXboxOneCSGPlugin(CSGROS2CommunicationHelper communicationHelper, double parameterIncrement, boolean useDeadmanSwitch)
+   {
+      this.communicationHelper = communicationHelper;
 
-      ros2ControllerPublisherMap = new ROS2ControllerPublisherMap(ros2Node, robotModel.getSimpleRobotName());
-      csgInputCommand = new ContinuousStepGeneratorInputMessage();
-      csgParametersCommand = new ContinuousStepGeneratorParametersMessage();
-      csgStatusSubscription = ros2Node.createQueuedSubscription(HumanoidControllerAPI.getTopic(ContinuousStepGeneratorStatusMessage.class, robotModel.getSimpleRobotName()), 10);
-
-      configureCSGParameters(csgParametersCommand, robotModel.getWalkingControllerParameters());
+      csgInputCommand = communicationHelper.getCSGInputCommand();
+      csgParametersCommand = communicationHelper.getCSGParametersCommand();
+      csgStatusMessage = communicationHelper.getCSGStatusMessage();
 
       xboxJoystickRos2Throttler = new Throttler().setFrequency(THROTTLER_THREAD_HERTZ);
 
@@ -94,12 +82,7 @@ public class RDXXBoxOneCSGPlugin extends RDXPanel implements RenderableProvider
          {
             currentControllerConnected = false;
 
-            csgInputCommand.setWalk(false);
-            csgInputCommand.setForwardVelocity(0.0);
-            csgInputCommand.setLateralVelocity(0.0);
-            csgInputCommand.setTurnVelocity(0.0);
-
-            ros2ControllerPublisherMap.publish(csgInputCommand);
+            sendStopWalkingCommands();
          }
 
          @Override
@@ -122,7 +105,7 @@ public class RDXXBoxOneCSGPlugin extends RDXPanel implements RenderableProvider
                else if (buttonCode == controller.getMapping().buttonDpadUp)
                   csgParametersCommand.setSwingHeight(csgStatusMessage.getCurrentSwingHeight() + parameterIncrement);
 
-               ros2ControllerPublisherMap.publish(csgParametersCommand);
+               communicationHelper.publish(csgParametersCommand);
             }
             return false;
          }
@@ -141,19 +124,16 @@ public class RDXXBoxOneCSGPlugin extends RDXPanel implements RenderableProvider
       };
    }
 
-   public void renderImGuiWidgets()
+   public void updateAndPublish()
    {
+      update(csgInputCommand);
+
       if (xboxJoystickRos2Throttler.run())
-      {
-         update();
-      }
+         communicationHelper.publish(csgInputCommand);
    }
 
-   private void update()
+   public void update(ContinuousStepGeneratorInputMessage csgInputCommandToPack)
    {
-      if (csgStatusSubscription.flushAndGetLatest(csgStatusMessage))
-         setCSGCommandsToCurrentValues(csgStatusMessage);
-
       boolean newControllerConnected = false;
       if (currentController != null && currentController != Controllers.getCurrent())
          newControllerConnected = true;
@@ -183,58 +163,25 @@ public class RDXXBoxOneCSGPlugin extends RDXPanel implements RenderableProvider
          turningJoystickValue = DeadbandTools.applyDeadband(deadband, -currentController.getAxis(currentController.getMapping().axisRightX));
       }
 
-      csgInputCommand.setWalk(requestWalking);
-      csgInputCommand.setUnitVelocities(false);
-      csgInputCommand.setForwardVelocity(forwardJoystickValue);
-      csgInputCommand.setLateralVelocity(lateralJoystickValue);
-      csgInputCommand.setTurnVelocity(turningJoystickValue);
-      ros2ControllerPublisherMap.publish(csgInputCommand);
+      csgInputCommandToPack.setWalk(requestWalking);
+      csgInputCommandToPack.setUnitVelocities(false);
+      csgInputCommandToPack.setForwardVelocity(forwardJoystickValue);
+      csgInputCommandToPack.setLateralVelocity(lateralJoystickValue);
+      csgInputCommandToPack.setTurnVelocity(turningJoystickValue);
    }
 
-   @Override
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
-   {
-      // Currently need this method to extend an RDX Panel, not doing anything with it yet
-   }
-
-   public void shutDownXboxJoystick()
+   public void sendStopWalkingCommands()
    {
       csgInputCommand.setWalk(false);
       csgInputCommand.setForwardVelocity(0.0);
       csgInputCommand.setLateralVelocity(0.0);
       csgInputCommand.setTurnVelocity(0.0);
 
-      ros2ControllerPublisherMap.publish(csgInputCommand);
+      communicationHelper.publish(csgInputCommand);
    }
 
-   private void setCSGCommandsToCurrentValues(ContinuousStepGeneratorStatusMessage csgStatusMessage)
+   public void shutDownXboxJoystick()
    {
-      csgParametersCommand.setSwingDuration(csgStatusMessage.getCurrentSwingDuration());
-      csgParametersCommand.setTransferDuration(csgStatusMessage.getCurrentTransferDuration());
-
-      csgParametersCommand.setSwingHeight(csgStatusMessage.getCurrentSwingHeight());
-      csgParametersCommand.setMaxStepLength(csgStatusMessage.getCurrentMaxStepLength());
-      csgParametersCommand.setDefaultStepWidth(csgStatusMessage.getCurrentDefaultStepWidth());
-      csgParametersCommand.setMinStepWidth(csgStatusMessage.getCurrentMinStepWidth());
-      csgParametersCommand.setMaxStepWidth(csgStatusMessage.getCurrentMaxStepWidth());
-      csgParametersCommand.setTurnMaxAngleInward(csgStatusMessage.getCurrentTurnMaxAngleInward());
-      csgParametersCommand.setTurnMaxAngleOutward(csgStatusMessage.getCurrentTurnMaxAngleOutward());
-   }
-
-   private void configureCSGParameters(ContinuousStepGeneratorParametersMessage csgParametersCommand, WalkingControllerParameters walkingControllerParameters)
-   {
-      csgParametersCommand.setNumberOfFootstepsToPlan(ContinuousStepGeneratorParametersBasics.DEFAULT_NUMBER_OF_FOOTSTEPS_TO_PLAN);
-      csgParametersCommand.setNumberOfFixedFootsteps(ContinuousStepGeneratorParametersBasics.DEFAULT_NUMBER_OF_FIXED_FOOTSTEPS);
-      csgParametersCommand.setSwingDuration(walkingControllerParameters.getDefaultSwingTime());
-      csgParametersCommand.setTransferDuration(walkingControllerParameters.getDefaultTransferTime());
-
-      SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
-      csgParametersCommand.setSwingHeight(walkingControllerParameters.getSwingTrajectoryParameters().getDefaultSwingHeight());
-      csgParametersCommand.setMaxStepLength(steppingParameters.getMaxStepLength());
-      csgParametersCommand.setDefaultStepWidth(steppingParameters.getInPlaceWidth());
-      csgParametersCommand.setMinStepWidth(steppingParameters.getMinStepWidth());
-      csgParametersCommand.setMaxStepWidth(steppingParameters.getMaxStepWidth());
-      csgParametersCommand.setTurnMaxAngleInward(steppingParameters.getMaxAngleTurnInwards());
-      csgParametersCommand.setTurnMaxAngleOutward(steppingParameters.getMaxAngleTurnOutwards());
+      sendStopWalkingCommands();
    }
 }
