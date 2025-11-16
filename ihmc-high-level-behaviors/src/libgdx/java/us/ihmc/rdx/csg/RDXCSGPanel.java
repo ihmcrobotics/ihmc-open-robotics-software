@@ -32,6 +32,7 @@ public class RDXCSGPanel extends RDXPanel
    private final ImDouble maxStepLengthForwards = new ImDouble();
    private final ImDouble maxStepLengthBackwards = new ImDouble();
    private final ImDouble maxStepWidth = new ImDouble();
+   private final ImDouble swingHeight = new ImDouble();
 
    private final ImDouble swingDuration = new ImDouble();
    private final ImDouble transferDuration = new ImDouble();
@@ -162,6 +163,8 @@ public class RDXCSGPanel extends RDXPanel
       boolean maxStepLengthBackwardsChanged = ImGuiTools.volatileInputDouble(labels.get("Max Step Length Backwards"), maxStepLengthBackwards);
       boolean maxStepWidthChanged = ImGuiTools.volatileInputDouble(labels.get("Max Step Width"), maxStepWidth);
 
+      boolean swingHeightChanged = ImGuiTools.volatileInputDouble(labels.get("Swing Height"), swingHeight);
+
       if (requestCSGWalkingChanged)
          csgInputCommand.setWalk(requestWalkCSG.get());
 
@@ -198,8 +201,11 @@ public class RDXCSGPanel extends RDXPanel
       if (maxStepWidthChanged)
          csgParametersCommand.setMaxStepWidth(maxStepWidth.get());
 
+      if (swingHeightChanged)
+         csgParametersCommand.setSwingHeight(swingHeight.get());
+
       publishCSGInputCommand = publishCSGInputCommand || requestCSGWalkingChanged || desiredForwardVelocityChanged || desiredLateralVelocityChanged || desiredTurningVelocityChanged;
-      publishCSGParametersCommand = swingDurationChanged || transferDurationChanged || maxStepLengthForwardsChanged || maxStepLengthBackwardsChanged || maxStepWidthChanged;
+      publishCSGParametersCommand = swingDurationChanged || transferDurationChanged || maxStepLengthForwardsChanged || maxStepLengthBackwardsChanged || maxStepWidthChanged || swingHeightChanged;
 
       if (publishCSGInputCommand)
          communicationHelper.publish(csgInputCommand);
@@ -221,6 +227,8 @@ public class RDXCSGPanel extends RDXPanel
       maxStepLengthForwards.set(csgStatusMessage.getCurrentMaxStepLengthForwards());
       maxStepLengthBackwards.set(csgStatusMessage.getCurrentMaxStepLengthBackwards());
       maxStepWidth.set(csgStatusMessage.getCurrentMaxStepWidth());
+
+      swingHeight.set(csgStatusMessage.getCurrentSwingHeight());
    }
 
    public void destroy()
