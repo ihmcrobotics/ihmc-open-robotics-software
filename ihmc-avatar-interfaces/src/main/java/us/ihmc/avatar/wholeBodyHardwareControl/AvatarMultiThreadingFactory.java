@@ -444,16 +444,17 @@ public class AvatarMultiThreadingFactory
          controllerFactory.addCustomStateTransition(createStandTransitionState(STAND_TRANSITION_STATE, controllerFactory,  !highLevelControllerParameters.automaticallyTransitionToWalkingWhenReady()));
 
          // Transition to DO_NOTHING in the event of a fault
-         HighLevelControllerStateCommand transitionToDoNothingCommand = new HighLevelControllerStateCommand();
-         CommandInputManager controllerCommandInputManager = controllerFactory.getCommandInputManager();
          hardwareCommunicationInterface.addFaultListener(change ->
                                                          {
                                                             if (hardwareCommunicationInterface.hasRobotFaulted())
-                                                            {
-                                                               transitionToDoNothingCommand.setHighLevelControllerName(DO_NOTHING_BEHAVIOR);
-                                                               controllerCommandInputManager.submitCommand(transitionToDoNothingCommand);
-                                                            }
+                                                               controllerFactory.getRequestedControlStateEnum().set(DO_NOTHING_BEHAVIOR);
                                                          });
+         // Transition to DO_NOTHING when the robot is unservoed
+         lowLevelOutputProcessor.addMasterGainListener(change ->
+                                                       {
+                                                          if (lowLevelOutputProcessor.getMasterGain().getValue() == 0.0)
+                                                             controllerFactory.getRequestedControlStateEnum().set(DO_NOTHING_BEHAVIOR);
+                                                       });
       }
 
       controllerFactory.setListenToHighLevelStatePackets(true);
