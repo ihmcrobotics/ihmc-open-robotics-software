@@ -253,6 +253,11 @@ public class AvatarLowLevelOutputProcessor
       servo.addListener(listener);
    }
 
+   public void addMasterGainListener(YoVariableChangedListener listener)
+   {
+      masterGain.addListener(listener);
+   }
+
    private static double computeMasterGain(double servoTime, double servoDuration, double startGain, double endGain)
    {
       double alpha = servoTime / servoDuration;
