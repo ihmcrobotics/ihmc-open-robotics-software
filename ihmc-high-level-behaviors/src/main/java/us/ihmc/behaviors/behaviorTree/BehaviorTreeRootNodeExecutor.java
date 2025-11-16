@@ -107,6 +107,8 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       {
          int next = state.getExecutionNextIndex();
          int after = state.getOrderedLeaves().get(i).getExecuteAfterLeafIndex();
+         for (int j = after + 1; j < i; j++) // Might have to wait on nearer leaves
+            after = Math.max(after, state.getOrderedLeaves().get(j).getExecuteAfterLeafIndex());
          state.getOrderedLeaves().get(i).setIsNextForExecution(i >= next && after < next);
       }
 
