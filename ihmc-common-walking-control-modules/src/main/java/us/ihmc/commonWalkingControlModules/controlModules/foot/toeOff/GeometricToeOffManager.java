@@ -178,7 +178,8 @@ public class GeometricToeOffManager
                                                FramePoint2DReadOnly desiredECMP,
                                                FramePoint2DReadOnly currentCoP,
                                                FramePoint2DReadOnly desiredICP,
-                                               FramePoint2DReadOnly currentICP)
+                                               FramePoint2DReadOnly currentICP,
+                                               double loadPercent)
    {
       setLeadingPolygonFromNextFootstep(stepSide, footstepPose, predictedContactPoints, leadingFootSupportPolygon);
 
@@ -193,6 +194,7 @@ public class GeometricToeOffManager
                              desiredECMP,
                              currentCoP,
                              toeOffPoint,
+                             loadPercent,
                              doToeOffIfPossibleInSingleSupport.getValue(),
                              footstepPose);
    }
@@ -202,7 +204,8 @@ public class GeometricToeOffManager
                                                FramePoint2DReadOnly desiredECMP,
                                                FramePoint2DReadOnly currentCoP,
                                                FramePoint2DReadOnly desiredICP,
-                                               FramePoint2DReadOnly currentICP)
+                                               FramePoint2DReadOnly currentICP,
+                                               double loadPercent)
    {
       setLeadingPolygonFromSupportFoot(trailingLeg, trailingFootSupportPolygon);
       setLeadingPolygonFromSupportFoot(trailingLeg.getOppositeSide(), leadingFootSupportPolygon);
@@ -218,6 +221,7 @@ public class GeometricToeOffManager
                              desiredECMP,
                              currentCoP,
                              toeOffPoint,
+                             loadPercent,
                              doToeOffIfPossibleInDoubleSupport.getValue(),
                              nextFrontFootPose);
    }
@@ -245,12 +249,13 @@ public class GeometricToeOffManager
                                        FramePoint2DReadOnly desiredECMP,
                                        FramePoint2DReadOnly currentCoP,
                                        FramePoint2DReadOnly toeOffPoint,
+                                       double loadPercent,
                                        boolean allowToeOff,
                                        FramePose3DReadOnly nextFrontFootPose)
    {
       dynamicStateInspector.setPolygons(leadingFootSupportPolygon, trailingFootSupportPolygon, onToesSupportPolygon);
       boolean wellPositioned = stepPositionInspector.isFrontFootWellPositionedForToeOff(trailingLeg, nextFrontFootPose);
-      dynamicStateInspector.checkICPLocations(dynamicStateInspectorParameters, trailingLeg, nextFrontFootPose, desiredICP, currentICP, desiredECMP, currentCoP, toeOffPoint);
+      dynamicStateInspector.checkICPLocations(dynamicStateInspectorParameters, trailingLeg, nextFrontFootPose, desiredICP, currentICP, desiredECMP, currentCoP, toeOffPoint, loadPercent);
 
       boolean jointsNeedToeingOff = false;
       if (jointLimitsInspector != null)

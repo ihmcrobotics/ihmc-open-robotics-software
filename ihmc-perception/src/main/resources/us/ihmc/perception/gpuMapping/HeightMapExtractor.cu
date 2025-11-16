@@ -69,7 +69,7 @@ __global__ void heightMapUpdateDataKernel(const unsigned short* __restrict__ dep
     float depth = rowPtr[xIndex] * 0.001f; // Scale to meters
 
     // Early exit for invalid depth
-    if (depth < 0.25f)
+    if (depth < 0.52f)
         return;
 
     // Back-project and transform

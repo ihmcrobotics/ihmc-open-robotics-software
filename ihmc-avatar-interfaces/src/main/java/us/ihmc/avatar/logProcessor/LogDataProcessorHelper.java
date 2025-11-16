@@ -185,6 +185,12 @@ public class LogDataProcessorHelper
             }
 
             @Override
+            public double getCenterOfPressureDistance()
+            {
+               return Double.NaN;
+            }
+
+            @Override
             public ReferenceFrame getMeasurementFrame()
             {
                return null;

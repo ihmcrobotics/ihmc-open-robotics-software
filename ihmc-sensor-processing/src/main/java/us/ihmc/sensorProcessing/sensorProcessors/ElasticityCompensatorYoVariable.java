@@ -1,12 +1,13 @@
 package us.ihmc.sensorProcessing.sensorProcessors;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType;
 import us.ihmc.yoVariables.filters.ProcessingYoVariable;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class ElasticityCompensatorYoVariable extends YoDouble implements ProcessingYoVariable
+public class ElasticityCompensatorYoVariable extends YoDouble implements OffsettingProcessorVariable
 {
    private final DoubleProvider stiffness;
    private final DoubleProvider rawJointPosition;
@@ -57,5 +58,11 @@ public class ElasticityCompensatorYoVariable extends YoDouble implements Process
       {
          throw new RuntimeException("Joint stiffness is zero or negative!");
       }
+   }
+
+   @Override
+   public double getOffset()
+   {
+      return deflection.getDoubleValue();
    }
 }
