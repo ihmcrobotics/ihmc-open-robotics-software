@@ -555,7 +555,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
       double swingDuration = walkingControllerParameters.getDefaultSwingTime();
       double transferDuration = walkingControllerParameters.getDefaultTransferTime();
-      double stepWidth = walkingControllerParameters.getSteppingParameters().getDefaultStepLength() / 2.0;
+      double stepWidth = walkingControllerParameters.getSteppingParametersForStepGeneration().getDefaultStepLength() / 2.0;
       RobotSide robotSide = RobotSide.LEFT;
       ReferenceFrame midFootZUpGroundFrame = humanoidReferenceFrames.getMidFootZUpGroundFrame();
       double time = walkingControllerParameters.getDefaultInitialTransferTime();
@@ -585,7 +585,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
    private double createWalkingMessage(int steps, FootstepDataListMessage messageToPack, boolean squareUp)
    {
       WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
-      SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
+      SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParametersForStepGeneration();
       double swingDuration = walkingControllerParameters.getDefaultSwingTime();
       double transferDuration = walkingControllerParameters.getDefaultTransferTime();
       double stepLength = 0.6 * steppingParameters.getDefaultStepLength();

@@ -74,7 +74,7 @@ public abstract class EndToEndFootstepQueueStatusMessageTest implements MultiRob
       referenceFrames.updateFrames();
       MovingReferenceFrame midFeetFrame = referenceFrames.getMidFootZUpGroundFrame();
 
-      SteppingParameters steppingParameters = robotModel.getWalkingControllerParameters().getSteppingParameters();
+      SteppingParameters steppingParameters = robotModel.getWalkingControllerParameters().getSteppingParametersForStepGeneration();
       double stepWidth = steppingParameters.getInPlaceWidth();
       double halfStepWidth = stepWidth / 2.0;
       double stepLength = steppingParameters.getDefaultStepLength() * 0.5;

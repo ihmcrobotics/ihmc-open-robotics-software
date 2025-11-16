@@ -78,7 +78,7 @@ public abstract class EndToEndFrameDataPublisherTest implements MultiRobotTestIn
       referenceFrames.updateFrames();
       MovingReferenceFrame midFeetFrame = referenceFrames.getMidFootZUpGroundFrame();
 
-      SteppingParameters steppingParameters = robotModel.getWalkingControllerParameters().getSteppingParameters();
+      SteppingParameters steppingParameters = robotModel.getWalkingControllerParameters().getSteppingParametersForStepGeneration();
       double maxStepWidth = steppingParameters.getMaxStepWidth();
       double minStepWidth = steppingParameters.getMinStepWidth();
       double halfStepWidth = (maxStepWidth + minStepWidth) / 4.0;
@@ -168,7 +168,7 @@ public abstract class EndToEndFrameDataPublisherTest implements MultiRobotTestIn
       ThreadTools.sleep(1000);
       assertTrue(simulationTestHelper.simulateNow(0.25));
 
-      SteppingParameters steppingParameters = robotModel.getWalkingControllerParameters().getSteppingParameters();
+      SteppingParameters steppingParameters = robotModel.getWalkingControllerParameters().getSteppingParametersForStepGeneration();
       double maxStepWidth = steppingParameters.getMaxStepWidth();
       double minStepWidth = steppingParameters.getMinStepWidth();
       double halfStepWidth = (maxStepWidth + minStepWidth) / 4.0;
@@ -181,8 +181,6 @@ public abstract class EndToEndFrameDataPublisherTest implements MultiRobotTestIn
 
       //            FootstepDataListMessage footStepDataListMessage = EndToEndTestTools.generateForwardSteps(stepSide,numberOfSteps, stepLength, stepWidth, swingTime, transferTime, new Pose3D(), false);
 
-      WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
-      SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
       FramePose3D startPose = new FramePose3D(simulationTestHelper.getControllerReferenceFrames().getMidFootZUpGroundFrame());
       startPose.changeFrame(worldFrame);
       //      FootstepDataListMessage steps = EndToEndTestTools.generateForwardSteps(RobotSide.LEFT,

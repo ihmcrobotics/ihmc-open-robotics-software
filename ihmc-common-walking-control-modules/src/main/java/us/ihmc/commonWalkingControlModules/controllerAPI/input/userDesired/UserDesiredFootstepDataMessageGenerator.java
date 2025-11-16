@@ -97,7 +97,7 @@ public class UserDesiredFootstepDataMessageGenerator
       desiredOrientation = new FrameQuaternion(stanceFootFrame);
 
       firstStepSide.set(supportSide);
-      SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
+      SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParametersForStepGeneration();
       minimumWidth.set(steppingParameters.getMinStepWidth());
       stepWidth.set((steppingParameters.getMaxStepWidth() + steppingParameters.getMinStepWidth()) / 2);
       swingHeight.set(0.0);

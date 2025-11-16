@@ -72,7 +72,7 @@ public abstract class EndToEndFootstepDataListMessageTest implements MultiRobotT
       referenceFrames.updateFrames();
       MovingReferenceFrame midFeetFrame = referenceFrames.getMidFootZUpGroundFrame();
 
-      SteppingParameters steppingParameters = robotModel.getWalkingControllerParameters().getSteppingParameters();
+      SteppingParameters steppingParameters = robotModel.getWalkingControllerParameters().getSteppingParametersForStepGeneration();
       double maxStepWidth = steppingParameters.getMaxStepWidth();
       double minStepWidth = steppingParameters.getMinStepWidth();
       double halfStepWidth = (maxStepWidth + minStepWidth) / 4.0;
