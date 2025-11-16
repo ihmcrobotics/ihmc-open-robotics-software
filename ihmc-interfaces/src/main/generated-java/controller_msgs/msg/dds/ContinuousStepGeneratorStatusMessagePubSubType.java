@@ -15,7 +15,7 @@ public class ContinuousStepGeneratorStatusMessagePubSubType implements us.ihmc.p
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "8ac62e7e0879aabb233540cf5ad99a8f243bc18193b73ebbe592ff4e58b44998";
+   		return "279f0c6c9f1ef8667775d9f24fcf2ff10ec329a8b37d7cd5b9f394fc3902a7dc";
    }
    
    @Override
@@ -55,6 +55,8 @@ public class ContinuousStepGeneratorStatusMessagePubSubType implements us.ihmc.p
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -135,6 +137,9 @@ public class ContinuousStepGeneratorStatusMessagePubSubType implements us.ihmc.p
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -157,7 +162,9 @@ public class ContinuousStepGeneratorStatusMessagePubSubType implements us.ihmc.p
 
       cdr.write_type_6(data.getCurrentTransferDuration());
 
-      cdr.write_type_6(data.getCurrentMaxStepLength());
+      cdr.write_type_6(data.getCurrentMaxStepLengthForwards());
+
+      cdr.write_type_6(data.getCurrentMaxStepLengthBackwards());
 
       cdr.write_type_6(data.getCurrentMaxStepWidth());
 
@@ -189,7 +196,9 @@ public class ContinuousStepGeneratorStatusMessagePubSubType implements us.ihmc.p
       	
       data.setCurrentTransferDuration(cdr.read_type_6());
       	
-      data.setCurrentMaxStepLength(cdr.read_type_6());
+      data.setCurrentMaxStepLengthForwards(cdr.read_type_6());
+      	
+      data.setCurrentMaxStepLengthBackwards(cdr.read_type_6());
       	
       data.setCurrentMaxStepWidth(cdr.read_type_6());
       	
@@ -215,7 +224,8 @@ public class ContinuousStepGeneratorStatusMessagePubSubType implements us.ihmc.p
       ser.write_type_6("current_swing_height", data.getCurrentSwingHeight());
       ser.write_type_6("current_swing_duration", data.getCurrentSwingDuration());
       ser.write_type_6("current_transfer_duration", data.getCurrentTransferDuration());
-      ser.write_type_6("current_max_step_length", data.getCurrentMaxStepLength());
+      ser.write_type_6("current_max_step_length_forwards", data.getCurrentMaxStepLengthForwards());
+      ser.write_type_6("current_max_step_length_backwards", data.getCurrentMaxStepLengthBackwards());
       ser.write_type_6("current_max_step_width", data.getCurrentMaxStepWidth());
       ser.write_type_6("current_min_step_width", data.getCurrentMinStepWidth());
       ser.write_type_6("current_default_step_width", data.getCurrentDefaultStepWidth());
@@ -234,7 +244,8 @@ public class ContinuousStepGeneratorStatusMessagePubSubType implements us.ihmc.p
       data.setCurrentSwingHeight(ser.read_type_6("current_swing_height"));
       data.setCurrentSwingDuration(ser.read_type_6("current_swing_duration"));
       data.setCurrentTransferDuration(ser.read_type_6("current_transfer_duration"));
-      data.setCurrentMaxStepLength(ser.read_type_6("current_max_step_length"));
+      data.setCurrentMaxStepLengthForwards(ser.read_type_6("current_max_step_length_forwards"));
+      data.setCurrentMaxStepLengthBackwards(ser.read_type_6("current_max_step_length_backwards"));
       data.setCurrentMaxStepWidth(ser.read_type_6("current_max_step_width"));
       data.setCurrentMinStepWidth(ser.read_type_6("current_min_step_width"));
       data.setCurrentDefaultStepWidth(ser.read_type_6("current_default_step_width"));

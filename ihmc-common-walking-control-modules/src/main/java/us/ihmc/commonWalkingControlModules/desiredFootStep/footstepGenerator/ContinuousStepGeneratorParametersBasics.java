@@ -19,7 +19,8 @@ public interface ContinuousStepGeneratorParametersBasics
       setSwingHeight(0.0);
       setMinStepWidth(0.0);
       setMaxStepWidth(Double.POSITIVE_INFINITY);
-      setMaxStepLength(Double.POSITIVE_INFINITY);
+      setMaxStepLengthForwards(Double.POSITIVE_INFINITY);
+      setMaxStepLengthBackwards(Double.POSITIVE_INFINITY);
       setTurnMaxAngleOutward(Math.PI / 2.0);
       setTurnMaxAngleInward(-Math.PI / 2.0);
       setStepsAreAdjustable(DEFAULT_STEPS_ARE_ADJUSTABLE);
@@ -34,7 +35,8 @@ public interface ContinuousStepGeneratorParametersBasics
       setSwingHeight(other.getSwingHeight());
       setSwingDuration(other.getSwingDuration());
       setTransferDuration(other.getTransferDuration());
-      setMaxStepLength(other.getMaxStepLength());
+      setMaxStepLengthForwards(other.getMaxStepLengthForwards());
+      setMaxStepLengthBackwards(other.getMaxStepLengthBackwards());
       setDefaultStepWidth(other.getDefaultStepWidth());
       setMinStepWidth(other.getMinStepWidth());
       setMaxStepWidth(other.getMaxStepWidth());
@@ -56,7 +58,8 @@ public interface ContinuousStepGeneratorParametersBasics
 
       SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
       setSwingHeight(walkingControllerParameters.getSwingTrajectoryParameters().getDefaultSwingHeight());
-      setMaxStepLength(steppingParameters.getMaxStepLength());
+      setMaxStepLengthForwards(steppingParameters.getMaxStepLength());
+      setMaxStepLengthBackwards(steppingParameters.getMaxBackwardStepLength());
       setDefaultStepWidth(steppingParameters.getInPlaceWidth());
       setMinStepWidth(steppingParameters.getMinStepWidth());
       setMaxStepWidth(steppingParameters.getMaxStepWidth());
@@ -80,7 +83,9 @@ public interface ContinuousStepGeneratorParametersBasics
 
    void setTransferDuration(double transferDuration);
 
-   void setMaxStepLength(double maxStepLength);
+   void setMaxStepLengthForwards(double maxStepLengthForwards);
+
+   void setMaxStepLengthBackwards(double maxStepLengthBackwards);
 
    void setDefaultStepWidth(double defaultStepWidth);
 
@@ -104,7 +109,9 @@ public interface ContinuousStepGeneratorParametersBasics
 
    double getTransferDuration();
 
-   double getMaxStepLength();
+   double getMaxStepLengthForwards();
+
+   double getMaxStepLengthBackwards();
 
    double getDefaultStepWidth();
 
@@ -122,10 +129,11 @@ public interface ContinuousStepGeneratorParametersBasics
 
    default String getString()
    {
-      return "number of footsteps to plan: " + getNumberOfFootstepsToPlan() + ", number of fixed footsteps: " + getNumberOfFixedFootsteps() +
-             ", ticks to update the environment: " + getTicksToUpdateTheEnvironment() + ", swing height: "
-            + getSwingHeight() + ", swing duration: " + getSwingDuration() + ", transfer duration: " + getTransferDuration() + ", max step length: "
-            + getMaxStepLength() + ", default step width: " + getDefaultStepWidth() + ", min step width: " + getMinStepWidth() + ", max step width: "
-            + getMaxStepWidth() + ", turn max angle inward: " + getTurnMaxAngleInward() + ", turn max angle outward: " + getTurnMaxAngleOutward();
+      return "number of footsteps to plan: " + getNumberOfFootstepsToPlan() + ", number of fixed footsteps: " + getNumberOfFixedFootsteps()
+             + ", ticks to update the environment: " + getTicksToUpdateTheEnvironment() + ", swing height: " + getSwingHeight() + ", swing duration: "
+             + getSwingDuration() + ", transfer duration: " + getTransferDuration() + ", max step length (forwards): " + getMaxStepLengthForwards()
+             + ", max step length (backwards): " + getMaxStepLengthBackwards() + ", default step width: " + getDefaultStepWidth() + ", min step width: "
+             + getMinStepWidth() + ", max step width: " + getMaxStepWidth() + ", turn max angle inward: " + getTurnMaxAngleInward()
+             + ", turn max angle outward: " + getTurnMaxAngleOutward();
    }
 }

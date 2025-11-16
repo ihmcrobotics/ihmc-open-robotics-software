@@ -36,7 +36,8 @@ public class ContinuousStepGeneratorParametersCommand implements Command<Continu
       parameters.setSwingHeight(message.getSwingHeight());
       parameters.setSwingDuration(message.getSwingDuration());
       parameters.setTransferDuration(message.getTransferDuration());
-      parameters.setMaxStepLength(message.getMaxStepLength());
+      parameters.setMaxStepLengthForwards(message.getMaxStepLengthForwards());
+      parameters.setMaxStepLengthBackwards(message.getMaxStepLengthBackwards());
       parameters.setDefaultStepWidth(message.getDefaultStepWidth());
       parameters.setMinStepWidth(message.getMinStepWidth());
       parameters.setMaxStepWidth(message.getMaxStepWidth());
