@@ -121,7 +121,7 @@ public class JoystickStepParametersProperty extends ParametersProperty<JoystickS
          swingDuration = walkingControllerParameters.getDefaultSwingTime();
          transferDuration = walkingControllerParameters.getDefaultTransferTime();
 
-         SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
+         SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParametersForStepGeneration();
          swingHeight = walkingControllerParameters.getSwingTrajectoryParameters().getMinSwingHeight();
          maxStepLength = steppingParameters.getMaxStepLength();
          defaultStepWidth = steppingParameters.getInPlaceWidth();

@@ -3,6 +3,7 @@ package us.ihmc.openAlexander.obstacleCourseTests;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
 import org.junit.jupiter.api.*;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.openAlexander.OpenAlexanderVersion;
 import us.ihmc.openAlexander.OpenAlexanderRobotModel;
 import us.ihmc.openAlexander.parameters.controller.AlexanderContactPointParameters;
@@ -165,12 +166,13 @@ public class AlexanderFinalsWorldStairsTest
    private ArrayList<Point2D> createPartialSupportPolygonForFoot(WalkingControllerParameters walkingControllerParameters)
    {
       ArrayList<Point2D> footSupportPolygon = new ArrayList<>();
-      double rearOfFoot = -walkingControllerParameters.getSteppingParameters().getFootLength() / 2.0;
-      double frontOfFoot = walkingControllerParameters.getSteppingParameters().getFootLength() / 2.0;
+      SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
+      double rearOfFoot = -steppingParameters.getFootLength() / 2.0;
+      double frontOfFoot = steppingParameters.getFootLength() / 2.0;
       double cropPercentage = 0.5;
       double adjustedRearOfFoot = rearOfFoot + cropPercentage * (frontOfFoot - rearOfFoot);
-      double frontWidth = walkingControllerParameters.getSteppingParameters().getToeWidth() / 2.0;
-      double rearWidth = (1 - cropPercentage) * walkingControllerParameters.getSteppingParameters().getFootWidth() / 2.0 + cropPercentage * frontWidth;
+      double frontWidth = steppingParameters.getToeWidth() / 2.0;
+      double rearWidth = (1 - cropPercentage) * steppingParameters.getFootWidth() / 2.0 + cropPercentage * frontWidth;
 
       footSupportPolygon.add(new Point2D(frontOfFoot, frontWidth));
       footSupportPolygon.add(new Point2D(frontOfFoot, -frontWidth));

@@ -104,7 +104,7 @@ public class CSGROS2CommunicationHelper
       csgParametersCommand.setSwingDuration(walkingControllerParameters.getDefaultSwingTime());
       csgParametersCommand.setTransferDuration(walkingControllerParameters.getDefaultTransferTime());
 
-      SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
+      SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParametersForStepGeneration();
       csgParametersCommand.setSwingHeight(walkingControllerParameters.getSwingTrajectoryParameters().getDefaultSwingHeight());
       csgParametersCommand.setMaxStepLengthForwards(steppingParameters.getMaxStepLength());
       csgParametersCommand.setMaxStepLengthBackwards(steppingParameters.getMaxBackwardStepLength());

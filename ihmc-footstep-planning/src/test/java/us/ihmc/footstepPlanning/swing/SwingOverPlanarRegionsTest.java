@@ -454,15 +454,16 @@ public class SwingOverPlanarRegionsTest
 
       double dt = 1e-3;
 
-      double footLength = getWalkingControllerParameters().getSteppingParameters().getFootLength();
-      double toeLength = getWalkingControllerParameters().getSteppingParameters().getFootForwardOffset();
-      double heelLength = getWalkingControllerParameters().getSteppingParameters().getFootBackwardOffset();
+      SteppingParameters steppingParameters = getWalkingControllerParameters().getSteppingParameters();
+      double footLength = steppingParameters.getFootLength();
+      double toeLength = steppingParameters.getFootForwardOffset();
+      double heelLength = steppingParameters.getFootBackwardOffset();
       double distance = Math.max(Math.max(footLength / 2.0, toeLength), heelLength);
 
       Box3D foot = new Box3D();
       foot.getSize()
-          .set(getWalkingControllerParameters().getSteppingParameters().getActualFootLength(),
-               getWalkingControllerParameters().getSteppingParameters().getActualFootWidth(),
+          .set(steppingParameters.getActualFootLength(),
+               steppingParameters.getActualFootWidth(),
                0.1);
 
       for (double time = 0.0; time <= 1.0; time += dt)

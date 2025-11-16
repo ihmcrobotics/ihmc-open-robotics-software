@@ -10,6 +10,7 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
@@ -73,9 +74,10 @@ public abstract class EndToEndFootstepQueueStatusMessageTest implements MultiRob
       referenceFrames.updateFrames();
       MovingReferenceFrame midFeetFrame = referenceFrames.getMidFootZUpGroundFrame();
 
-      double stepWidth = robotModel.getWalkingControllerParameters().getSteppingParameters().getInPlaceWidth();
+      SteppingParameters steppingParameters = robotModel.getWalkingControllerParameters().getSteppingParametersForStepGeneration();
+      double stepWidth = steppingParameters.getInPlaceWidth();
       double halfStepWidth = stepWidth / 2.0;
-      double stepLength = robotModel.getWalkingControllerParameters().getSteppingParameters().getDefaultStepLength() * 0.5;
+      double stepLength = steppingParameters.getDefaultStepLength() * 0.5;
       double nominalSwingTime = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
       double nominalTransferTime = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
       Random random = new Random(24384523737236643L);

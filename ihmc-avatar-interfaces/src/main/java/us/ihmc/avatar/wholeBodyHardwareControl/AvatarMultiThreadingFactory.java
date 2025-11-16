@@ -476,7 +476,7 @@ public class AvatarMultiThreadingFactory
       LogTools.info("create step generator = " + createStepGeneratorThread);
 
       HumanoidSteppingPluginEnvironmentalConstraints environmentalConstraints = new HumanoidSteppingPluginEnvironmentalConstraints(robotModel.getContactPointParameters(),
-                                                                                                                                   robotModel.getWalkingControllerParameters().getSteppingParameters());
+                                                                                                                                   robotModel.getWalkingControllerParameters().getSteppingParametersForStepGeneration());
       controllerFactory.setListenToHighLevelStatePackets(true);
 
       JoystickBasedSteppingPluginFactory pluginFactory = new JoystickBasedSteppingPluginFactory();

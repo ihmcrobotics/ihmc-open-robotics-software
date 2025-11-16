@@ -18,6 +18,7 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.CommandConsumerWithDelayBuffers;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -71,10 +72,11 @@ public abstract class EndToEndFootstepDataListMessageTest implements MultiRobotT
       referenceFrames.updateFrames();
       MovingReferenceFrame midFeetFrame = referenceFrames.getMidFootZUpGroundFrame();
 
-      double maxStepWidth = robotModel.getWalkingControllerParameters().getSteppingParameters().getMaxStepWidth();
-      double minStepWidth = robotModel.getWalkingControllerParameters().getSteppingParameters().getMinStepWidth();
+      SteppingParameters steppingParameters = robotModel.getWalkingControllerParameters().getSteppingParametersForStepGeneration();
+      double maxStepWidth = steppingParameters.getMaxStepWidth();
+      double minStepWidth = steppingParameters.getMinStepWidth();
       double halfStepWidth = (maxStepWidth + minStepWidth) / 4.0;
-      double stepLength = robotModel.getWalkingControllerParameters().getSteppingParameters().getDefaultStepLength() * 0.5;
+      double stepLength = steppingParameters.getDefaultStepLength() * 0.5;
       double nominalSwingTime = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
       double nominalTransferTime = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
       Random random = new Random(24384523737236643L);
