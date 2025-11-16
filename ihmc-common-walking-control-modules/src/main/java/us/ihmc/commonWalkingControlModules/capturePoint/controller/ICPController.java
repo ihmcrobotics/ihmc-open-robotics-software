@@ -424,22 +424,25 @@ public class ICPController implements ICPControllerInterface
       solver.setCopSafeDistanceToEdge(safeCoPDistanceToEdge.getValue());
       solver.setDesiredFeedbackDirection(unconstrainedFeedback, feedbackDirectionWeight.getValue());
 
-      if (ICPControllerHelper.isStationary(desiredICPVelocity))
+      boolean addConstraints = !ignoreRateLimitThisTick && hasNotConvergedCounts.getIntegerValue() < 5;
+      if (addConstraints)
       {
-         solver.setMaximumFeedbackMagnitude(transformedMagnitudeJacobian,
-                                            feedbackGains.getFeedbackPartMaxValueOrthogonalToMotion(),
-                                            feedbackGains.getFeedbackPartMaxValueOrthogonalToMotion());
-      }
-      else
-      {
-         solver.setMaximumFeedbackMagnitude(transformedMagnitudeJacobian,
-                                            feedbackGains.getFeedbackPartMaxValueParallelToMotion(),
-                                            feedbackGains.getFeedbackPartMaxValueOrthogonalToMotion());
-      }
-      if (!ignoreRateLimitThisTick)
+         if (ICPControllerHelper.isStationary(desiredICPVelocity))
+         {
+            solver.setMaximumFeedbackMagnitude(transformedMagnitudeJacobian,
+                                               feedbackGains.getFeedbackPartMaxValueOrthogonalToMotion(),
+                                               feedbackGains.getFeedbackPartMaxValueOrthogonalToMotion());
+         }
+         else
+         {
+            solver.setMaximumFeedbackMagnitude(transformedMagnitudeJacobian,
+                                               feedbackGains.getFeedbackPartMaxValueParallelToMotion(),
+                                               feedbackGains.getFeedbackPartMaxValueOrthogonalToMotion());
+         }
+
          solver.setMaximumFeedbackRate(feedbackGains.getFeedbackPartMaxRate(), controlDT);
-      else
-         ignoreRateLimitThisTick = false;
+      }
+      ignoreRateLimitThisTick = false;
 
       double feedbackRateWeight = usingHighCoPDamping.getValue() ? highlyDampedFeedbackRateWeight.getValue() : this.feedbackRateWeight.getValue();
       solver.setFeedbackRateWeight(copCMPFeedbackRateWeight.getValue() / controlDTSquare, feedbackRateWeight / controlDTSquare);

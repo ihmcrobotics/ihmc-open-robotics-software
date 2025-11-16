@@ -292,6 +292,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
    public void reset()
    {
       desiredLinearMomentumRateWeight.set(linearMomentumRateWeight);
+      initializeOnStateChange = true;
 
       capturePointVelocity.reset();
       yoDesiredCMP.setToNaN();

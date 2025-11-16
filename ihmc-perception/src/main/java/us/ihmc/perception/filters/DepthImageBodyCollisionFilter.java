@@ -33,6 +33,7 @@ public class DepthImageBodyCollisionFilter
    private static final boolean PRINT_DEBUG_TIMINGS = false;
    private static final int BLOCK_SIZE_XY = 32;
    private final int NUMBER_OF_ATTRIBUTES = 7;
+   private final float COLLISION_TOLERANCE_DEFAULT = 0.1f;
 
    private final CUDAProgram program;
    private final CUDAKernel kernel;
@@ -40,6 +41,7 @@ public class DepthImageBodyCollisionFilter
    private final List<Collidable> robotCollidables;
    private final int dataSize;
 
+   private float collisionTolerance = COLLISION_TOLERANCE_DEFAULT;
    private final int numberOfCollidables;
    private final FloatPointer deviceCollidableGeometryPointer;
    private final FloatPointer collidableGeometryPointer;
@@ -75,6 +77,19 @@ public class DepthImageBodyCollisionFilter
       collidableGeometryPointer = new FloatPointer((long) numberOfCollidables * NUMBER_OF_ATTRIBUTES);
    }
 
+   /**
+    * This is a tolerance that artificially inflates the size of each of the collision objects by this amount
+    * @param collisionTolerance amount to inflate, in meters.
+    */
+   public void setCollisionTolerance(float collisionTolerance)
+   {
+      this.collisionTolerance = collisionTolerance;
+   }
+   public List<Collidable> getRobotCollidables()
+   {
+      return robotCollidables;
+   }
+
    public void process(GpuMat deviceInputDepthImage, GpuMat deviceOutputImageToPack, CameraIntrinsics cameraIntrinsics, ReferenceFrame cameraFrame)
    {
       int error;
@@ -103,6 +118,7 @@ public class DepthImageBodyCollisionFilter
       kernel.withFloat((float) cameraIntrinsics.getFy());
       kernel.withFloat((float) cameraIntrinsics.getCx());
       kernel.withFloat((float) cameraIntrinsics.getCy());
+      kernel.withFloat(collisionTolerance);
       kernel.withPointer(deviceOutputImageToPack.data());
       kernel.withLong(deviceOutputImageToPack.step());
       kernel.withPointer(deviceCollidableGeometryPointer);

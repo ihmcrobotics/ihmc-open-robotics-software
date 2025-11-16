@@ -9,7 +9,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 /**
  * Processing YoVariable that computes the output by applying a {@link YoPolynomial} to an input variable.
  */
-public class PolynomialProcessorYoVariable extends YoDouble implements ProcessingYoVariable
+public class PolynomialProcessorYoVariable extends YoDouble implements OffsettingProcessorVariable
 {
    private final YoDouble input;
    private final PolynomialReadOnly polynomial;
@@ -27,5 +27,11 @@ public class PolynomialProcessorYoVariable extends YoDouble implements Processin
    {
       polynomial.compute(input.getDoubleValue());
       this.set(polynomial.getValue());
+   }
+
+   @Override
+   public double getOffset()
+   {
+      return input.getDoubleValue() - this.getDoubleValue();
    }
 }

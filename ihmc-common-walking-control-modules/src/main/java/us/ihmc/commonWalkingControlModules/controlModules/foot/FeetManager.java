@@ -516,7 +516,8 @@ public class FeetManager implements SCS2YoGraphicHolder
                                                FramePoint2DReadOnly desiredECMP,
                                                FramePoint2DReadOnly currentCoP,
                                                FramePoint2DReadOnly desiredICP,
-                                               FramePoint2DReadOnly currentICP)
+                                               FramePoint2DReadOnly currentICP,
+                                               double loadPercent)
    {
       toeOffManager.updateToeOffStatusSingleSupport(nextFootstep.getRobotSide(),
                                                     nextFootstep.getFootstepPose(),
@@ -525,7 +526,8 @@ public class FeetManager implements SCS2YoGraphicHolder
                                                     desiredECMP,
                                                     currentCoP,
                                                     desiredICP,
-                                                    currentICP);
+                                                    currentICP,
+                                                    loadPercent);
    }
 
    /**
@@ -558,9 +560,10 @@ public class FeetManager implements SCS2YoGraphicHolder
                                                FramePoint2DReadOnly desiredECMP,
                                                FramePoint2DReadOnly currentCoP,
                                                FramePoint2DReadOnly desiredICP,
-                                               FramePoint2DReadOnly currentICP)
+                                               FramePoint2DReadOnly currentICP,
+                                               double loadPercent)
    {
-      toeOffManager.updateToeOffStatusDoubleSupport(trailingLeg, exitCMP, desiredECMP, currentCoP, desiredICP, currentICP);
+      toeOffManager.updateToeOffStatusDoubleSupport(trailingLeg, exitCMP, desiredECMP, currentCoP, desiredICP, currentICP, loadPercent);
    }
 
    /**
