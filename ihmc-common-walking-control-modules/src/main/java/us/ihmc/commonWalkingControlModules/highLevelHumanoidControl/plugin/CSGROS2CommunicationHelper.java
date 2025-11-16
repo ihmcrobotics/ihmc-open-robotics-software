@@ -63,11 +63,6 @@ public class CSGROS2CommunicationHelper
     */
    private void setCSGCommandsToCurrentValues(ContinuousStepGeneratorStatusMessage csgStatusMessage)
    {
-      csgInputCommand.setWalk(csgStatusMessage.getIsWalking());
-      csgInputCommand.setForwardVelocity(csgStatusMessage.getCurrentForwardVelocity());
-      csgInputCommand.setLateralVelocity(csgStatusMessage.getCurrentLateralVelocity());
-      csgInputCommand.setTurnVelocity(csgStatusMessage.getCurrentTurnVelocity());
-
       csgParametersCommand.setSwingDuration(csgStatusMessage.getCurrentSwingDuration());
       csgParametersCommand.setTransferDuration(csgStatusMessage.getCurrentTransferDuration());
 

@@ -28,7 +28,7 @@ public class RDXXboxOneCSGPlugin
     * This defines the update thread rate for information being sent over ROS2. The reason this is a very low frequency is because
     * we only have a limited amount of networking bandwidth when using WIFI.
     */
-   private static final double THROTTLER_THREAD_HERTZ = 10.0;
+   private static final double THROTTLER_THREAD_HERTZ = 11.0;
 
    public static final double DEFAULT_PARAMETER_INCREMENT = 0.01;
    private static final boolean DEFAULT_USE_DEADMAN_SWITCH = true;
@@ -38,6 +38,7 @@ public class RDXXboxOneCSGPlugin
    private final ControllerListener controllerListener;
    private boolean currentControllerConnected = false;
    private boolean controllerListenerHasBeenAdded = false;
+   private boolean publishCSGInputCommand = false;
 
    // CSG ROS communication helper
    private final CSGROS2CommunicationHelper communicationHelper;
@@ -119,6 +120,19 @@ public class RDXXboxOneCSGPlugin
          @Override
          public boolean axisMoved(Controller controller, int axisCode, float value)
          {
+            if (controller != null)
+            {
+               if (axisCode == 4.0 && controller.getAxis(4) == 1.0)
+               {
+                  publishCSGInputCommand = true;
+               }
+               else if (axisCode == 4.0 && controller.getAxis(4) != 1.0 && publishCSGInputCommand)
+               {
+                  sendStopWalkingCommands();
+                  publishCSGInputCommand = false;
+               }
+            }
+
             return false;
          }
       };
@@ -128,7 +142,7 @@ public class RDXXboxOneCSGPlugin
    {
       update(csgInputCommand);
 
-      if (xboxJoystickRos2Throttler.run())
+      if (xboxJoystickRos2Throttler.run() && publishCSGInputCommand)
          communicationHelper.publish(csgInputCommand);
    }
 

@@ -16,23 +16,9 @@ import us.ihmc.ros2.ROS2Node;
 
 public class RDXCSGPanel extends RDXPanel
 {
-   private static final double THROTTLER_THREAD_HERTZ = 10.0;
+   private static final double THROTTLER_THREAD_HERTZ = 11.0;
 
-   private static final double FORWARD_VELOCITY_MIN_MAX = 0.9; // In m/s
-   private static final double LATERAL_VELOCITY_MIN_MAX = 0.7; // In m/s
-   private static final double TURNING_VELOCITY_MIN_MAX = Math.PI / 2.0; // In rad/s
-
-   private static final double MAX_STEP_LENGTH_MIN = 0.2; // In m
-   private static final double MAX_STEP_LENGTH_MAX = 0.5; // In m
-   
-   private static final double MAX_STEP_WIDTH_MIN = 0.2; // In m
-   private static final double MAX_STEP_WIDTH_MAX = 0.5; // In m
-
-   private static final double TRANSFER_DURATION_MIN = 0.3; // In sec
-   private static final double TRANSFER_DURATION_MAX = 0.6; // In sec
-
-   private static final double SWING_DURATION_MIN = 0.6; // In sec
-   private static final double SWING_DURATION_MAX = 0.9; // In sec
+   private static final boolean PUBLISH_IN_VELOCITY_UNITS = true;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
@@ -89,13 +75,51 @@ public class RDXCSGPanel extends RDXPanel
    {
       // Update and publish CSG commands from controller first
       if (xBoxOneCSGPlugin != null)
-         xBoxOneCSGPlugin.update(csgInputCommand);
+         xBoxOneCSGPlugin.updateAndPublish();
 
+      // Calculate min and max velocities based on max step length and desired step duration
+      double maxVelocityX;
+      double minVelocityX;
+      double minMaxVelocityY;
+      double minMaxVelocityTurn;
+      String velocityUnitsDescription;
+
+      if (PUBLISH_IN_VELOCITY_UNITS)
+      {
+         csgInputCommand.setUnitVelocities(true);
+
+         double currentStepTime = csgStatusMessage.getCurrentSwingDuration() + csgStatusMessage.getCurrentTransferDuration();
+         double currentMaxStepLengthForwards = csgStatusMessage.getCurrentMaxStepLengthForwards();
+         double currentMaxStepLengthBackwards = csgStatusMessage.getCurrentMaxStepLengthBackwards();
+         double currentMaxStepWidth = csgStatusMessage.getCurrentMaxStepWidth();
+         double currentTurnMaxAngleInward = csgStatusMessage.getCurrentTurnMaxAngleInward();
+         double currentTurnMaxAngleOutward = csgStatusMessage.getCurrentTurnMaxAngleOutward();
+
+         maxVelocityX = currentMaxStepLengthForwards / currentStepTime;
+         minVelocityX = -currentMaxStepLengthBackwards / currentStepTime;
+         minMaxVelocityY = currentMaxStepWidth / currentStepTime;
+         minMaxVelocityTurn = (currentTurnMaxAngleOutward - currentTurnMaxAngleInward) / currentStepTime;
+
+         velocityUnitsDescription = "(m/s)";
+      }
+      else
+      {
+         csgInputCommand.setUnitVelocities(false);
+
+         maxVelocityX = 1.0;
+         minVelocityX = -1.0;
+         minMaxVelocityY = 1.0;
+         minMaxVelocityTurn = 1.0;
+
+         velocityUnitsDescription = "(% min/max)";
+      }
+
+      // Get user input data from GUI widgets
       boolean requestCSGWalkingChanged = ImGui.checkbox(labels.get("Request Walk CSG"), requestWalkCSG);
 
-      boolean desiredForwardVelocityChanged = ImGuiTools.sliderDouble(labels.getHidden("Forward Velocity (% min/max)"), forwardVelocity, -1.0, 1.0, "Forward Velocity (% min/max): %.2f");
-      boolean desiredLateralVelocityChanged = ImGuiTools.sliderDouble(labels.getHidden("Lateral Velocity (% min/max)"), lateralVelocity, -1.0, 1.0, "Lateral Velocity (% min/max): %.2f");
-      boolean desiredTurningVelocityChanged = ImGuiTools.sliderDouble(labels.getHidden("Turning Velocity (% min/max)"), turningVelocity, -1.0, 1.0, "Turning Velocity (% min/max): %.2f");
+      boolean desiredForwardVelocityChanged = ImGuiTools.sliderDouble(labels.getHidden("Forward Velocity " + velocityUnitsDescription), forwardVelocity, minVelocityX, maxVelocityX, "Forward Velocity " + velocityUnitsDescription + ": %.2f");
+      boolean desiredLateralVelocityChanged = ImGuiTools.sliderDouble(labels.getHidden("Lateral Velocity " + velocityUnitsDescription), lateralVelocity, -minMaxVelocityY, minMaxVelocityY, "Lateral Velocity " + velocityUnitsDescription + ": %.2f");
+      boolean desiredTurningVelocityChanged = ImGuiTools.sliderDouble(labels.getHidden("Turning Velocity " + velocityUnitsDescription), turningVelocity, -minMaxVelocityTurn, minMaxVelocityTurn, "Turning Velocity " + velocityUnitsDescription + ": %.2f");
 
       boolean swingDurationChanged = ImGuiTools.volatileInputDouble(labels.get("Swing Duration"), swingDuration);//ImGuiTools.sliderDouble(labels.getHidden("Swing Duration"), swingDuration, SWING_DURATION_MIN, SWING_DURATION_MAX, "Swing Duration (s): %.2f");
       ImGui.sameLine();
@@ -106,6 +130,14 @@ public class RDXCSGPanel extends RDXPanel
       boolean maxStepLengthBackwardsChanged = ImGuiTools.volatileInputDouble(labels.get("Max Step Length Backwards"), maxStepLengthBackwards);
       ImGui.sameLine();
       boolean maxStepWidthChanged = ImGuiTools.volatileInputDouble(labels.get("Max Step Width"), maxStepWidth);//ImGuiTools.sliderDouble(labels.getHidden("Max Step Width"), maxStepWidth, MAX_STEP_WIDTH_MIN, MAX_STEP_WIDTH_MAX, "Max Step Width (m): %.2f");
+
+      // Reset these to zero in case Xbox plugin just populated them (Xbox does not send in velocity units)
+      if (desiredForwardVelocityChanged || desiredLateralVelocityChanged || desiredTurningVelocityChanged)
+      {
+         csgInputCommand.setForwardVelocity(0.0);
+         csgInputCommand.setLateralVelocity(0.0);
+         csgInputCommand.setTurnVelocity(0.0);
+      }
 
       if (requestCSGWalkingChanged)
          csgInputCommand.setWalk(requestWalkCSG.get());
@@ -143,13 +175,19 @@ public class RDXCSGPanel extends RDXPanel
       if (maxStepWidthChanged)
          csgParametersCommand.setMaxStepWidth(maxStepWidth.get());
 
+      boolean publishCSGInputCommand = requestCSGWalkingChanged || desiredForwardVelocityChanged || desiredLateralVelocityChanged || desiredTurningVelocityChanged;
+      boolean publishCSGParametersCommand = swingDurationChanged || transferDurationChanged || maxStepLengthForwardsChanged || maxStepLengthBackwardsChanged || maxStepWidthChanged;
+
       if (csgROS2PublisherThrottler.run())
       {
-         communicationHelper.publish(csgInputCommand);
-         communicationHelper.publish(csgParametersCommand);
-      }
+         if (publishCSGInputCommand)
+            communicationHelper.publish(csgInputCommand);
 
-      reset();
+         if (publishCSGParametersCommand)
+            communicationHelper.publish(csgParametersCommand);
+
+         reset();
+      }
    }
 
    private void reset()
