@@ -35,8 +35,8 @@ __device__ float3 scale(float scalar, float3 point)
 {
     float3 ret;
     ret.x = scalar * point.x;
-    ret.x = scalar * point.y;
-    ret.x = scalar * point.z;
+    ret.y = scalar * point.y;
+    ret.z = scalar * point.z;
 
     return ret;
 }
