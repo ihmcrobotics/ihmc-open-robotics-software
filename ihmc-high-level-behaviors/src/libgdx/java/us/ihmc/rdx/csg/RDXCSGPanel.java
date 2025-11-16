@@ -64,7 +64,7 @@ public class RDXCSGPanel extends RDXPanel
    public RDXCSGPanel(CSGROS2CommunicationHelper communicationHelper, boolean createXboxPlugin)
    {
       super("CSG Controls");
-      super.setRenderMethod(this::update);
+      super.setRenderMethod(this::renderImGuiWidgets);
 
       this.communicationHelper = communicationHelper;
 
@@ -79,12 +79,15 @@ public class RDXCSGPanel extends RDXPanel
 
    public void update()
    {
-      boolean publishCSGInputCommand = false;
-      boolean publishCSGParametersCommand = false;
-
       // Update and publish CSG commands from controller first
       if (xBoxOneCSGPlugin != null)
          xBoxOneCSGPlugin.updateAndPublish();
+   }
+
+   public void renderImGuiWidgets()
+   {
+      boolean publishCSGInputCommand = false;
+      boolean publishCSGParametersCommand = false;
 
       reset(csgStatusMessage);
 
