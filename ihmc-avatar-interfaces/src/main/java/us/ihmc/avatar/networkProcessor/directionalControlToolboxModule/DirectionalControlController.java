@@ -29,7 +29,6 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -198,7 +197,7 @@ public class DirectionalControlController extends ToolboxController
       this.footPolygons = getFootPolygons(walkingControllerParameters);
       this.robotUpdater = new RobotModelUpdater(robotModel);
 
-      steppingParameters = walkingControllerParameters.getSteppingParameters();
+      steppingParameters = walkingControllerParameters.getSteppingParametersForStepGeneration();
       stepTime = () -> getSwingDuration() + getTransferDuration();
 
       controlParameters = new JoystickStepParameters(walkingControllerParameters);
@@ -210,7 +209,7 @@ public class DirectionalControlController extends ToolboxController
       controlParameters = userProfileManager.loadProfile("default");
       stepParametersReference = new AtomicReference<JoystickStepParameters>(controlParameters);
 
-      snapAndWiggleParameters.setFootLength(walkingControllerParameters.getSteppingParameters().getFootLength());
+      snapAndWiggleParameters.setFootLength(steppingParameters.getFootLength());
       snapAndWiggleSingleStep = new SnapAndWiggleSingleStep(snapAndWiggleParameters);
 
       continuousStepGenerator.setNumberOfFootstepsToPlan(10);
@@ -399,7 +398,6 @@ public class DirectionalControlController extends ToolboxController
     */
    private SideDependentList<ConvexPolygon2D> getFootPolygons(WalkingControllerParameters walkingControllerParameters)
    {
-      SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
       double footLength = steppingParameters.getFootLength();
       double footWidth = steppingParameters.getFootWidth();
       ConvexPolygon2D footPolygon = new ConvexPolygon2D();

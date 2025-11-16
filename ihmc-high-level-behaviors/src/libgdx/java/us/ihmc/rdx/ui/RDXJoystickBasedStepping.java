@@ -95,7 +95,7 @@ public class RDXJoystickBasedStepping
    {
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       controllerFootGroundContactPoints = robotModel.getContactPointParameters().getControllerFootGroundContactPoints();
-      steppingParameters = walkingControllerParameters.getSteppingParameters();
+      steppingParameters = walkingControllerParameters.getSteppingParametersForStepGeneration();
       swingHeight.set(walkingControllerParameters.getSwingTrajectoryParameters().getMinSwingHeight());
       swingDuration.set(walkingControllerParameters.getDefaultSwingTime());
       transferDuration.set(walkingControllerParameters.getDefaultTransferTime());

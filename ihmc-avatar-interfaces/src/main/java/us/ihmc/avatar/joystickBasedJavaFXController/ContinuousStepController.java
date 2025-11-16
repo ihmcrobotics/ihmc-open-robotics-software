@@ -81,9 +81,13 @@ public class ContinuousStepController
 
    public ContinuousStepController(WalkingControllerParameters walkingControllerParameters)
    {
-      steppingParameters = walkingControllerParameters.getSteppingParameters();
+      steppingParameters = walkingControllerParameters.getSteppingParametersForStepGeneration();
 
-      snapAndWiggleParameters.setFootLength(walkingControllerParameters.getSteppingParameters().getFootLength());
+      double footLength = steppingParameters.getFootLength();
+      double toeWidth = steppingParameters.getToeWidth();
+      double footWidth = steppingParameters.getFootWidth();
+
+      snapAndWiggleParameters.setFootLength(footLength);
       snapAndWiggleSingleStep = new SnapAndWiggleSingleStep(snapAndWiggleParameters);
 
       continuousStepGenerator.setNumberOfTicksBeforeSubmittingFootsteps(0);
@@ -124,10 +128,7 @@ public class ContinuousStepController
       continuousStepGenerator.addFootstepValidityIndicator(this::isSafeDistanceFromObstacle);
       continuousStepGenerator.addFootstepValidityIndicator(this::isSafeStepHeight);
 
-      SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
-      double footLength = steppingParameters.getFootLength();
-      double toeWidth = steppingParameters.getToeWidth();
-      double footWidth = steppingParameters.getFootWidth();
+
       ConvexPolygon2D footPolygon = new ConvexPolygon2D();
       footPolygon.addVertex(footLength / 2.0, toeWidth / 2.0);
       footPolygon.addVertex(footLength / 2.0, -toeWidth / 2.0);

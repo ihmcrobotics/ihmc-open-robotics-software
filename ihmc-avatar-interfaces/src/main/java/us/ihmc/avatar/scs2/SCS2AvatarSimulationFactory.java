@@ -570,7 +570,7 @@ public class SCS2AvatarSimulationFactory
                                                                                                 .getContactPointParameters(),
                                                                                       robotModel.get()
                                                                                                 .getWalkingControllerParameters()
-                                                                                                .getSteppingParameters());
+                                                                                                .getSteppingParametersForStepGeneration());
             stepSnapperUpdatable.setSnapToHeightMap(true);
          }
 
