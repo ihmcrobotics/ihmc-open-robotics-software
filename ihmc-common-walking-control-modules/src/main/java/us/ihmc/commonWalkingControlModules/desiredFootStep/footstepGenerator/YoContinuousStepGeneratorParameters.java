@@ -11,7 +11,8 @@ public class YoContinuousStepGeneratorParameters implements ContinuousStepGenera
    private final YoInteger numberOfFixedFootsteps;
    private final YoDouble swingHeight;
    private final YoDouble swingDuration, transferDuration;
-   private final YoDouble maxStepLength;
+   private final YoDouble maxStepLengthForwards;
+   private final YoDouble maxStepLengthBackwards;
    private final YoDouble inPlaceWidth, minStepWidth, maxStepWidth;
    private final YoDouble turnMaxAngleInward, turnMaxAngleOutward;
    private final YoBoolean stepsAreAdjustable;
@@ -28,7 +29,8 @@ public class YoContinuousStepGeneratorParameters implements ContinuousStepGenera
       inPlaceWidth = new YoDouble("inPlaceWidth" + nameSuffix, registry);
       minStepWidth = new YoDouble("minStepWidth" + nameSuffix, registry);
       maxStepWidth = new YoDouble("maxStepWidth" + nameSuffix, registry);
-      maxStepLength = new YoDouble("maxStepLength" + nameSuffix, registry);
+      maxStepLengthForwards = new YoDouble("maxStepLengthForwards" + nameSuffix, registry);
+      maxStepLengthBackwards = new YoDouble("maxStepLengthBackwards" + nameSuffix, registry);
       turnMaxAngleOutward = new YoDouble("maxAngleTurnOutwards" + nameSuffix, registry);
       turnMaxAngleInward = new YoDouble("maxAngleTurnInwards" + nameSuffix, registry);
       stepsAreAdjustable = new YoBoolean("stepsAreAdjustable" + nameSuffix, registry);
@@ -85,9 +87,15 @@ public class YoContinuousStepGeneratorParameters implements ContinuousStepGenera
    }
 
    @Override
-   public void setMaxStepLength(double maxStepLength)
+   public void setMaxStepLengthForwards(double maxStepLengthForwards)
    {
-      this.maxStepLength.set(maxStepLength);
+      this.maxStepLengthForwards.set(maxStepLengthForwards);
+   }
+
+   @Override
+   public void setMaxStepLengthBackwards(double maxStepLengthBackwards)
+   {
+      this.maxStepLengthBackwards.set(maxStepLengthBackwards);
    }
 
    @Override
@@ -157,9 +165,15 @@ public class YoContinuousStepGeneratorParameters implements ContinuousStepGenera
    }
 
    @Override
-   public double getMaxStepLength()
+   public double getMaxStepLengthForwards()
    {
-      return maxStepLength.getValue();
+      return maxStepLengthForwards.getValue();
+   }
+
+   @Override
+   public double getMaxStepLengthBackwards()
+   {
+      return maxStepLengthBackwards.getValue();
    }
 
    @Override
@@ -208,8 +222,8 @@ public class YoContinuousStepGeneratorParameters implements ContinuousStepGenera
    public String toString()
    {
       return "number of fixed footsteps: " + numberOfFixedFootsteps + ", swing height: " + swingHeight + ", swing duration: " + swingDuration
-            + ", transfer duration: " + transferDuration + ", max step length: " + maxStepLength + ", default step width: " + inPlaceWidth
-            + ", min step width: " + minStepWidth + ", max step width: " + maxStepWidth + ", turn max angle inward: " + turnMaxAngleInward
-            + ", turn max angle outward: " + turnMaxAngleOutward;
+             + ", transfer duration: " + transferDuration + ", max step length: " + maxStepLengthForwards + ", default step width: " + inPlaceWidth
+             + ", min step width: " + minStepWidth + ", max step width: " + maxStepWidth + ", turn max angle inward: " + turnMaxAngleInward
+             + ", turn max angle outward: " + turnMaxAngleOutward;
    }
 }

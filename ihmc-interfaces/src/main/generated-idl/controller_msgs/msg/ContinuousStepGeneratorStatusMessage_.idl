@@ -22,7 +22,8 @@ module controller_msgs
         double current_swing_height;
         double current_swing_duration;
         double current_transfer_duration;
-        double current_max_step_length;
+        double current_max_step_length_forwards;
+        double current_max_step_length_backwards;
         double current_max_step_width;
         double current_min_step_width;
         double current_default_step_width;

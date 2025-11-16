@@ -11,7 +11,8 @@ float64 current_swing_height
 float64 current_swing_duration
 float64 current_transfer_duration
 
-float64 current_max_step_length
+float64 current_max_step_length_forwards
+float64 current_max_step_length_backwards
 float64 current_max_step_width
 float64 current_min_step_width
 float64 current_default_step_width

@@ -42,7 +42,8 @@ public class RDXCSGPanel extends RDXPanel
    private final ImDouble lateralVelocity = new ImDouble();
    private final ImDouble turningVelocity = new ImDouble();
 
-   private final ImDouble maxStepLength = new ImDouble();
+   private final ImDouble maxStepLengthForwards = new ImDouble();
+   private final ImDouble maxStepLengthBackwards = new ImDouble();
    private final ImDouble maxStepWidth = new ImDouble();
 
    private final ImDouble swingDuration = new ImDouble();
@@ -100,7 +101,9 @@ public class RDXCSGPanel extends RDXPanel
       ImGui.sameLine();
       boolean transferDurationChanged = ImGuiTools.volatileInputDouble(labels.get("Transfer Duration"), transferDuration);//ImGuiTools.sliderDouble(labels.getHidden("Transfer Duration"), transferDuration, TRANSFER_DURATION_MIN, TRANSFER_DURATION_MAX, "Transfer Duration (s): %.2f");
 
-      boolean maxStepLengthChanged = ImGuiTools.volatileInputDouble(labels.get("Max Step Length"), maxStepLength);//ImGuiTools.sliderDouble(labels.getHidden("Max Step Length"), maxStepLength, MAX_STEP_LENGTH_MIN, MAX_STEP_LENGTH_MAX, "Max Step Length (m): %.2f");
+      boolean maxStepLengthForwardsChanged = ImGuiTools.volatileInputDouble(labels.get("Max Step Length Forwards"), maxStepLengthForwards);//ImGuiTools.sliderDouble(labels.getHidden("Max Step Length"), maxStepLength, MAX_STEP_LENGTH_MIN, MAX_STEP_LENGTH_MAX, "Max Step Length (m): %.2f");
+      ImGui.sameLine();
+      boolean maxStepLengthBackwardsChanged = ImGuiTools.volatileInputDouble(labels.get("Max Step Length Backwards"), maxStepLengthBackwards);
       ImGui.sameLine();
       boolean maxStepWidthChanged = ImGuiTools.volatileInputDouble(labels.get("Max Step Width"), maxStepWidth);//ImGuiTools.sliderDouble(labels.getHidden("Max Step Width"), maxStepWidth, MAX_STEP_WIDTH_MIN, MAX_STEP_WIDTH_MAX, "Max Step Width (m): %.2f");
 
@@ -131,8 +134,11 @@ public class RDXCSGPanel extends RDXPanel
       if (transferDurationChanged)
          csgParametersCommand.setTransferDuration(transferDuration.get());
 
-      if (maxStepLengthChanged)
-         csgParametersCommand.setMaxStepLength(maxStepLength.get());
+      if (maxStepLengthForwardsChanged)
+         csgParametersCommand.setMaxStepLengthForwards(maxStepLengthForwards.get());
+
+      if (maxStepLengthBackwardsChanged)
+         csgParametersCommand.setMaxStepLengthBackwards(maxStepLengthBackwards.get());
 
       if (maxStepWidthChanged)
          csgParametersCommand.setMaxStepWidth(maxStepWidth.get());
@@ -156,7 +162,8 @@ public class RDXCSGPanel extends RDXPanel
       swingDuration.set(csgStatusMessage.getCurrentSwingDuration());
       transferDuration.set(csgStatusMessage.getCurrentTransferDuration());
 
-      maxStepLength.set(csgStatusMessage.getCurrentMaxStepLength());
+      maxStepLengthForwards.set(csgStatusMessage.getCurrentMaxStepLengthForwards());
+      maxStepLengthBackwards.set(csgStatusMessage.getCurrentMaxStepLengthBackwards());
       maxStepWidth.set(csgStatusMessage.getCurrentMaxStepWidth());
    }
 

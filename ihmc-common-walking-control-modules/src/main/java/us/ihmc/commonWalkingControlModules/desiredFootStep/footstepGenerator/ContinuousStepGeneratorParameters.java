@@ -9,7 +9,8 @@ public class ContinuousStepGeneratorParameters implements ContinuousStepGenerato
    private int ticksToUpdateTheEnvironment = DEFAULT_TICKS_TO_UPDATE_ENVIRONMENT;
    private double swingHeight;
    private double swingDuration, transferDuration;
-   private double maxStepLength;
+   private double maxStepLengthForwards;
+   private double maxStepLengthBackwards;
    private double defaultStepWidth, minStepWidth, maxStepWidth;
    private double turnMaxAngleInward, turnMaxAngleOutward;
    private boolean stepsAreAdjustable = DEFAULT_STEPS_ARE_ADJUSTABLE;
@@ -78,9 +79,15 @@ public class ContinuousStepGeneratorParameters implements ContinuousStepGenerato
    }
 
    @Override
-   public void setMaxStepLength(double maxStepLength)
+   public void setMaxStepLengthForwards(double maxStepLengthForwards)
    {
-      this.maxStepLength = maxStepLength;
+      this.maxStepLengthForwards = maxStepLengthForwards;
+   }
+
+   @Override
+   public void setMaxStepLengthBackwards(double maxStepLengthBackwards)
+   {
+      this.maxStepLengthBackwards = maxStepLengthBackwards;
    }
 
    @Override
@@ -150,9 +157,15 @@ public class ContinuousStepGeneratorParameters implements ContinuousStepGenerato
    }
 
    @Override
-   public double getMaxStepLength()
+   public double getMaxStepLengthForwards()
    {
-      return maxStepLength;
+      return maxStepLengthForwards;
+   }
+
+   @Override
+   public double getMaxStepLengthBackwards()
+   {
+      return maxStepLengthBackwards;
    }
 
    @Override
@@ -200,10 +213,10 @@ public class ContinuousStepGeneratorParameters implements ContinuousStepGenerato
    @Override
    public String toString()
    {
-      return "number of footsteps to plan: " + numberOfFootstepsToPlan + ", number of fixed footsteps: " + numberOfFixedFootsteps +
-             "ticks to update the environment: " + ticksToUpdateTheEnvironment + ", swing height: "
-            + swingHeight + ", swing duration: " + swingDuration + ", transfer duration: " + transferDuration + ", max step length: " + maxStepLength
-            + ", default step width: " + defaultStepWidth + ", min step width: " + minStepWidth + ", max step width: " + maxStepWidth
-            + ", turn max angle inward: " + turnMaxAngleInward + ", turn max angle outward: " + turnMaxAngleOutward;
+      return "number of footsteps to plan: " + numberOfFootstepsToPlan + ", number of fixed footsteps: " + numberOfFixedFootsteps
+             + "ticks to update the environment: " + ticksToUpdateTheEnvironment + ", swing height: " + swingHeight + ", swing duration: " + swingDuration
+             + ", transfer duration: " + transferDuration + ", max step length (forwards): " + maxStepLengthForwards + ", max step length (backwards): "
+             + maxStepLengthBackwards + ", default step width: " + defaultStepWidth + ", min step width: " + minStepWidth + ", max step width: " + maxStepWidth
+             + ", turn max angle inward: " + turnMaxAngleInward + ", turn max angle outward: " + turnMaxAngleOutward;
    }
 }

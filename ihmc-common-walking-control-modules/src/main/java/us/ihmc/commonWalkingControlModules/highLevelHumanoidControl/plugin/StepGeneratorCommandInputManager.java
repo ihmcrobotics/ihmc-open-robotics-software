@@ -163,7 +163,8 @@ public class StepGeneratorCommandInputManager implements Updatable
             continuousStepGenerator.setSwingHeight(swingHeight.getDoubleValue());
             continuousStepGenerator.setFootstepsAreAdjustable(parameters.getStepsAreAdjustable());
             continuousStepGenerator.setStepWidths(parameters.getDefaultStepWidth(), parameters.getMinStepWidth(), parameters.getMaxStepWidth());
-            continuousStepGenerator.setMaxStepLength(parameters.getMaxStepLength());
+            continuousStepGenerator.setMaxStepLengthForwards(parameters.getMaxStepLengthForwards());
+            continuousStepGenerator.setMaxStepLengthBackwards(parameters.getMaxStepLengthBackwards());
          }
       }
       commandInputManager.clearCommands(ContinuousStepGeneratorParametersCommand.class);
