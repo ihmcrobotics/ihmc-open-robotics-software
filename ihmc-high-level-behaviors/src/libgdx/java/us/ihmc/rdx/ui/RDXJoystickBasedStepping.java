@@ -258,6 +258,7 @@ public class RDXJoystickBasedStepping
                continuousStepGenerator.setStepTurningLimits(turnMaxAngleInward.get(), turnMaxAngleOutward.get());
                continuousStepGenerator.setStepWidths(defaultStepWidth.get(), minStepWidth.get(), maxStepWidth.get());
                continuousStepGenerator.setMaxStepLengthForwards(maxStepLength.get());
+               continuousStepGenerator.setMaxStepLengthBackwards(maxStepLength.get());
                continuousStepGenerator.update(Double.NaN);
             }
          }
