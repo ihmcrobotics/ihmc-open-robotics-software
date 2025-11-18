@@ -1,7 +1,6 @@
 # Parent definition fields
 behavior_msgs/ActionNodeDefinitionMessage definition
 
-
 # YOLO model name to use
 string yolo_model_name
 
@@ -27,7 +26,7 @@ bool use_foundation_pose
 string[<=10] enabled_yolo_models
 
 # YOLO classes to ignore
-bool[<=256] ignored_yolo_classes
+byte[<=256] ignored_yolo_class_indices
 
 # FoundationPose models that should be enabled at this point
 byte[<=10] enabled_foundation_pose_models

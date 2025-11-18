@@ -4,56 +4,60 @@ import behavior_msgs.msg.dds.SceneActionNodeDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeDefinition;
-import us.ihmc.communication.crdt.CRDTBidirectionalBooleanArray;
 import us.ihmc.communication.crdt.CRDTBidirectionalEnumField;
-import us.ihmc.communication.crdt.CRDTBidirectionalIntegerArray;
-import us.ihmc.communication.crdt.CRDTBidirectionalStringArray;
+import us.ihmc.communication.crdt.CRDTBidirectionalEnumList;
 import us.ihmc.communication.crdt.CRDTBidirectionalBoolean;
-import us.ihmc.communication.crdt.CRDTBidirectionalDouble;
+import us.ihmc.communication.crdt.CRDTBidirectionalFloat;
 import us.ihmc.communication.crdt.CRDTBidirectionalInteger;
+import us.ihmc.communication.crdt.CRDTBidirectionalIntegerList;
 import us.ihmc.communication.crdt.CRDTBidirectionalString;
+import us.ihmc.communication.crdt.CRDTBidirectionalStringList;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class SceneActionNodeDefinition extends ActionNodeDefinition
 {
    private final CRDTBidirectionalString yoloModelName;
-   private final CRDTBidirectionalDouble yoloConfidenceThreshold;
-   private final CRDTBidirectionalDouble yoloMaskThreshold;
+   private final CRDTBidirectionalFloat yoloConfidenceThreshold;
+   private final CRDTBidirectionalFloat yoloMaskThreshold;
    private final CRDTBidirectionalInteger segmentationMaskErosionRadius;
-   private final CRDTBidirectionalDouble outlierThreshold;
+   private final CRDTBidirectionalFloat outlierThreshold;
    private final CRDTBidirectionalEnumField<IsaacROSFoundationPoseObject> objectType;
    private final CRDTBidirectionalBoolean useFoundationPose;
-   private final CRDTBidirectionalStringArray enabledYoloModels;
-   private final CRDTBidirectionalBooleanArray ignoredYoloClasses;
-   private final CRDTBidirectionalIntegerArray enabledFoundationPoseModels;
+   private final CRDTBidirectionalStringList enabledYoloModels;
+   private final CRDTBidirectionalIntegerList ignoredYoloClassIndices;
+   private final CRDTBidirectionalEnumList<IsaacROSFoundationPoseObject> enabledFoundationPoseModels;
 
    private String onDiskYoloModelName;
-   private double onDiskYoloConfidenceThreshold;
-   private double onDiskYoloMaskThreshold;
+   private float onDiskYoloConfidenceThreshold;
+   private float onDiskYoloMaskThreshold;
    private int onDiskSegmentationMaskErosionRadius;
-   private double onDiskOutlierThreshold;
+   private float onDiskOutlierThreshold;
    private IsaacROSFoundationPoseObject onDiskObjectType;
    private boolean onDiskUseFoundationPose;
-   private String[] onDiskEnabledYoloModels;
-   private boolean[] onDiskIgnoredYoloClasses;
-   private int[] onDiskEnabledFoundationPoseModels;
+   private final List<String> onDiskEnabledYoloModels = new ArrayList<>();
+   private final TIntArrayList onDiskIgnoredYoloClassIndices = new TIntArrayList();
+   private final List<IsaacROSFoundationPoseObject> onDiskEnabledFoundationPoseModels = new ArrayList<>();
 
    public SceneActionNodeDefinition(BehaviorTreeRootNodeDefinition rootNode)
    {
       super(rootNode);
 
       yoloModelName = new CRDTBidirectionalString(this, "");
-      yoloConfidenceThreshold = new CRDTBidirectionalDouble(this, 0.5);
-      yoloMaskThreshold = new CRDTBidirectionalDouble(this, 0.5);
-      segmentationMaskErosionRadius = new CRDTBidirectionalInteger(this, 0);
-      outlierThreshold = new CRDTBidirectionalDouble(this, 0.0);
+      yoloConfidenceThreshold = new CRDTBidirectionalFloat(this, 0.7f);
+      yoloMaskThreshold = new CRDTBidirectionalFloat(this, 0.0f);
+      segmentationMaskErosionRadius = new CRDTBidirectionalInteger(this, 1);
+      outlierThreshold = new CRDTBidirectionalFloat(this, 1.0f);
       objectType = new CRDTBidirectionalEnumField<>(this, IsaacROSFoundationPoseObject.MUSTARD);
       useFoundationPose = new CRDTBidirectionalBoolean(this, false);
-      enabledYoloModels = new CRDTBidirectionalStringArray(this, 10);
-      ignoredYoloClasses = new CRDTBidirectionalBooleanArray(this, 256);
-      enabledFoundationPoseModels = new CRDTBidirectionalIntegerArray(this, 10);
+      enabledYoloModels = new CRDTBidirectionalStringList(this);
+      ignoredYoloClassIndices = new CRDTBidirectionalIntegerList(this);
+      enabledFoundationPoseModels = new CRDTBidirectionalEnumList<>(this);
    }
 
    @Override
@@ -70,26 +74,16 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
       jsonNode.put("useFoundationPose", useFoundationPose.getValue());
 
       ArrayNode enabledYoloModelsArray = jsonNode.putArray("enabledYoloModels");
-      for (int i = 0; i < enabledYoloModels.getLength(); i++)
-      {
-         String model = enabledYoloModels.getValueReadOnly(i);
-         if (!model.isEmpty())
-            enabledYoloModelsArray.add(model);
-      }
+      for (int i = 0; i < enabledYoloModels.getSize(); i++)
+         enabledYoloModelsArray.add(enabledYoloModels.getValueReadOnly(i));
 
-      ArrayNode ignoredYoloClassesArray = jsonNode.putArray("ignoredYoloClasses");
-      for (int i = 0; i < ignoredYoloClasses.getLength(); i++)
-      {
-         ignoredYoloClassesArray.add(ignoredYoloClasses.getValueReadOnly(i));
-      }
+      ArrayNode ignoredYoloClassesArray = jsonNode.putArray("ignoredYoloClassIndices");
+      for (int i = 0; i < ignoredYoloClassIndices.getSize(); i++)
+         ignoredYoloClassesArray.add(ignoredYoloClassIndices.getValueReadOnly(i));
 
       ArrayNode enabledFoundationPoseModelsArray = jsonNode.putArray("enabledFoundationPoseModels");
-      for (int i = 0; i < enabledFoundationPoseModels.getLength(); i++)
-      {
-         int model = enabledFoundationPoseModels.getValueReadOnly(i);
-         if (model != 0)
-            enabledFoundationPoseModelsArray.add(model);
-      }
+      for (int i = 0; i < enabledFoundationPoseModels.getSize(); i++)
+         enabledFoundationPoseModelsArray.add(enabledFoundationPoseModels.getValueReadOnly(i).name());
    }
 
    @Override
@@ -100,13 +94,13 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
       if (jsonNode.has("yoloModelName"))
          yoloModelName.setValue(jsonNode.get("yoloModelName").asText());
       if (jsonNode.has("yoloConfidenceThreshold"))
-         yoloConfidenceThreshold.setValue(jsonNode.get("yoloConfidenceThreshold").asDouble());
+         yoloConfidenceThreshold.setValue((float) jsonNode.get("yoloConfidenceThreshold").asDouble());
       if (jsonNode.has("yoloMaskThreshold"))
-         yoloMaskThreshold.setValue(jsonNode.get("yoloMaskThreshold").asDouble());
+         yoloMaskThreshold.setValue((float) jsonNode.get("yoloMaskThreshold").asDouble());
       if (jsonNode.has("segmentationMaskErosionRadius"))
          segmentationMaskErosionRadius.setValue(jsonNode.get("segmentationMaskErosionRadius").asInt());
       if (jsonNode.has("outlierThreshold"))
-         outlierThreshold.setValue(jsonNode.get("outlierThreshold").asDouble());
+         outlierThreshold.setValue((float) jsonNode.get("outlierThreshold").asDouble());
       if (jsonNode.has("objectType"))
          objectType.setValue(IsaacROSFoundationPoseObject.valueOf(jsonNode.get("objectType").asText()));
       if (jsonNode.has("useFoundationPose"))
@@ -115,28 +109,25 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
       if (jsonNode.has("enabledYoloModels"))
       {
          ArrayNode enabledYoloModelsArray = (ArrayNode) jsonNode.get("enabledYoloModels");
-         for (int i = 0; i < enabledYoloModelsArray.size() && i < enabledYoloModels.getLength(); i++)
-         {
+         enabledYoloModels.clear();
+         for (int i = 0; i < enabledYoloModelsArray.size(); i++)
             enabledYoloModels.setValue(i, enabledYoloModelsArray.get(i).asText());
-         }
       }
 
-      if (jsonNode.has("ignoredYoloClasses"))
+      if (jsonNode.has("ignoredYoloClassIndices"))
       {
-         ArrayNode ignoredYoloClassesArray = (ArrayNode) jsonNode.get("ignoredYoloClasses");
-         for (int i = 0; i < ignoredYoloClassesArray.size() && i < ignoredYoloClasses.getLength(); i++)
-         {
-            ignoredYoloClasses.setValue(i, ignoredYoloClassesArray.get(i).asBoolean());
-         }
+         ArrayNode ignoredYoloClassesArray = (ArrayNode) jsonNode.get("ignoredYoloClassIndices");
+         ignoredYoloClassIndices.clear();
+         for (int i = 0; i < ignoredYoloClassesArray.size(); i++)
+            ignoredYoloClassIndices.setValue(i, ignoredYoloClassesArray.get(i).asInt());
       }
 
       if (jsonNode.has("enabledFoundationPoseModels"))
       {
          ArrayNode enabledFoundationPoseModelsArray = (ArrayNode) jsonNode.get("enabledFoundationPoseModels");
-         for (int i = 0; i < enabledFoundationPoseModelsArray.size() && i < enabledFoundationPoseModels.getLength(); i++)
-         {
-            enabledFoundationPoseModels.setValue(i, enabledFoundationPoseModelsArray.get(i).asInt());
-         }
+         enabledFoundationPoseModels.clear();
+         for (int i = 0; i < enabledFoundationPoseModelsArray.size(); i++)
+            enabledFoundationPoseModels.setValue(i, IsaacROSFoundationPoseObject.valueOf(enabledFoundationPoseModelsArray.get(i).asText()));
       }
    }
 
@@ -153,23 +144,14 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
       onDiskObjectType = objectType.getValue();
       onDiskUseFoundationPose = useFoundationPose.getValue();
 
-      onDiskEnabledYoloModels = new String[enabledYoloModels.getLength()];
-      for (int i = 0; i < enabledYoloModels.getLength(); i++)
-      {
-         onDiskEnabledYoloModels[i] = enabledYoloModels.getValueReadOnly(i);
-      }
+      onDiskEnabledYoloModels.clear();
+      onDiskEnabledYoloModels.addAll(enabledYoloModels.getValue());
 
-      onDiskIgnoredYoloClasses = new boolean[ignoredYoloClasses.getLength()];
-      for (int i = 0; i < ignoredYoloClasses.getLength(); i++)
-      {
-         onDiskIgnoredYoloClasses[i] = ignoredYoloClasses.getValueReadOnly(i);
-      }
+      onDiskIgnoredYoloClassIndices.clear();
+      onDiskIgnoredYoloClassIndices.addAll(ignoredYoloClassIndices.getValue());
 
-      onDiskEnabledFoundationPoseModels = new int[enabledFoundationPoseModels.getLength()];
-      for (int i = 0; i < enabledFoundationPoseModels.getLength(); i++)
-      {
-         onDiskEnabledFoundationPoseModels[i] = enabledFoundationPoseModels.getValueReadOnly(i);
-      }
+      onDiskEnabledFoundationPoseModels.clear();
+      onDiskEnabledFoundationPoseModels.addAll(enabledFoundationPoseModels.getValue());
    }
 
    @Override
@@ -187,20 +169,14 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
          objectType.setValue(onDiskObjectType);
          useFoundationPose.setValue(onDiskUseFoundationPose);
 
-         for (int i = 0; i < enabledYoloModels.getLength() && i < onDiskEnabledYoloModels.length; i++)
-         {
-            enabledYoloModels.setValue(i, onDiskEnabledYoloModels[i]);
-         }
+         enabledYoloModels.clear();
+         enabledYoloModels.getValue().addAll(onDiskEnabledYoloModels);
 
-         for (int i = 0; i < ignoredYoloClasses.getLength() && i < onDiskIgnoredYoloClasses.length; i++)
-         {
-            ignoredYoloClasses.setValue(i, onDiskIgnoredYoloClasses[i]);
-         }
+         ignoredYoloClassIndices.clear();
+         ignoredYoloClassIndices.getValue().addAll(onDiskIgnoredYoloClassIndices);
 
-         for (int i = 0; i < enabledFoundationPoseModels.getLength() && i < onDiskEnabledFoundationPoseModels.length; i++)
-         {
-            enabledFoundationPoseModels.setValue(i, onDiskEnabledFoundationPoseModels[i]);
-         }
+         enabledFoundationPoseModels.clear();
+         enabledFoundationPoseModels.getValue().addAll(onDiskEnabledFoundationPoseModels);
       }
    }
 
@@ -217,20 +193,17 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
       unchanged &= objectType.getValue() == onDiskObjectType;
       unchanged &= useFoundationPose.getValue() == onDiskUseFoundationPose;
 
-      for (int i = 0; i < enabledYoloModels.getLength(); i++)
-      {
-         unchanged &= enabledYoloModels.getValueReadOnly(i).equals(onDiskEnabledYoloModels[i]);
-      }
+      unchanged &= enabledYoloModels.getSize() == onDiskEnabledYoloModels.size();
+      for (int i = 0; unchanged && i < enabledYoloModels.getSize(); i++)
+         unchanged = enabledYoloModels.getValueReadOnly(i).equals(onDiskEnabledYoloModels.get(i));
 
-      for (int i = 0; i < ignoredYoloClasses.getLength(); i++)
-      {
-         unchanged &= ignoredYoloClasses.getValueReadOnly(i) == onDiskIgnoredYoloClasses[i];
-      }
+      unchanged &= ignoredYoloClassIndices.getSize() == onDiskIgnoredYoloClassIndices.size();
+      for (int i = 0; unchanged && i < ignoredYoloClassIndices.getSize(); i++)
+         unchanged = ignoredYoloClassIndices.getValueReadOnly(i) == onDiskIgnoredYoloClassIndices.get(i);
 
-      for (int i = 0; i < enabledFoundationPoseModels.getLength(); i++)
-      {
-         unchanged &= enabledFoundationPoseModels.getValueReadOnly(i) == onDiskEnabledFoundationPoseModels[i];
-      }
+      unchanged &= enabledFoundationPoseModels.getSize() == onDiskEnabledFoundationPoseModels.size();
+      for (int i = 0; unchanged && i < enabledFoundationPoseModels.getSize(); i++)
+         unchanged = enabledFoundationPoseModels.getValueReadOnly(i).equals(onDiskEnabledFoundationPoseModels.get(i));
 
       return !unchanged;
    }
@@ -240,16 +213,15 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
       super.toMessage(message.getDefinition());
 
       message.setYoloModelName(yoloModelName.getValue());
-      message.setYoloConfidenceThreshold((float) yoloConfidenceThreshold.getValue());
-      message.setYoloMaskThreshold((float) yoloMaskThreshold.getValue());
+      message.setYoloConfidenceThreshold(yoloConfidenceThreshold.getValue());
+      message.setYoloMaskThreshold(yoloMaskThreshold.getValue());
       message.setSegmentationMaskErosionRadius(segmentationMaskErosionRadius.getValue());
-      message.setOutlierThreshold((float) outlierThreshold.getValue());
+      message.setOutlierThreshold(outlierThreshold.getValue());
       message.setObjectType(objectType.toMessageOrdinal());
       message.setUseFoundationPose(useFoundationPose.getValue());
-
       enabledYoloModels.toMessage(message.getEnabledYoloModels());
-      ignoredYoloClasses.toMessage(message.getIgnoredYoloClasses());
-//      enabledFoundationPoseModels.toMessage(message.getEnabledFoundationPoseModels());
+      ignoredYoloClassIndices.toMessage(message.getIgnoredYoloClassIndices());
+      enabledFoundationPoseModels.toMessage(message.getEnabledFoundationPoseModels());
    }
 
    public void fromMessage(SceneActionNodeDefinitionMessage message)
@@ -263,10 +235,9 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
       outlierThreshold.setValue(message.getOutlierThreshold());
       objectType.fromMessageOrdinal(message.getObjectType(), IsaacROSFoundationPoseObject.values);
       useFoundationPose.setValue(message.getUseFoundationPose());
-
       enabledYoloModels.fromMessage(message.getEnabledYoloModels());
-      ignoredYoloClasses.fromMessage(message.getIgnoredYoloClasses());
-//      enabledFoundationPoseModels.fromMessage(message.getEnabledFoundationPoseModels());
+      ignoredYoloClassIndices.fromMessage(message.getIgnoredYoloClassIndices());
+      enabledFoundationPoseModels.fromMessage(message.getEnabledFoundationPoseModels(), IsaacROSFoundationPoseObject.values);
    }
 
    public String getYoloModelName()
@@ -284,7 +255,7 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
       return yoloConfidenceThreshold.getValue();
    }
 
-   public void setYoloConfidenceThreshold(double yoloConfidenceThreshold)
+   public void setYoloConfidenceThreshold(float yoloConfidenceThreshold)
    {
       this.yoloConfidenceThreshold.setValue(yoloConfidenceThreshold);
    }
@@ -294,7 +265,7 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
       return yoloMaskThreshold.getValue();
    }
 
-   public void setYoloMaskThreshold(double yoloMaskThreshold)
+   public void setYoloMaskThreshold(float yoloMaskThreshold)
    {
       this.yoloMaskThreshold.setValue(yoloMaskThreshold);
    }
@@ -309,12 +280,12 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
       this.segmentationMaskErosionRadius.setValue(segmentationMaskErosionRadius);
    }
 
-   public double getOutlierThreshold()
+   public float getOutlierThreshold()
    {
       return outlierThreshold.getValue();
    }
 
-   public void setOutlierThreshold(double outlierThreshold)
+   public void setOutlierThreshold(float outlierThreshold)
    {
       this.outlierThreshold.setValue(outlierThreshold);
    }
@@ -339,17 +310,17 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
       this.useFoundationPose.setValue(useFoundationPose);
    }
 
-   public CRDTBidirectionalStringArray getEnabledYoloModels()
+   public CRDTBidirectionalStringList getEnabledYoloModels()
    {
       return enabledYoloModels;
    }
 
-   public CRDTBidirectionalBooleanArray getIgnoredYoloClasses()
+   public CRDTBidirectionalIntegerList getIgnoredYoloClasses()
    {
-      return ignoredYoloClasses;
+      return ignoredYoloClassIndices;
    }
 
-   public CRDTBidirectionalIntegerArray getEnabledFoundationPoseModels()
+   public CRDTBidirectionalEnumList<IsaacROSFoundationPoseObject> getEnabledFoundationPoseModels()
    {
       return enabledFoundationPoseModels;
    }
