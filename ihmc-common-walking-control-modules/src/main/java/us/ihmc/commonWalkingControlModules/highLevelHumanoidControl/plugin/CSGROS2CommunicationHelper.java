@@ -3,19 +3,27 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin;
 import controller_msgs.msg.dds.ContinuousStepGeneratorInputMessage;
 import controller_msgs.msg.dds.ContinuousStepGeneratorParametersMessage;
 import controller_msgs.msg.dds.ContinuousStepGeneratorStatusMessage;
+import std_msgs.msg.dds.Empty;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGeneratorParametersBasics;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.ros2.QueuedROS2Subscription;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
+import us.ihmc.ros2.ROS2Topic;
 
 import java.util.function.Consumer;
 
 public class CSGROS2CommunicationHelper
 {
+   public static final ROS2Topic<Empty> CSG_HEARTBEAT_TOPIC = new ROS2Topic<>().withPrefix("ihmc")
+                                                                               .withModule("continuous_step_generator")
+                                                                               .withSuffix("heartbeat")
+                                                                               .withType(Empty.class);
+
    private final ROS2Node ros2Node;
    private final String robotName;
 
@@ -29,6 +37,9 @@ public class CSGROS2CommunicationHelper
 
    private final ROS2Publisher<ContinuousStepGeneratorInputMessage> csgInputCommandPublisher;
    private final ROS2Publisher<ContinuousStepGeneratorParametersMessage> csgParametersCommandPublisher;
+
+   // Heartbeat to ensure StepGeneratorCommandInputManager stops walking if connection is broken
+   private final ROS2Heartbeat heartbeat;
 
    public CSGROS2CommunicationHelper(String robotName, ROS2Node ros2Node, WalkingControllerParameters walkingControllerParameters)
    {
@@ -53,6 +64,9 @@ public class CSGROS2CommunicationHelper
 
       csgInputCommandPublisher = ros2Node.createPublisher(HumanoidControllerAPI.getTopic(ContinuousStepGeneratorInputMessage.class, robotName));
       csgParametersCommandPublisher = ros2Node.createPublisher(HumanoidControllerAPI.getTopic(ContinuousStepGeneratorParametersMessage.class, robotName));
+
+      heartbeat = new ROS2Heartbeat(ros2Node, CSG_HEARTBEAT_TOPIC);
+      heartbeat.setAlive(true); // Heartbeat stays alive. The StepGeneratorCommandInputManager will stop if this process dies or Wi-Fi connection is lost
    }
 
    public void publish(ContinuousStepGeneratorInputMessage continuousStepGeneratorInputMessage)
@@ -146,5 +160,10 @@ public class CSGROS2CommunicationHelper
    public ContinuousStepGeneratorStatusMessage getCSGStatusMessage()
    {
       return csgStatusMessage;
+   }
+
+   public void destroy()
+   {
+      heartbeat.destroy();
    }
 }
