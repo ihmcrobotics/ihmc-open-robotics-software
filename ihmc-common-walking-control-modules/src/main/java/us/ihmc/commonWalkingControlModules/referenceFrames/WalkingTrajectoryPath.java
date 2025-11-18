@@ -45,7 +45,6 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.filters.AlphaFilterTools;
-import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.math.YoMatrix;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -77,6 +76,7 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final String WALKING_TRAJECTORY_PATH_FRAME_NAME = "walkingTrajectoryPathFrame";
    public static final int WALKING_TRAJECTORY_FRAME_ID = WALKING_TRAJECTORY_PATH_FRAME_NAME.hashCode();
+   private static final double DECAY_RATE = 10.0;
 
    private static final int MAX_NUMBER_OF_FOOTSTEPS = 2;
 
@@ -104,6 +104,9 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
    private final YoDouble currentYawRate = new YoDouble(namePrefix + "CurrentYawRate", registry);
    private final YoDouble currentYawAcceleration = new YoDouble(namePrefix + "CurrentYawAcceleration", registry);
    private final YoDouble finalTransferDuration = new YoDouble(namePrefix + "FinalTransferDuration", registry);
+
+   private final YoDouble decayRate = new YoDouble(namePrefix + "DecayRate", registry);
+   private final YoDouble decayFactor = new YoDouble(namePrefix + "DecayFactor", registry);
 
    private final YoFrameVector3D initialLinearVelocity = new YoFrameVector3D(namePrefix + "InitialLinearVelocity", worldFrame, registry);
    private final YoDouble initialYawRate = new YoDouble(namePrefix + "InitialYawRate", registry);
@@ -154,6 +157,7 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
       this.soleFrames = soleFrames;
 
       trajectoryManager = new TrajectoryManager(registry);
+      decayRate.set(DECAY_RATE);
       YoGraphicsList yoGraphicList;
 
       if (yoGraphicsListRegistry != null)
@@ -349,7 +353,16 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
       if (updateWaypoints)
          updateWaypoints();
 
-      double currentTime = MathTools.clamp(time.getValue() - startTime.getValue(), 0.0, totalDuration.getValue());
+      double maxTime = totalDuration.getDoubleValue();
+      if (!footsteps.isEmpty())
+      {
+         if (isInDoubleSupport.getBooleanValue())
+            maxTime = Math.min(footstepTimings.getFirst().getTransferTime(), maxTime);
+         else
+            maxTime = Math.min(footstepTimings.getFirst().getSwingTime(), maxTime);
+      }
+      double timeInState = time.getValue() - startTime.getDoubleValue();
+      double currentTime = MathTools.clamp(timeInState, 0.0, maxTime);
 
       trajectoryManager.initialize(initialLinearVelocity, initialYawRate.getValue(), waypoints, isLastWaypointOpen.getValue());
       trajectoryManager.computePosition(currentTime, currentPosition);
@@ -358,6 +371,12 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
       currentYaw.set(AngleTools.trimAngleMinusPiToPi(trajectoryManager.computeYaw(currentTime)));
       currentYawRate.set(trajectoryManager.computeYawRate(currentTime));
       currentYawAcceleration.set(trajectoryManager.computeYawAcceleration(currentTime));
+
+      // If we've overshot when this was supposed to end, decay the rate and acceleration
+      double overageTime = timeInState - currentTime;
+      decayFactor.set(Math.exp(-decayRate.getDoubleValue() * overageTime));
+      currentYawRate.mul(decayFactor.getDoubleValue());
+      currentYawAcceleration.mul(decayFactor.getDoubleValue() * decayFactor.getDoubleValue());
 
       walkingTrajectoryPathFrame.update();
       walkingTrajectoryAcceleration.getLinearPart().setMatchingFrame(currentLinearAcceleration);

@@ -46,6 +46,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
+import us.ihmc.commonWalkingControlModules.referenceFrames.WalkingTrajectoryPath;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMarginRegionCalculator;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -589,10 +590,12 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
    private void initializeWalkingTrajectoryPath()
    {
-      controllerToolbox.getWalkingTrajectoryPath().clearFootsteps();
-      controllerToolbox.getWalkingTrajectoryPath().reset();
-      controllerToolbox.getWalkingTrajectoryPath().initializeDoubleSupport();
-      controllerToolbox.getWalkingTrajectoryPath().updateTrajectory(FootControlModule.ConstraintType.FULL, FootControlModule.ConstraintType.FULL);
+      WalkingTrajectoryPath walkingTrajectoryPath = controllerToolbox.getWalkingTrajectoryPath();
+      walkingTrajectoryPath.clearFootsteps();
+      walkingTrajectoryPath.reset();
+      walkingTrajectoryPath.initializeDoubleSupport();
+      walkingTrajectoryPath.updateTrajectory(FootControlModule.ConstraintType.FULL,
+                                             FootControlModule.ConstraintType.FULL);
    }
 
    private void initializeManagers()
