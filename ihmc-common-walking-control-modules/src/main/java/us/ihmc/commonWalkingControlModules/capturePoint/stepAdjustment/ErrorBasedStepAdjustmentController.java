@@ -553,7 +553,6 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       adjustedSolution.set(pointToProject);
 
       captureRegionInWorld.setIncludingFrame(multiStepCaptureRegionCalculator.getCaptureRegion());
-//      captureRegionInWorld.setIncludingFrame(oneStepSafetyHeuristics.getCaptureRegionWithSafetyMargin());
       captureRegionInWorld.changeFrameAndProjectToXYPlane(worldFrame);
 
       if (!isTheCaptureRegionReachable())
