@@ -47,7 +47,7 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
    /**
             * YOLO classes to ignore
             */
-   public us.ihmc.idl.IDLSequence.Boolean  ignored_yolo_classes_;
+   public us.ihmc.idl.IDLSequence.Byte  ignored_yolo_class_indices_;
    /**
             * FoundationPose models that should be enabled at this point
             */
@@ -58,7 +58,7 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
       definition_ = new behavior_msgs.msg.dds.ActionNodeDefinitionMessage();
       yolo_model_name_ = new java.lang.StringBuilder(255);
       enabled_yolo_models_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (10, "type_d");
-      ignored_yolo_classes_ = new us.ihmc.idl.IDLSequence.Boolean (256, "type_7");
+      ignored_yolo_class_indices_ = new us.ihmc.idl.IDLSequence.Byte (256, "type_9");
 
       enabled_foundation_pose_models_ = new us.ihmc.idl.IDLSequence.Byte (10, "type_9");
 
@@ -89,7 +89,7 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
       use_foundation_pose_ = other.use_foundation_pose_;
 
       enabled_yolo_models_.set(other.enabled_yolo_models_);
-      ignored_yolo_classes_.set(other.ignored_yolo_classes_);
+      ignored_yolo_class_indices_.set(other.ignored_yolo_class_indices_);
       enabled_foundation_pose_models_.set(other.enabled_foundation_pose_models_);
    }
 
@@ -229,9 +229,9 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
    /**
             * YOLO classes to ignore
             */
-   public us.ihmc.idl.IDLSequence.Boolean  getIgnoredYoloClasses()
+   public us.ihmc.idl.IDLSequence.Byte  getIgnoredYoloClassIndices()
    {
-      return ignored_yolo_classes_;
+      return ignored_yolo_class_indices_;
    }
 
 
@@ -278,7 +278,7 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilderSequence(this.enabled_yolo_models_, other.enabled_yolo_models_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBooleanSequence(this.ignored_yolo_classes_, other.ignored_yolo_classes_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.ignored_yolo_class_indices_, other.ignored_yolo_class_indices_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.enabled_foundation_pose_models_, other.enabled_foundation_pose_models_, epsilon)) return false;
 
@@ -311,7 +311,7 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
       if(this.use_foundation_pose_ != otherMyClass.use_foundation_pose_) return false;
 
       if (!this.enabled_yolo_models_.equals(otherMyClass.enabled_yolo_models_)) return false;
-      if (!this.ignored_yolo_classes_.equals(otherMyClass.ignored_yolo_classes_)) return false;
+      if (!this.ignored_yolo_class_indices_.equals(otherMyClass.ignored_yolo_class_indices_)) return false;
       if (!this.enabled_foundation_pose_models_.equals(otherMyClass.enabled_foundation_pose_models_)) return false;
 
       return true;
@@ -341,8 +341,8 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
       builder.append(this.use_foundation_pose_);      builder.append(", ");
       builder.append("enabled_yolo_models=");
       builder.append(this.enabled_yolo_models_);      builder.append(", ");
-      builder.append("ignored_yolo_classes=");
-      builder.append(this.ignored_yolo_classes_);      builder.append(", ");
+      builder.append("ignored_yolo_class_indices=");
+      builder.append(this.ignored_yolo_class_indices_);      builder.append(", ");
       builder.append("enabled_foundation_pose_models=");
       builder.append(this.enabled_foundation_pose_models_);
       builder.append("}");

@@ -51,7 +51,7 @@ module behavior_msgs
         /**
          * YOLO classes to ignore
          */
-        sequence<boolean, 256> ignored_yolo_classes;
+        sequence<octet, 256> ignored_yolo_class_indices;
         /**
          * FoundationPose models that should be enabled at this point
          */
