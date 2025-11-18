@@ -594,8 +594,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       walkingTrajectoryPath.clearFootsteps();
       walkingTrajectoryPath.reset();
       walkingTrajectoryPath.initializeDoubleSupport();
-      walkingTrajectoryPath.updateTrajectory(0.0,
-                                             FootControlModule.ConstraintType.FULL,
+      walkingTrajectoryPath.updateTrajectory(FootControlModule.ConstraintType.FULL,
                                              FootControlModule.ConstraintType.FULL);
    }
 

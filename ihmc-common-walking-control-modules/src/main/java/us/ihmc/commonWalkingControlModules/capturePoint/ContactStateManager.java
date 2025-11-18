@@ -16,16 +16,12 @@ public class ContactStateManager
    private final YoBoolean inSingleSupport = new YoBoolean("InSingleSupport", registry);
    private final YoBoolean inStanding = new YoBoolean("InStanding", registry);
    private final YoDouble currentStateDuration = new YoDouble("CurrentStateDuration", registry);
-   private final YoDouble currentPhaseDuration = new YoDouble("CurrentPhaseDuration", registry);
    private final YoDouble totalStateDuration = new YoDouble("totalStateDuration", registry);
    private final YoDouble timeAtStartOfSupportSequence = new YoDouble("TimeAtStartOfSupportSequence", registry);
-   private final YoDouble timeAtStartOfPhase = new YoDouble("TimeAtStartOfPhase", registry);
    private final YoDouble timeInSupportSequence = new YoDouble("TimeInSupportSequence", registry);
-   private final YoDouble timeInPhase = new YoDouble("TimeInPhase", registry);
    private final YoDouble offsetTimeInState = new YoDouble("offsetTimeInState", registry);
 
    private final YoDouble adjustedTimeInSupportSequence = new YoDouble("AdjustedTimeInSupportSequence", registry);
-   private final YoDouble adjustedTimeInPhase = new YoDouble("AdjustedTimeInPhase", registry);
    private final YoDouble timeAdjustment = new YoDouble("timeAdjustment", registry);
    private final YoDouble totalTimeAdjustment = new YoDouble("totalTimeAdjustment", registry);
 
@@ -97,34 +93,19 @@ public class ContactStateManager
       return timeAdjustmentForSwing.getDoubleValue();
    }
 
-   /**
-    * This returns the time in the support sequence that has been adjusted for speed up. Note that, in swing, this adds the time of transfer
-    */
    public double getTimeInSupportSequence()
    {
       return adjustedTimeInSupportSequence.getDoubleValue();
    }
 
-   /**
-    * This returns the time in the support sequence that has been adjusted for speed up. Note that, in swing, this does not add the time of transfer
-    */
-   public double getTimeInPhase()
-   {
-      return adjustedTimeInPhase.getDoubleValue();
-   }
-
    public void initialize()
    {
       timeAtStartOfSupportSequence.set(time.getValue());
-      timeAtStartOfPhase.set(time.getValue());
       timeInSupportSequence.set(0.0);
-      timeInPhase.set(0.0);
       adjustedTimeInSupportSequence.set(0.0);
-      adjustedTimeInPhase.set(0.0);
       inSingleSupport.set(false);
       inStanding.set(true);
       currentStateDuration.set(Double.NaN);
-      currentPhaseDuration.set(Double.NaN);
       totalStateDuration.set(Double.NaN);
       offsetTimeInState.set(0.0);
 
@@ -137,11 +118,8 @@ public class ContactStateManager
       inStanding.set(true);
 
       timeAtStartOfSupportSequence.set(time.getValue());
-      timeAtStartOfPhase.set(time.getValue());
       timeInSupportSequence.set(0.0);
-      timeInPhase.set(0.0);
       currentStateDuration.set(Double.POSITIVE_INFINITY);
-      currentPhaseDuration.set(Double.POSITIVE_INFINITY);
       totalStateDuration.set(Double.POSITIVE_INFINITY);
       offsetTimeInState.set(0.0);
 
@@ -157,19 +135,15 @@ public class ContactStateManager
    public void initializeForTransfer(double transferDuration, double swingDuration)
    {
       timeAtStartOfSupportSequence.set(time.getValue());
-      timeAtStartOfPhase.set(time.getValue());
 
       timeInSupportSequence.set(0.0);
-      timeInPhase.set(0.0);
       currentStateDuration.set(transferDuration);
-      currentPhaseDuration.set(transferDuration);
       totalStateDuration.set(transferDuration + swingDuration);
       remainingTimeInContactSequence.set(transferDuration);
       adjustedRemainingTimeUnderDisturbance.set(transferDuration);
       offsetTimeInState.set(0.0);
 
       adjustedTimeInSupportSequence.set(0.0);
-      adjustedTimeInPhase.set(0.0);
       totalTimeAdjustment.set(0.0);
 
       inStanding.set(false);
@@ -185,19 +159,15 @@ public class ContactStateManager
 
       double stepDuration = transferDuration + swingDuration;
       timeAtStartOfSupportSequence.set(time.getValue() - transferDuration);
-      timeAtStartOfPhase.set(time.getValue());
 
       timeInSupportSequence.set(transferDuration);
       currentStateDuration.set(stepDuration);
-      currentPhaseDuration.set(swingDuration);
       totalStateDuration.set(stepDuration);
       remainingTimeInContactSequence.set(swingDuration);
       adjustedRemainingTimeUnderDisturbance.set(swingDuration);
       offsetTimeInState.set(transferDuration);
 
       adjustedTimeInSupportSequence.set(transferDuration);
-      timeInPhase.set(0.0);
-      adjustedTimeInPhase.set(0.0);
       totalTimeAdjustment.set(0.0);
 
       contactStateIsDone.set(false);
@@ -206,19 +176,15 @@ public class ContactStateManager
    public void initializeForTransferToStanding(double finalTransferDuration )
    {
       timeAtStartOfSupportSequence.set(time.getValue());
-      timeAtStartOfPhase.set(time.getValue());
 
       timeInSupportSequence.set(0.0);
       currentStateDuration.set(finalTransferDuration);
-      currentPhaseDuration.set(finalTransferDuration);
       totalStateDuration.set(finalTransferDuration);
       remainingTimeInContactSequence.set(finalTransferDuration);
       adjustedRemainingTimeUnderDisturbance.set(finalTransferDuration);
       offsetTimeInState.set(0.0);
 
       adjustedTimeInSupportSequence.set(0.0);
-      timeInPhase.set(0.0);
-      adjustedTimeInPhase.set(0.0);
       totalTimeAdjustment.set(0.0);
 
       inSingleSupport.set(false);
@@ -231,10 +197,7 @@ public class ContactStateManager
    {
       // If this condition is false we are experiencing a late touchdown or a delayed liftoff. Do not advance the time in support sequence!
       if (inStanding.getBooleanValue() || !contactStateIsDone.getBooleanValue())
-      {
          timeInSupportSequence.set(time.getValue() - timeAtStartOfSupportSequence.getValue());
-         timeInPhase.set(time.getValue() - timeAtStartOfPhase.getDoubleValue());
-      }
 
       remainingTimeInContactSequence.set(currentStateDuration.getDoubleValue() - timeInSupportSequence.getDoubleValue());
 
@@ -286,7 +249,6 @@ public class ContactStateManager
 
 
       adjustedTimeInSupportSequence.set(MathTools.clamp(timeInSupportSequence.getValue() + totalTimeAdjustment.getValue(), 0.0, currentStateDuration.getDoubleValue()));
-      adjustedTimeInPhase.set(MathTools.clamp(timeInPhase.getValue() + totalTimeAdjustment.getValue(), 0.0, currentPhaseDuration.getDoubleValue()));
 
       adjustedRemainingTimeUnderDisturbance.set(currentStateDuration.getDoubleValue() - adjustedTimeInSupportSequence.getDoubleValue());
 

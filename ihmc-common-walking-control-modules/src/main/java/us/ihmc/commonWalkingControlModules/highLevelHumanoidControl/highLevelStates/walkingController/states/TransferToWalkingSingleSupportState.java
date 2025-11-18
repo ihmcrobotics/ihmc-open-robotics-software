@@ -161,7 +161,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
          feetManager.updateSwingTrajectoryPreview(swingSide);
       balanceManager.setSwingFootTrajectory(swingSide, feetManager.getSwingTrajectory(swingSide));
       balanceManager.computeICPPlan();
-      updateWalkingTrajectoryPath(balanceManager.getTimeIntoCurrentPhase());
+      updateWalkingTrajectoryPath();
 
       if (!doManualLiftOff())
       {
@@ -191,11 +191,11 @@ public class TransferToWalkingSingleSupportState extends TransferState
       firstTickInState = false;
    }
 
-   private void updateWalkingTrajectoryPath(double timeInState)
+   private void updateWalkingTrajectoryPath()
    {
       walkingTrajectoryPath.clearFootsteps();
       walkingTrajectoryPath.addFootsteps(walkingMessageHandler);
-      walkingTrajectoryPath.updateTrajectory(timeInState, feetManager.getCurrentConstraintType(RobotSide.LEFT), feetManager.getCurrentConstraintType(RobotSide.RIGHT));
+      walkingTrajectoryPath.updateTrajectory(feetManager.getCurrentConstraintType(RobotSide.LEFT), feetManager.getCurrentConstraintType(RobotSide.RIGHT));
    }
 
    private boolean doManualLiftOff()
