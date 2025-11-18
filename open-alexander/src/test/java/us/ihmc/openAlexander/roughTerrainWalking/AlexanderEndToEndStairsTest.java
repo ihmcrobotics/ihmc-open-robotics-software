@@ -42,4 +42,11 @@ public class AlexanderEndToEndStairsTest extends HumanoidEndToEndStairsTest
    {
       testStairs(testInfo, false, false, 1.0, 0.35, 0.0);
    }
+
+   @Test
+   public void testSpecialStairs() throws Exception
+   {
+      testSpecialStairs(true, 0.8, 0.5);
+   }
+
 }

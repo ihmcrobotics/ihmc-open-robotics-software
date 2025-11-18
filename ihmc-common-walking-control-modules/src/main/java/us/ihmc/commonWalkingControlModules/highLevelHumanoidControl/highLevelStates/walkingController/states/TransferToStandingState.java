@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.referenceFrames.WalkingTrajectoryPath;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -33,6 +34,7 @@ public class TransferToStandingState extends WalkingState
    private final FeetManager feetManager;
 
    private final Point3D midFootPosition = new Point3D();
+   private RobotSide supportingSide;
 
    public TransferToStandingState(WalkingMessageHandler walkingMessageHandler,
                                   TouchdownErrorCompensator touchdownErrorCompensator,
@@ -65,7 +67,7 @@ public class TransferToStandingState extends WalkingState
       switchToPointToeOffIfAlreadyInLine();
 
       // Always do this so that when a foot slips or is loaded in the air, the height gets adjusted.
-      comHeightManager.setSupportLeg(RobotSide.LEFT);
+      comHeightManager.setSupportLeg(supportingSide);
    }
 
    private final FramePoint2D desiredCoP = new FramePoint2D();
@@ -171,14 +173,14 @@ public class TransferToStandingState extends WalkingState
 
       Footstep footstepLeft = walkingMessageHandler.getFootstepAtCurrentLocation(RobotSide.LEFT);
       Footstep footstepRight = walkingMessageHandler.getFootstepAtCurrentLocation(RobotSide.RIGHT);
-      RobotSide supportingSide = getSideCarryingMostWeight(footstepLeft, footstepRight);
+      supportingSide = getSideCarryingMostWeight(footstepLeft, footstepRight);
       supportingSide = supportingSide == null ? RobotSide.RIGHT : supportingSide;
 
       double extraToeOffHeight = 0.0;
       if (feetManager.getCurrentConstraintType(supportingSide.getOppositeSide()) == FootControlModule.ConstraintType.TOES)
          extraToeOffHeight = feetManager.getExtraCoMMaxHeightWithToes();
 
-      TransferToAndNextFootstepsData transferToAndNextFootstepsDataForDoubleSupport = walkingMessageHandler.createTransferToAndNextFootstepDataForDoubleSupport(supportingSide);
+      TransferToAndNextFootstepsData transferToAndNextFootstepsDataForDoubleSupport = walkingMessageHandler.createTransferToAndNextFootstepDataForDoubleSupport(supportingSide.getOppositeSide());
       comHeightManager.setSupportLeg(supportingSide);
       comHeightManager.initialize(transferToAndNextFootstepsDataForDoubleSupport, extraToeOffHeight);
 
