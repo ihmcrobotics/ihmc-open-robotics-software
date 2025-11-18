@@ -448,7 +448,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
             {
                tempPoint2D.set(footstepSolution.getPosition());
                computeBestReachabilityConstraintToUseWhenNotIntersecting();
-               FrameConvexPolygon2DReadOnly reachability = getSelectedRegion();
+               FrameConvexPolygon2DReadOnly reachability = getSelectedReachableRegion();
                if (!reachability.isPointInside(tempPoint2D))
                   reachability.orthogonalProjection(tempPoint2D);
                footstepSolution.getPosition().set(tempPoint2D);
@@ -559,12 +559,12 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       {
          captureRegionInWorld.orthogonalProjection(adjustedSolution);
          computeBestReachabilityConstraintToUseWhenNotIntersecting();
-         getSelectedRegion().orthogonalProjection(adjustedSolution);
+         getSelectedReachableRegion().orthogonalProjection(adjustedSolution);
       }
       else
       {
          computeBestReachabilityConstraintToUseWhenIntersecting();
-         getSelectedRegion().orthogonalProjection(adjustedSolution);
+         getSelectedReachableCaptureRegion().orthogonalProjection(adjustedSolution);
       }
 
       footstepAdjustment.set(adjustedSolution);
@@ -706,7 +706,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       };
    }
 
-   private FrameConvexPolygon2DReadOnly getSelectedRegion()
+   private FrameConvexPolygon2DReadOnly getSelectedReachableCaptureRegion()
    {
       return switch (selectedReachableRegion.getEnumValue())
       {
@@ -715,6 +715,17 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
          case BASELINE -> reachableCaptureRegion;
       };
    }
+
+   private FrameConvexPolygon2DReadOnly getSelectedReachableRegion()
+   {
+      return switch (selectedReachableRegion.getEnumValue())
+      {
+         case FORWARD -> reachabilityConstraintHandler.getForwardCrossOverPolygon();
+         case BACKWARD -> reachabilityConstraintHandler.getBackwardCrossOverPolygon();
+         case BASELINE -> reachabilityConstraintHandler.getReachabilityConstraint();
+      };
+   }
+
 
    private boolean deadbandAndApplyStepAdjustment()
    {
