@@ -39,7 +39,6 @@ public class CSGROS2CommunicationHelper
    private final ROS2Publisher<ContinuousStepGeneratorParametersMessage> csgParametersCommandPublisher;
 
    // Heartbeat to ensure StepGeneratorCommandInputManager stops walking if connection is broken
-   // TODO: Destroy heartbeat properly
    private final ROS2Heartbeat heartbeat;
 
    public CSGROS2CommunicationHelper(String robotName, ROS2Node ros2Node, WalkingControllerParameters walkingControllerParameters)
@@ -161,5 +160,10 @@ public class CSGROS2CommunicationHelper
    public ContinuousStepGeneratorStatusMessage getCSGStatusMessage()
    {
       return csgStatusMessage;
+   }
+
+   public void destroy()
+   {
+      heartbeat.destroy();
    }
 }

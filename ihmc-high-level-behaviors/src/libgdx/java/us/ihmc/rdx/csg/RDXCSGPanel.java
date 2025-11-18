@@ -4,12 +4,10 @@ import controller_msgs.msg.dds.ContinuousStepGeneratorInputMessage;
 import controller_msgs.msg.dds.ContinuousStepGeneratorParametersMessage;
 import controller_msgs.msg.dds.ContinuousStepGeneratorStatusMessage;
 import imgui.ImGui;
-import imgui.flag.ImGuiMouseButton;
 import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.CSGROS2CommunicationHelper;
-import us.ihmc.commons.thread.Throttler;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
@@ -17,8 +15,6 @@ import us.ihmc.ros2.ROS2Node;
 
 public class RDXCSGPanel extends RDXPanel
 {
-   private static final double THROTTLER_THREAD_HERTZ = 11.0;
-
    private static final boolean PUBLISH_IN_VELOCITY_UNITS = true;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -53,25 +49,15 @@ public class RDXCSGPanel extends RDXPanel
    private boolean resetDesiredLateralVelocityNextTick = false;
    private boolean resetDesiredTurningVelocityNextTick = false;
 
-   // Throttler for ensuring we aren't publishing too fast/often
-   private final Throttler csgROS2PublisherThrottler;
-
    public RDXCSGPanel(DRCRobotModel robotModel, ROS2Node ros2Node, boolean createXboxPlugin)
-   {
-      this(new CSGROS2CommunicationHelper(robotModel.getSimpleRobotName(), ros2Node, robotModel.getWalkingControllerParameters()), createXboxPlugin);
-   }
-
-   public RDXCSGPanel(CSGROS2CommunicationHelper communicationHelper, boolean createXboxPlugin)
    {
       super("CSG Controls");
       super.setRenderMethod(this::renderImGuiWidgets);
 
-      this.communicationHelper = communicationHelper;
+      communicationHelper = new CSGROS2CommunicationHelper(robotModel.getSimpleRobotName(), ros2Node, robotModel.getWalkingControllerParameters());
 
       csgParametersCommand = communicationHelper.getCSGParametersCommand();
       csgStatusMessage = communicationHelper.getCSGStatusMessage();
-
-      csgROS2PublisherThrottler = new Throttler().setFrequency(THROTTLER_THREAD_HERTZ);
 
       if (createXboxPlugin)
          xBoxOneCSGPlugin = new RDXXboxOneCSGPlugin(communicationHelper);
@@ -87,7 +73,6 @@ public class RDXCSGPanel extends RDXPanel
    public void renderImGuiWidgets()
    {
       boolean publishCSGInputCommand = false;
-      boolean publishCSGParametersCommand = false;
 
       reset(csgStatusMessage);
 
@@ -208,7 +193,7 @@ public class RDXCSGPanel extends RDXPanel
          csgParametersCommand.setSwingHeight(swingHeight.get());
 
       publishCSGInputCommand = publishCSGInputCommand || requestCSGWalkingChanged || desiredForwardVelocityChanged || desiredLateralVelocityChanged || desiredTurningVelocityChanged;
-      publishCSGParametersCommand = swingDurationChanged || transferDurationChanged || maxStepLengthForwardsChanged || maxStepLengthBackwardsChanged || maxStepWidthChanged || swingHeightChanged;
+      boolean publishCSGParametersCommand = swingDurationChanged || transferDurationChanged || maxStepLengthForwardsChanged || maxStepLengthBackwardsChanged || maxStepWidthChanged || swingHeightChanged;
 
       if (publishCSGInputCommand)
          communicationHelper.publish(csgInputCommand);
@@ -238,5 +223,7 @@ public class RDXCSGPanel extends RDXPanel
    {
       if (xBoxOneCSGPlugin != null)
          xBoxOneCSGPlugin.shutDownXboxJoystick();
+
+      communicationHelper.destroy();
    }
 }
