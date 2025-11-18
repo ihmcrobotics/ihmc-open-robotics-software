@@ -32,6 +32,7 @@ public class ROS2LogReplay
    private long pauseStartTime = 0L;
    private boolean pendingPause = false;
    private long totalPausedDuration = 0L;
+   private double replaySpeed = 0.5;
 
    public ROS2LogReplay(String robotName, List<ROS2Topic<?>> loggedTopics, ROS2LogTimeSource timeSource)
    {
@@ -124,7 +125,8 @@ public class ROS2LogReplay
          return false; // replay not advancing while paused
       }
 
-      long now = timestampSupplier.getAsLong() - startTime - totalPausedDuration;
+      long elapsed = timestampSupplier.getAsLong() - startTime - totalPausedDuration;
+      long now = (long) (elapsed * replaySpeed);
       lastReplayTime = now;
       boolean isDone = true;
 
@@ -165,7 +167,8 @@ public class ROS2LogReplay
       long startTime = timestampSupplier.getAsLong();
       while (true)
       {
-         long now = timestampSupplier.getAsLong() - startTime;
+         long elapsed = timestampSupplier.getAsLong() - startTime;
+         long now = (long) (elapsed * replaySpeed);
          boolean isDone = true;
 
          for (int topic_idx = 0; topic_idx < topicManagers.size(); topic_idx++)
@@ -233,6 +236,22 @@ public class ROS2LogReplay
    public void destroy()
    {
       ros2Node.destroy();
+   }
+
+   public void setReplaySpeed(double replaySpeed)
+   {
+      if (replaySpeed <= 0.0)
+      {
+         LogTools.warn("Replay speed must be > 0.0, keeping previous value: {}", this.replaySpeed);
+         return;
+      }
+      this.replaySpeed = replaySpeed;
+      LogTools.info("Replay speed set to {}", replaySpeed);
+   }
+
+   public double getReplaySpeed()
+   {
+      return replaySpeed;
    }
 
    public <T> void addReplayMutator(ROS2Topic<T> topic, ObjLongConsumer<T> mutator)

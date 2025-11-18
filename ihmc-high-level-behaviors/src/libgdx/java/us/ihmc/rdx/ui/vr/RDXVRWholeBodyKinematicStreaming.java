@@ -172,6 +172,7 @@ public class RDXVRWholeBodyKinematicStreaming
    private final ImString logFileName = new ImString();
    private volatile boolean replayThreadRunning = false;
    private Thread replayThread;
+   private final float[] replaySpeed = {1.0f};
 
    public RDXVRWholeBodyKinematicStreaming(ROS2SyncedRobotModel syncedRobot,
                                            ROS2ControllerHelper ros2ControllerHelper,
@@ -841,6 +842,13 @@ public class RDXVRWholeBodyKinematicStreaming
             replayer.pauseReplay(pauseReplay.get());
          }
          if (!replayMotion.get())
+            ImGui.endDisabled();
+
+         if (!pauseReplay.get())
+            ImGui.beginDisabled();
+         if (ImGui.sliderFloat("Replay speed", replaySpeed, 0.1f, 2.0f, "%.1f"))
+            replayer.setReplaySpeed(replaySpeed[0]);
+         if (!pauseReplay.get())
             ImGui.endDisabled();
       }
 
