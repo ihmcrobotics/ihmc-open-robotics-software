@@ -8,6 +8,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.perception.detections.PersistentDetection;
+import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseInstantDetection;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseObject;
 import us.ihmc.tools.Timer;
 
@@ -56,6 +57,9 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
       cameraPosition.set(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getExperimentalCameraFrame).getTranslation());
       for (PersistentDetection detection : scene.getPersistentDetections())
       {
+         if (definition.getUseFoundationPose() && !(detection.getMostRecentDetection() instanceof IsaacROSFoundationPoseInstantDetection))
+            continue;
+
          if (!detection.getDetectedObjectClass().equals(objectType.yoloClass))
             continue;
 

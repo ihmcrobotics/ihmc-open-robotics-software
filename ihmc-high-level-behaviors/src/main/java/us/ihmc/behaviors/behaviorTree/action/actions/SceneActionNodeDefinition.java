@@ -48,7 +48,7 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
    {
       super(rootNode);
 
-      yoloModelName = new CRDTBidirectionalString(this, "");
+      yoloModelName = new CRDTBidirectionalString(this, "best_multi_11_09_2025");
       yoloConfidenceThreshold = new CRDTBidirectionalFloat(this, 0.7f);
       yoloMaskThreshold = new CRDTBidirectionalFloat(this, 0.0f);
       segmentationMaskErosionRadius = new CRDTBidirectionalInteger(this, 1);
@@ -91,44 +91,28 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
    {
       super.loadFromFile(jsonNode);
 
-      if (jsonNode.has("yoloModelName"))
-         yoloModelName.setValue(jsonNode.get("yoloModelName").asText());
-      if (jsonNode.has("yoloConfidenceThreshold"))
-         yoloConfidenceThreshold.setValue((float) jsonNode.get("yoloConfidenceThreshold").asDouble());
-      if (jsonNode.has("yoloMaskThreshold"))
-         yoloMaskThreshold.setValue((float) jsonNode.get("yoloMaskThreshold").asDouble());
-      if (jsonNode.has("segmentationMaskErosionRadius"))
-         segmentationMaskErosionRadius.setValue(jsonNode.get("segmentationMaskErosionRadius").asInt());
-      if (jsonNode.has("outlierThreshold"))
-         outlierThreshold.setValue((float) jsonNode.get("outlierThreshold").asDouble());
-      if (jsonNode.has("objectType"))
-         objectType.setValue(IsaacROSFoundationPoseObject.valueOf(jsonNode.get("objectType").asText()));
-      if (jsonNode.has("useFoundationPose"))
-         useFoundationPose.setValue(jsonNode.get("useFoundationPose").asBoolean());
+      yoloModelName.setValue(jsonNode.get("yoloModelName").asText());
+      yoloConfidenceThreshold.setValue((float) jsonNode.get("yoloConfidenceThreshold").asDouble());
+      yoloMaskThreshold.setValue((float) jsonNode.get("yoloMaskThreshold").asDouble());
+      segmentationMaskErosionRadius.setValue(jsonNode.get("segmentationMaskErosionRadius").asInt());
+      outlierThreshold.setValue((float) jsonNode.get("outlierThreshold").asDouble());
+      objectType.setValue(IsaacROSFoundationPoseObject.valueOf(jsonNode.get("objectType").asText()));
+      useFoundationPose.setValue(jsonNode.get("useFoundationPose").asBoolean());
 
-      if (jsonNode.has("enabledYoloModels"))
-      {
-         ArrayNode enabledYoloModelsArray = (ArrayNode) jsonNode.get("enabledYoloModels");
-         enabledYoloModels.clear();
-         for (int i = 0; i < enabledYoloModelsArray.size(); i++)
-            enabledYoloModels.setValue(i, enabledYoloModelsArray.get(i).asText());
-      }
+      ArrayNode enabledYoloModelsArray = (ArrayNode) jsonNode.get("enabledYoloModels");
+      enabledYoloModels.clear();
+      for (int i = 0; i < enabledYoloModelsArray.size(); i++)
+         enabledYoloModels.setValue(i, enabledYoloModelsArray.get(i).asText());
 
-      if (jsonNode.has("ignoredYoloClassIndices"))
-      {
-         ArrayNode ignoredYoloClassesArray = (ArrayNode) jsonNode.get("ignoredYoloClassIndices");
-         ignoredYoloClassIndices.clear();
-         for (int i = 0; i < ignoredYoloClassesArray.size(); i++)
-            ignoredYoloClassIndices.setValue(i, ignoredYoloClassesArray.get(i).asInt());
-      }
+      ArrayNode ignoredYoloClassesArray = (ArrayNode) jsonNode.get("ignoredYoloClassIndices");
+      ignoredYoloClassIndices.clear();
+      for (int i = 0; i < ignoredYoloClassesArray.size(); i++)
+         ignoredYoloClassIndices.setValue(i, ignoredYoloClassesArray.get(i).asInt());
 
-      if (jsonNode.has("enabledFoundationPoseModels"))
-      {
-         ArrayNode enabledFoundationPoseModelsArray = (ArrayNode) jsonNode.get("enabledFoundationPoseModels");
-         enabledFoundationPoseModels.clear();
-         for (int i = 0; i < enabledFoundationPoseModelsArray.size(); i++)
-            enabledFoundationPoseModels.setValue(i, IsaacROSFoundationPoseObject.valueOf(enabledFoundationPoseModelsArray.get(i).asText()));
-      }
+      ArrayNode enabledFoundationPoseModelsArray = (ArrayNode) jsonNode.get("enabledFoundationPoseModels");
+      enabledFoundationPoseModels.clear();
+      for (int i = 0; i < enabledFoundationPoseModelsArray.size(); i++)
+         enabledFoundationPoseModels.setValue(i, IsaacROSFoundationPoseObject.valueOf(enabledFoundationPoseModelsArray.get(i).asText()));
    }
 
    @Override
@@ -212,13 +196,13 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
    {
       super.toMessage(message.getDefinition());
 
-      message.setYoloModelName(yoloModelName.getValue());
-      message.setYoloConfidenceThreshold(yoloConfidenceThreshold.getValue());
-      message.setYoloMaskThreshold(yoloMaskThreshold.getValue());
-      message.setSegmentationMaskErosionRadius(segmentationMaskErosionRadius.getValue());
-      message.setOutlierThreshold(outlierThreshold.getValue());
+      message.setYoloModelName(yoloModelName.toMessage());
+      message.setYoloConfidenceThreshold(yoloConfidenceThreshold.toMessage());
+      message.setYoloMaskThreshold(yoloMaskThreshold.toMessage());
+      message.setSegmentationMaskErosionRadius(segmentationMaskErosionRadius.toMessage());
+      message.setOutlierThreshold(outlierThreshold.toMessage());
       message.setObjectType(objectType.toMessageOrdinal());
-      message.setUseFoundationPose(useFoundationPose.getValue());
+      message.setUseFoundationPose(useFoundationPose.toMessage());
       enabledYoloModels.toMessage(message.getEnabledYoloModels());
       ignoredYoloClassIndices.toMessage(message.getIgnoredYoloClassIndices());
       enabledFoundationPoseModels.toMessage(message.getEnabledFoundationPoseModels());
@@ -228,13 +212,13 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
    {
       super.fromMessage(message.getDefinition());
 
-      yoloModelName.setValue(message.getYoloModelNameAsString());
-      yoloConfidenceThreshold.setValue(message.getYoloConfidenceThreshold());
-      yoloMaskThreshold.setValue(message.getYoloMaskThreshold());
-      segmentationMaskErosionRadius.setValue(message.getSegmentationMaskErosionRadius());
-      outlierThreshold.setValue(message.getOutlierThreshold());
+      yoloModelName.fromMessage(message.getYoloModelNameAsString());
+      yoloConfidenceThreshold.fromMessage(message.getYoloConfidenceThreshold());
+      yoloMaskThreshold.fromMessage(message.getYoloMaskThreshold());
+      segmentationMaskErosionRadius.fromMessage(message.getSegmentationMaskErosionRadius());
+      outlierThreshold.fromMessage(message.getOutlierThreshold());
       objectType.fromMessageOrdinal(message.getObjectType(), IsaacROSFoundationPoseObject.values);
-      useFoundationPose.setValue(message.getUseFoundationPose());
+      useFoundationPose.fromMessage(message.getUseFoundationPose());
       enabledYoloModels.fromMessage(message.getEnabledYoloModels());
       ignoredYoloClassIndices.fromMessage(message.getIgnoredYoloClassIndices());
       enabledFoundationPoseModels.fromMessage(message.getEnabledFoundationPoseModels(), IsaacROSFoundationPoseObject.values);
