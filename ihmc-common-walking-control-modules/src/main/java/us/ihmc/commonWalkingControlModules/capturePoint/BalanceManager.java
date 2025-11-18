@@ -937,6 +937,11 @@ public class BalanceManager implements SCS2YoGraphicHolder
       return contactStateManager.getTimeInSupportSequence();
    }
 
+   public double getTimeIntoCurrentPhase()
+   {
+      return contactStateManager.getTimeInPhase();
+   }
+
    public double getAdjustedTimeRemainingInCurrentSupportSequence()
    {
       return contactStateManager.getAdjustedTimeRemainingInCurrentSupportSequence();

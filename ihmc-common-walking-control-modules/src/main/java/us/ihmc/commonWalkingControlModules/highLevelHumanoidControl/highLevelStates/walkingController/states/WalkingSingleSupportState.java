@@ -256,7 +256,9 @@ public class WalkingSingleSupportState extends SingleSupportState
       walkingTrajectoryPath.clearFootsteps();
       walkingTrajectoryPath.addFootstep(nextFootstep, footstepTiming);
       walkingTrajectoryPath.addFootsteps(walkingMessageHandler);
-      walkingTrajectoryPath.updateTrajectory(feetManager.getCurrentConstraintType(RobotSide.LEFT), feetManager.getCurrentConstraintType(RobotSide.RIGHT));
+      walkingTrajectoryPath.updateTrajectory(balanceManager.getTimeIntoCurrentPhase(),
+                                             feetManager.getCurrentConstraintType(RobotSide.LEFT),
+                                             feetManager.getCurrentConstraintType(RobotSide.RIGHT));
    }
 
    @Override

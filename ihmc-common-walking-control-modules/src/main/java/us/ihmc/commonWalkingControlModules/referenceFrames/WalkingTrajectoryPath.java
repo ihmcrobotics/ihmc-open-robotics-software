@@ -335,12 +335,12 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
 //      updateFootstepsInternal();
    }
 
-   public void updateTrajectory(ConstraintType leftFootConstraintType, ConstraintType rightFootConstraintType)
+   public void updateTrajectory(double timeInState, ConstraintType leftFootConstraintType, ConstraintType rightFootConstraintType)
    {
-      updateTrajectory(leftFootConstraintType, rightFootConstraintType, false);
+      updateTrajectory(timeInState, leftFootConstraintType, rightFootConstraintType, false);
    }
 
-   public void updateTrajectory(ConstraintType leftFootConstraintType, ConstraintType rightFootConstraintType, boolean updateWaypoints)
+   public void updateTrajectory(double timeInState, ConstraintType leftFootConstraintType, ConstraintType rightFootConstraintType, boolean updateWaypoints)
    {
       timer.startMeasurement();
 
@@ -349,7 +349,7 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
       if (updateWaypoints)
          updateWaypoints();
 
-      double currentTime = MathTools.clamp(time.getValue() - startTime.getValue(), 0.0, totalDuration.getValue());
+      double currentTime = MathTools.clamp(timeInState, 0.0, totalDuration.getValue());
 
       trajectoryManager.initialize(initialLinearVelocity, initialYawRate.getValue(), waypoints, isLastWaypointOpen.getValue());
       trajectoryManager.computePosition(currentTime, currentPosition);
