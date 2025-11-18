@@ -61,6 +61,7 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
                                      BooleanProvider compensateGravity,
                                      DoubleProvider horizontalVelocityThreshold,
                                      DoubleProvider verticalVelocityThreshold,
+                                     DoubleProvider verticalVelocityHighThreshold,
                                      BooleanProvider useJacobianTranspose,
                                      YoRegistry parentRegistry)
    {
@@ -113,6 +114,7 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
                                                                compensateGravity,
                                                                horizontalVelocityThreshold,
                                                                verticalVelocityThreshold,
+                                                               verticalVelocityHighThreshold,
                                                                registry);
 
       parentRegistry.addChild(registry);
@@ -312,6 +314,7 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
 
       private final DoubleProvider horizontalVelocityThreshold;
       private final DoubleProvider verticalVelocityThreshold;
+      private final DoubleProvider verticalVelocityHighThreshold;
       private final YoBoolean isPastForceThresholdLow;
       private final GlitchFilteredYoBoolean isPastForceThresholdLowFiltered;
       private final YoBoolean isPastForceThresholdHigh;
@@ -340,6 +343,7 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
                                                  BooleanProvider compensateGravity,
                                                  DoubleProvider horizontalVelocityThreshold,
                                                  DoubleProvider verticalVelocityThreshold,
+                                                 DoubleProvider verticalVelocityHighThreshold,
                                                  YoRegistry registry)
       {
          this.soleFrame = soleFrame;
@@ -350,6 +354,7 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
          this.compensateGravity = compensateGravity;
          this.horizontalVelocityThreshold = horizontalVelocityThreshold;
          this.verticalVelocityThreshold = verticalVelocityThreshold;
+         this.verticalVelocityHighThreshold = verticalVelocityHighThreshold;
 
          legJoints = MultiBodySystemTools.createOneDoFJointPath(pelvis, foot);
 
@@ -488,9 +493,10 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
 
          boolean validCoP = isPastCoPThresholdFiltered.getValue();
          boolean hitGroundLow = isPastForceThresholdLowFiltered.getValue() && validCoP;
-         boolean allowableSpeed = horizontalVelocity.getValue() < horizontalVelocityThreshold.getValue() && Math.abs(verticalVelocity.getValue()) < verticalVelocityThreshold.getValue() ;
+         boolean allowableSpeed = horizontalVelocity.getValue() < horizontalVelocityThreshold.getValue() && Math.abs(verticalVelocity.getValue()) < verticalVelocityThreshold.getValue();
+         boolean allowableHighSpeed = Math.abs(verticalVelocity.getValue()) < verticalVelocityHighThreshold.getValue() ;
 
-         hasFootHitGround.set((hitGroundLow && allowableSpeed) || isPastForceThresholdHigh.getValue());
+         hasFootHitGround.set((hitGroundLow && allowableSpeed) || (isPastForceThresholdHigh.getValue() && allowableHighSpeed));
          hasFootHitGroundFiltered.update();
       }
 

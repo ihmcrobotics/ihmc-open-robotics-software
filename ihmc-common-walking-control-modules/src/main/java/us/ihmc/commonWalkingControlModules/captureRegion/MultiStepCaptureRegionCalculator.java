@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.captureRegion;
 import java.awt.*;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentReachabilityConstraint;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
@@ -35,6 +36,9 @@ import us.ihmc.yoVariables.variable.YoInteger;
  */
 public class MultiStepCaptureRegionCalculator implements SCS2YoGraphicHolder
 {
+   private static final double distanceThresholdToFilter = 0.005;
+   private static final double distanceThresholdToFilterSquared = MathTools.square(distanceThresholdToFilter);
+
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoInteger stepsInQueue = new YoInteger("stepsInQueue", registry);
@@ -162,7 +166,21 @@ public class MultiStepCaptureRegionCalculator implements SCS2YoGraphicHolder
          expandCaptureRegion(regionToExpand, reachabilityPolygonsWithOrigin.get(currentStanceSide), multiStepRegion, currentSupportMultiplier);
       }
 
-      yoMultiStepRegion.setMatchingFrame(multiStepRegion, false);
+      multiStepRegion.update();
+      updateInternalFilteringRepeats();
+   }
+
+   private void updateInternalFilteringRepeats()
+   {
+      yoMultiStepRegion.clear();
+      for (int i = 0; i < multiStepRegion.getNumberOfVertices(); i++)
+      {
+         FramePoint2DReadOnly previousVertex = multiStepRegion.getPreviousVertex(i);
+         FramePoint2DReadOnly vertex = multiStepRegion.getVertex(i);
+         if (vertex.distanceSquared(previousVertex) > distanceThresholdToFilterSquared)
+            yoMultiStepRegion.addVertexMatchingFrame(multiStepRegion.getVertex(i), false);
+      }
+      yoMultiStepRegion.update();
    }
 
    public FrameConvexPolygon2DReadOnly getCaptureRegion()
