@@ -34,7 +34,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 
 public class IntraprocessYoVariableLogger
 {
@@ -68,7 +67,7 @@ public class IntraprocessYoVariableLogger
    private ByteBuffer compressedBuffer;
    private ByteBuffer indexBuffer;
    private ConcurrentRingBuffer<ByteBuffer> compressionBufferRing;
-   private CountDownLatch compressionThreadLatch;
+   private final Object compressionThreadLock = new Object();
    private RepeatingTaskThread compressionThread;
    private FileChannel dataChannel;
    private FileChannel indexChannel;
@@ -196,10 +195,12 @@ public class IntraprocessYoVariableLogger
           */
          indexBuffer = ByteBuffer.allocate(2 * Long.BYTES);
          compressionBufferRing = new ConcurrentRingBuffer<>(() -> ByteBuffer.allocate(singleTickBufferSize), 2);
-         compressionThreadLatch = new CountDownLatch(1);
          compressionThread = new RepeatingTaskThread("IntraprocessLoggerCompressionThread", () ->
          {
-            compressionThreadLatch.await();
+            synchronized (compressionThreadLock)
+            {
+               compressionThreadLock.wait();
+            }
 
             if (compressionBufferRing.poll())
             {
@@ -323,7 +324,10 @@ public class IntraprocessYoVariableLogger
          compressionBufferRing.commit();
       }
 
-      compressionThreadLatch.countDown();
+      synchronized (compressionThreadLock)
+      {
+         compressionThreadLock.notify();
+      }
    }
 
    private File createFileInLogFolder(String filename)
