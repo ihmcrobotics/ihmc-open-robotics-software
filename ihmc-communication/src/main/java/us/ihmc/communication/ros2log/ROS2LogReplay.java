@@ -32,7 +32,7 @@ public class ROS2LogReplay
    private long pauseStartTime = 0L;
    private boolean pendingPause = false;
    private long totalPausedDuration = 0L;
-   private double replaySpeed = 0.5;
+   private double replaySpeed = 1.0;
 
    public ROS2LogReplay(String robotName, List<ROS2Topic<?>> loggedTopics, ROS2LogTimeSource timeSource)
    {
