@@ -32,6 +32,7 @@ public class RDXCSGPanel extends RDXPanel
 
    private final ImDouble swingDuration = new ImDouble();
    private final ImDouble transferDuration = new ImDouble();
+   private final ImBoolean stepsAreAdjustable = new ImBoolean();
 
    // CSG ROS communication helper
    private final CSGROS2CommunicationHelper communicationHelper;
@@ -152,6 +153,7 @@ public class RDXCSGPanel extends RDXPanel
       boolean maxStepWidthChanged = ImGuiTools.volatileInputDouble(labels.get("Max Step Width"), maxStepWidth);
 
       boolean swingHeightChanged = ImGuiTools.volatileInputDouble(labels.get("Swing Height"), swingHeight);
+      boolean stepsAreAdjustableChanged = ImGui.checkbox(labels.get("Steps Are Adjustable"), stepsAreAdjustable);
 
       if (requestCSGWalkingChanged)
          csgInputCommand.setWalk(requestWalkCSG.get());
@@ -192,8 +194,14 @@ public class RDXCSGPanel extends RDXPanel
       if (swingHeightChanged)
          csgParametersCommand.setSwingHeight(swingHeight.get());
 
-      publishCSGInputCommand = publishCSGInputCommand || requestCSGWalkingChanged || desiredForwardVelocityChanged || desiredLateralVelocityChanged || desiredTurningVelocityChanged;
-      boolean publishCSGParametersCommand = swingDurationChanged || transferDurationChanged || maxStepLengthForwardsChanged || maxStepLengthBackwardsChanged || maxStepWidthChanged || swingHeightChanged;
+      if (stepsAreAdjustableChanged)
+         csgParametersCommand.setStepsAreAdjustable(stepsAreAdjustable.get());
+
+      publishCSGInputCommand = publishCSGInputCommand || requestCSGWalkingChanged || desiredForwardVelocityChanged || desiredLateralVelocityChanged
+                               || desiredTurningVelocityChanged;
+      boolean publishCSGParametersCommand =
+            swingDurationChanged || transferDurationChanged || maxStepLengthForwardsChanged || maxStepLengthBackwardsChanged
+            || maxStepWidthChanged || swingHeightChanged || stepsAreAdjustableChanged;
 
       if (publishCSGInputCommand)
          communicationHelper.publish(csgInputCommand);
@@ -217,6 +225,8 @@ public class RDXCSGPanel extends RDXPanel
       maxStepWidth.set(csgStatusMessage.getCurrentMaxStepWidth());
 
       swingHeight.set(csgStatusMessage.getCurrentSwingHeight());
+
+      stepsAreAdjustable.set(csgStatusMessage.getAreStepsAdjustable());
    }
 
    public void destroy()
