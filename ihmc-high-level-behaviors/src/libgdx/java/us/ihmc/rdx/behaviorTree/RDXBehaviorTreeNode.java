@@ -163,7 +163,10 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
 
    public void renderRowBeginning()
    {
-      anySpecificWidgetOnLineClicked = false;
+      // Since we are doing mouseDown event action for all interactions except selecting the node settings,
+      // We need to not reset this unless the mouse is released and has been released
+      if (!ImGui.isMouseDown(ImGuiMouseButton.Left) && !ImGui.isMouseReleased(ImGuiMouseButton.Left))
+         anySpecificWidgetOnLineClicked = false;
 
       offsetY = ImGui.getCursorScreenPosY();
       ImGui.dummy(0.0f, ImGui.getFrameHeight()); // Make the lines as tall as when they have and input box
@@ -287,8 +290,9 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       }
 
       // We try to make anywhere on the row clickable to select the node,
-      // execpt for specific interactions
-      if (!anySpecificWidgetOnLineClicked && mouseHoveringNodeLine && ImGui.isMouseClicked(ImGuiMouseButton.Left) && !isNameBeingEdited)
+      // execpt for specific interactions. We use release without drag to prevent interference
+      // with the drag and drop functionality
+      if (!anySpecificWidgetOnLineClicked && mouseHoveringNodeLine && ImGuiTools.mouseReleasedWithoutDrag(ImGuiMouseButton.Left) && !isNameBeingEdited)
       {
          boolean desiredValue = !selected.get();
          RDXBehaviorTreeTools.clearOtherNodeSelections(this);
