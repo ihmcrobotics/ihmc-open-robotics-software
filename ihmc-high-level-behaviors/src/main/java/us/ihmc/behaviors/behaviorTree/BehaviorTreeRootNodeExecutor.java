@@ -212,24 +212,14 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
          }
          else
          {
-            while (shouldExecuteNextLeaf())
-            {
-               var nextLeaf = orderedLeaves.get(state.getExecutionNextIndex());
-               state.getLogger().info("Automatically executing leaf: %s (%s)".formatted(nextLeaf.getDefinition().getName(),
-                                                                                        nextLeaf.getClass().getSimpleName()));
-               executeNextLeaf();
-            }
+            while (wouldExecuteNextLeaf())
+               tryExecuteNextLeaf("Automatically");
          }
       }
       else if (state.pollManualExecutionRequested())
       {
-         while (shouldExecuteNextLeaf())
-         {
-            var nextLeaf = orderedLeaves.get(state.getExecutionNextIndex());
-            state.getLogger().info("Manually executing leaf: %s (%s)".formatted(nextLeaf.getDefinition().getName(),
-                                                                                nextLeaf.getClass().getSimpleName()));
-            executeNextLeaf();
-         }
+         while (wouldExecuteNextLeaf())
+            tryExecuteNextLeaf("Manually");
       }
 
       if (state.pollFailureResetRequested())
@@ -243,18 +233,29 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       }
    }
 
-   private void executeNextLeaf()
+   private void tryExecuteNextLeaf(String adjective)
    {
       LeafNodeExecutor<?, ?> leafToExecute = orderedLeaves.get(state.getExecutionNextIndex());
-
-      state.getLogger().info("Triggering leaf execution: %s (%s)".formatted(leafToExecute.getDefinition().getName(),
-                                                                            leafToExecute.getClass().getSimpleName()));
-      leafToExecute.triggerExecution();
-      currentlyExecutingLeaves.add(leafToExecute);
-      state.stepForwardNextExecutionIndex();
+      leafToExecute.update(); // Make sure can execute is up to date
+      if (leafToExecute.getState().getCanExecute())
+      {
+         state.getLogger().info("%s executing leaf: %s (%s)".formatted(adjective,
+                                                                       leafToExecute.getDefinition().getName(),
+                                                                       leafToExecute.getClass().getSimpleName()));
+         leafToExecute.triggerExecution();
+         currentlyExecutingLeaves.add(leafToExecute);
+         state.stepForwardNextExecutionIndex();
+      }
+      else
+      {
+         state.getLogger().error("Cannot execute leaf: %s: %s\n%s".formatted(leafToExecute.getClass().getSimpleName(),
+                                                                             leafToExecute.getDefinition().getName(),
+                                                                             leafToExecute.getCantExecuteMessage()));
+         state.setAutomaticExecution(false);
+      }
    }
 
-   private boolean shouldExecuteNextLeaf()
+   private boolean wouldExecuteNextLeaf()
    {
       if (isEndOfSequence())
          return false;
@@ -267,16 +268,6 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
             for (LeafNodeExecutor<?, ?> tryLeaf : fallbackNode.getTryLeaves())
                if (tryLeaf.getState().getIsExecuting())
                   return false;
-
-      nextNodeToExecute.update(); // Make sure can execute is up to date
-      if (!nextNodeToExecute.getState().getCanExecute())
-      {
-         state.getLogger().error("Cannot execute leaf: %s: %s\n%s".formatted(nextNodeToExecute.getClass().getSimpleName(),
-                                                                             nextNodeToExecute.getDefinition().getName(),
-                                                                             nextNodeToExecute.getCantExecuteMessage()));
-         state.setAutomaticExecution(false);
-         return false;
-      }
 
       if (state.getConcurrencyEnabled())
       {

@@ -138,7 +138,8 @@ public class LeafNodeState<D extends LeafNodeDefinition> extends BehaviorTreeNod
       this.canExecute.setValue(canExecute);
    }
 
-   /** @return whether this leaf is valid for execution. This is checked before triggering the leaf. */
+   /** @return whether this leaf is valid for execution. This is checked before triggering the leaf.
+    * Should be updated in the node's update() method. */
    public boolean getCanExecute()
    {
       return canExecute.getValue();
