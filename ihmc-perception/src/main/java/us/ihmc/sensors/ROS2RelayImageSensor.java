@@ -2,6 +2,7 @@ package us.ihmc.sensors;
 
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -14,6 +15,7 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Subscription;
 import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.sensors.realsense.RealSenseImageSensor;
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -21,7 +23,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.CountDownLatch;
 
-public class ROS2ImageSensor extends ImageSensor
+public class ROS2RelayImageSensor extends ImageSensor
 {
    private final ROS2Node ros2Node;
    private final Map<Integer, ImageReceiver> receivers;
@@ -34,7 +36,7 @@ public class ROS2ImageSensor extends ImageSensor
 
    private volatile boolean running = false;
 
-   public ROS2ImageSensor(String sensorName, Map<Integer, ROS2Topic<ImageMessage>> imageTopics)
+   public ROS2RelayImageSensor(String sensorName, Map<Integer, ROS2Topic<ImageMessage>> imageTopics)
    {
       super(sensorName);
 
@@ -247,5 +249,14 @@ public class ROS2ImageSensor extends ImageSensor
          running = false;
          subscription.remove();
       }
+   }
+
+   public static ROS2RelayImageSensor createRealSenseRelay()
+   {
+      return new ROS2RelayImageSensor("RealSense",
+                                      Map.of(RealSenseImageSensor.COLOR_IMAGE_KEY,
+                                             PerceptionAPI.D455_COLOR_IMAGE,
+                                             RealSenseImageSensor.DEPTH_IMAGE_KEY,
+                                             PerceptionAPI.D455_DEPTH_IMAGE));
    }
 }
