@@ -17,6 +17,12 @@ module behavior_msgs
       const octet PROXIMITY_TYPE =
       2;
 
+      const octet ALWAYS_FAIL =
+      3;
+
+      const octet ALWAYS_SUCCEED =
+      4;
+
       const octet PROXIMITY_XYZ =
       0;
 

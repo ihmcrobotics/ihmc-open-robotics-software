@@ -3,7 +3,6 @@ package us.ihmc.behaviors.behaviorTree;
 import org.apache.logging.log4j.Level;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
-import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeState;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
 import us.ihmc.behaviors.behaviorTree.control.FallbackNodeExecutor;
@@ -127,28 +126,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
             else
                failedLeaves.add(currentlyExecutingLeaf);
 
-            String name = currentlyExecutingLeaf.getDefinition().getName();
-            if (currentlyExecutingLeaf.getState() instanceof ActionNodeState<?> actionNodeState)
-            {
-               String resultMessage = success ? "completed successfully in" : "failed after";
-               double elapsedExecutionTime = actionNodeState.getElapsedExecutionTime();
-               LogTools.log(success ? Level.INFO : Level.ERROR, "Action %s %.2f s: %s".formatted(resultMessage, elapsedExecutionTime, name));
-            }
-            else
-            {
-               String resultMessage = success ? "completed successfully" : "failed";
-               LogTools.log(success ? Level.INFO : Level.ERROR, "Leaf %s: %s".formatted(resultMessage, name));
-            }
-
-            if (currentlyExecutingLeaf.getState() instanceof ConditionNodeState conditionNodeState)
-            {
-               if (conditionNodeState.isConditionMet())
-               {
-                  state.setExecutionNextIndex(conditionNodeState.getLeafIndex() + 3); // TODO Fix fallback action instead of doing this
-                  conditionNodeState.setConditionValue(false);
-                  conditionNodeState.setEvaluatingConditionValue(false);
-               }
-            }
+            reportLeafCeasedExecution(currentlyExecutingLeaf, success);
          }
       }
       currentlyExecutingLeaves.removeAll(failedLeaves);
@@ -212,14 +190,12 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
          }
          else
          {
-            while (wouldExecuteNextLeaf())
-               tryExecuteNextLeaf("Automatically");
+            while (wouldExecuteNextLeaf() && tryExecuteNextLeaf("Automatically"));
          }
       }
       else if (state.pollManualExecutionRequested())
       {
-         while (wouldExecuteNextLeaf())
-            tryExecuteNextLeaf("Manually");
+         while (wouldExecuteNextLeaf() && tryExecuteNextLeaf("Manually"));
       }
 
       if (state.pollFailureResetRequested())
@@ -233,8 +209,9 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       }
    }
 
-   private void tryExecuteNextLeaf(String adjective)
+   private boolean tryExecuteNextLeaf(String adjective)
    {
+      boolean keepGoing = true;
       LeafNodeExecutor<?, ?> leafToExecute = orderedLeaves.get(state.getExecutionNextIndex());
       leafToExecute.update(); // Make sure can execute is up to date
       if (leafToExecute.getState().getCanExecute())
@@ -243,7 +220,13 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
                                                                        leafToExecute.getDefinition().getName(),
                                                                        leafToExecute.getClass().getSimpleName()));
          leafToExecute.triggerExecution();
-         currentlyExecutingLeaves.add(leafToExecute);
+         if (leafToExecute.getState().getFailed()) // Handle immediate failure
+         {
+            keepGoing = false;
+            reportLeafCeasedExecution(leafToExecute, false);
+         }
+         else
+            currentlyExecutingLeaves.add(leafToExecute);
          state.stepForwardNextExecutionIndex();
       }
       else
@@ -251,8 +234,13 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
          state.getLogger().error("Cannot execute leaf: %s: %s\n%s".formatted(leafToExecute.getClass().getSimpleName(),
                                                                              leafToExecute.getDefinition().getName(),
                                                                              leafToExecute.getCantExecuteMessage()));
-         state.setAutomaticExecution(false);
+         keepGoing = false;
       }
+
+      if (!keepGoing)
+         state.setAutomaticExecution(false);
+
+      return keepGoing;
    }
 
    private boolean wouldExecuteNextLeaf()
@@ -280,6 +268,22 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       }
       else
          return currentlyExecutingLeaves.isEmpty();
+   }
+
+   private void reportLeafCeasedExecution(LeafNodeExecutor<?, ?> currentlyExecutingLeaf, boolean success)
+   {
+      String name = currentlyExecutingLeaf.getDefinition().getName();
+      if (currentlyExecutingLeaf.getState() instanceof ActionNodeState<?> actionNodeState)
+      {
+         String resultMessage = success ? "completed successfully in" : "failed after";
+         double elapsedExecutionTime = actionNodeState.getElapsedExecutionTime();
+         state.getLogger().log(success ? Level.INFO : Level.ERROR, "Action %s %.2f s: %s".formatted(resultMessage, elapsedExecutionTime, name));
+      }
+      else
+      {
+         String resultMessage = success ? "completed successfully" : "failed";
+         state.getLogger().log(success ? Level.INFO : Level.ERROR, "Leaf %s: %s".formatted(resultMessage, name));
+      }
    }
 
    public boolean isEndOfSequence()

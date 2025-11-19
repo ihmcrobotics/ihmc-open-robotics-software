@@ -16,6 +16,8 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
    public static final byte COUNTER_TYPE = (byte) 0;
    public static final byte LLM_TYPE = (byte) 1;
    public static final byte PROXIMITY_TYPE = (byte) 2;
+   public static final byte ALWAYS_FAIL = (byte) 3;
+   public static final byte ALWAYS_SUCCEED = (byte) 4;
    public static final byte PROXIMITY_XYZ = (byte) 0;
    public static final byte PROXIMITY_XY = (byte) 1;
    public static final byte PROXIMITY_Z = (byte) 2;

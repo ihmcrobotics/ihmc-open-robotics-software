@@ -4,6 +4,8 @@ behavior_msgs/LeafNodeDefinitionMessage definition
 byte COUNTER_TYPE = 0
 byte LLM_TYPE = 1
 byte PROXIMITY_TYPE = 2
+byte ALWAYS_FAIL = 3
+byte ALWAYS_SUCCEED = 4
 
 # The type of condition as defined above
 byte type
