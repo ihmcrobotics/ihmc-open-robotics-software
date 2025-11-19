@@ -261,22 +261,19 @@ public class RDXHumanoidDemoPoses extends RDXPanel
          System.arraycopy(leftArmFlamingo1, 0, leftArm, 0, Math.min(leftArm.length, leftArmFlamingo1.length));
          System.arraycopy(rightArmFlamingo1, 0, rightArm, 0, Math.min(rightArm.length, rightArmFlamingo1.length));
 
+         pelvisPosition.setZ(0.95);
+         pelvisPosition.addY(0.03);
          armsConfiguration.put(RobotSide.LEFT, leftArm);
          armsConfiguration.put(RobotSide.RIGHT, rightArm);
 
          RobotSide kickSide;
-         if (isFootOffGround(RobotSide.RIGHT))
-         {
-            kickSide = RobotSide.RIGHT;
-         }
-         else
-         {
-            kickSide = RobotSide.LEFT;
-         }
+
+         kickSide = RobotSide.RIGHT;
+
          FramePose3D footPose = new FramePose3D(syncedRobot.getReferenceFrames().getSoleFrame(kickSide.getOppositeSide()));
          footPose.getPosition().addZ(0.45);
-         footPose.getPosition().addX(0.25);
-         footPose.getPosition().setY(kickSide.negateIfRightSide(0.15));
+         footPose.getPosition().addX(-0.03);
+         footPose.getPosition().setY(kickSide.negateIfRightSide(0.12));
          createFootPoseMessage(kickSide, new double[] {teleoperationParameters.getTrajectoryTime()}, new FramePose3D[] {footPose});
 
          for (RobotSide robotSide : RobotSide.values)
@@ -292,22 +289,19 @@ public class RDXHumanoidDemoPoses extends RDXPanel
          System.arraycopy(leftArmFlamingo2, 0, leftArm, 0, Math.min(leftArm.length, leftArmFlamingo2.length));
          System.arraycopy(rightArmFlamingo2, 0, rightArm, 0, Math.min(rightArm.length, rightArmFlamingo2.length));
 
+         pelvisPosition.setZ(0.95);
+         pelvisPosition.addY(0.03);
+
          armsConfiguration.put(RobotSide.LEFT, leftArm);
          armsConfiguration.put(RobotSide.RIGHT, rightArm);
 
          RobotSide kickSide;
-         if (isFootOffGround(RobotSide.RIGHT))
-         {
-            kickSide = RobotSide.RIGHT;
-         }
-         else
-         {
-            kickSide = RobotSide.LEFT;
-         }
+         kickSide = RobotSide.RIGHT;
+
          FramePose3D footPose = new FramePose3D(syncedRobot.getReferenceFrames().getSoleFrame(kickSide.getOppositeSide()));
          footPose.getPosition().addZ(0.45);
-         footPose.getPosition().addX(0.25);
-         footPose.getPosition().setY(kickSide.negateIfRightSide(0.15));
+         footPose.getPosition().addX(-0.03);
+         footPose.getPosition().setY(kickSide.negateIfRightSide(0.12));
          createFootPoseMessage(kickSide, new double[] {teleoperationParameters.getTrajectoryTime()}, new FramePose3D[] {footPose});
 
          for (RobotSide robotSide : RobotSide.values)
