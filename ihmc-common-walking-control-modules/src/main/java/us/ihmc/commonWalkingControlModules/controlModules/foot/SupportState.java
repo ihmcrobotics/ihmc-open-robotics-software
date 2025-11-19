@@ -19,8 +19,6 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
@@ -36,7 +34,9 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -67,7 +67,7 @@ public class SupportState extends AbstractFootControlState
 
    private final PoseReferenceFrame controlFrame;
    private final PoseReferenceFrame desiredSoleFrame;
-   private final YoGraphicReferenceFrame frameViz;
+   private final YoFramePose3D controlFramePose;
 
    private final InverseDynamicsCommandList inverseDynamicsCommandsList = new InverseDynamicsCommandList();
    private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
@@ -130,6 +130,7 @@ public class SupportState extends AbstractFootControlState
       footSwitch = footControlHelper.getHighLevelHumanoidControllerToolbox().getFootSwitches().get(robotSide);
       controlFrame = new PoseReferenceFrame(prefix + "HoldPositionFrame", contactableFoot.getContactFrame());
       desiredSoleFrame = new PoseReferenceFrame(prefix + "DesiredSoleFrame", worldFrame);
+      controlFramePose = new YoFramePose3D(prefix + "HoldPosition", worldFrame, registry);
 
       footBarelyLoaded = new YoBoolean(prefix + "BarelyLoaded", registry);
       copOnEdge = new YoBoolean(prefix + "CopOnEdge", registry);
@@ -168,17 +169,6 @@ public class SupportState extends AbstractFootControlState
          timeBeforeExploring = new YoDouble(prefix + "TimeBeforeExploring", registry);
       }
 
-      YoGraphicsListRegistry graphicsListRegistry = footControlHelper.getHighLevelHumanoidControllerToolbox().getYoGraphicsListRegistry();
-      if (graphicsListRegistry != null)
-      {
-         frameViz = new YoGraphicReferenceFrame(controlFrame, registry, false, 0.2);
-         graphicsListRegistry.registerYoGraphic(prefix + getClass().getSimpleName(), frameViz);
-      }
-      else
-      {
-         frameViz = null;
-      }
-
       MovingReferenceFrame soleFrame = fullRobotModel.getSoleFrame(robotSide);
       double dt = controllerToolbox.getControlDT();
       footRotationCalculationModule = new FootholdCroppingModule(robotSide,
@@ -186,8 +176,7 @@ public class SupportState extends AbstractFootControlState
                                                                  footControlHelper.getContactableFoot().getContactPoints2D(),
                                                                  footControlHelper.getFootholdRotationParameters(),
                                                                  dt,
-                                                                 registry,
-                                                                 graphicsListRegistry);
+                                                                 registry);
 
       String feetManagerName = FeetManager.class.getSimpleName();
       String paramRegistryName = getClass().getSimpleName() + "Parameters";
@@ -226,8 +215,7 @@ public class SupportState extends AbstractFootControlState
       super.onExit(timeInState);
       footBarelyLoaded.set(false);
       copOnEdge.set(false);
-      if (frameViz != null)
-         frameViz.hide();
+      controlFramePose.setToNaN();
       explorationHelper.stopExploring();
       footRotationCalculationModule.reset();
 
@@ -375,8 +363,7 @@ public class SupportState extends AbstractFootControlState
       spatialFeedbackControlCommand.setSelectionMatrix(feedbackSelectionMatrix);
 
       // update visualization
-      if (frameViz != null)
-         frameViz.setToReferenceFrame(controlFrame);
+      controlFramePose.setFromReferenceFrame(controlFrame);
    }
 
    private void computeFootPolygon()
@@ -582,6 +569,8 @@ public class SupportState extends AbstractFootControlState
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
       group.addChild(explorationHelper.getSCS2YoGraphics());
+      group.addChild(footRotationCalculationModule.getSCS2YoGraphics());
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicCoordinateSystem3D("Hold Position Frame", controlFramePose, 0.2));
       if (group.isEmpty())
          return null;
       return group;

@@ -33,7 +33,6 @@ public class CoPHistoryRotationEdgeCalculatorTest extends RotationEdgeCalculator
                                                   () -> 0.001,
                                                   dt,
                                                   registry,
-                                                  null,
                                                   null);
    }
 
@@ -61,7 +60,6 @@ public class CoPHistoryRotationEdgeCalculatorTest extends RotationEdgeCalculator
                                                                                              () -> 0.001,
                                                                                              dt,
                                                                                              registry,
-                                                                                             null,
                                                                                              null);
 
       Point2D linePosition = new Point2D(0.05, -0.07);

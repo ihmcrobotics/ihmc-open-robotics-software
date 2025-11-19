@@ -4,13 +4,17 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 import java.awt.*;
 
-public class CombinedRotationEdgeCalculator implements RotationEdgeCalculator
+public class CombinedRotationEdgeCalculator implements RotationEdgeCalculator, SCS2YoGraphicHolder
 {
    private final RotationEdgeCalculator copHistoryEdgeCalculator;
    private final CoPAndVelocityRotationEdgeCalculator copAndVelocityEdgeCalculator;
@@ -22,11 +26,10 @@ public class CombinedRotationEdgeCalculator implements RotationEdgeCalculator
                                          MovingReferenceFrame soleFrame,
                                          YoPartialFootholdModuleParameters rotationParameters,
                                          double dt,
-                                         YoRegistry registry,
-                                         YoGraphicsListRegistry graphicsRegistry)
+                                         YoRegistry registry)
    {
-      copHistoryEdgeCalculator = new CoPHistoryRotationEdgeCalculator(side, soleFrame, rotationParameters, dt, registry, Color.BLUE, graphicsRegistry);
-      copAndVelocityEdgeCalculator = new CoPAndVelocityRotationEdgeCalculator(side, soleFrame, rotationParameters, dt, registry, Color.GRAY, graphicsRegistry);
+      copHistoryEdgeCalculator = new CoPHistoryRotationEdgeCalculator(side, soleFrame, rotationParameters, dt, registry, ColorDefinitions.Blue());
+      copAndVelocityEdgeCalculator = new CoPAndVelocityRotationEdgeCalculator(side, soleFrame, rotationParameters, dt, registry, ColorDefinitions.Gray());
 
       isEdgeStable = new YoBoolean(side.getLowerCaseName() + "IsEdgeStable", registry);
 
@@ -88,6 +91,16 @@ public class CombinedRotationEdgeCalculator implements RotationEdgeCalculator
       copAndVelocityEdgeCalculator.compute(measuredCoP);
 
       return getLineOfRotation();
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(copHistoryEdgeCalculator.getSCS2YoGraphics());
+      group.addChild(copAndVelocityEdgeCalculator.getSCS2YoGraphics());
+
+      return group;
    }
 
 }

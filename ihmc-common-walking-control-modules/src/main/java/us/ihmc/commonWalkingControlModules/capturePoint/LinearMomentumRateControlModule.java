@@ -670,7 +670,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
       group.addChild(newYoGraphicPoint2D("Desired CMP", yoDesiredCMP, 0.024, ColorDefinitions.Purple(), DefaultPoint2DGraphic.CIRCLE_PLUS));
       group.addChild(newYoGraphicPoint2D("Desired CoP", yoDesiredCoP, 0.015, ColorDefinitions.Purple(), DefaultPoint2DGraphic.CIRCLE));
       group.addChild(newYoGraphicPoint2D("Achieved CMP", yoAchievedCMP, 0.010, ColorDefinitions.DarkRed(), DefaultPoint2DGraphic.CIRCLE_PLUS));
-      group.addChild(newYoGraphicPoint2D("Achieved CoP", yoAchievedCoP, 0.06, ColorDefinitions.DarkRed(), DefaultPoint2DGraphic.CIRCLE));
+      group.addChild(newYoGraphicPoint2D("Achieved CoP", yoAchievedCoP, 0.006, ColorDefinitions.DarkRed(), DefaultPoint2DGraphic.CIRCLE));
       group.addChild(newYoGraphicPoint2D("Center Of Mass", yoCenterOfMass, 0.012, ColorDefinitions.Black(), DefaultPoint2DGraphic.CIRCLE_PLUS));
       group.addChild(newYoGraphicPoint2D("Capture Point", yoCapturePoint, 0.02, ColorDefinitions.Blue(), DefaultPoint2DGraphic.CIRCLE_CROSS));
       group.addChild(newYoGraphicPoint2D("Angular Capture Point", yoAngularCapturePoint, 0.02, ColorDefinitions.Red(), DefaultPoint2DGraphic.CIRCLE_CROSS));

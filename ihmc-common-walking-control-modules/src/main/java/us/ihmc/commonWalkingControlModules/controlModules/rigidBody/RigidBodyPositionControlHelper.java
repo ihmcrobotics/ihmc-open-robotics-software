@@ -108,7 +108,6 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
    private final FramePoint3D currentPosition = new FramePoint3D();
    private final YoFramePoint3D yoCurrentPosition;
    private final YoFramePoint3D yoDesiredPosition;
-   private final List<YoGraphicPosition> graphics = new ArrayList<>();
 
    private final String warningPrefix;
 
@@ -124,8 +123,7 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
                                          BooleanProvider useWeightFromMessage,
                                          boolean enableFunctionGenerators,
                                          DoubleProvider time,
-                                         YoRegistry registry,
-                                         YoGraphicsListRegistry graphicsListRegistry)
+                                         YoRegistry registry)
    {
       this.warningPrefix = warningPrefix;
       this.useBaseFrameForControl = useBaseFrameForControl;
@@ -151,17 +149,8 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
       bodyFrame = bodyToControl.getBodyFixedFrame();
       setDefaultControlFrame();
 
-      if (graphicsListRegistry != null)
-      {
-         yoCurrentPosition = new YoFramePoint3D(prefix + "Current", ReferenceFrame.getWorldFrame(), registry);
-         yoDesiredPosition = new YoFramePoint3D(prefix + "Desired", ReferenceFrame.getWorldFrame(), registry);
-         setupViz(graphicsListRegistry, bodyName);
-      }
-      else
-      {
-         yoCurrentPosition = null;
-         yoDesiredPosition = null;
-      }
+      yoCurrentPosition = new YoFramePoint3D(prefix + "Current", ReferenceFrame.getWorldFrame(), registry);
+      yoDesiredPosition = new YoFramePoint3D(prefix + "Desired", ReferenceFrame.getWorldFrame(), registry);
 
       streamTimestampOffset = new YoDouble(prefix + "StreamTimestampOffset", registry);
       streamTimestampOffset.setToNaN();
@@ -205,24 +194,6 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
    public YoFramePoint3D getYoDesiredPosition()
    {
       return yoDesiredPosition;
-   }
-
-   private void setupViz(YoGraphicsListRegistry graphicsListRegistry, String bodyName)
-   {
-      String listName = getClass().getSimpleName();
-
-      YoGraphicPosition controlPoint = new YoGraphicPosition(bodyName + "Current", yoCurrentPosition, 0.005, YoAppearance.Red());
-      graphicsListRegistry.registerYoGraphic(listName, controlPoint);
-      graphics.add(controlPoint);
-
-      YoGraphicPosition desiredPoint = new YoGraphicPosition(bodyName + "Desired", yoDesiredPosition, 0.005, YoAppearance.Blue());
-      graphicsListRegistry.registerYoGraphic(listName, desiredPoint);
-      graphics.add(desiredPoint);
-   }
-
-   public List<YoGraphicPosition> getGraphics()
-   {
-      return graphics;
    }
 
    private void setDefaultControlFrame()

@@ -271,8 +271,6 @@ public class WorkspaceLimiterControlModule implements SCS2YoGraphicHolder
          }
       };
 
-      YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
-      visualize = visualize && yoGraphicsListRegistry != null;
       moreVisualizers = visualize && moreVisualizers;
 
       yoCurrentFootPosition = new YoFramePoint3D(namePrefix + "CurrentFootPosition", worldFrame, registry);
@@ -314,47 +312,10 @@ public class WorkspaceLimiterControlModule implements SCS2YoGraphicHolder
                                                                                                registry,
                                                                                                correctionAlphaFilter);
 
-      if (visualize)
-      {
-         yoGraphicsListRegistry.registerYoGraphic("SingularityCollapseAvoidance",
-                                                  new YoGraphicPosition(namePrefix + "DesiredFootPosition",
-                                                                        yoDesiredFootPosition,
-                                                                        0.025,
-                                                                        YoAppearance.Red(),
-                                                                        GraphicType.BALL));
-         yoGraphicsListRegistry.registerYoGraphic("SingularityCollapseAvoidance",
-                                                  new YoGraphicPosition(namePrefix + "CorrectedDesiredFootPosition",
-                                                                        yoCorrectedDesiredFootPosition,
-                                                                        0.025,
-                                                                        YoAppearance.Green(),
-                                                                        GraphicType.BALL));
-      }
-
       if (moreVisualizers)
       {
          yoVirtualLegTangentialFrameHipCenteredPose = new YoFramePose3D(virtualLegTangentialFrameHipCentered.getName(), worldFrame, registry);
          yoVirtualLegTangentialFrameAnkleCenteredPose = new YoFramePose3D(virtualLegTangentialFrameAnkleCentered.getName(), worldFrame, registry);
-         yoGraphicsListRegistry.registerYoGraphic("SingularityCollapseAvoidance",
-                                                  new YoGraphicCoordinateSystem(virtualLegTangentialFrameHipCentered.getName(),
-                                                                                yoVirtualLegTangentialFrameHipCenteredPose,
-                                                                                0.1));
-         yoGraphicsListRegistry.registerYoGraphic("SingularityCollapseAvoidance",
-                                                  new YoGraphicCoordinateSystem(virtualLegTangentialFrameAnkleCentered.getName(),
-                                                                                yoVirtualLegTangentialFrameAnkleCenteredPose,
-                                                                                0.1));
-
-         yoGraphicsListRegistry.registerYoGraphic("SingularityCollapseAvoidance",
-                                                  new YoGraphicVector(namePrefix + "DesiredFootLinearVelocity",
-                                                                      yoDesiredFootPosition,
-                                                                      yoDesiredFootLinearVelocity,
-                                                                      0.2,
-                                                                      YoAppearance.Red()));
-         yoGraphicsListRegistry.registerYoGraphic("SingularityCollapseAvoidance",
-                                                  new YoGraphicVector(namePrefix + "CorrectedDesiredFootLinearVelocity",
-                                                                      yoCorrectedDesiredFootPosition,
-                                                                      yoCorrectedDesiredFootLinearVelocity,
-                                                                      0.2,
-                                                                      YoAppearance.Green()));
       }
       else
       {

@@ -6,13 +6,19 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.DefaultPoint2DGraphic;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 import java.util.List;
 
-public class FootholdCroppingModule
+public class FootholdCroppingModule implements SCS2YoGraphicHolder
 {
    private final FootholdCropper footholdCropper;
    private final CropVerifier cropVerifier;
@@ -28,8 +34,7 @@ public class FootholdCroppingModule
                                  List<? extends FramePoint2DReadOnly> defaultContactPoints,
                                  YoPartialFootholdModuleParameters rotationParameters,
                                  double dt,
-                                 YoRegistry parentRegistry,
-                                 YoGraphicsListRegistry graphicsRegistry)
+                                 YoRegistry parentRegistry)
    {
       YoRegistry registry = new YoRegistry(getClass().getSimpleName() + side.getPascalCaseName());
       parentRegistry.addChild(registry);
@@ -37,7 +42,7 @@ public class FootholdCroppingModule
       shouldShrinkFoothold = new YoBoolean(side.getLowerCaseName() + "ShouldShrinkFoothold", registry);
 
       rotationDetector = new CombinedFootRotationDetector(side, soleFrame, rotationParameters, dt, registry);
-      edgeCalculator = new CombinedRotationEdgeCalculator(side, soleFrame, rotationParameters, dt, registry, graphicsRegistry);
+      edgeCalculator = new CombinedRotationEdgeCalculator(side, soleFrame, rotationParameters, dt, registry);
 
       createPartialFootholdModule = rotationParameters.createPartialFootholdModule();
       if (rotationParameters.createPartialFootholdModule())
@@ -48,8 +53,7 @@ public class FootholdCroppingModule
                                                defaultContactPoints,
                                                rotationParameters.getFootholdCroppingParameters(),
                                                dt,
-                                               registry,
-                                               graphicsRegistry);
+                                               registry);
       }
       else
       {
@@ -147,5 +151,17 @@ public class FootholdCroppingModule
          cropVerifier.reset();
          footholdCropper.reset();
       }
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(edgeCalculator.getSCS2YoGraphics());
+//      group.addChild(cropVerifier.getSCS2YoGraphics());
+      if (footholdCropper != null)
+         group.addChild(footholdCropper.getSCS2YoGraphics());
+
+      return group;
    }
 }

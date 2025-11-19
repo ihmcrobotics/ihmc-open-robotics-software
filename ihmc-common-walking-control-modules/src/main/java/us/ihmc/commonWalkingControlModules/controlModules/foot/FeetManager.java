@@ -89,8 +89,7 @@ public class FeetManager implements SCS2YoGraphicHolder
                       PIDSE3GainsReadOnly holdFootGains,
                       PIDSE3GainsReadOnly toeOffFootGains,
                       SideDependentList<RigidBodyControlManager> flamingoFootControlManagers,
-                      YoRegistry parentRegistry,
-                      YoGraphicsListRegistry graphicsListRegistry)
+                      YoRegistry parentRegistry)
    {
       this.controllerToolbox = controllerToolbox;
       this.toeOffParameters = walkingControllerParameters.getToeOffParameters();
@@ -105,8 +104,7 @@ public class FeetManager implements SCS2YoGraphicHolder
       toeOffCalculator = new CentroidProjectionToeOffCalculator(contactStates,
                                                                 feet,
                                                                 walkingControllerParameters.getToeOffParameters(),
-                                                                registry,
-                                                                graphicsListRegistry);
+                                                                registry);
 
       toeOffManager = new GeometricToeOffManager(controllerToolbox,
                                                  walkingControllerParameters,

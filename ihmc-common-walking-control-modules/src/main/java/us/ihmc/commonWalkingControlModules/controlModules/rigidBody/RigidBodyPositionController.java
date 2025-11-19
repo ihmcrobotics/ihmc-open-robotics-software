@@ -52,8 +52,7 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
                                       ReferenceFrame baseFrame,
                                       YoDouble yoTime,
                                       boolean enableFunctionGenerators,
-                                      YoRegistry parentRegistry,
-                                      YoGraphicsListRegistry graphicsListRegistry)
+                                      YoRegistry parentRegistry)
    {
       super(RigidBodyControlMode.TASKSPACE, bodyToControl.getName(), yoTime, parentRegistry);
 
@@ -83,12 +82,7 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
                                                           usingWeightFromMessage,
                                                           enableFunctionGenerators,
                                                           yoTime,
-                                                          registry,
-                                                          graphicsListRegistry);
-
-      graphics.addAll(positionHelper.getGraphics());
-      hideGraphics();
-
+                                                          registry);
       statusHelper = new TaskspaceTrajectoryStatusMessageHelper(bodyToControl);
    }
 
@@ -163,8 +157,6 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
       numberOfPoints.set(numberOfPointsInQueue.getIntegerValue() + numberOfPointsInGenerator.getIntegerValue());
 
       statusHelper.updateWithTimeInTrajectory(timeInTrajectory);
-
-      updateGraphics();
    }
 
    @Override
@@ -204,7 +196,6 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
    public void onExit(double timeInState)
    {
       positionHelper.onExit();
-      hideGraphics();
       clear();
    }
 

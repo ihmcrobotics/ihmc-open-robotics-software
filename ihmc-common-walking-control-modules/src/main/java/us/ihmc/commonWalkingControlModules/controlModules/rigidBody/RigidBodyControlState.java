@@ -38,7 +38,6 @@ public abstract class RigidBodyControlState implements State, SCS2YoGraphicHolde
    private final YoDouble trajectoryStartTime;
    private final YoDouble yoTime;
 
-   protected final ArrayList<YoGraphic> graphics = new ArrayList<>();
    private final RigidBodyControlMode controlMode;
 
    public RigidBodyControlState(RigidBodyControlMode controlMode, String bodyName, YoDouble yoTime, YoRegistry parentRegistry)
@@ -155,31 +154,6 @@ public abstract class RigidBodyControlState implements State, SCS2YoGraphicHolde
    public JointDesiredOutputListReadOnly getJointDesiredData()
    {
       return null;
-   }
-
-   protected void updateGraphics()
-   {
-      for (int graphicsIdx = 0; graphicsIdx < graphics.size(); graphicsIdx++)
-         graphics.get(graphicsIdx).update();
-   }
-
-   protected void hideGraphics()
-   {
-      // TODO: make a hide method in the YoGraphic or find some other way to avoid this mess.
-      for (int graphicsIdx = 0; graphicsIdx < graphics.size(); graphicsIdx++)
-      {
-         YoGraphic yoGraphic = graphics.get(graphicsIdx);
-         if (yoGraphic instanceof YoGraphicReferenceFrame)
-            ((YoGraphicReferenceFrame) yoGraphic).hide();
-         else if (yoGraphic instanceof YoGraphicPosition)
-            ((YoGraphicPosition) yoGraphic).setPositionToNaN();
-         else if (yoGraphic instanceof YoGraphicVector)
-            ((YoGraphicVector) yoGraphic).hide();
-         else if (yoGraphic instanceof YoGraphicCoordinateSystem)
-            ((YoGraphicCoordinateSystem) yoGraphic).hide();
-         else
-            throw new RuntimeException("Implement hiding this.");
-      }
    }
 
    public static String createRegistryName(String bodyName, RigidBodyControlMode stateEnum)

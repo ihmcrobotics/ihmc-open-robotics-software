@@ -1,19 +1,19 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 
-import java.awt.Color;
-
 import us.ihmc.euclid.referenceFrame.FrameLine3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLine3DBasics;
-import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
+import us.ihmc.scs2.definition.visual.ColorDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
-public class EdgeVisualizer
+public class EdgeVisualizer implements SCS2YoGraphicHolder
 {
    private static final double LineVizWidth = 0.1;
 
@@ -25,14 +25,17 @@ public class EdgeVisualizer
    private final YoFramePoint2D linePointA;
    private final YoFramePoint2D linePointB;
 
-   public EdgeVisualizer(String prefix, Color color, YoRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
+   private final String prefix;
+   private final ColorDefinition color;
+
+   public EdgeVisualizer(String prefix, ColorDefinition color, YoRegistry registry)
    {
+      this.prefix = prefix;
+      this.color = color;
+
       visualize = new YoBoolean(prefix + "_Visualize", registry);
       linePointA = new YoFramePoint2D(prefix + "_FootRotationPointA", worldFrame, registry);
       linePointB = new YoFramePoint2D(prefix + "_FootRotationPointB", worldFrame, registry);
-
-      Artifact lineArtifact = new YoArtifactLineSegment2d(prefix + "_LineOfRotation", linePointA, linePointB, color, 0.005, 0.01);
-      graphicsListRegistry.registerArtifact(getClass().getSimpleName(), lineArtifact);
    }
 
    public void visualize(boolean visualize)
@@ -66,5 +69,17 @@ public class EdgeVisualizer
       {
          reset();
       }
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      if (color == null)
+         return null;
+
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicLineSegment2DDefinition(prefix + "_LineOfRotation", linePointA, linePointB, color));
+
+      return group;
    }
 }

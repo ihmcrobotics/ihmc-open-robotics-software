@@ -523,7 +523,6 @@ public class RigidBodyControlManagerTest
                                                                     WholeBodyPostureAdjustmentProvider.createZeroPostureAdjustmentProvider(),
                                                                     yoTime,
                                                                     0.0,
-                                                                    null,
                                                                     testRegistry);
       manager.setGains(jointspaceGains);
       manager.setWeights(jointspaceWeights, userModeWeights);

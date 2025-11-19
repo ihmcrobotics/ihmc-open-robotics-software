@@ -87,8 +87,7 @@ public class FootholdCroppingModuleTest
                                                                                 defaultFootPolygons,
                                                                                 parameters,
                                                                                 dt,
-                                                                                registry,
-                                                                                null);
+                                                                                registry);
 
       YoInteger shrinkMaxLimit = ((YoInteger) registry.findVariable("Cropping_ShrinkMaxLimit"));
       shrinkMaxLimit.set(6);
@@ -194,8 +193,7 @@ public class FootholdCroppingModuleTest
                                                                                 defaultFootPolygons,
                                                                                 parameters,
                                                                                 dt,
-                                                                                registry,
-                                                                                null);
+                                                                                registry);
 
       YoInteger shrinkMaxLimit = ((YoInteger) registry.findVariable("Cropping_ShrinkMaxLimit"));
       shrinkMaxLimit.set(6);

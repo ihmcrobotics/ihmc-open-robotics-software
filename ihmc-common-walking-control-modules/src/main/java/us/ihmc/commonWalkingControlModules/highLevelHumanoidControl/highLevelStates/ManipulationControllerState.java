@@ -261,7 +261,6 @@ public class ManipulationControllerState extends HighLevelControllerState
                                                                     WholeBodyPostureAdjustmentProvider.createZeroPostureAdjustmentProvider(),
                                                                     yoTime,
                                                                     gravityZ,
-                                                                    graphicsListRegistry,
                                                                     registry);
       manager.setGains(jointspaceGainMap);
       manager.setWeights(jointspaceWeightMap, userModeWeightMap);

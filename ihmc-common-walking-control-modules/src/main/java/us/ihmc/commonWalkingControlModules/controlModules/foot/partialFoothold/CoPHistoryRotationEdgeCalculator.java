@@ -6,8 +6,13 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.functionApproximation.OnlineLine2DLinearRegression;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.scs2.definition.visual.ColorDefinition;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameLine2D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.providers.IntegerProvider;
@@ -19,7 +24,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
  * It likely will not produce a good estimate of the actual direction of the rotation, because the measured CoP is likely going to be similar
  * to the same location, unless the foot rotates for a while. However, it will provide a good estimate of the location of the line.
  */
-public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator
+public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator, SCS2YoGraphicHolder
 {
    private final OnlineLine2DLinearRegression lineCalculator;
    private final YoFrameLine2D lineOfRotationInSole;
@@ -36,8 +41,7 @@ public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator
                                            YoPartialFootholdModuleParameters rotationParameters,
                                            double dt,
                                            YoRegistry parentRegistry,
-                                           Color color,
-                                           YoGraphicsListRegistry graphicsListRegistry)
+                                           ColorDefinition color)
    {
       this(side,
            soleFrame,
@@ -48,8 +52,7 @@ public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator
            rotationParameters.getTransverseCoPHistoryStdDev(),
            dt,
            parentRegistry,
-           color,
-           graphicsListRegistry);
+           color);
    }
 
    public CoPHistoryRotationEdgeCalculator(RobotSide side,
@@ -61,8 +64,7 @@ public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator
                                            DoubleProvider transverseStdDevThreshold,
                                            double dt,
                                            YoRegistry parentRegistry,
-                                           Color color,
-                                           YoGraphicsListRegistry graphicsListRegistry)
+                                           ColorDefinition color)
    {
       String namePrefix = side.getLowerCaseName() + "CoPHistory";
       YoRegistry registry = new YoRegistry(namePrefix + getClass().getSimpleName());
@@ -83,10 +85,7 @@ public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator
                                                               dt,
                                                               registry);
 
-      if (graphicsListRegistry != null)
-         edgeVisualizer = new EdgeVisualizer(namePrefix, color, registry, graphicsListRegistry);
-      else
-         edgeVisualizer = null;
+      edgeVisualizer = new EdgeVisualizer(namePrefix, color, registry);
 
       parentRegistry.addChild(registry);
    }
@@ -132,5 +131,14 @@ public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator
    public boolean isRotationEdgeTrusted()
    {
       return lineStable.getBooleanValue();
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(edgeVisualizer.getSCS2YoGraphics());
+
+      return group;
    }
 }

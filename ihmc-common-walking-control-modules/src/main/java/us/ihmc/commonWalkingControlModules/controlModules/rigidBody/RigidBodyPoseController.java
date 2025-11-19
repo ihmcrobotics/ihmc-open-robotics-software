@@ -72,7 +72,6 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
                                   YoDouble yoTime,
                                   RigidBodyJointControlHelper jointControlHelper,
                                   boolean enableFunctionGenerators,
-                                  YoGraphicsListRegistry graphicsListRegistry,
                                   YoRegistry parentRegistry)
    {
       super(RigidBodyControlMode.TASKSPACE, bodyToControl.getName(), yoTime, parentRegistry);
@@ -95,8 +94,7 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
                                                           usingWeightFromMessage,
                                                           enableFunctionGenerators,
                                                           yoTime,
-                                                          registry,
-                                                          graphicsListRegistry);
+                                                          registry);
       orientationHelper = new RigidBodyOrientationControlHelper(warningPrefix,
                                                                 bodyToControl,
                                                                 baseBody,
@@ -171,8 +169,6 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
       }
 
       statusHelper.updateWithTimeInTrajectory(timeInTrajectory);
-
-      updateGraphics();
    }
 
    private void updateCommand()
@@ -219,7 +215,6 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
       positionHelper.onExit();
       orientationHelper.onExit();
       hybridModeActive.set(false);
-      hideGraphics();
       clear();
    }
 
