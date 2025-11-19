@@ -56,8 +56,7 @@ public class MultiStepWithHeuristicsTest
                                                                                                   soleZUpFrames,
                                                                                                   false,
                                                                                                   "controller",
-                                                                                                  registry,
-                                                                                                  null);;
+                                                                                                  registry);
       CaptureRegionSafetyHeuristics heuristics = new CaptureRegionSafetyHeuristics(() -> maxLength, registry);
       StepAdjustmentReachabilityConstraint reachabilityConstraint = new StepAdjustmentReachabilityConstraint(soleZUpFrames,
                                                                                                              () -> maxLength,

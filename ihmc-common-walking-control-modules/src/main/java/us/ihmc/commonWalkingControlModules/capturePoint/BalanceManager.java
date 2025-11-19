@@ -236,8 +236,6 @@ public class BalanceManager implements SCS2YoGraphicHolder
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
 
-      YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
-
       double gravityZ = controllerToolbox.getGravityZ();
       double totalMass = MultiBodySystemMissingTools.computeSubTreeMass(fullRobotModel.getElevator());
 
@@ -254,8 +252,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
                                                             controllerToolbox,
                                                             controllerToolbox.getReferenceFrames().getSoleFrames(),
                                                             SettableContactStateProvider::new,
-                                                            registry,
-                                                            yoGraphicsListRegistry);
+                                                            registry);
 
       walkingControllerParameters.getICPControllerParameters().createFeedbackAlphaCalculator(registry, null);
       feedbackAlphaCalculator = walkingControllerParameters.getICPControllerParameters().getFeedbackAlphaCalculator();
@@ -266,7 +263,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
 
       bipedSupportPolygons = controllerToolbox.getBipedSupportPolygons();
       icpControlPlane = new ICPControlPlane(centerOfMassFrame, gravityZ, registry);
-      icpControlPolygons = new ICPControlPolygons(icpControlPlane, registry, yoGraphicsListRegistry);
+      icpControlPolygons = new ICPControlPolygons(icpControlPlane, registry);
 
       WalkingMessageHandler walkingMessageHandler = controllerToolbox.getWalkingMessageHandler();
       momentumTrajectoryHandler = walkingMessageHandler == null ? null : walkingMessageHandler.getMomentumTrajectoryHandler();
@@ -275,7 +272,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
       {
          CenterOfMassTrajectoryHandler comTrajectoryHandler = walkingMessageHandler.getComTrajectoryHandler();
          double dt = controllerToolbox.getControlDT();
-         precomputedICPPlanner = new PrecomputedICPPlanner(dt, comTrajectoryHandler, momentumTrajectoryHandler, registry, yoGraphicsListRegistry);
+         precomputedICPPlanner = new PrecomputedICPPlanner(dt, comTrajectoryHandler, momentumTrajectoryHandler, registry);
          precomputedICPPlanner.setOmega0(controllerToolbox.getOmega0());
          precomputedICPPlanner.setMass(totalMass);
          precomputedICPPlanner.setGravity(gravityZ);
@@ -332,18 +329,15 @@ public class BalanceManager implements SCS2YoGraphicHolder
          stepAdjustmentController = new ErrorBasedStepAdjustmentController(walkingControllerParameters,
                                                                            controllerToolbox.getReferenceFrames().getSoleZUpFrames(),
                                                                            bipedSupportPolygons,
-                                                                           icpControlPolygons,
                                                                            controllerToolbox.getContactableFeet(),
-                                                                           registry,
-                                                                           yoGraphicsListRegistry);
+                                                                           registry);
       }
       else
       {
          stepAdjustmentController = new CaptureRegionStepAdjustmentController(walkingControllerParameters,
                                                                               controllerToolbox.getReferenceFrames().getSoleZUpFrames(),
                                                                               bipedSupportPolygons,
-                                                                              registry,
-                                                                              yoGraphicsListRegistry);
+                                                                              registry);
       }
 
       if (walkingMessageHandler != null)
@@ -361,52 +355,10 @@ public class BalanceManager implements SCS2YoGraphicHolder
          walkingMessageHandler.getRequestDisableCopFeedbackControl().addListener(qfpParameterListener);
       }
 
-      String graphicListName = getClass().getSimpleName();
-
-      if (yoGraphicsListRegistry != null)
+      if (viewCoPHistory)
       {
-         if (viewCoPHistory)
-         {
-            perfectCoPTrajectory = new BagOfBalls(150, 0.002, "perfectCoP", DarkViolet(), GraphicType.BALL_WITH_CROSS, registry, yoGraphicsListRegistry);
-            perfectCMPTrajectory = new BagOfBalls(150, 0.002, "perfectCMP", BlueViolet(), GraphicType.BALL, registry, yoGraphicsListRegistry);
-         }
-         else
-         {
-            perfectCoPTrajectory = null;
-            perfectCMPTrajectory = null;
-         }
-
-         // TODO Don't merge to develop as is
-         //         comTrajectoryPlanner.setCornerPointViewer(new CornerPointViewer(true, false, registry, yoGraphicsListRegistry));
-         //         copTrajectory.setWaypointViewer(new CoPPointViewer(registry, yoGraphicsListRegistry));
-
-         YoGraphicPosition desiredCapturePointViz = new YoGraphicPosition("Desired Capture Point",
-                                                                          yoDesiredCapturePoint,
-                                                                          0.01,
-                                                                          Yellow(),
-                                                                          GraphicType.BALL_WITH_ROTATED_CROSS);
-         YoGraphicPosition finalDesiredCapturePointViz = new YoGraphicPosition("Final Desired Capture Point",
-                                                                               yoFinalDesiredICP,
-                                                                               0.01,
-                                                                               Beige(),
-                                                                               GraphicType.BALL_WITH_ROTATED_CROSS);
-         YoGraphicPosition finalDesiredCoMViz = new YoGraphicPosition("Final Desired CoM",
-                                                                      yoFinalDesiredCoM,
-                                                                      0.01,
-                                                                      Black(),
-                                                                      GraphicType.BALL_WITH_ROTATED_CROSS);
-         YoGraphicPosition perfectCMPViz = new YoGraphicPosition("Perfect CMP", yoPerfectCMP, 0.002, BlueViolet());
-         YoGraphicPosition perfectCoPViz = new YoGraphicPosition("Perfect CoP", yoPerfectCoP, 0.002, DarkViolet(), GraphicType.BALL_WITH_CROSS);
-
-         yoGraphicsListRegistry.registerArtifact(graphicListName, desiredCapturePointViz.createArtifact());
-         yoGraphicsListRegistry.registerArtifact(graphicListName, finalDesiredCapturePointViz.createArtifact());
-         yoGraphicsListRegistry.registerArtifact(graphicListName, finalDesiredCoMViz.createArtifact());
-         YoArtifactPosition perfectCMPArtifact = perfectCMPViz.createArtifact();
-         perfectCMPArtifact.setVisible(false);
-         yoGraphicsListRegistry.registerArtifact(graphicListName, perfectCMPArtifact);
-         YoArtifactPosition perfectCoPArtifact = perfectCoPViz.createArtifact();
-         perfectCoPArtifact.setVisible(false);
-         yoGraphicsListRegistry.registerArtifact(graphicListName, perfectCoPArtifact);
+         perfectCoPTrajectory = new BagOfBalls(150, 0.002, "perfectCoP", DarkViolet(), GraphicType.BALL_WITH_CROSS, registry, null);
+         perfectCMPTrajectory = new BagOfBalls(150, 0.002, "perfectCMP", BlueViolet(), GraphicType.BALL, registry, null);
       }
       else
       {

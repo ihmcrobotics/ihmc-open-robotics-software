@@ -253,7 +253,7 @@ public class SphereControlToolbox
       ICPControlPlane icpControlPlane = new ICPControlPlane(centerOfMassFrame, gravityZ, registry);
       omega0.addListener(var -> icpControlPlane.setOmega0(omega0.getValue()));
       omega0.notifyListeners();
-      icpControlPolygons = new ICPControlPolygons(icpControlPlane, registry, yoGraphicsListRegistry);
+      icpControlPolygons = new ICPControlPolygons(icpControlPlane, registry);
 
       footstepTestHelper = new FootstepTestHelper(contactableFeet);
 

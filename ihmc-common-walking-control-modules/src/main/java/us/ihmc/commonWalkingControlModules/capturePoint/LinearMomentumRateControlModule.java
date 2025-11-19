@@ -268,7 +268,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
       yoAngularCapturePoint.setToNaN();
 
       icpControlPlane = new ICPControlPlane(centerOfMassFrame, gravityZ, registry);
-      icpControlPolygons = new ICPControlPolygons(icpControlPlane, registry, yoGraphicsListRegistry);
+      icpControlPolygons = new ICPControlPolygons(icpControlPlane, registry);
       /*
        * TODO: The following is not being visualized since it is a duplicate for now.
        */

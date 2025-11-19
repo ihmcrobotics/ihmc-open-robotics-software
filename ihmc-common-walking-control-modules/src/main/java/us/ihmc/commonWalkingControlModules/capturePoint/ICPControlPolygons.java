@@ -50,17 +50,11 @@ public class ICPControlPolygons implements SCS2YoGraphicHolder
    private final FramePoint3D tempProjectedContactPosition = new FramePoint3D();
    private final FramePoint3D tempContactPosition = new FramePoint3D();
 
-   public ICPControlPolygons(ICPControlPlane icpControlPlane, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public ICPControlPolygons(ICPControlPlane icpControlPlane, YoRegistry parentRegistry)
    {
       this.icpControlPlane = icpControlPlane;
 
       controlPolygonViz = new YoFrameConvexPolygon2D("combinedPolygon", "", worldFrame, 2 * maxNumberOfContactPointsPerFoot, registry);
-
-      ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
-
-      YoArtifactPolygon controlPolygonArtifact = new YoArtifactPolygon("Combined Control Polygon", controlPolygonViz, combinedColor, false);
-      artifactList.add(controlPolygonArtifact);
-
       controlPolygonInWorld = new FrameConvexPolygon2D(worldFrame);
 
       for (RobotSide robotSide : RobotSide.values)
@@ -76,19 +70,8 @@ public class ICPControlPolygons implements SCS2YoGraphicHolder
                                                                                       maxNumberOfContactPointsPerFoot,
                                                                                       registry);
             controlFootPolygonsViz.put(robotSide, controlFootPolygonViz);
-            YoArtifactPolygon footPolygonArtifact = new YoArtifactPolygon(robotSide.getCamelCaseNameForMiddleOfExpression() + " Control Foot Polygon",
-                                                                          controlFootPolygonViz,
-                                                                          feetColors.get(robotSide),
-                                                                          false);
-            artifactList.add(footPolygonArtifact);
          }
       }
-
-      if (VISUALIZE && yoGraphicsListRegistry != null)
-      {
-         yoGraphicsListRegistry.registerArtifactList(artifactList);
-      }
-
       parentRegistry.addChild(registry);
    }
 
