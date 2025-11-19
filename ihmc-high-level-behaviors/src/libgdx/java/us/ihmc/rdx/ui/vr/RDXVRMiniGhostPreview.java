@@ -91,9 +91,6 @@ public class RDXVRMiniGhostPreview
    private void updateGhostPitchBasedOnFeet()
    {
       miniGhostFullRobotModel.getElevator().updateFramesRecursively();
-      miniGhostFullRobotModel.getRootJoint().getJointPose().getRotation();
-      miniGhostFullRobotModel.getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame().getRotation();
-      miniGhostFullRobotModel.getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame().getRotation();
 
       Quaternion rootJointInitialOrientation = new Quaternion(miniGhostFrame.getTransformToRoot().getRotation());
       // Get the rotations of the sole frames.
