@@ -456,6 +456,14 @@ public class ImGuiTools
    }
 
    /**
+    * This is a better way to detect a singular mouse click than any of the provided methods.
+    */
+   public static boolean mouseReleasedWithoutDrag(int button)
+   {
+      return ImGui.getMouseDragDeltaX(button) == 0.0f && ImGui.getMouseDragDeltaY(button) == 0.0f && ImGui.isMouseReleased(button);
+   }
+
+   /**
     * A separator with a label in it of given font.
     * This is in the newer versions of ImGui.
     */
