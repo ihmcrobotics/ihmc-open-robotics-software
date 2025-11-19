@@ -456,22 +456,19 @@ public class RDXHumanoidDemoPoses extends RDXPanel
          double duration = 2.0;
 
          RobotSide kickSide;
-         if (isFootOffGround(RobotSide.RIGHT))
-         {
-            kickSide = RobotSide.RIGHT;
-         }
-         else
-         {
-            kickSide = RobotSide.LEFT;
-         }
+
+         kickSide = RobotSide.RIGHT;
+
          FramePose3D footPose = new FramePose3D(syncedRobot.getReferenceFrames().getSoleFrame(kickSide.getOppositeSide()));
-         footPose.getPosition().setZ(0.5);
-         footPose.getPosition().setX(0.7);
-         footPose.getPosition().setY(kickSide.negateIfRightSide(0.175));
-         footPose.getOrientation().setYawPitchRoll(0.0, -Math.toRadians(70.0), 0.0);
+         footPose.getPosition().setZ(0.55);
+         footPose.getPosition().setX(0.65);
+         footPose.getPosition().setY(kickSide.negateIfRightSide(0.105));
+         footPose.getOrientation().setYawPitchRoll(0.0, -Math.toRadians(75.0), 0.0);
          createFootPoseMessage(kickSide, new double[] {duration}, new FramePose3D[] {footPose});
 
+         pelvisPosition.setZ(0.95);
          pelvisOrientation.setToPitchOrientation(-Math.toRadians(30.0));
+         pelvisOrientation.setToYawOrientation(-Math.toRadians(1.0));
 
          for (RobotSide robotSide : RobotSide.values)
             appendArmTrajectoryMessageToPublish(robotSide, armsConfiguration.get(robotSide), duration);
