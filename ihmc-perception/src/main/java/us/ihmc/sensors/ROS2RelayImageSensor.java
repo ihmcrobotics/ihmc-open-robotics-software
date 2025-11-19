@@ -1,5 +1,6 @@
 package us.ihmc.sensors;
 
+import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.communication.PerceptionAPI;
@@ -27,7 +28,7 @@ public class ROS2RelayImageSensor extends ImageSensor
 {
    private final ROS2Node ros2Node;
    private final Map<Integer, ImageReceiver> receivers;
-   private final CountDownLatch receiveCountdown;
+   private CountDownLatch receiveCountdown;
 
    private final int[] imageKeys;
    private final Map<Integer, RawImage> receivedImages;
@@ -42,7 +43,6 @@ public class ROS2RelayImageSensor extends ImageSensor
 
       ros2Node = new ROS2NodeBuilder().build("ros2_" + sensorName.toLowerCase().replaceAll(" ", "_") + "_image_sensor_node");
       receivers = new HashMap<>();
-      receiveCountdown = new CountDownLatch(imageTopics.size());
 
       imageKeys = new int[imageTopics.size()];
       receivedImages = new HashMap<>();
@@ -55,7 +55,7 @@ public class ROS2RelayImageSensor extends ImageSensor
          int imageKey = entry.getKey();
          imageKeys[i] = imageKey;
 
-         receivers.put(imageKey, new ImageReceiver(ros2Node, entry.getValue(), receiveCountdown));
+         receivers.put(imageKey, new ImageReceiver(ros2Node, entry.getValue()));
          imageFrames.put(imageKey, new MutableReferenceFrame("ROS2_" + sensorName + "_Image_" + imageKey + "+_Frame"));
          imageFrameArray[i] = imageFrames.get(imageKey).getReferenceFrame();
 
@@ -66,6 +66,7 @@ public class ROS2RelayImageSensor extends ImageSensor
    @Override
    protected boolean startSensor()
    {
+      resetCountDown();
       for (ImageReceiver receiver : receivers.values())
          receiver.start();
 
@@ -88,6 +89,8 @@ public class ROS2RelayImageSensor extends ImageSensor
       try
       {
          receiveCountdown.await();
+         resetCountDown();
+
          for (Entry<Integer, ImageReceiver> entry : receivers.entrySet())
          {
             int imageKey = entry.getKey();
@@ -101,7 +104,6 @@ public class ROS2RelayImageSensor extends ImageSensor
                receivedImages.put(imageKey, receiver.getReceivedImage());
                imageFrames.get(imageKey).update(transformToWorld -> transformToWorld.set(receivedImages.get(imageKey).getTransformToWorld()));
             }
-            receiver.armCountdown();
          }
       }
       catch (InterruptedException interruptedException)
@@ -147,6 +149,7 @@ public class ROS2RelayImageSensor extends ImageSensor
    {
       running = false;
 
+      super.getGrabThread().interrupt();
       super.close();
 
       for (ImageReceiver receiver : receivers.values())
@@ -155,10 +158,16 @@ public class ROS2RelayImageSensor extends ImageSensor
       ros2Node.destroy();
    }
 
+   private void resetCountDown()
+   {
+      receiveCountdown = new CountDownLatch(receivers.size());
+      for (ImageReceiver receiver : receivers.values())
+         receiver.armCountDown(receiveCountdown);
+   }
+
    private static class ImageReceiver implements AutoCloseable
    {
-      private final CountDownLatch latch;
-      private volatile boolean countDown = false;
+      private volatile CountDownLatch latch = null;
 
       private RawImage receivedImage;
       private final Mat decodeMat;
@@ -168,13 +177,12 @@ public class ROS2RelayImageSensor extends ImageSensor
 
       private volatile boolean running = false;
 
-      private ImageReceiver(ROS2Node ros2Node, ROS2Topic<ImageMessage> imageTopic, CountDownLatch latch)
+      private ImageReceiver(ROS2Node ros2Node, ROS2Topic<ImageMessage> imageTopic)
       {
-         this.latch = latch;
+         decodeMat = new Mat(1, 1, opencv_core.CV_8UC1);
+         decoder = new ImageMessageDecoder();
 
          subscription = ros2Node.createSubscription2(imageTopic, this::receiveImage);
-         decodeMat = new Mat();
-         decoder = new ImageMessageDecoder();
       }
 
       private void receiveImage(ImageMessage imageMessage)
@@ -207,7 +215,7 @@ public class ROS2RelayImageSensor extends ImageSensor
             if (receivedImage != null)
                receivedImage.release();
 
-            receivedImage = new RawImage(decodeMat,
+            receivedImage = new RawImage(decodeMat.clone(),
                                          null,
                                          decoder.getDecodedImagePixelFormat(),
                                          cameraIntrinsics,
@@ -218,16 +226,16 @@ public class ROS2RelayImageSensor extends ImageSensor
                                          depthDiscretization);
          }
 
-         if (countDown)
+         if (latch != null)
          {
             latch.countDown();
-            countDown = false;
+            latch = null;
          }
       }
 
-      private void armCountdown()
+      private void armCountDown(CountDownLatch latch)
       {
-         countDown = true;
+         this.latch = latch;
       }
 
       private RawImage getReceivedImage()
@@ -248,6 +256,7 @@ public class ROS2RelayImageSensor extends ImageSensor
       {
          running = false;
          subscription.remove();
+         decodeMat.release();
       }
    }
 
