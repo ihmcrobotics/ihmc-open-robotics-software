@@ -98,8 +98,6 @@ public class IntraprocessYoVariableLogger
          DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmssSSS");
          String fileTimestamp = dateFormat.format(Calendar.getInstance().getTime());
          logFolder = DEFAULT_INCOMING_LOGS_DIRECTORY.resolve(fileTimestamp + logName + INTRAPROCESS_LOG_POSTFIX);
-
-         // Make sure we can create a file in logFolder
          FileTools.ensureDirectoryExists(logFolder);
 
          Path tempFile = logFolder.resolve(".temp");
