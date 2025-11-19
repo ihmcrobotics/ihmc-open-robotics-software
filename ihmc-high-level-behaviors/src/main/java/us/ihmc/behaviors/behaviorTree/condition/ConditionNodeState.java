@@ -3,16 +3,12 @@ package us.ihmc.behaviors.behaviorTree.condition;
 import behavior_msgs.msg.dds.ConditionNodeStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.LeafNodeState;
-import us.ihmc.communication.crdt.CRDTStatusBoolean;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
 
 public class ConditionNodeState extends LeafNodeState<ConditionNodeDefinition>
 {
    private final CounterConditionState counter;
    private final LLMConditionState llm;
    private final ProximityConditionState proximityCheck;
-   private final CRDTStatusBoolean conditionMet;
-   private final CRDTStatusBoolean evaluatingCondition;
 
    public ConditionNodeState(long id, BehaviorTreeRootNodeState rootNode)
    {
@@ -21,9 +17,6 @@ public class ConditionNodeState extends LeafNodeState<ConditionNodeDefinition>
       counter = new CounterConditionState(definition);
       llm = new LLMConditionState(definition);
       proximityCheck = new ProximityConditionState(definition);
-
-      conditionMet = new CRDTStatusBoolean(ROS2ActorDesignation.ROBOT, crdtInfo, false);
-      evaluatingCondition = new CRDTStatusBoolean(ROS2ActorDesignation.ROBOT, crdtInfo, false);
    }
 
    public void toMessage(ConditionNodeStateMessage message)
@@ -67,25 +60,5 @@ public class ConditionNodeState extends LeafNodeState<ConditionNodeDefinition>
    public ProximityConditionState getProximityCheck()
    {
       return proximityCheck;
-   }
-
-   public void setConditionValue(boolean value)
-   {
-      conditionMet.setValue(value);
-   }
-
-   public boolean isConditionMet()
-   {
-      return conditionMet.getValue();
-   }
-
-   public void setEvaluatingConditionValue(boolean value)
-   {
-      evaluatingCondition.setValue(value);
-   }
-
-   public boolean isEvaluatingCondition()
-   {
-      return evaluatingCondition.getValue();
    }
 }

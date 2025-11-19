@@ -31,6 +31,20 @@ public class ConditionNodeExecutor extends LeafNodeExecutor<ConditionNodeState, 
    }
 
    @Override
+   public void triggerExecution()
+   {
+      super.triggerExecution();
+
+      switch (definition.getType().getValue())
+      {
+         case ALWAYS_FAIL:
+            state.setFailed(true);
+         case ALWAYS_SUCCEED:
+            state.setIsExecuting(false);
+      }
+   }
+
+   @Override
    public void updateCurrentlyExecuting()
    {
       switch (definition.getType().getValue())
@@ -45,7 +59,7 @@ public class ConditionNodeExecutor extends LeafNodeExecutor<ConditionNodeState, 
    public void destroy()
    {
       if (llm != null)
-         llm.destroy();
+         LLMConditionExecutor.destroy();
    }
 
    public CounterConditionExecutor getCounter()
