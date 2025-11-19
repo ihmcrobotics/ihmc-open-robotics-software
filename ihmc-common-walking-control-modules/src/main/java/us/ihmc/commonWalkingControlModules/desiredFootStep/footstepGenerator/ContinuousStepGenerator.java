@@ -562,6 +562,7 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
       csgStatusMessage.setCurrentDefaultStepWidth(parameters.getDefaultStepWidth());
       csgStatusMessage.setCurrentTurnMaxAngleInward(parameters.getTurnMaxAngleInward());
       csgStatusMessage.setCurrentTurnMaxAngleOutward(parameters.getTurnMaxAngleOutward());
+      csgStatusMessage.setAreStepsAdjustable(parameters.getStepsAreAdjustable());
 
       if (csgStatusMessageOutputManager != null)
          csgStatusMessageOutputManager.reportStatusMessage(csgStatusMessage);

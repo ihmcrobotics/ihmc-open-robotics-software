@@ -26,6 +26,7 @@ public class ContinuousStepGeneratorStatusMessage extends Packet<ContinuousStepG
    public double current_default_step_width_;
    public double current_turn_max_angle_inward_;
    public double current_turn_max_angle_outward_;
+   public boolean are_steps_adjustable_;
 
    public ContinuousStepGeneratorStatusMessage()
    {
@@ -68,6 +69,8 @@ public class ContinuousStepGeneratorStatusMessage extends Packet<ContinuousStepG
       current_turn_max_angle_inward_ = other.current_turn_max_angle_inward_;
 
       current_turn_max_angle_outward_ = other.current_turn_max_angle_outward_;
+
+      are_steps_adjustable_ = other.are_steps_adjustable_;
 
    }
 
@@ -206,6 +209,15 @@ public class ContinuousStepGeneratorStatusMessage extends Packet<ContinuousStepG
       return current_turn_max_angle_outward_;
    }
 
+   public void setAreStepsAdjustable(boolean are_steps_adjustable)
+   {
+      are_steps_adjustable_ = are_steps_adjustable;
+   }
+   public boolean getAreStepsAdjustable()
+   {
+      return are_steps_adjustable_;
+   }
+
 
    public static Supplier<ContinuousStepGeneratorStatusMessagePubSubType> getPubSubType()
    {
@@ -254,6 +266,8 @@ public class ContinuousStepGeneratorStatusMessage extends Packet<ContinuousStepG
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.current_turn_max_angle_outward_, other.current_turn_max_angle_outward_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.are_steps_adjustable_, other.are_steps_adjustable_, epsilon)) return false;
+
 
       return true;
    }
@@ -297,6 +311,8 @@ public class ContinuousStepGeneratorStatusMessage extends Packet<ContinuousStepG
 
       if(this.current_turn_max_angle_outward_ != otherMyClass.current_turn_max_angle_outward_) return false;
 
+      if(this.are_steps_adjustable_ != otherMyClass.are_steps_adjustable_) return false;
+
 
       return true;
    }
@@ -336,7 +352,9 @@ public class ContinuousStepGeneratorStatusMessage extends Packet<ContinuousStepG
       builder.append("current_turn_max_angle_inward=");
       builder.append(this.current_turn_max_angle_inward_);      builder.append(", ");
       builder.append("current_turn_max_angle_outward=");
-      builder.append(this.current_turn_max_angle_outward_);
+      builder.append(this.current_turn_max_angle_outward_);      builder.append(", ");
+      builder.append("are_steps_adjustable=");
+      builder.append(this.are_steps_adjustable_);
       builder.append("}");
       return builder.toString();
    }

@@ -43,6 +43,7 @@ public class ContinuousStepGeneratorParametersCommand implements Command<Continu
       parameters.setMaxStepWidth(message.getMaxStepWidth());
       parameters.setTurnMaxAngleInward(message.getTurnMaxAngleInward());
       parameters.setTurnMaxAngleOutward(message.getTurnMaxAngleOutward());
+      parameters.setStepsAreAdjustable(message.getStepsAreAdjustable());
    }
 
    public ContinuousStepGeneratorParameters getParameters()

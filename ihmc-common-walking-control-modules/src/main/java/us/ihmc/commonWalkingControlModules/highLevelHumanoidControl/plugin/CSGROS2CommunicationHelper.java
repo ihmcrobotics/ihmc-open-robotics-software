@@ -145,6 +145,7 @@ public class CSGROS2CommunicationHelper
       csgStatusMessage.setCurrentDefaultStepWidth(steppingParameters.getInPlaceWidth());
       csgStatusMessage.setCurrentTurnMaxAngleOutward(steppingParameters.getMaxAngleTurnOutwards());
       csgStatusMessage.setCurrentTurnMaxAngleInward(steppingParameters.getMaxAngleTurnInwards());
+      csgStatusMessage.setAreStepsAdjustable(csgParametersCommand.getStepsAreAdjustable());
    }
 
    public ContinuousStepGeneratorInputMessage getCSGInputCommand()

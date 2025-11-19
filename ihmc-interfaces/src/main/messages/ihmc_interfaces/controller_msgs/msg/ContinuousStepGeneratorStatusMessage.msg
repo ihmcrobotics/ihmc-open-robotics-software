@@ -18,3 +18,5 @@ float64 current_min_step_width
 float64 current_default_step_width
 float64 current_turn_max_angle_inward
 float64 current_turn_max_angle_outward
+
+bool are_steps_adjustable
