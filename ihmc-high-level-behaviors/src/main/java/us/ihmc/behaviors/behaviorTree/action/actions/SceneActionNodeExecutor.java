@@ -4,6 +4,7 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectState;
+import us.ihmc.commons.thread.Throttler;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -15,6 +16,7 @@ import us.ihmc.tools.Timer;
 public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeState, SceneActionNodeDefinition>
 {
    private final Timer timer = new Timer();
+   private final Throttler throttler = new Throttler().setFrequency(1.0);
    private final Point3D cameraPosition = new Point3D();
    private final Vector3D detectionToCamera = new Vector3D();
 
@@ -42,13 +44,18 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
    @Override
    public void updateCurrentlyExecuting()
    {
+      state.setElapsedExecutionTime(timer.getElapsedTime());
+
       double timeout = 5.0;
       if (!timer.isRunning(timeout))
       {
+         state.getLogger().error("Timed out after %.1f s without finding a suitable detection.".formatted(timeout));
          state.setFailed(true);
          state.setIsExecuting(false);
          return;
       }
+
+      boolean printDebug = throttler.run();
 
       // Find a close stable detection
       PersistentDetection bestDetection = null;
@@ -58,14 +65,31 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
       for (PersistentDetection detection : scene.getPersistentDetections())
       {
          if (definition.getUseFoundationPose() && !(detection.getMostRecentDetection() instanceof IsaacROSFoundationPoseInstantDetection))
+         {
+            if (printDebug)
+               state.getLogger().warn("Need FoundationPose but found %s name: %s"
+                                            .formatted(detection.getMostRecentDetection().getClass().getSimpleName(),
+                                                       detection.getMostRecentDetection().getDetectedObjectClass()));
+
             continue;
+         }
 
          if (!detection.getDetectedObjectClass().equals(objectType.yoloClass))
+         {
+            if (printDebug)
+               state.getLogger().warn("Need object class type {} but found {}", objectType.yoloClass, detection.getDetectedObjectClass());
+
             continue;
+         }
 
          int minimumHistorySize = 5;
          if (detection.getHistorySize() < minimumHistorySize)
+         {
+            if (printDebug)
+               state.getLogger().warn("Need history size of at least {} but found {}", minimumHistorySize, detection.getHistorySize());
+
             continue;
+         }
 
          detectionToCamera.set(detection.getFilteredTransform().getTranslation());
          detectionToCamera.sub(cameraPosition);
@@ -80,6 +104,9 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
 
       if (bestDetection == null)
       {
+         if (printDebug)
+            state.getLogger().warn("No suitable persistent detection found. There are currently {} persistent detections.",
+                                    scene.getPersistentDetections().size());
          return;
       }
 
