@@ -23,7 +23,13 @@ public class RDX3DPanelNotificationManager
 
    public void pushNotification(int additionalStackTraceHeight, String text)
    {
-      LogTools.info(additionalStackTraceHeight, text);
+      this.pushNotification(additionalStackTraceHeight + 1, text, true);
+   }
+
+   public void pushNotification(int additionalStackTraceHeight, String text, boolean log)
+   {
+      if (log)
+         LogTools.info(additionalStackTraceHeight, text);
       synchronized (notificationDeque)
       {
          notificationDeque.addLast(new RDX3DPanelNotification(panel3D, text));

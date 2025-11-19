@@ -700,4 +700,9 @@ public class RDXBaseUI
    {
       instance.getPrimary3DPanel().getNotificationManager().pushNotification(2, text);
    }
+
+   public static void pushNotification(String text, boolean log)
+   {
+      instance.getPrimary3DPanel().getNotificationManager().pushNotification(2, text, log);
+   }
 }

@@ -9,7 +9,6 @@ import us.ihmc.rdx.imgui.ImGuiFlashingColors;
 import us.ihmc.rdx.imgui.ImGuiFlashingText;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.widgets.ImGuiHollowArrowRenderer;
 
 /**
@@ -23,8 +22,6 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
    private final ImGuiFlashingColors isExecutingFlashingColor = new ImGuiFlashingColors(0.1, ImGuiTools.PURPLE, ImGuiTools.DARK_PURPLE);
    private final ImGuiHollowArrowRenderer hollowArrowRenderer = new ImGuiHollowArrowRenderer();
    private final ImGuiFlashingText flashingDescriptionColor = new ImGuiFlashingText(ImGuiTools.RED);
-   /** Used to trigger a UI notification when the action goes from !failed -> failed. */
-   private boolean wasFailed = false;
 
    public RDXLeafNode(S state, RDXBehaviorTreeRootNode rootNode)
    {
@@ -35,12 +32,6 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
    public void update()
    {
       super.update();
-
-      if (!wasFailed && state.getFailed())
-      {
-         RDXBaseUI.pushNotification("%s failed".formatted(definition.getName()));
-      }
-      wasFailed = state.getFailed();
    }
 
    @Override
