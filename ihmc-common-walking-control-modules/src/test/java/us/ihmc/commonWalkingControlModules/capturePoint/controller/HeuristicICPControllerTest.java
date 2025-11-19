@@ -64,9 +64,7 @@ public class HeuristicICPControllerTest
                                                       YoGraphicsListRegistry yoGraphicsListRegistry)
    {   
       return new HeuristicICPController(icpControllerParameters,
-                                        controlDT,
-                                        registry,
-                                        yoGraphicsListRegistry);
+                                        registry);
 
    }
 
@@ -100,15 +98,15 @@ public class HeuristicICPControllerTest
          }
 
          @Override
-         public void createFeedForwardAlphaCalculator(YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+         public void createFeedForwardAlphaCalculator(YoRegistry registry)
          {
             feedForwardAlphaCalculator = new ErrorBasedFeedForwardAlphaCalculator("", registry);
          }
 
          @Override
-         public void createFeedbackProjectionOperator(YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+         public void createFeedbackProjectionOperator(YoRegistry registry)
          {
-            feedbackProjectionOperator = new CoPProjectionTowardsMidpoint(registry, yoGraphicsListRegistry);
+            feedbackProjectionOperator = new CoPProjectionTowardsMidpoint(registry);
          }
 
          @Override

@@ -169,7 +169,6 @@ public class WholeBodyControllerCoreFactory
       DoubleProvider totalMassProvider = controllerToolbox.getTotalMassProvider();
       RigidBodyBasics elevator = fullRobotModel.getElevator();
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
-      YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       SideDependentList<ContactableFoot> contactableFeet = controllerToolbox.getContactableFeet();
       WholeBodyAngularVelocityCalculator wholeBodyAngularVelocityCalculator = controllerToolbox.getWholeBodyAngularVelocityCalculator();
 
@@ -182,8 +181,7 @@ public class WholeBodyControllerCoreFactory
                                                                             wholeBodyAngularVelocityCalculator,
                                                                             gravityZ,
                                                                             controlDT,
-                                                                            registry,
-                                                                            yoGraphicsListRegistry);
+                                                                            registry);
 
       return linearMomentumRateControlModule;
    }

@@ -254,7 +254,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
                                                             SettableContactStateProvider::new,
                                                             registry);
 
-      walkingControllerParameters.getICPControllerParameters().createFeedbackAlphaCalculator(registry, null);
+      walkingControllerParameters.getICPControllerParameters().createFeedbackAlphaCalculator(registry);
       feedbackAlphaCalculator = walkingControllerParameters.getICPControllerParameters().getFeedbackAlphaCalculator();
 
       icpErrorThresholdToAdjustTime.set(walkingControllerParameters.getICPErrorThresholdToSpeedUpSwing());

@@ -60,7 +60,7 @@ public class SplinedHeightTrajectory implements SCS2YoGraphicHolder
    private final YoDouble partialDsDx;
    private final YoDouble partialDsDy;
 
-   public SplinedHeightTrajectory(YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public SplinedHeightTrajectory(YoRegistry registry)
    {
       trajectoryGenerator = new OptimizedTrajectoryGenerator("height", 10, 4, registry);
 
@@ -73,14 +73,7 @@ public class SplinedHeightTrajectory implements SCS2YoGraphicHolder
       contactFrameZeroPosition = new YoFramePoint3D("contactFrameZeroPosition", worldFrame, registry);
       contactFrameOnePosition = new YoFramePoint3D("contactFrameOnePosition", worldFrame, registry);
 
-      if (yoGraphicsListRegistry != null)
-      {
-         bagOfBalls = new BagOfBalls(15, 0.01, "height", registry, yoGraphicsListRegistry);
-      }
-      else
-      {
-         bagOfBalls = null;
-      }
+      bagOfBalls = new BagOfBalls(15, 0.01, "height", registry, null);
    }
 
    public void setReferenceFrame(ReferenceFrame referenceFrame)

@@ -187,8 +187,7 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
                                                                             controllerToolbox.getWholeBodyAngularVelocityCalculator(),
                                                                             gravityZ,
                                                                             controlDT,
-                                                                            walkingParentRegistry,
-                                                                            yoGraphicsListRegistry);
+                                                                            walkingParentRegistry);
 
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

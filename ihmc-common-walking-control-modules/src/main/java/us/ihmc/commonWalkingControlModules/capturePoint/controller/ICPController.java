@@ -147,16 +147,14 @@ public class ICPController implements ICPControllerInterface
                         ICPControlPolygons icpControlPolygons,
                         SideDependentList<? extends ContactablePlaneBody> contactableFeet,
                         double controlDT,
-                        YoRegistry parentRegistry,
-                        YoGraphicsListRegistry yoGraphicsListRegistry)
+                        YoRegistry parentRegistry)
    {
       this(walkingControllerParameters,
            walkingControllerParameters.getICPControllerParameters(),
            icpControlPolygons,
            contactableFeet,
            controlDT,
-           parentRegistry,
-           yoGraphicsListRegistry);
+           parentRegistry);
    }
 
    public ICPController(WalkingControllerParameters walkingControllerParameters,
@@ -164,8 +162,7 @@ public class ICPController implements ICPControllerInterface
                         ICPControlPolygons icpControlPolygons,
                         SideDependentList<? extends ContactablePlaneBody> contactableFeet,
                         double controlDT,
-                        YoRegistry parentRegistry,
-                        YoGraphicsListRegistry yoGraphicsListRegistry)
+                        YoRegistry parentRegistry)
    {
       this.parameters = icpOptimizationParameters;
       this.controlDT = controlDT;
@@ -226,44 +223,11 @@ public class ICPController implements ICPControllerInterface
 
       copConstraintHandler = new ICPCoPConstraintHandler(icpControlPolygons, useICPControlPolygons, hasICPControlPolygons, registry);
 
-      parameters.createFeedForwardAlphaCalculator(registry, yoGraphicsListRegistry);
-      parameters.createFeedbackAlphaCalculator(registry, null);
-      parameters.createFeedbackProjectionOperator(registry, null);
-
-      if (yoGraphicsListRegistry != null)
-         setupVisualizers(yoGraphicsListRegistry);
+      parameters.createFeedForwardAlphaCalculator(registry);
+      parameters.createFeedbackAlphaCalculator(registry);
+      parameters.createFeedbackProjectionOperator(registry);
 
       parentRegistry.addChild(registry);
-   }
-
-   private void setupVisualizers(YoGraphicsListRegistry yoGraphicsListRegistry)
-   {
-      ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
-
-      YoGraphicPosition feedbackCoP = new YoGraphicPosition(yoNamePrefix + "FeedbackCoP",
-                                                            this.feedbackCoP,
-                                                            0.005,
-                                                            YoAppearance.Darkorange(),
-                                                            YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
-      YoGraphicPosition feedForwardCoP = new YoGraphicPosition(yoNamePrefix + "ReferenceFeedForwardCoP",
-                                                               this.referenceFeedForwardCoP,
-                                                               0.005,
-                                                               YoAppearance.Red(),
-                                                               YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
-
-      YoGraphicPosition unconstrainedFeedbackCMP = new YoGraphicPosition(yoNamePrefix + "UnconstrainedFeedbackCMP",
-                                                                         this.unconstrainedFeedbackCMP,
-                                                                         0.006,
-                                                                         YoAppearance.Purple(),
-                                                                         GraphicType.BALL_WITH_CROSS);
-
-      artifactList.add(feedbackCoP.createArtifact());
-      artifactList.add(feedForwardCoP.createArtifact());
-      artifactList.add(unconstrainedFeedbackCMP.createArtifact());
-
-      artifactList.setVisible(VISUALIZE);
-
-      yoGraphicsListRegistry.registerArtifactList(artifactList);
    }
 
    /**

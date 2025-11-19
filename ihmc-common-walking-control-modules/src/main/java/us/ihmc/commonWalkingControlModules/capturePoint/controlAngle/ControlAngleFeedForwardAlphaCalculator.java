@@ -36,6 +36,8 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ControlAngleFeedForwardAlphaCalculator implements ICPControllerParameters.FeedForwardAlphaCalculator
 {
+   private static final boolean VISUALIZE = true;
+
    static final double nominalAngleToConverge = Math.toRadians(7.0);
    private static final double defaultErrorToStartScalingFeedForward = 0.01;
    private static final double defaultErrorToCompleteScalingFeedForward = 0.05;
@@ -79,7 +81,7 @@ public class ControlAngleFeedForwardAlphaCalculator implements ICPControllerPara
    private final FramePoint2D pointToThrowAway = new FramePoint2D();
    private final FrameVector2D tempDirection = new FrameVector2D();
 
-   public ControlAngleFeedForwardAlphaCalculator(YoRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
+   public ControlAngleFeedForwardAlphaCalculator(YoRegistry registry)
    {
       minimumICPControlAngle = new DoubleParameter("minimumICPControlAngle", registry, nominalAngleToConverge);
       errorToStartScalingFeedForward = new DoubleParameter("errorToStartScalingFeedForward", registry, defaultErrorToStartScalingFeedForward);
@@ -95,41 +97,12 @@ public class ControlAngleFeedForwardAlphaCalculator implements ICPControllerPara
       pointOnEdgeWithAllFeedForward = new YoFramePoint2D("pointOnEdgeWithAllFeedForward", ReferenceFrame.getWorldFrame(), registry);
       pointOnEdgeThatConverges = new YoFramePoint2D("pointOnEdgeThatConverges", ReferenceFrame.getWorldFrame(), registry);
 
-      if (graphicsListRegistry != null)
+      if (VISUALIZE)
       {
          worstCaseEdge = new YoFrameLineSegment2D("worstCaseEdge", ReferenceFrame.getWorldFrame(), registry);
          errorEdge = new YoFrameLineSegment2D("errorEdge", ReferenceFrame.getWorldFrame(), registry);
          finalLine = new YoFrameLineSegment2D("finalLine", ReferenceFrame.getWorldFrame(), registry);
          convergentLineSegment = new YoFrameLineSegment2D("convergentLine", ReferenceFrame.getWorldFrame(), registry);
-
-         YoGraphicPosition noFeedForwardViz = new YoGraphicPosition("No FeedForward Viz",
-                                                                    pointOnEdgeWithNoFeedForward,
-                                                                    0.005,
-                                                                    YoAppearance.Green(),
-                                                                    YoGraphicPosition.GraphicType.SOLID_BALL);
-         YoGraphicPosition allFeedForwardViz = new YoGraphicPosition("All FeedForward Viz",
-                                                                     pointOnEdgeWithAllFeedForward,
-                                                                     0.005,
-                                                                     YoAppearance.Green(),
-                                                                     YoGraphicPosition.GraphicType.SOLID_BALL);
-         YoGraphicPosition convergentPointViz = new YoGraphicPosition("Convergent Point Viz",
-                                                                      pointOnEdgeThatConverges,
-                                                                      0.005,
-                                                                      YoAppearance.Green(),
-                                                                      YoGraphicPosition.GraphicType.SOLID_BALL);
-
-         YoArtifactLineSegment2d worstCaseEdgeViz = new YoArtifactLineSegment2d("Worst Case Edge Viz", worstCaseEdge, Color.red, 0.0, 0.0);
-         YoArtifactLineSegment2d errorEdgeViz = new YoArtifactLineSegment2d("Error Edge Viz", errorEdge, Color.blue, 0.0, 0.0);
-         YoArtifactLineSegment2d finalLineViz = new YoArtifactLineSegment2d("Final Line Viz", finalLine, Color.yellow, 0.0, 0.0);
-         YoArtifactLineSegment2d convergentLineViz = new YoArtifactLineSegment2d("Convergent Line Viz", convergentLineSegment, Color.green);
-
-         graphicsListRegistry.registerArtifact("FeedForwardAlphaCalculator", noFeedForwardViz.createArtifact());
-         graphicsListRegistry.registerArtifact("FeedForwardAlphaCalculator", allFeedForwardViz.createArtifact());
-         graphicsListRegistry.registerArtifact("FeedForwardAlphaCalculator", convergentPointViz.createArtifact());
-         graphicsListRegistry.registerArtifact("FeedForwardAlphaCalculator", worstCaseEdgeViz);
-         graphicsListRegistry.registerArtifact("FeedForwardAlphaCalculator", errorEdgeViz);
-         graphicsListRegistry.registerArtifact("FeedForwardAlphaCalculator", finalLineViz);
-         graphicsListRegistry.registerArtifact("FeedForwardAlphaCalculator", convergentLineViz);
       }
       else
       {
@@ -271,6 +244,7 @@ public class ControlAngleFeedForwardAlphaCalculator implements ICPControllerPara
       group.addChild(newYoGraphicPoint2D("All FeedForward", pointOnEdgeWithAllFeedForward, 0.01, green, DefaultPoint2DGraphic.CIRCLE_FILLED));
       group.addChild(newYoGraphicPoint2D("Convergent Point", pointOnEdgeThatConverges, 0.01, green, DefaultPoint2DGraphic.CIRCLE_FILLED));
       group.addChild(newYoGraphicLineSegment2DDefinition("Worst Case Edge", worstCaseEdge, ColorDefinitions.Red()));
+      group.addChild(newYoGraphicLineSegment2DDefinition("Error Edge", errorEdge, ColorDefinitions.Blue()));
       group.addChild(newYoGraphicLineSegment2DDefinition("Final Line", finalLine, ColorDefinitions.Yellow()));
       group.addChild(newYoGraphicLineSegment2DDefinition("Convergent Line", convergentLineSegment, green));
       return group;

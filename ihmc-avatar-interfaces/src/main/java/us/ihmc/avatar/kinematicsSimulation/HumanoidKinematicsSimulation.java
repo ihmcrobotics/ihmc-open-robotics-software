@@ -328,8 +328,7 @@ public class HumanoidKinematicsSimulation
                                                                             controllerToolbox.getWholeBodyAngularVelocityCalculator(),
                                                                             GRAVITY_Z,
                                                                             controllerToolbox.getControlDT(),
-                                                                            walkingParentRegistry,
-                                                                            yoGraphicsListRegistry);
+                                                                            walkingParentRegistry);
 
       ParameterLoaderHelper.loadParameters(this, robotModel, drcControllerThreadRegistry);
       YoVariable defaultHeight = registry.findVariable(PelvisHeightControlState.class.getSimpleName(),

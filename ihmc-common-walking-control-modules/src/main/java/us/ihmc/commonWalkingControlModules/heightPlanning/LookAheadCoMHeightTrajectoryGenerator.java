@@ -113,7 +113,6 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
                                                 ReferenceFrame frameOfHeight,
                                                 SideDependentList<? extends ReferenceFrame> soleFrames,
                                                 DoubleProvider yoTime,
-                                                YoGraphicsListRegistry yoGraphicsListRegistry,
                                                 YoRegistry parentRegistry)
    {
       this(minimumLegLength,
@@ -127,7 +126,6 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
            frameOfHeight,
            soleFrames,
            yoTime,
-           yoGraphicsListRegistry,
            parentRegistry);
    }
 
@@ -142,7 +140,6 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
                                                 ReferenceFrame frameOfHeight,
                                                 SideDependentList<? extends ReferenceFrame> soleFrames,
                                                 DoubleProvider yoTime,
-                                                YoGraphicsListRegistry yoGraphicsListRegistry,
                                                 YoRegistry parentRegistry)
    {
       this.centerOfMassFrame = centerOfMassFrame;
@@ -162,7 +159,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
 
       heightWaypoints = new RecyclingArrayList<>(6, SupplierBuilder.indexedSupplier(this::createHeightWaypoint));
 
-      splinedHeightTrajectory = new SplinedHeightTrajectory(registry, yoGraphicsListRegistry);
+      splinedHeightTrajectory = new SplinedHeightTrajectory(registry);
 
       setSupportLeg(RobotSide.LEFT);
 
@@ -171,39 +168,6 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
       this.nominalLegLength.addListener(v -> initializeToNominalHeight());
 
       parentRegistry.addChild(registry);
-
-      if (yoGraphicsListRegistry == null)
-         visualize = false;
-
-      if (visualize)
-      {
-         double pointSize = 0.03;
-
-         String prefix = "better_";
-
-         List<AppearanceDefinition> colors = new ArrayList<>();
-         colors.add(YoAppearance.CadetBlue());
-         colors.add(YoAppearance.Chartreuse());
-         colors.add(YoAppearance.Yellow());
-         colors.add(YoAppearance.Yellow());
-         colors.add(YoAppearance.BlueViolet());
-         colors.add(YoAppearance.Azure());
-
-         String graphicListName = "CoMHeightTrajectoryGenerator";
-
-         heightWaypoints.clear();
-         for (int i = 0; i < colors.size(); i++)
-         {
-            heightWaypoints.add().setupViz(graphicListName, prefix + "HeightWaypoint" + i, colors.get(i), yoGraphicsListRegistry);
-         }
-
-         YoGraphicPosition desiredCoMPositionViz = new YoGraphicPosition(prefix + "desiredCoMPosition",
-                                                                         desiredCoMPosition,
-                                                                         1.1 * pointSize,
-                                                                         YoAppearance.Gold());
-
-         yoGraphicsListRegistry.registerYoGraphic(graphicListName, desiredCoMPositionViz);
-      }
       heightWaypoints.clear();
    }
 
