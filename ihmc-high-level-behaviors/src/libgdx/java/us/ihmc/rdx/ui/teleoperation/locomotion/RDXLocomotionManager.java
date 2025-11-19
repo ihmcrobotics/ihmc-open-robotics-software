@@ -72,6 +72,7 @@ public class RDXLocomotionManager
    private ImGuiStoredPropertySetBooleanWidget planBodyPathCheckbox;
    private ImGuiStoredPropertySetDoubleWidget swingTimeSlider;
    private ImGuiStoredPropertySetDoubleWidget transferTimeSlider;
+   private ImGuiStoredPropertySetDoubleWidget swingHeightSlider;
    private ImGuiSliderDouble stepAggressivenessSlider;
    private ImGuiSliderDouble turnAggressivenessSlider;
    private ImGuiStoredPropertySetEnumWidget initialStanceSideRadioButtons;
@@ -156,6 +157,7 @@ public class RDXLocomotionManager
       planBodyPathCheckbox = locomotionParametersTuner.createBooleanCheckbox(LocomotionParameters.planWidthBodyPath);
       swingTimeSlider = locomotionParametersTuner.createDoubleSlider(LocomotionParameters.swingTime, "s", 0.3, 1.5, "%.2f", true);
       transferTimeSlider = locomotionParametersTuner.createDoubleSlider(LocomotionParameters.transferTime, "s", 0.1, 1.5, "%.2f", true);
+      swingHeightSlider = locomotionParametersTuner.createDoubleSlider(LocomotionParameters.swingHeight, "m", 0.1, 1.5, "%.2f", true);
       stepAggressivenessSlider = new ImGuiSliderDouble("Step Aggressiveness", "%.2f",aStarFootstepPlannerParameters.getIdealFootstepLength()
                                                                                      / aStarFootstepPlannerParameters.getMaxStepReach());
       turnAggressivenessSlider = new ImGuiSliderDouble("Turn Aggressiveness", "%.2f", 0.5);
@@ -377,6 +379,11 @@ public class RDXLocomotionManager
          ImGui.setCursorPosX(widgetStartX);
          ImGui.setNextItemWidth(-1);
          transferTimeSlider.renderImGuiWidget();
+         ImGui.text("Swing Height:");
+         ImGui.sameLine();
+         ImGui.setCursorPosX(widgetStartX);
+         ImGui.setNextItemWidth(-1);
+         swingHeightSlider.renderImGuiWidget();
          ImGui.text("Step Aggressiveness:");
          ImGui.sameLine();
          ImGui.setCursorPosX(widgetStartX);
