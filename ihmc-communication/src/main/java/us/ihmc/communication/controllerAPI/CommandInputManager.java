@@ -218,11 +218,11 @@ public class CommandInputManager
          LogTools.error("{}The message type {} is not supported.", printStatementPrefix, message.getClass().getSimpleName());
          return;
       }
-      Command nextCommand = (Command) buffer.next();
-      if (nextCommand == null)
+      Command nextCommand;
+      while ((nextCommand = (Command) buffer.next()) == null)
       {
-         LogTools.warn("{}The buffer for the message: {} is full. Message ignored.", printStatementPrefix, message.getClass().getSimpleName());
-         return;
+         buffer.poll();
+         LogTools.warn("{}The buffer for the message: {} is full. Ignoring oldest message.", printStatementPrefix, message.getClass().getSimpleName());
       }
 
       Class<?> commandClass = nextCommand.getClass();
