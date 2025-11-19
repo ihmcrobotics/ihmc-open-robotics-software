@@ -62,6 +62,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    private final String nodePopupID = labels.get("Node popup");
    private String modalPopupID = labels.get("Create node");
    private final ImGuiScrollableLogArea logArea = new ImGuiScrollableLogArea();
+   public static boolean logNotifications = true;
    private RDXBehaviorTreeNode<?, ?> draggedNode = null;
    private boolean dragging = false;
    private boolean dragReleasedBefore = false;
@@ -130,7 +131,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       {
          LogMessage message = state.getLogger().getRecentMessages().poll();
          logArea.submitEntry(message.instant(), message.level(), message.message());
-         RDXBaseUI.pushNotification(message.message());
+         RDXBaseUI.pushNotification(message.message(), logNotifications);
       }
    }
 
