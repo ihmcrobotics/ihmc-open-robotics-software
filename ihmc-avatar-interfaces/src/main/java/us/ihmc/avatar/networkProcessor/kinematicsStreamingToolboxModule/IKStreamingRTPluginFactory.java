@@ -366,12 +366,6 @@ public class IKStreamingRTPluginFactory
          return humanoidRobotContextData;
       }
 
-      public YoGraphicsListRegistry getSCS1YoGraphicsListRegistry()
-      {
-         // FIXME There's duplicate YoGraphics
-         return new YoGraphicsListRegistry();
-      }
-
       @Override
       public YoGraphicGroupDefinition getSCS2YoGraphics()
       {

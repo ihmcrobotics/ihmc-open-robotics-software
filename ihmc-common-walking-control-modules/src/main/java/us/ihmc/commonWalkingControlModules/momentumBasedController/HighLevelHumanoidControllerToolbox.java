@@ -136,7 +136,6 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    private final FootShakiesEstimator footShakiesEstimator;
 
    private ContactPointVisualizer contactPointVisualizer;
-   private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
    private final JointBasics[] controlledJoints;
    private final OneDoFJointBasics[] controlledOneDoFJoints;
@@ -198,11 +197,9 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
                                              boolean kinematicsSimulation, // Whether to create for non-physical motion generation only
                                              List<Updatable> updatables,
                                              List<ContactablePlaneBody> contactableBodies,
-                                             YoGraphicsListRegistry yoGraphicsListRegistry,
                                              JointBasics... jointsToIgnore)
    {
       this.centerOfMassStateProvider = centerOfMassStateProvider;
-      this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
 
@@ -867,11 +864,6 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    public BipedSupportPolygons getBipedSupportPolygons()
    {
       return bipedSupportPolygons;
-   }
-
-   public YoGraphicsListRegistry getYoGraphicsListRegistry()
-   {
-      return yoGraphicsListRegistry;
    }
 
    public JointBasics[] getControlledJoints()

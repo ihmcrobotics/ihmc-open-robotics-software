@@ -37,7 +37,6 @@ import us.ihmc.yoVariables.variable.YoLong;
 public class AvatarStepGeneratorThread implements AvatarControllerThreadInterface
 {
    private final YoRegistry csgRegistry = new YoRegistry("csgRegistry");
-   private final YoGraphicsListRegistry csgGraphics = new YoGraphicsListRegistry();
 
    private final HumanoidSteppingPlugin continuousStepGeneratorPlugin;
    private final FullHumanoidRobotModel fullRobotModel;
@@ -181,10 +180,6 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
       return csgRegistry;
    }
 
-   public YoGraphicsListRegistry getSCS1YoGraphicsListRegistry()
-   {
-      return csgGraphics;
-   }
 
    @Override
    public YoGraphicGroupDefinition getSCS2YoGraphics()

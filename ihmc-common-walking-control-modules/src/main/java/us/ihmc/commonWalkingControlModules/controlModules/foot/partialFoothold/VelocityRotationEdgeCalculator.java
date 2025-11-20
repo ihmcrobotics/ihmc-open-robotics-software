@@ -8,6 +8,10 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.DefaultPoint2DGraphic;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFramePoint2D;
 import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFrameVector2D;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -19,6 +23,8 @@ import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.providers.IntegerProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
+
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicPoint2D;
 
 public class VelocityRotationEdgeCalculator implements RotationEdgeCalculator
 {
@@ -84,7 +90,7 @@ public class VelocityRotationEdgeCalculator implements RotationEdgeCalculator
       lineOfRotationStandardDeviation = new Line2DStatisticsCalculator(namePrefix + "LineOfRotation", lineOfRotationInSole, registry);
 
       if (graphicsListRegistry != null)
-         edgeVisualizer = new EdgeVisualizer(namePrefix, Color.GREEN, registry, graphicsListRegistry);
+         edgeVisualizer = new EdgeVisualizer(namePrefix, ColorDefinitions.Green(), registry);
       else
          edgeVisualizer = null;
 
@@ -164,5 +170,14 @@ public class VelocityRotationEdgeCalculator implements RotationEdgeCalculator
    public boolean isRotationEdgeTrusted()
    {
       return stabilityEvaluator.isEdgeVelocityStable();
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      if (edgeVisualizer != null)
+         group.addChild(edgeVisualizer.getSCS2YoGraphics());
+      return group;
    }
 }

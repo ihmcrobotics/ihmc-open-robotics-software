@@ -471,7 +471,6 @@ public class AvatarMultiThreadingFactory
                                                                HighLevelHumanoidControllerFactory controllerFactory)
    {
       AvatarStepGeneratorThread stepGeneratorThread = null;
-      YoGraphicsListRegistry stepGeneratorGraphics = null;
 
       LogTools.info("create step generator = " + createStepGeneratorThread);
 
@@ -483,8 +482,6 @@ public class AvatarMultiThreadingFactory
 
       if (createStepGeneratorThread)
       {
-         stepGeneratorGraphics = new YoGraphicsListRegistry();
-
          stepGeneratorThread = new AvatarStepGeneratorThread(pluginFactory,
                                                              controllerContextFactory,
                                                              controllerFactory.getStatusOutputManager(),

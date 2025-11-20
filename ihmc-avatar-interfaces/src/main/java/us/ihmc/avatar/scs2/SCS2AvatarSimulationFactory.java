@@ -122,9 +122,6 @@ public class SCS2AvatarSimulationFactory
          "highLevelHumanoidControllerFactory");
    protected final ArrayList<TerrainObjectDefinition> terrainObjectDefinitions = new ArrayList<>();
 
-   protected final OptionalFactoryField<Boolean> enableSCS1YoGraphics = new OptionalFactoryField<Boolean>(
-         "enableSCS1YoGraphics",
-         false);
    protected final OptionalFactoryField<Boolean> enableSCS2YoGraphics = new OptionalFactoryField<Boolean>(
          "enableSCS2YoGraphics",
          true);
@@ -526,8 +523,6 @@ public class SCS2AvatarSimulationFactory
                                                     ros2Node,
                                                     gravity.get(),
                                                     kinematicsSimulation.get());
-      if (enableSCS1YoGraphics.get())
-         simulationConstructionSet.addYoGraphics(YoGraphicConversionTools.toYoGraphicDefinitions(controllerThread.getSCS1YoGraphicsListRegistry()));
       if (enableSCS2YoGraphics.get())
          simulationConstructionSet.addYoGraphic(controllerThread.getSCS2YoGraphics());
    }

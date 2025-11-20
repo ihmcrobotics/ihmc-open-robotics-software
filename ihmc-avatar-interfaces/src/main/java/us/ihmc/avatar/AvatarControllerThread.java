@@ -77,7 +77,6 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
    private final FullHumanoidRobotModel controllerFullRobotModel;
    private final FullRobotModelCorruptor fullRobotModelCorruptor;
 
-   private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private final List<Supplier<YoGraphicDefinition>> scs2YoGraphicHolders = new ArrayList<>();
 
    private final ModularRobotController robotController;
@@ -225,7 +224,6 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
                                                             CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
                                                             HumanoidRobotSensorInformation sensorInformation,
                                                             JointDesiredOutputListBasics lowLevelControllerOutput,
-                                                            YoGraphicsListRegistry yoGraphicsListRegistry,
                                                             YoRegistry registry,
                                                             boolean kinematicsSimulation,
                                                             JointBasics... jointsToIgnore)
@@ -236,7 +234,6 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
          {
             CenterOfMassCalibrationTool centerOfMassCalibrationTool = new CenterOfMassCalibrationTool(controllerModel,
                                                                                                       forceSensorDataHolderForController,
-                                                                                                      yoGraphicsListRegistry,
                                                                                                       registry);
             controllerFactory.addUpdatable(centerOfMassCalibrationTool);
          }
@@ -251,7 +248,6 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
                                                                                            gravity,
                                                                                            kinematicsSimulation,
                                                                                            yoTime,
-                                                                                           yoGraphicsListRegistry,
                                                                                            sensorInformation,
                                                                                            forceSensorDataHolderForController,
                                                                                            centerOfMassDataHolderForController,
@@ -269,6 +265,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
          {
             CommonInertiaEllipsoidsVisualizer commonInertiaElipsoidsVisualizer = new CommonInertiaEllipsoidsVisualizer(controllerModel.getElevator(),
                                                                                                                        yoGraphicsListRegistry);
+            scs2YoGraphicHolders.add(commonInertiaElipsoidsVisualizer);
             modularRobotController.addRobotController(commonInertiaElipsoidsVisualizer);
          }
 
@@ -277,12 +274,14 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
             InverseDynamicsMechanismReferenceFrameVisualizer inverseDynamicsMechanismReferenceFrameVisualizer = new InverseDynamicsMechanismReferenceFrameVisualizer(controllerModel.getElevator(),
                                                                                                                                                                      yoGraphicsListRegistry,
                                                                                                                                                                      0.5);
+            scs2YoGraphicHolders.add(inverseDynamicsMechanismReferenceFrameVisualizer);
             modularRobotController.addRobotController(inverseDynamicsMechanismReferenceFrameVisualizer);
          }
 
          if (SHOW_JOINTAXIS_ZALIGN_FRAMES)
          {
             JointAxisVisualizer jointAxisVisualizer = new JointAxisVisualizer(controllerModel.getElevator(), yoGraphicsListRegistry, 0.3);
+            scs2YoGraphicHolders.add(jointAxisVisualizer);
             modularRobotController.addRobotController(jointAxisVisualizer);
          }
       }
@@ -358,11 +357,6 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
    public YoRegistry getYoVariableRegistry()
    {
       return registry;
-   }
-
-   public YoGraphicsListRegistry getSCS1YoGraphicsListRegistry()
-   {
-      return yoGraphicsListRegistry;
    }
 
    @Override

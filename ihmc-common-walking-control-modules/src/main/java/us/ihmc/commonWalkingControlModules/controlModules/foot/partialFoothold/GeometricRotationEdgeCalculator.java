@@ -12,6 +12,9 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.statistics.Line2DStatisticsCalculator;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameLine2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
@@ -64,7 +67,7 @@ public class GeometricRotationEdgeCalculator implements RotationEdgeCalculator
       lineOfRotationStandardDeviation = new Line2DStatisticsCalculator(namePrefix + "LineOfRotation", lineOfRotationInSole, registry);
 
       if (graphicsListRegistry != null)
-         edgeVisualizer = new EdgeVisualizer(namePrefix, Color.GREEN, registry, graphicsListRegistry);
+         edgeVisualizer = new EdgeVisualizer(namePrefix, ColorDefinitions.Green(), registry);
       else
          edgeVisualizer = null;
 
@@ -127,5 +130,14 @@ public class GeometricRotationEdgeCalculator implements RotationEdgeCalculator
    public boolean isRotationEdgeTrusted()
    {
       return stabilityEvaluator.isEdgeVelocityStable();
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      if (edgeVisualizer != null)
+         group.addChild(edgeVisualizer.getSCS2YoGraphics());
+      return group;
    }
 }
