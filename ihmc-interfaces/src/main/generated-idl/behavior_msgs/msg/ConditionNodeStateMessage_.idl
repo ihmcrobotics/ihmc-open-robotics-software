@@ -3,6 +3,7 @@
 
 #include "behavior_msgs/msg/./ConditionNodeDefinitionMessage_.idl"
 #include "behavior_msgs/msg/./LeafNodeStateMessage_.idl"
+#include "geometry_msgs/msg/./Vector3_.idl"
 module behavior_msgs
 {
   module msg
@@ -35,13 +36,17 @@ module behavior_msgs
          */
         boolean request_reset_context;
         /**
-         * The current distance of the object from the reference frame
+         * The positional vector from frame B to frame A in world frame
          */
-        double current_distance;
+        geometry_msgs::msg::dds::Vector3 b_to_a;
         /**
-         * Whether frame to evaluate the proximity is missing
+         * Whether frame A is present
          */
-        boolean missing_frame;
+        boolean frame_a_is_present;
+        /**
+         * Whether frame B is present
+         */
+        boolean frame_b_is_present;
       };
     };
   };

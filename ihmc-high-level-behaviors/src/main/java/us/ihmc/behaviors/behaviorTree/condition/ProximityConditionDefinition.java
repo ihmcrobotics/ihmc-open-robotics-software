@@ -3,7 +3,6 @@ package us.ihmc.behaviors.behaviorTree.condition;
 import behavior_msgs.msg.dds.ConditionNodeDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import us.ihmc.communication.crdt.CRDTBidirectionalBoolean;
 import us.ihmc.communication.crdt.CRDTBidirectionalDouble;
 import us.ihmc.communication.crdt.CRDTBidirectionalEnumField;
 import us.ihmc.communication.crdt.CRDTBidirectionalString;
@@ -21,172 +20,162 @@ public class ProximityConditionDefinition
       public static final DistanceType[] values = values();
    }
 
-   private final CRDTBidirectionalEnumField<DistanceType> type;
+   private final CRDTBidirectionalEnumField<DistanceType> distanceType;
 
-   private final CRDTBidirectionalString objectFrameName;
-   private final CRDTBidirectionalString referenceFrameName;
-   private final CRDTBidirectionalDouble maxDistanceToObject;
-   private final CRDTBidirectionalDouble maxEvaluationTime;
-   private final CRDTBidirectionalBoolean manageMissingFrameInternally;
+   private final CRDTBidirectionalString frameNameA;
+   private final CRDTBidirectionalString frameNameB;
+   private final CRDTBidirectionalDouble minDistance;
+   private final CRDTBidirectionalDouble maxDistance;
+   private final CRDTBidirectionalDouble timeout;
 
-   private DistanceType onDiskType;
-   private String onDiskObjectFrameName;
-   private String onDiskReferenceFrameName;
-   private double onDiskDistanceToObject;
-   private double onDiskMaxEvaluationTime;
-   private boolean onDiskManageMissingFrameInternally;
+   private DistanceType onDiskDistanceType;
+   private String onDiskFrameNameA;
+   private String onDiskFrameNameB;
+   private double onDiskMinDistance;
+   private double onDiskMaxDistance;
+   private double onDiskTimeout;
 
    public ProximityConditionDefinition(LatestTimestampModifiable latestTimestampModifiable)
    {
-      type = new CRDTBidirectionalEnumField<>(latestTimestampModifiable, DistanceType.XYZ);
-      objectFrameName = new CRDTBidirectionalString(latestTimestampModifiable, ReferenceFrame.getWorldFrame().getName());
-      referenceFrameName = new CRDTBidirectionalString(latestTimestampModifiable, ReferenceFrame.getWorldFrame().getName());
-      maxDistanceToObject = new CRDTBidirectionalDouble(latestTimestampModifiable, 1.0);
-      maxEvaluationTime = new CRDTBidirectionalDouble(latestTimestampModifiable, 5.0);
-      manageMissingFrameInternally = new CRDTBidirectionalBoolean(latestTimestampModifiable, false);
+      distanceType = new CRDTBidirectionalEnumField<>(latestTimestampModifiable, DistanceType.XYZ);
+      frameNameA = new CRDTBidirectionalString(latestTimestampModifiable, ReferenceFrame.getWorldFrame().getName());
+      frameNameB = new CRDTBidirectionalString(latestTimestampModifiable, ReferenceFrame.getWorldFrame().getName());
+      minDistance = new CRDTBidirectionalDouble(latestTimestampModifiable, 0.0);
+      maxDistance = new CRDTBidirectionalDouble(latestTimestampModifiable, 1.0);
+      timeout = new CRDTBidirectionalDouble(latestTimestampModifiable, 5.0);
    }
 
    public void saveToFile(ObjectNode jsonNode)
    {
-      jsonNode.put("objectFrameName", objectFrameName.getValue());
-      jsonNode.put("referenceFrameName", referenceFrameName.getValue());
-      jsonNode.put("maxDistanceToObject", maxDistanceToObject.getValue());
-      jsonNode.put("distanceType", type.getValue().toString());
-      jsonNode.put("maxEvaluationTime", maxEvaluationTime.getValue());
-      jsonNode.put("manageMissingFrameInternally", manageMissingFrameInternally.getValue());
+      jsonNode.put("distanceType", distanceType.getValue().toString());
+      jsonNode.put("frameNameA", frameNameA.getValue());
+      jsonNode.put("frameNameB", frameNameB.getValue());
+      jsonNode.put("minDistance", minDistance.getValue());
+      jsonNode.put("maxDistance", maxDistance.getValue());
+      jsonNode.put("timeout", timeout.getValue());
    }
 
    public void loadFromFile(JsonNode jsonNode)
    {
-      objectFrameName.setValue(jsonNode.get("objectFrameName").textValue());
-      referenceFrameName.setValue(jsonNode.get("referenceFrameName").textValue());
-      maxDistanceToObject.setValue(jsonNode.get("maxDistanceToObject").asDouble());
-      type.setValue(DistanceType.valueOf(jsonNode.get("distanceType").textValue()));
-      maxEvaluationTime.setValue(jsonNode.get("maxEvaluationTime").asDouble());
-      manageMissingFrameInternally.setValue(jsonNode.get("manageMissingFrameInternally").asBoolean());
+      distanceType.setValue(DistanceType.valueOf(jsonNode.get("distanceType").textValue()));
+      frameNameA.setValue(jsonNode.get("frameNameA").textValue());
+      frameNameB.setValue(jsonNode.get("frameNameB").textValue());
+      minDistance.setValue(jsonNode.get("minDistance").asDouble());
+      maxDistance.setValue(jsonNode.get("maxDistance").asDouble());
+      timeout.setValue(jsonNode.get("timeout").asDouble());
    }
 
    public void setOnDiskFields()
    {
-      onDiskType = type.getValue();
-      onDiskObjectFrameName = objectFrameName.getValue();
-      onDiskReferenceFrameName = referenceFrameName.getValue();
-      onDiskDistanceToObject = maxDistanceToObject.getValue();
-      onDiskMaxEvaluationTime = maxEvaluationTime.getValue();
-      onDiskManageMissingFrameInternally = manageMissingFrameInternally.getValue();
+      onDiskDistanceType = distanceType.getValue();
+      onDiskFrameNameA = frameNameA.getValue();
+      onDiskFrameNameB = frameNameB.getValue();
+      onDiskMinDistance = minDistance.getValue();
+      onDiskMaxDistance = maxDistance.getValue();
+      onDiskTimeout = timeout.getValue();
    }
 
    public void undoAllNontopologicalChanges()
    {
-      type.setValue(onDiskType);
-      objectFrameName.setValue(onDiskObjectFrameName);
-      referenceFrameName.setValue(onDiskReferenceFrameName);
-      maxDistanceToObject.setValue(onDiskDistanceToObject);
-      maxEvaluationTime.setValue(onDiskMaxEvaluationTime);
-      manageMissingFrameInternally.setValue(onDiskManageMissingFrameInternally);
+      distanceType.setValue(onDiskDistanceType);
+      frameNameA.setValue(onDiskFrameNameA);
+      frameNameB.setValue(onDiskFrameNameB);
+      minDistance.setValue(onDiskMinDistance);
+      maxDistance.setValue(onDiskMaxDistance);
+      timeout.setValue(onDiskTimeout);
    }
 
    public boolean hasChanges()
    {
       boolean unchanged = true;
 
-      unchanged &= type.getValue() == onDiskType;
-      unchanged &= objectFrameName.getValue().equals(onDiskObjectFrameName);
-      unchanged &= referenceFrameName.getValue().equals(onDiskReferenceFrameName);
-      unchanged &= maxDistanceToObject.getValue() == (onDiskDistanceToObject);
-      unchanged &= maxEvaluationTime.getValue() == (onDiskMaxEvaluationTime);
-      unchanged &= manageMissingFrameInternally.getValue() == (onDiskManageMissingFrameInternally);
+      unchanged &= distanceType.getValue() == onDiskDistanceType;
+      unchanged &= frameNameA.getValue().equals(onDiskFrameNameA);
+      unchanged &= frameNameB.getValue().equals(onDiskFrameNameB);
+      unchanged &= minDistance.getValue() == (onDiskMinDistance);
+      unchanged &= maxDistance.getValue() == (onDiskMaxDistance);
+      unchanged &= timeout.getValue() == (onDiskTimeout);
 
       return !unchanged;
    }
 
    public void toMessage(ConditionNodeDefinitionMessage message)
    {
-      message.setProximityDistanceType((byte) type.toMessage().ordinal());
-      message.setProximityObjectFrameName(objectFrameName.toMessage());
-      message.setProximityReferenceFrameName(referenceFrameName.toMessage());
-      message.setProximityDistanceToObject(maxDistanceToObject.toMessage());
-      message.setProximityEvaluationTime(maxEvaluationTime.toMessage());
-      message.setManageMissingFrameInternally(manageMissingFrameInternally.toMessage());
+      message.setDistanceType(distanceType.toMessageOrdinal());
+      message.setFrameNameA(frameNameA.toMessage());
+      message.setFrameNameB(frameNameB.toMessage());
+      message.setMinDistance(minDistance.toMessage());
+      message.setMaxDistance(maxDistance.toMessage());
+      message.setTimeout(timeout.toMessage());
    }
 
    public void fromMessage(ConditionNodeDefinitionMessage message)
    {
-      type.fromMessage(DistanceType.values()[message.getProximityDistanceType()]);
-      objectFrameName.fromMessage(message.getProximityObjectFrameNameAsString());
-      referenceFrameName.fromMessage(message.getProximityReferenceFrameNameAsString());
-      maxDistanceToObject.fromMessage(message.getProximityDistanceToObject());
-      maxEvaluationTime.fromMessage(message.getProximityEvaluationTime());
-      manageMissingFrameInternally.fromMessage(message.getManageMissingFrameInternally());
+      distanceType.fromMessageOrdinal(message.getDistanceType(), DistanceType.values);
+      frameNameA.fromMessage(message.getFrameNameAAsString());
+      frameNameB.fromMessage(message.getFrameNameBAsString());
+      minDistance.fromMessage(message.getMinDistance());
+      maxDistance.fromMessage(message.getMaxDistance());
+      timeout.fromMessage(message.getTimeout());
    }
 
-   public void setObjectFrameName(String objectFrameName)
+   public void setFrameNameA(String frameNameA)
    {
-      this.objectFrameName.setValue(objectFrameName);
+      this.frameNameA.setValue(frameNameA);
    }
 
-   public void setReferenceFrameName(String referenceFrameName)
+   public void setFrameNameB(String frameNameB)
    {
-      this.referenceFrameName.setValue(referenceFrameName);
+      this.frameNameB.setValue(frameNameB);
    }
 
-   public void setMaxDistanceToObject(double distance)
+   public void setTimeout(double time)
    {
-      this.maxDistanceToObject.setValue(distance);
+      this.timeout.setValue(time);
    }
 
-   public void setMaxEvaluationTime(double time)
+   public String getFrameNameA()
    {
-      this.maxEvaluationTime.setValue(time);
+      return frameNameA.getValue();
    }
 
-   public void setManageMissingFrameInternally(boolean value)
+   public String getFrameNameB()
    {
-      this.manageMissingFrameInternally.setValue(value);
+      return frameNameB.getValue();
    }
 
-   public String getObjectFrameName()
+   public double getMaxDistance()
    {
-      return objectFrameName.getValue();
+      return maxDistance.getValue();
    }
 
-   public String getReferenceFrameName()
+   public void setMaxDistance(double maxDistance)
    {
-      return referenceFrameName.getValue();
+      this.maxDistance.setValue(maxDistance);
    }
 
-   public double getMaxDistanceToObject()
+   public double getMinDistance()
    {
-      return maxDistanceToObject.getValue();
+      return minDistance.getValue();
    }
 
-   public CRDTBidirectionalString getCRDTObjectFrameName()
+   public void setMinDistance(double minDistance)
    {
-      return objectFrameName;
+      this.minDistance.setValue(minDistance);
    }
 
-   public CRDTBidirectionalString getCRDTReferenceFrameName()
+   public DistanceType getDistanceType()
    {
-      return referenceFrameName;
+      return distanceType.getValue();
    }
 
-   public CRDTBidirectionalDouble getCRDTMaxDistanceToObject()
+   public void setDistanceType(DistanceType distanceType)
    {
-      return maxDistanceToObject;
+      this.distanceType.setValue(distanceType);
    }
 
-   public CRDTBidirectionalDouble getCRDTMaxEvaluationTime()
+   public double getTimeout()
    {
-      return maxEvaluationTime;
-   }
-
-   public CRDTBidirectionalBoolean getCRDTManageMissingFrameInternally()
-   {
-      return manageMissingFrameInternally;
-   }
-
-   public CRDTBidirectionalEnumField<DistanceType> getType()
-   {
-      return type;
+      return timeout.getValue();
    }
 }

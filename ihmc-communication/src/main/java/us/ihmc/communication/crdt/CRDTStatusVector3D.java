@@ -21,6 +21,15 @@ public class CRDTStatusVector3D extends CRDTStatusMutableField<Vector3D>
       return getValueInternal();
    }
 
+   /** Prefer this method in the case you need to call it every tick, as it no-ops in the case the value is the same. */
+   public void setValue(Vector3DReadOnly value, double epsilon)
+   {
+      if (!(getValueInternal().epsilonEquals(value, epsilon)))
+      {
+         accessValue().set(value);
+      }
+   }
+
    public void toMessage(Vector3D message)
    {
       message.set(getValueReadOnly());
