@@ -30,6 +30,11 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
       return get(logHeightMap);
    }
 
+   default double getMinDepthToAccept()
+   {
+      return get(minDepthToAccept);
+   }
+
    default double getMinHeightRegistration()
    {
       return get(minHeightRegistration);
