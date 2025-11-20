@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.ContinuousStepGeneratorInputMessage;
 import controller_msgs.msg.dds.ContinuousStepGeneratorParametersMessage;
 import controller_msgs.msg.dds.ContinuousStepGeneratorStatusMessage;
 import imgui.ImGui;
+import imgui.flag.ImGuiMouseButton;
 import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -45,17 +46,13 @@ public class RDXCSGPanel extends RDXPanel
    // Xbox joystick walking plugin
    private RDXXboxOneCSGPlugin xBoxOneCSGPlugin;
 
-   // These are used to reset the desired velocity sliders to 0.0 m/s
-   private boolean resetDesiredForwardVelocityNextTick = false;
-   private boolean resetDesiredLateralVelocityNextTick = false;
-   private boolean resetDesiredTurningVelocityNextTick = false;
-
    public RDXCSGPanel(DRCRobotModel robotModel, ROS2Node ros2Node, boolean createXboxPlugin)
    {
       super("CSG Controls");
       super.setRenderMethod(this::renderImGuiWidgets);
 
       communicationHelper = new CSGROS2CommunicationHelper(robotModel.getSimpleRobotName(), ros2Node, robotModel.getWalkingControllerParameters());
+      communicationHelper.addVolatileCSGStatusCallbackSubscription(this::reset);
 
       csgParametersCommand = communicationHelper.getCSGParametersCommand();
       csgStatusMessage = communicationHelper.getCSGStatusMessage();
@@ -73,34 +70,6 @@ public class RDXCSGPanel extends RDXPanel
 
    public void renderImGuiWidgets()
    {
-      boolean publishCSGInputCommand = false;
-
-      reset(csgStatusMessage);
-
-      if (resetDesiredForwardVelocityNextTick)
-      {
-         forwardVelocity.set(0.0);
-         csgInputCommand.setForwardVelocity(0.0);
-         resetDesiredForwardVelocityNextTick = false;
-         publishCSGInputCommand = true;
-      }
-
-      if (resetDesiredLateralVelocityNextTick)
-      {
-         lateralVelocity.set(0.0);
-         csgInputCommand.setLateralVelocity(0.0);
-         resetDesiredLateralVelocityNextTick = false;
-         publishCSGInputCommand = true;
-      }
-
-      if (resetDesiredTurningVelocityNextTick)
-      {
-         turningVelocity.set(0.0);
-         csgInputCommand.setTurnVelocity(0.0);
-         resetDesiredTurningVelocityNextTick = false;
-         publishCSGInputCommand = true;
-      }
-
       // Calculate min and max velocities based on max step length and desired step duration
       double maxVelocityX;
       double minVelocityX;
@@ -142,8 +111,13 @@ public class RDXCSGPanel extends RDXPanel
       boolean requestCSGWalkingChanged = ImGui.checkbox(labels.get("Request Walk CSG"), requestWalkCSG);
 
       boolean desiredForwardVelocityChanged = ImGuiTools.sliderDouble(labels.getHidden("Forward Velocity " + velocityUnitsDescription), forwardVelocity, minVelocityX, maxVelocityX, "Forward Velocity " + velocityUnitsDescription + ": %.2f");
+      boolean desiredForwardVelocityIsHovered = ImGui.isItemHovered();
+
       boolean desiredLateralVelocityChanged = ImGuiTools.sliderDouble(labels.getHidden("Lateral Velocity " + velocityUnitsDescription), lateralVelocity, -minMaxVelocityY, minMaxVelocityY, "Lateral Velocity " + velocityUnitsDescription + ": %.2f");
+      boolean desiredLateralVelocityIsHovered = ImGui.isItemHovered();
+
       boolean desiredTurningVelocityChanged = ImGuiTools.sliderDouble(labels.getHidden("Turning Velocity " + velocityUnitsDescription), turningVelocity, -minMaxVelocityTurn, minMaxVelocityTurn, "Turning Velocity " + velocityUnitsDescription + ": %.2f");
+      boolean desiredTurningVelocityIsHovered = ImGui.isItemHovered();
 
       boolean swingDurationChanged = ImGuiTools.volatileInputDouble(labels.get("Swing Duration"), swingDuration);
       boolean transferDurationChanged = ImGuiTools.volatileInputDouble(labels.get("Transfer Duration"), transferDuration);
@@ -159,22 +133,13 @@ public class RDXCSGPanel extends RDXPanel
          csgInputCommand.setWalk(requestWalkCSG.get());
 
       if (desiredForwardVelocityChanged)
-      {
          csgInputCommand.setForwardVelocity(forwardVelocity.get());
-         resetDesiredForwardVelocityNextTick = true;
-      }
 
       if (desiredLateralVelocityChanged)
-      {
          csgInputCommand.setLateralVelocity(lateralVelocity.get());
-         resetDesiredLateralVelocityNextTick = true;
-      }
 
       if (desiredTurningVelocityChanged)
-      {
          csgInputCommand.setTurnVelocity(turningVelocity.get());
-         resetDesiredTurningVelocityNextTick = true;
-      }
 
       if (swingDurationChanged)
          csgParametersCommand.setSwingDuration(swingDuration.get());
@@ -197,17 +162,43 @@ public class RDXCSGPanel extends RDXPanel
       if (stepsAreAdjustableChanged)
          csgParametersCommand.setStepsAreAdjustable(stepsAreAdjustable.get());
 
-      publishCSGInputCommand = publishCSGInputCommand || requestCSGWalkingChanged || desiredForwardVelocityChanged || desiredLateralVelocityChanged
+
+      boolean publishCSGInputCommand = requestCSGWalkingChanged || desiredForwardVelocityChanged || desiredLateralVelocityChanged
                                || desiredTurningVelocityChanged;
+
       boolean publishCSGParametersCommand =
             swingDurationChanged || transferDurationChanged || maxStepLengthForwardsChanged || maxStepLengthBackwardsChanged
             || maxStepWidthChanged || swingHeightChanged || stepsAreAdjustableChanged;
 
-      if (publishCSGInputCommand)
+      if (desiredForwardVelocityIsHovered && ImGui.isMouseReleased(ImGuiMouseButton.Left))
+      {
+         forwardVelocity.set(0.0);
+         csgInputCommand.setForwardVelocity(0.0);
          communicationHelper.publish(csgInputCommand);
+         publishCSGInputCommand = false;
+      }
+
+      if (desiredLateralVelocityIsHovered && ImGui.isMouseReleased(ImGuiMouseButton.Left))
+      {
+         lateralVelocity.set(0.0);
+         csgInputCommand.setLateralVelocity(0.0);
+         communicationHelper.publish(csgInputCommand);
+         publishCSGInputCommand = false;
+      }
+
+      if (desiredTurningVelocityIsHovered && ImGui.isMouseReleased(ImGuiMouseButton.Left))
+      {
+         turningVelocity.set(0.0);
+         csgInputCommand.setTurnVelocity(0.0);
+         communicationHelper.publish(csgInputCommand);
+         publishCSGInputCommand = false;
+      }
+
+      if (publishCSGInputCommand)
+         communicationHelper.publishAtThrottledRate(csgInputCommand);
 
       if (publishCSGParametersCommand)
-         communicationHelper.publish(csgParametersCommand);
+         communicationHelper.publishAtThrottledRate(csgParametersCommand);
    }
 
    private void reset(ContinuousStepGeneratorStatusMessage csgStatusMessage)
