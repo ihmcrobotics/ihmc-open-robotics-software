@@ -5,7 +5,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2DemandGraphNode;
-import us.ihmc.communication.ros2.ROS2DemandGraphTools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2TunedRigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
@@ -41,6 +40,7 @@ public class ContinuousHikingProcess
    private final GpuMappingThread gpuMappingThread;
 
    private final ROS2DemandGraphNode heightMapDemandNode;
+   private final ROS2DemandGraphNode heightMapControllerDemandNode;
    private final ROS2DemandGraphNode terrainMapDemandNode;
 
    private final boolean openCLAvailable; // Should be false on robot
@@ -76,6 +76,7 @@ public class ContinuousHikingProcess
       ros2ImageSensors.registerImageQueueForZED(rawImageCollectionZED, ZEDImageSensor.DEPTH_IMAGE_KEY);
 
       heightMapDemandNode = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_HEIGHT_MAP);
+      heightMapControllerDemandNode = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_HEIGHT_MAP_FOR_CONTROLLER);
       terrainMapDemandNode = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_TERRAIN_MAP);
 
       // Class's that perform the real work of the process... the good stuff
@@ -89,6 +90,7 @@ public class ContinuousHikingProcess
                                                  activeMappingParameterToolBox.getTerrainMapParameters(),
                                                  activeMappingParameterToolBox.getDepthImageFilteringParameters(),
                                                  heightMapDemandNode::isDemanded,
+                                                 heightMapControllerDemandNode::isDemanded,
                                                  terrainMapDemandNode::isDemanded);
 
          if (openCLAvailable)
@@ -132,6 +134,9 @@ public class ContinuousHikingProcess
 
    public void destroy()
    {
+      heightMapDemandNode.destroy();
+      heightMapControllerDemandNode.destroy();
+      terrainMapDemandNode.destroy();
       gpuMappingThread.blockingKill();
       if (openCLAvailable)
          rapidPlanarRegionsExtractionThread.kill();

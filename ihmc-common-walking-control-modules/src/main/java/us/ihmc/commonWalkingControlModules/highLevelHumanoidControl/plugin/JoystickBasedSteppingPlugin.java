@@ -53,7 +53,6 @@ public class JoystickBasedSteppingPlugin implements HumanoidSteppingPlugin
    public void setFootstepAdjustment(FootstepAdjustment footstepAdjustment)
    {
       stepGenerator.setFootstepAdjustment(footstepAdjustment);
-//      fastWalkingJoystickPlugin.setFo
    }
 
    public void setHighLevelStateChangeStatusListener(StatusMessageOutputManager statusMessageOutputManager)

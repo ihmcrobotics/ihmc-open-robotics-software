@@ -325,6 +325,7 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
          footstepDataListMessage.setDefaultTransferDuration(parameters.getTransferDuration());
          footstepDataListMessage.setFinalTransferDuration(parameters.getTransferDuration());
          footstepDataListMessage.setAreFootstepsAdjustable(parameters.getStepsAreAdjustable());
+         footstepDataListMessage.setOffsetFootstepsHeightWithExecutionError(parameters.getAccountForGroundDrift());
          footstepDataListMessage.setOffsetFootstepsWithExecutionError(parameters.getShiftUpcomingStepsWithTouchdown());
       }
 
@@ -522,7 +523,6 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
             footstepDataListMessage.setSequenceId(currentFootstepDataListCommandID.getValue());
             footstepDataListMessage.getQueueingProperties().setSequenceId(currentFootstepDataListCommandID.getValue());
             footstepDataListMessage.getQueueingProperties().setMessageId(currentFootstepDataListCommandID.getValue());
-            footstepDataListMessage.setOffsetFootstepsHeightWithExecutionError(enableHeightOffsetErrorCompensation.getBooleanValue());
             footstepMessenger.submitFootsteps(footstepDataListMessage);
             counter = 0;
          }
@@ -563,6 +563,8 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
       csgStatusMessage.setCurrentTurnMaxAngleInward(parameters.getTurnMaxAngleInward());
       csgStatusMessage.setCurrentTurnMaxAngleOutward(parameters.getTurnMaxAngleOutward());
       csgStatusMessage.setAreStepsAdjustable(parameters.getStepsAreAdjustable());
+      csgStatusMessage.setSnappingToHeightmap(parameters.getRequestSnapToHeightmap());
+      csgStatusMessage.setAccountingForGroundDrift(parameters.getAccountForGroundDrift());
 
       if (csgStatusMessageOutputManager != null)
          csgStatusMessageOutputManager.reportStatusMessage(csgStatusMessage);
@@ -662,6 +664,11 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    public void setFootstepsAreAdjustable(boolean footstepsAreAdjustable)
    {
       parameters.setStepsAreAdjustable(footstepsAreAdjustable);
+   }
+
+   public void setAccountForGroundDrift(boolean accountForGroundDrift)
+   {
+      parameters.setAccountForGroundDrift(accountForGroundDrift);
    }
 
    public void setSwingHeight(double swingHeight)

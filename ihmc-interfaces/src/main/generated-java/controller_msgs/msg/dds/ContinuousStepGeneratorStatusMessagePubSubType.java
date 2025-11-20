@@ -15,7 +15,7 @@ public class ContinuousStepGeneratorStatusMessagePubSubType implements us.ihmc.p
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "37bcb56e97eb4f672b607469279726fa5e7f91983e5703856fd5796da363d1d3";
+   		return "866695640f461c37882c4b65734666d23122e0a9a91b74884f16fb16a84ac076";
    }
    
    @Override
@@ -84,6 +84,10 @@ public class ContinuousStepGeneratorStatusMessagePubSubType implements us.ihmc.p
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -145,6 +149,12 @@ public class ContinuousStepGeneratorStatusMessagePubSubType implements us.ihmc.p
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -183,6 +193,10 @@ public class ContinuousStepGeneratorStatusMessagePubSubType implements us.ihmc.p
 
       cdr.write_type_7(data.getAreStepsAdjustable());
 
+      cdr.write_type_7(data.getSnappingToHeightmap());
+
+      cdr.write_type_7(data.getAccountingForGroundDrift());
+
    }
 
    public static void read(controller_msgs.msg.dds.ContinuousStepGeneratorStatusMessage data, us.ihmc.idl.CDR cdr)
@@ -219,6 +233,10 @@ public class ContinuousStepGeneratorStatusMessagePubSubType implements us.ihmc.p
       	
       data.setAreStepsAdjustable(cdr.read_type_7());
       	
+      data.setSnappingToHeightmap(cdr.read_type_7());
+      	
+      data.setAccountingForGroundDrift(cdr.read_type_7());
+      	
 
    }
 
@@ -241,6 +259,8 @@ public class ContinuousStepGeneratorStatusMessagePubSubType implements us.ihmc.p
       ser.write_type_6("current_turn_max_angle_inward", data.getCurrentTurnMaxAngleInward());
       ser.write_type_6("current_turn_max_angle_outward", data.getCurrentTurnMaxAngleOutward());
       ser.write_type_7("are_steps_adjustable", data.getAreStepsAdjustable());
+      ser.write_type_7("snapping_to_heightmap", data.getSnappingToHeightmap());
+      ser.write_type_7("accounting_for_ground_drift", data.getAccountingForGroundDrift());
    }
 
    @Override
@@ -262,6 +282,8 @@ public class ContinuousStepGeneratorStatusMessagePubSubType implements us.ihmc.p
       data.setCurrentTurnMaxAngleInward(ser.read_type_6("current_turn_max_angle_inward"));
       data.setCurrentTurnMaxAngleOutward(ser.read_type_6("current_turn_max_angle_outward"));
       data.setAreStepsAdjustable(ser.read_type_7("are_steps_adjustable"));
+      data.setSnappingToHeightmap(ser.read_type_7("snapping_to_heightmap"));
+      data.setAccountingForGroundDrift(ser.read_type_7("accounting_for_ground_drift"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.ContinuousStepGeneratorStatusMessage src, controller_msgs.msg.dds.ContinuousStepGeneratorStatusMessage dest)

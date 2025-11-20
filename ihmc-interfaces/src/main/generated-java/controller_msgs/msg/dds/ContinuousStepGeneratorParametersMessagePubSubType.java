@@ -15,7 +15,7 @@ public class ContinuousStepGeneratorParametersMessagePubSubType implements us.ih
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "b50b737fc6137b507dc5597b9916f52d933eef2a9f694d559b29fb2924a9f66e";
+   		return "e080b3ef45ee83b61fcdbb9c4457172fba07903e003f0a850072e47cc08b09f1";
    }
    
    @Override
@@ -80,6 +80,10 @@ public class ContinuousStepGeneratorParametersMessagePubSubType implements us.ih
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -135,6 +139,12 @@ public class ContinuousStepGeneratorParametersMessagePubSubType implements us.ih
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -169,6 +179,10 @@ public class ContinuousStepGeneratorParametersMessagePubSubType implements us.ih
 
       cdr.write_type_7(data.getStepsAreAdjustable());
 
+      cdr.write_type_7(data.getSnapToHeightmap());
+
+      cdr.write_type_7(data.getAccountForGroundDrift());
+
    }
 
    public static void read(controller_msgs.msg.dds.ContinuousStepGeneratorParametersMessage data, us.ihmc.idl.CDR cdr)
@@ -201,6 +215,10 @@ public class ContinuousStepGeneratorParametersMessagePubSubType implements us.ih
       	
       data.setStepsAreAdjustable(cdr.read_type_7());
       	
+      data.setSnapToHeightmap(cdr.read_type_7());
+      	
+      data.setAccountForGroundDrift(cdr.read_type_7());
+      	
 
    }
 
@@ -221,6 +239,8 @@ public class ContinuousStepGeneratorParametersMessagePubSubType implements us.ih
       ser.write_type_6("turn_max_angle_inward", data.getTurnMaxAngleInward());
       ser.write_type_6("turn_max_angle_outward", data.getTurnMaxAngleOutward());
       ser.write_type_7("steps_are_adjustable", data.getStepsAreAdjustable());
+      ser.write_type_7("snap_to_heightmap", data.getSnapToHeightmap());
+      ser.write_type_7("account_for_ground_drift", data.getAccountForGroundDrift());
    }
 
    @Override
@@ -240,6 +260,8 @@ public class ContinuousStepGeneratorParametersMessagePubSubType implements us.ih
       data.setTurnMaxAngleInward(ser.read_type_6("turn_max_angle_inward"));
       data.setTurnMaxAngleOutward(ser.read_type_6("turn_max_angle_outward"));
       data.setStepsAreAdjustable(ser.read_type_7("steps_are_adjustable"));
+      data.setSnapToHeightmap(ser.read_type_7("snap_to_heightmap"));
+      data.setAccountForGroundDrift(ser.read_type_7("account_for_ground_drift"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.ContinuousStepGeneratorParametersMessage src, controller_msgs.msg.dds.ContinuousStepGeneratorParametersMessage dest)
