@@ -5,7 +5,7 @@
   "Enable chunked map": false,
   "Log height map": false,
   "Min Depth To Accept": {
-    "value": 0.74,
+    "value": 0.88,
     "lowerBound": 0.0,
     "upperBound": 2.0
   },
