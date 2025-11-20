@@ -29,6 +29,8 @@ public class ContinuousStepGeneratorParametersMessage extends Packet<ContinuousS
    public double turn_max_angle_inward_ = -1.0;
    public double turn_max_angle_outward_ = -1.0;
    public boolean steps_are_adjustable_;
+   public boolean snap_to_heightmap_;
+   public boolean account_for_ground_drift_;
 
    public ContinuousStepGeneratorParametersMessage()
    {
@@ -69,6 +71,10 @@ public class ContinuousStepGeneratorParametersMessage extends Packet<ContinuousS
       turn_max_angle_outward_ = other.turn_max_angle_outward_;
 
       steps_are_adjustable_ = other.steps_are_adjustable_;
+
+      snap_to_heightmap_ = other.snap_to_heightmap_;
+
+      account_for_ground_drift_ = other.account_for_ground_drift_;
 
    }
 
@@ -204,6 +210,24 @@ public class ContinuousStepGeneratorParametersMessage extends Packet<ContinuousS
       return steps_are_adjustable_;
    }
 
+   public void setSnapToHeightmap(boolean snap_to_heightmap)
+   {
+      snap_to_heightmap_ = snap_to_heightmap;
+   }
+   public boolean getSnapToHeightmap()
+   {
+      return snap_to_heightmap_;
+   }
+
+   public void setAccountForGroundDrift(boolean account_for_ground_drift)
+   {
+      account_for_ground_drift_ = account_for_ground_drift;
+   }
+   public boolean getAccountForGroundDrift()
+   {
+      return account_for_ground_drift_;
+   }
+
 
    public static Supplier<ContinuousStepGeneratorParametersMessagePubSubType> getPubSubType()
    {
@@ -250,6 +274,10 @@ public class ContinuousStepGeneratorParametersMessage extends Packet<ContinuousS
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.steps_are_adjustable_, other.steps_are_adjustable_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.snap_to_heightmap_, other.snap_to_heightmap_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.account_for_ground_drift_, other.account_for_ground_drift_, epsilon)) return false;
+
 
       return true;
    }
@@ -291,6 +319,10 @@ public class ContinuousStepGeneratorParametersMessage extends Packet<ContinuousS
 
       if(this.steps_are_adjustable_ != otherMyClass.steps_are_adjustable_) return false;
 
+      if(this.snap_to_heightmap_ != otherMyClass.snap_to_heightmap_) return false;
+
+      if(this.account_for_ground_drift_ != otherMyClass.account_for_ground_drift_) return false;
+
 
       return true;
    }
@@ -328,7 +360,11 @@ public class ContinuousStepGeneratorParametersMessage extends Packet<ContinuousS
       builder.append("turn_max_angle_outward=");
       builder.append(this.turn_max_angle_outward_);      builder.append(", ");
       builder.append("steps_are_adjustable=");
-      builder.append(this.steps_are_adjustable_);
+      builder.append(this.steps_are_adjustable_);      builder.append(", ");
+      builder.append("snap_to_heightmap=");
+      builder.append(this.snap_to_heightmap_);      builder.append(", ");
+      builder.append("account_for_ground_drift=");
+      builder.append(this.account_for_ground_drift_);
       builder.append("}");
       return builder.toString();
    }

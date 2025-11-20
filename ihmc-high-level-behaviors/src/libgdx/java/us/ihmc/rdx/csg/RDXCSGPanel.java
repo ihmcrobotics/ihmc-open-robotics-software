@@ -34,6 +34,8 @@ public class RDXCSGPanel extends RDXPanel
    private final ImDouble swingDuration = new ImDouble();
    private final ImDouble transferDuration = new ImDouble();
    private final ImBoolean stepsAreAdjustable = new ImBoolean();
+   private final ImBoolean snapToHeightMap = new ImBoolean();
+   private final ImBoolean accountForGroundDrift = new ImBoolean();
 
    // CSG ROS communication helper
    private final CSGROS2CommunicationHelper communicationHelper;
@@ -127,7 +129,10 @@ public class RDXCSGPanel extends RDXPanel
       boolean maxStepWidthChanged = ImGuiTools.volatileInputDouble(labels.get("Max Step Width"), maxStepWidth);
 
       boolean swingHeightChanged = ImGuiTools.volatileInputDouble(labels.get("Swing Height"), swingHeight);
+
       boolean stepsAreAdjustableChanged = ImGui.checkbox(labels.get("Steps Are Adjustable"), stepsAreAdjustable);
+      boolean snapToHeightMapChanged = ImGui.checkbox(labels.get("Snap to Heightmap"), snapToHeightMap);
+      boolean accountForGroundDriftChanged = ImGui.checkbox(labels.get("Account for Ground Drift"), accountForGroundDrift);
 
       if (requestCSGWalkingChanged)
          csgInputCommand.setWalk(requestWalkCSG.get());
@@ -162,13 +167,19 @@ public class RDXCSGPanel extends RDXPanel
       if (stepsAreAdjustableChanged)
          csgParametersCommand.setStepsAreAdjustable(stepsAreAdjustable.get());
 
+      if (snapToHeightMapChanged)
+         csgParametersCommand.setSnapToHeightmap(snapToHeightMap.get());
+
+      if (accountForGroundDriftChanged)
+         csgParametersCommand.setAccountForGroundDrift(accountForGroundDrift.get());
+
 
       boolean publishCSGInputCommand = requestCSGWalkingChanged || desiredForwardVelocityChanged || desiredLateralVelocityChanged
                                || desiredTurningVelocityChanged;
 
       boolean publishCSGParametersCommand =
             swingDurationChanged || transferDurationChanged || maxStepLengthForwardsChanged || maxStepLengthBackwardsChanged
-            || maxStepWidthChanged || swingHeightChanged || stepsAreAdjustableChanged;
+            || maxStepWidthChanged || swingHeightChanged || stepsAreAdjustableChanged || snapToHeightMapChanged || accountForGroundDriftChanged;
 
       if (desiredForwardVelocityIsHovered && ImGui.isMouseReleased(ImGuiMouseButton.Left))
       {
@@ -218,6 +229,8 @@ public class RDXCSGPanel extends RDXPanel
       swingHeight.set(csgStatusMessage.getCurrentSwingHeight());
 
       stepsAreAdjustable.set(csgStatusMessage.getAreStepsAdjustable());
+      snapToHeightMap.set(csgStatusMessage.getSnappingToHeightmap());
+      accountForGroundDrift.set(csgStatusMessage.getAccountingForGroundDrift());
    }
 
    public void destroy()
