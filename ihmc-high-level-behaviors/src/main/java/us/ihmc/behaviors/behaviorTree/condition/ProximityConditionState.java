@@ -1,49 +1,65 @@
 package us.ihmc.behaviors.behaviorTree.condition;
 
 import behavior_msgs.msg.dds.ConditionNodeStateMessage;
-import us.ihmc.communication.crdt.CRDTBidirectionalBoolean;
-import us.ihmc.communication.crdt.CRDTBidirectionalDouble;
+import us.ihmc.communication.crdt.CRDTStatusBoolean;
+import us.ihmc.communication.crdt.CRDTStatusVector3D;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
 public class ProximityConditionState
 {
-   private final CRDTBidirectionalDouble currentDistance;
-   private final CRDTBidirectionalBoolean missingFrame;
+   private final CRDTStatusVector3D vectorBToA;
+   private final CRDTStatusBoolean frameAIsPresent;
+   private final CRDTStatusBoolean frameBIsPresent;
 
    public ProximityConditionState(ConditionNodeDefinition definition)
    {
-      currentDistance = new CRDTBidirectionalDouble(definition, -1.0);
-      missingFrame = new CRDTBidirectionalBoolean(definition, false);
+      vectorBToA = new CRDTStatusVector3D(ROS2ActorDesignation.ROBOT, definition.getCRDTInfo());
+      frameAIsPresent = new CRDTStatusBoolean(ROS2ActorDesignation.ROBOT, definition.getCRDTInfo(), false);
+      frameBIsPresent = new CRDTStatusBoolean(ROS2ActorDesignation.ROBOT, definition.getCRDTInfo(), false);
    }
 
    public void toMessage(ConditionNodeStateMessage message)
    {
-      message.setCurrentDistance(currentDistance.toMessage());
-      message.setMissingFrame(missingFrame.toMessage());
+      vectorBToA.toMessage(message.getBToA());
+      message.setFrameAIsPresent(frameAIsPresent.toMessage());
+      message.setFrameBIsPresent(frameBIsPresent.toMessage());
    }
 
    public void fromMessage(ConditionNodeStateMessage message)
    {
-      currentDistance.fromMessage(message.getCurrentDistance());
-      missingFrame.fromMessage(message.getMissingFrame());
+      vectorBToA.fromMessage(message.getBToA());
+      frameAIsPresent.fromMessage(message.getFrameAIsPresent());
+      frameBIsPresent.fromMessage(message.getFrameBIsPresent());
    }
 
-   public CRDTBidirectionalDouble getCurrentDistance()
+   public Vector3DReadOnly getVectorBToA()
    {
-      return currentDistance;
+      return vectorBToA.getValueReadOnly();
    }
 
-   public CRDTBidirectionalBoolean getMissingFrame()
+   public void setVectorBToA(Vector3DReadOnly value, double epsilon)
    {
-      return missingFrame;
+      vectorBToA.setValue(value, epsilon);
    }
 
-   public void setCurrentDistance(double distance)
+   public boolean getFrameAIsPresent()
    {
-      currentDistance.setValue(distance);
+      return frameAIsPresent.getValue();
    }
 
-   public void setMissingFrame(boolean value)
+   public void setFrameAIsPresent(boolean value)
    {
-      missingFrame.setValue(value);
+      frameAIsPresent.setValue(value);
+   }
+
+   public boolean getFrameBIsPresent()
+   {
+      return frameBIsPresent.getValue();
+   }
+
+   public void setFrameBIsPresent(boolean value)
+   {
+      frameBIsPresent.setValue(value);
    }
 }

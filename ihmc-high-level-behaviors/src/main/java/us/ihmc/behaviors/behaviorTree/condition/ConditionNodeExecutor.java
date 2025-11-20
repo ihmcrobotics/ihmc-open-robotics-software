@@ -41,6 +41,10 @@ public class ConditionNodeExecutor extends LeafNodeExecutor<ConditionNodeState, 
             state.setFailed(true);
          case ALWAYS_SUCCEED:
             state.setIsExecuting(false);
+            break;
+         case PROXIMITY:
+            proximityCheck.triggerExecution();
+            break;
       }
    }
 

@@ -227,9 +227,9 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
                      if (conditionNodeState.getDefinition().getType().getValue() == ConditionNodeDefinition.Type.PROXIMITY)
                      {
                         failureMessage.setMissingFrame(actionFailureMissingFrame);
-                        failureMessage.setActionFrame(conditionNodeState.getDefinition().getProximityCheck().getObjectFrameName());
-                        double maxDistanceAllowed = conditionNodeState.getDefinition().getProximityCheck().getMaxDistanceToObject();
-                        double currentDistance = conditionNodeState.getProximityCheck().getCurrentDistance().getValue();
+                        failureMessage.setActionFrame(conditionNodeState.getDefinition().getProximityCheck().getFrameNameA());
+                        double maxDistanceAllowed = conditionNodeState.getDefinition().getProximityCheck().getMaxDistance();
+                        double currentDistance = conditionNodeState.getProximityCheck().getVectorBToA().norm();
                         double error = currentDistance - maxDistanceAllowed;
                         failureMessage.getPositionError().set(error, 0.0, 0.0);
                         failureMessage.setPositionTolerance(0.0);

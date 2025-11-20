@@ -15,7 +15,7 @@ public class ConditionNodeStateMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "0811016b9ee4ea00d431d2cd905488ee92736b56707ba8a572634de7f223036b";
+   		return "b827b34c050717f739b1690d4eeab4c828c518ce6c639bf0717fe07573419183";
    }
    
    @Override
@@ -60,7 +60,9 @@ public class ConditionNodeStateMessagePubSubType implements us.ihmc.pubsub.Topic
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -87,7 +89,9 @@ public class ConditionNodeStateMessagePubSubType implements us.ihmc.pubsub.Topic
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getBToA(), current_alignment);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -105,9 +109,10 @@ public class ConditionNodeStateMessagePubSubType implements us.ihmc.pubsub.Topic
 
       cdr.write_type_7(data.getRequestResetContext());
 
-      cdr.write_type_6(data.getCurrentDistance());
+      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getBToA(), cdr);
+      cdr.write_type_7(data.getFrameAIsPresent());
 
-      cdr.write_type_7(data.getMissingFrame());
+      cdr.write_type_7(data.getFrameBIsPresent());
 
    }
 
@@ -119,9 +124,10 @@ public class ConditionNodeStateMessagePubSubType implements us.ihmc.pubsub.Topic
       	
       data.setRequestResetContext(cdr.read_type_7());
       	
-      data.setCurrentDistance(cdr.read_type_6());
+      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getBToA(), cdr);	
+      data.setFrameAIsPresent(cdr.read_type_7());
       	
-      data.setMissingFrame(cdr.read_type_7());
+      data.setFrameBIsPresent(cdr.read_type_7());
       	
 
    }
@@ -135,8 +141,10 @@ public class ConditionNodeStateMessagePubSubType implements us.ihmc.pubsub.Topic
 
       ser.write_type_4("count", data.getCount());
       ser.write_type_7("request_reset_context", data.getRequestResetContext());
-      ser.write_type_6("current_distance", data.getCurrentDistance());
-      ser.write_type_7("missing_frame", data.getMissingFrame());
+      ser.write_type_a("b_to_a", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getBToA());
+
+      ser.write_type_7("frame_a_is_present", data.getFrameAIsPresent());
+      ser.write_type_7("frame_b_is_present", data.getFrameBIsPresent());
    }
 
    @Override
@@ -148,8 +156,10 @@ public class ConditionNodeStateMessagePubSubType implements us.ihmc.pubsub.Topic
 
       data.setCount(ser.read_type_4("count"));
       data.setRequestResetContext(ser.read_type_7("request_reset_context"));
-      data.setCurrentDistance(ser.read_type_6("current_distance"));
-      data.setMissingFrame(ser.read_type_7("missing_frame"));
+      ser.read_type_a("b_to_a", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getBToA());
+
+      data.setFrameAIsPresent(ser.read_type_7("frame_a_is_present"));
+      data.setFrameBIsPresent(ser.read_type_7("frame_b_is_present"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.ConditionNodeStateMessage src, behavior_msgs.msg.dds.ConditionNodeStateMessage dest)
