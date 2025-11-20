@@ -10,7 +10,6 @@ import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneExecutor;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.handsros2.abilityHand.AbilityHandROS2HardwareCommunication;
-import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.util.ArrayList;
@@ -25,7 +24,6 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
    private final List<LeafNodeExecutor<?, ?>> currentlyExecutingLeaves = new ArrayList<>();
    private final List<LeafNodeExecutor<?, ?>> failedLeaves = new ArrayList<>();
    private final List<LeafNodeExecutor<?, ?>> successfulLeaves = new ArrayList<>();
-   private final List<LeafNodeExecutor<?, ?>> failedLeavesWithoutFallback = new ArrayList<>();
 
    public BehaviorTreeRootNodeExecutor(long id,
                                        CRDTInfo crdtInfo,
@@ -66,7 +64,10 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
                orderedActions.add(actionNode);
          }
          else if (child instanceof FallbackNodeExecutor fallbackNode)
+         {
+            fallbackNode.update();
             fallbackNodes.add(fallbackNode);
+         }
 
          updateNodeListsRecursive(child);
       }
@@ -101,189 +102,133 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
          }
       }
 
-      // Update is next for execution
+      // Determine the concurrent group
+      int next = state.getExecutionNextIndex();
       for (int i = 0; i < state.getOrderedLeaves().size(); i++)
       {
-         int next = state.getExecutionNextIndex();
-         int after = state.getOrderedLeaves().get(i).getExecuteAfterLeafIndex();
-         for (int j = after + 1; j < i; j++) // Might have to wait on nearer leaves
-            after = Math.max(after, state.getOrderedLeaves().get(j).getExecuteAfterLeafIndex());
-         state.getOrderedLeaves().get(i).setIsNextForExecution(i >= next && after < next);
+         LeafNodeExecutor<?, ?> leaf = orderedLeaves.get(i);
+         int after = effectiveExecuteAfterLeafIndex(leaf);
+         leaf.getState().setIsNextForExecution(i >= next && after < next);
       }
 
-      failedLeaves.clear();
-      successfulLeaves.clear();
       for (LeafNodeExecutor<?, ?> currentlyExecutingLeaf : currentlyExecutingLeaves)
       {
          currentlyExecutingLeaf.updateCurrentlyExecuting();
 
-         // This leaf has completed on this update
          if (!currentlyExecutingLeaf.getState().getIsExecuting())
-         {
-            boolean success = !currentlyExecutingLeaf.getState().getFailed();
-            if (success)
-               successfulLeaves.add(currentlyExecutingLeaf);
-            else
-               failedLeaves.add(currentlyExecutingLeaf);
-
-            reportLeafCeasedExecution(currentlyExecutingLeaf, success);
-         }
+            leafCeasedExecution(currentlyExecutingLeaf);
       }
       currentlyExecutingLeaves.removeAll(failedLeaves);
       currentlyExecutingLeaves.removeAll(successfulLeaves);
 
-      failedLeavesWithoutFallback.clear();
-      failedLeavesWithoutFallback.addAll(failedLeaves);
-      for (FallbackNodeExecutor fallbackNode : fallbackNodes)
-      {
-         fallbackNode.update();
-
-         if (!fallbackNode.getFallbackLeaves().isEmpty())
-            failedLeavesWithoutFallback.removeAll(fallbackNode.getTryLeaves());
-      }
-
-      // Handle skipping the fallback if try leaf group is successful
-      boolean leafEnded = !failedLeaves.isEmpty() || !successfulLeaves.isEmpty();
-      if (leafEnded && currentlyExecutingLeaves.isEmpty() && !isEndOfSequence())
-      {
-         LeafNodeExecutor<?, ?> nextNodeToExecute = orderedLeaves.get(state.getExecutionNextIndex());
-
-         for (FallbackNodeExecutor fallbackNode : fallbackNodes)
-         {
-            if (fallbackNode.getFallbackLeaves().indexOf(nextNodeToExecute) == 0)
-            {
-               boolean anyFailed = false;
-               for (LeafNodeExecutor<?, ?> tryLeaf : fallbackNode.getTryLeaves())
-               {
-                  if (tryLeaf.getState().getFailed())
-                  {
-                     anyFailed = true;
-                     break;
-                  }
-               }
-
-               if (anyFailed) // Nothing is executing and a tried leaf failed -- falling back
-               {
-                  LogTools.warn("Leaves failed, fallback leaves are next for execution.");
-               }
-               else // Nothing is executing and none of the try leaves failed -- skip fallback
-               {
-                  LeafNodeExecutor<?, ?> lastFallbackLeaf = fallbackNode.getFallbackLeaves().get(fallbackNode.getFallbackLeaves().size() - 1);
-                  LogTools.info("Leaves successful, skipping fallback leaves(s)");
-                  state.setExecutionNextIndex(lastFallbackLeaf.getState().getLeafIndex() + 1);
-               }
-            }
-         }
-      }
-
-      if (state.getAutomaticExecution())
+      boolean keepTrying = state.getAutomaticExecution() || state.pollManualExecutionRequested();
+      executionLoop:
+      while (keepTrying)
       {
          if (isEndOfSequence())
          {
             state.getLogger().info("End of sequence.");
             state.setAutomaticExecution(false);
+            break;
          }
-         else if (!failedLeavesWithoutFallback.isEmpty())
+
+         LeafNodeExecutor<?, ?> leafToExecute = orderedLeaves.get(state.getExecutionNextIndex());
+
+         if (!state.getAutomaticExecution() && !leafToExecute.getState().getIsNextForExecution())
+            break;
+
+         for (FallbackNodeExecutor fallbackNode : fallbackNodes)
+            if (fallbackNode.tryLeafIsBlocking(leafToExecute))
+               break executionLoop;
+         // Break if anything earlier than effective after execute is still going
+         for (int i = effectiveExecuteAfterLeafIndex(leafToExecute); i >= 0; i--)
+            if (state.getOrderedLeaves().get(i).getIsExecuting())
+               break executionLoop;
+
+         leafToExecute.update(); // Make sure can execute is up to date
+         if (leafToExecute.getState().getCanExecute())
          {
-            state.getLogger().error("A leaf failed. Disabling automatic execution.\n   Failed: %s".formatted(failedLeavesWithoutFallback));
-            state.setAutomaticExecution(false);
+            state.getLogger().info("%s executing leaf: %s (%s)".formatted(state.getAutomaticExecution() ? "Automatically" : "Manually",
+                                                                          leafToExecute.getDefinition().getName(),
+                                                                          leafToExecute.getClass().getSimpleName()));
+            leafToExecute.triggerExecution();
+            if (!leafToExecute.getState().getIsExecuting()) // Handle immediately ceased execution
+               keepTrying = leafCeasedExecution(leafToExecute);
+            else
+               currentlyExecutingLeaves.add(leafToExecute);
+            state.stepForwardNextExecutionIndex();
          }
          else
          {
-            while (wouldExecuteNextLeaf() && tryExecuteNextLeaf("Automatically"));
+            state.getLogger().error("Cannot execute leaf: %s: %s\n%s".formatted(leafToExecute.getClass().getSimpleName(),
+                                                                                leafToExecute.getDefinition().getName(),
+                                                                                leafToExecute.getCantExecuteMessage()));
+            keepTrying = false;
          }
-      }
-      else if (state.pollManualExecutionRequested())
-      {
-         while (wouldExecuteNextLeaf() && tryExecuteNextLeaf("Manually"));
       }
 
       if (state.pollFailureResetRequested())
-      {
-         failedLeaves.clear();
          for (int i = 0; i < state.getOrderedLeaves().size(); i++)
          {
             state.getOrderedLeaves().get(i).setFailed(false);
             state.getOrderedLeaves().get(i).setIsExecuting(false);
          }
-      }
    }
 
-   private boolean tryExecuteNextLeaf(String adjective)
+   private boolean leafCeasedExecution(LeafNodeExecutor<?, ?> leaf)
    {
       boolean keepGoing = true;
-      LeafNodeExecutor<?, ?> leafToExecute = orderedLeaves.get(state.getExecutionNextIndex());
-      leafToExecute.update(); // Make sure can execute is up to date
-      if (leafToExecute.getState().getCanExecute())
+      String name = leaf.getDefinition().getName();
+      boolean failed = leaf.getState().getFailed();
+      if (leaf.getState() instanceof ActionNodeState<?> actionNodeState)
       {
-         state.getLogger().info("%s executing leaf: %s (%s)".formatted(adjective,
-                                                                       leafToExecute.getDefinition().getName(),
-                                                                       leafToExecute.getClass().getSimpleName()));
-         leafToExecute.triggerExecution();
-         if (leafToExecute.getState().getFailed()) // Handle immediate failure
-         {
-            keepGoing = false;
-            reportLeafCeasedExecution(leafToExecute, false);
-         }
-         else
-            currentlyExecutingLeaves.add(leafToExecute);
-         state.stepForwardNextExecutionIndex();
+         String resultMessage = failed ? "failed after" : "completed successfully in";
+         double elapsedExecutionTime = actionNodeState.getElapsedExecutionTime();
+         state.getLogger().log(failed ? Level.ERROR : Level.INFO, "Action %s %.2f s: %s".formatted(resultMessage, elapsedExecutionTime, name));
       }
       else
       {
-         state.getLogger().error("Cannot execute leaf: %s: %s\n%s".formatted(leafToExecute.getClass().getSimpleName(),
-                                                                             leafToExecute.getDefinition().getName(),
-                                                                             leafToExecute.getCantExecuteMessage()));
+         String resultMessage = failed ? "failed" : "completed successfully";
+         state.getLogger().log(failed ? Level.ERROR : Level.INFO, "Leaf %s: %s".formatted(resultMessage, name));
+      }
+
+      boolean isTryLeaf = false;
+      for (FallbackNodeExecutor fallbackNode : fallbackNodes)
+         if (fallbackNode.getChildrenLeaves().contains(leaf))
+            isTryLeaf |= fallbackNode.leafCeasedExecution(leaf);
+
+      if (!isTryLeaf && failed)
+      {
+         state.getLogger().error("A leaf failed. Disabling automatic execution.\n   Failed: %s".formatted(leaf));
+         state.setAutomaticExecution(false);
          keepGoing = false;
       }
 
-      if (!keepGoing)
-         state.setAutomaticExecution(false);
+      if (failed)
+         failedLeaves.add(leaf);
+      else
+         successfulLeaves.add(leaf);
 
       return keepGoing;
    }
 
-   private boolean wouldExecuteNextLeaf()
+   private int effectiveExecuteAfterLeafIndex(LeafNodeExecutor<?, ?> leaf)
    {
-      if (isEndOfSequence())
-         return false;
+      int i = leaf.getState().getLeafIndex();
 
-      LeafNodeExecutor<?, ?> nextNodeToExecute = orderedLeaves.get(state.getExecutionNextIndex());
+      if (!state.getConcurrencyEnabled())
+         return i - 1;
 
-      // If a fallback catch is up next, block if any corresponding try leaves are executing
-      for (FallbackNodeExecutor fallbackNode : fallbackNodes)
-         if (fallbackNode.getFallbackLeaves().indexOf(nextNodeToExecute) == 0) // The first fallback catch leaf is next
-            for (LeafNodeExecutor<?, ?> tryLeaf : fallbackNode.getTryLeaves())
-               if (tryLeaf.getState().getIsExecuting())
-                  return false;
+      int after = leaf.getState().getExecuteAfterLeafIndex();
 
-      if (state.getConcurrencyEnabled())
-      {
-         int executeAfterLeafIndex = nextNodeToExecute.getState().getExecuteAfterLeafIndex();
+      for (int j = after + 1; j < i; j++) // Might have to wait on nearer leaves
+         after = Math.max(after, state.getOrderedLeaves().get(j).getExecuteAfterLeafIndex());
 
-         if (executeAfterLeafIndex < 0) // Execute after beginning
-            return true;
-         else
-            return !orderedLeaves.get(executeAfterLeafIndex).getState().getIsExecuting();
-      }
-      else
-         return currentlyExecutingLeaves.isEmpty();
-   }
+      for (FallbackNodeExecutor fallbackNode : fallbackNodes) // catch group can't execute with anything above catch
+         if (fallbackNode.getCatchLeaves().contains(leaf))
+            after = Math.max(after, fallbackNode.getCatchLeaves().get(0).getState().getLeafIndex() - 1);
 
-   private void reportLeafCeasedExecution(LeafNodeExecutor<?, ?> currentlyExecutingLeaf, boolean success)
-   {
-      String name = currentlyExecutingLeaf.getDefinition().getName();
-      if (currentlyExecutingLeaf.getState() instanceof ActionNodeState<?> actionNodeState)
-      {
-         String resultMessage = success ? "completed successfully in" : "failed after";
-         double elapsedExecutionTime = actionNodeState.getElapsedExecutionTime();
-         state.getLogger().log(success ? Level.INFO : Level.ERROR, "Action %s %.2f s: %s".formatted(resultMessage, elapsedExecutionTime, name));
-      }
-      else
-      {
-         String resultMessage = success ? "completed successfully" : "failed";
-         state.getLogger().log(success ? Level.INFO : Level.ERROR, "Leaf %s: %s".formatted(resultMessage, name));
-      }
+      return after;
    }
 
    public boolean isEndOfSequence()
