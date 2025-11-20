@@ -3,7 +3,11 @@ package us.ihmc.rdx.ui.graphics.ros2.pointCloud;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import imgui.ImGui;
+import imgui.type.ImBoolean;
 import perception_msgs.msg.dds.ImageMessage;
+import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.imageMessage.ImageMessageDecoder;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -36,6 +40,9 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXROS2MultiTopicVisuali
    private final ImageMessageDecoder colorMessageDecoder = new ImageMessageDecoder();
 
    private final RDXRawImagePointCloudVisualizer visualizer;
+   private ROS2Heartbeat fullResolutionHeartbeat;
+   private final ImBoolean requestFullResolution = new ImBoolean(false);
+
 
    public RDXROS2ColoredPointCloudVisualizer(String title, ROS2Node ros2Node, ROS2Topic<ImageMessage> depthTopic, ROS2Topic<ImageMessage> colorTopic)
    {
@@ -84,6 +91,9 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXROS2MultiTopicVisuali
    @Override
    public void renderImGuiWidgets()
    {
+      if (ImGui.checkbox(labels.get("Full Resolution Hearbeat"), requestFullResolution) && fullResolutionHeartbeat != null)
+         fullResolutionHeartbeat.setAlive(requestFullResolution.get());
+
       depthMessageSizeReadout.renderImGuiWidgets();
       colorMessageSizeReadout.renderImGuiWidgets();
 
@@ -108,6 +118,12 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXROS2MultiTopicVisuali
       visualizer.destroy();
       depthMessageDecoder.destroy();
       colorMessageDecoder.destroy();
+   }
+
+   public void setupFullResolutionRequestHeartbeat(ROS2Node ros2Node)
+   {
+      fullResolutionHeartbeat = new ROS2Heartbeat(ros2Node, PerceptionAPI.REQUEST_FULL_RESOLUTION_HEARTBEAT);
+      fullResolutionHeartbeat.setAlive(requestFullResolution.get());
    }
 
    private void subscribe()
