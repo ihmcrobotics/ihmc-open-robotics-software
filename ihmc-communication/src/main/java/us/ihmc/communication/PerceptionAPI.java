@@ -118,6 +118,15 @@ public final class PerceptionAPI
                                                                                            .withTypeName(ImageMessage.class)
                                                                                            .withSuffix("depth_filtered");
 
+   public static final ROS2Topic<Empty> REQUEST_FULL_RESOLUTION_HEARTBEAT = PERCEPTION_MODULE.withSuffix("request_realsense_full_resolution")
+                                                                                             .withType(Empty.class);
+   public static final ROS2Topic<ImageMessage> D455_DEPTH_IMAGE_FULL_RESOLUTION = BEST_EFFORT.withModule("d455")
+                                                                                             .withTypeName(ImageMessage.class)
+                                                                                             .withSuffix("depth_full_resolution");
+   public static final ROS2Topic<ImageMessage> D455_COLOR_IMAGE_FULL_RESOLUTION = BEST_EFFORT.withModule("d455")
+                                                                                             .withTypeName(ImageMessage.class)
+                                                                                             .withSuffix("color_full_resolution");
+
    /*
     * RealSense image topics (official ROS 2 Image and CameraInfo types)
     */

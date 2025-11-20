@@ -26,6 +26,8 @@ public class ROS2ImageSensors
    private ImageSensor zedSensor;
    private ROS2DemandGraphNode zedPublishDemandNode;
    private ImageSensorPublishThread zedPublishThread;
+   private ROS2DemandGraphNode ros2DemandGraphNode;
+   private ImageSensorPublishThread imageSensorPublishThread;
 
    public ROS2ImageSensors(ROS2Node ros2Node)
    {
@@ -46,6 +48,18 @@ public class ROS2ImageSensors
       realsensePublishThread.addTopic(PerceptionAPI.D455_DEPTH_IMAGE, RealSenseImageSensor.DEPTH_IMAGE_KEY, 0.25);
       realsensePublishThread.addTopic(PerceptionAPI.D455_COLOR_IMAGE, RealSenseImageSensor.COLOR_IMAGE_KEY, 0.25);
       setupCallbackForDemandNode(realsensePublishThread, realsensePublishDemandNode);
+   }
+
+   // Must be called after the realsense has been added, no safety checks
+   public void addFullResolutionRealSensePublisher(ImageSensor realsenseSensor)
+   {
+      ros2DemandGraphNode = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_FULL_RESOLUTION_HEARTBEAT);
+      realsenseDemandNode.addDependents(ros2DemandGraphNode);
+
+      imageSensorPublishThread = new ImageSensorPublishThread(ros2Node, realsenseSensor);
+      realsensePublishThread.addTopic(PerceptionAPI.D455_DEPTH_IMAGE_FULL_RESOLUTION, RealSenseImageSensor.DEPTH_IMAGE_KEY);
+      realsensePublishThread.addTopic(PerceptionAPI.D455_COLOR_IMAGE_FULL_RESOLUTION, RealSenseImageSensor.COLOR_IMAGE_KEY);
+      setupCallbackForDemandNode(imageSensorPublishThread, ros2DemandGraphNode);
    }
 
    public void addZEDSensor(ImageSensor zedSensor, ReferenceFrame sensorFrame)
