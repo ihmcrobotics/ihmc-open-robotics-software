@@ -5,6 +5,7 @@ import imgui.flag.ImGuiCol;
 import us.ihmc.behaviors.behaviorTree.LeafNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.LeafNodeState;
 import us.ihmc.log.LogTools;
+import us.ihmc.rdx.behaviorTree.control.RDXFallbackNode;
 import us.ihmc.rdx.imgui.ImGuiFlashingColors;
 import us.ihmc.rdx.imgui.ImGuiFlashingText;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -22,6 +23,8 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
    private final ImGuiFlashingColors isExecutingFlashingColor = new ImGuiFlashingColors(0.1, ImGuiTools.PURPLE, ImGuiTools.DARK_PURPLE);
    private final ImGuiHollowArrowRenderer hollowArrowRenderer = new ImGuiHollowArrowRenderer();
    private final ImGuiFlashingText flashingDescriptionColor = new ImGuiFlashingText(ImGuiTools.RED);
+
+   float lineStartX = Float.NaN;
 
    public RDXLeafNode(S state, RDXBehaviorTreeRootNode rootNode)
    {
@@ -49,6 +52,7 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
 
       // Give the arrow a little space to the left, like the other icons
       ImGui.setCursorPosX(ImGui.getCursorPosX() + ImGui.getStyle().getItemSpacingX());
+      lineStartX = ImGui.getCursorScreenPosX();
 
       boolean colorArrow = state.getIsNextForExecution() || state.getIsExecuting();
       int arrowColor = state.getIsNextForExecution() ? ImGuiTools.GREEN : isExecutingFlashingColor.getColor(state.getIsExecuting());
@@ -62,6 +66,19 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
 
    public void renderConcurrencyGraph()
    {
+      if (getParent() instanceof RDXFallbackNode fallbackNode)
+      {
+         if (!fallbackNode.getCatchLeaves().isEmpty() && fallbackNode.getCatchLeaves().get(0) == this)
+         {
+            float frameHeight = ImGui.getFrameHeight();
+            ImGui.sameLine(ImGui.getColumnWidth(), 0.0f);
+            int color = ImGui.getColorU32(ImGuiCol.TextDisabled);
+            float offsetX = ImGui.getCursorScreenPosX();
+            ImGui.getWindowDrawList().addLine(lineStartX, offsetY, offsetX - ImGui.getFontSize(), offsetY, color, 1);
+            ImGui.dummy(0.0f, frameHeight);
+         }
+      }
+
       if (!definition.getExecuteAfterPrevious())
       {
          float frameHeight = ImGui.getFrameHeight();
@@ -89,7 +106,7 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
             ImGui.getWindowDrawList().addLine(offsetX, offsetY + frameHeight * 0.5f, offsetX, executeAfterY, color, thickness);
             ImGui.getWindowDrawList().addLine(offsetX - scale * 0.4f, executeAfterY + scale * 0.5f, offsetX, executeAfterY, color, thickness);
             ImGui.getWindowDrawList().addLine(offsetX + scale * 0.4f, executeAfterY + scale * 0.5f, offsetX, executeAfterY, color, thickness);
-            ImGui.getWindowDrawList().addCircle(offsetX, offsetY + frameHeight * 0.5f, scale * 0.15f, color, 16, thickness);
+            ImGui.getWindowDrawList().addCircleFilled(offsetX, offsetY + frameHeight * 0.5f, scale * 0.20f, color, 16);
             ImGui.dummy(0.0f, frameHeight);
          }
       }
