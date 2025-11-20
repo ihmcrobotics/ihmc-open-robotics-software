@@ -77,8 +77,7 @@ public class SimpleMomentumStateUpdater implements MomentumStateUpdater
                                      double gravitationalAcceleration,
                                      StateEstimatorParameters stateEstimatorParameters,
                                      Map<RigidBodyBasics, FootSwitchInterface> footSwitches,
-                                     CenterOfMassDataHolder estimatorCenterOfMassDataHolderToUpdate,
-                                     YoGraphicsListRegistry yoGraphicsListRegistry)
+                                     CenterOfMassDataHolder estimatorCenterOfMassDataHolderToUpdate)
    {
       this.estimatorCenterOfMassDataHolderToUpdate = estimatorCenterOfMassDataHolderToUpdate;
       this.footSwitches = footSwitches;
@@ -105,19 +104,6 @@ public class SimpleMomentumStateUpdater implements MomentumStateUpdater
       yoCenterOfMassVelocityUsingPelvisAndKinematics = new YoFrameVector3D("estimatedCenterOfMassVelocityPelvisAndKin", worldFrame, registry);
       yoCenterOfMassVelocityIntegrateGRF = new YoFrameVector3D("estimatedCenterOfMassVelocityGRF", worldFrame, registry);
       yoCenterOfMassVelocity = new YoFrameVector3D("estimatedCenterOfMassVelocity", worldFrame, registry);
-
-      if (VISUALIZE)
-      {
-         if (yoGraphicsListRegistry != null)
-         {
-            YoArtifactPosition comArtifact = new YoGraphicPosition("Meas CoM",
-                                                                   yoCenterOfMassPosition,
-                                                                   0.006,
-                                                                   YoAppearance.Black(),
-                                                                   GraphicType.CROSS).createArtifact();
-            yoGraphicsListRegistry.registerArtifact("StateEstimator", comArtifact);
-         }
-      }
    }
 
    @Override
@@ -210,6 +196,9 @@ public class SimpleMomentumStateUpdater implements MomentumStateUpdater
    @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
+      if (!VISUALIZE)
+         return null;
+
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
       group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D("Meas CoM",
                                                                     yoCenterOfMassPosition,

@@ -14,8 +14,10 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HeightMapCommand;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -29,10 +31,9 @@ import java.util.function.Consumer;
  * Updatable to clear the graphics to the
  * {@link us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HumanoidSteppingPluginFactory#addUpdatable(Updatable)}
  */
-public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<HeightMapCommand>, Updatable
+public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<HeightMapCommand>, Updatable, SCS2YoGraphicHolder
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-   private final YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
    private final YoBoolean checkStepHeight;
    private final YoBoolean checkStepLength;
@@ -97,11 +98,6 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
       return registry;
    }
 
-   public YoGraphicsListRegistry getGraphicsListRegistry()
-   {
-      return graphicsListRegistry;
-   }
-
    /**
     * Returns a snapper that will snap a {@link FootstepDataListMessage} to the environment modeled by planar regions
     */
@@ -134,5 +130,11 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
 
       // The 10% here is a "fudge factor". This is meant to reject steps that are wildly wrong.
       return touchdownPose.getPosition().distanceXY(stancePose.getPosition()) < 1.1 * EuclidCoreTools.norm(steppingParameters.getMaxStepLength(), steppingParameters.getMaxStepWidth());
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      return null;
    }
 }

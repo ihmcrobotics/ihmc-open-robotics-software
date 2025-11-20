@@ -157,6 +157,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
       isAutomaticManipulationAbortEnabled.set(false); // TODO This is a hack to prevent the walking controller from aborting the manipulation task.
       createToolboxController(robotModel, toolboxParameters, collisionModel);
       simulationTestHelper.addYoGraphicsListRegistry(yoGraphicsListRegistry);
+      simulationTestHelper.addYoGraphicDefinition(toolboxController.getSCS2YoGraphics());
 
       ros2Node = simulationTestHelper.getROS2Node();
 
@@ -307,7 +308,6 @@ public abstract class KinematicsStreamingToolboxControllerTest
                                                                    toolboxParameters,
                                                                    desiredFullRobotModel,
                                                                    robotModel,
-                                                                   yoGraphicsListRegistry,
                                                                    toolboxRegistry);
       toolboxController.setCollisionModel(collisionModel);
    }

@@ -99,7 +99,6 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
                                                      CenterOfPressureDataHolder centerOfPressureDataHolderFromController,
                                                      double estimatorDT,
                                                      StateEstimatorParameters stateEstimatorParameters,
-                                                     YoGraphicsListRegistry yoGraphicsListRegistry,
                                                      YoRegistry parentRegistry)
    {
       rootJoint = inverseDynamicsStructure.getRootJoint();
@@ -150,14 +149,6 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
       /*
        * -------------------------------------------------------------------------------------------------
        */
-
-      if (VISUALIZE)
-      {
-         for (SingleFootEstimator footEstimator : footEstimators)
-         {
-            footEstimator.createVisualization(yoGraphicsListRegistry);
-         }
-      }
 
       parentRegistry.addChild(registry);
    }

@@ -43,9 +43,7 @@ public class CenterOfPressureVisualizer implements SCS2YoGraphicHolder
    private final Collection<RigidBodyBasics> footRigidBodies;
    private final List<RigidBodyBasics> footList = new ArrayList<>();
 
-   public CenterOfPressureVisualizer(Map<RigidBodyBasics, FootSwitchInterface> footSwitches,
-                                     YoGraphicsListRegistry yoGraphicsListRegistry,
-                                     YoRegistry parentRegistry)
+   public CenterOfPressureVisualizer(Map<RigidBodyBasics, FootSwitchInterface> footSwitches, YoRegistry parentRegistry)
    {
       this.footSwitches = footSwitches;
       footRigidBodies = footSwitches.keySet();
@@ -58,23 +56,10 @@ public class CenterOfPressureVisualizer implements SCS2YoGraphicHolder
          YoFramePoint3D rawCoPPositionInWorld = new YoFramePoint3D("raw" + rigidBodyName + "CoPPositionsInWorld", worldFrame, registry);
          footRawCoPPositionsInWorld.put(rigidBody, rawCoPPositionInWorld);
 
-         YoGraphicPosition copYoGraphic = new YoGraphicPosition("Meas " + rigidBodyName
-               + "CoP", rawCoPPositionInWorld, 0.008, YoAppearance.DarkRed(), GraphicType.DIAMOND);
-         YoArtifactPosition copArtifact = copYoGraphic.createArtifact();
-         yoGraphicsListRegistry.registerArtifact("StateEstimator", copArtifact);
-
          footList.add(rigidBody);
       }
 
       overallRawCoPPositionInWorld = new YoFramePoint3D("overallRawCoPPositionInWorld", worldFrame, registry);
-      YoGraphicPosition overallRawCoPYoGraphic = new YoGraphicPosition("Meas CoP",
-                                                                       overallRawCoPPositionInWorld,
-                                                                       0.015,
-                                                                       YoAppearance.DarkRed(),
-                                                                       GraphicType.DIAMOND);
-      YoArtifactPosition overallRawCoPArtifact = overallRawCoPYoGraphic.createArtifact();
-      overallRawCoPArtifact.setVisible(false);
-      yoGraphicsListRegistry.registerArtifact("StateEstimator", overallRawCoPArtifact);
 
       parentRegistry.addChild(registry);
    }

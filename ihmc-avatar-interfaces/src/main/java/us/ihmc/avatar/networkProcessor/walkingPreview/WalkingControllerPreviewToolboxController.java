@@ -147,7 +147,7 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
       controllerToolbox = createHighLevelControllerToolbox(robotModel, yoGraphicsListRegistry);
       controllerToolbox.attachControllerFailureListener(fallingDirection -> hasControllerFailed.set(true));
       humanoidHighLevelControllerManager.addChild(controllerToolbox.getYoVariableRegistry());
-      setupWalkingMessageHandler(walkingControllerParameters, copTrajectoryParameters, yoGraphicsListRegistry);
+      setupWalkingMessageHandler(walkingControllerParameters);
       rootJoint = fullRobotModel.getRootJoint();
       allOneDoFJointsExcludingHands = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
 
@@ -240,9 +240,7 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
                                                     jointsToIgnore);
    }
 
-   private void setupWalkingMessageHandler(WalkingControllerParameters walkingControllerParameters,
-                                           CoPTrajectoryParameters copTrajectoryParameters,
-                                           YoGraphicsListRegistry yoGraphicsListRegistry)
+   private void setupWalkingMessageHandler(WalkingControllerParameters walkingControllerParameters)
    {
       double defaultTransferTime = walkingControllerParameters.getDefaultTransferTime();
       double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
@@ -255,7 +253,6 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
                                                                               controllerToolbox.getContactableFeet(),
                                                                               walkingOutputManager,
                                                                               previewTime,
-                                                                              yoGraphicsListRegistry,
                                                                               controllerToolbox.getYoVariableRegistry());
       controllerToolbox.setWalkingMessageHandler(walkingMessageHandler);
    }

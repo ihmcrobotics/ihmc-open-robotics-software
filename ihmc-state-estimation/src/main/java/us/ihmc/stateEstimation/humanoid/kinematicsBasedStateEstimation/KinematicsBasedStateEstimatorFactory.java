@@ -121,7 +121,7 @@ public class KinematicsBasedStateEstimatorFactory
       return this;
    }
 
-   public DRCKinematicsBasedStateEstimator createStateEstimator(YoRegistry stateEstimatorRegistry, YoGraphicsListRegistry stateEstimatorYoGraphicsListRegistry)
+   public DRCKinematicsBasedStateEstimator createStateEstimator(YoRegistry stateEstimatorRegistry)
    {
       FactoryTools.checkAllFactoryFieldsAreSet(this);
 
@@ -184,8 +184,7 @@ public class KinematicsBasedStateEstimatorFactory
                                                                                         centerOfPressureDataHolderFromControllerField.get(),
                                                                                         robotMotionStatusFromControllerField.get(),
                                                                                         bipedFeetMap,
-                                                                                        estimatorForceSensorDataHolder,
-                                                                                        stateEstimatorYoGraphicsListRegistry);
+                                                                                        estimatorForceSensorDataHolder);
 
       if (externalPelvisPoseSubscriberField.hasValue())
       {

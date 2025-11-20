@@ -12,6 +12,11 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.DefaultPoint2DGraphic;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFramePoint3D;
 import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFrameVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
@@ -19,24 +24,31 @@ import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicPoint2D;
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicPoint3D;
+
 /**
  * Helper class that converts a measured foot wrench into a "zero-linear-velocity" sensor for the CoP location.
  *
  * @author Georg Wiedebach
  */
-public class FootWrenchSensorUpdater
+public class FootWrenchSensorUpdater implements SCS2YoGraphicHolder
 {
    private static final String parameterGroup = "Foot";
 
    private final double weight;
    private final AlphaFilteredYoFrameVector3D filteredForce;
    private final ReferenceFrame copFrame;
+   private final YoFramePoint3D yoCopPosition;
 
    private final FootVelocitySensor footVelocitySensor;
 
    private final DoubleProvider weightThresholdForTrust;
 
-   public FootWrenchSensorUpdater(RigidBodyBasics foot, ReferenceFrame soleFrame, double dt, double weight, YoGraphicsListRegistry graphicsListRegistry,
+   public FootWrenchSensorUpdater(RigidBodyBasics foot,
+                                  ReferenceFrame soleFrame,
+                                  double dt,
+                                  double weight,
                                   YoRegistry registry)
    {
       this.weight = weight;
@@ -47,7 +59,7 @@ public class FootWrenchSensorUpdater
 
       filteredForce = new AlphaFilteredYoFrameVector3D(foot.getName() + "Force", "", registry, forceAlpha, ReferenceFrame.getWorldFrame());
       AlphaFilteredYoFramePoint3D filteredCoP = new AlphaFilteredYoFramePoint3D(soleFrame.getName() + "CoPPositionInSole", "", registry, forceAlpha, soleFrame);
-      YoFramePoint3D yoCopPosition = new YoFramePoint3D(soleFrame.getName() + "CoPPosition", ReferenceFrame.getWorldFrame(), registry);
+      yoCopPosition = new YoFramePoint3D(soleFrame.getName() + "CoPPosition", ReferenceFrame.getWorldFrame(), registry);
 
       copFrame = new ReferenceFrame(soleFrame.getName() + "CopFrame", soleFrame)
       {
@@ -77,13 +89,6 @@ public class FootWrenchSensorUpdater
             transformToParent.setTranslationAndIdentityRotation(filteredCoP);
          }
       };
-
-      if (graphicsListRegistry != null)
-      {
-         YoGraphicPosition copViz = new YoGraphicPosition(copFrame.getName(), yoCopPosition, 0.01, YoAppearance.Green());
-         graphicsListRegistry.registerYoGraphic("EKF", copViz);
-         graphicsListRegistry.registerArtifact("EKF", copViz.createArtifact());
-      }
 
       footVelocitySensor = new FootVelocitySensor(dt, foot, copFrame, parameterGroup, registry);
    }
@@ -126,5 +131,14 @@ public class FootWrenchSensorUpdater
    public Sensor getFootLinearVelocitySensor()
    {
       return footVelocitySensor;
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(newYoGraphicPoint3D(copFrame.getName(), yoCopPosition, 0.02, ColorDefinitions.Green()));
+      group.addChild(newYoGraphicPoint2D(copFrame.getName(), yoCopPosition, 0.02, ColorDefinitions.Green(), DefaultPoint2DGraphic.CIRCLE));
+      return group;
    }
 }

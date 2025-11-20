@@ -282,7 +282,6 @@ public abstract class HumanoidControllerWarmup
                                                                  false,
                                                                  null,
                                                                  contactableBodies,
-                                                                 yoGraphicsListRegistry,
                                                                  jointsToIgnore);
 
       double defaultTransferTime = walkingControllerParameters.getDefaultTransferTime();
@@ -296,7 +295,6 @@ public abstract class HumanoidControllerWarmup
                                                                               feet,
                                                                               statusOutputManager,
                                                                               yoTime,
-                                                                              yoGraphicsListRegistry,
                                                                               controllerToolbox.getYoVariableRegistry());
       controllerToolbox.setWalkingMessageHandler(walkingMessageHandler);
 

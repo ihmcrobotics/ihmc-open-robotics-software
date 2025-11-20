@@ -19,11 +19,14 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -38,7 +41,7 @@ import static us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.K
 /**
  * The main class for setting up the IK streaming controller.
  */
-public class KinematicsStreamingToolboxController extends ToolboxController
+public class KinematicsStreamingToolboxController extends ToolboxController implements SCS2YoGraphicHolder
 {
    public enum KSTState
    {
@@ -78,7 +81,6 @@ public class KinematicsStreamingToolboxController extends ToolboxController
                                                KinematicsStreamingToolboxParameters parameters,
                                                FullHumanoidRobotModel desiredFullRobotModel,
                                                DRCRobotModel robotModel,
-                                               YoGraphicsListRegistry yoGraphicsListRegistry,
                                                YoRegistry parentRegistry)
    {
       super(statusOutputManager, parentRegistry);
@@ -96,7 +98,6 @@ public class KinematicsStreamingToolboxController extends ToolboxController
                            desiredFullRobotModel,
                            robotModel,
                            time,
-                           yoGraphicsListRegistry,
                            registry);
 
       // Sleep state does pretty much nothing.
@@ -346,5 +347,13 @@ public class KinematicsStreamingToolboxController extends ToolboxController
             }
          };
       }
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(tools.getSCS2YoGraphics());
+      return group;
    }
 }

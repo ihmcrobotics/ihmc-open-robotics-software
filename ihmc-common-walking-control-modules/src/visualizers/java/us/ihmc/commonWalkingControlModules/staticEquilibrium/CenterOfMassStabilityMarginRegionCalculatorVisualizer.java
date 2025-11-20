@@ -33,12 +33,10 @@ public class CenterOfMassStabilityMarginRegionCalculatorVisualizer
       SimulationConstructionSet2 scs2 = new SimulationConstructionSet2(PhysicsEngineFactory.newDoNothingPhysicsEngineFactory());
       scs2.start(true, true, false);
 
-      YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-      StabilityMarginRegionCalculator calculator = StabilityMarginRegionCalculator.createForCoMStabilityMargin("", 1.0, scs2.getRootRegistry(), graphicsListRegistry);
+      StabilityMarginRegionCalculator calculator = StabilityMarginRegionCalculator.createForCoMStabilityMargin("", 1.0, scs2.getRootRegistry(), null);
       calculator.updateContactState(input);
 
-      List<YoGraphicDefinition> graphicDefinitions = YoGraphicConversionTools.toYoGraphicDefinitions(graphicsListRegistry);
-      scs2.addYoGraphics(graphicDefinitions);
+      scs2.addYoGraphic(calculator.getSCS2YoGraphics());
 
       LogTools.info("----- Support Region -----");
 

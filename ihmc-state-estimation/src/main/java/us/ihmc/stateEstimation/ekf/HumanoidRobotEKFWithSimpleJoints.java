@@ -23,10 +23,13 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointStateReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
@@ -56,7 +59,7 @@ public class HumanoidRobotEKFWithSimpleJoints implements StateEstimatorControlle
 
    public HumanoidRobotEKFWithSimpleJoints(FullHumanoidRobotModel estimatorFullRobotModel, String primaryImuName, Collection<String> imuNames,
                                            SideDependentList<String> footForceSensorNames, SensorOutputMapReadOnly rawSensorOutput, double dt,
-                                           double gravity, SensorOutputMapReadOnly processedSensorOutput, YoGraphicsListRegistry graphicsListRegistry,
+                                           double gravity, SensorOutputMapReadOnly processedSensorOutput,
                                            FullHumanoidRobotModel referenceModel)
    {
       this.processedSensorOutput = processedSensorOutput;
@@ -97,7 +100,7 @@ public class HumanoidRobotEKFWithSimpleJoints implements StateEstimatorControlle
 
       FloatingJointBasics rootJoint = estimatorFullRobotModel.getRootJoint();
       leggedRobotEKF = new LeggedRobotEKF(rootJoint, jointsForEKF, primaryImuName, imuSensorMap, forceSensorMap, rawSensorOutput, processedSensorOutput, dt,
-                                          gravity, jointParameterGroups, graphicsListRegistry, referenceJointsForEKF);
+                                          gravity, jointParameterGroups, referenceJointsForEKF);
    }
 
    private static Map<String, String> createJointGroups(FullHumanoidRobotModel fullRobotModel)
@@ -165,5 +168,13 @@ public class HumanoidRobotEKFWithSimpleJoints implements StateEstimatorControlle
    public void requestStateEstimatorMode(StateEstimatorMode operatingMode)
    {
       leggedRobotEKF.requestStateEstimatorMode(operatingMode);
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(leggedRobotEKF.getSCS2YoGraphics());
+      return group;
    }
 }

@@ -29,7 +29,6 @@ public class WholeBodyTrajectoryToolboxModule extends ToolboxModule
    private final WholeBodyTrajectoryToolboxController wholeBodyTrajectoryToolboxController;
 
    public WholeBodyTrajectoryToolboxModule(DRCRobotModel drcRobotModel, boolean startYoVariableServer)
-         throws IOException
    {
       super(drcRobotModel.getSimpleRobotName(),
             drcRobotModel.createFullRobotModel(),
@@ -40,7 +39,8 @@ public class WholeBodyTrajectoryToolboxModule extends ToolboxModule
       setTimeWithoutInputsBeforeGoingToSleep(Double.POSITIVE_INFINITY);
 
       wholeBodyTrajectoryToolboxController = new WholeBodyTrajectoryToolboxController(drcRobotModel, fullRobotModel, commandInputManager, statusOutputManager,
-                                                                                      registry, yoGraphicsListRegistry, startYoVariableServer);
+                                                                                      registry, startYoVariableServer);
+      graphicGroupDefinition.addChild(wholeBodyTrajectoryToolboxController.getSCS2YoGraphics());
       controllerNetworkSubscriber.registerSubcriberWithMessageUnpacker(WholeBodyTrajectoryToolboxMessage.class, 10,
                                                                        MessageUnpackingTools.createWholeBodyTrajectoryToolboxMessageUnpacker());
       commandInputManager.registerConversionHelper(new WholeBodyTrajectoryToolboxCommandConverter(fullRobotModel));

@@ -35,8 +35,11 @@ import us.ihmc.manipulation.planning.rrt.configurationAndTimeSpace.TreeStateVisu
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -44,7 +47,9 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-public class WholeBodyTrajectoryToolboxController extends ToolboxController
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicCoordinateSystem3D;
+
+public class WholeBodyTrajectoryToolboxController extends ToolboxController implements SCS2YoGraphicHolder
 {
    private static final boolean VERBOSE = true;
    private static final int DEFAULT_NUMBER_OF_ITERATIONS_FOR_SHORTCUT_OPTIMIZATION = 10;
@@ -104,10 +109,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
    private final SideDependentList<YoFramePoseUsingYawPitchRoll> endeffectorPose = new SideDependentList<>();
 
-   private final SideDependentList<YoGraphicCoordinateSystem> endeffectorFrame = new SideDependentList<>();
-
    private final YoFramePoseUsingYawPitchRoll testFramePose;
-   private final YoGraphicCoordinateSystem testFrameViz;
    private final YoDouble minimumDistanceFromManifold = new YoDouble("minimumDistanceFromManifold", registry);
 
    /*
@@ -152,9 +154,11 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
    private final CommandInputManager commandInputManager;
 
+   private final List<YoGraphicDefinition> graphicsList = new ArrayList<>();
+
    public WholeBodyTrajectoryToolboxController(DRCRobotModel drcRobotModel, FullHumanoidRobotModel fullRobotModel, CommandInputManager commandInputManager,
                                                StatusMessageOutputManager statusOutputManager, YoRegistry registry,
-                                               YoGraphicsListRegistry yoGraphicsListRegistry, boolean visualize)
+                                               boolean visualize)
    {
       super(statusOutputManager, registry);
       this.commandInputManager = commandInputManager;
@@ -165,7 +169,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       this.visualize = visualize;
       if (visualize)
       {
-         treeStateVisualizer = new TreeStateVisualizer("TreeStateVisualizer", "VisualizerGraphicsList", yoGraphicsListRegistry, registry);
+         treeStateVisualizer = new TreeStateVisualizer("TreeStateVisualizer", registry);
       }
       else
       {
@@ -177,16 +181,14 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       {
          endeffectorPose.put(robotSide, new YoFramePoseUsingYawPitchRoll("" + robotSide + "endeffectorPose", ReferenceFrame.getWorldFrame(), registry));
 
-         endeffectorFrame.put(robotSide, new YoGraphicCoordinateSystem("" + robotSide + "endeffectorPoseFrame", endeffectorPose.get(robotSide), 0.25));
-         endeffectorFrame.get(robotSide).setVisible(true);
-         yoGraphicsListRegistry.registerYoGraphic("" + robotSide + "endeffectorPoseViz", endeffectorFrame.get(robotSide));
+         graphicsList.add(newYoGraphicCoordinateSystem3D("" + robotSide + "endeffectorPoseFrame", endeffectorPose.get(robotSide), 0.25));
       }
 
       numberOfIterationForShortcutOptimization.set(DEFAULT_NUMBER_OF_ITERATIONS_FOR_SHORTCUT_OPTIMIZATION);
       maximumNumberOfIterations.set(DEFAULT_MAXIMUM_NUMBER_OF_ITERATIONS);
       terminalConditionNumberOfValidInitialGuesses.set(TERMINAL_CONDITION_NUMBER_OF_VALID_INITIAL_GUESSES);
 
-      humanoidKinematicsSolver = new HumanoidKinematicsSolver(drcRobotModel, yoGraphicsListRegistry, registry);
+      humanoidKinematicsSolver = new HumanoidKinematicsSolver(drcRobotModel, registry);
 
       toolboxSolution = new WholeBodyTrajectoryToolboxOutputStatus();
       toolboxSolution.setDestination(-1);
@@ -194,8 +196,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       configurationConverter = new KinematicsToolboxOutputConverter(drcRobotModel);
 
       testFramePose = new YoFramePoseUsingYawPitchRoll("testFramePose", ReferenceFrame.getWorldFrame(), registry);
-      testFrameViz = new YoGraphicCoordinateSystem("testFrameViz", testFramePose, 0.25);
-      yoGraphicsListRegistry.registerYoGraphic("testFrameYoGraphic", testFrameViz);
+      graphicsList.add(newYoGraphicCoordinateSystem3D("testFrameViz", testFramePose, 0.25));
    }
 
    @Override
@@ -236,7 +237,6 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
       updateVisualizerRobotConfiguration();
       updateVisualizers();
-      updateYoVariables();
 
       // ************************************************************************************************************** //
       if (currentNumberOfIterations.getIntegerValue() == maximumNumberOfIterations.getIntegerValue())
@@ -436,8 +436,6 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
                   testFramePose.setPosition(testFrame.getPosition());
                   testFramePose.setOrientation(testFrame.getOrientation());
-                  testFrameViz.setVisible(true);
-                  testFrameViz.update();
 
                   // TODO : terminal condition for manifold command.
                   double maximumDistanceFromManifolds = toolboxData.getMaximumDistanceFromManifolds(tree.getLastNodeAdded());
@@ -865,18 +863,6 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
    }
 
    /**
-    * YoVariables.
-    */
-   private void updateYoVariables()
-   {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         endeffectorFrame.get(robotSide).setVisible(true);
-         endeffectorFrame.get(robotSide).update();
-      }
-   }
-
-   /**
     * oneTime shortcut : try to make a shortcut from index to index+2
     */
    private boolean updateShortcutPath(List<SpatialNode> path, int index)
@@ -954,5 +940,16 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
    FullHumanoidRobotModel getSolverFullRobotModel()
    {
       return humanoidKinematicsSolver.getDesiredFullRobotModel();
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      if (treeStateVisualizer != null)
+         group.addChild(treeStateVisualizer.getSCS2YoGraphics());
+      group.addChild(humanoidKinematicsSolver.getSCS2YoGraphics());
+      graphicsList.forEach(group::addChild);
+      return group;
    }
 }

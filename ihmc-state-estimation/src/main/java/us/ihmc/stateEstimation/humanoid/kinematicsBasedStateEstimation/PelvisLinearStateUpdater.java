@@ -154,7 +154,6 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
                                    Map<RigidBodyBasics, ? extends ContactablePlaneBody> feetContactablePlaneBodies,
                                    double gravitationalAcceleration,
                                    StateEstimatorParameters stateEstimatorParameters,
-                                   YoGraphicsListRegistry yoGraphicsListRegistry,
                                    YoRegistry parentRegistry)
    {
       this.estimatorDT = stateEstimatorParameters.getEstimatorDT();
@@ -175,7 +174,6 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
                                                                                             centerOfPressureDataHolderFromController,
                                                                                             estimatorDT,
                                                                                             stateEstimatorParameters,
-                                                                                            yoGraphicsListRegistry,
                                                                                             registry);
 
       imuBasedLinearStateCalculator = new PelvisIMUBasedLinearStateCalculator(rootJoint,
@@ -185,7 +183,6 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
                                                                               estimatorDT,
                                                                               gravitationalAcceleration,
                                                                               stateEstimatorParameters,
-                                                                              yoGraphicsListRegistry,
                                                                               registry);
 
       imuAgainstKinematicsForVelocityBreakFrequency = new DoubleParameter("imuAgainstKinematicsForVelocityBreakFrequency",

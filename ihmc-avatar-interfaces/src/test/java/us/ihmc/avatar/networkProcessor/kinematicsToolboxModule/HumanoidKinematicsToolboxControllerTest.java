@@ -95,7 +95,6 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
 
    private CommandInputManager commandInputManager;
    private YoRegistry mainRegistry;
-   private YoGraphicsListRegistry yoGraphicsListRegistry;
    private HumanoidKinematicsToolboxController toolboxController;
 
    private YoBoolean initializationSucceeded;
@@ -125,7 +124,6 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
       initializationSucceeded = new YoBoolean("initializationSucceeded", mainRegistry);
       numberOfIterations = new YoInteger("numberOfIterations", mainRegistry);
       finalSolutionQuality = new YoDouble("finalSolutionQuality", mainRegistry);
-      yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
       DRCRobotModel robotModel = getRobotModel();
 
@@ -139,7 +137,6 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
                                                                   statusOutputManager,
                                                                   desiredFullRobotModel,
                                                                   updateDT,
-                                                                  yoGraphicsListRegistry,
                                                                   mainRegistry);
       commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(desiredFullRobotModel, toolboxController.getDesiredReferenceFrames()));
 
@@ -165,7 +162,7 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
          scs = new SimulationConstructionSet2();
          scs.addRobot(robot);
          scs.addRobot(ghost);
-         scs.addYoGraphics(YoGraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry));
+         scs.addYoGraphic(toolboxController.getSCS2YoGraphics());
          scs.start(true, true, true);
          scs.setCameraFocusPosition(0.0, 0.0, 1.0);
          scs.setCameraPosition(8.0, 0.0, 3.0);
@@ -200,8 +197,6 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
       }
 
       initializationSucceeded = null;
-
-      yoGraphicsListRegistry = null;
 
       commandInputManager = null;
 

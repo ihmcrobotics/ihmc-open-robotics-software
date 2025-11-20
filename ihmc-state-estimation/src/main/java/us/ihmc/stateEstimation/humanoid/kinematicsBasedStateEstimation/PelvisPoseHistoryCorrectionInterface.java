@@ -1,8 +1,9 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 
-public interface PelvisPoseHistoryCorrectionInterface
+public interface PelvisPoseHistoryCorrectionInterface extends SCS2YoGraphicHolder
 {
 
    /**

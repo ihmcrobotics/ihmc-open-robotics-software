@@ -28,8 +28,8 @@ public class ContactPointVisualizer implements Updatable, SCS2YoGraphicHolder
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final List<YoFramePoint3D> contactPointsWorld = new ArrayList<>();
-   private final List<YoGraphicPosition> yoGraphicPositions = new ArrayList<>();
-   private final List<YoGraphicVector> yoGraphicVectors = new ArrayList<>();
+   private final List<YoGraphicPosition> yoGraphicPositions;
+   private final List<YoGraphicVector> yoGraphicVectors;
    private final List<YoFrameVector3D> normalVectors = new ArrayList<>();
    private final double normalVectorScale = 0.1;
    private final int maxNumberOfYoGraphicPositions;
@@ -48,15 +48,29 @@ public class ContactPointVisualizer implements Updatable, SCS2YoGraphicHolder
       {
          YoFramePoint3D contactPointWorld = new YoFramePoint3D("contactPoint" + i, worldFrame, registry);
          contactPointsWorld.add(contactPointWorld);
-         YoGraphicPosition yoGraphicPosition = new YoGraphicPosition("contactViz" + i, contactPointWorld, 0.01, YoAppearance.Crimson());
-         yoGraphicPositions.add(yoGraphicPosition);
-         yoGraphicsListRegistry.registerYoGraphic("contactPoints", yoGraphicPosition);
 
          YoFrameVector3D normalVector = new YoFrameVector3D("contactNormal" + i, worldFrame, registry);
          normalVectors.add(normalVector);
-         YoGraphicVector yoGraphicVector = new YoGraphicVector("contactNormalViz" + i, contactPointWorld, normalVector, YoAppearance.Crimson());
-         yoGraphicVectors.add(yoGraphicVector);
-         yoGraphicsListRegistry.registerYoGraphic("contactPoints", yoGraphicVector);
+      }
+
+      if (yoGraphicsListRegistry != null)
+      {
+         yoGraphicPositions = new ArrayList<>();
+         yoGraphicVectors = new ArrayList<>();
+         for (int i = 0; i < maxNumberOfYoGraphicPositions; i++)
+         {
+            YoGraphicPosition yoGraphicPosition = new YoGraphicPosition("contactViz" + i, contactPointsWorld.get(i), 0.01, YoAppearance.Crimson());
+            yoGraphicPositions.add(yoGraphicPosition);
+            yoGraphicsListRegistry.registerYoGraphic("contactPoints", yoGraphicPosition);
+            YoGraphicVector yoGraphicVector = new YoGraphicVector("contactNormalViz" + i, contactPointsWorld.get(i), normalVectors.get(i), YoAppearance.Crimson());
+            yoGraphicVectors.add(yoGraphicVector);
+            yoGraphicsListRegistry.registerYoGraphic("contactPoints", yoGraphicVector);
+         }
+      }
+      else
+      {
+         yoGraphicPositions = null;
+         yoGraphicVectors = null;
       }
       parentRegistry.addChild(registry);
    }
@@ -89,19 +103,28 @@ public class ContactPointVisualizer implements Updatable, SCS2YoGraphicHolder
          contactPointsWorld.get(i).setMatchingFrame(contactPoint);
          normalVectors.get(i).set(tempFrameVector);
 
-         yoGraphicPositions.get(i).showGraphicObject();
-         yoGraphicVectors.get(i).showGraphicObject();
+         if (yoGraphicPositions != null)
+         {
+            yoGraphicPositions.get(i).showGraphicObject();
+            yoGraphicVectors.get(i).showGraphicObject();
+         }
       }
       else
       {
          contactPointsWorld.get(i).setToNaN();
          normalVectors.get(i).set(Double.NaN, Double.NaN, Double.NaN);
-         yoGraphicPositions.get(i).hideGraphicObject();
-         yoGraphicVectors.get(i).hideGraphicObject();
+         if (yoGraphicPositions != null)
+         {
+            yoGraphicPositions.get(i).hideGraphicObject();
+            yoGraphicVectors.get(i).hideGraphicObject();
+         }
       }
 
-      yoGraphicPositions.get(i).update();
-      yoGraphicVectors.get(i).update();
+      if (yoGraphicPositions != null)
+      {
+         yoGraphicPositions.get(i).update();
+         yoGraphicVectors.get(i).update();
+      }
    }
 
    @Override

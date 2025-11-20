@@ -28,12 +28,14 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.scs2.definition.collision.CollisionShapeDefinition;
 import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.simulation.collision.Collidable;
 import us.ihmc.scs2.simulation.collision.CollisionTools;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
@@ -48,7 +50,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class ReachabilityMapSolver
+public class ReachabilityMapSolver implements SCS2YoGraphicHolder
 {
    private static final int DEFAULT_MAX_NUMBER_OF_ITERATIONS = 100;
    private static final double DEFAULT_QUALITY_THRESHOLD = 0.001;
@@ -79,7 +81,6 @@ public class ReachabilityMapSolver
 
    public ReachabilityMapSolver(String cloneSuffix,
                                 OneDoFJointBasics[] robotArmJoints,
-                                YoGraphicsListRegistry yoGraphicsListRegistry,
                                 YoRegistry parentRegistry)
    {
       this.cloneSuffix = cloneSuffix;
@@ -91,7 +92,6 @@ public class ReachabilityMapSolver
                                                                     robotArmJoints,
                                                                     Collections.singleton(endEffector),
                                                                     1.0e-3,
-                                                                    yoGraphicsListRegistry,
                                                                     registry);
       commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(MultiBodySystemTools.getRootBody(endEffector)));
 
@@ -318,5 +318,11 @@ public class ReachabilityMapSolver
    public FramePose3D getControlFramePoseInEndEffector()
    {
       return controlFramePoseInEndEffector;
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      return kinematicsToolboxController.getSCS2YoGraphics();
    }
 }

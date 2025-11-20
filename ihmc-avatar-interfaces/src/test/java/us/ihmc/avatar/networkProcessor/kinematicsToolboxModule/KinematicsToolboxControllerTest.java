@@ -72,7 +72,6 @@ public final class KinematicsToolboxControllerTest
 
    private CommandInputManager commandInputManager;
    private YoRegistry mainRegistry;
-   private YoGraphicsListRegistry yoGraphicsListRegistry;
    private KinematicsToolboxController toolboxController;
 
    private YoBoolean initializationSucceeded;
@@ -93,7 +92,6 @@ public final class KinematicsToolboxControllerTest
       initializationSucceeded = new YoBoolean("initializationSucceeded", mainRegistry);
       numberOfIterations = new YoInteger("numberOfIterations", mainRegistry);
       finalSolutionQuality = new YoDouble("finalSolutionQuality", mainRegistry);
-      yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
       desiredFullRobotModel = KinematicsToolboxControllerTestRobotsSCS2.createInverseDynamicsRobot(robotDefinition);
       commandInputManager = new CommandInputManager(KinematicsToolboxModule.supportedCommands());
@@ -108,7 +106,6 @@ public final class KinematicsToolboxControllerTest
                                                           desiredFullRobotModel.getOneDoFJoints(),
                                                           null,
                                                           updateDT,
-                                                          yoGraphicsListRegistry,
                                                           mainRegistry);
 
       robotDefinition.ignoreAllJoints();
@@ -130,7 +127,7 @@ public final class KinematicsToolboxControllerTest
          if (ghost != null)
             scs.addRobot(ghost);
          scs.addRobot(robot);
-         scs.addYoGraphics(YoGraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry));
+         scs.addYoGraphic(toolboxController.getSCS2YoGraphics());
 
          scs.start(true, true, true);
          scs.setCameraFocusPosition(0.0, 0.0, 1.0);
@@ -172,7 +169,6 @@ public final class KinematicsToolboxControllerTest
       }
 
       commandInputManager = null;
-      yoGraphicsListRegistry = null;
       toolboxController = null;
       initializationSucceeded = null;
       numberOfIterations = null;

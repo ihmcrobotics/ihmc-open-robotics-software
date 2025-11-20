@@ -41,6 +41,7 @@ import java.util.Arrays;
 import java.util.function.Supplier;
 
 import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.*;
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.*;
 
 /**
  * Helper class for using {@link StabilityMarginOptimizationModule} to update and manage a multi-contact stability region.
@@ -627,7 +628,7 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
             nearestSegmentGraphic.setStrokeWidth(1.0);
             group.addChild(nearestSegmentGraphic);
 
-            YoGraphicPoint2DDefinition vertexGraphic = YoGraphicDefinitionFactory.newYoGraphicPoint2D(namePrefix + "Point" + vertex_idx,
+            YoGraphicPoint2DDefinition vertexGraphic = newYoGraphicPoint2D(namePrefix + "Point" + vertex_idx,
                                                                                                       optimizedVertices[vertex_idx],
                                                                                                       0.003,
                                                                                                       ColorDefinitions.Blue(),
@@ -636,7 +637,7 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
          }
       }
 
-      YoGraphicPoint2DDefinition vertexGraphic = YoGraphicDefinitionFactory.newYoGraphicPoint2D(namePrefix + "StabilityMarginPoint",
+      YoGraphicPoint2DDefinition vertexGraphic = newYoGraphicPoint2D(namePrefix + "StabilityMarginPoint",
                                                                                                 yoStabilityMarginPoint,
                                                                                                 0.003,
                                                                                                 ColorDefinitions.Blue(),

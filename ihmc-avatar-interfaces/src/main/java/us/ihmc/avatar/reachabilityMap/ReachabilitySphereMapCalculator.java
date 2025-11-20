@@ -100,13 +100,12 @@ public class ReachabilitySphereMapCalculator implements Controller
                                  .toArray(OneDoFJointBasics[]::new);
          }
 
-         YoGraphicsListRegistry solverGraphicsRegistry = new YoGraphicsListRegistry();
-         solvers[i] = new ReachabilityMapSolver(cloneSuffix, solverJoints, solverGraphicsRegistry, solverRegistry);
+         solvers[i] = new ReachabilityMapSolver(cloneSuffix, solverJoints, solverRegistry);
 
          if (i == 0 || VISUALIZE_ALL_SOLVERS)
          {
             YoGraphicGroupDefinition solverYoGraphicGroup = new YoGraphicGroupDefinition("solver" + i);
-            solverYoGraphicGroup.setChildren(YoGraphicConversionTools.toYoGraphicDefinitions(solverGraphicsRegistry));
+            solverYoGraphicGroup.addChild(solvers[i].getSCS2YoGraphics());
             solverYoGraphicGroupDefinitions.add(solverYoGraphicGroup);
          }
          solverInputs[i] = new FramePose3D();

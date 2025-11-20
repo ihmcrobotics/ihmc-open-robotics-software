@@ -134,7 +134,6 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
                                 SideDependentList<? extends ContactablePlaneBody> contactableFeet,
                                 StatusMessageOutputManager statusOutputManager,
                                 YoDouble yoTime,
-                                YoGraphicsListRegistry yoGraphicsListRegistry,
                                 YoRegistry parentRegistry)
    {
       this.statusOutputManager = statusOutputManager;

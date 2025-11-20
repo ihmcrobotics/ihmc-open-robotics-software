@@ -92,8 +92,8 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
                                                             parameters,
                                                             fullRobotModel,
                                                             robotModel,
-                                                            yoGraphicsListRegistry,
                                                             registry);
+      graphicGroupDefinition.addChild(controller.getSCS2YoGraphics());
       controller.setRobotStateUpdater(robotStateUpdater);
       controller.setCollisionModel(robotModel.getHumanoidRobotKinematicsCollisionModel());
       List<String> inactiveJoints = parameters.getInactiveJoints();

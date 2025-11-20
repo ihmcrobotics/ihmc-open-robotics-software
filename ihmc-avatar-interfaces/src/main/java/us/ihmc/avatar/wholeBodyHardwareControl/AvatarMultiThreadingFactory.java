@@ -227,17 +227,18 @@ public class AvatarMultiThreadingFactory
       // Set the root registry as the YoVariableServer's main registry
       yoVariableServer.setMainRegistry(rootRegistry,
                                        estimatorThread.get().getFullRobotModel().getRootJoint().subtreeList(),
-                                       estimatorThread.get().getSCS1YoGraphicsListRegistry());
+                                       null,
+                                       estimatorThread.get().getSCS2YoGraphics());
 
       // Add controller thread registry directly to the YoVariableServer (since it is in a separate thread)
-      yoVariableServer.addRegistry(controllerThread.get().getYoVariableRegistry(), controllerThread.get().getSCS1YoGraphicsListRegistry());
+      yoVariableServer.addRegistry(controllerThread.get().getYoVariableRegistry(), null, controllerThread.get().getSCS2YoGraphics());
 
       // Add step generator thread registry directly to the YoVariableServer (since it is in a separate thread)
       if (createStepGeneratorThread)
-         yoVariableServer.addRegistry(stepGeneratorThread.get().getYoVariableRegistry(), stepGeneratorThread.get().getSCS1YoGraphicsListRegistry());
+         yoVariableServer.addRegistry(stepGeneratorThread.get().getYoVariableRegistry(), null, stepGeneratorThread.get().getSCS2YoGraphics());
 
       if (ikStreamingThread.hasValue())
-         yoVariableServer.addRegistry(ikStreamingThread.get().getYoVariableRegistry(), ikStreamingThread.get().getSCS1YoGraphicsListRegistry());
+         yoVariableServer.addRegistry(ikStreamingThread.get().getYoVariableRegistry(), null, ikStreamingThread.get().getSCS2YoGraphics());
 
       // Setup JVM statistics
       PeriodicThreadSchedulerFactory jvmSchedulerFactory;
@@ -281,20 +282,21 @@ public class AvatarMultiThreadingFactory
          ArrayList<RegistrySendBufferBuilder> builders = new ArrayList<>();
          builders.add(new RegistrySendBufferBuilder(rootRegistry,
                                                     estimatorThread.get().getFullRobotModel().getRootJoint().subtreeList(),
-                                                    estimatorThread.get().getSCS1YoGraphicsListRegistry()));
+                                                    null,
+                                                    estimatorThread.get().getSCS2YoGraphics()));
          builders.add(new RegistrySendBufferBuilder(controllerThread.get().getYoVariableRegistry(),
-                                                    controllerThread.get().getSCS1YoGraphicsListRegistry(),
+                                                    null,
                                                     controllerThread.get().getSCS2YoGraphics()));
          if (stepGeneratorThread.hasValue())
          {
             builders.add(new RegistrySendBufferBuilder(stepGeneratorThread.get().getYoVariableRegistry(),
-                                                       stepGeneratorThread.get().getSCS1YoGraphicsListRegistry(),
+                                                       null,
                                                        stepGeneratorThread.get().getSCS2YoGraphics()));
          }
          if (ikStreamingThread.hasValue())
          {
             builders.add(new RegistrySendBufferBuilder(ikStreamingThread.get().getYoVariableRegistry(),
-                                                       ikStreamingThread.get().getSCS1YoGraphicsListRegistry(),
+                                                       null,
                                                        ikStreamingThread.get().getSCS2YoGraphics()));
          }
 
@@ -509,10 +511,6 @@ public class AvatarMultiThreadingFactory
 
          // otherwise this would go into the step generator registry
          controllerThread.getYoVariableRegistry().addChild(environmentalConstraints.getRegistry());
-         List<ArtifactList> artifactLists = new ArrayList<>();
-         environmentalConstraints.getGraphicsListRegistry().getRegisteredArtifactLists(artifactLists);
-         controllerThread.getSCS1YoGraphicsListRegistry().registerYoGraphicsLists(environmentalConstraints.getGraphicsListRegistry().getYoGraphicsLists());
-         controllerThread.getSCS1YoGraphicsListRegistry().registerArtifactLists(artifactLists);
       }
 
       return stepGeneratorThread;

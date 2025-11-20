@@ -18,6 +18,8 @@ import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToo
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -26,7 +28,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 /**
  * Provides whole body inverse kinematics solutions in the local process without ROS 2 communication.
  */
-public class HumanoidKinematicsSolver
+public class HumanoidKinematicsSolver implements SCS2YoGraphicHolder
 {
    private static final int DEFAULT_MAX_NUMBER_OF_ITERATIONS = 200;
    private static final double DEFAULT_QUALITY_THRESHOLD = 0.005;
@@ -53,7 +55,6 @@ public class HumanoidKinematicsSolver
    private final RobotConfigurationDataBasedUpdater desiredRobotStateUpdater = new RobotConfigurationDataBasedUpdater();
 
    public HumanoidKinematicsSolver(FullHumanoidRobotModelFactory fullRobotModelFactory,
-                                   YoGraphicsListRegistry yoGraphicsListRegistry,
                                    YoRegistry parentRegistry)
    {
       StatusMessageOutputManager statusOutputManager = new StatusMessageOutputManager(KinematicsToolboxModule.supportedStatus());
@@ -64,7 +65,6 @@ public class HumanoidKinematicsSolver
                                                            statusOutputManager,
                                                            desiredFullRobotModel,
                                                            updateDT,
-                                                           yoGraphicsListRegistry,
                                                            registry);
       controller.setDesiredRobotStateUpdater(desiredRobotStateUpdater);
 
@@ -208,5 +208,11 @@ public class HumanoidKinematicsSolver
    public OneDoFJointBasics[] getDesiredOneDoFJoints()
    {
       return controller.getDesiredOneDoFJoints();
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      return controller.getSCS2YoGraphics();
    }
 }

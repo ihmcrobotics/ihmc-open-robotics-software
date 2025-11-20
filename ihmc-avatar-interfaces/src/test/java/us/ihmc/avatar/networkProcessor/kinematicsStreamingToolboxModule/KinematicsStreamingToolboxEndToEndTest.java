@@ -62,7 +62,6 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
    protected CommandInputManager commandInputManager;
    protected StatusMessageOutputManager statusOutputManager;
    protected YoRegistry toolboxRegistry;
-   protected YoGraphicsListRegistry yoGraphicsListRegistry;
    protected FullHumanoidRobotModel desiredFullRobotModel;
    protected KinematicsStreamingToolboxController toolboxController;
    private Robot toolboxGhost;
@@ -174,7 +173,6 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
 
       desiredFullRobotModel = robotModel.createFullRobotModel();
       toolboxRegistry = new YoRegistry("toolboxMain");
-      yoGraphicsListRegistry = new YoGraphicsListRegistry();
       commandInputManager = new CommandInputManager(KinematicsStreamingToolboxModule.supportedCommands());
       statusOutputManager = new StatusMessageOutputManager(KinematicsStreamingToolboxModule.supportedStatus());
 
@@ -189,7 +187,6 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
                                                                    parameters,
                                                                    desiredFullRobotModel,
                                                                    robotModel,
-                                                                   yoGraphicsListRegistry,
                                                                    toolboxRegistry);
       toolboxController.setTrajectoryMessagePublisher(simulationTestHelper::publishToController);
       toolboxController.setStreamingMessagePublisher(simulationTestHelper::publishToController);
@@ -223,7 +220,6 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
       commandInputManager = null;
       statusOutputManager = null;
       toolboxRegistry = null;
-      yoGraphicsListRegistry = null;
       desiredFullRobotModel = null;
       toolboxController = null;
       toolboxGhost = null;
