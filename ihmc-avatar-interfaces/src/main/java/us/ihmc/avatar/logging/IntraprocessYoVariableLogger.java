@@ -34,7 +34,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 
 public class IntraprocessYoVariableLogger
 {
@@ -46,6 +45,7 @@ public class IntraprocessYoVariableLogger
    public static final String MODEL_RESOURCE_BUNDLE = "resources.zip";
    public static final String INDEX_FILENAME = "robotData.dat";
    public static final Path DEFAULT_INCOMING_LOGS_DIRECTORY = Paths.get(System.getProperty("user.home")).resolve(".ihmc").resolve("logs");
+   public static final Path BACKUP_INCOMING_LOGS_DIRECTORY = Paths.get(System.getProperty("user.home")).resolve(".ihmc").resolve("logs2");
 
    private final List<RegistrySendBufferBuilder> registrySendBufferBuilders;
    private final double dt;
@@ -67,7 +67,7 @@ public class IntraprocessYoVariableLogger
    private ByteBuffer compressedBuffer;
    private ByteBuffer indexBuffer;
    private ConcurrentRingBuffer<ByteBuffer> compressionBufferRing;
-   private CountDownLatch compressionThreadLatch;
+   private final Object compressionThreadLock = new Object();
    private RepeatingTaskThread compressionThread;
    private FileChannel dataChannel;
    private FileChannel indexChannel;
@@ -97,6 +97,23 @@ public class IntraprocessYoVariableLogger
          DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmssSSS");
          String fileTimestamp = dateFormat.format(Calendar.getInstance().getTime());
          logFolder = DEFAULT_INCOMING_LOGS_DIRECTORY.resolve(fileTimestamp + logName + INTRAPROCESS_LOG_POSTFIX);
+         FileTools.ensureDirectoryExists(logFolder);
+
+         Path tempFile = logFolder.resolve(".temp");
+         FileTools.deleteQuietly(tempFile);
+         if (!tempFile.toFile().createNewFile())
+         {
+            // If we failed to create a temp file, try the backup logs dir
+            logFolder = BACKUP_INCOMING_LOGS_DIRECTORY;
+            FileTools.ensureDirectoryExists(logFolder);
+
+            if (!tempFile.toFile().createNewFile())
+            {
+               // We failed to use both the default and backup logs dir
+               return false;
+            }
+         }
+         FileTools.deleteQuietly(tempFile);
 
          YoVariableHandShakeBuilder handshakeBuilder = new YoVariableHandShakeBuilder("main", dt);
          handshakeBuilder.setFrames(ReferenceFrame.getWorldFrame());
@@ -178,10 +195,12 @@ public class IntraprocessYoVariableLogger
           */
          indexBuffer = ByteBuffer.allocate(2 * Long.BYTES);
          compressionBufferRing = new ConcurrentRingBuffer<>(() -> ByteBuffer.allocate(singleTickBufferSize), 2);
-         compressionThreadLatch = new CountDownLatch(1);
          compressionThread = new RepeatingTaskThread("IntraprocessLoggerCompressionThread", () ->
          {
-            compressionThreadLatch.await();
+            synchronized (compressionThreadLock)
+            {
+               compressionThreadLock.wait();
+            }
 
             if (compressionBufferRing.poll())
             {
@@ -201,8 +220,20 @@ public class IntraprocessYoVariableLogger
                   indexBuffer.putLong(dataChannel.position());
                   indexBuffer.flip();
 
-                  indexChannel.write(indexBuffer);
-                  dataChannel.write(compressedBuffer);
+                  try
+                  {
+                     long ignored0 = indexChannel.write(indexBuffer);
+                     long ignored1 = dataChannel.write(compressedBuffer);
+                  }
+                  catch (IOException e)
+                  {
+                     LogTools.error("Could not log to: " + logFolder.toAbsolutePath());
+                     LogTools.error("Stopping Intraprocess logger...");
+
+                     destroy();
+
+                     compressionThread.blockingKill();
+                  }
                }
 
                compressionBufferRing.flush();
@@ -252,7 +283,6 @@ public class IntraprocessYoVariableLogger
    {
       if (destroyed)
       {
-         LogTools.error("Logger has already been destroyed.");
          return;
       }
 
@@ -294,7 +324,10 @@ public class IntraprocessYoVariableLogger
          compressionBufferRing.commit();
       }
 
-      compressionThreadLatch.countDown();
+      synchronized (compressionThreadLock)
+      {
+         compressionThreadLock.notify();
+      }
    }
 
    private File createFileInLogFolder(String filename)
