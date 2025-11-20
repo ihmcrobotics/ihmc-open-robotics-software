@@ -43,6 +43,7 @@ module controller_msgs
         double turn_max_angle_inward;
         @defaultValue(value=-1.0)
         double turn_max_angle_outward;
+        boolean steps_are_adjustable;
       };
     };
   };

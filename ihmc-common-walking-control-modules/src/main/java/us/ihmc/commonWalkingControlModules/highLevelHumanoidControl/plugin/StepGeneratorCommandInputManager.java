@@ -12,12 +12,15 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.St
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.communication.ros2.ROS2HeartbeatMonitor;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HeightMapCommand;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.yoVariables.euclid.YoVector2D;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -43,6 +46,7 @@ public class StepGeneratorCommandInputManager implements Updatable
    private final YoDouble turningVelocity;
    private final YoDouble swingHeight;
    private final YoBoolean isUnitVelocities;
+   private final YoBoolean overrideHeartbeat;
    private int ticksToUpdateTheEnvironment = Integer.MAX_VALUE;
    private HighLevelControllerName currentController;
    private ContinuousStepGenerator continuousStepGenerator;
@@ -56,6 +60,11 @@ public class StepGeneratorCommandInputManager implements Updatable
    private final AtomicBoolean shouldSubmitNewRegions = new AtomicBoolean(true);
    private final AtomicInteger ticksSinceUpdatingTheEnvironment = new AtomicInteger(0);
 
+   // ROS 2 stuff
+   // TODO: Destroy these objects properly
+   private final ROS2Node ros2Node;
+   private final ROS2HeartbeatMonitor heartbeatMonitor;
+
    public StepGeneratorCommandInputManager()
    {
       String suffix = "StepGeneratorCommandInputManager";
@@ -65,9 +74,14 @@ public class StepGeneratorCommandInputManager implements Updatable
       swingHeight = new YoDouble("desiredSwingHeight_" + suffix, registry);
       isUnitVelocities = new YoBoolean("isUnitVelocities_" + suffix, registry);
       isUnitVelocities.set(false);
+      overrideHeartbeat = new YoBoolean("overrideHeartbeat_" + suffix, registry);
+      overrideHeartbeat.set(false);
 
       // by default, command input manager is not enabled, set enabled only if #update is called
       commandInputManager.setEnabled(false);
+
+      ros2Node = new ROS2NodeBuilder().build(getClass().getSimpleName().toLowerCase() + "Node");
+      heartbeatMonitor = new ROS2HeartbeatMonitor(ros2Node, CSGROS2CommunicationHelper.CSG_HEARTBEAT_TOPIC);
    }
 
    public void setCSG(ContinuousStepGenerator continuousStepGenerator)
@@ -138,7 +152,15 @@ public class StepGeneratorCommandInputManager implements Updatable
       isOpen = currentController == HighLevelControllerName.WALKING || currentController == HighLevelControllerName.QUICKSTER;
       commandInputManager.setEnabled(isOpen);
 
-      if (commandInputManager.isNewCommandAvailable(ContinuousStepGeneratorInputCommand.class))
+      if (!overrideHeartbeat.getValue() && !heartbeatMonitor.isAlive())
+      {
+         desiredVelocity.setX(0.0);
+         desiredVelocity.setY(0.0);
+         turningVelocity.set(0.0);
+         isUnitVelocities.set(false);
+         walk.set(false);
+      }
+      else if (commandInputManager.isNewCommandAvailable(ContinuousStepGeneratorInputCommand.class))
       {
          ContinuousStepGeneratorInputCommand command = commandInputManager.pollNewestCommand(ContinuousStepGeneratorInputCommand.class);
          desiredVelocity.setX(command.getForwardVelocity());

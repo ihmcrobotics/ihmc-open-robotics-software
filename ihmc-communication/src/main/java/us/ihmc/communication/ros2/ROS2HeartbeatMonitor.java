@@ -4,12 +4,11 @@ import std_msgs.msg.dds.Empty;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.commons.thread.TypedNotification;
-import us.ihmc.ros2.ROS2Input;
+import us.ihmc.commons.thread.Throttler;
+import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.Timer;
-import us.ihmc.commons.thread.Throttler;
 
 import java.util.function.Consumer;
 
@@ -28,24 +27,25 @@ public class ROS2HeartbeatMonitor
     */
    public static final double HEARTBEAT_EXPIRATION = 1.25 * ROS2Heartbeat.HEARTBEAT_PERIOD;
    private final Timer timer = new Timer();
+   private final Empty heartbeatMessage = new Empty();
 
    // To provide callback when aliveness changes
    private volatile boolean running = true;
    private final Throttler throttler = new Throttler();
    private boolean wasAlive = false;
    private Consumer<Boolean> callback = null;
-   private final TypedNotification<Boolean> alivenessChangedNotification = new TypedNotification<>();
 
    public ROS2HeartbeatMonitor(ROS2Node ros2Node, ROS2Topic<Empty> heartbeatTopic)
    {
-      ros2Node.createSubscription2(heartbeatTopic, this::receivedHeartbeat);
+      ros2Node.createSubscription(heartbeatTopic, this::receivedHeartbeat);
       ThreadTools.startAsDaemon(() -> ExceptionTools.handle(this::monitorThread, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE),
                                 "HeartbeatMonitor");
    }
 
-   private synchronized void receivedHeartbeat(Empty empty)
+   private synchronized void receivedHeartbeat(Subscriber<Empty> subscriber)
    {
-      timer.reset();
+      if (subscriber.takeNextData(heartbeatMessage, null))
+         timer.reset();
    }
 
    /**
@@ -77,14 +77,8 @@ public class ROS2HeartbeatMonitor
 
             if (callback != null)
                callback.accept(isAlive);
-            alivenessChangedNotification.set(isAlive);
          }
       }
-   }
-
-   public TypedNotification<Boolean> getAlivenessChangedNotification()
-   {
-      return alivenessChangedNotification;
    }
 
    public void destroy()

@@ -54,8 +54,7 @@ public class OpenAlexanderMomentumOptimizationSettings extends MomentumOptimizat
    // TODO Needs tune up.
    private final Vector2D copRateHighWeight = new Vector2D(0.00008, 0.00032);
 
-   // TODO Needs tune up.
-   private final double neckJointspaceWeight = 0.0;
+   private final double neckJointspaceWeight = 50.0;
    // TODO Needs tune up.
    private final double spineJointspaceWeight = 10.0;
    // TODO Needs tune up.

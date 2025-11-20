@@ -15,7 +15,7 @@ public class ContinuousStepGeneratorParametersMessagePubSubType implements us.ih
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "834580f3a0944537d5c0deb849076c165bcd7a80ad35ea683a14c2cbf7daeeaa";
+   		return "b50b737fc6137b507dc5597b9916f52d933eef2a9f694d559b29fb2924a9f66e";
    }
    
    @Override
@@ -78,6 +78,8 @@ public class ContinuousStepGeneratorParametersMessagePubSubType implements us.ih
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -130,6 +132,9 @@ public class ContinuousStepGeneratorParametersMessagePubSubType implements us.ih
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -162,6 +167,8 @@ public class ContinuousStepGeneratorParametersMessagePubSubType implements us.ih
 
       cdr.write_type_6(data.getTurnMaxAngleOutward());
 
+      cdr.write_type_7(data.getStepsAreAdjustable());
+
    }
 
    public static void read(controller_msgs.msg.dds.ContinuousStepGeneratorParametersMessage data, us.ihmc.idl.CDR cdr)
@@ -192,6 +199,8 @@ public class ContinuousStepGeneratorParametersMessagePubSubType implements us.ih
       	
       data.setTurnMaxAngleOutward(cdr.read_type_6());
       	
+      data.setStepsAreAdjustable(cdr.read_type_7());
+      	
 
    }
 
@@ -211,6 +220,7 @@ public class ContinuousStepGeneratorParametersMessagePubSubType implements us.ih
       ser.write_type_6("max_step_width", data.getMaxStepWidth());
       ser.write_type_6("turn_max_angle_inward", data.getTurnMaxAngleInward());
       ser.write_type_6("turn_max_angle_outward", data.getTurnMaxAngleOutward());
+      ser.write_type_7("steps_are_adjustable", data.getStepsAreAdjustable());
    }
 
    @Override
@@ -229,6 +239,7 @@ public class ContinuousStepGeneratorParametersMessagePubSubType implements us.ih
       data.setMaxStepWidth(ser.read_type_6("max_step_width"));
       data.setTurnMaxAngleInward(ser.read_type_6("turn_max_angle_inward"));
       data.setTurnMaxAngleOutward(ser.read_type_6("turn_max_angle_outward"));
+      data.setStepsAreAdjustable(ser.read_type_7("steps_are_adjustable"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.ContinuousStepGeneratorParametersMessage src, controller_msgs.msg.dds.ContinuousStepGeneratorParametersMessage dest)
