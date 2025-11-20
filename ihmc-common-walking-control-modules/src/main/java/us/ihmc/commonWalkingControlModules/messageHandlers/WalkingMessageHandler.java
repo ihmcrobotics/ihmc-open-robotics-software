@@ -162,10 +162,7 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
       for (int i = 0; i < numberOfFootstepsToVisualize; i++)
          upcomingFoostepSide[i] = new YoEnum<>("upcomingFootstepSide" + i, registry, RobotSide.class, true);
 
-      if (yoGraphicsListRegistry != null)
-         footstepListVisualizer = new FootstepListVisualizer(contactableFeet, yoGraphicsListRegistry, registry);
-      else
-         footstepListVisualizer = null;
+      footstepListVisualizer = new FootstepListVisualizer(contactableFeet, registry);
       updateVisualization();
 
       momentumTrajectoryHandler = new MomentumTrajectoryHandler(yoTime, registry);

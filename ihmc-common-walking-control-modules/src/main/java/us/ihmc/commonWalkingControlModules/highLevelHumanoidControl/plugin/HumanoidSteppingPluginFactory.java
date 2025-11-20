@@ -59,7 +59,6 @@ public interface HumanoidSteppingPluginFactory extends HighLevelHumanoidControll
                          controllerFactoryHelper.getWalkingControllerParameters(),
                          controllerFactoryHelper.getStatusMessageOutputManager(),
                          controllerFactoryHelper.getCommandInputManager(),
-                         controllerToolbox.getYoGraphicsListRegistry(),
                          controllerToolbox.getContactableFeet(),
                          controllerToolbox.getYoTime());
    }
@@ -70,7 +69,6 @@ public interface HumanoidSteppingPluginFactory extends HighLevelHumanoidControll
                                       WalkingControllerParameters walkingControllerParameters,
                                       StatusMessageOutputManager walkingStatusMessageOutputManager,
                                       CommandInputManager walkingCommandInputManager,
-                                      YoGraphicsListRegistry yoGraphicsListRegistry,
                                       SideDependentList<? extends ContactableBody> contactableFeet,
                                       DoubleProvider timeProvider);
 }

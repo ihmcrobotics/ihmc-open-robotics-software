@@ -35,7 +35,7 @@ public class KinematicsBasedFootSwitchFactory implements FootSwitchFactory
    public FootSwitchInterface newFootSwitch(String namePrefix, ContactablePlaneBody foot, Collection<? extends ContactablePlaneBody> otherFeet,
                                             RigidBodyBasics rootBody,
                                             ForceSensorDataReadOnly footForceSensor,
-                                            double totalRobotWeight, YoGraphicsListRegistry yoGraphicsListRegistry,
+                                            double totalRobotWeight,
                                             YoRegistry registry)
    {
       if (contactThresholdHeight == null)

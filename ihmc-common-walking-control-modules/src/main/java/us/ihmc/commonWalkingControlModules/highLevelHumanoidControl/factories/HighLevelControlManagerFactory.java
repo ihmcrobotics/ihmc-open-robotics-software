@@ -517,6 +517,8 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
          for (RigidBodyControlManager rigidBodyControlManager : rigidBodyManagerMapByBodyName.values())
             group.addChild(rigidBodyControlManager.getSCS2YoGraphics());
       }
+      if (naturalPostureManager != null)
+         group.addChild(naturalPostureManager.getSCS2YoGraphics());
       return group;
    }
 }

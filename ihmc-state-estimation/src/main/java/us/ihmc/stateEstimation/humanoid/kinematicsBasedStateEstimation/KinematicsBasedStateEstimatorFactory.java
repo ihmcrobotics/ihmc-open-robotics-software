@@ -165,7 +165,6 @@ public class KinematicsBasedStateEstimatorFactory
                                                                           fullRobotModel.getRootBody(),
                                                                           footForceSensorForEstimator,
                                                                           totalRobotWeight,
-                                                                          null,
                                                                           stateEstimatorRegistry);
          footSwitchMap.put(foot, footSwitch);
       }

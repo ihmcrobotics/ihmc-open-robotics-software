@@ -111,8 +111,7 @@ public class PartialFootholdControlModule implements SCS2YoGraphicHolder
                                        HighLevelHumanoidControllerToolbox controllerToolbox,
                                        WalkingControllerParameters walkingControllerParameters,
                                        ExplorationParameters explorationParameters,
-                                       YoRegistry parentRegistry,
-                                       YoGraphicsListRegistry yoGraphicsListRegistry)
+                                       YoRegistry parentRegistry)
    {
       ContactableFoot contactableFoot = controllerToolbox.getContactableFeet().get(robotSide);
       String namePrefix = contactableFoot.getRigidBody().getName();
@@ -142,26 +141,12 @@ public class PartialFootholdControlModule implements SCS2YoGraphicHolder
 
       numberOfCellsOccupiedOnSideOfLine = new YoInteger(namePrefix + "NumberOfCellsOccupiedOnSideOfLine", registry);
 
-      if (yoGraphicsListRegistry != null)
-      {
-         String listName = getClass().getSimpleName();
-
-         YoArtifactPolygon yoGraphicPolygon = new YoArtifactPolygon(namePrefix + "UnsafeRegion", yoUnsafePolygon, Color.RED, false);
-         yoGraphicPolygon.setVisible(false);
-         yoGraphicsListRegistry.registerArtifact(listName, yoGraphicPolygon);
-
-         YoArtifactPolygon yoShrunkPolygon = new YoArtifactPolygon(namePrefix + "ShrunkPolygon", yoShrunkFootPolygon, Color.CYAN, false);
-         yoShrunkPolygon.setVisible(false);
-         yoGraphicsListRegistry.registerArtifact(listName, yoShrunkPolygon);
-      }
-
       footCoPOccupancyGrid = new FootCoPOccupancyGrid(namePrefix,
                                                       soleFrame,
                                                       40,
                                                       20,
                                                       walkingControllerParameters,
                                                       explorationParameters,
-                                                      yoGraphicsListRegistry,
                                                       registry);
 
       shrinkMaxLimit = explorationParameters.getShrinkMaxLimit();
@@ -189,12 +174,10 @@ public class PartialFootholdControlModule implements SCS2YoGraphicHolder
                                                                                                  dt,
                                                                                                  contactableFoot,
                                                                                                  explorationParameters,
-                                                                                                 yoGraphicsListRegistry,
                                                                                                  registry);
       FootRotationCalculator geometricFootRotationCalculator = new GeometricFootRotationCalculator(namePrefix,
                                                                                                    contactableFoot,
                                                                                                    explorationParameters,
-                                                                                                   yoGraphicsListRegistry,
                                                                                                    registry);
       rotationCalculators.put(RotationCalculatorType.VELOCITY, velocityFootRotationCalculator);
       rotationCalculators.put(RotationCalculatorType.GEOMETRY, geometricFootRotationCalculator);

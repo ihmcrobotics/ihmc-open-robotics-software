@@ -303,7 +303,6 @@ public class CoPObjectiveCalculatorTest
    private void setupTest()
    {
       YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       double controlDT = 0.005;
 
       fullHumanoidRobotModel = new FullRobotModelTestTools.RandomFullHumanoidRobotModel(random);
@@ -329,7 +328,6 @@ public class CoPObjectiveCalculatorTest
                                                 jointsToOptimizeFor,
                                                 centerOfMassFrame,
                                                 momentumOptimizationSettings,
-                                                yoGraphicsListRegistry,
                                                 registry);
       toolbox.setupForInverseDynamicsSolver(contactablePlaneBodies);
 

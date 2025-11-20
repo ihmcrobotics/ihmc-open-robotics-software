@@ -102,7 +102,6 @@ public class WholeBodyControllerCoreFactory
                                                 jointsToOptimizeFor,
                                                 centerOfMassFrame,
                                                 walkingControllerParameters.getMomentumOptimizationSettings(),
-                                                controllerToolbox.getYoGraphicsListRegistry(),
                                                 registry);
       return toolbox;
    }

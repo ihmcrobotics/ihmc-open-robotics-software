@@ -275,7 +275,6 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
                                                                                        controlledJoints,
                                                                                        controllerToolbox.getCenterOfMassFrame(),
                                                                                        momentumOptimizationSettings,
-                                                                                       yoGraphicsListRegistry,
                                                                                        registry);
 
       controlCoreToolbox.setJointPrivilegedConfigurationParameters(jointPrivilegedConfigurationParameters);

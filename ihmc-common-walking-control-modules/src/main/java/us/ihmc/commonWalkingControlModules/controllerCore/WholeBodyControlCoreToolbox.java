@@ -50,7 +50,6 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
    private final ReferenceFrame centerOfMassFrame;
    private final ControllerCoreOptimizationSettings optimizationSettings;
    private FeedbackControllerSettings feedbackControllerSettings = FeedbackControllerSettings.getDefault();
-   private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
    private final JointIndexHandler jointIndexHandler;
    private final List<OneDoFJointBasics> inactiveOneDoFJoints = new ArrayList<>();
@@ -144,9 +143,6 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
     *                                           assumed to be updated from outside the controller core.
     * @param controllerCoreOptimizationSettings set of parameters used to initialize the optimization
     *                                           problems.
-    * @param yoGraphicsListRegistry             the registry in which the {@link YoGraphic}s and
-    *                                           {@link Artifact}s of the controller core are
-    *                                           registered.
     * @param parentRegistry                     registry to which this toolbox will attach its own
     *                                           registry.
     */
@@ -156,14 +152,12 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
                                       JointBasics[] controlledJoints,
                                       ReferenceFrame centerOfMassFrame,
                                       ControllerCoreOptimizationSettings controllerCoreOptimizationSettings,
-                                      YoGraphicsListRegistry yoGraphicsListRegistry,
                                       YoRegistry parentRegistry)
    {
       this.controlDT = controlDT;
       this.gravityZ = gravityZ;
       this.rootJoint = rootJoint;
       this.optimizationSettings = controllerCoreOptimizationSettings;
-      this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
       if (rootJoint != null && Stream.of(controlledJoints).noneMatch(joint -> joint == rootJoint))
       {
@@ -554,11 +548,6 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
       return totalMassProvider;
    }
 
-   public YoGraphicsListRegistry getYoGraphicsListRegistry()
-   {
-      return yoGraphicsListRegistry;
-   }
-
    public List<? extends ContactablePlaneBody> getContactablePlaneBodies()
    {
       return contactablePlaneBodies;
@@ -567,7 +556,7 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
    public PlaneContactWrenchProcessor getPlaneContactWrenchProcessor()
    {
       if (planeContactWrenchProcessor == null)
-         planeContactWrenchProcessor = new PlaneContactWrenchProcessor(contactablePlaneBodies, yoGraphicsListRegistry, registry);
+         planeContactWrenchProcessor = new PlaneContactWrenchProcessor(contactablePlaneBodies, registry);
       return planeContactWrenchProcessor;
    }
 
@@ -583,11 +572,9 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
 
    public WrenchVisualizer getWrenchVisualizer()
    {
-      if (yoGraphicsListRegistry == null)
-         return null;
       if (wrenchVisualizer == null)
       {
-         wrenchVisualizer = new WrenchVisualizer("DesiredExternal", 1.0, yoGraphicsListRegistry, registry);
+         wrenchVisualizer = new WrenchVisualizer("DesiredExternal", 1.0, registry);
          wrenchVisualizer.registerContactablePlaneBodies(contactablePlaneBodies);
       }
       return wrenchVisualizer;

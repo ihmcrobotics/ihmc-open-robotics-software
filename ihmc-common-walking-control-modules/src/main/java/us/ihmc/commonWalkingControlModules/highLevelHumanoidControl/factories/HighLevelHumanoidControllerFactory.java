@@ -515,7 +515,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                                fullRobotModel.getRootBody(),
                                                                                totalRobotWeight,
                                                                                kinematicsSimulation,
-                                                                               yoGraphicsListRegistry,
                                                                                registry);
       SideDependentList<ForceSensorDataReadOnly> wristForceSensors = createWristForceSensors(forceSensorDataHolder);
 
@@ -597,7 +596,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                      RigidBodyBasics rootBody,
                                                                      double totalRobotWeight,
                                                                      boolean kinematicsSimulation,
-                                                                     YoGraphicsListRegistry yoGraphicsListRegistry,
                                                                      YoRegistry registry)
    {
       SideDependentList<FootSwitchInterface> footSwitches = new SideDependentList<>();
@@ -626,7 +624,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                              rootBody,
                                                                              footForceSensor,
                                                                              totalRobotWeight,
-                                                                             yoGraphicsListRegistry,
                                                                              registry);
             footSwitches.put(robotSide, footSwitch);
          }

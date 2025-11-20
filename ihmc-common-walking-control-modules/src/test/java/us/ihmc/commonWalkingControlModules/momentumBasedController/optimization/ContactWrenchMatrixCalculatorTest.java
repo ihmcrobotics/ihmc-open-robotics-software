@@ -132,7 +132,6 @@ public class ContactWrenchMatrixCalculatorTest
                                              rootJoint.subtreeArray(),
                                              centerOfMassFrame,
                                              new GeneralOptimizationSettings(),
-                                             yoGraphicsListRegistry,
                                              registry);
    }
 

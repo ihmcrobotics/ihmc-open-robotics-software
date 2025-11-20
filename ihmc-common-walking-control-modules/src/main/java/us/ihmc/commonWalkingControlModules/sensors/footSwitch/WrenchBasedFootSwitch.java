@@ -95,7 +95,6 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
                                 DoubleProvider contactForceThresholdLow,
                                 DoubleProvider contactForceThresholdHigh,
                                 DoubleProvider contactCoPThreshold,
-                                YoGraphicsListRegistry yoGraphicsListRegistry,
                                 YoRegistry parentRegistry)
    {
       this.forceSensorData = forceSensorData;

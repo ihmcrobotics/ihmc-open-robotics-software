@@ -739,7 +739,6 @@ public class KinematicsToolboxController extends ToolboxController
                                                                             controlledJoints,
                                                                             centerOfMassFrame,
                                                                             optimizationSettings,
-                                                                            null,
                                                                             registry);
       toolbox.setJointPrivilegedConfigurationParameters(jointPrivilegedConfigurationParameters);
       jointTorqueMinimizationWeightCalculator = new JointTorqueSoftLimitWeightCalculator(toolbox.getJointIndexHandler());

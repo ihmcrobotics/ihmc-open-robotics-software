@@ -136,7 +136,6 @@ public class CrossFourBarLinkageWBCController implements RobotController
                                                                                           oneDoFJoints,
                                                                                           null,
                                                                                           new RobotArmControllerCoreOptimizationSettings(),
-                                                                                          null,
                                                                                           registry);
       controllerCoreToolbox.addKinematicLoopFunction(fourBarKinematicLoop);
       controllerCoreToolbox.setupForInverseDynamicsSolver(Collections.emptyList());

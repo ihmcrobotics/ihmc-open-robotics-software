@@ -1,58 +1,47 @@
 package us.ihmc.robotics.geometry;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
+import us.ihmc.scs2.definition.visual.ColorDefinition;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class YoGroundPlaneEstimator extends GroundPlaneEstimator
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicPolygonExtruded3DDefinition;
+
+public class YoGroundPlaneEstimator extends GroundPlaneEstimator implements SCS2YoGraphicHolder
 {
    private final YoFramePoint3D yoGroundPlanePoint;
    private final YoFrameVector3D yoGroundPlaneNormal;
-   private final YoFrameYawPitchRoll yoGroundPlaneOrientation;
-   private  YoGraphicPolygon groundPlaneVisualizer;
+   private final YoFrameQuaternion yoGroundPlaneOrientation;
 
-   public YoGroundPlaneEstimator(YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
+   public YoGroundPlaneEstimator(YoRegistry parentRegistry)
    {
-      this("", parentRegistry, graphicsListRegistry, YoAppearance.Glass());
+      this("", parentRegistry);
    }
 
-   public YoGroundPlaneEstimator(String prefix, YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry, AppearanceDefinition groundPlaneAppearance)
+   public YoGroundPlaneEstimator(String prefix, YoRegistry parentRegistry)
    {
       YoRegistry registry = new YoRegistry(prefix + getClass().getSimpleName());
 
       yoGroundPlanePoint = new YoFramePoint3D(prefix + "GroundPlanePointInWorld", ReferenceFrame.getWorldFrame(), registry);
       yoGroundPlaneNormal = new YoFrameVector3D(prefix + "GroundPlaneNormalInWorld", ReferenceFrame.getWorldFrame(), registry);
-      yoGroundPlaneOrientation = new YoFrameYawPitchRoll(prefix + "GroundPlaneOrientationInWorld", ReferenceFrame.getWorldFrame(), registry);
+      yoGroundPlaneOrientation = new YoFrameQuaternion(prefix + "GroundPlaneOrientationInWorld", ReferenceFrame.getWorldFrame(), registry);
 
       if (parentRegistry != null)
       {
          parentRegistry.addChild(registry);
-      }
-
-      if (graphicsListRegistry != null)
-      {
-         YoFrameConvexPolygon2D yoGroundPlaneEstimate = new YoFrameConvexPolygon2D("groundPlaneEstimate", "", ReferenceFrame.getWorldFrame(), 4, parentRegistry);
-         yoGroundPlaneEstimate.addVertex(2.0, 2.0);
-         yoGroundPlaneEstimate.addVertex(2.0, -2.0);
-         yoGroundPlaneEstimate.addVertex(-2.0, -2.0);
-         yoGroundPlaneEstimate.addVertex(-2.0, 2.0);
-
-         groundPlaneVisualizer = new YoGraphicPolygon("groundPlaneEstimateVisualizer", yoGroundPlaneEstimate,
-                                                      yoGroundPlanePoint, yoGroundPlaneOrientation,
-                                                      1, YoAppearance.Glass());
-         graphicsListRegistry.registerYoGraphic(prefix + "GroundPlaneEstimate", groundPlaneVisualizer);
       }
 
       hideGraphics();
@@ -80,8 +69,6 @@ public class YoGroundPlaneEstimator extends GroundPlaneEstimator
       yoGroundPlanePoint.set(getPlanePoint());
 
       yoGroundPlaneOrientation.setYawPitchRoll(yaw, getPitch(yaw), getRoll(yaw));
-
-      groundPlaneVisualizer.update();
    }
 
    /**
@@ -108,8 +95,6 @@ public class YoGroundPlaneEstimator extends GroundPlaneEstimator
       yoGroundPlanePoint.set(getPlanePoint());
 
       yoGroundPlaneOrientation.setYawPitchRoll(yaw, getPitch(yaw), getRoll(yaw));
-
-      groundPlaneVisualizer.update();
    }
 
    /**
@@ -136,13 +121,29 @@ public class YoGroundPlaneEstimator extends GroundPlaneEstimator
       yoGroundPlanePoint.set(getPlanePoint());
 
       yoGroundPlaneOrientation.setYawPitchRoll(yaw, getPitch(yaw), getRoll(yaw));
-
-      groundPlaneVisualizer.update();
    }
 
    public void hideGraphics()
    {
       yoGroundPlaneNormal.setToNaN();
       yoGroundPlanePoint.setToNaN();
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition graphicGroupDefinition = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      List<Point2D> vertices = new ArrayList<>();
+      vertices.add(new Point2D(2.0, 2.0));
+      vertices.add(new Point2D(2.0, -2.0));
+      vertices.add(new Point2D(-2.0, -2.0));
+      vertices.add(new Point2D(-2.0, 2.0));
+      ColorDefinition color = ColorDefinitions.SkyBlue();
+      color.setAlpha(0.5);
+      graphicGroupDefinition.addChild(newYoGraphicPolygonExtruded3DDefinition("groundPlaneEstimateVisualizer",
+                                                                              new YoFramePose3D(yoGroundPlanePoint, yoGroundPlaneOrientation),
+                                                                              vertices,
+                                                                              0.01, color));
+      return null;
    }
 }

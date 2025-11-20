@@ -53,6 +53,12 @@ public class PlaneContactWrenchProcessor implements SCS2YoGraphicHolder
    private final DesiredExternalWrenchHolder desiredExternalWrenchHolder;
 
    public PlaneContactWrenchProcessor(List<? extends ContactablePlaneBody> contactablePlaneBodies,
+                                      YoRegistry parentRegistry)
+   {
+      this(contactablePlaneBodies, null, parentRegistry);
+   }
+
+   public PlaneContactWrenchProcessor(List<? extends ContactablePlaneBody> contactablePlaneBodies,
                                       YoGraphicsListRegistry yoGraphicsListRegistry,
                                       YoRegistry parentRegistry)
    {

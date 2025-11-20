@@ -147,7 +147,6 @@ public class CrossFourBarOneDoFJointWBCController implements RobotController
                                                                                           oneDoFJoints,
                                                                                           null,
                                                                                           new RobotArmControllerCoreOptimizationSettings(),
-                                                                                          null,
                                                                                           registry);
       controllerCoreToolbox.setupForInverseDynamicsSolver(Collections.emptyList());
 

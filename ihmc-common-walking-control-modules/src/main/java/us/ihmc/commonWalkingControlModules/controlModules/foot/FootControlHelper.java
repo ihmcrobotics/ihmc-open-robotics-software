@@ -75,15 +75,13 @@ public class FootControlHelper implements SCS2YoGraphicHolder
       RigidBodyBasics foot = contactableFoot.getRigidBody();
       String namePrefix = foot.getName();
 
-      YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       if (walkingControllerParameters.createFootholdExplorationTools() && explorationParameters != null)
       {
          partialFootholdControlModule = new PartialFootholdControlModule(robotSide,
                                                                          controllerToolbox,
                                                                          walkingControllerParameters,
                                                                          explorationParameters,
-                                                                         registry,
-                                                                         yoGraphicsListRegistry);
+                                                                         registry);
       }
       else
       {

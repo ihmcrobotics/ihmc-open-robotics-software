@@ -69,7 +69,6 @@ public class WrenchBasedFootSwitchFactory implements FootSwitchFactory
                                             RigidBodyBasics rootBody,
                                             ForceSensorDataReadOnly footForceSensor,
                                             double totalRobotWeight,
-                                            YoGraphicsListRegistry yoGraphicsListRegistry,
                                             YoRegistry registry)
    {
       if (contactThresholdForceParameter == null)
@@ -86,7 +85,6 @@ public class WrenchBasedFootSwitchFactory implements FootSwitchFactory
                                        contactThresholdForceParameter,
                                        secondContactThresholdForceParameter,
                                        copThresholdFractionParameter,
-                                       yoGraphicsListRegistry,
                                        registry);
    }
 }

@@ -84,9 +84,8 @@ public class PushRecoveryControlModule implements SCS2YoGraphicHolder
       enablePushRecovery = new YoBoolean("enablePushRecovery", registry);
       enablePushRecovery.set(ENABLE); // todo add some smartness on whether ot not to enable this if using the icp optimization
 
-      YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
-      captureRegionCalculator = new OneStepCaptureRegionCalculator(referenceFrames, recoveryControllerParameters, registry, yoGraphicsListRegistry);
-      footstepAdjustor = new FootstepAdjustor(feet, registry, yoGraphicsListRegistry);
+      captureRegionCalculator = new OneStepCaptureRegionCalculator(referenceFrames, recoveryControllerParameters, registry, null);
+      footstepAdjustor = new FootstepAdjustor(feet, registry);
 
       footstepWasProjectedInCaptureRegion = new YoBoolean("footstepWasProjectedInCaptureRegion", registry);
       recovering = new YoBoolean("recovering", registry);

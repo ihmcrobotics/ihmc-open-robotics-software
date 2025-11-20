@@ -115,7 +115,6 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
                                                                 joints,
                                                                 referenceFrames.getCenterOfMassFrame(),
                                                                 robotModel.getWalkingControllerParameters().getMomentumOptimizationSettings(),
-                                                                graphicsListRegistry,
                                                                 parentRegistry);
 
       ArrayList<ContactablePlaneBody> contactablePlaneBodies = new ArrayList<>();

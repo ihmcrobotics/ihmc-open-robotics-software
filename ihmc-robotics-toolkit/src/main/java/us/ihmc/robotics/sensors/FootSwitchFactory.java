@@ -14,10 +14,9 @@ public interface FootSwitchFactory
                                              Collection<? extends ContactablePlaneBody> otherFeet,
                                              ForceSensorDataReadOnly footForceSensor,
                                              double totalRobotWeight,
-                                             YoGraphicsListRegistry yoGraphicsListRegistry,
                                              YoRegistry registry)
    {
-      return newFootSwitch(namePrefix, foot, otherFeet, null, footForceSensor, totalRobotWeight, yoGraphicsListRegistry, registry);
+      return newFootSwitch(namePrefix, foot, otherFeet, null, footForceSensor, totalRobotWeight, registry);
    }
 
    FootSwitchInterface newFootSwitch(String namePrefix,
@@ -26,6 +25,5 @@ public interface FootSwitchFactory
                                      RigidBodyBasics rootBody,
                                      ForceSensorDataReadOnly footForceSensor,
                                      double totalRobotWeight,
-                                     YoGraphicsListRegistry yoGraphicsListRegistry,
                                      YoRegistry registry);
 }

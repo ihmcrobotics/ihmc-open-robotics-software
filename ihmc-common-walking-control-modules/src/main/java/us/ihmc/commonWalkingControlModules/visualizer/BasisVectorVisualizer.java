@@ -31,14 +31,16 @@ public class BasisVectorVisualizer implements SCS2YoGraphicHolder
    private final int rhoSize;
    private final double vizScaling;
 
+   public BasisVectorVisualizer(String name, int rhoSize, double vizScaling, YoRegistry parentRegistry)
+   {
+      this(name, rhoSize, vizScaling, null, parentRegistry);
+   }
+
    public BasisVectorVisualizer(String name, int rhoSize, double vizScaling, YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry parentRegistry)
    {
       this.vizScaling = vizScaling;
-      AppearanceDefinition basisAppearance = YoAppearance.Aqua();
 
       this.rhoSize = rhoSize;
-
-      YoGraphicsList yoGraphicsList = new YoGraphicsList(name);
 
       for (int i = 0; i < rhoSize; i++)
       {
@@ -49,13 +51,25 @@ public class BasisVectorVisualizer implements SCS2YoGraphicHolder
 
          YoFramePoint3D pointOfBasis = new YoFramePoint3D(prefix + "PointOfBasis", ReferenceFrame.getWorldFrame(), registry);
          pointOfBases.add(pointOfBasis);
-
-         YoGraphicVector basisVisualizer = new YoGraphicVector(prefix + "BasisViz", pointOfBasis, basisVector, vizScaling, basisAppearance, true);
-         yoGraphicsListRegistry.registerArtifact(name, basisVisualizer.createArtifact());
-         yoGraphicsList.add(basisVisualizer);
       }
 
-      yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
+      if (yoGraphicsListRegistry != null)
+      {
+         YoGraphicsList yoGraphicsList = new YoGraphicsList(name);
+         AppearanceDefinition basisAppearance = YoAppearance.Aqua();
+
+         for (int i = 0; i < rhoSize; i++)
+         {
+            String prefix = name + i;
+
+            YoGraphicVector basisVisualizer = new YoGraphicVector(prefix + "BasisViz", pointOfBases.get(i), yoBasisVectors.get(i), vizScaling, basisAppearance, true);
+            yoGraphicsListRegistry.registerArtifact(name, basisVisualizer.createArtifact());
+            yoGraphicsList.add(basisVisualizer);
+         }
+
+         yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
+
+      }
 
       parentRegistry.addChild(registry);
    }

@@ -28,10 +28,8 @@ public class FootstepListVisualizer implements SCS2YoGraphicHolder
    private final SideDependentList<List<FootstepVisualizer>> footstepVisualizers = new SideDependentList<>();
 
    public FootstepListVisualizer(SideDependentList<? extends ContactablePlaneBody> contactableFeet,
-                                 YoGraphicsListRegistry yoGraphicsListRegistry,
                                  YoRegistry parentRegistry)
    {
-      String graphicListName = "FootstepVisualizer";
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -42,11 +40,9 @@ public class FootstepListVisualizer implements SCS2YoGraphicHolder
          {
             String name = robotSide.getCamelCaseNameForStartOfExpression() + "Footstep" + i;
             FootstepVisualizer footstepVisualizer = new FootstepVisualizer(name,
-                                                                           graphicListName,
                                                                            robotSide,
                                                                            contactableFoot,
                                                                            defaultFeetColors.get(robotSide).darker(),
-                                                                           yoGraphicsListRegistry,
                                                                            registry);
             footstepVisualizers.get(robotSide).add(footstepVisualizer);
          }

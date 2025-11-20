@@ -20,6 +20,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
@@ -35,7 +36,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-public class SwingTrajectoryCalculator
+public class SwingTrajectoryCalculator implements SCS2YoGraphicHolder
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -128,7 +129,7 @@ public class SwingTrajectoryCalculator
                                                                defaultSwingHeightFromStanceFoot,
                                                                customWaypointAngleThreshold,
                                                                registry,
-                                                               controllerToolbox.getYoGraphicsListRegistry());
+                                                               null);
       swingTrajectoryOptimizer.setObstacleClearanceWaypointHeightFactors(firstWaypointHeightFactorForSteppingUp, secondWaypointHeightFactorForSteppingDown);
       double minDistanceToStance = walkingControllerParameters.getMinSwingTrajectoryClearanceFromStanceFoot();
       swingTrajectoryOptimizer.enableStanceCollisionAvoidance(robotSide, oppositeSoleZUpFrame, minDistanceToStance);
@@ -543,6 +544,7 @@ public class SwingTrajectoryCalculator
       return isSteppingForward && isSteppingDown;
    }
 
+   @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(namePrefix + getClass().getSimpleName());

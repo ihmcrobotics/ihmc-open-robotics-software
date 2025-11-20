@@ -21,14 +21,13 @@ public class FootstepAdjusterVisualizer implements SCS2YoGraphicHolder
 
    private final String name = getClass().getSimpleName();
    private final YoRegistry registry = new YoRegistry(name + "Registry");
-   private final YoArtifactPolygon nextFootstepPolygonArtifact;
 
    private final FootstepAdjustor footstepAdjustor;
 
    private YoFrameConvexPolygon2D yoNextFootstepPolygon;
    private FrameConvexPolygon2D nextFootstepPolygon;
 
-   public FootstepAdjusterVisualizer(FootstepAdjustor footstepAdjustor, YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry parentRegistry)
+   public FootstepAdjusterVisualizer(FootstepAdjustor footstepAdjustor, YoRegistry parentRegistry)
    {
       this.footstepAdjustor = footstepAdjustor;
 
@@ -36,10 +35,6 @@ public class FootstepAdjusterVisualizer implements SCS2YoGraphicHolder
 
       yoNextFootstepPolygon = new YoFrameConvexPolygon2D(nextFootstepCaption, "", worldFrame, 8, registry);
       nextFootstepPolygon = new FrameConvexPolygon2D(worldFrame);
-
-      nextFootstepPolygonArtifact = new YoArtifactPolygon(nextFootstepCaption, yoNextFootstepPolygon, colorDefault, false);
-      nextFootstepPolygonArtifact.setVisible(false);
-      yoGraphicsListRegistry.registerArtifact(getClass().getSimpleName(), nextFootstepPolygonArtifact);
 
       parentRegistry.addChild(registry);
    }

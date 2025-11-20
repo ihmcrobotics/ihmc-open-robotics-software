@@ -304,7 +304,6 @@ public class HumanoidKinematicsSimulation
                                                                                        controllerToolbox.getControlledJoints(),
                                                                                        controllerToolbox.getCenterOfMassFrame(),
                                                                                        walkingControllerParameters.getMomentumOptimizationSettings(),
-                                                                                       yoGraphicsListRegistry,
                                                                                        registry);
       controlCoreToolbox.setJointPrivilegedConfigurationParameters(walkingControllerParameters.getJointPrivilegedConfigurationParameters());
       controlCoreToolbox.setFeedbackControllerSettings(walkingControllerParameters.getFeedbackControllerSettings());
