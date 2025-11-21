@@ -199,6 +199,9 @@ public abstract class ImageSensor implements AutoCloseable
             {
                RawImage image = getImage(imageKey);
 
+               if (image == null)
+                   return;
+
                if (!queue.offer(image))
                {
                   // Meaning we couldn't add the image to the queue

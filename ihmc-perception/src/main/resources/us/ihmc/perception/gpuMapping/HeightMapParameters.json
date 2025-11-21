@@ -4,6 +4,11 @@
   "Flying points filter": false,
   "Enable chunked map": false,
   "Log height map": false,
+  "Min Depth To Accept": {
+    "value": 0.88,
+    "lowerBound": 0.0,
+    "upperBound": 2.0
+  },
   "Min height registration": {
     "value": -1.5,
     "lowerBound": -10.0,
