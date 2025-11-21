@@ -29,6 +29,9 @@ module controller_msgs
         double current_default_step_width;
         double current_turn_max_angle_inward;
         double current_turn_max_angle_outward;
+        boolean are_steps_adjustable;
+        boolean snapping_to_heightmap;
+        boolean accounting_for_ground_drift;
       };
     };
   };

@@ -16,3 +16,6 @@ float64 min_step_width -1
 float64 max_step_width -1
 float64 turn_max_angle_inward -1
 float64 turn_max_angle_outward -1
+bool steps_are_adjustable
+bool snap_to_heightmap
+bool account_for_ground_drift
