@@ -93,6 +93,8 @@ public class AbilityHandActionExecutor extends ActionNodeExecutor<AbilityHandAct
       AbilityHandState handState = readState();
       if (handState != null && timer.isRunning(5.0)) // timeout 5 s
       {
+         // state.getPositionDistanceToGoalTolerance()
+
          boolean moving = false;
          for (int i = 0; i < 6; i++)
             moving |= Math.abs(handState.getGoalVelocities()[i]) > 0.0f;
