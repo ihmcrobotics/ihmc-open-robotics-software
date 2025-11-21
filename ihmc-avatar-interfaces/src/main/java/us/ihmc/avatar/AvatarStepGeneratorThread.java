@@ -215,4 +215,9 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
    {
       return csgCommandInputManager;
    }
+
+   public void destroy()
+   {
+      csgCommandInputManager.destroy();
+   }
 }

@@ -63,7 +63,6 @@ public class StepGeneratorCommandInputManager implements Updatable
    private final AtomicInteger ticksSinceUpdatingTheEnvironment = new AtomicInteger(0);
 
    // ROS 2 stuff
-   // TODO: Destroy these objects properly
    private final ROS2Node ros2Node;
    private final ROS2HeartbeatMonitor heartbeatMonitor;
 
@@ -308,5 +307,11 @@ public class StepGeneratorCommandInputManager implements Updatable
    public YoRegistry getRegistry()
    {
       return registry;
+   }
+
+   public void destroy()
+   {
+      ros2Node.destroy();
+      heartbeatMonitor.destroy();
    }
 }
