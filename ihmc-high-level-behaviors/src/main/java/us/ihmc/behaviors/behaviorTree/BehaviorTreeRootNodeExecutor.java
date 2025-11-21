@@ -121,9 +121,9 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       currentlyExecutingLeaves.removeAll(failedLeaves);
       currentlyExecutingLeaves.removeAll(successfulLeaves);
 
-      boolean keepTrying = state.getAutomaticExecution() || state.pollManualExecutionRequested();
+      boolean tryExecuteNext = state.getAutomaticExecution() || state.pollManualExecutionRequested();
       executionLoop:
-      while (keepTrying)
+      while (tryExecuteNext)
       {
          if (isEndOfSequence())
          {
@@ -154,7 +154,11 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
             leafToExecute.triggerExecution();
             state.stepForwardNextExecutionIndex();
             if (!leafToExecute.getState().getIsExecuting()) // Handle immediately ceased execution
-               keepTrying = leafCeasedExecution(leafToExecute);
+            {
+               boolean isTryLeaf = leafCeasedExecution(leafToExecute);
+               if (!isTryLeaf && leafToExecute.getState().getFailed())
+                  tryExecuteNext = false;
+            }
             else
                currentlyExecutingLeaves.add(leafToExecute);
          }
@@ -163,7 +167,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
             state.getLogger().error("Cannot execute leaf: %s: %s\n%s".formatted(leafToExecute.getClass().getSimpleName(),
                                                                                 leafToExecute.getDefinition().getName(),
                                                                                 leafToExecute.getCantExecuteMessage()));
-            keepTrying = false;
+            tryExecuteNext = false;
          }
       }
 
@@ -177,9 +181,13 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
 
    private boolean leafCeasedExecution(LeafNodeExecutor<?, ?> leaf)
    {
-      boolean keepGoing = true;
-      String name = leaf.getDefinition().getName();
       boolean failed = leaf.getState().getFailed();
+      if (failed)
+         failedLeaves.add(leaf);
+      else
+         successfulLeaves.add(leaf);
+
+      String name = leaf.getDefinition().getName();
       if (leaf.getState() instanceof ActionNodeState<?> actionNodeState)
       {
          String resultMessage = failed ? "failed after" : "completed successfully in";
@@ -201,16 +209,10 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       {
          state.getLogger().error("A leaf failed. Disabling automatic execution.\n   Failed: %s".formatted(leaf));
          state.setAutomaticExecution(false);
-         state.stepBackNextExecutionIndex(); // It is convenient to stay at the failed node to debug/retry
-         keepGoing = false;
+         state.setExecutionNextIndex(leaf.getState().getLeafIndex()); // It is convenient to stay at the failed node to debug/retry
       }
 
-      if (failed)
-         failedLeaves.add(leaf);
-      else
-         successfulLeaves.add(leaf);
-
-      return keepGoing;
+      return isTryLeaf;
    }
 
    private int effectiveExecuteAfterLeafIndex(LeafNodeExecutor<?, ?> leaf)
