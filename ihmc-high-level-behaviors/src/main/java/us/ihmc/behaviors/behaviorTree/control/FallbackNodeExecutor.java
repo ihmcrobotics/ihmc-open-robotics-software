@@ -70,13 +70,19 @@ public class FallbackNodeExecutor extends BehaviorTreeNodeExecutor<FallbackNodeS
       {
          if (leaf.getState().getFailed())
          {
-            LogTools.warn("Try leaf failed, skipping to first check leaf.");
-            rootNode.getState().setExecutionNextIndex(catchLeaves.get(0).getState().getLeafIndex() - 1); // Minus one because gets incremented after
+            LeafNodeExecutor<?, ?> firstCatchLeaf = catchLeaves.get(0);
+            LogTools.warn("Try leaf failed, skipping to first catch leaf: %s".formatted(firstCatchLeaf.getDefinition().getName()));
+            rootNode.getState().setExecutionNextIndex(firstCatchLeaf.getState().getLeafIndex()); // Minus one because gets incremented after
          }
          else if (tryLeaves.indexOf(leaf) == tryLeaves.size() - 1) // Last try leaf succeeded
          {
-            LogTools.info("Last try leaf successful, skipping fallback leaves.");
-            rootNode.getState().setExecutionNextIndex(catchLeaves.get(catchLeaves.size() - 1).getState().getLeafIndex()); // Minus one because gets incremented after
+            String gotoNodeName = "End of sequence";
+            int indexAfterLastCatchLeaf = catchLeaves.get(catchLeaves.size() - 1).getState().getLeafIndex() + 1;
+            if (rootNode.getOrderedLeaves().size() > indexAfterLastCatchLeaf)
+               gotoNodeName = rootNode.getOrderedLeaves().get(indexAfterLastCatchLeaf).getDefinition().getName();
+
+            LogTools.info("Last try leaf successful, skipping fallback leaves to: %s".formatted(gotoNodeName));
+            rootNode.getState().setExecutionNextIndex(indexAfterLastCatchLeaf); // Minus one because gets incremented after
          }
 
          return true;

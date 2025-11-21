@@ -106,7 +106,7 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
             ImGui.getWindowDrawList().addLine(offsetX, offsetY + frameHeight * 0.5f, offsetX, executeAfterY, color, thickness);
             ImGui.getWindowDrawList().addLine(offsetX - scale * 0.4f, executeAfterY + scale * 0.5f, offsetX, executeAfterY, color, thickness);
             ImGui.getWindowDrawList().addLine(offsetX + scale * 0.4f, executeAfterY + scale * 0.5f, offsetX, executeAfterY, color, thickness);
-            ImGui.getWindowDrawList().addCircleFilled(offsetX, offsetY + frameHeight * 0.5f, scale * 0.20f, color, 16);
+            ImGui.getWindowDrawList().addCircle(offsetX + 0.5f, offsetY + frameHeight * 0.5f, scale * 0.15f, color, 16, thickness);
             ImGui.dummy(0.0f, frameHeight);
          }
       }
