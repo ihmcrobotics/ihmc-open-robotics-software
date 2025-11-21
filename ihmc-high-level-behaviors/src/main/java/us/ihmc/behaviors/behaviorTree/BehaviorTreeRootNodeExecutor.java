@@ -152,11 +152,11 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
                                                                           leafToExecute.getDefinition().getName(),
                                                                           leafToExecute.getClass().getSimpleName()));
             leafToExecute.triggerExecution();
+            state.stepForwardNextExecutionIndex();
             if (!leafToExecute.getState().getIsExecuting()) // Handle immediately ceased execution
                keepTrying = leafCeasedExecution(leafToExecute);
             else
                currentlyExecutingLeaves.add(leafToExecute);
-            state.stepForwardNextExecutionIndex();
          }
          else
          {
@@ -201,6 +201,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       {
          state.getLogger().error("A leaf failed. Disabling automatic execution.\n   Failed: %s".formatted(leaf));
          state.setAutomaticExecution(false);
+         state.stepBackNextExecutionIndex(); // It is convenient to stay at the failed node to debug/retry
          keepGoing = false;
       }
 
