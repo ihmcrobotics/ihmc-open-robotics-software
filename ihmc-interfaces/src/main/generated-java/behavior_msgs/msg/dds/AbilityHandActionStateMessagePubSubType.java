@@ -15,7 +15,7 @@ public class AbilityHandActionStateMessagePubSubType implements us.ihmc.pubsub.T
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "4292f2f2abe96b7c145f1e20387d8e02069b6117547e8f7d19ae3a2d36ac644b";
+   		return "4687e5173134d3cdb224e3367cb6bd4766fd13a9d068d5ab10ef973cb81266c4";
    }
    
    @Override
