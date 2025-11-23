@@ -112,20 +112,6 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
       }
    }
 
-   public void renderConcurrencyRank()
-   {
-      // Probably better to display some parallel bars like a Git log view maybe. @dcalvert
-      if (state.getConcurrencyRank() != 1)
-      {
-         ImGui.pushStyleColor(ImGuiCol.Text, ImGui.getColorU32(ImGuiCol.TextDisabled));
-         String text = state.getConcurrencyRank() == 1 ? " " : String.valueOf(state.getConcurrencyRank());
-         ImGui.setCursorPosX(ImGui.getCursorPosX() - ImGuiTools.calcTextSizeX(text) - ImGui.getStyle().getItemSpacingX());
-         ImGui.text(text);
-         ImGui.popStyleColor();
-         ImGui.sameLine();
-      }
-   }
-
    @Override
    public void renderNodeSettingsWidgets()
    {
