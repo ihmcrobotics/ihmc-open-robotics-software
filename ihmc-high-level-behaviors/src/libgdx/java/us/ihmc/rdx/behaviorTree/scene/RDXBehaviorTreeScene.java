@@ -102,12 +102,15 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
       ImGui.separator();
       ImGui.text("Add virtual:");
       ImGui.indent();
-      if (ImGuiTools.textWithUnderlineOnHover("Mustard") && ImGui.isMouseClicked(ImGuiMouseButton.Left))
+      for (IsaacROSFoundationPoseObject objectType : IsaacROSFoundationPoseObject.values())
       {
-         beingPlaced = (RDXBehaviorTreeSceneObject) createObject(IsaacROSFoundationPoseObject.MUSTARD);
-         objects.add(beingPlaced);
-         objectsModifiable.modify();
-         needToInitializePlacementHeight = true;
+         if (ImGuiTools.textWithUnderlineOnHover(objectType.titleCaseName) && ImGui.isMouseClicked(ImGuiMouseButton.Left))
+         {
+            beingPlaced = (RDXBehaviorTreeSceneObject) createObject(objectType);
+            objects.add(beingPlaced);
+            objectsModifiable.modify();
+            needToInitializePlacementHeight = true;
+         }
       }
       ImGui.unindent();
       ImGui.separator();
