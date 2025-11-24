@@ -11,6 +11,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseInstantDetection;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseObject;
+import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
 import us.ihmc.tools.Timer;
 
 public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeState, SceneActionNodeDefinition>
@@ -64,22 +65,42 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
       cameraPosition.set(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getExperimentalCameraFrame).getTranslation());
       for (PersistentDetection detection : scene.getPersistentDetections())
       {
-         if (definition.getUseFoundationPose() && !(detection.getMostRecentDetection() instanceof IsaacROSFoundationPoseInstantDetection))
+         if (detection.getMostRecentDetection() instanceof IsaacROSFoundationPoseInstantDetection fpDetection)
          {
-            if (printDebug)
-               state.getLogger().warn("Need FoundationPose but found %s name: %s"
-                                            .formatted(detection.getMostRecentDetection().getClass().getSimpleName(),
-                                                       detection.getMostRecentDetection().getDetectedObjectClass()));
+            if (!definition.getUseFoundationPose())
+            {
+               if (printDebug)
+                  state.getLogger().warn("Need YOLO but found FoundationPose name: %s".formatted(fpDetection.getObject().name()));
 
-            continue;
+               continue;
+            }
+
+            if (fpDetection.getObject() != objectType)
+            {
+               if (printDebug)
+                  state.getLogger().warn("Need object class type {} but found {}", objectType.name(), fpDetection.getObject().name());
+
+               continue;
+            }
          }
-
-         if (!detection.getDetectedObjectClass().equals(objectType.yoloClass))
+         else if (detection.getMostRecentDetection() instanceof YOLOv8InstantDetection yoloDetection)
          {
-            if (printDebug)
-               state.getLogger().warn("Need object class type {} but found {}", objectType.yoloClass, detection.getDetectedObjectClass());
+            if (definition.getUseFoundationPose())
+            {
+               if (printDebug)
+                  state.getLogger().warn("Need FoundationPose but found YOLOv8 name: %s"
+                                               .formatted(detection.getMostRecentDetection().getDetectedObjectClass()));
 
-            continue;
+               continue;
+            }
+
+            if (!yoloDetection.getDetectedObjectClass().equals(objectType.yoloClass))
+            {
+               if (printDebug)
+                  state.getLogger().warn("Need object class type {} but found {}", objectType.yoloClass, yoloDetection.getDetectedObjectClass());
+
+               continue;
+            }
          }
 
          int minimumHistorySize = 5;
