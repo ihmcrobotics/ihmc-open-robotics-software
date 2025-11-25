@@ -20,17 +20,24 @@ import java.util.Set;
 
 public class ROS2ImageSensors
 {
-   public static final Map<ROS2Topic<? extends Packet<?>>, Integer> REALSENSE_TOPIC_MAP = Map.of(PerceptionAPI.D455_COLOR_IMAGE,
-                                                                                                 RealSenseImageSensor.COLOR_IMAGE_KEY,
-                                                                                                 PerceptionAPI.D455_DEPTH_IMAGE,
-                                                                                                 RealSenseImageSensor.DEPTH_IMAGE_KEY);
+   public static final Map<ROS2Topic<? extends Packet<?>>, Integer> STEPPING_REALSENSE_TOPIC_MAP = Map.of(PerceptionAPI.STEPPING_REALSENSE_COLOR,
+                                                                                                          RealSenseImageSensor.COLOR_IMAGE_KEY,
+                                                                                                          PerceptionAPI.STEPPING_REALSENSE_DEPTH,
+                                                                                                          RealSenseImageSensor.DEPTH_IMAGE_KEY);
 
-   public static final Map<ROS2Topic<? extends Packet<?>>, Integer> ZED_TOPIC_MAP = Map.of(PerceptionAPI.ZED_COLOR_IMAGES.get(RobotSide.LEFT),
-                                                                                           ZEDImageSensor.LEFT_COLOR_IMAGE_KEY,
-                                                                                           PerceptionAPI.ZED_COLOR_IMAGES.get(RobotSide.RIGHT),
-                                                                                           ZEDImageSensor.RIGHT_COLOR_IMAGE_KEY,
-                                                                                           PerceptionAPI.ZED_DEPTH,
-                                                                                           ZEDImageSensor.DEPTH_IMAGE_KEY);
+   public static final Map<ROS2Topic<? extends Packet<?>>, Integer> EXPERIMENTAL_ZED_TOPIC_MAP = Map.of(PerceptionAPI.EXPERIMENTAL_ZED_COLOR.get(RobotSide.LEFT),
+                                                                                                        ZEDImageSensor.LEFT_COLOR_IMAGE_KEY,
+                                                                                                        PerceptionAPI.EXPERIMENTAL_ZED_COLOR.get(RobotSide.RIGHT),
+                                                                                                        ZEDImageSensor.RIGHT_COLOR_IMAGE_KEY,
+                                                                                                        PerceptionAPI.EXPERIMENTAL_ZED_DEPTH,
+                                                                                                        ZEDImageSensor.DEPTH_IMAGE_KEY);
+
+   public static final Map<ROS2Topic<? extends Packet<?>>, Integer> STEPPING_ZED_TOPIC_MAP = Map.of(PerceptionAPI.STEPPING_ZED_COLOR.get(RobotSide.LEFT),
+                                                                                                        ZEDImageSensor.LEFT_COLOR_IMAGE_KEY,
+                                                                                                        PerceptionAPI.STEPPING_ZED_COLOR.get(RobotSide.RIGHT),
+                                                                                                        ZEDImageSensor.RIGHT_COLOR_IMAGE_KEY,
+                                                                                                        PerceptionAPI.STEPPING_ZED_DEPTH,
+                                                                                                        ZEDImageSensor.DEPTH_IMAGE_KEY);
 
    private final ROS2Node ros2Node;
 

@@ -71,9 +71,9 @@ public class ROS2ZEDSDKVideoStreamImageMessageRelay extends ZEDImageSensor
          packImageMessage(rightColorImage, lastRightColorImageMessage);
 
          // Publish async to not block receiving new images
-         publisherExecutor.submit(() -> ros2Helper.publish(PerceptionAPI.ZED_DEPTH, lastDepthImageMessage));
-         publisherExecutor.submit(() -> ros2Helper.publish(PerceptionAPI.ZED_COLOR_IMAGES.get(RobotSide.LEFT), lastLeftColorImageMessage));
-         publisherExecutor.submit(() -> ros2Helper.publish(PerceptionAPI.ZED_COLOR_IMAGES.get(RobotSide.RIGHT), lastRightColorImageMessage));
+         publisherExecutor.submit(() -> ros2Helper.publish(PerceptionAPI.EXPERIMENTAL_ZED_DEPTH, lastDepthImageMessage));
+         publisherExecutor.submit(() -> ros2Helper.publish(PerceptionAPI.EXPERIMENTAL_ZED_COLOR.get(RobotSide.LEFT), lastLeftColorImageMessage));
+         publisherExecutor.submit(() -> ros2Helper.publish(PerceptionAPI.EXPERIMENTAL_ZED_COLOR.get(RobotSide.RIGHT), lastRightColorImageMessage));
 
          rightColorImage.release();
          leftColorImage.release();
