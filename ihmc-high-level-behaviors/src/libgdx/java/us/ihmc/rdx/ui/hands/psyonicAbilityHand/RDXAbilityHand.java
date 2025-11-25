@@ -76,7 +76,7 @@ public class RDXAbilityHand implements RDXHandInterface
          }
          else
          {
-            command.setControlMode(ControlMode.VEL_TO_POS.toByte());
+            command.setControlMode(ControlMode.POSITION.toByte());
             for (int i = 0; i < 6; i++)
                command.getGoalPositions()[i] = desiredPositions[i].get();
          }

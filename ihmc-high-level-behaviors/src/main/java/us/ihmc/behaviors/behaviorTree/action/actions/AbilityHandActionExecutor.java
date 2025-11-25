@@ -151,7 +151,7 @@ public class AbilityHandActionExecutor extends ActionNodeExecutor<AbilityHandAct
                AbilityHandCommand command = getCommand();
                if (command != null)
                {
-                  command.setControlMode(ControlMode.VEL_TO_POS.toByte());
+                  command.setControlMode(ControlMode.POSITION.toByte());
                   for (int i = 0; i < 6; i++)
                   {
                      float position = definition.getGoalPositions().getValueReadOnly(i);

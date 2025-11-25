@@ -23,7 +23,7 @@ public class RDXAbilityHandAction extends RDXActionNode<AbilityHandActionState, 
 
    private final ImFloat[] sliderPositions = new ImFloat[6];
    private final ImFloat[] sliderVelocities = new ImFloat[6];
-   private final ControlMode[] modes = { ControlMode.GRIP, ControlMode.VEL_TO_POS };
+   private final ControlMode[] modes = { ControlMode.GRIP, ControlMode.POSITION };
    private final ImFloatWrapper ultimateTimeoutWidget;
    private final ImBooleanWrapper enableWiggleOnFailureWidget;
    private final ImFloatWrapper timeToWiggleWidget;
