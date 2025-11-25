@@ -1,10 +1,10 @@
 package us.ihmc.perception;
 
 import std_msgs.msg.dds.Empty;
-import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros2.ROS2DemandGraphNode;
+import us.ihmc.communication.ros2.ROS2DemandGraphTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
@@ -63,6 +63,11 @@ public class ROS2ImageSensors
 
    public void publishSensor(String sensorId, Map<ROS2Topic<? extends Packet<?>>, Integer> topicMap, ROS2Topic<Empty> demandTopic)
    {
+      publishSensor(sensorId, topicMap, demandTopic, ros2Node);
+   }
+
+   public void publishSensor(String sensorId, Map<ROS2Topic<? extends Packet<?>>, Integer> topicMap, ROS2Topic<Empty> demandTopic, ROS2Node ros2node)
+   {
       ImageSensor sensor = imageSensors.get(sensorId);
       ImageSensorPublishThread publishThread = new ImageSensorPublishThread(ros2Node, sensor);
 
@@ -85,19 +90,8 @@ public class ROS2ImageSensors
          if (sensorDemandNode != null)
             sensorDemandNode.addDependents(publishDemandNode);
 
-         setupCallbackForDemandNode(publishThread, publishDemandNode);
+         ROS2DemandGraphTools.runWhileDemanded(publishThread, publishDemandNode);
       }
-   }
-
-   private static void setupCallbackForDemandNode(RepeatingTaskThread loopThread, ROS2DemandGraphNode demandNode)
-   {
-      if (!loopThread.isAlive())
-         loopThread.start();
-
-      if (demandNode.isDemanded())
-         loopThread.startRepeating();
-
-      demandNode.addDemandChangedCallback(loopThread::setRepeating);
    }
 
    public ImageSensor getSensor(String sensorId)
