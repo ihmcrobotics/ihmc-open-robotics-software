@@ -37,7 +37,6 @@ public class RDXAbilityHand implements RDXHandInterface
    private final ImFloat[] desiredVelocities = new ImFloat[6];
 
    private float[] currentPositions = new float[6];
-   private float[] handGoalPositions = new float[6];
    private Grip executeGrip = null;
    private boolean executeVelToPos = false;
    private final Throttler publishThrottler = new Throttler().setFrequency(30.0);
@@ -66,7 +65,6 @@ public class RDXAbilityHand implements RDXHandInterface
       }
 
       currentPositions = communication.readState(identifier).getActuatorPositions();
-      handGoalPositions = communication.readState(identifier).getGoalPositions();
 
       if ((executeGrip != null || executeVelToPos) && publishThrottler.run())
       {
@@ -107,7 +105,7 @@ public class RDXAbilityHand implements RDXHandInterface
       {
          if (ImGui.button(labels.get(grip.name())))
             executeGrip = grip;
-         if (grip != Grip.values[4] && grip != Grip.values[8] && grip != Grip.values[Grip.values.length - 1])
+         if (grip != Grip.values[5] && grip != Grip.values[7] && grip != Grip.values[Grip.values.length - 1])
             ImGui.sameLine();
       }
 
@@ -122,9 +120,9 @@ public class RDXAbilityHand implements RDXHandInterface
 
          ImGui.pushItemWidth(sliderWidth);
          scheduleExecuteVelToPos |= ImGui.sliderFloat(labels.getHidden(FINGER_NAMES[i]), desiredPositions[i].getData(), sliderMin, sliderMax,
-                               "%s: %.2f%s flexion".formatted(FINGER_NAMES[i], desiredPositions[i].get(), EuclidCoreMissingTools.DEGREE_SYMBOL));
+                               "%s: %.2f%s flexion".formatted(FINGER_NAMES[i], currentPositions[i], EuclidCoreMissingTools.DEGREE_SYMBOL));
          if (!ImGui.isItemActive() && !executeVelToPos) // Prevent overriding externally submitted positions too
-            desiredPositions[i].set(handGoalPositions[i]);
+            desiredPositions[i].set(currentPositions[i]);
          ImGui.popItemWidth();
          ImGui.sameLine();
          ImGui.pushItemWidth(ImGui.getColumnWidth());
