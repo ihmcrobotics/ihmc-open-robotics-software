@@ -37,6 +37,9 @@ public class RDXAbilityHand implements RDXHandInterface
    private final ImFloat[] desiredVelocities = new ImFloat[6];
 
    private float[] currentPositions = new float[6];
+   private float[] handGoalPositions = new float[6];
+   private boolean setSlidersUsingGoalPosition = false;
+
    private Grip executeGrip = null;
    private boolean executeVelToPos = false;
    private final Throttler publishThrottler = new Throttler().setFrequency(30.0);
@@ -65,6 +68,7 @@ public class RDXAbilityHand implements RDXHandInterface
       }
 
       currentPositions = communication.readState(identifier).getActuatorPositions();
+      handGoalPositions = communication.readState(identifier).getGoalPositions();
 
       if ((executeGrip != null || executeVelToPos) && publishThrottler.run())
       {
@@ -109,6 +113,15 @@ public class RDXAbilityHand implements RDXHandInterface
             ImGui.sameLine();
       }
 
+      // Set position slider values using current position when commanding a grip (goal position doesn't get set the same way)
+      if (executeGrip != null)
+         setSlidersUsingGoalPosition = false;
+
+      // Update position slider values using either current or goal positions
+      float[] sliderPositionSetter = setSlidersUsingGoalPosition ? handGoalPositions : currentPositions;
+      for (int i = 0; i < 6; i++)
+         desiredPositions[i].set(sliderPositionSetter[i]);
+
       boolean scheduleExecuteVelToPos = false;
       for (int i = 0; i < 6; i++)
       {
@@ -121,8 +134,6 @@ public class RDXAbilityHand implements RDXHandInterface
          ImGui.pushItemWidth(sliderWidth);
          scheduleExecuteVelToPos |= ImGui.sliderFloat(labels.getHidden(FINGER_NAMES[i]), desiredPositions[i].getData(), sliderMin, sliderMax,
                                "%s: %.2f%s flexion".formatted(FINGER_NAMES[i], currentPositions[i], EuclidCoreMissingTools.DEGREE_SYMBOL));
-         if (!ImGui.isItemActive() && !executeVelToPos) // Prevent overriding externally submitted positions too
-            desiredPositions[i].set(currentPositions[i]);
          ImGui.popItemWidth();
          ImGui.sameLine();
          ImGui.pushItemWidth(ImGui.getColumnWidth());
@@ -131,7 +142,12 @@ public class RDXAbilityHand implements RDXHandInterface
       }
 
       if (scheduleExecuteVelToPos)
+      {
          executeVelToPos = true;
+         // Set position slider values using goal position when using position sliders
+         setSlidersUsingGoalPosition = true;
+      }
+
       ImGui.endDisabled();
    }
 
