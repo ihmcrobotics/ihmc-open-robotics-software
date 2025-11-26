@@ -42,7 +42,7 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
    {
       renderRowBeginning();
       renderEditableName();
-      renderConcurrencyGraph();
+      renderRowEnd();
    }
 
    @Override
@@ -64,7 +64,7 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
       ImGui.sameLine();
    }
 
-   public void renderConcurrencyGraph()
+   public void renderRowEnd()
    {
       if (getParent() instanceof RDXFallbackNode fallbackNode)
       {
