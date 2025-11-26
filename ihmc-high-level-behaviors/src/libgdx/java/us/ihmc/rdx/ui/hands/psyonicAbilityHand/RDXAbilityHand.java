@@ -105,7 +105,7 @@ public class RDXAbilityHand implements RDXHandInterface
       {
          if (ImGui.button(labels.get(grip.name())))
             executeGrip = grip;
-         if (grip != Grip.values[5] && grip != Grip.values[7] && grip != Grip.values[Grip.values.length - 1])
+         if (grip != Grip.values[4] && grip != Grip.values[8] && grip != Grip.values[Grip.values.length - 1])
             ImGui.sameLine();
       }
 
