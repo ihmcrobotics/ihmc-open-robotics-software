@@ -56,7 +56,7 @@ public class AbilityHandActionDefinition extends ActionNodeDefinition implements
 
       side = new CRDTBidirectionalEnumField<>(this, RobotSide.LEFT);
       controlMode = new CRDTBidirectionalEnumField<>(this, ControlMode.GRIP);
-      grip = new CRDTBidirectionalEnumField<>(this, Grip.PINCH_O);
+      grip = new CRDTBidirectionalEnumField<>(this, Grip.RELAX);
       goalPositions = new CRDTBidirectionalFloatArray(this, 6);
       goalVelocities = new CRDTBidirectionalFloatArray(this, 6);
       for (int i = 0; i < 6; i++)
