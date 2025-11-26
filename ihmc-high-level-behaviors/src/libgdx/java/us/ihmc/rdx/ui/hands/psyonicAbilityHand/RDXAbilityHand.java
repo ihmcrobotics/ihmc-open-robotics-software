@@ -37,6 +37,7 @@ public class RDXAbilityHand implements RDXHandInterface
    private final ImFloat[] desiredVelocities = new ImFloat[6];
 
    private float[] currentPositions = new float[6];
+   private float[] handGoalPositions = new float[6];
    private Grip executeGrip = null;
    private boolean executeVelToPos = false;
    private final Throttler publishThrottler = new Throttler().setFrequency(30.0);
@@ -65,6 +66,7 @@ public class RDXAbilityHand implements RDXHandInterface
       }
 
       currentPositions = communication.readState(identifier).getActuatorPositions();
+      handGoalPositions = communication.readState(identifier).getGoalPositions();
 
       if ((executeGrip != null || executeVelToPos) && publishThrottler.run())
       {
@@ -122,7 +124,7 @@ public class RDXAbilityHand implements RDXHandInterface
          scheduleExecuteVelToPos |= ImGui.sliderFloat(labels.getHidden(FINGER_NAMES[i]), desiredPositions[i].getData(), sliderMin, sliderMax,
                                "%s: %.2f%s flexion".formatted(FINGER_NAMES[i], desiredPositions[i].get(), EuclidCoreMissingTools.DEGREE_SYMBOL));
          if (!ImGui.isItemActive() && !executeVelToPos) // Prevent overriding externally submitted positions too
-            desiredPositions[i].set(currentPositions[i]);
+            desiredPositions[i].set(handGoalPositions[i]);
          ImGui.popItemWidth();
          ImGui.sameLine();
          ImGui.pushItemWidth(ImGui.getColumnWidth());
