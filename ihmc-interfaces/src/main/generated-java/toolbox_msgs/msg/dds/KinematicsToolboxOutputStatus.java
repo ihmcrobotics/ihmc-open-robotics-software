@@ -75,6 +75,7 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple4D.Quaternion>  rigid_body_orientations_;
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Vector3D>  rigid_body_linear_velocities_;
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Vector3D>  rigid_body_angular_velocities_;
+   public float com_offset_;
    /**
             * Legged robot-specific contact information (false if not a legged robot)
             */
@@ -135,6 +136,8 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       rigid_body_orientations_.set(other.rigid_body_orientations_);
       rigid_body_linear_velocities_.set(other.rigid_body_linear_velocities_);
       rigid_body_angular_velocities_.set(other.rigid_body_angular_velocities_);
+      com_offset_ = other.com_offset_;
+
       left_foot_in_contact_ = other.left_foot_in_contact_;
 
       right_foot_in_contact_ = other.right_foot_in_contact_;
@@ -299,6 +302,15 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       return rigid_body_angular_velocities_;
    }
 
+   public void setComOffset(float com_offset)
+   {
+      com_offset_ = com_offset;
+   }
+   public float getComOffset()
+   {
+      return com_offset_;
+   }
+
    /**
             * Legged robot-specific contact information (false if not a legged robot)
             */
@@ -405,6 +417,8 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
          {  if (!this.rigid_body_angular_velocities_.get(i).epsilonEquals(other.rigid_body_angular_velocities_.get(i), epsilon)) return false; }
       }
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.com_offset_, other.com_offset_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.left_foot_in_contact_, other.left_foot_in_contact_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.right_foot_in_contact_, other.right_foot_in_contact_, epsilon)) return false;
@@ -446,6 +460,8 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       if (!this.rigid_body_orientations_.equals(otherMyClass.rigid_body_orientations_)) return false;
       if (!this.rigid_body_linear_velocities_.equals(otherMyClass.rigid_body_linear_velocities_)) return false;
       if (!this.rigid_body_angular_velocities_.equals(otherMyClass.rigid_body_angular_velocities_)) return false;
+      if(this.com_offset_ != otherMyClass.com_offset_) return false;
+
       if(this.left_foot_in_contact_ != otherMyClass.left_foot_in_contact_) return false;
 
       if(this.right_foot_in_contact_ != otherMyClass.right_foot_in_contact_) return false;
@@ -500,6 +516,8 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       builder.append(this.rigid_body_linear_velocities_);      builder.append(", ");
       builder.append("rigid_body_angular_velocities=");
       builder.append(this.rigid_body_angular_velocities_);      builder.append(", ");
+      builder.append("com_offset=");
+      builder.append(this.com_offset_);      builder.append(", ");
       builder.append("left_foot_in_contact=");
       builder.append(this.left_foot_in_contact_);      builder.append(", ");
       builder.append("right_foot_in_contact=");

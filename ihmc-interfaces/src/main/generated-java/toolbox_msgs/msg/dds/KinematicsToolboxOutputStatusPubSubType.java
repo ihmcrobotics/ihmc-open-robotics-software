@@ -15,7 +15,7 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "58f5d795a65dec519b75c8ae8de9daef8eff3848e4775015affc68945b02a411";
+   		return "f765e87a3802793e3079c4a5a0528b8a8b0fab25786001408e445ff4d52ce3e7";
    }
    
    @Override
@@ -97,6 +97,8 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -179,6 +181,9 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       {
           current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getRigidBodyAngularVelocities().get(i0), current_alignment);}
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -240,6 +245,8 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       cdr.write_type_e(data.getRigidBodyAngularVelocities());else
           throw new RuntimeException("rigid_body_angular_velocities field exceeds the maximum length: %d > %d".formatted(data.getRigidBodyAngularVelocities().size(), 100));
 
+      cdr.write_type_5(data.getComOffset());
+
       cdr.write_type_7(data.getLeftFootInContact());
 
       cdr.write_type_7(data.getRightFootInContact());
@@ -272,6 +279,8 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       cdr.read_type_e(data.getRigidBodyOrientations());	
       cdr.read_type_e(data.getRigidBodyLinearVelocities());	
       cdr.read_type_e(data.getRigidBodyAngularVelocities());	
+      data.setComOffset(cdr.read_type_5());
+      	
       data.setLeftFootInContact(cdr.read_type_7());
       	
       data.setRightFootInContact(cdr.read_type_7());
@@ -311,6 +320,7 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       ser.write_type_e("rigid_body_orientations", data.getRigidBodyOrientations());
       ser.write_type_e("rigid_body_linear_velocities", data.getRigidBodyLinearVelocities());
       ser.write_type_e("rigid_body_angular_velocities", data.getRigidBodyAngularVelocities());
+      ser.write_type_5("com_offset", data.getComOffset());
       ser.write_type_7("left_foot_in_contact", data.getLeftFootInContact());
       ser.write_type_7("right_foot_in_contact", data.getRightFootInContact());
       ser.write_type_6("solution_quality", data.getSolutionQuality());
@@ -346,6 +356,7 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       ser.read_type_e("rigid_body_orientations", data.getRigidBodyOrientations());
       ser.read_type_e("rigid_body_linear_velocities", data.getRigidBodyLinearVelocities());
       ser.read_type_e("rigid_body_angular_velocities", data.getRigidBodyAngularVelocities());
+      data.setComOffset(ser.read_type_5("com_offset"));
       data.setLeftFootInContact(ser.read_type_7("left_foot_in_contact"));
       data.setRightFootInContact(ser.read_type_7("right_foot_in_contact"));
       data.setSolutionQuality(ser.read_type_6("solution_quality"));

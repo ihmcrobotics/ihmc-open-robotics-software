@@ -89,6 +89,7 @@ module toolbox_msgs
         sequence<geometry_msgs::msg::dds::Quaternion> rigid_body_orientations;
         sequence<geometry_msgs::msg::dds::Vector3> rigid_body_linear_velocities;
         sequence<geometry_msgs::msg::dds::Vector3> rigid_body_angular_velocities;
+        float com_offset;
         /**
          * Legged robot-specific contact information (false if not a legged robot)
          */

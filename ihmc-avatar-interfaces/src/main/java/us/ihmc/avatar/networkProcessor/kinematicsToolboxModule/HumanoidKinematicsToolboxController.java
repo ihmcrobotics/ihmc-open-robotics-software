@@ -45,7 +45,6 @@ import us.ihmc.mecano.algorithms.CentroidalMomentumCalculator;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.AngleTools;
@@ -570,6 +569,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
             getSolution().getRigidBodyAngularVelocities().get(i).set(bodyFrameCoM.getTwistOfFrame().getAngularPart());
          }
       }
+      // Com offset - only needed for status message
+      getSolution().setComOffset(computeCenterOfMassOffset());
 
       if (!isUserProvidingSupportPolygon() && isUpperBodyLoadBearing.getValue())
       {
@@ -985,5 +986,36 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
       updateSupportPolygonConstraint(activeContactPointPositions);
       updateCoMPositionToHold();
+   }
+
+   private final Point3D leftFootXYInWorld = new Point3D();
+   private final Point3D rightFootXYInWorld = new Point3D();
+   private final Vector3D feetVector = new Vector3D();
+   private final Vector3D comProjectionVector = new Vector3D();
+
+   private float computeCenterOfMassOffset()
+   {
+      MovingReferenceFrame leftFootFrame = desiredFullRobotModel.getFoot(RobotSide.LEFT).getParentJoint().getFrameAfterJoint();
+      MovingReferenceFrame rightFootFrame = desiredFullRobotModel.getFoot(RobotSide.RIGHT).getParentJoint().getFrameAfterJoint();
+      leftFootXYInWorld.set(leftFootFrame.getTransformToWorldFrame().getTranslation());
+      leftFootXYInWorld.setZ(0.0);
+      rightFootXYInWorld.set(rightFootFrame.getTransformToWorldFrame().getTranslation());
+      rightFootXYInWorld.setZ(0.0);
+
+      // Calculate the vector between the ankles (feet)
+      feetVector.sub(rightFootXYInWorld, leftFootXYInWorld);
+
+      // Project the waist tracker ground projection onto the line between the feet
+      comProjectionVector.set(desiredReferenceFrames.getCenterOfMassFrame().getTransformToWorldFrame().getTranslation());
+      comProjectionVector.setZ(0.0);
+      comProjectionVector.sub(leftFootXYInWorld);
+      double dotProduct = comProjectionVector.dot(feetVector);
+      double normSqFeetVector = feetVector.lengthSquared();
+
+      // Calculate normalized offset along the line connecting the feet
+      float normalizedOffset = (float) (dotProduct / normSqFeetVector);
+      normalizedOffset = Math.min(1.0f, Math.max(0.0f, normalizedOffset));
+
+      return normalizedOffset;
    }
 }

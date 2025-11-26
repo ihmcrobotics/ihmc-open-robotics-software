@@ -49,6 +49,8 @@ geometry_msgs/Quaternion[] rigid_body_orientations
 geometry_msgs/Vector3[] rigid_body_linear_velocities
 geometry_msgs/Vector3[] rigid_body_angular_velocities
 
+float32 com_offset
+
 # Legged robot-specific contact information (false if not a legged robot)
 bool left_foot_in_contact
 bool right_foot_in_contact
