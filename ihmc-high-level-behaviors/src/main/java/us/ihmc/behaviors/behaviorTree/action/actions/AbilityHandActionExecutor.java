@@ -58,7 +58,7 @@ public class AbilityHandActionExecutor extends ActionNodeExecutor<AbilityHandAct
                for (int i = 0; i < grip.getFingersInStage(s); i++)
                {
                   int finger = grip.getStageFingerIndex(s, i);
-                  float position = grip.getStageFingerPosition(s, i);
+                  double position = grip.getStageFingerPosition(s, i);
                   state.getCommandedJointTrajectories().addTrajectoryPoint(finger, position, (s + 1) * stageLength);
                }
             }
