@@ -9,8 +9,8 @@ import us.ihmc.communication.crdt.CRDTBidirectionalBoolean;
 import us.ihmc.communication.crdt.CRDTBidirectionalEnumField;
 import us.ihmc.communication.crdt.CRDTBidirectionalFloat;
 import us.ihmc.communication.crdt.CRDTBidirectionalFloatArray;
-import us.ihmc.handsros2.abilityHand.AbilityHandManager.ControlMode;
-import us.ihmc.handsros2.abilityHand.AbilityHandManager.Grip;
+import us.ihmc.handsros2.abilityHand.AbilityHandControlMode;
+import us.ihmc.handsros2.abilityHand.AbilityHandGrip;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SidedObject;
 
@@ -26,8 +26,8 @@ public class AbilityHandActionDefinition extends ActionNodeDefinition implements
    }
 
    private final CRDTBidirectionalEnumField<RobotSide> side;
-   private final CRDTBidirectionalEnumField<ControlMode> controlMode;
-   private final CRDTBidirectionalEnumField<Grip> grip;
+   private final CRDTBidirectionalEnumField<AbilityHandControlMode> controlMode;
+   private final CRDTBidirectionalEnumField<AbilityHandGrip> grip;
    private final CRDTBidirectionalFloatArray goalPositions;
    private final CRDTBidirectionalFloatArray goalVelocities;
    private final CRDTBidirectionalEnumField<SuccessCriteria> successCriteria;
@@ -39,8 +39,8 @@ public class AbilityHandActionDefinition extends ActionNodeDefinition implements
 
    // On disk fields
    private RobotSide onDiskSide;
-   private ControlMode onDiskControlMode;
-   private Grip onDiskGrip;
+   private AbilityHandControlMode onDiskControlMode;
+   private AbilityHandGrip onDiskGrip;
    private final float[] onDiskGoalPositions = new float[6];
    private final float[] onDiskGoalVelocities = new float[6];
    private SuccessCriteria onDiskSuccessCriteria;
@@ -55,8 +55,8 @@ public class AbilityHandActionDefinition extends ActionNodeDefinition implements
       super(rootNode);
 
       side = new CRDTBidirectionalEnumField<>(this, RobotSide.LEFT);
-      controlMode = new CRDTBidirectionalEnumField<>(this, ControlMode.GRIP);
-      grip = new CRDTBidirectionalEnumField<>(this, Grip.RELAX);
+      controlMode = new CRDTBidirectionalEnumField<>(this, AbilityHandControlMode.GRIP);
+      grip = new CRDTBidirectionalEnumField<>(this, AbilityHandGrip.RELAX);
       goalPositions = new CRDTBidirectionalFloatArray(this, 6);
       goalVelocities = new CRDTBidirectionalFloatArray(this, 6);
       for (int i = 0; i < 6; i++)
@@ -97,8 +97,8 @@ public class AbilityHandActionDefinition extends ActionNodeDefinition implements
       super.loadFromFile(jsonNode);
 
       side.setValue(RobotSide.getSideFromString(jsonNode.get("side").asText()));
-      controlMode.setValue(ControlMode.valueOf(jsonNode.get("controlMode").asText()));
-      grip.setValue(Grip.valueOf(jsonNode.get("grip").asText()));
+      controlMode.setValue(AbilityHandControlMode.valueOf(jsonNode.get("controlMode").asText()));
+      grip.setValue(AbilityHandGrip.valueOf(jsonNode.get("grip").asText()));
       for (int i = 0; i < 6; i++)
          goalPositions.setValue(i, (float) jsonNode.get("goalPositions").get(i).asDouble());
       for (int i = 0; i < 6; i++)
@@ -199,8 +199,8 @@ public class AbilityHandActionDefinition extends ActionNodeDefinition implements
       super.fromMessage(message.getDefinition());
 
       side.fromMessage(RobotSide.fromByte(message.getRobotSide()));
-      controlMode.fromMessageOrdinal(message.getControlMode(), ControlMode.values);
-      grip.fromMessageOrdinal(message.getGrip(), Grip.values);
+      controlMode.fromMessageOrdinal(message.getControlMode(), AbilityHandControlMode.values);
+      grip.fromMessageOrdinal(message.getGrip(), AbilityHandGrip.values);
       goalPositions.fromMessage(message.getGoalPositions());
       goalVelocities.fromMessage(message.getGoalVelocities());
       successCriteria.fromMessageOrdinal(message.getSuccessCriteria(), SuccessCriteria.values);
@@ -222,22 +222,22 @@ public class AbilityHandActionDefinition extends ActionNodeDefinition implements
       this.side.setValue(side);
    }
 
-   public ControlMode getControlMode()
+   public AbilityHandControlMode getControlMode()
    {
       return controlMode.getValue();
    }
 
-   public void setControlMode(ControlMode controlMode)
+   public void setControlMode(AbilityHandControlMode controlMode)
    {
       this.controlMode.setValue(controlMode);
    }
 
-   public Grip getGrip()
+   public AbilityHandGrip getGrip()
    {
       return grip.getValue();
    }
 
-   public void setGrip(Grip grip)
+   public void setGrip(AbilityHandGrip grip)
    {
       this.grip.setValue(grip);
    }

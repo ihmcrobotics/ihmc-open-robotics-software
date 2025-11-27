@@ -6,8 +6,8 @@ import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.type.ImFloat;
 import us.ihmc.commons.thread.Throttler;
-import us.ihmc.handsros2.abilityHand.AbilityHandManager.ControlMode;
-import us.ihmc.handsros2.abilityHand.AbilityHandManager.Grip;
+import us.ihmc.handsros2.abilityHand.AbilityHandControlMode;
+import us.ihmc.handsros2.abilityHand.AbilityHandGrip;
 import us.ihmc.handsros2.abilityHand.AbilityHandROS2HardwareCommunication;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -37,7 +37,7 @@ public class RDXAbilityHand implements RDXHandInterface
    private final ImFloat[] desiredVelocities = new ImFloat[6];
 
    private float[] currentPositions = new float[6];
-   private Grip executeGrip = null;
+   private AbilityHandGrip executeGrip = null;
    private boolean executeVelToPos = false;
    private final Throttler publishThrottler = new Throttler().setFrequency(30.0);
 
@@ -71,12 +71,12 @@ public class RDXAbilityHand implements RDXHandInterface
          AbilityHandCommand command = communication.getCommand(identifier);
          if (executeGrip != null)
          {
-            command.setControlMode(ControlMode.GRIP.toByte());
+            command.setControlMode(AbilityHandControlMode.GRIP.toByte());
             command.setGrip(executeGrip.toByte());
          }
          else
          {
-            command.setControlMode(ControlMode.POSITION.toByte());
+            command.setControlMode(AbilityHandControlMode.POSITION.toByte());
             for (int i = 0; i < 6; i++)
                command.getGoalPositions()[i] = desiredPositions[i].get();
          }
@@ -101,11 +101,11 @@ public class RDXAbilityHand implements RDXHandInterface
 
       ImGui.beginDisabled(!connected);
 
-      for (Grip grip : Grip.values)
+      for (AbilityHandGrip grip : AbilityHandGrip.values)
       {
          if (ImGui.button(labels.get(grip.name())))
             executeGrip = grip;
-         if (grip != Grip.values[5] && grip != Grip.values[7] && grip != Grip.values[Grip.values.length - 1])
+         if (grip != AbilityHandGrip.values[5] && grip != AbilityHandGrip.values[7] && grip != AbilityHandGrip.values[AbilityHandGrip.values.length - 1])
             ImGui.sameLine();
       }
 
@@ -163,9 +163,9 @@ public class RDXAbilityHand implements RDXHandInterface
    public void sendCommand(HandAction handAction)
    {
       if (handAction == HandAction.OPEN)
-         executeGrip = Grip.OPEN;
+         executeGrip = AbilityHandGrip.OPEN;
       else if (handAction == HandAction.CLOSE || handAction == HandAction.GRIP)
-         executeGrip = Grip.CLOSE;
+         executeGrip = AbilityHandGrip.CLOSE;
       else
          LogTools.warn("Attempted to send an unsupported hand action command: {}", handAction.name());
    }

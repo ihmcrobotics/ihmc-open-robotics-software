@@ -6,8 +6,8 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
 import us.ihmc.handsros2.HandInterface;
 import us.ihmc.handsros2.HandType;
-import us.ihmc.handsros2.abilityHand.AbilityHandManager.ControlMode;
-import us.ihmc.handsros2.abilityHand.AbilityHandManager.Grip;
+import us.ihmc.handsros2.abilityHand.AbilityHandControlMode;
+import us.ihmc.handsros2.abilityHand.AbilityHandGrip;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.tools.Timer;
 
@@ -47,9 +47,9 @@ public class AbilityHandActionExecutor extends ActionNodeExecutor<AbilityHandAct
             state.getCommandedJointTrajectories().addTrajectoryPoint(i, handState.getActuatorPositions()[i], 0.0);
 
          command.setControlMode(definition.getControlMode().toByte());
-         if (definition.getControlMode() == ControlMode.GRIP)
+         if (definition.getControlMode() == AbilityHandControlMode.GRIP)
          {
-            Grip grip = definition.getGrip();
+            AbilityHandGrip grip = definition.getGrip();
             command.setGrip(grip.toByte());
 
             double stageLength = nominalExecutionDuration / grip.getNumberOfStages();
@@ -151,7 +151,7 @@ public class AbilityHandActionExecutor extends ActionNodeExecutor<AbilityHandAct
                AbilityHandCommand command = getCommand();
                if (command != null)
                {
-                  command.setControlMode(ControlMode.POSITION.toByte());
+                  command.setControlMode(AbilityHandControlMode.POSITION.toByte());
                   for (int i = 0; i < 6; i++)
                   {
                      float position = definition.getGoalPositions().getValueReadOnly(i);
