@@ -5,11 +5,12 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
+import us.ihmc.behaviors.behaviorTree.action.actions.AbilityHandActionComms;
 import us.ihmc.behaviors.behaviorTree.control.FallbackNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneExecutor;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.handsros2.abilityHand.AbilityHandROS2HardwareCommunication;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.util.ArrayList;
@@ -31,14 +32,14 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
                                        ROS2ControllerHelper ros2ControllerHelper,
                                        ROS2SyncedRobotModel syncedRobot,
                                        ControllerStatusTracker controllerStatusTracker,
-                                       AbilityHandROS2HardwareCommunication abilityHandCommunication,
+                                       SideDependentList<AbilityHandActionComms> abilityHandComms,
                                        BehaviorTreeSceneExecutor scene)
    {
       super(new BehaviorTreeRootNodeState(id, crdtInfo, saveFileDirectory, syncedRobot.getRobotModel(), scene),
             ros2ControllerHelper,
             syncedRobot,
             controllerStatusTracker,
-            abilityHandCommunication,
+            abilityHandComms,
             scene);
    }
 
@@ -268,9 +269,9 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       return controllerStatusTracker;
    }
 
-   public AbilityHandROS2HardwareCommunication getAbilityHandCommunication()
+   public SideDependentList<AbilityHandActionComms> getAbilityHandComms()
    {
-      return abilityHandCommunication;
+      return abilityHandComms;
    }
 
    public BehaviorTreeSceneExecutor getScene()

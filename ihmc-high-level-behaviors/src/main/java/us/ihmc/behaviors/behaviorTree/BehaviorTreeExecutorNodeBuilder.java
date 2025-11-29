@@ -11,7 +11,7 @@ import us.ihmc.behaviors.behaviorTree.control.door.*;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneExecutor;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.handsros2.abilityHand.AbilityHandROS2HardwareCommunication;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.util.HashMap;
@@ -50,7 +50,7 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
    private ROS2ControllerHelper ros2ControllerHelper;
    private ROS2SyncedRobotModel syncedRobot;
    private ControllerStatusTracker controllerStatusTracker;
-   private AbilityHandROS2HardwareCommunication abilityHandCommunication;
+   private SideDependentList<AbilityHandActionComms> abilityHandComms;
    private BehaviorTreeSceneExecutor scene;
 
    public void initialize(CRDTInfo crdtInfo,
@@ -58,7 +58,7 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
                           ROS2ControllerHelper ros2ControllerHelper,
                           ROS2SyncedRobotModel syncedRobot,
                           ControllerStatusTracker controllerStatusTracker,
-                          AbilityHandROS2HardwareCommunication abilityHandCommunication,
+                          SideDependentList<AbilityHandActionComms> abilityHandComms,
                           BehaviorTreeSceneExecutor scene)
    {
       this.crdtInfo = crdtInfo;
@@ -66,7 +66,7 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
       this.controllerStatusTracker = controllerStatusTracker;
-      this.abilityHandCommunication = abilityHandCommunication;
+      this.abilityHandComms = abilityHandComms;
       this.scene = scene;
    }
 
@@ -79,7 +79,7 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
                                               ros2ControllerHelper,
                                               syncedRobot,
                                               controllerStatusTracker,
-                                              abilityHandCommunication,
+                                              abilityHandComms,
                                               scene);
    }
 
