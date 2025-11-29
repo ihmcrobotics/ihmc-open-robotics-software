@@ -131,15 +131,16 @@ public class RDXAbilityHand implements RDXHandInterface
       {
          float sliderMin = 0.0f;
          float sliderMax = i == 5 ? -120.0f : 120.0f; // thumb rotator moves negative
-         float currentNotch = (latestState.getActuatorPositions()[i] - sliderMin) / (sliderMax - sliderMin);
+         float actuatorPosition = latestState == null ? Float.NaN : latestState.getActuatorPositions()[i];
+         float currentNotch = (actuatorPosition - sliderMin) / (sliderMax - sliderMin);
          float sliderWidth = ImGui.getColumnWidth() * 0.6f;
          ImGuiTools.renderSliderOrProgressNotch(currentNotch * sliderWidth, ImGui.getColorU32(ImGuiCol.Text));
 
          ImGui.pushItemWidth(sliderWidth);
          scheduleExecuteVelToPos |= ImGui.sliderFloat(labels.getHidden(FINGER_NAMES[i]), desiredPositions[i].getData(), sliderMin, sliderMax,
-                               "%s: %.2f%s flexion".formatted(FINGER_NAMES[i], latestState.getActuatorPositions()[i], EuclidCoreMissingTools.DEGREE_SYMBOL));
+                               "%s: %.2f%s flexion".formatted(FINGER_NAMES[i], actuatorPosition, EuclidCoreMissingTools.DEGREE_SYMBOL));
          if (!ImGui.isItemActive() && !executeVelToPos) // Prevent overriding externally submitted positions too
-            desiredPositions[i].set(latestState.getActuatorPositions()[i]);
+            desiredPositions[i].set(actuatorPosition);
          ImGui.popItemWidth();
          ImGui.sameLine();
          ImGui.pushItemWidth(ImGui.getColumnWidth());
