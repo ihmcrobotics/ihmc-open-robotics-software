@@ -510,48 +510,95 @@ public class ZEDImageSensor extends ImageSensor
     */
    private void updateMeshData()
    {
-      try
+      // Use IntPointers for output parameters to ensure we read C-side writes
+      try (IntPointer nbVerticesPerSubmesh = new IntPointer(1000);
+           IntPointer nbTrianglesPerSubmesh = new IntPointer(1000);
+           IntPointer nbSubmeshes = new IntPointer(1);
+           IntPointer updatedIndices = new IntPointer(1000);
+           IntPointer nbVerticesTot = new IntPointer(1);
+           IntPointer nbTrianglesTot = new IntPointer(1))
       {
-         // Extract the complete spatial map
-         sl_extract_whole_spatial_map(cameraID);
-
-         // Get mesh size information
          int maxSubmesh = 1000;
-         int[] nbVerticesPerSubmesh = new int[maxSubmesh];
-         int[] nbTrianglesPerSubmesh = new int[maxSubmesh];
-         int[] nbSubmeshes = new int[1];
-         int[] updatedIndices = new int[maxSubmesh];
-         int[] nbVerticesTot = new int[1];
-         int[] nbTrianglesTot = new int[1];
 
-         sl_update_mesh(cameraID, nbVerticesPerSubmesh, nbTrianglesPerSubmesh, nbSubmeshes, updatedIndices, nbVerticesTot, nbTrianglesTot, maxSubmesh);
+         int mappingState = sl_get_spatial_mapping_state(cameraID);
+         LogTools.debug("Spatial mapping state: {}", mappingState);
+         switch (mappingState)
+         {
+            case SL_SPATIAL_MAPPING_STATE_INITIALIZING:
+               LogTools.debug("Spatial mapping initializing...");
+               break;
+            case SL_SPATIAL_MAPPING_STATE_OK:
+               LogTools.debug("Spatial mapping OK");
+               break;
+            case SL_SPATIAL_MAPPING_STATE_NOT_ENOUGH_MEMORY:
+               LogTools.debug("Not enough memory for spatial mapping");
+               return;
+            case SL_SPATIAL_MAPPING_STATE_NOT_ENABLED:
+               LogTools.debug("Spatial mapping not enabled");
+               return;
+            case SL_SPATIAL_MAPPING_STATE_FPS_TOO_LOW:
+               LogTools.debug("FPS too low for spatial mapping");
+               return;
+         }
 
-         int numVertices = nbVerticesTot[0];
-         int numTriangles = nbTrianglesTot[0];
+         sl_request_mesh_async(cameraID);
 
+         // Check if mesh is ready
+         int meshReadyStatus = sl_get_mesh_request_status_async(cameraID);
+         if (meshReadyStatus != SL_ERROR_CODE_SUCCESS)
+         {
+            LogTools.debug("Mesh not ready yet: {}", getZEDErrorName(meshReadyStatus));
+            return;
+         }
+
+         // Call update_mesh with Pointers
+         int updateResult = sl_update_mesh(cameraID,
+                                           nbVerticesPerSubmesh,
+                                           nbTrianglesPerSubmesh,
+                                           nbSubmeshes,
+                                           updatedIndices,
+                                           nbVerticesTot,
+                                           nbTrianglesTot,
+                                           maxSubmesh);
+
+         // Check result code
+         if (updateResult != SL_ERROR_CODE_SUCCESS)
+         {
+            LogTools.warn("sl_update_mesh failed with error: {} ({})",
+                          getZEDErrorName(updateResult), updateResult);
+            return;
+         }
+
+         // Read values from Pointers
+         int numVertices = nbVerticesTot.get();
+         int numTriangles = nbTrianglesTot.get();
          if (numVertices > 0 && numTriangles > 0)
          {
             // Allocate arrays for mesh data
-            float[] vertices = new float[numVertices * 3]; // x, y, z for each vertex
-            int[] triangles = new int[numTriangles * 3]; // v1, v2, v3 indices for each triangle
-            byte[] colors = new byte[numVertices * 4]; // RGBA for each vertex
-            float[] uvs = null; // Texture coordinates (not needed if save_texture is false)
-            byte[] texturePtr = null; // Texture data (not needed if save_texture is false)
+            float[] vertices = new float[numVertices * 3];
+            int[] triangles = new int[numTriangles * 3];
+            byte[] colors = new byte[numVertices * 4];
+            float[] uvs = null;
+            byte[] texturePtr = null;
 
-            // Retrieve mesh data
-            sl_retrieve_mesh(cameraID, vertices, triangles, colors, uvs, texturePtr, nbSubmeshes[0]);
+            // Retrieve using the calculated sizes
+            int retrieveResult = sl_retrieve_mesh(cameraID, vertices, triangles, colors, uvs, texturePtr, maxSubmesh);
 
-            // Store mesh data in fields
-            synchronized (this)
+            if (retrieveResult == SL_ERROR_CODE_SUCCESS)
             {
-               meshVertices = vertices;
-               meshTriangles = triangles;
-               meshColors = colors;
-               meshNumVertices = numVertices;
-               meshNumTriangles = numTriangles;
+               synchronized (this)
+               {
+                  meshVertices = vertices;
+                  meshTriangles = triangles;
+                  meshColors = colors;
+                  meshNumVertices = numVertices;
+                  meshNumTriangles = numTriangles;
+               }
             }
-
-            LogTools.info("Mesh updated: {} vertices, {} triangles (from {} submeshes)", numVertices, numTriangles, nbSubmeshes[0]);
+            else
+            {
+               LogTools.error("Failed to retrieve mesh: " + getZEDErrorName(retrieveResult));
+            }
          }
       }
       catch (Exception e)
