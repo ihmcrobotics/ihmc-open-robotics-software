@@ -43,9 +43,9 @@ public class RDXAbilityHandAction extends RDXActionNode<AbilityHandActionState, 
          definition.setControlMode(ControlMode.GRIP);
       }
       ImGui.sameLine();
-      if (ImGui.radioButton(labels.get(ControlMode.VEL_TO_POS.name()), definition.getControlMode() == ControlMode.VEL_TO_POS))
+      if (ImGui.radioButton(labels.get(ControlMode.POSITION.name()), definition.getControlMode() == ControlMode.POSITION))
       {
-         definition.setControlMode(ControlMode.VEL_TO_POS);
+         definition.setControlMode(ControlMode.POSITION);
       }
 
       if (definition.getControlMode() == ControlMode.GRIP)
