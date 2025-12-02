@@ -116,12 +116,15 @@ public class AlexanderSimulationCollisionModel implements RobotCollisionModel
          }
          { // Foot
             JointBasics ankleRoll = RobotCollisionModel.findJoint(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_ROLL), multiBodySystem);
-            MovingReferenceFrame ankleRollFrame = ankleRoll.getFrameAfterJoint();
-            RigidBodyBasics foot = ankleRoll.getSuccessor();
-            // Using a STP box so the sole is slightly rounded allowing for continuous and smooth contact with the ground.
-            FrameBox3DBasics footShape = newBoxWithSTP(ankleRollFrame, new Vector3D(0.26, 0.14, 0.055));
-            footShape.getPosition().set(0.045, 0.0, -0.05);
-            collidables.add(new Collidable(foot, collisionMask, collisionGroup, footShape));
+            if (ankleRoll != null)
+            {
+               MovingReferenceFrame ankleRollFrame = ankleRoll.getFrameAfterJoint();
+               RigidBodyBasics foot = ankleRoll.getSuccessor();
+               // Using a STP box so the sole is slightly rounded allowing for continuous and smooth contact with the ground.
+               FrameBox3DBasics footShape = newBoxWithSTP(ankleRollFrame, new Vector3D(0.26, 0.14, 0.055));
+               footShape.getPosition().set(0.045, 0.0, -0.05);
+               collidables.add(new Collidable(foot, collisionMask, collisionGroup, footShape));
+            }
          }
       }
 
