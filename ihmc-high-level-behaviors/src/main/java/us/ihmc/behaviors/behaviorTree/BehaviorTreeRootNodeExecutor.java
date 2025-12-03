@@ -82,6 +82,8 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       orderedActions.clear();
       fallbackNodes.clear();
       currentlyExecutingLeaves.clear();
+      failedLeaves.clear();
+      successfulLeaves.clear();
       updateNodeListsRecursive(this);
 
       for (LeafNodeExecutor<?, ?> leaf : orderedLeaves)
