@@ -116,7 +116,9 @@ public class RDXVRHandControl
                                  mappedValue = -1.0f * mappedValue;
                               }
 
-                              handManager.getHand(side).sendFingerPosition(mappedIndex, mappedValue);
+                              // Keep pinky and ring finger always closed
+                              if (mappedIndex != 2 && mappedIndex != 3)
+                                 handManager.getHand(side).sendFingerPosition(mappedIndex, mappedValue);
                            }
                         }
 
