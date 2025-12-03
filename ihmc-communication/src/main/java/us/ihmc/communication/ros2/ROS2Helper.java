@@ -3,6 +3,7 @@ package us.ihmc.communication.ros2;
 import org.apache.commons.lang3.mutable.MutableInt;
 import std_msgs.msg.dds.Bool;
 import std_msgs.msg.dds.Empty;
+import std_msgs.msg.dds.Int32;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.commons.thread.TypedNotification;
@@ -177,6 +178,13 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
    public void publish(ROS2Topic<Empty> topic)
    {
       ros2PublisherMap.publish(topic);
+   }
+
+   public void publish(ROS2Topic<Int32> topic, int value)
+   {
+      Int32 message = new Int32();
+      message.setData(value);
+      ros2PublisherMap.publish(topic, message);
    }
 
    @Override

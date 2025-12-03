@@ -8,9 +8,8 @@ import us.ihmc.handsros2.HandInterface;
 import us.ihmc.handsros2.HandType;
 import us.ihmc.handsros2.abilityHand.AbilityHandManager.ControlMode;
 import us.ihmc.handsros2.abilityHand.AbilityHandManager.Grip;
+import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.tools.Timer;
-
-import java.util.Arrays;
 
 public class AbilityHandActionExecutor extends ActionNodeExecutor<AbilityHandActionState, AbilityHandActionDefinition>
 {
@@ -47,7 +46,6 @@ public class AbilityHandActionExecutor extends ActionNodeExecutor<AbilityHandAct
          for (int i = 0; i < 6; i++)
             state.getCommandedJointTrajectories().addTrajectoryPoint(i, handState.getActuatorPositions()[i], 0.0);
 
-         Arrays.fill(command.getGoalVelocities(), 30.0f);
          command.setControlMode(definition.getControlMode().toByte());
          if (definition.getControlMode() == ControlMode.GRIP)
          {
@@ -88,16 +86,22 @@ public class AbilityHandActionExecutor extends ActionNodeExecutor<AbilityHandAct
    @Override
    public void updateCurrentlyExecuting()
    {
-      state.setElapsedExecutionTime(timer.getElapsedTime());
+      double elapsedTime = timer.getElapsedTime();
+      state.setElapsedExecutionTime(elapsedTime);
+
+      if (!timer.isRunning(definition.getUltimateTimeout()))
+      {
+         state.getLogger().error("Timed out after %.1f s.".formatted(elapsedTime));
+         state.setFailed(true);
+         state.setIsExecuting(false);
+      }
 
       AbilityHandState handState = readState();
-      if (handState != null && timer.isRunning(5.0)) // timeout 5 s
+      if (handState != null)
       {
-         boolean moving = false;
-         for (int i = 0; i < 6; i++)
-            moving |= Math.abs(handState.getGoalVelocities()[i]) > 0.0f;
-         if (moving)
-            timer.reset();
+         // TODO: Look at SCS YoVariable data to inform better strategies
+         //   Possibly add "current checkpoints", succeed once each joint breaks some current level
+         //   Possible wait some time after success to allow for grasp completion
 
          for (int i = 0; i < 6; i++)
          {
@@ -106,11 +110,64 @@ public class AbilityHandActionExecutor extends ActionNodeExecutor<AbilityHandAct
             state.getCurrentJointAngles().setValue(i, handState.getActuatorPositions()[i]);
          }
 
-         if (!timer.isRunning(1.0)) // end after 1 s of stillness
-            state.setIsExecuting(false);
+         switch (definition.getSuccessCriteria())
+         {
+            case CHECK_EACH_JOINT_POSITION ->
+            {
+               boolean success = true;
+               for (int i = 0; i < 6; i++)
+               {
+                  double error = Math.abs(definition.getGoalPositions().getValueReadOnly(i) - handState.getActuatorPositions()[i]);
+                  success &= error <= definition.getEachJointPositionTolerance();
+               }
+               if (success)
+               {
+                  state.getLogger().info("Success: All fingers within tolerance of %.2f %s.".formatted(definition.getEachJointPositionTolerance(),
+                                                                                                       EuclidCoreMissingTools.DEGREE_SYMBOL));
+                  state.setIsExecuting(false);
+               }
+            }
+            case CHECK_CUMULATIVE_JOINT_MOVEMENT ->
+            {
+               double cumulativeMovement = 0.0;
+               for (int i = 0; i < 6; i++)
+               {
+                  double movement = Math.abs(handState.getActuatorPositions()[i]
+                                             - state.getCommandedJointTrajectories().getFirstValueReadOnly(i).getPosition());
+                  cumulativeMovement += movement;
+               }
+               if (cumulativeMovement >= definition.getSufficientCumulativeJointMovement())
+               {
+                  state.getLogger().info("Success: Moved cumulative %.2f %s.".formatted(cumulativeMovement, EuclidCoreMissingTools.DEGREE_SYMBOL));
+                  state.setIsExecuting(false);
+               }
+            }
+         }
+
+         if (definition.getEnableWiggleOnFailure())
+         {
+            if (!timer.isRunning(definition.getTimeToWiggle()))
+            {
+               AbilityHandCommand command = getCommand();
+               if (command != null)
+               {
+                  command.setControlMode(ControlMode.POSITION.toByte());
+                  for (int i = 0; i < 6; i++)
+                  {
+                     float position = definition.getGoalPositions().getValueReadOnly(i);
+                     float wiggleAmplitude = 7.0f;
+                     float wiggleFrequency = 2.0f;
+                     command.getGoalPositions()[i] = position + wiggleAmplitude * (float) Math.sin(wiggleFrequency * 2 * Math.PI * timer.getElapsedTime());
+                     command.getGoalVelocities()[i] = definition.getGoalVelocities().getValueReadOnly(i);
+                  }
+                  abilityHandCommunication.publishCommand(identifier);
+               }
+            }
+         }
       }
       else
       {
+         state.getLogger().error("Failed to read hand state.");
          state.setFailed(true);
          state.setIsExecuting(false);
       }

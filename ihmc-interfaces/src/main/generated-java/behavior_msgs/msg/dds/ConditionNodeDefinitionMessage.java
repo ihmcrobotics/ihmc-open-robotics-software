@@ -16,9 +16,11 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
    public static final byte COUNTER_TYPE = (byte) 0;
    public static final byte LLM_TYPE = (byte) 1;
    public static final byte PROXIMITY_TYPE = (byte) 2;
-   public static final byte PROXIMITY_XYZ = (byte) 0;
-   public static final byte PROXIMITY_XY = (byte) 1;
-   public static final byte PROXIMITY_Z = (byte) 2;
+   public static final byte ALWAYS_FAIL = (byte) 3;
+   public static final byte ALWAYS_SUCCEED = (byte) 4;
+   public static final byte XYZ = (byte) 0;
+   public static final byte XY = (byte) 1;
+   public static final byte Z = (byte) 2;
    /**
             * Parent definition fields
             */
@@ -62,27 +64,27 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
    /**
             * The type of distance condition as defined above
             */
-   public byte proximity_distance_type_;
+   public byte distance_type_;
    /**
-            * Name of the object frame
+            * Name of frame A
             */
-   public java.lang.StringBuilder proximity_object_frame_name_;
+   public java.lang.StringBuilder frame_name_a_;
    /**
-            * Name of the frame the distance is expressed in
+            * Name of frame B
             */
-   public java.lang.StringBuilder proximity_reference_frame_name_;
+   public java.lang.StringBuilder frame_name_b_;
    /**
-            * The maximum distance between the object and the reference frame
+            * The minimum distance between the two frames
             */
-   public double proximity_distance_to_object_;
+   public double min_distance_;
    /**
-            * The maximum time that is spent in evaluating the condition
+            * The maximum distance between the two frames
             */
-   public double proximity_evaluation_time_;
+   public double max_distance_;
    /**
-            * Whether the failure of missing frame is handled internally by the condition node or not
+            * Timeout for waiting for the condition to be satisfied
             */
-   public boolean manage_missing_frame_internally_;
+   public double timeout_;
 
    public ConditionNodeDefinitionMessage()
    {
@@ -90,8 +92,8 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
       system_ = new java.lang.StringBuilder(10000);
       prompt_ = new java.lang.StringBuilder(10000);
       response_matcher_ = new java.lang.StringBuilder(10000);
-      proximity_object_frame_name_ = new java.lang.StringBuilder(255);
-      proximity_reference_frame_name_ = new java.lang.StringBuilder(255);
+      frame_name_a_ = new java.lang.StringBuilder(255);
+      frame_name_b_ = new java.lang.StringBuilder(255);
    }
 
    public ConditionNodeDefinitionMessage(ConditionNodeDefinitionMessage other)
@@ -124,19 +126,19 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
       response_matcher_.setLength(0);
       response_matcher_.append(other.response_matcher_);
 
-      proximity_distance_type_ = other.proximity_distance_type_;
+      distance_type_ = other.distance_type_;
 
-      proximity_object_frame_name_.setLength(0);
-      proximity_object_frame_name_.append(other.proximity_object_frame_name_);
+      frame_name_a_.setLength(0);
+      frame_name_a_.append(other.frame_name_a_);
 
-      proximity_reference_frame_name_.setLength(0);
-      proximity_reference_frame_name_.append(other.proximity_reference_frame_name_);
+      frame_name_b_.setLength(0);
+      frame_name_b_.append(other.frame_name_b_);
 
-      proximity_distance_to_object_ = other.proximity_distance_to_object_;
+      min_distance_ = other.min_distance_;
 
-      proximity_evaluation_time_ = other.proximity_evaluation_time_;
+      max_distance_ = other.max_distance_;
 
-      manage_missing_frame_internally_ = other.manage_missing_frame_internally_;
+      timeout_ = other.timeout_;
 
    }
 
@@ -314,109 +316,109 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
    /**
             * The type of distance condition as defined above
             */
-   public void setProximityDistanceType(byte proximity_distance_type)
+   public void setDistanceType(byte distance_type)
    {
-      proximity_distance_type_ = proximity_distance_type;
+      distance_type_ = distance_type;
    }
    /**
             * The type of distance condition as defined above
             */
-   public byte getProximityDistanceType()
+   public byte getDistanceType()
    {
-      return proximity_distance_type_;
+      return distance_type_;
    }
 
    /**
-            * Name of the object frame
+            * Name of frame A
             */
-   public void setProximityObjectFrameName(java.lang.String proximity_object_frame_name)
+   public void setFrameNameA(java.lang.String frame_name_a)
    {
-      proximity_object_frame_name_.setLength(0);
-      proximity_object_frame_name_.append(proximity_object_frame_name);
+      frame_name_a_.setLength(0);
+      frame_name_a_.append(frame_name_a);
    }
 
    /**
-            * Name of the object frame
+            * Name of frame A
             */
-   public java.lang.String getProximityObjectFrameNameAsString()
+   public java.lang.String getFrameNameAAsString()
    {
-      return getProximityObjectFrameName().toString();
+      return getFrameNameA().toString();
    }
    /**
-            * Name of the object frame
+            * Name of frame A
             */
-   public java.lang.StringBuilder getProximityObjectFrameName()
+   public java.lang.StringBuilder getFrameNameA()
    {
-      return proximity_object_frame_name_;
-   }
-
-   /**
-            * Name of the frame the distance is expressed in
-            */
-   public void setProximityReferenceFrameName(java.lang.String proximity_reference_frame_name)
-   {
-      proximity_reference_frame_name_.setLength(0);
-      proximity_reference_frame_name_.append(proximity_reference_frame_name);
+      return frame_name_a_;
    }
 
    /**
-            * Name of the frame the distance is expressed in
+            * Name of frame B
             */
-   public java.lang.String getProximityReferenceFrameNameAsString()
+   public void setFrameNameB(java.lang.String frame_name_b)
    {
-      return getProximityReferenceFrameName().toString();
-   }
-   /**
-            * Name of the frame the distance is expressed in
-            */
-   public java.lang.StringBuilder getProximityReferenceFrameName()
-   {
-      return proximity_reference_frame_name_;
+      frame_name_b_.setLength(0);
+      frame_name_b_.append(frame_name_b);
    }
 
    /**
-            * The maximum distance between the object and the reference frame
+            * Name of frame B
             */
-   public void setProximityDistanceToObject(double proximity_distance_to_object)
+   public java.lang.String getFrameNameBAsString()
    {
-      proximity_distance_to_object_ = proximity_distance_to_object;
+      return getFrameNameB().toString();
    }
    /**
-            * The maximum distance between the object and the reference frame
+            * Name of frame B
             */
-   public double getProximityDistanceToObject()
+   public java.lang.StringBuilder getFrameNameB()
    {
-      return proximity_distance_to_object_;
-   }
-
-   /**
-            * The maximum time that is spent in evaluating the condition
-            */
-   public void setProximityEvaluationTime(double proximity_evaluation_time)
-   {
-      proximity_evaluation_time_ = proximity_evaluation_time;
-   }
-   /**
-            * The maximum time that is spent in evaluating the condition
-            */
-   public double getProximityEvaluationTime()
-   {
-      return proximity_evaluation_time_;
+      return frame_name_b_;
    }
 
    /**
-            * Whether the failure of missing frame is handled internally by the condition node or not
+            * The minimum distance between the two frames
             */
-   public void setManageMissingFrameInternally(boolean manage_missing_frame_internally)
+   public void setMinDistance(double min_distance)
    {
-      manage_missing_frame_internally_ = manage_missing_frame_internally;
+      min_distance_ = min_distance;
    }
    /**
-            * Whether the failure of missing frame is handled internally by the condition node or not
+            * The minimum distance between the two frames
             */
-   public boolean getManageMissingFrameInternally()
+   public double getMinDistance()
    {
-      return manage_missing_frame_internally_;
+      return min_distance_;
+   }
+
+   /**
+            * The maximum distance between the two frames
+            */
+   public void setMaxDistance(double max_distance)
+   {
+      max_distance_ = max_distance;
+   }
+   /**
+            * The maximum distance between the two frames
+            */
+   public double getMaxDistance()
+   {
+      return max_distance_;
+   }
+
+   /**
+            * Timeout for waiting for the condition to be satisfied
+            */
+   public void setTimeout(double timeout)
+   {
+      timeout_ = timeout;
+   }
+   /**
+            * Timeout for waiting for the condition to be satisfied
+            */
+   public double getTimeout()
+   {
+      return timeout_;
    }
 
 
@@ -456,17 +458,17 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.response_matcher_, other.response_matcher_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.proximity_distance_type_, other.proximity_distance_type_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.distance_type_, other.distance_type_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.proximity_object_frame_name_, other.proximity_object_frame_name_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.frame_name_a_, other.frame_name_a_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.proximity_reference_frame_name_, other.proximity_reference_frame_name_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.frame_name_b_, other.frame_name_b_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.proximity_distance_to_object_, other.proximity_distance_to_object_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.min_distance_, other.min_distance_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.proximity_evaluation_time_, other.proximity_evaluation_time_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.max_distance_, other.max_distance_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.manage_missing_frame_internally_, other.manage_missing_frame_internally_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.timeout_, other.timeout_, epsilon)) return false;
 
 
       return true;
@@ -500,17 +502,17 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
 
       if (!us.ihmc.idl.IDLTools.equals(this.response_matcher_, otherMyClass.response_matcher_)) return false;
 
-      if(this.proximity_distance_type_ != otherMyClass.proximity_distance_type_) return false;
+      if(this.distance_type_ != otherMyClass.distance_type_) return false;
 
-      if (!us.ihmc.idl.IDLTools.equals(this.proximity_object_frame_name_, otherMyClass.proximity_object_frame_name_)) return false;
+      if (!us.ihmc.idl.IDLTools.equals(this.frame_name_a_, otherMyClass.frame_name_a_)) return false;
 
-      if (!us.ihmc.idl.IDLTools.equals(this.proximity_reference_frame_name_, otherMyClass.proximity_reference_frame_name_)) return false;
+      if (!us.ihmc.idl.IDLTools.equals(this.frame_name_b_, otherMyClass.frame_name_b_)) return false;
 
-      if(this.proximity_distance_to_object_ != otherMyClass.proximity_distance_to_object_) return false;
+      if(this.min_distance_ != otherMyClass.min_distance_) return false;
 
-      if(this.proximity_evaluation_time_ != otherMyClass.proximity_evaluation_time_) return false;
+      if(this.max_distance_ != otherMyClass.max_distance_) return false;
 
-      if(this.manage_missing_frame_internally_ != otherMyClass.manage_missing_frame_internally_) return false;
+      if(this.timeout_ != otherMyClass.timeout_) return false;
 
 
       return true;
@@ -542,18 +544,18 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
       builder.append(this.prompt_);      builder.append(", ");
       builder.append("response_matcher=");
       builder.append(this.response_matcher_);      builder.append(", ");
-      builder.append("proximity_distance_type=");
-      builder.append(this.proximity_distance_type_);      builder.append(", ");
-      builder.append("proximity_object_frame_name=");
-      builder.append(this.proximity_object_frame_name_);      builder.append(", ");
-      builder.append("proximity_reference_frame_name=");
-      builder.append(this.proximity_reference_frame_name_);      builder.append(", ");
-      builder.append("proximity_distance_to_object=");
-      builder.append(this.proximity_distance_to_object_);      builder.append(", ");
-      builder.append("proximity_evaluation_time=");
-      builder.append(this.proximity_evaluation_time_);      builder.append(", ");
-      builder.append("manage_missing_frame_internally=");
-      builder.append(this.manage_missing_frame_internally_);
+      builder.append("distance_type=");
+      builder.append(this.distance_type_);      builder.append(", ");
+      builder.append("frame_name_a=");
+      builder.append(this.frame_name_a_);      builder.append(", ");
+      builder.append("frame_name_b=");
+      builder.append(this.frame_name_b_);      builder.append(", ");
+      builder.append("min_distance=");
+      builder.append(this.min_distance_);      builder.append(", ");
+      builder.append("max_distance=");
+      builder.append(this.max_distance_);      builder.append(", ");
+      builder.append("timeout=");
+      builder.append(this.timeout_);
       builder.append("}");
       return builder.toString();
    }

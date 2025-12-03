@@ -3,6 +3,9 @@
 # Last 4 digits of UUID as a string
 string id
 
+# Instant detection simple class name (e.g. YOLO, FoundationPose)
+string detection_type
+
 # Object class name (e.g., "bottle")
 string object_class
 

@@ -336,6 +336,7 @@ public class ROS2BehaviorTreeMessageTools
          {
             ConditionNodeStateMessage conditionNodeStateMessage = treeStateMessage.getConditionNodes().get(indexInTypesList);
             subscriptionNode.setConditionNodeStateMessage(conditionNodeStateMessage);
+            subscriptionNode.setLeafNodeStateMessage(conditionNodeStateMessage.getState());
             subscriptionNode.setBehaviorTreeNodeStateMessage(conditionNodeStateMessage.getState().getState());
             subscriptionNode.setBehaviorTreeNodeDefinitionMessage(conditionNodeStateMessage.getDefinition().getDefinition().getDefinition());
          }
@@ -343,6 +344,7 @@ public class ROS2BehaviorTreeMessageTools
          {
             GotoNodeStateMessage gotoNodeStateMessage = treeStateMessage.getGotoNodes().get(indexInTypesList);
             subscriptionNode.setGotoNodeStateMessage(gotoNodeStateMessage);
+            subscriptionNode.setLeafNodeStateMessage(gotoNodeStateMessage.getState());
             subscriptionNode.setBehaviorTreeNodeStateMessage(gotoNodeStateMessage.getState().getState());
             subscriptionNode.setBehaviorTreeNodeDefinitionMessage(gotoNodeStateMessage.getDefinition().getDefinition().getDefinition());
          }
@@ -350,6 +352,7 @@ public class ROS2BehaviorTreeMessageTools
          {
             CheckPointNodeStateMessage checkPointNodeStateMessage = treeStateMessage.getCheckpointNodes().get(indexInTypesList);
             subscriptionNode.setCheckPointNodeStateMessage(checkPointNodeStateMessage);
+            subscriptionNode.setLeafNodeStateMessage(checkPointNodeStateMessage.getState());
             subscriptionNode.setBehaviorTreeNodeStateMessage(checkPointNodeStateMessage.getState().getState());
             subscriptionNode.setBehaviorTreeNodeDefinitionMessage(checkPointNodeStateMessage.getDefinition().getDefinition().getDefinition());
          }
@@ -357,6 +360,8 @@ public class ROS2BehaviorTreeMessageTools
          {
             SceneActionNodeStateMessage sceneActionNodeStateMessage = treeStateMessage.getSceneActions().get(indexInTypesList);
             subscriptionNode.setSceneActionNodeStateMessage(sceneActionNodeStateMessage);
+            subscriptionNode.setActionNodeStateMessage(sceneActionNodeStateMessage.getState());
+            subscriptionNode.setLeafNodeStateMessage(sceneActionNodeStateMessage.getState().getState());
             subscriptionNode.setBehaviorTreeNodeStateMessage(sceneActionNodeStateMessage.getState().getState().getState());
             subscriptionNode.setBehaviorTreeNodeDefinitionMessage(sceneActionNodeStateMessage.getDefinition().getDefinition().getDefinition().getDefinition());
          }
@@ -385,6 +390,8 @@ public class ROS2BehaviorTreeMessageTools
          {
             ChestOrientationActionStateMessage chestOrientationActionStateMessage = treeStateMessage.getChestOrientationActions().get(indexInTypesList);
             subscriptionNode.setChestOrientationActionStateMessage(chestOrientationActionStateMessage);
+            subscriptionNode.setActionNodeStateMessage(chestOrientationActionStateMessage.getState());
+            subscriptionNode.setLeafNodeStateMessage(chestOrientationActionStateMessage.getState().getState());
             subscriptionNode.setBehaviorTreeNodeStateMessage(chestOrientationActionStateMessage.getState().getState().getState());
             subscriptionNode.setBehaviorTreeNodeDefinitionMessage(chestOrientationActionStateMessage.getDefinition().getDefinition().getDefinition().getDefinition());
          }
@@ -392,6 +399,8 @@ public class ROS2BehaviorTreeMessageTools
          {
             FootstepPlanActionStateMessage footstepPlanActionStateMessage = treeStateMessage.getFootstepPlanActions().get(indexInTypesList);
             subscriptionNode.setFootstepPlanActionStateMessage(footstepPlanActionStateMessage);
+            subscriptionNode.setActionNodeStateMessage(footstepPlanActionStateMessage.getState());
+            subscriptionNode.setLeafNodeStateMessage(footstepPlanActionStateMessage.getState().getState());
             subscriptionNode.setBehaviorTreeNodeStateMessage(footstepPlanActionStateMessage.getState().getState().getState());
             subscriptionNode.setBehaviorTreeNodeDefinitionMessage(footstepPlanActionStateMessage.getDefinition().getDefinition().getDefinition().getDefinition());
          }
@@ -399,6 +408,8 @@ public class ROS2BehaviorTreeMessageTools
          {
             HandPoseActionStateMessage handPoseActionStateMessage = treeStateMessage.getHandPoseActions().get(indexInTypesList);
             subscriptionNode.setHandPoseActionStateMessage(handPoseActionStateMessage);
+            subscriptionNode.setActionNodeStateMessage(handPoseActionStateMessage.getState());
+            subscriptionNode.setLeafNodeStateMessage(handPoseActionStateMessage.getState().getState());
             subscriptionNode.setBehaviorTreeNodeStateMessage(handPoseActionStateMessage.getState().getState().getState());
             subscriptionNode.setBehaviorTreeNodeDefinitionMessage(handPoseActionStateMessage.getDefinition().getDefinition().getDefinition().getDefinition());
          }
@@ -406,6 +417,8 @@ public class ROS2BehaviorTreeMessageTools
          {
             HandWrenchActionStateMessage handWrenchActionStateMessage = treeStateMessage.getHandWrenchActions().get(indexInTypesList);
             subscriptionNode.setHandWrenchActionStateMessage(handWrenchActionStateMessage);
+            subscriptionNode.setActionNodeStateMessage(handWrenchActionStateMessage.getState());
+            subscriptionNode.setLeafNodeStateMessage(handWrenchActionStateMessage.getState().getState());
             subscriptionNode.setBehaviorTreeNodeStateMessage(handWrenchActionStateMessage.getState().getState().getState());
             subscriptionNode.setBehaviorTreeNodeDefinitionMessage(handWrenchActionStateMessage.getDefinition().getDefinition().getDefinition().getDefinition());
          }
@@ -413,6 +426,8 @@ public class ROS2BehaviorTreeMessageTools
          {
             ScrewPrimitiveActionStateMessage screwPrimitiveActionStateMessage = treeStateMessage.getScrewPrimitiveActions().get(indexInTypesList);
             subscriptionNode.setScrewPrimitiveActionStateMessage(screwPrimitiveActionStateMessage);
+            subscriptionNode.setActionNodeStateMessage(screwPrimitiveActionStateMessage.getState());
+            subscriptionNode.setLeafNodeStateMessage(screwPrimitiveActionStateMessage.getState().getState());
             subscriptionNode.setBehaviorTreeNodeStateMessage(screwPrimitiveActionStateMessage.getState().getState().getState());
             subscriptionNode.setBehaviorTreeNodeDefinitionMessage(screwPrimitiveActionStateMessage.getDefinition().getDefinition().getDefinition().getDefinition());
          }
@@ -420,6 +435,8 @@ public class ROS2BehaviorTreeMessageTools
          {
             PelvisHeightOrientationActionStateMessage pelvisHeightOrientationActionStateMessage = treeStateMessage.getPelvisHeightActions().get(indexInTypesList);
             subscriptionNode.setPelvisHeightOrientationActionStateMessage(pelvisHeightOrientationActionStateMessage);
+            subscriptionNode.setActionNodeStateMessage(pelvisHeightOrientationActionStateMessage.getState());
+            subscriptionNode.setLeafNodeStateMessage(pelvisHeightOrientationActionStateMessage.getState().getState());
             subscriptionNode.setBehaviorTreeNodeStateMessage(pelvisHeightOrientationActionStateMessage.getState().getState().getState());
             subscriptionNode.setBehaviorTreeNodeDefinitionMessage(pelvisHeightOrientationActionStateMessage.getDefinition().getDefinition().getDefinition().getDefinition());
          }
@@ -427,6 +444,8 @@ public class ROS2BehaviorTreeMessageTools
          {
             AbilityHandActionStateMessage abilityHandActionStateMessage = treeStateMessage.getAbilityHandActions().get(indexInTypesList);
             subscriptionNode.setAbilityHandActionStateMessage(abilityHandActionStateMessage);
+            subscriptionNode.setActionNodeStateMessage(abilityHandActionStateMessage.getState());
+            subscriptionNode.setLeafNodeStateMessage(abilityHandActionStateMessage.getState().getState());
             subscriptionNode.setBehaviorTreeNodeStateMessage(abilityHandActionStateMessage.getState().getState().getState());
             subscriptionNode.setBehaviorTreeNodeDefinitionMessage(abilityHandActionStateMessage.getDefinition().getDefinition().getDefinition().getDefinition());
          }
@@ -434,6 +453,8 @@ public class ROS2BehaviorTreeMessageTools
          {
             SakeHandCommandActionStateMessage sakeHandCommandActionStateMessage = treeStateMessage.getSakeHandCommandActions().get(indexInTypesList);
             subscriptionNode.setSakeHandCommandActionStateMessage(sakeHandCommandActionStateMessage);
+            subscriptionNode.setActionNodeStateMessage(sakeHandCommandActionStateMessage.getState());
+            subscriptionNode.setLeafNodeStateMessage(sakeHandCommandActionStateMessage.getState().getState());
             subscriptionNode.setBehaviorTreeNodeStateMessage(sakeHandCommandActionStateMessage.getState().getState().getState());
             subscriptionNode.setBehaviorTreeNodeDefinitionMessage(sakeHandCommandActionStateMessage.getDefinition().getDefinition().getDefinition().getDefinition());
          }
@@ -441,6 +462,8 @@ public class ROS2BehaviorTreeMessageTools
          {
             WaitDurationActionStateMessage waitDurationActionStateMessage = treeStateMessage.getWaitDurationActions().get(indexInTypesList);
             subscriptionNode.setWaitDurationActionStateMessage(waitDurationActionStateMessage);
+            subscriptionNode.setActionNodeStateMessage(waitDurationActionStateMessage.getState());
+            subscriptionNode.setLeafNodeStateMessage(waitDurationActionStateMessage.getState().getState());
             subscriptionNode.setBehaviorTreeNodeStateMessage(waitDurationActionStateMessage.getState().getState().getState());
             subscriptionNode.setBehaviorTreeNodeDefinitionMessage(waitDurationActionStateMessage.getDefinition().getDefinition().getDefinition().getDefinition());
          }
@@ -448,6 +471,8 @@ public class ROS2BehaviorTreeMessageTools
          {
             FootPoseActionStateMessage footPoseActionStateMessage = treeStateMessage.getFootPoseActions().get(indexInTypesList);
             subscriptionNode.setFootPoseActionStateMessage(footPoseActionStateMessage);
+            subscriptionNode.setActionNodeStateMessage(footPoseActionStateMessage.getState());
+            subscriptionNode.setLeafNodeStateMessage(footPoseActionStateMessage.getState().getState());
             subscriptionNode.setBehaviorTreeNodeStateMessage(footPoseActionStateMessage.getState().getState().getState());
             subscriptionNode.setBehaviorTreeNodeDefinitionMessage(footPoseActionStateMessage.getDefinition().getDefinition().getDefinition().getDefinition());
          }

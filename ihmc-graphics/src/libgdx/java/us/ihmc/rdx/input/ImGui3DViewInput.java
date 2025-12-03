@@ -2,7 +2,7 @@ package us.ihmc.rdx.input;
 
 import com.badlogic.gdx.math.Vector3;
 import imgui.flag.ImGuiMouseButton;
-import imgui.internal.ImGui;
+import imgui.ImGui;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
@@ -213,7 +213,7 @@ public class ImGui3DViewInput
     */
    public boolean mouseReleasedWithoutDrag(int button)
    {
-      return ImGui.getMouseDragDeltaX(button) == 0.0f && ImGui.getMouseDragDeltaY(button) == 0.0f && ImGui.isMouseReleased(button);
+      return ImGuiTools.mouseReleasedWithoutDrag(button);
    }
 
    public boolean isWindowHovered()
