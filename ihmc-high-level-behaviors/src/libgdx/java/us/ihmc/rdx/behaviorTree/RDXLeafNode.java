@@ -24,7 +24,7 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
    private final ImGuiHollowArrowRenderer hollowArrowRenderer = new ImGuiHollowArrowRenderer();
    private final ImGuiFlashingText flashingDescriptionColor = new ImGuiFlashingText(ImGuiTools.RED);
 
-   float lineStartX = Float.NaN;
+   private float lineStartX = Float.NaN;
 
    public RDXLeafNode(S state, RDXBehaviorTreeRootNode rootNode)
    {
