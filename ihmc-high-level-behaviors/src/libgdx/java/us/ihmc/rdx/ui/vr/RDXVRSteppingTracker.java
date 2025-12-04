@@ -15,11 +15,16 @@ public class RDXVRSteppingTracker
     private static final double LIFT_THRESHOLD = 0.02;
     private static final double STABILITY_THRESHOLD = 0.01;
     private static final int STABILITY_ITERATIONS = 3;
+
+   private static final double LANDING_HEIGHT_THRESHOLD = 0.03; // tune
+   private static final double LANDING_BLEND_START_HEIGHT = 0.08;
+
     private final SideDependentList<Boolean> isUserStepping = new SideDependentList<>();
     private final SideDependentList<RigidBodyTransform> initialTrackersTransform = new SideDependentList<>();
     private final SideDependentList<RigidBodyTransform> previousTrackersTransform = new SideDependentList<>();
     private final SideDependentList<Integer> stableIterationCounts = new SideDependentList<>();
     private final SideDependentList<Notification> landedFoot = new SideDependentList<>();
+   private final SideDependentList<Double> currentFootHeight = new SideDependentList<>();
 
     public RDXVRSteppingTracker()
     {
@@ -53,6 +58,7 @@ public class RDXVRSteppingTracker
         FrameVector2D translationTrackerXY = new FrameVector2D(ReferenceFrame.getWorldFrame(),
                 translationTracker.getX(),
                 translationTracker.getY());
+        currentFootHeight.put(side, translationTracker.getZ());
 
         if (!isUserStepping.get(side)) // Tracker is not moving by a lot yet
         {
@@ -111,6 +117,34 @@ public class RDXVRSteppingTracker
     {
         return !isUserStepping.get(side);
     }
+
+   public boolean isFootLanding(RobotSide side)
+   {
+      if (!isUserStepping.get(side))
+         return false;
+
+      double height = currentFootHeight.get(side);
+      return height <= LANDING_BLEND_START_HEIGHT;
+   }
+
+   public double getLandingBlendFactor(RobotSide side)
+   {
+      if (!isFootLanding(side))
+         return 0.0;
+
+      double height = currentFootHeight.get(side);
+      double start = LANDING_BLEND_START_HEIGHT;
+      double end = LANDING_HEIGHT_THRESHOLD;
+
+      if (height >= start)
+         return 0.0;
+      if (height <= end)
+         return 1.0;
+
+      // map height in [start, end] to alpha in [0,1]
+      double alpha = (start - height) / (start - end);
+      return Math.max(0.0, Math.min(1.0, alpha));
+   }
 
     public Notification getLandedFootNotification(RobotSide side)
     {
