@@ -131,7 +131,7 @@ public class DoorSceneNodeDefinitions
    public static final double DOOR_FRAME_MAXIMUM_DISTANCE_TO_LOCK_IN = 2.0;
 
    // TODO: These transforms need to be verified.
-   public static final String DOOR_PANEL_VISUAL_MODEL_FILE_PATH = "environmentObjects/door/doorPanel/DoorPanel.g3dj";
+   public static final String DOOR_PANEL_VISUAL_MODEL_FILE_PATH = "environmentObjects/doorPanel/doorPanel.g3dj";
    public static final RigidBodyTransform PULL_DOOR_PANEL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
    //   static
    //   {
