@@ -570,7 +570,7 @@ public class SCS2AvatarSimulationFactory
                                                                                                 .getContactPointParameters(),
                                                                                       robotModel.get()
                                                                                                 .getWalkingControllerParameters()
-                                                                                                .getSteppingParameters());
+                                                                                                .getSteppingParametersForStepGeneration());
             stepSnapperUpdatable.setSnapToHeightMap(true);
          }
 
@@ -1071,6 +1071,14 @@ public class SCS2AvatarSimulationFactory
    public void addTerrainObjectDefinition(TerrainObjectDefinition terrainObjectDefinition)
    {
       terrainObjectDefinitions.add(terrainObjectDefinition);
+   }
+
+   public void addTerrainObjectDefinition(CommonAvatarEnvironmentInterface environment)
+   {
+      addTerrainObjectDefinition(TerrainObjectDefinitionTools.toTerrainObjectDefinition(environment,
+                                                                                        collidableHelper,
+                                                                                        terrainCollisionName,
+                                                                                        robotCollisionName));
    }
 
    public void setCommonAvatarEnvrionmentInterface(CommonAvatarEnvironmentInterface environment)

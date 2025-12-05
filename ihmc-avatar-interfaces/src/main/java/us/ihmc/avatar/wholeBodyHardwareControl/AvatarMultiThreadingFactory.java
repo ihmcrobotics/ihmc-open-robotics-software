@@ -48,6 +48,7 @@ import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
+import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.tools.TimestampProvider;
@@ -186,6 +187,10 @@ public class AvatarMultiThreadingFactory
       // Create estimator thread
       estimatorThread.set(estimatorThreadFactory.createAvatarEstimatorThread());
 
+      // Hand the communication module the sensor processor
+      SensorProcessing sensorProcessing = estimatorThread.get().getSensorReader().getSensorProcessing();
+      hardwareCommunicationInterface.setSensorProcessing(sensorProcessing);
+
       // Create controller thread
       if (estimatorModeMapReference.hasValue())
       {
@@ -234,7 +239,6 @@ public class AvatarMultiThreadingFactory
       if (ikStreamingThread.hasValue())
          yoVariableServer.addRegistry(ikStreamingThread.get().getYoVariableRegistry(), ikStreamingThread.get().getSCS1YoGraphicsListRegistry());
 
-
       // Setup JVM statistics
       PeriodicThreadSchedulerFactory jvmSchedulerFactory;
       if (useRealtimeThreads)
@@ -275,15 +279,23 @@ public class AvatarMultiThreadingFactory
       {
          // Setup logger
          ArrayList<RegistrySendBufferBuilder> builders = new ArrayList<>();
-         builders.add(new RegistrySendBufferBuilder(rootRegistry, null));
-         builders.add(new RegistrySendBufferBuilder(controllerThread.get().getYoVariableRegistry(), null, controllerThread.get().getSCS2YoGraphics()));
+         builders.add(new RegistrySendBufferBuilder(rootRegistry,
+                                                    estimatorThread.get().getFullRobotModel().getRootJoint().subtreeList(),
+                                                    estimatorThread.get().getSCS1YoGraphicsListRegistry()));
+         builders.add(new RegistrySendBufferBuilder(controllerThread.get().getYoVariableRegistry(),
+                                                    controllerThread.get().getSCS1YoGraphicsListRegistry(),
+                                                    controllerThread.get().getSCS2YoGraphics()));
          if (stepGeneratorThread.hasValue())
          {
-            builders.add(new RegistrySendBufferBuilder(stepGeneratorThread.get().getYoVariableRegistry(), null, stepGeneratorThread.get().getSCS2YoGraphics()));
+            builders.add(new RegistrySendBufferBuilder(stepGeneratorThread.get().getYoVariableRegistry(),
+                                                       stepGeneratorThread.get().getSCS1YoGraphicsListRegistry(),
+                                                       stepGeneratorThread.get().getSCS2YoGraphics()));
          }
          if (ikStreamingThread.hasValue())
          {
-            builders.add(new RegistrySendBufferBuilder(ikStreamingThread.get().getYoVariableRegistry(), null, ikStreamingThread.get().getSCS2YoGraphics()));
+            builders.add(new RegistrySendBufferBuilder(ikStreamingThread.get().getYoVariableRegistry(),
+                                                       ikStreamingThread.get().getSCS1YoGraphicsListRegistry(),
+                                                       ikStreamingThread.get().getSCS2YoGraphics()));
          }
 
          builders.add(new RegistrySendBufferBuilder(jvmStatisticsGenerator.getYoRegistry(), null));
@@ -429,19 +441,20 @@ public class AvatarMultiThreadingFactory
          controllerFactory.addFinishedTransition(STAND_TRANSITION_STATE, WALKING, false);
          controllerFactory.addFinishedTransition(EXIT_WALKING, FREEZE_STATE);
 
-         controllerFactory.addCustomStateTransition(createStandTransitionState(STAND_TRANSITION_STATE, controllerFactory, feetForceSensorNames, !highLevelControllerParameters.automaticallyTransitionToWalkingWhenReady()));
+         controllerFactory.addCustomStateTransition(createStandTransitionState(STAND_TRANSITION_STATE, controllerFactory,  !highLevelControllerParameters.automaticallyTransitionToWalkingWhenReady()));
 
          // Transition to DO_NOTHING in the event of a fault
-         HighLevelControllerStateCommand transitionToDoNothingCommand = new HighLevelControllerStateCommand();
-         CommandInputManager controllerCommandInputManager = controllerFactory.getCommandInputManager();
          hardwareCommunicationInterface.addFaultListener(change ->
                                                          {
                                                             if (hardwareCommunicationInterface.hasRobotFaulted())
-                                                            {
-                                                               transitionToDoNothingCommand.setHighLevelControllerName(DO_NOTHING_BEHAVIOR);
-                                                               controllerCommandInputManager.submitCommand(transitionToDoNothingCommand);
-                                                            }
+                                                               controllerFactory.getRequestedControlStateEnum().set(DO_NOTHING_BEHAVIOR);
                                                          });
+         // Transition to DO_NOTHING when the robot is unservoed
+         lowLevelOutputProcessor.addMasterGainListener(change ->
+                                                       {
+                                                          if (lowLevelOutputProcessor.getMasterGain().getValue() == 0.0)
+                                                             controllerFactory.getRequestedControlStateEnum().set(DO_NOTHING_BEHAVIOR);
+                                                       });
       }
 
       controllerFactory.setListenToHighLevelStatePackets(true);
@@ -463,7 +476,7 @@ public class AvatarMultiThreadingFactory
       LogTools.info("create step generator = " + createStepGeneratorThread);
 
       HumanoidSteppingPluginEnvironmentalConstraints environmentalConstraints = new HumanoidSteppingPluginEnvironmentalConstraints(robotModel.getContactPointParameters(),
-                                                                                                                                   robotModel.getWalkingControllerParameters().getSteppingParameters());
+                                                                                                                                   robotModel.getWalkingControllerParameters().getSteppingParametersForStepGeneration());
       controllerFactory.setListenToHighLevelStatePackets(true);
 
       JoystickBasedSteppingPluginFactory pluginFactory = new JoystickBasedSteppingPluginFactory();
@@ -527,7 +540,6 @@ public class AvatarMultiThreadingFactory
     */
    private static ControllerStateTransitionFactory<HighLevelControllerName> createStandTransitionState(HighLevelControllerName transitionStateName,
                                                                                                        HighLevelHumanoidControllerFactory controllerFactory,
-                                                                                                       SideDependentList<String> feetForceSensorNames,
                                                                                                        boolean waitForRequestToTransition)
    {
       return new ControllerStateTransitionFactory<>()
@@ -548,14 +560,12 @@ public class AvatarMultiThreadingFactory
             double gravityZ = controllerToolbox.getGravityZ();
             double controlDT = controllerToolbox.getControlDT();
             YoEnum<HighLevelControllerName> requestedState = controllerFactory.getRequestedControlStateEnum();
-            ForceSensorDataHolderReadOnly forceSensorDataHolder = controllerFactoryHelper.getForceSensorDataHolder();
             HighLevelControllerParameters highLevelControllerParameters = controllerFactoryHelper.getHighLevelControllerParameters();
 
             StateTransitionCondition feetLoadedTransition = new FeetLoadedToWalkingStandTransition(transitionStateName,
                                                                                                    requestedState,
                                                                                                    waitForRequestToTransition,
-                                                                                                   forceSensorDataHolder,
-                                                                                                   feetForceSensorNames,
+                                                                                                   controllerToolbox.getFootSwitches(),
                                                                                                    controlDT,
                                                                                                    totalMass,
                                                                                                    gravityZ,
@@ -604,7 +614,7 @@ public class AvatarMultiThreadingFactory
 
    public void addStandPrepStateTransition(HighLevelControllerName nextControlStateEnum)
    {
-      controllerFactory.addCustomStateTransition(createStandTransitionState(nextControlStateEnum, controllerFactory, robotModel.getSensorInformation().getFeetForceSensorNames(), true));
+      controllerFactory.addCustomStateTransition(createStandTransitionState(nextControlStateEnum, controllerFactory, true));
    }
 
    public void addFinishedTransition(HighLevelControllerName currentControlStateEnum, HighLevelControllerName nextControlStateEnum, boolean performNextStateOnEntry)

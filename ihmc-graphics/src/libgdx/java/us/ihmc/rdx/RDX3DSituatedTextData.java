@@ -13,6 +13,7 @@ public class RDX3DSituatedTextData
    private final Texture texture;
    private final Model model;
    private final ModelInstance modelInstance;
+   private boolean disposed = false;
 
    public RDX3DSituatedTextData(Pixmap pixmap, BytePointer rgba8888BytePointer, Texture texture, Model model, ModelInstance modelInstance)
    {
@@ -25,10 +26,14 @@ public class RDX3DSituatedTextData
 
    public void dispose()
    {
-      model.dispose();
-      texture.dispose();
-      rgba8888BytePointer.close();
-      pixmap.dispose();
+      if (!disposed)
+      {
+         disposed = true;
+         model.dispose();
+         texture.dispose();
+         rgba8888BytePointer.close();
+         pixmap.dispose();
+      }
    }
 
    public ModelInstance getModelInstance()

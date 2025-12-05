@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
-import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.joystickBasedJavaFXController.JoystickStepParametersProperty.JoystickStepParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
@@ -22,7 +21,6 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -83,9 +81,13 @@ public class ContinuousStepController
 
    public ContinuousStepController(WalkingControllerParameters walkingControllerParameters)
    {
-      steppingParameters = walkingControllerParameters.getSteppingParameters();
+      steppingParameters = walkingControllerParameters.getSteppingParametersForStepGeneration();
 
-      snapAndWiggleParameters.setFootLength(walkingControllerParameters.getSteppingParameters().getFootLength());
+      double footLength = steppingParameters.getFootLength();
+      double toeWidth = steppingParameters.getToeWidth();
+      double footWidth = steppingParameters.getFootWidth();
+
+      snapAndWiggleParameters.setFootLength(footLength);
       snapAndWiggleSingleStep = new SnapAndWiggleSingleStep(snapAndWiggleParameters);
 
       continuousStepGenerator.setNumberOfTicksBeforeSubmittingFootsteps(0);
@@ -126,10 +128,7 @@ public class ContinuousStepController
       continuousStepGenerator.addFootstepValidityIndicator(this::isSafeDistanceFromObstacle);
       continuousStepGenerator.addFootstepValidityIndicator(this::isSafeStepHeight);
 
-      SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
-      double footLength = steppingParameters.getFootLength();
-      double toeWidth = steppingParameters.getToeWidth();
-      double footWidth = steppingParameters.getFootWidth();
+
       ConvexPolygon2D footPolygon = new ConvexPolygon2D();
       footPolygon.addVertex(footLength / 2.0, toeWidth / 2.0);
       footPolygon.addVertex(footLength / 2.0, -toeWidth / 2.0);
@@ -232,7 +231,7 @@ public class ContinuousStepController
       continuousStepGenerator.setStepWidths(joystickStepParameters.getDefaultStepWidth(),
                                             joystickStepParameters.getMinStepWidth(),
                                             joystickStepParameters.getMaxStepWidth());
-      continuousStepGenerator.setMaxStepLength(joystickStepParameters.getMaxStepLength());
+      continuousStepGenerator.setMaxStepLengthForwards(joystickStepParameters.getMaxStepLength());
       continuousStepGenerator.update(Double.NaN);
 
       if (!isWalking.getValue())

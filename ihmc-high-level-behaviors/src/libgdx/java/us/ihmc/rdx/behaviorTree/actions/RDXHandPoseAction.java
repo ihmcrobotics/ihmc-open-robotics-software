@@ -8,8 +8,10 @@ import imgui.flag.ImGuiMouseButton;
 import imgui.type.ImInt;
 import org.apache.commons.lang3.mutable.MutableObject;
 import us.ihmc.avatar.arm.PresetArmConfiguration;
+import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
 import us.ihmc.behaviors.behaviorTree.action.actions.HandPoseActionDefinition;
 import us.ihmc.behaviors.behaviorTree.action.actions.HandPoseActionState;
+import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.crdt.CRDTBidirectionalRigidBodyTransform;
 import us.ihmc.communication.crdt.CRDTDetachableReferenceFrame;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -76,6 +78,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
    private final ImDoubleWrapper positionErrorToleranceInput;
    private final ImDoubleWrapper orientationErrorToleranceDegreesInput;
    private final SideDependentList<RDXArmMultiBodyGraphic> armMultiBodyGraphics = new SideDependentList<>();
+   private final Throttler lowQualityRenderThrottler = new Throttler();
    private final RDX3DPanelTooltip tooltip;
 
    public RDXHandPoseAction(long id, RDXBehaviorTreeRootNode rootNode)
@@ -292,13 +295,17 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
    private void visualizeIK()
    {
       RDXArmMultiBodyGraphic armMultiBodyGraphic = armMultiBodyGraphics.get(definition.getSide());
-      armMultiBodyGraphic.getFloatingJoint().getJointPose().set(state.getGoalChestToWorldTransform().getValueReadOnly());
-      for (int i = 0; i < armMultiBodyGraphic.getJoints().length; i++)
+      double solutionQuality = state.getSolutionQuality();
+      if (solutionQuality < ArmIKSolver.GOOD_QUALITY_MAX || lowQualityRenderThrottler.run(0.5))
       {
-         armMultiBodyGraphic.getJoints()[i].setQ(state.getPreviewJointAngles().getValueReadOnly(i));
+         armMultiBodyGraphic.getFloatingJoint().getJointPose().set(state.getGoalChestToWorldTransform().getValueReadOnly());
+         for (int i = 0; i < armMultiBodyGraphic.getJoints().length; i++)
+         {
+            armMultiBodyGraphic.getJoints()[i].setQ(state.getPreviewJointAngles().getValueReadOnly(i));
+         }
+         armMultiBodyGraphic.updateAfterModifyingConfiguration();
       }
-      armMultiBodyGraphic.updateAfterModifyingConfiguration();
-      armMultiBodyGraphic.setColor(RDXIKSolverColors.getColor(state.getSolutionQuality()));
+      armMultiBodyGraphic.setColor(RDXIKSolverColors.getColor(solutionQuality));
    }
 
    @Override
@@ -314,6 +321,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
          poseGizmo.setSelected(!gizmoWasSelected);
       }
 
+      renderRowEnd();
    }
 
    @Override

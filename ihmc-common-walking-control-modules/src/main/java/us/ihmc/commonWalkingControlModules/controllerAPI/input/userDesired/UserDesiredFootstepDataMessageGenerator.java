@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired;
 
 import java.util.List;
 
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -96,9 +97,9 @@ public class UserDesiredFootstepDataMessageGenerator
       desiredOrientation = new FrameQuaternion(stanceFootFrame);
 
       firstStepSide.set(supportSide);
-      minimumWidth.set(walkingControllerParameters.getSteppingParameters().getMinStepWidth());
-      stepWidth.set((walkingControllerParameters.getSteppingParameters().getMaxStepWidth()
-            + walkingControllerParameters.getSteppingParameters().getMinStepWidth()) / 2);
+      SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParametersForStepGeneration();
+      minimumWidth.set(steppingParameters.getMinStepWidth());
+      stepWidth.set((steppingParameters.getMaxStepWidth() + steppingParameters.getMinStepWidth()) / 2);
       swingHeight.set(0.0);
 
       swingTime.set(walkingControllerParameters.getDefaultSwingTime());

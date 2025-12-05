@@ -19,7 +19,6 @@ import std_msgs.msg.dds.Empty;
 import std_msgs.msg.dds.Float32;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.thread.Throttler;
-import us.ihmc.perception.gpuMapping.ActiveMappingProcessParameters;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.behaviors.activeMapping.StancePoseCalculator;
@@ -68,43 +67,54 @@ import static us.ihmc.communication.HumanoidControllerAPI.getTopic;
 
 public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProvider
 {
+   /**
+    * This defines the update thread rate for information being sent over ROS2. The reason this is a very low frequency is because
+    * we only have a limited amount of networking bandwidth when using WIFI.
+    */
+   private static final double THROTTLER_THREAD_HERTZ = 2.0;
    private static final boolean DEBUG = true;
+
+   private final Throttler ros2Throttler;
+
+   private final RDXStancePoseSelectionPanel stancePoseSelectionPanel;
+   private final RDXTerrainPlanningDebugger terrainPlanningDebugger;
+
    private static final int numberOfKnotPoints = 12;
    private static final int maxIterationsOptimization = 100;
-   private final ROS2Publisher<ContinuousHikingCommandMessage> commandPublisher;
-   private final ROS2Publisher<Empty> squareUpPublisher;
-   private final ContinuousHikingCommandMessage commandMessage = new ContinuousHikingCommandMessage();
-   private final RDXStancePoseSelectionPanel stancePoseSelectionPanel;
    private final PositionOptimizedTrajectoryGenerator positionTrajectoryGenerator = new PositionOptimizedTrajectoryGenerator(numberOfKnotPoints,
                                                                                                                              maxIterationsOptimization);
-   private final RDXTerrainPlanningDebugger terrainPlanningDebugger;
-   private final SwingTrajectoryParameters swingTrajectoryParameters;
-   private final RDXStoredPropertySetTuner continuousHikingParametersPanel = new RDXStoredPropertySetTuner("Continuous Hiking Parameters (CH)");
    private final ImGuiRemoteROS2StoredPropertySetGroup hostStoredPropertySets;
+   private final RDXStoredPropertySetTuner continuousHikingParametersPanel = new RDXStoredPropertySetTuner("Continuous Hiking Parameters (CH)");
+   private final ContinuousHikingParameters continuousHikingParameters;
+   private final SwingTrajectoryParameters swingTrajectoryParameters;
+
    private final ImBoolean squareUpToGoal = new ImBoolean(true);
    private final ImBoolean enableContinuousHiking = new ImBoolean(false);
    private final ImBoolean useAStarFootstepPlanner = new ImBoolean(true);
    private final ImBoolean useMonteCarloReference = new ImBoolean(false);
    private final ImBoolean useMonteCarloFootstepPlanner = new ImBoolean(false);
+
    private final ControllerFootstepQueueMonitor controllerFootstepQueueMonitorUI;
+   private final ContinuousHikingCommandMessage commandMessage = new ContinuousHikingCommandMessage();
+   private final ROS2Publisher<ContinuousHikingCommandMessage> commandPublisher;
+   private final ROS2Publisher<Empty> squareUpPublisher;
+   private final ROS2Publisher<Empty> clearGoalFootstepsPublisher;
+   private final ROS2Publisher<Empty> resetStateMachinePublisher;
+   private final ROS2Publisher<Float32> turn90DegreesPublisher;
    private final ROS2Publisher<PlanOffsetStatus> planOffsetStatusPublisher;
    private final ROS2Publisher<FootstepStatusMessage> footstepStatusMessagePublisher;
    private final ROS2Publisher<WalkingControllerFailureStatusMessage> walkingControllerFailureStatusPublisher;
-   private final ROS2Publisher<Empty> clearGoalFootstepsPublisher;
-   private final ROS2Publisher<Empty> resetStateMachinePublisher;
-   private final ContinuousHikingParameters continuousHikingParameters;
-   private final ROS2Publisher<Float32> turn90DegreesPublisher;
+
    private SideDependentList<FramePose3D> startStancePose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
-   private FootstepPlan latestFootstepPlan;
    private List<EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories;
+   private FootstepPlan latestFootstepPlan;
+
    // When running in simulation only, these fields allow running the Continuous Hiking Process locally
    private double simulatedDriftInMeters = -0.1;
    private boolean previousRightBumper;
    private boolean previousLeftBumper;
    private boolean previousYButton;
    private boolean previousStartButton;
-
-   private Throttler ros2Throttler;
 
    public RDXContinuousHikingPanel(RDXBaseUI baseUI, ROS2Node ros2Node, DRCRobotModel robotModel)
    {
@@ -158,12 +168,6 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       continuousHikingParameters = new ContinuousHikingParameters();
       HeightMapParameters heightMapParameters = new HeightMapParameters();
       TerrainMapParameters terrainMapParameters = new TerrainMapParameters();
-      ActiveMappingProcessParameters processParameters = new ActiveMappingProcessParameters();
-      RDXStoredPropertySetTuner processParametersPanel = new RDXStoredPropertySetTuner("Process Parameters Panel (CH)");
-      createParametersPanel(processParameters,
-                            processParametersPanel,
-                            hostStoredPropertySets,
-                            ContinuousHikingAPI.PROCESS_PARAMETERS);
       createParametersPanel(continuousHikingParameters,
                             continuousHikingParametersPanel,
                             hostStoredPropertySets,
@@ -193,7 +197,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
 
       controllerFootstepQueueMonitorUI = new ControllerFootstepQueueMonitor(ros2Node, robotModel.getSimpleRobotName());
 
-      ros2Throttler = new Throttler().setFrequency(2.0);
+      ros2Throttler = new Throttler().setFrequency(THROTTLER_THREAD_HERTZ);
    }
 
    /**

@@ -60,7 +60,7 @@ import us.ihmc.yoVariables.variable.YoLong;
  * <li><u>Step timing and step reach:</u><br>
  * They can all be set by calling: {@link #configureWith(WalkingControllerParameters)}, otherwise
  * they have to be set via {@link #setFootstepTiming(double, double)},
- * {@link #setStepWidths(double, double, double)}, {@link #setMaxStepLength(double)}, and
+ * {@link #setStepWidths(double, double, double)}, {@link #setMaxStepLengthForwards(double)}, and
  * {@link #setStepTurningLimits(double, double)}. <b>If the step timing is not provided, the
  * generated footsteps will only be in place</b>.
  * <li><u>Protocol to access the current robot foot position and orientation:</u><br>
@@ -153,6 +153,8 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    private final YoVector2D desiredVelocity = new YoVector2D("desiredVelocity" + variableNameSuffix, registry);
    private final ExecutionTimer stepGeneratorTimer = new ExecutionTimer("stepGeneratorTimer" + variableNameSuffix, registry);
 
+   private final YoBoolean enableHeightOffsetErrorCompensation = new YoBoolean("enableHeightOffsetErrorCompensation", registry);
+
    private final FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
    private final RecyclingArrayList<FootstepDataMessage> footsteps = footstepDataListMessage.getFootstepDataList();
 
@@ -210,7 +212,7 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
                           if (!walk.getBooleanValue())
                              isWalking.set(walk.getBooleanValue());
                        });
-
+      
       setSupportFootBasedFootstepAdjustment(true);
    }
 
@@ -323,10 +325,12 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
          footstepDataListMessage.setDefaultTransferDuration(parameters.getTransferDuration());
          footstepDataListMessage.setFinalTransferDuration(parameters.getTransferDuration());
          footstepDataListMessage.setAreFootstepsAdjustable(parameters.getStepsAreAdjustable());
+         footstepDataListMessage.setOffsetFootstepsHeightWithExecutionError(parameters.getAccountForGroundDrift());
          footstepDataListMessage.setOffsetFootstepsWithExecutionError(parameters.getShiftUpcomingStepsWithTouchdown());
       }
 
-      double maxStepLength = parameters.getMaxStepLength();
+      double maxStepLengthForwards = parameters.getMaxStepLengthForwards();
+      double maxStepLengthBackwards = parameters.getMaxStepLengthBackwards();
       double maxStepWidth = parameters.getMaxStepWidth();
       double minStepWidth = parameters.getMinStepWidth();
       double defaultStepWidth = parameters.getDefaultStepWidth();
@@ -338,18 +342,23 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
       double desiredVelocityY = desiredVelocity.getY();
       double turningVelocity = desiredTurningVelocityProvider.getTurningVelocity();
 
-      double minMaxVelocityX = maxStepLength / stepTime.getValue();
+      double maxVelocityX = maxStepLengthForwards / stepTime.getValue();
+      double minVelocityX = -maxStepLengthBackwards / stepTime.getValue();
       double minMaxVelocityY = maxStepWidth / stepTime.getValue();
       double minMaxVelocityTurn = (turnMaxAngleOutward - turnMaxAngleInward) / stepTime.getValue();
 
       if (desiredVelocityProvider.isUnitVelocity())
       {
-         desiredVelocityX = MathTools.clamp(desiredVelocityX, minMaxVelocityX);
+         desiredVelocityX = MathTools.clamp(desiredVelocityX, minVelocityX, maxVelocityX);
          desiredVelocityY = MathTools.clamp(desiredVelocityY, minMaxVelocityY);
       }
       else
       {
-         desiredVelocityX = minMaxVelocityX * MathTools.clamp(desiredVelocityX, 1.0);
+         if (desiredVelocityX >= 0.0)
+            desiredVelocityX = maxVelocityX * MathTools.clamp(desiredVelocityX, 1.0);
+         else
+            desiredVelocityX = minVelocityX * MathTools.clamp(Math.abs(desiredVelocityX), 1.0);
+
          desiredVelocityY = minMaxVelocityY * MathTools.clamp(desiredVelocityY, 1.0);
       }
 
@@ -390,7 +399,8 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
                                            desiredVelocityY,
                                            desiredTurningVelocity.getDoubleValue(),
                                            swingSide,
-                                           maxStepLength,
+                                           maxStepLengthForwards,
+                                           maxStepLengthBackwards,
                                            maxStepWidth,
                                            defaultStepWidth,
                                            minStepWidth,
@@ -407,7 +417,8 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
                                         desiredVelocityY,
                                         desiredTurningVelocity.getDoubleValue(),
                                         swingSide,
-                                        maxStepLength,
+                                        maxStepLengthForwards,
+                                        maxStepLengthBackwards,
                                         maxStepWidth,
                                         defaultStepWidth,
                                         minStepWidth,
@@ -533,10 +544,10 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
       csgStatusMessage.setIsWalking(isWalking.getBooleanValue());
       csgStatusMessage.setIsInUnitVelocities(desiredVelocityProvider.isUnitVelocity());
 
-      // Current walking speed values
-      csgStatusMessage.setCurrentForwardVelocity(desiredVelocityProvider.getDesiredVelocity().getX());
-      csgStatusMessage.setCurrentLateralVelocity(desiredVelocityProvider.getDesiredVelocity().getY());
-      csgStatusMessage.setCurrentTurnVelocity(desiredTurningVelocityProvider.getTurningVelocity());
+      // Current walking speed values (in velocity units)
+      csgStatusMessage.setCurrentForwardVelocity(desiredVelocity.getX());
+      csgStatusMessage.setCurrentLateralVelocity(desiredVelocity.getY());
+      csgStatusMessage.setCurrentTurnVelocity(desiredTurningVelocity.getDoubleValue());
 
       // Current swing parameter values
       csgStatusMessage.setCurrentSwingHeight(parameters.getSwingHeight());
@@ -544,23 +555,37 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
       csgStatusMessage.setCurrentTransferDuration(parameters.getTransferDuration());
 
       // Current step limit values
-      csgStatusMessage.setCurrentMaxStepLength(parameters.getMaxStepLength());
+      csgStatusMessage.setCurrentMaxStepLengthForwards(parameters.getMaxStepLengthForwards());
+      csgStatusMessage.setCurrentMaxStepLengthBackwards(parameters.getMaxStepLengthBackwards());
       csgStatusMessage.setCurrentMaxStepWidth(parameters.getMaxStepWidth());
       csgStatusMessage.setCurrentMinStepWidth(parameters.getMinStepWidth());
       csgStatusMessage.setCurrentDefaultStepWidth(parameters.getDefaultStepWidth());
       csgStatusMessage.setCurrentTurnMaxAngleInward(parameters.getTurnMaxAngleInward());
       csgStatusMessage.setCurrentTurnMaxAngleOutward(parameters.getTurnMaxAngleOutward());
+      csgStatusMessage.setAreStepsAdjustable(parameters.getStepsAreAdjustable());
+      csgStatusMessage.setSnappingToHeightmap(parameters.getRequestSnapToHeightmap());
+      csgStatusMessage.setAccountingForGroundDrift(parameters.getAccountForGroundDrift());
 
       if (csgStatusMessageOutputManager != null)
          csgStatusMessageOutputManager.reportStatusMessage(csgStatusMessage);
    }
 
-   private static void calculateNextFootstepPose2D(double stepTime, double desiredVelocityX, double desiredVelocityY, double desiredTurningVelocity,
-                                                   RobotSide swingSide, double maxStepLength, double maxStepWidth, double defaultStepWidth,
-                                                   double minStepWidth, double turnMaxAngleInward, double turnMaxAngleOutward,
-                                                   FramePose2D stanceFootPose2D, FramePose2D nextFootstepPose2DToPack)
+   private static void calculateNextFootstepPose2D(double stepTime,
+                                                   double desiredVelocityX,
+                                                   double desiredVelocityY,
+                                                   double desiredTurningVelocity,
+                                                   RobotSide swingSide,
+                                                   double maxStepLengthForwards,
+                                                   double maxStepLengthBackwards,
+                                                   double maxStepWidth,
+                                                   double defaultStepWidth,
+                                                   double minStepWidth,
+                                                   double turnMaxAngleInward,
+                                                   double turnMaxAngleOutward,
+                                                   FramePose2D stanceFootPose2D,
+                                                   FramePose2D nextFootstepPose2DToPack)
    {
-      double xDisplacement = MathTools.clamp(stepTime * desiredVelocityX, maxStepLength);
+      double xDisplacement = MathTools.clamp(stepTime * desiredVelocityX, -maxStepLengthBackwards, maxStepLengthForwards);
       double yDisplacement = stepTime * desiredVelocityY + swingSide.negateIfRightSide(defaultStepWidth);
       double headingDisplacement = stepTime * desiredTurningVelocity;
 
@@ -639,6 +664,11 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    public void setFootstepsAreAdjustable(boolean footstepsAreAdjustable)
    {
       parameters.setStepsAreAdjustable(footstepsAreAdjustable);
+   }
+
+   public void setAccountForGroundDrift(boolean accountForGroundDrift)
+   {
+      parameters.setAccountForGroundDrift(accountForGroundDrift);
    }
 
    public void setSwingHeight(double swingHeight)
@@ -802,13 +832,23 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    }
 
    /**
-    * Maximum step length for both stepping forward and backward.
+    * Maximum step length for stepping forward.
     *
-    * @param max maximum step length.
+    * @param maxStepLengthForwards maximum step length.
     */
-   public void setMaxStepLength(double max)
+   public void setMaxStepLengthForwards(double maxStepLengthForwards)
    {
-      parameters.setMaxStepLength(max);
+      parameters.setMaxStepLengthForwards(maxStepLengthForwards);
+   }
+
+   /**
+    * Maximum step length for stepping backward.
+    *
+    * @param maxStepLengthBackwards maximum step length.
+    */
+   public void setMaxStepLengthBackwards(double maxStepLengthBackwards)
+   {
+      parameters.setMaxStepLengthBackwards(maxStepLengthBackwards);
    }
 
    /**
@@ -1104,6 +1144,11 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    public YoRegistry getRegistry()
    {
       return registry;
+   }
+
+   public YoContinuousStepGeneratorParameters getCSGParameters()
+   {
+      return parameters;
    }
 
    private boolean isStepValid(FramePose3DReadOnly touchdownPose, FramePose3DReadOnly stancePose, RobotSide swingSide)

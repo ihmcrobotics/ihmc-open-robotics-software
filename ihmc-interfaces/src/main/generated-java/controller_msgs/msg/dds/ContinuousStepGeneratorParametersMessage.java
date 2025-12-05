@@ -21,12 +21,16 @@ public class ContinuousStepGeneratorParametersMessage extends Packet<ContinuousS
    public double swing_height_ = -1.0;
    public double swing_duration_ = -1.0;
    public double transfer_duration_ = -1.0;
-   public double max_step_length_ = -1.0;
+   public double max_step_length_forwards_ = -1.0;
+   public double max_step_length_backwards_ = -1.0;
    public double default_step_width_ = -1.0;
    public double min_step_width_ = -1.0;
    public double max_step_width_ = -1.0;
    public double turn_max_angle_inward_ = -1.0;
    public double turn_max_angle_outward_ = -1.0;
+   public boolean steps_are_adjustable_;
+   public boolean snap_to_heightmap_;
+   public boolean account_for_ground_drift_;
 
    public ContinuousStepGeneratorParametersMessage()
    {
@@ -52,7 +56,9 @@ public class ContinuousStepGeneratorParametersMessage extends Packet<ContinuousS
 
       transfer_duration_ = other.transfer_duration_;
 
-      max_step_length_ = other.max_step_length_;
+      max_step_length_forwards_ = other.max_step_length_forwards_;
+
+      max_step_length_backwards_ = other.max_step_length_backwards_;
 
       default_step_width_ = other.default_step_width_;
 
@@ -63,6 +69,12 @@ public class ContinuousStepGeneratorParametersMessage extends Packet<ContinuousS
       turn_max_angle_inward_ = other.turn_max_angle_inward_;
 
       turn_max_angle_outward_ = other.turn_max_angle_outward_;
+
+      steps_are_adjustable_ = other.steps_are_adjustable_;
+
+      snap_to_heightmap_ = other.snap_to_heightmap_;
+
+      account_for_ground_drift_ = other.account_for_ground_drift_;
 
    }
 
@@ -126,13 +138,22 @@ public class ContinuousStepGeneratorParametersMessage extends Packet<ContinuousS
       return transfer_duration_;
    }
 
-   public void setMaxStepLength(double max_step_length)
+   public void setMaxStepLengthForwards(double max_step_length_forwards)
    {
-      max_step_length_ = max_step_length;
+      max_step_length_forwards_ = max_step_length_forwards;
    }
-   public double getMaxStepLength()
+   public double getMaxStepLengthForwards()
    {
-      return max_step_length_;
+      return max_step_length_forwards_;
+   }
+
+   public void setMaxStepLengthBackwards(double max_step_length_backwards)
+   {
+      max_step_length_backwards_ = max_step_length_backwards;
+   }
+   public double getMaxStepLengthBackwards()
+   {
+      return max_step_length_backwards_;
    }
 
    public void setDefaultStepWidth(double default_step_width)
@@ -180,6 +201,33 @@ public class ContinuousStepGeneratorParametersMessage extends Packet<ContinuousS
       return turn_max_angle_outward_;
    }
 
+   public void setStepsAreAdjustable(boolean steps_are_adjustable)
+   {
+      steps_are_adjustable_ = steps_are_adjustable;
+   }
+   public boolean getStepsAreAdjustable()
+   {
+      return steps_are_adjustable_;
+   }
+
+   public void setSnapToHeightmap(boolean snap_to_heightmap)
+   {
+      snap_to_heightmap_ = snap_to_heightmap;
+   }
+   public boolean getSnapToHeightmap()
+   {
+      return snap_to_heightmap_;
+   }
+
+   public void setAccountForGroundDrift(boolean account_for_ground_drift)
+   {
+      account_for_ground_drift_ = account_for_ground_drift;
+   }
+   public boolean getAccountForGroundDrift()
+   {
+      return account_for_ground_drift_;
+   }
+
 
    public static Supplier<ContinuousStepGeneratorParametersMessagePubSubType> getPubSubType()
    {
@@ -210,7 +258,9 @@ public class ContinuousStepGeneratorParametersMessage extends Packet<ContinuousS
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.transfer_duration_, other.transfer_duration_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.max_step_length_, other.max_step_length_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.max_step_length_forwards_, other.max_step_length_forwards_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.max_step_length_backwards_, other.max_step_length_backwards_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.default_step_width_, other.default_step_width_, epsilon)) return false;
 
@@ -221,6 +271,12 @@ public class ContinuousStepGeneratorParametersMessage extends Packet<ContinuousS
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.turn_max_angle_inward_, other.turn_max_angle_inward_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.turn_max_angle_outward_, other.turn_max_angle_outward_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.steps_are_adjustable_, other.steps_are_adjustable_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.snap_to_heightmap_, other.snap_to_heightmap_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.account_for_ground_drift_, other.account_for_ground_drift_, epsilon)) return false;
 
 
       return true;
@@ -247,7 +303,9 @@ public class ContinuousStepGeneratorParametersMessage extends Packet<ContinuousS
 
       if(this.transfer_duration_ != otherMyClass.transfer_duration_) return false;
 
-      if(this.max_step_length_ != otherMyClass.max_step_length_) return false;
+      if(this.max_step_length_forwards_ != otherMyClass.max_step_length_forwards_) return false;
+
+      if(this.max_step_length_backwards_ != otherMyClass.max_step_length_backwards_) return false;
 
       if(this.default_step_width_ != otherMyClass.default_step_width_) return false;
 
@@ -258,6 +316,12 @@ public class ContinuousStepGeneratorParametersMessage extends Packet<ContinuousS
       if(this.turn_max_angle_inward_ != otherMyClass.turn_max_angle_inward_) return false;
 
       if(this.turn_max_angle_outward_ != otherMyClass.turn_max_angle_outward_) return false;
+
+      if(this.steps_are_adjustable_ != otherMyClass.steps_are_adjustable_) return false;
+
+      if(this.snap_to_heightmap_ != otherMyClass.snap_to_heightmap_) return false;
+
+      if(this.account_for_ground_drift_ != otherMyClass.account_for_ground_drift_) return false;
 
 
       return true;
@@ -281,8 +345,10 @@ public class ContinuousStepGeneratorParametersMessage extends Packet<ContinuousS
       builder.append(this.swing_duration_);      builder.append(", ");
       builder.append("transfer_duration=");
       builder.append(this.transfer_duration_);      builder.append(", ");
-      builder.append("max_step_length=");
-      builder.append(this.max_step_length_);      builder.append(", ");
+      builder.append("max_step_length_forwards=");
+      builder.append(this.max_step_length_forwards_);      builder.append(", ");
+      builder.append("max_step_length_backwards=");
+      builder.append(this.max_step_length_backwards_);      builder.append(", ");
       builder.append("default_step_width=");
       builder.append(this.default_step_width_);      builder.append(", ");
       builder.append("min_step_width=");
@@ -292,7 +358,13 @@ public class ContinuousStepGeneratorParametersMessage extends Packet<ContinuousS
       builder.append("turn_max_angle_inward=");
       builder.append(this.turn_max_angle_inward_);      builder.append(", ");
       builder.append("turn_max_angle_outward=");
-      builder.append(this.turn_max_angle_outward_);
+      builder.append(this.turn_max_angle_outward_);      builder.append(", ");
+      builder.append("steps_are_adjustable=");
+      builder.append(this.steps_are_adjustable_);      builder.append(", ");
+      builder.append("snap_to_heightmap=");
+      builder.append(this.snap_to_heightmap_);      builder.append(", ");
+      builder.append("account_for_ground_drift=");
+      builder.append(this.account_for_ground_drift_);
       builder.append("}");
       return builder.toString();
    }

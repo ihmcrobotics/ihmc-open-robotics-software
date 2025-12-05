@@ -45,10 +45,32 @@ public abstract class ICPControllerParameters
    public abstract double getFeedbackRateWeight();
 
    /**
+    * Penalization on changes in the total feedback between control ticks. This weight is normalized by
+    * the control DT.
+    */
+   public double getHighlyDampedFeedbackRateWeight()
+   {
+      return getFeedbackRateWeight();
+   }
+
+   /**
+    * This is a deadband applied to the icp error, in a magnitude manner, so along the vector of the error.
+    */
+   public double getICPErrorDeadband()
+   {
+      return 0.0;
+   }
+
+   /**
     * Gains for the proportional ICP controller that is encoded into the optimization. Also includes
     * gains for the smart integrator that is used when the controller is stuck.
     */
    public abstract ICPControlGainsReadOnly getICPFeedbackGains();
+
+   public ICPControlGainsReadOnly getHighlyDampedICPFeedbackGains()
+   {
+      return getICPFeedbackGains();
+   }
 
    /**
     * Sets whether the integration gains returned by {@link #getICPFeedbackGains()} is used to perform

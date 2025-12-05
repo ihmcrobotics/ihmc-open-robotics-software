@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.swing;
 
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.AdaptiveSwingTimingTools;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -43,6 +44,7 @@ public class AdaptiveSwingTrajectoryCalculator
    private final SwingPlannerParametersReadOnly swingPlannerParameters;
    private final DefaultFootstepPlannerParametersReadOnly footstepPlannerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
+   private final SteppingParameters steppingParameters;
    private TerrainMapData heightMapData;
 
    private final FramePose3D startOfSwingPose = new FramePose3D();
@@ -68,6 +70,7 @@ public class AdaptiveSwingTrajectoryCalculator
       this.swingPlannerParameters = swingPlannerParameters;
       this.footstepPlannerParameters = footstepPlannerParameters;
       this.walkingControllerParameters = walkingControllerParameters;
+      this.steppingParameters = walkingControllerParameters.getSteppingParameters();
 
       if (tickAndUpdatable != null)
       {
@@ -81,7 +84,7 @@ public class AdaptiveSwingTrajectoryCalculator
          footstepGraphic = new YoGraphicPolygon("footstep", 4, registry, false, 1.0, YoAppearance.Red());
 
          Graphics3DObject collisionBoxGraphic = new Graphics3DObject();
-         collisionBoxGraphic.addCube(swingPlannerParameters.getFootStubClearance(), walkingControllerParameters.getSteppingParameters().getFootWidth(), boxHeight, true, YoAppearance.Orange());
+         collisionBoxGraphic.addCube(swingPlannerParameters.getFootStubClearance(), steppingParameters.getFootWidth(), boxHeight, true, YoAppearance.Orange());
 
          startOfSwingToeCollisionGraphic = new YoGraphicShape("startOfSwingToe", collisionBoxGraphic, "startOfSwingToe", "", registry, 1.0, YoAppearance.Orange());
          endOfSwingHeelCollisionGraphic = new YoGraphicShape("endOfSwingHeel", collisionBoxGraphic, "endOfSwingHeel", "", registry, 1.0, YoAppearance.Orange());
@@ -154,9 +157,9 @@ public class AdaptiveSwingTrajectoryCalculator
 
    private void setBoxPose(Box3D collisionBox, Pose3DReadOnly footstepPose, boolean shiftForward)
    {
-      collisionBox.getSize().set(swingPlannerParameters.getFootStubClearance(), walkingControllerParameters.getSteppingParameters().getFootWidth(), boxHeight);
+      collisionBox.getSize().set(swingPlannerParameters.getFootStubClearance(), steppingParameters.getFootWidth(), boxHeight);
 
-      double footHalfLength = 0.5 * walkingControllerParameters.getSteppingParameters().getFootLength();
+      double footHalfLength = 0.5 * steppingParameters.getFootLength();
       double xOffset = (shiftForward ? 1.0 : -1.0) * (swingPlannerParameters.getFootStubClearance() + 0.5 * footHalfLength);
       double zOffset = boxGroundClearance + 0.5 * boxHeight;
       collisionBox.getPose().set(footstepPose);

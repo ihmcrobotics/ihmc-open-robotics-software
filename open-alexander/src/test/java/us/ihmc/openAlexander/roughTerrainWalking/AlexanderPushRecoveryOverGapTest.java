@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import us.ihmc.openAlexander.OpenAlexanderVersion;
 import us.ihmc.openAlexander.OpenAlexanderRobotModel;
-import us.ihmc.openAlexander.parameters.controller.AlexanderStepAdjustmentParameters;
+import us.ihmc.openAlexander.parameters.controller.OpenAlexanderStepAdjustmentParameters;
 import us.ihmc.openAlexander.parameters.controller.OpenAlexanderSteppingParameters;
 import us.ihmc.openAlexander.parameters.controller.OpenAlexanderWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -71,7 +71,7 @@ public class AlexanderPushRecoveryOverGapTest extends AvatarPushRecoveryOverGapT
                @Override
                public StepAdjustmentParameters getStepAdjustmentParameters()
                {
-                  return new AlexanderStepAdjustmentParameters()
+                  return new OpenAlexanderStepAdjustmentParameters()
                   {
                      @Override
                      public boolean allowStepAdjustment()

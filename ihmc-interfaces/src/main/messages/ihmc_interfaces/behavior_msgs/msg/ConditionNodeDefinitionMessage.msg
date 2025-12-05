@@ -4,6 +4,8 @@ behavior_msgs/LeafNodeDefinitionMessage definition
 byte COUNTER_TYPE = 0
 byte LLM_TYPE = 1
 byte PROXIMITY_TYPE = 2
+byte ALWAYS_FAIL = 3
+byte ALWAYS_SUCCEED = 4
 
 # The type of condition as defined above
 byte type
@@ -38,24 +40,24 @@ string<=10000 response_matcher
 
 # PROXIMITY TYPE
 
-byte PROXIMITY_XYZ = 0
-byte PROXIMITY_XY = 1
-byte PROXIMITY_Z = 2
+byte XYZ = 0
+byte XY = 1
+byte Z = 2
 
 # The type of distance condition as defined above
-byte proximity_distance_type
+byte distance_type
 
-# Name of the object frame
-string proximity_object_frame_name
+# Name of frame A
+string frame_name_a
 
-# Name of the frame the distance is expressed in
-string proximity_reference_frame_name
+# Name of frame B
+string frame_name_b
 
-# The maximum distance between the object and the reference frame
-float64 proximity_distance_to_object
+# The minimum distance between the two frames
+float64 min_distance
 
-# The maximum time that is spent in evaluating the condition
-float64 proximity_evaluation_time
+# The maximum distance between the two frames
+float64 max_distance
 
-# Whether the failure of missing frame is handled internally by the condition node or not
-bool manage_missing_frame_internally
+# Timeout for waiting for the condition to be satisfied
+float64 timeout

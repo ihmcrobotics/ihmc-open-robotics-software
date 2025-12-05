@@ -487,15 +487,16 @@ public class WorkspaceLimiterControlModule implements SCS2YoGraphicHolder
             (maxPercentOfLegLengthForSingularityAvoidanceInSwingForHeight.getValue() - percentOfLegLengthMarginToEnableSingularityAvoidanceForHeight.getValue())
             * maximumLegLength.getDoubleValue();
       double maxLengthToAllow = maxPercentOfLegLengthForSingularityAvoidanceInSwingForHeight.getValue() * maximumLegLength.getDoubleValue();
+      // If we only use a single linear interpolation, then the error term later is always zero.
       double lengthToUse = InterpolationTools.linearInterpolate(lengthToStartLimiting,
                                                                  maxLengthToAllow,
-                                                                 alphaSwingSingularityAvoidanceForHeight.getDoubleValue());
+                                                                 alphaSwingSingularityAvoidanceForHeight.getDoubleValue() * alphaSwingSingularityAvoidanceForHeight.getDoubleValue());
 
       double desiredFootPositionInAxisFrame = -Math.min(desiredLegLengthSwing.getDoubleValue(), lengthToUse);
 
       // When alpha is 1, we want the length to be at maxLengthToAllow. When alpha is 0, we want the length to be at lengthToStartLimiting.
 
-      double unachievedHeightTranslation = alphaSwingSingularityAvoidanceForHeight.getDoubleValue() * (desiredFootPosition.getZ() - desiredFootPositionInAxisFrame);
+      double unachievedHeightTranslation = (desiredFootPosition.getZ() - desiredFootPositionInAxisFrame);
 
       tempVector.setIncludingFrame(desiredFootPosition.getReferenceFrame(), 0.0, 0.0, unachievedHeightTranslation);
       unachievedSwingTranslation.setMatchingFrame(tempVector);

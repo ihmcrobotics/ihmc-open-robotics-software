@@ -19,8 +19,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 public class RDXAbilityHand implements RDXHandInterface
 {
    public static final float START_POSITION = 30.0f;
-   public static final float SLIDER_MIN = 0.0f;
-   public static final float SLIDER_MAX = 120.0f;
    public static final float DEFAULT_VELOCITY = 30.0f; // TODO: Is 30 a good default?
    public static final float THUMB_CURL_MAX = 70.0f;
    public static final float THUMB_CURL_MIN = 10.0f;
@@ -78,10 +76,9 @@ public class RDXAbilityHand implements RDXHandInterface
          }
          else
          {
-            command.setControlMode(ControlMode.VEL_TO_POS.toByte());
-            for (int i = 0; i < 5; i++)
+            command.setControlMode(ControlMode.POSITION.toByte());
+            for (int i = 0; i < 6; i++)
                command.getGoalPositions()[i] = desiredPositions[i].get();
-            command.getGoalPositions()[5] = -desiredPositions[5].get();
          }
          for (int i = 0; i < 6; i++)
             command.getGoalVelocities()[i] = desiredVelocities[i].get();
@@ -104,48 +101,32 @@ public class RDXAbilityHand implements RDXHandInterface
 
       ImGui.beginDisabled(!connected);
 
-      if (ImGui.button(labels.get("Open")))
-         executeGrip = Grip.RELAX;
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Grip")))
-         executeGrip = Grip.POWER;
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Tripod Closed")))
-         executeGrip = Grip.TRIPOD_C;
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Hook")))
-         executeGrip = Grip.HOOK;
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Tripod Open")))
-         executeGrip = Grip.TRIPOD_O;
-      if (ImGui.button(labels.get("Pinch Open")))
-         executeGrip = Grip.PINCH_O;
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Pinch Closed")))
-         executeGrip = Grip.PINCH_C;
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Key")))
-         executeGrip = Grip.KEY;
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Rude")))
-         executeGrip = Grip.RUDE;
+      for (Grip grip : Grip.values)
+      {
+         if (ImGui.button(labels.get(grip.name())))
+            executeGrip = grip;
+         if (grip != Grip.values[5] && grip != Grip.values[7] && grip != Grip.values[Grip.values.length - 1])
+            ImGui.sameLine();
+      }
 
       boolean scheduleExecuteVelToPos = false;
       for (int i = 0; i < 6; i++)
       {
-         float currentNotch = (currentPositions[i] - SLIDER_MIN) / (SLIDER_MAX - SLIDER_MIN);
+         float sliderMin = 0.0f;
+         float sliderMax = i == 5 ? -120.0f : 120.0f; // thumb rotator moves negative
+         float currentNotch = (currentPositions[i] - sliderMin) / (sliderMax - sliderMin);
          float sliderWidth = ImGui.getColumnWidth() * 0.6f;
          ImGuiTools.renderSliderOrProgressNotch(currentNotch * sliderWidth, ImGui.getColorU32(ImGuiCol.Text));
 
          ImGui.pushItemWidth(sliderWidth);
-         scheduleExecuteVelToPos |= ImGui.sliderFloat(labels.getHidden(FINGER_NAMES[i]), desiredPositions[i].getData(), SLIDER_MIN, SLIDER_MAX,
-                               "%s: %.2f%s flexion".formatted(FINGER_NAMES[i], desiredPositions[i].get(), EuclidCoreMissingTools.DEGREE_SYMBOL));
-         if (!ImGui.isItemActive())
+         scheduleExecuteVelToPos |= ImGui.sliderFloat(labels.getHidden(FINGER_NAMES[i]), desiredPositions[i].getData(), sliderMin, sliderMax,
+                               "%s: %.2f%s flexion".formatted(FINGER_NAMES[i], currentPositions[i], EuclidCoreMissingTools.DEGREE_SYMBOL));
+         if (!ImGui.isItemActive() && !executeVelToPos) // Prevent overriding externally submitted positions too
             desiredPositions[i].set(currentPositions[i]);
          ImGui.popItemWidth();
          ImGui.sameLine();
          ImGui.pushItemWidth(ImGui.getColumnWidth());
-         scheduleExecuteVelToPos |= ImGui.inputFloat(labels.getHidden("Velocity" + i), desiredVelocities[i], 0.1f, 1.0f, "%.2f rad/s");
+         scheduleExecuteVelToPos |= ImGui.inputFloat(labels.getHidden("Velocity" + i), desiredVelocities[i], 0.1f, 1.0f, "%.2f deg/s");
          ImGui.popItemWidth();
       }
 
@@ -182,17 +163,17 @@ public class RDXAbilityHand implements RDXHandInterface
    public void sendCommand(HandAction handAction)
    {
       if (handAction == HandAction.OPEN)
-         executeGrip = Grip.RELAX;
+         executeGrip = Grip.OPEN;
       else if (handAction == HandAction.CLOSE || handAction == HandAction.GRIP)
-         executeGrip = Grip.POWER;
+         executeGrip = Grip.CLOSE;
       else
          LogTools.warn("Attempted to send an unsupported hand action command: {}", handAction.name());
    }
 
    @Override
-   public void sendFingerPosition(int index, float value)
+   public void sendFingerPosition(int index, float angleDegrees)
    {
-      desiredPositions[index].set(value);
+      desiredPositions[index].set(index == 5 ? -angleDegrees : angleDegrees);
       executeVelToPos = true;
    }
 

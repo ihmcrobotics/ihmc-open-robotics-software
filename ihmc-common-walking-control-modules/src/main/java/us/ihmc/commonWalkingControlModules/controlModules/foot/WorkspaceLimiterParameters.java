@@ -42,13 +42,16 @@ public class WorkspaceLimiterParameters
                                                                                   0.98);
       maxPercentOfLegLengthForSingularityAvoidanceInSwingForFoot = new DoubleParameter(namePrefix + "MaxPercOfLegLengthForSingularityAvoidanceInSwingForFoot",
                                                                                        registry,
-                                                                                       0.97);
+                                                                                       0.99);
+      // As a note, this should really always be slightly less than the one for the foot, so that you're dropping the height more than you're limiting the swing
+      // foot.
       maxPercentOfLegLengthForSingularityAvoidanceInSwingForHeight = new DoubleParameter(namePrefix
             + "MaxPercOfLegLengthForSingularityAvoidanceInSwingForHeight", registry, 0.98);
       minPercentOfLegLengthForSingularityAvoidanceInSwing = new DoubleParameter(namePrefix + "MinPercOfLegLengthForSingularityAvoidanceInSwing", registry, 0.5);
       percentOfLegLengthMarginToEnableSingularityAvoidanceForFoot = new DoubleParameter(namePrefix + "PercMarginToEnableSingularityAvoidanceForFoot",
                                                                                         registry,
                                                                                         0.05);
+      // The starting point for this is always best to have as around the same or slightly before the starting point for the foot.
       percentOfLegLengthMarginToEnableSingularityAvoidanceForHeight = new DoubleParameter(namePrefix + "PercMarginToEnableSingularityAvoidanceForHeight",
                                                                                           registry,
                                                                                           0.06);
@@ -57,7 +60,7 @@ public class WorkspaceLimiterParameters
 
       velocityDifferenceForLengthening = new DoubleParameter(namePrefix + "VelocityDifferenceForLengthening", registry, defaultMinVelocityDifference);
 
-      enableSingularityAvoidanceOnSwingFoot = new BooleanParameter(namePrefix + "enableSingularityAvoidanceOnSwingFoot", registry, true);
+      enableSingularityAvoidanceOnSwingFoot = new BooleanParameter(namePrefix + "enableSingularityAvoidanceOnSwingFoot", registry, false);
 
       parentRegistry.addChild(registry);
    }

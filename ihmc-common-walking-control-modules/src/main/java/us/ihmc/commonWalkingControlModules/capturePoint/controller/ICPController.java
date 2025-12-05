@@ -96,6 +96,7 @@ public class ICPController implements ICPControllerInterface
    private final DoubleProvider safeCoPDistanceToEdge;
 
    private final DoubleProvider feedbackRateWeight;
+   private final DoubleProvider highlyDampedFeedbackRateWeight;
    private final DoubleProvider copCMPFeedbackRateWeight;
    private final DoubleProvider dynamicsObjectiveWeight;
 
@@ -103,7 +104,9 @@ public class ICPController implements ICPControllerInterface
 
    private final AngularMomentumIntegrator integrator;
 
+   private final DoubleProvider icpErrorDeadband;
    private final ICPControlGainsReadOnly feedbackGains;
+   private final ICPControlGainsReadOnly highlyDampedFeedbackGains;
    private final DMatrixRMaj transformedGains = new DMatrixRMaj(2, 2);
    private final DMatrixRMaj inverseTransformedGains = new DMatrixRMaj(2, 2);
    private final DMatrixRMaj transformedMagnitudeJacobian = new DMatrixRMaj(2, 2);
@@ -131,9 +134,12 @@ public class ICPController implements ICPControllerInterface
    private final FrameVector2D currentCoMVelocity = new FrameVector2D();
 
    private final ICPControllerParameters parameters;
+   private final YoBoolean usingHighCoPDamping = new YoBoolean("usingHighCopDamping", registry);
 
    private final double controlDT;
    private final double controlDTSquare;
+
+   private boolean ignoreRateLimitThisTick = false;
 
    private final ICPControllerHelper helper = new ICPControllerHelper();
 
@@ -182,13 +188,16 @@ public class ICPController implements ICPControllerInterface
                                                      registry,
                                                      icpOptimizationParameters.getCoPCMPFeedbackRateWeight());
       feedbackRateWeight = new DoubleParameter(yoNamePrefix + "FeedbackRateWeight", registry, icpOptimizationParameters.getFeedbackRateWeight());
+      highlyDampedFeedbackRateWeight = new DoubleParameter(yoNamePrefix + "HighlyDampedFeedbackRateWeight", registry, icpOptimizationParameters.getHighlyDampedFeedbackRateWeight());
 
       YoDouble maxAlphaRate = new YoDouble(yoNamePrefix + "MaxAlphaRate", registry);
       maxAlphaRate.set(icpOptimizationParameters.getMaxAlphaRate());
       feedbackAlphaLimited = new RateLimitedYoVariable(yoNamePrefix + "FeedbackAlphaLimited", registry, maxAlphaRate, feedbackAlpha, controlDT);
       feedForwardAlphaLimited = new RateLimitedYoVariable(yoNamePrefix + "FeedForwardAlphaLimited", registry, maxAlphaRate, feedForwardAlpha, controlDT);
 
+      icpErrorDeadband = new DoubleParameter(yoNamePrefix + "ICPErrorDeadband", registry, icpOptimizationParameters.getICPErrorDeadband());
       feedbackGains = new ParameterizedICPControlGains("", icpOptimizationParameters.getICPFeedbackGains(), registry);
+      highlyDampedFeedbackGains = new ParameterizedICPControlGains("_HighlyDamped", icpOptimizationParameters.getHighlyDampedICPFeedbackGains(), registry);
 
       dynamicsObjectiveWeight = new DoubleParameter(yoNamePrefix + "DynamicsObjectiveWeight", registry, icpOptimizationParameters.getDynamicsObjectiveWeight());
 
@@ -263,6 +272,7 @@ public class ICPController implements ICPControllerInterface
    @Override
    public void initialize()
    {
+      ignoreRateLimitThisTick = true;
       integrator.reset();
    }
 
@@ -345,6 +355,8 @@ public class ICPController implements ICPControllerInterface
 
       this.icpError.sub(currentICP, desiredICP);
 
+      applyDeadbandToICPError(icpError);
+
       scaleFeedbackWeightWithGain();
 
       submitSolverTaskConditions(supportPolygonInWorld);
@@ -365,6 +377,20 @@ public class ICPController implements ICPControllerInterface
       controllerTimer.stopMeasurement();
    }
 
+   private void applyDeadbandToICPError(FixedFrameVector2DBasics icpErrorToPack)
+   {
+      double icpErrorMagnitude = icpErrorToPack.norm();
+      if (icpErrorMagnitude < icpErrorDeadband.getValue())
+      {
+         icpErrorToPack.setToZero();
+      }
+      else
+      {
+         double deadbandedMagnitude = icpErrorMagnitude - icpErrorDeadband.getValue();
+         icpErrorToPack.scale(deadbandedMagnitude / icpErrorMagnitude);
+      }
+   }
+
    private void submitSolverTaskConditions(FrameConvexPolygon2DReadOnly supportPolygonInWorld)
    {
       solver.resetCoPLocationConstraint();
@@ -373,6 +399,7 @@ public class ICPController implements ICPControllerInterface
       if (copConstraintHandler.hasSupportPolygonChanged())
          solver.notifyResetActiveSet();
 
+      ICPControlGainsReadOnly feedbackGains = usingHighCoPDamping.getBooleanValue() ? highlyDampedFeedbackGains : this.feedbackGains;
       helper.transformGainsFromDynamicsFrame(transformedGains,
                                              desiredICPVelocity,
                                              feedbackGains.getKpParallelToMotion(),
@@ -390,28 +417,39 @@ public class ICPController implements ICPControllerInterface
 
       UnrolledInverseFromMinor_DDRM.inv(transformedGains, inverseTransformedGains);
 
-      solver.resetCoPFeedbackConditions();
-      solver.resetFeedbackDirection();
+      solver.resetFeedbackConditions();
       solver.setFeedbackConditions(scaledCoPFeedbackWeight, transformedGains, dynamicsObjectiveWeight.getValue());
       solver.setMaxCMPDistanceFromEdge(maxAllowedDistanceCMPSupport.getValue());
       solver.setCopSafeDistanceToEdge(safeCoPDistanceToEdge.getValue());
       solver.setDesiredFeedbackDirection(unconstrainedFeedback, feedbackDirectionWeight.getValue());
 
-      if (ICPControllerHelper.isStationary(desiredICPVelocity))
+      boolean addConstraints = !ignoreRateLimitThisTick && hasNotConvergedCounts.getIntegerValue() < 5;
+      if (addConstraints)
       {
-         solver.setMaximumFeedbackMagnitude(transformedMagnitudeJacobian,
-                                            feedbackGains.getFeedbackPartMaxValueOrthogonalToMotion(),
-                                            feedbackGains.getFeedbackPartMaxValueOrthogonalToMotion());
+         if (ICPControllerHelper.isStationary(desiredICPVelocity))
+         {
+            solver.setMaximumFeedbackMagnitude(transformedMagnitudeJacobian,
+                                               feedbackGains.getFeedbackPartMaxValueOrthogonalToMotion(),
+                                               feedbackGains.getFeedbackPartMaxValueOrthogonalToMotion());
+         }
+         else
+         {
+            solver.setMaximumFeedbackMagnitude(transformedMagnitudeJacobian,
+                                               feedbackGains.getFeedbackPartMaxValueParallelToMotion(),
+                                               feedbackGains.getFeedbackPartMaxValueOrthogonalToMotion());
+         }
+
+         solver.setMaximumFeedbackRate(feedbackGains.getFeedbackPartMaxRate(), controlDT);
       }
       else
       {
-         solver.setMaximumFeedbackMagnitude(transformedMagnitudeJacobian,
-                                            feedbackGains.getFeedbackPartMaxValueParallelToMotion(),
-                                            feedbackGains.getFeedbackPartMaxValueOrthogonalToMotion());
+         solver.removeMaximumFeedbackMagnitude();
+         solver.removeFeedbackRateLimit();
       }
-      solver.setMaximumFeedbackRate(feedbackGains.getFeedbackPartMaxRate(), controlDT);
+      ignoreRateLimitThisTick = false;
 
-      solver.setFeedbackRateWeight(copCMPFeedbackRateWeight.getValue() / controlDTSquare, feedbackRateWeight.getValue() / controlDTSquare);
+      double feedbackRateWeight = usingHighCoPDamping.getValue() ? highlyDampedFeedbackRateWeight.getValue() : this.feedbackRateWeight.getValue();
+      solver.setFeedbackRateWeight(copCMPFeedbackRateWeight.getValue() / controlDTSquare, feedbackRateWeight / controlDTSquare);
 
       if (useCMPFeedback.getValue())
          solver.setCMPFeedbackConditions(cmpFeedbackWeight.getValue(), useAngularMomentum.getValue());
@@ -511,6 +549,8 @@ public class ICPController implements ICPControllerInterface
 
       if (scaleFeedbackWeightWithGain.getValue())
       {
+         ICPControlGainsReadOnly feedbackGains = usingHighCoPDamping.getBooleanValue() ? highlyDampedFeedbackGains : this.feedbackGains;
+
          double parallel = feedbackGains.getKpParallelToMotion();
          double orthogonal = feedbackGains.getKpOrthogonalToMotion();
          double magnitude = helper.transformGainsFromDynamicsFrame(transformedGains, desiredICPVelocity, parallel, orthogonal);
@@ -530,6 +570,12 @@ public class ICPController implements ICPControllerInterface
    public void setMultiContactStabilityRegion(FrameConvexPolygon2DReadOnly multiContactStabilityRegion)
    {
       this.copConstraintHandler.setMultiContactStabilityRegion(multiContactStabilityRegion);
+   }
+
+   @Override
+   public void setUseHighCoPDamping(boolean useHighCoPDamping)
+   {
+      this.usingHighCoPDamping.set(useHighCoPDamping);
    }
 
    @Override

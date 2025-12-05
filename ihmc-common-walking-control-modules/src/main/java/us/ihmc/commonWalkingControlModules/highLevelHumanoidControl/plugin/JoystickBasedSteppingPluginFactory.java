@@ -132,8 +132,6 @@ public class JoystickBasedSteppingPluginFactory implements HumanoidSteppingPlugi
                                                                     commandInputManager::setWalkingStatus);
       walkingStatusMessageOutputManager.attachStatusMessageListener(FootstepStatusMessage.class, commandInputManager::consumeFootstepStatus);
 
-      updatables.add(commandInputManager);
-
       //this is probably not the way the class was intended to be modified.
       commandInputManager.setCSG(csgFootstepGenerator.getContinuousStepGenerator());
 

@@ -62,9 +62,9 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
 
       Point3DReadOnly definitionGoalStancePoint = definition.getGoalStancePoint().getValueReadOnly();
       Point3DReadOnly definitionGoalFocalPoint = definition.getGoalFocalPoint().getValueReadOnly();
-      boolean invalidDefinition = definitionGoalStancePoint.geometricallyEquals(definitionGoalFocalPoint, 1e-4);
+      boolean stanceEqualsGoal = definitionGoalStancePoint.geometricallyEquals(definitionGoalFocalPoint, 1e-4);
 
-      state.setCanExecute(state.areFramesInWorld() && !invalidDefinition);
+      state.setCanExecute(state.areFramesInWorld() && !stanceEqualsGoal);
       if (state.getCanExecute() && !definition.getIsManuallyPlaced())
       {
          FramePoint3D frameStancePoint = new FramePoint3D();
@@ -147,6 +147,18 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
                }
             }
          }
+      }
+      else
+      {
+         cantExecuteMessage = "";
+         if (!state.areFramesInWorld())
+         {
+            cantExecuteMessage += "state.areFramesInWorld() = false\n";
+            cantExecuteMessage += "definition.getParentFrameName() = %s\n".formatted(definition.getParentFrameName());
+            cantExecuteMessage += "state.getGoalFrame().isChildOfWorld() = %b\n".formatted(state.getGoalFrame().isChildOfWorld());
+         }
+         if (!stanceEqualsGoal)
+            cantExecuteMessage += "stanceEqualsGoal = false\n";
       }
 
       for (RobotSide side : RobotSide.values)

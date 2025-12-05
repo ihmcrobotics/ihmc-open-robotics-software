@@ -422,7 +422,6 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
       fourthMidpoint.setXY(fourthMidpointX, fourthMidpointY);
       endWaypoint.setXY(endWaypointX, endWaypointY);
 
-
       // Handle the case where the feet are basically squared up when stepping up. In that case, the max height needs to be pinned by the "from" foot, as the
       // way the phase variable works means we can approach what is meant to be swing on the "to" foot while still in the "from" foot.
       if (Math.abs(transferToPosition.getX()) < 0.1 && endGroundHeight > startGroundHeight)

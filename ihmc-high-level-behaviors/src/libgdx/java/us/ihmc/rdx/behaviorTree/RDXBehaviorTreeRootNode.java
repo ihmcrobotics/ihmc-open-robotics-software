@@ -72,15 +72,13 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
       orderedActions.clear();
       nextForExecutionLeaves.clear();
       currentlyExecutingLeaves.clear();
-      updateSubtree(this);
+      updateNodeListsRecursive(this);
 
       for (RDXLeafNode<?, ?> leaf : orderedLeaves)
-      {
-         leaf.getState().validateFields(state.getOrderedLeaves());
-      }
+         leaf.getState().validateDefinition(state.getOrderedLeaves());
    }
 
-   public void updateSubtree(RDXBehaviorTreeNode<?, ?> node)
+   public void updateNodeListsRecursive(RDXBehaviorTreeNode<?, ?> node)
    {
       idToNodeMap.put(node.getState().getID(), node);
 
@@ -98,7 +96,7 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
                orderedActions.add(action);
          }
 
-         updateSubtree(child);
+         updateNodeListsRecursive(child);
       }
    }
 
@@ -125,48 +123,40 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
    public void renderExecutionControlAndProgressWidgets()
    {
       if (ImGui.button(labels.get("<")))
-      {
          state.stepBackNextExecutionIndex();
-      }
       ImGuiTools.previousWidgetTooltip("Go to previous leaf");
       ImGui.sameLine();
       ImGui.text("Index: " + String.format("%03d", state.getExecutionNextIndex()));
       ImGui.sameLine();
       if (ImGui.button(labels.get(">")))
-      {
          state.stepForwardNextExecutionIndex();
-      }
       ImGuiTools.previousWidgetTooltip("Go to next leaf");
 
+      ImGui.sameLine();
+      ImGui.text("Execute");
+      ImGui.sameLine();
+
+      automaticExecutionCheckbox.renderImGuiWidget();
+      if (automaticExecutionCheckbox.changed())
+         definition.modify();
+
+      ImGuiTools.previousWidgetTooltip("Enables autonomous execution. Will immediately start executing when checked.");
+
       boolean endOfSequence = state.getExecutionNextIndex() >= state.getOrderedLeaves().size();
-      ImGui.beginDisabled(endOfSequence); // Use disabled so stuff doesn't glitch around
+      ImGui.beginDisabled(endOfSequence || state.getAutomaticExecution());
       {
          ImGui.sameLine();
-         ImGui.text("Execute");
-         ImGui.sameLine();
 
-         automaticExecutionCheckbox.renderImGuiWidget();
-         if (automaticExecutionCheckbox.changed())
-            definition.modify();
-
-         ImGuiTools.previousWidgetTooltip("Enables autonomous execution. Will immediately start executing when checked.");
-
-         ImGui.beginDisabled(state.getAutomaticExecution());
+         boolean disableManuallyExecuteButton = state.getManualExecutionRequested();
+         ImGui.beginDisabled(disableManuallyExecuteButton);
          {
-            ImGui.sameLine();
-
-            boolean disableManuallyExecuteButton = state.getManualExecutionRequested();
-            ImGui.beginDisabled(disableManuallyExecuteButton);
+            if (ImGui.button(labels.get("Manually")))
             {
-               if (ImGui.button(labels.get("Manually")))
-               {
-                  state.setManualExecutionRequested();
-               }
+               state.setManualExecutionRequested();
             }
-            ImGui.endDisabled();
-            ImGuiTools.previousWidgetTooltip("Executes the next leaf.");
          }
          ImGui.endDisabled();
+         ImGuiTools.previousWidgetTooltip("Executes the next leaf.");
       }
       ImGui.endDisabled();
       if (ImGui.button(labels.get("Reset Failures")))

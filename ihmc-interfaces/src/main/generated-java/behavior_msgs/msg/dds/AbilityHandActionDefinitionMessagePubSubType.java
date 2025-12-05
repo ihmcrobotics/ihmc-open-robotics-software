@@ -15,7 +15,7 @@ public class AbilityHandActionDefinitionMessagePubSubType implements us.ihmc.pub
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "9908f468c0be71cfeed1956553c7dff971f9dd693ede2afcb8b4514017dc12de";
+   		return "f86152b3120b24a068a687036eb2afab4280995d8acebb9e89028ea7b1ec6610";
    }
    
    @Override
@@ -56,6 +56,26 @@ public class AbilityHandActionDefinitionMessagePubSubType implements us.ihmc.pub
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += ((6) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += ((6) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       return current_alignment - initial_alignment;
    }
@@ -74,6 +94,32 @@ public class AbilityHandActionDefinitionMessagePubSubType implements us.ihmc.pub
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += ((6) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += ((6) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -83,12 +129,66 @@ public class AbilityHandActionDefinitionMessagePubSubType implements us.ihmc.pub
       behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
       cdr.write_type_9(data.getRobotSide());
 
+      cdr.write_type_9(data.getControlMode());
+
+      cdr.write_type_9(data.getGrip());
+
+      for(int i0 = 0; i0 < data.getGoalPositions().length; ++i0)
+      {
+        	cdr.write_type_5(data.getGoalPositions()[i0]);	
+      }
+
+      for(int i0 = 0; i0 < data.getGoalVelocities().length; ++i0)
+      {
+        	cdr.write_type_5(data.getGoalVelocities()[i0]);	
+      }
+
+      cdr.write_type_9(data.getSuccessCriteria());
+
+      cdr.write_type_5(data.getEachJointPositionTolerance());
+
+      cdr.write_type_5(data.getSufficientCumulativeJointMovement());
+
+      cdr.write_type_7(data.getEnableWiggleOnFailure());
+
+      cdr.write_type_5(data.getTimeToWiggle());
+
+      cdr.write_type_5(data.getUltimateTimeout());
+
    }
 
    public static void read(behavior_msgs.msg.dds.AbilityHandActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
       data.setRobotSide(cdr.read_type_9());
+      	
+      data.setControlMode(cdr.read_type_9());
+      	
+      data.setGrip(cdr.read_type_9());
+      	
+      for(int i0 = 0; i0 < data.getGoalPositions().length; ++i0)
+      {
+        	data.getGoalPositions()[i0] = cdr.read_type_5();
+        	
+      }
+      	
+      for(int i0 = 0; i0 < data.getGoalVelocities().length; ++i0)
+      {
+        	data.getGoalVelocities()[i0] = cdr.read_type_5();
+        	
+      }
+      	
+      data.setSuccessCriteria(cdr.read_type_9());
+      	
+      data.setEachJointPositionTolerance(cdr.read_type_5());
+      	
+      data.setSufficientCumulativeJointMovement(cdr.read_type_5());
+      	
+      data.setEnableWiggleOnFailure(cdr.read_type_7());
+      	
+      data.setTimeToWiggle(cdr.read_type_5());
+      	
+      data.setUltimateTimeout(cdr.read_type_5());
       	
 
    }
@@ -99,6 +199,16 @@ public class AbilityHandActionDefinitionMessagePubSubType implements us.ihmc.pub
       ser.write_type_a("definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getDefinition());
 
       ser.write_type_9("robot_side", data.getRobotSide());
+      ser.write_type_9("control_mode", data.getControlMode());
+      ser.write_type_9("grip", data.getGrip());
+      ser.write_type_f("goal_positions", data.getGoalPositions());
+      ser.write_type_f("goal_velocities", data.getGoalVelocities());
+      ser.write_type_9("success_criteria", data.getSuccessCriteria());
+      ser.write_type_5("each_joint_position_tolerance", data.getEachJointPositionTolerance());
+      ser.write_type_5("sufficient_cumulative_joint_movement", data.getSufficientCumulativeJointMovement());
+      ser.write_type_7("enable_wiggle_on_failure", data.getEnableWiggleOnFailure());
+      ser.write_type_5("time_to_wiggle", data.getTimeToWiggle());
+      ser.write_type_5("ultimate_timeout", data.getUltimateTimeout());
    }
 
    @Override
@@ -107,6 +217,16 @@ public class AbilityHandActionDefinitionMessagePubSubType implements us.ihmc.pub
       ser.read_type_a("definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getDefinition());
 
       data.setRobotSide(ser.read_type_9("robot_side"));
+      data.setControlMode(ser.read_type_9("control_mode"));
+      data.setGrip(ser.read_type_9("grip"));
+      ser.read_type_f("goal_positions", data.getGoalPositions());
+      ser.read_type_f("goal_velocities", data.getGoalVelocities());
+      data.setSuccessCriteria(ser.read_type_9("success_criteria"));
+      data.setEachJointPositionTolerance(ser.read_type_5("each_joint_position_tolerance"));
+      data.setSufficientCumulativeJointMovement(ser.read_type_5("sufficient_cumulative_joint_movement"));
+      data.setEnableWiggleOnFailure(ser.read_type_7("enable_wiggle_on_failure"));
+      data.setTimeToWiggle(ser.read_type_5("time_to_wiggle"));
+      data.setUltimateTimeout(ser.read_type_5("ultimate_timeout"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.AbilityHandActionDefinitionMessage src, behavior_msgs.msg.dds.AbilityHandActionDefinitionMessage dest)

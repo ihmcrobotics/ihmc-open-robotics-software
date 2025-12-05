@@ -4,12 +4,13 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2TunedRigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
-import us.ihmc.perception.ROS2ImageSensors;
 import us.ihmc.perception.GpuMappingThread;
+import us.ihmc.perception.ROS2ImageSensors;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractionThread;
@@ -19,6 +20,7 @@ import us.ihmc.sensors.ImageSensor;
 import us.ihmc.sensors.realsense.RealSenseImageSensor;
 import us.ihmc.sensors.zed.ZEDImageSensor;
 
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -36,6 +38,10 @@ public class ContinuousHikingProcess
    private final ActiveMappingParameterToolBox activeMappingParameterToolBox;
    private final ContinuousPlanningStateMachine continuousPlanningStateMachine;
    private final GpuMappingThread gpuMappingThread;
+
+   private final ROS2DemandGraphNode heightMapDemandNode;
+   private final ROS2DemandGraphNode heightMapControllerDemandNode;
+   private final ROS2DemandGraphNode terrainMapDemandNode;
 
    private final boolean openCLAvailable; // Should be false on robot
    private RapidPlanarRegionsExtractionThread rapidPlanarRegionsExtractionThread = null;
@@ -69,6 +75,10 @@ public class ContinuousHikingProcess
       ros2ImageSensors.registerImageQueueForRealsense(rawImageCollectionRealsnese, RealSenseImageSensor.DEPTH_IMAGE_KEY);
       ros2ImageSensors.registerImageQueueForZED(rawImageCollectionZED, ZEDImageSensor.DEPTH_IMAGE_KEY);
 
+      heightMapDemandNode = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_HEIGHT_MAP);
+      heightMapControllerDemandNode = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_HEIGHT_MAP_FOR_CONTROLLER);
+      terrainMapDemandNode = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_TERRAIN_MAP);
+
       // Class's that perform the real work of the process... the good stuff
       {
          gpuMappingThread = new GpuMappingThread(ros2Node,
@@ -76,10 +86,12 @@ public class ContinuousHikingProcess
                                                  robotCollisionModel,
                                                  rawImageCollectionRealsnese,
                                                  controllerFootstepQueueMonitor,
-                                                 activeMappingParameterToolBox.getProcessParameters(),
                                                  activeMappingParameterToolBox.getHeightMapParameters(),
                                                  activeMappingParameterToolBox.getTerrainMapParameters(),
-                                                 activeMappingParameterToolBox.getDepthImageFilteringParameters());
+                                                 activeMappingParameterToolBox.getDepthImageFilteringParameters(),
+                                                 heightMapDemandNode::isDemanded,
+                                                 heightMapControllerDemandNode::isDemanded,
+                                                 terrainMapDemandNode::isDemanded);
 
          if (openCLAvailable)
             rapidPlanarRegionsExtractionThread = new RapidPlanarRegionsExtractionThread(ros2Node, new OpenCLManager(), rawImageCollectionZED);
@@ -122,6 +134,9 @@ public class ContinuousHikingProcess
 
    public void destroy()
    {
+      heightMapDemandNode.destroy();
+      heightMapControllerDemandNode.destroy();
+      terrainMapDemandNode.destroy();
       gpuMappingThread.blockingKill();
       if (openCLAvailable)
          rapidPlanarRegionsExtractionThread.kill();

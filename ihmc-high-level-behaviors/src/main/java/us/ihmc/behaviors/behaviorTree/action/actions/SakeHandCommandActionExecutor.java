@@ -20,18 +20,13 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
     * TODO: Make this derivative of the command by adding and supporting
     *   desired finger velocities.
     */
-   private static final double NOMINAL_TRAJECORY_DURATION = 1.0;
+   private static final double NOMINAL_TRAJECTORY_DURATION = 1.0;
 
    private final SideDependentList<ROS2SakeHandStatus> sakeHandStatus = new SideDependentList<>();
    private final JointspaceTrajectoryTrackingErrorCalculator trackingCalculator = new JointspaceTrajectoryTrackingErrorCalculator();
    private final SideDependentList<RevoluteJoint> x1KnuckleJoints = new SideDependentList<>();
    private final SideDependentList<RevoluteJoint> x2KnuckleJoints = new SideDependentList<>();
    private final SakeHandDesiredCommandMessage sakeHandDesiredCommandMessage = new SakeHandDesiredCommandMessage();
-
-   private boolean hasX1KnuckleJoint;
-   private boolean hasX2KnuckleJoint;
-   private boolean isCalibrated;
-   private boolean needsReset;
 
    public SakeHandCommandActionExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
    {
@@ -55,28 +50,25 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
 
       trackingCalculator.update(Conversions.nanosecondsToSeconds(syncedRobot.getTimestamp()));
 
-      hasX1KnuckleJoint = x1KnuckleJoints.get(definition.getSide()) != null;
-      hasX2KnuckleJoint = x2KnuckleJoints.get(definition.getSide()) != null;
-      isCalibrated = syncedRobot.getSakeHandStatus().get(definition.getSide()).getIsCalibrated();
-      needsReset = syncedRobot.getSakeHandStatus().get(definition.getSide()).getNeedsReset();
+      boolean hasX1KnuckleJoint = x1KnuckleJoints.get(definition.getSide()) != null;
+      boolean hasX2KnuckleJoint = x2KnuckleJoints.get(definition.getSide()) != null;
+      boolean isCalibrated = syncedRobot.getSakeHandStatus().get(definition.getSide()).getIsCalibrated();
+      boolean needsReset = syncedRobot.getSakeHandStatus().get(definition.getSide()).getNeedsReset();
 
       boolean canExecute = hasX1KnuckleJoint;
       canExecute &= hasX2KnuckleJoint;
       canExecute &= isCalibrated;
       canExecute &= !needsReset;
 
-      state.setCanExecute(canExecute);
-   }
-
-   @Override
-   public String getCantExecuteMessage()
-   {
-      return """
+      if (!canExecute)
+         cantExecuteMessage = """
              Has X1 knuckle joint: %b
              Has X2 knuckle joint: %b
              Is calibrated: %b
              Needs reset: %b
              """.formatted(hasX1KnuckleJoint, hasX2KnuckleJoint, isCalibrated, needsReset);
+
+      state.setCanExecute(canExecute);
    }
 
    @Override
@@ -128,10 +120,10 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
 
          state.getCommandedJointTrajectories().clear(2);
          state.getCommandedJointTrajectories().addTrajectoryPoint(0, x1KnuckleJoints.get(definition.getSide()).getQ(), 0.0);
-         state.getCommandedJointTrajectories().addTrajectoryPoint(0, goalKnuckleJointAngle, NOMINAL_TRAJECORY_DURATION);
+         state.getCommandedJointTrajectories().addTrajectoryPoint(0, goalKnuckleJointAngle, NOMINAL_TRAJECTORY_DURATION);
          state.getCommandedJointTrajectories().addTrajectoryPoint(1, x2KnuckleJoints.get(definition.getSide()).getQ(), 0.0);
-         state.getCommandedJointTrajectories().addTrajectoryPoint(1, goalKnuckleJointAngle, NOMINAL_TRAJECORY_DURATION);
-         state.setNominalExecutionDuration(NOMINAL_TRAJECORY_DURATION);
+         state.getCommandedJointTrajectories().addTrajectoryPoint(1, goalKnuckleJointAngle, NOMINAL_TRAJECTORY_DURATION);
+         state.setNominalExecutionDuration(NOMINAL_TRAJECTORY_DURATION);
          state.setPositionDistanceToGoalTolerance(definition.getCompletionHandAngleTolerance());
       }
    }
@@ -142,8 +134,8 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
       trackingCalculator.computeExecutionTimings(state.getNominalExecutionDuration());
 
       state.setElapsedExecutionTime(trackingCalculator.getElapsedTime());
-      state.getCurrentJointAngles().accessValue()[0] = x1KnuckleJoints.get(definition.getSide()).getQ();
-      state.getCurrentJointAngles().accessValue()[1] = x2KnuckleJoints.get(definition.getSide()).getQ();
+      state.getCurrentJointAngles().setValue(0, x1KnuckleJoints.get(definition.getSide()).getQ());
+      state.getCurrentJointAngles().setValue(1, x2KnuckleJoints.get(definition.getSide()).getQ());
 
       if (trackingCalculator.getHitTimeLimit(state.getLogger()))
       {

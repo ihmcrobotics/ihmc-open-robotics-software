@@ -9,9 +9,13 @@ int32 number_of_fixed_footsteps -1
 float64 swing_height -1
 float64 swing_duration -1
 float64 transfer_duration -1
-float64 max_step_length -1
+float64 max_step_length_forwards -1
+float64 max_step_length_backwards -1
 float64 default_step_width -1
 float64 min_step_width -1
 float64 max_step_width -1
 float64 turn_max_angle_inward -1
 float64 turn_max_angle_outward -1
+bool steps_are_adjustable
+bool snap_to_heightmap
+bool account_for_ground_drift

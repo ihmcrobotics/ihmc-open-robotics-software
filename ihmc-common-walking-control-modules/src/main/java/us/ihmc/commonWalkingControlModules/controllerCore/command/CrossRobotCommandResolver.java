@@ -183,8 +183,10 @@ public class CrossRobotCommandResolver
    {
       out.setHasCenterOfMassPosition(in.hasCenterOfMassPosition());
       out.setHasCenterOfMassVelocity(in.hasCenterOfMassVelocity());
+      out.setHasAngularMomentum(in.hasAngularMomentum());
       resolveFrameTuple3D(in.getCenterOfMassPosition(), out.getCenterOfMassPosition());
       resolveFrameTuple3D(in.getCenterOfMassVelocity(), out.getCenterOfMassVelocity());
+      resolveFrameTuple3D(in.getAngularMomentum(), out.getAngularMomentum());
    }
 
    public void resolveHumanoidRobotContextData(HumanoidRobotContextData in, HumanoidRobotContextData out)
@@ -916,6 +918,7 @@ public class CrossRobotCommandResolver
    {
       out.setOmega0(in.getOmega0());
       out.setUseMomentumRecoveryMode(in.getUseMomentumRecoveryMode());
+      out.setIsCoPDamped(in.getIsCoPDamped());
       out.setUseAngularCapturePoint(in.getUseAngularCapturePoint());
       resolveFrameTuple2D(in.getDesiredCapturePoint(), out.getDesiredCapturePoint());
       resolveFrameTuple2D(in.getDesiredCapturePointVelocity(), out.getDesiredCapturePointVelocity());

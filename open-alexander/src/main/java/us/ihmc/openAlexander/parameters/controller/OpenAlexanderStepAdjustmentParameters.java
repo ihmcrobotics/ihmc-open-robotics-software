@@ -2,7 +2,7 @@ package us.ihmc.openAlexander.parameters.controller;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentParameters;
 
-public class AlexanderStepAdjustmentParameters extends StepAdjustmentParameters
+public class OpenAlexanderStepAdjustmentParameters extends StepAdjustmentParameters
 {
    private static final boolean useStepAdjustment = true;
 

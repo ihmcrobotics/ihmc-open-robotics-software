@@ -59,7 +59,8 @@ public class TransferToStandingState extends WalkingState
    {
       balanceManager.computeICPPlan();
       controllerToolbox.getWalkingTrajectoryPath()
-                       .updateTrajectory(feetManager.getCurrentConstraintType(RobotSide.LEFT), feetManager.getCurrentConstraintType(RobotSide.RIGHT));
+                       .updateTrajectory(feetManager.getCurrentConstraintType(RobotSide.LEFT),
+                                         feetManager.getCurrentConstraintType(RobotSide.RIGHT));
 
       switchToPointToeOffIfAlreadyInLine();
 

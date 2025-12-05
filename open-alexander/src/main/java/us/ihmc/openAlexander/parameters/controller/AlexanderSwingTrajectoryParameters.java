@@ -33,7 +33,7 @@ public class AlexanderSwingTrajectoryParameters extends SwingTrajectoryParameter
    @Override
    public double getDefaultSwingHeight()
    {
-      return 0.09;
+      return 0.06;
    }
 
    @Override
@@ -102,7 +102,7 @@ public class AlexanderSwingTrajectoryParameters extends SwingTrajectoryParameter
    @Override
    public double getMinHeightDifferenceForStepUpOrDown()
    {
-      return 0.1;
+      return 0.05;
    }
 
    @Override

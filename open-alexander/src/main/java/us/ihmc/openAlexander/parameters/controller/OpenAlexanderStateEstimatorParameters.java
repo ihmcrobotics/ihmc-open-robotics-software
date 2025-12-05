@@ -58,20 +58,20 @@ public class OpenAlexanderStateEstimatorParameters extends StateEstimatorParamet
 
       this.footForceSensorNames = sensorInformation.getFeetForceSensorNames();
 
-      spineJointPositionFrequency = target == RobotTarget.REAL_ROBOT ? 100.0 : Double.POSITIVE_INFINITY;
-      spineJointVelocityFrequency = target == RobotTarget.REAL_ROBOT ? 100.0 : Double.POSITIVE_INFINITY;
+      spineJointPositionFrequency = target == RobotTarget.REAL_ROBOT ? 1000.0 : Double.POSITIVE_INFINITY;
+      spineJointVelocityFrequency = target == RobotTarget.REAL_ROBOT ? 1000.0 : Double.POSITIVE_INFINITY;
 
-      neckJointPositionFrequency = target == RobotTarget.REAL_ROBOT ? 25.0 : Double.POSITIVE_INFINITY;
-      neckJointVelocityFrequency = target == RobotTarget.REAL_ROBOT ? 50.0 : Double.POSITIVE_INFINITY;
+      neckJointPositionFrequency = target == RobotTarget.REAL_ROBOT ? 1000.0 : Double.POSITIVE_INFINITY;
+      neckJointVelocityFrequency = target == RobotTarget.REAL_ROBOT ? 1000.0 : Double.POSITIVE_INFINITY;
 
-      lowerBodyJointPositionFrequency = target == RobotTarget.REAL_ROBOT ? 25.0 : Double.POSITIVE_INFINITY;
-      lowerBodyJointVelocityFrequency = target == RobotTarget.REAL_ROBOT ? 50.0 : Double.POSITIVE_INFINITY;
+      lowerBodyJointPositionFrequency = target == RobotTarget.REAL_ROBOT ? 1000.0 : Double.POSITIVE_INFINITY;
+      lowerBodyJointVelocityFrequency = target == RobotTarget.REAL_ROBOT ? 1000.0 : Double.POSITIVE_INFINITY;
 
-      upperArmJointPositionFrequency = target == RobotTarget.REAL_ROBOT ? 60.0 : Double.POSITIVE_INFINITY;
-      upperArmJointVelocityFrequency = target == RobotTarget.REAL_ROBOT ? 15.0 : Double.POSITIVE_INFINITY;
+      upperArmJointPositionFrequency = target == RobotTarget.REAL_ROBOT ? 1000.0 : Double.POSITIVE_INFINITY;
+      upperArmJointVelocityFrequency = target == RobotTarget.REAL_ROBOT ? 1000.0 : Double.POSITIVE_INFINITY;
 
-      forearmJointPositionFrequency = target == RobotTarget.REAL_ROBOT ? 60.0 : Double.POSITIVE_INFINITY;
-      forearmJointVelocityFrequency = target == RobotTarget.REAL_ROBOT ? 9.0 : Double.POSITIVE_INFINITY;
+      forearmJointPositionFrequency = target == RobotTarget.REAL_ROBOT ? 1000.0 : Double.POSITIVE_INFINITY;
+      forearmJointVelocityFrequency = target == RobotTarget.REAL_ROBOT ? 1000.0 : Double.POSITIVE_INFINITY;
 
       orientationFrequency = target == RobotTarget.REAL_ROBOT ? 25.0 : Double.POSITIVE_INFINITY;
       angularVelocityFrequency = target == RobotTarget.REAL_ROBOT ? 25.0 : Double.POSITIVE_INFINITY;

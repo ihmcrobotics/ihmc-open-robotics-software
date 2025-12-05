@@ -6,6 +6,9 @@ ihmc_common_msgs/LatestModificationMessage latest_modification_to_data
 # The object's unique ID
 uint32 id
 
+# Persistent detection associated with this object
+behavior_msgs/PersistentDetectionStatusMessage persistent_detection
+
 # Object type (IsaacROSFoundationPoseObject ordinal)
 int32 object_type
 

@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import org.ejml.data.DMatrixRMaj;
 
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
@@ -82,8 +83,9 @@ public class FootCoPOccupancyGrid implements SCS2YoGraphicHolder
                                YoGraphicsListRegistry yoGraphicsListRegistry,
                                YoRegistry parentRegistry)
    {
-      this.footLength = walkingControllerParameters.getSteppingParameters().getFootLength();
-      this.footWidth = walkingControllerParameters.getSteppingParameters().getFootWidth();
+      SteppingParameters stepping = walkingControllerParameters.getSteppingParameters();
+      this.footLength = stepping.getFootLength();
+      this.footWidth = stepping.getFootWidth();
       this.soleFrame = soleFrame;
       gridOrigin.setIncludingFrame(soleFrame, -footLength, -footWidth);
       gridOrigin.scale(0.5);

@@ -11,7 +11,7 @@ float64 swing_duration
 float64 transfer_duration
 
 # OVERRIDE (0) or QUEUE (1)
-int32 execution_mode
+byte execution_mode
 
 # Is using the footstep planner or manually placing
 bool is_manually_placed

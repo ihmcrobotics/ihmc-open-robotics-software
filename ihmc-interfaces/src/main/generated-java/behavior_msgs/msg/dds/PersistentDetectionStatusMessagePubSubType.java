@@ -15,7 +15,7 @@ public class PersistentDetectionStatusMessagePubSubType implements us.ihmc.pubsu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "4f841b5ae325e3f3acf526b677b9a06bfb89d7983851a9b2ae49cc4bdcb62eb1";
+   		return "0f320bdc9036f03ba8aaa3d0dbd41d80d15abfc1a1e1ab7d54d2cefbf44908cb";
    }
    
    @Override
@@ -53,11 +53,15 @@ public class PersistentDetectionStatusMessagePubSubType implements us.ihmc.pubsu
       int initial_alignment = current_alignment;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -74,6 +78,10 @@ public class PersistentDetectionStatusMessagePubSubType implements us.ihmc.pubsu
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getId().length() + 1;
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getDetectionType().length() + 1;
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getObjectClass().length() + 1;
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -87,12 +95,22 @@ public class PersistentDetectionStatusMessagePubSubType implements us.ihmc.pubsu
 
       current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getCdrSerializedSize(data.getTransformToWorld(), current_alignment);
 
+      current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getCdrSerializedSize(data.getTransformToCamera(), current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
 
    public static void write(behavior_msgs.msg.dds.PersistentDetectionStatusMessage data, us.ihmc.idl.CDR cdr)
    {
+      if(data.getId().length() <= 255)
+      cdr.write_type_d(data.getId());else
+          throw new RuntimeException("id field exceeds the maximum length: %d > %d".formatted(data.getId().length(), 255));
+
+      if(data.getDetectionType().length() <= 255)
+      cdr.write_type_d(data.getDetectionType());else
+          throw new RuntimeException("detection_type field exceeds the maximum length: %d > %d".formatted(data.getDetectionType().length(), 255));
+
       if(data.getObjectClass().length() <= 255)
       cdr.write_type_d(data.getObjectClass());else
           throw new RuntimeException("object_class field exceeds the maximum length: %d > %d".formatted(data.getObjectClass().length(), 255));
@@ -104,10 +122,13 @@ public class PersistentDetectionStatusMessagePubSubType implements us.ihmc.pubsu
       cdr.write_type_7(data.getIsStable());
 
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getTransformToWorld(), cdr);
+      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getTransformToCamera(), cdr);
    }
 
    public static void read(behavior_msgs.msg.dds.PersistentDetectionStatusMessage data, us.ihmc.idl.CDR cdr)
    {
+      cdr.read_type_d(data.getId());	
+      cdr.read_type_d(data.getDetectionType());	
       cdr.read_type_d(data.getObjectClass());	
       data.setDecayingFrequency(cdr.read_type_6());
       	
@@ -116,28 +137,37 @@ public class PersistentDetectionStatusMessagePubSubType implements us.ihmc.pubsu
       data.setIsStable(cdr.read_type_7());
       	
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getTransformToWorld(), cdr);	
+      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getTransformToCamera(), cdr);	
 
    }
 
    @Override
    public final void serialize(behavior_msgs.msg.dds.PersistentDetectionStatusMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+      ser.write_type_d("id", data.getId());
+      ser.write_type_d("detection_type", data.getDetectionType());
       ser.write_type_d("object_class", data.getObjectClass());
       ser.write_type_6("decaying_frequency", data.getDecayingFrequency());
       ser.write_type_2("history_size", data.getHistorySize());
       ser.write_type_7("is_stable", data.getIsStable());
       ser.write_type_a("transform_to_world", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToWorld());
 
+      ser.write_type_a("transform_to_camera", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToCamera());
+
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.PersistentDetectionStatusMessage data)
    {
+      ser.read_type_d("id", data.getId());
+      ser.read_type_d("detection_type", data.getDetectionType());
       ser.read_type_d("object_class", data.getObjectClass());
       data.setDecayingFrequency(ser.read_type_6("decaying_frequency"));
       data.setHistorySize(ser.read_type_2("history_size"));
       data.setIsStable(ser.read_type_7("is_stable"));
       ser.read_type_a("transform_to_world", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToWorld());
+
+      ser.read_type_a("transform_to_camera", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToCamera());
 
    }
 

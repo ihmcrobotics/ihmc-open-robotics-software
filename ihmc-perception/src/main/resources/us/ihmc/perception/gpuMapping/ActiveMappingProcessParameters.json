@@ -1,6 +1,0 @@
-{
-  "title" : "ActiveMappingProcessParameters",
-  "Run onboard kernels" : false,
-  "Publish height map" : false,
-  "Publish terrain map" : false
-}

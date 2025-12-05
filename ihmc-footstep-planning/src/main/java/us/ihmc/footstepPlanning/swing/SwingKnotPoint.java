@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.swing;
 
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FrameBox3D;
@@ -116,10 +117,11 @@ public class SwingKnotPoint implements SCS2YoGraphicHolder
                                               Vector3DBasics boxCenterInSoleFrameToPack)
    {
       // set default size
-      double footForwardOffset = walkingControllerParameters.getSteppingParameters().getFootForwardOffset();
-      double footBackwardOffset = walkingControllerParameters.getSteppingParameters().getFootBackwardOffset();
-      double boxSizeX = walkingControllerParameters.getSteppingParameters().getActualFootLength();
-      double boxSizeY = walkingControllerParameters.getSteppingParameters().getActualFootWidth();
+      SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
+      double footForwardOffset = steppingParameters.getFootForwardOffset();
+      double footBackwardOffset = steppingParameters.getFootBackwardOffset();
+      double boxSizeX = steppingParameters.getActualFootLength();
+      double boxSizeY = steppingParameters.getActualFootWidth();
       double boxSizeZ = collisionBoxHeight;
       collisionBoxToPack.getSize().set(boxSizeX, boxSizeY, boxSizeZ);
 

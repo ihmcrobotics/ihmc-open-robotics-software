@@ -137,7 +137,8 @@ public class DynamicStateInspector
                                  FramePoint2DReadOnly currentICP,
                                  FramePoint2DReadOnly desiredECMP,
                                  FramePoint2DReadOnly currentCoP,
-                                 FramePoint2DReadOnly toeOffPoint)
+                                 FramePoint2DReadOnly toeOffPoint,
+                                 double percentLoad)
    {
       leadingFootFrame.setPoseAndUpdate(leadingFootPose);
       leadingFootZUpFrame.update();
@@ -172,11 +173,11 @@ public class DynamicStateInspector
       {
          this.isDesiredECMPOKForToeOff.set(true);
       }
-      if (currentCoP != null)
+      if (currentCoP != null && Double.isFinite(percentLoad) && percentLoad > parameters.getLoadThresholdToCheckCoP())
       {
          this.currentCoP.setIncludingFrame(currentCoP);
          this.currentCoP.changeFrameAndProjectToXYPlane(onToesPolygon.getReferenceFrame());
-         this.isCoPOKForToeOff.set(onToesPolygon.signedDistance(this.currentCoP) < parameters.getMaxDistanceToMoveECMP());
+         this.isCoPOKForToeOff.set(onToesPolygon.signedDistance(this.currentCoP) < parameters.getLoadThresholdToCheckCoP());
       }
       else
       {
@@ -187,7 +188,7 @@ public class DynamicStateInspector
 
       if (supportPolygon.isPointInside(currentICP) && supportPolygon.isPointInside(desiredICP))
       {
-         dynamicsAreDefinitelyNotOKForToeOff.update(!dynamicsAreOkForToeOff.getBooleanValue() || !isDesiredECMPOKForToeOff.getBooleanValue());
+         dynamicsAreDefinitelyNotOKForToeOff.update(!dynamicsAreOkForToeOff.getBooleanValue() || !isDesiredECMPOKForToeOff.getBooleanValue() || !isCoPOKForToeOff.getBooleanValue());
       }
       else
       {

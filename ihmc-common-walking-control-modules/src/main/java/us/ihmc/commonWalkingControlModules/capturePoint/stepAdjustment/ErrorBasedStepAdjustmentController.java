@@ -9,12 +9,10 @@ import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepCaptureRegionC
 import us.ihmc.commonWalkingControlModules.captureRegion.OneStepCaptureRegionCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -49,6 +47,8 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
+   private static final double AREA_TO_CONSIDER_SWITCHING = 0.05;
+
    private static final boolean VISUALIZE = true;
    private static final boolean CONTINUOUSLY_UPDATE_DESIRED_POSITION = true;
    private static final int minTicksIntoStep = 5;
@@ -78,7 +78,6 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    private final RecyclingArrayList<Point2D> upcomingFootstepContactPoints = new RecyclingArrayList<>(Point2D.class);
    private final YoFramePoint3D referenceFootstepPosition = new YoFramePoint3D(yoNamePrefix + "ReferenceFootstepPosition", worldFrame, registry);
 
-   private final FramePoint3D tempPoint = new FramePoint3D();
    private final FramePoint2D tempPoint2D = new FramePoint2D();
 
    private final YoFrameVector2D footstepAdjustment = new YoFrameVector2D(yoNamePrefix + "FootstepAdjustment",
@@ -100,6 +99,13 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    private final YoDouble speedUpTime = new YoDouble(yoNamePrefix + "SpeedUpTime", registry);
 
    private final YoBoolean footstepWasAdjusted = new YoBoolean(yoNamePrefix + "FootstepWasAdjusted", registry);
+
+   private enum ReachableRegion {FORWARD, BACKWARD, BASELINE}
+   private final YoDouble forwardReachableArea = new YoDouble(yoNamePrefix + "ForwardReachableArea", registry);
+   private final YoDouble backwardReachableArea = new YoDouble(yoNamePrefix + "BackwardReachableArea", registry);
+   private final YoDouble baselineReachableArea = new YoDouble(yoNamePrefix + "BaselineReachableArea", registry);
+   private final YoDouble areaToConsiderSwitching = new YoDouble(yoNamePrefix + "areaToConsiderSwitching", registry);
+   private final YoEnum<ReachableRegion> selectedReachableRegion = new YoEnum<>(yoNamePrefix + "SelectedReachableRegion",registry, ReachableRegion.class, true);
 
    private final BooleanProvider resetFootstepProjectionEachTick;
    private final DoubleProvider minimumTimeForStepAdjustment;
@@ -125,7 +131,6 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
 
    private final BipedSupportPolygons bipedSupportPolygons;
 
-   private final FramePoint3D vertexInWorld = new FramePoint3D();
    private final FrameConvexPolygon2D allowableAreaForCoPInFoot = new FrameConvexPolygon2D();
 
    public ErrorBasedStepAdjustmentController(WalkingControllerParameters walkingControllerParameters,
@@ -189,6 +194,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       DoubleProvider innerLimit = new DoubleParameter(yoNamePrefix + "MinReachabilityWidth", registry, steppingParameters.getMinStepWidth());
       DoubleProvider outerLimit = new DoubleParameter(yoNamePrefix + "MaxReachabilityWidth", registry, steppingParameters.getMaxStepWidth());
       DoubleProvider inPlaceWidth = new DoubleParameter(yoNamePrefix + "InPlaceWidth", registry, steppingParameters.getInPlaceWidth());
+      areaToConsiderSwitching.set(AREA_TO_CONSIDER_SWITCHING);
 
       reachabilityConstraintHandler = new StepAdjustmentReachabilityConstraint(soleZUpFrames,
                                                                                lengthLimit,
@@ -213,6 +219,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       oneStepSafetyHeuristics = new CaptureRegionSafetyHeuristics(lengthLimit, registry, null);
       multiStepCaptureRegionCalculator = new MultiStepCaptureRegionCalculator(reachabilityConstraintHandler,
                                                                               allowCrossOverSteps,
+                                                                              stepAdjustmentParameters.getMaximumNumberOfStepsToConsider(),
                                                                               registry,
                                                                               yoGraphicsListRegistry);
       environmentConstraintProvider = new EnvironmentConstraintHandler(contactableFeet,
@@ -352,6 +359,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       previousFootstepSolution.set(footstepSolution.getPosition());
       totalStepAdjustment.setToZero();
       controlTicksIntoStep.set(0);
+      selectedReachableRegion.set(null);
    }
 
    @Override
@@ -439,7 +447,8 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
             if (environmentallyConstrained)
             {
                tempPoint2D.set(footstepSolution.getPosition());
-               FrameConvexPolygon2DReadOnly reachability = getBestReachabilityConstraintToUseWhenNotIntersecting();
+               computeBestReachabilityConstraintToUseWhenNotIntersecting();
+               FrameConvexPolygon2DReadOnly reachability = getSelectedReachableRegion();
                if (!reachability.isPointInside(tempPoint2D))
                   reachability.orthogonalProjection(tempPoint2D);
                footstepSolution.getPosition().set(tempPoint2D);
@@ -549,11 +558,13 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       if (!isTheCaptureRegionReachable())
       {
          captureRegionInWorld.orthogonalProjection(adjustedSolution);
-         getBestReachabilityConstraintToUseWhenNotIntersecting().orthogonalProjection(adjustedSolution);
+         computeBestReachabilityConstraintToUseWhenNotIntersecting();
+         getSelectedReachableRegion().orthogonalProjection(adjustedSolution);
       }
       else
       {
-         getBestReachabilityConstraintToUseWhenIntersecting().orthogonalProjection(adjustedSolution);
+         computeBestReachabilityConstraintToUseWhenIntersecting();
+         getSelectedReachableCaptureRegion().orthogonalProjection(adjustedSolution);
       }
 
       footstepAdjustment.set(adjustedSolution);
@@ -593,38 +604,56 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       return intersect;
    }
 
-   private FrameConvexPolygon2DReadOnly getBestReachabilityConstraintToUseWhenNotIntersecting()
+   private void computeBestReachabilityConstraintToUseWhenNotIntersecting()
    {
       if (!allowCrossOverSteps.getValue())
-         return reachabilityConstraintHandler.getReachabilityConstraint();
+      {
+         selectedReachableRegion.set(ReachableRegion.BASELINE);
+         return;
+      }
 
       double distanceToForward = reachabilityConstraintHandler.getForwardCrossOverPolygon().distance(adjustedSolution);
       double distanceToBackward = reachabilityConstraintHandler.getBackwardCrossOverPolygon().distance(adjustedSolution);
       double distanceToNominal = reachabilityConstraintHandler.getReachabilityConstraint().distance(adjustedSolution);
 
+      double distanceToPreviouslySelectedRegion = distanceToNominal;
+      if (selectedReachableRegion.getEnumValue() != null)
+      {
+         if (selectedReachableRegion.getEnumValue() == ReachableRegion.FORWARD)
+            distanceToPreviouslySelectedRegion = distanceToForward;
+         else if (selectedReachableRegion.getEnumValue() == ReachableRegion.BACKWARD)
+            distanceToPreviouslySelectedRegion = distanceToBackward;
+         else
+            distanceToPreviouslySelectedRegion = distanceToNominal;
+      }
+      else
+      {
+         // initialize this as the default
+         selectedReachableRegion.set(ReachableRegion.BASELINE);
+      }
+
       boolean forwardIsCloser = distanceToForward < distanceToBackward;
 
       if (forwardIsCloser)
       {
-         if (distanceToNominal < distanceToForward)
-            return reachabilityConstraintHandler.getReachabilityConstraint();
-         else
-            return reachabilityConstraintHandler.getForwardCrossOverPolygon();
+         if (distanceToForward < distanceToPreviouslySelectedRegion)
+         {
+            selectedReachableRegion.set(ReachableRegion.FORWARD);
+         }
       }
-      else if (distanceToNominal < distanceToBackward)
+      else if (distanceToBackward < distanceToPreviouslySelectedRegion)
       {
-         return reachabilityConstraintHandler.getReachabilityConstraint();
-      }
-      else
-      {
-         return reachabilityConstraintHandler.getBackwardCrossOverPolygon();
+         selectedReachableRegion.set(ReachableRegion.BACKWARD);
       }
    }
 
-   private FrameConvexPolygon2DReadOnly getBestReachabilityConstraintToUseWhenIntersecting()
+   private void computeBestReachabilityConstraintToUseWhenIntersecting()
    {
       if (!allowCrossOverSteps.getValue())
-         return reachableCaptureRegion;
+      {
+         selectedReachableRegion.set(ReachableRegion.BASELINE);
+         return;
+      }
 
       double forwardArea = forwardCrossOverReachableCaptureRegion.getArea();
       double backwardArea = backwardCrossOverReachableCaptureRegion.getArea();
@@ -634,24 +663,69 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       backwardArea = Double.isNaN(backwardArea) ? Double.NEGATIVE_INFINITY : backwardArea;
       reachableArea = Double.isNaN(reachableArea) ? Double.NEGATIVE_INFINITY : reachableArea;
 
+      forwardReachableArea.set(forwardArea);
+      backwardReachableArea.set(backwardArea);
+      baselineReachableArea.set(reachableArea);
+
+      double areaOfPreviouslySelectedRegion = reachableArea;
+      if (selectedReachableRegion.getEnumValue() != null)
+      {
+         areaOfPreviouslySelectedRegion = getSelectedArea();
+         // Don't switch if the area of the previous selection isn't too low
+         if (getSelectedArea() > areaToConsiderSwitching.getDoubleValue())
+            return;
+      }
+      else
+      {
+         // initialize th is as the default
+         selectedReachableRegion.set(ReachableRegion.BASELINE);
+      }
+
       boolean forwardIsLargestCrossoverArea = forwardArea > backwardArea;
 
       if (forwardIsLargestCrossoverArea)
       {
-         if (forwardArea > 2.0 * reachableArea)
-            return forwardCrossOverReachableCaptureRegion;
-         else
-            return reachableCaptureRegion;
+         if (forwardArea > 2.0 * areaOfPreviouslySelectedRegion)
+         {
+            selectedReachableRegion.set(ReachableRegion.FORWARD);
+         }
       }
-      else if (backwardArea > 2.0 * reachableArea)
+      else if (backwardArea > 2.0 * areaOfPreviouslySelectedRegion)
       {
-         return backwardCrossOverReachableCaptureRegion;
-      }
-      else
-      {
-         return reachableCaptureRegion;
+         selectedReachableRegion.set(ReachableRegion.BACKWARD);
       }
    }
+
+   private double getSelectedArea()
+   {
+      return switch (selectedReachableRegion.getEnumValue())
+      {
+         case FORWARD -> forwardReachableArea.getDoubleValue();
+         case BACKWARD -> backwardReachableArea.getDoubleValue();
+         case BASELINE -> baselineReachableArea.getDoubleValue();
+      };
+   }
+
+   private FrameConvexPolygon2DReadOnly getSelectedReachableCaptureRegion()
+   {
+      return switch (selectedReachableRegion.getEnumValue())
+      {
+         case FORWARD -> forwardCrossOverReachableCaptureRegion;
+         case BACKWARD -> backwardCrossOverReachableCaptureRegion;
+         case BASELINE -> reachableCaptureRegion;
+      };
+   }
+
+   private FrameConvexPolygon2DReadOnly getSelectedReachableRegion()
+   {
+      return switch (selectedReachableRegion.getEnumValue())
+      {
+         case FORWARD -> reachabilityConstraintHandler.getForwardCrossOverPolygon();
+         case BACKWARD -> reachabilityConstraintHandler.getBackwardCrossOverPolygon();
+         case BASELINE -> reachabilityConstraintHandler.getReachabilityConstraint();
+      };
+   }
+
 
    private boolean deadbandAndApplyStepAdjustment()
    {

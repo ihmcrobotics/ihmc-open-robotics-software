@@ -121,6 +121,7 @@ public class MultiStepCaptureRegionCalculatorTest
                                                                                                              null);
       MultiStepCaptureRegionCalculator multiStepRegionCalculator = new MultiStepCaptureRegionCalculator(reachabilityConstraint,
                                                                                                         yoUseCrossOverSteps,
+                                                                                                        10,
                                                                                                         registry);
 
       new DefaultParameterReader().readParametersInRegistry(registry);
@@ -273,6 +274,7 @@ public class MultiStepCaptureRegionCalculatorTest
                                                                                                              null);
       MultiStepCaptureRegionCalculator multiStepRegionCalculator = new MultiStepCaptureRegionCalculator(reachabilityConstraint,
                                                                                                         yoUseCrossOverSteps,
+                                                                                                        10,
                                                                                                         registry);
 
       new DefaultParameterReader().readParametersInRegistry(registry);
@@ -425,6 +427,7 @@ public class MultiStepCaptureRegionCalculatorTest
                                                                                                              null);
       MultiStepCaptureRegionCalculator multiStepRegionCalculator = new MultiStepCaptureRegionCalculator(reachabilityConstraint,
                                                                                                         yoUseCrossOverSteps,
+                                                                                                        10,
                                                                                                         registry);
 
       new DefaultParameterReader().readParametersInRegistry(registry);
@@ -572,6 +575,7 @@ public class MultiStepCaptureRegionCalculatorTest
                                                                                                              null);
       MultiStepCaptureRegionCalculator multiStepRegionCalculator = new MultiStepCaptureRegionCalculator(reachabilityConstraint,
                                                                                                         yoUseCrossOverSteps,
+                                                                                                        10,
                                                                                                         registry);
 
       new DefaultParameterReader().readParametersInRegistry(registry);
@@ -727,6 +731,7 @@ public class MultiStepCaptureRegionCalculatorTest
                                                                                                              null);
       MultiStepCaptureRegionCalculator multiStepRegionCalculator = new MultiStepCaptureRegionCalculator(reachabilityConstraint,
                                                                                                         yoUseCrossoverSteps,
+                                                                                                        10,
                                                                                                         registry);
 
       new DefaultParameterReader().readParametersInRegistry(registry);
@@ -889,6 +894,7 @@ public class MultiStepCaptureRegionCalculatorTest
                                                                                                              null);
       MultiStepCaptureRegionCalculator multiStepRegionCalculator = new MultiStepCaptureRegionCalculator(reachabilityConstraint,
                                                                                                         yoUseCrossoverSteps,
+                                                                                                        10,
                                                                                                         registry);
 
       new DefaultParameterReader().readParametersInRegistry(registry);
@@ -1043,6 +1049,7 @@ public class MultiStepCaptureRegionCalculatorTest
                                                                                                              null);
       MultiStepCaptureRegionCalculator multiStepRegionCalculator = new MultiStepCaptureRegionCalculator(reachabilityConstraint,
                                                                                                         yoUseCrossoverSteps,
+                                                                                                        10,
                                                                                                         registry);
 
       new DefaultParameterReader().readParametersInRegistry(registry);
@@ -1193,6 +1200,7 @@ public class MultiStepCaptureRegionCalculatorTest
                                                                                                              null);
       MultiStepCaptureRegionCalculator multiStepRegionCalculator = new MultiStepCaptureRegionCalculator(reachabilityConstraint,
                                                                                                         yoUseCrossoverSteps,
+                                                                                                        10,
                                                                                                         registry);
 
       new DefaultParameterReader().readParametersInRegistry(registry);
@@ -1348,6 +1356,7 @@ public class MultiStepCaptureRegionCalculatorTest
                                                                                                              null);
       MultiStepCaptureRegionCalculator multiStepRegionCalculator = new MultiStepCaptureRegionCalculator(reachabilityConstraint,
                                                                                                         () -> false,
+                                                                                                        10,
                                                                                                         registry);
 
 
@@ -1370,6 +1379,7 @@ public class MultiStepCaptureRegionCalculatorTest
                                                                                                              null);
       MultiStepCaptureRegionCalculator crossOverMultiStepRegionCalculator = new MultiStepCaptureRegionCalculator(crossOverReachabilityConstraint,
                                                                                                                  () -> true,
+                                                                                                                 10,
                                                                                                                  crossOverRegistry);
 
 

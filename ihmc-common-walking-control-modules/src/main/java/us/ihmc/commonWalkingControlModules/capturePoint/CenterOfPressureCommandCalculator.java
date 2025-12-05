@@ -36,12 +36,17 @@ public class CenterOfPressureCommandCalculator
       this.midFootZUpFrame = midFootZUpFrame;
       this.contactableFeet = contactableFeet;
 
-      centerOfPressureWeight = new DoubleParameter("CenterOfPressureObjectiveWeight", registry, 0.0);
+      centerOfPressureWeight = new DoubleParameter("CenterOfPressureObjectiveWeight", registry, 15.0);
    }
 
    public CenterOfPressureCommand getCenterOfPressureCommand()
    {
       return centerOfPressureCommand;
+   }
+
+   public double getCenterOfPressureWeight()
+   {
+      return centerOfPressureWeight.getValue();
    }
 
    public void computeCenterOfPressureCommand(FramePoint2DReadOnly desiredCoP,

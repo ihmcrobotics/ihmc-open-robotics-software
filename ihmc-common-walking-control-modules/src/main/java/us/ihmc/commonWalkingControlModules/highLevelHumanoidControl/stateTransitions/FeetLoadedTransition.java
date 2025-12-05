@@ -2,8 +2,10 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.stateTransi
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
@@ -12,6 +14,9 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+import java.util.function.Function;
+import java.util.function.Supplier;
+
 public class FeetLoadedTransition implements StateTransitionCondition
 {
    protected final YoRegistry registry;
@@ -19,7 +24,7 @@ public class FeetLoadedTransition implements StateTransitionCondition
    private static final double MINIMUM_WEIGHT_FRACTION = 1.0 / 6.0;
    private static final double TIME_WINDOW = 3.0;
 
-   private final SideDependentList<ForceSensorDataReadOnly> footSensors = new SideDependentList<>();
+   private final Function<RobotSide, WrenchReadOnly> footSensors;
 
    private final YoBoolean areFeetLoaded;
    private final YoDouble weightPerFootForLoaded;
@@ -51,10 +56,38 @@ public class FeetLoadedTransition implements StateTransitionCondition
                                double totalMass,
                                YoRegistry parentRegistry)
    {
-      registry = new YoRegistry(getClass().getSimpleName() + suffix);
+      this(suffix,
+           (side) -> forceSensorDataHolder.getData(feetForceSensors.get(side)).getWrench(),
+           controlDT,
+           gravityZ,
+           totalMass,
+           parentRegistry);
+   }
 
-      for (RobotSide robotSide : RobotSide.values)
-         footSensors.put(robotSide, forceSensorDataHolder.getData(feetForceSensors.get(robotSide)));
+   public FeetLoadedTransition(String suffix,
+                               SideDependentList<FootSwitchInterface> footSwitches,
+                               double controlDT,
+                               double gravityZ,
+                               double totalMass,
+                               YoRegistry parentRegistry)
+   {
+      this(suffix,
+           (side) -> footSwitches.get(side).getMeasuredWrench(),
+           controlDT,
+           gravityZ,
+           totalMass,
+           parentRegistry);
+   }
+
+   public FeetLoadedTransition(String suffix,
+                               Function<RobotSide, WrenchReadOnly> footSensors,
+                               double controlDT,
+                               double gravityZ,
+                               double totalMass,
+                               YoRegistry parentRegistry)
+   {
+      this.footSensors = footSensors;
+      registry = new YoRegistry(getClass().getSimpleName() + suffix);
 
       int windowSize = (int) Math.floor(TIME_WINDOW / controlDT);
 
@@ -88,7 +121,7 @@ public class FeetLoadedTransition implements StateTransitionCondition
          YoDouble prepFootFz = prepFootFzs.get(robotSide);
          SimpleMovingAverageFilteredYoVariable prepFootFzAverage = prepFootFzAverages.get(robotSide);
 
-         temporaryFootWrench.setIncludingFrame(footSensors.get(robotSide).getWrench());
+         temporaryFootWrench.setIncludingFrame(footSensors.apply(robotSide));
          temporaryFootWrench.changeFrame(ReferenceFrame.getWorldFrame());
          prepFootFz.set(temporaryFootWrench.getLinearPartZ());
          prepFootFzAverage.update();

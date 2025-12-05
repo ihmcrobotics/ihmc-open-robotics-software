@@ -5,7 +5,6 @@ import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.perception.gpuMapping.ActiveMappingProcessParameters;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.euclid.referenceFrame.FixedReferenceFrame;
@@ -32,6 +31,7 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
 
 import java.util.concurrent.BlockingQueue;
+import java.util.function.BooleanSupplier;
 
 public class GpuMappingThread extends RepeatingTaskThread
 {
@@ -44,19 +44,28 @@ public class GpuMappingThread extends RepeatingTaskThread
    private final ROS2Publisher<ImageMessage> filteredDepthPublisher;
    private final BlockingQueue<RawImage> rawImageCollection;
 
+   private final BooleanSupplier publishHeightMap;
+   private final BooleanSupplier publishHeightMapToController;
+   private final BooleanSupplier publishTerrainMap;
+
    public GpuMappingThread(ROS2Node ros2Node,
                            ROS2SyncedRobotModel syncedRobotModel,
                            RobotCollisionModel robotCollisionModel,
                            BlockingQueue<RawImage> rawImageCollection,
                            ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
-                           ActiveMappingProcessParameters processParameters,
                            HeightMapParameters heightMapParameters,
                            TerrainMapParameters terrainMapParameters,
-                           DepthImageFilteringParameters depthImageFilteringParameters)
+                           DepthImageFilteringParameters depthImageFilteringParameters,
+                           BooleanSupplier publishHeightMap,
+                           BooleanSupplier publishHeightMapToController,
+                           BooleanSupplier publishTerrainMap)
    {
       super(GpuMappingThread.class.getSimpleName());
       this.rawImageCollection = rawImageCollection;
       this.heightMapParameters = heightMapParameters;
+      this.publishHeightMap = publishHeightMap;
+      this.publishHeightMapToController = publishHeightMapToController;
+      this.publishTerrainMap = publishTerrainMap;
 
       // At the highest level pass in the reference frames for the specific robot
       ReferenceFrame leftFootFrame = syncedRobotModel.getReferenceFrames().getSoleFrame(RobotSide.LEFT);
@@ -75,7 +84,6 @@ public class GpuMappingThread extends RepeatingTaskThread
                                                 rightFootFrame,
                                                 heightMapCenterFrame,
                                                 controllerFootstepQueueMonitor,
-                                                processParameters,
                                                 heightMapParameters,
                                                 terrainMapParameters);
    }
@@ -130,8 +138,19 @@ public class GpuMappingThread extends RepeatingTaskThread
          // Update height map
          synchronized (terrainMapLock)
          {
-            gpuMappingManager.updateAndPublish(filteredDepthImage, depthIntrinsicsCopy, cameraFrameInWorld, cameraZUpFrameInWorld);
+            gpuMappingManager.update(filteredDepthImage, depthIntrinsicsCopy, cameraFrameInWorld, cameraZUpFrameInWorld);
          }
+
+         // Publish the updated maps if demanded
+         if (publishHeightMap.getAsBoolean())
+            gpuMappingManager.publishHeightMap();
+         if (publishHeightMapToController.getAsBoolean())
+            gpuMappingManager.publishHeightMapForController();
+         if (publishTerrainMap.getAsBoolean())
+            gpuMappingManager.publishTerrainMap();
+
+         // Chunked map is only published if it's enabled by the height map parameters
+         gpuMappingManager.publishChunkedMap();
 
          filteredDepthImage.close();
          depthImage.release();

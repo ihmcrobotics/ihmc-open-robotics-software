@@ -17,13 +17,19 @@ module behavior_msgs
       const octet PROXIMITY_TYPE =
       2;
 
-      const octet PROXIMITY_XYZ =
+      const octet ALWAYS_FAIL =
+      3;
+
+      const octet ALWAYS_SUCCEED =
+      4;
+
+      const octet XYZ =
       0;
 
-      const octet PROXIMITY_XY =
+      const octet XY =
       1;
 
-      const octet PROXIMITY_Z =
+      const octet Z =
       2;
 
 
@@ -78,27 +84,27 @@ module behavior_msgs
         /**
          * The type of distance condition as defined above
          */
-        octet proximity_distance_type;
+        octet distance_type;
         /**
-         * Name of the object frame
+         * Name of frame A
          */
-        string proximity_object_frame_name;
+        string frame_name_a;
         /**
-         * Name of the frame the distance is expressed in
+         * Name of frame B
          */
-        string proximity_reference_frame_name;
+        string frame_name_b;
         /**
-         * The maximum distance between the object and the reference frame
+         * The minimum distance between the two frames
          */
-        double proximity_distance_to_object;
+        double min_distance;
         /**
-         * The maximum time that is spent in evaluating the condition
+         * The maximum distance between the two frames
          */
-        double proximity_evaluation_time;
+        double max_distance;
         /**
-         * Whether the failure of missing frame is handled internally by the condition node or not
+         * Timeout for waiting for the condition to be satisfied
          */
-        boolean manage_missing_frame_internally;
+        double timeout;
       };
     };
   };

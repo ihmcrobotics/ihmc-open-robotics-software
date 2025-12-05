@@ -28,6 +28,11 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
       set(HeightMapParameters.logHeightMap, logHeightMap);
    }
 
+   default void setMinDepthToAccept(double minDepthToAccept)
+   {
+      set(HeightMapParameters.minDepthToAccept, minDepthToAccept);
+   }
+
    default void setMinHeightRegistration(double minHeightRegistration)
    {
       set(HeightMapParameters.minHeightRegistration, minHeightRegistration);

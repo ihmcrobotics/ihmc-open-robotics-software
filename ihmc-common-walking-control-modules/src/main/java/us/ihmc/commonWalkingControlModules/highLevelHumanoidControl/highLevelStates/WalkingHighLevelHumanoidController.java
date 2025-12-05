@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManage
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleInput;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleOutput;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.FootShakiesEstimator;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
@@ -45,6 +46,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
+import us.ihmc.commonWalkingControlModules.referenceFrames.WalkingTrajectoryPath;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMarginRegionCalculator;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -125,6 +127,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private final FullHumanoidRobotModel fullRobotModel;
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final WalkingControllerParameters walkingControllerParameters;
+
+   private final FootShakiesEstimator footShakiesEstimator;
 
    private final SideDependentList<? extends ContactablePlaneBody> feet;
 
@@ -250,6 +254,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       enableHeightFeedbackControl.set(walkingControllerParameters.enableHeightFeedbackControl());
 
       failureDetectionControlModule = controllerToolbox.getFailureDetectionControlModule();
+      footShakiesEstimator = controllerToolbox.getFootShakiesEstimator();
 
       walkingMessageHandler = controllerToolbox.getWalkingMessageHandler();
       commandConsumer = new WalkingCommandConsumer(commandInputManager,
@@ -265,7 +270,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       double highCoPDampingDuration = walkingControllerParameters.getHighCoPDampingDurationToPreventFootShakies();
       double coPErrorThreshold = walkingControllerParameters.getCoPErrorThresholdForHighCoPDamping();
       boolean enableHighCoPDamping = highCoPDampingDuration > 0.0 && !Double.isInfinite(coPErrorThreshold);
-      controllerToolbox.setHighCoPDampingParameters(enableHighCoPDamping, highCoPDampingDuration, coPErrorThreshold);
+      footShakiesEstimator.setHighCoPDampingParameters(enableHighCoPDamping, highCoPDampingDuration, coPErrorThreshold);
 
       String[] jointNamesRestrictiveLimits = walkingControllerParameters.getJointsWithRestrictiveLimits();
       OneDoFJointBasics[] jointsWithRestrictiveLimit = MultiBodySystemTools.filterJoints(ScrewTools.findJointsWithNames(allOneDoFjoints,
@@ -585,10 +590,12 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
    private void initializeWalkingTrajectoryPath()
    {
-      controllerToolbox.getWalkingTrajectoryPath().clearFootsteps();
-      controllerToolbox.getWalkingTrajectoryPath().reset();
-      controllerToolbox.getWalkingTrajectoryPath().initializeDoubleSupport();
-      controllerToolbox.getWalkingTrajectoryPath().updateTrajectory(FootControlModule.ConstraintType.FULL, FootControlModule.ConstraintType.FULL);
+      WalkingTrajectoryPath walkingTrajectoryPath = controllerToolbox.getWalkingTrajectoryPath();
+      walkingTrajectoryPath.clearFootsteps();
+      walkingTrajectoryPath.reset();
+      walkingTrajectoryPath.initializeDoubleSupport();
+      walkingTrajectoryPath.updateTrajectory(FootControlModule.ConstraintType.FULL,
+                                             FootControlModule.ConstraintType.FULL);
    }
 
    private void initializeManagers()
@@ -693,6 +700,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       walkingStateTimer.stopMeasurement();
 
       currentState = stateMachine.getCurrentState();
+
+      balanceManager.setIsCoPDamped(footShakiesEstimator.estimateIfHighCoPDampingNeeded(footDesiredCoPs));
 
       managerUpdateTimer.startMeasurement();
       updateManagers(currentState);
@@ -1015,7 +1024,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          limitCommandSent.set(true);
       }
 
-      boolean isHighCoPDampingNeeded = controllerToolbox.estimateIfHighCoPDampingNeeded(footDesiredCoPs);
+      boolean isHighCoPDampingNeeded = footShakiesEstimator.isCoPDamped();
 
       // Foot control:
       for (RobotSide robotSide : RobotSide.values)

@@ -28,6 +28,9 @@ import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.rdx.tools.LibGDXTools;
 
 /**
  * Provides the ability to put text in the 3D scene.
@@ -51,6 +54,14 @@ public class RDX3DSituatedText implements RenderableProvider
    private final Font awtFont;
    private final Color awtColor;
    private final float textHeightMeters;
+   private final transient RigidBodyTransform transform = new RigidBodyTransform();
+
+   public RDX3DSituatedText()
+   {
+      this.awtFont = DEFAULT_FONT;
+      this.awtColor = DEFAULT_COLOR;
+      this.textHeightMeters = DEFAULT_HEIGHT;
+   }
 
    public RDX3DSituatedText(String text)
    {
@@ -73,25 +84,50 @@ public class RDX3DSituatedText implements RenderableProvider
       this.awtFont = awtFont;
       this.awtColor = awtColor;
       this.textHeightMeters = textHeightMeters;
-      setText(text);
+      setTextWithCache(text);
    }
 
-   public void setText(String text)
+   public RDX3DSituatedText(Font awtFont, Color awtColor, float textHeightMeters)
    {
-      this.currentText = text;
-      textData = textDataMap.get(text);
+      this.awtFont = awtFont;
+      this.awtColor = awtColor;
+      this.textHeightMeters = textHeightMeters;
+   }
 
-      if (textData == null)
+   /**
+    * Use this method for a small set of text values to increase performance.
+    */
+   public void setTextWithCache(String text)
+   {
+      if (!text.equals(currentText))
       {
-         setTextWithoutCache(text);
-         textDataMap.put(text, textData);
+         currentText = text;
+         textData = textDataMap.get(text);
+
+         if (textData == null)
+         {
+            textData = createTextData(text);
+            textDataMap.put(text, textData);
+         }
       }
    }
 
-   public RDX3DSituatedTextData setTextWithoutCache(String text)
+   /**
+    * Use this method for text that is changing all the time.
+    */
+   public void setTextWithoutCache(String text)
    {
-      this.currentText = text;
+      if (!text.equals(currentText))
+      {
+         dispose();
 
+         currentText = text;
+         textData = createTextData(text);
+      }
+   }
+
+   private RDX3DSituatedTextData createTextData(String text)
+   {
       // Mostly following this method: https://stackoverflow.com/a/18800845/3503725
       // Create temporary image here in order to get Graphics2D instance
       BufferedImage onePixelImage = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
@@ -155,9 +191,21 @@ public class RDX3DSituatedText implements RenderableProvider
       float normalZ = 1.0f;
       Model model = modelBuilder.createRect(x00, y00, z00, x10, y10, z10, x11, y11, z11, x01, y01, z01, normalX, normalY, normalZ, material, attributes);
       ModelInstance modelInstance = new ModelInstance(model);
-      textData = new RDX3DSituatedTextData(pixmap, rgba8888BytePointer, libGDXTexture, model, modelInstance);
+      return new RDX3DSituatedTextData(pixmap, rgba8888BytePointer, libGDXTexture, model, modelInstance);
+   }
 
-      return textData;
+   public void setPositionFacingCamera(RDXFocusBasedCamera camera, Tuple3DReadOnly position)
+   {
+      setPositionFacingCamera(camera, position.getX(), position.getY(), position.getZ());
+   }
+
+   public void setPositionFacingCamera(RDXFocusBasedCamera camera, double x, double y, double z)
+   {
+      transform.getRotation().set(camera.getCameraPose().getOrientation());
+      transform.getRotation().appendPitchRotation(-Math.PI / 2.0);
+      transform.getRotation().appendYawRotation(-Math.PI / 2.0);
+      transform.getTranslation().set(x, y, z);
+      LibGDXTools.toLibGDX(transform, textData.getModelInstance().transform);
    }
 
    public Matrix4 getModelTransform()
@@ -168,14 +216,21 @@ public class RDX3DSituatedText implements RenderableProvider
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      textData.getModelInstance().getRenderables(renderables, pool);
+      if (textData != null)
+         textData.getModelInstance().getRenderables(renderables, pool);
    }
 
    public void dispose()
    {
-      for (RDX3DSituatedTextData textData : textDataMap.values())
-      {
+      if (textData != null)
          textData.dispose();
+
+      if (!textDataMap.isEmpty())
+      {
+         for (RDX3DSituatedTextData textData : textDataMap.values())
+            textData.dispose();
+
+         textDataMap.clear();
       }
    }
 

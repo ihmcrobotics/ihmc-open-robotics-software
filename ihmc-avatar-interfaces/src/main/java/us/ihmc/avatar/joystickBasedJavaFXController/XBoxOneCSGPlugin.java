@@ -189,7 +189,8 @@ public class XBoxOneCSGPlugin
       csgParametersCommand.setTransferDuration(csgStatusMessage.getCurrentTransferDuration());
 
       csgParametersCommand.setSwingHeight(csgStatusMessage.getCurrentSwingHeight());
-      csgParametersCommand.setMaxStepLength(csgStatusMessage.getCurrentMaxStepLength());
+      csgParametersCommand.setMaxStepLengthForwards(csgStatusMessage.getCurrentMaxStepLengthForwards());
+      csgParametersCommand.setMaxStepLengthBackwards(csgStatusMessage.getCurrentMaxStepLengthBackwards());
       csgParametersCommand.setDefaultStepWidth(csgStatusMessage.getCurrentDefaultStepWidth());
       csgParametersCommand.setMinStepWidth(csgStatusMessage.getCurrentMinStepWidth());
       csgParametersCommand.setMaxStepWidth(csgStatusMessage.getCurrentMaxStepWidth());
@@ -204,9 +205,10 @@ public class XBoxOneCSGPlugin
       csgParametersCommand.setSwingDuration(walkingControllerParameters.getDefaultSwingTime());
       csgParametersCommand.setTransferDuration(walkingControllerParameters.getDefaultTransferTime());
 
-      SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
+      SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParametersForStepGeneration();
       csgParametersCommand.setSwingHeight(walkingControllerParameters.getSwingTrajectoryParameters().getDefaultSwingHeight());
-      csgParametersCommand.setMaxStepLength(steppingParameters.getMaxStepLength());
+      csgParametersCommand.setMaxStepLengthForwards(steppingParameters.getMaxStepLength());
+      csgParametersCommand.setMaxStepLengthBackwards(steppingParameters.getMaxBackwardStepLength());
       csgParametersCommand.setDefaultStepWidth(steppingParameters.getInPlaceWidth());
       csgParametersCommand.setMinStepWidth(steppingParameters.getMinStepWidth());
       csgParametersCommand.setMaxStepWidth(steppingParameters.getMaxStepWidth());

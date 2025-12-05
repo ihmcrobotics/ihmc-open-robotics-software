@@ -1,15 +1,15 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import gnu.trove.list.array.TFloatArrayList;
-import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.HeightMapMessageForController;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.tuple2D.Point2D;
 
-public class HeightMapCommand implements Command<HeightMapCommand, HeightMapMessage>
+public class HeightMapCommand implements Command<HeightMapCommand, HeightMapMessageForController>
 {
    /* By default, use the capacity defined in HeightMapMessage.msg */
-   private static final int DEFAULT_CAPACITY = new HeightMapMessage().getHeights().capacity();
+   private static final int DEFAULT_CAPACITY = new HeightMapMessageForController().getHeights().capacity();
 
    private long sequenceId;
 
@@ -42,7 +42,7 @@ public class HeightMapCommand implements Command<HeightMapCommand, HeightMapMess
    }
 
    @Override
-   public void setFromMessage(HeightMapMessage message)
+   public void setFromMessage(HeightMapMessageForController message)
    {
       this.sequenceId = message.getSequenceId();
       this.centerIndex = computeCenterIndex(message.getWidthInMeters(), message.getCellSizeInMeters());
@@ -62,9 +62,9 @@ public class HeightMapCommand implements Command<HeightMapCommand, HeightMapMess
    }
 
    @Override
-   public Class<HeightMapMessage> getMessageClass()
+   public Class<HeightMapMessageForController> getMessageClass()
    {
-      return HeightMapMessage.class;
+      return HeightMapMessageForController.class;
    }
 
    @Override

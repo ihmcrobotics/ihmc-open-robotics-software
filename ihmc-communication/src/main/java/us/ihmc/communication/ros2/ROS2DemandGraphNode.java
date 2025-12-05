@@ -49,13 +49,7 @@ public class ROS2DemandGraphNode
       if (nodeHeartbeatMonitor.isAlive())
          return true;
 
-      for (ROS2DemandGraphNode dependent : dependents)
-      {
-         if (dependent.isDemanded())
-            return true;
-      }
-
-      return false;
+      return ROS2DemandGraphTools.anyDemanded(dependents);
    }
 
    public void destroy()

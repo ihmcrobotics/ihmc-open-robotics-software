@@ -12,19 +12,21 @@ import static us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPos
 
 public enum IsaacROSFoundationPoseObject
 {
-   MUSTARD("mustard", "bottle"),
-   TRAFFIC_BARRIER("traffic_barrier", "traffic_barrier"),
-   EXPLOSIVE_CHARGE("charge", "charge"),
-   DOOR_PANEL("door_panel", "door_panel");
+   MUSTARD("Mustard", "mustard", "bottle"),
+   TRAFFIC_BARRIER("Traffic Barrier", "barrier", "traffic_barrier"),
+   EXPLOSIVE_CHARGE("Explosive Charge", "charge", "charge"),
+   DOOR_PANEL("Door Panel", "doorPanel", "door_panel");
 
    public static final IsaacROSFoundationPoseObject[] values = values();
 
+   public final String titleCaseName;
    public final String meshName;
    public final String yoloClass;
    public final FoundationPoseTopics topics;
 
-   IsaacROSFoundationPoseObject(String meshName, String yoloClass)
+   IsaacROSFoundationPoseObject(String titleCaseName, String meshName, String yoloClass)
    {
+      this.titleCaseName = titleCaseName;
       this.meshName = meshName;
       this.yoloClass = yoloClass;
       topics = new FoundationPoseTopics(meshName);

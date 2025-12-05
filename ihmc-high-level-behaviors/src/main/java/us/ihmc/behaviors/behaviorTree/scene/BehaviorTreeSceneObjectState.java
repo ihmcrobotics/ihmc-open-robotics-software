@@ -32,7 +32,7 @@ public class BehaviorTreeSceneObjectState extends LatestTimestampModifiable
 
    public String getName()
    {
-      return objectType.name();
+      return objectType.titleCaseName;
    }
 
    public IsaacROSFoundationPoseObject getObjectType()

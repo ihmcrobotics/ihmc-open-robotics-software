@@ -256,7 +256,8 @@ public class WalkingSingleSupportState extends SingleSupportState
       walkingTrajectoryPath.clearFootsteps();
       walkingTrajectoryPath.addFootstep(nextFootstep, footstepTiming);
       walkingTrajectoryPath.addFootsteps(walkingMessageHandler);
-      walkingTrajectoryPath.updateTrajectory(feetManager.getCurrentConstraintType(RobotSide.LEFT), feetManager.getCurrentConstraintType(RobotSide.RIGHT));
+      walkingTrajectoryPath.updateTrajectory(feetManager.getCurrentConstraintType(RobotSide.LEFT),
+                                             feetManager.getCurrentConstraintType(RobotSide.RIGHT));
    }
 
    @Override
@@ -469,7 +470,8 @@ public class WalkingSingleSupportState extends SingleSupportState
                                                   balanceManager.getDesiredCMP(),
                                                   controllerToolbox.getFootSwitches().get(supportSide).getCenterOfPressure(),
                                                   balanceManager.getDesiredICP(),
-                                                  currentICP);
+                                                  currentICP,
+                                                  controllerToolbox.getFootSwitches().get(supportSide).getFootLoadPercentage());
 
       if (feetManager.okForPointToeOff(true))
          feetManager.requestPointToeOff(supportSide, supportFootExitCMP, desiredCoP);

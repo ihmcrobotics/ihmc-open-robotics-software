@@ -1,12 +1,5 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.centerOfMassEstimator;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -27,18 +20,25 @@ import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameTwist;
 import us.ihmc.robotics.math.filters.IntegratorBiasCompensatorYoFrameVector3D;
 import us.ihmc.robotics.math.filters.YoIMUMahonyFilter;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.IMUBasedPelvisRotationalStateUpdater;
-import us.ihmc.yoVariables.euclid.filters.FilteredFiniteDifferenceYoFrameVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
-import us.ihmc.yoVariables.filters.AlphaFilterTools;
-import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.yoVariables.filters.RateLimitedYoVariable;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * This estimator takes advantage of having several IMUs distributed on the robot to refine the pose
@@ -67,6 +67,10 @@ public class DistributedIMUBasedCenterOfMassStateUpdater implements MomentumStat
 
    private final FrameVector3D gravityVector = new FrameVector3D();
 
+   private final Map<RigidBodyReadOnly, YoFrameVector3D> positionAdjustmentFromFoot = new HashMap<>();
+   private final Map<RigidBodyReadOnly, YoFrameVector3D> velocityAdjustmentFromFoot = new HashMap<>();
+   private final Map<RigidBodyReadOnly, RateLimitedYoVariable> adjustmentWeight = new HashMap<>();
+
    private final YoFramePoint3D estimatedCoMPosition = new YoFramePoint3D("estimatedCenterOfMassPosition", worldFrame, registry);
    private final YoFrameVector3D estimatedCoMVelocity = new YoFrameVector3D("estimatedCenterOfMassVelocity", worldFrame, registry);
    private final YoFrameVector3D estimatedAngularMomentum = new YoFrameVector3D("estimatedAngularMomentum", worldFrame, registry);
@@ -84,10 +88,12 @@ public class DistributedIMUBasedCenterOfMassStateUpdater implements MomentumStat
    private final YoBoolean enableOutput = new YoBoolean("distIMUCoMEstimatorEnableOutput", registry);
    private final double gravitationalAcceleration;
    private final List<? extends RigidBodyReadOnly> listOfTrustedFeet;
+   private final List<? extends RigidBodyReadOnly> allFeet;
 
    public DistributedIMUBasedCenterOfMassStateUpdater(FloatingJointReadOnly rootJoint,
                                                       List<? extends IMUSensorReadOnly> imuSensors,
                                                       List<? extends RigidBodyReadOnly> listOfTrustedFeet,
+                                                      List<? extends RigidBodyReadOnly> allFeet,
                                                       double dt,
                                                       double gravitationalAcceleration,
                                                       boolean enableCoMPositionAdjustment,
@@ -95,6 +101,7 @@ public class DistributedIMUBasedCenterOfMassStateUpdater implements MomentumStat
                                                       CenterOfMassDataHolder centerOfMassDataHolder)
    {
       this.listOfTrustedFeet = listOfTrustedFeet;
+      this.allFeet = allFeet;
       this.dt = dt;
       this.gravitationalAcceleration = gravitationalAcceleration;
       this.centerOfMassDataHolder = centerOfMassDataHolder;
@@ -136,6 +143,14 @@ public class DistributedIMUBasedCenterOfMassStateUpdater implements MomentumStat
          }
 
          imuSensorMap.put(body, imuSensor);
+      }
+
+      for (RigidBodyReadOnly foot : allFeet)
+      {
+         String prefix = foot.getName();
+         positionAdjustmentFromFoot.put(foot, new YoFrameVector3D(prefix + "CoMPositionAdjustment", worldFrame, registry));
+         velocityAdjustmentFromFoot.put(foot, new YoFrameVector3D(prefix + "CoMVelocityAdjustment", worldFrame, registry));
+         adjustmentWeight.put(foot, new RateLimitedYoVariable(prefix + "CoMAdjustmentWeight", registry, 5.0, dt));
       }
 
       rootEstimator = new RigidBodyStateEstimator(null, rootJoint.getSuccessor(), null);
@@ -253,33 +268,50 @@ public class DistributedIMUBasedCenterOfMassStateUpdater implements MomentumStat
       estimatedCoMPosition.scale(1.0 / totalMass);
       estimatedCoMVelocity.scale(1.0 / totalMass);
 
+      double totalWeight = 0.0;
+      for (int i = 0; i < allFeet.size(); i++)
+      {
+         RigidBodyReadOnly foot = allFeet.get(i);
+         if (listOfTrustedFeet.contains(foot))
+            adjustmentWeight.get(foot).update(1.0);
+         else
+            adjustmentWeight.get(foot).update(0.0);
+         totalWeight += adjustmentWeight.get(foot).getValue();
+      }
+
       { // Adjust using trusted feet
-         double scale = 1.0 / listOfTrustedFeet.size();
          positionAdjustment.setToZero();
          velocityAdjustment.setToZero();
 
-         for (int i = 0; i < listOfTrustedFeet.size(); i++)
+         for (int i = 0; i < allFeet.size(); i++)
          {
-            RigidBodyReadOnly trustedFoot = listOfTrustedFeet.get(i);
-            RigidBodyStateEstimator footEstimator = estimatorMap.get(trustedFoot);
+            RigidBodyReadOnly foot = allFeet.get(i);
+            RigidBodyStateEstimator footEstimator = estimatorMap.get(foot);
+
+            // Compute the total weight
+            double scale = adjustmentWeight.get(foot).getDoubleValue() / totalWeight;
+            if (Double.isNaN(scale))
+               scale = 0.0;
+            YoFrameVector3D positionAdjustmentForFoot = positionAdjustmentFromFoot.get(foot);
+            YoFrameVector3D velocityAdjustmentForFoot = velocityAdjustmentFromFoot.get(foot);
 
             // Get the difference between the estimate from the kinematics and the integrated IMU measurement, and add it to the adjustment
-            tempPoint.sub(footEstimator.getBodyFrame().getTransformToRoot().getTranslation(), footEstimator.estimatedPose.getTranslation());
-            tempPoint.scale(scale);
-            positionAdjustment.add(tempPoint);
+            positionAdjustmentForFoot.sub(footEstimator.getBodyFrame().getTransformToRoot().getTranslation(),
+                                          footEstimator.getEstimatedPose().getTranslation());
+            positionAdjustment.scaleAdd(scale, positionAdjustmentForFoot, positionAdjustment);
 
             // FIXME is this right? or is the sign wrong?
             // Get the difference between the estimate from the kinematics and the integrated IMU measurement, and add it to the adjustment
             tempLinearPart.setIncludingFrame(footEstimator.getEstimatedTwist().getLinearPart());
             tempLinearPart.sub(footEstimator.getBodyFrame().getTwistOfFrame().getLinearPart());
             tempLinearPart.changeFrame(worldFrame);
-            tempLinearPart.scale(scale);
-            velocityAdjustment.add(tempLinearPart);
+            velocityAdjustmentForFoot.set(tempLinearPart);
+            velocityAdjustment.scaleAdd(scale, velocityAdjustmentForFoot, velocityAdjustment);
          }
 
-         if (enableCoMPositionAdjustment.getValue())
+         if (enableCoMPositionAdjustment.getValue() && !positionAdjustment.containsNaN())
             estimatedCoMPosition.add(positionAdjustment);
-         if (enableCoMVelocityAdjustment.getValue())
+         if (enableCoMVelocityAdjustment.getValue() && !velocityAdjustment.containsNaN())
             estimatedCoMVelocity.add(velocityAdjustment);
       }
 
@@ -447,7 +479,7 @@ public class DistributedIMUBasedCenterOfMassStateUpdater implements MomentumStat
             expectedStaticAcceleration.setMatchingFrame(gravityVector);
             expectedStaticAcceleration.negate();
 
-            // Estimate angular velocity & orientation
+            // Estimate angular velocity & orientation of the IMU using a Mahoney filter.
             linearAcceleration.setIncludingFrame(getIMUFrame(), imuSensor.getLinearAccelerationMeasurement());
             angularVelocity.setIncludingFrame(getIMUFrame(), imuSensor.getAngularVelocityMeasurement());
             northVector.setIncludingFrame(worldFrame, Axis3D.X);
@@ -509,7 +541,7 @@ public class DistributedIMUBasedCenterOfMassStateUpdater implements MomentumStat
 
       public RigidBodyTransformReadOnly getEstimatedPose()
       {
-         return estimatedPose;
+         return yoEstimatedPose;
       }
 
       public TwistReadOnly getEstimatedTwist()

@@ -44,7 +44,7 @@ public class AlexanderPushRecoveryOverSteppingStonesTest extends AvatarPushRecov
                @Override
                public StepAdjustmentParameters getStepAdjustmentParameters()
                {
-                  return new AlexanderStepAdjustmentParameters()
+                  return new OpenAlexanderStepAdjustmentParameters()
                   {
                      @Override
                      public boolean allowStepAdjustment()

@@ -1,11 +1,15 @@
 package us.ihmc.rdx.behaviorTree.scene;
 
+import behavior_msgs.msg.dds.BehaviorTreeSceneObjectStateMessage;
+import behavior_msgs.msg.dds.PersistentDetectionStatusMessage;
 import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseObject;
 import us.ihmc.rdx.behaviorTree.RDXCRDTTools;
-import us.ihmc.rdx.sceneManager.RDXRenderableAdapter;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -18,7 +22,8 @@ public class RDXBehaviorTreeSceneObject extends BehaviorTreeSceneObjectState
    private final RDXSelectablePose3DGizmo gizmo;
    private final Model model;
    private final RDXModelInstance modelInstance;
-   private final RDXRenderableAdapter modelRenderableAdapter;
+
+   private final PersistentDetectionStatusMessage persistentDetection = new PersistentDetectionStatusMessage();
 
    public RDXBehaviorTreeSceneObject(long id, CRDTInfo crdtInfo, IsaacROSFoundationPoseObject objectType, RDXBaseUI baseUI)
    {
@@ -28,16 +33,11 @@ public class RDXBehaviorTreeSceneObject extends BehaviorTreeSceneObjectState
 
       gizmo = new RDXSelectablePose3DGizmo();
       gizmo.createAndSetupDefault(baseUI.getPrimary3DPanel());
-      gizmo.setSelected(true);
       gizmo.getPoseGizmo().setGizmoFrame(referenceFrame);
 
-      String modelName = "";
-      if (objectType.equals(IsaacROSFoundationPoseObject.MUSTARD))
-         modelName = "environmentObjects/mustard/mustard.glb";
-
+      String modelName = "environmentObjects/" + objectType.meshName + "/" + objectType.meshName + ".glb";
       model = RDXModelLoader.load(modelName);
       modelInstance = new RDXModelInstance(model);
-      modelRenderableAdapter = baseUI.getPrimaryScene().addModelInstance(modelInstance);
    }
 
    public void update()
@@ -46,16 +46,33 @@ public class RDXBehaviorTreeSceneObject extends BehaviorTreeSceneObjectState
       modelInstance.setTransformToWorldFrame(transform.getValueUnsafe());
    }
 
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+      modelInstance.getRenderables(renderables, pool);
+   }
+
    public void destroy()
    {
-      baseUI.getPrimaryScene().removeRenderableAdapter(modelRenderableAdapter);
       gizmo.setSelected(false);
       gizmo.destroyDefault(baseUI.getPrimary3DPanel());
       model.dispose();
    }
 
+   @Override
+   public void fromMessage(BehaviorTreeSceneObjectStateMessage message)
+   {
+      super.fromMessage(message);
+
+      persistentDetection.set(message.getPersistentDetection());
+   }
+
    public RDXSelectablePose3DGizmo getGizmo()
    {
       return gizmo;
+   }
+
+   public PersistentDetectionStatusMessage getPersistentDetection()
+   {
+      return persistentDetection;
    }
 }

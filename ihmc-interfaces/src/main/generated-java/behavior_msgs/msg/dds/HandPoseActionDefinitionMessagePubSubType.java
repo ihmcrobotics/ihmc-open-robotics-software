@@ -15,7 +15,7 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "89609430f53defe66e13d25a5760706eab37a1230124341d2b5a38f6f5362854";
+   		return "61e3aa09f5a3fbbd605891a9551237370593689c436852ab4581398eba53624b";
    }
    
    @Override
@@ -63,7 +63,7 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += ((7) * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -109,7 +109,7 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
       current_alignment += ((7) * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -152,7 +152,7 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
 
       cdr.write_type_7(data.getUsePredefinedJointAngles());
 
-      cdr.write_type_2(data.getPreset());
+      cdr.write_type_9(data.getPreset());
 
       for(int i0 = 0; i0 < data.getJointAngles().length; ++i0)
       {
@@ -186,7 +186,7 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
       	
       data.setUsePredefinedJointAngles(cdr.read_type_7());
       	
-      data.setPreset(cdr.read_type_2());
+      data.setPreset(cdr.read_type_9());
       	
       for(int i0 = 0; i0 < data.getJointAngles().length; ++i0)
       {
@@ -222,7 +222,7 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
 
       ser.write_type_7("joint_space_control", data.getJointSpaceControl());
       ser.write_type_7("use_predefined_joint_angles", data.getUsePredefinedJointAngles());
-      ser.write_type_2("preset", data.getPreset());
+      ser.write_type_9("preset", data.getPreset());
       ser.write_type_f("joint_angles", data.getJointAngles());
       ser.write_type_6("trajectory_duration", data.getTrajectoryDuration());
       ser.write_type_7("hold_pose_in_world", data.getHoldPoseInWorld());
@@ -244,7 +244,7 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
 
       data.setJointSpaceControl(ser.read_type_7("joint_space_control"));
       data.setUsePredefinedJointAngles(ser.read_type_7("use_predefined_joint_angles"));
-      data.setPreset(ser.read_type_2("preset"));
+      data.setPreset(ser.read_type_9("preset"));
       ser.read_type_f("joint_angles", data.getJointAngles());
       data.setTrajectoryDuration(ser.read_type_6("trajectory_duration"));
       data.setHoldPoseInWorld(ser.read_type_7("hold_pose_in_world"));
