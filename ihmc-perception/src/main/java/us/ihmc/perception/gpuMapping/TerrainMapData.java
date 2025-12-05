@@ -83,6 +83,16 @@ public class TerrainMapData
       return heightMap[key];
    }
 
+   public double getHeight(int xIndex, int yIndex)
+   {
+      if (xIndex < 0 || yIndex < 0 || xIndex >= cellsPerAxis || yIndex >= cellsPerAxis)
+      {
+         return Double.NaN;
+      }
+
+      return heightMap[HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex)];
+   }
+
    public double getMinHeight()
    {
       double minValue = Double.POSITIVE_INFINITY;
