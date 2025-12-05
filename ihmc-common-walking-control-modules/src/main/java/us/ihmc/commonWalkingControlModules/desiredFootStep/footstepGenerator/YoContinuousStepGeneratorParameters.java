@@ -16,6 +16,8 @@ public class YoContinuousStepGeneratorParameters implements ContinuousStepGenera
    private final YoDouble inPlaceWidth, minStepWidth, maxStepWidth;
    private final YoDouble turnMaxAngleInward, turnMaxAngleOutward;
    private final YoBoolean stepsAreAdjustable;
+   private final YoBoolean requestSnapToHeightmap;
+   private final YoBoolean accountForGroundDrift;
    private final YoBoolean shiftUpcomingStepsWithTouchdown;
    private final YoInteger ticksToUpdateTheEnvironment;
 
@@ -34,6 +36,8 @@ public class YoContinuousStepGeneratorParameters implements ContinuousStepGenera
       turnMaxAngleOutward = new YoDouble("maxAngleTurnOutwards" + nameSuffix, registry);
       turnMaxAngleInward = new YoDouble("maxAngleTurnInwards" + nameSuffix, registry);
       stepsAreAdjustable = new YoBoolean("stepsAreAdjustable" + nameSuffix, registry);
+      requestSnapToHeightmap = new YoBoolean("requestSnapToHeightmap" + nameSuffix, registry);
+      accountForGroundDrift = new YoBoolean("accountForGroundDrift" + nameSuffix, registry);
       shiftUpcomingStepsWithTouchdown = new YoBoolean("shiftUpcomingStepsWithTouchdown" + nameSuffix, registry);
       ticksToUpdateTheEnvironment = new YoInteger("ticksToUpdateTheEnvironment" + nameSuffix, registry);
    }
@@ -42,6 +46,18 @@ public class YoContinuousStepGeneratorParameters implements ContinuousStepGenera
    public void setStepsAreAdjustable(boolean stepsAreAdjustable)
    {
       this.stepsAreAdjustable.set(stepsAreAdjustable);
+   }
+
+   @Override
+   public void setRequestSnapToHeightmap(boolean requestSnapToHeightmap)
+   {
+      this.requestSnapToHeightmap.set(requestSnapToHeightmap);
+   }
+
+   @Override
+   public void setAccountForGroundDrift(boolean accountForGroundDrift)
+   {
+      this.accountForGroundDrift.set(accountForGroundDrift);
    }
 
    @Override
@@ -210,6 +226,18 @@ public class YoContinuousStepGeneratorParameters implements ContinuousStepGenera
    public boolean getStepsAreAdjustable()
    {
       return stepsAreAdjustable.getBooleanValue();
+   }
+
+   @Override
+   public boolean getRequestSnapToHeightmap()
+   {
+      return requestSnapToHeightmap.getBooleanValue();
+   }
+
+   @Override
+   public boolean getAccountForGroundDrift()
+   {
+      return accountForGroundDrift.getBooleanValue();
    }
 
    @Override

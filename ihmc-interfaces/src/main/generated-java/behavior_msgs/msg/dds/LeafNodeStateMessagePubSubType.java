@@ -15,7 +15,7 @@ public class LeafNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "b6093474a9b1f6f624472e0fb67578a4355a561ed125ec4264ba5c2b9d98d41c";
+   		return "a380aa2cc46041cf82374abd975f18f2d16ffbfed6dff1fcdb7dc62912dcc252";
    }
    
    @Override
@@ -58,8 +58,6 @@ public class LeafNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDataT
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
-
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -87,9 +85,6 @@ public class LeafNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDataT
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
-
-
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -110,8 +105,6 @@ public class LeafNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDataT
 
       cdr.write_type_7(data.getIsNextForExecution());
 
-      cdr.write_type_3(data.getConcurrencyRank());
-
       cdr.write_type_7(data.getCanExecute());
 
       cdr.write_type_7(data.getIsExecuting());
@@ -126,8 +119,6 @@ public class LeafNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDataT
       data.setId(cdr.read_type_4());
       	
       data.setIsNextForExecution(cdr.read_type_7());
-      	
-      data.setConcurrencyRank(cdr.read_type_3());
       	
       data.setCanExecute(cdr.read_type_7());
       	
@@ -145,7 +136,6 @@ public class LeafNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDataT
 
       ser.write_type_4("id", data.getId());
       ser.write_type_7("is_next_for_execution", data.getIsNextForExecution());
-      ser.write_type_3("concurrency_rank", data.getConcurrencyRank());
       ser.write_type_7("can_execute", data.getCanExecute());
       ser.write_type_7("is_executing", data.getIsExecuting());
       ser.write_type_7("failed", data.getFailed());
@@ -158,7 +148,6 @@ public class LeafNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDataT
 
       data.setId(ser.read_type_4("id"));
       data.setIsNextForExecution(ser.read_type_7("is_next_for_execution"));
-      data.setConcurrencyRank(ser.read_type_3("concurrency_rank"));
       data.setCanExecute(ser.read_type_7("can_execute"));
       data.setIsExecuting(ser.read_type_7("is_executing"));
       data.setFailed(ser.read_type_7("failed"));

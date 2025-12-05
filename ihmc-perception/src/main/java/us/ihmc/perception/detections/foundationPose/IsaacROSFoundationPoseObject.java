@@ -13,9 +13,9 @@ import static us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPos
 public enum IsaacROSFoundationPoseObject
 {
    MUSTARD("Mustard", "mustard", "bottle"),
-   TRAFFIC_BARRIER("Traffic Barrier", "traffic_barrier", "traffic_barrier"),
+   TRAFFIC_BARRIER("Traffic Barrier", "barrier", "traffic_barrier"),
    EXPLOSIVE_CHARGE("Explosive Charge", "charge", "charge"),
-   DOOR_PANEL("Door Panel", "door_panel", "door_panel");
+   DOOR_PANEL("Door Panel", "doorPanel", "door_panel");
 
    public static final IsaacROSFoundationPoseObject[] values = values();
 

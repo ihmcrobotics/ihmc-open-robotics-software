@@ -275,7 +275,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
       ImGui.sameLine();
       footstepsWidget.render(ImGui.getFrameHeight());
 
-      renderConcurrencyGraph();
+      renderRowEnd();
    }
 
    @Override

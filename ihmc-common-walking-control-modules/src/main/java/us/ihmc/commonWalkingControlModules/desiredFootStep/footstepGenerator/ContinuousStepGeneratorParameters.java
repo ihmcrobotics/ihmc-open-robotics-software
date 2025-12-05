@@ -14,6 +14,8 @@ public class ContinuousStepGeneratorParameters implements ContinuousStepGenerato
    private double defaultStepWidth, minStepWidth, maxStepWidth;
    private double turnMaxAngleInward, turnMaxAngleOutward;
    private boolean stepsAreAdjustable = DEFAULT_STEPS_ARE_ADJUSTABLE;
+   private boolean requestSnapToHeightMap = DEFAULT_REQUEST_SNAP_TO_HEIGHTMAP;
+   private boolean accountForGroundDrift = DEFAULT_ACCOUNT_FOR_GROUND_DRIFT;
    private boolean shiftUpcomingStepsWithTouchdown = DEFAULT_SHIFT_UPCOMING_STEPS_WITH_TOUCHDOWN;
 
    public ContinuousStepGeneratorParameters()
@@ -121,6 +123,18 @@ public class ContinuousStepGeneratorParameters implements ContinuousStepGenerato
    }
 
    @Override
+   public void setRequestSnapToHeightmap(boolean requestSnapToHeightMap)
+   {
+      this.requestSnapToHeightMap = requestSnapToHeightMap;
+   }
+
+   @Override
+   public void setAccountForGroundDrift(boolean accountForGroundDrift)
+   {
+      this.accountForGroundDrift = accountForGroundDrift;
+   }
+
+   @Override
    public int getNumberOfFootstepsToPlan()
    {
       return numberOfFootstepsToPlan;
@@ -202,6 +216,18 @@ public class ContinuousStepGeneratorParameters implements ContinuousStepGenerato
    public boolean getStepsAreAdjustable()
    {
       return stepsAreAdjustable;
+   }
+
+   @Override
+   public boolean getRequestSnapToHeightmap()
+   {
+      return requestSnapToHeightMap;
+   }
+
+   @Override
+   public boolean getAccountForGroundDrift()
+   {
+      return accountForGroundDrift;
    }
 
    @Override

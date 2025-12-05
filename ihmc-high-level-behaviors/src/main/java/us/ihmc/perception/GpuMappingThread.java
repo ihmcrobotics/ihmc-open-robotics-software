@@ -45,6 +45,7 @@ public class GpuMappingThread extends RepeatingTaskThread
    private final BlockingQueue<RawImage> rawImageCollection;
 
    private final BooleanSupplier publishHeightMap;
+   private final BooleanSupplier publishHeightMapToController;
    private final BooleanSupplier publishTerrainMap;
 
    public GpuMappingThread(ROS2Node ros2Node,
@@ -56,12 +57,14 @@ public class GpuMappingThread extends RepeatingTaskThread
                            TerrainMapParameters terrainMapParameters,
                            DepthImageFilteringParameters depthImageFilteringParameters,
                            BooleanSupplier publishHeightMap,
+                           BooleanSupplier publishHeightMapToController,
                            BooleanSupplier publishTerrainMap)
    {
       super(GpuMappingThread.class.getSimpleName());
       this.rawImageCollection = rawImageCollection;
       this.heightMapParameters = heightMapParameters;
       this.publishHeightMap = publishHeightMap;
+      this.publishHeightMapToController = publishHeightMapToController;
       this.publishTerrainMap = publishTerrainMap;
 
       // At the highest level pass in the reference frames for the specific robot
@@ -141,6 +144,8 @@ public class GpuMappingThread extends RepeatingTaskThread
          // Publish the updated maps if demanded
          if (publishHeightMap.getAsBoolean())
             gpuMappingManager.publishHeightMap();
+         if (publishHeightMapToController.getAsBoolean())
+            gpuMappingManager.publishHeightMapForController();
          if (publishTerrainMap.getAsBoolean())
             gpuMappingManager.publishTerrainMap();
 

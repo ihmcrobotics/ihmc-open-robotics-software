@@ -76,7 +76,7 @@ public class RDXAbilityHand implements RDXHandInterface
          }
          else
          {
-            command.setControlMode(ControlMode.VEL_TO_POS.toByte());
+            command.setControlMode(ControlMode.POSITION.toByte());
             for (int i = 0; i < 6; i++)
                command.getGoalPositions()[i] = desiredPositions[i].get();
          }
@@ -101,31 +101,13 @@ public class RDXAbilityHand implements RDXHandInterface
 
       ImGui.beginDisabled(!connected);
 
-      if (ImGui.button(labels.get("Open")))
-         executeGrip = Grip.RELAX;
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Grip")))
-         executeGrip = Grip.POWER;
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Tripod Closed")))
-         executeGrip = Grip.TRIPOD_C;
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Hook")))
-         executeGrip = Grip.HOOK;
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Tripod Open")))
-         executeGrip = Grip.TRIPOD_O;
-      if (ImGui.button(labels.get("Pinch Open")))
-         executeGrip = Grip.PINCH_O;
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Pinch Closed")))
-         executeGrip = Grip.PINCH_C;
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Key")))
-         executeGrip = Grip.KEY;
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Rude")))
-         executeGrip = Grip.RUDE;
+      for (Grip grip : Grip.values)
+      {
+         if (ImGui.button(labels.get(grip.name())))
+            executeGrip = grip;
+         if (grip != Grip.values[5] && grip != Grip.values[7] && grip != Grip.values[Grip.values.length - 1])
+            ImGui.sameLine();
+      }
 
       boolean scheduleExecuteVelToPos = false;
       for (int i = 0; i < 6; i++)
@@ -138,7 +120,7 @@ public class RDXAbilityHand implements RDXHandInterface
 
          ImGui.pushItemWidth(sliderWidth);
          scheduleExecuteVelToPos |= ImGui.sliderFloat(labels.getHidden(FINGER_NAMES[i]), desiredPositions[i].getData(), sliderMin, sliderMax,
-                               "%s: %.2f%s flexion".formatted(FINGER_NAMES[i], desiredPositions[i].get(), EuclidCoreMissingTools.DEGREE_SYMBOL));
+                               "%s: %.2f%s flexion".formatted(FINGER_NAMES[i], currentPositions[i], EuclidCoreMissingTools.DEGREE_SYMBOL));
          if (!ImGui.isItemActive() && !executeVelToPos) // Prevent overriding externally submitted positions too
             desiredPositions[i].set(currentPositions[i]);
          ImGui.popItemWidth();
@@ -181,9 +163,9 @@ public class RDXAbilityHand implements RDXHandInterface
    public void sendCommand(HandAction handAction)
    {
       if (handAction == HandAction.OPEN)
-         executeGrip = Grip.RELAX;
+         executeGrip = Grip.OPEN;
       else if (handAction == HandAction.CLOSE || handAction == HandAction.GRIP)
-         executeGrip = Grip.POWER;
+         executeGrip = Grip.CLOSE;
       else
          LogTools.warn("Attempted to send an unsupported hand action command: {}", handAction.name());
    }

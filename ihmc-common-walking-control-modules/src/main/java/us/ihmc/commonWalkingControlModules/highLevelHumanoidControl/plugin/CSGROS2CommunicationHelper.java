@@ -7,6 +7,7 @@ import std_msgs.msg.dds.Empty;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGeneratorParametersBasics;
+import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
@@ -19,6 +20,12 @@ import java.util.function.Consumer;
 
 public class CSGROS2CommunicationHelper
 {
+   /**
+    * This defines the update thread rate for information being sent over ROS2. The reason this is a very low frequency is because
+    * we only have a limited amount of networking bandwidth when using WIFI.
+    */
+   private static final double THROTTLER_THREAD_HERTZ = 11.0;
+
    public static final ROS2Topic<Empty> CSG_HEARTBEAT_TOPIC = new ROS2Topic<>().withPrefix("ihmc")
                                                                                .withModule("continuous_step_generator")
                                                                                .withSuffix("heartbeat")
@@ -38,13 +45,17 @@ public class CSGROS2CommunicationHelper
    private final ROS2Publisher<ContinuousStepGeneratorInputMessage> csgInputCommandPublisher;
    private final ROS2Publisher<ContinuousStepGeneratorParametersMessage> csgParametersCommandPublisher;
 
-   // Heartbeat to ensure StepGeneratorCommandInputManager stops walking if connection is broken
+   // Heartbeat and throttles to ensure StepGeneratorCommandInputManager stops walking if connection is broken
    private final ROS2Heartbeat heartbeat;
+   private Throttler ros2Throttler;
 
    public CSGROS2CommunicationHelper(String robotName, ROS2Node ros2Node, WalkingControllerParameters walkingControllerParameters)
    {
       this(robotName, ros2Node);
       initializeCSGParameters(walkingControllerParameters);
+
+      ros2Throttler = new Throttler();
+      ros2Throttler.setFrequency(THROTTLER_THREAD_HERTZ);
    }
 
    public CSGROS2CommunicationHelper(String robotName, ROS2Node ros2Node)
@@ -77,6 +88,18 @@ public class CSGROS2CommunicationHelper
    public void publish(ContinuousStepGeneratorParametersMessage continuousStepGeneratorParametersMessage)
    {
       csgParametersCommandPublisher.publish(continuousStepGeneratorParametersMessage);
+   }
+
+   public void publishAtThrottledRate(ContinuousStepGeneratorInputMessage continuousStepGeneratorInputMessage)
+   {
+      if (ros2Throttler.run())
+         csgInputCommandPublisher.publish(continuousStepGeneratorInputMessage);
+   }
+
+   public void publishAtThrottledRate(ContinuousStepGeneratorParametersMessage continuousStepGeneratorParametersMessage)
+   {
+      if (ros2Throttler.run())
+         csgParametersCommandPublisher.publish(continuousStepGeneratorParametersMessage);
    }
 
    public void addVolatileCSGStatusCallbackSubscription(Consumer<ContinuousStepGeneratorStatusMessage> callback)
@@ -145,6 +168,7 @@ public class CSGROS2CommunicationHelper
       csgStatusMessage.setCurrentDefaultStepWidth(steppingParameters.getInPlaceWidth());
       csgStatusMessage.setCurrentTurnMaxAngleOutward(steppingParameters.getMaxAngleTurnOutwards());
       csgStatusMessage.setCurrentTurnMaxAngleInward(steppingParameters.getMaxAngleTurnInwards());
+      csgStatusMessage.setAreStepsAdjustable(csgParametersCommand.getStepsAreAdjustable());
    }
 
    public ContinuousStepGeneratorInputMessage getCSGInputCommand()

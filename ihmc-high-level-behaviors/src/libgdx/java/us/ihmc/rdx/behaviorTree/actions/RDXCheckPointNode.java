@@ -25,7 +25,7 @@ public class RDXCheckPointNode extends RDXLeafNode<CheckPointNodeState, CheckPoi
       ImGui.sameLine();
       checkpointNodeWidget.render();
 
-      renderConcurrencyGraph();
+      renderRowEnd();
    }
 
    @Override

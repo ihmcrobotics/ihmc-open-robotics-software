@@ -6,6 +6,7 @@ import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGenerator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGeneratorParameters;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGeneratorParametersBasics;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.DesiredTurningVelocityProvider;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.DesiredVelocityProvider;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition;
@@ -52,6 +53,7 @@ public class StepGeneratorCommandInputManager implements Updatable
    private ContinuousStepGenerator continuousStepGenerator;
 
    private final List<Consumer<HeightMapCommand>> heightMapCommandConsumers = new ArrayList<>();
+   private final List<Consumer<ContinuousStepGeneratorParametersBasics>> csgParametersConsumers = new ArrayList<>();
    private final AtomicReference<FootstepStatus> latestFootstepStatusReceived = new AtomicReference<>(null);
    private final AtomicReference<FootstepStatus> previousFootstepStatusReceived = new AtomicReference<>(null);
    private final AtomicReference<HeightMapCommand> latestHeightMap = new AtomicReference<>(null);
@@ -61,7 +63,6 @@ public class StepGeneratorCommandInputManager implements Updatable
    private final AtomicInteger ticksSinceUpdatingTheEnvironment = new AtomicInteger(0);
 
    // ROS 2 stuff
-   // TODO: Destroy these objects properly
    private final ROS2Node ros2Node;
    private final ROS2HeartbeatMonitor heartbeatMonitor;
 
@@ -92,6 +93,11 @@ public class StepGeneratorCommandInputManager implements Updatable
    public void addHeightMapCommandConsumer(Consumer<HeightMapCommand> heightMapCommandConsumer)
    {
       heightMapCommandConsumers.add(heightMapCommandConsumer);
+   }
+
+   public void addCSGParametersCommandConsumer(Consumer<ContinuousStepGeneratorParametersBasics> csgParametersConsumer)
+   {
+      csgParametersConsumers.add(csgParametersConsumer);
    }
 
    public CommandInputManager getCommandInputManager()
@@ -187,6 +193,8 @@ public class StepGeneratorCommandInputManager implements Updatable
             continuousStepGenerator.setStepWidths(parameters.getDefaultStepWidth(), parameters.getMinStepWidth(), parameters.getMaxStepWidth());
             continuousStepGenerator.setMaxStepLengthForwards(parameters.getMaxStepLengthForwards());
             continuousStepGenerator.setMaxStepLengthBackwards(parameters.getMaxStepLengthBackwards());
+            continuousStepGenerator.getCSGParameters().setRequestSnapToHeightmap(parameters.getRequestSnapToHeightmap());
+            continuousStepGenerator.getCSGParameters().setAccountForGroundDrift(parameters.getAccountForGroundDrift());
          }
       }
       commandInputManager.clearCommands(ContinuousStepGeneratorParametersCommand.class);
@@ -225,6 +233,12 @@ public class StepGeneratorCommandInputManager implements Updatable
 
             ticksSinceUpdatingTheEnvironment.set(0);
          }
+      }
+
+      if (continuousStepGenerator != null)
+      {
+         for (int i = 0; i < csgParametersConsumers.size(); i++)
+            csgParametersConsumers.get(i).accept(continuousStepGenerator.getCSGParameters());
       }
 
       ticksSinceUpdatingTheEnvironment.incrementAndGet();
@@ -293,5 +307,11 @@ public class StepGeneratorCommandInputManager implements Updatable
    public YoRegistry getRegistry()
    {
       return registry;
+   }
+
+   public void destroy()
+   {
+      ros2Node.destroy();
+      heartbeatMonitor.destroy();
    }
 }

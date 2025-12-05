@@ -37,6 +37,30 @@ module behavior_msgs
          * Goal positions for the joints
          */
         float goal_velocities[6];
+        /**
+         * Success criteria type (enum in AbilityHandActionDefinition)
+         */
+        octet success_criteria;
+        /**
+         * +/- tolerance in degrees for each joint position check
+         */
+        float each_joint_position_tolerance;
+        /**
+         * Sum all absolute joint movement into one value and check it exceeds this value
+         */
+        float sufficient_cumulative_joint_movement;
+        /**
+         * Enable a sinusoidal wiggling of joints if they are unresponsive
+         */
+        boolean enable_wiggle_on_failure;
+        /**
+         * When to start wiggling
+         */
+        float time_to_wiggle;
+        /**
+         * Timeout regardless of modes, action will cease after this time
+         */
+        float ultimate_timeout;
       };
     };
   };

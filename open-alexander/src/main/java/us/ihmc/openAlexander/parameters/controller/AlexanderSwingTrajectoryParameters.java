@@ -102,7 +102,7 @@ public class AlexanderSwingTrajectoryParameters extends SwingTrajectoryParameter
    @Override
    public double getMinHeightDifferenceForStepUpOrDown()
    {
-      return 0.1;
+      return 0.05;
    }
 
    @Override

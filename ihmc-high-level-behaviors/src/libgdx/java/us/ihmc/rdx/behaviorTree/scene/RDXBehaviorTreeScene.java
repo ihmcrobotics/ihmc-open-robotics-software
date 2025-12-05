@@ -19,7 +19,9 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseInstantDetection;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseObject;
+import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
 import us.ihmc.rdx.RDX3DSituatedText;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -102,12 +104,15 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
       ImGui.separator();
       ImGui.text("Add virtual:");
       ImGui.indent();
-      if (ImGuiTools.textWithUnderlineOnHover("Mustard") && ImGui.isMouseClicked(ImGuiMouseButton.Left))
+      for (IsaacROSFoundationPoseObject objectType : IsaacROSFoundationPoseObject.values())
       {
-         beingPlaced = (RDXBehaviorTreeSceneObject) createObject(IsaacROSFoundationPoseObject.MUSTARD);
-         objects.add(beingPlaced);
-         objectsModifiable.modify();
-         needToInitializePlacementHeight = true;
+         if (ImGuiTools.textWithUnderlineOnHover(objectType.titleCaseName) && ImGui.isMouseClicked(ImGuiMouseButton.Left))
+         {
+            beingPlaced = (RDXBehaviorTreeSceneObject) createObject(objectType);
+            objects.add(beingPlaced);
+            objectsModifiable.modify();
+            needToInitializePlacementHeight = true;
+         }
       }
       ImGui.unindent();
       ImGui.separator();
@@ -149,10 +154,16 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
 
    private static void renderPersistentDetection(PersistentDetectionStatusMessage message)
    {
-      String text = "%s %.2f Hz Size: %d ID.%s".formatted(message.getObjectClassAsString(),
-                                                           message.getDecayingFrequency(),
-                                                           message.getHistorySize(),
-                                                           message.getIdAsString());
+      String type = "(?)";
+      if (message.getDetectionTypeAsString().equals(IsaacROSFoundationPoseInstantDetection.class.getSimpleName()))
+         type = "(FoundationPose)";
+      if (message.getDetectionTypeAsString().equals(YOLOv8InstantDetection.class.getSimpleName()))
+         type = "(YOLOv8)";
+      String text = "%s %s %.2f Hz Size: %d ID.%s".formatted(type,
+                                                             message.getObjectClassAsString(),
+                                                             message.getDecayingFrequency(),
+                                                             message.getHistorySize(),
+                                                             message.getIdAsString());
       if (message.getIsStable())
          ImGui.text(text);
       else

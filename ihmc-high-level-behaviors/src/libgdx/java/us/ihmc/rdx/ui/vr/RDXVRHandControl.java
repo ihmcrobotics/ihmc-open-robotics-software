@@ -126,7 +126,7 @@ public class RDXVRHandControl
                            float newThumbOpposition = thumbOpposition.get(side) + side.negateIfRightSide(1.0f) * Math.signum(lateralJoystick) * THUMB_OPPOSITION_JOYSTICK_INCREMENT;
                            newThumbOpposition = Math.max(0.0f, Math.min(newThumbOpposition, 1.0f));
                            thumbOpposition.put(side, newThumbOpposition);
-                           handManager.getHand(side).sendFingerPosition(5, thumbOpposition.get(side));
+                           handManager.getHand(side).sendFingerPosition(5, 120.0f * thumbOpposition.get(side));
                         }
                      }
 
