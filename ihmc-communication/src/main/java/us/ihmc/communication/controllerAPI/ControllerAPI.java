@@ -3,6 +3,7 @@ package us.ihmc.communication.controllerAPI;
 import controller_msgs.msg.dds.*;
 import ihmc_common_msgs.msg.dds.MessageCollection;
 import ihmc_common_msgs.msg.dds.MessageCollectionNotification;
+import ihmc_common_msgs.msg.dds.Point2DMessage;
 import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
 import toolbox_msgs.msg.dds.*;
 import us.ihmc.communication.ROS2Tools;
@@ -79,6 +80,9 @@ public final class ControllerAPI
 
       // Command supported by the joint-space controller JointspacePositionControllerState
       inputMessageClasses.add(WholeBodyJointspaceTrajectoryMessage.class);
+
+      // TODO
+      inputMessageClasses.add(Point2DMessage.class);
 
       // Toolbox management
       inputMessageClasses.add(ToolboxStateMessage.class);
