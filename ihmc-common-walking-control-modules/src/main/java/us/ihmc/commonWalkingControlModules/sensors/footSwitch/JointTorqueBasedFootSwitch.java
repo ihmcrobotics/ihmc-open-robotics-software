@@ -40,6 +40,7 @@ import java.util.List;
 
 public class JointTorqueBasedFootSwitch implements FootSwitchInterface
 {
+   private static final double DETERMINANT_THRESHOLD = 2E-3;
    private static final double GRAVITY_Z = -9.81;
    private final YoRegistry registry;
 
@@ -312,6 +313,8 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
       private final GlitchFilteredYoBoolean hasFootHitGroundFiltered;
       private final GlitchFilteredYoBoolean isPastCoPThresholdFiltered;
 
+      private final YoDouble determinantThreshold;
+      private final YoDouble jacobianDeterminant;
       private final YoDouble copDistance;
       private final YoDouble footForceMagnitude;
       private final YoDouble alphaFootLoadFiltering;
@@ -381,6 +384,9 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
 
          footForceMagnitude = new YoDouble(namePrefix + "FootForceMag", registry);
          copDistance = new YoDouble(namePrefix + "CoPDistance", registry);
+         determinantThreshold = new YoDouble(namePrefix + "DeterminantThreshold", registry);
+         jacobianDeterminant = new YoDouble(namePrefix + "JacobianDeterminant", registry);
+         determinantThreshold.set(DETERMINANT_THRESHOLD);
 
          alphaFootLoadFiltering = new YoDouble(namePrefix + "AlphaFootLoadFiltering", registry);
          alphaFootLoadFiltering.set(0.1);
@@ -405,6 +411,8 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
          footJacobian.compute();
          jacobianTranspose.reshape(footJacobian.getNumberOfColumns(), 6);
          CommonOps_DDRM.transpose(footJacobian.getJacobianMatrix(), jacobianTranspose);
+
+         jacobianDeterminant.set(CommonOps_DDRM.det(jacobianTranspose));
 
          for (int i = 0; i < legJoints.length; i++)
             torqueVector.set(i, 0, legJoints[i].getTau());
@@ -487,10 +495,18 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
 //       This is the former condition that we were using, we took out the horizontal velocity because the robot in single support was shaking too much
 //       hasFootHitGround.set(isPastForceThreshold.getValue() && horizontalVelocity.getValue() < horizontalVelocityThreshold.getValue()
 //                              && Math.abs(verticalVelocity.getValue()) < verticalVelocityThreshold.getValue());
-         boolean validCoP = isPastCoPThresholdFiltered.getValue();
-         boolean hitGroundLow = (isPastForceThresholdLowFiltered.getValue() && validCoP && Math.abs(verticalVelocity.getValue()) < verticalVelocityThreshold.getValue()) ;
+         if (jacobianDeterminant.getValue() > determinantThreshold.getValue())
+         {
+            boolean validCoP = isPastCoPThresholdFiltered.getValue();
+            boolean hitGroundLow = (isPastForceThresholdLowFiltered.getValue() && validCoP
+                                    && Math.abs(verticalVelocity.getValue()) < verticalVelocityThreshold.getValue());
 
-         hasFootHitGround.set(hitGroundLow || isPastForceThresholdHigh.getValue());
+            hasFootHitGround.set(hitGroundLow || isPastForceThresholdHigh.getValue());
+         }
+         else
+         {
+            hasFootHitGround.set(Math.abs(verticalVelocity.getValue()) < verticalVelocityThreshold.getValue());
+         }
          hasFootHitGroundFiltered.update();
       }
 
