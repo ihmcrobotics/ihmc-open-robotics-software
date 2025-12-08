@@ -1,13 +1,13 @@
 package us.ihmc.behaviors.activeMapping.ContinuousHikingStateMachine;
 
 import controller_msgs.msg.dds.PauseWalkingMessage;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.activeMapping.ContinuousPlanner;
 import us.ihmc.behaviors.activeMapping.TerrainPlanningDebugger;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.State;
@@ -15,7 +15,7 @@ import us.ihmc.ros2.ROS2Publisher;
 
 public class DoNothingState implements State
 {
-   private final HumanoidReferenceFrames referenceFrames;
+   private final ROS2SyncedRobotModel syncedRobotModel;
    private final ContinuousPlanner continuousPlanner;
    private final TerrainPlanningDebugger debugger;
 
@@ -28,12 +28,12 @@ public class DoNothingState implements State
     * When we leave this state we re-initialize the continuous planner as this can only mean we are starting things up.
     */
    public DoNothingState(ROS2Helper ros2Helper,
-                         HumanoidReferenceFrames referenceFrames,
+                         ROS2SyncedRobotModel syncedRobotModel,
                          String simpleRobotName,
                          ContinuousPlanner continuousPlanner,
                          TerrainPlanningDebugger debugger)
    {
-      this.referenceFrames = referenceFrames;
+      this.syncedRobotModel = syncedRobotModel;
       this.continuousPlanner = continuousPlanner;
       this.debugger = debugger;
 
@@ -60,12 +60,18 @@ public class DoNothingState implements State
          debugger.resetVisualizationForUIPublisher();
       }
 
-      // We are deep coping the frames here to avoid a data race condition, still possible but very small chance
-      RigidBodyTransform leftSoldTransform = new RigidBodyTransform(referenceFrames.getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame());
-      RigidBodyTransform rightSoldTransform = new RigidBodyTransform(referenceFrames.getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame());
+      RigidBodyTransform leftSoleTransform;
+      RigidBodyTransform rightSoleTransform;
 
-      robotFeet.get(RobotSide.LEFT).set(leftSoldTransform);
-      robotFeet.get(RobotSide.RIGHT).set(rightSoldTransform);
+      // The reference frames are being updated in another thread, to prevent reading when its writing, use the synchronized call
+      synchronized (syncedRobotModel)
+      {
+         leftSoleTransform = new RigidBodyTransform(syncedRobotModel.getReferenceFrames().getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame());
+         rightSoleTransform = new RigidBodyTransform(syncedRobotModel.getReferenceFrames().getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame());
+      }
+
+      robotFeet.get(RobotSide.LEFT).set(leftSoleTransform);
+      robotFeet.get(RobotSide.RIGHT).set(rightSoleTransform);
       debugger.publishStartAndGoalForVisualization(robotFeet, robotFeet);
 
       continuousPlanner.setInitialized(false);

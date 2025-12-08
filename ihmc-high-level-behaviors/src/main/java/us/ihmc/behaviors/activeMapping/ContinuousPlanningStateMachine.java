@@ -75,7 +75,7 @@ public class ContinuousPlanningStateMachine
       stateMachineFactory.setRegistry(registry);
 
       // Create the different states
-      State notStartedState = new DoNothingState(ros2Helper, referenceFrames, simpleRobotName, continuousPlanner, debugger);
+      State notStartedState = new DoNothingState(ros2Helper, syncedRobotModel, simpleRobotName, continuousPlanner, debugger);
       State readyToPlanState = new ReadyToPlanState(ros2Helper,
                                                     referenceFrames,
                                                     commandMessage,
