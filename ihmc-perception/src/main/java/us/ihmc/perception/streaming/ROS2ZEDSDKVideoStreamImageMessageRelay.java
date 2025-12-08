@@ -71,22 +71,28 @@ public class ROS2ZEDSDKVideoStreamImageMessageRelay extends ZEDImageSensor
          waitForGrab(timeout);
 
          RawImage depthImage = getImage(ZEDImageSensor.DEPTH_IMAGE_KEY);
+         if (depthImage != null)
+         {
+            packImageMessage(depthImage, lastDepthImageMessage);
+            publisherExecutor.submit(() -> ros2Helper.publish(depthTopic, lastDepthImageMessage));
+            depthImage.release();
+         }
+
          RawImage leftColorImage = getImage(ZEDImageSensor.LEFT_COLOR_IMAGE_KEY);
+         if (leftColorImage != null)
+         {
+            packImageMessage(leftColorImage, lastLeftColorImageMessage);
+            publisherExecutor.submit(() -> ros2Helper.publish(colorTopics.get(RobotSide.LEFT), lastLeftColorImageMessage));
+            leftColorImage.release();
+         }
+
          RawImage rightColorImage = getImage(ZEDImageSensor.RIGHT_COLOR_IMAGE_KEY);
-
-         // Pack all RawImages into ImageMessages
-         packImageMessage(depthImage, lastDepthImageMessage);
-         packImageMessage(leftColorImage, lastLeftColorImageMessage);
-         packImageMessage(rightColorImage, lastRightColorImageMessage);
-
-         // Publish async to not block receiving new images
-         publisherExecutor.submit(() -> ros2Helper.publish(depthTopic, lastDepthImageMessage));
-         publisherExecutor.submit(() -> ros2Helper.publish(colorTopics.get(RobotSide.LEFT), lastLeftColorImageMessage));
-         publisherExecutor.submit(() -> ros2Helper.publish(colorTopics.get(RobotSide.RIGHT), lastRightColorImageMessage));
-
-         rightColorImage.release();
-         leftColorImage.release();
-         depthImage.release();
+         if (rightColorImage != null)
+         {
+            packImageMessage(rightColorImage, lastRightColorImageMessage);
+            publisherExecutor.submit(() -> ros2Helper.publish(colorTopics.get(RobotSide.RIGHT), lastRightColorImageMessage));
+            rightColorImage.release();
+         }
       }
       else
       {
@@ -109,9 +115,8 @@ public class ROS2ZEDSDKVideoStreamImageMessageRelay extends ZEDImageSensor
    @Override
    public void close()
    {
-      publisherExecutor.shutdownNow();
       publishThread.blockingKill();
-
+      publisherExecutor.shutdownNow();
       super.close();
    }
 }

@@ -460,9 +460,12 @@ public class ZEDImageSensor extends ImageSensor
          }
       }
 
-      for (RawImage image : grabbedImages)
-         if (image != null)
-            image.release();
+      synchronized (grabbedImages)
+      {
+         for (RawImage image : grabbedImages)
+            if (image != null)
+               image.release();
+      }
 
       sl_close_camera(cameraID);
 
