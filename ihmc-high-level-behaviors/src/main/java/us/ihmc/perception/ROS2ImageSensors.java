@@ -73,7 +73,7 @@ public class ROS2ImageSensors
       publishSensor(sensorId, topicMap, demandTopic, ros2Node);
    }
 
-   public void publishSensor(String sensorId, Map<ROS2Topic<? extends Packet<?>>, Integer> topicMap, ROS2Topic<Empty> demandTopic, ROS2Node ros2node)
+   public void publishSensor(String sensorId, Map<ROS2Topic<? extends Packet<?>>, Integer> topicMap, ROS2Topic<Empty> demandTopic, ROS2Node ros2Node)
    {
       ImageSensor sensor = imageSensors.get(sensorId);
       ImageSensorPublishThread publishThread = new ImageSensorPublishThread(ros2Node, sensor);

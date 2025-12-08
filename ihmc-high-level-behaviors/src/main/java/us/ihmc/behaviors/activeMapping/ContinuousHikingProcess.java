@@ -72,8 +72,10 @@ public class ContinuousHikingProcess
       // This is for the height map, it expects the queue of images that we get from the sensors
       BlockingQueue<RawImage> rawImageCollectionRealsnese = new LinkedBlockingQueue<>(ImageSensor.DEFAULT_IMAGE_QUEUE_CAPACITY);
       BlockingQueue<RawImage> rawImageCollectionZED = new LinkedBlockingQueue<>(ImageSensor.DEFAULT_IMAGE_QUEUE_CAPACITY);
-      ros2ImageSensors.getSensor("Stepping Camera").registerImageQueue(rawImageCollectionRealsnese, RealSenseImageSensor.DEPTH_IMAGE_KEY);
-      ros2ImageSensors.getSensor("Experimental Camera").registerImageQueue(rawImageCollectionZED, ZEDImageSensor.DEPTH_IMAGE_KEY);
+      if (ros2ImageSensors.getSensor("Stepping Camera") != null)
+         ros2ImageSensors.getSensor("Stepping Camera").registerImageQueue(rawImageCollectionRealsnese, RealSenseImageSensor.DEPTH_IMAGE_KEY);
+      if (ros2ImageSensors.getSensor("Experimental Camera") != null)
+         ros2ImageSensors.getSensor("Experimental Camera").registerImageQueue(rawImageCollectionZED, ZEDImageSensor.DEPTH_IMAGE_KEY);
 
       heightMapDemandNode = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_HEIGHT_MAP);
       heightMapControllerDemandNode = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_HEIGHT_MAP_FOR_CONTROLLER);

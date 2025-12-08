@@ -84,9 +84,9 @@ public final class PerceptionAPI
     * Camera topic bases
     */
    private static final ROS2Topic<?> EXPERIMENTAL_CAMERA = BEST_EFFORT.withPrefix("experimental_camera");
-   private static final ROS2Topic<?> ROS2_EXPERIMENTAL_CAMERA = RELIABLE.withPrefix("experimental_camera");
+   private static final ROS2Topic<?> ROS2_EXPERIMENTAL_CAMERA = RELIABLE.withPrefix("ros2_experimental_camera");
    private static final ROS2Topic<?> STEPPING_CAMERA = BEST_EFFORT.withPrefix("stepping_camera");
-   private static final ROS2Topic<?> ROS2_STEPPING_CAMERA = RELIABLE.withPrefix("stepping_camera");
+   private static final ROS2Topic<?> ROS2_STEPPING_CAMERA = RELIABLE.withPrefix("ros2_stepping_camera");
 
    /*
     * Experimental ZED image topics (IHMC ImageMessage type)
