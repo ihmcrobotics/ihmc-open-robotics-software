@@ -37,6 +37,7 @@ public class ROS2BehaviorTreeYoRegistry
    private int depthFirstIndex = 0;
    private int executingActionIndex = 0;
 
+   private final YoLong messagesReceived = new YoLong("messagesReceived", registry);
    private final YoInteger persistentDetections = new YoInteger("persistentDetections", registry);
    private final YoInteger sceneObjects = new YoInteger("sceneObjects", registry);
    private final YoBoolean automaticExecution = new YoBoolean("automaticExecution", registry);
@@ -44,7 +45,7 @@ public class ROS2BehaviorTreeYoRegistry
    private final YoBoolean concurrencyEnabled = new YoBoolean("concurrencyEnabled", registry);
    private final YoInteger executingActions = new YoInteger("executingActions", registry);
    private final YoInteger failedActions = new YoInteger("failedActions", registry);
-   private final YoLong actionStatesReceived;
+   private final YoLong actionStatesReceived = new YoLong("actionStatesReceived", registry);
    private final YoInteger[] executingActionTypes = new YoInteger[5];
    private final YoInteger[] executingActionIDs = new YoInteger[5];
    private final YoDouble[] elapsedExecutionTimes = new YoDouble[5];
@@ -62,7 +63,6 @@ public class ROS2BehaviorTreeYoRegistry
          executingActionIDs[i] = new YoInteger("executingActionID" + i, registry);
          elapsedExecutionTimes[i] = new YoDouble("elapsedExecutionTime" + i, registry);
       }
-      actionStatesReceived = new YoLong("actionStatesReceived", registry);
 
       for (RobotSide side : RobotSide.values)
       {
@@ -80,6 +80,7 @@ public class ROS2BehaviorTreeYoRegistry
          {
             BehaviorTreeStateMessage state = subscription.getForThreadTwo();
 
+            messagesReceived.increment();
             persistentDetections.set(state.getScene().getPersistentDetections().size());
             sceneObjects.set(state.getScene().getObjects().size());
 
@@ -99,23 +100,23 @@ public class ROS2BehaviorTreeYoRegistry
                goalHandPoses.get(side).setToNaN();
             }
             failedActions.set(0);
-            if (!state.getRootNodes().isEmpty())
-            {
-               BehaviorTreeRootNodeStateMessage root = state.getRootNodes().get(0);
-               automaticExecution.set(root.getAutomaticExecution());
-               concurrencyEnabled.set(root.getConcurrencyEnabled());
-               executionNextIndex.set(root.getExecutionNextIndex());
 
-               buildSubscriptionTree(state, subscriptionRootNode);
-
-               processNode(subscriptionRootNode);
-            }
+            buildSubscriptionTree(state, subscriptionRootNode);
+            processNode(subscriptionRootNode);
          }
       }
    }
 
    private void processNode(ROS2BehaviorTreeSubscriptionNode node)
    {
+      BehaviorTreeRootNodeStateMessage rootState = node.getBehaviorTreeRootNodeStateMessage();
+      if (rootState != null)
+      {
+         automaticExecution.set(rootState.getAutomaticExecution());
+         concurrencyEnabled.set(rootState.getConcurrencyEnabled());
+         executionNextIndex.set(rootState.getExecutionNextIndex());
+      }
+
       LeafNodeStateMessage leafNodeState = node.getLeafNodeStateMessage();
       if (leafNodeState != null)
       {
@@ -128,6 +129,7 @@ public class ROS2BehaviorTreeYoRegistry
             ActionNodeStateMessage actionState = node.getActionNodeStateMessage();
             if (actionState != null)
             {
+               actionStatesReceived.increment();
                elapsedExecutionTimes[executingActionIndex].set(actionState.getElapsedExecutionTime());
             }
 
