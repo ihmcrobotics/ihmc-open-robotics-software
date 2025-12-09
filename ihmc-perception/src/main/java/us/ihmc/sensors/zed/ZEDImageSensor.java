@@ -25,6 +25,7 @@ import us.ihmc.zed.SL_Vector3;
 import us.ihmc.zed.library.ZEDJavaAPINativeLibrary;
 
 import java.time.Instant;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static us.ihmc.zed.global.zed.*;
 
@@ -35,7 +36,7 @@ public class ZEDImageSensor extends ImageSensor
       ZEDJavaAPINativeLibrary.load();
    }
 
-   private static int nextStreamingPort = 30000;
+   private static final AtomicInteger nextStreamingPort = new AtomicInteger(30000);
 
    public static final int LEFT_COLOR_IMAGE_KEY = 0;
    public static final int RIGHT_COLOR_IMAGE_KEY = 1;
@@ -48,6 +49,7 @@ public class ZEDImageSensor extends ImageSensor
    private static final float MILLIMETER_TO_METERS = 0.001f;
 
    private final int cameraID;
+   private final int serialNumber;
    private final ZEDModelData zedModel;
    private final int slInputType;
    private final int slDepthMode;
@@ -56,7 +58,7 @@ public class ZEDImageSensor extends ImageSensor
    private int bitrate;
    private String remoteStreamingAddress;
    private int remoteStreamingPort;
-   private final int localStreamingPort = nextStreamingPort++;
+   private final int localStreamingPort = nextStreamingPort.getAndAdd(2);
 
    private final RawImage[] grabbedImages = new RawImage[OUTPUT_IMAGE_COUNT];
    private final Pointer[] slMatPointers = new Pointer[OUTPUT_IMAGE_COUNT];
@@ -87,6 +89,11 @@ public class ZEDImageSensor extends ImageSensor
       this(cameraID, zedModel, slInputType, slDepthMode, DEFAULT_RESOLUTION, DEFAULT_FPS);
    }
 
+   public ZEDImageSensor(int cameraID, ZEDModelData zedModel, int slInputType, int slDepthMode, int resolution, int fps)
+   {
+      this(cameraID, 0, zedModel, slInputType, slDepthMode, resolution, fps);
+   }
+
    /**
     * See the documentation for the available resolutions and frame rates:
     * <ul>
@@ -99,11 +106,12 @@ public class ZEDImageSensor extends ImageSensor
     *    <li>{@link us.ihmc.zed.global.zed#SL_RESOLUTION_VGA}</li>
     * </ul>
     */
-   public ZEDImageSensor(int cameraID, ZEDModelData zedModel, int slInputType, int slDepthMode, int resolution, int fps)
+   public ZEDImageSensor(int cameraID, int serialNumber, ZEDModelData zedModel, int slInputType, int slDepthMode, int resolution, int fps)
    {
       super(zedModel.name());
 
       this.cameraID = cameraID;
+      this.serialNumber = serialNumber;
       this.zedModel = zedModel;
       this.slInputType = slInputType;
       this.slDepthMode = slDepthMode;
@@ -255,9 +263,9 @@ public class ZEDImageSensor extends ImageSensor
    protected int openCamera()
    {
       if (slInputType == SL_INPUT_TYPE_STREAM)
-         return sl_open_camera(cameraID, zedInitParameters, 0, "", remoteStreamingAddress, remoteStreamingPort, "", "", "");
+         return sl_open_camera(cameraID, zedInitParameters, serialNumber, "", remoteStreamingAddress, remoteStreamingPort, "", "", "");
       else
-         return sl_open_camera(cameraID, zedInitParameters, 0, "", "", 0, "", "", "");
+         return sl_open_camera(cameraID, zedInitParameters, serialNumber, "", "", 0, "", "", "");
    }
 
    @Override
@@ -452,9 +460,12 @@ public class ZEDImageSensor extends ImageSensor
          }
       }
 
-      for (RawImage image : grabbedImages)
-         if (image != null)
-            image.release();
+      synchronized (grabbedImages)
+      {
+         for (RawImage image : grabbedImages)
+            if (image != null)
+               image.release();
+      }
 
       sl_close_camera(cameraID);
 
@@ -479,7 +490,7 @@ public class ZEDImageSensor extends ImageSensor
       @Override
       public String getMessage()
       {
-         return "ZED Error (%d): %s".formatted(zedErrorCode, getZEDErrorName(zedErrorCode));
+         return "[%s] ZED Error (%d): %s".formatted(getSensorName(), zedErrorCode, getZEDErrorName(zedErrorCode));
       }
    }
 

@@ -80,8 +80,8 @@ public class IsaacROSFoundationPoseDemo
          RawImage depth = zedImageSensor.getImage(ZEDImageSensor.DEPTH_IMAGE_KEY);
 
          // Publish for the UI
-         imagePublisher.publishImage(PerceptionAPI.ZED_DEPTH, depth);
-         imagePublisher.publishImage(PerceptionAPI.ZED_COLOR_IMAGES.get(RobotSide.LEFT), color);
+         imagePublisher.publishImage(PerceptionAPI.EXPERIMENTAL_ZED_DEPTH, depth);
+         imagePublisher.publishImage(PerceptionAPI.EXPERIMENTAL_ZED_COLOR.get(RobotSide.LEFT), color);
 
          // Run YOLO using the color image
          yoloExecutor.runNextEnabledModel(color, depth);
