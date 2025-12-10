@@ -1,19 +1,25 @@
 package us.ihmc.behaviors.behaviorTree.ros2;
 
+import behavior_msgs.msg.dds.ActionNodeStateMessage;
 import behavior_msgs.msg.dds.BehaviorTreeRootNodeStateMessage;
 import behavior_msgs.msg.dds.BehaviorTreeStateMessage;
 import behavior_msgs.msg.dds.HandPoseActionStateMessage;
+import behavior_msgs.msg.dds.LeafNodeStateMessage;
 import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.AutonomyAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.idl.IDLSequence.Object;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.thread.SwapReference;
 import us.ihmc.yoVariables.euclid.YoPose3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.YoLong;
 
 /**
  * Enabled logging behavior data synchronized with control data.
@@ -31,6 +37,7 @@ public class ROS2BehaviorTreeYoRegistry
    private int depthFirstIndex = 0;
    private int executingActionIndex = 0;
 
+   private final YoLong messagesReceived = new YoLong("messagesReceived", registry);
    private final YoInteger persistentDetections = new YoInteger("persistentDetections", registry);
    private final YoInteger sceneObjects = new YoInteger("sceneObjects", registry);
    private final YoBoolean automaticExecution = new YoBoolean("automaticExecution", registry);
@@ -38,9 +45,13 @@ public class ROS2BehaviorTreeYoRegistry
    private final YoBoolean concurrencyEnabled = new YoBoolean("concurrencyEnabled", registry);
    private final YoInteger executingActions = new YoInteger("executingActions", registry);
    private final YoInteger failedActions = new YoInteger("failedActions", registry);
+   private final YoLong actionStatesReceived = new YoLong("actionStatesReceived", registry);
    private final YoInteger[] executingActionTypes = new YoInteger[5];
-   private final YoPose3D[] currentHandPoses = new YoPose3D[5];
-   private final YoPose3D[] goalHandPoses = new YoPose3D[5];
+   private final YoInteger[] executingActionIDs = new YoInteger[5];
+   private final YoDouble[] elapsedExecutionTimes = new YoDouble[5];
+   private final SideDependentList<YoLong> handActionStatesReceived = new SideDependentList<>();
+   private final SideDependentList<YoPose3D> currentHandPoses = new SideDependentList<>();
+   private final SideDependentList<YoPose3D> goalHandPoses = new SideDependentList<>();
 
    public ROS2BehaviorTreeYoRegistry(ROS2Node ros2Node)
    {
@@ -48,76 +59,111 @@ public class ROS2BehaviorTreeYoRegistry
 
       for (int i = 0; i < executingActionTypes.length; i++)
       {
-         executingActionTypes[i] = new YoInteger("executingAction" + i, registry);
-         currentHandPoses[i] = new YoPose3D("currentHandPose" + i, registry);
-         goalHandPoses[i] = new YoPose3D("goalHandPose" + i, registry);
+         executingActionTypes[i] = new YoInteger("executingActionType" + i, registry);
+         executingActionIDs[i] = new YoInteger("executingActionID" + i, registry);
+         elapsedExecutionTimes[i] = new YoDouble("elapsedExecutionTime" + i, registry);
+      }
+
+      for (RobotSide side : RobotSide.values)
+      {
+         handActionStatesReceived.put(side, new YoLong("handActionStatesReceived" + side.getPascalCaseName(), registry));
+         currentHandPoses.put(side, new YoPose3D("currentHandPose" + side.getPascalCaseName(), registry));
+         goalHandPoses.put(side, new YoPose3D("goalHandPose" + side.getPascalCaseName(), registry));
       }
    }
 
    public void update()
    {
-      if (notification.poll())
+      try // Make sure exceptions don't crash controller
       {
-         synchronized (subscription)
+         if (notification.poll())
          {
-            BehaviorTreeStateMessage state = subscription.getForThreadTwo();
-
-            persistentDetections.set(state.getScene().getPersistentDetections().size());
-            sceneObjects.set(state.getScene().getObjects().size());
-
-            subscriptionRootNode.clear();
-            depthFirstIndex = 0;
-            executingActionIndex = 0;
-            executingActions.set(0);
-            for (int i = 0; i < executingActionTypes.length; i++)
+            synchronized (subscription)
             {
-               executingActionTypes[i].set(-1);
-               currentHandPoses[i].setToNaN();
-               goalHandPoses[i].setToNaN();
-            }
-            failedActions.set(0);
-            if (!state.getRootNodes().isEmpty())
-            {
-               BehaviorTreeRootNodeStateMessage root = state.getRootNodes().get(0);
-               automaticExecution.set(root.getAutomaticExecution());
-               concurrencyEnabled.set(root.getConcurrencyEnabled());
-               executionNextIndex.set(root.getExecutionNextIndex());
+               BehaviorTreeStateMessage state = subscription.getForThreadTwo();
 
-               buildSubscriptionTree(state, subscriptionRootNode);
+               messagesReceived.increment();
+               persistentDetections.set(state.getScene().getPersistentDetections().size());
+               sceneObjects.set(state.getScene().getObjects().size());
 
-               processNode(subscriptionRootNode);
+               subscriptionRootNode.clear();
+               depthFirstIndex = 0;
+               executingActionIndex = 0;
+               executingActions.set(0);
+               for (int i = 0; i < executingActionTypes.length; i++)
+               {
+                  executingActionTypes[i].set(-1);
+                  executingActionIDs[i].set(-1);
+                  elapsedExecutionTimes[i].set(Double.NaN);
+               }
+               for (RobotSide side : RobotSide.values)
+               {
+                  currentHandPoses.get(side).setToNaN();
+                  goalHandPoses.get(side).setToNaN();
+               }
+               failedActions.set(0);
+
+               if (!state.getBehaviorTreeTypes().isEmpty())
+               {
+                  buildSubscriptionTree(state, subscriptionRootNode);
+                  processNode(subscriptionRootNode);
+               }
             }
          }
+      }
+      catch (Throwable t)
+      {
+         t.printStackTrace();
       }
    }
 
    private void processNode(ROS2BehaviorTreeSubscriptionNode node)
    {
-      if (node.getLeafNodeStateMessage() != null)
+      BehaviorTreeRootNodeStateMessage rootState = node.getBehaviorTreeRootNodeStateMessage();
+      if (rootState != null)
       {
-         if (node.getLeafNodeStateMessage().getIsExecuting())
+         automaticExecution.set(rootState.getAutomaticExecution());
+         concurrencyEnabled.set(rootState.getConcurrencyEnabled());
+         executionNextIndex.set(rootState.getExecutionNextIndex());
+      }
+
+      LeafNodeStateMessage leafNodeState = node.getLeafNodeStateMessage();
+      if (leafNodeState != null)
+      {
+         if (leafNodeState.getIsExecuting())
          {
             executingActions.increment();
             executingActionTypes[executingActionIndex].set(node.getPackedType());
-            ++executingActionIndex;
+            executingActionIDs[executingActionIndex].set((int) node.getBehaviorTreeNodeStateMessage().getId());
 
-            if (node.getHandPoseActionStateMessage() != null)
+            ActionNodeStateMessage actionState = node.getActionNodeStateMessage();
+            if (actionState != null)
             {
-               HandPoseActionStateMessage handPose = node.getHandPoseActionStateMessage();
+               actionStatesReceived.increment();
+               elapsedExecutionTimes[executingActionIndex].set(actionState.getElapsedExecutionTime());
+            }
 
-               currentHandPoses[node.getPackedType()].set(handPose.getState().getCurrentPose());
+            HandPoseActionStateMessage handPoseState = node.getHandPoseActionStateMessage();
+            if (handPoseState != null)
+            {
+               RobotSide side = RobotSide.fromByte(handPoseState.getDefinition().getRobotSide());
 
-               Object<SE3TrajectoryPointMessage> trajectory = handPose.getState().getCommandedTrajectory();
+               handActionStatesReceived.get(side).increment();
+               currentHandPoses.get(side).set(handPoseState.getState().getCurrentPose());
+
+               Object<SE3TrajectoryPointMessage> trajectory = handPoseState.getState().getCommandedTrajectory();
                if (!trajectory.isEmpty())
                {
                   SE3TrajectoryPointMessage lastPose = trajectory.get(trajectory.size() - 1);
-                  goalHandPoses[node.getPackedType()].getPosition().set(lastPose.getPosition());
-                  goalHandPoses[node.getPackedType()].getOrientation().set(lastPose.getOrientation());
+                  goalHandPoses.get(side).getPosition().set(lastPose.getPosition());
+                  goalHandPoses.get(side).getOrientation().set(lastPose.getOrientation());
                }
             }
+
+            ++executingActionIndex;
          }
 
-         if (node.getLeafNodeStateMessage().getFailed())
+         if (leafNodeState.getFailed())
          {
             failedActions.increment();
          }
