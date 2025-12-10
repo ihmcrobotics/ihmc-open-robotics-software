@@ -74,36 +74,46 @@ public class ROS2BehaviorTreeYoRegistry
 
    public void update()
    {
-      if (notification.poll())
+      try // Make sure exceptions don't crash controller
       {
-         synchronized (subscription)
+         if (notification.poll())
          {
-            BehaviorTreeStateMessage state = subscription.getForThreadTwo();
-
-            messagesReceived.increment();
-            persistentDetections.set(state.getScene().getPersistentDetections().size());
-            sceneObjects.set(state.getScene().getObjects().size());
-
-            subscriptionRootNode.clear();
-            depthFirstIndex = 0;
-            executingActionIndex = 0;
-            executingActions.set(0);
-            for (int i = 0; i < executingActionTypes.length; i++)
+            synchronized (subscription)
             {
-               executingActionTypes[i].set(-1);
-               executingActionIDs[i].set(-1);
-               elapsedExecutionTimes[i].set(Double.NaN);
-            }
-            for (RobotSide side : RobotSide.values)
-            {
-               currentHandPoses.get(side).setToNaN();
-               goalHandPoses.get(side).setToNaN();
-            }
-            failedActions.set(0);
+               BehaviorTreeStateMessage state = subscription.getForThreadTwo();
 
-            buildSubscriptionTree(state, subscriptionRootNode);
-            processNode(subscriptionRootNode);
+               messagesReceived.increment();
+               persistentDetections.set(state.getScene().getPersistentDetections().size());
+               sceneObjects.set(state.getScene().getObjects().size());
+
+               subscriptionRootNode.clear();
+               depthFirstIndex = 0;
+               executingActionIndex = 0;
+               executingActions.set(0);
+               for (int i = 0; i < executingActionTypes.length; i++)
+               {
+                  executingActionTypes[i].set(-1);
+                  executingActionIDs[i].set(-1);
+                  elapsedExecutionTimes[i].set(Double.NaN);
+               }
+               for (RobotSide side : RobotSide.values)
+               {
+                  currentHandPoses.get(side).setToNaN();
+                  goalHandPoses.get(side).setToNaN();
+               }
+               failedActions.set(0);
+
+               if (!state.getBehaviorTreeTypes().isEmpty())
+               {
+                  buildSubscriptionTree(state, subscriptionRootNode);
+                  processNode(subscriptionRootNode);
+               }
+            }
          }
+      }
+      catch (Throwable t)
+      {
+         t.printStackTrace();
       }
    }
 
