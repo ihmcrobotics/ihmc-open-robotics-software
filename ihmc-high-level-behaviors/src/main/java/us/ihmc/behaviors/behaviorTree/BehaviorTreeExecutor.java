@@ -53,6 +53,9 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeRootNodeExecu
 
    public void update()
    {
+      for (RobotSide side : abilityHandComms.sides())
+         abilityHandComms.get(side).update();
+
       scene.update();
 
       if (rootNode != null)
