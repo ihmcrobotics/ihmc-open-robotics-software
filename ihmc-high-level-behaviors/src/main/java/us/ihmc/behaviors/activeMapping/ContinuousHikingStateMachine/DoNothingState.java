@@ -66,8 +66,8 @@ public class DoNothingState implements State
       // The reference frames are being updated in another thread, to prevent reading when its writing, use the synchronized call
       synchronized (syncedRobotModel)
       {
-         leftSoleTransform = new RigidBodyTransform(syncedRobotModel.getReferenceFrames().getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame());
-         rightSoleTransform = new RigidBodyTransform(syncedRobotModel.getReferenceFrames().getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame());
+         leftSoleTransform = syncedRobotModel.getReferenceFrames().getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame();
+         rightSoleTransform = syncedRobotModel.getReferenceFrames().getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame();
       }
 
       robotFeet.get(RobotSide.LEFT).set(leftSoleTransform);
