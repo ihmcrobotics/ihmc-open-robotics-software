@@ -113,6 +113,7 @@ public class RDXAbilityHandAction extends RDXActionNode<AbilityHandActionState, 
       ultimateTimeoutWidget.renderImGuiWidget();
 
       if (ImGui.beginCombo(labels.get("Success Criteria"), definition.getSuccessCriteria().name()))
+      {
          for (SuccessCriteria successCriteria : SuccessCriteria.values)
          {
             boolean selected = definition.getSuccessCriteria() == successCriteria;
@@ -120,8 +121,9 @@ public class RDXAbilityHandAction extends RDXActionNode<AbilityHandActionState, 
                definition.setSuccessCriteria(successCriteria);
             if (selected)
                ImGui.setItemDefaultFocus();
-            ImGui.endCombo();
          }
+         ImGui.endCombo();
+      }
 
       switch (definition.getSuccessCriteria())
       {
