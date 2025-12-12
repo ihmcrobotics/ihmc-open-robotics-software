@@ -24,6 +24,7 @@ import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -793,7 +794,7 @@ public class AvatarEstimatorThreadFactory
             forceSensorDataHolderToSend = getMainStateEstimator().getForceSensorOutputWithGravityCancelled();
 
          RobotConfigurationDataPublisherFactory factory = new RobotConfigurationDataPublisherFactory();
-         factory.setDefinitionsToPublish(getEstimatorFullRobotModel());
+         factory.setDefinitionsToPublish((FullRobotModel) getEstimatorFullRobotModel());
          factory.setSensorSource(getEstimatorFullRobotModel(), forceSensorDataHolderToSend, getRawSensorOutputMap());
          factory.setRobotMotionStatusHolder(getRobotMotionStatusFromController());
          factory.setROS2Info(realtimeROS2NodeField.get(), outputTopicField.get());
