@@ -2,6 +2,7 @@ package us.ihmc.behaviors.behaviorTree;
 
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.behaviorTree.action.actions.AbilityHandActionComms;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneExecutor;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.behaviors.behaviorTree.condition.LLMConditionExecutor;
@@ -9,10 +10,11 @@ import us.ihmc.behaviors.tools.interfaces.LogToolsLogger;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
-import us.ihmc.handsros2.abilityHand.AbilityHandROS2HardwareCommunication;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseCommunicatorMap;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.tools.io.WorkspaceResourceFile;
 
@@ -20,7 +22,7 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeRootNodeExecu
 {
    private final ControllerStatusTracker controllerStatusTracker;
    private final BehaviorTreeSceneExecutor scene;
-   private final AbilityHandROS2HardwareCommunication abilityHandCommunication;
+   private final SideDependentList<AbilityHandActionComms> abilityHandComms = new SideDependentList<>();
 
    public BehaviorTreeExecutor(ROS2SyncedRobotModel syncedRobot,
                                ROS2PeerClockOffsetEstimator peerClockEstimator,
@@ -35,8 +37,8 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeRootNodeExecu
             new BehaviorTreeExecutorNodeBuilder());
 
       controllerStatusTracker = new ControllerStatusTracker(new LogToolsLogger(), ros2ControllerHelper.getROS2Node(), robotModel.getSimpleRobotName());
-      abilityHandCommunication = new AbilityHandROS2HardwareCommunication("bt_abilty_hand");
-      abilityHandCommunication.start();
+      for (RobotSide robotSide : RobotSide.values)
+         abilityHandComms.put(robotSide, new AbilityHandActionComms(robotSide, ros2ControllerHelper.getROS2Node()));
       scene = new BehaviorTreeSceneExecutor(crdtInfo, this::getAndIncrementNextID, syncedRobot, yolo, foundationPose);
       setScene(scene);
 
@@ -45,12 +47,15 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeRootNodeExecu
                                                                       ros2ControllerHelper,
                                                                       syncedRobot,
                                                                       controllerStatusTracker,
-                                                                      abilityHandCommunication,
+                                                                      abilityHandComms,
                                                                       scene);
    }
 
    public void update()
    {
+      for (RobotSide side : abilityHandComms.sides())
+         abilityHandComms.get(side).update();
+
       scene.update();
 
       if (rootNode != null)
@@ -75,7 +80,6 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeRootNodeExecu
 
    public void destroy()
    {
-      abilityHandCommunication.shutdown();
       modifyTreeTopology(BehaviorTreeTopologyOperationQueue::queueDestroyEntireTree);
       LLMConditionExecutor.destroy();
    }

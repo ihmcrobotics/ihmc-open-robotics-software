@@ -4,10 +4,8 @@ import ihmc_hands_ros2.msg.dds.AbilityHandCommand;
 import ihmc_hands_ros2.msg.dds.AbilityHandState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
-import us.ihmc.handsros2.HandInterface;
-import us.ihmc.handsros2.HandType;
-import us.ihmc.handsros2.abilityHand.AbilityHandManager.ControlMode;
-import us.ihmc.handsros2.abilityHand.AbilityHandManager.Grip;
+import us.ihmc.handsros2.abilityHand.AbilityHandControlMode;
+import us.ihmc.handsros2.abilityHand.AbilityHandGrip;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.tools.Timer;
 
@@ -34,9 +32,8 @@ public class AbilityHandActionExecutor extends ActionNodeExecutor<AbilityHandAct
 
       state.getLogger().info("Executing Ability Hand action for side: {} with grip {}", definition.getSide(), definition.getGrip());
 
-      AbilityHandCommand command = getCommand();
-      AbilityHandState handState = readState();
-      if (command != null && handState != null)
+      AbilityHandActionComms comms = abilityHandComms.get(definition.getSide());
+      if (comms.isConnected())
       {
          double nominalExecutionDuration = 4.0;
          state.setNominalExecutionDuration(nominalExecutionDuration);
@@ -44,12 +41,13 @@ public class AbilityHandActionExecutor extends ActionNodeExecutor<AbilityHandAct
 
          state.getCommandedJointTrajectories().clear(6);
          for (int i = 0; i < 6; i++)
-            state.getCommandedJointTrajectories().addTrajectoryPoint(i, handState.getActuatorPositions()[i], 0.0);
+            state.getCommandedJointTrajectories().addTrajectoryPoint(i, comms.getLatestState().getActuatorPositions()[i], 0.0);
 
+         AbilityHandCommand command = comms.getCommand();
          command.setControlMode(definition.getControlMode().toByte());
-         if (definition.getControlMode() == ControlMode.GRIP)
+         if (definition.getControlMode() == AbilityHandControlMode.GRIP)
          {
-            Grip grip = definition.getGrip();
+            AbilityHandGrip grip = definition.getGrip();
             command.setGrip(grip.toByte());
 
             double stageLength = nominalExecutionDuration / grip.getNumberOfStages();
@@ -58,7 +56,7 @@ public class AbilityHandActionExecutor extends ActionNodeExecutor<AbilityHandAct
                for (int i = 0; i < grip.getFingersInStage(s); i++)
                {
                   int finger = grip.getStageFingerIndex(s, i);
-                  float position = grip.getStageFingerPosition(s, i);
+                  double position = grip.getStageFingerPosition(s, i);
                   state.getCommandedJointTrajectories().addTrajectoryPoint(finger, position, (s + 1) * stageLength);
                }
             }
@@ -74,7 +72,7 @@ public class AbilityHandActionExecutor extends ActionNodeExecutor<AbilityHandAct
          }
          for (int i = 0; i < 6; i++)
             command.getGoalVelocities()[i] = definition.getGoalVelocities().getValueReadOnly(i);
-         abilityHandCommunication.publishCommand(identifier);
+         comms.publishCommand();
          timer.reset();
       }
       else
@@ -96,7 +94,8 @@ public class AbilityHandActionExecutor extends ActionNodeExecutor<AbilityHandAct
          state.setIsExecuting(false);
       }
 
-      AbilityHandState handState = readState();
+      AbilityHandActionComms comms = abilityHandComms.get(definition.getSide());
+      AbilityHandState handState = comms.getLatestState();
       if (handState != null)
       {
          // TODO: Look at SCS YoVariable data to inform better strategies
@@ -148,20 +147,17 @@ public class AbilityHandActionExecutor extends ActionNodeExecutor<AbilityHandAct
          {
             if (!timer.isRunning(definition.getTimeToWiggle()))
             {
-               AbilityHandCommand command = getCommand();
-               if (command != null)
+               AbilityHandCommand command = comms.getCommand();
+               command.setControlMode(AbilityHandControlMode.POSITION.toByte());
+               for (int i = 0; i < 6; i++)
                {
-                  command.setControlMode(ControlMode.POSITION.toByte());
-                  for (int i = 0; i < 6; i++)
-                  {
-                     float position = definition.getGoalPositions().getValueReadOnly(i);
-                     float wiggleAmplitude = 7.0f;
-                     float wiggleFrequency = 2.0f;
-                     command.getGoalPositions()[i] = position + wiggleAmplitude * (float) Math.sin(wiggleFrequency * 2 * Math.PI * timer.getElapsedTime());
-                     command.getGoalVelocities()[i] = definition.getGoalVelocities().getValueReadOnly(i);
-                  }
-                  abilityHandCommunication.publishCommand(identifier);
+                  float position = definition.getGoalPositions().getValueReadOnly(i);
+                  float wiggleAmplitude = 7.0f;
+                  float wiggleFrequency = 2.0f;
+                  command.getGoalPositions()[i] = position + wiggleAmplitude * (float) Math.sin(wiggleFrequency * 2 * Math.PI * timer.getElapsedTime());
+                  command.getGoalVelocities()[i] = definition.getGoalVelocities().getValueReadOnly(i);
                }
+               comms.publishCommand();
             }
          }
       }
@@ -171,21 +167,5 @@ public class AbilityHandActionExecutor extends ActionNodeExecutor<AbilityHandAct
          state.setFailed(true);
          state.setIsExecuting(false);
       }
-   }
-
-   private String updateIdentifier()
-   {
-      identifier = HandInterface.getSimpleIdentifier(robotModel.getSimpleRobotName(), definition.getSide(), HandType.ABILITY_HAND);
-      return identifier;
-   }
-
-   private AbilityHandCommand getCommand()
-   {
-      return abilityHandCommunication.getAvailableHands().contains(updateIdentifier()) ? abilityHandCommunication.getCommand(identifier) : null;
-   }
-
-   private AbilityHandState readState()
-   {
-      return abilityHandCommunication.getAvailableHands().contains(updateIdentifier()) ? abilityHandCommunication.readState(identifier) : null;
    }
 }

@@ -5,8 +5,8 @@ import imgui.type.ImFloat;
 import us.ihmc.behaviors.behaviorTree.action.actions.AbilityHandActionDefinition;
 import us.ihmc.behaviors.behaviorTree.action.actions.AbilityHandActionDefinition.SuccessCriteria;
 import us.ihmc.behaviors.behaviorTree.action.actions.AbilityHandActionState;
-import us.ihmc.handsros2.abilityHand.AbilityHandManager;
-import us.ihmc.handsros2.abilityHand.AbilityHandManager.ControlMode;
+import us.ihmc.handsros2.abilityHand.AbilityHandGrip;
+import us.ihmc.handsros2.abilityHand.AbilityHandControlMode;
 import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeRootNode;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImFloatWrapper;
@@ -23,7 +23,7 @@ public class RDXAbilityHandAction extends RDXActionNode<AbilityHandActionState, 
 
    private final ImFloat[] sliderPositions = new ImFloat[6];
    private final ImFloat[] sliderVelocities = new ImFloat[6];
-   private final ControlMode[] modes = { ControlMode.GRIP, ControlMode.POSITION };
+   private final AbilityHandControlMode[] modes = {AbilityHandControlMode.GRIP, AbilityHandControlMode.POSITION };
    private final ImFloatWrapper ultimateTimeoutWidget;
    private final ImBooleanWrapper enableWiggleOnFailureWidget;
    private final ImFloatWrapper timeToWiggleWidget;
@@ -66,19 +66,19 @@ public class RDXAbilityHandAction extends RDXActionNode<AbilityHandActionState, 
       ImGui.text("Ability Hand action for " + definition.getSide().getLowerCaseName() + " side");
 
       ImGui.text("Control Mode:");
-      for (ControlMode mode : modes)
+      for (AbilityHandControlMode mode : modes)
       {
          if (ImGui.radioButton(labels.get(mode.name()), definition.getControlMode() == mode))
             definition.setControlMode(mode);
-         if (mode == ControlMode.GRIP)
+         if (mode == AbilityHandControlMode.GRIP)
             ImGui.sameLine();
       }
 
-      if (definition.getControlMode() == ControlMode.GRIP)
+      if (definition.getControlMode() == AbilityHandControlMode.GRIP)
       {
          if (ImGui.beginCombo(labels.get("Grip"), definition.getGrip().name()))
          {
-            for (AbilityHandManager.Grip grip : AbilityHandManager.Grip.values)
+            for (AbilityHandGrip grip : AbilityHandGrip.values)
             {
                boolean isSelected = definition.getGrip() == grip;
                if (ImGui.selectable(grip.name(), isSelected))
