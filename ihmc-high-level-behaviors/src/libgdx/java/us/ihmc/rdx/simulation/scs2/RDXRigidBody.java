@@ -92,6 +92,49 @@ public class RDXRigidBody implements RigidBodyBasics
       }
    }
 
+   public void setOpacity(float opacity)
+   {
+      if (visualGraphicsNode != null)
+      {
+         for (RDXFrameNodePart part : visualGraphicsNode.getParts())
+         {
+            part.getModelInstance().setOpacity(opacity);
+         }
+      }
+   }
+
+   public void setDiffuseColorRecursive(Color color)
+   {
+      for (RDXRigidBody rigidBody : subtreeIterable())
+      {
+         rigidBody.setDiffuseColor(color);
+         for (JointBasics childrenJoint : rigidBody.getChildrenJoints())
+         {
+            if (childrenJoint instanceof CrossFourBarJoint fourBarJoint)
+            {
+               ((RDXRigidBody) fourBarJoint.getJointA().getSuccessor()).setDiffuseColor(color);
+               ((RDXRigidBody) fourBarJoint.getJointB().getSuccessor()).setDiffuseColor(color);
+            }
+         }
+      }
+   }
+
+   public void setOpacityRecursive(float opacity)
+   {
+      for (RDXRigidBody rigidBody : subtreeIterable())
+      {
+         rigidBody.setOpacity(opacity);
+         for (JointBasics childrenJoint : rigidBody.getChildrenJoints())
+         {
+            if (childrenJoint instanceof CrossFourBarJoint fourBarJoint)
+            {
+               ((RDXRigidBody) fourBarJoint.getJointA().getSuccessor()).setOpacity(opacity);
+               ((RDXRigidBody) fourBarJoint.getJointB().getSuccessor()).setOpacity(opacity);
+            }
+         }
+      }
+   }
+
    public RDXFrameGraphicsNode getVisualGraphicsNode()
    {
       return visualGraphicsNode;

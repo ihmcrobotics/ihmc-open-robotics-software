@@ -13,9 +13,12 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.simulation.scs2.RDXRigidBody;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -44,6 +47,7 @@ public class RDXRobotModelViewerHand
    private final RDXReferenceFrameGraphic graphicFrameGraphic;
    private final RDXSelectablePose3DGizmo handControlFrameGizmo;
    private final RDXSelectablePose3DGizmo handGraphicFrameGizmo;
+   private final RDXRigidBody handMultiBody;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImString controlTransformString = new ImString(500);
    private final ImString graphicTransformString = new ImString(500);
@@ -61,12 +65,20 @@ public class RDXRobotModelViewerHand
       handModelGraphic = new RDXModelInstance(RDXModelLoader.load(modelFileName));
       handModelGraphic.setOpacity(0.5f);
       //            handControlFrame = fullRobotModel.getHandControlFrame(side);
-      handControlFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("leftHandControlFrame", handFrame, handControlFrameToWristTransform);
-      handGraphicFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("leftHandGraphicFrame", handFrame, handGraphicToHandFrameTransform);
+      handControlFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent(side.getLowerCaseName() + "HandControlFrame",
+                                                                                         handFrame,
+                                                                                         handControlFrameToWristTransform);
+      handGraphicFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent(side.getLowerCaseName() + "HandGraphicFrame",
+                                                                                         handFrame,
+                                                                                         handGraphicToHandFrameTransform);
       handControlFrameGizmo = new RDXSelectablePose3DGizmo(handControlFrame, handControlFrameToWristTransform);
       handControlFrameGizmo.createAndSetupDefault(baseUI.getPrimary3DPanel());
       handGraphicFrameGizmo = new RDXSelectablePose3DGizmo(handGraphicFrame, handGraphicToHandFrameTransform);
       handGraphicFrameGizmo.createAndSetupDefault(baseUI.getPrimary3DPanel());
+
+      handMultiBody = RDXInteractableTools.loadAbilityHand(robotModel.getRobotDefinition(), side);
+      if (handMultiBody != null)
+         handMultiBody.setOpacityRecursive(0.5f);
    }
 
    public void update()
@@ -77,6 +89,10 @@ public class RDXRobotModelViewerHand
       handControlFrameGraphic.setToReferenceFrame(handControlFrame);
       handModelGraphic.setTransformToReferenceFrame(handGraphicFrame);
       graphicFrameGraphic.setTransformToReferenceFrame(handGraphicFrame);
+      SixDoFJoint sixDoFJoint = (SixDoFJoint) handMultiBody.getChildrenJoints().get(0);
+      sixDoFJoint.getJointPose().set(handGraphicFrame.getTransformToWorldFrame());
+      handMultiBody.updateFramesRecursively();
+      handMultiBody.updateSubtreeGraphics();
    }
 
    public void getRenderables(Array<Renderable> renderables,
@@ -85,7 +101,8 @@ public class RDXRobotModelViewerHand
                               ImBoolean showHandFrames,
                               ImBoolean showHandControlFrames,
                               ImBoolean showHandGraphicFrames,
-                              ImBoolean showHandGraphics)
+                              ImBoolean showHandGraphics,
+                              ImBoolean showHandMultiBody)
    {
       if (showHandFrames.get())
       {
@@ -102,6 +119,10 @@ public class RDXRobotModelViewerHand
       if (showHandGraphics.get())
       {
          handModelGraphic.getRenderables(renderables, pool);
+      }
+      if (handMultiBody != null && showHandMultiBody.get())
+      {
+         handMultiBody.getVisualRenderables(renderables, pool);
       }
    }
 
