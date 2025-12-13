@@ -4,6 +4,7 @@ import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class TerrainMapData
@@ -15,14 +16,14 @@ public class TerrainMapData
    private final int centerIndex;
    private final int cellsPerAxis;
 
-   private float[] heightMap;
+   private final float[] heightMap;
 
-   private float[] traversabilityScoreMap;
-   private byte[] traversabilityClassMap;
+   private final float[] traversabilityScoreMap;
+   private final byte[] traversabilityClassMap;
 
-   private byte[] snapNormalXMap;
-   private byte[] snapNormalYMap;
-   private byte[] snapNormalZMap;
+   private final byte[] snapNormalXMap;
+   private final byte[] snapNormalYMap;
+   private final byte[] snapNormalZMap;
 
    public TerrainMapData(double cellSize, double mapSize, double gridCenterX, double gridCenterY)
    {
@@ -64,6 +65,14 @@ public class TerrainMapData
       this.snapNormalXMap = Arrays.copyOf(other.snapNormalXMap, size);
       this.snapNormalYMap = Arrays.copyOf(other.snapNormalYMap, size);
       this.snapNormalZMap = Arrays.copyOf(other.snapNormalZMap, size);
+   }
+
+   public void checkHeightMapSize(double cellSize, double mapSize)
+   {
+      if (this.cellSize != cellSize)
+         throw new RuntimeException("The cell size of the maps are different. Expected " + this.cellSize + ", received  " + cellSize);
+      if (this.mapSize != mapSize)
+         throw new RuntimeException("The map size of the maps are different. Expected " + this.mapSize + ", received  " + mapSize);
    }
 
    public void setHeight(double x, double y, double z)
@@ -175,32 +184,32 @@ public class TerrainMapData
 
    public void setHeightMap(float[] heightMap)
    {
-      this.heightMap = heightMap;
+      System.arraycopy(heightMap, 0, this.heightMap, 0, this.heightMap.length);
    }
 
    public void setTraversabilityScoreMap(float[] traversabilityScoreMap)
    {
-      this.traversabilityScoreMap = traversabilityScoreMap;
+      System.arraycopy(traversabilityScoreMap, 0, this.traversabilityScoreMap, 0, this.traversabilityScoreMap.length);
    }
 
    public void setTraversabilityClassMap(byte[] traversabilityClassMap)
    {
-      this.traversabilityClassMap = traversabilityClassMap;
+      System.arraycopy(traversabilityClassMap, 0, this.traversabilityClassMap, 0, this.traversabilityClassMap.length);
    }
 
    public void setSnapNormalXMap(byte[] snapNormalXMap)
    {
-      this.snapNormalXMap = snapNormalXMap;
+      System.arraycopy(snapNormalXMap, 0, this.snapNormalXMap, 0, this.snapNormalXMap.length);
    }
 
    public void setSnapNormalYMap(byte[] snapNormalYMap)
    {
-      this.snapNormalYMap = snapNormalYMap;
+      System.arraycopy(snapNormalYMap, 0, this.snapNormalYMap, 0, this.snapNormalYMap.length);
    }
 
    public void setSnapNormalZMap(byte[] snapNormalZMap)
    {
-      this.snapNormalZMap = snapNormalZMap;
+      System.arraycopy(snapNormalZMap, 0, this.snapNormalZMap, 0, this.snapNormalZMap.length);
    }
 
    public static float unpackByteAsFloat(byte[] byteArray, int index, float minValue, float maxValue)
