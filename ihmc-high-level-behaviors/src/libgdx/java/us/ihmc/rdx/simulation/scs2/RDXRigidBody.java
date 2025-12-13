@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
+import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.CrossFourBarJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -42,6 +43,13 @@ public class RDXRigidBody implements RigidBodyBasics
       this.rigidBody = rigidBody;
       if (!rigidBody.isRootBody())
          rigidBody.getParentJoint().setSuccessor(this);
+   }
+
+   /** Call each time after modifiying joint data before renderering. */
+   public void update()
+   {
+      updateFramesRecursively();
+      updateSubtreeGraphics();
    }
 
    public void updateSubtreeGraphics()
@@ -271,5 +279,13 @@ public class RDXRigidBody implements RigidBodyBasics
       if (rigidBodiesToHide == null)
          rigidBodiesToHide = new TreeSet<>();
       return rigidBodiesToHide;
+   }
+
+   /** Convenient for the user to move the graphic around. */
+   public SixDoFJoint getFloatingJoint()
+   {
+      if (getChildrenJoints().get(0) instanceof SixDoFJoint sixDoFJoint)
+         return sixDoFJoint;
+      return null;
    }
 }

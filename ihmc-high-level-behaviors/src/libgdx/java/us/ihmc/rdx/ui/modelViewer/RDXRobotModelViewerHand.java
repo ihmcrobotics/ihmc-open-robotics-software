@@ -13,8 +13,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -89,10 +87,8 @@ public class RDXRobotModelViewerHand
       handControlFrameGraphic.setToReferenceFrame(handControlFrame);
       handModelGraphic.setTransformToReferenceFrame(handGraphicFrame);
       graphicFrameGraphic.setTransformToReferenceFrame(handGraphicFrame);
-      SixDoFJoint sixDoFJoint = (SixDoFJoint) handMultiBody.getChildrenJoints().get(0);
-      sixDoFJoint.getJointPose().set(handGraphicFrame.getTransformToWorldFrame());
-      handMultiBody.updateFramesRecursively();
-      handMultiBody.updateSubtreeGraphics();
+      handMultiBody.getFloatingJoint().getJointPose().set(handGraphicFrame.getTransformToWorldFrame());
+      handMultiBody.update();
    }
 
    public void getRenderables(Array<Renderable> renderables,

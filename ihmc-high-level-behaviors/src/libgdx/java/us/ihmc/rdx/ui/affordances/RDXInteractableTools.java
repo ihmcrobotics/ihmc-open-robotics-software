@@ -36,7 +36,7 @@ public class RDXInteractableTools
 
    public static RDXRigidBody loadAbilityHand(RobotDefinition robotDefinition, RobotSide side)
    {
-      JointDefinition handMountJoint = robotDefinition.getJointDefinition(side.getLowerCaseName() + "_hand_mount");
+      JointDefinition handMountJoint = robotDefinition.getJointDefinition(side.getLowerCaseName() + "_hand_mount"); // specific to urdf convention
       RigidBodyDefinition wristLink = handMountJoint.getPredecessor(); // must start with wrist link so the mount transform is included
 
       RDXRigidBody body = null;
