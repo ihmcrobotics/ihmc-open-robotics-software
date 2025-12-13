@@ -4,6 +4,7 @@ import perception_msgs.msg.dds.TerrainMapMessage;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.perception.gpuMapping.SnapResult;
@@ -76,6 +77,12 @@ public class PlanarRegionToHeightMapConverter
                message.getTraversabilityScore().add(1.0f);
                message.getTraversabilityClass().add(SnapResult.VALID.toByte());
                UnitVector3DReadOnly normal = intersectingRegions.get(0).getNormal();
+               if (normal.getZ() < 0.0)
+               {
+                  UnitVector3D flippedNormal = new UnitVector3D(normal);
+                  flippedNormal.negate();
+                  normal = flippedNormal;
+               }
                message.getSnappedNormalXData().add(TerrainMapData.packFloatAsByte(normal.getX32(), -1.0f, 1.0f));
                message.getSnappedNormalYData().add(TerrainMapData.packFloatAsByte(normal.getY32(), -1.0f, 1.0f));
                message.getSnappedNormalZData().add(TerrainMapData.packFloatAsByte(normal.getZ32(), 0.0f, 1.0f));
