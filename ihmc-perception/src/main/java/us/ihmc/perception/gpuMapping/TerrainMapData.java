@@ -136,7 +136,7 @@ public class TerrainMapData
          return null;
 
       int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
-      return SnapResult.values()[traversabilityClassMap[key]];
+      return SnapResult.values[traversabilityClassMap[key]];
    }
 
    public UnitVector3DReadOnly getNormal(double x, double y)
@@ -214,8 +214,20 @@ public class TerrainMapData
 
    public static float unpackByteAsFloat(byte[] byteArray, int index, float minValue, float maxValue)
    {
-      return (float) (byteArray[index] & 0xFF) * (maxValue - minValue) / 255 + minValue;
+      return unpackByteAsFloat(byteArray[index], minValue, maxValue);
    }
+
+   public static float unpackByteAsFloat(byte val, float minValue, float maxValue)
+   {
+      return (float) (val & 0xFF) * (maxValue - minValue) / 255 + minValue;
+   }
+
+   public static byte packFloatAsByte(float value, float minValue, float maxValue)
+   {
+      int val =  ((byte) ((value - minValue) * 255 / (maxValue - minValue))) & 0xFF;
+      return (byte) val;
+   }
+
 
    public void setGridCenterX(double gridCenterX)
    {
