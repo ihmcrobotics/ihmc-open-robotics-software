@@ -44,6 +44,9 @@ import us.ihmc.yoVariables.variable.YoEnum;
 public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolder
 {
    private static final double defaultPercentageInOffset = 0.05;
+   private static final double THRESHOLD_FOR_DETECTING_AN_IN_PLACE_STEP = 0.1;
+   private static final double THRESHOLD_FOR_STEP_UP_HEIGHT = 0.05;
+
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private boolean visualize = true;
@@ -425,8 +428,6 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
       // Handle the case where the feet are basically squared up when stepping up, but are at different heights In that case, the max height needs to be pinned
       // by the "from" foot, as the
       // way the phase variable works means we can approach what is meant to be swing on the "to" foot while still in the "from" foot.
-      double THRESHOLD_FOR_DETECTING_AN_IN_PLACE_STEP = 0.1;
-      double THRESHOLD_FOR_STEP_UP_HEIGHT = 0.05;
       if (Math.abs(transferToPosition.getX()) < THRESHOLD_FOR_DETECTING_AN_IN_PLACE_STEP && endGroundHeight > startGroundHeight
           && transferToPosition.getZ() > transferFromPosition.getZ() + THRESHOLD_FOR_STEP_UP_HEIGHT)
       {
