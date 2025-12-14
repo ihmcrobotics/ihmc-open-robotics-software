@@ -26,9 +26,10 @@ public class AlexanderPostProcessingTest extends AvatarPostProcessingTests
          {
             return new OpenAlexanderWalkingControllerParameters(getRobotVersion(), RobotTarget.SCS, getJointMap(), getPhysicalProperties(), getContactPointParameters())
             {
-               public boolean createFootholdExplorationTools()
+               @Override
+               public double maximumHeightAboveAnkle()
                {
-                  return false;
+                  return 0.89;
                }
             };
          }

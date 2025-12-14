@@ -274,9 +274,16 @@ public class CollisionFreeSwingCalculator implements SCS2YoGraphicHolder
          swingKnotOptimizationResult.reset();
          optimizeKnotPoints(planarRegionsList, terrainMapData);
          //LogTools.info("Swing Knot Result: [{}]", swingKnotOptimizationResult.toString());
-
-         footstep.setTrajectoryType(TrajectoryType.CUSTOM);
-         swingTrajectories.add(recomputeTrajectory(footstep));
+         if (collisionFound.getValue())
+         {
+            footstep.setTrajectoryType(TrajectoryType.CUSTOM);
+            swingTrajectories.add(recomputeTrajectory(footstep));
+         }
+         else
+         {
+            footstep.setTrajectoryType(TrajectoryType.DEFAULT);
+            swingTrajectories.add(null);
+         }
       }
    }
 
