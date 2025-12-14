@@ -3,9 +3,10 @@ package us.ihmc.behaviors.behaviorTree;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.behaviorTree.action.actions.AbilityHandActionComms;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneExecutor;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
-import us.ihmc.handsros2.abilityHand.AbilityHandROS2HardwareCommunication;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -34,7 +35,7 @@ public class BehaviorTreeNodeExecutor<S extends BehaviorTreeNodeState<D>,
    protected final ROS2ControllerHelper ros2ControllerHelper;
    protected final ROS2SyncedRobotModel syncedRobot;
    protected final ControllerStatusTracker controllerStatusTracker;
-   protected final AbilityHandROS2HardwareCommunication abilityHandCommunication;
+   protected final SideDependentList<AbilityHandActionComms> abilityHandComms;
    protected final BehaviorTreeSceneExecutor scene;
 
    /** For creating a basic node. */ // TODO: Should not exist???
@@ -53,7 +54,7 @@ public class BehaviorTreeNodeExecutor<S extends BehaviorTreeNodeState<D>,
       this.ros2ControllerHelper = rootNode.getRos2ControllerHelper();
       this.syncedRobot = rootNode.getSyncedRobot();
       this.controllerStatusTracker = rootNode.getControllerStatusTracker();
-      this.abilityHandCommunication = rootNode.getAbilityHandCommunication();
+      this.abilityHandComms = rootNode.getAbilityHandComms();
       this.scene = rootNode.getScene();
    }
 
@@ -62,7 +63,7 @@ public class BehaviorTreeNodeExecutor<S extends BehaviorTreeNodeState<D>,
                                    ROS2ControllerHelper ros2ControllerHelper,
                                    ROS2SyncedRobotModel syncedRobot,
                                    ControllerStatusTracker controllerStatusTracker,
-                                   AbilityHandROS2HardwareCommunication abilityHandCommunication,
+                                   SideDependentList<AbilityHandActionComms> abilityHandComms,
                                    BehaviorTreeSceneExecutor scene)
    {
       this.definition = state.getDefinition();
@@ -72,7 +73,7 @@ public class BehaviorTreeNodeExecutor<S extends BehaviorTreeNodeState<D>,
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
       this.controllerStatusTracker = controllerStatusTracker;
-      this.abilityHandCommunication = abilityHandCommunication;
+      this.abilityHandComms = abilityHandComms;
       this.scene = scene;
    }
 

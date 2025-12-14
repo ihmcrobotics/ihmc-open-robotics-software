@@ -28,7 +28,7 @@ public class CRDTStatusOneDoFJointTrajectoryList extends CRDTStatusMutableField<
 
    public OneDoFTrajectoryPointReadOnly getLastValueReadOnly(int jointIndex)
    {
-      return getValueInternal().get(jointIndex).get(getNumberOfJoints() - 1);
+      return getValueInternal().get(jointIndex).get(getNumberOfPoints(jointIndex) - 1);
    }
 
    public boolean isEmpty()

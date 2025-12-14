@@ -26,26 +26,26 @@ public class RDXZED2DisplayDemo
          {
             RDXROS2ImageMessageVisualizer zed2LeftColorImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED 2 Color Left",
                                                                                                            ros2Node,
-                                                                                                           PerceptionAPI.ZED_COLOR_IMAGES.get(RobotSide.LEFT));
+                                                                                                           PerceptionAPI.EXPERIMENTAL_ZED_COLOR.get(RobotSide.LEFT));
             zed2LeftColorImageVisualizer.setActive(true);
             perceptionVisualizerPanel.addVisualizer(zed2LeftColorImageVisualizer);
 
             RDXROS2ImageMessageVisualizer zed2RightColorImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED 2 Color Right",
                                                                                                             ros2Node,
-                                                                                                            PerceptionAPI.ZED_COLOR_IMAGES.get(RobotSide.RIGHT));
+                                                                                                            PerceptionAPI.EXPERIMENTAL_ZED_COLOR.get(RobotSide.RIGHT));
             zed2RightColorImageVisualizer.setActive(true);
             perceptionVisualizerPanel.addVisualizer(zed2RightColorImageVisualizer);
 
             RDXROS2ImageMessageVisualizer zed2DepthImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED 2 Depth",
                                                                                                        ros2Node,
-                                                                                                       PerceptionAPI.ZED_DEPTH);
+                                                                                                       PerceptionAPI.EXPERIMENTAL_ZED_DEPTH);
             zed2DepthImageVisualizer.setActive(true);
             perceptionVisualizerPanel.addVisualizer(zed2DepthImageVisualizer);
 
             RDXROS2ColoredPointCloudVisualizer zed2ColoredPointCloudVisualizer = new RDXROS2ColoredPointCloudVisualizer("ZED 2 Colored Point Cloud",
                                                                                                                         ros2Node,
-                                                                                                                        PerceptionAPI.ZED_DEPTH,
-                                                                                                                        PerceptionAPI.ZED_COLOR_IMAGES.get(
+                                                                                                                        PerceptionAPI.EXPERIMENTAL_ZED_DEPTH,
+                                                                                                                        PerceptionAPI.EXPERIMENTAL_ZED_COLOR.get(
                                                                                                                               RobotSide.LEFT));
             zed2ColoredPointCloudVisualizer.setActive(true);
             perceptionVisualizerPanel.addVisualizer(zed2ColoredPointCloudVisualizer);

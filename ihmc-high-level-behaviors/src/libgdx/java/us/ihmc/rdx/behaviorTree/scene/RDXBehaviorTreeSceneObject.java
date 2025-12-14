@@ -35,7 +35,7 @@ public class RDXBehaviorTreeSceneObject extends BehaviorTreeSceneObjectState
       gizmo.createAndSetupDefault(baseUI.getPrimary3DPanel());
       gizmo.getPoseGizmo().setGizmoFrame(referenceFrame);
 
-      String modelName = "environmentObjects/" + objectType.meshName + "/" + objectType.meshName + ".glb";
+      String modelName = "environmentObjects/" + objectType.meshDirectory + "/" + objectType.meshDirectory + ".glb";
       model = RDXModelLoader.load(modelName);
       modelInstance = new RDXModelInstance(model);
    }

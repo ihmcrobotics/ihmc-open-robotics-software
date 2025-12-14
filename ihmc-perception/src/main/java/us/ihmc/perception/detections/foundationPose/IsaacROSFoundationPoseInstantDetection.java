@@ -15,7 +15,7 @@ public class IsaacROSFoundationPoseInstantDetection extends InstantDetection
                                                  Box3DReadOnly boundingBox,
                                                  Instant detectionTime)
    {
-      super(trackedObject.meshName, 1.0, new Pose3D(boundingBox.getPose()), detectionTime);
+      super(trackedObject.meshDirectory, 1.0, new Pose3D(boundingBox.getPose()), detectionTime);
 
       this.trackedObject = trackedObject;
       this.boundingBox = boundingBox;

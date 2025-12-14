@@ -13,23 +13,25 @@ import static us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPos
 public enum IsaacROSFoundationPoseObject
 {
    MUSTARD("Mustard", "mustard", "bottle"),
-   TRAFFIC_BARRIER("Traffic Barrier", "barrier", "traffic_barrier"),
+   TRAFFIC_BARRIER("Traffic Barrier", "traffic_barrier", "traffic_barrier"),
    EXPLOSIVE_CHARGE("Explosive Charge", "charge", "charge"),
-   DOOR_PANEL("Door Panel", "doorPanel", "door_panel");
+   DOOR_PANEL("Door Panel", "door_panel", "door_panel"),
+   DOOR_HANDLE("Door Handle", "door_handle", "door_lever"),
+   DOOR_KNOB("Door Knob", "door_knob", "door_knob");
 
    public static final IsaacROSFoundationPoseObject[] values = values();
 
    public final String titleCaseName;
-   public final String meshName;
+   public final String meshDirectory; // Name of mesh directory in robotlabfiles/ihmc-isaac-ros/meshes
    public final String yoloClass;
    public final FoundationPoseTopics topics;
 
-   IsaacROSFoundationPoseObject(String titleCaseName, String meshName, String yoloClass)
+   IsaacROSFoundationPoseObject(String titleCaseName, String meshDirectory, String yoloClass)
    {
       this.titleCaseName = titleCaseName;
-      this.meshName = meshName;
+      this.meshDirectory = meshDirectory;
       this.yoloClass = yoloClass;
-      topics = new FoundationPoseTopics(meshName);
+      topics = new FoundationPoseTopics(meshDirectory);
    }
 
    public record FoundationPoseTopics(ROS2Topic<Image> poseEstimationDepthImage, ROS2Topic<Image> poseEstimationRGBImage,

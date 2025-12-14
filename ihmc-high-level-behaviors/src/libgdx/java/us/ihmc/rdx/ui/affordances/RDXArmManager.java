@@ -121,7 +121,7 @@ public class RDXArmManager
          armConfigurationNames[i] = PresetArmConfiguration.values[i].name();
       }
 
-      handManager = new RDXHandManager(robotModel);
+      handManager = new RDXHandManager(robotModel, communicationHelper.getROS2Node());
    }
 
    public void create(RDXBaseUI baseUI)
