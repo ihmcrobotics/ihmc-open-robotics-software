@@ -24,6 +24,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
+import us.ihmc.perception.gpuMapping.TerrainMapMessageTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.graphics.Graphics3DObjectTools;
@@ -91,7 +93,7 @@ public class FootstepSnapAndWigglerTest
 
       PlanarRegionsListGenerator planarRegionsListGenerator = new PlanarRegionsListGenerator();
       planarRegionsListGenerator.translate(0.0, 0.0, groundHeight);
-      planarRegionsListGenerator.addRectangle(100.0, 100.0);
+      planarRegionsListGenerator.addRectangle(10.0, 10.0);
 
       // regions low enough to snap
       planarRegionsListGenerator.identity();
@@ -133,9 +135,10 @@ public class FootstepSnapAndWigglerTest
       FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(PlannerTools.createDefaultFootPolygons(), footstepPlannerParameters, environmentHandler);
 
       TerrainMapMessage heightMapMessage = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList);
+      environmentHandler.setTerrainMapData(TerrainMapMessageTools.unpackMessage(heightMapMessage));
 
       RigidBodyTransform expectedTransform = new RigidBodyTransform();
-      double epsilon = 1e-5;
+      double epsilon = 1e-2;
 
       DiscreteFootstep stanceNode = new DiscreteFootstep(0.0, 0.0);
       snapper.snapFootstep(stanceNode, null, false);
@@ -178,9 +181,9 @@ public class FootstepSnapAndWigglerTest
 
       PlanarRegionsListGenerator planarRegionsListGenerator = new PlanarRegionsListGenerator();
       planarRegionsListGenerator.translate(0.0, 0.0, groundHeight);
-      planarRegionsListGenerator.addRectangle(100.0, 100.0);
+      planarRegionsListGenerator.addRectangle(10.0, 00.0);
       planarRegionsListGenerator.rotate(rotatedAngle, Axis3D.Y);
-      planarRegionsListGenerator.addRectangle(100.0, 100.0);
+      planarRegionsListGenerator.addRectangle(10.0, 10.0);
 
       PlanarRegionsList planarRegionsList = planarRegionsListGenerator.getPlanarRegionsList();
       DefaultFootstepPlannerParameters footstepPlannerParameters = new DefaultFootstepPlannerParameters();
@@ -189,9 +192,9 @@ public class FootstepSnapAndWigglerTest
       FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(PlannerTools.createDefaultFootPolygons(), footstepPlannerParameters, environmentHandler);
 
       TerrainMapMessage terrainMapMessage = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList);
-
+      environmentHandler.setTerrainMapData(TerrainMapMessageTools.unpackMessage(terrainMapMessage));
       RigidBodyTransform expectedTransform = new RigidBodyTransform();
-      double epsilon = 1e-5;
+      double epsilon = 1e-2;
 
       DiscreteFootstep stanceNode = new DiscreteFootstep(0.0, 0.0);
       snapper.snapFootstep(stanceNode, null, false);

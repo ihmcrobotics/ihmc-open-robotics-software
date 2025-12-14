@@ -43,6 +43,13 @@ public class TerrainMapData
       snapNormalXMap = new byte[cellsPerAxis * cellsPerAxis];
       snapNormalYMap = new byte[cellsPerAxis * cellsPerAxis];
       snapNormalZMap = new byte[cellsPerAxis * cellsPerAxis];
+
+      // Initialize the snap normal as ZUp
+      byte zUpNormalXY = packFloatAsByte(0.0f, -1.0f, 1.0f);
+      byte zUpNormalZ = packFloatAsByte(1.0f, 0.0f, 1.0f);
+      Arrays.fill(snapNormalXMap, zUpNormalXY);
+      Arrays.fill(snapNormalYMap, zUpNormalXY);
+      Arrays.fill(snapNormalZMap, zUpNormalZ);
    }
 
    public TerrainMapData(TerrainMapData other)
@@ -79,6 +86,14 @@ public class TerrainMapData
    {
       int key = HeightMapTools.coordinateToKey(x, y, gridCenterX, gridCenterY, cellSize, centerIndex);
       heightMap[key] = (float) z;
+   }
+
+   public void setSnapNormal(double x, double y, double normalX, double normalY, double normalZ)
+   {
+      int key = HeightMapTools.coordinateToKey(x, y, gridCenterX, gridCenterY, cellSize, centerIndex);
+      snapNormalXMap[key] = packFloatAsByte((float) normalX, -1.0f, 1.0f);
+      snapNormalYMap[key] = packFloatAsByte((float) normalY, -1.0f, 1.0f);
+      snapNormalZMap[key] = packFloatAsByte((float) normalZ, 0.0f, 1.0f);
    }
 
    public double getHeight(double x, double y)
