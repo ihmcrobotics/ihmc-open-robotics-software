@@ -140,6 +140,9 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
       }
    }
 
+   /**
+    * This tests a set of stairs that require the robot square up on each step, and are also exactly one 9" cinder block high.
+    */
    public void testSpecialStairs(boolean goingUp,
                                  double swingDuration,
                                  double transferDuration) throws Exception
