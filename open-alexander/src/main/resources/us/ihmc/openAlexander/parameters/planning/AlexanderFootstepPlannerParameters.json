@@ -34,7 +34,7 @@
   "RMS Error Threshold" : 0.6,
   "RMS Error Cost" : 1.5,
   "RMS Min Error To Penalize" : 0.3,
-  "Height map snap threshold" : 0.06,
+  "Height map snap threshold" : 0.15,
   "Reference plan alpha" : 0.7,
   "Wiggle inside delta target" : 0.01,
   "Wiggle inside delta minimum" : 0.0,

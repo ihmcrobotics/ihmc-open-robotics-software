@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.graphSearch.stepChecking;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import rcl_interfaces.msg.dds.Log;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -24,6 +25,7 @@ import us.ihmc.footstepPlanning.tools.PlanarRegionToHeightMapConverter;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.perception.gpuMapping.TerrainMapMessageTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -308,6 +310,7 @@ public class HeightMapFootstepCheckerTest
       snapTransform1.getTranslation().setZ(parameters.getMaxStepZ() + 1.0e-10);
       snapper.addSnapData(step1, new FootstepSnapData(snapTransform0));
       snapper.addSnapData(step2, new FootstepSnapData(snapTransform1));
+      snapper.addSnapData(step0, new FootstepSnapData(snapTransform1));
       assertFalse(checker.isStepValid(step2, step1, step0));
 
       // too low step
@@ -357,8 +360,11 @@ public class HeightMapFootstepCheckerTest
       goodFoothold.addVertex(-side / 2.0, -side / 2.0);
       goodFoothold.update();
 
-      // sufficient foothold
+      // sufficient foothold for planning step
       snapper.addSnapData(step2, new FootstepSnapData(snapTransform0, goodFoothold));
+      // sufficient foothold for stance step
+      snapper.addSnapData(step1, new FootstepSnapData(snapTransform0, goodFoothold));
+      snapper.addSnapData(step0, new FootstepSnapData(snapTransform0, goodFoothold));
       assertTrue(checker.isStepValid(step2, step1, step0));
 
       footholdArea = footArea * minFoothold * 0.99;
@@ -567,7 +573,8 @@ public class HeightMapFootstepCheckerTest
 
          double angleFromFlat = vertical.angle(normal);
 
-         if (Math.abs(angleFromFlat) > parameters.getMinSurfaceIncline())
+         // There's some margin on either side, because of the conversion from float to byte and back.
+         if (Math.abs(angleFromFlat) > parameters.getMinSurfaceIncline() + barelyTooSteepEpsilon)
          {
             String message = "actual rotation = " + angleFromFlat + ", allowed rotation = " + parameters.getMinSurfaceIncline();
             assertFalse(nodeChecker.isStepValid(step2, step1, step0), message);
@@ -577,7 +584,9 @@ public class HeightMapFootstepCheckerTest
          }
          else if (Math.abs(angleFromFlat) < parameters.getMinSurfaceIncline() - barelyTooSteepEpsilon)
          {
-            assertTrue(nodeChecker.isStepValid(step2, step1, step0));
+            String message = "actual rotation = " + angleFromFlat + ", allowed rotation = " + parameters.getMinSurfaceIncline() + ". Iter " + iter;
+
+            assertTrue(nodeChecker.isStepValid(step2, step1, step0), message);
             //            assertEquals(null, registry.getRejectionReason());
          }
       }

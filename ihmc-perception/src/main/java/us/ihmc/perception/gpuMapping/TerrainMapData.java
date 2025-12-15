@@ -4,6 +4,7 @@ import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class TerrainMapData
@@ -15,14 +16,14 @@ public class TerrainMapData
    private final int centerIndex;
    private final int cellsPerAxis;
 
-   private float[] heightMap;
+   private final float[] heightMap;
 
-   private float[] traversabilityScoreMap;
-   private byte[] traversabilityClassMap;
+   private final float[] traversabilityScoreMap;
+   private final byte[] traversabilityClassMap;
 
-   private byte[] snapNormalXMap;
-   private byte[] snapNormalYMap;
-   private byte[] snapNormalZMap;
+   private final byte[] snapNormalXMap;
+   private final byte[] snapNormalYMap;
+   private final byte[] snapNormalZMap;
 
    public TerrainMapData(double cellSize, double mapSize, double gridCenterX, double gridCenterY)
    {
@@ -42,6 +43,13 @@ public class TerrainMapData
       snapNormalXMap = new byte[cellsPerAxis * cellsPerAxis];
       snapNormalYMap = new byte[cellsPerAxis * cellsPerAxis];
       snapNormalZMap = new byte[cellsPerAxis * cellsPerAxis];
+
+      // Initialize the snap normal as ZUp
+      byte zUpNormalXY = packFloatAsByte(0.0f, -1.0f, 1.0f);
+      byte zUpNormalZ = packFloatAsByte(1.0f, 0.0f, 1.0f);
+      Arrays.fill(snapNormalXMap, zUpNormalXY);
+      Arrays.fill(snapNormalYMap, zUpNormalXY);
+      Arrays.fill(snapNormalZMap, zUpNormalZ);
    }
 
    public TerrainMapData(TerrainMapData other)
@@ -66,10 +74,26 @@ public class TerrainMapData
       this.snapNormalZMap = Arrays.copyOf(other.snapNormalZMap, size);
    }
 
+   public void checkHeightMapSize(double cellSize, double mapSize)
+   {
+      if (this.cellSize != cellSize)
+         throw new RuntimeException("The cell size of the maps are different. Expected " + this.cellSize + ", received  " + cellSize);
+      if (this.mapSize != mapSize)
+         throw new RuntimeException("The map size of the maps are different. Expected " + this.mapSize + ", received  " + mapSize);
+   }
+
    public void setHeight(double x, double y, double z)
    {
       int key = HeightMapTools.coordinateToKey(x, y, gridCenterX, gridCenterY, cellSize, centerIndex);
       heightMap[key] = (float) z;
+   }
+
+   public void setSnapNormal(double x, double y, double normalX, double normalY, double normalZ)
+   {
+      int key = HeightMapTools.coordinateToKey(x, y, gridCenterX, gridCenterY, cellSize, centerIndex);
+      snapNormalXMap[key] = packFloatAsByte((float) normalX, -1.0f, 1.0f);
+      snapNormalYMap[key] = packFloatAsByte((float) normalY, -1.0f, 1.0f);
+      snapNormalZMap[key] = packFloatAsByte((float) normalZ, 0.0f, 1.0f);
    }
 
    public double getHeight(double x, double y)
@@ -127,7 +151,7 @@ public class TerrainMapData
          return null;
 
       int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
-      return SnapResult.values()[traversabilityClassMap[key]];
+      return SnapResult.values[traversabilityClassMap[key]];
    }
 
    public UnitVector3DReadOnly getNormal(double x, double y)
@@ -175,38 +199,50 @@ public class TerrainMapData
 
    public void setHeightMap(float[] heightMap)
    {
-      this.heightMap = heightMap;
+      System.arraycopy(heightMap, 0, this.heightMap, 0, this.heightMap.length);
    }
 
    public void setTraversabilityScoreMap(float[] traversabilityScoreMap)
    {
-      this.traversabilityScoreMap = traversabilityScoreMap;
+      System.arraycopy(traversabilityScoreMap, 0, this.traversabilityScoreMap, 0, this.traversabilityScoreMap.length);
    }
 
    public void setTraversabilityClassMap(byte[] traversabilityClassMap)
    {
-      this.traversabilityClassMap = traversabilityClassMap;
+      System.arraycopy(traversabilityClassMap, 0, this.traversabilityClassMap, 0, this.traversabilityClassMap.length);
    }
 
    public void setSnapNormalXMap(byte[] snapNormalXMap)
    {
-      this.snapNormalXMap = snapNormalXMap;
+      System.arraycopy(snapNormalXMap, 0, this.snapNormalXMap, 0, this.snapNormalXMap.length);
    }
 
    public void setSnapNormalYMap(byte[] snapNormalYMap)
    {
-      this.snapNormalYMap = snapNormalYMap;
+      System.arraycopy(snapNormalYMap, 0, this.snapNormalYMap, 0, this.snapNormalYMap.length);
    }
 
    public void setSnapNormalZMap(byte[] snapNormalZMap)
    {
-      this.snapNormalZMap = snapNormalZMap;
+      System.arraycopy(snapNormalZMap, 0, this.snapNormalZMap, 0, this.snapNormalZMap.length);
    }
 
    public static float unpackByteAsFloat(byte[] byteArray, int index, float minValue, float maxValue)
    {
-      return (float) (byteArray[index] & 0xFF) * (maxValue - minValue) / 255 + minValue;
+      return unpackByteAsFloat(byteArray[index], minValue, maxValue);
    }
+
+   public static float unpackByteAsFloat(byte val, float minValue, float maxValue)
+   {
+      return (float) (val & 0xFF) * (maxValue - minValue) / 255 + minValue;
+   }
+
+   public static byte packFloatAsByte(float value, float minValue, float maxValue)
+   {
+      int val =  ((byte) ((value - minValue) * 255 / (maxValue - minValue))) & 0xFF;
+      return (byte) val;
+   }
+
 
    public void setGridCenterX(double gridCenterX)
    {
