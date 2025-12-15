@@ -5,14 +5,20 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.TerrainMapMessage;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.footstepPlanning.tools.PlanarRegionToHeightMapConverter;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pathPlanning.PlannerInput;
+import us.ihmc.perception.gpuMapping.HeightMapMessageTools;
+import us.ihmc.perception.gpuMapping.TerrainMapMessageTools;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -91,14 +97,20 @@ public class FootstepPlanningModuleTest
       PlanarRegionsListGenerator planarRegionsListGenerator = new PlanarRegionsListGenerator();
       planarRegionsListGenerator.addRectangle(6.0, 6.0);
 
+      PlanarRegionsList planarRegionsList = planarRegionsListGenerator.getPlanarRegionsList();
+      TerrainMapMessage terrainMapMessage = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList);
+
       FootstepPlannerRequest request = new FootstepPlannerRequest();
       Pose3D initialMidFootPose = new Pose3D();
+      // Since the support is only 6x6, a goal pose of 3.5 is out bounds. The bounds are 3.0.
       Pose3D goalMidFootPose = new Pose3D(3.5, 0.0, 0.0, 0.0, 0.0, 0.0);
       request.setStartFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), initialMidFootPose);
       request.setGoalFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), goalMidFootPose);
       request.setRequestedInitialStanceSide(RobotSide.LEFT);
       request.setPlanBodyPath(false);
-      request.setGoalDistanceProximity(0.65);
+      request.setAssumeFlatGround(false);
+      request.setGoalDistanceProximity(0.65); // This proximity means we should be ok.
+      request.setTerrainMapData(TerrainMapMessageTools.unpackMessage(terrainMapMessage));
       request.setGoalYawProximity(0.4);
       request.setTimeout(Double.MAX_VALUE);
       request.setMaximumIterations(50);
@@ -116,6 +128,9 @@ public class FootstepPlanningModuleTest
       PlanarRegionsListGenerator planarRegionsListGenerator = new PlanarRegionsListGenerator();
       planarRegionsListGenerator.addRectangle(6.0, 6.0);
 
+      PlanarRegionsList planarRegionsList = planarRegionsListGenerator.getPlanarRegionsList();
+      TerrainMapMessage terrainMapMessage = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList);
+
       FootstepPlannerRequest request = new FootstepPlannerRequest();
       Pose3D initialMidFootPose = new Pose3D();
       Pose3D goalMidFootPose = new Pose3D(2.0, 0.0, 0.0, 0.5 * Math.PI, 0.0, 0.0);
@@ -123,6 +138,7 @@ public class FootstepPlanningModuleTest
       request.setGoalFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), goalMidFootPose);
       request.setRequestedInitialStanceSide(RobotSide.LEFT);
       request.setPlanBodyPath(false);
+      request.setTerrainMapData(TerrainMapMessageTools.unpackMessage(terrainMapMessage));
       request.setGoalDistanceProximity(0.3);
       request.setGoalYawProximity(0.25 * Math.PI);
       request.setTimeout(Double.MAX_VALUE);
@@ -144,9 +160,13 @@ public class FootstepPlanningModuleTest
       planarRegionsListGenerator.translate(0.0, 0.0, groundHeight);
       planarRegionsListGenerator.addRectangle(6.0, 6.0);
 
+      PlanarRegionsList planarRegionsList = planarRegionsListGenerator.getPlanarRegionsList();
+      TerrainMapMessage terrainMapMessage = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList);
+
       FootstepPlannerRequest request = new FootstepPlannerRequest();
       Pose3D initialMidFootPose = new Pose3D(0.0, 0.0, groundHeight, 0.0, 0.0, 0.0);
       Pose3D goalMidFootPose = new Pose3D(2.0, 0.0, providedGoalNodeHeights, 0.0, 0.0, 0.0);
+      request.setTerrainMapData(TerrainMapMessageTools.unpackMessage(terrainMapMessage));
       request.setStartFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), initialMidFootPose);
       request.setGoalFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), goalMidFootPose);
       request.setRequestedInitialStanceSide(RobotSide.LEFT);
@@ -156,6 +176,8 @@ public class FootstepPlanningModuleTest
 
       // test snap goal steps
       request.setSnapGoalSteps(true);
+      // We need to set this false, otherwise it automatically sets the footstep height.
+      request.setAssumeFlatGround(false);
 
       FootstepPlannerOutput plannerOutput = planningModule.handleRequest(request);
       Assertions.assertTrue(plannerOutput.getFootstepPlanningResult().validForExecution());
@@ -174,7 +196,7 @@ public class FootstepPlanningModuleTest
       request.setAbortIfGoalStepSnappingFails(true);
 
       plannerOutput = planningModule.handleRequest(request);
-      Assertions.assertSame(plannerOutput.getFootstepPlanningResult(), FootstepPlanningResult.INVALID_GOAL);
+      Assertions.assertEquals(FootstepPlanningResult.INVALID_GOAL, plannerOutput.getFootstepPlanningResult());
 
       // test that not snapping keeps original requested pose
       double heightOffset = 0.035;
@@ -298,7 +320,7 @@ public class FootstepPlanningModuleTest
                                              timestamp.set(stopwatch.totalElapsed());
                                           });
       FootstepPlannerOutput output = planningModule.handleRequest(request);
-      Assertions.assertEquals(output.getFootstepPlanningResult(), FootstepPlanningResult.HALTED);
+      Assertions.assertEquals(FootstepPlanningResult.HALTED, output.getFootstepPlanningResult());
       Assertions.assertTrue(timestampPrev.get() < customTimeout);
       Assertions.assertTrue(output.getPlannerTimings().getTotalElapsedSeconds() >= customTimeout);
 
@@ -307,8 +329,8 @@ public class FootstepPlanningModuleTest
       planningModule.clearCustomTerminationConditions();
       planningModule.addCustomTerminationCondition((time, iterations, finalStep, secondToFinalStep, pathSize) -> iterations >= iterationLimit);
       output = planningModule.handleRequest(request);
-      Assertions.assertEquals(output.getFootstepPlanningResult(), FootstepPlanningResult.HALTED);
-      Assertions.assertEquals(output.getPlannerTimings().getStepPlanningIterations(), iterationLimit);
+      Assertions.assertEquals(FootstepPlanningResult.HALTED, output.getFootstepPlanningResult());
+      Assertions.assertEquals(iterationLimit, output.getPlannerTimings().getStepPlanningIterations());
 
       // test step limit
       int stepLimit = 4;
@@ -316,8 +338,8 @@ public class FootstepPlanningModuleTest
       planningModule.clearCustomTerminationConditions();
       planningModule.addCustomTerminationCondition((time, iterations, finalStep, secondToFinalStep, pathSize) -> pathSize >= stepLimit);
       output = planningModule.handleRequest(request);
-      Assertions.assertEquals(output.getFootstepPlanningResult(), FootstepPlanningResult.HALTED);
-      Assertions.assertEquals(output.getFootstepPlan().getNumberOfSteps(), stepLimit);
+      Assertions.assertEquals(FootstepPlanningResult.HALTED, output.getFootstepPlanningResult());
+      Assertions.assertEquals(stepLimit, output.getFootstepPlan().getNumberOfSteps());
 
       // test final step position
       double xThreshold = 3.88;
@@ -325,7 +347,7 @@ public class FootstepPlanningModuleTest
       planningModule.clearCustomTerminationConditions();
       planningModule.addCustomTerminationCondition((time, iterations, finalStep, secondToFinalStep, pathSize) -> finalStep.getTranslationX() >= xThreshold);
       output = planningModule.handleRequest(request);
-      Assertions.assertEquals(output.getFootstepPlanningResult(), FootstepPlanningResult.HALTED);
+      Assertions.assertEquals(FootstepPlanningResult.HALTED, output.getFootstepPlanningResult());
       FootstepPlan plan = output.getFootstepPlan();
 
       double finalStepX = plan.getFootstep(plan.getNumberOfSteps() - 1).getFootstepPose().getX();
