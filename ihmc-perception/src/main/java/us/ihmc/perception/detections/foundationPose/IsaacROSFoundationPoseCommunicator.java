@@ -79,7 +79,7 @@ public class IsaacROSFoundationPoseCommunicator implements AutoCloseable
       parameters.getEnabled().setValue(false);
       wasEnabled = false;
 
-      sensorFrame = new ROS2MutableFrame(ros2Node, objectToTrack.meshName + "_ImageFrame", ReferenceFrame.getWorldFrame());
+      sensorFrame = new ROS2MutableFrame(ros2Node, objectToTrack.meshDirectory + "_ImageFrame", ReferenceFrame.getWorldFrame());
 
       resultCallbacks = new ArrayList<>();
    }

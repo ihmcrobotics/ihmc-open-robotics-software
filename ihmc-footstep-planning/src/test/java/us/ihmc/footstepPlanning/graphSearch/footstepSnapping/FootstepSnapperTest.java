@@ -38,6 +38,7 @@ public class FootstepSnapperTest
       planarRegionsList.getPlanarRegion(0).applyTransform(transform);
       TerrainMapData terrainMapData = TerrainMapMessageTools.unpackMessage(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(
             planarRegionsList));
+      environmentHandler.setTerrainMapData(terrainMapData);
 
       for (int i = 0; i < xIndices.length; i++)
       {

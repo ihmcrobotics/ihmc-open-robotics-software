@@ -24,18 +24,18 @@ public class AlexanderLiftOffAndTouchDownTest
    {
       DRCRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT)
       {
-         @Override
-         public WalkingControllerParameters getWalkingControllerParameters()
-         {
-            return new OpenAlexanderWalkingControllerParameters(getRobotVersion(), getTarget(), getJointMap(), getPhysicalProperties(), getContactPointParameters())
-            {
-               @Override
-               public double nominalHeightAboveAnkle()
-               {
-                  return 0.76;
-               }
-            };
-         }
+//         @Override
+//         public WalkingControllerParameters getWalkingControllerParameters()
+//         {
+//            return new OpenAlexanderWalkingControllerParameters(getRobotVersion(), getTarget(), getJointMap(), getPhysicalProperties(), getContactPointParameters())
+//            {
+//               @Override
+//               public double nominalHeightAboveAnkle()
+//               {
+//                  return 0.76;
+//               }
+//            };
+//         }
       };
       SCS2AvatarTestingSimulation testHelper = AvatarLiftOffAndTouchDownTest.setupTest(robotModel, Math.toRadians(90.0));
       // We need to turn off the CoP threshold fraction here. If it's left on, contact isn't triggered until the CoP is far enough within the foot. This means

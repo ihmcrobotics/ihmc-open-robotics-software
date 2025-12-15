@@ -153,6 +153,9 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
    private BipedalFootstepPlannerNodeRejectionReason doValidityCheckForTerrainMap(DiscreteFootstep candidateStep)
    {
       SnapResult snapResult = environmentHandler.getTerrainMapData().getTraversabilityClass(candidateStep.getX(), candidateStep.getY());
+      if (snapResult == null)
+         return null;
+
       return switch (snapResult)
             {
                case SQUARED_ERROR -> BipedalFootstepPlannerNodeRejectionReason.RMS_ERROR_TOO_HIGH;

@@ -1,121 +1,124 @@
 package us.ihmc.perception;
 
-import us.ihmc.commons.thread.RepeatingTaskThread;
+import std_msgs.msg.dds.Empty;
 import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros2.ROS2DemandGraphNode;
+import us.ihmc.communication.ros2.ROS2DemandGraphTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensors.ImageSensor;
 import us.ihmc.sensors.realsense.RealSenseImageSensor;
 import us.ihmc.sensors.zed.ZEDImageSensor;
 
-import java.util.concurrent.BlockingQueue;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class ROS2ImageSensors
 {
+   public static final Map<ROS2Topic<? extends Packet<?>>, Integer> STEPPING_REALSENSE_TOPIC_MAP = Map.of(PerceptionAPI.STEPPING_REALSENSE_COLOR,
+                                                                                                          RealSenseImageSensor.COLOR_IMAGE_KEY,
+                                                                                                          PerceptionAPI.STEPPING_REALSENSE_DEPTH,
+                                                                                                          RealSenseImageSensor.DEPTH_IMAGE_KEY);
+
+   public static final Map<ROS2Topic<? extends Packet<?>>, Integer> EXPERIMENTAL_ZED_TOPIC_MAP = Map.of(PerceptionAPI.EXPERIMENTAL_ZED_COLOR.get(RobotSide.LEFT),
+                                                                                                        ZEDImageSensor.LEFT_COLOR_IMAGE_KEY,
+                                                                                                        PerceptionAPI.EXPERIMENTAL_ZED_COLOR.get(RobotSide.RIGHT),
+                                                                                                        ZEDImageSensor.RIGHT_COLOR_IMAGE_KEY,
+                                                                                                        PerceptionAPI.EXPERIMENTAL_ZED_DEPTH,
+                                                                                                        ZEDImageSensor.DEPTH_IMAGE_KEY);
+
+   public static final Map<ROS2Topic<? extends Packet<?>>, Integer> STEPPING_ZED_TOPIC_MAP = Map.of(PerceptionAPI.STEPPING_ZED_COLOR.get(RobotSide.LEFT),
+                                                                                                        ZEDImageSensor.LEFT_COLOR_IMAGE_KEY,
+                                                                                                        PerceptionAPI.STEPPING_ZED_COLOR.get(RobotSide.RIGHT),
+                                                                                                        ZEDImageSensor.RIGHT_COLOR_IMAGE_KEY,
+                                                                                                        PerceptionAPI.STEPPING_ZED_DEPTH,
+                                                                                                        ZEDImageSensor.DEPTH_IMAGE_KEY);
+
    private final ROS2Node ros2Node;
 
-   // Realsense
-   private ImageSensor realsenseSensor;
-   private ROS2DemandGraphNode realsenseDemandNode;
-   private ROS2DemandGraphNode realsensePublishDemandNode;
-   private ImageSensorPublishThread realsensePublishThread;
-
-   // ZED
-   private ImageSensor zedSensor;
-   private ROS2DemandGraphNode zedPublishDemandNode;
-   private ImageSensorPublishThread zedPublishThread;
+   private final Map<String, ImageSensor> imageSensors = new HashMap<>();
+   private final Map<String, ROS2DemandGraphNode> sensorDemandNodes = new HashMap<>();
+   private final Map<String, Set<ImageSensorPublishThread>> publishThreads = new HashMap<>();
+   private final Map<String, ROS2DemandGraphNode> publishDemandNodes = new HashMap<>();
 
    public ROS2ImageSensors(ROS2Node ros2Node)
    {
       this.ros2Node = ros2Node;
    }
 
-   public void addRealsenseSensor(ImageSensor realsenseSensor, ReferenceFrame sensorFrame)
+   public void addImageSensor(String sensorId, ImageSensor imageSensor, ReferenceFrame sensorFrame, ROS2Topic<Empty> demandTopic)
    {
-      this.realsenseSensor = realsenseSensor;
-      realsenseDemandNode = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_REALSENSE);
-      realsenseSensor.setSensorFrame(sensorFrame);
-      realsenseSensor.run(true);
+      imageSensor.setSensorFrame(sensorFrame);
+      imageSensors.put(sensorId, imageSensor);
 
-      realsensePublishDemandNode = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_REALSENSE_PUBLICATION);
-      realsenseDemandNode.addDependents(realsensePublishDemandNode);
-
-      realsensePublishThread = new ImageSensorPublishThread(ros2Node, realsenseSensor);
-      realsensePublishThread.addTopic(PerceptionAPI.D455_DEPTH_IMAGE, RealSenseImageSensor.DEPTH_IMAGE_KEY, 0.25);
-      realsensePublishThread.addTopic(PerceptionAPI.D455_COLOR_IMAGE, RealSenseImageSensor.COLOR_IMAGE_KEY, 0.25);
-      setupCallbackForDemandNode(realsensePublishThread, realsensePublishDemandNode);
+      if (demandTopic == null)
+      {
+         imageSensor.run(true);
+      }
+      else
+      {
+         ROS2DemandGraphNode sensorDemandNode = new ROS2DemandGraphNode(ros2Node, demandTopic);
+         sensorDemandNode.addDemandChangedCallback(imageSensor::run);
+         sensorDemandNodes.put(sensorId, sensorDemandNode);
+      }
    }
 
-   public void addZEDSensor(ImageSensor zedSensor, ReferenceFrame sensorFrame)
+   public void publishSensor(String sensorId, Map<ROS2Topic<? extends Packet<?>>, Integer> topicMap, ROS2Topic<Empty> demandTopic)
    {
-      this.zedSensor = zedSensor;
-      zedSensor.setSensorFrame(sensorFrame);
-      zedPublishDemandNode = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_ZED_PUBLICATION);
-      zedSensor.run(true); // Always start ZED, do not wait for any demand node
-
-      zedPublishThread = new ImageSensorPublishThread(ros2Node, zedSensor);
-      zedPublishThread.addTopic(PerceptionAPI.ZED_DEPTH, ZEDImageSensor.DEPTH_IMAGE_KEY);
-      zedPublishThread.addTopic(PerceptionAPI.ZED_COLOR_IMAGES.get(RobotSide.LEFT), ZEDImageSensor.LEFT_COLOR_IMAGE_KEY);
-      zedPublishThread.addTopic(PerceptionAPI.ZED_COLOR_IMAGES.get(RobotSide.RIGHT), ZEDImageSensor.RIGHT_COLOR_IMAGE_KEY);
-      setupCallbackForDemandNode(zedPublishThread, zedPublishDemandNode);
+      publishSensor(sensorId, topicMap, demandTopic, ros2Node);
    }
 
-   private static void setupCallbackForDemandNode(RepeatingTaskThread loopThread, ROS2DemandGraphNode demandNode)
+   public void publishSensor(String sensorId, Map<ROS2Topic<? extends Packet<?>>, Integer> topicMap, ROS2Topic<Empty> demandTopic, ROS2Node ros2Node)
    {
-      if (!loopThread.isAlive())
-         loopThread.start();
+      ImageSensor sensor = imageSensors.get(sensorId);
+      ImageSensorPublishThread publishThread = new ImageSensorPublishThread(ros2Node, sensor);
 
-      if (demandNode.isDemanded())
-         loopThread.startRepeating();
+      for (Map.Entry<ROS2Topic<? extends Packet<?>>, Integer> entry : topicMap.entrySet())
+         publishThread.addTopic(entry.getKey(), entry.getValue());
 
-      demandNode.addDemandChangedCallback(loopThread::setRepeating);
+      publishThreads.putIfAbsent(sensorId, new HashSet<>());
+      publishThreads.get(sensorId).add(publishThread);
+
+      if (demandTopic == null)
+      {
+         publishThread.startRepeating();
+      }
+      else
+      {
+         ROS2DemandGraphNode publishDemandNode = new ROS2DemandGraphNode(ros2Node, demandTopic);
+         publishDemandNodes.put(sensorId, publishDemandNode);
+
+         ROS2DemandGraphNode sensorDemandNode = sensorDemandNodes.get(sensorId);
+         if (sensorDemandNode != null)
+            sensorDemandNode.addDependents(publishDemandNode);
+
+         ROS2DemandGraphTools.runWhileDemanded(publishThread, publishDemandNode);
+      }
    }
 
-   /**
-    * These could all be null because we can't guarantee which sensors will be created.
-    * This is because we know about the sensors that can exist on the humanoid robots, but we can't guarantee that both sensors are created for each robot.
-    */
+   public ImageSensor getSensor(String sensorId)
+   {
+      return imageSensors.get(sensorId);
+   }
+
    public void destroy()
    {
-      // Destroy Realsense
-      if (realsenseSensor != null)
-         realsenseSensor.close();
-      if (realsenseDemandNode != null)
-         realsenseDemandNode.destroy();
-      if (realsensePublishDemandNode != null)
-         realsensePublishDemandNode.destroy();
-      if (realsensePublishThread != null)
-         realsensePublishThread.blockingKill();
+      for (ImageSensor sensor : imageSensors.values())
+         sensor.close();
 
-      // Destroy ZED
-      if (zedSensor != null)
-         zedSensor.close();
-      if  (zedPublishDemandNode != null)
-         zedPublishDemandNode.destroy();
-      if (zedPublishThread != null)
-         zedPublishThread.blockingKill();
-   }
+      for (ROS2DemandGraphNode node : sensorDemandNodes.values())
+         node.destroy();
 
-   /**
-    * We are attempting to add this queue holder to our image sensor.
-    * That sensor could be null depending on the robot you are using.
-    * Having the null check allows for the underlying algorithm to stay the same regardless of what sensors are being used.
-    */
-   public void registerImageQueueForRealsense(BlockingQueue<RawImage> rawImageCollection, int imageKey)
-   {
-      if (realsenseSensor != null)  // Don't have a Realsense Sensor created for this robot
-         realsenseSensor.registerImageQueue(rawImageCollection, imageKey);
-   }
-   /**
-    * We are attempting to add this queue holder to our image sensor.
-    * That sensor could be null depending on the robot you are using.
-    * Having the null check allows for the underlying algorithm to stay the same regardless of what sensors are being used.
-    */
-   public void registerImageQueueForZED(BlockingQueue<RawImage> rawImageCollection, int imageKey)
-   {
-      if (zedSensor != null)  // Don't have a ZED Sensor created for this robot
-         zedSensor.registerImageQueue(rawImageCollection, imageKey);
+      for (Set<ImageSensorPublishThread> threads : publishThreads.values())
+         for (ImageSensorPublishThread thread : threads)
+            thread.kill();
+
+      for (ROS2DemandGraphNode node : publishDemandNodes.values())
+         node.destroy();
    }
 }

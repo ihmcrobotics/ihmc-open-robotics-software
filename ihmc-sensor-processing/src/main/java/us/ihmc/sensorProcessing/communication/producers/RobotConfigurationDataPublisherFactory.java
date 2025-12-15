@@ -138,7 +138,7 @@ public class RobotConfigurationDataPublisherFactory
     */
    public void setDefinitionsToPublish(FullHumanoidRobotModel fullHumanoidRobotModel)
    {
-      setDefinitionsToPublish(FullRobotModelUtils.getAllJointsExcludingHands(fullHumanoidRobotModel),
+      setDefinitionsToPublish(fullHumanoidRobotModel.getOneDoFJoints(),
                               fullHumanoidRobotModel.getForceSensorDefinitions(),
                               fullHumanoidRobotModel.getIMUDefinitions());
    }

@@ -58,8 +58,7 @@ public class PlanarRegionToHeightMapConverterTest
          // get the planar region as a height map
          TerrainMapData terrainMapData = TerrainMapMessageTools.unpackMessage(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(
                planarRegionsList,
-               PlanarRegionToHeightMapConverter.defaultResolution,
-               Double.NaN));
+               PlanarRegionToHeightMapConverter.defaultResolution));
 
          // get the desired normal from the input values
          Vector3D vertical = new Vector3D(0.0, 0.0, 1.0);

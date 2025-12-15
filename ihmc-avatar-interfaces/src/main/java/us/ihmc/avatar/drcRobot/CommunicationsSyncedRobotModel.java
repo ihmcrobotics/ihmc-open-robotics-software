@@ -13,7 +13,6 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.partNames.HandJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -53,7 +52,7 @@ public abstract class CommunicationsSyncedRobotModel
       this.handModels = handModels;
       robotConfigurationData = new RobotConfigurationData();
       referenceFrames = new HumanoidReferenceFrames(fullRobotModel, sensorInformation);
-      allJoints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
+      allJoints = fullRobotModel.getOneDoFJoints();
 
       if (handModels != null)
          HandModelUtils.getHandJoints(handModels, fullRobotModel, handJoints);

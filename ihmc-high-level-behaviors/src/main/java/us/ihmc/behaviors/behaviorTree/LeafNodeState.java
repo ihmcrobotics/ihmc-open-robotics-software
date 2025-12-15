@@ -168,7 +168,8 @@ public class LeafNodeState<D extends LeafNodeDefinition> extends BehaviorTreeNod
          return executeAfterNode;
       }
 
-      LogTools.error("Node ID not found: {}", definition.getExecuteAfterNodeID());
+      LogTools.error("Node \"%s\" refers to execute after node that doesn't exist: \"%s\""
+                           .formatted(definition.getName(), definition.getExecuteAfterLeafName()));
 
       return null;
    }

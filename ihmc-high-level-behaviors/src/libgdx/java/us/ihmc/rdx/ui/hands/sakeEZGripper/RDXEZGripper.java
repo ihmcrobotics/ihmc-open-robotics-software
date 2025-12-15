@@ -20,8 +20,7 @@ import us.ihmc.rdx.ui.hands.RDXHandInterface;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.handsros2.ezGripper.EZGripperError;
-import us.ihmc.handsros2.ezGripper.EZGripperManager;
-import us.ihmc.handsros2.ezGripper.EZGripperManager.OperationMode;
+import us.ihmc.handsros2.ezGripper.EZGripper.OperationMode;
 import us.ihmc.handsros2.ezGripper.EZGripperROS2HardwareCommunication;
 
 public class RDXEZGripper implements RDXHandInterface
@@ -49,7 +48,7 @@ public class RDXEZGripper implements RDXHandInterface
    private final ImGuiFlashingText needResetStatusText = new ImGuiFlashingText(ImGuiTools.RED);
    private final ImGuiFlashingText sakeErrorStatusText = new ImGuiFlashingText(ImGuiTools.RED);
 
-   private EZGripperManager.OperationMode previousOperationMode = null;
+   private OperationMode previousOperationMode = null;
 
    public RDXEZGripper(String identifier, RobotSide handSide, EZGripperROS2HardwareCommunication communication)
    {
