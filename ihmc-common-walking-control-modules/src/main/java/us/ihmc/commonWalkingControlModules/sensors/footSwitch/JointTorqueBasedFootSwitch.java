@@ -62,7 +62,7 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
                                      DoubleProvider horizontalVelocityThreshold,
                                      DoubleProvider verticalVelocityThreshold,
                                      DoubleProvider verticalVelocityHighThreshold,
-                                     DoubleProvider jacobianDeterminantThreshold,
+                                     DoubleProvider jacobianDeterminantSingularityThreshold,
                                      BooleanProvider useJacobianTranspose,
                                      YoRegistry parentRegistry)
    {
@@ -116,7 +116,7 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
                                                                horizontalVelocityThreshold,
                                                                verticalVelocityThreshold,
                                                                verticalVelocityHighThreshold,
-                                                               jacobianDeterminantThreshold,
+                                                               jacobianDeterminantSingularityThreshold,
                                                                registry);
 
       parentRegistry.addChild(registry);

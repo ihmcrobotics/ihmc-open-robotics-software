@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.sensors.footSwitch;
 import java.util.Collection;
 
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
@@ -28,7 +27,7 @@ public class JointTorqueBasedFootSwitchFactory implements FootSwitchFactory
    private double defaultHorizontalVelocityThreshold = 0.5;
    private double defaultVerticalVelocityThreshold = 0.125;
    private double defaultVerticalVelocityHighThreshold = 0.5;
-   private double defaultJacobianDeterminantThreshold = 2e-3;
+   private double defaultJacobianDeterminantSingularityThreshold = 2e-3;
 
    private DoubleProvider contactThresholdTorque;
    private DoubleProvider higherContactThresholdTorque;
@@ -39,7 +38,7 @@ public class JointTorqueBasedFootSwitchFactory implements FootSwitchFactory
    private DoubleProvider horizontalVelocityThreshold;
    private DoubleProvider verticalVelocityThreshold;
    private DoubleProvider verticalVelocityHighThreshold;
-   private DoubleProvider jacobianDeterminantThreshold;
+   private DoubleProvider jacobianDeterminantSingularityThreshold;
    private YoInteger contactWindowSize;
    private BooleanProvider useJacobianTranspose;
 
@@ -114,9 +113,9 @@ public class JointTorqueBasedFootSwitchFactory implements FootSwitchFactory
       this.defaultVerticalVelocityThreshold = defaultVerticalVelocityThreshold;
    }
 
-   public void setDefaultJacobianDeterminantThreshold(double defaultJacobianDeterminantThreshold)
+   public void setDefaultJacobianDeterminantSingularityThreshold(double defaultJacobianDeterminantSingularityThreshold)
    {
-      this.defaultJacobianDeterminantThreshold = defaultJacobianDeterminantThreshold;
+      this.defaultJacobianDeterminantSingularityThreshold = defaultJacobianDeterminantSingularityThreshold;
    }
 
    @Override
@@ -143,7 +142,8 @@ public class JointTorqueBasedFootSwitchFactory implements FootSwitchFactory
          verticalVelocityThreshold = new DoubleParameter(namePrefix + "VerticalVelocityThreshold", registry, defaultVerticalVelocityThreshold);
          verticalVelocityHighThreshold = new DoubleParameter(namePrefix + "VerticalVelocityHighThreshold", registry, defaultVerticalVelocityHighThreshold);
          horizontalVelocityThreshold = new DoubleParameter(namePrefix + "HorizontalVelocityThreshold", registry, defaultHorizontalVelocityThreshold);
-         jacobianDeterminantThreshold = new DoubleParameter(namePrefix + "JacobianDeterminantThreshold", registry, defaultJacobianDeterminantThreshold);
+         jacobianDeterminantSingularityThreshold = new DoubleParameter(namePrefix + "JacobianDeterminantSingularityThreshold", registry,
+                                                            defaultJacobianDeterminantSingularityThreshold);
       }
 
       return new JointTorqueBasedFootSwitch(namePrefix,
@@ -160,7 +160,7 @@ public class JointTorqueBasedFootSwitchFactory implements FootSwitchFactory
                                             horizontalVelocityThreshold,
                                             verticalVelocityThreshold,
                                             verticalVelocityHighThreshold,
-                                            jacobianDeterminantThreshold,
+                                            jacobianDeterminantSingularityThreshold,
                                             useJacobianTranspose,
                                             registry);
    }
