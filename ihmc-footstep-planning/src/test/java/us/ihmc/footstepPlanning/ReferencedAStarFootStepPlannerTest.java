@@ -1,9 +1,11 @@
 package us.ihmc.footstepPlanning;
 
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticePoint;
@@ -20,16 +22,18 @@ public class ReferencedAStarFootStepPlannerTest
 {
    // The epsilons are multiplied by 0.5 so that we allow a max epsilon of half the distance between two grid points, we hope to round to the nearest grid point, so if we are greater than 0.5 we should round up
    private static final double EPSILON = 0.5 * LatticePoint.gridSizeXY;
-   private static final double EPSLILON_YAW = 0.5 * LatticePoint.gridSizeYaw;
-   private static final Pose3D leftNominalGoalPose = new Pose3D(0.6, 0.1, 0.0, 0.0, 0.0, 0.0);
-   private static final Pose3D rightNominalGoalPose = new Pose3D(0.6, -0.1, 0.0, 0.0, 0.0, 0.0);
-   private static final FootstepPlannerRequest request = new FootstepPlannerRequest();
-   private static final FootstepPlanningModule footstepPlannerModule = new FootstepPlanningModule("testerModule");
+   private static final double EPSILON_YAW = 0.5 * LatticePoint.gridSizeYaw;
+   private static final Pose3DReadOnly leftNominalGoalPose = new Pose3D(0.6, 0.1, 0.0, 0.0, 0.0, 0.0);
+   private static final Pose3DReadOnly rightNominalGoalPose = new Pose3D(0.6, -0.1, 0.0, 0.0, 0.0, 0.0);
 
-   private static FootstepPlannerOutput plannerOutput;
-   private static final TestFootstepPlannerParameters parameters = new TestFootstepPlannerParameters();
-   @BeforeAll
-   public static void generateAStarPlan()
+   private final FootstepPlannerRequest request = new FootstepPlannerRequest();
+   private final FootstepPlanningModule footstepPlannerModule = new FootstepPlanningModule("testerModule");
+
+   private FootstepPlannerOutput plannerOutput;
+   private final TestFootstepPlannerParameters parameters = new TestFootstepPlannerParameters();
+
+   @BeforeEach
+   public void generateAStarPlan()
    {
       // We use test parameters so we know what to expect
       footstepPlannerModule.getFootstepPlannerParameters().set(parameters);
@@ -58,8 +62,9 @@ public class ReferencedAStarFootStepPlannerTest
 
       PlannedFootstep leftFinalStep = plannerOutput.getFootstepPlan().getFootstep(numSteps - 2);
       PlannedFootstep rightFinalStep = plannerOutput.getFootstepPlan().getFootstep(numSteps - 1);
-      assertTrue(leftNominalGoalPose.epsilonEquals(leftFinalStep.getFootstepPose(), EPSILON));
-      assertTrue(rightNominalGoalPose.epsilonEquals(rightFinalStep.getFootstepPose(), EPSILON));
+
+      EuclidCoreTestTools.assertEquals(leftNominalGoalPose, leftFinalStep.getFootstepPose(), EPSILON);
+      EuclidCoreTestTools.assertEquals(rightNominalGoalPose, rightFinalStep.getFootstepPose(), EPSILON);
    }
 
    /**
@@ -104,14 +109,20 @@ public class ReferencedAStarFootStepPlannerTest
          expectedTranslation.setY(EuclidCoreTools.interpolate(nominalStepPose.getY(), adjustedStepPose.getY(), referenceAlpha));
          double expectedYaw = AngleTools.interpolateAngle(nominalStepPose.getYaw(), adjustedStepPose.getYaw(), referenceAlpha);
 
-         assertTrue(EuclidCoreTools.epsilonEquals(outputStep.getTranslationX(), expectedTranslation.getX(), EPSILON),
-                    "The actual pose was: " + outputStep.getTranslationX() + " and the expected is: " + expectedTranslation.getX() + "! referenceAlpha: "
-                    + referenceAlpha);
-         assertTrue(EuclidCoreTools.epsilonEquals(outputStep.getTranslationY(), expectedTranslation.getY(), EPSILON),
-                    "The actual pose was: " + outputStep.getTranslationY() + " and the expected is: " + expectedTranslation.getY() + "! referenceAlpha: "
-                    + referenceAlpha);
-         assertTrue(EuclidCoreTools.epsilonEquals(outputStep.getYaw(), expectedYaw, EPSLILON_YAW),
-                    "The actual yaw was: " + outputStep.getYaw() + " and the expected is: " + expectedYaw + "! referenceAlpha: " + referenceAlpha);
+         assertEquals(outputStep.getTranslationX(),
+                      expectedTranslation.getX(),
+                      EPSILON,
+                      "The actual pose was: " + outputStep.getTranslationX() + " and the expected is: " + expectedTranslation.getX() + "! referenceAlpha: "
+                      + referenceAlpha);
+         assertEquals(outputStep.getTranslationY(),
+                      expectedTranslation.getY(),
+                      EPSILON,
+                      "The actual pose was: " + outputStep.getTranslationY() + " and the expected is: " + expectedTranslation.getY() + "! referenceAlpha: "
+                      + referenceAlpha);
+         assertEquals(outputStep.getYaw(),
+                      expectedYaw,
+                      EPSILON_YAW,
+                      "The actual yaw was: " + outputStep.getYaw() + " and the expected is: " + expectedYaw + "! referenceAlpha: " + referenceAlpha);
       }
    }
 

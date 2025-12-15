@@ -14,7 +14,6 @@ public class TestFootstepPlannerParameters extends StoredPropertySet implements 
     * We need to leave these variables here because of how the {@link StoredPropertySet}'s work.
     * Do not remove without checking the tests first!!
     */
-   public static final BooleanStoredPropertyKey useGPU = keys.addBooleanKey("Use GPU");
    public static final DoubleStoredPropertyKey astarHeuristicsWeight = keys.addDoubleKey("AStar heuristics weight");
    public static final IntegerStoredPropertyKey maxBranchFactor = keys.addIntegerKey("Max branch factor");
    public static final BooleanStoredPropertyKey enableExpansionMask = keys.addBooleanKey("Enable expansion mask");
