@@ -1,6 +1,7 @@
 package us.ihmc.openAlexander;
 
 import us.ihmc.avatar.arm.PresetArmConfiguration;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -42,10 +43,12 @@ public class AlexanderPresetArmConfigurations
       if (robotVersion.getJointMap().hasCycloidForearm(side))
       {
          jointAngles = new double[HOME_7DOF.get(RobotSide.LEFT).length];
+         LogTools.warn("ASSUMING 7DOF");
          getCycloid7DoFArmConfigurations(side, presetArmConfiguration, jointAngles);
       }
       else
       {
+         LogTools.warn("ASSUMING 4DOF");
          jointAngles = new double[HOME_4DOF.get(RobotSide.LEFT).length];
          getCycloid4DoFArmConfigurations(side, presetArmConfiguration, jointAngles);
       }

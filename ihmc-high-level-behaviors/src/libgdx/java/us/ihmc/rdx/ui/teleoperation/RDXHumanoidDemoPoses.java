@@ -53,11 +53,11 @@ public class RDXHumanoidDemoPoses extends RDXPanel
    private final ArrayList<PelvisTrajectoryMessage> pelvisTrajectoryMessagesToPublish = new ArrayList<>();
    private final SideDependentList<FootTrajectoryMessage> footTrajectoryMessagesToPublish = new SideDependentList<>();
 
-   private static final double[] rightArmGreeting1 = {-0.63, -0.34, 0.25, -2.039, -0.049, 0.227, -0.675};
-   private static final double[] rightArmGreeting2 = {-0.63, -0.34, -0.915, -2.039, -0.049, 0.227, -0.675};
+   private static final double[] rightArmGreeting1 = new double[] {-0.63, -0.34, 0.25, -2.039};//, -0.049, 0.227, -0.675};
+   private static final double[] rightArmGreeting2 = new double[] {-0.63, -0.34, -0.915, -2.039};//, -0.049, 0.227, -0.675};
 
-   private static final double[] leftArmHomeConfiguration = new double[] {0.7, 0.4, -0.4, -1.9, 0.0, 0.0, 0.0};
-   private static final double[] rightArmHomeConfiguration = new double[] {0.7, -0.4, 0.4, -1.9, 0.0, 0.0, 0.0};
+   private static final double[] leftArmHomeConfiguration = new double[] {0.7, 0.4, -0.4, -1.9};//, 0.0, 0.0, 0.0};
+   private static final double[] rightArmHomeConfiguration = new double[] {0.7, -0.4, 0.4, -1.9};//, 0.0, 0.0, 0.0};
 
    private static final double[] leftArmFlex1 = new double[] {0.71, 1.4, 1.05, -2.00};
    private static final double[] rightArmFlex1 = new double[] {0.71, -1.4, -1.05, -2.00};
@@ -72,17 +72,17 @@ public class RDXHumanoidDemoPoses extends RDXPanel
    private static final double[] leftArmKarateKid1 = new double[] {1.0, 1.22, 1.05, -1.57, 0.0, 0.0, 0.0};
    private static final double[] rightArmKarateKid1 = new double[] {1.0, -1.22, -1.05, 0.0, 0.0, 0.0};
 
-   private static final double[] leftArmFlamingo1 = new double[] {0.058, 1.872, 1.105, -1.003, -1.57, -0.61};
-   private static final double[] rightArmFlamingo1 = new double[] {-0.158, -1.872, -1.105, -1.003, -1.570, -0.61};
+   private static final double[] leftArmFlamingo1 = new double[] {0.058, 1.872, 1.105, -1.003};//, -1.57, -0.61};
+   private static final double[] rightArmFlamingo1 = new double[] {-0.158, -1.872, -1.105, -1.003};//, -1.570, -0.61};
 
-   private static final double[] leftArmFlamingo2 = new double[] {0.156, 0.645, 1.105, -1.003, -1.57, -0.61};
-   private static final double[] rightArmFlamingo2 = new double[] {0.207, -0.718, -1.192, -1.003, -1.570, -0.61};
+   private static final double[] leftArmFlamingo2 = new double[] {0.156, 0.645, 1.105, -1.003};//, -1.57, -0.61};
+   private static final double[] rightArmFlamingo2 = new double[] {0.207, -0.718, -1.192, -1.003};//, -1.570, -0.61};
 
    private static final double[] leftArmKarateKid2 = new double[] {1.0, 0.0, 1.05, 0.0, 0.0, 0.0};
    private static final double[] rightArmKarateKid2 = new double[] {1.0, 0.0, -1.05, 0.0, 0.0, 0.0};
 
-   private static final double[] rightArmRunningMan = new double[] {-0.729, -0.403, -0.112, -1.9, 0.0};
-   private static final double[] leftArmRunningMan = new double[] {0.958, 0.528, -0.356, -1.409, 0.0};
+   private static final double[] rightArmRunningMan = new double[] {-0.729, -0.403, -0.112, -1.9};//, 0.0};
+   private static final double[] leftArmRunningMan = new double[] {0.958, 0.528, -0.356, -1.409};//, 0.0};
 
    private static final double[] extendedDab = new double[] {0.4, Math.toRadians(60), 0.0, 0.0};
    private static final double[] bentDab = new double[] {-0.42, -1.22, 0.33, -1.85, -1.73, -0.11, -0.156};
