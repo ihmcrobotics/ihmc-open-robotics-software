@@ -25,6 +25,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.sceneManager.RDX3DScene;
+import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.JSONFileTools;
@@ -436,6 +437,17 @@ public class RDXVRContext
       }
    }
 
+   private double[] controllerOpacities = new double[2];
+   {
+      controllerOpacities[0] = 1.0;
+      controllerOpacities[1] = 1.0;
+   }
+
+   public void setControllerOpacity(RobotSide robotSide, double opacity)
+   {
+      controllerOpacities[robotSide.ordinal()] = opacity;
+   }
+
    public void getControllerRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       for (RobotSide side : RobotSide.values)
@@ -443,7 +455,12 @@ public class RDXVRContext
          RDXVRController controller = controllers.get(side);
          if (controller.isConnected())
          {
-            controller.getRenderables(renderables, pool);
+            if (controllerOpacities[side.ordinal()] != 0.0)
+            {
+               LibGDXTools.setOpacity(controller.getModelInstance(), (float) controllerOpacities[side.ordinal()]);
+
+               controller.getRenderables(renderables, pool);
+            }
          }
       }
    }
