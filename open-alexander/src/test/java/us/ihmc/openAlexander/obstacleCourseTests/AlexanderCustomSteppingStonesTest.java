@@ -3,11 +3,13 @@ package us.ihmc.openAlexander.obstacleCourseTests;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.openAlexander.OpenAlexanderVersion;
 import us.ihmc.openAlexander.OpenAlexanderRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.AvatarCustomSteppingStonesTest;
+import us.ihmc.openAlexander.parameters.controller.OpenAlexanderWalkingControllerParameters;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 
 public class AlexanderCustomSteppingStonesTest extends AvatarCustomSteppingStonesTest
@@ -66,7 +68,27 @@ public class AlexanderCustomSteppingStonesTest extends AvatarCustomSteppingStone
    @Override
    public DRCRobotModel getRobotModel()
    {
-      return new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT, RobotTarget.SCS);
+      return new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT, RobotTarget.SCS)
+      {
+         @Override
+         public WalkingControllerParameters getWalkingControllerParameters()
+         {
+            return new OpenAlexanderWalkingControllerParameters(getRobotVersion(), getTarget(), getJointMap(), getPhysicalProperties())
+            {
+               @Override
+               public double nominalHeightAboveAnkle()
+               {
+                  return 0.91;
+               }
+
+               @Override
+               public double maximumHeightAboveAnkle()
+               {
+                  return 0.93;
+               }
+            };
+         }
+      };
    }
 
    @Override
