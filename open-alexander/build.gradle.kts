@@ -12,7 +12,7 @@ ihmc {
 }
 
 mainDependencies {
-   api("us.ihmc:ihmc-alexander-sdk:0.3.4")
+   api("us.ihmc:ihmc-alex-sdk:0.3.6")
    api("us.ihmc:ihmc-avatar-interfaces-visualizers:source")
    api("us.ihmc:ihmc-model-file-loader:source")
    api("us.ihmc:ihmc-manipulation-planning:source")

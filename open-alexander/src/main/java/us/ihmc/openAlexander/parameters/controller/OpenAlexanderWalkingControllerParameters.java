@@ -101,7 +101,7 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
 
       toeOffParameters = new AlexanderToeOffParameters(physicalProperties);
       momentumOptimizationSettings = new OpenAlexanderMomentumOptimizationSettings(target, jointMap, 2 + contactPointParameters.getAdditionalContactNames().size());
-      swingTrajectoryParameters = new AlexanderSwingTrajectoryParameters();
+      swingTrajectoryParameters = new OpenAlexanderSwingTrajectoryParameters();
       steppingParameters = new OpenAlexanderSteppingParameters(physicalProperties);
       icpControllerParameters = new OpenAlexanderICPControllerParameters();
       stepAdjustmentParameters = new OpenAlexanderStepAdjustmentParameters();

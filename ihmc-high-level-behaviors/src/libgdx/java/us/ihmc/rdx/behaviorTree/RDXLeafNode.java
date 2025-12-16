@@ -5,11 +5,11 @@ import imgui.flag.ImGuiCol;
 import us.ihmc.behaviors.behaviorTree.LeafNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.LeafNodeState;
 import us.ihmc.log.LogTools;
+import us.ihmc.rdx.behaviorTree.control.RDXFallbackNode;
 import us.ihmc.rdx.imgui.ImGuiFlashingColors;
 import us.ihmc.rdx.imgui.ImGuiFlashingText;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.widgets.ImGuiHollowArrowRenderer;
 
 /**
@@ -23,8 +23,8 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
    private final ImGuiFlashingColors isExecutingFlashingColor = new ImGuiFlashingColors(0.1, ImGuiTools.PURPLE, ImGuiTools.DARK_PURPLE);
    private final ImGuiHollowArrowRenderer hollowArrowRenderer = new ImGuiHollowArrowRenderer();
    private final ImGuiFlashingText flashingDescriptionColor = new ImGuiFlashingText(ImGuiTools.RED);
-   /** Used to trigger a UI notification when the action goes from !failed -> failed. */
-   private boolean wasFailed = false;
+
+   private float lineStartX = Float.NaN;
 
    public RDXLeafNode(S state, RDXBehaviorTreeRootNode rootNode)
    {
@@ -35,12 +35,6 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
    public void update()
    {
       super.update();
-
-      if (!wasFailed && state.getFailed())
-      {
-         RDXBaseUI.pushNotification("%s failed".formatted(definition.getName()));
-      }
-      wasFailed = state.getFailed();
    }
 
    @Override
@@ -48,7 +42,7 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
    {
       renderRowBeginning();
       renderEditableName();
-      renderConcurrencyGraph();
+      renderRowEnd();
    }
 
    @Override
@@ -58,6 +52,7 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
 
       // Give the arrow a little space to the left, like the other icons
       ImGui.setCursorPosX(ImGui.getCursorPosX() + ImGui.getStyle().getItemSpacingX());
+      lineStartX = ImGui.getCursorScreenPosX();
 
       boolean colorArrow = state.getIsNextForExecution() || state.getIsExecuting();
       int arrowColor = state.getIsNextForExecution() ? ImGuiTools.GREEN : isExecutingFlashingColor.getColor(state.getIsExecuting());
@@ -69,8 +64,21 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
       ImGui.sameLine();
    }
 
-   public void renderConcurrencyGraph()
+   public void renderRowEnd()
    {
+      if (getParent() instanceof RDXFallbackNode fallbackNode)
+      {
+         if (!fallbackNode.getCatchLeaves().isEmpty() && fallbackNode.getCatchLeaves().get(0) == this)
+         {
+            float frameHeight = ImGui.getFrameHeight();
+            ImGui.sameLine(ImGui.getColumnWidth(), 0.0f);
+            int color = ImGui.getColorU32(ImGuiCol.TextDisabled);
+            float offsetX = ImGui.getCursorScreenPosX();
+            ImGui.getWindowDrawList().addLine(lineStartX, offsetY, offsetX - ImGui.getFontSize(), offsetY, color, 1);
+            ImGui.dummy(0.0f, frameHeight);
+         }
+      }
+
       if (!definition.getExecuteAfterPrevious())
       {
          float frameHeight = ImGui.getFrameHeight();
@@ -98,23 +106,9 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
             ImGui.getWindowDrawList().addLine(offsetX, offsetY + frameHeight * 0.5f, offsetX, executeAfterY, color, thickness);
             ImGui.getWindowDrawList().addLine(offsetX - scale * 0.4f, executeAfterY + scale * 0.5f, offsetX, executeAfterY, color, thickness);
             ImGui.getWindowDrawList().addLine(offsetX + scale * 0.4f, executeAfterY + scale * 0.5f, offsetX, executeAfterY, color, thickness);
-            ImGui.getWindowDrawList().addCircle(offsetX, offsetY + frameHeight * 0.5f, scale * 0.15f, color, 16, thickness);
+            ImGui.getWindowDrawList().addCircle(offsetX + 0.5f, offsetY + frameHeight * 0.5f, scale * 0.15f, color, 16, thickness);
             ImGui.dummy(0.0f, frameHeight);
          }
-      }
-   }
-
-   public void renderConcurrencyRank()
-   {
-      // Probably better to display some parallel bars like a Git log view maybe. @dcalvert
-      if (state.getConcurrencyRank() != 1)
-      {
-         ImGui.pushStyleColor(ImGuiCol.Text, ImGui.getColorU32(ImGuiCol.TextDisabled));
-         String text = state.getConcurrencyRank() == 1 ? " " : String.valueOf(state.getConcurrencyRank());
-         ImGui.setCursorPosX(ImGui.getCursorPosX() - ImGuiTools.calcTextSizeX(text) - ImGui.getStyle().getItemSpacingX());
-         ImGui.text(text);
-         ImGui.popStyleColor();
-         ImGui.sameLine();
       }
    }
 

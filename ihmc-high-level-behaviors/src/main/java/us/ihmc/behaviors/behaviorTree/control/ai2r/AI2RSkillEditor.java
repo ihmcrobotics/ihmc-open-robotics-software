@@ -177,8 +177,8 @@ public class AI2RSkillEditor
             {
                if (conditionNodeState.getParent().getDefinition().getName().contains("ReceiveObject"))
                {
-                  conditionNodeState.getDefinition().getProximityCheck().setObjectFrameName(objectGrasped);
-                  conditionNodeState.getDefinition().getProximityCheck().setReferenceFrameName(RobotSide.fromByte(receiveMessage.getSide())==RobotSide.LEFT ? "leftHandZUp" : "rightHandZUp");
+                  conditionNodeState.getDefinition().getProximityCheck().setFrameNameA(objectGrasped);
+                  conditionNodeState.getDefinition().getProximityCheck().setFrameNameB(RobotSide.fromByte(receiveMessage.getSide()) == RobotSide.LEFT ? "leftHandZUp" : "rightHandZUp");
                }
             }
          }

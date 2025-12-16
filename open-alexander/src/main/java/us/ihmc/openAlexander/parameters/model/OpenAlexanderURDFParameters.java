@@ -19,21 +19,21 @@ import java.util.List;
  */
 public class OpenAlexanderURDFParameters implements HumanoidURDFParameterInterface
 {
-   public static final String URDF_MODEL_NAME = "Alexander";
-   private static final String[] RESOURCE_DIRECTORIES = new String[] {"alexander_V1_description/",
-                                                                      "alexander_V1_description/urdf/",
-                                                                      "alexander_V1_description/meshes/"};
+   public static final String URDF_MODEL_NAME = "Alex";
+   private static final String[] RESOURCE_DIRECTORIES = new String[] {"alex_V1_description/",
+                                                                      "alex_V1_description/urdf/",
+                                                                      "alex_V1_description/meshes/"};
 
-   private static final String[] LOGGED_RESOURCES = {"alexander_V1_description/"};
+   private static final String[] LOGGED_RESOURCES = {"alex_V1_description/"};
 
-   public static final String URDF_FULL_BODY = "alexander_v1.fullBody.urdf";
-   public static final String URDF_LOWER_BODY = "alexander_v1.lowerBody.urdf";
-   public static final String URDF_HEAD = "alexander_v1.head.urdf";
+   public static final String URDF_FULL_BODY = "alex_v1.fullBody.urdf";
+   public static final String URDF_LOWER_BODY = "alex_v1.lowerBody.urdf";
+   public static final String URDF_HEAD = "alex_v1.head.urdf";
 
-   public static final String URDF_LOWER_BODY_ONLY = "alexander_v1.lowerBodyOnly.urdf";
+   public static final String URDF_LOWER_BODY_ONLY = "alex_v1.lowerBodyOnly.urdf";
    
-   public static final String URDF_LEFT_ARM_NUB_FOREARM = "alexander_v0.leftArmFixedForearm.urdf";
-   public static final String URDF_RIGHT_ARM_NUB_FOREARM = "alexander_v0.rightArmFixedForearm.urdf";
+   public static final String URDF_LEFT_ARM_NUB_FOREARM = "alex_v0.leftArmFixedForearm.urdf";
+   public static final String URDF_RIGHT_ARM_NUB_FOREARM = "alex_v0.rightArmFixedForearm.urdf";
 
    private final String[] robotModelResourceDirectory = new String[1];
    private final String[] urdfResourceDirectories;

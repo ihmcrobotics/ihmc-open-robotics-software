@@ -36,7 +36,7 @@ public class RDXConditionNode extends RDXLeafNode<ConditionNodeState, ConditionN
       ImGui.sameLine();
       conditionIconWidget.render();
 
-      renderConcurrencyGraph();
+      renderRowEnd();
    }
 
    @Override

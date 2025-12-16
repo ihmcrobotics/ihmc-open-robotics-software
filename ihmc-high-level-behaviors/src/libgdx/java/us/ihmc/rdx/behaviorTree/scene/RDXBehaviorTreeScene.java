@@ -19,7 +19,9 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseInstantDetection;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseObject;
+import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
 import us.ihmc.rdx.RDX3DSituatedText;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -152,10 +154,16 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
 
    private static void renderPersistentDetection(PersistentDetectionStatusMessage message)
    {
-      String text = "%s %.2f Hz Size: %d ID.%s".formatted(message.getObjectClassAsString(),
-                                                           message.getDecayingFrequency(),
-                                                           message.getHistorySize(),
-                                                           message.getIdAsString());
+      String type = "(?)";
+      if (message.getDetectionTypeAsString().equals(IsaacROSFoundationPoseInstantDetection.class.getSimpleName()))
+         type = "(FoundationPose)";
+      if (message.getDetectionTypeAsString().equals(YOLOv8InstantDetection.class.getSimpleName()))
+         type = "(YOLOv8)";
+      String text = "%s %s %.2f Hz Size: %d ID.%s".formatted(type,
+                                                             message.getObjectClassAsString(),
+                                                             message.getDecayingFrequency(),
+                                                             message.getHistorySize(),
+                                                             message.getIdAsString());
       if (message.getIsStable())
          ImGui.text(text);
       else
@@ -173,6 +181,9 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
 
    private void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
+      if (!sceneLevels.contains(RDXSceneLevel.VIRTUAL))
+         return;
+
       if (showCameraFrame.get())
       {
          cameraFrameGraphic.getRenderables(renderables, pool);

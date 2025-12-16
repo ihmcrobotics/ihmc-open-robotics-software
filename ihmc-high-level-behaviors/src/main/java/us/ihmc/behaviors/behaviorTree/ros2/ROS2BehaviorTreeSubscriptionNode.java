@@ -23,6 +23,7 @@ public class ROS2BehaviorTreeSubscriptionNode
    private AI2RNodeStateMessage ai2rNodeStateMessage;
    private DoorTraversalStateMessage doorTraversalStateMessage;
    private BuildingExplorationStateMessage buildingExplorationStateMessage;
+   private LeafNodeStateMessage leafNodeStateMessage;
    private ActionNodeStateMessage actionNodeStateMessage;
    private ChestOrientationActionStateMessage chestOrientationActionStateMessage;
    private FootstepPlanActionStateMessage footstepPlanActionStateMessage;
@@ -53,6 +54,7 @@ public class ROS2BehaviorTreeSubscriptionNode
       ai2rNodeStateMessage = null;
       doorTraversalStateMessage = null;
       buildingExplorationStateMessage = null;
+      leafNodeStateMessage = null;
       actionNodeStateMessage = null;
       chestOrientationActionStateMessage = null;
       footstepPlanActionStateMessage = null;
@@ -121,6 +123,16 @@ public class ROS2BehaviorTreeSubscriptionNode
    public void setBehaviorTreeRootNodeStateMessage(BehaviorTreeRootNodeStateMessage behaviorTreeRootNodeStateMessage)
    {
       this.behaviorTreeRootNodeStateMessage = behaviorTreeRootNodeStateMessage;
+   }
+
+   public LeafNodeStateMessage getLeafNodeStateMessage()
+   {
+      return leafNodeStateMessage;
+   }
+
+   public void setLeafNodeStateMessage(LeafNodeStateMessage leafNodeStateMessage)
+   {
+      this.leafNodeStateMessage = leafNodeStateMessage;
    }
 
    public ActionNodeStateMessage getActionNodeStateMessage()
