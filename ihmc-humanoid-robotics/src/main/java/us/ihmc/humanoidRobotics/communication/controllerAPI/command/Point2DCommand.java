@@ -5,32 +5,49 @@ import us.ihmc.communication.controllerAPI.command.Command;
 
 public class Point2DCommand implements Command<Point2DCommand, Point2DMessage>
 {
-   public void set()
-   {
+   // TODO do we need sequence ID?
+   private double x;
+   private double y;
 
+   @Override
+   public void set(Point2DCommand other)
+   {
+      clear();
+
+      x = other.getX();
+      y = other.getY();
    }
 
    public void clear()
    {
-
+      x = 0.0;
+      y = 0.0;
    }
 
    @Override
    public void setFromMessage(Point2DMessage message)
    {
+      set(message);
+   }
 
+   public void set(Point2DMessage message)
+   {
+      clear();
+
+      x = message.getX();
+      y = message.getY();
    }
 
    @Override
    public Class<Point2DMessage> getMessageClass()
    {
-      return null;
+      return Point2DMessage.class;
    }
 
    @Override
    public boolean isCommandValid()
    {
-      return false;
+      return true;
    }
 
    @Override
@@ -39,9 +56,18 @@ public class Point2DCommand implements Command<Point2DCommand, Point2DMessage>
       return 0;
    }
 
-   @Override
-   public void set(Point2DCommand point2DCommand)
+   public double getX()
    {
+      return x;
+   }
 
+   public double getY()
+   {
+      return y;
+   }
+
+   public String toString()
+   {
+      return getClass().getSimpleName() + ": " + "{ x  : " + String.valueOf(x) + ", y    : " + String.valueOf(y)  + "}";
    }
 }

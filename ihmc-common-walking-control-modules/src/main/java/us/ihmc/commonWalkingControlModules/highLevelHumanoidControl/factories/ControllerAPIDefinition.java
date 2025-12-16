@@ -97,6 +97,9 @@ public class ControllerAPIDefinition
       /** Command supported by the joint-space controller {@link JointspacePositionControllerState} */
       commands.add(WholeBodyJointspaceTrajectoryCommand.class);
 
+      //TODO
+      commands.add(Point2DCommand.class);
+
       controllerSupportedCommands = new ArrayList<>(commands);
 
       controllerSupportedStatusMessages = ControllerAPI.outputMessageClasses.stream().toList();
