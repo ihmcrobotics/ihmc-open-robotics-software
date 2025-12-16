@@ -26,7 +26,7 @@ public class JointTorqueBasedFootSwitchFactory implements FootSwitchFactory
    private boolean defaultUseJacobianTranspose = false;
    private double defaultHorizontalVelocityThreshold = 0.5;
    private double defaultVerticalVelocityThreshold = 0.125;
-   private double defaultVerticalVelocityHighThreshold = 0.5;
+   private double defaultVerticalVelocityHighThreshold = 0.3;
    private double defaultJacobianDeterminantSingularityThreshold = 2e-3;
 
    private DoubleProvider contactThresholdTorque;
