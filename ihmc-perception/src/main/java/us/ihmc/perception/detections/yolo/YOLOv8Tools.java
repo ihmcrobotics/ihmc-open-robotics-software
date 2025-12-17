@@ -152,11 +152,25 @@ public class YOLOv8Tools
          opencv_imgproc.putText(annotatedImage, text, textLocation, FONT, FONT_SCALE, WHITE, FONT_THICKNESS, LINE_TYPE, false);
 
          // Add green tint to show mask
-         // FIXME: A simple resize isn't accurate here as the mask and input image may have different aspect ratios.
          RawImage mask = detection.mask();
-         Mat resizedMask = new Mat();
-         opencv_imgproc.resize(mask.getCpuImageMat(), resizedMask, annotatedImage.size());
-         opencv_core.add(annotatedImage, greenMat, annotatedImage, resizedMask, -1);
+         Mat maskMat = mask.getCpuImageMat();
+
+         // Account for aspect ratio by scaling to match annotatedImage width
+         Size scaleSize = new Size(annotatedImage.cols(), maskMat.rows() * annotatedImage.cols() / maskMat.cols());
+         Mat scaledMask = new Mat(scaleSize, maskMat.type());
+         opencv_imgproc.resize(maskMat, scaledMask, scaleSize);
+         Scalar scalar = new Scalar(0);
+         Mat paddedMask = new Mat(annotatedImage.rows(), annotatedImage.cols(), maskMat.type(), scalar);
+         Rect roi = new Rect(0, (annotatedImage.rows() - scaledMask.rows()) / 2, scaledMask.cols(), scaledMask.rows());
+         Mat paddedMaskCenter = new Mat(paddedMask, roi);
+         scaledMask.copyTo(paddedMaskCenter);
+         scaleSize.close();
+         paddedMaskCenter.close();
+         scalar.close();
+         roi.close();
+
+         opencv_core.add(annotatedImage, greenMat, annotatedImage, paddedMask, -1);
+         paddedMask.close();
 
          boundingBox.close();
          textBox.close();
