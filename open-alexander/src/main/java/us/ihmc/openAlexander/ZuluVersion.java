@@ -113,19 +113,19 @@ public enum ZuluVersion implements ZuluVersionInterface
       {
          case V1_FULL_ROBOT:
             jointMap = new ZuluJointMap(getPhysicalProperties(),
-                                        new SideDependentList<>(AlexanderArmConfiguration.FOREARM, AlexanderArmConfiguration.FOREARM),
+                                        new SideDependentList<>(ZuluArmConfiguration.FOREARM, ZuluArmConfiguration.FOREARM),
                                         true,
                                         true);
             break;
          case V1_NUB_FOREARMS:
             jointMap = new ZuluJointMap(getPhysicalProperties(),
-                                        new SideDependentList<>(AlexanderArmConfiguration.NUB, AlexanderArmConfiguration.NUB),
+                                        new SideDependentList<>(ZuluArmConfiguration.NUB, ZuluArmConfiguration.NUB),
                                         true,
                                         true);
             break;
          case V1_LEGS_ROBOT:
             jointMap = new ZuluJointMap(getPhysicalProperties(),
-                                        new SideDependentList<>(AlexanderArmConfiguration.NONE, AlexanderArmConfiguration.NONE),
+                                        new SideDependentList<>(ZuluArmConfiguration.NONE, ZuluArmConfiguration.NONE),
                                         false,
                                         false);
       }

@@ -1,6 +1,6 @@
 package us.ihmc.openAlexander;
 
-public enum AlexanderArmConfiguration
+public enum ZuluArmConfiguration
 {
    /* No arm is present */
    NONE,

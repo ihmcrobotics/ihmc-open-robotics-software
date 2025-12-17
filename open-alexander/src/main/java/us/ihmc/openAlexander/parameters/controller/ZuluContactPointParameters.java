@@ -74,11 +74,11 @@ public class ZuluContactPointParameters extends RobotContactPointParameters<Robo
       {
          /////////////// NUB MODE ////////////////////////////
 
-         if (((ZuluJointMap) jointMap).getArmConfiguration(robotSide) == AlexanderArmConfiguration.NUB)
+         if (((ZuluJointMap) jointMap).getArmConfiguration(robotSide) == ZuluArmConfiguration.NUB)
          {
             String handName = ((HumanoidJointNameMap) jointMap).getHandName(robotSide);
             String elbowJointName = ((HumanoidJointNameMap) jointMap).getArmJointName(robotSide, ArmJointName.ELBOW_PITCH);
-            Vector3D contactPointPositionInParentJointFrame = new Vector3D(AlexanderNubHandModel.getElbowToControlFrame());
+            Vector3D contactPointPositionInParentJointFrame = new Vector3D(ZuluNubHandModel.getElbowToControlFrame());
 
             addSimulationContactPoint(elbowJointName, contactPointPositionInParentJointFrame);
 
@@ -86,7 +86,7 @@ public class ZuluContactPointParameters extends RobotContactPointParameters<Robo
             addControllerContactPoint(handName, handName + "Contact", transformToContactFrame);
             numberOfHandContactPoints++;
          }
-         else if (((ZuluJointMap) jointMap).getArmConfiguration(robotSide) == AlexanderArmConfiguration.FOREARM)
+         else if (((ZuluJointMap) jointMap).getArmConfiguration(robotSide) == ZuluArmConfiguration.FOREARM)
          {
             String handName = ((HumanoidJointNameMap) jointMap).getHandName(robotSide);
             String wristJointName = ((HumanoidJointNameMap) jointMap).getArmJointName(robotSide, ArmJointName.WRIST_YAW);
@@ -110,7 +110,7 @@ public class ZuluContactPointParameters extends RobotContactPointParameters<Robo
       fullRobotModel.updateFrames();
 
       OneDoFJointBasics elbowJoint = fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_PITCH);
-      FramePoint3D knubPoint = new FramePoint3D(elbowJoint.getFrameAfterJoint(), AlexanderNubHandModel.getElbowToControlFrame());
+      FramePoint3D knubPoint = new FramePoint3D(elbowJoint.getFrameAfterJoint(), ZuluNubHandModel.getElbowToControlFrame());
       knubPoint.changeFrame(elbowJoint.getSuccessor().getBodyFixedFrame());
       return knubPoint;
    }

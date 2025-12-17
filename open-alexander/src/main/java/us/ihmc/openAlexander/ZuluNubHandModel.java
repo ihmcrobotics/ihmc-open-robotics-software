@@ -4,7 +4,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.handsros2.HandModel;
 import us.ihmc.robotics.partNames.HandJointName;
 
-public class AlexanderNubHandModel implements HandModel
+public class ZuluNubHandModel implements HandModel
 {
    public static final double CARBON_TUBE_RADIUS = 0.03;
    public static final double CONTROL_FRAME_X_OFFSET = -0.013;
@@ -20,7 +20,7 @@ public class AlexanderNubHandModel implements HandModel
 
    public static Vector3D getElbowToControlFrame()
    {
-      return new Vector3D(AlexanderNubHandModel.CONTROL_FRAME_X_OFFSET, 0.0, CONTROL_FRAME_Z_OFFSET);
+      return new Vector3D(ZuluNubHandModel.CONTROL_FRAME_X_OFFSET, 0.0, CONTROL_FRAME_Z_OFFSET);
    }
 
    private final HandJointName[] handJointNames = new HandJointName[0];

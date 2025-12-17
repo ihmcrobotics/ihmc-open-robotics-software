@@ -47,7 +47,7 @@ public class ZuluJointMap implements HumanoidJointNameMap
 
    private final SideDependentList<RigidBodyTransform> handControlFrameToWristTransforms = new SideDependentList<>();
    private final AlexanderPhysicalProperties alexanderPhysicalProperties;
-   private final SideDependentList<AlexanderArmConfiguration> armConfigurations;
+   private final SideDependentList<ZuluArmConfiguration> armConfigurations;
    private final SideDependentList<String> nameOfJointsBeforeHands = new SideDependentList<>();
    private final LinkedHashMap<String, JointRole> jointRoles = new LinkedHashMap<>();
    private final String[] jointNamesBeforeFeet = new String[2];
@@ -57,7 +57,7 @@ public class ZuluJointMap implements HumanoidJointNameMap
    private final HashSet<String> lastSimulatedJoints = new HashSet<>();
 
    public ZuluJointMap(AlexanderPhysicalProperties alexanderPhysicalProperties,
-                       SideDependentList<AlexanderArmConfiguration> armConfigurations,
+                       SideDependentList<ZuluArmConfiguration> armConfigurations,
                        boolean hasHead,
                        boolean hasArms)
    {
@@ -137,19 +137,19 @@ public class ZuluJointMap implements HumanoidJointNameMap
          {
             Joints lastSimulatedJoint = null;
 
-            if (armConfigurations.get(robotSide) == AlexanderArmConfiguration.NUB)
+            if (armConfigurations.get(robotSide) == ZuluArmConfiguration.NUB)
             {
                Links hand = robotSide == RobotSide.LEFT ? Links.LEFT_ELBOW_Y_LINK : Links.RIGHT_ELBOW_Y_LINK;
                handNames.put(robotSide, hand.name);
 
                lastSimulatedJoint = robotSide == RobotSide.LEFT ? Joints.LEFT_ELBOW_Y : Joints.RIGHT_ELBOW_Y;
 
-               handControlFrameToWristTransforms.put(robotSide, new RigidBodyTransform(new AxisAngle(), AlexanderNubHandModel.getElbowToControlFrame()));
+               handControlFrameToWristTransforms.put(robotSide, new RigidBodyTransform(new AxisAngle(), ZuluNubHandModel.getElbowToControlFrame()));
 
                Joints jointBeforeHand = robotSide == RobotSide.LEFT ? Joints.LEFT_ELBOW_Y : Joints.RIGHT_ELBOW_Y;
                nameOfJointsBeforeHands.put(robotSide, jointBeforeHand.name);
             }
-            else if (armConfigurations.get(robotSide) == AlexanderArmConfiguration.FOREARM)
+            else if (armConfigurations.get(robotSide) == ZuluArmConfiguration.FOREARM)
             {
                Links hand = robotSide == RobotSide.LEFT ? Links.LEFT_GRIPPER_Z_LINK : Links.RIGHT_GRIPPER_Z_LINK;
                handNames.put(robotSide, hand.name);
@@ -175,29 +175,29 @@ public class ZuluJointMap implements HumanoidJointNameMap
 
    private void setArmJointNames()
    {
-      if (armConfigurations.get(RobotSide.LEFT) == AlexanderArmConfiguration.NUB || armConfigurations.get(RobotSide.LEFT) == AlexanderArmConfiguration.FOREARM)
+      if (armConfigurations.get(RobotSide.LEFT) == ZuluArmConfiguration.NUB || armConfigurations.get(RobotSide.LEFT) == ZuluArmConfiguration.FOREARM)
       {
          armJointNames.put(Joints.LEFT_SHOULDER_Y.getName(), new ImmutablePair<>(RobotSide.LEFT, ArmJointName.SHOULDER_PITCH));
          armJointNames.put(Joints.LEFT_SHOULDER_X.getName(), new ImmutablePair<>(RobotSide.LEFT, ArmJointName.SHOULDER_ROLL));
          armJointNames.put(Joints.LEFT_SHOULDER_Z.getName(), new ImmutablePair<>(RobotSide.LEFT, ArmJointName.SHOULDER_YAW));
          armJointNames.put(Joints.LEFT_ELBOW_Y.getName(), new ImmutablePair<>(RobotSide.LEFT, ArmJointName.ELBOW_PITCH));
       }
-      if (armConfigurations.get(RobotSide.LEFT) == AlexanderArmConfiguration.FOREARM)
+      if (armConfigurations.get(RobotSide.LEFT) == ZuluArmConfiguration.FOREARM)
       {
          armJointNames.put(Joints.LEFT_WRIST_Z.getName(), new ImmutablePair<>(RobotSide.LEFT, ArmJointName.ELBOW_YAW));
          armJointNames.put(Joints.LEFT_WRIST_X.getName(), new ImmutablePair<>(RobotSide.LEFT, ArmJointName.WRIST_ROLL));
          armJointNames.put(Joints.LEFT_GRIPPER_Z.getName(), new ImmutablePair<>(RobotSide.LEFT, ArmJointName.WRIST_YAW));
       }
 
-      if (armConfigurations.get(RobotSide.RIGHT) == AlexanderArmConfiguration.NUB
-          || armConfigurations.get(RobotSide.RIGHT) == AlexanderArmConfiguration.FOREARM)
+      if (armConfigurations.get(RobotSide.RIGHT) == ZuluArmConfiguration.NUB
+          || armConfigurations.get(RobotSide.RIGHT) == ZuluArmConfiguration.FOREARM)
       {
          armJointNames.put(Joints.RIGHT_SHOULDER_Y.getName(), new ImmutablePair<>(RobotSide.RIGHT, ArmJointName.SHOULDER_PITCH));
          armJointNames.put(Joints.RIGHT_SHOULDER_X.getName(), new ImmutablePair<>(RobotSide.RIGHT, ArmJointName.SHOULDER_ROLL));
          armJointNames.put(Joints.RIGHT_SHOULDER_Z.getName(), new ImmutablePair<>(RobotSide.RIGHT, ArmJointName.SHOULDER_YAW));
          armJointNames.put(Joints.RIGHT_ELBOW_Y.getName(), new ImmutablePair<>(RobotSide.RIGHT, ArmJointName.ELBOW_PITCH));
       }
-      if (armConfigurations.get(RobotSide.RIGHT) == AlexanderArmConfiguration.FOREARM)
+      if (armConfigurations.get(RobotSide.RIGHT) == ZuluArmConfiguration.FOREARM)
       {
          armJointNames.put(Joints.RIGHT_WRIST_Z.getName(), new ImmutablePair<>(RobotSide.RIGHT, ArmJointName.ELBOW_YAW));
          armJointNames.put(Joints.RIGHT_WRIST_X.getName(), new ImmutablePair<>(RobotSide.RIGHT, ArmJointName.WRIST_ROLL));
@@ -256,7 +256,7 @@ public class ZuluJointMap implements HumanoidJointNameMap
       jointNamesBeforeFeet[1] = getJointBeforeFootName(RobotSide.RIGHT);
    }
 
-   public AlexanderArmConfiguration getArmConfiguration(RobotSide robotSide)
+   public ZuluArmConfiguration getArmConfiguration(RobotSide robotSide)
    {
       return armConfigurations.get(robotSide);
    }
@@ -480,14 +480,14 @@ public class ZuluJointMap implements HumanoidJointNameMap
    {
       if (armConfigurations == null)
          return false;
-      return armConfigurations.get(RobotSide.LEFT) == AlexanderArmConfiguration.FOREARM;
+      return armConfigurations.get(RobotSide.LEFT) == ZuluArmConfiguration.FOREARM;
    }
 
    public boolean hasRightCycloidForearm()
    {
       if (armConfigurations == null)
          return false;
-      return armConfigurations.get(RobotSide.RIGHT) == AlexanderArmConfiguration.FOREARM;
+      return armConfigurations.get(RobotSide.RIGHT) == ZuluArmConfiguration.FOREARM;
    }
 
    public enum Joints
@@ -515,50 +515,50 @@ public class ZuluJointMap implements HumanoidJointNameMap
       NECK_Z,
       NECK_Y,
       /* Left shoulder joints */
-      LEFT_SHOULDER_Y(RobotSide.LEFT, AlexanderArmConfiguration.NUB),
-      LEFT_SHOULDER_X(RobotSide.LEFT, AlexanderArmConfiguration.NUB),
-      LEFT_SHOULDER_Z(RobotSide.LEFT, AlexanderArmConfiguration.NUB),
-      LEFT_ELBOW_Y(RobotSide.LEFT, AlexanderArmConfiguration.NUB),
+      LEFT_SHOULDER_Y(RobotSide.LEFT, ZuluArmConfiguration.NUB),
+      LEFT_SHOULDER_X(RobotSide.LEFT, ZuluArmConfiguration.NUB),
+      LEFT_SHOULDER_Z(RobotSide.LEFT, ZuluArmConfiguration.NUB),
+      LEFT_ELBOW_Y(RobotSide.LEFT, ZuluArmConfiguration.NUB),
 
       /* Left forearm + gripper joints */
-      LEFT_WRIST_Z(RobotSide.LEFT, AlexanderArmConfiguration.FOREARM),
-      LEFT_WRIST_X(RobotSide.LEFT, AlexanderArmConfiguration.FOREARM),
-      LEFT_GRIPPER_Z(RobotSide.LEFT, AlexanderArmConfiguration.FOREARM),
-      LEFT_GRIPPER_X1(RobotSide.LEFT, AlexanderArmConfiguration.FOREARM),
-      LEFT_GRIPPER_X2(RobotSide.LEFT, AlexanderArmConfiguration.FOREARM),
+      LEFT_WRIST_Z(RobotSide.LEFT, ZuluArmConfiguration.FOREARM),
+      LEFT_WRIST_X(RobotSide.LEFT, ZuluArmConfiguration.FOREARM),
+      LEFT_GRIPPER_Z(RobotSide.LEFT, ZuluArmConfiguration.FOREARM),
+      LEFT_GRIPPER_X1(RobotSide.LEFT, ZuluArmConfiguration.FOREARM),
+      LEFT_GRIPPER_X2(RobotSide.LEFT, ZuluArmConfiguration.FOREARM),
 
       /* Left shoulder joints */
-      RIGHT_SHOULDER_Y(RobotSide.RIGHT, AlexanderArmConfiguration.NUB),
-      RIGHT_SHOULDER_X(RobotSide.RIGHT, AlexanderArmConfiguration.NUB),
-      RIGHT_SHOULDER_Z(RobotSide.RIGHT, AlexanderArmConfiguration.NUB),
-      RIGHT_ELBOW_Y(RobotSide.RIGHT, AlexanderArmConfiguration.NUB),
+      RIGHT_SHOULDER_Y(RobotSide.RIGHT, ZuluArmConfiguration.NUB),
+      RIGHT_SHOULDER_X(RobotSide.RIGHT, ZuluArmConfiguration.NUB),
+      RIGHT_SHOULDER_Z(RobotSide.RIGHT, ZuluArmConfiguration.NUB),
+      RIGHT_ELBOW_Y(RobotSide.RIGHT, ZuluArmConfiguration.NUB),
 
       /* Right forearm + gripper joints */
-      RIGHT_WRIST_Z(RobotSide.RIGHT, AlexanderArmConfiguration.FOREARM),
-      RIGHT_WRIST_X(RobotSide.RIGHT, AlexanderArmConfiguration.FOREARM),
-      RIGHT_GRIPPER_Z(RobotSide.RIGHT, AlexanderArmConfiguration.FOREARM),
-      RIGHT_GRIPPER_X1(RobotSide.RIGHT, AlexanderArmConfiguration.FOREARM),
-      RIGHT_GRIPPER_X2(RobotSide.RIGHT, AlexanderArmConfiguration.FOREARM),
+      RIGHT_WRIST_Z(RobotSide.RIGHT, ZuluArmConfiguration.FOREARM),
+      RIGHT_WRIST_X(RobotSide.RIGHT, ZuluArmConfiguration.FOREARM),
+      RIGHT_GRIPPER_Z(RobotSide.RIGHT, ZuluArmConfiguration.FOREARM),
+      RIGHT_GRIPPER_X1(RobotSide.RIGHT, ZuluArmConfiguration.FOREARM),
+      RIGHT_GRIPPER_X2(RobotSide.RIGHT, ZuluArmConfiguration.FOREARM),
       ;
 
       private final String name = toString();
       private final RobotSide armJointSide;
-      private final AlexanderArmConfiguration armConfiguration;
+      private final ZuluArmConfiguration armConfiguration;
 
       Joints()
       {
          this(null, null);
       }
 
-      Joints(RobotSide armJointSide, AlexanderArmConfiguration armConfiguration)
+      Joints(RobotSide armJointSide, ZuluArmConfiguration armConfiguration)
       {
          this.armJointSide = armJointSide;
          this.armConfiguration = armConfiguration;
       }
 
-      public boolean isPresent(SideDependentList<AlexanderArmConfiguration> armConfigurations)
+      public boolean isPresent(SideDependentList<ZuluArmConfiguration> armConfigurations)
       {
-         if (armConfigurations.get(armJointSide) != AlexanderArmConfiguration.NONE)
+         if (armConfigurations.get(armJointSide) != ZuluArmConfiguration.NONE)
             return true;
          else
             return false;
