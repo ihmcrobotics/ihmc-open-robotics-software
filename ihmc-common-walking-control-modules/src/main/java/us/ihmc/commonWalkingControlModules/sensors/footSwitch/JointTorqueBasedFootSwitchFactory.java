@@ -27,6 +27,7 @@ public class JointTorqueBasedFootSwitchFactory implements FootSwitchFactory
    private boolean defaultUseJacobianTranspose = false;
    private double defaultHorizontalVelocityThreshold = 0.5;
    private double defaultVerticalVelocityThreshold = 0.125;
+   private double defaultVerticalVelocityHighThreshold = 0.5;
 
    private DoubleProvider contactThresholdTorque;
    private DoubleProvider higherContactThresholdTorque;
@@ -36,6 +37,7 @@ public class JointTorqueBasedFootSwitchFactory implements FootSwitchFactory
    private BooleanProvider compensateGravity;
    private DoubleProvider horizontalVelocityThreshold;
    private DoubleProvider verticalVelocityThreshold;
+   private DoubleProvider verticalVelocityHighThreshold;
    private YoInteger contactWindowSize;
    private BooleanProvider useJacobianTranspose;
 
@@ -132,6 +134,7 @@ public class JointTorqueBasedFootSwitchFactory implements FootSwitchFactory
          compensateGravity = new BooleanParameter(namePrefix + "JacobianTCompensateGravity", registry, true);
          useJacobianTranspose = new BooleanParameter(namePrefix + "UseJacobianTranspose", registry, defaultUseJacobianTranspose);
          verticalVelocityThreshold = new DoubleParameter(namePrefix + "VerticalVelocityThreshold", registry, defaultVerticalVelocityThreshold);
+         verticalVelocityHighThreshold = new DoubleParameter(namePrefix + "VerticalVelocityHighThreshold", registry, defaultVerticalVelocityHighThreshold);
          horizontalVelocityThreshold = new DoubleParameter(namePrefix + "HorizontalVelocityThreshold", registry, defaultHorizontalVelocityThreshold);
       }
 
@@ -148,6 +151,7 @@ public class JointTorqueBasedFootSwitchFactory implements FootSwitchFactory
                                             compensateGravity,
                                             horizontalVelocityThreshold,
                                             verticalVelocityThreshold,
+                                            verticalVelocityHighThreshold,
                                             useJacobianTranspose,
                                             registry);
    }

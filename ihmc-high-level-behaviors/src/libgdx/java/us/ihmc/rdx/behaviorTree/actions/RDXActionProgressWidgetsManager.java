@@ -177,7 +177,7 @@ public class RDXActionProgressWidgetsManager
                handleRenderingBlankBar(true);
                for (int i = 0; i < actionNodesToRender.size(); i++)
                {
-                  actionNodesToRender.get(i).getProgressWidgets().renderJointspacePositionError(2, dividedBarWidth, renderAsPlots);
+                  actionNodesToRender.get(i).getProgressWidgets().renderJointspacePositionError(f, dividedBarWidth, renderAsPlots);
                   sameLineExceptLast(i);
                }
                ++numberOfLines;

@@ -8,6 +8,7 @@ public abstract class LocomotionParameters extends StoredPropertySet
 
    public static final DoubleStoredPropertyKey swingTime = keys.addDoubleKey("Swing time", 0.8);
    public static final DoubleStoredPropertyKey transferTime = keys.addDoubleKey("Transfer time", 0.4);
+   public static final DoubleStoredPropertyKey swingHeight = keys.addDoubleKey("Swing height", 0.07);
    public static final BooleanStoredPropertyKey assumeFlatGround = keys.addBooleanKey("Assume flat ground", true);
    public static final BooleanStoredPropertyKey performAStarSearch = keys.addBooleanKey("Perform A star search", true);
    public static final BooleanStoredPropertyKey areFootstepsAdjustable = keys.addBooleanKey("Are footsteps adjustable", false);
@@ -31,6 +32,11 @@ public abstract class LocomotionParameters extends StoredPropertySet
    public double getTransferTime()
    {
       return get(transferTime);
+   }
+
+   public double getSwingHeight()
+   {
+      return get(swingHeight);
    }
 
    public boolean getAssumeFlatGround()

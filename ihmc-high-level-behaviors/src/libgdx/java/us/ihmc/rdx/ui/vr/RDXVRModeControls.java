@@ -3,16 +3,12 @@ package us.ihmc.rdx.ui.vr;
 import imgui.ImGui;
 import imgui.flag.ImGuiTreeNodeFlags;
 import imgui.type.ImBoolean;
-import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.RDXJoystickBasedStepping;
 import us.ihmc.rdx.ui.graphics.RDXRobotPerceptionVisualizersPanel;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
-import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationManager;
-
-import java.util.Collection;
 
 public class RDXVRModeControls
 {
@@ -104,12 +100,12 @@ public class RDXVRModeControls
             {
                if (panel instanceof RDXRobotPerceptionVisualizersPanel perceptionVisualizersPanel)
                {
-                  RDXROS2ImageMessageVisualizer leftColorVisualizer = perceptionVisualizersPanel.getZedLeftColorImageVisualizer();
+                  RDXROS2ImageMessageVisualizer leftColorVisualizer = perceptionVisualizersPanel.getExperimentalCameraLeftColorImageVisualizer();
                   if (leftColorVisualizer != null)
                   {
                      activateWithSubscriptionOnly(leftColorVisualizer);
                   }
-                  RDXROS2ImageMessageVisualizer rightColorVisualizer = perceptionVisualizersPanel.getZedRightColorImageVisualizer();
+                  RDXROS2ImageMessageVisualizer rightColorVisualizer = perceptionVisualizersPanel.getExperimentalCameraRightColorImageVisualizer();
                   if (rightColorVisualizer != null)
                   {
                      activateWithSubscriptionOnly(rightColorVisualizer);

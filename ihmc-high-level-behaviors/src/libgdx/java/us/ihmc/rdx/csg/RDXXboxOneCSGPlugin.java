@@ -9,7 +9,6 @@ import controller_msgs.msg.dds.ContinuousStepGeneratorStatusMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.CSGROS2CommunicationHelper;
 import us.ihmc.commons.DeadbandTools;
-import us.ihmc.commons.thread.Throttler;
 import us.ihmc.ros2.ROS2Node;
 
 /**
@@ -24,12 +23,6 @@ import us.ihmc.ros2.ROS2Node;
  */
 public class RDXXboxOneCSGPlugin
 {
-   /**
-    * This defines the update thread rate for information being sent over ROS2. The reason this is a very low frequency is because
-    * we only have a limited amount of networking bandwidth when using WIFI.
-    */
-   private static final double THROTTLER_THREAD_HERTZ = 11.0;
-
    public static final double DEFAULT_PARAMETER_INCREMENT = 0.01;
    private static final boolean DEFAULT_USE_DEADMAN_SWITCH = true;
 
@@ -48,9 +41,6 @@ public class RDXXboxOneCSGPlugin
    private final ContinuousStepGeneratorParametersMessage csgParametersCommand;
    private final ContinuousStepGeneratorStatusMessage csgStatusMessage;
 
-   // Throttler for ensuring we aren't publishing too fast/often
-   private final Throttler xboxJoystickRos2Throttler;
-
    public RDXXboxOneCSGPlugin(DRCRobotModel robotModel, ROS2Node ros2Node)
    {
       this(new CSGROS2CommunicationHelper(robotModel.getSimpleRobotName(), ros2Node, robotModel.getWalkingControllerParameters()));
@@ -68,8 +58,6 @@ public class RDXXboxOneCSGPlugin
       csgInputCommand = communicationHelper.getCSGInputCommand();
       csgParametersCommand = communicationHelper.getCSGParametersCommand();
       csgStatusMessage = communicationHelper.getCSGStatusMessage();
-
-      xboxJoystickRos2Throttler = new Throttler().setFrequency(THROTTLER_THREAD_HERTZ);
 
       controllerListener = new ControllerListener()
       {
@@ -142,8 +130,8 @@ public class RDXXboxOneCSGPlugin
    {
       update(csgInputCommand);
 
-      if (xboxJoystickRos2Throttler.run() && publishCSGInputCommand)
-         communicationHelper.publish(csgInputCommand);
+      if (publishCSGInputCommand)
+         communicationHelper.publishAtThrottledRate(csgInputCommand);
    }
 
    public void update(ContinuousStepGeneratorInputMessage csgInputCommandToPack)

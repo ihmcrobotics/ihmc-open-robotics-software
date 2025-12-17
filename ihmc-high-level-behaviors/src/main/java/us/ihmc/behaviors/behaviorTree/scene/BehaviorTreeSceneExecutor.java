@@ -5,6 +5,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.perception.detections.PersistentDetection;
+import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseCommunicator;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseCommunicatorMap;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseObject;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
@@ -45,6 +46,13 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
 
       if (yolo != null)
          yolo.addDetectionConsumerCallback(instantDetectionQueue::add);
+
+      if (foundationPose != null)
+      {
+         IsaacROSFoundationPoseCommunicator mustardCommunicator = foundationPose.get(IsaacROSFoundationPoseObject.MUSTARD);
+         mustardCommunicator.enable(true);
+         mustardCommunicator.addResultCallback(detection -> instantDetectionQueue.add(List.of(detection)));
+      }
    }
 
    public void update()

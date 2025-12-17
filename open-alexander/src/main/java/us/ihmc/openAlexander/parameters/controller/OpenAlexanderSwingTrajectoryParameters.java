@@ -4,7 +4,7 @@ import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParamet
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 
-public class AlexanderSwingTrajectoryParameters extends SwingTrajectoryParameters
+public class OpenAlexanderSwingTrajectoryParameters extends SwingTrajectoryParameters
 {
    @Override
    public double getFinalCoMVelocityInjectionRatio()
@@ -33,7 +33,7 @@ public class AlexanderSwingTrajectoryParameters extends SwingTrajectoryParameter
    @Override
    public double getDefaultSwingHeight()
    {
-      return 0.06;
+      return 0.1;
    }
 
    @Override
@@ -71,7 +71,7 @@ public class AlexanderSwingTrajectoryParameters extends SwingTrajectoryParameter
    public double getDesiredTouchdownVelocity()
    {
       // TODO Needs tune up
-      return -0.1;
+      return -0.15;
    }
 
    @Override
@@ -102,7 +102,7 @@ public class AlexanderSwingTrajectoryParameters extends SwingTrajectoryParameter
    @Override
    public double getMinHeightDifferenceForStepUpOrDown()
    {
-      return 0.1;
+      return 0.05;
    }
 
    @Override

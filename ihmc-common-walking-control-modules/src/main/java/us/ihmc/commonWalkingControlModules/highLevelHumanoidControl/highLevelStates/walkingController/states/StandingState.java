@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -33,6 +34,8 @@ public class StandingState extends WalkingState
    private final RigidBodyControlManager chestManager;
    private final SideDependentList<RigidBodyControlManager> handManagers = new SideDependentList<>();
    private final FeetManager feetManager;
+
+   private RobotSide supportingSide;
 
    public StandingState(CommandInputManager commandInputManager,
                         WalkingMessageHandler walkingMessageHandler,
@@ -74,7 +77,7 @@ public class StandingState extends WalkingState
    public void doAction(double timeInState)
    {
       if (!holdDesiredHeightConstantWhenStanding)
-         comHeightManager.setSupportLeg(RobotSide.LEFT);
+         comHeightManager.setSupportLeg(supportingSide);
       balanceManager.computeICPPlan();
       controllerToolbox.getWalkingTrajectoryPath().updateTrajectory(feetManager.getCurrentConstraintType(RobotSide.LEFT),
                                                                     feetManager.getCurrentConstraintType(RobotSide.RIGHT),
@@ -99,10 +102,17 @@ public class StandingState extends WalkingState
       if (holdDesiredHeightConstantWhenStanding)
       {
          comHeightManager.initializeToNominalDesiredHeight();
+         supportingSide = RobotSide.LEFT;
       }
       else
       {
-         TransferToAndNextFootstepsData transferToAndNextFootstepsDataForDoubleSupport = walkingMessageHandler.createTransferToAndNextFootstepDataForDoubleSupport(RobotSide.RIGHT);
+         Footstep footstepLeft = walkingMessageHandler.getFootstepAtCurrentLocation(RobotSide.LEFT);
+         Footstep footstepRight = walkingMessageHandler.getFootstepAtCurrentLocation(RobotSide.RIGHT);
+
+         supportingSide = getSideCarryingMostWeight(footstepLeft, footstepRight);
+         supportingSide = supportingSide == null ? RobotSide.LEFT : supportingSide;
+
+         TransferToAndNextFootstepsData transferToAndNextFootstepsDataForDoubleSupport = walkingMessageHandler.createTransferToAndNextFootstepDataForDoubleSupport(supportingSide.getOppositeSide());
          comHeightManager.initialize(transferToAndNextFootstepsDataForDoubleSupport, 0.0);
       }
 
@@ -150,5 +160,24 @@ public class StandingState extends WalkingState
    public boolean isDone(double timeInState)
    {
       return true;
+   }
+
+   private RobotSide getSideCarryingMostWeight(Footstep leftFootstep, Footstep rightFootstep)
+   {
+      WalkingStateEnum previousWalkingState = getPreviousWalkingStateEnum();
+      if (previousWalkingState == null)
+         return null;
+
+      RobotSide mostSupportingSide = null;
+      boolean leftStepLower = leftFootstep.getZ() <= rightFootstep.getZ();
+      boolean rightStepLower = leftFootstep.getZ() > rightFootstep.getZ();
+      if (leftStepLower)
+         mostSupportingSide = RobotSide.LEFT;
+      else if (rightStepLower)
+         mostSupportingSide = RobotSide.RIGHT;
+      else if (previousWalkingState.getTransferToSide() != null)
+         mostSupportingSide = previousWalkingState.getTransferToSide().getOppositeSide();
+
+      return mostSupportingSide;
    }
 }
