@@ -1,7 +1,7 @@
 package us.ihmc.openAlexander.posePlayback;
 
 import org.junit.jupiter.api.Test;
-import us.ihmc.openAlexander.OpenAlexanderVersion;
+import us.ihmc.openAlexander.ZuluVersion;
 import us.ihmc.openAlexander.OpenAlexanderRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -14,7 +14,7 @@ public class AlexanderPlaybackPoseSequenceTest extends PlaybackPoseSequenceDRCTe
    @Override
    public DRCRobotModel getRobotModel()
    {
-      return new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT, RobotTarget.SCS);
+      return new OpenAlexanderRobotModel(ZuluVersion.V1_FULL_ROBOT, RobotTarget.SCS);
    }
 
    @Override

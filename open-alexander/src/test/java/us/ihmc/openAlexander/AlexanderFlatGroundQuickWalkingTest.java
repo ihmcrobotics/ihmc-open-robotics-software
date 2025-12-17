@@ -19,7 +19,7 @@ public class AlexanderFlatGroundQuickWalkingTest extends AvatarFlatGroundQuickWa
    @Override
    public DRCRobotModel getRobotModel()
    {
-      return new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT)
+      return new OpenAlexanderRobotModel(ZuluVersion.V1_FULL_ROBOT)
       {
          @Override
          public HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes, boolean enableJointDamping)

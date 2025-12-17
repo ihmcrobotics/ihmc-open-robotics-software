@@ -1,8 +1,8 @@
 package us.ihmc.openAlexander.parameters.controller;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
-import us.ihmc.openAlexander.AlexanderJointMap;
-import us.ihmc.openAlexander.AlexanderVersionInterface;
+import us.ihmc.openAlexander.ZuluJointMap;
+import us.ihmc.openAlexander.ZuluVersionInterface;
 import us.ihmc.openAlexander.parameters.model.AlexanderPhysicalProperties;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
@@ -42,23 +42,23 @@ import java.util.Map;
 
 public class OpenAlexanderWalkingControllerParameters extends WalkingControllerParameters
 {
-   private final AlexanderVersionInterface version;
+   private final ZuluVersionInterface version;
    private final RobotTarget target;
-   protected final AlexanderJointMap jointMap;
+   protected final ZuluJointMap jointMap;
    private final AlexanderPhysicalProperties physicalProperties;
    private final ToeOffParameters toeOffParameters;
    private SwingTrajectoryParameters swingTrajectoryParameters;
-   private final ZuluAlexanderSteppingParameters steppingParameters;
-   private final OpenAlexanderICPControllerParameters icpControllerParameters;
-   private final OpenAlexanderStepAdjustmentParameters stepAdjustmentParameters;
-   private JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = new AlexanderJointPrivilegedConfigurationParameters();
+   private final ZuluSteppingParameters steppingParameters;
+   private final ICPControllerParameters icpControllerParameters;
+   private final StepAdjustmentParameters stepAdjustmentParameters;
+   private final JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = new JointPrivilegedConfigurationParameters();
    private final OneDoFJointPrivilegedConfigurationParameters kneePrivilegedConfigurationParameters;
    private final JointLimitParameters kneeJointLimitParameters;
 
    protected TObjectDoubleHashMap<String> jointHomeConfiguration = null;
    private Map<String, Pose3D> bodyHomeConfiguration = null;
 
-   private final OpenAlexanderMomentumOptimizationSettings momentumOptimizationSettings;
+   private final ZuluMomentumOptimizationSettings momentumOptimizationSettings;
 
    // USE THESE FOR Real Alexander Robot and sims when controlling pelvis height instead of CoM.
    private final double minimumHeightAboveGround;
@@ -83,14 +83,14 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
    /* Setting to true makes the arms stiffer but more responsive for streaming */
    public static final boolean RESPONSIVE_STREAMING_MODE = false;
 
-   public OpenAlexanderWalkingControllerParameters(AlexanderVersionInterface version, RobotTarget target, AlexanderJointMap jointMap, AlexanderPhysicalProperties physicalProperties)
+   public OpenAlexanderWalkingControllerParameters(ZuluVersionInterface version, RobotTarget target, ZuluJointMap jointMap, AlexanderPhysicalProperties physicalProperties)
    {
       this(version, target, jointMap, physicalProperties, new ZuluContactPointParameters(jointMap, physicalProperties, true));
    }
 
-   public OpenAlexanderWalkingControllerParameters(AlexanderVersionInterface version,
+   public OpenAlexanderWalkingControllerParameters(ZuluVersionInterface version,
                                                    RobotTarget target,
-                                                   AlexanderJointMap jointMap,
+                                                   ZuluJointMap jointMap,
                                                    AlexanderPhysicalProperties physicalProperties,
                                                    RobotContactPointParameters<RobotSide> contactPointParameters)
    {
@@ -100,11 +100,11 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
       this.physicalProperties = physicalProperties;
 
       toeOffParameters = new ZuluToeOffParameters(physicalProperties);
-      momentumOptimizationSettings = new OpenAlexanderMomentumOptimizationSettings(target, jointMap, 2 + contactPointParameters.getAdditionalContactNames().size());
+      momentumOptimizationSettings = new ZuluMomentumOptimizationSettings(target, jointMap, 2 + contactPointParameters.getAdditionalContactNames().size());
       swingTrajectoryParameters = new SwingTrajectoryParameters();
-      steppingParameters = new ZuluAlexanderSteppingParameters(physicalProperties);
-      icpControllerParameters = new OpenAlexanderICPControllerParameters();
-      stepAdjustmentParameters = new OpenAlexanderStepAdjustmentParameters();
+      steppingParameters = new ZuluSteppingParameters(physicalProperties);
+      icpControllerParameters = new ICPControllerParameters();
+      stepAdjustmentParameters = new StepAdjustmentParameters();
 
       kneePrivilegedConfigurationParameters = new OneDoFJointPrivilegedConfigurationParameters();
       kneePrivilegedConfigurationParameters.setConfigurationGain(target == RobotTarget.REAL_ROBOT ? 60.0 : 120.0);
@@ -866,11 +866,6 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
    public void setSwingTrajectoryParameters(SwingTrajectoryParameters swingTrajectoryParameters)
    {
       this.swingTrajectoryParameters = swingTrajectoryParameters;
-   }
-
-   public void setJointPrivilegedConfigurationParameters(JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters)
-   {
-      this.jointPrivilegedConfigurationParameters = jointPrivilegedConfigurationParameters;
    }
 
    /** {@inheritDoc} */

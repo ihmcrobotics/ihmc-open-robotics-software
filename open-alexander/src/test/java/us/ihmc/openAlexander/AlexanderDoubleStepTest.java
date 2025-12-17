@@ -10,7 +10,7 @@ public class AlexanderDoubleStepTest extends AvatarDoubleStepTest
 {
    private final RobotTarget target = RobotTarget.SCS;
 
-   private final OpenAlexanderRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT, target);
+   private final OpenAlexanderRobotModel robotModel = new OpenAlexanderRobotModel(ZuluVersion.V1_FULL_ROBOT, target);
 
    @Tag("humanoid-flat-ground-slow-2")
    @Test

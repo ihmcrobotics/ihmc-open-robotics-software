@@ -3,7 +3,6 @@ package us.ihmc.openAlexander;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import us.ihmc.openAlexander.parameters.controller.OpenAlexanderICPControllerParameters;
 import us.ihmc.openAlexander.parameters.controller.OpenAlexanderWalkingControllerParameters;
 import us.ihmc.avatar.AvatarFlatGroundSideSteppingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -16,7 +15,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 @Tag("humanoid-flat-ground-slow-2")
 public class AlexanderFlatGroundSideSteppingTest extends AvatarFlatGroundSideSteppingTest
 {
-   private final OpenAlexanderVersion version = OpenAlexanderVersion.V1_FULL_ROBOT;
+   private final ZuluVersion version = ZuluVersion.V1_FULL_ROBOT;
    private final RobotTarget target = RobotTarget.SCS;
    private final OpenAlexanderRobotModel robotModel = new OpenAlexanderRobotModel(version, target)
    {
@@ -28,7 +27,7 @@ public class AlexanderFlatGroundSideSteppingTest extends AvatarFlatGroundSideSte
             @Override
             public ICPControllerParameters getICPControllerParameters()
             {
-               return new OpenAlexanderICPControllerParameters()
+               return new ICPControllerParameters()
                {
                   @Override
                   public boolean useAngularMomentum()

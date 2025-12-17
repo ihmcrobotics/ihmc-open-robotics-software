@@ -2,7 +2,7 @@ package us.ihmc.openAlexander.pushRecovery;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import us.ihmc.openAlexander.OpenAlexanderVersion;
+import us.ihmc.openAlexander.ZuluVersion;
 import us.ihmc.openAlexander.OpenAlexanderRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -71,7 +71,7 @@ public class AlexanderPushRecoveryWalkingTrackTest extends AvatarPushRecoveryWal
    @Test
    public void testFlatGroundWalking()
    {
-      robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT, RobotTarget.SCS);
+      robotModel = new OpenAlexanderRobotModel(ZuluVersion.V1_FULL_ROBOT, RobotTarget.SCS);
       super.testFlatGroundWalking();
    }
 }

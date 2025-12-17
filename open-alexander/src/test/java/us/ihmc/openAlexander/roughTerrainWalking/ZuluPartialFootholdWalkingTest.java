@@ -3,7 +3,7 @@ package us.ihmc.openAlexander.roughTerrainWalking;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import us.ihmc.openAlexander.OpenAlexanderVersion;
+import us.ihmc.openAlexander.ZuluVersion;
 import us.ihmc.openAlexander.OpenAlexanderRobotModel;
 import us.ihmc.openAlexander.parameters.controller.ZuluContactPointParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -23,7 +23,7 @@ public class ZuluPartialFootholdWalkingTest extends HumanoidPartialFootholdWalki
    @Override
    public DRCRobotModel getRobotModel()
    {
-      OpenAlexanderVersion version = OpenAlexanderVersion.V1_FULL_ROBOT;
+      ZuluVersion version = ZuluVersion.V1_FULL_ROBOT;
       FootContactPoints<RobotSide> simulationContactPoints = new AdditionalSimulationContactPoints<>(RobotSide.values, 10, 5, true, false);
       ZuluContactPointParameters contactPointParameters=  new ZuluContactPointParameters(version.getJointMap(), version.getPhysicalProperties(), simulationContactPoints, false);
       OpenAlexanderRobotModel robotModel = new OpenAlexanderRobotModel(version, RobotTarget.SCS, contactPointParameters)

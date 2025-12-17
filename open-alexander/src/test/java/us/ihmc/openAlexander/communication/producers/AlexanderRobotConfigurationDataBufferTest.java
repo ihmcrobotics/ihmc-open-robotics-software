@@ -2,7 +2,7 @@ package us.ihmc.openAlexander.communication.producers;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import us.ihmc.openAlexander.OpenAlexanderVersion;
+import us.ihmc.openAlexander.ZuluVersion;
 import us.ihmc.openAlexander.OpenAlexanderRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -15,7 +15,7 @@ public class AlexanderRobotConfigurationDataBufferTest extends RobotConfiguratio
    @Override
    public FullHumanoidRobotModel getFullRobotModel()
    {
-      return new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT, RobotTarget.SCS).createFullRobotModel();
+      return new OpenAlexanderRobotModel(ZuluVersion.V1_FULL_ROBOT, RobotTarget.SCS).createFullRobotModel();
    }
 
    @Override

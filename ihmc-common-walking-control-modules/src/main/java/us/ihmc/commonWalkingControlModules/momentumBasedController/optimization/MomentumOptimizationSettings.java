@@ -3,21 +3,16 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
 public abstract class MomentumOptimizationSettings implements ControllerCoreOptimizationSettings
 {
-   /**
-    * Note: This method does not need to be overwritten if the values for this parameter are loaded from XML.
-    */
    public Vector3DReadOnly getLinearMomentumWeight()
    {
-      return null;
+      return new Vector3D(0.5, 0.5, 0.02);
    }
 
-   /**
-    * Note: This method does not need to be overwritten if the values for this parameter are loaded from XML.
-    */
    public Vector3DReadOnly getRecoveryLinearMomentumWeight()
    {
       return getLinearMomentumWeight();
@@ -28,11 +23,10 @@ public abstract class MomentumOptimizationSettings implements ControllerCoreOpti
     */
    public Vector3DReadOnly getAngularMomentumWeight()
    {
-      return null;
+      return new Vector3D(0.0, 0.0, 0.1);
    }
 
    /**
-    * Note: This method does not need to be overwritten if the values for this parameter are loaded from XML.
     * <p>
     * Returns the optimization weight for the linear objective of the foot whenever the foot is
     * in support (loaded). When the foot is not loaded the default weight from
@@ -41,11 +35,10 @@ public abstract class MomentumOptimizationSettings implements ControllerCoreOpti
     */
    public Vector3DReadOnly getLoadedFootLinearWeight()
    {
-      return null;
+      return new Vector3D(50.0, 50.0, 50.0);
    }
 
    /**
-    * Note: This method does not need to be overwritten if the values for this parameter are loaded from XML.
     * <p>
     * Returns the optimization weight for the angular objective of the foot whenever the foot is
     * in support (loaded).When the foot is not loaded the default weight from
@@ -54,7 +47,7 @@ public abstract class MomentumOptimizationSettings implements ControllerCoreOpti
     */
    public Vector3DReadOnly getLoadedFootAngularWeight()
    {
-      return null;
+      return new Vector3D(5.0, 5.0, 5.0);
    }
 
    /**

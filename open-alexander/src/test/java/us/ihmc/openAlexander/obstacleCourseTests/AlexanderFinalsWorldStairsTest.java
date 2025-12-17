@@ -4,7 +4,7 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
 import org.junit.jupiter.api.*;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
-import us.ihmc.openAlexander.OpenAlexanderVersion;
+import us.ihmc.openAlexander.ZuluVersion;
 import us.ihmc.openAlexander.OpenAlexanderRobotModel;
 import us.ihmc.openAlexander.parameters.controller.ZuluContactPointParameters;
 import us.ihmc.avatar.DRCStartingLocation;
@@ -70,7 +70,7 @@ public class AlexanderFinalsWorldStairsTest
 
       DRCStartingLocation selectedLocation = DRCSCStartingLocations.STAIRS_START;
 
-      OpenAlexanderVersion version = OpenAlexanderVersion.V1_FULL_ROBOT;
+      ZuluVersion version = ZuluVersion.V1_FULL_ROBOT;
       FootContactPoints<RobotSide> simulationContactPoints = new AdditionalSimulationContactPoints<>(RobotSide.values, 8, 3, true, true);
       ZuluContactPointParameters contactPointParameters = new ZuluContactPointParameters(version.getJointMap(), version.getPhysicalProperties(), simulationContactPoints, false);
       OpenAlexanderRobotModel robotModel = new OpenAlexanderRobotModel(version, RobotTarget.SCS, contactPointParameters);
@@ -121,7 +121,7 @@ public class AlexanderFinalsWorldStairsTest
       CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCStartingLocation selectedLocation = DRCSCStartingLocations.STAIRS_START;
-      OpenAlexanderVersion version = OpenAlexanderVersion.V1_FULL_ROBOT;
+      ZuluVersion version = ZuluVersion.V1_FULL_ROBOT;
       FootContactPoints<RobotSide> simulationContactPoints = new AdditionalSimulationContactPoints<>(RobotSide.values, 8, 3, true, true);
       ZuluContactPointParameters contactPointParameters = new ZuluContactPointParameters(version.getJointMap(), version.getPhysicalProperties(), simulationContactPoints, false);
       OpenAlexanderRobotModel robotModel = new OpenAlexanderRobotModel(version, RobotTarget.SCS, contactPointParameters);

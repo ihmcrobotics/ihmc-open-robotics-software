@@ -1,7 +1,7 @@
 package us.ihmc.openAlexander.parameters.model;
 
 import jakarta.xml.bind.JAXBException;
-import us.ihmc.openAlexander.AlexanderVersionInterface;
+import us.ihmc.openAlexander.ZuluVersionInterface;
 import us.ihmc.scs2.definition.robot.urdf.URDFTools;
 import us.ihmc.scs2.definition.robot.urdf.items.URDFModel;
 
@@ -10,7 +10,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -41,7 +40,7 @@ public class OpenAlexanderURDFParameters implements HumanoidURDFParameterInterfa
 
    private final URDFTools.URDFParserProperties urdfParserProperties = new URDFTools.URDFParserProperties();
 
-   public OpenAlexanderURDFParameters(AlexanderVersionInterface alexanderVersion)
+   public OpenAlexanderURDFParameters(ZuluVersionInterface alexanderVersion)
    {
       urdfParserProperties.setHandleImplicitJointDefinitions(false);
 

@@ -1,6 +1,6 @@
 package us.ihmc.openAlexander.parameters.controller;
 
-import us.ihmc.openAlexander.AlexanderJointMap;
+import us.ihmc.openAlexander.ZuluJointMap;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -15,7 +15,7 @@ public class ZuluStandPrepSetPoints implements WholeBodySetpointParameters
 {
    private final Map<String, Double> setPoints = new LinkedHashMap<>();
 
-   public ZuluStandPrepSetPoints(AlexanderJointMap jointMap)
+   public ZuluStandPrepSetPoints(ZuluJointMap jointMap)
    {
       setPoints.put(jointMap.getSpineJointName(SpineJointName.SPINE_YAW), 0.0);
       setPoints.put(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH), 0.0);

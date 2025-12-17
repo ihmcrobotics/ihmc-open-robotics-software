@@ -3,7 +3,7 @@ package us.ihmc.openAlexander.networkProcessor.footstepPostProcessing;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import us.ihmc.openAlexander.OpenAlexanderVersion;
+import us.ihmc.openAlexander.ZuluVersion;
 import us.ihmc.openAlexander.OpenAlexanderRobotModel;
 import us.ihmc.openAlexander.parameters.controller.OpenAlexanderWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -21,7 +21,7 @@ public class AlexanderPostProcessingTest extends AvatarPostProcessingTests
    @Override
    public DRCRobotModel getRobotModel()
    {
-      return new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT, RobotTarget.SCS)
+      return new OpenAlexanderRobotModel(ZuluVersion.V1_FULL_ROBOT, RobotTarget.SCS)
       {
          public WalkingControllerParameters getWalkingControllerParameters()
          {

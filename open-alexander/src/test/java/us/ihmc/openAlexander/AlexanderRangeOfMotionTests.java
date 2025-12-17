@@ -10,7 +10,7 @@ import us.ihmc.simulationConstructionSetTools.tools.CITools;
 
 public class AlexanderRangeOfMotionTests extends AvatarRangeOfMotionTests
 {
-   private final DRCRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT, RobotTarget.SCS);
+   private final DRCRobotModel robotModel = new OpenAlexanderRobotModel(ZuluVersion.V1_FULL_ROBOT, RobotTarget.SCS);
 
    @Override
    public DRCRobotModel getRobotModel()

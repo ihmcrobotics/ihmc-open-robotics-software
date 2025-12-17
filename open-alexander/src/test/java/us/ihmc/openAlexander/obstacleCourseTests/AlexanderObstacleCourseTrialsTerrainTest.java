@@ -3,7 +3,7 @@ package us.ihmc.openAlexander.obstacleCourseTests;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import us.ihmc.openAlexander.OpenAlexanderVersion;
+import us.ihmc.openAlexander.ZuluVersion;
 import us.ihmc.openAlexander.OpenAlexanderRobotModel;
 import us.ihmc.openAlexander.parameters.controller.ZuluContactPointParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -21,13 +21,13 @@ public class AlexanderObstacleCourseTrialsTerrainTest extends DRCObstacleCourseT
    @Override
    public DRCRobotModel getRobotModel()
    {
-      return new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT, RobotTarget.SCS);
+      return new OpenAlexanderRobotModel(ZuluVersion.V1_FULL_ROBOT, RobotTarget.SCS);
    }
 
    @Override
    protected DRCRobotModel getRobotModelWithAdditionalFootContactPoints()
    {
-      OpenAlexanderVersion version = OpenAlexanderVersion.V1_FULL_ROBOT;
+      ZuluVersion version = ZuluVersion.V1_FULL_ROBOT;
       FootContactPoints<RobotSide> simulationContactPoints = new AdditionalSimulationContactPoints<>(RobotSide.values, 5, 3, true, false);
       ZuluContactPointParameters contactPointParameters = new ZuluContactPointParameters(version.getJointMap(), version.getPhysicalProperties(), simulationContactPoints, false);
       return new OpenAlexanderRobotModel(version, RobotTarget.SCS, contactPointParameters);

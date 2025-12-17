@@ -11,7 +11,7 @@ public class AlexanderNubHandModel implements HandModel
 
    private static final double SHORT_CONTROL_FRAME_Z_OFFSET = -0.298;
    private static final double LONG_CONTROL_FRAME_Z_OFFSET = -0.413;
-   public static final double CONTROL_FRAME_Z_OFFSET = OpenAlexanderVersion.SHORT_NUBS ? SHORT_CONTROL_FRAME_Z_OFFSET : LONG_CONTROL_FRAME_Z_OFFSET;
+   public static final double CONTROL_FRAME_Z_OFFSET = ZuluVersion.SHORT_NUBS ? SHORT_CONTROL_FRAME_Z_OFFSET : LONG_CONTROL_FRAME_Z_OFFSET;
 
    public static double getControlFrameOffsetZ()
    {

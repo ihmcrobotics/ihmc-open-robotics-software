@@ -19,7 +19,7 @@ import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class AlexanderJointMap implements HumanoidJointNameMap
+public class ZuluJointMap implements HumanoidJointNameMap
 {
    private final boolean hasHead;
    private final boolean hasArms;
@@ -56,10 +56,10 @@ public class AlexanderJointMap implements HumanoidJointNameMap
 
    private final HashSet<String> lastSimulatedJoints = new HashSet<>();
 
-   public AlexanderJointMap(AlexanderPhysicalProperties alexanderPhysicalProperties,
-                            SideDependentList<AlexanderArmConfiguration> armConfigurations,
-                            boolean hasHead,
-                            boolean hasArms)
+   public ZuluJointMap(AlexanderPhysicalProperties alexanderPhysicalProperties,
+                       SideDependentList<AlexanderArmConfiguration> armConfigurations,
+                       boolean hasHead,
+                       boolean hasArms)
    {
       this.alexanderPhysicalProperties = alexanderPhysicalProperties;
       this.armConfigurations = armConfigurations;

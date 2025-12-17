@@ -23,7 +23,7 @@ public class OpenAlexanderFlatGroundWalkingTrack
 
    public OpenAlexanderFlatGroundWalkingTrack()
    {
-      DRCRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_NUB_FOREARMS, RobotTarget.SCS);
+      DRCRobotModel robotModel = new OpenAlexanderRobotModel(ZuluVersion.V1_NUB_FOREARMS, RobotTarget.SCS);
       FlatGroundEnvironment environment = new FlatGroundEnvironment();
 
       int recordFrequency = (int) Math.max(1.0, Math.round(robotModel.getControllerDT() / robotModel.getSimulateDT()));

@@ -113,7 +113,7 @@ public class AlexanderWalkingTrajectoryPathFrameTest
    {
       if (robotModel == null)
       {
-         robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT, RobotTarget.SCS);
+         robotModel = new OpenAlexanderRobotModel(ZuluVersion.V1_FULL_ROBOT, RobotTarget.SCS);
       }
       return robotModel;
    }

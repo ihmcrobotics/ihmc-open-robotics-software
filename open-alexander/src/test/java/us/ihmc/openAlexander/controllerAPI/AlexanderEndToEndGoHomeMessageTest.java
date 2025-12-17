@@ -3,7 +3,7 @@ package us.ihmc.openAlexander.controllerAPI;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import us.ihmc.openAlexander.OpenAlexanderVersion;
+import us.ihmc.openAlexander.ZuluVersion;
 import us.ihmc.openAlexander.OpenAlexanderRobotModel;
 import us.ihmc.avatar.controllerAPI.EndToEndGoHomeMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -14,7 +14,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 
 public class AlexanderEndToEndGoHomeMessageTest extends EndToEndGoHomeMessageTest
 {
-   private final DRCRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT, RobotTarget.SCS);
+   private final DRCRobotModel robotModel = new OpenAlexanderRobotModel(ZuluVersion.V1_FULL_ROBOT, RobotTarget.SCS);
 
    @Tag("controller-api")
    @Override

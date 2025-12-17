@@ -2,12 +2,10 @@ package us.ihmc.openAlexander;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import us.ihmc.openAlexander.parameters.controller.OpenAlexanderWalkingControllerParameters;
 import us.ihmc.openAlexander.parameters.model.AlexanderPhysicalPropertiesV0;
 import us.ihmc.avatar.AvatarLiftOffAndTouchDownTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -22,7 +20,7 @@ public class AlexanderLiftOffAndTouchDownTest
    @Test
    public void testForwardStepRotated() throws SimulationExceededMaximumTimeException
    {
-      DRCRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT)
+      DRCRobotModel robotModel = new OpenAlexanderRobotModel(ZuluVersion.V1_FULL_ROBOT)
       {
 //         @Override
 //         public WalkingControllerParameters getWalkingControllerParameters()

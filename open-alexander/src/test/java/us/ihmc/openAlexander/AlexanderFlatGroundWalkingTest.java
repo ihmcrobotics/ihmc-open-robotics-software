@@ -32,7 +32,7 @@ public class AlexanderFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
    @Test
    public void testFlatGroundWalking()
    {
-      robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT, RobotTarget.SCS);
+      robotModel = new OpenAlexanderRobotModel(ZuluVersion.V1_FULL_ROBOT, RobotTarget.SCS);
       setDoPelvisWarmup(true);
       super.testFlatGroundWalking();
    }
@@ -42,7 +42,7 @@ public class AlexanderFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
    @Test
    public void testFlatGroundWalkingBullet()
    {
-      robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT, RobotTarget.SCS);
+      robotModel = new OpenAlexanderRobotModel(ZuluVersion.V1_FULL_ROBOT, RobotTarget.SCS);
       setDoPelvisWarmup(false);
       super.testFlatGroundWalkingBullet();
    }
@@ -52,7 +52,7 @@ public class AlexanderFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
    @Test
    public void testReset()
    {
-      robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT, RobotTarget.SCS);
+      robotModel = new OpenAlexanderRobotModel(ZuluVersion.V1_FULL_ROBOT, RobotTarget.SCS);
       super.testReset();
    }
 
@@ -66,7 +66,7 @@ public class AlexanderFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
          Assumptions.assumeTrue(CITools.isNightlyBuild());
          CITools.reportTestStartedMessage(getSimulationTestingParameters().getShowWindows());
 
-         robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT, RobotTarget.SCS);
+         robotModel = new OpenAlexanderRobotModel(ZuluVersion.V1_FULL_ROBOT, RobotTarget.SCS);
 
          setupAndTestFlatGroundSimulationTrackTwice(robotModel);
       }

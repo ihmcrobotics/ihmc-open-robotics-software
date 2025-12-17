@@ -1,7 +1,6 @@
 package us.ihmc.openAlexander;
 
 import org.apache.commons.lang3.SystemUtils;
-import us.ihmc.openAlexander.parameters.model.HumanoidURDFParameterInterface;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.modelFileLoaders.RobotDefinitionLoader;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.DefaultLogModelProvider;
@@ -25,13 +24,13 @@ public class AlexanderModelFactory
    private final OpenAlexanderURDFParameters urdfParameters;
    private final RobotContactPointParameters<RobotSide> contactPointParameters;
    private RobotDefinition simulationRobotDefinition;
-   private final AlexanderVersionInterface alexanderVersion;
+   private final ZuluVersionInterface alexanderVersion;
    private RobotDefinition controllerRobotDefinition;
-   private final AlexanderJointMap jointMap;
+   private final ZuluJointMap jointMap;
    private final Consumer<RobotDefinition> robotDefinitionMutator;
 
-   public AlexanderModelFactory(AlexanderVersionInterface alexanderVersion,
-                                AlexanderJointMap jointMap,
+   public AlexanderModelFactory(ZuluVersionInterface alexanderVersion,
+                                ZuluJointMap jointMap,
                                 RobotContactPointParameters<RobotSide> contactPointParameters,
                                 Consumer<RobotDefinition> robotDefinitionMutator)
    {
@@ -99,7 +98,7 @@ public class AlexanderModelFactory
       return simulationRobotDefinition;
    }
 
-   private void addForceSensors(RobotDefinition robotDefinition, AlexanderSensorInformation alexanderSensorInformation)
+   private void addForceSensors(RobotDefinition robotDefinition, ZuluSensorInformation alexanderSensorInformation)
    {
       SideDependentList<String> feetForceSensorNames = alexanderSensorInformation.getFeetForceSensorNames();
       SideDependentList<String> feetForceSensorParentJointNames = alexanderSensorInformation.getFeetForceSensorParentJointNames();

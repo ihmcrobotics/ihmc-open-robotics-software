@@ -2,8 +2,8 @@ package us.ihmc.openAlexander.roughTerrainWalking;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import us.ihmc.openAlexander.AlexanderVersionInterface;
-import us.ihmc.openAlexander.OpenAlexanderVersion;
+import us.ihmc.openAlexander.ZuluVersionInterface;
+import us.ihmc.openAlexander.ZuluVersion;
 import us.ihmc.openAlexander.OpenAlexanderRobotModel;
 import us.ihmc.openAlexander.parameters.simulation.AlexanderInitialSetup;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -47,7 +47,7 @@ public class AlexanderAbsoluteStepTimingsTest extends AvatarAbsoluteStepTimingsT
    @Override
    public DRCRobotModel getRobotModel()
    {
-      AlexanderVersionInterface robotVersion = OpenAlexanderVersion.V1_FULL_ROBOT;
+      ZuluVersionInterface robotVersion = ZuluVersion.V1_FULL_ROBOT;
       return new OpenAlexanderRobotModel(robotVersion, RobotTarget.SCS)
       {
          @Override

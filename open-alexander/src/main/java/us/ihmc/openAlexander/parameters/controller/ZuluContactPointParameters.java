@@ -74,7 +74,7 @@ public class ZuluContactPointParameters extends RobotContactPointParameters<Robo
       {
          /////////////// NUB MODE ////////////////////////////
 
-         if (((AlexanderJointMap) jointMap).getArmConfiguration(robotSide) == AlexanderArmConfiguration.NUB)
+         if (((ZuluJointMap) jointMap).getArmConfiguration(robotSide) == AlexanderArmConfiguration.NUB)
          {
             String handName = ((HumanoidJointNameMap) jointMap).getHandName(robotSide);
             String elbowJointName = ((HumanoidJointNameMap) jointMap).getArmJointName(robotSide, ArmJointName.ELBOW_PITCH);
@@ -86,7 +86,7 @@ public class ZuluContactPointParameters extends RobotContactPointParameters<Robo
             addControllerContactPoint(handName, handName + "Contact", transformToContactFrame);
             numberOfHandContactPoints++;
          }
-         else if (((AlexanderJointMap) jointMap).getArmConfiguration(robotSide) == AlexanderArmConfiguration.FOREARM)
+         else if (((ZuluJointMap) jointMap).getArmConfiguration(robotSide) == AlexanderArmConfiguration.FOREARM)
          {
             String handName = ((HumanoidJointNameMap) jointMap).getHandName(robotSide);
             String wristJointName = ((HumanoidJointNameMap) jointMap).getArmJointName(robotSide, ArmJointName.WRIST_YAW);
@@ -105,7 +105,7 @@ public class ZuluContactPointParameters extends RobotContactPointParameters<Robo
 
    public static FramePoint3DReadOnly computeNubPoseInBodyFrame(RobotSide robotSide)
    {
-      DRCRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT, RobotTarget.SCS);
+      DRCRobotModel robotModel = new OpenAlexanderRobotModel(ZuluVersion.V1_FULL_ROBOT, RobotTarget.SCS);
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       fullRobotModel.updateFrames();
 

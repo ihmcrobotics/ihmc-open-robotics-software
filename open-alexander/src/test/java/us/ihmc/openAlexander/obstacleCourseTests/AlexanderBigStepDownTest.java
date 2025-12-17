@@ -3,7 +3,7 @@ package us.ihmc.openAlexander.obstacleCourseTests;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import us.ihmc.openAlexander.OpenAlexanderVersion;
+import us.ihmc.openAlexander.ZuluVersion;
 import us.ihmc.openAlexander.OpenAlexanderRobotModel;
 import us.ihmc.openAlexander.parameters.controller.OpenAlexanderWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -21,7 +21,7 @@ public class AlexanderBigStepDownTest extends AvatarBigStepDownTest
    @Override
    public DRCRobotModel getRobotModel()
    {
-      DRCRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT)
+      DRCRobotModel robotModel = new OpenAlexanderRobotModel(ZuluVersion.V1_FULL_ROBOT)
       {
          @Override
          public WalkingControllerParameters getWalkingControllerParameters()

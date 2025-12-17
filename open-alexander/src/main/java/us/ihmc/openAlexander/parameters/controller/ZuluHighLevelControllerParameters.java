@@ -5,8 +5,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import us.ihmc.openAlexander.AlexanderJointMap;
-import us.ihmc.openAlexander.AlexanderVersionInterface;
+import us.ihmc.openAlexander.ZuluJointMap;
+import us.ihmc.openAlexander.ZuluVersionInterface;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
@@ -26,16 +26,16 @@ import static us.ihmc.sensorProcessing.outputData.JointDesiredControlMode.EFFORT
 import static us.ihmc.sensorProcessing.outputData.JointDesiredControlMode.POSITION;
 import static us.ihmc.wholeBodyController.parameters.HighLevelParametersTools.*;
 
-public class OpenAlexanderHighLevelControllerParameters implements HighLevelControllerParameters
+public class ZuluHighLevelControllerParameters implements HighLevelControllerParameters
 {
-   protected final AlexanderVersionInterface alexanderVersion;
-   protected final AlexanderJointMap jointMap;
-   protected final RobotTarget target;
+   private final ZuluVersionInterface zuluVersion;
+   private final ZuluJointMap jointMap;
+   private final RobotTarget target;
    private final ZuluStandPrepSetPoints standPrepSetPoints;
 
-   public OpenAlexanderHighLevelControllerParameters(AlexanderVersionInterface alexanderVersion, AlexanderJointMap jointMap, RobotTarget target)
+   public ZuluHighLevelControllerParameters(ZuluVersionInterface zuluVersion, ZuluJointMap jointMap, RobotTarget target)
    {
-      this.alexanderVersion = alexanderVersion;
+      this.zuluVersion = zuluVersion;
       this.jointMap = jointMap;
       this.target = target;
       standPrepSetPoints = new ZuluStandPrepSetPoints(jointMap);
@@ -80,7 +80,7 @@ public class OpenAlexanderHighLevelControllerParameters implements HighLevelCont
          return null;
    }
 
-   protected List<GroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviorForDoNothing()
+   private List<GroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviorForDoNothing()
    {
       List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors = new ArrayList<>();
 
@@ -97,7 +97,7 @@ public class OpenAlexanderHighLevelControllerParameters implements HighLevelCont
       return behaviors;
    }
 
-   protected List<GroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviorForWalkingUnderLoad()
+   private List<GroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviorForWalkingUnderLoad()
    {
       List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors = new ArrayList<>();
 
@@ -122,7 +122,7 @@ public class OpenAlexanderHighLevelControllerParameters implements HighLevelCont
             configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SHOULDER_YAW, EFFORT, 5.0, 8.0, 0.25, 1.0, cycloidVelScale);
             configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_PITCH, EFFORT, 5.0, 8.0, 0.25, 1.0, cycloidVelScale);
 
-            if (alexanderVersion.hasCycloidForearms())
+            if (zuluVersion.hasCycloidForearms())
             {
                configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_YAW, EFFORT, 5.0, 8.0, 0.25, 1.0, cycloidVelScale);
                configureSymmetricBehavior(behaviors, jointMap, ArmJointName.WRIST_ROLL, EFFORT, 5.0, 8.0, 0.25, 1.0, cycloidVelScale);
@@ -140,7 +140,7 @@ public class OpenAlexanderHighLevelControllerParameters implements HighLevelCont
       return behaviors;
    }
 
-   protected List<GroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviorForWalkingNotLoaded()
+   private List<GroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviorForWalkingNotLoaded()
    {
       List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors = new ArrayList<>();
 
@@ -172,7 +172,7 @@ public class OpenAlexanderHighLevelControllerParameters implements HighLevelCont
             configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_PITCH, EFFORT, 2.5, 4.0, 0.35, 2.0, cycloidVelScale);
          }
 
-         if (alexanderVersion.hasCycloidForearms())
+         if (zuluVersion.hasCycloidForearms())
          { // Cycloid forearms
             configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_YAW, POSITION, 3.5, 4.0, Double.MAX_VALUE, Double.MAX_VALUE, 1.0);
             configureSymmetricBehavior(behaviors, jointMap, ArmJointName.WRIST_ROLL, POSITION, 2.0, 3.0, Double.MAX_VALUE, Double.MAX_VALUE, 1.0);
@@ -221,7 +221,7 @@ public class OpenAlexanderHighLevelControllerParameters implements HighLevelCont
          configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SHOULDER_YAW, EFFORT, 60.0, 3.0, maxArmPosError, maxArmVelError, armVelScale);
          configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_PITCH, EFFORT, 100.0, 4.0, maxArmPosError, maxArmVelError, armVelScale);
 
-         if (alexanderVersion.hasCycloidForearms())
+         if (zuluVersion.hasCycloidForearms())
          { // Cycloid forearms
             configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_YAW, POSITION, 20.0, 4.0, Double.MAX_VALUE, Double.MAX_VALUE, 1.0);
             configureSymmetricBehavior(behaviors, jointMap, ArmJointName.WRIST_ROLL, POSITION, 15.0, 2.5, Double.MAX_VALUE, Double.MAX_VALUE, 1.0);
@@ -254,7 +254,7 @@ public class OpenAlexanderHighLevelControllerParameters implements HighLevelCont
          configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SHOULDER_YAW, POSITION, 120.0, 12.0, maxArmPosError, maxArmVelError, armVelScale);
          configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_PITCH, POSITION, 120.0, 12.0, maxArmPosError, maxArmVelError, armVelScale);
 
-         if (alexanderVersion.hasCycloidForearms())
+         if (zuluVersion.hasCycloidForearms())
          { // Cycloid forearms
             configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_YAW, POSITION, 20.0, 4.0, Double.MAX_VALUE, Double.MAX_VALUE, 1.0);
             configureSymmetricBehavior(behaviors, jointMap, ArmJointName.WRIST_ROLL, POSITION, 15.0, 2.5, Double.MAX_VALUE, Double.MAX_VALUE, 1.0);
@@ -295,7 +295,7 @@ public class OpenAlexanderHighLevelControllerParameters implements HighLevelCont
          configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SHOULDER_YAW, EFFORT, 15.0, 2.0, maxArmPosError, maxArmVelError, armVelScale);
          configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_PITCH, EFFORT, 20.0, 2.0, maxArmPosError, maxArmVelError, armVelScale);
 
-         if (alexanderVersion.hasCycloidForearms())
+         if (zuluVersion.hasCycloidForearms())
          { // Cycloid forearms
             configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_YAW, POSITION, 15.0, 3.0, Double.MAX_VALUE, Double.MAX_VALUE, 1.0);
             configureSymmetricBehavior(behaviors, jointMap, ArmJointName.WRIST_ROLL, POSITION, 12.0, 2.0, Double.MAX_VALUE, Double.MAX_VALUE, 1.0);
@@ -325,7 +325,7 @@ public class OpenAlexanderHighLevelControllerParameters implements HighLevelCont
          configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SHOULDER_YAW, EFFORT, 120.0, 12.0, maxPosError, maxVelError, velScale);
          configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_PITCH, EFFORT, 120.0, 12.0, maxPosError, maxVelError, velScale);
 
-         if (alexanderVersion.hasCycloidForearms())
+         if (zuluVersion.hasCycloidForearms())
          { // Cycloid forearms
             configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_YAW, POSITION, 15.0, 3.0, Double.MAX_VALUE, Double.MAX_VALUE, 1.0);
             configureSymmetricBehavior(behaviors, jointMap, ArmJointName.WRIST_ROLL, POSITION, 12.0, 2.0, Double.MAX_VALUE, Double.MAX_VALUE, 1.0);
@@ -368,7 +368,7 @@ public class OpenAlexanderHighLevelControllerParameters implements HighLevelCont
          return null;
    }
 
-   protected List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParametersForWalkingNotLoaded()
+   private List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParametersForWalkingNotLoaded()
    {
       List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> ret = new ArrayList<>();
 
@@ -448,7 +448,7 @@ public class OpenAlexanderHighLevelControllerParameters implements HighLevelCont
                jointNames.add(jointMap.getArmJointName(robotSide, armJointName));
          }
 
-         if (alexanderVersion.hasCycloidForearms())
+         if (zuluVersion.hasCycloidForearms())
          {
             for (ArmJointName armJointName : new ArmJointName[] {ArmJointName.ELBOW_YAW,
                                                                  ArmJointName.WRIST_ROLL,
@@ -476,7 +476,7 @@ public class OpenAlexanderHighLevelControllerParameters implements HighLevelCont
       return ret;
    }
 
-   protected List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParametersForFastWalkingNotLoaded()
+   private List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParametersForFastWalkingNotLoaded()
    {
       List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> ret = new ArrayList<>();
 
@@ -554,7 +554,7 @@ public class OpenAlexanderHighLevelControllerParameters implements HighLevelCont
                jointNames.add(jointMap.getArmJointName(robotSide, armJointName));
          }
 
-         if (alexanderVersion.hasCycloidForearms())
+         if (zuluVersion.hasCycloidForearms())
          {
             for (ArmJointName armJointName : new ArmJointName[] {ArmJointName.ELBOW_YAW,
                                                                  ArmJointName.WRIST_ROLL,
@@ -582,7 +582,7 @@ public class OpenAlexanderHighLevelControllerParameters implements HighLevelCont
       return ret;
    }
 
-   protected List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParametersForWalkingUnderLoad()
+   private List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParametersForWalkingUnderLoad()
    {
       List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> ret = new ArrayList<>();
 
@@ -641,7 +641,7 @@ public class OpenAlexanderHighLevelControllerParameters implements HighLevelCont
       return ret;
    }
 
-   protected List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParametersForHangingAround()
+   private List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParametersForHangingAround()
    {
       // Possible add a single parameter that is shared between all joints here.
       return null;

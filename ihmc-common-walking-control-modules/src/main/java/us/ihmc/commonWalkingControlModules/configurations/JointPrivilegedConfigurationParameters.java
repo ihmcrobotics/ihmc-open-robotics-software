@@ -65,7 +65,7 @@ public class JointPrivilegedConfigurationParameters
     */
    public double getDefaultVelocityGain()
    {
-      return 6.0;
+      return 2.0;
    }
 
    /**

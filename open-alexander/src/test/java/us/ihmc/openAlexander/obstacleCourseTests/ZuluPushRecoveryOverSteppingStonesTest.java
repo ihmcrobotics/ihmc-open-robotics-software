@@ -2,7 +2,7 @@ package us.ihmc.openAlexander.obstacleCourseTests;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import us.ihmc.openAlexander.OpenAlexanderVersion;
+import us.ihmc.openAlexander.ZuluVersion;
 import us.ihmc.openAlexander.OpenAlexanderRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -21,7 +21,7 @@ public class ZuluPushRecoveryOverSteppingStonesTest extends AvatarPushRecoveryOv
    @Override
    public DRCRobotModel getRobotModel()
    {
-      OpenAlexanderRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT, RobotTarget.SCS)
+      OpenAlexanderRobotModel robotModel = new OpenAlexanderRobotModel(ZuluVersion.V1_FULL_ROBOT, RobotTarget.SCS)
       {
          @Override
          public WalkingControllerParameters getWalkingControllerParameters()
@@ -31,7 +31,7 @@ public class ZuluPushRecoveryOverSteppingStonesTest extends AvatarPushRecoveryOv
                @Override
                public ICPControllerParameters getICPControllerParameters()
                {
-                  return new OpenAlexanderICPControllerParameters()
+                  return new ICPControllerParameters()
                   {
                      @Override
                      public boolean useAngularMomentum()
@@ -44,7 +44,7 @@ public class ZuluPushRecoveryOverSteppingStonesTest extends AvatarPushRecoveryOv
                @Override
                public StepAdjustmentParameters getStepAdjustmentParameters()
                {
-                  return new OpenAlexanderStepAdjustmentParameters()
+                  return new StepAdjustmentParameters()
                   {
                      @Override
                      public boolean allowStepAdjustment()
@@ -57,7 +57,7 @@ public class ZuluPushRecoveryOverSteppingStonesTest extends AvatarPushRecoveryOv
                @Override
                public SteppingParameters getSteppingParameters()
                {
-                  return new ZuluAlexanderSteppingParameters(getPhysicalProperties())
+                  return new ZuluSteppingParameters(getPhysicalProperties())
                   {
                      @Override
                      public double getMaxStepLength()

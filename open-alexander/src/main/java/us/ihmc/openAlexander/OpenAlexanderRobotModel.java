@@ -27,8 +27,8 @@ import us.ihmc.handsros2.abilityHand.AbilityHandModel;
 import us.ihmc.handsros2.ezGripper.EZGripperModel;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.openAlexander.parameters.controller.ZuluContactPointParameters;
-import us.ihmc.openAlexander.parameters.controller.OpenAlexanderHighLevelControllerParameters;
-import us.ihmc.openAlexander.parameters.controller.OpenAlexanderStateEstimatorParameters;
+import us.ihmc.openAlexander.parameters.controller.ZuluHighLevelControllerParameters;
+import us.ihmc.openAlexander.parameters.controller.ZuluStateEstimatorParameters;
 import us.ihmc.openAlexander.parameters.controller.OpenAlexanderWalkingControllerParameters;
 import us.ihmc.openAlexander.parameters.diagnostic.AlexanderDiagnosticParameters;
 import us.ihmc.openAlexander.parameters.model.AlexanderKSTKinematicsCollisionModel;
@@ -87,8 +87,8 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
    protected final AlexanderPhysicalProperties physicalProperties;
    protected final WalkingControllerParameters walkingControllerParameters;
    private final HighLevelControllerParameters highLevelControllerParameters;
-   private final AlexanderSensorInformation sensorInformation;
-   protected final AlexanderJointMap jointMap;
+   private final ZuluSensorInformation sensorInformation;
+   protected final ZuluJointMap jointMap;
    protected final RobotContactPointParameters<RobotSide> contactPointParameters;
    private final CoPTrajectoryParameters copTrajectoryParameters = new CoPTrajectoryParameters();
    private final AlexanderDiagnosticParameters diagnosticParameters;
@@ -100,34 +100,34 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
    private final AlexanderModelFactory modelFactory;
 
    protected final RobotTarget robotTarget;
-   protected final AlexanderVersionInterface robotVersion;
+   protected final ZuluVersionInterface robotVersion;
    private final SideDependentList<HandModel> handModels = new SideDependentList<>();
 
    private final SideDependentList<RigidBodyTransform> handGraphicToHandFrameTransforms = new SideDependentList<>();
 
-   public OpenAlexanderRobotModel(AlexanderVersionInterface robotVersion)
+   public OpenAlexanderRobotModel(ZuluVersionInterface robotVersion)
    {
       this(robotVersion, RobotTarget.SCS);
    }
 
-   public OpenAlexanderRobotModel(AlexanderVersionInterface robotVersion, RobotTarget robotTarget)
+   public OpenAlexanderRobotModel(ZuluVersionInterface robotVersion, RobotTarget robotTarget)
    {
       this(robotVersion, robotTarget, null, true);
    }
 
-   public OpenAlexanderRobotModel(AlexanderVersionInterface robotVersion,
+   public OpenAlexanderRobotModel(ZuluVersionInterface robotVersion,
                                   RobotTarget robotTarget,
                                   RobotContactPointParameters<RobotSide> contactPointParameters)
    {
       this(robotVersion, robotTarget, null, contactPointParameters);
    }
 
-   public OpenAlexanderRobotModel(AlexanderVersionInterface robotVersion, RobotTarget robotTarget, MaterialDefinition robotMaterial)
+   public OpenAlexanderRobotModel(ZuluVersionInterface robotVersion, RobotTarget robotTarget, MaterialDefinition robotMaterial)
    {
       this(robotVersion, robotTarget, robotMaterial, true);
    }
 
-   public OpenAlexanderRobotModel(AlexanderVersionInterface robotVersion,
+   public OpenAlexanderRobotModel(ZuluVersionInterface robotVersion,
                                   RobotTarget robotTarget,
                                   MaterialDefinition robotMaterial,
                                   boolean createHandContactPoints)
@@ -138,7 +138,7 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
            new ZuluContactPointParameters(robotVersion.getJointMap(), robotVersion.getPhysicalProperties(), createHandContactPoints));
    }
 
-   public OpenAlexanderRobotModel(AlexanderVersionInterface robotVersion,
+   public OpenAlexanderRobotModel(ZuluVersionInterface robotVersion,
                                   RobotTarget robotTarget,
                                   MaterialDefinition robotMaterial,
                                   RobotContactPointParameters<RobotSide> contactPointParameters,
@@ -157,9 +157,9 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
                                                                                  jointMap,
                                                                                  physicalProperties,
                                                                                  contactPointParameters);
-      highLevelControllerParameters = new OpenAlexanderHighLevelControllerParameters(robotVersion, jointMap, robotTarget);
+      highLevelControllerParameters = new ZuluHighLevelControllerParameters(robotVersion, jointMap, robotTarget);
       diagnosticParameters = new AlexanderDiagnosticParameters(robotTarget, jointMap, sensorInformation, highLevelControllerParameters);
-      stateEstimatorParameters = new OpenAlexanderStateEstimatorParameters(getEstimatorDT(), robotTarget, sensorInformation, jointMap);
+      stateEstimatorParameters = new ZuluStateEstimatorParameters(getEstimatorDT(), robotTarget, sensorInformation, jointMap);
 
       modelFactory = new AlexanderModelFactory(robotVersion, jointMap, contactPointParameters, new AlexanderRigidBodyMutator(getPhysicalProperties(), imusToIgnore));
       logModelProvider = modelFactory.createLogModelProvider();
@@ -206,7 +206,7 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
    }
 
    @Override
-   public AlexanderVersionInterface getRobotVersion()
+   public ZuluVersionInterface getRobotVersion()
    {
       return robotVersion;
    }
@@ -241,7 +241,7 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
    }
 
    @Override
-   public AlexanderJointMap getJointMap()
+   public ZuluJointMap getJointMap()
    {
       return jointMap;
    }
@@ -277,7 +277,7 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
    }
 
    @Override
-   public AlexanderSensorInformation getSensorInformation()
+   public ZuluSensorInformation getSensorInformation()
    {
       return sensorInformation;
    }

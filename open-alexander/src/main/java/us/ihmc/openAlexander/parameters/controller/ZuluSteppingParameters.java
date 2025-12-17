@@ -3,11 +3,11 @@ package us.ihmc.openAlexander.parameters.controller;
 import us.ihmc.openAlexander.parameters.model.AlexanderPhysicalProperties;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 
-public class ZuluAlexanderSteppingParameters implements SteppingParameters
+public class ZuluSteppingParameters implements SteppingParameters
 {
    protected final AlexanderPhysicalProperties alexanderPhysicalProperties;
 
-   public ZuluAlexanderSteppingParameters(AlexanderPhysicalProperties alexanderPhysicalProperties)
+   public ZuluSteppingParameters(AlexanderPhysicalProperties alexanderPhysicalProperties)
    {
       this.alexanderPhysicalProperties = alexanderPhysicalProperties;
    }

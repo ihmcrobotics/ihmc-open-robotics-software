@@ -15,7 +15,7 @@ import us.ihmc.sensors.zed.ZEDModelData;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AlexanderSensorInformation implements HumanoidRobotSensorInformation
+public class ZuluSensorInformation implements HumanoidRobotSensorInformation
 {
    // ZED X Mini
    private static final RigidBodyTransform ZED_X_MINI_TO_HEAD_TRANSFORM = new RigidBodyTransform();
@@ -106,30 +106,26 @@ public class AlexanderSensorInformation implements HumanoidRobotSensorInformatio
                                                                         rightFootIMU,
                                                                         headIMU));
 
-   private AlexanderVersionInterface alexanderVersion;
-
-   public AlexanderSensorInformation(AlexanderVersionInterface alexanderVersion)
+   public ZuluSensorInformation(ZuluVersionInterface zuluVersion)
    {
-      this.alexanderVersion = alexanderVersion;
-
       feetForceSensorNames.put(RobotSide.LEFT, "LeftFootFTSensor");
       feetForceSensorNames.put(RobotSide.RIGHT, "RightFootFTSensor");
       feetForceSensorParentJointNames.put(RobotSide.LEFT, "LEFT_ANKLE_X");
       feetForceSensorParentJointNames.put(RobotSide.RIGHT, "RIGHT_ANKLE_X");
 
-      if (!alexanderVersion.hasHead())
+      if (!zuluVersion.hasHead())
          imuSensorsToUse.remove(headIMU);
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         if (!alexanderVersion.hasArm(robotSide))
+         if (!zuluVersion.hasArm(robotSide))
          {
             imuSensorsToUse.remove(shoulderIMUNames.get(robotSide));
             imuSensorsToUse.remove(bicepIMUNames.get(robotSide));
             imuSensorsToUse.remove(forearmIMUNames.get(robotSide));
             imuSensorsToUse.remove(handIMUNames.get(robotSide));
          }
-         else if (!alexanderVersion.hasCycloidForearms())
+         else if (!zuluVersion.hasCycloidForearms())
          {
             imuSensorsToUse.remove(forearmIMUNames.get(robotSide));
             imuSensorsToUse.remove(handIMUNames.get(robotSide));

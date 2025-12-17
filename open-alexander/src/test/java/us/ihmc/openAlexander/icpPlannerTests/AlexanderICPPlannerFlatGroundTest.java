@@ -3,8 +3,8 @@ package us.ihmc.openAlexander.icpPlannerTests;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import us.ihmc.openAlexander.AlexanderJointMap;
-import us.ihmc.openAlexander.OpenAlexanderVersion;
+import us.ihmc.openAlexander.ZuluJointMap;
+import us.ihmc.openAlexander.ZuluVersion;
 import us.ihmc.openAlexander.OpenAlexanderRobotModel;
 import us.ihmc.openAlexander.parameters.controller.OpenAlexanderWalkingControllerParameters;
 import us.ihmc.openAlexander.parameters.model.AlexanderPhysicalProperties;
@@ -17,7 +17,7 @@ import us.ihmc.simulationConstructionSetTools.tools.CITools;
 @Tag("humanoid-flat-ground")
 public class AlexanderICPPlannerFlatGroundTest extends AvatarICPPlannerFlatGroundTest
 {
-   private final DRCRobotModel robotModel = new TestModel(OpenAlexanderVersion.V1_FULL_ROBOT, RobotTarget.SCS);
+   private final DRCRobotModel robotModel = new TestModel(ZuluVersion.V1_FULL_ROBOT, RobotTarget.SCS);
 
    @Override
    @Disabled
@@ -68,7 +68,7 @@ public class AlexanderICPPlannerFlatGroundTest extends AvatarICPPlannerFlatGroun
    {
       private final TestWalkingParameters walkingParameters;
 
-      public TestModel(OpenAlexanderVersion version, RobotTarget target)
+      public TestModel(ZuluVersion version, RobotTarget target)
       {
          super(version, target);
          walkingParameters = new TestWalkingParameters(version, target, getJointMap(), getPhysicalProperties());
@@ -84,7 +84,7 @@ public class AlexanderICPPlannerFlatGroundTest extends AvatarICPPlannerFlatGroun
 
    private static class TestWalkingParameters extends OpenAlexanderWalkingControllerParameters
    {
-      public TestWalkingParameters(OpenAlexanderVersion version, RobotTarget target, AlexanderJointMap jointMap, AlexanderPhysicalProperties physicalProperties)
+      public TestWalkingParameters(ZuluVersion version, RobotTarget target, ZuluJointMap jointMap, AlexanderPhysicalProperties physicalProperties)
       {
          super(version, target, jointMap,physicalProperties);
       }

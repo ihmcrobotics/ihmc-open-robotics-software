@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import us.ihmc.openAlexander.AlexanderJointMap;
+import us.ihmc.openAlexander.ZuluJointMap;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
@@ -23,12 +23,12 @@ import static us.ihmc.wholeBodyController.parameters.HighLevelParametersTools.ge
 public class AlexanderDiagnosticParameters extends DiagnosticParameters
 {
    private final RobotTarget target;
-   private final AlexanderJointMap jointMap;
+   private final ZuluJointMap jointMap;
    private final HumanoidRobotSensorInformation sensorInformation;
    private final HighLevelControllerParameters highLevelControllerParameters;
 
    public AlexanderDiagnosticParameters(RobotTarget target,
-                                    AlexanderJointMap jointMap,
+                                    ZuluJointMap jointMap,
                                     HumanoidRobotSensorInformation sensorInformation,
                                     HighLevelControllerParameters highLevelControllerParameters)
    {

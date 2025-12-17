@@ -35,7 +35,7 @@ public class AlexanderPresetArmConfigurations
    /**
     * @return a copy so the original values don't get modified.
     */
-   public static double[] getPresetArmConfiguration(AlexanderVersionInterface robotVersion, RobotSide side, PresetArmConfiguration presetArmConfiguration)
+   public static double[] getPresetArmConfiguration(ZuluVersionInterface robotVersion, RobotSide side, PresetArmConfiguration presetArmConfiguration)
    {
       double[] jointAngles;
 

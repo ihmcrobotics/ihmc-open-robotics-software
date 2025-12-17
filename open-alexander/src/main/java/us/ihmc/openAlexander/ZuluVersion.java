@@ -11,15 +11,15 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import java.util.Arrays;
 import java.util.Collection;
 
-public enum OpenAlexanderVersion implements AlexanderVersionInterface
+public enum ZuluVersion implements ZuluVersionInterface
 {
-   V1_FULL_ROBOT(OpenAlexanderVersion.V1_RESOURCE_DIRECTORY, Arrays.asList(OpenAlexanderURDFParameters.URDF_FULL_BODY), null), V1_NUB_FOREARMS(
-      OpenAlexanderVersion.V1_RESOURCE_DIRECTORY,
+   V1_FULL_ROBOT(ZuluVersion.V1_RESOURCE_DIRECTORY, Arrays.asList(OpenAlexanderURDFParameters.URDF_FULL_BODY), null), V1_NUB_FOREARMS(
+      ZuluVersion.V1_RESOURCE_DIRECTORY,
       Arrays.asList(OpenAlexanderURDFParameters.URDF_LOWER_BODY,
                     OpenAlexanderURDFParameters.URDF_LEFT_ARM_NUB_FOREARM,
                     OpenAlexanderURDFParameters.URDF_HEAD,
                     OpenAlexanderURDFParameters.URDF_RIGHT_ARM_NUB_FOREARM),
-      null), V1_LEGS_ROBOT(OpenAlexanderVersion.V1_RESOURCE_DIRECTORY, Arrays.asList(OpenAlexanderURDFParameters.URDF_LOWER_BODY_ONLY), null);
+      null), V1_LEGS_ROBOT(ZuluVersion.V1_RESOURCE_DIRECTORY, Arrays.asList(OpenAlexanderURDFParameters.URDF_LOWER_BODY_ONLY), null);
 
    private static final String V1_RESOURCE_DIRECTORY = "alex_V1_description/";
 
@@ -32,12 +32,12 @@ public enum OpenAlexanderVersion implements AlexanderVersionInterface
 
    private final Collection<String> urdfResources;
 
-   private AlexanderJointMap jointMap;
+   private ZuluJointMap jointMap;
    private AlexanderPhysicalProperties physicalProperties;
-   private AlexanderSensorInformation sensorInformation;
+   private ZuluSensorInformation sensorInformation;
    private OpenAlexanderURDFParameters urdfParameters;
 
-   OpenAlexanderVersion(String robotModelResourceDirectory, Collection<String> urdfResources, Collection<String> xmlResources)
+   ZuluVersion(String robotModelResourceDirectory, Collection<String> urdfResources, Collection<String> xmlResources)
    {
       this.robotModelResourceDirectory = robotModelResourceDirectory;
       this.urdfResources = urdfResources;
@@ -103,7 +103,7 @@ public enum OpenAlexanderVersion implements AlexanderVersionInterface
    }
 
    @Override
-   public AlexanderJointMap getJointMap()
+   public ZuluJointMap getJointMap()
    {
       if (jointMap != null)
       {
@@ -112,22 +112,22 @@ public enum OpenAlexanderVersion implements AlexanderVersionInterface
       switch (this)
       {
          case V1_FULL_ROBOT:
-            jointMap = new AlexanderJointMap(getPhysicalProperties(),
-                                             new SideDependentList<>(AlexanderArmConfiguration.FOREARM, AlexanderArmConfiguration.FOREARM),
-                                             true,
-                                             true);
+            jointMap = new ZuluJointMap(getPhysicalProperties(),
+                                        new SideDependentList<>(AlexanderArmConfiguration.FOREARM, AlexanderArmConfiguration.FOREARM),
+                                        true,
+                                        true);
             break;
          case V1_NUB_FOREARMS:
-            jointMap = new AlexanderJointMap(getPhysicalProperties(),
-                                             new SideDependentList<>(AlexanderArmConfiguration.NUB, AlexanderArmConfiguration.NUB),
-                                             true,
-                                             true);
+            jointMap = new ZuluJointMap(getPhysicalProperties(),
+                                        new SideDependentList<>(AlexanderArmConfiguration.NUB, AlexanderArmConfiguration.NUB),
+                                        true,
+                                        true);
             break;
          case V1_LEGS_ROBOT:
-            jointMap = new AlexanderJointMap(getPhysicalProperties(),
-                                             new SideDependentList<>(AlexanderArmConfiguration.NONE, AlexanderArmConfiguration.NONE),
-                                             false,
-                                             false);
+            jointMap = new ZuluJointMap(getPhysicalProperties(),
+                                        new SideDependentList<>(AlexanderArmConfiguration.NONE, AlexanderArmConfiguration.NONE),
+                                        false,
+                                        false);
       }
       return jointMap;
    }
@@ -187,7 +187,7 @@ public enum OpenAlexanderVersion implements AlexanderVersionInterface
    }
 
    @Override
-   public AlexanderSensorInformation getSensorInformation()
+   public ZuluSensorInformation getSensorInformation()
    {
       if (sensorInformation != null)
       {
@@ -197,7 +197,7 @@ public enum OpenAlexanderVersion implements AlexanderVersionInterface
       switch (this)
       {
          case V1_FULL_ROBOT, V1_NUB_FOREARMS, V1_LEGS_ROBOT:
-            sensorInformation = new AlexanderSensorInformation(this);
+            sensorInformation = new ZuluSensorInformation(this);
             break;
          default:
             break;

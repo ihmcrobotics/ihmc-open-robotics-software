@@ -2,7 +2,6 @@ package us.ihmc.openAlexander;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import us.ihmc.openAlexander.parameters.controller.OpenAlexanderStepAdjustmentParameters;
 import us.ihmc.openAlexander.parameters.controller.OpenAlexanderWalkingControllerParameters;
 import us.ihmc.avatar.AvatarStepInPlaceTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -10,9 +9,9 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 
-public class AlexanderStepInPlaceTest extends AvatarStepInPlaceTest
+public class ZuluStepInPlaceTest extends AvatarStepInPlaceTest
 {
-   private final OpenAlexanderVersion version = OpenAlexanderVersion.V1_FULL_ROBOT;
+   private final ZuluVersion version = ZuluVersion.V1_FULL_ROBOT;
    private final RobotTarget target = RobotTarget.SCS;
    private final OpenAlexanderRobotModel robotModel = new OpenAlexanderRobotModel(version, target)
    {
@@ -24,7 +23,7 @@ public class AlexanderStepInPlaceTest extends AvatarStepInPlaceTest
             @Override
             public StepAdjustmentParameters getStepAdjustmentParameters()
             {
-               return new OpenAlexanderStepAdjustmentParameters()
+               return new StepAdjustmentParameters()
                {
                   @Override
                   public double getMinICPErrorForStepAdjustment()

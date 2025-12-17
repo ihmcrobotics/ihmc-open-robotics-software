@@ -1,7 +1,7 @@
 package us.ihmc.openAlexander.parameters.controller;
 
-import us.ihmc.openAlexander.AlexanderJointMap;
-import us.ihmc.openAlexander.AlexanderSensorInformation;
+import us.ihmc.openAlexander.ZuluJointMap;
+import us.ihmc.openAlexander.ZuluSensorInformation;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitchFactory;
 import us.ihmc.robotics.partNames.ArmJointName;
@@ -20,13 +20,10 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import java.util.ArrayList;
 import java.util.List;
 
-public class OpenAlexanderStateEstimatorParameters extends StateEstimatorParameters
+public class ZuluStateEstimatorParameters extends StateEstimatorParameters
 {
    private final double estimatorDT;
-   private final RobotTarget target;
-   private final AlexanderJointMap jointMap;
-
-   private final double kinematicsPelvisPositionFilterFreqInHertz;
+   private final ZuluJointMap jointMap;
 
    private final SideDependentList<String> footForceSensorNames;
 
@@ -47,13 +44,9 @@ public class OpenAlexanderStateEstimatorParameters extends StateEstimatorParamet
 
    protected final List<IMUBasedJointStateEstimatorParameters> imuBasedJointStateEstimatorParameters = new ArrayList<>();
 
-   private final AlexanderSensorInformation sensorInformation;
-
-   public OpenAlexanderStateEstimatorParameters(double estimatorDT, RobotTarget target, AlexanderSensorInformation sensorInformation, AlexanderJointMap jointMap)
+   public ZuluStateEstimatorParameters(double estimatorDT, RobotTarget target, ZuluSensorInformation sensorInformation, ZuluJointMap jointMap)
    {
-      this.target = target;
       this.estimatorDT = estimatorDT;
-      this.sensorInformation = sensorInformation;
       this.jointMap = jointMap;
 
       this.footForceSensorNames = sensorInformation.getFeetForceSensorNames();
@@ -76,8 +69,6 @@ public class OpenAlexanderStateEstimatorParameters extends StateEstimatorParamet
       orientationFrequency = target == RobotTarget.REAL_ROBOT ? 25.0 : Double.POSITIVE_INFINITY;
       angularVelocityFrequency = target == RobotTarget.REAL_ROBOT ? 25.0 : Double.POSITIVE_INFINITY;
       linearAccelerationFrequency = target == RobotTarget.REAL_ROBOT ? 25.0 : Double.POSITIVE_INFINITY;
-
-      kinematicsPelvisPositionFilterFreqInHertz = Double.POSITIVE_INFINITY;
    }
 
    @Override
@@ -204,127 +195,9 @@ public class OpenAlexanderStateEstimatorParameters extends StateEstimatorParamet
    }
 
    @Override
-   public boolean usePelvisLinearStateNewFusingFilter()
-   {
-      return true;
-   }
-
-   @Override
-   public double getKinematicsPelvisPositionFilterFreqInHertz()
-   {
-      return kinematicsPelvisPositionFilterFreqInHertz;
-   }
-
-   @Override
-   public double getCoPFilterFreqInHertz()
-   {
-      return Double.POSITIVE_INFINITY;
-   }
-
-   @Override
-   public boolean enableIMUBiasCompensation()
-   {
-      return true;
-   }
-
-   @Override
-   public double getIMUBiasFilterFreqInHertz()
-   {
-      return 0.04;
-   }
-
-   @Override
-   public double getIMUBiasVelocityThreshold()
-   {
-      return 0.035;
-   }
-
-   @Override
-   public boolean correctTrustedFeetPositions()
-   {
-      return true;
-   }
-
-   @Override
-   public boolean useAccelerometerForEstimation()
-   {
-      return true;
-   }
-
-   @Override
-   public boolean cancelGravityFromAccelerationMeasurement()
-   {
-      return true;
-   }
-
-   @Override
-   public double getPelvisPositionFusingFrequency()
-   {
-      // TODO Tune me
-      return 11.7893;
-   }
-
-   @Override
-   public double getPelvisLinearVelocityFusingFrequency()
-   {
-      // TODO Tune me
-      return 2.0146195328088035;
-   }
-
-   @Override
-   public double getDelayTimeForTrustingFoot()
-   {
-      // TODO Tune me
-      return 0.02;
-   }
-
-   @Override
-   public double getForceInPercentOfWeightThresholdToTrustFoot()
-   {
-      // TODO Tune me
-      return 0.3;
-   }
-
-   @Override
-   public boolean trustCoPAsNonSlippingContactPoint()
-   {
-      return true;
-   }
-
-   @Override
-   public double getPelvisLinearVelocityAlphaNewTwist()
-   {
-      return 0.2;
-   }
-
-   @Override
-   public boolean requestFootForceSensorCalibrationAtStart()
-   {
-      return false;
-   }
-
-   @Override
    public SideDependentList<String> getFootForceSensorNames()
    {
       return footForceSensorNames;
-   }
-
-   @Override
-   public boolean getPelvisLinearStateUpdaterTrustImuWhenNoFeetAreInContact()
-   {
-      return true;
-   }
-
-   @Override
-   public double getCenterOfMassVelocityFusingFrequency()
-   {
-      return 0.4261;
-   }
-
-   @Override
-   public boolean useGroundReactionForcesToComputeCenterOfMassVelocity()
-   {
-      return false;
    }
 
    @Override
@@ -341,11 +214,5 @@ public class OpenAlexanderStateEstimatorParameters extends StateEstimatorParamet
    public List<IMUBasedJointStateEstimatorParameters> getIMUBasedJointStateEstimatorParameters()
    {
       return imuBasedJointStateEstimatorParameters;
-   }
-
-   @Override
-   public MomentumEstimatorMode getMomentumEstimatorMode()
-   {
-      return MomentumEstimatorMode.SIMPLE;
    }
 }

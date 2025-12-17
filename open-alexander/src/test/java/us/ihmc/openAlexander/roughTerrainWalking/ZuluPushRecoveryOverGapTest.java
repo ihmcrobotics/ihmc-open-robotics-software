@@ -2,10 +2,9 @@ package us.ihmc.openAlexander.roughTerrainWalking;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import us.ihmc.openAlexander.OpenAlexanderVersion;
+import us.ihmc.openAlexander.ZuluVersion;
 import us.ihmc.openAlexander.OpenAlexanderRobotModel;
-import us.ihmc.openAlexander.parameters.controller.OpenAlexanderStepAdjustmentParameters;
-import us.ihmc.openAlexander.parameters.controller.ZuluAlexanderSteppingParameters;
+import us.ihmc.openAlexander.parameters.controller.ZuluSteppingParameters;
 import us.ihmc.openAlexander.parameters.controller.OpenAlexanderWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -42,7 +41,7 @@ public class ZuluPushRecoveryOverGapTest extends AvatarPushRecoveryOverGapTest
    @Override
    public DRCRobotModel getRobotModel()
    {
-      OpenAlexanderRobotModel alexanderRobotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT, RobotTarget.SCS)
+      OpenAlexanderRobotModel alexanderRobotModel = new OpenAlexanderRobotModel(ZuluVersion.V1_FULL_ROBOT, RobotTarget.SCS)
       {
          @Override
          public WalkingControllerParameters getWalkingControllerParameters()
@@ -58,7 +57,7 @@ public class ZuluPushRecoveryOverGapTest extends AvatarPushRecoveryOverGapTest
                @Override
                public SteppingParameters getSteppingParameters()
                {
-                  return new ZuluAlexanderSteppingParameters(getPhysicalProperties())
+                  return new ZuluSteppingParameters(getPhysicalProperties())
                   {
                      @Override
                      public double getMaxStepLength()
@@ -71,7 +70,7 @@ public class ZuluPushRecoveryOverGapTest extends AvatarPushRecoveryOverGapTest
                @Override
                public StepAdjustmentParameters getStepAdjustmentParameters()
                {
-                  return new OpenAlexanderStepAdjustmentParameters()
+                  return new StepAdjustmentParameters()
                   {
                      @Override
                      public boolean allowStepAdjustment()
