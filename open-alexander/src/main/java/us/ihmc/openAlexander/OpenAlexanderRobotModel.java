@@ -10,6 +10,7 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.initialSetup.HumanoidRobotInitialSetup;
 import us.ihmc.avatar.kinematicsSimulation.SimulatedHandKinematicController;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
+import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.DefaultSplitFractionCalculatorParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -25,8 +26,7 @@ import us.ihmc.handsros2.HandModel;
 import us.ihmc.handsros2.abilityHand.AbilityHandModel;
 import us.ihmc.handsros2.ezGripper.EZGripperModel;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
-import us.ihmc.openAlexander.parameters.controller.AlexanderContactPointParameters;
-import us.ihmc.openAlexander.parameters.controller.AlexanderICPSplitFractionCalculatorParameters;
+import us.ihmc.openAlexander.parameters.controller.ZuluContactPointParameters;
 import us.ihmc.openAlexander.parameters.controller.OpenAlexanderHighLevelControllerParameters;
 import us.ihmc.openAlexander.parameters.controller.OpenAlexanderStateEstimatorParameters;
 import us.ihmc.openAlexander.parameters.controller.OpenAlexanderWalkingControllerParameters;
@@ -135,7 +135,7 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
       this(robotVersion,
            robotTarget,
            robotMaterial,
-           new AlexanderContactPointParameters(robotVersion.getJointMap(), robotVersion.getPhysicalProperties(), createHandContactPoints));
+           new ZuluContactPointParameters(robotVersion.getJointMap(), robotVersion.getPhysicalProperties(), createHandContactPoints));
    }
 
    public OpenAlexanderRobotModel(AlexanderVersionInterface robotVersion,
@@ -475,7 +475,7 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
    @Override
    public SplitFractionCalculatorParametersReadOnly getSplitFractionCalculatorParameters()
    {
-      return new AlexanderICPSplitFractionCalculatorParameters();
+      return new DefaultSplitFractionCalculatorParameters();
    }
 
    @Override

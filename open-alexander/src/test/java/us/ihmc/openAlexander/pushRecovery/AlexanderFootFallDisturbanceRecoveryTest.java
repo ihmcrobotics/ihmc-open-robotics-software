@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import us.ihmc.openAlexander.OpenAlexanderVersion;
 import us.ihmc.openAlexander.OpenAlexanderRobotModel;
-import us.ihmc.openAlexander.parameters.controller.OpenAlexanderSwingTrajectoryParameters;
 import us.ihmc.openAlexander.parameters.controller.OpenAlexanderWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -46,7 +45,7 @@ public class AlexanderFootFallDisturbanceRecoveryTest extends HumanoidFootFallDi
                @Override
                public SwingTrajectoryParameters getSwingTrajectoryParameters()
                {
-                  return new OpenAlexanderSwingTrajectoryParameters()
+                  return new SwingTrajectoryParameters()
                   {
                      @Override
                      public Tuple3DReadOnly getTouchdownVelocityWeight()

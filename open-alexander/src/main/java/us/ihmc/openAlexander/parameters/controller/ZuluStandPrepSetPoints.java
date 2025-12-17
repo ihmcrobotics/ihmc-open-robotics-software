@@ -11,11 +11,11 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class AlexanderStandPrepSetPoints implements WholeBodySetpointParameters
+public class ZuluStandPrepSetPoints implements WholeBodySetpointParameters
 {
    private final Map<String, Double> setPoints = new LinkedHashMap<>();
 
-   public AlexanderStandPrepSetPoints(AlexanderJointMap jointMap)
+   public ZuluStandPrepSetPoints(AlexanderJointMap jointMap)
    {
       setPoints.put(jointMap.getSpineJointName(SpineJointName.SPINE_YAW), 0.0);
       setPoints.put(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH), 0.0);

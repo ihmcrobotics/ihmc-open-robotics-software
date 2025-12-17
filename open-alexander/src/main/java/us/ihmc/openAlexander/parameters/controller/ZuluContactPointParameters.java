@@ -17,12 +17,12 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
-public class AlexanderContactPointParameters extends RobotContactPointParameters<RobotSide>
+public class ZuluContactPointParameters extends RobotContactPointParameters<RobotSide>
 {
    private final boolean createHandContactPoints;
 
-   public AlexanderContactPointParameters(HumanoidJointNameMap jointMap, AlexanderPhysicalProperties physicalProperties,
-                                      FootContactPoints<RobotSide> footContactPoints, boolean createHandContactPoints)
+   public ZuluContactPointParameters(HumanoidJointNameMap jointMap, AlexanderPhysicalProperties physicalProperties,
+                                     FootContactPoints<RobotSide> footContactPoints, boolean createHandContactPoints)
    {
       super(jointMap,
             physicalProperties.getToeWidthForControl(),
@@ -41,7 +41,7 @@ public class AlexanderContactPointParameters extends RobotContactPointParameters
    }
 
 
-   public AlexanderContactPointParameters(HumanoidJointNameMap jointMap, AlexanderPhysicalProperties physicalProperties, boolean createHandContactPoints)
+   public ZuluContactPointParameters(HumanoidJointNameMap jointMap, AlexanderPhysicalProperties physicalProperties, boolean createHandContactPoints)
    {
       super(jointMap,
             physicalProperties.getToeWidthForControl(),
@@ -57,38 +57,6 @@ public class AlexanderContactPointParameters extends RobotContactPointParameters
       {
          createHandContactPointsForNubs(physicalProperties);
       }
-   }
-
-   public void createGroundContactModelParameters(double simDT)
-   {
-      double zStiffness;
-      double zDamping;
-      double xyStiffness;
-      double xyDamping;
-
-      // The gains were computed for simDT = 0.0001sec. This assumes that the gains should be inversely proportional to the simulation DT.
-      double simDTRef = 0.0001;
-      double modelScale = Math.pow(jointMap.getModelScale(), jointMap.getMassScalePower());
-
-      if (useSoftGroundContactParameters)
-      {
-         double scale = modelScale * Math.pow(simDTRef / simDT, 0.25);
-         zStiffness = (4000.0 * scale);
-         zDamping = (750.0 * scale);
-         xyStiffness = (50000.0 * scale);
-         xyDamping = (1000.0 * scale);
-      }
-      else
-      {
-         double scale = modelScale * Math.pow(simDTRef / simDT, 0.6);
-
-         zStiffness = (1500.0 * scale);
-         zDamping = (1000.0 * scale);
-         xyStiffness = (30000.0 * scale);
-         xyDamping = (1500.0 * scale);
-      }
-
-      setGroundContactModelParameters(new GroundContactModelParameters(zStiffness, zDamping, xyStiffness, xyDamping));
    }
 
    private void addControllerContactPoint(String bodyName, String contactName, RigidBodyTransform transformToContactFrame)

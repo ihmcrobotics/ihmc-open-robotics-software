@@ -2,17 +2,21 @@ package us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculatio
 
 public class DefaultSplitFractionCalculatorParameters implements SplitFractionCalculatorParametersBasics
 {
-   private boolean calculateSplitFractionsFromPositions = false;
+   private boolean calculateSplitFractionsFromPositions = true;
    private boolean calculateSplitFractionsFromArea = false;
 
    private double defaultTransferSplitFraction = 0.5;
-   private double stepHeightForLargeStepDown = 0.15;
-   private double stepHeightForLargeStepUp = 0.15;
-   private double largestStepDownHeight = 0.25;
+   private double stepHeightForLargeStepDown = 0.1;
+   private double stepHeightForLargeStepUp = 0.5;
+   private double largestStepDownHeight = 0.15;
    private double largestStepUpHeight = 0.25;
 
    private double transferSplitFractionAtFullDepth = 0.3;
-   private double transferWeightDistributionAtFullDepth = 0.75;
+   private double transferSplitFractionForStepUpAtFullDepth = 0.6;
+   private double transferWeightDistributionAtFullDepth = 0.65;
+   private double transferWeightDistributionForStepUpAtFullDepth = 0.25;
+   private double transferFinalWeightDistributionAtFullDepth = 0.8;
+   private double transferFinalWeightDistributionForStepUpAtFullDepth = 0.35;
 
    private double fractionLoadIfFootHasFullSupport = 0.5;
    private double fractionTimeOnFootIfFootHasFullSupport = 0.5;
@@ -94,6 +98,11 @@ public class DefaultSplitFractionCalculatorParameters implements SplitFractionCa
       this.largestStepDownHeight = height;
    }
 
+   @Override
+   public void setLargestStepUpHeight(double height)
+   {
+      this.largestStepUpHeight = height;
+   }
 
    /** {@inheritDoc} */
    @Override
@@ -102,17 +111,17 @@ public class DefaultSplitFractionCalculatorParameters implements SplitFractionCa
       return transferSplitFractionAtFullDepth;
    }
 
-   /** {@inheritDoc} */
-   @Override
-   public double getTransferSplitFractionForStepUpAtFullDepth()
-   {
-      return 1.0 - transferSplitFractionAtFullDepth;
-   }
-
    @Override
    public void setTransferSplitFractionAtFullDepth(double splitFraction)
    {
       this.transferSplitFractionAtFullDepth = splitFraction;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getTransferSplitFractionForStepUpAtFullDepth()
+   {
+      return transferSplitFractionForStepUpAtFullDepth;
    }
 
    /** {@inheritDoc} */
@@ -126,7 +135,21 @@ public class DefaultSplitFractionCalculatorParameters implements SplitFractionCa
    @Override
    public double getTransferWeightDistributionForStepUpAtFullDepth()
    {
-      return 1.0 - transferWeightDistributionAtFullDepth;
+      return transferWeightDistributionForStepUpAtFullDepth;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getTransferFinalWeightDistributionAtFullDepth()
+   {
+      return transferFinalWeightDistributionAtFullDepth;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getTransferFinalWeightDistributionForStepUpAtFullDepth()
+   {
+      return transferFinalWeightDistributionForStepUpAtFullDepth;
    }
 
    @Override

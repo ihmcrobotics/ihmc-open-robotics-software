@@ -3,7 +3,7 @@ package us.ihmc.openAlexander;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-import us.ihmc.openAlexander.parameters.controller.AlexanderToeOffParameters;
+import us.ihmc.openAlexander.parameters.controller.ZuluToeOffParameters;
 import us.ihmc.openAlexander.parameters.controller.OpenAlexanderWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -97,7 +97,7 @@ public class AlexanderToeOffTest extends AvatarToeOffTest
                     @Override
                     public ToeOffParameters getToeOffParameters()
                     {
-                        return new AlexanderToeOffParameters(getPhysicalProperties())
+                        return new ZuluToeOffParameters(getPhysicalProperties())
                         {
                             @Override
                             public boolean doToeOffIfPossibleInSingleSupport()

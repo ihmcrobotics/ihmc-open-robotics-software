@@ -16,7 +16,7 @@ import us.ihmc.openAlexander.parameters.controller.*;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 
 @Tag("humanoid-obstacle-slow-3")
-public class AlexanderPushRecoveryOverSteppingStonesTest extends AvatarPushRecoveryOverSteppingStonesTest
+public class ZuluPushRecoveryOverSteppingStonesTest extends AvatarPushRecoveryOverSteppingStonesTest
 {
    @Override
    public DRCRobotModel getRobotModel()
@@ -57,7 +57,7 @@ public class AlexanderPushRecoveryOverSteppingStonesTest extends AvatarPushRecov
                @Override
                public SteppingParameters getSteppingParameters()
                {
-                  return new OpenAlexanderSteppingParameters(getPhysicalProperties())
+                  return new ZuluAlexanderSteppingParameters(getPhysicalProperties())
                   {
                      @Override
                      public double getMaxStepLength()
@@ -76,7 +76,7 @@ public class AlexanderPushRecoveryOverSteppingStonesTest extends AvatarPushRecov
                @Override
                public ToeOffParameters getToeOffParameters()
                {
-                  return new AlexanderToeOffParameters(getPhysicalProperties())
+                  return new ZuluToeOffParameters(getPhysicalProperties())
                   {
                      @Override
                      public double getAnkleLowerLimitToTriggerToeOff()

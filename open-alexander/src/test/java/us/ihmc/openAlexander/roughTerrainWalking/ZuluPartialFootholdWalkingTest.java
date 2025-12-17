@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import us.ihmc.openAlexander.OpenAlexanderVersion;
 import us.ihmc.openAlexander.OpenAlexanderRobotModel;
-import us.ihmc.openAlexander.parameters.controller.AlexanderContactPointParameters;
+import us.ihmc.openAlexander.parameters.controller.ZuluContactPointParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.roughTerrainWalking.HumanoidPartialFootholdWalkingTest;
@@ -17,7 +17,7 @@ import us.ihmc.wholeBodyController.FootContactPoints;
 // This doesn't work if the partial foothold module isn't created, which it's not by default.
 @Disabled
 @Tag("humanoid-rough-terrain-slow")
-public class AlexanderPartialFootholdWalkingTest extends HumanoidPartialFootholdWalkingTest
+public class ZuluPartialFootholdWalkingTest extends HumanoidPartialFootholdWalkingTest
 {
 
    @Override
@@ -25,7 +25,7 @@ public class AlexanderPartialFootholdWalkingTest extends HumanoidPartialFoothold
    {
       OpenAlexanderVersion version = OpenAlexanderVersion.V1_FULL_ROBOT;
       FootContactPoints<RobotSide> simulationContactPoints = new AdditionalSimulationContactPoints<>(RobotSide.values, 10, 5, true, false);
-      AlexanderContactPointParameters contactPointParameters=  new AlexanderContactPointParameters(version.getJointMap(), version.getPhysicalProperties(), simulationContactPoints, false);
+      ZuluContactPointParameters contactPointParameters=  new ZuluContactPointParameters(version.getJointMap(), version.getPhysicalProperties(), simulationContactPoints, false);
       OpenAlexanderRobotModel robotModel = new OpenAlexanderRobotModel(version, RobotTarget.SCS, contactPointParameters)
       {
          @Override

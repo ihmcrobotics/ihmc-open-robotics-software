@@ -3,14 +3,14 @@ package us.ihmc.commonWalkingControlModules.configurations;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 
-public abstract class SwingTrajectoryParameters
+public class SwingTrajectoryParameters
 {
    /**
     * Returns the maximum swing height from the stance foot for this robot
     */
    public double getMaxSwingHeight()
    {
-      return 0.3;
+      return 0.35;
    }
 
    /**
@@ -18,7 +18,7 @@ public abstract class SwingTrajectoryParameters
     */
    public double getMinSwingHeight()
    {
-      return 0.1;
+      return 0.025;
    }
 
    /**
@@ -27,7 +27,7 @@ public abstract class SwingTrajectoryParameters
     */
    public double getDefaultSwingHeight()
    {
-      return getMinSwingHeight();
+      return 0.1;
    }
 
    /**
@@ -39,7 +39,7 @@ public abstract class SwingTrajectoryParameters
     */
    public boolean useInitialToeHeight()
    {
-      return false;
+      return true;
    }
 
    /**
@@ -52,7 +52,7 @@ public abstract class SwingTrajectoryParameters
     */
    public boolean useFinalHeelHeight()
    {
-      return false;
+      return true;
    }
 
    /**
@@ -70,19 +70,28 @@ public abstract class SwingTrajectoryParameters
     * Useful to force the swing foot to end up with an height offset with respect to the given
     * footstep.
     */
-   public abstract double getDesiredTouchdownHeightOffset();
+   public double getDesiredTouchdownHeightOffset()
+   {
+      return 0.0;
+   }
 
    /**
     * Useful to force the swing foot go towards the ground once the desired final position is reached
     * but the foot has not touched the ground yet.
     */
-   public abstract double getDesiredTouchdownVelocity();
+   public double getDesiredTouchdownVelocity()
+   {
+      return -0.15;
+   }
 
    /**
     * Useful to force the swing foot accelerate towards the ground once the desired final position is
     * reached but the foot has not touched the ground yet.
     */
-   public abstract double getDesiredTouchdownAcceleration();
+   public double getDesiredTouchdownAcceleration()
+   {
+      return -2.0;
+   }
 
    /**
     * Ratio used to modify the x and y components of the desired swing final velocity by adding a
@@ -94,7 +103,7 @@ public abstract class SwingTrajectoryParameters
     */
    public double getFinalCoMVelocityInjectionRatio()
    {
-      return 0.0;
+      return 0.5;
    }
 
    /**
@@ -131,7 +140,7 @@ public abstract class SwingTrajectoryParameters
     */
    public Tuple3DReadOnly getTouchdownVelocityWeight()
    {
-      return new Vector3D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+      return new Vector3D(30.0, 30.0, Double.POSITIVE_INFINITY);
    }
 
    /**
@@ -140,7 +149,7 @@ public abstract class SwingTrajectoryParameters
     */
    public double getBlindFootstepsHeightOffset()
    {
-      return 0.03;
+      return 0.00;
    }
 
    /**
@@ -156,7 +165,7 @@ public abstract class SwingTrajectoryParameters
     */
    public double getDefaultSwingStepUpHeight()
    {
-      return getDefaultSwingHeight();
+      return 0.13;
    }
 
    /**
@@ -164,7 +173,7 @@ public abstract class SwingTrajectoryParameters
     */
    public double getDefaultSwingStepDownHeight()
    {
-      return getDefaultSwingHeight();
+      return 0.10;
    }
 
    /**
@@ -173,7 +182,7 @@ public abstract class SwingTrajectoryParameters
     */
    public double[] getSwingStepUpWaypointProportions()
    {
-      return getSwingWaypointProportions();
+      return new double[] {0.05, 0.80};
    }
 
    /**
@@ -182,7 +191,7 @@ public abstract class SwingTrajectoryParameters
     */
    public double[] getSwingStepDownWaypointProportions()
    {
-      return getSwingWaypointProportions();
+      return new double[] {0.20, 0.95};
    }
 
    /**
@@ -198,7 +207,7 @@ public abstract class SwingTrajectoryParameters
     */
    public double getFirstWaypointHeightFactorForSteppingUp()
    {
-      return 1.0;
+      return 0.5;
    }
 
    /**
@@ -214,7 +223,7 @@ public abstract class SwingTrajectoryParameters
     */
    public double getSecondWaypointHeightFactorForSteppingDown()
    {
-      return 1.0;
+      return 0.5;
    }
 
    /**
@@ -222,7 +231,7 @@ public abstract class SwingTrajectoryParameters
     */
    public boolean addOrientationMidpointForObstacleClearance()
    {
-      return false;
+      return true;
    }
 
    /**
@@ -239,7 +248,7 @@ public abstract class SwingTrajectoryParameters
     */
    public boolean addFootPitchToAvoidHeelStrikeWhenSteppingForwardAndDown()
    {
-      return false;
+      return true;
    }
 
    /**
@@ -267,7 +276,7 @@ public abstract class SwingTrajectoryParameters
     */
    public double getMinHeightDifferenceForStepUpOrDown()
    {
-      return 0.075;
+      return 0.05;
    }
 
    /**

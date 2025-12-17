@@ -31,14 +31,14 @@ public class OpenAlexanderHighLevelControllerParameters implements HighLevelCont
    protected final AlexanderVersionInterface alexanderVersion;
    protected final AlexanderJointMap jointMap;
    protected final RobotTarget target;
-   private final AlexanderStandPrepSetPoints standPrepSetPoints;
+   private final ZuluStandPrepSetPoints standPrepSetPoints;
 
    public OpenAlexanderHighLevelControllerParameters(AlexanderVersionInterface alexanderVersion, AlexanderJointMap jointMap, RobotTarget target)
    {
       this.alexanderVersion = alexanderVersion;
       this.jointMap = jointMap;
       this.target = target;
-      standPrepSetPoints = new AlexanderStandPrepSetPoints(jointMap);
+      standPrepSetPoints = new ZuluStandPrepSetPoints(jointMap);
    }
 
    @Override

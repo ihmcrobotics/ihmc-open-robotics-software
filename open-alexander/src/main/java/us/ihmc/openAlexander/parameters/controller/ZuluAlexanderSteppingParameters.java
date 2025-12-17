@@ -3,11 +3,11 @@ package us.ihmc.openAlexander.parameters.controller;
 import us.ihmc.openAlexander.parameters.model.AlexanderPhysicalProperties;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 
-public class OpenAlexanderSteppingParameters implements SteppingParameters
+public class ZuluAlexanderSteppingParameters implements SteppingParameters
 {
    protected final AlexanderPhysicalProperties alexanderPhysicalProperties;
 
-   public OpenAlexanderSteppingParameters(AlexanderPhysicalProperties alexanderPhysicalProperties)
+   public ZuluAlexanderSteppingParameters(AlexanderPhysicalProperties alexanderPhysicalProperties)
    {
       this.alexanderPhysicalProperties = alexanderPhysicalProperties;
    }
@@ -22,65 +22,6 @@ public class OpenAlexanderSteppingParameters implements SteppingParameters
    public double getFootBackwardOffset()
    {
       return alexanderPhysicalProperties.getFootBackForControl();
-   }
-
-   @Override
-   public double getInPlaceWidth()
-   {
-      // TODO Needs tune up.
-      return 0.22;
-   }
-
-   @Override
-   public double getMaxStepLength()
-   {
-      return 0.7;
-   }
-
-   @Override
-   public double getMinStepWidth()
-   {
-      return 0.12;
-   }
-
-   @Override
-   public double getMaxStepWidth()
-   {
-      return 0.8;
-   }
-
-   @Override
-   public double getDefaultStepLength()
-   {
-      // TODO Needs tune up.
-      return 0.4;
-   }
-
-   @Override
-   public double getMaxStepUp()
-   {
-      // TODO Needs tune up.
-      return 0.25;
-   }
-
-   @Override
-   public double getMaxStepDown()
-   {
-      // TODO Needs tune up.
-      return 0.2;
-   }
-
-   @Override
-   public double getMaxAngleTurnOutwards()
-   {
-      return 0.65;
-   }
-
-   @Override
-   public double getMaxAngleTurnInwards()
-   {
-      // TODO Needs tune up.
-      return 0.0;
    }
 
    @Override

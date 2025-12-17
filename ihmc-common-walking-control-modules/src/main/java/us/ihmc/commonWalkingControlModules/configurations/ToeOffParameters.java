@@ -6,9 +6,15 @@ public abstract class ToeOffParameters
     * Boolean to enable transitions to the toe off contact state, if the appropriate conditions are satisfied.
     * @return boolean (true = Allow Toe Off, false = Don't Allow Toe Off)
     */
-   public abstract boolean doToeOffIfPossible();
+   public boolean doToeOffIfPossible()
+   {
+      return true;
+   }
 
-   public abstract boolean doToeOffIfPossibleInSingleSupport();
+   public boolean doToeOffIfPossibleInSingleSupport()
+   {
+      return false;
+   }
 
    /**
     * Minimum stance length in double support to enable toe off.
@@ -17,7 +23,7 @@ public abstract class ToeOffParameters
    public abstract double getMinStepLengthForToeOff();
 
    /**
-    * Whether or not to use a line contact during the swing state. If false, will use a point contact instead.
+    * Whether to use a line contact during the swing state. If false, will use a point contact instead.
     */
    public boolean useToeOffLineContactInSwing()
    {
@@ -25,7 +31,7 @@ public abstract class ToeOffParameters
    }
 
    /**
-    * Whether or not to use a line contact during the transfer state. If false, will use a point contact instead.
+    * Whether to use a line contact during the transfer state. If false, will use a point contact instead.
     */
    public boolean useToeOffLineContactInTransfer()
    {
@@ -35,7 +41,10 @@ public abstract class ToeOffParameters
    /**
     * To enable that feature, {@link ToeOffParameters#doToeOffIfPossible()} return true is required. John parameter
     */
-   public abstract boolean doToeOffWhenHittingAnkleLimit();
+   public boolean doToeOffWhenHittingAnkleLimit()
+   {
+      return true;
+   }
 
    /**
     * Ankle limit that triggers {@link ToeOffParameters#doToeOffWhenHittingAnkleLimit()}.
@@ -59,7 +68,7 @@ public abstract class ToeOffParameters
     */
    public boolean doToeOffWhenHittingTrailingKneeLowerLimit()
    {
-      return false;
+      return true;
    }
 
    /**
@@ -77,7 +86,7 @@ public abstract class ToeOffParameters
     */
    public double getKneeLowerLimitToTriggerToeOff()
    {
-      return 0.0;
+      return 0.4;
    }
 
    /**

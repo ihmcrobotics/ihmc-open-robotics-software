@@ -26,6 +26,8 @@ public interface SplitFractionCalculatorParametersBasics extends SplitFractionCa
     */
    void setLargestStepDownHeight(double height);
 
+   void setLargestStepUpHeight(double height);
+
    /**
     * Sets the desired transfer split fraction if the robot is stepping down by {@link #getLargestStepDownHeight()}.
     * If the step down height is between {@link #getStepHeightForLargeStepDown()} and {@link #getLargestStepDownHeight()}, the

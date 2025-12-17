@@ -227,15 +227,10 @@ public abstract class RobotContactPointParameters<E extends Enum<E> & RobotSegme
       {
          double scale = modelScale * Math.pow(simDTRef / simDT, 0.6);
 
-//         zStiffness = (2000.0 * scale);
-//         zDamping = (1500.0 * scale);
-//         xyStiffness = (50000.0 * scale);
-//         xyDamping = (2000.0 * scale);
-
-         zStiffness = (2000.0 * scale);
-         zDamping = (1500.0 * scale);
-         xyStiffness = (50000.0 * scale);
-         xyDamping = (2000.0 * scale);
+         zStiffness = (1500.0 * scale);
+         zDamping = (1000.0 * scale);
+         xyStiffness = (30000.0 * scale);
+         xyDamping = (1500.0 * scale);
       }
 
       setGroundContactModelParameters(new GroundContactModelParameters(zStiffness, zDamping, xyStiffness, xyDamping));

@@ -48,7 +48,7 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
    private final AlexanderPhysicalProperties physicalProperties;
    private final ToeOffParameters toeOffParameters;
    private SwingTrajectoryParameters swingTrajectoryParameters;
-   private final OpenAlexanderSteppingParameters steppingParameters;
+   private final ZuluAlexanderSteppingParameters steppingParameters;
    private final OpenAlexanderICPControllerParameters icpControllerParameters;
    private final OpenAlexanderStepAdjustmentParameters stepAdjustmentParameters;
    private JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = new AlexanderJointPrivilegedConfigurationParameters();
@@ -85,7 +85,7 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
 
    public OpenAlexanderWalkingControllerParameters(AlexanderVersionInterface version, RobotTarget target, AlexanderJointMap jointMap, AlexanderPhysicalProperties physicalProperties)
    {
-      this(version, target, jointMap, physicalProperties, new AlexanderContactPointParameters(jointMap, physicalProperties, true));
+      this(version, target, jointMap, physicalProperties, new ZuluContactPointParameters(jointMap, physicalProperties, true));
    }
 
    public OpenAlexanderWalkingControllerParameters(AlexanderVersionInterface version,
@@ -99,10 +99,10 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
       this.jointMap = jointMap;
       this.physicalProperties = physicalProperties;
 
-      toeOffParameters = new AlexanderToeOffParameters(physicalProperties);
+      toeOffParameters = new ZuluToeOffParameters(physicalProperties);
       momentumOptimizationSettings = new OpenAlexanderMomentumOptimizationSettings(target, jointMap, 2 + contactPointParameters.getAdditionalContactNames().size());
-      swingTrajectoryParameters = new OpenAlexanderSwingTrajectoryParameters();
-      steppingParameters = new OpenAlexanderSteppingParameters(physicalProperties);
+      swingTrajectoryParameters = new SwingTrajectoryParameters();
+      steppingParameters = new ZuluAlexanderSteppingParameters(physicalProperties);
       icpControllerParameters = new OpenAlexanderICPControllerParameters();
       stepAdjustmentParameters = new OpenAlexanderStepAdjustmentParameters();
 

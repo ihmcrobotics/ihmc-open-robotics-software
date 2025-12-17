@@ -6,7 +6,7 @@ import org.junit.jupiter.api.*;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.openAlexander.OpenAlexanderVersion;
 import us.ihmc.openAlexander.OpenAlexanderRobotModel;
-import us.ihmc.openAlexander.parameters.controller.AlexanderContactPointParameters;
+import us.ihmc.openAlexander.parameters.controller.ZuluContactPointParameters;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.environments.DRCFinalsEnvironment;
@@ -72,7 +72,7 @@ public class AlexanderFinalsWorldStairsTest
 
       OpenAlexanderVersion version = OpenAlexanderVersion.V1_FULL_ROBOT;
       FootContactPoints<RobotSide> simulationContactPoints = new AdditionalSimulationContactPoints<>(RobotSide.values, 8, 3, true, true);
-      AlexanderContactPointParameters contactPointParameters = new AlexanderContactPointParameters(version.getJointMap(), version.getPhysicalProperties(), simulationContactPoints, false);
+      ZuluContactPointParameters contactPointParameters = new ZuluContactPointParameters(version.getJointMap(), version.getPhysicalProperties(), simulationContactPoints, false);
       OpenAlexanderRobotModel robotModel = new OpenAlexanderRobotModel(version, RobotTarget.SCS, contactPointParameters);
 
       DRCFinalsEnvironment environment = new DRCFinalsEnvironment(false, false, false, false, true);
@@ -123,7 +123,7 @@ public class AlexanderFinalsWorldStairsTest
       DRCStartingLocation selectedLocation = DRCSCStartingLocations.STAIRS_START;
       OpenAlexanderVersion version = OpenAlexanderVersion.V1_FULL_ROBOT;
       FootContactPoints<RobotSide> simulationContactPoints = new AdditionalSimulationContactPoints<>(RobotSide.values, 8, 3, true, true);
-      AlexanderContactPointParameters contactPointParameters = new AlexanderContactPointParameters(version.getJointMap(), version.getPhysicalProperties(), simulationContactPoints, false);
+      ZuluContactPointParameters contactPointParameters = new ZuluContactPointParameters(version.getJointMap(), version.getPhysicalProperties(), simulationContactPoints, false);
       OpenAlexanderRobotModel robotModel = new OpenAlexanderRobotModel(version, RobotTarget.SCS, contactPointParameters);
       DRCFinalsEnvironment environment = new DRCFinalsEnvironment(false, false, false, false, true);
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel,

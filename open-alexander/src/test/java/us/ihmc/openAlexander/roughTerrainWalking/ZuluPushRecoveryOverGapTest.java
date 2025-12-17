@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.openAlexander.OpenAlexanderVersion;
 import us.ihmc.openAlexander.OpenAlexanderRobotModel;
 import us.ihmc.openAlexander.parameters.controller.OpenAlexanderStepAdjustmentParameters;
-import us.ihmc.openAlexander.parameters.controller.OpenAlexanderSteppingParameters;
+import us.ihmc.openAlexander.parameters.controller.ZuluAlexanderSteppingParameters;
 import us.ihmc.openAlexander.parameters.controller.OpenAlexanderWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -16,7 +16,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 
 @Tag("humanoid-rough-terrain")
-public class AlexanderPushRecoveryOverGapTest extends AvatarPushRecoveryOverGapTest
+public class ZuluPushRecoveryOverGapTest extends AvatarPushRecoveryOverGapTest
 {
    @Override
    @Test
@@ -58,7 +58,7 @@ public class AlexanderPushRecoveryOverGapTest extends AvatarPushRecoveryOverGapT
                @Override
                public SteppingParameters getSteppingParameters()
                {
-                  return new OpenAlexanderSteppingParameters(getPhysicalProperties())
+                  return new ZuluAlexanderSteppingParameters(getPhysicalProperties())
                   {
                      @Override
                      public double getMaxStepLength()
