@@ -156,12 +156,16 @@ public class YOLOv8Tools
          Mat maskMat = mask.getCpuImageMat();
 
          // Account for aspect ratio by scaling to match annotatedImage width
-         Size scaleSize = new Size(annotatedImage.cols(), maskMat.rows() * annotatedImage.cols() / maskMat.cols());
+         Size scaleSize = annotatedImage.rows() > maskMat.rows() ?
+                                new Size(annotatedImage.cols(), maskMat.rows() * annotatedImage.cols() / maskMat.cols())
+                              : new Size(maskMat.cols() * annotatedImage.rows() / maskMat.rows(), annotatedImage.rows());
          Mat scaledMask = new Mat(scaleSize, maskMat.type());
          opencv_imgproc.resize(maskMat, scaledMask, scaleSize);
          Scalar scalar = new Scalar(0);
          Mat paddedMask = new Mat(annotatedImage.rows(), annotatedImage.cols(), maskMat.type(), scalar);
-         Rect roi = new Rect(0, (annotatedImage.rows() - scaledMask.rows()) / 2, scaledMask.cols(), scaledMask.rows());
+         Rect roi = annotatedImage.rows() > maskMat.rows() ?
+                          new Rect(0, (annotatedImage.rows() - scaledMask.rows()) / 2, scaledMask.cols(), scaledMask.rows())
+                        : new Rect((annotatedImage.cols() - scaledMask.cols()) / 2, 0, scaledMask.cols(), scaledMask.rows());
          Mat paddedMaskCenter = new Mat(paddedMask, roi);
          scaledMask.copyTo(paddedMaskCenter);
          scaleSize.close();
