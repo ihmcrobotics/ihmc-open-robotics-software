@@ -14,6 +14,8 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Size;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
@@ -21,6 +23,7 @@ import us.ihmc.perception.cuda.CUDADepthImageSegmenter;
 import us.ihmc.perception.cuda.CUDAPointCloudExtractor;
 import us.ihmc.perception.detections.yolo.YOLOv8Detection;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionList;
+import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
 import us.ihmc.perception.detections.yolo.YOLOv8Model;
 import us.ihmc.perception.detections.yolo.YOLOv8Tools;
 import us.ihmc.perception.imageMessage.PixelFormat;
@@ -34,12 +37,12 @@ import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.sensors.zed.ZEDImageSensor;
 import us.ihmc.sensors.zed.ZEDModelData;
 import us.ihmc.sensors.zed.ROS2ZEDSVOPlaybackSensor;
-import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.zed.global.zed;
 
 import java.io.File;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -50,7 +53,7 @@ import java.util.concurrent.TimeUnit;
 
 public class RDXYOLOv8PipelineDemo
 {
-   private static final String SVO_FILE = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20240715_103234_ZEDRecording_NewONRCourseWalk.svo2").toAbsolutePath().toString();
+   private static final String SVO_FILE = System.getProperty("user.home") + "/Downloads/20251217_151953_H1NewModelTest.svo2";
 
    private static final String SAVE_DIRECTORY = System.getProperty("user.home") + File.separator + "Documents" + File.separator;
 
@@ -295,10 +298,6 @@ public class RDXYOLOv8PipelineDemo
       YOLOv8Detection detection = results.get(0);
       detectionMask = detection.mask();
 
-      // Get an annotated image
-      annotatedImage = bgrImage.replaceImage(new Mat(bgrImage.getCpuImageMat().size(), bgrImage.getOpenCVType()));
-      YOLOv8Tools.annotateImage(bgrImage.getCpuImageMat(), annotatedImage.getCpuImageMat(), List.of(detection));
-
       // Get the eroded mask
       Mat erodedMat = new Mat();
       opencv_imgproc.erode(detectionMask.getCpuImageMat(),
@@ -310,6 +309,19 @@ public class RDXYOLOv8PipelineDemo
 
       // Segment depth using eroded mask
       segmentedDepth = depthImageSegmenter.removeBackground(depthImage, erodedMask);
+
+      // Get an annotated image
+      YOLOv8InstantDetection instantDetection = new YOLOv8InstantDetection(detection.objectClass(),
+                                                                           detection.confidence(),
+                                                                           new Pose3D(centroid, new RotationMatrix()),
+                                                                           Instant.now(),
+                                                                           bgrImage,
+                                                                           erodedMask,
+                                                                           depthImage,
+                                                                           detection.boundingBox(),
+                                                                           null);
+      annotatedImage = bgrImage.replaceImage(new Mat(bgrImage.getCpuImageMat().size(), bgrImage.getOpenCVType()));
+      YOLOv8Tools.annotateImage(bgrImage.getCpuImageMat(), annotatedImage.getCpuImageMat(), List.of(instantDetection));
 
       // Find the centroid of the segmented depth
       centroid.set(findCentroid(segmentedDepth));
