@@ -40,7 +40,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
@@ -52,7 +51,7 @@ public class YOLOv8DetectionExecutor
    private final CUDADepthImageSegmenter segmenter;
 
    private final Map<String, YOLOv8Model> availableModels = new LinkedHashMap<>();
-   private final Map<YOLOv8Model, YOLOv8DetectionList> yoloDetectionResults = new ConcurrentHashMap<>();
+   private List<YOLOv8InstantDetection> annotatedImageDetections = new ArrayList<>();
    private Iterator<YOLOv8Model> modelIterator;
 
    private final SyncedYOLOv8ExecutorParameters parameters;
@@ -176,7 +175,7 @@ public class YOLOv8DetectionExecutor
             return;
          }
 
-         yoloDetectionResults.remove(model);
+         annotatedImageDetections.remove(model);
       }
 
       while (modelIterator.hasNext())
@@ -189,7 +188,7 @@ public class YOLOv8DetectionExecutor
             return;
          }
 
-         yoloDetectionResults.remove(model);
+         annotatedImageDetections.remove(model);
       }
    }
 
@@ -214,14 +213,6 @@ public class YOLOv8DetectionExecutor
             RawImage bgrImage = colorImage.replaceImage(bgrMat, PixelFormat.BGR8);
             YOLOv8DetectionList yoloResults = yoloModel.run(bgrImage);
 
-            // TODO: temp hack
-            synchronized (yoloDetectionResults)
-            {
-               if (yoloDetectionResults.containsKey(yoloModel))
-                  yoloDetectionResults.remove(yoloModel).destroy();
-               yoloDetectionResults.put(yoloModel, yoloResults);
-            }
-
             if (newestColorImage.poll())
                newestColorImage.read().release();
             newestColorImage.set(bgrImage.get());
@@ -230,6 +221,7 @@ public class YOLOv8DetectionExecutor
 
             // Create list of instant detections from results
             List<InstantDetection> yoloInstantDetections = new ArrayList<>();
+            List<YOLOv8InstantDetection> annotatedImageDetections = new ArrayList<>();
             for (YOLOv8Detection detection : yoloResults)
             {
                RawImage objectMask = detection.mask();
@@ -253,35 +245,50 @@ public class YOLOv8DetectionExecutor
                List<Point3D32> pointCloud = extractor.extractPointCloud(segmentedDepth);
                // Filter out outliers from the point cloud
                float outlierThreshold = modelParameters.getOutlierThresholds().getValueReadOnly(detection.objectClassID());
-               pointCloud = YOLOv8Tools.filterOutliers(pointCloud, outlierThreshold, 128);
-               // Get the centroid of the point cloud
-               Point3D32 centroid = YOLOv8Tools.computeCentroidOfPointCloud(pointCloud, 128);
-               if (centroid.containsNaN())
-               {
-                  erodedObjectMask.release();
-                  segmentedDepth.release();
-                  continue;
-               }
+               List<Point3D32> filteredPoints = YOLOv8Tools.filterOutliers(pointCloud, outlierThreshold, 128);
 
-               // Create an instant detection from data
-               YOLOv8InstantDetection instantDetection = new YOLOv8InstantDetection(detection.objectClass(),
-                                                                                    detection.confidence(),
-                                                                                    new Pose3D(centroid, new RotationMatrix()),
-                                                                                    erodedObjectMask.getAcquisitionTime(),
-                                                                                    bgrImage,
-                                                                                    erodedObjectMask,
-                                                                                    depthImage,
-                                                                                    detection.boundingBox(),
-                                                                                    pointCloud);
-               yoloInstantDetections.add(instantDetection);
+               if (!filteredPoints.isEmpty())
+               {
+                  Point3D32 centroid = YOLOv8Tools.computeCentroidOfPointCloud(filteredPoints, 128);
+
+                  annotatedImageDetections.add(new YOLOv8InstantDetection(detection.objectClass(),
+                                                                          detection.confidence(),
+                                                                          new Pose3D(centroid, new RotationMatrix()),
+                                                                          erodedObjectMask.getAcquisitionTime(),
+                                                                          bgrImage,
+                                                                          erodedObjectMask,
+                                                                          depthImage,
+                                                                          detection.boundingBox(),
+                                                                          filteredPoints));
+                  yoloInstantDetections.add(new YOLOv8InstantDetection(detection.objectClass(),
+                                                                       detection.confidence(),
+                                                                       new Pose3D(centroid, new RotationMatrix()),
+                                                                       erodedObjectMask.getAcquisitionTime(),
+                                                                       bgrImage,
+                                                                       erodedObjectMask,
+                                                                       depthImage,
+                                                                       detection.boundingBox(),
+                                                                       filteredPoints));
+               }
                erodedObjectMask.release();
                segmentedDepth.release();
             }
 
             // Process callbacks
             if (!yoloInstantDetections.isEmpty())
+            {
                detectionConsumerCallbacks.forEach(callback -> callback.accept(yoloInstantDetections));
 
+               synchronized (annotatedImagePublishedThread)
+               {
+                  List<YOLOv8InstantDetection> previousAnnotatedImageDetections = this.annotatedImageDetections;
+                  this.annotatedImageDetections = annotatedImageDetections;
+                  for (YOLOv8InstantDetection previousAnnotatedImageDetection : previousAnnotatedImageDetections)
+                     previousAnnotatedImageDetection.destroy();
+               }
+            }
+
+            yoloResults.destroy();
             bgrImage.release();
             colorImage.release();
             depthImage.release();
@@ -304,9 +311,6 @@ public class YOLOv8DetectionExecutor
 
       for (YOLOv8Model yoloModel : availableModels.values())
          yoloModel.destroy();
-
-      for (YOLOv8DetectionList yoloResults : yoloDetectionResults.values())
-         yoloResults.destroy();
 
       extractor.close();
       segmenter.close();
@@ -336,11 +340,9 @@ public class YOLOv8DetectionExecutor
       }
 
       Mat resultMat = new Mat();
-      synchronized (yoloDetectionResults)
+      synchronized (annotatedImagePublishedThread)
       {
-         List<YOLOv8Detection> allDetections = new ArrayList<>();
-         yoloDetectionResults.values().forEach(allDetections::addAll);
-         YOLOv8Tools.annotateImage(colorImage.getCpuImageMat(), resultMat, allDetections);
+         YOLOv8Tools.annotateImage(colorImage.getCpuImageMat(), resultMat, annotatedImageDetections);
       }
 
       BytePointer annotatedImagePointer = new BytePointer();
