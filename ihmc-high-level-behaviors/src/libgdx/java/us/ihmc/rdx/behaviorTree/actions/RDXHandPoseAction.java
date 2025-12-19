@@ -333,7 +333,8 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
          RigidBodyBasics palm = abilityHand.getChildrenJoints().get(0).getSuccessor().getChildrenJoints().get(0).getSuccessor();
          for (int i = state.getLeafIndex() - 1; i >= 0; i--)
          {
-            if (rootNode.getState().getOrderedLeaves().get(i) instanceof AbilityHandActionState abilityHandActionState)
+            if (rootNode.getState().getOrderedLeaves().get(i) instanceof AbilityHandActionState abilityHandActionState
+                && abilityHandActionState.getDefinition().getSide() == definition.getSide())
             {
                if (abilityHandActionState.getDefinition().getControlMode() == AbilityHandControlMode.GRIP)
                {
