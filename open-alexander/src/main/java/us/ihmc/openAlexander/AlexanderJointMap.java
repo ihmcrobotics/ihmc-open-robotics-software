@@ -375,7 +375,7 @@ public class AlexanderJointMap implements HumanoidJointNameMap
    @Override
    public String getModelName()
    {
-      return "alexander";
+      return "alex";
    }
 
    @Override

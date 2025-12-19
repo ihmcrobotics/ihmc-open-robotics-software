@@ -4,7 +4,6 @@ import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 
 public class TerrainMapData
