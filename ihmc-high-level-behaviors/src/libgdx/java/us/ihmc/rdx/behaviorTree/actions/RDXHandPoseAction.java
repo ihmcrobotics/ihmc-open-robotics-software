@@ -158,6 +158,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
                                                              definition::setUsePredefinedJointAngles,
                                                              imBoolean ->
                         {
+                           ImGui.beginDisabled(!state.getPalmFrame().isChildOfWorld());
                            if (ImGui.checkbox(labels.get("Use Predefined Joint Angles"), imBoolean))
                            {
                               definition.setPreset(null); // Preserve joint angles from before
@@ -181,6 +182,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
                                  actionPalmFrame.update();
                               }
                            }
+                           ImGui.endDisabled();
                         });
       jointSpaceControlWrapper = new ImBooleanWrapper(definition::getJointspaceOnly,
                                                       definition::setJointspaceOnly,
