@@ -28,5 +28,5 @@ public interface AlexanderVersionInterface extends RobotVersion
 
    AlexanderPhysicalProperties getPhysicalProperties();
 
-   OpenAlexanderURDFParameters getURDFParameters();
+   HumanoidURDFParameterInterface getURDFParameters();
 }
