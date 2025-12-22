@@ -33,6 +33,7 @@ import us.ihmc.rdx.ui.hands.RDXHandManager;
 import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationManager;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRManager;
+import us.ihmc.rdx.vr.RDXVRTracker;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -236,11 +237,14 @@ public class RDXVRModeManager
 
       float opacity = 1.0f;
 
-      if (mode == RDXVRMode.WHOLE_BODY_IK_STREAMING)
-         if (kinematicsStreaming.streamToController.get())
+      if (mode == RDXVRMode.WHOLE_BODY_IK_STREAMING && kinematicsStreaming != null)
+         if (!kinematicsStreaming.getShowGhosts() && kinematicsStreaming.getStreamToController())
             opacity = 0.0f;
 
-      vrManager.getContext().getController(RobotSide.RIGHT).setOpacity(opacity);
+      for (RobotSide side : vrManager.getContext().getControllers().sides())
+         vrManager.getContext().getController(side).setOpacity(opacity);
+      for (RDXVRTracker tracker : vrManager.getContext().getTrackers().values())
+         tracker.setOpacity(opacity);
 
       switch (mode)
       {

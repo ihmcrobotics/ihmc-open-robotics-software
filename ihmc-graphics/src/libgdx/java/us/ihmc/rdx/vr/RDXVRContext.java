@@ -424,47 +424,16 @@ public class RDXVRContext
       vrInputProcessors.remove(vrInputProcessorOwnerKeyMap.remove(ownerKey));
    }
 
-   public void getHeadsetRenderable(Array<Renderable> renderables, Pool<Renderable> pool)
-   {
-      if (headset.isConnected())
-      {
-         ModelInstance modelInstance = headset.getModelInstance();
-         if (modelInstance != null)
-         {
-            modelInstance.getRenderables(renderables, pool);
-         }
-      }
-   }
-
    public void getControllerRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      for (RobotSide side : RobotSide.values)
-      {
-         RDXVRController controller = controllers.get(side);
-         if (controller.isConnected())
-               controller.getRenderables(renderables, pool);
-      }
-   }
-
-   public void getTrackerRenderables(String serialNumber, Array<Renderable> renderables, Pool<Renderable> pool)
-   {
-      ModelInstance modelInstance = trackers.get(serialNumber).getModelInstance();
-      if (modelInstance != null)
-      {
-         modelInstance.getRenderables(renderables, pool);
-      }
+      for (RobotSide side : controllers.sides())
+         controllers.get(side).getRenderables(renderables, pool);
    }
 
    public void getTrackersRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      for (var tracker : trackers.entrySet())
-      {
-         ModelInstance modelInstance = tracker.getValue().getModelInstance();
-         if (modelInstance != null)
-         {
-            modelInstance.getRenderables(renderables, pool);
-         }
-      }
+      for (RDXVRTracker tracker : trackers.values())
+         tracker.getRenderables(renderables, pool);
    }
 
    public RDXVRController getController(RobotSide side)

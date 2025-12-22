@@ -2,7 +2,10 @@ package us.ihmc.rdx.vr;
 
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.BufferUtils;
+import com.badlogic.gdx.utils.Pool;
 import org.lwjgl.openvr.VR;
 import org.lwjgl.openvr.VRSystem;
 import us.ihmc.euclid.exceptions.NotARotationMatrixException;
@@ -135,6 +138,12 @@ public abstract class RDXVRTrackedDevice
    protected void setConnected(boolean isConnected)
    {
       this.isConnected = isConnected;
+   }
+
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+      if (isConnected && modelInstance != null && opacity > 0.0f)
+         modelInstance.getRenderables(renderables, pool);
    }
 
    public ModelInstance getModelInstance()

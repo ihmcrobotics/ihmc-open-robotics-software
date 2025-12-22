@@ -113,7 +113,7 @@ public class RDXVRWholeBodyKinematicStreaming
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final RetargetingParameters retargetingParameters;
    private final ImBoolean isKSTEnabled = new ImBoolean(false);
-   public final ImBoolean streamToController = new ImBoolean(false);
+   private final ImBoolean streamToController = new ImBoolean(false);
 
    private final ImBoolean demonstrationMode = new ImBoolean(false);
    private int demonstrationTaskIndex = 0;
@@ -1000,5 +1000,15 @@ public class RDXVRWholeBodyKinematicStreaming
    public RDXMultiBodyGraphic getGhostRobotGraphic()
    {
       return ghostRobotGraphic;
+   }
+
+   public boolean getStreamToController()
+   {
+      return streamToController.get();
+   }
+
+   public boolean getShowGhosts()
+   {
+      return showGhosts.get();
    }
 }
