@@ -1001,4 +1001,14 @@ public class RDXVRWholeBodyKinematicStreaming
    {
       return ghostRobotGraphic;
    }
+
+   public boolean getStreamToController()
+   {
+      return streamToController.get();
+   }
+
+   public boolean getShowGhosts()
+   {
+      return showGhosts.get();
+   }
 }
