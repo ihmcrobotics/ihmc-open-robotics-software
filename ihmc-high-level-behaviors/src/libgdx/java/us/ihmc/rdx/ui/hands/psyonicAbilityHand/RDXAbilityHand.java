@@ -6,6 +6,7 @@ import ihmc_hands_ros2.msg.dds.AbilityHandState;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.type.ImFloat;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.handsros2.abilityHand.AbilityHandControlMode;
@@ -129,7 +130,7 @@ public class RDXAbilityHand implements RDXHandInterface
       boolean scheduleExecuteVelToPos = false;
       for (int i = 0; i < 6; i++)
       {
-         float sliderMin = 0.0f;
+         float sliderMin = 5.0f;
          float sliderMax = i == 5 ? -120.0f : 120.0f; // thumb rotator moves negative
          float actuatorPosition = latestState == null ? Float.NaN : latestState.getActuatorPositions()[i];
          float currentNotch = (actuatorPosition - sliderMin) / (sliderMax - sliderMin);
@@ -191,6 +192,7 @@ public class RDXAbilityHand implements RDXHandInterface
    @Override
    public void sendFingerPosition(int index, float angleDegrees)
    {
+      angleDegrees = (float) MathTools.clamp(angleDegrees, 5.0, 120.0);
       desiredPositions[index].set(index == 5 ? -angleDegrees : angleDegrees);
       executeVelToPos = true;
    }
