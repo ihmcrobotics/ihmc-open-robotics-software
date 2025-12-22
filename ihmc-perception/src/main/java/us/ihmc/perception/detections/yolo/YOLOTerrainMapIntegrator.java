@@ -1,32 +1,49 @@
 package us.ihmc.perception.detections.yolo;
 
+import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.TerrainMapMessage;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.perception.gpuMapping.HeightMapData;
+import us.ihmc.perception.gpuMapping.HeightMapMessageTools;
 import us.ihmc.perception.gpuMapping.HeightMapTools;
 import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.perception.detections.InstantDetection;
+import us.ihmc.perception.gpuMapping.TerrainMapMessageTools;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 
 import java.util.List;
 
 public class YOLOTerrainMapIntegrator
 {
-   private static final double OBSTACLE_HEIGHT = 1000.0;
-   private final double markingRadius; // Radius around detection point to mark as obstacle
+   private static final double OBSTACLE_HEIGHT = 1.0;
+   private static final double INNER_MARKING_RADIUS = 0.1;
+   private static final double OUTER_MARKING_RADIUS = 0.35;
 
-   public YOLOTerrainMapIntegrator(double markingRadius)
+   private final TerrainMapData yoloTerrain;
+   private final ROS2Publisher<HeightMapMessage> yoloHeightMapPublisher;
+   private final ROS2Publisher<TerrainMapMessage> yoloTerrainMapPublisher;
+   private long yoloHeightMapSequenceId = 0;
+   private long yoloTerrainMapSequenceId = 0;
+
+   public YOLOTerrainMapIntegrator(ROS2Node ros2Node, double cellSize, double width)
    {
-      this.markingRadius = markingRadius;
+      yoloTerrain = new TerrainMapData(cellSize, width, 0.0, 0.0);
+
+      yoloHeightMapPublisher  = ros2Node.createPublisher(PerceptionAPI.YOLO_HEIGHT_MAP);
+      yoloTerrainMapPublisher = ros2Node.createPublisher(PerceptionAPI.YOLO_TERRAIN_MAP);
    }
 
    /**
     * Marks cells in the terrain map as obstacles based on YOLO detections.
-    * Sets height to 100.0 for all cells within markingRadius of each detection's point cloud points.
-    * 
-    * @param terrainMapData The terrain map to modify
+    * Sets height to 1.0 for all cells within markingRadius of each detection's point cloud points.
+    *
     * @param detections List of YOLO instant detections containing point clouds
     */
-   public void integrateDetectionsIntoTerrainMap(TerrainMapData terrainMapData, List<InstantDetection> detections)
+   public void integrateDetectionsIntoTerrainMap(List<InstantDetection> detections)
    {
-      if (terrainMapData == null || detections == null || detections.isEmpty())
+      if (detections == null || detections.isEmpty())
          return;
 
       for (InstantDetection detection : detections)
@@ -50,9 +67,20 @@ public class YOLOTerrainMapIntegrator
                double y = point.getY();
                
                // Mark the cell and surrounding cells within radius
-               markObstacleRegion(terrainMapData, x, y);
+               markObstacleRegion(yoloTerrain, x, y);
             }
          }
+      }
+   }
+
+   public void clearYoloTerrain()
+   {
+      float[] heights = yoloTerrain.getHeightMap();
+      float[] scores  = yoloTerrain.getTraversabilityScoreMap();
+      for (int i = 0; i < heights.length; i++)
+      {
+         heights[i] = 0.0f;
+         scores[i]  = 1.0f;
       }
    }
 
@@ -62,18 +90,26 @@ public class YOLOTerrainMapIntegrator
    private void markObstacleRegion(TerrainMapData terrainMapData, double centerX, double centerY)
    {
       double cellSize = terrainMapData.getCellSize();
-      int radiusCells = (int) Math.ceil(markingRadius / cellSize);
-      
-      int centerXIndex = HeightMapTools.coordinateToIndex(centerX, 
-                                                          terrainMapData.getGridCenterX(), 
-                                                          cellSize, 
+      int radiusCells = (int) Math.ceil(OUTER_MARKING_RADIUS / cellSize);
+
+      int centerXIndex = HeightMapTools.coordinateToIndex(centerX,
+                                                          terrainMapData.getGridCenterX(),
+                                                          cellSize,
                                                           terrainMapData.getCenterIndex());
-      int centerYIndex = HeightMapTools.coordinateToIndex(centerY, 
-                                                          terrainMapData.getGridCenterY(), 
-                                                          cellSize, 
+      int centerYIndex = HeightMapTools.coordinateToIndex(centerY,
+                                                          terrainMapData.getGridCenterY(),
+                                                          cellSize,
                                                           terrainMapData.getCenterIndex());
 
-      // Mark cells in a circular pattern
+      float[] heightMap = terrainMapData.getHeightMap();
+      float[] traversabilityScoreMap = terrainMapData.getTraversabilityScoreMap();
+      int cellsPerAxis = terrainMapData.getCellsPerAxis();
+      int centerIndex = terrainMapData.getCenterIndex();
+
+      double minDistance = INNER_MARKING_RADIUS;
+      double maxDistance = OUTER_MARKING_RADIUS;
+      double bandWidth   = maxDistance - minDistance;
+
       for (int dx = -radiusCells; dx <= radiusCells; dx++)
       {
          for (int dy = -radiusCells; dy <= radiusCells; dy++)
@@ -81,26 +117,81 @@ public class YOLOTerrainMapIntegrator
             double offsetX = dx * cellSize;
             double offsetY = dy * cellSize;
             double distance = Math.sqrt(offsetX * offsetX + offsetY * offsetY);
-            
-            if (distance <= markingRadius)
+
+            if (distance <= maxDistance)
             {
                int xIndex = centerXIndex + dx;
                int yIndex = centerYIndex + dy;
-               
-               // Check bounds
-               if (xIndex >= 0 && xIndex < terrainMapData.getCellsPerAxis() &&
-                   yIndex >= 0 && yIndex < terrainMapData.getCellsPerAxis())
+
+               if (xIndex >= 0 && xIndex < cellsPerAxis &&
+                   yIndex >= 0 && yIndex < cellsPerAxis)
                {
-                  int key = HeightMapTools.indicesToKey(xIndex, yIndex, terrainMapData.getCenterIndex());
-                  terrainMapData.getHeightMap()[key] = (float) OBSTACLE_HEIGHT;
+                  int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
+
+                  // Traversability score: 0 at inner, 1 at outer ---
+                  float score;
+                  if (distance < minDistance || bandWidth <= 1e-6)
+                  {
+                     score = 0.0f;
+                  }
+                  else
+                  {
+                     score = (float) ((distance - minDistance) / bandWidth); // 0→1
+                     if (score < 0.0f) score = 0.0f;
+                     if (score > 1.0f) score = 1.0f;
+                  }
+                  if (score < traversabilityScoreMap[key])
+                     traversabilityScoreMap[key] = score;
+
+                  // Height map: OBSTACLE_HEIGHT at inner, 0 at outer ---
+                  float height;
+                  if (distance < minDistance || bandWidth <= 1e-6)
+                  {
+                     height = (float) OBSTACLE_HEIGHT;
+                  }
+                  else
+                  {
+                     double t = (distance - minDistance) / bandWidth; // 0 at inner, 1 at outer
+                     t = Math.max(0.0, Math.min(1.0, t));
+                     height = (float) ((1.0 - t) * OBSTACLE_HEIGHT); // linear to 0
+                  }
+
+                  // If multiple obstacles overlap, keep the max height
+                  if (height > heightMap[key])
+                     heightMap[key] = height;
                }
             }
          }
       }
    }
 
-   public double getMarkingRadius()
+   public void publishTerrainMaps()
    {
-      return markingRadius;
+      // Terrain (obstacle layer)
+      TerrainMapMessage terrainMsg = new TerrainMapMessage();
+      TerrainMapMessageTools.toMessage(yoloTerrain, terrainMsg);
+      terrainMsg.setSequenceId(yoloTerrainMapSequenceId++);
+      yoloTerrainMapPublisher.publish(terrainMsg);
+
+      // Height map (just the same heights, packaged as HeightMapMessage)
+      HeightMapMessage heightMsg = new HeightMapMessage();
+      toHeightMapMessageFromTerrain(yoloTerrain, heightMsg);
+      heightMsg.setSequenceId(yoloHeightMapSequenceId++);
+      yoloHeightMapPublisher.publish(heightMsg);
+   }
+
+   public static void toHeightMapMessageFromTerrain(TerrainMapData terrainMapData, HeightMapMessage messageToPack)
+   {
+      HeightMapData heightMapData = new HeightMapData(terrainMapData.getCellSize(),
+                                                      terrainMapData.getMapSize(),
+                                                      terrainMapData.getGridCenterX(),
+                                                      terrainMapData.getGridCenterY());
+      heightMapData.setHeights(terrainMapData.getHeightMap());
+      HeightMapMessageTools.toMessage(heightMapData, messageToPack);
+   }
+
+   public TerrainMapData getTerrainMap()
+   {
+      return yoloTerrain;
    }
 }
