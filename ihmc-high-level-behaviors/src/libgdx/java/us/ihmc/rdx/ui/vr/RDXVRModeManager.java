@@ -234,13 +234,13 @@ public class RDXVRModeManager
    {
       vrManager.getTeleporter().setBButtonEnabled(mode != RDXVRMode.WHOLE_BODY_IK_STREAMING);
 
-      double opacity = 1.0;
+      float opacity = 1.0f;
 
       if (mode == RDXVRMode.WHOLE_BODY_IK_STREAMING)
          if (kinematicsStreaming.streamToController.get())
-            opacity = 0.0;
+            opacity = 0.0f;
 
-      vrManager.getContext().setControllerOpacity(RobotSide.RIGHT, opacity);
+      vrManager.getContext().getController(RobotSide.RIGHT).setOpacity(opacity);
 
       switch (mode)
       {

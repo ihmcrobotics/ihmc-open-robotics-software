@@ -26,6 +26,7 @@ public abstract class RDXVRTrackedDevice
    private final ReferenceFrame deviceYUpZBackFrame;
    private final RigidBodyTransform tempOpenVRToWorldTransform = new RigidBodyTransform();
    private ModelInstance modelInstance = null;
+   private float opacity = 1.0f;
    private long lastPollTimeNanos;
    private final Vector3D trackedLinearVelocity = new Vector3D();
    private final Vector3D trackedAngularVelocity = new Vector3D();
@@ -139,6 +140,20 @@ public abstract class RDXVRTrackedDevice
    public ModelInstance getModelInstance()
    {
       return modelInstance;
+   }
+
+   public void setOpacity(float opacity)
+   {
+      if (this.opacity != opacity)
+      {
+         this.opacity = opacity;
+         LibGDXTools.setOpacity(modelInstance, opacity);
+      }
+   }
+
+   public float getOpacity()
+   {
+      return opacity;
    }
 
    public boolean isConnected()
