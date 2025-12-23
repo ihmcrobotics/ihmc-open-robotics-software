@@ -380,7 +380,7 @@ public class FootstepPlannerRequest
 
    public boolean isHeightMapAvailable()
    {
-      return  getEnvironmentHandler().getTerrainMapData() != null;
+      return getEnvironmentHandler().getTerrainMapData() != null;
    }
 
    public boolean getAssumeFlatGround()

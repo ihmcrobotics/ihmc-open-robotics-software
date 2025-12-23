@@ -76,11 +76,13 @@ public class YOLOTerrainMapIntegrator
    public void clearYoloTerrain()
    {
       float[] heights = yoloTerrain.getHeightMap();
-      float[] scores  = yoloTerrain.getTraversabilityScoreMap();
+      float[] scores  = yoloTerrain.getObstacleClearanceScoreMap();
+      float[] traversabilityScores  = yoloTerrain.getTraversabilityScoreMap();
       for (int i = 0; i < heights.length; i++)
       {
          heights[i] = 0.0f;
          scores[i]  = 1.0f;
+         traversabilityScores[i] = 1.0f;
       }
    }
 
@@ -103,6 +105,7 @@ public class YOLOTerrainMapIntegrator
 
       float[] heightMap = terrainMapData.getHeightMap();
       float[] traversabilityScoreMap = terrainMapData.getTraversabilityScoreMap();
+      float[] obstacleClearanceScoreMap = terrainMapData.getObstacleClearanceScoreMap();
       int cellsPerAxis = terrainMapData.getCellsPerAxis();
       int centerIndex = terrainMapData.getCenterIndex();
 
@@ -140,8 +143,11 @@ public class YOLOTerrainMapIntegrator
                      if (score < 0.0f) score = 0.0f;
                      if (score > 1.0f) score = 1.0f;
                   }
-                  if (score < traversabilityScoreMap[key])
+                  if (score < obstacleClearanceScoreMap[key])
+                  {
+                     obstacleClearanceScoreMap[key] = score;
                      traversabilityScoreMap[key] = score;
+                  }
 
                   // Height map: OBSTACLE_HEIGHT at inner, 0 at outer ---
                   float height;

@@ -58,6 +58,7 @@ public class AStarBodyPathPlanner
    private final YoDouble roll = new YoDouble("roll", registry);
    private final YoDouble nominalIncline = new YoDouble("nominalIncline", registry);
    private final YoDouble heuristicCost = new YoDouble("heuristicCost", registry);
+   private final YoDouble yoloTraversabilityCost = new YoDouble("traversabilityCost", registry);
    private final YoDouble totalCost = new YoDouble("totalCost", registry);
 
    private final PriorityQueue<BodyPathLatticePoint> stack;
@@ -125,11 +126,12 @@ public class AStarBodyPathPlanner
                                          containsCollision.set(false);
                                          deltaHeight.set(Double.NaN);
                                          edgeCost.set(Double.NaN);
-                                         deltaHeight.set(Double.NaN);
+                                         snapHeight.set(Double.NaN);
                                          rejectionReason.set(null);
                                          roll.set(0.0);
                                          incline.set(0.0);
                                          heuristicCost.setToNaN();
+                                         yoloTraversabilityCost.setToNaN();
                                          totalCost.setToNaN();
                                       });
 
@@ -313,6 +315,21 @@ public class AStarBodyPathPlanner
             {
                throw new RuntimeException("Negative edge cost!");
             }
+
+            // YOLO obstacle clearance terrain cost term
+            double obstacleClearance = terrainMapData.getObstacleClearanceScore(neighbor.getX(), neighbor.getY());
+            if (!Double.isNaN(obstacleClearance))
+            {
+               double obstacleClearanceCost = plannerParameters.getObstacleClearanceWeight() * (1.0f - obstacleClearance);
+               yoloTraversabilityCost.set(obstacleClearanceCost);
+            }
+            else
+            {
+               yoloTraversabilityCost.setToNaN();
+            }
+
+            if (!Double.isNaN(yoloTraversabilityCost.getValue()))
+               edgeCost.add(yoloTraversabilityCost.getValue());
 
             totalCost.set(heuristicCost.getValue() + edgeCost.getValue());
             graph.checkAndSetEdge(node, neighbor, edgeCost.getValue());
