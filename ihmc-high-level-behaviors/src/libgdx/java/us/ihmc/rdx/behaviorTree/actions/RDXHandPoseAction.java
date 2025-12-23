@@ -366,6 +366,8 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
                else
                   joint = (RevoluteJoint) palm.getChildrenJoints().get(i == 5 ? 4 : i);
                joint.setQ(Math.toRadians(fingerPositions[i]));
+               if (i < 4) // set 2nd joints on non-thumb fingers
+                  ((RevoluteJoint) palm.getChildrenJoints().get(i).getSuccessor().getChildrenJoints().get(0)).setQ(Math.toRadians(fingerPositions[i]));
             }
             abilityHand.update();
          }
