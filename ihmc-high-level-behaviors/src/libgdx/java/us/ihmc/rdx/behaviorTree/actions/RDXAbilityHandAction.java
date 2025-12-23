@@ -64,8 +64,6 @@ public class RDXAbilityHandAction extends RDXActionNode<AbilityHandActionState, 
    @Override
    protected void renderImGuiWidgetsInternal()
    {
-      ImGui.text("Ability Hand action for " + definition.getSide().getLowerCaseName() + " side");
-
       ImGui.text("Control Mode:");
       for (AbilityHandControlMode mode : modes)
       {
@@ -102,6 +100,7 @@ public class RDXAbilityHandAction extends RDXActionNode<AbilityHandActionState, 
       }
       else
       {
+         ImGui.sameLine();
          if (ImGui.button(labels.get("Set to current")))
             for (int i = 0; i < 6; i++)
                definition.getGoalPositions().setValue(i, state.getCurrentFingerPositions().getValueReadOnly(i));
@@ -162,6 +161,8 @@ public class RDXAbilityHandAction extends RDXActionNode<AbilityHandActionState, 
 
       ImGui.sameLine();
       handWidget.render(definition.getSide(), ImGui.getFrameHeight(), false);
+
+      renderRowEnd();
    }
 
    @Override
