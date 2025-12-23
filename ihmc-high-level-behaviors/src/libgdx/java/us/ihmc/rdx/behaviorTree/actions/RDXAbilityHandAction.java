@@ -10,6 +10,7 @@ import us.ihmc.handsros2.abilityHand.AbilityHandControlMode;
 import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeRootNode;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImFloatWrapper;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.widgets.ImGuiHandWidget;
 import us.ihmc.robotics.EuclidCoreMissingTools;
@@ -69,7 +70,17 @@ public class RDXAbilityHandAction extends RDXActionNode<AbilityHandActionState, 
       for (AbilityHandControlMode mode : modes)
       {
          if (ImGui.radioButton(labels.get(mode.name()), definition.getControlMode() == mode))
+         {
+            if (mode == AbilityHandControlMode.POSITION) // Copy grip positions over
+            {
+               AbilityHandGrip grip = definition.getGrip();
+               for (int s = 0; s < grip.getNumberOfStages(); s++)
+                  for (int j = 0; j < grip.getFingersInStage(s); j++)
+                     definition.getGoalPositions().setValue(grip.getStageFingerIndex(s, j), grip.getStageFingerPosition(s, j));
+            }
+
             definition.setControlMode(mode);
+         }
          if (mode == AbilityHandControlMode.GRIP)
             ImGui.sameLine();
       }
@@ -91,6 +102,10 @@ public class RDXAbilityHandAction extends RDXActionNode<AbilityHandActionState, 
       }
       else
       {
+         if (ImGui.button(labels.get("Set to current")))
+            for (int i = 0; i < 6; i++)
+               definition.getGoalPositions().setValue(i, state.getCurrentFingerPositions().getValueReadOnly(i));
+
          for (int i = 0; i < 6; i++)
          {
             sliderPositions[i].set(definition.getGoalPositions().getValueReadOnly(i));
@@ -104,8 +119,9 @@ public class RDXAbilityHandAction extends RDXActionNode<AbilityHandActionState, 
             ImGui.popItemWidth();
             ImGui.sameLine();
             ImGui.pushItemWidth(ImGui.getColumnWidth());
-            if (ImGui.inputFloat(labels.getHidden("Velocity" + i), sliderVelocities[i], 0.1f, 1.0f, "%.2f deg/s"))
-               definition.getGoalVelocities().setValue(i, sliderVelocities[i].get());
+            if (ImGuiTools.volatileInputFloat(labels.getHidden("Velocity" + i), sliderVelocities[i], 0.1f, 1.0f, "%.2f deg/s"))
+               for (int j = 0; j < 6; j++)
+                  definition.getGoalVelocities().setValue(j, sliderVelocities[i].get());
             ImGui.popItemWidth();
          }
       }
