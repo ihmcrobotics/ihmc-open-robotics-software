@@ -3,6 +3,8 @@ package us.ihmc.perception.detections.yolo;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.TerrainMapMessage;
 import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.perception.gpuMapping.HeightMapData;
 import us.ihmc.perception.gpuMapping.HeightMapMessageTools;
@@ -21,18 +23,41 @@ public class YOLOTerrainMapIntegrator
    private static final double INNER_MARKING_RADIUS = 0.1;
    private static final double OUTER_MARKING_RADIUS = 0.35;
 
+   private final double terrainWidth;
    private final TerrainMapData yoloTerrain;
    private final ROS2Publisher<HeightMapMessage> yoloHeightMapPublisher;
    private final ROS2Publisher<TerrainMapMessage> yoloTerrainMapPublisher;
    private long yoloHeightMapSequenceId = 0;
    private long yoloTerrainMapSequenceId = 0;
 
-   public YOLOTerrainMapIntegrator(ROS2Node ros2Node, double cellSize, double width)
+   public YOLOTerrainMapIntegrator(ROS2Node ros2Node, double cellSize, double width, ReferenceFrame cameraFrame)
    {
-      yoloTerrain = new TerrainMapData(cellSize, width, 0.0, 0.0);
+      this.terrainWidth = width;
+      yoloTerrain = new TerrainMapData(cellSize, width, 0, 0);
 
       yoloHeightMapPublisher  = ros2Node.createPublisher(PerceptionAPI.YOLO_HEIGHT_MAP);
       yoloTerrainMapPublisher = ros2Node.createPublisher(PerceptionAPI.YOLO_TERRAIN_MAP);
+   }
+
+   public void updateTerrainCenterFromCamera(ReferenceFrame cameraFrame)
+   {
+      RigidBodyTransform cameraToWorld = cameraFrame.getTransformToRoot();
+
+      double cameraX = cameraToWorld.getTranslationX();
+      double cameraY = cameraToWorld.getTranslationY();
+
+      // Forward offset (camera X axis) by width/2 - 0.25
+      double forwardOffset = terrainWidth / 2.0 - 0.25;
+
+      // Assuming yaw-only rotation; camera X axis projected into world XY
+      double cosYaw = cameraToWorld.getM00(); // world X component of camera X
+      double sinYaw = cameraToWorld.getM10(); // world Y component of camera X
+
+      double gridCenterX = cameraX + forwardOffset * cosYaw;
+      double gridCenterY = cameraY + forwardOffset * sinYaw;
+
+      yoloTerrain.setGridCenterX(gridCenterX);
+      yoloTerrain.setGridCenterY(gridCenterY);
    }
 
    /**
