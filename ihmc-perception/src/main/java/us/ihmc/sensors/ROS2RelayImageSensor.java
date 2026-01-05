@@ -264,8 +264,8 @@ public class ROS2RelayImageSensor extends ImageSensor
    {
       return new ROS2RelayImageSensor("RealSense",
                                       Map.of(RealSenseImageSensor.COLOR_IMAGE_KEY,
-                                             PerceptionAPI.D455_COLOR_IMAGE,
+                                             PerceptionAPI.STEPPING_REALSENSE_COLOR,
                                              RealSenseImageSensor.DEPTH_IMAGE_KEY,
-                                             PerceptionAPI.D455_DEPTH_IMAGE));
+                                             PerceptionAPI.STEPPING_REALSENSE_DEPTH));
    }
 }
