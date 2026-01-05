@@ -101,20 +101,7 @@ public class RDXMultiBodyGraphic extends RDXVisualizer
 
    public void setOpacity(float opacity)
    {
-      for (RDXRigidBody rigidBody : multiBody.subtreeIterable())
-      {
-         RDXVisualTools.collectRDXRigidBodiesIncludingPossibleFourBars(rigidBody, rdxRigidBody ->
-         {
-            RDXFrameGraphicsNode visualGraphicsNode = rdxRigidBody.getVisualGraphicsNode();
-            if (visualGraphicsNode != null) // This is null for the elevator
-            {
-               for (RDXFrameNodePart part : visualGraphicsNode.getParts())
-               {
-                  part.getModelInstance().setOpacity(opacity);
-               }
-            }
-         });
-      }
+      multiBody.setOpacityRecursive(opacity);
    }
 
    public boolean isRobotLoaded()

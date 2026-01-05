@@ -37,7 +37,7 @@ public class RDXROS2YOLOv8ModelSettings
    private final ImFloat universalConfidenceThreshold = new ImFloat(0.7f);
    private final ImFloat universalMaskThreshold = new ImFloat(0.0f);
    private final ImInt universalErosionKernelRadius = new ImInt(1);
-   private final ImFloat universalOutlierThreshold = new ImFloat(1.0f);
+   private final ImFloat universalOutlierThreshold = new ImFloat(2.0f);
 
    // Adjustors for individual object classes
    private final RDXYOLOv8ModelClassSettings[] classSettings;
@@ -169,7 +169,7 @@ public class RDXROS2YOLOv8ModelSettings
 
       if (ImGui.tableNextColumn()) // Outlier threshold
       {
-         if (tableInputFloat(universalOutlierThreshold, 0.0f, 1.0f))
+         if (tableInputFloat(universalOutlierThreshold, 0.0f, 5.0f))
          {
             for (int i = 0; i < detectableObjectClassCount; ++i)
                classSettings[i].outlierThreshold.set(universalOutlierThreshold);
@@ -214,7 +214,7 @@ public class RDXROS2YOLOv8ModelSettings
          confidenceThreshold = new ImFloat(0.7f);
          maskThreshold = new ImFloat(0.0f);
          erosionKernelRadius = new ImInt(1);
-         outlierThreshold = new ImFloat(1.0f);
+         outlierThreshold = new ImFloat(2.0f);
       }
 
       public void update()
@@ -260,7 +260,7 @@ public class RDXROS2YOLOv8ModelSettings
             tableInputInt(erosionKernelRadius, 0, 10);
 
          if (ImGui.tableNextColumn()) // Outlier threshold
-            tableInputFloat(outlierThreshold, 0.0f, 1.0f);
+            tableInputFloat(outlierThreshold, 0.0f, 5.0f);
       }
    }
 

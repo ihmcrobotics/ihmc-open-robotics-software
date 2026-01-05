@@ -12,7 +12,6 @@ import us.ihmc.tools.Timer;
 
 public class AbilityHandActionExecutor extends ActionNodeExecutor<AbilityHandActionState, AbilityHandActionDefinition>
 {
-   private String identifier = null;
    private final Timer timer = new Timer();
 
    public AbilityHandActionExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
@@ -24,6 +23,11 @@ public class AbilityHandActionExecutor extends ActionNodeExecutor<AbilityHandAct
    public void update()
    {
       super.update();
+
+      AbilityHandState handState = abilityHandComms.get(definition.getSide()).getLatestState();
+      if (handState != null)
+         for (int i = 0; i < 6; i++)
+            state.getCurrentFingerPositions().setValue(i, handState.getActuatorPositions()[i]);
    }
 
    @Override
@@ -36,8 +40,8 @@ public class AbilityHandActionExecutor extends ActionNodeExecutor<AbilityHandAct
       AbilityHandActionComms comms = abilityHandComms.get(definition.getSide());
       if (comms.isConnected())
       {
-         double nominalExecutionDuration = 4.0;
-         state.setNominalExecutionDuration(nominalExecutionDuration);
+         float ultimateTimeout = definition.getUltimateTimeout();
+         state.setNominalExecutionDuration(ultimateTimeout);
          state.setPositionDistanceToGoalTolerance(Math.toRadians(10.0));
 
          state.getCommandedJointTrajectories().clear(6);
@@ -51,7 +55,7 @@ public class AbilityHandActionExecutor extends ActionNodeExecutor<AbilityHandAct
             AbilityHandGrip grip = definition.getGrip();
             command.setGrip(grip.toByte());
 
-            double stageLength = nominalExecutionDuration / grip.getNumberOfStages();
+            double stageLength = ultimateTimeout / grip.getNumberOfStages();
             for (int s = 0; s < grip.getNumberOfStages(); s++)
             {
                for (int i = 0; i < grip.getFingersInStage(s); i++)
@@ -68,7 +72,7 @@ public class AbilityHandActionExecutor extends ActionNodeExecutor<AbilityHandAct
             {
                float position = definition.getGoalPositions().getValueReadOnly(i);
                command.getGoalPositions()[i] = position;
-               state.getCommandedJointTrajectories().addTrajectoryPoint(i, Math.toRadians(position), nominalExecutionDuration);
+               state.getCommandedJointTrajectories().addTrajectoryPoint(i, Math.toRadians(position), ultimateTimeout);
             }
          }
          for (int i = 0; i < 6; i++)

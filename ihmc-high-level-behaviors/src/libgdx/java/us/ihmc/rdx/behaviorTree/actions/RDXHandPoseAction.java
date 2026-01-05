@@ -9,6 +9,7 @@ import imgui.type.ImInt;
 import org.apache.commons.lang3.mutable.MutableObject;
 import us.ihmc.avatar.arm.PresetArmConfiguration;
 import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
+import us.ihmc.behaviors.behaviorTree.action.actions.AbilityHandActionState;
 import us.ihmc.behaviors.behaviorTree.action.actions.HandPoseActionDefinition;
 import us.ihmc.behaviors.behaviorTree.action.actions.HandPoseActionState;
 import us.ihmc.commons.thread.Throttler;
@@ -17,14 +18,19 @@ import us.ihmc.communication.crdt.CRDTDetachableReferenceFrame;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.handsros2.abilityHand.AbilityHandControlMode;
+import us.ihmc.handsros2.abilityHand.AbilityHandGrip;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeRootNode;
 import us.ihmc.rdx.behaviorTree.RDXCRDTTools;
 import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.input.ImGui3DViewPickResult;
+import us.ihmc.rdx.simulation.scs2.RDXRigidBody;
 import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.affordances.RDXInteractableHighlightModel;
 import us.ihmc.rdx.ui.affordances.RDXInteractableTools;
@@ -78,6 +84,9 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
    private final ImDoubleWrapper positionErrorToleranceInput;
    private final ImDoubleWrapper orientationErrorToleranceDegreesInput;
    private final SideDependentList<RDXArmMultiBodyGraphic> armMultiBodyGraphics = new SideDependentList<>();
+   private final SideDependentList<RDXRigidBody> abilityHands = new SideDependentList<>();
+   private final double[] fingerPositions = new double[6];
+   private boolean showAbilityHand = false;
    private final Throttler lowQualityRenderThrottler = new Throttler();
    private final RDX3DPanelTooltip tooltip;
 
@@ -149,6 +158,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
                                                              definition::setUsePredefinedJointAngles,
                                                              imBoolean ->
                         {
+                           ImGui.beginDisabled(!state.getPalmFrame().isChildOfWorld());
                            if (ImGui.checkbox(labels.get("Use Predefined Joint Angles"), imBoolean))
                            {
                               definition.setPreset(null); // Preserve joint angles from before
@@ -172,6 +182,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
                                  actionPalmFrame.update();
                               }
                            }
+                           ImGui.endDisabled();
                         });
       jointSpaceControlWrapper = new ImBooleanWrapper(definition::getJointspaceOnly,
                                                       definition::setJointspaceOnly,
@@ -228,6 +239,16 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
          }
 
          armMultiBodyGraphics.put(side, new RDXArmMultiBodyGraphic(robotModel, syncedFullRobotModel, side));
+
+         if (robotModel.getRobotVersion().hasSakeGripperJoints(side))
+         {
+            // TODO: Sake gripper
+         }
+         else if (robotModel.getRobotVersion().hasHandWithFingers(side))
+         {
+            abilityHands.put(side, RDXInteractableTools.loadAbilityHand(robotModel.getRobotDefinition(), side));
+            abilityHands.get(side).setOpacityRecursive(0.5f);
+         }
       }
 
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
@@ -245,6 +266,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
       super.update();
 
       // IK solution visualization via ghost arms
+      showAbilityHand = false;
       if (state.getIsNextForExecution())
          visualizeIK();
 
@@ -306,6 +328,50 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
          armMultiBodyGraphic.updateAfterModifyingConfiguration();
       }
       armMultiBodyGraphic.setColor(RDXIKSolverColors.getColor(solutionQuality));
+
+      if (abilityHands.containsKey(definition.getSide()))
+      {
+         RDXRigidBody abilityHand = abilityHands.get(definition.getSide());
+         RigidBodyBasics palm = abilityHand.getChildrenJoints().get(0).getSuccessor().getChildrenJoints().get(0).getSuccessor();
+         for (int i = state.getLeafIndex() - 1; i >= 0; i--)
+         {
+            if (rootNode.getState().getOrderedLeaves().get(i) instanceof AbilityHandActionState abilityHandActionState
+                && abilityHandActionState.getDefinition().getSide() == definition.getSide())
+            {
+               if (abilityHandActionState.getDefinition().getControlMode() == AbilityHandControlMode.GRIP)
+               {
+                  AbilityHandGrip grip = abilityHandActionState.getDefinition().getGrip();
+                  for (int s = 0; s < grip.getNumberOfStages(); s++)
+                     for (int j = 0; j < grip.getFingersInStage(s); j++)
+                        fingerPositions[grip.getStageFingerIndex(s, j)] = grip.getStageFingerPosition(s, j);
+                  showAbilityHand = true;
+               }
+               else if (abilityHandActionState.getDefinition().getControlMode() == AbilityHandControlMode.POSITION)
+               {
+                  for (int f = 0; f < 6; f++)
+                     fingerPositions[f] = abilityHandActionState.getDefinition().getGoalPositions().getValueReadOnly(f);
+                  showAbilityHand = true;
+               }
+               break;
+            }
+         }
+         if (showAbilityHand)
+         {
+            abilityHand.getFloatingJoint().getJointPose().set(armMultiBodyGraphic.getHand().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame());
+            for (int i = 0; i < 6; i++)
+            {
+               RevoluteJoint joint;
+               if (i == 4)
+                  joint = (RevoluteJoint) palm.getChildrenJoints().get(4).getSuccessor().getChildrenJoints().get(0);
+               else
+                  joint = (RevoluteJoint) palm.getChildrenJoints().get(i == 5 ? 4 : i);
+               joint.setQ(Math.toRadians(fingerPositions[i]));
+               if (i < 4) // set 2nd joints on non-thumb fingers
+                  ((RevoluteJoint) palm.getChildrenJoints().get(i).getSuccessor().getChildrenJoints().get(0)).setQ(Math.toRadians(fingerPositions[i]));
+            }
+            abilityHand.update();
+         }
+      }
    }
 
    @Override
@@ -462,7 +528,11 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
          poseGizmo.getVirtualRenderables(renderables, pool);
 
          if (state.getIsNextForExecution())
+         {
             armMultiBodyGraphics.get(definition.getSide()).getRootBody().getVisualRenderables(renderables, pool);
+            if (showAbilityHand && abilityHands.containsKey(definition.getSide()))
+               abilityHands.get(definition.getSide()).getVisualRenderables(renderables, pool);
+         }
       }
    }
 

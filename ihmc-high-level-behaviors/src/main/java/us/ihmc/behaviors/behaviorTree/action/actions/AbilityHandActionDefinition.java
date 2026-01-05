@@ -60,13 +60,19 @@ public class AbilityHandActionDefinition extends ActionNodeDefinition implements
       goalPositions = new CRDTBidirectionalFloatArray(this, 6);
       goalVelocities = new CRDTBidirectionalFloatArray(this, 6);
       for (int i = 0; i < 6; i++)
-         goalVelocities.getValue()[i] = 30.0f; // important not to modify to set initial values
-      successCriteria = new CRDTBidirectionalEnumField<>(this, SuccessCriteria.CHECK_EACH_JOINT_POSITION);
+      {
+         AbilityHandGrip grip = AbilityHandGrip.RELAX;
+         for (int s = 0; s < grip.getNumberOfStages(); s++)
+            for (int j = 0; j < grip.getFingersInStage(s); j++)
+               goalPositions.getValue()[grip.getStageFingerIndex(s, j)] = grip.getStageFingerPosition(s, j);
+         goalVelocities.getValue()[i] = 150.0f; // important not to modify to set initial values
+      }
+      successCriteria = new CRDTBidirectionalEnumField<>(this, SuccessCriteria.WAIT_ONLY);
       eachJointPositionTolerance = new CRDTBidirectionalFloat(this, 10.0f);
       sufficientCumulativeJointMovement = new CRDTBidirectionalFloat(this, 50.0f);
       enableWiggleOnFailure = new CRDTBidirectionalBoolean(this, false);
       timeToWiggle = new CRDTBidirectionalFloat(this, 5.0f);
-      ultimateTimeout = new CRDTBidirectionalFloat(this, 10.0f);
+      ultimateTimeout = new CRDTBidirectionalFloat(this, 2.0f);
    }
 
    @Override
