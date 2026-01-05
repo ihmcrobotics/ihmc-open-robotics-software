@@ -337,9 +337,10 @@ public class RDXVRController extends RDXVRTrackedDevice
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (getModelInstance() != null)
+      super.getRenderables(renderables, pool);
+
+      if (isConnected() && getModelInstance() != null && getOpacity() > 0.0f)
       {
-         getModelInstance().getRenderables(renderables, pool);
          pickPoseSphere.getRenderables(renderables, pool);
          radialMenu.getRenderables(renderables, pool);
 
