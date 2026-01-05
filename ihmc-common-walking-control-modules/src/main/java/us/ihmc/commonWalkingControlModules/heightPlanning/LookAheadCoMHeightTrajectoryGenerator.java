@@ -44,6 +44,9 @@ import us.ihmc.yoVariables.variable.YoEnum;
 public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolder
 {
    private static final double defaultPercentageInOffset = 0.05;
+   private static final double THRESHOLD_FOR_DETECTING_AN_IN_PLACE_STEP = 0.1;
+   private static final double THRESHOLD_FOR_STEP_UP_HEIGHT = 0.05;
+
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private boolean visualize = true;
@@ -422,11 +425,13 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
       fourthMidpoint.setXY(fourthMidpointX, fourthMidpointY);
       endWaypoint.setXY(endWaypointX, endWaypointY);
 
-      // Handle the case where the feet are basically squared up when stepping up. In that case, the max height needs to be pinned by the "from" foot, as the
+      // Handle the case where the feet are basically squared up when stepping up, but are at different heights In that case, the max height needs to be pinned
+      // by the "from" foot, as the
       // way the phase variable works means we can approach what is meant to be swing on the "to" foot while still in the "from" foot.
-      if (Math.abs(transferToPosition.getX()) < 0.1 && endGroundHeight > startGroundHeight)
+      if (Math.abs(transferToPosition.getX()) < THRESHOLD_FOR_DETECTING_AN_IN_PLACE_STEP && endGroundHeight > startGroundHeight
+          && transferToPosition.getZ() > transferFromPosition.getZ() + THRESHOLD_FOR_STEP_UP_HEIGHT)
       {
-         double blend = Math.abs(transferToPosition.getX()) / 0.1;
+         double blend = Math.abs(transferToPosition.getX()) / THRESHOLD_FOR_DETECTING_AN_IN_PLACE_STEP;
          double minHeight = Math.min(startGroundHeight + extraToeOffHeight, endGroundHeight);
          endGroundHeight = EuclidCoreTools.interpolate(minHeight, endGroundHeight, blend);
       }

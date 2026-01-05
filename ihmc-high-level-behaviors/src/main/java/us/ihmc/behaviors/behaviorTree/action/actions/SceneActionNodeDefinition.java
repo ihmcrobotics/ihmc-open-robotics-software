@@ -52,7 +52,7 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
       yoloConfidenceThreshold = new CRDTBidirectionalFloat(this, 0.7f);
       yoloMaskThreshold = new CRDTBidirectionalFloat(this, 0.0f);
       segmentationMaskErosionRadius = new CRDTBidirectionalInteger(this, 1);
-      outlierThreshold = new CRDTBidirectionalFloat(this, 1.0f);
+      outlierThreshold = new CRDTBidirectionalFloat(this, 2.0f);
       objectType = new CRDTBidirectionalEnumField<>(this, IsaacROSFoundationPoseObject.MUSTARD);
       useFoundationPose = new CRDTBidirectionalBoolean(this, false);
       enabledYoloModels = new CRDTBidirectionalStringList(this);

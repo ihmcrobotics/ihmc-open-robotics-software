@@ -4,6 +4,7 @@ import ihmc_hands_ros2.msg.dds.AbilityHandCommand;
 import ihmc_hands_ros2.msg.dds.AbilityHandState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
+import us.ihmc.behaviors.behaviorTree.action.actions.AbilityHandActionDefinition.SuccessCriteria;
 import us.ihmc.handsros2.abilityHand.AbilityHandControlMode;
 import us.ihmc.handsros2.abilityHand.AbilityHandGrip;
 import us.ihmc.robotics.EuclidCoreMissingTools;
@@ -11,7 +12,6 @@ import us.ihmc.tools.Timer;
 
 public class AbilityHandActionExecutor extends ActionNodeExecutor<AbilityHandActionState, AbilityHandActionDefinition>
 {
-   private String identifier = null;
    private final Timer timer = new Timer();
 
    public AbilityHandActionExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
@@ -23,6 +23,11 @@ public class AbilityHandActionExecutor extends ActionNodeExecutor<AbilityHandAct
    public void update()
    {
       super.update();
+
+      AbilityHandState handState = abilityHandComms.get(definition.getSide()).getLatestState();
+      if (handState != null)
+         for (int i = 0; i < 6; i++)
+            state.getCurrentFingerPositions().setValue(i, handState.getActuatorPositions()[i]);
    }
 
    @Override
@@ -35,13 +40,13 @@ public class AbilityHandActionExecutor extends ActionNodeExecutor<AbilityHandAct
       AbilityHandActionComms comms = abilityHandComms.get(definition.getSide());
       if (comms.isConnected())
       {
-         double nominalExecutionDuration = 4.0;
-         state.setNominalExecutionDuration(nominalExecutionDuration);
-         state.setPositionDistanceToGoalTolerance(10.0);
+         float ultimateTimeout = definition.getUltimateTimeout();
+         state.setNominalExecutionDuration(ultimateTimeout);
+         state.setPositionDistanceToGoalTolerance(Math.toRadians(10.0));
 
          state.getCommandedJointTrajectories().clear(6);
          for (int i = 0; i < 6; i++)
-            state.getCommandedJointTrajectories().addTrajectoryPoint(i, comms.getLatestState().getActuatorPositions()[i], 0.0);
+            state.getCommandedJointTrajectories().addTrajectoryPoint(i, Math.toRadians(comms.getLatestState().getActuatorPositions()[i]), 0.0);
 
          AbilityHandCommand command = comms.getCommand();
          command.setControlMode(definition.getControlMode().toByte());
@@ -50,14 +55,14 @@ public class AbilityHandActionExecutor extends ActionNodeExecutor<AbilityHandAct
             AbilityHandGrip grip = definition.getGrip();
             command.setGrip(grip.toByte());
 
-            double stageLength = nominalExecutionDuration / grip.getNumberOfStages();
+            double stageLength = ultimateTimeout / grip.getNumberOfStages();
             for (int s = 0; s < grip.getNumberOfStages(); s++)
             {
                for (int i = 0; i < grip.getFingersInStage(s); i++)
                {
                   int finger = grip.getStageFingerIndex(s, i);
                   double position = grip.getStageFingerPosition(s, i);
-                  state.getCommandedJointTrajectories().addTrajectoryPoint(finger, position, (s + 1) * stageLength);
+                  state.getCommandedJointTrajectories().addTrajectoryPoint(finger, Math.toRadians(position), (s + 1) * stageLength);
                }
             }
          }
@@ -67,7 +72,7 @@ public class AbilityHandActionExecutor extends ActionNodeExecutor<AbilityHandAct
             {
                float position = definition.getGoalPositions().getValueReadOnly(i);
                command.getGoalPositions()[i] = position;
-               state.getCommandedJointTrajectories().addTrajectoryPoint(i, position, nominalExecutionDuration);
+               state.getCommandedJointTrajectories().addTrajectoryPoint(i, Math.toRadians(position), ultimateTimeout);
             }
          }
          for (int i = 0; i < 6; i++)
@@ -89,8 +94,11 @@ public class AbilityHandActionExecutor extends ActionNodeExecutor<AbilityHandAct
 
       if (!timer.isRunning(definition.getUltimateTimeout()))
       {
-         state.getLogger().error("Timed out after %.1f s.".formatted(elapsedTime));
-         state.setFailed(true);
+         if (definition.getSuccessCriteria() == SuccessCriteria.WAIT_ONLY)
+            state.getLogger().info("Waited %.1f s.".formatted(elapsedTime));
+         else
+            state.getLogger().error("Timed out after %.1f s.".formatted(elapsedTime));
+         state.setFailed(definition.getSuccessCriteria() != SuccessCriteria.WAIT_ONLY);
          state.setIsExecuting(false);
       }
 
@@ -106,7 +114,7 @@ public class AbilityHandActionExecutor extends ActionNodeExecutor<AbilityHandAct
          {
             state.getCurrentFingerPositions().setValue(i, handState.getActuatorPositions()[i]);
             state.getDesiredFingerPositions().setValue(i, handState.getGoalPositions()[i]);
-            state.getCurrentJointAngles().setValue(i, handState.getActuatorPositions()[i]);
+            state.getCurrentJointAngles().setValue(i, Math.toRadians(handState.getActuatorPositions()[i]));
          }
 
          switch (definition.getSuccessCriteria())
@@ -132,7 +140,7 @@ public class AbilityHandActionExecutor extends ActionNodeExecutor<AbilityHandAct
                for (int i = 0; i < 6; i++)
                {
                   double movement = Math.abs(handState.getActuatorPositions()[i]
-                                             - state.getCommandedJointTrajectories().getFirstValueReadOnly(i).getPosition());
+                                             - Math.toDegrees(state.getCommandedJointTrajectories().getFirstValueReadOnly(i).getPosition()));
                   cumulativeMovement += movement;
                }
                if (cumulativeMovement >= definition.getSufficientCumulativeJointMovement())

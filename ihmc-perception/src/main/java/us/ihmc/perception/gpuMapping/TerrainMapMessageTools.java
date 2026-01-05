@@ -37,29 +37,28 @@ public class TerrainMapMessageTools
                                                          message.getGridCenterX(),
                                                          message.getGridCenterY());
 
-      Float heightMap = message.getHeightMap();
-      float[] heightMapArray = heightMap.toArray();
-      terrainMapData.setHeightMap(heightMapArray);
+      float[] heightMap = message.getHeightMap().toArray();
+      terrainMapData.setHeightMap(heightMap);
 
-      Float traversabilityScoreMap = message.getTraversabilityScore();
-      float[] traversabilityScoreArray = traversabilityScoreMap.toArray();
-      terrainMapData.setTraversabilityScoreMap(traversabilityScoreArray);
+      float[] traversabilityScoreMap = message.getTraversabilityScore().toArray();
+      if (traversabilityScoreMap.length > 0)
+         terrainMapData.setTraversabilityScoreMap(traversabilityScoreMap);
 
-      Byte traversabilityClassMap = message.getTraversabilityClass();
-      byte[] traversabilityClassArray = traversabilityClassMap.copyArray();
-      terrainMapData.setTraversabilityClassMap(traversabilityClassArray);
+      byte[] traversabilityClassMap = message.getTraversabilityClass().copyArray();
+      if (traversabilityClassMap.length > 0)
+         terrainMapData.setTraversabilityClassMap(traversabilityClassMap);
 
-      Byte snappedNormalXMap = message.getSnappedNormalXData();
-      byte[] snappedNormalXMapArray = snappedNormalXMap.copyArray();
-      terrainMapData.setSnapNormalXMap(snappedNormalXMapArray);
+      byte[] snappedNormalXMap = message.getSnappedNormalXData().copyArray();
+      if (snappedNormalXMap.length > 0)
+         terrainMapData.setSnapNormalXMap(snappedNormalXMap);
 
-      Byte snappedNormalYMap = message.getSnappedNormalYData();
-      byte[] snappedNormalYMapArray = snappedNormalYMap.copyArray();
-      terrainMapData.setSnapNormalYMap(snappedNormalYMapArray);
+      byte[] snappedNormalYMap = message.getSnappedNormalYData().copyArray();
+      if (snappedNormalYMap.length > 0)
+         terrainMapData.setSnapNormalYMap(snappedNormalYMap);
 
-      Byte snappedNormalZMap = message.getSnappedNormalZData();
-      byte[] snappedNormalZMapArray = snappedNormalZMap.copyArray();
-      terrainMapData.setSnapNormalZMap(snappedNormalZMapArray);
+      byte[] snappedNormalZMap = message.getSnappedNormalZData().copyArray();
+      if (snappedNormalZMap.length > 0)
+         terrainMapData.setSnapNormalZMap(snappedNormalZMap);
 
       return terrainMapData;
    }

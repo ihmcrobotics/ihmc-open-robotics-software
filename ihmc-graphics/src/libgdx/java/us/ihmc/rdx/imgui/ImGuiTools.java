@@ -221,21 +221,24 @@ public class ImGuiTools
 
    public static boolean volatileInputFloat(String label, ImFloat imFloat)
    {
-      int inputTextFlags = ImGuiInputTextFlags.None;
-      inputTextFlags += ImGuiInputTextFlags.EnterReturnsTrue;
-      return ImGui.inputFloat(label, imFloat, 0, 0, "%.3f", inputTextFlags);
+      return volatileInputFloat(label, imFloat, 0.0f, 0.0f);
    }
 
-   public static boolean volatileInputFloat(String label, ImFloat imFloat, float step)
+   public static boolean volatileInputFloat(String label, ImFloat imFloat, float step, float stepFast)
+   {
+      return volatileInputFloat(label, imFloat, step, stepFast, "%.3f");
+   }
+
+   public static boolean volatileInputFloat(String label, ImFloat imFloat, float step, float stepFast, String format)
    {
       int inputTextFlags = ImGuiInputTextFlags.None;
       inputTextFlags += ImGuiInputTextFlags.EnterReturnsTrue;
-      return ImGui.inputFloat(label, imFloat, step, 0, "%.3f", inputTextFlags);
+      return ImGui.inputFloat(label, imFloat, step, stepFast, format, inputTextFlags);
    }
 
    public static boolean volatileInputDouble(String label, ImDouble imDouble)
    {
-      return volatileInputDouble(label, imDouble, 0, 0);
+      return volatileInputDouble(label, imDouble, 0.0, 0.0);
    }
 
    public static boolean volatileInputDouble(String label, ImDouble imDouble, double step, double stepFast)

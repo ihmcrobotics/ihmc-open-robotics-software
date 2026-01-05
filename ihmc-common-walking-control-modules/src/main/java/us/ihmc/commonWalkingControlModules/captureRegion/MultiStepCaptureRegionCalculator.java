@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.captureRegion;
 
 import java.awt.*;
 
+import rcl_interfaces.msg.dds.Log;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentReachabilityConstraint;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -15,6 +16,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -37,7 +39,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 public class MultiStepCaptureRegionCalculator implements SCS2YoGraphicHolder
 {
    private static final double distanceThresholdToFilter = 0.005;
-   private static final double distanceThresholdToFilterSquared = MathTools.square(distanceThresholdToFilter);
+   static final double distanceThresholdToFilterSquared = MathTools.square(distanceThresholdToFilter);
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -167,20 +169,30 @@ public class MultiStepCaptureRegionCalculator implements SCS2YoGraphicHolder
       }
 
       multiStepRegion.update();
-      updateInternalFilteringRepeats();
+      populateRegionRemovingClosePoints(multiStepRegion, yoMultiStepRegion, distanceThresholdToFilterSquared);
    }
 
-   private void updateInternalFilteringRepeats()
+
+   static void populateRegionRemovingClosePoints(FrameConvexPolygon2DReadOnly regionToCopy,
+                                                 FixedFrameConvexPolygon2DBasics regionToPack,
+                                                 double minDistanceSquared)
    {
-      yoMultiStepRegion.clear();
-      for (int i = 0; i < multiStepRegion.getNumberOfVertices(); i++)
+      regionToPack.clear();
+      if (regionToCopy.getNumberOfVertices() > 1)
       {
-         FramePoint2DReadOnly previousVertex = multiStepRegion.getPreviousVertex(i);
-         FramePoint2DReadOnly vertex = multiStepRegion.getVertex(i);
-         if (vertex.distanceSquared(previousVertex) > distanceThresholdToFilterSquared)
-            yoMultiStepRegion.addVertexMatchingFrame(multiStepRegion.getVertex(i), false);
+         for (int i = 0; i < regionToCopy.getNumberOfVertices(); i++)
+         {
+            FramePoint2DReadOnly previousVertex = regionToCopy.getPreviousVertex(i);
+            FramePoint2DReadOnly vertex = regionToCopy.getVertex(i);
+            if (vertex.distanceSquared(previousVertex) > minDistanceSquared)
+               regionToPack.addVertexMatchingFrame(vertex, false);
+         }
       }
-      yoMultiStepRegion.update();
+      else
+      {
+         regionToPack.addVertexMatchingFrame(regionToCopy.getVertex(0), false);
+      }
+      regionToPack.update();
    }
 
    public FrameConvexPolygon2DReadOnly getCaptureRegion()

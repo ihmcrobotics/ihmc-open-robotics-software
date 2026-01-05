@@ -44,7 +44,7 @@ public class SyncedYOLOv8ModelParameters extends LatestTimestampModifiable
       erosionKernelRadii = new CRDTBidirectionalIntegerArray(this, objectClassCount);
       Arrays.fill(erosionKernelRadii.getValue(), 1);
       outlierThresholds = new CRDTBidirectionalFloatArray(this, objectClassCount);
-      Arrays.fill(outlierThresholds.getValue(), 1.0f);
+      Arrays.fill(outlierThresholds.getValue(), 2.0f);
    }
 
    /**

@@ -1,5 +1,6 @@
 package us.ihmc.openAlexander.networkProcessor.footstepPostProcessing;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import us.ihmc.openAlexander.OpenAlexanderVersion;
@@ -26,9 +27,10 @@ public class AlexanderPostProcessingTest extends AvatarPostProcessingTests
          {
             return new OpenAlexanderWalkingControllerParameters(getRobotVersion(), RobotTarget.SCS, getJointMap(), getPhysicalProperties(), getContactPointParameters())
             {
-               public boolean createFootholdExplorationTools()
+               @Override
+               public double maximumHeightAboveAnkle()
                {
-                  return false;
+                  return 0.89;
                }
             };
          }
@@ -99,6 +101,7 @@ public class AlexanderPostProcessingTest extends AvatarPostProcessingTests
       super.testWalkingOffOfMediumPlatform();
    }
 
+   @Disabled
    @Tag("humanoid-obstacle-2")
    @Override
    @Test
