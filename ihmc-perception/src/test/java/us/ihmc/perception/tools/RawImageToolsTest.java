@@ -158,8 +158,6 @@ public class RawImageToolsTest
    @Test
    public void testScale()
    {
-      opencv_cudawarping.remap(cpuBGRImage.getCpuImageMat(), gpuBGRImage.getCpuImageMat(), new Mat(), new Mat(), opencv_imgproc.INTER_LINEAR);
-
       testScale(cpuBGRImage, 0.5, 0.5, 2.0);
       testScale(cpuBGRImage, 0.9, 0.8, 1.0);
       testScale(cpuBGRImage, 1.5, 1.3, 1.0);
