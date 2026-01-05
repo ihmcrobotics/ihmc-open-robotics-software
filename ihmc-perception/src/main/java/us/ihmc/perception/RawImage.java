@@ -432,6 +432,11 @@ public class RawImage
       return numberOfReferences.get() > 0;
    }
 
+   public int getReferenceCount()
+   {
+      return numberOfReferences.get();
+   }
+
    public RawImage get()
    {
       if (numberOfReferences.incrementAndGet() > 1)
