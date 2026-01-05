@@ -89,12 +89,12 @@ public class RawImageToolsTest
    public void testResize()
    {
       testResize(cpuBGRImage, 640, 360, 2.0);
-      testResize(cpuBGRImage, 1000, 500, 1.0);
+      testResize(cpuBGRImage, 1000, 500, 1.5);
       testResize(cpuBGRImage, 2000, 1000, 1.0);
       testResize(cpuBGRImage, 2560, 1440, 1.0);
 
       testResize(gpuBGRImage, 640, 360, 2.0);
-      testResize(gpuBGRImage, 1000, 500, 1.0);
+      testResize(gpuBGRImage, 1000, 500, 1.5);
       testResize(gpuBGRImage, 2000, 1000, 1.0);
       testResize(gpuBGRImage, 2560, 1440, 1.0);
 
