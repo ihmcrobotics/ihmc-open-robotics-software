@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.behaviors.tools.CommunicationHelper;
@@ -260,9 +261,16 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
    public void walkFromSteps()
    {
       FootstepDataListMessage messageList = new FootstepDataListMessage();
+      double defaultHeight = locomotionParameters.getSwingHeight();
       for (RDXInteractableFootstep step : footsteps)
       {
-         messageList.getFootstepDataList().add().set(step.getPlannedFootstep().getAsMessage());
+         FootstepDataMessage data = messageList.getFootstepDataList().add();
+         data.set(step.getPlannedFootstep().getAsMessage());
+         if (step.getPlannedFootstep().getSwingHeight() < defaultHeight && defaultHeight > 0.0)
+         {
+            // The swing height may be set by the planner. Make sure only to use swing heights greater than the value set here.
+            data.setSwingHeight(defaultHeight);
+         }
       }
       // TODO figure out some better logic here. For example, when footstep planning from the current pose, or using the control ring, this is probably pretty
       // TODO dangerous. However when manually placing footsteps, this is great.

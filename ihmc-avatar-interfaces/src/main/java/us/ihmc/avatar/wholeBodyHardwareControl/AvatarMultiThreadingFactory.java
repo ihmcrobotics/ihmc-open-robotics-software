@@ -24,11 +24,9 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.Joyst
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.stateTransitions.FeetLoadedToWalkingStandTransition;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HighLevelControllerStateCommand;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
 import us.ihmc.log.LogTools;
@@ -37,11 +35,9 @@ import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotDataVisualizer.logger.localLogging.JVMStatisticsGenerator;
-import us.ihmc.robotDataVisualizer.logger.localLogging.LocalLoggingTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateTransition;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
@@ -126,6 +122,7 @@ public class AvatarMultiThreadingFactory
    private final boolean createStepGeneratorThread;
    private final boolean useRealtimeThreads;
    private final boolean useMultiThreading;
+   private final boolean useLocalLogging;
    private final YoVariableServer yoVariableServer;
 
    public AvatarMultiThreadingFactory(DRCRobotModel robotModel,
@@ -139,6 +136,7 @@ public class AvatarMultiThreadingFactory
                                       boolean createStepGeneratorThread,
                                       boolean useRealtimeThreads,
                                       boolean useMultiThreading,
+                                      boolean useLocalLogging,
                                       MonotonicTime period,
                                       double masterThreadDt,
                                       TimestampProvider monotonicTimeProvider,
@@ -155,6 +153,7 @@ public class AvatarMultiThreadingFactory
       this.createStepGeneratorThread = createStepGeneratorThread;
       this.useRealtimeThreads = useRealtimeThreads;
       this.useMultiThreading = useMultiThreading;
+      this.useLocalLogging = useLocalLogging;
       this.rootRegistry = registry;
       this.yoVariableServer = yoVariableServer;
 
@@ -276,7 +275,7 @@ public class AvatarMultiThreadingFactory
       // Set up the block to prevent execution whenever there is no new state message.
       threadingManager.get().setBlockingProvider(() -> !hardwareCommunicationInterface.hasNewStateMessage());
 
-      if (LocalLoggingTools.LOGGING_LOCALLY)
+      if (useLocalLogging)
       {
          // Setup logger
          ArrayList<RegistrySendBufferBuilder> builders = new ArrayList<>();

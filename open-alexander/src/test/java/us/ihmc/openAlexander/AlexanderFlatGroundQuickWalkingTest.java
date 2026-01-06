@@ -2,7 +2,7 @@ package us.ihmc.openAlexander;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import us.ihmc.openAlexander.parameters.controller.AlexanderSwingTrajectoryParameters;
+import us.ihmc.openAlexander.parameters.controller.OpenAlexanderSwingTrajectoryParameters;
 import us.ihmc.openAlexander.parameters.controller.AlexanderToeOffParameters;
 import us.ihmc.openAlexander.parameters.controller.OpenAlexanderWalkingControllerParameters;
 import us.ihmc.avatar.AvatarFlatGroundQuickWalkingTest;
@@ -55,7 +55,7 @@ public class AlexanderFlatGroundQuickWalkingTest extends AvatarFlatGroundQuickWa
                @Override
                public SwingTrajectoryParameters getSwingTrajectoryParameters()
                {
-                  return new AlexanderSwingTrajectoryParameters()
+                  return new OpenAlexanderSwingTrajectoryParameters()
                   {
                      @Override
                      public double getDesiredTouchdownHeightOffset()

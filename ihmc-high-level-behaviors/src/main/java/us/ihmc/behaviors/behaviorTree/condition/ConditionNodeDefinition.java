@@ -19,7 +19,9 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
    {
       COUNTER,
       LLM,
-      PROXIMITY;
+      PROXIMITY,
+      ALWAYS_FAIL,
+      ALWAYS_SUCCEED;
 
       public static final Type[] values = values();
    }

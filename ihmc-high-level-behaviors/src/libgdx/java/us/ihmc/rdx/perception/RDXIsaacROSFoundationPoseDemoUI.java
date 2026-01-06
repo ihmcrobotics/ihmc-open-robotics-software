@@ -30,10 +30,10 @@ public class RDXIsaacROSFoundationPoseDemoUI
          {
             visualizers.addVisualizer(new RDXROS2ColoredPointCloudVisualizer("ZED Point Cloud",
                                                                              ros2Node,
-                                                                             PerceptionAPI.ZED_DEPTH,
-                                                                             PerceptionAPI.ZED_COLOR_IMAGES.get(RobotSide.LEFT)));
-            visualizers.addVisualizer(new RDXROS2ImageMessageVisualizer("ZED Color", ros2Node, PerceptionAPI.ZED_COLOR_IMAGES.get(RobotSide.LEFT)));
-            visualizers.addVisualizer(new RDXROS2ImageMessageVisualizer("ZED Depth", ros2Node, PerceptionAPI.ZED_DEPTH));
+                                                                             PerceptionAPI.EXPERIMENTAL_ZED_DEPTH,
+                                                                             PerceptionAPI.EXPERIMENTAL_ZED_COLOR.get(RobotSide.LEFT)));
+            visualizers.addVisualizer(new RDXROS2ImageMessageVisualizer("ZED Color", ros2Node, PerceptionAPI.EXPERIMENTAL_ZED_COLOR.get(RobotSide.LEFT)));
+            visualizers.addVisualizer(new RDXROS2ImageMessageVisualizer("ZED Depth", ros2Node, PerceptionAPI.EXPERIMENTAL_ZED_DEPTH));
             visualizers.addVisualizer(new RDXROS2YOLOv8Visualizer("YOLO", ros2Node, peerClockOffsetEstimator, PerceptionAPI.YOLO_ANNOTATED_IMAGE));
             visualizers.addVisualizer(new RDXIsaacROSFoundationPoseVisualizer("FoundationPose", ros2Node, peerClockOffsetEstimator));
             visualizers.create(baseUI);

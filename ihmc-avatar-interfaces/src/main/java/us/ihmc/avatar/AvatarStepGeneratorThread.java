@@ -3,6 +3,7 @@ package us.ihmc.avatar;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
@@ -11,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextTools;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepValidityIndicator;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ContinuousStepGeneratorParametersCommand;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HumanoidSteppingPlugin;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HumanoidSteppingPluginFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.StepGeneratorCommandInputManager;
@@ -90,6 +92,8 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
          // Adds checkers for footholds based on the environment
          for (FootstepValidityIndicator footstepValidityIndicator : environmentalConstraints.getFootstepValidityIndicators())
             pluginFactory.addFootstepValidityIndicator(footstepValidityIndicator);
+
+         csgCommandInputManager.addCSGParametersCommandConsumer(csgParameters -> environmentalConstraints.setSnapToHeightMap(csgParameters.getRequestSnapToHeightmap()));
 
          // clear the environment at the beginning of every update
          pluginFactory.addUpdatable(environmentalConstraints);
@@ -203,5 +207,10 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
    public StepGeneratorCommandInputManager getCsgCommandInputManager()
    {
       return csgCommandInputManager;
+   }
+
+   public void destroy()
+   {
+      csgCommandInputManager.destroy();
    }
 }

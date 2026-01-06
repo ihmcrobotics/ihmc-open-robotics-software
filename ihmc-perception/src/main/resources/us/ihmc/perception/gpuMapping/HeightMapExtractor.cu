@@ -21,6 +21,7 @@ extern "C"
 #define VARIANCE_PER_TRANSLATION_SPEED 16
 #define VARIANCE_PER_ROTATION_SPEED 17
 #define GROUND_HEIGHT 18
+#define MIN_DEPTH_TO_ACCEPT 19
 
 __device__ float3 back_project_perspective(int2 pos, float Z, const float *params)
 {
@@ -69,7 +70,7 @@ __global__ void heightMapUpdateDataKernel(const unsigned short* __restrict__ dep
     float depth = rowPtr[xIndex] * 0.001f; // Scale to meters
 
     // Early exit for invalid depth
-    if (depth < 0.52f)
+    if (depth < params[MIN_DEPTH_TO_ACCEPT])
         return;
 
     // Back-project and transform

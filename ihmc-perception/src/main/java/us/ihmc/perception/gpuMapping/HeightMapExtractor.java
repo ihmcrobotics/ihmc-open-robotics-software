@@ -418,7 +418,8 @@ public class HeightMapExtractor
                           (float) parameters.getVariancePerMeter(),
                           (float) parameters.getVariancePerTranslationSpeed(),
                           (float) parameters.getVariancePerRotationSpeed(),
-                          (float) groundHeightGuess};
+                          (float) groundHeightGuess,
+                          (float) parameters.getMinDepthToAccept()};
    }
 
    public HeightMapData getHeightMapData()

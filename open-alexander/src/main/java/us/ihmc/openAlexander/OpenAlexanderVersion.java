@@ -21,7 +21,7 @@ public enum OpenAlexanderVersion implements AlexanderVersionInterface
                     OpenAlexanderURDFParameters.URDF_RIGHT_ARM_NUB_FOREARM),
       null), V1_LEGS_ROBOT(OpenAlexanderVersion.V1_RESOURCE_DIRECTORY, Arrays.asList(OpenAlexanderURDFParameters.URDF_LOWER_BODY_ONLY), null);
 
-   private static final String V1_RESOURCE_DIRECTORY = "alexander_V1_description/";
+   private static final String V1_RESOURCE_DIRECTORY = "alex_V1_description/";
 
    private final String robotModelResourceDirectory;
 

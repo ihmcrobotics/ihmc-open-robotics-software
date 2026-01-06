@@ -2,7 +2,6 @@ package us.ihmc.behaviors.behaviorTree;
 
 import behavior_msgs.msg.dds.LeafNodeStateMessage;
 import us.ihmc.communication.crdt.CRDTStatusBoolean;
-import us.ihmc.communication.crdt.CRDTStatusInteger;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.log.LogTools;
 
@@ -11,7 +10,6 @@ import java.util.List;
 public class LeafNodeState<D extends LeafNodeDefinition> extends BehaviorTreeNodeState<D>
 {
    private final CRDTStatusBoolean isNextForExecution;
-   private final CRDTStatusInteger concurrencyRank;
    private final CRDTStatusBoolean canExecute;
    private final CRDTStatusBoolean isExecuting;
    private final CRDTStatusBoolean failed;
@@ -24,7 +22,6 @@ public class LeafNodeState<D extends LeafNodeDefinition> extends BehaviorTreeNod
       super(id, definition, rootNode);
 
       isNextForExecution = new CRDTStatusBoolean(ROS2ActorDesignation.ROBOT, crdtInfo, false);
-      concurrencyRank = new CRDTStatusInteger(ROS2ActorDesignation.ROBOT, crdtInfo, 1);
       canExecute = new CRDTStatusBoolean(ROS2ActorDesignation.ROBOT, crdtInfo, true);
       isExecuting = new CRDTStatusBoolean(ROS2ActorDesignation.ROBOT, crdtInfo, false);
       failed = new CRDTStatusBoolean(ROS2ActorDesignation.ROBOT, crdtInfo, false);
@@ -64,7 +61,6 @@ public class LeafNodeState<D extends LeafNodeDefinition> extends BehaviorTreeNod
    {
       boolean hasStatus = false;
       hasStatus |= isNextForExecution.pollHasStatus();
-      hasStatus |= concurrencyRank.pollHasStatus();
       hasStatus |= canExecute.pollHasStatus();
       hasStatus |= isExecuting.pollHasStatus();
       hasStatus |= failed.pollHasStatus();
@@ -76,7 +72,6 @@ public class LeafNodeState<D extends LeafNodeDefinition> extends BehaviorTreeNod
       super.toMessage(message.getState());
 
       message.setIsNextForExecution(isNextForExecution.toMessage());
-      message.setConcurrencyRank(concurrencyRank.toMessage());
       message.setCanExecute(canExecute.toMessage());
       message.setIsExecuting(isExecuting.toMessage());
       message.setFailed(failed.toMessage());
@@ -87,7 +82,6 @@ public class LeafNodeState<D extends LeafNodeDefinition> extends BehaviorTreeNod
       super.fromMessage(message.getState());
 
       isNextForExecution.fromMessage(message.getIsNextForExecution());
-      concurrencyRank.fromMessage(message.getConcurrencyRank());
       canExecute.fromMessage(message.getCanExecute());
       isExecuting.fromMessage(message.getIsExecuting());
       failed.fromMessage(message.getFailed());
@@ -114,31 +108,13 @@ public class LeafNodeState<D extends LeafNodeDefinition> extends BehaviorTreeNod
       return isNextForExecution.getValue();
    }
 
-   public void setConcurrencyRank(int concurrencyRank)
-   {
-      this.concurrencyRank.setValue(concurrencyRank);
-   }
-
-   /**
-    * Gives an idea how many leaves will be executing all together with this one.
-    * How many leaves will be started when the execute next index is set to this action.
-    */
-   public int getConcurrencyRank()
-   {
-      return concurrencyRank.getValue();
-   }
-
-   public boolean getIsToBeExecutedConcurrently()
-   {
-      return concurrencyRank.getValue() > 1;
-   }
-
    public void setCanExecute(boolean canExecute)
    {
       this.canExecute.setValue(canExecute);
    }
 
-   /** @return whether this leaf is valid for execution. This is checked before triggering the leaf. */
+   /** @return whether this leaf is valid for execution. This is checked before triggering the leaf.
+    * Should be updated in the node's update() method. */
    public boolean getCanExecute()
    {
       return canExecute.getValue();
@@ -192,7 +168,8 @@ public class LeafNodeState<D extends LeafNodeDefinition> extends BehaviorTreeNod
          return executeAfterNode;
       }
 
-      LogTools.error("Node ID not found: {}", definition.getExecuteAfterNodeID());
+      LogTools.error("Node \"%s\" refers to execute after node that doesn't exist: \"%s\""
+                           .formatted(definition.getName(), definition.getExecuteAfterLeafName()));
 
       return null;
    }

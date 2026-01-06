@@ -107,7 +107,7 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
    public <T extends LeafNodeState<?>> T findNextPreviousLeaf(Class<T> leafClass, int queryIndex, @Nullable RobotSide side)
    {
       T previousLeaf = null;
-      for (int i = queryIndex - 1; i >= 0 && previousLeaf == null; i--)
+      for (int i = queryIndex - 1; orderedLeaves.size() > i && i >= 0 && previousLeaf == null; i--)
       {
          LeafNodeState<?> leaf = orderedLeaves.get(i);
          if (leafClass.isInstance(leaf))

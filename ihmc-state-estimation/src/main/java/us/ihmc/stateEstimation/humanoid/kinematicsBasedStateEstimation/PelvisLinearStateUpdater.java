@@ -11,6 +11,8 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
@@ -662,7 +664,8 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
          if (!areFeetTrusted.get(foot).getBooleanValue())
             continue;
 
-         double footAngularVelocity = foot.getBodyFixedFrame().getTwistOfFrame().getAngularPart().norm();
+         FrameVector3DReadOnly angularVelocity = foot.getBodyFixedFrame().getTwistOfFrame().getAngularPart();
+         double footAngularVelocity = EuclidCoreTools.norm(angularVelocity.getX(), angularVelocity.getY());
          footAngularVelocities.get(foot).set(footAngularVelocity);
 
          if (footAngularVelocity < slowestVelocity)

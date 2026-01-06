@@ -381,8 +381,7 @@ public class ICPController implements ICPControllerInterface
 
       UnrolledInverseFromMinor_DDRM.inv(transformedGains, inverseTransformedGains);
 
-      solver.resetCoPFeedbackConditions();
-      solver.resetFeedbackDirection();
+      solver.resetFeedbackConditions();
       solver.setFeedbackConditions(scaledCoPFeedbackWeight, transformedGains, dynamicsObjectiveWeight.getValue());
       solver.setMaxCMPDistanceFromEdge(maxAllowedDistanceCMPSupport.getValue());
       solver.setCopSafeDistanceToEdge(safeCoPDistanceToEdge.getValue());
@@ -405,6 +404,11 @@ public class ICPController implements ICPControllerInterface
          }
 
          solver.setMaximumFeedbackRate(feedbackGains.getFeedbackPartMaxRate(), controlDT);
+      }
+      else
+      {
+         solver.removeMaximumFeedbackMagnitude();
+         solver.removeFeedbackRateLimit();
       }
       ignoreRateLimitThisTick = false;
 

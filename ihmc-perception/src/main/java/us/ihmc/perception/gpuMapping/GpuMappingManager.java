@@ -50,6 +50,7 @@ public class GpuMappingManager
    private final HeightMapMessage heightMapMessage;
    private final HeightMapMessageForController heightMapMessageForController;
    private long heightMapSequenceId = 0;
+   private long heightMapForControllerSequenceId = 0;
    private final TerrainMapMessage terrainMapMessage;
    private long terrainMapSequenceId = 0;
 
@@ -165,7 +166,14 @@ public class GpuMappingManager
 
       heightMapMessage.setSequenceId(heightMapSequenceId++);
       heightMapMessagePublisher.publish(heightMapMessage);
+   }
+
+   public void publishHeightMapForController()
+   {
+      HeightMapMessageTools.toMessageForController(heightMapExtractor.getHeightMapData(), heightMapMessageForController);
+      heightMapMessageForController.setSequenceId(heightMapForControllerSequenceId++);
       controllerHeightMapMessagePublisher.publish(heightMapMessageForController);
+
    }
 
     public void publishTerrainMap()

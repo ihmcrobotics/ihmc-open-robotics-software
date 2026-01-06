@@ -266,7 +266,7 @@ public class KSTTools implements SCS2YoGraphicHolder
       {
          areHandTaskspaceOutputsEnabled.get(robotSide).set(configurationCommand.isHandTaskspaceEnabled(robotSide));
          areArmJointspaceOutputsEnabled.get(robotSide).set(configurationCommand.isArmJointspaceEnabled(robotSide));
-         areLegJointspaceOutputsEnabled.get(robotSide).set(configurationCommand.isLegJointspaceEnabled(robotSide));
+         areLegJointspaceOutputsEnabled.get(robotSide).set(configurationCommand.isLegJointspaceEnabled(robotSide) && !isFootInSupport.get(robotSide));
       }
 
       if (commandInputManager.isNewCommandAvailable(KinematicsStreamingToolboxInitialConfigurationCommand.class))

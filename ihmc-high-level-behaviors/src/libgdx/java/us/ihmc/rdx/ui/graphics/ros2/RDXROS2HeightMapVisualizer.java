@@ -45,12 +45,14 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
    private final RDXHeightMapRenderer heightMapRenderer = new RDXHeightMapRenderer();
    private final RDXChunkedMapRenderer chunkedMapRenderer;
    private final ImBoolean requestTerrainMap = new ImBoolean(false);
+   private final ImBoolean requestHeightMapController = new ImBoolean(false);
    private final ImBoolean enableChunkedMapRenderer = new ImBoolean(false);
    private final ImBoolean enableHeightMapRenderer = new ImBoolean(true);
    private final ImBoolean colorBasedOnTraversability = new ImBoolean(false);
    private final Stopwatch stopwatch = new Stopwatch();
    private ROS2PublishSubscribeAPI ros2;
    private ROS2Heartbeat terrainMapRequestHeartbeat;
+   private ROS2Heartbeat heightMapControllerRequestHeartbeat;
    private Mat heightMap;
    private Mat traversabilityScore;
    private HeightMapData latestHeightMapData;
@@ -197,6 +199,9 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       if (terrainMapRequestHeartbeat != null && ImGui.checkbox(labels.get("Request Terrain Map"), requestTerrainMap))
          terrainMapRequestHeartbeat.setAlive(requestTerrainMap.get());
 
+      if (heightMapControllerRequestHeartbeat != null && ImGui.checkbox(labels.get("Send Height Map to Controller"), requestHeightMapController))
+         heightMapControllerRequestHeartbeat.setAlive(requestHeightMapController.get());
+
       if (ImGui.collapsingHeader(labels.get("Visualization Options")))
       {
          ImGui.checkbox(labels.get("Enable Height Map"), enableHeightMapRenderer);
@@ -287,6 +292,12 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
    {
       terrainMapRequestHeartbeat = new ROS2Heartbeat(ros2Node, PerceptionAPI.REQUEST_TERRAIN_MAP);
       terrainMapRequestHeartbeat.setAlive(requestTerrainMap.get());
+   }
+
+   public void setupHeightMapControllerRequestHeartbeat(ROS2Node ros2Node)
+   {
+      heightMapControllerRequestHeartbeat = new ROS2Heartbeat(ros2Node, PerceptionAPI.REQUEST_HEIGHT_MAP_FOR_CONTROLLER);
+      heightMapControllerRequestHeartbeat.setAlive(requestHeightMapController.get());
    }
 
    public HeightMapData getLatestHeightMapData()

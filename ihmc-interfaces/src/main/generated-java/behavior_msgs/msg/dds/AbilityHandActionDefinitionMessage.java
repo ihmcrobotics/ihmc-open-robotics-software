@@ -32,6 +32,30 @@ public class AbilityHandActionDefinitionMessage extends Packet<AbilityHandAction
             * Goal positions for the joints
             */
    public float[] goal_velocities_;
+   /**
+            * Success criteria type (enum in AbilityHandActionDefinition)
+            */
+   public byte success_criteria_;
+   /**
+            * +/- tolerance in degrees for each joint position check
+            */
+   public float each_joint_position_tolerance_;
+   /**
+            * Sum all absolute joint movement into one value and check it exceeds this value
+            */
+   public float sufficient_cumulative_joint_movement_;
+   /**
+            * Enable a sinusoidal wiggling of joints if they are unresponsive
+            */
+   public boolean enable_wiggle_on_failure_;
+   /**
+            * When to start wiggling
+            */
+   public float time_to_wiggle_;
+   /**
+            * Timeout regardless of modes, action will cease after this time
+            */
+   public float ultimate_timeout_;
 
    public AbilityHandActionDefinitionMessage()
    {
@@ -68,6 +92,18 @@ public class AbilityHandActionDefinitionMessage extends Packet<AbilityHandAction
             goal_velocities_[i3] = other.goal_velocities_[i3];
 
       }
+
+      success_criteria_ = other.success_criteria_;
+
+      each_joint_position_tolerance_ = other.each_joint_position_tolerance_;
+
+      sufficient_cumulative_joint_movement_ = other.sufficient_cumulative_joint_movement_;
+
+      enable_wiggle_on_failure_ = other.enable_wiggle_on_failure_;
+
+      time_to_wiggle_ = other.time_to_wiggle_;
+
+      ultimate_timeout_ = other.ultimate_timeout_;
 
    }
 
@@ -143,6 +179,96 @@ public class AbilityHandActionDefinitionMessage extends Packet<AbilityHandAction
       return goal_velocities_;
    }
 
+   /**
+            * Success criteria type (enum in AbilityHandActionDefinition)
+            */
+   public void setSuccessCriteria(byte success_criteria)
+   {
+      success_criteria_ = success_criteria;
+   }
+   /**
+            * Success criteria type (enum in AbilityHandActionDefinition)
+            */
+   public byte getSuccessCriteria()
+   {
+      return success_criteria_;
+   }
+
+   /**
+            * +/- tolerance in degrees for each joint position check
+            */
+   public void setEachJointPositionTolerance(float each_joint_position_tolerance)
+   {
+      each_joint_position_tolerance_ = each_joint_position_tolerance;
+   }
+   /**
+            * +/- tolerance in degrees for each joint position check
+            */
+   public float getEachJointPositionTolerance()
+   {
+      return each_joint_position_tolerance_;
+   }
+
+   /**
+            * Sum all absolute joint movement into one value and check it exceeds this value
+            */
+   public void setSufficientCumulativeJointMovement(float sufficient_cumulative_joint_movement)
+   {
+      sufficient_cumulative_joint_movement_ = sufficient_cumulative_joint_movement;
+   }
+   /**
+            * Sum all absolute joint movement into one value and check it exceeds this value
+            */
+   public float getSufficientCumulativeJointMovement()
+   {
+      return sufficient_cumulative_joint_movement_;
+   }
+
+   /**
+            * Enable a sinusoidal wiggling of joints if they are unresponsive
+            */
+   public void setEnableWiggleOnFailure(boolean enable_wiggle_on_failure)
+   {
+      enable_wiggle_on_failure_ = enable_wiggle_on_failure;
+   }
+   /**
+            * Enable a sinusoidal wiggling of joints if they are unresponsive
+            */
+   public boolean getEnableWiggleOnFailure()
+   {
+      return enable_wiggle_on_failure_;
+   }
+
+   /**
+            * When to start wiggling
+            */
+   public void setTimeToWiggle(float time_to_wiggle)
+   {
+      time_to_wiggle_ = time_to_wiggle;
+   }
+   /**
+            * When to start wiggling
+            */
+   public float getTimeToWiggle()
+   {
+      return time_to_wiggle_;
+   }
+
+   /**
+            * Timeout regardless of modes, action will cease after this time
+            */
+   public void setUltimateTimeout(float ultimate_timeout)
+   {
+      ultimate_timeout_ = ultimate_timeout;
+   }
+   /**
+            * Timeout regardless of modes, action will cease after this time
+            */
+   public float getUltimateTimeout()
+   {
+      return ultimate_timeout_;
+   }
+
 
    public static Supplier<AbilityHandActionDefinitionMessagePubSubType> getPubSubType()
    {
@@ -178,6 +304,18 @@ public class AbilityHandActionDefinitionMessage extends Packet<AbilityHandAction
                 if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.goal_velocities_[i7], other.goal_velocities_[i7], epsilon)) return false;
       }
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.success_criteria_, other.success_criteria_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.each_joint_position_tolerance_, other.each_joint_position_tolerance_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sufficient_cumulative_joint_movement_, other.sufficient_cumulative_joint_movement_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_wiggle_on_failure_, other.enable_wiggle_on_failure_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.time_to_wiggle_, other.time_to_wiggle_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.ultimate_timeout_, other.ultimate_timeout_, epsilon)) return false;
+
 
       return true;
    }
@@ -208,6 +346,18 @@ public class AbilityHandActionDefinitionMessage extends Packet<AbilityHandAction
                 if(this.goal_velocities_[i11] != otherMyClass.goal_velocities_[i11]) return false;
 
       }
+      if(this.success_criteria_ != otherMyClass.success_criteria_) return false;
+
+      if(this.each_joint_position_tolerance_ != otherMyClass.each_joint_position_tolerance_) return false;
+
+      if(this.sufficient_cumulative_joint_movement_ != otherMyClass.sufficient_cumulative_joint_movement_) return false;
+
+      if(this.enable_wiggle_on_failure_ != otherMyClass.enable_wiggle_on_failure_) return false;
+
+      if(this.time_to_wiggle_ != otherMyClass.time_to_wiggle_) return false;
+
+      if(this.ultimate_timeout_ != otherMyClass.ultimate_timeout_) return false;
+
 
       return true;
    }
@@ -229,7 +379,19 @@ public class AbilityHandActionDefinitionMessage extends Packet<AbilityHandAction
       builder.append("goal_positions=");
       builder.append(java.util.Arrays.toString(this.goal_positions_));      builder.append(", ");
       builder.append("goal_velocities=");
-      builder.append(java.util.Arrays.toString(this.goal_velocities_));
+      builder.append(java.util.Arrays.toString(this.goal_velocities_));      builder.append(", ");
+      builder.append("success_criteria=");
+      builder.append(this.success_criteria_);      builder.append(", ");
+      builder.append("each_joint_position_tolerance=");
+      builder.append(this.each_joint_position_tolerance_);      builder.append(", ");
+      builder.append("sufficient_cumulative_joint_movement=");
+      builder.append(this.sufficient_cumulative_joint_movement_);      builder.append(", ");
+      builder.append("enable_wiggle_on_failure=");
+      builder.append(this.enable_wiggle_on_failure_);      builder.append(", ");
+      builder.append("time_to_wiggle=");
+      builder.append(this.time_to_wiggle_);      builder.append(", ");
+      builder.append("ultimate_timeout=");
+      builder.append(this.ultimate_timeout_);
       builder.append("}");
       return builder.toString();
    }
