@@ -24,7 +24,11 @@ public class AbilityHandActionComms
    {
       this.handSide = handSide;
 
-      ros2Node.createSubscription2(AbilityHandROS2API.STATE_TOPIC, stateNotification::set);
+      ros2Node.createSubscription2(AbilityHandROS2API.STATE_TOPIC, stateMessage ->
+      {
+         if (stateMessage.getHandSide() == handSide.toByte())
+            stateNotification.set(stateMessage);
+      });
       commandPublisher = ros2Node.createPublisher(AbilityHandROS2API.COMMAND_TOPIC);
    }
 
@@ -32,13 +36,9 @@ public class AbilityHandActionComms
    {
       if (stateNotification.poll())
       {
-         AbilityHandState read = stateNotification.read();
-         if (read.getHandSide() == handSide.toByte())
-         {
-            latestState = read;
-            command.setIdentifier(latestState.getIdentifierAsString());
-            connectedTimer.reset();
-         }
+         latestState = stateNotification.read();
+         command.setIdentifier(latestState.getIdentifierAsString());
+         connectedTimer.reset();
       }
 
       if (!connectedTimer.isRunning(0.5))
