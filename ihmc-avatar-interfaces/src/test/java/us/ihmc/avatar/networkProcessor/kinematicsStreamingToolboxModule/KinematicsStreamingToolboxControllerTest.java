@@ -104,7 +104,6 @@ public abstract class KinematicsStreamingToolboxControllerTest
    protected CommandInputManager commandInputManager;
    protected StatusMessageOutputManager statusOutputManager;
    protected YoRegistry toolboxRegistry;
-   protected YoGraphicsListRegistry yoGraphicsListRegistry;
    protected FullHumanoidRobotModel desiredFullRobotModel;
    protected KinematicsStreamingToolboxController toolboxController;
 
@@ -156,7 +155,6 @@ public abstract class KinematicsStreamingToolboxControllerTest
                                                                                                     "isAutomaticManipulationAbortEnabled");
       isAutomaticManipulationAbortEnabled.set(false); // TODO This is a hack to prevent the walking controller from aborting the manipulation task.
       createToolboxController(robotModel, toolboxParameters, collisionModel);
-      simulationTestHelper.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       simulationTestHelper.addYoGraphicDefinition(toolboxController.getSCS2YoGraphics());
 
       ros2Node = simulationTestHelper.getROS2Node();
@@ -266,7 +264,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
          scs.setDT(toolboxController.getTools().getToolboxControllerPeriod());
          scs.initializeBufferRecordTickPeriod(1);
 
-         simulationTestHelper = new SCS2AvatarTestingSimulation(scs, robotModel, desiredFullRobotModel, yoGraphicsListRegistry, simulationTestingParameters);
+         simulationTestHelper = new SCS2AvatarTestingSimulation(scs, robotModel, desiredFullRobotModel, simulationTestingParameters);
          simulationTestHelper.setKeepSCSUp(simulationTestingParameters.getKeepSCSUp());
          simulationTestHelper.start(false);
          simulationTestHelper.setCamera(new Point3D(0, 0, 1), new Point3D(6, 0, 1));
@@ -294,7 +292,6 @@ public abstract class KinematicsStreamingToolboxControllerTest
    {
       desiredFullRobotModel = robotModel.createFullRobotModel();
       toolboxRegistry = new YoRegistry("toolboxMain");
-      yoGraphicsListRegistry = new YoGraphicsListRegistry();
       commandInputManager = new CommandInputManager(KinematicsStreamingToolboxModule.supportedCommands());
       statusOutputManager = new StatusMessageOutputManager(KinematicsStreamingToolboxModule.supportedStatus());
 
@@ -331,7 +328,6 @@ public abstract class KinematicsStreamingToolboxControllerTest
 
       desiredFullRobotModel = null;
       toolboxRegistry = null;
-      yoGraphicsListRegistry = null;
       commandInputManager = null;
       toolboxController = null;
       robot = null;

@@ -89,7 +89,6 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
    private CommandInputManager toolboxInputManager;
    private StatusMessageOutputManager toolboxOutputManager;
    private YoRegistry toolboxMainRegistry;
-   private YoGraphicsListRegistry yoGraphicsListRegistry;
    private WalkingControllerPreviewToolboxController toolboxController;
 
    private YoBoolean enableToolboxUpdater;
@@ -107,7 +106,6 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       enableToolboxUpdater = new YoBoolean("enableToolboxUpdater", toolboxMainRegistry);
       pauseToolboxUpdater = new YoBoolean("pauseToolboxUpdater", toolboxMainRegistry);
       initializationSucceeded = new YoBoolean("initializationSucceeded", toolboxMainRegistry);
-      yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
       DRCRobotModel robotModel = getRobotModel();
       toolboxInputManager = new CommandInputManager(WalkingControllerPreviewToolboxModule.supportedCommands());
@@ -116,7 +114,6 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
                                                                         integrationDT,
                                                                         toolboxInputManager,
                                                                         toolboxOutputManager,
-                                                                        yoGraphicsListRegistry,
                                                                         toolboxMainRegistry);
    }
 
@@ -162,7 +159,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       scs.setDT(toolboxController.getIntegrationDT());
       scs.initializeBufferRecordTickPeriod(1);
 
-      simulationTestHelper = new SCS2AvatarTestingSimulation(scs, getRobotModel(), null, yoGraphicsListRegistry, simulationTestingParameters);
+      simulationTestHelper = new SCS2AvatarTestingSimulation(scs, getRobotModel(), null, simulationTestingParameters);
       simulationTestHelper.start();
 
       FullHumanoidRobotModel fullRobotModelAtInitialConfiguration = createFullRobotModelAtInitialConfiguration(2.0);
@@ -240,7 +237,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       simulationTestHelperFactory.addSecondaryRobot(ghost);
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
       simulationTestHelper.getRootRegistry().addChild(toolboxMainRegistry);
-      simulationTestHelper.getSimulationConstructionSet().addYoGraphics(YoGraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry));
+      simulationTestHelper.addYoGraphicDefinition(toolboxController.getSCS2YoGraphics());
       simulationTestHelper.start();
 
       //root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WalkingHighLevelHumanoidController.walkingCurrentState
@@ -359,7 +356,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
                                                                                               EuclidCoreRandomTools.nextDouble(random, Math.PI)));
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
       simulationTestHelper.getRootRegistry().addChild(toolboxMainRegistry);
-      simulationTestHelper.getSimulationConstructionSet().addYoGraphics(YoGraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry));
+      simulationTestHelper.addYoGraphicDefinition(toolboxController.getSCS2YoGraphics());
       simulationTestHelper.start();
 
       //root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WalkingHighLevelHumanoidController.walkingCurrentState

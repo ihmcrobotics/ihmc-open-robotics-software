@@ -12,6 +12,7 @@ import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -21,7 +22,10 @@ public class FootstepListVisualizer implements SCS2YoGraphicHolder
    private static final int maxNumberOfFootstepsToVisualizePerSide = 2;
    public static final Color defaultLeftColor = new Color(0.85f, 0.35f, 0.65f, 1.0f);
    public static final Color defaultRightColor = new Color(0.15f, 0.8f, 0.15f, 1.0f);
+   public static final ColorDefinition defaultLeftColorDefinition = new ColorDefinition(0.85f, 0.35f, 0.65f, 1.0f);
+   public static final ColorDefinition defaultRightColorDefinition = new ColorDefinition(0.15f, 0.8f, 0.15f, 1.0f);
    public static final SideDependentList<Color> defaultFeetColors = new SideDependentList<>(defaultLeftColor, defaultRightColor);
+   public static final SideDependentList<ColorDefinition> defaultFeetColorDefinitions = new SideDependentList<>(defaultLeftColorDefinition, defaultRightColorDefinition);
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 

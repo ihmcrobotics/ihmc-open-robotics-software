@@ -25,7 +25,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.stateTransit
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
@@ -344,7 +343,6 @@ public class AvatarMultiThreadingFactory
       avatarEstimatorThreadFactory.configureWithWholeBodyControllerParameters(robotModel);
       avatarEstimatorThreadFactory.setEstimatorFullRobotModel(fullRobotModel);
       avatarEstimatorThreadFactory.setSensorReaderFactory(sensorReaderFactory);
-//      avatarEstimatorThreadFactory.setYoGraphicsListRegistry(sensorReaderFactory.getYoGraphicsListRegistry()); //TODO do we need this?
       avatarEstimatorThreadFactory.setHumanoidRobotContextDataFactory(estimatorContextDataFactory);
       avatarEstimatorThreadFactory.setGravity(GRAVITY);
       //      if (secondaryEstimatorFactory != null)
