@@ -25,7 +25,7 @@ public interface AlexanderVersionInterface extends RobotVersion
 
    AlexanderJointMap getJointMap();
 
-   boolean hasNubHands(RobotSide side);
+   boolean hasNubForearms(RobotSide side);
 
    AlexanderSensorInformation getSensorInformation();
 

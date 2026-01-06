@@ -175,7 +175,7 @@ public enum OpenAlexanderVersion implements AlexanderVersionInterface
    }
 
    @Override
-   public boolean hasNubHands(RobotSide side)
+   public boolean hasNubForearms(RobotSide side)
    {
       switch (this)
       {
