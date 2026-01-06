@@ -59,7 +59,11 @@ public class RDXAbilityHand implements RDXHandInterface
          desiredVelocities[i] = new ImFloat(DEFAULT_VELOCITY);
       }
 
-      ros2Node.createSubscription2(AbilityHandROS2API.STATE_TOPIC, stateNotification::set);
+      ros2Node.createSubscription2(AbilityHandROS2API.STATE_TOPIC, stateMessage ->
+      {
+         if (stateMessage.getIdentifierAsString().equals(identifier) && stateMessage.getHandSide() == handSide.toByte())
+            stateNotification.set(stateMessage);
+      });
       command.setIdentifier(identifier);
       commandPublisher = ros2Node.createPublisher(AbilityHandROS2API.COMMAND_TOPIC);
    }
@@ -69,12 +73,8 @@ public class RDXAbilityHand implements RDXHandInterface
    {
       if (stateNotification.poll())
       {
-         AbilityHandState read = stateNotification.read();
-         if (read.getIdentifierAsString().equals(identifier) && read.getHandSide() == handSide.toByte())
-         {
-            latestState = read;
-            connectedTimer.reset();
-         }
+         latestState = stateNotification.read();
+         connectedTimer.reset();
       }
 
       if (!connectedTimer.isRunning(0.5))
