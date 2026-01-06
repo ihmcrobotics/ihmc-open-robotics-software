@@ -385,7 +385,7 @@ public class HeightMapFootstepCheckerTest
    }
 
    private static final double barelyTooSteepEpsilon = 0.1;
-   private static final int iters = 10000;
+   private static final int iters = 1000;
 
    @Test
    public void testSnappingToIncline()

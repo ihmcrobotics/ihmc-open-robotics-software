@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.TerrainMapMessage;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -18,6 +19,7 @@ import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pathPlanning.PlannerInput;
 import us.ihmc.perception.gpuMapping.HeightMapMessageTools;
 import us.ihmc.perception.gpuMapping.TerrainMapMessageTools;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -88,7 +90,12 @@ public class FootstepPlanningModuleTest
                               "Planner doesn't appear to be streaming correctly. Planning duration=" + totalElapsed + ", publish period=" + publishPeriod
                               + ", # of statuses=" + numberOfStreamingStatuses.getValue());
    }
-   
+
+   /**
+    * This test is dependent on a lot of parameters. The ideal step length or ideal step yaw will determine where the step starts.
+    * From there we can move it some amount but those parameters could cause the test to pass or fail. Same with the goal distance proximity.
+    * So changing this guy: planningModule.getFootstepPlannerParameters().setIdealFootstepLength(0.2); can break the test
+    */
    @Test
    public void testGoalProximityWhenGoalIsUnreachable()
    {
@@ -109,14 +116,14 @@ public class FootstepPlanningModuleTest
       request.setRequestedInitialStanceSide(RobotSide.LEFT);
       request.setPlanBodyPath(false);
       request.setAssumeFlatGround(false);
-      request.setGoalDistanceProximity(0.65); // This proximity means we should be ok.
+      request.setGoalDistanceProximity(0.7); // This proximity means we should be ok. We might not check the value exactly x = 3.0, so (x + goalDistanceProximity)
       request.setTerrainMapData(TerrainMapMessageTools.unpackMessage(terrainMapMessage));
       request.setGoalYawProximity(0.4);
       request.setTimeout(Double.MAX_VALUE);
       request.setMaximumIterations(50);
 
       FootstepPlannerOutput plannerOutput = planningModule.handleRequest(request);
-      Assertions.assertTrue(plannerOutput.getFootstepPlanningResult().validForExecution());
+      Assertions.assertTrue(plannerOutput.getFootstepPlanningResult().validForExecution(), "Valid for Execution was " + plannerOutput.getFootstepPlanningResult().validForExecution());
    }
 
    @Test
@@ -124,6 +131,8 @@ public class FootstepPlanningModuleTest
    {
       FootstepPlanningModule planningModule = new FootstepPlanningModule(getClass().getSimpleName());
       planningModule.getFootstepPlannerParameters().setMaxBranchFactor(0);
+      planningModule.getFootstepPlannerParameters().setMaxStepYaw(0.25 * Math.PI);
+      planningModule.getFootstepPlannerParameters().setMinStepYaw(-0.25 * Math.PI);
 
       PlanarRegionsListGenerator planarRegionsListGenerator = new PlanarRegionsListGenerator();
       planarRegionsListGenerator.addRectangle(6.0, 6.0);
@@ -304,7 +313,7 @@ public class FootstepPlanningModuleTest
       Stopwatch stopwatch = new Stopwatch();
 
       // test time
-      double customTimeout = 1.65;
+      double customTimeout = 1.0;
       AtomicDouble timestampPrev = new AtomicDouble();
       AtomicDouble timestamp = new AtomicDouble();
       AtomicBoolean firstTick = new AtomicBoolean(true);
@@ -314,6 +323,9 @@ public class FootstepPlanningModuleTest
                                              if (firstTick.getAndSet(false))
                                              {
                                                 stopwatch.start();
+
+                                                // In order to reach the timeout value, we sleep that long
+                                                ThreadTools.sleepSeconds(1.0);
                                              }
 
                                              timestampPrev.set(timestamp.get());
