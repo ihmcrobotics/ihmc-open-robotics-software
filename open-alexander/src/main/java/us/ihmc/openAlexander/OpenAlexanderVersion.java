@@ -74,7 +74,7 @@ public enum OpenAlexanderVersion implements AlexanderVersionInterface
    }
 
    @Override
-   public boolean hasCycloidForearms()
+   public boolean hasCycloidForearm()
    {
       switch (this)
       {

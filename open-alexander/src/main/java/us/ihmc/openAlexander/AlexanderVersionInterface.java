@@ -15,7 +15,8 @@ public interface AlexanderVersionInterface extends RobotVersion
 
    Collection<String> getXMLDescriptionResources();
 
-   default boolean hasCycloidForearms()
+   /** Has at least one cycloid forearm. */
+   default boolean hasCycloidForearm()
    {
       return hasCycloidForearm(RobotSide.LEFT) || hasCycloidForearm(RobotSide.RIGHT);
    }
