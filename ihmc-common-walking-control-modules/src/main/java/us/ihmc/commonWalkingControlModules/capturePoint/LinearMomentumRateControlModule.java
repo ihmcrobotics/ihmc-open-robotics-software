@@ -253,7 +253,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
       /*
        * TODO: The following is not being visualized since it is a duplicate for now.
        */
-      bipedSupportPolygons = new BipedSupportPolygons(referenceFrames, registry, null);
+      bipedSupportPolygons = new BipedSupportPolygons(referenceFrames, registry);
 
       ICPControllerParameters icpControllerParameters = walkingControllerParameters.getICPControllerParameters();
 

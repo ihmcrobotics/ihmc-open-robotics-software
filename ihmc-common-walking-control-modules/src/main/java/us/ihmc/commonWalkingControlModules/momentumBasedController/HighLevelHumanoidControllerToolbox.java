@@ -203,7 +203,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
 
-      bipedSupportPolygons = new BipedSupportPolygons(referenceFrames, registry, null);
+      bipedSupportPolygons = new BipedSupportPolygons(referenceFrames, registry);
 
       this.footSwitches = new SideDependentList<>(footSwitches);
       this.wristForceSensors = wristForceSensors;

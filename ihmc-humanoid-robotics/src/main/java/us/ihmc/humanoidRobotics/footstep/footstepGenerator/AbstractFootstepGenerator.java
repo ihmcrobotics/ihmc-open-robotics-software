@@ -14,7 +14,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.humanoidRobotics.footstep.FootstepUtils;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.OverheadPath;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
@@ -192,10 +191,29 @@ public abstract class AbstractFootstepGenerator implements FootstepGenerator
    {
       FramePose2D endPose = getPath().getPoseAtS(1);
       Point3D endPoint = new Point3D(endPose.getX(), endPose.getY(), 0.0);
-      RobotSide closestSideToEnd = FootstepUtils.getFrontFootRobotSideFromFootsteps(lastFootsteps, new FramePoint3D(ReferenceFrame.getWorldFrame(), endPoint));
+      RobotSide closestSideToEnd = getFrontFootRobotSideFromFootsteps(lastFootsteps, new FramePoint3D(ReferenceFrame.getWorldFrame(), endPoint));
 
       return closestSideToEnd;
    }
+
+   public static RobotSide getFrontFootRobotSideFromFootsteps(SideDependentList<Footstep> footSteps, FramePoint3D destination)
+   {
+      FramePoint3D destinationInWorld = new FramePoint3D(destination);
+      destinationInWorld.changeFrame(ReferenceFrame.getWorldFrame());
+      SideDependentList<Double> distances = new SideDependentList<Double>();
+      for (RobotSide side : RobotSide.values)
+      {
+         FramePoint3D footstepPosition = new FramePoint3D();
+         footSteps.get(side).getPosition(footstepPosition);
+         footstepPosition.changeFrame(ReferenceFrame.getWorldFrame());
+         distances.set(side, new Double(footstepPosition.distanceSquared(destinationInWorld)));
+      }
+
+      RobotSide frontSide = (distances.get(RobotSide.LEFT) <= distances.get(RobotSide.RIGHT)) ? RobotSide.LEFT : RobotSide.RIGHT;
+
+      return frontSide;
+   }
+
 
    protected FramePoint2D offsetFootstepFromPath(RobotSide currentFootstepSide, FramePoint2D footstepPosition2d, double footHeading, double offsetAmount)
    {
