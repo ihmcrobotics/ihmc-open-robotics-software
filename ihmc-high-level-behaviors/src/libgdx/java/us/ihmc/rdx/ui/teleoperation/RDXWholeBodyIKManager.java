@@ -88,8 +88,7 @@ public class RDXWholeBodyIKManager
       this.syncedRobot = syncedRobot;
       this.controllerStatusTracker = controllerStatusTracker;
 
-      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-      wholeBodyIKSolver = new HumanoidKinematicsSolver(robotModel, yoGraphicsListRegistry, new YoRegistry(getClass().getSimpleName()));
+      wholeBodyIKSolver = new HumanoidKinematicsSolver(robotModel, new YoRegistry(getClass().getSimpleName()));
       desiredOneDoFJointsExcludingHands = FullRobotModelUtils.getAllJointsExcludingHands(desiredRobot.getDesiredFullRobotModel());
 
       for (RobotSide side : RobotSide.values)

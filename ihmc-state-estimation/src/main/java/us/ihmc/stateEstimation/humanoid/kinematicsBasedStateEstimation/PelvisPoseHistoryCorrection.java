@@ -12,6 +12,8 @@ import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import controller_msgs.msg.dds.PelvisPoseErrorPacket;
 import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import us.ihmc.commons.MathTools;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -481,5 +483,11 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
    public void setExternalPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber)
    {
       this.pelvisPoseCorrectionCommunicator = externalPelvisPoseSubscriber;
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      return null;
    }
 }

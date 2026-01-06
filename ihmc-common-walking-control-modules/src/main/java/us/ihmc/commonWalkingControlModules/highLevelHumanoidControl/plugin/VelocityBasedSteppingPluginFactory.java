@@ -111,7 +111,6 @@ public class VelocityBasedSteppingPluginFactory implements HumanoidSteppingPlugi
                                                   WalkingControllerParameters walkingControllerParameters,
                                                   StatusMessageOutputManager walkingStatusMessageOutputManager,
                                                   CommandInputManager walkingCommandInputManager,
-                                                  YoGraphicsListRegistry yoGraphicsListRegistry,
                                                   SideDependentList<? extends ContactableBody> contactableFeet,
                                                   DoubleProvider timeProvider)
    {

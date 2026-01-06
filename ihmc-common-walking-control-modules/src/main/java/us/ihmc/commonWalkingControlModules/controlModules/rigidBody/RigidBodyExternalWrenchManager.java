@@ -63,7 +63,6 @@ public class RigidBodyExternalWrenchManager extends RigidBodyControlState
                                          RigidBodyBasics baseBody,
                                          ReferenceFrame controlFrame,
                                          YoDouble yoTime,
-                                         YoGraphicsListRegistry graphicsListRegistry,
                                          YoRegistry parentRegistry)
    {
       super(null, bodyToControl.getName() + "Wrench", yoTime, parentRegistry);
@@ -146,8 +145,6 @@ public class RigidBodyExternalWrenchManager extends RigidBodyControlState
       numberOfPointsInGenerator.set(getNumberOfPointsInGenerator());
       numberOfPoints.set(numberOfPointsInQueue.getIntegerValue() + numberOfPointsInGenerator.getIntegerValue());
       wrenchStatusHelper.updateWithTimeInTrajectory(timeInTrajectory);
-
-      updateGraphics();
    }
 
    private boolean fillAndReinitializeTrajectories()

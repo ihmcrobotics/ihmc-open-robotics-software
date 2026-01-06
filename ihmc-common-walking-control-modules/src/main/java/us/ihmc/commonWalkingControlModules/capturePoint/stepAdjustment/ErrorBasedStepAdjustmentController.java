@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
 import us.ihmc.commonWalkingControlModules.captureRegion.CaptureRegionSafetyHeuristics;
 import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepCaptureRegionCalculator;
 import us.ihmc.commonWalkingControlModules.captureRegion.OneStepCaptureRegionCalculator;
@@ -16,10 +15,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.log.LogTools;
@@ -136,29 +131,23 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    public ErrorBasedStepAdjustmentController(WalkingControllerParameters walkingControllerParameters,
                                              SideDependentList<? extends ReferenceFrame> soleZUpFrames,
                                              BipedSupportPolygons bipedSupportPolygons,
-                                             ICPControlPolygons icpControlPolygons,
                                              SideDependentList<? extends ContactablePlaneBody> contactableFeet,
-                                             YoRegistry parentRegistry,
-                                             YoGraphicsListRegistry yoGraphicsListRegistry)
+                                             YoRegistry parentRegistry)
    {
       this(walkingControllerParameters,
            walkingControllerParameters.getStepAdjustmentParameters(),
            soleZUpFrames,
            bipedSupportPolygons,
-           icpControlPolygons,
            contactableFeet,
-           parentRegistry,
-           yoGraphicsListRegistry);
+           parentRegistry);
    }
 
    public ErrorBasedStepAdjustmentController(WalkingControllerParameters walkingControllerParameters,
                                              StepAdjustmentParameters stepAdjustmentParameters,
                                              SideDependentList<? extends ReferenceFrame> soleZUpFrames,
                                              BipedSupportPolygons bipedSupportPolygons,
-                                             ICPControlPolygons icpControlPolygons,
                                              SideDependentList<? extends ContactablePlaneBody> contactableFeet,
-                                             YoRegistry parentRegistry,
-                                             YoGraphicsListRegistry yoGraphicsListRegistry)
+                                             YoRegistry parentRegistry)
    {
       this.bipedSupportPolygons = bipedSupportPolygons;
 
@@ -206,7 +195,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
                                                                                yoNamePrefix,
                                                                                VISUALIZE,
                                                                                registry,
-                                                                               yoGraphicsListRegistry);
+                                                                               null);
 
       // the 1.5 multiplier is important so that the capture region is bigger than reachable
       captureRegionCalculator = new OneStepCaptureRegionCalculator(steppingParameters.getFootWidth(),
@@ -214,18 +203,16 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
                                                                    soleZUpFrames,
                                                                    false,
                                                                    yoNamePrefix,
-                                                                   registry,
-                                                                   yoGraphicsListRegistry);
+                                                                   registry);
       oneStepSafetyHeuristics = new CaptureRegionSafetyHeuristics(lengthLimit, registry, null);
       multiStepCaptureRegionCalculator = new MultiStepCaptureRegionCalculator(reachabilityConstraintHandler,
                                                                               allowCrossOverSteps,
                                                                               stepAdjustmentParameters.getMaximumNumberOfStepsToConsider(),
-                                                                              registry,
-                                                                              yoGraphicsListRegistry);
+                                                                              registry);
       environmentConstraintProvider = new EnvironmentConstraintHandler(contactableFeet,
                                                                        yoNamePrefix,
                                                                        registry,
-                                                                       yoGraphicsListRegistry);
+                                                                       null);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -239,27 +226,8 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
 
       swingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
 
-      if (yoGraphicsListRegistry != null)
-         setupVisualizers(yoGraphicsListRegistry);
 
       parentRegistry.addChild(registry);
-   }
-
-   private void setupVisualizers(YoGraphicsListRegistry yoGraphicsListRegistry)
-   {
-      ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
-
-      YoGraphicPosition clippedFootstepSolution = new YoGraphicPosition(yoNamePrefix + "FootstepSolution",
-                                                                        this.footstepSolution.getPosition(),
-                                                                        0.005,
-                                                                        YoAppearance.DarkRed(),
-                                                                        YoGraphicPosition.GraphicType.BALL);
-
-      artifactList.add(clippedFootstepSolution.createArtifact());
-
-      artifactList.setVisible(VISUALIZE);
-
-      yoGraphicsListRegistry.registerArtifactList(artifactList);
    }
 
    @Override

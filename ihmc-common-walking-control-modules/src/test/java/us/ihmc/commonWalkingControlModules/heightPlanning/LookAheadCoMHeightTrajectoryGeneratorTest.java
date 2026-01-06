@@ -232,7 +232,6 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
                                                                                                   comFrame,
                                                                                                   soleFrames,
                                                                                                   robot.getYoTime(),
-                                                                                                  graphicsListRegistry,
                                                                                                   registry);
 
       RobotSide supportSide = stepSide.getOppositeSide();

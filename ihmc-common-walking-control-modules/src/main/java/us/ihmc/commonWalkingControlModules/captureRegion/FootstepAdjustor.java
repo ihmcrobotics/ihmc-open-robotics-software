@@ -42,14 +42,12 @@ public class FootstepAdjustor implements SCS2YoGraphicHolder
 
    private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
 
-   public FootstepAdjustor(SideDependentList<? extends ContactablePlaneBody> contactableFeet,
-                           YoRegistry parentRegistry,
-                           YoGraphicsListRegistry yoGraphicsListRegistry)
+   public FootstepAdjustor(SideDependentList<? extends ContactablePlaneBody> contactableFeet, YoRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
-      if (yoGraphicsListRegistry != null && VISUALIZE)
+      if (VISUALIZE)
       {
-         footstepAdjusterVisualizer = new FootstepAdjusterVisualizer(this, yoGraphicsListRegistry, registry);
+         footstepAdjusterVisualizer = new FootstepAdjusterVisualizer(this, registry);
       }
 
       defaultSupportPolygons = new SideDependentList<>();

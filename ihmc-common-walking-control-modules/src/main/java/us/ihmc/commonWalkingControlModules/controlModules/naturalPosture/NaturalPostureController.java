@@ -12,7 +12,10 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.referenceFrames.OrientationFrame;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
@@ -22,7 +25,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class NaturalPostureController
+public class NaturalPostureController implements SCS2YoGraphicHolder
 {
    private static final boolean generateDataForPaper = false;
 
@@ -99,7 +102,6 @@ public class NaturalPostureController
 
       if (robotNaturalPosture.getRegistry() != null)
          registry.addChild(robotNaturalPosture.getRegistry());
-      robotNaturalPosture.createVisuals(controllerToolbox.getYoGraphicsListRegistry());
 
       velocityBreakFrequency.addListener(v -> velocityAlpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(velocityBreakFrequency.getDoubleValue(),
                                                                                                                                 controlDT), false));
@@ -267,5 +269,14 @@ public class NaturalPostureController
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
       return naturalPostureControlCommand;
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(robotNaturalPosture.getSCS2YoGraphics());
+
+      return group;
    }
 }

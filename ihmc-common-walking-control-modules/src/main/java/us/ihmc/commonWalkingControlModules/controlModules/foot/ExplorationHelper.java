@@ -71,19 +71,7 @@ public class ExplorationHelper implements SCS2YoGraphicHolder
       partialFootholdControlModule = footControlHelper.getPartialFootholdControlModule();
 
       commandWeight.setToZero(soleFrame);
-
-      YoGraphicsListRegistry graphicObjectsListRegistry = footControlHelper.getHighLevelHumanoidControllerToolbox().getYoGraphicsListRegistry();
-      if (graphicObjectsListRegistry != null)
-      {
-         yoDesiredCop = new YoFramePoint2D(prefix + "DesiredExplorationCop", ReferenceFrame.getWorldFrame(), registry);
-         String name = prefix + "Desired Center of Pressure for Exploration";
-         YoArtifactPosition artifact = new YoArtifactPosition(name, yoDesiredCop.getYoX(), yoDesiredCop.getYoY(), GraphicType.BALL, Color.BLUE, 0.003);
-         graphicObjectsListRegistry.registerArtifact(prefix + getClass().getSimpleName(), artifact);
-      }
-      else
-      {
-         yoDesiredCop = null;
-      }
+      yoDesiredCop = new YoFramePoint2D(prefix + "DesiredExplorationCop", ReferenceFrame.getWorldFrame(), registry);
    }
 
    public void compute(double time, boolean footholdWasUpdated)

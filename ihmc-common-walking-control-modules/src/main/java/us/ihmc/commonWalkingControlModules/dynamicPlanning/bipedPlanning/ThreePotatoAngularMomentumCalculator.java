@@ -114,8 +114,7 @@ public class ThreePotatoAngularMomentumCalculator implements SCS2YoGraphicHolder
                                                double gravityZ,
                                                CenterOfMassStateProvider centerOfMassStateProvider,
                                                SideDependentList<MovingReferenceFrame> soleFrames,
-                                               YoRegistry parentRegistry,
-                                               YoGraphicsListRegistry graphicsListRegistry)
+                                               YoRegistry parentRegistry)
    {
       this.gravityZ = Math.abs(gravityZ);
       this.centerOfMassStateProvider = centerOfMassStateProvider;
@@ -132,9 +131,9 @@ public class ThreePotatoAngularMomentumCalculator implements SCS2YoGraphicHolder
       if (visualize)
       {
          double size = 0.01;
-         comTrajectoryVis = new BagOfBalls(100, size, "comTrajectoryVis", YoAppearance.Black(), registry, graphicsListRegistry);
-         secondPotatoVis = new BagOfBalls(100, size, "secondPotatoVis", YoAppearance.Blue(), registry, graphicsListRegistry);
-         thirdPotatoVis = new BagOfBalls(100, size, "thirdPotatoVis", YoAppearance.Red(), registry, graphicsListRegistry);
+         comTrajectoryVis = new BagOfBalls(100, size, "comTrajectoryVis", YoAppearance.Black(), registry, null);
+         secondPotatoVis = new BagOfBalls(100, size, "secondPotatoVis", YoAppearance.Blue(), registry, null);
+         thirdPotatoVis = new BagOfBalls(100, size, "thirdPotatoVis", YoAppearance.Red(), registry, null);
       }
       else
       {

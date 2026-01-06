@@ -89,23 +89,20 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
    public CaptureRegionStepAdjustmentController(WalkingControllerParameters walkingControllerParameters,
                                                 SideDependentList<? extends ReferenceFrame> soleZUpFrames,
                                                 BipedSupportPolygons bipedSupportPolygons,
-                                                YoRegistry parentRegistry,
-                                                YoGraphicsListRegistry yoGraphicsListRegistry)
+                                                YoRegistry parentRegistry)
    {
       this(walkingControllerParameters,
            walkingControllerParameters.getStepAdjustmentParameters(),
            soleZUpFrames,
            bipedSupportPolygons,
-           parentRegistry,
-           yoGraphicsListRegistry);
+           parentRegistry);
    }
 
    public CaptureRegionStepAdjustmentController(WalkingControllerParameters walkingControllerParameters,
                                                 StepAdjustmentParameters stepAdjustmentParameters,
                                                 SideDependentList<? extends ReferenceFrame> soleZUpFrames,
                                                 BipedSupportPolygons bipedSupportPolygons,
-                                                YoRegistry parentRegistry,
-                                                YoGraphicsListRegistry yoGraphicsListRegistry)
+                                                YoRegistry parentRegistry)
    {
       this.bipedSupportPolygons = bipedSupportPolygons;
 
@@ -118,39 +115,19 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
                                                                                yoNamePrefix,
                                                                                VISUALIZE,
                                                                                registry,
-                                                                               yoGraphicsListRegistry);
+                                                                               null);
 
       captureRegionCalculator = new OneStepCaptureRegionCalculator(soleZUpFrames,
                                                                    walkingControllerParameters,
                                                                    false,
                                                                    yoNamePrefix,
                                                                    registry,
-                                                                   yoGraphicsListRegistry);
+                                                                   null);
 
       if (walkingControllerParameters != null)
          swingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
 
-      if (yoGraphicsListRegistry != null)
-         setupVisualizers(yoGraphicsListRegistry);
-
       parentRegistry.addChild(registry);
-   }
-
-   private void setupVisualizers(YoGraphicsListRegistry yoGraphicsListRegistry)
-   {
-      ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
-
-      YoGraphicPosition clippedFootstepSolution = new YoGraphicPosition(yoNamePrefix + "FootstepSolution",
-                                                                        this.footstepSolution.getPosition(),
-                                                                        0.005,
-                                                                        YoAppearance.DarkRed(),
-                                                                        YoGraphicPosition.GraphicType.BALL);
-
-      artifactList.add(clippedFootstepSolution.createArtifact());
-
-      artifactList.setVisible(VISUALIZE);
-
-      yoGraphicsListRegistry.registerArtifactList(artifactList);
    }
 
    @Override

@@ -75,15 +75,6 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
                                              ToeOffParameters toeOffParameters,
                                              YoRegistry parentRegistry)
    {
-      this(contactStates, feet, toeOffParameters, parentRegistry, null);
-   }
-
-   public CentroidProjectionToeOffCalculator(SideDependentList<YoPlaneContactState> contactStates,
-                                             SideDependentList<? extends ContactablePlaneBody> feet,
-                                             ToeOffParameters toeOffParameters,
-                                             YoRegistry parentRegistry,
-                                             YoGraphicsListRegistry graphicsListRegistry)
-   {
       for (RobotSide robotSide : RobotSide.values)
       {
          ReferenceFrame soleFrame = feet.get(robotSide).getContactFrame();
@@ -100,17 +91,10 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
 
       parentRegistry.addChild(registry);
 
-      if (visualize && graphicsListRegistry != null)
+      if (visualize)
       {
          rayOrigin = new YoFramePoint2D("toeOffRayOrigin", worldFrame, registry);
          rayEnd = new YoFramePoint2D("toeOffRayEnd", worldFrame, registry);
-
-         YoGraphicPosition originViz = new YoGraphicPosition("originViz", rayOrigin, 0.005, YoAppearance.Blue(), GraphicType.SOLID_BALL);
-         YoGraphicPosition endViz = new YoGraphicPosition("endViz", rayEnd, 0.005, YoAppearance.Red(), GraphicType.SOLID_BALL);
-         Artifact lineArtifact = new YoArtifactLineSegment2d("toeOffLine", rayOrigin, rayEnd, Color.RED, 0.005, 0.01);
-         graphicsListRegistry.registerArtifact(getClass().getSimpleName(), lineArtifact);
-         graphicsListRegistry.registerArtifact(getClass().getSimpleName(), originViz.createArtifact());
-         graphicsListRegistry.registerArtifact(getClass().getSimpleName(), endViz.createArtifact());
       }
       else
       {

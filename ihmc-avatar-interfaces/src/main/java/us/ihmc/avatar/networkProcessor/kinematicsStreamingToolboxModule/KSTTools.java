@@ -51,10 +51,13 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -69,7 +72,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-public class KSTTools
+public class KSTTools implements SCS2YoGraphicHolder
 {
    private final CommandInputManager commandInputManager;
    private final CommandInputManager ikCommandInputManager;
@@ -78,7 +81,6 @@ public class KSTTools
    private final FullHumanoidRobotModel desiredFullRobotModel;
    private final DRCRobotModel robotModel;
    private final DoubleProvider time;
-   private final YoGraphicsListRegistry yoGraphicsListRegistry;
    private final YoRegistry registry;
 
    private final FullHumanoidRobotModel currentFullRobotModel;
@@ -135,7 +137,6 @@ public class KSTTools
                    FullHumanoidRobotModel desiredFullRobotModel,
                    DRCRobotModel robotModel,
                    DoubleProvider time,
-                   YoGraphicsListRegistry yoGraphicsListRegistry,
                    YoRegistry registry)
    {
       this.commandInputManager = commandInputManager;
@@ -145,7 +146,6 @@ public class KSTTools
       this.robotModel = robotModel;
       this.toolboxControllerPeriod = parameters.getToolboxUpdatePeriod();
       this.time = time;
-      this.yoGraphicsListRegistry = yoGraphicsListRegistry;
       this.registry = registry;
 
       walkingControllerMonotonicTime = new YoDouble("walkingControllerMonotonicTime", registry);
@@ -192,7 +192,6 @@ public class KSTTools
                                                              statusOutputManager,
                                                              desiredFullRobotModel,
                                                              toolboxControllerPeriod,
-                                                             yoGraphicsListRegistry,
                                                              registry);
 
       KinematicsStreamingToolboxCommandConverter commandConversionHelper = new KinematicsStreamingToolboxCommandConverter(desiredFullRobotModel,
@@ -658,11 +657,6 @@ public class KSTTools
       return robotModel;
    }
 
-   public YoGraphicsListRegistry getYoGraphicsListRegistry()
-   {
-      return yoGraphicsListRegistry;
-   }
-
    public YoRegistry getRegistry()
    {
       return registry;
@@ -948,5 +942,13 @@ public class KSTTools
          return 2.0 * (qDotMax - qDot) / dt;
       else
          return Double.POSITIVE_INFINITY;
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(ikController.getSCS2YoGraphics());
+      return group;
    }
 }

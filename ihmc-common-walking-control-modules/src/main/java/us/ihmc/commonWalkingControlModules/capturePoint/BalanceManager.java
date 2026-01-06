@@ -16,7 +16,12 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.*;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.AngularMomentumHandler;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryGeneratorState;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.FlamingoCoPTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.WalkingCoPTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMContinuousContinuityCalculator;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlanner;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
@@ -25,13 +30,20 @@ import us.ihmc.commonWalkingControlModules.messageHandlers.MomentumTrajectoryHan
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.referenceFrame.*;
-import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegionsList;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
@@ -48,7 +60,6 @@ import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajec
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
-import us.ihmc.robotics.trajectories.yoVariables.YoFramePolynomial3D;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
@@ -67,13 +78,13 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.*;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.BlueViolet;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.DarkViolet;
 import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.*;
 
 public class BalanceManager implements SCS2YoGraphicHolder
@@ -236,8 +247,6 @@ public class BalanceManager implements SCS2YoGraphicHolder
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
 
-      YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
-
       double gravityZ = controllerToolbox.getGravityZ();
       double totalMass = MultiBodySystemMissingTools.computeSubTreeMass(fullRobotModel.getElevator());
 
@@ -254,10 +263,9 @@ public class BalanceManager implements SCS2YoGraphicHolder
                                                             controllerToolbox,
                                                             controllerToolbox.getReferenceFrames().getSoleFrames(),
                                                             SettableContactStateProvider::new,
-                                                            registry,
-                                                            yoGraphicsListRegistry);
+                                                            registry);
 
-      walkingControllerParameters.getICPControllerParameters().createFeedbackAlphaCalculator(registry, null);
+      walkingControllerParameters.getICPControllerParameters().createFeedbackAlphaCalculator(registry);
       feedbackAlphaCalculator = walkingControllerParameters.getICPControllerParameters().getFeedbackAlphaCalculator();
 
       icpErrorThresholdToAdjustTime.set(walkingControllerParameters.getICPErrorThresholdToSpeedUpSwing());
@@ -266,7 +274,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
 
       bipedSupportPolygons = controllerToolbox.getBipedSupportPolygons();
       icpControlPlane = new ICPControlPlane(centerOfMassFrame, gravityZ, registry);
-      icpControlPolygons = new ICPControlPolygons(icpControlPlane, registry, yoGraphicsListRegistry);
+      icpControlPolygons = new ICPControlPolygons(icpControlPlane, registry);
 
       WalkingMessageHandler walkingMessageHandler = controllerToolbox.getWalkingMessageHandler();
       momentumTrajectoryHandler = walkingMessageHandler == null ? null : walkingMessageHandler.getMomentumTrajectoryHandler();
@@ -275,7 +283,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
       {
          CenterOfMassTrajectoryHandler comTrajectoryHandler = walkingMessageHandler.getComTrajectoryHandler();
          double dt = controllerToolbox.getControlDT();
-         precomputedICPPlanner = new PrecomputedICPPlanner(dt, comTrajectoryHandler, momentumTrajectoryHandler, registry, yoGraphicsListRegistry);
+         precomputedICPPlanner = new PrecomputedICPPlanner(dt, comTrajectoryHandler, momentumTrajectoryHandler, registry);
          precomputedICPPlanner.setOmega0(controllerToolbox.getOmega0());
          precomputedICPPlanner.setMass(totalMass);
          precomputedICPPlanner.setGravity(gravityZ);
@@ -332,18 +340,15 @@ public class BalanceManager implements SCS2YoGraphicHolder
          stepAdjustmentController = new ErrorBasedStepAdjustmentController(walkingControllerParameters,
                                                                            controllerToolbox.getReferenceFrames().getSoleZUpFrames(),
                                                                            bipedSupportPolygons,
-                                                                           icpControlPolygons,
                                                                            controllerToolbox.getContactableFeet(),
-                                                                           registry,
-                                                                           yoGraphicsListRegistry);
+                                                                           registry);
       }
       else
       {
          stepAdjustmentController = new CaptureRegionStepAdjustmentController(walkingControllerParameters,
                                                                               controllerToolbox.getReferenceFrames().getSoleZUpFrames(),
                                                                               bipedSupportPolygons,
-                                                                              registry,
-                                                                              yoGraphicsListRegistry);
+                                                                              registry);
       }
 
       if (walkingMessageHandler != null)
@@ -361,52 +366,10 @@ public class BalanceManager implements SCS2YoGraphicHolder
          walkingMessageHandler.getRequestDisableCopFeedbackControl().addListener(qfpParameterListener);
       }
 
-      String graphicListName = getClass().getSimpleName();
-
-      if (yoGraphicsListRegistry != null)
+      if (viewCoPHistory)
       {
-         if (viewCoPHistory)
-         {
-            perfectCoPTrajectory = new BagOfBalls(150, 0.002, "perfectCoP", DarkViolet(), GraphicType.BALL_WITH_CROSS, registry, yoGraphicsListRegistry);
-            perfectCMPTrajectory = new BagOfBalls(150, 0.002, "perfectCMP", BlueViolet(), GraphicType.BALL, registry, yoGraphicsListRegistry);
-         }
-         else
-         {
-            perfectCoPTrajectory = null;
-            perfectCMPTrajectory = null;
-         }
-
-         // TODO Don't merge to develop as is
-         //         comTrajectoryPlanner.setCornerPointViewer(new CornerPointViewer(true, false, registry, yoGraphicsListRegistry));
-         //         copTrajectory.setWaypointViewer(new CoPPointViewer(registry, yoGraphicsListRegistry));
-
-         YoGraphicPosition desiredCapturePointViz = new YoGraphicPosition("Desired Capture Point",
-                                                                          yoDesiredCapturePoint,
-                                                                          0.01,
-                                                                          Yellow(),
-                                                                          GraphicType.BALL_WITH_ROTATED_CROSS);
-         YoGraphicPosition finalDesiredCapturePointViz = new YoGraphicPosition("Final Desired Capture Point",
-                                                                               yoFinalDesiredICP,
-                                                                               0.01,
-                                                                               Beige(),
-                                                                               GraphicType.BALL_WITH_ROTATED_CROSS);
-         YoGraphicPosition finalDesiredCoMViz = new YoGraphicPosition("Final Desired CoM",
-                                                                      yoFinalDesiredCoM,
-                                                                      0.01,
-                                                                      Black(),
-                                                                      GraphicType.BALL_WITH_ROTATED_CROSS);
-         YoGraphicPosition perfectCMPViz = new YoGraphicPosition("Perfect CMP", yoPerfectCMP, 0.002, BlueViolet());
-         YoGraphicPosition perfectCoPViz = new YoGraphicPosition("Perfect CoP", yoPerfectCoP, 0.002, DarkViolet(), GraphicType.BALL_WITH_CROSS);
-
-         yoGraphicsListRegistry.registerArtifact(graphicListName, desiredCapturePointViz.createArtifact());
-         yoGraphicsListRegistry.registerArtifact(graphicListName, finalDesiredCapturePointViz.createArtifact());
-         yoGraphicsListRegistry.registerArtifact(graphicListName, finalDesiredCoMViz.createArtifact());
-         YoArtifactPosition perfectCMPArtifact = perfectCMPViz.createArtifact();
-         perfectCMPArtifact.setVisible(false);
-         yoGraphicsListRegistry.registerArtifact(graphicListName, perfectCMPArtifact);
-         YoArtifactPosition perfectCoPArtifact = perfectCoPViz.createArtifact();
-         perfectCoPArtifact.setVisible(false);
-         yoGraphicsListRegistry.registerArtifact(graphicListName, perfectCoPArtifact);
+         perfectCoPTrajectory = new BagOfBalls(150, 0.002, "perfectCoP", DarkViolet(), GraphicType.BALL_WITH_CROSS, registry, null);
+         perfectCMPTrajectory = new BagOfBalls(150, 0.002, "perfectCMP", BlueViolet(), GraphicType.BALL, registry, null);
       }
       else
       {

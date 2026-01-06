@@ -10,6 +10,7 @@ import us.ihmc.mecano.algorithms.CenterOfMassCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
@@ -18,6 +19,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -42,7 +45,9 @@ public class CenterOfMassCalibrationTool implements Updatable
    
    private final YoDouble leftKneeTorqueCheck = new YoDouble("leftKneeTorqueCheck", registry);
    
-   public CenterOfMassCalibrationTool(FullHumanoidRobotModel fullRobotModel, ForceSensorDataHolderReadOnly forceSensorDataHolder, YoGraphicsListRegistry yoGraphicsListRegistry,
+   public CenterOfMassCalibrationTool(FullHumanoidRobotModel fullRobotModel,
+                                      ForceSensorDataHolderReadOnly forceSensorDataHolder,
+                                      YoGraphicsListRegistry yoGraphicsListRegistry,
                                       YoRegistry parentRegistry)
    {
       this.fullRobotModel = fullRobotModel;
@@ -75,14 +80,26 @@ public class CenterOfMassCalibrationTool implements Updatable
       rightKneeCenterOfMassCalculator = createCenterOfMassCalculatorInJointZUpFrame(rightKneeBody, true);
       rightKneeCoMInZUpFrame = new YoFramePoint3D("rightKneeCoMInZUpFrame", rightKneeCenterOfMassCalculator.getReferenceFrame(), registry);
 
-      spinePitchZUpFrameViz = new YoGraphicCoordinateSystem("spinePitchZUpFrameViz", "", registry, true, 0.3);
-      yoGraphicsListRegistry.registerYoGraphic("CenterOfMassCalibrationTool", spinePitchZUpFrameViz);
-      
-      leftHipPitchZUpFrameViz = new YoGraphicCoordinateSystem("leftHipPitchZUpFrameViz", "", registry, true, 0.3);
-      yoGraphicsListRegistry.registerYoGraphic("CenterOfMassCalibrationTool", leftHipPitchZUpFrameViz);
-      
-      leftHipPitchFrameViz = new YoGraphicCoordinateSystem("leftHipPitchFrameViz", "", registry, true, 0.3);
-      yoGraphicsListRegistry.registerYoGraphic("CenterOfMassCalibrationTool", leftHipPitchFrameViz);
+
+      if (yoGraphicsListRegistry != null)
+      {
+         spinePitchZUpFrameViz = new YoGraphicCoordinateSystem("spinePitchZUpFrameViz", "", registry, true, 0.3);
+
+         leftHipPitchZUpFrameViz = new YoGraphicCoordinateSystem("leftHipPitchZUpFrameViz", "", registry, true, 0.3);
+
+         leftHipPitchFrameViz = new YoGraphicCoordinateSystem("leftHipPitchFrameViz", "", registry, true, 0.3);
+
+         yoGraphicsListRegistry.registerYoGraphic("CenterOfMassCalibrationTool", spinePitchZUpFrameViz);
+         yoGraphicsListRegistry.registerYoGraphic("CenterOfMassCalibrationTool", leftHipPitchZUpFrameViz);
+         yoGraphicsListRegistry.registerYoGraphic("CenterOfMassCalibrationTool", leftHipPitchFrameViz);
+      }
+      else
+      {
+         spinePitchZUpFrameViz = null;
+         leftHipPitchZUpFrameViz = null;
+         leftHipPitchFrameViz = null;
+      }
+
       
       parentRegistry.addChild(registry);
    }
@@ -90,9 +107,12 @@ public class CenterOfMassCalibrationTool implements Updatable
    @Override
    public void update(double time)
    {
-      spinePitchZUpFrameViz.setToReferenceFrame(spinePitchCenterOfMassCalculator.getReferenceFrame());
-      leftHipPitchZUpFrameViz.setToReferenceFrame(leftHipPitchCenterOfMassCalculator.getReferenceFrame());
-      leftHipPitchFrameViz.setToReferenceFrame(fullRobotModel.getLegJoint(RobotSide.LEFT, LegJointName.HIP_PITCH).getFrameAfterJoint());
+      if (spinePitchZUpFrameViz != null)
+      {
+         spinePitchZUpFrameViz.setToReferenceFrame(spinePitchCenterOfMassCalculator.getReferenceFrame());
+         leftHipPitchZUpFrameViz.setToReferenceFrame(leftHipPitchCenterOfMassCalculator.getReferenceFrame());
+         leftHipPitchFrameViz.setToReferenceFrame(fullRobotModel.getLegJoint(RobotSide.LEFT, LegJointName.HIP_PITCH).getFrameAfterJoint());
+      }
 
       spinePitchCenterOfMassCalculator.getReferenceFrame().update();
       leftHipPitchCenterOfMassCalculator.getReferenceFrame().update();

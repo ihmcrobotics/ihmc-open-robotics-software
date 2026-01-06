@@ -129,6 +129,24 @@ public class OneStepCaptureRegionCalculator implements SCS2YoGraphicHolder
    }
 
    public OneStepCaptureRegionCalculator(double footWidth,
+                                         double kinematicStepRange,
+                                         SideDependentList<? extends ReferenceFrame> soleZUpFrames,
+                                         YoRegistry parentRegistry)
+   {
+      this(footWidth, () -> kinematicStepRange, soleZUpFrames, true, "", parentRegistry, null);
+   }
+
+   public OneStepCaptureRegionCalculator(double footWidth,
+                                         DoubleProvider kinematicStepRange,
+                                         SideDependentList<? extends ReferenceFrame> soleZUpFrames,
+                                         boolean useInternalReachableRegions,
+                                         String suffix,
+                                         YoRegistry parentRegistry)
+   {
+      this(footWidth, kinematicStepRange, soleZUpFrames, useInternalReachableRegions, suffix, parentRegistry, null);
+   }
+
+   public OneStepCaptureRegionCalculator(double footWidth,
                                          DoubleProvider kinematicStepRange,
                                          SideDependentList<? extends ReferenceFrame> soleZUpFrames,
                                          boolean useInternalReachableRegions,
@@ -144,7 +162,7 @@ public class OneStepCaptureRegionCalculator implements SCS2YoGraphicHolder
 
       // set up registry and visualizer
       parentRegistry.addChild(registry);
-      if (yoGraphicsListRegistry != null && VISUALIZE)
+      if (VISUALIZE)
       {
          captureRegionVisualizer = new CaptureRegionVisualizer(this::getCaptureRegion, suffix, yoGraphicsListRegistry, registry);
       }
