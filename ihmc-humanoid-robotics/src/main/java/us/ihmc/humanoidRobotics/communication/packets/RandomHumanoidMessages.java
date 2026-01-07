@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.stream.IntStream;
 
-import atlas_msgs.msg.dds.*;
 import controller_msgs.msg.dds.*;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import ihmc_common_msgs.msg.dds.*;
@@ -24,13 +23,10 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.communication.packets.atlas.AtlasLowLevelControlMode;
-import us.ihmc.humanoidRobotics.communication.packets.bdi.BDIRobotBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasElectricMotorPacketEnum;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
@@ -520,13 +516,6 @@ public final class RandomHumanoidMessages
       return next;
    }
 
-   public static AtlasLowLevelControlModeMessage nextAtlasLowLevelControlModeMessage(Random random)
-   {
-      AtlasLowLevelControlModeMessage next = new AtlasLowLevelControlModeMessage();
-      next.setRequestedAtlasLowLevelControlMode(RandomNumbers.nextEnum(random, AtlasLowLevelControlMode.class).toByte());
-      return next;
-   }
-
    public static BehaviorControlModeResponsePacket nextBehaviorControlModeResponsePacket(Random random)
    {
       BehaviorControlModeResponsePacket next = new BehaviorControlModeResponsePacket();
@@ -621,13 +610,6 @@ public final class RandomHumanoidMessages
       next.getGroundQuadTreeSupport().add(RandomNumbers.nextFloatArray(random, random.nextInt(), 100.0f));
       next.getDecayingWorldScan().add(RandomNumbers.nextFloatArray(random, random.nextInt(), 100.0f));
       next.setDefaultGroundHeight(random.nextFloat());
-      return next;
-   }
-
-   public static AtlasWristSensorCalibrationRequestPacket nextAtlasWristSensorCalibrationRequestPacket(Random random)
-   {
-      AtlasWristSensorCalibrationRequestPacket next = new AtlasWristSensorCalibrationRequestPacket();
-      next.setRobotSide(RandomNumbers.nextEnum(random, RobotSide.class).toByte());
       return next;
    }
 
@@ -872,20 +854,6 @@ public final class RandomHumanoidMessages
       return next;
    }
 
-   public static AtlasDesiredPumpPSIPacket nextAtlasDesiredPumpPSIPacket(Random random)
-   {
-      AtlasDesiredPumpPSIPacket next = new AtlasDesiredPumpPSIPacket();
-      next.setDesiredPumpPsi(random.nextInt());
-      return next;
-   }
-
-   public static BDIBehaviorStatusPacket nextBDIBehaviorStatusPacket(Random random)
-   {
-      BDIBehaviorStatusPacket next = new BDIBehaviorStatusPacket();
-      next.setCurrentBdiRobotBehavior(RandomNumbers.nextEnum(random, BDIRobotBehavior.class).toByte());
-      return next;
-   }
-
    public static StopAllTrajectoryMessage nextStopAllTrajectoryMessage(Random random)
    {
       StopAllTrajectoryMessage next = new StopAllTrajectoryMessage();
@@ -902,21 +870,6 @@ public final class RandomHumanoidMessages
       next.getDesiredFootOrientationInWorld().set(EuclidCoreRandomTools.nextQuaternion(random));
       next.getActualFootPositionInWorld().set(EuclidCoreRandomTools.nextPoint3D(random, 1.0, 1.0, 1.0));
       next.getActualFootOrientationInWorld().set(EuclidCoreRandomTools.nextQuaternion(random));
-      return next;
-   }
-
-   public static AtlasElectricMotorAutoEnableFlagPacket nextAtlasElectricMotorAutoEnableFlagPacket(Random random)
-   {
-      AtlasElectricMotorAutoEnableFlagPacket next = new AtlasElectricMotorAutoEnableFlagPacket();
-      next.setShouldAutoEnable(random.nextBoolean());
-      return next;
-   }
-
-   public static BDIBehaviorCommandPacket nextBDIBehaviorCommandPacket(Random random)
-   {
-      BDIBehaviorCommandPacket next = new BDIBehaviorCommandPacket();
-      next.setAtlasBdiRobotBehavior(RandomNumbers.nextEnum(random, BDIRobotBehavior.class).toByte());
-      next.setStop(random.nextBoolean());
       return next;
    }
 
@@ -950,14 +903,6 @@ public final class RandomHumanoidMessages
    {
       BehaviorControlModePacket next = new BehaviorControlModePacket();
       next.setBehaviorControlModeEnumRequest(RandomNumbers.nextEnum(random, BehaviorControlModeEnum.class).toByte());
-      return next;
-   }
-
-   public static AtlasElectricMotorEnablePacket nextAtlasElectricMotorEnablePacket(Random random)
-   {
-      AtlasElectricMotorEnablePacket next = new AtlasElectricMotorEnablePacket();
-      next.setAtlasElectricMotorPacketEnumEnable(RandomNumbers.nextEnum(random, AtlasElectricMotorPacketEnum.class).toByte());
-      next.setEnable(random.nextBoolean());
       return next;
    }
 
