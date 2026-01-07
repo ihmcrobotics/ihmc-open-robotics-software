@@ -8,7 +8,6 @@ import us.ihmc.robotics.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.YoOneDoFTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.OneDoFTrajectoryPointBasics;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.TrajectoryPointListBasics;
-import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -30,13 +29,6 @@ public class MultipleWaypointsMinimumJerkTrajectoryGenerator implements DoubleTr
 
    private final ArrayList<YoOneDoFTrajectoryPoint> waypoints;
 
-   private final SettableDoubleProvider initialPositionProvider = new SettableDoubleProvider();
-   private final SettableDoubleProvider initialVelocityProvider = new SettableDoubleProvider();
-   private final SettableDoubleProvider initialAccelerationProvider = new SettableDoubleProvider();
-   private final SettableDoubleProvider finalPositionProvider = new SettableDoubleProvider();
-   private final SettableDoubleProvider finalVelocityProvider = new SettableDoubleProvider();
-   private final SettableDoubleProvider finalAccelerationProvider = new SettableDoubleProvider();
-   private final SettableDoubleProvider trajectoryTimeProvider = new SettableDoubleProvider();
    private final YoPolynomial subTrajectory;
 
    public MultipleWaypointsMinimumJerkTrajectoryGenerator(String namePrefix, YoRegistry parentRegistry)
@@ -153,10 +145,9 @@ public class MultipleWaypointsMinimumJerkTrajectoryGenerator implements DoubleTr
       if (numberOfWaypoints.getIntegerValue() == 1)
       {
          YoOneDoFTrajectoryPoint firstWaypoint = waypoints.get(0);
-         finalPositionProvider.setValue(firstWaypoint.getPosition());
-         finalVelocityProvider.setValue(firstWaypoint.getVelocity());
-         trajectoryTimeProvider.setValue(0.0);
-         subTrajectory.setLinear(trajectoryTimeProvider.getValue(), finalPositionProvider.getValue(), finalVelocityProvider.getValue());
+         double finalPosition = firstWaypoint.getPosition();
+         double finalVelocity = firstWaypoint.getVelocity();
+         subTrajectory.setLinear(0.0, finalPosition, finalVelocity);
       }
       else
          initializeSubTrajectory(0);
@@ -164,25 +155,20 @@ public class MultipleWaypointsMinimumJerkTrajectoryGenerator implements DoubleTr
 
    private void initializeSubTrajectory(int waypointIndex)
    {
-      initialPositionProvider.setValue(waypoints.get(waypointIndex).getPosition());
-      initialVelocityProvider.setValue(waypoints.get(waypointIndex).getVelocity());
+      double initialPosition = waypoints.get(waypointIndex).getPosition();
+      double initialVelocity = waypoints.get(waypointIndex).getVelocity();
 
-      finalPositionProvider.setValue(waypoints.get(waypointIndex + 1).getPosition());
-      finalVelocityProvider.setValue(waypoints.get(waypointIndex + 1).getVelocity());
-
-      if (waypointIndex > 0)
-         initialAccelerationProvider.setValue(subTrajectory.getAcceleration());
-      finalAccelerationProvider.setValue(0.0);
+      double finalPosition = waypoints.get(waypointIndex + 1).getPosition();
+      double finalVelocity = waypoints.get(waypointIndex + 1).getVelocity();
 
       double subTrajectoryTime = waypoints.get(waypointIndex + 1).getTime() - waypoints.get(waypointIndex).getTime();
-      trajectoryTimeProvider.setValue(subTrajectoryTime);
 
       subTrajectory.setQuinticWithZeroTerminalAcceleration(0.0,
-                                                           trajectoryTimeProvider.getValue(),
-                                                           initialPositionProvider.getValue(),
-                                                           initialVelocityProvider.getValue(),
-                                                           finalPositionProvider.getValue(),
-                                                           finalVelocityProvider.getValue());
+                                                           subTrajectoryTime,
+                                                           initialPosition,
+                                                           initialVelocity,
+                                                           finalPosition,
+                                                           finalVelocity);
    }
 
    @Override
