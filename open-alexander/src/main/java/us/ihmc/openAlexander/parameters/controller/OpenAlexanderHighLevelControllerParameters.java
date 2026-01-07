@@ -122,7 +122,7 @@ public class OpenAlexanderHighLevelControllerParameters implements HighLevelCont
             configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SHOULDER_YAW, EFFORT, 5.0, 8.0, 0.25, 1.0, cycloidVelScale);
             configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_PITCH, EFFORT, 5.0, 8.0, 0.25, 1.0, cycloidVelScale);
 
-            if (alexanderVersion.hasCycloidForearms())
+            if (alexanderVersion.hasCycloidForearm())
             {
                configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_YAW, EFFORT, 5.0, 8.0, 0.25, 1.0, cycloidVelScale);
                configureSymmetricBehavior(behaviors, jointMap, ArmJointName.WRIST_ROLL, EFFORT, 5.0, 8.0, 0.25, 1.0, cycloidVelScale);
@@ -172,7 +172,7 @@ public class OpenAlexanderHighLevelControllerParameters implements HighLevelCont
             configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_PITCH, EFFORT, 2.5, 4.0, 0.35, 2.0, cycloidVelScale);
          }
 
-         if (alexanderVersion.hasCycloidForearms())
+         if (alexanderVersion.hasCycloidForearm())
          { // Cycloid forearms
             configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_YAW, POSITION, 3.5, 4.0, Double.MAX_VALUE, Double.MAX_VALUE, 1.0);
             configureSymmetricBehavior(behaviors, jointMap, ArmJointName.WRIST_ROLL, POSITION, 2.0, 3.0, Double.MAX_VALUE, Double.MAX_VALUE, 1.0);
@@ -221,7 +221,7 @@ public class OpenAlexanderHighLevelControllerParameters implements HighLevelCont
          configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SHOULDER_YAW, EFFORT, 60.0, 3.0, maxArmPosError, maxArmVelError, armVelScale);
          configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_PITCH, EFFORT, 100.0, 4.0, maxArmPosError, maxArmVelError, armVelScale);
 
-         if (alexanderVersion.hasCycloidForearms())
+         if (alexanderVersion.hasCycloidForearm())
          { // Cycloid forearms
             configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_YAW, POSITION, 20.0, 4.0, Double.MAX_VALUE, Double.MAX_VALUE, 1.0);
             configureSymmetricBehavior(behaviors, jointMap, ArmJointName.WRIST_ROLL, POSITION, 15.0, 2.5, Double.MAX_VALUE, Double.MAX_VALUE, 1.0);
@@ -254,7 +254,7 @@ public class OpenAlexanderHighLevelControllerParameters implements HighLevelCont
          configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SHOULDER_YAW, POSITION, 120.0, 12.0, maxArmPosError, maxArmVelError, armVelScale);
          configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_PITCH, POSITION, 120.0, 12.0, maxArmPosError, maxArmVelError, armVelScale);
 
-         if (alexanderVersion.hasCycloidForearms())
+         if (alexanderVersion.hasCycloidForearm())
          { // Cycloid forearms
             configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_YAW, POSITION, 20.0, 4.0, Double.MAX_VALUE, Double.MAX_VALUE, 1.0);
             configureSymmetricBehavior(behaviors, jointMap, ArmJointName.WRIST_ROLL, POSITION, 15.0, 2.5, Double.MAX_VALUE, Double.MAX_VALUE, 1.0);
@@ -295,7 +295,7 @@ public class OpenAlexanderHighLevelControllerParameters implements HighLevelCont
          configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SHOULDER_YAW, EFFORT, 15.0, 2.0, maxArmPosError, maxArmVelError, armVelScale);
          configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_PITCH, EFFORT, 20.0, 2.0, maxArmPosError, maxArmVelError, armVelScale);
 
-         if (alexanderVersion.hasCycloidForearms())
+         if (alexanderVersion.hasCycloidForearm())
          { // Cycloid forearms
             configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_YAW, POSITION, 15.0, 3.0, Double.MAX_VALUE, Double.MAX_VALUE, 1.0);
             configureSymmetricBehavior(behaviors, jointMap, ArmJointName.WRIST_ROLL, POSITION, 12.0, 2.0, Double.MAX_VALUE, Double.MAX_VALUE, 1.0);
@@ -325,7 +325,7 @@ public class OpenAlexanderHighLevelControllerParameters implements HighLevelCont
          configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SHOULDER_YAW, EFFORT, 120.0, 12.0, maxPosError, maxVelError, velScale);
          configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_PITCH, EFFORT, 120.0, 12.0, maxPosError, maxVelError, velScale);
 
-         if (alexanderVersion.hasCycloidForearms())
+         if (alexanderVersion.hasCycloidForearm())
          { // Cycloid forearms
             configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_YAW, POSITION, 15.0, 3.0, Double.MAX_VALUE, Double.MAX_VALUE, 1.0);
             configureSymmetricBehavior(behaviors, jointMap, ArmJointName.WRIST_ROLL, POSITION, 12.0, 2.0, Double.MAX_VALUE, Double.MAX_VALUE, 1.0);
@@ -448,7 +448,7 @@ public class OpenAlexanderHighLevelControllerParameters implements HighLevelCont
                jointNames.add(jointMap.getArmJointName(robotSide, armJointName));
          }
 
-         if (alexanderVersion.hasCycloidForearms())
+         if (alexanderVersion.hasCycloidForearm())
          {
             for (ArmJointName armJointName : new ArmJointName[] {ArmJointName.ELBOW_YAW,
                                                                  ArmJointName.WRIST_ROLL,
@@ -554,7 +554,7 @@ public class OpenAlexanderHighLevelControllerParameters implements HighLevelCont
                jointNames.add(jointMap.getArmJointName(robotSide, armJointName));
          }
 
-         if (alexanderVersion.hasCycloidForearms())
+         if (alexanderVersion.hasCycloidForearm())
          {
             for (ArmJointName armJointName : new ArmJointName[] {ArmJointName.ELBOW_YAW,
                                                                  ArmJointName.WRIST_ROLL,
