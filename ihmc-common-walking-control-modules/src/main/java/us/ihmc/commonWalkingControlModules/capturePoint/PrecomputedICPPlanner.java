@@ -35,6 +35,8 @@ import us.ihmc.robotics.math.filters.AlphaFilteredTuple2D;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
+import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFramePoint2D;
+import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFrameVector2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;

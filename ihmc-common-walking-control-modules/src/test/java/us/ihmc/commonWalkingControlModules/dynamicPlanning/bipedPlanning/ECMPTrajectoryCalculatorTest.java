@@ -25,11 +25,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
-
 public class ECMPTrajectoryCalculatorTest
 {
    private static final double epsilon = 1e-4;
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    @Test
    public void testThreeStepsWithoutCoM()

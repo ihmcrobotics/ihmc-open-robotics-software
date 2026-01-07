@@ -8,13 +8,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import atlas_msgs.msg.dds.AtlasDesiredPumpPSIPacket;
-import atlas_msgs.msg.dds.AtlasElectricMotorAutoEnableFlagPacket;
-import atlas_msgs.msg.dds.AtlasElectricMotorEnablePacket;
-import atlas_msgs.msg.dds.AtlasLowLevelControlModeMessage;
-import atlas_msgs.msg.dds.AtlasWristSensorCalibrationRequestPacket;
-import atlas_msgs.msg.dds.BDIBehaviorCommandPacket;
-import atlas_msgs.msg.dds.BDIBehaviorStatusPacket;
 import controller_msgs.msg.dds.ArmDesiredAccelerationsMessage;
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.AutomaticManipulationAbortMessage;
@@ -81,13 +74,11 @@ import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
 import perception_msgs.msg.dds.BlackFlyParameterPacket;
 import perception_msgs.msg.dds.DetectedObjectPacket;
 import perception_msgs.msg.dds.DoorLocationPacket;
-import perception_msgs.msg.dds.FisheyePacket;
 import perception_msgs.msg.dds.IntrinsicParametersMessage;
 import perception_msgs.msg.dds.MultisenseParameterPacket;
 import perception_msgs.msg.dds.PointCloudWorldPacket;
 import perception_msgs.msg.dds.ValveLocationPacket;
 import perception_msgs.msg.dds.VehiclePosePacket;
-import perception_msgs.msg.dds.VideoPacket;
 import perception_msgs.msg.dds.WallPosePacket;
 import toolbox_msgs.msg.dds.BehaviorControlModePacket;
 import toolbox_msgs.msg.dds.BehaviorControlModeResponsePacket;
@@ -109,7 +100,6 @@ import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
@@ -137,15 +127,12 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxMessageFactory;
-import us.ihmc.humanoidRobotics.communication.packets.atlas.AtlasLowLevelControlMode;
-import us.ihmc.humanoidRobotics.communication.packets.bdi.BDIRobotBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.CurrentBehaviorStatus;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.WalkToGoalAction;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasElectricMotorPacketEnum;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
@@ -830,21 +817,6 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static BDIBehaviorCommandPacket createBDIBehaviorCommandPacket(BDIRobotBehavior atlasRobotBehavior)
-   {
-      BDIBehaviorCommandPacket message = new BDIBehaviorCommandPacket();
-      message.setAtlasBdiRobotBehavior(atlasRobotBehavior.toByte());
-      return message;
-   }
-
-   public static AtlasElectricMotorEnablePacket createAtlasElectricMotorEnablePacket(AtlasElectricMotorPacketEnum motorEnableEnum, boolean enable)
-   {
-      AtlasElectricMotorEnablePacket message = new AtlasElectricMotorEnablePacket();
-      message.setAtlasElectricMotorPacketEnumEnable(motorEnableEnum.toByte());
-      message.setEnable(enable);
-      return message;
-   }
-
    public static ChestTrajectoryMessage createChestTrajectoryMessage(double trajectoryTime,
                                                                        Orientation3DReadOnly desiredOrientation)
    {
@@ -1348,13 +1320,6 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static AtlasLowLevelControlModeMessage createAtlasLowLevelControlModeMessage(AtlasLowLevelControlMode request)
-   {
-      AtlasLowLevelControlModeMessage message = new AtlasLowLevelControlModeMessage();
-      message.setRequestedAtlasLowLevelControlMode(request.toByte());
-      return message;
-   }
-
    public static HandLoadBearingMessage createHandLoadBearingMessage(RobotSide robotSide)
    {
       HandLoadBearingMessage message = new HandLoadBearingMessage();
@@ -1503,47 +1468,6 @@ public class HumanoidMessageTools
       HandDesiredConfigurationMessage message = new HandDesiredConfigurationMessage();
       message.setRobotSide(robotSide.toByte());
       message.setDesiredHandConfiguration(handDesiredConfiguration.toByte());
-      return message;
-   }
-
-   @Deprecated
-   public static FisheyePacket createFisheyePacket(VideoSource videoSource,
-                                                   long timeStamp,
-                                                   byte[] data,
-                                                   Point3DReadOnly position,
-                                                   Orientation3DReadOnly orientation,
-                                                   Object intrinsicParameters)
-   {
-      FisheyePacket message = new FisheyePacket();
-      message.getVideoPacket().set(createVideoPacket(videoSource, timeStamp, data, position, orientation, intrinsicParameters));
-      return message;
-   }
-
-   @Deprecated
-   public static VideoPacket createVideoPacket(VideoSource videoSource,
-                                               long timeStamp,
-                                               byte[] data,
-                                               Point3DReadOnly position,
-                                               Orientation3DReadOnly orientation,
-                                               Object intrinsicParameters)
-   {
-      VideoPacket message = new VideoPacket();
-      message.setVideoSource(videoSource.toByte());
-      message.setTimestamp(timeStamp);
-      message.getData().add(data);
-      message.getPosition().set(position);
-      message.getOrientation().set(orientation);
-      message.getIntrinsicParameters().set(toIntrinsicParametersMessage(intrinsicParameters));
-      return message;
-   }
-
-   @Deprecated
-   public static LocalVideoPacket createLocalVideoPacket(long timeStamp, BufferedImage image, Object intrinsicParameters)
-   {
-      LocalVideoPacket message = new LocalVideoPacket();
-      message.timeStamp = timeStamp;
-      message.image = image;
-      message.intrinsicParameters = toIntrinsicParametersMessage(intrinsicParameters);
       return message;
    }
 
@@ -1721,13 +1645,6 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static BDIBehaviorCommandPacket createBDIBehaviorCommandPacket(boolean stop)
-   {
-      BDIBehaviorCommandPacket message = new BDIBehaviorCommandPacket();
-      message.setStop(stop);
-      return message;
-   }
-
    public static OneDoFJointTrajectoryMessage createOneDoFJointTrajectoryMessage(OneDoFTrajectoryPointList trajectoryData)
    {
       OneDoFJointTrajectoryMessage message = new OneDoFJointTrajectoryMessage();
@@ -1783,20 +1700,6 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static AtlasDesiredPumpPSIPacket createAtlasDesiredPumpPSIPacket(int desiredPumpPsi)
-   {
-      AtlasDesiredPumpPSIPacket message = new AtlasDesiredPumpPSIPacket();
-      message.setDesiredPumpPsi(desiredPumpPsi);
-      return message;
-   }
-
-   public static AtlasElectricMotorAutoEnableFlagPacket createAtlasElectricMotorAutoEnableFlagPacket(boolean shouldAutoEnable)
-   {
-      AtlasElectricMotorAutoEnableFlagPacket message = new AtlasElectricMotorAutoEnableFlagPacket();
-      message.setShouldAutoEnable(shouldAutoEnable);
-      return message;
-   }
-
    public static EuclideanTrajectoryPointMessage createEuclideanTrajectoryPointMessage(double time, Point3DReadOnly position, Vector3DReadOnly linearVelocity)
    {
       EuclideanTrajectoryPointMessage message = new EuclideanTrajectoryPointMessage();
@@ -1821,13 +1724,6 @@ public class HumanoidMessageTools
       message.setYGoal(yGoal);
       message.setThetaGoal(thetaGoal);
       message.setGoalRobotSide(goalSide.toByte());
-      return message;
-   }
-
-   public static BDIBehaviorStatusPacket createBDIBehaviorStatusPacket(BDIRobotBehavior currentBehavior)
-   {
-      BDIBehaviorStatusPacket message = new BDIBehaviorStatusPacket();
-      message.setCurrentBdiRobotBehavior(currentBehavior.toByte());
       return message;
    }
 
@@ -2065,13 +1961,6 @@ public class HumanoidMessageTools
    {
       WalkingControllerFailureStatusMessage message = new WalkingControllerFailureStatusMessage();
       message.getFallingDirection().set(fallingDirection);
-      return message;
-   }
-
-   public static AtlasWristSensorCalibrationRequestPacket createAtlasWristSensorCalibrationRequestPacket(RobotSide robotSide)
-   {
-      AtlasWristSensorCalibrationRequestPacket message = new AtlasWristSensorCalibrationRequestPacket();
-      message.setRobotSide(robotSide.toByte());
       return message;
    }
 

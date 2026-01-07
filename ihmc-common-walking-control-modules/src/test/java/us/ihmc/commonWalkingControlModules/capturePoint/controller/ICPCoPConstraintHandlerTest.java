@@ -435,7 +435,7 @@ public class ICPCoPConstraintHandlerTest
                                                             ankleZUpFrames.get(RobotSide.RIGHT));
       midFeetZUpFrame.update();
 
-      BipedSupportPolygons bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, ankleZUpFrames, soleFrames, registry, null);
+      BipedSupportPolygons bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, ankleZUpFrames, soleFrames, registry);
       bipedSupportPolygons.updateUsingContactStates(contactStatesToPack);
 
       return bipedSupportPolygons;

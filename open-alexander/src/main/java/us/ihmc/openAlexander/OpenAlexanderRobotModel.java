@@ -9,7 +9,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.initialSetup.HumanoidRobotInitialSetup;
 import us.ihmc.avatar.kinematicsSimulation.SimulatedHandKinematicController;
-import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -38,9 +37,7 @@ import us.ihmc.openAlexander.parameters.model.OpenAlexanderURDFParameters;
 import us.ihmc.openAlexander.parameters.planning.AlexanderFootstepPlannerParameters;
 import us.ihmc.openAlexander.parameters.planning.AlexanderLocomotionParameters;
 import us.ihmc.openAlexander.parameters.planning.AlexanderSwingPlannerParameters;
-import us.ihmc.openAlexander.parameters.planning.AlexanderVisibilityGraphParameters;
 import us.ihmc.openAlexander.parameters.simulation.AlexanderInitialSetup;
-import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -326,18 +323,6 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
    }
 
    @Override
-   public DRCSensorSuiteManager getSensorSuiteManager()
-   {
-      return null;
-   }
-
-   @Override
-   public DRCSensorSuiteManager getSensorSuiteManager(ROS2Node ros2Node)
-   {
-      return null;
-   }
-
-   @Override
    public LogModelProvider getLogModelProvider()
    {
       return logModelProvider;
@@ -455,12 +440,6 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
    }
 
    @Override
-   public VisibilityGraphsParametersBasics getVisibilityGraphsParameters()
-   {
-      return new AlexanderVisibilityGraphParameters();
-   }
-
-   @Override
    public SwingPlannerParametersBasics getSwingPlannerParameters()
    {
       return new AlexanderSwingPlannerParameters();
@@ -482,21 +461,6 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
    public double getStepGeneratorDT()
    {
       return stepGeneratorDT;
-   }
-
-   @Override
-   public Transform getJmeTransformWristToHand(RobotSide robotSide)
-   {
-      Vector3f centerOfHandToWristTranslation = new Vector3f();
-      float[] angles = new float[3];
-
-      centerOfHandToWristTranslation = new Vector3f(0f, robotSide.negateIfLeftSide(0.015f), -0.06f);
-      angles[0] = (float) robotSide.negateIfLeftSide(Math.toRadians(90));
-      angles[1] = 0.0f;
-      angles[2] = (float) robotSide.negateIfLeftSide(Math.toRadians(90));
-
-      Quaternion centerOfHandToWristRotation = new Quaternion(angles);
-      return new Transform(centerOfHandToWristTranslation, centerOfHandToWristRotation);
    }
 
    @Override

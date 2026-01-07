@@ -17,7 +17,6 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.PathTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
@@ -72,7 +71,7 @@ public class RDXBodyPathPlanGraphic implements RenderableProvider
    {
       RDXMultiColorMeshBuilder meshBuilder = new RDXMultiColorMeshBuilder();
 
-      double totalPathLength = PathTools.computePosePathLength(bodyPath);
+      double totalPathLength = computePosePathLength(bodyPath);
       double currentLength = 0.0;
 
       for (int segmentIndex = 0; segmentIndex < bodyPath.size() - 1; segmentIndex++)
@@ -107,6 +106,19 @@ public class RDXBodyPathPlanGraphic implements RenderableProvider
          lastModel = modelBuilder.end();
          modelInstance = new ModelInstance(lastModel); // TODO: Clean up garbage and look into reusing the Model
       };
+   }
+
+   public static double computePosePathLength(List<? extends Pose3DReadOnly> path)
+   {
+      double pathLength = 0.0;
+      for (int i = 1; i < path.size(); i++)
+      {
+         Point3DReadOnly from = path.get(i - 1).getPosition();
+         Point3DReadOnly to = path.get(i).getPosition();
+
+         pathLength = pathLength + from.distance(to);
+      }
+      return pathLength;
    }
 
    private static void createCoordinateFrame(Pose3DReadOnly pose, RDXMultiColorMeshBuilder meshBuilder, double length)

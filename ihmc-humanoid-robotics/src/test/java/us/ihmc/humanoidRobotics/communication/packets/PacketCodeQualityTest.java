@@ -12,7 +12,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import ihmc_common_msgs.msg.dds.FrameInformation;
-import perception_msgs.msg.dds.VideoPacket;
 import toolbox_msgs.msg.dds.FootstepPlannerStatusMessage;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterEach;
@@ -71,7 +70,6 @@ public class PacketCodeQualityTest
       Reflections reflections = new Reflections(PACKETS_LOCATION);
       Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
       allPacketTypes.removeAll(reaInternalComms);
-      allPacketTypes.remove(LocalVideoPacket.class);
 
       Set<Class<? extends Packet>> packetTypesWithNullFields = new TreeSet<>((o1, o2) -> o1.getSimpleName().compareTo(o2.getSimpleName()));
 
@@ -429,7 +427,6 @@ public class PacketCodeQualityTest
       Reflections reflections = new Reflections(PACKETS_LOCATION);
       Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
       allPacketTypes.removeAll(reaInternalComms);
-      allPacketTypes.remove(LocalVideoPacket.class); // That guy is a packet but does not make it to the network. It will stay on Kryo.
 
       Map<Class<? extends Packet>, List<Class>> packetTypesWithIllegalFieldTypes = new HashMap<>();
 
@@ -614,7 +611,6 @@ public class PacketCodeQualityTest
       Set<Class<? extends Packet>> packetTypesWithByteFieldNameNotMatchingEnum = new HashSet<>();
 
       Set<Field> fieldsToIngore = new HashSet<>();
-      fieldsToIngore.add(VideoPacket.class.getField("data_"));
       fieldsToIngore.add(SnapFootstepPacket.class.getField("flag_"));
 
       for (Class<? extends Packet> packetType : allPacketTypes)
@@ -685,7 +681,6 @@ public class PacketCodeQualityTest
       Set<Class<? extends Packet>> packetTypesWithByteFieldNameNotMatchingEnum = new HashSet<>();
 
       Set<Field> fieldsToIngore = new HashSet<>();
-      fieldsToIngore.add(VideoPacket.class.getField("data_"));
       fieldsToIngore.add(SnapFootstepPacket.class.getField("flag_"));
       fieldsToIngore.add(FootstepPlannerStatusMessage.class.getField("footstep_planner_status_")); // In footstep planner land
 
