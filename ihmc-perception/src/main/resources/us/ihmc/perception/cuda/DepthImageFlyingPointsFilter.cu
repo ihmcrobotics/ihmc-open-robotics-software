@@ -1,3 +1,16 @@
+/*
+ * Flying pixel filtering kernel.
+ *
+ * For each pixel, we back-project the depth value into 3D camera space
+ * and estimate a local surface normal using RANSAC over a spatial window.
+ * The pixel is classified as a flying point if the angle between the
+ * viewing ray and the estimated surface normal exceeds a threshold.
+ *
+ * Flying pixels are corrected by projecting the point along its viewing
+ * ray to best fit neighboring points, weighted by RGB similarity.
+ * Pixels that cannot be corrected reliably are discarded.
+ */
+
 #include "MathUtils.cuh"
 
 __device__ float3 computeRay(int u, int v, float depth, float fx, float fy, float cx, float cy)
@@ -97,92 +110,187 @@ __device__ float3 computeNormalRANSAC(unsigned short *depthImage, size_t pitchDe
     return bestNormal;
 }
 
-__device__ float computeColorWeight(const float3 &ci, const float3 &cj, float sigma_c)
-{
-    float3 diff = sub(ci, cj);
-    float dist2 = dot(diff, diff);
-    float denom = 2.0f * sigma_c * sigma_c;
-    return __expf(-dist2 / denom);
-}
+// __device__ float computeColorWeight(const float3 &ci, const float3 &cj, float sigma_c)
+// {
+//     float3 diff = sub(ci, cj);
+//     float dist2 = dot(diff, diff);
+//     float denom = 2.0f * sigma_c * sigma_c;
+//     return __expf(-dist2 / denom);
+// }
+//
+// __device__ int gatherNeighbors(
+//     unsigned short *depthImage, size_t pitchDepthImage,
+//     unsigned char *coloredImage, size_t pitchColoredImage,
+//     int width, int height,
+//     int u, int v, int windowSize,
+//     float3 *points, float3 *colors, int maxNeighbors)
+// {
+//     int half = windowSize / 2;
+//     int count = 0;
+//     for (int dy = -half; dy <= half; ++dy)
+//     {
+//         int y = v + dy;
+//         if (y < 0 || y >= height) continue;
+//
+//         unsigned short *depthRow = (unsigned short *)((char *)depthImage + y * pitchDepthImage);
+//
+//         unsigned char *colorRow = (unsigned char *)((char *)coloredImage + y * pitchColoredImage);
+//
+//         for (int dx = -half; dx <= half; ++dx)
+//         {
+//             int x = u + dx;
+//             if (x < 0 || x >= width) continue;
+//
+//             unsigned short d = depthRow[x];
+//             if (d == 0) continue;
+//
+//             points[count] = computeRay(x, y, d, fx, fy, cx, cy);
+//
+//             float R = colorRow[3 * x + 0];
+//             float G = colorRow[3 * x + 1];
+//             float B = colorRow[3 * x + 2];
+//             colors[count] = make_float3(R, G, B);
+//
+//             if (++count >= maxNeighbors) return count;
+//         }
+//     }
+//     return count;
+// }
 
-__device__ int gatherNeighbors(
-    unsigned short *depthImage, size_t pitchDepthImage,
-    unsigned char *coloredImage, size_t pitchColoredImage,
-    int width, int height,
-    int u, int v, int windowSize,
-    float3 *points, float3 *colors, int maxNeighbors)
-{
-    int half = windowSize / 2;
-    int count = 0;
-    for (int dy = -half; dy <= half; ++dy)
-    {
-        int y = v + dy;
-        if (y < 0 || y >= height) continue;
-
-        unsigned short *depthRow = (unsigned short *)((char *)depthImage + y * pitchDepthImage);
-
-        unsigned char *colorRow = (unsigned char *)((char *)coloredImage + y * pitchColoredImage);
-
-        for (int dx = -half; dx <= half; ++dx)
-        {
-            int x = u + dx;
-            if (x < 0 || x >= width) continue;
-
-            unsigned short d = depthRow[x];
-            if (d == 0) continue;
-
-            points[count] = computeRay(x, y, d, fx, fy, cx, cy);
-
-            float R = colorRow[3 * x + 0];
-            float G = colorRow[3 * x + 1];
-            float B = colorRow[3 * x + 2];
-            colors[count] = make_float3(R, G, B);
-
-            if (++count >= maxNeighbors) return count;
-        }
-    }
-    return count;
-}
-
-__device__ float solveT(
-    const float3 &pi, const float3 &ri,
-    float3 *neighbors, float *weights, int count)
-{
-    float num = 0.0f;
-    float den = 0.0f;
-
-    for (int j = 0; j < count; ++j)
-    {
-        float3 pj = neighbors[j];
-        float3 diff = sub(pi, pj);        // (p_i - p_j)
-        float proj = dot(ri, diff);       // r_i^T (p_i - p_j)
-        float w = weights[j];
-        num += w * proj;
-        den += w;
-    }
-
-    if (den < 1e-6f) return 0.0f;
-
-    return -num / den;
-}
-
+// __device__ float solveT(
+//     const float3 &pi, const float3 &ri,
+//     float3 *neighbors, float *weights, int count)
+// {
+//     float num = 0.0f;
+//     float den = 0.0f;
+//
+//     for (int j = 0; j < count; ++j)
+//     {
+//         float3 pj = neighbors[j];
+//         float3 diff = sub(pi, pj);        // (p_i - p_j)
+//         float proj = dot(ri, diff);       // r_i^T (p_i - p_j)
+//         float w = weights[j];
+//         num += w * proj;
+//         den += w;
+//     }
+//
+//     if (den < 1e-6f) return 0.0f;
+//
+//     return -num / den;
+// }
 
 // extern "C"
-// __global__ void filterFlyingPoints(unsigned short *depthImage, size_t pitchDepthImage,
-//                                    unsigned short *filteredImage, size_t pitchFilteredImage,
-//                                    unsigned char *coloredImage, size_t pitchColoredImage
-//                                    int width, int height,
-//                                    int windowSizeInPixels, int ransacIterations, int minimumDepthValuesRequiredInWindow,
-//                                    float angleThresholdInRadians, float normalAngleThreshold,
-//                                    float fx, float fy, float cx, float cy)
+// __global__ void filterFlyingPoints(
+//     unsigned short *depthImage, size_t pitchDepthImage,
+//     unsigned short *filteredImage, size_t pitchFilteredImage,
+// //     unsigned char *coloredImage, size_t pitchColoredImage,
+//     int width, int height,
+//     int windowSizeInPixels, int ransacIterations, int minimumDepthValuesRequiredInWindow,
+//     float angleThresholdInRadians, float normalAngleThreshold,
+//     float fx, float fy, float cx, float cy)
+// //     float sigma_c)
 // {
 //     int u = blockIdx.x * blockDim.x + threadIdx.x;
 //     int v = blockIdx.y * blockDim.y + threadIdx.y;
+//     if (u >= width || v >= height) return;
 //
-//     if (u >= width || v >= height)
+//     unsigned short *depthRow = (unsigned short *)((char *)depthImage + v * pitchDepthImage);
+//     unsigned short d = depthRow[u];
+//
+//     unsigned short *filteredRow = (unsigned short *)((char *)filteredImage + v * pitchFilteredImage);
+//
+//     filteredRow[u] = 0;
+//
+//     if (d == 0)
+//     {
+//         filteredRow[u] = 0;
 //         return;
+//     }
 //
-//     unsigned short *depthValue = (unsigned short *)((char *)depthImage + u * pitchDepthImage) + v;
+//     float3 pi = computeRay(u, v, d, fx, fy, cx, cy);
+//     float3 ri = pi;
+//     float rayLength = length(ri);
+//     if (rayLength < 1e-5f)
+//     {
+//         filteredRow[u] = 0;
+//         return;
+//     }
+//     ri = scale(1.0f / rayLength, ri); // normalize
+//
+//     float3 normal = computeNormalRANSAC(
+//         depthImage, pitchDepthImage,
+//         width, height, u, v, fx, fy, cx, cy,
+//         windowSizeInPixels, ransacIterations,
+//         minimumDepthValuesRequiredInWindow, normalAngleThreshold);
+//
+//     float angleCos = fabsf(dot(ri, normal));
+//     float angle = acosf(fminf(fmaxf(angleCos, -1.0f), 1.0f)); // radians
+//
+//     bool isFP = (angle >= angleThresholdInRadians); // or your condition
+//
+//     if (!isFP)
+//     {
+//         // Keep native depth
+//         filteredRow[u] = d;
+//         return;
+//     }
+//
+//     // 2) RGB-guided correction for flying pixels
+//     const int maxNeighbors = 64;
+//     float3 neighborPoints[maxNeighbors];
+//     float3 neighborColors[maxNeighbors];
+//     int neighborCount = gatherNeighbors(
+//         depthImage, pitchDepthImage,
+//         coloredImage, pitchColoredImage,
+//         width, height,
+//         u, v, windowSizeInPixels,
+//         neighborPoints, neighborColors, maxNeighbors);
+//
+//     if (neighborCount < minimumDepthValuesRequiredInWindow)
+//     {
+//         // Could not correct reliably; option: drop pixel
+//         filteredRow[u] = 0;
+//         return;
+//     }
+//
+//     // Color of current pixel
+//     unsigned char *colorRow = (unsigned char *)((char *)coloredImage + v * pitchColoredImage);
+//     float3 ci = make_float3(
+//         colorRow[3 * u + 0],
+//         colorRow[3 * u + 1],
+//         colorRow[3 * u + 2]);
+//
+//     float weights[maxNeighbors];
+//     for (int j = 0; j < neighborCount; ++j)
+//         weights[j] = computeColorWeight(ci, neighborColors[j], sigma_c);
+//
+//     float t = solveT(pi, ri, neighborPoints, weights, neighborCount);
+//     float3 p_corrected = add(pi, scale(t, ri));
+//     float correctedDepth = p_corrected.z; // or length(p_corrected);
+//
+// //     filteredRow[u] = (unsigned short)max(0.0f, min(correctedDepth, 65535.0f));
+// }
+
+
+
+extern "C"
+__global__ void filterFlyingPoints(unsigned short *depthImage, size_t pitchDepthImage,
+                                   unsigned short *filteredImage, size_t pitchFilteredImage,
+//                                    unsigned char *coloredImage, size_t pitchColoredImage,
+                                   int width, int height,
+                                   int windowSizeInPixels, int ransacIterations, int minimumDepthValuesRequiredInWindow,
+                                   float angleThresholdInRadians, float normalAngleThreshold,
+                                   float fx, float fy, float cx, float cy)
+{
+    int u = blockIdx.x * blockDim.x + threadIdx.x;
+    int v = blockIdx.y * blockDim.y + threadIdx.y;
+
+    if (u >= width || v >= height)
+        return;
+
+//     unsigned short *filteredImageRow = (unsigned short *)((char *)filteredImage + u * pitchFilteredImage);
+
+    unsigned short *depthValue = (unsigned short *)((char *)depthImage + u * pitchDepthImage) + v;
 //
 //     if (*depthValue <= 0)
 //     {
@@ -191,121 +299,30 @@ __device__ float solveT(
 //         return;
 //     }
 //
-//     float3 point = computeRay(u, v, *depthValue, fx, fy, cx, cy);
-//     float3 ray = point;
-//
-//     float rayLength = length(ray);
-//     if (rayLength < 1e-5f)
-//     {
-//         unsigned short *filteredImageRow = (unsigned short *)((char *)filteredImage + u * pitchFilteredImage);
-//         filteredImageRow[v] = 0;
-//         return;
-//     }
-//
+    float3 point = computeRay(u, v, *depthValue, fx, fy, cx, cy);
+    float3 ray = point;
+
+    float rayLength = length(ray);
+    if (rayLength < 1e-5f)
+    {
+        unsigned short *filteredImageRow = (unsigned short *)((char *)filteredImage + u * pitchFilteredImage);
+        filteredImageRow[v] = 0;
+        return;
+    }
+
 //     sqrtDepth = colorizedRow[3 * x + 0];
 //                 adjustmentA = colorizedRow[3 * x + 1];
 //                 adjustmentB = colorizedRow[3 * x + 2];
-//
-//     ray = scale(1.0 / rayLength, ray);
-//
-//     float3 normal = computeNormalRANSAC(depthImage, pitchDepthImage,
-//                                         width, height, u, v, fx, fy, cx, cy,
-//                                         windowSizeInPixels, ransacIterations, minimumDepthValuesRequiredInWindow, normalAngleThreshold);
-//
-//     float angleBetweenVectors = dot(ray, normal);
-//     angleBetweenVectors = fabsf(angleBetweenVectors);  // we want it close to 0, regardless of direction
-//
-//     unsigned short *filteredImageRow = (unsigned short *)((char *)filteredImage + u * pitchFilteredImage);
-//     filteredImageRow[v] = (angleBetweenVectors < angleThresholdInRadians) ? *depthValue : 0;
-// }
 
-extern "C"
-__global__ void filterFlyingPoints(
-    unsigned short *depthImage, size_t pitchDepthImage,
-    unsigned short *filteredImage, size_t pitchFilteredImage,
-    unsigned char *coloredImage, size_t pitchColoredImage,
-    int width, int height,
-    int windowSizeInPixels, int ransacIterations, int minimumDepthValuesRequiredInWindow,
-    float angleThresholdInRadians, float normalAngleThreshold,
-    float fx, float fy, float cx, float cy,
-    float sigma_c) // <-- new parameter for color weights
-{
-    int u = blockIdx.x * blockDim.x + threadIdx.x;
-    int v = blockIdx.y * blockDim.y + threadIdx.y;
-    if (u >= width || v >= height) return;
+    ray = scale(1.0 / rayLength, ray);
 
-    unsigned short *depthRow = (unsigned short *)((char *)depthImage + v * pitchDepthImage);
-    unsigned short d = depthRow[u];
+    float3 normal = computeNormalRANSAC(depthImage, pitchDepthImage,
+                                        width, height, u, v, fx, fy, cx, cy,
+                                        windowSizeInPixels, ransacIterations, minimumDepthValuesRequiredInWindow, normalAngleThreshold);
 
-    unsigned short *filteredRow = (unsigned short *)((char *)filteredImage + v * pitchFilteredImage);
+    float angleBetweenVectors = dot(ray, normal);
+    angleBetweenVectors = fabsf(angleBetweenVectors);  // we want it close to 0, regardless of direction
 
-    if (d == 0)
-    {
-        filteredRow[u] = 0;
-        return;
-    }
-
-    float3 pi = computeRay(u, v, d, fx, fy, cx, cy);
-    float3 ri = pi;
-    float rayLength = length(ri);
-    if (rayLength < 1e-5f)
-    {
-        filteredRow[u] = 0;
-        return;
-    }
-    ri = scale(1.0f / rayLength, ri); // normalize
-
-    // 1) normal-based FP detection
-    float3 normal = computeNormalRANSAC(
-        depthImage, pitchDepthImage,
-        width, height, u, v, fx, fy, cx, cy,
-        windowSizeInPixels, ransacIterations,
-        minimumDepthValuesRequiredInWindow, normalAngleThreshold);
-
-    float angleCos = fabsf(dot(ri, normal));
-    float angle = acosf(fminf(fmaxf(angleCos, -1.0f), 1.0f)); // radians
-
-    bool isFP = (angle >= angleThresholdInRadians); // or your condition
-
-    if (!isFP)
-    {
-        // Keep native depth
-        filteredRow[u] = d;
-        return;
-    }
-
-    // 2) RGB-guided correction for flying pixels
-    const int maxNeighbors = 64;
-    float3 neighborPoints[maxNeighbors];
-    float3 neighborColors[maxNeighbors];
-    int neighborCount = gatherNeighbors(
-        depthImage, pitchDepthImage,
-        coloredImage, pitchColoredImage,
-        width, height,
-        u, v, windowSizeInPixels,
-        neighborPoints, neighborColors, maxNeighbors);
-
-    if (neighborCount < minimumDepthValuesRequiredInWindow)
-    {
-        // Could not correct reliably; option: drop pixel
-        filteredRow[u] = 0;
-        return;
-    }
-
-    // Color of current pixel
-    unsigned char *colorRow = (unsigned char *)((char *)coloredImage + v * pitchColoredImage);
-    float3 ci = make_float3(
-        colorRow[3 * u + 0],
-        colorRow[3 * u + 1],
-        colorRow[3 * u + 2]);
-
-    float weights[maxNeighbors];
-    for (int j = 0; j < neighborCount; ++j)
-        weights[j] = computeColorWeight(ci, neighborColors[j], sigma_c);
-
-    float t = solveT(pi, ri, neighborPoints, weights, neighborCount);
-    float3 p_corrected = add(pi, scale(t, ri));
-    float correctedDepth = p_corrected.z; // or length(p_corrected);
-
-    filteredRow[u] = (unsigned short)max(0.0f, min(correctedDepth, 65535.0f));
+    unsigned short *filteredImageRow = (unsigned short *)((char *)filteredImage + u * pitchFilteredImage);
+    filteredImageRow[v] = (angleBetweenVectors < angleThresholdInRadians) ? *depthValue : 0;
 }

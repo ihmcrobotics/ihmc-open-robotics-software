@@ -143,7 +143,7 @@ public final class PerceptionAPI
    private static final ROS2Topic<?> STEPPING_REALSENSE = STEPPING_CAMERA.withModule("realsense");
    public static final ROS2Topic<Empty> REQUEST_STEPPING_REALSENSE = STEPPING_REALSENSE.withSuffix("request").withType(Empty.class);
    public static final ROS2Topic<Empty> REQUEST_STEPPING_REALSENSE_PUBLICATION = STEPPING_REALSENSE.withSuffix("request_publication").withType(Empty.class);
-   public static final ROS2Topic<ImageMessage> STEPPING_REALSENSE_DEPTH = STEPPING_REALSENSE.withType(ImageMessage.class).withSuffix("depth");
+   public static final ROS2Topic<ImageMessage> STEPPING_REALSENSE_DEPTH = BEST_EFFORT.withModule("d455").withTypeName(ImageMessage.class).withSuffix("depth");
    public static final ROS2Topic<ImageMessage> STEPPING_REALSENSE_COLOR = STEPPING_REALSENSE.withType(ImageMessage.class).withSuffix("color");
    public static final ROS2Topic<ImageMessage> STEPPING_REALSENSE_DEPTH_FILTERED = STEPPING_REALSENSE.withType(ImageMessage.class).withSuffix("depth_filtered");
 

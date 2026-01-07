@@ -51,6 +51,7 @@ public class ContinuousHikingProcess
                                   ROS2Node ros2Node,
                                   ROS2ImageSensors ros2ImageSensors,
                                   ROS2SyncedRobotModel ros2SyncedRobot,
+                                  BlockingQueue<RawImage> rawImageQueue,
                                   boolean openCLAvailable)
    {
       this.openCLAvailable = openCLAvailable;
@@ -70,12 +71,12 @@ public class ContinuousHikingProcess
                                                                                                                    .getSteppingCameraTransform());
 
       // This is for the height map, it expects the queue of images that we get from the sensors
-      BlockingQueue<RawImage> rawImageCollectionRealsnese = new LinkedBlockingQueue<>(ImageSensor.DEFAULT_IMAGE_QUEUE_CAPACITY);
-      BlockingQueue<RawImage> rawImageCollectionZED = new LinkedBlockingQueue<>(ImageSensor.DEFAULT_IMAGE_QUEUE_CAPACITY);
-      if (ros2ImageSensors.getSensor("Stepping Camera") != null)
-         ros2ImageSensors.getSensor("Stepping Camera").registerImageQueue(rawImageCollectionRealsnese, RealSenseImageSensor.DEPTH_IMAGE_KEY);
-      if (ros2ImageSensors.getSensor("Experimental Camera") != null)
-         ros2ImageSensors.getSensor("Experimental Camera").registerImageQueue(rawImageCollectionZED, ZEDImageSensor.DEPTH_IMAGE_KEY);
+//      BlockingQueue<RawImage> rawImageCollectionRealsnese = new LinkedBlockingQueue<>(ImageSensor.DEFAULT_IMAGE_QUEUE_CAPACITY);
+//      BlockingQueue<RawImage> rawImageCollectionZED = new LinkedBlockingQueue<>(ImageSensor.DEFAULT_IMAGE_QUEUE_CAPACITY);
+//      if (ros2ImageSensors.getSensor("Stepping Camera") != null)
+//         ros2ImageSensors.getSensor("Stepping Camera").registerImageQueue(rawImageCollectionRealsnese, RealSenseImageSensor.DEPTH_IMAGE_KEY);
+//      if (ros2ImageSensors.getSensor("Experimental Camera") != null)
+//         ros2ImageSensors.getSensor("Experimental Camera").registerImageQueue(rawImageCollectionZED, ZEDImageSensor.DEPTH_IMAGE_KEY);
 
       heightMapDemandNode = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_HEIGHT_MAP);
       heightMapControllerDemandNode = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_HEIGHT_MAP_FOR_CONTROLLER);
@@ -86,7 +87,7 @@ public class ContinuousHikingProcess
          gpuMappingThread = new GpuMappingThread(ros2Node,
                                                  ros2SyncedRobot,
                                                  robotCollisionModel,
-                                                 rawImageCollectionRealsnese,
+                                                 rawImageQueue,
                                                  controllerFootstepQueueMonitor,
                                                  activeMappingParameterToolBox.getHeightMapParameters(),
                                                  activeMappingParameterToolBox.getTerrainMapParameters(),
@@ -95,8 +96,8 @@ public class ContinuousHikingProcess
                                                  heightMapControllerDemandNode::isDemanded,
                                                  terrainMapDemandNode::isDemanded);
 
-         if (openCLAvailable)
-            rapidPlanarRegionsExtractionThread = new RapidPlanarRegionsExtractionThread(ros2Node, new OpenCLManager(), rawImageCollectionZED);
+//         if (openCLAvailable)
+//            rapidPlanarRegionsExtractionThread = new RapidPlanarRegionsExtractionThread(ros2Node, new OpenCLManager(), rawImageCollectionZED);
 
          continuousPlanningStateMachine = new ContinuousPlanningStateMachine(robotModel,
                                                                              ros2Node,
