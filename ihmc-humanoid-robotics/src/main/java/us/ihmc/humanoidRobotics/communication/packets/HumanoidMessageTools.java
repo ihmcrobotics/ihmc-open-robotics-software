@@ -74,13 +74,11 @@ import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
 import perception_msgs.msg.dds.BlackFlyParameterPacket;
 import perception_msgs.msg.dds.DetectedObjectPacket;
 import perception_msgs.msg.dds.DoorLocationPacket;
-import perception_msgs.msg.dds.FisheyePacket;
 import perception_msgs.msg.dds.IntrinsicParametersMessage;
 import perception_msgs.msg.dds.MultisenseParameterPacket;
 import perception_msgs.msg.dds.PointCloudWorldPacket;
 import perception_msgs.msg.dds.ValveLocationPacket;
 import perception_msgs.msg.dds.VehiclePosePacket;
-import perception_msgs.msg.dds.VideoPacket;
 import perception_msgs.msg.dds.WallPosePacket;
 import toolbox_msgs.msg.dds.BehaviorControlModePacket;
 import toolbox_msgs.msg.dds.BehaviorControlModeResponsePacket;
@@ -102,7 +100,6 @@ import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
@@ -1471,47 +1468,6 @@ public class HumanoidMessageTools
       HandDesiredConfigurationMessage message = new HandDesiredConfigurationMessage();
       message.setRobotSide(robotSide.toByte());
       message.setDesiredHandConfiguration(handDesiredConfiguration.toByte());
-      return message;
-   }
-
-   @Deprecated
-   public static FisheyePacket createFisheyePacket(VideoSource videoSource,
-                                                   long timeStamp,
-                                                   byte[] data,
-                                                   Point3DReadOnly position,
-                                                   Orientation3DReadOnly orientation,
-                                                   Object intrinsicParameters)
-   {
-      FisheyePacket message = new FisheyePacket();
-      message.getVideoPacket().set(createVideoPacket(videoSource, timeStamp, data, position, orientation, intrinsicParameters));
-      return message;
-   }
-
-   @Deprecated
-   public static VideoPacket createVideoPacket(VideoSource videoSource,
-                                               long timeStamp,
-                                               byte[] data,
-                                               Point3DReadOnly position,
-                                               Orientation3DReadOnly orientation,
-                                               Object intrinsicParameters)
-   {
-      VideoPacket message = new VideoPacket();
-      message.setVideoSource(videoSource.toByte());
-      message.setTimestamp(timeStamp);
-      message.getData().add(data);
-      message.getPosition().set(position);
-      message.getOrientation().set(orientation);
-      message.getIntrinsicParameters().set(toIntrinsicParametersMessage(intrinsicParameters));
-      return message;
-   }
-
-   @Deprecated
-   public static LocalVideoPacket createLocalVideoPacket(long timeStamp, BufferedImage image, Object intrinsicParameters)
-   {
-      LocalVideoPacket message = new LocalVideoPacket();
-      message.timeStamp = timeStamp;
-      message.image = image;
-      message.intrinsicParameters = toIntrinsicParametersMessage(intrinsicParameters);
       return message;
    }
 

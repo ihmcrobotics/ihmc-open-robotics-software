@@ -16,7 +16,6 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.ExecutionTiming;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -786,20 +785,6 @@ public final class RandomHumanoidMessages
       next.setGain(random.nextDouble());
       next.setShutter(random.nextDouble());
       next.setRobotSide(RandomNumbers.nextEnum(random, RobotSide.class).toByte());
-      return next;
-   }
-
-   public static VideoPacket nextVideoPacket(Random random)
-   {
-      VideoPacket next = new VideoPacket();
-      next.setVideoSource(RandomNumbers.nextEnum(random, VideoSource.class).toByte());
-      next.setTimestamp(random.nextLong());
-      byte[] data = new byte[random.nextInt((int) (Math.pow(2, 20) - 19))];
-      random.nextBytes(data);
-      next.getData().add(data);
-      next.getPosition().set(EuclidCoreRandomTools.nextPoint3D(random));
-      next.getOrientation().set(EuclidCoreRandomTools.nextQuaternion(random));
-      next.getIntrinsicParameters().set(nextIntrinsicParametersMessage(random));
       return next;
    }
 

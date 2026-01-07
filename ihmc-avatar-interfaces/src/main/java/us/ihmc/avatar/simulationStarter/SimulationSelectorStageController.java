@@ -90,8 +90,8 @@ public class SimulationSelectorStageController
          @Override
          public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue)
          {
-            boolean isNetworkProcessorSelected = moduleCheckBoxes.get(Modules.NETWORK_PROCESSOR).isSelected();
-            boolean isNetworkProcessorDisabled = moduleCheckBoxes.get(Modules.NETWORK_PROCESSOR).isDisabled();
+            boolean isNetworkProcessorSelected = false;
+            boolean isNetworkProcessorDisabled = false;
             moduleCheckBoxes.get(Modules.SENSOR_MODULE).setDisable(!isNetworkProcessorSelected || isNetworkProcessorDisabled);
             moduleCheckBoxes.get(Modules.ZERO_POSE_PRODUCER).setDisable(!isNetworkProcessorSelected || isNetworkProcessorDisabled);
             moduleCheckBoxes.get(Modules.ROS_MODULE).setDisable(!isNetworkProcessorSelected || isNetworkProcessorDisabled);
@@ -107,10 +107,8 @@ public class SimulationSelectorStageController
          public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue)
          {
             boolean isSimulationSelected = moduleCheckBoxes.get(Modules.SIMULATION).isSelected();
-            moduleCheckBoxes.get(Modules.NETWORK_PROCESSOR).setDisable(!isSimulationSelected);
          }
       };
-      moduleCheckBoxes.get(Modules.NETWORK_PROCESSOR).selectedProperty().addListener(networkProcessorCheckBoxChangeListener);
       moduleCheckBoxes.get(Modules.SIMULATION).selectedProperty().addListener(simulationCheckBoxChangeListener);
 
       // Call the listeners

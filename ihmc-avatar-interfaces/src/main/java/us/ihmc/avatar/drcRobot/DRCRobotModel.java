@@ -13,7 +13,6 @@ import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.kinematicsSimulation.SimulatedHandKinematicController;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.ros.WallTimeBasedROSClockCalculator;
-import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
@@ -121,13 +120,6 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
       return new WallTimeBasedROSClockCalculator();
    }
 
-   public default DRCSensorSuiteManager getSensorSuiteManager()
-   {
-      return getSensorSuiteManager(null);
-   }
-
-   public abstract DRCSensorSuiteManager getSensorSuiteManager(ROS2Node ros2Node);
-
    public default AvatarSimulatedHandControlThread createSimulatedHandController(RealtimeROS2Node realtimeROS2Node, boolean kinematicsSimulation)
    {
       return null;
@@ -158,48 +150,6 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    public abstract String getSimpleRobotName();
 
    public abstract CollisionBoxProvider getCollisionBoxProvider();
-
-   /**
-    * Override this method to create a custom output processor to be used with this robot.
-    * <p>
-    * <b> This output writer is meant to be used in simulation only.
-    * </p>
-    * 
-    * @param humanoidFloatingRootJointRobot Optional handle to the robot to allow directly writing to
-    *                                       the joints.
-    * @return the custom output processor.
-    */
-   public default DRCOutputProcessor getCustomSimulationOutputProcessor(HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot)
-   {
-      return null;
-   }
-
-   /**
-    * Override this method to create a custom output writer to be used with this robot.
-    * <p>
-    * <b> This output writer is meant to be used in simulation only.
-    * </p>
-    * 
-    * @param JointDesiredOutputWriter The outputWriter to use. If null is returned, no output writer is
-    *                                 used.
-    * @return the custom output writer.
-    */
-   public default JointDesiredOutputWriter getCustomSimulationOutputWriter(HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot,
-                                                                           HumanoidRobotContextData contextData)
-   {
-      return null;
-   }
-
-   /**
-    * Returns a factory for creating low-level joint controller that can be used to simulate for
-    * instance a joint position controller.
-    * 
-    * @return the low-level controller factory to use in simulation.
-    */
-   public default SimulationLowLevelControllerFactory getSimulationLowLevelControllerFactory()
-   {
-      return new DefaultSimulationLowLevelControllerFactory(getJointMap(), getSimulateDT());
-   }
 
    public default LocomotionParameters getLocomotionParameters()
    {
@@ -252,11 +202,6 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    }
 
    public HighLevelControllerParameters getHighLevelControllerParameters();
-
-   public default DRCRobotModelShapeCollisionSettings getShapeCollisionSettings()
-   {
-      return new DefaultShapeCollisionSettings();
-   }
 
    default RobotCollisionModel getHumanoidRobotKinematicsCollisionModel()
    {
@@ -315,7 +260,4 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    {
       return new RigidBodyTransform();
    }
-
-   public abstract Transform getJmeTransformWristToHand(RobotSide side);
-
 }
