@@ -218,13 +218,6 @@ jobs:
     with:
       subproject: 'ihmc-robotics-toolkit'
       test-category: 'fast'
-  ihmc-ros-tools:
-    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
-    secrets:
-      ROSIE_PERSONAL_ACCESS_TOKEN: ${{ secrets.ROSIE_PERSONAL_ACCESS_TOKEN }}
-    with:
-      subproject: 'ihmc-ros-tools'
-      test-category: 'fast'
   ihmc-sensor-processing:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     secrets:
