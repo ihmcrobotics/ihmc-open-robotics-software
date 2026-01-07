@@ -269,7 +269,7 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
          cycloidArmJointNames.add(jointMap.getArmJointName(side, ArmJointName.SHOULDER_YAW));
          cycloidArmJointNames.add(jointMap.getArmJointName(side, ArmJointName.ELBOW_PITCH));
 
-         if (version.hasCycloidForearms())
+         if (version.hasCycloidForearm())
          {
             cycloidArmJointNames.add(jointMap.getArmJointName(side, ArmJointName.ELBOW_YAW));
             cycloidArmJointNames.add(jointMap.getArmJointName(side, ArmJointName.WRIST_ROLL));

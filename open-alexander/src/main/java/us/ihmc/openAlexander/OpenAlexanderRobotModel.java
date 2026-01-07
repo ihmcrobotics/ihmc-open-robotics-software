@@ -503,7 +503,7 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
    public RigidBodyTransform getHandGraphicToHandFrameTransform(RobotSide side)
    {
       RigidBodyTransform handGraphicToHandTransform = new RigidBodyTransform();
-      if (!robotVersion.hasNubHands(side))
+      if (!robotVersion.hasNubForearms(side))
          handGraphicToHandTransform.getRotation().setYawPitchRoll(0.0, Math.PI / 2.0, 0.0);
 
       return handGraphicToHandTransform;
