@@ -34,41 +34,10 @@ public class PacketCommunicator implements Connectable
 
    private static boolean freezeCommunication = false;
 
-   public static PacketCommunicator createTCPPacketCommunicatorClient(String host, NetworkPorts port, NetClassList netClassList)
-   {
-      return createTCPPacketCommunicatorClient(host, port, netClassList, true);
-   }
 
    public static void freezeCommunication(boolean freeze)
    {
       freezeCommunication = freeze;
-   }
-
-   public static PacketCommunicator createTCPPacketCommunicatorClient(String host, NetworkPorts port, NetClassList netClassList, boolean reconnectAutomatically)
-   {
-      PrintTools.info(PacketCommunicator.class, "Creating Kryo TCP client on port: " + port.getName());
-      KryoObjectClient objectCommunicator = new KryoObjectClient(KryoObjectClient.getByName(host), port.getPort(), netClassList, BUFFER_SIZE, BUFFER_SIZE);
-      objectCommunicator.setReconnectAutomatically(reconnectAutomatically);
-      return new PacketCommunicator("TCPClient[host=" + host + ",port=" + port + "]", objectCommunicator, netClassList);
-   }
-
-   public static PacketCommunicator createTCPPacketCommunicatorServer(NetworkPorts port, NetClassList netClassList)
-   {
-      return createTCPPacketCommunicatorServer(port, BUFFER_SIZE, BUFFER_SIZE, netClassList);
-   }
-
-   public static PacketCommunicator createTCPPacketCommunicatorServer(NetworkPorts port, int writeBufferSize, int receiveBufferSize, NetClassList netClassList,
-                                                                      int maximumObjectSize)
-   {
-      PrintTools.info(PacketCommunicator.class, "Creating Kryo TCP server on port: " + port.getName());
-      KryoObjectServer server = new KryoObjectServer(port.getPort(), netClassList, writeBufferSize, receiveBufferSize);
-      server.setMaximumObjectSize(maximumObjectSize);
-      return new PacketCommunicator("TCPServer[port=" + port + "]", server, netClassList);
-   }
-
-   public static PacketCommunicator createTCPPacketCommunicatorServer(NetworkPorts port, int writeBufferSize, int receiveBufferSize, NetClassList netClassList)
-   {
-      return createTCPPacketCommunicatorServer(port, writeBufferSize, receiveBufferSize, netClassList, 0); //infinite
    }
 
    public static PacketCommunicator createIntraprocessPacketCommunicator(NetworkPorts port, NetClassList netClassList)
@@ -77,27 +46,11 @@ public class PacketCommunicator implements Connectable
       return new PacketCommunicator("IntraProcess[port=" + port + "]", new IntraprocessObjectCommunicator(port.getPort(), netClassList), netClassList);
    }
 
-   public static PacketCommunicator createCustomPacketCommunicator(NetworkedObjectCommunicator objectCommunicator, NetClassList netClassList)
-   {
-      PrintTools.info(PacketCommunicator.class, "Creating custom");
-      return new PacketCommunicator("Custom[class=" + objectCommunicator.getClass().getSimpleName() + "]", objectCommunicator, netClassList);
-   }
-
    private PacketCommunicator(String description, NetworkedObjectCommunicator communicator, NetClassList netClassList)
    {
       this.description = description;
       this.communicator = communicator;
       this.netClassList = netClassList;
-   }
-
-   public void attachStateListener(ConnectionStateListener stateListener)
-   {
-      communicator.attachStateListener(stateListener);
-   }
-
-   public void attachStateListener(TcpNetStateListener stateListener)
-   {
-      communicator.attachStateListener(stateListener);
    }
 
    public <T extends Packet<?>> void attachListener(Class<T> clazz, PacketConsumer<T> listener)
@@ -151,11 +104,6 @@ public class PacketCommunicator implements Connectable
    public boolean isConnected()
    {
       return communicator.isConnected();
-   }
-
-   public void closeConnection()
-   {
-      communicator.closeConnection();
    }
 
    public void disconnect()

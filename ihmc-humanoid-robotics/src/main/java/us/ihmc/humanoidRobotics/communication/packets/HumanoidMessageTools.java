@@ -8,13 +8,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import atlas_msgs.msg.dds.AtlasDesiredPumpPSIPacket;
-import atlas_msgs.msg.dds.AtlasElectricMotorAutoEnableFlagPacket;
-import atlas_msgs.msg.dds.AtlasElectricMotorEnablePacket;
-import atlas_msgs.msg.dds.AtlasLowLevelControlModeMessage;
-import atlas_msgs.msg.dds.AtlasWristSensorCalibrationRequestPacket;
-import atlas_msgs.msg.dds.BDIBehaviorCommandPacket;
-import atlas_msgs.msg.dds.BDIBehaviorStatusPacket;
 import controller_msgs.msg.dds.ArmDesiredAccelerationsMessage;
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.AutomaticManipulationAbortMessage;
@@ -137,15 +130,12 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxMessageFactory;
-import us.ihmc.humanoidRobotics.communication.packets.atlas.AtlasLowLevelControlMode;
-import us.ihmc.humanoidRobotics.communication.packets.bdi.BDIRobotBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.CurrentBehaviorStatus;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.WalkToGoalAction;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasElectricMotorPacketEnum;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
@@ -830,21 +820,6 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static BDIBehaviorCommandPacket createBDIBehaviorCommandPacket(BDIRobotBehavior atlasRobotBehavior)
-   {
-      BDIBehaviorCommandPacket message = new BDIBehaviorCommandPacket();
-      message.setAtlasBdiRobotBehavior(atlasRobotBehavior.toByte());
-      return message;
-   }
-
-   public static AtlasElectricMotorEnablePacket createAtlasElectricMotorEnablePacket(AtlasElectricMotorPacketEnum motorEnableEnum, boolean enable)
-   {
-      AtlasElectricMotorEnablePacket message = new AtlasElectricMotorEnablePacket();
-      message.setAtlasElectricMotorPacketEnumEnable(motorEnableEnum.toByte());
-      message.setEnable(enable);
-      return message;
-   }
-
    public static ChestTrajectoryMessage createChestTrajectoryMessage(double trajectoryTime,
                                                                        Orientation3DReadOnly desiredOrientation)
    {
@@ -1348,13 +1323,6 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static AtlasLowLevelControlModeMessage createAtlasLowLevelControlModeMessage(AtlasLowLevelControlMode request)
-   {
-      AtlasLowLevelControlModeMessage message = new AtlasLowLevelControlModeMessage();
-      message.setRequestedAtlasLowLevelControlMode(request.toByte());
-      return message;
-   }
-
    public static HandLoadBearingMessage createHandLoadBearingMessage(RobotSide robotSide)
    {
       HandLoadBearingMessage message = new HandLoadBearingMessage();
@@ -1721,13 +1689,6 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static BDIBehaviorCommandPacket createBDIBehaviorCommandPacket(boolean stop)
-   {
-      BDIBehaviorCommandPacket message = new BDIBehaviorCommandPacket();
-      message.setStop(stop);
-      return message;
-   }
-
    public static OneDoFJointTrajectoryMessage createOneDoFJointTrajectoryMessage(OneDoFTrajectoryPointList trajectoryData)
    {
       OneDoFJointTrajectoryMessage message = new OneDoFJointTrajectoryMessage();
@@ -1783,20 +1744,6 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static AtlasDesiredPumpPSIPacket createAtlasDesiredPumpPSIPacket(int desiredPumpPsi)
-   {
-      AtlasDesiredPumpPSIPacket message = new AtlasDesiredPumpPSIPacket();
-      message.setDesiredPumpPsi(desiredPumpPsi);
-      return message;
-   }
-
-   public static AtlasElectricMotorAutoEnableFlagPacket createAtlasElectricMotorAutoEnableFlagPacket(boolean shouldAutoEnable)
-   {
-      AtlasElectricMotorAutoEnableFlagPacket message = new AtlasElectricMotorAutoEnableFlagPacket();
-      message.setShouldAutoEnable(shouldAutoEnable);
-      return message;
-   }
-
    public static EuclideanTrajectoryPointMessage createEuclideanTrajectoryPointMessage(double time, Point3DReadOnly position, Vector3DReadOnly linearVelocity)
    {
       EuclideanTrajectoryPointMessage message = new EuclideanTrajectoryPointMessage();
@@ -1821,13 +1768,6 @@ public class HumanoidMessageTools
       message.setYGoal(yGoal);
       message.setThetaGoal(thetaGoal);
       message.setGoalRobotSide(goalSide.toByte());
-      return message;
-   }
-
-   public static BDIBehaviorStatusPacket createBDIBehaviorStatusPacket(BDIRobotBehavior currentBehavior)
-   {
-      BDIBehaviorStatusPacket message = new BDIBehaviorStatusPacket();
-      message.setCurrentBdiRobotBehavior(currentBehavior.toByte());
       return message;
    }
 
@@ -2065,13 +2005,6 @@ public class HumanoidMessageTools
    {
       WalkingControllerFailureStatusMessage message = new WalkingControllerFailureStatusMessage();
       message.getFallingDirection().set(fallingDirection);
-      return message;
-   }
-
-   public static AtlasWristSensorCalibrationRequestPacket createAtlasWristSensorCalibrationRequestPacket(RobotSide robotSide)
-   {
-      AtlasWristSensorCalibrationRequestPacket message = new AtlasWristSensorCalibrationRequestPacket();
-      message.setRobotSide(robotSide.toByte());
       return message;
    }
 
