@@ -1,9 +1,5 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 
-import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.*;
-import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.DefaultPoint2DGraphic.CIRCLE;
-import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.DefaultPoint2DGraphic.CIRCLE_FILLED;
-
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -12,11 +8,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
-import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLine2d;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
@@ -29,6 +20,10 @@ import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.DefaultPoint2DGraphic.CIRCLE;
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.DefaultPoint2DGraphic.CIRCLE_FILLED;
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicPoint2D;
 
 public class CoPProjectionTowardsMidpoint implements ICPControllerParameters.FeedbackProjectionOperator
 {
@@ -62,7 +57,7 @@ public class CoPProjectionTowardsMidpoint implements ICPControllerParameters.Fee
 
    private final FramePoint2D unconstrainedFeedbackCoP = new FramePoint2D();
 
-   public CoPProjectionTowardsMidpoint(YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public CoPProjectionTowardsMidpoint(YoRegistry registry)
    {
       minICPPushDelta = new DoubleParameter(yoNamePrefix + "MinICPPushDelta",
                                             "When projecting the CoP into the foot, make sure to not move the CMP any closer than this amount from the ICP",
@@ -88,42 +83,6 @@ public class CoPProjectionTowardsMidpoint implements ICPControllerParameters.Fee
       firstProjectionIntersection = new YoFramePoint2D(yoNamePrefix + "FirstIntersection", worldFrame, registry);
       secondProjectionIntersection = new YoFramePoint2D(yoNamePrefix + "SecondIntersection", worldFrame, registry);
       icpProjection = new YoFramePoint2D(yoNamePrefix + "ICPProjection", worldFrame, registry);
-
-      if (yoGraphicsListRegistry == null)
-         return;
-
-      ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
-
-      //TODO: Figure out a viz that works with the logger.
-
-      YoArtifactLine2d projectionLineViz = new YoArtifactLine2d(yoNamePrefix + "ProjectionLine", this.projectionLine, YoAppearance.Aqua().getAwtColor());
-
-      YoGraphicPosition firstIntersectionViz = new YoGraphicPosition(yoNamePrefix + "FirstIntersection",
-                                                                     this.firstProjectionIntersection,
-                                                                     0.004,
-                                                                     YoAppearance.Green(),
-                                                                     YoGraphicPosition.GraphicType.SOLID_BALL);
-
-      YoGraphicPosition secondIntersectionViz = new YoGraphicPosition(yoNamePrefix + "SecondIntersection",
-                                                                      this.secondProjectionIntersection,
-                                                                      0.004,
-                                                                      YoAppearance.Green(),
-                                                                      YoGraphicPosition.GraphicType.SOLID_BALL);
-
-      YoGraphicPosition icpProjectionViz = new YoGraphicPosition(yoNamePrefix + "ICPProjection",
-                                                                 this.icpProjection,
-                                                                 0.003,
-                                                                 YoAppearance.Purple(),
-                                                                 YoGraphicPosition.GraphicType.BALL);
-
-      artifactList.add(firstIntersectionViz.createArtifact());
-      artifactList.add(secondIntersectionViz.createArtifact());
-      artifactList.add(projectionLineViz);
-      artifactList.add(icpProjectionViz.createArtifact());
-
-      artifactList.setVisible(VISUALIZE);
-
-      yoGraphicsListRegistry.registerArtifactList(artifactList);
    }
 
    @Override

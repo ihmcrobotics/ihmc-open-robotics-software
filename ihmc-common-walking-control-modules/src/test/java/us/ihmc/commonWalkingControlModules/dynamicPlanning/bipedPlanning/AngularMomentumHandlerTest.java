@@ -55,8 +55,7 @@ public class AngularMomentumHandlerTest
                                                                                                                  null,
                                                                                                                  null,
                                                                                                                  SettableContactStateProvider::new,
-                                                                                                                 registry,
-                                                                                                                 null);
+                                                                                                                 registry);
 
       DefaultParameterReader parameterReader = new DefaultParameterReader();
       parameterReader.readParametersInRegistry(registry);
@@ -279,8 +278,7 @@ public class AngularMomentumHandlerTest
                                                                                                                  null,
                                                                                                                  null,
                                                                                                                  SettableContactStateProvider::new,
-                                                                                                                 registry,
-                                                                                                                 null);
+                                                                                                                 registry);
 
       CoMTrajectoryPlanner comTrajectoryPlanner = new CoMTrajectoryPlanner(gravityZ, 1.0, registry);
 

@@ -41,6 +41,10 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointStateReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
@@ -51,6 +55,8 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicCoordinateSystem3D;
 
 /**
  * A state estimator implementation for legged robots:</br>
@@ -102,8 +108,6 @@ public class LeggedRobotEKF implements StateEstimatorController
    private final YoFixedFrameTwist yoRootTwist;
    private final YoFrameVector3D linearVelocityInWorld = new YoFrameVector3D("RootLinearVelocity", ReferenceFrame.getWorldFrame(), registry);
 
-   private final YoFramePoseUsingYawPitchRoll pelvisPoseViz = new YoFramePoseUsingYawPitchRoll("PelvisPose", ReferenceFrame.getWorldFrame(), registry);
-
    private final AtomicBoolean fixRobotRequest = new AtomicBoolean(false);
    private final YoBoolean fixRobot = new YoBoolean("FixRobot", registry);
 
@@ -117,7 +121,6 @@ public class LeggedRobotEKF implements StateEstimatorController
                          double dt,
                          double gravity,
                          Map<String, String> jointGroups,
-                         YoGraphicsListRegistry graphicsListRegistry,
                          List<OneDoFJointBasics> referenceJoints)
    {
       FilterTools.proccessNoiseModel = ProccessNoiseModel.ONLY_ACCELERATION_VARIANCE;
@@ -130,7 +133,7 @@ public class LeggedRobotEKF implements StateEstimatorController
       List<Sensor> sensors = new ArrayList<>();
       rootState = createState(rootJoint, oneDoFJoints, dt, sensors, jointGroups);
       createImuSensors(primaryImuName, imuSensorMap, processedSensorOutput, dt, sensors);
-      createFootSensors(rootJoint, forceSensorMap, processedSensorOutput, dt, gravity, graphicsListRegistry, sensors);
+      createFootSensors(rootJoint, forceSensorMap, processedSensorOutput, dt, gravity, sensors);
 
       RobotState robotState = new RobotState(rootState, jointStates);
       stateEstimator = new StateEstimator(sensors, robotState, registry);
@@ -141,11 +144,6 @@ public class LeggedRobotEKF implements StateEstimatorController
                                           rootJoint.getFrameBeforeJoint(),
                                           rootJoint.getFrameAfterJoint(),
                                           registry);
-
-      if (graphicsListRegistry != null)
-      {
-         graphicsListRegistry.registerYoGraphic("EKF", new YoGraphicCoordinateSystem("PelvisFrame", pelvisPoseViz, 0.3, YoAppearance.Green()));
-      }
    }
 
    private void createFootSensors(FloatingJointBasics rootJoint,
@@ -153,7 +151,6 @@ public class LeggedRobotEKF implements StateEstimatorController
                                   SensorOutputMapReadOnly sensorOutput,
                                   double dt,
                                   double gravity,
-                                  YoGraphicsListRegistry graphicsListRegistry,
                                   List<Sensor> sensors)
    {
       RigidBodyBasics[] allBodies = ScrewTools.computeSubtreeSuccessors(rootJoint.getPredecessor());
@@ -168,7 +165,7 @@ public class LeggedRobotEKF implements StateEstimatorController
          RigidBodyBasics foot = forceSensorMap.get(forceSensorName).getRight().getRigidBody();
 
          LogTools.info("Adding foot velocity sensor for " + soleFrame);
-         FootWrenchSensorUpdater footWrenchSensorUpdater = new FootWrenchSensorUpdater(foot, soleFrame, dt, weight, graphicsListRegistry, registry);
+         FootWrenchSensorUpdater footWrenchSensorUpdater = new FootWrenchSensorUpdater(foot, soleFrame, dt, weight, registry);
 
          footWrenchSensorUpdaters.add(footWrenchSensorUpdater);
          forceSensorOutputs.add(forceSensorOutput);
@@ -274,8 +271,6 @@ public class LeggedRobotEKF implements StateEstimatorController
          yoJointAngles.get(jointIdx).set(jointState.getQ());
          yoJointVelocities.get(jointIdx).set(jointState.getQd());
       }
-
-      pelvisPoseViz.set(yoRootPose);
    }
 
    private final Wrench tempWrench = new Wrench();
@@ -388,5 +383,15 @@ public class LeggedRobotEKF implements StateEstimatorController
    public String getDescription()
    {
       return getName();
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(newYoGraphicCoordinateSystem3D("PelvisFrame", yoRootPose, 0.3, ColorDefinitions.Green()));
+      for (FootWrenchSensorUpdater footWrenchSensorUpdater : footWrenchSensorUpdaters)
+         group.addChild(footWrenchSensorUpdater.getSCS2YoGraphics());
+      return group;
    }
 }

@@ -163,8 +163,6 @@ public class RigidBodyOrientationController extends RigidBodyTaskspaceControlSta
       }
 
       statusHelper.updateWithTimeInTrajectory(timeInTrajectory);
-
-      updateGraphics();
    }
 
    @Override
@@ -261,7 +259,6 @@ public class RigidBodyOrientationController extends RigidBodyTaskspaceControlSta
    public void onExit(double timeInState)
    {
       orientationHelper.onExit();
-      hideGraphics();
       clear();
    }
 

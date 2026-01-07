@@ -135,7 +135,6 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
                                            RigidBodyOrientationControlHelper orientationControlHelper,
                                            LoadBearingParameters loadBearingParameters,
                                            double nominalRhoWeight,
-                                           YoGraphicsListRegistry graphicsListRegistry,
                                            YoRegistry parentRegistry)
    {
       super(RigidBodyControlMode.LOADBEARING, bodyToControl.getName(), yoTime, parentRegistry);
@@ -181,8 +180,6 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
 
       this.jointControlHelper = jointControlHelper;
       this.orientationControlHelper = orientationControlHelper;
-
-      setupViz(graphicsListRegistry, bodyName);
    }
 
    private void configureGains()
@@ -208,39 +205,6 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       feedbackGains.setOrientationProportionalGains(kpXYOrientation, kpXYOrientation, kpZOrientation);
       feedbackGains.setOrientationDerivativeGains(kdOrientationXY, kdOrientationXY, kdOrientationZ);
       feedbackGains.setOrientationMaxFeedbackAndFeedbackRate(maxAngularAcceleration, maxAngularJerk);
-   }
-
-   private void setupViz(YoGraphicsListRegistry graphicsListRegistry, String bodyName)
-   {
-      if (graphicsListRegistry == null)
-         return;
-
-      String listName = getClass().getSimpleName();
-
-      YoGraphicVector surfaceNormal = new YoGraphicVector(bodyName + "ContactNormal", currentContactPointInWorld, contactNormal, 0.1, YoAppearance.Black());
-      graphicsListRegistry.registerYoGraphic(listName, surfaceNormal);
-      graphics.add(surfaceNormal);
-
-      YoGraphicPosition contactPoint = new YoGraphicPosition(bodyName + "ContactPoint", currentContactPointInWorld, 0.01, YoAppearance.Black());
-      graphicsListRegistry.registerYoGraphic(listName, contactPoint);
-      graphics.add(contactPoint);
-
-      YoGraphicVector controllerDesiredForce = new YoGraphicVector(bodyName + "DesiredForceGraphic",
-                                                                   currentContactPointInWorld,
-                                                                   yoControllerDesiredForce,
-                                                                   0.015,
-                                                                   YoAppearance.Red());
-      graphicsListRegistry.registerYoGraphic(listName, controllerDesiredForce);
-      graphics.add(controllerDesiredForce);
-
-      YoGraphicCoordinateSystem contactControlFrame = new YoGraphicCoordinateSystem(bodyName + "LoadBearingControlFrame", yoDesiredContactPosition,
-                                                                                    yoDesiredContactOrientation,
-                                                                                    0.17,
-                                                                                    YoAppearance.LightGray());
-      graphicsListRegistry.registerYoGraphic(listName, contactControlFrame);
-      graphics.add(contactControlFrame);
-
-      hideGraphics();
    }
 
    @Override
@@ -320,8 +284,6 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       {
          orientationControlHelper.doAction(timeInTrajectory);
       }
-
-      updateGraphics();
    }
 
    public void load(double coefficientOfFriction,
@@ -428,8 +390,6 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    @Override
    public void onExit(double timeInState)
    {
-      hideGraphics();
-
       yoDesiredContactPosition.setToNaN();
       yoDesiredContactOrientation.setToNaN();
       currentContactPointInWorld.setToNaN();

@@ -76,8 +76,8 @@ public class KinematicsToolboxModule extends ToolboxModule
                                                                             statusOutputManager,
                                                                             fullRobotModel,
                                                                             0.001,
-                                                                            yoGraphicsListRegistry,
                                                                             registry);
+      graphicGroupDefinition.addChild(kinematicsToolBoxController.getSCS2YoGraphics());
       kinematicsToolBoxController.setDesiredRobotStateUpdater(robotStateUpdater);
       if (setupInitialConfiguration)
          kinematicsToolBoxController.setInitialRobotConfiguration(robotModel);

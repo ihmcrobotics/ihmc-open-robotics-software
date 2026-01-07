@@ -80,7 +80,6 @@ public class FootCoPOccupancyGrid implements SCS2YoGraphicHolder
                                int nWidthSubdivisions,
                                WalkingControllerParameters walkingControllerParameters,
                                ExplorationParameters explorationParameters,
-                               YoGraphicsListRegistry yoGraphicsListRegistry,
                                YoRegistry parentRegistry)
    {
       SteppingParameters stepping = walkingControllerParameters.getSteppingParameters();
@@ -140,9 +139,6 @@ public class FootCoPOccupancyGrid implements SCS2YoGraphicHolder
                YoFramePoint3D pointForViz = new YoFramePoint3D(namePrefix + namePrefix2, ReferenceFrame.getWorldFrame(), registry);
                pointForViz.setToNaN();
                cellViz[i][j] = pointForViz;
-               YoGraphicPosition yoGraphicPosition = new YoGraphicPosition(namePrefix + namePrefix2, pointForViz, 0.004, YoAppearance.Orange());
-               yoGraphicsListRegistry.registerArtifact(name, yoGraphicPosition.createArtifact());
-               yoGraphicsListRegistry.registerYoGraphic(name, yoGraphicPosition);
             }
          }
       }

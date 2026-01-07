@@ -47,8 +47,11 @@ public class CaptureRegionVisualizer implements SCS2YoGraphicHolder
 
       yoCaptureRegionPolygon = new YoFrameConvexPolygon2D(caption, suffix, worldFrame, 30, registry);
 
-      YoArtifactPolygon polygonArtifact = new YoArtifactPolygon(caption + suffix, yoCaptureRegionPolygon, color, false);
-      yoGraphicsListRegistry.registerArtifact(getClass().getSimpleName(), polygonArtifact);
+      if (yoGraphicsListRegistry != null)
+      {
+         YoArtifactPolygon polygonArtifact = new YoArtifactPolygon(caption + suffix, yoCaptureRegionPolygon, color, false);
+         yoGraphicsListRegistry.registerArtifact(getClass().getSimpleName(), polygonArtifact);
+      }
 
       parentRegistry.addChild(registry);
    }

@@ -96,7 +96,7 @@ public class VirtualModelControlOptimizationControlModule implements SCS2YoGraph
       numberOfDoFs = toolbox.getJointIndexHandler().getNumberOfDoFs();
 
       if (VISUALIZE_RHO_BASIS_VECTORS)
-         basisVectorVisualizer = new BasisVectorVisualizer("ContactBasisVectors", rhoSize, 1.0, toolbox.getYoGraphicsListRegistry(), registry);
+         basisVectorVisualizer = new BasisVectorVisualizer("ContactBasisVectors", rhoSize, 1.0, registry);
       else
          basisVectorVisualizer = null;
 

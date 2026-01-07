@@ -29,9 +29,7 @@ public class ManipulationControllerStateFactory implements HighLevelControllerSt
                                                                        controllerFactoryHelper.getWalkingControllerParameters(),
                                                                        controllerFactoryHelper.getHighLevelHumanoidControllerToolbox().getFullRobotModel(),
                                                                        null,
-                                                                       controllerFactoryHelper.getHighLevelHumanoidControllerToolbox().getYoTime(),
-                                                                       controllerFactoryHelper.getHighLevelHumanoidControllerToolbox()
-                                                                                              .getYoGraphicsListRegistry());
+                                                                       controllerFactoryHelper.getHighLevelHumanoidControllerToolbox().getYoTime());
       }
 
       return manipulationControllerState;

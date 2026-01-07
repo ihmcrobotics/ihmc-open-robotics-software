@@ -9,9 +9,15 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
+
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.*;
 
 /*
  * This visualizer show state of the CTTaskNodeTree.
@@ -19,7 +25,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
  * And the current new node validity is also shown by color (Green and Red). 
  */
 
-public class TreeStateVisualizer
+public class TreeStateVisualizer implements SCS2YoGraphicHolder
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -32,35 +38,17 @@ public class TreeStateVisualizer
    private Point3D pointCurrentTime = new Point3D(0.0, 0.0, 1.0);
    private Point3D pointTreeReachingTime = new Point3D(0.0, 0.0, 1.0);
 
-   private final YoFramePoint3D yoFramePointCurrentTimeLineOrigin;
    private final YoFramePoint3D yoFramePointCurrentTime;
    private final YoFramePoint3D yoFramePointCurrentTimeInvalid;
    private final YoFramePoint3D yoFramePointTreeReachingTime;
 
-   /*
-    * find sphere thing
-    */
-   private final YoGraphicCylinder currentTimeLineViz;
-   private final YoGraphicPosition currentTimeViz;
-   private final YoGraphicPosition currentTimeInvalidViz;
-   private final YoGraphicPosition treeReachingTimeViz;
+
+   private final YoGraphicGroupDefinition graphicGroupDefinition = new YoGraphicGroupDefinition(getClass().getSimpleName());
    
-   public TreeStateVisualizer(String name, String graphicsListName, YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry registry)
+   public TreeStateVisualizer(String name, YoRegistry registry)
    {
-      YoGraphicsList yoGraphicsList = new YoGraphicsList("TreeStateVisualizerGraphicsList");
 
-      /*
-       * set currentTimeLine.
-       */
-      yoFramePointCurrentTimeLineOrigin = new YoFramePoint3D(name + "currentTimeOrigin", worldFrame, registry);
-      yoFramePointCurrentTimeLineOrigin.set(pointCurrentTimeLineOrigin);
 
-      YoFrameVector3D currentTimeLineVector = new YoFrameVector3D("currentTimeLineVector", worldFrame, registry);
-      currentTimeLineVector.set(new Vector3D(0.0, 1.0, 0.0));
-
-      currentTimeLineViz = new YoGraphicCylinder("currentTimeLine", yoFramePointCurrentTimeLineOrigin, currentTimeLineVector, YoAppearance.LightBlue(), 0.03);
-
-      yoGraphicsList.add(currentTimeLineViz);
 
       /*
        * set currentTime.
@@ -73,11 +61,9 @@ public class TreeStateVisualizer
       pointCurrentTime.set(pointCurrentTimeLineOrigin);
       yoFramePointCurrentTimeInvalid.set(pointCurrentTime);
 
-      currentTimeViz = new YoGraphicPosition("currentTime", yoFramePointCurrentTime, 0.06, YoAppearance.Blue(), GraphicType.BALL);
-      yoGraphicsList.add(currentTimeViz);
-      
-      currentTimeInvalidViz = new YoGraphicPosition("currentTimeInvalid", yoFramePointCurrentTimeInvalid, 0.06, YoAppearance.Red(), GraphicType.BALL);
-      yoGraphicsList.add(currentTimeInvalidViz);
+      graphicGroupDefinition.addChild(newYoGraphicPoint3D("currentTime", yoFramePointCurrentTime, 0.12, ColorDefinitions.Blue()));
+
+      graphicGroupDefinition.addChild(newYoGraphicPoint3D("currentTimeInvalid", yoFramePointCurrentTimeInvalid, 0.12, ColorDefinitions.Red()));
 
       /*
        * set treeReachingTime.
@@ -86,13 +72,7 @@ public class TreeStateVisualizer
       pointCurrentTime.set(pointCurrentTimeLineOrigin);
       yoFramePointTreeReachingTime.set(pointCurrentTime);
 
-      treeReachingTimeViz = new YoGraphicPosition("treeReachingTime", yoFramePointTreeReachingTime, 0.05, YoAppearance.Black(), GraphicType.BALL);
-      yoGraphicsList.add(treeReachingTimeViz);
-      
-      /*
-       * register YoGraphicsList
-       */
-      yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
+      graphicGroupDefinition.addChild(newYoGraphicPoint3D("treeReachingTime", yoFramePointTreeReachingTime, 0.1, ColorDefinitions.Black()));
    }
 
    public void setCurrentNormalizedTime(double value)
@@ -131,10 +111,11 @@ public class TreeStateVisualizer
       pointTreeReachingTime.set(pointCurrentTimeLineOrigin);
       pointTreeReachingTime.add(new Vector3D(0.0, treeReachingTime, 0.0));
       yoFramePointTreeReachingTime.set(pointTreeReachingTime);
+   }
 
-      currentTimeInvalidViz.update();
-      treeReachingTimeViz.update();
-      currentTimeLineViz.update();
-      currentTimeViz.update();
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      return graphicGroupDefinition;
    }
 }

@@ -36,7 +36,7 @@ public class WalkingControllerPreviewToolboxModule extends ToolboxModule
             DEFAULT_UPDATE_PERIOD_MILLISECONDS, realtimeROS2Node);
       setTimeWithoutInputsBeforeGoingToSleep(60.0);
 
-      controller = new WalkingControllerPreviewToolboxController(robotModel, 0.02, commandInputManager, statusOutputManager, yoGraphicsListRegistry, registry);
+      controller = new WalkingControllerPreviewToolboxController(robotModel, 0.02, commandInputManager, statusOutputManager, registry);
       startYoVariableServer();
    }
 

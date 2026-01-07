@@ -1051,12 +1051,10 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
 
    /**
     * Creates a footstep visualization with a default size for the feet.
-    *
-    * @param yoGraphicsListRegistry the registry to attach the {@code YoGraphic}s to.
     */
-   public void setupVisualization(YoGraphicsListRegistry yoGraphicsListRegistry)
+   public void setupVisualization()
    {
-      setupVisualization(FootstepVisualizer.createTrapezoidalFootPolygon(0.12, 0.15, 0.25), yoGraphicsListRegistry);
+      setupVisualization(FootstepVisualizer.createTrapezoidalFootPolygon(0.12, 0.15, 0.25));
    }
 
    /**
@@ -1064,24 +1062,22 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
     *
     * @param footPolygon            the foot corner points (in clockwise order) to use for the
     *                               visualization of both feet.
-    * @param yoGraphicsListRegistry the registry to attach the {@code YoGraphic}s to.
     */
-   public void setupVisualization(List<? extends Point2DReadOnly> footPolygon, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public void setupVisualization(List<? extends Point2DReadOnly> footPolygon)
    {
-      setupVisualization(footPolygon, footPolygon, yoGraphicsListRegistry);
+      setupVisualization(footPolygon, footPolygon);
    }
 
    /**
     * Creates a footstep visualization.
     *
     * @param contactableFeet        used to generate the foot polygons.
-    * @param yoGraphicsListRegistry the registry to attach the {@code YoGraphic}s to.
     */
-   public void setupVisualization(SideDependentList<? extends ContactableBody> contactableFeet, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public void setupVisualization(SideDependentList<? extends ContactableBody> contactableFeet)
    {
       List<Point2D> leftFoot = contactableFeet.get(RobotSide.LEFT).getContactPointsCopy().stream().map(Point2D::new).collect(Collectors.toList());
       List<Point2D> rightFoot = contactableFeet.get(RobotSide.RIGHT).getContactPointsCopy().stream().map(Point2D::new).collect(Collectors.toList());
-      setupVisualization(leftFoot, rightFoot, yoGraphicsListRegistry);
+      setupVisualization(leftFoot, rightFoot);
    }
 
    /**
@@ -1091,14 +1087,10 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
     *                               visualization of the left foot.
     * @param rightFootPolygon       the foot corner points (in clockwise order) to use for the
     *                               visualization of the right foot.
-    * @param yoGraphicsListRegistry the registry to attach the {@code YoGraphic}s to.
     */
    public void setupVisualization(List<? extends Point2DReadOnly> leftFootPolygon,
-                                  List<? extends Point2DReadOnly> rightFootPolygon,
-                                  YoGraphicsListRegistry yoGraphicsListRegistry)
+                                  List<? extends Point2DReadOnly> rightFootPolygon)
    {
-      String graphicListName = "FootstepGenerator";
-
       SideDependentList<List<? extends Point2DReadOnly>> footPolygons = new SideDependentList<>(leftFootPolygon, rightFootPolygon);
 
       for (RobotSide robotSide : RobotSide.values)
@@ -1109,11 +1101,9 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
          {
             String name = robotSide.getCamelCaseNameForStartOfExpression() + "PlannedFootstep" + i;
             visualizers.add(new FootstepVisualizer(name,
-                                                   graphicListName,
                                                    robotSide,
                                                    footPolygons.get(robotSide),
                                                    defaultFeetColors.get(robotSide),
-                                                   yoGraphicsListRegistry,
                                                    registry));
          }
 

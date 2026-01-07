@@ -37,7 +37,6 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.ClearDelayQueueConverter;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameMessageCommandConverter;
@@ -451,7 +450,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                            double gravity,
                                                            boolean kinematicsSimulation, // For fast non-physics preview simulations
                                                            YoDouble yoTime,
-                                                           YoGraphicsListRegistry yoGraphicsListRegistry,
                                                            HumanoidRobotSensorInformation sensorInformation,
                                                            ForceSensorDataHolderReadOnly forceSensorDataHolder,
                                                            CenterOfMassDataHolderReadOnly centerOfMassDataHolderForController,
@@ -515,7 +513,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                                fullRobotModel.getRootBody(),
                                                                                totalRobotWeight,
                                                                                kinematicsSimulation,
-                                                                               yoGraphicsListRegistry,
                                                                                registry);
       SideDependentList<ForceSensorDataReadOnly> wristForceSensors = createWristForceSensors(forceSensorDataHolder);
 
@@ -535,7 +532,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                  kinematicsSimulation,
                                                                  updatables,
                                                                  contactablePlaneBodies,
-                                                                 yoGraphicsListRegistry,
                                                                  jointsToIgnore);
       controllerToolbox.attachControllerStateChangedListeners(controllerStateChangedListenersToAttach);
       attachControllerFailureListeners(controllerFailureListenersToAttach);
@@ -559,7 +555,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                               feet,
                                                                               statusMessageOutputManager,
                                                                               yoTime,
-                                                                              yoGraphicsListRegistry,
                                                                               registry);
       controllerToolbox.setWalkingMessageHandler(walkingMessageHandler);
 
@@ -587,8 +582,12 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                                   lowLevelControllerOutput);
       humanoidHighLevelControllerManager.addYoVariableRegistry(registry);
       humanoidHighLevelControllerManager.setListenToHighLevelStatePackets(isListeningToHighLevelStatePackets);
+
+
+      humanoidHighLevelControllerManager.addYoGraphic(walkingMessageHandler.getSCS2YoGraphics());
       for (RobotSide robotSide : RobotSide.values)
          humanoidHighLevelControllerManager.addYoGraphic(footSwitches.get(robotSide).getSCS2YoGraphics());
+
       return humanoidHighLevelControllerManager;
    }
 
@@ -597,7 +596,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                      RigidBodyBasics rootBody,
                                                                      double totalRobotWeight,
                                                                      boolean kinematicsSimulation,
-                                                                     YoGraphicsListRegistry yoGraphicsListRegistry,
                                                                      YoRegistry registry)
    {
       SideDependentList<FootSwitchInterface> footSwitches = new SideDependentList<>();
@@ -626,7 +624,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                              rootBody,
                                                                              footForceSensor,
                                                                              totalRobotWeight,
-                                                                             yoGraphicsListRegistry,
                                                                              registry);
             footSwitches.put(robotSide, footSwitch);
          }

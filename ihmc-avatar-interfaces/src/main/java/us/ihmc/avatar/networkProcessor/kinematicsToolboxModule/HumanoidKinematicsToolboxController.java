@@ -50,6 +50,8 @@ import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.yoVariables.euclid.YoVector2D;
@@ -182,7 +184,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
                                               StatusMessageOutputManager statusOutputManager,
                                               FullHumanoidRobotModel desiredFullRobotModel,
                                               double updateDT,
-                                              YoGraphicsListRegistry yoGraphicsListRegistry,
                                               YoRegistry parentRegistry)
    {
       this(commandInputManager,
@@ -190,7 +191,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
            desiredFullRobotModel,
            createListOfControllableRigidBodies(desiredFullRobotModel),
            updateDT,
-           yoGraphicsListRegistry,
            parentRegistry);
    }
 
@@ -202,7 +202,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
     * @param desiredFullRobotModel   the robot model the solver will be working on and storing the latest solution.
     * @param controllableRigidBodies the list of rigid-bodies that can be controlled by the solver. Mostly used for visualization.
     * @param updateDT                the time step used by the solver.
-    * @param yoGraphicsListRegistry  the registry used to store the graphics for visualization.
     * @param parentRegistry          the parent registry for this controller.
     */
    public HumanoidKinematicsToolboxController(CommandInputManager commandInputManager,
@@ -210,7 +209,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
                                               FullHumanoidRobotModel desiredFullRobotModel,
                                               Collection<? extends RigidBodyBasics> controllableRigidBodies,
                                               double updateDT,
-                                              YoGraphicsListRegistry yoGraphicsListRegistry,
                                               YoRegistry parentRegistry)
    {
       super(commandInputManager,
@@ -219,7 +217,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
             getAllJointsExcludingHands(desiredFullRobotModel),
             controllableRigidBodies,
             updateDT,
-            yoGraphicsListRegistry,
             parentRegistry);
 
       this.desiredFullRobotModel = desiredFullRobotModel;
@@ -231,7 +228,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       supportRigidBodyWeight.set(200.0);
       momentumWeight.set(0.001);
 
-      multiContactRegionCalculator = StabilityMarginRegionCalculator.createForCoPStabilityMargin("", desiredFullRobotModel.getTotalMass(), desiredReferenceFrames.getCenterOfMassFrame(), desiredReferenceFrames.getMidFeetZUpFrame(), registry, yoGraphicsListRegistry);
+      multiContactRegionCalculator = StabilityMarginRegionCalculator.createForCoPStabilityMargin("", desiredFullRobotModel.getTotalMass(), desiredReferenceFrames.getCenterOfMassFrame(), desiredReferenceFrames.getMidFeetZUpFrame(), registry, null);
       multiContactRegionCalculator.setupForStabilityMarginCalculation(() -> centerOfMass);
       wholeBodyContactState = new WholeBodyContactState(desiredOneDoFJoints, rootJoint);
 
@@ -952,5 +949,14 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
       updateSupportPolygonConstraint(activeContactPointPositions);
       updateCoMPositionToHold();
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(super.getSCS2YoGraphics());
+      group.addChild(multiContactRegionCalculator.getSCS2YoGraphics());
+      return group;
    }
 }

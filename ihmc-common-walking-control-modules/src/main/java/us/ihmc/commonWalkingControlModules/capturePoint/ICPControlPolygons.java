@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
-import java.awt.Color;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointBasics;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
@@ -10,9 +8,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameConvexPolygon2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
-import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -22,6 +17,8 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.registry.YoRegistry;
+
+import java.awt.*;
 
 public class ICPControlPolygons implements SCS2YoGraphicHolder
 {
@@ -50,17 +47,11 @@ public class ICPControlPolygons implements SCS2YoGraphicHolder
    private final FramePoint3D tempProjectedContactPosition = new FramePoint3D();
    private final FramePoint3D tempContactPosition = new FramePoint3D();
 
-   public ICPControlPolygons(ICPControlPlane icpControlPlane, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public ICPControlPolygons(ICPControlPlane icpControlPlane, YoRegistry parentRegistry)
    {
       this.icpControlPlane = icpControlPlane;
 
       controlPolygonViz = new YoFrameConvexPolygon2D("combinedPolygon", "", worldFrame, 2 * maxNumberOfContactPointsPerFoot, registry);
-
-      ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
-
-      YoArtifactPolygon controlPolygonArtifact = new YoArtifactPolygon("Combined Control Polygon", controlPolygonViz, combinedColor, false);
-      artifactList.add(controlPolygonArtifact);
-
       controlPolygonInWorld = new FrameConvexPolygon2D(worldFrame);
 
       for (RobotSide robotSide : RobotSide.values)
@@ -76,19 +67,8 @@ public class ICPControlPolygons implements SCS2YoGraphicHolder
                                                                                       maxNumberOfContactPointsPerFoot,
                                                                                       registry);
             controlFootPolygonsViz.put(robotSide, controlFootPolygonViz);
-            YoArtifactPolygon footPolygonArtifact = new YoArtifactPolygon(robotSide.getCamelCaseNameForMiddleOfExpression() + " Control Foot Polygon",
-                                                                          controlFootPolygonViz,
-                                                                          feetColors.get(robotSide),
-                                                                          false);
-            artifactList.add(footPolygonArtifact);
          }
       }
-
-      if (VISUALIZE && yoGraphicsListRegistry != null)
-      {
-         yoGraphicsListRegistry.registerArtifactList(artifactList);
-      }
-
       parentRegistry.addChild(registry);
    }
 

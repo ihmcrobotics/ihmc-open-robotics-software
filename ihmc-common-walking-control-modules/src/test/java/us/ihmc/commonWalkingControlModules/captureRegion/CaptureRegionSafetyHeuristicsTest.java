@@ -91,7 +91,7 @@ public class CaptureRegionSafetyHeuristicsTest
       double omega0 = 3.0;
 
       OneStepCaptureRegionCalculator captureRegionCalculator = new OneStepCaptureRegionCalculator(footWidth, kinematicStepRange,
-            ankleZUpFrames, registry, null);
+            ankleZUpFrames, registry);
       CaptureRegionSafetyHeuristics heuristics = new CaptureRegionSafetyHeuristics(() -> kinematicStepRange, registry);
 
       new DefaultParameterReader().readParametersInRegistry(registry);
@@ -154,7 +154,7 @@ public class CaptureRegionSafetyHeuristicsTest
       double omega0 = 3.0;
 
       OneStepCaptureRegionCalculator captureRegionCalculator = new OneStepCaptureRegionCalculator(footWidth, kinematicStepRange,
-                                                                                                  ankleZUpFrames, registry, null);
+                                                                                                  ankleZUpFrames, registry);
       CaptureRegionSafetyHeuristics heuristics = new CaptureRegionSafetyHeuristics(() -> kinematicStepRange, registry);
 
       new DefaultParameterReader().readParametersInRegistry(registry);
@@ -208,7 +208,7 @@ public class CaptureRegionSafetyHeuristicsTest
       double omega0 = 3.0;
 
       OneStepCaptureRegionCalculator captureRegionCalculator = new OneStepCaptureRegionCalculator(footWidth, kinematicStepRange,
-                                                                                                  ankleZUpFrames, registry, null);
+                                                                                                  ankleZUpFrames, registry);
       CaptureRegionSafetyHeuristics heuristics = new CaptureRegionSafetyHeuristics(() -> kinematicStepRange, registry);
 
       new DefaultParameterReader().readParametersInRegistry(registry);
@@ -269,7 +269,7 @@ public class CaptureRegionSafetyHeuristicsTest
       double omega0 = 3.0;
 
       OneStepCaptureRegionCalculator captureRegionCalculator = new OneStepCaptureRegionCalculator(footWidth, kinematicsStepRange,
-            ankleZUpFrames, registry, null);
+            ankleZUpFrames, registry);
       CaptureRegionSafetyHeuristics heuristics = new CaptureRegionSafetyHeuristics(() -> kinematicsStepRange, registry);
 
       new DefaultParameterReader().readParametersInRegistry(registry);
@@ -351,8 +351,7 @@ public class CaptureRegionSafetyHeuristicsTest
                                                                                                   ankleZUpFrames,
                                                                                                   true,
                                                                                                   "",
-                                                                                                  registry,
-                                                                                                  null);
+                                                                                                  registry);
       CaptureRegionSafetyHeuristics heuristics = new CaptureRegionSafetyHeuristics(kinematicsStepRange::get, registry);
 
       new DefaultParameterReader().readParametersInRegistry(registry);
@@ -562,7 +561,7 @@ public class CaptureRegionSafetyHeuristicsTest
       double feedbackAlpha = 0.9608231064369759;
 
       OneStepCaptureRegionCalculator captureRegionCalculator = new OneStepCaptureRegionCalculator(footWidth, kinematicsStepRange,
-                                                                                                  ankleZUpFrames, registry, null);
+                                                                                                  ankleZUpFrames, registry);
       CaptureRegionSafetyHeuristics heuristics = new CaptureRegionSafetyHeuristics(() -> kinematicsStepRange, registry);
 
       new DefaultParameterReader().readParametersInRegistry(registry);
