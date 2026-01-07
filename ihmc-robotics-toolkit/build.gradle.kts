@@ -31,6 +31,9 @@ mainDependencies {
    api("us.ihmc:ihmc-graphics-description:0.26.2")
    api("us.ihmc:simulation-construction-set-utilities:0.25.3")
    api("us.ihmc:ihmc-native-library-loader:2.0.6")
+   api("us.ihmc:ihmc-realtime:1.7.0")
+   api("us.ihmc:ihmc-robot-data-logger:0.36.4")
+
    api("us.ihmc:scs2-definition:17-0.31.3")
    api("us.ihmc:scs2-simulation:17-0.31.3")
    api("us.ihmc:ihmc-math-linear-algebra:0.15.3")
