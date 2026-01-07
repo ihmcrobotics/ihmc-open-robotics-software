@@ -81,7 +81,7 @@ public final class ControllerAPI
       // Command supported by the joint-space controller JointspacePositionControllerState
       inputMessageClasses.add(WholeBodyJointspaceTrajectoryMessage.class);
 
-      // TODO
+      // Command supported by the RL controller, not in this repo
       inputMessageClasses.add(Point2DMessage.class);
 
       // Toolbox management
