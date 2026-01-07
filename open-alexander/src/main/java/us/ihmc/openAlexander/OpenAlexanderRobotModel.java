@@ -38,9 +38,7 @@ import us.ihmc.openAlexander.parameters.model.OpenAlexanderURDFParameters;
 import us.ihmc.openAlexander.parameters.planning.AlexanderFootstepPlannerParameters;
 import us.ihmc.openAlexander.parameters.planning.AlexanderLocomotionParameters;
 import us.ihmc.openAlexander.parameters.planning.AlexanderSwingPlannerParameters;
-import us.ihmc.openAlexander.parameters.planning.AlexanderVisibilityGraphParameters;
 import us.ihmc.openAlexander.parameters.simulation.AlexanderInitialSetup;
-import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -452,12 +450,6 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
    public AStarBodyPathPlannerParametersBasics getAStarBodyPathPlannerParameters()
    {
       return new AStarBodyPathPlannerParameters();
-   }
-
-   @Override
-   public VisibilityGraphsParametersBasics getVisibilityGraphsParameters()
-   {
-      return new AlexanderVisibilityGraphParameters();
    }
 
    @Override

@@ -1,48 +1,10 @@
 package us.ihmc.footstepPlanning.tools;
 
 import toolbox_msgs.msg.dds.FootstepPlannerParametersPacket;
-import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
-import toolbox_msgs.msg.dds.VisibilityGraphsParametersPacket;
-import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
-import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 public class FootstepPlannerMessageTools
 {
-   public static FootstepPlanningRequestPacket createFootstepPlanningRequestPacket(RobotSide initialStanceSide,
-                                                                                   Pose3DReadOnly startLeftFootPose,
-                                                                                   Pose3DReadOnly startRightFootPose,
-                                                                                   Pose3DReadOnly goalMidFootPose,
-                                                                                   double idealStanceWidth,
-                                                                                   boolean planBodyPath)
-   {
-      Pose3D goalLeftFootPose = new Pose3D(goalMidFootPose);
-      Pose3D goalRightFootPose = new Pose3D(goalMidFootPose);
-      goalLeftFootPose.appendTranslation(0.0, 0.5 * idealStanceWidth, 0.0);
-      goalRightFootPose.appendTranslation(0.0, -0.5 * idealStanceWidth, 0.0);
-      return createFootstepPlanningRequestPacket(initialStanceSide, startLeftFootPose, startRightFootPose, goalLeftFootPose, goalRightFootPose, planBodyPath);
-   }
-
-   public static FootstepPlanningRequestPacket createFootstepPlanningRequestPacket(RobotSide initialStanceSide,
-                                                                                   Pose3DReadOnly startLeftFootPose,
-                                                                                   Pose3DReadOnly startRightFootPose,
-                                                                                   Pose3DReadOnly goalLeftFootPose,
-                                                                                   Pose3DReadOnly goalRightFootPose,
-                                                                                   boolean planBodyPath)
-   {
-      FootstepPlanningRequestPacket message = new FootstepPlanningRequestPacket();
-      message.setRequestedInitialStanceSide(initialStanceSide.toByte());
-      message.getStartLeftFootPose().set(startLeftFootPose);
-      message.getStartRightFootPose().set(startRightFootPose);
-      message.getGoalLeftFootPose().set(goalLeftFootPose);
-      message.getGoalRightFootPose().set(goalRightFootPose);
-      message.setPlanBodyPath(planBodyPath);
-
-      return message;
-   }
-
    public static void copyParametersToPacket(FootstepPlannerParametersPacket packet, DefaultFootstepPlannerParametersReadOnly parameters)
    {
       if (parameters == null)
@@ -117,40 +79,5 @@ public class FootstepPlannerMessageTools
       packet.setFootholdAreaWeight(parameters.getFootholdAreaWeight());
       packet.setDistanceFromPathTolerance(parameters.getDistanceFromPathTolerance());
       packet.setDeltaYawFromReferenceTolerance(parameters.getDeltaYawFromReferenceTolerance());
-   }
-
-   public static void copyParametersToPacket(VisibilityGraphsParametersPacket packet, VisibilityGraphsParametersReadOnly parameters)
-   {
-      if (parameters == null)
-      {
-         return;
-      }
-
-      packet.setMaxInterRegionConnectionLength(parameters.getMaxInterRegionConnectionLength());
-      packet.setNormalZThresholdForAccessibleRegions(parameters.getNormalZThresholdForAccessibleRegions());
-      packet.setNavigableExtrusionDistance(parameters.getNavigableExtrusionDistance());
-      packet.setObstacleExtrusionDistance(parameters.getObstacleExtrusionDistance());
-      packet.setObstacleExtrusionDistanceIfNotTooHighToStep(parameters.getObstacleExtrusionDistanceIfNotTooHighToStep());
-      packet.setTooHighToStepDistance(parameters.getTooHighToStepDistance());
-      packet.setHeightForMaxAvoidance(parameters.getHeightForMaxAvoidance());
-      packet.setClusterResolution(parameters.getClusterResolution());
-      packet.setExplorationDistanceFromStartGoal(parameters.getExplorationDistanceFromStartGoal());
-      packet.setPlanarRegionMinArea(parameters.getPlanarRegionMinArea());
-      packet.setPlanarRegionMinSize(parameters.getPlanarRegionMinSize());
-      packet.setRegionOrthogonalAngle(parameters.getRegionOrthogonalAngle());
-      packet.setSearchHostRegionEpsilon(parameters.getSearchHostRegionEpsilon());
-      packet.setCanEasilyStepOverHeight(parameters.getCanEasilyStepOverHeight());
-      packet.setCanDuckUnderHeight(parameters.getCanDuckUnderHeight());
-      packet.setLengthForLongInterRegionEdge(parameters.getLengthForLongInterRegionEdge());
-      packet.setPerformPostProcessingNodeShifting(parameters.getPerformPostProcessingNodeShifting());
-      packet.setIntroduceMidpointsInPostProcessing(parameters.getIntroduceMidpointsInPostProcessing());
-      packet.setComputeOrientationsToAvoidObstacles(parameters.getComputeOrientationsToAvoidObstacles());
-      packet.setHeuristicWeight(parameters.getHeuristicWeight());
-      packet.setDistanceWeight(parameters.getDistanceWeight());
-      packet.setElevationWeight(parameters.getElevationWeight());
-      packet.setReturnBestEffortSolution(parameters.returnBestEffortSolution());
-      packet.setOccludedGoalEdgeWeight(parameters.getOccludedGoalEdgeWeight());
-      packet.setWeightForInterRegionEdge(parameters.getWeightForInterRegionEdge());
-      packet.setOptimizeForNarrowPassage(parameters.getOptimizeForNarrowPassage());
    }
 }

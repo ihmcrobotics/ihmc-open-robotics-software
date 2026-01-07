@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.stepAdjustment.StepAdjustmentCalculator;
+import us.ihmc.avatar.stepAdjustment.StepConstraintCalculator;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -83,7 +83,7 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
 
       ((YoBoolean) simulationTestHelper.findVariable("switchPlanarRegionConstraintsAutomatically")).set(true);
 
-      StepAdjustmentCalculator stepConstraintCalculator = new StepAdjustmentCalculator(4.0, simulationTestHelper.getControllerRegistry());
+      StepConstraintCalculator stepConstraintCalculator = new StepConstraintCalculator(4.0, simulationTestHelper.getControllerRegistry());
 
       PlanarRegionsList planarRegionsList = environment.getPlanarRegionsList();
 

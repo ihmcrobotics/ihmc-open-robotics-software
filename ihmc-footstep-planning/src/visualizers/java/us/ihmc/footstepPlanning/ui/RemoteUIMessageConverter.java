@@ -13,8 +13,6 @@ import controller_msgs.msg.dds.NeckTrajectoryMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.SpineTrajectoryMessage;
 import org.apache.commons.lang3.tuple.Pair;
-import perception_msgs.msg.dds.HeightMapMessage;
-import perception_msgs.msg.dds.OcTreeKeyListMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import perception_msgs.msg.dds.TerrainMapMessage;
 import toolbox_msgs.msg.dds.FootstepPlannerActionMessage;
@@ -48,7 +46,6 @@ import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
-import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2NodeBuilder;
@@ -80,7 +77,6 @@ public class RemoteUIMessageConverter
 
    private final String robotName;
 
-   private final AtomicReference<VisibilityGraphsParametersReadOnly> visibilityGraphParametersReference;
    private final AtomicReference<DefaultFootstepPlannerParametersReadOnly> plannerParametersReference;
    private final AtomicReference<SwingPlannerParametersReadOnly> swingPlannerParametersReference;
    private final AtomicReference<Pose3DReadOnly> leftFootPose;
@@ -89,16 +85,13 @@ public class RemoteUIMessageConverter
    private final AtomicReference<Pose3DReadOnly> goalRightFootPose;
    private final AtomicReference<Boolean> snapGoalSteps;
    private final AtomicReference<Boolean> abortIfGoalStepSnapFails;
-   private final AtomicReference<PlanarRegionsList> plannerPlanarRegionReference;
    private final AtomicReference<TerrainMapMessage> terrainMapReference;
    private final AtomicReference<Boolean> planBodyPath;
-   private final AtomicReference<Boolean> planNarrowPassage;
    private final AtomicReference<Boolean> performAStarSearch;
    private final AtomicReference<SwingPlannerType> requestedSwingPlanner;
    private final AtomicReference<Double> plannerTimeoutReference;
    private final AtomicReference<Integer> maxIterations;
    private final AtomicReference<RobotSide> plannerInitialSupportSideReference;
-   private final AtomicReference<Double> pathHeadingReference;
    private final AtomicReference<Integer> plannerRequestIdReference;
    private final AtomicReference<Double> plannerHorizonLengthReference;
    private final AtomicReference<Boolean> acceptNewPlanarRegionsReference;
@@ -146,7 +139,6 @@ public class RemoteUIMessageConverter
       this.ros2Node = ros2Node;
 
       plannerParametersReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerParameters, null);
-      visibilityGraphParametersReference = messager.createInput(FootstepPlannerMessagerAPI.VisibilityGraphsParameters, null);
       swingPlannerParametersReference = messager.createInput(FootstepPlannerMessagerAPI.SwingPlannerParameters, null);
 
       leftFootPose = messager.createInput(FootstepPlannerMessagerAPI.LeftFootPose);
@@ -155,16 +147,13 @@ public class RemoteUIMessageConverter
       goalRightFootPose = messager.createInput(FootstepPlannerMessagerAPI.RightFootGoalPose);
       snapGoalSteps = messager.createInput(FootstepPlannerMessagerAPI.SnapGoalSteps);
       abortIfGoalStepSnapFails = messager.createInput(FootstepPlannerMessagerAPI.AbortIfGoalStepSnapFails);
-      plannerPlanarRegionReference = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionData);
       terrainMapReference = messager.createInput(FootstepPlannerMessagerAPI.terrainMapMessage);
       planBodyPath = messager.createInput(FootstepPlannerMessagerAPI.PlanBodyPath, false);
-      planNarrowPassage = messager.createInput(FootstepPlannerMessagerAPI.PlanNarrowPassage, false);
       performAStarSearch = messager.createInput(FootstepPlannerMessagerAPI.PerformAStarSearch, true);
       requestedSwingPlanner = messager.createInput(FootstepPlannerMessagerAPI.RequestedSwingPlannerType, SwingPlannerType.NONE);
       plannerTimeoutReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerTimeout, 5.0);
       maxIterations = messager.createInput(FootstepPlannerMessagerAPI.MaxIterations, -1);
       plannerInitialSupportSideReference = messager.createInput(FootstepPlannerMessagerAPI.InitialSupportSide, RobotSide.LEFT);
-      pathHeadingReference = messager.createInput(FootstepPlannerMessagerAPI.RequestedFootstepPlanHeading, 0.0);
       plannerRequestIdReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerRequestId);
       plannerHorizonLengthReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerHorizonLength);
       acceptNewPlanarRegionsReference = messager.createInput(FootstepPlannerMessagerAPI.AcceptNewPlanarRegions, true);
@@ -377,14 +366,6 @@ public class RemoteUIMessageConverter
 
       if (verbose)
          LogTools.info("Told the toolbox to wake up.");
-
-      VisibilityGraphsParametersReadOnly visibilityGraphsParameters = visibilityGraphParametersReference.get();
-      if(visibilityGraphsParameters != null)
-      {
-         VisibilityGraphsParametersPacket visibilityGraphsParametersPacket = new VisibilityGraphsParametersPacket();
-         FootstepPlannerMessageTools.copyParametersToPacket(visibilityGraphsParametersPacket, visibilityGraphsParameters);
-         visibilityGraphsParametersPublisher.publish(visibilityGraphsParametersPacket);
-      }
 
       DefaultFootstepPlannerParametersReadOnly footstepPlannerParameters = plannerParametersReference.get();
       if(footstepPlannerParameters != null)

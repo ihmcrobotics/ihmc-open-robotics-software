@@ -16,10 +16,6 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerPar
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
-import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
-import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
-import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.PathOrientationCalculator;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.PointCloudTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -79,69 +75,4 @@ public class FootstepPlanningWithBodyPathTest
          PlanningTestTools.visualizeAndSleep(null, plannerOutput.getFootstepPlan(), goalPose, bodyPath);
    }
 
-   @Test
-   @Disabled
-   public void testMaze(TestInfo testInfo)
-   {
-      WaypointDefinedBodyPathPlanHolder bodyPath = new WaypointDefinedBodyPathPlanHolder();
-      List<Pose3D> waypoints = new ArrayList<>();
-
-      ArrayList<PlanarRegion> regions = PointCloudTools.loadPlanarRegionsFromFile("resources/PlanarRegions_NRI_Maze.txt");
-      Point3D startPos = new Point3D(9.5, 9, 0);
-      Point3D goalPos = new Point3D(0.5, 0.5, 0);
-      startPos = PlanarRegionTools.projectPointToPlanes(startPos, new PlanarRegionsList(regions));
-      goalPos = PlanarRegionTools.projectPointToPlanes(goalPos, new PlanarRegionsList(regions));
-
-      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(new DefaultVisibilityGraphParameters());
-      PathOrientationCalculator orientationCalculator = new PathOrientationCalculator(new DefaultVisibilityGraphParameters());
-      List<Point3DReadOnly> pathPoints = navigableRegionsManager.calculateBodyPath(startPos, goalPos);
-      List<? extends Pose3DReadOnly> path = orientationCalculator.computePosesFromPath(pathPoints, navigableRegionsManager.getVisibilityMapSolution(),
-                                                                                       new Quaternion(), new Quaternion());
-
-      for (Pose3DReadOnly waypoint3d : path)
-      {
-         waypoints.add(new Pose3D(waypoint3d));
-      }
-      bodyPath.setPoseWaypoints(path);
-
-      Pose3D startPose = new Pose3D();
-      bodyPath.getPointAlongPath(0.0, startPose);
-      Pose3D finalPose = new Pose3D();
-      bodyPath.getPointAlongPath(1.0, finalPose);
-
-      DefaultFootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
-      double defaultStepWidth = parameters.getIdealFootstepWidth();
-
-      FramePose3D initialMidFootPose = new FramePose3D();
-      initialMidFootPose.setX(startPos.getX());
-      initialMidFootPose.setY(startPos.getY());
-      initialMidFootPose.getOrientation().setYawPitchRoll(startPose.getYaw(), 0.0, 0.0);
-      PoseReferenceFrame midFootFrame = new PoseReferenceFrame("InitialMidFootFrame", initialMidFootPose);
-
-      RobotSide initialStanceFootSide = RobotSide.RIGHT;
-      FramePose3D initialStanceFootPose = new FramePose3D(midFootFrame);
-      initialStanceFootPose.setY(initialStanceFootSide.negateIfRightSide(defaultStepWidth / 2.0));
-      initialStanceFootPose.changeFrame(ReferenceFrame.getWorldFrame());
-
-      FramePose3D goalPose = new FramePose3D();
-      goalPose.setX(finalPose.getX());
-      goalPose.setY(finalPose.getY());
-      goalPose.getOrientation().setYawPitchRoll(finalPose.getYaw(), 0.0, 0.0);
-
-      PlanarRegionsList planarRegionsList = new PlanarRegionsList(regions);
-      FootstepPlanningModule planner = new FootstepPlanningModule(getClass().getSimpleName());
-
-      FootstepPlannerRequest request = new FootstepPlannerRequest();
-      request.setTimeout(1.0);
-      request.setStartFootPoses(defaultStepWidth, initialStanceFootPose);
-      request.setRequestedInitialStanceSide(initialStanceFootSide);
-      request.setGoalFootPoses(defaultStepWidth, goalPose);
-      request.getBodyPathWaypoints().addAll(waypoints);
-
-      FootstepPlannerOutput plannerOutput = planner.handleRequest(request);
-      Assertions.assertTrue(plannerOutput.getFootstepPlanningResult().validForExecution());
-
-      if (visualize)
-         PlanningTestTools.visualizeAndSleep(planarRegionsList, plannerOutput.getFootstepPlan(), goalPose, bodyPath);
-   }
 }
