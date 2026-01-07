@@ -204,13 +204,6 @@ jobs:
       subproject: 'ihmc-perception'
       test-category: 'fast'
       requires-self-hosted: true
-  ihmc-robot-data-visualizer:
-    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
-    secrets:
-      ROSIE_PERSONAL_ACCESS_TOKEN: ${{ secrets.ROSIE_PERSONAL_ACCESS_TOKEN }}
-    with:
-      subproject: 'ihmc-robot-data-visualizer'
-      test-category: 'fast'
   ihmc-robot-models:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     secrets:
