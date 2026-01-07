@@ -1,4 +1,4 @@
-package us.ihmc.pathPlanning.visibilityGraphs.tools;
+package us.ihmc.behaviors.tools.perception;
 
 import static org.junit.jupiter.api.Assertions.*;
 

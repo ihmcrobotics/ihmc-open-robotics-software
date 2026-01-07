@@ -500,38 +500,4 @@ public class FootstepPlannerUI
    {
       return new FootstepPlannerUI(primaryStage, messager, showTestDashboard, defaultContactPoints);
    }
-
-   public static FootstepPlannerUI createUI(Stage primaryStage,
-                                            JavaFXMessager messager,
-                                            AStarBodyPathPlannerParametersBasics aStarBodyPathParameters,
-                                            DefaultFootstepPlannerParametersBasics plannerParameters,
-                                            SwingPlannerParametersBasics swingPlannerParameters,
-                                            FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
-                                            FullHumanoidRobotModelFactory previewModelFactory,
-                                            HumanoidJointNameMap jointMap,
-                                            RobotContactPointParameters<RobotSide> contactPointParameters,
-                                            WalkingControllerParameters walkingControllerParameters,
-                                            UIAuxiliaryRobotData auxiliaryRobotData,
-                                            CollisionBoxProvider collisionBoxProvider) throws Exception
-   {
-      SideDependentList<List<Point2D>> defaultContactPoints = new SideDependentList<>();
-      for (RobotSide side : RobotSide.values)
-      {
-         defaultContactPoints.put(side, contactPointParameters.getControllerFootGroundContactPoints().get(side));
-      }
-
-      return new FootstepPlannerUI(primaryStage,
-                                   messager,
-                                   aStarBodyPathParameters,
-                                   plannerParameters,
-                                   swingPlannerParameters,
-                                   fullHumanoidRobotModelFactory,
-                                   previewModelFactory,
-                                   jointMap,
-                                   walkingControllerParameters,
-                                   auxiliaryRobotData,
-                                   false,
-                                   defaultContactPoints,
-                                   collisionBoxProvider);
-   }
 }

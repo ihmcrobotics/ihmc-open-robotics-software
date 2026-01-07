@@ -26,11 +26,8 @@ import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.SwingPlanningModule;
-import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
-import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
-import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAvoidanceProcessor;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -56,7 +53,6 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
    protected final ROS2ControllerHelper ros2Helper;
 
    private RemoteHumanoidRobotInterface robot;
-   private VisibilityGraphPathPlanner bodyPathPlanner;
    private FootstepPlanningModule footstepPlanner;
    private RobotLowLevelMessenger lowLevelMessenger;
 
@@ -81,14 +77,6 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
       return robot;
    }
 
-   public VisibilityGraphPathPlanner getOrCreateBodyPathPlanner()
-   {
-      if (bodyPathPlanner == null)
-      {
-         bodyPathPlanner = newBodyPathPlanner();
-      }
-      return bodyPathPlanner;
-   }
 
    public ROS2SyncedRobotModel newSyncedRobot()
    {
@@ -98,12 +86,6 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
    public ROS2SyncedRobotModel newSyncedRobot(boolean enforceUniqueReferenceFrames)
    {
       return getOrCreateRobotInterface().newSyncedRobot(enforceUniqueReferenceFrames);
-   }
-
-   public VisibilityGraphPathPlanner newBodyPathPlanner()
-   {
-      VisibilityGraphsParametersBasics visibilityGraphsParameters = robotModel.getVisibilityGraphsParameters();
-      return new VisibilityGraphPathPlanner(visibilityGraphsParameters, new ObstacleAvoidanceProcessor(visibilityGraphsParameters));
    }
 
    public RobotLowLevelMessenger getOrCreateRobotLowLevelMessenger()

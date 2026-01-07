@@ -1,7 +1,6 @@
-package us.ihmc.pathPlanning.visibilityGraphs.tools;
+package us.ihmc.behaviors.tools.perception;
 
 import java.awt.Color;
-import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.euclid.geometry.LineSegment2D;

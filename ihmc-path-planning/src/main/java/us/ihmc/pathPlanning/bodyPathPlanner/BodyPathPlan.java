@@ -1,4 +1,4 @@
-package us.ihmc.pathPlanning.visibilityGraphs.tools;
+package us.ihmc.pathPlanning.bodyPathPlanner;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,8 +8,6 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 
 public class BodyPathPlan
 {

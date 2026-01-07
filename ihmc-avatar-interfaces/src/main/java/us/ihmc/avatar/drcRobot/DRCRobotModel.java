@@ -26,7 +26,6 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerPar
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.handsros2.HandModel;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
-import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -167,11 +166,6 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    }
 
    default DefaultFootstepPlannerParametersBasics getFootstepPlannerParameters(String fileNameSuffix)
-   {
-      return null;
-   }
-
-   default VisibilityGraphsParametersBasics getVisibilityGraphsParameters()
    {
       return null;
    }
