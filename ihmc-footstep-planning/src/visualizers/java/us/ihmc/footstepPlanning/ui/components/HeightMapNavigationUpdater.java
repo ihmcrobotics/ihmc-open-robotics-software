@@ -2,7 +2,6 @@ package us.ihmc.footstepPlanning.ui.components;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import javafx.animation.AnimationTimer;
-import map_sense.RawGPUPlanarRegionList;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.thread.ThreadTools;
@@ -40,8 +39,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.utilities.ros.RosNodeInterface;
-import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +47,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 
 public class HeightMapNavigationUpdater extends AnimationTimer
 {
@@ -163,22 +159,6 @@ public class HeightMapNavigationUpdater extends AnimationTimer
          MultiBodySystemTools.collectJointPath(fullHumanoidRobotModel.getPelvis(), shin, joints);
          joints.forEach(joint -> shapeTester.addJoint(collisionBoxProvider, joint));
       }
-   }
-
-   public static AbstractRosTopicSubscriber<RawGPUPlanarRegionList> createROS1Callback(String topic,
-                                                                                       RosNodeInterface ros1Node,
-                                                                                       Consumer<RawGPUPlanarRegionList> callback)
-   {
-      AbstractRosTopicSubscriber<RawGPUPlanarRegionList> subscriber = new AbstractRosTopicSubscriber<RawGPUPlanarRegionList>(RawGPUPlanarRegionList._TYPE)
-      {
-         @Override
-         public void onNewMessage(RawGPUPlanarRegionList rawGPUPlanarRegionList)
-         {
-            callback.accept(rawGPUPlanarRegionList);
-         }
-      };
-      ros1Node.attachSubscriber(topic, subscriber);
-      return subscriber;
    }
 
    private static final RigidBodyTransform zForwardXRightToZUpXForward = new RigidBodyTransform();
