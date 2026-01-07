@@ -345,7 +345,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(PelvisHeightTrajectoryMessagePubSubType.class);
       registerPacketField(JointStatePubSubType.class);
       registerPacketField(QuaternionStampedPubSubType.class);
-      registerPacketField(SimulatedLidarScanPacketPubSubType.class);
       registerPacketField(JointspaceTrajectoryMessagePubSubType.class);
       registerPacketField(QueueableMessagePubSubType.class);
       registerPacketField(IlluminancePubSubType.class);
@@ -371,7 +370,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(PointCloudWorldPacketPubSubType.class);
       registerPacketField(WholeBodyTrajectoryMessagePubSubType.class);
       registerPacketField(MultiEchoLaserScanPubSubType.class);
-      registerPacketField(LidarScanParametersMessagePubSubType.class);
       registerPacketField(RelativeHumidityPubSubType.class);
       registerPacketField(FrameInformationPubSubType.class);
       registerPacketField(HandTrajectoryMessagePubSubType.class);
@@ -499,9 +497,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(char[].class);
 
       // Video data
-      registerPacketClass(SimulatedLidarScanPacket.class);
       registerPacketField(IntrinsicParametersMessage.class);
-      registerPacketField(LidarScanParametersMessage.class);
 
       registerPacketClass(IMUPacket.class);
       registerPacketField(IMUPacket[].class);
@@ -707,7 +703,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(float[].class);
       registerPacketField(Quaternion32.class);
       registerPacketField(Vector3D32.class);
-      registerPacketField(LidarScanParameters.class);
 
       // Robot pose estimation
       registerPacketClass(StampedPosePacket.class);
