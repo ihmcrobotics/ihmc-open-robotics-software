@@ -14,7 +14,6 @@ import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerPar
 import us.ihmc.commonWalkingControlModules.configurations.InertialEstimationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired.UserDesiredControllerCommandGenerators;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.QueuedControllerCommandGenerator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
@@ -112,7 +111,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    private final SideDependentList<String> wristSensorNames;
 
    private boolean createQueuedControllerCommandGenerator = false;
-   private boolean createUserDesiredControllerCommandGenerator = false;
    private boolean useHeadingAndVelocityScript = true;
 
    private boolean isListeningToHighLevelStatePackets = true;
@@ -246,41 +244,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
          createQueuedControllerCommandGenerator = true;
          this.controllerCommands = controllerCommands;
       }
-   }
-
-   private UserDesiredControllerCommandGenerators userDesiredControllerCommandGenerators = null;
-
-   public void createUserDesiredControllerCommandGenerator()
-   {
-      if (userDesiredControllerCommandGenerators != null)
-         return;
-
-      if (controllerToolbox != null)
-      {
-         double defaultTrajectoryTime = 1.0;
-         SideDependentList<ContactableFoot> contactableFeet = controllerToolbox.getContactableFeet();
-         userDesiredControllerCommandGenerators = new UserDesiredControllerCommandGenerators(commandInputManager,
-                                                                                             controllerToolbox.getFullRobotModel(),
-                                                                                             controllerToolbox.getReferenceFrames(),
-                                                                                             contactableFeet,
-                                                                                             walkingControllerParameters,
-                                                                                             defaultTrajectoryTime,
-                                                                                             registry);
-      }
-      else
-      {
-         createUserDesiredControllerCommandGenerator = true;
-      }
-   }
-
-   public void useDefaultDiagnosticControlState()
-   {
-      //TODO
-   }
-
-   public void useDefaultCalibrationControlState()
-   {
-      //TODO
    }
 
    public void replaceControllerFactory(HighLevelControllerName controllerName, HighLevelControllerStateFactory controllerFactory)
@@ -537,8 +500,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       attachControllerFailureListeners(controllerFailureListenersToAttach);
       if (createQueuedControllerCommandGenerator)
          createQueuedControllerCommandGenerator(controllerCommands);
-      if (createUserDesiredControllerCommandGenerator)
-         createUserDesiredControllerCommandGenerator();
 
       List<String> jointsToCheckTorqueFeasibilityInMultiContact = walkingControllerParameters.getJointsToCheckTorqueFeasibilityInMultiContact();
       if (controllerToolbox.enableUpperBodyLoadBearing() && jointsToCheckTorqueFeasibilityInMultiContact != null)

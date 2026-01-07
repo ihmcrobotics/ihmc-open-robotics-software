@@ -38,7 +38,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-public class ErrorBasedStepAdjustmentController implements StepAdjustmentController
+public class ErrorBasedStepAdjustmentController
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -230,7 +230,6 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       parentRegistry.addChild(registry);
    }
 
-   @Override
    public void reset()
    {
       reachabilityConstraintHandler.reset();
@@ -249,15 +248,12 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       this.subsequentStepDuration.set(Double.NaN);
    }
 
-   @Override
    public void setFootstepQueueInformation(int numberOfStepsInQueue, double subsequentStepDuration)
    {
       stepsInQueue.set(numberOfStepsInQueue);
       this.subsequentStepDuration.set(subsequentStepDuration);
    }
 
-
-   @Override
    public void setFootstepToAdjust(SimpleFootstep footstep, double swingDuration)
    {
       FramePose3DReadOnly footstepPose = footstep.getSoleFramePose();
@@ -289,7 +285,6 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       }
    }
 
-   @Override
    public void submitSwingSpeedUpUnderDisturbance(double swingSpeedUp)
    {
       if (swingSpeedUpEnabled.getBooleanValue() && swingSpeedUp > speedUpTime.getValue())
@@ -298,25 +293,21 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       }
    }
 
-   @Override
    public void setStepConstraintRegions(List<StepConstraintRegion> stepConstraintRegion)
    {
       environmentConstraintProvider.setStepConstraintRegions(stepConstraintRegion);
    }
 
-   @Override
    public void setSwingSpeedUpEnabled(boolean swingSpeedUpEnabled)
    {
       this.swingSpeedUpEnabled.set(swingSpeedUpEnabled);
    }
 
-   @Override
    public List<StepConstraintRegion> getStepConstraintRegions()
    {
       return environmentConstraintProvider.getStepConstraintRegions();
    }
 
-   @Override
    public void initialize(double initialTime, RobotSide supportSide)
    {
       isInSwing.set(true);
@@ -330,7 +321,6 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       selectedReachableRegion.set(null);
    }
 
-   @Override
    public void compute(double currentTime,
                        FramePoint2DReadOnly desiredICP,
                        FramePoint2DReadOnly currentICP,
@@ -718,19 +708,16 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       return adjusted;
    }
 
-   @Override
    public FramePose3DReadOnly getFootstepSolution()
    {
       return footstepSolution;
    }
 
-   @Override
    public boolean wasFootstepAdjusted()
    {
       return footstepWasAdjusted.getBooleanValue();
    }
 
-   @Override
    public boolean useStepAdjustment()
    {
       return useStepAdjustment.getBooleanValue();
@@ -746,7 +733,6 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       timeRemainingInState.set(swingDuration.getDoubleValue() - timeInCurrentState.getDoubleValue());
    }
 
-   @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());

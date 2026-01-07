@@ -6,9 +6,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
-import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.CaptureRegionStepAdjustmentController;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.ErrorBasedStepAdjustmentController;
-import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentController;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
@@ -106,7 +104,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
    private final LinearMomentumRateControlModuleInput linearMomentumRateControlModuleInput = new LinearMomentumRateControlModuleInput();
 
    private final PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager;
-   private final StepAdjustmentController stepAdjustmentController;
+   private final ErrorBasedStepAdjustmentController stepAdjustmentController;
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
    private final YoFramePoint2D yoDesiredCapturePoint = new YoFramePoint2D("desiredICP", worldFrame, registry);
@@ -335,21 +333,11 @@ public class BalanceManager implements SCS2YoGraphicHolder
 
       previousPrecomputedTrajectoryTime.setToNaN();
 
-      if (USE_ERROR_BASED_STEP_ADJUSTMENT)
-      {
-         stepAdjustmentController = new ErrorBasedStepAdjustmentController(walkingControllerParameters,
-                                                                           controllerToolbox.getReferenceFrames().getSoleZUpFrames(),
-                                                                           bipedSupportPolygons,
-                                                                           controllerToolbox.getContactableFeet(),
-                                                                           registry);
-      }
-      else
-      {
-         stepAdjustmentController = new CaptureRegionStepAdjustmentController(walkingControllerParameters,
-                                                                              controllerToolbox.getReferenceFrames().getSoleZUpFrames(),
-                                                                              bipedSupportPolygons,
-                                                                              registry);
-      }
+      stepAdjustmentController = new ErrorBasedStepAdjustmentController(walkingControllerParameters,
+                                                                        controllerToolbox.getReferenceFrames().getSoleZUpFrames(),
+                                                                        bipedSupportPolygons,
+                                                                        controllerToolbox.getContactableFeet(),
+                                                                        registry);
 
       if (walkingMessageHandler != null)
       {

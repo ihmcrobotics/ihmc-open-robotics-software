@@ -105,7 +105,6 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
                                                                                                                                              meshTerrainEnvironment,
                                                                                                                                              simulationTestingParameters);
       simulationTestHelperFactory.setDefaultHighLevelHumanoidControllerFactory(useVelocityAndHeadingScript, getWalkingScriptParameters());
-      simulationTestHelperFactory.getHighLevelHumanoidControllerFactory().createUserDesiredControllerCommandGenerator();
       if (useBulletPhysicsEngine)
       {
          robotModel.getHumanoidRobotKinematicsCollisionModel();
@@ -137,7 +136,6 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
                                                                                                                                              flatGround,
                                                                                                                                              simulationTestingParameters);
       simulationTestHelperFactory.setDefaultHighLevelHumanoidControllerFactory(useVelocityAndHeadingScript, getWalkingScriptParameters());
-      simulationTestHelperFactory.getHighLevelHumanoidControllerFactory().createUserDesiredControllerCommandGenerator();
       if (useBulletPhysicsEngine)
       {
          robotModel.getHumanoidRobotKinematicsCollisionModel();
