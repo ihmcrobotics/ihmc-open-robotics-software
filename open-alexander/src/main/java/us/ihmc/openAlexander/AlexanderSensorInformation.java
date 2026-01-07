@@ -129,7 +129,7 @@ public class AlexanderSensorInformation implements HumanoidRobotSensorInformatio
             imuSensorsToUse.remove(forearmIMUNames.get(robotSide));
             imuSensorsToUse.remove(handIMUNames.get(robotSide));
          }
-         else if (!alexanderVersion.hasCycloidForearms())
+         else if (!alexanderVersion.hasCycloidForearm())
          {
             imuSensorsToUse.remove(forearmIMUNames.get(robotSide));
             imuSensorsToUse.remove(handIMUNames.get(robotSide));
