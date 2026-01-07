@@ -472,21 +472,6 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
    }
 
    @Override
-   public Transform getJmeTransformWristToHand(RobotSide robotSide)
-   {
-      Vector3f centerOfHandToWristTranslation = new Vector3f();
-      float[] angles = new float[3];
-
-      centerOfHandToWristTranslation = new Vector3f(0f, robotSide.negateIfLeftSide(0.015f), -0.06f);
-      angles[0] = (float) robotSide.negateIfLeftSide(Math.toRadians(90));
-      angles[1] = 0.0f;
-      angles[2] = (float) robotSide.negateIfLeftSide(Math.toRadians(90));
-
-      Quaternion centerOfHandToWristRotation = new Quaternion(angles);
-      return new Transform(centerOfHandToWristTranslation, centerOfHandToWristRotation);
-   }
-
-   @Override
    public RigidBodyTransform getHandGraphicToHandFrameTransform(RobotSide side)
    {
       RigidBodyTransform handGraphicToHandTransform = new RigidBodyTransform();
