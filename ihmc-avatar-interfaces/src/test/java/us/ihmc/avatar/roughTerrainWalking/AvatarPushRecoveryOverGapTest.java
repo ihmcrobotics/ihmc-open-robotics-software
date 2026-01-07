@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.stepAdjustment.StepConstraintCalculator;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -26,6 +25,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintMessageConverter;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.RigidBodyTransformGenerator;
@@ -42,6 +42,7 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -83,12 +84,9 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
 
       ((YoBoolean) simulationTestHelper.findVariable("switchPlanarRegionConstraintsAutomatically")).set(true);
 
-      StepConstraintCalculator stepConstraintCalculator = new StepConstraintCalculator(4.0, simulationTestHelper.getControllerRegistry());
-
       PlanarRegionsList planarRegionsList = environment.getPlanarRegionsList();
 
-      stepConstraintCalculator.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
-      List<StepConstraintRegion> stepConstraints = stepConstraintCalculator.computeSteppableRegions();
+      List<StepConstraintRegion> stepConstraints = convertToConstraintRegions(planarRegionsList.getPlanarRegionsAsList(), 0.1);
 
       double z = getForcePointOffsetZInChestFrame();
       pushRobotController = new PushRobotControllerSCS2(simulationTestHelper.getSimulationConstructionSet().getTime(),
@@ -128,6 +126,21 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       footsteps.getDefaultStepConstraints().set(constraintsListMessage);
       simulationTestHelper.publishToController(footsteps);
 
+   }
+
+   private static List<StepConstraintRegion> convertToConstraintRegions(List<PlanarRegion> planarRegions, double distanceInside)
+   {
+      List<StepConstraintRegion> regions = new ArrayList<>();
+      ConvexPolygonScaler scaler = new ConvexPolygonScaler();
+      for (PlanarRegion planarRegion : planarRegions)
+      {
+         ConvexPolygon2D shrunkRegion = new ConvexPolygon2D();
+         scaler.scaleConvexPolygon(planarRegion.getConvexHull(), distanceInside, shrunkRegion);
+         StepConstraintRegion stepConstraintRegion = new StepConstraintRegion(planarRegion.getTransformToWorld(), shrunkRegion);
+         regions.add(stepConstraintRegion);
+      }
+
+      return regions;
    }
 
    @Test

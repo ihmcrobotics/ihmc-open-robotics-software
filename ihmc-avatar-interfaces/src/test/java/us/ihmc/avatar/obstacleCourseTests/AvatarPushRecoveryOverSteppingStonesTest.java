@@ -8,16 +8,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
-import us.ihmc.avatar.stepAdjustment.StepConstraintCalculator;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -27,9 +24,10 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintMessageConverter;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -38,7 +36,6 @@ import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationToolkit.controllers.PushRobotControllerSCS2;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -127,12 +124,9 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
    {
       double transferTime = getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
 
-      StepConstraintCalculator stepAdjustmentCalculator = new StepConstraintCalculator(100.0, new YoRegistry("test"));
-      stepAdjustmentCalculator.setPlanarRegions(createPlanarRegionsList());
-
       FootstepDataListMessage footstepDataList = createFootstepsForWalkingOverEasySteppingStones(swingTime, transferTime);
       footstepDataList.setAreFootstepsAdjustable(true);
-      footstepDataList.getDefaultStepConstraints().set(StepConstraintMessageConverter.convertToStepConstraintsListMessage(stepAdjustmentCalculator.computeSteppableRegions()));
+      footstepDataList.getDefaultStepConstraints().set(StepConstraintMessageConverter.convertToStepConstraintsListMessage(createConstraintRegions()));
       simulationTestHelper.publishToController(footstepDataList);
 
       return footstepDataList;
@@ -232,7 +226,7 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       return EndToEndTestTools.generateFootstepsFromPose3Ds(RobotSide.RIGHT, footstepPoses, swingTime, transferTime);
    }
 
-   private List<PlanarRegion> createPlanarRegionsList()
+   private  static List<Point3D> getSteppingStoneLocations()
    {
       List<Point3D> locations = new ArrayList<>();
       locations.add(new Point3D(-7.75, -0.55, 0.3));
@@ -242,6 +236,13 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       locations.add(new Point3D(-9.75, -0.55, 0.3));
       locations.add(new Point3D(-10.25, -1.0, 0.3));
       locations.add(new Point3D(-10.25, -0.65, 0.3));
+
+      return locations;
+   }
+
+   private List<PlanarRegion> createPlanarRegionsList()
+   {
+      List<Point3D> locations = getSteppingStoneLocations();
 
       List<PlanarRegion> planarRegions = new ArrayList<>();
       int idStart = 10;
@@ -260,9 +261,25 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       return planarRegions;
    }
 
-   private PlanarRegionsListMessage createPlanarRegionsListMessage()
+   private List<StepConstraintRegion> createConstraintRegions()
    {
-      return PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(new PlanarRegionsList(createPlanarRegionsList()));
+      List<Point3D> locations = getSteppingStoneLocations();
+
+      List<StepConstraintRegion> planarRegions = new ArrayList<>();
+      int idStart = 10;
+      for (int i = 0; i < locations.size() - 2; i++)
+      {
+         StepConstraintRegion planarRegion = createConstrainRegion(locations.get(i));
+         planarRegion.setRegionId(idStart + i);
+         planarRegions.add(planarRegion);
+      }
+
+      StepConstraintRegion platform = createEndConstraintRegion(locations.get(locations.size() - 2));
+      platform.setRegionId(idStart + locations.size() - 2);
+
+      planarRegions.add(platform);
+
+      return planarRegions;
    }
 
    private PlanarRegion createSteppingStonePlanarRegion(Point3D centered)
@@ -283,6 +300,26 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       return planarRegion;
    }
 
+   private StepConstraintRegion createConstrainRegion(Point3D centered)
+   {
+      ConvexPolygon2D convexPolygon2D = new ConvexPolygon2D();
+      ConvexPolygonScaler convexPolygonScaler = new ConvexPolygonScaler();
+      List<Point2D> points = createSteppingStoneFace();
+      for (Point2D point : points)
+      {
+         point.add(centered.getX(), centered.getY());
+         convexPolygon2D.addVertex(point);
+      }
+      convexPolygon2D.update();
+      convexPolygonScaler.scaleConvexPolygon(convexPolygon2D, 0.1, convexPolygon2D);
+
+      TranslationReferenceFrame planarRegionFrame = new TranslationReferenceFrame("planarRegionFrame", ReferenceFrame.getWorldFrame());
+      planarRegionFrame.updateTranslation(new Vector3D(0.0, 0.0, 0.3));
+
+      StepConstraintRegion constraintRegion = new StepConstraintRegion(planarRegionFrame.getTransformToWorldFrame(), convexPolygon2D);
+      return constraintRegion;
+   }
+
    private PlanarRegion createEndPlanarRegion(Point3D centered)
    {
       ConvexPolygon2D convexPolygon2D = new ConvexPolygon2D();
@@ -298,6 +335,26 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       planarRegionFrame.updateTranslation(new Vector3D(0.0, 0.0, 0.3));
 
       PlanarRegion planarRegion = new PlanarRegion(planarRegionFrame.getTransformToWorldFrame(), convexPolygon2D);
+      return planarRegion;
+   }
+
+   private StepConstraintRegion createEndConstraintRegion(Point3D centered)
+   {
+      ConvexPolygon2D convexPolygon2D = new ConvexPolygon2D();
+      ConvexPolygonScaler scaler = new ConvexPolygonScaler();
+      List<Point2D> points = createPlatformFace();
+      for (Point2D point : points)
+      {
+         point.add(centered.getX(), centered.getY());
+         convexPolygon2D.addVertex(point);
+      }
+      convexPolygon2D.update();
+      scaler.scaleConvexPolygon(convexPolygon2D, 0.1, convexPolygon2D);
+
+      TranslationReferenceFrame planarRegionFrame = new TranslationReferenceFrame("planarRegionFrame", ReferenceFrame.getWorldFrame());
+      planarRegionFrame.updateTranslation(new Vector3D(0.0, 0.0, 0.3));
+
+      StepConstraintRegion planarRegion = new StepConstraintRegion(planarRegionFrame.getTransformToWorldFrame(), convexPolygon2D);
       return planarRegion;
    }
 
