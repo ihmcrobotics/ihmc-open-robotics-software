@@ -2,12 +2,12 @@
   "dockspacePanels" : { },
   "windows" : {
     "3D View" : true,
-    "Annotated Image###us.ihmc.rdx.ui.graphics.RDXImageVisualizer:Annotated Image" : true,
-    "Detection Mask###us.ihmc.rdx.ui.graphics.RDXImageVisualizer:Detection Mask" : true,
-    "Eroded Mask###us.ihmc.rdx.ui.graphics.RDXImageVisualizer:Eroded Mask" : true,
+    "Annotated Image###RDXImageVisualizer9:Annotated Image" : true,
+    "Detection Mask###RDXImageVisualizer5:Detection Mask" : true,
+    "Eroded Mask###RDXImageVisualizer7:Eroded Mask" : true,
     "Options" : true,
-    "Segmented Depth###us.ihmc.rdx.ui.graphics.RDXImageVisualizer:Segmented Depth" : true,
-    "ZED Color###us.ihmc.rdx.ui.graphics.RDXImageVisualizer:ZED Color" : true,
-    "ZED Depth###us.ihmc.rdx.ui.graphics.RDXImageVisualizer:ZED Depth" : true
+    "Segmented Depth###RDXImageVisualizer11:Segmented Depth" : true,
+    "ZED Color###RDXImageVisualizer1:ZED Color" : true,
+    "ZED Depth###RDXImageVisualizer3:ZED Depth" : true
   }
 }

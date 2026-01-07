@@ -46,14 +46,18 @@ public class YOLOv8Tools
 
    public static List<Point3D32> filterOutliers(List<Point3D32> pointCloud, double zScoreThreshold, int numberOfSamples)
    {
+      if (pointCloud.isEmpty())
+         return pointCloud;
+
       Point3D32 centroid = new Point3D32();
       double standardDeviation = calculateStandardDeviationAndCentroid(pointCloud, numberOfSamples, true, centroid);
+      double inverseStdDev = 1.0 / standardDeviation;
 
       return pointCloud.parallelStream().filter(point ->
       {
          Vector3D zVector = new Vector3D(point);
          zVector.sub(centroid);
-         zVector.scale(1.0 / standardDeviation);
+         zVector.scale(inverseStdDev);
          return zVector.norm() < zScoreThreshold;
       }).collect(Collectors.toList());
    }
@@ -77,30 +81,48 @@ public class YOLOv8Tools
                                                               boolean shuffle,
                                                               Point3DBasics centroidToPack)
    {
+      if (pointCloud == null || pointCloud.isEmpty())
+         return 0.0;
+
       if (shuffle)
          Collections.shuffle(pointCloud);
 
-      Vector3D sumVector = new Vector3D(0.0, 0.0, 0.0);
-      Vector3D squaredSumVector = new Vector3D(0.0, 0.0, 0.0);
-      int numberOfSamples = Math.min(pointCloud.size(), maxNumberOfSamples);
+      int n = Math.min(pointCloud.size(), maxNumberOfSamples);
 
-      pointCloud.parallelStream().limit(numberOfSamples).forEach(point ->
+      // Welford variables for each axis
+      double meanX = 0, meanY = 0, meanZ = 0;
+      double m2X = 0, m2Y = 0, m2Z = 0;
+
+      // Welford's Algorithm
+      for (int i = 1; i <= n; i++)
       {
-         sumVector.add(point);
-         squaredSumVector.add((point.getX() * point.getX()), (point.getY() * point.getY()), (point.getZ() * point.getZ()));
-      });
+         Point3DReadOnly point = pointCloud.get(i - 1);
 
-      centroidToPack.set(sumVector);
-      centroidToPack.scale(1.0 / numberOfSamples);
+         double dx = point.getX() - meanX;
+         meanX += dx / i;
+         m2X += dx * (point.getX() - meanX);
 
-      Vector3D meanSquaredVector = new Vector3D(centroidToPack);
-      meanSquaredVector.scale(meanSquaredVector.getX(), meanSquaredVector.getY(), meanSquaredVector.getZ());
+         double dy = point.getY() - meanY;
+         meanY += dy / i;
+         m2Y += dy * (point.getY() - meanY);
 
-      Vector3D varianceVector = new Vector3D(squaredSumVector);
-      varianceVector.scale(1.0 / numberOfSamples);
-      varianceVector.sub(meanSquaredVector);
+         double dz = point.getZ() - meanZ;
+         meanZ += dz / i;
+         m2Z += dz * (point.getZ() - meanZ);
+      }
 
-      return Math.sqrt(varianceVector.getX() + varianceVector.getY() + varianceVector.getZ());
+      centroidToPack.set(meanX, meanY, meanZ);
+
+      // Calculate Variance (m2 / n)
+      // We use population variance (divide by n) to match your previous logic
+      double varX = m2X / n;
+      double varY = m2Y / n;
+      double varZ = m2Z / n;
+
+      // Compute combined Standard Deviation
+      // Clamping to 0 just in case of extreme floating point jitter
+      double totalVariance = Math.max(0, varX) + Math.max(0, varY) + Math.max(0, varZ);
+      return Math.sqrt(totalVariance);
    }
 
    public static Point3D32 computeCentroidOfPointCloud(List<Point3D32> pointCloud, int pointsToAverage)
@@ -122,7 +144,7 @@ public class YOLOv8Tools
     * @param annotatedImage Annotated output Mat.
     * @param detections     YOLO detections.
     */
-   public static void annotateImage(Mat inputImage, Mat annotatedImage, List<YOLOv8Detection> detections)
+   public static void annotateImage(Mat inputImage, Mat annotatedImage, List<YOLOv8InstantDetection> detections)
    {
       Mat greenMat = GREEN_MAT.get();
       if (!OpenCVTools.dimensionsMatch(inputImage, greenMat))
@@ -130,12 +152,15 @@ public class YOLOv8Tools
 
       inputImage.copyTo(annotatedImage);
 
-      for (YOLOv8Detection detection : detections)
+      for (YOLOv8InstantDetection detection : detections)
       {
-         String text = String.format("%s: %.2f", detection.objectClass(), detection.confidence());
+         String text = String.format("%s: %.2f", detection.getDetectedObjectClass(), detection.getConfidence());
 
          // Draw the bounding box
-         Rect boundingBox = detection.boundingBoxRect();
+         Rect boundingBox = new Rect((int) Math.round(detection.getBoundingBox().getMinX()),
+                                     (int) Math.round(detection.getBoundingBox().getMinY()),
+                                     (int) Math.round(detection.getBoundingBox().getMaxX() - detection.getBoundingBox().getMinX()),
+                                     (int) Math.round(detection.getBoundingBox().getMaxY() - detection.getBoundingBox().getMinY()));
          opencv_imgproc.rectangle(annotatedImage, boundingBox, GREEN, 5, LINE_TYPE, 0);
 
          // Draw text background
@@ -152,15 +177,32 @@ public class YOLOv8Tools
          opencv_imgproc.putText(annotatedImage, text, textLocation, FONT, FONT_SCALE, WHITE, FONT_THICKNESS, LINE_TYPE, false);
 
          // Add green tint to show mask
-         // FIXME: A simple resize isn't accurate here as the mask and input image may have different aspect ratios.
-         RawImage mask = detection.mask();
-         Mat resizedMask = new Mat();
-         opencv_imgproc.resize(mask.getCpuImageMat(), resizedMask, annotatedImage.size());
-         opencv_core.add(annotatedImage, greenMat, annotatedImage, resizedMask, -1);
+         RawImage mask = detection.getObjectMask();
+         Mat maskMat = mask.getCpuImageMat();
+
+         // Account for aspect ratio by scaling to match annotatedImage width
+         Size scaleSize = annotatedImage.rows() > maskMat.rows() ?
+                                new Size(annotatedImage.cols(), maskMat.rows() * annotatedImage.cols() / maskMat.cols())
+                              : new Size(maskMat.cols() * annotatedImage.rows() / maskMat.rows(), annotatedImage.rows());
+         Mat scaledMask = new Mat(scaleSize, maskMat.type());
+         opencv_imgproc.resize(maskMat, scaledMask, scaleSize);
+         Scalar scalar = new Scalar(0);
+         Mat paddedMask = new Mat(annotatedImage.rows(), annotatedImage.cols(), maskMat.type(), scalar);
+         Rect roi = annotatedImage.rows() > maskMat.rows() ?
+                          new Rect(0, (annotatedImage.rows() - scaledMask.rows()) / 2, scaledMask.cols(), scaledMask.rows())
+                        : new Rect((annotatedImage.cols() - scaledMask.cols()) / 2, 0, scaledMask.cols(), scaledMask.rows());
+         Mat paddedMaskCenter = new Mat(paddedMask, roi);
+         scaledMask.copyTo(paddedMaskCenter);
+         scaleSize.close();
+         paddedMaskCenter.close();
+         scalar.close();
+         roi.close();
+
+         opencv_core.add(annotatedImage, greenMat, annotatedImage, paddedMask, -1);
+         paddedMask.close();
 
          boundingBox.close();
          textBox.close();
-         mask.release();
       }
    }
 

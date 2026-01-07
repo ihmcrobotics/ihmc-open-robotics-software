@@ -72,7 +72,7 @@ public class FootstepPlannerCompletionChecker
     */
    public FootstepGraphNode checkIfGoalIsReached(AStarIterationData<FootstepGraphNode> iterationData)
    {
-      if (isProximityModeEnabled() && iterationData.getParentNode() != null)
+      if (isProximityModeEnabled() && iterationData.getParentNode() != null && !iterationData.getValidChildNodes().isEmpty())
       {
          DiscreteFootstep stanceStep = iterationData.getParentNode().getSecondStep();
          squaredUpStepComparator.setIdealSquaredUpStep(stanceStep, footstepPlannerParameters.getIdealFootstepWidth());
