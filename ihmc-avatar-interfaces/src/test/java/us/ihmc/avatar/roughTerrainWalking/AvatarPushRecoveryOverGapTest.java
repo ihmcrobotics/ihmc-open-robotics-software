@@ -86,7 +86,7 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
 
       PlanarRegionsList planarRegionsList = environment.getPlanarRegionsList();
 
-      List<StepConstraintRegion> stepConstraints = convertToConstraintRegions(planarRegionsList.getPlanarRegionsAsList(), 0.1);
+      List<StepConstraintRegion> stepConstraints = convertToConstraintRegions(planarRegionsList.getPlanarRegionsAsList(), 0.025);
 
       double z = getForcePointOffsetZInChestFrame();
       pushRobotController = new PushRobotControllerSCS2(simulationTestHelper.getSimulationConstructionSet().getTime(),
