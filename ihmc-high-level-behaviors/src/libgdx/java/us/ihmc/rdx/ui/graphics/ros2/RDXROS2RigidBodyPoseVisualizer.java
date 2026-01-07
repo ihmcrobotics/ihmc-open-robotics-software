@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import geometry_msgs.PoseStamped;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -28,7 +27,6 @@ public class RDXROS2RigidBodyPoseVisualizer extends RDXROS2SingleTopicVisualizer
 {
    private ModelInstance poseModel;
    private ReferenceFrame frame;
-   private PoseStamped pose;
    private final FramePose3D framePose = new FramePose3D();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final ROS2Topic<Pose3D> topic;

@@ -9,7 +9,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.initialSetup.HumanoidRobotInitialSetup;
 import us.ihmc.avatar.kinematicsSimulation.SimulatedHandKinematicController;
-import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -323,18 +322,6 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
    public double getFeedbackControllerDT()
    {
       return feedbackControllerDT;
-   }
-
-   @Override
-   public DRCSensorSuiteManager getSensorSuiteManager()
-   {
-      return null;
-   }
-
-   @Override
-   public DRCSensorSuiteManager getSensorSuiteManager(ROS2Node ros2Node)
-   {
-      return null;
    }
 
    @Override
