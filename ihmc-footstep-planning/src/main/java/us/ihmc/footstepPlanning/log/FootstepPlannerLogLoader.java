@@ -19,7 +19,6 @@ import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.*;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.variable.YoVariableType;
