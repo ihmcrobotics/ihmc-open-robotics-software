@@ -48,6 +48,8 @@ public class RawImageTest
    public void closeMats()
    {
       mat8UC1.close();
+      mat8UC3.close();
+      mat16UC1.close();
       gpuMat8UC1.close();
    }
 
