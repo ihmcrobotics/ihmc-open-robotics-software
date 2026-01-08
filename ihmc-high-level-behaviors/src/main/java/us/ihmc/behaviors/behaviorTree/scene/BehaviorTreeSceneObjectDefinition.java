@@ -26,8 +26,8 @@ public class BehaviorTreeSceneObjectDefinition extends LatestTimestampModifiable
       super(crdtInfo);
 
       objectType = new CRDTBidirectionalEnumField<>(this, BehaviorTreeSceneObjectType.YOLO_ONLY);
-      yoloModelName = new CRDTBidirectionalString(this, "");
-      yoloClassName = new CRDTBidirectionalString(this, "");
+      yoloModelName = new CRDTBidirectionalString(this, "best_multi_12_17_2025");
+      yoloClassName = new CRDTBidirectionalString(this, "door_lever");
       foundationPoseObjectType = new CRDTBidirectionalEnumField<>(this, IsaacROSFoundationPoseObject.MUSTARD);
    }
 
