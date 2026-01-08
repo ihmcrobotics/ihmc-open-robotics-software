@@ -86,9 +86,4 @@
     </queueing__properties__>
   </controller__msgs.msg.dds.FootstepDataListMessage>
   <long>0</long>
-  <us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand>
-    <uniqueId>0</uniqueId>
-    <destination>0</destination>
-    <source>0</source>
-  </us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand>
 </object-stream>

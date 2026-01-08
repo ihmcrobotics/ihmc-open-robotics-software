@@ -1,22 +1,9 @@
 package us.ihmc.avatar.ros;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
-import us.ihmc.utilities.ros.RosNodeInterface;
 
 public interface RobotROSClockCalculator
 {
-   /**
-    * Overrides this method for calculators that requires to subscribe to a ROS topic.
-    *
-    * @param rosMainNode
-    */
-   default void subscribeToROS1Topics(RosNodeInterface rosMainNode)
-   {
-   }
-
-   default void unsubscribeFromROS1Topics(RosNodeInterface ros1Node)
-   {
-   }
 
    /**
     * This method is called every time a new {@code RobotConfigurationData} has been received from the

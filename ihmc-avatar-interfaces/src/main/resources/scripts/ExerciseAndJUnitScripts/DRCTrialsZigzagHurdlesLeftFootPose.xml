@@ -406,9 +406,4 @@
     <pause__>false</pause__>
   </controller__msgs.msg.dds.PauseWalkingMessage>
   <long>0</long>
-  <us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand>
-    <uniqueId>0</uniqueId>
-    <destination>0</destination>
-    <source>0</source>
-  </us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand>
 </object-stream>
