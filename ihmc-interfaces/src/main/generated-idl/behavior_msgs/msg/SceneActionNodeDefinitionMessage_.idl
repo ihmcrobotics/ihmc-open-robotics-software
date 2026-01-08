@@ -2,6 +2,7 @@
 #define __behavior_msgs__msg__SceneActionNodeDefinitionMessage__idl__
 
 #include "behavior_msgs/msg/./ActionNodeDefinitionMessage_.idl"
+#include "behavior_msgs/msg/./BehaviorTreeSceneObjectDefinitionMessage_.idl"
 module behavior_msgs
 {
   module msg
@@ -9,6 +10,10 @@ module behavior_msgs
     module dds
     {
 
+      /**
+       * TODO: Add other actions besides setting up an object
+       * TODO: The following fields are work in progress:
+       */
       @TypeCode(type="behavior_msgs::msg::dds_::SceneActionNodeDefinitionMessage_")
       struct SceneActionNodeDefinitionMessage
       {
@@ -17,9 +22,9 @@ module behavior_msgs
          */
         behavior_msgs::msg::dds::ActionNodeDefinitionMessage definition;
         /**
-         * YOLO model name to use
+         * Definition of the object to setup
          */
-        string yolo_model_name;
+        behavior_msgs::msg::dds::BehaviorTreeSceneObjectDefinitionMessage scene_object_definition;
         /**
          * YOLO confidence threshold
          */
@@ -37,14 +42,6 @@ module behavior_msgs
          */
         float outlier_threshold;
         /**
-         * FoundationPose object type (enum ordinal)
-         */
-        octet object_type;
-        /**
-         * True to use foundation pose, else use a YOLO based detection
-         */
-        boolean use_foundation_pose;
-        /**
          * YOLO models that should be enabled at this point
          */
         sequence<string, 10> enabled_yolo_models;
@@ -52,6 +49,10 @@ module behavior_msgs
          * YOLO classes to ignore
          */
         sequence<octet, 256> ignored_yolo_class_indices;
+        /**
+         * FoundationPose object type (enum ordinal)
+         */
+        octet foundation_pose_object_type;
         /**
          * FoundationPose models that should be enabled at this point
          */
