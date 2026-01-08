@@ -44,13 +44,12 @@ public class RDXHandManager
             }
          }
 
-         String handIdentifier = HandInterface.getSimpleIdentifier(robotName, side, handType);
          switch (handType)
          {
             case EZ_GRIPPER ->
-                  rdxHands.put(side, new RDXEZGripper(handIdentifier, side, ezGripperCommunication));
+                  rdxHands.put(side, new RDXEZGripper(side, ezGripperCommunication));
             case ABILITY_HAND ->
-                  rdxHands.put(side, new RDXAbilityHand(handIdentifier, side, ros2Node));
+                  rdxHands.put(side, new RDXAbilityHand(side, ros2Node));
          }
       }
    }
