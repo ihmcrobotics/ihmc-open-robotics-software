@@ -23,6 +23,9 @@ public class RawImageTools
       if (imageToResize.get() == null)
          throw new RuntimeException("Input image was deallocated before it could be processed.");
 
+      if (imageToResize.getWidth() == outputWidth && imageToResize.getHeight() == outputHeight)
+         return imageToResize;
+
       Size outputSize = new Size(outputWidth, outputHeight);
 
       Mat resizedCpuMat = null;
@@ -52,12 +55,16 @@ public class RawImageTools
                                            imageToResize.getDepthDiscretization());
 
       imageToResize.release();
+      outputSize.close();
 
       return resizedImage;
    }
 
    public static CameraIntrinsics resize(CameraIntrinsics intrinsicsToResize, int outputWidth, int outputHeight)
    {
+      if (intrinsicsToResize.getWidth() == outputWidth && intrinsicsToResize.getHeight() == outputHeight)
+         return new CameraIntrinsics(intrinsicsToResize);
+
       double scaleX = (double) outputWidth / intrinsicsToResize.getWidth();
       double scaleY = (double) outputHeight / intrinsicsToResize.getHeight();
 
@@ -120,7 +127,7 @@ public class RawImageTools
          throw new RuntimeException("Input image was deallocated before it could be processed.");
 
       if (imageToConvert.getPixelFormat() == newPixelFormat)
-         return new RawImage(imageToConvert);
+         return imageToConvert;
 
       RawImage result;
       if (imageToConvert.hasGpuImage())
