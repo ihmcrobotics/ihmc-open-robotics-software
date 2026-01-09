@@ -585,13 +585,6 @@ public final class RandomHumanoidMessages
       return next;
    }
 
-   public static LocalizationStatusPacket nextLocalizationStatusPacket(Random random)
-   {
-      LocalizationStatusPacket next = new LocalizationStatusPacket();
-      next.setOverlap(random.nextDouble());
-      next.setStatus(Integer.toHexString(random.nextInt()));
-      return next;
-   }
 
    public static PelvisPoseErrorPacket nextPelvisPoseErrorPacket(Random random)
    {
@@ -602,30 +595,6 @@ public final class RandomHumanoidMessages
       return next;
    }
 
-   public static PointCloudWorldPacket nextPointCloudWorldPacket(Random random)
-   {
-      PointCloudWorldPacket next = new PointCloudWorldPacket();
-      next.setTimestamp(random.nextLong());
-      next.getGroundQuadTreeSupport().add(RandomNumbers.nextFloatArray(random, random.nextInt(), 100.0f));
-      next.getDecayingWorldScan().add(RandomNumbers.nextFloatArray(random, random.nextInt(), 100.0f));
-      next.setDefaultGroundHeight(random.nextFloat());
-      return next;
-   }
-
-   public static VehiclePosePacket nextVehiclePosePacket(Random random)
-   {
-      VehiclePosePacket next = new VehiclePosePacket();
-      next.getPosition().set(EuclidCoreRandomTools.nextPoint3D(random));
-      next.getOrientation().set(EuclidCoreRandomTools.nextQuaternion(random));
-      return next;
-   }
-
-   public static HandPowerCyclePacket nextHandPowerCyclePacket(Random random)
-   {
-      HandPowerCyclePacket next = new HandPowerCyclePacket();
-      next.setRobotSide(RandomNumbers.nextEnum(random, RobotSide.class).toByte());
-      return next;
-   }
 
    public static CapturabilityBasedStatus nextCapturabilityBasedStatus(Random random)
    {
@@ -748,20 +717,6 @@ public final class RandomHumanoidMessages
       return next;
    }
 
-   public static MultisenseParameterPacket nextMultisenseParameterPacket(Random random)
-   {
-      MultisenseParameterPacket next = new MultisenseParameterPacket();
-      next.setInitialize(random.nextBoolean());
-      next.setGain(random.nextDouble());
-      next.setMotorSpeed(random.nextDouble());
-      next.setLedEnable(random.nextBoolean());
-      next.setFlashEnable(random.nextBoolean());
-      next.setDutyCycle(random.nextInt());
-      next.setAutoExposure(random.nextBoolean());
-      next.setAutoWhiteBalance(random.nextBoolean());
-      return next;
-   }
-
    public static KinematicsToolboxOutputStatus nextKinematicsToolboxOutputStatus(Random random)
    {
       KinematicsToolboxOutputStatus next = new KinematicsToolboxOutputStatus();
@@ -770,21 +725,6 @@ public final class RandomHumanoidMessages
       next.getDesiredRootPosition().set(EuclidCoreRandomTools.nextVector3D32(random));
       next.getDesiredRootOrientation().set(EuclidCoreRandomTools.nextQuaternion32(random));
       next.setSolutionQuality(random.nextDouble());
-      return next;
-   }
-
-   public static BlackFlyParameterPacket nextBlackFlyParameterPacket(Random random)
-   {
-      BlackFlyParameterPacket next = new BlackFlyParameterPacket();
-      next.setAutoExposure(random.nextBoolean());
-      next.setAutoGain(random.nextBoolean());
-      next.setAutoShutter(random.nextBoolean());
-      next.setExposure(random.nextDouble());
-      next.setFrameRate(random.nextDouble());
-      next.setFromUi(random.nextBoolean());
-      next.setGain(random.nextDouble());
-      next.setShutter(random.nextDouble());
-      next.setRobotSide(RandomNumbers.nextEnum(random, RobotSide.class).toByte());
       return next;
    }
 
@@ -801,14 +741,6 @@ public final class RandomHumanoidMessages
       next.getRadial().add(RandomNumbers.nextDoubleArray(random, random.nextInt(1000), 1.0));
       next.setT1(random.nextDouble());
       next.setT2(random.nextDouble());
-      return next;
-   }
-
-   public static LocalizationPointMapPacket nextLocalizationPointMapPacket(Random random)
-   {
-      LocalizationPointMapPacket next = new LocalizationPointMapPacket();
-      next.setTimestamp(random.nextLong());
-      next.getLocalizationPointMap().add(RandomNumbers.nextFloatArray(random, random.nextInt(10000), 1.0f));
       return next;
    }
 
@@ -905,37 +837,6 @@ public final class RandomHumanoidMessages
       return next;
    }
 
-   public static SimulatedLidarScanPacket nextSimulatedLidarScanPacket(Random random)
-   {
-      SimulatedLidarScanPacket next = new SimulatedLidarScanPacket();
-      int size = Math.abs(random.nextInt(1000000));
-      for (int i = 0; i < size; i++)
-      {
-         next.getRanges().add(random.nextFloat());
-      }
-
-      next.setSensorId(random.nextInt());
-
-      next.getLidarScanParameters().set(nextLidarScanParametersMessage(random));
-      return next;
-   }
-
-   public static LidarScanParametersMessage nextLidarScanParametersMessage(Random random)
-   {
-      LidarScanParametersMessage next = new LidarScanParametersMessage();
-      next.setTimestamp(random.nextLong());
-      next.setSweepYawMax(random.nextFloat());
-      next.setSweepYawMin(random.nextFloat());
-      next.setHeightPitchMax(random.nextFloat());
-      next.setHeightPitchMin(random.nextFloat());
-      next.setTimeIncrement(random.nextFloat());
-      next.setScanTime(random.nextFloat());
-      next.setMinRange(random.nextFloat());
-      next.setMaxRange(random.nextFloat());
-      next.setPointsPerSweep(random.nextInt());
-      next.setScanHeight(random.nextInt());
-      return null;
-   }
 
    public static ManualHandControlPacket nextManualHandControlPacket(Random random)
    {

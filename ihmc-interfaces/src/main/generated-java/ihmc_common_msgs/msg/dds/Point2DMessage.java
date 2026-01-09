@@ -9,6 +9,10 @@ import us.ihmc.pubsub.TopicDataType;
 public class Point2DMessage extends Packet<Point2DMessage> implements Settable<Point2DMessage>, EpsilonComparable<Point2DMessage>
 {
    /**
+            * sequence id
+            */
+   public long sequence_id_;
+   /**
             * x coordinate
             */
    public double x_;
@@ -29,10 +33,27 @@ public class Point2DMessage extends Packet<Point2DMessage> implements Settable<P
 
    public void set(Point2DMessage other)
    {
+      sequence_id_ = other.sequence_id_;
+
       x_ = other.x_;
 
       y_ = other.y_;
 
+   }
+
+   /**
+            * sequence id
+            */
+   public void setSequenceId(long sequence_id)
+   {
+      sequence_id_ = sequence_id;
+   }
+   /**
+            * sequence id
+            */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -83,6 +104,8 @@ public class Point2DMessage extends Packet<Point2DMessage> implements Settable<P
       if(other == null) return false;
       if(other == this) return true;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.x_, other.x_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.y_, other.y_, epsilon)) return false;
@@ -100,6 +123,8 @@ public class Point2DMessage extends Packet<Point2DMessage> implements Settable<P
 
       Point2DMessage otherMyClass = (Point2DMessage) other;
 
+      if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
+
       if(this.x_ != otherMyClass.x_) return false;
 
       if(this.y_ != otherMyClass.y_) return false;
@@ -114,6 +139,8 @@ public class Point2DMessage extends Packet<Point2DMessage> implements Settable<P
       StringBuilder builder = new StringBuilder();
 
       builder.append("Point2DMessage {");
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("x=");
       builder.append(this.x_);      builder.append(", ");
       builder.append("y=");

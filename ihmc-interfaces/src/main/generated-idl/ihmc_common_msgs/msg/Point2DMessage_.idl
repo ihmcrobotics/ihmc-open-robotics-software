@@ -12,6 +12,10 @@ module ihmc_common_msgs
       struct Point2DMessage
       {
         /**
+         * sequence id
+         */
+        unsigned long long sequence_id;
+        /**
          * x coordinate
          */
         double x;
