@@ -10,8 +10,6 @@ import java.util.Map;
 import ihmc_common_msgs.msg.dds.MessageCollection;
 import ihmc_common_msgs.msg.dds.MessageCollectionNotification;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 
 /**
@@ -145,6 +143,11 @@ public class MessageCollectionMessenger
     * messages should be gathered and processed at the same time, and then the collection of
     * messages that have been added via {@link #addMessage(Packet)}.
     * <p>
+    * When using this method, the user should register the method
+    * {@link #receivedNotification(MessageCollectionNotification)} as a listener to the
+    * communication, so {@code this} can receive the notification from the controller.
+    * </p>
+    * <p>
     * This method is safer than {@link #sendMessageCollectionUnsafe(Messenger)} as before actually
     * sending the messages, it will wait for first receiving a
     * {@link MessageCollectionNotification}. The notification indicates that the controller is ready
@@ -160,32 +163,10 @@ public class MessageCollectionMessenger
     * running the task on a different thread, i.e. {@code runOnThread = true} will prevent this
     * effect.
     * </p>
-    * 
-    * @param packetCommunicator used to communicate with the controller.
-    * @param runOnThread whether this method should be executed on a separate thread.
-    * @see #NOTIFICATION_TIMEOUT
-    */
-   public void sendMessageCollectionSafe(PacketCommunicator packetCommunicator, boolean runOnThread)
-   {
-      PacketConsumer<MessageCollectionNotification> listener = this::receivedNotification;
-      packetCommunicator.attachListener(MessageCollectionNotification.class, listener);
-
-      sendMessageCollectionSafe(packetCommunicator::send, runOnThread, () -> packetCommunicator.detachListener(MessageCollectionNotification.class, listener));
-   }
-
-   /**
-    * Sends, in a safe manner, first a {@code MessageCollection} to indicate that the following
-    * messages should be gathered and processed at the same time, and then the collection of
-    * messages that have been added via {@link #addMessage(Packet)}.
-    * <p>
-    * When using this method, the user should register the method
-    * {@link #receivedNotification(MessageCollectionNotification)} as a listener to the
-    * communication, so {@code this} can receive the notification from the controller.
-    * </p>
-    * 
+    **
     * @param messenger the protocol for sending messages to the controller.
     * @param runOnThread whether this method should be executed on a separate thread.
-    * @see #sendMessageCollectionSafe(PacketCommunicator, boolean)
+    *  @see #NOTIFICATION_TIMEOUT
     */
    public void sendMessageCollectionSafe(Messenger messenger, boolean runOnThread)
    {
@@ -214,7 +195,7 @@ public class MessageCollectionMessenger
     * <p>
     * This method strongly rely on the reliability of the communication and expect the
     * {@code MessageCollection} to arrive first. Prefer using
-    * {@link #sendMessageCollectionSafe(PacketCommunicator, boolean)}.
+    * {@link #sendMessageCollectionSafe(Messenger, boolean)}.
     * </p>
     * 
     * @param messenger the protocol for sending messages to the controller.
