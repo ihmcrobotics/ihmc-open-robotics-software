@@ -298,6 +298,9 @@ public class AvatarMultiThreadingFactory
                                                        ikStreamingThread.get().getSCS2YoGraphics()));
          }
 
+         // FIXME add this back when a release of the logger is done.
+//         builders.add(new RegistrySendBufferBuilder(jvmStatisticsGenerator.getYoRegistry(), null));
+
          // Logging locally on the robot
          IntraprocessYoVariableLogger intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(builders,
                                                                          robotModel.getEstimatorDT(),
