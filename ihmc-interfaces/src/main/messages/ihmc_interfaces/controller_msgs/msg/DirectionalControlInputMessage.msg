@@ -11,6 +11,8 @@
 # v>0 indicates forwards/right/clockwise at v*max speed.
 
 uint64 sequence_id
+bool walk
 float64 forward
 float64 right
 float64 clockwise
+bool unit_velocities

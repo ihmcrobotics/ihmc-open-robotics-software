@@ -6,28 +6,34 @@ import us.ihmc.communication.controllerAPI.command.Command;
 public class DirectionalControlInputCommand implements Command<DirectionalControlInputCommand, DirectionalControlInputMessage>
 {
    private long sequenceId;
+   private boolean walk;
    private double forward;
    private double right;
    private double clockwise;
+   private boolean unitVelocities;
 
    @Override
    public void set(DirectionalControlInputCommand other)
    {
       clear();
 
+      walk = other.walk;
       sequenceId = other.sequenceId;
       forward = other.forward;
       right = other.right;
       clockwise = other.clockwise;
+      unitVelocities = other.unitVelocities;
    }
 
    @Override
    public void clear()
    {
+      walk = false;
       sequenceId = 0;
       forward = 0.0;
       right = 0.0;
       clockwise = 0.0;
+      unitVelocities = false;
    }
 
    @Override
@@ -39,10 +45,12 @@ public class DirectionalControlInputCommand implements Command<DirectionalContro
    public void set(DirectionalControlInputMessage message)
    {
       clear();
+      walk = message.getWalk();
       sequenceId = message.getSequenceId();
       forward = message.getForward();
       right = message.getRight();
       clockwise = message.getClockwise();
+      unitVelocities = message.getUnitVelocities();
    }
 
    @Override
@@ -63,6 +71,11 @@ public class DirectionalControlInputCommand implements Command<DirectionalContro
       return sequenceId;
    }
 
+   public boolean getWalk()
+   {
+      return walk;
+   }
+
    public double getForward()
    {
       return forward;
@@ -76,6 +89,11 @@ public class DirectionalControlInputCommand implements Command<DirectionalContro
    public double getClockwise()
    {
       return clockwise;
+   }
+
+   public boolean getUnitVelocities()
+   {
+      return unitVelocities;
    }
 
    public String toString()
