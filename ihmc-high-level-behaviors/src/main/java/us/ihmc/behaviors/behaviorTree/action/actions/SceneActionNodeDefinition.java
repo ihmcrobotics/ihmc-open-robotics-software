@@ -39,7 +39,7 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
    {
       super(rootNode);
 
-      sceneObjectDefinition = new BehaviorTreeSceneObjectDefinition(getCRDTInfo());
+      sceneObjectDefinition = new BehaviorTreeSceneObjectDefinition(this);
       yoloConfidenceThreshold = new CRDTBidirectionalFloat(this, 0.7f);
       yoloMaskThreshold = new CRDTBidirectionalFloat(this, 0.0f);
       segmentationMaskErosionRadius = new CRDTBidirectionalInteger(this, 1);

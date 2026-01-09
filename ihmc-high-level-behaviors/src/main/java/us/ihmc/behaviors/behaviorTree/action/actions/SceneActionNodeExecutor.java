@@ -89,13 +89,21 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
                continue;
             }
          }
+         else if (desiredObjectDefinition.getObjectType() == BehaviorTreeSceneObjectType.DOOR_PANEL)
+         {
+            if (printDebug)
+               state.getLogger().warn("Door panel not yet implemented.");
+
+            continue;
+         }
          else if (detection.getMostRecentDetection() instanceof YOLOv8InstantDetection yoloDetection)
          {
             if (!(desiredObjectDefinition.getObjectType() == BehaviorTreeSceneObjectType.YOLO_ONLY))
             {
                if (printDebug)
-                  state.getLogger().warn("Need FoundationPose but found YOLOv8 name: %s"
-                                               .formatted(detection.getMostRecentDetection().getDetectedObjectClass()));
+                  state.getLogger().warn("Need %s but found YOLOv8 name: %s"
+                                               .formatted(desiredObjectDefinition.getObjectType().name(),
+                                                          detection.getMostRecentDetection().getDetectedObjectClass()));
 
                continue;
             }
