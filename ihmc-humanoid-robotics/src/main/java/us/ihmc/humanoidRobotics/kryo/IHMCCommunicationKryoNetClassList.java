@@ -265,19 +265,16 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(WrenchStampedPubSubType.class);
       registerPacketField(TimePubSubType.class);
       registerPacketField(ParameterPubSubType.class);
-      registerPacketField(UIConnectedPacketPubSubType.class);
       registerPacketField(WrenchPubSubType.class);
       registerPacketField(OccupancyGridPubSubType.class);
       registerPacketField(TFMessagePubSubType.class);
       registerPacketField(PathPubSubType.class);
-      registerPacketField(LocalizationStatusPacketPubSubType.class);
       registerPacketField(UInt32MultiArrayPubSubType.class);
       registerPacketField(NavSatStatusPubSubType.class);
       registerPacketField(HandHybridJointspaceTaskspaceTrajectoryMessagePubSubType.class);
       registerPacketField(HumanoidBehaviorTypePacketPubSubType.class);
       registerPacketField(Vector3StampedPubSubType.class);
       registerPacketField(InteractiveMarkerUpdatePubSubType.class);
-      registerPacketField(BlackFlyParameterPacketPubSubType.class);
       registerPacketField(GridCellsPubSubType.class);
       registerPacketField(HeightQuadTreeLeafMessagePubSubType.class);
       registerPacketField(Polygon2DMessagePubSubType.class);
@@ -302,23 +299,19 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(Pose2DPubSubType.class);
       registerPacketField(SnapFootstepPacketPubSubType.class);
       registerPacketField(WalkingStatusMessagePubSubType.class);
-      registerPacketField(MultisenseParameterPacketPubSubType.class);
       registerPacketField(PoseArrayPubSubType.class);
       registerPacketField(WeightMatrix3DMessagePubSubType.class);
       registerPacketField(ReachingManifoldMessagePubSubType.class);
       registerPacketField(PolygonPubSubType.class);
       registerPacketField(ParameterDescriptorPubSubType.class);
-      registerPacketField(WallPosePacketPubSubType.class);
       registerPacketField(StopAllTrajectoryMessagePubSubType.class);
       registerPacketField(Int8MultiArrayPubSubType.class);
       registerPacketField(DesiredAccelerationsMessagePubSubType.class);
-      registerPacketField(DoorLocationPacketPubSubType.class);
       registerPacketField(MultiDOFJointTrajectoryPointPubSubType.class);
       registerPacketField(ChannelFloat32PubSubType.class);
       registerPacketField(SCSListenerPacketPubSubType.class);
       registerPacketField(TransformStampedPubSubType.class);
       registerPacketField(AccelWithCovarianceStampedPubSubType.class);
-      registerPacketField(DetectedFacesPacketPubSubType.class);
       registerPacketField(RobotConfigurationDataPubSubType.class);
       registerPacketField(MessageCollectionPubSubType.class);
       registerPacketField(MessageCollectionNotificationPubSubType.class);
@@ -332,7 +325,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(InvalidPacketNotificationPacketPubSubType.class);
       registerPacketField(CenterOfMassTrajectoryMessagePubSubType.class);
       registerPacketField(PointCloudPubSubType.class);
-      registerPacketField(UIPositionCheckerPacketPubSubType.class);
       registerPacketField(WaypointBasedTrajectoryMessagePubSubType.class);
       registerPacketField(HeadHybridJointspaceTaskspaceTrajectoryMessagePubSubType.class);
       registerPacketField(PoseWithCovarianceStampedPubSubType.class);
@@ -340,12 +332,10 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(PoseWithCovariancePubSubType.class);
       registerPacketField(Int32PubSubType.class);
       registerPacketField(ByteMultiArrayPubSubType.class);
-      registerPacketField(HandPowerCyclePacketPubSubType.class);
       registerPacketField(QuaternionPubSubType.class);
       registerPacketField(PelvisHeightTrajectoryMessagePubSubType.class);
       registerPacketField(JointStatePubSubType.class);
       registerPacketField(QuaternionStampedPubSubType.class);
-      registerPacketField(SimulatedLidarScanPacketPubSubType.class);
       registerPacketField(JointspaceTrajectoryMessagePubSubType.class);
       registerPacketField(QueueableMessagePubSubType.class);
       registerPacketField(IlluminancePubSubType.class);
@@ -368,10 +358,8 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(LidarScanMessagePubSubType.class);
       registerPacketField(PointPubSubType.class);
       registerPacketField(KinematicsToolboxRigidBodyMessagePubSubType.class);
-      registerPacketField(PointCloudWorldPacketPubSubType.class);
       registerPacketField(WholeBodyTrajectoryMessagePubSubType.class);
       registerPacketField(MultiEchoLaserScanPubSubType.class);
-      registerPacketField(LidarScanParametersMessagePubSubType.class);
       registerPacketField(RelativeHumidityPubSubType.class);
       registerPacketField(FrameInformationPubSubType.class);
       registerPacketField(HandTrajectoryMessagePubSubType.class);
@@ -396,13 +384,11 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(DiagnosticArrayPubSubType.class);
       registerPacketField(ImagePubSubType.class);
       registerPacketField(SE3TrajectoryPointMessagePubSubType.class);
-      registerPacketField(LocalizationPointMapPacketPubSubType.class);
       registerPacketField(JointTrajectoryPointPubSubType.class);
       registerPacketField(SimpleCoactiveBehaviorDataPacketPubSubType.class);
       registerPacketField(CapturabilityBasedStatusPubSubType.class);
       registerPacketField(CharPubSubType.class);
       registerPacketField(UInt32PubSubType.class);
-      registerPacketField(ValveLocationPacketPubSubType.class);
       registerPacketField(GoalStatusArrayPubSubType.class);
       registerPacketField(MultiArrayLayoutPubSubType.class);
       registerPacketField(MomentumTrajectoryMessagePubSubType.class);
@@ -423,7 +409,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(JointTrajectoryPubSubType.class);
       registerPacketField(UInt64PubSubType.class);
       registerPacketField(BoundingBoxesPacketPubSubType.class);
-      registerPacketField(RequestLidarScanMessagePubSubType.class);
       registerPacketField(PoseStampedPubSubType.class);
       registerPacketField(PointFieldPubSubType.class);
       registerPacketField(TwistWithCovarianceStampedPubSubType.class);
@@ -468,7 +453,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(SelectionMatrix3DMessagePubSubType.class);
       registerPacketField(MeshPubSubType.class);
       registerPacketField(TransitionDescriptionPubSubType.class);
-      registerPacketField(VehiclePosePacketPubSubType.class);
       registerPacketField(NeckTrajectoryMessagePubSubType.class);
       registerPacketField(HeadTrajectoryMessagePubSubType.class);
       registerPacketField(WalkOverTerrainGoalPacketPubSubType.class);
@@ -499,9 +483,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(char[].class);
 
       // Video data
-      registerPacketClass(SimulatedLidarScanPacket.class);
       registerPacketField(IntrinsicParametersMessage.class);
-      registerPacketField(LidarScanParametersMessage.class);
 
       registerPacketClass(IMUPacket.class);
       registerPacketField(IMUPacket[].class);
@@ -607,9 +589,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       // Controller failure
       registerPacketClass(WalkingControllerFailureStatusMessage.class);
 
-      //Vehicle
-      registerPacketClass(VehiclePosePacket.class);
-
       // Toolbox modules
       registerPacketClass(ToolboxStateMessage.class);
       registerPacketField(ToolboxState.class);
@@ -707,7 +686,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(float[].class);
       registerPacketField(Quaternion32.class);
       registerPacketField(Vector3D32.class);
-      registerPacketField(LidarScanParameters.class);
 
       // Robot pose estimation
       registerPacketClass(StampedPosePacket.class);
@@ -722,13 +700,10 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
 
       //hand joint and control packets
       registerPacketClass(ManualHandControlPacket.class);
-      registerPacketClass(HandPowerCyclePacket.class);
       registerPacketClass(HandJointAnglePacket.class);
 
       // Camera information related
 //      registerPacketField(CameraPinholeBrown.class);
-
-      registerPacketClass(MultisenseParameterPacket.class);
 
       // Humanoid Behaviors
       registerPacketClass(HumanoidBehaviorTypePacket.class);
@@ -739,19 +714,14 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
 
       registerPacketClass(HandDesiredConfigurationMessage.class);
       registerPacketClass(ManualHandControlPacket.class);
-      registerPacketClass(MultisenseParameterPacket.class);
       registerPacketClass(SnapFootstepPacket.class);
-      registerPacketClass(BlackFlyParameterPacket.class);
       registerPacketClass(WalkToGoalBehaviorPacket.class);
       registerPacketField(WalkToGoalAction.class);
       registerPacketField(FootstepDataMessage.class);
       registerPacketField(FootstepDataMessage[].class);
       registerPacketClass(SimpleCoactiveBehaviorDataPacket.class);
-      registerPacketClass(WallPosePacket.class);
       registerPacketClass(WalkOverTerrainGoalPacket.class);
 
-      registerPacketClass(DoorLocationPacket.class);
-      registerPacketClass(ValveLocationPacket.class);
       registerPacketClass(BehaviorStatusPacket.class);
       registerPacketField(CurrentBehaviorStatus.class);
 
@@ -759,15 +729,11 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
 
       // Localization
       registerPacketClass(LocalizationPacket.class);
-      registerPacketClass(LocalizationStatusPacket.class);
       registerPacketClass(PelvisPoseErrorPacket.class);
-      registerPacketClass(LocalizationPointMapPacket.class);
 
       registerPacketField(Vector3D[].class);
       registerPacketField(Quaternion[].class);
       registerPacketField(Point3D[].class);
-
-      registerPacketClass(PointCloudWorldPacket.class);
 
       // New quadTree
       registerPacketClass(HeightQuadTreeToolboxRequestMessage.class);
@@ -778,7 +744,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
 
       // Lidar messages
       registerPacketClass(LidarScanMessage.class);
-      registerPacketClass(RequestLidarScanMessage.class);
 
       registerPacketClass(ControllerCrashNotificationPacket.class);
       registerPacketField(ControllerCrashLocation.class);
@@ -795,9 +760,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(StateEstimatorMode.class);
 
       registerPacketClass(RequestWristForceSensorCalibrationPacket.class);
-      registerPacketClass(UIConnectedPacket.class);
       registerPacketClass(LegCompliancePacket.class);
-      registerPacketClass(UIPositionCheckerPacket.class);
       registerPacketClass(TextToSpeechPacket.class);
 
       registerPacketField(Quaternion.class);
