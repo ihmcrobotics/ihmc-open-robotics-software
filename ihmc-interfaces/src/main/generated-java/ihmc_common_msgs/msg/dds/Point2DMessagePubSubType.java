@@ -15,7 +15,7 @@ public class Point2DMessagePubSubType implements us.ihmc.pubsub.TopicDataType<ih
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "84a58716726e3af372362df1cb04897644241284ab466ce1fcd4e2ade344083e";
+   		return "9decd9fd6bdc4b86b076c08d8a81207f8896b2a572919ecb3886513e954532fb";
    }
    
    @Override
@@ -56,6 +56,8 @@ public class Point2DMessagePubSubType implements us.ihmc.pubsub.TopicDataType<ih
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -75,12 +77,17 @@ public class Point2DMessagePubSubType implements us.ihmc.pubsub.TopicDataType<ih
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
 
    public static void write(ihmc_common_msgs.msg.dds.Point2DMessage data, us.ihmc.idl.CDR cdr)
    {
+      cdr.write_type_12(data.getSequenceId());
+
       cdr.write_type_6(data.getX());
 
       cdr.write_type_6(data.getY());
@@ -89,6 +96,8 @@ public class Point2DMessagePubSubType implements us.ihmc.pubsub.TopicDataType<ih
 
    public static void read(ihmc_common_msgs.msg.dds.Point2DMessage data, us.ihmc.idl.CDR cdr)
    {
+      data.setSequenceId(cdr.read_type_12());
+      	
       data.setX(cdr.read_type_6());
       	
       data.setY(cdr.read_type_6());
@@ -99,6 +108,7 @@ public class Point2DMessagePubSubType implements us.ihmc.pubsub.TopicDataType<ih
    @Override
    public final void serialize(ihmc_common_msgs.msg.dds.Point2DMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_6("x", data.getX());
       ser.write_type_6("y", data.getY());
    }
@@ -106,6 +116,7 @@ public class Point2DMessagePubSubType implements us.ihmc.pubsub.TopicDataType<ih
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, ihmc_common_msgs.msg.dds.Point2DMessage data)
    {
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setX(ser.read_type_6("x"));
       data.setY(ser.read_type_6("y"));
    }

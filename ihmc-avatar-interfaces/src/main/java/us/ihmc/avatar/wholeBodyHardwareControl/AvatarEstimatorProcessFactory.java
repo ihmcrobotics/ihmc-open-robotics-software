@@ -148,7 +148,8 @@ public class AvatarEstimatorProcessFactory
       // Set the root registry as the YoVariableServer's main registry
       yoVariableServer.setMainRegistry(rootRegistry,
                                        estimatorThread.get().getFullRobotModel().getRootJoint().subtreeList(),
-                                       estimatorThread.get().getSCS1YoGraphicsListRegistry());
+                                       null,
+                                       estimatorThread.get().getSCS2YoGraphics());
 
       // Create threading manager
       threadingManager.set(new AvatarEstimatorThreadManager(robotModel.getSimpleRobotName().toLowerCase(),

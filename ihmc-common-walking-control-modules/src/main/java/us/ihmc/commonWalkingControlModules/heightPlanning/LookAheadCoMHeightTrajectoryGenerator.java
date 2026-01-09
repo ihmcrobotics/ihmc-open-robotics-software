@@ -1,8 +1,5 @@
 package us.ihmc.commonWalkingControlModules.heightPlanning;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
@@ -15,10 +12,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
@@ -40,6 +33,9 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolder
 {
@@ -116,7 +112,6 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
                                                 ReferenceFrame frameOfHeight,
                                                 SideDependentList<? extends ReferenceFrame> soleFrames,
                                                 DoubleProvider yoTime,
-                                                YoGraphicsListRegistry yoGraphicsListRegistry,
                                                 YoRegistry parentRegistry)
    {
       this(minimumLegLength,
@@ -130,7 +125,6 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
            frameOfHeight,
            soleFrames,
            yoTime,
-           yoGraphicsListRegistry,
            parentRegistry);
    }
 
@@ -145,7 +139,6 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
                                                 ReferenceFrame frameOfHeight,
                                                 SideDependentList<? extends ReferenceFrame> soleFrames,
                                                 DoubleProvider yoTime,
-                                                YoGraphicsListRegistry yoGraphicsListRegistry,
                                                 YoRegistry parentRegistry)
    {
       this.centerOfMassFrame = centerOfMassFrame;
@@ -165,7 +158,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
 
       heightWaypoints = new RecyclingArrayList<>(6, SupplierBuilder.indexedSupplier(this::createHeightWaypoint));
 
-      splinedHeightTrajectory = new SplinedHeightTrajectory(registry, yoGraphicsListRegistry);
+      splinedHeightTrajectory = new SplinedHeightTrajectory(registry);
 
       setSupportLeg(RobotSide.LEFT);
 
@@ -174,39 +167,6 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
       this.nominalLegLength.addListener(v -> initializeToNominalHeight());
 
       parentRegistry.addChild(registry);
-
-      if (yoGraphicsListRegistry == null)
-         visualize = false;
-
-      if (visualize)
-      {
-         double pointSize = 0.03;
-
-         String prefix = "better_";
-
-         List<AppearanceDefinition> colors = new ArrayList<>();
-         colors.add(YoAppearance.CadetBlue());
-         colors.add(YoAppearance.Chartreuse());
-         colors.add(YoAppearance.Yellow());
-         colors.add(YoAppearance.Yellow());
-         colors.add(YoAppearance.BlueViolet());
-         colors.add(YoAppearance.Azure());
-
-         String graphicListName = "CoMHeightTrajectoryGenerator";
-
-         heightWaypoints.clear();
-         for (int i = 0; i < colors.size(); i++)
-         {
-            heightWaypoints.add().setupViz(graphicListName, prefix + "HeightWaypoint" + i, colors.get(i), yoGraphicsListRegistry);
-         }
-
-         YoGraphicPosition desiredCoMPositionViz = new YoGraphicPosition(prefix + "desiredCoMPosition",
-                                                                         desiredCoMPosition,
-                                                                         1.1 * pointSize,
-                                                                         YoAppearance.Gold());
-
-         yoGraphicsListRegistry.registerYoGraphic(graphicListName, desiredCoMPositionViz);
-      }
       heightWaypoints.clear();
    }
 

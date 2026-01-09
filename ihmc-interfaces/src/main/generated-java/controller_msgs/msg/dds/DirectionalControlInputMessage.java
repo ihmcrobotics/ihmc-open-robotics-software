@@ -22,9 +22,11 @@ import us.ihmc.pubsub.TopicDataType;
 public class DirectionalControlInputMessage extends Packet<DirectionalControlInputMessage> implements Settable<DirectionalControlInputMessage>, EpsilonComparable<DirectionalControlInputMessage>
 {
    public long sequence_id_;
+   public boolean walk_;
    public double forward_;
    public double right_;
    public double clockwise_;
+   public boolean unit_velocities_;
 
    public DirectionalControlInputMessage()
    {
@@ -40,11 +42,15 @@ public class DirectionalControlInputMessage extends Packet<DirectionalControlInp
    {
       sequence_id_ = other.sequence_id_;
 
+      walk_ = other.walk_;
+
       forward_ = other.forward_;
 
       right_ = other.right_;
 
       clockwise_ = other.clockwise_;
+
+      unit_velocities_ = other.unit_velocities_;
 
    }
 
@@ -55,6 +61,15 @@ public class DirectionalControlInputMessage extends Packet<DirectionalControlInp
    public long getSequenceId()
    {
       return sequence_id_;
+   }
+
+   public void setWalk(boolean walk)
+   {
+      walk_ = walk;
+   }
+   public boolean getWalk()
+   {
+      return walk_;
    }
 
    public void setForward(double forward)
@@ -84,6 +99,15 @@ public class DirectionalControlInputMessage extends Packet<DirectionalControlInp
       return clockwise_;
    }
 
+   public void setUnitVelocities(boolean unit_velocities)
+   {
+      unit_velocities_ = unit_velocities;
+   }
+   public boolean getUnitVelocities()
+   {
+      return unit_velocities_;
+   }
+
 
    public static Supplier<DirectionalControlInputMessagePubSubType> getPubSubType()
    {
@@ -104,11 +128,15 @@ public class DirectionalControlInputMessage extends Packet<DirectionalControlInp
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.walk_, other.walk_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.forward_, other.forward_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.right_, other.right_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.clockwise_, other.clockwise_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.unit_velocities_, other.unit_velocities_, epsilon)) return false;
 
 
       return true;
@@ -125,11 +153,15 @@ public class DirectionalControlInputMessage extends Packet<DirectionalControlInp
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
+      if(this.walk_ != otherMyClass.walk_) return false;
+
       if(this.forward_ != otherMyClass.forward_) return false;
 
       if(this.right_ != otherMyClass.right_) return false;
 
       if(this.clockwise_ != otherMyClass.clockwise_) return false;
+
+      if(this.unit_velocities_ != otherMyClass.unit_velocities_) return false;
 
 
       return true;
@@ -143,12 +175,16 @@ public class DirectionalControlInputMessage extends Packet<DirectionalControlInp
       builder.append("DirectionalControlInputMessage {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
+      builder.append("walk=");
+      builder.append(this.walk_);      builder.append(", ");
       builder.append("forward=");
       builder.append(this.forward_);      builder.append(", ");
       builder.append("right=");
       builder.append(this.right_);      builder.append(", ");
       builder.append("clockwise=");
-      builder.append(this.clockwise_);
+      builder.append(this.clockwise_);      builder.append(", ");
+      builder.append("unit_velocities=");
+      builder.append(this.unit_velocities_);
       builder.append("}");
       return builder.toString();
    }

@@ -11,16 +11,23 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicEllipsoid;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicShape;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.robotDescription.InertiaTools;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicEllipsoid3DDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -28,7 +35,10 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotController
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoOrientation3DDefinition;
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoTuple3DDefinition;
+
+public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotController, SCS2YoGraphicHolder
 {
    private final String name = getClass().getSimpleName();
 
@@ -37,7 +47,8 @@ public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotContro
 
    private final YoFrameVector3D inertiaEllipsoidGhostOffset = new YoFrameVector3D("inertiaEllipsoidGhostOffset", "", worldFrame, registry);
 
-   private final ArrayList<YoGraphic> yoGraphics = new ArrayList<YoGraphic>();
+   private final ArrayList<YoGraphic> yoGraphics = new ArrayList<>();
+   private final ArrayList<YoGraphicDefinition> graphicDefinitions = new ArrayList<>();
 
    private final YoDouble minimumMassOfRigidBodies = new YoDouble("minimumMassOfRigidBodies", registry);
    private final YoDouble maximumMassOfRigidBodies = new YoDouble("maximumMassOfRigidBodies", registry);
@@ -71,7 +82,8 @@ public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotContro
 
       findMinimumAndMaximumMassOfRigidBodies(rootBody);
       addRigidBodyAndChilderenToVisualization(rootBody);
-      yoGraphicsListRegistry.registerYoGraphics(name, yoGraphics);
+      if ( yoGraphicsListRegistry != null)
+         yoGraphicsListRegistry.registerYoGraphics(name, yoGraphics);
       update();
 
    }
@@ -147,9 +159,17 @@ public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotContro
          appearance.setTransparency(0.6);
 
          //            new YoGraphicShape(rigidBodyName, linkGraphics, framePose, scale)
-         YoGraphicShape comViz = new YoGraphicShape(rigidBodyName + "CoMEllipsoid", createEllipsoid(inertiaMatrix, mass, appearance), comPosition,
+         Graphics3DObject graphics3DObject = createEllipsoid(inertiaMatrix, mass, appearance);
+         YoGraphicShape comViz = new YoGraphicShape(rigidBodyName + "CoMEllipsoid", graphics3DObject, comPosition,
                comOrientation, 1.0);
          yoGraphics.add(comViz);
+
+         YoGraphicEllipsoid3DDefinition ellipsoidData = new YoGraphicEllipsoid3DDefinition();
+         ellipsoidData.setPosition(newYoTuple3DDefinition(comPosition));
+         ellipsoidData.setOrientation(newYoOrientation3DDefinition(comOrientation));
+         ellipsoidData.setPosition(newYoTuple3DDefinition(createRadii(inertiaMatrix, mass)));
+
+         graphicDefinitions.add(ellipsoidData);
          //         }
       }
 
@@ -216,7 +236,7 @@ public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotContro
       update();
    }
 
-   private Graphics3DObject createEllipsoid(Matrix3D inertia, double mass, AppearanceDefinition appearance)
+   private static Vector3D createRadii(Matrix3D inertia, double mass)
    {
       RotationMatrix rotationMatrix3d = new RotationMatrix();
       Vector3D principalMomentsOfInertiaToPack = new Vector3D();
@@ -229,11 +249,31 @@ public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotContro
       double ry = Math.sqrt(0.5 * (a - b + c));
       double rz = Math.sqrt(0.5 * (a + b - c));
 
+      return new Vector3D(rx, ry, rz);
+   }
+
+   private Graphics3DObject createEllipsoid(Matrix3D inertia, double mass, AppearanceDefinition appearance)
+   {
+      RotationMatrix rotationMatrix3d = new RotationMatrix();
+      Vector3D principalMomentsOfInertiaToPack = new Vector3D();
+      InertiaTools.computePrincipalMomentsOfInertia(inertia, rotationMatrix3d, principalMomentsOfInertiaToPack);
+
+      Vector3DReadOnly radii = createRadii(inertia, mass);
+
       Graphics3DObject graphics = new Graphics3DObject();
       graphics.identity();
       graphics.rotate(rotationMatrix3d);
-      graphics.addEllipsoid(rx, ry, rz, appearance);
+      graphics.addEllipsoid(radii.getX(), radii.getY(), radii.getZ(), appearance);
 
       return graphics;
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      graphicDefinitions.forEach(group::addChild);
+
+      return group;
    }
 }

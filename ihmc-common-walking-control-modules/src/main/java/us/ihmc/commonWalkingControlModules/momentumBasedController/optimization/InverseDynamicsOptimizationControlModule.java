@@ -141,9 +141,8 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
 
       wrenchMatrixCalculator = toolbox.getWrenchMatrixCalculator();
 
-      YoGraphicsListRegistry yoGraphicsListRegistry = toolbox.getYoGraphicsListRegistry();
       if (VISUALIZE_RHO_BASIS_VECTORS)
-         basisVectorVisualizer = new BasisVectorVisualizer("ContactBasisVectors", rhoSize, 1.0, yoGraphicsListRegistry, registry);
+         basisVectorVisualizer = new BasisVectorVisualizer("ContactBasisVectors", rhoSize, 1.0, registry);
       else
          basisVectorVisualizer = null;
 

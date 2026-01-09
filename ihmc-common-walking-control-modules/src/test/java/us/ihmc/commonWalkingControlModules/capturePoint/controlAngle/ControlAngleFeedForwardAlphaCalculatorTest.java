@@ -1,10 +1,13 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.controlAngle;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Blue;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Gray;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Red;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Yellow;
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicPoint2D;
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicPolygon2D;
 
 import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Disabled;
@@ -29,7 +32,12 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.robotics.Assert;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.scs2.SimulationConstructionSet2;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.DefaultPoint2DGraphic;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
@@ -47,9 +55,8 @@ public class ControlAngleFeedForwardAlphaCalculatorTest
    public void testStandingInPlace()
    {
       YoRegistry registry = new YoRegistry("test");
-      YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
-      ControlAngleFeedForwardAlphaCalculator calculator = new ControlAngleFeedForwardAlphaCalculator(registry, graphicsListRegistry);
+      ControlAngleFeedForwardAlphaCalculator calculator = new ControlAngleFeedForwardAlphaCalculator(registry);
 
       new DefaultParameterReader().readParametersInRegistry(registry);
 
@@ -72,7 +79,7 @@ public class ControlAngleFeedForwardAlphaCalculatorTest
 
       FeedForwardVisualizer visualizer = null;
       if (visualize)
-         visualizer = new FeedForwardVisualizer(registry, graphicsListRegistry);
+         visualizer = new FeedForwardVisualizer(registry, calculator.getSCS2YoGraphics());
 
       double computedAlpha = calculator.computeAlpha(currentICP, referenceICP, finalICP, referenceCMP, feedbackCMP, supportPolygon);
 
@@ -81,16 +88,15 @@ public class ControlAngleFeedForwardAlphaCalculatorTest
          visualizer.visualize(currentICP, referenceICP, finalICP, referenceCMP, feedbackCMP, supportPolygon);
          visualizer.waitUntilVisualizerDown();
       }
-      Assert.assertEquals(0.0, computedAlpha, 1e-5);
+      assertEquals(0.0, computedAlpha, 1e-5);
    }
 
    @Test
    public void testLeftFootForward()
    {
       YoRegistry registry = new YoRegistry("test");
-      YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
-      ControlAngleFeedForwardAlphaCalculator calculator = new ControlAngleFeedForwardAlphaCalculator(registry, graphicsListRegistry);
+      ControlAngleFeedForwardAlphaCalculator calculator = new ControlAngleFeedForwardAlphaCalculator(registry);
 
       new DefaultParameterReader().readParametersInRegistry(registry);
 
@@ -127,7 +133,7 @@ public class ControlAngleFeedForwardAlphaCalculatorTest
 
       FeedForwardVisualizer visualizer = null;
       if (visualize)
-         visualizer = new FeedForwardVisualizer(registry, graphicsListRegistry);
+         visualizer = new FeedForwardVisualizer(registry, calculator.getSCS2YoGraphics());
 
       double computedAlpha = calculator.computeAlpha(currentICP, referenceICP, finalICP, referenceCMP, feedbackCMP, supportPolygon);
 
@@ -164,7 +170,7 @@ public class ControlAngleFeedForwardAlphaCalculatorTest
       EuclidFrameTestTools.assertGeometricallyEquals(pointWithNoFeedForward, calculator.getPointOnEdgeWithNoFeedForward(), 1e-5);
       EuclidFrameTestTools.assertGeometricallyEquals(pointWithFullFeedForward, calculator.getPointOnEdgeWithFullFeedForward(), 1e-5);
 
-      Assert.assertTrue(computedAlpha > 0.0);
+      assertTrue(computedAlpha > 0.0);
 
       FrameVector2D vectorToEnd = new FrameVector2D();
       vectorToEnd.sub(finalICP, currentICP);
@@ -172,10 +178,10 @@ public class ControlAngleFeedForwardAlphaCalculatorTest
       FramePoint2D convergedPoint = new FramePoint2D();
       convergedPoint.add(currentICP, minConvergenceVector);
 
-      Assert.assertTrue(vectorToEnd.angle(error) < 0.0);
+      assertTrue(vectorToEnd.angle(error) < 0.0);
       RotationMatrixTools.applyYawRotation(-Math.abs(ControlAngleFeedForwardAlphaCalculator.nominalAngleToConverge), vectorToEnd, minConvergenceVector);
-      Assert.assertTrue(vectorToEnd.angle(minConvergenceVector) < 0.0);
-      Assert.assertTrue(convergedPoint.getY() < finalICP.getY());
+      assertTrue(vectorToEnd.angle(minConvergenceVector) < 0.0);
+      assertTrue(convergedPoint.getY() < finalICP.getY());
 
       FrameLine2D convergenceLine = new FrameLine2D();
       convergenceLine.set(currentICP, minConvergenceVector);
@@ -195,15 +201,15 @@ public class ControlAngleFeedForwardAlphaCalculatorTest
       FrameLineSegment2D referenceControlLine = new FrameLineSegment2D();
       referenceControlLine.set(finalICP, reallyFarAwayCMP);
 
-      Assert.assertTrue(Double.isFinite(EuclidGeometryTools.percentageOfIntersectionBetweenLineSegment2DAndLine2D(reallyFarAwayCMP,
+      assertTrue(Double.isFinite(EuclidGeometryTools.percentageOfIntersectionBetweenLineSegment2DAndLine2D(reallyFarAwayCMP,
                                                                                                                   finalICP,
                                                                                                                   currentICP,
                                                                                                                   minConvergenceVector)));
-      Assert.assertFalse(convergenceLine.intersectionWith(referenceControlLine) == null);
+      assertFalse(convergenceLine.intersectionWith(referenceControlLine) == null);
 
       EuclidFrameTestTools.assertGeometricallyEquals(minPointAlongEdge, calculator.getPointOnEdgeThatConverges(), 5e-4);
 
-      Assert.assertEquals(EuclidGeometryTools.percentageAlongLineSegment2D(minPointAlongEdge, pointWithFullFeedForward, pointWithNoFeedForward),
+      assertEquals(EuclidGeometryTools.percentageAlongLineSegment2D(minPointAlongEdge, pointWithFullFeedForward, pointWithNoFeedForward),
                           computedAlpha,
                           5e-2);
    }
@@ -213,9 +219,8 @@ public class ControlAngleFeedForwardAlphaCalculatorTest
    public void testLeftFootForwardDynamicsInLine()
    {
       YoRegistry registry = new YoRegistry("test");
-      YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
-      ControlAngleFeedForwardAlphaCalculator calculator = new ControlAngleFeedForwardAlphaCalculator(registry, graphicsListRegistry);
+      ControlAngleFeedForwardAlphaCalculator calculator = new ControlAngleFeedForwardAlphaCalculator(registry);
 
       new DefaultParameterReader().readParametersInRegistry(registry);
 
@@ -252,7 +257,7 @@ public class ControlAngleFeedForwardAlphaCalculatorTest
 
       FeedForwardVisualizer visualizer = null;
       if (visualize)
-         visualizer = new FeedForwardVisualizer(registry, graphicsListRegistry);
+         visualizer = new FeedForwardVisualizer(registry, calculator.getSCS2YoGraphics());
 
       double alpha = calculator.computeAlpha(currentICP, referenceICP, finalICP, referenceCMP, feedbackCMP, supportPolygon);
 
@@ -262,13 +267,13 @@ public class ControlAngleFeedForwardAlphaCalculatorTest
          visualizer.waitUntilVisualizerDown();
       }
 
-      Assert.assertEquals(0.0, alpha, 1e-5);
+      assertEquals(0.0, alpha, 1e-5);
 
       error.negate();
       currentICP.add(referenceICP, error);
       feedbackCMP.scaleAdd(2.0, error, referenceCMP);
 
-      Assert.assertEquals(0.0, calculator.computeAlpha(currentICP, referenceICP, finalICP, referenceCMP, feedbackCMP, supportPolygon), 1e-5);
+      assertEquals(0.0, calculator.computeAlpha(currentICP, referenceICP, finalICP, referenceCMP, feedbackCMP, supportPolygon), 1e-5);
 
       if (visualize)
       {
@@ -281,9 +286,8 @@ public class ControlAngleFeedForwardAlphaCalculatorTest
    public void testLeadingDynamicsWithALittleOrthogonal()
    {
       YoRegistry registry = new YoRegistry("test");
-      YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
-      ControlAngleFeedForwardAlphaCalculator calculator = new ControlAngleFeedForwardAlphaCalculator(registry, graphicsListRegistry);
+      ControlAngleFeedForwardAlphaCalculator calculator = new ControlAngleFeedForwardAlphaCalculator(registry);
 
       new DefaultParameterReader().readParametersInRegistry(registry);
 
@@ -327,7 +331,7 @@ public class ControlAngleFeedForwardAlphaCalculatorTest
 
       FeedForwardVisualizer visualizer = null;
       if (visualize)
-         visualizer = new FeedForwardVisualizer(registry, graphicsListRegistry);
+         visualizer = new FeedForwardVisualizer(registry, calculator.getSCS2YoGraphics());
 
       double alpha = calculator.computeAlpha(currentICP, referenceICP, finalICP, referenceCMP, feedbackCMP, supportPolygon);
 
@@ -337,7 +341,7 @@ public class ControlAngleFeedForwardAlphaCalculatorTest
          visualizer.waitUntilVisualizerDown();
       }
 
-      Assert.assertEquals(0.0, alpha, 1e-5);
+      assertEquals(0.0, alpha, 1e-5);
 
       perpendicularError.negate();
       error.add(parallelError, perpendicularError);
@@ -352,7 +356,7 @@ public class ControlAngleFeedForwardAlphaCalculatorTest
          visualizer.waitUntilVisualizerDown();
       }
 
-      Assert.assertEquals(0.0, alpha, 1e-5);
+      assertEquals(0.0, alpha, 1e-5);
 
    }
 
@@ -361,9 +365,8 @@ public class ControlAngleFeedForwardAlphaCalculatorTest
    public void testWithReferenceCMPFarOutside()
    {
       YoRegistry registry = new YoRegistry("test");
-      YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
-      ControlAngleFeedForwardAlphaCalculator calculator = new ControlAngleFeedForwardAlphaCalculator(registry, graphicsListRegistry);
+      ControlAngleFeedForwardAlphaCalculator calculator = new ControlAngleFeedForwardAlphaCalculator(registry);
 
       new DefaultParameterReader().readParametersInRegistry(registry);
 
@@ -407,7 +410,7 @@ public class ControlAngleFeedForwardAlphaCalculatorTest
 
       FeedForwardVisualizer visualizer = null;
       if (visualize)
-         visualizer = new FeedForwardVisualizer(registry, graphicsListRegistry);
+         visualizer = new FeedForwardVisualizer(registry, calculator.getSCS2YoGraphics());
 
       double alpha = calculator.computeAlpha(currentICP, referenceICP, finalICP, referenceCMP, feedbackCMP, supportPolygon);
       double expectedAlpha = EuclidGeometryTools.percentageAlongLineSegment2D(calculator.getPointOnEdgeThatConverges(),
@@ -445,9 +448,8 @@ public class ControlAngleFeedForwardAlphaCalculatorTest
    public void testTrickyCollinearCase()
    {
       YoRegistry registry = new YoRegistry("test");
-      YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
-      ControlAngleFeedForwardAlphaCalculator calculator = new ControlAngleFeedForwardAlphaCalculator(registry, graphicsListRegistry);
+      ControlAngleFeedForwardAlphaCalculator calculator = new ControlAngleFeedForwardAlphaCalculator(registry);
 
       new DefaultParameterReader().readParametersInRegistry(registry);
 
@@ -503,7 +505,7 @@ public class ControlAngleFeedForwardAlphaCalculatorTest
 
       FeedForwardVisualizer visualizer = null;
       if (visualize)
-         visualizer = new FeedForwardVisualizer(registry, graphicsListRegistry);
+         visualizer = new FeedForwardVisualizer(registry, calculator.getSCS2YoGraphics());
 
       double alpha = calculator.computeAlpha(currentICP, referenceICP, finalICP, referenceCMP, feedbackCMP, supportPolygon);
 
@@ -513,7 +515,7 @@ public class ControlAngleFeedForwardAlphaCalculatorTest
          visualizer.waitUntilVisualizerDown();
       }
 
-      Assert.assertEquals(0.0, alpha, 1e-5);
+      assertEquals(0.0, alpha, 1e-5);
    }
 
    private static FrameConvexPolygon2D createFootPolygon(double xPosition, double yPosition, double footLength, double footWidth)
@@ -541,7 +543,7 @@ public class ControlAngleFeedForwardAlphaCalculatorTest
       private final YoFramePoint2D finalICP;
       private final YoFrameConvexPolygon2D supportPolygon;
 
-      public FeedForwardVisualizer(YoRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
+      public FeedForwardVisualizer(YoRegistry registry, YoGraphicDefinition graphicDefinition)
       {
          currentICP = new YoFramePoint2D("currentICP", ReferenceFrame.getWorldFrame(), registry);
          referenceICP = new YoFramePoint2D("referenceICP", ReferenceFrame.getWorldFrame(), registry);
@@ -550,46 +552,20 @@ public class ControlAngleFeedForwardAlphaCalculatorTest
          finalICP = new YoFramePoint2D("finalICP", ReferenceFrame.getWorldFrame(), registry);
          supportPolygon = new YoFrameConvexPolygon2D("SupportPolygon", ReferenceFrame.getWorldFrame(), 8, registry);
 
-         YoGraphicPosition desiredCapturePointViz = new YoGraphicPosition("Desired Capture Point",
-                                                                          referenceICP,
-                                                                          0.01,
-                                                                          Yellow(),
-                                                                          YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
-         YoGraphicPosition currentCapturePointViz = new YoGraphicPosition("Current Capture Point",
-                                                                          currentICP,
-                                                                          0.01,
-                                                                          Blue(),
-                                                                          YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
-         YoGraphicPosition finalDesiredCapturePointViz = new YoGraphicPosition("Final Desired Capture Point",
-                                                                               finalICP,
-                                                                               0.01,
-                                                                               Red(),
-                                                                               YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
-         YoGraphicPosition perfectCMPViz = new YoGraphicPosition("Perfect CMP",
-                                                                 referenceCMP,
-                                                                 0.01,
-                                                                 Gray(),
-                                                                 YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
-         YoGraphicPosition feedbackCMP = new YoGraphicPosition("Feedback CMP",
-                                                               this.feedbackCMP,
-                                                               0.01,
-                                                               Purple(),
-                                                               YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
-         YoArtifactPolygon supportPolygonViz = new YoArtifactPolygon("Support Polygon", supportPolygon, YoAppearance.Tan().getAwtColor(), false);
-
-         graphicsListRegistry.registerArtifact("test", desiredCapturePointViz.createArtifact());
-         graphicsListRegistry.registerArtifact("test", currentCapturePointViz.createArtifact());
-         graphicsListRegistry.registerArtifact("test", finalDesiredCapturePointViz.createArtifact());
-         graphicsListRegistry.registerArtifact("test", perfectCMPViz.createArtifact());
-         graphicsListRegistry.registerArtifact("test", feedbackCMP.createArtifact());
-         graphicsListRegistry.registerArtifact("test", supportPolygonViz);
+         YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+         group.addChild(newYoGraphicPoint2D("Desired Capture Point", referenceICP, 0.02, ColorDefinitions.Yellow(), DefaultPoint2DGraphic.CIRCLE_CROSS));
+         group.addChild(newYoGraphicPoint2D("Current Capture Point", currentICP, 0.02, ColorDefinitions.Blue(), DefaultPoint2DGraphic.CIRCLE_CROSS));
+         group.addChild(newYoGraphicPoint2D("Final Desired Capture Point", finalICP, 0.02, ColorDefinitions.Red(), DefaultPoint2DGraphic.CIRCLE_CROSS));
+         group.addChild(newYoGraphicPoint2D("Perfect CMP", referenceCMP, 0.02, ColorDefinitions.Gray(), DefaultPoint2DGraphic.CIRCLE_CROSS));
+         group.addChild(newYoGraphicPoint2D("Feedback CMP", this.feedbackCMP, 0.02, ColorDefinitions.Purple(), DefaultPoint2DGraphic.CIRCLE_CROSS));
+         group.addChild(newYoGraphicPolygon2D("Support Polygon",supportPolygon, ColorDefinitions.Tan()));
 
          scs = new SimulationConstructionSet2();
          scs.setDT(1.0);
          scs.initializeBufferSize(500);
          scs.setShutdownSessionOnVisualizerClose(false);
          scs.getRootRegistry().addChild(registry);
-         scs.addYoGraphics(YoGraphicConversionTools.toYoGraphicDefinitions(graphicsListRegistry));
+         scs.addYoGraphic(graphicDefinition);
          scs.start(true, true, true);
       }
 

@@ -125,7 +125,6 @@ public class JointTorqueBasedFootSwitchFactory implements FootSwitchFactory
                                             RigidBodyBasics rootBody,
                                             ForceSensorDataReadOnly footForceSensor,
                                             double totalRobotWeight,
-                                            YoGraphicsListRegistry yoGraphicsListRegistry,
                                             YoRegistry registry)
    {
       if (contactThresholdTorque == null)

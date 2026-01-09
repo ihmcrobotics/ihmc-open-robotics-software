@@ -64,7 +64,6 @@ public enum DataSetName
 	_20171218_205120_BodyPathPlannerEnvironment,
 	_20171218_205040_SimpleMaze,
 	_20171218_204953_FlatGroundWithWall,
-	_20171218_204917_FlatGround,
 	_20171216_111326_CrossoverPlatforms,
 	_20171215_220523_SteppingStones,
 	_20171215_220208_SimpleStairs,

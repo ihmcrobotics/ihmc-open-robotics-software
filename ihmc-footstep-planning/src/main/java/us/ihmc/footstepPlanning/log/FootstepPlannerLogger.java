@@ -32,11 +32,6 @@ import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
-import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.ExtrusionHull;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.Connection;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.ConnectionPoint3D;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMap;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.IHMCCommonPaths;
@@ -613,55 +608,6 @@ public class FootstepPlannerLogger
    private void writePoint2D(int numTabs, Tuple2DReadOnly tuple) throws IOException
    {
       writeLine(numTabs, EuclidCoreIOTools.getStringOf(",", EuclidCoreIOTools.getStringFormat(8, 8), tuple.getX(), tuple.getY()));
-   }
-
-   private void writeVisibilityMap(String name, int numTabs, VisibilityMap visibilityMap) throws IOException
-   {
-      writeLine(numTabs, name);
-      writeLine(numTabs + 1, "connections:" + visibilityMap.getConnections().size());
-      for (Connection connection : visibilityMap.getConnections())
-      {
-         ConnectionPoint3D sourcePoint = connection.getSourcePoint();
-         ConnectionPoint3D targetPoint = connection.getTargetPoint();
-         writeLine(numTabs + 2,
-                   EuclidCoreIOTools.getStringOf(",",
-                                                 EuclidCoreIOTools.getStringFormat(8, 8),
-                                                 sourcePoint.getX(),
-                                                 sourcePoint.getY(),
-                                                 sourcePoint.getZ(),
-                                                 targetPoint.getX(),
-                                                 targetPoint.getY(),
-                                                 targetPoint.getZ()));
-      }
-      writeLine(numTabs + 1, "vertices:" + visibilityMap.getVertices().size());
-      for (ConnectionPoint3D vertex : visibilityMap.getVertices())
-      {
-         writeLine(numTabs + 2, EuclidCoreIOTools.getStringOf(",", EuclidCoreIOTools.getStringFormat(8, 8), vertex.getX(), vertex.getY(), vertex.getZ()));
-      }
-   }
-
-   private void writeNavigableRegion(int numTabs, int index, VisibilityMapWithNavigableRegion navigableRegion) throws IOException
-   {
-      writeLine(numTabs, "navigableRegion " + index);
-      writeLine(numTabs + 1, "mapId:" + navigableRegion.getMapId());
-      writeLine(numTabs + 1, "homeClusterType:" + navigableRegion.getHomeRegionCluster().getType().toByte());
-      writeLine(numTabs + 1, "extrusionSide:" + navigableRegion.getHomeRegionCluster().getExtrusionSide().toByte());
-
-      ExtrusionHull navigableExtrusions = navigableRegion.getHomeRegionCluster().getNavigableExtrusionsInLocal();
-      writeLine(numTabs + 1, "navigableExtrusions:" + navigableExtrusions.size());
-      for (int i = 0; i < navigableExtrusions.size(); i++)
-      {
-         writePoint2D(numTabs + 2, navigableExtrusions.get(i));
-      }
-
-      ExtrusionHull nonNavigableExtrusions = navigableRegion.getHomeRegionCluster().getNonNavigableExtrusionsInLocal();
-      writeLine(numTabs + 1, "nonNavigableExtrusions:" + nonNavigableExtrusions.size());
-      for (int i = 0; i < nonNavigableExtrusions.size(); i++)
-      {
-         writePoint2D(numTabs + 2, nonNavigableExtrusions.get(i));
-      }
-
-      writeVisibilityMap("visibilityMapInLocal", numTabs + 1, navigableRegion.getVisibilityMapInLocal());
    }
 
    private static final String tab = "\t";

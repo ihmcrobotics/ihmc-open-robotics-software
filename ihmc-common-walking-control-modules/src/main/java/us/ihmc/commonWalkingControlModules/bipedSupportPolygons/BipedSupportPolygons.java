@@ -49,16 +49,15 @@ public class BipedSupportPolygons implements SCS2YoGraphicHolder
 
    private final FramePoint3D tempContactPosition = new FramePoint3D();
 
-   public BipedSupportPolygons(CommonHumanoidReferenceFrames referenceFrames, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public BipedSupportPolygons(CommonHumanoidReferenceFrames referenceFrames, YoRegistry parentRegistry)
    {
-      this(referenceFrames.getMidFeetZUpFrame(), referenceFrames.getSoleZUpFrames(), referenceFrames.getSoleFrames(), parentRegistry, yoGraphicsListRegistry);
+      this(referenceFrames.getMidFeetZUpFrame(), referenceFrames.getSoleZUpFrames(), referenceFrames.getSoleFrames(), parentRegistry);
    }
 
    public BipedSupportPolygons(ReferenceFrame midFeetZUpFrame,
                                SideDependentList<? extends ReferenceFrame> soleZUpFrames,
                                SideDependentList<? extends ReferenceFrame> soleFrames,
-                               YoRegistry parentRegistry,
-                               YoGraphicsListRegistry yoGraphicsListRegistry)
+                               YoRegistry parentRegistry)
    {
       supportPolygonViz = new YoFrameConvexPolygon2D("combinedPolygon", "", worldFrame, 2 * maxNumberOfContactPointsPerFoot, registry);
 
@@ -89,11 +88,6 @@ public class BipedSupportPolygons implements SCS2YoGraphicHolder
                                                                        defaultFeetColors.get(robotSide),
                                                                        false);
          artifactList.add(footPolygonArtifact);
-      }
-
-      if (yoGraphicsListRegistry != null)
-      {
-         yoGraphicsListRegistry.registerArtifactList(artifactList);
       }
 
       parentRegistry.addChild(registry);

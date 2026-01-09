@@ -274,13 +274,6 @@ jobs:
     with:
       subproject: 'robot-environment-awareness'
       test-category: 'fast'
-  robotiq-hand-drivers:
-    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
-    secrets:
-      ROSIE_PERSONAL_ACCESS_TOKEN: ${{ secrets.ROSIE_PERSONAL_ACCESS_TOKEN }}
-    with:
-      subproject: 'robotiq-hand-drivers'
-      test-category: 'fast'
   simulation-construction-set-tools:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     secrets:

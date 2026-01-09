@@ -7,6 +7,7 @@ import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.conversion.YoGraphicConversionTools;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -14,6 +15,9 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.scs2.SimulationConstructionSet2;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
@@ -25,6 +29,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer.defaultFeetColorDefinitions;
 import static us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer.defaultFeetColors;
 
 public class CoPTrajectoryVisualizer
@@ -33,15 +38,18 @@ public class CoPTrajectoryVisualizer
    {
       YoRegistry registry = new YoRegistry("visualizer");
       registry.addChild(copTrajectoryGenerator.getYoRegistry());
-      YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-      CoPPointViewer viewer = new CoPPointViewer(registry, graphicsListRegistry);
+      CoPPointViewer viewer = new CoPPointViewer(registry);
 
       YoFramePoint3D desiredCoP = new YoFramePoint3D("desiredCoP", ReferenceFrame.getWorldFrame(), registry);
-      BagOfBalls desiredCoPViz = new BagOfBalls(100, 0.005, YoAppearance.Black(), YoGraphicPosition.GraphicType.SOLID_BALL, registry, graphicsListRegistry);
+      BagOfBalls desiredCoPViz = new BagOfBalls(100, 0.005, YoAppearance.Black(), YoGraphicPosition.GraphicType.SOLID_BALL, registry, null);
 
       int maxNumberOfContactPointsPerFoot = 6;
       SideDependentList<YoFrameConvexPolygon2D> footPolygonsViz = new SideDependentList<>();
 
+
+      SimulationConstructionSet2 scs2 = new SimulationConstructionSet2();
+      for (int i = 0; i < 100; i++)
+         scs2.addYoGraphic(YoGraphicDefinitionFactory.newYoGraphicPoint3D("desired CoP " + i, desiredCoPViz.getPositions().get(i), 0.0025, ColorDefinitions.Black()));
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -50,9 +58,8 @@ public class CoPTrajectoryVisualizer
          YoFrameConvexPolygon2D footPolygonViz = new YoFrameConvexPolygon2D(robotSidePrefix + "FootPolygon", "", ReferenceFrame.getWorldFrame(), maxNumberOfContactPointsPerFoot,
                                                                             registry);
          footPolygonsViz.put(robotSide, footPolygonViz);
-         YoArtifactPolygon footPolygonArtifact = new YoArtifactPolygon(robotSide.getCamelCaseNameForMiddleOfExpression() + " Foot Polygon", footPolygonViz,
-                                                                       defaultFeetColors.get(robotSide), false);
-         graphicsListRegistry.registerArtifact("Viz", footPolygonArtifact);
+         scs2.addYoGraphic(YoGraphicDefinitionFactory.newYoGraphicPolygon2D(robotSide.getCamelCaseNameForMiddleOfExpression() + " Foot Polygon", footPolygonViz,
+                                                                       defaultFeetColorDefinitions.get(robotSide), false));
       }
 
       List<YoFrameConvexPolygon2D> stepPolygonViz = new ArrayList<>();
@@ -61,23 +68,14 @@ public class CoPTrajectoryVisualizer
          YoFrameConvexPolygon2D footPolygonViz = new YoFrameConvexPolygon2D("upcomingStepPolygon", "" + i, ReferenceFrame.getWorldFrame(), maxNumberOfContactPointsPerFoot,
                                                                             registry);
          stepPolygonViz.add(footPolygonViz);
-         YoArtifactPolygon footPolygonArtifact = new YoArtifactPolygon("Step Polygon" + i, footPolygonViz, Color.GREEN, false);
-         graphicsListRegistry.registerArtifact("Viz", footPolygonArtifact);
-
+         scs2.addYoGraphic(YoGraphicDefinitionFactory.newYoGraphicPolygon2D("Step Polygon" + i, footPolygonViz, ColorDefinitions.Green(), false));
       }
 
+      scs2.setDT(0.01);
+      scs2.addRegistry(registry);
+      scs2.addYoGraphic(viewer.getSCS2YoGraphics());
 
-      Robot robot = new Robot("dummy");
-      robot.getRobotsYoRegistry().addChild(registry);
-      SimulationConstructionSet simulationConstructionSet = new SimulationConstructionSet(robot);
-      simulationConstructionSet.addYoGraphicsListRegistry(graphicsListRegistry);
-
-      SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = simulationConstructionSet.createSimulationOverheadPlotterFactory();
-      simulationOverheadPlotterFactory.addYoGraphicsListRegistries(graphicsListRegistry);
-      simulationOverheadPlotterFactory.createOverheadPlotter();
-
-      simulationConstructionSet.startOnAThread();
-
+      scs2.startSimulationThread();
 
       List<? extends ContactStateProvider> contactStateProviderList = copTrajectoryGenerator.getContactStateProviders();
       double totalDuration = Math.min(10.0, contactStateProviderList.get(contactStateProviderList.size() - 1).getTimeInterval().getEndTime());
@@ -96,12 +94,11 @@ public class CoPTrajectoryVisualizer
          stepPolygonViz.get(i).setMatchingFrame(polygon, false);
       }
 
-      for (double time = 0; time <= totalDuration; time += 0.01)
+      for (double time = 0; time <= totalDuration; time += scs2.getDT())
       {
-         robot.getYoTime().set(time);
          copTrajectoryGenerator.update(time, desiredCoP);
          desiredCoPViz.setBallLoop(desiredCoP);
-         simulationConstructionSet.tickAndUpdate();
+         scs2.tick();
       }
 
       ThreadTools.sleepForever();

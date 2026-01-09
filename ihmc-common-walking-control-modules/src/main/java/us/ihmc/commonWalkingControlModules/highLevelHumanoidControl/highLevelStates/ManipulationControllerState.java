@@ -105,8 +105,7 @@ public class ManipulationControllerState extends HighLevelControllerState
                                       WalkingControllerParameters walkingControllerParameters,
                                       FullHumanoidRobotModel fullRobotModel,
                                       JointBasics[] jointsToIgnore,
-                                      YoDouble yoTime,
-                                      YoGraphicsListRegistry graphicsListRegistry)
+                                      YoDouble yoTime)
    {
       super(controllerName, highLevelControllerParameters, collectControllableJoints(fullRobotModel, jointsToIgnore));
 
@@ -153,8 +152,8 @@ public class ManipulationControllerState extends HighLevelControllerState
       RigidBodyBasics chest = controllerSystem.findRigidBody(chestName);
       RigidBodyBasics head = controllerSystem.findRigidBody(headName);
 
-      chestManager = createRigidBodyManager(chest, elevator, chest.getBodyFixedFrame(), elevator.getBodyFixedFrame(), elevator, yoTime, graphicsListRegistry);
-      headManager = createRigidBodyManager(head, chest, head.getBodyFixedFrame(), chest.getBodyFixedFrame(), elevator, yoTime, graphicsListRegistry);
+      chestManager = createRigidBodyManager(chest, elevator, chest.getBodyFixedFrame(), elevator.getBodyFixedFrame(), elevator, yoTime);
+      headManager = createRigidBodyManager(head, chest, head.getBodyFixedFrame(), chest.getBodyFixedFrame(), elevator, yoTime);
 
       privilegedConfigurationCommand.clear();
       for (RobotSide robotSide : RobotSide.values)
@@ -170,7 +169,7 @@ public class ManipulationControllerState extends HighLevelControllerState
                                                                 handControlFrameTransform));
          }
 
-         RigidBodyControlManager handManager = createRigidBodyManager(hand, chest, handControlFrames.get(robotSide), chest.getBodyFixedFrame(), elevator, yoTime, graphicsListRegistry);
+         RigidBodyControlManager handManager = createRigidBodyManager(hand, chest, handControlFrames.get(robotSide), chest.getBodyFixedFrame(), elevator, yoTime);
          handManager.setDoPrepareForLocomotion(false);
          handManagers.put(robotSide, handManager);
 
@@ -194,7 +193,6 @@ public class ManipulationControllerState extends HighLevelControllerState
                                                            controlledJoints,
                                                            centerOfMassFrame,
                                                            walkingControllerParameters.getMomentumOptimizationSettings(),
-                                                           graphicsListRegistry,
                                                            registry);
 
       FeedbackControlCommandList feedbackControlCommandList = new FeedbackControlCommandList();
@@ -222,8 +220,7 @@ public class ManipulationControllerState extends HighLevelControllerState
                                                           ReferenceFrame controlFrame,
                                                           ReferenceFrame baseFrame,
                                                           RigidBodyBasics elevator,
-                                                          YoDouble yoTime,
-                                                          YoGraphicsListRegistry graphicsListRegistry)
+                                                          YoDouble yoTime)
    {
       String bodyName = bodyToControl.getName();
 
@@ -261,7 +258,6 @@ public class ManipulationControllerState extends HighLevelControllerState
                                                                     WholeBodyPostureAdjustmentProvider.createZeroPostureAdjustmentProvider(),
                                                                     yoTime,
                                                                     gravityZ,
-                                                                    graphicsListRegistry,
                                                                     registry);
       manager.setGains(jointspaceGainMap);
       manager.setWeights(jointspaceWeightMap, userModeWeightMap);

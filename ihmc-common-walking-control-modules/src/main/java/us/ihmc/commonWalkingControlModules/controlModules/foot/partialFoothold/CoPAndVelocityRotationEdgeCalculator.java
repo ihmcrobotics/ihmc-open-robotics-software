@@ -8,6 +8,10 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
+import us.ihmc.scs2.definition.visual.ColorDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFramePoint2D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameLine2D;
@@ -17,7 +21,7 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.providers.IntegerProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class CoPAndVelocityRotationEdgeCalculator implements RotationEdgeCalculator
+public class CoPAndVelocityRotationEdgeCalculator implements RotationEdgeCalculator, SCS2YoGraphicHolder
 {
    private final RotationEdgeCalculator velocityEdgeCalculator;
 
@@ -33,8 +37,7 @@ public class CoPAndVelocityRotationEdgeCalculator implements RotationEdgeCalcula
                                                YoPartialFootholdModuleParameters rotationParameters,
                                                double dt,
                                                YoRegistry parentRegistry,
-                                               Color color,
-                                               YoGraphicsListRegistry graphicsListRegistry)
+                                               ColorDefinition color)
    {
       this(side,
            soleFrame,
@@ -45,8 +48,7 @@ public class CoPAndVelocityRotationEdgeCalculator implements RotationEdgeCalcula
            rotationParameters.getStableEdgeWindowSize(),
            dt,
            parentRegistry,
-           color,
-           graphicsListRegistry);
+           color);
    }
 
    public CoPAndVelocityRotationEdgeCalculator(RobotSide side,
@@ -58,8 +60,7 @@ public class CoPAndVelocityRotationEdgeCalculator implements RotationEdgeCalcula
                                                IntegerProvider stableEdgeWindowSize,
                                                double dt,
                                                YoRegistry parentRegistry,
-                                               Color color,
-                                               YoGraphicsListRegistry graphicsListRegistry)
+                                               ColorDefinition color)
    {
       this(side,
            soleFrame,
@@ -78,8 +79,7 @@ public class CoPAndVelocityRotationEdgeCalculator implements RotationEdgeCalcula
            stableEdgeWindowSize,
            dt,
            parentRegistry,
-           color,
-           graphicsListRegistry);
+           color);
    }
 
    public CoPAndVelocityRotationEdgeCalculator(RobotSide side,
@@ -91,8 +91,7 @@ public class CoPAndVelocityRotationEdgeCalculator implements RotationEdgeCalcula
                                                IntegerProvider stableEdgeWindowSize,
                                                double dt,
                                                YoRegistry parentRegistry,
-                                               Color color,
-                                               YoGraphicsListRegistry graphicsListRegistry)
+                                               ColorDefinition color)
    {
       this.velocityEdgeCalculator = velocityEdgeCalculator;
 
@@ -113,10 +112,7 @@ public class CoPAndVelocityRotationEdgeCalculator implements RotationEdgeCalcula
                                                               dt,
                                                               registry);
 
-      if (graphicsListRegistry != null)
-         edgeVisualizer = new EdgeVisualizer(namePrefix, color, registry, graphicsListRegistry);
-      else
-         edgeVisualizer = null;
+      edgeVisualizer = new EdgeVisualizer(namePrefix, color, registry);
 
       reset();
 
@@ -174,5 +170,14 @@ public class CoPAndVelocityRotationEdgeCalculator implements RotationEdgeCalcula
    public boolean isRotationEdgeTrusted()
    {
       return stabilityEvaluator.isEdgeVelocityStable();
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(edgeVisualizer.getSCS2YoGraphics());
+
+      return group;
    }
 }

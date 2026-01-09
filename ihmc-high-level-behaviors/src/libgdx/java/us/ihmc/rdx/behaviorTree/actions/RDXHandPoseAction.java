@@ -158,6 +158,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
                                                              definition::setUsePredefinedJointAngles,
                                                              imBoolean ->
                         {
+                           ImGui.beginDisabled(!state.getPalmFrame().isChildOfWorld());
                            if (ImGui.checkbox(labels.get("Use Predefined Joint Angles"), imBoolean))
                            {
                               definition.setPreset(null); // Preserve joint angles from before
@@ -181,6 +182,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
                                  actionPalmFrame.update();
                               }
                            }
+                           ImGui.endDisabled();
                         });
       jointSpaceControlWrapper = new ImBooleanWrapper(definition::getJointspaceOnly,
                                                       definition::setJointspaceOnly,
@@ -333,7 +335,8 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
          RigidBodyBasics palm = abilityHand.getChildrenJoints().get(0).getSuccessor().getChildrenJoints().get(0).getSuccessor();
          for (int i = state.getLeafIndex() - 1; i >= 0; i--)
          {
-            if (rootNode.getState().getOrderedLeaves().get(i) instanceof AbilityHandActionState abilityHandActionState)
+            if (rootNode.getState().getOrderedLeaves().get(i) instanceof AbilityHandActionState abilityHandActionState
+                && abilityHandActionState.getDefinition().getSide() == definition.getSide())
             {
                if (abilityHandActionState.getDefinition().getControlMode() == AbilityHandControlMode.GRIP)
                {
@@ -363,6 +366,8 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
                else
                   joint = (RevoluteJoint) palm.getChildrenJoints().get(i == 5 ? 4 : i);
                joint.setQ(Math.toRadians(fingerPositions[i]));
+               if (i < 4) // set 2nd joints on non-thumb fingers
+                  ((RevoluteJoint) palm.getChildrenJoints().get(i).getSuccessor().getChildrenJoints().get(0)).setQ(Math.toRadians(fingerPositions[i]));
             }
             abilityHand.update();
          }

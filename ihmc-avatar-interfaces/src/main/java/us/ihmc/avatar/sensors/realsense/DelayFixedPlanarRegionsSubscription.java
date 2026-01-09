@@ -1,21 +1,12 @@
 package us.ihmc.avatar.sensors.realsense;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
-import map_sense.RawGPUPlanarRegionList;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.apache.commons.lang3.tuple.Pair;
-import org.ros.message.Time;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
-import us.ihmc.commons.Conversions;
-import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.StateEstimatorAPI;
-import us.ihmc.euclid.exceptions.NotARotationMatrixException;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -30,9 +21,6 @@ import us.ihmc.ros2.ROS2Subscription;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
-import us.ihmc.utilities.ros.RosNodeInterface;
-import us.ihmc.utilities.ros.publisher.RosPoseStampedPublisher;
-import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,17 +41,13 @@ public class DelayFixedPlanarRegionsSubscription
    private final FullHumanoidRobotModel fullRobotModel;
    private final RobotROSClockCalculator rosClockCalculator;
    private ROS2Subscription<?> robotConfigurationDataSubscriber;
-   private RosPoseStampedPublisher sensorPosePublisher;
-   private RosPoseStampedPublisher pelvisPosePublisher;
    private boolean posePublisherEnabled = false;
 
    private CollisionBoxProvider collisionBoxProvider;
    private CollidingScanRegionFilter collisionFilter;
 
    private boolean enabled = false;
-   private AbstractRosTopicSubscriber<RawGPUPlanarRegionList> subscriber;
    private double delay = 0.0;
-   private RosNodeInterface ros1Node;
 
    public DelayFixedPlanarRegionsSubscription(ROS2Node ros2Node,
                                               DRCRobotModel robotModel,
@@ -86,9 +70,6 @@ public class DelayFixedPlanarRegionsSubscription
       fullRobotModel = robotModel.createFullRobotModel();
       robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
 
-      sensorPosePublisher = new RosPoseStampedPublisher(false);
-      pelvisPosePublisher = new RosPoseStampedPublisher(false);
-
       referenceFrames = new HumanoidReferenceFrames(fullRobotModel, robotModel.getSensorInformation());
 
       collisionBoxProvider = robotModel.getCollisionBoxProvider();
@@ -103,20 +84,6 @@ public class DelayFixedPlanarRegionsSubscription
       collisionFilter = new CollidingScanRegionFilter(shapeTester);
    }
 
-   public void subscribe(RosNodeInterface ros1Node)
-   {
-      this.ros1Node = ros1Node;
-      this.ros1Node.attachPublisher("/atlas/sensors/chest_l515/pose", sensorPosePublisher);
-      this.ros1Node.attachPublisher("/ihmc/pelvis_pose_world", pelvisPosePublisher);
-      rosClockCalculator.subscribeToROS1Topics(ros1Node);
-      subscriber = MapsenseTools.createROS1Callback(topic, ros1Node, this::acceptRawGPUPlanarRegionsList);
-   }
-
-   public void unsubscribe(RosNodeInterface ros1Node)
-   {
-      ros1Node.removeSubscriber(subscriber);
-      rosClockCalculator.unsubscribeFromROS1Topics(ros1Node);
-   }
 
    private void acceptRobotConfigurationData(RobotConfigurationData robotConfigurationData)
    {
@@ -124,90 +91,90 @@ public class DelayFixedPlanarRegionsSubscription
       robotConfigurationDataBuffer.update(robotConfigurationData);
    }
 
-   private void acceptRawGPUPlanarRegionsList(RawGPUPlanarRegionList rawGPUPlanarRegionList)
-   {
-      if (enabled)
-      {
-         executorService.clearQueueAndExecute(() ->
-         {
-            long timestamp = rawGPUPlanarRegionList.getHeader().getStamp().totalNsecs();
-            //      LogTools.info("rawGPU timestamp: {}", timestamp);
-            double seconds = delayOffset.getValue();
-            //      LogTools.info("Latest delay: {}", seconds);
-            timestamp -= Conversions.secondsToNanoseconds(seconds);
-
-
-//            if (!rosClockCalculator.offsetIsDetermined())
+//   private void acceptRawGPUPlanarRegionsList(RawGPUPlanarRegionList rawGPUPlanarRegionList)
+//   {
+//      if (enabled)
+//      {
+//         executorService.clearQueueAndExecute(() ->
+//         {
+//            long timestamp = rawGPUPlanarRegionList.getHeader().getStamp().totalNsecs();
+//            //      LogTools.info("rawGPU timestamp: {}", timestamp);
+//            double seconds = delayOffset.getValue();
+//            //      LogTools.info("Latest delay: {}", seconds);
+//            timestamp -= Conversions.secondsToNanoseconds(seconds);
+//
+//
+////            if (!rosClockCalculator.offsetIsDetermined())
+////            {
+////               delay = Double.NaN;
+////               return;
+////            }
+////
+////            long controllerTime = rosClockCalculator.computeRobotMonotonicTime(timestamp);
+////            if (controllerTime == -1L)
+////            {
+////               delay = Double.NaN;
+////               return;
+////            }
+//
+//            long newestTimestamp = robotConfigurationDataBuffer.getNewestTimestamp();
+//            if (newestTimestamp == -1L)
 //            {
 //               delay = Double.NaN;
 //               return;
 //            }
 //
-//            long controllerTime = rosClockCalculator.computeRobotMonotonicTime(timestamp);
-//            if (controllerTime == -1L)
+//            long controllerTime = newestTimestamp - Conversions.millisecondsToNanoseconds(250);
+//
+//            boolean waitIfNecessary = false; // dangerous if true! need a timeout
+//            long selectedTimestamp = robotConfigurationDataBuffer.updateFullRobotModel(waitIfNecessary, controllerTime, fullRobotModel, null);
+//            if (selectedTimestamp != -1L)
 //            {
-//               delay = Double.NaN;
-//               return;
+////               long currentTimeInWall = ros1Node.getCurrentTime().totalNsecs();
+////               long selectedTimeInWall = selectedTimestamp - rosClockCalculator.getCurrentTimestampOffset();
+////               delay = Conversions.nanosecondsToSeconds(currentTimeInWall - selectedTimeInWall);
+////
+////               try
+////               {
+////                  referenceFrames.updateFrames();
+////               }
+////               catch (NotARotationMatrixException e)
+////               {
+////                  LogTools.error(e.getMessage());
+////               }
+////
+////               PlanarRegionsList planarRegionsList = gpuPlanarRegionUpdater.generatePlanarRegions(rawGPUPlanarRegionList);
+////               try
+////               {
+////                  planarRegionsList.applyTransform(MapsenseTools.getTransformFromCameraToWorld());
+////                  planarRegionsList.applyTransform(referenceFrames.getSteppingCameraFrame().getTransformToWorldFrame());
+////
+////                  collisionFilter.update();
+////                  gpuPlanarRegionUpdater.filterCollidingPlanarRegions(planarRegionsList, collisionFilter);
+////
+////                  if(posePublisherEnabled)
+////                  {
+////                     RigidBodyTransform transform = referenceFrames.getSteppingCameraFrame().getTransformToWorldFrame();
+////                     sensorPosePublisher.publish("world",
+////                                                 (Vector3D) transform.getTranslation(),
+////                                                 new Quaternion(transform.getRotation()),
+////                                                 new Time(currentTimeInWall));
+////                     transform = referenceFrames.getMidFeetUnderPelvisFrame().getTransformToWorldFrame();
+////                     pelvisPosePublisher.publish("world",
+////                                                 (Vector3D) transform.getTranslation(),
+////                                                 new Quaternion(transform.getRotation()),
+////                                                 new Time(currentTimeInWall));
+////                  }
+////               }
+////               catch (NotARotationMatrixException e)
+////               {
+////                  LogTools.error(e.getMessage());
+////               }
+////               callback.accept(Pair.of(currentTimeInWall, planarRegionsList));
 //            }
-
-            long newestTimestamp = robotConfigurationDataBuffer.getNewestTimestamp();
-            if (newestTimestamp == -1L)
-            {
-               delay = Double.NaN;
-               return;
-            }
-
-            long controllerTime = newestTimestamp - Conversions.millisecondsToNanoseconds(250);
-
-            boolean waitIfNecessary = false; // dangerous if true! need a timeout
-            long selectedTimestamp = robotConfigurationDataBuffer.updateFullRobotModel(waitIfNecessary, controllerTime, fullRobotModel, null);
-            if (selectedTimestamp != -1L)
-            {
-//               long currentTimeInWall = ros1Node.getCurrentTime().totalNsecs();
-//               long selectedTimeInWall = selectedTimestamp - rosClockCalculator.getCurrentTimestampOffset();
-//               delay = Conversions.nanosecondsToSeconds(currentTimeInWall - selectedTimeInWall);
-//
-//               try
-//               {
-//                  referenceFrames.updateFrames();
-//               }
-//               catch (NotARotationMatrixException e)
-//               {
-//                  LogTools.error(e.getMessage());
-//               }
-//
-//               PlanarRegionsList planarRegionsList = gpuPlanarRegionUpdater.generatePlanarRegions(rawGPUPlanarRegionList);
-//               try
-//               {
-//                  planarRegionsList.applyTransform(MapsenseTools.getTransformFromCameraToWorld());
-//                  planarRegionsList.applyTransform(referenceFrames.getSteppingCameraFrame().getTransformToWorldFrame());
-//
-//                  collisionFilter.update();
-//                  gpuPlanarRegionUpdater.filterCollidingPlanarRegions(planarRegionsList, collisionFilter);
-//
-//                  if(posePublisherEnabled)
-//                  {
-//                     RigidBodyTransform transform = referenceFrames.getSteppingCameraFrame().getTransformToWorldFrame();
-//                     sensorPosePublisher.publish("world",
-//                                                 (Vector3D) transform.getTranslation(),
-//                                                 new Quaternion(transform.getRotation()),
-//                                                 new Time(currentTimeInWall));
-//                     transform = referenceFrames.getMidFeetUnderPelvisFrame().getTransformToWorldFrame();
-//                     pelvisPosePublisher.publish("world",
-//                                                 (Vector3D) transform.getTranslation(),
-//                                                 new Quaternion(transform.getRotation()),
-//                                                 new Time(currentTimeInWall));
-//                  }
-//               }
-//               catch (NotARotationMatrixException e)
-//               {
-//                  LogTools.error(e.getMessage());
-//               }
-//               callback.accept(Pair.of(currentTimeInWall, planarRegionsList));
-            }
-         });
-      }
-   }
+//         });
+//      }
+//   }
 
    public void destroy()
    {

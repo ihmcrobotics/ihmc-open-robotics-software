@@ -91,7 +91,6 @@ public class ArmIKSolver
                                                                             workingOneDoFJoints,
                                                                             centerOfMassFrame,
                                                                             optimizationSettings,
-                                                                            yoGraphicsListRegistry,
                                                                             registry);
 
       JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = new JointPrivilegedConfigurationParameters();

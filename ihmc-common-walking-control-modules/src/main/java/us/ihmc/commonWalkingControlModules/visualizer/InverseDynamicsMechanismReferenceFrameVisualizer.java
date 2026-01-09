@@ -9,10 +9,18 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicCoordinateSystem3DDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.simulationconstructionset.util.RobotController;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class InverseDynamicsMechanismReferenceFrameVisualizer implements RobotController
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicCoordinateSystem3D;
+
+public class InverseDynamicsMechanismReferenceFrameVisualizer implements RobotController, SCS2YoGraphicHolder
 {
    public enum FrameToDisplay
    {
@@ -21,24 +29,24 @@ public class InverseDynamicsMechanismReferenceFrameVisualizer implements RobotCo
 
    private final String name = getClass().getSimpleName();
    private final YoRegistry registry = new YoRegistry(name);
-   private final List<YoGraphicReferenceFrame> yoGraphicReferenceFrames = new ArrayList<YoGraphicReferenceFrame>();
 
-   public InverseDynamicsMechanismReferenceFrameVisualizer(RigidBodyBasics rootBody, YoGraphicsListRegistry yoGraphicsListRegistry, double length, FrameToDisplay frameToDisplay,
-                                                           YoRegistry parentRegistry)
+   private final List<ReferenceFrame> referenceFrames = new ArrayList<>();
+   private final List<YoFramePose3D> framePoses = new ArrayList<>();
+   private final List<YoGraphicCoordinateSystem3DDefinition> graphics = new ArrayList<>();
+
+   public InverseDynamicsMechanismReferenceFrameVisualizer(RigidBodyBasics rootBody, double length, FrameToDisplay frameToDisplay, YoRegistry parentRegistry)
    {
-      this(rootBody, yoGraphicsListRegistry, length, frameToDisplay);
+      this(rootBody, length, frameToDisplay);
       parentRegistry.addChild(registry);
    }
 
-   public InverseDynamicsMechanismReferenceFrameVisualizer(RigidBodyBasics rootBody, YoGraphicsListRegistry yoGraphicsListRegistry, double length)
+   public InverseDynamicsMechanismReferenceFrameVisualizer(RigidBodyBasics rootBody, double length)
    {
-      this(rootBody, yoGraphicsListRegistry, length, FrameToDisplay.BODY_FIXED_FRAME);
+      this(rootBody, length, FrameToDisplay.BODY_FIXED_FRAME);
    }
 
-   public InverseDynamicsMechanismReferenceFrameVisualizer(RigidBodyBasics rootBody, YoGraphicsListRegistry yoGraphicsListRegistry,
-         double length, FrameToDisplay frameToDisplay)
+   public InverseDynamicsMechanismReferenceFrameVisualizer(RigidBodyBasics rootBody, double length, FrameToDisplay frameToDisplay)
    {
-      YoGraphicsList yoGraphicsList = new YoGraphicsList(name);
       List<JointBasics> jointStack = new ArrayList<JointBasics>(rootBody.getChildrenJoints());
       while (!jointStack.isEmpty())
       {
@@ -56,14 +64,15 @@ public class InverseDynamicsMechanismReferenceFrameVisualizer implements RobotCo
                   throw new RuntimeException("Invalid frame to display: " + frameToDisplay);
             
          }
-         YoGraphicReferenceFrame yoGraphicReferenceFrame = new YoGraphicReferenceFrame(referenceFrame, registry, false, length);
-         yoGraphicsList.add(yoGraphicReferenceFrame);
-         yoGraphicReferenceFrames.add(yoGraphicReferenceFrame);
+         YoFramePose3D framePose = new YoFramePose3D(referenceFrame.getName(), ReferenceFrame.getWorldFrame(), registry);
+         graphics.add(newYoGraphicCoordinateSystem3D(referenceFrame.getName(), framePose, length, ColorDefinitions.Gold()));
+         referenceFrames.add(referenceFrame);
+         framePoses.add(framePose);
+
          List<? extends JointBasics> childrenJoints = joint.getSuccessor().getChildrenJoints();
          jointStack.addAll(childrenJoints);
          jointStack.remove(joint);
       }
-      yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
    }
 
    @Override
@@ -93,9 +102,15 @@ public class InverseDynamicsMechanismReferenceFrameVisualizer implements RobotCo
    @Override
    public void doControl()
    {
-      for (int i = 0; i < yoGraphicReferenceFrames.size(); i++)
-      {
-         yoGraphicReferenceFrames.get(i).update();
-      }
+      for (int i = 0; i < framePoses.size(); i++)
+         framePoses.get(i).setFromReferenceFrame(referenceFrames.get(i));
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      graphics.forEach(group::addChild);
+      return group;
    }
 }

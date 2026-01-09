@@ -39,7 +39,6 @@ import us.ihmc.yoVariables.variable.YoLong;
 public class AvatarStepGeneratorThread implements AvatarControllerThreadInterface
 {
    private final YoRegistry csgRegistry = new YoRegistry("csgRegistry");
-   private final YoGraphicsListRegistry csgGraphics = new YoGraphicsListRegistry();
 
    private final HumanoidSteppingPlugin continuousStepGeneratorPlugin;
    private final FullHumanoidRobotModel fullRobotModel;
@@ -53,6 +52,7 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
    private final YoBoolean runCSG = new YoBoolean("RunCSG", csgRegistry);
 
    private final StepGeneratorCommandInputManager csgCommandInputManager;
+   private final HumanoidSteppingPluginEnvironmentalConstraints environmentalConstraints;
 
    public AvatarStepGeneratorThread(HumanoidSteppingPluginFactory pluginFactory,
                                     HumanoidRobotContextDataFactory contextDataFactory,
@@ -63,6 +63,7 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
                                     RealtimeROS2Node ros2Node)
    {
       this.fullRobotModel = drcRobotModel.createFullRobotModel();
+      this.environmentalConstraints = environmentalConstraints;
 
       HumanoidRobotContextJointData processedJointData = new HumanoidRobotContextJointData(fullRobotModel.getOneDoFJoints().length);
       ForceSensorDataHolder forceSensorDataHolderForController = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
@@ -109,7 +110,6 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
                                                                 drcRobotModel.getWalkingControllerParameters(),
                                                                 walkingOutputManager,
                                                                 walkingCommandInputManager,
-                                                                csgGraphics,
                                                                 null,
                                                                 csgTime);
       csgRegistry.addChild(continuousStepGeneratorPlugin.getRegistry());
@@ -117,11 +117,6 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
       if (environmentalConstraints != null)
       {
          csgRegistry.addChild(environmentalConstraints.getRegistry());
-         csgGraphics.registerYoGraphicsLists(environmentalConstraints.getGraphicsListRegistry().getYoGraphicsLists());
-
-         List<ArtifactList> artifactLists = new ArrayList<>();
-         environmentalConstraints.getGraphicsListRegistry().getRegisteredArtifactLists(artifactLists);
-         csgGraphics.registerArtifactLists(artifactLists);
       }
 
       ParameterLoaderHelper.loadParameters(this, drcRobotModel, csgRegistry);
@@ -186,16 +181,14 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
       return csgRegistry;
    }
 
-   public YoGraphicsListRegistry getSCS1YoGraphicsListRegistry()
-   {
-      return csgGraphics;
-   }
 
    @Override
    public YoGraphicGroupDefinition getSCS2YoGraphics()
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
       group.addChild(continuousStepGeneratorPlugin.getSCS2YoGraphics());
+      if (environmentalConstraints != null)
+         group.addChild(environmentalConstraints.getSCS2YoGraphics());
       return group.isEmpty() ? null : group;
    }
 

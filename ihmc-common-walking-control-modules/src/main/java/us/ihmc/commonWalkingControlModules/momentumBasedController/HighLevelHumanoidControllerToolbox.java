@@ -136,7 +136,6 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    private final FootShakiesEstimator footShakiesEstimator;
 
    private ContactPointVisualizer contactPointVisualizer;
-   private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
    private final JointBasics[] controlledJoints;
    private final OneDoFJointBasics[] controlledOneDoFJoints;
@@ -198,20 +197,18 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
                                              boolean kinematicsSimulation, // Whether to create for non-physical motion generation only
                                              List<Updatable> updatables,
                                              List<ContactablePlaneBody> contactableBodies,
-                                             YoGraphicsListRegistry yoGraphicsListRegistry,
                                              JointBasics... jointsToIgnore)
    {
       this.centerOfMassStateProvider = centerOfMassStateProvider;
-      this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
 
-      bipedSupportPolygons = new BipedSupportPolygons(referenceFrames, registry, yoGraphicsListRegistry);
+      bipedSupportPolygons = new BipedSupportPolygons(referenceFrames, registry);
 
       this.footSwitches = new SideDependentList<>(footSwitches);
       this.wristForceSensors = wristForceSensors;
 
-      walkingTrajectoryPath = new WalkingTrajectoryPath(yoTime, controlDT, fullRobotModel.getSoleFrames(), yoGraphicsListRegistry, registry);
+      walkingTrajectoryPath = new WalkingTrajectoryPath(yoTime, controlDT, fullRobotModel.getSoleFrames(), null, registry);
       referenceFrameHashCodeResolver = new ReferenceFrameHashCodeResolver(fullRobotModel, referenceFrames);
       referenceFrameHashCodeResolver.put(walkingTrajectoryPath.getWalkingTrajectoryPathFrame());
 
@@ -228,15 +225,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       this.omega0.set(omega0);
 
       windowedCoMVelocityEstimate = new TimeWindowVelocityEstimator3D("windowCoMVelocityEstimate", worldFrame, 0.25, controlDT, registry);
-
-      if (yoGraphicsListRegistry != null)
-      {
-         referenceFramesVisualizer = new CommonHumanoidReferenceFramesVisualizer(referenceFrames, yoGraphicsListRegistry, registry);
-      }
-      else
-      {
-         referenceFramesVisualizer = null;
-      }
+      referenceFramesVisualizer = new CommonHumanoidReferenceFramesVisualizer(referenceFrames, null, registry);
 
       // Initialize the contactable bodies
       this.feet = feet;
@@ -282,14 +271,11 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       controlledJoints = computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
       controlledOneDoFJoints = MultiBodySystemTools.filterJoints(controlledJoints, OneDoFJointBasics.class);
 
-      if (yoGraphicsListRegistry != null)
-      {
-         ArrayList<YoPlaneContactState> planeContactStateList = new ArrayList<>();
-         for (RobotSide robotSide : RobotSide.values)
-            planeContactStateList.add(footContactStates.get(robotSide));
-         contactPointVisualizer = new ContactPointVisualizer(planeContactStateList, yoGraphicsListRegistry, registry);
-         addUpdatable(contactPointVisualizer);
-      }
+      ArrayList<YoPlaneContactState> planeContactStateList = new ArrayList<>();
+      for (RobotSide robotSide : RobotSide.values)
+         planeContactStateList.add(footContactStates.get(robotSide));
+      contactPointVisualizer = new ContactPointVisualizer(planeContactStateList, null, registry);
+      addUpdatable(contactPointVisualizer);
 
       footShakiesEstimator = new FootShakiesEstimator(feet, footSwitches, yoTime, totalMass, controlDT, gravityZ, registry);
 
@@ -345,7 +331,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       if (enableUpperBodyLoadBearing())
       {
          wholeBodyContactState = new WholeBodyContactState(controlledOneDoFJoints, fullRobotModel.getRootJoint());
-         multiContactStabilityRegionCalculator = StabilityMarginRegionCalculator.createForCoPStabilityMargin("cop_", totalMass.getValue(), centerOfMassFrame, referenceFrames.getMidFeetZUpFrame(), registry, yoGraphicsListRegistry);
+         multiContactStabilityRegionCalculator = StabilityMarginRegionCalculator.createForCoPStabilityMargin("cop_", totalMass.getValue(), centerOfMassFrame, referenceFrames.getMidFeetZUpFrame(), registry, null);
          //         multiContactStabilityRegionCalculator = StabilityMarginRegionCalculator.createForCoMStabilityMargin("cop_", totalMass.getValue(), registry, yoGraphicsListRegistry);
          multiContactStabilityRegionCalculator.setupForStabilityMarginCalculation(centerOfMassStateProvider::getCenterOfMassPosition);
       }
@@ -355,17 +341,6 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
          wholeBodyContactState = null;
       }
 
-      String graphicListName = getClass().getSimpleName();
-      if (yoGraphicsListRegistry != null)
-      {
-         YoArtifactPosition copViz = new YoArtifactPosition("Controller CoP",
-                                                            yoCenterOfPressure.getYoX(),
-                                                            yoCenterOfPressure.getYoY(),
-                                                            GraphicType.DIAMOND,
-                                                            Color.BLACK,
-                                                            0.005);
-         yoGraphicsListRegistry.registerArtifact(graphicListName, copViz);
-      }
       yoCenterOfPressure.setToNaN();
 
       angularExcursionCalculator = new AngularExcursionCalculator(centerOfMassFrame, fullRobotModel.getElevator(), controlDT, registry, null);
@@ -867,11 +842,6 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    public BipedSupportPolygons getBipedSupportPolygons()
    {
       return bipedSupportPolygons;
-   }
-
-   public YoGraphicsListRegistry getYoGraphicsListRegistry()
-   {
-      return yoGraphicsListRegistry;
    }
 
    public JointBasics[] getControlledJoints()

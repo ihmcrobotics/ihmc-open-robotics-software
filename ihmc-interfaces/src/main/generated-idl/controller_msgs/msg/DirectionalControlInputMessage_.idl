@@ -25,9 +25,11 @@ module controller_msgs
       struct DirectionalControlInputMessage
       {
         unsigned long long sequence_id;
+        boolean walk;
         double forward;
         double right;
         double clockwise;
+        boolean unit_velocities;
       };
     };
   };
