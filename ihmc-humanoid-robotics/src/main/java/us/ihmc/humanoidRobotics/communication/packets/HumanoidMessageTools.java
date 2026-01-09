@@ -1,65 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
-import static us.ihmc.euclid.tools.EuclidCoreTools.zeroVector3D;
-
-import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import controller_msgs.msg.dds.ArmDesiredAccelerationsMessage;
-import controller_msgs.msg.dds.ArmTrajectoryMessage;
-import controller_msgs.msg.dds.AutomaticManipulationAbortMessage;
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.CenterOfMassTrajectoryMessage;
-import controller_msgs.msg.dds.ChestHybridJointspaceTaskspaceTrajectoryMessage;
-import controller_msgs.msg.dds.ChestTrajectoryMessage;
-import controller_msgs.msg.dds.ClearDelayQueueMessage;
-import controller_msgs.msg.dds.DesiredAccelerationsMessage;
-import controller_msgs.msg.dds.FootLoadBearingMessage;
-import controller_msgs.msg.dds.FootTrajectoryMessage;
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.FootstepStatusMessage;
-import controller_msgs.msg.dds.GoHomeMessage;
-import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
-import controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage;
-import controller_msgs.msg.dds.HandJointAnglePacket;
-import controller_msgs.msg.dds.HandLoadBearingMessage;
-import controller_msgs.msg.dds.HandPowerCyclePacket;
-import controller_msgs.msg.dds.HandTrajectoryMessage;
-import controller_msgs.msg.dds.HeadHybridJointspaceTaskspaceTrajectoryMessage;
-import controller_msgs.msg.dds.HeadTrajectoryMessage;
-import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
-import controller_msgs.msg.dds.HighLevelStateMessage;
-import controller_msgs.msg.dds.JointspaceTrajectoryMessage;
-import controller_msgs.msg.dds.LegCompliancePacket;
-import controller_msgs.msg.dds.LegTrajectoryMessage;
-import controller_msgs.msg.dds.LocalizationPacket;
-import controller_msgs.msg.dds.LocalizationPointMapPacket;
-import controller_msgs.msg.dds.LocalizationStatusPacket;
-import controller_msgs.msg.dds.ManualHandControlPacket;
-import controller_msgs.msg.dds.NeckDesiredAccelerationsMessage;
-import controller_msgs.msg.dds.NeckTrajectoryMessage;
-import controller_msgs.msg.dds.ObjectWeightPacket;
-import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
-import controller_msgs.msg.dds.PauseWalkingMessage;
-import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
-import controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage;
-import controller_msgs.msg.dds.PelvisPoseErrorPacket;
-import controller_msgs.msg.dds.PelvisTrajectoryMessage;
-import controller_msgs.msg.dds.PlanOffsetStatus;
-import controller_msgs.msg.dds.PrepareForLocomotionMessage;
-import controller_msgs.msg.dds.SnapFootstepPacket;
-import controller_msgs.msg.dds.SpineDesiredAccelerationsMessage;
-import controller_msgs.msg.dds.SpineTrajectoryMessage;
-import controller_msgs.msg.dds.StateEstimatorModePacket;
-import controller_msgs.msg.dds.WalkOverTerrainGoalPacket;
-import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
-import controller_msgs.msg.dds.WholeBodyStreamingMessage;
-import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
-import controller_msgs.msg.dds.WrenchTrajectoryPointMessage;
+import controller_msgs.msg.dds.*;
 import gnu.trove.list.array.TDoubleArrayList;
 import ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessage;
 import ihmc_common_msgs.msg.dds.EuclideanTrajectoryPointMessage;
@@ -71,15 +12,8 @@ import ihmc_common_msgs.msg.dds.SO3TrajectoryMessage;
 import ihmc_common_msgs.msg.dds.SO3TrajectoryPointMessage;
 import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
-import perception_msgs.msg.dds.BlackFlyParameterPacket;
 import perception_msgs.msg.dds.DetectedObjectPacket;
-import perception_msgs.msg.dds.DoorLocationPacket;
 import perception_msgs.msg.dds.IntrinsicParametersMessage;
-import perception_msgs.msg.dds.MultisenseParameterPacket;
-import perception_msgs.msg.dds.PointCloudWorldPacket;
-import perception_msgs.msg.dds.ValveLocationPacket;
-import perception_msgs.msg.dds.VehiclePosePacket;
-import perception_msgs.msg.dds.WallPosePacket;
 import toolbox_msgs.msg.dds.BehaviorControlModePacket;
 import toolbox_msgs.msg.dds.BehaviorControlModeResponsePacket;
 import toolbox_msgs.msg.dds.BehaviorStatusPacket;
@@ -103,7 +37,6 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
-import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -120,10 +53,8 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxMessageFactory;
@@ -157,35 +88,19 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static us.ihmc.euclid.tools.EuclidCoreTools.zeroVector3D;
+
 public class HumanoidMessageTools
 {
    public static final int CAPTURABILITY_BASED_STATUS_MAXIMUM_NUMBER_OF_VERTICES = 8;
 
    private HumanoidMessageTools()
    {
-   }
-
-   public static BlackFlyParameterPacket createBlackFlyParameterPacket(boolean fromUI,
-                                                                       double gain,
-                                                                       double exposure,
-                                                                       double frameRate,
-                                                                       double shutter,
-                                                                       boolean autoExposure,
-                                                                       boolean autoGain,
-                                                                       boolean autoShutter,
-                                                                       RobotSide side)
-   {
-      BlackFlyParameterPacket message = new BlackFlyParameterPacket();
-      message.setFromUi(fromUI);
-      message.setExposure(exposure);
-      message.setShutter(shutter);
-      message.setGain(gain);
-      message.setFrameRate(frameRate);
-      message.setAutoExposure(autoExposure);
-      message.setAutoGain(autoGain);
-      message.setAutoShutter(autoShutter);
-      message.setRobotSide(side.toByte());
-      return message;
    }
 
    public static DesiredAccelerationsMessage createDesiredAccelerationsMessage(double[] desiredJointAccelerations)
@@ -470,66 +385,6 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static MultisenseParameterPacket createMultisenseParameterPacket(boolean initialize,
-                                                                           double gain,
-                                                                           double motorSpeed,
-                                                                           double dutyCycle,
-                                                                           boolean ledEnable,
-                                                                           boolean flashEnable,
-                                                                           boolean autoExposure,
-                                                                           boolean autoWhiteBalance)
-   {
-      MultisenseParameterPacket message = new MultisenseParameterPacket();
-      message.setInitialize(initialize);
-      message.setGain(gain);
-      message.setFlashEnable(flashEnable);
-      message.setMotorSpeed(motorSpeed);
-      message.setLedEnable(ledEnable);
-      message.setDutyCycle(dutyCycle);
-      message.setAutoExposure(autoExposure);
-      message.setAutoWhiteBalance(autoWhiteBalance);
-      return message;
-   }
-
-   public static DoorLocationPacket createDoorLocationPacket(RigidBodyTransform doorTransformToWorld)
-   {
-      return createDoorLocationPacket(new Pose3D(doorTransformToWorld));
-   }
-
-   public static DoorLocationPacket createDoorLocationPacket(RigidBodyTransform doorTransformToWorld, byte doorType)
-   {
-      return createDoorLocationPacket(new Pose3D(doorTransformToWorld), doorType);
-   }
-
-   public static DoorLocationPacket createDoorLocationPacket(Pose3D doorTransformToWorld)
-   {
-      return createDoorLocationPacket(doorTransformToWorld, DoorLocationPacket.UNKNOWN_TYPE);
-   }
-
-   public static DoorLocationPacket createDoorLocationPacket(Pose3D doorTransformToWorld, byte doorType)
-   {
-      DoorLocationPacket message = new DoorLocationPacket();
-      message.getDoorTransformToWorld().set(doorTransformToWorld);
-      message.setDetectedDoorType(doorType);
-      return message;
-   }
-
-   public static VehiclePosePacket createVehiclePosePacket(Point3D position, Quaternion orientation)
-   {
-      VehiclePosePacket message = new VehiclePosePacket();
-      message.getPosition().set(position);
-      message.getOrientation().set(orientation);
-      return message;
-   }
-
-   public static VehiclePosePacket createVehiclePosePacket(RigidBodyTransform transformFromVehicleToWorld)
-   {
-      VehiclePosePacket message = new VehiclePosePacket();
-      message.getOrientation().set(transformFromVehicleToWorld.getRotation());
-      message.getPosition().set(transformFromVehicleToWorld.getTranslation());
-      return message;
-   }
-
    public static HighLevelStateChangeStatusMessage createHighLevelStateChangeStatusMessage(HighLevelControllerName initialState,
                                                                                            HighLevelControllerName endState)
    {
@@ -622,13 +477,6 @@ public class HumanoidMessageTools
       ObjectWeightPacket message = new ObjectWeightPacket();
       message.setRobotSide(robotSide.toByte());
       message.setWeight(weight);
-      return message;
-   }
-
-   public static HandPowerCyclePacket createHandPowerCyclePacket(RobotSide robotSide)
-   {
-      HandPowerCyclePacket message = new HandPowerCyclePacket();
-      message.setRobotSide(robotSide.toByte());
       return message;
    }
 
@@ -1282,31 +1130,6 @@ public class HumanoidMessageTools
    {
       HighLevelStateMessage message = new HighLevelStateMessage();
       message.setHighLevelControllerName(highLevelControllerName.toByte());
-      return message;
-   }
-
-   public static WallPosePacket createWallPosePacket(WallPosePacket other)
-   {
-      WallPosePacket message = new WallPosePacket();
-      message.set(other);
-      return message;
-   }
-
-   public static WallPosePacket createWallPosePacket(double cuttingRadius, Tuple3DReadOnly centerPosition, Orientation3DReadOnly centerOrientation)
-   {
-      WallPosePacket message = new WallPosePacket();
-      message.setCuttingRadius(cuttingRadius);
-      message.getCenterPosition().set(centerPosition);
-      message.getCenterOrientation().set(centerOrientation);
-      return message;
-   }
-
-   public static WallPosePacket createWallPosePacket(double cuttingRadius, Tuple3DReadOnly centerPosition, RotationMatrixReadOnly rotationMatrix)
-   {
-      WallPosePacket message = new WallPosePacket();
-      message.setCuttingRadius(cuttingRadius);
-      message.getCenterPosition().set(centerPosition);
-      message.getCenterOrientation().set(new Quaternion(rotationMatrix));
       return message;
    }
 
@@ -2241,30 +2064,6 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static LocalizationStatusPacket createLocalizationStatusPacket(double overlap, String status)
-   {
-      LocalizationStatusPacket message = new LocalizationStatusPacket();
-      message.setOverlap(overlap);
-      message.setStatus(status);
-      return message;
-   }
-
-   public static ValveLocationPacket createValveLocationPacket(RigidBodyTransform valveTransformToWorld, double valveRadius)
-   {
-      ValveLocationPacket message = new ValveLocationPacket();
-      message.getValvePoseInWorld().set(valveTransformToWorld);
-      message.setValveRadius(valveRadius);
-      return message;
-   }
-
-   public static ValveLocationPacket createValveLocationPacket(Pose3D valvePoseInWorld, double valveRadius)
-   {
-      ValveLocationPacket message = new ValveLocationPacket();
-      message.getValvePoseInWorld().set(valvePoseInWorld);
-      message.setValveRadius(valveRadius);
-      return message;
-   }
-
    public static LegTrajectoryMessage createLegTrajectoryMessage(RobotSide robotSide, JointspaceTrajectoryMessage jointspaceTrajectoryMessage)
    {
       LegTrajectoryMessage message = new LegTrajectoryMessage();
@@ -2488,48 +2287,6 @@ public class HumanoidMessageTools
       return message.getPredictedContactPoints2d().stream().map(Point2D::new).collect(Collectors.toList());
    }
 
-   public static void setGroundQuadTreeSupport(Point3DReadOnly[] pointCloud, PointCloudWorldPacket pointCloudWorldPacket)
-   {
-      pointCloudWorldPacket.getGroundQuadTreeSupport().reset();
-
-      for (int i = 0; i < pointCloud.length; i++)
-      {
-         Point3DReadOnly point = pointCloud[i];
-         pointCloudWorldPacket.getGroundQuadTreeSupport().add((float) point.getX());
-         pointCloudWorldPacket.getGroundQuadTreeSupport().add((float) point.getY());
-         pointCloudWorldPacket.getGroundQuadTreeSupport().add((float) point.getZ());
-      }
-   }
-
-   public static void setDecayingWorldScan(Point3DReadOnly[] pointCloud, PointCloudWorldPacket pointCloudWorldPacket)
-   {
-      pointCloudWorldPacket.getDecayingWorldScan().reset();
-
-      for (int i = 0; i < pointCloud.length; i++)
-      {
-         Point3DReadOnly point = pointCloud[i];
-         pointCloudWorldPacket.getDecayingWorldScan().add((float) point.getX());
-         pointCloudWorldPacket.getDecayingWorldScan().add((float) point.getY());
-         pointCloudWorldPacket.getDecayingWorldScan().add((float) point.getZ());
-      }
-   }
-
-   public static Point3D32[] getDecayingWorldScan(PointCloudWorldPacket pointCloudWorldPacket)
-   {
-      int numberOfPoints = pointCloudWorldPacket.getDecayingWorldScan().size() / 3;
-
-      Point3D32[] points = new Point3D32[numberOfPoints];
-      for (int i = 0; i < numberOfPoints; i++)
-      {
-         Point3D32 point = new Point3D32();
-         point.setX(pointCloudWorldPacket.getDecayingWorldScan().get(3 * i));
-         point.setY(pointCloudWorldPacket.getDecayingWorldScan().get(3 * i + 1));
-         point.setZ(pointCloudWorldPacket.getDecayingWorldScan().get(3 * i + 2));
-         points[i] = point;
-      }
-
-      return points;
-   }
 
    public static HeightQuadTreeToolboxRequestMessage clearRequest(PacketDestination destination)
    {
@@ -2547,36 +2304,6 @@ public class HumanoidMessageTools
       requestMessage.setRequestClearQuadTree(false);
       requestMessage.setRequestQuadTreeUpdate(true);
       return requestMessage;
-   }
-
-   public static void packLocalizationPointMap(Point3DReadOnly[] pointCloud, LocalizationPointMapPacket localizationPointMapPacket)
-   {
-      localizationPointMapPacket.getLocalizationPointMap().reset();
-
-      for (int i = 0; i < pointCloud.length; i++)
-      {
-         Point3DReadOnly point = pointCloud[i];
-         localizationPointMapPacket.getLocalizationPointMap().add((float) point.getX());
-         localizationPointMapPacket.getLocalizationPointMap().add((float) point.getY());
-         localizationPointMapPacket.getLocalizationPointMap().add((float) point.getZ());
-      }
-   }
-
-   public static Point3D32[] unpackLocalizationPointMap(LocalizationPointMapPacket localizationPointMapPacket)
-   {
-      int numberOfPoints = localizationPointMapPacket.getLocalizationPointMap().size() / 3;
-
-      Point3D32[] points = new Point3D32[numberOfPoints];
-      for (int i = 0; i < numberOfPoints; i++)
-      {
-         Point3D32 point = new Point3D32();
-         point.setX(localizationPointMapPacket.getLocalizationPointMap().get(3 * i));
-         point.setY(localizationPointMapPacket.getLocalizationPointMap().get(3 * i + 1));
-         point.setZ(localizationPointMapPacket.getLocalizationPointMap().get(3 * i + 2));
-         points[i] = point;
-      }
-
-      return points;
    }
 
    public static void checkIfDataFrameIdsMatch(FrameInformation frameInformation, ReferenceFrame referenceFrame)
