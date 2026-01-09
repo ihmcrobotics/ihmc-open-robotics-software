@@ -87,7 +87,6 @@ import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.*;
 
 public class BalanceManager implements SCS2YoGraphicHolder
 {
-   private static final boolean USE_ERROR_BASED_STEP_ADJUSTMENT = true;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final boolean viewCoPHistory = false;
    private static final FrameVector2D zeroVector = new FrameVector2D();
