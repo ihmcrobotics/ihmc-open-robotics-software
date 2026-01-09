@@ -45,20 +45,22 @@ public class BehaviorTreeSceneObjectDefinition extends LatestTimestampModifiable
 
    public void saveToFile(ObjectNode jsonNode)
    {
-      if (objectType.getValue() != null)
-         jsonNode.put("objectType", objectType.getValue().name());
+      jsonNode.put("objectType", objectType.getValue().name());
       jsonNode.put("yoloModelName", yoloModelName.getValue());
-      jsonNode.put("yoloClassName", yoloClassName.getValue());
-      jsonNode.put("foundationPoseObjectType", foundationPoseObjectType.getValue().name());
+      if (objectType.getValue() == BehaviorTreeSceneObjectType.YOLO_ONLY)
+         jsonNode.put("yoloClassName", yoloClassName.getValue());
+      else if (objectType.getValue() == BehaviorTreeSceneObjectType.FOUNDATION_POSE)
+         jsonNode.put("foundationPoseObjectType", foundationPoseObjectType.getValue().name());
    }
 
    public void loadFromFile(JsonNode jsonNode)
    {
-      if (jsonNode.has("objectType"))
-         objectType.setValue(BehaviorTreeSceneObjectType.valueOf(jsonNode.get("objectType").asText()));
+      objectType.setValue(BehaviorTreeSceneObjectType.valueOf(jsonNode.get("objectType").asText()));
       yoloModelName.setValue(jsonNode.get("yoloModelName").asText());
-      yoloClassName.setValue(jsonNode.get("yoloClassName").asText());
-      foundationPoseObjectType.setValue(IsaacROSFoundationPoseObject.valueOf(jsonNode.get("foundationPoseObjectType").asText()));
+      if (objectType.getValue() == BehaviorTreeSceneObjectType.YOLO_ONLY)
+         yoloClassName.setValue(jsonNode.get("yoloClassName").asText());
+      else if (objectType.getValue() == BehaviorTreeSceneObjectType.FOUNDATION_POSE)
+         foundationPoseObjectType.setValue(IsaacROSFoundationPoseObject.valueOf(jsonNode.get("foundationPoseObjectType").asText()));
    }
 
    public void setOnDiskFields()
