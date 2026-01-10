@@ -1,4 +1,4 @@
-package us.ihmc.robotDataVisualizer;
+package us.ihmc.avatar.ros2.networkTest;
 
 import us.ihmc.robotDataLogger.YoVariableClientInterface;
 import us.ihmc.robotDataLogger.YoVariablesUpdatedListener;
