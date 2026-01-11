@@ -1,9 +1,13 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
+import behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage;
+import behavior_msgs.msg.dds.SceneActionNodeDefinitionMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
+import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectDefinition;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectState;
+import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectType;
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -37,7 +41,7 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
    {
       super.triggerExecution();
 
-      state.getLogger().info("Executing scene action for object type: {}", definition.getObjectType().name());
+      state.getLogger().info("Executing scene action for object type: {}", definition.getName());
 
       timer.reset();
    }
@@ -61,43 +65,54 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
       // Find a close stable detection
       PersistentDetection bestDetection = null;
       double closestDistanceSquared = Double.MAX_VALUE;
-      IsaacROSFoundationPoseObject objectType = definition.getObjectType();
+      BehaviorTreeSceneObjectDefinition desiredObjectDefinition = definition.getSceneObjectDefinition();
       cameraPosition.set(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getExperimentalCameraFrame).getTranslation());
       for (PersistentDetection detection : scene.getPersistentDetections())
       {
          if (detection.getMostRecentDetection() instanceof IsaacROSFoundationPoseInstantDetection fpDetection)
          {
-            if (!definition.getUseFoundationPose())
+            if (!(desiredObjectDefinition.getObjectType() == BehaviorTreeSceneObjectType.FOUNDATION_POSE))
             {
                if (printDebug)
-                  state.getLogger().warn("Need YOLO but found FoundationPose name: %s".formatted(fpDetection.getObject().name()));
+                  state.getLogger().warn("Need %s but found FoundationPose name: %s".formatted(desiredObjectDefinition.getObjectType().name(),
+                                                                                               fpDetection.getObject().name()));
 
                continue;
             }
 
-            if (fpDetection.getObject() != objectType)
+            IsaacROSFoundationPoseObject desiredFPType = desiredObjectDefinition.getFoundationPoseObjectType();
+            if (fpDetection.getObject() != desiredFPType)
             {
                if (printDebug)
-                  state.getLogger().warn("Need object class type {} but found {}", objectType.name(), fpDetection.getObject().name());
+                  state.getLogger().warn("Need FP object class type {} but found {}", desiredFPType.name(), fpDetection.getObject().name());
 
                continue;
             }
          }
+         else if (desiredObjectDefinition.getObjectType() == BehaviorTreeSceneObjectType.DOOR_PANEL)
+         {
+            if (printDebug)
+               state.getLogger().warn("Door panel not yet implemented.");
+
+            continue;
+         }
          else if (detection.getMostRecentDetection() instanceof YOLOv8InstantDetection yoloDetection)
          {
-            if (definition.getUseFoundationPose())
+            if (!(desiredObjectDefinition.getObjectType() == BehaviorTreeSceneObjectType.YOLO_ONLY))
             {
                if (printDebug)
-                  state.getLogger().warn("Need FoundationPose but found YOLOv8 name: %s"
-                                               .formatted(detection.getMostRecentDetection().getDetectedObjectClass()));
+                  state.getLogger().warn("Need %s but found YOLOv8 name: %s"
+                                               .formatted(desiredObjectDefinition.getObjectType().name(),
+                                                          detection.getMostRecentDetection().getDetectedObjectClass()));
 
                continue;
             }
 
-            if (!yoloDetection.getDetectedObjectClass().equals(objectType.yoloClass))
+            String desiredYOLOClass = desiredObjectDefinition.getYoloClassName();
+            if (!yoloDetection.getDetectedObjectClass().equals(desiredYOLOClass))
             {
                if (printDebug)
-                  state.getLogger().warn("Need object class type {} but found {}", objectType.yoloClass, yoloDetection.getDetectedObjectClass());
+                  state.getLogger().warn("Need YOLO class type {} but found {}", desiredYOLOClass, yoloDetection.getDetectedObjectClass());
 
                continue;
             }
@@ -137,23 +152,32 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
       BehaviorTreeSceneObjectExecutor targetSceneObject = null;
       for (BehaviorTreeSceneObjectState object : scene.getObjects())
       {
-         if (object.getObjectType() == objectType)
+         if (object.getObjectType() == desiredObjectDefinition.getObjectType())
          {
-            targetSceneObject = (BehaviorTreeSceneObjectExecutor) object;
-            break;
+            boolean match = desiredObjectDefinition.getObjectType() == BehaviorTreeSceneObjectType.YOLO_ONLY
+                            && object.getYoloClassName().equals(desiredObjectDefinition.getYoloClassName());
+            match |= desiredObjectDefinition.getObjectType() == BehaviorTreeSceneObjectType.FOUNDATION_POSE
+                     && object.getFoundationPoseObjectType() == desiredObjectDefinition.getFoundationPoseObjectType();
+            if (match)
+            {
+               targetSceneObject = (BehaviorTreeSceneObjectExecutor) object;
+               break;
+            }
          }
       }
 
       if (targetSceneObject != null)
       {
-         state.getLogger().info("Updating existing scene object for type: {}", objectType.titleCaseName);
+         state.getLogger().info("Updating existing scene object for type: {}", desiredObjectDefinition.getName());
          targetSceneObject.setPersistentDetection(bestDetection);
       }
       else
       {
-         state.getLogger().info("Creating new scene object for type: {}", objectType.titleCaseName);
+         state.getLogger().info("Creating new scene object for type: {}", desiredObjectDefinition.getName());
 
-         targetSceneObject = (BehaviorTreeSceneObjectExecutor) scene.createObject(objectType);
+         BehaviorTreeSceneObjectDefinitionMessage message = new BehaviorTreeSceneObjectDefinitionMessage();
+         desiredObjectDefinition.toMessage(message);
+         targetSceneObject = (BehaviorTreeSceneObjectExecutor) scene.createObject(message);
          targetSceneObject.setPersistentDetection(bestDetection);
          scene.getObjects().add(targetSceneObject);
          scene.getObjectsModifiable().modify();

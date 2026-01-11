@@ -1,5 +1,6 @@
 package us.ihmc.rdx.behaviorTree.scene;
 
+import behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage;
 import behavior_msgs.msg.dds.BehaviorTreeSceneStateMessage;
 import behavior_msgs.msg.dds.PersistentDetectionStatusMessage;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
@@ -12,6 +13,7 @@ import imgui.flag.ImGuiMouseButton;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectState;
+import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectType;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneState;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.crdt.CRDTInfo;
@@ -108,7 +110,10 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
       {
          if (ImGuiTools.textWithUnderlineOnHover(objectType.titleCaseName) && ImGui.isMouseClicked(ImGuiMouseButton.Left))
          {
-            beingPlaced = (RDXBehaviorTreeSceneObject) createObject(objectType);
+            BehaviorTreeSceneObjectDefinitionMessage message = new BehaviorTreeSceneObjectDefinitionMessage();
+            message.setObjectType((byte) BehaviorTreeSceneObjectType.FOUNDATION_POSE.ordinal());
+            message.setFoundationPoseObjectType((byte) objectType.ordinal());
+            beingPlaced = (RDXBehaviorTreeSceneObject) createObject(message);
             objects.add(beingPlaced);
             objectsModifiable.modify();
             needToInitializePlacementHeight = true;
@@ -201,9 +206,9 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
    }
 
    @Override
-   protected BehaviorTreeSceneObjectState buildObject(long id, CRDTInfo crdtInfo, IsaacROSFoundationPoseObject objectType)
+   protected BehaviorTreeSceneObjectState buildObject(long id, CRDTInfo crdtInfo, BehaviorTreeSceneObjectDefinitionMessage definition)
    {
-      return new RDXBehaviorTreeSceneObject(id, crdtInfo, objectType, baseUI);
+      return new RDXBehaviorTreeSceneObject(id, crdtInfo, definition, baseUI);
    }
 
    @Override
