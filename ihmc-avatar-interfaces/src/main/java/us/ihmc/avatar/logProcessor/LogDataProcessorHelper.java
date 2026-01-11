@@ -223,7 +223,7 @@ public class LogDataProcessorHelper
 
    public void update()
    {
-      sensorReader.read();
+      sensorReader.doControl();
       controllerToolbox.update();
    }
 

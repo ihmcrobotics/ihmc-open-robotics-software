@@ -52,7 +52,7 @@ public class DRCPerfectSensorReader implements SensorReader
    {
       if (rawSensorReader != null)
       {
-         rawSensorReader.read();
+         rawSensorReader.doControl();
       }
       return processedSensorOutputMap.getMonotonicTime();
    }

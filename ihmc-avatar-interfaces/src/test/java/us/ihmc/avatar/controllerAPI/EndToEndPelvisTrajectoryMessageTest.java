@@ -68,6 +68,7 @@ import us.ihmc.robotics.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.VisualDefinitionFactory;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
@@ -1370,7 +1371,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       finalPose.prependTranslation(randomPose.getPosition());
       finalPose.appendRotation(randomPose.getOrientation());
 
-      simulationTestHelper.addRobotControllerOnControllerThread(new RobotController()
+      simulationTestHelper.addRobotControllerOnControllerThread(new Controller()
       {
          @Override
          public void initialize()
@@ -1415,21 +1416,9 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
          }
 
          @Override
-         public YoRegistry getYoRegistry()
-         {
-            return null;
-         }
-
-         @Override
-         public String getDescription()
-         {
-            return RobotController.super.getDescription();
-         }
-
-         @Override
          public String getName()
          {
-            return RobotController.super.getName();
+            return Controller.super.getName();
          }
       });
 

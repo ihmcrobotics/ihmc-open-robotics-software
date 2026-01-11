@@ -153,12 +153,6 @@ public class HumanoidRobotEKFWithSimpleJoints implements StateEstimatorControlle
    }
 
    @Override
-   public String getDescription()
-   {
-      return getName();
-   }
-
-   @Override
    public void initializeEstimator(RigidBodyTransformReadOnly rootJointTransform, TObjectDoubleMap<String> jointPositions)
    {
       leggedRobotEKF.initializeEstimator(rootJointTransform, jointPositions);

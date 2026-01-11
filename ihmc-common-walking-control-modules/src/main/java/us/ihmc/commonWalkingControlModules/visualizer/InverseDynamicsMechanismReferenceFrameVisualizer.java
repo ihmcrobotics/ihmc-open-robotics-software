@@ -1,26 +1,23 @@
 package us.ihmc.commonWalkingControlModules.visualizer;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
+import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicCoordinateSystem3DDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
-import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicCoordinateSystem3D;
 
-public class InverseDynamicsMechanismReferenceFrameVisualizer implements RobotController, SCS2YoGraphicHolder
+public class InverseDynamicsMechanismReferenceFrameVisualizer implements Controller, SCS2YoGraphicHolder
 {
    public enum FrameToDisplay
    {
@@ -91,12 +88,6 @@ public class InverseDynamicsMechanismReferenceFrameVisualizer implements RobotCo
    public String getName()
    {
       return name;
-   }
-
-   @Override
-   public String getDescription()
-   {
-      return getName();
    }
 
    @Override

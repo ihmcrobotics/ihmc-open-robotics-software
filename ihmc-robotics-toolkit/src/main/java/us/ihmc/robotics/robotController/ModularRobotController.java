@@ -1,21 +1,166 @@
 package us.ihmc.robotics.robotController;
 
-import us.ihmc.simulationconstructionset.util.RobotController;
+import us.ihmc.scs2.definition.controller.interfaces.Controller;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class ModularRobotController extends AbstractModularRobotController implements RobotController
+import java.util.ArrayList;
+
+public class ModularRobotController implements Controller
 {
+   protected final YoRegistry registry;
+   protected RawSensorReader rawSensorReader;
+   protected SensorProcessor sensorProcessor;
+   protected ArrayList<Controller> robotControllers = new ArrayList<Controller>();
+   protected OutputProcessor outputProcessor;
+   protected RawOutputWriter rawOutputWriter;
+
    public ModularRobotController(String name)
    {
-      super(name);
+      registry = new YoRegistry(name);
    }
+
+   public void initialize()
+   {
+      if (rawSensorReader != null)
+         rawSensorReader.initialize();
+      if (sensorProcessor != null)
+         sensorProcessor.initialize();
+
+      for (int i = 0; i < robotControllers.size(); i++)
+      {
+         robotControllers.get(i).initialize();
+      }
+
+      if (outputProcessor != null)
+         outputProcessor.initialize();
+      if (rawOutputWriter != null)
+         rawOutputWriter.initialize();
+   }
+
+   public YoRegistry getYoRegistry()
+   {
+      return registry;
+   }
+
+   public String getName()
+   {
+      return registry.getName();
+   }
+
+   public void setRawSensorReader(RawSensorReader rawSensorReader)
+   {
+      if (this.rawSensorReader != null)
+         throw new RuntimeException("Already have a rawSensorReader");
+
+      this.rawSensorReader = rawSensorReader;
+      registry.addChild(rawSensorReader.getYoRegistry());
+   }
+
+   public void setSensorProcessor(SensorProcessor sensorProcessor)
+   {
+      if (this.sensorProcessor != null)
+         throw new RuntimeException("Already have a sensorProcessor");
+
+      this.sensorProcessor = sensorProcessor;
+      registry.addChild(sensorProcessor.getYoRegistry());
+   }
+
+   public void addRobotController(Controller robotController)
+   {
+      if(robotController == this)
+      {
+         throw new RuntimeException("Cannot add self to modular robot controller");
+      }
+
+      this.robotControllers.add(robotController);
+      YoRegistry controllerRegistry = robotController.getYoRegistry();
+      if (controllerRegistry != null)
+         registry.addChild(controllerRegistry);
+   }
+
+   public void setOutputProcessor(OutputProcessor outputProcessor)
+   {
+      if (this.outputProcessor != null)
+         throw new RuntimeException("Already have a outputProcessor");
+
+      this.outputProcessor = outputProcessor;
+      if(this.outputProcessor != null)
+      {
+         registry.addChild(outputProcessor.getYoRegistry());
+      }
+   }
+
+   public void setRawOutputWriter(RawOutputWriter rawOutputWriter)
+   {
+      if (this.rawOutputWriter != null)
+         throw new RuntimeException("Already have a rawOutputWriter");
+
+      this.rawOutputWriter = rawOutputWriter;
+      registry.addChild(rawOutputWriter.getYoRegistry());
+   }
+
+   public RawSensorReader getRawSensorReader()
+   {
+      return rawSensorReader;
+   }
+
+   public SensorProcessor getSensorProcessor()
+   {
+      return sensorProcessor;
+   }
+
+   public ArrayList<Controller> getRobotControllers()
+   {
+      return robotControllers;
+   }
+
+   public OutputProcessor getOutputProcessor()
+   {
+      return outputProcessor;
+   }
+
+   public RawOutputWriter getRawOutputWriter()
+   {
+      return rawOutputWriter;
+   }
+
+   public String getDescription()
+   {
+      return "ModularRobotController with a rawSensorReader, sensorProcessor, robotController, outputProcessor, and rawOutputWriter";
+   }
+
+   @Override
+   public String toString()
+   {
+      StringBuffer buf = new StringBuffer();
+
+      buf.append("Modular Robot Controller:\n");
+      if (rawSensorReader != null) buf.append("Raw sensor reader:\n" + rawSensorReader.toString() + "\n");
+
+      if (sensorProcessor != null) buf.append("Sensor processor:\n" + sensorProcessor.toString() + "\n");
+      buf.append("Robot controllers:\n");
+
+      for (Controller robotController : robotControllers)
+      {
+         buf.append(robotController.getClass().getSimpleName() + "\n");
+      }
+
+      buf.append("\n");
+
+      if (outputProcessor != null) buf.append("Output processor:\n" + outputProcessor.toString() + "\n");
+      if (rawOutputWriter != null) buf.append("Raw output writer:\n" + rawOutputWriter.toString());
+
+      return buf.toString();
+   }
+
 
    @Override
    public void doControl()
    {
       if (rawSensorReader != null)
-         rawSensorReader.read();
+         rawSensorReader.doControl();
       if (sensorProcessor != null)
-         sensorProcessor.update();
+         sensorProcessor.doControl();
    
       for (int i = 0; i < robotControllers.size(); i++)
       {
@@ -23,8 +168,8 @@ public class ModularRobotController extends AbstractModularRobotController imple
       }
    
       if (outputProcessor != null)
-         outputProcessor.update();
+         outputProcessor.doControl();
       if (rawOutputWriter != null)
-         rawOutputWriter.write();
+         rawOutputWriter.doControl();
    }
 }

@@ -9,6 +9,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.geometry.GeometryTools;
+import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicCoordinateSystem3DDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
@@ -22,7 +23,7 @@ import java.util.List;
 
 import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicCoordinateSystem3D;
 
-public class JointAxisVisualizer implements RobotController, SCS2YoGraphicHolder
+public class JointAxisVisualizer implements Controller, SCS2YoGraphicHolder
 {
    private final  String name = getClass().getSimpleName();
    private final YoRegistry registry = new YoRegistry(name);
@@ -68,12 +69,6 @@ public class JointAxisVisualizer implements RobotController, SCS2YoGraphicHolder
    public String getName()
    {
       return name;
-   }
-
-   @Override
-   public String getDescription()
-   {
-      return getName();
    }
 
    @Override

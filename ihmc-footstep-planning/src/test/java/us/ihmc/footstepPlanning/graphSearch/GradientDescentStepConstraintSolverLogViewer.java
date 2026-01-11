@@ -51,7 +51,7 @@ public class GradientDescentStepConstraintSolverLogViewer
 
       PlanarRegionFootstepSnapAndWiggler snapAndWiggler = new PlanarRegionFootstepSnapAndWiggler(footPolygons,
                                                                                      footstepPlannerParameters,
-                                                                                     scs,
+                                                                                     t -> scs.tickAndUpdate(),
                                                                                      graphicsListRegistry,
                                                                                      scs.getRootRegistry());
       // FIXME

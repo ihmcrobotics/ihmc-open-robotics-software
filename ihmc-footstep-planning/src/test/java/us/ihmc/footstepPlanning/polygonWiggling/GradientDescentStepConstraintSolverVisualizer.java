@@ -57,7 +57,9 @@ public class GradientDescentStepConstraintSolverVisualizer
       scs.setGroundVisible(false);
       YoRegistry registry = new YoRegistry(getClass().getSimpleName());
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-      GradientDescentStepConstraintSolver gradientDescentStepConstraintSolver = new GradientDescentStepConstraintSolver(scs, graphicsListRegistry, registry);
+      GradientDescentStepConstraintSolver gradientDescentStepConstraintSolver = new GradientDescentStepConstraintSolver((time) -> scs.tickAndUpdate(),
+                                                                                                                        graphicsListRegistry,
+                                                                                                                        registry);
 
       Graphics3DObject regionsGraphic = new Graphics3DObject();
       IdMappedColorFunction colorMapper = IdMappedColorFunction.INSTANCE;

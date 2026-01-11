@@ -602,7 +602,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       };
    }
 
-   private class RigidBodyTrackingWatcher implements RobotController
+   private class RigidBodyTrackingWatcher implements Controller
    {
       private final YoRegistry registry;
       private final RigidBodyReadOnly controllerBody;
@@ -707,7 +707,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
     * late at a state change, it is ran multiple times until it catches up. When the preview is ahead
     * at a state change, it is paused until the controller catches up.
     */
-   private class Synchronizer implements RobotController
+   private class Synchronizer implements Controller
    {
       private final YoRegistry registry = new YoRegistry(getName());
 

@@ -56,6 +56,7 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoi
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameEuclideanTrajectoryPointList;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinitionFactory;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
@@ -851,7 +852,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       finalPose.prependTranslation(randomPose.getPosition());
       finalPose.appendRotation(randomPose.getOrientation());
 
-      simulationTestHelper.addRobotControllerOnControllerThread(new RobotController()
+      simulationTestHelper.addRobotControllerOnControllerThread(new Controller()
       {
          @Override
          public void initialize()
@@ -897,21 +898,9 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          }
 
          @Override
-         public YoRegistry getYoRegistry()
-         {
-            return null;
-         }
-
-         @Override
-         public String getDescription()
-         {
-            return RobotController.super.getDescription();
-         }
-
-         @Override
          public String getName()
          {
-            return RobotController.super.getName();
+            return Controller.super.getName();
          }
       });
 

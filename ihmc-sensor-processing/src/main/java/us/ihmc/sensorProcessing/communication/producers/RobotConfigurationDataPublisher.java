@@ -90,7 +90,7 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
    }
 
    @Override
-   public void write()
+   public void doControl()
    {
       if (lastPublishTime > 0 && timestampHolder.getMonotonicTime() - lastPublishTime < publishPeriod)
          return;

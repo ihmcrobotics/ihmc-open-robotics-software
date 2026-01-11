@@ -380,12 +380,6 @@ public class LeggedRobotEKF implements StateEstimatorController
    }
 
    @Override
-   public String getDescription()
-   {
-      return getName();
-   }
-
-   @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());

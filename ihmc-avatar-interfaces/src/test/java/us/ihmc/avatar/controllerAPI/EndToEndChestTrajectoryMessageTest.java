@@ -61,6 +61,7 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.MovingZUpFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
+import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
@@ -1675,7 +1676,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       cloneOneDoFJointKinematicChain[0].updateFramesRecursively();
       finalOrientation.setFromReferenceFrame(cloneOneDoFJointKinematicChain[cloneOneDoFJointKinematicChain.length - 1].getSuccessor().getBodyFixedFrame());
 
-      simulationTestHelper.addRobotControllerOnControllerThread(new RobotController()
+      simulationTestHelper.addRobotControllerOnControllerThread(new Controller()
       {
          @Override
          public void initialize()
@@ -1703,21 +1704,9 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
          }
 
          @Override
-         public YoRegistry getYoRegistry()
-         {
-            return null;
-         }
-
-         @Override
-         public String getDescription()
-         {
-            return RobotController.super.getDescription();
-         }
-
-         @Override
          public String getName()
          {
-            return RobotController.super.getName();
+            return Controller.super.getName();
          }
       });
 

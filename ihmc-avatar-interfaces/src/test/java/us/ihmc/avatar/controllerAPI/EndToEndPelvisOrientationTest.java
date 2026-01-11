@@ -43,6 +43,7 @@ import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.interpolators.OrientationInterpolationCalculator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SO3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -460,7 +461,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       finalOrientation.setFromReferenceFrame(pelvis.getBodyFixedFrame());
       finalOrientation.append(EuclidCoreRandomTools.nextQuaternion(random, 0.3));
 
-      simulationTestHelper.addRobotControllerOnControllerThread(new RobotController()
+      simulationTestHelper.addRobotControllerOnControllerThread(new Controller()
       {
          @Override
          public void initialize()
@@ -497,21 +498,9 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
          }
 
          @Override
-         public YoRegistry getYoRegistry()
-         {
-            return null;
-         }
-
-         @Override
-         public String getDescription()
-         {
-            return RobotController.super.getDescription();
-         }
-
-         @Override
          public String getName()
          {
-            return RobotController.super.getName();
+            return Controller.super.getName();
          }
       });
 

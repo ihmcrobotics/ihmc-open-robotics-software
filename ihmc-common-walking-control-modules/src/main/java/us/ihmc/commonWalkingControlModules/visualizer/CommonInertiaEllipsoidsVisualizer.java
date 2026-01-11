@@ -1,9 +1,5 @@
 package us.ihmc.commonWalkingControlModules.visualizer;
 
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
-
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -16,7 +12,6 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicEllipsoid;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicShape;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -24,21 +19,24 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.robotDescription.InertiaTools;
+import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
-import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicEllipsoid3DDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
-import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
+
 import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoOrientation3DDefinition;
 import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoTuple3DDefinition;
 
-public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotController, SCS2YoGraphicHolder
+public class CommonInertiaEllipsoidsVisualizer implements Updatable, Controller, SCS2YoGraphicHolder
 {
    private final String name = getClass().getSimpleName();
 

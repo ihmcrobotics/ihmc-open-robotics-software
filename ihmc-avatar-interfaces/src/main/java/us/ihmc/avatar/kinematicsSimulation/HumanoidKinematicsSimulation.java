@@ -478,7 +478,7 @@ public class HumanoidKinematicsSimulation
 
       doControl();
 
-      robotConfigurationDataPublisher.write();
+      robotConfigurationDataPublisher.doControl();
 
       if (kinematicsSimulationParameters.runNoFasterThanMaxRealtimeRate())
       {

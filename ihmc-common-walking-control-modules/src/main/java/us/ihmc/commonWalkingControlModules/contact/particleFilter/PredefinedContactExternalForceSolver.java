@@ -9,11 +9,10 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.math.linearAlgebra.DampedLeastSquaresSolver;
 import us.ihmc.matrixlib.MatrixTools;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialVector;
-import us.ihmc.simulationconstructionset.util.RobotController;
+import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -24,7 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
 
-public class PredefinedContactExternalForceSolver implements RobotController
+public class PredefinedContactExternalForceSolver implements Controller
 {
    public static final double forceGraphicScale = 0.035;
    private static final int maximumNumberOfContactPoints = 10;
@@ -35,7 +34,7 @@ public class PredefinedContactExternalForceSolver implements RobotController
 
    private final YoBoolean firstTick = new YoBoolean("firstTick", registry);
    private final YoDouble solverAlpha = new YoDouble("solverAlpha", registry);
-   private final JointBasics[] joints;
+   private final JointReadOnly[] joints;
    private final int dofs;
 
    private final List<PredefinedContactPoint> contactPoints = new ArrayList<>();
@@ -51,7 +50,7 @@ public class PredefinedContactExternalForceSolver implements RobotController
 
    private final FramePoint3D tempPoint = new FramePoint3D();
 
-   public PredefinedContactExternalForceSolver(JointBasics[] joints,
+   public PredefinedContactExternalForceSolver(JointReadOnly[] joints,
                                                double dt,
                                                ForceEstimatorDynamicMatrixUpdater dynamicMatrixUpdater,
                                                YoGraphicsListRegistry graphicsListRegistry,

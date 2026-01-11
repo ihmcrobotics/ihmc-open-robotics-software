@@ -8,7 +8,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -34,7 +33,7 @@ public class ExternalTorqueEstimator implements ExternalTorqueEstimatorInterface
    private final YoDouble estimationGain = new YoDouble("estimationGain", registry);
    private final double dt;
 
-   private final JointBasics[] joints;
+   private final JointReadOnly[] joints;
    private final int dofs;
    private final DMatrixRMaj tau;
    private final DMatrixRMaj qd;
@@ -56,7 +55,7 @@ public class ExternalTorqueEstimator implements ExternalTorqueEstimatorInterface
 
    private boolean firstTick = true;
 
-   public ExternalTorqueEstimator(JointBasics[] joints,
+   public ExternalTorqueEstimator(JointReadOnly[] joints,
                                   double dt,
                                   ForceEstimatorDynamicMatrixUpdater dynamicMatrixUpdater,
                                   YoRegistry parentRegistry)

@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.polygonWiggling;
 
 import java.awt.Color;
 
+import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -20,7 +21,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.graphics.YoGraphicPlanarRegionsList;
-import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameLineSegment2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -60,7 +60,7 @@ public class GradientDescentStepConstraintSolver
 
    private final ConvexPolygon2D transformedFootPolygon = new ConvexPolygon2D();
 
-   private final TickAndUpdatable tickAndUpdatable;
+   private final Updatable tickAndUpdatable;
    private final YoFrameLineSegment2D[] initialPolygonToWiggle = new YoFrameLineSegment2D[5];
    private final YoFrameLineSegment2D[] linearizedTransformedPolygonToWiggle = new YoFrameLineSegment2D[5];
    private final YoFrameLineSegment2D[] transformedPolygonToWiggle = new YoFrameLineSegment2D[5];
@@ -84,7 +84,7 @@ public class GradientDescentStepConstraintSolver
       this.soleFrameGraphic = null;
    }
 
-   public GradientDescentStepConstraintSolver(TickAndUpdatable tickAndUpdatable, YoGraphicsListRegistry graphicsListRegistry, YoRegistry registry)
+   public GradientDescentStepConstraintSolver(Updatable tickAndUpdatable, YoGraphicsListRegistry graphicsListRegistry, YoRegistry registry)
    {
       registry.addChild(this.registry);
       this.tickAndUpdatable = tickAndUpdatable;
@@ -146,7 +146,7 @@ public class GradientDescentStepConstraintSolver
       if (tickAndUpdatable != null)
       {
          initializeConstraintGraphics(polygonToWiggle, input);
-         tickAndUpdatable.tickAndUpdate();
+         tickAndUpdatable.update(0.0);
       }
 
       if (input.containsInputForLegCollisionCheck())
@@ -225,7 +225,7 @@ public class GradientDescentStepConstraintSolver
          if (tickAndUpdatable != null)
          {
             gradientMagnitude.set(gradient.length());
-            tickAndUpdatable.tickAndUpdate();
+            tickAndUpdatable.update(0.0);
          }
 
          if (gradient.lengthSquared() > MathTools.square(gradientMagnitudeToApplyStandardAlpha))
@@ -310,14 +310,14 @@ public class GradientDescentStepConstraintSolver
                                                                   input.getPolygonToWiggleInto(),
                                                                   input.getWiggleParameters(),
                                                                   gradient);
-      if (gradient.length() > gradientEpsilonToActivateConstraint)
+      if (gradient.norm() > gradientEpsilonToActivateConstraint)
       {
          return Constraint.FOOT_AREA;
       }
 
       if (tickAndUpdatable != null)
       {
-         tickAndUpdatable.tickAndUpdate();
+         tickAndUpdatable.update(0.0);
       }
 
       return null;

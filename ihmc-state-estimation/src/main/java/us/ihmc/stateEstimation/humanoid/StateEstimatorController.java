@@ -5,8 +5,8 @@ import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
+import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
-import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorCalibrationModule;
 
 /**
@@ -15,7 +15,7 @@ import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSens
  * Classes implementing this interface will extend the {@link RobotController} interface as well.
  * </p>
  */
-public interface StateEstimatorController extends RobotController, StateEstimatorModeSubscriber, SCS2YoGraphicHolder
+public interface StateEstimatorController extends Controller, StateEstimatorModeSubscriber, SCS2YoGraphicHolder
 {
    static final TObjectDoubleMap<String> EMPTY_JOINT_POSITION_MAP = new TObjectDoubleHashMap<>(0);
 

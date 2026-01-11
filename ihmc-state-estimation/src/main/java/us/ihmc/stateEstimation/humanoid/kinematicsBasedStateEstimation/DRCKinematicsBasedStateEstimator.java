@@ -389,12 +389,6 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       return name;
    }
 
-   @Override
-   public String getDescription()
-   {
-      return getName();
-   }
-
    public void setExternalPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber)
    {
       pelvisPoseHistoryCorrection.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);

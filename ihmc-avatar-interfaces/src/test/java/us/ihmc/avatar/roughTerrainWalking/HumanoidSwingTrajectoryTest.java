@@ -361,7 +361,7 @@ public abstract class HumanoidSwingTrajectoryTest implements MultiRobotTestInter
       }
    }
 
-   private class CollisionDetector extends SimpleRobotController
+   private class CollisionDetector implements Controller
    {
       private final CommonHumanoidReferenceFrames referenceFrames;
       private final SideDependentList<ConvexPolygon2D> footPolygonsInSole;

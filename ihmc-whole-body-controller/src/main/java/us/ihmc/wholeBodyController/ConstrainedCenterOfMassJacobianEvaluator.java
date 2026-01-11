@@ -27,6 +27,7 @@ import us.ihmc.robotics.linearAlgebra.ColumnSpaceProjector;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.ConstrainedCenterOfMassJacobianCalculator;
 import us.ihmc.robotics.screwTheory.ConstrainedCentroidalMomentumMatrixCalculator;
+import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -38,7 +39,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
  * @author twan
  *         Date: 4/15/13
  */
-public class ConstrainedCenterOfMassJacobianEvaluator implements RobotController
+public class ConstrainedCenterOfMassJacobianEvaluator implements Controller
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final ConstrainedCenterOfMassJacobianCalculator constrainedCenterOfMassJacobianCalculator;

@@ -24,6 +24,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
@@ -139,7 +140,7 @@ public abstract class EndToEndNeckTrajectoryMessageTest implements MultiRobotTes
          desiredNeckJointVelocities[i] = qDDesired;
       }
 
-      simulationTestHelper.addRobotControllerOnControllerThread(new RobotController()
+      simulationTestHelper.addRobotControllerOnControllerThread(new Controller()
       {
          @Override
          public void initialize()
@@ -190,15 +191,9 @@ public abstract class EndToEndNeckTrajectoryMessageTest implements MultiRobotTes
          }
 
          @Override
-         public String getDescription()
-         {
-            return RobotController.super.getDescription();
-         }
-
-         @Override
          public String getName()
          {
-            return RobotController.super.getName();
+            return Controller.super.getName();
          }
       });
 

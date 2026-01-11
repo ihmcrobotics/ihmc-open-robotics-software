@@ -1,9 +1,5 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.List;
-
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.RobotDesiredConfigurationData;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModule;
@@ -13,7 +9,11 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCor
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoLowLevelOneDoFJointDesiredDataHolder;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.*;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerStateTransitionFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControllerStateFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WholeBodyControllerCoreFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HighLevelHumanoidControllerPlugin;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HighLevelHumanoidControllerPluginFactory;
@@ -41,20 +41,24 @@ import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.core.StateTransition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicListDefinition;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
-import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.parameters.IntegerParameter;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-public class HumanoidHighLevelControllerManager implements RobotController, SCS2YoGraphicHolder
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.List;
+
+public class HumanoidHighLevelControllerManager implements Controller, SCS2YoGraphicHolder
 {
    private final String name = getClass().getSimpleName();
    private final YoRegistry registry = new YoRegistry(name);
@@ -247,12 +251,6 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
    public String getName()
    {
       return this.getClass().getSimpleName();
-   }
-
-   @Override
-   public String getDescription()
-   {
-      return getName();
    }
 
    private StateMachine<HighLevelControllerName, HighLevelControllerState> setUpStateMachine(HighLevelControllerName initialControllerState,

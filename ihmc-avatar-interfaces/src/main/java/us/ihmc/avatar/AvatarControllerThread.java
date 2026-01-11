@@ -30,6 +30,7 @@ import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
@@ -284,7 +285,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
 
       if (CREATE_DYNAMICALLY_CONSISTENT_NULLSPACE_EVALUATOR)
       {
-         RobotController dynamicallyConsistentNullspaceEvaluator = new ConstrainedCenterOfMassJacobianEvaluator(controllerModel);
+         Controller dynamicallyConsistentNullspaceEvaluator = new ConstrainedCenterOfMassJacobianEvaluator(controllerModel);
          modularRobotController.addRobotController(dynamicallyConsistentNullspaceEvaluator);
       }
 
@@ -371,7 +372,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
     *
     * @param controller
     */
-   public void addRobotController(RobotController controller)
+   public void addRobotController(Controller controller)
    {
       robotController.addRobotController(controller);
    }

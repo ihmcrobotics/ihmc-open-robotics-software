@@ -27,6 +27,7 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.scs2.SimulationConstructionSet2;
+import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
@@ -670,7 +671,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    /**
     * For unit testing only
     */
-   public void addRobotControllerOnControllerThread(RobotController controller)
+   public void addRobotControllerOnControllerThread(Controller controller)
    {
       avatarSimulation.addRobotControllerOnControllerThread(controller);
    }

@@ -51,7 +51,7 @@ public class GradientDescentStepConstraintSolverTest
          scs.setGroundVisible(false);
          registry = new YoRegistry(getClass().getSimpleName());
          graphicsListRegistry = new YoGraphicsListRegistry();
-         gradientDescentStepConstraintSolver = new GradientDescentStepConstraintSolver(scs, graphicsListRegistry, registry);
+         gradientDescentStepConstraintSolver = new GradientDescentStepConstraintSolver(t -> scs.tickAndUpdate(), graphicsListRegistry, registry);
          graphicsListRegistry.addArtifactListsToPlotter(scs.createSimulationOverheadPlotterFactory().createOverheadPlotter().getPlotter());
          scs.addYoGraphicsListRegistry(graphicsListRegistry);
          scs.getRootRegistry().addChild(registry);

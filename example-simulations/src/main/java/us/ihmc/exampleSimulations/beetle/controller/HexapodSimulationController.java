@@ -206,7 +206,7 @@ public class HexapodSimulationController implements RobotController
    public void doControl()
    {
       long startTime = System.nanoTime();
-      sensorReader.read();
+      sensorReader.doControl();
       contactPointVisualizer.update(0.0);
       for (YoGraphicReferenceFrame frame : referenceFrameGraphics)
       {

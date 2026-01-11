@@ -9,12 +9,13 @@ import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.log.LogTools;
+import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
-public class PelvisCheckpointChecker extends SimpleRobotController
+public class PelvisCheckpointChecker implements Controller
 {
    private final Robot humanoidRobotModel;
 

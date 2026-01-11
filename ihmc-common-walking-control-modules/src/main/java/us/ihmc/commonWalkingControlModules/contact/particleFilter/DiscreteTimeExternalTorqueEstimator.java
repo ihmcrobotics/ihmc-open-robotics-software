@@ -27,7 +27,7 @@ public class DiscreteTimeExternalTorqueEstimator implements ExternalTorqueEstima
    private final YoDouble discreteTimeGain = new YoDouble("discreteTimeFilterGain", registry);
    private final YoDouble beta = new YoDouble("discreteTimeMomentumGain", registry);
 
-   private final JointBasics[] joints;
+   private final JointReadOnly[] joints;
    private final int dofs;
    private final DMatrixRMaj tau;
    private final DMatrixRMaj qd;
@@ -49,7 +49,7 @@ public class DiscreteTimeExternalTorqueEstimator implements ExternalTorqueEstima
 
    private boolean firstTick = true;
 
-   public DiscreteTimeExternalTorqueEstimator(JointBasics[] joints,
+   public DiscreteTimeExternalTorqueEstimator(JointReadOnly[] joints,
                                               double dt,
                                               ForceEstimatorDynamicMatrixUpdater dynamicMatrixUpdater,
                                               YoRegistry parentRegistry)

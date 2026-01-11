@@ -46,6 +46,7 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.OneDoFTrajectoryPoint
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.OneDoFTrajectoryPointList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
@@ -1005,7 +1006,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
          }
       }
 
-      simulationTestHelper.addRobotControllerOnControllerThread(new RobotController()
+      simulationTestHelper.addRobotControllerOnControllerThread(new Controller()
       {
          @Override
          public void initialize()
@@ -1057,21 +1058,9 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
          }
 
          @Override
-         public YoRegistry getYoRegistry()
-         {
-            return null;
-         }
-
-         @Override
-         public String getDescription()
-         {
-            return RobotController.super.getDescription();
-         }
-
-         @Override
          public String getName()
          {
-            return RobotController.super.getName();
+            return Controller.super.getName();
          }
       });
 

@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 
+import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.*;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
@@ -57,20 +58,20 @@ public class PlanarRegionFootstepSnapAndWiggler implements FootstepSnapperReadOn
    // Call this constructor only for testing
    public PlanarRegionFootstepSnapAndWiggler(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame,
                                              DefaultFootstepPlannerParametersReadOnly parameters,
-                                             TickAndUpdatable tickAndUpdatable,
+                                             Updatable updatable,
                                              YoGraphicsListRegistry graphicsListRegistry,
                                              YoRegistry parentRegistry)
    {
       this.footPolygonsInSoleFrame = footPolygonsInSoleFrame;
       this.parameters = parameters;
 
-      if (tickAndUpdatable == null)
+      if (updatable == null)
       {
          gradientDescentStepConstraintSolver = new GradientDescentStepConstraintSolver();
       }
       else
       {
-         gradientDescentStepConstraintSolver = new GradientDescentStepConstraintSolver(tickAndUpdatable, graphicsListRegistry, parentRegistry);
+         gradientDescentStepConstraintSolver = new GradientDescentStepConstraintSolver(updatable, graphicsListRegistry, parentRegistry);
       }
    }
 

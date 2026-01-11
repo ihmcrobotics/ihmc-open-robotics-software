@@ -7,6 +7,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.PointJacobian;
@@ -42,13 +43,13 @@ public class PredefinedContactPoint
 
    private final FramePoint3D tempPoint = new FramePoint3D();
 
-   public PredefinedContactPoint(JointBasics[] orderedJoints, RigidBodyBasics rigidBody, boolean assumeZeroTorque)
+   public PredefinedContactPoint(JointReadOnly[] orderedJoints, RigidBodyBasics rigidBody, boolean assumeZeroTorque)
    {
       this.rigidBody = rigidBody;
       this.assumeZeroTorque = assumeZeroTorque;
       this.numberOfDecisionVariables = assumeZeroTorque ? 3 : 6;
 
-      RigidBodyBasics baseLink = orderedJoints[0].getPredecessor();
+      RigidBodyBasics baseLink = (RigidBodyBasics) orderedJoints[0].getPredecessor();
       this.contactPointJacobian = new GeometricJacobian(baseLink, rigidBody, baseLink.getBodyFixedFrame());
 
       this.contactPointFrame = new ReferenceFrame(rigidBody.getName() + "ContactFrame", ReferenceFrame.getWorldFrame())

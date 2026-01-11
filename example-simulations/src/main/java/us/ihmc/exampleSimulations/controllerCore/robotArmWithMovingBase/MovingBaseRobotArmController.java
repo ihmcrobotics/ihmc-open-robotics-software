@@ -31,6 +31,9 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.controllers.pidGains.implementations.SymmetricYoPIDSE3Gains;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.scs2.definition.controller.interfaces.Controller;
+import us.ihmc.scs2.simulation.robot.Robot;
+import us.ihmc.scs2.simulation.robot.multiBodySystem.interfaces.SimJointBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.RobotJointLimitWatcher;
@@ -42,7 +45,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-public class MovingBaseRobotArmController implements RobotController
+public class MovingBaseRobotArmController implements Controller
 {
    private static final boolean USE_PRIVILEGED_CONFIGURATION = true;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -94,16 +97,15 @@ public class MovingBaseRobotArmController implements RobotController
    private final YoBoolean setRandomConfiguration = new YoBoolean("setRandomConfiguration", registry);
    private final ReferenceFrame baseFrame;
 
-   public MovingBaseRobotArmController(MovingBaseRobotArm robotArm, double controlDT, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public MovingBaseRobotArmController(Robot robot, YoDouble yoTime, double gravityZ, double controlDT, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this.robotArm = robotArm;
+      this.robotArm = new MovingBaseRobotArm(robot, controlDT, registry);
+      this.yoTime = yoTime;
       baseFrame = robotArm.getBase().getBodyFixedFrame();
 
       controllerCoreMode.set(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
       controllerCoreMode.addListener(v -> controllerCoreModeHasChanged.set(true));
 
-      yoTime = robotArm.getYoTime();
-      double gravityZ = robotArm.getGravity();
       RigidBodyBasics hand = robotArm.getHand();
       RigidBodyBasics base = robotArm.getBase();
       RigidBodyBasics elevator = robotArm.getElevator();
@@ -112,7 +114,7 @@ public class MovingBaseRobotArmController implements RobotController
 
       ControllerCoreOptimizationSettings optimizationSettings = new RobotArmControllerCoreOptimizationSettings();
 
-      controlCoreToolbox = new WholeBodyControlCoreToolbox(controlDT, gravityZ, null, controlledJoints, centerOfMassFrame,
+      controlCoreToolbox = new WholeBodyControlCoreToolbox(controlDT, Math.abs(gravityZ), null, controlledJoints, centerOfMassFrame,
                                                                                        optimizationSettings, registry);
 
       if (USE_PRIVILEGED_CONFIGURATION)
@@ -138,7 +140,7 @@ public class MovingBaseRobotArmController implements RobotController
                                                                                          YoAppearance.Red()));
 
       privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_ZERO);
-      privilegedConfigurationCommand.addJoint(robotArm.getElbowPitch(), Math.PI / 3.0);
+      privilegedConfigurationCommand.addJoint((OneDoFJointBasics) robotArm.getElbowPitch(), Math.PI / 3.0);
 
       trajectory = new StraightLinePoseTrajectoryGenerator("handTrajectory", baseFrame, registry, true, yoGraphicsListRegistry);
 
@@ -156,7 +158,7 @@ public class MovingBaseRobotArmController implements RobotController
    @Override
    public void initialize()
    {
-      robotArm.updateIDRobot();
+      robotArm.update();
 
       baseWeight.set(100.0);
 
@@ -210,8 +212,7 @@ public class MovingBaseRobotArmController implements RobotController
    @Override
    public void doControl()
    {
-      robotArm.updateControlFrameAcceleration();
-      robotArm.updateIDRobot();
+      robotArm.update();
       centerOfMassFrame.update();
 
       updateBaseTrajectoryAndCommands();
@@ -342,10 +343,9 @@ public class MovingBaseRobotArmController implements RobotController
       return name;
    }
 
-   @Override
-   public String getDescription()
+   public SimJointBasics getWristYaw()
    {
-      return name;
+      return robotArm.getSimWristYaw();
    }
 
    public YoFramePoint3D getHandTargetPosition()

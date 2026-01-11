@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.contact.particleFilter;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 
 import java.util.function.IntUnaryOperator;
@@ -12,12 +12,12 @@ import java.util.stream.IntStream;
 
 public class ExternalForceEstimationTools
 {
-   public static int[] createIndexMap(GeometricJacobian jacobian, JointBasics[] joints)
+   public static int[] createIndexMap(GeometricJacobian jacobian, JointReadOnly[] joints)
    {
       int[] indexMap = new int[jacobian.getJacobianMatrix().getNumCols()];
 
-      JointBasics[] jointPath = jacobian.getJointsInOrder();
-      ToIntFunction<JointBasics> jointIndexFunction = joint -> IntStream.range(0, joints.length)
+      JointReadOnly[] jointPath = jacobian.getJointsInOrder();
+      ToIntFunction<JointReadOnly> jointIndexFunction = joint -> IntStream.range(0, joints.length)
                                                                         .filter(i -> joint == joints[i])
                                                                         .findFirst()
                                                                         .orElseThrow(() -> new RuntimeException("Could not find joint"));
@@ -25,7 +25,7 @@ public class ExternalForceEstimationTools
 
       for (int jointIndex = 0, mappedIndex = 0; jointIndex < jointPath.length; jointIndex++)
       {
-         JointBasics joint = jointPath[jointIndex];
+         JointReadOnly joint = jointPath[jointIndex];
          int offset = indexOffset.applyAsInt(jointIndexFunction.applyAsInt(joint));
 
          for (int i = 0; i < joint.getDegreesOfFreedom(); i++)

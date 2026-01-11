@@ -56,6 +56,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
 import us.ihmc.scs2.simulation.robot.Robot;
@@ -473,7 +474,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
    }
 
-   private class ContactPointController implements RobotController
+   private class ContactPointController implements Controller
    {
       private List<? extends Point2DReadOnly> newContactPoints = null;
       private RobotSide robotSide = null;
@@ -524,12 +525,6 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
 
       @Override
       public String getName()
-      {
-         return null;
-      }
-
-      @Override
-      public String getDescription()
       {
          return null;
       }

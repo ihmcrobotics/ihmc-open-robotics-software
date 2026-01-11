@@ -141,7 +141,7 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    @Override
    public void initialize()
    {
-      read();
+      doControl();
    }
 
    @Override
@@ -156,19 +156,13 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
       return name;
    }
 
-   @Override
-   public String getDescription()
-   {
-      return getName();
-   }
-
    private final RigidBodyTransform temporaryRootToWorldTransform = new RigidBodyTransform();
    private final Vector3D linearAcceleration = new Vector3D();
    private final Vector3D angularVelocity = new Vector3D();
    private final Quaternion orientation = new Quaternion();
 
    @Override
-   public void read()
+   public void doControl()
    {
       // Think about adding root body acceleration to the fullrobotmodel
       for (int i = 0; i < oneDoFJointStateUpdaters.size(); i++)

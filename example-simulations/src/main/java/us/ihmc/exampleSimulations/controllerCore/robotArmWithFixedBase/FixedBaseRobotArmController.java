@@ -33,10 +33,11 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.controllers.pidGains.implementations.SymmetricYoPIDSE3Gains;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.scs2.definition.controller.interfaces.Controller;
+import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.RobotJointLimitWatcher;
-import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -44,7 +45,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-public class FixedBaseRobotArmController implements RobotController
+public class FixedBaseRobotArmController implements Controller
 {
    private static final boolean USE_PRIVILEGED_CONFIGURATION = false;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -100,15 +101,14 @@ public class FixedBaseRobotArmController implements RobotController
 
    private final YoBoolean setRandomConfiguration = new YoBoolean("setRandomConfiguration", registry);
 
-   public FixedBaseRobotArmController(FixedBaseRobotArm robotArm, double controlDT, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public FixedBaseRobotArmController(Robot robot, YoDouble yoTime, double gravityZ, double controlDT, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this.robotArm = robotArm;
+      this.robotArm = new FixedBaseRobotArm(robot, controlDT, registry);
+      this.yoTime = yoTime;
 
       controllerCoreMode.set(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
       controllerCoreMode.addListener(v -> controllerCoreModeHasChanged.set(true));
 
-      yoTime = robotArm.getYoTime();
-      double gravityZ = robotArm.getGravity();
       RigidBodyBasics hand = robotArm.getHand();
       RigidBodyBasics elevator = robotArm.getElevator();
       JointBasics[] controlledJoints = MultiBodySystemTools.collectSupportAndSubtreeJoints(elevator);
@@ -116,7 +116,7 @@ public class FixedBaseRobotArmController implements RobotController
 
       ControllerCoreOptimizationSettings optimizationSettings = new RobotArmControllerCoreOptimizationSettings();
 
-      controlCoreToolbox = new WholeBodyControlCoreToolbox(controlDT, gravityZ, null, controlledJoints, centerOfMassFrame,
+      controlCoreToolbox = new WholeBodyControlCoreToolbox(controlDT, Math.abs(gravityZ), null, controlledJoints, centerOfMassFrame,
                                                                                        optimizationSettings, registry);
 
       if (USE_PRIVILEGED_CONFIGURATION)
@@ -142,7 +142,7 @@ public class FixedBaseRobotArmController implements RobotController
                                                                                          YoAppearance.Red()));
 
       privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_ZERO);
-      privilegedConfigurationCommand.addJoint(robotArm.getElbowPitch(), Math.PI / 3.0);
+      privilegedConfigurationCommand.addJoint((OneDoFJointBasics) robotArm.getElbowPitch(), Math.PI / 3.0);
 
       trajectory = new StraightLinePoseTrajectoryGenerator("handTrajectory", worldFrame, registry, true, yoGraphicsListRegistry);
 
@@ -160,7 +160,7 @@ public class FixedBaseRobotArmController implements RobotController
    @Override
    public void initialize()
    {
-      robotArm.updateIDRobot();
+      robotArm.update();
 
       handWeight.set(1.0);
 
@@ -202,8 +202,7 @@ public class FixedBaseRobotArmController implements RobotController
    @Override
    public void doControl()
    {
-      robotArm.updateControlFrameAcceleration();
-      robotArm.updateIDRobot();
+      robotArm.update();
       centerOfMassFrame.update();
 
       updateTrajectory();
@@ -236,7 +235,7 @@ public class FixedBaseRobotArmController implements RobotController
       controllerCoreCommand.setControllerCoreMode(controllerCoreMode.getEnumValue());
 
       if (controllerCoreMode.getEnumValue() == WholeBodyControllerCoreMode.INVERSE_DYNAMICS)
-         robotArm.updateJointTaus(lowLevelOneDoFJointDesiredDataHolder);
+         robotArm.updateSCSRobotJointTaus(lowLevelOneDoFJointDesiredDataHolder);
       else
          robotArm.updateSCSRobotJointConfiguration(lowLevelOneDoFJointDesiredDataHolder);
 
@@ -351,12 +350,6 @@ public class FixedBaseRobotArmController implements RobotController
 
    @Override
    public String getName()
-   {
-      return name;
-   }
-
-   @Override
-   public String getDescription()
    {
       return name;
    }

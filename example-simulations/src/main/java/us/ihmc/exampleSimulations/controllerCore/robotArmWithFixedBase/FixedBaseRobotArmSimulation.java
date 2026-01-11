@@ -1,10 +1,12 @@
 package us.ihmc.exampleSimulations.controllerCore.robotArmWithFixedBase;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.graphicsDescription.conversion.YoGraphicConversionTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.scs2.SimulationConstructionSet2;
+import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.simulationConstructionSetTools.util.inputdevices.MidiSliderBoard;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 
 public class FixedBaseRobotArmSimulation
 {
@@ -13,22 +15,28 @@ public class FixedBaseRobotArmSimulation
       double controlDT = 5.0e-5;
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
-      FixedBaseRobotArm robotArm = new FixedBaseRobotArm(controlDT);
-      FixedBaseRobotArmController robotArmController = new FixedBaseRobotArmController(robotArm, controlDT, yoGraphicsListRegistry);
-      robotArmController.registerControllerCoreModeChangedListener((mode) -> robotArm.setDynamic(mode == WholeBodyControllerCoreMode.INVERSE_DYNAMICS));
-      robotArm.setController(robotArmController);
+      FixedBaseRobotArmDefinition robotArmDefinition = new FixedBaseRobotArmDefinition();
 
-      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
-      parameters.setDataBufferSize((int) Math.pow(2, 16)); // => 65536
-      SimulationConstructionSet scs = new SimulationConstructionSet(robotArm, parameters);
+      SimulationConstructionSet2 scs = new SimulationConstructionSet2(ReferenceFrame.getWorldFrame());
+      Robot robotArm = scs.addRobot(robotArmDefinition);
+      FixedBaseRobotArmController robotArmController = new FixedBaseRobotArmController(robotArm,
+                                                                                       scs.getTime(),
+                                                                                       scs.getGravity().getZ(),
+                                                                                       controlDT,
+                                                                                       yoGraphicsListRegistry);
+//      robotArmController.registerControllerCoreModeChangedListener((mode) -> robotArm.setDynamic(mode == WholeBodyControllerCoreMode.INVERSE_DYNAMICS));
+
+      robotArm.addThrottledController(robotArmController, controlDT);
+
+      scs.initializeBufferSize((int) Math.pow(2, 16));
       setupSliderBoard(scs);
-      scs.setFastSimulate(true, 15);
-      scs.addYoGraphicsListRegistry(yoGraphicsListRegistry, true);
-      scs.setDT(controlDT, 10);
-      scs.startOnAThread();
+      scs.addYoGraphics(YoGraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry));
+      scs.setDT(controlDT);
+      scs.setBufferRecordTickPeriod(10);
+      scs.startSimulationThread();
    }
 
-   private static void setupSliderBoard(SimulationConstructionSet scs)
+   private static void setupSliderBoard(SimulationConstructionSet2 scs)
    {
       MidiSliderBoard midiSliderBoard = new MidiSliderBoard(scs);
       int sliderIndex = 1;

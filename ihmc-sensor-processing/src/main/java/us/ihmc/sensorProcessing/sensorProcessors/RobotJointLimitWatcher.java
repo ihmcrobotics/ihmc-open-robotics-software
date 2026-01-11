@@ -5,11 +5,11 @@ import us.ihmc.commons.lists.TripleList;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.robotics.math.YoVariableLimitChecker;
-import us.ihmc.simulationconstructionset.util.RobotController;
+import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class RobotJointLimitWatcher implements RobotController
+public class RobotJointLimitWatcher implements Controller
 {
    protected final YoRegistry registry = new YoRegistry("JointLimits");
 

@@ -23,6 +23,7 @@ import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.SimulationConstructionSet2;
+import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.state.interfaces.SixDoFJointStateBasics;
 import us.ihmc.scs2.simulation.robot.Robot;
@@ -359,7 +360,7 @@ public class SCS2AvatarSimulation
    /**
     * For unit testing only
     */
-   public void addRobotControllerOnControllerThread(RobotController controller)
+   public void addRobotControllerOnControllerThread(Controller controller)
    {
       controllerThread.addRobotController(controller);
    }
@@ -467,11 +468,6 @@ public class SCS2AvatarSimulation
    public void setFullHumanoidRobotModel(FullHumanoidRobotModel controllerFullRobotModel)
    {
       this.controllerFullRobotModel = controllerFullRobotModel;
-   }
-
-   public void addRobotControllerOnEstimatorThread(RobotController controller)
-   {
-      estimatorThread.addRobotController(controller);
    }
 
    public void setRobot(Robot robot)

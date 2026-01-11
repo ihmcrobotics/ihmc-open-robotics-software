@@ -37,6 +37,7 @@ import us.ihmc.humanoidRobotics.communication.packets.TrajectoryExecutionStatus;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -348,7 +349,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       initialHeight.set(pelvisPosition.getZ());
       finalHeight.set(pelvisPosition.getZ() + RandomNumbers.nextDouble(random, 0.1));
 
-      simulationTestHelper.addRobotControllerOnControllerThread(new RobotController()
+      simulationTestHelper.addRobotControllerOnControllerThread(new Controller()
       {
          @Override
          public void initialize()
@@ -389,15 +390,9 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
          }
 
          @Override
-         public String getDescription()
-         {
-            return RobotController.super.getDescription();
-         }
-
-         @Override
          public String getName()
          {
-            return RobotController.super.getName();
+            return Controller.super.getName();
          }
       });
 

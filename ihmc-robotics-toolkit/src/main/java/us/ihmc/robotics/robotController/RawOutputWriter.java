@@ -1,8 +1,7 @@
 package us.ihmc.robotics.robotController;
 
-import us.ihmc.simulationconstructionset.util.RobotControlElement;
+import us.ihmc.scs2.definition.controller.interfaces.Controller;
 
-public interface RawOutputWriter extends RobotControlElement
+public interface RawOutputWriter extends Controller
 {
-   public abstract void write();
 }

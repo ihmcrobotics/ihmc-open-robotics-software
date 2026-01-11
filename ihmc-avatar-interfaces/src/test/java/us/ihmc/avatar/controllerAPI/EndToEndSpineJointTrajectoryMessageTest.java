@@ -44,6 +44,7 @@ import us.ihmc.mecano.tools.MultiBodySystemFactories;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
 import us.ihmc.simulationconstructionset.util.RobotController;
@@ -428,7 +429,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
          desiredSpineJointVelocities[i] = qDDesired;
       }
 
-      simulationTestHelper.addRobotControllerOnControllerThread(new RobotController()
+      simulationTestHelper.addRobotControllerOnControllerThread(new Controller()
       {
          @Override
          public void initialize()
@@ -473,21 +474,9 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
          }
 
          @Override
-         public YoRegistry getYoRegistry()
-         {
-            return null;
-         }
-
-         @Override
-         public String getDescription()
-         {
-            return RobotController.super.getDescription();
-         }
-
-         @Override
          public String getName()
          {
-            return RobotController.super.getName();
+            return Controller.super.getName();
          }
       });
 
@@ -704,7 +693,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   private class ControllerSpy extends SimpleRobotController
+   private class ControllerSpy implements Controller
    {
       private final double controllerDT;
       private final OneDoFJointBasics[] spineJoints;
@@ -717,6 +706,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       private final YoBoolean orientationControlEnabled;
       private final QuaternionReadOnly desiredOrientation;
 
+      private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
       private final YoFrameQuaternion currentDesiredOrientation = new YoFrameQuaternion("CurrentDesired", ReferenceFrame.getWorldFrame(), registry);
       private final YoFrameQuaternion previousDesiredOrientation = new YoFrameQuaternion("PreviousDesired", ReferenceFrame.getWorldFrame(), registry);
 
@@ -742,6 +732,12 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
          desiredOrientation = EndToEndTestTools.findFeedbackControllerDesiredOrientation(chest.getName(), yoVariableHolder);
          inconsistentControl.set(false);
          maxSpeed.set(0.0);
+      }
+
+      @Override
+      public YoRegistry getYoRegistry()
+      {
+         return registry;
       }
 
       @Override
