@@ -215,7 +215,7 @@ public abstract class RobotContactPointParameters<E extends Enum<E> & RobotSegme
       double simDTRef = 0.0001;
       double modelScale = Math.pow(jointMap.getModelScale(), jointMap.getMassScalePower());
 
-      if (useSoftGroundContactParameters)
+//      if (useSoftGroundContactParameters)
       {
          double scale = modelScale * Math.pow(simDTRef / simDT, 0.25);
          zStiffness = (4000.0 * scale);
@@ -223,20 +223,15 @@ public abstract class RobotContactPointParameters<E extends Enum<E> & RobotSegme
          xyStiffness = (50000.0 * scale);
          xyDamping = (1000.0 * scale);
       }
-      else
-      {
-         double scale = modelScale * Math.pow(simDTRef / simDT, 0.6);
-
+//      else
+//      {
+//         double scale = modelScale * Math.pow(simDTRef / simDT, 0.6);
+//
 //         zStiffness = (2000.0 * scale);
 //         zDamping = (1500.0 * scale);
 //         xyStiffness = (50000.0 * scale);
 //         xyDamping = (2000.0 * scale);
-
-         zStiffness = (2000.0 * scale);
-         zDamping = (1500.0 * scale);
-         xyStiffness = (50000.0 * scale);
-         xyDamping = (2000.0 * scale);
-      }
+//      }
 
       setGroundContactModelParameters(new GroundContactModelParameters(zStiffness, zDamping, xyStiffness, xyDamping));
    }

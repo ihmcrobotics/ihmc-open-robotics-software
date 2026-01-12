@@ -517,9 +517,9 @@ public class ZuluWalkingControllerParameters extends WalkingControllerParameters
    private PID3DGains createHandPositionControlGains()
    {
       double kp = 80.0;
-      double zeta = 0.9;
-      double maximumPositionError = 0.08;
-      double maximumVelocityError = 0.6;
+      double zeta = 1.2;
+      double maximumPositionError = 0.12;
+      double maximumVelocityError = 0.5;
 
       DefaultPID3DGains gains = new DefaultPID3DGains();
       gains.setProportionalGains(kp);
