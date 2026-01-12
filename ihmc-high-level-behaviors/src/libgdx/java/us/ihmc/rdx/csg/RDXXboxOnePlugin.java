@@ -6,7 +6,9 @@ import com.badlogic.gdx.controllers.Controllers;
 import controller_msgs.msg.dds.ContinuousStepGeneratorInputMessage;
 import controller_msgs.msg.dds.ContinuousStepGeneratorParametersMessage;
 import controller_msgs.msg.dds.ContinuousStepGeneratorStatusMessage;
+import controller_msgs.msg.dds.DirectionalControlInputMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.CSGROS2CommunicationHelper;
 import us.ihmc.commons.DeadbandTools;
 import us.ihmc.ros2.ROS2Node;
@@ -21,7 +23,7 @@ import us.ihmc.ros2.ROS2Node;
  *
  * @author Stefan Fasano
  */
-public class RDXXboxOneCSGPlugin
+public class RDXXboxOnePlugin
 {
    public static final double DEFAULT_PARAMETER_INCREMENT = 0.01;
    private static final boolean DEFAULT_USE_DEADMAN_SWITCH = true;
@@ -31,33 +33,42 @@ public class RDXXboxOneCSGPlugin
    private final ControllerListener controllerListener;
    private boolean currentControllerConnected = false;
    private boolean controllerListenerHasBeenAdded = false;
-   private boolean publishCSGInputCommand = false;
+   private boolean publishNewCommand = false;
 
-   // CSG ROS communication helper
-   private final CSGROS2CommunicationHelper communicationHelper;
+   // CSG thread ROS communication helper
+   private final CSGROS2CommunicationHelper csgCommunicationHelper;
 
-   // CSG command and status messages
+   // Controller thread ROS communication helper
+   private final ROS2ControllerHelper controllerCommunicationHelper;
+
+   // CSG thread command and status messages
    private final ContinuousStepGeneratorInputMessage csgInputCommand;
    private final ContinuousStepGeneratorParametersMessage csgParametersCommand;
    private final ContinuousStepGeneratorStatusMessage csgStatusMessage;
 
-   public RDXXboxOneCSGPlugin(DRCRobotModel robotModel, ROS2Node ros2Node)
+   // Controller thread walking speed and heading command
+   private final DirectionalControlInputMessage directionalControlInputMessage;
+
+   public RDXXboxOnePlugin(DRCRobotModel robotModel, ROS2Node ros2Node)
    {
-      this(new CSGROS2CommunicationHelper(robotModel.getSimpleRobotName(), ros2Node, robotModel.getWalkingControllerParameters()));
+      this(new CSGROS2CommunicationHelper(robotModel.getSimpleRobotName(), ros2Node, robotModel.getWalkingControllerParameters()), new ROS2ControllerHelper(ros2Node, robotModel));
    }
 
-   public RDXXboxOneCSGPlugin(CSGROS2CommunicationHelper communicationHelper)
+   public RDXXboxOnePlugin(CSGROS2CommunicationHelper csgCommunicationHelper, ROS2ControllerHelper controllerCommunicationHelper)
    {
-      this(communicationHelper, DEFAULT_PARAMETER_INCREMENT, DEFAULT_USE_DEADMAN_SWITCH);
+      this(csgCommunicationHelper, controllerCommunicationHelper, DEFAULT_PARAMETER_INCREMENT, DEFAULT_USE_DEADMAN_SWITCH);
    }
 
-   public RDXXboxOneCSGPlugin(CSGROS2CommunicationHelper communicationHelper, double parameterIncrement, boolean useDeadmanSwitch)
+   public RDXXboxOnePlugin(CSGROS2CommunicationHelper csgCommunicationHelper, ROS2ControllerHelper controllerCommunicationHelper, double parameterIncrement, boolean useDeadmanSwitch)
    {
-      this.communicationHelper = communicationHelper;
+      this.csgCommunicationHelper = csgCommunicationHelper;
+      this.controllerCommunicationHelper = controllerCommunicationHelper;
 
-      csgInputCommand = communicationHelper.getCSGInputCommand();
-      csgParametersCommand = communicationHelper.getCSGParametersCommand();
-      csgStatusMessage = communicationHelper.getCSGStatusMessage();
+      csgInputCommand = csgCommunicationHelper.getCSGInputCommand();
+      csgParametersCommand = csgCommunicationHelper.getCSGParametersCommand();
+      csgStatusMessage = csgCommunicationHelper.getCSGStatusMessage();
+
+      directionalControlInputMessage = new DirectionalControlInputMessage();
 
       controllerListener = new ControllerListener()
       {
@@ -94,7 +105,7 @@ public class RDXXboxOneCSGPlugin
                else if (buttonCode == controller.getMapping().buttonDpadUp)
                   csgParametersCommand.setSwingHeight(csgStatusMessage.getCurrentSwingHeight() + parameterIncrement);
 
-               communicationHelper.publish(csgParametersCommand);
+               csgCommunicationHelper.publish(csgParametersCommand);
             }
             return false;
          }
@@ -112,12 +123,12 @@ public class RDXXboxOneCSGPlugin
             {
                if (axisCode == 4.0 && controller.getAxis(4) == 1.0)
                {
-                  publishCSGInputCommand = true;
+                  publishNewCommand = true;
                }
-               else if (axisCode == 4.0 && controller.getAxis(4) != 1.0 && publishCSGInputCommand)
+               else if (axisCode == 4.0 && controller.getAxis(4) != 1.0 && publishNewCommand)
                {
                   sendStopWalkingCommands();
-                  publishCSGInputCommand = false;
+                  publishNewCommand = false;
                }
             }
 
@@ -128,13 +139,16 @@ public class RDXXboxOneCSGPlugin
 
    public void updateAndPublish()
    {
-      update(csgInputCommand);
+      update(csgInputCommand, directionalControlInputMessage);
 
-      if (publishCSGInputCommand)
-         communicationHelper.publishAtThrottledRate(csgInputCommand);
+      if (publishNewCommand)
+      {
+         csgCommunicationHelper.publishAtThrottledRate(csgInputCommand);
+         controllerCommunicationHelper.publishToController(directionalControlInputMessage);
+      }
    }
 
-   public void update(ContinuousStepGeneratorInputMessage csgInputCommandToPack)
+   public void update(ContinuousStepGeneratorInputMessage csgInputCommandToPack, DirectionalControlInputMessage directionalControlInputMessageToPack)
    {
       boolean newControllerConnected = false;
       if (currentController != null && currentController != Controllers.getCurrent())
@@ -170,6 +184,12 @@ public class RDXXboxOneCSGPlugin
       csgInputCommandToPack.setForwardVelocity(forwardJoystickValue);
       csgInputCommandToPack.setLateralVelocity(lateralJoystickValue);
       csgInputCommandToPack.setTurnVelocity(turningJoystickValue);
+
+      directionalControlInputMessageToPack.setWalk(requestWalking);
+      directionalControlInputMessageToPack.setUnitVelocities(false);
+      directionalControlInputMessageToPack.setForward(forwardJoystickValue);
+      directionalControlInputMessageToPack.setRight(-lateralJoystickValue);
+      directionalControlInputMessageToPack.setClockwise(-turningJoystickValue);
    }
 
    public void sendStopWalkingCommands()
@@ -179,11 +199,24 @@ public class RDXXboxOneCSGPlugin
       csgInputCommand.setLateralVelocity(0.0);
       csgInputCommand.setTurnVelocity(0.0);
 
-      communicationHelper.publish(csgInputCommand);
+      csgCommunicationHelper.publish(csgInputCommand);
+      controllerCommunicationHelper.publishToController(directionalControlInputMessage);
    }
 
    public void shutDownXboxJoystick()
    {
       sendStopWalkingCommands();
+
+      csgCommunicationHelper.destroy();
+   }
+
+   public CSGROS2CommunicationHelper getCsgCommunicationHelper()
+   {
+      return csgCommunicationHelper;
+   }
+
+   public ROS2ControllerHelper getControllerCommunicationHelper()
+   {
+      return controllerCommunicationHelper;
    }
 }

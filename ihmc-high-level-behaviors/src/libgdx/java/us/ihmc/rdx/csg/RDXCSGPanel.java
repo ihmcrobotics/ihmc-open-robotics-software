@@ -45,29 +45,16 @@ public class RDXCSGPanel extends RDXPanel
    private final ContinuousStepGeneratorParametersMessage csgParametersCommand;
    private final ContinuousStepGeneratorStatusMessage csgStatusMessage;
 
-   // Xbox joystick walking plugin
-   private RDXXboxOneCSGPlugin xBoxOneCSGPlugin;
-
-   public RDXCSGPanel(DRCRobotModel robotModel, ROS2Node ros2Node, boolean createXboxPlugin)
+   public RDXCSGPanel(CSGROS2CommunicationHelper communicationHelper)
    {
       super("CSG Controls");
       super.setRenderMethod(this::renderImGuiWidgets);
 
-      communicationHelper = new CSGROS2CommunicationHelper(robotModel.getSimpleRobotName(), ros2Node, robotModel.getWalkingControllerParameters());
+      this.communicationHelper = communicationHelper;
       communicationHelper.addVolatileCSGStatusCallbackSubscription(this::reset);
 
       csgParametersCommand = communicationHelper.getCSGParametersCommand();
       csgStatusMessage = communicationHelper.getCSGStatusMessage();
-
-      if (createXboxPlugin)
-         xBoxOneCSGPlugin = new RDXXboxOneCSGPlugin(communicationHelper);
-   }
-
-   public void update()
-   {
-      // Update and publish CSG commands from controller first
-      if (xBoxOneCSGPlugin != null)
-         xBoxOneCSGPlugin.updateAndPublish();
    }
 
    public void renderImGuiWidgets()
@@ -231,13 +218,5 @@ public class RDXCSGPanel extends RDXPanel
       stepsAreAdjustable.set(csgStatusMessage.getAreStepsAdjustable());
       snapToHeightMap.set(csgStatusMessage.getSnappingToHeightmap());
       accountForGroundDrift.set(csgStatusMessage.getAccountingForGroundDrift());
-   }
-
-   public void destroy()
-   {
-      if (xBoxOneCSGPlugin != null)
-         xBoxOneCSGPlugin.shutDownXboxJoystick();
-
-      communicationHelper.destroy();
    }
 }
