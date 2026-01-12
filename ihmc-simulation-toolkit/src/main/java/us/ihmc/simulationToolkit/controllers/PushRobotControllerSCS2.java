@@ -1,10 +1,5 @@
 package us.ihmc.simulationToolkit.controllers;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.LinkedList;
-import java.util.concurrent.atomic.AtomicReference;
-
 import javafx.scene.control.Button;
 import javafx.scene.control.Tooltip;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -27,6 +22,9 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
+
+import java.util.LinkedList;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class PushRobotControllerSCS2 implements Controller
 {
@@ -139,6 +137,11 @@ public class PushRobotControllerSCS2 implements Controller
 
    public void addPushButtonToSCS(SimulationConstructionSet2 scs)
    {
+      addPushButtonToSCS(scs, null);
+   }
+
+   public void addPushButtonToSCS(SimulationConstructionSet2 scs, Runnable additionalRunnable)
+   {
       if (scs != null)
       {
          scs.executeOrScheduleVisualizerTask(() ->
@@ -147,12 +150,16 @@ public class PushRobotControllerSCS2 implements Controller
             button.setTooltip(new Tooltip("Click to push the robot as defined in the variables 'pushDirection' and 'pushMagnitude'"));
             button.setOnAction(e ->
             {
+               if (additionalRunnable != null)
+                  additionalRunnable.run();
+
                scheduledPushAction.set(() ->
                {
                   pushCondition = null;
                   applyForce();
                });
             });
+
             scs.addCustomGUIControl(button);
          });
 
