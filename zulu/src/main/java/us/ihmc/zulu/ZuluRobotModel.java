@@ -63,7 +63,7 @@ public class ZuluRobotModel implements DRCRobotModel
 {
    static final boolean ENFORCE_UNIQUE_REFERENCE_FRAMES = false;
 
-   private static final double DEFAULT_SIMULATE_DT = 0.0002;
+   private static final double DEFAULT_SIMULATE_DT = 0.0001;
    private static final double DEFAULT_ESTIMATE_DT = 0.001;
    public static final double DEFAULT_CONTROL_DT = 0.003;
    private static final double DEFAULT_FEEDBACK_CONTROLLER_DT = 0.002;
