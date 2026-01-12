@@ -9,13 +9,13 @@ import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
  * This class takes in a {@link ControllerFootstepQueueMonitor} in order to subscribe to the {@link PlanOffsetStatus}.
  * It then keeps track of the current drift since walking has started.
  */
-public class RapidHeightMapDriftOffset
+public class HeightMapDriftOffset
 {
    private final ControllerFootstepQueueMonitor controllerFootstepQueueMonitor;
    private final Vector3D previousPlanOffsetProcessed = new Vector3D();
    private final Vector3D incrementalOffset = new Vector3D();
 
-   public RapidHeightMapDriftOffset(ControllerFootstepQueueMonitor controllerFootstepQueueMonitor)
+   public HeightMapDriftOffset(ControllerFootstepQueueMonitor controllerFootstepQueueMonitor)
    {
       this.controllerFootstepQueueMonitor = controllerFootstepQueueMonitor;
    }

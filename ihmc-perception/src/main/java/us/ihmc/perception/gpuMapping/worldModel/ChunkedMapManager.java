@@ -57,8 +57,6 @@ public class ChunkedMapManager
    {
       chunks.clear();
 
-      int centerIndex = HeightMapTools.computeCenterIndex(gridSize, resolution);
-
       int centerIndexOfIncomingHeightMap = HeightMapTools.computeCenterIndex(gridSize, resolution);
       int cellsPerAxisOfIncomingHeightMap = 2 * centerIndexOfIncomingHeightMap + 1;
       int totalCellsOfIncomingHeightMap = cellsPerAxisOfIncomingHeightMap * cellsPerAxisOfIncomingHeightMap;
@@ -72,8 +70,8 @@ public class ChunkedMapManager
       {
          for (int j = 0; j < heightMap.cols(); j++)
          {
-            double XCord = HeightMapTools.indexToCoordinate(i, heightMapCenter.getX(), resolution, centerIndex);
-            double YCord = HeightMapTools.indexToCoordinate(j, heightMapCenter.getY(), resolution, centerIndex);
+            double XCord = HeightMapTools.indexToCoordinate(i, heightMapCenter.getX(), resolution, centerIndexOfIncomingHeightMap);
+            double YCord = HeightMapTools.indexToCoordinate(j, heightMapCenter.getY(), resolution, centerIndexOfIncomingHeightMap);
 
             Chunk chunk = getOrCreateChunk(XCord, YCord, Chunk.CHUNK_WIDTH, resolution);
 

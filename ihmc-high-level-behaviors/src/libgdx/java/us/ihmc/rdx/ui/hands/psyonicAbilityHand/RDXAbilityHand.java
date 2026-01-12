@@ -32,7 +32,6 @@ public class RDXAbilityHand implements RDXHandInterface
    public static final float FINGER_CURL_MIN = 0.0f;
    public static final String[] FINGER_NAMES = {"Index", "Middle", "Ring", "Pinky", "Flex", "Rotator"};
 
-   private final String identifier;
    private final RobotSide handSide;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -48,9 +47,8 @@ public class RDXAbilityHand implements RDXHandInterface
    private final Throttler commandThrottler = new Throttler().setFrequency(30.0);
    private final Timer connectedTimer = new Timer();
 
-   public RDXAbilityHand(String identifier, RobotSide handSide, ROS2Node ros2Node)
+   public RDXAbilityHand(RobotSide handSide, ROS2Node ros2Node)
    {
-      this.identifier = identifier;
       this.handSide = handSide;
 
       for (int i = 0; i < 6; i++)
@@ -59,13 +57,8 @@ public class RDXAbilityHand implements RDXHandInterface
          desiredVelocities[i] = new ImFloat(DEFAULT_VELOCITY);
       }
 
-      ros2Node.createSubscription2(AbilityHandROS2API.STATE_TOPIC, stateMessage ->
-      {
-         if (stateMessage.getIdentifierAsString().equals(identifier) && stateMessage.getHandSide() == handSide.toByte())
-            stateNotification.set(stateMessage);
-      });
-      command.setIdentifier(identifier);
-      commandPublisher = ros2Node.createPublisher(AbilityHandROS2API.COMMAND_TOPIC);
+      ros2Node.createSubscription2(AbilityHandROS2API.STATE_TOPICS.get(handSide), stateNotification::set);
+      commandPublisher = ros2Node.createPublisher(AbilityHandROS2API.COMMAND_TOPICS.get(handSide));
    }
 
    @Override
@@ -151,12 +144,6 @@ public class RDXAbilityHand implements RDXHandInterface
       if (scheduleExecutePosition)
          executePosition = true;
       ImGui.endDisabled();
-   }
-
-   @Override
-   public String getIdentifier()
-   {
-      return identifier;
    }
 
    @Override
