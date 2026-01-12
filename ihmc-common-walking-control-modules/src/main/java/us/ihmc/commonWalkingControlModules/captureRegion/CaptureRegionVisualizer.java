@@ -1,10 +1,8 @@
 package us.ihmc.commonWalkingControlModules.captureRegion;
 
 import java.awt.Color;
-import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
-import us.ihmc.communication.net.ObjectProducer;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;

@@ -1,5 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.scene;
 
+import behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage;
 import behavior_msgs.msg.dds.BehaviorTreeSceneStateMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.crdt.CRDTInfo;
@@ -140,9 +141,9 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
    }
 
    @Override
-   protected BehaviorTreeSceneObjectState buildObject(long id, CRDTInfo crdtInfo, IsaacROSFoundationPoseObject objectType)
+   protected BehaviorTreeSceneObjectState buildObject(long id, CRDTInfo crdtInfo, BehaviorTreeSceneObjectDefinitionMessage definition)
    {
-      return new BehaviorTreeSceneObjectExecutor(id, crdtInfo, syncedRobot, objectType);
+      return new BehaviorTreeSceneObjectExecutor(id, crdtInfo, syncedRobot, definition);
    }
 
    @Override

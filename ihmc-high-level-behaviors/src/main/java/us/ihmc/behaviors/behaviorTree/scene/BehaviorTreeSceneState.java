@@ -1,12 +1,12 @@
 package us.ihmc.behaviors.behaviorTree.scene;
 
+import behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage;
 import behavior_msgs.msg.dds.BehaviorTreeSceneObjectStateMessage;
 import behavior_msgs.msg.dds.BehaviorTreeSceneStateMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.LatestTimestampModifiable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseObject;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import javax.annotation.Nullable;
@@ -144,17 +144,16 @@ public abstract class BehaviorTreeSceneState
                object.fromMessage(objectMessage);
    }
 
-   protected abstract BehaviorTreeSceneObjectState buildObject(long id, CRDTInfo crdtInfo, IsaacROSFoundationPoseObject objectType);
+   protected abstract BehaviorTreeSceneObjectState buildObject(long id, CRDTInfo crdtInfo, BehaviorTreeSceneObjectDefinitionMessage definition);
 
-   public BehaviorTreeSceneObjectState createObject(IsaacROSFoundationPoseObject objectType)
+   public BehaviorTreeSceneObjectState createObject(BehaviorTreeSceneObjectDefinitionMessage definition)
    {
-      return buildObject(idSupplier.getAsLong(), crdtInfo, objectType);
+      return buildObject(idSupplier.getAsLong(), crdtInfo, definition);
    }
 
    protected BehaviorTreeSceneObjectState buildObject(BehaviorTreeSceneObjectStateMessage message)
    {
-      IsaacROSFoundationPoseObject objectType = IsaacROSFoundationPoseObject.values[message.getObjectType()];
-      return buildObject(message.getId(), crdtInfo, objectType);
+      return buildObject(message.getId(), crdtInfo, message.getDefinition());
    }
 
    public BehaviorTreeSceneObjectState getObject(String objectName)

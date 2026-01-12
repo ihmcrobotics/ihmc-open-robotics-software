@@ -15,7 +15,7 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "106a465f2ca6c52121b3de77c5e225fc8b620486fef483ba9a1a6320ca9437aa";
+   		return "9643bf65b3921cd3391b7d97ccbba3c86c0147f4bd8895c2851f4ea0959918db";
    }
    
    @Override
@@ -54,7 +54,8 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
 
       current_alignment += behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      current_alignment += behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -63,15 +64,13 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 10; ++i0)
       {
         current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       }
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (256 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (10 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -90,7 +89,7 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
 
       current_alignment += behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.getCdrSerializedSize(data.getDefinition(), current_alignment);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getYoloModelName().length() + 1;
+      current_alignment += behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessagePubSubType.getCdrSerializedSize(data.getSceneObjectDefinition(), current_alignment);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -104,12 +103,6 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getEnabledYoloModels().size(); ++i0)
       {
@@ -117,6 +110,9 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
       }
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getIgnoredYoloClassIndices().size() * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -130,10 +126,7 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
    public static void write(behavior_msgs.msg.dds.SceneActionNodeDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
-      if(data.getYoloModelName().length() <= 255)
-      cdr.write_type_d(data.getYoloModelName());else
-          throw new RuntimeException("yolo_model_name field exceeds the maximum length: %d > %d".formatted(data.getYoloModelName().length(), 255));
-
+      behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessagePubSubType.write(data.getSceneObjectDefinition(), cdr);
       cdr.write_type_5(data.getYoloConfidenceThreshold());
 
       cdr.write_type_5(data.getYoloMaskThreshold());
@@ -142,10 +135,6 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
 
       cdr.write_type_5(data.getOutlierThreshold());
 
-      cdr.write_type_9(data.getObjectType());
-
-      cdr.write_type_7(data.getUseFoundationPose());
-
       if(data.getEnabledYoloModels().size() <= 10)
       cdr.write_type_e(data.getEnabledYoloModels());else
           throw new RuntimeException("enabled_yolo_models field exceeds the maximum length: %d > %d".formatted(data.getEnabledYoloModels().size(), 10));
@@ -153,6 +142,8 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
       if(data.getIgnoredYoloClassIndices().size() <= 256)
       cdr.write_type_e(data.getIgnoredYoloClassIndices());else
           throw new RuntimeException("ignored_yolo_class_indices field exceeds the maximum length: %d > %d".formatted(data.getIgnoredYoloClassIndices().size(), 256));
+
+      cdr.write_type_9(data.getFoundationPoseObjectType());
 
       if(data.getEnabledFoundationPoseModels().size() <= 10)
       cdr.write_type_e(data.getEnabledFoundationPoseModels());else
@@ -163,7 +154,7 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
    public static void read(behavior_msgs.msg.dds.SceneActionNodeDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
-      cdr.read_type_d(data.getYoloModelName());	
+      behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessagePubSubType.read(data.getSceneObjectDefinition(), cdr);	
       data.setYoloConfidenceThreshold(cdr.read_type_5());
       	
       data.setYoloMaskThreshold(cdr.read_type_5());
@@ -172,12 +163,10 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
       	
       data.setOutlierThreshold(cdr.read_type_5());
       	
-      data.setObjectType(cdr.read_type_9());
-      	
-      data.setUseFoundationPose(cdr.read_type_7());
-      	
       cdr.read_type_e(data.getEnabledYoloModels());	
       cdr.read_type_e(data.getIgnoredYoloClassIndices());	
+      data.setFoundationPoseObjectType(cdr.read_type_9());
+      	
       cdr.read_type_e(data.getEnabledFoundationPoseModels());	
 
    }
@@ -187,15 +176,15 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
    {
       ser.write_type_a("definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getDefinition());
 
-      ser.write_type_d("yolo_model_name", data.getYoloModelName());
+      ser.write_type_a("scene_object_definition", new behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessagePubSubType(), data.getSceneObjectDefinition());
+
       ser.write_type_5("yolo_confidence_threshold", data.getYoloConfidenceThreshold());
       ser.write_type_5("yolo_mask_threshold", data.getYoloMaskThreshold());
       ser.write_type_3("segmentation_mask_erosion_radius", data.getSegmentationMaskErosionRadius());
       ser.write_type_5("outlier_threshold", data.getOutlierThreshold());
-      ser.write_type_9("object_type", data.getObjectType());
-      ser.write_type_7("use_foundation_pose", data.getUseFoundationPose());
       ser.write_type_e("enabled_yolo_models", data.getEnabledYoloModels());
       ser.write_type_e("ignored_yolo_class_indices", data.getIgnoredYoloClassIndices());
+      ser.write_type_9("foundation_pose_object_type", data.getFoundationPoseObjectType());
       ser.write_type_e("enabled_foundation_pose_models", data.getEnabledFoundationPoseModels());
    }
 
@@ -204,15 +193,15 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
    {
       ser.read_type_a("definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getDefinition());
 
-      ser.read_type_d("yolo_model_name", data.getYoloModelName());
+      ser.read_type_a("scene_object_definition", new behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessagePubSubType(), data.getSceneObjectDefinition());
+
       data.setYoloConfidenceThreshold(ser.read_type_5("yolo_confidence_threshold"));
       data.setYoloMaskThreshold(ser.read_type_5("yolo_mask_threshold"));
       data.setSegmentationMaskErosionRadius(ser.read_type_3("segmentation_mask_erosion_radius"));
       data.setOutlierThreshold(ser.read_type_5("outlier_threshold"));
-      data.setObjectType(ser.read_type_9("object_type"));
-      data.setUseFoundationPose(ser.read_type_7("use_foundation_pose"));
       ser.read_type_e("enabled_yolo_models", data.getEnabledYoloModels());
       ser.read_type_e("ignored_yolo_class_indices", data.getIgnoredYoloClassIndices());
+      data.setFoundationPoseObjectType(ser.read_type_9("foundation_pose_object_type"));
       ser.read_type_e("enabled_foundation_pose_models", data.getEnabledFoundationPoseModels());
    }
 

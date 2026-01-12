@@ -33,9 +33,6 @@ import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFSensor.Ray.Range;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFSensor.Ray.Scan;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFSensor.Ray.Scan.HorizontalScan;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFSensor.Ray.Scan.VerticalScan;
-import us.ihmc.robotics.lidar.SimulatedLIDARSensorLimitationParameters;
-import us.ihmc.robotics.lidar.SimulatedLIDARSensorNoiseParameters;
-import us.ihmc.robotics.lidar.SimulatedLIDARSensorUpdateParameters;
 import us.ihmc.robotics.partNames.ContactPointDefinitionHolder;
 import us.ihmc.robotics.partNames.JointNameMap;
 import us.ihmc.robotics.robotDescription.CameraSensorDescription;
@@ -652,18 +649,7 @@ public class RobotDescriptionFromSDFLoader
          linkToSensorInZUp.multiply(ModelFileLoaderConversionsHelper.poseToTransform(sensor.getPose()));
          showCordinateSystem(scsJoint, linkToSensorInZUp);
 
-         SimulatedLIDARSensorNoiseParameters noiseParameters = new SimulatedLIDARSensorNoiseParameters();
-         noiseParameters.setGaussianNoiseStandardDeviation(sdfGaussianStdDev);
-         noiseParameters.setGaussianNoiseMean(sdfGaussianMean);
 
-         SimulatedLIDARSensorLimitationParameters limitationParameters = new SimulatedLIDARSensorLimitationParameters();
-         limitationParameters.setMaxRange(sdfMaxRange);
-         limitationParameters.setMinRange(sdfMinRange);
-         limitationParameters.setQuantization(sdfRangeResolution);
-
-         SimulatedLIDARSensorUpdateParameters updateParameters = new SimulatedLIDARSensorUpdateParameters();
-         updateParameters.setAlwaysOn(sdfAlwaysOn);
-         updateParameters.setUpdatePeriodInMillis(sdfUpdateRate);
 
          LidarSensorDescription lidarMount = new LidarSensorDescription(sensor.getName(), linkToSensorInZUp);
          lidarMount.setPointsPerSweep(sdfSamples);

@@ -6,7 +6,6 @@ import controller_msgs.msg.dds.InvalidPacketNotificationPacket;
 import controller_msgs.msg.dds.RigidBodyTransformMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
-import controller_msgs.msg.dds.UIPositionCheckerPacket;
 import gnu.trove.list.array.TByteArrayList;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TFloatArrayList;
@@ -29,13 +28,10 @@ import ihmc_common_msgs.msg.dds.UUIDMessage;
 import ihmc_common_msgs.msg.dds.WeightMatrix3DMessage;
 import ihmc_common_msgs.msg.dds.YoRegistryMessage;
 import org.apache.logging.log4j.Level;
-import perception_msgs.msg.dds.DetectedFacesPacket;
 import perception_msgs.msg.dds.HeatMapPacket;
 import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.LidarScanMessage;
-import perception_msgs.msg.dds.LidarScanParametersMessage;
 import perception_msgs.msg.dds.ObjectDetectorResultPacket;
-import perception_msgs.msg.dds.SimulatedLidarScanPacket;
 import std_msgs.msg.dds.Bool;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInitialConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
@@ -124,25 +120,6 @@ public class MessageTools
       return message;
    }
 
-   public static SimulatedLidarScanPacket createSimulatedLidarScanPacket(int sensorId, LidarScanParameters params, float[] ranges)
-   {
-      SimulatedLidarScanPacket message = new SimulatedLidarScanPacket();
-      message.getRanges().add(ranges);
-      message.setSensorId(sensorId);
-      message.getLidarScanParameters().setTimestamp(params.timestamp);
-      message.getLidarScanParameters().setSweepYawMax(params.sweepYawMax);
-      message.getLidarScanParameters().setSweepYawMin(params.sweepYawMin);
-      message.getLidarScanParameters().setHeightPitchMax(params.heightPitchMax);
-      message.getLidarScanParameters().setHeightPitchMin(params.heightPitchMin);
-      message.getLidarScanParameters().setTimeIncrement(params.timeIncrement);
-      message.getLidarScanParameters().setScanTime(params.scanTime);
-      message.getLidarScanParameters().setMinRange(params.minRange);
-      message.getLidarScanParameters().setMaxRange(params.maxRange);
-      message.getLidarScanParameters().setPointsPerSweep(params.pointsPerSweep);
-      message.getLidarScanParameters().setScanHeight(params.scanHeight);
-      return message;
-   }
-
    public static InvalidPacketNotificationPacket createInvalidPacketNotificationPacket(Class<?> packetClass, String errorMessage)
    {
       InvalidPacketNotificationPacket message = new InvalidPacketNotificationPacket();
@@ -156,22 +133,6 @@ public class MessageTools
       ObjectDetectorResultPacket message = new ObjectDetectorResultPacket();
       message.getHeatMap().set(heatMap);
       message.getBoundingBoxes().set(boundingBoxes);
-      return message;
-   }
-
-   public static UIPositionCheckerPacket createUIPositionCheckerPacket(Point3DReadOnly position)
-   {
-      UIPositionCheckerPacket message = new UIPositionCheckerPacket();
-      message.getPosition().set(position);
-      message.getOrientation().setToNaN();
-      return message;
-   }
-
-   public static UIPositionCheckerPacket createUIPositionCheckerPacket(Point3DReadOnly position, Quaternion orientation)
-   {
-      UIPositionCheckerPacket message = new UIPositionCheckerPacket();
-      message.getPosition().set(position);
-      message.getOrientation().set(orientation);
       return message;
    }
 
@@ -190,14 +151,6 @@ public class MessageTools
    {
       KinematicsToolboxCenterOfMassMessage message = new KinematicsToolboxCenterOfMassMessage();
       message.getDesiredPositionInWorld().set(desiredPosition);
-      return message;
-   }
-
-   public static DetectedFacesPacket createDetectedFacesPacket(String[] ids, Point3D[] positions)
-   {
-      DetectedFacesPacket message = new DetectedFacesPacket();
-      copyData(ids, message.getIds());
-      copyData(positions, message.getPositions());
       return message;
    }
 
@@ -543,21 +496,6 @@ public class MessageTools
    public static <T extends Enum<T>> T fromByteToEnum(byte value, Class<T> enumType)
    {
       return enumType.getEnumConstants()[(int) value];
-   }
-
-   public static LidarScanParameters toLidarScanParameters(LidarScanParametersMessage message)
-   {
-      return new LidarScanParameters(message.getPointsPerSweep(),
-                                     message.getScanHeight(),
-                                     message.getSweepYawMin(),
-                                     message.getSweepYawMax(),
-                                     message.getHeightPitchMin(),
-                                     message.getHeightPitchMax(),
-                                     message.getTimeIncrement(),
-                                     message.getMinRange(),
-                                     message.getMaxRange(),
-                                     message.getScanTime(),
-                                     message.getTimestamp());
    }
 
    /**
@@ -1149,22 +1087,6 @@ public class MessageTools
       message.getInitialJointAngles().add(jointAngles);
    }
 
-   public static void packScan(LidarScanMessage lidarScanMessage, Point3DReadOnly[] scan)
-   {
-      lidarScanMessage.getScan().resetQuick();
-      LidarPointCloudCompression.compressPointCloud(scan.length, lidarScanMessage, (i, j) -> scan[i].getElement(j));
-   }
-
-   public static Point3D[] unpackScanPoint3ds(LidarScanMessage lidarScanMessage)
-   {
-      int numberOfScanPoints = lidarScanMessage.getNumberOfPoints();
-      Point3D[] scanPoints = new Point3D[numberOfScanPoints];
-      LidarPointCloudCompression.decompressPointCloud(lidarScanMessage.getScan(),
-                                                      lidarScanMessage.getNumberOfPoints(),
-                                                      (i, x, y, z) -> scanPoints[i] = new Point3D(x, y, z));
-      return scanPoints;
-   }
-
    public static RigidBodyTransform unpackSensorPose(StereoVisionPointCloudMessage stereoVisionPointCloudMessage)
    {
       return new RigidBodyTransform(stereoVisionPointCloudMessage.getSensorOrientation(), stereoVisionPointCloudMessage.getSensorPosition());
@@ -1234,24 +1156,10 @@ public class MessageTools
       return message;
    }
 
-   public static Ramp3DMessage createRamp3DMessage(Ramp3DReadOnly ramp)
-   {
-      Ramp3DMessage message = new Ramp3DMessage();
-      packRamp3DMessage(ramp, message);
-      return message;
-   }
-
    public static ConvexPolytope3DMessage createConvexPolytope3DMessage(ConvexPolytope3DReadOnly polytope)
    {
       ConvexPolytope3DMessage message = new ConvexPolytope3DMessage();
       packConvexPolytope3DMessage(polytope, message);
-      return message;
-   }
-
-   public static Cylinder3DMessage createCylinder3DMessage(Cylinder3DReadOnly cylinder)
-   {
-      Cylinder3DMessage message = new Cylinder3DMessage();
-      packCylinder3DMessage(cylinder, message);
       return message;
    }
 
@@ -1273,12 +1181,6 @@ public class MessageTools
    {
       boxMessageToSet.getSize().set(box.getSize());
       boxMessageToSet.getPose().set(box.getPose());
-   }
-
-   public static void packRamp3DMessage(Ramp3DReadOnly ramp, Ramp3DMessage rampMessageToSet)
-   {
-      rampMessageToSet.getSize().set(ramp.getSize());
-      rampMessageToSet.getPose().set(ramp.getPose());
    }
 
    public static void packConvexPolytope3DMessage(ConvexPolytope3DReadOnly polytope, ConvexPolytope3DMessage convexPolytopeMessageToSet)
