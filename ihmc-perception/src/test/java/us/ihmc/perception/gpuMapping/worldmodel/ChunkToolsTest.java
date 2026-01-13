@@ -1,4 +1,4 @@
-package us.ihmc.perception.heightmap;
+package us.ihmc.perception.gpuMapping.worldmodel;
 
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;

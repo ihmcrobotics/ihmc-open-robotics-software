@@ -138,8 +138,6 @@ public class ChunkedMapManager
          if (!chunk.isDirty())
             continue;
 
-         chunkMessage.setHashCodeOfChunk(chunk.hashCode());
-
          ChunkMessageTools.toMessage(chunk, chunkMessage);
          publisher.publish(chunkMessage);
          // After it's been published, we reset the dirty value so we don't keep publishing it even

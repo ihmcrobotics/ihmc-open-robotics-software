@@ -29,6 +29,7 @@ public class ChunkMessageTools
 
    public static void toMessage(Chunk chunk, ChunkMessage messageToPack)
    {
+      messageToPack.setHashCodeOfChunk(chunk.hashCode());
       messageToPack.setOriginX(chunk.getOriginX());
       messageToPack.setOriginY(chunk.getOriginY());
       messageToPack.setWidthInMeters(chunk.getWidthInMeters());

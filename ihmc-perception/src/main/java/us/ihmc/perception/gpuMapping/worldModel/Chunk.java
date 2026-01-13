@@ -28,6 +28,11 @@ public class Chunk
    private final float widthInMeters;
 
    private float[] chunkHeights;
+
+   /**
+    * The idea of the dirty field is to note if the chunk has been updated or not.
+    * We say a chunk is dirty if one of the updated height values, doesn't equal the previous height value for the given cell
+    */
    private boolean dirty = false;
 
    public Chunk(float originX, float originY, float cellSize, int cellsPerAxis)

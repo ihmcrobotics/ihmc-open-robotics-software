@@ -1,4 +1,4 @@
-package us.ihmc.perception.heightmap;
+package us.ihmc.perception.gpuMapping.worldmodel;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.RepeatedTest;
