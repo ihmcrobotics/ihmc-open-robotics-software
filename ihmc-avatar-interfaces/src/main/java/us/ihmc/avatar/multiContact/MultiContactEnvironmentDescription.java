@@ -30,7 +30,6 @@ public class MultiContactEnvironmentDescription
    private static final JSONSerializer<ConvexPolytope3DMessage> polytopeSerializer = new JSONSerializer<>(new ConvexPolytope3DMessagePubSubType());
    private static final JSONSerializer<Cylinder3DMessage> cylinderSerializer = new JSONSerializer<>(new Cylinder3DMessagePubSubType());
    private static final JSONSerializer<Ellipsoid3DMessage> ellipsoidSerializer = new JSONSerializer<>(new Ellipsoid3DMessagePubSubType());
-   private static final JSONSerializer<Ramp3DMessage> rampSerializer = new JSONSerializer<>(new Ramp3DMessagePubSubType());
 
    public static JsonNode toJSON(FrameShape3DReadOnly environmentShape)
    {
@@ -95,12 +94,6 @@ public class MultiContactEnvironmentDescription
             FrameEllipsoid3D ellipsoid = new FrameEllipsoid3D(ReferenceFrame.getWorldFrame());
             MessageTools.unpackEllipsoid3DMessage(ellipsoidSerializer.deserialize(environmentShape.toString()), ellipsoid);
             return ellipsoid;
-         }
-         else if (messageClassName.equals(Ramp3DMessage.class.getSimpleName()))
-         {
-            FrameRamp3D ramp = new FrameRamp3D(ReferenceFrame.getWorldFrame());
-            MessageTools.unpackRamp3DMessage(rampSerializer.deserialize(environmentShape.toString()), ramp);
-            return ramp;
          }
          else
          {

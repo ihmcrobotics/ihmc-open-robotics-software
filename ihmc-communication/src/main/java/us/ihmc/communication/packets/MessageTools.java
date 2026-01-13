@@ -19,7 +19,6 @@ import ihmc_common_msgs.msg.dds.Ellipsoid3DMessage;
 import ihmc_common_msgs.msg.dds.GuidMessage;
 import ihmc_common_msgs.msg.dds.InstantMessage;
 import ihmc_common_msgs.msg.dds.PoseListMessage;
-import ihmc_common_msgs.msg.dds.Ramp3DMessage;
 import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
 import ihmc_common_msgs.msg.dds.SelectionMatrix3DMessage;
 import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
@@ -1219,12 +1218,6 @@ public class MessageTools
    {
       boxToSet.getSize().set(boxMessage.getSize());
       boxToSet.getPose().set(boxMessage.getPose());
-   }
-
-   public static void unpackRamp3DMessage(Ramp3DMessage rampMessage, Ramp3DBasics rampToSet)
-   {
-      rampToSet.getSize().set(rampMessage.getSize());
-      rampToSet.getPose().set(rampMessage.getPose());
    }
 
    public static void unpackConvexPolytope3DMessage(ConvexPolytope3DMessage convexPolytopeMessage, FrameConvexPolytope3D polytopeToSet)
