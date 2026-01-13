@@ -120,7 +120,6 @@ public class RDXVRWholeBodyKinematicStreaming
    private final RetargetingParameters retargetingParameters;
    private final ImBoolean isKSTEnabled = new ImBoolean(false);
    private final ImBoolean streamToController = new ImBoolean(false);
-   private final ImBoolean processUserMotion = new ImBoolean(false);
 
    private final ImBoolean demonstrationMode = new ImBoolean(false);
    private int demonstrationTaskIndex = 0;
@@ -335,7 +334,7 @@ public class RDXVRWholeBodyKinematicStreaming
       multiContact.processVRInput();
       handControl.processVRInput();
       
-      if (isKSTEnabled.get() && processUserMotion.get() && toolboxInputStreamRateLimiter.run(streamPeriod) && !replayMotion.get())
+      if (isKSTEnabled.get() && toolboxInputStreamRateLimiter.run(streamPeriod) && !replayMotion.get())
       {
          KinematicsStreamingToolboxInputMessage toolboxInputMessage = new KinematicsStreamingToolboxInputMessage();
          processControllers(toolboxInputMessage);
@@ -374,8 +373,6 @@ public class RDXVRWholeBodyKinematicStreaming
       {
          if (demonstrationMode.get())
             demonstrationTaskIndex = (demonstrationTaskIndex + 1) % demonstrationCounts.length;
-         else
-            processUserMotion.set(!processUserMotion.get());
       }
    }
 
@@ -770,7 +767,6 @@ public class RDXVRWholeBodyKinematicStreaming
       {
          setKSTEnabled(isKSTEnabled.get());
       }
-      ImGui.checkbox(labels.get("Process User Motion"), processUserMotion);
       if (ImGui.checkbox(labels.get("Control Robot"), streamToController))
       {
          setStreamToController(streamToController.get(), true);

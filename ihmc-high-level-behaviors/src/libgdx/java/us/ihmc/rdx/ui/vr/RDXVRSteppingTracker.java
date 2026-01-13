@@ -16,8 +16,8 @@ public class RDXVRSteppingTracker
     private static final double STABILITY_THRESHOLD = 0.01;
     private static final int STABILITY_ITERATIONS = 3;
 
-   private static final double LANDING_HEIGHT_THRESHOLD = 0.03; // tune
-   private static final double LANDING_BLEND_START_HEIGHT = 0.08;
+   private static final double LANDING_HEIGHT_THRESHOLD = 0.1;
+   private static final double LANDING_BLEND_START_HEIGHT = 0.25;
 
     private final SideDependentList<Boolean> isUserStepping = new SideDependentList<>();
     private final SideDependentList<RigidBodyTransform> initialTrackersTransform = new SideDependentList<>();
@@ -146,7 +146,7 @@ public class RDXVRSteppingTracker
       return Math.max(0.0, Math.min(1.0, alpha));
    }
 
-    public Notification getLandedFootNotification(RobotSide side)
+   public Notification getLandedFootNotification(RobotSide side)
     {
         return landedFoot.get(side);
     }
