@@ -1,70 +1,81 @@
 package us.ihmc.perception.heightmap;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
-import perception_msgs.msg.dds.HeightMapMessage;
-import us.ihmc.perception.gpuMapping.HeightMapData;
-import us.ihmc.perception.gpuMapping.HeightMapMessageTools;
+import perception_msgs.msg.dds.ChunkMessage;
 import us.ihmc.perception.gpuMapping.HeightMapTools;
+import us.ihmc.perception.gpuMapping.worldModel.Chunk;
+import us.ihmc.perception.gpuMapping.worldModel.ChunkMessageTools;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class HeightMapMessageToolsTest
+public class ChunkMessageToolsTest
 {
    private final int iterations = 1000;
    private final static float MICROSECOND_TOLERANCE = 500.0f;
 
-   /**
-    * These values are set to reflect the size of the {@link HeightMapMessage#heights_}.
-    * We only allocate so much data in the message so we don't want to store more than that in the {@link HeightMapData#getHeights()}.
-    */
-   private static final float WIDTH_IN_METERS = 10.0f;
-   private static final float CELL_RESOLUTION = 0.2f;
+   private static final float WIDTH_IN_METERS = 1.0f;
+   private static final float CELL_RESOLUTION = 0.02f;
 
-   @Test
-   public void testHeightMapMessaging()
+   @RepeatedTest(10)
+   public void testChunkMapMessaging()
    {
-      HeightMapMessage heightMapMessage = new HeightMapMessage();
+      ChunkMessage chunkMessage = new ChunkMessage();
 
       int centerIndex = HeightMapTools.computeCenterIndex(WIDTH_IN_METERS, CELL_RESOLUTION);
-      int cellsPerAxis = 2 * centerIndex + 1;
-      HeightMapData heightMapData = new HeightMapData(CELL_RESOLUTION, WIDTH_IN_METERS, 0.0, 0.0);
+      int cellsPerAxis = 2 * centerIndex;
+      Chunk chunk = new Chunk(0.0, 0.0, CELL_RESOLUTION, cellsPerAxis, WIDTH_IN_METERS);
       for (int i = 0; i < cellsPerAxis * cellsPerAxis; i++)
       {
-         heightMapData.setHeight(i, 100);
+         chunk.setHeight(i, 100);
       }
 
-      HeightMapMessageTools.toMessage(heightMapData, heightMapMessage);
+      ChunkMessageTools.toMessage(chunk, chunkMessage);
 
-      HeightMapData heightMapDataResult = HeightMapMessageTools.unpackMessageToHeightMapData(heightMapMessage);
+      Chunk chunkResult = new Chunk(chunkMessage.getOriginX(),
+                                    chunkMessage.getOriginY(),
+                                    chunkMessage.getCellSizeInMeters(),
+                                    chunkMessage.getCellsPerAxis(),
+                                    (float) chunkMessage.getWidthInMeters());
+
+      ChunkMessageTools.unpackMessageToChunk(chunkMessage, chunkResult);
 
       for (int i = 0; i < cellsPerAxis * cellsPerAxis; i++)
       {
-         assertEquals(heightMapData.getHeight(i), heightMapDataResult.getHeight(i));
+         assertEquals(chunk.getChunkHeights()[i], chunkResult.getChunkHeights()[i]);
       }
    }
 
    @Test
-   public void testSpeedUnpackingHeightMapMessage()
+   public void testSpeedUnpackingChunkMessage()
    {
-      HeightMapMessage heightMapMessage = new HeightMapMessage();
+      ChunkMessage chunkMessage = new ChunkMessage();
 
-      int centerIndex = HeightMapTools.computeCenterIndex(WIDTH_IN_METERS, CELL_RESOLUTION);
+      double cellSize = 0.02;
+      double terrainWidth = 1.0;
+      double centerX = 0.0;
+      double centerY = 0.0;
+
+      int centerIndex = HeightMapTools.computeCenterIndex(terrainWidth, cellSize);
       int cellsPerAxis = 2 * centerIndex + 1;
-      HeightMapData heightMapData = new HeightMapData(CELL_RESOLUTION, WIDTH_IN_METERS, 0.0, 0.0);
+
+      Chunk chunkData = new Chunk(centerX, centerY, cellSize, cellsPerAxis, (float) (cellSize * cellsPerAxis));
+
       for (int i = 0; i < cellsPerAxis * cellsPerAxis; i++)
       {
-         heightMapData.setHeight(i, 100);
+         chunkData.setHeight(i, 100);
       }
 
-      HeightMapMessageTools.toMessage(heightMapData, heightMapMessage);
+      ChunkMessageTools.toMessage(chunkData, chunkMessage);
 
       long startTime = System.nanoTime();
 
+      Chunk chunkResult = new Chunk(centerX, centerY, cellSize, cellsPerAxis, (float) (cellSize * cellsPerAxis));
+
       for (int i = 0; i < iterations; i++)
       {
-         HeightMapMessageTools.unpackMessageToHeightMapData(heightMapMessage);
+         ChunkMessageTools.unpackMessageToChunk(chunkMessage, chunkResult);
       }
 
       long endTime = System.nanoTime();
@@ -84,25 +95,32 @@ public class HeightMapMessageToolsTest
    }
 
    @Test
-   public void testSpeedOfPackingHeightMapMessage()
+   public void testSpeedOfPackingChunkMessage()
    {
-      HeightMapData heightMapData = new HeightMapData(CELL_RESOLUTION, WIDTH_IN_METERS, 0.0, 0.0);
-      HeightMapMessage heightMapMessage = new HeightMapMessage();
+      double cellSize = 0.02;
+      double terrainWidth = 1.0;
+      double centerX = 0.0;
+      double centerY = 0.0;
 
-      int centerIndex = HeightMapTools.computeCenterIndex(WIDTH_IN_METERS, CELL_RESOLUTION);
+      int centerIndex = HeightMapTools.computeCenterIndex(terrainWidth, cellSize);
       int cellsPerAxis = 2 * centerIndex + 1;
+
+      Chunk chunkData = new Chunk(centerX, centerY, cellSize, cellsPerAxis, (float) terrainWidth);
+
+      ChunkMessage chunkMessage = new ChunkMessage();
+
       int totalCells = cellsPerAxis * cellsPerAxis;
 
       for (int i = 0; i < totalCells; i++)
       {
-         heightMapData.setHeight(i, 1.0f);
+         chunkData.setHeight(i, 1.0f);
       }
 
       long startTime = System.nanoTime();
 
       for (int i = 0; i < iterations; i++)
       {
-         HeightMapMessageTools.toMessage(heightMapData, heightMapMessage);
+         ChunkMessageTools.toMessage(chunkData, chunkMessage);
       }
 
       long endTime = System.nanoTime();

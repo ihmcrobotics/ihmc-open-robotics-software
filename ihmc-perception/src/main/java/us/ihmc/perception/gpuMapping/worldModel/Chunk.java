@@ -1,12 +1,7 @@
 package us.ihmc.perception.gpuMapping.worldModel;
 
-import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
-import perception_msgs.msg.dds.ChunkMessage;
-import us.ihmc.perception.gpuMapping.HeightMapMessageTools;
 import us.ihmc.perception.gpuMapping.HeightMapTools;
-
-import java.nio.FloatBuffer;
 
 /**
  * This class represents a spot in the world that we are modeling.
@@ -30,58 +25,23 @@ public class Chunk
    private double originX;
    private double originY;
    private double cellSize;
-
    private int cellsPerAxis;
+   private final float widthInMeters;
 
    private Mat chunk;
    private float[] chunkHeights;
+   private boolean dirty = false;
 
-   public Chunk(double originX, double originY, double cellSize, int cellsPerAxis)
+   public Chunk(double originX, double originY, double cellSize, int cellsPerAxis, float widthInMeters)
    {
       this.originX = originX;
       this.originY = originY;
       this.cellSize = cellSize;
       this.cellsPerAxis = cellsPerAxis;
+      this.widthInMeters = widthInMeters;
 
       int totalCells = this.cellsPerAxis * this.cellsPerAxis;
-      chunk = new Mat(this.cellsPerAxis, this.cellsPerAxis, opencv_core.CV_32FC1);
       chunkHeights = new float[totalCells];
-
-      setDefaultHeight(this.cellsPerAxis);
-   }
-
-   /**
-    * This is meant to be used on the receiving side when you've received a {@link ChunkMessage}, then we "download" all that data to use later.
-    */
-   public Chunk(ChunkMessage chunkMessage)
-   {
-      this.originX = chunkMessage.getOriginX();
-      this.originY = chunkMessage.getOriginY();
-      this.cellSize = chunkMessage.getCellSizeInMeters();
-      this.cellsPerAxis = chunkMessage.getCellsPerAxis();
-
-      this.chunk = HeightMapMessageTools.unpackMessageToMat(chunkMessage);
-
-      setDefaultHeight(cellsPerAxis);
-   }
-
-   /**
-    * We shouldn't have t odo this, but there is a memory problem where the new Mats are pointing to an old address or something
-    * and that is causing the new data to be filled with old data. Even though its a new object.
-    * So... TODO remove this hehe
-    */
-   private void setDefaultHeight(int cellsPerAxis)
-   {
-      // Set default height of the Mat
-      int totalCells = cellsPerAxis * cellsPerAxis;
-      float[] heights = new float[totalCells];
-      FloatBuffer buffer = chunk.createBuffer();
-      buffer.put(heights);
-   }
-
-   public Mat getChunk()
-   {
-      return chunk;
    }
 
    public double getOriginX()
@@ -119,12 +79,6 @@ public class Chunk
       this.cellSize = cellSize;
    }
 
-   public void setChunk(Mat chunk)
-   {
-      // Deep copy here cause the original gets closed
-      this.chunk = chunk.clone();
-   }
-
    public void setCellsPerAxis(int cellsPerAxis)
    {
       this.cellsPerAxis = cellsPerAxis;
@@ -137,14 +91,23 @@ public class Chunk
 
       if (i >= 0 && i < cellsPerAxis && j >= 0 && j < cellsPerAxis)
       {
-         chunkHeights[i * cellsPerAxis + j] = height;
+         float previousHeight = chunkHeights[i * cellsPerAxis + j];
+
+         if (previousHeight != height)
+         {
+            // If we updated a height value that didn't match what we already had, we say the chunk is dirty, and needs to be published.
+            dirty = true;
+            chunkHeights[i * cellsPerAxis + j] = height;
+         }
       }
    }
 
-   public void commitHeightsToMat()
+   public void setHeight(int key, double height)
    {
-      FloatBuffer buffer = chunk.createBuffer();
-      buffer.put(chunkHeights);
+      if (key >= 0 && key < chunkHeights.length)
+      {
+         chunkHeights[key] = (float) height;
+      }
    }
 
    public static int generateHashForChunk(double xIndex, double yIndex)
@@ -153,5 +116,30 @@ public class Chunk
       int iy = (int) Math.floor(yIndex);
 
       return 13 * ix + 17 * iy;
+   }
+
+   public void setDirty(boolean dirty)
+   {
+      this.dirty = dirty;
+   }
+
+   public boolean isDirty()
+   {
+      return dirty;
+   }
+
+   public float[] getChunkHeights()
+   {
+      return chunkHeights;
+   }
+
+   public void setChunkHeights(float[] chunkHeights)
+   {
+      this.chunkHeights = chunkHeights;
+   }
+
+   public float getWidthInMeters()
+   {
+      return widthInMeters;
    }
 }

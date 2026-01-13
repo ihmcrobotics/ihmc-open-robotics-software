@@ -15,7 +15,7 @@ public class ChunkMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "879a1fed1210ee26b401ba0c7f916690bf30e13a08ed1679b6419fe8cda731d4";
+   		return "7576038293b46353ec9f3a07b8f7d16d5e6306ac675aa51a1a7e6a9fd83fd277";
    }
    
    @Override
@@ -66,7 +66,7 @@ public class ChunkMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (5000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (50000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
       return current_alignment - initial_alignment;
@@ -103,7 +103,7 @@ public class ChunkMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (data.getHeights().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getHeights().size() * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
 
@@ -126,9 +126,9 @@ public class ChunkMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
 
       cdr.write_type_2(data.getCellsPerAxis());
 
-      if(data.getHeights().size() <= 5000)
+      if(data.getHeights().size() <= 50000)
       cdr.write_type_e(data.getHeights());else
-          throw new RuntimeException("heights field exceeds the maximum length: %d > %d".formatted(data.getHeights().size(), 5000));
+          throw new RuntimeException("heights field exceeds the maximum length: %d > %d".formatted(data.getHeights().size(), 50000));
 
    }
 

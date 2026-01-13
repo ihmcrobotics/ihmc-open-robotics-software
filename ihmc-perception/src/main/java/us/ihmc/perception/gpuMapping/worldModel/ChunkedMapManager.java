@@ -4,9 +4,7 @@ import com.esotericsoftware.kryo.util.IntMap;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ChunkMessage;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.perception.gpuMapping.HeightMapMessageTools;
 import us.ihmc.perception.gpuMapping.HeightMapParameters;
 import us.ihmc.perception.gpuMapping.HeightMapTools;
 import us.ihmc.ros2.ROS2Node;
@@ -35,12 +33,10 @@ public class ChunkedMapManager
    private final HashSet<Chunk> chunks = new HashSet<>();
    private final Deque<Integer> queueOfChunks = new ArrayDeque<>();
    private final ROS2Publisher<ChunkMessage> chunkMessagePublisher;
-   private final ChunkMessage chunkMessage;
 
    public ChunkedMapManager(ROS2Node ros2Node, HeightMapParameters heightMapParameters)
    {
       this.heightMapParameters = heightMapParameters;
-      chunkMessage = new ChunkMessage();
       chunkMessagePublisher = ros2Node.createPublisher(PerceptionAPI.CHUNK);
    }
 
@@ -72,7 +68,6 @@ public class ChunkedMapManager
          {
             double XCord = HeightMapTools.indexToCoordinate(i, heightMapCenter.getX(), resolution, centerIndexOfIncomingHeightMap);
             double YCord = HeightMapTools.indexToCoordinate(j, heightMapCenter.getY(), resolution, centerIndexOfIncomingHeightMap);
-
             Chunk chunk = getOrCreateChunk(XCord, YCord, Chunk.CHUNK_WIDTH, resolution);
 
             int index = i * cellsPerAxisOfIncomingHeightMap + j;
@@ -82,11 +77,6 @@ public class ChunkedMapManager
 
             chunks.add(chunk);
          }
-      }
-
-      for (Chunk chunk : chunks)
-      {
-         chunk.commitHeightsToMat();
       }
    }
 
@@ -119,7 +109,7 @@ public class ChunkedMapManager
       Chunk chunk = chunksHashMap.get(hash);
       if (chunk == null)
       {
-         chunk = new Chunk(chunkOriginX, chunkOriginY, chunkResolution, cellsPerAxis);
+         chunk = new Chunk(chunkOriginX, chunkOriginY, chunkResolution, cellsPerAxis, (float) chunkSizeInMeters);
          chunksHashMap.put(hash, chunk);
          queueOfChunks.addLast(hash);
 
@@ -142,15 +132,18 @@ public class ChunkedMapManager
       Collection<Chunk> chunks = getChunks();
       for (Chunk chunk : chunks)
       {
+         // If the chunk doesn't have any new height values, we don't need to publish it again
+         if (!chunk.isDirty())
+            continue;
+
+         ChunkMessage chunkMessage = new ChunkMessage();
          chunkMessage.setHashCodeOfChunk(chunk.hashCode());
 
-         HeightMapMessageTools.toMessage(chunk.getChunk(),
-                                         chunkMessage,
-                                         new Point3D(chunk.getOriginX(), chunk.getOriginY(), 0),
-                                         Chunk.CHUNK_WIDTH,
-                                         chunk.getCellSize(),
-                                         chunk.getCellsPerAxis());
+         ChunkMessageTools.toMessage(chunk, chunkMessage);
          publisher.publish(chunkMessage);
+         // After it's been published, we reset the dirty value so we don't keep publishing it even
+         // if it hasn't changed
+         chunk.setDirty(false);
       }
    }
 

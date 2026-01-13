@@ -39,11 +39,11 @@ public class ChunkMessage extends Packet<ChunkMessage> implements Settable<Chunk
    /**
             * List of heights, which correspond to the list of keys
             */
-   public us.ihmc.idl.IDLSequence.Float  heights_;
+   public us.ihmc.idl.IDLSequence.Byte  heights_;
 
    public ChunkMessage()
    {
-      heights_ = new us.ihmc.idl.IDLSequence.Float (5000, "type_5");
+      heights_ = new us.ihmc.idl.IDLSequence.Byte (50000, "type_9");
 
    }
 
@@ -181,7 +181,7 @@ public class ChunkMessage extends Packet<ChunkMessage> implements Settable<Chunk
    /**
             * List of heights, which correspond to the list of keys
             */
-   public us.ihmc.idl.IDLSequence.Float  getHeights()
+   public us.ihmc.idl.IDLSequence.Byte  getHeights()
    {
       return heights_;
    }
@@ -218,7 +218,7 @@ public class ChunkMessage extends Packet<ChunkMessage> implements Settable<Chunk
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.cells_per_axis_, other.cells_per_axis_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.heights_, other.heights_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.heights_, other.heights_, epsilon)) return false;
 
 
       return true;
