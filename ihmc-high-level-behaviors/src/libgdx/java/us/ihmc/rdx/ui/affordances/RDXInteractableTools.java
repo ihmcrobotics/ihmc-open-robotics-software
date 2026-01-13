@@ -7,7 +7,6 @@ import us.ihmc.rdx.simulation.scs2.RDXMultiBodySystemFactories;
 import us.ihmc.rdx.simulation.scs2.RDXRigidBody;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.scs2.definition.geometry.ModelFileGeometryDefinition;
-import us.ihmc.scs2.definition.robot.JointDefinition;
 import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.robot.SixDoFJointDefinition;
@@ -36,12 +35,9 @@ public class RDXInteractableTools
 
    public static RDXRigidBody loadAbilityHand(RobotDefinition robotDefinition, RobotSide side)
    {
-      RigidBodyDefinition wristLink; // must start with wrist link so the mount transform is included
-      JointDefinition handMountJoint = robotDefinition.getJointDefinition(side.getLowerCaseName() + "_hand_mount"); // H1
-      if (handMountJoint == null)
+      RigidBodyDefinition wristLink = robotDefinition.getRigidBodyDefinition(side.getLowerCaseName() + "_wrist_yaw_link"); // H1
+      if (wristLink == null)
          wristLink = robotDefinition.getRigidBodyDefinition(side.getSideNameInAllCaps() + "_GRIPPER_Z_LINK"); // Alex
-      else
-         wristLink = handMountJoint.getPredecessor();
 
       RDXRigidBody body = null;
       if (wristLink != null)
@@ -54,7 +50,8 @@ public class RDXInteractableTools
          RigidBodyDefinition copiedWristLink = wristLink.copyRecursive();
          copiedWristLink.getChildrenJoints().removeIf(joint -> joint.getName().toLowerCase().contains("imu")); // Remove any IMU joints
          floatingRoot.setSuccessor(copiedWristLink);
-         copiedWristLink.getVisualDefinitions().clear(); // We just want to show the hand
+         copiedWristLink.getVisualDefinitions().removeIf(definition -> definition.getName() != null // Keep only hand mesh
+                                                                       && !definition.getName().toLowerCase().contains("palm_mesh"));
 
          RigidBodyBasics handMultiBody = handRobot.newInstance(ReferenceFrame.getWorldFrame());
          body = RDXMultiBodySystemFactories.toRDXMultiBodySystem(handMultiBody, handRobot);
