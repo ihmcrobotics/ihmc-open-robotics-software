@@ -48,7 +48,6 @@ public class RDXInteractableTools
          SixDoFJointDefinition floatingRoot = new SixDoFJointDefinition("floating_base");
          elevator.addChildJoint(floatingRoot);
          RigidBodyDefinition copiedWristLink = wristLink.copyRecursive();
-         copiedWristLink.getChildrenJoints().removeIf(joint -> joint.getName().toLowerCase().contains("imu")); // Remove any IMU joints
          floatingRoot.setSuccessor(copiedWristLink);
          copiedWristLink.getVisualDefinitions().removeIf(definition -> definition.getName() != null // Keep only hand mesh
                                                                        && !definition.getName().toLowerCase().contains("palm_mesh"));
