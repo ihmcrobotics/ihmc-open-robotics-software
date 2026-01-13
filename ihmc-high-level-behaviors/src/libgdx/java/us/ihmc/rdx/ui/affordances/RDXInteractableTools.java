@@ -36,17 +36,12 @@ public class RDXInteractableTools
 
    public static RDXRigidBody loadAbilityHand(RobotDefinition robotDefinition, RobotSide side)
    {
-      JointDefinition handMountJoint = robotDefinition.getJointDefinition(side.getLowerCaseName() + "_hand_mount"); // specific to urdf convention
-
-      RigidBodyDefinition wristLink = null;
-      if (handMountJoint == null) // Alex FIXME: Not working yet I think
-      {
-         wristLink = robotDefinition.getRigidBodyDefinition(side.getSideNameInAllCaps() + "_GRIPPER_Z_LINK");
-      }
-      else // H1
-      {
-         wristLink = handMountJoint.getPredecessor(); // must start with wrist link so the mount transform is included
-      }
+      RigidBodyDefinition wristLink; // must start with wrist link so the mount transform is included
+      JointDefinition handMountJoint = robotDefinition.getJointDefinition(side.getLowerCaseName() + "_hand_mount"); // H1
+      if (handMountJoint == null)
+         wristLink = robotDefinition.getRigidBodyDefinition(side.getSideNameInAllCaps() + "_GRIPPER_Z_LINK"); // Alex
+      else
+         wristLink = handMountJoint.getPredecessor();
 
       RDXRigidBody body = null;
       if (wristLink != null)
@@ -57,6 +52,7 @@ public class RDXInteractableTools
          SixDoFJointDefinition floatingRoot = new SixDoFJointDefinition("floating_base");
          elevator.addChildJoint(floatingRoot);
          RigidBodyDefinition copiedWristLink = wristLink.copyRecursive();
+         copiedWristLink.getChildrenJoints().removeIf(joint -> joint.getName().toLowerCase().contains("imu")); // Remove any IMU joints
          floatingRoot.setSuccessor(copiedWristLink);
          copiedWristLink.getVisualDefinitions().clear(); // We just want to show the hand
 

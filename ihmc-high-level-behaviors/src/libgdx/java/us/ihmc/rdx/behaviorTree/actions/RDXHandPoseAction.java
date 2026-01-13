@@ -20,6 +20,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.handsros2.abilityHand.AbilityHandControlMode;
 import us.ihmc.handsros2.abilityHand.AbilityHandGrip;
+import us.ihmc.handsros2.abilityHand.AbilityHandModel.AbilityHandJointName;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
@@ -367,7 +368,8 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
                   joint = (RevoluteJoint) palm.getChildrenJoints().get(i == 5 ? 4 : i);
                joint.setQ(Math.toRadians(fingerPositions[i]));
                if (i < 4) // set 2nd joints on non-thumb fingers
-                  ((RevoluteJoint) palm.getChildrenJoints().get(i).getSuccessor().getChildrenJoints().get(0)).setQ(Math.toRadians(fingerPositions[i]));
+                  ((RevoluteJoint) palm.getChildrenJoints().get(i).getSuccessor().getChildrenJoints().get(0))
+                        .setQ(AbilityHandJointName.getQ2Position(Math.toRadians(fingerPositions[i])));
             }
             abilityHand.update();
          }
