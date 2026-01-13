@@ -106,6 +106,7 @@ public class RDXChunkedMapRenderer implements RenderableProvider
       }
 
       ChunkMessageTools.unpackMessageToChunk(chunkMessage, chunkRenderer.getChunk());
+      ChunkTools.convertToMat(chunkRenderer.getMap(), chunkRenderer.getChunk());
    }
 
    @Override

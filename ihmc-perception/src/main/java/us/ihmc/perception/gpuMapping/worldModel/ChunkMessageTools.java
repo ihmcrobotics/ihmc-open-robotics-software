@@ -14,17 +14,17 @@ public class ChunkMessageTools
    {
       // Decode the PNG compressed height map data
       Mat compressedMat = new Mat(chunkMessage.getHeights().getBuffer().array());
-      Mat heightMapMat = new Mat(chunkMessage.getCellsPerAxis(), 2 * chunkMessage.getCellsPerAxis(), opencv_core.CV_16UC1);
-      opencv_imgcodecs.imdecode(compressedMat, opencv_imgcodecs.IMREAD_UNCHANGED, heightMapMat);
+      Mat chunkMap = new Mat(chunkMessage.getCellsPerAxis(), 2 * chunkMessage.getCellsPerAxis(), opencv_core.CV_16UC1);
+      opencv_imgcodecs.imdecode(compressedMat, opencv_imgcodecs.IMREAD_UNCHANGED, chunkMap);
 
       // Convert the Mat into HeightMapData object
       Point3D mapOrigin = new Point3D(chunkMessage.getOriginX(), chunkMessage.getOriginY(), 0.0);
 
-      ChunkTools.convertToChunk(heightMapMat, chunkToPack, mapOrigin, (float) chunkMessage.getWidthInMeters(), (float) chunkMessage.getCellSizeInMeters());
+      ChunkTools.convertToChunk(chunkMap, chunkToPack, mapOrigin, (float) chunkMessage.getWidthInMeters(), (float) chunkMessage.getCellSizeInMeters());
 
       // Close pointers
       compressedMat.close();
-      heightMapMat.close();
+      chunkMap.close();
    }
 
    public static void toMessage(Chunk chunk, ChunkMessage messageToPack)

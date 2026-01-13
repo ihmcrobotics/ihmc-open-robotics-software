@@ -147,7 +147,7 @@ public class ChunkedMapManager
       }
    }
 
-   private Collection<Chunk> getChunks()
+   public Collection<Chunk> getChunks()
    {
       return chunks;
    }
