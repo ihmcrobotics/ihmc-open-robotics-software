@@ -1,8 +1,6 @@
 package us.ihmc.openAlexander.parameters.simulation;
 
 import us.ihmc.avatar.initialSetup.HumanoidRobotInitialSetup;
-import us.ihmc.handsros2.HandType;
-import us.ihmc.handsros2.abilityHand.AbilityHandModel.AbilityHandJointName;
 import us.ihmc.openAlexander.AlexanderVersionInterface;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
@@ -34,19 +32,6 @@ public class AlexanderInitialSetup extends HumanoidRobotInitialSetup
          setJoint(robotSide, ArmJointName.ELBOW_YAW, 0.0);
          setJoint(robotSide, ArmJointName.WRIST_ROLL, 0.0);
          setJoint(robotSide, ArmJointName.WRIST_YAW, 0.0);
-
-         if (version.getHandType(robotSide) == HandType.ABILITY_HAND)
-         {
-            setJoint(AbilityHandJointName.INDEX_Q1.getJointName(robotSide), 0.0);
-            setJoint(AbilityHandJointName.INDEX_Q2.getJointName(robotSide), AbilityHandJointName.getQ2Position(0.0));
-            setJoint(AbilityHandJointName.MIDDLE_Q1.getJointName(robotSide), 0.0);
-            setJoint(AbilityHandJointName.MIDDLE_Q2.getJointName(robotSide), AbilityHandJointName.getQ2Position(0.0));
-            setJoint(AbilityHandJointName.RING_Q1.getJointName(robotSide), 0.0);
-            setJoint(AbilityHandJointName.RING_Q2.getJointName(robotSide), AbilityHandJointName.getQ2Position(0.0));
-            setJoint(AbilityHandJointName.PINKY_Q1.getJointName(robotSide), 0.0);
-            setJoint(AbilityHandJointName.PINKY_Q2.getJointName(robotSide), AbilityHandJointName.getQ2Position(0.0));
-            setJoint(AbilityHandJointName.THUMB_Q1.getJointName(robotSide), 0.0);
-         }
       }
 
       setJoint(SpineJointName.SPINE_YAW, 0.0);
