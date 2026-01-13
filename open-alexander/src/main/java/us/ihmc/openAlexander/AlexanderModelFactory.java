@@ -79,7 +79,6 @@ public class AlexanderModelFactory
          URDFTools.URDFParserProperties parserProperties = new URDFTools.URDFParserProperties();
          parserProperties.setTransformToZUp(false);
          parserProperties.setHandleImplicitJointDefinitions(false);
-         parserProperties.setSimplifyKinematics(false);
          simulationRobotDefinition = RobotDefinitionLoader.loadURDFModel(urdfParameters.getURDFAsInputStream(),
                                                                          Arrays.asList(urdfParameters.getResourceDirectories()),
                                                                          getClass().getClassLoader(),
