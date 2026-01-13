@@ -33,23 +33,25 @@ public class ChunkedMapManager
    private final HashSet<Chunk> chunks = new HashSet<>();
    private final Deque<Integer> queueOfChunks = new ArrayDeque<>();
    private final ROS2Publisher<ChunkMessage> chunkMessagePublisher;
+   private final ChunkMessage chunkMessage;
 
    public ChunkedMapManager(ROS2Node ros2Node, HeightMapParameters heightMapParameters)
    {
       this.heightMapParameters = heightMapParameters;
       chunkMessagePublisher = ros2Node.createPublisher(PerceptionAPI.CHUNK);
+      chunkMessage = new ChunkMessage();
    }
 
    public void updateAndPublish(Mat latestHeightMap, Point3DReadOnly heightMapCenterPoint)
    {
       if (heightMapParameters.getEnableChunkedMap())
       {
-         addHeightMap(latestHeightMap, heightMapCenterPoint, heightMapParameters.getWidthInMeters(), heightMapParameters.getCellSize());
+         addHeightMap(latestHeightMap, heightMapCenterPoint, heightMapParameters.getWidthInMeters(), (float) heightMapParameters.getCellSize());
          publishChunkedMap(chunkMessagePublisher);
       }
    }
 
-   public void addHeightMap(Mat heightMap, Point3DReadOnly heightMapCenter, double gridSize, double resolution)
+   public void addHeightMap(Mat heightMap, Point3DReadOnly heightMapCenter, double gridSize, float resolution)
    {
       chunks.clear();
 
@@ -85,9 +87,9 @@ public class ChunkedMapManager
     * So we pull from our map of {@link Chunk}'s to check, if we don't have one, we create a new one.
     * Which is why we need to pass in so many parameters.
     */
-   private Chunk getOrCreateChunk(double xCoordinate, double yCoordinate, double chunkSizeInMeters, double chunkResolution)
+   private Chunk getOrCreateChunk(double xCoordinate, double yCoordinate, float chunkSizeInMeters, float chunkResolution)
    {
-      int cellsPerAxis = (int) Math.round(chunkSizeInMeters / chunkResolution);
+      int cellsPerAxis = Math.round(chunkSizeInMeters / chunkResolution);
 
       int worldCellX = (int) Math.floor(xCoordinate / chunkResolution);
       int worldCellY = (int) Math.floor(yCoordinate / chunkResolution);
@@ -101,15 +103,15 @@ public class ChunkedMapManager
        * And so we need the center of cell [0,0] for the chunk map to also be at world (0.0, 0.0)
        * So the (0.5 * resolution) shifts the origin to be aligned with the height map
        */
-      double chunkOriginX = chunkIndexX * chunkSizeInMeters - 0.5 * chunkResolution;
-      double chunkOriginY = chunkIndexY * chunkSizeInMeters - 0.5 * chunkResolution;
+      float chunkOriginX = chunkIndexX * chunkSizeInMeters - 0.5f * chunkResolution;
+      float chunkOriginY = chunkIndexY * chunkSizeInMeters - 0.5f * chunkResolution;
 
       int hash = Chunk.generateHashForChunk(chunkOriginX, chunkOriginY);
 
       Chunk chunk = chunksHashMap.get(hash);
       if (chunk == null)
       {
-         chunk = new Chunk(chunkOriginX, chunkOriginY, chunkResolution, cellsPerAxis, (float) chunkSizeInMeters);
+         chunk = new Chunk(chunkOriginX, chunkOriginY, chunkResolution, cellsPerAxis);
          chunksHashMap.put(hash, chunk);
          queueOfChunks.addLast(hash);
 
@@ -136,7 +138,6 @@ public class ChunkedMapManager
          if (!chunk.isDirty())
             continue;
 
-         ChunkMessage chunkMessage = new ChunkMessage();
          chunkMessage.setHashCodeOfChunk(chunk.hashCode());
 
          ChunkMessageTools.toMessage(chunk, chunkMessage);

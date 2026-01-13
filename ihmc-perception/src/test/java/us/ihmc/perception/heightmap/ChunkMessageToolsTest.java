@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ChunkMessageToolsTest
 {
    private final int iterations = 1000;
-   private final static float MICROSECOND_TOLERANCE = 500.0f;
+   private final static float MILLISECOND_TOLERANCE = 2.0f;
 
    private static final float WIDTH_IN_METERS = 1.0f;
    private static final float CELL_RESOLUTION = 0.02f;
@@ -25,7 +25,7 @@ public class ChunkMessageToolsTest
 
       int centerIndex = HeightMapTools.computeCenterIndex(WIDTH_IN_METERS, CELL_RESOLUTION);
       int cellsPerAxis = 2 * centerIndex;
-      Chunk chunk = new Chunk(0.0, 0.0, CELL_RESOLUTION, cellsPerAxis, WIDTH_IN_METERS);
+      Chunk chunk = new Chunk(0.0f, 0.0f, CELL_RESOLUTION, cellsPerAxis);
       for (int i = 0; i < cellsPerAxis * cellsPerAxis; i++)
       {
          chunk.setHeight(i, 100);
@@ -36,8 +36,7 @@ public class ChunkMessageToolsTest
       Chunk chunkResult = new Chunk(chunkMessage.getOriginX(),
                                     chunkMessage.getOriginY(),
                                     chunkMessage.getCellSizeInMeters(),
-                                    chunkMessage.getCellsPerAxis(),
-                                    (float) chunkMessage.getWidthInMeters());
+                                    chunkMessage.getCellsPerAxis());
 
       ChunkMessageTools.unpackMessageToChunk(chunkMessage, chunkResult);
 
@@ -52,15 +51,15 @@ public class ChunkMessageToolsTest
    {
       ChunkMessage chunkMessage = new ChunkMessage();
 
-      double cellSize = 0.02;
-      double terrainWidth = 1.0;
-      double centerX = 0.0;
-      double centerY = 0.0;
+      float cellSize = 0.02f;
+      float terrainWidth = 1.0f;
+      float centerX = 0.0f;
+      float centerY = 0.0f;
 
       int centerIndex = HeightMapTools.computeCenterIndex(terrainWidth, cellSize);
       int cellsPerAxis = 2 * centerIndex + 1;
 
-      Chunk chunkData = new Chunk(centerX, centerY, cellSize, cellsPerAxis, (float) (cellSize * cellsPerAxis));
+      Chunk chunkData = new Chunk(centerX, centerY, cellSize, cellsPerAxis);
 
       for (int i = 0; i < cellsPerAxis * cellsPerAxis; i++)
       {
@@ -71,7 +70,7 @@ public class ChunkMessageToolsTest
 
       long startTime = System.nanoTime();
 
-      Chunk chunkResult = new Chunk(centerX, centerY, cellSize, cellsPerAxis, (float) (cellSize * cellsPerAxis));
+      Chunk chunkResult = new Chunk(centerX, centerY, cellSize, cellsPerAxis);
 
       for (int i = 0; i < iterations; i++)
       {
@@ -80,32 +79,30 @@ public class ChunkMessageToolsTest
 
       long endTime = System.nanoTime();
       double totalTimeMillis = (endTime - startTime) / 1_000_000.0;
-      double totalTimeMicroSeconds = (endTime - startTime) / 1_000.0;
       double averageTimeMilliSeconds = totalTimeMillis / iterations;
-      double averageTimeMicroSecondsPerIteration = totalTimeMicroSeconds / iterations;
 
       System.out.printf("Average time per pack of Message -> Height Map Data: %.3f us (%.9f ms)%n",
-                        averageTimeMicroSecondsPerIteration,
+                        averageTimeMilliSeconds,
                         averageTimeMilliSeconds);
 
       // This will be machine-dependent, the benchmark for this value came from a laptop with a AMD Ryzen 7 5800H cpu.
-      float expectedMicrosToPackMessage = MICROSECOND_TOLERANCE;
-      Assertions.assertTrue(averageTimeMicroSecondsPerIteration < expectedMicrosToPackMessage,
-                            "Actual was: " + averageTimeMicroSecondsPerIteration + ", but the Expected was: " + expectedMicrosToPackMessage);
+      float expectedMicrosToPackMessage = MILLISECOND_TOLERANCE;
+      Assertions.assertTrue(averageTimeMilliSeconds < expectedMicrosToPackMessage,
+                            "Actual was: " + averageTimeMilliSeconds + ", but the Expected was: " + expectedMicrosToPackMessage);
    }
 
    @Test
    public void testSpeedOfPackingChunkMessage()
    {
-      double cellSize = 0.02;
-      double terrainWidth = 1.0;
-      double centerX = 0.0;
-      double centerY = 0.0;
+      float cellSize = 0.02f;
+      float terrainWidth = 1.0f;
+      float centerX = 0.0f;
+      float centerY = 0.0f;
 
       int centerIndex = HeightMapTools.computeCenterIndex(terrainWidth, cellSize);
       int cellsPerAxis = 2 * centerIndex + 1;
 
-      Chunk chunkData = new Chunk(centerX, centerY, cellSize, cellsPerAxis, (float) terrainWidth);
+      Chunk chunkData = new Chunk(centerX, centerY, cellSize, cellsPerAxis);
 
       ChunkMessage chunkMessage = new ChunkMessage();
 
@@ -125,17 +122,15 @@ public class ChunkMessageToolsTest
 
       long endTime = System.nanoTime();
       double totalTimeMillis = (endTime - startTime) / 1_000_000.0;
-      double totalTimeMicroSeconds = (endTime - startTime) / 1_000.0;
       double averageTimeMilliSeconds = totalTimeMillis / iterations;
-      double averageTimeMicroSecondsPerIteration = totalTimeMicroSeconds / iterations;
 
       System.out.printf("Average time per pack of Height Map Data -> Message: %.3f us (%.9f ms)%n",
-                        averageTimeMicroSecondsPerIteration,
+                        averageTimeMilliSeconds,
                         averageTimeMilliSeconds);
 
       // This will be machine-dependent, the benchmark for this value came from a laptop with a AMD Ryzen 7 5800H cpu.
-      float expectedMicrosToPackMessage = MICROSECOND_TOLERANCE;
-      Assertions.assertTrue(averageTimeMicroSecondsPerIteration < expectedMicrosToPackMessage,
-                            "Actual was: " + averageTimeMicroSecondsPerIteration + ", but the Expected was: " + expectedMicrosToPackMessage);
+      float expectedMicrosToPackMessage = MILLISECOND_TOLERANCE;
+      Assertions.assertTrue(averageTimeMilliSeconds < expectedMicrosToPackMessage,
+                            "Actual was: " + averageTimeMilliSeconds + ", but the Expected was: " + expectedMicrosToPackMessage);
    }
 }

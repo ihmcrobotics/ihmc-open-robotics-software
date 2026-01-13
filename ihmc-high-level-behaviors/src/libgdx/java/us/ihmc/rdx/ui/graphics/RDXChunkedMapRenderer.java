@@ -96,8 +96,7 @@ public class RDXChunkedMapRenderer implements RenderableProvider
          Chunk latestChunk = new Chunk(chunkMessage.getOriginX(),
                                        chunkMessage.getOriginY(),
                                        chunkMessage.getCellSizeInMeters(),
-                                       chunkMessage.getCellsPerAxis(),
-                                       (float) chunkMessage.getWidthInMeters());
+                                       chunkMessage.getCellsPerAxis());
          ChunkMessageTools.unpackMessageToChunk(chunkMessage, latestChunk);
 
          chunkRenderer = new ChunkRenderer(latestChunk);
@@ -137,7 +136,7 @@ public class RDXChunkedMapRenderer implements RenderableProvider
       public ChunkRenderer(Chunk chunk)
       {
          renderer = new RDXChunkRenderer();
-         this.chunk = new Chunk(chunk.getOriginX(), chunk.getOriginY(), chunk.getCellSize(), chunk.getCellsPerAxis(), chunk.getWidthInMeters());
+         this.chunk = new Chunk(chunk.getOriginX(), chunk.getOriginY(), chunk.getCellSize(), chunk.getCellsPerAxis());
          map = new Mat(chunk.getCellsPerAxis(), chunk.getCellsPerAxis(), opencv_core.CV_32FC1);
 
          ChunkTools.convertToMat(map, chunk);

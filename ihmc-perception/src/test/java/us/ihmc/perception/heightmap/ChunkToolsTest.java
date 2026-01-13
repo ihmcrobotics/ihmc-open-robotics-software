@@ -21,18 +21,18 @@ public class ChunkToolsTest
    @RepeatedTest(10)
    public void testRoundTripConvertMatToHeightMapDataAndBack()
    {
-      double cellSize = 0.04;
-      double terrainWidth = 1.0;
-      double centerX = 0.0;
-      double centerY = 0.0;
+      float cellSize = 0.04f;
+      float terrainWidth = 1.0f;
+      float centerX = 0.0f;
+      float centerY = 0.0f;
 
       int centerIndex = HeightMapTools.computeCenterIndex(terrainWidth, cellSize);
-      int cellsPerAxis = 2 * centerIndex + 1;
+      int cellsPerAxis = 2 * centerIndex;
       Point3D centerLocation = new Point3D(centerX, centerY, 0.0);
 
       Mat originalMat = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1, new Scalar(1000));
-      Chunk chunkData = new Chunk(centerX, centerY, cellSize, cellsPerAxis, (float) (cellSize * cellsPerAxis));
-      ChunkTools.convertToChunk(originalMat, chunkData, centerLocation, (float) terrainWidth, (float) cellSize);
+      Chunk chunkData = new Chunk(centerX, centerY, cellSize, cellsPerAxis);
+      ChunkTools.convertToChunk(originalMat, chunkData, centerLocation, terrainWidth, cellSize);
 
       Mat newData = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
       ChunkTools.convertToMat(newData, chunkData);
@@ -49,15 +49,15 @@ public class ChunkToolsTest
    @Test
    public void testSpeedConvertChunkToMat()
    {
-      double cellSize = 0.01;
-      double terrainWidth = 5.0;
-      double centerX = 0.0;
-      double centerY = 0.0;
+      float cellSize = 0.01f;
+      float terrainWidth = 5.0f;
+      float centerX = 0.0f;
+      float centerY = 0.0f;
 
       int centerIndex = HeightMapTools.computeCenterIndex(terrainWidth, cellSize);
-      int cellsPerAxis = 2 * centerIndex + 1;
+      int cellsPerAxis = 2 * centerIndex;
 
-      Chunk chunkData = new Chunk(centerX, centerY, cellSize, cellsPerAxis, (float) (cellSize * cellsPerAxis));
+      Chunk chunkData = new Chunk(centerX, centerY, cellSize, cellsPerAxis);
       for (int i = 0; i < cellsPerAxis; i++)
       {
          for (int j = 0; j < cellsPerAxis; j++)
@@ -91,30 +91,23 @@ public class ChunkToolsTest
    public void testSpeedConvertMatToHeightMapData()
    {
 
-      double cellSize = 0.01;
-      double terrainWidth = 5.0;
-      double centerX = 0.0;
-      double centerY = 0.0;
+      float cellSize = 0.1f;
+      float terrainWidth = 5.0f;
+      float centerX = 0.0f;
+      float centerY = 0.0f;
 
       int centerIndex = HeightMapTools.computeCenterIndex(terrainWidth, cellSize);
-      int cellsPerAxis = 2 * centerIndex + 1;
+      int cellsPerAxis = 2 * centerIndex;
 
-      Mat chunkMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
-      for (int i = 0; i < cellsPerAxis; i++)
-      {
-         for (int j = 0; j < cellsPerAxis; j++)
-         {
-            chunkMap.ptr(i, j).putFloat(1.0f);
-         }
-      }
+      Mat chunkMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1, new Scalar(1));
 
-      Chunk chunkData = new Chunk(centerX, centerY, cellSize, cellsPerAxis, (float) (cellSize * cellsPerAxis));
+      Chunk chunkData = new Chunk(centerX, centerY, cellSize, cellsPerAxis);
 
       long startTime = System.nanoTime();
 
       for (int i = 0; i < iterations; i++)
       {
-         ChunkTools.convertToChunk(chunkMap, chunkData, new Point3D(0.0, 0.0, 0.0), (float) terrainWidth, (float) cellSize);
+         ChunkTools.convertToChunk(chunkMap, chunkData, new Point3D(0.0, 0.0, 0.0), terrainWidth, cellSize);
       }
 
       long endTime = System.nanoTime();

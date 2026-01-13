@@ -1,6 +1,5 @@
 package us.ihmc.perception.gpuMapping.worldModel;
 
-import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.perception.gpuMapping.HeightMapTools;
 
 /**
@@ -20,41 +19,40 @@ public class Chunk
    /**
     * Width of a chunk in meters
     */
-   public static final double CHUNK_WIDTH = 1.0;
+   public static final float CHUNK_WIDTH = 1.0f;
 
-   private double originX;
-   private double originY;
-   private double cellSize;
+   private float originX;
+   private float originY;
+   private float cellSize;
    private int cellsPerAxis;
    private final float widthInMeters;
 
-   private Mat chunk;
    private float[] chunkHeights;
    private boolean dirty = false;
 
-   public Chunk(double originX, double originY, double cellSize, int cellsPerAxis, float widthInMeters)
+   public Chunk(float originX, float originY, float cellSize, int cellsPerAxis)
    {
       this.originX = originX;
       this.originY = originY;
       this.cellSize = cellSize;
       this.cellsPerAxis = cellsPerAxis;
-      this.widthInMeters = widthInMeters;
+      this.widthInMeters = cellSize * cellsPerAxis;
 
       int totalCells = this.cellsPerAxis * this.cellsPerAxis;
       chunkHeights = new float[totalCells];
    }
 
-   public double getOriginX()
+   public float getOriginX()
    {
       return originX;
    }
 
-   public double getOriginY()
+   public float getOriginY()
    {
       return originY;
    }
 
-   public double getCellSize()
+   public float getCellSize()
    {
       return cellSize;
    }
@@ -64,17 +62,17 @@ public class Chunk
       return cellsPerAxis;
    }
 
-   public void setOriginX(double originX)
+   public void setOriginX(float originX)
    {
       this.originX = originX;
    }
 
-   public void setOriginY(double originY)
+   public void setOriginY(float originY)
    {
       this.originY = originY;
    }
 
-   public void setCellSize(double cellSize)
+   public void setCellSize(float cellSize)
    {
       this.cellSize = cellSize;
    }

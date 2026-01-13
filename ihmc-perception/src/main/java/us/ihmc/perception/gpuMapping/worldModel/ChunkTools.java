@@ -16,8 +16,8 @@ public class ChunkTools
       int cellsPerAxis = 2 * centerIndex;
       int totalCells = cellsPerAxis * cellsPerAxis;
 
-      chunkToPack.setOriginX(gridCenter.getX());
-      chunkToPack.setOriginY(gridCenter.getY());
+      chunkToPack.setOriginX(gridCenter.getX32());
+      chunkToPack.setOriginY(gridCenter.getY32());
 
       FloatPointer floatPointer = new FloatPointer(chunkMapPointer.data());
       float[] values = new float[totalCells];

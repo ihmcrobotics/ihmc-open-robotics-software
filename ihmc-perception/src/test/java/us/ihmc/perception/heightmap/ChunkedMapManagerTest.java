@@ -37,7 +37,10 @@ public class ChunkedMapManagerTest
          }
       }
 
-      chunkedMapManager.addHeightMap(heightMapMat, new Point3D(2.0, 2.0, 0.0), heightMapParameters.getWidthInMeters(), heightMapParameters.getCellSize());
+      chunkedMapManager.addHeightMap(heightMapMat,
+                                     new Point3D(2.0, 2.0, 0.0),
+                                     heightMapParameters.getWidthInMeters(),
+                                     (float) heightMapParameters.getCellSize());
 
       Collection<Chunk> chunks = chunkedMapManager.getChunks();
       // Because the cells per axis is 101 per side, we expect to get 3 chunks for that, on each axis.
@@ -47,11 +50,11 @@ public class ChunkedMapManagerTest
          Mat what = new Mat(chunk.getCellsPerAxis(), chunk.getCellsPerAxis(), opencv_core.CV_32FC1);
          ChunkTools.convertToMat(what, chunk);
          PerceptionDebugTools.printMat("s", what, 5);
-//         float[] chunkHeights = chunk.getChunkHeights();
-//         for (int i = 0; i < chunkHeights.length; i++)
-//         {
-//            assertEquals(chunkHeights[i], 100.0);
-//         }
+         //         float[] chunkHeights = chunk.getChunkHeights();
+         //         for (int i = 0; i < chunkHeights.length; i++)
+         //         {
+         //            assertEquals(chunkHeights[i], 100.0);
+         //         }
       }
    }
 }

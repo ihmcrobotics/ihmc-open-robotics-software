@@ -19,19 +19,19 @@ public class ChunkMessage extends Packet<ChunkMessage> implements Settable<Chunk
    /**
             * X coordinate of the center of the height map
             */
-   public double origin_x_;
+   public float origin_x_;
    /**
             * Y coordinate of the center of the height map
             */
-   public double origin_y_;
+   public float origin_y_;
    /**
             * Width of the height map in meters
             */
-   public double width_in_meters_;
+   public float width_in_meters_;
    /**
             * Cell size in meters of an individual cell
             */
-   public double cell_size_in_meters_;
+   public float cell_size_in_meters_;
    /**
             * Cells per axis
             */
@@ -43,7 +43,7 @@ public class ChunkMessage extends Packet<ChunkMessage> implements Settable<Chunk
 
    public ChunkMessage()
    {
-      heights_ = new us.ihmc.idl.IDLSequence.Byte (50000, "type_9");
+      heights_ = new us.ihmc.idl.IDLSequence.Byte (20000, "type_9");
 
    }
 
@@ -105,14 +105,14 @@ public class ChunkMessage extends Packet<ChunkMessage> implements Settable<Chunk
    /**
             * X coordinate of the center of the height map
             */
-   public void setOriginX(double origin_x)
+   public void setOriginX(float origin_x)
    {
       origin_x_ = origin_x;
    }
    /**
             * X coordinate of the center of the height map
             */
-   public double getOriginX()
+   public float getOriginX()
    {
       return origin_x_;
    }
@@ -120,14 +120,14 @@ public class ChunkMessage extends Packet<ChunkMessage> implements Settable<Chunk
    /**
             * Y coordinate of the center of the height map
             */
-   public void setOriginY(double origin_y)
+   public void setOriginY(float origin_y)
    {
       origin_y_ = origin_y;
    }
    /**
             * Y coordinate of the center of the height map
             */
-   public double getOriginY()
+   public float getOriginY()
    {
       return origin_y_;
    }
@@ -135,14 +135,14 @@ public class ChunkMessage extends Packet<ChunkMessage> implements Settable<Chunk
    /**
             * Width of the height map in meters
             */
-   public void setWidthInMeters(double width_in_meters)
+   public void setWidthInMeters(float width_in_meters)
    {
       width_in_meters_ = width_in_meters;
    }
    /**
             * Width of the height map in meters
             */
-   public double getWidthInMeters()
+   public float getWidthInMeters()
    {
       return width_in_meters_;
    }
@@ -150,14 +150,14 @@ public class ChunkMessage extends Packet<ChunkMessage> implements Settable<Chunk
    /**
             * Cell size in meters of an individual cell
             */
-   public void setCellSizeInMeters(double cell_size_in_meters)
+   public void setCellSizeInMeters(float cell_size_in_meters)
    {
       cell_size_in_meters_ = cell_size_in_meters;
    }
    /**
             * Cell size in meters of an individual cell
             */
-   public double getCellSizeInMeters()
+   public float getCellSizeInMeters()
    {
       return cell_size_in_meters_;
    }
