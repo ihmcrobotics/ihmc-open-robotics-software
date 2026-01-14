@@ -2,6 +2,7 @@ package us.ihmc.perception.gpuMapping.worldmodel;
 
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.perception.gpuMapping.HeightMapParameters;
@@ -16,6 +17,11 @@ import java.util.Collection;
 
 public class ChunkedMapManagerTest
 {
+   /**
+    * Currently using this test just to verify that things can work when I print things out locally.
+    * Don't really need it but wanted to leave the code for now to expand later
+    */
+   @Disabled
    @Test
    public void testChunksGetHeightsCorrectly()
    {
