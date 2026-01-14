@@ -36,18 +36,18 @@ public class RapidPatchesDebugOutputGenerator
       debugImage = new Mat(height, width, opencv_core.CV_8UC4);
    }
 
-   public void drawRegionInternalPatches(RapidPlanarRegionIsland island, int patchHeight, int patchWidth)
+   public void drawRegionInternalPatches(RapidPlanarRegion planarRegion, int patchHeight, int patchWidth)
    {
       if (!enabled)
          return;
 
-      for (Point2D regionIndex : island.planarRegion.getRegionIndices())
+      for (Point2D regionIndex : planarRegion.getRegionIndices())
       {
          int x = (int) regionIndex.getX();
          int y = (int) regionIndex.getY();
-         int r = (island.planarRegionIslandIndex + 1) * 312 % 255;
-         int g = (island.planarRegionIslandIndex + 1) * 123 % 255;
-         int b = (island.planarRegionIslandIndex + 1) * 231 % 255;
+         int r = (planarRegion.getId() + 1) * 312 % 255;
+         int g = (planarRegion.getId() + 1) * 123 % 255;
+         int b = (planarRegion.getId() + 1) * 231 % 255;
 
          // Draw a filled rectangle for the patch instead of a single pixel
          Scalar color = new Scalar(r, g, b, 255);
