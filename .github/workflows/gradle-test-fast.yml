@@ -19,13 +19,6 @@ jobs:
     with:
       subproject: 'open-alexander'
       test-category: 'fast'
-  alexander-video:
-    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
-    secrets:
-      ROSIE_PERSONAL_ACCESS_TOKEN: ${{ secrets.ROSIE_PERSONAL_ACCESS_TOKEN }}
-    with:
-      subproject: 'open-alexander'
-      test-category: 'video'
   alexander-controller-api:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     secrets:
