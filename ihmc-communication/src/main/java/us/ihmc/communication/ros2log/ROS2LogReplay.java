@@ -39,7 +39,7 @@ public class ROS2LogReplay
       this.timeSource = timeSource;
       this.loggedTopics = loggedTopics;
 
-      ros2Node = new ROS2NodeBuilder().build("ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, getClass().getSimpleName()));
+      ros2Node = new ROS2NodeBuilder().build("ihmc_ros2_log_replay");
       timestampSupplier = timeSource.createTimestampProvider(robotName, ros2Node);
    }
 
@@ -48,7 +48,7 @@ public class ROS2LogReplay
       this.timeSource = timeSource;
       this.loggedTopics = loggedTopics;
 
-      ros2Node = new ROS2NodeBuilder().build("ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, getClass().getSimpleName()));
+      ros2Node = new ROS2NodeBuilder().build("ihmc_ros2_log_replay");
       topicManagers = ROS2LogIOTools.loadLogFile(ros2Node, loggedTopics, logFile);
       timestampSupplier = timeSource.createTimestampProvider(robotName, ros2Node);
 
