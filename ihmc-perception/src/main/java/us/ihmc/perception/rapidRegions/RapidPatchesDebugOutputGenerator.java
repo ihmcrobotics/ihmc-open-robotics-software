@@ -1,6 +1,5 @@
 package us.ihmc.perception.rapidRegions;
 
-import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -49,10 +48,12 @@ public class RapidPatchesDebugOutputGenerator
          int r = (island.planarRegionIslandIndex + 1) * 312 % 255;
          int g = (island.planarRegionIslandIndex + 1) * 123 % 255;
          int b = (island.planarRegionIslandIndex + 1) * 231 % 255;
-         BytePointer pixel = debugImage.ptr(y * patchHeight, x * patchWidth);
-         pixel.put(0, (byte) r);
-         pixel.put(1, (byte) g);
-         pixel.put(2, (byte) b);
+
+         // Draw a filled rectangle for the patch instead of a single pixel
+         Scalar color = new Scalar(r, g, b, 255);
+         Point topLeft = new Point(x * patchWidth, y * patchHeight);
+         Point bottomRight = new Point((x + 1) * patchWidth - 1, (y + 1) * patchHeight - 1);
+         opencv_imgproc.rectangle(debugImage, topLeft, bottomRight, color, -1, opencv_imgproc.LINE_8, 0);
       }
    }
 
@@ -68,10 +69,12 @@ public class RapidPatchesDebugOutputGenerator
          int r = (regionRing.getIndex() + 1) * 130 % 255;
          int g = (regionRing.getIndex() + 1) * 227 % 255;
          int b = (regionRing.getIndex() + 1) * 332 % 255;
-         BytePointer pixel = debugImage.ptr(y * patchSize, x * patchSize);
-         pixel.put(0, (byte) r);
-         pixel.put(1, (byte) g);
-         pixel.put(2, (byte) b);
+
+         // Draw a filled rectangle for the patch instead of a single pixel
+         Scalar color = new Scalar(r, g, b, 255);
+         Point topLeft = new Point(x * patchSize, y * patchSize);
+         Point bottomRight = new Point((x + 1) * patchSize - 1, (y + 1) * patchSize - 1);
+         opencv_imgproc.rectangle(debugImage, topLeft, bottomRight, color, -1, opencv_imgproc.LINE_8, 0);
       }
    }
 
