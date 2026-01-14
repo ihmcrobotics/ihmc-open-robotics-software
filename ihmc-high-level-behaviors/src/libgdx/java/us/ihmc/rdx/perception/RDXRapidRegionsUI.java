@@ -77,12 +77,14 @@ public class RDXRapidRegionsUI implements RenderableProvider
 
    private Mat tempNormalized8U;
    private Mat tempRGBA;
+   private Mat tempDebugFlipped;
 
    public void create(RapidPlanarRegionsExtractor rapidPlanarRegionsExtractor)
    {
       this.rapidPlanarRegionsExtractor = rapidPlanarRegionsExtractor;
       this.rapidPlanarRegionsCustomizer = rapidPlanarRegionsExtractor.getRapidPlanarRegionsCustomizer();
       this.rapidRegionsDebutOutputGenerator = rapidPlanarRegionsExtractor.getDebugger();
+      this.rapidRegionsDebutOutputGenerator.setEnabled(true);
 
       patchImageWidth = rapidPlanarRegionsExtractor.getPatchImageWidth();
       patchImageHeight = rapidPlanarRegionsExtractor.getPatchImageHeight();
@@ -106,7 +108,7 @@ public class RDXRapidRegionsUI implements RenderableProvider
       gxImagePanel = new RDXMatImagePanel("Gx Image", patchImageWidth, patchImageHeight, RDXImagePanel.FLIP_Y);
       gyImagePanel = new RDXMatImagePanel("Gy Image", patchImageWidth, patchImageHeight, RDXImagePanel.FLIP_Y);
       gzImagePanel = new RDXMatImagePanel("Gz Image", patchImageWidth, patchImageHeight, RDXImagePanel.FLIP_Y);
-      debugExtractionPanel = new RDXMatImagePanel("Planar Region Extraction Image", patchImageWidth, patchImageHeight, RDXImagePanel.FLIP_Y);
+      debugExtractionPanel = new RDXMatImagePanel("Planar Region Extraction Image", imageWidth, imageHeight, RDXImagePanel.FLIP_Y);
 
       imguiPanel.addChild(depthPanel.getImagePanel());
       imguiPanel.addChild(nxImagePanel.getImagePanel());
@@ -131,6 +133,7 @@ public class RDXRapidRegionsUI implements RenderableProvider
 
       tempNormalized8U = new Mat();
       tempRGBA = new Mat();
+      tempDebugFlipped = new Mat();
    }
 
    public void render()
@@ -142,7 +145,13 @@ public class RDXRapidRegionsUI implements RenderableProvider
       displayFloatImage(rapidPlanarRegionsExtractor.getPatchCentroidsYHost(), gyImagePanel);
       displayFloatImage(rapidPlanarRegionsExtractor.getPatchCentroidsZHost(), gzImagePanel);
 
-      debugExtractionPanel.displayByte(rapidRegionsDebutOutputGenerator.getDebugImage());
+      // Display debug image (needs to be flipped to match orientation)
+      Mat debugImage = rapidRegionsDebutOutputGenerator.getDebugImage();
+      if (debugExtractionPanel.getImagePanel().getIsShowing().get() && !debugImage.empty())
+      {
+         opencv_core.flip(debugImage, tempDebugFlipped, 0);
+         debugExtractionPanel.displayByte(tempDebugFlipped);
+      }
    }
 
    private void displayFloatImage(Mat floatMat, RDXMatImagePanel panel)
@@ -233,6 +242,8 @@ public class RDXRapidRegionsUI implements RenderableProvider
          tempNormalized8U.close();
       if (tempRGBA != null)
          tempRGBA.close();
+      if (tempDebugFlipped != null)
+         tempDebugFlipped.close();
    }
 
    public RDXPanel getPanel()
