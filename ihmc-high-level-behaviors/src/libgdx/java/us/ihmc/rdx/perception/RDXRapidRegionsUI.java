@@ -7,6 +7,9 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_imgproc;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -72,6 +75,9 @@ public class RDXRapidRegionsUI implements RenderableProvider
    private int imageWidth = 0;
    private int imageHeight = 0;
 
+   private Mat tempNormalized8U;
+   private Mat tempRGBA;
+
    public void create(RapidPlanarRegionsExtractor rapidPlanarRegionsExtractor)
    {
       this.rapidPlanarRegionsExtractor = rapidPlanarRegionsExtractor;
@@ -122,20 +128,55 @@ public class RDXRapidRegionsUI implements RenderableProvider
 
       planarRegionsGraphic = new RDXPlanarRegionsGraphic();
       sensorFrameGraphic = RDXModelBuilder.createCoordinateFrameInstance(0.3);
+
+      tempNormalized8U = new Mat();
+      tempRGBA = new Mat();
    }
 
    public void render()
    {
-      // TODO
-
-//      nxImagePanel.drawDepthImage(rapidPlanarRegionsExtractor.getCurrentFeatureGrid().getNxImage().getBytedecoOpenCVMat());
-//      nyImagePanel.drawDepthImage(rapidPlanarRegionsExtractor.getCurrentFeatureGrid().getNyImage().getBytedecoOpenCVMat());
-//      nzImagePanel.drawDepthImage(rapidPlanarRegionsExtractor.getCurrentFeatureGrid().getNzImage().getBytedecoOpenCVMat());
-//      gxImagePanel.drawDepthImage(rapidPlanarRegionsExtractor.getCurrentFeatureGrid().getCxImage().getBytedecoOpenCVMat());
-//      gyImagePanel.drawDepthImage(rapidPlanarRegionsExtractor.getCurrentFeatureGrid().getCyImage().getBytedecoOpenCVMat());
-//      gzImagePanel.drawDepthImage(rapidPlanarRegionsExtractor.getCurrentFeatureGrid().getCzImage().getBytedecoOpenCVMat());
+      displayFloatImage(rapidPlanarRegionsExtractor.getPatchNormalsXHost(), nxImagePanel);
+      displayFloatImage(rapidPlanarRegionsExtractor.getPatchNormalsYHost(), nyImagePanel);
+      displayFloatImage(rapidPlanarRegionsExtractor.getPatchNormalsZHost(), nzImagePanel);
+      displayFloatImage(rapidPlanarRegionsExtractor.getPatchCentroidsXHost(), gxImagePanel);
+      displayFloatImage(rapidPlanarRegionsExtractor.getPatchCentroidsYHost(), gyImagePanel);
+      displayFloatImage(rapidPlanarRegionsExtractor.getPatchCentroidsZHost(), gzImagePanel);
 
       debugExtractionPanel.displayByte(rapidRegionsDebutOutputGenerator.getDebugImage());
+   }
+
+   private void displayFloatImage(Mat floatMat, RDXMatImagePanel panel)
+   {
+      if (panel.getImagePanel().getIsShowing().get() && !floatMat.empty())
+      {
+         // Check if the mat has valid dimensions and data
+         if (floatMat.rows() == 0 || floatMat.cols() == 0)
+            return;
+
+         // Find min and max values in the image
+         double[] minVal = new double[1];
+         double[] maxVal = new double[1];
+         opencv_core.minMaxLoc(floatMat, minVal, maxVal, null, null, opencv_core.noArray());
+
+         // Skip if min and max are both zero (uninitialized data)
+         if (Math.abs(minVal[0]) < 1e-10 && Math.abs(maxVal[0]) < 1e-10)
+            return;
+
+         // Normalize float values to 0-255 range using actual min/max from the image
+         // This ensures we use the full dynamic range for visualization
+         double alpha = 255.0 / (maxVal[0] - minVal[0] + 1e-10); // Avoid division by zero
+         double beta = -minVal[0] * alpha;
+         floatMat.convertTo(tempNormalized8U, opencv_core.CV_8U, alpha, beta);
+
+         // Convert grayscale to RGBA
+         opencv_imgproc.cvtColor(tempNormalized8U, tempRGBA, opencv_imgproc.COLOR_GRAY2RGBA);
+
+         // Flip vertically to match OpenGL coordinate system
+         opencv_core.flip(tempRGBA, tempRGBA, 0);
+
+         // Display the RGBA image
+         panel.displayByte(tempRGBA);
+      }
    }
 
    public void render3DGraphics(FramePlanarRegionsList planarRegions)
@@ -178,9 +219,9 @@ public class RDXRapidRegionsUI implements RenderableProvider
          boundaryMaxSearchDepthPlot.render((float) rapidPlanarRegionsExtractor.getRapidRegionsExtractorParameters().getBoundarySearchDepthLimit());
       }
 
-      boolean anyParameterChanged = gpuRegionParametersTuner.renderImGuiWidgets();
-      anyParameterChanged |= polygonizerParametersTuner.renderImGuiWidgets();
-      anyParameterChanged |= concaveHullParametersTuner.renderImGuiWidgets();
+      gpuRegionParametersTuner.renderImGuiWidgets();
+      polygonizerParametersTuner.renderImGuiWidgets();
+      concaveHullParametersTuner.renderImGuiWidgets();
 
       svdDurationPlot.render((float) rapidPlanarRegionsExtractor.getMaxSVDSolveTime());
    }
@@ -188,6 +229,10 @@ public class RDXRapidRegionsUI implements RenderableProvider
    public void destroy()
    {
       planarRegionsGraphic.destroy();
+      if (tempNormalized8U != null)
+         tempNormalized8U.close();
+      if (tempRGBA != null)
+         tempRGBA.close();
    }
 
    public RDXPanel getPanel()

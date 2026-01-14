@@ -640,6 +640,36 @@ public class RapidPlanarRegionsExtractor
       return debugger;
    }
 
+   public Mat getPatchNormalsXHost()
+   {
+      return patchNormalsXHost;
+   }
+
+   public Mat getPatchNormalsYHost()
+   {
+      return patchNormalsYHost;
+   }
+
+   public Mat getPatchNormalsZHost()
+   {
+      return patchNormalsZHost;
+   }
+
+   public Mat getPatchCentroidsXHost()
+   {
+      return patchCentroidsXHost;
+   }
+
+   public Mat getPatchCentroidsYHost()
+   {
+      return patchCentroidsYHost;
+   }
+
+   public Mat getPatchCentroidsZHost()
+   {
+      return patchCentroidsZHost;
+   }
+
    public void destroy()
    {
       rapidRegionsProgram.close();

@@ -117,4 +117,9 @@ public class RapidPlanarRegionsExtractionThread extends RepeatingTaskThread
          extractor.destroy();
       }
    }
+
+   public RapidPlanarRegionsExtractor getExtractor()
+   {
+      return extractor;
+   }
 }
