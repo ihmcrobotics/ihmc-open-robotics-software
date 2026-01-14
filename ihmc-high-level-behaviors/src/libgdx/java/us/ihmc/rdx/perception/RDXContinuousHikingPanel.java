@@ -44,12 +44,15 @@ import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.filters.DepthImageFilteringParameters;
 import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.perception.gpuMapping.TerrainMapParameters;
+import us.ihmc.perception.rapidRegions.RapidRegionsExtractorParameters;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.ImGuiRemoteROS2StoredPropertySetGroup;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
+import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotics.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
@@ -104,6 +107,10 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    private final ROS2Publisher<PlanOffsetStatus> planOffsetStatusPublisher;
    private final ROS2Publisher<FootstepStatusMessage> footstepStatusMessagePublisher;
    private final ROS2Publisher<WalkingControllerFailureStatusMessage> walkingControllerFailureStatusPublisher;
+
+   private final RapidRegionsExtractorParameters rapidRegionsExtractorParameters;
+   private final PolygonizerParameters polygonizerParameters;
+   private final ConcaveHullFactoryParameters concaveHullFactoryParameters;
 
    private SideDependentList<FramePose3D> startStancePose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private List<EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories;
@@ -168,6 +175,11 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       continuousHikingParameters = new ContinuousHikingParameters();
       HeightMapParameters heightMapParameters = new HeightMapParameters();
       TerrainMapParameters terrainMapParameters = new TerrainMapParameters();
+
+      rapidRegionsExtractorParameters = new RapidRegionsExtractorParameters();
+      polygonizerParameters = new PolygonizerParameters();
+      concaveHullFactoryParameters = new ConcaveHullFactoryParameters();
+
       createParametersPanel(continuousHikingParameters,
                             continuousHikingParametersPanel,
                             hostStoredPropertySets,
@@ -182,6 +194,16 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
                             footstepPlanningParametersPanel,
                             hostStoredPropertySets,
                             ContinuousHikingAPI.FOOTSTEP_PLANNING_PARAMETERS);
+
+      RDXStoredPropertySetTuner rapidRegionsParametersPanel = new RDXStoredPropertySetTuner("Rapid Regions Parameters");
+      createParametersPanel(rapidRegionsExtractorParameters, rapidRegionsParametersPanel, hostStoredPropertySets, PerceptionComms.PERSPECTIVE_RAPID_REGION_PARAMETERS);
+
+      RDXStoredPropertySetTuner polygonizerParametersPanel = new RDXStoredPropertySetTuner("Polygonizer Parameters");
+      createParametersPanel(polygonizerParameters, polygonizerParametersPanel, hostStoredPropertySets, PerceptionComms.PERSPECTIVE_POLYGONIZER_PARAMETERS);
+
+      RDXStoredPropertySetTuner concaveHullParametersPanel = new RDXStoredPropertySetTuner("Concave Hull Parameters");
+      createParametersPanel(concaveHullFactoryParameters, concaveHullParametersPanel, hostStoredPropertySets, PerceptionComms.PERSPECTIVE_CONCAVE_HULL_FACTORY_PARAMETERS);
+
       RDXStoredPropertySetTuner swingPlannerParametersPanel = new RDXStoredPropertySetTuner("Swing Planner Parameters (CH)");
       createParametersPanel(swingPlannerParameters, swingPlannerParametersPanel, hostStoredPropertySets, ContinuousHikingAPI.SWING_PLANNING_PARAMETERS);
       RDXStoredPropertySetTuner heightMapParametersPanel = new RDXStoredPropertySetTuner("Height Map Parameters (CH)");
