@@ -337,6 +337,8 @@ public class RapidPlanarRegionsExtractor
                   planarRegion.update(parameters.getUseSVDNormals(), parameters.getSVDReductionFactor());
                   if (planarRegion.getSVDDuration() > maxSVDSolveTime)
                      maxSVDSolveTime = planarRegion.getSVDDuration();
+
+                  debugger.drawRegionInternalPatches(planarRegion, parameters.getPatchSize(), parameters.getPatchSize());
                }
                else
                {
