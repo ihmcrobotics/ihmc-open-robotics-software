@@ -18,6 +18,11 @@ public class ChunkMessageToolsTest
    private static final float WIDTH_IN_METERS = 1.0f;
    private static final float CELL_RESOLUTION = 0.02f;
 
+   /**
+    * We are testing that when a message is packed and sent. That when its unpacked, its values are all the same.
+    * So we pack a {@link ChunkMessage} and check that when we unpack the {@link ChunkMessage} all the values match
+    * the original data.
+    */
    @RepeatedTest(10)
    public void testChunkMapMessaging()
    {
@@ -33,10 +38,7 @@ public class ChunkMessageToolsTest
 
       ChunkMessageTools.toMessage(chunk, chunkMessage);
 
-      Chunk chunkResult = new Chunk(chunkMessage.getOriginX(),
-                                    chunkMessage.getOriginY(),
-                                    chunkMessage.getCellSizeInMeters(),
-                                    chunkMessage.getCellsPerAxis());
+      Chunk chunkResult = new Chunk(chunkMessage.getOriginX(), chunkMessage.getOriginY(), chunkMessage.getCellSizeInMeters(), chunkMessage.getCellsPerAxis());
 
       ChunkMessageTools.unpackMessageToChunk(chunkMessage, chunkResult);
 
@@ -81,9 +83,7 @@ public class ChunkMessageToolsTest
       double totalTimeMillis = (endTime - startTime) / 1_000_000.0;
       double averageTimeMilliSeconds = totalTimeMillis / iterations;
 
-      System.out.printf("Average time per pack of Message -> Height Map Data: %.3f us (%.9f ms)%n",
-                        averageTimeMilliSeconds,
-                        averageTimeMilliSeconds);
+      System.out.printf("Average time per pack of Message -> Height Map Data: %.3f us (%.9f ms)%n", averageTimeMilliSeconds, averageTimeMilliSeconds);
 
       // This will be machine-dependent, the benchmark for this value came from a laptop with a AMD Ryzen 7 5800H cpu.
       float expectedMicrosToPackMessage = MILLISECOND_TOLERANCE;
@@ -124,9 +124,7 @@ public class ChunkMessageToolsTest
       double totalTimeMillis = (endTime - startTime) / 1_000_000.0;
       double averageTimeMilliSeconds = totalTimeMillis / iterations;
 
-      System.out.printf("Average time per pack of Height Map Data -> Message: %.3f us (%.9f ms)%n",
-                        averageTimeMilliSeconds,
-                        averageTimeMilliSeconds);
+      System.out.printf("Average time per pack of Height Map Data -> Message: %.3f us (%.9f ms)%n", averageTimeMilliSeconds, averageTimeMilliSeconds);
 
       // This will be machine-dependent, the benchmark for this value came from a laptop with a AMD Ryzen 7 5800H cpu.
       float expectedMicrosToPackMessage = MILLISECOND_TOLERANCE;
