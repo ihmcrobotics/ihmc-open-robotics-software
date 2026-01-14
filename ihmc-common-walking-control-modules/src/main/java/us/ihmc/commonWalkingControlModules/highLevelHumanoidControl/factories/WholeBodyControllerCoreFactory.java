@@ -163,7 +163,7 @@ public class WholeBodyControllerCoreFactory
 
       CenterOfMassStateProvider centerOfMassStateProvider = controllerToolbox;
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
-      double controlDT = controllerToolbox.getControlDT();
+      DoubleProvider controlDT = controllerToolbox.getControlDT();
       double gravityZ = controllerToolbox.getGravityZ();
       DoubleProvider totalMassProvider = controllerToolbox.getTotalMassProvider();
       RigidBodyBasics elevator = fullRobotModel.getElevator();

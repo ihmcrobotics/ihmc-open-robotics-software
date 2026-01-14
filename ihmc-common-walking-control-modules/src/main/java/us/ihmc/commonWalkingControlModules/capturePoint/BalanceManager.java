@@ -279,7 +279,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
       if (walkingMessageHandler != null)
       {
          CenterOfMassTrajectoryHandler comTrajectoryHandler = walkingMessageHandler.getComTrajectoryHandler();
-         double dt = controllerToolbox.getControlDT();
+         DoubleProvider dt = controllerToolbox.getControlDT();
          precomputedICPPlanner = new PrecomputedICPPlanner(dt, comTrajectoryHandler, momentumTrajectoryHandler, registry);
          precomputedICPPlanner.setOmega0(controllerToolbox.getOmega0());
          precomputedICPPlanner.setMass(totalMass);
@@ -776,7 +776,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
          return;
       }
 
-      double scaleUpdated = icpVelocityReductionFactor.getValue() - controllerToolbox.getControlDT() / icpVelocityDecayDurationWhenDone.getValue();
+      double scaleUpdated = icpVelocityReductionFactor.getValue() - controllerToolbox.getControlDT().getValue() / icpVelocityDecayDurationWhenDone.getValue();
       icpVelocityReductionFactor.set(Math.max(0.0, scaleUpdated));
    }
 

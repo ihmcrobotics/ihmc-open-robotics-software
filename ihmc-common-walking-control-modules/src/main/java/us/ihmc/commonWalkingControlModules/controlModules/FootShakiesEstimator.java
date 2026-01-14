@@ -82,7 +82,7 @@ public class FootShakiesEstimator
    private final double footLength;
    private final double footWidth;
 
-   private final double controlDT;
+   private final DoubleProvider controlDT;
    private int writeIndex = -1;
    private int windowCurrentSize = 0;
    private final int windowMaxSize;
@@ -91,7 +91,7 @@ public class FootShakiesEstimator
                                SideDependentList<? extends FootSwitchInterface> footSwitches,
                                DoubleProvider time,
                                DoubleProvider totalMass,
-                               double controlDT,
+                               DoubleProvider controlDT,
                                double gravityZ,
                                YoRegistry parentRegistry)
    {
@@ -141,7 +141,7 @@ public class FootShakiesEstimator
       footWidth = maxY - minY;
 
       copRateBreakFrequency.set(30.0);
-      DoubleProvider copRateAlpha = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(copRateBreakFrequency.getDoubleValue(), controlDT);
+      DoubleProvider copRateAlpha = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(copRateBreakFrequency.getDoubleValue(), controlDT.getValue());
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -242,7 +242,7 @@ public class FootShakiesEstimator
 
    private void updateCoPSwitchingCounters(SideDependentList<? extends FramePoint2DReadOnly> desiredCoPs)
    {
-      int glitchFilterSize = (int) Math.ceil(copSegmentGlitchDuration.getDoubleValue() / controlDT);
+      int glitchFilterSize = (int) Math.ceil(copSegmentGlitchDuration.getDoubleValue() / controlDT.getValue());
 
       double minZForceForCoPControlScaling = minWeightFractionForControlScaling.getDoubleValue() * totalMass.getValue() * gravityZ;
 

@@ -28,6 +28,7 @@ import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -105,7 +106,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
    private final RigidBodyBasics rootBody;
    private final RigidBodyBasics endEffector;
 
-   private final double dt;
+   private final DoubleProvider dt;
    private final boolean isRootBody;
    private final boolean computeIntegralTerm;
 
@@ -625,7 +626,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
          }
 
          feedbackTermToPack.setIncludingFrame(yoErrorPosition);
-         feedbackTermToPack.scale(dt);
+         feedbackTermToPack.scale(dt.getValue());
          feedbackTermToPack.add(yoErrorPositionIntegrated);
          feedbackTermToPack.changeFrame(controlFrame);
          selectionMatrix.applyLinearSelection(feedbackTermToPack);

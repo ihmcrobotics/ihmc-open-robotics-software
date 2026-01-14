@@ -10,6 +10,7 @@ import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.yoVariables.filters.SimpleMovingAverageFilteredYoVariable;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -34,7 +35,7 @@ public class FeetLoadedTransition implements StateTransitionCondition
 
    public FeetLoadedTransition(ForceSensorDataHolderReadOnly forceSensorDataHolder,
                                SideDependentList<String> feetForceSensors,
-                               double controlDT,
+                               DoubleProvider controlDT,
                                double gravityZ,
                                double totalMass,
                                YoRegistry parentRegistry)
@@ -51,7 +52,7 @@ public class FeetLoadedTransition implements StateTransitionCondition
    public FeetLoadedTransition(String suffix,
                                ForceSensorDataHolderReadOnly forceSensorDataHolder,
                                SideDependentList<String> feetForceSensors,
-                               double controlDT,
+                               DoubleProvider controlDT,
                                double gravityZ,
                                double totalMass,
                                YoRegistry parentRegistry)
@@ -66,7 +67,7 @@ public class FeetLoadedTransition implements StateTransitionCondition
 
    public FeetLoadedTransition(String suffix,
                                SideDependentList<FootSwitchInterface> footSwitches,
-                               double controlDT,
+                               DoubleProvider controlDT,
                                double gravityZ,
                                double totalMass,
                                YoRegistry parentRegistry)
@@ -81,7 +82,7 @@ public class FeetLoadedTransition implements StateTransitionCondition
 
    public FeetLoadedTransition(String suffix,
                                Function<RobotSide, WrenchReadOnly> footSensors,
-                               double controlDT,
+                               DoubleProvider controlDT,
                                double gravityZ,
                                double totalMass,
                                YoRegistry parentRegistry)

@@ -54,6 +54,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.filters.AlphaBasedOnBreakFrequencyProvider;
+import us.ihmc.yoVariables.filters.AlphaFilterTools;
 import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
@@ -192,7 +193,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
                                           DoubleProvider totalMassProvider,
                                           WholeBodyAngularVelocityCalculator wholeBodyAngularVelocityCalculator,
                                           double gravityZ,
-                                          double controlDT,
+                                          DoubleProvider controlDT,
                                           YoRegistry parentRegistry)
    {
       this.totalMassProvider = totalMassProvider;
@@ -237,7 +238,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
 
       YoDouble angularMomentumBreakFrequency = new YoDouble("angularMomentumBreakFrequency", registry);
       angularMomentumBreakFrequency.set(20.0);
-      AlphaBasedOnBreakFrequencyProvider angularMomentumAlpha = new AlphaBasedOnBreakFrequencyProvider(angularMomentumBreakFrequency, controlDT);
+      DoubleProvider angularMomentumAlpha = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(angularMomentumBreakFrequency.getDoubleValue(), controlDT.getValue());
       filteredYoAngularMomentum = new AlphaFilteredYoFrameVector3D("filteredAngularMomentum", "", registry, angularMomentumAlpha, yoAngularMomentum);
 
       yoDesiredCMP.setToNaN();

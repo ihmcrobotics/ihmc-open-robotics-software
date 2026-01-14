@@ -1,16 +1,16 @@
 package us.ihmc.commonWalkingControlModules.inverseKinematics;
 
 import org.ejml.data.DMatrixRMaj;
-
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.QuaternionCalculus;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.SixDoFJointReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public class RobotJointVelocityAccelerationIntegrator
 {
@@ -18,7 +18,7 @@ public class RobotJointVelocityAccelerationIntegrator
    private final DMatrixRMaj jointVelocities = new DMatrixRMaj(100, 0);
    private final DMatrixRMaj jointAccelerations = new DMatrixRMaj(100, 0);
 
-   private final double controlDT;
+   private final DoubleProvider controlDT;
    private double maximumOneDoFJointVelocity = Double.POSITIVE_INFINITY;
    private double maximumSixDoFJointLinearVelocity = Double.POSITIVE_INFINITY;
    private double maximumSixDoFJointAngularVelocity = Double.POSITIVE_INFINITY;
@@ -35,7 +35,7 @@ public class RobotJointVelocityAccelerationIntegrator
    private final Vector3D previousLinearVelocity = new Vector3D();
    private final Vector3D previousAngularVelocity = new Vector3D();
 
-   public RobotJointVelocityAccelerationIntegrator(double controlDT)
+   public RobotJointVelocityAccelerationIntegrator(DoubleProvider controlDT)
    {
       this.controlDT = controlDT;
    }
@@ -80,15 +80,13 @@ public class RobotJointVelocityAccelerationIntegrator
 
       for (int i = 0; i < joints.length; i++)
       {
-         if (joints[i] instanceof OneDoFJointBasics)
+         if (joints[i] instanceof OneDoFJointReadOnly joint)
          {
-            OneDoFJointBasics joint = (OneDoFJointBasics) joints[i];
-
             double qDot = MathTools.clamp(jointVelocitiesToIntegrate.get(jointStartIndex, 0), maximumOneDoFJointVelocity);
 
-            double q = joint.getQ() + qDot * controlDT;
+            double q = joint.getQ() + qDot * controlDT.getValue();
             q = MathTools.clamp(q, joint.getJointLimitLower(), joint.getJointLimitUpper());
-            qDot = (q - joint.getQ()) / controlDT;
+            qDot = (q - joint.getQ()) / controlDT.getValue();
 
             jointConfigurations.set(jointConfigurationStartIndex, 0, q);
             jointVelocities.set(jointStartIndex, 0, qDot);
@@ -96,27 +94,26 @@ public class RobotJointVelocityAccelerationIntegrator
             jointConfigurationStartIndex++;
             jointStartIndex++;
          }
-         else if (joints[i] instanceof SixDoFJoint)
+         else if (joints[i] instanceof SixDoFJointReadOnly joint)
          {
-            SixDoFJoint joint = (SixDoFJoint) joints[i];
             previousOrientation.set(joint.getJointPose().getOrientation());
             previousTranslation.set(joint.getJointPose().getPosition());
 
             angularVelocity.set(jointStartIndex, jointVelocitiesToIntegrate);
-            double angularVelocityMagnitude = angularVelocity.length();
+            double angularVelocityMagnitude = angularVelocity.norm();
             if (angularVelocityMagnitude > maximumSixDoFJointAngularVelocity)
                angularVelocity.scale(maximumSixDoFJointAngularVelocity / angularVelocityMagnitude);
-            rotationVectorIntegrated.setAndScale(controlDT, angularVelocity);
-            quaternionCalculus.exp(rotationVectorIntegrated, rotationIntegrated);
+            rotationVectorIntegrated.setAndScale(controlDT.getValue(), angularVelocity);
+            QuaternionCalculus.exp(rotationVectorIntegrated, rotationIntegrated);
 
             rotation.set(previousOrientation);
             rotation.multiply(rotationIntegrated);
 
             linearVelocity.set(jointStartIndex + 3, jointVelocitiesToIntegrate);
-            double linearVelocityMagnitude = linearVelocity.length();
+            double linearVelocityMagnitude = linearVelocity.norm();
             if (linearVelocityMagnitude > maximumSixDoFJointLinearVelocity)
                linearVelocity.scale(maximumSixDoFJointLinearVelocity / linearVelocityMagnitude);
-            translationIntegrated.setAndScale(controlDT, linearVelocity);
+            translationIntegrated.setAndScale(controlDT.getValue(), linearVelocity);
             rotation.transform(translationIntegrated);
 
             translation.add(previousTranslation, translationIntegrated);
@@ -148,40 +145,37 @@ public class RobotJointVelocityAccelerationIntegrator
 
       for (int i = 0; i < joints.length; i++)
       {
-         if (joints[i] instanceof OneDoFJointBasics)
+         if (joints[i] instanceof OneDoFJointReadOnly joint)
          {
-            OneDoFJointBasics joint = (OneDoFJointBasics) joints[i];
-
             double qDDot = MathTools.clamp(jointAccelerationsToIntegrate.get(jointStartIndex, 0), maximumOneDoFJointAcceleration);
 
-            double qDot = joint.getQd() + qDDot * controlDT;
+            double qDot = joint.getQd() + qDDot * controlDT.getValue();
             qDot = MathTools.clamp(qDot, maximumOneDoFJointVelocity);
-            qDDot = (qDot - joint.getQd()) / controlDT;
+            qDDot = (qDot - joint.getQd()) / controlDT.getValue();
 
             jointVelocities.set(jointStartIndex, 0, qDot);
             jointAccelerations.set(jointStartIndex, 0, qDDot);
 
             jointStartIndex++;
          }
-         else if (joints[i] instanceof SixDoFJoint)
+         else if (joints[i] instanceof SixDoFJointReadOnly joint)
          {
-            SixDoFJoint joint = (SixDoFJoint) joints[i];
             previousOrientation.set(joint.getJointPose().getOrientation());
             previousTranslation.set(joint.getJointPose().getPosition());
             previousLinearVelocity.set(joint.getJointTwist().getLinearPart());
             previousAngularVelocity.set(joint.getJointTwist().getAngularPart());
 
             angularAcceleration.set(jointStartIndex, jointAccelerationsToIntegrate);
-            double angularAccelerationMagnitude = angularAcceleration.length();
+            double angularAccelerationMagnitude = angularAcceleration.norm();
             if (angularAccelerationMagnitude > maximumSixDoFJointAngularAcceleration)
                angularAcceleration.scale(maximumSixDoFJointAngularAcceleration / angularAccelerationMagnitude);
-            angularAccelerationIntegrated.setAndScale(controlDT, angularAcceleration);
+            angularAccelerationIntegrated.setAndScale(controlDT.getValue(), angularAcceleration);
 
             linearAcceleration.set(jointStartIndex + 3, jointAccelerationsToIntegrate);
-            double linearAccelerationMagnitude = linearAcceleration.length();
+            double linearAccelerationMagnitude = linearAcceleration.norm();
             if (linearAccelerationMagnitude > maximumSixDoFJointLinearAcceleration)
                linearAcceleration.scale(maximumSixDoFJointLinearAcceleration / linearAccelerationMagnitude);
-            linearAccelerationIntegrated.setAndScale(controlDT, linearAcceleration);
+            linearAccelerationIntegrated.setAndScale(controlDT.getValue(), linearAcceleration);
 
             angularVelocity.add(previousAngularVelocity, angularAccelerationIntegrated);
             linearVelocity.add(previousLinearVelocity, linearAccelerationIntegrated);

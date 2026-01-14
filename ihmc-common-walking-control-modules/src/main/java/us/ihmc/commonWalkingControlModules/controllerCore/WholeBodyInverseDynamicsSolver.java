@@ -45,6 +45,7 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -113,7 +114,7 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
     */
    private final YoBoolean updateDynamicMatrixCalculator;
 
-   private final double controlDT;
+   private final DoubleProvider controlDT;
    private final ExecutionTimer setupTimer;
    private final ExecutionTimer outputTimer;
 

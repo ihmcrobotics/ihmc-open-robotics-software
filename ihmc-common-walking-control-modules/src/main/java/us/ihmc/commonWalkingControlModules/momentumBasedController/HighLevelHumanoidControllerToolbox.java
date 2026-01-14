@@ -73,6 +73,8 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.filters.AlphaBasedOnBreakFrequencyProvider;
+import us.ihmc.yoVariables.filters.AlphaFilterTools;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -112,7 +114,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
    private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
    private final YoDouble yoTime;
-   private final double controlDT;
+   private final DoubleProvider controlDT;
    private final double gravity;
    private final boolean kinematicsSimulation;
 
@@ -193,7 +195,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
                                              double gravityZ,
                                              double omega0,
                                              SideDependentList<ContactableFoot> feet,
-                                             double controlDT,
+                                             DoubleProvider controlDT,
                                              boolean kinematicsSimulation, // Whether to create for non-physical motion generation only
                                              List<Updatable> updatables,
                                              List<ContactablePlaneBody> contactableBodies,
@@ -356,7 +358,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       YoDouble momentumBreakFrequency = new YoDouble("momentumBreakFrequency", registry);
       // Move value out of hard coding
       momentumBreakFrequency.set(20.0);
-      AlphaBasedOnBreakFrequencyProvider momentumAlpha = new AlphaBasedOnBreakFrequencyProvider(momentumBreakFrequency, controlDT);
+      DoubleProvider momentumAlpha = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(momentumBreakFrequency.getDoubleValue(), controlDT.getValue());
       filteredYoAngularMomentum = new AlphaFilteredYoFrameVector3D("filteredAngularMomentum", "", registry, momentumAlpha, yoAngularMomentum);
       filteredYoLinearMomentum = new AlphaFilteredYoFrameVector3D("filteredLinearMomentum", "", registry, momentumAlpha, yoLinearMomentum);
 
@@ -774,7 +776,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       return gravity;
    }
 
-   public double getControlDT()
+   public DoubleProvider getControlDT()
    {
       return controlDT;
    }

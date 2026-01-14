@@ -16,7 +16,9 @@ import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.kinematics.JointLimitData;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
+import us.ihmc.yoVariables.filters.AlphaFilterTools;
 import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -46,10 +48,10 @@ public class WholeBodyControllerBoundCalculator
    private final JointIndexHandler jointIndexHandler;
    private final OneDoFJointBasics[] oneDoFJoints;
 
-   private final double controlDT;
+   private final DoubleProvider controlDT;
 
    public WholeBodyControllerBoundCalculator(JointIndexHandler jointIndexHandler,
-                                             double controlDT,
+                                             DoubleProvider controlDT,
                                              boolean considerJointVelocityLimits,
                                              YoRegistry parentRegistry)
    {
@@ -93,7 +95,7 @@ public class WholeBodyControllerBoundCalculator
          YoDouble filterAlpha = new YoDouble("joint_limit_filter_alpha_" + joint.getName(), registry);
          YoDouble velocityDeadband = new YoDouble("joint_limit_velocity_deadband" + joint.getName(), registry);
          YoDouble romMarginFraction = new YoDouble("joint_limit_rom_margin_fraction" + joint.getName(), registry);
-         filterAlpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(Double.POSITIVE_INFINITY, controlDT));
+         filterAlpha.set(AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(Double.POSITIVE_INFINITY, controlDT.getValue()));
          AlphaFilteredYoVariable filteredLowerLimit = new AlphaFilteredYoVariable("qdd_min_filter_" + joint.getName(), registry, filterAlpha);
          AlphaFilteredYoVariable filteredUpperLimit = new AlphaFilteredYoVariable("qdd_max_filter_" + joint.getName(), registry, filterAlpha);
          YoDouble hardLowerLimit = new YoDouble("qdd_min_hard_" + joint.getName(), registry);
@@ -144,8 +146,8 @@ public class WholeBodyControllerBoundCalculator
          if (params != null)
          {
             jointLimitParameters[jointIndex].set(params);
-            filterAlphas[jointIndex].set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(params.getJointLimitFilterBreakFrequency(),
-                                                                                                         controlDT));
+            filterAlphas[jointIndex].set(AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(params.getJointLimitFilterBreakFrequency(),
+                                                                                                         controlDT.getValue()));
             velocityGains[jointIndex].set(params.getVelocityControlGain());
             romMarginFractions[jointIndex].set(params.getRangeOfMotionMarginFraction());
             velocityDeadbandSizes[jointIndex].set(params.getVelocityDeadbandSize());
@@ -216,7 +218,7 @@ public class WholeBodyControllerBoundCalculator
 
       if (!Double.isInfinite(jointLimitLower) || !Double.isInfinite(velocityLimitLower))
       {
-         double qDotMinFromFD = (jointLimitLower - joint.getQ()) / controlDT;
+         double qDotMinFromFD = (jointLimitLower - joint.getQ()) / controlDT.getValue();
          double qDotMin = MathTools.clamp(qDotMinFromFD, velocityLimitLower, velocityLimitUpper);
 
          qDotMinToPack.set(index, 0, qDotMin);
@@ -224,7 +226,7 @@ public class WholeBodyControllerBoundCalculator
 
       if (!Double.isInfinite(jointLimitUpper) || !Double.isInfinite(velocityLimitUpper))
       {
-         double qDotMaxFromFD = (jointLimitUpper - joint.getQ()) / controlDT;
+         double qDotMaxFromFD = (jointLimitUpper - joint.getQ()) / controlDT.getValue();
          double qDotMax = MathTools.clamp(qDotMaxFromFD, velocityLimitLower, velocityLimitUpper);
 
          qDotMaxToPack.set(index, 0, qDotMax);
@@ -292,20 +294,20 @@ public class WholeBodyControllerBoundCalculator
       double brakeVelocity = DeadbandTools.applyDeadband(velocityDeadbandSizes[index].getDoubleValue(), joint.getQd());
       if (!Double.isInfinite(jointLimitLower) || !Double.isInfinite(velocityLimitLower))
       {
-         double qDotMinFromFD = (jointLimitLower - joint.getQ()) / controlDT;
+         double qDotMinFromFD = (jointLimitLower - joint.getQ()) / controlDT.getValue();
          double qDotMin = MathTools.clamp(qDotMinFromFD, velocityLimitLower, velocityLimitUpper);
 
-         qDDotMin = 2.0 * (qDotMin - brakeVelocity) / controlDT;
+         qDDotMin = 2.0 * (qDotMin - brakeVelocity) / controlDT.getValue();
          qDDotMin = MathTools.clamp(qDDotMin, -absoluteMaximumJointAcceleration, 0.0);
          qDDotMinToPack.set(index, 0, qDDotMin);
          lowerHardLimits[index].set(qDDotMin);
       }
       if (!Double.isInfinite(jointLimitUpper) || !Double.isInfinite(velocityLimitUpper))
       {
-         double qDotMaxFromFD = (jointLimitUpper - joint.getQ()) / controlDT;
+         double qDotMaxFromFD = (jointLimitUpper - joint.getQ()) / controlDT.getValue();
          double qDotMax = MathTools.clamp(qDotMaxFromFD, velocityLimitLower, velocityLimitUpper);
 
-         qDDotMax = 2.0 * (qDotMax - brakeVelocity) / controlDT;
+         qDDotMax = 2.0 * (qDotMax - brakeVelocity) / controlDT.getValue();
          qDDotMax = MathTools.clamp(qDDotMax, -0.0, absoluteMaximumJointAcceleration);
          qDDotMaxToPack.set(index, 0, qDDotMax);
          upperHardLimits[index].set(qDDotMax);

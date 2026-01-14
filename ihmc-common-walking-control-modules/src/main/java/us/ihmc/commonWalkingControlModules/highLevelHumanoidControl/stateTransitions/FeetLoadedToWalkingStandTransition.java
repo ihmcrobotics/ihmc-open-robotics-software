@@ -7,6 +7,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -50,7 +51,7 @@ public class FeetLoadedToWalkingStandTransition extends FeetLoadedTransition
                                              boolean waitForRequestToTransition,
                                              ForceSensorDataHolderReadOnly forceSensorDataHolder,
                                              SideDependentList<String> feetForceSensors,
-                                             double controlDT,
+                                             DoubleProvider controlDT,
                                              double totalMass,
                                              double gravityZ,
                                              HighLevelControllerParameters highLevelControllerParameters,
@@ -71,7 +72,7 @@ public class FeetLoadedToWalkingStandTransition extends FeetLoadedTransition
                                              YoEnum<HighLevelControllerName> requestedState,
                                              boolean waitForRequestToTransition,
                                              Function<RobotSide, WrenchReadOnly> footSensors,
-                                             double controlDT,
+                                             DoubleProvider controlDT,
                                              double totalMass,
                                              double gravityZ,
                                              HighLevelControllerParameters highLevelControllerParameters,

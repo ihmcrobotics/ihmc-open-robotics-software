@@ -21,6 +21,7 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.filters.GlitchFilteredYoBoolean;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -63,7 +64,7 @@ public class PushRecoveryControlModule implements SCS2YoGraphicHolder
 
    private final FrameConvexPolygon2D footPolygon = new FrameConvexPolygon2D();
 
-   private final double controlDT;
+   private final DoubleProvider controlDT;
    private double omega0;
    private final FramePoint2D desiredCapturePoint2d = new FramePoint2D();
    private final FramePoint2D capturePoint2d = new FramePoint2D();
@@ -203,7 +204,7 @@ public class PushRecoveryControlModule implements SCS2YoGraphicHolder
       captureRegionCalculator.calculateCaptureRegion(swingSide, preferredSwingTime, capturePoint2d, omega0, footPolygon);
       double captureRegionArea = captureRegionCalculator.getCaptureRegionArea();
 
-      if (swingTimeRemaining <= controlDT)
+      if (swingTimeRemaining <= controlDT.getValue())
          return swingTimeRemaining;
 
       // If there is no capture region for the given swing time we reduce it.

@@ -39,6 +39,7 @@ import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFramePoint2D;
 import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFrameVector2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.filters.AlphaFilterTools;
 import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -93,10 +94,10 @@ public class PrecomputedICPPlanner implements SCS2YoGraphicHolder
                                 MomentumTrajectoryHandler momentumTrajectoryHandler,
                                 YoRegistry parentRegistry)
    {
-      this(Double.NaN, centerOfMassTrajectoryHandler, momentumTrajectoryHandler, parentRegistry);
+      this(null, centerOfMassTrajectoryHandler, momentumTrajectoryHandler, parentRegistry);
    }
 
-   public PrecomputedICPPlanner(double dt,
+   public PrecomputedICPPlanner(DoubleProvider dt,
                                 CenterOfMassTrajectoryHandler centerOfMassTrajectoryHandler,
                                 MomentumTrajectoryHandler momentumTrajectoryHandler,
                                 YoRegistry parentRegistry)
@@ -105,14 +106,14 @@ public class PrecomputedICPPlanner implements SCS2YoGraphicHolder
       this.momentumTrajectoryHandler = momentumTrajectoryHandler;
       blendingDuration.set(0.5);
 
-      if (!Double.isNaN(dt))
+      if (dt != null)
       {
          alphaProvider = new DoubleProvider()
          {
             @Override
             public double getValue()
             {
-               return AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(filterBreakFrequency.getValue(), dt);
+               return AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(filterBreakFrequency.getValue(), dt.getValue());
             }
          };
          filteredPrecomputedIcpVelocity = new AlphaFilteredTuple2D(alphaProvider);

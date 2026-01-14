@@ -26,6 +26,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -108,7 +109,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    private final RigidBodyBasics endEffector;
    private final YoOrientationFrame controlFrame;
 
-   private final double dt;
+   private final DoubleProvider dt;
    private final boolean isRootBody;
    private final boolean computeIntegralTerm;
 
@@ -645,7 +646,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       errorOrientationCumulated.normalizeAndLimitToPi();
 
       errorOrientationCumulated.getRotationVector(feedbackTermToPack);
-      feedbackTermToPack.scale(dt);
+      feedbackTermToPack.scale(dt.getValue());
       feedbackTermToPack.changeFrame(controlFrame);
       selectionMatrix.applyAngularSelection(feedbackTermToPack);
       feedbackTermToPack.clipToMaxNorm(maximumIntegralError);
