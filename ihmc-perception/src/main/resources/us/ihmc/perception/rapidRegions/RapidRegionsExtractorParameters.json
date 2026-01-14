@@ -1,14 +1,9 @@
 {
   "title" : "Rapid region extractor parameters",
   "Normal pack range" : {
-    "value" : 10,
-    "lowerBound" : 1,
-    "upperBound" : 10
-  },
-  "Centroid pack range" : {
     "value" : 1,
     "lowerBound" : 1,
-    "upperBound" : 10
+    "upperBound" : 4
   },
   "Merge range" : {
     "value" : 1,
@@ -16,12 +11,12 @@
     "upperBound" : 10
   },
   "Merge orthogonal threshold" : {
-    "value" : 0.201031,
+    "value" : 0.03,
     "lowerBound" : 0.0,
-    "upperBound" : 1.5
+    "upperBound" : 0.2
   },
   "Merge distance threshold" : {
-    "value" : 1.005,
+    "value" : 1.06,
     "lowerBound" : 0.0,
     "upperBound" : 2.0
   },
@@ -31,18 +26,13 @@
     "upperBound" : 1.0
   },
   "Connection threshold" : {
-    "value" : 5,
+    "value" : 6,
     "lowerBound" : 0,
     "upperBound" : 8
   },
   "Patch size" : {
-    "value" : 12,
+    "value" : 8,
     "lowerBound" : 2,
-    "upperBound" : 20
-  },
-  "Dead pixel filter patch size" : {
-    "value" : 1,
-    "lowerBound" : 1,
     "upperBound" : 20
   },
   "Focal length X pixels" : {
@@ -57,7 +47,6 @@
   },
   "Principal offset X pixels" : 651.14,
   "Principal offset Y pixels" : 361.89,
-  "Use filtered image" : true,
   "Use SVD normals" : true,
   "SVD reduction factor" : {
     "value" : 20,
@@ -65,12 +54,12 @@
     "upperBound" : 100
   },
   "Internal search depth limit" : {
-    "value" : 35000,
+    "value" : 20000,
     "lowerBound" : 1,
     "upperBound" : 50000
   },
   "Boundary search depth limit" : {
-    "value" : 8000,
+    "value" : 4000,
     "lowerBound" : 1,
     "upperBound" : 15000
   },

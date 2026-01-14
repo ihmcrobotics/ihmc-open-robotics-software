@@ -58,14 +58,13 @@ public class RDXRapidRegionsUI implements RenderableProvider
    private ImGuiPlot planarRegionCustomizationDurationPlot;
 
    private RDXPanel imguiPanel;
-   private RDXBytedecoImagePanel blurredDepthPanel;
-   private RDXBytedecoImagePanel filteredDepthPanel;
-   private RDXBytedecoImagePanel nxImagePanel;
-   private RDXBytedecoImagePanel nyImagePanel;
-   private RDXBytedecoImagePanel nzImagePanel;
-   private RDXBytedecoImagePanel gxImagePanel;
-   private RDXBytedecoImagePanel gyImagePanel;
-   private RDXBytedecoImagePanel gzImagePanel;
+   private RDXMatImagePanel depthPanel;
+   private RDXMatImagePanel nxImagePanel;
+   private RDXMatImagePanel nyImagePanel;
+   private RDXMatImagePanel nzImagePanel;
+   private RDXMatImagePanel gxImagePanel;
+   private RDXMatImagePanel gyImagePanel;
+   private RDXMatImagePanel gzImagePanel;
    private RDXMatImagePanel debugExtractionPanel;
 
    private int patchImageWidth = 0;
@@ -81,11 +80,11 @@ public class RDXRapidRegionsUI implements RenderableProvider
 
       patchImageWidth = rapidPlanarRegionsExtractor.getPatchImageWidth();
       patchImageHeight = rapidPlanarRegionsExtractor.getPatchImageHeight();
-      imageWidth = rapidPlanarRegionsExtractor.getImageWidth();
-      imageHeight = rapidPlanarRegionsExtractor.getImageHeight();
+      imageWidth = rapidPlanarRegionsExtractor.getCameraIntrinsics().getWidth();
+      imageHeight = rapidPlanarRegionsExtractor.getCameraIntrinsics().getHeight();
 
-      gpuRegionParametersTuner = new RDXStoredPropertySetTuner(rapidPlanarRegionsExtractor.getParameters().getTitle());
-      gpuRegionParametersTuner.create(rapidPlanarRegionsExtractor.getParameters());
+      gpuRegionParametersTuner = new RDXStoredPropertySetTuner(rapidPlanarRegionsExtractor.getRapidRegionsExtractorParameters().getTitle());
+      gpuRegionParametersTuner.create(rapidPlanarRegionsExtractor.getRapidRegionsExtractorParameters());
 
       polygonizerParametersTuner = new RDXStoredPropertySetTuner(rapidPlanarRegionsCustomizer.getPolygonizerParameters().getTitle());
       polygonizerParametersTuner.create(rapidPlanarRegionsCustomizer.getPolygonizerParameters(), true);
@@ -94,19 +93,16 @@ public class RDXRapidRegionsUI implements RenderableProvider
       concaveHullParametersTuner.create(rapidPlanarRegionsCustomizer.getConcaveHullFactoryParameters(), true);
 
       imguiPanel = new RDXPanel("GPU Planar Region Extraction", this::renderImGuiWidgets);
-      blurredDepthPanel = new RDXBytedecoImagePanel("Blurred Depth", imageWidth, imageHeight, RDXImagePanel.FLIP_Y);
-      filteredDepthPanel = new RDXBytedecoImagePanel("Filtered Depth", imageWidth, imageHeight, RDXImagePanel.FLIP_Y);
-
-      nxImagePanel = new RDXBytedecoImagePanel("Nx Image", patchImageWidth, patchImageHeight, RDXImagePanel.FLIP_Y);
-      nyImagePanel = new RDXBytedecoImagePanel("Ny Image", patchImageWidth, patchImageHeight, RDXImagePanel.FLIP_Y);
-      nzImagePanel = new RDXBytedecoImagePanel("Nz Image", patchImageWidth, patchImageHeight, RDXImagePanel.FLIP_Y);
-      gxImagePanel = new RDXBytedecoImagePanel("Gx Image", patchImageWidth, patchImageHeight, RDXImagePanel.FLIP_Y);
-      gyImagePanel = new RDXBytedecoImagePanel("Gy Image", patchImageWidth, patchImageHeight, RDXImagePanel.FLIP_Y);
-      gzImagePanel = new RDXBytedecoImagePanel("Gz Image", patchImageWidth, patchImageHeight, RDXImagePanel.FLIP_Y);
+      depthPanel = new RDXMatImagePanel("Depth", imageWidth, imageHeight, RDXImagePanel.FLIP_Y);
+      nxImagePanel = new RDXMatImagePanel("Nx Image", patchImageWidth, patchImageHeight, RDXImagePanel.FLIP_Y);
+      nyImagePanel = new RDXMatImagePanel("Ny Image", patchImageWidth, patchImageHeight, RDXImagePanel.FLIP_Y);
+      nzImagePanel = new RDXMatImagePanel("Nz Image", patchImageWidth, patchImageHeight, RDXImagePanel.FLIP_Y);
+      gxImagePanel = new RDXMatImagePanel("Gx Image", patchImageWidth, patchImageHeight, RDXImagePanel.FLIP_Y);
+      gyImagePanel = new RDXMatImagePanel("Gy Image", patchImageWidth, patchImageHeight, RDXImagePanel.FLIP_Y);
+      gzImagePanel = new RDXMatImagePanel("Gz Image", patchImageWidth, patchImageHeight, RDXImagePanel.FLIP_Y);
       debugExtractionPanel = new RDXMatImagePanel("Planar Region Extraction Image", patchImageWidth, patchImageHeight, RDXImagePanel.FLIP_Y);
 
-      imguiPanel.addChild(blurredDepthPanel.getImagePanel());
-      imguiPanel.addChild(filteredDepthPanel.getImagePanel());
+      imguiPanel.addChild(depthPanel.getImagePanel());
       imguiPanel.addChild(nxImagePanel.getImagePanel());
       imguiPanel.addChild(nyImagePanel.getImagePanel());
       imguiPanel.addChild(nzImagePanel.getImagePanel());
@@ -130,12 +126,14 @@ public class RDXRapidRegionsUI implements RenderableProvider
 
    public void render()
    {
-      nxImagePanel.drawDepthImage(rapidPlanarRegionsExtractor.getCurrentFeatureGrid().getNxImage().getBytedecoOpenCVMat());
-      nyImagePanel.drawDepthImage(rapidPlanarRegionsExtractor.getCurrentFeatureGrid().getNyImage().getBytedecoOpenCVMat());
-      nzImagePanel.drawDepthImage(rapidPlanarRegionsExtractor.getCurrentFeatureGrid().getNzImage().getBytedecoOpenCVMat());
-      gxImagePanel.drawDepthImage(rapidPlanarRegionsExtractor.getCurrentFeatureGrid().getCxImage().getBytedecoOpenCVMat());
-      gyImagePanel.drawDepthImage(rapidPlanarRegionsExtractor.getCurrentFeatureGrid().getCyImage().getBytedecoOpenCVMat());
-      gzImagePanel.drawDepthImage(rapidPlanarRegionsExtractor.getCurrentFeatureGrid().getCzImage().getBytedecoOpenCVMat());
+      // TODO
+
+//      nxImagePanel.drawDepthImage(rapidPlanarRegionsExtractor.getCurrentFeatureGrid().getNxImage().getBytedecoOpenCVMat());
+//      nyImagePanel.drawDepthImage(rapidPlanarRegionsExtractor.getCurrentFeatureGrid().getNyImage().getBytedecoOpenCVMat());
+//      nzImagePanel.drawDepthImage(rapidPlanarRegionsExtractor.getCurrentFeatureGrid().getNzImage().getBytedecoOpenCVMat());
+//      gxImagePanel.drawDepthImage(rapidPlanarRegionsExtractor.getCurrentFeatureGrid().getCxImage().getBytedecoOpenCVMat());
+//      gyImagePanel.drawDepthImage(rapidPlanarRegionsExtractor.getCurrentFeatureGrid().getCyImage().getBytedecoOpenCVMat());
+//      gzImagePanel.drawDepthImage(rapidPlanarRegionsExtractor.getCurrentFeatureGrid().getCzImage().getBytedecoOpenCVMat());
 
       debugExtractionPanel.displayByte(rapidRegionsDebutOutputGenerator.getDebugImage());
    }
@@ -158,8 +156,8 @@ public class RDXRapidRegionsUI implements RenderableProvider
 
    public void renderImGuiWidgets()
    {
-      int imageWidth = rapidPlanarRegionsExtractor.getImageWidth();
-      int imageHeight = rapidPlanarRegionsExtractor.getImageHeight();
+      int imageWidth = rapidPlanarRegionsExtractor.getCameraIntrinsics().getWidth();
+      int imageHeight = rapidPlanarRegionsExtractor.getCameraIntrinsics().getHeight();
 
       ImGui.text("Input image dimensions: " + imageWidth + " x " + imageHeight);
       ImGui.checkbox(labels.get("Enabled"), enabled);
@@ -176,8 +174,8 @@ public class RDXRapidRegionsUI implements RenderableProvider
          planarRegionCustomizationDurationPlot.render(rapidPlanarRegionsCustomizer.getStopWatch().totalElapsed());
 
          numberOfPlanarRegionsPlot.render((float) rapidPlanarRegionsExtractor.getRapidPlanarRegions().size());
-         regionMaxSearchDepthPlot.render((float) rapidPlanarRegionsExtractor.getRegionMaxSearchDepth());
-         boundaryMaxSearchDepthPlot.render((float) rapidPlanarRegionsExtractor.getBoundaryMaxSearchDepth());
+         regionMaxSearchDepthPlot.render((float) rapidPlanarRegionsExtractor.getRapidRegionsExtractorParameters().getInternalSearchDepthLimit());
+         boundaryMaxSearchDepthPlot.render((float) rapidPlanarRegionsExtractor.getRapidRegionsExtractorParameters().getBoundarySearchDepthLimit());
       }
 
       boolean anyParameterChanged = gpuRegionParametersTuner.renderImGuiWidgets();

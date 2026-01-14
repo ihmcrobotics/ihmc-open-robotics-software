@@ -56,7 +56,7 @@ public class RapidPatchesDebugOutputGenerator
       }
    }
 
-   public void drawRegionRing(RapidRegionRing regionRing, int patchHeight, int patchWidth)
+   public void drawRegionRing(RapidRegionRing regionRing, int patchSize)
    {
       if (!enabled)
          return;
@@ -68,7 +68,7 @@ public class RapidPatchesDebugOutputGenerator
          int r = (regionRing.getIndex() + 1) * 130 % 255;
          int g = (regionRing.getIndex() + 1) * 227 % 255;
          int b = (regionRing.getIndex() + 1) * 332 % 255;
-         BytePointer pixel = debugImage.ptr(y * patchHeight, x * patchWidth);
+         BytePointer pixel = debugImage.ptr(y * patchSize, x * patchSize);
          pixel.put(0, (byte) r);
          pixel.put(1, (byte) g);
          pixel.put(2, (byte) b);
@@ -230,7 +230,7 @@ public class RapidPatchesDebugOutputGenerator
       debugImage.put(new Scalar(0, 0, 0, 0));
    }
 
-   public void update(Mat inputDepthImage, PatchFeatureGrid patchFeatureGrid, BytedecoImage patchGraph, FloatBuffer floatBuffer, RigidBodyTransform transform)
+   public void update(Mat inputDepthImage, FloatBuffer floatBuffer, RigidBodyTransform transform)
    {
       if (!enabled)
          return;

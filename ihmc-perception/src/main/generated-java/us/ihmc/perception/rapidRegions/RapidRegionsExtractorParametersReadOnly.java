@@ -15,11 +15,6 @@ public interface RapidRegionsExtractorParametersReadOnly extends StoredPropertyS
       return get(normalPackRange);
    }
 
-   default int getCentroidPackRange()
-   {
-      return get(centroidPackRange);
-   }
-
    default int getMergeRange()
    {
       return get(mergeRange);
@@ -50,11 +45,6 @@ public interface RapidRegionsExtractorParametersReadOnly extends StoredPropertyS
       return get(patchSize);
    }
 
-   default int getDeadPixelFilterPatchSize()
-   {
-      return get(deadPixelFilterPatchSize);
-   }
-
    default double getFocalLengthXPixels()
    {
       return get(focalLengthXPixels);
@@ -73,11 +63,6 @@ public interface RapidRegionsExtractorParametersReadOnly extends StoredPropertyS
    default double getPrincipalOffsetYPixels()
    {
       return get(principalOffsetYPixels);
-   }
-
-   default boolean getUseFilteredImage()
-   {
-      return get(useFilteredImage);
    }
 
    default boolean getUseSVDNormals()

@@ -1,38 +1,69 @@
 package us.ihmc.rdx.perception;
 
-import org.bytedeco.opencl._cl_program;
-import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
-import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.MutableBytePointer;
-import us.ihmc.sensors.realsense.RealSenseDevice;
-import us.ihmc.sensors.realsense.RealSenseDeviceManager;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableReferenceFrame;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
-import us.ihmc.robotics.geometry.FramePlanarRegionsList;
+import us.ihmc.robotDataLogger.ZEDSDKAnnounce;
+import us.ihmc.robotDataLogger.logger.ZEDSVOLoggerManager;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2Publisher;
+import us.ihmc.sensors.zed.ZEDImageSensor;
+import us.ihmc.sensors.zed.ZEDModelData;
+
+import static us.ihmc.zed.global.zed.*;
 
 public class RDXRapidPlanarRegionsHardwareDemo
 {
+   private static final int ZED_FPS = 30;
+
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private RDXInteractableReferenceFrame robotInteractableReferenceFrame;
-   private RealSenseDeviceManager realsenseDeviceManager;
-   private RealSenseDevice l515;
    private Mat depthU16C1Image;
-   private BytedecoImage bytedecoDepthImage;
-   private RDXPose3DGizmo l515PoseGizmo = new RDXPose3DGizmo();
+   private RDXPose3DGizmo zedPoseGizmo = new RDXPose3DGizmo();
    private RDXRapidRegionsUI rapidRegionsUI = new RDXRapidRegionsUI();
    private RapidPlanarRegionsExtractor rapidRegionsExtractor;
-   private OpenCLManager openCLManager;
-   private _cl_program openCLProgram;
+   private final ZEDImageSensor zedImageSensor;
+   private final ROS2Node announceNode = new ROS2NodeBuilder().build("zed_announce_node");
+   private final RepeatingTaskThread zedSDKAnnounceThread;
 
    public RDXRapidPlanarRegionsHardwareDemo()
    {
+      zedImageSensor = new ZEDImageSensor(1, 56758881, ZEDModelData.ZED_X_MINI, SL_INPUT_TYPE_GMSL, SL_DEPTH_MODE_ULTRA, SL_RESOLUTION_HD1200, ZED_FPS);
+
+      ROS2Publisher<ZEDSDKAnnounce> publisher = announceNode.createPublisher(ZEDSVOLoggerManager.ZED_SDK_ANNOUNCE_TOPIC);
+      zedSDKAnnounceThread = new RepeatingTaskThread("ZEDSDKAnnounceThread", () ->
+      {
+         // Pack controller timestamp only if we recieved robot configuation data in the past 1/50th of a second
+         // We want to align the ZED clock with the controller clock
+         // Doing this association on board the robot is the most accurate
+         // This avoids delays and significant time stretching issues we experienced
+         if (zedImageSensor.isSensorRunning())
+         {
+            ZEDSDKAnnounce message = new ZEDSDKAnnounce();
+            message.setSensorName("AlexExperimentalZEDXMini");
+            message.setAddress("10.42.0.1");
+            message.setPort((short) zedImageSensor.getStreamingPort());
+            message.setFps(zedImageSensor.getFps());
+            message.setBitrate(zedImageSensor.getStreamingBitrate());
+            message.setSensorTimestamp(zedImageSensor.getLastGrabTimestamp());
+//            if (syncedRobot.getDataReceptionTimerSnapshot().isRunning(0.02))
+//               message.setControllerTimestamp(syncedRobot.getLatestRobotConfigurationData().getMonotonicTime());
+//            else
+//               message.setControllerTimestamp(0);
+            publisher.publish(message);
+         }
+
+      });
+      zedSDKAnnounceThread.setFrequencyLimit(5.0);
+      zedSDKAnnounceThread.startRepeating();
+
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
          @Override
@@ -45,81 +76,19 @@ public class RDXRapidPlanarRegionsHardwareDemo
             robotInteractableReferenceFrame.getTransformToParent().getTranslation().add(2.2, 0.0, 1.0);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(robotInteractableReferenceFrame::process3DViewInput);
             baseUI.getPrimaryScene().addRenderableProvider(robotInteractableReferenceFrame::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
-            l515PoseGizmo = new RDXPose3DGizmo(robotInteractableReferenceFrame.getRepresentativeReferenceFrame());
-            l515PoseGizmo.create(baseUI.getPrimary3DPanel());
-            l515PoseGizmo.setResizeAutomatically(false);
-            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(l515PoseGizmo::calculate3DViewPick);
-            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(l515PoseGizmo::process3DViewInput);
-            baseUI.getPrimaryScene().addRenderableProvider(l515PoseGizmo, RDXSceneLevel.VIRTUAL);
-            l515PoseGizmo.getTransformToParent().appendPitchRotation(Math.toRadians(60.0));
-
-            realsenseDeviceManager = new RealSenseDeviceManager();
-            //                  l515 = realSenseHardwareManager.createFullFeaturedL515("F1120418");
-            l515 = realsenseDeviceManager.createFullFeaturedL515();
-            l515.initialize();
+            zedPoseGizmo = new RDXPose3DGizmo(robotInteractableReferenceFrame.getRepresentativeReferenceFrame());
+            zedPoseGizmo.create(baseUI.getPrimary3DPanel());
+            zedPoseGizmo.setResizeAutomatically(false);
+            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(zedPoseGizmo::calculate3DViewPick);
+            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(zedPoseGizmo::process3DViewInput);
+            baseUI.getPrimaryScene().addRenderableProvider(zedPoseGizmo, RDXSceneLevel.VIRTUAL);
+            zedPoseGizmo.getTransformToParent().appendPitchRotation(Math.toRadians(10.0));
          }
 
          @Override
          public void render()
          {
-            if (l515.readFrameData())
-            {
-               l515.updateDataBytePointers();
-
-               if (openCLManager == null)
-               {
-                  openCLManager = new OpenCLManager();
-                  openCLProgram = openCLManager.loadProgram("RapidRegionsExtractor");
-
-                  realsenseDeviceManager = new RealSenseDeviceManager();
-                  l515 = realsenseDeviceManager.createFullFeaturedL515();
-                  l515.initialize();
-               }
-
-               if (l515.readFrameData())
-               {
-                  l515.updateDataBytePointers();
-
-                  if (rapidRegionsUI == null)
-                  {
-                     MutableBytePointer depthFrameData = l515.getDepthFrameData();
-                     depthU16C1Image = new Mat(l515.getDepthHeight(), l515.getDepthWidth(), opencv_core.CV_16UC1, depthFrameData);
-
-                     bytedecoDepthImage = new BytedecoImage(l515.getDepthWidth(), l515.getDepthHeight(), opencv_core.CV_16UC1);
-
-                     rapidRegionsExtractor = new RapidPlanarRegionsExtractor(openCLManager,
-                                                                             openCLProgram,
-                                                                             l515.getDepthWidth(),
-                                                                             l515.getDepthHeight(),
-                                                                             l515.getDepthIntrinsicParameters().fx(),
-                                                                             l515.getDepthIntrinsicParameters().fy(),
-                                                                             l515.getDepthIntrinsicParameters().ppx(),
-                                                                             l515.getDepthIntrinsicParameters().ppy());
-
-                     rapidRegionsUI.getEnabled().set(true);
-                     baseUI.getImGuiPanelManager().addPanel(rapidRegionsUI.getPanel());
-                     baseUI.getPrimaryScene().addRenderableProvider(rapidRegionsUI::getRenderables, RDXSceneLevel.VIRTUAL);
-
-                     baseUI.getLayoutManager().reloadLayout();
-                  }
-
-                  if (rapidRegionsUI.getEnabled().get())
-                  {
-                     depthU16C1Image.convertTo(bytedecoDepthImage.getBytedecoOpenCVMat(), opencv_core.CV_16UC1, 1, 0);
-
-                     // Get the planar regions from the planar region extractor
-                     FramePlanarRegionsList frameRegions = new FramePlanarRegionsList();
-                     rapidRegionsExtractor.update(bytedecoDepthImage, l515PoseGizmo.getGizmoFrame(), frameRegions);
-                     rapidRegionsExtractor.setProcessing(false);
-
-                     if (rapidRegionsExtractor.isModified())
-                     {
-                        rapidRegionsUI.render3DGraphics(frameRegions);
-                        rapidRegionsExtractor.setProcessing(false);
-                     }
-                  }
-               }
-            }
+            // TODO update rapid regions and render
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
