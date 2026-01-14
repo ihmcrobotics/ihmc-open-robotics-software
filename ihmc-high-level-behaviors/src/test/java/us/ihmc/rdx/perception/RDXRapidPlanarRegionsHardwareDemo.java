@@ -1,11 +1,9 @@
 package us.ihmc.rdx.perception;
 
-import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.RawImage;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractionThread;
 import us.ihmc.sensors.ImageSensor;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
@@ -35,11 +33,9 @@ public class RDXRapidPlanarRegionsHardwareDemo
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private RDXInteractableReferenceFrame robotInteractableReferenceFrame;
-   private Mat depthU16C1Image;
    private RDXPose3DGizmo zedPoseGizmo = new RDXPose3DGizmo();
    private RDXRawImagePointCloudVisualizer pointCloudVisualizer;
-   private RDXRapidRegionsUI rapidRegionsUI = new RDXRapidRegionsUI();
-   private RapidPlanarRegionsExtractor rapidRegionsExtractor;
+   private RDXRapidRegionsUI rapidRegionsUI;
    private RDXROS2FramePlanarRegionsVisualizer planarRegionsVisualizer;
    private final ZEDImageSensor zedImageSensor;
    private final RepeatingTaskThread zedGrabThread = new RepeatingTaskThread("ZEDGrabThread", this::zedGrabThread);
@@ -121,8 +117,18 @@ public class RDXRapidPlanarRegionsHardwareDemo
          @Override
          public void render()
          {
+            if (rapidRegionsUI == null && rapidPlanarRegionsExtractionThread.getExtractor() != null)
+            {
+               rapidRegionsUI = new RDXRapidRegionsUI();
+               rapidRegionsUI.create(rapidPlanarRegionsExtractionThread.getExtractor());
+               baseUI.getImGuiPanelManager().addPanel(rapidRegionsUI.getPanel());
+               baseUI.getLayoutManager().reloadLayout();
+            }
+
             pointCloudVisualizer.update();
             planarRegionsVisualizer.update();
+            if (rapidRegionsUI != null)
+               rapidRegionsUI.render();
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
@@ -136,6 +142,7 @@ public class RDXRapidPlanarRegionsHardwareDemo
             zedImageSensor.close();
             pointCloudVisualizer.destroy();
             planarRegionsVisualizer.destroy();
+            rapidRegionsUI.destroy();
             colorImageQueue.forEach(RawImage::release);
             depthImageQueue.forEach(RawImage::release);
             announceNode.destroy();
