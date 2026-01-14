@@ -158,9 +158,9 @@ __global__ void packKernel(const unsigned short* __restrict__ depthImage,
 
     // Compute centroid over patch
     int minU = max(patchXIndex * patchSize, 0);
-    int maxU = min((patchXIndex + 1) * patchSize - 1, imageWidth);
+    int maxU = min((patchXIndex + 1) * patchSize - 1, imageWidth - 1);
     int minV = max(patchYIndex * patchSize, 0);
-    int maxV = min((patchYIndex + 1) * patchSize - 1, imageHeight);
+    int maxV = min((patchYIndex + 1) * patchSize - 1, imageHeight - 1);
 
     int uSize = maxU - minU + 1;
     int vSize = maxV - minV + 1;
