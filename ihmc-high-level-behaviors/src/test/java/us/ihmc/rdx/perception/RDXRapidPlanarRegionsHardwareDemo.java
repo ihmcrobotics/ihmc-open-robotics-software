@@ -3,12 +3,14 @@ package us.ihmc.rdx.perception;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.perception.RawImage;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableReferenceFrame;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
+import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudVisualizer;
 import us.ihmc.robotDataLogger.ZEDSDKAnnounce;
 import us.ihmc.robotDataLogger.logger.ZEDSVOLoggerManager;
 import us.ihmc.ros2.ROS2Node;
@@ -16,8 +18,10 @@ import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.sensors.zed.ZEDImageSensor;
 import us.ihmc.sensors.zed.ZEDModelData;
+import us.ihmc.zed.global.zed;
 
-import static us.ihmc.zed.global.zed.*;
+import java.util.LinkedList;
+import java.util.Queue;
 
 public class RDXRapidPlanarRegionsHardwareDemo
 {
@@ -27,15 +31,20 @@ public class RDXRapidPlanarRegionsHardwareDemo
    private RDXInteractableReferenceFrame robotInteractableReferenceFrame;
    private Mat depthU16C1Image;
    private RDXPose3DGizmo zedPoseGizmo = new RDXPose3DGizmo();
+   private RDXRawImagePointCloudVisualizer pointCloudVisualizer;
    private RDXRapidRegionsUI rapidRegionsUI = new RDXRapidRegionsUI();
    private RapidPlanarRegionsExtractor rapidRegionsExtractor;
    private final ZEDImageSensor zedImageSensor;
+   private final RepeatingTaskThread zedGrabThread = new RepeatingTaskThread("ZEDGrabThread", this::zedGrabThread);
+   private final Queue<RawImage> depthImageQueue = new LinkedList<>();
+   private final Queue<RawImage> colorImageQueue = new LinkedList<>();
    private final ROS2Node announceNode = new ROS2NodeBuilder().build("zed_announce_node");
    private final RepeatingTaskThread zedSDKAnnounceThread;
 
    public RDXRapidPlanarRegionsHardwareDemo()
    {
-      zedImageSensor = new ZEDImageSensor(1, 56758881, ZEDModelData.ZED_X_MINI, SL_INPUT_TYPE_GMSL, SL_DEPTH_MODE_ULTRA, SL_RESOLUTION_HD1200, ZED_FPS);
+      zedImageSensor = new ZEDImageSensor(0, ZEDModelData.ZED_2, zed.SL_INPUT_TYPE_USB, zed.SL_DEPTH_MODE_NEURAL);
+      zedImageSensor.run(true);
 
       ROS2Publisher<ZEDSDKAnnounce> publisher = announceNode.createPublisher(ZEDSVOLoggerManager.ZED_SDK_ANNOUNCE_TOPIC);
       zedSDKAnnounceThread = new RepeatingTaskThread("ZEDSDKAnnounceThread", () ->
@@ -71,6 +80,11 @@ public class RDXRapidPlanarRegionsHardwareDemo
          {
             baseUI.create();
 
+            pointCloudVisualizer = new RDXRawImagePointCloudVisualizer("ZED Point Cloud");
+            baseUI.getPrimaryScene().addRenderableProvider(pointCloudVisualizer);
+            baseUI.getImGuiPanelManager().addPanel("Point Cloud", pointCloudVisualizer::renderImGuiWidgets);
+            zedGrabThread.startRepeating();
+
             robotInteractableReferenceFrame = new RDXInteractableReferenceFrame();
             robotInteractableReferenceFrame.create(ReferenceFrame.getWorldFrame(), 0.15, baseUI.getPrimary3DPanel());
             robotInteractableReferenceFrame.getTransformToParent().getTranslation().add(2.2, 0.0, 1.0);
@@ -88,6 +102,8 @@ public class RDXRapidPlanarRegionsHardwareDemo
          @Override
          public void render()
          {
+            pointCloudVisualizer.update();
+
             // TODO update rapid regions and render
 
             baseUI.renderBeforeOnScreenUI();
@@ -97,9 +113,42 @@ public class RDXRapidPlanarRegionsHardwareDemo
          @Override
          public void dispose()
          {
+            zedGrabThread.blockingKill();
+            zedImageSensor.close();
+            pointCloudVisualizer.destroy();
+            colorImageQueue.forEach(RawImage::release);
+            depthImageQueue.forEach(RawImage::release);
+
             baseUI.dispose();
          }
       });
+   }
+
+   private void zedGrabThread() throws InterruptedException
+   {
+      zedImageSensor.waitForGrab();
+
+      RawImage colorImage = zedImageSensor.getImage(ZEDImageSensor.LEFT_COLOR_IMAGE_KEY);
+      RawImage depthImage = zedImageSensor.getImage(ZEDImageSensor.DEPTH_IMAGE_KEY);
+
+      colorImageQueue.add(colorImage);
+      depthImageQueue.add(depthImage);
+
+      RawImage oldestColorImage = colorImageQueue.peek();
+      while (oldestColorImage != null)
+      {
+         pointCloudVisualizer.setColorImage(oldestColorImage);
+         colorImageQueue.remove().release();
+         oldestColorImage = colorImageQueue.peek();
+      }
+
+      RawImage oldestDepthImage = depthImageQueue.peek();
+      while (oldestDepthImage != null)
+      {
+         pointCloudVisualizer.setDepthImage(oldestDepthImage);
+         depthImageQueue.remove().release();
+         oldestDepthImage = depthImageQueue.peek();
+      }
    }
 
    public static void main(String[] args)
