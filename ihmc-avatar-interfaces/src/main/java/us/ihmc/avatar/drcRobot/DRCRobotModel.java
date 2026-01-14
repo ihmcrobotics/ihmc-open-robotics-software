@@ -1,19 +1,13 @@
 package us.ihmc.avatar.drcRobot;
 
-import com.jme3.math.Transform;
 import us.ihmc.avatar.AvatarSimulatedHandControlThread;
 import us.ihmc.avatar.arm.PresetArmConfiguration;
-import us.ihmc.avatar.drcRobot.shapeContactSettings.DRCRobotModelShapeCollisionSettings;
-import us.ihmc.avatar.drcRobot.shapeContactSettings.DefaultShapeCollisionSettings;
 import us.ihmc.avatar.factory.DefaultSimulatedHandOutputWriter;
 import us.ihmc.avatar.factory.DefaultSimulatedHandSensorReader;
 import us.ihmc.avatar.factory.SimulatedHandOutputWriter;
 import us.ihmc.avatar.factory.SimulatedHandSensorReader;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.kinematicsSimulation.SimulatedHandKinematicController;
-import us.ihmc.avatar.ros.RobotROSClockCalculator;
-import us.ihmc.avatar.ros.WallTimeBasedROSClockCalculator;
-import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
@@ -37,10 +31,8 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.simulation.collision.Collidable;
 import us.ihmc.scs2.simulation.collision.CollidableHelper;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJointHolder;
-import us.ihmc.wholeBodyController.DRCOutputProcessor;
 import us.ihmc.wholeBodyController.SimulatedFullHumanoidRobotModelFactory;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticAnalysisController;
@@ -114,32 +106,9 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
       return 10.0 * getControllerDT();
    }
 
-   public default RobotROSClockCalculator getROSClockCalculator()
-   {
-      return new WallTimeBasedROSClockCalculator();
-   }
-
    public default AvatarSimulatedHandControlThread createSimulatedHandController(RealtimeROS2Node realtimeROS2Node, boolean kinematicsSimulation)
    {
       return null;
-   }
-
-   @Deprecated
-   public default SimulatedHandKinematicController createSimulatedHandKinematicController(FullHumanoidRobotModel fullHumanoidRobotModel,
-                                                                                          RealtimeROS2Node realtimeROS2Node,
-                                                                                          DoubleProvider controllerTime)
-   {
-      return null;
-   }
-
-   public default SimulatedHandSensorReader createSimulatedHandSensorReader(OneDegreeOfFreedomJointHolder robot, List<String> fingerJointNames)
-   {
-      return new DefaultSimulatedHandSensorReader(robot, fingerJointNames);
-   }
-
-   public default SimulatedHandOutputWriter createSimulatedHandOutputWriter(OneDegreeOfFreedomJointHolder robot)
-   {
-      return new DefaultSimulatedHandOutputWriter(robot);
    }
 
    public abstract DataServerSettings getLogSettings();
@@ -147,8 +116,6 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    public abstract LogModelProvider getLogModelProvider();
 
    public abstract String getSimpleRobotName();
-
-   public abstract CollisionBoxProvider getCollisionBoxProvider();
 
    public default LocomotionParameters getLocomotionParameters()
    {
@@ -215,17 +182,6 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
     * @return the robot collision model used to create the robot's {@link Collidable}s.
     */
    default RobotCollisionModel getSimulationRobotCollisionModel(CollidableHelper helper, String robotCollisionMask, String... environmentCollisionMasks)
-   {
-      return null;
-   }
-
-   /**
-    * Gets the parameters necessary to run an automated diagnostic on the robot.
-    * 
-    * @return the parameters required for running the diagnostic controller.
-    * @see AutomatedDiagnosticAnalysisController
-    */
-   default DiagnosticParameters getDiagnoticParameters()
    {
       return null;
    }

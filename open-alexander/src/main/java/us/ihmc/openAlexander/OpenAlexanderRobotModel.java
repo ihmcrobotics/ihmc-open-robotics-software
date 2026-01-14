@@ -390,14 +390,6 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
    }
 
    @Override
-   public SimulatedHandKinematicController createSimulatedHandKinematicController(FullHumanoidRobotModel fullHumanoidRobotModel,
-                                                                                  RealtimeROS2Node realtimeROS2Node,
-                                                                                  DoubleProvider controllerTime)
-   {
-      return null;
-   }
-
-   @Override
    public DiagnosticParameters getDiagnoticParameters()
    {
       return diagnosticParameters;

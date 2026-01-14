@@ -1,7 +1,6 @@
 package us.ihmc.behaviors.tools;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
-import org.apache.commons.lang3.tuple.Pair;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import std_msgs.msg.dds.Bool;
 import std_msgs.msg.dds.Empty;
@@ -9,8 +8,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
-import us.ihmc.avatar.sensors.realsense.DelayFixedPlanarRegionsSubscription;
-import us.ihmc.avatar.sensors.realsense.MapsenseTools;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
@@ -112,11 +109,6 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
                                      swingPlannerParameters,
                                      walkingControllerParameters,
                                      createFootPolygons());
-   }
-
-   public DelayFixedPlanarRegionsSubscription subscribeToPlanarRegionsViaCallback(String topic, Consumer<Pair<Long, PlanarRegionsList>> callback)
-   {
-      return MapsenseTools.subscribeToPlanarRegionsWithDelayCompensation(ros2Helper.getROS2Node(), robotModel, topic, callback);
    }
 
    @Override

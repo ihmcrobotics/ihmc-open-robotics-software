@@ -1,6 +1,5 @@
 package us.ihmc.openAlexander.parameters.model;
 
-import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FrameBox3D;
 import us.ihmc.euclid.referenceFrame.FrameCapsule3D;
@@ -25,8 +24,6 @@ import java.util.List;
 
 /**
  * Collision model for Alexander used for simulating shape-to-shape collisions.
- * {@link DRCSCSInitialSetup#setUseExperimentalPhysicsEngine(boolean)}.
- * </p>
  *
  * @author Sylvain Bertrand
  */

@@ -114,7 +114,6 @@ public class HumanoidKinematicsSimulation
    private final RobotConfigurationDataPublisher robotConfigurationDataPublisher;
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-   private final SimulatedHandKinematicController simulatedHandKinematicController;
    private final RobotMotionStatusHolder robotMotionStatusHolder = new RobotMotionStatusHolder(RobotMotionStatus.UNKNOWN);
    private double yoVariableServerTime = 0.0;
    private final Stopwatch monotonicTimer = new Stopwatch();
@@ -290,8 +289,6 @@ public class HumanoidKinematicsSimulation
       controllerNetworkSubscriber.addMessageCollectors(ControllerAPIDefinition.createDefaultMessageIDExtractor(), 3);
       controllerNetworkSubscriber.addMessageValidator(ControllerAPIDefinition.createDefaultMessageValidation());
 
-      simulatedHandKinematicController = robotModel.createSimulatedHandKinematicController(fullRobotModel, realtimeROS2Node, yoTime);
-      
       robotConfigurationDataPublisher = createRobotConfigurationDataPublisher(robotModel.getSimpleRobotName());
 
       realtimeROS2Node.spin();
@@ -466,9 +463,6 @@ public class HumanoidKinematicsSimulation
                                  KinematicsSimulationContactStateHolder.holdAtCurrent(controllerToolbox.getFootContactStates().get(robotSide)));
       }
 
-      if (simulatedHandKinematicController != null)
-         simulatedHandKinematicController.initialize();
-
       monotonicTimer.start();
    }
 
@@ -538,17 +532,6 @@ public class HumanoidKinematicsSimulation
       integrator.setIntegrationDT(kinematicsSimulationParameters.getDt());
       integrator.doubleIntegrateFromAcceleration(Arrays.asList(controllerToolbox.getControlledJoints()));
 
-      // spin lidar
-      JointBasics hokuyoJoint = fullRobotModel.getLidarJoint("head_hokuyo_sensor");
-      if (hokuyoJoint instanceof RevoluteJoint)
-      {
-         RevoluteJoint revoluteHokuyoJoint = (RevoluteJoint) hokuyoJoint;
-         revoluteHokuyoJoint.setQ(revoluteHokuyoJoint.getQ() + LIDAR_SPINDLE_SPEED * kinematicsSimulationParameters.getUpdatePeriod());
-      }
-
-      if (simulatedHandKinematicController != null)
-         simulatedHandKinematicController.doControl();
-
       yoVariableServerTime += Conversions.millisecondsToSeconds(1);
       if (kinematicsSimulationParameters.getLogToFile())
       {
@@ -602,8 +585,6 @@ public class HumanoidKinematicsSimulation
       LogTools.info("Shutting down...");
       if (intraprocessYoVariableLogger != null)
          intraprocessYoVariableLogger.destroy();
-      if (simulatedHandKinematicController != null)
-         simulatedHandKinematicController.cleanup();
       controlThread.destroy();
       heartbeat.destroy();
       ros2Node.destroy();
