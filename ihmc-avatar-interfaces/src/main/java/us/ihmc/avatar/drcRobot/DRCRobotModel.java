@@ -19,6 +19,7 @@ import us.ihmc.footstepPlanning.LocomotionParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.handsros2.HandModel;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
@@ -97,13 +98,40 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
       return handModels;
    }
 
+   default double getSlowestControllerDT()
+   {
+      double dt = 0.0;
+      for (HighLevelControllerName name : HighLevelControllerName.values)
+         dt = Math.max(getHighLevelControllerParameters().getControlDT(name), dt);
+      return dt;
+   }
+
+   default double getFastestControllerDT()
+   {
+      double dt = Double.POSITIVE_INFINITY;
+      for (HighLevelControllerName name : HighLevelControllerName.values)
+         dt = Math.min(getHighLevelControllerParameters().getControlDT(name), dt);
+      return dt;
+   }
+
+   default double getSimulatedHandControlDT()
+   {
+      return getFastestControllerDT();
+   }
+
+   default double getFeedbackControllerDT()
+   {
+      return 0.0;
+   }
+
+
    public abstract double getSimulateDT();
 
    public abstract double getEstimatorDT();
 
    default double getStepGeneratorDT()
    {
-      return 10.0 * getControllerDT();
+      return 10.0 * getFastestControllerDT();
    }
 
    public default AvatarSimulatedHandControlThread createSimulatedHandController(RealtimeROS2Node realtimeROS2Node, boolean kinematicsSimulation)

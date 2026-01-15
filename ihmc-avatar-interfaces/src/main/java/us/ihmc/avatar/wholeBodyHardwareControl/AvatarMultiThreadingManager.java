@@ -152,7 +152,7 @@ public class AvatarMultiThreadingManager
          tasks.add(setupControllerTaskAndThread(robotModel, controllerThread, masterFullRobotModel, yoVariableServer));
 
       if (stepGeneratorThread != null)
-         tasks.add(setupStepGeneratorTaskAndThread(robotModel, stepGeneratorThread, masterFullRobotModel, yoVariableServer));
+         tasks.add(setupStepGeneratorTaskAndThread(robotModel, stepGeneratorThread, yoVariableServer));
 
       if (ikStreamingThread != null)
          tasks.add(setupIKStreamingTaskAndThread(ikStreamingThread, yoVariableServer));
@@ -201,11 +201,7 @@ public class AvatarMultiThreadingManager
                                                                  YoVariableServer yoVariableServer)
    {
       // Set up Controller Task
-      int controllerDivisor = (int) Math.round(robotModel.getControllerDT() / masterThreadDt);
-      if (!Precision.equals(robotModel.getControllerDT() / masterThreadDt, controllerDivisor))
-         throw new RuntimeException("Controller DT must be multiple of master thread DT.");
-
-      controllerTask = new ControllerTask("Controller", controllerThread, controllerDivisor, masterThreadDt, masterFullRobotModel);
+      controllerTask = new ControllerTask("Controller", controllerThread, masterThreadDt, masterFullRobotModel);
 
       if (yoVariableServer != null)
          controllerTask.addCallbackPostTask(() -> yoVariableServer.update(controllerThread.getHumanoidRobotContextData().getTimestamp(),
@@ -243,7 +239,6 @@ public class AvatarMultiThreadingManager
 
    private HumanoidRobotControlTask setupStepGeneratorTaskAndThread(DRCRobotModel robotModel,
                                                                     AvatarStepGeneratorThread stepGeneratorThread,
-                                                                    FullHumanoidRobotModel masterFullRobotModel,
                                                                     YoVariableServer yoVariableServer)
    {
       // Set up Step Generator Task
@@ -251,7 +246,7 @@ public class AvatarMultiThreadingManager
       if (!Precision.equals(robotModel.getStepGeneratorDT() / masterThreadDt, stepGeneratorDivisor))
          throw new RuntimeException("Step generator DT must be multiple of master thread DT.");
 
-      stepGeneratorTask = new StepGeneratorTask("StepGenerator", stepGeneratorThread, stepGeneratorDivisor, masterThreadDt, masterFullRobotModel);
+      stepGeneratorTask = new StepGeneratorTask("StepGenerator", stepGeneratorThread, stepGeneratorDivisor, masterThreadDt);
 
       if (yoVariableServer != null)
          stepGeneratorTask.addCallbackPostTask(() -> yoVariableServer.update(stepGeneratorThread.getHumanoidRobotContextData().getTimestamp(),

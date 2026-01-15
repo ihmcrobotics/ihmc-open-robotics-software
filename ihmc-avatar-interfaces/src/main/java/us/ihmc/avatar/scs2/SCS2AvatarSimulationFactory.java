@@ -229,7 +229,7 @@ public class SCS2AvatarSimulationFactory
    public SCS2AvatarSimulation createAvatarSimulation()
    {
       simulationDataRecordTickPeriod.setDefaultValue((int) Math.max(1.0,
-                                                                    robotModel.get().getControllerDT()
+                                                                    robotModel.get().getFastestControllerDT()
                                                                     / simulationDT.get()));
 
       FactoryTools.checkAllFactoryFieldsAreSet(this);
@@ -616,7 +616,6 @@ public class SCS2AvatarSimulationFactory
 
       // Create the tasks that will be run on their own threads.
       int estimatorDivisor = (int) Math.round(robotModel.getEstimatorDT() / simulationDT.get());
-      int controllerDivisor = (int) Math.round(robotModel.getControllerDT() / simulationDT.get());
       int stepGeneratorDivisor = (int) Math.round(robotModel.getStepGeneratorDT() / simulationDT.get());
       int handControlDivisor = (int) Math.round(robotModel.getSimulatedHandControlDT() / simulationDT.get());
       HumanoidRobotControlTask estimatorTask = new EstimatorTask(estimatorThread,
@@ -625,14 +624,12 @@ public class SCS2AvatarSimulationFactory
                                                                  masterFullRobotModel);
       controllerTask = new ControllerTask("Controller",
                                           controllerThread,
-                                          controllerDivisor,
                                           simulationDT.get(),
                                           masterFullRobotModel);
       HumanoidRobotControlTask stepGeneratorTask = new StepGeneratorTask("StepGenerator",
                                                                          stepGeneratorThread,
                                                                          stepGeneratorDivisor,
-                                                                         simulationDT.get(),
-                                                                         masterFullRobotModel);
+                                                                         simulationDT.get());
       HumanoidRobotControlTask ikStreamingRTTask;
       if (createIKStreamingRealTimeController.get())
          ikStreamingRTTask = ikStreamingRealTimePluginFactory.createRTTask(simulationDT.get());

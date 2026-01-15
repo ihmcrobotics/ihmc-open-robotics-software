@@ -17,28 +17,28 @@ public class ControllerTask extends HumanoidRobotControlTask
 
    private final AvatarControllerThreadInterface controllerThread;
 
-   private final long divisor;
    private final ThreadTimer timer;
    private final YoLong ticksBehindScheduled;
 
    protected final List<Runnable> postControllerCallbacks = new ArrayList<>();
    protected final List<Runnable> schedulerThreadRunnables = new ArrayList<>();
 
+   private final double schedulerDt;
+
    public ControllerTask(String prefix,
                          AvatarControllerThreadInterface controllerThread,
-                         long divisor,
                          double schedulerDt,
                          FullHumanoidRobotModel masterFullRobotModel)
    {
-      super(divisor);
-      this.divisor = divisor;
+      super((int) Math.round(controllerThread.getCurrentDT() / schedulerDt));
       this.controllerThread = controllerThread;
+      this.schedulerDt = schedulerDt;
 
       controllerResolver = new CrossRobotCommandResolver(controllerThread.getFullRobotModel());
       masterResolver = new CrossRobotCommandResolver(masterFullRobotModel);
 
       //      String prefix = "Controller";
-      timer = new ThreadTimer(prefix, schedulerDt * divisor, controllerThread.getYoVariableRegistry());
+      timer = new ThreadTimer(prefix, schedulerDt * (int) Math.round(controllerThread.getCurrentDT() / schedulerDt), controllerThread.getYoVariableRegistry());
       ticksBehindScheduled = new YoLong(prefix + "TicksBehindScheduled", controllerThread.getYoVariableRegistry());
    }
 
@@ -56,6 +56,8 @@ public class ControllerTask extends HumanoidRobotControlTask
    {
       timer.start();
       long schedulerTick = controllerThread.getHumanoidRobotContextData().getSchedulerTick();
+      int divisor = (int) Math.round(controllerThread.getCurrentDT() / schedulerDt);
+      setDivisor(divisor);
       ticksBehindScheduled.set(schedulerTick - timer.getTickCount() * divisor);
       controllerThread.run();
       runAll(postControllerCallbacks);

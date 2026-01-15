@@ -91,7 +91,7 @@ public abstract class HumanoidControllerWarmup
    public HumanoidControllerWarmup(DRCRobotModel robotModel)
    {
       this.robotModel = robotModel;
-      controlDT = robotModel.getControllerDT();
+      controlDT = robotModel.getFastestControllerDT();
 
       setupController();
       controllerToolbox.initialize();
@@ -146,7 +146,7 @@ public abstract class HumanoidControllerWarmup
       // update viz and advance time
       fullRobotModel.updateFrames();
       referenceFrames.updateFrames();
-      yoTime.add(robotModel.getControllerDT());
+      yoTime.add(controlDT);
    }
 
    private final Quaternion newOrientation = new Quaternion();

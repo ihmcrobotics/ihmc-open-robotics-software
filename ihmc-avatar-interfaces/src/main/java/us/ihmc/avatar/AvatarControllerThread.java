@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextTools;
+import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidHighLevelControllerManager;
@@ -84,6 +85,8 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
 
    private final ROS2Publisher<ControllerCrashNotificationPacket> crashNotificationPublisher;
 
+   private HumanoidHighLevelControllerManager controllerManager;
+   private final HighLevelControllerParameters highLevelControllerParameters;
    private final HumanoidRobotContextData humanoidRobotContextData;
 
    private final ExecutionTimer controllerThreadTimer;
@@ -99,6 +102,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
                                  double gravity,
                                  boolean kinematicsSimulation)
    {
+      highLevelControllerParameters = robotModel.getHighLevelControllerParameters();
       controllerFullRobotModel = robotModel.createFullRobotModel();
       if (robotInitialSetup != null)
       {
@@ -167,6 +171,12 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       }
 
       ParameterLoaderHelper.loadParameters(this, robotModel, registry);
+   }
+
+   @Override
+   public double getCurrentDT()
+   {
+      return highLevelControllerParameters.getControlDT(controllerManager.getCurrentHighLevelControlState());
    }
 
    public static JointBasics[] createListOfJointsToIgnore(FullHumanoidRobotModel controllerFullRobotModel,
@@ -242,17 +252,17 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
          }
       }
 
-      HumanoidHighLevelControllerManager robotController = controllerFactory.getController(controllerModel,
-                                                                                           gravity,
-                                                                                           kinematicsSimulation,
-                                                                                           yoTime,
-                                                                                           sensorInformation,
-                                                                                           forceSensorDataHolderForController,
-                                                                                           centerOfMassDataHolderForController,
-                                                                                           centerOfPressureDataHolderForEstimator,
-                                                                                           lowLevelControllerOutput,
-                                                                                           jointsToIgnore);
-      scs2YoGraphicHolders.add(robotController::getSCS2YoGraphics);
+      controllerManager = controllerFactory.getController(controllerModel,
+                                                        gravity,
+                                                        kinematicsSimulation,
+                                                        yoTime,
+                                                        sensorInformation,
+                                                        forceSensorDataHolderForController,
+                                                        centerOfMassDataHolderForController,
+                                                        centerOfPressureDataHolderForEstimator,
+                                                        lowLevelControllerOutput,
+                                                        jointsToIgnore);
+      scs2YoGraphicHolders.add(controllerManager::getSCS2YoGraphics);
 
       ModularRobotController modularRobotController = new ModularRobotController("DRCMomentumBasedController");
       modularRobotController.addRobotController(robotController);

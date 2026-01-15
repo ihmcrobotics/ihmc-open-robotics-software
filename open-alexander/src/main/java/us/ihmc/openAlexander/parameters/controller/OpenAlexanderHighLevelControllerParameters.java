@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import gnu.trove.map.TObjectDoubleMap;
+import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.openAlexander.AlexanderJointMap;
 import us.ihmc.openAlexander.AlexanderVersionInterface;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -15,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccele
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointVelocityIntegratorResetMode;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.openAlexander.OpenAlexanderRobotModel;
 import us.ihmc.robotics.partNames.*;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.outputData.JointDesiredBehavior;
@@ -32,6 +35,7 @@ public class OpenAlexanderHighLevelControllerParameters implements HighLevelCont
    protected final AlexanderJointMap jointMap;
    protected final RobotTarget target;
    private final AlexanderStandPrepSetPoints standPrepSetPoints;
+   private final TObjectDoubleHashMap<HighLevelControllerName> controlDTs = new TObjectDoubleHashMap<>();
 
    public OpenAlexanderHighLevelControllerParameters(AlexanderVersionInterface alexanderVersion, AlexanderJointMap jointMap, RobotTarget target)
    {
@@ -39,6 +43,27 @@ public class OpenAlexanderHighLevelControllerParameters implements HighLevelCont
       this.jointMap = jointMap;
       this.target = target;
       standPrepSetPoints = new AlexanderStandPrepSetPoints(jointMap);
+      controlDTs.put(HighLevelControllerName.WALKING, OpenAlexanderRobotModel.DEFAULT_CONTROL_DT);
+      controlDTs.put(HighLevelControllerName.CUSTOM1, OpenAlexanderRobotModel.DEFAULT_CONTROL_DT);
+      controlDTs.put(HighLevelControllerName.QUICKSTER, OpenAlexanderRobotModel.DEFAULT_CONTROL_DT);
+      controlDTs.put(HighLevelControllerName.DO_NOTHING_BEHAVIOR, OpenAlexanderRobotModel.DEFAULT_CONTROL_DT);
+      controlDTs.put(HighLevelControllerName.STAND_PREP_STATE, OpenAlexanderRobotModel.DEFAULT_CONTROL_DT);
+      controlDTs.put(HighLevelControllerName.STAND_READY, OpenAlexanderRobotModel.DEFAULT_CONTROL_DT);
+      controlDTs.put(HighLevelControllerName.STAND_TRANSITION_STATE, OpenAlexanderRobotModel.DEFAULT_CONTROL_DT);
+      controlDTs.put(HighLevelControllerName.EXIT_WALKING, OpenAlexanderRobotModel.DEFAULT_CONTROL_DT);
+      controlDTs.put(HighLevelControllerName.FREEZE_STATE, OpenAlexanderRobotModel.DEFAULT_CONTROL_DT);
+      controlDTs.put(HighLevelControllerName.CUSTOM1, OpenAlexanderRobotModel.DEFAULT_CONTROL_DT);
+   }
+
+   @Override
+   public double getControlDT(HighLevelControllerName state)
+   {
+      return controlDTs.get(state);
+   }
+
+   public void setControlDT(HighLevelControllerName state, double controlDT)
+   {
+      controlDTs.put(state, controlDT);
    }
 
    @Override
