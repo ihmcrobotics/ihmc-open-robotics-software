@@ -110,7 +110,7 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
 
       YoDouble yoTime = controllerToolbox.getYoTime();
 
-      positionController = new RigidBodyPositionController(pelvis, elevator, elevator, pelvisFrame, baseFrame, yoTime, false, registry);
+      positionController = new RigidBodyPositionController(pelvis, elevator, elevator, pelvisFrame, baseFrame, yoTime, false, controllerToolbox.getControlDT(), registry);
 
       defaultHeight = new DoubleParameter(getClass().getSimpleName() + "DefaultHeight", registry);
       minHeight = new DoubleParameter(getClass().getSimpleName() + "MinHeight", registry, 0.0);

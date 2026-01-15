@@ -32,9 +32,14 @@ public class FunctionGeneratorErrorCalculator
       controllerCounter = new YoLong(namePrefix + "controllerCounter", registry);
    }
 
-   public void addTrajectorySignal(YoFunctionGeneratorNew functionGenerator, DoubleProvider baselineDesiredValue, OneDoFJointBasics joint)
+   public void addTrajectorySignal(String signalPrefix,
+                                   YoFunctionGeneratorNew functionGenerator,
+                                   DoubleProvider desiredValue,
+                                   DoubleProvider desiredValueDot,
+                                   DoubleProvider measuredValue,
+                                   DoubleProvider measuredValueDot)
    {
-      trajectorySignals.add(new TrajectorySignal(functionGenerator, joint, baselineDesiredValue, registry));
+      trajectorySignals.add(new TrajectorySignal(signalPrefix, functionGenerator, desiredValue, desiredValueDot, measuredValue, measuredValueDot, registry));
    }
 
    public void update()
@@ -50,12 +55,11 @@ public class FunctionGeneratorErrorCalculator
    private class TrajectorySignal
    {
       private final YoFunctionGeneratorNew functionGenerator;
-      private final OneDoFJointBasics joint;
       private final YoDouble previousFrequency;
       private final YoInteger counter;
-      private final DoubleProvider baselineDesiredValue;
+      private final DoubleProvider desiredValue, desiredValueDot;
+      private final DoubleProvider measuredValue, measuredValueDot;
 
-      private long startCount;
       private int controlTicksPerSample;
       private int samplesPerPeriod;
       private int controlTicksPerPeriod;
@@ -66,16 +70,24 @@ public class FunctionGeneratorErrorCalculator
       private final TDoubleArrayList positionErrorsSq = new TDoubleArrayList(new double[MAX_SAMPLES]);
       private final TDoubleArrayList velocityErrorsSq = new TDoubleArrayList(new double[MAX_SAMPLES]);
 
-      TrajectorySignal(YoFunctionGeneratorNew functionGenerator, OneDoFJointBasics joint, DoubleProvider baselineDesiredValue, YoRegistry registry)
+      TrajectorySignal(String signalPrefix,
+                       YoFunctionGeneratorNew functionGenerator,
+                       DoubleProvider desiredValue,
+                       DoubleProvider desiredValueDot,
+                       DoubleProvider measuredValue,
+                       DoubleProvider measuredValueDot,
+                       YoRegistry registry)
       {
          this.functionGenerator = functionGenerator;
-         this.joint = joint;
-         this.previousFrequency = new YoDouble("prevFreq" + joint.getName(), registry);
-         this.baselineDesiredValue = baselineDesiredValue;
+         this.previousFrequency = new YoDouble(signalPrefix + "_freq_prev", registry);
+         this.desiredValue = desiredValue;
+         this.desiredValueDot = desiredValueDot;
+         this.measuredValue = measuredValue;
+         this.measuredValueDot = measuredValueDot;
 
-         rmsPositionError = new YoDouble("q_err_rms_" + joint.getName(), registry);
-         rmsVelocityError = new YoDouble("qd_err_rms_" + joint.getName(), registry);
-         counter = new YoInteger("counter" + joint.getName(), registry);
+         rmsPositionError = new YoDouble(signalPrefix + "_err_rms", registry);
+         rmsVelocityError = new YoDouble(signalPrefix + "_d_err_rms", registry);
+         counter = new YoInteger(signalPrefix + "_counter", registry);
          previousFrequency.setToNaN();
       }
 
@@ -99,7 +111,6 @@ public class FunctionGeneratorErrorCalculator
 
             positionErrorsSq.fill(0.0);
             velocityErrorsSq.fill(0.0);
-            startCount = controllerCounter.getValue();
             counter.set(0);
          }
 
@@ -110,8 +121,8 @@ public class FunctionGeneratorErrorCalculator
 
          if (counter.getValue() % controlTicksPerSample == 0)
          {
-            positionErrorsSq.set(counter.getValue() / controlTicksPerSample, EuclidCoreTools.square(baselineDesiredValue.getValue() - joint.getQ()));
-            velocityErrorsSq.set(counter.getValue() / controlTicksPerSample, EuclidCoreTools.square(functionGenerator.getValueDot() - joint.getQd()));
+            positionErrorsSq.set(counter.getValue() / controlTicksPerSample, EuclidCoreTools.square(desiredValue.getValue() - measuredValue.getValue()));
+            velocityErrorsSq.set(counter.getValue() / controlTicksPerSample, EuclidCoreTools.square(desiredValueDot.getValue() - measuredValueDot.getValue()));
             rmsPositionError.set(Math.sqrt(positionErrorsSq.sum() / samplesPerPeriod));
             rmsVelocityError.set(Math.sqrt(velocityErrorsSq.sum() / samplesPerPeriod));
          }

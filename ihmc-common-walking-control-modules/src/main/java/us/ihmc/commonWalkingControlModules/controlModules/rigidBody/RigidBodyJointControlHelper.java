@@ -143,7 +143,9 @@ public class RigidBodyJointControlHelper
          {
             functionGenerators.add(new YoFunctionGeneratorNew(prefix + "_" + jointName + "_FG", time, registry));
             int jointIdxFinal = jointIdx;
-            functionGeneratorErrorCalculator.addTrajectorySignal(functionGenerators.get(jointIdx), () -> getJointDesiredPosition(jointIdxFinal), jointsToControl[jointIdx]);
+            DoubleProvider desiredPosition = () -> getJointDesiredPosition(jointIdxFinal);
+            DoubleProvider desiredVelocity = () -> getJointDesiredVelocity(jointIdxFinal);
+            functionGeneratorErrorCalculator.addTrajectorySignal(jointName, functionGenerators.get(jointIdx), desiredPosition, desiredVelocity, joint::getQ, joint::getQd);
          }
 
          bypassAccelerationIntegration[jointIdx] = new BooleanParameter(jointsToControl[jointIdx].getName() + "BypassAccelerationIntegration", registry);
