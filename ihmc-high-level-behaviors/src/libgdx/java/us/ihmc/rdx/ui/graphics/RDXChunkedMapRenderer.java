@@ -91,6 +91,7 @@ public class RDXChunkedMapRenderer implements RenderableProvider
             int oldestRenderer = queueOfRenderers.poll();
             ChunkRenderer oldestChunkRenderer = chunkRenderers.remove(oldestRenderer);
             renderersToRemove.add(oldestChunkRenderer);
+            oldestChunkRenderer.close();
          }
 
          Chunk latestChunk = new Chunk(chunkMessage.getOriginX(),
@@ -155,6 +156,11 @@ public class RDXChunkedMapRenderer implements RenderableProvider
       public RDXChunkRenderer getRenderer()
       {
          return renderer;
+      }
+
+      public void close()
+      {
+         map.close();
       }
    }
 }

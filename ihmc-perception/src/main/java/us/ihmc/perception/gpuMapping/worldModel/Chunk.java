@@ -96,7 +96,7 @@ public class Chunk
       {
          float previousHeight = chunkHeights[i * cellsPerAxis + j];
 
-         if (previousHeight != height)
+         if (Math.abs(previousHeight - height) > 1E-4)
          {
             // If we updated a height value that didn't match what we already had, we say the chunk is dirty, and needs to be published.
             dirty = true;
