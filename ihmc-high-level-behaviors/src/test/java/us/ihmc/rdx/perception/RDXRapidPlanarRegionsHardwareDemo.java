@@ -13,17 +13,12 @@ import us.ihmc.rdx.ui.affordances.RDXInteractableReferenceFrame;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2FramePlanarRegionsVisualizer;
-import us.ihmc.robotDataLogger.ZEDSDKAnnounce;
-import us.ihmc.robotDataLogger.logger.ZEDSVOLoggerManager;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.sensors.zed.ZEDImageSensor;
 import us.ihmc.sensors.zed.ZEDModelData;
 import us.ihmc.zed.global.zed;
 
-import java.util.LinkedList;
-import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -37,8 +32,6 @@ public class RDXRapidPlanarRegionsHardwareDemo
    private RDXROS2FramePlanarRegionsVisualizer planarRegionsVisualizer;
    private final ZEDImageSensor zedImageSensor;
    private final RepeatingTaskThread zedGrabThread = new RepeatingTaskThread("ZEDGrabThread", this::zedGrabThread);
-   private final Queue<RawImage> depthImageQueue = new LinkedList<>();
-   private final Queue<RawImage> colorImageQueue = new LinkedList<>();
    private final ROS2Node ros2Node = new ROS2NodeBuilder().build("rapid_regions_node");
    private final RapidPlanarRegionsExtractionThread rapidPlanarRegionsExtractionThread;
 
@@ -114,8 +107,6 @@ public class RDXRapidPlanarRegionsHardwareDemo
             pointCloudVisualizer.destroy();
             planarRegionsVisualizer.destroy();
             rapidRegionsUI.destroy();
-            colorImageQueue.forEach(RawImage::release);
-            depthImageQueue.forEach(RawImage::release);
             ros2Node.destroy();
 
             baseUI.dispose();
@@ -130,24 +121,11 @@ public class RDXRapidPlanarRegionsHardwareDemo
       RawImage colorImage = zedImageSensor.getImage(ZEDImageSensor.LEFT_COLOR_IMAGE_KEY);
       RawImage depthImage = zedImageSensor.getImage(ZEDImageSensor.DEPTH_IMAGE_KEY);
 
-      colorImageQueue.add(colorImage);
-      depthImageQueue.add(depthImage);
+      pointCloudVisualizer.setColorImage(colorImage);
+      pointCloudVisualizer.setDepthImage(depthImage);
 
-      RawImage oldestColorImage = colorImageQueue.peek();
-      while (oldestColorImage != null)
-      {
-         pointCloudVisualizer.setColorImage(oldestColorImage);
-         colorImageQueue.remove().release();
-         oldestColorImage = colorImageQueue.peek();
-      }
-
-      RawImage oldestDepthImage = depthImageQueue.peek();
-      while (oldestDepthImage != null)
-      {
-         pointCloudVisualizer.setDepthImage(oldestDepthImage);
-         depthImageQueue.remove().release();
-         oldestDepthImage = depthImageQueue.peek();
-      }
+      colorImage.release();
+      depthImage.release();
    }
 
    public static void main(String[] args)
