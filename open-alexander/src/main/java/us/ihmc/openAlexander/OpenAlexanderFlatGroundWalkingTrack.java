@@ -26,7 +26,7 @@ public class OpenAlexanderFlatGroundWalkingTrack
       DRCRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_NUB_FOREARMS, RobotTarget.SCS);
       FlatGroundEnvironment environment = new FlatGroundEnvironment();
 
-      int recordFrequency = (int) Math.max(1.0, Math.round(robotModel.getControllerDT() / robotModel.getSimulateDT()));
+      int recordFrequency = (int) Math.max(1.0, Math.round(robotModel.getFastestControllerDT() / robotModel.getSimulateDT()));
 
       boolean useVelocityAndHeadingScript = true;
       HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters = new HeadingAndVelocityEvaluationScriptParameters();

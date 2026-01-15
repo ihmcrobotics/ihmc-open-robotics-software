@@ -93,12 +93,6 @@ public class AlexanderFlatGroundQuickWalkingTest extends AvatarFlatGroundQuickWa
          }
 
          @Override
-         public double getControllerDT()
-         {
-            return 0.002;
-         }
-
-         @Override
          public double getSimulateDT()
          {
             return 0.0005;

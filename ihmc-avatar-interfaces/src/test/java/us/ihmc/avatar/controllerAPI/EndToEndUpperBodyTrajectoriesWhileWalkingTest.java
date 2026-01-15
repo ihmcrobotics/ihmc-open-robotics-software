@@ -211,7 +211,7 @@ public abstract class EndToEndUpperBodyTrajectoriesWhileWalkingTest implements M
             messageList.add(armTrajectoryMessage);
             simulationTestHelper.publishToController(armTrajectoryMessage);
 
-            success = simulationTestHelper.simulateNow(robotModel.getControllerDT());
+            success = simulationTestHelper.simulateNow(simulationTestHelper.getCurrentControlDT());
             assertTrue(success);
          }
          armTrajectoryMessages.put(robotSide, messageList);

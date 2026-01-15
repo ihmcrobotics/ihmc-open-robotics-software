@@ -145,7 +145,6 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
                                                                                  physicalProperties,
                                                                                  contactPointParameters);
       highLevelControllerParameters = new OpenAlexanderHighLevelControllerParameters(robotVersion, jointMap, robotTarget);
-      diagnosticParameters = new AlexanderDiagnosticParameters(robotTarget, jointMap, sensorInformation, highLevelControllerParameters);
       stateEstimatorParameters = new OpenAlexanderStateEstimatorParameters(getEstimatorDT(), robotTarget, sensorInformation, jointMap);
 
       modelFactory = new AlexanderModelFactory(robotVersion, jointMap, contactPointParameters, new AlexanderRigidBodyMutator(getPhysicalProperties(), imusToIgnore));

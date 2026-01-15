@@ -147,7 +147,7 @@ public abstract class EndToEndLegTrajectoryMessageTest implements MultiRobotTest
                                                             0.0,
                                                             legJointNames,
                                                             startedStatus,
-                                                            getRobotModel().getControllerDT());
+                                                            simulationTestHelper.getCurrentControlDT());
          EndToEndTestTools.assertJointspaceTrajectoryStatus(sequenceID,
                                                             TrajectoryExecutionStatus.COMPLETED,
                                                             trajectoryTime,
@@ -155,7 +155,7 @@ public abstract class EndToEndLegTrajectoryMessageTest implements MultiRobotTest
                                                             legJointNames,
                                                             completedStatus,
                                                             1.0e-12,
-                                                            getRobotModel().getControllerDT());
+                                                            simulationTestHelper.getCurrentControlDT());
 
          // Without forgetting to put the foot back on the ground
          prepFootForLoadBearing(robotSide, foot, initialFootPosition, simulationTestHelper);
