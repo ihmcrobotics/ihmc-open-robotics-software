@@ -29,8 +29,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class RDXRapidPlanarRegionsHardwareDemo
 {
-   private static final int ZED_FPS = 30;
-
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private RDXInteractableReferenceFrame robotInteractableReferenceFrame;
    private RDXPose3DGizmo zedPoseGizmo = new RDXPose3DGizmo();
@@ -41,45 +39,18 @@ public class RDXRapidPlanarRegionsHardwareDemo
    private final RepeatingTaskThread zedGrabThread = new RepeatingTaskThread("ZEDGrabThread", this::zedGrabThread);
    private final Queue<RawImage> depthImageQueue = new LinkedList<>();
    private final Queue<RawImage> colorImageQueue = new LinkedList<>();
-   private final ROS2Node announceNode = new ROS2NodeBuilder().build("zed_announce_node");
-   private final RepeatingTaskThread zedSDKAnnounceThread;
-   private final BlockingQueue<RawImage> rapidRegionsDepthQueue = new LinkedBlockingQueue<>(ImageSensor.DEFAULT_IMAGE_QUEUE_CAPACITY);
+   private final ROS2Node ros2Node = new ROS2NodeBuilder().build("rapid_regions_node");
    private final RapidPlanarRegionsExtractionThread rapidPlanarRegionsExtractionThread;
 
    public RDXRapidPlanarRegionsHardwareDemo()
    {
       zedImageSensor = new ZEDImageSensor(0, ZEDModelData.ZED_2, zed.SL_INPUT_TYPE_USB, zed.SL_DEPTH_MODE_NEURAL);
       zedImageSensor.run(true);
+
+      BlockingQueue<RawImage> rapidRegionsDepthQueue = new LinkedBlockingQueue<>(ImageSensor.DEFAULT_IMAGE_QUEUE_CAPACITY);
       zedImageSensor.registerImageQueue(rapidRegionsDepthQueue, ZEDImageSensor.DEPTH_IMAGE_KEY);
 
-      rapidPlanarRegionsExtractionThread = new RapidPlanarRegionsExtractionThread(announceNode, rapidRegionsDepthQueue);
-
-      ROS2Publisher<ZEDSDKAnnounce> publisher = announceNode.createPublisher(ZEDSVOLoggerManager.ZED_SDK_ANNOUNCE_TOPIC);
-      zedSDKAnnounceThread = new RepeatingTaskThread("ZEDSDKAnnounceThread", () ->
-      {
-         // Pack controller timestamp only if we recieved robot configuation data in the past 1/50th of a second
-         // We want to align the ZED clock with the controller clock
-         // Doing this association on board the robot is the most accurate
-         // This avoids delays and significant time stretching issues we experienced
-         if (zedImageSensor.isSensorRunning())
-         {
-            ZEDSDKAnnounce message = new ZEDSDKAnnounce();
-            message.setSensorName("AlexExperimentalZEDXMini");
-            message.setAddress("10.42.0.1");
-            message.setPort((short) zedImageSensor.getStreamingPort());
-            message.setFps(zedImageSensor.getFps());
-            message.setBitrate(zedImageSensor.getStreamingBitrate());
-            message.setSensorTimestamp(zedImageSensor.getLastGrabTimestamp());
-//            if (syncedRobot.getDataReceptionTimerSnapshot().isRunning(0.02))
-//               message.setControllerTimestamp(syncedRobot.getLatestRobotConfigurationData().getMonotonicTime());
-//            else
-//               message.setControllerTimestamp(0);
-            publisher.publish(message);
-         }
-
-      });
-      zedSDKAnnounceThread.setFrequencyLimit(5.0);
-      zedSDKAnnounceThread.startRepeating();
+      rapidPlanarRegionsExtractionThread = new RapidPlanarRegionsExtractionThread(ros2Node, rapidRegionsDepthQueue);
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -92,9 +63,9 @@ public class RDXRapidPlanarRegionsHardwareDemo
             baseUI.getPrimaryScene().addRenderableProvider(pointCloudVisualizer);
             baseUI.getImGuiPanelManager().addPanel("Point Cloud", pointCloudVisualizer::renderImGuiWidgets);
 
-            planarRegionsVisualizer = new RDXROS2FramePlanarRegionsVisualizer("Planar Regions", announceNode, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS);
+            planarRegionsVisualizer = new RDXROS2FramePlanarRegionsVisualizer("Planar Regions", ros2Node, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS);
             planarRegionsVisualizer.setActive(true);
-            baseUI.getPrimaryScene().addRenderableProvider(planarRegionsVisualizer::getRenderables);
+            baseUI.getPrimaryScene().addRenderableProvider(planarRegionsVisualizer);
             baseUI.getImGuiPanelManager().addPanel("Planar Regions", planarRegionsVisualizer::renderImGuiWidgets);
 
             rapidPlanarRegionsExtractionThread.startRepeating();
@@ -145,7 +116,7 @@ public class RDXRapidPlanarRegionsHardwareDemo
             rapidRegionsUI.destroy();
             colorImageQueue.forEach(RawImage::release);
             depthImageQueue.forEach(RawImage::release);
-            announceNode.destroy();
+            ros2Node.destroy();
 
             baseUI.dispose();
          }
