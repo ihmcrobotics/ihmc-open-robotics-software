@@ -149,6 +149,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                                                                              baseFrame,
                                                                                              yoTime,
                                                                                              enableFunctionGenerators,
+                                                                                             controlDT,
                                                                                              parentRegistry);
          if (taskspacePositionGains == null)
          {
@@ -169,6 +170,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                                                                      yoTime,
                                                                                      jointControlHelper,
                                                                                      enableFunctionGenerators,
+                                                                                     controlDT,
                                                                                      registry);
          if (taskspaceOrientationGains == null || taskspacePositionGains == null)
          {

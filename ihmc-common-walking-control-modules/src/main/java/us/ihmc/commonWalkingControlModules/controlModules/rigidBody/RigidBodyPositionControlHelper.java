@@ -24,6 +24,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
+import us.ihmc.robotics.math.functionGenerator.FunctionGeneratorErrorCalculator;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorNew;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
@@ -89,6 +90,7 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
    private Vector3DReadOnly defaultWeight;
    private PID3DGainsReadOnly gains;
    private final List<YoFunctionGeneratorNew> functionGenerators = new ArrayList<>();
+   private final FunctionGeneratorErrorCalculator functionGeneratorErrorCalculator;
 
    private final FramePoint3D desiredPosition = new FramePoint3D();
    private final FrameVector3D desiredVelocity = new FrameVector3D();
@@ -122,6 +124,7 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
                                          BooleanProvider useBaseFrameForControl,
                                          BooleanProvider useWeightFromMessage,
                                          boolean enableFunctionGenerators,
+                                         double controlDT,
                                          DoubleProvider time,
                                          YoRegistry registry)
    {
@@ -159,10 +162,27 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
 
       if (enableFunctionGenerators)
       {
+         functionGeneratorErrorCalculator = new FunctionGeneratorErrorCalculator(bodyName, controlDT, registry);
          for (int axisIdx = 0; axisIdx < Axis3D.values.length; axisIdx++)
          {
             functionGenerators.add(new YoFunctionGeneratorNew(prefix + Axis3D.values()[axisIdx] + "_FG", time, registry));
+            int axisIdxFinal = axisIdx;
+            DoubleProvider desiredPosition = () -> this.yoDesiredPosition.getElement(axisIdxFinal);
+            DoubleProvider desiredVelocity = () -> this.yoCurrentPosition.getElement(axisIdxFinal);
+            DoubleProvider measuredPosition = () -> this.yoCurrentPosition.getElement(axisIdxFinal);
+            DoubleProvider measuredVelocity = () -> 0.0; // TODO
+
+            functionGeneratorErrorCalculator.addTrajectorySignal(Axis3D.values()[axisIdx].name(),
+                                                                 functionGenerators.get(axisIdxFinal),
+                                                                 desiredPosition,
+                                                                 desiredVelocity,
+                                                                 measuredPosition,
+                                                                 measuredVelocity);
          }
+      }
+      else
+      {
+         functionGeneratorErrorCalculator = null;
       }
    }
 
@@ -549,6 +569,9 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
          desiredVelocity.setElement(axisIdx, desiredVelocity.getElement(axisIdx) + functionGenerator.getValueDot());
          feedForwardAcceleration.setElement(axisIdx, feedForwardAcceleration.getElement(axisIdx) + functionGenerator.getValueDDot());
       }
+
+      if (functionGeneratorErrorCalculator != null)
+         functionGeneratorErrorCalculator.update();
    }
 
    public boolean isMessageWeightValid()

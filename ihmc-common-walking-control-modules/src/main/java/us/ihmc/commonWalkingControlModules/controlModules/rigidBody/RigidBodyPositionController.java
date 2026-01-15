@@ -52,6 +52,7 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
                                       ReferenceFrame baseFrame,
                                       YoDouble yoTime,
                                       boolean enableFunctionGenerators,
+                                      double controlDT,
                                       YoRegistry parentRegistry)
    {
       super(RigidBodyControlMode.TASKSPACE, bodyToControl.getName(), yoTime, parentRegistry);
@@ -81,6 +82,7 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
                                                           useBaseFrameForControl,
                                                           usingWeightFromMessage,
                                                           enableFunctionGenerators,
+                                                          controlDT,
                                                           yoTime,
                                                           registry);
       statusHelper = new TaskspaceTrajectoryStatusMessageHelper(bodyToControl);
