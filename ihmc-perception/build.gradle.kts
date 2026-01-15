@@ -53,6 +53,9 @@ mainDependencies {
 testDependencies {
    api("us.ihmc:simulation-construction-set-tools:source")
    api("us.ihmc:simulation-construction-set-tools-test:source")
+   api("org.openjdk.jmh:jmh-core:1.37")
+   api("org.openjdk.jmh:jmh-generator-annprocess:1.37")
+   api("org.openjdk.jmh:jmh-generator-bytecode:1.73")
 }
 
 slamWrapperDependencies {
