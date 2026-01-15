@@ -20,7 +20,7 @@ public class ChunkMessageTools
       // Convert the Mat into HeightMapData object
       Point3D mapOrigin = new Point3D(chunkMessage.getOriginX(), chunkMessage.getOriginY(), 0.0);
 
-      ChunkTools.convertToChunk(chunkMap, chunkToPack, mapOrigin, (float) chunkMessage.getWidthInMeters(), (float) chunkMessage.getCellSizeInMeters());
+      ChunkTools.convertToChunk(chunkMap, chunkToPack, mapOrigin, chunkMessage.getWidthInMeters(), chunkMessage.getCellSizeInMeters());
 
       // Close pointers
       compressedMat.close();

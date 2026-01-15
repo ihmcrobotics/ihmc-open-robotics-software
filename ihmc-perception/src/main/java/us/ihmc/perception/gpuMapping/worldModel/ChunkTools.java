@@ -3,7 +3,6 @@ package us.ihmc.perception.gpuMapping.worldModel;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.perception.gpuMapping.HeightMapTools;
 
 import java.nio.FloatBuffer;
 
@@ -12,8 +11,7 @@ public class ChunkTools
    public static void convertToChunk(Mat chunkMapPointer, Chunk chunkToPack, Point3D gridCenter, float widthInMeters, float cellSizeInMeters)
    {
       widthInMeters = (float) (Math.floor(widthInMeters / cellSizeInMeters) * cellSizeInMeters);
-      int centerIndex = HeightMapTools.computeCenterIndex(widthInMeters, cellSizeInMeters);
-      int cellsPerAxis = 2 * centerIndex;
+      int cellsPerAxis = (int) (widthInMeters / cellSizeInMeters);
       int totalCells = cellsPerAxis * cellsPerAxis;
 
       chunkToPack.setOriginX(gridCenter.getX32());
