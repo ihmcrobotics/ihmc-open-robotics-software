@@ -77,7 +77,6 @@ public class RDXRapidRegionsUI implements RenderableProvider
 
    private Mat tempNormalized8U;
    private Mat tempRGBA;
-   private Mat tempDebugFlipped;
 
    public void create(RapidPlanarRegionsExtractor rapidPlanarRegionsExtractor)
    {
@@ -101,14 +100,14 @@ public class RDXRapidRegionsUI implements RenderableProvider
       concaveHullParametersTuner.create(rapidPlanarRegionsCustomizer.getConcaveHullFactoryParameters(), true);
 
       imguiPanel = new RDXPanel("GPU Planar Region Extraction", this::renderImGuiWidgets);
-      depthPanel = new RDXMatImagePanel("Depth", imageWidth, imageHeight, RDXImagePanel.FLIP_Y);
-      nxImagePanel = new RDXMatImagePanel("Nx Image", patchImageWidth, patchImageHeight, RDXImagePanel.FLIP_Y);
-      nyImagePanel = new RDXMatImagePanel("Ny Image", patchImageWidth, patchImageHeight, RDXImagePanel.FLIP_Y);
-      nzImagePanel = new RDXMatImagePanel("Nz Image", patchImageWidth, patchImageHeight, RDXImagePanel.FLIP_Y);
-      gxImagePanel = new RDXMatImagePanel("Gx Image", patchImageWidth, patchImageHeight, RDXImagePanel.FLIP_Y);
-      gyImagePanel = new RDXMatImagePanel("Gy Image", patchImageWidth, patchImageHeight, RDXImagePanel.FLIP_Y);
-      gzImagePanel = new RDXMatImagePanel("Gz Image", patchImageWidth, patchImageHeight, RDXImagePanel.FLIP_Y);
-      debugExtractionPanel = new RDXMatImagePanel("Planar Region Extraction Image", imageWidth, imageHeight, RDXImagePanel.FLIP_Y);
+      depthPanel = new RDXMatImagePanel("Depth", imageWidth, imageHeight, RDXImagePanel.DO_NOT_FLIP_Y);
+      nxImagePanel = new RDXMatImagePanel("Nx Image", patchImageWidth, patchImageHeight, RDXImagePanel.DO_NOT_FLIP_Y);
+      nyImagePanel = new RDXMatImagePanel("Ny Image", patchImageWidth, patchImageHeight, RDXImagePanel.DO_NOT_FLIP_Y);
+      nzImagePanel = new RDXMatImagePanel("Nz Image", patchImageWidth, patchImageHeight, RDXImagePanel.DO_NOT_FLIP_Y);
+      gxImagePanel = new RDXMatImagePanel("Gx Image", patchImageWidth, patchImageHeight, RDXImagePanel.DO_NOT_FLIP_Y);
+      gyImagePanel = new RDXMatImagePanel("Gy Image", patchImageWidth, patchImageHeight, RDXImagePanel.DO_NOT_FLIP_Y);
+      gzImagePanel = new RDXMatImagePanel("Gz Image", patchImageWidth, patchImageHeight, RDXImagePanel.DO_NOT_FLIP_Y);
+      debugExtractionPanel = new RDXMatImagePanel("Planar Region Extraction Image", imageWidth, imageHeight, RDXImagePanel.DO_NOT_FLIP_Y);
 
       imguiPanel.addChild(depthPanel.getImagePanel());
       imguiPanel.addChild(nxImagePanel.getImagePanel());
@@ -133,7 +132,6 @@ public class RDXRapidRegionsUI implements RenderableProvider
 
       tempNormalized8U = new Mat();
       tempRGBA = new Mat();
-      tempDebugFlipped = new Mat();
    }
 
    public void render()
@@ -145,12 +143,10 @@ public class RDXRapidRegionsUI implements RenderableProvider
       displayFloatImage(rapidPlanarRegionsExtractor.getPatchCentroidsYHost(), gyImagePanel);
       displayFloatImage(rapidPlanarRegionsExtractor.getPatchCentroidsZHost(), gzImagePanel);
 
-      // Display debug image (needs to be flipped to match orientation)
       Mat debugImage = rapidRegionsDebutOutputGenerator.getDebugImage();
       if (debugExtractionPanel.getImagePanel().getIsShowing().get() && !debugImage.empty())
       {
-         opencv_core.flip(debugImage, tempDebugFlipped, 0);
-         debugExtractionPanel.displayByte(tempDebugFlipped);
+         debugExtractionPanel.displayByte(debugImage);
       }
    }
 
@@ -179,9 +175,6 @@ public class RDXRapidRegionsUI implements RenderableProvider
 
          // Convert grayscale to RGBA
          opencv_imgproc.cvtColor(tempNormalized8U, tempRGBA, opencv_imgproc.COLOR_GRAY2RGBA);
-
-         // Flip vertically to match OpenGL coordinate system
-         opencv_core.flip(tempRGBA, tempRGBA, 0);
 
          // Display the RGBA image
          panel.displayByte(tempRGBA);
@@ -242,8 +235,6 @@ public class RDXRapidRegionsUI implements RenderableProvider
          tempNormalized8U.close();
       if (tempRGBA != null)
          tempRGBA.close();
-      if (tempDebugFlipped != null)
-         tempDebugFlipped.close();
    }
 
    public RDXPanel getPanel()
