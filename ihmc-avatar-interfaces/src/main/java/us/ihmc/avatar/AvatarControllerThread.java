@@ -176,7 +176,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
    @Override
    public double getCurrentDT()
    {
-      return highLevelControllerParameters.getControlDT(controllerManager.getCurrentHighLevelControlState());
+      return controllerManager.getCurrentControlDT();
    }
 
    public static JointBasics[] createListOfJointsToIgnore(FullHumanoidRobotModel controllerFullRobotModel,
@@ -265,7 +265,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       scs2YoGraphicHolders.add(controllerManager::getSCS2YoGraphics);
 
       ModularRobotController modularRobotController = new ModularRobotController("DRCMomentumBasedController");
-      modularRobotController.addRobotController(robotController);
+      modularRobotController.addRobotController(controllerManager);
 
       if (SHOW_INERTIA_GRAPHICS)
       {

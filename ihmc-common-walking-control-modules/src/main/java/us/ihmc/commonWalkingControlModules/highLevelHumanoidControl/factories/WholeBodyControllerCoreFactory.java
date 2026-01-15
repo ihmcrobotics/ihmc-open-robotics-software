@@ -45,7 +45,7 @@ public class WholeBodyControllerCoreFactory
 
    private boolean hasControlDTProvider(Class<?> managerClass)
    {
-      if (controllerToolbox != null)
+      if (controlDT != null)
          return true;
       missingObjectWarning(DoubleProvider.class, managerClass);
       return false;

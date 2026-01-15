@@ -194,6 +194,11 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
       isListeningToHighLevelStateMessage.set(isListening);
    }
 
+   public double getCurrentControlDT()
+   {
+      return controlDT.getValue();
+   }
+
    @Override
    public void initialize()
    {

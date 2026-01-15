@@ -308,6 +308,7 @@ public abstract class HumanoidControllerWarmup
       controllerCoreFactory = new WholeBodyControllerCoreFactory(managerFactoryParent);
       controllerCoreFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
       controllerCoreFactory.setWalkingControllerParameters(walkingControllerParameters);
+      controllerCoreFactory.setControlDTProvider(() -> controlDT);
 
       walkingControllerState = new WalkingControllerState(commandInputManager,
                                                           statusOutputManager,

@@ -422,6 +422,8 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       YoBoolean usingEstimatorCoMPosition = new YoBoolean("usingEstimatorCoMPosition", registry);
       YoBoolean usingEstimatorCoMVelocity = new YoBoolean("usingEstimatorCoMVelocity", registry);
 
+      controllerCoreFactory.setControlDTProvider(controlDT);
+
       controlDT.set(highLevelControllerParameters.getControlDT(highLevelControllerParameters.getDefaultInitialControllerState()));
 
       CenterOfMassStateProvider centerOfMassStateProvider = new CenterOfMassStateProvider()

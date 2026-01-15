@@ -13,7 +13,6 @@ public class GrowableRingIntBuffer
    private TIntArrayList tempValues = new TIntArrayList();
    private TIntArrayList values = new TIntArrayList();
    private int writeIndex;
-   private int currentSize;
    private int capacity;
 
    public GrowableRingIntBuffer(int initialCapacity)
@@ -24,13 +23,12 @@ public class GrowableRingIntBuffer
       values.clear();
       capacity = initialCapacity;
 
-      currentSize = 0;
+      writeIndex = -1;
    }
 
    public void clear()
    {
       writeIndex = -1;
-      currentSize = 0;
    }
 
    public void resize(int newCapacity)
@@ -49,19 +47,12 @@ public class GrowableRingIntBuffer
    private void growValuesSize()
    {
       // The data pool grew. To make sure we're appending moving forward, we want to unroll the array.
-      tempValues.clear();
-      int readIndex = nextIndex(capacity, writeIndex);
-      // copy the current values into the data pool, in order
-      for (int i = 0; i < currentSize; i++)
-      {
-         tempValues.add(values.get(readIndex));
-         readIndex = nextIndex(capacity, readIndex);
-      }
+      unrollDataToTempHolder(values.size());
 
       switchActiveBuffers();
 
       // Change the write index to append to the end, since we grew.
-      writeIndex = currentSize;
+      writeIndex = values.size() - 1;
    }
 
    private void shrinkValuesSize(int newCapacity)
@@ -69,28 +60,45 @@ public class GrowableRingIntBuffer
       // The capacity shrank.
       // we want to unroll the data from the values list into the pool array, and then copy the data from the pool back into the values list.
       // we want to ignore the oldest entries
-      tempValues.clear();
-      int readIndex = nextIndex(capacity, writeIndex + capacity - newCapacity);
-      for (int i = 0; i < newCapacity; i++)
-      {
-         tempValues.add(values.get(readIndex));
-         readIndex = nextIndex(capacity, readIndex);
-      }
-
+      unrollDataToTempHolder(newCapacity);
       switchActiveBuffers();
 
       // The capacity shrank.
-      if (currentSize >= capacity)
+      if (values.size() >= capacity)
       {
          // The current size is greater than the new capacity, so start overwriting the oldest value, which is now the start since it was unrolled.
          writeIndex = -1;
-         currentSize = capacity;
       }
       else
       {
-         writeIndex = currentSize;
+         writeIndex = values.size() - 1;
       }
    }
+
+   private void unrollDataToTempHolder(int valuesToUnroll)
+   {
+      tempValues.clear();
+      if (values.size() <= valuesToUnroll)
+      {
+         int readIndex = getStartOfWindowIndex();
+         for (int i = 0; i < values.size(); i++)
+         {
+            tempValues.add(values.get(readIndex));
+            readIndex = nextIndex(values.size(), readIndex);
+         }
+      }
+      else
+      {
+         int valuesToIgnore = values.size() - valuesToUnroll;
+         int readIndex = wrapIndex(getStartOfWindowIndex() + valuesToIgnore);
+         for (int i = 0; i < valuesToUnroll; i++)
+         {
+            tempValues.add(values.get(readIndex));
+            readIndex = nextIndex(values.size(), readIndex);
+         }
+      }
+   }
+
 
    private void switchActiveBuffers()
    {
@@ -102,18 +110,24 @@ public class GrowableRingIntBuffer
    public void add(int entry)
    {
       int bufferCapacity = values.size();
+      if (capacity == bufferCapacity)
+      {
+         // Get the next index
+         writeIndex = nextIndex(bufferCapacity, writeIndex);
+         // Grow the current size, up to a clamped amount.
 
-      // Get the next index
-      writeIndex = nextIndex(bufferCapacity, writeIndex);
-      // Grow the current size, up to a clamped amount.
-      currentSize = Math.min(bufferCapacity, currentSize + 1);
-
-      values.set(writeIndex, entry);
+         values.set(writeIndex, entry);
+      }
+      else
+      {
+         values.add(entry);
+         writeIndex = values.size() - 1;
+      }
    }
 
    public int getStart()
    {
-      return values.get(nextIndex(capacity, writeIndex));
+      return values.get(getStartOfWindowIndex());
    }
 
    public int getEnd()
@@ -123,17 +137,17 @@ public class GrowableRingIntBuffer
 
    public int get(int entry)
    {
-      return values.get(wrapIndex(getStartOfWindowIndex(currentSize) + entry));
+      return values.get(wrapIndex(getStartOfWindowIndex() + entry));
    }
 
    public int getCapacity()
    {
-      return values.size();
+      return capacity;
    }
 
    public int getCurrentSize()
    {
-      return currentSize;
+      return values.size();
    }
 
    private static int nextIndex(int maxCapacity, int index)
@@ -145,18 +159,18 @@ public class GrowableRingIntBuffer
 
    private int wrapIndex(int index)
    {
-      while (index > values.size())
+      while (index >= values.size())
          index -= values.size();
 
       return index;
    }
 
-   private int getStartOfWindowIndex(int maxSize)
+   private int getStartOfWindowIndex()
    {
-      if (values.size() == maxSize)
+      if (values.size() == capacity)
       {
          // the buffer is full, so get the next write index, as it's the start
-         return nextIndex(maxSize, writeIndex);
+         return nextIndex(values.size(), writeIndex);
       }
       else
       {
