@@ -10,6 +10,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepQueueStatusMessage;
+import org.apache.commons.net.telnet.EchoOptionHandler;
 import us.ihmc.behaviors.tools.MinimalFootstep;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.RepeatingTaskThread;
@@ -218,45 +219,52 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
       }
       buildMeshAndCreateModelInstance = () ->
       {
-         // First, dispose last models
-         for (RDX3DSituatedText textRenderable : textRenderables)
-            textRenderable.dispose();
-
-         if (lastModel != null)
-            lastModel.dispose();
-
-         // This can't be done outside the libGDX thread. TODO: Consider using Gdx.app.postRunnable
-         textRenderables.clear();
-         for (int i = 0; i < footsteps.size(); i++)
+         try
          {
-            MinimalFootstep minimalFootstep = footsteps.get(i);
-            float textHeight = 0.08f;
-            RDX3DSituatedText footstepIndexText = new RDX3DSituatedText("" + i, textHeight);
-            minimalFootstep.getSolePoseInWorld().get(tempTransform);
-            footstepFrame.update();
-            textFramePose.setToZero(footstepFrame);
-            textFramePose.getOrientation().prependYawRotation(-Math.PI / 2.0);
-            textFramePose.getPosition().addZ(0.01);
-            textFramePose.getPosition().addY(textHeight / 4.0);
-            textFramePose.getPosition().addX(-textHeight / 2.0);
-            textFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-            LibGDXTools.toLibGDX(textFramePose, tempTransform, footstepIndexText.getModelTransform());
-            textRenderables.add(footstepIndexText);
+            // First, dispose last models
+            for (RDX3DSituatedText textRenderable : textRenderables)
+               textRenderable.dispose();
 
-            if (minimalFootstep.getDescription() != null && !minimalFootstep.getDescription().isEmpty())
+            if (lastModel != null)
+               lastModel.dispose();
+
+            // This can't be done outside the libGDX thread. TODO: Consider using Gdx.app.postRunnable
+            textRenderables.clear();
+            for (int i = 0; i < footsteps.size(); i++)
             {
-               RDX3DSituatedText footstepListDescriptionText = new RDX3DSituatedText(minimalFootstep.getDescription(), textHeight);
-               textFramePose.changeFrame(footstepFrame);
-               textFramePose.getPosition().subY(0.12);
+               MinimalFootstep minimalFootstep = footsteps.get(i);
+               float textHeight = 0.08f;
+               RDX3DSituatedText footstepIndexText = new RDX3DSituatedText("" + i, textHeight);
+               minimalFootstep.getSolePoseInWorld().get(tempTransform);
+               footstepFrame.update();
+               textFramePose.setToZero(footstepFrame);
+               textFramePose.getOrientation().prependYawRotation(-Math.PI / 2.0);
+               textFramePose.getPosition().addZ(0.01);
+               textFramePose.getPosition().addY(textHeight / 4.0);
+               textFramePose.getPosition().addX(-textHeight / 2.0);
                textFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-               LibGDXTools.toLibGDX(textFramePose, tempTransform, footstepListDescriptionText.getModelTransform());
-               textRenderables.add(footstepListDescriptionText);
-            }
-         }
+               LibGDXTools.toLibGDX(textFramePose, tempTransform, footstepIndexText.getModelTransform());
+               textRenderables.add(footstepIndexText);
 
-         lastModel = RDXModelBuilder.buildModelFromMesh(modelBuilder, meshBuilder);
-         LibGDXTools.setOpacity(lastModel, footstepColors.get(RobotSide.LEFT).a);
-         modelInstance = new ModelInstance(lastModel); // TODO: Clean up garbage and look into reusing the Model
+               if (minimalFootstep.getDescription() != null && !minimalFootstep.getDescription().isEmpty())
+               {
+                  RDX3DSituatedText footstepListDescriptionText = new RDX3DSituatedText(minimalFootstep.getDescription(), textHeight);
+                  textFramePose.changeFrame(footstepFrame);
+                  textFramePose.getPosition().subY(0.12);
+                  textFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+                  LibGDXTools.toLibGDX(textFramePose, tempTransform, footstepListDescriptionText.getModelTransform());
+                  textRenderables.add(footstepListDescriptionText);
+               }
+            }
+
+            lastModel = RDXModelBuilder.buildModelFromMesh(modelBuilder, meshBuilder);
+            LibGDXTools.setOpacity(lastModel, footstepColors.get(RobotSide.LEFT).a);
+            modelInstance = new ModelInstance(lastModel); // TODO: Clean up garbage and look into reusing the Model
+         }
+         catch (Exception e)
+         {
+            LogTools.error(e.getMessage());
+         }
       };
    }
 

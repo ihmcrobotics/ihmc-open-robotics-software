@@ -18,20 +18,44 @@ public class RDXMeshDataInterpreter
       MeshBuilder meshBuilder = new MeshBuilder();
       meshBuilder.begin(Position | Normal | ColorUnpacked | TextureCoordinates, GL41.GL_TRIANGLES);
 
-      for (int i = 0; i < meshData.getVertices().length; i++)
+      int vertexCount       = meshData.getVertices().length;
+      int normalsCount      = meshData.getVertexNormals() != null ? meshData.getVertexNormals().length : 0;
+      int texCoordsCount    = meshData.getTexturePoints() != null ? meshData.getTexturePoints().length : 0;
+      int safeVertexCount   = vertexCount;
+      // Ensure we don't index past normals / UVs
+      safeVertexCount = Math.min(safeVertexCount, normalsCount);
+      safeVertexCount = Math.min(safeVertexCount, texCoordsCount);
+
+      for (int i = 0; i < safeVertexCount; i++)
       {
          Vector3 position = LibGDXTools.toLibGDX(meshData.getVertices()[i]);
-         Vector3 normal = LibGDXTools.toLibGDX(meshData.getVertexNormals()[i]);
+
+         Vector3 normal = (i < normalsCount)
+               ? LibGDXTools.toLibGDX(meshData.getVertexNormals()[i])
+               : new Vector3(0f, 0f, 1f); // fallback
+
+         Vector2 uv = (i < texCoordsCount)
+               ? LibGDXTools.toLibGDX(meshData.getTexturePoints()[i])
+               : new Vector2(0f, 0f); // fallback
+
          Color color = Color.WHITE;
-         Vector2 uvTextureCoordinates = LibGDXTools.toLibGDX(meshData.getTexturePoints()[i]);
-         meshBuilder.vertex(position, normal, color, uvTextureCoordinates);
+         meshBuilder.vertex(position, normal, color, uv);
       }
 
-      for (int i = 0; i < meshData.getTriangleIndices().length; i += 3)
+      int[] indices = meshData.getTriangleIndices();
+      int maxVertexIndex = safeVertexCount; // indices must refer only to vertices we actually emitted
+
+      for (int i = 0; i + 2 < indices.length; i += 3)
       {
-         meshBuilder.triangle((short) meshData.getTriangleIndices()[i],
-                              (short) meshData.getTriangleIndices()[i + 1],
-                              (short) meshData.getTriangleIndices()[i + 2]);
+         int i0 = indices[i];
+         int i1 = indices[i + 1];
+         int i2 = indices[i + 2];
+
+         if (i0 < 0 || i1 < 0 || i2 < 0 ||
+             i0 >= maxVertexIndex || i1 >= maxVertexIndex || i2 >= maxVertexIndex)
+            continue;
+
+         meshBuilder.triangle((short) i0, (short) i1, (short) i2);
       }
 
       return meshBuilder.end();
