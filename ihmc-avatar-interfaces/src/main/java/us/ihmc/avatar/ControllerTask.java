@@ -58,7 +58,8 @@ public class ControllerTask extends HumanoidRobotControlTask
       long oldDivisor = getDivisor();
       long schedulerTick = controllerThread.getHumanoidRobotContextData().getSchedulerTick();
       int divisor = (int) Math.round(controllerThread.getCurrentDT() / schedulerDt);
-      setDivisor(divisor);
+      if (divisor != oldDivisor)
+         setDivisor(divisor);
       ticksBehindScheduled.set(schedulerTick - timer.getTickCount() * oldDivisor);
       controllerThread.run();
       runAll(postControllerCallbacks);
