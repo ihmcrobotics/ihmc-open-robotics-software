@@ -32,6 +32,7 @@ import static guru.nidi.graphviz.model.Factory.mutNode;
 
 public class RobotDefinitionTreeRenderer
 {
+   private final RobotDefinition robotDefinition;
    private final List<JointDefinitionLabelProvider> jointLabelProviders = new ArrayList<>();
    private final List<RigidBodyDefinitionLabelProvider> rigidBodyLabelProviders = new ArrayList<>();
 
@@ -45,7 +46,13 @@ public class RobotDefinitionTreeRenderer
       String getLabel(RigidBodyDefinition rigidBodyDefinition);
    }
 
-   public RobotDefinitionTreeRenderer(RobotDefinition robotDefinition, String filenamePostfix)
+   public RobotDefinitionTreeRenderer(RobotDefinition robotDefinition)
+   {
+      this.robotDefinition = robotDefinition;
+      initializeLabelProviders();
+   }
+
+   private void initializeLabelProviders()
    {
       jointLabelProviders.add(JointDefinition::getName);
       rigidBodyLabelProviders.add(RigidBodyDefinition::getName);
@@ -304,19 +311,49 @@ public class RobotDefinitionTreeRenderer
          else
             return null;
       });
+   }
 
+   /**
+    * Renders the robot definition tree as a Graphviz PNG file.
+    */
+   public void renderGraphviz()
+   {
       MutableGraph graph = mutGraph("MultiBodySystemView").setDirected(true);
       MutableNode rootNode = createRigidBodyNode(robotDefinition.getRootBodyDefinition(), graph);
       addChildrenToGraph(robotDefinition.getRootBodyDefinition(), rootNode, graph);
 
       try
       {
-         Graphviz.fromGraph(graph).render(Format.PNG).toFile(new File(robotDefinition.getName() + filenamePostfix + ".png"));
+         Graphviz.fromGraph(graph).render(Format.PNG).toFile(new File(robotDefinition.getName() + ".png"));
       }
       catch (IOException e)
       {
          e.printStackTrace();
       }
+   }
+
+   /**
+    * Renders the robot definition tree as an ASCII art tree with detailed box formatting.
+    * Prints the output to console.
+    */
+   public void renderAscii()
+   {
+      StringBuilder output = new StringBuilder();
+      renderAsciiHeader(robotDefinition.getName(), output);
+      renderAsciiRigidBody(robotDefinition.getRootBodyDefinition(), "", true, output);
+      System.out.println(output.toString());
+   }
+
+   /**
+    * Renders the robot definition tree as a minimal ASCII tree showing only names.
+    * Prints the output to console.
+    */
+   public void renderAsciiMinimal()
+   {
+      StringBuilder output = new StringBuilder();
+      output.append(robotDefinition.getName()).append("\n");
+      renderAsciiMinimalRigidBody(robotDefinition.getRootBodyDefinition(), "", true, output);
+      System.out.println(output.toString());
    }
 
    private MutableNode createRigidBodyNode(RigidBodyDefinition rigidBodyDefinition, MutableGraph graph)
@@ -376,5 +413,170 @@ public class RobotDefinitionTreeRenderer
       ret += EuclidCoreIOTools.getStringOf("|", " |\n", ", ", matrix.getM10(), matrix.getM11(), matrix.getM12());
       ret += EuclidCoreIOTools.getStringOf("\\\\", " /", ", ", matrix.getM20(), matrix.getM21(), matrix.getM22());
       return ret;
+   }
+
+   // ASCII rendering methods (from RobotDefinitionTreeRenderer2)
+
+   private void renderAsciiHeader(String robotName, StringBuilder output)
+   {
+      String headerLine = "╔" + "═".repeat(78) + "╗";
+      String titleLine = "║  ROBOT DEFINITION TREE: " + robotName + " ".repeat(78 - 26 - robotName.length()) + "║";
+      String separatorLine = "╚" + "═".repeat(78) + "╝";
+
+      output.append(headerLine).append("\n");
+      output.append(titleLine).append("\n");
+      output.append(separatorLine).append("\n\n");
+   }
+
+   private void renderAsciiRigidBody(RigidBodyDefinition rigidBodyDefinition, String prefix, boolean isRoot, StringBuilder output)
+   {
+      // Render the body box
+      String bodyLabel = getRigidBodyLabel(rigidBodyDefinition);
+      String[] lines = bodyLabel.split("\n");
+
+      // Calculate max line width for box
+      int maxWidth = 0;
+      for (String line : lines)
+      {
+         maxWidth = Math.max(maxWidth, line.length());
+      }
+      maxWidth = Math.min(maxWidth, 100); // Cap at reasonable width
+
+      // Draw top border
+      if (isRoot)
+      {
+         output.append(prefix).append("┌─ RIGID BODY ").append("─".repeat(Math.max(0, maxWidth - 11))).append("┐\n");
+      }
+      else
+      {
+         output.append(prefix).append("    ┌─ RIGID BODY ").append("─".repeat(Math.max(0, maxWidth - 11))).append("┐\n");
+      }
+
+      // Draw body content
+      for (String line : lines)
+      {
+         if (isRoot)
+         {
+            output.append(prefix).append("│ ").append(line).append(" ".repeat(Math.max(0, maxWidth - line.length() + 1))).append("│\n");
+         }
+         else
+         {
+            output.append(prefix).append("    │ ").append(line).append(" ".repeat(Math.max(0, maxWidth - line.length() + 1))).append("│\n");
+         }
+      }
+
+      // Draw bottom border
+      if (isRoot)
+      {
+         output.append(prefix).append("└").append("─".repeat(maxWidth + 2)).append("┘\n");
+      }
+      else
+      {
+         output.append(prefix).append("    └").append("─".repeat(maxWidth + 2)).append("┘\n");
+      }
+
+      // Render child joints and bodies
+      List<JointDefinition> childJoints = rigidBodyDefinition.getChildrenJoints();
+      for (int i = 0; i < childJoints.size(); i++)
+      {
+         JointDefinition joint = childJoints.get(i);
+         boolean isLast = (i == childJoints.size() - 1);
+
+         renderAsciiJoint(joint, prefix, isLast, output);
+         renderAsciiRigidBody(joint.getSuccessor(), prefix + (isLast ? "    " : "│   "), false, output);
+      }
+   }
+
+   private void renderAsciiJoint(JointDefinition joint, String prefix, boolean isLast, StringBuilder output)
+   {
+      String jointLabel = getJointLabel(joint);
+      String[] lines = jointLabel.split("\n");
+
+      // Calculate max line width
+      int maxWidth = 0;
+      for (String line : lines)
+      {
+         maxWidth = Math.max(maxWidth, line.length());
+      }
+      maxWidth = Math.min(maxWidth, 100);
+
+      // Draw connector
+      String connector = isLast ? "└──" : "├──";
+      output.append(prefix).append(connector).append("┬─ JOINT ").append("─".repeat(Math.max(0, maxWidth - 6))).append("┐\n");
+
+      // Draw joint content
+      for (int i = 0; i < lines.length; i++)
+      {
+         String line = lines[i];
+         String linePrefix = isLast ? "    " : "│   ";
+         output.append(prefix).append(linePrefix).append("│ ").append(line).append(" ".repeat(Math.max(0, maxWidth - line.length() + 1))).append("│\n");
+      }
+
+      // Draw bottom border
+      String bottomPrefix = isLast ? "    " : "│   ";
+      output.append(prefix).append(bottomPrefix).append("└").append("─".repeat(maxWidth + 2)).append("┘\n");
+   }
+
+   private String getRigidBodyLabel(RigidBodyDefinition rigidBodyDefinition)
+   {
+      String label = "";
+
+      for (int i = 0; i < rigidBodyLabelProviders.size(); i++)
+      {
+         String additionalLabel = rigidBodyLabelProviders.get(i).getLabel(rigidBodyDefinition);
+         if (additionalLabel != null)
+         {
+            if (!label.isEmpty())
+               label += "\n";
+            label += additionalLabel;
+         }
+      }
+
+      return label.isEmpty() ? "Unnamed Body" : label;
+   }
+
+   private String getJointLabel(JointDefinition joint)
+   {
+      String label = "";
+
+      for (int i = 0; i < jointLabelProviders.size(); i++)
+      {
+         String additionalLabel = jointLabelProviders.get(i).getLabel(joint);
+         if (additionalLabel != null)
+         {
+            if (!label.isEmpty())
+               label += "\n";
+            label += additionalLabel;
+         }
+      }
+
+      return label.isEmpty() ? "Unnamed Joint" : label;
+   }
+
+   // Minimal ASCII rendering methods (from RobotDefinitionTreeRenderer3)
+
+   private void renderAsciiMinimalRigidBody(RigidBodyDefinition rigidBodyDefinition, String prefix, boolean isRoot, StringBuilder output)
+   {
+      if (!isRoot)
+      {
+         output.append(prefix).append("└─ ").append(rigidBodyDefinition.getName()).append("\n");
+      }
+      else
+      {
+         output.append(rigidBodyDefinition.getName()).append("\n");
+      }
+
+      List<JointDefinition> childJoints = rigidBodyDefinition.getChildrenJoints();
+      for (int i = 0; i < childJoints.size(); i++)
+      {
+         JointDefinition joint = childJoints.get(i);
+         boolean isLast = (i == childJoints.size() - 1);
+
+         String connector = isLast ? "└─ " : "├─ ";
+         String childPrefix = isRoot ? (isLast ? "   " : "│  ") : prefix + (isLast ? "   " : "│  ");
+
+         output.append(prefix).append(connector).append("[").append(joint.getName()).append("]\n");
+         renderAsciiMinimalRigidBody(joint.getSuccessor(), childPrefix, false, output);
+      }
    }
 }

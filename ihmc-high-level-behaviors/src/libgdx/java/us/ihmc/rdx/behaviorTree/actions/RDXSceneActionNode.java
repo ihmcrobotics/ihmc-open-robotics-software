@@ -11,7 +11,9 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseObject;
 import us.ihmc.perception.detections.yolo.YOLOv8Tools;
 import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeRootNode;
+import us.ihmc.rdx.imgui.ImFloatWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.imgui.ImIntegerWrapper;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,6 +32,8 @@ public class RDXSceneActionNode extends RDXActionNode<SceneActionNodeState, Scen
    private final String[] fpTypeNames;
    private final String[] availableYOLOModelNames;
    private final String[][] availableYOLOClasses;
+   private final ImFloatWrapper timeoutWidget;
+   private final ImIntegerWrapper minHistorySizeWidget;
 
    public RDXSceneActionNode(long id, RDXBehaviorTreeRootNode rootNode)
    {
@@ -65,6 +69,13 @@ public class RDXSceneActionNode extends RDXActionNode<SceneActionNodeState, Scen
             DefaultExceptionHandler.MESSAGE_AND_STACKTRACE.handleException(e);
          }
       }
+
+      timeoutWidget = new ImFloatWrapper(definition::getTimeout,
+                                         definition::setTimeout,
+                                         imFloat -> ImGui.inputFloat(labels.get("Timeout"), imFloat));
+      minHistorySizeWidget = new ImIntegerWrapper(definition::getMinimumHistorySize,
+                                                  definition::setMinimumHistorySize,
+                                                  imInteger -> ImGui.inputInt(labels.get("Minimum History Size"), imInteger));
    }
 
    @Override
@@ -105,6 +116,11 @@ public class RDXSceneActionNode extends RDXActionNode<SceneActionNodeState, Scen
             objectDefinition.setFoundationPoseObjectType(IsaacROSFoundationPoseObject.values()[imFPType.get()]);
          ImGui.popItemWidth();
       }
+
+      ImGui.pushItemWidth(100.0f);
+      timeoutWidget.renderImGuiWidget();
+      minHistorySizeWidget.renderImGuiWidget();
+      ImGui.popItemWidth();
    }
 
    @Override

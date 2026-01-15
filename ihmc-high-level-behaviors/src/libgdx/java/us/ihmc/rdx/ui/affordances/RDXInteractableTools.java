@@ -7,7 +7,6 @@ import us.ihmc.rdx.simulation.scs2.RDXMultiBodySystemFactories;
 import us.ihmc.rdx.simulation.scs2.RDXRigidBody;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.scs2.definition.geometry.ModelFileGeometryDefinition;
-import us.ihmc.scs2.definition.robot.JointDefinition;
 import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.robot.SixDoFJointDefinition;
@@ -36,8 +35,9 @@ public class RDXInteractableTools
 
    public static RDXRigidBody loadAbilityHand(RobotDefinition robotDefinition, RobotSide side)
    {
-      JointDefinition handMountJoint = robotDefinition.getJointDefinition(side.getLowerCaseName() + "_hand_mount"); // specific to urdf convention
-      RigidBodyDefinition wristLink = handMountJoint.getPredecessor(); // must start with wrist link so the mount transform is included
+      RigidBodyDefinition wristLink = robotDefinition.getRigidBodyDefinition(side.getLowerCaseName() + "_wrist_yaw_link"); // H1
+      if (wristLink == null)
+         wristLink = robotDefinition.getRigidBodyDefinition(side.getSideNameInAllCaps() + "_GRIPPER_Z_LINK"); // Alex
 
       RDXRigidBody body = null;
       if (wristLink != null)
@@ -49,7 +49,8 @@ public class RDXInteractableTools
          elevator.addChildJoint(floatingRoot);
          RigidBodyDefinition copiedWristLink = wristLink.copyRecursive();
          floatingRoot.setSuccessor(copiedWristLink);
-         copiedWristLink.getVisualDefinitions().clear(); // We just want to show the hand
+         copiedWristLink.getVisualDefinitions().removeIf(definition -> definition.getName() != null // Keep only hand mesh
+                                                                       && !definition.getName().toLowerCase().contains("palm_mesh"));
 
          RigidBodyBasics handMultiBody = handRobot.newInstance(ReferenceFrame.getWorldFrame());
          body = RDXMultiBodySystemFactories.toRDXMultiBodySystem(handMultiBody, handRobot);
