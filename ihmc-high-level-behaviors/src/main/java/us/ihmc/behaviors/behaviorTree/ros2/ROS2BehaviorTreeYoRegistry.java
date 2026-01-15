@@ -10,8 +10,10 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.AutonomyAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.idl.IDLSequence.Object;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
@@ -31,7 +33,8 @@ import us.ihmc.yoVariables.variable.YoLong;
  */
 public class ROS2BehaviorTreeYoRegistry
 {
-   protected final YoRegistry registry = new YoRegistry("BehaviorTreeExecutor");
+   private final FullHumanoidRobotModel fullRobotModel;
+   private final YoRegistry registry = new YoRegistry("BehaviorTreeExecutor");
    private final Notification notification = new Notification();
    private final SwapReference<BehaviorTreeStateMessage> subscription;
 
@@ -52,13 +55,17 @@ public class ROS2BehaviorTreeYoRegistry
    private final YoInteger[] executingActionIDs = new YoInteger[5];
    private final YoDouble[] elapsedExecutionTimes = new YoDouble[5];
    private final SideDependentList<YoLong> handActionStatesReceived = new SideDependentList<>();
+   private final RigidBodyTransform transform = new RigidBodyTransform();
+   private final YoPose3D estimatorChestPose;
+   private final SideDependentList<YoPose3D> estimatorHandPoses = new SideDependentList<>();
    private final SideDependentList<YoPose3D> currentHandPoses = new SideDependentList<>();
    private final SideDependentList<YoPose3D> goalHandPoses = new SideDependentList<>();
    private final YoPose3D sceneObject0 = new YoPose3D("sceneObject0", registry);
-   private final RigidBodyTransform sceneObject0Transform = new RigidBodyTransform();
 
-   public ROS2BehaviorTreeYoRegistry(ROS2Node ros2Node)
+   public ROS2BehaviorTreeYoRegistry(ROS2Node ros2Node, FullHumanoidRobotModel fullRobotModel)
    {
+      this.fullRobotModel = fullRobotModel;
+
       subscription = ROS2Tools.createSwapReferenceSubscription(ros2Node, AutonomyAPI.BEHAVIOR_TREE.getStatusTopic(), notification);
 
       for (int i = 0; i < executingActionTypes.length; i++)
@@ -68,8 +75,10 @@ public class ROS2BehaviorTreeYoRegistry
          elapsedExecutionTimes[i] = new YoDouble("elapsedExecutionTime" + i, registry);
       }
 
+      estimatorChestPose = new YoPose3D("estimatorChestPose", registry);
       for (RobotSide side : RobotSide.values)
       {
+         estimatorHandPoses.put(side, new YoPose3D("estimatorHandPose" + side.getPascalCaseName(), registry));
          handActionStatesReceived.put(side, new YoLong("handActionStatesReceived" + side.getPascalCaseName(), registry));
          currentHandPoses.put(side, new YoPose3D("currentHandPose" + side.getPascalCaseName(), registry));
          goalHandPoses.put(side, new YoPose3D("goalHandPose" + side.getPascalCaseName(), registry));
@@ -80,6 +89,14 @@ public class ROS2BehaviorTreeYoRegistry
    {
       try // Make sure exceptions don't crash controller
       {
+         fullRobotModel.getChest().getParentJoint().getFrameAfterJoint().getTransformToDesiredFrame(transform, ReferenceFrame.getWorldFrame());
+         estimatorChestPose.set(transform);
+         for (RobotSide side : RobotSide.values)
+         {
+            fullRobotModel.getHandControlFrame(side).getTransformToDesiredFrame(transform, ReferenceFrame.getWorldFrame());
+            estimatorHandPoses.get(side).set(transform);
+         }
+
          if (notification.poll())
          {
             synchronized (subscription)
@@ -94,8 +111,8 @@ public class ROS2BehaviorTreeYoRegistry
                   sceneObject0.setToNaN();
                else
                {
-                  MessageTools.toEuclid(state.getScene().getObjects().get(0).getTransformToWorld(), sceneObject0Transform);
-                  sceneObject0.set(sceneObject0Transform);
+                  MessageTools.toEuclid(state.getScene().getObjects().get(0).getTransformToWorld(), transform);
+                  sceneObject0.set(transform);
                }
 
                subscriptionRootNode.clear();
