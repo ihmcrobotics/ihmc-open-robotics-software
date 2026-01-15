@@ -102,7 +102,11 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    {
       double dt = 0.0;
       for (HighLevelControllerName name : HighLevelControllerName.values)
-         dt = Math.max(getHighLevelControllerParameters().getControlDT(name), dt);
+      {
+         double stateDT = getHighLevelControllerParameters().getControlDT(name);
+         if (stateDT > 0.0)
+            dt = Math.max(stateDT, dt);
+      }
       return dt;
    }
 
@@ -110,7 +114,11 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    {
       double dt = Double.POSITIVE_INFINITY;
       for (HighLevelControllerName name : HighLevelControllerName.values)
-         dt = Math.min(getHighLevelControllerParameters().getControlDT(name), dt);
+      {
+         double stateDT = getHighLevelControllerParameters().getControlDT(name);
+         if (stateDT > 0.0)
+            dt = Math.min(stateDT, dt);
+      }
       return dt;
    }
 
