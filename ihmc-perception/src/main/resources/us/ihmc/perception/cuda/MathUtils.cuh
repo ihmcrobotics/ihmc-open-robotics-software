@@ -3,25 +3,25 @@
 
 const float PI_F = 3.1415927f;
 
-__host__ __device__ __forceinline__
+__device__ __forceinline__
 float3 operator+(const float3& a, const float3& b)
 {
     return make_float3(a.x + b.x, a.y + b.y, a.z + b.z);
 }
 
-__host__ __device__ __forceinline__
+__device__ __forceinline__
 float3 operator-(const float3& a, const float3& b)
 {
     return make_float3(a.x - b.x, a.y - b.y, a.z - b.z);
 }
 
-__host__ __device__ __forceinline__
+__device__ __forceinline__
 float3 operator*(const float3& a, const float scalar)
 {
     return make_float3(a.x * scalar, a.y * scalar, a.z * scalar);
 }
 
-__host__ __device__ __forceinline__
+__device__ __forceinline__
 float3 operator/(const float3& a, const float divisor)
 {
     return make_float3(a.x / divisor, a.y / divisor, a.z / divisor);

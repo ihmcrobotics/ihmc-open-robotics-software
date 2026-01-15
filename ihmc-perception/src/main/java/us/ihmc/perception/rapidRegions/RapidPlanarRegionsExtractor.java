@@ -92,7 +92,6 @@ public class RapidPlanarRegionsExtractor
    private int numberOfRegionPatches = 0;
    private int regionMaxSearchDepth = 0;
    private int boundaryMaxSearchDepth = 0;
-   private int numberOfBoundaryPatchesInWholeImage = 0;
    private double maxSVDSolveTime = Double.NaN;
 
    private final int[] adjacentY = {-1, -1, -1, 0, 0, 1, 1, 1};
@@ -454,7 +453,6 @@ public class RapidPlanarRegionsExtractor
       if (searchDepth > boundaryMaxSearchDepth)
          boundaryMaxSearchDepth = searchDepth;
 
-      ++numberOfBoundaryPatchesInWholeImage;
       boundaryVisitedMatrix.set(row, column, true);
       regionRing.getBoundaryIndices().add().set(column, row);
 
