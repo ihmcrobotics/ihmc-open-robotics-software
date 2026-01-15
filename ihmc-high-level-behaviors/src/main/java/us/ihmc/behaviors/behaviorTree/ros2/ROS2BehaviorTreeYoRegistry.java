@@ -45,6 +45,7 @@ public class ROS2BehaviorTreeYoRegistry
    private final YoLong messagesReceived = new YoLong("messagesReceived", registry);
    private final YoInteger persistentDetections = new YoInteger("persistentDetections", registry);
    private final YoInteger sceneObjects = new YoInteger("sceneObjects", registry);
+   private final YoPose3D[] sceneObjectPoses = new YoPose3D[3];
    private final YoBoolean automaticExecution = new YoBoolean("automaticExecution", registry);
    private final YoInteger executionNextIndex = new YoInteger("executionNextIndex", registry);
    private final YoBoolean concurrencyEnabled = new YoBoolean("concurrencyEnabled", registry);
@@ -60,13 +61,15 @@ public class ROS2BehaviorTreeYoRegistry
    private final SideDependentList<YoPose3D> estimatorHandPoses = new SideDependentList<>();
    private final SideDependentList<YoPose3D> currentHandPoses = new SideDependentList<>();
    private final SideDependentList<YoPose3D> goalHandPoses = new SideDependentList<>();
-   private final YoPose3D sceneObject0 = new YoPose3D("sceneObject0", registry);
 
    public ROS2BehaviorTreeYoRegistry(ROS2Node ros2Node, FullHumanoidRobotModel fullRobotModel)
    {
       this.fullRobotModel = fullRobotModel;
 
       subscription = ROS2Tools.createSwapReferenceSubscription(ros2Node, AutonomyAPI.BEHAVIOR_TREE.getStatusTopic(), notification);
+
+      for (int i = 0; i < sceneObjectPoses.length; i++)
+         sceneObjectPoses[i] = new YoPose3D("sceneObject" + i, registry);
 
       for (int i = 0; i < executingActionTypes.length; i++)
       {
@@ -107,12 +110,15 @@ public class ROS2BehaviorTreeYoRegistry
                persistentDetections.set(state.getScene().getPersistentDetections().size());
                sceneObjects.set(state.getScene().getObjects().size());
 
-               if (state.getScene().getObjects().isEmpty())
-                  sceneObject0.setToNaN();
-               else
+               for (int i = 0; i < sceneObjectPoses.length; i++)
                {
-                  MessageTools.toEuclid(state.getScene().getObjects().get(0).getTransformToWorld(), transform);
-                  sceneObject0.set(transform);
+                  if (i < state.getScene().getObjects().size())
+                  {
+                     MessageTools.toEuclid(state.getScene().getObjects().get(i).getTransformToWorld(), transform);
+                     sceneObjectPoses[i].set(transform);
+                  }
+                  else
+                     sceneObjectPoses[i].setToNaN();
                }
 
                subscriptionRootNode.clear();
