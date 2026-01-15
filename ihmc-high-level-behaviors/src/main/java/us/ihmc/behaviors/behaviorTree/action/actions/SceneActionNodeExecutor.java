@@ -1,7 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
 import behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage;
-import behavior_msgs.msg.dds.SceneActionNodeDefinitionMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectDefinition;
@@ -51,7 +50,7 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
    {
       state.setElapsedExecutionTime(timer.getElapsedTime());
 
-      double timeout = 5.0;
+      double timeout = definition.getTimeout();
       if (!timer.isRunning(timeout))
       {
          state.getLogger().error("Timed out after %.1f s without finding a suitable detection.".formatted(timeout));
@@ -118,7 +117,7 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
             }
          }
 
-         int minimumHistorySize = 5;
+         int minimumHistorySize = definition.getMinimumHistorySize();
          if (detection.getHistorySize() < minimumHistorySize)
          {
             if (printDebug)
