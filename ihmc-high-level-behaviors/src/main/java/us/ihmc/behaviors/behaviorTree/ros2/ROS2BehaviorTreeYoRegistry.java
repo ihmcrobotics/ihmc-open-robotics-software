@@ -9,6 +9,8 @@ import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.AutonomyAPI;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -52,6 +54,8 @@ public class ROS2BehaviorTreeYoRegistry
    private final SideDependentList<YoLong> handActionStatesReceived = new SideDependentList<>();
    private final SideDependentList<YoPose3D> currentHandPoses = new SideDependentList<>();
    private final SideDependentList<YoPose3D> goalHandPoses = new SideDependentList<>();
+   private final YoPose3D sceneObject0 = new YoPose3D("sceneObject0", registry);
+   private final RigidBodyTransform sceneObject0Transform = new RigidBodyTransform();
 
    public ROS2BehaviorTreeYoRegistry(ROS2Node ros2Node)
    {
@@ -85,6 +89,14 @@ public class ROS2BehaviorTreeYoRegistry
                messagesReceived.increment();
                persistentDetections.set(state.getScene().getPersistentDetections().size());
                sceneObjects.set(state.getScene().getObjects().size());
+
+               if (state.getScene().getObjects().isEmpty())
+                  sceneObject0.setToNaN();
+               else
+               {
+                  MessageTools.toEuclid(state.getScene().getObjects().get(0).getTransformToWorld(), sceneObject0Transform);
+                  sceneObject0.set(sceneObject0Transform);
+               }
 
                subscriptionRootNode.clear();
                depthFirstIndex = 0;
