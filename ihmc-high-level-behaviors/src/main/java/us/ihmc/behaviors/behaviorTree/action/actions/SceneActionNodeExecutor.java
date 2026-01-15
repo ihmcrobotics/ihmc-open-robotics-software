@@ -3,7 +3,6 @@ package us.ihmc.behaviors.behaviorTree.action.actions;
 import behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
-import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectDefinition;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectState;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectType;
@@ -23,6 +22,7 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
    private final Throttler throttler = new Throttler().setFrequency(1.0);
    private final Point3D cameraPosition = new Point3D();
    private final Vector3D detectionToCamera = new Vector3D();
+   private boolean printDebug = false;
 
    public SceneActionNodeExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
    {
@@ -59,27 +59,180 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
          return;
       }
 
-      boolean printDebug = throttler.run();
+      printDebug = throttler.run();
+      cameraPosition.set(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getExperimentalCameraFrame).getTranslation());
 
+      boolean success = false;
+
+      if (definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.DOOR_PANEL)
+         success |= setupDoorPanelDetection();
+      else
+         success |= setupSinglePersistentDetection();
+
+      if (success)
+         state.setIsExecuting(false);
+   }
+
+   private boolean setupDoorPanelDetection()
+   {
+      // First, find the closest door opening mechanism (lever, knob, push bar, or pull handle)
+      PersistentDetection openingMechanismDetection = null;
+      double closestMechanismDistanceSquared = Double.MAX_VALUE;
+
+      for (PersistentDetection detection : scene.getPersistentDetections())
+      {
+         // Only consider YOLOv8 detections
+         if (!(detection.getMostRecentDetection() instanceof YOLOv8InstantDetection yoloDetection))
+            continue;
+
+         String className = yoloDetection.getDetectedObjectClass();
+         boolean isOpeningMechanism = className.equals("door_lever")
+                                      || className.equals("door_knob")
+                                      || className.equals("door_push_bar")
+                                      || className.equals("door_pull_handle");
+
+         if (!isOpeningMechanism)
+            continue;
+
+         int minimumHistorySize = definition.getMinimumHistorySize();
+         if (detection.getHistorySize() < minimumHistorySize)
+         {
+            if (printDebug)
+               state.getLogger().warn("Door opening mechanism has history size {} but need at least {}",
+                                      detection.getHistorySize(), minimumHistorySize);
+            continue;
+         }
+
+         detectionToCamera.set(detection.getFilteredTransform().getTranslation());
+         detectionToCamera.sub(cameraPosition);
+         double distanceSquared = detectionToCamera.normSquared();
+
+         if (distanceSquared < closestMechanismDistanceSquared)
+         {
+            closestMechanismDistanceSquared = distanceSquared;
+            openingMechanismDetection = detection;
+         }
+      }
+
+      if (openingMechanismDetection == null)
+      {
+         if (printDebug)
+            state.getLogger().warn("No suitable door opening mechanism found (door_lever, door_knob, door_push_bar, or door_pull_handle).");
+         return false;
+      }
+
+      state.getLogger().info("Found door opening mechanism: {} with history size: {}",
+                             openingMechanismDetection.getMostRecentDetection().getDetectedObjectClass(),
+                             openingMechanismDetection.getHistorySize());
+
+      // Now find the closest door_panel detection to the opening mechanism
+      PersistentDetection doorPanelDetection = null;
+      double closestPanelToMechanismDistanceSquared = Double.MAX_VALUE;
+      Point3D openingMechanismPosition = new Point3D(openingMechanismDetection.getFilteredTransform().getTranslation());
+      Vector3D panelToMechanism = new Vector3D();
+
+      for (PersistentDetection detection : scene.getPersistentDetections())
+      {
+         // Only consider YOLOv8 detections
+         if (!(detection.getMostRecentDetection() instanceof YOLOv8InstantDetection yoloDetection))
+            continue;
+
+         String className = yoloDetection.getDetectedObjectClass();
+         if (!className.equals("door_panel"))
+            continue;
+
+         int minimumHistorySize = definition.getMinimumHistorySize();
+         if (detection.getHistorySize() < minimumHistorySize)
+         {
+            if (printDebug)
+               state.getLogger().warn("Door panel has history size {} but need at least {}",
+                                      detection.getHistorySize(), minimumHistorySize);
+            continue;
+         }
+
+         // Find closest panel to opening mechanism
+         panelToMechanism.set(detection.getFilteredTransform().getTranslation());
+         panelToMechanism.sub(openingMechanismPosition);
+         double distanceToMechanismSquared = panelToMechanism.normSquared();
+
+         if (distanceToMechanismSquared < closestPanelToMechanismDistanceSquared)
+         {
+            closestPanelToMechanismDistanceSquared = distanceToMechanismSquared;
+            doorPanelDetection = detection;
+         }
+      }
+
+      if (doorPanelDetection == null)
+      {
+         if (printDebug)
+            state.getLogger().warn("No suitable door_panel found.");
+         return false;
+      }
+
+      // Check that the closest panel is within 2 meters of the opening mechanism
+      double distanceToMechanism = Math.sqrt(closestPanelToMechanismDistanceSquared);
+      if (distanceToMechanism > 2.0)
+      {
+         if (printDebug)
+            state.getLogger().warn("Closest door_panel is %.2f m from opening mechanism, must be within 2.0 m".formatted(distanceToMechanism));
+         return false;
+      }
+
+      state.getLogger().info("Found door_panel with history size: {} at distance %.2f m from opening mechanism",
+                             doorPanelDetection.getHistorySize(),
+                             distanceToMechanism);
+
+      // Check if a door panel scene object already exists
+      BehaviorTreeSceneObjectExecutor targetSceneObject = null;
+      for (BehaviorTreeSceneObjectState object : scene.getObjects())
+      {
+         if (object.getObjectType() == BehaviorTreeSceneObjectType.DOOR_PANEL)
+         {
+            targetSceneObject = (BehaviorTreeSceneObjectExecutor) object;
+            break;
+         }
+      }
+
+      if (targetSceneObject != null)
+      {
+         state.getLogger().info("Updating existing door panel scene object");
+         targetSceneObject.setPersistentDetection(doorPanelDetection);
+      }
+      else
+      {
+         state.getLogger().info("Creating new door panel scene object");
+
+         BehaviorTreeSceneObjectDefinitionMessage message = new BehaviorTreeSceneObjectDefinitionMessage();
+         definition.getSceneObjectDefinition().toMessage(message);
+         targetSceneObject = (BehaviorTreeSceneObjectExecutor) scene.createObject(message);
+         targetSceneObject.setPersistentDetection(doorPanelDetection);
+         scene.getObjects().add(targetSceneObject);
+         scene.getObjectsModifiable().modify();
+      }
+
+      return true;
+   }
+
+   private boolean setupSinglePersistentDetection()
+   {
       // Find a close stable detection
       PersistentDetection bestDetection = null;
       double closestDistanceSquared = Double.MAX_VALUE;
-      BehaviorTreeSceneObjectDefinition desiredObjectDefinition = definition.getSceneObjectDefinition();
-      cameraPosition.set(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getExperimentalCameraFrame).getTranslation());
+
       for (PersistentDetection detection : scene.getPersistentDetections())
       {
          if (detection.getMostRecentDetection() instanceof IsaacROSFoundationPoseInstantDetection fpDetection)
          {
-            if (!(desiredObjectDefinition.getObjectType() == BehaviorTreeSceneObjectType.FOUNDATION_POSE))
+            if (!(definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.FOUNDATION_POSE))
             {
                if (printDebug)
-                  state.getLogger().warn("Need %s but found FoundationPose name: %s".formatted(desiredObjectDefinition.getObjectType().name(),
+                  state.getLogger().warn("Need %s but found FoundationPose name: %s".formatted(definition.getSceneObjectDefinition().getObjectType().name(),
                                                                                                fpDetection.getObject().name()));
 
                continue;
             }
 
-            IsaacROSFoundationPoseObject desiredFPType = desiredObjectDefinition.getFoundationPoseObjectType();
+            IsaacROSFoundationPoseObject desiredFPType = definition.getSceneObjectDefinition().getFoundationPoseObjectType();
             if (fpDetection.getObject() != desiredFPType)
             {
                if (printDebug)
@@ -88,26 +241,19 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
                continue;
             }
          }
-         else if (desiredObjectDefinition.getObjectType() == BehaviorTreeSceneObjectType.DOOR_PANEL)
-         {
-            if (printDebug)
-               state.getLogger().warn("Door panel not yet implemented.");
-
-            continue;
-         }
          else if (detection.getMostRecentDetection() instanceof YOLOv8InstantDetection yoloDetection)
          {
-            if (!(desiredObjectDefinition.getObjectType() == BehaviorTreeSceneObjectType.YOLO_ONLY))
+            if (!(definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.YOLO_ONLY))
             {
                if (printDebug)
                   state.getLogger().warn("Need %s but found YOLOv8 name: %s"
-                                               .formatted(desiredObjectDefinition.getObjectType().name(),
+                                               .formatted(definition.getSceneObjectDefinition().getObjectType().name(),
                                                           detection.getMostRecentDetection().getDetectedObjectClass()));
 
                continue;
             }
 
-            String desiredYOLOClass = desiredObjectDefinition.getYoloClassName();
+            String desiredYOLOClass = definition.getSceneObjectDefinition().getYoloClassName();
             if (!yoloDetection.getDetectedObjectClass().equals(desiredYOLOClass))
             {
                if (printDebug)
@@ -141,8 +287,8 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
       {
          if (printDebug)
             state.getLogger().warn("No suitable persistent detection found. There are currently {} persistent detections.",
-                                    scene.getPersistentDetections().size());
-         return;
+                                   scene.getPersistentDetections().size());
+         return false;
       }
 
       state.getLogger().info("Found persistent detection with history size: {}", bestDetection.getHistorySize());
@@ -151,12 +297,12 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
       BehaviorTreeSceneObjectExecutor targetSceneObject = null;
       for (BehaviorTreeSceneObjectState object : scene.getObjects())
       {
-         if (object.getObjectType() == desiredObjectDefinition.getObjectType())
+         if (object.getObjectType() == definition.getSceneObjectDefinition().getObjectType())
          {
-            boolean match = desiredObjectDefinition.getObjectType() == BehaviorTreeSceneObjectType.YOLO_ONLY
-                            && object.getYoloClassName().equals(desiredObjectDefinition.getYoloClassName());
-            match |= desiredObjectDefinition.getObjectType() == BehaviorTreeSceneObjectType.FOUNDATION_POSE
-                     && object.getFoundationPoseObjectType() == desiredObjectDefinition.getFoundationPoseObjectType();
+            boolean match = definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.YOLO_ONLY
+                            && object.getYoloClassName().equals(definition.getSceneObjectDefinition().getYoloClassName());
+            match |= definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.FOUNDATION_POSE
+                     && object.getFoundationPoseObjectType() == definition.getSceneObjectDefinition().getFoundationPoseObjectType();
             if (match)
             {
                targetSceneObject = (BehaviorTreeSceneObjectExecutor) object;
@@ -167,21 +313,21 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
 
       if (targetSceneObject != null)
       {
-         state.getLogger().info("Updating existing scene object for type: {}", desiredObjectDefinition.getName());
+         state.getLogger().info("Updating existing scene object for type: {}", definition.getSceneObjectDefinition().getName());
          targetSceneObject.setPersistentDetection(bestDetection);
       }
       else
       {
-         state.getLogger().info("Creating new scene object for type: {}", desiredObjectDefinition.getName());
+         state.getLogger().info("Creating new scene object for type: {}", definition.getSceneObjectDefinition().getName());
 
          BehaviorTreeSceneObjectDefinitionMessage message = new BehaviorTreeSceneObjectDefinitionMessage();
-         desiredObjectDefinition.toMessage(message);
+         definition.getSceneObjectDefinition().toMessage(message);
          targetSceneObject = (BehaviorTreeSceneObjectExecutor) scene.createObject(message);
          targetSceneObject.setPersistentDetection(bestDetection);
          scene.getObjects().add(targetSceneObject);
          scene.getObjectsModifiable().modify();
       }
 
-      state.setIsExecuting(false);
+      return true;
    }
 }
