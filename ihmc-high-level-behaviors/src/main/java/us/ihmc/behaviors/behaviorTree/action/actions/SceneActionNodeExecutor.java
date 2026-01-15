@@ -179,9 +179,9 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
          return false;
       }
 
-      state.getLogger().info("Found door_panel with history size: {} at distance %.2f m from opening mechanism",
+      state.getLogger().info("Found door_panel with history size: %d at distance %.2f m from opening mechanism".formatted(
                              doorPanelDetection.getHistorySize(),
-                             distanceToMechanism);
+                             distanceToMechanism));
 
       // Check if a door panel scene object already exists
       BehaviorTreeSceneDoorPanelExecutor targetSceneObject = null;
@@ -207,7 +207,7 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
          BehaviorTreeSceneObjectDefinitionMessage message = new BehaviorTreeSceneObjectDefinitionMessage();
          definition.getSceneObjectDefinition().toMessage(message);
          targetSceneObject = (BehaviorTreeSceneDoorPanelExecutor) scene.createObject(message);
-         targetSceneObject.setPersistentDetection(doorPanelDetection);
+         targetSceneObject.setPersistentDetection(openingMechanismDetection);
          targetSceneObject.setDoorPanelPersistentDetection(doorPanelDetection);
          scene.getObjects().add(targetSceneObject);
          scene.getObjectsModifiable().modify();

@@ -28,6 +28,7 @@ public class RDXBehaviorTreeSceneDoorPanel extends RDXBehaviorTreeSceneObject
 
       model = RDXModelLoader.load("environmentObjects/door_panel/door_panel.glb");
       modelInstance = new RDXModelInstance(model);
+      modelInstance.setOpacity(0.3f);
    }
 
    @Override
@@ -35,7 +36,8 @@ public class RDXBehaviorTreeSceneDoorPanel extends RDXBehaviorTreeSceneObject
    {
       super.update();
 
-      modelOffset.getRotation().setToPitchOrientation(Math.PI / 2.0); // TODO Tune this
+      modelOffset.setToZero();
+      modelOffset.appendTranslation(0.4, 0.0, 0.0); // Could tune better
 
       detectionFrame.update();
       modelFrame.update();
