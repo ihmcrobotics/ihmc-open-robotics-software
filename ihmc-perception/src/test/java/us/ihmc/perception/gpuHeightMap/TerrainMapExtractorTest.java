@@ -143,9 +143,6 @@ public class TerrainMapExtractorTest
       byte[] snapNormalYMap = terrainMapData.getSnapNormalYMap();
       byte[] snapNormalZMap = terrainMapData.getSnapNormalZMap();
 
-      LogTools.info("normal: " + terrainMapData.getNormal(0.3, 0.0));
-      System.out.println(terrainMapData.getTraversabilityClass(0.3, 0.0));
-
       for (int i = 0; i < cellsPerAxis; i++)
       {
          for (int j = 0; j < cellsPerAxis; j++)

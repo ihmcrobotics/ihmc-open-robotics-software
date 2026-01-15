@@ -189,4 +189,59 @@ __device__ double solveForPlaneCoefficients(double* covariance_matrix, double* z
     return squared_error / n;
 }
 
+/**
+ * Compute the mean squared error of a plane fit using least-squares sums.
+ *
+ * The plane is defined as: z = A*x + B*y + C
+ * The inputs are precomputed sums from the sampled points:
+ *   - sum_xx, sum_xy, sum_yy: sums of products of x and y
+ *   - sum_xz, sum_yz, sum_zz: sums of products of x,y with z (relative to max)
+ *   - sum_x, sum_y, sum_z: sums of x, y, z coordinates
+ *   - num_points: total number of points used in the fit
+ *
+ * This makes the least-squares squared error calculation explicit
+ * and easy to read/debug, using temporary variables for clarity.
+ */
+__device__ float computePlaneSquaredErrorVerbose(
+    const float coefficients[3],  // [A, B, C]
+    float sum_xx, float sum_xy, float sum_x,
+    float sum_yy, float sum_y,
+    float sum_xz, float sum_yz, float sum_z,
+    float sum_zz,
+    float num_points)
+{
+    float A = coefficients[0]; // Plane slope in x
+    float B = coefficients[1]; // Plane slope in y
+    float C = coefficients[2]; // Plane intercept
+
+    // ---- Terms from x contributions ----
+    float term_xx = A * A * sum_xx;       // A^2 * Σ(x_i^2)
+    float term_xy = 2.0f * A * B * sum_xy; // 2 * A * B * Σ(x_i*y_i)
+    float term_xz = 2.0f * A * sum_xz;     // 2 * A * Σ(x_i * z_i)
+    float term_xC = 2.0f * A * C * sum_x;  // 2 * A * C * Σ(x_i)
+
+    // ---- Terms from y contributions ----
+    float term_yy = B * B * sum_yy;       // B^2 * Σ(y_i^2)
+    float term_yz = 2.0f * B * sum_yz;     // 2 * B * Σ(y_i * z_i)
+    float term_yC = 2.0f * B * C * sum_y;  // 2 * B * C * Σ(y_i)
+
+    // ---- Terms from constant C ----
+    float term_CC = C * C * num_points;    // C^2 * n
+    float term_Cz = 2.0f * C * sum_z;      // 2 * C * Σ(z_i)
+
+    // ---- Terms independent of plane coefficients ----
+    float term_zz = sum_zz;                // Σ(z_i^2)
+
+    // ---- Sum all contributions to get total squared error ----
+    float total_squared_error = term_xx + term_xy + term_xz + term_xC
+                              + term_yy + term_yz + term_yC
+                              + term_CC + term_Cz
+                              + term_zz;
+
+    // ---- Normalize by number of points to get mean squared error ----
+    float mean_squared_error = total_squared_error / num_points;
+
+    return mean_squared_error;
+}
+
 #endif // MATH_UTILS

@@ -23,6 +23,41 @@ extern "C"
 #define TOO_STEEP 4
 #define CLIFF_TOP 5
 
+__device__ bool choleskySolve3x3(const float A[9], const float b[3], float x[3])
+{
+    // Lower triangular L
+    float L00, L10, L11, L20, L21, L22;
+
+    // Factorization L * L^T = A
+    L00 = sqrtf(A[0]);
+    if (L00 < 1e-6f) return false;
+
+    L10 = A[3] / L00;
+    L20 = A[6] / L00;
+
+    float t11 = A[4] - L10 * L10;
+    if (t11 < 1e-6f) return false;
+    L11 = sqrtf(t11);
+
+    L21 = (A[7] - L20 * L10) / L11;
+
+    float t22 = A[8] - L20 * L20 - L21 * L21;
+    if (t22 < 1e-6f) return false;
+    L22 = sqrtf(t22);
+
+    // Forward substitution: L * y = b
+    float y0 = b[0] / L00;
+    float y1 = (b[1] - L10 * y0) / L11;
+    float y2 = (b[2] - L20 * y0 - L21 * y1) / L22;
+
+    // Backward substitution: L^T * x = y
+    x[2] = y2 / L22;
+    x[1] = (y1 - L21 * x[2]) / L11;
+    x[0] = (y0 - L10 * x[1] - L20 * x[2]) / L00;
+
+    return true;
+}
+
 /*
    This kernel is designed to compute the average snap height for every cell in the window. This can be done by either snapping a rectangular foot down if
    there's a known yaw, or, more efficiently, a circle on the ground, where you don't need to know the yaw. It also computes the local normal at that cell.
@@ -88,16 +123,16 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
     }
 
     // Setup values to perform a least squares fit of the foot to the height map, but omitting any points that are too far below the foot.
-    double n = 0.0f;
-    double x = 0.0f;
-    double y = 0.0f;
-    double z = 0.0f;
-    double xx = 0.0f;
-    double xy = 0.0f;
-    double xz = 0.0f;
-    double yy = 0.0f;
-    double yz = 0.0f;
-    double zz = 0.0f;
+    float n = 0.0f;
+    float x = 0.0f;
+    float y = 0.0f;
+    float z = 0.0f;
+    float xx = 0.0f;
+    float xy = 0.0f;
+    float xz = 0.0f;
+    float yy = 0.0f;
+    float yz = 0.0f;
+    float zz = 0.0f;
 
     int max_points_possible_under_support = 0;
 
@@ -184,33 +219,66 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
 
     // Perform best fit plane
     float3 normal = make_float3(0.0f, 0.0f, 1.0f);
-    double coefficients[3] = {0.0, 0.0, 0.0};
+    // Output coefficients (A, B, C)
+    float coefficients[3] = {0.0f, 0.0f, 0.0f};
 
     if (traversability_result == VALID)
     {
         // Solve for the plane normal, as well as the height of the foot along that plane.
-        double covariance_matrix[9] = {xx, xy, x, xy, yy, y, x, y, n};
-        double z_variance_vector[3] = {-xz, -yz, -z};
-        double squared_error = solveForPlaneCoefficients(covariance_matrix, z_variance_vector, zz, coefficients);
+        // ---------------------------
+        // Float-only plane fit
+        // ---------------------------
 
-        normal.x = static_cast<float>(coefficients[0]);
-        normal.y = static_cast<float>(coefficients[1]);
-        normal = normalize(normal);
+        // Build 3x3 covariance matrix (float)
+        float cov[9] = {
+            xx, xy, x,
+            xy, yy, y,
+            x,  y,  n
+        };
 
-        // If the normal points down, we need to flip it.
-        if (normal.z < 0.0)
+        // Build RHS vector (float)
+        float zvec[3] = { -xz, -yz, -z };
+
+        // Solve A * coeffs = zvec using Cholesky
+        bool success = choleskySolve3x3(cov, zvec, coefficients);
+
+        if (!success)
         {
-            normal.x = -normal.x;
-            normal.y = -normal.y;
-            normal.z = -normal.z;
-        }
-
-        // Roughness check
-        float squaredErrorThreshold = params[SQUARED_ERROR_THRESHOLD];
-        squared_error_traversability = clamp(1.0f - static_cast<float>(squared_error) / squaredErrorThreshold, 0.0f, 1.0f);
-        if (squared_error > squaredErrorThreshold)
-        {
+            // Degenerate case, fall back to default normal
+            normal = make_float3(0.0f, 0.0f, 1.0f);
+            squared_error_traversability = 0.0f;
             traversability_result = SQUARED_ERROR;
+        }
+        else
+        {
+            // Construct the normal from plane coefficients
+            normal.x = coefficients[0];
+            normal.y = coefficients[1];
+            normal = normalize(normal);
+
+            // Flip if pointing down
+            if (normal.z < 0.0f)
+            {
+                normal.x = -normal.x;
+                normal.y = -normal.y;
+                normal.z = -normal.z;
+            }
+
+            // Compute squared error (float-safe)
+            // squared_error = sum_i( (z_i - (A*x_i + B*y_i + C))^2 ) / n
+            float A = coefficients[0];
+            float B = coefficients[1];
+            float C = coefficients[2];
+
+            float squared_error = computePlaneSquaredErrorVerbose(coefficients, xx, xy, x, yy, y, xz, yz, z, zz, n);
+
+            squared_error /= n;
+            squared_error_traversability = clamp(1.0f - squared_error / params[SQUARED_ERROR_THRESHOLD], 0.0f, 1.0f);
+
+            if (squared_error > params[SQUARED_ERROR_THRESHOLD])
+            {
+                traversability_result = SQUARED_ERROR;
+            }
         }
 
         // Incline check
