@@ -73,6 +73,8 @@ public class RDXZEDSVORecorderPanel
 
    public void render()
    {
+      if (latestMessage == null)
+         return;
       ImGuiTools.textBold("Current SVO:");
       ImGui.sameLine();
       ImGui.textWrapped(latestMessage.getCurrentFileName().toString());
