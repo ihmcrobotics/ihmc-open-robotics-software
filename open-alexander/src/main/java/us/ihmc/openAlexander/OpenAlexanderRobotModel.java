@@ -349,7 +349,7 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
    @Override
    public RobotCollisionModel getSimulationRobotCollisionModel(CollidableHelper helper, String robotCollisionMask, String... environmentCollisionMasks)
    {
-      AlexanderSimulationCollisionModel collisionModel = new AlexanderSimulationCollisionModel(jointMap, physicalProperties);
+      AlexanderSimulationCollisionModel collisionModel = new AlexanderSimulationCollisionModel(jointMap);
       collisionModel.setCollidableHelper(helper, robotCollisionMask, environmentCollisionMasks);
       return collisionModel;
    }
@@ -430,9 +430,6 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
    public RigidBodyTransform getHandGraphicToHandFrameTransform(RobotSide side)
    {
       RigidBodyTransform handGraphicToHandTransform = new RigidBodyTransform();
-      if (!robotVersion.hasNubForearms(side))
-         handGraphicToHandTransform.getRotation().setYawPitchRoll(0.0, Math.PI / 2.0, 0.0);
-
       return handGraphicToHandTransform;
    }
 
