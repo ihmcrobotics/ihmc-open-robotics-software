@@ -69,7 +69,6 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
-import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -107,6 +106,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    private final ArrayList<ControllerStateChangedListener> controllerStateChangedListenersToAttach = new ArrayList<>();
    private final ArrayList<ControllerFailureListener> controllerFailureListenersToAttach = new ArrayList<>();
    private final List<HighLevelHumanoidControllerPluginFactory> pluginFactories = new ArrayList<>();
+   private final List<StateChangedListener<HighLevelControllerName>> highLevelStateChangeListenersToAttach = new ArrayList<>();
 
    private final SideDependentList<String> footSensorNames;
    private final SideDependentList<String> wristSensorNames;
@@ -550,8 +550,15 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
       humanoidHighLevelControllerManager.addHighLevelStateChangedListener((from, to) ->
                                                                           {
-                                                                             controlDT.set(Math.max(highLevelControllerParameters.getControlDT(from), highLevelControllerParameters.getControlDT(to)));
+                                                                             if (from == null)
+                                                                                controlDT.set(highLevelControllerParameters.getControlDT(to));
+                                                                             else if (to == null)
+                                                                                controlDT.set(highLevelControllerParameters.getControlDT(from));
+                                                                             else
+                                                                                controlDT.set(Math.max(highLevelControllerParameters.getControlDT(from), highLevelControllerParameters.getControlDT(to)));
                                                                           });
+      attachHighLevelStateChangedListener(highLevelStateChangeListenersToAttach);
+
 
       humanoidHighLevelControllerManager.addYoGraphic(walkingMessageHandler.getSCS2YoGraphics());
       for (RobotSide robotSide : RobotSide.values)
@@ -648,6 +655,20 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       return controllerCoreFactory;
    }
 
+   public void attachHighLevelStateChangedListener(List<StateChangedListener<HighLevelControllerName>> stateChangedListeners)
+   {
+      for (int i = 0; i < stateChangedListeners.size(); i++)
+         attachHighLevelStateChangedListener(stateChangedListeners.get(i));
+   }
+
+   public void attachHighLevelStateChangedListener(StateChangedListener<HighLevelControllerName> stateChangedListener)
+   {
+      if (humanoidHighLevelControllerManager != null)
+         humanoidHighLevelControllerManager.addHighLevelStateChangedListener(stateChangedListener);
+      else
+         highLevelStateChangeListenersToAttach.add(stateChangedListener);
+   }
+
    public void attachControllerFailureListeners(List<ControllerFailureListener> listeners)
    {
       for (int i = 0; i < listeners.size(); i++)
@@ -719,10 +740,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       return humanoidHighLevelControllerManager.getCurrentHighLevelControlState();
    }
 
-   public void addHighLevelStateChangedListener(StateChangedListener<HighLevelControllerName> stateChangedListener)
-   {
-      humanoidHighLevelControllerManager.addHighLevelStateChangedListener(stateChangedListener);
-   }
 
    public void setListenToHighLevelStatePackets(boolean isListening)
    {
