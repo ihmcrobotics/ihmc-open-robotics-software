@@ -725,7 +725,7 @@ public class KinematicsToolboxController extends ToolboxController implements SC
       {
          controlledJoints = desiredOneDoFJoints;
       }
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(updateDT,
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(() -> updateDT,
                                                                             GRAVITY,
                                                                             rootJoint,
                                                                             controlledJoints,

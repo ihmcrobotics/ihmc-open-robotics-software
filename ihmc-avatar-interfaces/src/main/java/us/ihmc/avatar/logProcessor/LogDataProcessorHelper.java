@@ -146,7 +146,7 @@ public class LogDataProcessorHelper
                                                                           gravityZ,
                                                                           omega0,
                                                                           contactableFeet,
-                                                                          controllerDT,
+                                                                          () -> controllerDT,
                                                                           updatables,
                                                                           null,
                                                                           null);

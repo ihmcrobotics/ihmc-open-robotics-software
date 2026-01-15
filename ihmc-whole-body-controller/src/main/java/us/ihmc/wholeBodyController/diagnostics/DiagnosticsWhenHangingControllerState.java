@@ -113,7 +113,8 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
 
    public DiagnosticsWhenHangingControllerState(HumanoidJointPoseList humanoidJointPoseList, boolean useArms, boolean robotIsHanging,
                                                 HighLevelHumanoidControllerToolbox controllerToolbox,
-                                                HighLevelControllerParameters highLevelControllerParameters, TorqueOffsetPrinter torqueOffsetPrinter)
+                                                HighLevelControllerParameters highLevelControllerParameters, TorqueOffsetPrinter torqueOffsetPrinter,
+                                                double controlDT)
    {
       super(controllerState, highLevelControllerParameters, controllerToolbox.getControlledOneDoFJoints());
 
@@ -189,7 +190,7 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
 
       // Foot force sensors tarring stuff
       footSwitches = controllerToolbox.getFootSwitches();
-      alphaFootForce = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(0.1, controllerToolbox.getControlDT().getValue());
+      alphaFootForce = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(0.1, controlDT);
       updateFootForceSensorOffsets.set(true);
 
       for (RobotSide robotSide : RobotSide.values)

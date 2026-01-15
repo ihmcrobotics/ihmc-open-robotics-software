@@ -16,10 +16,10 @@ public class TransferToFlamingoStanceState extends TransferState
    public TransferToFlamingoStanceState(WalkingStateEnum stateEnum, WalkingMessageHandler walkingMessageHandler,
                                         HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
                                         WalkingFailureDetectionControlModule failureDetectionControlModule,
-                                        DoubleProvider unloadFraction, DoubleProvider rhoMin, YoRegistry parentRegistry)
+                                        DoubleProvider unloadFraction, DoubleProvider rhoMin, double controlDT, YoRegistry parentRegistry)
    {
       super(stateEnum, walkingMessageHandler, controllerToolbox, managerFactory, failureDetectionControlModule, unloadFraction,
-            rhoMin, parentRegistry);
+            rhoMin, controlDT, parentRegistry);
    }
 
    @Override

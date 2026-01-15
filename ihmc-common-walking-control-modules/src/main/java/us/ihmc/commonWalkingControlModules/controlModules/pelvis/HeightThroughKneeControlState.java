@@ -77,7 +77,6 @@ public class HeightThroughKneeControlState implements PelvisAndCenterOfMassHeigh
    private final FramePoint3D pelvisPosition = new FramePoint3D();
 
    public HeightThroughKneeControlState(HighLevelHumanoidControllerToolbox controllerToolbox,
-                                        WalkingControllerParameters walkingControllerParameters,
                                         YoRegistry parentRegistry)
    {
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();

@@ -32,6 +32,7 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.RobotController;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
@@ -62,7 +63,7 @@ public class CrossFourBarLinkageWBCController implements RobotController
 
    private final OneDoFJointBasics[] oneDoFJoints;
 
-   public CrossFourBarLinkageWBCController(CrossFourBarLinkageRobotDefinition robotDefinition, Robot robot, double controlDT)
+   public CrossFourBarLinkageWBCController(CrossFourBarLinkageRobotDefinition robotDefinition, Robot robot, DoubleProvider controlDT)
    {
       rootBody = robotDefinition.newInstance(ReferenceFrame.getWorldFrame());
       shoulderJoint = HAS_SHOULDER_JOINT ? findJoint(robotDefinition.getShoulderJointName()) : null;

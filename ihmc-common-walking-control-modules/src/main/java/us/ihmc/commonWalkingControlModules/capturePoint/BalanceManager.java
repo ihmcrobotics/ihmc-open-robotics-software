@@ -162,6 +162,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
    private final YoBoolean blendICPTrajectories = new YoBoolean("blendICPTrajectories", registry);
 
    private final FrameVector2D icpError2d = new FrameVector2D();
+   private final double controlDT;
 
    private final ConvexPolygonScaler convexPolygonShrinker = new ConvexPolygonScaler();
    private final FrameConvexPolygon2D shrunkSupportPolygon = new FrameConvexPolygon2D();
@@ -239,8 +240,10 @@ public class BalanceManager implements SCS2YoGraphicHolder
                          WalkingControllerParameters walkingControllerParameters,
                          CoPTrajectoryParameters copTrajectoryParameters,
                          SplitFractionCalculatorParametersReadOnly splitFractionParameters,
+                         double controlDT,
                          YoRegistry parentRegistry)
    {
+      this.controlDT = controlDT;
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
 
@@ -279,8 +282,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
       if (walkingMessageHandler != null)
       {
          CenterOfMassTrajectoryHandler comTrajectoryHandler = walkingMessageHandler.getComTrajectoryHandler();
-         DoubleProvider dt = controllerToolbox.getControlDT();
-         precomputedICPPlanner = new PrecomputedICPPlanner(dt, comTrajectoryHandler, momentumTrajectoryHandler, registry);
+         precomputedICPPlanner = new PrecomputedICPPlanner(controlDT, comTrajectoryHandler, momentumTrajectoryHandler, registry);
          precomputedICPPlanner.setOmega0(controllerToolbox.getOmega0());
          precomputedICPPlanner.setMass(totalMass);
          precomputedICPPlanner.setGravity(gravityZ);
@@ -311,6 +313,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
       pelvisICPBasedTranslationManager = new PelvisICPBasedTranslationManager(controllerToolbox,
                                                                               pelvisTranslationICPSupportPolygonSafeMargin,
                                                                               bipedSupportPolygons,
+                                                                              controlDT,
                                                                               registry);
 
       SideDependentList<FrameConvexPolygon2D> defaultSupportPolygons = controllerToolbox.getDefaultFootPolygons();
@@ -371,6 +374,11 @@ public class BalanceManager implements SCS2YoGraphicHolder
       yoPerfectCoPVelocity.setToNaN();
 
       parentRegistry.addChild(registry);
+   }
+
+   public double getControlDT()
+   {
+      return controlDT;
    }
 
    public Footstep getFootstep(int stepNumber)
@@ -776,7 +784,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
          return;
       }
 
-      double scaleUpdated = icpVelocityReductionFactor.getValue() - controllerToolbox.getControlDT().getValue() / icpVelocityDecayDurationWhenDone.getValue();
+      double scaleUpdated = icpVelocityReductionFactor.getValue() - controlDT / icpVelocityDecayDurationWhenDone.getValue();
       icpVelocityReductionFactor.set(Math.max(0.0, scaleUpdated));
    }
 

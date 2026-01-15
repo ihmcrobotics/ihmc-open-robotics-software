@@ -18,6 +18,7 @@ import us.ihmc.robotics.screwTheory.MovingZUpFrame;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class QuicksterFootstepProviderEstimates
@@ -46,7 +47,7 @@ public class QuicksterFootstepProviderEstimates
                                               CommonHumanoidReferenceFrames referenceFrames,
                                               FrameQuaternionReadOnly desiredPelvisOrientation,
                                               QuicksterFootstepProviderParameters parameters,
-                                              double updateDT,
+                                              DoubleProvider updateDT,
                                               String variableNameSuffix,
                                               YoRegistry registry,
                                               YoGraphicsListRegistry yoGraphicsListRegistry)

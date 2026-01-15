@@ -85,7 +85,7 @@ public class ArmIKSolver
       SixDoFJoint rootSixDoFJoint = null; // don't need this for fixed base single limb IK
       CenterOfMassReferenceFrame centerOfMassFrame = null; // we don't need this
       YoGraphicsListRegistry yoGraphicsListRegistry = null; // opt out
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(CONTROL_DT,
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(() -> CONTROL_DT,
                                                                             GRAVITY,
                                                                             rootSixDoFJoint,
                                                                             workingOneDoFJoints,

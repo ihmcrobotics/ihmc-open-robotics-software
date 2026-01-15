@@ -94,10 +94,10 @@ public class PrecomputedICPPlanner implements SCS2YoGraphicHolder
                                 MomentumTrajectoryHandler momentumTrajectoryHandler,
                                 YoRegistry parentRegistry)
    {
-      this(null, centerOfMassTrajectoryHandler, momentumTrajectoryHandler, parentRegistry);
+      this(Double.NaN, centerOfMassTrajectoryHandler, momentumTrajectoryHandler, parentRegistry);
    }
 
-   public PrecomputedICPPlanner(DoubleProvider dt,
+   public PrecomputedICPPlanner(double dt,
                                 CenterOfMassTrajectoryHandler centerOfMassTrajectoryHandler,
                                 MomentumTrajectoryHandler momentumTrajectoryHandler,
                                 YoRegistry parentRegistry)
@@ -106,14 +106,14 @@ public class PrecomputedICPPlanner implements SCS2YoGraphicHolder
       this.momentumTrajectoryHandler = momentumTrajectoryHandler;
       blendingDuration.set(0.5);
 
-      if (dt != null)
+      if (!Double.isNaN(dt))
       {
          alphaProvider = new DoubleProvider()
          {
             @Override
             public double getValue()
             {
-               return AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(filterBreakFrequency.getValue(), dt.getValue());
+               return AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(filterBreakFrequency.getValue(), dt);
             }
          };
          filteredPrecomputedIcpVelocity = new AlphaFilteredTuple2D(alphaProvider);

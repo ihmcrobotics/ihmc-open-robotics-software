@@ -69,6 +69,7 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -225,14 +226,12 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
          SideDependentList<ContactableFoot> contactableFeet = controllerToolbox.getContactableFeet();
          CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
-         double controlDT = controllerToolbox.getControlDT();
          queuedControllerCommandGenerator = new QueuedControllerCommandGenerator(controllerCommands,
                                                                                  commandInputManager,
                                                                                  statusMessageOutputManager,
                                                                                  walkingControllerParameters,
                                                                                  referenceFrames,
                                                                                  contactableFeet,
-                                                                                 controlDT,
                                                                                  useHeadingAndVelocityScript,
                                                                                  registry);
 
@@ -409,7 +408,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    }
 
    public HumanoidHighLevelControllerManager getController(FullHumanoidRobotModel fullRobotModel,
-                                                           double controlDT,
                                                            double gravity,
                                                            boolean kinematicsSimulation, // For fast non-physics preview simulations
                                                            YoDouble yoTime,
@@ -420,8 +418,11 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                            JointDesiredOutputListBasics lowLevelControllerOutput,
                                                            JointBasics... jointsToIgnore)
    {
+      YoDouble controlDT = new YoDouble("controlDT", registry);
       YoBoolean usingEstimatorCoMPosition = new YoBoolean("usingEstimatorCoMPosition", registry);
       YoBoolean usingEstimatorCoMVelocity = new YoBoolean("usingEstimatorCoMVelocity", registry);
+
+      controlDT.set(highLevelControllerParameters.getControlDT(highLevelControllerParameters.getDefaultInitialControllerState()));
 
       CenterOfMassStateProvider centerOfMassStateProvider = new CenterOfMassStateProvider()
       {
@@ -540,10 +541,15 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                                   controllerToolbox,
                                                                                   centerOfPressureDataHolderForEstimator,
                                                                                   forceSensorDataHolder,
-                                                                                  lowLevelControllerOutput);
+                                                                                  lowLevelControllerOutput,
+                                                                                  controlDT);
       humanoidHighLevelControllerManager.addYoVariableRegistry(registry);
       humanoidHighLevelControllerManager.setListenToHighLevelStatePackets(isListeningToHighLevelStatePackets);
 
+      humanoidHighLevelControllerManager.addHighLevelStateChangedListener((from, to) ->
+                                                                          {
+                                                                             controlDT.set(Math.max(highLevelControllerParameters.getControlDT(from), highLevelControllerParameters.getControlDT(to)));
+                                                                          });
 
       humanoidHighLevelControllerManager.addYoGraphic(walkingMessageHandler.getSCS2YoGraphics());
       for (RobotSide robotSide : RobotSide.values)

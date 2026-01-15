@@ -222,7 +222,7 @@ public class HumanoidKinematicsSimulation
                                                                  GRAVITY_Z,
                                                                  robotModel.getWalkingControllerParameters().getOmega0(),
                                                                  feet,
-                                                                 kinematicsSimulationParameters.getDt(),
+                                                                 kinematicsSimulationParameters::getDt,
                                                                  false,
                                                                  Collections.emptyList(),
                                                                  allContactableBodies,
@@ -258,7 +258,8 @@ public class HumanoidKinematicsSimulation
                                                                  walkingOutputManager,
                                                                  managerFactory,
                                                                  walkingControllerParameters,
-                                                                 controllerToolbox);
+                                                                 controllerToolbox,
+                                                                 kinematicsSimulationParameters.getDt());
       walkingParentRegistry.addChild(walkingController.getYoVariableRegistry());
 
       // create controller network subscriber here!!
@@ -293,7 +294,7 @@ public class HumanoidKinematicsSimulation
 
       realtimeROS2Node.spin();
 
-      WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(kinematicsSimulationParameters.getDt(),
+      WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(kinematicsSimulationParameters::getDt,
                                                                                        GRAVITY_Z,
                                                                                        fullRobotModel.getRootJoint(),
                                                                                        controllerToolbox.getControlledJoints(),
@@ -321,7 +322,7 @@ public class HumanoidKinematicsSimulation
                                                                             controllerToolbox.getTotalMassProvider(),
                                                                             controllerToolbox.getWholeBodyAngularVelocityCalculator(),
                                                                             GRAVITY_Z,
-                                                                            controllerToolbox.getControlDT(),
+                                                                            kinematicsSimulationParameters::getDt,
                                                                             walkingParentRegistry);
 
       ParameterLoaderHelper.loadParameters(this, robotModel, drcControllerThreadRegistry);
@@ -496,7 +497,7 @@ public class HumanoidKinematicsSimulation
       }
 
       // Trigger footstep completion based on swing time alone
-      if (contactStateHolders.sides().length == 1 && managerFactory.getOrCreateBalanceManager().isICPPlanDone())
+      if (contactStateHolders.sides().length == 1 && managerFactory.getOrCreateBalanceManager(kinematicsSimulationParameters.getDt()).isICPPlanDone())
       {
          footSwitches.get(contactStateHolders.sides()[0].getOppositeSide()).setFootContactState(true);
       }

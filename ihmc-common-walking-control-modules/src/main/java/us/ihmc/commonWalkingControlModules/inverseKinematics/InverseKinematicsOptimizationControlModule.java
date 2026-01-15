@@ -208,7 +208,7 @@ public class InverseKinematicsOptimizationControlModule implements SCS2YoGraphic
       boolean success = motionQPInputCalculator.computeGravityCompensationMinimization(qpInput,
                                                                                        toolbox.getJointTorqueMinimizationWeightCalculator(),
                                                                                        true,
-                                                                                       toolbox.getControlDT());
+                                                                                       toolbox.getControlDT().getValue());
       if (success)
          qpSolver.addMotionInput(qpInput);
    }

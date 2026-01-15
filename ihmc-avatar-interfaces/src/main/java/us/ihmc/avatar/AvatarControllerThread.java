@@ -46,6 +46,7 @@ import us.ihmc.wholeBodyController.ConstrainedCenterOfMassJacobianEvaluator;
 import us.ihmc.wholeBodyController.DRCOutputProcessor;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -142,7 +143,6 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       robotController = createHighLevelController(controllerFullRobotModel,
                                                   controllerFactory,
                                                   controllerTime,
-                                                  robotModel.getControllerDT(),
                                                   gravity,
                                                   forceSensorDataHolderForController,
                                                   centerOfMassDataHolderForController,
@@ -216,7 +216,6 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
    private ModularRobotController createHighLevelController(FullHumanoidRobotModel controllerModel,
                                                             HighLevelHumanoidControllerFactory controllerFactory,
                                                             YoDouble yoTime,
-                                                            double controlDT,
                                                             double gravity,
                                                             ForceSensorDataHolderReadOnly forceSensorDataHolderForController,
                                                             CenterOfMassDataHolderReadOnly centerOfMassDataHolderForController,
@@ -244,7 +243,6 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       }
 
       HumanoidHighLevelControllerManager robotController = controllerFactory.getController(controllerModel,
-                                                                                           controlDT,
                                                                                            gravity,
                                                                                            kinematicsSimulation,
                                                                                            yoTime,

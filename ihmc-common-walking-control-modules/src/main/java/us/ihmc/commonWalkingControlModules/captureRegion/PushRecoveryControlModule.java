@@ -64,7 +64,7 @@ public class PushRecoveryControlModule implements SCS2YoGraphicHolder
 
    private final FrameConvexPolygon2D footPolygon = new FrameConvexPolygon2D();
 
-   private final DoubleProvider controlDT;
+   private final double controlDT;
    private double omega0;
    private final FramePoint2D desiredCapturePoint2d = new FramePoint2D();
    private final FramePoint2D capturePoint2d = new FramePoint2D();
@@ -72,10 +72,13 @@ public class PushRecoveryControlModule implements SCS2YoGraphicHolder
    private final FramePoint3D projectedCapturePoint = new FramePoint3D();
    private final FramePoint2D projectedCapturePoint2d = new FramePoint2D();
 
-   public PushRecoveryControlModule(BipedSupportPolygons bipedSupportPolygons, HighLevelHumanoidControllerToolbox controllerToolbox,
-                                    WalkingControllerParameters recoveryControllerParameters, YoRegistry parentRegistry)
+   public PushRecoveryControlModule(BipedSupportPolygons bipedSupportPolygons,
+                                    HighLevelHumanoidControllerToolbox controllerToolbox,
+                                    WalkingControllerParameters recoveryControllerParameters,
+                                    double controlDT,
+                                    YoRegistry parentRegistry)
    {
-      controlDT = controllerToolbox.getControlDT();
+      this.controlDT = controlDT;
       this.bipedSupportPolygon = bipedSupportPolygons;
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       feet = controllerToolbox.getContactableFeet();
@@ -204,7 +207,7 @@ public class PushRecoveryControlModule implements SCS2YoGraphicHolder
       captureRegionCalculator.calculateCaptureRegion(swingSide, preferredSwingTime, capturePoint2d, omega0, footPolygon);
       double captureRegionArea = captureRegionCalculator.getCaptureRegionArea();
 
-      if (swingTimeRemaining <= controlDT.getValue())
+      if (swingTimeRemaining <= controlDT)
          return swingTimeRemaining;
 
       // If there is no capture region for the given swing time we reduce it.

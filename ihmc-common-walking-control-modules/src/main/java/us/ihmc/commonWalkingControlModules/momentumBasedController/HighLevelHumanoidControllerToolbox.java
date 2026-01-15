@@ -114,7 +114,6 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
    private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
    private final YoDouble yoTime;
-   private final DoubleProvider controlDT;
    private final double gravity;
    private final boolean kinematicsSimulation;
 
@@ -220,7 +219,6 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
       this.fullRobotModel = fullRobotModel;
       this.referenceFrames = referenceFrames;
-      this.controlDT = controlDT;
       this.gravity = gravityZ;
       this.kinematicsSimulation = kinematicsSimulation;
       this.yoTime = yoTime;
@@ -774,11 +772,6 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    public double getGravityZ()
    {
       return gravity;
-   }
-
-   public DoubleProvider getControlDT()
-   {
-      return controlDT;
    }
 
    /** If the controller is created in a non-physics nominal motion previewing only mode. */

@@ -37,6 +37,7 @@ import us.ihmc.sensorProcessing.sensorProcessors.RobotJointLimitWatcher;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -94,7 +95,7 @@ public class MovingBaseRobotArmController implements RobotController
    private final YoBoolean setRandomConfiguration = new YoBoolean("setRandomConfiguration", registry);
    private final ReferenceFrame baseFrame;
 
-   public MovingBaseRobotArmController(MovingBaseRobotArm robotArm, double controlDT, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public MovingBaseRobotArmController(MovingBaseRobotArm robotArm, DoubleProvider controlDT, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.robotArm = robotArm;
       baseFrame = robotArm.getBase().getBodyFixedFrame();

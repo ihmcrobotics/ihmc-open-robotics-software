@@ -441,7 +441,9 @@ public class AvatarMultiThreadingFactory
          controllerFactory.addFinishedTransition(STAND_TRANSITION_STATE, WALKING, false);
          controllerFactory.addFinishedTransition(EXIT_WALKING, FREEZE_STATE);
 
-         controllerFactory.addCustomStateTransition(createStandTransitionState(STAND_TRANSITION_STATE, controllerFactory,  !highLevelControllerParameters.automaticallyTransitionToWalkingWhenReady()));
+         controllerFactory.addCustomStateTransition(createStandTransitionState(STAND_TRANSITION_STATE,
+                                                                               controllerFactory,
+                                                                               !highLevelControllerParameters.automaticallyTransitionToWalkingWhenReady()));
 
          // Transition to DO_NOTHING in the event of a fault
          hardwareCommunicationInterface.addFaultListener(change ->
@@ -551,7 +553,6 @@ public class AvatarMultiThreadingFactory
             HighLevelHumanoidControllerToolbox controllerToolbox = controllerFactory.getHighLevelHumanoidControllerToolbox();
             double totalMass = controllerToolbox.getFullRobotModel().getTotalMass();
             double gravityZ = controllerToolbox.getGravityZ();
-            double controlDT = controllerToolbox.getControlDT();
             YoEnum<HighLevelControllerName> requestedState = controllerFactory.getRequestedControlStateEnum();
             HighLevelControllerParameters highLevelControllerParameters = controllerFactoryHelper.getHighLevelControllerParameters();
 
@@ -559,7 +560,7 @@ public class AvatarMultiThreadingFactory
                                                                                                    requestedState,
                                                                                                    waitForRequestToTransition,
                                                                                                    controllerToolbox.getFootSwitches(),
-                                                                                                   controlDT,
+                                                                                                   highLevelControllerParameters.getControlDT(STAND_PREP_STATE),
                                                                                                    totalMass,
                                                                                                    gravityZ,
                                                                                                    highLevelControllerParameters,

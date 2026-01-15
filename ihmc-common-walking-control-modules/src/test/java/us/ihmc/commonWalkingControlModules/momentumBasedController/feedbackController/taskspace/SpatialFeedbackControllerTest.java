@@ -70,7 +70,7 @@ public final class SpatialFeedbackControllerTest
       // Create the feedback controller for the end effector.
       JointBasics[] joints = MultiBodySystemTools.collectSupportAndSubtreeJoints(elevator);
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", worldFrame, elevator);
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, joints, centerOfMassFrame, null, registry);
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(() -> controlDT, 0.0, null, joints, centerOfMassFrame, null, registry);
       toolbox.setupForInverseDynamicsSolver(null);
       FeedbackControllerToolbox feedbackControllerToolbox = new FeedbackControllerToolbox(registry);
       SpatialFeedbackController spatialFeedbackController = new SpatialFeedbackController(endEffector, toolbox, feedbackControllerToolbox, registry);
@@ -99,7 +99,7 @@ public final class SpatialFeedbackControllerTest
       NativeQPInputTypeA motionQPInput = new NativeQPInputTypeA(MultiBodySystemTools.computeDegreesOfFreedom(joints));
       DMatrixRMaj jointAccelerations = new DMatrixRMaj(0, 0);
       double damping = 0.001;
-      RobotJointVelocityAccelerationIntegrator integrator = new RobotJointVelocityAccelerationIntegrator(controlDT);
+      RobotJointVelocityAccelerationIntegrator integrator = new RobotJointVelocityAccelerationIntegrator(() -> controlDT);
 
       for (int i = 0; i < simulationTime / controlDT; i++)
       {
@@ -155,7 +155,7 @@ public final class SpatialFeedbackControllerTest
       double controlDT = 0.004;
 
 
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame,                                                                             null, registry);
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(() -> controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame,                                                                             null, registry);
       toolbox.setupForInverseDynamicsSolver(null);
       FeedbackControllerToolbox feedbackControllerToolbox = new FeedbackControllerToolbox(registry);
       SpatialFeedbackController spatialFeedbackController = new SpatialFeedbackController(endEffector, toolbox, feedbackControllerToolbox, registry);
@@ -177,7 +177,7 @@ public final class SpatialFeedbackControllerTest
       DMatrixRMaj jInverse = new DMatrixRMaj(numberOfDoFs, 6);
       MotionQPInputCalculator motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
       DMatrixRMaj jointAccelerations = new DMatrixRMaj(numberOfDoFs, 1);
-      RobotJointVelocityAccelerationIntegrator integrator = new RobotJointVelocityAccelerationIntegrator(controlDT);
+      RobotJointVelocityAccelerationIntegrator integrator = new RobotJointVelocityAccelerationIntegrator(() -> controlDT);
 
       FramePoint3D currentPosition = new FramePoint3D();
       FrameQuaternion currentOrientation = new FrameQuaternion();
@@ -257,7 +257,7 @@ public final class SpatialFeedbackControllerTest
       JointBasics[] jointsToOptimizeFor = MultiBodySystemTools.collectSupportAndSubtreeJoints(elevator);
       double controlDT = 0.004;
 
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null, registry);
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(() -> controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null, registry);
       toolbox.setupForInverseDynamicsSolver(null);
       FeedbackControllerToolbox feedbackControllerToolbox = new FeedbackControllerToolbox(registry);
       SpatialFeedbackController spatialFeedbackController = new SpatialFeedbackController(endEffector, toolbox, feedbackControllerToolbox, registry);
@@ -281,7 +281,7 @@ public final class SpatialFeedbackControllerTest
       DMatrixRMaj jointAccelerations = new DMatrixRMaj(numberOfDoFs, 1);
       DMatrixRMaj jointAccelerationsFromJerryQP = new DMatrixRMaj(numberOfDoFs, 1);
       DMatrixRMaj jointAccelerationsFromQPOASES = new DMatrixRMaj(numberOfDoFs, 1);
-      RobotJointVelocityAccelerationIntegrator integrator = new RobotJointVelocityAccelerationIntegrator(controlDT);
+      RobotJointVelocityAccelerationIntegrator integrator = new RobotJointVelocityAccelerationIntegrator(() -> controlDT);
 
       SimpleEfficientActiveSetQPSolver jerryQPSolver = new SimpleEfficientActiveSetQPSolver();
       OASESConstrainedQPSolver oasesQPSolver = new OASESConstrainedQPSolver();

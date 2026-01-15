@@ -171,6 +171,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
 
    public LinearMomentumRateControlModule(HighLevelHumanoidControllerToolbox controllerToolbox,
                                           WalkingControllerParameters walkingControllerParameters,
+                                          DoubleProvider controlDT,
                                           YoRegistry parentRegistry)
    {
       this(controllerToolbox,
@@ -181,7 +182,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
            controllerToolbox.getTotalMassProvider(),
            controllerToolbox.getWholeBodyAngularVelocityCalculator(),
            controllerToolbox.getGravityZ(),
-           controllerToolbox.getControlDT(),
+           controlDT,
            parentRegistry);
    }
 
@@ -228,8 +229,8 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
       pelvisHeightController = new PelvisHeightController(referenceFrames.getPelvisFrame(), elevator.getBodyFixedFrame(), registry);
       comHeightController = new CoMHeightController(centerOfMassStateProvider, registry);
 
-      DoubleProvider capturePointVelocityAlpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(capturePointVelocityBreakFrequency.getValue(),
-                                                                                                                       controlDT);
+      DoubleProvider capturePointVelocityAlpha = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(capturePointVelocityBreakFrequency.getValue(),
+                                                                                                                controlDT.getValue());
       capturePointVelocity = new FilteredFiniteDifferenceYoFrameVector2D("capturePointVelocity", "", capturePointVelocityAlpha, controlDT, registry, worldFrame);
 
       // Filtered Momentum setup, this is exactly same from the {@Link HihgLevelHumanoidControllerToolbox}

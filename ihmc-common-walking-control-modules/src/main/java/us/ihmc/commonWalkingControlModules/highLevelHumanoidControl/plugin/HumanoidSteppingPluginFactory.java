@@ -49,13 +49,13 @@ public interface HumanoidSteppingPluginFactory extends HighLevelHumanoidControll
    }
 
    @Override
-   default HumanoidSteppingPlugin buildPlugin(HighLevelControllerFactoryHelper controllerFactoryHelper)
+   default HumanoidSteppingPlugin buildPlugin(HighLevelControllerFactoryHelper controllerFactoryHelper, DoubleProvider updateDT)
    {
       HighLevelHumanoidControllerToolbox controllerToolbox = controllerFactoryHelper.getHighLevelHumanoidControllerToolbox();
 
       return buildPlugin(controllerToolbox.getFullRobotModel(),
                          controllerToolbox.getReferenceFrames(),
-                         controllerToolbox.getControlDT(),
+                         updateDT,
                          controllerFactoryHelper.getWalkingControllerParameters(),
                          controllerFactoryHelper.getStatusMessageOutputManager(),
                          controllerFactoryHelper.getCommandInputManager(),
@@ -65,7 +65,7 @@ public interface HumanoidSteppingPluginFactory extends HighLevelHumanoidControll
 
    HumanoidSteppingPlugin buildPlugin(FullHumanoidRobotModel robotModel,
                                       CommonHumanoidReferenceFrames referenceFrames,
-                                      double updateDT,
+                                      DoubleProvider updateDT,
                                       WalkingControllerParameters walkingControllerParameters,
                                       StatusMessageOutputManager walkingStatusMessageOutputManager,
                                       CommandInputManager walkingCommandInputManager,

@@ -35,7 +35,7 @@ public class FeetLoadedTransition implements StateTransitionCondition
 
    public FeetLoadedTransition(ForceSensorDataHolderReadOnly forceSensorDataHolder,
                                SideDependentList<String> feetForceSensors,
-                               DoubleProvider controlDT,
+                               double controlDT,
                                double gravityZ,
                                double totalMass,
                                YoRegistry parentRegistry)
@@ -52,7 +52,7 @@ public class FeetLoadedTransition implements StateTransitionCondition
    public FeetLoadedTransition(String suffix,
                                ForceSensorDataHolderReadOnly forceSensorDataHolder,
                                SideDependentList<String> feetForceSensors,
-                               DoubleProvider controlDT,
+                               double controlDT,
                                double gravityZ,
                                double totalMass,
                                YoRegistry parentRegistry)
@@ -67,7 +67,7 @@ public class FeetLoadedTransition implements StateTransitionCondition
 
    public FeetLoadedTransition(String suffix,
                                SideDependentList<FootSwitchInterface> footSwitches,
-                               DoubleProvider controlDT,
+                               double controlDT,
                                double gravityZ,
                                double totalMass,
                                YoRegistry parentRegistry)
@@ -82,7 +82,7 @@ public class FeetLoadedTransition implements StateTransitionCondition
 
    public FeetLoadedTransition(String suffix,
                                Function<RobotSide, WrenchReadOnly> footSensors,
-                               DoubleProvider controlDT,
+                               double controlDT,
                                double gravityZ,
                                double totalMass,
                                YoRegistry parentRegistry)

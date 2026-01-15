@@ -111,6 +111,7 @@ public class PartialFootholdControlModule implements SCS2YoGraphicHolder
                                        HighLevelHumanoidControllerToolbox controllerToolbox,
                                        WalkingControllerParameters walkingControllerParameters,
                                        ExplorationParameters explorationParameters,
+                                       double controlDT,
                                        YoRegistry parentRegistry)
    {
       ContactableFoot contactableFoot = controllerToolbox.getContactableFeet().get(robotSide);
@@ -168,10 +169,8 @@ public class PartialFootholdControlModule implements SCS2YoGraphicHolder
       expectingLineContact = new YoBoolean(namePrefix + "ExpectingLineContact", registry);
       expectingLineContact.set(false);
 
-      double dt = controllerToolbox.getControlDT();
-
       FootRotationCalculator velocityFootRotationCalculator = new VelocityFootRotationCalculator(namePrefix,
-                                                                                                 dt,
+                                                                                                 controlDT,
                                                                                                  contactableFoot,
                                                                                                  explorationParameters,
                                                                                                  registry);

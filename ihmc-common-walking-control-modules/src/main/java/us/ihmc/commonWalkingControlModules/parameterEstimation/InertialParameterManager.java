@@ -21,7 +21,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModelWrapper;
 import us.ihmc.robotics.MatrixMissingTools;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.yoVariables.filters.AlphaFilterTools;
-import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.filters.FilteredFiniteDifferenceYoVariable;
 import us.ihmc.yoVariables.math.YoMatrix;
 import us.ihmc.yoVariables.filters.AlphaFilteredYoMatrix;
@@ -86,7 +85,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final YoBoolean excludeBias;
    private final YoBoolean eraseBias;
 
-   private final YoDouble accelerationCalculationAlpha;  // useful to have a master setting, we want to filter all DoFs equally
+   private final DoubleProvider accelerationCalculationAlpha;  // useful to have a master setting, we want to filter all DoFs equally
 
    private final YoDouble normalizedInnovation;
    private final YoDouble normalizedInnovationThreshold;
@@ -108,7 +107,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       REGRESSOR
    }
 
-   public InertialParameterManager(HighLevelHumanoidControllerToolbox toolbox, InertialEstimationParameters inertialEstimationParameters, YoRegistry parentRegistry)
+   public InertialParameterManager(HighLevelHumanoidControllerToolbox toolbox, InertialEstimationParameters inertialEstimationParameters, DoubleProvider dt, YoRegistry parentRegistry)
    {
       YoRegistry registry = new YoRegistry(getClass().getSimpleName());
       parentRegistry.addChild(registry);
@@ -182,9 +181,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       String[] measurementNames = inertialEstimationParameters.getMeasurementNames();
       residual = new YoMatrix("residual_", nDoFs, 1, measurementNames, registry);
 
-      DoubleProvider dt = toolbox.getControlDT();
-      accelerationCalculationAlpha = new YoDouble("accelerationCalculationAlpha", registry);
-      accelerationCalculationAlpha.set(AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(inertialEstimationParameters.getBreakFrequencyForAccelerationCalculation(), dt.getValue()));
+      accelerationCalculationAlpha = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(inertialEstimationParameters.getBreakFrequencyForAccelerationCalculation(), dt.getValue());
       jointVelocitiesContainer = new DMatrixRMaj(nDoFs, 1);
       jointAccelerations = new FilteredFiniteDifferenceYoVariable[nDoFs];
       for (int i = 0; i < measurementNames.length; i++)
@@ -192,10 +189,10 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
       String[] estimateNames = inertialEstimationParameters.getEstimateNames();
       estimate = new YoMatrix("", nParameters, 1, estimateNames, null, registry);
-      double defaultEstimateFilteringAlpha = AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(inertialEstimationParameters.getBreakFrequencyForEstimateFiltering(), dt.getValue());
+      DoubleProvider defaultEstimateFilteringAlpha = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(inertialEstimationParameters.getBreakFrequencyForEstimateFiltering(), dt.getValue());
       filteredEstimate = new AlphaFilteredYoMatrix("filtered_", defaultEstimateFilteringAlpha, nParameters, 1, estimateNames, null, registry);
 
-      int windowSizeInTicks = (int) (inertialEstimationParameters.getBiasCompensationWindowSizeInSeconds() / dt);
+      int windowSizeInTicks = (int) (inertialEstimationParameters.getBiasCompensationWindowSizeInSeconds() / dt.getValue());
       calculateBias = new YoBoolean("calculateBias", registry);
       biasWindowFilter = new InertialBiasWindowFilter(nDoFs, windowSizeInTicks, measurementNames, registry);
       excludeBias = new YoBoolean("excludeBias", registry);

@@ -21,18 +21,24 @@ public class FeetLoadedToWalkingStandTransitionFactory implements ControllerStat
 
    private final HighLevelControllerName stateToAttachEnum;
    private final HighLevelControllerName nextStateEnum;
+   private final HighLevelControllerParameters highLevelControllerParameters;
 
    private final YoEnum<HighLevelControllerName> requestedState;
    private final SideDependentList<String> feetForceSensors;
 
    private final boolean waitForRequestToTransition;
 
-   public FeetLoadedToWalkingStandTransitionFactory(HighLevelControllerName stateToAttachEnum, HighLevelControllerName nextStateEnum,
-                                                    YoEnum<HighLevelControllerName> requestedState, boolean waitForRequestToTransition, SideDependentList<String> feetForceSensors)
+   public FeetLoadedToWalkingStandTransitionFactory(HighLevelControllerName stateToAttachEnum,
+                                                    HighLevelControllerName nextStateEnum,
+                                                    HighLevelControllerParameters highLevelControllerParameters,
+                                                    YoEnum<HighLevelControllerName> requestedState,
+                                                    boolean waitForRequestToTransition,
+                                                    SideDependentList<String> feetForceSensors)
    {
       this.stateToAttachEnum = stateToAttachEnum;
       this.nextStateEnum = nextStateEnum;
       this.requestedState = requestedState;
+      this.highLevelControllerParameters = highLevelControllerParameters;
       this.waitForRequestToTransition = waitForRequestToTransition;
       this.feetForceSensors = feetForceSensors;
    }
@@ -48,14 +54,13 @@ public class FeetLoadedToWalkingStandTransitionFactory implements ControllerStat
       HighLevelHumanoidControllerToolbox controllerToolbox = controllerFactoryHelper.getHighLevelHumanoidControllerToolbox();
       double totalMass = controllerToolbox.getFullRobotModel().getTotalMass();
       double gravityZ = controllerToolbox.getGravityZ();
-      double controlDT = controllerToolbox.getControlDT();
       HighLevelControllerParameters highLevelControllerParameters = controllerFactoryHelper.getHighLevelControllerParameters();
 
       StateTransitionCondition stateTransitionCondition = new FeetLoadedToWalkingStandTransition(nextStateEnum,
                                                                                                  requestedState,
                                                                                                  waitForRequestToTransition,
                                                                                                  controllerToolbox.getFootSwitches(),
-                                                                                                 controlDT,
+                                                                                                 highLevelControllerParameters.getControlDT(stateToAttachEnum),
                                                                                                  totalMass,
                                                                                                  gravityZ,
                                                                                                  highLevelControllerParameters,
