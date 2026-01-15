@@ -73,7 +73,7 @@ public final class PointFeedbackControllerTest
       // Create the feedback controller for the end effector.
       JointBasics[] joints = MultiBodySystemTools.collectSupportAndSubtreeJoints(elevator);
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", worldFrame, elevator);
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, joints, centerOfMassFrame, null, null, registry);
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, joints, centerOfMassFrame, null, registry);
       toolbox.setupForInverseDynamicsSolver(null);
       FeedbackControllerToolbox feedbackControllerToolbox = new FeedbackControllerToolbox(registry);
       PointFeedbackController pointFeedbackController = new PointFeedbackController(endEffector, toolbox, feedbackControllerToolbox, registry);
@@ -161,7 +161,7 @@ public final class PointFeedbackControllerTest
       JointBasics[] jointsToOptimizeFor = MultiBodySystemTools.collectSupportAndSubtreeJoints(elevator);
       double controlDT = 0.004;
 
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null, null, registry);
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null, registry);
       toolbox.setupForInverseDynamicsSolver(null);
       FeedbackControllerToolbox feedbackControllerToolbox = new FeedbackControllerToolbox(registry);
       PointFeedbackController pointFeedbackController = new PointFeedbackController(endEffector, toolbox, feedbackControllerToolbox, registry);
@@ -248,7 +248,7 @@ public final class PointFeedbackControllerTest
       JointBasics[] jointsToOptimizeFor = MultiBodySystemTools.collectSupportAndSubtreeJoints(elevator);
       double controlDT = 0.004;
 
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null, null, registry);
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null, registry);
       toolbox.setupForInverseDynamicsSolver(null);
       FeedbackControllerToolbox feedbackControllerToolbox = new FeedbackControllerToolbox(registry);
       PointFeedbackController pointFeedbackController = new PointFeedbackController(endEffector, toolbox, feedbackControllerToolbox, registry);
@@ -365,7 +365,7 @@ public final class PointFeedbackControllerTest
       JointBasics[] jointsToOptimizeFor = MultiBodySystemTools.collectSupportAndSubtreeJoints(elevator);
       double controlDT = 0.004;
 
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null, null, registry);
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null, registry);
       toolbox.setupForInverseDynamicsSolver(null);
 
       // Making the controllers to run with different instances of the toolbox so they don't share variables.
@@ -544,7 +544,7 @@ public final class PointFeedbackControllerTest
       JointBasics[] jointsToOptimizeFor = MultiBodySystemTools.collectSupportAndSubtreeJoints(elevator);
       double controlDT = 0.004;
 
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null, null, registry);
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null, registry);
       toolbox.setupForInverseDynamicsSolver(null);
       // Making the controllers to run with different instances of the toolbox so they don't share variables.
       PointFeedbackController pointFeedbackController = new PointFeedbackController(endEffector,

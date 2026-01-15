@@ -203,17 +203,11 @@ public class ImageMessageDecoder
 
    private void resizeToMessageDimensions(ImageMessage imageMessage, Mat imageToResize)
    {
-      if (imageToResize.cols() != imageMessage.getImageWidth())
-         imageToResize.cols(imageMessage.getImageWidth());
-      if (imageToResize.rows() != imageMessage.getImageHeight())
-         imageToResize.rows(imageMessage.getImageHeight());
+      imageToResize.create(imageMessage.getImageHeight(), imageMessage.getImageWidth(), PixelFormat.fromByte(imageMessage.getPixelFormat()).toOpenCVType());
    }
 
    private void resizeToMessageDimensions(ImageMessage imageMessage, GpuMat imageToResize)
    {
-      if (imageToResize.cols() != imageMessage.getImageWidth())
-         imageToResize.cols(imageMessage.getImageWidth());
-      if (imageToResize.rows() != imageMessage.getImageHeight())
-         imageToResize.rows(imageMessage.getImageHeight());
+      imageToResize.create(imageMessage.getImageHeight(), imageMessage.getImageWidth(), PixelFormat.fromByte(imageMessage.getPixelFormat()).toOpenCVType());
    }
 }

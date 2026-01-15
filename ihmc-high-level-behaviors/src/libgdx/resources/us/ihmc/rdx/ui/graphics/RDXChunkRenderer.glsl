@@ -80,7 +80,7 @@ void main()
     vec4 pointInCameraFrame = u_viewTrans * vec4(xPosition, yPosition, zPosition, 1);
     vec4 projectedSpriteCornerZero = u_projTrans * vec4(0.0, 0.0, pointInCameraFrame.z, pointInCameraFrame.w);
 
-    vec4 projectedSpriteCorner = u_projTrans * vec4(0.02f, 0.02f, pointInCameraFrame.z, pointInCameraFrame.w);
+    vec4 projectedSpriteCorner = u_projTrans * vec4(u_cellSize, u_cellSize, pointInCameraFrame.z, pointInCameraFrame.w);
     float projectedSize = u_screenWidth * projectedSpriteCorner.x / projectedSpriteCorner.w;
 
     gl_PointSize = 0.5 * (projectedSize);

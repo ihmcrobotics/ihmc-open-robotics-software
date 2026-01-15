@@ -28,9 +28,7 @@ public class CoPPointViewer implements SCS2YoGraphicHolder
    private final List<YoFramePoint3D> copStartPoints = new ArrayList<>();
    private final List<YoFramePoint3D> copEndPoints = new ArrayList<>();
 
-   private static final String name = "Corner Points";
-
-   public CoPPointViewer(YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public CoPPointViewer(YoRegistry registry)
    {
       for (int i = 0; i < maxPoints; i++)
       {
@@ -42,15 +40,6 @@ public class CoPPointViewer implements SCS2YoGraphicHolder
 
          copStartPoints.add(copStartPoint);
          copEndPoints.add(copEndPoint);
-
-         YoGraphicPosition copStartPointGraphic = new YoGraphicPosition("copStartPoint" + i, copStartPoint, size, YoAppearance.DarkRed(), GraphicType.CROSS);
-         YoGraphicPosition copEndPointGraphic = new YoGraphicPosition("copEndPoint" + i, copEndPoint, size, YoAppearance.DarkRed(), GraphicType.ROTATED_CROSS);
-
-         yoGraphicsListRegistry.registerYoGraphic(name, copStartPointGraphic);
-         yoGraphicsListRegistry.registerYoGraphic(name, copEndPointGraphic);
-
-         yoGraphicsListRegistry.registerArtifact(name, copStartPointGraphic.createArtifact());
-         yoGraphicsListRegistry.registerArtifact(name, copEndPointGraphic.createArtifact());
       }
 
    }

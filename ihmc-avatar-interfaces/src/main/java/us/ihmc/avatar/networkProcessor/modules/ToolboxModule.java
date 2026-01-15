@@ -29,6 +29,7 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -58,6 +59,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
 
    protected final String name = getClass().getSimpleName();
    protected final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
+   protected final YoGraphicGroupDefinition graphicGroupDefinition = new YoGraphicGroupDefinition(getClass().getSimpleName());
    protected final YoRegistry registry = new YoRegistry(name);
    protected long serverTime = 0L;
    protected final YoDouble yoTime = new YoDouble("localTime", registry);
@@ -196,7 +198,8 @@ public abstract class ToolboxModule implements CloseableAndDisposable
                yoVariableServer = new YoVariableServer(getClass(), modelProvider, yoVariableServerSettings, YO_VARIABLE_SERVER_DT);
                yoVariableServer.setMainRegistry(registry,
                                                 createYoVariableServerJointList(fullRobotModel.getElevator()),
-                                                yoGraphicsListRegistry);
+                                                yoGraphicsListRegistry,
+                                                graphicGroupDefinition);
                yoVariableServer.start();
                break;
             }

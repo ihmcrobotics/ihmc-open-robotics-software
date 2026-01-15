@@ -1,8 +1,5 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
-import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicPoint2D;
-
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
 import us.ihmc.commonWalkingControlModules.capturePoint.ParameterizedICPControlGains;
@@ -13,11 +10,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
@@ -27,6 +19,8 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicPoint2D;
 
 /**
  * HeuristicICPController controls the ICP using a few simple heuristics, including: a) Use a simple
@@ -101,10 +95,7 @@ public class HeuristicICPController implements ICPControllerInterface
    private final ICPControllerParameters.FeedbackProjectionOperator feedbackProjectionOperator;
    private final ICPControllerParameters.FeedForwardAlphaCalculator feedForwardAlphaCalculator;
 
-   public HeuristicICPController(ICPControllerParameters icpControllerParameters,
-                                 double controlDT,
-                                 YoRegistry parentRegistry,
-                                 YoGraphicsListRegistry yoGraphicsListRegistry)
+   public HeuristicICPController(ICPControllerParameters icpControllerParameters, YoRegistry parentRegistry)
    {
 
       pureFeedbackErrorThreshold.set(icpControllerParameters.getPureFeedbackErrorThreshold());
@@ -113,14 +104,10 @@ public class HeuristicICPController implements ICPControllerInterface
 
       feedbackGains = new ParameterizedICPControlGains("", icpControllerParameters.getICPFeedbackGains(), registry);
 
-      icpControllerParameters.createFeedbackProjectionOperator(registry, yoGraphicsListRegistry);
-      icpControllerParameters.createFeedForwardAlphaCalculator(registry, yoGraphicsListRegistry);
+      icpControllerParameters.createFeedbackProjectionOperator(registry);
+      icpControllerParameters.createFeedForwardAlphaCalculator(registry);
       feedbackProjectionOperator = icpControllerParameters.getFeedbackProjectionOperator();
       feedForwardAlphaCalculator = icpControllerParameters.getFeedForwardAlphaCalculator();
-
-      if (yoGraphicsListRegistry != null)
-         setupVisualizers(yoGraphicsListRegistry);
-
       parentRegistry.addChild(registry);
    }
 
@@ -241,38 +228,6 @@ public class HeuristicICPController implements ICPControllerInterface
       expectedControlICPVelocity.scale(omega0);
 
       controllerTimer.stopMeasurement();
-   }
-
-   private void setupVisualizers(YoGraphicsListRegistry yoGraphicsListRegistry)
-   {
-      ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
-
-      YoGraphicPosition feedbackCoPViz = new YoGraphicPosition(yoNamePrefix + "FeedbackCoP",
-                                                               this.feedbackCoP,
-                                                               0.005,
-                                                               YoAppearance.Darkorange(),
-                                                               YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
-
-      YoGraphicPosition unconstrainedFeedbackCMPViz = new YoGraphicPosition(yoNamePrefix + "UnconstrainedFeedbackCMP",
-                                                                            this.unconstrainedFeedbackCMP,
-                                                                            0.008,
-                                                                            Purple(),
-                                                                            GraphicType.BALL_WITH_CROSS);
-
-      YoGraphicPosition unconstrainedFeedbackCoPViz = new YoGraphicPosition(yoNamePrefix + "UnconstrainedFeedbackCoP",
-                                                                            this.unconstrainedFeedbackCoP,
-                                                                            0.004,
-                                                                            YoAppearance.Green(),
-                                                                            GraphicType.BALL_WITH_ROTATED_CROSS);
-
-      artifactList.add(feedbackCoPViz.createArtifact());
-      artifactList.add(unconstrainedFeedbackCMPViz.createArtifact());
-      artifactList.add(unconstrainedFeedbackCoPViz.createArtifact());
-      //      artifactList.add(projectionLineViz);
-
-      artifactList.setVisible(VISUALIZE);
-
-      yoGraphicsListRegistry.registerArtifactList(artifactList);
    }
 
    @Override

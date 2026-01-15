@@ -227,7 +227,6 @@ public class HumanoidKinematicsSimulation
                                                                  false,
                                                                  Collections.emptyList(),
                                                                  allContactableBodies,
-                                                                 yoGraphicsListRegistry,
                                                                  jointsToIgnore);
       humanoidHighLevelControllerManagerRegistry.addChild(controllerToolbox.getYoVariableRegistry());
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
@@ -239,7 +238,6 @@ public class HumanoidKinematicsSimulation
                                                                               controllerToolbox.getContactableFeet(),
                                                                               walkingOutputManager,
                                                                               yoTime,
-                                                                              yoGraphicsListRegistry,
                                                                               controllerToolbox.getYoVariableRegistry());
       controllerToolbox.setWalkingMessageHandler(walkingMessageHandler);
       controllerToolbox.attachRobotMotionStatusChangedListener((newStatus, time) -> robotMotionStatusHolder.setCurrentRobotMotionStatus(newStatus));
@@ -304,7 +302,6 @@ public class HumanoidKinematicsSimulation
                                                                                        controllerToolbox.getControlledJoints(),
                                                                                        controllerToolbox.getCenterOfMassFrame(),
                                                                                        walkingControllerParameters.getMomentumOptimizationSettings(),
-                                                                                       yoGraphicsListRegistry,
                                                                                        registry);
       controlCoreToolbox.setJointPrivilegedConfigurationParameters(walkingControllerParameters.getJointPrivilegedConfigurationParameters());
       controlCoreToolbox.setFeedbackControllerSettings(walkingControllerParameters.getFeedbackControllerSettings());
@@ -328,8 +325,7 @@ public class HumanoidKinematicsSimulation
                                                                             controllerToolbox.getWholeBodyAngularVelocityCalculator(),
                                                                             GRAVITY_Z,
                                                                             controllerToolbox.getControlDT(),
-                                                                            walkingParentRegistry,
-                                                                            yoGraphicsListRegistry);
+                                                                            walkingParentRegistry);
 
       ParameterLoaderHelper.loadParameters(this, robotModel, drcControllerThreadRegistry);
       YoVariable defaultHeight = registry.findVariable(PelvisHeightControlState.class.getSimpleName(),

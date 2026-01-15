@@ -98,7 +98,6 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                   WholeBodyPostureAdjustmentProvider postureAdjustmentProvider,
                                   YoDouble yoTime,
                                   double controlDT,
-                                  YoGraphicsListRegistry graphicsListRegistry,
                                   YoRegistry parentRegistry)
    {
       this.bodyToControl = bodyToControl;
@@ -147,8 +146,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                                                                              baseFrame,
                                                                                              yoTime,
                                                                                              enableFunctionGenerators,
-                                                                                             parentRegistry,
-                                                                                             graphicsListRegistry);
+                                                                                             parentRegistry);
          if (taskspacePositionGains == null)
          {
             throw new RuntimeException("Can not create position control manager with null gains for " + bodyName);
@@ -168,7 +166,6 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                                                                      yoTime,
                                                                                      jointControlHelper,
                                                                                      enableFunctionGenerators,
-                                                                                     graphicsListRegistry,
                                                                                      registry);
          if (taskspaceOrientationGains == null || taskspacePositionGains == null)
          {
@@ -198,7 +195,6 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                                                         taskspaceControlState.getOrientationControlHelper(),
                                                                         loadBearingParameters,
                                                                         nominalRhoWeight,
-                                                                        graphicsListRegistry,
                                                                         registry);
       }
       else
@@ -211,7 +207,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
       else
          this.homePose = null;
 
-      externalWrenchManager = new RigidBodyExternalWrenchManager(bodyToControl, baseBody, controlFrame, yoTime, graphicsListRegistry, registry);
+      externalWrenchManager = new RigidBodyExternalWrenchManager(bodyToControl, baseBody, controlFrame, yoTime, registry);
 
       defaultControlMode = defaultControlMode == null ? RigidBodyControlMode.JOINTSPACE : defaultControlMode;
       checkDefaultControlMode(defaultControlMode, this.homePose, bodyName);

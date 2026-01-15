@@ -4,15 +4,16 @@ import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.tools.functional.IntDoubleConsumer;
 
 import java.util.function.*;
 
-import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
-
 public class SplitFractionFromPositionCalculator
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
    private final FramePose3D stanceFootPose = new FramePose3D();
    private final FramePose3D nextFootPose = new FramePose3D();
 

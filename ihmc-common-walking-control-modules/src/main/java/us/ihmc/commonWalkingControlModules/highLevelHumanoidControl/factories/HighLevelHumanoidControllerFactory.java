@@ -14,7 +14,6 @@ import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerPar
 import us.ihmc.commonWalkingControlModules.configurations.InertialEstimationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired.UserDesiredControllerCommandGenerators;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.QueuedControllerCommandGenerator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
@@ -37,7 +36,6 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.ClearDelayQueueConverter;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameMessageCommandConverter;
@@ -113,7 +111,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    private final SideDependentList<String> wristSensorNames;
 
    private boolean createQueuedControllerCommandGenerator = false;
-   private boolean createUserDesiredControllerCommandGenerator = false;
    private boolean useHeadingAndVelocityScript = true;
 
    private boolean isListeningToHighLevelStatePackets = true;
@@ -247,41 +244,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
          createQueuedControllerCommandGenerator = true;
          this.controllerCommands = controllerCommands;
       }
-   }
-
-   private UserDesiredControllerCommandGenerators userDesiredControllerCommandGenerators = null;
-
-   public void createUserDesiredControllerCommandGenerator()
-   {
-      if (userDesiredControllerCommandGenerators != null)
-         return;
-
-      if (controllerToolbox != null)
-      {
-         double defaultTrajectoryTime = 1.0;
-         SideDependentList<ContactableFoot> contactableFeet = controllerToolbox.getContactableFeet();
-         userDesiredControllerCommandGenerators = new UserDesiredControllerCommandGenerators(commandInputManager,
-                                                                                             controllerToolbox.getFullRobotModel(),
-                                                                                             controllerToolbox.getReferenceFrames(),
-                                                                                             contactableFeet,
-                                                                                             walkingControllerParameters,
-                                                                                             defaultTrajectoryTime,
-                                                                                             registry);
-      }
-      else
-      {
-         createUserDesiredControllerCommandGenerator = true;
-      }
-   }
-
-   public void useDefaultDiagnosticControlState()
-   {
-      //TODO
-   }
-
-   public void useDefaultCalibrationControlState()
-   {
-      //TODO
    }
 
    public void replaceControllerFactory(HighLevelControllerName controllerName, HighLevelControllerStateFactory controllerFactory)
@@ -451,7 +413,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                            double gravity,
                                                            boolean kinematicsSimulation, // For fast non-physics preview simulations
                                                            YoDouble yoTime,
-                                                           YoGraphicsListRegistry yoGraphicsListRegistry,
                                                            HumanoidRobotSensorInformation sensorInformation,
                                                            ForceSensorDataHolderReadOnly forceSensorDataHolder,
                                                            CenterOfMassDataHolderReadOnly centerOfMassDataHolderForController,
@@ -515,7 +476,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                                fullRobotModel.getRootBody(),
                                                                                totalRobotWeight,
                                                                                kinematicsSimulation,
-                                                                               yoGraphicsListRegistry,
                                                                                registry);
       SideDependentList<ForceSensorDataReadOnly> wristForceSensors = createWristForceSensors(forceSensorDataHolder);
 
@@ -535,14 +495,11 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                  kinematicsSimulation,
                                                                  updatables,
                                                                  contactablePlaneBodies,
-                                                                 yoGraphicsListRegistry,
                                                                  jointsToIgnore);
       controllerToolbox.attachControllerStateChangedListeners(controllerStateChangedListenersToAttach);
       attachControllerFailureListeners(controllerFailureListenersToAttach);
       if (createQueuedControllerCommandGenerator)
          createQueuedControllerCommandGenerator(controllerCommands);
-      if (createUserDesiredControllerCommandGenerator)
-         createUserDesiredControllerCommandGenerator();
 
       List<String> jointsToCheckTorqueFeasibilityInMultiContact = walkingControllerParameters.getJointsToCheckTorqueFeasibilityInMultiContact();
       if (controllerToolbox.enableUpperBodyLoadBearing() && jointsToCheckTorqueFeasibilityInMultiContact != null)
@@ -559,7 +516,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                               feet,
                                                                               statusMessageOutputManager,
                                                                               yoTime,
-                                                                              yoGraphicsListRegistry,
                                                                               registry);
       controllerToolbox.setWalkingMessageHandler(walkingMessageHandler);
 
@@ -587,8 +543,12 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                                   lowLevelControllerOutput);
       humanoidHighLevelControllerManager.addYoVariableRegistry(registry);
       humanoidHighLevelControllerManager.setListenToHighLevelStatePackets(isListeningToHighLevelStatePackets);
+
+
+      humanoidHighLevelControllerManager.addYoGraphic(walkingMessageHandler.getSCS2YoGraphics());
       for (RobotSide robotSide : RobotSide.values)
          humanoidHighLevelControllerManager.addYoGraphic(footSwitches.get(robotSide).getSCS2YoGraphics());
+
       return humanoidHighLevelControllerManager;
    }
 
@@ -597,7 +557,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                      RigidBodyBasics rootBody,
                                                                      double totalRobotWeight,
                                                                      boolean kinematicsSimulation,
-                                                                     YoGraphicsListRegistry yoGraphicsListRegistry,
                                                                      YoRegistry registry)
    {
       SideDependentList<FootSwitchInterface> footSwitches = new SideDependentList<>();
@@ -626,7 +585,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                              rootBody,
                                                                              footForceSensor,
                                                                              totalRobotWeight,
-                                                                             yoGraphicsListRegistry,
                                                                              registry);
             footSwitches.put(robotSide, footSwitch);
          }

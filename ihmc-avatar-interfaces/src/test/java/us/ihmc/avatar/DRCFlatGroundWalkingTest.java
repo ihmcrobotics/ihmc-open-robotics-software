@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.ArrayList;
 
+import controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage;
 import org.junit.jupiter.api.*;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -13,6 +14,8 @@ import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.avatar.testTools.scs2.SCS2RunsSameWayTwiceVerifier;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotDataLogger.RobotVisualizer;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -105,7 +108,6 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
                                                                                                                                              meshTerrainEnvironment,
                                                                                                                                              simulationTestingParameters);
       simulationTestHelperFactory.setDefaultHighLevelHumanoidControllerFactory(useVelocityAndHeadingScript, getWalkingScriptParameters());
-      simulationTestHelperFactory.getHighLevelHumanoidControllerFactory().createUserDesiredControllerCommandGenerator();
       if (useBulletPhysicsEngine)
       {
          robotModel.getHumanoidRobotKinematicsCollisionModel();
@@ -137,7 +139,6 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
                                                                                                                                              flatGround,
                                                                                                                                              simulationTestingParameters);
       simulationTestHelperFactory.setDefaultHighLevelHumanoidControllerFactory(useVelocityAndHeadingScript, getWalkingScriptParameters());
-      simulationTestHelperFactory.getHighLevelHumanoidControllerFactory().createUserDesiredControllerCommandGenerator();
       if (useBulletPhysicsEngine)
       {
          robotModel.getHumanoidRobotKinematicsCollisionModel();
@@ -191,10 +192,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       {
          comError = (YoDouble) simulationTestHelper.findVariable("pelvisErrorPositionZ");
       }
-      YoBoolean userUpdateDesiredPelvisPose = (YoBoolean) simulationTestHelper.findVariable("userUpdateDesiredPelvisPose");
-      YoBoolean userDoPelvisPose = (YoBoolean) simulationTestHelper.findVariable("userDoPelvisPose");
-      YoDouble userDesiredPelvisPoseYaw = (YoDouble) simulationTestHelper.findVariable("userDesiredPelvisPoseYaw");
-      YoDouble userDesiredPelvisPoseTrajectoryTime = (YoDouble) simulationTestHelper.findVariable("userDesiredPelvisPoseTrajectoryTime");
+      YoDouble currentPelvisYaw = (YoDouble) simulationTestHelper.findVariable("q_" + simulationTestHelper.getControllerFullRobotModel().getPelvis().getName() + "_yaw");
       YoDouble icpErrorX = (YoDouble) simulationTestHelper.findVariable("icpErrorX");
       YoDouble icpErrorY = (YoDouble) simulationTestHelper.findVariable("icpErrorY");
 
@@ -207,13 +205,11 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
 
       if (doPelvisYawWarmup)
       {
-         userDesiredPelvisPoseTrajectoryTime.set(0.0);
-         userUpdateDesiredPelvisPose.set(true);
          assertTrue(simulationTestHelper.simulateNow(0.1), "Simulation has failed");
 
-         double startingYaw = userDesiredPelvisPoseYaw.getDoubleValue();
-         userDesiredPelvisPoseYaw.set(startingYaw + Math.PI / 4.0);
-         userDoPelvisPose.set(true);
+         double startingYaw = currentPelvisYaw.getDoubleValue();
+         PelvisOrientationTrajectoryMessage pelvisMessage = HumanoidMessageTools.createPelvisOrientationTrajectoryMessage(0.0, new Quaternion(startingYaw + Math.PI / 4.0, 0.0, 0.0));
+         simulationTestHelper.publishToController(pelvisMessage);
 
          assertTrue(simulationTestHelper.simulateNow(yawingTimeDuration), "Simulation has failed");
 
@@ -225,8 +221,8 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
                                  + controllerICPErrorY.getDoubleValue() * controllerICPErrorY.getDoubleValue());
          assertTrue(icpError < 0.005, physicsEngineName + "icsError < 0.005 for startingYaw + pi/4.0 test");
 
-         userDesiredPelvisPoseYaw.set(startingYaw);
-         userDoPelvisPose.set(true);
+         pelvisMessage = HumanoidMessageTools.createPelvisOrientationTrajectoryMessage(0.0, new Quaternion(startingYaw, 0.0, 0.0));
+         simulationTestHelper.publishToController(pelvisMessage);
          assertTrue(simulationTestHelper.simulateNow(yawingTimeDuration + 0.3), "Simulation has failed");
 
          if (icpErrorX != null && icpErrorY != null)

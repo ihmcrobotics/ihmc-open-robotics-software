@@ -70,7 +70,6 @@ public class PelvisIMUBasedLinearStateCalculator implements SCS2YoGraphicHolder
                                               double estimatorDT,
                                               double gravitationalAcceleration,
                                               StateEstimatorParameters stateEstimatorParameters,
-                                              YoGraphicsListRegistry yoGraphicsListRegistry,
                                               YoRegistry parentRegistry)
    {
       this.imuBiasProvider = imuBiasProvider;

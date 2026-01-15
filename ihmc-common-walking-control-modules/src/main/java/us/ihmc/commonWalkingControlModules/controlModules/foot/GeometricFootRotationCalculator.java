@@ -73,7 +73,6 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
    public GeometricFootRotationCalculator(String namePrefix,
                                           ContactablePlaneBody contactableFoot,
                                           ExplorationParameters explorationParameters,
-                                          YoGraphicsListRegistry yoGraphicsListRegistry,
                                           YoRegistry parentRegistry)
    {
       this.namePrefix = namePrefix;
@@ -92,37 +91,6 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
 
       groundPlaneNormal = new YoFrameVector3D(namePrefix + "PlaneNormal", worldFrame, registry);
       lineSegmentOfRotation = new YoFrameLineSegment2D(namePrefix + "LineOfRotationGeometric", "", worldFrame, registry);
-
-      if (yoGraphicsListRegistry != null)
-      {
-         String listName = getClass().getSimpleName();
-         ArtifactList artifactList = new ArtifactList(listName);
-         YoGraphicsList graphicsList = new YoGraphicsList(listName);
-
-         YoGraphicPosition planePointViz = new YoGraphicPosition(namePrefix + "PlanePoint",
-                                                                 measuredCoPFiltered,
-                                                                 0.005,
-                                                                 YoAppearance.Blue(),
-                                                                 GraphicType.SOLID_BALL);
-
-         YoGraphicVector planeNormalViz = new YoGraphicVector(namePrefix + "PlaneNormal", measuredCoPFiltered, groundPlaneNormal, YoAppearance.Blue());
-
-         YoArtifactLineSegment2d lineOfRotationArtifact = new YoArtifactLineSegment2d(namePrefix + "LineOfRotationGeometric",
-                                                                                      lineSegmentOfRotation,
-                                                                                      Color.GREEN,
-                                                                                      0.01,
-                                                                                      0.01);
-
-         graphicsList.add(planeNormalViz);
-         artifactList.add(planePointViz.createArtifact());
-         artifactList.add(lineOfRotationArtifact);
-
-         graphicsList.setVisible(VISUALIZE);
-         artifactList.setVisible(VISUALIZE);
-
-         yoGraphicsListRegistry.registerYoGraphicsList(graphicsList);
-         yoGraphicsListRegistry.registerArtifactList(artifactList);
-      }
    }
 
    private final FrameVector3D lineOfContact = new FrameVector3D();

@@ -42,7 +42,10 @@ import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.filters.RateLimitedYoFramePose3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
@@ -55,8 +58,6 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class SwingState extends AbstractFootControlState
 {
-   private static final boolean visualizeAdjustedSwing = false;
-
    // This flag indicates whether or not its the first tick in the transfer state. This is used to avoid double-computing some of the calls.
    private boolean firstTickInState = true;
 
@@ -69,7 +70,6 @@ public class SwingState extends AbstractFootControlState
 
    private final SwingTrajectoryCalculator swingTrajectoryCalculator;
    private final MultipleWaypointsBlendedPoseTrajectoryGenerator blendedSwingTrajectory;
-   private final BlendedPositionTrajectoryGeneratorVisualizer swingVisualizer;
    private final SoftTouchdownPoseTrajectoryGenerator touchdownTrajectory;
    private final C1ContinuousTrajectorySmoother swingTrajectorySmoother;
    private double swingTrajectoryBlendDuration = 0.0;
@@ -78,7 +78,7 @@ public class SwingState extends AbstractFootControlState
    private final PoseReferenceFrame adjustedFootstepFrame;
    private final FramePose3D adjustedWaypoint = new FramePose3D();
 
-   private final List<FixedFramePoint3DBasics> swingWaypointsForViz = new ArrayList<>();
+   private final List<YoFramePoint3D> swingWaypointsForViz = new ArrayList<>();
 
    private final ReferenceFrame soleFrame;
    private final YoSwingTrajectoryParameters swingTrajectoryParameters;
@@ -220,7 +220,6 @@ public class SwingState extends AbstractFootControlState
       originOfControlFrame.getTransformToDesiredFrame(soleToControlFrameTransform, soleFrame);
       desiredControlFrame.setPoseAndUpdate(soleToControlFrameTransform);
 
-      YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       swingDuration = new YoDouble(namePrefix + "Duration", registry);
       desiredPositionWhenAdjusted = new YoFramePoint3D(namePrefix + "DesiredPositionWhenAdjusted", worldFrame, registry);
       desiredVelocityWhenAdjusted = new YoFrameVector3D(namePrefix + "DesiredVelocityWhenAdjusted", worldFrame, registry);
@@ -229,11 +228,6 @@ public class SwingState extends AbstractFootControlState
       blendedSwingTrajectory = new MultipleWaypointsBlendedPoseTrajectoryGenerator(namePrefix, swingTrajectoryCalculator.getSwingTrajectory(), worldFrame, registry);
       swingTrajectorySmoother = new C1ContinuousTrajectorySmoother(namePrefix, blendedSwingTrajectory, registry);
       touchdownTrajectory = new SoftTouchdownPoseTrajectoryGenerator(namePrefix + "Touchdown", registry);
-
-      if (visualizeAdjustedSwing)
-         swingVisualizer = new BlendedPositionTrajectoryGeneratorVisualizer(namePrefix, blendedSwingTrajectory, swingDuration, registry, yoGraphicsListRegistry);
-      else
-         swingVisualizer = null;
 
       swingTimeSpeedUpFactor = new YoDouble(namePrefix + "TimeSpeedUpFactor", registry);
       minSwingTimeForDisturbanceRecovery = new YoDouble(namePrefix + "MinTimeForDisturbanceRecovery", registry);
@@ -284,22 +278,10 @@ public class SwingState extends AbstractFootControlState
       footstepFrame = new PoseReferenceFrame(namePrefix + "FootstepFrame", worldFrame);
       adjustedFootstepFrame = new PoseReferenceFrame(namePrefix + "AdjustedFootstepFrame", worldFrame);
 
-      setupViz(yoGraphicsListRegistry, registry);
-   }
-
-   private void setupViz(YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry registry)
-   {
-      if (yoGraphicsListRegistry == null)
-      {
-         return;
-      }
-
       for (int i = 0; i < Footstep.maxNumberOfSwingWaypoints; i++)
       {
          YoFramePoint3D yoWaypoint = new YoFramePoint3D("SwingWaypoint" + robotSide.getPascalCaseName() + i, ReferenceFrame.getWorldFrame(), registry);
-         YoGraphicPosition waypointViz = new YoGraphicPosition("SwingWaypoint" + robotSide.getPascalCaseName() + i, yoWaypoint , 0.01, YoAppearance.GreenYellow());
          yoWaypoint.setToNaN();
-         yoGraphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), waypointViz);
          swingWaypointsForViz.add(yoWaypoint);
       }
    }
@@ -525,8 +507,6 @@ public class SwingState extends AbstractFootControlState
       secondaryJointWeightScale.set(computeSecondaryJointWeightScale(time));
 
       firstTickInState = false;
-      if (swingVisualizer != null)
-         swingVisualizer.visualize();
    }
 
    public void setFootstep(Footstep footstep, double swingTime)
@@ -657,8 +637,6 @@ public class SwingState extends AbstractFootControlState
    {
       double swingDuration = this.swingDuration.getDoubleValue();
       blendedSwingTrajectory.clear();
-      if (swingVisualizer != null)
-         swingVisualizer.hideVisualization();
       if (swingTrajectoryBlendDuration > 0.0)
       {
          initialPose.changeFrame(worldFrame);
@@ -709,8 +687,6 @@ public class SwingState extends AbstractFootControlState
 
       blendedSwingTrajectory.initialize();
       touchdownTrajectory.initialize();
-      if (swingVisualizer != null)
-         swingVisualizer.visualize();
 
       if (!swingWaypointsForViz.isEmpty() && swingTrajectoryCalculator.getActiveTrajectoryType() == TrajectoryType.WAYPOINTS)
       {
@@ -864,7 +840,14 @@ public class SwingState extends AbstractFootControlState
    @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
-      return null;
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      for (int i = 0; i < Footstep.maxNumberOfSwingWaypoints; i++)
+      {
+         group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint3D("SwingWaypoint" + robotSide.getPascalCaseName() + i, swingWaypointsForViz.get(i), 0.02,
+                                                                       ColorDefinitions.GreenYellow()));
+      }
+
+      return group;
    }
 
    @Override

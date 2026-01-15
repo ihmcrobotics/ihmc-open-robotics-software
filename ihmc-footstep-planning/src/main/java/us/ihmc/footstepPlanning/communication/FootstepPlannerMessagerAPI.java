@@ -36,7 +36,6 @@ import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pathPlanning.HeightMapDataSetName;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
-import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -94,7 +93,6 @@ public class FootstepPlannerMessagerAPI
    // Parameters
    public static final Topic<DefaultFootstepPlannerParametersReadOnly> PlannerParameters = topic("PlannerParameters");
    public static final Topic<AStarBodyPathPlannerParametersReadOnly> AStarBodyPathPlannerParameters = topic("AStarBodyPathPlannerParameters");
-   public static final Topic<VisibilityGraphsParametersReadOnly> VisibilityGraphsParameters = topic("VisibilityGraphsParameters");
    public static final Topic<SwingPlannerParametersReadOnly> SwingPlannerParameters = topic("SwingPlannerParameters");
    public static final Topic<BipedalSupportPlanarRegionParametersMessage> BipedalSupportRegionsParameters = topic("BipedalSupportRegionsParameters");
 

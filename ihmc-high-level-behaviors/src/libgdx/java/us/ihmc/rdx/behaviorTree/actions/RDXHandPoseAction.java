@@ -20,6 +20,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.handsros2.abilityHand.AbilityHandControlMode;
 import us.ihmc.handsros2.abilityHand.AbilityHandGrip;
+import us.ihmc.handsros2.abilityHand.AbilityHandModel.AbilityHandJointName;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
@@ -158,6 +159,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
                                                              definition::setUsePredefinedJointAngles,
                                                              imBoolean ->
                         {
+                           ImGui.beginDisabled(!state.getPalmFrame().isChildOfWorld());
                            if (ImGui.checkbox(labels.get("Use Predefined Joint Angles"), imBoolean))
                            {
                               definition.setPreset(null); // Preserve joint angles from before
@@ -181,6 +183,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
                                  actionPalmFrame.update();
                               }
                            }
+                           ImGui.endDisabled();
                         });
       jointSpaceControlWrapper = new ImBooleanWrapper(definition::getJointspaceOnly,
                                                       definition::setJointspaceOnly,
@@ -330,10 +333,11 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
       if (abilityHands.containsKey(definition.getSide()))
       {
          RDXRigidBody abilityHand = abilityHands.get(definition.getSide());
-         RigidBodyBasics palm = abilityHand.getChildrenJoints().get(0).getSuccessor().getChildrenJoints().get(0).getSuccessor();
+         RigidBodyBasics palm = abilityHand.getChildrenJoints().get(0).getSuccessor();
          for (int i = state.getLeafIndex() - 1; i >= 0; i--)
          {
-            if (rootNode.getState().getOrderedLeaves().get(i) instanceof AbilityHandActionState abilityHandActionState)
+            if (rootNode.getState().getOrderedLeaves().get(i) instanceof AbilityHandActionState abilityHandActionState
+                && abilityHandActionState.getDefinition().getSide() == definition.getSide())
             {
                if (abilityHandActionState.getDefinition().getControlMode() == AbilityHandControlMode.GRIP)
                {
@@ -363,6 +367,9 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
                else
                   joint = (RevoluteJoint) palm.getChildrenJoints().get(i == 5 ? 4 : i);
                joint.setQ(Math.toRadians(fingerPositions[i]));
+               if (i < 4) // set 2nd joints on non-thumb fingers
+                  ((RevoluteJoint) palm.getChildrenJoints().get(i).getSuccessor().getChildrenJoints().get(0))
+                        .setQ(AbilityHandJointName.getQ2Position(Math.toRadians(fingerPositions[i])));
             }
             abilityHand.update();
          }

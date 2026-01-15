@@ -11,7 +11,7 @@ import us.ihmc.communication.ToolboxAPIs;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.footstepStreamingToolboxAPI.FootstepStreamingToolboxInputCommand;
-import us.ihmc.robotDataVisualizer.logger.localLogging.JVMStatisticsGenerator;
+import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 

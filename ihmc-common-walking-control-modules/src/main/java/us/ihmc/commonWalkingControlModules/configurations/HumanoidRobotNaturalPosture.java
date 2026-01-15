@@ -4,6 +4,7 @@ import org.ejml.data.DMatrixRMaj;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
@@ -11,7 +12,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
  * robot, similar to how center of mass is the average position of all mass in the robot. It short, it is the angle to which the robot is servoed.
  * REF: Y.-M. Chen, G. Nelson, R. Griffin, M. Posa, and J. Pratt, "Angular Center of Mass for Humanoid Robots." 2022. http://arxiv.org/abs/2210.08111
  */
-public interface HumanoidRobotNaturalPosture
+public interface HumanoidRobotNaturalPosture extends SCS2YoGraphicHolder
 {
    /**
     * This is the main method of this class. An implementation of this method should contain the calculation which computes the Angular Center of Mass (ACOM).
@@ -58,6 +59,4 @@ public interface HumanoidRobotNaturalPosture
    {
       return null;
    }
-
-   void createVisuals(YoGraphicsListRegistry yoGraphicsListRegistry);
 }

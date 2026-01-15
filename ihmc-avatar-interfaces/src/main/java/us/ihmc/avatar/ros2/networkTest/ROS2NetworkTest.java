@@ -12,7 +12,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotDataLogger.YoVariableClient;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
-import us.ihmc.robotDataVisualizer.BasicYoVariablesUpdatedListener;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;

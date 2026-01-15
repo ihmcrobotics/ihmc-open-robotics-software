@@ -117,7 +117,7 @@ public class FixedBaseRobotArmController implements RobotController
       ControllerCoreOptimizationSettings optimizationSettings = new RobotArmControllerCoreOptimizationSettings();
 
       controlCoreToolbox = new WholeBodyControlCoreToolbox(controlDT, gravityZ, null, controlledJoints, centerOfMassFrame,
-                                                                                       optimizationSettings, yoGraphicsListRegistry, registry);
+                                                                                       optimizationSettings, registry);
 
       if (USE_PRIVILEGED_CONFIGURATION)
          controlCoreToolbox.setJointPrivilegedConfigurationParameters(new JointPrivilegedConfigurationParameters());

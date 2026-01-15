@@ -51,6 +51,11 @@ public class HeightMapTools
       return (int) Math.round((coordinate - gridCenter) / resolution) + centerIndex;
    }
 
+   public static int coordinateToChunkIndex(double coordinate, double chunkOrigin, double resolution)
+   {
+      return (int) Math.floor((coordinate - chunkOrigin) / resolution);
+   }
+
    public static double indexToCoordinate(int index, double mapCenter, double resolution, int centerIndex)
    {
       return (index - centerIndex) * resolution + mapCenter;

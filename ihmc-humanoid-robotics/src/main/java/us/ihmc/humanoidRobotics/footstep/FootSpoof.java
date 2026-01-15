@@ -41,11 +41,6 @@ public class FootSpoof implements ContactablePlaneBody
    private final double coefficientOfFriction;
    private final int totalNumberOfContactPoints;
 
-   public FootSpoof(String name)
-   {
-      this(name, -0.15, 0.02, 0.21, 0.1, 0.05, 0.05, 0.0);
-   }
-
    public FootSpoof(String name, double xToAnkle, double yToAnkle, double zToAnkle, List<Point2D> contactPoints2dInSoleFrame,
                     double coefficientOfFriction)
    {
@@ -67,38 +62,6 @@ public class FootSpoof implements ContactablePlaneBody
          contactPoints.add(point);
          contactPoints2d.add(new FramePoint2D(point));
       }
-
-      totalNumberOfContactPoints = contactPoints.size();
-
-      this.coefficientOfFriction = coefficientOfFriction;
-   }
-
-   public FootSpoof(String name, double xToAnkle, double yToAnkle, double zToAnkle, double footForward, double footBack, double footHalfWidth,
-                    double coefficientOfFriction)
-   {
-      RigidBodyTransform transformToAnkle = new RigidBodyTransform();
-      transformToAnkle.getTranslation().set(new Vector3D(-xToAnkle, -yToAnkle, -zToAnkle));
-
-//    if(FootstepUtilsTest.DEBUG_TESTS)
-//       System.out.println("FootSpoof: making transform from plane to ankle equal to "+transformToAnkle);
-
-      shinFrame = new PoseReferenceFrame(name + "ShinFrame", ReferenceFrame.getWorldFrame());
-      this.shin = new RigidBody(name, shinFrame);
-      this.ankle = new RevoluteJoint(name + "Ankle", shin, new RigidBodyTransform(), new Vector3D(0.0, 1.0, 0.0));
-      this.foot = new RigidBody(name, ankle, new Matrix3D(), 1.0, new RigidBodyTransform());
-      soleFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(name + "soleFrame", ankle.getFrameAfterJoint(), transformToAnkle);
-      FramePoint3D point1 = new FramePoint3D(soleFrame, new Point3D(footForward, footHalfWidth, 0.0));
-      FramePoint3D point2 = new FramePoint3D(soleFrame, new Point3D(footForward, -footHalfWidth, 0.0));
-      FramePoint3D point3 = new FramePoint3D(soleFrame, new Point3D(-footBack, -footHalfWidth, 0.0));
-      FramePoint3D point4 = new FramePoint3D(soleFrame, new Point3D(-footBack, footHalfWidth, 0.0));
-      contactPoints.add(point1);
-      contactPoints.add(point2);
-      contactPoints.add(point3);
-      contactPoints.add(point4);
-      contactPoints2d.add(new FramePoint2D(point1));
-      contactPoints2d.add(new FramePoint2D(point2));
-      contactPoints2d.add(new FramePoint2D(point3));
-      contactPoints2d.add(new FramePoint2D(point4));
 
       totalNumberOfContactPoints = contactPoints.size();
 

@@ -23,7 +23,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.List;
 
-import static us.ihmc.robotics.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class WalkingCoPTrajectoryGeneratorTest
 {

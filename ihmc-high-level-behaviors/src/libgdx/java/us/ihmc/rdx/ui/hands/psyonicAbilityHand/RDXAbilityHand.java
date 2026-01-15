@@ -1,6 +1,5 @@
 package us.ihmc.rdx.ui.hands.psyonicAbilityHand;
 
-import com.badlogic.gdx.graphics.Color;
 import ihmc_hands_ros2.msg.dds.AbilityHandCommand;
 import ihmc_hands_ros2.msg.dds.AbilityHandState;
 import imgui.ImGui;
@@ -24,7 +23,7 @@ import us.ihmc.tools.Timer;
 public class RDXAbilityHand implements RDXHandInterface
 {
    public static final float START_POSITION = 30.0f;
-   public static final float DEFAULT_VELOCITY = 30.0f; // TODO: Is 30 a good default?
+   public static final float DEFAULT_VELOCITY = 180.0f;
    public static final float THUMB_CURL_MAX = 70.0f;
    public static final float THUMB_CURL_MIN = 10.0f;
    public static final float THUMB_OPPOSITION_MAX = 100.0f;
@@ -33,14 +32,13 @@ public class RDXAbilityHand implements RDXHandInterface
    public static final float FINGER_CURL_MIN = 0.0f;
    public static final String[] FINGER_NAMES = {"Index", "Middle", "Ring", "Pinky", "Flex", "Rotator"};
 
-   private final String identifier;
    private final RobotSide handSide;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImFloat[] desiredPositions = new ImFloat[6];
    private final ImFloat[] desiredVelocities = new ImFloat[6];
    private AbilityHandGrip executeGrip = null;
-   private boolean executeVelToPos = false;
+   private boolean executePosition = false;
 
    private final TypedNotification<AbilityHandState> stateNotification = new TypedNotification<>();
    private AbilityHandState latestState = null;
@@ -49,9 +47,8 @@ public class RDXAbilityHand implements RDXHandInterface
    private final Throttler commandThrottler = new Throttler().setFrequency(30.0);
    private final Timer connectedTimer = new Timer();
 
-   public RDXAbilityHand(String identifier, RobotSide handSide, ROS2Node ros2Node)
+   public RDXAbilityHand(RobotSide handSide, ROS2Node ros2Node)
    {
-      this.identifier = identifier;
       this.handSide = handSide;
 
       for (int i = 0; i < 6; i++)
@@ -60,9 +57,8 @@ public class RDXAbilityHand implements RDXHandInterface
          desiredVelocities[i] = new ImFloat(DEFAULT_VELOCITY);
       }
 
-      ros2Node.createSubscription2(AbilityHandROS2API.STATE_TOPIC, stateNotification::set);
-      command.setIdentifier(identifier);
-      commandPublisher = ros2Node.createPublisher(AbilityHandROS2API.COMMAND_TOPIC);
+      ros2Node.createSubscription2(AbilityHandROS2API.STATE_TOPICS.get(handSide), stateNotification::set);
+      commandPublisher = ros2Node.createPublisher(AbilityHandROS2API.COMMAND_TOPICS.get(handSide));
    }
 
    @Override
@@ -70,12 +66,8 @@ public class RDXAbilityHand implements RDXHandInterface
    {
       if (stateNotification.poll())
       {
-         AbilityHandState read = stateNotification.read();
-         if (read.getIdentifierAsString().equals(identifier) && read.getHandSide() == handSide.toByte())
-         {
-            latestState = read;
-            connectedTimer.reset();
-         }
+         latestState = stateNotification.read();
+         connectedTimer.reset();
       }
 
       if (!connectedTimer.isRunning(0.5))
@@ -84,9 +76,9 @@ public class RDXAbilityHand implements RDXHandInterface
       if (latestState == null)
       {
          executeGrip = null;
-         executeVelToPos = false;
+         executePosition = false;
       }
-      else if ((executeGrip != null || executeVelToPos) && commandThrottler.run())
+      else if ((executeGrip != null || executePosition) && commandThrottler.run())
       {
          if (executeGrip != null)
          {
@@ -104,7 +96,7 @@ public class RDXAbilityHand implements RDXHandInterface
          commandPublisher.publish(command);
 
          executeGrip = null;
-         executeVelToPos = false;
+         executePosition = false;
       }
    }
 
@@ -112,9 +104,6 @@ public class RDXAbilityHand implements RDXHandInterface
    public void renderImGuiWidgets()
    {
       ImGuiTools.separatorText(getSide().toString() + " Ability Hand", ImGuiTools.getSmallBoldFont());
-
-      if (latestState == null)
-         ImGuiTools.textColored(Color.RED, "Not connected");
 
       ImGui.beginDisabled(latestState == null);
 
@@ -126,7 +115,7 @@ public class RDXAbilityHand implements RDXHandInterface
             ImGui.sameLine();
       }
 
-      boolean scheduleExecuteVelToPos = false;
+      boolean scheduleExecutePosition = false;
       for (int i = 0; i < 6; i++)
       {
          float sliderMin = 0.0f;
@@ -137,26 +126,24 @@ public class RDXAbilityHand implements RDXHandInterface
          ImGuiTools.renderSliderOrProgressNotch(currentNotch * sliderWidth, ImGui.getColorU32(ImGuiCol.Text));
 
          ImGui.pushItemWidth(sliderWidth);
-         scheduleExecuteVelToPos |= ImGui.sliderFloat(labels.getHidden(FINGER_NAMES[i]), desiredPositions[i].getData(), sliderMin, sliderMax,
+         scheduleExecutePosition |= ImGui.sliderFloat(labels.getHidden(FINGER_NAMES[i]), desiredPositions[i].getData(), sliderMin, sliderMax,
                                "%s: %.2f%s flexion".formatted(FINGER_NAMES[i], actuatorPosition, EuclidCoreMissingTools.DEGREE_SYMBOL));
-         if (!ImGui.isItemActive() && !executeVelToPos && latestState != null) // Prevent overriding externally submitted positions too
+         if (!ImGui.isItemActive() && !executePosition && latestState != null) // Prevent overriding externally submitted positions too
             desiredPositions[i].set(latestState.getGoalPositions()[i]);
          ImGui.popItemWidth();
          ImGui.sameLine();
          ImGui.pushItemWidth(ImGui.getColumnWidth());
-         scheduleExecuteVelToPos |= ImGui.inputFloat(labels.getHidden("Velocity" + i), desiredVelocities[i], 0.1f, 1.0f, "%.2f deg/s");
+         boolean velocityInput = ImGuiTools.volatileInputFloat(labels.getHidden("Velocity" + i), desiredVelocities[i], 0.1f, 1.0f, "%.2f deg/s");
+         if (velocityInput)
+            for (int j = 0; j < 6; j++)
+               desiredVelocities[j].set(desiredVelocities[i].get());
+         scheduleExecutePosition |= velocityInput;
          ImGui.popItemWidth();
       }
 
-      if (scheduleExecuteVelToPos)
-         executeVelToPos = true;
+      if (scheduleExecutePosition)
+         executePosition = true;
       ImGui.endDisabled();
-   }
-
-   @Override
-   public String getIdentifier()
-   {
-      return identifier;
    }
 
    @Override
@@ -192,7 +179,7 @@ public class RDXAbilityHand implements RDXHandInterface
    public void sendFingerPosition(int index, float angleDegrees)
    {
       desiredPositions[index].set(index == 5 ? -angleDegrees : angleDegrees);
-      executeVelToPos = true;
+      executePosition = true;
    }
 
    @Override

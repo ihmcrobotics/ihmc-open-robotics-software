@@ -30,7 +30,7 @@ public class GpuMappingManager
 
    private final ReferenceFrame heightMapCenter;
    private final HeightMapParameters heightMapParameters;
-   private final RapidHeightMapDriftOffset rapidHeightMapDriftOffset;
+   private final HeightMapDriftOffset heightMapDriftOffset;
    private final HeightMapExtractor heightMapExtractor;
    private final TerrainMapExtractor terrainMapExtractor;
    private final ChunkedMapManager chunkedMapManager;
@@ -69,7 +69,7 @@ public class GpuMappingManager
       footSoleFrames.add(leftFootSoleFrame);
       footSoleFrames.add(rightFootSoleFrame);
 
-      rapidHeightMapDriftOffset = new RapidHeightMapDriftOffset(controllerFootstepQueueMonitor);
+      heightMapDriftOffset = new HeightMapDriftOffset(controllerFootstepQueueMonitor);
       heightMapExtractor = new HeightMapExtractor(heightMapParameters);
       terrainMapExtractor = new TerrainMapExtractor(heightMapParameters, terrainMapParameters);
       chunkedMapManager = new ChunkedMapManager(ros2Node, heightMapParameters);
@@ -102,7 +102,7 @@ public class GpuMappingManager
          heightMapExtractor.reset(footHeight, loweredFootHeight);
          if (heightMapParameters.getDriftOffsetFilter())
          {
-            rapidHeightMapDriftOffset.reset();
+            heightMapDriftOffset.reset();
          }
       }
 
@@ -113,7 +113,7 @@ public class GpuMappingManager
          heightMapExtractor.reset(footHeight);
          if (heightMapParameters.getDriftOffsetFilter())
          {
-            rapidHeightMapDriftOffset.reset();
+            heightMapDriftOffset.reset();
          }
       }
 
@@ -136,7 +136,7 @@ public class GpuMappingManager
       float driftOffsetInZ = 0;
       if (heightMapParameters.getDriftOffsetFilter())
       {
-         driftOffsetInZ = rapidHeightMapDriftOffset.getUpdateDriftOffset();
+         driftOffsetInZ = heightMapDriftOffset.getUpdateDriftOffset();
       }
 
       // Perform update, this actually creates the height map

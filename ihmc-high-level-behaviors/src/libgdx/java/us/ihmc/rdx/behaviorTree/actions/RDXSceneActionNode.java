@@ -1,51 +1,110 @@
 package us.ihmc.rdx.behaviorTree.actions;
 
 import imgui.ImGui;
-import imgui.flag.ImGuiInputTextFlags;
 import imgui.type.ImInt;
-import imgui.type.ImString;
+import org.yaml.snakeyaml.Yaml;
 import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionNodeState;
+import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectDefinition;
+import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectType;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseObject;
+import us.ihmc.perception.detections.yolo.YOLOv8Tools;
 import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeRootNode;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 public class RDXSceneActionNode extends RDXActionNode<SceneActionNodeState, SceneActionNodeDefinition>
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImString imYOLOModelName = new ImString(256);
-   private final ImInt currentObjectType = new ImInt(0);
-   private final String[] objectTypeNames;
+   private final ImInt imYOLOModel = new ImInt(0);
+   private final ImInt imYOLOClass = new ImInt(0);
+   private final ImInt imFPType = new ImInt(0);
+   private final String[] fpTypeNames;
+   private final String[] availableYOLOModelNames;
+   private final String[][] availableYOLOClasses;
 
    public RDXSceneActionNode(long id, RDXBehaviorTreeRootNode rootNode)
    {
       super(new SceneActionNodeState(id, rootNode.getState()), rootNode);
 
       IsaacROSFoundationPoseObject[] values = IsaacROSFoundationPoseObject.values();
-      objectTypeNames = new String[values.length];
+      fpTypeNames = new String[values.length];
       for (int i = 0; i < values.length; i++)
+         fpTypeNames[i] = values[i].titleCaseName;
+
+      List<URL> yoloModelDirectories = YOLOv8Tools.getYOLOModelDirectories();
+      availableYOLOModelNames = new String[yoloModelDirectories.size()];
+      for (int i = 0; i < yoloModelDirectories.size(); i++)
       {
-         objectTypeNames[i] = values[i].titleCaseName;
+         String[] path = yoloModelDirectories.get(i).getPath().split(Pattern.quote(File.separator));
+         availableYOLOModelNames[i] = path[path.length - 1];
+      }
+
+      availableYOLOClasses = new String[availableYOLOModelNames.length][];
+      for (int i = 0; i < availableYOLOModelNames.length; i++)
+      {
+         try (InputStream classNamesFile = YOLOv8Tools.getClassNamesFile(yoloModelDirectories.get(i)).openStream())
+         {
+            Yaml yaml = new Yaml();
+            Map<String, List<Object>> classNamesData = yaml.load(classNamesFile);
+            List<Object> names = classNamesData.get("names");
+            availableYOLOClasses[i] = new String[names.size()];
+            for (int j = 0; j < names.size(); j++)
+               availableYOLOClasses[i][j] = names.get(j).toString();
+         }
+         catch (IOException e)
+         {
+            DefaultExceptionHandler.MESSAGE_AND_STACKTRACE.handleException(e);
+         }
       }
    }
 
    @Override
    protected void renderImGuiWidgetsInternal()
    {
-      imYOLOModelName.set(definition.getYoloModelName());
-      if (ImGui.inputText(labels.get("YOLO Model Name"), imYOLOModelName, ImGuiInputTextFlags.EnterReturnsTrue))
-         definition.setYoloModelName(imYOLOModelName.get());
+      BehaviorTreeSceneObjectDefinition objectDefinition = definition.getSceneObjectDefinition();
 
-      if (ImGui.checkbox(labels.get("Use FoundationPose"), definition.getUseFoundationPose()))
-         definition.setUseFoundationPose(!definition.getUseFoundationPose());
+      ImGui.text("Setup Object Type:");
+      for (BehaviorTreeSceneObjectType type : BehaviorTreeSceneObjectType.values)
+         if (ImGui.radioButton(type.name(), objectDefinition.getObjectType() == type))
+            objectDefinition.setObjectType(type);
 
       ImGui.pushItemWidth(200.0f);
-      currentObjectType.set(definition.getObjectType().ordinal());
-      if (ImGui.combo(labels.get("Object Type"), currentObjectType, objectTypeNames))
-      {
-         definition.setObjectType(IsaacROSFoundationPoseObject.values()[currentObjectType.get()]);
-      }
+      imYOLOModel.set(-1);
+      for (int i = 0; i < availableYOLOModelNames.length; i++)
+         if (availableYOLOModelNames[i].equals(objectDefinition.getYoloModelName()))
+            imYOLOModel.set(i);
+      if (ImGui.combo(labels.get("YOLO Model"), imYOLOModel, availableYOLOModelNames))
+         objectDefinition.setYoloModelName(availableYOLOModelNames[imYOLOModel.get()]);
       ImGui.popItemWidth();
+
+      if (objectDefinition.getObjectType() == BehaviorTreeSceneObjectType.YOLO_ONLY)
+      {
+         ImGui.pushItemWidth(200.0f);
+         imYOLOClass.set(-1);
+         for (int i = 0; i < availableYOLOClasses[imYOLOModel.get()].length; i++)
+            if (availableYOLOClasses[imYOLOModel.get()][i].equals(objectDefinition.getYoloClassName()))
+               imYOLOClass.set(i);
+         if (ImGui.combo(labels.get("YOLO Class"), imYOLOClass, availableYOLOClasses[imYOLOModel.get()]))
+            objectDefinition.setYoloClassName(availableYOLOClasses[imYOLOModel.get()][imYOLOClass.get()]);
+         ImGui.popItemWidth();
+      }
+      else if (objectDefinition.getObjectType() == BehaviorTreeSceneObjectType.FOUNDATION_POSE)
+      {
+         ImGui.pushItemWidth(200.0f);
+         imFPType.set(objectDefinition.getFoundationPoseObjectType().ordinal());
+         if (ImGui.combo(labels.get("FoundationPose Type"), imFPType, fpTypeNames))
+            objectDefinition.setFoundationPoseObjectType(IsaacROSFoundationPoseObject.values()[imFPType.get()]);
+         ImGui.popItemWidth();
+      }
    }
 
    @Override

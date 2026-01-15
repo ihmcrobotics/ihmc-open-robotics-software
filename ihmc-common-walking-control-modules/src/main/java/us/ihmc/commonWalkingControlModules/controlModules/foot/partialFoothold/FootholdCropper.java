@@ -13,10 +13,15 @@ import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.occupancyGrid.OccupancyGrid;
 import us.ihmc.robotics.occupancyGrid.OccupancyGridVisualizer;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -26,7 +31,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-public class FootholdCropper
+public class FootholdCropper implements SCS2YoGraphicHolder
 {
    private static final double defaultThresholdForMeasuredCellActivation = 1.0;
    private static final double defaultMeasuredDecayRatePerSecond = 0.0;// 0.2;
@@ -59,15 +64,17 @@ public class FootholdCropper
 
    private final OccupancyGridVisualizer measuredVisualizer;
 
+   private final String namePrefix;
+
    public FootholdCropper(String namePrefix,
                           ReferenceFrame soleFrame,
                           List<? extends FramePoint2DReadOnly> defaultContactPoints,
                           YoPartialFootholdModuleParameters.FootholdCroppingParameters rotationParameters,
                           double dt,
-                          YoRegistry parentRegistry,
-                          YoGraphicsListRegistry yoGraphicsListRegistry)
+                          YoRegistry parentRegistry)
    {
       this.rotationParameters = rotationParameters;
+      this.namePrefix = namePrefix;
 
       defaultFootPolygon = new FrameConvexPolygon2D(FrameVertex2DSupplier.asFrameVertex2DSupplier(defaultContactPoints));
       numberOfFootCornerPoints = defaultContactPoints.size();
@@ -101,14 +108,6 @@ public class FootholdCropper
       shrinkCounter = new YoInteger(namePrefix + "ShrinkCounter", registry);
       shrinkMaxLimit = rotationParameters.getShrinkMaxLimit();
 
-      if (yoGraphicsListRegistry != null)
-      {
-         String listName = getClass().getSimpleName();
-
-         YoArtifactPolygon yoShrunkPolygon = new YoArtifactPolygon(namePrefix + "ShrunkPolygon", shrunkenFootPolygonInWorld, Color.BLUE, false);
-         yoShrunkPolygon.setVisible(true);
-         yoGraphicsListRegistry.registerArtifact(listName, yoShrunkPolygon);
-      }
       measuredVisualizer = null;
 
       parentRegistry.addChild(registry);
@@ -262,5 +261,14 @@ public class FootholdCropper
    public FrameConvexPolygon2DReadOnly getShrunkenFootPolygon()
    {
       return shrunkenFootPolygon;
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPolygon2D(namePrefix + "ShrunkPolygon", shrunkenFootPolygonInWorld, ColorDefinitions.Blue()));
+
+      return group;
    }
 }

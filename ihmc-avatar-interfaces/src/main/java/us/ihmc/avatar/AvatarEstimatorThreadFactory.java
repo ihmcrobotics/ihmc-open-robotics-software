@@ -446,8 +446,7 @@ public class AvatarEstimatorThreadFactory
                                                                               getMainStateEstimator(),
                                                                               getSecondaryStateEstimators(),
                                                                               createControllerCrashPublisher(),
-                                                                              getEstimatorRegistry(),
-                                                                              getYoGraphicsListRegistry());
+                                                                              getEstimatorRegistry());
 
       avatarEstimatorThread.addRobotController(new RobotJointLimitWatcher(getEstimatorFullRobotModel().getOneDoFJoints(), getRawSensorOutputMap()));
       RobotConfigurationDataPublisher robotConfigurationDataPublisher = getRobotConfigurationDataPublisher();
@@ -479,7 +478,7 @@ public class AvatarEstimatorThreadFactory
       estimatorFactory.setCenterOfPressureDataHolderFromController(getCenterOfPressureDataHolderFromController());
       estimatorFactory.setRobotMotionStatusFromController(getRobotMotionStatusFromController());
       estimatorFactory.setExternalPelvisCorrectorSubscriber(getExternalPelvisPoseSubscriberField());
-      DRCKinematicsBasedStateEstimator stateEstimator = estimatorFactory.createStateEstimator(getEstimatorRegistry(), getYoGraphicsListRegistry());
+      DRCKinematicsBasedStateEstimator stateEstimator = estimatorFactory.createStateEstimator(getEstimatorRegistry());
 
       if (realtimeROS2NodeField.hasValue())
       {
@@ -509,7 +508,6 @@ public class AvatarEstimatorThreadFactory
                                                                                                 estimatorDT,
                                                                                                 getGravity(),
                                                                                                 getProcessedSensorOutputMap(),
-                                                                                                getYoGraphicsListRegistry(),
                                                                                                 getEstimatorFullRobotModel());
 
       InputStream ekfParameterStream = LeggedRobotEKF.class.getResourceAsStream("/ekf.xml");
@@ -801,13 +799,6 @@ public class AvatarEstimatorThreadFactory
          robotConfigurationDataPublisherField.set(factory.createRobotConfigurationDataPublisher());
       }
       return robotConfigurationDataPublisherField.get();
-   }
-
-   public YoGraphicsListRegistry getYoGraphicsListRegistry()
-   {
-      if (!yoGraphicsListRegistryField.hasValue())
-         yoGraphicsListRegistryField.set(new YoGraphicsListRegistry());
-      return yoGraphicsListRegistryField.get();
    }
 
    public YoRegistry getEstimatorRegistry()

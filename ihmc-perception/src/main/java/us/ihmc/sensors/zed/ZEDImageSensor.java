@@ -22,11 +22,13 @@ import us.ihmc.zed.SL_PositionalTrackingParameters;
 import us.ihmc.zed.SL_Quaternion;
 import us.ihmc.zed.SL_RuntimeParameters;
 import us.ihmc.zed.SL_Vector3;
+import us.ihmc.zed.ZEDException;
 import us.ihmc.zed.library.ZEDJavaAPINativeLibrary;
 
 import java.time.Instant;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static us.ihmc.zed.ZEDTools.throwOnError;
 import static us.ihmc.zed.global.zed.*;
 
 public class ZEDImageSensor extends ImageSensor
@@ -470,73 +472,6 @@ public class ZEDImageSensor extends ImageSensor
       sl_close_camera(cameraID);
 
       System.out.println("Closed " + getClass().getSimpleName());
-   }
-
-   private void throwOnError(int errorCode) throws ZEDException
-   {
-      if (errorCode != SL_ERROR_CODE_SUCCESS)
-         throw new ZEDException(errorCode);
-   }
-
-   private class ZEDException extends Exception
-   {
-      private final int zedErrorCode;
-
-      public ZEDException(int zedErrorCode)
-      {
-         this.zedErrorCode = zedErrorCode;
-      }
-
-      @Override
-      public String getMessage()
-      {
-         return "[%s] ZED Error (%d): %s".formatted(getSensorName(), zedErrorCode, getZEDErrorName(zedErrorCode));
-      }
-   }
-
-   private String getZEDErrorName(int errorCode)
-   {
-      return switch (errorCode)
-      {
-         case SL_ERROR_CODE_CORRUPTED_FRAME -> "SL_ERROR_CODE_CORRUPTED_FRAME";
-         case SL_ERROR_CODE_CAMERA_REBOOTING -> "SL_ERROR_CODE_CAMERA_REBOOTING";
-         case SL_ERROR_CODE_SUCCESS -> "SL_ERROR_CODE_SUCCESS";
-         case SL_ERROR_CODE_FAILURE -> "SL_ERROR_CODE_FAILURE";
-         case SL_ERROR_CODE_NO_GPU_COMPATIBLE -> "SL_ERROR_CODE_NO_GPU_COMPATIBLE";
-         case SL_ERROR_CODE_NOT_ENOUGH_GPU_MEMORY -> "SL_ERROR_CODE_NOT_ENOUGH_GPU_MEMORY";
-         case SL_ERROR_CODE_CAMERA_NOT_DETECTED -> "SL_ERROR_CODE_CAMERA_NOT_DETECTED";
-         case SL_ERROR_CODE_SENSORS_NOT_INITIALIZED -> "SL_ERROR_CODE_SENSORS_NOT_INITIALIZED";
-         case SL_ERROR_CODE_SENSORS_NOT_AVAILABLE -> "SL_ERROR_CODE_SENSORS_NOT_AVAILABLE";
-         case SL_ERROR_CODE_INVALID_RESOLUTION -> "SL_ERROR_CODE_INVALID_RESOLUTION";
-         case SL_ERROR_CODE_LOW_USB_BANDWIDTH -> "SL_ERROR_CODE_LOW_USB_BANDWIDTH";
-         case SL_ERROR_CODE_CALIBRATION_FILE_NOT_AVAILABLE -> "SL_ERROR_CODE_CALIBRATION_FILE_NOT_AVAILABLE";
-         case SL_ERROR_CODE_INVALID_CALIBRATION_FILE -> "SL_ERROR_CODE_INVALID_CALIBRATION_FILE";
-         case SL_ERROR_CODE_INVALID_SVO_FILE -> "SL_ERROR_CODE_INVALID_SVO_FILE";
-         case SL_ERROR_CODE_SVO_RECORDING_ERROR -> "SL_ERROR_CODE_SVO_RECORDING_ERROR";
-         case SL_ERROR_CODE_SVO_UNSUPPORTED_COMPRESSION -> "SL_ERROR_CODE_SVO_UNSUPPORTED_COMPRESSION";
-         case SL_ERROR_CODE_END_OF_SVOFILE_REACHED -> "SL_ERROR_CODE_END_OF_SVOFILE_REACHED";
-         case SL_ERROR_CODE_INVALID_COORDINATE_SYSTEM -> "SL_ERROR_CODE_INVALID_COORDINATE_SYSTEM";
-         case SL_ERROR_CODE_INVALID_FIRMWARE -> "SL_ERROR_CODE_INVALID_FIRMWARE";
-         case SL_ERROR_CODE_INVALID_FUNCTION_PARAMETERS -> "SL_ERROR_CODE_INVALID_FUNCTION_PARAMETERS";
-         case SL_ERROR_CODE_CUDA_ERROR -> "SL_ERROR_CODE_CUDA_ERROR";
-         case SL_ERROR_CODE_CAMERA_NOT_INITIALIZED -> "SL_ERROR_CODE_CAMERA_NOT_INITIALIZED";
-         case SL_ERROR_CODE_NVIDIA_DRIVER_OUT_OF_DATE -> "SL_ERROR_CODE_NVIDIA_DRIVER_OUT_OF_DATE";
-         case SL_ERROR_CODE_INVALID_FUNCTION_CALL -> "SL_ERROR_CODE_INVALID_FUNCTION_CALL";
-         case SL_ERROR_CODE_CORRUPTED_SDK_INSTALLATION -> "SL_ERROR_CODE_CORRUPTED_SDK_INSTALLATION";
-         case SL_ERROR_CODE_INCOMPATIBLE_SDK_VERSION -> "SL_ERROR_CODE_INCOMPATIBLE_SDK_VERSION";
-         case SL_ERROR_CODE_INVALID_AREA_FILE -> "SL_ERROR_CODE_INVALID_AREA_FILE";
-         case SL_ERROR_CODE_INCOMPATIBLE_AREA_FILE -> "SL_ERROR_CODE_INCOMPATIBLE_AREA_FILE";
-         case SL_ERROR_CODE_CAMERA_FAILED_TO_SETUP -> "SL_ERROR_CODE_CAMERA_FAILED_TO_SETUP";
-         case SL_ERROR_CODE_CAMERA_DETECTION_ISSUE -> "SL_ERROR_CODE_CAMERA_DETECTION_ISSUE";
-         case SL_ERROR_CODE_CANNOT_START_CAMERA_STREAM -> "SL_ERROR_CODE_CANNOT_START_CAMERA_STREAM";
-         case SL_ERROR_CODE_NO_GPU_DETECTED -> "SL_ERROR_CODE_NO_GPU_DETECTED";
-         case SL_ERROR_CODE_PLANE_NOT_FOUND -> "SL_ERROR_CODE_PLANE_NOT_FOUND";
-         case SL_ERROR_CODE_MODULE_NOT_COMPATIBLE_WITH_CAMERA -> "SL_ERROR_CODE_MODULE_NOT_COMPATIBLE_WITH_CAMERA";
-         case SL_ERROR_CODE_MOTION_SENSORS_REQUIRED -> "SL_ERROR_CODE_MOTION_SENSORS_REQUIRED";
-         case SL_ERROR_CODE_MODULE_NOT_COMPATIBLE_WITH_CUDA_VERSION -> "SL_ERROR_CODE_MODULE_NOT_COMPATIBLE_WITH_CUDA_VERSION";
-         case SL_ERROR_CODE_SENSORS_DATA_REQUIRED -> "SL_ERROR_CODE_SENSORS_DATA_REQUIRED";
-         default -> "UNKNOWN";
-      };
    }
 
    private static int calculateBitrate(int width, int height, int fps)

@@ -40,6 +40,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 
 import java.util.ArrayList;
@@ -188,9 +189,12 @@ public class StepGeneratorJavaFXController
 
       LogTools.info("{}: Trying to start YoVariableServer using port: {}.", name, settings.getPort());
       yoVariableServer = new YoVariableServer(getClass(), modelProvider, settings, yoVariableServerDT);
-      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-      continuousStepController.setupVisualization(yoGraphicsListRegistry);
-      yoVariableServer.setMainRegistry(continuousStepController.getRegistry(), javaFXRobotVisualizer.getFullRobotModel().getElevator(), yoGraphicsListRegistry);
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(continuousStepController.getSCS2YoGraphics());
+      yoVariableServer.setMainRegistry(continuousStepController.getRegistry(),
+                                       javaFXRobotVisualizer.getFullRobotModel().getElevator(),
+                                       null,
+                                       group);
       yoVariableServer.start();
    }
 

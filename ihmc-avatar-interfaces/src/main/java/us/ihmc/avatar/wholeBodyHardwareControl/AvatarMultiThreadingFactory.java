@@ -25,7 +25,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.stateTransit
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
@@ -34,7 +33,7 @@ import us.ihmc.realtime.MonotonicTime;
 import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
-import us.ihmc.robotDataVisualizer.logger.localLogging.JVMStatisticsGenerator;
+import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -226,17 +225,18 @@ public class AvatarMultiThreadingFactory
       // Set the root registry as the YoVariableServer's main registry
       yoVariableServer.setMainRegistry(rootRegistry,
                                        estimatorThread.get().getFullRobotModel().getRootJoint().subtreeList(),
-                                       estimatorThread.get().getSCS1YoGraphicsListRegistry());
+                                       null,
+                                       estimatorThread.get().getSCS2YoGraphics());
 
       // Add controller thread registry directly to the YoVariableServer (since it is in a separate thread)
-      yoVariableServer.addRegistry(controllerThread.get().getYoVariableRegistry(), controllerThread.get().getSCS1YoGraphicsListRegistry());
+      yoVariableServer.addRegistry(controllerThread.get().getYoVariableRegistry(), null, controllerThread.get().getSCS2YoGraphics());
 
       // Add step generator thread registry directly to the YoVariableServer (since it is in a separate thread)
       if (createStepGeneratorThread)
-         yoVariableServer.addRegistry(stepGeneratorThread.get().getYoVariableRegistry(), stepGeneratorThread.get().getSCS1YoGraphicsListRegistry());
+         yoVariableServer.addRegistry(stepGeneratorThread.get().getYoVariableRegistry(), null, stepGeneratorThread.get().getSCS2YoGraphics());
 
       if (ikStreamingThread.hasValue())
-         yoVariableServer.addRegistry(ikStreamingThread.get().getYoVariableRegistry(), ikStreamingThread.get().getSCS1YoGraphicsListRegistry());
+         yoVariableServer.addRegistry(ikStreamingThread.get().getYoVariableRegistry(), null, ikStreamingThread.get().getSCS2YoGraphics());
 
       // Setup JVM statistics
       PeriodicThreadSchedulerFactory jvmSchedulerFactory;
@@ -280,24 +280,26 @@ public class AvatarMultiThreadingFactory
          ArrayList<RegistrySendBufferBuilder> builders = new ArrayList<>();
          builders.add(new RegistrySendBufferBuilder(rootRegistry,
                                                     estimatorThread.get().getFullRobotModel().getRootJoint().subtreeList(),
-                                                    estimatorThread.get().getSCS1YoGraphicsListRegistry()));
+                                                    null,
+                                                    estimatorThread.get().getSCS2YoGraphics()));
          builders.add(new RegistrySendBufferBuilder(controllerThread.get().getYoVariableRegistry(),
-                                                    controllerThread.get().getSCS1YoGraphicsListRegistry(),
+                                                    null,
                                                     controllerThread.get().getSCS2YoGraphics()));
          if (stepGeneratorThread.hasValue())
          {
             builders.add(new RegistrySendBufferBuilder(stepGeneratorThread.get().getYoVariableRegistry(),
-                                                       stepGeneratorThread.get().getSCS1YoGraphicsListRegistry(),
+                                                       null,
                                                        stepGeneratorThread.get().getSCS2YoGraphics()));
          }
          if (ikStreamingThread.hasValue())
          {
             builders.add(new RegistrySendBufferBuilder(ikStreamingThread.get().getYoVariableRegistry(),
-                                                       ikStreamingThread.get().getSCS1YoGraphicsListRegistry(),
+                                                       null,
                                                        ikStreamingThread.get().getSCS2YoGraphics()));
          }
 
-         builders.add(new RegistrySendBufferBuilder(jvmStatisticsGenerator.getYoRegistry(), null));
+         // FIXME add this back when a release of the logger is done.
+//         builders.add(new RegistrySendBufferBuilder(jvmStatisticsGenerator.getYoRegistry(), null));
 
          // Logging locally on the robot
          IntraprocessYoVariableLogger intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(builders,
@@ -342,7 +344,6 @@ public class AvatarMultiThreadingFactory
       avatarEstimatorThreadFactory.configureWithWholeBodyControllerParameters(robotModel);
       avatarEstimatorThreadFactory.setEstimatorFullRobotModel(fullRobotModel);
       avatarEstimatorThreadFactory.setSensorReaderFactory(sensorReaderFactory);
-//      avatarEstimatorThreadFactory.setYoGraphicsListRegistry(sensorReaderFactory.getYoGraphicsListRegistry()); //TODO do we need this?
       avatarEstimatorThreadFactory.setHumanoidRobotContextDataFactory(estimatorContextDataFactory);
       avatarEstimatorThreadFactory.setGravity(GRAVITY);
       //      if (secondaryEstimatorFactory != null)
@@ -470,7 +471,6 @@ public class AvatarMultiThreadingFactory
                                                                HighLevelHumanoidControllerFactory controllerFactory)
    {
       AvatarStepGeneratorThread stepGeneratorThread = null;
-      YoGraphicsListRegistry stepGeneratorGraphics = null;
 
       LogTools.info("create step generator = " + createStepGeneratorThread);
 
@@ -482,8 +482,6 @@ public class AvatarMultiThreadingFactory
 
       if (createStepGeneratorThread)
       {
-         stepGeneratorGraphics = new YoGraphicsListRegistry();
-
          stepGeneratorThread = new AvatarStepGeneratorThread(pluginFactory,
                                                              controllerContextFactory,
                                                              controllerFactory.getStatusOutputManager(),
@@ -511,10 +509,6 @@ public class AvatarMultiThreadingFactory
 
          // otherwise this would go into the step generator registry
          controllerThread.getYoVariableRegistry().addChild(environmentalConstraints.getRegistry());
-         List<ArtifactList> artifactLists = new ArrayList<>();
-         environmentalConstraints.getGraphicsListRegistry().getRegisteredArtifactLists(artifactLists);
-         controllerThread.getSCS1YoGraphicsListRegistry().registerYoGraphicsLists(environmentalConstraints.getGraphicsListRegistry().getYoGraphicsLists());
-         controllerThread.getSCS1YoGraphicsListRegistry().registerArtifactLists(artifactLists);
       }
 
       return stepGeneratorThread;

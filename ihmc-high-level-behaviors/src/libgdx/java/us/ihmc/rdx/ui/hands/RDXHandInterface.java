@@ -1,6 +1,5 @@
 package us.ihmc.rdx.ui.hands;
 
-import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public interface RDXHandInterface
@@ -9,8 +8,6 @@ public interface RDXHandInterface
    {
       OPEN, CLOSE, GRIP, CALIBRATE, RESET
    }
-
-   String getIdentifier();
 
    RobotSide getSide();
 

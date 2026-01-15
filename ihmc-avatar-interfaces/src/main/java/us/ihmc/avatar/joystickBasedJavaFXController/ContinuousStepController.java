@@ -33,16 +33,19 @@ import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStep.SnappingF
 import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStepParameters;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class ContinuousStepController
+public class ContinuousStepController implements SCS2YoGraphicHolder
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -350,13 +353,6 @@ public class ContinuousStepController
       return hasSuccessfullyStoppedWalking.getValue();
    }
 
-   public void setupVisualization(YoGraphicsListRegistry yoGraphicsListRegistry)
-   {
-      continuousStepGenerator.setupVisualization(footPolygons.get(RobotSide.LEFT).getPolygonVerticesView(),
-                                                 footPolygons.get(RobotSide.RIGHT).getPolygonVerticesView(),
-                                                 yoGraphicsListRegistry);
-   }
-
    private boolean adjustFootstep(FramePose3DReadOnly stanceFootPose, FramePose2DReadOnly footstepPose, RobotSide footSide, FootstepDataMessage adjustedFootstep)
    {
       FramePose3D adjustedBasedOnStanceFoot = new FramePose3D();
@@ -445,5 +441,11 @@ public class ContinuousStepController
    public YoRegistry getRegistry()
    {
       return registry;
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      return continuousStepGenerator.getSCS2YoGraphics();
    }
 }

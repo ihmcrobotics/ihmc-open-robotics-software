@@ -21,8 +21,8 @@ public class AlexanderSensorInformation implements HumanoidRobotSensorInformatio
    private static final RigidBodyTransform ZED_X_MINI_TO_HEAD_TRANSFORM = new RigidBodyTransform();
    static
    {
-      ZED_X_MINI_TO_HEAD_TRANSFORM.getTranslation().set(0.13041,  -0.01079,  -0.00619);
-      EuclidCoreMissingTools.setYawPitchRollDegrees(ZED_X_MINI_TO_HEAD_TRANSFORM.getRotation(), 0.0, 7.87148, 0.0);
+      ZED_X_MINI_TO_HEAD_TRANSFORM.getTranslation().set(0.13041,  -0.01079,  0.02381);
+      EuclidCoreMissingTools.setYawPitchRollDegrees(ZED_X_MINI_TO_HEAD_TRANSFORM.getRotation(), 0.0, 20.81529, 0.0);
    }
 
    private static final SideDependentList<RigidBodyTransform> ZED_X_MINI_LENSES_TO_HEAD_TRANSFORM = new SideDependentList<RigidBodyTransform>()
@@ -39,8 +39,8 @@ public class AlexanderSensorInformation implements HumanoidRobotSensorInformatio
    private static final RigidBodyTransform D457_TO_CHEST_TRANSFORM = new RigidBodyTransform();
    static
    {
-      D457_TO_CHEST_TRANSFORM.getTranslation().set(0.081,  0.04,  0.087);
-      EuclidCoreMissingTools.setYawPitchRollDegrees(D457_TO_CHEST_TRANSFORM.getRotation(), -0.8, 44.0, -1.0);
+      D457_TO_CHEST_TRANSFORM.getTranslation().set(0.1,  0.0,  0.05);
+      EuclidCoreMissingTools.setYawPitchRollDegrees(D457_TO_CHEST_TRANSFORM.getRotation(), 0.0, 52.0, 0.0);
    }
 
    protected final SideDependentList<String> feetForceSensorNames = new SideDependentList<String>();
@@ -129,7 +129,7 @@ public class AlexanderSensorInformation implements HumanoidRobotSensorInformatio
             imuSensorsToUse.remove(forearmIMUNames.get(robotSide));
             imuSensorsToUse.remove(handIMUNames.get(robotSide));
          }
-         else if (!alexanderVersion.hasCycloidForearms())
+         else if (!alexanderVersion.hasCycloidForearm())
          {
             imuSensorsToUse.remove(forearmIMUNames.get(robotSide));
             imuSensorsToUse.remove(handIMUNames.get(robotSide));

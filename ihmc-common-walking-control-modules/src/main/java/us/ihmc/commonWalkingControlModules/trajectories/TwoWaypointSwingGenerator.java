@@ -26,6 +26,7 @@ import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -39,7 +40,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class TwoWaypointSwingGenerator implements SwingGenerator
+public class TwoWaypointSwingGenerator implements SwingGenerator, SCS2YoGraphicHolder
 {
    private static final int maxTimeIterations = -1; // setting this negative activates continuous updating
    private static final int defaultNumberOfWaypoints = 2;
@@ -132,26 +133,6 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
                                     double maxSwingHeight,
                                     double defaultSwingHeight,
                                     double customWaypointAngleThreshold,
-                                    int maxNumberOfSwingWaypoints,
-                                    YoRegistry parentRegistry,
-                                    YoGraphicsListRegistry yoGraphicsListRegistry)
-   {
-      this(namePrefix,
-           minSwingHeight,
-           maxSwingHeight,
-           defaultSwingHeight,
-           customWaypointAngleThreshold,
-           maxNumberOfSwingWaypoints,
-           worldFrame,
-           parentRegistry,
-           yoGraphicsListRegistry);
-   }
-
-   public TwoWaypointSwingGenerator(String namePrefix,
-                                    double minSwingHeight,
-                                    double maxSwingHeight,
-                                    double defaultSwingHeight,
-                                    double customWaypointAngleThreshold,
                                     ReferenceFrame trajectoryFrame,
                                     YoRegistry parentRegistry,
                                     YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -219,15 +200,12 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
 
       trajectory = new PositionOptimizedTrajectoryGenerator(namePrefix,
                                                             registry,
-                                                            yoGraphicsListRegistry,
+                                                            null,
                                                             maxTimeIterations,
                                                             maxNumberOfSwingWaypoints,
                                                             trajectoryFrame);
 
-      if (yoGraphicsListRegistry != null)
-         waypointViz = new BagOfBalls(maxNumberOfSwingWaypoints, 0.02, namePrefix + "Waypoints", YoAppearance.White(), registry, yoGraphicsListRegistry);
-      else
-         waypointViz = null;
+      waypointViz = new BagOfBalls(maxNumberOfSwingWaypoints, 0.02, namePrefix + "Waypoints", YoAppearance.White(), registry, yoGraphicsListRegistry);
 
       needToAdjustedSwingForSelfCollision = new YoBoolean(namePrefix + "AdjustedSwing", registry);
       crossOverStep = new YoBoolean(namePrefix + "CrossOverStep", registry);
@@ -838,6 +816,7 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
       return isSteppingDown.getBooleanValue();
    }
 
+   @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());

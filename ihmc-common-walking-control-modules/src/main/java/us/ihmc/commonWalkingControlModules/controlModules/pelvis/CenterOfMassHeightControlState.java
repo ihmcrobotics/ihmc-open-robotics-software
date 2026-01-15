@@ -170,7 +170,6 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
                                                        pelvisFrame,
                                                        referenceFrames.getSoleZUpFrames(),
                                                        controllerToolbox.getYoTime(),
-                                                       controllerToolbox.getYoGraphicsListRegistry(),
                                                        registry);
    }
 

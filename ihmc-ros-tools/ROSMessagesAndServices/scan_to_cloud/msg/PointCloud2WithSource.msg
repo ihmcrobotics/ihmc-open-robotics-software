@@ -1,3 +1,0 @@
-sensor_msgs/PointCloud2 cloud
-geometry_msgs/Point translation
-geometry_msgs/Quaternion orientation

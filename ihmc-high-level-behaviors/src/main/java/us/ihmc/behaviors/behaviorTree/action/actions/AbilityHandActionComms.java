@@ -24,21 +24,16 @@ public class AbilityHandActionComms
    {
       this.handSide = handSide;
 
-      ros2Node.createSubscription2(AbilityHandROS2API.STATE_TOPIC, stateNotification::set);
-      commandPublisher = ros2Node.createPublisher(AbilityHandROS2API.COMMAND_TOPIC);
+      ros2Node.createSubscription2(AbilityHandROS2API.STATE_TOPICS.get(handSide), stateNotification::set);
+      commandPublisher = ros2Node.createPublisher(AbilityHandROS2API.COMMAND_TOPICS.get(handSide));
    }
 
    public void update()
    {
       if (stateNotification.poll())
       {
-         AbilityHandState read = stateNotification.read();
-         if (read.getHandSide() == handSide.toByte())
-         {
-            latestState = read;
-            command.setIdentifier(latestState.getIdentifierAsString());
-            connectedTimer.reset();
-         }
+         latestState = stateNotification.read();
+         connectedTimer.reset();
       }
 
       if (!connectedTimer.isRunning(0.5))
