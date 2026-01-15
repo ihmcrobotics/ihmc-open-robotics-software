@@ -3,6 +3,7 @@ package us.ihmc.behaviors.behaviorTree.action.actions;
 import behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
+import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneDoorPanelExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectState;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectType;
@@ -183,12 +184,12 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
                              distanceToMechanism);
 
       // Check if a door panel scene object already exists
-      BehaviorTreeSceneObjectExecutor targetSceneObject = null;
+      BehaviorTreeSceneDoorPanelExecutor targetSceneObject = null;
       for (BehaviorTreeSceneObjectState object : scene.getObjects())
       {
-         if (object.getObjectType() == BehaviorTreeSceneObjectType.DOOR_PANEL)
+         if (object instanceof BehaviorTreeSceneDoorPanelExecutor doorPanelExecutor)
          {
-            targetSceneObject = (BehaviorTreeSceneObjectExecutor) object;
+            targetSceneObject = doorPanelExecutor;
             break;
          }
       }
@@ -196,7 +197,8 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
       if (targetSceneObject != null)
       {
          state.getLogger().info("Updating existing door panel scene object");
-         targetSceneObject.setPersistentDetection(doorPanelDetection);
+         targetSceneObject.setPersistentDetection(openingMechanismDetection);
+         targetSceneObject.setDoorPanelPersistentDetection(doorPanelDetection);
       }
       else
       {
@@ -204,8 +206,9 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
 
          BehaviorTreeSceneObjectDefinitionMessage message = new BehaviorTreeSceneObjectDefinitionMessage();
          definition.getSceneObjectDefinition().toMessage(message);
-         targetSceneObject = (BehaviorTreeSceneObjectExecutor) scene.createObject(message);
+         targetSceneObject = (BehaviorTreeSceneDoorPanelExecutor) scene.createObject(message);
          targetSceneObject.setPersistentDetection(doorPanelDetection);
+         targetSceneObject.setDoorPanelPersistentDetection(doorPanelDetection);
          scene.getObjects().add(targetSceneObject);
          scene.getObjectsModifiable().modify();
       }

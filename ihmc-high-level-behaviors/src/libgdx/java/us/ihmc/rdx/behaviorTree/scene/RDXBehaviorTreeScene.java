@@ -208,7 +208,10 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
    @Override
    protected BehaviorTreeSceneObjectState buildObject(long id, CRDTInfo crdtInfo, BehaviorTreeSceneObjectDefinitionMessage definition)
    {
-      return new RDXBehaviorTreeSceneObject(id, crdtInfo, definition, baseUI);
+      if (definition.getObjectType() == BehaviorTreeSceneObjectType.DOOR_PANEL.ordinal())
+         return new RDXBehaviorTreeSceneDoorPanel(id, crdtInfo, definition, baseUI);
+      else
+         return new RDXBehaviorTreeSceneObject(id, crdtInfo, definition, baseUI);
    }
 
    @Override
