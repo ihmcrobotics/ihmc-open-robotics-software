@@ -17,6 +17,14 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
             */
    public behavior_msgs.msg.dds.ActionNodeDefinitionMessage definition_;
    /**
+            * If this action can't do what it needs to do in this amount of time, give up.
+            */
+   public float timeout_;
+   /**
+            * Filter for persistent detection history size
+            */
+   public int minimum_history_size_;
+   /**
             * Definition of the object to setup
             */
    public behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage scene_object_definition_;
@@ -73,6 +81,10 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
    public void set(SceneActionNodeDefinitionMessage other)
    {
       behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
+      timeout_ = other.timeout_;
+
+      minimum_history_size_ = other.minimum_history_size_;
+
       behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessagePubSubType.staticCopy(other.scene_object_definition_, scene_object_definition_);
       yolo_confidence_threshold_ = other.yolo_confidence_threshold_;
 
@@ -96,6 +108,36 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
    public behavior_msgs.msg.dds.ActionNodeDefinitionMessage getDefinition()
    {
       return definition_;
+   }
+
+   /**
+            * If this action can't do what it needs to do in this amount of time, give up.
+            */
+   public void setTimeout(float timeout)
+   {
+      timeout_ = timeout;
+   }
+   /**
+            * If this action can't do what it needs to do in this amount of time, give up.
+            */
+   public float getTimeout()
+   {
+      return timeout_;
+   }
+
+   /**
+            * Filter for persistent detection history size
+            */
+   public void setMinimumHistorySize(int minimum_history_size)
+   {
+      minimum_history_size_ = minimum_history_size;
+   }
+   /**
+            * Filter for persistent detection history size
+            */
+   public int getMinimumHistorySize()
+   {
+      return minimum_history_size_;
    }
 
 
@@ -228,6 +270,10 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
       if(other == this) return true;
 
       if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.timeout_, other.timeout_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_history_size_, other.minimum_history_size_, epsilon)) return false;
+
       if (!this.scene_object_definition_.epsilonEquals(other.scene_object_definition_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.yolo_confidence_threshold_, other.yolo_confidence_threshold_, epsilon)) return false;
 
@@ -259,6 +305,10 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
       SceneActionNodeDefinitionMessage otherMyClass = (SceneActionNodeDefinitionMessage) other;
 
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
+      if(this.timeout_ != otherMyClass.timeout_) return false;
+
+      if(this.minimum_history_size_ != otherMyClass.minimum_history_size_) return false;
+
       if (!this.scene_object_definition_.equals(otherMyClass.scene_object_definition_)) return false;
       if(this.yolo_confidence_threshold_ != otherMyClass.yolo_confidence_threshold_) return false;
 
@@ -285,6 +335,10 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
       builder.append("SceneActionNodeDefinitionMessage {");
       builder.append("definition=");
       builder.append(this.definition_);      builder.append(", ");
+      builder.append("timeout=");
+      builder.append(this.timeout_);      builder.append(", ");
+      builder.append("minimum_history_size=");
+      builder.append(this.minimum_history_size_);      builder.append(", ");
       builder.append("scene_object_definition=");
       builder.append(this.scene_object_definition_);      builder.append(", ");
       builder.append("yolo_confidence_threshold=");
