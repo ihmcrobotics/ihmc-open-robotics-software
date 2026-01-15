@@ -25,6 +25,7 @@ public class YOLOTerrainMapIntegrator
 
    private final double terrainWidth;
    private final TerrainMapData yoloTerrain;
+   private volatile TerrainMapData latestSnapshotTerrain;
    private final ROS2Publisher<HeightMapMessage> yoloHeightMapPublisher;
    private final ROS2Publisher<TerrainMapMessage> yoloTerrainMapPublisher;
    private long yoloHeightMapSequenceId = 0;
@@ -198,17 +199,46 @@ public class YOLOTerrainMapIntegrator
 
    public void publishTerrainMaps()
    {
-      // Terrain (obstacle layer)
+      // Create a fresh snapshot from yoloTerrain
+      TerrainMapData snapshot = new TerrainMapData(yoloTerrain.getCellSize(),
+                                                   yoloTerrain.getMapSize(),
+                                                   yoloTerrain.getGridCenterX(),
+                                                   yoloTerrain.getGridCenterY());
+      copyTerrainContents(yoloTerrain, snapshot);
+
+      // Publish from the snapshot
       TerrainMapMessage terrainMsg = new TerrainMapMessage();
-      TerrainMapMessageTools.toMessage(yoloTerrain, terrainMsg);
+      TerrainMapMessageTools.toMessage(snapshot, terrainMsg);
       terrainMsg.setSequenceId(yoloTerrainMapSequenceId++);
       yoloTerrainMapPublisher.publish(terrainMsg);
 
-      // Height map (just the same heights, packaged as HeightMapMessage)
       HeightMapMessage heightMsg = new HeightMapMessage();
-      toHeightMapMessageFromTerrain(yoloTerrain, heightMsg);
+      toHeightMapMessageFromTerrain(snapshot, heightMsg);
       heightMsg.setSequenceId(yoloHeightMapSequenceId++);
       yoloHeightMapPublisher.publish(heightMsg);
+
+      // Atomically make this snapshot available to other threads
+      latestSnapshotTerrain = snapshot;
+   }
+
+   private static void copyTerrainContents(TerrainMapData source, TerrainMapData target)
+   {
+      // Basic metadata already set by constructor (cell size, center, mapSize)
+      target.setGridCenterX(source.getGridCenterX());
+      target.setGridCenterY(source.getGridCenterY());
+
+      float[] srcHeights = source.getHeightMap();
+      float[] srcTrav    = source.getTraversabilityScoreMap();
+      float[] srcObs     = source.getObstacleClearanceScoreMap();
+
+      float[] dstHeights = target.getHeightMap();
+      float[] dstTrav    = target.getTraversabilityScoreMap();
+      float[] dstObs     = target.getObstacleClearanceScoreMap();
+
+      // Arrays are same length by construction
+      System.arraycopy(srcHeights, 0, dstHeights, 0, srcHeights.length);
+      System.arraycopy(srcTrav,    0, dstTrav,    0, srcTrav.length);
+      System.arraycopy(srcObs,     0, dstObs,     0, srcObs.length);
    }
 
    public static void toHeightMapMessageFromTerrain(TerrainMapData terrainMapData, HeightMapMessage messageToPack)
@@ -223,6 +253,10 @@ public class YOLOTerrainMapIntegrator
 
    public TerrainMapData getTerrainMap()
    {
-      return yoloTerrain;
+      TerrainMapData snapshot = latestSnapshotTerrain;
+      if (snapshot != null)
+         return snapshot;
+      else
+         return yoloTerrain;
    }
 }
