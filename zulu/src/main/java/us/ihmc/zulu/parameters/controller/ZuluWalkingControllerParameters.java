@@ -536,6 +536,11 @@ public class ZuluWalkingControllerParameters extends WalkingControllerParameters
    {
       Map<String, RigidBodyControlMode> defaultControlModes = new HashMap<>();
       defaultControlModes.put(jointMap.getChestName(), RigidBodyControlMode.JOINTSPACE);
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         defaultControlModes.put(jointMap.getHandName(robotSide), RigidBodyControlMode.TASKSPACE);
+      }
+
       return defaultControlModes;
    }
 
@@ -595,15 +600,15 @@ public class ZuluWalkingControllerParameters extends WalkingControllerParameters
 
          if (version.getJointMap().hasCycloidForearm(robotSide))
          { // Cycloid forearm home pose
-            handPoseInChestBodyFrame.getPosition().set(0.111, robotSide.negateIfRightSide(0.338), -0.641);
+            handPoseInChestBodyFrame.getPosition().set(0.117, robotSide.negateIfRightSide(0.338), -0.218);
             handPoseInChestBodyFrame.getOrientation()
-                                    .set(robotSide.negateIfRightSide(0.056), -0.140, robotSide.negateIfRightSide(-0.105), 0.983);
+                                    .set(robotSide.negateIfRightSide(0.053), -0.567, robotSide.negateIfRightSide(-0.113), 0.814);
          }
          else
          { // 4-dof cycloid home pose
-            handPoseInChestBodyFrame.getPosition().set(0.125, robotSide.negateIfRightSide(0.342), -0.695);
+            handPoseInChestBodyFrame.getPosition().set(0.171, robotSide.negateIfRightSide(0.336), -0.236);
             handPoseInChestBodyFrame.getOrientation()
-                                    .set(robotSide.negateIfRightSide(0.056), -0.140, robotSide.negateIfRightSide(-0.105), 0.983);
+                                    .set(robotSide.negateIfRightSide(0.053), -0.567, robotSide.negateIfRightSide(-0.113), 0.814);
          }
 
          bodyHomeConfiguration.put(jointMap.getHandName(robotSide), handPoseInChestBodyFrame);
