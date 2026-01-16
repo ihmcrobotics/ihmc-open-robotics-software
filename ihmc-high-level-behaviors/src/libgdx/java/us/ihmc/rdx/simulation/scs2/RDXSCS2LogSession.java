@@ -25,6 +25,7 @@ import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
 import us.ihmc.robotDataLogger.Camera;
 import us.ihmc.scs2.session.log.BlackMagicScrubber;
 import us.ihmc.scs2.session.log.LogDataReader;
+import us.ihmc.scs2.session.log.LogDataReaderInterface;
 import us.ihmc.scs2.session.log.MagewellScrubber;
 import us.ihmc.scs2.session.log.ZEDSVOScrubber;
 import us.ihmc.tools.time.DurationFormatter;
@@ -48,7 +49,7 @@ public class RDXSCS2LogSession extends RDXSCS2Session
    private int lastUpdatedLogPosition = -1;
    private SCS2LogSessionWithVideo logSession;
    private YoLong yoTimestamp;
-   private LogDataReader logDataReader;
+   private LogDataReaderInterface logDataReader;
 
    private record ZEDLogVideo(ZEDSVOScrubber scrubber, RDXImageVisualizer visualizer) { }
    private final List<ZEDLogVideo> zedLogVideos = new ArrayList<>();

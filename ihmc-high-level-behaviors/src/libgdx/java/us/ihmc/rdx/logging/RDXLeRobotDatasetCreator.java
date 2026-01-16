@@ -21,6 +21,7 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.scs2.session.SessionMode;
 import us.ihmc.scs2.session.log.LogDataReader;
+import us.ihmc.scs2.session.log.LogDataReaderInterface;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 
 import java.awt.*;
@@ -283,7 +284,7 @@ public class RDXLeRobotDatasetCreator
 
    private void renderLogScrubberWidgets()
    {
-      LogDataReader logDataReader = logSession.getSession().getLogDataReader();
+      LogDataReaderInterface logDataReader = logSession.getSession().getLogDataReader();
       float sliderWidth = ImGui.getColumnWidth();
       ImGui.pushItemWidth(sliderWidth);
 

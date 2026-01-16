@@ -21,7 +21,7 @@ public class SCS2LogSessionWithVideo extends LogSession
 {
    private YoLong yoTimestamp;
    private File logDirectory;
-   private LogDataReader logDataReader;
+   private LogDataReaderInterface logDataReader;
    private LogPropertiesReader logProperties;
 
    private final List<MagewellScrubber> magewellScrubbers = new ArrayList<>();
