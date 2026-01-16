@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.perception.gpuMapping.HeightMapTools;
 import us.ihmc.perception.gpuMapping.worldModel.Chunk;
 import us.ihmc.perception.gpuMapping.worldModel.ChunkTools;
 
@@ -15,19 +14,18 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class ChunkToolsTest
 {
-   private final int iterations = 1000;
    private final static float MILLISECOND_TOLERANCE = 1.0f;
+   private final int iterations = 1000;
 
    @RepeatedTest(10)
-   public void testRoundTripConvertMatToHeightMapDataAndBack()
+   public void testRoundTripConvertMatToChunkAndBack()
    {
       float cellSize = 0.04f;
-      float terrainWidth = 1.0f;
+      int terrainWidth = 1;
       float centerX = 0.0f;
       float centerY = 0.0f;
 
-      int centerIndex = HeightMapTools.computeCenterIndex(terrainWidth, cellSize);
-      int cellsPerAxis = 2 * centerIndex;
+      int cellsPerAxis = (int) (terrainWidth / cellSize);
       Point3D centerLocation = new Point3D(centerX, centerY, 0.0);
 
       Mat originalMat = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1, new Scalar(1000));
@@ -54,8 +52,7 @@ public class ChunkToolsTest
       float centerX = 0.0f;
       float centerY = 0.0f;
 
-      int centerIndex = HeightMapTools.computeCenterIndex(terrainWidth, cellSize);
-      int cellsPerAxis = 2 * centerIndex;
+      int cellsPerAxis = (int) (terrainWidth / cellSize);
 
       Chunk chunkData = new Chunk(centerX, centerY, cellSize, cellsPerAxis);
       for (int i = 0; i < cellsPerAxis; i++)
@@ -79,16 +76,16 @@ public class ChunkToolsTest
       double totalTimeMillis = (endTime - startTime) / 1_000_000.0;
       double averageTimePerIteration = totalTimeMillis / iterations;
 
-      System.out.printf("Average time per pack [ HeightMapData -> Mat ]: %.3f ms%n", averageTimePerIteration);
+      System.out.printf("Average time per pack [ Chunk -> Mat ]: %.3f ms%n", averageTimePerIteration);
 
       // This will be machine-dependent, the benchmark for this value came from the cpu on the CI machine.
-      float expectedTimeTakenToPackHeightMapMessageFromAMatInMillis = MILLISECOND_TOLERANCE;
-      Assertions.assertTrue(averageTimePerIteration < expectedTimeTakenToPackHeightMapMessageFromAMatInMillis,
-                            "Actual was : " + averageTimePerIteration + ", but the Expected was: " + expectedTimeTakenToPackHeightMapMessageFromAMatInMillis);
+      float expectedTimeTakenToPackChunkMessageFromAMatInMillis = MILLISECOND_TOLERANCE;
+      Assertions.assertTrue(averageTimePerIteration < expectedTimeTakenToPackChunkMessageFromAMatInMillis,
+                            "Actual was : " + averageTimePerIteration + ", but the Expected was: " + expectedTimeTakenToPackChunkMessageFromAMatInMillis);
    }
 
    @Test
-   public void testSpeedConvertMatToHeightMapData()
+   public void testSpeedConvertMatToChunkData()
    {
 
       float cellSize = 0.1f;
@@ -96,8 +93,7 @@ public class ChunkToolsTest
       float centerX = 0.0f;
       float centerY = 0.0f;
 
-      int centerIndex = HeightMapTools.computeCenterIndex(terrainWidth, cellSize);
-      int cellsPerAxis = 2 * centerIndex;
+      int cellsPerAxis = (int) (terrainWidth / cellSize);
 
       Mat chunkMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1, new Scalar(1));
 
@@ -114,11 +110,11 @@ public class ChunkToolsTest
       double totalTimeMillis = (endTime - startTime) / 1_000_000.0;
       double averageTimePerIteration = totalTimeMillis / iterations;
 
-      System.out.printf("Average time per pack [ Mat -> HeightMapData ]: %.3f ms%n", averageTimePerIteration);
+      System.out.printf("Average time per pack [ Mat -> ChunkData ]: %.3f ms%n", averageTimePerIteration);
 
       // This will be machine-dependent, the benchmark for this value came from the cpu on the CI machine.
-      float expectedTimeTakenToPackHeightMapMessageFromAMatInMillis = MILLISECOND_TOLERANCE;
-      Assertions.assertTrue(averageTimePerIteration < expectedTimeTakenToPackHeightMapMessageFromAMatInMillis,
-                            "Actual was : " + averageTimePerIteration + ", but the Expected was: " + expectedTimeTakenToPackHeightMapMessageFromAMatInMillis);
+      float expectedTimeTakenToPackChunkMessageFromAMatInMillis = MILLISECOND_TOLERANCE;
+      Assertions.assertTrue(averageTimePerIteration < expectedTimeTakenToPackChunkMessageFromAMatInMillis,
+                            "Actual was : " + averageTimePerIteration + ", but the Expected was: " + expectedTimeTakenToPackChunkMessageFromAMatInMillis);
    }
 }
