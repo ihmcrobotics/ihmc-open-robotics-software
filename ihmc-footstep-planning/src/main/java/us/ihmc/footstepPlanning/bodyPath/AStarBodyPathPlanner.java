@@ -322,14 +322,12 @@ public class AStarBodyPathPlanner
             {
                double obstacleClearanceCost = plannerParameters.getObstacleClearanceWeight() * (1.0f - obstacleClearance);
                yoloTraversabilityCost.set(obstacleClearanceCost);
+               edgeCost.add(obstacleClearanceCost);
             }
             else
             {
                yoloTraversabilityCost.setToNaN();
             }
-
-            if (!Double.isNaN(yoloTraversabilityCost.getValue()))
-               edgeCost.add(yoloTraversabilityCost.getValue());
 
             totalCost.set(heuristicCost.getValue() + edgeCost.getValue());
             graph.checkAndSetEdge(node, neighbor, edgeCost.getValue());
@@ -509,7 +507,7 @@ public class AStarBodyPathPlanner
       int xIndex = HeightMapTools.coordinateToIndex(latticePoint.getX(), terrainMapData.getGridCenterX(), terrainMapData.getCellSize(), centerIndex);
       int yIndex = HeightMapTools.coordinateToIndex(latticePoint.getY(), terrainMapData.getGridCenterY(), terrainMapData.getCellSize(), centerIndex);
 
-      TDoubleArrayList heights = new TDoubleArrayList();
+      double maxHeight = Double.NEGATIVE_INFINITY;
       for (int i = 0; i < xSnapOffsets.size(); i++)
       {
          int xQuery = xIndex + xSnapOffsets.get(i);
@@ -517,19 +515,17 @@ public class AStarBodyPathPlanner
          double heightQuery = terrainMapData.getHeight(xQuery, yQuery);
          if (!Double.isNaN(heightQuery))
          {
-            heights.add(heightQuery);
+            maxHeight = Math.max(maxHeight, heightQuery);
          }
       }
 
-      if (heights.isEmpty())
+      if (Double.isInfinite(maxHeight))
       {
          gridHeightMap.put(latticePoint, Double.NaN);
          return Double.NaN;
       }
 
-      double maxHeight = heights.max();
       double minHeight = maxHeight - plannerParameters.getMinSnapHeightThreshold();
-
       double runningSum = 0.0;
       int numberOfSamples = 0;
 

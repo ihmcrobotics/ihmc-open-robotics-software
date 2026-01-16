@@ -4,6 +4,7 @@ import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.TerrainMapMessage;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.perception.gpuMapping.HeightMapData;
@@ -74,9 +75,8 @@ public class YOLOTerrainMapIntegrator
 
       for (InstantDetection detection : detections)
       {
-         if (detection instanceof YOLOv8InstantDetection)
+         if (detection instanceof YOLOv8InstantDetection yoloDetection)
          {
-            YOLOv8InstantDetection yoloDetection = (YOLOv8InstantDetection) detection;
             List<Point3D32> pointCloud = yoloDetection.getObjectPointCloud();
             
             if (pointCloud == null || pointCloud.isEmpty())
@@ -145,53 +145,39 @@ public class YOLOTerrainMapIntegrator
          {
             double offsetX = dx * cellSize;
             double offsetY = dy * cellSize;
-            double distance = Math.sqrt(offsetX * offsetX + offsetY * offsetY);
+            double distance = EuclidCoreTools.norm(offsetX, offsetY);
 
-            if (distance <= maxDistance)
+            int xIndex = centerXIndex + dx;
+            int yIndex = centerYIndex + dy;
+
+            if (distance <= maxDistance && xIndex >= 0 && xIndex < cellsPerAxis && yIndex >= 0 && yIndex < cellsPerAxis)
             {
-               int xIndex = centerXIndex + dx;
-               int yIndex = centerYIndex + dy;
+               int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
 
-               if (xIndex >= 0 && xIndex < cellsPerAxis &&
-                   yIndex >= 0 && yIndex < cellsPerAxis)
+               // Traversability score: 0 at inner, 1 at outer ---
+               float score = 0.0f;
+               // Height map: OBSTACLE_HEIGHT at inner, 0 at outer ---
+               float height = (float) OBSTACLE_HEIGHT;
+
+               if (distance > minDistance && bandWidth > 1e-6)
                {
-                  int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
+                  // Compute interpolated score
+                  score = (float) EuclidCoreTools.clamp((distance - minDistance) / bandWidth, 0.0, 1.0); // 0→1
 
-                  // Traversability score: 0 at inner, 1 at outer ---
-                  float score;
-                  if (distance < minDistance || bandWidth <= 1e-6)
-                  {
-                     score = 0.0f;
-                  }
-                  else
-                  {
-                     score = (float) ((distance - minDistance) / bandWidth); // 0→1
-                     if (score < 0.0f) score = 0.0f;
-                     if (score > 1.0f) score = 1.0f;
-                  }
-                  if (score < obstacleClearanceScoreMap[key])
-                  {
-                     obstacleClearanceScoreMap[key] = score;
-                     traversabilityScoreMap[key] = score;
-                  }
-
-                  // Height map: OBSTACLE_HEIGHT at inner, 0 at outer ---
-                  float height;
-                  if (distance < minDistance || bandWidth <= 1e-6)
-                  {
-                     height = (float) OBSTACLE_HEIGHT;
-                  }
-                  else
-                  {
-                     double t = (distance - minDistance) / bandWidth; // 0 at inner, 1 at outer
-                     t = Math.max(0.0, Math.min(1.0, t));
-                     height = (float) ((1.0 - t) * OBSTACLE_HEIGHT); // linear to 0
-                  }
-
-                  // If multiple obstacles overlap, keep the max height
-                  if (height > heightMap[key])
-                     heightMap[key] = height;
+                  // Compute interpolated height
+                  height = (float) ((1.0 - score) * OBSTACLE_HEIGHT); // linear 1→0
                }
+
+               // If multiple obstacles overlap, keep the min score
+               if (score < obstacleClearanceScoreMap[key])
+               {
+                  obstacleClearanceScoreMap[key] = score;
+                  traversabilityScoreMap[key] = score;
+               }
+
+               // If multiple obstacles overlap, keep the max height
+               if (height > heightMap[key])
+                  heightMap[key] = height;
             }
          }
       }
