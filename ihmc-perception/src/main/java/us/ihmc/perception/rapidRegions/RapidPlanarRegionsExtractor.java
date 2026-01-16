@@ -192,7 +192,7 @@ public class RapidPlanarRegionsExtractor
       int gridDimY = (patchImageHeight + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
       dim3 gridSize = new dim3(gridDimX, gridDimY, 1);
 
-      // Run pack kernel, compute surface normal and centroid locally
+      // Run pack kernel, estimate surface normal and centroid locally
       packKernel.withPointer(latestDepthImageGPU.data());
       packKernel.withPointer(patchNormalsXDevice.data());
       packKernel.withPointer(patchNormalsYDevice.data());
@@ -203,12 +203,9 @@ public class RapidPlanarRegionsExtractor
       packKernel.withLong(latestDepthImageGPU.step());
       packKernel.withLong(patchNormalsXDevice.step());
       packKernel.withPointer(parametersDevicePointer);
-
       packKernel.run(stream, gridSize, blockSize, 0);
 
-      error = cudaStreamSynchronize(stream);
-      CUDATools.checkCUDAError(error);
-
+      // Run merge kernel, determine local connectivity
       mergeKernel.withPointer(patchNormalsXDevice.data());
       mergeKernel.withPointer(patchNormalsYDevice.data());
       mergeKernel.withPointer(patchNormalsZDevice.data());
@@ -252,11 +249,6 @@ public class RapidPlanarRegionsExtractor
       rapidPlanarRegionsCustomizer.createCustomPlanarRegionsList(rapidPlanarRegions, cameraFrame, frameRegions);
 
       wholeAlgorithmDurationStopwatch.suspend();
-//      debugger.update(depthImageCPU,
-//                      currentFeatureGrid,
-//                      patchGraph,
-//                      cloudBuffer.getBackingDirectFloatBuffer(),
-//                      cameraFrame.getTransformToWorldFrame());
    }
 
    /* for testing */ Vector3D[] getNormals()
@@ -365,7 +357,6 @@ public class RapidPlanarRegionsExtractor
       boundaryMaxSearchDepth = 0;
       rapidPlanarRegions.parallelStream().forEach(planarRegion ->
                                                   {
-                                                     int leafPatchIndex = 0;
                                                      int regionRingIndex = 0;
                                                      planarRegion.getRegionsRingsBySize().clear();
                                                      for (Point2D leafPatch : planarRegion.getBorderIndices())
@@ -377,7 +368,6 @@ public class RapidPlanarRegionsExtractor
                                                                                                                (int) leafPatch.getX(),
                                                                                                                planarRegion.getId(),
                                                                                                                regionRing,
-                                                                                                               leafPatchIndex,
                                                                                                                1);
                                                         if (numberOfBoundaryPatches >= parameters.getBoundaryMinPatches())
                                                         {
@@ -391,7 +381,6 @@ public class RapidPlanarRegionsExtractor
                                                         {
                                                            planarRegion.getRegionRings().remove(planarRegion.getRegionRings().size() - 1);
                                                         }
-                                                        ++leafPatchIndex;
                                                      }
 
                                                      // remove holes
@@ -445,7 +434,7 @@ public class RapidPlanarRegionsExtractor
                                  });
    }
 
-   private int boundaryDepthFirstSearch(int row, int column, int planarRegionId, RapidRegionRing regionRing, int leafPatchIndex, int searchDepth)
+   private int boundaryDepthFirstSearch(int row, int column, int planarRegionId, RapidRegionRing regionRing, int searchDepth)
    {
       if (boundaryVisitedMatrix.get(row, column) || searchDepth > parameters.getBoundarySearchDepthLimit())
          return 0;
@@ -466,7 +455,6 @@ public class RapidPlanarRegionsExtractor
                                                                 column + adjacentX[i],
                                                                 planarRegionId,
                                                                 regionRing,
-                                                                leafPatchIndex,
                                                                 searchDepth + 1);
          }
       }
