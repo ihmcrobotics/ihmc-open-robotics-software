@@ -13,11 +13,6 @@ public interface RapidRegionsExtractorParametersBasics extends RapidRegionsExtra
       set(RapidRegionsExtractorParameters.normalPackRange, normalPackRange);
    }
 
-   default void setCentroidPackRange(int centroidPackRange)
-   {
-      set(RapidRegionsExtractorParameters.centroidPackRange, centroidPackRange);
-   }
-
    default void setMergeRange(int mergeRange)
    {
       set(RapidRegionsExtractorParameters.mergeRange, mergeRange);
@@ -48,11 +43,6 @@ public interface RapidRegionsExtractorParametersBasics extends RapidRegionsExtra
       set(RapidRegionsExtractorParameters.patchSize, patchSize);
    }
 
-   default void setDeadPixelFilterPatchSize(int deadPixelFilterPatchSize)
-   {
-      set(RapidRegionsExtractorParameters.deadPixelFilterPatchSize, deadPixelFilterPatchSize);
-   }
-
    default void setFocalLengthXPixels(double focalLengthXPixels)
    {
       set(RapidRegionsExtractorParameters.focalLengthXPixels, focalLengthXPixels);
@@ -71,11 +61,6 @@ public interface RapidRegionsExtractorParametersBasics extends RapidRegionsExtra
    default void setPrincipalOffsetYPixels(double principalOffsetYPixels)
    {
       set(RapidRegionsExtractorParameters.principalOffsetYPixels, principalOffsetYPixels);
-   }
-
-   default void setUseFilteredImage(boolean useFilteredImage)
-   {
-      set(RapidRegionsExtractorParameters.useFilteredImage, useFilteredImage);
    }
 
    default void setUseSVDNormals(boolean useSVDNormals)

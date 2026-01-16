@@ -1,0 +1,17 @@
+{
+  "dockspacePanels" : { },
+  "windows" : {
+    "3D View" : true,
+    "GPU Planar Region Extraction" : true,
+    "Depth" : true,
+    "Gx Image" : true,
+    "Gy Image" : true,
+    "Gz Image" : true,
+    "Nx Image" : true,
+    "Ny Image" : true,
+    "Nz Image" : true,
+    "Planar Region Extraction Image" : true,
+    "Planar Regions" : true,
+    "Point Cloud" : true
+  }
+}
