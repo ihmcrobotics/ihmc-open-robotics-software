@@ -49,9 +49,10 @@ public class GpuMappingManager
    // These fields are created globally cause it takes compute time to create it in the update loop
    private final HeightMapMessage heightMapMessage;
    private final HeightMapMessageForController heightMapMessageForController;
+   private final VoxelMapExtractor voxelMapExtractor;
+   private final TerrainMapMessage terrainMapMessage;
    private long heightMapSequenceId = 0;
    private long heightMapForControllerSequenceId = 0;
-   private final TerrainMapMessage terrainMapMessage;
    private long terrainMapSequenceId = 0;
 
    public GpuMappingManager(String robotName,
@@ -71,6 +72,7 @@ public class GpuMappingManager
 
       heightMapDriftOffset = new HeightMapDriftOffset(controllerFootstepQueueMonitor);
       heightMapExtractor = new HeightMapExtractor(heightMapParameters);
+      voxelMapExtractor = new VoxelMapExtractor();
       terrainMapExtractor = new TerrainMapExtractor(heightMapParameters, terrainMapParameters);
       chunkedMapManager = new ChunkedMapManager(ros2Node, heightMapParameters);
 
@@ -139,6 +141,8 @@ public class GpuMappingManager
          driftOffsetInZ = heightMapDriftOffset.getUpdateDriftOffset();
       }
 
+      voxelMapExtractor.update(latestDepthImage, depthIntrinsics, sensorToWorld, sensorToGround, groundToWorld, heightMapCenterOrigin);
+
       // Perform update, this actually creates the height map
       heightMapExtractor.update(latestDepthImage,
                                 depthIntrinsics,
@@ -173,16 +177,15 @@ public class GpuMappingManager
       HeightMapMessageTools.toMessageForController(heightMapExtractor.getHeightMapData(), heightMapMessageForController);
       heightMapMessageForController.setSequenceId(heightMapForControllerSequenceId++);
       controllerHeightMapMessagePublisher.publish(heightMapMessageForController);
-
    }
 
-    public void publishTerrainMap()
-    {
-        TerrainMapMessageTools.toMessage(terrainMapExtractor.getTerrainMapData(), terrainMapMessage);
-        terrainMapMessage.setSequenceId(terrainMapSequenceId++);
+   public void publishTerrainMap()
+   {
+      TerrainMapMessageTools.toMessage(terrainMapExtractor.getTerrainMapData(), terrainMapMessage);
+      terrainMapMessage.setSequenceId(terrainMapSequenceId++);
 
-        terrainMapMessagePublisher.publish(terrainMapMessage);
-    }
+      terrainMapMessagePublisher.publish(terrainMapMessage);
+   }
 
    public void publishChunkedMap()
    {
@@ -207,7 +210,7 @@ public class GpuMappingManager
 
    public TerrainMapData getLatestTerrainMapData()
    {
-       return terrainMapExtractor.getTerrainMapData();
+      return terrainMapExtractor.getTerrainMapData();
    }
 
    private double computeFootHeight()
@@ -241,6 +244,7 @@ public class GpuMappingManager
       controllerHeightMapMessagePublisher.remove();
       heightMapMessagePublisher.remove();
       heightMapExtractor.destroy();
+      voxelMapExtractor.destroy();
       terrainMapExtractor.destroy();
       chunkedMapManager.destroy();
    }
