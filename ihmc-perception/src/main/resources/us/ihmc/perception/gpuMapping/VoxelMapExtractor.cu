@@ -25,7 +25,7 @@ __device__ inline int flattenIndex(int ix, int iy, int iz, int dimX, int dimY, i
 
 extern "C"
 __global__ void voxelMapKernel(unsigned short* depthImage, size_t pitchDepth,
-                               int* voxelMap,   // 3D voxel array
+                               int* voxelMap, size_t pitchVoxel,   // 3D voxel array
                                float* sensorToWorldAlignedGroundTf,
                                float* params)
 {
@@ -36,9 +36,8 @@ __global__ void voxelMapKernel(unsigned short* depthImage, size_t pitchDepth,
     const int depthHeight = static_cast<int>(params[DEPTH_INPUT_HEIGHT]);
     const int cellsPerAxis = static_cast<int>(params[CELLS_PER_AXIS]);
 
-
     if (xIndex >= depthWidth || yIndex >= depthHeight)
-       return;
+        return;
 
     // Coalesced read from depth image
     const unsigned short* rowPtr = (const unsigned short*)((const char*)depthImage + yIndex * pitchDepth);
@@ -58,6 +57,10 @@ __global__ void voxelMapKernel(unsigned short* depthImage, size_t pitchDepth,
     int ix = (int) floorf(pointInZUpWorldAlignedGroundFrame.x / params[CELL_SIZE]);
     int iy = (int) floorf(pointInZUpWorldAlignedGroundFrame.y / params[CELL_SIZE]);
     int iz = (int) floorf(pointInZUpWorldAlignedGroundFrame.z / params[CELL_SIZE]);
+
+//     printf("pointInZUpWorldAlignedGroundFrame.x=%f", pointInZUpWorldAlignedGroundFrame.x);
+//     printf("pointInZUpWorldAlignedGroundFrame.y=%f", pointInZUpWorldAlignedGroundFrame.y);
+//     printf("pointInZUpWorldAlignedGroundFrame.z=%f", pointInZUpWorldAlignedGroundFrame.z);
 
     // Bounds check against the local map dimensions because we are scanning the entire depth image
     if (ix < 0 || ix >= cellsPerAxis || iy < 0 || iy >= cellsPerAxis || iz < 0 || iz >= cellsPerAxis)
