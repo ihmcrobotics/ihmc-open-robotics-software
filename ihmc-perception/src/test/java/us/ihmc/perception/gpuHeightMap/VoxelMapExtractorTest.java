@@ -62,6 +62,4 @@ public class VoxelMapExtractorTest
       transformArray[11] = 3.0; // Tz
       return transformArray;
    }
-
-
 }

@@ -5,6 +5,7 @@ import org.bytedeco.cuda.cudart.dim3;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
+import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.perception.camera.CameraIntrinsics;
@@ -12,9 +13,11 @@ import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
 import us.ihmc.perception.cuda.CUDAStreamManager;
 import us.ihmc.perception.cuda.CUDATools;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 
 import java.net.URL;
 
+import static org.bytedeco.cuda.global.cudart.cudaMemset2DAsync;
 import static org.bytedeco.cuda.global.cudart.cudaStreamSynchronize;
 
 public class VoxelMapExtractor
@@ -39,6 +42,7 @@ public class VoxelMapExtractor
    private final CUDAKernel voxelMapKernel;
    private final float[] sensorToWorldAlignedGroundTransformArray = new float[16];
    int cellsPerAxis = 10;
+   private final float cellSize = 0.4f;
 
    public VoxelMapExtractor()
    {
@@ -57,7 +61,7 @@ public class VoxelMapExtractor
          voxelMapKernel = voxelMapProgram.loadKernel("voxelMapKernel");
          voxelMapKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
 
-         voxelMap = new GpuMat(1, 10 * 10 * 10, opencv_core.CV_8UC1);
+         voxelMap = new GpuMat(1, cellsPerAxis * cellsPerAxis * cellsPerAxis, opencv_core.CV_32SC1);
 
          // Initialize transformation pointers
          sensorToWorldAlignedGroundTransformHostPointer = new FloatPointer(16);
@@ -113,21 +117,27 @@ public class VoxelMapExtractor
                             this.sensorToWorldAlignedGroundTransformArray.length,
                             stream);
 
-      // ---------- Run the registration kernel for an empty global voxel map ----------
-      {
-         int gridSizeXY = (cellsPerAxis + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
-         dim3 registerKernelGridDim = new dim3(gridSizeXY, gridSizeXY, 1);
+      cudaMemset2DAsync(voxelMap.data(), voxelMap.step(), 0, (long) voxelMap.cols() * Integer.BYTES, voxelMap.rows());
 
-         voxelMapKernel.withPointer(latestDepthImageGPU.data()).withLong(latestDepthImageGPU.step());
-         voxelMapKernel.withPointer(voxelMap.data()).withLong(voxelMap.step());
-         voxelMapKernel.withPointer(sensorToWorldAlignedGroundTransformDevicePointer);
-         voxelMapKernel.withPointer(parametersDevicePointer);
+      int gridDimX = (latestDepthImageGPU.cols() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
+      int gridDimY = (latestDepthImageGPU.rows() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
+      dim3 registerKernelGridDim = new dim3(gridDimX, gridDimY, 1);
 
-         voxelMapKernel.run(stream, registerKernelGridDim, blockSize, 0);
+      voxelMapKernel.withPointer(latestDepthImageGPU.data()).withLong(latestDepthImageGPU.step());
+      voxelMapKernel.withPointer(voxelMap.data()).withLong(voxelMap.step());
+      voxelMapKernel.withPointer(sensorToWorldAlignedGroundTransformDevicePointer);
+      voxelMapKernel.withPointer(parametersDevicePointer);
 
-         registerKernelGridDim.close();
-         checkCUDAError();
-      }
+      voxelMapKernel.run(stream, registerKernelGridDim, blockSize, 0);
+
+      registerKernelGridDim.close();
+
+      int error = cudaStreamSynchronize(stream);
+      CUDATools.checkCUDAError(error);
+
+      Mat what = new Mat();
+      voxelMap.download(what);
+      PerceptionDebugTools.printMat("s", what, 1);
    }
 
    public float[] populateParameterArray(CameraIntrinsics cameraIntrinsics)
@@ -138,28 +148,23 @@ public class VoxelMapExtractor
                           (float) cameraIntrinsics.getCy(),
                           (float) cameraIntrinsics.getFx(),
                           (float) cameraIntrinsics.getFy(),
-                          (float) 0.1,
+                          (float) cellSize,
                           (float) cellsPerAxis};
    }
 
-   public void close()
+   public float getCellSize()
    {
-      voxelMapProgram.close();
+      return cellSize;
    }
 
-   /**
-    * If we are debugging the kernels with {@link VoxelMapExtractor#PRINT_TIMING_FOR_KERNELS} then we want to synchronize the GPU
-    * The reason we synchronize because we are checking for errors, so this would help identify where the error is happening
-    */
-   private void checkCUDAError()
+   public int getCellsPerAxis()
    {
-      int error;
-      if (PRINT_TIMING_FOR_KERNELS)
-      {
-         // Check for errors after the async calls
-         error = cudaStreamSynchronize(stream);
-         CUDATools.checkCUDAError(error);
-      }
+      return cellsPerAxis;
+   }
+
+   public GpuMat getVoxelMap()
+   {
+      return voxelMap;
    }
 
    public void destroy()
