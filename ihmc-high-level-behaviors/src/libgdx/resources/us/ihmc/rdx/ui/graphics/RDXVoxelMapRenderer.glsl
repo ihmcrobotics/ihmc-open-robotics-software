@@ -19,9 +19,9 @@ void main()
     // Compute screen-space point size similar to height map
     vec4 p0 = u_projTrans * vec4(0.0, 0.0, cam.z, cam.w);
     vec4 p1 = u_projTrans * vec4(u_voxelSize, u_voxelSize, cam.z, cam.w);
-    float projectedSize = u_screenWidth * p1.x / p1.w;
+    float projectedSize = u_screenWidth * abs((p1.x / p1.w) - (p0.x / p0.w));
 
-    gl_PointSize = max(1.0, 0.5 * projectedSize);
+    gl_PointSize = max(1.0, projectedSize);
 
     // Simple color: cyan for occupied voxels
     v_color = vec4(0.2, 0.8, 1.0, 1.0);

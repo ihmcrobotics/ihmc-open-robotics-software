@@ -32,11 +32,7 @@ public class RDXVoxelMapRenderer implements RenderableProvider
    private final Renderable renderable = new Renderable();
 
    // Vertex attribute: position only (x, y, z)
-   private final VertexAttributes vertexAttributes = new VertexAttributes(new VertexAttribute(VertexAttributes.Usage.Position,
-                                                                                              3,
-                                                                                              GL41.GL_FLOAT,
-                                                                                              false,
-                                                                                              "a_position"));
+   private final VertexAttributes vertexAttributes = new VertexAttributes(new VertexAttribute(VertexAttributes.Usage.Position, 3, "a_position"));
 
    // Uniforms
    private float voxelSize = 0.05f; // default, set with update()
@@ -107,6 +103,11 @@ public class RDXVoxelMapRenderer implements RenderableProvider
          buffer.put(p.z);
       }
 
+      // TODO this isn't working so absolutely REST IN PEACE
+      buffer.flip();
+      float[] verts = new float[buffer.remaining()];
+      buffer.get(verts);
+      renderable.meshPart.mesh.setVertices(verts);
       renderable.meshPart.size = occupiedVoxels.size();
    }
 
@@ -146,9 +147,11 @@ public class RDXVoxelMapRenderer implements RenderableProvider
                int flatIndex = ix + iy * cellsPerAxis + iz * cellsPerAxis * cellsPerAxis;
                if (dataPtr.get(flatIndex) != 0)
                {
-                  float x = ix * voxelSize + gridCenterX;
-                  float y = iy * voxelSize + gridCenterY;
-                  float z = iz * voxelSize;
+                  float half = 0.5f * cellsPerAxis * voxelSize;
+                  float x = (ix * voxelSize) - half + gridCenterX;
+                  float y = (iy * voxelSize) - half + gridCenterY;
+                  float z = (iz * voxelSize) - half; // or + gridCenterZ if you have one
+
                   occupiedVoxels.add(new Vector3(x, y, z));
                }
             }
