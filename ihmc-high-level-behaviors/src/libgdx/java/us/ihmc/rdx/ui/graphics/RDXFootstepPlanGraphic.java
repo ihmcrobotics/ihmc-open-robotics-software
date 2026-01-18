@@ -10,7 +10,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepQueueStatusMessage;
-import org.apache.commons.net.telnet.EchoOptionHandler;
 import us.ihmc.behaviors.tools.MinimalFootstep;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.RepeatingTaskThread;
