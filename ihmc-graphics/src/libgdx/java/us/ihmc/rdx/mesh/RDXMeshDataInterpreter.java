@@ -55,7 +55,7 @@ public class RDXMeshDataInterpreter
       }
       else
       {
-         LogTools.warn("Mesh data does not contain normals or texture coordinates.");
+         LogTools.warn("Mesh data contains null fields: normals={}, texCoords={}", meshData.getVertexNormals(), meshData.getTexturePoints());
       }
 
       return meshBuilder.end();
