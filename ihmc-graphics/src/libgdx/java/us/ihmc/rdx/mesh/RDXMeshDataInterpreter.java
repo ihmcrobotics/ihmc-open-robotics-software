@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import org.lwjgl.opengl.GL41;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.graphicsDescription.MeshDataHolder;
 import com.badlogic.gdx.graphics.*;
@@ -18,44 +19,43 @@ public class RDXMeshDataInterpreter
       MeshBuilder meshBuilder = new MeshBuilder();
       meshBuilder.begin(Position | Normal | ColorUnpacked | TextureCoordinates, GL41.GL_TRIANGLES);
 
-      int vertexCount       = meshData.getVertices().length;
-      int normalsCount      = meshData.getVertexNormals() != null ? meshData.getVertexNormals().length : 0;
-      int texCoordsCount    = meshData.getTexturePoints() != null ? meshData.getTexturePoints().length : 0;
-      int safeVertexCount   = vertexCount;
-      // Ensure we don't index past normals / UVs
-      safeVertexCount = Math.min(safeVertexCount, normalsCount);
-      safeVertexCount = Math.min(safeVertexCount, texCoordsCount);
-
-      for (int i = 0; i < safeVertexCount; i++)
+      if (meshData.getVertexNormals() != null && meshData.getTexturePoints() != null)
       {
-         Vector3 position = LibGDXTools.toLibGDX(meshData.getVertices()[i]);
+         int vertexCount = meshData.getVertices().length;
+         int normalsCount = meshData.getVertexNormals().length;
+         int texCoordsCount = meshData.getTexturePoints().length;
 
-         Vector3 normal = (i < normalsCount)
-               ? LibGDXTools.toLibGDX(meshData.getVertexNormals()[i])
-               : new Vector3(0f, 0f, 1f); // fallback
+         if (vertexCount != normalsCount || vertexCount != texCoordsCount)
+            LogTools.warn("Vertex count mismatch: vertices={}, normals={}, texCoords={}", vertexCount, normalsCount, texCoordsCount);
 
-         Vector2 uv = (i < texCoordsCount)
-               ? LibGDXTools.toLibGDX(meshData.getTexturePoints()[i])
-               : new Vector2(0f, 0f); // fallback
+         vertexCount = Math.min(vertexCount, normalsCount);
+         vertexCount = Math.min(vertexCount, texCoordsCount);
 
-         Color color = Color.WHITE;
-         meshBuilder.vertex(position, normal, color, uv);
+         for (int i = 0; i < vertexCount; i++)
+         {
+            Vector3 position = LibGDXTools.toLibGDX(meshData.getVertices()[i]);
+            Vector3 normal = LibGDXTools.toLibGDX(meshData.getVertexNormals()[i]);
+            Color color = Color.WHITE;
+            Vector2 uv = LibGDXTools.toLibGDX(meshData.getTexturePoints()[i]);
+            meshBuilder.vertex(position, normal, color, uv);
+         }
+
+         int[] indices = meshData.getTriangleIndices();
+         for (int i = 0; i + 2 < indices.length; i += 3)
+         {
+            int t0 = indices[i];
+            int t1 = indices[i + 1];
+            int t2 = indices[i + 2];
+
+            if (t0 < 0 || t1 < 0 || t2 < 0 || t0 >= vertexCount || t1 >= vertexCount || t2 >= vertexCount)
+               continue;
+
+            meshBuilder.triangle((short) t0, (short) t1, (short) t2);
+         }
       }
-
-      int[] indices = meshData.getTriangleIndices();
-      int maxVertexIndex = safeVertexCount; // indices must refer only to vertices we actually emitted
-
-      for (int i = 0; i + 2 < indices.length; i += 3)
+      else
       {
-         int i0 = indices[i];
-         int i1 = indices[i + 1];
-         int i2 = indices[i + 2];
-
-         if (i0 < 0 || i1 < 0 || i2 < 0 ||
-             i0 >= maxVertexIndex || i1 >= maxVertexIndex || i2 >= maxVertexIndex)
-            continue;
-
-         meshBuilder.triangle((short) i0, (short) i1, (short) i2);
+         LogTools.warn("Mesh data does not contain normals or texture coordinates.");
       }
 
       return meshBuilder.end();
