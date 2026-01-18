@@ -4,6 +4,7 @@ import com.badlogic.gdx.math.Vector3;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Scalar;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -50,10 +51,8 @@ public class RDXVoxelMapRendererTest
       // Create fake data for the test
       GpuMat gpuMat = new GpuMat(1280, 720, opencv_core.CV_16UC1);
       gpuMat.setTo(new Scalar(2000));
-      CameraIntrinsics cameraIntrinsics = new CameraIntrinsics();
-      // Need to set these to the size of the image
-      cameraIntrinsics.setWidth(1280);
-      cameraIntrinsics.setHeight(720);
+
+      CameraIntrinsics cameraIntrinsics = createGenericCameraIntrinsics();
       double[] transformArray = getDoubles();
 
       RigidBodyTransform rigidBodyTransform = new RigidBodyTransform(transformArray);
@@ -99,5 +98,18 @@ public class RDXVoxelMapRendererTest
 
       voxelMapExtractor.destroy();
       baseUI.dispose();
+   }
+
+   @NotNull
+   private static CameraIntrinsics createGenericCameraIntrinsics()
+   {
+      CameraIntrinsics cameraIntrinsics = new CameraIntrinsics();
+      cameraIntrinsics.setWidth(1280);
+      cameraIntrinsics.setHeight(720);
+      cameraIntrinsics.setCx(640);
+      cameraIntrinsics.setCy(360);
+      cameraIntrinsics.setFx(700);
+      cameraIntrinsics.setFy(700);
+      return cameraIntrinsics;
    }
 }

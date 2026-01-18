@@ -41,8 +41,8 @@ public class VoxelMapExtractor
 
    private final CUDAKernel voxelMapKernel;
    private final float[] sensorToWorldAlignedGroundTransformArray = new float[16];
-   int cellsPerAxis = 10;
-   private final float cellSize = 0.4f;
+   int cellsPerAxis = 20;
+   private final float cellSize = 0.5f;
 
    public VoxelMapExtractor()
    {
@@ -124,7 +124,7 @@ public class VoxelMapExtractor
       dim3 registerKernelGridDim = new dim3(gridDimX, gridDimY, 1);
 
       voxelMapKernel.withPointer(latestDepthImageGPU.data()).withLong(latestDepthImageGPU.step());
-      voxelMapKernel.withPointer(voxelMap.data()).withLong(voxelMap.step());
+      voxelMapKernel.withPointer(voxelMap.data());
       voxelMapKernel.withPointer(sensorToWorldAlignedGroundTransformDevicePointer);
       voxelMapKernel.withPointer(parametersDevicePointer);
 
