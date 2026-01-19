@@ -15,6 +15,8 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -45,6 +47,9 @@ import static us.ihmc.zed.global.zed.*;
 
 public class RDXSCS2LogSession extends RDXSCS2Session
 {
+   private final RDXPerceptionVisualizersPanel perceptionVisualizersPanel;
+   private final TypedNotification<String> loadLogRequest = new TypedNotification<>();
+   private boolean loadingLog = false;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImInt desiredLoadedIndex = new ImInt();
    private final ImFloat zedDelayCompensation = new ImFloat();
@@ -61,12 +66,14 @@ public class RDXSCS2LogSession extends RDXSCS2Session
    private record BlackmagicLogVideo(BlackMagicScrubber scrubber, RDXImageVisualizer visualizer) { }
    private final List<BlackmagicLogVideo> blackmagicLogVideos = new ArrayList<>();
 
-   public RDXSCS2LogSession(RDXBaseUI baseUI)
+   public RDXSCS2LogSession(RDXBaseUI baseUI, RDXPerceptionVisualizersPanel perceptionVisualizersPanel)
    {
       super(baseUI);
+
+      this.perceptionVisualizersPanel = perceptionVisualizersPanel;
    }
 
-   public void startSession(String logFilePath, RDXPerceptionVisualizersPanel perceptionVisualizersPanel)
+   public void startSession(String logFilePath)
    {
       try
       {
@@ -146,7 +153,13 @@ public class RDXSCS2LogSession extends RDXSCS2Session
 
    public void update()
    {
+      if (loadLogRequest.poll())
+         startSession(loadLogRequest.read());
+
       super.update();
+
+      if (logSession == null)
+         return;
 
       int currentLogPosition = logDataReader.getCurrentLogPosition();
       if (scrubAnyway.poll() || lastUpdatedLogPosition != currentLogPosition)
@@ -201,6 +214,34 @@ public class RDXSCS2LogSession extends RDXSCS2Session
    @Override
    public void renderImGuiWidgets()
    {
+      if (session == null)
+      {
+         if (loadingLog)
+         {
+            ImGui.text("Loading log...");
+         }
+         else if (ImGui.button(labels.get("Open log...")))
+         {
+            ThreadTools.startAsDaemon(() ->
+            {
+               loadingLog = true;
+               java.awt.Frame frame = new java.awt.Frame();
+               FileDialog fileDialog = new FileDialog(frame, "Choose a .log file", FileDialog.LOAD);
+               fileDialog.setFile("*.log");
+               fileDialog.setVisible(true);
+               loadingLog = false;
+               String directory = fileDialog.getDirectory();
+               String filename = fileDialog.getFile();
+               if (directory != null && filename != null)
+                  loadLogRequest.set(new File(directory, filename).getAbsolutePath());
+            }, "LogFileDialog");
+         }
+
+         return;
+      }
+
+      loadingLog = false;
+
       if (isSessionThreadRunning())
       {
          File logDirectory = logDataReader.getLogDirectory();

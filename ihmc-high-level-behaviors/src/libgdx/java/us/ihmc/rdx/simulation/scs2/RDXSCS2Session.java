@@ -186,6 +186,9 @@ public class RDXSCS2Session
 
    public void update()
    {
+      if (session == null)
+         return;
+
       yoManager.update();
       plotManager.update();
 
@@ -245,12 +248,18 @@ public class RDXSCS2Session
    public void renderImGuiWidgets()
    {
       renderImGuiWidgetsPartOne();
-      renderImGuiWidgetsPartTwo();
+
+      if (session != null)
+         renderImGuiWidgetsPartTwo();
    }
 
    protected void renderImGuiWidgetsPartOne()
    {
       ImGui.text(sessionInfo);
+
+      if (session == null)
+         return;
+
       ImGui.pushItemWidth(110);
       if (ImGuiTools.volatileInputInt("DT (Hz)", dtHz))
       {
