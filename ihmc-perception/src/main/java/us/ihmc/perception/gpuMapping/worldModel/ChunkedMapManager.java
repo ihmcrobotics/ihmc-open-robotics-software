@@ -3,6 +3,7 @@ package us.ihmc.perception.gpuMapping.worldModel;
 import com.esotericsoftware.kryo.util.IntMap;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ChunkMessage;
+import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.gpuMapping.HeightMapParameters;
@@ -27,6 +28,7 @@ import java.util.HashSet;
 public class ChunkedMapManager
 {
    private static final int MAX_CHUNKS_TO_STORE = 100;
+   private static final double CHUNK_PUBLISH_FREQUENCY = 8.0;
    private final HeightMapParameters heightMapParameters;
 
    private final IntMap<Chunk> chunksHashMap = new IntMap<>();
@@ -34,6 +36,7 @@ public class ChunkedMapManager
    private final Deque<Integer> queueOfChunks = new ArrayDeque<>();
    private final ROS2Publisher<ChunkMessage> chunkMessagePublisher;
    private final ChunkMessage chunkMessage;
+   private final IntMap<Throttler> chunkThrottlers = new IntMap<>();
 
    public ChunkedMapManager(ROS2Node ros2Node, HeightMapParameters heightMapParameters)
    {
@@ -115,6 +118,9 @@ public class ChunkedMapManager
          chunksHashMap.put(hash, chunk);
          queueOfChunks.addLast(hash);
 
+         // Create a throttler for this chunk
+         chunkThrottlers.put(hash, new Throttler().setFrequency(CHUNK_PUBLISH_FREQUENCY));
+
          // Resources aren't free, at some point there is a limit on how much we can store, time to see if we should remove any
          if (chunksHashMap.size > MAX_CHUNKS_TO_STORE)
          {
@@ -122,6 +128,7 @@ public class ChunkedMapManager
             if (oldestHash != null)
             {
                chunksHashMap.remove(oldestHash);
+               chunkThrottlers.remove(oldestHash);
             }
          }
       }
@@ -138,11 +145,17 @@ public class ChunkedMapManager
          if (!chunk.isDirty())
             continue;
 
-         ChunkMessageTools.toMessage(chunk, chunkMessage);
-         publisher.publish(chunkMessage);
-         // After it's been published, we reset the dirty value so we don't keep publishing it even
-         // if it hasn't changed
-         chunk.setDirty(false);
+         int hash = Chunk.generateHashForChunk(chunk.getOriginX(), chunk.getOriginY());
+         Throttler throttler = chunkThrottlers.get(hash);
+
+         if (throttler != null && throttler.run())
+         {
+            ChunkMessageTools.toMessage(chunk, chunkMessage);
+            publisher.publish(chunkMessage);
+            // After it's been published, we reset the dirty value so we don't keep publishing it even
+            // if it hasn't changed
+            chunk.setDirty(false);
+         }
       }
    }
 
