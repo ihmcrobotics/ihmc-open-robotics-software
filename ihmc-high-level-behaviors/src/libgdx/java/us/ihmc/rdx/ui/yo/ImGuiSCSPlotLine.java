@@ -18,7 +18,7 @@ public abstract class ImGuiSCSPlotLine
 
    public abstract void setupLinkedVariable(RDXYoManager yoManager);
 
-   public void render(float plotWidth, float plotHeight)
+   public void render(float plotWidth, float plotHeight, int lineIndex)
    {
 
    }

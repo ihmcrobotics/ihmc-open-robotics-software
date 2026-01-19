@@ -3,6 +3,7 @@ package us.ihmc.rdx.imgui;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.ImGui;
 import imgui.internal.ImGuiDockNode;
@@ -24,6 +25,7 @@ public class RDXPanel extends RDXPanelSizeHandler
    private final TreeSet<RDXPanel> children = new TreeSet<>(Comparator.comparing(RDXPanel::getPanelName));
    private final ConcurrentLinkedQueue<RDXPanel> removalQueue = new ConcurrentLinkedQueue<>();
    private final ConcurrentLinkedQueue<RDXPanel> additionQueue = new ConcurrentLinkedQueue<>();
+   private boolean removePadding = false;
 
    @Nullable
    private RDXDockspacePanel parentDockspacePanel = null;
@@ -101,6 +103,9 @@ public class RDXPanel extends RDXPanelSizeHandler
             }
          }
 
+         if (removePadding)
+            ImGui.pushStyleVar(ImGuiStyleVar.WindowPadding, 0.0f, 0.0f);
+
          int windowFlags = ImGuiWindowFlags.None;
          if (hasMenuBar)
             windowFlags |= ImGuiWindowFlags.MenuBar;
@@ -112,6 +117,9 @@ public class RDXPanel extends RDXPanelSizeHandler
 
          render.run();
          ImGui.end();
+
+         if (removePadding)
+            ImGui.popStyleVar();
       }
 
       for (RDXPanel child : children)
@@ -183,6 +191,11 @@ public class RDXPanel extends RDXPanelSizeHandler
    public void setRenderMethod(Runnable render)
    {
       this.render = render;
+   }
+
+   public void setRemovePadding(boolean removePadding)
+   {
+      this.removePadding = removePadding;
    }
 
    public ImBoolean getIsShowing()

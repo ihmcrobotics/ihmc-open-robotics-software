@@ -1,6 +1,7 @@
 package us.ihmc.rdx.ui.yo;
 
 import imgui.ImGui;
+import imgui.flag.ImGuiStyleVar;
 import imgui.type.ImInt;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -31,6 +32,7 @@ public class ImPlotModifiableYoPlotPanel extends RDXPanel
       this.yoManager = yoManager;
       this.removeSelf = removeSelf;
       setRenderMethod(this::render);
+      setRemovePadding(true);
       updatePlots();
    }
 
@@ -89,6 +91,8 @@ public class ImPlotModifiableYoPlotPanel extends RDXPanel
 
       plotWidth = ImGui.getColumnWidth() / columns.get();
 
+      ImGui.pushStyleVar(ImGuiStyleVar.ItemSpacing, 0.0f, 0.0f);
+      ImGui.setCursorPosY(ImGui.getCursorPosY() + 1);
       for (int row = 0; row < rows.get(); row++)
       {
          for (int column = 0; column < columns.get(); column++)
@@ -99,6 +103,7 @@ public class ImPlotModifiableYoPlotPanel extends RDXPanel
                ImGui.sameLine();
          }
       }
+      ImGui.popStyleVar();
    }
 
    public ImPlotModifiableYoPlot plot(int column, int row, String... variables)
