@@ -135,7 +135,7 @@ public class RDXSCS2YoImPlotManager
                      ImPlotModifiableYoPlot yoPlot = plotPanel.getPlot(column, row);
                      ObjectNode plotNode = plotArrayNode.addObject();
                      ArrayNode variableArrayNode = plotNode.putArray("variables");
-                     for (Pair<YoVariable, ImPlotYoBufferPlotLineBasics> yoVariableImPlotPlotLinePair : yoPlot.getVariablePlotLinePairList())
+                     for (Pair<YoVariable, ImGuiSCSPlotLine> yoVariableImPlotPlotLinePair : yoPlot.getVariablePlotLinePairList())
                      {
                         ObjectNode variableNode = variableArrayNode.addObject();
                         variableNode.put("variableName", yoVariableImPlotPlotLinePair.getLeft().getFullNameString());
@@ -157,7 +157,7 @@ public class RDXSCS2YoImPlotManager
             for (int row = 0; row < plotPanel.getRows().get(); row++)
             {
                ImPlotModifiableYoPlot yoPlot = plotPanel.getPlot(column, row);
-               for (Pair<YoVariable, ImPlotYoBufferPlotLineBasics> yoVariableImPlotPlotLinePair : yoPlot.getVariablePlotLinePairList())
+               for (Pair<YoVariable, ImGuiSCSPlotLine> yoVariableImPlotPlotLinePair : yoPlot.getVariablePlotLinePairList())
                   yoVariableImPlotPlotLinePair.getRight().setupLinkedVariable(yoManager);
             }
          }

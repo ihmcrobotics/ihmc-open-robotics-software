@@ -6,8 +6,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.simulation.scs2.RDXYoManager;
 import us.ihmc.log.LogTools;
-import us.ihmc.rdx.imgui.ImPlotPlot;
-import us.ihmc.rdx.imgui.ImPlotPlotLine;
 import us.ihmc.yoVariables.variable.*;
 
 import java.util.ArrayList;
@@ -15,9 +13,9 @@ import java.util.HashMap;
 
 public class ImPlotModifiableYoPlot
 {
-   private final ImPlotPlot imPlotPlot;
-   private final HashMap<YoVariable, ImPlotPlotLine> variablePlotLineMap = new HashMap<>();
-   private final ArrayList<Pair<YoVariable, ImPlotYoBufferPlotLineBasics>> variablePlotLinePairList = new ArrayList<>();
+   private final ImGuiSCSPlot imGuiSCSPlot;
+   private final HashMap<YoVariable, ImGuiSCSPlotLine> variablePlotLineMap = new HashMap<>();
+   private final ArrayList<Pair<YoVariable, ImGuiSCSPlotLine>> variablePlotLinePairList = new ArrayList<>();
    private final ImGuiYoVariableSearchPanel imGuiYoVariableSearchPanel;
    private final ImPlotModifiableYoPlotPanel imPlotModifiableYoPlotPanel;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -31,57 +29,52 @@ public class ImPlotModifiableYoPlot
       this.imGuiYoVariableSearchPanel = imGuiYoVariableSearchPanel;
       this.imPlotModifiableYoPlotPanel = imPlotModifiableYoPlotPanel;
       this.yoManager = yoManager;
-      imPlotPlot = new ImPlotPlot();
-      imPlotPlot.setPopupContextWindowImGuiRenderer(this::renderPopupContextWindow);
+      imGuiSCSPlot = new ImGuiSCSPlot();
+      imGuiSCSPlot.setPopupContextWindowImGuiRenderer(this::renderPopupContextWindow);
    }
 
    public void addVariable(YoVariable yoVariable, boolean initializeLinkedVariable)
    {
-      ImPlotYoBufferPlotLineBasics plotLine = null;
-      if (yoVariable instanceof YoDouble)
+      ImGuiSCSPlotLine plotLine = null;
+      if (yoVariable instanceof YoDouble yoDouble)
       {
-         YoDouble yoDouble = (YoDouble) yoVariable;
-         ImPlotYoBufferDoublePlotLine doublePlotLine = new ImPlotYoBufferDoublePlotLine(yoDouble, this::removeVariable);
+         ImGuiSCSDoublePlotLine doublePlotLine = new ImGuiSCSDoublePlotLine(yoDouble, this::removeVariable);
          if (initializeLinkedVariable)
             doublePlotLine.setupLinkedVariable(yoManager);
          plotLine = doublePlotLine;
-         imPlotPlot.getPlotLines().add(doublePlotLine);
+         imGuiSCSPlot.getPlotLines().add(doublePlotLine);
       }
-      else if (yoVariable instanceof YoInteger)
+      else if (yoVariable instanceof YoInteger yoInteger)
       {
-         YoInteger yoInteger = (YoInteger) yoVariable;
-         ImPlotYoBufferIntegerPlotLine integerPlotLine = new ImPlotYoBufferIntegerPlotLine(yoInteger, this::removeVariable);
+         ImGuiSCSIntegerPlotLine integerPlotLine = new ImGuiSCSIntegerPlotLine(yoInteger, this::removeVariable);
          if (initializeLinkedVariable)
             integerPlotLine.setupLinkedVariable(yoManager);
          plotLine = integerPlotLine;
-         imPlotPlot.getPlotLines().add(integerPlotLine);
+         imGuiSCSPlot.getPlotLines().add(integerPlotLine);
       }
-      else if (yoVariable instanceof YoLong)
+      else if (yoVariable instanceof YoLong yoInteger)
       {
-         YoLong yoInteger = (YoLong) yoVariable;
-         ImPlotYoBufferLongPlotLine longPlotLine = new ImPlotYoBufferLongPlotLine(yoInteger, this::removeVariable);
+         ImGuiSCSLongPlotLine longPlotLine = new ImGuiSCSLongPlotLine(yoInteger, this::removeVariable);
          if (initializeLinkedVariable)
             longPlotLine.setupLinkedVariable(yoManager);
          plotLine = longPlotLine;
-         imPlotPlot.getPlotLines().add(longPlotLine);
+         imGuiSCSPlot.getPlotLines().add(longPlotLine);
       }
-      else if (yoVariable instanceof YoEnum)
+      else if (yoVariable instanceof YoEnum yoEnum)
       {
-         YoEnum yoEnum = (YoEnum) yoVariable;
-         ImPlotYoBufferEnumPlotLine enumPlotLine = new ImPlotYoBufferEnumPlotLine(yoEnum, this::removeVariable);
+         ImGuiSCSEnumPlotLine enumPlotLine = new ImGuiSCSEnumPlotLine(yoEnum, this::removeVariable);
          if (initializeLinkedVariable)
             enumPlotLine.setupLinkedVariable(yoManager);
          plotLine = enumPlotLine;
-         imPlotPlot.getPlotLines().add(enumPlotLine);
+         imGuiSCSPlot.getPlotLines().add(enumPlotLine);
       }
-      else if (yoVariable instanceof YoBoolean)
+      else if (yoVariable instanceof YoBoolean yoBoolean)
       {
-         YoBoolean yoBoolean = (YoBoolean) yoVariable;
-         ImPlotYoBufferBooleanPlotLine booleanPlotLine = new ImPlotYoBufferBooleanPlotLine(yoBoolean, this::removeVariable);
+         ImGuiSCSBooleanPlotLine booleanPlotLine = new ImGuiSCSBooleanPlotLine(yoBoolean, this::removeVariable);
          if (initializeLinkedVariable)
             booleanPlotLine.setupLinkedVariable(yoManager);
          plotLine = booleanPlotLine;
-         imPlotPlot.getPlotLines().add(booleanPlotLine);
+         imGuiSCSPlot.getPlotLines().add(booleanPlotLine);
       }
       else if (yoVariable == null)
       {
@@ -98,12 +91,12 @@ public class ImPlotModifiableYoPlot
 
    public void removeVariable(YoVariable yoVariable)
    {
-      imPlotPlot.queueRemovePlotLine(variablePlotLineMap.get(yoVariable));
+      imGuiSCSPlot.queueRemovePlotLine(variablePlotLineMap.get(yoVariable));
       variablePlotLineMap.remove(yoVariable);
       int indexToRemove = -1;
       for (int i = 0; i < variablePlotLinePairList.size(); i++)
       {
-         Pair<YoVariable, ImPlotYoBufferPlotLineBasics> yoVariableImPlotPlotLinePair = variablePlotLinePairList.get(i);
+         Pair<YoVariable, ImGuiSCSPlotLine> yoVariableImPlotPlotLinePair = variablePlotLinePairList.get(i);
          if (yoVariableImPlotPlotLinePair.getLeft().equals(yoVariable))
          {
             indexToRemove = i;
@@ -127,7 +120,7 @@ public class ImPlotModifiableYoPlot
          requestedVariable = false; // Search was cancelled
       }
 
-      imPlotPlot.render(plotWidth, plotHeight);
+      imGuiSCSPlot.render(plotWidth, plotHeight);
    }
 
    private void renderPopupContextWindow()
@@ -140,7 +133,7 @@ public class ImPlotModifiableYoPlot
       }
    }
 
-   public ArrayList<Pair<YoVariable, ImPlotYoBufferPlotLineBasics>> getVariablePlotLinePairList()
+   public ArrayList<Pair<YoVariable, ImGuiSCSPlotLine>> getVariablePlotLinePairList()
    {
       return variablePlotLinePairList;
    }
