@@ -5,8 +5,13 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 /*
  * RDX UI to visualize SCS 2 logs with perception data.
+ *
+ * Pass -Dlog=~/LogDir to open that log on launch.
  */
 public class RDXSCS2LogVisualizer
 {
@@ -28,6 +33,14 @@ public class RDXSCS2LogVisualizer
             perceptionVisualizerPanel = new RDXPerceptionVisualizersPanel();
 
             scs2Session = new RDXSCS2LogSession(baseUI, perceptionVisualizerPanel);
+
+            String logDirectory = System.getProperty("log");
+            if (logDirectory != null)
+            {
+               Path path = Paths.get(logDirectory.replaceAll("~", System.getProperty("user.home")), "robotData.log");
+               if (path.toFile().exists())
+                  scs2Session.startSession(path.toString());
+            }
 
             perceptionVisualizerPanel.create(baseUI);
          }
