@@ -3,8 +3,11 @@ package us.ihmc.rdx.ui.yo;
 import imgui.ImGui;
 import imgui.ImVec2;
 import imgui.flag.ImDrawFlags;
+import imgui.flag.ImGuiMouseButton;
+import us.ihmc.commons.MathTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.simulation.scs2.RDXYoManager;
+import us.ihmc.scs2.session.Session;
 import us.ihmc.scs2.sharedMemory.BufferSample;
 import us.ihmc.scs2.sharedMemory.LinkedYoVariable;
 import us.ihmc.scs2.sharedMemory.interfaces.YoBufferPropertiesReadOnly;
@@ -16,12 +19,14 @@ import java.util.function.Consumer;
 
 public class ImGuiSCSDoublePlotLine extends ImGuiSCSPlotLine
 {
+   private Session session;
    private final YoDouble yoDouble;
    private LinkedYoVariable<YoDouble> linkedYoDoubleVariable;
    private YoBufferPropertiesReadOnly bufferProperties;
    private double[] data;
    private final ArrayList<ImVec2> pointsList = new ArrayList<>();
    private ImVec2[] points = new ImVec2[0];
+   private boolean isDragging = false;
 
    public ImGuiSCSDoublePlotLine(YoDouble yoDouble, Consumer<YoVariable> removeSelf)
    {
@@ -34,6 +39,7 @@ public class ImGuiSCSDoublePlotLine extends ImGuiSCSPlotLine
    {
       if (linkedYoDoubleVariable == null)
       {
+         session = yoManager.getSession();
          linkedYoDoubleVariable = (LinkedYoVariable) yoManager.newLinkedYoVariable(yoDouble);
          linkedYoDoubleVariable.addUser(this);
       }
@@ -87,6 +93,25 @@ public class ImGuiSCSDoublePlotLine extends ImGuiSCSPlotLine
          double normalized = (data[i] - minValue) / range;
          float y = cursorY + lineAreaHeight * (1.0f - (float) normalized);
          points[i].set(x, y);
+      }
+
+      float plotMinX = cursorX;
+      float plotMaxX = cursorX + plotWidth;
+      float plotMinY = cursorY;
+      float plotMaxY = cursorY + plotHeight;
+      float mouseX = ImGui.getMousePosX();
+      float mouseY = ImGui.getMousePosY();
+      boolean mouseInPlotBounds = mouseX >= plotMinX && mouseX <= plotMaxX && mouseY >= plotMinY && mouseY <= plotMaxY;
+
+      if (mouseInPlotBounds && ImGui.isMouseClicked(ImGuiMouseButton.Left))
+         isDragging = true;
+      if (!ImGui.isMouseDown(ImGuiMouseButton.Left))
+         isDragging = false;
+
+      if (isDragging)
+      {
+         float dragXPlot = (float) MathTools.clamp(ImGui.getMousePosX(), cursorX, cursorX + plotWidth);
+         session.submitBufferIndexRequest(Math.round((dragXPlot - cursorX) * data.length / plotWidth));
       }
 
       int currentIndex = bufferProperties.getCurrentIndex();
