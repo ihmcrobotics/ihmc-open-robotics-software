@@ -106,7 +106,7 @@ public class ImPlotModifiableYoPlot
       variablePlotLinePairList.remove(indexToRemove);
    }
 
-   public void render(float plotWidth, float plotHeight)
+   public void render(int column, int row, float plotWidth, float plotHeight)
    {
       if (requestedVariable && imGuiYoVariableSearchPanel.getSelectedVariable() != null)
       {
@@ -120,7 +120,7 @@ public class ImPlotModifiableYoPlot
          requestedVariable = false; // Search was cancelled
       }
 
-      imGuiSCSPlot.render(plotWidth, plotHeight);
+      imGuiSCSPlot.render(column, row, plotWidth, plotHeight);
    }
 
    private void renderPopupContextWindow()

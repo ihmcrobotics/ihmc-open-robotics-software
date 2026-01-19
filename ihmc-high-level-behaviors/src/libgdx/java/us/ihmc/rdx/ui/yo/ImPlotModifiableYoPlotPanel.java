@@ -93,7 +93,7 @@ public class ImPlotModifiableYoPlotPanel extends RDXPanel
       {
          for (int column = 0; column < columns.get(); column++)
          {
-            yoPlots.get(column).get(row).render(plotWidth, plotHeight.get());
+            yoPlots.get(column).get(row).render(column, row, plotWidth, plotHeight.get());
 
             if (column != columns.get() - 1)
                ImGui.sameLine();

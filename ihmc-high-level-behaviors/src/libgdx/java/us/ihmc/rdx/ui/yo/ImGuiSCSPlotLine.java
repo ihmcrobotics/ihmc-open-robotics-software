@@ -18,13 +18,9 @@ public abstract class ImGuiSCSPlotLine
 
    public abstract void setupLinkedVariable(RDXYoManager yoManager);
 
-   protected abstract void plot(String labelID);
-
-   protected abstract void update();
-
-   public boolean render()
+   public void render(float plotWidth, float plotHeight)
    {
-      return false;
+
    }
 
    public String getVariableName()

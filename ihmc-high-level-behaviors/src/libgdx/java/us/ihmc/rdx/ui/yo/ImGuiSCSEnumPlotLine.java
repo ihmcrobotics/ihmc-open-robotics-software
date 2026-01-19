@@ -20,14 +20,4 @@ public class ImGuiSCSEnumPlotLine extends ImGuiSCSPlotLine
    public void setupLinkedVariable(RDXYoManager yoManager)
    {
    }
-
-   @Override
-   protected void plot(String labelID)
-   {
-   }
-
-   @Override
-   protected void update()
-   {
-   }
 }
