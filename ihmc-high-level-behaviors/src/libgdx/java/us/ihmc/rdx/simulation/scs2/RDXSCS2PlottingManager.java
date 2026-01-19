@@ -13,7 +13,6 @@ import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXImGuiLayoutManager;
 import us.ihmc.rdx.ui.ImGuiConfigurationLocation;
-import us.ihmc.rdx.ui.yo.*;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.*;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -21,13 +20,13 @@ import us.ihmc.yoVariables.variable.YoVariable;
 import java.nio.file.Path;
 import java.util.ArrayList;
 
-public class RDXSCS2YoImPlotManager
+public class RDXSCS2PlottingManager
 {
    private RDXImGuiLayoutManager layoutManager;
-   private final ArrayList<ImPlotModifiableYoPlotPanel> plotPanels = new ArrayList<>();
+   private final ArrayList<RDXSCS2PlotPanel> plotPanels = new ArrayList<>();
    private final ArrayList<RDXLinkedYoBooleanWidget> variableWidgets = new ArrayList<>();
    private RDXYoManager yoManager;
-   private ImGuiYoVariableSearchPanel yoVariableSearchPanel;
+   private RDXSCS2YoVariableSearchPanel searchPanel;
    private RDXPanel parentPanel;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImString panelToCreateName = new ImString("", 100);
@@ -66,16 +65,16 @@ public class RDXSCS2YoImPlotManager
    {
       this.yoManager = yoManager;
 
-      if (yoVariableSearchPanel == null)
+      if (searchPanel == null)
       {
          // We are using getRootRegistry which is the session's working copy; i.e. not linked
-         yoVariableSearchPanel = new ImGuiYoVariableSearchPanel(yoManager.getRootRegistry());
-         parentPanel.addChild(yoVariableSearchPanel.getPanel());
+         searchPanel = new RDXSCS2YoVariableSearchPanel(yoManager.getRootRegistry());
+         parentPanel.addChild(searchPanel.getPanel());
       }
       else
       {
          removeAllPlotPanels();
-         yoVariableSearchPanel.changeYoRegistry(yoManager.getRootRegistry());
+         searchPanel.changeYoRegistry(yoManager.getRootRegistry());
       }
 
 //      loadConfiguration(layoutManager.getCurrentConfigurationLocation());
@@ -98,10 +97,10 @@ public class RDXSCS2YoImPlotManager
             JSONTools.forEachArrayElement(node, "panels", panelNode ->
             {
                String panelName = panelNode.get("name").asText();
-               ImPlotModifiableYoPlotPanel plotPanel = addPlotPanel(panelName);
+               RDXSCS2PlotPanel plotPanel = addPlotPanel(panelName);
                JSONTools.forEachArrayElement(panelNode, "plots", plotNode ->
                {
-//                  ImPlotModifiableYoPlot imPlotModifiableYoPlot = plotPanel.addPlot();
+//                  RDXSCS2Plot imPlotModifiableYoPlot = plotPanel.addPlot();
 //                  JSONTools.forEachArrayElement(plotNode, "variables", variableNode ->
 //                  {
 //                     // We are using getRootRegistry which is the session's working copy; i.e. not linked
@@ -123,7 +122,7 @@ public class RDXSCS2YoImPlotManager
          JSONFileTools.save(fileForWriting, rootNode ->
          {
             ArrayNode panelArrayNode = rootNode.putArray("panels");
-            for (ImPlotModifiableYoPlotPanel plotPanel : plotPanels)
+            for (RDXSCS2PlotPanel plotPanel : plotPanels)
             {
                ObjectNode panelNode = panelArrayNode.addObject();
                panelNode.put("name", plotPanel.getPanelName());
@@ -132,10 +131,10 @@ public class RDXSCS2YoImPlotManager
                {
                   for (int row = 0; row < plotPanel.getRows().get(); row++)
                   {
-                     ImPlotModifiableYoPlot yoPlot = plotPanel.getPlot(column, row);
+                     RDXSCS2Plot plot = plotPanel.getPlot(column, row);
                      ObjectNode plotNode = plotArrayNode.addObject();
                      ArrayNode variableArrayNode = plotNode.putArray("variables");
-                     for (Pair<YoVariable, ImGuiSCSPlotLine> yoVariableImPlotPlotLinePair : yoPlot.getVariablePlotLinePairList())
+                     for (Pair<YoVariable, RDXSCS2PlotLine> yoVariableImPlotPlotLinePair : plot.getVariablePlotLinePairList())
                      {
                         ObjectNode variableNode = variableArrayNode.addObject();
                         variableNode.put("variableName", yoVariableImPlotPlotLinePair.getLeft().getFullNameString());
@@ -149,15 +148,15 @@ public class RDXSCS2YoImPlotManager
 
    public void initializeLinkedVariables()
    {
-      yoVariableSearchPanel.initializeYoVariablesAfterSessionStart();
-      for (ImPlotModifiableYoPlotPanel plotPanel : plotPanels)
+      searchPanel.initializeYoVariablesAfterSessionStart();
+      for (RDXSCS2PlotPanel plotPanel : plotPanels)
       {
          for (int column = 0; column < plotPanel.getColumns().get(); column++)
          {
             for (int row = 0; row < plotPanel.getRows().get(); row++)
             {
-               ImPlotModifiableYoPlot yoPlot = plotPanel.getPlot(column, row);
-               for (Pair<YoVariable, ImGuiSCSPlotLine> yoVariableImPlotPlotLinePair : yoPlot.getVariablePlotLinePairList())
+               RDXSCS2Plot plot = plotPanel.getPlot(column, row);
+               for (Pair<YoVariable, RDXSCS2PlotLine> yoVariableImPlotPlotLinePair : plot.getVariablePlotLinePairList())
                   yoVariableImPlotPlotLinePair.getRight().setupLinkedVariable(yoManager);
             }
          }
@@ -180,8 +179,8 @@ public class RDXSCS2YoImPlotManager
       if (ImGui.button("Add Plot Panel"))
          addPlotPanel(panelToCreateName.get().isEmpty() ? "Plot Panel " + plotPanels.size() : panelToCreateName.get());
 
-      ImPlotModifiableYoPlotPanel remove = null;
-      for (ImPlotModifiableYoPlotPanel plotPanel : plotPanels)
+      RDXSCS2PlotPanel remove = null;
+      for (RDXSCS2PlotPanel plotPanel : plotPanels)
       {
          ImGui.checkbox(labels.get(plotPanel.getPanelName()), plotPanel.getIsShowing());
          ImGui.sameLine();
@@ -194,16 +193,16 @@ public class RDXSCS2YoImPlotManager
          removePlotPanel(remove);
    }
 
-   public ImPlotModifiableYoPlotPanel addPlotPanel(String name)
+   public RDXSCS2PlotPanel addPlotPanel(String name)
    {
-      ImPlotModifiableYoPlotPanel plotPanel = new ImPlotModifiableYoPlotPanel(name, yoVariableSearchPanel, yoManager, this::removePlotPanel);
+      RDXSCS2PlotPanel plotPanel = new RDXSCS2PlotPanel(name, searchPanel, yoManager, this::removePlotPanel);
       plotPanel.getIsShowing().set(true);
       parentPanel.queueAddChild(plotPanel);
       plotPanels.add(plotPanel);
       return plotPanel;
    }
 
-   private void removePlotPanel(ImPlotModifiableYoPlotPanel plotPanel)
+   private void removePlotPanel(RDXSCS2PlotPanel plotPanel)
    {
       plotPanels.remove(plotPanel);
       parentPanel.queueRemoveChild(plotPanel);
@@ -212,13 +211,13 @@ public class RDXSCS2YoImPlotManager
    public void destroy()
    {
       removeAllPlotPanels();
-      parentPanel.queueRemoveChild(yoVariableSearchPanel.getPanel());
+      parentPanel.queueRemoveChild(searchPanel.getPanel());
    }
 
    private void removeAllPlotPanels()
    {
-      ImPlotModifiableYoPlotPanel[] plotPanelsArray = plotPanels.toArray(new ImPlotModifiableYoPlotPanel[0]);
-      for (ImPlotModifiableYoPlotPanel plotPanel : plotPanelsArray)
+      RDXSCS2PlotPanel[] plotPanelsArray = plotPanels.toArray(new RDXSCS2PlotPanel[0]);
+      for (RDXSCS2PlotPanel plotPanel : plotPanelsArray)
       {
          removePlotPanel(plotPanel);
       }
@@ -229,9 +228,9 @@ public class RDXSCS2YoImPlotManager
       variableWidgets.add(new RDXLinkedYoBooleanWidget(yoManager, variableName));
    }
 
-   public ImPlotModifiableYoPlotPanel getPlotPanel(String name)
+   public RDXSCS2PlotPanel getPlotPanel(String name)
    {
-      for (ImPlotModifiableYoPlotPanel plotPanel : plotPanels)
+      for (RDXSCS2PlotPanel plotPanel : plotPanels)
          if (plotPanel.getPanelName().equals(name))
             return plotPanel;
 

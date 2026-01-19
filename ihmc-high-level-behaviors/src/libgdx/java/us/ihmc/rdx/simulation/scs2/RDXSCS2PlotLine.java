@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.yo;
+package us.ihmc.rdx.simulation.scs2;
 
 import imgui.ImGui;
 import imgui.ImVec2;
@@ -6,7 +6,6 @@ import imgui.flag.ImDrawFlags;
 import imgui.flag.ImGuiMouseButton;
 import us.ihmc.commons.MathTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
-import us.ihmc.rdx.simulation.scs2.RDXYoManager;
 import us.ihmc.scs2.session.Session;
 import us.ihmc.scs2.sharedMemory.BufferSample;
 import us.ihmc.scs2.sharedMemory.LinkedYoVariable;
@@ -17,7 +16,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 
-public class ImGuiSCSPlotLine
+public class RDXSCS2PlotLine
 {
    private final YoVariable yoVariable;
    private final Consumer<YoVariable> removeSelf;
@@ -30,7 +29,7 @@ public class ImGuiSCSPlotLine
    private ImVec2[] points = new ImVec2[0];
    private boolean isDragging = false;
 
-   public ImGuiSCSPlotLine(YoVariable yoVariable, Consumer<YoVariable> removeSelf)
+   public RDXSCS2PlotLine(YoVariable yoVariable, Consumer<YoVariable> removeSelf)
    {
       this.yoVariable = yoVariable;
       this.removeSelf = removeSelf;
@@ -120,7 +119,7 @@ public class ImGuiSCSPlotLine
       ImGui.getWindowDrawList().addLine(verticalLineX, cursorY, verticalLineX, cursorY + lineAreaHeight, ImGuiTools.BLACK);
 
       int numPoints;
-      int color = ImGuiSCSPlot.CHART_COLORS[lineIndex % ImGuiSCSPlot.CHART_COLORS.length];
+      int color = RDXSCS2Plot.CHART_COLORS[lineIndex % RDXSCS2Plot.CHART_COLORS.length];
       int imDrawFlags = ImDrawFlags.None;
       float thickness = 1.0f;
       ImGui.getWindowDrawList().addPolyline(points, points.length, color, imDrawFlags, thickness);

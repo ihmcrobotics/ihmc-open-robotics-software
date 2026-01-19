@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.yo;
+package us.ihmc.rdx.simulation.scs2;
 
 import imgui.ImGui;
 import imgui.type.ImString;
@@ -10,7 +10,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
 
 import java.util.ArrayList;
 
-public class ImGuiYoVariableSearchPanel
+public class RDXSCS2YoVariableSearchPanel
 {
    private final RDXPanel panel = new RDXPanel("YoVariable Search", this::renderImGuiWidgets);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -20,7 +20,7 @@ public class ImGuiYoVariableSearchPanel
    private boolean searchRequested = false;
    private YoVariable selectedVariable = null;
 
-   public ImGuiYoVariableSearchPanel(YoRegistry yoRegistry)
+   public RDXSCS2YoVariableSearchPanel(YoRegistry yoRegistry)
    {
       changeYoRegistry(yoRegistry);
 

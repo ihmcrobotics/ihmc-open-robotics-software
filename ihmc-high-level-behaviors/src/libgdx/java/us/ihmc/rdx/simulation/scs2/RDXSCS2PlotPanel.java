@@ -1,55 +1,34 @@
-package us.ihmc.rdx.ui.yo;
+package us.ihmc.rdx.simulation.scs2;
 
 import imgui.ImGui;
 import imgui.flag.ImGuiStyleVar;
 import imgui.type.ImInt;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.simulation.scs2.RDXYoManager;
 
 import java.util.ArrayList;
 import java.util.function.Consumer;
 
-public class ImPlotModifiableYoPlotPanel extends RDXPanel
+public class RDXSCS2PlotPanel extends RDXPanel
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ArrayList<ArrayList<ImPlotModifiableYoPlot>> yoPlots = new ArrayList<>();
+   private final ArrayList<ArrayList<RDXSCS2Plot>> plots = new ArrayList<>();
    private final ImInt rows = new ImInt(1);
    private final ImInt columns = new ImInt(1);
    private final ImInt plotHeight = new ImInt(60);
-   private float plotWidth;
-   private final ImGuiYoVariableSearchPanel yoVariableSearchPanel;
+   private final RDXSCS2YoVariableSearchPanel searchPanel;
    private final RDXYoManager yoManager;
-   private final Consumer<ImPlotModifiableYoPlotPanel> removeSelf;
+   private final Consumer<RDXSCS2PlotPanel> removeSelf;
 
-   public ImPlotModifiableYoPlotPanel(String panelName,
-                                      ImGuiYoVariableSearchPanel yoVariableSearchPanel,
-                                      RDXYoManager yoManager,
-                                      Consumer<ImPlotModifiableYoPlotPanel> removeSelf)
+   public RDXSCS2PlotPanel(String panelName, RDXSCS2YoVariableSearchPanel searchPanel, RDXYoManager yoManager, Consumer<RDXSCS2PlotPanel> removeSelf)
    {
       super(panelName, null, false, true);
-      this.yoVariableSearchPanel = yoVariableSearchPanel;
+      this.searchPanel = searchPanel;
       this.yoManager = yoManager;
       this.removeSelf = removeSelf;
       setRenderMethod(this::render);
       setRemovePadding(true);
       updatePlots();
-   }
-
-   private void updatePlots()
-   {
-      while (yoPlots.size() < columns.get())
-         yoPlots.add(new ArrayList<>());
-      while (yoPlots.size() > columns.get())
-         yoPlots.remove(yoPlots.size() - 1);
-
-      for (ArrayList<ImPlotModifiableYoPlot> column : yoPlots)
-      {
-         while (column.size() < rows.get())
-            column.add(new ImPlotModifiableYoPlot(yoVariableSearchPanel, this, yoManager));
-         while (column.size() > rows.get())
-            column.remove(column.size() - 1);
-      }
    }
 
    public void render()
@@ -89,7 +68,7 @@ public class ImPlotModifiableYoPlotPanel extends RDXPanel
 
       ImGui.endMenuBar();
 
-      plotWidth = ImGui.getColumnWidth() / columns.get();
+      float plotWidth = ImGui.getColumnWidth() / columns.get();
 
       ImGui.pushStyleVar(ImGuiStyleVar.ItemSpacing, 0.0f, 0.0f);
       ImGui.setCursorPosY(ImGui.getCursorPosY() + 1);
@@ -97,7 +76,7 @@ public class ImPlotModifiableYoPlotPanel extends RDXPanel
       {
          for (int column = 0; column < columns.get(); column++)
          {
-            yoPlots.get(column).get(row).render(column, row, plotWidth, plotHeight.get());
+            plots.get(column).get(row).render(column, row, plotWidth, plotHeight.get());
 
             if (column != columns.get() - 1)
                ImGui.sameLine();
@@ -106,17 +85,33 @@ public class ImPlotModifiableYoPlotPanel extends RDXPanel
       ImGui.popStyleVar();
    }
 
-   public ImPlotModifiableYoPlot plot(int column, int row, String... variables)
+   private void updatePlots()
    {
-      ImPlotModifiableYoPlot plot = getPlot(column, row);
+      while (plots.size() < columns.get())
+         plots.add(new ArrayList<>());
+      while (plots.size() > columns.get())
+         plots.remove(plots.size() - 1);
+
+      for (ArrayList<RDXSCS2Plot> column : plots)
+      {
+         while (column.size() < rows.get())
+            column.add(new RDXSCS2Plot(searchPanel, this, yoManager));
+         while (column.size() > rows.get())
+            column.remove(column.size() - 1);
+      }
+   }
+
+   public RDXSCS2Plot plot(int column, int row, String... variables)
+   {
+      RDXSCS2Plot plot = getPlot(column, row);
       for (String variable : variables)
          plot.addVariable(yoManager.getRootRegistry().findVariable(variable), false);
       return plot;
    }
 
-   public ImPlotModifiableYoPlot getPlot(int column, int row)
+   public RDXSCS2Plot getPlot(int column, int row)
    {
-      return yoPlots.get(column).get(row);
+      return plots.get(column).get(row);
    }
 
    public ImInt getRows()
