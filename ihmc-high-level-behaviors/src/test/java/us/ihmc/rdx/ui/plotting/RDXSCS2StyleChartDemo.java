@@ -46,6 +46,15 @@ public class RDXSCS2StyleChartDemo
                plotPanel.plot(i, 5, "root.Block%d.q_Block%d_qz".formatted(i, i));
             for (int i = 0; i < 5; i++)
                plotPanel.plot(i, 6, "root.Block%d.q_Block%d_qs".formatted(i, i));
+
+            int block = 1;
+            plotPanel.plot(0, 0, "root.Block%d.q_Block%d_x".formatted(block, block));
+            plotPanel.plot(0, 1, "root.Block%d.q_Block%d_y".formatted(block, block));
+            plotPanel.plot(0, 2, "root.Block%d.q_Block%d_z".formatted(block, block));
+            plotPanel.plot(0, 3, "root.Block%d.q_Block%d_qx".formatted(block, block));
+            plotPanel.plot(0, 4, "root.Block%d.q_Block%d_qy".formatted(block, block));
+            plotPanel.plot(0, 5, "root.Block%d.q_Block%d_qz".formatted(block, block));
+            plotPanel.plot(0, 6, "root.Block%d.q_Block%d_qs".formatted(block, block));
          }
 
          @Override

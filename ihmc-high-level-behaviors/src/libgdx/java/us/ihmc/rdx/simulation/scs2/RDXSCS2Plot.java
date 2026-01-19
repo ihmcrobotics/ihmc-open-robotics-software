@@ -1,9 +1,14 @@
 package us.ihmc.rdx.simulation.scs2;
 
 import imgui.ImGui;
+import imgui.ImVec2;
+import imgui.flag.ImDrawFlags;
 import imgui.flag.ImGuiCol;
+import imgui.flag.ImGuiMouseButton;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import us.ihmc.commons.MathTools;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.log.LogTools;
 import us.ihmc.yoVariables.variable.*;
@@ -88,9 +93,7 @@ public class RDXSCS2Plot
       }
 
       if (requestedVariable && !searchPanel.getSearchRequested())
-      {
          requestedVariable = false; // Search was cancelled
-      }
 
       while (!removalQueue.isEmpty())
          plotLines.remove(removalQueue.poll());
@@ -102,8 +105,69 @@ public class RDXSCS2Plot
 
       ImGui.setCursorPos(ImGui.getCursorPosX() + 2, ImGui.getCursorPosY() + 2);
 
-      for (int i = 0; i < plotLines.size(); i++)
-         plotLines.get(i).render(plotWidth - 2, plotHeight - 3, i);
+      for (RDXSCS2PlotLine plotLine : plotLines)
+         plotLine.updateData();
+
+      double minValue = Double.POSITIVE_INFINITY;
+      double maxValue = Double.NEGATIVE_INFINITY;
+      for (RDXSCS2PlotLine plotLine : plotLines)
+         if (plotLine.data != null)
+         {
+            minValue = Math.min(minValue, plotLine.minValue);
+            maxValue = Math.max(maxValue, plotLine.maxValue);
+         }
+      double range = maxValue - minValue;
+
+      float innerWidth = plotWidth - 2;
+      float innerHeight = plotHeight - 3;
+      cursorX = ImGui.getCursorScreenPosX();
+      cursorY = ImGui.getCursorScreenPosY();
+      int fontSize = ImGui.getFontSize();
+      float lineAreaHeight = innerHeight - 1.1f * fontSize;
+
+      for (int lineIndex = 0; lineIndex < plotLines.size(); lineIndex++)
+      {
+         RDXSCS2PlotLine plotLine = plotLines.get(lineIndex);
+         if (plotLine.data == null)
+            continue;
+
+         for (int i = 0; i < plotLine.points.length; i++)
+         {
+            float x = cursorX + i * innerWidth / plotLine.data.length;
+            double normalized = (plotLine.data[i] - minValue) / range;
+            float y = cursorY + lineAreaHeight * (1.0f - (float) normalized);
+            plotLine.points[i].set(x, y);
+         }
+
+         if (ImGui.getMousePosX() >= cursorX
+          && ImGui.getMousePosX() <= cursorX + innerWidth
+          && ImGui.getMousePosY() >= cursorY
+          && ImGui.getMousePosY() <= cursorY + innerHeight
+          && ImGui.isMouseClicked(ImGuiMouseButton.Left))
+            plotLine.isDragging = true;
+         if (!ImGui.isMouseDown(ImGuiMouseButton.Left))
+            plotLine.isDragging = false;
+
+         if (plotLine.isDragging)
+         {
+            float dragXPlot = (float) MathTools.clamp(ImGui.getMousePosX(), cursorX, cursorX + innerWidth);
+            yoManager.getSession().submitBufferIndexRequest(Math.round((dragXPlot - cursorX) * plotLine.data.length / innerWidth));
+         }
+
+         int currentIndex = plotLine.bufferProperties.getCurrentIndex();
+         float verticalLineX = cursorX + currentIndex * innerWidth / plotLine.data.length;
+         ImGui.getWindowDrawList().addLine(verticalLineX, cursorY, verticalLineX, cursorY + lineAreaHeight, ImGuiTools.BLACK);
+
+         int color = CHART_COLORS[lineIndex % CHART_COLORS.length];
+         int imDrawFlags = ImDrawFlags.None;
+         float thickness = 1.0f;
+         ImGui.getWindowDrawList().addPolyline(plotLine.points, plotLine.points.length, color, imDrawFlags, thickness);
+
+         ImGui.getWindowDrawList().addText(cursorX + 0.05f * fontSize,
+                                           cursorY + innerHeight - (lineIndex + 1.0f + 0.05f) * fontSize,
+                                           color,
+                                           plotLine.linkedYoDoubleVariable.getLinkedYoVariable().getName() + " %.5f".formatted(plotLine.data[currentIndex]));
+      }
 
       ImGui.setCursorPos(ImGui.getCursorPosX() - 2, ImGui.getCursorPosY() - 2);
 
