@@ -29,23 +29,24 @@ public class RDXSCS2StyleChartDemo
             session.changeBufferDuration(1.0);
             session.getSession().setSessionMode(SessionMode.RUNNING);
 
-            ImPlotModifiableYoPlotPanel plotPanel = session.getPlotManager().getPlotPanel("Poses");
-            plotPanel.setNumberOfRows(7);
-            plotPanel.setNumberOfColumns(5);
+//            ImPlotModifiableYoPlotPanel plotPanel = session.getPlotManager().getPlotPanel("Poses");
+            ImPlotModifiableYoPlotPanel plotPanel = session.getPlotManager().addPlotPanel("Poses");
+            plotPanel.setRows(7);
+            plotPanel.setColumns(5);
             for (int i = 0; i < 5; i++)
-               plotPanel.addPlot("root.Block%d.q_Block%d_x".formatted(i, i));
+               plotPanel.plot(i, 0, "root.Block%d.q_Block%d_x".formatted(i, i));
             for (int i = 0; i < 5; i++)
-               plotPanel.addPlot("root.Block%d.q_Block%d_y".formatted(i, i));
+               plotPanel.plot(i, 1, "root.Block%d.q_Block%d_y".formatted(i, i));
             for (int i = 0; i < 5; i++)
-               plotPanel.addPlot("root.Block%d.q_Block%d_z".formatted(i, i));
+               plotPanel.plot(i, 2, "root.Block%d.q_Block%d_z".formatted(i, i));
             for (int i = 0; i < 5; i++)
-               plotPanel.addPlot("root.Block%d.q_Block%d_qx".formatted(i, i));
+               plotPanel.plot(i, 3, "root.Block%d.q_Block%d_qx".formatted(i, i));
             for (int i = 0; i < 5; i++)
-               plotPanel.addPlot("root.Block%d.q_Block%d_qy".formatted(i, i));
+               plotPanel.plot(i, 4, "root.Block%d.q_Block%d_qy".formatted(i, i));
             for (int i = 0; i < 5; i++)
-               plotPanel.addPlot("root.Block%d.q_Block%d_qz".formatted(i, i));
+               plotPanel.plot(i, 5, "root.Block%d.q_Block%d_qz".formatted(i, i));
             for (int i = 0; i < 5; i++)
-               plotPanel.addPlot("root.Block%d.q_Block%d_qs".formatted(i, i));
+               plotPanel.plot(i, 6, "root.Block%d.q_Block%d_qs".formatted(i, i));
          }
 
          @Override

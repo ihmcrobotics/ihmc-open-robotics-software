@@ -1,6 +1,6 @@
 package us.ihmc.rdx.ui.yo;
 
-import imgui.internal.ImGui;
+import imgui.ImGui;
 import imgui.type.ImInt;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -12,9 +12,9 @@ import java.util.function.Consumer;
 public class ImPlotModifiableYoPlotPanel extends RDXPanel
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ArrayList<ImPlotModifiableYoPlot> yoPlots = new ArrayList<>();
-   private final ImInt numberOfRows = new ImInt(1);
-   private final ImInt numberOfColumns = new ImInt(1);
+   private final ArrayList<ArrayList<ImPlotModifiableYoPlot>> yoPlots = new ArrayList<>();
+   private final ImInt rows = new ImInt(1);
+   private final ImInt columns = new ImInt(1);
    private final ImInt plotHeight = new ImInt(60);
    private float plotWidth;
    private final ImGuiYoVariableSearchPanel yoVariableSearchPanel;
@@ -31,6 +31,23 @@ public class ImPlotModifiableYoPlotPanel extends RDXPanel
       this.yoManager = yoManager;
       this.removeSelf = removeSelf;
       setRenderMethod(this::render);
+      updatePlots();
+   }
+
+   private void updatePlots()
+   {
+      while (yoPlots.size() < columns.get())
+         yoPlots.add(new ArrayList<>());
+      while (yoPlots.size() > columns.get())
+         yoPlots.remove(yoPlots.size() - 1);
+
+      for (ArrayList<ImPlotModifiableYoPlot> column : yoPlots)
+      {
+         while (column.size() < rows.get())
+            column.add(new ImPlotModifiableYoPlot(yoVariableSearchPanel, this, yoManager));
+         while (column.size() > rows.get())
+            column.remove(column.size() - 1);
+      }
    }
 
    public void render()
@@ -39,17 +56,19 @@ public class ImPlotModifiableYoPlotPanel extends RDXPanel
       if (ImGui.beginMenu(labels.get("Layout")))
       {
          ImGui.pushItemWidth(100);
-         if (ImGui.inputInt(labels.get("Number of rows"), numberOfRows))
+         if (ImGui.inputInt(labels.get("Number of rows"), rows))
          {
-            if (numberOfRows.get() < 1)
-               numberOfRows.set(1);
+            if (rows.get() < 1)
+               rows.set(1);
+            updatePlots();
          }
-         if (ImGui.inputInt(labels.get("Number of columns"), numberOfColumns))
+         if (ImGui.inputInt(labels.get("Number of columns"), columns))
          {
-            if (numberOfColumns.get() < 1)
-               numberOfColumns.set(1);
+            if (columns.get() < 1)
+               columns.set(1);
+            updatePlots();
          }
-         if (ImGui.inputInt(labels.get("Plot height"), plotHeight))
+         if (ImGui.inputInt(labels.get("Plot height"), plotHeight, 10))
          {
             if (plotHeight.get() < 10)
                plotHeight.set(10);
@@ -59,10 +78,6 @@ public class ImPlotModifiableYoPlotPanel extends RDXPanel
       }
       if (ImGui.beginMenu(labels.get("Plots")))
       {
-         if (ImGui.button(labels.get("Add Plot")))
-         {
-            addPlot();
-         }
          if (ImGui.menuItem(labels.get("Remove this panel")))
          {
             removeSelf.accept(this);
@@ -72,49 +87,52 @@ public class ImPlotModifiableYoPlotPanel extends RDXPanel
 
       ImGui.endMenuBar();
 
-      plotWidth = ImGui.getColumnWidth() / numberOfColumns.get();
+      plotWidth = ImGui.getColumnWidth() / columns.get();
 
-      for (int i = 0; i < yoPlots.size(); i++)
+      for (int row = 0; row < rows.get(); row++)
       {
-         yoPlots.get(i).render(plotWidth, plotHeight.get());
+         for (int column = 0; column < columns.get(); column++)
+         {
+            yoPlots.get(column).get(row).render(plotWidth, plotHeight.get());
 
-         if (i % numberOfColumns.get() != numberOfColumns.get() - 1)
-            ImGui.sameLine();
+            if (column != columns.get() - 1)
+               ImGui.sameLine();
+         }
       }
    }
 
-   public ImPlotModifiableYoPlot addPlot(String... variables)
+   public ImPlotModifiableYoPlot plot(int column, int row, String... variables)
    {
-      ImPlotModifiableYoPlot plot = addPlot();
+      ImPlotModifiableYoPlot plot = getPlot(column, row);
       for (String variable : variables)
          plot.addVariable(yoManager.getRootRegistry().findVariable(variable), false);
       return plot;
    }
 
-   public ImPlotModifiableYoPlot addPlot()
+   public ImPlotModifiableYoPlot getPlot(int column, int row)
    {
-      ImPlotModifiableYoPlot imPlotModifiableYoPlot = new ImPlotModifiableYoPlot(yoVariableSearchPanel, this, yoManager, this::removePlot);
-      yoPlots.add(imPlotModifiableYoPlot);
-      return imPlotModifiableYoPlot;
+      return yoPlots.get(column).get(row);
    }
 
-   private void removePlot(ImPlotModifiableYoPlot plot)
+   public ImInt getRows()
    {
-      yoPlots.remove(plot);
+      return rows;
    }
 
-   public ArrayList<ImPlotModifiableYoPlot> getYoPlots()
+   public void setRows(int rows)
    {
-      return yoPlots;
+      this.rows.set(rows);
+      updatePlots();
    }
 
-   public void setNumberOfRows(int numberOfRows)
+   public ImInt getColumns()
    {
-      this.numberOfRows.set(numberOfRows);
+      return columns;
    }
 
-   public void setNumberOfColumns(int numberOfColumns)
+   public void setColumns(int columns)
    {
-      this.numberOfColumns.set(numberOfColumns);
+      this.columns.set(columns);
+      updatePlots();
    }
 }

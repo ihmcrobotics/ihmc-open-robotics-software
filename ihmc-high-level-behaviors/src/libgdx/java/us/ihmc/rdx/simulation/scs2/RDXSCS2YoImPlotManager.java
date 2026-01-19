@@ -2,10 +2,13 @@ package us.ihmc.rdx.simulation.scs2;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiInputTextFlags;
-import imgui.internal.ImGui;
+import imgui.flag.ImGuiMouseButton;
+import imgui.ImGui;
 import imgui.type.ImString;
 import org.apache.commons.lang3.tuple.Pair;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXImGuiLayoutManager;
@@ -39,8 +42,8 @@ public class RDXSCS2YoImPlotManager
 
       updateConfigurationFile(layoutManager.getLayoutDirectory());
       layoutManager.getLayoutDirectoryUpdatedListeners().add(this::updateConfigurationFile);
-      layoutManager.getLoadListeners().add(this::loadConfiguration);
-      layoutManager.getSaveListeners().add(this::saveConfiguration);
+//      layoutManager.getLoadListeners().add(this::loadConfiguration);
+//      layoutManager.getSaveListeners().add(this::saveConfiguration);
    }
 
    public void update()
@@ -75,7 +78,7 @@ public class RDXSCS2YoImPlotManager
          yoVariableSearchPanel.changeYoRegistry(yoManager.getRootRegistry());
       }
 
-      loadConfiguration(layoutManager.getCurrentConfigurationLocation());
+//      loadConfiguration(layoutManager.getCurrentConfigurationLocation());
    }
 
    private void updateConfigurationFile(HybridResourceDirectory layoutDirectory)
@@ -98,12 +101,12 @@ public class RDXSCS2YoImPlotManager
                ImPlotModifiableYoPlotPanel plotPanel = addPlotPanel(panelName);
                JSONTools.forEachArrayElement(panelNode, "plots", plotNode ->
                {
-                  ImPlotModifiableYoPlot imPlotModifiableYoPlot = plotPanel.addPlot();
-                  JSONTools.forEachArrayElement(plotNode, "variables", variableNode ->
-                  {
-                     // We are using getRootRegistry which is the session's working copy; i.e. not linked
-                     imPlotModifiableYoPlot.addVariable(yoManager.getRootRegistry().findVariable(variableNode.get("variableName").asText()), false);
-                  });
+//                  ImPlotModifiableYoPlot imPlotModifiableYoPlot = plotPanel.addPlot();
+//                  JSONTools.forEachArrayElement(plotNode, "variables", variableNode ->
+//                  {
+//                     // We are using getRootRegistry which is the session's working copy; i.e. not linked
+//                     imPlotModifiableYoPlot.addVariable(yoManager.getRootRegistry().findVariable(variableNode.get("variableName").asText()), false);
+//                  });
                });
             });
          });
@@ -125,14 +128,18 @@ public class RDXSCS2YoImPlotManager
                ObjectNode panelNode = panelArrayNode.addObject();
                panelNode.put("name", plotPanel.getPanelName());
                ArrayNode plotArrayNode = panelNode.putArray("plots");
-               for (ImPlotModifiableYoPlot yoPlot : plotPanel.getYoPlots())
+               for (int column = 0; column < plotPanel.getColumns().get(); column++)
                {
-                  ObjectNode plotNode = plotArrayNode.addObject();
-                  ArrayNode variableArrayNode = plotNode.putArray("variables");
-                  for (Pair<YoVariable, ImPlotYoBufferPlotLineBasics> yoVariableImPlotPlotLinePair : yoPlot.getVariablePlotLinePairList())
+                  for (int row = 0; row < plotPanel.getRows().get(); row++)
                   {
-                     ObjectNode variableNode = variableArrayNode.addObject();
-                     variableNode.put("variableName", yoVariableImPlotPlotLinePair.getLeft().getFullNameString());
+                     ImPlotModifiableYoPlot yoPlot = plotPanel.getPlot(column, row);
+                     ObjectNode plotNode = plotArrayNode.addObject();
+                     ArrayNode variableArrayNode = plotNode.putArray("variables");
+                     for (Pair<YoVariable, ImPlotYoBufferPlotLineBasics> yoVariableImPlotPlotLinePair : yoPlot.getVariablePlotLinePairList())
+                     {
+                        ObjectNode variableNode = variableArrayNode.addObject();
+                        variableNode.put("variableName", yoVariableImPlotPlotLinePair.getLeft().getFullNameString());
+                     }
                   }
                }
             }
@@ -145,11 +152,13 @@ public class RDXSCS2YoImPlotManager
       yoVariableSearchPanel.initializeYoVariablesAfterSessionStart();
       for (ImPlotModifiableYoPlotPanel plotPanel : plotPanels)
       {
-         for (ImPlotModifiableYoPlot yoPlot : plotPanel.getYoPlots())
+         for (int column = 0; column < plotPanel.getColumns().get(); column++)
          {
-            for (Pair<YoVariable, ImPlotYoBufferPlotLineBasics> yoVariableImPlotPlotLinePair : yoPlot.getVariablePlotLinePairList())
+            for (int row = 0; row < plotPanel.getRows().get(); row++)
             {
-               yoVariableImPlotPlotLinePair.getRight().setupLinkedVariable(yoManager);
+               ImPlotModifiableYoPlot yoPlot = plotPanel.getPlot(column, row);
+               for (Pair<YoVariable, ImPlotYoBufferPlotLineBasics> yoVariableImPlotPlotLinePair : yoPlot.getVariablePlotLinePairList())
+                  yoVariableImPlotPlotLinePair.getRight().setupLinkedVariable(yoManager);
             }
          }
       }
@@ -165,16 +174,27 @@ public class RDXSCS2YoImPlotManager
       ImGui.pushItemWidth(150);
       int flags = ImGuiInputTextFlags.None;
       flags += ImGuiInputTextFlags.CallbackResize;
-      ImGui.inputText(labels.get("Panel name"), panelToCreateName, flags);
+      ImGui.inputTextWithHint(labels.get("Panel name"), "Plot Panel " + plotPanels.size(), panelToCreateName, flags);
       ImGui.popItemWidth();
       ImGui.sameLine();
-      if (ImGui.button("Add Plot Panel") && !panelToCreateName.get().isEmpty())
+      if (ImGui.button("Add Plot Panel"))
+         addPlotPanel(panelToCreateName.get().isEmpty() ? "Plot Panel " + plotPanels.size() : panelToCreateName.get());
+
+      ImPlotModifiableYoPlotPanel remove = null;
+      for (ImPlotModifiableYoPlotPanel plotPanel : plotPanels)
       {
-         addPlotPanel(panelToCreateName.get());
+         ImGui.checkbox(labels.get(plotPanel.getPanelName()), plotPanel.getIsShowing());
+         ImGui.sameLine();
+         ImGui.pushStyleColor(ImGuiCol.Text, ImGuiTools.DARK_RED);
+         if (ImGuiTools.textWithUnderlineOnHover("X") && imgui.ImGui.isMouseClicked(ImGuiMouseButton.Left))
+            remove = plotPanel;
+         ImGui.popStyleColor();
       }
+      if (remove != null)
+         removePlotPanel(remove);
    }
 
-   private ImPlotModifiableYoPlotPanel addPlotPanel(String name)
+   public ImPlotModifiableYoPlotPanel addPlotPanel(String name)
    {
       ImPlotModifiableYoPlotPanel plotPanel = new ImPlotModifiableYoPlotPanel(name, yoVariableSearchPanel, yoManager, this::removePlotPanel);
       plotPanel.getIsShowing().set(true);

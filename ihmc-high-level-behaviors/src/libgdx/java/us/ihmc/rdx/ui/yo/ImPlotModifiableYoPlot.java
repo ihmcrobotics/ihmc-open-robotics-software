@@ -12,7 +12,6 @@ import us.ihmc.yoVariables.variable.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.function.Consumer;
 
 public class ImPlotModifiableYoPlot
 {
@@ -24,17 +23,14 @@ public class ImPlotModifiableYoPlot
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final RDXYoManager yoManager;
    private boolean requestedVariable = false;
-   private final Consumer<ImPlotModifiableYoPlot> removeSelf;
 
    public ImPlotModifiableYoPlot(ImGuiYoVariableSearchPanel imGuiYoVariableSearchPanel,
                                  ImPlotModifiableYoPlotPanel imPlotModifiableYoPlotPanel,
-                                 RDXYoManager yoManager,
-                                 Consumer<ImPlotModifiableYoPlot> removeSelf)
+                                 RDXYoManager yoManager)
    {
       this.imGuiYoVariableSearchPanel = imGuiYoVariableSearchPanel;
       this.imPlotModifiableYoPlotPanel = imPlotModifiableYoPlotPanel;
       this.yoManager = yoManager;
-      this.removeSelf = removeSelf;
       imPlotPlot = new ImPlotPlot();
       imPlotPlot.setPopupContextWindowImGuiRenderer(this::renderPopupContextWindow);
    }
@@ -140,11 +136,6 @@ public class ImPlotModifiableYoPlot
       {
          imGuiYoVariableSearchPanel.setSearchRequested(true);
          requestedVariable = true;
-         ImGui.closeCurrentPopup();
-      }
-      if (ImGui.menuItem(labels.get("Remove this plot")))
-      {
-         removeSelf.accept(this);
          ImGui.closeCurrentPopup();
       }
    }
