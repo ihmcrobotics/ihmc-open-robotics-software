@@ -35,56 +35,16 @@ public class ImPlotModifiableYoPlot
 
    public void addVariable(YoVariable yoVariable, boolean initializeLinkedVariable)
    {
-      ImGuiSCSPlotLine plotLine = null;
-      if (yoVariable instanceof YoDouble yoDouble)
-      {
-         ImGuiSCSDoublePlotLine doublePlotLine = new ImGuiSCSDoublePlotLine(yoDouble, this::removeVariable);
-         if (initializeLinkedVariable)
-            doublePlotLine.setupLinkedVariable(yoManager);
-         plotLine = doublePlotLine;
-         imGuiSCSPlot.getPlotLines().add(doublePlotLine);
-      }
-      else if (yoVariable instanceof YoInteger yoInteger)
-      {
-         ImGuiSCSIntegerPlotLine integerPlotLine = new ImGuiSCSIntegerPlotLine(yoInteger, this::removeVariable);
-         if (initializeLinkedVariable)
-            integerPlotLine.setupLinkedVariable(yoManager);
-         plotLine = integerPlotLine;
-         imGuiSCSPlot.getPlotLines().add(integerPlotLine);
-      }
-      else if (yoVariable instanceof YoLong yoInteger)
-      {
-         ImGuiSCSLongPlotLine longPlotLine = new ImGuiSCSLongPlotLine(yoInteger, this::removeVariable);
-         if (initializeLinkedVariable)
-            longPlotLine.setupLinkedVariable(yoManager);
-         plotLine = longPlotLine;
-         imGuiSCSPlot.getPlotLines().add(longPlotLine);
-      }
-      else if (yoVariable instanceof YoEnum yoEnum)
-      {
-         ImGuiSCSEnumPlotLine enumPlotLine = new ImGuiSCSEnumPlotLine(yoEnum, this::removeVariable);
-         if (initializeLinkedVariable)
-            enumPlotLine.setupLinkedVariable(yoManager);
-         plotLine = enumPlotLine;
-         imGuiSCSPlot.getPlotLines().add(enumPlotLine);
-      }
-      else if (yoVariable instanceof YoBoolean yoBoolean)
-      {
-         ImGuiSCSBooleanPlotLine booleanPlotLine = new ImGuiSCSBooleanPlotLine(yoBoolean, this::removeVariable);
-         if (initializeLinkedVariable)
-            booleanPlotLine.setupLinkedVariable(yoManager);
-         plotLine = booleanPlotLine;
-         imGuiSCSPlot.getPlotLines().add(booleanPlotLine);
-      }
-      else if (yoVariable == null)
+      if (yoVariable == null)
       {
          LogTools.warn("YoVariable was null");
          return;
       }
-      else
-      {
-         throw new RuntimeException("Implement for " + yoVariable.getClass().getSimpleName());
-      }
+
+      ImGuiSCSPlotLine plotLine = new ImGuiSCSPlotLine(yoVariable, this::removeVariable);
+      if (initializeLinkedVariable)
+         plotLine.setupLinkedVariable(yoManager);
+      imGuiSCSPlot.getPlotLines().add(plotLine);
       variablePlotLineMap.put(yoVariable, plotLine);
       variablePlotLinePairList.add(ImmutablePair.of(yoVariable, plotLine));
    }
