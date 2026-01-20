@@ -1,14 +1,12 @@
 package us.ihmc.rdx.simulation.scs2;
 
 import imgui.ImGui;
-import imgui.ImVec2;
 import imgui.flag.ImDrawFlags;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiMouseButton;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commons.MathTools;
-import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.log.LogTools;
 import us.ihmc.yoVariables.variable.*;
@@ -156,7 +154,8 @@ public class RDXSCS2Plot
             plotLine.points[i].set(x, y);
          }
 
-         if (ImGui.getMousePosX() >= cursorX
+         if (ImGui.isWindowHovered()
+          && ImGui.getMousePosX() >= cursorX
           && ImGui.getMousePosX() <= cursorX + innerWidth
           && ImGui.getMousePosY() >= cursorY
           && ImGui.getMousePosY() <= cursorY + innerHeight
@@ -173,7 +172,14 @@ public class RDXSCS2Plot
 
          int currentIndex = plotLine.bufferProperties.getCurrentIndex();
          float verticalLineX = cursorX + currentIndex * innerWidth / plotLine.data.length;
-         ImGui.getWindowDrawList().addLine(verticalLineX, cursorY, verticalLineX, cursorY + lineAreaHeight, ImGuiTools.BLACK);
+         ImGui.getWindowDrawList().addLine(verticalLineX, cursorY, verticalLineX, cursorY + lineAreaHeight, ImGui.getColorU32(ImGuiCol.Text));
+
+         if (minValue <= 0.0 && maxValue >= 0.0)
+         {
+            double normalizedZero = (0.0 - minValue) / range;
+            float zeroLineY = cursorY + lineAreaHeight * (1.0f - (float) normalizedZero);
+            ImGui.getWindowDrawList().addLine(cursorX, zeroLineY, cursorX + innerWidth, zeroLineY, ImGui.getColorU32(ImGuiCol.Border), 2.0f);
+         }
 
          int color = CHART_COLORS[lineIndex % CHART_COLORS.length];
          int imDrawFlags = ImDrawFlags.None;
