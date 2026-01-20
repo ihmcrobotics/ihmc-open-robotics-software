@@ -12,6 +12,8 @@ public enum RigidBodyControlMode
    TASKSPACE,
    /** Simple pass-through of user jointspace acceleration commands via {@link RigidBodyUserControlState} */
    USER,
-   /** Mode where the rigid body bears the load of the robot. {@link RigidBodyLoadBearingControlState} */
+   /** Mode where the rigid body has an active contact point, intended to be used quasi-statically. {@link RigidBodyLoadBearingControlState} */
    LOADBEARING,
+   /** Mode where the rigid body dynamically makes contact. {@link RigidBodyLoadBearingControlState} */
+   REACTIVE_BRACING,
 }

@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
@@ -25,11 +26,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
@@ -127,6 +123,9 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    /* Error measurement to detect slipping */
    private final YoFramePoint3D positionError;
 
+   /* Flag for notifying contact change */
+   private final MutableBoolean hasContactStateChanged;
+
    public RigidBodyLoadBearingControlState(RigidBodyBasics bodyToControl,
                                            RigidBodyBasics baseBody,
                                            RigidBodyBasics elevator,
@@ -135,6 +134,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
                                            RigidBodyOrientationControlHelper orientationControlHelper,
                                            LoadBearingParameters loadBearingParameters,
                                            double nominalRhoWeight,
+                                           MutableBoolean hasContactStateChanged,
                                            YoRegistry parentRegistry)
    {
       super(RigidBodyControlMode.LOADBEARING, bodyToControl.getName(), yoTime, parentRegistry);
@@ -144,6 +144,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       this.elevatorFrame = elevator.getBodyFixedFrame();
       this.loadBearingParameters = loadBearingParameters;
       this.nominalRhoWeight = nominalRhoWeight;
+      this.hasContactStateChanged = hasContactStateChanged;
 
 //      LogTools.info("Setting up load bearing state " + bodyToControl.getName());
 
@@ -385,6 +386,8 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       {
          orientationControlHelper.holdCurrentDesired();
       }
+
+      hasContactStateChanged.setValue(true);
    }
 
    @Override
@@ -408,6 +411,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       }
 
       orientationControlHelper.clear();
+      hasContactStateChanged.setValue(true);
    }
 
    @Override

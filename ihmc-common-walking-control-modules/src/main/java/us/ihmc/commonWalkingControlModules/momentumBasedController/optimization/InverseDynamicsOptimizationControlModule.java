@@ -54,7 +54,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHolder
 {
-   private static final boolean VISUALIZE_RHO_BASIS_VECTORS = false;
+   private static final boolean VISUALIZE_RHO_BASIS_VECTORS = true;
    private static final boolean SETUP_JOINT_LIMIT_CONSTRAINTS = true;
    private static final boolean SETUP_RHO_TASKS = true;
 
@@ -143,7 +143,7 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
       wrenchMatrixCalculator = toolbox.getWrenchMatrixCalculator();
 
       if (VISUALIZE_RHO_BASIS_VECTORS)
-         basisVectorVisualizer = new BasisVectorVisualizer("ContactBasisVectors", rhoSize, 1.0, registry);
+         basisVectorVisualizer = new BasisVectorVisualizer("ContactBasisVectors", rhoSize, 3.0, registry);
       else
          basisVectorVisualizer = null;
 

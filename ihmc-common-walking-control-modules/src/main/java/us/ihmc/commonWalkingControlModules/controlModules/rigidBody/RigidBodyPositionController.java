@@ -220,6 +220,12 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
       return false;
    }
 
+   @Override
+   public RigidBodyPositionControlHelper getPositionControlHelper()
+   {
+      return positionHelper;
+   }
+
    private void clear()
    {
       numberOfPointsInQueue.set(0);
