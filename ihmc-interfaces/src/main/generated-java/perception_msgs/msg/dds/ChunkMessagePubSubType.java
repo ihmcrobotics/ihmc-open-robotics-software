@@ -15,7 +15,7 @@ public class ChunkMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "879a1fed1210ee26b401ba0c7f916690bf30e13a08ed1679b6419fe8cda731d4";
+   		return "23e6508d40724b22876e1d9338bda36450eab672784c593401655f7130170ed6";
    }
    
    @Override
@@ -54,19 +54,19 @@ public class ChunkMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (5000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (20000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
       return current_alignment - initial_alignment;
@@ -84,26 +84,26 @@ public class ChunkMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (data.getHeights().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getHeights().size() * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
 
@@ -114,21 +114,21 @@ public class ChunkMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
    {
       cdr.write_type_2(data.getHashCodeOfChunk());
 
-      cdr.write_type_12(data.getSequenceId());
+      cdr.write_type_4(data.getSequenceId());
 
-      cdr.write_type_6(data.getOriginX());
+      cdr.write_type_5(data.getOriginX());
 
-      cdr.write_type_6(data.getOriginY());
+      cdr.write_type_5(data.getOriginY());
 
-      cdr.write_type_6(data.getWidthInMeters());
+      cdr.write_type_5(data.getWidthInMeters());
 
-      cdr.write_type_6(data.getCellSizeInMeters());
+      cdr.write_type_5(data.getCellSizeInMeters());
 
       cdr.write_type_2(data.getCellsPerAxis());
 
-      if(data.getHeights().size() <= 5000)
+      if(data.getHeights().size() <= 20000)
       cdr.write_type_e(data.getHeights());else
-          throw new RuntimeException("heights field exceeds the maximum length: %d > %d".formatted(data.getHeights().size(), 5000));
+          throw new RuntimeException("heights field exceeds the maximum length: %d > %d".formatted(data.getHeights().size(), 20000));
 
    }
 
@@ -136,15 +136,15 @@ public class ChunkMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
    {
       data.setHashCodeOfChunk(cdr.read_type_2());
       	
-      data.setSequenceId(cdr.read_type_12());
+      data.setSequenceId(cdr.read_type_4());
       	
-      data.setOriginX(cdr.read_type_6());
+      data.setOriginX(cdr.read_type_5());
       	
-      data.setOriginY(cdr.read_type_6());
+      data.setOriginY(cdr.read_type_5());
       	
-      data.setWidthInMeters(cdr.read_type_6());
+      data.setWidthInMeters(cdr.read_type_5());
       	
-      data.setCellSizeInMeters(cdr.read_type_6());
+      data.setCellSizeInMeters(cdr.read_type_5());
       	
       data.setCellsPerAxis(cdr.read_type_2());
       	
@@ -156,11 +156,11 @@ public class ChunkMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
    public final void serialize(perception_msgs.msg.dds.ChunkMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_2("hash_code_of_chunk", data.getHashCodeOfChunk());
-      ser.write_type_12("sequence_id", data.getSequenceId());
-      ser.write_type_6("origin_x", data.getOriginX());
-      ser.write_type_6("origin_y", data.getOriginY());
-      ser.write_type_6("width_in_meters", data.getWidthInMeters());
-      ser.write_type_6("cell_size_in_meters", data.getCellSizeInMeters());
+      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_5("origin_x", data.getOriginX());
+      ser.write_type_5("origin_y", data.getOriginY());
+      ser.write_type_5("width_in_meters", data.getWidthInMeters());
+      ser.write_type_5("cell_size_in_meters", data.getCellSizeInMeters());
       ser.write_type_2("cells_per_axis", data.getCellsPerAxis());
       ser.write_type_e("heights", data.getHeights());
    }
@@ -169,11 +169,11 @@ public class ChunkMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.ChunkMessage data)
    {
       data.setHashCodeOfChunk(ser.read_type_2("hash_code_of_chunk"));
-      data.setSequenceId(ser.read_type_12("sequence_id"));
-      data.setOriginX(ser.read_type_6("origin_x"));
-      data.setOriginY(ser.read_type_6("origin_y"));
-      data.setWidthInMeters(ser.read_type_6("width_in_meters"));
-      data.setCellSizeInMeters(ser.read_type_6("cell_size_in_meters"));
+      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setOriginX(ser.read_type_5("origin_x"));
+      data.setOriginY(ser.read_type_5("origin_y"));
+      data.setWidthInMeters(ser.read_type_5("width_in_meters"));
+      data.setCellSizeInMeters(ser.read_type_5("cell_size_in_meters"));
       data.setCellsPerAxis(ser.read_type_2("cells_per_axis"));
       ser.read_type_e("heights", data.getHeights());
    }
