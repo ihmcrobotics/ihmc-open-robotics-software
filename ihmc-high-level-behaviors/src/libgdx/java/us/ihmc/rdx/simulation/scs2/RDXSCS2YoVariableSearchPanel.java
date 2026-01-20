@@ -4,7 +4,6 @@ import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
-import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -63,10 +62,7 @@ public class RDXSCS2YoVariableSearchPanel
                              + " (" + yoVariable.getClass().getSimpleName() + ": " + yoVariable.getValueAsString("%.5f") + ")",
                              yoVariable == selectedVariable);
             if (ImGui.isItemClicked())
-            {
-               LogTools.info("Selected variable: " + yoVariable.getFullNameString());
                selectedVariable = yoVariable;
-            }
 
             if (ImGui.beginPopupContextItem())
             {
