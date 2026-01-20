@@ -1,0 +1,116 @@
+package us.ihmc.zulu.obstacleCourseTests;
+
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import us.ihmc.zulu.ZuluVersion;
+import us.ihmc.zulu.ZuluRobotModel;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.avatar.obstacleCourseTests.AvatarObstacleCoursePlatformTest;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
+import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+
+public class ZuluObstacleCoursePlatformTest extends AvatarObstacleCoursePlatformTest
+{
+
+   @Override
+   public DRCRobotModel getRobotModel()
+   {
+      return new ZuluRobotModel(ZuluVersion.V1_FULL_ROBOT, RobotTarget.SCS);
+   }
+
+   @Override
+   protected double getHeightOffsetForLargePlatforms()
+   {
+      return -0.10;
+   }
+
+   @Override
+   public String getSimpleRobotName()
+   {
+      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ALEXANDER);
+   }
+
+   @Override
+   // "This test is flaky. Sometimes it works, sometimes it doesn't due to threading of the various globalDataProducer and communicators. We need to be able to shut those off or make them not screw up the robot run.")
+   @Disabled
+   @Test
+   public void testRunsTheSameWayTwiceJustStanding() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException
+   {
+      super.testRunsTheSameWayTwiceJustStanding();
+   }
+
+   @Tag("humanoid-obstacle")
+   @Override
+   @Test
+   public void testSidestepOverSmallPlatform()
+   {
+      super.testSidestepOverSmallPlatform();
+   }
+
+   @Tag("humanoid-obstacle-slow")
+   @Override
+   @Test
+   public void testSidestepOverSmallWall()
+   {
+      super.testSidestepOverSmallWall();
+   }
+
+   @Tag("humanoid-obstacle")
+   @Override
+   @Test
+   public void testWalkingOffOfMediumPlatform()
+   {
+      super.testWalkingOffOfMediumPlatform();
+   }
+
+   @Tag("humanoid-obstacle-slow")
+   @Override
+   @Test
+   public void testWalkingOffOfMediumPlatformSlowSteps()
+   {
+      super.testWalkingOffOfMediumPlatformSlowSteps();
+   }
+
+   @Tag("humanoid-obstacle-slow")
+   @Override
+   @Test
+   public void testWalkingOffOfLargePlatform()
+   {
+      super.testWalkingOffOfLargePlatform();
+   }
+
+   @Tag("humanoid-obstacle-slow")
+   @Override
+   @Test
+   public void testWalkingOntoMediumPlatformToesTouching()
+   {
+      super.testWalkingOntoMediumPlatformToesTouching();
+   }
+
+   @Tag("humanoid-obstacle-slow")
+   @Override
+   @Test
+   public void testWalkingOverSmallPlatform()
+   {
+      super.testWalkingOverSmallPlatform();
+   }
+
+   @Tag("humanoid-obstacle-slow")
+   @Override
+   @Test
+   public void testWalkingOverSmallPlatformQuickly()
+   {
+      super.testWalkingOverSmallPlatformQuickly();
+   }
+
+   @Tag("humanoid-obstacle-2")
+   @Override
+   @Test
+   public void testWalkingOntoLargePlatform()
+   {
+      super.testWalkingOntoLargePlatform();
+   }
+}
