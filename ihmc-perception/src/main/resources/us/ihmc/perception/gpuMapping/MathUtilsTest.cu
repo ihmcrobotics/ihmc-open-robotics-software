@@ -77,18 +77,9 @@ __global__ void test_math_utils_transform_point_2(float px, float py, float pz, 
 }
 
 extern "C"
-__global__ void test_best_fit_plane(float* points, int number_of_points, float* point_result, float* normal_result, float* squared_error_result)
+__global__ void test_best_fit_plane(float* points, int number_of_points, float* point_result, float* normal_result, float* squared_error_result, int test_index)
 {
-    float n = 0.0f;
-    float x = 0.0f;
-    float y = 0.0f;
-    float z = 0.0f;
-    float xx = 0.0f;
-    float xy = 0.0f;
-    float xz = 0.0f;
-    float yy = 0.0f;
-    float yz = 0.0f;
-    float zz = 0.0f;
+    CovarianceData covarianceData = {};
 
     for (int i = 0; i < number_of_points; i++)
     {
@@ -96,26 +87,35 @@ __global__ void test_best_fit_plane(float* points, int number_of_points, float* 
         float py = points[3 * i + 1];
         float pz = points[3 * i + 2];
 
-        n += 1;
-        x += px;
-        y += py;
-        z += pz;
-        xx += px * px;
-        xy += px * py;
-        xz += px * pz;
-        yy += py * py;
-        yz += py * pz;
-        zz += pz * pz;
+        covarianceData.numberOfPoints += 1;
+        covarianceData.sum_x += px;
+        covarianceData.sum_y += py;
+        covarianceData.sum_z += pz;
+        covarianceData.sum_xx += px * px;
+        covarianceData.sum_xy += px * py;
+        covarianceData.sum_xz += px * pz;
+        covarianceData.sum_yy += py * py;
+        covarianceData.sum_yz += py * pz;
+        covarianceData.sum_zz += pz * pz;
     }
 
-    double covariance_matrix[9] = {xx, xy, x, xy, yy, y, x, y, n};
-    double z_variance_vector[3] = {-xz, -yz, -z};
-    double coefficients[3] = {0.0f, 0.0f, 0.0f};
-    double squared_error = solveForPlaneCoefficients3x3(covariance_matrix, z_variance_vector, zz, coefficients);
-    squared_error_result[0] = static_cast<float>(squared_error);
+    float coefficients[3] = {0.0f, 0.0f, 0.0f};
 
-    point_result[0] = x / n;
-    point_result[1] = y / n;
+    // alternate testing cholesky and determinant
+    float squared_error;
+    if (test_index % 2 == 0)
+    {
+        squared_error = solveForPlaneCoefficients3x3_Determinants(covarianceData, coefficients);
+    }
+    else
+    {
+        squared_error = solveForPlaneCoefficients3x3_Cholesky(covarianceData, coefficients);
+    }
+
+    squared_error_result[0] = squared_error;
+
+    point_result[0] = covarianceData.sum_x / number_of_points;
+    point_result[1] = covarianceData.sum_y / number_of_points;
     point_result[2] = -coefficients[0] * point_result[0] - coefficients[1] * point_result[1] - coefficients[2];
 
     normal_result[0] = coefficients[0];

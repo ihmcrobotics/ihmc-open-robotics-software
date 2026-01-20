@@ -88,7 +88,7 @@ __device__ bool rayIntersectsCapsule(float3 rayOrigin,
     // Dot product for rayOrigin - topCenter
     float3 distanceBetweenRayAndTopCenter = sub(rayOrigin, topCenter);
 
-    float squaredLengthOfCapsuleAxis = norm(distanceBetweenCenters);
+    float squaredLengthOfCapsuleAxis = normSquared(distanceBetweenCenters);
 
     // Dot product between capsule's axis vector and the ray direction
     // If they point the same way value is large, if they are perpendicular value is 0 and if they are opposite value is negative
@@ -102,7 +102,7 @@ __device__ bool rayIntersectsCapsule(float3 rayOrigin,
     // The dot product tells you how much the ray’s direction points toward or away from the capsule’s top center
     float rayDirOriginProjection = dot(rayDirection, distanceBetweenRayAndTopCenter);
 
-    float magnitudeDistanceBetweenRayAndTopCenter = norm(distanceBetweenRayAndTopCenter);
+    float magnitudeDistanceBetweenRayAndTopCenter = normSquared(distanceBetweenRayAndTopCenter);
 
     // This is effectively the portion of the center axis that is normal to the ray
     float quadraticCoeffA = squaredLengthOfCapsuleAxis - centerAxisParallelToRay * centerAxisParallelToRay;
@@ -139,7 +139,7 @@ __device__ bool rayIntersectsCapsule(float3 rayOrigin,
     }
 
     float raySphereIntersection =  dot(rayDirection, sphereCheck);
-    float sphereQuadraticConstant = norm(sphereCheck) - radius * radius;
+    float sphereQuadraticConstant = normSquared(sphereCheck) - radius * radius;
     float quadraticCoeffDiscriminantSphere = raySphereIntersection * raySphereIntersection - sphereQuadraticConstant;
     if (quadraticCoeffDiscriminantSphere < 0.0f)
         return false;

@@ -88,16 +88,7 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
     }
 
     // Setup values to perform a least squares fit of the foot to the height map, but omitting any points that are too far below the foot.
-    float n = 0.0f;
-    float x = 0.0f;
-    float y = 0.0f;
-    float z = 0.0f;
-    float xx = 0.0f;
-    float xy = 0.0f;
-    float xz = 0.0f;
-    float yy = 0.0f;
-    float yz = 0.0f;
-    float zz = 0.0f;
+    CovarianceData covarianceData = {};
 
     int max_points_possible_under_support = 0;
 
@@ -141,16 +132,18 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
                 // Since only the relative z values are important, we subtract relative to the max height
                 float z_relative = query_height - max_height_in_radius;
 
-                n += 1.0f;
-                x += point_query.x;
-                y += point_query.y;
-                z += z_relative;
-                xx += point_query.x * point_query.x;
-                xy += point_query.x * point_query.y;
-                xz += point_query.x * z_relative;
-                yy += point_query.y * point_query.y;
-                yz += point_query.y * z_relative;
-                zz += z_relative * z_relative;
+                covarianceData.numberOfPoints += 1.0f;
+
+                covarianceData.sum_x += point_query.x;
+                covarianceData.sum_y += point_query.y;
+                covarianceData.sum_z += z_relative;
+
+                covarianceData.sum_xx += point_query.x * point_query.x;
+                covarianceData.sum_xy += point_query.x * point_query.y;
+                covarianceData.sum_xz += point_query.x * z_relative;
+                covarianceData.sum_yy += point_query.y * point_query.y;
+                covarianceData.sum_yz += point_query.y * z_relative;
+                covarianceData.sum_zz += z_relative * z_relative;
             }
         }
     }
@@ -164,7 +157,7 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
     int traversability_result = VALID;
 
     // Fail if insufficient data is in the search radius
-    if (n < 3)
+    if (covarianceData.numberOfPoints < 3)
     {
        traversability_result = SNAP_FAILED;
     }
@@ -173,7 +166,7 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
     if (traversability_result == VALID)
     {
         float min_area_percentage = params[MIN_SUPPORT_AREA_FRACTION];
-        float area_percentage = n / max_points_possible_under_support;
+        float area_percentage = covarianceData.numberOfPoints / max_points_possible_under_support;
         area_traversability = clamp((area_percentage - min_area_percentage) / (1.0f - min_area_percentage), 0.0f, 1.0f);
 
         if (area_percentage < min_area_percentage)
@@ -192,21 +185,13 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
 
     if (traversability_result == VALID)
     {
-        // ---------------------------
-        // Float-only plane fit
-        // ---------------------------
-        float covariance_matrix[9] = {xx, xy, x, xy, yy, y, x, y, n};
-        float z_variance_vector[3] = {-xz, -yz, -z};
-        float squared_error = solveForPlaneCoefficientsWithCholesky(covariance_matrix, z_variance_vector, zz, coefficients);
+        // Option 1 - fit plane with Cholesky
+        float squared_error = solveForPlaneCoefficients3x3_Cholesky(covarianceData, coefficients);
+        // Option 2 - fit plane with determinants
+//         float squared_error = solveForPlaneCoefficients3x3_Determinants(covarianceData, coefficients);
 
-        // This shows how to solve for the plane coefficients using doubles
-        // Solve for the plane normal, as well as the height of the foot along that plane.
-        // double covariance_matrix[9] = {xx, xy, x, xy, yy, y, x, y, n};
-        // double z_variance_vector[3] = {-xz, -yz, -z};
-        // double squared_error = solveForPlaneCoefficients3x3(covariance_matrix, z_variance_vector, zz, coefficients);
-
-        normal.x = static_cast<float>(coefficients[0]);
-        normal.y = static_cast<float>(coefficients[1]);
+        normal.x = coefficients[0];
+        normal.y = coefficients[1];
         normal = normalize(normal);
 
         // If the normal points down, we need to flip it.
@@ -219,7 +204,7 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
 
         // Roughness check
         float squaredErrorThreshold = params[SQUARED_ERROR_THRESHOLD];
-        squared_error_traversability = clamp(1.0f - static_cast<float>(squared_error) / squaredErrorThreshold, 0.0f, 1.0f);
+        squared_error_traversability = clamp((1.0f - squared_error) / squaredErrorThreshold, 0.0f, 1.0f);
         if (squared_error > squaredErrorThreshold)
         {
             traversability_result = SQUARED_ERROR;
