@@ -3,6 +3,7 @@ package us.ihmc.rdx.simulation.scs2;
 import imgui.ImGui;
 import imgui.flag.ImDrawFlags;
 import imgui.flag.ImGuiCol;
+import imgui.flag.ImGuiHoveredFlags;
 import imgui.flag.ImGuiMouseButton;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -39,6 +40,7 @@ public class RDXSCS2Plot
    private final RDXSCS2PlotPanel panel;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final RDXYoManager yoManager;
+   private boolean isDragging = false;
 
    public RDXSCS2Plot(RDXSCS2YoVariableSearchPanel searchPanel, RDXSCS2PlotPanel panel, RDXYoManager yoManager)
    {
@@ -92,6 +94,20 @@ public class RDXSCS2Plot
 
       ImGui.setCursorPos(ImGui.getCursorPosX() + 2, ImGui.getCursorPosY() + 2);
 
+      float innerWidth = plotWidth - 2;
+      float innerHeight = plotHeight - 3;
+      cursorX = ImGui.getCursorScreenPosX();
+      cursorY = ImGui.getCursorScreenPosY();
+      int fontSize = ImGui.getFontSize();
+
+      boolean isPlotHovered = ImGui.getMousePosX() >= cursorX
+                           && ImGui.getMousePosX() <= cursorX + innerWidth
+                           && ImGui.getMousePosY() >= cursorY
+                           && ImGui.getMousePosY() <= cursorY + innerHeight;
+
+      if (ImGui.isWindowHovered(ImGuiHoveredFlags.AllowWhenBlockedByActiveItem) && isPlotHovered && ImGui.isMouseReleased(ImGuiMouseButton.Left))
+         addVariable(searchPanel.getSelectedVariable(), true);
+
       for (RDXSCS2PlotLine plotLine : plotLines)
          plotLine.updateData();
 
@@ -105,11 +121,16 @@ public class RDXSCS2Plot
          }
       double range = maxValue - minValue;
 
-      float innerWidth = plotWidth - 2;
-      float innerHeight = plotHeight - 3;
-      cursorX = ImGui.getCursorScreenPosX();
-      cursorY = ImGui.getCursorScreenPosY();
-      int fontSize = ImGui.getFontSize();
+      if (ImGui.isWindowHovered() && isPlotHovered && ImGui.isMouseClicked(ImGuiMouseButton.Left))
+         isDragging = true;
+      if (!ImGui.isMouseDown(ImGuiMouseButton.Left))
+         isDragging = false;
+
+      if (isDragging)
+      {
+         float dragXPlot = (float) MathTools.clamp(ImGui.getMousePosX(), cursorX, cursorX + innerWidth);
+         yoManager.getSession().submitBufferIndexRequest(Math.round((dragXPlot - cursorX) * yoManager.getActiveBufferLength() / innerWidth));
+      }
 
       float legendTextX = cursorX + 0.05f * fontSize;
       int numberLegendLines = 1;
@@ -129,6 +150,26 @@ public class RDXSCS2Plot
 
       float lineAreaHeight = innerHeight - (1.1f * numberLegendLines) * fontSize;
 
+      int currentIndex = yoManager.getCurrentIndex();
+      float verticalLineX = cursorX + currentIndex * innerWidth / yoManager.getActiveBufferLength();
+      ImGui.getWindowDrawList().addLine(verticalLineX, cursorY, verticalLineX, cursorY + lineAreaHeight, ImGui.getColorU32(ImGuiCol.Text));
+
+      if (minValue <= 0.0 && maxValue >= 0.0)
+      {
+         double normalizedZero = (0.0 - minValue) / range;
+         float zeroLineY = cursorY + lineAreaHeight * (1.0f - (float) normalizedZero);
+         float dashSize = 10.0f;
+         float gapSize = 8.0f;
+         float totalDashCycle = dashSize + gapSize;
+         float currentX = cursorX;
+         while (currentX < cursorX + innerWidth)
+         {
+            float dashEnd = Math.min(currentX + dashSize, cursorX + innerWidth);
+            ImGui.getWindowDrawList().addLine(currentX, zeroLineY, dashEnd, zeroLineY, ImGui.getColorU32(ImGuiCol.Border), 2.0f);
+            currentX += totalDashCycle;
+         }
+      }
+
       for (int lineIndex = 0; lineIndex < plotLines.size(); lineIndex++)
       {
          RDXSCS2PlotLine plotLine = plotLines.get(lineIndex);
@@ -141,42 +182,6 @@ public class RDXSCS2Plot
             double normalized = (plotLine.data[i] - minValue) / range;
             float y = cursorY + lineAreaHeight * (1.0f - (float) normalized);
             plotLine.points[i].set(x, y);
-         }
-
-         if (ImGui.isWindowHovered()
-          && ImGui.getMousePosX() >= cursorX
-          && ImGui.getMousePosX() <= cursorX + innerWidth
-          && ImGui.getMousePosY() >= cursorY
-          && ImGui.getMousePosY() <= cursorY + innerHeight
-          && ImGui.isMouseClicked(ImGuiMouseButton.Left))
-            plotLine.isDragging = true;
-         if (!ImGui.isMouseDown(ImGuiMouseButton.Left))
-            plotLine.isDragging = false;
-
-         if (plotLine.isDragging)
-         {
-            float dragXPlot = (float) MathTools.clamp(ImGui.getMousePosX(), cursorX, cursorX + innerWidth);
-            yoManager.getSession().submitBufferIndexRequest(Math.round((dragXPlot - cursorX) * plotLine.data.length / innerWidth));
-         }
-
-         int currentIndex = plotLine.bufferProperties.getCurrentIndex();
-         float verticalLineX = cursorX + currentIndex * innerWidth / plotLine.data.length;
-         ImGui.getWindowDrawList().addLine(verticalLineX, cursorY, verticalLineX, cursorY + lineAreaHeight, ImGui.getColorU32(ImGuiCol.Text));
-
-         if (minValue <= 0.0 && maxValue >= 0.0)
-         {
-            double normalizedZero = (0.0 - minValue) / range;
-            float zeroLineY = cursorY + lineAreaHeight * (1.0f - (float) normalizedZero);
-            float dashSize = 10.0f;
-            float gapSize = 8.0f;
-            float totalDashCycle = dashSize + gapSize;
-            float currentX = cursorX;
-            while (currentX < cursorX + innerWidth)
-            {
-               float dashEnd = Math.min(currentX + dashSize, cursorX + innerWidth);
-               ImGui.getWindowDrawList().addLine(currentX, zeroLineY, dashEnd, zeroLineY, ImGui.getColorU32(ImGuiCol.Border), 2.0f);
-               currentX += totalDashCycle;
-            }
          }
 
          int color = CHART_COLORS[lineIndex % CHART_COLORS.length];

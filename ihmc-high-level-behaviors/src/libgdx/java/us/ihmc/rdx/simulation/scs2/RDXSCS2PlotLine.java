@@ -21,7 +21,6 @@ public class RDXSCS2PlotLine
    double[] data;
    final ArrayList<ImVec2> pointsList = new ArrayList<>();
    ImVec2[] points = new ImVec2[0];
-   boolean isDragging = false;
    double minValue = Double.POSITIVE_INFINITY;
    double maxValue = Double.NEGATIVE_INFINITY;
    String legendText;

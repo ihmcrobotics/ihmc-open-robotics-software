@@ -1,7 +1,11 @@
 package us.ihmc.rdx.simulation.scs2;
 
 import imgui.ImGui;
+import imgui.flag.ImGuiMouseButton;
+import imgui.type.ImBoolean;
 import imgui.type.ImString;
+import us.ihmc.log.LogTools;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.scs2.sessionVisualizer.jfx.controllers.RegularExpression;
@@ -15,6 +19,7 @@ public class RDXSCS2YoVariableSearchPanel
    private final RDXPanel panel = new RDXPanel("YoVariable Search", this::renderImGuiWidgets);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImString searchBar = new ImString();
+   private final ImBoolean showFullName = new ImBoolean(true);
    private YoRegistry yoRegistry;
    private final ArrayList<YoVariable> allVariables = new ArrayList<>();
    private YoVariable selectedVariable = null;
@@ -40,8 +45,12 @@ public class RDXSCS2YoVariableSearchPanel
       ImGui.inputText(labels.get("Search"), searchBar);
 
       ImGui.text("Registry contains " + allVariables.size() + " variables.");
+      ImGui.sameLine();
+      ImGuiTools.smallCheckbox(labels.get("Show Full Name"), showFullName);
       ImGui.separator();
 
+      if (!ImGui.isMouseDown(ImGuiMouseButton.Left))
+         selectedVariable = null;
 
       if (ImGui.beginListBox("##YoVariables", ImGui.getColumnWidth(), ImGui.getWindowSizeY() - 100))
       {
@@ -50,9 +59,12 @@ public class RDXSCS2YoVariableSearchPanel
             if (!RegularExpression.check(yoVariable.getFullNameString(), searchBar.get()))
                continue;
 
-            ImGui.selectable(yoVariable.getFullNameString() + " (" + yoVariable.getClass().getSimpleName() + ": " + yoVariable.getValueAsString("%.5f") + ")");
+            ImGui.selectable((showFullName.get() ? yoVariable.getFullNameString() : yoVariable.getName())
+                             + " (" + yoVariable.getClass().getSimpleName() + ": " + yoVariable.getValueAsString("%.5f") + ")",
+                             yoVariable == selectedVariable);
             if (ImGui.isItemClicked())
             {
+               LogTools.info("Selected variable: " + yoVariable.getFullNameString());
                selectedVariable = yoVariable;
             }
 
@@ -102,10 +114,5 @@ public class RDXSCS2YoVariableSearchPanel
    public YoVariable getSelectedVariable()
    {
       return selectedVariable;
-   }
-
-   public void setSelectedVariable(YoVariable selectedVariable)
-   {
-      this.selectedVariable = selectedVariable;
    }
 }
