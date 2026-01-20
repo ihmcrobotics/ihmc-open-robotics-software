@@ -178,7 +178,16 @@ public class RDXSCS2Plot
          {
             double normalizedZero = (0.0 - minValue) / range;
             float zeroLineY = cursorY + lineAreaHeight * (1.0f - (float) normalizedZero);
-            ImGui.getWindowDrawList().addLine(cursorX, zeroLineY, cursorX + innerWidth, zeroLineY, ImGui.getColorU32(ImGuiCol.Border), 2.0f);
+            float dashSize = 10.0f;
+            float gapSize = 8.0f;
+            float totalDashCycle = dashSize + gapSize;
+            float currentX = cursorX;
+            while (currentX < cursorX + innerWidth)
+            {
+               float dashEnd = Math.min(currentX + dashSize, cursorX + innerWidth);
+               ImGui.getWindowDrawList().addLine(currentX, zeroLineY, dashEnd, zeroLineY, ImGui.getColorU32(ImGuiCol.Border), 2.0f);
+               currentX += totalDashCycle;
+            }
          }
 
          int color = CHART_COLORS[lineIndex % CHART_COLORS.length];
