@@ -144,7 +144,7 @@ public class RDXPanel extends RDXPanelSizeHandler
       else
       {
          if (dockNode.getParentNode().ptr == 0) // Preventing rare hard crash
-            LogTools.error("Not sure why this would happen yet but pretty sure it did once.");
+            LogTools.debug("Not sure why this would happen yet but pretty sure it did once.");
          else
             findParentDockspacePanel(dockNode.getParentNode().getID(), dockIDMap);
       }
