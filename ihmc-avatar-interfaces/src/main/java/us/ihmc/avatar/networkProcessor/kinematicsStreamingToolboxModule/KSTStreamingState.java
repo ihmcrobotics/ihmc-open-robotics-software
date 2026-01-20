@@ -538,7 +538,6 @@ public class KSTStreamingState implements State
                rigidBodyInitialPoseMap.get(rigidBodyName).set(desiredRigidBodies.get(rigidBodyName).getBodyFixedFrame().getTransformToRoot());
             }
             blendWeightMatrix(rigidBodyInput.getWeightMatrix(), timeInState, startTime.getValue(), streamingBlendingDuration.getValue());
-//            blendPose(rigidBodyInitialPoseMap.get(rigidBodyName), rigidBodyInput.getDesiredPose(), timeInState, startTime.getValue(), streamingBlendingDuration.getValue());
 
             // Update the list of bodies that are not controlled this tick
             uncontrolledRigidBodies.remove(rigidBodyInput.getEndEffector());
@@ -560,7 +559,6 @@ public class KSTStreamingState implements State
                centerOfMassInitialPosition.set(ikController.getCenterOfMass());
             }
             blendWeightMatrix(centerOfMassInput.getWeightMatrix(), timeInState, centerOfMassControlStartTime.getValue(), streamingBlendingDuration.getValue());
-//            blendPosition(centerOfMassInitialPosition, centerOfMassInput.getDesiredPosition(), timeInState, centerOfMassControlStartTime.getValue(), streamingBlendingDuration.getValue());
          }
          else
          {
@@ -852,31 +850,6 @@ public class KSTStreamingState implements State
       { // Blend the weight matrix to smoothly activate the objective.
          double blendingFactor = MathTools.clamp(controlDuration / blendingDuration, 0.0, 1.0);
          weightMatrix.scale(blendingFactor);
-      }
-   }
-
-   private static void blendPose(FramePose3DReadOnly startPose,
-                                 FramePose3D currentPoseToPack,
-                                 double currentTime, double startTime, double blendingDuration)
-   {
-      double controlDuration = currentTime - startTime;
-      if (controlDuration < blendingDuration * 1000)
-      {
-         double blendingFactor = MathTools.clamp(controlDuration / blendingDuration, 0.0, 1.0);
-         currentPoseToPack.getPosition().interpolate(startPose.getPosition(), currentPoseToPack.getPosition(), blendingFactor);
-         QuaternionTools.interpolate(startPose.getOrientation(), currentPoseToPack.getOrientation(), blendingFactor, currentPoseToPack.getOrientation());
-      }
-   }
-
-   private static void blendPosition(FramePoint3DReadOnly startPosition,
-                                     FramePoint3D currentPositionToPack,
-                                     double currentTime, double startTime, double blendingDuration)
-   {
-      double controlDuration = currentTime - startTime;
-      if (controlDuration < blendingDuration * 1000)
-      {
-         double blendingFactor = MathTools.clamp(controlDuration / blendingDuration, 0.0, 1.0);
-         currentPositionToPack.interpolate(startPosition, currentPositionToPack, blendingFactor);
       }
    }
 
