@@ -45,6 +45,7 @@ public class GpuMappingThread extends RepeatingTaskThread
    private final BlockingQueue<RawImage> rawImageCollection;
 
    private final BooleanSupplier publishHeightMap;
+   private final BooleanSupplier publishHeightMapToController;
    private final BooleanSupplier publishTerrainMap;
 
    public GpuMappingThread(ROS2Node ros2Node,
@@ -56,12 +57,14 @@ public class GpuMappingThread extends RepeatingTaskThread
                            TerrainMapParameters terrainMapParameters,
                            DepthImageFilteringParameters depthImageFilteringParameters,
                            BooleanSupplier publishHeightMap,
+                           BooleanSupplier publishHeightMapToController,
                            BooleanSupplier publishTerrainMap)
    {
       super(GpuMappingThread.class.getSimpleName());
       this.rawImageCollection = rawImageCollection;
       this.heightMapParameters = heightMapParameters;
       this.publishHeightMap = publishHeightMap;
+      this.publishHeightMapToController = publishHeightMapToController;
       this.publishTerrainMap = publishTerrainMap;
 
       // At the highest level pass in the reference frames for the specific robot
@@ -71,7 +74,7 @@ public class GpuMappingThread extends RepeatingTaskThread
       // This will make the height map not appear correct cause the center is wrong
       ReferenceFrame heightMapCenterFrame = syncedRobotModel.getReferenceFrames().getSteppingCameraFrame();
 
-      filteredDepthPublisher = ros2Node.createPublisher(PerceptionAPI.REALSENSE_DEPTH_FILTERED_IMAGE);
+      filteredDepthPublisher = ros2Node.createPublisher(PerceptionAPI.STEPPING_REALSENSE_DEPTH_FILTERED);
 
       bodyCollisionFilter = new DepthImageBodyCollisionFilter(robotCollisionModel, syncedRobotModel.getFullRobotModel().getRootBody());
       flyingPointsFilter = new DepthImageFlyingPointsFilter(depthImageFilteringParameters);
@@ -141,6 +144,8 @@ public class GpuMappingThread extends RepeatingTaskThread
          // Publish the updated maps if demanded
          if (publishHeightMap.getAsBoolean())
             gpuMappingManager.publishHeightMap();
+         if (publishHeightMapToController.getAsBoolean())
+            gpuMappingManager.publishHeightMapForController();
          if (publishTerrainMap.getAsBoolean())
             gpuMappingManager.publishTerrainMap();
 

@@ -39,6 +39,8 @@ public class RDXGotoNode extends RDXLeafNode<GotoNodeState, GotoNodeDefinition>
 
       ImGui.sameLine();
       gotoNodeWidget.render();
+
+      renderRowEnd();
    }
 
    @Override
@@ -46,7 +48,7 @@ public class RDXGotoNode extends RDXLeafNode<GotoNodeState, GotoNodeDefinition>
    {
       // Validate state in case something earlier in this UI tick messed with things.
       // This happens with the Undo non-topological changes button.
-      state.validateFields(rootNode.getState().getOrderedLeaves());
+      state.validateDefinition(rootNode.getState().getOrderedLeaves());
 
       if (ImGui.beginCombo(labels.get("Goto"), definition.getNodeToGotoName()))
       {

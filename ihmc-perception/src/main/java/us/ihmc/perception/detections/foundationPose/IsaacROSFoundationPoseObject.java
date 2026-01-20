@@ -12,22 +12,28 @@ import static us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPos
 
 public enum IsaacROSFoundationPoseObject
 {
-   MUSTARD("mustard", "bottle"),
-   TRAFFIC_BARRIER("traffic_barrier", "traffic_barrier"),
-   EXPLOSIVE_CHARGE("charge", "charge"),
-   DOOR_PANEL("door_panel", "door_panel");
+   MUSTARD("Mustard", "mustard", "bottle"),
+   TRAFFIC_BARRIER("Traffic Barrier", "traffic_barrier", "traffic_barrier"),
+   EXPLOSIVE_CHARGE("Explosive Charge", "charge", "charge"),
+   DOOR_PANEL("Door Panel", "door_panel", "door_panel"),
+   DOOR_HANDLE("Door Lever", "door_handle", "door_lever"),
+   DOOR_LEVER_WAVY("Door Lever Wavy", "door_lever_wavy", "door_lever"),
+   DOOR_KNOB("Door Knob", "door_knob", "door_knob"),
+   DOOR_PULL_HANDLE("Door Pull Handle", "door_pull_handle", "door_pull_handle"); // TODO: Add model
 
    public static final IsaacROSFoundationPoseObject[] values = values();
 
-   public final String meshName;
+   public final String titleCaseName;
+   public final String meshDirectory; // Name of mesh directory in robotlabfiles/ihmc-isaac-ros/meshes and .glb in environmentObjects
    public final String yoloClass;
    public final FoundationPoseTopics topics;
 
-   IsaacROSFoundationPoseObject(String meshName, String yoloClass)
+   IsaacROSFoundationPoseObject(String titleCaseName, String meshDirectory, String yoloClass)
    {
-      this.meshName = meshName;
+      this.titleCaseName = titleCaseName;
+      this.meshDirectory = meshDirectory;
       this.yoloClass = yoloClass;
-      topics = new FoundationPoseTopics(meshName);
+      topics = new FoundationPoseTopics(meshDirectory);
    }
 
    public record FoundationPoseTopics(ROS2Topic<Image> poseEstimationDepthImage, ROS2Topic<Image> poseEstimationRGBImage,

@@ -35,7 +35,7 @@ public class RDXVRControllerButtonLabel
 
    public void setText(String text)
    {
-      situatedText.setText(text);
+      situatedText.setTextWithCache(text);
       LibGDXTools.toLibGDX(textFrame.getReferenceFrame().getTransformToRoot(), situatedText.getModelTransform());
    }
 

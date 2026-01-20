@@ -128,7 +128,6 @@ public class RelativeEndEffectorControlTest
                                                               desiredFullRobotModel.getRight(),
                                                               centerOfMassFrame,
                                                               optimizationSettings,
-                                                              yoGraphicsListRegistry,
                                                               mainRegistry);
       controllerCoreToolbox.setupForInverseKinematicsSolver();
       controllerCoreToolbox.setJointPrivilegedConfigurationParameters(new JointPrivilegedConfigurationParameters());

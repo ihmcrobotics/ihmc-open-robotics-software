@@ -15,7 +15,7 @@ public class ContinuousStepGeneratorParametersMessagePubSubType implements us.ih
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "753c00217ab57af48ac6e56f5448a80d68cfa320492df29ff0f6f31c4c022bd8";
+   		return "e080b3ef45ee83b61fcdbb9c4457172fba07903e003f0a850072e47cc08b09f1";
    }
    
    @Override
@@ -76,6 +76,14 @@ public class ContinuousStepGeneratorParametersMessagePubSubType implements us.ih
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -125,6 +133,18 @@ public class ContinuousStepGeneratorParametersMessagePubSubType implements us.ih
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -143,7 +163,9 @@ public class ContinuousStepGeneratorParametersMessagePubSubType implements us.ih
 
       cdr.write_type_6(data.getTransferDuration());
 
-      cdr.write_type_6(data.getMaxStepLength());
+      cdr.write_type_6(data.getMaxStepLengthForwards());
+
+      cdr.write_type_6(data.getMaxStepLengthBackwards());
 
       cdr.write_type_6(data.getDefaultStepWidth());
 
@@ -154,6 +176,12 @@ public class ContinuousStepGeneratorParametersMessagePubSubType implements us.ih
       cdr.write_type_6(data.getTurnMaxAngleInward());
 
       cdr.write_type_6(data.getTurnMaxAngleOutward());
+
+      cdr.write_type_7(data.getStepsAreAdjustable());
+
+      cdr.write_type_7(data.getSnapToHeightmap());
+
+      cdr.write_type_7(data.getAccountForGroundDrift());
 
    }
 
@@ -171,7 +199,9 @@ public class ContinuousStepGeneratorParametersMessagePubSubType implements us.ih
       	
       data.setTransferDuration(cdr.read_type_6());
       	
-      data.setMaxStepLength(cdr.read_type_6());
+      data.setMaxStepLengthForwards(cdr.read_type_6());
+      	
+      data.setMaxStepLengthBackwards(cdr.read_type_6());
       	
       data.setDefaultStepWidth(cdr.read_type_6());
       	
@@ -182,6 +212,12 @@ public class ContinuousStepGeneratorParametersMessagePubSubType implements us.ih
       data.setTurnMaxAngleInward(cdr.read_type_6());
       	
       data.setTurnMaxAngleOutward(cdr.read_type_6());
+      	
+      data.setStepsAreAdjustable(cdr.read_type_7());
+      	
+      data.setSnapToHeightmap(cdr.read_type_7());
+      	
+      data.setAccountForGroundDrift(cdr.read_type_7());
       	
 
    }
@@ -195,12 +231,16 @@ public class ContinuousStepGeneratorParametersMessagePubSubType implements us.ih
       ser.write_type_6("swing_height", data.getSwingHeight());
       ser.write_type_6("swing_duration", data.getSwingDuration());
       ser.write_type_6("transfer_duration", data.getTransferDuration());
-      ser.write_type_6("max_step_length", data.getMaxStepLength());
+      ser.write_type_6("max_step_length_forwards", data.getMaxStepLengthForwards());
+      ser.write_type_6("max_step_length_backwards", data.getMaxStepLengthBackwards());
       ser.write_type_6("default_step_width", data.getDefaultStepWidth());
       ser.write_type_6("min_step_width", data.getMinStepWidth());
       ser.write_type_6("max_step_width", data.getMaxStepWidth());
       ser.write_type_6("turn_max_angle_inward", data.getTurnMaxAngleInward());
       ser.write_type_6("turn_max_angle_outward", data.getTurnMaxAngleOutward());
+      ser.write_type_7("steps_are_adjustable", data.getStepsAreAdjustable());
+      ser.write_type_7("snap_to_heightmap", data.getSnapToHeightmap());
+      ser.write_type_7("account_for_ground_drift", data.getAccountForGroundDrift());
    }
 
    @Override
@@ -212,12 +252,16 @@ public class ContinuousStepGeneratorParametersMessagePubSubType implements us.ih
       data.setSwingHeight(ser.read_type_6("swing_height"));
       data.setSwingDuration(ser.read_type_6("swing_duration"));
       data.setTransferDuration(ser.read_type_6("transfer_duration"));
-      data.setMaxStepLength(ser.read_type_6("max_step_length"));
+      data.setMaxStepLengthForwards(ser.read_type_6("max_step_length_forwards"));
+      data.setMaxStepLengthBackwards(ser.read_type_6("max_step_length_backwards"));
       data.setDefaultStepWidth(ser.read_type_6("default_step_width"));
       data.setMinStepWidth(ser.read_type_6("min_step_width"));
       data.setMaxStepWidth(ser.read_type_6("max_step_width"));
       data.setTurnMaxAngleInward(ser.read_type_6("turn_max_angle_inward"));
       data.setTurnMaxAngleOutward(ser.read_type_6("turn_max_angle_outward"));
+      data.setStepsAreAdjustable(ser.read_type_7("steps_are_adjustable"));
+      data.setSnapToHeightmap(ser.read_type_7("snap_to_heightmap"));
+      data.setAccountForGroundDrift(ser.read_type_7("account_for_ground_drift"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.ContinuousStepGeneratorParametersMessage src, controller_msgs.msg.dds.ContinuousStepGeneratorParametersMessage dest)

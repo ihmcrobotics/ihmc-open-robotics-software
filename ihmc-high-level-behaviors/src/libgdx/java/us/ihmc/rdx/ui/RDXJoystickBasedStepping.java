@@ -95,7 +95,7 @@ public class RDXJoystickBasedStepping
    {
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       controllerFootGroundContactPoints = robotModel.getContactPointParameters().getControllerFootGroundContactPoints();
-      steppingParameters = walkingControllerParameters.getSteppingParameters();
+      steppingParameters = walkingControllerParameters.getSteppingParametersForStepGeneration();
       swingHeight.set(walkingControllerParameters.getSwingTrajectoryParameters().getMinSwingHeight());
       swingDuration.set(walkingControllerParameters.getDefaultSwingTime());
       transferDuration.set(walkingControllerParameters.getDefaultTransferTime());
@@ -257,7 +257,8 @@ public class RDXJoystickBasedStepping
                continuousStepGenerator.setFootstepTiming(swingDuration.get(), transferDuration.get());
                continuousStepGenerator.setStepTurningLimits(turnMaxAngleInward.get(), turnMaxAngleOutward.get());
                continuousStepGenerator.setStepWidths(defaultStepWidth.get(), minStepWidth.get(), maxStepWidth.get());
-               continuousStepGenerator.setMaxStepLength(maxStepLength.get());
+               continuousStepGenerator.setMaxStepLengthForwards(maxStepLength.get());
+               continuousStepGenerator.setMaxStepLengthBackwards(maxStepLength.get());
                continuousStepGenerator.update(Double.NaN);
             }
          }

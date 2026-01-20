@@ -99,7 +99,7 @@ public class RDXVRFootstepPlacement
       }
 
       WalkingControllerParameters walkingControllerParameters = syncedRobot.getRobotModel().getWalkingControllerParameters();
-      SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
+      SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParametersForStepGeneration();
       footstepOptimizer = new CUDAFootstepOptimizer((float) steppingParameters.getFootLength(),
                                                     (float) steppingParameters.getFootWidth());
 
@@ -181,6 +181,8 @@ public class RDXVRFootstepPlacement
          footstepDataMessage.getLocation().set(placedFootstep.getPose().getPosition());
          footstepDataMessage.getOrientation().set(placedFootstep.getPose().getOrientation());
          footstepDataMessage.setTrajectoryType(TrajectoryType.DEFAULT.toByte());
+         if (locomotionParameters.getSwingHeight() > 0.0)
+            footstepDataMessage.setSwingHeight(locomotionParameters.getSwingHeight());
       }
       controllerHelper.publishToController(footstepDataListMessage);
       reset();

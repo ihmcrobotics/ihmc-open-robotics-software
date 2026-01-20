@@ -64,9 +64,7 @@ public class HeuristicICPControllerTest
                                                       YoGraphicsListRegistry yoGraphicsListRegistry)
    {   
       return new HeuristicICPController(icpControllerParameters,
-                                        controlDT,
-                                        registry,
-                                        yoGraphicsListRegistry);
+                                        registry);
 
    }
 
@@ -100,15 +98,15 @@ public class HeuristicICPControllerTest
          }
 
          @Override
-         public void createFeedForwardAlphaCalculator(YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+         public void createFeedForwardAlphaCalculator(YoRegistry registry)
          {
             feedForwardAlphaCalculator = new ErrorBasedFeedForwardAlphaCalculator("", registry);
          }
 
          @Override
-         public void createFeedbackProjectionOperator(YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+         public void createFeedbackProjectionOperator(YoRegistry registry)
          {
-            feedbackProjectionOperator = new CoPProjectionTowardsMidpoint(registry, yoGraphicsListRegistry);
+            feedbackProjectionOperator = new CoPProjectionTowardsMidpoint(registry);
          }
 
          @Override
@@ -519,7 +517,7 @@ public class HeuristicICPControllerTest
                                                             soleZUpFrames.get(RobotSide.RIGHT));
       midFeetZUpFrame.update();
 
-      BipedSupportPolygons bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, soleZUpFrames, soleFrames, registry, null);
+      BipedSupportPolygons bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, soleZUpFrames, soleFrames, registry);
       bipedSupportPolygons.updateUsingContactStates(contactStates);
 
       return bipedSupportPolygons;

@@ -99,7 +99,6 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
                                                      CenterOfPressureDataHolder centerOfPressureDataHolderFromController,
                                                      double estimatorDT,
                                                      StateEstimatorParameters stateEstimatorParameters,
-                                                     YoGraphicsListRegistry yoGraphicsListRegistry,
                                                      YoRegistry parentRegistry)
    {
       rootJoint = inverseDynamicsStructure.getRootJoint();
@@ -151,14 +150,6 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
        * -------------------------------------------------------------------------------------------------
        */
 
-      if (VISUALIZE)
-      {
-         for (SingleFootEstimator footEstimator : footEstimators)
-         {
-            footEstimator.createVisualization(yoGraphicsListRegistry);
-         }
-      }
-
       parentRegistry.addChild(registry);
    }
 
@@ -180,7 +171,7 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
 
       for (SingleFootEstimator footEstimator : footEstimators)
       {
-         footEstimator.updateUntrustedFootPosition(pelvisPosition);
+         footEstimator.updateUntrustedFootPosition(pelvisPosition, useControllerDesiredCoP.getValue());
       }
       kinematicsIsUpToDate.set(false);
    }
@@ -222,7 +213,7 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
    {
       for (SingleFootEstimator footEstimator : footEstimators)
       {
-         footEstimator.updateUntrustedFootPosition(pelvisPosition);
+         footEstimator.updateUntrustedFootPosition(pelvisPosition, useControllerDesiredCoP.getValue());
       }
 
       rootJointPosition.set(pelvisPosition);
@@ -281,7 +272,7 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
       for (int i = 0; i < unTrustedFeet.size(); i++)
       {
          SingleFootEstimator footEstimator = footEstimatorMap.get(unTrustedFeet.get(i));
-         footEstimator.updateUntrustedFootPosition(pelvisPosition);
+         footEstimator.updateUntrustedFootPosition(pelvisPosition, useControllerDesiredCoP.getValue());
       }
 
       kinematicsIsUpToDate.set(false);
@@ -446,14 +437,49 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
        * @param swingingFoot   a foot in swing
        * @param pelvisPosition the current pelvis position
        */
-      private void updateUntrustedFootPosition(FramePoint3DReadOnly pelvisPosition)
+      private void updateUntrustedFootPosition(FramePoint3DReadOnly pelvisPosition, boolean useControllerDesiredCoP)
       {
          footPositionInWorld.sub(pelvisPosition, footToRootJointPosition);
-
          copPositionInWorld.set(footPositionInWorld);
 
-         copRawInFootFrame.setToZero();
-         copFilteredInFootFrame.setToZero();
+         if (footSwitch.hasFootHitGroundFiltered())
+         {
+            // The foot is still on the ground. This means that we still have a valid CoP, and may trust it again very soon. We shouldn't zero out the cop
+            // position, as that causes a bunch of discrete jumps as to where the filtered value is.
+            if (useControllerDesiredCoP)
+               centerOfPressureDataHolderFromController.getCenterOfPressure(tempCoP2d, foot);
+            else
+               footSwitch.getCenterOfPressure(tempCoP2d);
+            tempCoP2d.checkReferenceFrameMatch(copRawInFootFrame.getReferenceFrame());
+            copRawInFootFrame.set(tempCoP2d);
+            copFilteredInFootFrame.update();
+
+            // Cache the frame
+            ReferenceFrame oldFrame = tempCoPOffset.getReferenceFrame();
+            // Compute the cop position offset in world.
+            tempCoPOffset.setIncludingFrame(soleFrame, copFilteredInFootFrame.getX(), copFilteredInFootFrame.getY(), 0.0);
+            tempCoPOffset.changeFrame(worldFrame);
+
+            if (copRawInFootFrame.containsNaN() || copFilteredInFootFrame.containsNaN() || tempCoPOffset.containsNaN())
+            {
+               // Something was corrupted, fallback to center of the foot.
+               copRawInFootFrame.setToZero();
+               copFilteredInFootFrame.setToZero();
+            }
+            else
+            {
+               // Offset the cop position in the world based on the foot.
+               copPositionInWorld.add(tempCoPOffset);
+            }
+
+            // Set the frame back so it's not busted elsewhere.
+            tempCoPOffset.setReferenceFrame(oldFrame);
+         }
+         else
+         {
+            copRawInFootFrame.setToZero();
+            copFilteredInFootFrame.setToZero();
+         }
       }
 
       private final FrameVector3D tempFrameVector = new FrameVector3D();
@@ -468,8 +494,7 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
             copPositionInWorld.add(tempFrameVector); // New CoP position
          }
 
-         footPositionInWorld.set(rootJointPosition);
-         footPositionInWorld.sub(footToRootJointPosition);
+         footPositionInWorld.sub(rootJointPosition, footToRootJointPosition);
       }
 
       private final FramePoint2D tempCoP2d = new FramePoint2D();

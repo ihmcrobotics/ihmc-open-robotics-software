@@ -17,6 +17,7 @@ import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.thread.ThreadTools;
@@ -148,7 +149,7 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
 
       for (int i = 0; i < numberOfChanges; i++)
       {
-         ArrayList<Point2D> newContactPoints = generateContactPointsForHalfOfFoot(random, getRobotModel().getWalkingControllerParameters(), 0.4);
+         ArrayList<Point2D> newContactPoints = generateContactPointsForHalfOfFoot(random, getRobotModel().getWalkingControllerParameters().getSteppingParameters(), 0.4);
          changeAppendageGroundContactPointsToNewOffsets(simulationTestHelper.getSimulationTime(),
                                                         robot,
                                                         newContactPoints,
@@ -608,10 +609,11 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
    private ArrayList<Point2D> generateContactPointsForAllOfFoot()
    {
       WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
-      double footForwardOffset = walkingControllerParameters.getSteppingParameters().getFootForwardOffset();
-      double footBackwardOffset = walkingControllerParameters.getSteppingParameters().getFootBackwardOffset();
-      double footWidth = walkingControllerParameters.getSteppingParameters().getFootWidth();
-      double toeWidth = walkingControllerParameters.getSteppingParameters().getToeWidth();
+      SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
+      double footForwardOffset = steppingParameters.getFootForwardOffset();
+      double footBackwardOffset = steppingParameters.getFootBackwardOffset();
+      double footWidth = steppingParameters.getFootWidth();
+      double toeWidth = steppingParameters.getToeWidth();
 
       ArrayList<Point2D> ret = new ArrayList<Point2D>();
 
@@ -622,26 +624,26 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
       return ret;
    }
 
-   private ArrayList<Point2D> generateContactPointsForHalfOfFoot(Random random, WalkingControllerParameters walkingControllerParameters, double percentToKeep)
+   private ArrayList<Point2D> generateContactPointsForHalfOfFoot(Random random, SteppingParameters steppingParameters, double percentToKeep)
    {
       int footHalf = random.nextInt(4);
 
       if (footHalf == 0)
-         return generateContactPointsForLeftOfFoot(walkingControllerParameters, percentToKeep);
+         return generateContactPointsForLeftOfFoot(steppingParameters, percentToKeep);
       if (footHalf == 1)
-         return generateContactPointsForRightOfFoot(walkingControllerParameters, percentToKeep);
+         return generateContactPointsForRightOfFoot(steppingParameters, percentToKeep);
       if (footHalf == 2)
-         return generateContactPointsForFrontOfFoot(walkingControllerParameters, percentToKeep);
+         return generateContactPointsForFrontOfFoot(steppingParameters, percentToKeep);
 
-      return generateContactPointsForBackOfFoot(walkingControllerParameters, percentToKeep);
+      return generateContactPointsForBackOfFoot(steppingParameters, percentToKeep);
    }
 
-   private ArrayList<Point2D> generateContactPointsForLeftOfFoot(WalkingControllerParameters walkingControllerParameters, double percentToKeep)
+   private ArrayList<Point2D> generateContactPointsForLeftOfFoot(SteppingParameters steppingParameters, double percentToKeep)
    {
-      double footForwardOffset = walkingControllerParameters.getSteppingParameters().getFootForwardOffset();
-      double footBackwardOffset = walkingControllerParameters.getSteppingParameters().getFootBackwardOffset();
-      double footWidth = walkingControllerParameters.getSteppingParameters().getFootWidth();
-      double toeWidth = walkingControllerParameters.getSteppingParameters().getToeWidth();
+      double footForwardOffset = steppingParameters.getFootForwardOffset();
+      double footBackwardOffset = steppingParameters.getFootBackwardOffset();
+      double footWidth = steppingParameters.getFootWidth();
+      double toeWidth = steppingParameters.getToeWidth();
 
       ArrayList<Point2D> ret = new ArrayList<Point2D>();
 
@@ -653,12 +655,12 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
       return ret;
    }
 
-   private ArrayList<Point2D> generateContactPointsForRightOfFoot(WalkingControllerParameters walkingControllerParameters, double percentToKeep)
+   private ArrayList<Point2D> generateContactPointsForRightOfFoot(SteppingParameters steppingParameters, double percentToKeep)
    {
-      double footForwardOffset = walkingControllerParameters.getSteppingParameters().getFootForwardOffset();
-      double footBackwardOffset = walkingControllerParameters.getSteppingParameters().getFootBackwardOffset();
-      double footWidth = walkingControllerParameters.getSteppingParameters().getFootWidth();
-      double toeWidth = walkingControllerParameters.getSteppingParameters().getToeWidth();
+      double footForwardOffset = steppingParameters.getFootForwardOffset();
+      double footBackwardOffset = steppingParameters.getFootBackwardOffset();
+      double footWidth = steppingParameters.getFootWidth();
+      double toeWidth = steppingParameters.getToeWidth();
 
       ArrayList<Point2D> ret = new ArrayList<Point2D>();
 
@@ -670,12 +672,12 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
       return ret;
    }
 
-   private ArrayList<Point2D> generateContactPointsForFrontOfFoot(WalkingControllerParameters walkingControllerParameters, double percentToKeep)
+   private ArrayList<Point2D> generateContactPointsForFrontOfFoot(SteppingParameters steppingParameters, double percentToKeep)
    {
-      double footForwardOffset = walkingControllerParameters.getSteppingParameters().getFootForwardOffset();
-      double footWidth = walkingControllerParameters.getSteppingParameters().getFootWidth();
-      double toeWidth = walkingControllerParameters.getSteppingParameters().getToeWidth();
-      double footLength = walkingControllerParameters.getSteppingParameters().getFootLength();
+      double footForwardOffset = steppingParameters.getFootForwardOffset();
+      double footWidth = steppingParameters.getFootWidth();
+      double toeWidth = steppingParameters.getToeWidth();
+      double footLength = steppingParameters.getFootLength();
 
       ArrayList<Point2D> ret = new ArrayList<Point2D>();
 
@@ -688,12 +690,12 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
       return ret;
    }
 
-   private ArrayList<Point2D> generateContactPointsForBackOfFoot(WalkingControllerParameters walkingControllerParameters, double percentToKeep)
+   private ArrayList<Point2D> generateContactPointsForBackOfFoot(SteppingParameters steppingParameters, double percentToKeep)
    {
-      double footBackwardOffset = walkingControllerParameters.getSteppingParameters().getFootBackwardOffset();
-      double footWidth = walkingControllerParameters.getSteppingParameters().getFootWidth();
-      double toeWidth = walkingControllerParameters.getSteppingParameters().getToeWidth();
-      double footLength = walkingControllerParameters.getSteppingParameters().getFootLength();
+      double footBackwardOffset = steppingParameters.getFootBackwardOffset();
+      double footWidth = steppingParameters.getFootWidth();
+      double toeWidth = steppingParameters.getToeWidth();
+      double footLength = steppingParameters.getFootLength();
 
       ArrayList<Point2D> ret = new ArrayList<Point2D>();
 

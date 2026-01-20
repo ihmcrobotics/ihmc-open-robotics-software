@@ -265,16 +265,14 @@ public class RDXVRManager
       {
          teleporter.getRenderables(renderables, pool);
          if (!skipHeadset)
-         {
-            context.getHeadsetRenderable(renderables, pool);
-         }
+            context.getHeadset().getRenderables(renderables, pool);
          context.getControllerRenderables(renderables, pool);
          for (var trackerRoleManager : trackerRoleManagers)
          {
             if (!trackerRoleManager.isRoleAssigned())
                trackerRoleManager.getRedModelInstance().getRenderables(renderables, pool);
             else
-               context.getTrackerRenderables(trackerRoleManager.getTrackerSerialNumber(), renderables, pool);
+               context.getTrackers().get(trackerRoleManager.getTrackerSerialNumber()).getRenderables(renderables, pool);
          }
          if (showScenePoseGizmo.get())
             scenePoseGizmo.getRenderables(renderables, pool);

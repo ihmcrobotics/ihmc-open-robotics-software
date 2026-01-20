@@ -4,6 +4,8 @@ public class LeafNodeExecutor<S extends LeafNodeState<D>,
                               D extends LeafNodeDefinition>
       extends BehaviorTreeNodeExecutor<S, D>
 {
+   protected String cantExecuteMessage = "Not yet evaluated.";
+
    public LeafNodeExecutor(S state, BehaviorTreeRootNodeExecutor rootNode)
    {
       super(state, rootNode);
@@ -12,7 +14,7 @@ public class LeafNodeExecutor<S extends LeafNodeState<D>,
    /** Message to print when {@link LeafNodeState#getCanExecute()} is false, to communicate the problem to the operator. */
    public String getCantExecuteMessage()
    {
-      return "";
+      return cantExecuteMessage;
    }
 
    /** Trigger the action to begin executing. Called once per execution. */

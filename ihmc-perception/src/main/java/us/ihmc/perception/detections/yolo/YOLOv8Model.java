@@ -406,9 +406,13 @@ public class YOLOv8Model
 
          // Get some useful stuff
          CameraIntrinsics maskIntrinsics = computeMaskIntrinsics(bgrInputImage);
-         float scaleFactor = Math.min((float) bgrInputImage.getWidth() / DETECTION_SIZE.width(), (float) bgrInputImage.getHeight() / DETECTION_SIZE.height());
-         float offsetX = 0.5f * (bgrInputImage.getWidth() / scaleFactor - DETECTION_SIZE.width());
-         float offsetY = 0.5f * (bgrInputImage.getHeight() / scaleFactor - DETECTION_SIZE.height());
+         float widthScale = (float) bgrInputImage.getWidth() / DETECTION_SIZE.width();
+         float heightScale = (float) bgrInputImage.getHeight() / DETECTION_SIZE.height();
+         float scaleFactor = Math.min(widthScale, heightScale);
+         float scaledDetectionWidth = DETECTION_SIZE.width() * scaleFactor;
+         float scaledDetectionHeight = DETECTION_SIZE.height() * scaleFactor;
+         float offsetX = 0.5f * (bgrInputImage.getWidth() - scaledDetectionWidth);
+         float offsetY = 0.5f * (bgrInputImage.getHeight() - scaledDetectionHeight);
 
          // Create the list of YOLOv8Detections
          for (int i = 0; i < remainingDetectionCount; ++i)

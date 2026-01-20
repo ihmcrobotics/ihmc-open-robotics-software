@@ -19,13 +19,6 @@ jobs:
     with:
       subproject: 'open-alexander'
       test-category: 'fast'
-  alexander-video:
-    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
-    secrets:
-      ROSIE_PERSONAL_ACCESS_TOKEN: ${{ secrets.ROSIE_PERSONAL_ACCESS_TOKEN }}
-    with:
-      subproject: 'open-alexander'
-      test-category: 'video'
   alexander-controller-api:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     secrets:
@@ -204,13 +197,6 @@ jobs:
       subproject: 'ihmc-perception'
       test-category: 'fast'
       requires-self-hosted: true
-  ihmc-robot-data-visualizer:
-    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
-    secrets:
-      ROSIE_PERSONAL_ACCESS_TOKEN: ${{ secrets.ROSIE_PERSONAL_ACCESS_TOKEN }}
-    with:
-      subproject: 'ihmc-robot-data-visualizer'
-      test-category: 'fast'
   ihmc-robot-models:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     secrets:
@@ -224,13 +210,6 @@ jobs:
       ROSIE_PERSONAL_ACCESS_TOKEN: ${{ secrets.ROSIE_PERSONAL_ACCESS_TOKEN }}
     with:
       subproject: 'ihmc-robotics-toolkit'
-      test-category: 'fast'
-  ihmc-ros-tools:
-    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
-    secrets:
-      ROSIE_PERSONAL_ACCESS_TOKEN: ${{ secrets.ROSIE_PERSONAL_ACCESS_TOKEN }}
-    with:
-      subproject: 'ihmc-ros-tools'
       test-category: 'fast'
   ihmc-sensor-processing:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
@@ -273,13 +252,6 @@ jobs:
       ROSIE_PERSONAL_ACCESS_TOKEN: ${{ secrets.ROSIE_PERSONAL_ACCESS_TOKEN }}
     with:
       subproject: 'robot-environment-awareness'
-      test-category: 'fast'
-  robotiq-hand-drivers:
-    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
-    secrets:
-      ROSIE_PERSONAL_ACCESS_TOKEN: ${{ secrets.ROSIE_PERSONAL_ACCESS_TOKEN }}
-    with:
-      subproject: 'robotiq-hand-drivers'
       test-category: 'fast'
   simulation-construction-set-tools:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main

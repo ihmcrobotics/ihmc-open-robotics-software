@@ -6,18 +6,22 @@ import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGenerator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGeneratorParameters;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGeneratorParametersBasics;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.DesiredTurningVelocityProvider;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.DesiredVelocityProvider;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.communication.ros2.ROS2HeartbeatMonitor;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HeightMapCommand;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.yoVariables.euclid.YoVector2D;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -43,11 +47,13 @@ public class StepGeneratorCommandInputManager implements Updatable
    private final YoDouble turningVelocity;
    private final YoDouble swingHeight;
    private final YoBoolean isUnitVelocities;
+   private final YoBoolean overrideHeartbeat;
    private int ticksToUpdateTheEnvironment = Integer.MAX_VALUE;
    private HighLevelControllerName currentController;
    private ContinuousStepGenerator continuousStepGenerator;
 
    private final List<Consumer<HeightMapCommand>> heightMapCommandConsumers = new ArrayList<>();
+   private final List<Consumer<ContinuousStepGeneratorParametersBasics>> csgParametersConsumers = new ArrayList<>();
    private final AtomicReference<FootstepStatus> latestFootstepStatusReceived = new AtomicReference<>(null);
    private final AtomicReference<FootstepStatus> previousFootstepStatusReceived = new AtomicReference<>(null);
    private final AtomicReference<HeightMapCommand> latestHeightMap = new AtomicReference<>(null);
@@ -55,6 +61,10 @@ public class StepGeneratorCommandInputManager implements Updatable
    private final AtomicReference<WalkingStatus> previousWalkingStatus = new AtomicReference<>(null);
    private final AtomicBoolean shouldSubmitNewRegions = new AtomicBoolean(true);
    private final AtomicInteger ticksSinceUpdatingTheEnvironment = new AtomicInteger(0);
+
+   // ROS 2 stuff
+   private final ROS2Node ros2Node;
+   private final ROS2HeartbeatMonitor heartbeatMonitor;
 
    public StepGeneratorCommandInputManager()
    {
@@ -65,9 +75,14 @@ public class StepGeneratorCommandInputManager implements Updatable
       swingHeight = new YoDouble("desiredSwingHeight_" + suffix, registry);
       isUnitVelocities = new YoBoolean("isUnitVelocities_" + suffix, registry);
       isUnitVelocities.set(false);
+      overrideHeartbeat = new YoBoolean("overrideHeartbeat_" + suffix, registry);
+      overrideHeartbeat.set(false);
 
       // by default, command input manager is not enabled, set enabled only if #update is called
       commandInputManager.setEnabled(false);
+
+      ros2Node = new ROS2NodeBuilder().build(getClass().getSimpleName().toLowerCase() + "Node");
+      heartbeatMonitor = new ROS2HeartbeatMonitor(ros2Node, CSGROS2CommunicationHelper.CSG_HEARTBEAT_TOPIC);
    }
 
    public void setCSG(ContinuousStepGenerator continuousStepGenerator)
@@ -78,6 +93,11 @@ public class StepGeneratorCommandInputManager implements Updatable
    public void addHeightMapCommandConsumer(Consumer<HeightMapCommand> heightMapCommandConsumer)
    {
       heightMapCommandConsumers.add(heightMapCommandConsumer);
+   }
+
+   public void addCSGParametersCommandConsumer(Consumer<ContinuousStepGeneratorParametersBasics> csgParametersConsumer)
+   {
+      csgParametersConsumers.add(csgParametersConsumer);
    }
 
    public CommandInputManager getCommandInputManager()
@@ -138,7 +158,15 @@ public class StepGeneratorCommandInputManager implements Updatable
       isOpen = currentController == HighLevelControllerName.WALKING || currentController == HighLevelControllerName.QUICKSTER;
       commandInputManager.setEnabled(isOpen);
 
-      if (commandInputManager.isNewCommandAvailable(ContinuousStepGeneratorInputCommand.class))
+      if (!overrideHeartbeat.getValue() && !heartbeatMonitor.isAlive())
+      {
+         desiredVelocity.setX(0.0);
+         desiredVelocity.setY(0.0);
+         turningVelocity.set(0.0);
+         isUnitVelocities.set(false);
+         walk.set(false);
+      }
+      else if (commandInputManager.isNewCommandAvailable(ContinuousStepGeneratorInputCommand.class))
       {
          ContinuousStepGeneratorInputCommand command = commandInputManager.pollNewestCommand(ContinuousStepGeneratorInputCommand.class);
          desiredVelocity.setX(command.getForwardVelocity());
@@ -163,7 +191,10 @@ public class StepGeneratorCommandInputManager implements Updatable
             continuousStepGenerator.setSwingHeight(swingHeight.getDoubleValue());
             continuousStepGenerator.setFootstepsAreAdjustable(parameters.getStepsAreAdjustable());
             continuousStepGenerator.setStepWidths(parameters.getDefaultStepWidth(), parameters.getMinStepWidth(), parameters.getMaxStepWidth());
-            continuousStepGenerator.setMaxStepLength(parameters.getMaxStepLength());
+            continuousStepGenerator.setMaxStepLengthForwards(parameters.getMaxStepLengthForwards());
+            continuousStepGenerator.setMaxStepLengthBackwards(parameters.getMaxStepLengthBackwards());
+            continuousStepGenerator.getCSGParameters().setRequestSnapToHeightmap(parameters.getRequestSnapToHeightmap());
+            continuousStepGenerator.getCSGParameters().setAccountForGroundDrift(parameters.getAccountForGroundDrift());
          }
       }
       commandInputManager.clearCommands(ContinuousStepGeneratorParametersCommand.class);
@@ -174,6 +205,9 @@ public class StepGeneratorCommandInputManager implements Updatable
          latestHeightMap.set(commandInputManager.pollNewestCommand(HeightMapCommand.class));
       }
       commandInputManager.clearCommands(HeightMapCommand.class);
+
+      if (continuousStepGenerator != null)
+         ticksToUpdateTheEnvironment = continuousStepGenerator.getCSGParameters().getTicksToUpdateTheEnvironment();
 
       // if the robot is standing, or we just finished a step, we should submit the newest regions
       if (latestWalkingStatus.get() == WalkingStatus.COMPLETED || latestFootstepStatusReceived.get() == FootstepStatus.COMPLETED)
@@ -199,9 +233,15 @@ public class StepGeneratorCommandInputManager implements Updatable
 
             ticksSinceUpdatingTheEnvironment.set(0);
          }
-
-         ticksSinceUpdatingTheEnvironment.incrementAndGet();
       }
+
+      if (continuousStepGenerator != null)
+      {
+         for (int i = 0; i < csgParametersConsumers.size(); i++)
+            csgParametersConsumers.get(i).accept(continuousStepGenerator.getCSGParameters());
+      }
+
+      ticksSinceUpdatingTheEnvironment.incrementAndGet();
 
       previousWalkingStatus.set(latestWalkingStatus.get());
       previousFootstepStatusReceived.set(latestFootstepStatusReceived.get());
@@ -267,5 +307,11 @@ public class StepGeneratorCommandInputManager implements Updatable
    public YoRegistry getRegistry()
    {
       return registry;
+   }
+
+   public void destroy()
+   {
+      ros2Node.destroy();
+      heartbeatMonitor.destroy();
    }
 }

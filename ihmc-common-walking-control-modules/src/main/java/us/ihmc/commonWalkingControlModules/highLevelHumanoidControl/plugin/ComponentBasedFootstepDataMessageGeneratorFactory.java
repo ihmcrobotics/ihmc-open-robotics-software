@@ -139,7 +139,6 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
                                                                  WalkingControllerParameters walkingControllerParameters,
                                                                  StatusMessageOutputManager walkingStatusMessageOutputManager,
                                                                  CommandInputManager walkingCommandInputManager,
-                                                                 YoGraphicsListRegistry yoGraphicsListRegistry,
                                                                  SideDependentList<? extends ContactableBody> contactableFeet,
                                                                  DoubleProvider timeProvider)
    {
@@ -191,8 +190,8 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
 
       continuousStepGenerator.setFootstepMessenger(walkingCommandInputManager::submitMessage);
 
-      if (yoGraphicsListRegistry != null && contactableFeet != null)
-         continuousStepGenerator.setupVisualization(contactableFeet, yoGraphicsListRegistry);
+      if (contactableFeet != null)
+         continuousStepGenerator.setupVisualization(contactableFeet);
 
       if (useHeadingAndVelocityScriptField.get())
       {

@@ -155,6 +155,7 @@ public class RDXVRWholeBodyKinematicStreaming
    private final Throttler messageThrottler = new Throttler();
 
    private final ImBoolean controlArmsOnly = new ImBoolean(false);
+   private final ImBoolean lockPelvis = new ImBoolean(false);
    private final ImBoolean armScaling = new ImBoolean(false);
    private final ImBoolean comTracking = new ImBoolean(true);
    private final RDXVRMotionRetargeting motionRetargeting;
@@ -346,6 +347,11 @@ public class RDXVRWholeBodyKinematicStreaming
          if (controlArmsOnly.get())
          { // If option 'Control Arms Only' is active, lock pelvis and chest to current pose
             lockChest(toolboxInputMessage);
+            lockPelvis(toolboxInputMessage);
+         }
+
+         if (lockPelvis.get())
+         {
             lockPelvis(toolboxInputMessage);
          }
 
@@ -772,6 +778,7 @@ public class RDXVRWholeBodyKinematicStreaming
          setStreamToController(streamToController.get(), true);
       }
       ImGui.checkbox(labels.get("Control Arms Only"), controlArmsOnly);
+      ImGui.checkbox(labels.get("Lock Pelvis"), lockPelvis);
       Set<String> connectedTrackers = vrContext.getAssignedTrackerRoles();
       if (connectedTrackers.contains(WAIST.getSegmentName()) &&
           connectedTrackers.contains(LEFT_ANKLE.getSegmentName()) &&
@@ -1143,5 +1150,15 @@ public class RDXVRWholeBodyKinematicStreaming
    public RDXMultiBodyGraphic getGhostRobotGraphic()
    {
       return ghostRobotGraphic;
+   }
+
+   public boolean getStreamToController()
+   {
+      return streamToController.get();
+   }
+
+   public boolean getShowGhosts()
+   {
+      return showGhosts.get();
    }
 }

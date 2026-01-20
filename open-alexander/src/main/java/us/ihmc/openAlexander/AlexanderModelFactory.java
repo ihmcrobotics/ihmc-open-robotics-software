@@ -22,7 +22,7 @@ import java.util.function.Predicate;
 public class AlexanderModelFactory
 {
    private final String[] resourceModelsToBeLogged;
-   private final OpenAlexanderURDFParameters urdfParameters;
+   private final HumanoidURDFParameterInterface urdfParameters;
    private final RobotContactPointParameters<RobotSide> contactPointParameters;
    private RobotDefinition simulationRobotDefinition;
    private final AlexanderVersionInterface alexanderVersion;

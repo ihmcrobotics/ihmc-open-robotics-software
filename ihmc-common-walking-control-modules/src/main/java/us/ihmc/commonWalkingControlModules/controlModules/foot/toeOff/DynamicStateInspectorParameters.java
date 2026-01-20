@@ -27,6 +27,8 @@ public class DynamicStateInspectorParameters
    private final DoubleParameter maxNormalizedErrorNeededForControl;
 
    private final DoubleParameter maxDistanceToMoveECMP;
+   private final DoubleParameter loadThresholdToCheckCoP;
+   private final DoubleParameter maxDistanceToMoveCoP;
 
    public DynamicStateInspectorParameters(YoRegistry parentRegistry)
    {
@@ -53,6 +55,8 @@ public class DynamicStateInspectorParameters
       maxNormalizedErrorNeededForControl = new DoubleParameter("maxNormErrorNeededForControl" + suffix, registry, 1.0);
 
       maxDistanceToMoveECMP = new DoubleParameter("maxDistanceToMoveECMP" + suffix, registry, 0.02);
+      loadThresholdToCheckCoP = new DoubleParameter("loadThresholdToCheckCoP" + suffix, registry, 0.2);
+      maxDistanceToMoveCoP = new DoubleParameter("maxDistanceToMoveCoP" + suffix, registry, 0.05);
 
       parentRegistry.addChild(registry);
    }
@@ -117,6 +121,16 @@ public class DynamicStateInspectorParameters
       return maxDistanceToMoveECMP.getValue();
    }
 
+   public double getMaxDistanceToMoveCoP()
+   {
+      return maxDistanceToMoveCoP.getValue();
+   }
+
+   public double getLoadThresholdToCheckCoP()
+   {
+      return loadThresholdToCheckCoP.getValue();
+   }
+
    public void attachParameterChangeListener(YoParameterChangedListener changedListener)
    {
       minLateralDistanceInside.addListener(changedListener);
@@ -131,5 +145,7 @@ public class DynamicStateInspectorParameters
       maxRatioOfControlDecreaseFromToeingOff.addListener(changedListener);
       maxNormalizedErrorNeededForControl.addListener(changedListener);
       maxDistanceToMoveECMP.addListener(changedListener);
+      maxDistanceToMoveCoP.addListener(changedListener);
+      loadThresholdToCheckCoP.addListener(changedListener);
    }
 }

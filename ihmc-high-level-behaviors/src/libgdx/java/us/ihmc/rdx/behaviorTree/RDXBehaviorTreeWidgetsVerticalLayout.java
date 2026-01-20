@@ -170,8 +170,6 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
 
    private void renderNodeCreationModalDialog(RDXBehaviorTreeNode<?, ?> node)
    {
-      float parentWindowHeight = ImGui.getWindowSizeY();
-
       // Make sure the menu doesn't grow to be taller than the main window
       // and keep it in the main viewport.
       // We can get a native crash if this popup creates its own viewport.
@@ -179,9 +177,7 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
       int windowFlags = ImGuiWindowFlags.None;
       if (ImGui.beginPopupModal(node.getModalPopupID(), windowFlags))
       {
-         ImGui.beginChild(labels.get("Node Creation Modal Section"), 50.0f * ImGuiTools.calcTextSizeX("A"), 0.8f * parentWindowHeight);
          behaviorTree.getNodeCreationMenu().renderImGuiWidgets(modalPopupNode, insertionType);
-         ImGui.endChild();
 
          ImGui.separator();
          if (ImGui.button(labels.get("Cancel")) || ImGui.isKeyPressed(ImGuiTools.getEscapeKey()))

@@ -133,7 +133,7 @@ public class RDXBaseUI
 
    public RDXBaseUI()
    {
-      this(0, null);
+      this(0, null, null);
    }
 
    /**
@@ -141,7 +141,13 @@ public class RDXBaseUI
     */
    public RDXBaseUI(String windowTitle)
    {
-      this(0, windowTitle);
+      this(0, null, windowTitle);
+   }
+
+   /** @param classForLoading Used to find the resources directories for layouts. Useful for abstract UIs. */
+   public RDXBaseUI(Class<?> classForLoading)
+   {
+      this(0, classForLoading, null);
    }
 
    /**
@@ -151,13 +157,16 @@ public class RDXBaseUI
     *                                              We want the highest level calling class to be the one used for loading resources.
     * @param windowTitle Title cased "My Window Title"; no symbols allowed
     */
-   /* package private*/ RDXBaseUI(int additionalStackHeightForFindingCaller, String windowTitle)
+   /* package private*/ RDXBaseUI(int additionalStackHeightForFindingCaller, Class<?> classForLoading, String windowTitle)
    {
       instance = this;
 
-      StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
-      Class<?> classForLoading = ExceptionTools.handle(() -> Class.forName(stackTraceElements[3 + additionalStackHeightForFindingCaller].getClassName()),
-                                                       DefaultExceptionHandler.RUNTIME_EXCEPTION);
+      if (classForLoading == null)
+      {
+         StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+         classForLoading = ExceptionTools.handle(() -> Class.forName(stackTraceElements[3 + additionalStackHeightForFindingCaller].getClassName()),
+                                                 DefaultExceptionHandler.RUNTIME_EXCEPTION);
+      }
       LogTools.info("Using class for loading resources: {}", classForLoading.getName());
 
       this.windowTitle = windowTitle = windowTitle == null ? classForLoading.getSimpleName() : windowTitle;
@@ -699,5 +708,10 @@ public class RDXBaseUI
    public static void pushNotification(String text)
    {
       instance.getPrimary3DPanel().getNotificationManager().pushNotification(2, text);
+   }
+
+   public static void pushNotification(String text, boolean log)
+   {
+      instance.getPrimary3DPanel().getNotificationManager().pushNotification(2, text, log);
    }
 }

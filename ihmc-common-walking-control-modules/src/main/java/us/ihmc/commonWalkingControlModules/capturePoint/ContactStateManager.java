@@ -114,7 +114,6 @@ public class ContactStateManager
 
    public void initializeForStanding()
    {
-
       inSingleSupport.set(false);
       inStanding.set(true);
 
@@ -136,6 +135,7 @@ public class ContactStateManager
    public void initializeForTransfer(double transferDuration, double swingDuration)
    {
       timeAtStartOfSupportSequence.set(time.getValue());
+
       timeInSupportSequence.set(0.0);
       currentStateDuration.set(transferDuration);
       totalStateDuration.set(transferDuration + swingDuration);
@@ -159,13 +159,13 @@ public class ContactStateManager
 
       double stepDuration = transferDuration + swingDuration;
       timeAtStartOfSupportSequence.set(time.getValue() - transferDuration);
+
       timeInSupportSequence.set(transferDuration);
       currentStateDuration.set(stepDuration);
       totalStateDuration.set(stepDuration);
       remainingTimeInContactSequence.set(swingDuration);
       adjustedRemainingTimeUnderDisturbance.set(swingDuration);
       offsetTimeInState.set(transferDuration);
-
 
       adjustedTimeInSupportSequence.set(transferDuration);
       totalTimeAdjustment.set(0.0);
@@ -176,6 +176,7 @@ public class ContactStateManager
    public void initializeForTransferToStanding(double finalTransferDuration )
    {
       timeAtStartOfSupportSequence.set(time.getValue());
+
       timeInSupportSequence.set(0.0);
       currentStateDuration.set(finalTransferDuration);
       totalStateDuration.set(finalTransferDuration);

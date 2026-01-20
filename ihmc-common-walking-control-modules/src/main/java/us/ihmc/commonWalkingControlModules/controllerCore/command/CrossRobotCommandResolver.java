@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command;
 
-import us.ihmc.commonWalkingControlModules.barrierScheduler.context.AtlasHumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleInput;
@@ -183,8 +182,10 @@ public class CrossRobotCommandResolver
    {
       out.setHasCenterOfMassPosition(in.hasCenterOfMassPosition());
       out.setHasCenterOfMassVelocity(in.hasCenterOfMassVelocity());
+      out.setHasAngularMomentum(in.hasAngularMomentum());
       resolveFrameTuple3D(in.getCenterOfMassPosition(), out.getCenterOfMassPosition());
       resolveFrameTuple3D(in.getCenterOfMassVelocity(), out.getCenterOfMassVelocity());
+      resolveFrameTuple3D(in.getAngularMomentum(), out.getAngularMomentum());
    }
 
    public void resolveHumanoidRobotContextData(HumanoidRobotContextData in, HumanoidRobotContextData out)
@@ -233,19 +234,6 @@ public class CrossRobotCommandResolver
       resolveForceSensorDataHolder(in.getForceSensorDataHolder(), out.getForceSensorDataHolder());
       resolveCenterOfMassDataHolder(in.getCenterOfMassDataHolder(), out.getCenterOfMassDataHolder());
       out.setEstimatorRan(in.getEstimatorRan());
-
-      // TODO: remove this hack.
-      // Was the easiest way to get Atlas working since it needs additional context information.
-      if (in instanceof AtlasHumanoidRobotContextData && out instanceof AtlasHumanoidRobotContextData)
-      {
-         resolveRawJointSensorDataHolderMap(((AtlasHumanoidRobotContextData) in).getRawJointSensorDataHolderMap(),
-                                            ((AtlasHumanoidRobotContextData) out).getRawJointSensorDataHolderMap());
-      }
-   }
-
-   public void resolveAtlasHumanoidRobotContextData(AtlasHumanoidRobotContextData in, AtlasHumanoidRobotContextData out)
-   {
-      resolveHumanoidRobotContextData(in, out);
    }
 
    public void resolveSensorDataContext(SensorDataContext in, SensorDataContext out)

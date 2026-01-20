@@ -36,8 +36,7 @@ public class AngularMomentumHandler<T extends ContactStateBasics<T>> implements 
                                  CenterOfMassStateProvider centerOfMassStateProvider,
                                  SideDependentList<MovingReferenceFrame> soleFrames,
                                  Supplier<T> contactSupplier,
-                                 YoRegistry parentRegistry,
-                                 YoGraphicsListRegistry graphicsListRegistry)
+                                 YoRegistry parentRegistry)
    {
       YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -50,8 +49,7 @@ public class AngularMomentumHandler<T extends ContactStateBasics<T>> implements 
                                                                            gravity,
                                                                            centerOfMassStateProvider,
                                                                            soleFrames,
-                                                                           registry,
-                                                                           graphicsListRegistry);
+                                                                           registry);
 
       parentRegistry.addChild(registry);
    }

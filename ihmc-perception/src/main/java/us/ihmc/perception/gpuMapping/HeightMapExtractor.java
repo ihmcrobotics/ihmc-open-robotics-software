@@ -72,8 +72,8 @@ public class HeightMapExtractor
    private final FloatPointer parametersHostPointer;
    private final FloatPointer parametersDevicePointer;
 
-   private int centerIndex;
-   private int cellsPerAxis;
+   private final int centerIndex;
+   private final int cellsPerAxis;
 
    private final RigidBodyTransform previousSensorToWorld = new RigidBodyTransform();
    private int previousCellX;
@@ -160,7 +160,6 @@ public class HeightMapExtractor
       resetOffset -= loweredValue;
 
       globalMeanMap.setTo(new Scalar(resetOffset));
-      emptyGlobalHeightMap.setTo(new Scalar(resetOffset));
    }
 
    public void update(GpuMat latestDepthImageGPU,
@@ -315,19 +314,19 @@ public class HeightMapExtractor
          }
       }
 
+      float zeroValueForEmptySpaces = 0.0f;
       // ---------- Run the registration kernel for an empty global height map ----------
       {
          int emptyRegistrationGridSizeXY = (cellsPerAxis + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
          dim3 registerKernelGridDim = new dim3(emptyRegistrationGridSizeXY, emptyRegistrationGridSizeXY, 1);
 
          // Need to reset the empty global map before using it so when its filled it starts with all "zero" values
-         emptyGlobalHeightMap.setTo(new Scalar(resetOffset));
+         emptyGlobalHeightMap.setTo(new Scalar(zeroValueForEmptySpaces));
 
          emptyRegisterKernel.withPointer(localMeanMap.data()).withLong(localMeanMap.step());
          emptyRegisterKernel.withPointer(emptyGlobalHeightMap.data()).withLong(emptyGlobalHeightMap.step());
          emptyRegisterKernel.withPointer(zUpCameraToWorldAlignedGroundDevicePointer);
          emptyRegisterKernel.withPointer(parametersDevicePointer);
-         emptyRegisterKernel.withFloat(resetOffset);
 
          emptyRegisterKernel.run(stream, registerKernelGridDim, blockSize, 0);
 
@@ -344,7 +343,7 @@ public class HeightMapExtractor
          planOffsetKernel.withPointer(globalMeanMap.data()).withLong(globalMeanMap.step());
          planOffsetKernel.withPointer(emptyGlobalHeightMap.data()).withLong(emptyGlobalHeightMap.step());
          planOffsetKernel.withFloat(zDriftInMeters);
-         planOffsetKernel.withFloat(resetOffset);
+         planOffsetKernel.withFloat(zeroValueForEmptySpaces);
          planOffsetKernel.withPointer(parametersDevicePointer);
 
          planOffsetKernel.run(stream, planOffsetKernelGridDim, blockSize, 0);
@@ -418,7 +417,8 @@ public class HeightMapExtractor
                           (float) parameters.getVariancePerMeter(),
                           (float) parameters.getVariancePerTranslationSpeed(),
                           (float) parameters.getVariancePerRotationSpeed(),
-                          (float) groundHeightGuess};
+                          (float) groundHeightGuess,
+                          (float) parameters.getMinDepthToAccept()};
    }
 
    public HeightMapData getHeightMapData()

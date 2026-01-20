@@ -68,6 +68,20 @@ public class WrenchVisualizer
       this(name, visualizationScaling, yoGraphicsListRegistry, parentRegistry, YoAppearance.OrangeRed(), YoAppearance.CornflowerBlue());
    }
 
+   public WrenchVisualizer(String name, double visualizationScaling, YoRegistry parentRegistry)
+   {
+      this(name, visualizationScaling, null, parentRegistry, YoAppearance.OrangeRed(), YoAppearance.CornflowerBlue());
+   }
+
+   public WrenchVisualizer(String name,
+                           double visualizationScaling,
+                           YoRegistry parentRegistry,
+                           AppearanceDefinition forceAppearance,
+                           AppearanceDefinition torqueAppearance)
+   {
+      this(name, visualizationScaling, null, parentRegistry, forceAppearance, torqueAppearance);
+   }
+
    public WrenchVisualizer(String name,
                            double visualizationScaling,
                            YoGraphicsListRegistry yoGraphicsListRegistry,
@@ -170,14 +184,17 @@ public class WrenchVisualizer
          torqueSole = new YoFrameVector3D(prefix + "TorqueSoleFrame", soleFrame, registry);
          centerOfPressure = new YoFramePoint3D(prefix + "CenterOfPressure", worldFrame, registry);
 
-         YoGraphicVector forceViz = new YoGraphicVector(prefix + "ForceViz",
-                                                        centerOfPressure,
-                                                        forceWorld,
-                                                        FORCE_VECTOR_SCALE * visualizationScaling,
-                                                        forceAppearance,
-                                                        true);
+         if (yoGraphicsListRegistry != null)
+         {
+            YoGraphicVector forceViz = new YoGraphicVector(prefix + "ForceViz",
+                                                           centerOfPressure,
+                                                           forceWorld,
+                                                           FORCE_VECTOR_SCALE * visualizationScaling,
+                                                           forceAppearance,
+                                                           true);
 
-         yoGraphicsListRegistry.registerYoGraphic(name, forceViz);
+            yoGraphicsListRegistry.registerYoGraphic(name, forceViz);
+         }
       }
 
       @Override
@@ -236,13 +253,16 @@ public class WrenchVisualizer
          torque = new YoFrameVector3D(prefix + "TorqueWorldFrame", worldFrame, registry);
          pointOfApplication = new YoFramePoint3D(prefix + "PointOfApplication", worldFrame, registry);
 
-         double forceScale = FORCE_VECTOR_SCALE * visualizationScaling;
-         double torqueScale = TORQUE_VECTOR_SCALE * visualizationScaling;
-         YoGraphicVector forceViz = new YoGraphicVector(prefix + "ForceViz", pointOfApplication, force, forceScale, forceAppearance, true);
-         YoGraphicVector torqueViz = new YoGraphicVector(prefix + "TorqueViz", pointOfApplication, torque, torqueScale, torqueAppearance, true);
+         if (yoGraphicsListRegistry != null)
+         {
+            double forceScale = FORCE_VECTOR_SCALE * visualizationScaling;
+            double torqueScale = TORQUE_VECTOR_SCALE * visualizationScaling;
+            YoGraphicVector forceViz = new YoGraphicVector(prefix + "ForceViz", pointOfApplication, force, forceScale, forceAppearance, true);
+            YoGraphicVector torqueViz = new YoGraphicVector(prefix + "TorqueViz", pointOfApplication, torque, torqueScale, torqueAppearance, true);
 
-         yoGraphicsListRegistry.registerYoGraphic(name, forceViz);
-         yoGraphicsListRegistry.registerYoGraphic(name, torqueViz);
+            yoGraphicsListRegistry.registerYoGraphic(name, forceViz);
+            yoGraphicsListRegistry.registerYoGraphic(name, torqueViz);
+         }
       }
 
       @Override

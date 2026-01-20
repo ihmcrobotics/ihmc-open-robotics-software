@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import org.ejml.data.DMatrixRMaj;
 
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
@@ -79,11 +80,11 @@ public class FootCoPOccupancyGrid implements SCS2YoGraphicHolder
                                int nWidthSubdivisions,
                                WalkingControllerParameters walkingControllerParameters,
                                ExplorationParameters explorationParameters,
-                               YoGraphicsListRegistry yoGraphicsListRegistry,
                                YoRegistry parentRegistry)
    {
-      this.footLength = walkingControllerParameters.getSteppingParameters().getFootLength();
-      this.footWidth = walkingControllerParameters.getSteppingParameters().getFootWidth();
+      SteppingParameters stepping = walkingControllerParameters.getSteppingParameters();
+      this.footLength = stepping.getFootLength();
+      this.footWidth = stepping.getFootWidth();
       this.soleFrame = soleFrame;
       gridOrigin.setIncludingFrame(soleFrame, -footLength, -footWidth);
       gridOrigin.scale(0.5);
@@ -138,9 +139,6 @@ public class FootCoPOccupancyGrid implements SCS2YoGraphicHolder
                YoFramePoint3D pointForViz = new YoFramePoint3D(namePrefix + namePrefix2, ReferenceFrame.getWorldFrame(), registry);
                pointForViz.setToNaN();
                cellViz[i][j] = pointForViz;
-               YoGraphicPosition yoGraphicPosition = new YoGraphicPosition(namePrefix + namePrefix2, pointForViz, 0.004, YoAppearance.Orange());
-               yoGraphicsListRegistry.registerArtifact(name, yoGraphicPosition.createArtifact());
-               yoGraphicsListRegistry.registerYoGraphic(name, yoGraphicPosition);
             }
          }
       }

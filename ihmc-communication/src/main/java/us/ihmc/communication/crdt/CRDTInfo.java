@@ -5,7 +5,7 @@ import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 
 /**
  * Holds onto this actor's CRDT information, used by the algorithm to sync data.
- * There should typically be only one of these in a process.
+ * There should only one of these per synchronizing module.
  */
 public class CRDTInfo
 {

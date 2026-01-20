@@ -3,8 +3,11 @@ package us.ihmc.behaviors.behaviorTree;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.behaviorTree.action.actions.AbilityHandActionComms;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneExecutor;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -33,7 +36,9 @@ public class BehaviorTreeNodeExecutor<S extends BehaviorTreeNodeState<D>,
    protected final ROS2ControllerHelper ros2ControllerHelper;
    protected final ROS2SyncedRobotModel syncedRobot;
    protected final ControllerStatusTracker controllerStatusTracker;
+   protected final SideDependentList<AbilityHandActionComms> abilityHandComms;
    protected final BehaviorTreeSceneExecutor scene;
+   protected final TerrainMapData terrainMapData;
 
    /** For creating a basic node. */ // TODO: Should not exist???
    public BehaviorTreeNodeExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
@@ -51,7 +56,9 @@ public class BehaviorTreeNodeExecutor<S extends BehaviorTreeNodeState<D>,
       this.ros2ControllerHelper = rootNode.getRos2ControllerHelper();
       this.syncedRobot = rootNode.getSyncedRobot();
       this.controllerStatusTracker = rootNode.getControllerStatusTracker();
+      this.abilityHandComms = rootNode.getAbilityHandComms();
       this.scene = rootNode.getScene();
+      this.terrainMapData = rootNode.getTerrainMap();
    }
 
    /** Root node constructor. */
@@ -59,7 +66,9 @@ public class BehaviorTreeNodeExecutor<S extends BehaviorTreeNodeState<D>,
                                    ROS2ControllerHelper ros2ControllerHelper,
                                    ROS2SyncedRobotModel syncedRobot,
                                    ControllerStatusTracker controllerStatusTracker,
-                                   BehaviorTreeSceneExecutor scene)
+                                   SideDependentList<AbilityHandActionComms> abilityHandComms,
+                                   BehaviorTreeSceneExecutor scene,
+                                   TerrainMapData terrainMapData)
    {
       this.definition = state.getDefinition();
       this.state = state;
@@ -68,7 +77,9 @@ public class BehaviorTreeNodeExecutor<S extends BehaviorTreeNodeState<D>,
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
       this.controllerStatusTracker = controllerStatusTracker;
+      this.abilityHandComms = abilityHandComms;
       this.scene = scene;
+      this.terrainMapData = terrainMapData;
    }
 
    /**

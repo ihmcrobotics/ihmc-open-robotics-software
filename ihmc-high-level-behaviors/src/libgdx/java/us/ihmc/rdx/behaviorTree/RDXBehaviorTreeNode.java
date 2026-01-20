@@ -38,6 +38,8 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
                                  D extends BehaviorTreeNodeDefinition>
       implements BehaviorTreeNode<RDXBehaviorTreeNode<?, ?>, S, D>
 {
+   private static final RDXBehaviorTreeNodeExpansionManager expansionManager = new RDXBehaviorTreeNodeExpansionManager();
+
    /** Convenient accessor to the state to keep the code clean, available to all inheriting classes. */
    protected final S state;
    /** Convenient accessor to the definition to keep the code clean, available to all inheriting classes. */
@@ -47,20 +49,22 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    private transient RDXBehaviorTreeNode<?, ?> parent;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   protected float offsetY = 0.0f;
    private final ImBoolean selected = new ImBoolean();
    private transient final ImVec2 lineMin = new ImVec2();
    private transient final ImVec2 indentMin = new ImVec2();
    private transient final ImVec2 lineMax = new ImVec2();
-   private boolean mouseHoveringNodeLine;
+   protected boolean mouseHoveringNodeLine;
    protected boolean anySpecificWidgetOnLineClicked = false;
-   protected boolean treeWidgetExpanded = false;
-   private int previousNumberOfChildren = 0;
+   protected boolean initialized = false;
+   protected boolean treeWidgetExpanded = true;
    private boolean isNameBeingEdited = false;
    private transient final ImString imNodeNameText = new ImString();
    private transient final ImString notesText = new ImString(1500);
    private final String nodePopupID = labels.get("Node popup");
    private String modalPopupID = labels.get("Create node");
    private final ImGuiScrollableLogArea logArea = new ImGuiScrollableLogArea();
+   public static boolean logNotifications = true;
    private RDXBehaviorTreeNode<?, ?> draggedNode = null;
    private boolean dragging = false;
    private boolean dragReleasedBefore = false;
@@ -117,17 +121,19 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    {
       BehaviorTreeNode.super.update();
 
-      // Automatically expand if less than 5 children are added at once
-      int deltaChildren = getChildren().size() - previousNumberOfChildren;
-      previousNumberOfChildren = getChildren().size();
-      if (deltaChildren > 0 && deltaChildren < 5)
-         treeWidgetExpanded = true;
+      if (!initialized)
+      {
+         initialized = true;
+         treeWidgetExpanded = expansionManager.isExpanded(definition.getName());
+      }
+
+      offsetY = Float.NaN;
 
       while (!state.getLogger().getRecentMessages().isEmpty())
       {
          LogMessage message = state.getLogger().getRecentMessages().poll();
          logArea.submitEntry(message.instant(), message.level(), message.message());
-         RDXBaseUI.pushNotification(message.message());
+         RDXBaseUI.pushNotification(message.message(), logNotifications);
       }
    }
 
@@ -160,8 +166,12 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
 
    public void renderRowBeginning()
    {
-      anySpecificWidgetOnLineClicked = false;
+      // Since we are doing mouseDown event action for all interactions except selecting the node settings,
+      // We need to not reset this unless the mouse is released and has been released
+      if (!ImGui.isMouseDown(ImGuiMouseButton.Left) && !ImGui.isMouseReleased(ImGuiMouseButton.Left))
+         anySpecificWidgetOnLineClicked = false;
 
+      offsetY = ImGui.getCursorScreenPosY();
       ImGui.dummy(0.0f, ImGui.getFrameHeight()); // Make the lines as tall as when they have and input box
       ImGui.sameLine(0.0f, 0.0f);
       ImGui.alignTextToFramePadding(); // Centers the node descriptions vertically in the frame height area
@@ -233,7 +243,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
          if (isHovered && ImGui.isMouseClicked(ImGuiMouseButton.Left))
          {
             anySpecificWidgetOnLineClicked = true;
-            treeWidgetExpanded = !treeWidgetExpanded;
+            setTreeWidgetExpanded(!treeWidgetExpanded);
          }
       }
       ImGui.setCursorScreenPos(indentMin.x + itemWidth, indentMin.y); // Leave space for the expand/collapse arrow regardless
@@ -283,8 +293,9 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       }
 
       // We try to make anywhere on the row clickable to select the node,
-      // execpt for specific interactions
-      if (!anySpecificWidgetOnLineClicked && mouseHoveringNodeLine && ImGui.isMouseClicked(ImGuiMouseButton.Left) && !isNameBeingEdited)
+      // execpt for specific interactions. We use release without drag to prevent interference
+      // with the drag and drop functionality
+      if (!anySpecificWidgetOnLineClicked && mouseHoveringNodeLine && ImGuiTools.mouseReleasedWithoutDrag(ImGuiMouseButton.Left) && !isNameBeingEdited)
       {
          boolean desiredValue = !selected.get();
          RDXBehaviorTreeTools.clearOtherNodeSelections(this);
@@ -391,6 +402,9 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
 
    public void setTreeWidgetExpanded(boolean treeWidgetExpanded)
    {
+      if (treeWidgetExpanded != this.treeWidgetExpanded)
+         expansionManager.setExpanded(definition.getName(), treeWidgetExpanded);
+
       this.treeWidgetExpanded = treeWidgetExpanded;
    }
 

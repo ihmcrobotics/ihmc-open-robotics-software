@@ -19,12 +19,16 @@ public class ContinuousStepGeneratorStatusMessage extends Packet<ContinuousStepG
    public double current_swing_height_;
    public double current_swing_duration_;
    public double current_transfer_duration_;
-   public double current_max_step_length_;
+   public double current_max_step_length_forwards_;
+   public double current_max_step_length_backwards_;
    public double current_max_step_width_;
    public double current_min_step_width_;
    public double current_default_step_width_;
    public double current_turn_max_angle_inward_;
    public double current_turn_max_angle_outward_;
+   public boolean are_steps_adjustable_;
+   public boolean snapping_to_heightmap_;
+   public boolean accounting_for_ground_drift_;
 
    public ContinuousStepGeneratorStatusMessage()
    {
@@ -54,7 +58,9 @@ public class ContinuousStepGeneratorStatusMessage extends Packet<ContinuousStepG
 
       current_transfer_duration_ = other.current_transfer_duration_;
 
-      current_max_step_length_ = other.current_max_step_length_;
+      current_max_step_length_forwards_ = other.current_max_step_length_forwards_;
+
+      current_max_step_length_backwards_ = other.current_max_step_length_backwards_;
 
       current_max_step_width_ = other.current_max_step_width_;
 
@@ -65,6 +71,12 @@ public class ContinuousStepGeneratorStatusMessage extends Packet<ContinuousStepG
       current_turn_max_angle_inward_ = other.current_turn_max_angle_inward_;
 
       current_turn_max_angle_outward_ = other.current_turn_max_angle_outward_;
+
+      are_steps_adjustable_ = other.are_steps_adjustable_;
+
+      snapping_to_heightmap_ = other.snapping_to_heightmap_;
+
+      accounting_for_ground_drift_ = other.accounting_for_ground_drift_;
 
    }
 
@@ -140,13 +152,22 @@ public class ContinuousStepGeneratorStatusMessage extends Packet<ContinuousStepG
       return current_transfer_duration_;
    }
 
-   public void setCurrentMaxStepLength(double current_max_step_length)
+   public void setCurrentMaxStepLengthForwards(double current_max_step_length_forwards)
    {
-      current_max_step_length_ = current_max_step_length;
+      current_max_step_length_forwards_ = current_max_step_length_forwards;
    }
-   public double getCurrentMaxStepLength()
+   public double getCurrentMaxStepLengthForwards()
    {
-      return current_max_step_length_;
+      return current_max_step_length_forwards_;
+   }
+
+   public void setCurrentMaxStepLengthBackwards(double current_max_step_length_backwards)
+   {
+      current_max_step_length_backwards_ = current_max_step_length_backwards;
+   }
+   public double getCurrentMaxStepLengthBackwards()
+   {
+      return current_max_step_length_backwards_;
    }
 
    public void setCurrentMaxStepWidth(double current_max_step_width)
@@ -194,6 +215,33 @@ public class ContinuousStepGeneratorStatusMessage extends Packet<ContinuousStepG
       return current_turn_max_angle_outward_;
    }
 
+   public void setAreStepsAdjustable(boolean are_steps_adjustable)
+   {
+      are_steps_adjustable_ = are_steps_adjustable;
+   }
+   public boolean getAreStepsAdjustable()
+   {
+      return are_steps_adjustable_;
+   }
+
+   public void setSnappingToHeightmap(boolean snapping_to_heightmap)
+   {
+      snapping_to_heightmap_ = snapping_to_heightmap;
+   }
+   public boolean getSnappingToHeightmap()
+   {
+      return snapping_to_heightmap_;
+   }
+
+   public void setAccountingForGroundDrift(boolean accounting_for_ground_drift)
+   {
+      accounting_for_ground_drift_ = accounting_for_ground_drift;
+   }
+   public boolean getAccountingForGroundDrift()
+   {
+      return accounting_for_ground_drift_;
+   }
+
 
    public static Supplier<ContinuousStepGeneratorStatusMessagePubSubType> getPubSubType()
    {
@@ -228,7 +276,9 @@ public class ContinuousStepGeneratorStatusMessage extends Packet<ContinuousStepG
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.current_transfer_duration_, other.current_transfer_duration_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.current_max_step_length_, other.current_max_step_length_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.current_max_step_length_forwards_, other.current_max_step_length_forwards_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.current_max_step_length_backwards_, other.current_max_step_length_backwards_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.current_max_step_width_, other.current_max_step_width_, epsilon)) return false;
 
@@ -239,6 +289,12 @@ public class ContinuousStepGeneratorStatusMessage extends Packet<ContinuousStepG
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.current_turn_max_angle_inward_, other.current_turn_max_angle_inward_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.current_turn_max_angle_outward_, other.current_turn_max_angle_outward_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.are_steps_adjustable_, other.are_steps_adjustable_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.snapping_to_heightmap_, other.snapping_to_heightmap_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.accounting_for_ground_drift_, other.accounting_for_ground_drift_, epsilon)) return false;
 
 
       return true;
@@ -269,7 +325,9 @@ public class ContinuousStepGeneratorStatusMessage extends Packet<ContinuousStepG
 
       if(this.current_transfer_duration_ != otherMyClass.current_transfer_duration_) return false;
 
-      if(this.current_max_step_length_ != otherMyClass.current_max_step_length_) return false;
+      if(this.current_max_step_length_forwards_ != otherMyClass.current_max_step_length_forwards_) return false;
+
+      if(this.current_max_step_length_backwards_ != otherMyClass.current_max_step_length_backwards_) return false;
 
       if(this.current_max_step_width_ != otherMyClass.current_max_step_width_) return false;
 
@@ -280,6 +338,12 @@ public class ContinuousStepGeneratorStatusMessage extends Packet<ContinuousStepG
       if(this.current_turn_max_angle_inward_ != otherMyClass.current_turn_max_angle_inward_) return false;
 
       if(this.current_turn_max_angle_outward_ != otherMyClass.current_turn_max_angle_outward_) return false;
+
+      if(this.are_steps_adjustable_ != otherMyClass.are_steps_adjustable_) return false;
+
+      if(this.snapping_to_heightmap_ != otherMyClass.snapping_to_heightmap_) return false;
+
+      if(this.accounting_for_ground_drift_ != otherMyClass.accounting_for_ground_drift_) return false;
 
 
       return true;
@@ -307,8 +371,10 @@ public class ContinuousStepGeneratorStatusMessage extends Packet<ContinuousStepG
       builder.append(this.current_swing_duration_);      builder.append(", ");
       builder.append("current_transfer_duration=");
       builder.append(this.current_transfer_duration_);      builder.append(", ");
-      builder.append("current_max_step_length=");
-      builder.append(this.current_max_step_length_);      builder.append(", ");
+      builder.append("current_max_step_length_forwards=");
+      builder.append(this.current_max_step_length_forwards_);      builder.append(", ");
+      builder.append("current_max_step_length_backwards=");
+      builder.append(this.current_max_step_length_backwards_);      builder.append(", ");
       builder.append("current_max_step_width=");
       builder.append(this.current_max_step_width_);      builder.append(", ");
       builder.append("current_min_step_width=");
@@ -318,7 +384,13 @@ public class ContinuousStepGeneratorStatusMessage extends Packet<ContinuousStepG
       builder.append("current_turn_max_angle_inward=");
       builder.append(this.current_turn_max_angle_inward_);      builder.append(", ");
       builder.append("current_turn_max_angle_outward=");
-      builder.append(this.current_turn_max_angle_outward_);
+      builder.append(this.current_turn_max_angle_outward_);      builder.append(", ");
+      builder.append("are_steps_adjustable=");
+      builder.append(this.are_steps_adjustable_);      builder.append(", ");
+      builder.append("snapping_to_heightmap=");
+      builder.append(this.snapping_to_heightmap_);      builder.append(", ");
+      builder.append("accounting_for_ground_drift=");
+      builder.append(this.accounting_for_ground_drift_);
       builder.append("}");
       return builder.toString();
    }

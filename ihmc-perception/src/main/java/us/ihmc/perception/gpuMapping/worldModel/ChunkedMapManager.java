@@ -3,10 +3,9 @@ package us.ihmc.perception.gpuMapping.worldModel;
 import com.esotericsoftware.kryo.util.IntMap;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ChunkMessage;
+import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.perception.gpuMapping.HeightMapMessageTools;
 import us.ihmc.perception.gpuMapping.HeightMapParameters;
 import us.ihmc.perception.gpuMapping.HeightMapTools;
 import us.ihmc.ros2.ROS2Node;
@@ -29,6 +28,7 @@ import java.util.HashSet;
 public class ChunkedMapManager
 {
    private static final int MAX_CHUNKS_TO_STORE = 100;
+   private static final double CHUNK_PUBLISH_FREQUENCY = 8.0;
    private final HeightMapParameters heightMapParameters;
 
    private final IntMap<Chunk> chunksHashMap = new IntMap<>();
@@ -36,28 +36,27 @@ public class ChunkedMapManager
    private final Deque<Integer> queueOfChunks = new ArrayDeque<>();
    private final ROS2Publisher<ChunkMessage> chunkMessagePublisher;
    private final ChunkMessage chunkMessage;
+   private final IntMap<Throttler> chunkThrottlers = new IntMap<>();
 
    public ChunkedMapManager(ROS2Node ros2Node, HeightMapParameters heightMapParameters)
    {
       this.heightMapParameters = heightMapParameters;
-      chunkMessage = new ChunkMessage();
       chunkMessagePublisher = ros2Node.createPublisher(PerceptionAPI.CHUNK);
+      chunkMessage = new ChunkMessage();
    }
 
    public void updateAndPublish(Mat latestHeightMap, Point3DReadOnly heightMapCenterPoint)
    {
       if (heightMapParameters.getEnableChunkedMap())
       {
-         addHeightMap(latestHeightMap, heightMapCenterPoint, heightMapParameters.getWidthInMeters(), heightMapParameters.getCellSize());
+         addHeightMap(latestHeightMap, heightMapCenterPoint, heightMapParameters.getWidthInMeters(), (float) heightMapParameters.getCellSize());
          publishChunkedMap(chunkMessagePublisher);
       }
    }
 
-   public void addHeightMap(Mat heightMap, Point3DReadOnly heightMapCenter, double gridSize, double resolution)
+   public void addHeightMap(Mat heightMap, Point3DReadOnly heightMapCenter, double gridSize, float resolution)
    {
       chunks.clear();
-
-      int centerIndex = HeightMapTools.computeCenterIndex(gridSize, resolution);
 
       int centerIndexOfIncomingHeightMap = HeightMapTools.computeCenterIndex(gridSize, resolution);
       int cellsPerAxisOfIncomingHeightMap = 2 * centerIndexOfIncomingHeightMap + 1;
@@ -72,9 +71,8 @@ public class ChunkedMapManager
       {
          for (int j = 0; j < heightMap.cols(); j++)
          {
-            double XCord = HeightMapTools.indexToCoordinate(i, heightMapCenter.getX(), resolution, centerIndex);
-            double YCord = HeightMapTools.indexToCoordinate(j, heightMapCenter.getY(), resolution, centerIndex);
-
+            double XCord = HeightMapTools.indexToCoordinate(i, heightMapCenter.getX(), resolution, centerIndexOfIncomingHeightMap);
+            double YCord = HeightMapTools.indexToCoordinate(j, heightMapCenter.getY(), resolution, centerIndexOfIncomingHeightMap);
             Chunk chunk = getOrCreateChunk(XCord, YCord, Chunk.CHUNK_WIDTH, resolution);
 
             int index = i * cellsPerAxisOfIncomingHeightMap + j;
@@ -85,11 +83,6 @@ public class ChunkedMapManager
             chunks.add(chunk);
          }
       }
-
-      for (Chunk chunk : chunks)
-      {
-         chunk.commitHeightsToMat();
-      }
    }
 
    /**
@@ -97,9 +90,9 @@ public class ChunkedMapManager
     * So we pull from our map of {@link Chunk}'s to check, if we don't have one, we create a new one.
     * Which is why we need to pass in so many parameters.
     */
-   private Chunk getOrCreateChunk(double xCoordinate, double yCoordinate, double chunkSizeInMeters, double chunkResolution)
+   private Chunk getOrCreateChunk(double xCoordinate, double yCoordinate, float chunkSizeInMeters, float chunkResolution)
    {
-      int cellsPerAxis = (int) Math.round(chunkSizeInMeters / chunkResolution);
+      int cellsPerAxis = Math.round(chunkSizeInMeters / chunkResolution);
 
       int worldCellX = (int) Math.floor(xCoordinate / chunkResolution);
       int worldCellY = (int) Math.floor(yCoordinate / chunkResolution);
@@ -113,8 +106,8 @@ public class ChunkedMapManager
        * And so we need the center of cell [0,0] for the chunk map to also be at world (0.0, 0.0)
        * So the (0.5 * resolution) shifts the origin to be aligned with the height map
        */
-      double chunkOriginX = chunkIndexX * chunkSizeInMeters - 0.5 * chunkResolution;
-      double chunkOriginY = chunkIndexY * chunkSizeInMeters - 0.5 * chunkResolution;
+      float chunkOriginX = chunkIndexX * chunkSizeInMeters - 0.5f * chunkResolution;
+      float chunkOriginY = chunkIndexY * chunkSizeInMeters - 0.5f * chunkResolution;
 
       int hash = Chunk.generateHashForChunk(chunkOriginX, chunkOriginY);
 
@@ -125,6 +118,9 @@ public class ChunkedMapManager
          chunksHashMap.put(hash, chunk);
          queueOfChunks.addLast(hash);
 
+         // Create a throttler for this chunk
+         chunkThrottlers.put(hash, new Throttler().setFrequency(CHUNK_PUBLISH_FREQUENCY));
+
          // Resources aren't free, at some point there is a limit on how much we can store, time to see if we should remove any
          if (chunksHashMap.size > MAX_CHUNKS_TO_STORE)
          {
@@ -132,6 +128,7 @@ public class ChunkedMapManager
             if (oldestHash != null)
             {
                chunksHashMap.remove(oldestHash);
+               chunkThrottlers.remove(oldestHash);
             }
          }
       }
@@ -144,19 +141,25 @@ public class ChunkedMapManager
       Collection<Chunk> chunks = getChunks();
       for (Chunk chunk : chunks)
       {
-         chunkMessage.setHashCodeOfChunk(chunk.hashCode());
+         // If the chunk doesn't have any new height values, we don't need to publish it again
+         if (!chunk.isDirty())
+            continue;
 
-         HeightMapMessageTools.toMessage(chunk.getChunk(),
-                                         chunkMessage,
-                                         new Point3D(chunk.getOriginX(), chunk.getOriginY(), 0),
-                                         Chunk.CHUNK_WIDTH,
-                                         chunk.getCellSize(),
-                                         chunk.getCellsPerAxis());
-         publisher.publish(chunkMessage);
+         int hash = Chunk.generateHashForChunk(chunk.getOriginX(), chunk.getOriginY());
+         Throttler throttler = chunkThrottlers.get(hash);
+
+         if (throttler != null && throttler.run())
+         {
+            ChunkMessageTools.toMessage(chunk, chunkMessage);
+            publisher.publish(chunkMessage);
+            // After it's been published, we reset the dirty value so we don't keep publishing it even
+            // if it hasn't changed
+            chunk.setDirty(false);
+         }
       }
    }
 
-   private Collection<Chunk> getChunks()
+   public Collection<Chunk> getChunks()
    {
       return chunks;
    }

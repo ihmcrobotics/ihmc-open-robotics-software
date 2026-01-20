@@ -1,17 +1,14 @@
 package us.ihmc.rdx.perception.sceneGraph;
 
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import org.bytedeco.opencl.global.OpenCL;
+import org.bytedeco.opencv.opencv_core.GpuMat;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.property.ROS2StoredPropertySet;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
-import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.ImageSensorPublishThread;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.comms.PerceptionComms;
@@ -45,10 +42,9 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.sensors.zed.ROS2ZEDSVOPlaybackSensor;
 import us.ihmc.sensors.zed.ZEDImageSensor;
 import us.ihmc.sensors.zed.ZEDModelData;
-import us.ihmc.sensors.zed.ROS2ZEDSVOPlaybackSensor;
-import us.ihmc.tools.IHMCCommonPaths;
 
 import static us.ihmc.zed.global.zed.SL_DEPTH_MODE_NEURAL;
 import static us.ihmc.zed.global.zed.SL_DEPTH_MODE_PERFORMANCE;
@@ -114,23 +110,23 @@ public class RDXSceneGraphDemo
                RDXROS2ImageMessageVisualizer zedColorImageVisualizer
                      = new RDXROS2ImageMessageVisualizer("ZED 2 Color %s".formatted(side.getPascalCaseName()),
                                                          ros2Node,
-                                                         PerceptionAPI.ZED_COLOR_IMAGES.get(side));
-               zedColorImageVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_PUBLICATION);
+                                                         PerceptionAPI.EXPERIMENTAL_ZED_COLOR.get(side));
+               zedColorImageVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_EXPERIMENTAL_ZED_PUBLICATION);
                perceptionVisualizerPanel.addVisualizer(zedColorImageVisualizer);
             }
 
             RDXROS2ImageMessageVisualizer zed2DepthImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED 2 Depth Image",
                                                                                                        ros2Node,
-                                                                                                       PerceptionAPI.ZED_DEPTH);
-            zed2DepthImageVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_PUBLICATION);
+                                                                                                       PerceptionAPI.EXPERIMENTAL_ZED_DEPTH);
+            zed2DepthImageVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_EXPERIMENTAL_ZED_PUBLICATION);
             perceptionVisualizerPanel.addVisualizer(zed2DepthImageVisualizer);
 
             RDXROS2ColoredPointCloudVisualizer zed2ColoredPointCloudVisualizer
                   = new RDXROS2ColoredPointCloudVisualizer("ZED 2 Colored Point Cloud",
                                                            ros2Node,
-                                                           PerceptionAPI.ZED_DEPTH,
-                                                           PerceptionAPI.ZED_COLOR_IMAGES.get(RobotSide.LEFT));
-            zed2ColoredPointCloudVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_PUBLICATION);
+                                                           PerceptionAPI.EXPERIMENTAL_ZED_DEPTH,
+                                                           PerceptionAPI.EXPERIMENTAL_ZED_COLOR.get(RobotSide.LEFT));
+            zed2ColoredPointCloudVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_EXPERIMENTAL_ZED_PUBLICATION);
             zed2ColoredPointCloudVisualizer.setActive(true);
             perceptionVisualizerPanel.addVisualizer(zed2ColoredPointCloudVisualizer);
 
@@ -161,9 +157,9 @@ public class RDXSceneGraphDemo
             zedSVOPlayer.run(true);
 
             zedPublishThread = new ImageSensorPublishThread(ros2Node, zedSVOPlayer);
-            zedPublishThread.addTopic(PerceptionAPI.ZED_COLOR_IMAGES.get(RobotSide.LEFT), ZEDImageSensor.LEFT_COLOR_IMAGE_KEY);
-            zedPublishThread.addTopic(PerceptionAPI.ZED_COLOR_IMAGES.get(RobotSide.RIGHT), ZEDImageSensor.RIGHT_COLOR_IMAGE_KEY);
-            zedPublishThread.addTopic(PerceptionAPI.ZED_DEPTH, ZEDImageSensor.DEPTH_IMAGE_KEY);
+            zedPublishThread.addTopic(PerceptionAPI.EXPERIMENTAL_ZED_COLOR.get(RobotSide.LEFT), ZEDImageSensor.LEFT_COLOR_IMAGE_KEY);
+            zedPublishThread.addTopic(PerceptionAPI.EXPERIMENTAL_ZED_COLOR.get(RobotSide.RIGHT), ZEDImageSensor.RIGHT_COLOR_IMAGE_KEY);
+            zedPublishThread.addTopic(PerceptionAPI.EXPERIMENTAL_ZED_DEPTH, ZEDImageSensor.DEPTH_IMAGE_KEY);
             zedPublishThread.startRepeating();
 
             zedSVORecorderPanel = new RDXZEDSVORecorderPanel(ros2Helper);
@@ -192,30 +188,18 @@ public class RDXSceneGraphDemo
 
                if (planarRegionsExtractor == null)
                {
-                  int imageHeight = zedDepthImage.getHeight();
-                  int imageWidth = zedDepthImage.getWidth();
-                  double fx = zedDepthImage.getFocalLengthX();
-                  double fy = zedDepthImage.getFocalLengthY();
-                  double cx = zedDepthImage.getPrincipalPointX();
-                  double cy = zedDepthImage.getPrincipalPointY();
-                  planarRegionsExtractor = new RapidPlanarRegionsExtractor(planarRegionsOpenCLManager, imageHeight, imageWidth, fx, fy, cx, cy);
-                  planarRegionsExtractor.getDebugger().setEnabled(false);
-
+                  planarRegionsExtractor = new RapidPlanarRegionsExtractor(zedDepthImage.getIntrinsicsCopy());
                   planarRegionsExtractorParameterSync = new ROS2StoredPropertySet<>(ros2Node,
                                                                                     PerceptionComms.PERSPECTIVE_RAPID_REGION_PARAMETERS,
-                                                                                    planarRegionsExtractor.getParameters());
+                                                                                    planarRegionsExtractor.getRapidRegionsExtractorParameters());
                }
 
                planarRegionsExtractorParameterSync.updateAndPublishThrottledStatus();
 
                FramePlanarRegionsList framePlanarRegionsList = new FramePlanarRegionsList();
 
-               // TODO: Get rid of BytedecoImage, RapidPlanarRegionsExtractor requires it
-               BytedecoImage bytedecoImage = new BytedecoImage(zedDepthImage.getCpuImageMat().clone());
-               bytedecoImage.createOpenCLImage(planarRegionsOpenCLManager, OpenCL.CL_MEM_READ_WRITE);
-               planarRegionsExtractor.update(bytedecoImage, sensorFrame.getReferenceFrame(), framePlanarRegionsList);
-               planarRegionsExtractor.setProcessing(false);
-               bytedecoImage.destroy(planarRegionsOpenCLManager);
+               GpuMat depthImage = zedDepthImage.getGpuImageMat();
+               planarRegionsExtractor.update(depthImage, sensorFrame.getReferenceFrame(), framePlanarRegionsList);
 
                PlanarRegionsList planarRegionsInWorldFrame = framePlanarRegionsList.getPlanarRegionsList().copy();
                planarRegionsInWorldFrame.applyTransform(sensorFrame.getReferenceFrame().getTransformToWorldFrame());
@@ -228,8 +212,7 @@ public class RDXSceneGraphDemo
 
                if (yolov8DetectionExecutor == null)
                {
-                  yolov8DetectionExecutor = new YOLOv8DetectionExecutor(new CRDTInfo(ROS2ActorDesignation.ROBOT, robotClockOffsetEstimator),
-                                                                        yoloSettingsVisualizer::isActive);
+                  yolov8DetectionExecutor = new YOLOv8DetectionExecutor(robotClockOffsetEstimator, yoloSettingsVisualizer::isActive);
                   yolov8DetectionExecutor.addDetectionConsumerCallback(detectionManager::addDetections);
                }
 

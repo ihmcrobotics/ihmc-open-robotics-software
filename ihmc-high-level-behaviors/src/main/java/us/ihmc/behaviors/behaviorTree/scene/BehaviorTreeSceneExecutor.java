@@ -1,15 +1,12 @@
 package us.ihmc.behaviors.behaviorTree.scene;
 
+import behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage;
 import behavior_msgs.msg.dds.BehaviorTreeSceneStateMessage;
-import behavior_msgs.msg.dds.PersistentDetectionStatusMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.perception.detections.PersistentDetection;
+import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseCommunicator;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseCommunicatorMap;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseObject;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
@@ -33,8 +30,7 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
    private final Set<PersistentDetection> matchedThisTick = new HashSet<>();
    private final List<PersistentDetection> persistentDetections = new ArrayList<>();
    private final List<PersistentDetection> oldUnstableDetections = new ArrayList<>();
-   private final transient FramePose3D detectionPose = new FramePose3D();
-   private final transient RigidBodyTransform detectionTransform = new RigidBodyTransform();
+   private final PersistentDetectionMessageTool persistentDetectionMessageTool = new PersistentDetectionMessageTool();
 
    public BehaviorTreeSceneExecutor(CRDTInfo crdtInfo,
                                     LongSupplier idSupplier,
@@ -49,7 +45,15 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
 
       objects = (List) super.objects;
 
-      yolo.addDetectionConsumerCallback(instantDetectionQueue::add);
+      if (yolo != null)
+         yolo.addDetectionConsumerCallback(instantDetectionQueue::add);
+
+      if (foundationPose != null)
+      {
+         IsaacROSFoundationPoseCommunicator mustardCommunicator = foundationPose.get(IsaacROSFoundationPoseObject.MUSTARD);
+         mustardCommunicator.enable(true);
+         mustardCommunicator.addResultCallback(detection -> instantDetectionQueue.add(List.of(detection)));
+      }
    }
 
    public void update()
@@ -61,7 +65,7 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
 
       for (BehaviorTreeSceneObjectExecutor object : objects)
       {
-         object.update(syncedRobot.getReferenceFrames().getExperimentalCameraFrame());
+         object.update();
       }
    }
 
@@ -107,7 +111,7 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
          else
          {
             double poseFilterAlpha = 0.5;
-            double acceptanceConfidence = 0.5;
+            double acceptanceConfidence = 0.25;
             double stabilityFrequency = 1.0;
             double historyDuration = 2.0;
             persistentDetections.add(new PersistentDetection(newDetection, poseFilterAlpha, acceptanceConfidence, stabilityFrequency, historyDuration));
@@ -137,9 +141,9 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
    }
 
    @Override
-   protected BehaviorTreeSceneObjectState buildObject(long id, CRDTInfo crdtInfo, IsaacROSFoundationPoseObject objectType)
+   protected BehaviorTreeSceneObjectState buildObject(long id, CRDTInfo crdtInfo, BehaviorTreeSceneObjectDefinitionMessage definition)
    {
-      return new BehaviorTreeSceneObjectExecutor(id, crdtInfo, objectType);
+      return new BehaviorTreeSceneObjectExecutor(id, crdtInfo, syncedRobot, definition);
    }
 
    @Override
@@ -150,19 +154,7 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
       Instant now = Instant.now();
       message.getPersistentDetections().clear();
       for (PersistentDetection persistentDetection : persistentDetections)
-      {
-         PersistentDetectionStatusMessage status = message.getPersistentDetections().add();
-         status.setObjectClass(persistentDetection.getDetectedObjectClass());
-         status.setDecayingFrequency(persistentDetection.getDetectionFrequencyDecaying(now));
-         status.setHistorySize(persistentDetection.getHistorySize());
-         status.setIsStable(persistentDetection.isStable(now));
-
-         detectionPose.setToZero(syncedRobot.getReferenceFrames().getExperimentalCameraFrame());
-         detectionPose.set(persistentDetection.getFilteredTransformToCamera());
-         detectionPose.changeFrame(ReferenceFrame.getWorldFrame());
-         detectionTransform.set(detectionPose);
-         MessageTools.toMessage(detectionTransform, status.getTransformToWorld());
-      }
+         persistentDetectionMessageTool.toMessage(syncedRobot, now, persistentDetection, message.getPersistentDetections().add());
    }
 
    public List<PersistentDetection> getPersistentDetections()

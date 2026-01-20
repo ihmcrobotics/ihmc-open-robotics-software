@@ -48,7 +48,6 @@ public class AvatarEstimatorThread extends ModularRobotController implements SCS
 
    private final List<Runnable> runnables = new ArrayList<>();
    private final ROS2Publisher<ControllerCrashNotificationPacket> controllerCrashPublisher;
-   private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
    private final ExecutionTimer estimatorThreadTimer;
 
@@ -58,8 +57,7 @@ public class AvatarEstimatorThread extends ModularRobotController implements SCS
                                 StateEstimatorController mainStateEstimator,
                                 PairList<BooleanSupplier, StateEstimatorController> secondaryStateEstimators,
                                 ROS2Publisher<ControllerCrashNotificationPacket> controllerCrashPublisher,
-                                YoRegistry estimatorRegistry,
-                                YoGraphicsListRegistry yoGraphicsListRegistry)
+                                YoRegistry estimatorRegistry)
    {
       super("EstimatorController");
 
@@ -70,7 +68,6 @@ public class AvatarEstimatorThread extends ModularRobotController implements SCS
       this.secondaryStateEstimators = secondaryStateEstimators;
       this.controllerCrashPublisher = controllerCrashPublisher;
       this.estimatorRegistry = estimatorRegistry;
-      this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
       // This is to preserve the registry hierarchy for the parameters to work
       estimatorRegistry.addChild(super.getYoRegistry());
@@ -195,10 +192,6 @@ public class AvatarEstimatorThread extends ModularRobotController implements SCS
       return estimatorRegistry;
    }
 
-   public YoGraphicsListRegistry getSCS1YoGraphicsListRegistry()
-   {
-      return yoGraphicsListRegistry;
-   }
 
    @Override
    public YoGraphicGroupDefinition getSCS2YoGraphics()

@@ -51,12 +51,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxInputCollectionCommand;
@@ -73,6 +68,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.MultiBodySystemMissingTools;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPIDSE3Gains;
@@ -80,6 +76,11 @@ import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.time.ThreadTimer;
+import us.ihmc.scs2.definition.visual.ColorDefinition;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicCoordinateSystem3DDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.scs2.simulation.collision.Collidable;
 import us.ihmc.scs2.simulation.collision.CollisionResult;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
@@ -91,7 +92,6 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -101,6 +101,8 @@ import java.util.Map;
 import java.util.Random;
 
 import static toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus.*;
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicCoordinateSystem3D;
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicPoint3D;
 
 /**
  * {@code KinematicsToolboxController} is used as a whole-body inverse kinematics solver.
@@ -111,7 +113,7 @@ import static toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus.*;
  *
  * @author Sylvain Bertrand
  */
-public class KinematicsToolboxController extends ToolboxController
+public class KinematicsToolboxController extends ToolboxController implements SCS2YoGraphicHolder
 {
    private static final double GRAVITY = 9.81;
 
@@ -124,8 +126,6 @@ public class KinematicsToolboxController extends ToolboxController
     * {@link ToolboxModule}.
     */
    protected final double updateDT;
-
-   private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
    /**
     * Reference to the desired robot's root body.
@@ -148,6 +148,8 @@ public class KinematicsToolboxController extends ToolboxController
     * mass position when requested.
     */
    protected final ReferenceFrame centerOfMassFrame;
+
+   private final List<YoGraphicDefinition> graphicsList = new ArrayList<>();
 
    /**
     * The same set of gains is used for controlling any part of the desired robot body.
@@ -267,18 +269,17 @@ public class KinematicsToolboxController extends ToolboxController
     * Visualization of the desired end-effector poses seen as coordinate systems in the
     * {@code SCSVisualizer}. They are only visible when the end-effector is being actively controlled.
     */
-   private final Map<RigidBodyBasics, YoGraphicCoordinateSystem> desiredCoodinateSystems = new HashMap<>();
+   private final Map<RigidBodyBasics, YoFramePose3D> desiredPoses = new HashMap<>();
    /**
     * Visualization of the current end-effector poses seen as coordinate systems in the
     * {@code SCSVisualizer}. They are only visible when the end-effector is being actively controlled.
     */
-   private final Map<RigidBodyBasics, YoGraphicCoordinateSystem> currentCoodinateSystems = new HashMap<>();
+   private final Map<RigidBodyBasics, YoFramePose3D> currentPoses = new HashMap<>();
    /**
     * Center of Mass data used for visualization. They are only updated and visible when the center of
     * mass either has a setpoint or is constrained.
     */
    protected final YoFramePoint3D yoDesiredCenterOfMass, yoCurrentCenterOfMass;
-   protected final YoGraphicPosition desiredCenterOfMassGraphic, currentCenterOfMassGraphic;
 
    /**
     * This updater is used to initialize the state of the desired robot to the initial configuration.
@@ -445,7 +446,6 @@ public class KinematicsToolboxController extends ToolboxController
     *                                Can be {@code null} in the case all rigid-body should be
     *                                controllable.
     * @param updateDT                the period of one optimization tick.
-    * @param yoGraphicsListRegistry  registry to register visualization to.
     * @param parentRegistry          registry to attach {@code YoVariable}s to.
     */
    public KinematicsToolboxController(CommandInputManager commandInputManager,
@@ -454,7 +454,6 @@ public class KinematicsToolboxController extends ToolboxController
                                       OneDoFJointBasics[] desiredOneDoFJoints,
                                       Collection<? extends RigidBodyBasics> controllableRigidBodies,
                                       double updateDT,
-                                      YoGraphicsListRegistry yoGraphicsListRegistry,
                                       YoRegistry parentRegistry)
    {
       super(statusOutputManager, parentRegistry);
@@ -463,7 +462,6 @@ public class KinematicsToolboxController extends ToolboxController
       this.desiredOneDoFJoints = desiredOneDoFJoints;
       this.controllableRigidBodies = controllableRigidBodies == null ? null : new ArrayList<>(controllableRigidBodies);
       this.updateDT = updateDT;
-      this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
       // This will find the root body without using rootJoint so it can be null.
       rootBody = MultiBodySystemTools.getRootBody(desiredOneDoFJoints[0].getPredecessor());
@@ -502,11 +500,9 @@ public class KinematicsToolboxController extends ToolboxController
 
       yoDesiredCenterOfMass = new YoFramePoint3D("desiredCenterOfMass", ReferenceFrame.getWorldFrame(), registry);
       yoCurrentCenterOfMass = new YoFramePoint3D("currentCenterOfMass", ReferenceFrame.getWorldFrame(), registry);
-      desiredCenterOfMassGraphic = new YoGraphicPosition("desiredCoMGraphic", yoDesiredCenterOfMass, 0.02, YoAppearance.Red());
-      currentCenterOfMassGraphic = new YoGraphicPosition("currentCoMGraphic", yoCurrentCenterOfMass, 0.02, YoAppearance.Black());
 
-      yoGraphicsListRegistry.registerYoGraphic("CenterOfMass", desiredCenterOfMassGraphic);
-      yoGraphicsListRegistry.registerYoGraphic("CenterOfMass", currentCenterOfMassGraphic);
+      graphicsList.add(newYoGraphicPoint3D("desiredCoMGraphic", yoDesiredCenterOfMass, 0.04, ColorDefinitions.Red()));
+      graphicsList.add(newYoGraphicPoint3D("currentCoMGraphic", yoCurrentCenterOfMass, 0.04, ColorDefinitions.Black()));
 
       publishSolutionPeriod.set(0.01);
       preserveUserCommandHistory.set(true);
@@ -539,14 +535,11 @@ public class KinematicsToolboxController extends ToolboxController
          YoFramePoint3D collisionPointB = new YoFramePoint3D("collision_" + i + "_pointB" + i, worldFrame, registry);
          YoFramePose3D collisionFramePose = new YoFramePose3D("collision_" + i + "_frame", worldFrame, registry);
 
-         if (yoGraphicsListRegistry != null)
-         {
-            AppearanceDefinition appearance = new YoAppearanceRGBColor(new Color(random.nextInt()), 0.7);
-            yoGraphicsListRegistry.registerYoGraphic("Collisions", new YoGraphicPosition("collision_" + i + "_pointA", collisionPointA, 0.01, appearance));
-            yoGraphicsListRegistry.registerYoGraphic("Collisions", new YoGraphicPosition("collision_" + i + "_pointB", collisionPointB, 0.01, appearance));
-            yoGraphicsListRegistry.registerYoGraphic("Collisions",
-                                                     new YoGraphicCoordinateSystem("collision_" + i + "_frame", collisionFramePose, 0.1, appearance));
-         }
+         ColorDefinition color = ColorDefinitions.rgb(random.nextInt());
+         color.setAlpha(0.7);
+         graphicsList.add(newYoGraphicPoint3D("collision_" + i + "_pointA", collisionPointA, 0.02, color));
+         graphicsList.add(newYoGraphicPoint3D("collision_" + i + "_pointB", collisionPointB, 0.02, color));
+         graphicsList.add(newYoGraphicCoordinateSystem3D("collision_" + i + "_frame", collisionFramePose, 0.02, color));
 
          yoCollisionDistances[i] = collisionDistance;
          yoCollisionPointAs[i] = collisionPointA;
@@ -678,20 +671,19 @@ public class KinematicsToolboxController extends ToolboxController
     */
    public void setupVisualization(RigidBodyBasics... rigidBodies)
    {
-      AppearanceDefinition desiredAppearance = YoAppearance.Red();
-      AppearanceDefinition currentAppearance = YoAppearance.Blue();
+      ColorDefinition desiredAppearance = ColorDefinitions.Red();
+      ColorDefinition currentAppearance = ColorDefinitions.Blue();
 
       for (RigidBodyBasics rigidBody : rigidBodies)
       {
-         YoGraphicCoordinateSystem desiredCoodinateSystem = createCoodinateSystem(rigidBody, Type.DESIRED, desiredAppearance);
-         YoGraphicCoordinateSystem currentCoodinateSystem = createCoodinateSystem(rigidBody, Type.CURRENT, currentAppearance);
+         YoFramePose3D desiredPose = new YoFramePose3D(rigidBody.getName() + Type.DESIRED.getName(), "", worldFrame, registry);
+         YoFramePose3D currentPose = new YoFramePose3D(rigidBody.getName() + Type.CURRENT.getName(), "", worldFrame, registry);
+         graphicsList.add(createCoordinateSystem(rigidBody, Type.DESIRED, desiredPose, desiredAppearance));
+         graphicsList.add(createCoordinateSystem(rigidBody, Type.CURRENT, currentPose, currentAppearance));
 
          rigidBodiesWithVisualization.add(rigidBody);
-         desiredCoodinateSystems.put(rigidBody, desiredCoodinateSystem);
-         currentCoodinateSystems.put(rigidBody, currentCoodinateSystem);
-
-         yoGraphicsListRegistry.registerYoGraphic("CoordinateSystems", desiredCoodinateSystem);
-         yoGraphicsListRegistry.registerYoGraphic("CoordinateSystems", currentCoodinateSystem);
+         desiredPoses.put(rigidBody, desiredPose);
+         currentPoses.put(rigidBody, currentPose);
       }
    }
 
@@ -705,13 +697,13 @@ public class KinematicsToolboxController extends ToolboxController
     *                             {@link YoGraphicCoordinateSystem}.
     * @param type                 used to create a name prefix required for creating a
     *                             {@link YoGraphicCoordinateSystem}.
-    * @param appearanceDefinition the appearance of the coordinate system's arrows.
+    * @param color the appearance of the coordinate system's arrows.
     * @return the graphic with a good name for the given end-effector.
     */
-   private YoGraphicCoordinateSystem createCoodinateSystem(RigidBodyBasics endEffector, Type type, AppearanceDefinition appearanceDefinition)
+   private YoGraphicCoordinateSystem3DDefinition createCoordinateSystem(RigidBodyBasics endEffector, Type type, YoFramePose3D pose, ColorDefinition color)
    {
       String namePrefix = endEffector.getName() + type.getName();
-      return new YoGraphicCoordinateSystem(namePrefix, "", registry, false, 0.2, appearanceDefinition);
+      return newYoGraphicCoordinateSystem3D(namePrefix, pose, 0.2, color);
    }
 
    /**
@@ -739,7 +731,6 @@ public class KinematicsToolboxController extends ToolboxController
                                                                             controlledJoints,
                                                                             centerOfMassFrame,
                                                                             optimizationSettings,
-                                                                            null,
                                                                             registry);
       toolbox.setJointPrivilegedConfigurationParameters(jointPrivilegedConfigurationParameters);
       jointTorqueMinimizationWeightCalculator = new JointTorqueSoftLimitWeightCalculator(toolbox.getJointIndexHandler());
@@ -932,8 +923,6 @@ public class KinematicsToolboxController extends ToolboxController
          yoDesiredCenterOfMass.setToNaN();
       }
       yoCurrentCenterOfMass.set(centerOfMass);
-      desiredCenterOfMassGraphic.update();
-      currentCenterOfMassGraphic.update();
 
       // Updating the the robot state from the current solution, initializing the next control tick.
       KinematicsToolboxHelper.setRobotStateFromControllerCoreOutput(controllerCoreOutput, rootJoint, desiredOneDoFJoints);
@@ -1520,35 +1509,35 @@ public class KinematicsToolboxController extends ToolboxController
       for (int i = 0; i < rigidBodiesWithVisualization.size(); i++)
       {
          RigidBodyBasics endEffector = rigidBodiesWithVisualization.get(i);
-         YoGraphicCoordinateSystem coordinateSystem = desiredCoodinateSystems.get(endEffector);
+         YoFramePose3D pose = desiredPoses.get(endEffector);
          feedbackControllerDataHolder.getPositionData(endEffector, rigidBodyPositions, Type.DESIRED);
          if (rigidBodyPositions.isEmpty())
-            coordinateSystem.hide();
+            pose.setToNaN();
          else // TODO Handle the case there are more than 1 active controller.
-            coordinateSystem.setPosition(rigidBodyPositions.get(0));
+            pose.getPosition().set(rigidBodyPositions.get(0));
 
          feedbackControllerDataHolder.getOrientationData(endEffector, rigidBodyOrientations, Type.DESIRED);
          if (rigidBodyOrientations.isEmpty())
-            coordinateSystem.hide();
+            pose.setToZero();
          else // TODO Handle the case there are more than 1 active controller.
-            coordinateSystem.setOrientation(rigidBodyOrientations.get(0));
+            pose.getOrientation().set(rigidBodyOrientations.get(0));
       }
 
       for (int i = 0; i < rigidBodiesWithVisualization.size(); i++)
       {
          RigidBodyBasics endEffector = rigidBodiesWithVisualization.get(i);
-         YoGraphicCoordinateSystem coordinateSystem = currentCoodinateSystems.get(endEffector);
+         YoFramePose3D pose = currentPoses.get(endEffector);
          feedbackControllerDataHolder.getPositionData(endEffector, rigidBodyPositions, Type.CURRENT);
          if (rigidBodyPositions.isEmpty())
-            coordinateSystem.hide();
+            pose.setToNaN();
          else // TODO Handle the case there are more than 1 active controller.
-            coordinateSystem.setPosition(rigidBodyPositions.get(0));
+            pose.getPosition().set(rigidBodyPositions.get(0));
 
          feedbackControllerDataHolder.getOrientationData(endEffector, rigidBodyOrientations, Type.CURRENT);
          if (rigidBodyOrientations.isEmpty())
-            coordinateSystem.hide();
+            pose.setToNaN();
          else // TODO Handle the case there are more than 1 active controller.
-            coordinateSystem.setOrientation(rigidBodyOrientations.get(0));
+            pose.getOrientation().set(rigidBodyOrientations.get(0));
       }
    }
 
@@ -1967,5 +1956,15 @@ public class KinematicsToolboxController extends ToolboxController
          robotConfigurationDataInternal.set(robotConfigurationData);
          return robotConfigurationDataInternal;
       }
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+
+      graphicsList.forEach(group::addChild);
+
+      return group;
    }
 }

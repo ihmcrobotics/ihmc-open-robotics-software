@@ -21,6 +21,7 @@ extern "C"
 #define VARIANCE_PER_TRANSLATION_SPEED 16
 #define VARIANCE_PER_ROTATION_SPEED 17
 #define GROUND_HEIGHT 18
+#define MIN_DEPTH_TO_ACCEPT 19
 
 __device__ float3 back_project_perspective(int2 pos, float Z, const float *params)
 {
@@ -69,7 +70,7 @@ __global__ void heightMapUpdateDataKernel(const unsigned short* __restrict__ dep
     float depth = rowPtr[xIndex] * 0.001f; // Scale to meters
 
     // Early exit for invalid depth
-    if (depth < 0.25f)
+    if (depth < params[MIN_DEPTH_TO_ACCEPT])
         return;
 
     // Back-project and transform
@@ -276,7 +277,7 @@ extern "C"
 __global__ void heightMapEmptyRegistrationKernel(float *localMap, size_t pitchLocal,
                                                  float *globalMap, size_t pitchGlobal,
                                                  float *zUpCameraToWorldAlignedGround,
-                                                 float *params, float resetOffset)
+                                                 float *params)
 {
     int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
     int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
@@ -296,6 +297,7 @@ __global__ void heightMapEmptyRegistrationKernel(float *localMap, size_t pitchLo
 
     float *localHeight = (float *)((char *)localMap + localIndex.x * pitchLocal) + localIndex.y;
 
+    // This is a way of checking if we have any read data in the spot, its very unlikely that any real data is 0.0
     if (*localHeight == 0.0f)
         return;
 
@@ -304,9 +306,17 @@ __global__ void heightMapEmptyRegistrationKernel(float *localMap, size_t pitchLo
 }
 
 extern "C"
+/**
+    @brief Compute Plan Offset KERNEL: This kernel is not very intuitive. For background we've got a status message
+    being published that gives us an offset in Z in meters that the robot thinks its drifted by.
+    Our goal is to update the height map accordingly. However, it doesn't make sense to update any values that are
+    in the live view of the camera, because: a) they will just get overwritten the next image, and b) that data doesn't drift
+    because its live data. So we pass in this matrix of values to skip because those values are outside the live view
+    of the camera.
+*/
 __global__ void planOffsetKernel(float *matrixToModify, size_t pitchMatrixToModify,
                                  float *matrixValuesToSkip, size_t pitchMatrixValuesToSkip,
-                                 float offsetInZ, float resetOffset, float *params)
+                                 float offsetInZ, float zeroValueForEmptySpaces, float *params)
 {
     int indexX = blockIdx.x * blockDim.x + threadIdx.x;
     int indexY = blockIdx.y * blockDim.y + threadIdx.y;
@@ -317,9 +327,8 @@ __global__ void planOffsetKernel(float *matrixToModify, size_t pitchMatrixToModi
         return;
 
     float *skipRow = (float *)((char *)matrixValuesToSkip + indexX * pitchMatrixValuesToSkip);
-    // This is less then or equal to due to a round error that can give +- 1 offsets
     // This skips the cells that have real data in them coming from the values to skip
-    if (fabsf(skipRow[indexY] - resetOffset) >= 2.0f)
+    if (skipRow[indexY] != zeroValueForEmptySpaces)
         return;
 
     float *matrixRow = (float *)((char *)matrixToModify + indexX * pitchMatrixToModify);

@@ -219,7 +219,7 @@ class CrossRobotCommandResolverTest
          // Doing this ensures that the output is a command buffer if needed.
          Object actualOut = resolveMethod.getParameters()[1].getType().newInstance();
          resolveMethod.invoke(crossRobotCommandResolver, in, actualOut);
-         assertEquals(expectedOut, actualOut, "Iteration: " + i);
+         assertTrue(expectedOut.equals(actualOut), "Iteration: " + i);
       }
    }
 

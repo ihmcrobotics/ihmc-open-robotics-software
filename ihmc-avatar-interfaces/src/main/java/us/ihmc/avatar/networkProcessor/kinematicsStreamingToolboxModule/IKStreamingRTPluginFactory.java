@@ -181,7 +181,6 @@ public class IKStreamingRTPluginFactory
    public static class IKStreamingRTThread implements AvatarControllerThreadInterface
    {
       private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-      private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       private final CommandInputManager commandInputManager;
       private final StatusMessageOutputManager statusOutputManager;
       private final KinematicsStreamingToolboxController kinematicsStreamingToolboxController;
@@ -223,7 +222,6 @@ public class IKStreamingRTPluginFactory
                                                                                               parameters,
                                                                                               desiredFullRobotModel,
                                                                                               robotModel,
-                                                                                              yoGraphicsListRegistry,
                                                                                               registry);
 
          List<String> inactiveJoints = parameters.getInactiveJoints();
@@ -366,16 +364,12 @@ public class IKStreamingRTPluginFactory
          return humanoidRobotContextData;
       }
 
-      public YoGraphicsListRegistry getSCS1YoGraphicsListRegistry()
-      {
-         // FIXME There's duplicate YoGraphics
-         return new YoGraphicsListRegistry();
-      }
-
       @Override
       public YoGraphicGroupDefinition getSCS2YoGraphics()
       {
-         return null;
+         YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+         group.addChild(kinematicsStreamingToolboxController.getSCS2YoGraphics());
+         return group;
       }
    }
 

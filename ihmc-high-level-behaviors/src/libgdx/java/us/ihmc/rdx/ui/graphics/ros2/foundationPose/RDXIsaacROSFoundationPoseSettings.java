@@ -3,6 +3,8 @@ package us.ihmc.rdx.ui.graphics.ros2.foundationPose;
 import imgui.ImGui;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseObject;
 import us.ihmc.perception.detections.foundationPose.SyncedIsaacROSFoundationPoseParameters;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
@@ -24,12 +26,15 @@ public class RDXIsaacROSFoundationPoseSettings
    private final ImBooleanWrapper autoResetEnabled;
    private final ImDoubleWrapper resetDistance;
 
-   public RDXIsaacROSFoundationPoseSettings(ROS2Node ros2Node, CRDTInfo crdtInfo, IsaacROSFoundationPoseObject object)
+   public RDXIsaacROSFoundationPoseSettings(ROS2Node ros2Node,
+                                            ROS2PeerClockOffsetEstimator ros2ClockOffsetEstimator,
+                                            IsaacROSFoundationPoseObject object)
    {
       this.object = object;
 
       resetRequestPublisher = ros2Node.createPublisher(object.topics.reset());
 
+      CRDTInfo crdtInfo = new CRDTInfo(ROS2ActorDesignation.OPERATOR, ros2ClockOffsetEstimator);
       parameters = new SyncedIsaacROSFoundationPoseParameters(ros2Node, crdtInfo, object);
 
       labels = new ImGuiUniqueLabelMap(getClass());

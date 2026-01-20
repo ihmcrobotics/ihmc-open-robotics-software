@@ -21,7 +21,7 @@ import us.ihmc.realtime.MonotonicTime;
 import us.ihmc.realtime.PeriodicParameters;
 import us.ihmc.realtime.RealtimeThread;
 import us.ihmc.robotDataLogger.YoVariableServer;
-import us.ihmc.robotDataVisualizer.logger.localLogging.JVMStatisticsGenerator;
+import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
@@ -88,6 +88,7 @@ public class AvatarMultiThreadingManager
 
    private ControllerTask controllerTask;
    private StepGeneratorTask stepGeneratorTask;
+   private final AvatarStepGeneratorThread stepGeneratorThread;
 
    private final AvatarAffinityInterface affinity;
 
@@ -134,6 +135,7 @@ public class AvatarMultiThreadingManager
       this.hardwareCommunicationInterface = hardwareCommunicationInterface;
       this.lowLevelOutputProcessor = lowLevelOutputProcessor;
       this.estimatorThread = estimatorThread;
+      this.stepGeneratorThread = stepGeneratorThread;
       this.affinity = affinity;
       this.masterThreadDt = masterThreadDt;
       this.monotonicTimeProvider = monotonicTimeProvider;
@@ -397,6 +399,8 @@ public class AvatarMultiThreadingManager
 
          ((RepeatingTaskThread) masterThread).stopRepeating();
       }
+
+      stepGeneratorThread.destroy();
 
       ThreadTools.sleep(1000L);
 

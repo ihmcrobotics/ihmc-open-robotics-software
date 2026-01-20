@@ -13,7 +13,6 @@ public class RDX3DSituatedTextDemo
       {
          private RDX3DSituatedText text;
          private RDX3DSituatedText rapidlyChangingText;
-         private RDX3DSituatedTextData previousTextData;
          private final Stopwatch stopwatch = new Stopwatch().start();
 
          @Override
@@ -36,10 +35,7 @@ public class RDX3DSituatedTextDemo
          {
             text.getModelTransform().rotate(0.0f, 0.0f, 1.0f, 1.0f);
 
-            if (previousTextData != null)
-               previousTextData.dispose();
-
-            previousTextData = rapidlyChangingText.setTextWithoutCache("Time: " + stopwatch.totalElapsed());
+            rapidlyChangingText.setTextWithoutCache("Time: " + stopwatch.totalElapsed());
             rapidlyChangingText.getModelTransform().rotate(1.0f, 0.0f, 0.0f, 200.0f * (float) stopwatch.totalElapsed());
 
             baseUI.renderBeforeOnScreenUI();
@@ -49,6 +45,7 @@ public class RDX3DSituatedTextDemo
          @Override
          public void dispose()
          {
+            rapidlyChangingText.dispose();
             baseUI.dispose();
          }
       });

@@ -1,6 +1,8 @@
 #ifndef __behavior_msgs__msg__BehaviorTreeSceneObjectStateMessage__idl__
 #define __behavior_msgs__msg__BehaviorTreeSceneObjectStateMessage__idl__
 
+#include "behavior_msgs/msg/./BehaviorTreeSceneObjectDefinitionMessage_.idl"
+#include "behavior_msgs/msg/./PersistentDetectionStatusMessage_.idl"
 #include "controller_msgs/msg/./RigidBodyTransformMessage_.idl"
 #include "ihmc_common_msgs/msg/./LatestModificationMessage_.idl"
 module behavior_msgs
@@ -24,10 +26,11 @@ module behavior_msgs
          * The object's unique ID
          */
         unsigned long id;
+        behavior_msgs::msg::dds::BehaviorTreeSceneObjectDefinitionMessage definition;
         /**
-         * Object type (IsaacROSFoundationPoseObject ordinal)
+         * Persistent detection associated with this object
          */
-        long object_type;
+        behavior_msgs::msg::dds::PersistentDetectionStatusMessage persistent_detection;
         /**
          * Transform of the object frame to world frame
          */

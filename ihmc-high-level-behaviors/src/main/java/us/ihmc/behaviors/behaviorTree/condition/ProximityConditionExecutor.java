@@ -1,97 +1,96 @@
 package us.ihmc.behaviors.behaviorTree.condition;
 
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneState;
-import us.ihmc.communication.crdt.CRDTBidirectionalDouble;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.tools.Timer;
 
 public class ProximityConditionExecutor
 {
    private final BehaviorTreeSceneState scene;
    private final ConditionNodeState state;
    private final ConditionNodeDefinition definition;
+   private final ProximityConditionState proximityState;
+   private final ProximityConditionDefinition proximityDefinition;
 
-   private final CRDTBidirectionalDouble distance;
-   private final CRDTBidirectionalDouble maxDistanceToObject;
-   private double conditionStartTime = -1.0;
+   private ReferenceFrame frameA;
+   private ReferenceFrame frameB;
+   private final FramePoint3D frameAPoint = new FramePoint3D();
+   private final FramePoint3D frameBPoint = new FramePoint3D();
+   private final Timer timer = new Timer();
+   private final Vector3D bToA = new Vector3D();
 
    public ProximityConditionExecutor(ConditionNodeState state, BehaviorTreeSceneState scene)
    {
-      this.state = state;
       this.scene = scene;
-
+      this.state = state;
       definition = state.getDefinition();
-
-      distance = state.getProximityCheck().getCurrentDistance();
-      maxDistanceToObject = definition.getProximityCheck().getCRDTMaxDistanceToObject();
+      proximityState = state.getProximityCheck();
+      proximityDefinition = definition.getProximityCheck();
    }
 
    public void update()
    {
-      boolean canExecute = true;
-      canExecute &= scene.findFrameByName(definition.getProximityCheck().getReferenceFrameName()) != null;
-
-      boolean manageMissingFrameInternally = definition.getProximityCheck().getCRDTManageMissingFrameInternally().getValue();
-      boolean missingFrame = scene.findFrameByName(definition.getProximityCheck().getObjectFrameName()) == null;
-      if (!manageMissingFrameInternally)
-      {
-         canExecute &= !missingFrame;
-      }
+      frameA = scene.findFrameByName(proximityDefinition.getFrameNameA());
+      frameB = scene.findFrameByName(proximityDefinition.getFrameNameB());
+      proximityState.setFrameAIsPresent(frameA != null);
+      proximityState.setFrameBIsPresent(frameB != null);
+      boolean canExecute = frameA != null && frameB != null;
       state.setCanExecute(canExecute);
-      state.getProximityCheck().setMissingFrame(missingFrame);
 
-      if (!missingFrame)
+      if (canExecute)
       {
-         if ((state.getIsExecuting() || state.isEvaluatingCondition()) && state.getCanExecute())
-         {
-            FramePose3D objectFramePose = new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                                          scene.findFrameByName(definition.getProximityCheck().getObjectFrameName())
-                                                                               .getTransformToWorldFrame());
-            FramePose3D referenceFramePose = new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                                             scene.findFrameByName(definition.getProximityCheck().getReferenceFrameName())
-                                                                                  .getTransformToWorldFrame());
-            switch (definition.getProximityCheck().getType().getValue())
-            {
-               case XYZ -> distance.setValue(objectFramePose.getPosition().distance(referenceFramePose.getPosition()));
-               case XY -> distance.setValue(objectFramePose.getPosition().distanceXY(referenceFramePose.getPosition()));
-               case Z -> distance.setValue(Math.abs(objectFramePose.getPosition().getZ() - referenceFramePose.getPosition().getZ()));
-            }
-         }
+         frameAPoint.setFromReferenceFrame(frameA);
+         frameBPoint.setFromReferenceFrame(frameB);
+         bToA.sub(frameBPoint, frameAPoint);
+         proximityState.setVectorBToA(bToA, 1e-3);
       }
+   }
 
+   public void triggerExecution()
+   {
+      timer.reset();
    }
 
    public void updateCurrentlyExecuting()
    {
-      if (!state.getProximityCheck().getMissingFrame().getValue())
+      if (frameA == null)
+         state.getLogger().error("Frame A is null.");
+      if (frameB == null)
+         state.getLogger().error("Frame B is null.");
+
+      double distance = Double.NaN;
+      if (frameA != null && frameB != null)
       {
-         if (!state.isEvaluatingCondition())
+         distance = switch (proximityDefinition.getDistanceType())
          {
-            conditionStartTime = System.nanoTime();
-            state.setEvaluatingConditionValue(true);
-         }
+            case XYZ -> bToA.norm();
+            case XY -> Math.hypot(bToA.getX(), bToA.getY());
+            case Z -> Math.abs(bToA.getZ());
+         };
+      }
 
-         boolean conditionValue = distance.getValue() >= 0 && distance.getValue() < maxDistanceToObject.getValue();
-         state.setConditionValue(conditionValue);
+      boolean timeout = !timer.isRunning(proximityDefinition.getTimeout());
+      if (timeout)
+      {
+         state.getLogger().error("Timeout after %.2f seconds.".formatted(proximityDefinition.getTimeout()));
 
-         if (!conditionValue)
+         if (frameA != null && frameB != null)
          {
-            if (getTimeElapsedInCondition() > definition.getProximityCheck().getCRDTMaxEvaluationTime().getValue())
-            {
-               state.setFailed(true);
-               state.setEvaluatingConditionValue(false);
-            }
+            state.getLogger().error("Distance not in range: %.2f < %.2f < %.2f"
+                                     .formatted(proximityDefinition.getMinDistance(), distance, proximityDefinition.getMaxDistance()));
          }
       }
 
-      state.setIsExecuting(false); // Completes immediately
-   }
+      if (frameA == null || frameB == null || timeout)
+      {
+         state.setFailed(true);
+         state.setIsExecuting(false);
+         return;
+      }
 
-   private double getTimeElapsedInCondition()
-   {
-      if (conditionStartTime < 0.0)
-         return 0.0;
-      else
-         return (System.nanoTime() - conditionStartTime) * 1.0e-9;
+      if (distance > proximityDefinition.getMinDistance() && distance < proximityDefinition.getMaxDistance())
+         state.setIsExecuting(false);
    }
 }

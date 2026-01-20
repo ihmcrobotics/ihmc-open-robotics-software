@@ -1,6 +1,7 @@
 package us.ihmc.avatar.wholeBodyHardwareControl;
 
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 
@@ -32,6 +33,10 @@ public interface HardwareCommunicationInterface
    }
 
    default void setSoftEStop(boolean softEStop)
+   {
+   }
+
+   default void setSensorProcessing(SensorProcessing sensorProcessing)
    {
    }
 

@@ -1,10 +1,8 @@
 package us.ihmc.commonWalkingControlModules.captureRegion;
 
 import java.awt.Color;
-import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
-import us.ihmc.communication.net.ObjectProducer;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
@@ -47,8 +45,11 @@ public class CaptureRegionVisualizer implements SCS2YoGraphicHolder
 
       yoCaptureRegionPolygon = new YoFrameConvexPolygon2D(caption, suffix, worldFrame, 30, registry);
 
-      YoArtifactPolygon polygonArtifact = new YoArtifactPolygon(caption + suffix, yoCaptureRegionPolygon, color, false);
-      yoGraphicsListRegistry.registerArtifact(getClass().getSimpleName(), polygonArtifact);
+      if (yoGraphicsListRegistry != null)
+      {
+         YoArtifactPolygon polygonArtifact = new YoArtifactPolygon(caption + suffix, yoCaptureRegionPolygon, color, false);
+         yoGraphicsListRegistry.registerArtifact(getClass().getSimpleName(), polygonArtifact);
+      }
 
       parentRegistry.addChild(registry);
    }

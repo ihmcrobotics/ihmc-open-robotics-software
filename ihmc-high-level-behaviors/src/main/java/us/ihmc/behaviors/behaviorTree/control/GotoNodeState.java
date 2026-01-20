@@ -16,9 +16,9 @@ public class GotoNodeState extends LeafNodeState<GotoNodeDefinition>
    }
 
    @Override
-   public void validateFields(List<LeafNodeState<?>> leaves)
+   public void validateDefinition(List<LeafNodeState<?>> leaves)
    {
-      super.validateFields(leaves);
+      super.validateDefinition(leaves);
 
       if (definition.getNodeToGotoIsInvalid())
       {

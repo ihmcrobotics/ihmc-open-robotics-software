@@ -5,7 +5,6 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.RandomMatrices_DDRM;
 import org.reflections.Reflections;
-import us.ihmc.commonWalkingControlModules.barrierScheduler.context.AtlasHumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextRootJointData;
@@ -161,7 +160,6 @@ public class CrossRobotCommandRandomTools
       set.add(SensorDataContext.class);
       set.add(ImuData.class);
       set.add(HumanoidRobotContextData.class);
-      set.add(AtlasHumanoidRobotContextData.class);
       return set;
    }
 
@@ -1697,43 +1695,6 @@ public class CrossRobotCommandRandomTools
       return next;
    }
 
-   public static AtlasHumanoidRobotContextData nextAtlasHumanoidRobotContextData(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
-   {
-      return nextAtlasHumanoidRobotContextData(random, false, rootBody, possibleFrames);
-   }
-
-   public static AtlasHumanoidRobotContextData nextAtlasHumanoidRobotContextData(Random random,
-                                                                                 boolean ensureNonEmptyCommand,
-                                                                                 RigidBodyBasics rootBody,
-                                                                                 ReferenceFrame... possibleFrames)
-   {
-      HumanoidRobotContextJointData processedJointData = nextHumanoidRobotContextJointData(random, ensureNonEmptyCommand);
-      ForceSensorDataHolder forceSensorDataHolder = nextForceSensorDataHolder(random, ensureNonEmptyCommand, rootBody, possibleFrames);
-      CenterOfMassDataHolder centerOfMassDataHolder = nextCenterOfMassDataHolder(random, possibleFrames);
-      CenterOfPressureDataHolder centerOfPressureDataHolder = nextCenterOfPressureDataHolder(random, ensureNonEmptyCommand, rootBody, possibleFrames);
-      RobotMotionStatusHolder robotMotionStatusHolder = nextRobotMotionStatusHolder(random);
-      LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList = nextLowLevelOneDoFJointDesiredDataHolder(random,
-                                                                                                             ensureNonEmptyCommand,
-                                                                                                             rootBody,
-                                                                                                             possibleFrames);
-      SensorDataContext sensorDataContext = nextSensorDataContext(random, ensureNonEmptyCommand, rootBody);
-      RawJointSensorDataHolderMap rawJointSensorDataHolderMap = nextRawJointSensorDataHolderMap(random, ensureNonEmptyCommand, rootBody);
-      AtlasHumanoidRobotContextData next = new AtlasHumanoidRobotContextData(processedJointData,
-                                                                             forceSensorDataHolder,
-                                                                             centerOfMassDataHolder,
-                                                                             centerOfPressureDataHolder,
-                                                                             robotMotionStatusHolder,
-                                                                             jointDesiredOutputList,
-                                                                             sensorDataContext,
-                                                                             rawJointSensorDataHolderMap);
-      next.setTimestamp(random.nextLong());
-      next.setSchedulerTick(random.nextLong());
-      next.setControllerRan(random.nextBoolean());
-      next.setEstimatorRan(random.nextBoolean());
-      next.setPerceptionRan(random.nextBoolean());
-      return next;
-   }
-
    public static SensorDataContext nextSensorDataContext(Random random, RigidBodyBasics rootBody)
    {
       return nextSensorDataContext(random, false, rootBody);
@@ -1848,12 +1809,9 @@ public class CrossRobotCommandRandomTools
          next.getCenterOfMassVelocity().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
 
       if (random.nextBoolean())
-      {
-         next.setHasAngularMomentum(true);
-         next.getAngularMomentum().set(nextVector3D(random));
-      }
+         next.setAngularMomentum(nextFrameVector3D(random, possibleFrames));
       else
-         next.setHasAngularMomentum(false);
+         next.getAngularMomentum().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
 
       return next;
    }

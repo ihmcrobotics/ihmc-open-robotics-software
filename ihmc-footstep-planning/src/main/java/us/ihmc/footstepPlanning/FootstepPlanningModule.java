@@ -31,7 +31,7 @@ import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
+import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlan;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
@@ -173,8 +173,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       aStarFootstepPlanner.clearLoggedData();
       bodyPathPlanner.clearLoggedData();
 
-      boolean heightMapAvailable = request.getEnvironmentHandler().getTerrainMapData() != null;
-
       startMidFootPose.interpolate(request.getStartFootPoses().get(RobotSide.LEFT), request.getStartFootPoses().get(RobotSide.RIGHT), 0.5);
       goalMidFootPose.interpolate(request.getGoalFootPoses().get(RobotSide.LEFT), request.getGoalFootPoses().get(RobotSide.RIGHT), 0.5);
 
@@ -182,7 +180,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       output.getPlannerTimings().setTimeBeforePlanningSeconds(stopwatch.lap());
       output.getPlannerTimings().setTotalElapsedSeconds(stopwatch.totalElapsed());
 
-      if (request.getPlanBodyPath() && heightMapAvailable)
+      if (request.getPlanBodyPath() && (request.isHeightMapAvailable()))
       {
          bodyPathPlanner.handleRequest(request, output);
          List<Pose3D> bodyPathWaypoints = output.getBodyPath();

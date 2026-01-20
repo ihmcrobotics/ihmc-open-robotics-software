@@ -2,8 +2,6 @@ package us.ihmc.perception.demo;
 
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.RawImagePublisher;
@@ -58,10 +56,9 @@ public class IsaacROSFoundationPoseDemo
       zedImageSensor.setSensorFrame(zedImageSensor.getTrackedSensorFrame());
       zedImageSensor.run(true);
 
-      CRDTInfo crdtInfo = new CRDTInfo(ROS2ActorDesignation.ROBOT, peerClockOffsetEstimator);
-      foundationPoseCommunicators = new IsaacROSFoundationPoseCommunicatorMap(crdtInfo);
+      foundationPoseCommunicators = new IsaacROSFoundationPoseCommunicatorMap(peerClockOffsetEstimator);
 
-      yoloExecutor = new YOLOv8DetectionExecutor(new CRDTInfo(ROS2ActorDesignation.ROBOT, peerClockOffsetEstimator), () -> true);
+      yoloExecutor = new YOLOv8DetectionExecutor(peerClockOffsetEstimator, () -> true);
       yoloExecutor.addDetectionConsumerCallback(foundationPoseCommunicators::updatePoseEstimations);
       yoloExecutor.disableAllModels();
 
@@ -83,8 +80,8 @@ public class IsaacROSFoundationPoseDemo
          RawImage depth = zedImageSensor.getImage(ZEDImageSensor.DEPTH_IMAGE_KEY);
 
          // Publish for the UI
-         imagePublisher.publishImage(PerceptionAPI.ZED_DEPTH, depth);
-         imagePublisher.publishImage(PerceptionAPI.ZED_COLOR_IMAGES.get(RobotSide.LEFT), color);
+         imagePublisher.publishImage(PerceptionAPI.EXPERIMENTAL_ZED_DEPTH, depth);
+         imagePublisher.publishImage(PerceptionAPI.EXPERIMENTAL_ZED_COLOR.get(RobotSide.LEFT), color);
 
          // Run YOLO using the color image
          yoloExecutor.runNextEnabledModel(color, depth);

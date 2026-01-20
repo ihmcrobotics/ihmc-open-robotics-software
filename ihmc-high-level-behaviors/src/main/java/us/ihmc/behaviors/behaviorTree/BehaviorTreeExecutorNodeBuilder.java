@@ -11,6 +11,9 @@ import us.ihmc.behaviors.behaviorTree.control.door.*;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneExecutor;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.perception.detections.yolo.YOLOTerrainMapIntegrator;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.util.HashMap;
@@ -49,27 +52,41 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
    private ROS2ControllerHelper ros2ControllerHelper;
    private ROS2SyncedRobotModel syncedRobot;
    private ControllerStatusTracker controllerStatusTracker;
+   private SideDependentList<AbilityHandActionComms> abilityHandComms;
    private BehaviorTreeSceneExecutor scene;
+   private TerrainMapData terrainMapData;
 
    public void initialize(CRDTInfo crdtInfo,
                           WorkspaceResourceDirectory saveFileDirectory,
                           ROS2ControllerHelper ros2ControllerHelper,
                           ROS2SyncedRobotModel syncedRobot,
                           ControllerStatusTracker controllerStatusTracker,
-                          BehaviorTreeSceneExecutor scene)
+                          SideDependentList<AbilityHandActionComms> abilityHandComms,
+                          BehaviorTreeSceneExecutor scene,
+                          TerrainMapData terrainMapData)
    {
       this.crdtInfo = crdtInfo;
       this.saveFileDirectory = saveFileDirectory;
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
       this.controllerStatusTracker = controllerStatusTracker;
+      this.abilityHandComms = abilityHandComms;
       this.scene = scene;
+      this.terrainMapData = terrainMapData;
    }
 
    @Override
    public BehaviorTreeRootNodeExecutor createRootNode(long id)
    {
-      return new BehaviorTreeRootNodeExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, syncedRobot, controllerStatusTracker, scene);
+      return new BehaviorTreeRootNodeExecutor(id,
+                                              crdtInfo,
+                                              saveFileDirectory,
+                                              ros2ControllerHelper,
+                                              syncedRobot,
+                                              controllerStatusTracker,
+                                              abilityHandComms,
+                                              scene,
+                                              terrainMapData);
    }
 
    @Override

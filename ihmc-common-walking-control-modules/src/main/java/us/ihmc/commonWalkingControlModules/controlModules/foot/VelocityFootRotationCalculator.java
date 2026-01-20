@@ -129,7 +129,6 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
                                          double dt,
                                          ContactablePlaneBody rotatingFoot,
                                          ExplorationParameters explorationParameters,
-                                         YoGraphicsListRegistry yoGraphicsListRegistry,
                                          YoRegistry parentRegistry)
    {
       this.namePrefix = namePrefix;
@@ -201,13 +200,6 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
 
       angularVelocity.setToZero(soleFrame);
       lineOfRotationInSoleFrame.setIncludingFrame(soleFrame, 0.0, 0.0, 1.0, 0.0);
-
-      if (yoGraphicsListRegistry != null)
-      {
-         Artifact lineOfRotationArtifact = new YoArtifactLineSegment2d(namePrefix + "LineOfRotation", lineSegmentOfRotation, Color.ORANGE, 0.005, 0.01);
-         lineOfRotationArtifact.setVisible(false);
-         yoGraphicsListRegistry.registerArtifact(getClass().getSimpleName(), lineOfRotationArtifact);
-      }
    }
 
    @SuppressWarnings("unused")

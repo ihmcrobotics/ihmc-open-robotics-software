@@ -20,18 +20,18 @@ import us.ihmc.rdx.ui.hands.RDXHandInterface;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.handsros2.ezGripper.EZGripperError;
-import us.ihmc.handsros2.ezGripper.EZGripperManager;
-import us.ihmc.handsros2.ezGripper.EZGripperManager.OperationMode;
+import us.ihmc.handsros2.ezGripper.EZGripper.OperationMode;
 import us.ihmc.handsros2.ezGripper.EZGripperROS2HardwareCommunication;
 
 public class RDXEZGripper implements RDXHandInterface
 {
    private static final double SEND_PERIOD = UnitConversions.hertzToSeconds(5.0);
+   private static final long CONNECTION_TIMEOUT = 500; // Hand connection timeout in millis
 
-   private final String identifier;
    private final RobotSide handSide;
    private final EZGripperROS2HardwareCommunication communication;
 
+   private final EZGripperCommand commandMessage = new EZGripperCommand();
    private final Throttler sendThrottler = new Throttler();
    private final Notification commandChanged = new Notification();
 
@@ -49,11 +49,10 @@ public class RDXEZGripper implements RDXHandInterface
    private final ImGuiFlashingText needResetStatusText = new ImGuiFlashingText(ImGuiTools.RED);
    private final ImGuiFlashingText sakeErrorStatusText = new ImGuiFlashingText(ImGuiTools.RED);
 
-   private EZGripperManager.OperationMode previousOperationMode = null;
+   private OperationMode previousOperationMode = null;
 
-   public RDXEZGripper(String identifier, RobotSide handSide, EZGripperROS2HardwareCommunication communication)
+   public RDXEZGripper(RobotSide handSide, EZGripperROS2HardwareCommunication communication)
    {
-      this.identifier = identifier;
       this.handSide = handSide;
       this.communication = communication;
 
@@ -61,12 +60,6 @@ public class RDXEZGripper implements RDXHandInterface
       handOpenAngleDegreesSlider.addWidgetAligner(widgetAligner);
       fingertipGripForceSlider = new ImGuiSliderDouble("Fingertip Grip Force Limit", "%.1f N", Double.NaN);
       fingertipGripForceSlider.addWidgetAligner(widgetAligner);
-   }
-
-   @Override
-   public String getIdentifier()
-   {
-      return identifier;
    }
 
    @Override
@@ -78,35 +71,35 @@ public class RDXEZGripper implements RDXHandInterface
    @Override
    public boolean isCalibrated()
    {
-      return communication.getAvailableHands().contains(identifier) && communication.readState(identifier).getIsCalibrated();
+      return communication.isHandConnected(handSide, CONNECTION_TIMEOUT) && communication.readState(handSide).getIsCalibrated();
    }
 
    @Override
    public boolean needsReset()
    {
-      return communication.getAvailableHands().contains(identifier) && communication.readState(identifier).getErrorCode() != EZGripperError.NONE.errorCode;
+      return communication.isHandConnected(handSide, CONNECTION_TIMEOUT) && communication.readState(handSide).getErrorCode() != EZGripperError.NONE.errorCode;
    }
 
    @Override
    public void update()
    {
-      if (!communication.getAvailableHands().contains(identifier))
+      if (!communication.isHandConnected(handSide, CONNECTION_TIMEOUT))
          return;
 
-      EZGripperState state = communication.readState(identifier);
+      EZGripperState state = communication.readState(handSide);
 
       if (previousOperationMode != OperationMode.POSITION_CONTROL)
          handOpenAngleDegreesSlider.setDoubleValue(Math.toDegrees(SakeHandParameters.denormalizeHandOpenAngle(state.getCurrentPosition())));
 
       if (sendThrottler.run(SEND_PERIOD) && commandChanged.poll())
       {
-         communication.publishCommand(identifier);
-         previousOperationMode = OperationMode.fromByte(communication.getCommand(identifier).getOperationMode());
+         communication.publishCommand(handSide, commandMessage);
+         previousOperationMode = OperationMode.fromByte(commandMessage.getOperationMode());
 
          // This prevents requesting calibration or error reset multiple times in a row
          if (previousOperationMode != OperationMode.POSITION_CONTROL)
          {
-            communication.getCommand(identifier).setOperationMode(EZGripperCommand.POSITION_CONTROL);
+            commandMessage.setOperationMode(EZGripperCommand.POSITION_CONTROL);
             commandChanged.set();
          }
       }
@@ -115,10 +108,7 @@ public class RDXEZGripper implements RDXHandInterface
    @Override
    public void renderImGuiWidgets()
    {
-      if (!communication.getAvailableHands().contains(identifier))
-         return;
-
-      EZGripperState state = communication.readState(identifier);
+      EZGripperState state = communication.readState(handSide);
 
       ImGui.beginDisabled(needsReset() || !isCalibrated());
 
@@ -130,10 +120,10 @@ public class RDXEZGripper implements RDXHandInterface
             double normalizedEffort = SakeHandParameters.normalizeFingertipGripForceLimit(preset.getFingertipGripForceLimit());
 
             // Set the command
-            communication.getCommand(identifier).setOperationMode(EZGripperCommand.POSITION_CONTROL);
-            communication.getCommand(identifier).setGoalPosition((float) normalizedPosition);
-            communication.getCommand(identifier).setMaxEffort((float) normalizedEffort);
-            communication.getCommand(identifier).setTorqueOn(normalizedEffort > 1E-3);
+            commandMessage.setOperationMode(EZGripperCommand.POSITION_CONTROL);
+            commandMessage.setGoalPosition((float) normalizedPosition);
+            commandMessage.setMaxEffort((float) normalizedEffort);
+            commandMessage.setTorqueOn(normalizedEffort > 1E-3);
 
             // Update sliders to match
             handOpenAngleDegreesSlider.setDoubleValue(Math.toDegrees(preset.getHandOpenAngle()));
@@ -149,7 +139,7 @@ public class RDXEZGripper implements RDXHandInterface
 
       if (ImGui.button(labels.get("Calibrate")))
       {
-         communication.getCommand(identifier).setOperationMode(EZGripperCommand.CALIBRATION);
+         commandMessage.setOperationMode(EZGripperCommand.CALIBRATION);
          commandChanged.set();
       }
 
@@ -158,7 +148,7 @@ public class RDXEZGripper implements RDXHandInterface
       ImGui.sameLine();
       if (ImGui.button(labels.get("Reset Errors")))
       {
-         communication.getCommand(identifier).setOperationMode(EZGripperCommand.ERROR_RESET);
+         commandMessage.setOperationMode(EZGripperCommand.ERROR_RESET);
          commandChanged.set();
       }
 
@@ -172,7 +162,7 @@ public class RDXEZGripper implements RDXHandInterface
          commandChanged.set();
       ImGui.endDisabled();
 
-      communication.getCommand(identifier).setTemperatureLimit((byte) (imAutoCoolDownEnabled.get() ? temperatureLimit.get() : 255));
+      commandMessage.setTemperatureLimit((byte) (imAutoCoolDownEnabled.get() ? temperatureLimit.get() : 255));
 
       calibrateStatusText.renderText("Is Calibrated: %b ".formatted(isCalibrated()), !isCalibrated());
       ImGui.sameLine();
@@ -214,10 +204,10 @@ public class RDXEZGripper implements RDXHandInterface
          double normalizedPosition = SakeHandParameters.normalizeHandOpenAngle(Math.toRadians(handOpenAngleDegreesSlider.getDoubleValue()));
          double normalizedEffort = SakeHandParameters.normalizeFingertipGripForceLimit(fingertipGripForceSlider.getDoubleValue());
 
-         communication.getCommand(identifier).setOperationMode(EZGripperCommand.POSITION_CONTROL);
-         communication.getCommand(identifier).setGoalPosition((float) normalizedPosition);
-         communication.getCommand(identifier).setMaxEffort((float) normalizedEffort);
-         communication.getCommand(identifier).setTorqueOn(normalizedEffort > 1E-3);
+         commandMessage.setOperationMode(EZGripperCommand.POSITION_CONTROL);
+         commandMessage.setGoalPosition((float) normalizedPosition);
+         commandMessage.setMaxEffort((float) normalizedEffort);
+         commandMessage.setTorqueOn(normalizedEffort > 1E-3);
 
          commandChanged.set();
       }
@@ -256,10 +246,10 @@ public class RDXEZGripper implements RDXHandInterface
          double normalizedPosition = SakeHandParameters.normalizeHandOpenAngle(Math.toRadians(handOpenAngleDegreesSlider.getDoubleValue()));
          double normalizedEffort = SakeHandParameters.normalizeFingertipGripForceLimit(fingertipGripForceSlider.getDoubleValue());
 
-         communication.getCommand(identifier).setOperationMode(EZGripperCommand.POSITION_CONTROL);
-         communication.getCommand(identifier).setGoalPosition((float) normalizedPosition);
-         communication.getCommand(identifier).setMaxEffort((float) normalizedEffort);
-         communication.getCommand(identifier).setTorqueOn(normalizedEffort > 1E-3);
+         commandMessage.setOperationMode(EZGripperCommand.POSITION_CONTROL);
+         commandMessage.setGoalPosition((float) normalizedPosition);
+         commandMessage.setMaxEffort((float) normalizedEffort);
+         commandMessage.setTorqueOn(normalizedEffort > 1E-3);
 
          commandChanged.set();
       }
@@ -297,14 +287,14 @@ public class RDXEZGripper implements RDXHandInterface
    @Override
    public void sendCommand(HandAction action)
    {
-      if (!communication.getAvailableHands().contains(identifier))
+      if (!communication.isHandConnected(handSide, CONNECTION_TIMEOUT))
          return;
 
       switch (action)
       {
          case OPEN ->
          {
-            EZGripperCommand command = communication.getCommand(identifier);
+            EZGripperCommand command = commandMessage;
             command.setOperationMode(EZGripperCommand.POSITION_CONTROL);
             command.setGoalPosition((float) SakeHandParameters.normalizeHandOpenAngle(SakeHandPreset.OPEN.getHandOpenAngle()));
             command.setMaxEffort((float) (SakeHandPreset.OPEN.getFingertipGripForceLimit() / SakeHandParameters.FINGERTIP_GRIP_FORCE_HARDWARE_LIMIT));
@@ -313,7 +303,7 @@ public class RDXEZGripper implements RDXHandInterface
          }
          case CLOSE ->
          {
-            EZGripperCommand command = communication.getCommand(identifier);
+            EZGripperCommand command = commandMessage;
             command.setOperationMode(EZGripperCommand.POSITION_CONTROL);
             command.setGoalPosition((float) SakeHandParameters.normalizeHandOpenAngle(SakeHandPreset.CLOSE.getHandOpenAngle()));
             command.setMaxEffort((float) (SakeHandPreset.CLOSE.getFingertipGripForceLimit() / SakeHandParameters.FINGERTIP_GRIP_FORCE_HARDWARE_LIMIT));
@@ -322,7 +312,7 @@ public class RDXEZGripper implements RDXHandInterface
          }
          case GRIP ->
          {
-            EZGripperCommand command = communication.getCommand(identifier);
+            EZGripperCommand command = commandMessage;
             command.setOperationMode(EZGripperCommand.POSITION_CONTROL);
             command.setGoalPosition((float) SakeHandParameters.normalizeHandOpenAngle(SakeHandPreset.GRIP.getHandOpenAngle()));
             command.setMaxEffort((float) (SakeHandPreset.GRIP.getFingertipGripForceLimit() / SakeHandParameters.FINGERTIP_GRIP_FORCE_HARDWARE_LIMIT));
@@ -331,13 +321,13 @@ public class RDXEZGripper implements RDXHandInterface
          }
          case CALIBRATE ->
          {
-            EZGripperCommand command = communication.getCommand(identifier);
+            EZGripperCommand command = commandMessage;
             command.setOperationMode(EZGripperCommand.CALIBRATION);
             publishCommand();
          }
          case RESET ->
          {
-            EZGripperCommand command = communication.getCommand(identifier);
+            EZGripperCommand command = commandMessage;
             command.setOperationMode(EZGripperCommand.ERROR_RESET);
             publishCommand();
          }
@@ -346,10 +336,10 @@ public class RDXEZGripper implements RDXHandInterface
 
    private synchronized void publishCommand()
    {
-      if (!communication.getAvailableHands().contains(identifier))
+      if (!communication.isHandConnected(handSide, CONNECTION_TIMEOUT))
          return;
 
-      communication.publishCommand(identifier);
+      communication.publishCommand(handSide, commandMessage);
    }
 
    @Override

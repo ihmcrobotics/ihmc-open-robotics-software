@@ -11,7 +11,6 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HeightMapCommand;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
@@ -21,6 +20,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 import static us.ihmc.footstepPlanning.polygonSnapping.PolygonSnapperTools.*;
 
@@ -29,9 +29,9 @@ public class HeightMapFootstepSnapper implements FootstepAdjustment
    // When snapping, the foot polygon is expanded by this amount to improve the surface normal detection
    private static final double FOOT_INFLATION_DISTANCE = 0.08;
    // Only heights within this vertical distance of the highest point are used in the snap computation
-   private static final double MAXIMUM_HEIGHT_DELTA_TO_CONSIDER = 0.1;
+   private static final double MAXIMUM_HEIGHT_DELTA_TO_CONSIDER = 0.2;
    // Only heights within this vertical distance of the highest point are used in the snap computation
-   private static final double MAXIMUM_HEIGHT_ABOVE_STANCE_TO_CONSIDER = 0.55;
+   private static final double MAXIMUM_HEIGHT_ABOVE_STANCE_TO_CONSIDER = 0.3;
 
    private HeightMapCommand heightMapCommand;
    private final SideDependentList<ConvexPolygon2DReadOnly> footPolygons = new SideDependentList<>();
@@ -45,6 +45,10 @@ public class HeightMapFootstepSnapper implements FootstepAdjustment
    private final YoBoolean hasHeightMap;
    private final YoBoolean snapToHeightMap;
    private final YoBoolean includePitchAndRoll;
+   private final YoDouble heightOfNewPose;
+   private final YoDouble maxHeightYoVariable;
+   private final YoDouble maximumHeightDeltaToConsider;
+   private final YoDouble maximumHeightAboveStanceToConsider;
 
    private final RotationMatrix rotationMatrix = new RotationMatrix();
 
@@ -53,8 +57,17 @@ public class HeightMapFootstepSnapper implements FootstepAdjustment
       this.hasHeightMap = new YoBoolean("hasHeightMap", registry);
       this.snapToHeightMap = new YoBoolean("snapToHeightMap", registry);
       this.includePitchAndRoll = new YoBoolean("includePitchAndRoll", registry);
+
+      heightOfNewPose = new YoDouble("HeightMapFootstepSnallerHeightOfNewPose", registry);
+      maxHeightYoVariable = new YoDouble("HeightMapFootstepSnapperMaxHeight", registry);
+
+      maximumHeightDeltaToConsider = new YoDouble("maximumHeightDeltaToConsider", registry);
+      maximumHeightDeltaToConsider.set(MAXIMUM_HEIGHT_DELTA_TO_CONSIDER);
+
+      maximumHeightAboveStanceToConsider = new YoDouble("maximumHeightAboveStanceToConsider", registry);
+      maximumHeightAboveStanceToConsider.set(MAXIMUM_HEIGHT_ABOVE_STANCE_TO_CONSIDER);
+
       hasHeightMap.set(false);
-      includePitchAndRoll.set(true);
 
       ConvexPolygonScaler polygonScaler = new ConvexPolygonScaler();
       for (RobotSide robotSide : RobotSide.values)
@@ -69,6 +82,7 @@ public class HeightMapFootstepSnapper implements FootstepAdjustment
    public boolean adjustFootstep(FramePose3DReadOnly stanceFootPose, FramePose2DReadOnly footstepPose, RobotSide footSide, FootstepDataMessage adjustedPoseToPack)
    {
       adjustedPoseToPack.getLocation().set(footstepPose.getPosition(), stanceFootPose.getZ());
+      adjustedPoseToPack.getOrientation().set(footstepPose.getOrientation());
       hasHeightMap.set(heightMapCommand != null);
 
       if (!hasHeightMap.getValue() || !snapToHeightMap.getValue())
@@ -76,8 +90,8 @@ public class HeightMapFootstepSnapper implements FootstepAdjustment
          return true;
       }
 
-      double minimumZToConsider = stanceFootPose.getZ() - MAXIMUM_HEIGHT_ABOVE_STANCE_TO_CONSIDER;
-      double maximumZToConsider = stanceFootPose.getZ() + MAXIMUM_HEIGHT_ABOVE_STANCE_TO_CONSIDER;
+      double minimumZToConsider = stanceFootPose.getZ() - maximumHeightAboveStanceToConsider.getDoubleValue();
+      double maximumZToConsider = stanceFootPose.getZ() + maximumHeightAboveStanceToConsider.getDoubleValue();
       double maximumHeight = -Double.MAX_VALUE;
 
       polygonToSnap.set(footPolygons.get(footSide));
@@ -108,7 +122,8 @@ public class HeightMapFootstepSnapper implements FootstepAdjustment
          }
       }
 
-      double heightThresholdToFilter = maximumHeight - MAXIMUM_HEIGHT_DELTA_TO_CONSIDER;
+      maxHeightYoVariable.set(maximumHeight);
+      double heightThresholdToFilter = maximumHeight - maximumHeightDeltaToConsider.getDoubleValue();
       for (int i = 0; i < pointsInsidePolygon.size(); i++)
       {
          if (pointsInsidePolygon.get(i).getZ() > heightThresholdToFilter)
@@ -128,12 +143,14 @@ public class HeightMapFootstepSnapper implements FootstepAdjustment
       // Set position z of snapped foot
       double height = bestFitPlane.getZOnPlane(footstepPose.getX(), footstepPose.getY());
       adjustedPoseToPack.getLocation().setZ(height);
+      heightOfNewPose.set(height);
 
       // Set orientation of snapped foot
       if (includePitchAndRoll.getValue())
       {
          constructRotationToMatchSurfaceNormal(bestFitPlane.getNormal(), rotationMatrix);
          adjustedPoseToPack.getOrientation().set(rotationMatrix);
+         adjustedPoseToPack.getOrientation().setToYawOrientation(footstepPose.getYaw());
       }
 
       return true;

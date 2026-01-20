@@ -3,6 +3,30 @@
 
 const float PI_F = 3.1415927f;
 
+__device__ __forceinline__
+float3 operator+(const float3& a, const float3& b)
+{
+    return make_float3(a.x + b.x, a.y + b.y, a.z + b.z);
+}
+
+__device__ __forceinline__
+float3 operator-(const float3& a, const float3& b)
+{
+    return make_float3(a.x - b.x, a.y - b.y, a.z - b.z);
+}
+
+__device__ __forceinline__
+float3 operator*(const float3& a, const float scalar)
+{
+    return make_float3(a.x * scalar, a.y * scalar, a.z * scalar);
+}
+
+__device__ __forceinline__
+float3 operator/(const float3& a, const float divisor)
+{
+    return make_float3(a.x / divisor, a.y / divisor, a.z / divisor);
+}
+
 __device__ float dot(const float3 a, const float3 b)
 {
     return a.x * b.x + a.y * b.y + a.z * b.z;
@@ -31,6 +55,26 @@ __device__ float interpolate(float a, float b, float alpha)
     return (1.0f - alpha) * a + alpha * b;
 }
 
+__device__ float3 scale(float scalar, float3 point)
+{
+    float3 ret;
+    ret.x = scalar * point.x;
+    ret.y = scalar * point.y;
+    ret.z = scalar * point.z;
+
+    return ret;
+}
+
+__device__ float3 add(float3 pointA, float3 pointB)
+{
+    return make_float3(pointA.x + pointB.x, pointA.y + pointB.y, pointA.z + pointB.z);
+}
+
+__device__ float3 sub(float3 pointA, float3 pointB)
+{
+    return make_float3(pointA.x - pointB.x, pointA.y - pointB.y, pointA.z - pointB.z);
+}
+
 __device__ float3 transformPoint3D(float3 point, const float* transform)
 {
     return make_float3(dot(make_float3(transform[0], transform[1], transform[2]), point) + transform[3],
@@ -50,6 +94,21 @@ __device__ float length2D(float2 vec)
 }
 
 // Euclidean distance
+__device__ float norm(float3 v)
+{
+    return dot(v, v);
+}
+
+__device__ float distanceSquared(float3 pointA, float3 pointB)
+{
+    return norm(sub(pointA, pointB));
+}
+
+__device__ float distance(float3 pointA, float3 pointB)
+{
+    return sqrtf(distanceSquared(pointA, pointB));
+}
+
 __device__ float length(float3 v)
 {
     return sqrtf(v.x * v.x + v.y * v.y + v.z * v.z);
@@ -118,7 +177,7 @@ __device__ void invert3x3Matrix(double* matrix, double* result)
    result[8] = detMinor22 / det;
 }
 
-__device__ double solveForPlaneCoefficients(double* covariance_matrix, double* z_variance_vector, double zz, double* coefficients)
+__device__ double solveForPlaneCoefficients3x3(double* covariance_matrix, double* z_variance_vector, double zz, double* coefficients)
 {
     // Invert the 3x3 covariance matrix (this should be done on the device as well)
     double inverse_covariance_matrix[9];
@@ -152,6 +211,36 @@ __device__ double solveForPlaneCoefficients(double* covariance_matrix, double* z
 
     double squared_error = A*A * xx + 2 * A*B*xy + 2*A*xz + 2*A*C*x + B*B*yy + 2*B*yz + 2*B*C*y + zz + 2* C*z + n*C*C;
     return squared_error / n;
+}
+
+__device__ bool solveForPlaneCoefficients2x2(float cxx, float cxy, float cyy, float cxz, float cyz, float3 centroid, float3& normal)
+{
+    // regularization
+    const float lambda = 1e-6f;
+    cxx += lambda;
+    cyy += lambda;
+
+    float det = cxx * cyy - cxy * cxy;
+
+    // degenerate neighborhood
+    if (fabsf(det) < 1e-8f)
+        return false;
+
+    float invDet = 1.0f / det;
+
+    float A = ( cyy * cxz - cxy * cyz) * invDet;
+    float B = (-cxy * cxz + cxx * cyz) * invDet;
+
+    // Plane: Ax + By - z + C = 0
+    normal = make_float3(A, B, -1.0f);
+
+    // Normalize normal
+    float norm = rsqrtf(A*A + B*B + 1.0f);
+    normal.x *= norm;
+    normal.y *= norm;
+    normal.z *= norm;
+
+    return true;
 }
 
 #endif // MATH_UTILS

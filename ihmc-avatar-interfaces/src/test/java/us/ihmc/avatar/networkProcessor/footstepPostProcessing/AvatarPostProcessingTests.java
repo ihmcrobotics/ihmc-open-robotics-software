@@ -56,6 +56,8 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.scs2.simulation.robot.multiBodySystem.interfaces.SimJointBasics;
 import us.ihmc.scs2.simulation.robot.trackers.GroundContactPoint;
@@ -148,6 +150,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
 
       footstepPlannerParameters.setMaxStepZ(height + 0.05);
       footstepPlannerParameters.setIdealFootstepLength(0.28);
+      footstepPlannerParameters.setMinFootholdPercent(0.95);
 
       boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
@@ -413,17 +416,14 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
 
    private void runTest(FootstepPlanningRequestPacket requestPacket)
    {
-      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       YoRegistry registry = new YoRegistry("TestRegistry");
       YoFramePoint3D goalPosition = new YoFramePoint3D("goalPosition", ReferenceFrame.getWorldFrame(), registry);
-      YoGraphicPosition goalGraphic = new YoGraphicPosition("goalGraphic", goalPosition, 0.05, YoAppearance.Green());
 
       Pose3D goalMidFootPose = new Pose3D();
       goalMidFootPose.interpolate(requestPacket.getGoalLeftFootPose(), requestPacket.getGoalRightFootPose(), 0.5);
       goalPosition.set(goalMidFootPose.getPosition());
-      yoGraphicsListRegistry.registerYoGraphic("Test", goalGraphic);
       simulationTestHelper.getRootRegistry().addChild(registry);
-      simulationTestHelper.addYoGraphicsListRegistry(yoGraphicsListRegistry);
+      simulationTestHelper.addYoGraphicDefinition(YoGraphicDefinitionFactory.newYoGraphicPoint3D("goalGraphic", goalPosition, 0.025, ColorDefinitions.Green()));
 
       FootstepPlannerRequest request = new FootstepPlannerRequest();
       request.setFromPacket(requestPacket);

@@ -35,7 +35,10 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -48,7 +51,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class KinematicsPlanningToolboxController extends ToolboxController
+public class KinematicsPlanningToolboxController extends ToolboxController implements SCS2YoGraphicHolder
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -96,7 +99,6 @@ public class KinematicsPlanningToolboxController extends ToolboxController
                                               FullHumanoidRobotModel fullRobotModel,
                                               CommandInputManager commandInputManager,
                                               StatusMessageOutputManager statusOutputManager,
-                                              YoGraphicsListRegistry yoGraphicsListRegistry,
                                               YoRegistry parentRegistry)
    {
       super(statusOutputManager, parentRegistry);
@@ -130,7 +132,6 @@ public class KinematicsPlanningToolboxController extends ToolboxController
                                                              statusOutputManager,
                                                              fullRobotModel,
                                                              updateDT,
-                                                             yoGraphicsListRegistry,
                                                              parentRegistry);
       ikController.setDesiredRobotStateUpdater(((rootJoint, oneDoFJoints) -> true)); // Sharing the same desired robot state with the IK controller. Just need to notify it that it gets updated.
       ikCommandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(fullRobotModel, ikController.getDesiredReferenceFrames()));
@@ -645,5 +646,13 @@ public class KinematicsPlanningToolboxController extends ToolboxController
    public CommonHumanoidReferenceFrames getDesiredReferenceFrames()
    {
       return ikController.getDesiredReferenceFrames();
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(ikController.getSCS2YoGraphics());
+      return group;
    }
 }

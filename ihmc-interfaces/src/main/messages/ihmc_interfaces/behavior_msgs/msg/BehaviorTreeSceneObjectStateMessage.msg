@@ -6,8 +6,10 @@ ihmc_common_msgs/LatestModificationMessage latest_modification_to_data
 # The object's unique ID
 uint32 id
 
-# Object type (IsaacROSFoundationPoseObject ordinal)
-int32 object_type
+behavior_msgs/BehaviorTreeSceneObjectDefinitionMessage definition
+
+# Persistent detection associated with this object
+behavior_msgs/PersistentDetectionStatusMessage persistent_detection
 
 # Transform of the object frame to world frame
 controller_msgs/RigidBodyTransformMessage transform_to_world

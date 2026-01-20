@@ -48,7 +48,7 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
    private final AlexanderPhysicalProperties physicalProperties;
    private final ToeOffParameters toeOffParameters;
    private SwingTrajectoryParameters swingTrajectoryParameters;
-   private OpenAlexanderSteppingParameters steppingParameters;
+   private final OpenAlexanderSteppingParameters steppingParameters;
    private final OpenAlexanderICPControllerParameters icpControllerParameters;
    private final OpenAlexanderStepAdjustmentParameters stepAdjustmentParameters;
    private JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = new AlexanderJointPrivilegedConfigurationParameters();
@@ -101,7 +101,7 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
 
       toeOffParameters = new AlexanderToeOffParameters(physicalProperties);
       momentumOptimizationSettings = new OpenAlexanderMomentumOptimizationSettings(target, jointMap, 2 + contactPointParameters.getAdditionalContactNames().size());
-      swingTrajectoryParameters = new AlexanderSwingTrajectoryParameters();
+      swingTrajectoryParameters = new OpenAlexanderSwingTrajectoryParameters();
       steppingParameters = new OpenAlexanderSteppingParameters(physicalProperties);
       icpControllerParameters = new OpenAlexanderICPControllerParameters();
       stepAdjustmentParameters = new OpenAlexanderStepAdjustmentParameters();
@@ -269,7 +269,7 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
          cycloidArmJointNames.add(jointMap.getArmJointName(side, ArmJointName.SHOULDER_YAW));
          cycloidArmJointNames.add(jointMap.getArmJointName(side, ArmJointName.ELBOW_PITCH));
 
-         if (version.hasCycloidForearms())
+         if (version.hasCycloidForearm())
          {
             cycloidArmJointNames.add(jointMap.getArmJointName(side, ArmJointName.ELBOW_YAW));
             cycloidArmJointNames.add(jointMap.getArmJointName(side, ArmJointName.WRIST_ROLL));
@@ -861,11 +861,6 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
    public void setDoPreparePelvisForLocomotion(boolean doPreparePelvisForLocomotion)
    {
       this.doPreparePelvisForLocomotion = doPreparePelvisForLocomotion;
-   }
-
-   public void setSteppingParameters(OpenAlexanderSteppingParameters steppingParameters)
-   {
-      this.steppingParameters = steppingParameters;
    }
 
    public void setSwingTrajectoryParameters(SwingTrajectoryParameters swingTrajectoryParameters)

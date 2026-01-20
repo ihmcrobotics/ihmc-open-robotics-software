@@ -21,11 +21,12 @@ import us.ihmc.yoVariables.variable.YoInteger;
 public class FootShakiesEstimator
 {
    private static final double COP_WINDOW_DURATION = 0.5;
-   private static final double COP_SEGMENT_GLITCH_DURATION = 0.02;
+   private static final double COP_SEGMENT_GLITCH_DURATION = 0.025;
    private static final double COP_MIDDLE_SEGMENT_FRACTION = 0.6;
-   private static final double MIN_WEIGHT_FRACTION_FOR_CONTROL_SCALING = 0.2;
+   private static final double MIN_WEIGHT_FRACTION_FOR_CONTROL_SCALING = 0.32;
    private static final int COP_FORWARD_SWITCHES_FOR_SHAKIES = 4;
    private static final int COP_SIDEWAYS_SWITCHES_FOR_SHAKIES = 3;
+
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -80,7 +81,6 @@ public class FootShakiesEstimator
 
    private final double footLength;
    private final double footWidth;
-
 
    private final double controlDT;
    private int writeIndex = -1;

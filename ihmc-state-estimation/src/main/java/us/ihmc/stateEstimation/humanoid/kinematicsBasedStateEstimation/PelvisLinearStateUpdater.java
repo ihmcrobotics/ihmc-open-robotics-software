@@ -11,6 +11,8 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
@@ -154,7 +156,6 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
                                    Map<RigidBodyBasics, ? extends ContactablePlaneBody> feetContactablePlaneBodies,
                                    double gravitationalAcceleration,
                                    StateEstimatorParameters stateEstimatorParameters,
-                                   YoGraphicsListRegistry yoGraphicsListRegistry,
                                    YoRegistry parentRegistry)
    {
       this.estimatorDT = stateEstimatorParameters.getEstimatorDT();
@@ -175,7 +176,6 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
                                                                                             centerOfPressureDataHolderFromController,
                                                                                             estimatorDT,
                                                                                             stateEstimatorParameters,
-                                                                                            yoGraphicsListRegistry,
                                                                                             registry);
 
       imuBasedLinearStateCalculator = new PelvisIMUBasedLinearStateCalculator(rootJoint,
@@ -185,7 +185,6 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
                                                                               estimatorDT,
                                                                               gravitationalAcceleration,
                                                                               stateEstimatorParameters,
-                                                                              yoGraphicsListRegistry,
                                                                               registry);
 
       imuAgainstKinematicsForVelocityBreakFrequency = new DoubleParameter("imuAgainstKinematicsForVelocityBreakFrequency",
@@ -369,6 +368,8 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
       numberOfEndEffectorsFilteredByLoad.set(0);
       numberOfEndEffectorsFilteredByVelocity.set(0);
 
+      numberOfEndEffectorsTrusted.set(filterTrustedFeetBasedOnVelocity(numberOfEndEffectorsTrusted.getIntegerValue()));
+
       if (numberOfEndEffectorsTrusted.getIntegerValue() >= optimalNumberOfTrustedFeet.getValue())
       {
          switch (slippageCompensatorMode.getEnumValue())
@@ -383,7 +384,6 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
                throw new RuntimeException("Should not get there");
          }
       }
-      numberOfEndEffectorsTrusted.set(filterTrustedFeetBasedOnVelocity(numberOfEndEffectorsTrusted.getIntegerValue()));
 
       if (imuBasedLinearStateCalculator.isEstimationEnabled())
          imuBasedLinearStateCalculator.updateLinearAccelerationMeasurement();
@@ -629,7 +629,11 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
             highestLoadedFoot = foot;
          }
 
-         if (footLoad.getValue() < magnitudeForTrust)
+         double copDistance = footSwitches.get(foot).getCenterOfPressureDistance();
+         if (Double.isNaN(copDistance))
+            copDistance = 0.0;
+
+         if (footLoad.getValue() < magnitudeForTrust || copDistance > 0.01)
             areFeetTrusted.get(foot).set(false);
          else
             filteredNumberOfEndEffectorsTrusted++;
@@ -660,7 +664,8 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
          if (!areFeetTrusted.get(foot).getBooleanValue())
             continue;
 
-         double footAngularVelocity = foot.getBodyFixedFrame().getTwistOfFrame().getAngularPart().norm();
+         FrameVector3DReadOnly angularVelocity = foot.getBodyFixedFrame().getTwistOfFrame().getAngularPart();
+         double footAngularVelocity = EuclidCoreTools.norm(angularVelocity.getX(), angularVelocity.getY());
          footAngularVelocities.get(foot).set(footAngularVelocity);
 
          if (footAngularVelocity < slowestVelocity)

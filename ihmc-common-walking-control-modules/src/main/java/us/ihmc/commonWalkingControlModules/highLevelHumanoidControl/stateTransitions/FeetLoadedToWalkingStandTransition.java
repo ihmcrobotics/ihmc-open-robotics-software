@@ -2,12 +2,17 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.stateTransi
 
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+
+import java.util.function.Function;
 
 public class FeetLoadedToWalkingStandTransition extends FeetLoadedTransition
 {
@@ -19,12 +24,60 @@ public class FeetLoadedToWalkingStandTransition extends FeetLoadedTransition
 
    private final YoDouble minimumTimeInState;
 
-   public FeetLoadedToWalkingStandTransition(HighLevelControllerName nextStateEnum, YoEnum<HighLevelControllerName> requestedState, boolean waitForRequestToTransition,
-                                             ForceSensorDataHolderReadOnly forceSensorDataHolder, SideDependentList<String> feetForceSensors, double controlDT,
-                                             double totalMass, double gravityZ, HighLevelControllerParameters highLevelControllerParameters,
+   public FeetLoadedToWalkingStandTransition(HighLevelControllerName nextStateEnum,
+                                             YoEnum<HighLevelControllerName> requestedState,
+                                             boolean waitForRequestToTransition,
+                                             SideDependentList<FootSwitchInterface> footSwitches,
+                                             double controlDT,
+                                             double totalMass,
+                                             double gravityZ,
+                                             HighLevelControllerParameters highLevelControllerParameters,
                                              YoRegistry parentRegistry)
    {
-      super(nextStateEnum.toString(), forceSensorDataHolder, feetForceSensors, controlDT, totalMass, gravityZ, parentRegistry);
+      this(nextStateEnum,
+           requestedState,
+           waitForRequestToTransition,
+           (side) -> footSwitches.get(side).getMeasuredWrench(),
+           controlDT,
+           totalMass,
+           gravityZ,
+           highLevelControllerParameters,
+           parentRegistry);
+   }
+
+   public FeetLoadedToWalkingStandTransition(HighLevelControllerName nextStateEnum,
+                                             YoEnum<HighLevelControllerName> requestedState,
+                                             boolean waitForRequestToTransition,
+                                             ForceSensorDataHolderReadOnly forceSensorDataHolder,
+                                             SideDependentList<String> feetForceSensors,
+                                             double controlDT,
+                                             double totalMass,
+                                             double gravityZ,
+                                             HighLevelControllerParameters highLevelControllerParameters,
+                                             YoRegistry parentRegistry)
+   {
+      this(nextStateEnum,
+           requestedState,
+           waitForRequestToTransition,
+           (side) -> forceSensorDataHolder.getData(feetForceSensors.get(side)).getWrench(),
+           controlDT,
+           totalMass,
+           gravityZ,
+           highLevelControllerParameters,
+           parentRegistry);
+   }
+
+   public FeetLoadedToWalkingStandTransition(HighLevelControllerName nextStateEnum,
+                                             YoEnum<HighLevelControllerName> requestedState,
+                                             boolean waitForRequestToTransition,
+                                             Function<RobotSide, WrenchReadOnly> footSensors,
+                                             double controlDT,
+                                             double totalMass,
+                                             double gravityZ,
+                                             HighLevelControllerParameters highLevelControllerParameters,
+                                             YoRegistry parentRegistry)
+   {
+      super(nextStateEnum.toString(), footSensors, controlDT, totalMass, gravityZ, parentRegistry);
 
       this.nextStateEnum = nextStateEnum;
       this.requestedState = requestedState;

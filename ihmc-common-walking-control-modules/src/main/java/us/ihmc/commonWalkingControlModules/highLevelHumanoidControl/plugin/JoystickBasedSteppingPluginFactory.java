@@ -93,7 +93,6 @@ public class JoystickBasedSteppingPluginFactory implements HumanoidSteppingPlugi
                                                   WalkingControllerParameters walkingControllerParameters,
                                                   StatusMessageOutputManager walkingStatusMessageOutputManager,
                                                   CommandInputManager walkingCommandInputManager,
-                                                  YoGraphicsListRegistry yoGraphicsListRegistry,
                                                   SideDependentList<? extends ContactableBody> contactableFeet,
                                                   DoubleProvider timeProvider)
    {
@@ -103,7 +102,6 @@ public class JoystickBasedSteppingPluginFactory implements HumanoidSteppingPlugi
                                                                                                      walkingControllerParameters,
                                                                                                      walkingStatusMessageOutputManager,
                                                                                                      walkingCommandInputManager,
-                                                                                                     yoGraphicsListRegistry,
                                                                                                      contactableFeet,
                                                                                                      timeProvider);
 
@@ -113,7 +111,6 @@ public class JoystickBasedSteppingPluginFactory implements HumanoidSteppingPlugi
                                                                                         walkingControllerParameters,
                                                                                         walkingStatusMessageOutputManager,
                                                                                         walkingCommandInputManager,
-                                                                                        yoGraphicsListRegistry,
                                                                                         contactableFeet,
                                                                                         timeProvider);
 
@@ -131,8 +128,6 @@ public class JoystickBasedSteppingPluginFactory implements HumanoidSteppingPlugi
       walkingStatusMessageOutputManager.attachStatusMessageListener(WalkingStatusMessage.class,
                                                                     commandInputManager::setWalkingStatus);
       walkingStatusMessageOutputManager.attachStatusMessageListener(FootstepStatusMessage.class, commandInputManager::consumeFootstepStatus);
-
-      updatables.add(commandInputManager);
 
       //this is probably not the way the class was intended to be modified.
       commandInputManager.setCSG(csgFootstepGenerator.getContinuousStepGenerator());

@@ -32,7 +32,6 @@ import java.util.List;
  */
 public class AlexanderSimulationCollisionModel implements RobotCollisionModel
 {
-   private final AlexanderPhysicalProperties physicalProperties;
    private final HumanoidJointNameMap jointMap;
    private final boolean useSTPShapesForSmoothContact;
    private final double stpMinimumMargin = 1.0e-5;
@@ -44,15 +43,14 @@ public class AlexanderSimulationCollisionModel implements RobotCollisionModel
    private long collisionMask;
    private long collisionGroup;
 
-   public AlexanderSimulationCollisionModel(HumanoidJointNameMap jointMap, AlexanderPhysicalProperties physicalProperties)
+   public AlexanderSimulationCollisionModel(HumanoidJointNameMap jointMap)
    {
-      this(jointMap, physicalProperties, true);
+      this(jointMap, true);
    }
 
-   public AlexanderSimulationCollisionModel(HumanoidJointNameMap jointMap, AlexanderPhysicalProperties physicalProperties, boolean useSTPShapesForSmoothContact)
+   public AlexanderSimulationCollisionModel(HumanoidJointNameMap jointMap, boolean useSTPShapesForSmoothContact)
    {
       this.jointMap = jointMap;
-      this.physicalProperties = physicalProperties;
       this.useSTPShapesForSmoothContact = useSTPShapesForSmoothContact;
    }
 
@@ -116,12 +114,15 @@ public class AlexanderSimulationCollisionModel implements RobotCollisionModel
          }
          { // Foot
             JointBasics ankleRoll = RobotCollisionModel.findJoint(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_ROLL), multiBodySystem);
-            MovingReferenceFrame ankleRollFrame = ankleRoll.getFrameAfterJoint();
-            RigidBodyBasics foot = ankleRoll.getSuccessor();
-            // Using a STP box so the sole is slightly rounded allowing for continuous and smooth contact with the ground.
-            FrameBox3DBasics footShape = newBoxWithSTP(ankleRollFrame, new Vector3D(0.26, 0.14, 0.055));
-            footShape.getPosition().set(0.045, 0.0, -0.05);
-            collidables.add(new Collidable(foot, collisionMask, collisionGroup, footShape));
+            if (ankleRoll != null)
+            {
+               MovingReferenceFrame ankleRollFrame = ankleRoll.getFrameAfterJoint();
+               RigidBodyBasics foot = ankleRoll.getSuccessor();
+               // Using a STP box so the sole is slightly rounded allowing for continuous and smooth contact with the ground.
+               FrameBox3DBasics footShape = newBoxWithSTP(ankleRollFrame, new Vector3D(0.26, 0.14, 0.055));
+               footShape.getPosition().set(0.045, 0.0, -0.05);
+               collidables.add(new Collidable(foot, collisionMask, collisionGroup, footShape));
+            }
          }
       }
 

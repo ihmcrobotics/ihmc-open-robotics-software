@@ -38,6 +38,7 @@ public final class PerceptionAPI
    public static final ROS2Topic<?> TERRAIN_MAP_MODULE = IHMC_ROOT.withModule("terrain_map");
 
    public static final ROS2Topic<?> BEST_EFFORT = IHMC_ROOT.withQoS(ROS2QosProfile.BEST_EFFORT());
+   public static final ROS2Topic<?> RELIABLE = IHMC_ROOT.withQoS(ROS2QosProfile.RELIABLE());
 
    /*
     * Scene graph
@@ -80,54 +81,82 @@ public final class PerceptionAPI
    public static final ROS2Topic<ArUcoMarkerPoses> ARUCO_MARKER_POSES = PERCEPTION_MODULE.withType(ArUcoMarkerPoses.class).withSuffix("aruco_marker_poses");
 
    /*
-    * ZED image topics (IHMC ImageMessage type)
+    * Camera topic bases
     */
-   public static final ROS2Topic<Empty> REQUEST_ZED = PERCEPTION_MODULE.withSuffix("request_zed").withType(Empty.class);
-   public static final ROS2Topic<Empty> REQUEST_ZED_PUBLICATION = PERCEPTION_MODULE.withSuffix("request_zed_publication").withType(Empty.class);
-   public static final ROS2Topic<ImageMessage> ZED_DEPTH = BEST_EFFORT.withModule("zed").withType(ImageMessage.class).withSuffix("depth");
-   public static final SideDependentList<ROS2Topic<ImageMessage>> ZED_COLOR_IMAGES = new SideDependentList<>(BEST_EFFORT.withModule("zed")
-                                                                                                                        .withType(ImageMessage.class)
-                                                                                                                        .withSuffix("left_color"),
-                                                                                                             BEST_EFFORT.withModule("zed")
-                                                                                                                        .withType(ImageMessage.class)
-                                                                                                                        .withSuffix("right_color"));
+   private static final ROS2Topic<?> EXPERIMENTAL_CAMERA = BEST_EFFORT.withPrefix("experimental_camera");
+   private static final ROS2Topic<?> ROS2_EXPERIMENTAL_CAMERA = RELIABLE.withPrefix("ros2_experimental_camera");
+   private static final ROS2Topic<?> STEPPING_CAMERA = BEST_EFFORT.withPrefix("stepping_camera");
+   private static final ROS2Topic<?> ROS2_STEPPING_CAMERA = RELIABLE.withPrefix("ros2_stepping_camera");
 
    /*
-    * ZED image topics (official ROS 2 Image and CameraInfo types)
+    * Experimental ZED image topics (IHMC ImageMessage type)
     */
-   private static final ROS2Topic<?> ROS2_ZED = new ROS2Topic<>().withPrefix("zed").withQoS(ROS2QosProfile.RELIABLE());
-   private static final ROS2Topic<?> ROS2_ZED_COLOR = ROS2_ZED.withModule("color");
-   public static final SideDependentList<ROS2Topic<Image>> ROS2_ZED_COLOR_IMAGES = new SideDependentList<>(ROS2_ZED_COLOR.withSuffix("left/image")
-                                                                                                                         .withType(Image.class),
-                                                                                                           ROS2_ZED_COLOR.withSuffix("right/image")
-                                                                                                                         .withType(Image.class));
-   public static final SideDependentList<ROS2Topic<CameraInfo>> ROS2_ZED_COLOR_CAMERA_INFOS = new SideDependentList<>(ROS2_ZED_COLOR.withSuffix(
-         "left/camera_info").withType(CameraInfo.class), ROS2_ZED_COLOR.withSuffix("right/camera_info").withType(CameraInfo.class));
-   private static final ROS2Topic<?> ROS2_ZED_DEPTH = ROS2_ZED.withModule("depth");
-   public static final ROS2Topic<Image> ROS2_ZED_DEPTH_IMAGE = ROS2_ZED_DEPTH.withSuffix("image").withType(Image.class);
-   public static final ROS2Topic<CameraInfo> ROS2_ZED_DEPTH_CAMERA_INFO = ROS2_ZED_DEPTH.withSuffix("camera_info").withType(CameraInfo.class);
+   private static final ROS2Topic<?> EXPERIMENTAL_ZED = EXPERIMENTAL_CAMERA.withModule("zed");
+   public static final ROS2Topic<Empty> REQUEST_EXPERIMENTAL_ZED = EXPERIMENTAL_ZED.withSuffix("request").withType(Empty.class);
+   public static final ROS2Topic<Empty> REQUEST_EXPERIMENTAL_ZED_PUBLICATION = EXPERIMENTAL_ZED.withSuffix("request_publication").withType(Empty.class);
+   public static final ROS2Topic<ImageMessage> EXPERIMENTAL_ZED_DEPTH = EXPERIMENTAL_ZED.withType(ImageMessage.class).withSuffix("depth");
+   public static final SideDependentList<ROS2Topic<ImageMessage>> EXPERIMENTAL_ZED_COLOR
+         = new SideDependentList<>(EXPERIMENTAL_ZED.withType(ImageMessage.class).withSuffix("left_color"),
+                                   EXPERIMENTAL_ZED.withType(ImageMessage.class).withSuffix("right_color"));
 
    /*
-    * RealSense image topics (IHMC ImageMessage type)
+    * Experimental ZED image topics (official ROS 2 Image and CameraInfo types)
     */
-   public static final ROS2Topic<Empty> REQUEST_REALSENSE = PERCEPTION_MODULE.withSuffix("request_realsense").withType(Empty.class);
-   public static final ROS2Topic<Empty> REQUEST_REALSENSE_PUBLICATION = PERCEPTION_MODULE.withSuffix("request_realsense_publication").withType(Empty.class);
-   public static final ROS2Topic<ImageMessage> D455_DEPTH_IMAGE = BEST_EFFORT.withModule("d455").withTypeName(ImageMessage.class).withSuffix("depth");
-   public static final ROS2Topic<ImageMessage> D455_COLOR_IMAGE = BEST_EFFORT.withModule("d455").withTypeName(ImageMessage.class).withSuffix("color");
-   public static final ROS2Topic<ImageMessage> REALSENSE_DEPTH_FILTERED_IMAGE = BEST_EFFORT.withModule("realsense")
-                                                                                           .withTypeName(ImageMessage.class)
-                                                                                           .withSuffix("depth_filtered");
+   private static final ROS2Topic<?> ROS2_EXPERIMENTAL_ZED = ROS2_EXPERIMENTAL_CAMERA.withModule("zed");
+   public static final SideDependentList<ROS2Topic<Image>> ROS2_EXPERIMENTAL_ZED_COLOR
+         = new SideDependentList<>(ROS2_EXPERIMENTAL_ZED.withSuffix("color/left/image").withType(Image.class),
+                                   ROS2_EXPERIMENTAL_ZED.withSuffix("color/right/image").withType(Image.class));
+   public static final SideDependentList<ROS2Topic<CameraInfo>> ROS2_EXPERIMENTAL_ZED_COLOR_CAMERA_INFO
+         = new SideDependentList<>(ROS2_EXPERIMENTAL_ZED.withSuffix("color/left/camera_info").withType(CameraInfo.class),
+                                   ROS2_EXPERIMENTAL_ZED.withSuffix("color/right/camera_info").withType(CameraInfo.class));
+   public static final ROS2Topic<Image> ROS2_EXPERIMENTAL_ZED_DEPTH = ROS2_EXPERIMENTAL_ZED.withSuffix("depth/image").withType(Image.class);
+   public static final ROS2Topic<CameraInfo> ROS2_EXPERIMENTAL_ZED_DEPTH_CAMERA_INFO = ROS2_EXPERIMENTAL_ZED.withSuffix("depth/camera_info")
+                                                                                                            .withType(CameraInfo.class);
 
    /*
-    * RealSense image topics (official ROS 2 Image and CameraInfo types)
+    * Stepping ZED image topics  (IHMC ImageMessage type)
     */
-   private static final ROS2Topic<?> ROS2_REALSENSE = new ROS2Topic<>().withPrefix("realsense").withQoS(ROS2QosProfile.RELIABLE());
-   private static final ROS2Topic<?> ROS2_REALSENSE_COLOR = ROS2_REALSENSE.withModule("color");
-   public static final ROS2Topic<Image> ROS2_REALSENSE_COLOR_IMAGE = ROS2_REALSENSE_COLOR.withSuffix("image").withType(Image.class);
-   public static final ROS2Topic<CameraInfo> ROS2_REALSENSE_COLOR_CAMERA_INFO = ROS2_REALSENSE_COLOR.withSuffix("camera_info").withType(CameraInfo.class);
-   private static final ROS2Topic<?> ROS2_REALSENSE_DEPTH = ROS2_REALSENSE.withModule("depth");
-   public static final ROS2Topic<Image> ROS2_REALSENSE_DEPTH_IMAGE = ROS2_REALSENSE_DEPTH.withSuffix("image").withType(Image.class);
-   public static final ROS2Topic<CameraInfo> ROS2_REALSENSE_DEPTH_CAMERA_INFO = ROS2_REALSENSE_DEPTH.withSuffix("camera_info").withType(CameraInfo.class);
+   private static final ROS2Topic<?> STEPPING_ZED = STEPPING_CAMERA.withModule("zed");
+   public static final ROS2Topic<Empty> REQUEST_STEPPING_ZED = STEPPING_ZED.withSuffix("request").withType(Empty.class);
+   public static final ROS2Topic<Empty> REQUEST_STEPPING_ZED_PUBLICATION = STEPPING_ZED.withSuffix("request_publication").withType(Empty.class);
+   public static final ROS2Topic<ImageMessage> STEPPING_ZED_DEPTH = STEPPING_ZED.withType(ImageMessage.class).withSuffix("depth");
+   public static final SideDependentList<ROS2Topic<ImageMessage>> STEPPING_ZED_COLOR
+         = new SideDependentList<>(STEPPING_ZED.withType(ImageMessage.class).withSuffix("left_color"),
+                                   STEPPING_ZED.withType(ImageMessage.class).withSuffix("right_color"));
+
+   /*
+    * Stepping ZED image topics (official ROS 2 Image and CameraInfo types)
+    */
+   private static final ROS2Topic<?> ROS2_STEPPING_ZED = ROS2_STEPPING_CAMERA.withModule("zed");
+   public static final SideDependentList<ROS2Topic<Image>> ROS2_STEPPING_ZED_COLOR
+         = new SideDependentList<>(ROS2_STEPPING_ZED.withSuffix("color/left/image").withType(Image.class),
+                                   ROS2_STEPPING_ZED.withSuffix("color/right/image").withType(Image.class));
+   public static final SideDependentList<ROS2Topic<CameraInfo>> ROS2_STEPPING_ZED_COLOR_CAMERA_INFO
+         = new SideDependentList<>(ROS2_STEPPING_ZED.withSuffix("color/left/camera_info").withType(CameraInfo.class),
+                                   ROS2_STEPPING_ZED.withSuffix("color/right/camera_info").withType(CameraInfo.class));
+   public static final ROS2Topic<Image> ROS2_STEPPING_ZED_DEPTH = ROS2_STEPPING_ZED.withSuffix("depth/image").withType(Image.class);
+   public static final ROS2Topic<CameraInfo> ROS2_STEPPING_ZED_DEPTH_CAMERA_INFO = ROS2_STEPPING_ZED.withSuffix("depth/camera_info").withType(CameraInfo.class);
+
+   /*
+    * Stepping RealSense image topics (IHMC ImageMessage type)
+    */
+   private static final ROS2Topic<?> STEPPING_REALSENSE = STEPPING_CAMERA.withModule("realsense");
+   public static final ROS2Topic<Empty> REQUEST_STEPPING_REALSENSE = STEPPING_REALSENSE.withSuffix("request").withType(Empty.class);
+   public static final ROS2Topic<Empty> REQUEST_STEPPING_REALSENSE_PUBLICATION = STEPPING_REALSENSE.withSuffix("request_publication").withType(Empty.class);
+   public static final ROS2Topic<ImageMessage> STEPPING_REALSENSE_DEPTH = STEPPING_REALSENSE.withType(ImageMessage.class).withSuffix("depth");
+   public static final ROS2Topic<ImageMessage> STEPPING_REALSENSE_COLOR = STEPPING_REALSENSE.withType(ImageMessage.class).withSuffix("color");
+   public static final ROS2Topic<ImageMessage> STEPPING_REALSENSE_DEPTH_FILTERED = STEPPING_REALSENSE.withType(ImageMessage.class).withSuffix("depth_filtered");
+
+   /*
+    * Stepping RealSense image topics (official ROS 2 Image and CameraInfo types)
+    */
+   private static final ROS2Topic<?> ROS2_STEPPING_REALSENSE = new ROS2Topic<>().withPrefix("realsense").withQoS(ROS2QosProfile.RELIABLE());
+   public static final ROS2Topic<Image> ROS2_STEPPING_REALSENSE_COLOR = ROS2_STEPPING_REALSENSE.withSuffix("color/image").withType(Image.class);
+   public static final ROS2Topic<CameraInfo> ROS2_STEPPING_REALSENSE_COLOR_CAMERA_INFO = ROS2_STEPPING_REALSENSE.withSuffix("color/camera_info")
+                                                                                                                .withType(CameraInfo.class);
+   public static final ROS2Topic<Image> ROS2_STEPPING_REALSENSE_DEPTH = ROS2_STEPPING_REALSENSE.withSuffix("depth/image").withType(Image.class);
+   public static final ROS2Topic<CameraInfo> ROS2_STEPPING_REALSENSE_DEPTH_CAMERA_INFO = ROS2_STEPPING_REALSENSE.withSuffix("depth/camera_info")
+                                                                                                                .withType(CameraInfo.class);
 
    /*
     * Planar regions
@@ -145,8 +174,11 @@ public final class PerceptionAPI
     * Height map
     */
    public static final ROS2Topic<Empty> REQUEST_HEIGHT_MAP = PERCEPTION_MODULE.withSuffix("request_height_map").withType(Empty.class);
+   public static final ROS2Topic<Empty> REQUEST_HEIGHT_MAP_FOR_CONTROLLER = PERCEPTION_MODULE.withSuffix("request_height_map_for_controller").withType(Empty.class);
    public static final ROS2Topic<Empty> REQUEST_TERRAIN_MAP = PERCEPTION_MODULE.withSuffix("request_terrain_map").withType(Empty.class);
+   public static final ROS2Topic<Empty> REQUEST_YOLO_HEIGHT_MAP = PERCEPTION_MODULE.withSuffix("request_yolo_height_map").withType(Empty.class);
    public static final ROS2Topic<HeightMapMessage> HEIGHT_MAP_MESSAGE = HEIGHT_MAP_MODULE.withOutput().withTypeName(HeightMapMessage.class);
+   public static final ROS2Topic<HeightMapMessage> YOLO_HEIGHT_MAP = HEIGHT_MAP_MODULE.withSuffix("yolo").withOutput().withTypeName(HeightMapMessage.class);
    public static final ROS2Topic<ChunkMessage> CHUNK = PERCEPTION_MODULE.withOutput().withTypeName(ChunkMessage.class).withSuffix("chunk");
    public static final ROS2Topic<Empty> RESET_HEIGHT_MAP = PERCEPTION_MODULE.withSuffix("reset_height_map").withType(Empty.class);
    public static final ROS2Topic<Empty> LOWER_HEIGHT_MAP_BACKDROP = PERCEPTION_MODULE.withSuffix("lower_height_map_backdrop").withType(Empty.class);
@@ -155,6 +187,7 @@ public final class PerceptionAPI
     * Terrain map
     */
    public static final ROS2Topic<TerrainMapMessage> TERRAIN_MAP_MESSAGE = TERRAIN_MAP_MODULE.withOutput().withTypeName(TerrainMapMessage.class);
+   public static final ROS2Topic<TerrainMapMessage> YOLO_TERRAIN_MAP = TERRAIN_MAP_MODULE.withSuffix("yolo").withOutput().withTypeName(TerrainMapMessage.class);
 
    /*
     * SLAM (old, not used)

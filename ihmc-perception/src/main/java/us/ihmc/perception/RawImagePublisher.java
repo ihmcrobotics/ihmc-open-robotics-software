@@ -2,6 +2,7 @@ package us.ihmc.perception;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import perception_msgs.msg.dds.ImageMessage;
 import sensor_msgs.msg.dds.CameraInfo;
@@ -9,8 +10,10 @@ import sensor_msgs.msg.dds.Image;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.cuda.CUDAJPEGProcessor;
+import us.ihmc.perception.cuda.CUDATools;
 import us.ihmc.perception.imageMessage.CompressionType;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.opencv.OpenCVTools;
@@ -19,8 +22,7 @@ import us.ihmc.perception.tools.RawImageTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 
-import static us.ihmc.perception.imageMessage.CompressionType.NVJPEG;
-import static us.ihmc.perception.imageMessage.CompressionType.PNG;
+import static us.ihmc.perception.imageMessage.CompressionType.*;
 
 public class RawImagePublisher implements AutoCloseable
 {
@@ -28,7 +30,7 @@ public class RawImagePublisher implements AutoCloseable
    private final ImageMessage imageMessage;
    private final Image ros2Image;
 
-   private final CUDAJPEGProcessor nvJPEG;
+   private CUDAJPEGProcessor nvJPEG;
 
    private double publishScale = 1.0;
    private boolean destroyed = false;
@@ -39,7 +41,10 @@ public class RawImagePublisher implements AutoCloseable
       imageMessage = new ImageMessage();
       ros2Image = new Image();
 
-      nvJPEG = new CUDAJPEGProcessor();
+      if (CUDATools.hasNVJPEG())
+         nvJPEG = new CUDAJPEGProcessor();
+      else
+         LogTools.warn("nvJPEG not found. Using CPU JPEG compression. Publishing images will be slow and CPU intensive.");
    }
 
    public RawImagePublisher(ROS2Node ros2Node, double publishScale)
@@ -110,8 +115,16 @@ public class RawImagePublisher implements AutoCloseable
             imageToCompress = colorConvertedImage;
          case BGR8:
             compressedImage = new BytePointer(OpenCVTools.dataSize(imageToCompress.getGpuImageMat()));
-            nvJPEG.encodeBGR(imageToCompress.getGpuImageMat(), compressedImage);
-            compressionType = NVJPEG;
+            if (nvJPEG != null)
+            {
+               nvJPEG.encodeBGR(imageToCompress.getGpuImageMat(), compressedImage);
+               compressionType = NVJPEG;
+            }
+            else
+            {
+               opencv_imgcodecs.imencode(".jpg", imageToCompress.getCpuImageMat(), compressedImage, OpenCVTools.compressionParametersJPG);
+               compressionType = JPEG;
+            }
             break;
 
          case RGBA8: // Convert to RGB8 first
@@ -119,14 +132,30 @@ public class RawImagePublisher implements AutoCloseable
             imageToCompress = colorConvertedImage;
          case RGB8:
             compressedImage = new BytePointer(OpenCVTools.dataSize(imageToCompress.getGpuImageMat()));
-            nvJPEG.encodeRGB(imageToCompress.getGpuImageMat(), compressedImage);
-            compressionType = NVJPEG;
+            if (nvJPEG != null)
+            {
+               nvJPEG.encodeRGB(imageToCompress.getGpuImageMat(), compressedImage);
+               compressionType = NVJPEG;
+            }
+            else
+            {
+               opencv_imgcodecs.imencode(".jpg", imageToCompress.getCpuImageMat(), compressedImage, OpenCVTools.compressionParametersJPG);
+               compressionType = JPEG;
+            }
             break;
 
          case GRAY8:
             compressedImage = new BytePointer(OpenCVTools.dataSize(imageToCompress.getGpuImageMat()));
-            nvJPEG.encodeGray(imageToCompress.getGpuImageMat(), compressedImage);
-            compressionType = NVJPEG;
+            if (nvJPEG != null)
+            {
+               nvJPEG.encodeGray(imageToCompress.getGpuImageMat(), compressedImage);
+               compressionType = NVJPEG;
+            }
+            else
+            {
+               opencv_imgcodecs.imencode(".jpg", imageToCompress.getCpuImageMat(), compressedImage, OpenCVTools.compressionParametersJPG);
+               compressionType = JPEG;
+            }
             break;
          default:
             throw new NotImplementedException("Tomasz has not implemented the compression method for this pixel format yet.");
@@ -191,7 +220,8 @@ public class RawImagePublisher implements AutoCloseable
    public synchronized void close()
    {
       System.out.println("Closing " + getClass().getSimpleName());
-      nvJPEG.destroy();
+      if (nvJPEG != null)
+         nvJPEG.destroy();
       destroyed = true;
       System.out.println("Closed " + getClass().getSimpleName());
    }

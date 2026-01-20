@@ -1,15 +1,8 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 
-import static us.ihmc.scs2.definition.visual.ColorDefinitions.DarkOrange;
-import static us.ihmc.scs2.definition.visual.ColorDefinitions.Purple;
-import static us.ihmc.scs2.definition.visual.ColorDefinitions.Red;
-import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicPoint2D;
-import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.DefaultPoint2DGraphic.CIRCLE_PLUS;
-
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.misc.UnrolledInverseFromMinor_DDRM;
-
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
@@ -18,12 +11,11 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.*;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -44,6 +36,10 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
+
+import static us.ihmc.scs2.definition.visual.ColorDefinitions.*;
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.DefaultPoint2DGraphic.CIRCLE_PLUS;
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicPoint2D;
 
 public class ICPController implements ICPControllerInterface
 {
@@ -147,16 +143,14 @@ public class ICPController implements ICPControllerInterface
                         ICPControlPolygons icpControlPolygons,
                         SideDependentList<? extends ContactablePlaneBody> contactableFeet,
                         double controlDT,
-                        YoRegistry parentRegistry,
-                        YoGraphicsListRegistry yoGraphicsListRegistry)
+                        YoRegistry parentRegistry)
    {
       this(walkingControllerParameters,
            walkingControllerParameters.getICPControllerParameters(),
            icpControlPolygons,
            contactableFeet,
            controlDT,
-           parentRegistry,
-           yoGraphicsListRegistry);
+           parentRegistry);
    }
 
    public ICPController(WalkingControllerParameters walkingControllerParameters,
@@ -164,8 +158,7 @@ public class ICPController implements ICPControllerInterface
                         ICPControlPolygons icpControlPolygons,
                         SideDependentList<? extends ContactablePlaneBody> contactableFeet,
                         double controlDT,
-                        YoRegistry parentRegistry,
-                        YoGraphicsListRegistry yoGraphicsListRegistry)
+                        YoRegistry parentRegistry)
    {
       this.parameters = icpOptimizationParameters;
       this.controlDT = controlDT;
@@ -226,44 +219,11 @@ public class ICPController implements ICPControllerInterface
 
       copConstraintHandler = new ICPCoPConstraintHandler(icpControlPolygons, useICPControlPolygons, hasICPControlPolygons, registry);
 
-      parameters.createFeedForwardAlphaCalculator(registry, yoGraphicsListRegistry);
-      parameters.createFeedbackAlphaCalculator(registry, null);
-      parameters.createFeedbackProjectionOperator(registry, null);
-
-      if (yoGraphicsListRegistry != null)
-         setupVisualizers(yoGraphicsListRegistry);
+      parameters.createFeedForwardAlphaCalculator(registry);
+      parameters.createFeedbackAlphaCalculator(registry);
+      parameters.createFeedbackProjectionOperator(registry);
 
       parentRegistry.addChild(registry);
-   }
-
-   private void setupVisualizers(YoGraphicsListRegistry yoGraphicsListRegistry)
-   {
-      ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
-
-      YoGraphicPosition feedbackCoP = new YoGraphicPosition(yoNamePrefix + "FeedbackCoP",
-                                                            this.feedbackCoP,
-                                                            0.005,
-                                                            YoAppearance.Darkorange(),
-                                                            YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
-      YoGraphicPosition feedForwardCoP = new YoGraphicPosition(yoNamePrefix + "ReferenceFeedForwardCoP",
-                                                               this.referenceFeedForwardCoP,
-                                                               0.005,
-                                                               YoAppearance.Red(),
-                                                               YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
-
-      YoGraphicPosition unconstrainedFeedbackCMP = new YoGraphicPosition(yoNamePrefix + "UnconstrainedFeedbackCMP",
-                                                                         this.unconstrainedFeedbackCMP,
-                                                                         0.006,
-                                                                         YoAppearance.Purple(),
-                                                                         GraphicType.BALL_WITH_CROSS);
-
-      artifactList.add(feedbackCoP.createArtifact());
-      artifactList.add(feedForwardCoP.createArtifact());
-      artifactList.add(unconstrainedFeedbackCMP.createArtifact());
-
-      artifactList.setVisible(VISUALIZE);
-
-      yoGraphicsListRegistry.registerArtifactList(artifactList);
    }
 
    /**
@@ -417,29 +377,36 @@ public class ICPController implements ICPControllerInterface
 
       UnrolledInverseFromMinor_DDRM.inv(transformedGains, inverseTransformedGains);
 
-      solver.resetCoPFeedbackConditions();
-      solver.resetFeedbackDirection();
+      solver.resetFeedbackConditions();
       solver.setFeedbackConditions(scaledCoPFeedbackWeight, transformedGains, dynamicsObjectiveWeight.getValue());
       solver.setMaxCMPDistanceFromEdge(maxAllowedDistanceCMPSupport.getValue());
       solver.setCopSafeDistanceToEdge(safeCoPDistanceToEdge.getValue());
       solver.setDesiredFeedbackDirection(unconstrainedFeedback, feedbackDirectionWeight.getValue());
 
-      if (ICPControllerHelper.isStationary(desiredICPVelocity))
+      boolean addConstraints = !ignoreRateLimitThisTick && hasNotConvergedCounts.getIntegerValue() < 5;
+      if (addConstraints)
       {
-         solver.setMaximumFeedbackMagnitude(transformedMagnitudeJacobian,
-                                            feedbackGains.getFeedbackPartMaxValueOrthogonalToMotion(),
-                                            feedbackGains.getFeedbackPartMaxValueOrthogonalToMotion());
-      }
-      else
-      {
-         solver.setMaximumFeedbackMagnitude(transformedMagnitudeJacobian,
-                                            feedbackGains.getFeedbackPartMaxValueParallelToMotion(),
-                                            feedbackGains.getFeedbackPartMaxValueOrthogonalToMotion());
-      }
-      if (!ignoreRateLimitThisTick)
+         if (ICPControllerHelper.isStationary(desiredICPVelocity))
+         {
+            solver.setMaximumFeedbackMagnitude(transformedMagnitudeJacobian,
+                                               feedbackGains.getFeedbackPartMaxValueOrthogonalToMotion(),
+                                               feedbackGains.getFeedbackPartMaxValueOrthogonalToMotion());
+         }
+         else
+         {
+            solver.setMaximumFeedbackMagnitude(transformedMagnitudeJacobian,
+                                               feedbackGains.getFeedbackPartMaxValueParallelToMotion(),
+                                               feedbackGains.getFeedbackPartMaxValueOrthogonalToMotion());
+         }
+
          solver.setMaximumFeedbackRate(feedbackGains.getFeedbackPartMaxRate(), controlDT);
+      }
       else
-         ignoreRateLimitThisTick = false;
+      {
+         solver.removeMaximumFeedbackMagnitude();
+         solver.removeFeedbackRateLimit();
+      }
+      ignoreRateLimitThisTick = false;
 
       double feedbackRateWeight = usingHighCoPDamping.getValue() ? highlyDampedFeedbackRateWeight.getValue() : this.feedbackRateWeight.getValue();
       solver.setFeedbackRateWeight(copCMPFeedbackRateWeight.getValue() / controlDTSquare, feedbackRateWeight / controlDTSquare);

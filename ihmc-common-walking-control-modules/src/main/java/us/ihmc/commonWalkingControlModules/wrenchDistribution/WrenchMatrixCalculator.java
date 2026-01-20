@@ -113,16 +113,14 @@ public class WrenchMatrixCalculator implements SCS2YoGraphicHolder
            toolbox.getContactablePlaneBodies(),
            toolbox.getOptimizationSettings(),
            toolbox.getControlDT(),
-           parentRegistry,
-           toolbox.getYoGraphicsListRegistry());
+           parentRegistry);
    }
 
    public WrenchMatrixCalculator(ReferenceFrame centerOfMassFrame,
                                  List<? extends ContactablePlaneBody> contactablePlaneBodies,
                                  ControllerCoreOptimizationSettings optimizationSettings,
                                  double dt,
-                                 YoRegistry parentRegistry,
-                                 YoGraphicsListRegistry graphicsListRegistry)
+                                 YoRegistry parentRegistry)
    {
       this.centerOfMassFrame = centerOfMassFrame;
       this.dtSquaredInv = 1.0 / (dt * dt);
@@ -187,12 +185,6 @@ public class WrenchMatrixCalculator implements SCS2YoGraphicHolder
 
          Wrench wrench = new Wrench(bodyFixedFrame, bodyFixedFrame);
          wrenchesFromRho.put(rigidBody, wrench);
-
-         if (graphicsListRegistry != null)
-         {
-            YoGraphicPosition copViz = new YoGraphicPosition(copName, cop, 0.005, YoAppearance.Navy(), YoGraphicPosition.GraphicType.BALL);
-            copViz.setVisible(PlaneContactWrenchProcessor.VISUALIZE);
-         }
       }
 
       rhoWeight.set(optimizationSettings.getRhoWeight());
