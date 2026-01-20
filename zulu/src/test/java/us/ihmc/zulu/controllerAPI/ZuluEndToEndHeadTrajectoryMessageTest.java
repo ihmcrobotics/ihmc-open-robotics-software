@@ -39,6 +39,6 @@ public class ZuluEndToEndHeadTrajectoryMessageTest extends EndToEndHeadTrajector
    @Override
    public String getSimpleRobotName()
    {
-      return CITools.getSimpleRobotNameFor(SimpleRobotNameKeys.ALEXANDER);
+      return CITools.getSimpleRobotNameFor(SimpleRobotNameKeys.ZULU);
    }
 }

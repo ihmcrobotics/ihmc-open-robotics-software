@@ -19,7 +19,7 @@ public class ZuluWalkingPathGeneratorTest extends AvatarWalkingPathGeneratorTest
    @Override
    public String getSimpleRobotName()
    {
-      return "alexander";
+      return "zulu";
    }
 
    @Override

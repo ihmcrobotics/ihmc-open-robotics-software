@@ -1,5 +1,5 @@
 {
-  "title" : "AlexanderSwingPlannerParameters",
+  "title" : "ZuluSwingPlannerParameters",
   "Swing Height If Collision Detected" : 0.1,
   "Minimum Swing Time" : 0.7,
   "Maximum Swing Time" : 0.7,

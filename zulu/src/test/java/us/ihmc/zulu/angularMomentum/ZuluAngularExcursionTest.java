@@ -43,6 +43,6 @@ public class ZuluAngularExcursionTest extends AvatarAngularExcursionTest
    @Override
    public String getSimpleRobotName()
    {
-      return "alexander";
+      return "zulu";
    }
 }

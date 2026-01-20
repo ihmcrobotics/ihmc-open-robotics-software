@@ -22,7 +22,7 @@ public class ZuluFlatGroundRewindabilityTest extends DRCFlatGroundRewindabilityT
    @Override
    public String getSimpleRobotName()
    {
-      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ALEXANDER);
+      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ZULU);
    }
 
    @Override

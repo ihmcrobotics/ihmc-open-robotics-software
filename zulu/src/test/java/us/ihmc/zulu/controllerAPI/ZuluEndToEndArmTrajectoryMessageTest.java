@@ -23,7 +23,7 @@ public class ZuluEndToEndArmTrajectoryMessageTest extends EndToEndArmTrajectoryM
    @Override
    public String getSimpleRobotName()
    {
-      return CITools.getSimpleRobotNameFor(SimpleRobotNameKeys.ALEXANDER);
+      return CITools.getSimpleRobotNameFor(SimpleRobotNameKeys.ZULU);
    }
 
    @Tag("controller-api-slow-4")

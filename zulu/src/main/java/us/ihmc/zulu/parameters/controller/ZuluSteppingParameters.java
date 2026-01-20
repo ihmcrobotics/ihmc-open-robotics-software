@@ -5,23 +5,23 @@ import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 
 public class ZuluSteppingParameters implements SteppingParameters
 {
-   protected final ZuluPhysicalProperties alexanderPhysicalProperties;
+   protected final ZuluPhysicalProperties zuluPhysicalProperties;
 
-   public ZuluSteppingParameters(ZuluPhysicalProperties alexanderPhysicalProperties)
+   public ZuluSteppingParameters(ZuluPhysicalProperties zuluPhysicalProperties)
    {
-      this.alexanderPhysicalProperties = alexanderPhysicalProperties;
+      this.zuluPhysicalProperties = zuluPhysicalProperties;
    }
 
    @Override
    public double getFootForwardOffset()
    {
-      return alexanderPhysicalProperties.getFootForwardForControl();
+      return zuluPhysicalProperties.getFootForwardForControl();
    }
 
    @Override
    public double getFootBackwardOffset()
    {
-      return alexanderPhysicalProperties.getFootBackForControl();
+      return zuluPhysicalProperties.getFootBackForControl();
    }
 
    @Override
@@ -86,30 +86,30 @@ public class ZuluSteppingParameters implements SteppingParameters
    @Override
    public double getFootWidth()
    {
-      return alexanderPhysicalProperties.getFootWidthForControl();
+      return zuluPhysicalProperties.getFootWidthForControl();
    }
 
    @Override
    public double getToeWidth()
    {
-      return alexanderPhysicalProperties.getToeWidthForControl();
+      return zuluPhysicalProperties.getToeWidthForControl();
    }
 
    @Override
    public double getFootLength()
    {
-      return alexanderPhysicalProperties.getFootLengthForControl();
+      return zuluPhysicalProperties.getFootLengthForControl();
    }
 
    @Override
    public double getActualFootWidth()
    {
-      return alexanderPhysicalProperties.getActualFootWidth();
+      return zuluPhysicalProperties.getActualFootWidth();
    }
 
    @Override
    public double getActualFootLength()
    {
-      return alexanderPhysicalProperties.getActualFootLength();
+      return zuluPhysicalProperties.getActualFootLength();
    }
 }

@@ -34,7 +34,7 @@ public class ZuluRangeOfMotionTests extends AvatarRangeOfMotionTests
    @Override
    public String getSimpleRobotName()
    {
-      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ALEXANDER);
+      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ZULU);
    }
 
    @Tag("controller-api-2")

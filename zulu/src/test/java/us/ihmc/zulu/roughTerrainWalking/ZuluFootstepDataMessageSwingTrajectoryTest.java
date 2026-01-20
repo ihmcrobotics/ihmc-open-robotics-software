@@ -2,6 +2,7 @@ package us.ihmc.zulu.roughTerrainWalking;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import us.ihmc.simulationConstructionSetTools.tools.CITools.SimpleRobotNameKeys;
 import us.ihmc.zulu.ZuluVersion;
 import us.ihmc.zulu.ZuluRobotModel;
 import us.ihmc.zulu.parameters.model.ZuluPhysicalProperties;
@@ -47,7 +48,7 @@ public class ZuluFootstepDataMessageSwingTrajectoryTest extends AvatarFootstepDa
    @Override
    public String getSimpleRobotName()
    {
-      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ALEXANDER);
+      return CITools.getSimpleRobotNameFor(SimpleRobotNameKeys.ZULU);
    }
 
    @Override

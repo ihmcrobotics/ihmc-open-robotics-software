@@ -3,6 +3,7 @@ package us.ihmc.zulu.icpPlannerTests;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import us.ihmc.simulationConstructionSetTools.tools.CITools.SimpleRobotNameKeys;
 import us.ihmc.zulu.ZuluJointMap;
 import us.ihmc.zulu.ZuluVersion;
 import us.ihmc.zulu.ZuluRobotModel;
@@ -61,7 +62,7 @@ public class ZuluICPPlannerFlatGroundTest extends AvatarICPPlannerFlatGroundTest
    @Override
    public String getSimpleRobotName()
    {
-      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ALEXANDER);
+      return CITools.getSimpleRobotNameFor(SimpleRobotNameKeys.ZULU);
    }
 
    private static class TestModel extends ZuluRobotModel

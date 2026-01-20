@@ -23,7 +23,7 @@ public class ZuluEndToEndFootLoadBearingTest extends EndToEndEndFootBearingMessa
    @Override
    public String getSimpleRobotName()
    {
-      return CITools.getSimpleRobotNameFor(SimpleRobotNameKeys.ALEXANDER);
+      return CITools.getSimpleRobotNameFor(SimpleRobotNameKeys.ZULU);
    }
 
    @Tag("controller-api")

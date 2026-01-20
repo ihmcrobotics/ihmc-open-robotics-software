@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
 import org.junit.jupiter.api.*;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
+import us.ihmc.simulationConstructionSetTools.tools.CITools.SimpleRobotNameKeys;
 import us.ihmc.zulu.ZuluVersion;
 import us.ihmc.zulu.ZuluRobotModel;
 import us.ihmc.zulu.parameters.controller.ZuluContactPointParameters;
@@ -312,7 +313,7 @@ public class ZuluFinalsWorldStairsTest
 
    public String getSimpleRobotName()
    {
-      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ALEXANDER);
+      return CITools.getSimpleRobotNameFor(SimpleRobotNameKeys.ZULU);
    }
 
    private void setupCameraForWalkingUpStairs()

@@ -19,20 +19,11 @@ import java.util.List;
 public class ZULUURDFParameters implements HumanoidURDFParameterInterface
 {
    public static final String URDF_MODEL_NAME = "Zulu";
-   private static final String[] RESOURCE_DIRECTORIES = new String[] {"zulu/",
-                                                                      "zulu/urdf/",
-                                                                      "zulu/meshes/"};
+   private static final String[] RESOURCE_DIRECTORIES = new String[] {"zulu/", "zulu/urdf/", "zulu/meshes/"};
 
    private static final String[] LOGGED_RESOURCES = {"zulu/"};
 
    public static final String URDF_FULL_BODY = "zulu-full-body.urdf";
-   public static final String URDF_LOWER_BODY = "alex_v1.lowerBody.urdf";
-   public static final String URDF_HEAD = "alex_v1.head.urdf";
-
-   public static final String URDF_LOWER_BODY_ONLY = "alex_v1.lowerBodyOnly.urdf";
-   
-   public static final String URDF_LEFT_ARM_NUB_FOREARM = "alex_v0.leftArmFixedForearm.urdf";
-   public static final String URDF_RIGHT_ARM_NUB_FOREARM = "alex_v0.rightArmFixedForearm.urdf";
 
    private final String[] robotModelResourceDirectory = new String[1];
    private final String[] urdfResourceDirectories;
@@ -40,34 +31,35 @@ public class ZULUURDFParameters implements HumanoidURDFParameterInterface
 
    private final URDFTools.URDFParserProperties urdfParserProperties = new URDFTools.URDFParserProperties();
 
-   public ZULUURDFParameters(ZuluVersionInterface alexanderVersion)
+   public ZULUURDFParameters(ZuluVersionInterface zuluVersion)
    {
       urdfParserProperties.setHandleImplicitJointDefinitions(false);
 
       // Directory containing all robot model resources for the given robot version
-      robotModelResourceDirectory[0] = alexanderVersion.getRobotModelResourceDirectory();
+      robotModelResourceDirectory[0] = zuluVersion.getRobotModelResourceDirectory();
 
       // List of directories containing robot model URDF resources for the given robot version
       List<String> urdfResourceDirectoriesList = new ArrayList<>();
-      urdfResourceDirectoriesList.add(alexanderVersion.getRobotModelResourceDirectory());
-      urdfResourceDirectoriesList.add(alexanderVersion.getRobotModelResourceDirectory() + "urdf" + '/');
-      urdfResourceDirectoriesList.add(alexanderVersion.getRobotModelResourceDirectory() + "meshes" + '/');
+      urdfResourceDirectoriesList.add(zuluVersion.getRobotModelResourceDirectory());
+      urdfResourceDirectoriesList.add(zuluVersion.getRobotModelResourceDirectory() + "urdf" + '/');
+      urdfResourceDirectoriesList.add(zuluVersion.getRobotModelResourceDirectory() + "meshes" + '/');
       urdfResourceDirectories = urdfResourceDirectoriesList.toArray(new String[0]);
 
       // List of urdf files and their path within the robot model resource directory for the given robot version
       List<String> urdfResourcesWithPathList = new ArrayList<>();
-      for(String file : alexanderVersion.getURDFDescriptionResources())
+      for (String file : zuluVersion.getURDFDescriptionResources())
       {
          String urdfResource;
          if (file.contains("ezGripper/") || file.contains("abilityHand/"))
             urdfResource = file;
          else
-            urdfResource = alexanderVersion.getRobotModelResourceDirectory() + "urdf" + '/' + file;
+            urdfResource = zuluVersion.getRobotModelResourceDirectory() + "urdf" + '/' + file;
 
          urdfResourcesWithPathList.add(urdfResource);
       }
 
-      urdfResourcesWithPath = urdfResourcesWithPathList.toArray(new String[0]);   }
+      urdfResourcesWithPath = urdfResourcesWithPathList.toArray(new String[0]);
+   }
 
    @Override
    public String getURDFModelName()

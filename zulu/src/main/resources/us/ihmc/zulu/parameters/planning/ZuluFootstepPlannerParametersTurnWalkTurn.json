@@ -1,5 +1,5 @@
 {
-  "title" : "AlexanderFootstepPlannerParameters",
+  "title" : "ZuluFootstepPlannerParameters",
   "Use GPU" : true,
   "AStar heuristics weight" : 1.5,
   "Max branch factor" : 175,

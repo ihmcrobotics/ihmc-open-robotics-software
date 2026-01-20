@@ -27,7 +27,7 @@ public class ZuluNumericalInverseKinematicsCalculatorWithRobotTest extends Numer
    @Override
    public String getSimpleRobotName()
    {
-      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ALEXANDER);
+      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ZULU);
    }
 
    @Disabled

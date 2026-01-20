@@ -3,6 +3,7 @@ package us.ihmc.zulu;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import us.ihmc.simulationConstructionSetTools.tools.CITools.SimpleRobotNameKeys;
 import us.ihmc.zulu.parameters.controller.ZuluToeOffParameters;
 import us.ihmc.zulu.parameters.controller.ZuluWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -115,6 +116,6 @@ public class ZuluToeOffTest extends AvatarToeOffTest
     @Override
     public String getSimpleRobotName()
     {
-        return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ALEXANDER);
+        return CITools.getSimpleRobotNameFor(SimpleRobotNameKeys.ZULU);
     }
 }

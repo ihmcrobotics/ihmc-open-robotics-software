@@ -106,30 +106,30 @@ public class ZuluSensorInformation implements HumanoidRobotSensorInformation
                                                                         rightFootIMU,
                                                                         headIMU));
 
-   private ZuluVersionInterface alexanderVersion;
+   private ZuluVersionInterface zuluVersion;
 
-   public ZuluSensorInformation(ZuluVersionInterface alexanderVersion)
+   public ZuluSensorInformation(ZuluVersionInterface zuluVersion)
    {
-      this.alexanderVersion = alexanderVersion;
+      this.zuluVersion = zuluVersion;
 
       feetForceSensorNames.put(RobotSide.LEFT, "LeftFootFTSensor");
       feetForceSensorNames.put(RobotSide.RIGHT, "RightFootFTSensor");
       feetForceSensorParentJointNames.put(RobotSide.LEFT, "LEFT_ANKLE_X");
       feetForceSensorParentJointNames.put(RobotSide.RIGHT, "RIGHT_ANKLE_X");
 
-      if (!alexanderVersion.hasHead())
+      if (!zuluVersion.hasHead())
          imuSensorsToUse.remove(headIMU);
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         if (!alexanderVersion.hasArm(robotSide))
+         if (!zuluVersion.hasArm(robotSide))
          {
             imuSensorsToUse.remove(shoulderIMUNames.get(robotSide));
             imuSensorsToUse.remove(bicepIMUNames.get(robotSide));
             imuSensorsToUse.remove(forearmIMUNames.get(robotSide));
             imuSensorsToUse.remove(handIMUNames.get(robotSide));
          }
-         else if (!alexanderVersion.hasCycloidForearm())
+         else if (!zuluVersion.hasCycloidForearm())
          {
             imuSensorsToUse.remove(forearmIMUNames.get(robotSide));
             imuSensorsToUse.remove(handIMUNames.get(robotSide));

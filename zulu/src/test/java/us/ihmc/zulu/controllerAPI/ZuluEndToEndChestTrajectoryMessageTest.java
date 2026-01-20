@@ -26,7 +26,7 @@ public class ZuluEndToEndChestTrajectoryMessageTest extends EndToEndChestTraject
    @Override
    public String getSimpleRobotName()
    {
-      return CITools.getSimpleRobotNameFor(SimpleRobotNameKeys.ALEXANDER);
+      return CITools.getSimpleRobotNameFor(SimpleRobotNameKeys.ZULU);
    }
 
    @Override
@@ -113,7 +113,7 @@ public class ZuluEndToEndChestTrajectoryMessageTest extends EndToEndChestTraject
       super.testQueueWithWrongPreviousId();
    }
 
-   // This doesn't work for Alexander, since we only have a yaw joint.
+   // This doesn't work for Zulu, since we only have a yaw joint.
    @Tag("controller-api-slow")
    @Disabled
    @Override

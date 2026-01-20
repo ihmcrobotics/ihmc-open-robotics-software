@@ -5,7 +5,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 /**
- * This class contains the arm configurations for Alexander
+ * This class contains the arm configurations for Zulu
  */
 public class ZuluPresetArmConfigurations
 {

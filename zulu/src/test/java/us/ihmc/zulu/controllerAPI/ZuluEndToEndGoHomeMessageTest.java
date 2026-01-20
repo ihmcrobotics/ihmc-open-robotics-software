@@ -24,7 +24,7 @@ public class ZuluEndToEndGoHomeMessageTest extends EndToEndGoHomeMessageTest
       super.testGoHomeArms();
    }
 
-   // This test is disabled becuase it assumes tha tthe chest is controlled in taskspace by default. Alexander is controlled in jointspace.
+   // This test is disabled because it assumes that the chest is controlled in taskspace by default. Zulu is controlled in jointspace.
    @Disabled
    @Tag("controller-api")
    @Override
@@ -51,6 +51,6 @@ public class ZuluEndToEndGoHomeMessageTest extends EndToEndGoHomeMessageTest
    @Override
    public String getSimpleRobotName()
    {
-      return CITools.getSimpleRobotNameFor(SimpleRobotNameKeys.ALEXANDER);
+      return CITools.getSimpleRobotNameFor(SimpleRobotNameKeys.ZULU);
    }
 }

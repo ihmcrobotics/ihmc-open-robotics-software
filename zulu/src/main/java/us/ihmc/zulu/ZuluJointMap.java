@@ -46,7 +46,7 @@ public class ZuluJointMap implements HumanoidJointNameMap
    private final SideDependentList<ArmJointName[]> armJoints = new SideDependentList<>();
 
    private final SideDependentList<RigidBodyTransform> handControlFrameToWristTransforms = new SideDependentList<>();
-   private final ZuluPhysicalProperties alexanderPhysicalProperties;
+   private final ZuluPhysicalProperties zuluPhysicalProperties;
    private final SideDependentList<ZuluArmConfiguration> armConfigurations;
    private final SideDependentList<String> nameOfJointsBeforeHands = new SideDependentList<>();
    private final LinkedHashMap<String, JointRole> jointRoles = new LinkedHashMap<>();
@@ -56,12 +56,12 @@ public class ZuluJointMap implements HumanoidJointNameMap
 
    private final HashSet<String> lastSimulatedJoints = new HashSet<>();
 
-   public ZuluJointMap(ZuluPhysicalProperties alexanderPhysicalProperties,
+   public ZuluJointMap(ZuluPhysicalProperties zuluPhysicalProperties,
                        SideDependentList<ZuluArmConfiguration> armConfigurations,
                        boolean hasHead,
                        boolean hasArms)
    {
-      this.alexanderPhysicalProperties = alexanderPhysicalProperties;
+      this.zuluPhysicalProperties = zuluPhysicalProperties;
       this.armConfigurations = armConfigurations;
       this.hasHead = hasHead;
       this.hasArms = hasArms;
@@ -159,7 +159,7 @@ public class ZuluJointMap implements HumanoidJointNameMap
 
                lastSimulatedJoint = robotSide == RobotSide.LEFT ? Joints.LEFT_GRIPPER_Z : Joints.RIGHT_GRIPPER_Z;
 
-               handControlFrameToWristTransforms.put(robotSide, alexanderPhysicalProperties.getHandControlFrameToWristTransform(robotSide));
+               handControlFrameToWristTransforms.put(robotSide, zuluPhysicalProperties.getHandControlFrameToWristTransform(robotSide));
 
                Joints jointBeforeHand = robotSide == RobotSide.LEFT ? Joints.LEFT_GRIPPER_Z : Joints.RIGHT_GRIPPER_Z;
                nameOfJointsBeforeHands.put(robotSide, jointBeforeHand.name);
@@ -369,13 +369,13 @@ public class ZuluJointMap implements HumanoidJointNameMap
    @Override
    public RigidBodyTransform getSoleToParentFrameTransform(RobotSide robotSide)
    {
-      return alexanderPhysicalProperties.getSoleToAnkleFrameTransforms().get(robotSide);
+      return zuluPhysicalProperties.getSoleToAnkleFrameTransforms().get(robotSide);
    }
 
    @Override
    public String getModelName()
    {
-      return "alexander";
+      return "zulu";
    }
 
    @Override

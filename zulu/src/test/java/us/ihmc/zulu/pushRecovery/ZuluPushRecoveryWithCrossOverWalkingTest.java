@@ -2,6 +2,7 @@ package us.ihmc.zulu.pushRecovery;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import us.ihmc.simulationConstructionSetTools.tools.CITools.SimpleRobotNameKeys;
 import us.ihmc.zulu.ZuluVersion;
 import us.ihmc.zulu.ZuluRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -20,7 +21,7 @@ public class ZuluPushRecoveryWithCrossOverWalkingTest extends AvatarPushRecovery
    @Override
    public String getSimpleRobotName()
    {
-      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ALEXANDER);
+      return CITools.getSimpleRobotNameFor(SimpleRobotNameKeys.ZULU);
    }
 
    @Override

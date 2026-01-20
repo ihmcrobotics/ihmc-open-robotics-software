@@ -110,7 +110,7 @@ public class ZuluEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajector
    }
 
    @Tag("controller-api")
-   @Disabled // This test is not applicable to Alexander V0, as it works with V1 version.
+   @Disabled // This test is not applicable to Zulu, TODO fix me.
    @Override
    @Test
    public void testStreaming() throws Exception
@@ -127,7 +127,7 @@ public class ZuluEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajector
    @Override
    public String getSimpleRobotName()
    {
-      return CITools.getSimpleRobotNameFor(SimpleRobotNameKeys.ALEXANDER);
+      return CITools.getSimpleRobotNameFor(SimpleRobotNameKeys.ZULU);
    }
 
    @Override

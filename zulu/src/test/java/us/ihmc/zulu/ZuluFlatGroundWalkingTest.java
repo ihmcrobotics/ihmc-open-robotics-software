@@ -9,6 +9,7 @@ import us.ihmc.avatar.DRCFlatGroundWalkingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools.SimpleRobotNameKeys;
 
 // This test is slow but very important, let's keep it in the FAST build please. (Sylvain)
 public class ZuluFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
@@ -72,7 +73,7 @@ public class ZuluFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
       }
       catch (TestAbortedException e)
       {
-         System.out.println("Not Nightly Build, skipping AlexanderlatGroundWalkingTest.testFlatGroundWalkingRunsSameWayTwice");
+         System.out.println("Not Nightly Build, skipping ZuluFlatGroundWalkingTest.testFlatGroundWalkingRunsSameWayTwice");
       }
    }
 
@@ -85,6 +86,6 @@ public class ZuluFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
    @Override
    public String getSimpleRobotName()
    {
-      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ALEXANDER);
+      return CITools.getSimpleRobotNameFor(SimpleRobotNameKeys.ZULU);
    }
 }

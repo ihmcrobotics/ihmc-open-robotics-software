@@ -5,11 +5,11 @@ import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 
 public class ZuluToeOffParameters extends ToeOffParameters
 {
-   private final ZuluPhysicalProperties alexanderPhysicalProperties;
+   private final ZuluPhysicalProperties zuluPhysicalProperties;
 
-   public ZuluToeOffParameters(ZuluPhysicalProperties alexanderPhysicalProperties)
+   public ZuluToeOffParameters(ZuluPhysicalProperties zuluPhysicalProperties)
    {
-      this.alexanderPhysicalProperties = alexanderPhysicalProperties;
+      this.zuluPhysicalProperties = zuluPhysicalProperties;
    }
 
    @Override
@@ -27,7 +27,7 @@ public class ZuluToeOffParameters extends ToeOffParameters
    @Override
    public double getMinStepLengthForToeOff()
    {
-      return alexanderPhysicalProperties.getFootLengthForControl();
+      return zuluPhysicalProperties.getFootLengthForControl();
    }
 
    @Override

@@ -190,8 +190,10 @@ public class CITools
             return "V2Exoskeleton";
          case V3EXOSKELETON:
             return "V3Exoskeleton";
-         case ALEXANDER:
-            return "Alexander";
+         case ALEX:
+            return "Alex";
+         case ZULU:
+            return "Zulu";
          default:
             return "";
       }
@@ -199,6 +201,6 @@ public class CITools
 
    public static enum SimpleRobotNameKeys
    {
-      M2V2, R2, VALKYRIE, ATLAS, NADIA, BONO, SPOKED_RUNNER, V2EXOSKELETON, V3EXOSKELETON, ALEXANDER
+      M2V2, R2, VALKYRIE, ATLAS, NADIA, BONO, SPOKED_RUNNER, V2EXOSKELETON, V3EXOSKELETON, ALEX, ZULU
    }
 }

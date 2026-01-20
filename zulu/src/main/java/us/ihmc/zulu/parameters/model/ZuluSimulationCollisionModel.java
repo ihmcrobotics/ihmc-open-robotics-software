@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Collision model for Alexander used for simulating shape-to-shape collisions.
+ * Collision model for Zulu used for simulating shape-to-shape collisions.
  * {@link DRCSCSInitialSetup#setUseExperimentalPhysicsEngine(boolean)}.
  * </p>
  *

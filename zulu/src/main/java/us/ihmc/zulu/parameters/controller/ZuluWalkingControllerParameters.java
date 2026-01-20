@@ -60,7 +60,6 @@ public class ZuluWalkingControllerParameters extends WalkingControllerParameters
 
    private final ZuluMomentumOptimizationSettings momentumOptimizationSettings;
 
-   // USE THESE FOR Real Alexander Robot and sims when controlling pelvis height instead of CoM.
    private final double minimumHeightAboveGround;
    private double nominalHeightAboveGround;
    private final double maximumHeightAboveGround;
@@ -590,7 +589,7 @@ public class ZuluWalkingControllerParameters extends WalkingControllerParameters
       bodyHomeConfiguration.put(jointMap.getChestName(), homeChestPoseInPelvisZUpFrame);
 
       for (RobotSide robotSide : RobotSide.values)
-      { // Hand taskspace home pose can be computed from jointspace home pose with AlexanderTaskspaceHomePoseCalculator
+      { // Hand taskspace home pose can be computed from jointspace home pose with ZuluTaskspaceHomePoseCalculator
 
          Pose3D handPoseInChestBodyFrame = new Pose3D();
 
@@ -891,7 +890,6 @@ public class ZuluWalkingControllerParameters extends WalkingControllerParameters
    public NaturalPostureParameters getNaturalPostureParameters()
    {
       // 240308 - disabled NP while integrating cycloid forearms
-//      return new AlexanderNaturalPostureParameters(jointMap);
 
       return null;
    }
