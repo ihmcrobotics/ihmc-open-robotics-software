@@ -244,4 +244,64 @@ __device__ float computePlaneSquaredErrorVerbose(
     return mean_squared_error;
 }
 
+__device__ bool choleskySolve3x3(const float A[9], const float b[3], float x[3])
+{
+    // Lower triangular L
+    float L00, L10, L11, L20, L21, L22;
+
+    // Factorization L * L^T = A
+    L00 = sqrtf(A[0]);
+    if (L00 < 1e-6f) return false;
+
+    L10 = A[3] / L00;
+    L20 = A[6] / L00;
+
+    float t11 = A[4] - L10 * L10;
+    if (t11 < 1e-6f) return false;
+    L11 = sqrtf(t11);
+
+    L21 = (A[7] - L20 * L10) / L11;
+
+    float t22 = A[8] - L20 * L20 - L21 * L21;
+    if (t22 < 1e-6f) return false;
+    L22 = sqrtf(t22);
+
+    // Forward substitution: L * y = b
+    float y0 = b[0] / L00;
+    float y1 = (b[1] - L10 * y0) / L11;
+    float y2 = (b[2] - L20 * y0 - L21 * y1) / L22;
+
+    // Backward substitution: L^T * x = y
+    x[2] = y2 / L22;
+    x[1] = (y1 - L21 * x[2]) / L11;
+    x[0] = (y0 - L10 * x[1] - L20 * x[2]) / L00;
+
+    return true;
+}
+
+__device__ float solveForPlaneCoefficientsWithCholesky(float* covariance_matrix, float* z_variance_vector, float zz, float* coefficients)
+{
+    // Solve A * coeffs = zvec using Cholesky
+    bool success = choleskySolve3x3(covariance_matrix, z_variance_vector, coefficients);
+
+    if (!success)
+    {
+        // Return infinity, we don't have access to cuda variables for infinity
+        return 1.0f / 0.0f;
+    }
+    else
+    {
+        // Compute squared error (float-safe)
+        // squared_error = sum_i( (z_i - (A*x_i + B*y_i + C))^2 ) / n
+        float squared_error = computePlaneSquaredErrorVerbose(coefficients,
+                                                              covariance_matrix[0], covariance_matrix[1], covariance_matrix[2],
+                                                              covariance_matrix[3], covariance_matrix[5],
+                                                              -z_variance_vector[0], -z_variance_vector[1], -z_variance_vector[2],
+                                                              zz,
+                                                              covariance_matrix[8]);
+        squared_error /= covariance_matrix[8];
+        return squared_error;
+    }
+}
+
 #endif // MATH_UTILS
