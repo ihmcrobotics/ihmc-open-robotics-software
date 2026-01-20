@@ -17,7 +17,6 @@ public class RDXSCS2YoVariableSearchPanel
    private final ImString searchBar = new ImString();
    private YoRegistry yoRegistry;
    private final ArrayList<YoVariable> allVariables = new ArrayList<>();
-   private boolean searchRequested = false;
    private YoVariable selectedVariable = null;
 
    public RDXSCS2YoVariableSearchPanel(YoRegistry yoRegistry)
@@ -40,16 +39,6 @@ public class RDXSCS2YoVariableSearchPanel
    {
       ImGui.inputText(labels.get("Search"), searchBar);
 
-      if (searchRequested)
-      {
-         ImGui.sameLine();
-         if (ImGui.button("Cancel"))
-         {
-            searchRequested = false;
-            panel.getIsShowing().set(false);
-         }
-      }
-
       ImGui.text("Registry contains " + allVariables.size() + " variables.");
       ImGui.separator();
 
@@ -65,8 +54,6 @@ public class RDXSCS2YoVariableSearchPanel
             if (ImGui.isItemClicked())
             {
                selectedVariable = yoVariable;
-               searchRequested = false;
-               panel.getIsShowing().set(false);
             }
 
             if (ImGui.beginPopupContextItem())
@@ -110,19 +97,6 @@ public class RDXSCS2YoVariableSearchPanel
    public RDXPanel getPanel()
    {
       return panel;
-   }
-
-   public void setSearchRequested(boolean searchRequested)
-   {
-      if (searchRequested)
-         panel.getIsShowing().set(true);
-
-      this.searchRequested = searchRequested;
-   }
-
-   public boolean getSearchRequested()
-   {
-      return searchRequested;
    }
 
    public YoVariable getSelectedVariable()

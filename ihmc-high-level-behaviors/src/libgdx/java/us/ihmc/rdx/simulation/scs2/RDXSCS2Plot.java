@@ -39,7 +39,6 @@ public class RDXSCS2Plot
    private final RDXSCS2PlotPanel panel;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final RDXYoManager yoManager;
-   private boolean requestedVariable = false;
 
    public RDXSCS2Plot(RDXSCS2YoVariableSearchPanel searchPanel, RDXSCS2PlotPanel panel, RDXYoManager yoManager)
    {
@@ -83,16 +82,6 @@ public class RDXSCS2Plot
 
    public void render(int column, int row, float plotWidth, float plotHeight)
    {
-      if (requestedVariable && searchPanel.getSelectedVariable() != null)
-      {
-         requestedVariable = false;
-         addVariable(searchPanel.getSelectedVariable(), true);
-         searchPanel.setSelectedVariable(null);
-      }
-
-      if (requestedVariable && !searchPanel.getSearchRequested())
-         requestedVariable = false; // Search was cancelled
-
       while (!removalQueue.isEmpty())
          plotLines.remove(removalQueue.poll());
 
@@ -205,7 +194,19 @@ public class RDXSCS2Plot
             continue;
 
          int color = CHART_COLORS[lineIndex % CHART_COLORS.length];
+         boolean isHovered = ImGui.isMouseHoveringRect(legendTextX, legendTextY, legendTextX + plotLine.legendTextSize, legendTextY + fontSize);
+         if (isHovered)
+         {
+            int r = (color) & 0xFF;
+            int g = (color >> 8) & 0xFF;
+            int b = (color >> 16) & 0xFF;
+            int a = (int) (255 * 0.6f);
+            color = (a << 24) | (b << 16) | (g << 8) | r;
+         }
          ImGui.getWindowDrawList().addText(legendTextX, legendTextY, color, plotLine.legendText);
+
+         if (isHovered && ImGui.isMouseClicked(ImGuiMouseButton.Middle))
+            removalQueue.add(plotLine);
 
          if (lineIndex < plotLines.size() - 1)
          {
@@ -225,10 +226,8 @@ public class RDXSCS2Plot
 
    private void renderPopupContextWindow()
    {
-      if (ImGui.menuItem(labels.get("Add Variable")))
+      if (ImGui.menuItem(labels.get("TODO")))
       {
-         searchPanel.setSearchRequested(true);
-         requestedVariable = true;
          ImGui.closeCurrentPopup();
       }
    }
