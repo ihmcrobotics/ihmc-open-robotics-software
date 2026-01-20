@@ -192,19 +192,18 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
 
     if (traversability_result == VALID)
     {
-        // Solve for the plane normal, as well as the height of the foot along that plane.
         // ---------------------------
         // Float-only plane fit
         // ---------------------------
-
         float covariance_matrix[9] = {xx, xy, x, xy, yy, y, x, y, n};
         float z_variance_vector[3] = {-xz, -yz, -z};
         float squared_error = solveForPlaneCoefficientsWithCholesky(covariance_matrix, z_variance_vector, zz, coefficients);
 
         // This shows how to solve for the plane coefficients using doubles
+        // Solve for the plane normal, as well as the height of the foot along that plane.
         // double covariance_matrix[9] = {xx, xy, x, xy, yy, y, x, y, n};
         // double z_variance_vector[3] = {-xz, -yz, -z};
-        // double squared_error = solveForPlaneCoefficients(covariance_matrix, z_variance_vector, zz, coefficients);
+        // double squared_error = solveForPlaneCoefficients3x3(covariance_matrix, z_variance_vector, zz, coefficients);
 
         normal.x = static_cast<float>(coefficients[0]);
         normal.y = static_cast<float>(coefficients[1]);

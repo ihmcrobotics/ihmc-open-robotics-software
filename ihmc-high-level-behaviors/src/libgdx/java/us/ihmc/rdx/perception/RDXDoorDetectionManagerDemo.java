@@ -79,7 +79,7 @@ public class RDXDoorDetectionManagerDemo
       yoloThread.addDetectionConsumerCallback(doorDetectionManager::registerNewDetections);
 
       BlockingQueue<RawImage> rawImageCollection = new LinkedBlockingQueue<>(ImageSensor.DEFAULT_IMAGE_QUEUE_CAPACITY);
-      planarRegionThread = new RapidPlanarRegionsExtractionThread(ros2Node, openCLManager, rawImageCollection);
+      planarRegionThread = new RapidPlanarRegionsExtractionThread(ros2Node, rawImageCollection);
       planarRegionThread.addPlanarRegionsConsumer(doorDetectionManager::updatePlanarRegions);
 
       baseUI = new RDXBaseUI();

@@ -21,4 +21,28 @@ namespace PerceptionUtils
     {
         return (T*)(matrix + column);
     }
+
+    /**
+     * Returns the matrix entry at the given row and column
+     */
+    template <typename T>
+    __device__ __forceinline__
+    T get2d(const T* matrix, long pitch, int columnIndex, int rowIndex)
+    {
+        const T* column = col(matrix, columnIndex);
+        const T* entry = row(column, pitch, rowIndex);
+        return *entry;
+    }
+
+    /**
+     * Sets the value of the matrix at the given row and column
+     */
+    template <typename T>
+    __device__ __forceinline__
+    void set2d(T* matrix, long pitch, int columnIndex, int rowIndex, T value)
+    {
+        T* column = col(matrix, columnIndex);
+        T* entry = row(column, pitch, rowIndex);
+        *entry = value;
+    }
 }

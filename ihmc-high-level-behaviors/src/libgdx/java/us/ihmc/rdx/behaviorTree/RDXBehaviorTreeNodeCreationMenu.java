@@ -173,11 +173,6 @@ public class RDXBehaviorTreeNodeCreationMenu
    {
       topologyOperationQueue.queueInsertNodeModify(insertionDefinition);
       ImGui.closeCurrentPopup();
-
-      if (insertionDefinition.getParent() != null)
-         insertionDefinition.getParent().setTreeWidgetExpanded(true);
-
-      insertionDefinition.getNodeToInsert().setTreeWidgetExpanded(true);
    }
 
    public void reindexDirectory()

@@ -3,6 +3,30 @@
 
 const float PI_F = 3.1415927f;
 
+__device__ __forceinline__
+float3 operator+(const float3& a, const float3& b)
+{
+    return make_float3(a.x + b.x, a.y + b.y, a.z + b.z);
+}
+
+__device__ __forceinline__
+float3 operator-(const float3& a, const float3& b)
+{
+    return make_float3(a.x - b.x, a.y - b.y, a.z - b.z);
+}
+
+__device__ __forceinline__
+float3 operator*(const float3& a, const float scalar)
+{
+    return make_float3(a.x * scalar, a.y * scalar, a.z * scalar);
+}
+
+__device__ __forceinline__
+float3 operator/(const float3& a, const float divisor)
+{
+    return make_float3(a.x / divisor, a.y / divisor, a.z / divisor);
+}
+
 __device__ float dot(const float3 a, const float3 b)
 {
     return a.x * b.x + a.y * b.y + a.z * b.z;
@@ -153,7 +177,7 @@ __device__ void invert3x3Matrix(double* matrix, double* result)
    result[8] = detMinor22 / det;
 }
 
-__device__ double solveForPlaneCoefficients(double* covariance_matrix, double* z_variance_vector, double zz, double* coefficients)
+__device__ double solveForPlaneCoefficients3x3(double* covariance_matrix, double* z_variance_vector, double zz, double* coefficients)
 {
     // Invert the 3x3 covariance matrix (this should be done on the device as well)
     double inverse_covariance_matrix[9];
@@ -187,6 +211,36 @@ __device__ double solveForPlaneCoefficients(double* covariance_matrix, double* z
 
     double squared_error = A*A * xx + 2 * A*B*xy + 2*A*xz + 2*A*C*x + B*B*yy + 2*B*yz + 2*B*C*y + zz + 2* C*z + n*C*C;
     return squared_error / n;
+}
+
+__device__ bool solveForPlaneCoefficients2x2(float cxx, float cxy, float cyy, float cxz, float cyz, float3 centroid, float3& normal)
+{
+    // regularization
+    const float lambda = 1e-6f;
+    cxx += lambda;
+    cyy += lambda;
+
+    float det = cxx * cyy - cxy * cxy;
+
+    // degenerate neighborhood
+    if (fabsf(det) < 1e-8f)
+        return false;
+
+    float invDet = 1.0f / det;
+
+    float A = ( cyy * cxz - cxy * cyz) * invDet;
+    float B = (-cxy * cxz + cxx * cyz) * invDet;
+
+    // Plane: Ax + By - z + C = 0
+    normal = make_float3(A, B, -1.0f);
+
+    // Normalize normal
+    float norm = rsqrtf(A*A + B*B + 1.0f);
+    normal.x *= norm;
+    normal.y *= norm;
+    normal.z *= norm;
+
+    return true;
 }
 
 /**
