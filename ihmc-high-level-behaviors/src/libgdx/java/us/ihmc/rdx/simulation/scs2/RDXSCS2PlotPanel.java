@@ -32,6 +32,7 @@ public class RDXSCS2PlotPanel extends RDXPanel
 
    public void render()
    {
+      ImGui.pushStyleVar(ImGuiStyleVar.WindowPadding, 8.0f, 8.0f);
       ImGui.beginMenuBar();
       if (ImGui.beginMenu(labels.get("Layout")))
       {
@@ -61,6 +62,7 @@ public class RDXSCS2PlotPanel extends RDXPanel
       }
 
       ImGui.endMenuBar();
+      ImGui.popStyleVar();
 
       float plotWidth = ImGui.getColumnWidth() / columns.get();
       float plotHeight = ImGui.getContentRegionAvailY() / rows.get();
