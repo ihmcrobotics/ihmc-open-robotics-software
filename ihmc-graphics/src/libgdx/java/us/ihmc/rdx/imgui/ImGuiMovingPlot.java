@@ -14,8 +14,8 @@ public class ImGuiMovingPlot
    private final float[] valuesA;
    private final float[] valuesB;
    private boolean isA = true;
-   private final int width;
-   private final int height;
+   private float width;
+   private float height;
    private float nextValue = Float.NaN;
    private boolean renderValueText = true;
 
@@ -29,7 +29,7 @@ public class ImGuiMovingPlot
       this(name, bufferSize, 230, 50);
    }
 
-   public ImGuiMovingPlot(String name, int bufferSize, int width, int height)
+   public ImGuiMovingPlot(String name, int bufferSize, float width, float height)
    {
       this.name = new ImGuiUniqueLabelMap(getClass()).get(name);
       this.bufferSize = bufferSize;
@@ -80,5 +80,11 @@ public class ImGuiMovingPlot
          ImGui.plotLines(name, values, bufferSize, 0, valueText, Float.MAX_VALUE, Float.MAX_VALUE, width, height);
 
       setNextValue(Float.NaN);
+   }
+
+   public void setSize(float width, float height)
+   {
+      this.width = width;
+      this.height = height;
    }
 }
