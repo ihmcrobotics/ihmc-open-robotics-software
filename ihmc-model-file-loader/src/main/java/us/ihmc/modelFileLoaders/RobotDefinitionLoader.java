@@ -12,8 +12,6 @@ import us.ihmc.scs2.definition.robot.*;
 import us.ihmc.scs2.definition.robot.sdf.SDFTools;
 import us.ihmc.scs2.definition.robot.sdf.items.SDFRoot;
 import us.ihmc.scs2.definition.robot.urdf.URDFTools;
-import us.ihmc.scs2.definition.robot.urdf.items.URDFGazebo;
-import us.ihmc.scs2.definition.robot.urdf.items.URDFJoint;
 import us.ihmc.scs2.definition.robot.urdf.items.URDFModel;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
@@ -24,7 +22,6 @@ import jakarta.xml.bind.JAXBException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
