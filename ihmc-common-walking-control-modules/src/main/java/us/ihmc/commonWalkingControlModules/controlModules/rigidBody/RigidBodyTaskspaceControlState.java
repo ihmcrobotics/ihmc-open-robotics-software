@@ -33,6 +33,11 @@ public abstract class RigidBodyTaskspaceControlState extends RigidBodyControlSta
    
    public abstract boolean isHybridModeActive();
 
+   public RigidBodyPositionControlHelper getPositionControlHelper()
+   {
+      return null;
+   }
+
    public RigidBodyOrientationControlHelper getOrientationControlHelper()
    {
       return null;

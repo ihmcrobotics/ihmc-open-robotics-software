@@ -451,4 +451,10 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
    {
       return orientationHelper;
    }
+
+   @Override
+   public RigidBodyPositionControlHelper getPositionControlHelper()
+   {
+      return positionHelper;
+   }
 }

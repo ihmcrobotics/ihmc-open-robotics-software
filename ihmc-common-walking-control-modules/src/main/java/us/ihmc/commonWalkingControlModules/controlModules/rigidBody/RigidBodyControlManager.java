@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import us.ihmc.commonWalkingControlModules.controlModules.multiContact.WholeBodyPostureAdjustmentProvider;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
@@ -9,15 +10,22 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.DesiredAccelerationsCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.WrenchTrajectoryControllerCommand;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -66,6 +74,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
    private final RigidBodyTaskspaceControlState taskspaceControlState;
    private final RigidBodyUserControlState userControlState;
    private final RigidBodyLoadBearingControlState loadBearingControlState;
+   private final RigidBodyReactiveBracingControlState reactiveBracingControlState;
    private final RigidBodyExternalWrenchManager externalWrenchManager;
 
    private final RigidBodyJointControlHelper jointControlHelper;
@@ -77,7 +86,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
    private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
    private final YoBoolean stateSwitched;
    private final YoBoolean doPrepareForLocomotion;
-   private boolean hasContactStateChanged = false;
+   private final MutableBoolean hasContactStateChanged = new MutableBoolean();
 
    private final double controlDT;
 
@@ -200,11 +209,22 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                                                         taskspaceControlState.getOrientationControlHelper(),
                                                                         loadBearingParameters,
                                                                         nominalRhoWeight,
+                                                                        hasContactStateChanged,
                                                                         registry);
+         reactiveBracingControlState = new RigidBodyReactiveBracingControlState(bodyToControl,
+                                                                                baseBody,
+                                                                                elevator,
+                                                                                yoTime,
+                                                                                taskspaceControlState.getPositionControlHelper(),
+                                                                                taskspaceControlState.getOrientationControlHelper(),
+                                                                                controlFrame,
+                                                                                hasContactStateChanged,
+                                                                                registry);
       }
       else
       {
          loadBearingControlState = null;
+         reactiveBracingControlState = null;
       }
 
       if (homePose != null)
@@ -235,6 +255,8 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
       factory.addState(RigidBodyControlMode.USER, userControlState);
       if (loadBearingControlState != null)
          factory.addStateAndDoneTransition(RigidBodyControlMode.LOADBEARING, loadBearingControlState, defaultControlMode);
+      if (reactiveBracingControlState != null)
+         factory.addStateAndDoneTransition(RigidBodyControlMode.REACTIVE_BRACING, reactiveBracingControlState, defaultControlMode);
 
       for (RigidBodyControlMode from : factory.getRegisteredStateKeys())
       {
@@ -244,7 +266,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
          }
       }
 
-      return factory.build(RigidBodyControlMode.JOINTSPACE);
+      return factory.build(defaultControlMode);
    }
 
    public void setWeights(Map<String, DoubleProvider> jointspaceWeights, Map<String, DoubleProvider> userModeWeights)
@@ -406,6 +428,15 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
       {
          LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " received invalid desired accelerations command.");
          hold();
+      }
+   }
+
+   public void handleReactiveBracingCommand(FramePoint3DReadOnly bracingPoint, FrameVector3DReadOnly bracingNormal)
+   {
+      if (reactiveBracingControlState != null)
+      {
+         reactiveBracingControlState.setBracingSurface(bracingPoint, bracingNormal);
+         requestState(reactiveBracingControlState.getControlMode());
       }
    }
 
@@ -572,7 +603,6 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
 
       loadBearingControlState.load(coefficientOfFriction, contactPointInBodyFrame, contactNormalInWorldFrame, jointspaceControlActive, orientationControlActive);
       requestState(loadBearingControlState.getControlMode());
-      hasContactStateChanged = true;
    }
 
    public void unload()
@@ -588,24 +618,29 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
          { // Otherwise hold current taskspace pose
             hold();
          }
-
-         hasContactStateChanged = true;
       }
    }
 
    public boolean isLoadBearing()
    {
-      if (loadBearingControlState == null)
-         return false;
+      // Is load-bearing (static)
+      if (loadBearingControlState != null && stateMachine.getCurrentStateKey() == loadBearingControlState.getControlMode())
+         return true;
+      // Is load-bearing (dynamic)
+      if (reactiveBracingControlState != null && stateMachine.getCurrentStateKey() == reactiveBracingControlState.getControlMode() && reactiveBracingControlState.isLoadBearing())
+         return true;
 
-      return stateMachine.getCurrentStateKey() == loadBearingControlState.getControlMode();
+      return false;
    }
 
    public void updateWholeBodyContactState(WholeBodyContactState wholeBodyContactStateToUpdate)
    {
       if (isLoadBearing())
       {
-         loadBearingControlState.updateWholeBodyContactState(wholeBodyContactStateToUpdate);
+         if (stateMachine.getCurrentStateKey() == loadBearingControlState.getControlMode())
+            loadBearingControlState.updateWholeBodyContactState(wholeBodyContactStateToUpdate);
+         else
+            reactiveBracingControlState.updateWholeBodyContactState(wholeBodyContactStateToUpdate);
       }
    }
 
@@ -613,7 +648,10 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
    {
       if (isLoadBearing())
       {
-         loadBearingControlState.packContactData(contactPointList, contactNormalToPack);
+         if (stateMachine.getCurrentStateKey() == loadBearingControlState.getControlMode())
+            loadBearingControlState.packContactData(contactPointList, contactNormalToPack);
+         else
+            reactiveBracingControlState.packContactData(contactPointList, contactNormalToPack);
       }
    }
 
@@ -727,15 +765,10 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
          loadBearingControlState.setControllerCoreOutput(controllerCoreOutput);
    }
 
-   public boolean peekContactHasChangedNotification()
-   {
-      return hasContactStateChanged;
-   }
-
    public boolean pollContactHasChangedNotification()
    {
-      boolean hasContactStateChanged = this.hasContactStateChanged;
-      this.hasContactStateChanged = false;
+      boolean hasContactStateChanged = this.hasContactStateChanged.getValue();
+      this.hasContactStateChanged.setValue(false);
       return hasContactStateChanged;
    }
 

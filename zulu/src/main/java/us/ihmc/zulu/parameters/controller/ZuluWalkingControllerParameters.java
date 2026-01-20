@@ -177,7 +177,7 @@ public class ZuluWalkingControllerParameters extends WalkingControllerParameters
    @Override
    public boolean allowAutomaticManipulationAbort()
    {
-      return true;
+      return false;
    }
 
    @Override

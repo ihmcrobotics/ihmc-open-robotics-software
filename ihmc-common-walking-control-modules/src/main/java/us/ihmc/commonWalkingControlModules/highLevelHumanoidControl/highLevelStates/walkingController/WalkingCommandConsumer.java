@@ -54,6 +54,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineTraject
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.WrenchTrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.velocityBasedWalkingAPI.VelocityBasedWalkingInputCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
 import us.ihmc.humanoidRobotics.communication.fastWalkingAPI.FastWalkingGaitParametersCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.log.LogTools;
@@ -166,6 +167,7 @@ public class WalkingCommandConsumer
       commandsToRegister.add(VelocityBasedWalkingInputCommand.class);
       commandsToRegister.add(FastWalkingGaitParametersCommand.class);
       commandsToRegister.add(ClearDelayQueueCommand.class);
+      commandsToRegister.add(ReactiveBracingCommand.class);
 
       commandConsumerWithDelayBuffers = new CommandConsumerWithDelayBuffers(commandInputManager, commandsToRegister, yoTime);
 
@@ -395,6 +397,7 @@ public class WalkingCommandConsumer
          commandConsumerWithDelayBuffers.clearCommands(ArmTrajectoryCommand.class);
          commandConsumerWithDelayBuffers.clearCommands(ArmDesiredAccelerationsCommand.class);
          commandConsumerWithDelayBuffers.clearCommands(HandHybridJointspaceTaskspaceTrajectoryCommand.class);
+         commandConsumerWithDelayBuffers.clearCommands(ReactiveBracingCommand.class);
          return;
       }
 
@@ -404,6 +407,7 @@ public class WalkingCommandConsumer
       List<ArmDesiredAccelerationsCommand> armDesiredAccelerationCommands = commandConsumerWithDelayBuffers.pollNewCommands(ArmDesiredAccelerationsCommand.class);
       List<HandHybridJointspaceTaskspaceTrajectoryCommand> handHybridCommands = commandConsumerWithDelayBuffers.pollNewCommands(
             HandHybridJointspaceTaskspaceTrajectoryCommand.class);
+      List<ReactiveBracingCommand> reactiveBracingCommands = commandConsumerWithDelayBuffers.pollNewCommands(ReactiveBracingCommand.class);
 
       boolean allowCommand = allowMotionRegardlessOfState || currentState.isStateSafeToConsumeManipulationCommands();
 
@@ -471,6 +475,18 @@ public class WalkingCommandConsumer
             desiredAccelerations.setSequenceId(command.getSequenceId());
             handManager.handleDesiredAccelerationsCommand(desiredAccelerations);
          }
+      }
+
+      for (int i = 0; i < reactiveBracingCommands.size(); i++)
+      {
+         ReactiveBracingCommand command = reactiveBracingCommands.get(i);
+         RobotSide robotSide = command.getRobotSide();
+         RigidBodyControlManager handManager = handManagers.get(robotSide);
+         if (handManager != null && allowCommand)
+         {
+            handManager.handleReactiveBracingCommand(command.getBracingPoint(), command.getBracingNormal());
+         }
+
       }
    }
 

@@ -80,6 +80,7 @@ public class ControllerAPIDefinition
       commands.add(CenterOfMassTrajectoryCommand.class);
       commands.add(HandWrenchTrajectoryCommand.class);
       commands.add(BipedTimedStepListCommand.class);
+      commands.add(ReactiveBracingCommand.class);
 
       /** Commands supported by the fast-walking controller, not in this repo */
       commands.add(VelocityBasedWalkingInputCommand.class);
