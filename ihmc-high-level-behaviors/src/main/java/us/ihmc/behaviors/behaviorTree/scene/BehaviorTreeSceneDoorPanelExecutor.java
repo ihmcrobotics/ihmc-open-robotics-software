@@ -1,12 +1,15 @@
 package us.ihmc.behaviors.behaviorTree.scene;
 
 import behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage;
+import behavior_msgs.msg.dds.BehaviorTreeSceneObjectStateMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.perception.detections.PersistentDetection;
+
+import java.time.Instant;
 
 /**
  * Tracks a door panel via two YOLO persistent detections, one for the panel and one for the opening mechanism.
@@ -16,6 +19,7 @@ public class BehaviorTreeSceneDoorPanelExecutor extends BehaviorTreeSceneObjectE
    private PersistentDetection panelDetection;
    private final RotationMatrix orientation = new RotationMatrix();
    private final Vector3D mechanismToPanel = new Vector3D();
+   private final PersistentDetectionMessageTool persistentDetectionMessageTool = new PersistentDetectionMessageTool();
 
    public BehaviorTreeSceneDoorPanelExecutor(long id, CRDTInfo crdtInfo, ROS2SyncedRobotModel syncedRobot, BehaviorTreeSceneObjectDefinitionMessage definition)
    {
@@ -45,6 +49,16 @@ public class BehaviorTreeSceneDoorPanelExecutor extends BehaviorTreeSceneObjectE
          }
       }
    }
+
+   @Override
+   public void toMessage(BehaviorTreeSceneObjectStateMessage message)
+   {
+      super.toMessage(message);
+
+      if (panelDetection != null)
+         persistentDetectionMessageTool.toMessage(syncedRobot, Instant.now(), panelDetection, message.getDoorPanelDetection());
+   }
+
 
    public PersistentDetection getDoorPanelPersistentDetection()
    {

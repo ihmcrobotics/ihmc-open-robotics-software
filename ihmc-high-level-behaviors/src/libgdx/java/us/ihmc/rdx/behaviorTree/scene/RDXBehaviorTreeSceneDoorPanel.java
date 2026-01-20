@@ -10,6 +10,7 @@ import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
 
 /**
  * Renders a door panel in the right spot.
@@ -28,16 +29,16 @@ public class RDXBehaviorTreeSceneDoorPanel extends RDXBehaviorTreeSceneObject
 
       model = RDXModelLoader.load("environmentObjects/door_panel/door_panel.glb");
       modelInstance = new RDXModelInstance(model);
+      modelInstance.setColor(ColorDefinitions.GreenYellow());
       modelInstance.setOpacity(0.3f);
+      modelOffset.setToZero();
+      modelOffset.appendTranslation(0.4, 0.0, 0.0); // Tune the door to roughly match the real one, for visual reference only
    }
 
    @Override
    public void update()
    {
       super.update();
-
-      modelOffset.setToZero();
-      modelOffset.appendTranslation(0.4, 0.0, 0.0); // Could tune better
 
       detectionFrame.update();
       modelFrame.update();
@@ -50,7 +51,7 @@ public class RDXBehaviorTreeSceneDoorPanel extends RDXBehaviorTreeSceneObject
    {
       super.fromMessage(message);
 
-      doorPanelPersistentDetection.set(message.getPersistentDetection());
+      doorPanelPersistentDetection.set(message.getDoorPanelDetection());
    }
 
    public PersistentDetectionStatusMessage getDoorPanelPersistentDetection()
