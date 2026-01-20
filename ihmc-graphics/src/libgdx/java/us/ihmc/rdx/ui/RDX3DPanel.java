@@ -473,6 +473,11 @@ public class RDX3DPanel extends RDXPanel
       this.backgroundShade = backgroundShade;
    }
 
+   public float getBackgroundShade()
+   {
+      return backgroundShade;
+   }
+
    public void setModelSceneMouseCollisionEnabled(boolean modelSceneMouseCollisionEnabled)
    {
       this.modelSceneMouseCollisionEnabled = modelSceneMouseCollisionEnabled;
