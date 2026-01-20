@@ -197,7 +197,7 @@ public class RDXBehaviorTestFacilitator
          yolo = null;
       }
 
-      behaviorTree = new ROS2BehaviorTreeExecutor(ros2, syncedRobot, yolo, foundationPose, peerClockEstimator);
+      behaviorTree = new ROS2BehaviorTreeExecutor(ros2, syncedRobot, yolo, foundationPose, null, peerClockEstimator);
 
       RepeatingTaskThread yoloThread = new RepeatingTaskThread("yolo", () ->
       {

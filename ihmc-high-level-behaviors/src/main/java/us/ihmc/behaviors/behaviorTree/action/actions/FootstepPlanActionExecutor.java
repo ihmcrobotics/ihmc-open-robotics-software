@@ -51,8 +51,8 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
 
       walkingControllerParameters = robotModel.getWalkingControllerParameters();
 
-      previewFootstepPlanningThread = new FootstepPlanActionPlanningThread(true, state, definition);
-      executionFootstepPlanningThread = new FootstepPlanActionPlanningThread(false, state, definition);
+      previewFootstepPlanningThread = new FootstepPlanActionPlanningThread(true, state, definition, rootNode.getTerrainMap());
+      executionFootstepPlanningThread = new FootstepPlanActionPlanningThread(false, state, definition, rootNode.getTerrainMap());
    }
 
    @Override

@@ -4,7 +4,6 @@ import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 
 public class TerrainMapData
@@ -18,6 +17,7 @@ public class TerrainMapData
 
    private final float[] heightMap;
 
+   private final float[] obstacleClearanceScoreMap;
    private final float[] traversabilityScoreMap;
    private final byte[] traversabilityClassMap;
 
@@ -37,6 +37,7 @@ public class TerrainMapData
 
       heightMap = new float[cellsPerAxis * cellsPerAxis];
 
+      obstacleClearanceScoreMap = new float[cellsPerAxis * cellsPerAxis];
       traversabilityScoreMap = new float[cellsPerAxis * cellsPerAxis];
       traversabilityClassMap = new byte[cellsPerAxis * cellsPerAxis];
 
@@ -66,6 +67,7 @@ public class TerrainMapData
 
       this.heightMap = Arrays.copyOf(other.heightMap, size);
 
+      this.obstacleClearanceScoreMap = Arrays.copyOf(other.obstacleClearanceScoreMap, size);
       this.traversabilityScoreMap = Arrays.copyOf(other.traversabilityScoreMap, size);
       this.traversabilityClassMap = Arrays.copyOf(other.traversabilityClassMap, size);
 
@@ -129,6 +131,17 @@ public class TerrainMapData
       return minValue;
    }
 
+   public double getObstacleClearanceScore(double x, double y)
+   {
+      int xIndex = HeightMapTools.coordinateToIndex(x, gridCenterX, cellSize, centerIndex);
+      int yIndex = HeightMapTools.coordinateToIndex(y, gridCenterY, cellSize, centerIndex);
+      if (TerrainMapTools.isOutOfBounds(cellsPerAxis, xIndex, yIndex))
+         return Double.NaN;
+
+      int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
+      return obstacleClearanceScoreMap[key];
+   }
+
    /**
     * Returns a traversability score from 0 to 1, where 0 is non-traversable and 1 is perfectly flat and level terrain.
     */
@@ -172,6 +185,11 @@ public class TerrainMapData
       return heightMap;
    }
 
+   public float[] getObstacleClearanceScoreMap()
+   {
+      return obstacleClearanceScoreMap;
+   }
+
    public float[] getTraversabilityScoreMap()
    {
       return traversabilityScoreMap;
@@ -205,6 +223,11 @@ public class TerrainMapData
    public void setTraversabilityScoreMap(float[] traversabilityScoreMap)
    {
       System.arraycopy(traversabilityScoreMap, 0, this.traversabilityScoreMap, 0, this.traversabilityScoreMap.length);
+   }
+
+   public void setObstacleClearanceScoreMap(float[] obstacleClearanceScoreMap)
+   {
+      System.arraycopy(obstacleClearanceScoreMap, 0, this.obstacleClearanceScoreMap, 0, this.obstacleClearanceScoreMap.length);
    }
 
    public void setTraversabilityClassMap(byte[] traversabilityClassMap)

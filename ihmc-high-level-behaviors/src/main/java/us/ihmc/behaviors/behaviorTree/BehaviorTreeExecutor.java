@@ -13,6 +13,7 @@ import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseCommunicatorMap;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -28,7 +29,8 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeRootNodeExecu
                                ROS2PeerClockOffsetEstimator peerClockEstimator,
                                ROS2ControllerHelper ros2ControllerHelper,
                                YOLOv8DetectionExecutor yolo,
-                               IsaacROSFoundationPoseCommunicatorMap foundationPose)
+                               IsaacROSFoundationPoseCommunicatorMap foundationPose,
+                               TerrainMapData terrainMapData)
    {
       super(syncedRobot,
             ROS2ActorDesignation.ROBOT,
@@ -48,7 +50,8 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeRootNodeExecu
                                                                       syncedRobot,
                                                                       controllerStatusTracker,
                                                                       abilityHandComms,
-                                                                      scene);
+                                                                      scene,
+                                                                      terrainMapData);
    }
 
    public void update()
