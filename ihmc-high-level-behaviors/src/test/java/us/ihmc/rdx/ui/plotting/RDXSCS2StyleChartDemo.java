@@ -49,6 +49,7 @@ public class RDXSCS2StyleChartDemo
 
             int block = 1;
             plotPanel.plot(0, 0, "root.Block%d.q_Block%d_x".formatted(block, block));
+            plotPanel.plot(0, 0, "root.Block%d.q_Block%d_x".formatted(2, 2));
             plotPanel.plot(0, 1, "root.Block%d.q_Block%d_y".formatted(block, block));
             plotPanel.plot(0, 2, "root.Block%d.q_Block%d_z".formatted(block, block));
             plotPanel.plot(0, 3, "root.Block%d.q_Block%d_qx".formatted(block, block));

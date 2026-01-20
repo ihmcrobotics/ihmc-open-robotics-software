@@ -1,6 +1,7 @@
 package us.ihmc.rdx.simulation.scs2;
 
 import imgui.ImVec2;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.scs2.sharedMemory.BufferSample;
 import us.ihmc.scs2.sharedMemory.LinkedYoVariable;
 import us.ihmc.scs2.sharedMemory.interfaces.YoBufferPropertiesReadOnly;
@@ -23,6 +24,8 @@ public class RDXSCS2PlotLine
    boolean isDragging = false;
    double minValue = Double.POSITIVE_INFINITY;
    double maxValue = Double.NEGATIVE_INFINITY;
+   String legendText;
+   float legendTextSize;
 
    public RDXSCS2PlotLine(YoVariable yoVariable, Consumer<YoVariable> removeSelf)
    {
@@ -74,6 +77,9 @@ public class RDXSCS2PlotLine
          minValue = Math.min(minValue, datum);
          maxValue = Math.max(maxValue, datum);
       }
+
+      legendText = linkedYoDoubleVariable.getLinkedYoVariable().getName() + " %.5f".formatted(data[bufferProperties.getCurrentIndex()]);
+      legendTextSize = ImGuiTools.calcTextSizeX(legendText);
    }
 
    public String getVariableName()

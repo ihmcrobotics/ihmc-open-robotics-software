@@ -15,7 +15,6 @@ public class RDXSCS2PlotPanel extends RDXPanel
    private final ArrayList<ArrayList<RDXSCS2Plot>> plots = new ArrayList<>();
    private final ImInt rows = new ImInt(1);
    private final ImInt columns = new ImInt(1);
-   private final ImInt plotHeight = new ImInt(60);
    private final RDXSCS2YoVariableSearchPanel searchPanel;
    private final RDXYoManager yoManager;
    private final Consumer<RDXSCS2PlotPanel> removeSelf;
@@ -49,11 +48,6 @@ public class RDXSCS2PlotPanel extends RDXPanel
                columns.set(1);
             updatePlots();
          }
-         if (ImGui.inputInt(labels.get("Plot height"), plotHeight, 10))
-         {
-            if (plotHeight.get() < 10)
-               plotHeight.set(10);
-         }
          ImGui.popItemWidth();
          ImGui.endMenu();
       }
@@ -69,6 +63,7 @@ public class RDXSCS2PlotPanel extends RDXPanel
       ImGui.endMenuBar();
 
       float plotWidth = ImGui.getColumnWidth() / columns.get();
+      float plotHeight = ImGui.getContentRegionAvailY() / rows.get();
 
       ImGui.pushStyleVar(ImGuiStyleVar.ItemSpacing, 0.0f, 0.0f);
       ImGui.setCursorPosY(ImGui.getCursorPosY() + 1);
@@ -76,7 +71,7 @@ public class RDXSCS2PlotPanel extends RDXPanel
       {
          for (int column = 0; column < columns.get(); column++)
          {
-            plots.get(column).get(row).render(column, row, plotWidth, plotHeight.get());
+            plots.get(column).get(row).render(column, row, plotWidth, plotHeight);
 
             if (column != columns.get() - 1)
                ImGui.sameLine();

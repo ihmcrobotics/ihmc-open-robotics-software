@@ -123,7 +123,24 @@ public class RDXSCS2Plot
       cursorX = ImGui.getCursorScreenPosX();
       cursorY = ImGui.getCursorScreenPosY();
       int fontSize = ImGui.getFontSize();
-      float lineAreaHeight = innerHeight - 1.1f * fontSize;
+
+      float legendTextX = cursorX + 0.05f * fontSize;
+      int numberLegendLines = 1;
+      for (int lineIndex = 0; lineIndex < plotLines.size(); lineIndex++)
+      {
+         RDXSCS2PlotLine plotLine = plotLines.get(lineIndex);
+         if (plotLine.data == null)
+            continue;
+
+         if (lineIndex < plotLines.size() - 1)
+         {
+            legendTextX += plotLine.legendTextSize + 0.2f * fontSize;
+            if (legendTextX + plotLines.get(lineIndex + 1).legendTextSize > cursorX + innerWidth)
+               ++numberLegendLines;
+         }
+      }
+
+      float lineAreaHeight = innerHeight - (1.1f * numberLegendLines) * fontSize;
 
       for (int lineIndex = 0; lineIndex < plotLines.size(); lineIndex++)
       {
@@ -162,11 +179,28 @@ public class RDXSCS2Plot
          int imDrawFlags = ImDrawFlags.None;
          float thickness = 1.0f;
          ImGui.getWindowDrawList().addPolyline(plotLine.points, plotLine.points.length, color, imDrawFlags, thickness);
+      }
 
-         ImGui.getWindowDrawList().addText(cursorX + 0.05f * fontSize,
-                                           cursorY + innerHeight - (lineIndex + 1.0f + 0.05f) * fontSize,
-                                           color,
-                                           plotLine.linkedYoDoubleVariable.getLinkedYoVariable().getName() + " %.5f".formatted(plotLine.data[currentIndex]));
+      legendTextX = cursorX + 0.05f * fontSize;
+      float legendTextY = cursorY  + innerHeight - (numberLegendLines + 0.05f) * fontSize;
+      for (int lineIndex = 0; lineIndex < plotLines.size(); lineIndex++)
+      {
+         RDXSCS2PlotLine plotLine = plotLines.get(lineIndex);
+         if (plotLine.data == null)
+            continue;
+
+         int color = CHART_COLORS[lineIndex % CHART_COLORS.length];
+         ImGui.getWindowDrawList().addText(legendTextX, legendTextY, color, plotLine.legendText);
+
+         if (lineIndex < plotLines.size() - 1)
+         {
+            legendTextX += plotLine.legendTextSize + 0.2f * fontSize;
+            if (legendTextX + plotLines.get(lineIndex + 1).legendTextSize > cursorX + innerWidth)
+            {
+               legendTextX = cursorX + 0.05f * fontSize;
+               legendTextY += 1.1f * fontSize;
+            }
+         }
       }
 
       ImGui.setCursorPos(ImGui.getCursorPosX() - 2, ImGui.getCursorPosY() - 2);
