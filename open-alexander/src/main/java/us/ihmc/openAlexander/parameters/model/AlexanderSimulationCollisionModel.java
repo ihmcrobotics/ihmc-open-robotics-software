@@ -32,7 +32,6 @@ import java.util.List;
  */
 public class AlexanderSimulationCollisionModel implements RobotCollisionModel
 {
-   private final AlexanderPhysicalProperties physicalProperties;
    private final HumanoidJointNameMap jointMap;
    private final boolean useSTPShapesForSmoothContact;
    private final double stpMinimumMargin = 1.0e-5;
@@ -44,15 +43,14 @@ public class AlexanderSimulationCollisionModel implements RobotCollisionModel
    private long collisionMask;
    private long collisionGroup;
 
-   public AlexanderSimulationCollisionModel(HumanoidJointNameMap jointMap, AlexanderPhysicalProperties physicalProperties)
+   public AlexanderSimulationCollisionModel(HumanoidJointNameMap jointMap)
    {
-      this(jointMap, physicalProperties, true);
+      this(jointMap, true);
    }
 
-   public AlexanderSimulationCollisionModel(HumanoidJointNameMap jointMap, AlexanderPhysicalProperties physicalProperties, boolean useSTPShapesForSmoothContact)
+   public AlexanderSimulationCollisionModel(HumanoidJointNameMap jointMap, boolean useSTPShapesForSmoothContact)
    {
       this.jointMap = jointMap;
-      this.physicalProperties = physicalProperties;
       this.useSTPShapesForSmoothContact = useSTPShapesForSmoothContact;
    }
 

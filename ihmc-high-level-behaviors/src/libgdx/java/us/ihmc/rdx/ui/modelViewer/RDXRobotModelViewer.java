@@ -341,7 +341,8 @@ public class RDXRobotModelViewer
                generatingGraphviz = true;
                ThreadTools.startAsDaemon(() ->
                {
-                  RobotDefinitionTreeRenderer robotDefinitionTreeRenderer = new RobotDefinitionTreeRenderer(robotModel.getRobotDefinition(), "");
+                  RobotDefinitionTreeRenderer robotDefinitionTreeRenderer = new RobotDefinitionTreeRenderer(robotModel.getRobotDefinition());
+                  robotDefinitionTreeRenderer.renderGraphviz();
                   generatingGraphviz = false;
                   generatedGraphviz = true;
                }, "RenderGraphvizTree");
@@ -372,6 +373,28 @@ public class RDXRobotModelViewer
                      }
                   }
                }
+            }
+
+            ImGui.text("Render ASCII:");
+            ImGui.sameLine();
+            if (ImGui.button(labels.get("Full")))
+            {
+               generatingGraphviz = true;
+               ThreadTools.startAsDaemon(() ->
+               {
+                  RobotDefinitionTreeRenderer robotDefinitionTreeRenderer = new RobotDefinitionTreeRenderer(robotModel.getRobotDefinition());
+                  robotDefinitionTreeRenderer.renderAscii();
+               }, "RenderAsciiTree");
+            }
+            ImGui.sameLine();
+            if (ImGui.button(labels.get("Minimal")))
+            {
+               generatingGraphviz = true;
+               ThreadTools.startAsDaemon(() ->
+               {
+                  RobotDefinitionTreeRenderer robotDefinitionTreeRenderer = new RobotDefinitionTreeRenderer(robotModel.getRobotDefinition());
+                  robotDefinitionTreeRenderer.renderAsciiMinimal();
+               }, "RenderAsciiMinimalTree");
             }
 
             for (RobotSide side : RobotSide.values)
