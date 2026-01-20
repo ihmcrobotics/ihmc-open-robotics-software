@@ -43,7 +43,6 @@ public class ExternalTransitionControllerStateFactory implements HighLevelContro
                                                                               externalControllerState,
                                                                               controlledJoints,
                                                                               controllerFactoryHelper.getHighLevelControllerParameters(),
-                                                                              controllerFactoryHelper.getLowLevelControllerOutput(),
                                                                               controllerFactoryHelper.getCommandInputManager());
       }
 

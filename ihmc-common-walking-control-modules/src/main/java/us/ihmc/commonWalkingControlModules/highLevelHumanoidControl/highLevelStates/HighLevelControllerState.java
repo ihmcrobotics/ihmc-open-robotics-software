@@ -109,9 +109,4 @@ public abstract class HighLevelControllerState implements State, JointLoadStatus
    {
       return null;
    }
-
-   public boolean forceExit()
-   {
-      return false;
-   }
 }

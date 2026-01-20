@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
-import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -26,21 +25,11 @@ public class TorqueSpaceBlender implements CommandBlender
          parentRegistry.addChild(registry);
    }
 
-   @Override
-   public void initialize(JointDesiredOutputBasics from)
-   {
-      from.setDesiredPosition(Double.NaN);
-      from.setDesiredVelocity(Double.NaN);
-   }
-
-   @Override
    public void computeAndUpdateJointControl(JointDesiredOutputBasics outputToPack,
                                             JointDesiredOutputReadOnly from,
                                             JointDesiredOutputReadOnly to,
                                             double alpha)
    {
-      alpha = MathTools.clamp(alpha, 0.0, 1.0);
-
       outputToPack.clear();
       outputToPack.setControlMode(from.getControlMode());
       outputToPack.setLoadMode(from.getLoadMode());
@@ -50,10 +39,12 @@ public class TorqueSpaceBlender implements CommandBlender
 
       if (validTo && validFrom)
       {
-         double pseudoFromTorque = from.getStiffness() * (from.getDesiredPosition() - joint.getQ()) - from.getDamping() * joint.getQd();
-         double pseudoToTorque = to.getStiffness() * (to.getDesiredPosition() - joint.getQ()) - to.getDamping() * joint.getQd();
+         double pseudoStandPrepTorque =
+               from.getStiffness() * (from.getDesiredPosition() - joint.getQ()) - from.getDamping() * joint.getQd();
+         double pseudoWalkingTorque =
+               to.getStiffness() * (to.getDesiredPosition() - joint.getQ()) - to.getDamping() * joint.getQd();
 
-         double effectiveTorque = EuclidCoreTools.interpolate(pseudoFromTorque, pseudoToTorque, alpha);
+         double effectiveTorque = EuclidCoreTools.interpolate(pseudoStandPrepTorque, pseudoWalkingTorque, alpha);
          double effectiveStiffness = EuclidCoreTools.interpolate(from.getStiffness(), to.getStiffness(), alpha);
          double effectiveDamping = EuclidCoreTools.interpolate(from.getDamping(), to.getDamping(), alpha);
 
