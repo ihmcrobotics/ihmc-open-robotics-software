@@ -1,0 +1,85 @@
+{
+  "ambientLight": 0.01,
+  "objects": [
+    {
+      "type": "RDXPointLightObject",
+      "x": 10.0,
+      "y": 10.0,
+      "z": 10.0,
+      "qx": 0.0,
+      "qy": 0.0,
+      "qz": 0.0,
+      "qs": 1.0
+    },
+    {
+      "type": "RDXPointLightObject",
+      "x": -10.0,
+      "y": 10.0,
+      "z": 10.0,
+      "qx": 0.0,
+      "qy": 0.0,
+      "qz": 0.0,
+      "qs": 1.0
+    },
+    {
+      "type": "RDXPointLightObject",
+      "x": -10.0,
+      "y": -10.0,
+      "z": 10.0,
+      "qx": 0.0,
+      "qy": 0.0,
+      "qz": 0.0,
+      "qs": 1.0
+    },
+    {
+      "type": "RDXPointLightObject",
+      "x": 10.0,
+      "y": -10.0,
+      "z": 10.0,
+      "qx": 0.0,
+      "qy": 0.0,
+      "qz": 0.0,
+      "qs": 1.0
+    },
+    {
+      "type": "RDXPalletObject",
+      "x": 0.85,
+      "y": -0.55,
+      "z": 0.55,
+      "qx": -0.059,
+      "qy": -0.595,
+      "qz": 0.000,
+      "qs": 0.802
+    },
+    {
+      "type": "RDXPalletObject",
+      "x": 1.1,
+      "y": 0.55,
+      "z": 0.45,
+      "qx": 0.222,
+      "qy": -0.635,
+      "qz": 0.000,
+      "qs": 0.740
+    },
+    {
+      "type": "RDXPalletObject",
+      "x": 1.7,
+      "y": -0.55,
+      "z": 1.4,
+      "qx": 0.199,
+      "qy": -0.569,
+      "qz": 0.000,
+      "qs": 0.798
+    },
+    {
+      "type": "RDXPalletObject",
+      "x": 2.0,
+      "y": 0.55,
+      "z": 1.55,
+      "qx": -0.199,
+      "qy": -0.569,
+      "qz": 0.000,
+      "qs": 0.798
+    }
+  ]
+}

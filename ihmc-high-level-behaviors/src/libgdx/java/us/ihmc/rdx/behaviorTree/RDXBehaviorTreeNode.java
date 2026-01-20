@@ -38,6 +38,8 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
                                  D extends BehaviorTreeNodeDefinition>
       implements BehaviorTreeNode<RDXBehaviorTreeNode<?, ?>, S, D>
 {
+   private static final RDXBehaviorTreeNodeExpansionManager expansionManager = new RDXBehaviorTreeNodeExpansionManager();
+
    /** Convenient accessor to the state to keep the code clean, available to all inheriting classes. */
    protected final S state;
    /** Convenient accessor to the definition to keep the code clean, available to all inheriting classes. */
@@ -54,8 +56,8 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    private transient final ImVec2 lineMax = new ImVec2();
    protected boolean mouseHoveringNodeLine;
    protected boolean anySpecificWidgetOnLineClicked = false;
-   protected boolean treeWidgetExpanded = false;
-   private int previousNumberOfChildren = 0;
+   protected boolean initialized = false;
+   protected boolean treeWidgetExpanded = true;
    private boolean isNameBeingEdited = false;
    private transient final ImString imNodeNameText = new ImString();
    private transient final ImString notesText = new ImString(1500);
@@ -119,11 +121,11 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    {
       BehaviorTreeNode.super.update();
 
-      // Automatically expand if less than 5 children are added at once
-      int deltaChildren = getChildren().size() - previousNumberOfChildren;
-      previousNumberOfChildren = getChildren().size();
-      if (deltaChildren > 0 && deltaChildren < 5)
-         treeWidgetExpanded = true;
+      if (!initialized)
+      {
+         initialized = true;
+         treeWidgetExpanded = expansionManager.isExpanded(definition.getName());
+      }
 
       offsetY = Float.NaN;
 
@@ -241,7 +243,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
          if (isHovered && ImGui.isMouseClicked(ImGuiMouseButton.Left))
          {
             anySpecificWidgetOnLineClicked = true;
-            treeWidgetExpanded = !treeWidgetExpanded;
+            setTreeWidgetExpanded(!treeWidgetExpanded);
          }
       }
       ImGui.setCursorScreenPos(indentMin.x + itemWidth, indentMin.y); // Leave space for the expand/collapse arrow regardless
@@ -400,6 +402,9 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
 
    public void setTreeWidgetExpanded(boolean treeWidgetExpanded)
    {
+      if (treeWidgetExpanded != this.treeWidgetExpanded)
+         expansionManager.setExpanded(definition.getName(), treeWidgetExpanded);
+
       this.treeWidgetExpanded = treeWidgetExpanded;
    }
 

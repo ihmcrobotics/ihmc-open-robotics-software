@@ -95,8 +95,7 @@ public class ContinuousHikingProcess
                                                  heightMapControllerDemandNode::isDemanded,
                                                  terrainMapDemandNode::isDemanded);
 
-         if (openCLAvailable)
-            rapidPlanarRegionsExtractionThread = new RapidPlanarRegionsExtractionThread(ros2Node, new OpenCLManager(), rawImageCollectionZED);
+         rapidPlanarRegionsExtractionThread = new RapidPlanarRegionsExtractionThread(ros2Node, rawImageCollectionZED);
 
          continuousPlanningStateMachine = new ContinuousPlanningStateMachine(robotModel,
                                                                              ros2Node,

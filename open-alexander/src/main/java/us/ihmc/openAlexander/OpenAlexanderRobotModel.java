@@ -334,7 +334,7 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
    @Override
    public String getSimpleRobotName()
    {
-      return jointMap.getModelName();
+      return "Alexander"; // TODO Should this just be robotName? Confusing which one to use
    }
 
    @Override

@@ -2,6 +2,7 @@ package us.ihmc.openAlexander;
 
 import us.ihmc.openAlexander.parameters.model.AlexanderPhysicalProperties;
 import us.ihmc.avatar.drcRobot.RobotVersion;
+import us.ihmc.openAlexander.parameters.model.HumanoidURDFParameterInterface;
 import us.ihmc.openAlexander.parameters.model.OpenAlexanderURDFParameters;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -31,5 +32,5 @@ public interface AlexanderVersionInterface extends RobotVersion
 
    AlexanderPhysicalProperties getPhysicalProperties();
 
-   OpenAlexanderURDFParameters getURDFParameters();
+   HumanoidURDFParameterInterface getURDFParameters();
 }
