@@ -21,8 +21,8 @@ public class RDXBehaviorTreeSceneObject extends BehaviorTreeSceneObjectState
    private final RDXBaseUI baseUI;
 
    private final RDXSelectablePose3DGizmo gizmo;
-   private Model model;
-   private RDXModelInstance modelInstance;
+   protected Model model;
+   protected RDXModelInstance modelInstance;
 
    private final PersistentDetectionStatusMessage persistentDetection = new PersistentDetectionStatusMessage();
 

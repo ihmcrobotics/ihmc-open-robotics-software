@@ -59,7 +59,7 @@ public class RDXSCS2Session
    protected final RDXYoManager yoManager = new RDXYoManager();
    private final ArrayList<RDXSCS2Robot> robots = new ArrayList<>();
    private final ArrayList<RDXSCS2TerrainObject> terrainObjects = new ArrayList<>();
-   private final RDXSCS2YoImPlotManager plotManager = new RDXSCS2YoImPlotManager();
+   private final RDXSCS2PlottingManager plottingManager = new RDXSCS2PlottingManager();
    private boolean sessionStartedHandled = false;
    private final RDXRenderableAdapter renderables = new RDXRenderableAdapter(this::getRenderables);
    private final ArrayList<Runnable> onSessionStartedRunnables = new ArrayList<>();
@@ -69,15 +69,10 @@ public class RDXSCS2Session
 
    public RDXSCS2Session(RDXBaseUI baseUI)
    {
-      this(baseUI, null);
-   }
-
-   public RDXSCS2Session(RDXBaseUI baseUI, RDXPanel plotManagerParentPanel)
-   {
       baseUI.getImGuiPanelManager().addPanel(controlPanel);
 
       baseUI.getPrimaryScene().addRenderableAdapter(renderables);
-      plotManager.create(baseUI.getLayoutManager(), plotManagerParentPanel == null ? controlPanel : plotManagerParentPanel);
+      plottingManager.create(baseUI.getLayoutManager(), controlPanel);
    }
 
    /**
@@ -184,21 +179,24 @@ public class RDXSCS2Session
          showRobotMap.put(robotDefinition.getName(), imBoolean);
       }
 
-      plotManager.setupForSession(yoManager);
+      plottingManager.setupForSession(yoManager);
 
       session.startSessionThread(); // TODO: Need start/stop controls?
    }
 
    public void update()
    {
+      if (session == null)
+         return;
+
       yoManager.update();
-      plotManager.update();
+      plottingManager.update();
 
       if (!sessionStartedHandled && session.hasSessionStarted())
       {
          sessionStartedHandled = true;
          LogTools.info("Session started.");
-         plotManager.initializeLinkedVariables();
+         plottingManager.initializeLinkedVariables();
       }
 
       for (RDXSCS2Robot robot : robots)
@@ -250,12 +248,18 @@ public class RDXSCS2Session
    public void renderImGuiWidgets()
    {
       renderImGuiWidgetsPartOne();
-      renderImGuiWidgetsPartTwo();
+
+      if (session != null)
+         renderImGuiWidgetsPartTwo();
    }
 
    protected void renderImGuiWidgetsPartOne()
    {
       ImGui.text(sessionInfo);
+
+      if (session == null)
+         return;
+
       ImGui.pushItemWidth(110);
       if (ImGuiTools.volatileInputInt("DT (Hz)", dtHz))
       {
@@ -386,7 +390,7 @@ public class RDXSCS2Session
 
    protected void renderImGuiWidgetsPartTwo()
    {
-      plotManager.renderImGuiWidgets();
+      plottingManager.renderImGuiWidgets();
 
       for (Runnable additionalImGuiWidget : additionalImGuiWidgets)
       {
@@ -459,7 +463,7 @@ public class RDXSCS2Session
    {
       baseUI.getPrimaryScene().removeRenderableAdapter(renderables);
 
-      plotManager.destroy();
+      plottingManager.destroy();
 
       showRobotMap.clear();
       showRobotPairs.clear();
@@ -480,9 +484,9 @@ public class RDXSCS2Session
       return yoManager;
    }
 
-   public RDXSCS2YoImPlotManager getPlotManager()
+   public RDXSCS2PlottingManager getPlottingManager()
    {
-      return plotManager;
+      return plottingManager;
    }
 
    public HashMap<String, ImBoolean> getShowRobotMap()

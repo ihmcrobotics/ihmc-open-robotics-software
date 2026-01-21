@@ -35,6 +35,10 @@ module behavior_msgs
          * Transform of the object frame to world frame
          */
         controller_msgs::msg::dds::RigidBodyTransformMessage transform_to_world;
+        /**
+         * Used only for door panel
+         */
+        behavior_msgs::msg::dds::PersistentDetectionStatusMessage door_panel_detection;
       };
     };
   };
