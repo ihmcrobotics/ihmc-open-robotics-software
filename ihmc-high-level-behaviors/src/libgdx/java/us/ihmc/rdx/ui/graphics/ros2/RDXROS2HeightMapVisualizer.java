@@ -44,6 +44,8 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
    private final RDXImageVisualizer heightMapImageVisualizer = new RDXImageVisualizer("Height Map Image", "Height Map Image Panel", true);
    private final RDXHeightMapRenderer heightMapRenderer = new RDXHeightMapRenderer();
    private final RDXChunkedMapRenderer chunkedMapRenderer;
+   private final ImBoolean requestChunkMap = new ImBoolean(false);
+   private final ImBoolean requestHeightMap = new ImBoolean(true);
    private final ImBoolean requestTerrainMap = new ImBoolean(false);
    private final ImBoolean requestHeightMapController = new ImBoolean(false);
    private final ImBoolean enableChunkedMapRenderer = new ImBoolean(false);
@@ -51,6 +53,8 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
    private final ImBoolean colorBasedOnTraversability = new ImBoolean(false);
    private final Stopwatch stopwatch = new Stopwatch();
    private ROS2PublishSubscribeAPI ros2;
+   private ROS2Heartbeat chunkMapRequestHeartbeat;
+   private ROS2Heartbeat heightMapRequestHeartbeat;
    private ROS2Heartbeat terrainMapRequestHeartbeat;
    private ROS2Heartbeat heightMapControllerRequestHeartbeat;
    private Mat heightMap;
@@ -207,6 +211,12 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       if (ros2 != null && ImGui.button(labels.get("Lower Height Map Backdrop")))
          ros2.publish(PerceptionAPI.LOWER_HEIGHT_MAP_BACKDROP);
 
+      if (heightMapRequestHeartbeat != null && ImGui.checkbox(labels.get("Request Height Map"), requestHeightMap))
+         heightMapRequestHeartbeat.setAlive(requestHeightMap.get());
+
+      if (chunkMapRequestHeartbeat != null && ImGui.checkbox(labels.get("Request Chunk Map"), requestChunkMap))
+         chunkMapRequestHeartbeat.setAlive(requestChunkMap.get());
+
       if (terrainMapRequestHeartbeat != null && ImGui.checkbox(labels.get("Request Terrain Map"), requestTerrainMap))
          terrainMapRequestHeartbeat.setAlive(requestTerrainMap.get());
 
@@ -297,6 +307,18 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       executorService.destroy();
       chunkedMapRenderer.destroy();
       heightMapRenderer.dispose();
+   }
+
+   public void setupChunkMapRequestHeartbeat(ROS2Node ros2Node)
+   {
+      chunkMapRequestHeartbeat = new ROS2Heartbeat(ros2Node, PerceptionAPI.REQUEST_CHUNK_MAP);
+      chunkMapRequestHeartbeat.setAlive(requestChunkMap.get());
+   }
+
+   public void setupHeightMapRequestHeartbeat(ROS2Node ros2Node)
+   {
+      heightMapRequestHeartbeat = new ROS2Heartbeat(ros2Node, PerceptionAPI.REQUEST_HEIGHT_MAP);
+      heightMapRequestHeartbeat.setAlive(requestHeightMap.get());
    }
 
    public void setupTerrainMapRequestHeartbeat(ROS2Node ros2Node)

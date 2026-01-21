@@ -45,13 +45,9 @@ public class ChunkedMapManager
       chunkMessage = new ChunkMessage();
    }
 
-   public void updateAndPublish(Mat latestHeightMap, Point3DReadOnly heightMapCenterPoint)
+   public void update(Mat latestHeightMap, Point3DReadOnly heightMapCenterPoint)
    {
-      if (heightMapParameters.getEnableChunkedMap())
-      {
-         addHeightMap(latestHeightMap, heightMapCenterPoint, heightMapParameters.getWidthInMeters(), (float) heightMapParameters.getCellSize());
-         publishChunkedMap(chunkMessagePublisher);
-      }
+      addHeightMap(latestHeightMap, heightMapCenterPoint, heightMapParameters.getWidthInMeters(), (float) heightMapParameters.getCellSize());
    }
 
    public void addHeightMap(Mat heightMap, Point3DReadOnly heightMapCenter, double gridSize, float resolution)
@@ -136,7 +132,7 @@ public class ChunkedMapManager
       return chunk;
    }
 
-   private void publishChunkedMap(ROS2Publisher<ChunkMessage> publisher)
+   public void publishChunkedMap()
    {
       Collection<Chunk> chunks = getChunks();
       for (Chunk chunk : chunks)
@@ -151,7 +147,7 @@ public class ChunkedMapManager
          if (throttler != null && throttler.run())
          {
             ChunkMessageTools.toMessage(chunk, chunkMessage);
-            publisher.publish(chunkMessage);
+            chunkMessagePublisher.publish(chunkMessage);
             // After it's been published, we reset the dirty value so we don't keep publishing it even
             // if it hasn't changed
             chunk.setDirty(false);
