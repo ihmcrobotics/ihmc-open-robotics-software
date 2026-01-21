@@ -16,8 +16,6 @@ import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,8 +24,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class RDXROS2TF2Demo
 {
-   private final ROS2Node ros2Node = new ROS2NodeBuilder().build("tf2_demo_node");
-
    private final Map<ROS2MutableFrame, RDXPose3DGizmo> mutableFrameMap = new HashMap<>();
    private final Map<ROS2StaticFrame, RDXReferenceFrameGraphic> staticFrameMap = new HashMap<>();
    private final Map<String, ReferenceFrame> allFrames = new TreeMap<>();
@@ -55,7 +51,7 @@ public class RDXROS2TF2Demo
          public void create()
          {
             addFrame(ReferenceFrameTools.getWorldFrame());
-            addFrame(new ROS2StaticFrame(ros2Node, "map", ReferenceFrame.getWorldFrame(), new RigidBodyTransform()));
+            addFrame(new ROS2StaticFrame("map", ReferenceFrame.getWorldFrame(), new RigidBodyTransform()));
 
             baseUI.getImGuiPanelManager().addPanel("Settings", this::renderSettings);
 
@@ -89,7 +85,7 @@ public class RDXROS2TF2Demo
                                                                          new Vector3D(transformTranslation[0],
                                                                                       transformTranslation[1],
                                                                                       transformTranslation[2]));
-               ROS2MutableFrame mutableFrame = new ROS2MutableFrame(ros2Node, frameIdToAdd.get(), parentFrame, initialOffset);
+               ROS2MutableFrame mutableFrame = new ROS2MutableFrame(frameIdToAdd.get(), parentFrame, initialOffset);
                addFrame(mutableFrame);
             }
 
@@ -103,7 +99,7 @@ public class RDXROS2TF2Demo
                                                                          new Vector3D(transformTranslation[0],
                                                                                       transformTranslation[1],
                                                                                       transformTranslation[2]));
-               ROS2StaticFrame staticFrame = new ROS2StaticFrame(ros2Node, frameIdToAdd.get(), parentFrame, initialOffset);
+               ROS2StaticFrame staticFrame = new ROS2StaticFrame(frameIdToAdd.get(), parentFrame, initialOffset);
                addFrame(staticFrame);
             }
 
@@ -170,7 +166,6 @@ public class RDXROS2TF2Demo
       if (destroyed.getAndSet(false))
       {
          allFrames.values().forEach(ReferenceFrame::remove);
-         ros2Node.destroy();
       }
    }
 

@@ -4,7 +4,6 @@ import geometry_msgs.msg.dds.TransformStamped;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
-import us.ihmc.ros2.ROS2Node;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
@@ -20,47 +19,37 @@ public class ROS2MutableFrame extends ROS2Frame
    /**
     * Constructs a non-root frame.
     *
-    * @param ros2Node    ROS 2 node to publish the TFMessage on.
     * @param id          The frame's id.
     * @param parentFrame The parent frame.
     */
-   public ROS2MutableFrame(ROS2Node ros2Node, String id, ReferenceFrame parentFrame)
+   public ROS2MutableFrame(String id, ReferenceFrame parentFrame)
    {
-      this(ros2Node, id, parentFrame, null);
+      this(id, parentFrame, null);
    }
 
    /**
     * Constructs a non-root frame.
     *
-    * @param ros2Node                  ROS 2 node to publish the TFMessage on.
-    * @param id                        The frame's id.
-    * @param parentFrame               The parent frame.
-    * @param transformToParent         Transform to the parent frame.
+    * @param id                The frame's id.
+    * @param parentFrame       The parent frame.
+    * @param transformToParent Transform to the parent frame.
     */
-   public ROS2MutableFrame(ROS2Node ros2Node,
-                           String id,
-                           ReferenceFrame parentFrame,
-                           RigidBodyTransformReadOnly transformToParent)
+   public ROS2MutableFrame(String id, ReferenceFrame parentFrame, RigidBodyTransformReadOnly transformToParent)
    {
-      this(ros2Node, id, parentFrame, transformToParent, false);
+      this(id, parentFrame, transformToParent, false);
    }
 
    /**
     * Constructs a non-root frame.
     *
-    * @param ros2Node                  ROS 2 node to publish the TFMessage on.
-    * @param id                        The frame's id.
-    * @param parentFrame               The parent frame.
-    * @param transformToParent         Transform to the parent frame.
-    * @param isZUpFrame                Whether this frame has its Z-axis aligned with root frame at all times.
+    * @param id                The frame's id.
+    * @param parentFrame       The parent frame.
+    * @param transformToParent Transform to the parent frame.
+    * @param isZUpFrame        Whether this frame has its Z-axis aligned with root frame at all times.
     */
-   public ROS2MutableFrame(ROS2Node ros2Node,
-                           String id,
-                           ReferenceFrame parentFrame,
-                           RigidBodyTransformReadOnly transformToParent,
-                           boolean isZUpFrame)
+   public ROS2MutableFrame(String id, ReferenceFrame parentFrame, RigidBodyTransformReadOnly transformToParent, boolean isZUpFrame)
    {
-      super(ros2Node, id, parentFrame, transformToParent, false, isZUpFrame, false);
+      super(id, parentFrame, transformToParent, false, isZUpFrame, false);
 
       newestTransformToParent = new RigidBodyTransform();
       getTransformToParent(newestTransformToParent);

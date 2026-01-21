@@ -4,7 +4,6 @@ import geometry_msgs.msg.dds.TransformStamped;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
-import us.ihmc.ros2.ROS2Node;
 
 /**
  * A ROS 2 frame with a static transform to parent.
@@ -16,44 +15,34 @@ public class ROS2StaticFrame extends ROS2Frame
    /**
     * Constructs a non-root frame.
     *
-    * @param ros2Node                  ROS 2 node to publish the TFMessage on.
-    * @param id                        The frame's id.
-    * @param parentFrame               The parent frame.
-    * @param transformToParent         Transform to the parent frame.
+    * @param id                The frame's id.
+    * @param parentFrame       The parent frame.
+    * @param transformToParent Transform to the parent frame.
     */
-   public ROS2StaticFrame(ROS2Node ros2Node,
-                          String id,
-                          ReferenceFrame parentFrame,
-                          RigidBodyTransformReadOnly transformToParent)
+   public ROS2StaticFrame(String id, ReferenceFrame parentFrame, RigidBodyTransformReadOnly transformToParent)
    {
-      this(ros2Node, id, parentFrame, transformToParent, false, false);
+      this(id, parentFrame, transformToParent, false, false);
    }
 
    /**
     * Constructs a non-root frame.
     *
-    * @param ros2Node                  ROS 2 node to publish the TFMessage on.
-    * @param id                        The frame's id.
-    * @param parentFrame               The parent frame.
-    * @param transformToParent         Transform to the parent frame.
-    * @param isAStationaryFrame        Whether this frame is stationary with respect to root frame.
-    * @param isZUpFrame                Whether this frame has its Z-axis aligned with root frame at all times.
+    * @param id                 The frame's id.
+    * @param parentFrame        The parent frame.
+    * @param transformToParent  Transform to the parent frame.
+    * @param isAStationaryFrame Whether this frame is stationary with respect to root frame.
+    * @param isZUpFrame         Whether this frame has its Z-axis aligned with root frame at all times.
     */
-   public ROS2StaticFrame(ROS2Node ros2Node,
-                          String id,
-                          ReferenceFrame parentFrame,
-                          RigidBodyTransformReadOnly transformToParent,
-                          boolean isAStationaryFrame,
-                          boolean isZUpFrame)
+   public ROS2StaticFrame(String id, ReferenceFrame parentFrame, RigidBodyTransformReadOnly transformToParent, boolean isAStationaryFrame, boolean isZUpFrame)
    {
-      super(ros2Node, id, parentFrame, transformToParent, isAStationaryFrame, isZUpFrame, true);
+      super(id, parentFrame, transformToParent, isAStationaryFrame, isZUpFrame, true);
 
       publishMessage = shouldPublishMessage(parentFrame);
    }
 
    private ROS2StaticFrame(String id)
    {
-      this(null, id, null, null, true, true);
+      this(id, null, null, true, true);
    }
 
    /**

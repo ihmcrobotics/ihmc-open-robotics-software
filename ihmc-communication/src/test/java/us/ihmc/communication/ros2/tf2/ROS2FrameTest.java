@@ -29,7 +29,7 @@ public class ROS2FrameTest
       String id = "test_static_frame_0";
       ReferenceFrame worldFrame = ReferenceFrameTools.getWorldFrame();
       RigidBodyTransformReadOnly transformToParent = new RigidBodyTransform(new YawPitchRoll(0.1, 0.2, 0.3), new Vector3D(0.4, 0.5, 0.6));
-      ROS2StaticFrame staticFrame = new ROS2StaticFrame(node, id, worldFrame, transformToParent);
+      ROS2StaticFrame staticFrame = new ROS2StaticFrame(id, worldFrame, transformToParent);
 
       assertFalse(staticFrame.isWorldFrame());
       assertFalse(staticFrame.isRootFrame());
@@ -45,10 +45,14 @@ public class ROS2FrameTest
       assertFalse(staticFrame.publishesMessageOnUpdate());
 
       // Test static frame that should publish its tf message every update
-      ReferenceFrame grandParentFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("grandparent_frame", worldFrame, new RigidBodyTransform());
-      ReferenceFrame parentFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformFromParent("parent_frame", grandParentFrame, new RigidBodyTransform());
+      ReferenceFrame grandParentFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("grandparent_frame",
+                                                                                                        worldFrame,
+                                                                                                        new RigidBodyTransform());
+      ReferenceFrame parentFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformFromParent("parent_frame",
+                                                                                                       grandParentFrame,
+                                                                                                       new RigidBodyTransform());
       String id2 = "test_static_frame_1";
-      ROS2StaticFrame staticFrame1 = new ROS2StaticFrame(node, id2, parentFrame, new RigidBodyTransform());
+      ROS2StaticFrame staticFrame1 = new ROS2StaticFrame(id2, parentFrame, new RigidBodyTransform());
 
       assertTrue(staticFrame1.publishesMessageOnUpdate());
 
@@ -64,7 +68,7 @@ public class ROS2FrameTest
 
       String id = "test_mutable_frame";
       ReferenceFrame parentFrame = ReferenceFrameTools.getWorldFrame();
-      ROS2MutableFrame mutableFrame = new ROS2MutableFrame(node, id, parentFrame);
+      ROS2MutableFrame mutableFrame = new ROS2MutableFrame(id, parentFrame);
 
       assertFalse(mutableFrame.isWorldFrame());
       assertFalse(mutableFrame.isRootFrame());
@@ -109,7 +113,7 @@ public class ROS2FrameTest
       // Construct a mutable frame
       String id = "test_mutable_frame";
       ReferenceFrame parentFrame = ReferenceFrameTools.getWorldFrame();
-      ROS2MutableFrame mutableFrame = new ROS2MutableFrame(node, id, parentFrame);
+      ROS2MutableFrame mutableFrame = new ROS2MutableFrame(id, parentFrame);
 
       // Run updates
       for (int i = 0; i < updatesToRun; ++i)
@@ -195,13 +199,13 @@ public class ROS2FrameTest
       ReferenceFrame odomFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("odom", mapFrame, odomToMapTransform);
 
       RigidBodyTransform baseLinkToOdomTransform = new RigidBodyTransform(new YawPitchRoll(1.3, 1.4, 1.5), new Vector3D(1.6, 1.7, 1.8));
-      ROS2MutableFrame ros2BaseLinkFrame = new ROS2MutableFrame(ros2Node, "base_link", odomFrame, baseLinkToOdomTransform);
+      ROS2MutableFrame ros2BaseLinkFrame = new ROS2MutableFrame("base_link", odomFrame, baseLinkToOdomTransform);
 
       RigidBodyTransform wristToBaseLinkTransform = new RigidBodyTransform(new YawPitchRoll(1.9, 2.0, 2.1), new Vector3D(2.2, 2.3, 2.4));
       ReferenceFrame wristFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("wrist", ros2BaseLinkFrame, wristToBaseLinkTransform);
 
       RigidBodyTransform wristToGripperTransform = new RigidBodyTransform(new YawPitchRoll(2.5, 2.6, 2.7), new Vector3D(2.8, 2.9, 3.0));
-      ROS2StaticFrame ros2GripperFrame = new ROS2StaticFrame(ros2Node, "gripper", wristFrame, wristToGripperTransform);
+      ROS2StaticFrame ros2GripperFrame = new ROS2StaticFrame("gripper", wristFrame, wristToGripperTransform);
 
       for (int i = 0; i < 10; ++i)
       {
