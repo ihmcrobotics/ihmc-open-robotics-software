@@ -36,16 +36,12 @@ public class ContinuousHikingProcess
    private final RapidPlanarRegionsExtractionThread rapidPlanarRegionsExtractionThread;
    private final GpuMappingThread gpuMappingThread;
 
-   private final boolean openCLAvailable; // Should be false on robot
-
    public ContinuousHikingProcess(DRCRobotModel robotModel,
                                   RobotCollisionModel robotCollisionModel,
                                   ROS2Node ros2Node,
                                   ROS2ImageSensors ros2ImageSensors,
-                                  ROS2SyncedRobotModel ros2SyncedRobot,
-                                  boolean openCLAvailable)
+                                  ROS2SyncedRobotModel ros2SyncedRobot)
    {
-      this.openCLAvailable = openCLAvailable;
       // Create a bunch of overhead for the ROS2 communication and the robot
       ros2SyncedRobot.initializeToDefaultRobotInitialSetup(0.0, 0.0, 0.0, 0.0);
       ControllerFootstepQueueMonitor controllerFootstepQueueMonitor = new ControllerFootstepQueueMonitor(ros2Node, robotModel.getSimpleRobotName());
@@ -66,8 +62,8 @@ public class ContinuousHikingProcess
       BlockingQueue<RawImage> rawImageCollectionHeadCamera = new LinkedBlockingQueue<>(ImageSensor.DEFAULT_IMAGE_QUEUE_CAPACITY);
       if (ros2ImageSensors.getSensor("Stepping Camera") != null)
          ros2ImageSensors.getSensor("Stepping Camera").registerImageQueue(rawImageCollectionSteppingCamera, ZEDImageSensor.DEPTH_IMAGE_KEY);
-      //      if (ros2ImageSensors.getSensor("Experimental Camera") != null)
-      //         ros2ImageSensors.getSensor("Experimental Camera").registerImageQueue(rawImageCollectionHeadCamera, ZEDImageSensor.DEPTH_IMAGE_KEY);
+      if (ros2ImageSensors.getSensor("Experimental Camera") != null)
+         ros2ImageSensors.getSensor("Experimental Camera").registerImageQueue(rawImageCollectionHeadCamera, ZEDImageSensor.DEPTH_IMAGE_KEY);
 
       // Class's that perform the real work of the process... the good stuff
       {
@@ -90,8 +86,7 @@ public class ContinuousHikingProcess
 
       // Custom thread getting started
       gpuMappingThread.startRepeating();
-      if (openCLAvailable)
-         rapidPlanarRegionsExtractionThread.startRepeating();
+      rapidPlanarRegionsExtractionThread.startRepeating();
 
       // We create ThreadFactory's here so that when profiling the thread, we have user-friendly names to identify the threads with
       ThreadFactory threadFactorySyncedRobot = new ThreadFactoryBuilder().setNameFormat(SYNCED_ROBOT_THREAD).build();
@@ -119,8 +114,7 @@ public class ContinuousHikingProcess
    public void destroy()
    {
       gpuMappingThread.blockingKill();
-      if (openCLAvailable)
-         rapidPlanarRegionsExtractionThread.kill();
+      rapidPlanarRegionsExtractionThread.kill();
       continuousPlanningStateMachine.destroy();
    }
 }
