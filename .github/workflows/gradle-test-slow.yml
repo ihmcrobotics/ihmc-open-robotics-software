@@ -14,77 +14,77 @@ jobs:
   alexander-allocation-slow:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
-      subproject: 'open-alexander'
+      subproject: 'zulu'
       test-category: 'allocation-slow'
   alexander-allocation-slow-2:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
-      subproject: 'open-alexander'
+      subproject: 'zulu'
       test-category: 'allocation-slow-2'
   alexander-controller-api-slow:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
-      subproject: 'open-alexander'
+      subproject: 'zulu'
       test-category: 'controller-api-slow'
   alexander-controller-api-slow-3:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
-      subproject: 'open-alexander'
+      subproject: 'zulu'
       test-category: 'controller-api-slow-3'
   alexander-controller-api-slow-4:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
-      subproject: 'open-alexander'
+      subproject: 'zulu'
       test-category: 'controller-api-slow-4'
   alexander-humanoid-behaviors-slow:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
-      subproject: 'open-alexander'
+      subproject: 'zulu'
       test-category: 'humanoid-behaviors-slow'
   alexander-humanoid-flat-ground-slow-2:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
-      subproject: 'open-alexander'
+      subproject: 'zulu'
       test-category: 'humanoid-flat-ground-slow-2'
   alexander-humanoid-flat-ground-slow-3:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
-      subproject: 'open-alexander'
+      subproject: 'zulu'
       test-category: 'humanoid-flat-ground-slow-3'
   alexander-humanoid-flat-ground-slow-4:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
-      subproject: 'open-alexander'
+      subproject: 'zulu'
       test-category: 'humanoid-flat-ground-slow-4'
   alexander-humanoid-obstacle-slow:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
-      subproject: 'open-alexander'
+      subproject: 'zulu'
       test-category: 'humanoid-obstacle-slow'
   alexander-humanoid-obstacle-slow-2:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
-      subproject: 'open-alexander'
+      subproject: 'zulu'
       test-category: 'humanoid-obstacle-slow-2'
   alexander-humanoid-obstacle-slow-3:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
-      subproject: 'open-alexander'
+      subproject: 'zulu'
       test-category: 'humanoid-obstacle-slow-3'
   alexander-humanoid-push-recovery-slow:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
-      subproject: 'open-alexander'
+      subproject: 'zulu'
       test-category: 'humanoid-push-recovery-slow'
   alexander-humanoid-rough-terrain-slow:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
-      subproject: 'open-alexander'
+      subproject: 'zulu'
       test-category: 'humanoid-rough-terrain-slow'
   alexander-humanoid-stairs-slow:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
-      subproject: 'open-alexander'
+      subproject: 'zulu'
       test-category: 'humanoid-stairs-slow'
   ihmc-footstep-planning-slow:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
