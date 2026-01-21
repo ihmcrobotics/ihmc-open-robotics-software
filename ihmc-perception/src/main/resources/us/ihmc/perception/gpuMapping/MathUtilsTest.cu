@@ -86,17 +86,7 @@ __global__ void test_best_fit_plane(float* points, int number_of_points, float* 
         float px = points[3 * i];
         float py = points[3 * i + 1];
         float pz = points[3 * i + 2];
-
-        covarianceData.numberOfPoints += 1;
-        covarianceData.sum_x += px;
-        covarianceData.sum_y += py;
-        covarianceData.sum_z += pz;
-        covarianceData.sum_xx += px * px;
-        covarianceData.sum_xy += px * py;
-        covarianceData.sum_xz += px * pz;
-        covarianceData.sum_yy += py * py;
-        covarianceData.sum_yz += py * pz;
-        covarianceData.sum_zz += pz * pz;
+        covarianceData.registerPoint(px, py, pz);
     }
 
     float coefficients[3] = {0.0f, 0.0f, 0.0f};

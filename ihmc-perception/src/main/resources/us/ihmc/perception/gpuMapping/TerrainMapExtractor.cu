@@ -131,19 +131,7 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
                 // Using query_height yields very high squared errors for large heights due to numerical errors in the matrix inversion when plane fitting
                 // Since only the relative z values are important, we subtract relative to the max height
                 float z_relative = query_height - max_height_in_radius;
-
-                covarianceData.numberOfPoints += 1.0f;
-
-                covarianceData.sum_x += point_query.x;
-                covarianceData.sum_y += point_query.y;
-                covarianceData.sum_z += z_relative;
-
-                covarianceData.sum_xx += point_query.x * point_query.x;
-                covarianceData.sum_xy += point_query.x * point_query.y;
-                covarianceData.sum_xz += point_query.x * z_relative;
-                covarianceData.sum_yy += point_query.y * point_query.y;
-                covarianceData.sum_yz += point_query.y * z_relative;
-                covarianceData.sum_zz += z_relative * z_relative;
+                covarianceData.registerPoint(point_query.x, point_query.y, z_relative);
             }
         }
     }

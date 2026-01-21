@@ -192,13 +192,7 @@ __global__ void packKernel(const unsigned short* __restrict__ depthImage,
             double dx = point.x - centroid.x;
             double dy = point.y - centroid.y;
             double dz = point.z - centroid.z;
-
-            covarianceData.sum_xx += dx * dx;
-            covarianceData.sum_xy += dx * dy;
-            covarianceData.sum_xz += dx * dz;
-            covarianceData.sum_yy += dy * dy;
-            covarianceData.sum_yz += dy * dz;
-            covarianceData.sum_zz += dz * dz;
+            covarianceData.registerPoint(dx, dy, dz);
         }
     }
 

@@ -245,6 +245,22 @@ struct CovarianceData
 
     float numberOfPoints;
 
+    __device__ void registerPoint(float x, float y, float z)
+    {
+        sum_xx += x * x;
+        sum_xy += x * y;
+        sum_xz += x * z;
+        sum_yy += y * y;
+        sum_yz += y * z;
+        sum_zz += z * z;
+
+        sum_x += x;
+        sum_y += y;
+        sum_z += z;
+
+        numberOfPoints += 1.0f;
+    }
+
     /**
      * Packs the covariance data in a 3x3 matrix A and 3x1 vector b, where Ax=b represents the best-fit plane.
      * Data is row major.
