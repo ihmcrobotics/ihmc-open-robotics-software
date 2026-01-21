@@ -39,6 +39,7 @@ public class ContinuousHikingProcess
    private final ContinuousPlanningStateMachine continuousPlanningStateMachine;
    private final GpuMappingThread gpuMappingThread;
 
+   private final ROS2DemandGraphNode chunkMapDemandNode;
    private final ROS2DemandGraphNode heightMapDemandNode;
    private final ROS2DemandGraphNode heightMapControllerDemandNode;
    private final ROS2DemandGraphNode terrainMapDemandNode;
@@ -77,6 +78,7 @@ public class ContinuousHikingProcess
 //      if (ros2ImageSensors.getSensor("Experimental Camera") != null)
 //         ros2ImageSensors.getSensor("Experimental Camera").registerImageQueue(rawImageCollectionZED, ZEDImageSensor.DEPTH_IMAGE_KEY);
 
+      chunkMapDemandNode = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_CHUNK_MAP);
       heightMapDemandNode = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_HEIGHT_MAP);
       heightMapControllerDemandNode = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_HEIGHT_MAP_FOR_CONTROLLER);
       terrainMapDemandNode = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_TERRAIN_MAP);
@@ -91,6 +93,7 @@ public class ContinuousHikingProcess
                                                  activeMappingParameterToolBox.getHeightMapParameters(),
                                                  activeMappingParameterToolBox.getTerrainMapParameters(),
                                                  activeMappingParameterToolBox.getDepthImageFilteringParameters(),
+                                                 chunkMapDemandNode::isDemanded,
                                                  heightMapDemandNode::isDemanded,
                                                  heightMapControllerDemandNode::isDemanded,
                                                  terrainMapDemandNode::isDemanded);
@@ -135,6 +138,7 @@ public class ContinuousHikingProcess
 
    public void destroy()
    {
+      chunkMapDemandNode.destroy();
       heightMapDemandNode.destroy();
       heightMapControllerDemandNode.destroy();
       terrainMapDemandNode.destroy();

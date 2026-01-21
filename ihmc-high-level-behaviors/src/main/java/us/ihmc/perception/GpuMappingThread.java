@@ -44,6 +44,7 @@ public class GpuMappingThread extends RepeatingTaskThread
    private final ROS2Publisher<ImageMessage> filteredDepthPublisher;
    private final BlockingQueue<RawImage> rawImageCollection;
 
+   private final BooleanSupplier publishChunkMap;
    private final BooleanSupplier publishHeightMap;
    private final BooleanSupplier publishHeightMapToController;
    private final BooleanSupplier publishTerrainMap;
@@ -56,6 +57,7 @@ public class GpuMappingThread extends RepeatingTaskThread
                            HeightMapParameters heightMapParameters,
                            TerrainMapParameters terrainMapParameters,
                            DepthImageFilteringParameters depthImageFilteringParameters,
+                           BooleanSupplier publishChunkMap,
                            BooleanSupplier publishHeightMap,
                            BooleanSupplier publishHeightMapToController,
                            BooleanSupplier publishTerrainMap)
@@ -63,6 +65,7 @@ public class GpuMappingThread extends RepeatingTaskThread
       super(GpuMappingThread.class.getSimpleName());
       this.rawImageCollection = rawImageCollection;
       this.heightMapParameters = heightMapParameters;
+      this.publishChunkMap = publishChunkMap;
       this.publishHeightMap = publishHeightMap;
       this.publishHeightMapToController = publishHeightMapToController;
       this.publishTerrainMap = publishTerrainMap;
@@ -150,7 +153,11 @@ public class GpuMappingThread extends RepeatingTaskThread
             gpuMappingManager.publishTerrainMap();
 
          // Chunked map is only published if it's enabled by the height map parameters
-         gpuMappingManager.publishChunkedMap();
+         if (publishChunkMap.getAsBoolean())
+         {
+            gpuMappingManager.updateChunkedMap();
+            gpuMappingManager.publishChunkedMap();
+         }
 
          filteredDepthImage.close();
          depthImage.release();
