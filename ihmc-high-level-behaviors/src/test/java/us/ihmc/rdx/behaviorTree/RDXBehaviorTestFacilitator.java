@@ -188,7 +188,7 @@ public class RDXBehaviorTestFacilitator
          foundationPose = new IsaacROSFoundationPoseCommunicatorMap(peerClockEstimator);
 
          yolo = new YOLOv8DetectionExecutor(peerClockEstimator, () -> true);
-         yolo.enableModel("best_multi_12_17_2025");
+         yolo.enableModel("best_multi_01_16_2025");
          yolo.addDetectionConsumerCallback(foundationPose::updatePoseEstimations);
       }
       else
