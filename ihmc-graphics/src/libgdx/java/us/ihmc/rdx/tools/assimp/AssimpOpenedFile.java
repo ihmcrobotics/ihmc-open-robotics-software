@@ -13,6 +13,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.resources.ResourceTools;
 import us.ihmc.tools.string.StringTools;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -24,7 +25,7 @@ import java.util.function.Supplier;
 public class AssimpOpenedFile
 {
    private final long assimpFileStructAddress;
-   private String fileName;
+   private final String fileName;
 
    public AssimpOpenedFile(long assimpFileIOAddress, long fileNameAddress, long openModeAddress) throws IOException
    {
@@ -34,15 +35,18 @@ public class AssimpOpenedFile
 
       Path filePath = Paths.get(fileName);
 
+      InputStream inputStream;
       URL resourceUrl = ResourceTools.getResourceSystem(filePath);
-      if (resourceUrl == null)
+      if (resourceUrl != null) // Check if resource exists, otherwise check filesystem
+         inputStream = resourceUrl.openStream();
+      else if (filePath.isAbsolute() && filePath.toFile().exists())
+         inputStream = new FileInputStream(filePath.toFile());
+      else
       {
-         Supplier<String> message = StringTools.format("Could not get resource: {}", filePath);
+         Supplier<String> message = StringTools.format("Could not find resource or file: {}", filePath);
          LogTools.error(message);
          throw new RuntimeException(message.get());
       }
-
-      InputStream inputStream = resourceUrl.openStream();
       byte[] byteArray = inputStream.readAllBytes();
       inputStream.close();
 
