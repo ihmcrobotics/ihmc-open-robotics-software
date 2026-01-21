@@ -45,7 +45,7 @@ public class ChunkedMapManager
       chunkMessage = new ChunkMessage();
    }
 
-   public void updateAndPublish(Mat latestHeightMap, Point3DReadOnly heightMapCenterPoint)
+   public void update(Mat latestHeightMap, Point3DReadOnly heightMapCenterPoint)
    {
       addHeightMap(latestHeightMap, heightMapCenterPoint, heightMapParameters.getWidthInMeters(), (float) heightMapParameters.getCellSize());
    }

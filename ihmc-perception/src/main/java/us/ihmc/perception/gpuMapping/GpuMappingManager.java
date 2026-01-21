@@ -192,7 +192,7 @@ public class GpuMappingManager
        GpuMat deviceGlobalHeightMap = heightMapExtractor.getHeightMap();
        deviceGlobalHeightMap.download(hostGlobalHeightMap);
 
-       chunkedMapManager.updateAndPublish(hostGlobalHeightMap, heightMapCenterPoint);
+       chunkedMapManager.update(hostGlobalHeightMap, heightMapCenterPoint);
 
        hostGlobalHeightMap.close();
     }
