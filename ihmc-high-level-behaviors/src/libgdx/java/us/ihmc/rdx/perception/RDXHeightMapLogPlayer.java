@@ -4,6 +4,7 @@ import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FixedReferenceFrame;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -16,6 +17,7 @@ import us.ihmc.perception.gpuMapping.HeightMapParameters;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudVisualizer;
+import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2HeightMapVisualizer;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.ros2.ROS2Node;
@@ -32,13 +34,14 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class RDXHeightMapLogPlayer
 {
-   private static final String SVO_FILE = System.getProperty("user.home") + "/Downloads/heightmap_test.svo2";
+   private static final String SVO_FILE = "/opt/ihmc/LogData/UserFolders/TomaszFolder/heightmap_test.svo2";
 
    private final RDXBaseUI baseUI;
    private final ROS2Node ros2Node;
 
    private final ROS2ZEDSVOPlaybackSensor zedPlaybackSensor;
    private final RDXZEDSVORecorderPanel zedSVOPanel;
+   private RDXReferenceFrameGraphic zedFrameGraphic;
 
    private final RDXRawImagePointCloudVisualizer zedPointCloudVisualizer = new RDXRawImagePointCloudVisualizer("ZED Point Cloud", true);
    private final RDXROS2HeightMapVisualizer heightMapVisualizer;
@@ -55,6 +58,7 @@ public class RDXHeightMapLogPlayer
       baseUI = new RDXBaseUI();
 
       zedPlaybackSensor = new ROS2ZEDSVOPlaybackSensor(ros2Helper, 0, ZEDModelData.ZED_X_MINI, zed.SL_DEPTH_MODE_NEURAL_LIGHT, SVO_FILE);
+      zedPlaybackSensor.setTrackedPoseOffset(new Pose3D(0.0, 0.0, 1.0, 0.0, 0.0, 0.0));
       zedPlaybackSensor.useTrackedPose(true);
       BlockingQueue<RawImage> rawImageCollection = new LinkedBlockingQueue<>(ImageSensor.DEFAULT_IMAGE_QUEUE_CAPACITY);
       zedPlaybackSensor.registerImageQueue(rawImageCollection, ZEDImageSensor.DEPTH_IMAGE_KEY);
@@ -81,6 +85,7 @@ public class RDXHeightMapLogPlayer
             zedPointCloudVisualizer.setActive(true);
             heightMapVisualizer.create();
             heightMapVisualizer.setActive(true);
+            zedFrameGraphic = new RDXReferenceFrameGraphic(0.2);
 
             zedPlaybackSensor.run(true);
 
@@ -90,6 +95,7 @@ public class RDXHeightMapLogPlayer
 
             baseUI.getPrimaryScene().addRenderableProvider(zedPointCloudVisualizer);
             baseUI.getPrimaryScene().addRenderableProvider(heightMapVisualizer);
+            baseUI.getPrimaryScene().addRenderableProvider(zedFrameGraphic);
          }
 
          @Override
@@ -108,6 +114,7 @@ public class RDXHeightMapLogPlayer
          {
             heightMapVisualizer.destroy();
             zedPlaybackSensor.close();
+            zedFrameGraphic.dispose();
 
             ros2Node.destroy();
             baseUI.dispose();
@@ -126,6 +133,8 @@ public class RDXHeightMapLogPlayer
 
          zedPointCloudVisualizer.setColorImage(colorImageLeft);
          zedPointCloudVisualizer.setDepthImage(depthImage);
+
+         zedFrameGraphic.setToReferenceFrame(zedPlaybackSensor.getSensorFrame());
 
          RigidBodyTransformReadOnly transformToWorld = depthImage.getTransformToWorld();
          ReferenceFrame cameraFrameInWorld = new FixedReferenceFrame("FrameInWorld", ReferenceFrame.getWorldFrame(), transformToWorld);

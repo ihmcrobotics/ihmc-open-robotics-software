@@ -164,8 +164,8 @@ public class HeightMapExtractor
 
    public void update(GpuMat latestDepthImageGPU,
                       CameraIntrinsics cameraIntrinsics,
-                      RigidBodyTransform sensorToWorldTransform,
-                      RigidBodyTransform sensorToGroundTransform,
+                      RigidBodyTransformReadOnly sensorToWorldTransform,
+                      RigidBodyTransformReadOnly sensorToGroundTransform,
                       RigidBodyTransformReadOnly groundToWorldTransform,
                       float zDriftInMeters,
                       Point3D heightMapCenter,
