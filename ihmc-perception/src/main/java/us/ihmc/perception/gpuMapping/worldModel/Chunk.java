@@ -20,6 +20,7 @@ public class Chunk
     * Width of a chunk in meters
     */
    public static final float CHUNK_WIDTH = 1.0f;
+   private static final float MINIMUM_CHANGE_IN_METERS = 0.002f;
 
    private float originX;
    private float originY;
@@ -96,7 +97,7 @@ public class Chunk
       {
          float previousHeight = chunkHeights[i * cellsPerAxis + j];
 
-         if (Math.abs(previousHeight - height) > 1E-4)
+         if (Math.abs(previousHeight - height) > MINIMUM_CHANGE_IN_METERS)
          {
             // If we updated a height value that didn't match what we already had, we say the chunk is dirty, and needs to be published.
             dirty = true;

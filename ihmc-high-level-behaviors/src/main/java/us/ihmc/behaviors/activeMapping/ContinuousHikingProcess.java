@@ -4,7 +4,6 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2TunedRigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
@@ -12,15 +11,12 @@ import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.perception.GpuMappingThread;
 import us.ihmc.perception.ROS2ImageSensors;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractionThread;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensors.ImageSensor;
-import us.ihmc.sensors.realsense.RealSenseImageSensor;
 import us.ihmc.sensors.zed.ZEDImageSensor;
 
-import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -37,14 +33,10 @@ public class ContinuousHikingProcess
    private final EnvironmentHandler environmentHandler = new EnvironmentHandler();
    private final ActiveMappingParameterToolBox activeMappingParameterToolBox;
    private final ContinuousPlanningStateMachine continuousPlanningStateMachine;
+   private final RapidPlanarRegionsExtractionThread rapidPlanarRegionsExtractionThread;
    private final GpuMappingThread gpuMappingThread;
 
-   private final ROS2DemandGraphNode heightMapDemandNode;
-   private final ROS2DemandGraphNode heightMapControllerDemandNode;
-   private final ROS2DemandGraphNode terrainMapDemandNode;
-
    private final boolean openCLAvailable; // Should be false on robot
-   private RapidPlanarRegionsExtractionThread rapidPlanarRegionsExtractionThread = null;
 
    public ContinuousHikingProcess(DRCRobotModel robotModel,
                                   RobotCollisionModel robotCollisionModel,
@@ -70,32 +62,23 @@ public class ContinuousHikingProcess
                                                                                                                    .getSteppingCameraTransform());
 
       // This is for the height map, it expects the queue of images that we get from the sensors
-      BlockingQueue<RawImage> rawImageCollectionRealsnese = new LinkedBlockingQueue<>(ImageSensor.DEFAULT_IMAGE_QUEUE_CAPACITY);
-      BlockingQueue<RawImage> rawImageCollectionZED = new LinkedBlockingQueue<>(ImageSensor.DEFAULT_IMAGE_QUEUE_CAPACITY);
+      BlockingQueue<RawImage> rawImageCollectionSteppingCamera = new LinkedBlockingQueue<>(ImageSensor.DEFAULT_IMAGE_QUEUE_CAPACITY);
+      BlockingQueue<RawImage> rawImageCollectionHeadCamera = new LinkedBlockingQueue<>(ImageSensor.DEFAULT_IMAGE_QUEUE_CAPACITY);
       if (ros2ImageSensors.getSensor("Stepping Camera") != null)
-         ros2ImageSensors.getSensor("Stepping Camera").registerImageQueue(rawImageCollectionRealsnese, ZEDImageSensor.DEPTH_IMAGE_KEY);
-//      if (ros2ImageSensors.getSensor("Experimental Camera") != null)
-//         ros2ImageSensors.getSensor("Experimental Camera").registerImageQueue(rawImageCollectionZED, ZEDImageSensor.DEPTH_IMAGE_KEY);
-
-      heightMapDemandNode = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_HEIGHT_MAP);
-      heightMapControllerDemandNode = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_HEIGHT_MAP_FOR_CONTROLLER);
-      terrainMapDemandNode = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_TERRAIN_MAP);
+         ros2ImageSensors.getSensor("Stepping Camera").registerImageQueue(rawImageCollectionSteppingCamera, ZEDImageSensor.DEPTH_IMAGE_KEY);
+      //      if (ros2ImageSensors.getSensor("Experimental Camera") != null)
+      //         ros2ImageSensors.getSensor("Experimental Camera").registerImageQueue(rawImageCollectionHeadCamera, ZEDImageSensor.DEPTH_IMAGE_KEY);
 
       // Class's that perform the real work of the process... the good stuff
       {
          gpuMappingThread = new GpuMappingThread(ros2Node,
                                                  ros2SyncedRobot,
                                                  robotCollisionModel,
-                                                 rawImageCollectionRealsnese,
+                                                 rawImageCollectionSteppingCamera,
                                                  controllerFootstepQueueMonitor,
-                                                 activeMappingParameterToolBox.getHeightMapParameters(),
-                                                 activeMappingParameterToolBox.getTerrainMapParameters(),
-                                                 activeMappingParameterToolBox.getDepthImageFilteringParameters(),
-                                                 heightMapDemandNode::isDemanded,
-                                                 heightMapControllerDemandNode::isDemanded,
-                                                 terrainMapDemandNode::isDemanded);
+                                                 activeMappingParameterToolBox);
 
-         rapidPlanarRegionsExtractionThread = new RapidPlanarRegionsExtractionThread(ros2Node, rawImageCollectionZED);
+         rapidPlanarRegionsExtractionThread = new RapidPlanarRegionsExtractionThread(ros2Node, rawImageCollectionHeadCamera);
 
          continuousPlanningStateMachine = new ContinuousPlanningStateMachine(robotModel,
                                                                              ros2Node,
@@ -135,9 +118,6 @@ public class ContinuousHikingProcess
 
    public void destroy()
    {
-      heightMapDemandNode.destroy();
-      heightMapControllerDemandNode.destroy();
-      terrainMapDemandNode.destroy();
       gpuMappingThread.blockingKill();
       if (openCLAvailable)
          rapidPlanarRegionsExtractionThread.kill();
