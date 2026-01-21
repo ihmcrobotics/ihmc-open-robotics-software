@@ -238,6 +238,7 @@ public class RDXVRModeManager
    public void update()
    {
       vrManager.getTeleporter().setBButtonEnabled(mode != RDXVRMode.WHOLE_BODY_IK_STREAMING);
+      interactablesEnabled.set(mode == RDXVRMode.INPUTS_DISABLED);
 
       float opacity = 1.0f;
 
