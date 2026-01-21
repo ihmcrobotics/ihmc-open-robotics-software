@@ -378,6 +378,11 @@ public class FootstepPlannerRequest
       return environmentHandler;
    }
 
+   public boolean isHeightMapAvailable()
+   {
+      return getEnvironmentHandler().getTerrainMapData() != null;
+   }
+
    public boolean getAssumeFlatGround()
    {
       return assumeFlatGround;

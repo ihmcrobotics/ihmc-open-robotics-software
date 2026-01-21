@@ -1,4 +1,4 @@
-package us.ihmc.perception.gpuHeightMap;
+package us.ihmc.perception.gpuMapping;
 
 import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.cuda.cudart.dim3;

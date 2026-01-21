@@ -63,3 +63,6 @@ float64 smoother_gradient_threshold_to_terminate
 
 # Distance from the start to perform collision checking. Avoids false-positive collisions of the robot or gantry, for example.
 float64 collision_start_tolerance
+
+# Weight on the obstacle clearance cost from the terrain map
+float64 obstacle_clearance_cost_weight

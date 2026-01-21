@@ -93,6 +93,10 @@ public class AStarBodyPathPlannerParametersPacket extends Packet<AStarBodyPathPl
             * Distance from the start to perform collision checking. Avoids false-positive collisions of the robot or gantry, for example.
             */
    public double collision_start_tolerance_;
+   /**
+            * Weight on the obstacle clearance cost from the terrain map
+            */
+   public double obstacle_clearance_cost_weight_;
 
    public AStarBodyPathPlannerParametersPacket()
    {
@@ -145,6 +149,8 @@ public class AStarBodyPathPlannerParametersPacket extends Packet<AStarBodyPathPl
       smoother_gradient_threshold_to_terminate_ = other.smoother_gradient_threshold_to_terminate_;
 
       collision_start_tolerance_ = other.collision_start_tolerance_;
+
+      obstacle_clearance_cost_weight_ = other.obstacle_clearance_cost_weight_;
 
    }
 
@@ -448,6 +454,21 @@ public class AStarBodyPathPlannerParametersPacket extends Packet<AStarBodyPathPl
       return collision_start_tolerance_;
    }
 
+   /**
+            * Weight on the obstacle clearance cost from the terrain map
+            */
+   public void setObstacleClearanceCostWeight(double obstacle_clearance_cost_weight)
+   {
+      obstacle_clearance_cost_weight_ = obstacle_clearance_cost_weight;
+   }
+   /**
+            * Weight on the obstacle clearance cost from the terrain map
+            */
+   public double getObstacleClearanceCostWeight()
+   {
+      return obstacle_clearance_cost_weight_;
+   }
+
 
    public static Supplier<AStarBodyPathPlannerParametersPacketPubSubType> getPubSubType()
    {
@@ -506,6 +527,8 @@ public class AStarBodyPathPlannerParametersPacket extends Packet<AStarBodyPathPl
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.collision_start_tolerance_, other.collision_start_tolerance_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.obstacle_clearance_cost_weight_, other.obstacle_clearance_cost_weight_, epsilon)) return false;
+
 
       return true;
    }
@@ -559,6 +582,8 @@ public class AStarBodyPathPlannerParametersPacket extends Packet<AStarBodyPathPl
 
       if(this.collision_start_tolerance_ != otherMyClass.collision_start_tolerance_) return false;
 
+      if(this.obstacle_clearance_cost_weight_ != otherMyClass.obstacle_clearance_cost_weight_) return false;
+
 
       return true;
    }
@@ -608,7 +633,9 @@ public class AStarBodyPathPlannerParametersPacket extends Packet<AStarBodyPathPl
       builder.append("smoother_gradient_threshold_to_terminate=");
       builder.append(this.smoother_gradient_threshold_to_terminate_);      builder.append(", ");
       builder.append("collision_start_tolerance=");
-      builder.append(this.collision_start_tolerance_);
+      builder.append(this.collision_start_tolerance_);      builder.append(", ");
+      builder.append("obstacle_clearance_cost_weight=");
+      builder.append(this.obstacle_clearance_cost_weight_);
       builder.append("}");
       return builder.toString();
    }

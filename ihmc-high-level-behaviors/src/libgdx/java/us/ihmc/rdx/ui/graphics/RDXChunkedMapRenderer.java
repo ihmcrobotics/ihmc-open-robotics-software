@@ -4,10 +4,12 @@ import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.Pool;
+import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ChunkMessage;
 import us.ihmc.perception.gpuMapping.worldModel.Chunk;
-import us.ihmc.perception.gpuMapping.HeightMapMessageTools;
+import us.ihmc.perception.gpuMapping.worldModel.ChunkMessageTools;
+import us.ihmc.perception.gpuMapping.worldModel.ChunkTools;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -67,16 +69,13 @@ public class RDXChunkedMapRenderer implements RenderableProvider
          if (heightMapRenderer.isHasBeenCreated())
          {
             Chunk chunk = chunkRenderer.getChunk();
-            if (chunk != null)
+            if (chunkRenderer.getMap().ptr(0) != null)
             {
-               if (chunk.getChunk() != null && chunk.getChunk().ptr(0) != null)
-               {
-                  heightMapRenderer.update(chunk.getChunk(),
-                                           (float) chunk.getOriginX(),
-                                           (float) chunk.getOriginY(),
-                                           chunk.getCellsPerAxis(),
-                                           (float) chunk.getCellSize());
-               }
+               heightMapRenderer.update(chunkRenderer.getMap(),
+                                        (float) chunk.getOriginX(),
+                                        (float) chunk.getOriginY(),
+                                        chunk.getCellsPerAxis(),
+                                        (float) chunk.getCellSize());
             }
          }
       }
@@ -92,23 +91,22 @@ public class RDXChunkedMapRenderer implements RenderableProvider
             int oldestRenderer = queueOfRenderers.poll();
             ChunkRenderer oldestChunkRenderer = chunkRenderers.remove(oldestRenderer);
             renderersToRemove.add(oldestChunkRenderer);
+            oldestChunkRenderer.close();
          }
 
-         chunkRenderer = new ChunkRenderer(chunkMessage);
+         Chunk latestChunk = new Chunk(chunkMessage.getOriginX(),
+                                       chunkMessage.getOriginY(),
+                                       chunkMessage.getCellSizeInMeters(),
+                                       chunkMessage.getCellsPerAxis());
+         ChunkMessageTools.unpackMessageToChunk(chunkMessage, latestChunk);
+
+         chunkRenderer = new ChunkRenderer(latestChunk);
          chunkRenderers.put(hash, chunkRenderer);
          queueOfRenderers.add(hash);
       }
 
-      Mat latestChunk = HeightMapMessageTools.unpackMessageToMat(chunkMessage);
-
-      Chunk chunk = chunkRenderer.getChunk();
-      chunk.setChunk(latestChunk);
-      chunk.setOriginX(chunkMessage.getOriginX());
-      chunk.setOriginY(chunkMessage.getOriginY());
-      chunk.setCellSize(chunkMessage.getCellSizeInMeters());
-      chunk.setCellsPerAxis(chunkMessage.getCellsPerAxis());
-
-      latestChunk.close();
+      ChunkMessageTools.unpackMessageToChunk(chunkMessage, chunkRenderer.getChunk());
+      ChunkTools.convertToMat(chunkRenderer.getMap(), chunkRenderer.getChunk());
    }
 
    @Override
@@ -132,13 +130,17 @@ public class RDXChunkedMapRenderer implements RenderableProvider
 
    private static class ChunkRenderer
    {
+      private final Mat map;
       private final Chunk chunk;
       private final RDXChunkRenderer renderer;
 
-      public ChunkRenderer(ChunkMessage chunkMessage)
+      public ChunkRenderer(Chunk chunk)
       {
          renderer = new RDXChunkRenderer();
-         chunk = new Chunk(chunkMessage);
+         this.chunk = new Chunk(chunk.getOriginX(), chunk.getOriginY(), chunk.getCellSize(), chunk.getCellsPerAxis());
+         map = new Mat(chunk.getCellsPerAxis(), chunk.getCellsPerAxis(), opencv_core.CV_32FC1);
+
+         ChunkTools.convertToMat(map, chunk);
       }
 
       public Chunk getChunk()
@@ -146,10 +148,19 @@ public class RDXChunkedMapRenderer implements RenderableProvider
          return chunk;
       }
 
+      public Mat getMap()
+      {
+         return map;
+      }
+
       public RDXChunkRenderer getRenderer()
       {
          return renderer;
       }
+
+      public void close()
+      {
+         map.close();
+      }
    }
 }
-

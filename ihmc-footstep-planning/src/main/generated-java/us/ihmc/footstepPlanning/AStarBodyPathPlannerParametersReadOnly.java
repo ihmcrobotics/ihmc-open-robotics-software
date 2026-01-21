@@ -55,6 +55,11 @@ public interface AStarBodyPathPlannerParametersReadOnly extends StoredPropertySe
       return get(inclineCostWeight);
    }
 
+   default double getObstacleClearanceWeight()
+   {
+      return get(obstacleClearanceWeight);
+   }
+
    /**
     * This is a deadband applied to the incline in the search.
     */
@@ -189,6 +194,7 @@ public interface AStarBodyPathPlannerParametersReadOnly extends StoredPropertySe
       packet.setInclineCostDeadband(getInclineCostDeadband());
       packet.setMaxIncline(getMaxIncline());
 
+      packet.setObstacleClearanceCostWeight(getObstacleClearanceWeight());
       // Collision
       packet.setCollisionBoxSizeY(getCollisionBoxSizeY());
       packet.setCollisionBoxSizeX(getCollisionBoxSizeX());

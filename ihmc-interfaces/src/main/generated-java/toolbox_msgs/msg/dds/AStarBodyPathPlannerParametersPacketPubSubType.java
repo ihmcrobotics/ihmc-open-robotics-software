@@ -15,7 +15,7 @@ public class AStarBodyPathPlannerParametersPacketPubSubType implements us.ihmc.p
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "bf7f3b36bcdf911d22a945a2c9341d3aa6d651c868e084c7a153ce033dd01def";
+   		return "c5b8b643f2277f61ec6cc0d8cdf07320ddc85e9b805a7a20650b6b6ad247e98c";
    }
    
    @Override
@@ -57,6 +57,8 @@ public class AStarBodyPathPlannerParametersPacketPubSubType implements us.ihmc.p
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -165,6 +167,9 @@ public class AStarBodyPathPlannerParametersPacketPubSubType implements us.ihmc.p
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -211,6 +216,8 @@ public class AStarBodyPathPlannerParametersPacketPubSubType implements us.ihmc.p
 
       cdr.write_type_6(data.getCollisionStartTolerance());
 
+      cdr.write_type_6(data.getObstacleClearanceCostWeight());
+
    }
 
    public static void read(toolbox_msgs.msg.dds.AStarBodyPathPlannerParametersPacket data, us.ihmc.idl.CDR cdr)
@@ -255,6 +262,8 @@ public class AStarBodyPathPlannerParametersPacketPubSubType implements us.ihmc.p
       	
       data.setCollisionStartTolerance(cdr.read_type_6());
       	
+      data.setObstacleClearanceCostWeight(cdr.read_type_6());
+      	
 
    }
 
@@ -281,6 +290,7 @@ public class AStarBodyPathPlannerParametersPacketPubSubType implements us.ihmc.p
       ser.write_type_6("smoother_hill_climb_gain", data.getSmootherHillClimbGain());
       ser.write_type_6("smoother_gradient_threshold_to_terminate", data.getSmootherGradientThresholdToTerminate());
       ser.write_type_6("collision_start_tolerance", data.getCollisionStartTolerance());
+      ser.write_type_6("obstacle_clearance_cost_weight", data.getObstacleClearanceCostWeight());
    }
 
    @Override
@@ -306,6 +316,7 @@ public class AStarBodyPathPlannerParametersPacketPubSubType implements us.ihmc.p
       data.setSmootherHillClimbGain(ser.read_type_6("smoother_hill_climb_gain"));
       data.setSmootherGradientThresholdToTerminate(ser.read_type_6("smoother_gradient_threshold_to_terminate"));
       data.setCollisionStartTolerance(ser.read_type_6("collision_start_tolerance"));
+      data.setObstacleClearanceCostWeight(ser.read_type_6("obstacle_clearance_cost_weight"));
    }
 
    public static void staticCopy(toolbox_msgs.msg.dds.AStarBodyPathPlannerParametersPacket src, toolbox_msgs.msg.dds.AStarBodyPathPlannerParametersPacket dest)

@@ -1,4 +1,4 @@
-package us.ihmc.perception.heightmap;
+package us.ihmc.perception.gpuMapping;
 
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -7,9 +7,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.perception.gpuMapping.HeightMapData;
-import us.ihmc.perception.gpuMapping.HeightMapParameters;
-import us.ihmc.perception.gpuMapping.HeightMapTools;
 
 import java.util.Random;
 

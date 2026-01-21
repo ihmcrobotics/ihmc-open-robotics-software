@@ -18,23 +18,23 @@ module perception_msgs
         /**
          * Unique ID used to identify this message, should preferably be consecutively increasing.
          */
-        unsigned long long sequence_id;
+        unsigned long sequence_id;
         /**
          * X coordinate of the center of the height map
          */
-        double origin_x;
+        float origin_x;
         /**
          * Y coordinate of the center of the height map
          */
-        double origin_y;
+        float origin_y;
         /**
          * Width of the height map in meters
          */
-        double width_in_meters;
+        float width_in_meters;
         /**
          * Cell size in meters of an individual cell
          */
-        double cell_size_in_meters;
+        float cell_size_in_meters;
         /**
          * Cells per axis
          */
@@ -42,7 +42,7 @@ module perception_msgs
         /**
          * List of heights, which correspond to the list of keys
          */
-        sequence<float, 5000> heights;
+        sequence<octet, 20000> heights;
       };
     };
   };

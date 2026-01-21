@@ -53,6 +53,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    private final ImDoubleWrapper transferDurationWidget;
    private final ImBooleanWrapper performAStarSearchWidget;
    private final ImBooleanWrapper walkWithGoalOrientationWidget;
+   private final ImBooleanWrapper planWithBodyPathWidget;
    private final RDXStoredPropertySetTuner plannerParametersWidgets;
    private int numberOfAllocatedFootsteps = 0;
    private final RecyclingArrayList<RDXFootstepPlanActionFootstep> manuallyPlacedFootsteps;
@@ -125,6 +126,9 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
       walkWithGoalOrientationWidget = new ImBooleanWrapper(definition.getPlannerWalkWithGoalOrientation()::getValue,
                                                            definition.getPlannerWalkWithGoalOrientation()::setValue,
                                                            imBoolean -> ImGui.checkbox(labels.get("Walk with goal orientation"), imBoolean));
+      planWithBodyPathWidget = new ImBooleanWrapper(definition.getPlannerPlanWithBodyPath()::getValue,
+                                                    definition.getPlannerPlanWithBodyPath()::setValue,
+                                                    imBoolean -> ImGui.checkbox(labels.get("Plan with body path"), imBoolean));
       plannerParametersWidgets = new RDXStoredPropertySetTuner("Planner Parameters");
       plannerParametersWidgets.create(definition.getPlannerParametersUnsafe(), false);
 
@@ -418,6 +422,8 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
             ImGui.beginDisabled(!definition.getPlannerPerformAStarSearch().getValue());
             walkWithGoalOrientationWidget.renderImGuiWidget();
             ImGui.endDisabled();
+
+            planWithBodyPathWidget.renderImGuiWidget();
 
             ImGui.text("Preview steps: %d".formatted(state.getPreviewFootsteps().getSize()));
 

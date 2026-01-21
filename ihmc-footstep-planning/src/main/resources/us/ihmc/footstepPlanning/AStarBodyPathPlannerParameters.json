@@ -75,5 +75,9 @@
   "Collision start tolerance": [
     0.5,
     "Distance from the start to perform collision checking. Avoids false-positive collisions of the robot or gantry, for example."
+  ],
+  "Obstacle clearance cost weight": [
+    1.5,
+    "Weight on the obstacle clearance cost from the terrain map (0 = ignore YOLO/obstacle band, larger = avoid obstacles more strongly)."
   ]
 }

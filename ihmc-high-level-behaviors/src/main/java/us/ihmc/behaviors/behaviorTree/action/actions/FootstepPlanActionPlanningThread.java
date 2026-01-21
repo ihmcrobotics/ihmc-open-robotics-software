@@ -15,6 +15,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.InitialStanceSide;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -33,12 +34,14 @@ public class FootstepPlanActionPlanningThread
    private final FramePose3D goalMidFeetPose = new FramePose3D();
    private FootstepPlan result;
    private final TypedNotification<FootstepPlan> resultNotification = new TypedNotification<>();
+   private final TerrainMapData terrainMapData;
 
-   public FootstepPlanActionPlanningThread(boolean isPreviewPlanner, FootstepPlanActionState state, FootstepPlanActionDefinition definition)
+   public FootstepPlanActionPlanningThread(boolean isPreviewPlanner, FootstepPlanActionState state, FootstepPlanActionDefinition definition, TerrainMapData terrainMapData)
    {
       this.isPreviewPlanner = isPreviewPlanner;
       this.state = state;
       this.definition = definition;
+      this.terrainMapData = terrainMapData;
       footstepPlanner = new FootstepPlanningModule();
    }
 
@@ -104,12 +107,15 @@ public class FootstepPlanActionPlanningThread
       }
 
       footstepPlannerRequest.setPerformAStarSearch(definition.getPlannerPerformAStarSearch().getValue());
-      footstepPlannerRequest.setAssumeFlatGround(true); // TODO: Incorporate height map
-
       footstepPlanner.getFootstepPlannerParameters().set(definition.getPlannerParametersReadOnly());
+      boolean planWithBodyPath = definition.getPlannerPlanWithBodyPath().getValue();
+      footstepPlannerRequest.setPlanBodyPath(planWithBodyPath);
+      if (planWithBodyPath && terrainMapData != null)
+      {
+         footstepPlannerRequest.setTerrainMapData(terrainMapData);
+      }
+      footstepPlannerRequest.setAssumeFlatGround(planWithBodyPath);
 
-      // TODO: Add body path planning options to user
-      footstepPlannerRequest.setPlanBodyPath(false);
       if (definition.getPlannerWalkWithGoalOrientation().getValue())
       {
          // At beginning, first turn in place to face the direction that the goal stance faces
