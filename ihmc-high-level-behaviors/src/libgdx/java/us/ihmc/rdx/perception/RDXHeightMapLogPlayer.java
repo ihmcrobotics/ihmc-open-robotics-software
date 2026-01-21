@@ -142,12 +142,15 @@ public class RDXHeightMapLogPlayer
          // Need to update this due to how its implemented, other the transform to world will be all zeros
          cameraZUpFrameInWorld.update();
 
-         RigidBodyTransform heightMapFrameToWorldFrame = new RigidBodyTransform();
+         RigidBodyTransform heightMapFrameToWorldFrame = new RigidBodyTransform(depthImage.getTransformToWorld());
          Point3D heightMapCenterOrigin = new Point3D(heightMapFrameToWorldFrame.getTranslation());
 
          RigidBodyTransform sensorToWorld = cameraFrameInWorld.getTransformToWorldFrame();
          RigidBodyTransform sensorToGround = cameraFrameInWorld.getTransformToDesiredFrame(cameraZUpFrameInWorld);
          RigidBodyTransform groundToWorld = cameraZUpFrameInWorld.getTransformToWorldFrame();
+
+         // Update the Z translation of the sensor to match the world transform (to handle the sensor's vertical position)
+         sensorToGround.getTranslation().setZ(sensorToWorld.getTranslation().getZ());
 
          heightMapExtractor.update(depthImage.getGpuImageMat(),
                                    depthImage.getIntrinsicsCopy(),
