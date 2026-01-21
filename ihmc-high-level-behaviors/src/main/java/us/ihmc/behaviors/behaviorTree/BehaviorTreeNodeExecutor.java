@@ -6,6 +6,7 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.action.actions.AbilityHandActionComms;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneExecutor;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import javax.annotation.Nullable;
@@ -37,6 +38,7 @@ public class BehaviorTreeNodeExecutor<S extends BehaviorTreeNodeState<D>,
    protected final ControllerStatusTracker controllerStatusTracker;
    protected final SideDependentList<AbilityHandActionComms> abilityHandComms;
    protected final BehaviorTreeSceneExecutor scene;
+   protected final TerrainMapData terrainMapData;
 
    /** For creating a basic node. */ // TODO: Should not exist???
    public BehaviorTreeNodeExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
@@ -56,6 +58,7 @@ public class BehaviorTreeNodeExecutor<S extends BehaviorTreeNodeState<D>,
       this.controllerStatusTracker = rootNode.getControllerStatusTracker();
       this.abilityHandComms = rootNode.getAbilityHandComms();
       this.scene = rootNode.getScene();
+      this.terrainMapData = rootNode.getTerrainMap();
    }
 
    /** Root node constructor. */
@@ -64,7 +67,8 @@ public class BehaviorTreeNodeExecutor<S extends BehaviorTreeNodeState<D>,
                                    ROS2SyncedRobotModel syncedRobot,
                                    ControllerStatusTracker controllerStatusTracker,
                                    SideDependentList<AbilityHandActionComms> abilityHandComms,
-                                   BehaviorTreeSceneExecutor scene)
+                                   BehaviorTreeSceneExecutor scene,
+                                   TerrainMapData terrainMapData)
    {
       this.definition = state.getDefinition();
       this.state = state;
@@ -75,6 +79,7 @@ public class BehaviorTreeNodeExecutor<S extends BehaviorTreeNodeState<D>,
       this.controllerStatusTracker = controllerStatusTracker;
       this.abilityHandComms = abilityHandComms;
       this.scene = scene;
+      this.terrainMapData = terrainMapData;
    }
 
    /**

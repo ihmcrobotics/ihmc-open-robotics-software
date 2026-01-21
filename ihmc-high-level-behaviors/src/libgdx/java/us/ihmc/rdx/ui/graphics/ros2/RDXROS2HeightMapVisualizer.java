@@ -58,6 +58,8 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
    private HeightMapData latestHeightMapData;
    private TerrainMapData latestTerrainMapData;
    private int cellsPerAxisOfChunks;
+   private ROS2Topic<HeightMapMessage> heightMapTopic = PerceptionAPI.HEIGHT_MAP_MESSAGE;
+   private ROS2Topic<TerrainMapMessage> terrainMapTopic = PerceptionAPI.TERRAIN_MAP_MESSAGE;
 
    public RDXROS2HeightMapVisualizer(String title)
    {
@@ -68,17 +70,26 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       executorService = MissingThreadTools.newSingleThreadExecutor("Height Map Visualizer Subscription", true, 1);
    }
 
+   public RDXROS2HeightMapVisualizer(String title,
+                                     ROS2Topic<HeightMapMessage> heightMapTopic,
+                                     ROS2Topic<TerrainMapMessage> terrainMapTopic)
+   {
+      this(title);
+      this.heightMapTopic = heightMapTopic;
+      this.terrainMapTopic = terrainMapTopic;
+   }
+
    @Override
    public List<ROS2Topic<?>> getTopics()
    {
-      return List.of(PerceptionAPI.HEIGHT_MAP_MESSAGE);
+      return List.of(heightMapTopic);
    }
 
    public void setupForImageMessage(ROS2PublishSubscribeAPI ros2)
    {
       this.ros2 = ros2;
-      ros2.subscribeViaCallback(PerceptionAPI.HEIGHT_MAP_MESSAGE, this::acceptHeightMapMessage);
-      ros2.subscribeViaCallback(PerceptionAPI.TERRAIN_MAP_MESSAGE, this::acceptTerrainMapMessage);
+      ros2.subscribeViaCallback(heightMapTopic, this::acceptHeightMapMessage);
+      ros2.subscribeViaCallback(terrainMapTopic, this::acceptTerrainMapMessage);
    }
 
    public void setupForChunkMessage(ROS2PublishSubscribeAPI ros2)

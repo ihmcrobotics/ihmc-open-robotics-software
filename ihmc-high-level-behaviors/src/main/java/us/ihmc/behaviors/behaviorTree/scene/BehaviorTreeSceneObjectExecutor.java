@@ -17,7 +17,7 @@ import java.time.Instant;
  */
 public class BehaviorTreeSceneObjectExecutor extends BehaviorTreeSceneObjectState
 {
-   private final ROS2SyncedRobotModel syncedRobot;
+   protected final ROS2SyncedRobotModel syncedRobot;
 
    private PersistentDetection persistentDetection;
 

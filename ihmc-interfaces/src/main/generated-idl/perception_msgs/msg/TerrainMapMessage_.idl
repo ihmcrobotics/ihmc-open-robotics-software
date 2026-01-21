@@ -43,6 +43,10 @@ module perception_msgs
          */
         sequence<float, 255000> height_map;
         /**
+         * Obstacle clearance score, on a 0 to 1 scale
+         */
+        sequence<float, 255000> obstacle_clearance_score;
+        /**
          * Traversability score, on a 0 to 1 scale
          */
         sequence<float, 255000> traversability_score;
