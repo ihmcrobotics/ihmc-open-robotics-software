@@ -3,7 +3,6 @@ package us.ihmc.zulu.roughTerrainWalking;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import us.ihmc.simulationConstructionSetTools.tools.CITools.SimpleRobotNameKeys;
-import us.ihmc.zulu.ZuluVersionInterface;
 import us.ihmc.zulu.ZuluVersion;
 import us.ihmc.zulu.ZuluRobotModel;
 import us.ihmc.zulu.parameters.simulation.ZuluInitialSetup;
@@ -48,7 +47,7 @@ public class ZuluAbsoluteStepTimingsTest extends AvatarAbsoluteStepTimingsTest
    @Override
    public DRCRobotModel getRobotModel()
    {
-      ZuluVersionInterface robotVersion = ZuluVersion.V1_FULL_ROBOT;
+      ZuluVersion robotVersion = ZuluVersion.V1_FULL_ROBOT;
       return new ZuluRobotModel(robotVersion, RobotTarget.SCS)
       {
          @Override

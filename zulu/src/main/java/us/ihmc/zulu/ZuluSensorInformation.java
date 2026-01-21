@@ -106,9 +106,9 @@ public class ZuluSensorInformation implements HumanoidRobotSensorInformation
                                                                         rightFootIMU,
                                                                         headIMU));
 
-   private ZuluVersionInterface zuluVersion;
+   private ZuluVersion zuluVersion;
 
-   public ZuluSensorInformation(ZuluVersionInterface zuluVersion)
+   public ZuluSensorInformation(ZuluVersion zuluVersion)
    {
       this.zuluVersion = zuluVersion;
 

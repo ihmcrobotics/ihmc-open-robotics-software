@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.List;
 
 import us.ihmc.zulu.ZuluJointMap;
-import us.ihmc.zulu.ZuluVersionInterface;
+import us.ihmc.zulu.ZuluVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
@@ -28,12 +28,12 @@ import static us.ihmc.wholeBodyController.parameters.HighLevelParametersTools.*;
 
 public class ZuluHighLevelControllerParameters implements HighLevelControllerParameters
 {
-   protected final ZuluVersionInterface zuluVersion;
+   protected final ZuluVersion zuluVersion;
    protected final ZuluJointMap jointMap;
    protected final RobotTarget target;
    private final ZuluStandPrepSetPoints standPrepSetPoints;
 
-   public ZuluHighLevelControllerParameters(ZuluVersionInterface zuluVersion, ZuluJointMap jointMap, RobotTarget target)
+   public ZuluHighLevelControllerParameters(ZuluVersion zuluVersion, ZuluJointMap jointMap, RobotTarget target)
    {
       this.zuluVersion = zuluVersion;
       this.jointMap = jointMap;

@@ -24,12 +24,12 @@ public class ZuluModelFactory
    private final HumanoidURDFParameterInterface urdfParameters;
    private final RobotContactPointParameters<RobotSide> contactPointParameters;
    private RobotDefinition simulationRobotDefinition;
-   private final ZuluVersionInterface zuluVersion;
+   private final ZuluVersion zuluVersion;
    private RobotDefinition controllerRobotDefinition;
    private final ZuluJointMap jointMap;
    private final Consumer<RobotDefinition> robotDefinitionMutator;
 
-   public ZuluModelFactory(ZuluVersionInterface zuluVersion,
+   public ZuluModelFactory(ZuluVersion zuluVersion,
                            ZuluJointMap jointMap,
                            RobotContactPointParameters<RobotSide> contactPointParameters,
                            Consumer<RobotDefinition> robotDefinitionMutator)

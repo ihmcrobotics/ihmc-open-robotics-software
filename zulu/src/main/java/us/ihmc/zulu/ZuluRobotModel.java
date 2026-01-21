@@ -94,34 +94,34 @@ public class ZuluRobotModel implements DRCRobotModel
    private final ZuluModelFactory modelFactory;
 
    protected final RobotTarget robotTarget;
-   protected final ZuluVersionInterface robotVersion;
+   protected final ZuluVersion robotVersion;
    private final SideDependentList<HandModel> handModels = new SideDependentList<>();
 
    private final SideDependentList<RigidBodyTransform> handGraphicToHandFrameTransforms = new SideDependentList<>();
 
-   public ZuluRobotModel(ZuluVersionInterface robotVersion)
+   public ZuluRobotModel(ZuluVersion robotVersion)
    {
       this(robotVersion, RobotTarget.SCS);
    }
 
-   public ZuluRobotModel(ZuluVersionInterface robotVersion, RobotTarget robotTarget)
+   public ZuluRobotModel(ZuluVersion robotVersion, RobotTarget robotTarget)
    {
       this(robotVersion, robotTarget, null, true);
    }
 
-   public ZuluRobotModel(ZuluVersionInterface robotVersion,
+   public ZuluRobotModel(ZuluVersion robotVersion,
                          RobotTarget robotTarget,
                          RobotContactPointParameters<RobotSide> contactPointParameters)
    {
       this(robotVersion, robotTarget, null, contactPointParameters);
    }
 
-   public ZuluRobotModel(ZuluVersionInterface robotVersion, RobotTarget robotTarget, MaterialDefinition robotMaterial)
+   public ZuluRobotModel(ZuluVersion robotVersion, RobotTarget robotTarget, MaterialDefinition robotMaterial)
    {
       this(robotVersion, robotTarget, robotMaterial, true);
    }
 
-   public ZuluRobotModel(ZuluVersionInterface robotVersion,
+   public ZuluRobotModel(ZuluVersion robotVersion,
                          RobotTarget robotTarget,
                          MaterialDefinition robotMaterial,
                          boolean createHandContactPoints)
@@ -132,7 +132,7 @@ public class ZuluRobotModel implements DRCRobotModel
            new ZuluContactPointParameters(robotVersion.getJointMap(), robotVersion.getPhysicalProperties(), createHandContactPoints));
    }
 
-   public ZuluRobotModel(ZuluVersionInterface robotVersion,
+   public ZuluRobotModel(ZuluVersion robotVersion,
                          RobotTarget robotTarget,
                          MaterialDefinition robotMaterial,
                          RobotContactPointParameters<RobotSide> contactPointParameters,
@@ -200,7 +200,7 @@ public class ZuluRobotModel implements DRCRobotModel
    }
 
    @Override
-   public ZuluVersionInterface getRobotVersion()
+   public ZuluVersion getRobotVersion()
    {
       return robotVersion;
    }

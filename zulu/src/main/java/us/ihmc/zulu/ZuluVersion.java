@@ -1,32 +1,24 @@
 package us.ihmc.zulu;
 
+import us.ihmc.avatar.drcRobot.RobotVersion;
 import us.ihmc.handsros2.HandType;
 import us.ihmc.zulu.parameters.model.ZuluPhysicalProperties;
 import us.ihmc.zulu.parameters.model.ZuluPhysicalPropertiesV0;
 import us.ihmc.zulu.parameters.model.ZULUURDFParameters;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
-public enum ZuluVersion implements ZuluVersionInterface
+public enum ZuluVersion implements RobotVersion
 {
-   V1_FULL_ROBOT(ZuluVersion.V1_RESOURCE_DIRECTORY, Arrays.asList(ZULUURDFParameters.URDF_FULL_BODY), null);
-//   V1_NUB_FOREARMS(ZuluVersion.V1_RESOURCE_DIRECTORY,
-//                   Arrays.asList(ZULUURDFParameters.URDF_LOWER_BODY,
-//                                 ZULUURDFParameters.URDF_LEFT_ARM_NUB_FOREARM,
-//                                 ZULUURDFParameters.URDF_HEAD,
-//                                 ZULUURDFParameters.URDF_RIGHT_ARM_NUB_FOREARM),
-//                   null),
-//   V1_LEGS_ROBOT(ZuluVersion.V1_RESOURCE_DIRECTORY, Arrays.asList(ZULUURDFParameters.URDF_LOWER_BODY_ONLY), null);
+   V1_FULL_ROBOT(ZuluVersion.V1_RESOURCE_DIRECTORY, List.of(ZULUURDFParameters.URDF_FULL_BODY), null);
 
    private static final String V1_RESOURCE_DIRECTORY = "us/ihmc/zulu/";
 
    private final String robotModelResourceDirectory;
 
-   private final SideDependentList<RigidBodyTransform> offsetHandFromAttachmentPlate = new SideDependentList<RigidBodyTransform>();
    private final Collection<String> xmlResources;
 
    public static final boolean SHORT_NUBS = false;
@@ -45,19 +37,16 @@ public enum ZuluVersion implements ZuluVersionInterface
       this.xmlResources = xmlResources;
    }
 
-   @Override
    public String getRobotModelResourceDirectory()
    {
       return robotModelResourceDirectory;
    }
 
-   @Override
    public Collection<String> getURDFDescriptionResources()
    {
       return urdfResources;
    }
 
-   @Override
    public Collection<String> getXMLDescriptionResources()
    {
       return xmlResources;
@@ -74,7 +63,6 @@ public enum ZuluVersion implements ZuluVersionInterface
       }
    }
 
-   @Override
    public boolean hasCycloidForearm()
    {
       switch (this)
@@ -86,7 +74,6 @@ public enum ZuluVersion implements ZuluVersionInterface
       }
    }
 
-   @Override
    public boolean hasCycloidForearm(RobotSide side)
    {
       switch (this)
@@ -103,7 +90,6 @@ public enum ZuluVersion implements ZuluVersionInterface
       return false;
    }
 
-   @Override
    public ZuluJointMap getJointMap()
    {
       if (jointMap != null)
@@ -144,7 +130,6 @@ public enum ZuluVersion implements ZuluVersionInterface
       };
    }
 
-   @Override
    public boolean hasHandWithFingers(RobotSide side)
    {
       return this == V1_FULL_ROBOT;
@@ -175,7 +160,6 @@ public enum ZuluVersion implements ZuluVersionInterface
       }
    }
 
-   @Override
    public boolean hasNubForearms(RobotSide side)
    {
       switch (this)
@@ -187,7 +171,6 @@ public enum ZuluVersion implements ZuluVersionInterface
       }
    }
 
-   @Override
    public ZuluSensorInformation getSensorInformation()
    {
       if (sensorInformation != null)
@@ -207,7 +190,6 @@ public enum ZuluVersion implements ZuluVersionInterface
       return sensorInformation;
    }
 
-   @Override
    public ZuluPhysicalProperties getPhysicalProperties()
    {
       if (physicalProperties != null)
@@ -226,7 +208,6 @@ public enum ZuluVersion implements ZuluVersionInterface
       return physicalProperties;
    }
 
-   @Override
    public ZULUURDFParameters getURDFParameters()
    {
       if (urdfParameters != null)

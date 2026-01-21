@@ -2,7 +2,7 @@ package us.ihmc.zulu.parameters.controller;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.zulu.ZuluJointMap;
-import us.ihmc.zulu.ZuluVersionInterface;
+import us.ihmc.zulu.ZuluVersion;
 import us.ihmc.zulu.parameters.model.ZuluPhysicalProperties;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
@@ -42,7 +42,7 @@ import java.util.Map;
 
 public class ZuluWalkingControllerParameters extends WalkingControllerParameters
 {
-   private final ZuluVersionInterface version;
+   private final ZuluVersion version;
    private final RobotTarget target;
    protected final ZuluJointMap jointMap;
    private final ZuluPhysicalProperties physicalProperties;
@@ -82,12 +82,12 @@ public class ZuluWalkingControllerParameters extends WalkingControllerParameters
    /* Setting to true makes the arms stiffer but more responsive for streaming */
    public static final boolean RESPONSIVE_STREAMING_MODE = false;
 
-   public ZuluWalkingControllerParameters(ZuluVersionInterface version, RobotTarget target, ZuluJointMap jointMap, ZuluPhysicalProperties physicalProperties)
+   public ZuluWalkingControllerParameters(ZuluVersion version, RobotTarget target, ZuluJointMap jointMap, ZuluPhysicalProperties physicalProperties)
    {
       this(version, target, jointMap, physicalProperties, new ZuluContactPointParameters(jointMap, physicalProperties, true));
    }
 
-   public ZuluWalkingControllerParameters(ZuluVersionInterface version,
+   public ZuluWalkingControllerParameters(ZuluVersion version,
                                           RobotTarget target,
                                           ZuluJointMap jointMap,
                                           ZuluPhysicalProperties physicalProperties,

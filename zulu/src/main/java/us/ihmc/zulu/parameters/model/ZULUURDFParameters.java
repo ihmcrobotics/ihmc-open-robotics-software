@@ -1,7 +1,7 @@
 package us.ihmc.zulu.parameters.model;
 
 import jakarta.xml.bind.JAXBException;
-import us.ihmc.zulu.ZuluVersionInterface;
+import us.ihmc.zulu.ZuluVersion;
 import us.ihmc.scs2.definition.robot.urdf.URDFTools;
 import us.ihmc.scs2.definition.robot.urdf.items.URDFModel;
 
@@ -31,7 +31,7 @@ public class ZULUURDFParameters implements HumanoidURDFParameterInterface
 
    private final URDFTools.URDFParserProperties urdfParserProperties = new URDFTools.URDFParserProperties();
 
-   public ZULUURDFParameters(ZuluVersionInterface zuluVersion)
+   public ZULUURDFParameters(ZuluVersion zuluVersion)
    {
       urdfParserProperties.setHandleImplicitJointDefinitions(false);
 
