@@ -1,6 +1,7 @@
 package us.ihmc.perception;
 
 import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
@@ -16,6 +17,7 @@ import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.filters.DepthImageBodyCollisionFilter;
 import us.ihmc.perception.filters.DepthImageFilteringParameters;
 import us.ihmc.perception.filters.DepthImageFlyingPointsFilter;
+import us.ihmc.perception.filters.DepthImagePointToPlaneICPFilter;
 import us.ihmc.perception.gpuMapping.GpuMappingManager;
 import us.ihmc.perception.gpuMapping.HeightMapData;
 import us.ihmc.perception.gpuMapping.HeightMapParameters;
@@ -47,6 +49,13 @@ public class GpuMappingThread extends RepeatingTaskThread
    private final BooleanSupplier publishHeightMap;
    private final BooleanSupplier publishHeightMapToController;
    private final BooleanSupplier publishTerrainMap;
+
+   private final DepthImagePointToPlaneICPFilter icpFilter;
+
+   private GpuMat previousDepthImage = null;
+   private GpuMat previousNormalImage = null;
+   private GpuMat currentNormalImage = null;
+   private static final boolean ENABLE_ICP = true;
 
    public GpuMappingThread(ROS2Node ros2Node,
                            ROS2SyncedRobotModel syncedRobotModel,
@@ -86,6 +95,7 @@ public class GpuMappingThread extends RepeatingTaskThread
                                                 controllerFootstepQueueMonitor,
                                                 heightMapParameters,
                                                 terrainMapParameters);
+      icpFilter = new DepthImagePointToPlaneICPFilter();
    }
 
    @Override
@@ -133,6 +143,32 @@ public class GpuMappingThread extends RepeatingTaskThread
             bytePointer.close();
 
             depthImageNoFlyingPoints.close();
+         }
+         if (ENABLE_ICP)
+         {
+            if (previousDepthImage != null && previousNormalImage != null)
+            {
+               if (currentNormalImage == null || currentNormalImage.rows() != filteredDepthImage.rows()
+                   || currentNormalImage.cols() != filteredDepthImage.cols())
+               {
+                  currentNormalImage = new GpuMat(filteredDepthImage.size(), filteredDepthImage.type());
+               }
+
+               // Compute normals for current frame
+               gpuMappingManager.computeNormals(filteredDepthImage, currentNormalImage, depthIntrinsicsCopy);
+
+               // Run point-to-plane ICP
+               icpFilter.process(filteredDepthImage, previousDepthImage, previousNormalImage, depthIntrinsicsCopy);
+
+               icpFilter.downloadResults();
+
+               // Solve on CPU (example – you may already have a solver)
+               FloatPointer ATA = icpFilter.getATA();
+               FloatPointer ATb = icpFilter.getATb();
+
+               // TODO: Solve 6x6 system and update camera pose
+               // This is intentionally separated (don’t do it inside ICP filter)
+            }
          }
 
          // Update height map
