@@ -1,7 +1,10 @@
-package us.ihmc.rdx.ui.yo;
+package us.ihmc.rdx.simulation.scs2;
 
 import imgui.ImGui;
+import imgui.flag.ImGuiMouseButton;
+import imgui.type.ImBoolean;
 import imgui.type.ImString;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.scs2.sessionVisualizer.jfx.controllers.RegularExpression;
@@ -10,17 +13,17 @@ import us.ihmc.yoVariables.variable.YoVariable;
 
 import java.util.ArrayList;
 
-public class ImGuiYoVariableSearchPanel
+public class RDXSCS2YoVariableSearchPanel
 {
    private final RDXPanel panel = new RDXPanel("YoVariable Search", this::renderImGuiWidgets);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImString searchBar = new ImString();
+   private final ImBoolean showFullName = new ImBoolean(true);
    private YoRegistry yoRegistry;
    private final ArrayList<YoVariable> allVariables = new ArrayList<>();
-   private boolean searchRequested = false;
    private YoVariable selectedVariable = null;
 
-   public ImGuiYoVariableSearchPanel(YoRegistry yoRegistry)
+   public RDXSCS2YoVariableSearchPanel(YoRegistry yoRegistry)
    {
       changeYoRegistry(yoRegistry);
 
@@ -40,19 +43,13 @@ public class ImGuiYoVariableSearchPanel
    {
       ImGui.inputText(labels.get("Search"), searchBar);
 
-      if (searchRequested)
-      {
-         ImGui.sameLine();
-         if (ImGui.button("Cancel"))
-         {
-            searchRequested = false;
-            panel.getIsShowing().set(false);
-         }
-      }
-
       ImGui.text("Registry contains " + allVariables.size() + " variables.");
+      ImGui.sameLine();
+      ImGuiTools.smallCheckbox(labels.get("Show Full Name"), showFullName);
       ImGui.separator();
 
+      if (!ImGui.isMouseDown(ImGuiMouseButton.Left))
+         selectedVariable = null;
 
       if (ImGui.beginListBox("##YoVariables", ImGui.getColumnWidth(), ImGui.getWindowSizeY() - 100))
       {
@@ -61,13 +58,11 @@ public class ImGuiYoVariableSearchPanel
             if (!RegularExpression.check(yoVariable.getFullNameString(), searchBar.get()))
                continue;
 
-            ImGui.selectable(yoVariable.getFullNameString() + " (" + yoVariable.getClass().getSimpleName() + ": " + yoVariable.getValueAsString("%.5f") + ")");
+            ImGui.selectable((showFullName.get() ? yoVariable.getFullNameString() : yoVariable.getName())
+                             + " (" + yoVariable.getClass().getSimpleName() + ": " + yoVariable.getValueAsString("%.5f") + ")",
+                             yoVariable == selectedVariable);
             if (ImGui.isItemClicked())
-            {
                selectedVariable = yoVariable;
-               searchRequested = false;
-               panel.getIsShowing().set(false);
-            }
 
             if (ImGui.beginPopupContextItem())
             {
@@ -112,26 +107,8 @@ public class ImGuiYoVariableSearchPanel
       return panel;
    }
 
-   public void setSearchRequested(boolean searchRequested)
-   {
-      if (searchRequested)
-         panel.getIsShowing().set(true);
-
-      this.searchRequested = searchRequested;
-   }
-
-   public boolean getSearchRequested()
-   {
-      return searchRequested;
-   }
-
    public YoVariable getSelectedVariable()
    {
       return selectedVariable;
-   }
-
-   public void setSelectedVariable(YoVariable selectedVariable)
-   {
-      this.selectedVariable = selectedVariable;
    }
 }
