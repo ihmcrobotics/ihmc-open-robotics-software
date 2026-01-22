@@ -66,7 +66,7 @@ public class SCS2LogLocomotionData
    {
       rootRegistry = logSession.getRootRegistry();
 
-      dt = logSession.getLogDataReader().getParser().getDt();
+      dt = logSession.getLogDataReader().getDt();
 
       if (rootRegistry.findVariable("root.main.DRCEstimatorThread.NadiaEtherCATRealtimeThread.workingCounterMismatch") instanceof YoInteger yoInteger)
          workingCounterMismatch = yoInteger;

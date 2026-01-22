@@ -4,6 +4,7 @@ import org.bytedeco.javacv.OpenCVFrameConverter;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotDataLogger.Camera;
 import us.ihmc.robotDataLogger.CameraType;
+import us.ihmc.robotDataLogger.LogProperties;
 import us.ihmc.robotDataLogger.logger.LogPropertiesReader;
 import us.ihmc.scs2.session.log.*;
 import us.ihmc.yoVariables.variable.YoLong;
@@ -22,7 +23,7 @@ public class SCS2LogSessionWithVideo extends LogSession
    private YoLong yoTimestamp;
    private File logDirectory;
    private LogDataReaderInterface logDataReader;
-   private LogPropertiesReader logProperties;
+   private LogProperties logProperties;
 
    private final List<MagewellScrubber> magewellScrubbers = new ArrayList<>();
    private final List<BlackMagicScrubber> blackMagicScrubbers = new ArrayList<>();
