@@ -143,6 +143,7 @@ public class MathUtilsTest
          kernel.withPointer(pointSolutionPointer);
          kernel.withPointer(normalSolutionPointer);
          kernel.withPointer(squaredErrorPointer);
+         kernel.withInt(i);
 
          kernel.run(stream, new dim3(), new dim3(), 0);
          cudaStreamSynchronize(stream);
