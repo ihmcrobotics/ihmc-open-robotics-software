@@ -20,5 +20,5 @@ __device__ int2 coordinate_to_indices(float2 coordinates, float2 center, float r
 
 __device__ int compute_center_index(float gridSize, float resolution)
 {
-    return round(0.5 * gridSize / resolution);
+    return round(0.5f * gridSize / resolution);
 }
