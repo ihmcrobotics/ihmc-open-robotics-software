@@ -108,7 +108,7 @@ public class RealSenseDevice
          // For playback from BAG file
          realsense2.rs2_config_enable_device_from_file(config, bagFilePath, error);
          checkError("Failed to enable device from file.");
-         LogTools.info("Configured playback from BAG file: {}", bagFilePath);
+         LogTools.info("Configured playback from bag file: {}", bagFilePath);
          return; // Skip device-specific configuration for playback
       }
 
