@@ -20,7 +20,7 @@ public class RealSenseBagPlaybackSensor extends RealSenseImageSensor
       this.realsenseManager = new RealSenseDeviceManager();
 
       if (!Files.exists(Path.of(bagFileName)))
-         throw new RuntimeException("BAG file does not exist: " + bagFileName);
+         throw new RuntimeException("Bag file does not exist: " + bagFileName);
    }
 
    @Override
@@ -38,7 +38,7 @@ public class RealSenseBagPlaybackSensor extends RealSenseImageSensor
       boolean success = realsense != null;
       if (success)
       {
-         LogTools.info("Initializing RealSense playback from BAG file: {}", bagFileName);
+         LogTools.info("Initializing RealSense playback from bag file: {}", bagFileName);
          realsense.enableColor(realsenseConfiguration);
          realsense.initialize();
 
