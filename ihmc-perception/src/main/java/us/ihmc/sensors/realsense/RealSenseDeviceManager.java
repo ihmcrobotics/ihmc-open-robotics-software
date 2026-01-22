@@ -161,6 +161,21 @@ public class RealSenseDeviceManager
       System.out.println("Deleted everything.");
    }
 
+   /**
+    * Creates a RealSense Device handler for playing back a recorded BAG file.
+    * Note: The device parameter in RealSenseDevice will be null for playback,
+    * as the pipeline is configured directly from the file.
+    *
+    * @param configuration The requested device settings
+    * @param bagFilePath Path to the .bag file to playback
+    * @return RealSenseDevice object for accessing sensor data from the recording
+    */
+   public RealSenseDevice createPlaybackDevice(RealSenseConfiguration configuration, String bagFilePath)
+   {
+      LogTools.info("Creating playback device from BAG file: {}", bagFilePath);
+      return new RealSenseDevice(context, null, configuration.getDepthWidth(), configuration.getDepthHeight(), configuration.getDepthFPS(), bagFilePath);
+   }
+
    private void checkError()
    {
       if (!error.isNull())

@@ -20,13 +20,13 @@ public class RealSenseImageSensor extends ImageSensor
    public static final int DEPTH_IMAGE_KEY = 1;
    public static final int OUTPUT_IMAGE_COUNT = 2;
 
-   private final RealSenseConfiguration realsenseConfiguration;
+   protected final RealSenseConfiguration realsenseConfiguration;
    private final RealSenseDeviceManager realsenseManager = new RealSenseDeviceManager();
-   private RealSenseDevice realsense = null;
+   protected RealSenseDevice realsense = null;
 
    private final RawImage[] grabbedImages = new RawImage[OUTPUT_IMAGE_COUNT];
    private long grabSequenceNumber = 0L;
-   private int grabFailureCount = 0;
+   protected int grabFailureCount = 0;
 
    private ReferenceFrame depthFrame;
    private ReferenceFrame colorFrame;
@@ -200,10 +200,15 @@ public class RealSenseImageSensor extends ImageSensor
             image.release();
 
       // Close the camera
-      if (realsense != null && realsense.getDevice() != null)
+      if (realsense != null)
+      {
          realsense.deleteDevice();
+         realsense = null;
+      }
 
-      realsenseManager.deleteContext();
+      // Don't delete context here - it can cause crashes with background threads
+      // The context will be cleaned up by the JVM when the application exits
+      // realsenseManager.deleteContext();
 
       System.out.println("Closed " + getClass().getSimpleName());
    }
