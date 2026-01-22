@@ -6,7 +6,6 @@ import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.perception.RawImage;
 import us.ihmc.rdx.perception.RDXRealSenseBagPlayerPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXImageVisualizer;
 import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudVisualizer;
 import us.ihmc.robotics.time.TimeTools;
@@ -35,7 +34,6 @@ public class RDXRealSenseBagPlaybackDemo
    private final Queue<RawImage> colorImageQueue = new LinkedList<>();
    private final ImFloat colorImageDelay = new ImFloat(0.0f);
 
-   private RDXPose3DGizmo sensorPoseGizmo;
    private RDXRealSenseBagPlayerPanel bagPlayerPanel;
 
    private RDXRealSenseBagPlaybackDemo()
@@ -54,11 +52,6 @@ public class RDXRealSenseBagPlaybackDemo
          {
             baseUI.create();
             baseUI.getPrimaryScene().addCoordinateFrame(0.3);
-
-            sensorPoseGizmo = new RDXPose3DGizmo();
-            sensorPoseGizmo.createAndSetupDefault(baseUI.getPrimary3DPanel());
-            baseUI.getPrimaryScene().addRenderableProvider(sensorPoseGizmo);
-            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(sensorPoseGizmo::calculate3DViewPick);
 
             colorVisualizer.create();
             colorVisualizer.setActive(true);
