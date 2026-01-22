@@ -2,7 +2,6 @@
   "title": "HeightMapParameters",
   "Drift offset filter": true,
   "Flying points filter": false,
-  "Enable chunked map": false,
   "Log height map": false,
   "Min Depth To Accept": {
     "value": 0.88,

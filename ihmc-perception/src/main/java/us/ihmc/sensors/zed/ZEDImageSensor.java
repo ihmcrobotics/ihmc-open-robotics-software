@@ -2,10 +2,10 @@ package us.ihmc.sensors.zed;
 
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.opencv.opencv_core.GpuMat;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -83,6 +83,7 @@ public class ZEDImageSensor extends ImageSensor
 
    private boolean positionalTrackingEnabled = false;
    private final MutableReferenceFrame trackedSensorFrame;
+   private final RigidBodyTransform trackedPoseOffset = new RigidBodyTransform();
    private final SL_Quaternion sensorRotation = new SL_Quaternion();
    private final SL_Vector3 sensorTranslation = new SL_Vector3();
 
@@ -143,6 +144,11 @@ public class ZEDImageSensor extends ImageSensor
 
       this.remoteStreamingAddress = remoteStreamingAddress;
       this.remoteStreamingPort = remoteStreamingPort;
+   }
+
+   public void setTrackedPoseOffset(RigidBodyTransformReadOnly offset)
+   {
+      trackedPoseOffset.set(offset);
    }
 
    private void updateReferenceFrames()
@@ -301,7 +307,7 @@ public class ZEDImageSensor extends ImageSensor
                sensorTranslation.z(0.0f);
 
                sl_reset_positional_tracking(cameraID, sensorRotation, sensorTranslation);
-               trackedSensorFrame.update(RigidBodyTransformBasics::setToZero);
+               trackedSensorFrame.update(transform -> transform.set(trackedPoseOffset));
             }
 
             return false;
@@ -321,7 +327,12 @@ public class ZEDImageSensor extends ImageSensor
             Quaternion euclidRotation = new Quaternion(sensorRotation.x(), sensorRotation.y(), sensorRotation.z(), sensorRotation.w());
             Vector3D euclidTranslation = new Vector3D(sensorTranslation.x(), sensorTranslation.y(), sensorTranslation.z());
             if (!euclidRotation.containsNaN() && !euclidTranslation.containsNaN())
-               trackedSensorFrame.update(transformToWorld -> transformToWorld.set(euclidRotation, euclidTranslation));
+               trackedSensorFrame.update(transformToWorld ->
+                                         {
+                                            transformToWorld.set(euclidRotation, euclidTranslation);
+                                            transformToWorld.prependOrientation(trackedPoseOffset.getRotation());
+                                            transformToWorld.prependTranslation(trackedPoseOffset.getTranslation());
+                                         });
          }
 
          // Retrieve the grabbed depth image

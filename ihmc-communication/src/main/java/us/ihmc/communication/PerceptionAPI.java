@@ -173,6 +173,7 @@ public final class PerceptionAPI
    /*
     * Height map
     */
+   public static final ROS2Topic<Empty> REQUEST_CHUNK_MAP = PERCEPTION_MODULE.withSuffix("request_chunk_map").withType(Empty.class);
    public static final ROS2Topic<Empty> REQUEST_HEIGHT_MAP = PERCEPTION_MODULE.withSuffix("request_height_map").withType(Empty.class);
    public static final ROS2Topic<Empty> REQUEST_HEIGHT_MAP_FOR_CONTROLLER = PERCEPTION_MODULE.withSuffix("request_height_map_for_controller").withType(Empty.class);
    public static final ROS2Topic<Empty> REQUEST_TERRAIN_MAP = PERCEPTION_MODULE.withSuffix("request_terrain_map").withType(Empty.class);
