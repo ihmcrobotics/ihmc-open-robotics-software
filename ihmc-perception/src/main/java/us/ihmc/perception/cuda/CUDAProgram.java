@@ -319,4 +319,9 @@ public class CUDAProgram implements AutoCloseable
 
       return computeVersion;
    }
+
+   public CUmod_st getModule()
+   {
+      return module;
+   }
 }

@@ -3,7 +3,9 @@ package us.ihmc.perception.gpuMapping;
 import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.cuda.cudart.dim3;
 import org.bytedeco.javacpp.FloatPointer;
+import org.bytedeco.javacpp.LongPointer;
 import org.bytedeco.javacpp.Pointer;
+import org.bytedeco.javacpp.SizeTPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -138,7 +140,7 @@ public class HeightMapExtractor
          zUpCameraToWorldAlignedGroundHostPointer = new FloatPointer(16);
          zUpCameraToWorldAlignedGroundDevicePointer = new FloatPointer();
 
-         parametersHostPointer = new FloatPointer(19);
+         parametersHostPointer = new FloatPointer(14);
          parametersDevicePointer = new FloatPointer();
       }
       catch (Exception e)
@@ -243,6 +245,46 @@ public class HeightMapExtractor
          int gridDimX = (latestDepthImageGPU.cols() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
          int gridDimY = (latestDepthImageGPU.rows() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
          dim3 updateTempMapsDim = new dim3(gridDimX, gridDimY, 1);
+
+         LongPointer cellSizeDevice = new LongPointer(1);
+         LongPointer centerIndexDevice = new LongPointer(1);
+         LongPointer cellsPerAxisDevice = new LongPointer(1);
+
+         LongPointer variancePerMeterDevice = new LongPointer(1);
+         LongPointer variancePerTranslationSpeedDevice = new LongPointer(1);
+         LongPointer variancePerRotationSpeedDevice = new LongPointer(1);
+
+         SizeTPointer cellSizeSymbolSize = new SizeTPointer(1);
+         SizeTPointer centerIndexSymbolSize = new SizeTPointer(1);
+         SizeTPointer cellsPerAxisSymbolSize = new SizeTPointer(1);
+
+         SizeTPointer variancePerMeterSymbolSize = new SizeTPointer(1);
+         SizeTPointer variancePerTranslationSpeedSymbolSize = new SizeTPointer(1);
+         SizeTPointer variancePerRotationSpeedSymbolSize = new SizeTPointer(1);
+
+         cuModuleGetGlobal(cellSizeDevice, cellSizeSymbolSize, heightMapProgram.getModule(), "CELL_SIZE");
+         cuModuleGetGlobal(centerIndexDevice, centerIndexSymbolSize, heightMapProgram.getModule(), "CENTER_INDEX");
+         cuModuleGetGlobal(cellsPerAxisDevice, cellsPerAxisSymbolSize, heightMapProgram.getModule(), "CELLS_PER_AXIS");
+
+         cuModuleGetGlobal(variancePerMeterDevice, variancePerMeterSymbolSize, heightMapProgram.getModule(), "VARIANCE_PER_METER");
+         cuModuleGetGlobal(variancePerTranslationSpeedDevice, variancePerTranslationSpeedSymbolSize, heightMapProgram.getModule(), "VARIANCE_PER_TRANSLATION_SPEED");
+         cuModuleGetGlobal(variancePerRotationSpeedDevice, variancePerRotationSpeedSymbolSize, heightMapProgram.getModule(), "VARIANCE_PER_ROTATION_SPEED");
+
+         FloatPointer cellSizeHost = new FloatPointer((float) heightMapParameters.getCellSize());
+         FloatPointer centerIndexHost = new FloatPointer((float) centerIndex);
+         FloatPointer cellsPerAxisHost = new FloatPointer((float) cellsPerAxis);
+
+         FloatPointer variancePerMeterHost = new FloatPointer((float) heightMapParameters.getVariancePerMeter());
+         FloatPointer variancePerTranslationSpeedHost = new FloatPointer((float) heightMapParameters.getVariancePerTranslationSpeed());
+         FloatPointer variancePerRotationSpeedHost = new FloatPointer((float) heightMapParameters.getVariancePerRotationSpeed());
+
+         cuMemcpyHtoD(cellSizeDevice.get(), cellSizeHost, cellSizeHost.sizeof());
+         cuMemcpyHtoD(centerIndexDevice.get(), centerIndexHost, centerIndexHost.sizeof());
+         cuMemcpyHtoD(cellsPerAxisDevice.get(), cellsPerAxisHost, cellsPerAxisHost.sizeof());
+
+         cuMemcpyHtoD(variancePerMeterDevice.get(), variancePerMeterHost, variancePerMeterHost.sizeof());
+         cuMemcpyHtoD(variancePerTranslationSpeedDevice.get(), variancePerTranslationSpeedHost, variancePerTranslationSpeedHost.sizeof());
+         cuMemcpyHtoD(variancePerRotationSpeedDevice.get(), variancePerRotationSpeedHost, variancePerRotationSpeedHost.sizeof());
 
          updateTempMapsKernel.withPointer(latestDepthImageGPU.data()).withLong(latestDepthImageGPU.step());
          updateTempMapsKernel.withPointer(tempSumMap.data()).withLong(tempSumMap.step());
@@ -399,10 +441,7 @@ public class HeightMapExtractor
 
    public float[] populateParameterArray(HeightMapParameters parameters, CameraIntrinsics cameraIntrinsics, double groundHeightGuess)
    {
-      return new float[] {(float) parameters.getCellSize(),
-                          (float) centerIndex,
-                          (float) cellsPerAxis,
-                          (float) cameraIntrinsics.getHeight(),
+      return new float[] {(float) cameraIntrinsics.getHeight(),
                           (float) cameraIntrinsics.getWidth(),
                           (float) cameraIntrinsics.getCx(),
                           (float) cameraIntrinsics.getCy(),
@@ -414,9 +453,6 @@ public class HeightMapExtractor
                           (float) parameters.getMaxClampHeight(),
                           (float) parameters.getKalmanFilterPredictionNoise(),
                           (float) parameters.getAdditionalTranslationalVarianceAdded(),
-                          (float) parameters.getVariancePerMeter(),
-                          (float) parameters.getVariancePerTranslationSpeed(),
-                          (float) parameters.getVariancePerRotationSpeed(),
                           (float) groundHeightGuess,
                           (float) parameters.getMinDepthToAccept()};
    }

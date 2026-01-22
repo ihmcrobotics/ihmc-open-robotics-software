@@ -2,26 +2,27 @@
 #include "MathUtils.cuh"
 
 extern "C"
-#define CELL_SIZE 0
-#define CENTER_INDEX 1
-#define CELLS_PER_AXIS 2
-#define DEPTH_INPUT_HEIGHT 3
-#define DEPTH_INPUT_WIDTH 4
-#define DEPTH_CX 5
-#define DEPTH_CY 6
-#define DEPTH_FX 7
-#define DEPTH_FY 8
-#define MIN_HEIGHT_REGISTRATION 9
-#define MAX_HEIGHT_REGISTRATION 10
-#define MIN_CLAMP_HEIGHT 11
-#define MAX_CLAMP_HEIGHT 12
-#define KALMAN_FILTER_PREDICTION_NOISE 13
-#define ADDITIONAL_TRANSLATIONAL_VARIANCE_ADDED 14
-#define VARIANCE_PER_METER 15
-#define VARIANCE_PER_TRANSLATION_SPEED 16
-#define VARIANCE_PER_ROTATION_SPEED 17
-#define GROUND_HEIGHT 18
-#define MIN_DEPTH_TO_ACCEPT 19
+#define DEPTH_INPUT_HEIGHT 0
+#define DEPTH_INPUT_WIDTH 1
+#define DEPTH_CX 2
+#define DEPTH_CY 3
+#define DEPTH_FX 4
+#define DEPTH_FY 5
+#define MIN_HEIGHT_REGISTRATION 6
+#define MAX_HEIGHT_REGISTRATION 7
+#define MIN_CLAMP_HEIGHT 8
+#define MAX_CLAMP_HEIGHT 9
+#define KALMAN_FILTER_PREDICTION_NOISE 10
+#define ADDITIONAL_TRANSLATIONAL_VARIANCE_ADDED 11
+#define GROUND_HEIGHT 12
+#define MIN_DEPTH_TO_ACCEPT 13
+
+__constant__ float CELL_SIZE;
+__constant__ float CENTER_INDEX;
+__constant__ float CELLS_PER_AXIS;
+__constant__ float VARIANCE_PER_METER;
+__constant__ float VARIANCE_PER_TRANSLATION_SPEED;
+__constant__ float VARIANCE_PER_ROTATION_SPEED;
 
 __device__ float3 back_project_perspective(int2 pos, float Z, const float *params)
 {
@@ -54,12 +55,6 @@ __global__ void heightMapUpdateDataKernel(const unsigned short* __restrict__ dep
 
     const int depthWidth = static_cast<int>(params[DEPTH_INPUT_WIDTH]);
     const int depthHeight = static_cast<int>(params[DEPTH_INPUT_HEIGHT]);
-    const int cellsPerAxis = static_cast<int>(params[CELLS_PER_AXIS]);
-    const float cellSize = params[CELL_SIZE];
-    const int centerIndex = static_cast<int>(params[CENTER_INDEX]);
-    const float varPerMeter = params[VARIANCE_PER_METER];
-    const float varPerTranslationSpeed = params[VARIANCE_PER_TRANSLATION_SPEED];
-    const float varPerRotationSpeed = params[VARIANCE_PER_ROTATION_SPEED];
 
     // Bounds check against depth image dimensions
     if (xIndex >= depthWidth || yIndex >= depthHeight)
@@ -79,10 +74,10 @@ __global__ void heightMapUpdateDataKernel(const unsigned short* __restrict__ dep
 
     // Get the correct cell index for the maps
     float2 xyCoords = make_float2(queryPointInZUpFrame.x, queryPointInZUpFrame.y);
-    int2 cellIndex = coordinate_to_indices(xyCoords, make_float2(0.0f, 0.0f), cellSize, centerIndex);
+    int2 cellIndex = coordinate_to_indices(xyCoords, make_float2(0.0f, 0.0f), CELL_SIZE, CENTER_INDEX);
 
     // Bounds check against the local map dimensions because we are scanning the entire depth image
-    if (cellIndex.x < 0 || cellIndex.x >= cellsPerAxis || cellIndex.y < 0 || cellIndex.y >= cellsPerAxis)
+    if (cellIndex.x < 0 || cellIndex.x >= CELLS_PER_AXIS || cellIndex.y < 0 || cellIndex.y >= CELLS_PER_AXIS)
         return;
 
     // Pointers to the target cell in each temporary map
@@ -100,7 +95,7 @@ __global__ void heightMapUpdateDataKernel(const unsigned short* __restrict__ dep
     float distance = sqrtf(queryPointInSensorFrame.x * queryPointInSensorFrame.x +
                            queryPointInSensorFrame.y * queryPointInSensorFrame.y +
                            queryPointInSensorFrame.z * queryPointInSensorFrame.z);
-    float motionVarianceF = distance * varPerMeter + linearMotionMagnitude * varPerTranslationSpeed + angularMotionMagnitude * distance * varPerRotationSpeed;
+    float motionVarianceF = distance * VARIANCE_PER_METER + linearMotionMagnitude * VARIANCE_PER_TRANSLATION_SPEED + angularMotionMagnitude * distance * VARIANCE_PER_ROTATION_SPEED;
     atomicAdd(motionVarPtr, motionVarianceF);
 }
 
@@ -122,10 +117,8 @@ __global__ void computeLocalMap(const float* __restrict__ sumMap, size_t pitchSu
     int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
     int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
 
-    const int cellsPerAxis = static_cast<int>(params[CELLS_PER_AXIS]);
-
     // Bounds check against local map dimensions
-    if (xIndex >= cellsPerAxis || yIndex >= cellsPerAxis)
+    if (xIndex >= CELLS_PER_AXIS || yIndex >= CELLS_PER_AXIS)
         return;
 
     const float* sumPtr = (const float*)((const char*)sumMap + yIndex * pitchSum) + xIndex;
@@ -175,15 +168,13 @@ __global__ void translateHeightMapKernel(float *oldHeightMapMean, size_t pitchOl
     int x = blockIdx.x * blockDim.x + threadIdx.x;
     int y = blockIdx.y * blockDim.y + threadIdx.y;
 
-    int globalCellsPerAxis = static_cast<int>(params[CELLS_PER_AXIS]);
-
-    if (x >= globalCellsPerAxis || y >= globalCellsPerAxis)
+    if (x >= CELLS_PER_AXIS || y >= CELLS_PER_AXIS)
         return;
 
     int srcX = x + shiftX;
     int srcY = y + shiftY;
 
-    if (srcX >= 0 && srcX < globalCellsPerAxis && srcY >= 0 && srcY < globalCellsPerAxis)
+    if (srcX >= 0 && srcX < CELLS_PER_AXIS && srcY >= 0 && srcY < CELLS_PER_AXIS)
     {
         float* oldMeanRow = (float*)((char*)oldHeightMapMean + srcX * pitchOldHeightMapMean);
         float* oldVarianceRow = (float *)((char*)oldHeightMapVariance + srcX * pitchOldHeightMapVariance);
@@ -220,19 +211,14 @@ __global__ void heightMapRegistrationKernel(const float *__restrict__ localMeanM
     int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
     int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
 
-    const int cellsPerAxis = static_cast<int>(params[CELLS_PER_AXIS]);
-
     // Check bounds for global indices
-    if (xIndex >= cellsPerAxis || yIndex >= cellsPerAxis)
+    if (xIndex >= CELLS_PER_AXIS || yIndex >= CELLS_PER_AXIS)
         return;
-
-    // Compute global map size
-    const int globalCellsPerAxis = static_cast<int>(params[CELLS_PER_AXIS]);
 
     int2 localIndex = make_int2(xIndex, yIndex);
     int2 globalIndex = make_int2(xIndex, yIndex);
 
-    if (globalIndex.x < 0 || globalIndex.x >= globalCellsPerAxis || globalIndex.y < 0 || globalIndex.y >= globalCellsPerAxis)
+    if (globalIndex.x < 0 || globalIndex.x >= CELLS_PER_AXIS || globalIndex.y < 0 || globalIndex.y >= CELLS_PER_AXIS)
         return;
 
     float *localMean = (float *)((char *)localMeanMap + localIndex.x * pitchLocalMean) + localIndex.y;
@@ -282,17 +268,14 @@ __global__ void heightMapEmptyRegistrationKernel(float *localMap, size_t pitchLo
     int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
     int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
 
-    // Compute global map size
-    int cellsPerAxis = static_cast<int>(params[CELLS_PER_AXIS]);
-
     // Check bounds for global indices
-    if (xIndex >= cellsPerAxis || yIndex >= cellsPerAxis)
+    if (xIndex >= CELLS_PER_AXIS || yIndex >= CELLS_PER_AXIS)
         return;
 
     int2 localIndex = make_int2(xIndex, yIndex);
     int2 globalIndex = make_int2(xIndex, yIndex);
 
-    if (globalIndex.x < 0 || globalIndex.x >= cellsPerAxis || globalIndex.y < 0 || globalIndex.y >= cellsPerAxis)
+    if (globalIndex.x < 0 || globalIndex.x >= CELLS_PER_AXIS || globalIndex.y < 0 || globalIndex.y >= CELLS_PER_AXIS)
         return;
 
     float *localHeight = (float *)((char *)localMap + localIndex.x * pitchLocal) + localIndex.y;
@@ -321,9 +304,7 @@ __global__ void planOffsetKernel(float *matrixToModify, size_t pitchMatrixToModi
     int indexX = blockIdx.x * blockDim.x + threadIdx.x;
     int indexY = blockIdx.y * blockDim.y + threadIdx.y;
 
-    int globalCellsPerAxis = static_cast<int>(params[CELLS_PER_AXIS]);
-
-    if (indexX >= globalCellsPerAxis || indexY >= globalCellsPerAxis)
+    if (indexX >= CELLS_PER_AXIS || indexY >= CELLS_PER_AXIS)
         return;
 
     float *skipRow = (float *)((char *)matrixValuesToSkip + indexX * pitchMatrixValuesToSkip);
