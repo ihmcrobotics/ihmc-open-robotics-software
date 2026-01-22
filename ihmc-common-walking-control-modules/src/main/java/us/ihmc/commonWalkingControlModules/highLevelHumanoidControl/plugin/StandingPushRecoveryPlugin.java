@@ -1,23 +1,12 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin;
 
-import controller_msgs.msg.dds.HandLoadBearingMessage;
-import controller_msgs.msg.dds.HandTrajectoryMessage;
 import controller_msgs.msg.dds.ReactiveBracingMessage;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandLoadBearingCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ReactiveBracingCommand;
-import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -32,7 +21,7 @@ public class StandingPushRecoveryPlugin implements HighLevelHumanoidControllerPl
 
    private final YoBoolean isHandRecoveryContactEnabled = new YoBoolean("isHandRecoveryContactEnabled", registry);
    private final YoDouble handTrajectoryTime = new YoDouble("handTrajectoryTime", registry);
-//   private final YoBoolean isFalling = new YoBoolean("isFalling", registry);
+   private final YoBoolean isFalling = new YoBoolean("isFalling", registry);
    private final YoBoolean sendReactiveBracingMessage = new YoBoolean("sendReactiveBracingMessage", registry);
    private boolean hasSentHandTrajectory = false;
 
@@ -49,12 +38,11 @@ public class StandingPushRecoveryPlugin implements HighLevelHumanoidControllerPl
    @Override
    public void update(double time)
    {
-//      double comVelocityX = controllerToolbox.getCenterOfMassVelocity().getX();
-//      double comVelocityY = controllerToolbox.getCenterOfMassVelocity().getY();
-//      isFalling.set(EuclidCoreTools.norm(comVelocityX, comVelocityY) > 0.07);
+      double comVelocityX = controllerToolbox.getCenterOfMassVelocity().getX();
+      double comVelocityY = controllerToolbox.getCenterOfMassVelocity().getY();
+      isFalling.set(EuclidCoreTools.norm(comVelocityX, comVelocityY) > 0.07); // TODO make this better
 
-//      if (!hasSentHandTrajectory && isFalling.getValue() && isHandRecoveryContactEnabled.getValue())
-      if (!hasSentHandTrajectory && sendReactiveBracingMessage.getValue())
+      if (!hasSentHandTrajectory && isFalling.getValue() && isHandRecoveryContactEnabled.getValue())
       {
          hasSentHandTrajectory = true;
          sendReactiveBracingMessage.set(false);
