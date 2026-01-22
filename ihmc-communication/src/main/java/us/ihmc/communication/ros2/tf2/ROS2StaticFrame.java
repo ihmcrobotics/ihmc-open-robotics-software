@@ -1,6 +1,5 @@
 package us.ihmc.communication.ros2.tf2;
 
-import geometry_msgs.msg.dds.TransformStamped;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -11,6 +10,7 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 public class ROS2StaticFrame extends ROS2Frame
 {
    private final boolean publishMessage;
+   private boolean firstPublish;
 
    /**
     * Constructs a non-root frame.
@@ -38,22 +38,9 @@ public class ROS2StaticFrame extends ROS2Frame
       super(id, parentFrame, transformToParent, isAStationaryFrame, isZUpFrame, true);
 
       publishMessage = shouldPublishMessage(parentFrame);
-   }
+      firstPublish = true;
 
-   private ROS2StaticFrame(String id)
-   {
-      this(id, null, null, true, true);
-   }
-
-   /**
-    * Constructs a root frame.
-    *
-    * @param id The frame's id.
-    * @return The root frame.
-    */
-   public static ROS2StaticFrame constructARootFrame(String id)
-   {
-      return new ROS2StaticFrame(id);
+      postConstruction();
    }
 
    private boolean shouldPublishMessage(ReferenceFrame parentFrame)
@@ -70,26 +57,12 @@ public class ROS2StaticFrame extends ROS2Frame
    @Override
    protected void updateTransformToParent(RigidBodyTransform transformToParent)
    {
-      // Transform to parent should not change in a static frame
-   }
-
-   @Override
-   protected void onNewTransformReceived(TransformStamped newTransform)
-   {
-      if (isRootFrame())
-         return;
-
-      if (!newTransform.getTransform().geometricallyEquals(getTransformToParent(), 1E-4))
-         throw new IllegalStateException("Transform of received message does not match static transform.");
-   }
-
-   @Override
-   public void update()
-   {
-      super.update();
-
-      if (publishMessage)
+      if (firstPublish || publishMessage)
+      {
+         markUpdateTime();
          publishTFMessages();
+         firstPublish = false;
+      }
    }
 
    public boolean publishesMessageOnUpdate()

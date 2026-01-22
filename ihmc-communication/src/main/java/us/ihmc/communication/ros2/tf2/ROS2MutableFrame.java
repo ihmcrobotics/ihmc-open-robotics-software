@@ -1,6 +1,6 @@
 package us.ihmc.communication.ros2.tf2;
 
-import geometry_msgs.msg.dds.TransformStamped;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -13,7 +13,7 @@ import java.util.function.Consumer;
  */
 public class ROS2MutableFrame extends ROS2Frame
 {
-   private final RigidBodyTransform newestTransformToParent;
+   private final RigidBodyTransform newestTransformToParent = new RigidBodyTransform();
    private final AtomicBoolean hasNewTransform = new AtomicBoolean(false);
 
    /**
@@ -50,9 +50,8 @@ public class ROS2MutableFrame extends ROS2Frame
    public ROS2MutableFrame(String id, ReferenceFrame parentFrame, RigidBodyTransformReadOnly transformToParent, boolean isZUpFrame)
    {
       super(id, parentFrame, transformToParent, false, isZUpFrame, false);
-
-      newestTransformToParent = new RigidBodyTransform();
       getTransformToParent(newestTransformToParent);
+      postConstruction();
    }
 
    /**
@@ -84,18 +83,10 @@ public class ROS2MutableFrame extends ROS2Frame
    {
       if (hasNewTransform.getAndSet(false))
          transformToParent.set(newestTransformToParent);
-   }
+      else if (remoteTransform != null && MessageTools.compareTime(updateTime, remoteTransform.getHeader().getStamp()) < 0)
+         transformToParent.set(remoteTransform.getTransform());
 
-   @Override
-   protected void onNewTransformReceived(TransformStamped newTransform)
-   {
-      setNewTransformToParent(newTransform.getTransform());
-   }
-
-   @Override
-   public void update()
-   {
-      super.update();
+      markUpdateTime();
       publishTFMessages();
    }
 }

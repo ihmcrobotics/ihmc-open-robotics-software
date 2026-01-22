@@ -16,18 +16,15 @@ public class ROS2FollowingFrame extends ROS2Frame
       super(id, parentFrame, null, parentFrame.isAStationaryFrame() && frameToFollow.isAStationaryFrame(), frameToFollow.isZupFrame(), false);
 
       this.frameToFollow = frameToFollow;
-   }
 
-   @Override
-   protected void onNewTransformReceived(TransformStamped newTransform)
-   {
-      // Do nothing
+      postConstruction();
    }
 
    @Override
    protected void updateTransformToParent(RigidBodyTransform transformToParent)
    {
       frameToFollow.getTransformToDesiredFrame(transformToParent, getParent());
+      markUpdateTime();
       publishTFMessages();
    }
 }
