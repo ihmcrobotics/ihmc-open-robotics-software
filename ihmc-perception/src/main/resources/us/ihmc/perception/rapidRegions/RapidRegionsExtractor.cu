@@ -101,7 +101,6 @@ __device__ bool isConnected(float3 pointA, float3 normalA, float3 pointB, float3
  */
 __device__ float3 estimateNormalPCA(const unsigned short* __restrict__ depthImage, long pitchDepthImage, const float* __restrict__ params, size_t patchXIndex, size_t patchYIndex)
 {
-    float Z = 0.0f;
     int patchSize = (int) params[PATCH_SIZE];
     int normalPackRange = clamp((int) params[NORMAL_PACK_RANGE], 1, patchSize - 1);
     int count = 0;
@@ -179,10 +178,9 @@ __global__ void packKernel(const unsigned short* __restrict__ depthImage,
     }
     centroid = centroid / numberOfPoints;
 
-    // Compute estimated surface normal
+    // Options 1, 2, 3 - compute covariance data
+    CovarianceData covarianceData = {};
 
-    // Option 1 -- compute through inverting 3x3 covariance matrix
-    double cxx=0.0, cxy=0.0, cxz=0.0, cyy=0.0, cyz=0.0, czz=0.0;
     for (int du = 0; du < uSize; du++)
     {
         for (int dv = 0; dv < vSize; dv++)
@@ -191,33 +189,35 @@ __global__ void packKernel(const unsigned short* __restrict__ depthImage,
             int vQuery = minV + dv;
             float3 point = backProject(uQuery, vQuery, depthImage, pitchDepthImage, params);
 
-            float dx = point.x - centroid.x;
-            float dy = point.y - centroid.y;
-            float dz = point.z - centroid.z;
-
-            cxx += dx * dx;
-            cxy += dx * dy;
-            cxz += dx * dz;
-            cyy += dy * dy;
-            cyz += dy * dz;
-            czz += dz * dz;
+            double dx = point.x - centroid.x;
+            double dy = point.y - centroid.y;
+            double dz = point.z - centroid.z;
+            covarianceData.registerPoint(dx, dy, dz);
         }
     }
 
-//     float3 normal = make_float3(0.0f, 0.0f, 1.0f);
-//     double coefficients[3] = {0.0, 0.0, 0.0};
-//     double covariance_matrix[9] = {cxx, cxy, 0.0, cxy, cyy, 0.0, 0.0, 0.0, (double) numberOfPoints};
-//     double z_variance_vector[3] = {-cxz, -cyz, 0.0};
-//     double squared_error = solveForPlaneCoefficients3x3(covariance_matrix, z_variance_vector, czz, coefficients);
-//     normal.x = coefficients[0];
-//     normal.y = coefficients[1];
+    covarianceData.numberOfPoints = (float) numberOfPoints;
+
+    float coefficients[3] = {0.0f, 0.0f, 0.0f};
+    float3 normal = make_float3(0.0f, 0.0f, 1.0f);
+
+    // Option 1 -- compute through inverting 3x3 covariance matrix (determinants)
+//     solveForPlaneCoefficients3x3_Determinants(covarianceData, coefficients);
+//     normal.x = (float) coefficients[0];
+//     normal.y = (float) coefficients[1];
 //     normal = normalize(normal);
 
-    // Option 2 -- compute through inverting 2x2 covariance matrix
-    float3 normal = make_float3(0.0f, 0.0f, 1.0f);
-    solveForPlaneCoefficients2x2(cxx, cxy, cyy, cxz, cyz, make_float3(0.0f, 0.0f, 0.0f), normal);
+    // Option 2 -- compute through inverting 3x3 covariance matrix (Cholesky)
+    solveForPlaneCoefficients3x3_Cholesky(covarianceData, coefficients);
+    normal.x = (float) coefficients[0];
+    normal.y = (float) coefficients[1];
+    normal = normalize(normal);
 
-    // Option 3 -- compute through principal component analysis, by area-weighted triangles
+    // Option 3 -- compute through inverting 2x2 covariance matrix
+//     solveForPlaneNormal2x2(covarianceData, normal);
+//     normal = normalize(normal);
+
+    // Option 4 -- compute through principal component analysis, by area-weighted triangles
 //     float3 normal = estimateNormalPCA(depthImage, pitchDepthImage, params, patchXIndex, patchYIndex);
 
     // Convert to Z-up
