@@ -161,9 +161,17 @@ public abstract class BehaviorTreeSceneState
       return null;
    }
 
-   public LatestTimestampModifiable getObjectsModifiable()
+   public void addObject(BehaviorTreeSceneObjectState object)
    {
-      return objectsModifiable;
+      objects.add(object);
+      objectsModifiable.modify();
+   }
+
+   public void removeAllObjects()
+   {
+      objects.forEach(BehaviorTreeSceneObjectState::destroy);
+      objects.clear();
+      objectsModifiable.modify();
    }
 
    public List<BehaviorTreeSceneObjectState> getObjects()
