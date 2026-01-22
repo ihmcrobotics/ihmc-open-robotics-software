@@ -19,7 +19,6 @@ public abstract class ROS2Frame extends ReferenceFrame
    private final ROS2Publisher<TFMessage> tfStaticPublisher;
 
    protected final Time updateTime;
-   protected TransformStamped remoteTransform;
 
    private volatile boolean hasBeenRemoved = false;
 
@@ -42,11 +41,6 @@ public abstract class ROS2Frame extends ReferenceFrame
 
       tfStaticMessageToPublish = new TFMessage();
       tfStaticPublisher = ros2Node.createPublisher(TF_STATIC_TOPIC);
-   }
-
-   protected void postConstruction()
-   {
-      ROS2TFTree.getInstance().registerFrame(this);
    }
 
    protected void markUpdateTime()
@@ -72,11 +66,6 @@ public abstract class ROS2Frame extends ReferenceFrame
          tfStaticPublisher.publish(tfStaticMessageToPublish);
    }
 
-   void setRemoteTransform(TransformStamped remoteTransform)
-   {
-      this.remoteTransform = remoteTransform;
-   }
-
    /**
     * Get this frame's id string.
     * <p>
@@ -95,8 +84,6 @@ public abstract class ROS2Frame extends ReferenceFrame
       if (hasBeenRemoved)
          return;
       hasBeenRemoved = true;
-
-      ROS2TFTree.getInstance().removeFrame(this);
 
       super.remove();
       if (tfPublisher != null)

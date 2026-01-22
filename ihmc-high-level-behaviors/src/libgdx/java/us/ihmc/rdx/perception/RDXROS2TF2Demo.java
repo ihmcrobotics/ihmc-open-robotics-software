@@ -158,7 +158,6 @@ public class RDXROS2TF2Demo
          RDXPose3DGizmo gizmo = mutableFrameMap.remove(mutableFrame);
          if (gizmo != null)
          {
-            baseUI.getPrimaryScene().removeRenderable(gizmo);
             gizmo.destroyDefault(baseUI.getPrimary3DPanel());
          }
       }

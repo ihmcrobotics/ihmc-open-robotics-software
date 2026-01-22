@@ -39,8 +39,6 @@ public class ROS2StaticFrame extends ROS2Frame
 
       publishMessage = shouldPublishMessage(parentFrame);
       firstPublish = true;
-
-      postConstruction();
    }
 
    private boolean shouldPublishMessage(ReferenceFrame parentFrame)

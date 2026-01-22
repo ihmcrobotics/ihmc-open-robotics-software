@@ -32,8 +32,7 @@ public class ROS2TFTree
       return instance;
    }
 
-   /** Contains all frames known to this process */
-   private final Map<CharSequence, ROS2Frame> frames;
+   /** Contains all transforms known to this process */
    private final Map<CharSequence, TransformStamped> transforms;
 
    private final ROS2Node ros2Node;
@@ -48,7 +47,6 @@ public class ROS2TFTree
    {
       Runtime.getRuntime().addShutdownHook(new Thread(this::close));
 
-      frames = new ConcurrentSkipListMap<>(CharSequence::compare);
       transforms = new ConcurrentSkipListMap<>(CharSequence::compare);
 
       ros2Node = new ROS2NodeBuilder().build("TFNode");
@@ -60,9 +58,9 @@ public class ROS2TFTree
       tfStaticSubscription = ros2Node.createSubscription(TF_STATIC_TOPIC, subscriber -> receiveTFMessage(subscriber, tfStaticMessage));
    }
 
-   public Set<CharSequence> getTransforms()
+   public Map<CharSequence, TransformStamped> getTransforms()
    {
-      return transforms.keySet();
+      return transforms;
    }
 
    public ROS2Node getTFNode()
@@ -70,24 +68,10 @@ public class ROS2TFTree
       return ros2Node;
    }
 
-   void registerFrame(ROS2Frame frame)
-   {
-      if (frames.putIfAbsent(frame.getFrameId(), frame) == null)
-      {
-         frame.setRemoteTransform(transforms.getOrDefault(frame.getFrameId(), null));
-      }
-   }
-
-   void removeFrame(ROS2Frame frame)
-   {
-      frames.remove(frame.getFrameId());
-      frame.setRemoteTransform(null);
-   }
-
    private void receiveTFMessage(@SuppressWarnings("deprecation") Subscriber<TFMessage> subscriber, TFMessage tfMessage)
    {
       // Read the new message
-      subscriber.takeNextData(tfStaticMessage, null);
+      subscriber.takeNextData(tfMessage, null);
 
       // Ignore null or empty messages
       if (tfMessage == null || tfMessage.getTransforms().isEmpty())
@@ -105,9 +89,6 @@ public class ROS2TFTree
          {
             recordedTransform = new TransformStamped(transformMessage);
             transforms.put(recordedTransform.getChildFrameId(), recordedTransform);
-            ROS2Frame frame = frames.get(recordedTransform.getChildFrameId());
-            if (frame != null)
-               frame.setRemoteTransform(recordedTransform);
          }
       }
    }

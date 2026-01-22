@@ -1,5 +1,6 @@
 package us.ihmc.communication.ros2.tf2;
 
+import geometry_msgs.msg.dds.TransformStamped;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -15,6 +16,8 @@ public class ROS2MutableFrame extends ROS2Frame
 {
    private final RigidBodyTransform newestTransformToParent = new RigidBodyTransform();
    private final AtomicBoolean hasNewTransform = new AtomicBoolean(false);
+
+   private TransformStamped remoteTransform;
 
    /**
     * Constructs a non-root frame.
@@ -51,7 +54,6 @@ public class ROS2MutableFrame extends ROS2Frame
    {
       super(id, parentFrame, transformToParent, false, isZUpFrame, false);
       getTransformToParent(newestTransformToParent);
-      postConstruction();
    }
 
    /**
@@ -81,6 +83,9 @@ public class ROS2MutableFrame extends ROS2Frame
    @Override
    protected void updateTransformToParent(RigidBodyTransform transformToParent)
    {
+      if (remoteTransform == null)
+         remoteTransform = ROS2TFTree.getInstance().getTransforms().get(getFrameId());
+
       if (hasNewTransform.getAndSet(false))
          transformToParent.set(newestTransformToParent);
       else if (remoteTransform != null && MessageTools.compareTime(updateTime, remoteTransform.getHeader().getStamp()) < 0)

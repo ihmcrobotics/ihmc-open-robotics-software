@@ -16,8 +16,6 @@ public class ROS2FollowingFrame extends ROS2Frame
       super(id, parentFrame, null, parentFrame.isAStationaryFrame() && frameToFollow.isAStationaryFrame(), frameToFollow.isZupFrame(), false);
 
       this.frameToFollow = frameToFollow;
-
-      postConstruction();
    }
 
    @Override
