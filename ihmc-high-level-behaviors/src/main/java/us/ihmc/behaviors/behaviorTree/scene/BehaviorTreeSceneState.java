@@ -174,6 +174,13 @@ public abstract class BehaviorTreeSceneState
       objectsModifiable.modify();
    }
 
+   public void removeObject(BehaviorTreeSceneObjectState object)
+   {
+      object.destroy();
+      objects.remove(object);
+      objectsModifiable.modify();
+   }
+
    public List<BehaviorTreeSceneObjectState> getObjects()
    {
       return objects;
