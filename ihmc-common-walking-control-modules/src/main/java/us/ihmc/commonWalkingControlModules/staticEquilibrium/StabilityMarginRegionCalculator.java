@@ -51,7 +51,7 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
    private static final int NULL_INDEX = -1;
    private static final double VERTEX_EPS = 1.0e-4;
 
-   public static final int DIRECTIONS_TO_OPTIMIZE = 18;
+   public static final int DIRECTIONS_TO_OPTIMIZE = 16;
    private final static double DELTA_ANGLE = 2.0 * Math.PI / DIRECTIONS_TO_OPTIMIZE;
    private static final double[] QUERY_X = new double[DIRECTIONS_TO_OPTIMIZE];
    private static final double[] QUERY_Y = new double[DIRECTIONS_TO_OPTIMIZE];
