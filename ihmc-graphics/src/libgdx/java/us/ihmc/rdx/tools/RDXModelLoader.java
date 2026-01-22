@@ -19,6 +19,7 @@ import us.ihmc.rdx.tools.assimp.RDXAssimpModelLoader;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.resources.ResourceTools;
 
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.TreeSet;
 
@@ -59,7 +60,8 @@ public class RDXModelLoader
    {
       String requestedModelFileName = modelFileName;
 
-      modelFileName = ResourceTools.sanitizeResourcePath(modelFileName);
+      if (!Paths.get(modelFileName).isAbsolute()) // Ignore in the case of absolute file paths. TODO: What is the point of sanitizeResourcePath?
+         modelFileName = ResourceTools.sanitizeResourcePath(modelFileName);
 
       Object preventLoadingMoreThanOnceSynchronizer = modelLoadingSynchronizers.computeIfAbsent(modelFileName, key -> new Object());
 

@@ -73,6 +73,10 @@ public class RDXZEDSVORecorderPanel
 
    public void render()
    {
+      // Because of threading, it's possible that we haven't received any message so we can't render anything yet
+      if (latestMessage == null)
+         return;
+
       ImGuiTools.textBold("Current SVO:");
       ImGui.sameLine();
       ImGui.textWrapped(latestMessage.getCurrentFileName().toString());
