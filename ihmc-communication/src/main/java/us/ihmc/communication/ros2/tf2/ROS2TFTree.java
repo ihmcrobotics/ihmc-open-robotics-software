@@ -3,6 +3,7 @@ package us.ihmc.communication.ros2.tf2;
 import geometry_msgs.msg.dds.TransformStamped;
 import tf2_msgs.msg.dds.TFMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
@@ -11,7 +12,6 @@ import us.ihmc.ros2.ROS2Subscription;
 import us.ihmc.ros2.ROS2Topic;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 @SuppressWarnings("ForLoopReplaceableByForEach")
@@ -81,14 +81,16 @@ public class ROS2TFTree
       RecyclingArrayList<TransformStamped> receivedTransforms = tfMessage.getTransforms();
       for (int i = 0; i < receivedTransforms.size(); ++i)
       {
-         TransformStamped transformMessage = receivedTransforms.get(i);
-         TransformStamped recordedTransform = transforms.get(transformMessage.getChildFrameId());
-         if (recordedTransform != null)
-            recordedTransform.set(transformMessage);
-         else
+         TransformStamped receivedMessage = receivedTransforms.get(i);
+         TransformStamped recordedTransform = transforms.get(receivedMessage.getChildFrameId());
+         if (recordedTransform == null)
          {
-            recordedTransform = new TransformStamped(transformMessage);
+            recordedTransform = new TransformStamped(receivedMessage);
             transforms.put(recordedTransform.getChildFrameId(), recordedTransform);
+         }
+         else if (MessageTools.compareTime(recordedTransform.getHeader().getStamp(), receivedMessage.getHeader().getStamp()) < 0)
+         {
+            recordedTransform.set(receivedMessage);
          }
       }
    }
