@@ -138,7 +138,7 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
             remove = object;
          ImGui.popStyleColor();
          ImGui.indent();
-         renderPersistentDetection(object.getPersistentDetection());
+         renderPersistentDetection(object, object.getPersistentDetection());
          ImGui.unindent();
       }
       ImGui.unindent();
@@ -153,22 +153,29 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
       ImGui.text("Stable Detections:");
       ImGui.indent();
       for (RDXBehaviorTreeSceneDetection persistentDetection : persistentDetections)
-         renderPersistentDetection(persistentDetection.getMessage());
+         renderPersistentDetection(null, persistentDetection.getMessage());
       ImGui.unindent();
    }
 
-   private static void renderPersistentDetection(PersistentDetectionStatusMessage message)
+   private static void renderPersistentDetection(RDXBehaviorTreeSceneObject object, PersistentDetectionStatusMessage message)
    {
       String type = "(?)";
-      if (message.getDetectionTypeAsString().equals(IsaacROSFoundationPoseInstantDetection.class.getSimpleName()))
+      if (object != null)
+         type = "(" + object.getObjectType().name() + ")";
+      else if (message.getDetectionTypeAsString().equals(IsaacROSFoundationPoseInstantDetection.class.getSimpleName()))
          type = "(FoundationPose)";
-      if (message.getDetectionTypeAsString().equals(YOLOv8InstantDetection.class.getSimpleName()))
+      else if (message.getDetectionTypeAsString().equals(YOLOv8InstantDetection.class.getSimpleName()))
          type = "(YOLOv8)";
       String text = "%s %s %.2f Hz Size: %d ID.%s".formatted(type,
                                                              message.getObjectClassAsString(),
                                                              message.getDecayingFrequency(),
                                                              message.getHistorySize(),
                                                              message.getIdAsString());
+      if (object instanceof RDXBehaviorTreeSceneDoorPanel doorPanel)
+         text += "%n %s %.2f Hz Size: %d ID.%s".formatted(doorPanel.getDoorPanelPersistentDetection().getObjectClassAsString(),
+                                                          doorPanel.getDoorPanelPersistentDetection().getDecayingFrequency(),
+                                                          doorPanel.getDoorPanelPersistentDetection().getHistorySize(),
+                                                          doorPanel.getDoorPanelPersistentDetection().getIdAsString());
       if (message.getIsStable())
          ImGui.text(text);
       else
@@ -208,7 +215,10 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
    @Override
    protected BehaviorTreeSceneObjectState buildObject(long id, CRDTInfo crdtInfo, BehaviorTreeSceneObjectDefinitionMessage definition)
    {
-      return new RDXBehaviorTreeSceneObject(id, crdtInfo, definition, baseUI);
+      if (definition.getObjectType() == BehaviorTreeSceneObjectType.DOOR_PANEL.ordinal())
+         return new RDXBehaviorTreeSceneDoorPanel(id, crdtInfo, definition, baseUI);
+      else
+         return new RDXBehaviorTreeSceneObject(id, crdtInfo, definition, baseUI);
    }
 
    @Override

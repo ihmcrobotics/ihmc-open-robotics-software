@@ -7,6 +7,7 @@ import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseCommunicatorMap;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.ros2.ROS2Node;
 
 public class ROS2BehaviorTreeUpdateThread extends RepeatingTaskThread
@@ -18,7 +19,8 @@ public class ROS2BehaviorTreeUpdateThread extends RepeatingTaskThread
                                        ROS2PeerClockOffsetEstimator peerClockOffsetEstimator,
                                        DRCRobotModel robotModel,
                                        YOLOv8DetectionExecutor yolo,
-                                       IsaacROSFoundationPoseCommunicatorMap foundationPose)
+                                       IsaacROSFoundationPoseCommunicatorMap foundationPose,
+                                       TerrainMapData terrainMapData)
    {
       super(ROS2BehaviorTreeUpdateThread.class.getSimpleName());
       setFrequencyLimit(ROS2BehaviorTree.SYNC_FREQUENCY);
@@ -26,7 +28,7 @@ public class ROS2BehaviorTreeUpdateThread extends RepeatingTaskThread
       ROS2ControllerHelper ros2ControllerHelper = new ROS2ControllerHelper(ros2Node, robotModel);
       syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2ControllerHelper.getROS2Node());
 
-      executor = new ROS2BehaviorTreeExecutor(ros2ControllerHelper, syncedRobot, yolo, foundationPose, peerClockOffsetEstimator);
+      executor = new ROS2BehaviorTreeExecutor(ros2ControllerHelper, syncedRobot, yolo, foundationPose, terrainMapData, peerClockOffsetEstimator);
    }
 
    @Override

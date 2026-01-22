@@ -1,0 +1,59 @@
+package us.ihmc.zulu;
+
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import us.ihmc.avatar.DRCFlatGroundRewindabilityTest;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
+
+@Tag("humanoid-flat-ground")
+@Disabled
+public class ZuluFlatGroundRewindabilityTest extends DRCFlatGroundRewindabilityTest
+{
+
+   @Override
+   public DRCRobotModel getRobotModel()
+   {
+      return new ZuluRobotModel(ZuluVersion.V1_FULL_ROBOT, RobotTarget.SCS);
+   }
+
+   @Override
+   public String getSimpleRobotName()
+   {
+      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ZULU);
+   }
+
+   @Override
+   @Test
+   public void testCanRewindAndGoForward()
+   {
+      super.testCanRewindAndGoForward();
+   }
+
+   @Override
+   @Disabled
+   @Test
+   public void testRewindabilityWithSimpleFastMethod()
+   {
+      super.testRewindabilityWithSimpleFastMethod();
+   }
+
+   @Override
+   // This takes a long time. Use it for debugging where the broken changes were made when the tests above fail.
+   @Disabled
+   @Test
+   public void testRewindabilityWithSlowerMoreExtensiveMethod()
+   {
+      super.testRewindabilityWithSlowerMoreExtensiveMethod();
+   }
+
+   @Override
+   @Test
+   public void testRunsTheSameWayTwice()
+   {
+      super.testRunsTheSameWayTwice();
+   }
+
+}

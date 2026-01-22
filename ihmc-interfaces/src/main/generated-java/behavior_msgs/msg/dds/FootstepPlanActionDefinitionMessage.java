@@ -81,6 +81,10 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
             */
    public boolean planner_walk_with_goal_orientation_;
    /**
+            * Whether to use the body path planner or not
+            */
+   public boolean planner_plan_with_body_path_;
+   /**
             * The footstep planner parameters
             */
    public ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessage planner_parameters_;
@@ -136,6 +140,8 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
       planner_perform_a_star_search_ = other.planner_perform_a_star_search_;
 
       planner_walk_with_goal_orientation_ = other.planner_walk_with_goal_orientation_;
+
+      planner_plan_with_body_path_ = other.planner_plan_with_body_path_;
 
       ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessagePubSubType.staticCopy(other.planner_parameters_, planner_parameters_);
    }
@@ -395,6 +401,21 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
       return planner_walk_with_goal_orientation_;
    }
 
+   /**
+            * Whether to use the body path planner or not
+            */
+   public void setPlannerPlanWithBodyPath(boolean planner_plan_with_body_path)
+   {
+      planner_plan_with_body_path_ = planner_plan_with_body_path;
+   }
+   /**
+            * Whether to use the body path planner or not
+            */
+   public boolean getPlannerPlanWithBodyPath()
+   {
+      return planner_plan_with_body_path_;
+   }
+
 
    /**
             * The footstep planner parameters
@@ -460,6 +481,8 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.planner_walk_with_goal_orientation_, other.planner_walk_with_goal_orientation_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.planner_plan_with_body_path_, other.planner_plan_with_body_path_, epsilon)) return false;
+
       if (!this.planner_parameters_.epsilonEquals(other.planner_parameters_, epsilon)) return false;
 
       return true;
@@ -505,6 +528,8 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
       if(this.planner_perform_a_star_search_ != otherMyClass.planner_perform_a_star_search_) return false;
 
       if(this.planner_walk_with_goal_orientation_ != otherMyClass.planner_walk_with_goal_orientation_) return false;
+
+      if(this.planner_plan_with_body_path_ != otherMyClass.planner_plan_with_body_path_) return false;
 
       if (!this.planner_parameters_.equals(otherMyClass.planner_parameters_)) return false;
 
@@ -553,6 +578,8 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
       builder.append(this.planner_perform_a_star_search_);      builder.append(", ");
       builder.append("planner_walk_with_goal_orientation=");
       builder.append(this.planner_walk_with_goal_orientation_);      builder.append(", ");
+      builder.append("planner_plan_with_body_path=");
+      builder.append(this.planner_plan_with_body_path_);      builder.append(", ");
       builder.append("planner_parameters=");
       builder.append(this.planner_parameters_);
       builder.append("}");

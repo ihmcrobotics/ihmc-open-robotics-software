@@ -137,12 +137,13 @@ public class RDXPlanarRegionsGraphic implements RenderableProvider
 
       meshBuilder.addMultiLine(transformToWorld, planarRegion.getConcaveHull(), 0.01, color, true);
 
-      double totalArea = 0.0;
+      int vertexCount = 0;
+      int maxVertices = 14000;
       for (ConvexPolygon2D convexPolygon : planarRegion.getConvexPolygons())
       {
-         meshBuilder.addPolygon(transformToWorld, convexPolygon, color);
-
-         totalArea += convexPolygon.getArea();
+         vertexCount += convexPolygon.getNumberOfVertices();
+         if (vertexCount < maxVertices)
+            meshBuilder.addPolygon(transformToWorld, convexPolygon, color);
       }
 
 //      LabelGraphic sizeLabel = null;
@@ -178,8 +179,6 @@ public class RDXPlanarRegionsGraphic implements RenderableProvider
                                        cylinderToConeLengthRatio,
                                        coneDiameterMultiplier, color);
       }
-
-
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)

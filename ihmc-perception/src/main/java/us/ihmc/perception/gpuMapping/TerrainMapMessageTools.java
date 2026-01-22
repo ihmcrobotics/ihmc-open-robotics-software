@@ -1,8 +1,6 @@
 package us.ihmc.perception.gpuMapping;
 
 import perception_msgs.msg.dds.TerrainMapMessage;
-import us.ihmc.idl.IDLSequence.Byte;
-import us.ihmc.idl.IDLSequence.Float;
 
 public class TerrainMapMessageTools
 {
@@ -17,6 +15,8 @@ public class TerrainMapMessageTools
       message.getHeightMap().resetQuick();
       message.getHeightMap().add(terrainMapData.getHeightMap());
 
+      message.getObstacleClearanceScore().resetQuick();
+      message.getObstacleClearanceScore().add(terrainMapData.getObstacleClearanceScoreMap());
       message.getTraversabilityScore().resetQuick();
       message.getTraversabilityScore().add(terrainMapData.getTraversabilityScoreMap());
       message.getTraversabilityClass().resetQuick();
@@ -39,6 +39,10 @@ public class TerrainMapMessageTools
 
       float[] heightMap = message.getHeightMap().toArray();
       terrainMapData.setHeightMap(heightMap);
+
+      float[] obstacleClearanceScoreMap = message.getObstacleClearanceScore().toArray();
+      if (obstacleClearanceScoreMap.length > 0)
+         terrainMapData.setObstacleClearanceScoreMap(obstacleClearanceScoreMap);
 
       float[] traversabilityScoreMap = message.getTraversabilityScore().toArray();
       if (traversabilityScoreMap.length > 0)

@@ -15,6 +15,8 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -23,6 +25,10 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXImageVisualizer;
 import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
 import us.ihmc.robotDataLogger.Camera;
+import us.ihmc.scs2.definition.geometry.ModelFileGeometryDefinition;
+import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
+import us.ihmc.scs2.definition.visual.VisualDefinition;
 import us.ihmc.scs2.session.log.BlackMagicScrubber;
 import us.ihmc.scs2.session.log.LogDataReader;
 import us.ihmc.scs2.session.log.LogDataReaderInterface;
@@ -42,6 +48,9 @@ import static us.ihmc.zed.global.zed.*;
 
 public class RDXSCS2LogSession extends RDXSCS2Session
 {
+   private final RDXPerceptionVisualizersPanel perceptionVisualizersPanel;
+   private final TypedNotification<String> loadLogRequest = new TypedNotification<>();
+   private boolean loadingLog = false;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImInt desiredLoadedIndex = new ImInt();
    private final ImFloat zedDelayCompensation = new ImFloat();
@@ -58,12 +67,14 @@ public class RDXSCS2LogSession extends RDXSCS2Session
    private record BlackmagicLogVideo(BlackMagicScrubber scrubber, RDXImageVisualizer visualizer) { }
    private final List<BlackmagicLogVideo> blackmagicLogVideos = new ArrayList<>();
 
-   public RDXSCS2LogSession(RDXBaseUI baseUI)
+   public RDXSCS2LogSession(RDXBaseUI baseUI, RDXPerceptionVisualizersPanel perceptionVisualizersPanel)
    {
       super(baseUI);
+
+      this.perceptionVisualizersPanel = perceptionVisualizersPanel;
    }
 
-   public void startSession(String logFilePath, RDXPerceptionVisualizersPanel perceptionVisualizersPanel)
+   public void startSession(String logFilePath)
    {
       try
       {
@@ -81,6 +92,28 @@ public class RDXSCS2LogSession extends RDXSCS2Session
 
       if (logSession != null)
       {
+         for (RobotDefinition robotDefinition : logSession.getRobotDefinitions())
+            for (RigidBodyDefinition allRigidBody : robotDefinition.getAllRigidBodies())
+               for (VisualDefinition visualDefinition : allRigidBody.getVisualDefinitions())
+                  if (visualDefinition.getGeometryDefinition() instanceof ModelFileGeometryDefinition modelFileGeometryDefinition)
+                  {
+                     String fileName = modelFileGeometryDefinition.getFileName();
+                     if (ClassLoader.getSystemResource(fileName) == null)
+                     {
+                        File file = new File(fileName);
+                        if (!file.isAbsolute() || !file.exists())
+                        {
+                           // SCS 2 will unzip resources to ~/.ihmc/resources/<robotName>/, we need to repath the definition for RDX to load it
+                           String robotName = logSession.getLogProperties().getModel().getNameAsString();
+                           File ihmcRobotFile = new File(System.getProperty("user.home"), ".ihmc/resources/" + robotName + "/" + fileName);
+                           if (ihmcRobotFile.exists())
+                              modelFileGeometryDefinition.setFileName(ihmcRobotFile.getAbsolutePath());
+                           else
+                              LogTools.error("Could not find model file '{}' on classpath, filesystem, or in ~/.ihmc/{}", fileName, robotName);
+                        }
+                     }
+                  }
+
          startSession(logSession);
 
          yoTimestamp = logDataReader.getTimestamp();
@@ -89,6 +122,7 @@ public class RDXSCS2LogSession extends RDXSCS2Session
          {
             Camera camera = magewellScrubber.getCamera();
             RDXImageVisualizer visualizer = new RDXImageVisualizer(camera.getNameAsString(), camera.getNameAsString(), false);
+            visualizer.setActive(true);
             perceptionVisualizersPanel.addVisualizer(visualizer);
             MagewellLogVideo magewellLogVideo = new MagewellLogVideo(magewellScrubber, new OpenCVFrameConverter.ToMat(), visualizer);
             magewellLogVideos.add(magewellLogVideo);
@@ -97,6 +131,7 @@ public class RDXSCS2LogSession extends RDXSCS2Session
          {
             Camera camera = blackMagicScrubber.getCamera();
             RDXImageVisualizer visualizer = new RDXImageVisualizer(camera.getNameAsString(), camera.getNameAsString(), false);
+            visualizer.setActive(true);
             perceptionVisualizersPanel.addVisualizer(visualizer);
             BlackmagicLogVideo blackmagicLogVideo = new BlackmagicLogVideo(blackMagicScrubber, visualizer);
             blackmagicLogVideos.add(blackmagicLogVideo);
@@ -104,6 +139,7 @@ public class RDXSCS2LogSession extends RDXSCS2Session
          for (ZEDSVOScrubber zedSVOScrubber : logSession.getZedSVOScrubbers())
          {
             RDXImageVisualizer visualizer = new RDXImageVisualizer(zedSVOScrubber.getName(), zedSVOScrubber.getName(), false);
+            visualizer.setActive(true);
             perceptionVisualizersPanel.addVisualizer(visualizer);
             ZEDLogVideo zedLogVideo = new ZEDLogVideo(zedSVOScrubber, visualizer);
             zedLogVideos.add(zedLogVideo);
@@ -118,7 +154,13 @@ public class RDXSCS2LogSession extends RDXSCS2Session
 
    public void update()
    {
+      if (loadLogRequest.poll())
+         startSession(loadLogRequest.read());
+
       super.update();
+
+      if (logSession == null)
+         return;
 
       int currentLogPosition = logDataReader.getCurrentLogPosition();
       if (scrubAnyway.poll() || lastUpdatedLogPosition != currentLogPosition)
@@ -173,6 +215,34 @@ public class RDXSCS2LogSession extends RDXSCS2Session
    @Override
    public void renderImGuiWidgets()
    {
+      if (session == null)
+      {
+         if (loadingLog)
+         {
+            ImGui.text("Loading log...");
+         }
+         else if (ImGui.button(labels.get("Open log...")))
+         {
+            ThreadTools.startAsDaemon(() ->
+            {
+               loadingLog = true;
+               java.awt.Frame frame = new java.awt.Frame();
+               FileDialog fileDialog = new FileDialog(frame, "Choose a .log file", FileDialog.LOAD);
+               fileDialog.setFile("*.log");
+               fileDialog.setVisible(true);
+               loadingLog = false;
+               String directory = fileDialog.getDirectory();
+               String filename = fileDialog.getFile();
+               if (directory != null && filename != null)
+                  loadLogRequest.set(new File(directory, filename).getAbsolutePath());
+            }, "LogFileDialog");
+         }
+
+         return;
+      }
+
+      loadingLog = false;
+
       if (isSessionThreadRunning())
       {
          File logDirectory = logDataReader.getLogDirectory();

@@ -40,6 +40,10 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
             */
    public us.ihmc.idl.IDLSequence.Float  height_map_;
    /**
+            * Obstacle clearance score, on a 0 to 1 scale
+            */
+   public us.ihmc.idl.IDLSequence.Float  obstacle_clearance_score_;
+   /**
             * Traversability score, on a 0 to 1 scale
             */
    public us.ihmc.idl.IDLSequence.Float  traversability_score_;
@@ -63,6 +67,8 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
    public TerrainMapMessage()
    {
       height_map_ = new us.ihmc.idl.IDLSequence.Float (255000, "type_5");
+
+      obstacle_clearance_score_ = new us.ihmc.idl.IDLSequence.Float (255000, "type_5");
 
       traversability_score_ = new us.ihmc.idl.IDLSequence.Float (255000, "type_5");
 
@@ -97,6 +103,7 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
       cells_per_axis_ = other.cells_per_axis_;
 
       height_map_.set(other.height_map_);
+      obstacle_clearance_score_.set(other.obstacle_clearance_score_);
       traversability_score_.set(other.traversability_score_);
       traversability_class_.set(other.traversability_class_);
       snapped_normal_x_data_.set(other.snapped_normal_x_data_);
@@ -205,6 +212,15 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
 
 
    /**
+            * Obstacle clearance score, on a 0 to 1 scale
+            */
+   public us.ihmc.idl.IDLSequence.Float  getObstacleClearanceScore()
+   {
+      return obstacle_clearance_score_;
+   }
+
+
+   /**
             * Traversability score, on a 0 to 1 scale
             */
    public us.ihmc.idl.IDLSequence.Float  getTraversabilityScore()
@@ -280,6 +296,8 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.height_map_, other.height_map_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.obstacle_clearance_score_, other.obstacle_clearance_score_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.traversability_score_, other.traversability_score_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.traversability_class_, other.traversability_class_, epsilon)) return false;
@@ -316,6 +334,7 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
       if(this.cells_per_axis_ != otherMyClass.cells_per_axis_) return false;
 
       if (!this.height_map_.equals(otherMyClass.height_map_)) return false;
+      if (!this.obstacle_clearance_score_.equals(otherMyClass.obstacle_clearance_score_)) return false;
       if (!this.traversability_score_.equals(otherMyClass.traversability_score_)) return false;
       if (!this.traversability_class_.equals(otherMyClass.traversability_class_)) return false;
       if (!this.snapped_normal_x_data_.equals(otherMyClass.snapped_normal_x_data_)) return false;
@@ -345,6 +364,8 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
       builder.append(this.cells_per_axis_);      builder.append(", ");
       builder.append("height_map=");
       builder.append(this.height_map_);      builder.append(", ");
+      builder.append("obstacle_clearance_score=");
+      builder.append(this.obstacle_clearance_score_);      builder.append(", ");
       builder.append("traversability_score=");
       builder.append(this.traversability_score_);      builder.append(", ");
       builder.append("traversability_class=");

@@ -21,6 +21,8 @@ int32 cells_per_axis
 # Height map in metric values
 float32[<=255000] height_map
 
+# Obstacle clearance score, on a 0 to 1 scale
+float32[<=255000] obstacle_clearance_score
 # Traversability score, on a 0 to 1 scale
 float32[<=255000] traversability_score
 # Classifying traversability according to SnapResult

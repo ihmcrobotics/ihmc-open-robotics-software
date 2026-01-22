@@ -36,6 +36,7 @@ public abstract class RDXRobotPerceptionVisualizersPanel extends RDXPerceptionVi
    protected RDXROS2ImageMessageVisualizer steppingCameraDepthImageVisualizer;
    protected RDXROS2YOLOv8Visualizer yoloVisualizer;
    protected RDXROS2HeightMapVisualizer heightMapVisualizer;
+   protected RDXROS2HeightMapVisualizer yoloMapVisualizer;
    protected RDXDetectionManagerSettings detectionManagerSettings;
    protected RDXROS2FramePlanarRegionsVisualizer planarRegionsVisualizer;
 
@@ -141,6 +142,11 @@ public abstract class RDXRobotPerceptionVisualizersPanel extends RDXPerceptionVi
    public RDXROS2HeightMapVisualizer getHeightMapVisualizer()
    {
       return heightMapVisualizer;
+   }
+
+   public RDXROS2HeightMapVisualizer getYOLOObstacleMapVisualizer()
+   {
+      return yoloMapVisualizer;
    }
 
    public RDXROS2FramePlanarRegionsVisualizer getPlanarRegionsVisualizer()

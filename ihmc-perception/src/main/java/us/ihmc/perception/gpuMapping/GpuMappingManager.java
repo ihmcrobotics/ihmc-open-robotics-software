@@ -184,20 +184,22 @@ public class GpuMappingManager
         terrainMapMessagePublisher.publish(terrainMapMessage);
     }
 
+    public void updateChunkedMap()
+    {
+       // Publish the height map to anyone who is subscribing
+       Mat hostGlobalHeightMap = new Mat();
+       // Don't destroy this mat as its being used in the extractor till that finish's
+       GpuMat deviceGlobalHeightMap = heightMapExtractor.getHeightMap();
+       deviceGlobalHeightMap.download(hostGlobalHeightMap);
+
+       chunkedMapManager.update(hostGlobalHeightMap, heightMapCenterPoint);
+
+       hostGlobalHeightMap.close();
+    }
+
    public void publishChunkedMap()
    {
-      if (heightMapParameters.getEnableChunkedMap())
-      {
-         // Publish the height map to anyone who is subscribing
-         Mat hostGlobalHeightMap = new Mat();
-         // Don't destroy this mat as its being used in the extractor till that finish's
-         GpuMat deviceGlobalHeightMap = heightMapExtractor.getHeightMap();
-         deviceGlobalHeightMap.download(hostGlobalHeightMap);
-
-         chunkedMapManager.updateAndPublish(hostGlobalHeightMap, heightMapCenterPoint);
-
-         hostGlobalHeightMap.close();
-      }
+      chunkedMapManager.publishChunkedMap();
    }
 
    public HeightMapData getLatestHeightMapData()
