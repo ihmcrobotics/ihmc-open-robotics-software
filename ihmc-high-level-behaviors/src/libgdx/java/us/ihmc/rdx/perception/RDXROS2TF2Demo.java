@@ -16,18 +16,13 @@ import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class RDXROS2TF2Demo
 {
-   private final ROS2Node ros2Node = new ROS2NodeBuilder().build("tf2_demo_node");
-
    private final Map<ROS2MutableFrame, RDXPose3DGizmo> mutableFrameMap = new HashMap<>();
    private final Map<ROS2StaticFrame, RDXReferenceFrameGraphic> staticFrameMap = new HashMap<>();
    private final Map<String, ReferenceFrame> allFrames = new TreeMap<>();
@@ -37,25 +32,22 @@ public class RDXROS2TF2Demo
 
    private final ImString frameIdToAdd = new ImString();
    private final ImInt parentFrameIdIndex = new ImInt();
+   private final ImInt frameToRemoveIndex = new  ImInt();
 
    private final float[] transformYawPitchRoll = new float[3];
    private final float[] transformTranslation = new float[3];
 
    private final Throttler updateThrottler = new Throttler().setFrequency(60.0);
 
-   private final AtomicBoolean destroyed = new AtomicBoolean(false);
-
-   public RDXROS2TF2Demo()
+   private RDXROS2TF2Demo()
    {
-      Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "TF2DemoDestroy"));
-
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
          @Override
          public void create()
          {
             addFrame(ReferenceFrameTools.getWorldFrame());
-            addFrame(new ROS2StaticFrame(ros2Node, "map", ReferenceFrame.getWorldFrame(), new RigidBodyTransform()));
+            addFrame(new ROS2StaticFrame("map", ReferenceFrame.getWorldFrame(), new RigidBodyTransform()));
 
             baseUI.getImGuiPanelManager().addPanel("Settings", this::renderSettings);
 
@@ -89,7 +81,7 @@ public class RDXROS2TF2Demo
                                                                          new Vector3D(transformTranslation[0],
                                                                                       transformTranslation[1],
                                                                                       transformTranslation[2]));
-               ROS2MutableFrame mutableFrame = new ROS2MutableFrame(ros2Node, frameIdToAdd.get(), parentFrame, initialOffset);
+               ROS2MutableFrame mutableFrame = new ROS2MutableFrame(frameIdToAdd.get(), parentFrame, initialOffset);
                addFrame(mutableFrame);
             }
 
@@ -103,11 +95,18 @@ public class RDXROS2TF2Demo
                                                                          new Vector3D(transformTranslation[0],
                                                                                       transformTranslation[1],
                                                                                       transformTranslation[2]));
-               ROS2StaticFrame staticFrame = new ROS2StaticFrame(ros2Node, frameIdToAdd.get(), parentFrame, initialOffset);
+               ROS2StaticFrame staticFrame = new ROS2StaticFrame(frameIdToAdd.get(), parentFrame, initialOffset);
                addFrame(staticFrame);
             }
 
             ImGui.endDisabled();
+
+            ImGui.separator();
+
+            ImGui.combo("###FrameToRemove", frameToRemoveIndex, frameIds);
+            ImGui.sameLine();
+            if (ImGui.button("Remove"))
+               removeFrame(allFrames.get(frameIds[frameToRemoveIndex.get()]));
          }
 
          @Override
@@ -115,43 +114,75 @@ public class RDXROS2TF2Demo
          {
             staticFrameMap.values().forEach(RDXReferenceFrameGraphic::dispose);
             baseUI.dispose();
-            destroy();
          }
       });
+   }
+
+   private void updateFrameIds()
+   {
+      frameIds = new String[allFrames.size()];
+      int i = 0;
+      for (CharSequence id : allFrames.keySet())
+      {
+         frameIds[i++] = id.toString();
+      }
    }
 
    private void addFrame(ReferenceFrame frame)
    {
       allFrames.put(frame.getName(), frame);
-      frameIds = new String[allFrames.size()];
-      int i = 0;
-      for (String id : allFrames.keySet())
-      {
-         frameIds[i++] = id;
-      }
+
+      updateFrameIds();
 
       if (frame instanceof ROS2StaticFrame staticFrame)
       {
          RDXReferenceFrameGraphic referenceFrameGraphic = new RDXReferenceFrameGraphic(0.3, Color.RED);
          referenceFrameGraphic.setToReferenceFrame(staticFrame);
-         baseUI.getPrimaryScene().addRenderableProvider(referenceFrameGraphic);
+         baseUI.getPrimaryScene().addRenderableProvider(referenceFrameGraphic, referenceFrameGraphic);
          staticFrameMap.put(staticFrame, referenceFrameGraphic);
       }
       else if (frame instanceof ROS2MutableFrame mutableFrame)
       {
          RDXPose3DGizmo poseGizmo = new RDXPose3DGizmo(mutableFrame, mutableFrame.getTransformToParent());
          poseGizmo.createAndSetupDefault(baseUI.getPrimary3DPanel());
-         baseUI.getPrimaryScene().addRenderableProvider(poseGizmo);
          mutableFrameMap.put(mutableFrame, poseGizmo);
       }
    }
 
+   private void removeFrame(ReferenceFrame frameToRemove)
+   {
+      allFrames.remove(frameToRemove.getName());
+
+      if (frameToRemove instanceof ROS2MutableFrame mutableFrame)
+      {
+         RDXPose3DGizmo gizmo = mutableFrameMap.remove(mutableFrame);
+         if (gizmo != null)
+         {
+            gizmo.destroyDefault(baseUI.getPrimary3DPanel());
+         }
+      }
+      else if (frameToRemove instanceof ROS2StaticFrame staticFrame)
+      {
+         RDXReferenceFrameGraphic graphic = staticFrameMap.remove(staticFrame);
+         baseUI.getPrimaryScene().removeRenderable(graphic);
+         if (graphic != null)
+            graphic.dispose();
+      }
+      frameToRemove.remove();
+
+      updateFrameIds();
+   }
+
    private void update()
    {
+      // Update all frames
+      if (updateThrottler.run()) // TODO: remove update throttler
+         allFrames.values().forEach(ReferenceFrame::update);
+
       // Update mutable reference frames from the graphics
       mutableFrameMap.forEach((frame, gizmo) ->
       {
-         if (!frame.getTransformToParent().geometricallyEquals(gizmo.getTransformToParent(), 1E-4))
+         if (gizmo.isBeingManipulated() && !frame.getTransformToParent().geometricallyEquals(gizmo.getTransformToParent(), 1E-4))
          {
             frame.setNewTransformToParent(gizmo.getTransformToParent());
          }
@@ -159,19 +190,6 @@ public class RDXROS2TF2Demo
 
       // Update static frame graphics from the frame
       staticFrameMap.values().forEach(RDXReferenceFrameGraphic::updateFromLastGivenFrame);
-
-      // Update all frames
-      if (updateThrottler.run()) // TODO: remove update throttler
-         allFrames.values().forEach(ReferenceFrame::update);
-   }
-
-   private void destroy()
-   {
-      if (destroyed.getAndSet(false))
-      {
-         allFrames.values().forEach(ReferenceFrame::remove);
-         ros2Node.destroy();
-      }
    }
 
    public static void main(String[] args)

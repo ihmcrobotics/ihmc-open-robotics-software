@@ -1,15 +1,12 @@
 package us.ihmc.communication.ros2.tf2;
 
+import builtin_interfaces.msg.dds.Time;
 import geometry_msgs.msg.dds.TransformStamped;
 import tf2_msgs.msg.dds.TFMessage;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
-import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.ros2.ROS2Subscription;
-
-import java.util.List;
 
 import static us.ihmc.communication.ros2.tf2.ROS2FrameTools.*;
 
@@ -21,17 +18,11 @@ public abstract class ROS2Frame extends ReferenceFrame
    private final TFMessage tfStaticMessageToPublish;
    private final ROS2Publisher<TFMessage> tfStaticPublisher;
 
-   private final TFMessage tfMessageToReceive;
-   private final ROS2Subscription<TFMessage> tfSubscription;
+   protected final Time updateTime;
 
-   private int lastPublishTimestampSeconds;
-   private int lastPublishTimestampNanos;
-
-   private volatile boolean readyToTakeData = false;
    private volatile boolean hasBeenRemoved = false;
 
-   protected ROS2Frame(ROS2Node ros2Node,
-                       String id,
+   protected ROS2Frame(String id,
                        ReferenceFrame parentFrame,
                        RigidBodyTransformReadOnly transformToParent,
                        boolean isAStationaryFrame,
@@ -40,94 +31,34 @@ public abstract class ROS2Frame extends ReferenceFrame
    {
       super(id, parentFrame, transformToParent, isAStationaryFrame, isZUpFrame, isStatic);
 
-      if (ros2Node != null)
-      {
-         tfMessageToPublish = new TFMessage();
-         tfPublisher = ros2Node.createPublisher(TF_TOPIC);
+      updateTime = new Time();
+      markUpdateTime();
 
-         tfStaticMessageToPublish = new TFMessage();
-         tfStaticPublisher = ros2Node.createPublisher(TF_STATIC_TOPIC);
+      ROS2Node ros2Node = ROS2TFTree.getInstance().getTFNode();
 
-         tfMessageToReceive = new TFMessage();
-         tfSubscription = ros2Node.createSubscription(isStatic ? TF_STATIC_TOPIC : TF_TOPIC, this::receiveTFMessage);
-      }
-      else
-      {
-         tfPublisher = null;
-         tfMessageToPublish = null;
+      tfMessageToPublish = new TFMessage();
+      tfPublisher = ros2Node.createPublisher(TF_TOPIC);
 
-         tfStaticPublisher = null;
-         tfStaticMessageToPublish = null;
-
-         tfSubscription = null;
-         tfMessageToReceive = null;
-      }
-
-      publishTFMessages();
-
-      readyToTakeData = true;
+      tfStaticMessageToPublish = new TFMessage();
+      tfStaticPublisher = ros2Node.createPublisher(TF_STATIC_TOPIC);
    }
 
-   private void receiveTFMessage(@SuppressWarnings("deprecation") Subscriber<TFMessage> subscriber)
+   protected void markUpdateTime()
    {
-      // Don't take data while initializing to avoid a race condition that causes createSubscription to hang on KEEP_HISTORY QoS
-      // TODO: Remove once race condition is fixed
-      if (!readyToTakeData)
-         return;
-
-      if (hasBeenRemoved)
-         return;
-
-      // Read the new message
-      subscriber.takeNextData(tfMessageToReceive, null);
-
-      // Ignore null or empty messages
-      if (tfMessageToReceive == null || tfMessageToReceive.getTransforms().isEmpty())
-         return;
-
-      // Find the matching transform (if it exists)
-      List<TransformStamped> transforms = tfMessageToReceive.getTransforms();
-      TransformStamped matchingTransform = null;
-      //noinspection ForLoopReplaceableByForEach
-      for (int i = 0; i < transforms.size(); ++i)
-      {
-         TransformStamped transform = transforms.get(i);
-         if (transform.getChildFrameIdAsString().equals(getFrameId()))
-         {
-            matchingTransform = transform;
-            break;
-         }
-      }
-
-      // Do nothing if the message doesn't contain a matching transform
-      if (matchingTransform == null)
-         return;
-
-      // Check whether the matching transform is newer than our transform. If it is, trigger onNewTransformReceived method.
-      int matchingTimestampSeconds = matchingTransform.getHeader().getStamp().getSec();
-      int matchingTimestampNanos = (int) matchingTransform.getHeader().getStamp().getNanosec();
-      if (matchingTimestampSeconds > lastPublishTimestampSeconds || (matchingTimestampSeconds == lastPublishTimestampSeconds
-                                                                     && matchingTimestampNanos > lastPublishTimestampNanos))
-      {
-         onNewTransformReceived(matchingTransform);
-      }
+      long currentTimeMillis = System.currentTimeMillis();
+      updateTime.setSec((int) (currentTimeMillis / 1000));
+      updateTime.setNanosec((currentTimeMillis % 1000) * 1000000);
    }
-
-   protected abstract void onNewTransformReceived(TransformStamped newTransform);
 
    protected void publishTFMessages()
    {
       if (hasBeenRemoved)
          return;
 
-      long currentTimeMillis = System.currentTimeMillis();
-      lastPublishTimestampSeconds = (int) (currentTimeMillis / 1000);
-      lastPublishTimestampNanos = (int) (currentTimeMillis % 1000) * 1000000;
-
       tfMessageToPublish.getTransforms().clear();
       tfStaticMessageToPublish.getTransforms().clear();
 
-      packTFMessages(this, lastPublishTimestampSeconds, lastPublishTimestampNanos, tfMessageToPublish, tfStaticMessageToPublish);
+      packTFMessages(this, updateTime, tfMessageToPublish, tfStaticMessageToPublish);
 
       if (!tfMessageToPublish.getTransforms().isEmpty())
          tfPublisher.publish(tfMessageToPublish);
@@ -159,7 +90,5 @@ public abstract class ROS2Frame extends ReferenceFrame
          tfPublisher.remove();
       if (tfStaticPublisher != null)
          tfStaticPublisher.remove();
-      if (tfSubscription != null)
-         tfSubscription.remove();
    }
 }

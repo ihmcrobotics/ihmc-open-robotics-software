@@ -149,13 +149,13 @@ public class ImageSensorPublishThread extends RepeatingTaskThread
       // Ensure we've added these frames
       if (cameraFrame == null)
       {
-         cameraFrame = new ROS2FollowingFrame(ros2Node, "ros2_" + imageFrame.getName(), imageSensor.getSensorFrame(), imageFrame);
+         cameraFrame = new ROS2FollowingFrame("ros2_" + imageFrame.getName(), imageSensor.getSensorFrame(), imageFrame);
          ros2CameraFrames.put(imageKey, cameraFrame);
       }
 
       if (opticalFrame == null)
       {
-         opticalFrame = new ROS2StaticFrame(ros2Node, cameraFrame.getFrameId() + "_optical", cameraFrame, CAMERA_TO_OPTICAL_TRANSFORM);
+         opticalFrame = new ROS2StaticFrame(cameraFrame.getFrameId() + "_optical", cameraFrame, CAMERA_TO_OPTICAL_TRANSFORM);
          ros2OpticalFrames.put(imageKey, opticalFrame);
       }
 
@@ -165,8 +165,8 @@ public class ImageSensorPublishThread extends RepeatingTaskThread
          cameraFrame.remove();
          opticalFrame.remove();
 
-         cameraFrame = new ROS2FollowingFrame(ros2Node, "ros2_" + imageFrame.getName(), imageSensor.getSensorFrame(), imageFrame);
-         opticalFrame = new ROS2StaticFrame(ros2Node, cameraFrame.getFrameId() + "_optical", cameraFrame, CAMERA_TO_OPTICAL_TRANSFORM);
+         cameraFrame = new ROS2FollowingFrame("ros2_" + imageFrame.getName(), imageSensor.getSensorFrame(), imageFrame);
+         opticalFrame = new ROS2StaticFrame(cameraFrame.getFrameId() + "_optical", cameraFrame, CAMERA_TO_OPTICAL_TRANSFORM);
 
          ros2CameraFrames.replace(imageKey, cameraFrame);
          ros2OpticalFrames.replace(imageKey, opticalFrame);
