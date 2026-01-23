@@ -1,8 +1,5 @@
 package us.ihmc.avatar;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import us.ihmc.avatar.factory.HumanoidRobotControlTask;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.CrossRobotCommandResolver;
@@ -20,9 +17,6 @@ public class ControllerTask extends HumanoidRobotControlTask
    private final long divisor;
    private final ThreadTimer timer;
    private final YoLong ticksBehindScheduled;
-
-   protected final List<Runnable> postControllerCallbacks = new ArrayList<>();
-   protected final List<Runnable> schedulerThreadRunnables = new ArrayList<>();
 
    public ControllerTask(String prefix, AvatarControllerThreadInterface controllerThread, long divisor, double schedulerDt, FullHumanoidRobotModel masterFullRobotModel)
    {
@@ -53,8 +47,9 @@ public class ControllerTask extends HumanoidRobotControlTask
       timer.start();
       long schedulerTick = controllerThread.getHumanoidRobotContextData().getSchedulerTick();
       ticksBehindScheduled.set(schedulerTick - timer.getTickCount() * divisor);
+      runAll(preTaskCallbacks);
       controllerThread.run();
-      runAll(postControllerCallbacks);
+      runAll(postTaskCallbacks);
       timer.stop();
    }
 
@@ -71,17 +66,4 @@ public class ControllerTask extends HumanoidRobotControlTask
       controllerResolver.resolveHumanoidRobotContextDataScheduler(masterContext, controllerThread.getHumanoidRobotContextData());
       controllerResolver.resolveHumanoidRobotContextDataEstimator(masterContext, controllerThread.getHumanoidRobotContextData());
    }
-
-   @Override
-   public void addCallbackPostTask(Runnable runnable)
-   {
-      postControllerCallbacks.add(runnable);
-   }
-
-   @Override
-   public void addRunnableOnSchedulerThread(Runnable runnable)
-   {
-      schedulerThreadRunnables.add(runnable);
-   }
-
 }

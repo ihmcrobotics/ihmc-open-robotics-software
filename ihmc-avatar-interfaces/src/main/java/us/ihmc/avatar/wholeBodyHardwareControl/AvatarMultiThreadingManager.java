@@ -66,15 +66,6 @@ public class AvatarMultiThreadingManager
    private final FrequencyCalculator estimatorThreadFrequencyCalculator = new FrequencyCalculator(false);
    private final YoLong estimatorThreadComputeTime = new YoLong("estimatorThreadComputeTime", registry);
 
-   private final YoDouble controllerThreadUpdateRate = new YoDouble("controllerThreadUpdateRate", registry);
-   private final FrequencyCalculator controllerThreadFrequencyCalculator = new FrequencyCalculator(false);
-
-   private final YoDouble stepGeneratorThreadUpdateRate = new YoDouble("stepGeneratorThreadUpdateRate", registry);
-   private final FrequencyCalculator stepGeneratorThreadFrequencyCalculator = new FrequencyCalculator(false);
-
-   private final YoDouble ikStreamingThreadUpdateRate = new YoDouble("ikStreamingThreadUpdateRate", registry);
-   private final FrequencyCalculator ikStreamingThreadFrequencyCalculator = new FrequencyCalculator(false);
-
    private final DisposableRobotController threadScheduler;
 
    private final PeriodicParameters periodicParameters;
@@ -86,14 +77,7 @@ public class AvatarMultiThreadingManager
    private final List<Runnable> preEstimatorThreadRunnables = new ArrayList<>();
    private final List<Runnable> postEstimatorThreadRunnables = new ArrayList<>();
 
-   private ControllerTask controllerTask;
-   private StepGeneratorTask stepGeneratorTask;
-   private final AvatarStepGeneratorThread stepGeneratorThread;
-
-   private final AvatarAffinityInterface affinity;
-
    private final RealtimeROS2Node estimatorROS2Node;
-   private final RealtimeROS2Node controllerROS2Node;
 
    private final HumanoidRobotContextData masterContext;
 
@@ -102,23 +86,17 @@ public class AvatarMultiThreadingManager
    private final TimestampProvider monotonicTimeProvider;
 
    private final boolean useRealtimeThreads;
-   private final boolean useMultiThreading;
 
    private final AvatarLowLevelOutputProcessor lowLevelOutputProcessor;
    private volatile boolean running = false;
 
    public AvatarMultiThreadingManager(String prefix,
-                                      DRCRobotModel robotModel,
                                       RealtimeROS2Node estimatorROS2Node,
-                                      RealtimeROS2Node controllerROS2Node,
                                       HumanoidRobotContextData masterContext,
-                                      FullHumanoidRobotModel masterFullRobotModel,
                                       HardwareCommunicationInterface hardwareCommunicationInterface,
                                       AvatarLowLevelOutputProcessor lowLevelOutputProcessor,
                                       AvatarEstimatorThread estimatorThread,
-                                      AvatarControllerThread controllerThread,
-                                      AvatarStepGeneratorThread stepGeneratorThread,
-                                      IKStreamingRTThread ikStreamingThread,
+                                      List<HumanoidRobotControlTask> tasks,
                                       AvatarAffinityInterface affinity,
                                       double masterThreadDt,
                                       MonotonicTime period,
@@ -130,32 +108,16 @@ public class AvatarMultiThreadingManager
                                       YoRegistry rootRegistry)
    {
       this.estimatorROS2Node = estimatorROS2Node;
-      this.controllerROS2Node = controllerROS2Node;
       this.masterContext = masterContext;
       this.hardwareCommunicationInterface = hardwareCommunicationInterface;
       this.lowLevelOutputProcessor = lowLevelOutputProcessor;
       this.estimatorThread = estimatorThread;
-      this.stepGeneratorThread = stepGeneratorThread;
-      this.affinity = affinity;
       this.masterThreadDt = masterThreadDt;
       this.monotonicTimeProvider = monotonicTimeProvider;
       this.useRealtimeThreads = useRealtimeThreads;
-      this.useMultiThreading = useMultiThreading;
       this.jvmStatisticsGenerator = jvmStatisticsGenerator;
       this.rootRegistry = rootRegistry;
       this.yoVariableServer = yoVariableServer;
-
-      // Set up the different tasks
-      List<HumanoidRobotControlTask> tasks = new ArrayList<>();
-
-      if (controllerThread != null)
-         tasks.add(setupControllerTaskAndThread(robotModel, controllerThread, masterFullRobotModel, yoVariableServer));
-
-      if (stepGeneratorThread != null)
-         tasks.add(setupStepGeneratorTaskAndThread(robotModel, stepGeneratorThread, masterFullRobotModel, yoVariableServer));
-
-      if (ikStreamingThread != null)
-         tasks.add(setupIKStreamingTaskAndThread(ikStreamingThread, yoVariableServer));
 
       // Set up the thread manager
       if (useMultiThreading)
@@ -195,134 +157,6 @@ public class AvatarMultiThreadingManager
       rootRegistry.addChild(registry);
    }
 
-   private HumanoidRobotControlTask setupControllerTaskAndThread(DRCRobotModel robotModel,
-                                                                 AvatarControllerThread controllerThread,
-                                                                 FullHumanoidRobotModel masterFullRobotModel,
-                                                                 YoVariableServer yoVariableServer)
-   {
-      // Set up Controller Task
-      int controllerDivisor = (int) Math.round(robotModel.getControllerDT() / masterThreadDt);
-      if (!Precision.equals(robotModel.getControllerDT() / masterThreadDt, controllerDivisor))
-         throw new RuntimeException("Controller DT must be multiple of master thread DT.");
-
-      controllerTask = new ControllerTask("Controller", controllerThread, controllerDivisor, masterThreadDt, masterFullRobotModel);
-
-      if (yoVariableServer != null)
-         controllerTask.addCallbackPostTask(() -> yoVariableServer.update(controllerThread.getHumanoidRobotContextData().getTimestamp(),
-                                                                          controllerThread.getYoVariableRegistry()));
-
-      controllerTask.addCallbackPostTask(lowLevelOutputProcessor::startDesiredsInterpolation);
-
-      controllerTask.addCallbackPostTask(()->
-                                         {
-                                            controllerThreadFrequencyCalculator.ping();
-                                            controllerThreadUpdateRate.set(controllerThreadFrequencyCalculator.getFrequency());
-                                         });
-
-      // Set up Controller Thread
-      if (useRealtimeThreads && useMultiThreading)
-      {
-         RealtimeThread controllerRealtimeThread = new RealtimeThread(affinity.getControllerThreadPriority(),
-                                                                      controllerTask,
-                                                                      controllerTask.getClass().getSimpleName() + "Thread");
-         controllerRealtimeThread.setAffinity(affinity.getControllerThreadProcessor());
-         controllerRealtimeThread.start();
-
-         childThreads.add(controllerRealtimeThread);
-      }
-      else if (!useRealtimeThreads && useMultiThreading)
-      {
-         Thread controllerNonRealtimeThread = new Thread(controllerTask, controllerTask.getClass().getSimpleName() + "Thread");
-         controllerNonRealtimeThread.start();
-
-         childThreads.add(controllerNonRealtimeThread);
-      }
-
-      return controllerTask;
-   }
-
-   private HumanoidRobotControlTask setupStepGeneratorTaskAndThread(DRCRobotModel robotModel,
-                                                                    AvatarStepGeneratorThread stepGeneratorThread,
-                                                                    FullHumanoidRobotModel masterFullRobotModel,
-                                                                    YoVariableServer yoVariableServer)
-   {
-      // Set up Step Generator Task
-      int stepGeneratorDivisor = (int) Math.round(robotModel.getStepGeneratorDT() / masterThreadDt);
-      if (!Precision.equals(robotModel.getStepGeneratorDT() / masterThreadDt, stepGeneratorDivisor))
-         throw new RuntimeException("Step generator DT must be multiple of master thread DT.");
-
-      stepGeneratorTask = new StepGeneratorTask("StepGenerator", stepGeneratorThread, stepGeneratorDivisor, masterThreadDt, masterFullRobotModel);
-
-      if (yoVariableServer != null)
-         stepGeneratorTask.addCallbackPostTask(() -> yoVariableServer.update(stepGeneratorThread.getHumanoidRobotContextData().getTimestamp(),
-                                                                             stepGeneratorThread.getYoVariableRegistry()));
-
-      stepGeneratorTask.addCallbackPostTask(()->
-                                         {
-                                            stepGeneratorThreadFrequencyCalculator.ping();
-                                            stepGeneratorThreadUpdateRate.set(stepGeneratorThreadFrequencyCalculator.getFrequency());
-                                         });
-
-      // Set up Step Generator Thread
-      if (useRealtimeThreads && useMultiThreading)
-      {
-         RealtimeThread stepGeneratorRealtimeThread = new RealtimeThread(affinity.getStepGeneratorThreadPriority(),
-                                                                         stepGeneratorTask,
-                                                                         stepGeneratorTask.getClass().getSimpleName() + "Thread");
-         stepGeneratorRealtimeThread.setAffinity(affinity.getStepGeneratorThreadProcessor());
-         stepGeneratorRealtimeThread.start();
-
-         childThreads.add(stepGeneratorRealtimeThread);
-      }
-      else if (!useRealtimeThreads && useMultiThreading)
-      {
-         Thread stepGeneratorNonRealtimeThread = new Thread(stepGeneratorTask, stepGeneratorTask.getClass().getSimpleName() + "Thread");
-         stepGeneratorNonRealtimeThread.start();
-
-         childThreads.add(stepGeneratorNonRealtimeThread);
-      }
-
-      return stepGeneratorTask;
-   }
-
-   private HumanoidRobotControlTask setupIKStreamingTaskAndThread(IKStreamingRTPluginFactory.IKStreamingRTThread ikStreamingThread,
-                                                                  YoVariableServer yoVariableServer)
-   {
-      // Set up Step Generator Task
-      IKStreamingRTPluginFactory.IKStreamingRTTask ikStreamingTask = IKStreamingRTPluginFactory.createIKStreamingRTTask(ikStreamingThread, masterThreadDt);
-
-      if (yoVariableServer != null)
-         ikStreamingTask.addCallbackPostTask(() -> yoVariableServer.update(ikStreamingThread.getHumanoidRobotContextData().getTimestamp(),
-                                                                           ikStreamingThread.getYoVariableRegistry()));
-
-      ikStreamingTask.addCallbackPostTask(() ->
-                                          {
-                                             ikStreamingThreadFrequencyCalculator.ping();
-                                             ikStreamingThreadUpdateRate.set(ikStreamingThreadFrequencyCalculator.getFrequency());
-                                          });
-
-      // Set up Step Generator Thread
-      if (useRealtimeThreads && useMultiThreading)
-      {
-         RealtimeThread ikStreamingRealtimeThread = new RealtimeThread(affinity.getIKStreamingThreadPriority(),
-                                                                       ikStreamingTask,
-                                                                       ikStreamingTask.getClass().getSimpleName() + "Thread");
-         ikStreamingRealtimeThread.setAffinity(affinity.getIKStreamingThreadProcessor());
-         ikStreamingRealtimeThread.start();
-
-         childThreads.add(ikStreamingRealtimeThread);
-      }
-      else if (!useRealtimeThreads && useMultiThreading)
-      {
-         Thread ikStreamingNonRealtimeThread = new Thread(ikStreamingTask, ikStreamingTask.getClass().getSimpleName() + "Thread");
-         ikStreamingNonRealtimeThread.start();
-
-         childThreads.add(ikStreamingNonRealtimeThread);
-      }
-
-      return ikStreamingTask;
-   }
-
    public void setListenToBlockingCondition(boolean listenToBlockingCondition)
    {
       this.listenToBlockingCondition.set(listenToBlockingCondition);
@@ -336,7 +170,6 @@ public class AvatarMultiThreadingManager
    public void start()
    {
       estimatorROS2Node.spin();
-      controllerROS2Node.spin();
       hardwareCommunicationInterface.start();
       jvmStatisticsGenerator.start();
       if (useRealtimeThreads)
@@ -362,7 +195,6 @@ public class AvatarMultiThreadingManager
    public void stop()
    {
       estimatorROS2Node.stopSpinning();
-      controllerROS2Node.stopSpinning();
       hardwareCommunicationInterface.stop();
       jvmStatisticsGenerator.stop();
    }
@@ -371,9 +203,6 @@ public class AvatarMultiThreadingManager
    {
       estimatorROS2Node.destroy();
       System.out.println("Estimator node has been destroyed");
-
-      controllerROS2Node.destroy();
-      System.out.println("Controller node has been destroyed");
 
       hardwareCommunicationInterface.destroy();
 
@@ -384,6 +213,7 @@ public class AvatarMultiThreadingManager
 
       running = false;
 
+      threadScheduler.dispose();
       if (useRealtimeThreads)
       {
          for (int i = 0; i < childThreads.size(); i++)
@@ -399,8 +229,6 @@ public class AvatarMultiThreadingManager
 
          ((RepeatingTaskThread) masterThread).stopRepeating();
       }
-
-      stepGeneratorThread.destroy();
 
       ThreadTools.sleep(1000L);
 
@@ -494,11 +322,6 @@ public class AvatarMultiThreadingManager
       return estimatorROS2Node;
    }
 
-   public RealtimeROS2Node getControllerROS2Node()
-   {
-      return controllerROS2Node;
-   }
-
    public void addPreEstimatorThreadRunnable(Runnable runnable)
    {
       preEstimatorThreadRunnables.add(runnable);
@@ -507,26 +330,6 @@ public class AvatarMultiThreadingManager
    public void addPostEstimatorThreadRunnable(Runnable runnable)
    {
       postEstimatorThreadRunnables.add(runnable);
-   }
-
-   public void addPreControllerThreadRunnable(Runnable runnable)
-   {
-      controllerTask.addCallbackPreTask(runnable);
-   }
-
-   public void addPostControllerThreadRunnable(Runnable runnable)
-   {
-      controllerTask.addCallbackPostTask(runnable);
-   }
-
-   public void addPreStepGeneratorThreadRunnable(Runnable runnable)
-   {
-      stepGeneratorTask.addCallbackPreTask(runnable);
-   }
-
-   public void addPostStepGeneratorThreadRunnable(Runnable runnable)
-   {
-      stepGeneratorTask.addCallbackPostTask(runnable);
    }
 
    private void updateYoVariableServer()
