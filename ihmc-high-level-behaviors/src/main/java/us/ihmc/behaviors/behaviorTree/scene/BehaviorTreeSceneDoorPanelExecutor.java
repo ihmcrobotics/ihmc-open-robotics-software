@@ -27,6 +27,23 @@ public class BehaviorTreeSceneDoorPanelExecutor extends BehaviorTreeSceneObjectE
    }
 
    @Override
+   public void updateTransform()
+   {
+      PersistentDetection mechanismDetection = getPersistentDetection();
+      Vector3DBasics mechanismPosition = mechanismDetection.getFilteredTransform().getTranslation();
+
+      // Set orientation to Z-up, then yaw so Y axis points from mechanism to panel
+      mechanismToPanel.set(panelDetection.getFilteredTransform().getTranslation());
+      mechanismToPanel.sub(mechanismPosition);
+      double yaw = Math.atan2(mechanismToPanel.getY(), mechanismToPanel.getX());
+      orientation.setToYawOrientation(yaw);
+
+      if (!(transform.getValueReadOnly().getRotation().geometricallyEquals(orientation, 1e-5)
+            && transform.getValueReadOnly().getTranslation().epsilonEquals(mechanismPosition, 1e-5)))
+         transform.getValueAndModify().set(orientation, mechanismPosition);
+   }
+
+   @Override
    public void update()
    {
       PersistentDetection mechanismDetection = getPersistentDetection();
@@ -35,17 +52,7 @@ public class BehaviorTreeSceneDoorPanelExecutor extends BehaviorTreeSceneObjectE
       {
          if (mechanismDetection.isStable() && panelDetection.isStable())
          {
-            Vector3DBasics mechanismPosition = mechanismDetection.getFilteredTransform().getTranslation();
-
-            // Set orientation to Z-up, then yaw so Y axis points from mechanism to panel
-            mechanismToPanel.set(panelDetection.getFilteredTransform().getTranslation());
-            mechanismToPanel.sub(mechanismPosition);
-            double yaw = Math.atan2(mechanismToPanel.getY(), mechanismToPanel.getX());
-            orientation.setToYawOrientation(yaw);
-
-            if (!(transform.getValueReadOnly().getRotation().geometricallyEquals(orientation, 1e-5)
-               && transform.getValueReadOnly().getTranslation().epsilonEquals(mechanismPosition, 1e-5)))
-               transform.getValueAndModify().set(orientation, mechanismPosition);
+            updateTransform();
          }
       }
    }
