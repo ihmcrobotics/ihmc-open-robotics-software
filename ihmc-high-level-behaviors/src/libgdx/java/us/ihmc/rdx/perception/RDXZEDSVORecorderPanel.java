@@ -114,15 +114,15 @@ public class RDXZEDSVORecorderPanel
          }
 
          ImGui.beginDisabled(!paused);
-         if (ImGui.button(labels.get("Next Frame")))
-         {
-            requestedPosition.set((int) latestMessage.getCurrentPosition() + 1);
-            publishPositionRequest();
-         }
-         ImGui.sameLine();
          if (ImGui.button(labels.get("Previous Frame")))
          {
             requestedPosition.set((int) latestMessage.getCurrentPosition() - 1);
+            publishPositionRequest();
+         }
+         ImGui.sameLine();
+         if (ImGui.button(labels.get("Next Frame")))
+         {
+            requestedPosition.set((int) latestMessage.getCurrentPosition() + 1);
             publishPositionRequest();
          }
          ImGui.endDisabled();
