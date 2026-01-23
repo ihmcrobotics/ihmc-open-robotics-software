@@ -45,7 +45,7 @@ public class ROS2TFTree
 
    private ROS2TFTree()
    {
-      Runtime.getRuntime().addShutdownHook(new Thread(this::close));
+      Runtime.getRuntime().addShutdownHook(new Thread(this::close, getClass().getSimpleName() + "Shutdown"));
 
       transforms = new ConcurrentSkipListMap<>(CharSequence::compare);
 
