@@ -25,6 +25,7 @@ public class ROS2BehaviorTreeSubscriptionNode
    private BuildingExplorationStateMessage buildingExplorationStateMessage;
    private LeafNodeStateMessage leafNodeStateMessage;
    private ActionNodeStateMessage actionNodeStateMessage;
+   private NeckActionStateMessage neckActionStateMessage;
    private ChestOrientationActionStateMessage chestOrientationActionStateMessage;
    private FootstepPlanActionStateMessage footstepPlanActionStateMessage;
    private AbilityHandActionStateMessage abilityHandActionStateMessage;
@@ -56,6 +57,7 @@ public class ROS2BehaviorTreeSubscriptionNode
       buildingExplorationStateMessage = null;
       leafNodeStateMessage = null;
       actionNodeStateMessage = null;
+      neckActionStateMessage = null;
       chestOrientationActionStateMessage = null;
       footstepPlanActionStateMessage = null;
       abilityHandActionStateMessage = null;
@@ -233,6 +235,16 @@ public class ROS2BehaviorTreeSubscriptionNode
    public void setBuildingExplorationStateMessage(BuildingExplorationStateMessage buildingExplorationStateMessage)
    {
       this.buildingExplorationStateMessage = buildingExplorationStateMessage;
+   }
+
+   public NeckActionStateMessage getNeckActionStateMessage()
+   {
+      return neckActionStateMessage;
+   }
+
+   public void setNeckActionStateMessage(NeckActionStateMessage neckActionStateMessage)
+   {
+      this.neckActionStateMessage = neckActionStateMessage;
    }
 
    public ChestOrientationActionStateMessage getChestOrientationActionStateMessage()
