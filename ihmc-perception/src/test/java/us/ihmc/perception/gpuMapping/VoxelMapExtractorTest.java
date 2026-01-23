@@ -1,4 +1,4 @@
-package us.ihmc.perception.gpuHeightMap;
+package us.ihmc.perception.gpuMapping;
 
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.perception.camera.CameraIntrinsics;
-import us.ihmc.perception.gpuMapping.VoxelMapExtractor;
 
 public class VoxelMapExtractorTest
 {

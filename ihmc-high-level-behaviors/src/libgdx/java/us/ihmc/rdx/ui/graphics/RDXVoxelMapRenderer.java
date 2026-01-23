@@ -22,6 +22,7 @@ import us.ihmc.rdx.shader.RDXUniform;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 
 /**
  * Renders a voxel map as a point cloud.
@@ -32,12 +33,13 @@ public class RDXVoxelMapRenderer implements RenderableProvider
    private final Renderable renderable = new Renderable();
 
    // Vertex attribute: position only (x, y, z)
-   private final VertexAttributes vertexAttributes = new VertexAttributes(new VertexAttribute(VertexAttributes.Usage.Position, 3, "a_position"));
+   private final VertexAttributes vertexAttributes = new VertexAttributes(VertexAttribute.Position());
 
    // Uniforms
    private float voxelSize = 0.05f; // default, set with update()
-   private float screenWidth = 1920f; // default, updated in shader
    private boolean hasBeenCreated = false;
+
+   private final int floatsPerVertex = vertexAttributes.vertexSize / Float.BYTES;
 
    public void create(int maxVoxels)
    {
@@ -78,7 +80,7 @@ public class RDXVoxelMapRenderer implements RenderableProvider
       // Screen width
       rdxShader.registerUniform(RDXUniform.createGlobalUniform("u_screenWidth", (shader, inputID, renderable, combinedAttributes) ->
       {
-         shader.set(inputID, screenWidth);
+         shader.set(inputID, shader.camera.viewportWidth);
       }));
    }
 
@@ -88,27 +90,26 @@ public class RDXVoxelMapRenderer implements RenderableProvider
     * @param occupiedVoxels    List of Vector3 positions in world coordinates
     * @param voxelSizeInMeters size of a voxel in meters
     */
-   public void update(List<Vector3> occupiedVoxels, float voxelSizeInMeters, float screenWidthPixels)
+   public void update(List<Vector3> occupiedVoxels, float voxelSizeInMeters)
    {
       this.voxelSize = voxelSizeInMeters;
-      this.screenWidth = screenWidthPixels;
 
       FloatBuffer buffer = renderable.meshPart.mesh.getVerticesBuffer(true);
-      buffer.clear();
 
-      for (Vector3 p : occupiedVoxels)
+      int voxelCount = occupiedVoxels.size();
+      if (renderable.meshPart.size != voxelCount)
       {
-         buffer.put(p.x);
-         buffer.put(p.y);
-         buffer.put(p.z);
+         renderable.meshPart.size = voxelCount;
+         buffer.limit(floatsPerVertex * voxelCount);
       }
 
-      // TODO this isn't working so absolutely REST IN PEACE
-      buffer.flip();
-      float[] verts = new float[buffer.remaining()];
-      buffer.get(verts);
-      renderable.meshPart.mesh.setVertices(verts);
-      renderable.meshPart.size = occupiedVoxels.size();
+      IntStream.range(0, voxelCount).parallel().unordered().forEach(i ->
+      {
+         int offset = i * floatsPerVertex;
+         buffer.put(offset, occupiedVoxels.get(i).x);
+         buffer.put(offset + 1, occupiedVoxels.get(i).y);
+         buffer.put(offset + 2, occupiedVoxels.get(i).z);
+      });
    }
 
    @Override
