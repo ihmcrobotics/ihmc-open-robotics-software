@@ -38,6 +38,7 @@ public class ROS2BehaviorTreeMessageTools
       treeStateMessage.getAi2rNodes().clear();
       treeStateMessage.getDoorTraversals().clear();
       treeStateMessage.getBuildingExplorations().clear();
+      treeStateMessage.getNeckActions().clear();
       treeStateMessage.getChestOrientationActions().clear();
       treeStateMessage.getFootstepPlanActions().clear();
       treeStateMessage.getHandPoseActions().clear();
@@ -123,6 +124,12 @@ public class ROS2BehaviorTreeMessageTools
             treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.BUILDING_EXPLORATION);
             treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getDoorTraversals().size());
             buildingExplorationState.toMessage(treeStateMessage.getBuildingExplorations().add());
+         }
+         else if (nodeState instanceof NeckActionState neckActionState)
+         {
+            treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.NECK_ACTION);
+            treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getNeckActions().size());
+            neckActionState.toMessage(treeStateMessage.getNeckActions().add());
          }
          else if (nodeState instanceof ChestOrientationActionState chestOrientationActionState)
          {
@@ -244,6 +251,10 @@ public class ROS2BehaviorTreeMessageTools
       else if (nodeState instanceof BuildingExplorationState buildingExplorationState)
       {
          buildingExplorationState.fromMessage(subscriptionNode.getBuildingExplorationStateMessage());
+      }
+      else if (nodeState instanceof NeckActionState neckActionState)
+      {
+         neckActionState.fromMessage(subscriptionNode.getNeckActionStateMessage());
       }
       else if (nodeState instanceof ChestOrientationActionState chestOrientationActionState)
       {
@@ -385,6 +396,15 @@ public class ROS2BehaviorTreeMessageTools
             subscriptionNode.setBuildingExplorationStateMessage(buildingExplorationStateMessage);
             subscriptionNode.setBehaviorTreeNodeStateMessage(buildingExplorationStateMessage.getState());
             subscriptionNode.setBehaviorTreeNodeDefinitionMessage(buildingExplorationStateMessage.getDefinition().getDefinition());
+         }
+         case BehaviorTreeStateMessage.NECK_ACTION ->
+         {
+            NeckActionStateMessage neckActionStateMessage = treeStateMessage.getNeckActions().get(indexInTypesList);
+            subscriptionNode.setNeckActionStateMessage(neckActionStateMessage);
+            subscriptionNode.setActionNodeStateMessage(neckActionStateMessage.getState());
+            subscriptionNode.setLeafNodeStateMessage(neckActionStateMessage.getState().getState());
+            subscriptionNode.setBehaviorTreeNodeStateMessage(neckActionStateMessage.getState().getState().getState());
+            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(neckActionStateMessage.getDefinition().getDefinition().getDefinition().getDefinition());
          }
          case BehaviorTreeStateMessage.CHEST_ORIENTATION_ACTION ->
          {
