@@ -11,7 +11,7 @@ ihmc {
 }
 
 mainDependencies {
-   api("us.ihmc:simulation-construction-set:0.25.3") // SCS1
+   api("us.ihmc:simulation-construction-set-group:0.25.3") // SCS1
    api("us.ihmc:ihmc-robotics-toolkit:source")
 }
 

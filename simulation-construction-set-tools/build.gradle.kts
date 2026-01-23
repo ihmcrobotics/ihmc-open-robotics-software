@@ -12,7 +12,7 @@ ihmc {
 }
 
 mainDependencies {
-   api("us.ihmc:simulation-construction-set:0.25.3")
+   api("us.ihmc:simulation-construction-set-group:0.25.3")
    api("us.ihmc:scs2-simulation-construction-set:17-0.31.3")
    api("us.ihmc:ihmc-parameter-optimization:source")
    api("us.ihmc:ihmc-java-toolkit:source")
