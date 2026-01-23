@@ -1,7 +1,8 @@
 #ifndef MATH_UTILS
 #define MATH_UTILS
 
-const float EPSILON = 1e-6;
+const float EPSILON_F = 1e-6f;
+const float EPSILON_D = 1e-6;
 const float PI_F = 3.1415927f;
 
 __device__ __forceinline__
@@ -119,7 +120,7 @@ __device__ float3 normalize(float3 v)
 {
     float norm = sqrtf(dot(v, v));
 
-    if (norm < EPSILON)
+    if (norm < EPSILON_F)
         return make_float3(0, 0, 0);
 
     return make_float3(v.x / norm, v.y / norm, v.z / norm);
@@ -140,47 +141,50 @@ __device__ float3 cross3(const float3 &a, const float3 &b)
  **/
 __device__ bool solve3x3System_Determinants(const float* matrixA, const float* vectorB, float* solutionXToPack)
 {
-    float m00 = matrixA[0];
-    float m01 = matrixA[1];
-    float m02 = matrixA[2];
-    float m10 = matrixA[3];
-    float m11 = matrixA[4];
-    float m12 = matrixA[5];
-    float m20 = matrixA[6];
-    float m21 = matrixA[7];
-    float m22 = matrixA[8];
+    double m00 = (double) matrixA[0];
+    double m01 = (double) matrixA[1];
+    double m02 = (double) matrixA[2];
+    double m10 = (double) matrixA[3];
+    double m11 = (double) matrixA[4];
+    double m12 = (double) matrixA[5];
+    double m20 = (double) matrixA[6];
+    double m21 = (double) matrixA[7];
+    double m22 = (double) matrixA[8];
 
     // compute the determinant
-   float det = m00 * m11 * m22 + m01 * m12 * m20 + m02 * m10 * m21 - m02 * m11 * m20 - m01 * m10 * m22 - m00 * m12 * m21;
-   if (fabsf(det) < EPSILON)
+   double det = m00 * m11 * m22 + m01 * m12 * m20 + m02 * m10 * m21 - m02 * m11 * m20 - m01 * m10 * m22 - m00 * m12 * m21;
+   if (fabs(det) < EPSILON_D)
         return false;
 
-   float detMinor00 = m11 * m22 - m12 * m21;
-   float detMinor01 = m10 * m22 - m12 * m20;
-   float detMinor02 = m10 * m21 - m11 * m20;
+   double detMinor00 = m11 * m22 - m12 * m21;
+   double detMinor01 = m10 * m22 - m12 * m20;
+   double detMinor02 = m10 * m21 - m11 * m20;
 
-   float detMinor10 = m01 * m22 - m02 * m21;
-   float detMinor11 = m00 * m22 - m02 * m20;
-   float detMinor12 = m00 * m21 - m01 * m20;
+   double detMinor10 = m01 * m22 - m02 * m21;
+   double detMinor11 = m00 * m22 - m02 * m20;
+   double detMinor12 = m00 * m21 - m01 * m20;
 
-   float detMinor20 = m01 * m12 - m02 * m11;
-   float detMinor21 = m00 * m12 - m02 * m10;
-   float detMinor22 = m00 * m11 - m01 * m10;
+   double detMinor20 = m01 * m12 - m02 * m11;
+   double detMinor21 = m00 * m12 - m02 * m10;
+   double detMinor22 = m00 * m11 - m01 * m10;
 
-   solutionXToPack[0] = 0.0f;
-   solutionXToPack[0] += vectorB[0] * detMinor00 / det;
-   solutionXToPack[0] += vectorB[1] * -detMinor10 / det;
-   solutionXToPack[0] += vectorB[2] * detMinor20 / det;
+   double solutionX0 = 0.0;
+   solutionX0 += vectorB[0] * detMinor00 / det;
+   solutionX0 += vectorB[1] * -detMinor10 / det;
+   solutionX0 += vectorB[2] * detMinor20 / det;
+   solutionXToPack[0] = (float) solutionX0;
 
-   solutionXToPack[1] = 0.0f;
-   solutionXToPack[1] += vectorB[0] * -detMinor01 / det;
-   solutionXToPack[1] += vectorB[1] * detMinor11 / det;
-   solutionXToPack[1] += vectorB[2] * -detMinor21 / det;
+   double solutionX1 = 0.0;
+   solutionX1 += vectorB[0] * -detMinor01 / det;
+   solutionX1 += vectorB[1] * detMinor11 / det;
+   solutionX1 += vectorB[2] * -detMinor21 / det;
+   solutionXToPack[1] = (float) solutionX1;
 
-   solutionXToPack[2] = 0.0f;
-   solutionXToPack[2] += vectorB[0] * detMinor02 / det;
-   solutionXToPack[2] += vectorB[1] * -detMinor12 / det;
-   solutionXToPack[2] += vectorB[2] * detMinor22 / det;
+   double solutionX2 = 0.0;
+   solutionX2 += vectorB[0] * detMinor02 / det;
+   solutionX2 += vectorB[1] * -detMinor12 / det;
+   solutionX2 += vectorB[2] * detMinor22 / det;
+   solutionXToPack[2] = (float) solutionX2;
 
    return true;
 }
@@ -196,21 +200,21 @@ __device__ bool solve3x3System_Cholesky(const float* matrixA, const float* vecto
 
     // Factorization L * L^T = A
     L00 = sqrtf(matrixA[0]);
-    if (L00 < EPSILON)
+    if (L00 < EPSILON_F)
         return false;
 
     L10 = matrixA[3] / L00;
     L20 = matrixA[6] / L00;
 
     float t11 = matrixA[4] - L10 * L10;
-    if (t11 < EPSILON)
+    if (t11 < EPSILON_F)
         return false;
     L11 = sqrtf(t11);
 
     L21 = (matrixA[7] - L20 * L10) / L11;
 
     float t22 = matrixA[8] - L20 * L20 - L21 * L21;
-    if (t22 < EPSILON)
+    if (t22 < EPSILON_F)
         return false;
     L22 = sqrtf(t22);
 
@@ -335,8 +339,8 @@ __device__ bool solveForPlaneNormal2x2(CovarianceData& covarianceData, float3& n
     float sum_z = covarianceData.sum_z;
 
     // regularization
-    sum_xx += EPSILON;
-    sum_yy += EPSILON;
+    sum_xx += EPSILON_F;
+    sum_yy += EPSILON_F;
 
     float det = sum_xx * sum_yy - sum_xy * sum_xy;
 

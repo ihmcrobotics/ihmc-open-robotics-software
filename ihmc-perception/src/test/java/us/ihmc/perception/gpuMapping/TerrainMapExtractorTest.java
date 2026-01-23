@@ -9,9 +9,11 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.log.LogTools;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static us.ihmc.perception.gpuMapping.TerrainMapData.*;
 
 public class TerrainMapExtractorTest
 {
@@ -115,7 +117,7 @@ public class TerrainMapExtractorTest
       {
          for (int col = 0; col < cellsPerAxis; col++)
          {
-            int key = row * cellsPerAxis + col;
+            int key = HeightMapTools.indicesToKey(row, col, centerIndex);
             double x = HeightMapTools.keyToXCoordinate(key, gridCenter.getX(), gridResolution, centerIndex);
             double y = HeightMapTools.keyToYCoordinate(key, gridCenter.getY(), gridResolution, centerIndex);
 
@@ -137,13 +139,19 @@ public class TerrainMapExtractorTest
       byte[] snapNormalYMap = terrainMapData.getSnapNormalYMap();
       byte[] snapNormalZMap = terrainMapData.getSnapNormalZMap();
 
-      for (int i = 0; i < cellsPerAxis; i++)
+      byte expectedNormalX = TerrainMapData.packFloatAsByte(normal.getX32(), -NORMAL_MIN_MAX_XY, NORMAL_MIN_MAX_XY);
+      byte expectedNormalY = TerrainMapData.packFloatAsByte(normal.getY32(), -NORMAL_MIN_MAX_XY, NORMAL_MIN_MAX_XY);
+      byte expectedNormalZ = TerrainMapData.packFloatAsByte(normal.getZ32(), NORMAL_MIN_Z, NORMAL_MAX_Z);
+
+      for (int row = 0; row < cellsPerAxis; row++)
       {
-         for (int j = 0; j < cellsPerAxis; j++)
+         for (int col = 0; col < cellsPerAxis; col++)
          {
-            assertEquals(108, snapNormalXMap[i * cellsPerAxis + j], "Normal x value is: (" + snapNormalXMap[i * cellsPerAxis + j] + ")");
-            assertEquals(127, snapNormalYMap[i * cellsPerAxis + j], "Normal y value is: (" + snapNormalYMap[i * cellsPerAxis + j] + ")");
-            assertEquals(-4, snapNormalZMap[i * cellsPerAxis + j], "Normal z value is: (" + snapNormalZMap[i * cellsPerAxis + j] + ")");
+            int key = HeightMapTools.indicesToKey(row, col, centerIndex);
+
+            assertEquals(expectedNormalX, snapNormalXMap[key], "Normal x value is: (" + snapNormalXMap[key] + ")");
+            assertEquals(expectedNormalY, snapNormalYMap[key], "Normal y value is: (" + snapNormalYMap[key] + ")");
+            assertEquals(expectedNormalZ, snapNormalZMap[key], "Normal z value is: (" + snapNormalZMap[key] + ")");
          }
       }
 
