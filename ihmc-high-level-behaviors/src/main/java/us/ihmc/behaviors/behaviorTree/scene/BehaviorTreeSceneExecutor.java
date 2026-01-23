@@ -31,7 +31,6 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
    private final List<PersistentDetection> persistentDetections = new ArrayList<>();
    private final List<PersistentDetection> oldUnstableDetections = new ArrayList<>();
    private final PersistentDetectionMessageTool persistentDetectionMessageTool = new PersistentDetectionMessageTool();
-   private final ArrayList<BehaviorTreeSceneObjectExecutor> objectsToRemove = new ArrayList<>();
 
    public BehaviorTreeSceneExecutor(CRDTInfo crdtInfo,
                                     LongSupplier idSupplier,
@@ -63,17 +62,6 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
          triageInstantDetections(instantDetectionQueue.poll());
 
       updatePersistentDetections();
-
-      objectsToRemove.clear();
-      for (BehaviorTreeSceneObjectExecutor object : objects)
-      {
-         object.update();
-         if (!object.isStable())
-            objectsToRemove.add(object);
-      }
-
-      for (BehaviorTreeSceneObjectExecutor object : objectsToRemove)
-         removeObject(object);
    }
 
    private void triageInstantDetections(List<InstantDetection> newInstantDetections)
