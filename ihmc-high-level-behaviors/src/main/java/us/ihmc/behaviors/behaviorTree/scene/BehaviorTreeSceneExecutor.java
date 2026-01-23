@@ -62,11 +62,6 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
          triageInstantDetections(instantDetectionQueue.poll());
 
       updatePersistentDetections();
-
-      for (BehaviorTreeSceneObjectExecutor object : objects)
-      {
-         object.update();
-      }
    }
 
    private void triageInstantDetections(List<InstantDetection> newInstantDetections)

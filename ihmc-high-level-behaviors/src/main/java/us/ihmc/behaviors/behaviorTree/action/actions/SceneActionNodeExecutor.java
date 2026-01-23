@@ -44,6 +44,8 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
       state.getLogger().info("Executing scene action for object type: {}", definition.getName());
 
       timer.reset();
+
+      scene.removeAllObjects(); // Temporary measure until we have a use case for more persistent objects
    }
 
    @Override
@@ -209,8 +211,7 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
          targetSceneObject = (BehaviorTreeSceneDoorPanelExecutor) scene.createObject(message);
          targetSceneObject.setPersistentDetection(openingMechanismDetection);
          targetSceneObject.setDoorPanelPersistentDetection(doorPanelDetection);
-         scene.getObjects().add(targetSceneObject);
-         scene.getObjectsModifiable().modify();
+         scene.addObject(targetSceneObject);
       }
 
       return true;
@@ -327,8 +328,7 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
          definition.getSceneObjectDefinition().toMessage(message);
          targetSceneObject = (BehaviorTreeSceneObjectExecutor) scene.createObject(message);
          targetSceneObject.setPersistentDetection(bestDetection);
-         scene.getObjects().add(targetSceneObject);
-         scene.getObjectsModifiable().modify();
+         scene.addObject(targetSceneObject);
       }
 
       return true;

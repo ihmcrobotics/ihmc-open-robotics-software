@@ -66,6 +66,11 @@ public class BehaviorTreeSceneObjectExecutor extends BehaviorTreeSceneObjectStat
          persistentDetectionMessageTool.toMessage(syncedRobot, Instant.now(), persistentDetection, message.getPersistentDetection());
    }
 
+   public boolean isStable()
+   {
+      return persistentDetection != null && persistentDetection.isStable();
+   }
+
    public PersistentDetection getPersistentDetection()
    {
       return persistentDetection;
