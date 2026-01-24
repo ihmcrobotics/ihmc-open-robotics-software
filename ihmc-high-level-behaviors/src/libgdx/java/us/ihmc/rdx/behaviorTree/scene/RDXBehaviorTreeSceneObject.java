@@ -72,7 +72,6 @@ public class RDXBehaviorTreeSceneObject extends BehaviorTreeSceneObjectState
       super.fromMessage(message);
 
       persistentDetection.set(message.getPersistentDetection());
-      modelInstance.setTransformToWorldFrame(transform.getValueUnsafe());
    }
 
    public RDXSelectablePose3DGizmo getGizmo()
