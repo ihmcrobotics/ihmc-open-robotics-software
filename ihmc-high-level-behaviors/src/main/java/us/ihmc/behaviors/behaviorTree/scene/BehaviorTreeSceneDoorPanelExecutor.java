@@ -38,9 +38,10 @@ public class BehaviorTreeSceneDoorPanelExecutor extends BehaviorTreeSceneObjectE
       double yaw = Math.atan2(mechanismToPanel.getY(), mechanismToPanel.getX());
       orientation.setToYawOrientation(yaw);
 
-      if (!(transform.getValueReadOnly().getRotation().geometricallyEquals(orientation, 1e-5)
-            && transform.getValueReadOnly().getTranslation().epsilonEquals(mechanismPosition, 1e-5)))
+//      if (!(transform.getValueReadOnly().getRotation().geometricallyEquals(orientation, 1e-5)
+//            && transform.getValueReadOnly().getTranslation().epsilonEquals(mechanismPosition, 1e-5)))
          transform.getValueAndModify().set(orientation, mechanismPosition);
+         referenceFrame.update();
    }
 
    @Override

@@ -40,9 +40,10 @@ public class BehaviorTreeSceneObjectExecutor extends BehaviorTreeSceneObjectStat
       else
          orientation = persistentDetection.getFilteredTransform().getRotation();
 
-      if (!(transform.getValueReadOnly().getRotation().geometricallyEquals(orientation, 1e-5)
-            && transform.getValueReadOnly().getTranslation().epsilonEquals(translation, 1e-5)))
+//      if (!(transform.getValueReadOnly().getRotation().geometricallyEquals(orientation, 1e-5)
+//            && transform.getValueReadOnly().getTranslation().epsilonEquals(translation, 1e-5)))
          transform.getValueAndModify().set(orientation, translation);
+      referenceFrame.update();
    }
 
    public void update()
