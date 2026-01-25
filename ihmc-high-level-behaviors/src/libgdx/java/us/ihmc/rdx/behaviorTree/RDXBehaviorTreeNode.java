@@ -266,8 +266,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       if (!isRootNode() && textHovered && ImGui.isMouseDoubleClicked(ImGuiMouseButton.Left))
       {
          anySpecificWidgetOnLineClicked = true;
-         RDXBehaviorTreeTools.clearOtherNodeSelections(this);
-         selected.set(true);
+         setSelected();
          isNameBeingEdited = true;
          imNodeNameText.set(definition.getName());
       }
@@ -287,8 +286,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
 
       if (mouseHoveringNodeLine && !isNameBeingEdited && ImGui.isMouseClicked(ImGuiMouseButton.Right))
       {
-         RDXBehaviorTreeTools.clearOtherNodeSelections(this);
-         selected.set(true);
+         setSelected();
          ImGui.openPopup(nodePopupID);
       }
 
@@ -297,10 +295,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       // with the drag and drop functionality
       if (!anySpecificWidgetOnLineClicked && mouseHoveringNodeLine
           && ImGuiTools.mouseReleasedWithoutDrag(ImGuiMouseButton.Left) && !isNameBeingEdited && !selected.get())
-      {
-         RDXBehaviorTreeTools.clearOtherNodeSelections(this);
-         selected.set(true);
-      }
+         setSelected();
    }
 
    public void renderContextMenuItems()
@@ -390,9 +385,10 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       return selected.get();
    }
 
-   public void setSelected(boolean selected)
+   public void setSelected()
    {
-      this.selected.set(selected);
+      RDXBehaviorTreeTools.clearOtherNodeSelections(this);
+      this.selected.set(true);
    }
 
    public void setNameBeingEdited(boolean nameBeingEdited)

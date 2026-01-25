@@ -122,7 +122,7 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
             else
             {
                if (node.getSelected() && lastRendereredNode != null) // Select previous node so layout doesn't jump
-                  lastRendereredNode.setSelected(true);
+                  lastRendereredNode.setSelected();
 
                topologyOperationQueue.queueDestroySubtreeModify(node);
             }
