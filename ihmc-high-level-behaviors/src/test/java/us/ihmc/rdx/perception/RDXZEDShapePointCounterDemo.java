@@ -5,9 +5,13 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
+import java.util.concurrent.atomic.AtomicInteger;
 import us.ihmc.commons.thread.RepeatingTaskThread;
+import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.perception.RawImage;
+import us.ihmc.perception.cuda.CUDASpherePointCounter;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.rdx.imgui.ImGuiMovingPlot;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.tools.LibGDXTools;
@@ -30,6 +34,11 @@ public class RDXZEDShapePointCounterDemo
    private final RepeatingTaskThread zedGrabThread = new RepeatingTaskThread("ZEDGrabThread", this::zedGrabThread);
    private RDXPose3DGizmo spherePoseGizmo;
    private ModelInstance sphereModel;
+   private final CUDASpherePointCounter spherePointCounter = new CUDASpherePointCounter();
+   private final Point3D32 sphereCenter = new Point3D32();
+   private final AtomicInteger pointsInSphere = new AtomicInteger();
+   private final ImGuiMovingPlot pointsPlot = new ImGuiMovingPlot("Points in Sphere", 1000, 300, 200);
+   private final Color sphereColor = new Color(0.0f, 0.0f, 1.0f, 0.5f);
    private final ImBoolean play = new ImBoolean(false);
    private final ImInt requestedPosition = new ImInt();
    private final ImInt currentPosition = new ImInt();
@@ -59,6 +68,7 @@ public class RDXZEDShapePointCounterDemo
          public void render()
          {
             LibGDXTools.toLibGDX(spherePoseGizmo.getTransformToParent(), sphereModel.transform);
+            updateSphereColor(pointsInSphere.get());
             pointCloudVisualizer.update();
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
@@ -71,6 +81,7 @@ public class RDXZEDShapePointCounterDemo
             zedSensor.close();
             pointCloudVisualizer.destroy();
             spherePoseGizmo.destroyDefault(baseUI.getPrimary3DPanel());
+            spherePointCounter.close();
             baseUI.dispose();
          }
       });
@@ -79,6 +90,11 @@ public class RDXZEDShapePointCounterDemo
    private void renderImGuiWidgets()
    {
       pointCloudVisualizer.renderImGuiWidgets();
+      ImGui.separator();
+      ImGui.pushFont(ImGuiTools.getBigFont());
+      ImGui.text("Points in sphere: " + pointsInSphere.get());
+      ImGui.popFont();
+      pointsPlot.calculate(pointsInSphere.get());
       ImGui.separator();
 
       currentPosition.set(zedSensor.getCurrentPosition());
@@ -106,6 +122,13 @@ public class RDXZEDShapePointCounterDemo
       ImGui.text("Frame: " + currentPosition.get() + " / " + Math.max(zedLength.get(), 0));
    }
 
+   private void updateSphereColor(int count)
+   {
+      float t = Math.min(Math.max(count / 20000.0f, 0.0f), 1.0f);
+      sphereColor.set(t, 0.0f, 1.0f - t, 0.5f);
+      LibGDXTools.setDiffuseColor(sphereModel, sphereColor);
+   }
+
    private void zedGrabThread() throws InterruptedException
    {
       zedSensor.waitForGrab();
@@ -120,6 +143,10 @@ public class RDXZEDShapePointCounterDemo
       }
       if (depthImage != null)
       {
+         sphereCenter.set((float) spherePoseGizmo.getTransformToParent().getM03(),
+                          (float) spherePoseGizmo.getTransformToParent().getM13(),
+                          (float) spherePoseGizmo.getTransformToParent().getM23());
+         pointsInSphere.set(spherePointCounter.countPointsInSphere(depthImage, sphereCenter, 0.5f));
          pointCloudVisualizer.setDepthImage(depthImage);
          depthImage.release();
       }
