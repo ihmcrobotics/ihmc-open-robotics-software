@@ -16,6 +16,9 @@ import java.util.stream.IntStream;
 
 import static org.bytedeco.cuda.global.cudart.*;
 
+/**
+ * Extracts 3D point clouds from depth images.
+ */
 public class CUDAPointCloudExtractor implements AutoCloseable
 {
    private static final int BLOCK_SIZE_XY = 16;
