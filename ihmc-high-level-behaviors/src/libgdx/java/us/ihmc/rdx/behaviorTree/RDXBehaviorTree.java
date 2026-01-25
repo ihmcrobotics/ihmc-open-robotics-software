@@ -223,7 +223,7 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
 
          if (rootNode != null && anyNodeSelected) // It can become null above
          {
-            float dividerHeight = ImGui.getTextLineHeight();
+            float dividerHeight = ImGui.getFrameHeight();
             float closeOffsetY = ImGui.getCursorScreenPosY();
             float closeOffsetX = ImGui.getCursorScreenPosX() + ImGui.getColumnWidth() - dividerHeight;
             boolean closeHovered = false;
@@ -255,12 +255,16 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
                   draggingDivider = false;
             }
 
+            // Draw separator with text
+            ImGui.dummy(0.0f, ImGui.getFrameHeight()); // Make the lines as tall as when they have and input box
+            ImGui.sameLine(0.0f, 0.0f);
+            ImGui.alignTextToFramePadding(); // Centers the node descriptions vertically in the frame height area
             float cursorScreenPosX = ImGui.getCursorScreenPosX();
             float cursorScreenPosY = ImGui.getCursorScreenPosY();
             int fontSize = ImGui.getFontSize();
             float itemSpacingX = ImGui.getStyle().getItemSpacingX();
             float lineThickness = fontSize * 0.2f;
-            float lineY = ImGui.getTextLineHeight() / 2.0f + (lineThickness / 2.0f);
+            float lineY = ImGui.getFrameHeight() / 2.0f + (lineThickness / 2.0f);
             float initialLineWidth = fontSize * 1.5f;
             int separatorColor = ImGui.getColorU32(ImGuiCol.Separator);
             ImGui.getWindowDrawList().addLine(cursorScreenPosX, cursorScreenPosY + lineY,
@@ -273,10 +277,29 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
             ImGui.getWindowDrawList()
                  .addLine(cursorScreenPosX + itemSpacingX, cursorScreenPosY + lineY, closeOffsetX, cursorScreenPosY + lineY, separatorColor, lineThickness);
 
-            int color = ImGui.getColorU32(closeHovered ? ImGuiCol.Text : ImGuiCol.TextDisabled);
-            float thickness = closeHovered ? 2.0f : 1.0f;
-            ImGui.getWindowDrawList().addLine(closeOffsetX, closeOffsetY, closeOffsetX + dividerHeight, closeOffsetY + dividerHeight, color, thickness);
-            ImGui.getWindowDrawList().addLine(closeOffsetX, closeOffsetY + dividerHeight, closeOffsetX + dividerHeight, closeOffsetY, color, thickness);
+            if (closeHovered) // Draw circle on hover
+            {
+               float circleRadius = dividerHeight * 0.43f;
+               float circleCenterX = closeOffsetX + dividerHeight / 2.0f;
+               float circleCenterY = closeOffsetY + dividerHeight / 2.0f;
+               int circleColor = ImGui.getColorU32(ImGuiCol.ButtonHovered);
+               ImGui.getWindowDrawList().addCircleFilled(circleCenterX, circleCenterY, circleRadius, circleColor);
+
+               if (ImGuiTools.mouseReleasedWithoutDrag(ImGuiMouseButton.Left, 1.0f))
+                  RDXBehaviorTreeTools.runForEntireTree(rootNode, RDXBehaviorTreeNode::clearSelections);
+            }
+
+            // Draw close X
+            float xSize = dividerHeight * 0.46f;
+            float xOffset = (dividerHeight - xSize) / 2.0f;
+            int xColor = ImGui.getColorU32(closeHovered ? ImGuiCol.Text : ImGuiCol.TextDisabled);
+            float xThickness = 1.0f;
+            ImGui.getWindowDrawList().addLine(closeOffsetX + xOffset, closeOffsetY + xOffset,
+                                              closeOffsetX + xOffset + xSize, closeOffsetY + xOffset + xSize,
+                                              xColor, xThickness);
+            ImGui.getWindowDrawList().addLine(closeOffsetX + xOffset, closeOffsetY + xOffset + xSize,
+                                              closeOffsetX + xOffset + xSize, closeOffsetY + xOffset,
+                                              xColor, xThickness);
             ImGui.dummy(0.0f, dividerHeight);
 
             ImGui.beginChild(labels.get("Node Settings Scroll Area"), 0.0f, ImGui.getContentRegionAvailY());

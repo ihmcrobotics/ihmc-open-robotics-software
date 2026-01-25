@@ -295,11 +295,11 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       // We try to make anywhere on the row clickable to select the node,
       // execpt for specific interactions. We use release without drag to prevent interference
       // with the drag and drop functionality
-      if (!anySpecificWidgetOnLineClicked && mouseHoveringNodeLine && ImGuiTools.mouseReleasedWithoutDrag(ImGuiMouseButton.Left) && !isNameBeingEdited)
+      if (!anySpecificWidgetOnLineClicked && mouseHoveringNodeLine
+          && ImGuiTools.mouseReleasedWithoutDrag(ImGuiMouseButton.Left) && !isNameBeingEdited && !selected.get())
       {
-         boolean desiredValue = !selected.get();
          RDXBehaviorTreeTools.clearOtherNodeSelections(this);
-         selected.set(desiredValue);
+         selected.set(true);
       }
    }
 
