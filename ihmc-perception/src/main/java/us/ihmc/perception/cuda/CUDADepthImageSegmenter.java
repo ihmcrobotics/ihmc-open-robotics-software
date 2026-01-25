@@ -11,6 +11,9 @@ import java.net.URL;
 
 import static org.bytedeco.cuda.global.cudart.*;
 
+/**
+ * Sets non-mask pixels of a depth image to zero, removing the background.
+ */
 public class CUDADepthImageSegmenter implements AutoCloseable
 {
    private static final int BLOCK_SIZE_XY = 16;
