@@ -1,5 +1,7 @@
 package us.ihmc.rdx.perception;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
@@ -8,7 +10,10 @@ import us.ihmc.perception.RawImage;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudVisualizer;
 import us.ihmc.sensors.zed.ZEDImageSensor;
 import us.ihmc.sensors.zed.ZEDModelData;
@@ -23,6 +28,8 @@ public class RDXZEDShapePointCounterDemo
    private final ZEDSVOPlaybackSensor zedSensor = new ZEDSVOPlaybackSensor(0, ZEDModelData.ZED_2I, zed.SL_DEPTH_MODE_PERFORMANCE, SVO_FILE);
    private final RDXRawImagePointCloudVisualizer pointCloudVisualizer = new RDXRawImagePointCloudVisualizer("ZED Point Cloud");
    private final RepeatingTaskThread zedGrabThread = new RepeatingTaskThread("ZEDGrabThread", this::zedGrabThread);
+   private RDXPose3DGizmo spherePoseGizmo;
+   private ModelInstance sphereModel;
    private final ImBoolean play = new ImBoolean(false);
    private final ImInt requestedPosition = new ImInt();
    private final ImInt currentPosition = new ImInt();
@@ -39,6 +46,11 @@ public class RDXZEDShapePointCounterDemo
             baseUI.create();
             zedSensor.startSensor();
             baseUI.getPrimaryScene().addRenderableProvider(pointCloudVisualizer);
+            sphereModel = RDXModelBuilder.createSphere(0.5f, new Color(0.45f, 0.75f, 1.0f, 1.0f));
+            LibGDXTools.setOpacity(sphereModel, 0.5f);
+            baseUI.getPrimaryScene().addModelInstance(sphereModel);
+            spherePoseGizmo = new RDXPose3DGizmo();
+            spherePoseGizmo.createAndSetupDefault(baseUI.getPrimary3DPanel());
             baseUI.getImGuiPanelManager().addPanel("Shape Point Counter", RDXZEDShapePointCounterDemo.this::renderImGuiWidgets);
             zedGrabThread.startRepeating();
          }
@@ -46,6 +58,7 @@ public class RDXZEDShapePointCounterDemo
          @Override
          public void render()
          {
+            LibGDXTools.toLibGDX(spherePoseGizmo.getTransformToParent(), sphereModel.transform);
             pointCloudVisualizer.update();
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
@@ -57,6 +70,7 @@ public class RDXZEDShapePointCounterDemo
             zedGrabThread.blockingKill();
             zedSensor.close();
             pointCloudVisualizer.destroy();
+            spherePoseGizmo.destroyDefault(baseUI.getPrimary3DPanel());
             baseUI.dispose();
          }
       });
