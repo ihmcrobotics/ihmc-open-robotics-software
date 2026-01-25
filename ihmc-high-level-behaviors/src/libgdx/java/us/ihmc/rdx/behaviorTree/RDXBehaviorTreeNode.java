@@ -390,6 +390,11 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       return selected.get();
    }
 
+   public void setSelected(boolean selected)
+   {
+      this.selected.set(selected);
+   }
+
    public void setNameBeingEdited(boolean nameBeingEdited)
    {
       isNameBeingEdited = nameBeingEdited;

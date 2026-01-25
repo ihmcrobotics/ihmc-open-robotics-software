@@ -23,6 +23,7 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
    private RDXBehaviorTreeNode<?, ?> modalPopupNode;
    private final TypedNotification<Runnable> queuePopupModal = new TypedNotification<>();
    private RDXBehaviorTreeNode<?, ?> draggedNode = null;
+   private RDXBehaviorTreeNode<?, ?> lastRendereredNode = null;
 
    public RDXBehaviorTreeWidgetsVerticalLayout(RDXBehaviorTree behaviorTree)
    {
@@ -33,6 +34,7 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
 
    public void renderImGuiWidgets()
    {
+      lastRendereredNode = null;
       renderImGuiWidgets(behaviorTree.getRootNode());
 
       if (!ImGui.isMouseDown(ImGuiMouseButton.Left))
@@ -118,7 +120,12 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
             if (node.isRootNode())
                topologyOperationQueue.queueDestroyEntireTreeModify();
             else
+            {
+               if (node.getSelected() && lastRendereredNode != null) // Select previous node so layout doesn't jump
+                  lastRendereredNode.setSelected(true);
+
                topologyOperationQueue.queueDestroySubtreeModify(node);
+            }
          }
          ImGui.popStyleColor();
 
@@ -135,6 +142,7 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
 
       renderNodeCreationModalDialog(node);
 
+      lastRendereredNode = node;
       if (node.getTreeWidgetExpanded())
       {
          float indentAmount = ImGui.getFontSize() * 0.7f;
