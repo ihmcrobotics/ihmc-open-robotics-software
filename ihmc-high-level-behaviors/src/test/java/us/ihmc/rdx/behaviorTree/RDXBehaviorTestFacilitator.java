@@ -188,7 +188,7 @@ public class RDXBehaviorTestFacilitator
          foundationPose = new IsaacROSFoundationPoseCommunicatorMap(peerClockEstimator);
 
          yolo = new YOLOv8DetectionExecutor(peerClockEstimator, () -> true);
-         yolo.enableModel("best_multi_12_17_2025");
+         yolo.enableModel("best_multi_01_16_2026");
          yolo.addDetectionConsumerCallback(foundationPose::updatePoseEstimations);
       }
       else
@@ -197,7 +197,7 @@ public class RDXBehaviorTestFacilitator
          yolo = null;
       }
 
-      behaviorTree = new ROS2BehaviorTreeExecutor(ros2, syncedRobot, yolo, foundationPose, peerClockEstimator);
+      behaviorTree = new ROS2BehaviorTreeExecutor(ros2, syncedRobot, yolo, foundationPose, null, peerClockEstimator);
 
       RepeatingTaskThread yoloThread = new RepeatingTaskThread("yolo", () ->
       {

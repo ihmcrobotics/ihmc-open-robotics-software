@@ -2,6 +2,7 @@ package us.ihmc.sensors.realsense;
 
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.FloatPointer;
+import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.librealsense2.global.realsense2;
 import org.bytedeco.librealsense2.rs2_config;
 import org.bytedeco.librealsense2.rs2_context;
@@ -51,6 +52,7 @@ public class RealSenseDevice
    protected final rs2_config config; // Create a configuration for configuring the pipeline with a non default profile
    protected rs2_sensor depthSensor; // The depth sensor
    protected final rs2_error error = new rs2_error(); // error pointer, have to check it after every call
+   protected final boolean isPlayback; // Whether this is a playback device from a BAG file
    protected rs2_pipeline_profile pipelineProfile;
    protected rs2_intrinsics depthStreamIntrinsics = new rs2_intrinsics();
    protected rs2_intrinsics colorStreamIntrinsics = new rs2_intrinsics();
@@ -81,20 +83,38 @@ public class RealSenseDevice
    private boolean colorEnabled = false;
    private int colorWidth;
    private int colorHeight;
+   private int detectedColorFormat = -1; // Will be set from bag file or defaults to BGR8 for live
    private CameraIntrinsics depthCameraIntrinsics;
    private CameraIntrinsics colorCameraIntrinsics;
 
    public RealSenseDevice(rs2_context context, rs2_device device, int depthWidth, int depthHeight, int fps)
    {
+      this(context, device, depthWidth, depthHeight, fps, null);
+   }
+
+   public RealSenseDevice(rs2_context context, rs2_device device, int depthWidth, int depthHeight, int fps, String bagFilePath)
+   {
       this.device = device;
       this.depthWidth = depthWidth;
       this.depthHeight = depthHeight;
       this.fps = fps;
+      this.isPlayback = bagFilePath != null;
+
       pipeline = realsense2.rs2_create_pipeline(context, error);
       checkError("Failed to create pipeline.");
       config = realsense2.rs2_create_config(error);
       checkError("Failed to create config.");
 
+      if (isPlayback)
+      {
+         // For playback from BAG file
+         realsense2.rs2_config_enable_device_from_file(config, bagFilePath, error);
+         checkError("Failed to enable device from file.");
+         LogTools.info("Configured playback from bag file: {}", bagFilePath);
+         return; // Skip device-specific configuration for playback
+      }
+
+      // For live device
       realsense2.rs2_config_enable_stream(config, realsense2.RS2_STREAM_DEPTH, DEPTH_STREAM_INDEX, depthWidth, depthHeight, realsense2.RS2_FORMAT_Z16, fps, error);
       checkError("Failed to enable stream.");
 
@@ -196,8 +216,13 @@ public class RealSenseDevice
       this.colorWidth = colorWidth;
       this.colorHeight = colorHeight;
 
-      realsense2.rs2_config_enable_stream(config, realsense2.RS2_STREAM_COLOR, COLOR_STREAM_INDEX, colorWidth, colorHeight, realsense2.RS2_FORMAT_BGR8, fps, error);
-      checkError("Failed to enable stream.");
+      if (!isPlayback)
+      {
+         realsense2.rs2_config_enable_stream(config, realsense2.RS2_STREAM_COLOR, COLOR_STREAM_INDEX, colorWidth, colorHeight, realsense2.RS2_FORMAT_BGR8, fps, error);
+         checkError("Failed to enable stream.");
+         detectedColorFormat = realsense2.RS2_FORMAT_BGR8; // Live devices use BGR8
+      }
+      // For playback, format will be detected from the actual stream data during first grab
 
       colorAlignProcessingBlock = realsense2.rs2_create_align(realsense2.RS2_STREAM_COLOR, error);
       checkError("");
@@ -222,6 +247,23 @@ public class RealSenseDevice
       pipelineProfile = realsense2.rs2_pipeline_start_with_config(pipeline, config, error);
       checkError("Error starting pipeline.");
 
+      // For playback devices, we need to get the device and depth sensor from the pipeline profile
+      if (isPlayback && depthSensor == null)
+      {
+         rs2_device playbackDevice = realsense2.rs2_pipeline_profile_get_device(pipelineProfile, error);
+         checkError("Failed to get device from pipeline profile.");
+
+         rs2_sensor_list sensorList = realsense2.rs2_query_sensors(playbackDevice, error);
+         checkError("Failed to query sensors.");
+
+         // Get the first sensor as depth sensor (similar to live device)
+         depthSensor = realsense2.rs2_create_sensor(sensorList, 0, error);
+         checkError("Failed to create sensor.");
+
+         realsense2.rs2_delete_sensor_list(sensorList);
+         LogTools.info("Retrieved depth sensor from playback device");
+      }
+
       colorEnabled = colorAlignProcessingBlock != null;
       if (colorEnabled)
       {
@@ -240,28 +282,85 @@ public class RealSenseDevice
 
       if (frameAvailable)
       {
+         rs2_frame alignedFrames = syncedFrames;
+         rs2_frame extractedDepthFrame = null;
          rs2_frame extractedColorFrame = null;
-         if (colorEnabled)
-         {
-            extractedColorFrame = realsense2.rs2_extract_frame(syncedFrames, 1, error);
-         }
-
-         depthFrameDataSize = realsense2.rs2_get_frame_data_size(syncedFrames, error);
-         checkError("");
 
          if (colorEnabled)
          {
+            // Process frames through alignment block
+            realsense2.rs2_process_frame(colorAlignProcessingBlock, syncedFrames, error);
+            if (!error.isNull())
+            {
+               checkError("Failed to process frame for alignment");
+               rs2_release_frame(syncedFrames);
+               return false;
+            }
+
+            // Poll for aligned frameset (non-blocking)
+            rs2_frame tempAlignedFrame = new rs2_frame();
+            int pollResult = realsense2.rs2_poll_for_frame(colorFrameQueue, tempAlignedFrame, error);
+            if (pollResult == 0 || !error.isNull() || tempAlignedFrame.isNull())
+            {
+               // No aligned frame available yet, skip this frame
+               rs2_release_frame(syncedFrames);
+               return false;
+            }
+            alignedFrames = tempAlignedFrame;
+
+            // Extract depth and color from aligned frameset
+            extractedDepthFrame = realsense2.rs2_extract_frame(alignedFrames, 0, error);
+            extractedColorFrame = realsense2.rs2_extract_frame(alignedFrames, 1, error);
+
+            if (extractedDepthFrame == null || extractedDepthFrame.isNull() || extractedColorFrame == null || extractedColorFrame.isNull())
+            {
+               // Failed to extract frames, cleanup and skip
+               if (extractedDepthFrame != null && !extractedDepthFrame.isNull())
+                  rs2_release_frame(extractedDepthFrame);
+               if (extractedColorFrame != null && !extractedColorFrame.isNull())
+                  rs2_release_frame(extractedColorFrame);
+               if (alignedFrames != syncedFrames)
+                  rs2_release_frame(alignedFrames);
+               rs2_release_frame(syncedFrames);
+               return false;
+            }
+
+            depthFrameDataSize = realsense2.rs2_get_frame_data_size(extractedDepthFrame, error);
+            if (!error.isNull() || depthFrameDataSize <= 0)
+            {
+               rs2_release_frame(extractedDepthFrame);
+               rs2_release_frame(extractedColorFrame);
+               if (alignedFrames != syncedFrames)
+                  rs2_release_frame(alignedFrames);
+               rs2_release_frame(syncedFrames);
+               return false;
+            }
+
             colorFrameDataSize = realsense2.rs2_get_frame_data_size(extractedColorFrame, error);
+            if (!error.isNull() || colorFrameDataSize <= 0)
+            {
+               rs2_release_frame(extractedDepthFrame);
+               rs2_release_frame(extractedColorFrame);
+               if (alignedFrames != syncedFrames)
+                  rs2_release_frame(alignedFrames);
+               rs2_release_frame(syncedFrames);
+               return false;
+            }
+         }
+         else
+         {
+            depthFrameDataSize = realsense2.rs2_get_frame_data_size(syncedFrames, error);
             checkError("");
          }
 
          if (depthFrameDataSize > 0)
          {
-            depthFrameDataAddress = realsense2.rs2_get_frame_data_address(syncedFrames, error);
+            rs2_frame depthFrameToUse = colorEnabled ? extractedDepthFrame : syncedFrames;
+            depthFrameDataAddress = realsense2.rs2_get_frame_data_address(depthFrameToUse, error);
 
             if (depthFrameStreamProfile == null)
             {
-               depthFrameStreamProfile = realsense2.rs2_get_frame_stream_profile(syncedFrames, error);
+               depthFrameStreamProfile = realsense2.rs2_get_frame_stream_profile(depthFrameToUse, error);
                realsense2.rs2_get_video_stream_intrinsics(depthFrameStreamProfile, depthStreamIntrinsics, error);
                checkError("Failed to get depth stream intrinsics.");
 
@@ -285,6 +384,34 @@ public class RealSenseDevice
                   colorFrameStreamProfile = realsense2.rs2_get_frame_stream_profile(extractedColorFrame, error);
                   realsense2.rs2_get_video_stream_intrinsics(colorFrameStreamProfile, colorStreamIntrinsics, error);
                   checkError("Failed to get color stream intrinsics.");
+
+                  // Detect color format from stream profile (important for bag files)
+                  if (isPlayback && detectedColorFormat == -1)
+                  {
+                     // Use IntPointer to get the format from the stream profile
+                     IntPointer streamPtr = new IntPointer(1);
+                     IntPointer formatPtr = new IntPointer(1);
+                     IntPointer indexPtr = new IntPointer(1);
+                     IntPointer uniqueIdPtr = new IntPointer(1);
+                     IntPointer frameratePtr = new IntPointer(1);
+
+                     realsense2.rs2_get_stream_profile_data(colorFrameStreamProfile, streamPtr, formatPtr, indexPtr, uniqueIdPtr, frameratePtr, error);
+                     checkError("Failed to get color stream format.");
+
+                     detectedColorFormat = formatPtr.get();
+                     String formatName = detectedColorFormat == realsense2.RS2_FORMAT_RGB8 ? "RGB8" :
+                                       detectedColorFormat == realsense2.RS2_FORMAT_BGR8 ? "BGR8" :
+                                       detectedColorFormat == realsense2.RS2_FORMAT_RGBA8 ? "RGBA8" :
+                                       detectedColorFormat == realsense2.RS2_FORMAT_BGRA8 ? "BGRA8" : "UNKNOWN(" + detectedColorFormat + ")";
+                     LogTools.info("Detected color format from bag file: {}", formatName);
+
+                     // Clean up
+                     streamPtr.close();
+                     formatPtr.close();
+                     indexPtr.close();
+                     uniqueIdPtr.close();
+                     frameratePtr.close();
+                  }
 
                   LogTools.info("Color intrinsics: {}", String.format("Color: fx: %.4f, fy: %.4f, cx: %.4f, cy: %.4f, h: %d, w: %d",
                                                                       colorStreamIntrinsics.fx(),
@@ -337,12 +464,18 @@ public class RealSenseDevice
             dataWasRead = true;
          }
 
-         rs2_release_frame(syncedFrames);
-
+         // Release frames
          if (colorEnabled)
          {
-            rs2_release_frame(extractedColorFrame);
+            if (extractedDepthFrame != null)
+               rs2_release_frame(extractedDepthFrame);
+            if (extractedColorFrame != null)
+               rs2_release_frame(extractedColorFrame);
+            if (alignedFrames != null && alignedFrames != syncedFrames)
+               rs2_release_frame(alignedFrames);
          }
+
+         rs2_release_frame(syncedFrames);
       }
 
       return dataWasRead;
@@ -387,21 +520,26 @@ public class RealSenseDevice
       realsense2.rs2_pipeline_stop(pipeline, error);
       checkError("Error stopping pipeline.");
 
-      System.out.println("Deleting pipeline profile...");
-      realsense2.rs2_delete_pipeline_profile(pipelineProfile);
+      // Give threads time to finish processing
+      try
+      {
+         Thread.sleep(300);
+      }
+      catch (InterruptedException e)
+      {
+         Thread.currentThread().interrupt();
+      }
 
-      // Calling delete on these may cause a native crash - it's not required anyway
-      // https://github.com/IntelRealSense/librealsense/issues/4651#issuecomment-522295675
-      // if (depthFrameStreamProfile != null)
-      // {
-      //    LogTools.info("Deleting depth stream profile...");
-      //    realsense2.rs2_delete_stream_profile(depthFrameStreamProfile);
-      // }
-      // if (colorFrameStreamProfile != null)
-      // {
-      //    LogTools.info("Deleting color stream profile...");
-      //    realsense2.rs2_delete_stream_profile(colorFrameStreamProfile);
-      // }
+      System.out.println("Deleting pipeline profile...");
+      if (pipelineProfile != null)
+         realsense2.rs2_delete_pipeline_profile(pipelineProfile);
+
+      // Delete processing block before frame queue
+      if (colorAlignProcessingBlock != null)
+      {
+         System.out.println("Deleting color align processing block...");
+         realsense2.rs2_delete_processing_block(colorAlignProcessingBlock);
+      }
 
       if (colorFrameQueue != null)
       {
@@ -409,17 +547,36 @@ public class RealSenseDevice
          realsense2.rs2_delete_frame_queue(colorFrameQueue);
       }
 
-      System.out.println("Deleting sensor...");
-      realsense2.rs2_delete_sensor(depthSensor);
+      // Calling delete on these may cause a native crash - it's not required anyway
+      // https://github.com/IntelRealSense/librealsense/issues/4651#issuecomment-522295675
+      // if (depthFrameStreamProfile != null)
+      // {
+      //    System.out.println("Deleting depth stream profile...");
+      //    realsense2.rs2_delete_stream_profile(depthFrameStreamProfile);
+      // }
+      // if (colorFrameStreamProfile != null)
+      // {
+      //    System.out.println("Deleting color stream profile...");
+      //    realsense2.rs2_delete_stream_profile(colorFrameStreamProfile);
+      // }
+
+      if (depthSensor != null)
+      {
+         System.out.println("Deleting sensor...");
+         realsense2.rs2_delete_sensor(depthSensor);
+      }
       System.out.println("Deleting config...");
       realsense2.rs2_delete_config(config);
       System.out.println("Deleting pipeline...");
       realsense2.rs2_delete_pipeline(pipeline);
-      System.out.println("Deleting device...");
-      realsense2.rs2_delete_device(device);
+      if (device != null)
+      {
+         System.out.println("Deleting device...");
+         realsense2.rs2_delete_device(device);
+      }
    }
 
-   private void checkError(String extraMessage)
+   public void checkError(String extraMessage)
    {
       if (!error.isNull())
       {
@@ -430,6 +587,11 @@ public class RealSenseDevice
                                                             realsense2.rs2_get_error_message(error).getString());
          LogTools.error(errorMessage);
       }
+   }
+
+   public rs2_error getError()
+   {
+      return error;
    }
 
    private boolean getColorEnabled()
@@ -570,5 +732,16 @@ public class RealSenseDevice
    public QuaternionReadOnly getDepthToColorRotation()
    {
       return depthToColorQuaternion;
+   }
+
+   /**
+    * Get the detected color format from the stream.
+    * For live devices, this will be RS2_FORMAT_BGR8.
+    * For bag files, this will be detected from the actual stream data.
+    * @return The RealSense format constant (e.g., RS2_FORMAT_BGR8, RS2_FORMAT_RGB8)
+    */
+   public int getDetectedColorFormat()
+   {
+      return detectedColorFormat;
    }
 }

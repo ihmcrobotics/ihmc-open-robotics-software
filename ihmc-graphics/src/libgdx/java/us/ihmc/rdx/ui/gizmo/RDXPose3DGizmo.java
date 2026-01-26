@@ -231,9 +231,9 @@ public class RDXPose3DGizmo implements RenderableProvider
    {
       create(panel3D);
       pickCalculator = this::calculate3DViewPick;
-      panel3D.addImGui3DViewPickCalculator(pickCalculator);
+      panel3D.addImGui3DViewPickCalculator(pickCalculator, pickCalculator);
       inputProcessor = this::process3DViewInput;
-      panel3D.addImGui3DViewInputProcessor(inputProcessor);
+      panel3D.addImGui3DViewInputProcessor(inputProcessor, inputProcessor);
       renderableAdapter = panel3D.getScene().addRenderableProvider(this, RDXSceneLevel.VIRTUAL);
    }
 

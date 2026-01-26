@@ -1,10 +1,10 @@
 package us.ihmc.communication.ros2.tf2;
 
 import geometry_msgs.msg.dds.TransformStamped;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
-import us.ihmc.ros2.ROS2Node;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
@@ -14,55 +14,45 @@ import java.util.function.Consumer;
  */
 public class ROS2MutableFrame extends ROS2Frame
 {
-   private final RigidBodyTransform newestTransformToParent;
+   private final RigidBodyTransform newestTransformToParent = new RigidBodyTransform();
    private final AtomicBoolean hasNewTransform = new AtomicBoolean(false);
+
+   private TransformStamped remoteTransform;
 
    /**
     * Constructs a non-root frame.
     *
-    * @param ros2Node    ROS 2 node to publish the TFMessage on.
     * @param id          The frame's id.
     * @param parentFrame The parent frame.
     */
-   public ROS2MutableFrame(ROS2Node ros2Node, String id, ReferenceFrame parentFrame)
+   public ROS2MutableFrame(String id, ReferenceFrame parentFrame)
    {
-      this(ros2Node, id, parentFrame, null);
+      this(id, parentFrame, null);
    }
 
    /**
     * Constructs a non-root frame.
     *
-    * @param ros2Node                  ROS 2 node to publish the TFMessage on.
-    * @param id                        The frame's id.
-    * @param parentFrame               The parent frame.
-    * @param transformToParent         Transform to the parent frame.
+    * @param id                The frame's id.
+    * @param parentFrame       The parent frame.
+    * @param transformToParent Transform to the parent frame.
     */
-   public ROS2MutableFrame(ROS2Node ros2Node,
-                           String id,
-                           ReferenceFrame parentFrame,
-                           RigidBodyTransformReadOnly transformToParent)
+   public ROS2MutableFrame(String id, ReferenceFrame parentFrame, RigidBodyTransformReadOnly transformToParent)
    {
-      this(ros2Node, id, parentFrame, transformToParent, false);
+      this(id, parentFrame, transformToParent, false);
    }
 
    /**
     * Constructs a non-root frame.
     *
-    * @param ros2Node                  ROS 2 node to publish the TFMessage on.
-    * @param id                        The frame's id.
-    * @param parentFrame               The parent frame.
-    * @param transformToParent         Transform to the parent frame.
-    * @param isZUpFrame                Whether this frame has its Z-axis aligned with root frame at all times.
+    * @param id                The frame's id.
+    * @param parentFrame       The parent frame.
+    * @param transformToParent Transform to the parent frame.
+    * @param isZUpFrame        Whether this frame has its Z-axis aligned with root frame at all times.
     */
-   public ROS2MutableFrame(ROS2Node ros2Node,
-                           String id,
-                           ReferenceFrame parentFrame,
-                           RigidBodyTransformReadOnly transformToParent,
-                           boolean isZUpFrame)
+   public ROS2MutableFrame(String id, ReferenceFrame parentFrame, RigidBodyTransformReadOnly transformToParent, boolean isZUpFrame)
    {
-      super(ros2Node, id, parentFrame, transformToParent, false, isZUpFrame, false);
-
-      newestTransformToParent = new RigidBodyTransform();
+      super(id, parentFrame, transformToParent, false, isZUpFrame, false);
       getTransformToParent(newestTransformToParent);
    }
 
@@ -93,20 +83,15 @@ public class ROS2MutableFrame extends ROS2Frame
    @Override
    protected void updateTransformToParent(RigidBodyTransform transformToParent)
    {
+      if (remoteTransform == null)
+         remoteTransform = ROS2TFTree.getInstance().getTransforms().get(getFrameId());
+
       if (hasNewTransform.getAndSet(false))
          transformToParent.set(newestTransformToParent);
-   }
+      else if (remoteTransform != null && MessageTools.compareTime(updateTime, remoteTransform.getHeader().getStamp()) < 0)
+         transformToParent.set(remoteTransform.getTransform());
 
-   @Override
-   protected void onNewTransformReceived(TransformStamped newTransform)
-   {
-      setNewTransformToParent(newTransform.getTransform());
-   }
-
-   @Override
-   public void update()
-   {
-      super.update();
+      markUpdateTime();
       publishTFMessages();
    }
 }

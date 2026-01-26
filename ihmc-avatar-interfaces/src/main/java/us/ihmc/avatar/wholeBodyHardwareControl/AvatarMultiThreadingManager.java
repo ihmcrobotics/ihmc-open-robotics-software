@@ -245,7 +245,7 @@ public class AvatarMultiThreadingManager
 
          ((RepeatingTaskThread) masterThread).stopRepeating();
       }
-
+      
       ThreadTools.sleep(1000L);
 
       System.out.println("MASTER THREAD SHUTDOWN COMPLETE -- EXITING");

@@ -96,8 +96,11 @@ public class ROS2BehaviorTreeYoRegistry
          estimatorChestPose.set(transform);
          for (RobotSide side : RobotSide.values)
          {
-            fullRobotModel.getHandControlFrame(side).getTransformToDesiredFrame(transform, ReferenceFrame.getWorldFrame());
-            estimatorHandPoses.get(side).set(transform);
+            if (fullRobotModel.getHandControlFrame(side) != null)
+            {
+               fullRobotModel.getHandControlFrame(side).getTransformToDesiredFrame(transform, ReferenceFrame.getWorldFrame());
+               estimatorHandPoses.get(side).set(transform);
+            }
          }
 
          if (notification.poll())
