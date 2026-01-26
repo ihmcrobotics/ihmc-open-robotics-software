@@ -80,7 +80,7 @@ public abstract class HumanoidRobotControlTask extends Task<HumanoidRobotContext
       cleanupRunnables.add(runnable);
    }
 
-      protected static void runAll(List<Runnable> runnables)
+   protected static void runAll(List<Runnable> runnables)
    {
       for (int i = 0; i < runnables.size(); i++)
          runnables.get(i).run();

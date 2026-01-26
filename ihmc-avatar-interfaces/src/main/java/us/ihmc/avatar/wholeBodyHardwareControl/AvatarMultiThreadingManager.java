@@ -19,6 +19,7 @@ import us.ihmc.commons.time.FrequencyCalculator;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler;
 import us.ihmc.realtime.MonotonicTime;
 import us.ihmc.realtime.PeriodicParameters;
+import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.realtime.RealtimeThread;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
@@ -26,6 +27,9 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.tools.TimestampProvider;
+import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
+import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
+import us.ihmc.util.PeriodicThreadSchedulerFactory;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -46,6 +50,8 @@ import java.util.List;
  */
 public class AvatarMultiThreadingManager
 {
+   private static final int JVM_STATISTICS_PRIORITY = 5;
+
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final JVMStatisticsGenerator jvmStatisticsGenerator;
    private final YoRegistry rootRegistry;
@@ -71,7 +77,7 @@ public class AvatarMultiThreadingManager
    private final PeriodicParameters periodicParameters;
 
    private final Runnable masterThread;
-   private final List<Runnable> childThreads = new ArrayList<>();
+   private final List<Runnable> childThreads;
 
    private final AvatarEstimatorThread estimatorThread;
    private final List<Runnable> preEstimatorThreadRunnables = new ArrayList<>();
@@ -97,6 +103,7 @@ public class AvatarMultiThreadingManager
                                       AvatarLowLevelOutputProcessor lowLevelOutputProcessor,
                                       AvatarEstimatorThread estimatorThread,
                                       List<HumanoidRobotControlTask> tasks,
+                                      List<Runnable> childThreads,
                                       AvatarAffinityInterface affinity,
                                       double masterThreadDt,
                                       MonotonicTime period,
@@ -104,7 +111,6 @@ public class AvatarMultiThreadingManager
                                       boolean useRealtimeThreads,
                                       boolean useMultiThreading,
                                       YoVariableServer yoVariableServer,
-                                      JVMStatisticsGenerator jvmStatisticsGenerator,
                                       YoRegistry rootRegistry)
    {
       this.estimatorROS2Node = estimatorROS2Node;
@@ -112,10 +118,10 @@ public class AvatarMultiThreadingManager
       this.hardwareCommunicationInterface = hardwareCommunicationInterface;
       this.lowLevelOutputProcessor = lowLevelOutputProcessor;
       this.estimatorThread = estimatorThread;
+      this.childThreads = childThreads;
       this.masterThreadDt = masterThreadDt;
       this.monotonicTimeProvider = monotonicTimeProvider;
       this.useRealtimeThreads = useRealtimeThreads;
-      this.jvmStatisticsGenerator = jvmStatisticsGenerator;
       this.rootRegistry = rootRegistry;
       this.yoVariableServer = yoVariableServer;
 
@@ -143,6 +149,16 @@ public class AvatarMultiThreadingManager
       {
          masterThread = new RepeatingTaskThread(prefix + "-master-thread", this::run, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
       }
+
+      // Setup JVM statistics
+      PeriodicThreadSchedulerFactory jvmSchedulerFactory;
+      if (useRealtimeThreads)
+         jvmSchedulerFactory = new PeriodicRealtimeThreadSchedulerFactory(new PriorityParameters(JVM_STATISTICS_PRIORITY));
+      else
+         jvmSchedulerFactory = new PeriodicNonRealtimeThreadSchedulerFactory();
+
+      jvmStatisticsGenerator = new JVMStatisticsGenerator(yoVariableServer, jvmSchedulerFactory);
+      jvmStatisticsGenerator.addVariablesToStatisticsGenerator(yoVariableServer);
 
       // Add fault listener to unservo robot quickly in the event of a fault
       hardwareCommunicationInterface.addFaultListener(change ->
