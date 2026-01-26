@@ -19,7 +19,7 @@ public class ROS2ZEDSVOPlaybackSensor extends ZEDSVOPlaybackSensor
       ros2.subscribeViaCallback(PerceptionAPI.ZED_SVO_PLAY, this::play);
       ros2.subscribeViaCallback(PerceptionAPI.ZED_SVO_SET_POSITION, position ->
       {
-         setCurrentPosition((int) position.getData() + 1);
+         setCurrentPosition((int) position.getData() + 1); // +1 is required to set the SVO to the correct frame. Otherwise, sets to 1 frame behind. Idk why.
          if (getGrabThread().getScheduled() == 0)
             getGrabThread().setScheduled(1);
       });
