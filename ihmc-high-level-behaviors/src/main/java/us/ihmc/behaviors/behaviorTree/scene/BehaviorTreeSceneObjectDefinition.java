@@ -112,7 +112,12 @@ public class BehaviorTreeSceneObjectDefinition extends LatestTimestampModifiable
 
    public String getName()
    {
-      return objectType.getValue() == BehaviorTreeSceneObjectType.YOLO_ONLY ? yoloClassName.getValue() : foundationPoseObjectType.getValue().titleCaseName;
+      return switch (objectType.getValue())
+      {
+         case YOLO_ONLY -> yoloClassName.getValue();
+         case FOUNDATION_POSE -> foundationPoseObjectType.getValue().titleCaseName;
+         case DOOR_PANEL -> "Door Panel";
+      };
    }
 
    public BehaviorTreeSceneObjectType getObjectType()

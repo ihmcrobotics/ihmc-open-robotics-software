@@ -30,6 +30,7 @@ public class BehaviorTreeDefinitionRegistry
       new DefinitionMapping(DoorTraversalDefinition.class, BehaviorTreeStateMessage.DOOR_TRAVERSAL),
       new DefinitionMapping(BuildingExplorationDefinition.class, BehaviorTreeStateMessage.BUILDING_EXPLORATION),
 
+      new DefinitionMapping(NeckActionDefinition.class, BehaviorTreeStateMessage.NECK_ACTION),
       new DefinitionMapping(ChestOrientationActionDefinition.class, BehaviorTreeStateMessage.CHEST_ORIENTATION_ACTION),
       new DefinitionMapping(FootstepPlanActionDefinition.class, BehaviorTreeStateMessage.FOOTSTEP_PLAN_ACTION),
       new DefinitionMapping(HandPoseActionDefinition.class, BehaviorTreeStateMessage.HAND_POSE_ACTION),

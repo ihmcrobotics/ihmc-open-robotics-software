@@ -29,6 +29,7 @@ public class BehaviorTreeDefinitionBuilder
       MAP.put(AI2RNodeDefinition.class, AI2RNodeDefinition::new);
       MAP.put(DoorTraversalDefinition.class, DoorTraversalDefinition::new);
       MAP.put(BuildingExplorationDefinition.class, BuildingExplorationDefinition::new);
+      MAP.put(NeckActionDefinition.class, NeckActionDefinition::new);
       MAP.put(ChestOrientationActionDefinition.class, ChestOrientationActionDefinition::new);
       MAP.put(FootstepPlanActionDefinition.class, FootstepPlanActionDefinition::new);
       MAP.put(HandPoseActionDefinition.class, HandPoseActionDefinition::new);

@@ -59,6 +59,11 @@ public class BehaviorTreeSceneDoorPanelExecutor extends BehaviorTreeSceneObjectE
          persistentDetectionMessageTool.toMessage(syncedRobot, Instant.now(), panelDetection, message.getDoorPanelDetection());
    }
 
+   @Override
+   public boolean isStable()
+   {
+      return super.isStable() && panelDetection != null && panelDetection.isStable();
+   }
 
    public PersistentDetection getDoorPanelPersistentDetection()
    {
