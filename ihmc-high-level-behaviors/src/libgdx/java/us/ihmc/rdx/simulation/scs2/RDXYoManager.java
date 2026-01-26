@@ -17,6 +17,7 @@ public class RDXYoManager
    private LinkedBufferProperties linkedBufferProperties;
    private LinkedYoVariableFactory linkedYoVariableFactory;
    private YoVariableDatabase rootRegistryDatabase = null;
+   private Session session;
 
    public RDXYoManager()
    {
@@ -24,6 +25,7 @@ public class RDXYoManager
 
    public void startSession(Session session)
    {
+      this.session = session;
       LogTools.info("Linking YoVariables");
       rootRegistry = session.getRootRegistry();
       linkedYoVariableFactory = session.getLinkedYoVariableFactory();
@@ -111,5 +113,10 @@ public class RDXYoManager
       if (linkedBufferProperties == null || linkedBufferProperties.peekCurrentBufferProperties() == null)
          return -1;
       return linkedBufferProperties.peekCurrentBufferProperties().getActiveBufferLength();
+   }
+
+   public Session getSession()
+   {
+      return session;
    }
 }

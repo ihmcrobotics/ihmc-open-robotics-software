@@ -16,6 +16,8 @@ import us.ihmc.perception.gpuMapping.HeightMapTools;
 
 import java.util.List;
 
+import static us.ihmc.perception.gpuMapping.TerrainMapData.*;
+
 public class PlanarRegionToHeightMapConverter
 {
    public static final double defaultResolution = 0.02;
@@ -83,9 +85,9 @@ public class PlanarRegionToHeightMapConverter
                   flippedNormal.negate();
                   normal = flippedNormal;
                }
-               message.getSnappedNormalXData().add(TerrainMapData.packFloatAsByte(normal.getX32(), -1.0f, 1.0f));
-               message.getSnappedNormalYData().add(TerrainMapData.packFloatAsByte(normal.getY32(), -1.0f, 1.0f));
-               message.getSnappedNormalZData().add(TerrainMapData.packFloatAsByte(normal.getZ32(), 0.0f, 1.0f));
+               message.getSnappedNormalXData().add(TerrainMapData.packFloatAsByte(normal.getX32(), -NORMAL_MIN_MAX_XY, NORMAL_MIN_MAX_XY));
+               message.getSnappedNormalYData().add(TerrainMapData.packFloatAsByte(normal.getY32(), -NORMAL_MIN_MAX_XY, NORMAL_MIN_MAX_XY));
+               message.getSnappedNormalZData().add(TerrainMapData.packFloatAsByte(normal.getZ32(), NORMAL_MIN_Z, NORMAL_MAX_Z));
             }
             else
             {

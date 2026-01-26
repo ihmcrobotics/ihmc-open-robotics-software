@@ -108,6 +108,7 @@ public class RDXBehaviorTreeNodeCreationMenu
             ImGui.sameLine();
             renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), SakeHandCommandActionDefinition.class, side);
          }
+         renderNodeCreationClickable(relativeNode, insertionType, "Neck", NeckActionDefinition.class, null);
          renderNodeCreationClickable(relativeNode, insertionType, "Chest Orientation", ChestOrientationActionDefinition.class, null);
          renderNodeCreationClickable(relativeNode, insertionType, "Pelvis Height", PelvisHeightOrientationActionDefinition.class, null);
          renderNodeCreationClickable(relativeNode, insertionType, "Wait", WaitDurationActionDefinition.class, null);
@@ -173,11 +174,6 @@ public class RDXBehaviorTreeNodeCreationMenu
    {
       topologyOperationQueue.queueInsertNodeModify(insertionDefinition);
       ImGui.closeCurrentPopup();
-
-      if (insertionDefinition.getParent() != null)
-         insertionDefinition.getParent().setTreeWidgetExpanded(true);
-
-      insertionDefinition.getNodeToInsert().setTreeWidgetExpanded(true);
    }
 
    public void reindexDirectory()

@@ -39,6 +39,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
    private final CRDTBidirectionalImmutableField<InitialStanceSide> plannerInitialStanceSide;
    private final CRDTBidirectionalBoolean plannerPerformAStarSearch;
    private final CRDTBidirectionalBoolean plannerWalkWithGoalOrientation;
+   private final CRDTBidirectionalBoolean plannerPlanWithBodyPath;
    private final BehaviorStoredPropertySetDefinition plannerParameters;
 
    // On disk fields
@@ -56,6 +57,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
    private InitialStanceSide onDiskPlannerInitialStanceSide;
    private boolean onDiskPlannerPerformAStarSearch;
    private boolean onDiskPlannerWalkWithGoalOrientation;
+   private boolean onDiskPlannerPlanWithBodyPath;
 
    public FootstepPlanActionDefinition(BehaviorTreeRootNodeDefinition rootNode)
    {
@@ -75,6 +77,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       plannerInitialStanceSide = new CRDTBidirectionalImmutableField<>(this, InitialStanceSide.AUTO);
       plannerPerformAStarSearch = new CRDTBidirectionalBoolean(this, false);
       plannerWalkWithGoalOrientation = new CRDTBidirectionalBoolean(this, true);
+      plannerPlanWithBodyPath = new CRDTBidirectionalBoolean(this, false);
       plannerParameters = new BehaviorStoredPropertySetDefinition(this, "plannerParameters", robotModel.getFootstepPlannerParameters());
    }
 
@@ -113,6 +116,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
          jsonNode.put("plannerPerformAStarSearch", plannerPerformAStarSearch.getValue());
          if (plannerPerformAStarSearch.getValue())
             jsonNode.put("plannerWalkWithGoalOrientation", plannerWalkWithGoalOrientation.getValue());
+         jsonNode.put("plannerPlanWithBodyPath", plannerPlanWithBodyPath.getValue());
          plannerParameters.toJSON(jsonNode);
       }
    }
@@ -151,6 +155,8 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
             plannerPerformAStarSearch.setValue(booleanNode.booleanValue());
          if (jsonNode.get("plannerWalkWithGoalOrientation") instanceof BooleanNode booleanNode)
             plannerWalkWithGoalOrientation.setValue(booleanNode.booleanValue());
+         if (jsonNode.get("plannerPlanWithBodyPath") instanceof BooleanNode booleanNode)
+            plannerPlanWithBodyPath.setValue(booleanNode.booleanValue());
          plannerParameters.fromJSON(jsonNode);
       }
    }
@@ -180,6 +186,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       onDiskPlannerInitialStanceSide = plannerInitialStanceSide.getValue();
       onDiskPlannerPerformAStarSearch = plannerPerformAStarSearch.getValue();
       onDiskPlannerWalkWithGoalOrientation = plannerWalkWithGoalOrientation.getValue();
+      onDiskPlannerPlanWithBodyPath = plannerPlanWithBodyPath.getValue();
       plannerParameters.setOnDiskFields();
    }
 
@@ -212,6 +219,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
          plannerInitialStanceSide.setValue(onDiskPlannerInitialStanceSide);
          plannerPerformAStarSearch.setValue(onDiskPlannerPerformAStarSearch);
          plannerWalkWithGoalOrientation.setValue(onDiskPlannerWalkWithGoalOrientation);
+         plannerPlanWithBodyPath.setValue(onDiskPlannerPlanWithBodyPath);
          plannerParameters.undoAllNontopologicalChanges();
       }
    }
@@ -244,6 +252,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       unchanged &= plannerInitialStanceSide.getValue() == onDiskPlannerInitialStanceSide;
       unchanged &= plannerPerformAStarSearch.getValue() == onDiskPlannerPerformAStarSearch;
       unchanged &= plannerWalkWithGoalOrientation.getValue() == onDiskPlannerWalkWithGoalOrientation;
+      unchanged &= plannerPlanWithBodyPath.getValue() == onDiskPlannerPlanWithBodyPath;
       unchanged &= plannerParameters.isUnchanged();
 
       return !unchanged;
@@ -275,6 +284,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       message.setPlannerInitialStanceSide(plannerInitialStanceSide.toMessage().toByte());
       message.setPlannerPerformAStarSearch(plannerPerformAStarSearch.toMessage());
       message.setPlannerWalkWithGoalOrientation(plannerWalkWithGoalOrientation.toMessage());
+      message.setPlannerPlanWithBodyPath(plannerPlanWithBodyPath.toMessage());
       plannerParameters.toMessage(message.getPlannerParameters());
    }
 
@@ -307,6 +317,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       plannerInitialStanceSide.fromMessage(InitialStanceSide.fromByte(message.getPlannerInitialStanceSide()));
       plannerPerformAStarSearch.fromMessage(message.getPlannerPerformAStarSearch());
       plannerWalkWithGoalOrientation.fromMessage(message.getPlannerWalkWithGoalOrientation());
+      plannerPlanWithBodyPath.fromMessage(message.getPlannerPlanWithBodyPath());
       plannerParameters.fromMessage(message.getPlannerParameters());
    }
 
@@ -403,6 +414,11 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
    public CRDTBidirectionalBoolean getPlannerWalkWithGoalOrientation()
    {
       return plannerWalkWithGoalOrientation;
+   }
+
+   public CRDTBidirectionalBoolean getPlannerPlanWithBodyPath()
+   {
+      return plannerPlanWithBodyPath;
    }
 
    public DefaultFootstepPlannerParametersReadOnly getPlannerParametersReadOnly()

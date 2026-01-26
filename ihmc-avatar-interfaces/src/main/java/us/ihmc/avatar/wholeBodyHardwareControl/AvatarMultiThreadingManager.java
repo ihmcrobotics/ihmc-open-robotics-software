@@ -400,7 +400,8 @@ public class AvatarMultiThreadingManager
          ((RepeatingTaskThread) masterThread).stopRepeating();
       }
 
-      stepGeneratorThread.destroy();
+      if (stepGeneratorThread != null)
+         stepGeneratorThread.destroy();
 
       ThreadTools.sleep(1000L);
 

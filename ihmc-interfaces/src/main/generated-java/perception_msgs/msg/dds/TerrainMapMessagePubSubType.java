@@ -15,7 +15,7 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "10b655da983436fd5158af936d927e51c5028d3cf10b244da3ac241e73cde91c";
+   		return "58027ab49a3814c637fa3dca90f82c4aa7d95823715f88a9bc234358a8109f06";
    }
    
    @Override
@@ -68,6 +68,8 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (255000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (255000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (255000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (255000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -112,6 +114,10 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getObstacleClearanceScore().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getTraversabilityScore().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
@@ -153,6 +159,10 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       cdr.write_type_e(data.getHeightMap());else
           throw new RuntimeException("height_map field exceeds the maximum length: %d > %d".formatted(data.getHeightMap().size(), 255000));
 
+      if(data.getObstacleClearanceScore().size() <= 255000)
+      cdr.write_type_e(data.getObstacleClearanceScore());else
+          throw new RuntimeException("obstacle_clearance_score field exceeds the maximum length: %d > %d".formatted(data.getObstacleClearanceScore().size(), 255000));
+
       if(data.getTraversabilityScore().size() <= 255000)
       cdr.write_type_e(data.getTraversabilityScore());else
           throw new RuntimeException("traversability_score field exceeds the maximum length: %d > %d".formatted(data.getTraversabilityScore().size(), 255000));
@@ -190,6 +200,7 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       data.setCellsPerAxis(cdr.read_type_2());
       	
       cdr.read_type_e(data.getHeightMap());	
+      cdr.read_type_e(data.getObstacleClearanceScore());	
       cdr.read_type_e(data.getTraversabilityScore());	
       cdr.read_type_e(data.getTraversabilityClass());	
       cdr.read_type_e(data.getSnappedNormalXData());	
@@ -208,6 +219,7 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       ser.write_type_6("cell_size_in_meters", data.getCellSizeInMeters());
       ser.write_type_2("cells_per_axis", data.getCellsPerAxis());
       ser.write_type_e("height_map", data.getHeightMap());
+      ser.write_type_e("obstacle_clearance_score", data.getObstacleClearanceScore());
       ser.write_type_e("traversability_score", data.getTraversabilityScore());
       ser.write_type_e("traversability_class", data.getTraversabilityClass());
       ser.write_type_e("snapped_normal_x_data", data.getSnappedNormalXData());
@@ -225,6 +237,7 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       data.setCellSizeInMeters(ser.read_type_6("cell_size_in_meters"));
       data.setCellsPerAxis(ser.read_type_2("cells_per_axis"));
       ser.read_type_e("height_map", data.getHeightMap());
+      ser.read_type_e("obstacle_clearance_score", data.getObstacleClearanceScore());
       ser.read_type_e("traversability_score", data.getTraversabilityScore());
       ser.read_type_e("traversability_class", data.getTraversabilityClass());
       ser.read_type_e("snapped_normal_x_data", data.getSnappedNormalXData());

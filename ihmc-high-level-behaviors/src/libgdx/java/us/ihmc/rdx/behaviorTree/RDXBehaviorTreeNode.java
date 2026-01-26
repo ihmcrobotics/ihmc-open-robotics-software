@@ -38,6 +38,8 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
                                  D extends BehaviorTreeNodeDefinition>
       implements BehaviorTreeNode<RDXBehaviorTreeNode<?, ?>, S, D>
 {
+   private static final RDXBehaviorTreeNodeExpansionManager expansionManager = new RDXBehaviorTreeNodeExpansionManager();
+
    /** Convenient accessor to the state to keep the code clean, available to all inheriting classes. */
    protected final S state;
    /** Convenient accessor to the definition to keep the code clean, available to all inheriting classes. */
@@ -54,8 +56,8 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    private transient final ImVec2 lineMax = new ImVec2();
    protected boolean mouseHoveringNodeLine;
    protected boolean anySpecificWidgetOnLineClicked = false;
-   protected boolean treeWidgetExpanded = false;
-   private int previousNumberOfChildren = 0;
+   protected boolean initialized = false;
+   protected boolean treeWidgetExpanded = true;
    private boolean isNameBeingEdited = false;
    private transient final ImString imNodeNameText = new ImString();
    private transient final ImString notesText = new ImString(1500);
@@ -119,11 +121,11 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    {
       BehaviorTreeNode.super.update();
 
-      // Automatically expand if less than 5 children are added at once
-      int deltaChildren = getChildren().size() - previousNumberOfChildren;
-      previousNumberOfChildren = getChildren().size();
-      if (deltaChildren > 0 && deltaChildren < 5)
-         treeWidgetExpanded = true;
+      if (!initialized)
+      {
+         initialized = true;
+         treeWidgetExpanded = expansionManager.isExpanded(definition.getName());
+      }
 
       offsetY = Float.NaN;
 
@@ -241,7 +243,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
          if (isHovered && ImGui.isMouseClicked(ImGuiMouseButton.Left))
          {
             anySpecificWidgetOnLineClicked = true;
-            treeWidgetExpanded = !treeWidgetExpanded;
+            setTreeWidgetExpanded(!treeWidgetExpanded);
          }
       }
       ImGui.setCursorScreenPos(indentMin.x + itemWidth, indentMin.y); // Leave space for the expand/collapse arrow regardless
@@ -264,8 +266,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       if (!isRootNode() && textHovered && ImGui.isMouseDoubleClicked(ImGuiMouseButton.Left))
       {
          anySpecificWidgetOnLineClicked = true;
-         RDXBehaviorTreeTools.clearOtherNodeSelections(this);
-         selected.set(true);
+         setSelected();
          isNameBeingEdited = true;
          imNodeNameText.set(definition.getName());
       }
@@ -285,20 +286,16 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
 
       if (mouseHoveringNodeLine && !isNameBeingEdited && ImGui.isMouseClicked(ImGuiMouseButton.Right))
       {
-         RDXBehaviorTreeTools.clearOtherNodeSelections(this);
-         selected.set(true);
+         setSelected();
          ImGui.openPopup(nodePopupID);
       }
 
       // We try to make anywhere on the row clickable to select the node,
       // execpt for specific interactions. We use release without drag to prevent interference
       // with the drag and drop functionality
-      if (!anySpecificWidgetOnLineClicked && mouseHoveringNodeLine && ImGuiTools.mouseReleasedWithoutDrag(ImGuiMouseButton.Left) && !isNameBeingEdited)
-      {
-         boolean desiredValue = !selected.get();
-         RDXBehaviorTreeTools.clearOtherNodeSelections(this);
-         selected.set(desiredValue);
-      }
+      if (!anySpecificWidgetOnLineClicked && mouseHoveringNodeLine
+          && ImGuiTools.mouseReleasedWithoutDrag(ImGuiMouseButton.Left) && !isNameBeingEdited && !selected.get())
+         setSelected();
    }
 
    public void renderContextMenuItems()
@@ -388,6 +385,12 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       return selected.get();
    }
 
+   public void setSelected()
+   {
+      RDXBehaviorTreeTools.clearOtherNodeSelections(this);
+      this.selected.set(true);
+   }
+
    public void setNameBeingEdited(boolean nameBeingEdited)
    {
       isNameBeingEdited = nameBeingEdited;
@@ -400,6 +403,9 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
 
    public void setTreeWidgetExpanded(boolean treeWidgetExpanded)
    {
+      if (treeWidgetExpanded != this.treeWidgetExpanded)
+         expansionManager.setExpanded(definition.getName(), treeWidgetExpanded);
+
       this.treeWidgetExpanded = treeWidgetExpanded;
    }
 

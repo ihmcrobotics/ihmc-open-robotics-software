@@ -11,6 +11,8 @@ import us.ihmc.behaviors.behaviorTree.control.door.*;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneExecutor;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.perception.detections.yolo.YOLOTerrainMapIntegrator;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
@@ -33,6 +35,7 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
       REGISTRY.put(AI2RNodeDefinition.class, AI2RNodeExecutor::new);
       REGISTRY.put(DoorTraversalDefinition.class, DoorTraversalExecutor::new);
       REGISTRY.put(BuildingExplorationDefinition.class, BuildingExplorationExecutor::new);
+      REGISTRY.put(NeckActionDefinition.class, NeckActionExecutor::new);
       REGISTRY.put(ChestOrientationActionDefinition.class, ChestOrientationActionExecutor::new);
       REGISTRY.put(FootstepPlanActionDefinition.class, FootstepPlanActionExecutor::new);
       REGISTRY.put(HandPoseActionDefinition.class, HandPoseActionExecutor::new);
@@ -52,6 +55,7 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
    private ControllerStatusTracker controllerStatusTracker;
    private SideDependentList<AbilityHandActionComms> abilityHandComms;
    private BehaviorTreeSceneExecutor scene;
+   private TerrainMapData terrainMapData;
 
    public void initialize(CRDTInfo crdtInfo,
                           WorkspaceResourceDirectory saveFileDirectory,
@@ -59,7 +63,8 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
                           ROS2SyncedRobotModel syncedRobot,
                           ControllerStatusTracker controllerStatusTracker,
                           SideDependentList<AbilityHandActionComms> abilityHandComms,
-                          BehaviorTreeSceneExecutor scene)
+                          BehaviorTreeSceneExecutor scene,
+                          TerrainMapData terrainMapData)
    {
       this.crdtInfo = crdtInfo;
       this.saveFileDirectory = saveFileDirectory;
@@ -68,6 +73,7 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
       this.controllerStatusTracker = controllerStatusTracker;
       this.abilityHandComms = abilityHandComms;
       this.scene = scene;
+      this.terrainMapData = terrainMapData;
    }
 
    @Override
@@ -80,7 +86,8 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
                                               syncedRobot,
                                               controllerStatusTracker,
                                               abilityHandComms,
-                                              scene);
+                                              scene,
+                                              terrainMapData);
    }
 
    @Override
