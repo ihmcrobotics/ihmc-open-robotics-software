@@ -23,6 +23,7 @@ public abstract class HumanoidRobotControlTask extends Task<HumanoidRobotContext
    protected boolean initialize()
    {
       runAll(startupRunnables);
+
       return true;
    }
 
@@ -67,7 +68,7 @@ public abstract class HumanoidRobotControlTask extends Task<HumanoidRobotContext
     */
    public void addRunnableOnStartup(Runnable runnable)
    {
-      cleanupRunnables.add(runnable);
+      startupRunnables.add(runnable);
    }
 
    /**

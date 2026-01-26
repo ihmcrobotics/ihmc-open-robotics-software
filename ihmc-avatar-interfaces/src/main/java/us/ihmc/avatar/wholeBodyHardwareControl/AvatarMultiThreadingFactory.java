@@ -99,6 +99,7 @@ public class AvatarMultiThreadingFactory
 
    // The thread factories
    private final AvatarEstimatorThreadFactory estimatorFactory;
+   private final AvatarEstimatorThread avatarEstimatorThread;
    private final HighLevelHumanoidControllerFactory controllerFactory;
 
    // The threads
@@ -177,6 +178,14 @@ public class AvatarMultiThreadingFactory
       // Setup state estimator factory
       estimatorFactory = createStateEstimatorFactory(robotModel, fullRobotModel, sensorReaderFactory);
 
+      // Create estimator thread
+      avatarEstimatorThread = estimatorFactory.createAvatarEstimatorThread();
+
+      // Set the root registry as the YoVariableServer's main registry
+      yoVariableServer.setMainRegistry(rootRegistry,
+                                       avatarEstimatorThread.getFullRobotModel().getRootJoint().subtreeList(),
+                                       null,
+                                       avatarEstimatorThread.getSCS2YoGraphics());
       // Setup state controller factory
       controllerFactory = createHighLevelControllerFactory(robotModel,
                                                            controllerRealtimeROS2Node,
@@ -187,8 +196,6 @@ public class AvatarMultiThreadingFactory
 
    public AvatarMultiThreadingManager buildThreadsAndThreadingManager()
    {
-      // Create estimator thread
-      AvatarEstimatorThread avatarEstimatorThread = estimatorFactory.createAvatarEstimatorThread();
       FullHumanoidRobotModel masterFullRobotModel = avatarEstimatorThread.getFullRobotModel();
 
       // Hand the communication module the sensor processor
@@ -246,12 +253,6 @@ public class AvatarMultiThreadingFactory
 
       // Add estimator thread registry as child to the root registry (since estimator thread is essentially our master thread)
       rootRegistry.addChild(avatarEstimatorThread.getYoRegistry());
-
-      // Set the root registry as the YoVariableServer's main registry
-      yoVariableServer.setMainRegistry(rootRegistry,
-                                       masterFullRobotModel.getRootJoint().subtreeList(),
-                                       null,
-                                       avatarEstimatorThread.getSCS2YoGraphics());
 
       // Add controller thread registry directly to the YoVariableServer (since it is in a separate thread)
       yoVariableServer.addRegistry(avatarControllerThread.getYoVariableRegistry(), null, avatarControllerThread.getSCS2YoGraphics());
@@ -519,6 +520,7 @@ public class AvatarMultiThreadingFactory
          threads.add(controllerNonRealtimeThread);
       }
 
+      tasks.add(controllerTask);
       return controllerTask;
    }
 
@@ -619,6 +621,7 @@ public class AvatarMultiThreadingFactory
          threads.add(stepGeneratorNonRealtimeThread);
       }
 
+      tasks.add(stepGeneratorTask);
       return stepGeneratorTask;
    }
 
@@ -673,6 +676,7 @@ public class AvatarMultiThreadingFactory
          threads.add(ikStreamingNonRealtimeThread);
       }
 
+      tasks.add(ikStreamingTask);
       return ikStreamingTask;
    }
 
