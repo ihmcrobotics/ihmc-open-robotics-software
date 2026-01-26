@@ -30,26 +30,23 @@ public class BehaviorTreeSceneObjectExecutor extends BehaviorTreeSceneObjectStat
       this.syncedRobot = syncedRobot;
    }
 
-   public void updateTransform()
-   {
-      Vector3DBasics translation = persistentDetection.getFilteredTransform().getTranslation();
-
-      Orientation3DReadOnly orientation;
-      if (persistentDetection.getMostRecentDetection() instanceof YOLOv8InstantDetection)
-         orientation = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getChestFrame).getOrientation();
-      else
-         orientation = persistentDetection.getFilteredTransform().getRotation();
-
-//      if (!(transform.getValueReadOnly().getRotation().geometricallyEquals(orientation, 1e-5)
-//            && transform.getValueReadOnly().getTranslation().epsilonEquals(translation, 1e-5)))
-         transform.getValueAndModify().set(orientation, translation);
-      referenceFrame.update();
-   }
-
    public void update()
    {
       if (persistentDetection != null && persistentDetection.isStable())
-         updateTransform();
+      {
+         Vector3DBasics translation = persistentDetection.getFilteredTransform().getTranslation();
+
+         Orientation3DReadOnly orientation;
+         if (persistentDetection.getMostRecentDetection() instanceof YOLOv8InstantDetection)
+            orientation = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getChestFrame).getOrientation();
+         else
+            orientation = persistentDetection.getFilteredTransform().getRotation();
+
+         if (!(transform.getValueReadOnly().getRotation().geometricallyEquals(orientation, 1e-5)
+             && transform.getValueReadOnly().getTranslation().epsilonEquals(translation, 1e-5)))
+            transform.getValueAndModify().set(orientation, translation);
+         referenceFrame.update();
+      }
    }
 
    @Override
