@@ -2,6 +2,7 @@
 #define __behavior_msgs__msg__ConditionNodeDefinitionMessage__idl__
 
 #include "behavior_msgs/msg/./LeafNodeDefinitionMessage_.idl"
+#include "controller_msgs/msg/./RigidBodyTransformMessage_.idl"
 module behavior_msgs
 {
   module msg
@@ -17,11 +18,14 @@ module behavior_msgs
       const octet PROXIMITY_TYPE =
       2;
 
-      const octet ALWAYS_FAIL =
+      const octet SHAPE_CONTAINS =
       3;
 
-      const octet ALWAYS_SUCCEED =
+      const octet ALWAYS_FAIL =
       4;
+
+      const octet ALWAYS_SUCCEED =
+      5;
 
       const octet XYZ =
       0;
@@ -32,11 +36,18 @@ module behavior_msgs
       const octet Z =
       2;
 
+      const octet CONTAINS_FRAME =
+      0;
+
+      const octet CONTAINS_POINTS =
+      1;
+
 
       /**
        * COUNTER TYPE
        * LLM TYPE
        * PROXIMITY TYPE
+       * SHAPE CONTAINS TYPE
        */
       @TypeCode(type="behavior_msgs::msg::dds_::ConditionNodeDefinitionMessage_")
       struct ConditionNodeDefinitionMessage
@@ -105,6 +116,30 @@ module behavior_msgs
          * Timeout for waiting for the condition to be satisfied
          */
         double timeout;
+        /**
+         * The type of shape contains condition as defined above
+         */
+        octet contains_type;
+        /**
+         * Name of the frame the the shape's pose is expressed in
+         */
+        string shape_parent_frame_name;
+        /**
+         * Transform that expresses the pose of the shape in the parent frame
+         */
+        controller_msgs::msg::dds::RigidBodyTransformMessage shape_transform_to_parent;
+        /**
+         * Radius of the sphere used for checking containment
+         */
+        float sphere_radius;
+        /**
+         * Name of frame to check for containment
+         */
+        string frame_name;
+        /**
+         * Minimum number of points in the shape
+         */
+        unsigned long min_points;
       };
     };
   };

@@ -20,6 +20,7 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
       COUNTER,
       LLM,
       PROXIMITY,
+      SHAPE_CONTAINS,
       ALWAYS_FAIL,
       ALWAYS_SUCCEED;
 
@@ -31,6 +32,7 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
    private final CounterConditionDefinition counter;
    private final LLMConditionDefinition llm;
    private final ProximityConditionDefinition proximityCheck;
+   private final ShapeContainsConditionDefinition shapeContains;
 
    private ConditionNodeType onDiskConditionType;
 
@@ -44,6 +46,7 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
       counter = new CounterConditionDefinition(this);
       llm = new LLMConditionDefinition(this);
       proximityCheck = new ProximityConditionDefinition(this);
+      shapeContains = new ShapeContainsConditionDefinition(this);
    }
 
    @Override
@@ -58,6 +61,7 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
          case COUNTER -> counter.saveToFile(jsonNode);
          case LLM -> llm.saveToFile(jsonNode);
          case PROXIMITY -> proximityCheck.saveToFile(jsonNode);
+         case SHAPE_CONTAINS -> shapeContains.saveToFile(jsonNode);
       }
    }
 
@@ -73,6 +77,7 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
          case COUNTER -> counter.loadFromFile(jsonNode);
          case LLM -> llm.loadFromFile(jsonNode);
          case PROXIMITY -> proximityCheck.loadFromFile(jsonNode);
+         case SHAPE_CONTAINS -> shapeContains.loadFromFile(jsonNode);
       }
    }
 
@@ -88,6 +93,7 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
          case COUNTER -> counter.setOnDiskFields();
          case LLM -> llm.setOnDiskFields();
          case PROXIMITY -> proximityCheck.setOnDiskFields();
+         case SHAPE_CONTAINS -> shapeContains.setOnDiskFields();
       }
    }
 
@@ -105,6 +111,7 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
             case COUNTER -> counter.undoAllNontopologicalChanges();
             case LLM -> llm.undoAllNontopologicalChanges();
             case PROXIMITY -> proximityCheck.undoAllNontopologicalChanges();
+            case SHAPE_CONTAINS -> shapeContains.undoAllNontopologicalChanges();
          }
       }
    }
@@ -121,6 +128,7 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
          case COUNTER -> unchanged &= !counter.hasChanges();
          case LLM -> unchanged &= !llm.hasChanges();
          case PROXIMITY -> unchanged &= !proximityCheck.hasChanges();
+         case SHAPE_CONTAINS -> unchanged &= !shapeContains.hasChanges();
       }
 
       return !unchanged;
@@ -137,6 +145,7 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
          case COUNTER -> counter.toMessage(message);
          case LLM -> llm.toMessage(message);
          case PROXIMITY -> proximityCheck.toMessage(message);
+         case SHAPE_CONTAINS -> shapeContains.toMessage(message);
       }
    }
 
@@ -151,6 +160,7 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
          case COUNTER -> counter.fromMessage(message);
          case LLM -> llm.fromMessage(message);
          case PROXIMITY -> proximityCheck.fromMessage(message);
+         case SHAPE_CONTAINS -> shapeContains.fromMessage(message);
       }
    }
 
@@ -172,5 +182,10 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
    public ProximityConditionDefinition getProximityCheck()
    {
       return proximityCheck;
+   }
+
+   public ShapeContainsConditionDefinition getShapeContains()
+   {
+      return shapeContains;
    }
 }

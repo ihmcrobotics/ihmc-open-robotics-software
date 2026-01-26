@@ -15,7 +15,7 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "d8f96b5c89a07a516288b3afe441e7fb7e44a8a5711ff533109d6f8956a84df3";
+   		return "0ce56a844cee9c1b89456875b9e6b5b5184b9ccd4d0e6b2d0225e5654a8d5850";
    }
    
    @Override
@@ -79,6 +79,16 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       return current_alignment - initial_alignment;
    }
@@ -134,6 +144,21 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getShapeParentFrameName().length() + 1;
+
+      current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getCdrSerializedSize(data.getShapeTransformToParent(), current_alignment);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getFrameName().length() + 1;
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -181,6 +206,21 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
 
       cdr.write_type_6(data.getTimeout());
 
+      cdr.write_type_9(data.getContainsType());
+
+      if(data.getShapeParentFrameName().length() <= 255)
+      cdr.write_type_d(data.getShapeParentFrameName());else
+          throw new RuntimeException("shape_parent_frame_name field exceeds the maximum length: %d > %d".formatted(data.getShapeParentFrameName().length(), 255));
+
+      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getShapeTransformToParent(), cdr);
+      cdr.write_type_5(data.getSphereRadius());
+
+      if(data.getFrameName().length() <= 255)
+      cdr.write_type_d(data.getFrameName());else
+          throw new RuntimeException("frame_name field exceeds the maximum length: %d > %d".formatted(data.getFrameName().length(), 255));
+
+      cdr.write_type_4(data.getMinPoints());
+
    }
 
    public static void read(behavior_msgs.msg.dds.ConditionNodeDefinitionMessage data, us.ihmc.idl.CDR cdr)
@@ -211,6 +251,15 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
       	
       data.setTimeout(cdr.read_type_6());
       	
+      data.setContainsType(cdr.read_type_9());
+      	
+      cdr.read_type_d(data.getShapeParentFrameName());	
+      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getShapeTransformToParent(), cdr);	
+      data.setSphereRadius(cdr.read_type_5());
+      	
+      cdr.read_type_d(data.getFrameName());	
+      data.setMinPoints(cdr.read_type_4());
+      	
 
    }
 
@@ -234,6 +283,13 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
       ser.write_type_6("min_distance", data.getMinDistance());
       ser.write_type_6("max_distance", data.getMaxDistance());
       ser.write_type_6("timeout", data.getTimeout());
+      ser.write_type_9("contains_type", data.getContainsType());
+      ser.write_type_d("shape_parent_frame_name", data.getShapeParentFrameName());
+      ser.write_type_a("shape_transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getShapeTransformToParent());
+
+      ser.write_type_5("sphere_radius", data.getSphereRadius());
+      ser.write_type_d("frame_name", data.getFrameName());
+      ser.write_type_4("min_points", data.getMinPoints());
    }
 
    @Override
@@ -256,6 +312,13 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
       data.setMinDistance(ser.read_type_6("min_distance"));
       data.setMaxDistance(ser.read_type_6("max_distance"));
       data.setTimeout(ser.read_type_6("timeout"));
+      data.setContainsType(ser.read_type_9("contains_type"));
+      ser.read_type_d("shape_parent_frame_name", data.getShapeParentFrameName());
+      ser.read_type_a("shape_transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getShapeTransformToParent());
+
+      data.setSphereRadius(ser.read_type_5("sphere_radius"));
+      ser.read_type_d("frame_name", data.getFrameName());
+      data.setMinPoints(ser.read_type_4("min_points"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.ConditionNodeDefinitionMessage src, behavior_msgs.msg.dds.ConditionNodeDefinitionMessage dest)

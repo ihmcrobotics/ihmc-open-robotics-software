@@ -9,6 +9,7 @@ public class ConditionNodeState extends LeafNodeState<ConditionNodeDefinition>
    private final CounterConditionState counter;
    private final LLMConditionState llm;
    private final ProximityConditionState proximityCheck;
+   private final ShapeContainsConditionState shapeContains;
 
    public ConditionNodeState(long id, BehaviorTreeRootNodeState rootNode)
    {
@@ -17,6 +18,18 @@ public class ConditionNodeState extends LeafNodeState<ConditionNodeDefinition>
       counter = new CounterConditionState(definition);
       llm = new LLMConditionState(definition);
       proximityCheck = new ProximityConditionState(definition);
+      shapeContains = new ShapeContainsConditionState(definition, scene);
+   }
+
+   @Override
+   public void update()
+   {
+      super.update();
+
+      switch (definition.getType().getValue())
+      {
+         case SHAPE_CONTAINS -> shapeContains.update();
+      }
    }
 
    public void toMessage(ConditionNodeStateMessage message)
@@ -30,6 +43,7 @@ public class ConditionNodeState extends LeafNodeState<ConditionNodeDefinition>
          case COUNTER -> counter.toMessage(message);
          case LLM -> llm.toMessage(message);
          case PROXIMITY -> proximityCheck.toMessage(message);
+         case SHAPE_CONTAINS -> shapeContains.toMessage(message);
       }
    }
 
@@ -44,6 +58,7 @@ public class ConditionNodeState extends LeafNodeState<ConditionNodeDefinition>
          case COUNTER -> counter.fromMessage(message);
          case LLM -> llm.fromMessage(message);
          case PROXIMITY -> proximityCheck.fromMessage(message);
+         case SHAPE_CONTAINS -> shapeContains.fromMessage(message);
       }
    }
 
@@ -60,5 +75,10 @@ public class ConditionNodeState extends LeafNodeState<ConditionNodeDefinition>
    public ProximityConditionState getProximityCheck()
    {
       return proximityCheck;
+   }
+
+   public ShapeContainsConditionState getShapeContains()
+   {
+      return shapeContains;
    }
 }

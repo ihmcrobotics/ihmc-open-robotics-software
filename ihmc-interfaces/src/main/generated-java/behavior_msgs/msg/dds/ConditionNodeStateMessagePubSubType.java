@@ -15,7 +15,7 @@ public class ConditionNodeStateMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "ef959af082234cf05dcefb783eb18544e0e16e298a6d591ed60fb5e47c84fb44";
+   		return "d0537b6a33030d68219402b0b91b896c552e07e2b27b917e43d91554081b8a96";
    }
    
    @Override
@@ -66,6 +66,10 @@ public class ConditionNodeStateMessagePubSubType implements us.ihmc.pubsub.Topic
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -97,6 +101,12 @@ public class ConditionNodeStateMessagePubSubType implements us.ihmc.pubsub.Topic
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -114,6 +124,10 @@ public class ConditionNodeStateMessagePubSubType implements us.ihmc.pubsub.Topic
 
       cdr.write_type_7(data.getFrameBIsPresent());
 
+      cdr.write_type_4(data.getNumberOfPointsContained());
+
+      cdr.write_type_7(data.getFrameIsContained());
+
    }
 
    public static void read(behavior_msgs.msg.dds.ConditionNodeStateMessage data, us.ihmc.idl.CDR cdr)
@@ -128,6 +142,10 @@ public class ConditionNodeStateMessagePubSubType implements us.ihmc.pubsub.Topic
       data.setFrameAIsPresent(cdr.read_type_7());
       	
       data.setFrameBIsPresent(cdr.read_type_7());
+      	
+      data.setNumberOfPointsContained(cdr.read_type_4());
+      	
+      data.setFrameIsContained(cdr.read_type_7());
       	
 
    }
@@ -145,6 +163,8 @@ public class ConditionNodeStateMessagePubSubType implements us.ihmc.pubsub.Topic
 
       ser.write_type_7("frame_a_is_present", data.getFrameAIsPresent());
       ser.write_type_7("frame_b_is_present", data.getFrameBIsPresent());
+      ser.write_type_4("number_of_points_contained", data.getNumberOfPointsContained());
+      ser.write_type_7("frame_is_contained", data.getFrameIsContained());
    }
 
    @Override
@@ -160,6 +180,8 @@ public class ConditionNodeStateMessagePubSubType implements us.ihmc.pubsub.Topic
 
       data.setFrameAIsPresent(ser.read_type_7("frame_a_is_present"));
       data.setFrameBIsPresent(ser.read_type_7("frame_b_is_present"));
+      data.setNumberOfPointsContained(ser.read_type_4("number_of_points_contained"));
+      data.setFrameIsContained(ser.read_type_7("frame_is_contained"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.ConditionNodeStateMessage src, behavior_msgs.msg.dds.ConditionNodeStateMessage dest)
