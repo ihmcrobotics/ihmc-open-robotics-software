@@ -1,5 +1,6 @@
 package us.ihmc.sensors.realsense;
 
+import org.bytedeco.librealsense2.global.realsense2;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.thread.Notification;
@@ -9,7 +10,9 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
+import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.sensors.ImageSensor;
 
 import java.time.Instant;
@@ -126,11 +129,28 @@ public class RealSenseImageSensor extends ImageSensor
          {
             if (grabbedImages[COLOR_IMAGE_KEY] != null)
                grabbedImages[COLOR_IMAGE_KEY].release();
-            grabbedImages[COLOR_IMAGE_KEY] = RawImage.createWithBGRImage(bgrImage,
-                                                                         realsense.getColorCameraIntrinsics(),
-                                                                         colorFrame.getTransformToRoot(),
-                                                                         grabTime,
-                                                                         grabSequenceNumber);
+
+            // Detect the color format from the RealSense device and create the appropriate RawImage
+            int detectedFormat = realsense.getDetectedColorFormat();
+            PixelFormat pixelFormat = PixelFormat.BGR8; // Default to BGR8
+
+            if (detectedFormat == realsense2.RS2_FORMAT_RGB8)
+               pixelFormat = PixelFormat.RGB8;
+            else if (detectedFormat == realsense2.RS2_FORMAT_RGBA8)
+               pixelFormat = PixelFormat.RGBA8;
+            else if (detectedFormat == realsense2.RS2_FORMAT_BGRA8)
+               pixelFormat = PixelFormat.BGRA8;
+            // else defaults to BGR8
+
+            grabbedImages[COLOR_IMAGE_KEY] = new RawImage(bgrImage,
+                                                          null,
+                                                          pixelFormat,
+                                                          realsense.getColorCameraIntrinsics(),
+                                                          CameraModel.PINHOLE,
+                                                          colorFrame.getTransformToRoot(),
+                                                          grabTime,
+                                                          grabSequenceNumber,
+                                                          -1.0f);
 
             if (grabbedImages[DEPTH_IMAGE_KEY] != null)
                grabbedImages[DEPTH_IMAGE_KEY].release();

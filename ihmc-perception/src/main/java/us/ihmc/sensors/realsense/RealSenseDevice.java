@@ -2,6 +2,7 @@ package us.ihmc.sensors.realsense;
 
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.FloatPointer;
+import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.librealsense2.global.realsense2;
 import org.bytedeco.librealsense2.rs2_config;
 import org.bytedeco.librealsense2.rs2_context;
@@ -82,6 +83,7 @@ public class RealSenseDevice
    private boolean colorEnabled = false;
    private int colorWidth;
    private int colorHeight;
+   private int detectedColorFormat = -1; // Will be set from bag file or defaults to BGR8 for live
    private CameraIntrinsics depthCameraIntrinsics;
    private CameraIntrinsics colorCameraIntrinsics;
 
@@ -218,7 +220,9 @@ public class RealSenseDevice
       {
          realsense2.rs2_config_enable_stream(config, realsense2.RS2_STREAM_COLOR, COLOR_STREAM_INDEX, colorWidth, colorHeight, realsense2.RS2_FORMAT_BGR8, fps, error);
          checkError("Failed to enable stream.");
+         detectedColorFormat = realsense2.RS2_FORMAT_BGR8; // Live devices use BGR8
       }
+      // For playback, format will be detected from the actual stream data during first grab
 
       colorAlignProcessingBlock = realsense2.rs2_create_align(realsense2.RS2_STREAM_COLOR, error);
       checkError("");
@@ -380,6 +384,34 @@ public class RealSenseDevice
                   colorFrameStreamProfile = realsense2.rs2_get_frame_stream_profile(extractedColorFrame, error);
                   realsense2.rs2_get_video_stream_intrinsics(colorFrameStreamProfile, colorStreamIntrinsics, error);
                   checkError("Failed to get color stream intrinsics.");
+
+                  // Detect color format from stream profile (important for bag files)
+                  if (isPlayback && detectedColorFormat == -1)
+                  {
+                     // Use IntPointer to get the format from the stream profile
+                     IntPointer streamPtr = new IntPointer(1);
+                     IntPointer formatPtr = new IntPointer(1);
+                     IntPointer indexPtr = new IntPointer(1);
+                     IntPointer uniqueIdPtr = new IntPointer(1);
+                     IntPointer frameratePtr = new IntPointer(1);
+
+                     realsense2.rs2_get_stream_profile_data(colorFrameStreamProfile, streamPtr, formatPtr, indexPtr, uniqueIdPtr, frameratePtr, error);
+                     checkError("Failed to get color stream format.");
+
+                     detectedColorFormat = formatPtr.get();
+                     String formatName = detectedColorFormat == realsense2.RS2_FORMAT_RGB8 ? "RGB8" :
+                                       detectedColorFormat == realsense2.RS2_FORMAT_BGR8 ? "BGR8" :
+                                       detectedColorFormat == realsense2.RS2_FORMAT_RGBA8 ? "RGBA8" :
+                                       detectedColorFormat == realsense2.RS2_FORMAT_BGRA8 ? "BGRA8" : "UNKNOWN(" + detectedColorFormat + ")";
+                     LogTools.info("Detected color format from bag file: {}", formatName);
+
+                     // Clean up
+                     streamPtr.close();
+                     formatPtr.close();
+                     indexPtr.close();
+                     uniqueIdPtr.close();
+                     frameratePtr.close();
+                  }
 
                   LogTools.info("Color intrinsics: {}", String.format("Color: fx: %.4f, fy: %.4f, cx: %.4f, cy: %.4f, h: %d, w: %d",
                                                                       colorStreamIntrinsics.fx(),
@@ -700,5 +732,16 @@ public class RealSenseDevice
    public QuaternionReadOnly getDepthToColorRotation()
    {
       return depthToColorQuaternion;
+   }
+
+   /**
+    * Get the detected color format from the stream.
+    * For live devices, this will be RS2_FORMAT_BGR8.
+    * For bag files, this will be detected from the actual stream data.
+    * @return The RealSense format constant (e.g., RS2_FORMAT_BGR8, RS2_FORMAT_RGB8)
+    */
+   public int getDetectedColorFormat()
+   {
+      return detectedColorFormat;
    }
 }
