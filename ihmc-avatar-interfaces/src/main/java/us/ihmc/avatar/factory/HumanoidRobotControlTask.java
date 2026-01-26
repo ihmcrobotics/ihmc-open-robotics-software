@@ -15,7 +15,7 @@ public abstract class HumanoidRobotControlTask extends Task<HumanoidRobotContext
    @Override
    protected boolean initialize()
    {
-      return true;
+      return super.initialize();
    }
 
    @Override
