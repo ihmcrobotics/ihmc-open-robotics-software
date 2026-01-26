@@ -2,7 +2,6 @@ package us.ihmc.sensors.zed;
 
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.opencv.opencv_core.GpuMat;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -129,7 +128,7 @@ public class ZEDImageSensor extends ImageSensor
       // Set runtime parameters to default values
       zedRuntimeParameters.reference_frame(SL_REFERENCE_FRAME_CAMERA);
       zedRuntimeParameters.enable_depth(slDepthMode != SL_DEPTH_MODE_NONE);
-      zedRuntimeParameters.confidence_threshold(70);
+      zedRuntimeParameters.confidence_threshold(50);
       zedRuntimeParameters.texture_confidence_threshold(100);
       zedRuntimeParameters.remove_saturated_areas(true);
       zedRuntimeParameters.enable_fill_mode(false);
