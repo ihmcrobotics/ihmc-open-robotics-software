@@ -112,6 +112,20 @@ public class RDXZEDSVORecorderPanel
             ros2Helper.publish(paused ? PerceptionAPI.ZED_SVO_PLAY : PerceptionAPI.ZED_SVO_PAUSE);
             paused = !paused;
          }
+
+         ImGui.beginDisabled(!paused);
+         if (ImGui.button(labels.get("Previous Frame")))
+         {
+            requestedPosition.set((int) latestMessage.getCurrentPosition() - 1);
+            publishPositionRequest();
+         }
+         ImGui.sameLine();
+         if (ImGui.button(labels.get("Next Frame")))
+         {
+            requestedPosition.set((int) latestMessage.getCurrentPosition() + 1);
+            publishPositionRequest();
+         }
+         ImGui.endDisabled();
       }
    }
 
