@@ -1,5 +1,7 @@
 package us.ihmc.rdx.perception;
 
+import org.bytedeco.opencv.opencv_core.GpuMat;
+import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.PerceptionAPI;
@@ -14,6 +16,7 @@ import us.ihmc.perception.RawImage;
 import us.ihmc.perception.gpuMapping.HeightMapExtractor;
 import us.ihmc.perception.gpuMapping.HeightMapMessageTools;
 import us.ihmc.perception.gpuMapping.HeightMapParameters;
+import us.ihmc.perception.gpuMapping.worldModel.ChunkedMapManager;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudVisualizer;
@@ -34,7 +37,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class RDXHeightMapLogPlayer
 {
-   private static final String SVO_FILE = "/opt/ihmc/LogData/UserFolders/TomaszFolder/heightmap_test.svo2";
+//   private static final String SVO_FILE = "/opt/ihmc/LogData/UserFolders/TomaszFolder/heightmap_test.svo2";
+   private static final String SVO_FILE = "/opt/ihmc/LogData/UserFolders/DexFolder/FrameGrabber9000/01262026/ZED_Recording_58123737_20260126_152719.svo";
 
    private final RDXBaseUI baseUI;
    private final ROS2Node ros2Node;
@@ -46,6 +50,7 @@ public class RDXHeightMapLogPlayer
    private final RDXRawImagePointCloudVisualizer zedPointCloudVisualizer = new RDXRawImagePointCloudVisualizer("ZED Point Cloud", true);
    private final RDXROS2HeightMapVisualizer heightMapVisualizer;
 
+   private final ChunkedMapManager chunkedMapManager;
    private final HeightMapExtractor heightMapExtractor;
    private final HeightMapMessage heightMapMessage;
    private final ROS2Publisher<HeightMapMessage> heightMapMessagePublisher;
@@ -66,8 +71,11 @@ public class RDXHeightMapLogPlayer
 
       heightMapVisualizer = new RDXROS2HeightMapVisualizer("Height Map Visualizer");
       heightMapVisualizer.setupForImageMessage(ros2Helper);
+      heightMapVisualizer.setupForChunkMessage(ros2Helper);
 
       HeightMapParameters heightMapParameters = new HeightMapParameters();
+      chunkedMapManager = new ChunkedMapManager(ros2Node, heightMapParameters);
+
       heightMapExtractor = new HeightMapExtractor(heightMapParameters);
       heightMapMessage = new HeightMapMessage();
       heightMapMessagePublisher = ros2Node.createPublisher(PerceptionAPI.HEIGHT_MAP_MESSAGE);
@@ -161,6 +169,17 @@ public class RDXHeightMapLogPlayer
                                    heightMapCenterOrigin,
                                    0);
 
+         // Publish the height map to anyone who is subscribing
+         Mat hostGlobalHeightMap = new Mat();
+         // Don't destroy this mat as its being used in the extractor till that finish's
+         GpuMat deviceGlobalHeightMap = heightMapExtractor.getHeightMap();
+         deviceGlobalHeightMap.download(hostGlobalHeightMap);
+
+         chunkedMapManager.update(hostGlobalHeightMap, heightMapCenterOrigin);
+
+         hostGlobalHeightMap.close();
+
+         publishChunkedMap();
          publishHeightMap();
 
          depthImage.release();
@@ -171,6 +190,11 @@ public class RDXHeightMapLogPlayer
       {
          e.printStackTrace();
       }
+   }
+
+   public void publishChunkedMap()
+   {
+      chunkedMapManager.publishChunkedMap();
    }
 
    public void publishHeightMap()

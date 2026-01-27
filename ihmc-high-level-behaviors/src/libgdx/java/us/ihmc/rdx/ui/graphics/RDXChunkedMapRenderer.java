@@ -10,6 +10,7 @@ import perception_msgs.msg.dds.ChunkMessage;
 import us.ihmc.perception.gpuMapping.worldModel.Chunk;
 import us.ihmc.perception.gpuMapping.worldModel.ChunkMessageTools;
 import us.ihmc.perception.gpuMapping.worldModel.ChunkTools;
+import us.ihmc.perception.gpuMapping.worldModel.ChunkedMapManager;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -18,7 +19,7 @@ import java.util.Queue;
 
 public class RDXChunkedMapRenderer implements RenderableProvider
 {
-   private static final int MAX_ENTREES = 100;
+   private static final int MAX_ENTREES = ChunkedMapManager.MAX_CHUNKS_TO_STORE;
 
    private final IntMap<ChunkRenderer> chunkRenderers = new IntMap<>();
    private final Queue<Integer> queueOfRenderers = new ArrayDeque<>();
