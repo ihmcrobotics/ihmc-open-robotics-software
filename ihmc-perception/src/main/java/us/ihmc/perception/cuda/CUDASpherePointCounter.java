@@ -64,6 +64,7 @@ public class CUDASpherePointCounter implements AutoCloseable
       depthToWorldTransform.set(depthImage.getTransformToWorld());
       depthToWorldTransform.get(transformArray);
       transformPointer.put(transformArray);
+      countPointer.put(0);
 
       dim3 blockSize = new dim3(BLOCK_SIZE_XY, BLOCK_SIZE_XY, 1);
       int gridSizeX = (depthImage.getWidth() + BLOCK_SIZE_XY - 1) / (BLOCK_SIZE_XY * 2);
