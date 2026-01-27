@@ -30,116 +30,12 @@ import java.util.List;
  */
 public class RDXVoxelMapRenderer implements RenderableProvider
 {
-   private static final float[] CUBE_VERTS = {
-         // +X face (normal +X), view from +X looking at origin
-         // corners on this face:
-         // p0 = (0.5,  0.5,  0.5)   // top-front
-         // p1 = (0.5, -0.5,  0.5)   // bottom-front
-         // p2 = (0.5, -0.5, -0.5)   // bottom-back
-         // p3 = (0.5,  0.5, -0.5)   // top-back
-
-         // t0: p0, p1, p2
-         0.5f,  0.5f,  0.5f,  // p0
-         0.5f, -0.5f,  0.5f,  // p1
-         0.5f, -0.5f, -0.5f,  // p2
-
-         // t1: p3, p0, p2
-         0.5f,  0.5f, -0.5f,  // p3
-         0.5f,  0.5f,  0.5f,  // p0
-         0.5f, -0.5f, -0.5f,  // p2
-
-
-         // -X face (normal -X), view from -X looking at origin
-         // p0 = (-0.5, -0.5, -0.5)  // bottom-back
-         // p1 = (-0.5,  0.5, -0.5)  // top-back
-         // p2 = (-0.5,  0.5,  0.5)  // top-front
-         // p3 = (-0.5, -0.5,  0.5)  // bottom-front
-
-         // t0: p0, p1, p2
-         -0.5f,  0.5f, -0.5f, // p1
-         -0.5f, -0.5f, -0.5f, // p0
-         -0.5f,  0.5f,  0.5f, // p2
-
-         // t1: p0, p2, p3
-         -0.5f,  0.5f,  0.5f, // p2
-         -0.5f, -0.5f, -0.5f, // p0
-         -0.5f, -0.5f,  0.5f, // p3
-
-
-         // +Y face (normal +Y), view from +Y looking at origin
-         // p0 = (-0.5,  0.5, -0.5)  // left-back
-         // p1 = (-0.5,  0.5,  0.5)  // left-front
-         // p2 = ( 0.5,  0.5,  0.5)  // right-front
-         // p3 = ( 0.5,  0.5, -0.5)  // right-back
-
-         // t0: p0, p1, p2
-         -0.5f,  0.5f, -0.5f, // p0
-         -0.5f,  0.5f,  0.5f, // p1
-         0.5f,  0.5f,  0.5f, // p2
-
-         // t1: p0, p2, p3
-         -0.5f,  0.5f, -0.5f, // p0
-         0.5f,  0.5f,  0.5f, // p2
-         0.5f,  0.5f, -0.5f, // p3
-
-
-         // -Y face (normal -Y), view from -Y looking at origin
-         // p0 = (-0.5, -0.5, -0.5)  // left-back
-         // p1 = ( 0.5, -0.5, -0.5)  // right-back
-         // p2 = ( 0.5, -0.5,  0.5)  // right-front
-         // p3 = (-0.5, -0.5,  0.5)  // left-front
-
-         // t0: p0, p1, p2
-         -0.5f, -0.5f, -0.5f, // p0
-         0.5f, -0.5f, -0.5f, // p1
-         0.5f, -0.5f,  0.5f, // p2
-
-         // t1: p0, p2, p3
-         -0.5f, -0.5f, -0.5f, // p0
-         0.5f, -0.5f,  0.5f, // p2
-         -0.5f, -0.5f,  0.5f, // p3
-
-
-         // +Z face (normal +Z), view from +Z looking at origin
-         // p0 = (-0.5, -0.5,  0.5)  // bottom-left
-         // p1 = ( 0.5, -0.5,  0.5)  // bottom-right
-         // p2 = ( 0.5,  0.5,  0.5)  // top-right
-         // p3 = (-0.5,  0.5,  0.5)  // top-left
-
-         // t0: p0, p1, p2
-         -0.5f, -0.5f,  0.5f, // p0
-         0.5f, -0.5f,  0.5f, // p1
-         0.5f,  0.5f,  0.5f, // p2
-
-         // t1: p0, p2, p3
-         -0.5f, -0.5f,  0.5f, // p0
-         0.5f,  0.5f,  0.5f, // p2
-         -0.5f,  0.5f,  0.5f, // p3
-
-
-         // -Z face (normal -Z), view from -Z looking at origin
-         // p0 = (-0.5, -0.5, -0.5)  // bottom-left
-         // p1 = ( 0.5, -0.5, -0.5)  // bottom-right
-         // p2 = ( 0.5,  0.5, -0.5)  // top-right
-         // p3 = (-0.5,  0.5, -0.5)  // top-left
-
-         // t0: p0, p3, p2  (this ordering is what you want if you need CCW from -Z)
-         -0.5f, -0.5f, -0.5f, // p0
-         -0.5f,  0.5f, -0.5f, // p3
-         0.5f,  0.5f, -0.5f, // p2
-
-         // t1: p0, p2, p1
-         -0.5f, -0.5f, -0.5f, // p0
-         0.5f,  0.5f, -0.5f, // p2
-         0.5f, -0.5f, -0.5f, // p1
-   };
    private static final int CUBE_VERTEX_COUNT = 36;
 
    private final Renderable renderable = new Renderable();
 
    // Vertex attribute: position only (x, y, z)
-   private final VertexAttributes vertexAttributes = new VertexAttributes(new VertexAttribute(Usage.Position, 3, "a_cubePos"),
-                                                                          new VertexAttribute(Usage.Generic, 3, "a_voxelCenter"));
+   private final VertexAttributes vertexAttributes = new VertexAttributes(VertexAttribute.Position());
 
    // Uniforms
    private float voxelSize = 0.05f; // default, set with update()
@@ -198,7 +94,7 @@ public class RDXVoxelMapRenderer implements RenderableProvider
       int vertexCount = voxelCount * CUBE_VERTEX_COUNT;
       renderable.meshPart.size = vertexCount;
 
-      int floatsPerVertex = vertexAttributes.vertexSize / Float.BYTES; // 6
+      int floatsPerVertex = vertexAttributes.vertexSize / Float.BYTES;
 
       buffer.clear();
       buffer.limit(vertexCount * floatsPerVertex);
@@ -217,20 +113,10 @@ public class RDXVoxelMapRenderer implements RenderableProvider
             int vertexIndex = baseVertexIndex + v;
             int floatIndex = vertexIndex * floatsPerVertex;
 
-            int cubeOffset = v * 3;
-            float lx = CUBE_VERTS[cubeOffset];
-            float ly = CUBE_VERTS[cubeOffset + 1];
-            float lz = CUBE_VERTS[cubeOffset + 2];
-
-            // a_cubePos
-            buffer.put(floatIndex,     lx);
-            buffer.put(floatIndex + 1, ly);
-            buffer.put(floatIndex + 2, lz);
-
-            // a_voxelCenter
-            buffer.put(floatIndex + 3, cx);
-            buffer.put(floatIndex + 4, cy);
-            buffer.put(floatIndex + 5, cz);
+            // a_position
+            buffer.put(floatIndex, cx);
+            buffer.put(floatIndex + 1, cy);
+            buffer.put(floatIndex + 2, cz);
          }
       }
    }
