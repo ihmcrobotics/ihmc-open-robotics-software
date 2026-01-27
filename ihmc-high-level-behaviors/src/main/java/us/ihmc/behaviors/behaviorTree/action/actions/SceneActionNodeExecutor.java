@@ -211,6 +211,7 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
          targetSceneObject = (BehaviorTreeSceneDoorPanelExecutor) scene.createObject(message);
          targetSceneObject.setPersistentDetection(openingMechanismDetection);
          targetSceneObject.setDoorPanelPersistentDetection(doorPanelDetection);
+         targetSceneObject.update();
          scene.addObject(targetSceneObject);
       }
 
@@ -328,6 +329,7 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
          definition.getSceneObjectDefinition().toMessage(message);
          targetSceneObject = (BehaviorTreeSceneObjectExecutor) scene.createObject(message);
          targetSceneObject.setPersistentDetection(bestDetection);
+         targetSceneObject.update();
          scene.addObject(targetSceneObject);
       }
 
