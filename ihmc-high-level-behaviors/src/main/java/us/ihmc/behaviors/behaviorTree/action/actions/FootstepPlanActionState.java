@@ -42,6 +42,7 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
 
       // Prevents feedback loop where UI modifies definition fields and robot side updates state fields
       stateDataSynchronizer = new LatestTimestampModifiable(definition.getCRDTInfo());
+      stateDataSynchronizer.setModifierName(definition.getName() + " state data:");
 
       goalToParentTransform = new CRDTBidirectionalRigidBodyTransform(stateDataSynchronizer);
       goalFrame = new DetachableReferenceFrame(scene::findFrameByName, goalToParentTransform.getValueReadOnly());
