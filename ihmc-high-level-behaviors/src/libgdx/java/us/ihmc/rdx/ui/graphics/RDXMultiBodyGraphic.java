@@ -1,6 +1,7 @@
 package us.ihmc.rdx.ui.graphics;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -102,6 +103,11 @@ public class RDXMultiBodyGraphic extends RDXVisualizer
    public void setOpacity(float opacity)
    {
       multiBody.setOpacityRecursive(opacity);
+   }
+
+   public void setColor(Color color)
+   {
+      multiBody.setDiffuseColorRecursive(color);
    }
 
    public boolean isRobotLoaded()

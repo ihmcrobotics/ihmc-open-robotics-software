@@ -96,7 +96,7 @@ public class RDXVRModeManager
                       boolean createKinematicsStreamingToolboxModule,
                       KinematicsStreamingToolboxParameters kstParameters)
    {
-      create(baseUI, syncedRobot, perceptionVisualizers, controllerHelper, retargetingParameters, createKinematicsStreamingToolboxModule, kstParameters, false, null, null, null, false);
+      create(baseUI, syncedRobot, perceptionVisualizers, controllerHelper, retargetingParameters, createKinematicsStreamingToolboxModule, kstParameters, false, null, null, false);
    }
 
    public void create(RDXBaseUI baseUI,
@@ -107,7 +107,6 @@ public class RDXVRModeManager
                       boolean createKinematicsStreamingToolboxModule,
                       KinematicsStreamingToolboxParameters kstParameters,
                       boolean recordKSTOutput,
-                      FullHumanoidRobotModel miniGhostFullRobotModel,
                       RobotDefinition miniGhostRobotDefinition,
                       ROS2LogReplay replayer,
                       boolean enableHeadsetlessTestMode)
@@ -141,7 +140,6 @@ public class RDXVRModeManager
                                                                     createKinematicsStreamingToolboxModule,
                                                                     recordKSTOutput,
                                                                     handManager,
-                                                                    miniGhostFullRobotModel,
                                                                     miniGhostRobotDefinition,
                                                                     replayer);
       }

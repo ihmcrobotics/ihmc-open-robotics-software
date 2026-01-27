@@ -1,5 +1,6 @@
 package us.ihmc.rdx.ui.vr;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -31,11 +32,21 @@ public class RDXVRMiniGhostPreview
    private ReferenceFrame miniGhostFrame;
    private OneDoFJointBasics[] miniGhostOneDoFJointsExcludingHands;
    private RDXMultiBodyGraphic miniGhostRobotGraphic;
+   private boolean graphicsInitialized = false;
+   private final float opacity;
+   private final Color color;
 
    public RDXVRMiniGhostPreview(String robotName, RobotDefinition robotDefinition, FullHumanoidRobotModel miniGhostFullRobotModel, RDXVRContext vrContext)
    {
+      this(robotName, robotDefinition, miniGhostFullRobotModel, vrContext, null, -1.0f);
+   }
+
+   public RDXVRMiniGhostPreview(String robotName, RobotDefinition robotDefinition, FullHumanoidRobotModel miniGhostFullRobotModel, RDXVRContext vrContext, Color color, float opacity)
+   {
       this.miniGhostFullRobotModel = miniGhostFullRobotModel;
       this.vrContext  = vrContext;
+      this.color = color;
+      this.opacity = opacity;
 
       if (isEnabled())
       {
@@ -65,12 +76,22 @@ public class RDXVRMiniGhostPreview
 
    public void updatePose()
    {
-      if (isEnabled() && miniGhostRobotGraphic.isActive())
+      if (!isEnabled() || !miniGhostRobotGraphic.isActive())
+         return;
+
+      // Initialize visual tweaks once the RDXRigidBody is actually available
+      if (!graphicsInitialized)
       {
-         updateGhostPoseWithJoystick();
-         updateGhostPitchBasedOnFeet();
-         miniGhostRobotGraphic.update();
+         if (color != null)
+            miniGhostRobotGraphic.setColor(color);
+         if (opacity >= 0.0f)
+            miniGhostRobotGraphic.setOpacity(opacity);
+         graphicsInitialized = true;
       }
+
+      updateGhostPoseWithJoystick();
+      updateGhostPitchBasedOnFeet();
+      miniGhostRobotGraphic.update();
    }
 
    private void updateGhostPoseWithJoystick()
@@ -117,6 +138,8 @@ public class RDXVRMiniGhostPreview
 
       miniGhostFullRobotModel.getRootJoint().setJointOrientation(finalRootJointOrientation);
       miniGhostFullRobotModel.getRootJoint().setJointPosition(miniGhostFrame.getTransformToRoot().getTranslation());
+
+      miniGhostFullRobotModel.getElevator().updateFramesRecursively();
    }
 
    public void setActive(boolean active)
