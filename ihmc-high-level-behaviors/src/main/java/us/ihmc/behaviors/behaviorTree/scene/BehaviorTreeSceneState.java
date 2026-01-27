@@ -43,6 +43,7 @@ public abstract class BehaviorTreeSceneState
       this.syncedRobot = syncedRobot;
 
       objectsModifiable = new LatestTimestampModifiable(crdtInfo);
+      objectsModifiable.setModifierName("Scene objects");
 
       addAll(Collections.singleton(ReferenceFrame.getWorldFrame()));
       addAll(syncedRobot.getReferenceFrames().getCommonReferenceFrames());
