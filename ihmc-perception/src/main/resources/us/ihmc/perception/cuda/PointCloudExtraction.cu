@@ -24,10 +24,6 @@ __global__ void extractPointCloud(unsigned short* depthImage,
     int startY = Utils::getThreadCoordY();
     int strideY = Utils::getStrideY();
 
-    if (startY == 0 && startX == 0)
-        *pointCloudSize = 0;
-    __syncthreads();
-
     for (int y = startY; y < height; y += strideY)
     {
         for (int x = startX; x < width; x += strideX)

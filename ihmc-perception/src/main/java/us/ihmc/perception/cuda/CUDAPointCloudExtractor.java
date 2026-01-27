@@ -99,6 +99,9 @@ public class CUDAPointCloudExtractor implements AutoCloseable
       depthToWorldTransform.get(transformArray);
       transformPointer.put(transformArray);
 
+      // Set the point cloud size counter to 0
+      pointCloudSize.put(0);
+
       // Calculate block size and grid size of the kernel launch
       dim3 blockSize = new dim3(BLOCK_SIZE_XY, BLOCK_SIZE_XY, 1);
 

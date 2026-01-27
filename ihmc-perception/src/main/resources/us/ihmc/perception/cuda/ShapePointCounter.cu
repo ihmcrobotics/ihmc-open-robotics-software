@@ -27,10 +27,6 @@ __global__ void countPointsInSphere(unsigned short* depthImage,
     int startY = Utils::getThreadCoordY();
     int strideY = Utils::getStrideY();
 
-    if (startY == 0 && startX == 0)
-        *count = 0;
-    __syncthreads();
-
     float r2 = sphereR * sphereR;
 
     for (int y = startY; y < height; y += strideY)
