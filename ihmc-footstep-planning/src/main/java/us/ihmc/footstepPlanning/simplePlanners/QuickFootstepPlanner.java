@@ -4,11 +4,11 @@ import org.apache.commons.math3.util.Pair;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -88,13 +88,13 @@ public class QuickFootstepPlanner
          if (!atGoals.get(side))
          {
             double oppositeStanceDistanceToGoal = stances.get(side.getOppositeSide()).getPosition().distance(goals.get(side).getPosition());
-            double oppositeStanceYawToGoal = Math.abs(goals.get(side).getOrientation().getYaw() - stances.get(side.getOppositeSide()).getOrientation().getYaw());
+            double oppositeStanceYawToGoal = Math.abs(goals.get(side).getOrientation().distance(stances.get(side.getOppositeSide()).getOrientation()));
 
             // Avoid erroring out if goal feet are farther apart than the step length
             double allowedLength = Math.max(idealStepLength, goals.get(side).getPosition().distance(goals.get(side.getOppositeSide()).getPosition()));
             // Avoid erroring out if goal feet are more yawed than the step yaw
             double allowedYaw = Math.max(idealStepYaw,
-                                         Math.abs(goals.get(side).getOrientation().getYaw() - stances.get(side.getOppositeSide()).getOrientation().getYaw()));
+                                         Math.abs(goals.get(side).getOrientation().distance(stances.get(side.getOppositeSide()).getOrientation())));
             if (oppositeStanceDistanceToGoal <= allowedLength && oppositeStanceYawToGoal <= allowedYaw)
             {
                footToSwing = side;
@@ -157,37 +157,51 @@ public class QuickFootstepPlanner
             double targetDistanceFromLine = 0.12;
             swingEnd.getPosition().scaleAdd(targetDistanceFromLine, oppositeStanceToProjection, midlinePoint);
 
-            double yawSum = 0.0;
-            int yawWeight = 0;
-            for (RobotSide side2 : RobotSide.values) // Always average in stance feet
-            {
-               yawSum += stances.get(side2).getOrientation().getYaw();
-               ++yawWeight;
-            }
+            Quaternion swingEndOrientation = new Quaternion(stanceMid.getOrientation());
+            // Always average in stance feet
             if (midlinePoint.distance(approachGoalMid) < 1.0) // If close to goal, average in goal feet
-            {
-               for (RobotSide side2 : RobotSide.values)
-               {
-                  yawSum += goals.get(side2).getOrientation().getYaw();
-                  ++yawWeight;
-               }
-            }
-            else // If far from goal, average in yaw along line
-            {
-               double yawAlongLine = Math.atan2(stanceToGoalLine.getDirection().getY(), stanceToGoalLine.getDirection().getX());
-               if (Math.abs(yawAlongLine) > Math.PI / 2.0)
-                  yawAlongLine -= Math.copySign(Math.PI, yawAlongLine);
-               yawSum += yawAlongLine;
-               ++yawWeight;
-            }
+               swingEndOrientation.interpolate(swingEndOrientation, goalMid.getOrientation(), 0.5);
+//            else // If far from goal, average in yaw along line
+//            {
+//               double yawAlongLine = Math.atan2(stanceToGoalLine.getDirection().getY(), stanceToGoalLine.getDirection().getX());
+//               if (Math.abs(yawAlongLine) > Math.PI / 2.0)
+//                  yawAlongLine -= Math.copySign(Math.PI, yawAlongLine);
+//               Quaternion alongLineOrientation = new Quaternion();
+//               alongLineOrientation.setYawPitchRoll(0.0, 0.0, yawAlongLine);
+//               swingEndOrientation.interpolate(swingEndOrientation, alongLineOrientation, 0.5);
+//            }
 
-            double yaw = yawSum / yawWeight;
+//            double yawSum = 0.0;
+//            int yawWeight = 0;
+//            for (RobotSide side2 : RobotSide.values) // Always average in stance feet
+//            {
+//               yawSum += stances.get(side2).getOrientation().getYaw();
+//               ++yawWeight;
+//            }
+//            if (midlinePoint.distance(approachGoalMid) < 1.0) // If close to goal, average in goal feet
+//            {
+//               for (RobotSide side2 : RobotSide.values)
+//               {
+//                  yawSum += goals.get(side2).getOrientation().getYaw();
+//                  ++yawWeight;
+//               }
+//            }
+//            else // If far from goal, average in yaw along line
+//            {
+//               double yawAlongLine = Math.atan2(stanceToGoalLine.getDirection().getY(), stanceToGoalLine.getDirection().getX());
+//               if (Math.abs(yawAlongLine) > Math.PI / 2.0)
+//                  yawAlongLine -= Math.copySign(Math.PI, yawAlongLine);
+//               yawSum += yawAlongLine;
+//               ++yawWeight;
+//            }
+//
+//            double yaw = yawSum / yawWeight;
+//
+//            double yawAmount = EuclidCoreTools.angleDifferenceMinusPiToPi(yaw, stances.get(side.getOppositeSide()).getOrientation().getYaw());
+//            if (yawAmount > idealStepYaw) // Clamp yaw amount
+//               yaw = stances.get(side.getOppositeSide()).getOrientation().getYaw() + Math.copySign(idealStepYaw, yawAmount);
 
-            double yawAmount = EuclidCoreTools.angleDifferenceMinusPiToPi(yaw, stances.get(side.getOppositeSide()).getOrientation().getYaw());
-            if (yawAmount > idealStepYaw) // Clamp yaw amount
-               yaw = stances.get(side.getOppositeSide()).getOrientation().getYaw() + Math.copySign(idealStepYaw, yawAmount);
-
-            swingEnd.getOrientation().setToYawOrientation(yaw);
+            swingEnd.getOrientation().set(swingEndOrientation);
          }
       }
 

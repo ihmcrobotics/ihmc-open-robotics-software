@@ -18,6 +18,7 @@ import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
+import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -126,9 +127,15 @@ public class RDXQuickFootstepPlannerDemo
             for (RobotSide side : RobotSide.values)
                ImGui.checkbox("Goal " + side.getPascalCaseName() + " Gizmo", goalGizmos.get(side).getSelected());
 
+            ImGui.text("Stance footsteps: ");
+            for (RobotSide side : RobotSide.values)
+               ImGui.text("Stance " + side + ": " + stanceGizmos.get(side).getPoseGizmo().getTransformToParent().getTranslation()
+                          + "  Yaw: (%.3f%s)".formatted(Math.toDegrees(stanceGizmos.get(side).getPoseGizmo().getTransformToParent().getRotation().getYaw()), EuclidCoreMissingTools.DEGREE_SYMBOL));
+
             ImGui.text("Planned Footsteps: " + footstepPlan.size());
             for (int i = 0; i < footstepPlan.size(); i++)
-               ImGui.text("Step " + i + ": " + footstepPlan.get(i).getFirst() + " to " + footstepPlan.get(i).getSecond());
+               ImGui.text("Step " + i + ": " + footstepPlan.get(i).getFirst() + " to " + footstepPlan.get(i).getSecond().getPosition()
+               + "  Yaw: (%.3f%s)".formatted(Math.toDegrees(footstepPlan.get(i).getSecond().getYaw()), EuclidCoreMissingTools.DEGREE_SYMBOL));
          }
 
          @Override
