@@ -58,7 +58,7 @@ public class CUDAShapePointCounter implements AutoCloseable
       CUDATools.checkCUDAError(error);
    }
 
-   public int countPointsInSphere(RawImage depthImage, Tuple3DReadOnly sphereCenter, float sphereRadius)
+   public long countPointsInSphere(RawImage depthImage, Tuple3DReadOnly sphereCenter, float sphereRadius)
    {
       if (depthImage.get() == null)
          return 0;
@@ -88,7 +88,7 @@ public class CUDAShapePointCounter implements AutoCloseable
                   .withFloat(sphereCenter.getZ32())
                   .withFloat(sphereRadius)
                   .withPointer(countPointer)
-                  .run(stream, gridSize, blockSize, 0);
+                  .run(stream, gridSize, blockSize, BLOCK_SIZE_XY * BLOCK_SIZE_XY * Integer.BYTES);
 
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
@@ -97,10 +97,10 @@ public class CUDAShapePointCounter implements AutoCloseable
       gridSize.close();
       depthImage.release();
 
-      return countPointer.get();
+      return Integer.toUnsignedLong(countPointer.get());
    }
 
-   public int countPointsInCapsule(RawImage depthImage, Tuple3DReadOnly pointA, Tuple3DReadOnly pointB, float radius)
+   public long countPointsInCapsule(RawImage depthImage, Tuple3DReadOnly pointA, Tuple3DReadOnly pointB, float radius)
    {
       if (depthImage.get() == null)
          return 0;
@@ -133,7 +133,7 @@ public class CUDAShapePointCounter implements AutoCloseable
                   .withPointer(pointsDevicePointer)
                   .withFloat(radius)
                   .withPointer(countPointer)
-                  .run(stream, gridSize, blockSize, 0);
+                  .run(stream, gridSize, blockSize, BLOCK_SIZE_XY * BLOCK_SIZE_XY * Integer.BYTES);
 
       cudaFreeAsync(pointsDevicePointer, stream);
 
@@ -146,7 +146,7 @@ public class CUDAShapePointCounter implements AutoCloseable
       gridSize.close();
       depthImage.release();
 
-      return countPointer.get();
+      return Integer.toUnsignedLong(countPointer.get());
    }
 
    @Override

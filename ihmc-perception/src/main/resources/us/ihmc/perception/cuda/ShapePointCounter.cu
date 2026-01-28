@@ -4,6 +4,29 @@
 
 using namespace PerceptionUtils;
 
+template <typename T>
+__device__ void reduceSum(T thisThreadValue, T* __restrict__ sharedArray, T* __restrict__ globalResult)
+{
+    unsigned int blockSize = blockDim.x * blockDim.y * blockDim.z;
+    unsigned int threadBlockIndex = threadIdx.x
+                                  + threadIdx.y * blockDim.x
+                                  + threadIdx.z * blockDim.x * blockDim.y;
+
+    sharedArray[threadBlockIndex] = thisThreadValue;
+    __syncthreads();
+
+    for (unsigned int stride = blockSize / 2; stride > 0; stride >>= 1)
+    {
+        if (threadBlockIndex < stride)
+            sharedArray[threadBlockIndex] += sharedArray[threadBlockIndex + stride];
+
+        __syncthreads();
+    }
+
+    if (threadBlockIndex == 0)
+        atomicAdd(globalResult, sharedArray[0]);
+}
+
 extern "C"
 __global__ void countPointsInSphere(unsigned short* depthImage,
                                     size_t pitch,
@@ -19,8 +42,11 @@ __global__ void countPointsInSphere(unsigned short* depthImage,
                                     float sphereY,
                                     float sphereZ,
                                     float sphereR,
-                                    int* count)
+                                    unsigned int* count)
 {
+    extern __shared__ unsigned int threadCounts[];
+    unsigned int threadCount = 0;
+
     int startX = Utils::getThreadCoordX();
     int strideX = Utils::getStrideX();
 
@@ -46,9 +72,11 @@ __global__ void countPointsInSphere(unsigned short* depthImage,
             float dz = worldFramePoint.z - sphereZ;
 
             if (dx * dx + dy * dy + dz * dz <= r2)
-                atomicAdd(count, 1);
+                ++threadCount;
         }
     }
+
+    reduceSum(threadCount, threadCounts, count);
 }
 
 extern "C"
@@ -64,8 +92,11 @@ __global__ void countPointsInCapsule(const unsigned short* depthImage,
                                      const float* depthToWorldTransform,
                                      const float* capsulePoints,
                                      float capsuleRadius,
-                                     int* count)
+                                     unsigned int* count)
 {
+    extern __shared__ unsigned int threadCounts[];
+    unsigned int threadCount = 0;
+
     int startX = Utils::getThreadCoordX();
     int strideX = Utils::getStrideX();
 
@@ -116,7 +147,9 @@ __global__ void countPointsInCapsule(const unsigned short* depthImage,
             }
 
             if (distance2 <= radius2)
-                atomicAdd(count, 1);
+                ++threadCount;
         }
     }
+
+    reduceSum(threadCount, threadCounts, count);
 }
