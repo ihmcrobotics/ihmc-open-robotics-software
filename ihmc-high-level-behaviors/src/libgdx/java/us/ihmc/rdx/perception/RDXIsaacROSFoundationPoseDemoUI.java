@@ -1,6 +1,7 @@
 package us.ihmc.rdx.perception;
 
 import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -22,6 +23,8 @@ public class RDXIsaacROSFoundationPoseDemoUI
    {
       RDXBaseUI baseUI = new RDXBaseUI();
       RDXPerceptionVisualizersPanel visualizers = new RDXPerceptionVisualizersPanel();
+      ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
+      RDXZEDSVORecorderPanel zedPanel = new RDXZEDSVORecorderPanel(ros2Helper);
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -39,6 +42,7 @@ public class RDXIsaacROSFoundationPoseDemoUI
             visualizers.create(baseUI);
 
             baseUI.getPrimaryScene().addRenderableProvider(visualizers);
+            baseUI.getImGuiPanelManager().addPanel("ZED Playback", zedPanel::render);
             baseUI.create();
          }
 

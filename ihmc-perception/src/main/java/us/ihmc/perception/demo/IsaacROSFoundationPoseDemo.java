@@ -2,6 +2,7 @@ package us.ihmc.perception.demo;
 
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.RawImagePublisher;
@@ -10,9 +11,9 @@ import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.sensors.zed.ROS2ZEDSVOPlaybackSensor;
 import us.ihmc.sensors.zed.ZEDImageSensor;
 import us.ihmc.sensors.zed.ZEDModelData;
-import us.ihmc.sensors.zed.ZEDSVOPlaybackSensor;
 import us.ihmc.zed.global.zed;
 
 /**
@@ -33,7 +34,7 @@ import us.ihmc.zed.global.zed;
  */
 public class IsaacROSFoundationPoseDemo
 {
-   private static final String SVO_FILE = "/home/robotlab/Downloads/20251020_ZEDXMini_DoorChargeBarrierBottle.svo2";
+   private static final String SVO_FILE = "/opt/ihmc/LogData/UserFolders/TomaszFolder/20251020_ZEDXMini_DoorChargeBarrierBottle.svo2";
 
    private final ROS2Node ros2Node = new ROS2NodeBuilder().build(getClass().getSimpleName().toLowerCase());
    private final ROS2PeerClockOffsetEstimator peerClockOffsetEstimator = new ROS2PeerClockOffsetEstimator(ros2Node);
@@ -49,7 +50,7 @@ public class IsaacROSFoundationPoseDemo
 
    private IsaacROSFoundationPoseDemo()
    {
-      zedImageSensor = new ZEDSVOPlaybackSensor(0, ZEDModelData.ZED_2I, zed.SL_DEPTH_MODE_NEURAL_LIGHT, SVO_FILE);
+      zedImageSensor = new ROS2ZEDSVOPlaybackSensor(new ROS2Helper(ros2Node), 0, ZEDModelData.ZED_2I, zed.SL_DEPTH_MODE_NEURAL_LIGHT, SVO_FILE);
 //      zedImageSensor = new ZEDImageSensor(0, ZEDModelData.ZED_X_MINI, zed.SL_INPUT_TYPE_GMSL, zed.SL_DEPTH_MODE_NEURAL, zed.SL_RESOLUTION_SVGA, 15);
 //      zedImageSensor = new ZEDImageSensor(0, ZEDModelData.ZED_2, zed.SL_INPUT_TYPE_USB, zed.SL_DEPTH_MODE_NEURAL, zed.SL_RESOLUTION_HD720, 15);
       zedImageSensor.enablePositionalTracking(true);
