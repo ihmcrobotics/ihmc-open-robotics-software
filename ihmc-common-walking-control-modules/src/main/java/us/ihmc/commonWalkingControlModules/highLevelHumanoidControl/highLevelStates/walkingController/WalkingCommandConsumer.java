@@ -449,7 +449,7 @@ public class WalkingCommandConsumer
          RigidBodyControlManager handManager = handManagers.get(robotSide);
          if (handManager != null && allowCommand)
          {
-            handManager.handleHandContactCommand(command.getBracingPoint(), command.getBracingNormal());
+            handManager.handleHandContactCommand(command.getBracingPoint(), command.getBracingNormal(), command.getTrajectoryDuration());
          }
 
       }
