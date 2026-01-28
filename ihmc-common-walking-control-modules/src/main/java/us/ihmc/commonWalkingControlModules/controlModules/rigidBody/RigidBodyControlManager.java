@@ -10,7 +10,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -431,11 +430,11 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
       }
    }
 
-   public void handleReactiveBracingCommand(FramePoint3DReadOnly bracingPoint, FrameVector3DReadOnly bracingNormal)
+   public void handleHandContactCommand(FramePoint3DReadOnly bracingPoint, FrameVector3DReadOnly bracingNormal, double trajectoryDuration)
    {
       if (reactiveBracingControlState != null)
       {
-         reactiveBracingControlState.setBracingSurface(bracingPoint, bracingNormal);
+         reactiveBracingControlState.setBracingSurface(bracingPoint, bracingNormal, trajectoryDuration);
          requestState(reactiveBracingControlState.getControlMode());
       }
    }

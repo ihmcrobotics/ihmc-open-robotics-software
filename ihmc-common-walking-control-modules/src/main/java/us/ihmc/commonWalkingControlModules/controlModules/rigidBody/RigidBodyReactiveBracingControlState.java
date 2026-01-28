@@ -64,9 +64,9 @@ public class RigidBodyReactiveBracingControlState extends RigidBodyControlState
       return factory.build(ReactiveBracingStateEnum.PRE_CONTACT);
    }
 
-   public void setBracingSurface(Point3DReadOnly bracingPoint, Vector3DReadOnly bracingNormal)
+   public void setBracingSurface(Point3DReadOnly bracingPoint, Vector3DReadOnly bracingNormal, double trajectoryDuration)
    {
-      preContactState.setBracingPoint(bracingPoint, bracingNormal);
+      preContactState.setBracingPoint(bracingPoint, bracingNormal, trajectoryDuration);
       postContactState.setBracingSurface(bracingNormal);
    }
 

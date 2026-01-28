@@ -31,7 +31,7 @@ public class ReactiveBracingPreContactState implements ReactiveBracingState
    private final FrameVector3D terminalVelocity = new FrameVector3D();
    private final Plane3D bracingPlane = new Plane3D();
 
-   private final YoDouble trajectoryTime;
+   private final YoDouble trajectoryDuration;
 
    private final DefaultYoPIDSE3Gains bracingFeedbackGains;
    private final YoFrameVector3D bracingPositionWeights;
@@ -49,8 +49,7 @@ public class ReactiveBracingPreContactState implements ReactiveBracingState
    {
       this.positionControlHelper = positionControlHelper;
 
-      trajectoryTime = new YoDouble("trajectoryTime", registry);
-      trajectoryTime.set(0.24);
+      trajectoryDuration = new YoDouble("trajectoryDuration", registry);
 
       bracingPositionWeights = new YoFrameVector3D("bracingPositionWeights", ReferenceFrame.getWorldFrame(), registry);
       bracingOrientationWeights = new YoFrameVector3D("bracingOrientationWeights", ReferenceFrame.getWorldFrame(), registry);
@@ -67,10 +66,11 @@ public class ReactiveBracingPreContactState implements ReactiveBracingState
       controlFrame.getTransformToDesiredFrame(trajectoryCommand.getControlFramePose(), bodyToControl.getBodyFixedFrame());
    }
 
-   public void setBracingPoint(Point3DReadOnly bracingPoint, Vector3DReadOnly bracingNormal)
+   public void setBracingPoint(Point3DReadOnly bracingPoint, Vector3DReadOnly bracingNormal, double trajectoryDuration)
    {
       this.desiredPosition.set(bracingPoint);
       this.bracingPlane.set(bracingPoint, bracingNormal);
+      this.trajectoryDuration.set(trajectoryDuration);
    }
 
    @Override
@@ -79,7 +79,7 @@ public class ReactiveBracingPreContactState implements ReactiveBracingState
       terminalVelocity.setAndScale(-terminalHandSpeed, bracingPlane.getNormal());
 
       trajectoryCommand.getTrajectoryPointList().clear();
-      trajectoryCommand.addTrajectoryPoint(trajectoryTime.getValue(), desiredPosition, terminalVelocity);
+      trajectoryCommand.addTrajectoryPoint(trajectoryDuration.getValue(), desiredPosition, terminalVelocity);
       positionControlHelper.handleTrajectoryCommand(trajectoryCommand, null);
 
       defaultPositionGains = positionControlHelper.getGains();

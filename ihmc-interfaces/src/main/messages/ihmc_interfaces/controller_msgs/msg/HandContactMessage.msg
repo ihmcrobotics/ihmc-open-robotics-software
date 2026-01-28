@@ -10,6 +10,9 @@ uint64 sequence_id
 # Specifies which hand will execute the trajectory.
 byte robot_side 255
 
+# Trajectory duration in seconds
+float64 trajectory_duration 0.0
+
 # Specifies the desired bracing point
 geometry_msgs/Point bracing_point
 

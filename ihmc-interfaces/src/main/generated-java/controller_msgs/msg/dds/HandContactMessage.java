@@ -10,7 +10,7 @@ import us.ihmc.pubsub.TopicDataType;
        * This message is part of the IHMC whole-body controller API.
        * This message commands the controller to brace against the given planar region
        */
-public class ReactiveBracingMessage extends Packet<ReactiveBracingMessage> implements Settable<ReactiveBracingMessage>, EpsilonComparable<ReactiveBracingMessage>
+public class HandContactMessage extends Packet<HandContactMessage> implements Settable<HandContactMessage>, EpsilonComparable<HandContactMessage>
 {
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
@@ -23,6 +23,10 @@ public class ReactiveBracingMessage extends Packet<ReactiveBracingMessage> imple
             */
    public byte robot_side_ = (byte) 255;
    /**
+            * Trajectory duration in seconds
+            */
+   public double trajectory_duration_;
+   /**
             * Specifies the desired bracing point
             */
    public us.ihmc.euclid.tuple3D.Point3D bracing_point_;
@@ -31,23 +35,25 @@ public class ReactiveBracingMessage extends Packet<ReactiveBracingMessage> imple
             */
    public us.ihmc.euclid.tuple3D.Vector3D bracing_normal_;
 
-   public ReactiveBracingMessage()
+   public HandContactMessage()
    {
       bracing_point_ = new us.ihmc.euclid.tuple3D.Point3D();
       bracing_normal_ = new us.ihmc.euclid.tuple3D.Vector3D();
    }
 
-   public ReactiveBracingMessage(ReactiveBracingMessage other)
+   public HandContactMessage(HandContactMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(ReactiveBracingMessage other)
+   public void set(HandContactMessage other)
    {
       sequence_id_ = other.sequence_id_;
 
       robot_side_ = other.robot_side_;
+
+      trajectory_duration_ = other.trajectory_duration_;
 
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.bracing_point_, bracing_point_);
       geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.bracing_normal_, bracing_normal_);
@@ -83,6 +89,21 @@ public class ReactiveBracingMessage extends Packet<ReactiveBracingMessage> imple
       return robot_side_;
    }
 
+   /**
+            * Trajectory duration in seconds
+            */
+   public void setTrajectoryDuration(double trajectory_duration)
+   {
+      trajectory_duration_ = trajectory_duration;
+   }
+   /**
+            * Trajectory duration in seconds
+            */
+   public double getTrajectoryDuration()
+   {
+      return trajectory_duration_;
+   }
+
 
    /**
             * Specifies the desired bracing point
@@ -102,19 +123,19 @@ public class ReactiveBracingMessage extends Packet<ReactiveBracingMessage> imple
    }
 
 
-   public static Supplier<ReactiveBracingMessagePubSubType> getPubSubType()
+   public static Supplier<HandContactMessagePubSubType> getPubSubType()
    {
-      return ReactiveBracingMessagePubSubType::new;
+      return HandContactMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return ReactiveBracingMessagePubSubType::new;
+      return HandContactMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(ReactiveBracingMessage other, double epsilon)
+   public boolean epsilonEquals(HandContactMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -122,6 +143,8 @@ public class ReactiveBracingMessage extends Packet<ReactiveBracingMessage> imple
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.trajectory_duration_, other.trajectory_duration_, epsilon)) return false;
 
       if (!this.bracing_point_.epsilonEquals(other.bracing_point_, epsilon)) return false;
       if (!this.bracing_normal_.epsilonEquals(other.bracing_normal_, epsilon)) return false;
@@ -134,13 +157,15 @@ public class ReactiveBracingMessage extends Packet<ReactiveBracingMessage> imple
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof ReactiveBracingMessage)) return false;
+      if(!(other instanceof HandContactMessage)) return false;
 
-      ReactiveBracingMessage otherMyClass = (ReactiveBracingMessage) other;
+      HandContactMessage otherMyClass = (HandContactMessage) other;
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
       if(this.robot_side_ != otherMyClass.robot_side_) return false;
+
+      if(this.trajectory_duration_ != otherMyClass.trajectory_duration_) return false;
 
       if (!this.bracing_point_.equals(otherMyClass.bracing_point_)) return false;
       if (!this.bracing_normal_.equals(otherMyClass.bracing_normal_)) return false;
@@ -153,11 +178,13 @@ public class ReactiveBracingMessage extends Packet<ReactiveBracingMessage> imple
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("ReactiveBracingMessage {");
+      builder.append("HandContactMessage {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);      builder.append(", ");
+      builder.append("trajectory_duration=");
+      builder.append(this.trajectory_duration_);      builder.append(", ");
       builder.append("bracing_point=");
       builder.append(this.bracing_point_);      builder.append(", ");
       builder.append("bracing_normal=");
