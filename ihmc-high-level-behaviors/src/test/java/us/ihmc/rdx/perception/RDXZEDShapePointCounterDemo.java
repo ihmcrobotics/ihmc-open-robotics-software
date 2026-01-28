@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.cuda.CUDASpherePointCounter;
+import us.ihmc.perception.cuda.CUDAShapePointCounter;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiMovingPlot;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -26,7 +26,7 @@ import us.ihmc.zed.global.zed;
 
 public class RDXZEDShapePointCounterDemo
 {
-   private static final String SVO_FILE = System.getProperty("user.home") + "/Downloads/20260121_120734_AlexDoorData.svo2";
+   private static final String SVO_FILE = "/opt/ihmc/LogData/UserFolders/TomaszFolder/heightmap_test.svo2";
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private final ZEDSVOPlaybackSensor zedSensor = new ZEDSVOPlaybackSensor(0, ZEDModelData.ZED_2I, zed.SL_DEPTH_MODE_PERFORMANCE, SVO_FILE);
@@ -34,7 +34,7 @@ public class RDXZEDShapePointCounterDemo
    private final RepeatingTaskThread zedGrabThread = new RepeatingTaskThread("ZEDGrabThread", this::zedGrabThread);
    private RDXPose3DGizmo spherePoseGizmo;
    private ModelInstance sphereModel;
-   private final CUDASpherePointCounter spherePointCounter = new CUDASpherePointCounter();
+   private final CUDAShapePointCounter shapePointCounter = new CUDAShapePointCounter();
    private final Point3D32 sphereCenter = new Point3D32();
    private final AtomicInteger pointsInSphere = new AtomicInteger();
    private final ImGuiMovingPlot pointsPlot = new ImGuiMovingPlot("Points in Sphere", 1000, 300, 200);
@@ -44,6 +44,8 @@ public class RDXZEDShapePointCounterDemo
    private final ImInt currentPosition = new ImInt();
    private final ImInt zedLength = new ImInt();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+
+   private RawImage latestDepth = null;
 
    public RDXZEDShapePointCounterDemo()
    {
@@ -68,7 +70,7 @@ public class RDXZEDShapePointCounterDemo
          public void render()
          {
             LibGDXTools.toLibGDX(spherePoseGizmo.getTransformToParent(), sphereModel.transform);
-            updateSphereColor(pointsInSphere.get());
+            updateSphere(pointsInSphere.get());
             pointCloudVisualizer.update();
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
@@ -81,7 +83,7 @@ public class RDXZEDShapePointCounterDemo
             zedSensor.close();
             pointCloudVisualizer.destroy();
             spherePoseGizmo.destroyDefault(baseUI.getPrimary3DPanel());
-            spherePointCounter.close();
+            shapePointCounter.close();
             baseUI.dispose();
          }
       });
@@ -122,8 +124,15 @@ public class RDXZEDShapePointCounterDemo
       ImGui.text("Frame: " + currentPosition.get() + " / " + Math.max(zedLength.get(), 0));
    }
 
-   private void updateSphereColor(int count)
+   private void updateSphere(int count)
    {
+      sphereCenter.set((float) spherePoseGizmo.getTransformToParent().getM03(),
+                       (float) spherePoseGizmo.getTransformToParent().getM13(),
+                       (float) spherePoseGizmo.getTransformToParent().getM23());
+
+      if (latestDepth != null)
+         pointsInSphere.set(shapePointCounter.countPointsInSphere(latestDepth, sphereCenter, 0.5f));
+
       float t = Math.min(Math.max(count / 20000.0f, 0.0f), 1.0f);
       sphereColor.set(t, 0.0f, 1.0f - t, 0.5f);
       LibGDXTools.setDiffuseColor(sphereModel, sphereColor);
@@ -143,10 +152,10 @@ public class RDXZEDShapePointCounterDemo
       }
       if (depthImage != null)
       {
-         sphereCenter.set((float) spherePoseGizmo.getTransformToParent().getM03(),
-                          (float) spherePoseGizmo.getTransformToParent().getM13(),
-                          (float) spherePoseGizmo.getTransformToParent().getM23());
-         pointsInSphere.set(spherePointCounter.countPointsInSphere(depthImage, sphereCenter, 0.5f));
+         if (latestDepth != null)
+            latestDepth.release();
+         latestDepth = depthImage.get();
+
          pointCloudVisualizer.setDepthImage(depthImage);
          depthImage.release();
       }
