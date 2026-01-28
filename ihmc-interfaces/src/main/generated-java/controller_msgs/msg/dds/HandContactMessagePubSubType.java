@@ -2,20 +2,20 @@ package controller_msgs.msg.dds;
 
 /**
 * 
-* Topic data type of the struct "ReactiveBracingMessage" defined in "ReactiveBracingMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+* Topic data type of the struct "HandContactMessage" defined in "HandContactMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
 *
-* This file was automatically generated from ReactiveBracingMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit ReactiveBracingMessage_.idl instead.
+* This file was automatically generated from HandContactMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit HandContactMessage_.idl instead.
 *
 */
-public class ReactiveBracingMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.ReactiveBracingMessage>
+public class HandContactMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.HandContactMessage>
 {
-   public static final java.lang.String name = "controller_msgs::msg::dds_::ReactiveBracingMessage_";
+   public static final java.lang.String name = "controller_msgs::msg::dds_::HandContactMessage_";
    
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "6894783483c2d76f38953b17faa75c65e2203530687dba6eff75b701e4701db9";
+   		return "c8f1c46f231733cb7a6e4f28b357e8154da505c64e9baaf26f3ade9640e8c668";
    }
    
    @Override
@@ -28,7 +28,7 @@ public class ReactiveBracingMessagePubSubType implements us.ihmc.pubsub.TopicDat
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(controller_msgs.msg.dds.ReactiveBracingMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
+   public void serialize(controller_msgs.msg.dds.HandContactMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -36,7 +36,7 @@ public class ReactiveBracingMessagePubSubType implements us.ihmc.pubsub.TopicDat
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.ReactiveBracingMessage data) throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.HandContactMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -56,6 +56,8 @@ public class ReactiveBracingMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
@@ -64,12 +66,12 @@ public class ReactiveBracingMessagePubSubType implements us.ihmc.pubsub.TopicDat
       return current_alignment - initial_alignment;
    }
 
-   public final static int getCdrSerializedSize(controller_msgs.msg.dds.ReactiveBracingMessage data)
+   public final static int getCdrSerializedSize(controller_msgs.msg.dds.HandContactMessage data)
    {
       return getCdrSerializedSize(data, 0);
    }
 
-   public final static int getCdrSerializedSize(controller_msgs.msg.dds.ReactiveBracingMessage data, int current_alignment)
+   public final static int getCdrSerializedSize(controller_msgs.msg.dds.HandContactMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
 
@@ -77,6 +79,9 @@ public class ReactiveBracingMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getBracingPoint(), current_alignment);
@@ -87,21 +92,25 @@ public class ReactiveBracingMessagePubSubType implements us.ihmc.pubsub.TopicDat
       return current_alignment - initial_alignment;
    }
 
-   public static void write(controller_msgs.msg.dds.ReactiveBracingMessage data, us.ihmc.idl.CDR cdr)
+   public static void write(controller_msgs.msg.dds.HandContactMessage data, us.ihmc.idl.CDR cdr)
    {
       cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_9(data.getRobotSide());
 
+      cdr.write_type_6(data.getTrajectoryDuration());
+
       geometry_msgs.msg.dds.PointPubSubType.write(data.getBracingPoint(), cdr);
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getBracingNormal(), cdr);
    }
 
-   public static void read(controller_msgs.msg.dds.ReactiveBracingMessage data, us.ihmc.idl.CDR cdr)
+   public static void read(controller_msgs.msg.dds.HandContactMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_12());
       	
       data.setRobotSide(cdr.read_type_9());
+      	
+      data.setTrajectoryDuration(cdr.read_type_6());
       	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getBracingPoint(), cdr);	
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getBracingNormal(), cdr);	
@@ -109,10 +118,11 @@ public class ReactiveBracingMessagePubSubType implements us.ihmc.pubsub.TopicDat
    }
 
    @Override
-   public final void serialize(controller_msgs.msg.dds.ReactiveBracingMessage data, us.ihmc.idl.InterchangeSerializer ser)
+   public final void serialize(controller_msgs.msg.dds.HandContactMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_9("robot_side", data.getRobotSide());
+      ser.write_type_6("trajectory_duration", data.getTrajectoryDuration());
       ser.write_type_a("bracing_point", new geometry_msgs.msg.dds.PointPubSubType(), data.getBracingPoint());
 
       ser.write_type_a("bracing_normal", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getBracingNormal());
@@ -120,25 +130,26 @@ public class ReactiveBracingMessagePubSubType implements us.ihmc.pubsub.TopicDat
    }
 
    @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.ReactiveBracingMessage data)
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.HandContactMessage data)
    {
       data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setRobotSide(ser.read_type_9("robot_side"));
+      data.setTrajectoryDuration(ser.read_type_6("trajectory_duration"));
       ser.read_type_a("bracing_point", new geometry_msgs.msg.dds.PointPubSubType(), data.getBracingPoint());
 
       ser.read_type_a("bracing_normal", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getBracingNormal());
 
    }
 
-   public static void staticCopy(controller_msgs.msg.dds.ReactiveBracingMessage src, controller_msgs.msg.dds.ReactiveBracingMessage dest)
+   public static void staticCopy(controller_msgs.msg.dds.HandContactMessage src, controller_msgs.msg.dds.HandContactMessage dest)
    {
       dest.set(src);
    }
 
    @Override
-   public controller_msgs.msg.dds.ReactiveBracingMessage createData()
+   public controller_msgs.msg.dds.HandContactMessage createData()
    {
-      return new controller_msgs.msg.dds.ReactiveBracingMessage();
+      return new controller_msgs.msg.dds.HandContactMessage();
    }
    @Override
    public int getTypeSize()
@@ -152,24 +163,24 @@ public class ReactiveBracingMessagePubSubType implements us.ihmc.pubsub.TopicDat
       return name;
    }
    
-   public void serialize(controller_msgs.msg.dds.ReactiveBracingMessage data, us.ihmc.idl.CDR cdr)
+   public void serialize(controller_msgs.msg.dds.HandContactMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
    }
 
-   public void deserialize(controller_msgs.msg.dds.ReactiveBracingMessage data, us.ihmc.idl.CDR cdr)
+   public void deserialize(controller_msgs.msg.dds.HandContactMessage data, us.ihmc.idl.CDR cdr)
    {
       read(data, cdr);
    }
    
-   public void copy(controller_msgs.msg.dds.ReactiveBracingMessage src, controller_msgs.msg.dds.ReactiveBracingMessage dest)
+   public void copy(controller_msgs.msg.dds.HandContactMessage src, controller_msgs.msg.dds.HandContactMessage dest)
    {
       staticCopy(src, dest);
    }
 
    @Override
-   public ReactiveBracingMessagePubSubType newInstance()
+   public HandContactMessagePubSubType newInstance()
    {
-      return new ReactiveBracingMessagePubSubType();
+      return new HandContactMessagePubSubType();
    }
 }

@@ -1,12 +1,12 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin;
 
-import controller_msgs.msg.dds.ReactiveBracingMessage;
+import controller_msgs.msg.dds.HandContactMessage;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ReactiveBracingCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandContactCommand;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -22,7 +22,7 @@ public class StandingPushRecoveryPlugin implements HighLevelHumanoidControllerPl
    private final YoBoolean isHandRecoveryContactEnabled = new YoBoolean("isHandRecoveryContactEnabled", registry);
    private final YoDouble handTrajectoryTime = new YoDouble("handTrajectoryTime", registry);
    private final YoBoolean isFalling = new YoBoolean("isFalling", registry);
-   private final YoBoolean sendReactiveBracingMessage = new YoBoolean("sendReactiveBracingMessage", registry);
+   private final YoBoolean sendHandContactMessage = new YoBoolean("sendHandContactMessage", registry);
    private boolean hasSentHandTrajectory = false;
 
    public StandingPushRecoveryPlugin(CommandInputManager commandInputManager, HighLevelHumanoidControllerToolbox controllerToolbox)
@@ -45,7 +45,7 @@ public class StandingPushRecoveryPlugin implements HighLevelHumanoidControllerPl
       if (!hasSentHandTrajectory && isFalling.getValue() && isHandRecoveryContactEnabled.getValue())
       {
          hasSentHandTrajectory = true;
-         sendReactiveBracingMessage.set(false);
+         sendHandContactMessage.set(false);
 
          RobotSide robotSide = RobotSide.LEFT;
          Point3D point = new Point3D(1.041, -0.499, 1.300);
@@ -81,13 +81,14 @@ public class StandingPushRecoveryPlugin implements HighLevelHumanoidControllerPl
 //         handLoadBearingCommand.setExecutionDelayTime(handTrajectoryTime.getValue());
 //         commandInputManager.submitCommand(handLoadBearingCommand);
 
-         ReactiveBracingMessage reactiveBracingMessage = new ReactiveBracingMessage();
-         reactiveBracingMessage.setRobotSide(robotSide.toByte());
-         reactiveBracingMessage.getBracingPoint().set(point);
-         reactiveBracingMessage.getBracingNormal().set(normal);
+         HandContactMessage handContactMessage = new HandContactMessage();
+         handContactMessage.setRobotSide(robotSide.toByte());
+         handContactMessage.setTrajectoryDuration(0.24);
+         handContactMessage.getBracingPoint().set(point);
+         handContactMessage.getBracingNormal().set(normal);
 
-         ReactiveBracingCommand reactiveBracingCommand = new ReactiveBracingCommand();
-         reactiveBracingCommand.setFromMessage(reactiveBracingMessage);
+         HandContactCommand reactiveBracingCommand = new HandContactCommand();
+         reactiveBracingCommand.setFromMessage(handContactMessage);
          commandInputManager.submitCommand(reactiveBracingCommand);
       }
    }

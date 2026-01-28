@@ -1018,7 +1018,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
       // Update LP solver constraints based on contact state
       multiContactRegionLPUpdateTimer.startMeasurement();
-      multiContactStabilityRegionCalculator.updateContactState(wholeBodyContactState, wholeBodyContactsChanged.getValue());
+      multiContactStabilityRegionCalculator.updateContactState(wholeBodyContactState, true);
       wholeBodyContactsChanged.set(false);
       multiContactRegionLPUpdateTimer.stopMeasurement();
 

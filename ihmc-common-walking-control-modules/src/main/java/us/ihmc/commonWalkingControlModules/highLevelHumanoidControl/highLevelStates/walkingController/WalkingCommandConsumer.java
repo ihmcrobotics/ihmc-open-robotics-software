@@ -132,7 +132,7 @@ public class WalkingCommandConsumer
       commandsToRegister.add(DirectionalControlInputCommand.class);
       commandsToRegister.add(FastWalkingGaitParametersCommand.class);
       commandsToRegister.add(ClearDelayQueueCommand.class);
-      commandsToRegister.add(ReactiveBracingCommand.class);
+      commandsToRegister.add(HandContactCommand.class);
 
       commandConsumerWithDelayBuffers = new CommandConsumerWithDelayBuffers(commandInputManager, commandsToRegister, yoTime);
 
@@ -362,7 +362,7 @@ public class WalkingCommandConsumer
          commandConsumerWithDelayBuffers.clearCommands(ArmTrajectoryCommand.class);
          commandConsumerWithDelayBuffers.clearCommands(ArmDesiredAccelerationsCommand.class);
          commandConsumerWithDelayBuffers.clearCommands(HandHybridJointspaceTaskspaceTrajectoryCommand.class);
-         commandConsumerWithDelayBuffers.clearCommands(ReactiveBracingCommand.class);
+         commandConsumerWithDelayBuffers.clearCommands(HandContactCommand.class);
          return;
       }
 
@@ -372,7 +372,7 @@ public class WalkingCommandConsumer
       List<ArmDesiredAccelerationsCommand> armDesiredAccelerationCommands = commandConsumerWithDelayBuffers.pollNewCommands(ArmDesiredAccelerationsCommand.class);
       List<HandHybridJointspaceTaskspaceTrajectoryCommand> handHybridCommands = commandConsumerWithDelayBuffers.pollNewCommands(
             HandHybridJointspaceTaskspaceTrajectoryCommand.class);
-      List<ReactiveBracingCommand> reactiveBracingCommands = commandConsumerWithDelayBuffers.pollNewCommands(ReactiveBracingCommand.class);
+      List<HandContactCommand> reactiveBracingCommands = commandConsumerWithDelayBuffers.pollNewCommands(HandContactCommand.class);
 
       boolean allowCommand = allowMotionRegardlessOfState || currentState.isStateSafeToConsumeManipulationCommands();
 
@@ -444,12 +444,12 @@ public class WalkingCommandConsumer
 
       for (int i = 0; i < reactiveBracingCommands.size(); i++)
       {
-         ReactiveBracingCommand command = reactiveBracingCommands.get(i);
+         HandContactCommand command = reactiveBracingCommands.get(i);
          RobotSide robotSide = command.getRobotSide();
          RigidBodyControlManager handManager = handManagers.get(robotSide);
          if (handManager != null && allowCommand)
          {
-            handManager.handleReactiveBracingCommand(command.getBracingPoint(), command.getBracingNormal());
+            handManager.handleHandContactCommand(command.getBracingPoint(), command.getBracingNormal());
          }
 
       }

@@ -183,7 +183,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
          forceSensorStateUpdater = null;
       }
 
-      if (imusToUse.size() > 0)
+      if (!imusToUse.isEmpty())
       {
          pelvisRotationalStateUpdater = new IMUBasedPelvisRotationalStateUpdater(inverseDynamicsStructure,
                                                                                  imusToUse,
