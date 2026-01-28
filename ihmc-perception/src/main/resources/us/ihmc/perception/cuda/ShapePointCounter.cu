@@ -4,29 +4,6 @@
 
 using namespace PerceptionUtils;
 
-template <typename T>
-__device__ void reduceSum(T thisThreadValue, T* __restrict__ sharedArray, T* __restrict__ globalResult)
-{
-    unsigned int blockSize = blockDim.x * blockDim.y * blockDim.z;
-    unsigned int threadBlockIndex = threadIdx.x
-                                  + threadIdx.y * blockDim.x
-                                  + threadIdx.z * blockDim.x * blockDim.y;
-
-    sharedArray[threadBlockIndex] = thisThreadValue;
-    __syncthreads();
-
-    for (unsigned int stride = blockSize / 2; stride > 0; stride >>= 1)
-    {
-        if (threadBlockIndex < stride)
-            sharedArray[threadBlockIndex] += sharedArray[threadBlockIndex + stride];
-
-        __syncthreads();
-    }
-
-    if (threadBlockIndex == 0)
-        atomicAdd(globalResult, sharedArray[0]);
-}
-
 extern "C"
 __global__ void countPointsInSphere(unsigned short* depthImage,
                                     size_t pitch,
@@ -76,7 +53,7 @@ __global__ void countPointsInSphere(unsigned short* depthImage,
         }
     }
 
-    reduceSum(threadCount, threadCounts, count);
+    Utils::reduceAdd(threadCount, threadCounts, count);
 }
 
 extern "C"
@@ -151,5 +128,5 @@ __global__ void countPointsInCapsule(const unsigned short* depthImage,
         }
     }
 
-    reduceSum(threadCount, threadCounts, count);
+    Utils::reduceAdd(threadCount, threadCounts, count);
 }

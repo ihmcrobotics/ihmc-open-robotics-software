@@ -27,7 +27,7 @@ import us.ihmc.sensors.zed.ZEDModelData;
 import us.ihmc.sensors.zed.ZEDSVOPlaybackSensor;
 import us.ihmc.zed.global.zed;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class RDXZEDShapePointCounterDemo
 {
@@ -49,7 +49,7 @@ public class RDXZEDShapePointCounterDemo
    private ModelInstance shapeModel;
 
    private final CUDAShapePointCounter shapePointCounter = new CUDAShapePointCounter();
-   private final AtomicInteger pointsInShape = new AtomicInteger();
+   private final AtomicLong pointsInShape = new AtomicLong();
 
    private final ImGuiMovingPlot pointsPlot = new ImGuiMovingPlot("Points in Sphere", 1000, 300, 200);
    private final ImBoolean play = new ImBoolean(false);
@@ -81,7 +81,7 @@ public class RDXZEDShapePointCounterDemo
          public void render()
          {
             LibGDXTools.toLibGDX(shapePoseGizmo.getTransformToParent(), shapeModel.transform);
-            updateShape(pointsInShape.get());
+            updateShape();
             pointCloudVisualizer.update();
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
@@ -168,11 +168,13 @@ public class RDXZEDShapePointCounterDemo
       baseUI.getPrimaryScene().addRenderableProvider(shapeModel, shapeModel, RDXSceneLevel.MODEL);
    }
 
-   private void updateShape(int count)
+   private void updateShape()
    {
+      long count = 0;
+
       if (latestDepth != null)
       {
-         int result = switch (shape.get())
+         count = switch (shape.get())
          {
             case 0 -> shapePointCounter.countPointsInSphere(latestDepth, shapePoseGizmo.getTransformToParent().getTranslation(), shapeRadius.get());
             case 1 ->
@@ -187,7 +189,7 @@ public class RDXZEDShapePointCounterDemo
             default -> 0;
          };
 
-         pointsInShape.set(result);
+         pointsInShape.set((int) count);
       }
 
       float t = Math.min(Math.max(count / 20000.0f, 0.0f), 1.0f);

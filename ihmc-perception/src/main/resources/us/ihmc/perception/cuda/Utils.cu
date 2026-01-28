@@ -35,4 +35,36 @@ namespace Utils
     {
         return blockDim.z * gridDim.z;
     }
+
+    template <typename T>
+    __device__ void warpReduceAdd(volatile T* __restrict__ sharedArray, unsigned int threadIndex, unsigned int blockSize)
+    {
+        if (blockSize >= 64) sharedArray[threadIndex] += sharedArray[threadIndex + 32];
+        if (blockSize >= 32) sharedArray[threadIndex] += sharedArray[threadIndex + 16];
+        if (blockSize >= 16) sharedArray[threadIndex] += sharedArray[threadIndex + 8];
+        if (blockSize >=  8) sharedArray[threadIndex] += sharedArray[threadIndex + 4];
+        if (blockSize >=  4) sharedArray[threadIndex] += sharedArray[threadIndex + 2];
+        if (blockSize >=  2) sharedArray[threadIndex] += sharedArray[threadIndex + 1];
+    }
+
+    template <typename T>
+    __device__ void reduceAdd(T value, T* __restrict__ sharedArray, T* __restrict__ globalResult)
+    {
+        unsigned int blockSize = blockDim.x * blockDim.y * blockDim.z;
+        unsigned int threadIndex = threadIdx.x
+                                 + threadIdx.y * blockDim.x
+                                 + threadIdx.z * blockDim.x * blockDim.y;
+
+        sharedArray[threadIndex] = value;
+        __syncthreads();
+
+        if (blockSize >= 1024) { if (threadIndex < 512) { sharedArray[threadIndex] += sharedArray[threadIndex + 512]; } __syncthreads(); }
+        if (blockSize >=  512) { if (threadIndex < 256) { sharedArray[threadIndex] += sharedArray[threadIndex + 256]; } __syncthreads(); }
+        if (blockSize >=  256) { if (threadIndex < 128) { sharedArray[threadIndex] += sharedArray[threadIndex + 128]; } __syncthreads(); }
+        if (blockSize >=  128) { if (threadIndex <  64) { sharedArray[threadIndex] += sharedArray[threadIndex +  64]; } __syncthreads(); }
+
+        if (threadIndex < 32) warpReduceAdd(sharedArray, threadIndex, blockSize);
+        if (threadIndex == 0) atomicAdd(globalResult, sharedArray[0]);
+    }
+
 }
