@@ -4,16 +4,19 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
+import imgui.type.ImFloat;
 import imgui.type.ImInt;
-import java.util.concurrent.atomic.AtomicInteger;
 import us.ihmc.commons.thread.RepeatingTaskThread;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.cuda.CUDAShapePointCounter;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiMovingPlot;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -24,21 +27,31 @@ import us.ihmc.sensors.zed.ZEDModelData;
 import us.ihmc.sensors.zed.ZEDSVOPlaybackSensor;
 import us.ihmc.zed.global.zed;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class RDXZEDShapePointCounterDemo
 {
    private static final String SVO_FILE = "/opt/ihmc/LogData/UserFolders/TomaszFolder/heightmap_test.svo2";
 
+   private static final String[] SHAPES = new String[] {"Sphere", "Capsule"};
+   private static final Color DEFAULT_COLOR = new Color(0.45f, 0.75f, 1.0f, 1.0f);
+
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private final ZEDSVOPlaybackSensor zedSensor = new ZEDSVOPlaybackSensor(0, ZEDModelData.ZED_2I, zed.SL_DEPTH_MODE_PERFORMANCE, SVO_FILE);
-   private final RDXRawImagePointCloudVisualizer pointCloudVisualizer = new RDXRawImagePointCloudVisualizer("ZED Point Cloud");
    private final RepeatingTaskThread zedGrabThread = new RepeatingTaskThread("ZEDGrabThread", this::zedGrabThread);
-   private RDXPose3DGizmo spherePoseGizmo;
-   private ModelInstance sphereModel;
+   private final RDXRawImagePointCloudVisualizer pointCloudVisualizer = new RDXRawImagePointCloudVisualizer("ZED Point Cloud");
+
+   private final ImInt shape = new ImInt(1);
+   private final ImFloat shapeRadius = new ImFloat(0.5f);
+   private final ImFloat shapeLength = new ImFloat(0.5f);
+   private RDXPose3DGizmo shapePoseGizmo;
+   private final Color shapeColor = new Color(0.0f, 0.0f, 1.0f, 0.5f);
+   private ModelInstance shapeModel;
+
    private final CUDAShapePointCounter shapePointCounter = new CUDAShapePointCounter();
-   private final Point3D32 sphereCenter = new Point3D32();
-   private final AtomicInteger pointsInSphere = new AtomicInteger();
+   private final AtomicInteger pointsInShape = new AtomicInteger();
+
    private final ImGuiMovingPlot pointsPlot = new ImGuiMovingPlot("Points in Sphere", 1000, 300, 200);
-   private final Color sphereColor = new Color(0.0f, 0.0f, 1.0f, 0.5f);
    private final ImBoolean play = new ImBoolean(false);
    private final ImInt requestedPosition = new ImInt();
    private final ImInt currentPosition = new ImInt();
@@ -57,11 +70,9 @@ public class RDXZEDShapePointCounterDemo
             baseUI.create();
             zedSensor.startSensor();
             baseUI.getPrimaryScene().addRenderableProvider(pointCloudVisualizer);
-            sphereModel = RDXModelBuilder.createSphere(0.5f, new Color(0.45f, 0.75f, 1.0f, 1.0f));
-            LibGDXTools.setOpacity(sphereModel, 0.5f);
-            baseUI.getPrimaryScene().addModelInstance(sphereModel);
-            spherePoseGizmo = new RDXPose3DGizmo();
-            spherePoseGizmo.createAndSetupDefault(baseUI.getPrimary3DPanel());
+            updateShapeModel();
+            shapePoseGizmo = new RDXPose3DGizmo();
+            shapePoseGizmo.createAndSetupDefault(baseUI.getPrimary3DPanel());
             baseUI.getImGuiPanelManager().addPanel("Shape Point Counter", RDXZEDShapePointCounterDemo.this::renderImGuiWidgets);
             zedGrabThread.startRepeating();
          }
@@ -69,8 +80,8 @@ public class RDXZEDShapePointCounterDemo
          @Override
          public void render()
          {
-            LibGDXTools.toLibGDX(spherePoseGizmo.getTransformToParent(), sphereModel.transform);
-            updateSphere(pointsInSphere.get());
+            LibGDXTools.toLibGDX(shapePoseGizmo.getTransformToParent(), shapeModel.transform);
+            updateShape(pointsInShape.get());
             pointCloudVisualizer.update();
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
@@ -82,7 +93,7 @@ public class RDXZEDShapePointCounterDemo
             zedGrabThread.blockingKill();
             zedSensor.close();
             pointCloudVisualizer.destroy();
-            spherePoseGizmo.destroyDefault(baseUI.getPrimary3DPanel());
+            shapePoseGizmo.destroyDefault(baseUI.getPrimary3DPanel());
             shapePointCounter.close();
             baseUI.dispose();
          }
@@ -94,9 +105,9 @@ public class RDXZEDShapePointCounterDemo
       pointCloudVisualizer.renderImGuiWidgets();
       ImGui.separator();
       ImGui.pushFont(ImGuiTools.getBigFont());
-      ImGui.text("Points in sphere: " + pointsInSphere.get());
+      ImGui.text("Points in sphere: " + pointsInShape.get());
       ImGui.popFont();
-      pointsPlot.calculate(pointsInSphere.get());
+      pointsPlot.calculate(pointsInShape.get());
       ImGui.separator();
 
       currentPosition.set(zedSensor.getCurrentPosition());
@@ -122,20 +133,66 @@ public class RDXZEDShapePointCounterDemo
       ImGui.endDisabled();
 
       ImGui.text("Frame: " + currentPosition.get() + " / " + Math.max(zedLength.get(), 0));
+
+      ImGui.separator();
+
+      boolean updateModel = ImGui.combo("Shape", shape, SHAPES);
+      updateModel |= ImGuiTools.volatileInputFloat("Radius", shapeRadius);
+      updateModel |= ImGuiTools.volatileInputFloat("Length", shapeLength);
+
+      if (updateModel)
+         updateShapeModel();
    }
 
-   private void updateSphere(int count)
+   private void updateShapeModel()
    {
-      sphereCenter.set((float) spherePoseGizmo.getTransformToParent().getM03(),
-                       (float) spherePoseGizmo.getTransformToParent().getM13(),
-                       (float) spherePoseGizmo.getTransformToParent().getM23());
+      if (shapeModel != null)
+         baseUI.getPrimaryScene().removeRenderable(shapeModel);
 
+      float radius = shapeRadius.get();
+      float length = shapeLength.get();
+
+      if (shape.get() == 0)
+         shapeModel = RDXModelBuilder.createSphere(radius, DEFAULT_COLOR);
+      else
+      {
+         shapeModel = RDXModelBuilder.buildModelInstance(builder ->
+                                                         {
+                                                            builder.addCylinder(length, radius, new Vector3D(0.0, 0.0, -0.5 * length), DEFAULT_COLOR);
+                                                            builder.addSphere(radius, new Vector3D(0.0, 0.0, 0.5 * length), DEFAULT_COLOR);
+                                                            builder.addSphere(radius, new Vector3D(0.0, 0.0, -0.5 * length), DEFAULT_COLOR);
+                                                         });
+      }
+      LibGDXTools.setOpacity(shapeModel, 0.5f);
+
+      baseUI.getPrimaryScene().addRenderableProvider(shapeModel, shapeModel, RDXSceneLevel.MODEL);
+   }
+
+   private void updateShape(int count)
+   {
       if (latestDepth != null)
-         pointsInSphere.set(shapePointCounter.countPointsInSphere(latestDepth, sphereCenter, 0.5f));
+      {
+         int result = switch (shape.get())
+         {
+            case 0 -> shapePointCounter.countPointsInSphere(latestDepth, shapePoseGizmo.getTransformToParent().getTranslation(), shapeRadius.get());
+            case 1 ->
+            {
+               Pose3D pose = new Pose3D(shapePoseGizmo.getTransformToParent());
+               pose.appendTranslation(0.0, 0.0, shapeLength.get() / 2);
+               Point3D32 pointA = new Point3D32(pose.getPosition());
+               pose.appendTranslation(0.0, 0.0, -shapeLength.get());
+               Point3D32 pointB = new Point3D32(pose.getPosition());
+               yield shapePointCounter.countPointsInCapsule(latestDepth, pointA, pointB, shapeRadius.get());
+            }
+            default -> 0;
+         };
+
+         pointsInShape.set(result);
+      }
 
       float t = Math.min(Math.max(count / 20000.0f, 0.0f), 1.0f);
-      sphereColor.set(t, 0.0f, 1.0f - t, 0.5f);
-      LibGDXTools.setDiffuseColor(sphereModel, sphereColor);
+      shapeColor.set(t, 0.0f, 1.0f - t, 0.5f);
+      LibGDXTools.setDiffuseColor(shapeModel, shapeColor);
    }
 
    private void zedGrabThread() throws InterruptedException

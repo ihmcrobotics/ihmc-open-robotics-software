@@ -5,7 +5,7 @@ import org.bytedeco.cuda.cudart.dim3;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.IntPointer;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.perception.RawImage;
 
 import java.net.URL;
@@ -58,7 +58,7 @@ public class CUDAShapePointCounter implements AutoCloseable
       CUDATools.checkCUDAError(error);
    }
 
-   public int countPointsInSphere(RawImage depthImage, Point3D32 sphereCenter, float sphereRadius)
+   public int countPointsInSphere(RawImage depthImage, Tuple3DReadOnly sphereCenter, float sphereRadius)
    {
       if (depthImage.get() == null)
          return 0;
@@ -92,16 +92,15 @@ public class CUDAShapePointCounter implements AutoCloseable
 
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
-      int count = countPointer.get();
 
       blockSize.close();
       gridSize.close();
       depthImage.release();
 
-      return count;
+      return countPointer.get();
    }
 
-   public int countPointsInCapsule(RawImage depthImage, Point3D32 pointA, Point3D32 pointB, float radius)
+   public int countPointsInCapsule(RawImage depthImage, Tuple3DReadOnly pointA, Tuple3DReadOnly pointB, float radius)
    {
       if (depthImage.get() == null)
          return 0;
@@ -111,15 +110,10 @@ public class CUDAShapePointCounter implements AutoCloseable
       transformPointer.put(transformArray);
       countPointer.put(0);
 
-      FloatPointer pointAHostPointer = new FloatPointer(pointA.getX32(), pointA.getY32(), pointA.getZ32());
-      FloatPointer pointADevicePointer = new FloatPointer();
-      CUDATools.mallocAsync(pointADevicePointer, 3, stream);
-      CUDATools.memcpyAsync(pointADevicePointer, pointAHostPointer, 3, stream);
-
-      FloatPointer pointBHostPointer = new FloatPointer(pointB.getX32(), pointB.getY32(), pointB.getZ32());
-      FloatPointer pointBDevicePointer = new FloatPointer();
-      CUDATools.mallocAsync(pointBDevicePointer, 3, stream);
-      CUDATools.memcpyAsync(pointBDevicePointer, pointBHostPointer, 3, stream);
+      FloatPointer pointsHostPointer = new FloatPointer(pointA.getX32(), pointA.getY32(), pointA.getZ32(), pointB.getX32(), pointB.getY32(), pointB.getZ32());
+      FloatPointer pointsDevicePointer = new FloatPointer();
+      CUDATools.mallocAsync(pointsDevicePointer, 6, stream);
+      CUDATools.memcpyAsync(pointsDevicePointer, pointsHostPointer, 6, stream);
 
       dim3 blockSize = new dim3(BLOCK_SIZE_XY, BLOCK_SIZE_XY, 1);
       int gridSizeX = (depthImage.getWidth() + BLOCK_SIZE_XY - 1) / (BLOCK_SIZE_XY * 2);
@@ -136,21 +130,23 @@ public class CUDAShapePointCounter implements AutoCloseable
                   .withFloat(depthImage.getPrincipalPointY())
                   .withFloat(depthImage.getDepthDiscretization())
                   .withPointer(transformPointer)
-                  .withPointer(pointADevicePointer)
-                  .withPointer(pointBDevicePointer)
+                  .withPointer(pointsDevicePointer)
                   .withFloat(radius)
                   .withPointer(countPointer)
                   .run(stream, gridSize, blockSize, 0);
 
+      cudaFreeAsync(pointsDevicePointer, stream);
+
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
-      int count = countPointer.get();
 
+      pointsDevicePointer.close();
+      pointsHostPointer.close();
       blockSize.close();
       gridSize.close();
       depthImage.release();
 
-      return count;
+      return countPointer.get();
    }
 
    @Override

@@ -62,8 +62,7 @@ __global__ void countPointsInCapsule(const unsigned short* depthImage,
                                      float cy,
                                      float depthDiscretization,
                                      const float* depthToWorldTransform,
-                                     float3 capsulePointA,
-                                     float3 capsulePointB,
+                                     const float* capsulePoints,
                                      float capsuleRadius,
                                      int* count)
 {
@@ -72,6 +71,9 @@ __global__ void countPointsInCapsule(const unsigned short* depthImage,
 
     int startY = Utils::getThreadCoordY();
     int strideY = Utils::getStrideY();
+
+    float3 capsulePointA = make_float3(capsulePoints[0], capsulePoints[1], capsulePoints[2]);
+    float3 capsulePointB = make_float3(capsulePoints[3], capsulePoints[4], capsulePoints[5]);
 
     // Vector from A to B
     float3 ab = capsulePointB - capsulePointA;
@@ -106,9 +108,11 @@ __global__ void countPointsInCapsule(const unsigned short* depthImage,
                 float t = clamp(dot(ap, ab) / abLength2, 0.0f, 1.0f);
 
                 // Closest point C on segment AB to P
-                float3 cp = capsulePointA + (ab * t);
+                float3 c = capsulePointA + (ab * t);
 
-                float distance2 = normSquared(cp);
+                // Squared distance from P to C
+                float3 pc = worldFramePoint - c;
+                distance2 = normSquared(pc);
             }
 
             if (distance2 <= radius2)
