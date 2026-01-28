@@ -33,9 +33,7 @@ __global__ void extractPointCloud(unsigned short* depthImage,
                 continue;
 
             float depthInMeters = depthDiscretization * depthValue;
-            float3 depthFramePoint = make_float3(depthInMeters,
-                                                 -(x - cx) / fx * depthInMeters,
-                                                 -(y - cy) / fy * depthInMeters);
+            float3 depthFramePoint = pixelDepthToPoint3D(x, y, depthInMeters, fx, fy, cx, cy);
             float3 worldFramePoint = transformPoint3D(depthFramePoint, depthToWorldTransform);
 
             int index = atomicAdd(pointCloudSize, 1);
