@@ -3,6 +3,7 @@ package us.ihmc.behaviors.behaviorTree.action.actions;
 import behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
+import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionNodeDefinition.Type;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneDoorPanelExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectState;
@@ -45,7 +46,8 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
 
       timer.reset();
 
-      scene.removeAllObjects(); // Temporary measure until we have a use case for more persistent objects
+      if (definition.getType().getValue() == Type.SETUP_OBJECT)
+         scene.removeAllObjects(); // Temporary measure until we have a use case for more persistent objects
    }
 
    @Override
@@ -53,27 +55,46 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
    {
       state.setElapsedExecutionTime(timer.getElapsedTime());
 
-      double timeout = definition.getTimeout();
-      if (!timer.isRunning(timeout))
+      if (definition.getType().getValue() == Type.FREEZE_OBJECT)
       {
-         state.getLogger().error("Timed out after %.1f s without finding a suitable detection.".formatted(timeout));
-         state.setFailed(true);
-         state.setIsExecuting(false);
-         return;
+         for (BehaviorTreeSceneObjectState object : scene.getObjects())
+         {
+//            if (object.getObjectType() != definition.getSceneObjectDefinition().getObjectType())
+
+            if (definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.DOOR_PANEL
+            && object instanceof BehaviorTreeSceneDoorPanelExecutor doorPanelExecutor)
+            {
+
+            }
+//            if (definition.getSceneObjectDefinition().)
+         }
+
+         state.getLogger().info("Freezing object: %s".formatted(definition.getSceneObjectDefinition().getName()));
       }
-
-      printDebug = throttler.run();
-      cameraPosition.set(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getExperimentalCameraFrame).getTranslation());
-
-      boolean success = false;
-
-      if (definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.DOOR_PANEL)
-         success |= setupDoorPanelDetection();
       else
-         success |= setupSinglePersistentDetection();
+      {
+         double timeout = definition.getTimeout();
+         if (!timer.isRunning(timeout))
+         {
+            state.getLogger().error("Timed out after %.1f s without finding a suitable detection.".formatted(timeout));
+            state.setFailed(true);
+            state.setIsExecuting(false);
+            return;
+         }
 
-      if (success)
-         state.setIsExecuting(false);
+         printDebug = throttler.run();
+         cameraPosition.set(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getExperimentalCameraFrame).getTranslation());
+
+         boolean success = false;
+
+         if (definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.DOOR_PANEL)
+            success |= setupDoorPanelDetection();
+         else
+            success |= setupSinglePersistentDetection();
+
+         if (success)
+            state.setIsExecuting(false);
+      }
    }
 
    private boolean setupDoorPanelDetection()
