@@ -5,6 +5,7 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionNodeDefinition.Type;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneDoorPanelExecutor;
+import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectDefinition;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectState;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectType;
@@ -57,17 +58,38 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
 
       if (definition.getType().getValue() == Type.FREEZE_OBJECT)
       {
+         BehaviorTreeSceneObjectState matchedObject = null;
          for (BehaviorTreeSceneObjectState object : scene.getObjects())
          {
-//            if (object.getObjectType() != definition.getSceneObjectDefinition().getObjectType())
+            BehaviorTreeSceneObjectDefinition sceneObjectDefinition = definition.getSceneObjectDefinition();
 
             if (definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.DOOR_PANEL
-            && object instanceof BehaviorTreeSceneDoorPanelExecutor doorPanelExecutor)
+            && object instanceof BehaviorTreeSceneDoorPanelExecutor)
             {
-
+               matchedObject = object;
             }
-//            if (definition.getSceneObjectDefinition().)
+            else if (definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.FOUNDATION_POSE
+            && object.getObjectType() == BehaviorTreeSceneObjectType.FOUNDATION_POSE
+            && object.getFoundationPoseObjectType() == definition.getSceneObjectDefinition().getFoundationPoseObjectType())
+            {
+               matchedObject = object;
+            }
+            else if (definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.YOLO_ONLY
+            && object.getYoloClassName().equals(definition.getSceneObjectDefinition().getYoloClassName()))
+            {
+               matchedObject = object;
+            }
          }
+
+         if (matchedObject == null)
+            state.getLogger().error("Failed to find a suitable object to freeze: %s".formatted(definition.getSceneObjectDefinition().getName()));
+         else
+         {
+            state.getLogger().info("Freezing object: %s".formatted(matchedObject.getName()));
+            matchedObject.freeze();
+         }
+         state.setFailed(matchedObject == null);
+         state.setIsExecuting(false);
 
          state.getLogger().info("Freezing object: %s".formatted(definition.getSceneObjectDefinition().getName()));
       }
