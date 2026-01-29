@@ -88,6 +88,12 @@ public class UtilsCuTest
       // Blocks of 1 thread
       testReduceAdd(4096, 4096, 1, 1, 1);
       testReduceAdd(4096, 4096, 1, 1, 17);
+
+      // Typical grid and block size for processing 1280 x 720 images
+      testReduceAdd(80, 45, 16, 16, 1);
+
+      // 1280 x 720 image if each thread processes 4 pixels
+      testReduceAdd(40, 28, 16, 16, 1);
    }
 
    private void testReduceAdd(int gridSizeX, int gridSizeY, int blockSizeX, int blockSizeY, int addValue) throws Exception

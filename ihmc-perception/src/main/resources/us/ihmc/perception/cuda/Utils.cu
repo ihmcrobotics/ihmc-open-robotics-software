@@ -47,23 +47,35 @@ namespace Utils
         if (blockSize >=  2) { if (threadIndex == 0) { sharedArray[0]           += sharedArray[1]; }}
     }
 
+    /*
+     * Sums all values provided in `value` by each thread to the `globalResult`.
+     * `sharedArray` must be an array declared using `__shared__` with `sizeInBytes >= sizeof(T) * blockSize`
+     * `globalResult` must be a pointer to global memory.
+     * Additionally, the block size must be a power of 2.
+     */
     template <typename T>
     __device__ void reduceAdd(T value, T* __restrict__ sharedArray, T* __restrict__ globalResult)
     {
+        // Calculate the block size and this thread's index
         unsigned int blockSize = blockDim.x * blockDim.y * blockDim.z;
         unsigned int threadIndex = threadIdx.x
                                  + threadIdx.y * blockDim.x
                                  + threadIdx.z * blockDim.x * blockDim.y;
 
+        // All threads load the value into the shared memory
         sharedArray[threadIndex] = value;
         __syncthreads();
 
+        // Do the reduction in shared memory
         if (blockSize >= 1024) { if (threadIndex < 512) { sharedArray[threadIndex] += sharedArray[threadIndex + 512]; } __syncthreads(); }
         if (blockSize >=  512) { if (threadIndex < 256) { sharedArray[threadIndex] += sharedArray[threadIndex + 256]; } __syncthreads(); }
         if (blockSize >=  256) { if (threadIndex < 128) { sharedArray[threadIndex] += sharedArray[threadIndex + 128]; } __syncthreads(); }
         if (blockSize >=  128) { if (threadIndex <  64) { sharedArray[threadIndex] += sharedArray[threadIndex +  64]; } __syncthreads(); }
 
+        // Once we have 64 elements (or less) left to reduce, we do it in a single warp and can avoid calling __syncthread()
         if (threadIndex < 32) warpReduceAdd(sharedArray, threadIndex, blockSize);
+
+        // Finally all blocks sum their value to a single global result
         if (threadIndex == 0) atomicAdd(globalResult, sharedArray[0]);
     }
 }
