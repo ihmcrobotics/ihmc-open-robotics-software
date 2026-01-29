@@ -22,9 +22,10 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.geometry.PlanarLandmark;
 import us.ihmc.perception.geometry.PlanarLandmarkList;
 import us.ihmc.perception.mapping.PlanarRegionMappingParameters;
-import us.ihmc.perception.rapidRegions.PatchFeatureGrid;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerTools;
-import us.ihmc.robotics.geometry.*;
+import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.geometry.RotationTools;
 
 import java.util.ArrayList;
 
@@ -539,108 +540,6 @@ public class PlaneRegistrationTools
          {
             matches.put(i, minSimilarityIndex);
          }
-      }
-   }
-
-   // TODO: Complete this method and test it with PatchFeatureGrid from the RapidRegionsExtractor.
-   public static void findPatchMatches(PatchFeatureGrid previousGrid, PatchFeatureGrid currentGrid, TIntIntMap matches)
-   {
-      Point3D previousCentroid = new Point3D();
-      Point3D currentCentroid = new Point3D();
-      Vector3D previousNormal = new Vector3D();
-      Vector3D currentNormal = new Vector3D();
-
-      float distanceThreshold = 0.1f;
-
-      for (int i = 0; i < previousGrid.getTotal(); i++)
-      {
-         previousGrid.getNormal(i, previousNormal);
-         previousGrid.getCentroid(i, previousCentroid);
-         previousNormal.normalize();
-
-         for (int j = 0; j < currentGrid.getTotal(); j++)
-         {
-            currentGrid.getNormal(j, currentNormal);
-            currentGrid.getCentroid(j, currentCentroid);
-            currentNormal.normalize();
-
-            double distance = currentCentroid.distance(previousCentroid);
-            double similarity = previousNormal.dot(currentNormal);
-
-            if (distance < distanceThreshold)
-            {
-               matches.put(i, j);
-            }
-         }
-      }
-   }
-
-   // TODO: Complete this method and test it with PatchFeatureGrid from the RapidRegionsExtractor.
-   public static void computeTransformFromPatches(PatchFeatureGrid previousGrid,
-                                                  PatchFeatureGrid currentGrid,
-                                                  TIntIntMap matches,
-                                                  RigidBodyTransform transformToPack)
-   {
-      SvdImplicitQrDecompose_DDRM svd = new SvdImplicitQrDecompose_DDRM(false, true, true, true);
-      DMatrixRMaj svdU = new DMatrixRMaj(3, 3);
-      DMatrixRMaj svdVt = new DMatrixRMaj(3, 3);
-      DMatrixRMaj patchMatrix = new DMatrixRMaj(3, 3);
-
-      DMatrixRMaj matrixOne = new DMatrixRMaj(3, matches.size());
-      DMatrixRMaj matrixTwo = new DMatrixRMaj(3, matches.size());
-
-      int[] keySet = matches.keySet().toArray();
-
-      Point3D previousCentroid = new Point3D();
-      Point3D currentCentroid = new Point3D();
-      Vector3D previousNormal = new Vector3D();
-      Vector3D currentNormal = new Vector3D();
-
-      Point3D previousMean = new Point3D();
-      Point3D currentMean = new Point3D();
-
-      int matrixIndex = 0;
-      for (Integer key : keySet)
-      {
-         int currentIndex = matches.get(key);
-
-         previousGrid.getCentroid(key, previousCentroid);
-         previousGrid.getNormal(key, previousNormal);
-
-         currentGrid.getCentroid(currentIndex, currentCentroid);
-         currentGrid.getNormal(currentIndex, currentNormal);
-
-         previousMean.add(previousCentroid);
-         currentMean.add(currentCentroid);
-
-         previousCentroid.get(0, matrixIndex, matrixOne);
-         currentCentroid.get(0, matrixIndex, matrixTwo);
-
-         CommonOps_DDRM.multAddTransB(matrixOne, matrixTwo, patchMatrix);
-
-         matrixIndex++;
-      }
-
-      previousMean.scale(1.0 / matches.size());
-      currentMean.scale(1.0 / matches.size());
-
-      Point3D translation = new Point3D();
-      translation.set(currentMean);
-      translation.sub(previousMean);
-
-      if (svd.decompose(patchMatrix))
-      {
-         svd.getU(svdU, false);
-         svd.getV(svdVt, true);
-
-         DMatrixRMaj rotationMatrix = new DMatrixRMaj(3, 3);
-         CommonOps_DDRM.mult(svdU, svdVt, rotationMatrix);
-
-         transformToPack.setRotationAndZeroTranslation(rotationMatrix);
-         transformToPack.appendTranslation(translation);
-
-         Point3D angles = new Point3D();
-         transformToPack.getRotation().getEuler(angles);
       }
    }
 }
