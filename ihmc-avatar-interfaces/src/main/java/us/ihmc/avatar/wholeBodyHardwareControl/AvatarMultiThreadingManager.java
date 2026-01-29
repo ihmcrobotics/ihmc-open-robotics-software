@@ -19,8 +19,6 @@ import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.realtime.RealtimeThread;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
-import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
 import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
@@ -207,17 +205,26 @@ public class AvatarMultiThreadingManager
 
    public void start()
    {
+      start(true);
+   }
+
+   public void start(boolean startMasterThread)
+   {
       hardwareCommunicationInterface.start();
       jvmStatisticsGenerator.start();
-      if (useRealtimeThreads)
+
+      if (startMasterThread)
       {
-         running = true;
-         ((RealtimeThread) masterThread).start();
-      }
-      else
-      {
-         ((RepeatingTaskThread) masterThread).setFrequencyLimit(Conversions.secondsToHertz(masterThreadDt));
-         ((RepeatingTaskThread) masterThread).startRepeating();
+         if (useRealtimeThreads)
+         {
+            running = true;
+            ((RealtimeThread) masterThread).start();
+         }
+         else
+         {
+            ((RepeatingTaskThread) masterThread).setFrequencyLimit(Conversions.secondsToHertz(masterThreadDt));
+            ((RepeatingTaskThread) masterThread).startRepeating();
+         }
       }
    }
 

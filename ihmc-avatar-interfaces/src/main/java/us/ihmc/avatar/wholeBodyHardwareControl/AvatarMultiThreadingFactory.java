@@ -11,6 +11,7 @@ import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.Kinemati
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextTools;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
@@ -185,7 +186,7 @@ public class AvatarMultiThreadingFactory
       this.rootRegistry = registry;
       this.yoVariableServer = yoVariableServer;
 
-      masterContext = createHumanoidRobotContextData();
+      masterContext = new HumanoidRobotContextData(masterFullRobotModel);
 
       // Estimator and controller ROS2 nodes
       IHMC_ROS_STATE_ESTIMATOR_NODE_NAME = robotModel.getSimpleRobotName().toLowerCase() + "_ihmc_state_estimator";
@@ -306,6 +307,9 @@ public class AvatarMultiThreadingFactory
 
       // Set up the block to prevent execution whenever there is no new state message.
       threadingManager.get().setBlockingProvider(() -> !hardwareCommunicationInterface.hasNewStateMessage());
+
+      //
+      threadingManager.get().addPostMasterThreadRunnable(()->HumanoidRobotContextTools.updateRobot(masterFullRobotModel, masterContext.getProcessedJointData()));
 
       if (useLocalLogging)
       {
@@ -1010,20 +1014,6 @@ public class AvatarMultiThreadingFactory
                                                               commandBlenderFactory);
    }
 
-   private HumanoidRobotContextData createHumanoidRobotContextData()
-   {
-      HumanoidRobotContextDataFactory contextDataFactory = new HumanoidRobotContextDataFactory();
-      contextDataFactory.setForceSensorDataHolder(new ForceSensorDataHolder(masterFullRobotModel.getForceSensorDefinitions()));
-      contextDataFactory.setCenterOfMassDataHolder(new CenterOfMassDataHolder());
-      contextDataFactory.setCenterOfPressureDataHolder(new CenterOfPressureDataHolder(masterFullRobotModel));
-      contextDataFactory.setRobotMotionStatusHolder(new RobotMotionStatusHolder());
-      contextDataFactory.setJointDesiredOutputList(new LowLevelOneDoFJointDesiredDataHolder(masterFullRobotModel.getControllableOneDoFJoints()));
-      contextDataFactory.setProcessedJointData(new HumanoidRobotContextJointData(masterFullRobotModel.getOneDoFJoints().length));
-      contextDataFactory.setSensorDataContext(new SensorDataContext(masterFullRobotModel));
-
-      return contextDataFactory.createHumanoidRobotContextData();
-   }
-
    public void setExternalMasterThread(RealtimeThread masterThread)
    {
       externalMasterThread.set(masterThread);
@@ -1052,6 +1042,11 @@ public class AvatarMultiThreadingFactory
    public RealtimeROS2Node getEstimatorROS2Node()
    {
       return estimatorRealtimeROS2Node;
+   }
+
+   public FullHumanoidRobotModel getEstimatorFullRobotModel()
+   {
+      return avatarEstimatorThread.getFullRobotModel();
    }
 
    public void addPreEstimatorThreadRunnable(Runnable runnable)
