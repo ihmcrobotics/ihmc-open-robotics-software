@@ -64,18 +64,18 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
             BehaviorTreeSceneObjectDefinition sceneObjectDefinition = definition.getSceneObjectDefinition();
 
             if (definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.DOOR_PANEL
-            && object instanceof BehaviorTreeSceneDoorPanelExecutor)
+             && object instanceof BehaviorTreeSceneDoorPanelExecutor)
             {
                matchedObject = object;
             }
             else if (definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.FOUNDATION_POSE
-            && object.getObjectType() == BehaviorTreeSceneObjectType.FOUNDATION_POSE
-            && object.getFoundationPoseObjectType() == definition.getSceneObjectDefinition().getFoundationPoseObjectType())
+                  && object.getObjectType() == BehaviorTreeSceneObjectType.FOUNDATION_POSE
+                  && object.getFoundationPoseObjectType() == definition.getSceneObjectDefinition().getFoundationPoseObjectType())
             {
                matchedObject = object;
             }
             else if (definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.YOLO_ONLY
-            && object.getYoloClassName().equals(definition.getSceneObjectDefinition().getYoloClassName()))
+                  && object.getYoloClassName().equals(definition.getSceneObjectDefinition().getYoloClassName()))
             {
                matchedObject = object;
             }
