@@ -8,6 +8,7 @@ import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectDefinition;
+import us.ihmc.communication.crdt.CRDTBidirectionalEnumField;
 import us.ihmc.communication.crdt.CRDTBidirectionalFloat;
 import us.ihmc.communication.crdt.CRDTBidirectionalInteger;
 import us.ihmc.communication.crdt.CRDTBidirectionalIntegerList;
@@ -18,9 +19,18 @@ import java.util.List;
 
 public class SceneActionNodeDefinition extends ActionNodeDefinition
 {
+   public enum Type
+   {
+      SETUP_OBJECT,
+      FREEZE_OBJECT;
+
+      public static final Type[] values = values();
+   }
+
+   private final CRDTBidirectionalEnumField<Type> type;
+   private final BehaviorTreeSceneObjectDefinition sceneObjectDefinition;
    private final CRDTBidirectionalFloat timeout;
    private final CRDTBidirectionalInteger minimumHistorySize;
-   private final BehaviorTreeSceneObjectDefinition sceneObjectDefinition;
    private final CRDTBidirectionalFloat yoloConfidenceThreshold;
    private final CRDTBidirectionalFloat yoloMaskThreshold;
    private final CRDTBidirectionalInteger segmentationMaskErosionRadius;
@@ -29,6 +39,7 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
    private final CRDTBidirectionalIntegerList ignoredYoloClassIndices;
    private final CRDTBidirectionalIntegerList enabledFoundationPoseModels;
 
+   private Type onDiskType;
    private float onDiskTimeout;
    private int onDiskMinimumHistorySize;
    private float onDiskYoloConfidenceThreshold;
@@ -43,9 +54,10 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
    {
       super(rootNode);
 
+      type = new CRDTBidirectionalEnumField<>(this, Type.SETUP_OBJECT);
+      sceneObjectDefinition = new BehaviorTreeSceneObjectDefinition(this);
       timeout = new CRDTBidirectionalFloat(this, 5.0f);
       minimumHistorySize = new CRDTBidirectionalInteger(this, 5);
-      sceneObjectDefinition = new BehaviorTreeSceneObjectDefinition(this);
       yoloConfidenceThreshold = new CRDTBidirectionalFloat(this, 0.7f);
       yoloMaskThreshold = new CRDTBidirectionalFloat(this, 0.0f);
       segmentationMaskErosionRadius = new CRDTBidirectionalInteger(this, 1);
@@ -60,10 +72,11 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
    {
       super.saveToFile(jsonNode);
 
-      jsonNode.put("timeout", timeout.getValue());
-      jsonNode.put("minimumHistorySize", minimumHistorySize.getValue());
+      jsonNode.put("sceneActionType", type.getValue().name());
       ObjectNode sceneObjectNode = jsonNode.putObject("sceneObjectDefinition");
       sceneObjectDefinition.saveToFile(sceneObjectNode);
+      jsonNode.put("timeout", timeout.getValue());
+      jsonNode.put("minimumHistorySize", minimumHistorySize.getValue());
       jsonNode.put("yoloConfidenceThreshold", yoloConfidenceThreshold.getValue());
       jsonNode.put("yoloMaskThreshold", yoloMaskThreshold.getValue());
       jsonNode.put("segmentationMaskErosionRadius", segmentationMaskErosionRadius.getValue());
@@ -87,9 +100,10 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
    {
       super.loadFromFile(jsonNode);
 
+      type.setValue(Type.valueOf(jsonNode.get("sceneActionType").textValue()));
+      sceneObjectDefinition.loadFromFile(jsonNode.get("sceneObjectDefinition"));
       timeout.setValue((float) jsonNode.get("timeout").asDouble());
       minimumHistorySize.setValue(jsonNode.get("minimumHistorySize").asInt());
-      sceneObjectDefinition.loadFromFile(jsonNode.get("sceneObjectDefinition"));
       yoloConfidenceThreshold.setValue((float) jsonNode.get("yoloConfidenceThreshold").asDouble());
       yoloMaskThreshold.setValue((float) jsonNode.get("yoloMaskThreshold").asDouble());
       segmentationMaskErosionRadius.setValue(jsonNode.get("segmentationMaskErosionRadius").asInt());
@@ -116,9 +130,10 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
    {
       super.setOnDiskFields();
 
+      onDiskType = type.getValue();
+      sceneObjectDefinition.setOnDiskFields();
       onDiskTimeout = timeout.getValue();
       onDiskMinimumHistorySize = minimumHistorySize.getValue();
-      sceneObjectDefinition.setOnDiskFields();
       onDiskYoloConfidenceThreshold = yoloConfidenceThreshold.getValue();
       onDiskYoloMaskThreshold = yoloMaskThreshold.getValue();
       onDiskSegmentationMaskErosionRadius = segmentationMaskErosionRadius.getValue();
@@ -141,9 +156,10 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
 
       if (isUndoAvailable())
       {
+         type.setValue(onDiskType);
+         sceneObjectDefinition.undoAllNontopologicalChanges();
          timeout.setValue(onDiskTimeout);
          minimumHistorySize.setValue(onDiskMinimumHistorySize);
-         sceneObjectDefinition.undoAllNontopologicalChanges();
          yoloConfidenceThreshold.setValue(onDiskYoloConfidenceThreshold);
          yoloMaskThreshold.setValue(onDiskYoloMaskThreshold);
          segmentationMaskErosionRadius.setValue(onDiskSegmentationMaskErosionRadius);
@@ -165,9 +181,10 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
    {
       boolean unchanged = !super.hasChanges();
 
+      unchanged &= type.getValue() == onDiskType;
+      unchanged &= !sceneObjectDefinition.hasChanges();
       unchanged &= timeout.getValue() == onDiskTimeout;
       unchanged &= minimumHistorySize.getValue() == onDiskMinimumHistorySize;
-      unchanged &= !sceneObjectDefinition.hasChanges();
       unchanged &= yoloConfidenceThreshold.getValue() == onDiskYoloConfidenceThreshold;
       unchanged &= yoloMaskThreshold.getValue() == onDiskYoloMaskThreshold;
       unchanged &= segmentationMaskErosionRadius.getValue() == onDiskSegmentationMaskErosionRadius;
@@ -192,9 +209,10 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
    {
       super.toMessage(message.getDefinition());
 
+      message.setType((byte) type.toMessage().ordinal());
+      sceneObjectDefinition.toMessage(message.getSceneObjectDefinition());
       message.setTimeout(timeout.toMessage());
       message.setMinimumHistorySize(minimumHistorySize.toMessage());
-      sceneObjectDefinition.toMessage(message.getSceneObjectDefinition());
       message.setYoloConfidenceThreshold(yoloConfidenceThreshold.toMessage());
       message.setYoloMaskThreshold(yoloMaskThreshold.toMessage());
       message.setSegmentationMaskErosionRadius(segmentationMaskErosionRadius.toMessage());
@@ -208,9 +226,10 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
    {
       super.fromMessage(message.getDefinition());
 
+      type.fromMessage(Type.values()[message.getType()]);
+      sceneObjectDefinition.fromMessage(message.getSceneObjectDefinition());
       timeout.fromMessage(message.getTimeout());
       minimumHistorySize.fromMessage(message.getMinimumHistorySize());
-      sceneObjectDefinition.fromMessage(message.getSceneObjectDefinition());
       yoloConfidenceThreshold.fromMessage(message.getYoloConfidenceThreshold());
       yoloMaskThreshold.fromMessage(message.getYoloMaskThreshold());
       segmentationMaskErosionRadius.fromMessage(message.getSegmentationMaskErosionRadius());
@@ -223,6 +242,11 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
    public BehaviorTreeSceneObjectDefinition getSceneObjectDefinition()
    {
       return sceneObjectDefinition;
+   }
+
+   public CRDTBidirectionalEnumField<Type> getType()
+   {
+      return type;
    }
 
    public float getTimeout()

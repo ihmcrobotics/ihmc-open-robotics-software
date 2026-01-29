@@ -4,6 +4,7 @@ import imgui.ImGui;
 import imgui.type.ImInt;
 import org.yaml.snakeyaml.Yaml;
 import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionNodeDefinition.Type;
 import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionNodeState;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectDefinition;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectType;
@@ -81,6 +82,17 @@ public class RDXSceneActionNode extends RDXActionNode<SceneActionNodeState, Scen
    @Override
    protected void renderImGuiWidgetsInternal()
    {
+      Type currentType = definition.getType().getValue();
+      if (ImGui.beginCombo(labels.get("Type"), currentType.name()))
+      {
+         for (Type value : Type.values)
+         {
+            if (ImGui.selectable(value.name(), value == currentType))
+               definition.getType().setValue(value);
+         }
+         ImGui.endCombo();
+      }
+
       BehaviorTreeSceneObjectDefinition objectDefinition = definition.getSceneObjectDefinition();
 
       ImGui.text("Setup Object Type:");
