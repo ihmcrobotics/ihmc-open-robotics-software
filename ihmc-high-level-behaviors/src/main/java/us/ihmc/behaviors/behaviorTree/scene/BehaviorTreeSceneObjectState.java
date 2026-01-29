@@ -8,7 +8,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseObject;
 
 public class BehaviorTreeSceneObjectState extends BehaviorTreeSceneObjectDefinition
 {
@@ -18,14 +17,9 @@ public class BehaviorTreeSceneObjectState extends BehaviorTreeSceneObjectDefinit
 
    public BehaviorTreeSceneObjectState(long id, CRDTInfo crdtInfo, BehaviorTreeSceneObjectDefinitionMessage definition)
    {
-      super(crdtInfo);
+      super(crdtInfo, definition);
 
       this.id = id;
-
-      setObjectType(BehaviorTreeSceneObjectType.values[definition.getObjectType()]);
-      setYoloModelName(definition.getYoloModelNameAsString());
-      setYoloClassName(definition.getYoloClassNameAsString());
-      setFoundationPoseObjectType(IsaacROSFoundationPoseObject.values[definition.getFoundationPoseObjectType()]);
 
       transform = new CRDTBidirectionalRigidBodyTransform(this);
       referenceFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("%s_%d".formatted(getName(), id),

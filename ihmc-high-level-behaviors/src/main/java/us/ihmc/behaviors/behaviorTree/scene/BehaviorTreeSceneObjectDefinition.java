@@ -11,10 +11,10 @@ import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseObject
 
 public class BehaviorTreeSceneObjectDefinition extends LatestTimestampModifiable
 {
-   private CRDTBidirectionalEnumField<BehaviorTreeSceneObjectType> objectType;
-   private CRDTBidirectionalString yoloModelName;
-   private CRDTBidirectionalString yoloClassName;
-   private CRDTBidirectionalEnumField<IsaacROSFoundationPoseObject> foundationPoseObjectType;
+   private final CRDTBidirectionalEnumField<BehaviorTreeSceneObjectType> objectType;
+   private final CRDTBidirectionalString yoloModelName;
+   private final CRDTBidirectionalString yoloClassName;
+   private final CRDTBidirectionalEnumField<IsaacROSFoundationPoseObject> foundationPoseObjectType;
 
    private BehaviorTreeSceneObjectType onDiskObjectType;
    private String onDiskYoloModelName;
@@ -22,25 +22,27 @@ public class BehaviorTreeSceneObjectDefinition extends LatestTimestampModifiable
    private IsaacROSFoundationPoseObject onDiskFoundationPoseObjectType;
 
    /** Used when a scene object state extends this. */
-   public BehaviorTreeSceneObjectDefinition(CRDTInfo crdtInfo)
+   public BehaviorTreeSceneObjectDefinition(CRDTInfo crdtInfo, BehaviorTreeSceneObjectDefinitionMessage definition)
    {
       super(crdtInfo);
-      initialize(this);
+
+      objectType = new CRDTBidirectionalEnumField<>(this, BehaviorTreeSceneObjectType.values[definition.getObjectType()]);
+      yoloModelName = new CRDTBidirectionalString(this, definition.getYoloModelNameAsString());
+      yoloClassName = new CRDTBidirectionalString(this, definition.getYoloClassNameAsString());
+      foundationPoseObjectType = new CRDTBidirectionalEnumField<>(this, IsaacROSFoundationPoseObject.values[definition.getFoundationPoseObjectType()]);
+      setModifierName(getName());
    }
 
    /** Used when this is a field of scene action. The super LatestTimestampModifiable is not used in this case. */
    public BehaviorTreeSceneObjectDefinition(LatestTimestampModifiable latestTimestampModifiable)
    {
       super(latestTimestampModifiable.getCRDTInfo());
-      initialize(latestTimestampModifiable);
-   }
 
-   private void initialize(LatestTimestampModifiable latestTimestampModifiable)
-   {
       objectType = new CRDTBidirectionalEnumField<>(latestTimestampModifiable, BehaviorTreeSceneObjectType.YOLO_ONLY);
       yoloModelName = new CRDTBidirectionalString(latestTimestampModifiable, "best_multi_01_16_2026");
       yoloClassName = new CRDTBidirectionalString(latestTimestampModifiable, "door_lever");
       foundationPoseObjectType = new CRDTBidirectionalEnumField<>(latestTimestampModifiable, IsaacROSFoundationPoseObject.MUSTARD);
+      setModifierName(getName());
    }
 
    public void saveToFile(ObjectNode jsonNode)

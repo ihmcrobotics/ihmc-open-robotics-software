@@ -23,7 +23,7 @@ import java.time.Instant;
 public class LatestTimestampModifiable
 {
    private final CRDTInfo crdtInfo;
-   private String ourName = "unamed";
+   private String ourName = "unnamed";
 
    private String latestModifierName = ourName;
    private final Guid latestModifierGuid = new Guid();
