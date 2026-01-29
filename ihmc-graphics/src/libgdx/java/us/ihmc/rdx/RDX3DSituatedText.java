@@ -243,5 +243,4 @@ public class RDX3DSituatedText implements RenderableProvider
    {
       textHeightMeters = height;
    }
-
 }
