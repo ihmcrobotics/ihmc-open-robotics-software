@@ -39,12 +39,12 @@ namespace Utils
     template <typename T>
     __device__ void warpReduceAdd(volatile T* __restrict__ sharedArray, unsigned int threadIndex, unsigned int blockSize)
     {
-        if (blockSize >= 64) sharedArray[threadIndex] += sharedArray[threadIndex + 32];
-        if (blockSize >= 32) sharedArray[threadIndex] += sharedArray[threadIndex + 16];
-        if (blockSize >= 16) sharedArray[threadIndex] += sharedArray[threadIndex + 8];
-        if (blockSize >=  8) sharedArray[threadIndex] += sharedArray[threadIndex + 4];
-        if (blockSize >=  4) sharedArray[threadIndex] += sharedArray[threadIndex + 2];
-        if (blockSize >=  2) sharedArray[threadIndex] += sharedArray[threadIndex + 1];
+        if (blockSize >= 64)                           sharedArray[threadIndex] += sharedArray[threadIndex + 32];
+        if (blockSize >= 32) { if (threadIndex < 16) { sharedArray[threadIndex] += sharedArray[threadIndex + 16]; }}
+        if (blockSize >= 16) { if (threadIndex <  8) { sharedArray[threadIndex] += sharedArray[threadIndex +  8]; }}
+        if (blockSize >=  8) { if (threadIndex <  4) { sharedArray[threadIndex] += sharedArray[threadIndex +  4]; }}
+        if (blockSize >=  4) { if (threadIndex <  2) { sharedArray[threadIndex] += sharedArray[threadIndex +  2]; }}
+        if (blockSize >=  2) { if (threadIndex == 0) { sharedArray[0]           += sharedArray[1]; }}
     }
 
     template <typename T>
@@ -66,5 +66,4 @@ namespace Utils
         if (threadIndex < 32) warpReduceAdd(sharedArray, threadIndex, blockSize);
         if (threadIndex == 0) atomicAdd(globalResult, sharedArray[0]);
     }
-
 }
