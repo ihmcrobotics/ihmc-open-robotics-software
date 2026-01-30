@@ -149,10 +149,12 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
    @Override
    protected BehaviorTreeSceneObjectState buildObject(long id, CRDTInfo crdtInfo, BehaviorTreeSceneObjectDefinitionMessage definition)
    {
-      if (definition.getObjectType() == BehaviorTreeSceneObjectType.DOOR_PANEL.ordinal())
-         return new BehaviorTreeSceneDoorPanelExecutor(id, crdtInfo, syncedRobot, definition);
-      else
-         return new BehaviorTreeSceneObjectExecutor(id, crdtInfo, syncedRobot, definition);
+      return switch (BehaviorTreeSceneObjectType.values()[definition.getObjectType()])
+      {
+         case DOOR_PANEL -> new BehaviorTreeSceneDoorPanelExecutor(id, crdtInfo, syncedRobot, definition);
+         case DOOR_FRAME -> new BehaviorTreeSceneDoorFrameExecutor(id, crdtInfo, syncedRobot, definition);
+         default -> new BehaviorTreeSceneObjectExecutor(id, crdtInfo, syncedRobot, definition);
+      };
    }
 
    @Override
