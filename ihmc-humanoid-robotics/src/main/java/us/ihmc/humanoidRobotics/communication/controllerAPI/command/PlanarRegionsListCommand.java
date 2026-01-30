@@ -6,6 +6,7 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.idl.IDLSequence.Object;
 
 public class PlanarRegionsListCommand implements Command<PlanarRegionsListCommand, PlanarRegionsListMessage>
@@ -47,7 +48,8 @@ public class PlanarRegionsListCommand implements Command<PlanarRegionsListComman
          int regionId = message.getRegionId().get(regionIndex);
          Point3D origin = message.getRegionOrigin().get(regionIndex);
          Vector3D normal = message.getRegionNormal().get(regionIndex);
-         planarRegionCommand.setRegionProperties(regionId, origin, normal);
+         Quaternion orientation = message.getRegionOrientation().get(regionIndex);
+         planarRegionCommand.setRegionProperties(regionId, origin, normal, orientation);
 
          upperBound += message.getConcaveHullsSize().get(regionIndex);
 

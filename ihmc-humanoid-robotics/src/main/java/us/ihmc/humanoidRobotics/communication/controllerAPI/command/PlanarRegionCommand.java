@@ -10,6 +10,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
 public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarRegionMessage>
@@ -51,7 +52,7 @@ public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarR
    public void setFromMessage(PlanarRegionMessage message)
    {
       sequenceId = message.getSequenceId();
-      setRegionProperties(message.getRegionId(), message.getRegionOrigin(), message.getRegionNormal());
+      setRegionProperties(message.getRegionId(), message.getRegionOrigin(), message.getRegionNormal(), message.getRegionOrientation());
 
       convexHull.clear();
       concaveHullsVertices.clear();
@@ -105,14 +106,18 @@ public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarR
          addConvexPolygon().set(convexPolygons.get(i));
 
       regionId = command.getRegionId();
+
+      regionOrigin.set(command.regionOrigin);
+      regionNormal.set(command.regionNormal);
+      regionOrientation.set(command.regionOrientation);
    }
 
-   public void setRegionProperties(int id, Tuple3DReadOnly origin, Tuple3DReadOnly normal)
+   public void setRegionProperties(int id, Tuple3DReadOnly origin, Tuple3DReadOnly normal, QuaternionReadOnly orientation)
    {
       regionId = id;
       regionOrigin.set(origin);
       regionNormal.set(normal);
-      EuclidGeometryTools.orientation3DFromZUpToVector3D(regionNormal, regionOrientation);
+      regionOrientation.set(orientation);
 
       fromLocalToWorldTransform.set(regionOrientation, regionOrigin);
       fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
