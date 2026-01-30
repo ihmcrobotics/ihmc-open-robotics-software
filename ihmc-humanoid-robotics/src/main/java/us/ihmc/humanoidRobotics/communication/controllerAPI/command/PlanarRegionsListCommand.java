@@ -54,6 +54,7 @@ public class PlanarRegionsListCommand implements Command<PlanarRegionsListComman
          for (; vertexIndex < upperBound; vertexIndex++)
          {
             planarRegionCommand.addConcaveHullVertex().set(vertexBuffer.get(vertexIndex));
+            planarRegionCommand.getConvexHull().addVertex(vertexBuffer.get(vertexIndex));
          }
 
          for ( int polygonIndex = 0; polygonIndex < message.getNumberOfConvexPolygons().get(regionIndex); polygonIndex++)

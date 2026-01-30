@@ -21,6 +21,7 @@ public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarR
    private final RigidBodyTransform fromLocalToWorldTransform = new RigidBodyTransform();
    private final RigidBodyTransform fromWorldToLocalTransform = new RigidBodyTransform();
 
+   private final ConvexPolygon2D convexHull = new ConvexPolygon2D();
    private final RecyclingArrayList<Point2D> concaveHullsVertices = new RecyclingArrayList<Point2D>(20, Point2D.class);
    private final RecyclingArrayList<ConvexPolygon2D> convexPolygons = new RecyclingArrayList<ConvexPolygon2D>(10, ConvexPolygon2D.class);
 
@@ -43,6 +44,7 @@ public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarR
       for (int i = 0; i < convexPolygons.size(); i++)
          convexPolygons.get(i).clear();
       convexPolygons.clear();
+      convexHull.clear();
    }
 
    @Override
@@ -51,14 +53,19 @@ public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarR
       sequenceId = message.getSequenceId();
       setRegionProperties(message.getRegionId(), message.getRegionOrigin(), message.getRegionNormal());
 
+      convexHull.clear();
       concaveHullsVertices.clear();
 
       int vertexIndex = 0;
       int upperBound = message.getConcaveHullSize();
 
       for (; vertexIndex < upperBound; vertexIndex++)
+      {
          addConcaveHullVertex().set(message.getVertexBuffer().get(vertexIndex));
+         convexHull.addVertex(message.getVertexBuffer().get(vertexIndex));
+      }
 
+      convexHull.update();
       convexPolygons.clear();
 
       for (int polygonIndex = 0; polygonIndex < message.getNumberOfConvexPolygons(); polygonIndex++)
@@ -84,8 +91,13 @@ public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarR
 
       RecyclingArrayList<Point2D> originalConcaveHullVertices = command.getConcaveHullsVertices();
       concaveHullsVertices.clear();
+      convexHull.clear();
       for (int i = 0; i < originalConcaveHullVertices.size(); i++)
+      {
          addConcaveHullVertex().set(originalConcaveHullVertices.get(i));
+         convexHull.addVertex(originalConcaveHullVertices.get(i));
+      }
+      convexHull.update();
 
       RecyclingArrayList<ConvexPolygon2D> convexPolygons = command.getConvexPolygons();
       this.convexPolygons.clear();
@@ -149,6 +161,11 @@ public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarR
       return fromLocalToWorldTransform;
    }
 
+   public Vector3D getRegionNormal()
+   {
+      return regionNormal;
+   }
+
    public RigidBodyTransform getTransformFromWorld()
    {
       return fromWorldToLocalTransform;
@@ -157,6 +174,11 @@ public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarR
    public RecyclingArrayList<ConvexPolygon2D> getConvexPolygons()
    {
       return convexPolygons;
+   }
+
+   public ConvexPolygon2D getConvexHull()
+   {
+      return convexHull;
    }
 
    public RecyclingArrayList<Point2D> getConcaveHullsVertices()

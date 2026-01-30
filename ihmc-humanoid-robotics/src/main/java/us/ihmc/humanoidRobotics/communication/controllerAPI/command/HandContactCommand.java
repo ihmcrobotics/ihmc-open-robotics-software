@@ -5,7 +5,9 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -63,6 +65,16 @@ public class HandContactCommand implements Command<HandContactCommand, HandConta
       bracingNormal.set(other.bracingNormal);
    }
 
+   public void setTrajectoryDuration(double trajectoryDuration)
+   {
+      this.trajectoryDuration = trajectoryDuration;
+   }
+
+   public void setRobotSide(RobotSide robotSide)
+   {
+      this.robotSide = robotSide;
+   }
+
    public RobotSide getRobotSide()
    {
       return robotSide;
@@ -73,12 +85,12 @@ public class HandContactCommand implements Command<HandContactCommand, HandConta
       return trajectoryDuration;
    }
 
-   public FramePoint3DReadOnly getBracingPoint()
+   public FramePoint3DBasics getBracingPoint()
    {
       return bracingPoint;
    }
 
-   public FrameVector3DReadOnly getBracingNormal()
+   public FrameVector3DBasics getBracingNormal()
    {
       return bracingNormal;
    }

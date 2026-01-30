@@ -234,4 +234,9 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    {
       return new RigidBodyTransform();
    }
+
+   default StandingReactiveBracingPlanner getReactiveBracingPlanner()
+   {
+      return null;
+   }
 }
