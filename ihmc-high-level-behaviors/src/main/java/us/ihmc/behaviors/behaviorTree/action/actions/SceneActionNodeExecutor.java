@@ -3,7 +3,7 @@ package us.ihmc.behaviors.behaviorTree.action.actions;
 import behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
-import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionNodeDefinition.Type;
+import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionNodeDefinition.SceneActionNodeType;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneDoorPanelExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectDefinition;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectExecutor;
@@ -47,7 +47,7 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
 
       timer.reset();
 
-      if (definition.getType().getValue() == Type.SETUP_OBJECT)
+      if (definition.getSceneActionType().getValue() == SceneActionNodeType.SETUP_OBJECT)
          scene.removeAllObjects(); // Temporary measure until we have a use case for more persistent objects
    }
 
@@ -56,7 +56,7 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
    {
       state.setElapsedExecutionTime(timer.getElapsedTime());
 
-      if (definition.getType().getValue() == Type.FREEZE_OBJECT)
+      if (definition.getSceneActionType().getValue() == SceneActionNodeType.FREEZE_OBJECT)
       {
          BehaviorTreeSceneObjectState matchedObject = null;
          for (BehaviorTreeSceneObjectState object : scene.getObjects())

@@ -4,7 +4,7 @@ import imgui.ImGui;
 import imgui.type.ImInt;
 import org.yaml.snakeyaml.Yaml;
 import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionNodeDefinition;
-import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionNodeDefinition.Type;
+import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionNodeDefinition.SceneActionNodeType;
 import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionNodeState;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectDefinition;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectType;
@@ -82,13 +82,13 @@ public class RDXSceneActionNode extends RDXActionNode<SceneActionNodeState, Scen
    @Override
    protected void renderImGuiWidgetsInternal()
    {
-      Type currentType = definition.getType().getValue();
-      if (ImGui.beginCombo(labels.get("Type"), currentType.name()))
+      SceneActionNodeType currentActionType = definition.getSceneActionType().getValue();
+      if (ImGui.beginCombo(labels.get("Action Type"), currentActionType.name()))
       {
-         for (Type value : Type.values)
+         for (SceneActionNodeType value : SceneActionNodeType.values)
          {
-            if (ImGui.selectable(value.name(), value == currentType))
-               definition.getType().setValue(value);
+            if (ImGui.selectable(value.name(), value == currentActionType))
+               definition.getSceneActionType().setValue(value);
          }
          ImGui.endCombo();
       }
