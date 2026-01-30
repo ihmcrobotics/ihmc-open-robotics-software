@@ -11,7 +11,6 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.UnitVector3D;
-import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 
@@ -100,99 +99,6 @@ public class RapidPatchesDebugOutputGenerator
             debugPoints.add().set(point);
             //LogTools.info("Point To Render: {} {} {}", cx, cy, cz);
          }
-      }
-   }
-
-   public void constructPointCloud(BytedecoImage cxImage, BytedecoImage cyImage, BytedecoImage czImage)
-   {
-      if (!enabled)
-         return;
-
-      FloatBuffer cxBuffer = cxImage.getBackingDirectByteBuffer().asFloatBuffer();
-      FloatBuffer cyBuffer = cyImage.getBackingDirectByteBuffer().asFloatBuffer();
-      FloatBuffer czBuffer = czImage.getBackingDirectByteBuffer().asFloatBuffer();
-
-      int rows = cxImage.getImageHeight();
-      int cols = cxImage.getImageWidth();
-
-      for (int y = 0; y < rows; y++)
-      {
-         for (int x = 0; x < cols; x++)
-         {
-            float cx = cxBuffer.get(y * cols + x);
-            float cy = cyBuffer.get(y * cols + x);
-            float cz = czBuffer.get(y * cols + x);
-
-            //LogTools.info(String.format("Centroid: %.2f,%.2f,%.2f,%.2f,%.2f,%.2f", cx, cy, cz, cv_cx, cv_cy, cv_cz));
-            if (!(cx == 0.0f && cy == 0.0f && cz == 0.0f))
-            {
-               debugPoints.add().set(cx, cy, cz);
-            }
-         }
-      }
-   }
-
-   public void constructCentroidSurfelCloud(BytedecoImage cxImage,
-                                            BytedecoImage cyImage,
-                                            BytedecoImage czImage,
-                                            BytedecoImage nxImage,
-                                            BytedecoImage nyImage,
-                                            BytedecoImage nzImage)
-   {
-
-      if (!enabled)
-         return;
-
-      FloatBuffer cxBuffer = cxImage.getBackingDirectByteBuffer().asFloatBuffer();
-      FloatBuffer cyBuffer = cyImage.getBackingDirectByteBuffer().asFloatBuffer();
-      FloatBuffer czBuffer = czImage.getBackingDirectByteBuffer().asFloatBuffer();
-
-      FloatBuffer nxBuffer = nxImage.getBackingDirectByteBuffer().asFloatBuffer();
-      FloatBuffer nyBuffer = nyImage.getBackingDirectByteBuffer().asFloatBuffer();
-      FloatBuffer nzBuffer = nzImage.getBackingDirectByteBuffer().asFloatBuffer();
-
-      int rows = cxImage.getImageHeight();
-      int cols = cxImage.getImageWidth();
-
-      for (int y = 0; y < rows; y++)
-      {
-         for (int x = 0; x < cols; x++)
-         {
-            float cx = cxBuffer.get(y * cols + x);
-            float cy = cyBuffer.get(y * cols + x);
-            float cz = czBuffer.get(y * cols + x);
-
-            float nx = cxBuffer.get(y * cols + x);
-            float ny = cyBuffer.get(y * cols + x);
-            float nz = czBuffer.get(y * cols + x);
-
-            if (!(cx == 0.0f && cy == 0.0f && cz == 0.0f))
-            {
-               debugPoints.add().set(cx, cy, cz);
-               debugNormals.add().set(nx, ny, nz);
-            }
-         }
-      }
-   }
-
-   public void printPatchGraph(BytedecoImage patchGraph)
-   {
-      if (!enabled)
-         return;
-
-      for (int i = 0; i < patchGraph.getImageHeight(); i++)
-      {
-         for (int j = 0; j < patchGraph.getImageWidth(); j++)
-         {
-            int value = patchGraph.getByteAsInteger(i, j);
-            if (value == 255)
-               System.out.print("o");
-            else if (value > 0)
-               System.out.print("+");
-            else
-               System.out.print(".");
-         }
-         System.out.println();
       }
    }
 
