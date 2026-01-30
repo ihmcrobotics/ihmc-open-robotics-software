@@ -25,7 +25,7 @@ public class ConditionNodeState extends LeafNodeState<ConditionNodeDefinition>
 
       super.toMessage(message.getState());
 
-      switch (definition.getType().getValue())
+      switch (definition.getConditionType().getValue())
       {
          case COUNTER -> counter.toMessage(message);
          case LLM -> llm.toMessage(message);
@@ -39,7 +39,7 @@ public class ConditionNodeState extends LeafNodeState<ConditionNodeDefinition>
 
       super.fromMessage(message.getState());
 
-      switch (definition.getType().getValue())
+      switch (definition.getConditionType().getValue())
       {
          case COUNTER -> counter.fromMessage(message);
          case LLM -> llm.fromMessage(message);

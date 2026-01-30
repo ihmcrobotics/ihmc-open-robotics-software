@@ -23,7 +23,7 @@ public class ConditionNodeExecutor extends LeafNodeExecutor<ConditionNodeState, 
    {
       super.update();
 
-      switch (definition.getType().getValue())
+      switch (definition.getConditionType().getValue())
       {
          //         case LLM -> llm.update();
          case PROXIMITY -> proximityCheck.update();
@@ -35,7 +35,7 @@ public class ConditionNodeExecutor extends LeafNodeExecutor<ConditionNodeState, 
    {
       super.triggerExecution();
 
-      switch (definition.getType().getValue())
+      switch (definition.getConditionType().getValue())
       {
          case ALWAYS_FAIL:
             state.setFailed(true);
@@ -51,7 +51,7 @@ public class ConditionNodeExecutor extends LeafNodeExecutor<ConditionNodeState, 
    @Override
    public void updateCurrentlyExecuting()
    {
-      switch (definition.getType().getValue())
+      switch (definition.getConditionType().getValue())
       {
          case COUNTER -> counter.updateCurrentlyExecuting();
          //         case LLM -> llm.updateCurrentlyExecuting();

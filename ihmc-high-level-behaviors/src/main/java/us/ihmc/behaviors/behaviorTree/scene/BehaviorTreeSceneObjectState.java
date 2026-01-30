@@ -2,6 +2,7 @@ package us.ihmc.behaviors.behaviorTree.scene;
 
 import behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage;
 import behavior_msgs.msg.dds.BehaviorTreeSceneObjectStateMessage;
+import us.ihmc.communication.crdt.CRDTBidirectionalBoolean;
 import us.ihmc.communication.crdt.CRDTBidirectionalRigidBodyTransform;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -12,6 +13,7 @@ import us.ihmc.log.LogTools;
 public class BehaviorTreeSceneObjectState extends BehaviorTreeSceneObjectDefinition
 {
    private final long id;
+   protected final CRDTBidirectionalBoolean frozen;
    protected final CRDTBidirectionalRigidBodyTransform transform;
    protected final ReferenceFrame referenceFrame;
 
@@ -25,6 +27,7 @@ public class BehaviorTreeSceneObjectState extends BehaviorTreeSceneObjectDefinit
       referenceFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("%s_%d".formatted(getName(), id),
                                                                                        ReferenceFrame.getWorldFrame(),
                                                                                        transform.getValueReadOnly());
+      frozen = new CRDTBidirectionalBoolean(this, false);
    }
 
    public void toMessage(BehaviorTreeSceneObjectStateMessage message)
@@ -33,6 +36,7 @@ public class BehaviorTreeSceneObjectState extends BehaviorTreeSceneObjectDefinit
       message.setId(id);
       super.toMessage(message.getDefinition());
       transform.toMessage(message.getTransformToWorld());
+      message.setFrozen(frozen.toMessage());
    }
 
    public void fromMessage(BehaviorTreeSceneObjectStateMessage message)
@@ -45,11 +49,22 @@ public class BehaviorTreeSceneObjectState extends BehaviorTreeSceneObjectDefinit
 
       transform.fromMessage(message.getTransformToWorld());
       referenceFrame.update();
+      frozen.fromMessage(message.getFrozen());
    }
 
    public void destroy()
    {
 
+   }
+
+   public void freeze()
+   {
+      frozen.setValue(true);
+   }
+
+   public boolean isFrozen()
+   {
+      return frozen.getValue();
    }
 
    public long getID()

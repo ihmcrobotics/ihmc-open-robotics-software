@@ -15,7 +15,7 @@ import us.ihmc.communication.crdt.CRDTBidirectionalEnumField;
  */
 public class ConditionNodeDefinition extends LeafNodeDefinition
 {
-   public enum Type
+   public enum ConditionNodeType
    {
       COUNTER,
       LLM,
@@ -23,22 +23,22 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
       ALWAYS_FAIL,
       ALWAYS_SUCCEED;
 
-      public static final Type[] values = values();
+      public static final ConditionNodeType[] values = values();
    }
 
-   private final CRDTBidirectionalEnumField<Type> type;
+   private final CRDTBidirectionalEnumField<ConditionNodeType> conditionType;
 
    private final CounterConditionDefinition counter;
    private final LLMConditionDefinition llm;
    private final ProximityConditionDefinition proximityCheck;
 
-   private Type onDiskType;
+   private ConditionNodeType onDiskConditionType;
 
    public ConditionNodeDefinition(BehaviorTreeRootNodeDefinition rootNode)
    {
       super(rootNode);
 
-      type = new CRDTBidirectionalEnumField<>(this, Type.COUNTER);
+      conditionType = new CRDTBidirectionalEnumField<>(this, ConditionNodeType.COUNTER);
 
       // TODO: Do we create them all or only as needed?
       counter = new CounterConditionDefinition(this);
@@ -51,9 +51,9 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
    {
       super.saveToFile(jsonNode);
 
-      jsonNode.put("conditionType", type.getValue().name());
+      jsonNode.put("conditionType", conditionType.getValue().name());
 
-      switch (type.getValue())
+      switch (conditionType.getValue())
       {
          case COUNTER -> counter.saveToFile(jsonNode);
          case LLM -> llm.saveToFile(jsonNode);
@@ -66,9 +66,9 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
    {
       super.loadFromFile(jsonNode);
 
-      type.setValue(Type.valueOf(jsonNode.get("conditionType").textValue()));
+      conditionType.setValue(ConditionNodeType.valueOf(jsonNode.get("conditionType").textValue()));
 
-      switch (type.getValue())
+      switch (conditionType.getValue())
       {
          case COUNTER -> counter.loadFromFile(jsonNode);
          case LLM -> llm.loadFromFile(jsonNode);
@@ -81,9 +81,9 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
    {
       super.setOnDiskFields();
 
-      onDiskType = type.getValue();
+      onDiskConditionType = conditionType.getValue();
 
-      switch (type.getValue())
+      switch (conditionType.getValue())
       {
          case COUNTER -> counter.setOnDiskFields();
          case LLM -> llm.setOnDiskFields();
@@ -98,9 +98,9 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
 
       if (isUndoAvailable())
       {
-         type.setValue(onDiskType);
+         conditionType.setValue(onDiskConditionType);
 
-         switch (type.getValue())
+         switch (conditionType.getValue())
          {
             case COUNTER -> counter.undoAllNontopologicalChanges();
             case LLM -> llm.undoAllNontopologicalChanges();
@@ -114,9 +114,9 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
    {
       boolean unchanged = !super.hasChanges();
 
-      unchanged &= type.getValue() == onDiskType;
+      unchanged &= conditionType.getValue() == onDiskConditionType;
 
-      switch (type.getValue())
+      switch (conditionType.getValue())
       {
          case COUNTER -> unchanged &= !counter.hasChanges();
          case LLM -> unchanged &= !llm.hasChanges();
@@ -130,9 +130,9 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
    {
       super.toMessage(message.getDefinition());
 
-      message.setType((byte) type.toMessage().ordinal());
+      message.setType((byte) conditionType.toMessage().ordinal());
 
-      switch (type.getValue())
+      switch (conditionType.getValue())
       {
          case COUNTER -> counter.toMessage(message);
          case LLM -> llm.toMessage(message);
@@ -144,9 +144,9 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
    {
       super.fromMessage(message.getDefinition());
 
-      type.fromMessage(Type.values()[message.getType()]);
+      conditionType.fromMessage(ConditionNodeType.values()[message.getType()]);
 
-      switch (type.getValue())
+      switch (conditionType.getValue())
       {
          case COUNTER -> counter.fromMessage(message);
          case LLM -> llm.fromMessage(message);
@@ -154,9 +154,9 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
       }
    }
 
-   public CRDTBidirectionalEnumField<Type> getType()
+   public CRDTBidirectionalEnumField<ConditionNodeType> getConditionType()
    {
-      return type;
+      return conditionType;
    }
 
    public CounterConditionDefinition getCounter()
