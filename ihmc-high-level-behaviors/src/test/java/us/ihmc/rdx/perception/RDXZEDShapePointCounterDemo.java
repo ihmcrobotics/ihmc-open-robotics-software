@@ -157,11 +157,11 @@ public class RDXZEDShapePointCounterDemo
       else
       {
          shapeModel = RDXModelBuilder.buildModelInstance(builder ->
-                                                         {
-                                                            builder.addCylinder(length, radius, new Vector3D(0.0, 0.0, -0.5 * length), DEFAULT_COLOR);
-                                                            builder.addSphere(radius, new Vector3D(0.0, 0.0, 0.5 * length), DEFAULT_COLOR);
-                                                            builder.addSphere(radius, new Vector3D(0.0, 0.0, -0.5 * length), DEFAULT_COLOR);
-                                                         });
+         {
+            builder.addCylinder(length, radius, new Vector3D(0.0, 0.0, -0.5 * length), DEFAULT_COLOR);
+            builder.addSphere(radius, new Vector3D(0.0, 0.0, 0.5 * length), DEFAULT_COLOR);
+            builder.addSphere(radius, new Vector3D(0.0, 0.0, -0.5 * length), DEFAULT_COLOR);
+         });
       }
       LibGDXTools.setOpacity(shapeModel, 0.5f);
 
