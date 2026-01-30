@@ -26,7 +26,7 @@ public class ConditionNodeState extends LeafNodeState<ConditionNodeDefinition>
    {
       super.update();
 
-      switch (definition.getType().getValue())
+      switch (definition.getConditionType().getValue())
       {
          case SHAPE_CONTAINS -> shapeContains.update();
       }

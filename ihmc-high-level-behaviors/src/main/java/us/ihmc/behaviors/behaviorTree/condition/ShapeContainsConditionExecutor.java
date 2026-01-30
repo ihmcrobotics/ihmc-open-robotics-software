@@ -5,9 +5,8 @@ import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneExecutor;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.cuda.CUDASpherePointCounter;
+import us.ihmc.perception.cuda.CUDAShapePointCounter;
 import us.ihmc.sensors.ImageSensor;
 import us.ihmc.sensors.zed.ZEDImageSensor;
 
@@ -22,7 +21,7 @@ public class ShapeContainsConditionExecutor
    private ReferenceFrame frame;
    private final FramePoint3D spherePose = new FramePoint3D();
    private final FramePoint3D framePose = new FramePoint3D();
-   private final CUDASpherePointCounter spherePointCounter = new CUDASpherePointCounter();
+   private final CUDAShapePointCounter spherePointCounter = new CUDAShapePointCounter();
    private final RepeatingTaskThread zedGrabThread = new RepeatingTaskThread("ZEDGrabThread", this::zedGrabThread);
    private int pointsInSphereCUDAOutput = -1;
 
@@ -127,7 +126,7 @@ public class ShapeContainsConditionExecutor
       {
          synchronized (this)
          {
-            pointsInSphereCUDAOutput = spherePointCounter.countPointsInSphere(depthImage, new Point3D32(spherePose), (float) shapeDefinition.getSphereRadius());
+            pointsInSphereCUDAOutput = (int) spherePointCounter.countPointsInSphere(depthImage, spherePose, (float) shapeDefinition.getSphereRadius());
          }
          depthImage.release();
       }
