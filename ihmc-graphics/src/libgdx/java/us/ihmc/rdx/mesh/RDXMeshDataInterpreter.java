@@ -84,6 +84,11 @@ public class RDXMeshDataInterpreter
    {
       meshToPack.getVerticesBuffer().clear();
 
+      // Cache texture location outside the loop - it's the same for all vertices
+      float[] textureLocation = RDXMultiColorMeshBuilder.getTextureLocation(color);
+      float texU = textureLocation[0];
+      float texV = textureLocation[1];
+
       for (int i = 0; i < meshData.getVertices().length; i++)
       {
          // Position
@@ -103,9 +108,8 @@ public class RDXMeshDataInterpreter
          meshToPack.getVerticesBuffer().put(meshData.getVertexNormals()[i].getZ32());
 
          // UV TextureCoordinates
-         float[] textureLocation = RDXMultiColorMeshBuilder.getTextureLocation(color);
-         meshToPack.getVerticesBuffer().put(textureLocation[0]);
-         meshToPack.getVerticesBuffer().put(textureLocation[1]);
+         meshToPack.getVerticesBuffer().put(texU);
+         meshToPack.getVerticesBuffer().put(texV);
       }
 
       meshToPack.getVerticesBuffer().flip();

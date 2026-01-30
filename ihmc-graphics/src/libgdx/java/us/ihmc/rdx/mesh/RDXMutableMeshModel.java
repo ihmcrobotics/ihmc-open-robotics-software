@@ -38,7 +38,11 @@ public class RDXMutableMeshModel
 
       if (emptyModel)
       {
-         modelInstance = null;
+         if (modelInstance != null)
+         {
+            modelInstance.model.dispose();
+            modelInstance = null;
+         }
       }
       else
       {
