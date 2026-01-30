@@ -618,7 +618,8 @@ public class SCS2AvatarSimulationFactory
          return;
 
       HumanoidRobotContextDataFactory contextDataFactory = new HumanoidRobotContextDataFactory();
-      standingPushRecoveryThread = new AvatarStandingPushRecoveryThread(robotModel.get(),
+      standingPushRecoveryThread = new AvatarStandingPushRecoveryThread(realtimeROS2Node.get(),
+                                                                        robotModel.get(),
                                                                         contextDataFactory,
                                                                         highLevelHumanoidControllerFactory.get().getStatusOutputManager(),
                                                                         highLevelHumanoidControllerFactory.get().getCommandInputManager());
