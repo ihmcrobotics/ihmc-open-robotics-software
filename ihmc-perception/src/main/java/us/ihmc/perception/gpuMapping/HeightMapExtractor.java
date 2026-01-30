@@ -61,13 +61,14 @@ public class HeightMapExtractor
    private final CUDAKernel planOffsetKernel;
    private final CUDAKernel emptyRegisterKernel;
 
-   private final float[] worldToGroundTransformArray = new float[16];
+   private final float[] groundToWorldNoRotationTransformArray = new float[16];
    private final float[] sensorToWorldAlignedGroundTransformArray = new float[16];
 
    private final FloatPointer sensorToWorldAlignedGroundTransformHostPointer;
    private final FloatPointer sensorToWorldAlignedGroundTransformDevicePointer;
-   private final FloatPointer zUpCameraToWorldAlignedGroundHostPointer;
-   private final FloatPointer zUpCameraToWorldAlignedGroundDevicePointer;
+
+   private final FloatPointer groundToWorldTranslationHostPointer;
+   private final FloatPointer groundToWorldTranslationDevicePointer;
 
    private final FloatPointer parametersHostPointer;
    private final FloatPointer parametersDevicePointer;
@@ -82,6 +83,8 @@ public class HeightMapExtractor
 
    private final HeightMapData heightMapData;
    private final Point3D heightMapCenterPoint = new Point3D();
+
+   private final HeightMapICPCalculator heightMapICPCalculator;
 
    public HeightMapExtractor(HeightMapParameters heightMapParameters)
    {
@@ -135,8 +138,8 @@ public class HeightMapExtractor
          sensorToWorldAlignedGroundTransformHostPointer = new FloatPointer(16);
          sensorToWorldAlignedGroundTransformDevicePointer = new FloatPointer();
 
-         zUpCameraToWorldAlignedGroundHostPointer = new FloatPointer(16);
-         zUpCameraToWorldAlignedGroundDevicePointer = new FloatPointer();
+         groundToWorldTranslationHostPointer = new FloatPointer(16);
+         groundToWorldTranslationDevicePointer = new FloatPointer();
 
          parametersHostPointer = new FloatPointer(19);
          parametersDevicePointer = new FloatPointer();
@@ -147,6 +150,7 @@ public class HeightMapExtractor
       }
 
       heightMapData = new HeightMapData(heightMapParameters.getCellSize(), heightMapParameters.getWidthInMeters(), 0.0, 0.0);
+      heightMapICPCalculator = new HeightMapICPCalculator(heightMapParameters, stream);
    }
 
    public void reset(double footHeight)
@@ -198,10 +202,10 @@ public class HeightMapExtractor
       // Step 4: Apply sensor->ground transform
       sensorToWorldAlignedGround.multiply(sensorToGroundTransform);
 
-      groundToWorldAlignedGround.get(worldToGroundTransformArray);
-      zUpCameraToWorldAlignedGroundHostPointer.put(worldToGroundTransformArray);
-      CUDATools.mallocAsync(zUpCameraToWorldAlignedGroundDevicePointer, worldToGroundTransformArray.length, stream);
-      CUDATools.memcpyAsync(zUpCameraToWorldAlignedGroundDevicePointer, zUpCameraToWorldAlignedGroundHostPointer, worldToGroundTransformArray.length, stream);
+      groundToWorldNoRotation.get(groundToWorldNoRotationTransformArray);
+      groundToWorldTranslationHostPointer.put(groundToWorldNoRotationTransformArray);
+      CUDATools.mallocAsync(groundToWorldTranslationDevicePointer, groundToWorldNoRotationTransformArray.length, stream);
+      CUDATools.memcpyAsync(groundToWorldTranslationDevicePointer, groundToWorldTranslationHostPointer, groundToWorldNoRotationTransformArray.length, stream);
       checkCUDAError();
 
       // --------- Run the temp and local kernel ---------
@@ -278,6 +282,8 @@ public class HeightMapExtractor
          checkCUDAError();
       }
 
+      heightMapICPCalculator.update(localMeanMap, globalMeanMap, groundToWorldTranslationDevicePointer, heightMapCenter);
+
       // ---------- Run the translate kernel ---------
       {
          int currentCellX = (int) Math.round(heightMapCenter.getX32() / heightMapParameters.getCellSize());
@@ -325,7 +331,6 @@ public class HeightMapExtractor
 
          emptyRegisterKernel.withPointer(localMeanMap.data()).withLong(localMeanMap.step());
          emptyRegisterKernel.withPointer(emptyGlobalHeightMap.data()).withLong(emptyGlobalHeightMap.step());
-         emptyRegisterKernel.withPointer(zUpCameraToWorldAlignedGroundDevicePointer);
          emptyRegisterKernel.withPointer(parametersDevicePointer);
 
          emptyRegisterKernel.run(stream, registerKernelGridDim, blockSize, 0);
@@ -362,7 +367,7 @@ public class HeightMapExtractor
          registerKernel.withPointer(localMotionVarianceMap.data()).withLong(localMotionVarianceMap.step());
          registerKernel.withPointer(globalMeanMap.data()).withLong(globalMeanMap.step());
          registerKernel.withPointer(globalVarianceMap.data()).withLong(globalVarianceMap.step());
-         registerKernel.withPointer(zUpCameraToWorldAlignedGroundDevicePointer);
+         registerKernel.withPointer(groundToWorldTranslationDevicePointer);
          registerKernel.withPointer(parametersDevicePointer);
          registerKernel.withFloat(resetOffset);
 
@@ -374,7 +379,6 @@ public class HeightMapExtractor
 
       // All that memory we allocated on the GPU, need to free that up now
       cudaFreeAsync(parametersDevicePointer, stream);
-      cudaFreeAsync(zUpCameraToWorldAlignedGroundDevicePointer, stream);
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
 
@@ -428,6 +432,8 @@ public class HeightMapExtractor
 
    public void destroy()
    {
+      heightMapICPCalculator.destroy();
+
       heightMapProgram.close();
       blockSize.close();
 
@@ -440,7 +446,7 @@ public class HeightMapExtractor
 
       // Clean up each resource
       deallocateFloatPointer(sensorToWorldAlignedGroundTransformHostPointer, sensorToWorldAlignedGroundTransformDevicePointer, stream);
-      deallocateFloatPointer(zUpCameraToWorldAlignedGroundHostPointer, zUpCameraToWorldAlignedGroundDevicePointer, stream);
+      deallocateFloatPointer(groundToWorldTranslationHostPointer, groundToWorldTranslationDevicePointer, stream);
       deallocateFloatPointer(parametersHostPointer, parametersDevicePointer, stream);
 
       tempSumMap.close();

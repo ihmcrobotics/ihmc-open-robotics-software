@@ -214,7 +214,7 @@ __global__ void heightMapRegistrationKernel(const float *__restrict__ localMeanM
                                             const float *__restrict__ localMotionVarianceMap, size_t pitchLocalMotionVariance,
                                             float *__restrict__ globalMeanMap, size_t pitchGlobalMean,
                                             float *__restrict__ globalVarianceMap, size_t pitchGlobalVariance,
-                                            const float *__restrict__ zUpCameraToWorldAlignedGround,
+                                            const float *__restrict__ groundToWorldTranslation,
                                             const float *__restrict__ params, float resetOffset)
 {
     int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
@@ -230,7 +230,9 @@ __global__ void heightMapRegistrationKernel(const float *__restrict__ localMeanM
     const int globalCellsPerAxis = static_cast<int>(params[CELLS_PER_AXIS]);
 
     int2 localIndex = make_int2(xIndex, yIndex);
-    int2 globalIndex = make_int2(xIndex, yIndex);
+    float3 queryPointInLocal = make_float3((float) localIndex.x, (float) localIndex.y, 0.0f);
+    float3 cellInGlobal = transformPoint3D(queryPointInLocal, groundToWorldTranslation);
+    int2 globalIndex = make_int2(cellInGlobal.x, cellInGlobal.y);
 
     if (globalIndex.x < 0 || globalIndex.x >= globalCellsPerAxis || globalIndex.y < 0 || globalIndex.y >= globalCellsPerAxis)
         return;
@@ -276,7 +278,6 @@ __global__ void heightMapRegistrationKernel(const float *__restrict__ localMeanM
 extern "C"
 __global__ void heightMapEmptyRegistrationKernel(float *localMap, size_t pitchLocal,
                                                  float *globalMap, size_t pitchGlobal,
-                                                 float *zUpCameraToWorldAlignedGround,
                                                  float *params)
 {
     int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
