@@ -21,7 +21,7 @@ public class RDXMutableMultiLineModel extends RDXMutableMeshModel
    public static final double EPSILON = 1e-4;
    public static final int DEFAULT_MAX_POINTS = 500; // Reduced from 1000 for better performance
    private static final int MESH_UPDATE_THROTTLE = 5; // Only rebuild mesh every N frames
-   private static final double MIN_POINT_DISTANCE = 0.05; // Minimum distance between points (5cm) to avoid excessive density
+   private static final double MIN_POINT_DISTANCE = 0.01; // Minimum distance between points (1cm) to avoid excessive density
    private final RecyclingArrayList<Point3D> points = new RecyclingArrayList<>(Point3D::new);
    private double lineWidth = Double.NaN;
    private int maxPoints = DEFAULT_MAX_POINTS;
