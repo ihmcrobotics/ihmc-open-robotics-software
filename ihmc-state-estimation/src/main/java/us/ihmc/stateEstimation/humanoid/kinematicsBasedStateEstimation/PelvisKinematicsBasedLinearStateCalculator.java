@@ -195,11 +195,21 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
       if (!kinematicsIsUpToDate.getBooleanValue())
          throw new RuntimeException("Leg kinematics needs to be updated before trying to estimate the pelvis position/linear velocity.");
 
+      double scaleFactor = 1.0 / trustedFeet.size();
+
       for (int i = 0; i < trustedFeet.size(); i++)
       {
          SingleFootEstimator footEstimator = footEstimatorMap.get(trustedFeet.get(i));
          footEstimator.computeFootPositionInWorld(useControllerDesiredCoP.getValue());
-         footEstimator.updatePelvisWithKinematics(trustedFeet.size(), alphaRootJointLinearVelocity.getValue(), rootJointPosition, rootJointLinearVelocity);
+
+         // Update the root joint estimate
+         rootJointPosition.scaleAdd(scaleFactor, footEstimator.getRootJointPositionEstimate(), rootJointPosition);
+
+         // Based on the previous estimate of the root joint velocity, we computed the foot velocity, which is located at the center of pressure. However, if
+         // we assume that the center of pressure isn't moving, we should subtract this velocity from the kinematics to make the velocity zero at that point.
+         rootJointLinearVelocity.scaleAdd(-scaleFactor * alphaRootJointLinearVelocity.getValue(),
+                                          footEstimator.getFootVelocityEstimateInWorld(),
+                                          rootJointLinearVelocity);
       }
 
       rootJointLinearVelocityFDDebug.update();

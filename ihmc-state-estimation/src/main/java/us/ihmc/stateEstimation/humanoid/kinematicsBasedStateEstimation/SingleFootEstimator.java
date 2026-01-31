@@ -12,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.log.LogTools;
@@ -53,7 +54,6 @@ class SingleFootEstimator implements SCS2YoGraphicHolder
    private final YoFrameVector3D footToRootJointAngularVelocity;
    private final YoFramePoint3D footPositionInWorld;
 
-
    private final YoFramePoint3D copPositionInWorld;
    private final AlphaFilteredYoFramePoint2D copFilteredInFootFrame;
    private final YoFramePoint2D copRawInFootFrame;
@@ -73,6 +73,8 @@ class SingleFootEstimator implements SCS2YoGraphicHolder
    private final Twist rootBodyTwistInFootFrame = new Twist();
    private final Twist footTwistInWorld = new Twist();
 
+   private final FramePoint2D tempCoP2d = new FramePoint2D();
+   private final FrameVector3D tempCoPOffset = new FrameVector3D();
 
    public SingleFootEstimator(FloatingJointBasics rootJoint,
                               ContactablePlaneBody contactableFoot,
@@ -130,25 +132,14 @@ class SingleFootEstimator implements SCS2YoGraphicHolder
       footVelocityInWorld.setToZero();
    }
 
-   /**
-    * Estimates the pelvis position and linear velocity using the leg kinematics
-    *
-    * @param trustedFoot          is the foot used to estimates the pelvis state
-    * @param numberOfTrustedSides is only one or both legs used to estimate the pelvis state
-    */
-   public void updatePelvisWithKinematics(int numberOfTrustedFeet,
-                                           double alphaVelocityUpdate,
-                                           FixedFramePoint3DBasics rootJointPosition,
-                                           FixedFrameVector3DBasics rootJointLinearVelocity)
+   public FramePoint3DReadOnly getRootJointPositionEstimate()
    {
-      double scaleFactor = 1.0 / numberOfTrustedFeet;
+      return rootJointPositionPerFoot;
+   }
 
-      rootJointPositionPerFoot.add(footPositionInWorld, footToRootJointPosition);
-      rootJointPosition.scaleAdd(scaleFactor, rootJointPositionPerFoot, rootJointPosition);
-
-      // Based on the previous estimate of the root joint velocity, we computed the foot velocity, which is located at the center of pressure. However, if
-      // we assume that the center of pressure isn't moving, we should subtract this velocity from the kinematics to make the velocity zero at that point.
-      rootJointLinearVelocity.scaleAdd(-scaleFactor * alphaVelocityUpdate, footVelocityInWorld, rootJointLinearVelocity);
+   public FrameVector3DReadOnly getFootVelocityEstimateInWorld()
+   {
+      return footVelocityInWorld;
    }
 
    /**
@@ -238,6 +229,13 @@ class SingleFootEstimator implements SCS2YoGraphicHolder
       }
    }
 
+   /**
+    * Update the foot position estimate in world, based on a new root joint position estimate and the kinematics from the foot to the root joint. This
+    * incorporates the fused root position into the foot position estimate.
+    * <p>
+    * This should be called after the foot position estimates computed by this module has been fused into the root position.
+    * </p>
+    */
    public void updateTrustedFootPosition(FramePoint3DReadOnly rootJointPosition)
    {
       if (trustCoPAsNonSlippingContactPoint.getValue())
@@ -250,12 +248,9 @@ class SingleFootEstimator implements SCS2YoGraphicHolder
 
       footPositionInWorld.sub(rootJointPosition, footToRootJointPosition);
    }
-   private final FramePoint2D tempCoP2d = new FramePoint2D();
-
-   private final FrameVector3D tempCoPOffset = new FrameVector3D();
 
    /**
-    * Compute the foot position in the world
+    * Compute the foot position in the world, assuming that the center of pressure doesn't move at all.
     */
    public void computeFootPositionInWorld(boolean useControllerDesiredCoP)
    {
@@ -290,6 +285,9 @@ class SingleFootEstimator implements SCS2YoGraphicHolder
          // We're assuming the foot isn't moving in XY, so leave those alone. Override the position in Z to zero.
          footPositionInWorld.setZ(0.0);
       }
+
+      // Compute the root position, according to the foot position estimate and the kinematics.
+      rootJointPositionPerFoot.add(footPositionInWorld, footToRootJointPosition);
    }
 
    private void computeCoPPositionInFootFrame(boolean useControllerDesiredCoP,
@@ -349,5 +347,4 @@ class SingleFootEstimator implements SCS2YoGraphicHolder
       tempCoPOffset.changeFrame(worldFrame);
       footPositionInWorld.sub(copPositionInWorld, tempCoPOffset);
    }
-
 }
