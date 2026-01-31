@@ -54,11 +54,11 @@ __global__ void heightMapICPKernel(float *__restrict__ localMap, size_t pitchLoc
                                                                 params[CELL_SIZE],
                                                                 params[CENTER_INDEX]);
         float3 globalPoint = make_float3(globalMapCellCoordinates.x ,globalMapCellCoordinates.y, globalHeight);
-        minDistanceVector = sub(globalPoint, localCoordinates3f);
+        minDistanceVector = sub(globalPoint, localCoordinatesInGlobalFrame);
 
-        minDistanceVector.x = fabsf(minDistanceVector.x);
-        minDistanceVector.y = fabsf(minDistanceVector.y);
-        minDistanceVector.z = fabsf(minDistanceVector.z);
+        minDistanceVector.x = minDistanceVector.x;
+        minDistanceVector.y = minDistanceVector.y;
+        minDistanceVector.z = minDistanceVector.z;
     }
 
     float* vectorRow = (float *)((char *)vectorMap + xIndex * pitchvector);
