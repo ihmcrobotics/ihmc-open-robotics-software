@@ -15,5 +15,5 @@ public enum RigidBodyControlMode
    /** Mode where the rigid body has an active contact point, intended to be used quasi-statically. {@link RigidBodyLoadBearingControlState} */
    LOADBEARING,
    /** Mode where the rigid body dynamically makes contact. {@link RigidBodyLoadBearingControlState} */
-   REACTIVE_BRACING,
+   DYNAMIC_LOADBEARING,
 }

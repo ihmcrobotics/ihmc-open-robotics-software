@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.controlModules.reactiveBracing;
+package us.ihmc.commonWalkingControlModules.controlModules.dynamicLoadBearing;
 
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyPositionControlHelper;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
@@ -16,12 +16,16 @@ import us.ihmc.robotics.controllers.pidGains.GainCalculator;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPIDSE3Gains;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class ReactiveBracingPreContactState implements ReactiveBracingState
+public class DynamicLoadBearingPreContactState implements DynamicLoadBearingState
 {
    private static final double terminalHandSpeed = 1.2;
 
@@ -39,13 +43,17 @@ public class ReactiveBracingPreContactState implements ReactiveBracingState
 
    private PID3DGainsReadOnly defaultPositionGains = null;
    private Vector3DReadOnly defaultPositionWeights = null;
+   private final YoDouble distanceToPlane;
+
+   private final YoFramePoint3D yoBracingPoint;
+   private final YoFrameVector3D yoBracingNormal;
 
    private final EuclideanTrajectoryControllerCommand trajectoryCommand = new EuclideanTrajectoryControllerCommand();
 
-   public ReactiveBracingPreContactState(RigidBodyBasics bodyToControl,
-                                         RigidBodyPositionControlHelper positionControlHelper,
-                                         ReferenceFrame controlFrame,
-                                         YoRegistry registry)
+   public DynamicLoadBearingPreContactState(RigidBodyBasics bodyToControl,
+                                            RigidBodyPositionControlHelper positionControlHelper,
+                                            ReferenceFrame controlFrame,
+                                            YoRegistry registry)
    {
       this.positionControlHelper = positionControlHelper;
 
@@ -57,13 +65,18 @@ public class ReactiveBracingPreContactState implements ReactiveBracingState
       bracingPositionWeights.set(4.0, 4.0, 4.0);
       bracingOrientationWeights.set(0.0, 0.0, 0.0);
 
-      bracingFeedbackGains = new DefaultYoPIDSE3Gains("PosReactiveBracing", GainCoupling.XYZ, false, registry);
+      bracingFeedbackGains = new DefaultYoPIDSE3Gains("PosDynamicLoadBearing", GainCoupling.XYZ, false, registry);
       configureGains();
+
+      distanceToPlane = new YoDouble("distanceToPlane", registry);
 
       trajectoryCommand.setExecutionMode(ExecutionMode.OVERRIDE);
       trajectoryCommand.setUseCustomControlFrame(true);
       trajectoryCommand.setTrajectoryFrame(ReferenceFrame.getWorldFrame());
       controlFrame.getTransformToDesiredFrame(trajectoryCommand.getControlFramePose(), bodyToControl.getBodyFixedFrame());
+
+      yoBracingPoint = new YoFramePoint3D(bodyToControl.getName() + "BracingPoint", ReferenceFrame.getWorldFrame(), registry);
+      yoBracingNormal = new YoFrameVector3D(bodyToControl.getName() + "BracingNormal", ReferenceFrame.getWorldFrame(), registry);
    }
 
    public void setBracingPoint(Point3DReadOnly bracingPoint, Vector3DReadOnly bracingNormal, double trajectoryDuration)
@@ -71,6 +84,9 @@ public class ReactiveBracingPreContactState implements ReactiveBracingState
       this.desiredPosition.set(bracingPoint);
       this.bracingPlane.set(bracingPoint, bracingNormal);
       this.trajectoryDuration.set(trajectoryDuration);
+
+      yoBracingPoint.set(bracingPoint);
+      yoBracingNormal.set(bracingNormal);
    }
 
    @Override
@@ -108,10 +124,11 @@ public class ReactiveBracingPreContactState implements ReactiveBracingState
       // sim
       double epsilon = 0.005;
 
-      // real robot
+      // real robot TODO tune up
 //      double epsilon = 0.01;
 
-      return bracingPlane.distance(positionControlHelper.getYoCurrentPosition()) < epsilon;
+      distanceToPlane.set(bracingPlane.distance(positionControlHelper.getYoCurrentPosition()));
+      return distanceToPlane.getValue() < epsilon;
    }
 
    private void configureGains()
@@ -154,6 +171,16 @@ public class ReactiveBracingPreContactState implements ReactiveBracingState
    @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
-      return null;
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint3D(yoBracingPoint.getNamePrefix(),
+                                                                    yoBracingPoint,
+                                                                    0.01,
+                                                                    ColorDefinitions.Red()));
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicArrow3D(yoBracingNormal.getNamePrefix(),
+                                                                    yoBracingPoint,
+                                                                    yoBracingNormal,
+                                                                    0.25,
+                                                                    ColorDefinitions.Red()));
+      return group;
    }
 }

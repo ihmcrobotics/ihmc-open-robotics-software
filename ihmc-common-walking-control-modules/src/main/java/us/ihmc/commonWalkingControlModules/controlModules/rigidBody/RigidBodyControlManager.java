@@ -73,7 +73,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
    private final RigidBodyTaskspaceControlState taskspaceControlState;
    private final RigidBodyUserControlState userControlState;
    private final RigidBodyLoadBearingControlState loadBearingControlState;
-   private final RigidBodyReactiveBracingControlState reactiveBracingControlState;
+   private final RigidBodyDynamicLoadBearingControlState dynamicLoadBearingControlState;
    private final RigidBodyExternalWrenchManager externalWrenchManager;
 
    private final RigidBodyJointControlHelper jointControlHelper;
@@ -210,20 +210,20 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                                                         nominalRhoWeight,
                                                                         hasContactStateChanged,
                                                                         registry);
-         reactiveBracingControlState = new RigidBodyReactiveBracingControlState(bodyToControl,
-                                                                                baseBody,
-                                                                                elevator,
-                                                                                yoTime,
-                                                                                taskspaceControlState.getPositionControlHelper(),
-                                                                                taskspaceControlState.getOrientationControlHelper(),
-                                                                                controlFrame,
-                                                                                hasContactStateChanged,
-                                                                                registry);
+         dynamicLoadBearingControlState = new RigidBodyDynamicLoadBearingControlState(bodyToControl,
+                                                                                      baseBody,
+                                                                                      elevator,
+                                                                                      yoTime,
+                                                                                      taskspaceControlState.getPositionControlHelper(),
+                                                                                      taskspaceControlState.getOrientationControlHelper(),
+                                                                                      controlFrame,
+                                                                                      hasContactStateChanged,
+                                                                                      registry);
       }
       else
       {
          loadBearingControlState = null;
-         reactiveBracingControlState = null;
+         dynamicLoadBearingControlState = null;
       }
 
       if (homePose != null)
@@ -254,8 +254,8 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
       factory.addState(RigidBodyControlMode.USER, userControlState);
       if (loadBearingControlState != null)
          factory.addStateAndDoneTransition(RigidBodyControlMode.LOADBEARING, loadBearingControlState, defaultControlMode);
-      if (reactiveBracingControlState != null)
-         factory.addStateAndDoneTransition(RigidBodyControlMode.REACTIVE_BRACING, reactiveBracingControlState, defaultControlMode);
+      if (dynamicLoadBearingControlState != null)
+         factory.addStateAndDoneTransition(RigidBodyControlMode.DYNAMIC_LOADBEARING, dynamicLoadBearingControlState, defaultControlMode);
 
       for (RigidBodyControlMode from : factory.getRegisteredStateKeys())
       {
@@ -432,10 +432,10 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
 
    public void handleHandContactCommand(FramePoint3DReadOnly bracingPoint, FrameVector3DReadOnly bracingNormal, double trajectoryDuration)
    {
-      if (reactiveBracingControlState != null)
+      if (dynamicLoadBearingControlState != null)
       {
-         reactiveBracingControlState.setBracingSurface(bracingPoint, bracingNormal, trajectoryDuration);
-         requestState(reactiveBracingControlState.getControlMode());
+         dynamicLoadBearingControlState.setBracingSurface(bracingPoint, bracingNormal, trajectoryDuration);
+         requestState(dynamicLoadBearingControlState.getControlMode());
       }
    }
 
@@ -626,7 +626,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
       if (loadBearingControlState != null && stateMachine.getCurrentStateKey() == loadBearingControlState.getControlMode())
          return true;
       // Is load-bearing (dynamic)
-      if (reactiveBracingControlState != null && stateMachine.getCurrentStateKey() == reactiveBracingControlState.getControlMode() && reactiveBracingControlState.isLoadBearing())
+      if (dynamicLoadBearingControlState != null && stateMachine.getCurrentStateKey() == dynamicLoadBearingControlState.getControlMode() && dynamicLoadBearingControlState.isLoadBearing())
          return true;
 
       return false;
@@ -639,7 +639,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
          if (stateMachine.getCurrentStateKey() == loadBearingControlState.getControlMode())
             loadBearingControlState.updateWholeBodyContactState(wholeBodyContactStateToUpdate);
          else
-            reactiveBracingControlState.updateWholeBodyContactState(wholeBodyContactStateToUpdate);
+            dynamicLoadBearingControlState.updateWholeBodyContactState(wholeBodyContactStateToUpdate);
       }
    }
 
@@ -650,7 +650,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
          if (stateMachine.getCurrentStateKey() == loadBearingControlState.getControlMode())
             loadBearingControlState.packContactData(contactPointList, contactNormalToPack);
          else
-            reactiveBracingControlState.packContactData(contactPointList, contactNormalToPack);
+            dynamicLoadBearingControlState.packContactData(contactPointList, contactNormalToPack);
       }
    }
 
@@ -783,6 +783,8 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
       group.addChild(taskspaceControlState.getSCS2YoGraphics());
       if (loadBearingControlState != null)
          group.addChild(loadBearingControlState.getSCS2YoGraphics());
+      if (dynamicLoadBearingControlState != null)
+         group.addChild(dynamicLoadBearingControlState.getSCS2YoGraphics());
       group.addChild(externalWrenchManager.getSCS2YoGraphics());
       return group.isEmpty() ? null : group;
    }

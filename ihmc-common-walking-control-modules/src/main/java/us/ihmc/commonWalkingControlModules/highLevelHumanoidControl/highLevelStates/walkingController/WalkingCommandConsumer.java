@@ -372,7 +372,7 @@ public class WalkingCommandConsumer
       List<ArmDesiredAccelerationsCommand> armDesiredAccelerationCommands = commandConsumerWithDelayBuffers.pollNewCommands(ArmDesiredAccelerationsCommand.class);
       List<HandHybridJointspaceTaskspaceTrajectoryCommand> handHybridCommands = commandConsumerWithDelayBuffers.pollNewCommands(
             HandHybridJointspaceTaskspaceTrajectoryCommand.class);
-      List<HandContactCommand> reactiveBracingCommands = commandConsumerWithDelayBuffers.pollNewCommands(HandContactCommand.class);
+      List<HandContactCommand> dynamicLoadBearingCommands = commandConsumerWithDelayBuffers.pollNewCommands(HandContactCommand.class);
 
       boolean allowCommand = allowMotionRegardlessOfState || currentState.isStateSafeToConsumeManipulationCommands();
 
@@ -442,16 +442,15 @@ public class WalkingCommandConsumer
          }
       }
 
-      for (int i = 0; i < reactiveBracingCommands.size(); i++)
+      for (int i = 0; i < dynamicLoadBearingCommands.size(); i++)
       {
-         HandContactCommand command = reactiveBracingCommands.get(i);
+         HandContactCommand command = dynamicLoadBearingCommands.get(i);
          RobotSide robotSide = command.getRobotSide();
          RigidBodyControlManager handManager = handManagers.get(robotSide);
          if (handManager != null && allowCommand)
          {
             handManager.handleHandContactCommand(command.getBracingPoint(), command.getBracingNormal(), command.getTrajectoryDuration());
          }
-
       }
    }
 
