@@ -215,11 +215,6 @@ public class PelvisIMUBasedLinearStateCalculator implements SCS2YoGraphicHolder
       return yoLinearAccelerationMeasurement;
    }
 
-   public FrameVector3DReadOnly getLinearAccelerationMeasurementInWorld()
-   {
-      return yoLinearAccelerationMeasurementInWorld;
-   }
-
    @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {

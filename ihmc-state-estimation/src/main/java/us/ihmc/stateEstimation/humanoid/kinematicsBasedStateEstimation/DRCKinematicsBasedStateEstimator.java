@@ -132,17 +132,12 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       }
 
       List<IMUSensorReadOnly> imuProcessedOutputs = new ArrayList<>();
-      List<IMUSensorReadOnly> imusToUseForMomentumEstimate = new ArrayList<>();
       for (IMUSensorReadOnly imu : sensorOutputMap.getIMUOutputs())
       {
          if (Arrays.asList(imuSensorsToUseInStateEstimator).contains(imu.getSensorName()))
          {
             imuProcessedOutputs.add(imu);
-            if (stateEstimatorParameters.getIMUsToUseInMomentumEstimator() == null)
-               imusToUseForMomentumEstimate.add(imu);
          }
-         if (stateEstimatorParameters.getIMUsToUseInMomentumEstimator() != null && Arrays.asList(stateEstimatorParameters.getIMUsToUseInMomentumEstimator()).contains(imu.getSensorName()))
-            imusToUseForMomentumEstimate.add(imu);
       }
 
       List<IMUSensorReadOnly> imusToUse = new ArrayList<>(imuProcessedOutputs);

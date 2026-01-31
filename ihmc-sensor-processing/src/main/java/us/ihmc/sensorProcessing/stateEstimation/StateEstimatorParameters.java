@@ -113,20 +113,6 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
 
    public abstract boolean cancelGravityFromAccelerationMeasurement();
 
-   public abstract double getPelvisPositionFusingFrequency();
-
-   /** The smaller the value, the more it trusts the IMU **/
-   public abstract double getPelvisLinearVelocityFusingFrequency();
-
-   /**
-    * The new fusing filter continuously estimates the bias from the accelerometer when integrating
-    * into pelvis linear velocity and then position.
-    */
-   public boolean usePelvisLinearStateNewFusingFilter()
-   {
-      return false;
-   }
-
    /**
     * Parameter for the new pelvis linear state fusing filter.
     * 
@@ -190,11 +176,6 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
    public boolean enableCoMVelocityAdjustment()
    {
       return false;
-   }
-
-   public String[] getIMUsToUseInMomentumEstimator()
-   {
-      return null;
    }
 
    /** The smaller the value, the more it trusts the IMU **/

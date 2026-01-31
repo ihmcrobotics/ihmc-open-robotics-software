@@ -43,6 +43,7 @@ import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsSt
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.filters.AlphaFilterTools;
 import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
@@ -65,7 +66,6 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final FloatingJointBasics rootJoint;
-   private final RigidBodyBasics[] feetRigidBodies;
    private final SingleFootEstimator[] footEstimators;
    private final Map<RigidBodyBasics, SingleFootEstimator> footEstimatorMap = new HashMap<>();
 
@@ -76,16 +76,9 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
    private final DoubleProvider alphaRootJointLinearVelocity;
 
    /** Debug variable */
-   private final YoDouble alphaLinearVelocityDebug = new YoDouble("alphaRootJointLinearVelocityBacklashKinematics", registry);
-   /** Debug variable */
-   private final YoDouble slopTimeLinearVelocityDebug = new YoDouble("slopTimeRootJointLinearVelocityBacklashKinematics", registry);
-   /** Debug variable */
    private final BacklashCompensatingVelocityYoFrameVector3D rootJointLinearVelocityFDDebug;
 
-   private final DoubleProvider footToRootJointPositionBreakFrequency;
    private final BooleanProvider correctTrustedFeetPositions;
-
-   private final DoubleProvider copFilterBreakFrequency;
 
    private final YoBoolean kinematicsIsUpToDate = new YoBoolean("kinematicsIsUpToDate", registry);
    private final BooleanProvider useControllerDesiredCoP;
@@ -102,9 +95,9 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
                                                      YoRegistry parentRegistry)
    {
       rootJoint = inverseDynamicsStructure.getRootJoint();
-      feetRigidBodies = feetContactablePlaneBodies.keySet().toArray(new RigidBodyBasics[0]);
+      RigidBodyBasics[] feetRigidBodies = feetContactablePlaneBodies.keySet().toArray(new RigidBodyBasics[0]);
 
-      footToRootJointPositionBreakFrequency = new DoubleParameter("FootToRootJointPositionBreakFrequency",
+      DoubleProvider footToRootJointPositionBreakFrequency = new DoubleParameter("FootToRootJointPositionBreakFrequency",
                                                                   registry,
                                                                   stateEstimatorParameters.getKinematicsPelvisPositionFilterFreqInHertz());
       alphaRootJointLinearVelocity = new DoubleParameter("alphaRootJointLinearVelocityKinematics",
@@ -114,7 +107,7 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
                                                                registry,
                                                                stateEstimatorParameters.trustCoPAsNonSlippingContactPoint());
       useControllerDesiredCoP = new BooleanParameter("useControllerDesiredCoP", registry, stateEstimatorParameters.useControllerDesiredCenterOfPressure());
-      copFilterBreakFrequency = new DoubleParameter("CopFilterBreakFrequency", registry, stateEstimatorParameters.getCoPFilterFreqInHertz());
+      DoubleProvider copFilterBreakFrequency = new DoubleParameter("CopFilterBreakFrequency", registry, stateEstimatorParameters.getCoPFilterFreqInHertz());
       correctTrustedFeetPositions = new BooleanParameter("correctTrustedFeetPositions", registry, stateEstimatorParameters.correctTrustedFeetPositions());
 
       footEstimators = new SingleFootEstimator[feetRigidBodies.length];
@@ -137,7 +130,9 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
       /*
        * These are for debug purposes, not need to clutter the state estimator parameters class with them.
        */
-      alphaLinearVelocityDebug.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(16.0, estimatorDT));
+      YoDouble alphaLinearVelocityDebug = new YoDouble("alphaRootJointLinearVelocityBacklashKinematics", registry);
+      YoDouble slopTimeLinearVelocityDebug = new YoDouble("slopTimeRootJointLinearVelocityBacklashKinematics", registry);
+      alphaLinearVelocityDebug.set(AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(16.0, estimatorDT));
       slopTimeLinearVelocityDebug.set(0.03);
       rootJointLinearVelocityFDDebug = new BacklashCompensatingVelocityYoFrameVector3D("estimatedRootJointLinearVelocityBacklashKin",
                                                                                                                                    "",
@@ -359,7 +354,7 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
 
          String namePrefix = foot.getName();
 
-         DoubleProvider alphaFoot = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(footToRootJointPositionBreakFrequency.getValue(),
+         DoubleProvider alphaFoot = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(footToRootJointPositionBreakFrequency.getValue(),
                                                                                                           estimatorDT);
          footToRootJointPosition = new AlphaFilteredYoFrameVector3D(namePrefix + "FootToRootJointPosition", "", registry, alphaFoot, worldFrame);
          footToRootJointLinearVelocity = new YoFrameVector3D(namePrefix + "FootToRootJointLinearVelocity", worldFrame, registry);
@@ -370,34 +365,21 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
          footCenterCoPLineSegment = new FrameLineSegment2D(soleFrame);
          copRawInFootFrame = new YoFramePoint2D(namePrefix + "CoPRawInFootFrame", soleFrame, registry);
 
-         DoubleProvider alphaCop = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(copFilterBreakFrequency.getValue(), estimatorDT);
+         DoubleProvider alphaCop = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(copFilterBreakFrequency.getValue(), estimatorDT);
          copFilteredInFootFrame = new AlphaFilteredYoFramePoint2D(namePrefix + "CoPFilteredInFootFrame", "", registry, alphaCop, copRawInFootFrame);
          copFilteredInFootFrame.update(0.0, 0.0);
          copPositionInWorld = new YoFramePoint3D(namePrefix + "CoPPositionsInWorld", worldFrame, registry);
          footVelocityInWorld = new YoFrameVector3D(namePrefix + "VelocityInWorld", worldFrame, registry);
       }
 
-      public void createVisualization(YoGraphicsListRegistry yoGraphicsListRegistry)
-      {
-         if (yoGraphicsListRegistry == null)
-            return;
-
-         String sidePrefix = foot.getName();
-         YoGraphicPosition copInWorld = new YoGraphicPosition(sidePrefix + "StateEstimatorCoP", copPositionInWorld, 0.005, YoAppearance.DeepPink());
-         YoArtifactPosition artifact = copInWorld.createArtifact();
-         artifact.setVisible(false);
-         yoGraphicsListRegistry.registerArtifact("StateEstimator", artifact);
-      }
-
       @Override
       public YoGraphicDefinition getSCS2YoGraphics()
       {
-         YoGraphicPoint2DDefinition copVisual = YoGraphicDefinitionFactory.newYoGraphicPoint2D(foot.getName() + "StateEstimatorCoP",
-                                                                                               copPositionInWorld,
-                                                                                               0.01,
-                                                                                               ColorDefinitions.DeepPink(),
-                                                                                               DefaultPoint2DGraphic.CIRCLE);
-         return copVisual;
+         return YoGraphicDefinitionFactory.newYoGraphicPoint2D(foot.getName() + "StateEstimatorCoP",
+                                                               copPositionInWorld,
+                                                               0.01,
+                                                               ColorDefinitions.DeepPink(),
+                                                               DefaultPoint2DGraphic.CIRCLE);
       }
 
       public void initialize()
