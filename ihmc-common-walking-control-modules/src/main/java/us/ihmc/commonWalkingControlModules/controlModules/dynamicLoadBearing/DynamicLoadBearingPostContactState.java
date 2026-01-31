@@ -1,9 +1,7 @@
-package us.ihmc.commonWalkingControlModules.controlModules.reactiveBracing;
+package us.ihmc.commonWalkingControlModules.controlModules.dynamicLoadBearing;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
@@ -11,16 +9,12 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.Axis3D;
-import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionCommand;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -28,7 +22,7 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class ReactiveBracingPostContactState implements ReactiveBracingState
+public class DynamicLoadBearingPostContactState implements DynamicLoadBearingState
 {
    private static final double COEFFICIENT_OF_FRICTION = 0.5;
    private static final double LOAD_TIME = 0.75;
@@ -51,12 +45,12 @@ public class ReactiveBracingPostContactState implements ReactiveBracingState
    private final FramePoint3D bracingContactPoint = new FramePoint3D();
    private final FrameVector3D bracingNormal = new FrameVector3D();
 
-   public ReactiveBracingPostContactState(RigidBodyBasics bodyToControl,
-                                          RigidBodyBasics baseBody,
-                                          RigidBodyBasics elevator,
-                                          ReferenceFrame controlFrame,
-                                          MutableBoolean hasContactChanged,
-                                          YoRegistry registry)
+   public DynamicLoadBearingPostContactState(RigidBodyBasics bodyToControl,
+                                             RigidBodyBasics baseBody,
+                                             RigidBodyBasics elevator,
+                                             ReferenceFrame controlFrame,
+                                             MutableBoolean hasContactChanged,
+                                             YoRegistry registry)
    {
       this.bodyToControl = bodyToControl;
       this.bodyFrame = bodyToControl.getBodyFixedFrame();

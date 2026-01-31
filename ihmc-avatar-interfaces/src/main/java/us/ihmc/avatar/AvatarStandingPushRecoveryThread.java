@@ -1,10 +1,8 @@
 package us.ihmc.avatar;
 
-import controller_msgs.msg.dds.HandContactMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.multiContact.pushRecovery.ReducedOrderRobotModel;
 import us.ihmc.avatar.multiContact.pushRecovery.StandingReactiveBracingPlanner;
-import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
@@ -14,22 +12,17 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLe
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StandingPushRecoveryAPIDefinition;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandContactCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -42,7 +35,6 @@ import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.Arrays;
 
@@ -87,11 +79,7 @@ public class AvatarStandingPushRecoveryThread implements AvatarControllerThreadI
 
       this.commandInputManager = new CommandInputManager(StandingPushRecoveryAPIDefinition.getPushRecoverySupportedCommands());
       this.statusOutputManager = new StatusMessageOutputManager(StandingPushRecoveryAPIDefinition.getPushRecoverySupportedStatusMessages());
-      ControllerNetworkSubscriber controllerNetworkSubscriber = new ControllerNetworkSubscriber(inputTopic,
-                                                                                                commandInputManager,
-                                                                                                outputTopic,
-                                                                                                statusOutputManager,
-                                                                                                ros2Node);
+      new ControllerNetworkSubscriber(inputTopic, commandInputManager, outputTopic, statusOutputManager, ros2Node);
 
       HumanoidRobotContextJointData processedJointData = new HumanoidRobotContextJointData(fullRobotModel.getOneDoFJoints().length);
       ForceSensorDataHolder forceSensorDataHolderForController = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
@@ -134,7 +122,7 @@ public class AvatarStandingPushRecoveryThread implements AvatarControllerThreadI
       centerOfMassJacobian.reset();
 
       FrameVector3DReadOnly comVelocity = centerOfMassJacobian.getCenterOfMassVelocity();
-//      isFalling.set(EuclidCoreTools.norm(comVelocity.getX(), comVelocity.getY()) > 0.07); // TODO make this better
+      isFalling.set(EuclidCoreTools.norm(comVelocity.getX(), comVelocity.getY()) > 0.07); // TODO make this better
 
       FramePoint3D centerOfMass = new FramePoint3D(humanoidReferenceFrames.getCenterOfMassFrame());
       FramePoint3D shoulder = new FramePoint3D(fullRobotModel.getOneDoFJointByName("LEFT_SHOULDER_Y").getFrameBeforeJoint());
@@ -148,7 +136,7 @@ public class AvatarStandingPushRecoveryThread implements AvatarControllerThreadI
       if (commandInputManager.isNewCommandAvailable(PlanarRegionsListCommand.class))
       {
          PlanarRegionsListCommand planarRegionsListCommand = commandInputManager.pollNewestCommand(PlanarRegionsListCommand.class);
-         LogTools.info("Received planar regions command! number of regions: " + planarRegionsListCommand.getNumberOfPlanarRegions());
+//         LogTools.info("Received planar regions command! number of regions: " + planarRegionsListCommand.getNumberOfPlanarRegions());
          planner.setPlanarRegions(planarRegionsListCommand);
       }
 
@@ -176,7 +164,7 @@ public class AvatarStandingPushRecoveryThread implements AvatarControllerThreadI
          plannedHandContacts.clear();
          planner.plan(reducedOrderRobotModel, plannedHandContacts);
 
-//         for (RobotSide robotSide : RobotSide.values)
+         for (RobotSide robotSide : RobotSide.values)
          {
             HandContactCommand handContactCommand = plannedHandContacts.get(RobotSide.LEFT);
             if (handContactCommand != null)

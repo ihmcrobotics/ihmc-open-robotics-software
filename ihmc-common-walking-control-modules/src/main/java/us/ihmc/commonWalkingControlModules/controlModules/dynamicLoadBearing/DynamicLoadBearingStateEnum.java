@@ -1,6 +1,6 @@
-package us.ihmc.commonWalkingControlModules.controlModules.reactiveBracing;
+package us.ihmc.commonWalkingControlModules.controlModules.dynamicLoadBearing;
 
-public enum ReactiveBracingStateEnum
+public enum DynamicLoadBearingStateEnum
 {
    /* Moving towards contact point */
    PRE_CONTACT,
