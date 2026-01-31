@@ -6,15 +6,6 @@ extern "C"
 #define CENTER_INDEX 1
 #define CELLS_PER_AXIS 2
 #define SEARCH_RADIUS 3
-#define MAX_CORRESPONDENCE_DISTANCE 4
-
-__device__ inline float distance3D(const float3& a, const float3& b)
-{
-    float dx = a.x - b.x;
-    float dy = a.y - b.y;
-    float dz = a.z - b.z;
-    return sqrtf(dx * dx + dy * dy + dz * dz);
-}
 
 extern "C"
 __global__ void heightMapICPKernel(float *__restrict__ localMap, size_t pitchLocal,
@@ -35,7 +26,6 @@ __global__ void heightMapICPKernel(float *__restrict__ localMap, size_t pitchLoc
 
     float* localRow = (float*)((char*)localMap + xIndex * pitchLocal);
     float localHeight = localRow[yIndex];
-    float3 localCoordinates3f = make_float3(localCoordinates.x, localCoordinates.y, localHeight);
     float3 localCoordinatesInGlobalFrame = transformPoint3D(make_float3(localCoordinates.x, localCoordinates.y, localHeight), localToGlobalTransform);
 
     int2 globalIndices = coordinate_to_indices(make_float2(localCoordinatesInGlobalFrame.x, localCoordinatesInGlobalFrame.y),
@@ -43,14 +33,13 @@ __global__ void heightMapICPKernel(float *__restrict__ localMap, size_t pitchLoc
                                                params[CELL_SIZE],
                                                params[CENTER_INDEX]);
 
-    float minDistance = 10000000;
+    float minDistance = 1000000000; // Set to very large value to start
     float3 closestGlobalPoint = make_float3(0.0f/0.0f, 0.0f/0.0f, 0.0f/0.0f);
 
     bool foundValidCorrespondence = false;
 
     // Get search radius (default to 2 if not provided)
     int searchRadius = params[SEARCH_RADIUS];
-    float maxCorrespondenceDistance = params[MAX_CORRESPONDENCE_DISTANCE];
 
     // Search in neighborhood around the transformed point
     for (int dx = -searchRadius; dx <= searchRadius; dx++)
@@ -71,7 +60,7 @@ __global__ void heightMapICPKernel(float *__restrict__ localMap, size_t pitchLoc
                                                                         params[CENTER_INDEX]);
                 float3 candidatePoint = make_float3(globalMapCellCoordinates.x ,globalMapCellCoordinates.y, globalHeight);
 
-                float distF = distance3D(candidatePoint, localCoordinatesInGlobalFrame);
+                float distF = distance(candidatePoint, localCoordinatesInGlobalFrame);
 
                 if (distF < minDistance)
                 {
@@ -87,7 +76,7 @@ __global__ void heightMapICPKernel(float *__restrict__ localMap, size_t pitchLoc
     // Compute the correspondence vector
     float3 minDistanceVector = make_float3(0.0f/0.0f, 0.0f/0.0f, 0.0f/0.0f);
 
-    if (foundValidCorrespondence && minDistance < maxCorrespondenceDistance)
+    if (foundValidCorrespondence)
     {
         // Vector from local point (in global frame) to closest global point
         minDistanceVector = sub(closestGlobalPoint, localCoordinatesInGlobalFrame);

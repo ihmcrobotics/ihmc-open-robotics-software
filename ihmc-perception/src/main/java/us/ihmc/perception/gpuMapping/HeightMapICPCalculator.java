@@ -15,7 +15,7 @@ import us.ihmc.perception.cuda.CUDATools;
 
 import java.net.URL;
 
-import static org.bytedeco.cuda.global.cudart.cudaStreamSynchronize;
+import static org.bytedeco.cuda.global.cudart.*;
 
 public class HeightMapICPCalculator
 {
@@ -80,6 +80,20 @@ public class HeightMapICPCalculator
       int maxIterations = 10;
       double convergenceThreshold = 0.001;
 
+      FloatPointer groundToWorldTranslationDevicePointerCopy = new FloatPointer();
+
+      // 1. Allocate memory for the copy (16 floats for a 4x4 matrix)
+      CUDATools.mallocAsync(groundToWorldTranslationDevicePointerCopy, 16, stream);
+
+      // 2. Perform the GPU-to-GPU copy
+      // cudaMemcpyDeviceToDevice is the standard way to clone data on the card
+      int error = cudaMemcpyAsync(groundToWorldTranslationDevicePointerCopy,
+                                  groundToWorldTranslationDevicePointer,
+                                  16 * Float.BYTES,
+                                  cudaMemcpyDeviceToDevice,
+                                  stream);
+      CUDATools.checkCUDAError(error);
+
       float[] parametersArray = populateParameterArray(heightMapParameters);
       parametersHostPointer.put(parametersArray);
       CUDATools.mallocAsync(parametersDevicePointer, parametersArray.length, stream);
@@ -93,7 +107,7 @@ public class HeightMapICPCalculator
 
          icpCoorespondenceKernel.withPointer(localMeanMap.data()).withLong(localMeanMap.step());
          icpCoorespondenceKernel.withPointer(globalMeanMap.data()).withLong(globalMeanMap.step());
-         icpCoorespondenceKernel.withPointer(groundToWorldTranslationDevicePointer);
+         icpCoorespondenceKernel.withPointer(groundToWorldTranslationDevicePointerCopy);
          icpCoorespondenceKernel.withFloat(heightMapCenter.getX32());
          icpCoorespondenceKernel.withFloat(heightMapCenter.getY32());
          icpCoorespondenceKernel.withPointer(vectorMap.data()).withLong(vectorMap.step());
@@ -103,19 +117,19 @@ public class HeightMapICPCalculator
 
          icpCorrespondenceDim.close();
 
-         int error = cudaStreamSynchronize(stream);
+         error = cudaStreamSynchronize(stream);
          CUDATools.checkCUDAError(error);
 
-         Mat what = new Mat();
-         vectorMap.download(what);
+         Mat cpuVectorMap = new Mat();
+         vectorMap.download(cpuVectorMap);
 
-         Scalar meanVector = opencv_core.mean(what);
+         Scalar meanVector = opencv_core.mean(cpuVectorMap);
 
          double dx = meanVector.get(0);
          double dy = meanVector.get(1);
          double dz = meanVector.get(2);
 
-         applyCorrectionToGpuMatrix(groundToWorldTranslationDevicePointer, dx, dy, dz, stream);
+         applyCorrectionToGpuMatrix(groundToWorldTranslationDevicePointerCopy, dx, dy, dz, stream);
 
          // 5. Check for convergence
          double totalShift = Math.sqrt(dx * dx + dy * dy + dz * dz);
@@ -129,7 +143,7 @@ public class HeightMapICPCalculator
       FloatPointer hostPointer = new FloatPointer(finalMatrix);
 
       // Copy the final corrected matrix from GPU to CPU
-      CUDATools.memcpyAsync(hostPointer, groundToWorldTranslationDevicePointer, 16, stream);
+      CUDATools.memcpyAsync(hostPointer, groundToWorldTranslationDevicePointerCopy, 16, stream);
       cudaStreamSynchronize(stream);
       hostPointer.get(finalMatrix);
 
@@ -138,7 +152,7 @@ public class HeightMapICPCalculator
 
    public float[] populateParameterArray(HeightMapParameters parameters)
    {
-      return new float[] {(float) parameters.getCellSize(), (float) centerIndex, (float) cellsPerAxis, (float) 5, (float) 1.1};
+      return new float[] {(float) parameters.getCellSize(), (float) centerIndex, (float) cellsPerAxis, 5.0f};
    }
 
    /**
