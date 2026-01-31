@@ -28,10 +28,14 @@ __global__ void heightMapICPKernel(float *__restrict__ localMap, size_t pitchLoc
     int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
     int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
 
+    if (xIndex >= params[CELLS_PER_AXIS] || yIndex >= params[CELLS_PER_AXIS])
+        return;
+
     float2 localCoordinates = indices_to_coordinate(make_int2(xIndex, yIndex), make_float2(0.0f, 0.0f), params[CELL_SIZE], params[CENTER_INDEX]);
 
     float* localRow = (float*)((char*)localMap + xIndex * pitchLocal);
     float localHeight = localRow[yIndex];
+    float3 localCoordinates3f = make_float3(localCoordinates.x, localCoordinates.y, localHeight);
     float3 localCoordinatesInGlobalFrame = transformPoint3D(make_float3(localCoordinates.x, localCoordinates.y, localHeight), localToGlobalTransform);
 
     int2 globalIndices = coordinate_to_indices(make_float2(localCoordinatesInGlobalFrame.x, localCoordinatesInGlobalFrame.y),
@@ -39,8 +43,7 @@ __global__ void heightMapICPKernel(float *__restrict__ localMap, size_t pitchLoc
                                                params[CELL_SIZE],
                                                params[CENTER_INDEX]);
 
-//     float minDistance = 100000.0f;
-    float3 minDistanceVector = make_float3(0.0f, 0.0f, 0.0f);
+    float3 minDistanceVector = make_float3(0.0f/0.0f, 0.0f/0.0f, 0.0f/0.0f);
 
     if (globalIndices.x >= 0 && globalIndices.x < params[CELLS_PER_AXIS] && globalIndices.y >= 0 && globalIndices.y < params[CELLS_PER_AXIS])
     {
@@ -51,28 +54,12 @@ __global__ void heightMapICPKernel(float *__restrict__ localMap, size_t pitchLoc
                                                                 params[CELL_SIZE],
                                                                 params[CENTER_INDEX]);
         float3 globalPoint = make_float3(globalMapCellCoordinates.x ,globalMapCellCoordinates.y, globalHeight);
-        minDistanceVector = sub(globalPoint, localCoordinatesInGlobalFrame);
-//         float distancef = distance(localCoordinatesInGlobalFrame, temp);
+        minDistanceVector = sub(globalPoint, localCoordinates3f);
 
-
+        minDistanceVector.x = fabsf(minDistanceVector.x);
+        minDistanceVector.y = fabsf(minDistanceVector.y);
+        minDistanceVector.z = fabsf(minDistanceVector.z);
     }
-//     for (int i = 0; i < params[CELLS_PER_AXIS]; i++)
-//     {
-//         for (int j = 0; j < params[CELLS_PER_AXIS]; j++)
-//         {
-//             float2 globalMapCellCoordinates = indices_to_coordinate(make_int2(i, j), make_float2(globalMapCenterX, globalMapCenterY), params[CELL_SIZE], params[CENTER_INDEX]);
-//             float* globalRow = (float*)((char*)globalMeanMap + i * pitchGlobalMean);
-//             float globalHeight = globalRow[j];
-//             float3 temp = make_float3(globalMapCellCoordinates.x ,globalMapCellCoordinates.y, globalHeight);
-//             float distancef = distance(localCoordinatesInGlobalFrame, temp);
-//
-//             if (distancef < minDistance)
-//             {
-//                 minDistance = distancef;
-//                 minDistanceVector = sub(temp, localCoordinatesInGlobalFrame);
-//             }
-//         }
-//     }
 
     float* vectorRow = (float *)((char *)vectorMap + xIndex * pitchvector);
 

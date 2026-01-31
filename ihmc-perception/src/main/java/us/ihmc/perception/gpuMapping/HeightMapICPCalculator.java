@@ -9,7 +9,6 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
 import us.ihmc.perception.cuda.CUDATools;
@@ -30,14 +29,14 @@ public class HeightMapICPCalculator
    private final int centerIndex;
    private final int cellsPerAxis;
 
-   private HeightMapParameters heightMapParameters;
-   private CUstream_st stream;
+   private final HeightMapParameters heightMapParameters;
+   private final CUstream_st stream;
 
    private final CUDAProgram heightMapICPProgram;
    private final dim3 blockSize;
 
    private final CUDAKernel icpCoorespondenceKernel;
-   private GpuMat vectorMap;
+   private final GpuMat vectorMap;
 
    private final FloatPointer parametersHostPointer;
    private final FloatPointer parametersDevicePointer;
@@ -77,13 +76,13 @@ public class HeightMapICPCalculator
 
    public void update(GpuMat localMeanMap, GpuMat globalMeanMap, FloatPointer groundToWorldTranslationDevicePointer, Point3D heightMapCenter)
    {
-      float[] parametersArray = populateParameterArray(heightMapParameters, localMeanMap);
+      float[] parametersArray = populateParameterArray(heightMapParameters);
       parametersHostPointer.put(parametersArray);
       CUDATools.mallocAsync(parametersDevicePointer, parametersArray.length, stream);
       CUDATools.memcpyAsync(parametersDevicePointer, parametersHostPointer, parametersArray.length, stream);
 
-      int gridDimX = (localMeanMap.cols() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
-      int gridDimY = (localMeanMap.rows() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
+      int gridDimX = (localMeanMap.rows() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
+      int gridDimY = (localMeanMap.cols() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
       dim3 icpCorrespondenceDim = new dim3(gridDimX, gridDimY, 1);
 
       icpCoorespondenceKernel.withPointer(localMeanMap.data()).withLong(localMeanMap.step());
@@ -113,11 +112,11 @@ public class HeightMapICPCalculator
       meanVector3D = new Vector3D(meanX, meanY, meanZ);
    }
 
-   public float[] populateParameterArray(HeightMapParameters parameters, GpuMat localMeanMap)
+   public float[] populateParameterArray(HeightMapParameters parameters)
    {
       return new float[] {(float) parameters.getCellSize(),
                           (float) centerIndex,
-                          (float) localMeanMap.rows(),
+                          (float) cellsPerAxis,
                           (float) parameters.getMinHeightRegistration(),
                           (float) parameters.getMaxHeightRegistration(),
                           (float) parameters.getMinClampHeight(),

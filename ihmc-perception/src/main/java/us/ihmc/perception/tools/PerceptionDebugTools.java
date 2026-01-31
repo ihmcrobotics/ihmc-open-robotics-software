@@ -279,6 +279,14 @@ public class PerceptionDebugTools
                matString.append("%.6f\t".formatted(image.ptr(i, j).getFloat()));
             if (image.type() == opencv_core.CV_32FC2)
                matString.append("%.5f\t%.5f\t\t".formatted(image.ptr(i, j).getFloat(), image.ptr(i, j).getFloat(Float.BYTES)));
+            if (image.type() == opencv_core.CV_32FC3)
+            {
+               float f0 = image.ptr(i,j).getFloat();
+               float f1 = image.ptr(i,j).getFloat(Float.BYTES);
+               float f2 = image.ptr(i,j).getFloat(2 * Float.BYTES);
+
+               matString.append("%.5f\t%.5f\t%.5f\t\t".formatted(f0, f1, f2));
+            }
          }
          matString.append("\n");
       }

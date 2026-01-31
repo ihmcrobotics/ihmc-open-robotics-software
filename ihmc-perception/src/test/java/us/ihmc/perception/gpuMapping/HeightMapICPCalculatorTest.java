@@ -24,11 +24,14 @@ public class HeightMapICPCalculatorTest
       CUstream_st stream = CUDAStreamManager.getStream();
       HeightMapICPCalculator heightMapICPCalculator = new HeightMapICPCalculator(heightMapParameters, stream);
 
+      int centerIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getWidthInMeters(), heightMapParameters.getCellSize());
+      int cellsPerAxis = 2 * centerIndex + 1;
+
       // 1. Create identical maps
-      GpuMat localMap = new GpuMat(200, 200, opencv_core.CV_32FC1); // Ensure type matches kernel expectation
+      GpuMat localMap = new GpuMat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1); // Ensure type matches kernel expectation
       localMap.setTo(new Scalar(1.0));
 
-      GpuMat globalMap = new GpuMat(200, 200, opencv_core.CV_32FC1);
+      GpuMat globalMap = new GpuMat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
       globalMap.setTo(new Scalar(1.0));
 
       // 2. Set Transform to Identity (Zero translation, Zero rotation)
@@ -49,11 +52,11 @@ public class HeightMapICPCalculatorTest
       heightMapICPCalculator.update(localMap, globalMap, devicePtr, mapCenter);
 
       // 5. Download results and Verify
-//      GpuMat vectorMapGpu = heightMapICPCalculator.getVectorMap();
-//      Mat vectorMapCpu = new Mat();
-//      vectorMapGpu.download(vectorMapCpu);
-//
-//      Scalar meanVector = opencv_core.mean(vectorMapCpu);
+      //      GpuMat vectorMapGpu = heightMapICPCalculator.getVectorMap();
+      //      Mat vectorMapCpu = new Mat();
+      //      vectorMapGpu.download(vectorMapCpu);
+      //
+      //      Scalar meanVector = opencv_core.mean(vectorMapCpu);
 
       Vector3D meanVector = heightMapICPCalculator.getVectorMap();
 
@@ -78,14 +81,17 @@ public class HeightMapICPCalculatorTest
       CUstream_st stream = CUDAStreamManager.getStream();
       HeightMapICPCalculator heightMapICPCalculator = new HeightMapICPCalculator(heightMapParameters, stream);
 
+      int centerIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getWidthInMeters(), heightMapParameters.getCellSize());
+      int cellsPerAxis = 2 * centerIndex + 1;
+
       // 1. Create maps with 1 meter Z offset
       // Local map at height 1.0m
-      GpuMat localMap = new GpuMat(200, 200, opencv_core.CV_32FC1);
-      localMap.setTo(new Scalar(1.0));
+      GpuMat localMap = new GpuMat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
+      localMap.setTo(new Scalar(1));
 
       // Global map at height 2.0m (1 meter higher)
-      GpuMat globalMap = new GpuMat(200, 200, opencv_core.CV_32FC1);
-      globalMap.setTo(new Scalar(2.0));
+      GpuMat globalMap = new GpuMat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
+      globalMap.setTo(new Scalar(2));
 
       // 2. Identity transform (same origins in X,Y)
       RigidBodyTransform identityTransform = new RigidBodyTransform();
@@ -128,17 +134,23 @@ public class HeightMapICPCalculatorTest
       CUstream_st stream = CUDAStreamManager.getStream();
       HeightMapICPCalculator heightMapICPCalculator = new HeightMapICPCalculator(heightMapParameters, stream);
 
+      int centerIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getWidthInMeters(), heightMapParameters.getCellSize());
+      int cellsPerAxis = 2 * centerIndex + 1;
+
       // 1. Create identical height maps (same Z values)
-      GpuMat localMap = new GpuMat(200, 200, opencv_core.CV_32FC1);
+      GpuMat localMap = new GpuMat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
       localMap.setTo(new Scalar(1.0));
 
-      GpuMat globalMap = new GpuMat(200, 200, opencv_core.CV_32FC1);
+      GpuMat globalMap = new GpuMat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
       globalMap.setTo(new Scalar(1.0));
 
-      // 2. Identity transform (no rotation or translation in transform)
-      RigidBodyTransform identityTransform = new RigidBodyTransform();
+      Point3D mapCenter = new Point3D(1.0, 0.0, 0.0); // +1m in X
+
+      // 2. Transform 1.0 meter in x
+      RigidBodyTransform translation = new RigidBodyTransform();
+      translation.getTranslation().set(new Vector3D(mapCenter));
       float[] transformArray = new float[16];
-      identityTransform.get(transformArray);
+      translation.get(transformArray);
 
       // 3. Prepare Device Pointers
       FloatPointer hostPtr = new FloatPointer(16);
@@ -150,7 +162,6 @@ public class HeightMapICPCalculatorTest
       // 4. Run Kernel with 1 meter offset in map centers
       // Local map centered at origin (0,0,0)
       // Global map centered at (1,0,0) - 1 meter offset in X
-      Point3D mapCenter = new Point3D(1.0, 0.0, 0.0);
       heightMapICPCalculator.update(localMap, globalMap, devicePtr, mapCenter);
 
       // 5. Download results and Verify
