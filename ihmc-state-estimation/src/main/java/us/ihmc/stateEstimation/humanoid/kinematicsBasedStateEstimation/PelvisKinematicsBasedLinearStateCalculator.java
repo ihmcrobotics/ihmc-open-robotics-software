@@ -161,14 +161,10 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
       tempRootBodyTwist.getLinearPart().setMatchingFrame(rootJointLinearVelocity);
 
       for (SingleFootEstimator footEstimator : footEstimators)
-         footEstimator.updateFootLinearVelocityInWorld(tempRootBodyTwist);
-
-      for (SingleFootEstimator footEstimator : footEstimators)
-         footEstimator.updateKinematics();
+         footEstimator.updateKinematics(tempRootBodyTwist);
 
       kinematicsIsUpToDate.set(true);
    }
-
 
 
    /**

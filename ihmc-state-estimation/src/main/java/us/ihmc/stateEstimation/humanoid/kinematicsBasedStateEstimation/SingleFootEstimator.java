@@ -65,7 +65,14 @@ class SingleFootEstimator implements SCS2YoGraphicHolder
    /** Debug variable */
    private final YoFramePoint3D rootJointPositionPerFoot;
 
+   // Temp variables
    private final FramePoint2DBasics[] intersectionPoints = new FramePoint2DBasics[] {new FramePoint2D(), new FramePoint2D()};
+   private final FramePoint3D tempFramePoint = new FramePoint3D();
+   private final FrameVector3D tempFrameVector = new FrameVector3D();
+
+   private final Twist rootBodyTwistInFootFrame = new Twist();
+   private final Twist footTwistInWorld = new Twist();
+
 
    public SingleFootEstimator(FloatingJointBasics rootJoint,
                               ContactablePlaneBody contactableFoot,
@@ -123,8 +130,6 @@ class SingleFootEstimator implements SCS2YoGraphicHolder
       footVelocityInWorld.setToZero();
    }
 
-   private final FramePoint3D tempFramePoint = new FramePoint3D();
-
    /**
     * Estimates the pelvis position and linear velocity using the leg kinematics
     *
@@ -144,6 +149,42 @@ class SingleFootEstimator implements SCS2YoGraphicHolder
       // Based on the previous estimate of the root joint velocity, we computed the foot velocity, which is located at the center of pressure. However, if
       // we assume that the center of pressure isn't moving, we should subtract this velocity from the kinematics to make the velocity zero at that point.
       rootJointLinearVelocity.scaleAdd(-scaleFactor * alphaVelocityUpdate, footVelocityInWorld, rootJointLinearVelocity);
+   }
+
+   /**
+    * Updates the different kinematics related stuff that is used to estimate the pelvis state. This includes the vector from the foot to the root, as well as
+    * the velocity of the foot at the contact point.
+    */
+   public void updateKinematics(TwistReadOnly rootBodyTwist)
+   {
+      // Compute the position of the root joint relative to the foot.
+      tempFramePoint.setToZero(rootJointFrame);
+      tempFramePoint.changeFrame(soleFrame);
+
+      // Store the vector from the foot to the root, and make sure it's expressed in the world frame.
+      tempFrameVector.setIncludingFrame(tempFramePoint);
+      tempFrameVector.changeFrame(worldFrame);
+
+      // Update the filtered offset vector.
+      footToRootJointPosition.update(tempFrameVector);
+
+      // Compute the twist of the root body, expressed in the foot frame.
+      rootBodyTwistInFootFrame.setIncludingFrame(rootBodyTwist);
+      rootBodyTwistInFootFrame.setBaseFrame(worldFrame);
+      rootBodyTwistInFootFrame.changeFrame(foot.getBodyFixedFrame());
+
+      // Get the twist relative to the root. This is purely based on kinematics.
+      foot.getBodyFixedFrame().getTwistRelativeToOther(rootJointFrame, footTwistInWorld);
+      // Update some debug variables for tracking the twist of the foot relative the root
+      footToRootJointLinearVelocity.setMatchingFrame(footTwistInWorld.getLinearPart());
+      footToRootJointAngularVelocity.setMatchingFrame(footTwistInWorld.getAngularPart());
+      // Update the twist of the foot in the world, by adding the root twist to it.
+      footTwistInWorld.add(rootBodyTwistInFootFrame);
+      footTwistInWorld.setBodyFrame(soleFrame);
+      footTwistInWorld.changeFrame(worldFrame);
+
+      // Compute the velocity at the CoP position, which we want to be zero.
+      footTwistInWorld.getLinearVelocityAt(copPositionInWorld, footVelocityInWorld);
    }
 
    /**
@@ -197,8 +238,6 @@ class SingleFootEstimator implements SCS2YoGraphicHolder
       }
    }
 
-   private final FrameVector3D tempFrameVector = new FrameVector3D();
-
    public void updateTrustedFootPosition(FramePoint3DReadOnly rootJointPosition)
    {
       if (trustCoPAsNonSlippingContactPoint.getValue())
@@ -211,8 +250,8 @@ class SingleFootEstimator implements SCS2YoGraphicHolder
 
       footPositionInWorld.sub(rootJointPosition, footToRootJointPosition);
    }
-
    private final FramePoint2D tempCoP2d = new FramePoint2D();
+
    private final FrameVector3D tempCoPOffset = new FrameVector3D();
 
    /**
@@ -311,41 +350,4 @@ class SingleFootEstimator implements SCS2YoGraphicHolder
       footPositionInWorld.sub(copPositionInWorld, tempCoPOffset);
    }
 
-   /**
-    * Updates the different kinematics related stuff that is used to estimate the pelvis state
-    */
-   public void updateKinematics()
-   {
-      tempFramePoint.setToZero(rootJointFrame);
-      tempFramePoint.changeFrame(soleFrame);
-
-      tempFrameVector.setIncludingFrame(tempFramePoint);
-      tempFrameVector.changeFrame(worldFrame);
-
-      footToRootJointPosition.update(tempFrameVector);
-   }
-
-   private final Twist tempRootBodyTwist = new Twist();
-   private final Twist footTwistInWorld = new Twist();
-
-   public void updateFootLinearVelocityInWorld(TwistReadOnly rootBodyTwist)
-   {
-      computeFootLinearVelocityInWorld(rootBodyTwist, footVelocityInWorld);
-   }
-
-   private void computeFootLinearVelocityInWorld(TwistReadOnly rootBodyTwist, FixedFrameVector3DBasics footLinearVelocityToPack)
-   {
-      tempRootBodyTwist.setIncludingFrame(rootBodyTwist);
-      tempRootBodyTwist.setBaseFrame(worldFrame);
-      tempRootBodyTwist.changeFrame(foot.getBodyFixedFrame());
-
-      foot.getBodyFixedFrame().getTwistRelativeToOther(rootJointFrame, footTwistInWorld);
-      footToRootJointLinearVelocity.setMatchingFrame(footTwistInWorld.getLinearPart());
-      footToRootJointAngularVelocity.setMatchingFrame(footTwistInWorld.getAngularPart());
-      footTwistInWorld.add(tempRootBodyTwist);
-      footTwistInWorld.setBodyFrame(soleFrame);
-      footTwistInWorld.changeFrame(worldFrame);
-
-      footTwistInWorld.getLinearVelocityAt(copPositionInWorld, footLinearVelocityToPack);
-   }
 }
