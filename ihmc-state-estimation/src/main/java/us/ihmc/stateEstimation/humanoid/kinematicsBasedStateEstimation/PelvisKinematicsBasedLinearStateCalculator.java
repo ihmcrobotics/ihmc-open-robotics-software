@@ -4,47 +4,24 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
-import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFramePoint2D;
-import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFrameVector3D;
 import us.ihmc.yoVariables.euclid.filters.BacklashCompensatingVelocityYoFrameVector3D;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
-import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
-import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
-import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.DefaultPoint2DGraphic;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
-import us.ihmc.scs2.definition.yoGraphic.YoGraphicPoint2DDefinition;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.filters.AlphaFilterTools;
-import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
@@ -82,9 +59,6 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
 
    private final YoBoolean kinematicsIsUpToDate = new YoBoolean("kinematicsIsUpToDate", registry);
    private final BooleanProvider useControllerDesiredCoP;
-   private final BooleanProvider trustCoPAsNonSlippingContactPoint;
-
-   private final BooleanParameter assumeTrustedFootAtZeroHeight = new BooleanParameter("assumeTrustedFootAtZeroHeight", registry, false);
 
    public PelvisKinematicsBasedLinearStateCalculator(FullInverseDynamicsStructure inverseDynamicsStructure,
                                                      Map<RigidBodyBasics, ? extends ContactablePlaneBody> feetContactablePlaneBodies,
@@ -103,9 +77,11 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
       alphaRootJointLinearVelocity = new DoubleParameter("alphaRootJointLinearVelocityKinematics",
                                                          registry,
                                                          stateEstimatorParameters.getPelvisLinearVelocityAlphaNewTwist());
-      trustCoPAsNonSlippingContactPoint = new BooleanParameter("trustCoPAsNonSlippingContactPoint",
+      BooleanProvider trustCoPAsNonSlippingContactPoint = new BooleanParameter("trustCoPAsNonSlippingContactPoint",
                                                                registry,
                                                                stateEstimatorParameters.trustCoPAsNonSlippingContactPoint());
+      BooleanParameter assumeTrustedFootAtZeroHeight = new BooleanParameter("assumeTrustedFootAtZeroHeight", registry, false);
+
       useControllerDesiredCoP = new BooleanParameter("useControllerDesiredCoP", registry, stateEstimatorParameters.useControllerDesiredCenterOfPressure());
       DoubleProvider copFilterBreakFrequency = new DoubleParameter("CopFilterBreakFrequency", registry, stateEstimatorParameters.getCoPFilterFreqInHertz());
       correctTrustedFeetPositions = new BooleanParameter("correctTrustedFeetPositions", registry, stateEstimatorParameters.correctTrustedFeetPositions());
@@ -121,6 +97,8 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
                                                      footSwitch,
                                                      footToRootJointPositionBreakFrequency,
                                                      copFilterBreakFrequency,
+                                                     trustCoPAsNonSlippingContactPoint,
+                                                     assumeTrustedFootAtZeroHeight,
                                                      centerOfPressureDataHolderFromController,
                                                      estimatorDT,
                                                      registry);
@@ -171,13 +149,19 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
       kinematicsIsUpToDate.set(false);
    }
 
+   private final Twist tempRootBodyTwist = new Twist();
+
    /**
     * Updates the different kinematics related stuff that is used to estimate the pelvis state
     */
    public void updateKinematics()
    {
       rootJointPosition.setToZero();
-      updateKinematicsNewTwist();
+      tempRootBodyTwist.setIncludingFrame(rootJoint.getJointTwist());
+      tempRootBodyTwist.getLinearPart().setMatchingFrame(rootJointLinearVelocity);
+
+      for (SingleFootEstimator footEstimator : footEstimators)
+         footEstimator.updateFootLinearVelocityInWorld(tempRootBodyTwist);
 
       for (SingleFootEstimator footEstimator : footEstimators)
          footEstimator.updateKinematics();
@@ -185,16 +169,7 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
       kinematicsIsUpToDate.set(true);
    }
 
-   private final Twist tempRootBodyTwist = new Twist();
 
-   private void updateKinematicsNewTwist()
-   {
-      tempRootBodyTwist.setIncludingFrame(rootJoint.getJointTwist());
-      tempRootBodyTwist.getLinearPart().setMatchingFrame(rootJointLinearVelocity);
-
-      for (SingleFootEstimator footEstimator : footEstimators)
-         footEstimator.updateFootLinearVelocityInWorld(tempRootBodyTwist);
-   }
 
    /**
     * Updates this module when no foot can be trusted.
@@ -224,33 +199,11 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
       if (!kinematicsIsUpToDate.getBooleanValue())
          throw new RuntimeException("Leg kinematics needs to be updated before trying to estimate the pelvis position/linear velocity.");
 
-      if (assumeTrustedFootAtZeroHeight.getValue())
+      for (int i = 0; i < trustedFeet.size(); i++)
       {
-         for (int i = 0; i < trustedFeet.size(); i++)
-         {
-            SingleFootEstimator footEstimator = footEstimatorMap.get(trustedFeet.get(i));
-            if (trustCoPAsNonSlippingContactPoint.getValue())
-            {
-               footEstimator.updateCoPPosition(trustCoPAsNonSlippingContactPoint.getValue(), useControllerDesiredCoP.getValue());
-               footEstimator.copPositionInWorld.setZ(0.0);
-               footEstimator.correctFootPositionsUsingCoP(trustCoPAsNonSlippingContactPoint.getValue());
-            }
-            else
-            {
-               footEstimator.footPositionInWorld.setZ(0.0);
-            }
-            footEstimator.updatePelvisWithKinematics(trustedFeet.size(), alphaRootJointLinearVelocity.getValue(), rootJointPosition, rootJointLinearVelocity);
-         }
-      }
-      else
-      {
-         for (int i = 0; i < trustedFeet.size(); i++)
-         {
-            SingleFootEstimator footEstimator = footEstimatorMap.get(trustedFeet.get(i));
-            footEstimator.updateCoPPosition(trustCoPAsNonSlippingContactPoint.getValue(), useControllerDesiredCoP.getValue());
-            footEstimator.correctFootPositionsUsingCoP(trustCoPAsNonSlippingContactPoint.getValue());
-            footEstimator.updatePelvisWithKinematics(trustedFeet.size(), alphaRootJointLinearVelocity.getValue(), rootJointPosition, rootJointLinearVelocity);
-         }
+         SingleFootEstimator footEstimator = footEstimatorMap.get(trustedFeet.get(i));
+         footEstimator.computeFootPositionInWorld(useControllerDesiredCoP.getValue());
+         footEstimator.updatePelvisWithKinematics(trustedFeet.size(), alphaRootJointLinearVelocity.getValue(), rootJointPosition, rootJointLinearVelocity);
       }
 
       rootJointLinearVelocityFDDebug.update();
@@ -260,7 +213,7 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
          for (int i = 0; i < trustedFeet.size(); i++)
          {
             SingleFootEstimator footEstimator = footEstimatorMap.get(trustedFeet.get(i));
-            footEstimator.updateTrustedFootPosition(trustCoPAsNonSlippingContactPoint.getValue(), rootJointPosition);
+            footEstimator.updateTrustedFootPosition(rootJointPosition);
          }
       }
 
@@ -272,6 +225,7 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
 
       kinematicsIsUpToDate.set(false);
    }
+
 
    public void setPelvisPosition(FramePoint3DReadOnly pelvisPosition)
    {
@@ -300,308 +254,6 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
    public FrameVector3DReadOnly getPelvisVelocity()
    {
       return rootJointLinearVelocity;
-   }
-
-   public void getFootToRootJointPosition(FramePoint3D positionToPack, RigidBodyBasics foot)
-   {
-      positionToPack.setIncludingFrame(footEstimatorMap.get(foot).footToRootJointPosition);
-   }
-
-   public FrameVector3DReadOnly getFootVelocityInWorld(RigidBodyBasics foot)
-   {
-      return footEstimatorMap.get(foot).footVelocityInWorld;
-   }
-
-   private static class SingleFootEstimator implements SCS2YoGraphicHolder
-   {
-      private final RigidBodyBasics foot;
-
-      private final ReferenceFrame rootJointFrame;
-      private final ReferenceFrame soleFrame;
-      private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
-      private final YoFrameVector3D footVelocityInWorld;
-      private final AlphaFilteredYoFrameVector3D footToRootJointPosition;
-      private final YoFrameVector3D footToRootJointLinearVelocity;
-      private final YoFrameVector3D footToRootJointAngularVelocity;
-      private final YoFramePoint3D footPositionInWorld;
-      /** Debug variable */
-      private final YoFramePoint3D rootJointPositionPerFoot;
-      private final YoFramePoint3D copPositionInWorld;
-      private final AlphaFilteredYoFramePoint2D copFilteredInFootFrame;
-      private final YoFramePoint2D copRawInFootFrame;
-      private final FrameConvexPolygon2D footPolygon;
-      private final FrameLineSegment2D footCenterCoPLineSegment;
-      private final FootSwitchInterface footSwitch;
-      private final CenterOfPressureDataHolder centerOfPressureDataHolderFromController;
-
-      private final FramePoint2DBasics[] intersectionPoints = new FramePoint2DBasics[] {new FramePoint2D(), new FramePoint2D()};
-
-      public SingleFootEstimator(FloatingJointBasics rootJoint,
-                                 ContactablePlaneBody contactableFoot,
-                                 FootSwitchInterface footSwitch,
-                                 DoubleProvider footToRootJointPositionBreakFrequency,
-                                 DoubleProvider copFilterBreakFrequency,
-                                 CenterOfPressureDataHolder centerOfPressureDataHolderFromController,
-                                 double estimatorDT,
-                                 YoRegistry registry)
-      {
-         this.rootJointFrame = rootJoint.getFrameAfterJoint();
-         this.footSwitch = footSwitch;
-         this.centerOfPressureDataHolderFromController = centerOfPressureDataHolderFromController;
-         foot = contactableFoot.getRigidBody();
-         soleFrame = contactableFoot.getContactFrame();
-
-         String namePrefix = foot.getName();
-
-         DoubleProvider alphaFoot = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(footToRootJointPositionBreakFrequency.getValue(),
-                                                                                                          estimatorDT);
-         footToRootJointPosition = new AlphaFilteredYoFrameVector3D(namePrefix + "FootToRootJointPosition", "", registry, alphaFoot, worldFrame);
-         footToRootJointLinearVelocity = new YoFrameVector3D(namePrefix + "FootToRootJointLinearVelocity", worldFrame, registry);
-         footToRootJointAngularVelocity = new YoFrameVector3D(namePrefix + "FootToRootJointAngularVelocity", worldFrame, registry);
-         rootJointPositionPerFoot = new YoFramePoint3D(namePrefix + "BasedRootJointPosition", worldFrame, registry);
-         footPositionInWorld = new YoFramePoint3D(namePrefix + "FootPositionInWorld", worldFrame, registry);
-         footPolygon = new FrameConvexPolygon2D(FrameVertex2DSupplier.asFrameVertex2DSupplier(contactableFoot.getContactPoints2D()));
-         footCenterCoPLineSegment = new FrameLineSegment2D(soleFrame);
-         copRawInFootFrame = new YoFramePoint2D(namePrefix + "CoPRawInFootFrame", soleFrame, registry);
-
-         DoubleProvider alphaCop = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(copFilterBreakFrequency.getValue(), estimatorDT);
-         copFilteredInFootFrame = new AlphaFilteredYoFramePoint2D(namePrefix + "CoPFilteredInFootFrame", "", registry, alphaCop, copRawInFootFrame);
-         copFilteredInFootFrame.update(0.0, 0.0);
-         copPositionInWorld = new YoFramePoint3D(namePrefix + "CoPPositionsInWorld", worldFrame, registry);
-         footVelocityInWorld = new YoFrameVector3D(namePrefix + "VelocityInWorld", worldFrame, registry);
-      }
-
-      @Override
-      public YoGraphicDefinition getSCS2YoGraphics()
-      {
-         return YoGraphicDefinitionFactory.newYoGraphicPoint2D(foot.getName() + "StateEstimatorCoP",
-                                                               copPositionInWorld,
-                                                               0.01,
-                                                               ColorDefinitions.DeepPink(),
-                                                               DefaultPoint2DGraphic.CIRCLE);
-      }
-
-      public void initialize()
-      {
-         footToRootJointPosition.reset();
-         copFilteredInFootFrame.reset();
-         copFilteredInFootFrame.update(0.0, 0.0);
-         footVelocityInWorld.setToZero();
-      }
-
-      private final FramePoint3D tempFramePoint = new FramePoint3D();
-
-      /**
-       * Estimates the pelvis position and linear velocity using the leg kinematics
-       *
-       * @param trustedFoot          is the foot used to estimates the pelvis state
-       * @param numberOfTrustedSides is only one or both legs used to estimate the pelvis state
-       */
-      private void updatePelvisWithKinematics(int numberOfTrustedFeet,
-                                              double alphaVelocityUpdate,
-                                              FixedFramePoint3DBasics rootJointPosition,
-                                              FixedFrameVector3DBasics rootJointLinearVelocity)
-      {
-         double scaleFactor = 1.0 / numberOfTrustedFeet;
-
-         rootJointPositionPerFoot.add(footPositionInWorld, footToRootJointPosition);
-         rootJointPosition.scaleAdd(scaleFactor, rootJointPositionPerFoot, rootJointPosition);
-
-         // Based on the previous estimate of the root joint velocity, we computed the foot velocity, which is located at the center of pressure. However, if
-         // we assume that the center of pressure isn't moving, we should subtract this velocity from the kinematics to make the velocity zero at that point.
-         rootJointLinearVelocity.scaleAdd(-scaleFactor * alphaVelocityUpdate, footVelocityInWorld, rootJointLinearVelocity);
-      }
-
-      /**
-       * updates the position of a swinging foot
-       *
-       * @param swingingFoot   a foot in swing
-       * @param pelvisPosition the current pelvis position
-       */
-      private void updateUntrustedFootPosition(FramePoint3DReadOnly pelvisPosition, boolean useControllerDesiredCoP)
-      {
-         footPositionInWorld.sub(pelvisPosition, footToRootJointPosition);
-         copPositionInWorld.set(footPositionInWorld);
-
-         if (footSwitch.hasFootHitGroundFiltered())
-         {
-            // The foot is still on the ground. This means that we still have a valid CoP, and may trust it again very soon. We shouldn't zero out the cop
-            // position, as that causes a bunch of discrete jumps as to where the filtered value is.
-            if (useControllerDesiredCoP)
-               centerOfPressureDataHolderFromController.getCenterOfPressure(tempCoP2d, foot);
-            else
-               footSwitch.getCenterOfPressure(tempCoP2d);
-            tempCoP2d.checkReferenceFrameMatch(copRawInFootFrame.getReferenceFrame());
-            copRawInFootFrame.set(tempCoP2d);
-            copFilteredInFootFrame.update();
-
-            // Cache the frame
-            ReferenceFrame oldFrame = tempCoPOffset.getReferenceFrame();
-            // Compute the cop position offset in world.
-            tempCoPOffset.setIncludingFrame(soleFrame, copFilteredInFootFrame.getX(), copFilteredInFootFrame.getY(), 0.0);
-            tempCoPOffset.changeFrame(worldFrame);
-
-            if (copRawInFootFrame.containsNaN() || copFilteredInFootFrame.containsNaN() || tempCoPOffset.containsNaN())
-            {
-               // Something was corrupted, fallback to center of the foot.
-               copRawInFootFrame.setToZero();
-               copFilteredInFootFrame.setToZero();
-            }
-            else
-            {
-               // Offset the cop position in the world based on the foot.
-               copPositionInWorld.add(tempCoPOffset);
-            }
-
-            // Set the frame back so it's not busted elsewhere.
-            tempCoPOffset.setReferenceFrame(oldFrame);
-         }
-         else
-         {
-            copRawInFootFrame.setToZero();
-            copFilteredInFootFrame.setToZero();
-         }
-      }
-
-      private final FrameVector3D tempFrameVector = new FrameVector3D();
-
-      private void updateTrustedFootPosition(boolean trustCoPAsNonSlippingContactPoint, FramePoint3DReadOnly rootJointPosition)
-      {
-         if (trustCoPAsNonSlippingContactPoint)
-         {
-            tempFrameVector.setIncludingFrame(rootJointPosition);
-            tempFrameVector.sub(footToRootJointPosition); // New foot position
-            tempFrameVector.sub(footPositionInWorld); // Delta from previous to new foot position
-            copPositionInWorld.add(tempFrameVector); // New CoP position
-         }
-
-         footPositionInWorld.sub(rootJointPosition, footToRootJointPosition);
-      }
-
-      private final FramePoint2D tempCoP2d = new FramePoint2D();
-      private final FrameVector3D tempCoPOffset = new FrameVector3D();
-
-      /**
-       * Compute the foot CoP. The CoP is the point on the support foot trusted to be not slipping.
-       *
-       * @param trustedSide
-       * @param footSwitch
-       */
-      private void updateCoPPosition(boolean trustCoPAsNonSlippingContactPoint, boolean useControllerDesiredCoP)
-      {
-         if (trustCoPAsNonSlippingContactPoint)
-         {
-            if (useControllerDesiredCoP)
-               centerOfPressureDataHolderFromController.getCenterOfPressure(tempCoP2d, foot);
-            else
-               footSwitch.getCenterOfPressure(tempCoP2d);
-
-            if (tempCoP2d.containsNaN())
-            {
-               tempCoP2d.setToZero(soleFrame);
-            }
-            else
-            {
-               boolean isCoPInsideFoot = footPolygon.isPointInside(tempCoP2d);
-               if (!isCoPInsideFoot)
-               {
-                  if (footSwitch.getFootLoadPercentage() > 0.2)
-                  {
-                     footCenterCoPLineSegment.set(soleFrame, 0.0, 0.0, tempCoP2d.getX(), tempCoP2d.getY());
-                     int intersections = footPolygon.intersectionWith(footCenterCoPLineSegment, intersectionPoints[0], intersectionPoints[1]);
-
-                     if (intersections == 0)
-                     {
-                        LogTools.info("Found no solution for the CoP projection.");
-                        tempCoP2d.setToZero(soleFrame);
-                     }
-                     else
-                     {
-                        tempCoP2d.set(intersectionPoints[0]);
-
-                        if (intersections == 2)
-                           LogTools.info("Found two solutions for the CoP projection.");
-                     }
-                  }
-                  else // If foot barely loaded and actual CoP outside, then don't update the raw CoP right below
-                  {
-                     tempCoP2d.setIncludingFrame(copRawInFootFrame);
-                  }
-               }
-            }
-
-            copRawInFootFrame.set(tempCoP2d);
-
-            tempCoPOffset.setIncludingFrame(soleFrame, copFilteredInFootFrame.getX(), copFilteredInFootFrame.getY(), 0.0);
-            copFilteredInFootFrame.update();
-            tempCoPOffset.setIncludingFrame(soleFrame,
-                                            copFilteredInFootFrame.getX() - tempCoPOffset.getX(),
-                                            copFilteredInFootFrame.getY() - tempCoPOffset.getY(),
-                                            0.0);
-
-            tempCoPOffset.changeFrame(worldFrame);
-            copPositionInWorld.add(tempCoPOffset);
-         }
-         else
-         {
-            tempCoP2d.setToZero(soleFrame);
-         }
-      }
-
-      /**
-       * Assuming the CoP is not moving, the foot position can be updated. That way we can see if the foot
-       * is on the edge.
-       *
-       * @param plantedFoot
-       */
-      private void correctFootPositionsUsingCoP(boolean trustCoPAsNonSlippingContactPoint)
-      {
-         if (!trustCoPAsNonSlippingContactPoint)
-            return;
-
-         tempCoPOffset.setIncludingFrame(copFilteredInFootFrame, 0.0);
-         tempCoPOffset.changeFrame(worldFrame);
-         footPositionInWorld.sub(copPositionInWorld, tempCoPOffset);
-      }
-
-      /**
-       * Updates the different kinematics related stuff that is used to estimate the pelvis state
-       */
-      public void updateKinematics()
-      {
-         tempFramePoint.setToZero(rootJointFrame);
-         tempFramePoint.changeFrame(soleFrame);
-
-         tempFrameVector.setIncludingFrame(tempFramePoint);
-         tempFrameVector.changeFrame(worldFrame);
-
-         footToRootJointPosition.update(tempFrameVector);
-      }
-
-      private final Twist tempRootBodyTwist = new Twist();
-      private final Twist footTwistInWorld = new Twist();
-
-      private void updateFootLinearVelocityInWorld(TwistReadOnly rootBodyTwist)
-      {
-         computeFootLinearVelocityInWorld(rootBodyTwist, footVelocityInWorld);
-      }
-
-      private void computeFootLinearVelocityInWorld(TwistReadOnly rootBodyTwist, FixedFrameVector3DBasics footLinearVelocityToPack)
-      {
-         tempRootBodyTwist.setIncludingFrame(rootBodyTwist);
-         tempRootBodyTwist.setBaseFrame(worldFrame);
-         tempRootBodyTwist.changeFrame(foot.getBodyFixedFrame());
-
-         foot.getBodyFixedFrame().getTwistRelativeToOther(rootJointFrame, footTwistInWorld);
-         footToRootJointLinearVelocity.setMatchingFrame(footTwistInWorld.getLinearPart());
-         footToRootJointAngularVelocity.setMatchingFrame(footTwistInWorld.getAngularPart());
-         footTwistInWorld.add(tempRootBodyTwist);
-         footTwistInWorld.setBodyFrame(soleFrame);
-         footTwistInWorld.changeFrame(worldFrame);
-
-         footTwistInWorld.getLinearVelocityAt(copPositionInWorld, footLinearVelocityToPack);
-      }
    }
 
    @Override
