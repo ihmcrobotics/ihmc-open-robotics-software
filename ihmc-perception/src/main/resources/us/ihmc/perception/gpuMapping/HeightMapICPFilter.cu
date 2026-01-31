@@ -5,16 +5,16 @@ extern "C"
 #define CELL_SIZE 0
 #define CENTER_INDEX 1
 #define CELLS_PER_AXIS 2
-#define MIN_HEIGHT_REGISTRATION 9
-#define MAX_HEIGHT_REGISTRATION 10
-#define MIN_CLAMP_HEIGHT 11
-#define MAX_CLAMP_HEIGHT 12
-#define KALMAN_FILTER_PREDICTION_NOISE 13
-#define ADDITIONAL_TRANSLATIONAL_VARIANCE_ADDED 14
-#define VARIANCE_PER_METER 15
-#define VARIANCE_PER_TRANSLATION_SPEED 16
-#define VARIANCE_PER_ROTATION_SPEED 17
-#define MIN_DEPTH_TO_ACCEPT 19
+#define SEARCH_RADIUS 3
+#define MAX_CORRESPONDENCE_DISTANCE 4
+
+__device__ inline float distance3D(const float3& a, const float3& b)
+{
+    float dx = a.x - b.x;
+    float dy = a.y - b.y;
+    float dz = a.z - b.z;
+    return sqrtf(dx * dx + dy * dy + dz * dz);
+}
 
 extern "C"
 __global__ void heightMapICPKernel(float *__restrict__ localMap, size_t pitchLocal,
@@ -43,23 +43,56 @@ __global__ void heightMapICPKernel(float *__restrict__ localMap, size_t pitchLoc
                                                params[CELL_SIZE],
                                                params[CENTER_INDEX]);
 
+    float minDistance = 10000000;
+    float3 closestGlobalPoint = make_float3(0.0f/0.0f, 0.0f/0.0f, 0.0f/0.0f);
+
+    bool foundValidCorrespondence = false;
+
+    // Get search radius (default to 2 if not provided)
+    int searchRadius = params[SEARCH_RADIUS];
+    float maxCorrespondenceDistance = params[MAX_CORRESPONDENCE_DISTANCE];
+
+    // Search in neighborhood around the transformed point
+    for (int dx = -searchRadius; dx <= searchRadius; dx++)
+    {
+        for (int dy = -searchRadius; dy <= searchRadius; dy++)
+        {
+            int searchX = globalIndices.x + dx;
+            int searchY = globalIndices.y + dy;
+
+            // Check if search indices are within bounds
+            if (searchX >= 0 && searchX < params[CELLS_PER_AXIS] && searchY >= 0 && searchY < params[CELLS_PER_AXIS])
+            {
+                float* globalRow = (float*)((char*)globalMeanMap + globalIndices.x * pitchGlobalMean);
+                float globalHeight = globalRow[globalIndices.y];
+                float2 globalMapCellCoordinates = indices_to_coordinate(make_int2(searchX, searchY),
+                                                                        make_float2(globalMapCenterX, globalMapCenterY),
+                                                                        params[CELL_SIZE],
+                                                                        params[CENTER_INDEX]);
+                float3 candidatePoint = make_float3(globalMapCellCoordinates.x ,globalMapCellCoordinates.y, globalHeight);
+
+                float distF = distance3D(candidatePoint, localCoordinatesInGlobalFrame);
+
+                if (distF < minDistance)
+                {
+                    minDistance = distF;
+                    closestGlobalPoint = candidatePoint;
+                    foundValidCorrespondence = true;
+
+                }
+            }
+        }
+    }
+
+    // Compute the correspondence vector
     float3 minDistanceVector = make_float3(0.0f/0.0f, 0.0f/0.0f, 0.0f/0.0f);
 
-    if (globalIndices.x >= 0 && globalIndices.x < params[CELLS_PER_AXIS] && globalIndices.y >= 0 && globalIndices.y < params[CELLS_PER_AXIS])
+    if (foundValidCorrespondence && minDistance < maxCorrespondenceDistance)
     {
-        float* globalRow = (float*)((char*)globalMeanMap + globalIndices.x * pitchGlobalMean);
-        float globalHeight = globalRow[globalIndices.y];
-        float2 globalMapCellCoordinates = indices_to_coordinate(make_int2(globalIndices.x, globalIndices.y),
-                                                                make_float2(globalMapCenterX, globalMapCenterY),
-                                                                params[CELL_SIZE],
-                                                                params[CENTER_INDEX]);
-        float3 globalPoint = make_float3(globalMapCellCoordinates.x ,globalMapCellCoordinates.y, globalHeight);
-        minDistanceVector = sub(globalPoint, localCoordinatesInGlobalFrame);
-
-        minDistanceVector.x = minDistanceVector.x;
-        minDistanceVector.y = minDistanceVector.y;
-        minDistanceVector.z = minDistanceVector.z;
+        // Vector from local point (in global frame) to closest global point
+        minDistanceVector = sub(closestGlobalPoint, localCoordinatesInGlobalFrame);
     }
+    // else: leave as NaN to indicate no valid correspondence
 
     float* vectorRow = (float *)((char *)vectorMap + xIndex * pitchvector);
 

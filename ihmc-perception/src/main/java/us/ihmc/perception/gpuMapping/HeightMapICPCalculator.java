@@ -41,6 +41,7 @@ public class HeightMapICPCalculator
    private final FloatPointer parametersHostPointer;
    private final FloatPointer parametersDevicePointer;
    private Vector3D meanVector3D;
+   private float[] finalMatrix;
 
    public HeightMapICPCalculator(HeightMapParameters heightMapParameters, CUstream_st stream)
    {
@@ -79,14 +80,13 @@ public class HeightMapICPCalculator
       int maxIterations = 10;
       double convergenceThreshold = 0.001;
 
+      float[] parametersArray = populateParameterArray(heightMapParameters);
+      parametersHostPointer.put(parametersArray);
+      CUDATools.mallocAsync(parametersDevicePointer, parametersArray.length, stream);
+      CUDATools.memcpyAsync(parametersDevicePointer, parametersHostPointer, parametersArray.length, stream);
+
       for (int i = 0; i < maxIterations; i++)
       {
-
-         float[] parametersArray = populateParameterArray(heightMapParameters);
-         parametersHostPointer.put(parametersArray);
-         CUDATools.mallocAsync(parametersDevicePointer, parametersArray.length, stream);
-         CUDATools.memcpyAsync(parametersDevicePointer, parametersHostPointer, parametersArray.length, stream);
-
          int gridDimX = (localMeanMap.rows() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
          int gridDimY = (localMeanMap.cols() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
          dim3 icpCorrespondenceDim = new dim3(gridDimX, gridDimY, 1);
@@ -125,7 +125,7 @@ public class HeightMapICPCalculator
          }
       }
 
-      float[] finalMatrix = new float[16];
+      finalMatrix = new float[16];
       FloatPointer hostPointer = new FloatPointer(finalMatrix);
 
       // Copy the final corrected matrix from GPU to CPU
@@ -138,19 +138,7 @@ public class HeightMapICPCalculator
 
    public float[] populateParameterArray(HeightMapParameters parameters)
    {
-      return new float[] {(float) parameters.getCellSize(),
-                          (float) centerIndex,
-                          (float) cellsPerAxis,
-                          (float) parameters.getMinHeightRegistration(),
-                          (float) parameters.getMaxHeightRegistration(),
-                          (float) parameters.getMinClampHeight(),
-                          (float) parameters.getMaxClampHeight(),
-                          (float) parameters.getKalmanFilterPredictionNoise(),
-                          (float) parameters.getAdditionalTranslationalVarianceAdded(),
-                          (float) parameters.getVariancePerMeter(),
-                          (float) parameters.getVariancePerTranslationSpeed(),
-                          (float) parameters.getVariancePerRotationSpeed(),
-                          (float) parameters.getMinDepthToAccept()};
+      return new float[] {(float) parameters.getCellSize(), (float) centerIndex, (float) cellsPerAxis, (float) 5, (float) 1.1};
    }
 
    /**
@@ -185,6 +173,11 @@ public class HeightMapICPCalculator
       // 4. Copy the updated matrix back to the GPU
       hostPointer.put(hostMatrix);
       CUDATools.memcpyAsync(matrixPtr, hostPointer, 16, stream);
+   }
+
+   public float[] getFinalMatrix()
+   {
+      return finalMatrix;
    }
 
    public Vector3D getVectorMap()
