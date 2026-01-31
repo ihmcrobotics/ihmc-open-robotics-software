@@ -181,4 +181,10 @@ public class HeightMapICPCalculatorTest
       hostPtr.close();
       cudaFreeAsync(devicePtr, stream);
    }
+
+   Need to create a test that puts a pillar in the middle of the global map, and a pillar in the middle of the local map
+   And ICP shsould be able to find the transform between them if I say the transform is 0.8 but the local center is 0.0, and the global center is 1.0
+   So there is the transform saying 0.8 but the map origins saying 1.0. The ICP should be able to find the difference.
+
+      In order to do this the global map may need to be larger then the local map. Going to look into that. I could increase it to 5 meters I guess
 }
