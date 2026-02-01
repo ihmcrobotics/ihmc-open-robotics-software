@@ -12,6 +12,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -37,19 +38,14 @@ public class QuickFootstepPlanner
 
    public List<Pair<RobotSide, Pose3D>> plan(SideDependentList<Pose3D> stances, SideDependentList<Pose3D> goals)
    {
-      List<Pair<RobotSide, Pose3D>> footstepPlan = new java.util.ArrayList<>();
-
-      SideDependentList<Pose3D> currentStances = new SideDependentList<>();
-      for (RobotSide side : RobotSide.values)
-      {
-         currentStances.put(side, new Pose3D(stances.get(side)));
-      }
+      List<Pair<RobotSide, Pose3D>> footstepPlan = new ArrayList<>();
+      var currentStances = new SideDependentList<>(side -> new Pose3D(stances.get(side)));
 
       boolean reachedGoal = false;
-      int maxIterations = 100;
-      int iteration = 0;
+      int plannedSteps = 0;
+      int maxPlannedSteps = 100;
 
-      while (!reachedGoal && iteration < maxIterations)
+      while (!reachedGoal && plannedSteps < maxPlannedSteps)
       {
          reachedGoal = planStep(currentStances, goals);
 
@@ -60,7 +56,7 @@ public class QuickFootstepPlanner
             stepPlannedCallback.run();
          }
 
-         iteration++;
+         plannedSteps++;
       }
 
       return footstepPlan;
@@ -71,12 +67,10 @@ public class QuickFootstepPlanner
       double positionThreshold = 0.01;
       double orientationThreshold = Math.toRadians(5.0);
 
-      SideDependentList<Double> positionErrors
-            = new SideDependentList<>(side -> stances.get(side).getPosition().distance(goals.get(side).getPosition()));
-      SideDependentList<Double> orientationErrors
-            = new SideDependentList<>(side -> stances.get(side).getOrientation().distance(goals.get(side).getOrientation()));
-      SideDependentList<Boolean> atGoals = new SideDependentList<>(side -> positionErrors.get(side) <= positionThreshold
-                                                                        && orientationErrors.get(side) <= orientationThreshold);
+      var positionErrors = new SideDependentList<>(side -> stances.get(side).getPosition().distance(goals.get(side).getPosition()));
+      var orientationErrors = new SideDependentList<>(side -> stances.get(side).getOrientation().distance(goals.get(side).getOrientation()));
+      var atGoals = new SideDependentList<>(side -> positionErrors.get(side) <= positionThreshold
+                                                 && orientationErrors.get(side) <= orientationThreshold);
 
       if (atGoals.get(RobotSide.LEFT) && atGoals.get(RobotSide.RIGHT))
          return true;
@@ -110,12 +104,11 @@ public class QuickFootstepPlanner
          if (distancesToGoalMid.get(side) >= distancesToGoalMid.get(side.getOppositeSide())) // Choose swing foot; furthest from goal
          {
             footToSwing = side;
-
             double stepAlongMidline = idealStepLength * 0.6;
-
             stanceMid.interpolate(stances.get(side), stances.get(side.getOppositeSide()), 0.5);
             goalMid.interpolate(goals.get(side), goals.get(side.getOppositeSide()), 0.5);
 
+            // Determine approach goal mid
             Point2D bisectorStart = new Point2D();
             Vector2D bisectorDirection = new Vector2D();
             EuclidGeometryTools.perpendicularBisector2D(new Point2D(goals.get(RobotSide.RIGHT).getPosition()),
@@ -133,7 +126,6 @@ public class QuickFootstepPlanner
             stanceToGoalMid.sub(goalMid.getPosition(), stanceMid.getPosition());
             if (stanceForward3D.dot(stanceToGoalMid) < 0.0)
                bisectorDirection.negate();
-
             approachGoalMid.scaleAdd(idealStepLength * 0.3, new Vector3D(bisectorDirection), goalMid.getPosition());
 
             stanceToGoalLine.set(stanceMid.getPosition(), approachGoalMid);
@@ -158,48 +150,8 @@ public class QuickFootstepPlanner
             swingEnd.getPosition().scaleAdd(targetDistanceFromLine, oppositeStanceToProjection, midlinePoint);
 
             Quaternion swingEndOrientation = new Quaternion(stanceMid.getOrientation());
-            // Always average in stance feet
             if (midlinePoint.distance(approachGoalMid) < 1.0) // If close to goal, average in goal feet
                swingEndOrientation.interpolate(swingEndOrientation, goalMid.getOrientation(), 0.5);
-//            else // If far from goal, average in yaw along line
-//            {
-//               double yawAlongLine = Math.atan2(stanceToGoalLine.getDirection().getY(), stanceToGoalLine.getDirection().getX());
-//               if (Math.abs(yawAlongLine) > Math.PI / 2.0)
-//                  yawAlongLine -= Math.copySign(Math.PI, yawAlongLine);
-//               Quaternion alongLineOrientation = new Quaternion();
-//               alongLineOrientation.setYawPitchRoll(0.0, 0.0, yawAlongLine);
-//               swingEndOrientation.interpolate(swingEndOrientation, alongLineOrientation, 0.5);
-//            }
-
-//            double yawSum = 0.0;
-//            int yawWeight = 0;
-//            for (RobotSide side2 : RobotSide.values) // Always average in stance feet
-//            {
-//               yawSum += stances.get(side2).getOrientation().getYaw();
-//               ++yawWeight;
-//            }
-//            if (midlinePoint.distance(approachGoalMid) < 1.0) // If close to goal, average in goal feet
-//            {
-//               for (RobotSide side2 : RobotSide.values)
-//               {
-//                  yawSum += goals.get(side2).getOrientation().getYaw();
-//                  ++yawWeight;
-//               }
-//            }
-//            else // If far from goal, average in yaw along line
-//            {
-//               double yawAlongLine = Math.atan2(stanceToGoalLine.getDirection().getY(), stanceToGoalLine.getDirection().getX());
-//               if (Math.abs(yawAlongLine) > Math.PI / 2.0)
-//                  yawAlongLine -= Math.copySign(Math.PI, yawAlongLine);
-//               yawSum += yawAlongLine;
-//               ++yawWeight;
-//            }
-//
-//            double yaw = yawSum / yawWeight;
-//
-//            double yawAmount = EuclidCoreTools.angleDifferenceMinusPiToPi(yaw, stances.get(side.getOppositeSide()).getOrientation().getYaw());
-//            if (yawAmount > idealStepYaw) // Clamp yaw amount
-//               yaw = stances.get(side.getOppositeSide()).getOrientation().getYaw() + Math.copySign(idealStepYaw, yawAmount);
 
             swingEnd.getOrientation().set(swingEndOrientation);
          }
