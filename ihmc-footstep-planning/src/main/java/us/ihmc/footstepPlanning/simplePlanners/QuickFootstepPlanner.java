@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.simplePlanners;
 
 import org.apache.commons.math3.util.Pair;
+import us.ihmc.euclid.Axis2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -28,7 +29,7 @@ public class QuickFootstepPlanner
    private final Vector3D directionToGoal = new Vector3D();
    private final Pose3D stanceMid = new Pose3D();
    private final Pose3D goalMid = new Pose3D();
-   private final Point3D approachGoalMid = new Point3D();
+//   private final Point3D approachGoalMid = new Point3D();
    private final Point3D oppositeStance = new Point3D();
    private final Point3D oppositeStanceMidlineProjection = new Point3D();
    private final Point3D midlinePoint = new Point3D();
@@ -98,48 +99,36 @@ public class QuickFootstepPlanner
          }
       }
 
+      double stepAlongMidline = idealStepLength * 0.6;
+      stanceMid.interpolate(stances.get(RobotSide.LEFT), stances.get(RobotSide.RIGHT), 0.5);
+      goalMid.interpolate(goals.get(RobotSide.LEFT), goals.get(RobotSide.RIGHT), 0.5);
+      stanceToGoalLine.set(stanceMid.getPosition(), goalMid.getPosition());
+      directionToGoal.sub(goalMid.getPosition(), stanceMid.getPosition());
+      directionToGoal.normalize();
+
+      Vector2D stanceToGoal = new Vector2D();
+      stanceToGoal.sub(new Point2D(goalMid.getPosition()), new Point2D(stanceMid.getPosition()));
+      stanceToGoal.normalize();
+      Vector2D stanceMidForward = new Vector2D(Axis2D.X);
+      stanceMid.getOrientation().transform(stanceMidForward);
+
+
       SideDependentList<Double> distancesToGoalMid = new SideDependentList<>(side -> stances.get(side).getPosition().distance(goalMid.getPosition()));
       for (RobotSide side : RobotSide.values) // Take a step towards the goal
       {
          if (distancesToGoalMid.get(side) >= distancesToGoalMid.get(side.getOppositeSide())) // Choose swing foot; furthest from goal
          {
             footToSwing = side;
-            double stepAlongMidline = idealStepLength * 0.6;
-            stanceMid.interpolate(stances.get(side), stances.get(side.getOppositeSide()), 0.5);
-            goalMid.interpolate(goals.get(side), goals.get(side.getOppositeSide()), 0.5);
 
-            // Determine approach goal mid
-            Point2D bisectorStart = new Point2D();
-            Vector2D bisectorDirection = new Vector2D();
-            EuclidGeometryTools.perpendicularBisector2D(new Point2D(goals.get(RobotSide.RIGHT).getPosition()),
-                                                        new Point2D(goals.get(RobotSide.LEFT).getPosition()),
-                                                        bisectorStart,
-                                                        bisectorDirection);
-            Vector3D midFeetForward3D = new Vector3D(1.0, 0.0, 0.0);
-            goalMid.getOrientation().transform(midFeetForward3D);
-            Vector2D midFeetForward = new Vector2D(midFeetForward3D.getX(), midFeetForward3D.getY());
-            if (midFeetForward.dot(bisectorDirection) > 0.0)
-               bisectorDirection.negate();
-            Vector3D stanceForward3D = new Vector3D(1.0, 0.0, 0.0);
-            stanceMid.getOrientation().transform(stanceForward3D);
-            Vector3D stanceToGoalMid = new Vector3D();
-            stanceToGoalMid.sub(goalMid.getPosition(), stanceMid.getPosition());
-            if (stanceForward3D.dot(stanceToGoalMid) < 0.0)
-               bisectorDirection.negate();
-            approachGoalMid.scaleAdd(idealStepLength * 0.3, new Vector3D(bisectorDirection), goalMid.getPosition());
-
-            stanceToGoalLine.set(stanceMid.getPosition(), approachGoalMid);
-            directionToGoal.sub(approachGoalMid, stanceMid.getPosition());
-            directionToGoal.normalize();
 
             oppositeStance.set(stances.get(side.getOppositeSide()).getPosition());
             oppositeStanceMidlineProjection.set(stanceToGoalLine.orthogonalProjectionCopy(oppositeStance));
 
             // Scale down step length as we approach goal to avoid small final steps
             double transitionDistance = 2.0 * idealStepLength * 0.6;
-            transistionToGoal = oppositeStanceMidlineProjection.distance(approachGoalMid) < transitionDistance;
+            transistionToGoal = oppositeStanceMidlineProjection.distance(goalMid.getPosition()) < transitionDistance;
             if (transistionToGoal)
-               stepAlongMidline = oppositeStanceMidlineProjection.distance(approachGoalMid) / 2.0;
+               stepAlongMidline = oppositeStanceMidlineProjection.distance(goalMid.getPosition()) / 2.0;
 
             midlinePoint.scaleAdd(stepAlongMidline, directionToGoal, oppositeStanceMidlineProjection);
 
@@ -150,7 +139,7 @@ public class QuickFootstepPlanner
             swingEnd.getPosition().scaleAdd(targetDistanceFromLine, oppositeStanceToProjection, midlinePoint);
 
             Quaternion swingEndOrientation = new Quaternion(stanceMid.getOrientation());
-            if (midlinePoint.distance(approachGoalMid) < 1.0) // If close to goal, average in goal feet
+            if (midlinePoint.distance(goalMid.getPosition()) < 1.0) // If close to goal, average in goal feet
                swingEndOrientation.interpolate(swingEndOrientation, goalMid.getOrientation(), 0.5);
 
             swingEnd.getOrientation().set(swingEndOrientation);
@@ -159,6 +148,28 @@ public class QuickFootstepPlanner
 
       return false;
    }
+
+//   private void calculateApproachMid()
+//   {
+//      Point2D bisectorStart = new Point2D();
+//      Vector2D bisectorDirection = new Vector2D();
+//      EuclidGeometryTools.perpendicularBisector2D(new Point2D(goals.get(RobotSide.RIGHT).getPosition()),
+//                                                  new Point2D(goals.get(RobotSide.LEFT).getPosition()),
+//                                                  bisectorStart,
+//                                                  bisectorDirection);
+//      Vector3D midFeetForward3D = new Vector3D(1.0, 0.0, 0.0);
+//      goalMid.getOrientation().transform(midFeetForward3D);
+//      Vector2D midFeetForward = new Vector2D(midFeetForward3D.getX(), midFeetForward3D.getY());
+//      if (midFeetForward.dot(bisectorDirection) > 0.0)
+//         bisectorDirection.negate();
+//      Vector3D stanceForward3D = new Vector3D(1.0, 0.0, 0.0);
+//      stanceMid.getOrientation().transform(stanceForward3D);
+//      Vector3D stanceToGoalMid = new Vector3D();
+//      stanceToGoalMid.sub(goalMid.getPosition(), stanceMid.getPosition());
+//      if (stanceForward3D.dot(stanceToGoalMid) < 0.0)
+//         bisectorDirection.negate();
+//      approachGoalMid.scaleAdd(idealStepLength * 0.3, new Vector3D(bisectorDirection), goalMid.getPosition());
+//   }
 
    public void setStepPlannedCallback(Runnable stepPlannedCallback)
    {
@@ -185,10 +196,10 @@ public class QuickFootstepPlanner
       return goalMid;
    }
 
-   public Point3D getApproachGoalMid()
-   {
-      return approachGoalMid;
-   }
+//   public Point3D getApproachGoalMid()
+//   {
+//      return approachGoalMid;
+//   }
 
    public Point3D getOppositeStance()
    {

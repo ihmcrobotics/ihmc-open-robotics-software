@@ -184,9 +184,9 @@ public class RDXQuickFootstepPlannerDemo
                visualModels.add(RDXModelBuilder.buildModelInstance(builder ->
                {
                   builder.addSphere(0.02f, planner.getGoalMid().getPosition(), Color.PURPLE);
-                  builder.addLine(planner.getStanceMid().getPosition(), planner.getApproachGoalMid(), 0.01, Color.WHITE);
+                  builder.addLine(planner.getStanceMid().getPosition(), planner.getGoalMid().getPosition(), 0.01, Color.WHITE);
                   builder.addLine(planner.getOppositeStance(), planner.getOppositeStanceMidlineProjection(), 0.01, Color.OLIVE);
-                  builder.addLine(planner.getGoalMid().getPosition(), planner.getApproachGoalMid(), 0.01, Color.CHARTREUSE);
+//                  builder.addLine(planner.getGoalMid().getPosition(), planner.getApproachGoalMid(), 0.01, Color.CHARTREUSE);
 
                   float r = 0.5294118f;
                   float g = 0.80784315f;
