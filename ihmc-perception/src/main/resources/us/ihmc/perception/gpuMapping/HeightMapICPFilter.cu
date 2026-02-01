@@ -52,8 +52,8 @@ __global__ void heightMapICPKernel(float *__restrict__ localMap, size_t pitchLoc
             // Check if search indices are within bounds
             if (searchX >= 0 && searchX < params[CELLS_PER_AXIS] && searchY >= 0 && searchY < params[CELLS_PER_AXIS])
             {
-                float* globalRow = (float*)((char*)globalMeanMap + globalIndices.x * pitchGlobalMean);
-                float globalHeight = globalRow[globalIndices.y];
+                float* globalRow = (float*)((char*)globalMeanMap + searchX * pitchGlobalMean);
+                float globalHeight = globalRow[searchY];
                 float2 globalMapCellCoordinates = indices_to_coordinate(make_int2(searchX, searchY),
                                                                         make_float2(globalMapCenterX, globalMapCenterY),
                                                                         params[CELL_SIZE],

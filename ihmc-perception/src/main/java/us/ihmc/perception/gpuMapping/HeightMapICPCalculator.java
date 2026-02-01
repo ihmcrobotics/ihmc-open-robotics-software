@@ -123,7 +123,14 @@ public class HeightMapICPCalculator
          Mat cpuVectorMap = new Mat();
          vectorMap.download(cpuVectorMap);
 
-         Scalar meanVector = opencv_core.mean(cpuVectorMap);
+         // 1. Create a mask where localMap has height (is not 0.0)
+         Mat mask = new Mat();
+         Mat cpuLocalMean = new Mat();
+         localMeanMap.download(cpuLocalMean);
+         opencv_core.compare(cpuLocalMean, new Mat(new Scalar(0.0)), mask, opencv_core.CMP_NE);
+
+         // 2. Compute mean only for the pillar area
+         Scalar meanVector = opencv_core.mean(cpuVectorMap, mask);
 
          double dx = meanVector.get(0);
          double dy = meanVector.get(1);

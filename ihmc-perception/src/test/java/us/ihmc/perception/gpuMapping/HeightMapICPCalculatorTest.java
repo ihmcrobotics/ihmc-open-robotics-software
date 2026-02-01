@@ -2,8 +2,10 @@ package us.ihmc.perception.gpuMapping;
 
 import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.javacpp.FloatPointer;
+import org.bytedeco.javacpp.indexer.FloatIndexer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
+import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -182,9 +184,89 @@ public class HeightMapICPCalculatorTest
       cudaFreeAsync(devicePtr, stream);
    }
 
-   Need to create a test that puts a pillar in the middle of the global map, and a pillar in the middle of the local map
-   And ICP shsould be able to find the transform between them if I say the transform is 0.8 but the local center is 0.0, and the global center is 1.0
-   So there is the transform saying 0.8 but the map origins saying 1.0. The ICP should be able to find the difference.
+   @Test
+   public void testICPWithPillarAndConflictingTransformAndOrigin()
+   {
+      HeightMapParameters heightMapParameters = new HeightMapParameters();
+      CUstream_st stream = CUDAStreamManager.getStream();
+      HeightMapICPCalculator heightMapICPCalculator = new HeightMapICPCalculator(heightMapParameters, stream);
+      int centerIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getWidthInMeters(), heightMapParameters.getCellSize());
+      int cellsPerAxis = 2 * centerIndex + 1;
 
-      In order to do this the global map may need to be larger then the local map. Going to look into that. I could increase it to 5 meters I guess
+      // 1. Create CPU Mats (Empty)
+      Mat localMatCPU = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1, new Scalar(0.0));
+      Mat globalMatCPU = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1, new Scalar(0.0));
+
+      // 2. Define Pillar Parameters
+      float pillarHeight = 2.0f;
+      int startX = centerIndex - 2; // Centering a 5x5 pillar around the centerIndex
+      int startY = centerIndex - 2;
+      int size = 5;
+
+      // 3. Populate CPU Mat using Indexer (Faster than .ptr for loops)
+      FloatIndexer localIndexer = localMatCPU.createIndexer();
+      FloatIndexer globalIndexer = globalMatCPU.createIndexer();
+
+      for (int y = startY; y < startY + size; y++)
+      {
+         for (int x = startX; x < startX + size; x++)
+         {
+            localIndexer.put(y, x, pillarHeight);
+            globalIndexer.put(y, x, pillarHeight);
+         }
+      }
+
+      // 4. Create GpuMats and Upload
+      GpuMat localMap = new GpuMat();
+      GpuMat globalMap = new GpuMat();
+
+      localMap.upload(localMatCPU);
+      globalMap.upload(globalMatCPU);
+
+      // Cleanup indexers/mats if necessary (Java handles most, but good to be aware)
+      localIndexer.release();
+      globalIndexer.release();
+
+      // 3. Map centers disagree
+      // Local center = 0.0
+      // Global center = 1.0
+      Point3D globalMapCenter = new Point3D(1.0, 0.0, 0.0);
+
+      // 4. Transform claims only 0.8m in X
+      // ICP should recover the remaining +0.2m
+      RigidBodyTransform transform = new RigidBodyTransform();
+      transform.getTranslation().set(0.8, 0.0, 0.0);
+
+      float[] transformArray = new float[16];
+      transform.get(transformArray);
+
+      // 5. Upload transform
+      FloatPointer hostPtr = new FloatPointer(16);
+      hostPtr.put(transformArray);
+
+      FloatPointer devicePtr = new FloatPointer();
+      CUDATools.mallocAsync(devicePtr, 16, stream);
+      CUDATools.memcpyAsync(devicePtr, hostPtr, 16, stream);
+
+      // 6. Run ICP
+      heightMapICPCalculator.update(localMap, globalMap, devicePtr, globalMapCenter);
+
+      // 7. Verify result
+      Vector3D meanVector = heightMapICPCalculator.getVectorMap();
+
+      System.out.println("Pillar + conflicting transform test:");
+      System.out.println("Mean X: " + meanVector.getX());
+      System.out.println("Mean Y: " + meanVector.getY());
+      System.out.println("Mean Z: " + meanVector.getZ());
+
+      // Expected:
+      // Global center (1.0) - transform (0.8) = 0.2
+      assertEquals(0.2, meanVector.getX(), 1e-4);
+      assertEquals(0.0, meanVector.getY(), 1e-5);
+      assertEquals(0.0, meanVector.getZ(), 1e-5);
+
+      // Cleanup
+      hostPtr.close();
+      cudaFreeAsync(devicePtr, stream);
+   }
 }
