@@ -59,7 +59,7 @@ module behavior_msgs
         /**
          * The type of condition as defined above
          */
-        octet type;
+        octet condition_type;
         /**
          * The number of times to fail before passing
          */
@@ -119,7 +119,7 @@ module behavior_msgs
         /**
          * The type of shape contains condition as defined above
          */
-        octet contains_type;
+        octet shape_contains_type;
         /**
          * Name of the frame the the shape's pose is expressed in
          */

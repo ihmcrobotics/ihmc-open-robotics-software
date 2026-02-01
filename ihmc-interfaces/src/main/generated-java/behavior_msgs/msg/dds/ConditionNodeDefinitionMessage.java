@@ -32,7 +32,7 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
    /**
             * The type of condition as defined above
             */
-   public byte type_;
+   public byte condition_type_;
    /**
             * The number of times to fail before passing
             */
@@ -92,7 +92,7 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
    /**
             * The type of shape contains condition as defined above
             */
-   public byte contains_type_;
+   public byte shape_contains_type_;
    /**
             * Name of the frame the the shape's pose is expressed in
             */
@@ -136,7 +136,7 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
    public void set(ConditionNodeDefinitionMessage other)
    {
       behavior_msgs.msg.dds.LeafNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
-      type_ = other.type_;
+      condition_type_ = other.condition_type_;
 
       count_to_ = other.count_to_;
 
@@ -171,7 +171,7 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
 
       timeout_ = other.timeout_;
 
-      contains_type_ = other.contains_type_;
+      shape_contains_type_ = other.shape_contains_type_;
 
       shape_parent_frame_name_.setLength(0);
       shape_parent_frame_name_.append(other.shape_parent_frame_name_);
@@ -198,16 +198,16 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
    /**
             * The type of condition as defined above
             */
-   public void setType(byte type)
+   public void setConditionType(byte condition_type)
    {
-      type_ = type;
+      condition_type_ = condition_type;
    }
    /**
             * The type of condition as defined above
             */
-   public byte getType()
+   public byte getConditionType()
    {
-      return type_;
+      return condition_type_;
    }
 
    /**
@@ -468,16 +468,16 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
    /**
             * The type of shape contains condition as defined above
             */
-   public void setContainsType(byte contains_type)
+   public void setShapeContainsType(byte shape_contains_type)
    {
-      contains_type_ = contains_type;
+      shape_contains_type_ = shape_contains_type;
    }
    /**
             * The type of shape contains condition as defined above
             */
-   public byte getContainsType()
+   public byte getShapeContainsType()
    {
-      return contains_type_;
+      return shape_contains_type_;
    }
 
    /**
@@ -586,7 +586,7 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
       if(other == this) return true;
 
       if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.type_, other.type_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.condition_type_, other.condition_type_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.count_to_, other.count_to_, epsilon)) return false;
 
@@ -616,7 +616,7 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.timeout_, other.timeout_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.contains_type_, other.contains_type_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.shape_contains_type_, other.shape_contains_type_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.shape_parent_frame_name_, other.shape_parent_frame_name_, epsilon)) return false;
 
@@ -641,7 +641,7 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
       ConditionNodeDefinitionMessage otherMyClass = (ConditionNodeDefinitionMessage) other;
 
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
-      if(this.type_ != otherMyClass.type_) return false;
+      if(this.condition_type_ != otherMyClass.condition_type_) return false;
 
       if(this.count_to_ != otherMyClass.count_to_) return false;
 
@@ -671,7 +671,7 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
 
       if(this.timeout_ != otherMyClass.timeout_) return false;
 
-      if(this.contains_type_ != otherMyClass.contains_type_) return false;
+      if(this.shape_contains_type_ != otherMyClass.shape_contains_type_) return false;
 
       if (!us.ihmc.idl.IDLTools.equals(this.shape_parent_frame_name_, otherMyClass.shape_parent_frame_name_)) return false;
 
@@ -694,8 +694,8 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
       builder.append("ConditionNodeDefinitionMessage {");
       builder.append("definition=");
       builder.append(this.definition_);      builder.append(", ");
-      builder.append("type=");
-      builder.append(this.type_);      builder.append(", ");
+      builder.append("condition_type=");
+      builder.append(this.condition_type_);      builder.append(", ");
       builder.append("count_to=");
       builder.append(this.count_to_);      builder.append(", ");
       builder.append("reset_context_each_run=");
@@ -724,8 +724,8 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
       builder.append(this.max_distance_);      builder.append(", ");
       builder.append("timeout=");
       builder.append(this.timeout_);      builder.append(", ");
-      builder.append("contains_type=");
-      builder.append(this.contains_type_);      builder.append(", ");
+      builder.append("shape_contains_type=");
+      builder.append(this.shape_contains_type_);      builder.append(", ");
       builder.append("shape_parent_frame_name=");
       builder.append(this.shape_parent_frame_name_);      builder.append(", ");
       builder.append("shape_transform_to_parent=");

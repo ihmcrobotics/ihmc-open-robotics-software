@@ -9,7 +9,7 @@ byte ALWAYS_FAIL = 4
 byte ALWAYS_SUCCEED = 5
 
 # The type of condition as defined above
-byte type
+byte condition_type
 
 # COUNTER TYPE
 
@@ -69,7 +69,7 @@ byte CONTAINS_FRAME = 0
 byte CONTAINS_POINTS = 1
 
 # The type of shape contains condition as defined above
-byte contains_type
+byte shape_contains_type
 
 # Name of the frame the the shape's pose is expressed in
 string shape_parent_frame_name

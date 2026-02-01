@@ -15,7 +15,7 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "2aad2c31712e17c0136cf7bfbeb8bb9729ef3f560d326b281fc5ebef26d836f8";
+   		return "d1ddda691fcad5d33fba1dcea356869c7152479dbd0ef84752e1f1122a165b3b";
    }
    
    @Override
@@ -141,7 +141,7 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
    public static void write(behavior_msgs.msg.dds.SceneActionNodeDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
-      cdr.write_type_9(data.getType());
+      cdr.write_type_9(data.getSceneActionType());
 
       behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessagePubSubType.write(data.getSceneObjectDefinition(), cdr);
       cdr.write_type_5(data.getTimeout());
@@ -175,7 +175,7 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
    public static void read(behavior_msgs.msg.dds.SceneActionNodeDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
-      data.setType(cdr.read_type_9());
+      data.setSceneActionType(cdr.read_type_9());
       	
       behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessagePubSubType.read(data.getSceneObjectDefinition(), cdr);	
       data.setTimeout(cdr.read_type_5());
@@ -203,7 +203,7 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
    {
       ser.write_type_a("definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getDefinition());
 
-      ser.write_type_9("type", data.getType());
+      ser.write_type_9("scene_action_type", data.getSceneActionType());
       ser.write_type_a("scene_object_definition", new behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessagePubSubType(), data.getSceneObjectDefinition());
 
       ser.write_type_5("timeout", data.getTimeout());
@@ -223,7 +223,7 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
    {
       ser.read_type_a("definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getDefinition());
 
-      data.setType(ser.read_type_9("type"));
+      data.setSceneActionType(ser.read_type_9("scene_action_type"));
       ser.read_type_a("scene_object_definition", new behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessagePubSubType(), data.getSceneObjectDefinition());
 
       data.setTimeout(ser.read_type_5("timeout"));

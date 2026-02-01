@@ -103,7 +103,7 @@ public class ShapeContainsConditionDefinition
 
    public void toMessage(ConditionNodeDefinitionMessage message)
    {
-      message.setContainsType(containsType.toMessageOrdinal());
+      message.setShapeContainsType(containsType.toMessageOrdinal());
       message.setFrameName(frameName.toMessage());
       message.setMinPoints(minPoints.toMessage());
       message.setShapeParentFrameName(shapeParentFrameName.toMessage());
@@ -113,7 +113,7 @@ public class ShapeContainsConditionDefinition
 
    public void fromMessage(ConditionNodeDefinitionMessage message)
    {
-      containsType.fromMessageOrdinal(message.getContainsType(), ContainsType.values);
+      containsType.fromMessageOrdinal(message.getShapeContainsType(), ContainsType.values);
       frameName.fromMessage(message.getFrameNameAsString());
       minPoints.fromMessage((int) message.getMinPoints());
       shapeParentFrameName.fromMessage(message.getShapeParentFrameNameAsString());

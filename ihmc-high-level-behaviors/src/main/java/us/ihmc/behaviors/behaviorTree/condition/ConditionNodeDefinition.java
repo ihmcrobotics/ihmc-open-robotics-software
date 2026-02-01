@@ -138,7 +138,7 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
    {
       super.toMessage(message.getDefinition());
 
-      message.setType((byte) conditionType.toMessage().ordinal());
+      message.setConditionType(conditionType.toMessageOrdinal());
 
       switch (conditionType.getValue())
       {
@@ -153,7 +153,7 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
    {
       super.fromMessage(message.getDefinition());
 
-      conditionType.fromMessage(ConditionNodeType.values()[message.getType()]);
+      conditionType.fromMessageOrdinal(message.getConditionType(), ConditionNodeType.values);
 
       switch (conditionType.getValue())
       {
