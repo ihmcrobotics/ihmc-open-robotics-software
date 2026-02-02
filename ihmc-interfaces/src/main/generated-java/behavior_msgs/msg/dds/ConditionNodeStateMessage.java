@@ -10,6 +10,7 @@ import us.ihmc.pubsub.TopicDataType;
        * COUNTER TYPE
        * LLM TYPE
        * PROXIMITY TYPE
+       * SHAPE CONTAINS TYPE
        */
 public class ConditionNodeStateMessage extends Packet<ConditionNodeStateMessage> implements Settable<ConditionNodeStateMessage>, EpsilonComparable<ConditionNodeStateMessage>
 {
@@ -41,6 +42,8 @@ public class ConditionNodeStateMessage extends Packet<ConditionNodeStateMessage>
             * Whether frame B is present
             */
    public boolean frame_b_is_present_;
+   public long number_of_points_contained_;
+   public boolean frame_is_contained_;
 
    public ConditionNodeStateMessage()
    {
@@ -67,6 +70,10 @@ public class ConditionNodeStateMessage extends Packet<ConditionNodeStateMessage>
       frame_a_is_present_ = other.frame_a_is_present_;
 
       frame_b_is_present_ = other.frame_b_is_present_;
+
+      number_of_points_contained_ = other.number_of_points_contained_;
+
+      frame_is_contained_ = other.frame_is_contained_;
 
    }
 
@@ -157,6 +164,24 @@ public class ConditionNodeStateMessage extends Packet<ConditionNodeStateMessage>
       return frame_b_is_present_;
    }
 
+   public void setNumberOfPointsContained(long number_of_points_contained)
+   {
+      number_of_points_contained_ = number_of_points_contained;
+   }
+   public long getNumberOfPointsContained()
+   {
+      return number_of_points_contained_;
+   }
+
+   public void setFrameIsContained(boolean frame_is_contained)
+   {
+      frame_is_contained_ = frame_is_contained;
+   }
+   public boolean getFrameIsContained()
+   {
+      return frame_is_contained_;
+   }
+
 
    public static Supplier<ConditionNodeStateMessagePubSubType> getPubSubType()
    {
@@ -186,6 +211,10 @@ public class ConditionNodeStateMessage extends Packet<ConditionNodeStateMessage>
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.frame_b_is_present_, other.frame_b_is_present_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.number_of_points_contained_, other.number_of_points_contained_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.frame_is_contained_, other.frame_is_contained_, epsilon)) return false;
+
 
       return true;
    }
@@ -210,6 +239,10 @@ public class ConditionNodeStateMessage extends Packet<ConditionNodeStateMessage>
 
       if(this.frame_b_is_present_ != otherMyClass.frame_b_is_present_) return false;
 
+      if(this.number_of_points_contained_ != otherMyClass.number_of_points_contained_) return false;
+
+      if(this.frame_is_contained_ != otherMyClass.frame_is_contained_) return false;
+
 
       return true;
    }
@@ -233,7 +266,11 @@ public class ConditionNodeStateMessage extends Packet<ConditionNodeStateMessage>
       builder.append("frame_a_is_present=");
       builder.append(this.frame_a_is_present_);      builder.append(", ");
       builder.append("frame_b_is_present=");
-      builder.append(this.frame_b_is_present_);
+      builder.append(this.frame_b_is_present_);      builder.append(", ");
+      builder.append("number_of_points_contained=");
+      builder.append(this.number_of_points_contained_);      builder.append(", ");
+      builder.append("frame_is_contained=");
+      builder.append(this.frame_is_contained_);
       builder.append("}");
       return builder.toString();
    }

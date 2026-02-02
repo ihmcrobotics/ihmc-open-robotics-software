@@ -29,7 +29,7 @@ module behavior_msgs
         /**
          * The type of action as defined above
          */
-        octet type;
+        octet scene_action_type;
         /**
          * Definition of the object to setup
          */
