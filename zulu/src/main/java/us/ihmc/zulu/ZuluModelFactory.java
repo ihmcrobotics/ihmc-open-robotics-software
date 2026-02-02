@@ -12,7 +12,7 @@ import us.ihmc.scs2.definition.robot.WrenchSensorDefinition;
 import us.ihmc.scs2.definition.robot.urdf.URDFTools;
 import us.ihmc.scs2.definition.robot.urdf.items.URDFModel;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
-import us.ihmc.zulu.parameters.model.ZULUURDFParameters;
+import us.ihmc.zulu.parameters.model.ZuluURDFParameters;
 
 import java.util.Arrays;
 import java.util.function.Consumer;
@@ -21,7 +21,7 @@ import java.util.function.Predicate;
 public class ZuluModelFactory
 {
    private final String[] resourceModelsToBeLogged;
-   private final ZULUURDFParameters urdfParameters;
+   private final ZuluURDFParameters urdfParameters;
    private final RobotContactPointParameters<RobotSide> contactPointParameters;
    private RobotDefinition simulationRobotDefinition;
    private final ZuluVersion zuluVersion;

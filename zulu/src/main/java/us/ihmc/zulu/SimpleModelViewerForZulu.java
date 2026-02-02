@@ -1,7 +1,7 @@
 package us.ihmc.zulu;
 
 import jakarta.xml.bind.JAXBException;
-import us.ihmc.zulu.parameters.model.ZULUURDFParameters;
+import us.ihmc.zulu.parameters.model.ZuluURDFParameters;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.robot.urdf.URDFTools;
 import us.ihmc.scs2.definition.robot.urdf.items.URDFModel;
@@ -16,7 +16,7 @@ public class SimpleModelViewerForZulu
    {
       // We define the version of the robot we want to us
       ZuluVersion version = ZuluVersion.V1_FULL_ROBOT;
-      ZULUURDFParameters modelParameters = new ZULUURDFParameters(version);
+      ZuluURDFParameters modelParameters = new ZuluURDFParameters(version);
 
       // We create the URDF model to be loaded into SCS2
       URDFModel urdfModel = URDFTools.loadURDFModel(modelParameters.getURDFAsInputStream(),

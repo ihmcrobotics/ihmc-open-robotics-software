@@ -28,7 +28,7 @@ import us.ihmc.zulu.parameters.controller.ZuluWalkingControllerParameters;
 import us.ihmc.zulu.parameters.diagnostic.ZuluDiagnosticParameters;
 import us.ihmc.zulu.parameters.model.ZuluPhysicalProperties;
 import us.ihmc.zulu.parameters.model.ZuluSimulationCollisionModel;
-import us.ihmc.zulu.parameters.model.ZULUURDFParameters;
+import us.ihmc.zulu.parameters.model.ZuluURDFParameters;
 import us.ihmc.zulu.parameters.planning.ZuluFootstepPlannerParameters;
 import us.ihmc.zulu.parameters.planning.ZuluLocomotionParameters;
 import us.ihmc.zulu.parameters.planning.ZuluSwingPlannerParameters;
@@ -241,7 +241,7 @@ public class ZuluRobotModel implements DRCRobotModel
    @Override
    public String toString()
    {
-      return ZULUURDFParameters.URDF_MODEL_NAME;
+      return ZuluURDFParameters.URDF_MODEL_NAME;
    }
 
    @Override
@@ -332,7 +332,7 @@ public class ZuluRobotModel implements DRCRobotModel
    @Override
    public String getSimpleRobotName()
    {
-      return ZULUURDFParameters.URDF_MODEL_NAME;
+      return ZuluURDFParameters.URDF_MODEL_NAME;
    }
 
    @Override

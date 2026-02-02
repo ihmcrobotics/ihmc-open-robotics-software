@@ -13,15 +13,13 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * This class contains the paths to the individual URDF files that will be used to build the robot. It also holds some simple methods to combine the different
- * files into one input stream that will be used to build the URDF.
+ * This class contains the paths to the URDF file that will be used to build the robot.
  */
-public class ZULUURDFParameters
+public class ZuluURDFParameters
 {
+   public static final String RESOURCE_DIRECTORY = "zulu/";
    public static final String URDF_MODEL_NAME = "Zulu";
    private static final String[] RESOURCE_DIRECTORIES = new String[] {"zulu/", "zulu/urdf/", "zulu/meshes/"};
-
-   private static final String[] LOGGED_RESOURCES = {"zulu/"};
 
    public static final String URDF_FULL_BODY = "zulu-full-body.urdf";
 
@@ -30,7 +28,7 @@ public class ZULUURDFParameters
 
    private final URDFTools.URDFParserProperties urdfParserProperties = new URDFTools.URDFParserProperties();
 
-   public ZULUURDFParameters(ZuluVersion zuluVersion)
+   public ZuluURDFParameters(ZuluVersion zuluVersion)
    {
       urdfParserProperties.setHandleImplicitJointDefinitions(false);
 
@@ -69,7 +67,7 @@ public class ZULUURDFParameters
 
    public String[] getLoggedResources()
    {
-      return LOGGED_RESOURCES;
+      return new String[] {RESOURCE_DIRECTORY};
    }
 
    public InputStream getURDFAsInputStream()
