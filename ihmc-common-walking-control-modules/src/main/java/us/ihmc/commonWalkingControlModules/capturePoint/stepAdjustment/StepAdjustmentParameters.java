@@ -1,8 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment;
 
-import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
-
-public abstract class StepAdjustmentParameters
+public class StepAdjustmentParameters
 {
    /**
     * Specifies the amount of ICP error (the 2D distance in XY from desired to current) that is required for the controller to consider step adjustment.
@@ -15,7 +13,10 @@ public abstract class StepAdjustmentParameters
    /**
     * Enabling this boolean enables the use step adjustment for stabilization.
     */
-   public abstract boolean allowStepAdjustment();
+   public boolean allowStepAdjustment()
+   {
+      return true;
+   }
 
    /**
     * Maximum number of steps to consider in the capture region calculation.
@@ -38,7 +39,10 @@ public abstract class StepAdjustmentParameters
     * When the adjustment is within the deadband, it is set to zero.
     * When it is outside the deadband, the deadband is subtracted from it.
     */
-   public abstract double getAdjustmentDeadband();
+   public double getAdjustmentDeadband()
+   {
+      return 0.005;
+   }
 
    /**
     * Specifies the minimum time remaining for the controller to allow step adjustment. Once the time remaining goes below this value, the step position in
@@ -46,7 +50,7 @@ public abstract class StepAdjustmentParameters
     */
    public double getMinimumTimeForStepAdjustment()
    {
-      return 0.02;
+      return -0.2;
    }
 
    /**

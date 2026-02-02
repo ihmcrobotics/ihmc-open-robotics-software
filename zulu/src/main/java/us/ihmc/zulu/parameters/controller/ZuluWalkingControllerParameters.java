@@ -50,7 +50,7 @@ public class ZuluWalkingControllerParameters extends WalkingControllerParameters
    private SwingTrajectoryParameters swingTrajectoryParameters;
    private final SteppingParameters steppingParameters;
    private final ICPControllerParameters icpControllerParameters;
-   private final ZuluStepAdjustmentParameters stepAdjustmentParameters;
+   private final StepAdjustmentParameters stepAdjustmentParameters;
    private JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = new ZuluJointPrivilegedConfigurationParameters();
    private final OneDoFJointPrivilegedConfigurationParameters kneePrivilegedConfigurationParameters;
    private final JointLimitParameters kneeJointLimitParameters;
@@ -103,7 +103,7 @@ public class ZuluWalkingControllerParameters extends WalkingControllerParameters
       swingTrajectoryParameters = new SwingTrajectoryParameters();
       steppingParameters = new SteppingParameters();
       icpControllerParameters = new ICPControllerParameters();
-      stepAdjustmentParameters = new ZuluStepAdjustmentParameters();
+      stepAdjustmentParameters = new StepAdjustmentParameters();
 
       kneePrivilegedConfigurationParameters = new OneDoFJointPrivilegedConfigurationParameters();
       kneePrivilegedConfigurationParameters.setConfigurationGain(target == RobotTarget.REAL_ROBOT ? 60.0 : 120.0);

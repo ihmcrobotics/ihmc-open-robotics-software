@@ -8,12 +8,10 @@ import us.ihmc.zulu.ZuluRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.AvatarPushRecoveryOverSteppingStonesTest;
-import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
-import us.ihmc.zulu.parameters.controller.ZuluStepAdjustmentParameters;
 import us.ihmc.zulu.parameters.controller.ZuluWalkingControllerParameters;
 
 @Tag("humanoid-obstacle-slow-3")
@@ -29,19 +27,6 @@ public class ZuluPushRecoveryOverSteppingStonesTest extends AvatarPushRecoveryOv
          {
             return new ZuluWalkingControllerParameters(getRobotVersion(), RobotTarget.SCS, getJointMap(), getPhysicalProperties(), getContactPointParameters())
             {
-               @Override
-               public StepAdjustmentParameters getStepAdjustmentParameters()
-               {
-                  return new ZuluStepAdjustmentParameters()
-                  {
-                     @Override
-                     public boolean allowStepAdjustment()
-                     {
-                        return true;
-                     }
-                  };
-               }
-
                @Override
                public SteppingParameters getSteppingParameters()
                {
