@@ -12,10 +12,7 @@ ihmc {
 }
 
 mainDependencies {
-   api("commons-collections:commons-collections:3.2.1")
    api("com.thoughtworks.xstream:xstream:1.4.19")
-   api("org.jgrapht:jgrapht-core:0.9.0")
-   api("org.jgrapht:jgrapht-ext:0.9.0")
    api("com.github.wendykierp:JTransforms:3.1")
 
    api("us.ihmc:ihmc-communication:source")
