@@ -16,6 +16,7 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 /**
  * This class is responsible for applying a master gain to all low-level desired outputs.
@@ -251,6 +252,11 @@ public class AvatarLowLevelOutputProcessor
    public void addServoListener(YoVariableChangedListener listener)
    {
       servo.addListener(listener);
+   }
+
+   public void addUnservoQuicklyListener(YoVariableChangedListener listener)
+   {
+      unservoQuickly.addListener(listener);
    }
 
    public void addMasterGainListener(YoVariableChangedListener listener)
