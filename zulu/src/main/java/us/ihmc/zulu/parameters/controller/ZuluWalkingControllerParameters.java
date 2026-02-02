@@ -51,7 +51,7 @@ public class ZuluWalkingControllerParameters extends WalkingControllerParameters
    private final SteppingParameters steppingParameters;
    private final ICPControllerParameters icpControllerParameters;
    private final StepAdjustmentParameters stepAdjustmentParameters;
-   private JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = new ZuluJointPrivilegedConfigurationParameters();
+   private JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = new JointPrivilegedConfigurationParameters();
    private final OneDoFJointPrivilegedConfigurationParameters kneePrivilegedConfigurationParameters;
    private final JointLimitParameters kneeJointLimitParameters;
 
