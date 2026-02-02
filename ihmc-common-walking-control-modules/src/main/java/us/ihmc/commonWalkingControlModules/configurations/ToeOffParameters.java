@@ -1,23 +1,34 @@
 package us.ihmc.commonWalkingControlModules.configurations;
 
-public abstract class ToeOffParameters
+public class ToeOffParameters
 {
    /**
     * Boolean to enable transitions to the toe off contact state, if the appropriate conditions are satisfied.
+    *
     * @return boolean (true = Allow Toe Off, false = Don't Allow Toe Off)
     */
-   public abstract boolean doToeOffIfPossible();
+   public boolean doToeOffIfPossible()
+   {
+      return true;
+   }
 
-   public abstract boolean doToeOffIfPossibleInSingleSupport();
+   public boolean doToeOffIfPossibleInSingleSupport()
+   {
+      return false;
+   }
 
    /**
     * Minimum stance length in double support to enable toe off.
+    *
     * @return threshold stance length in meters
     */
-   public abstract double getMinStepLengthForToeOff();
+   public double getMinStepLengthForToeOff()
+   {
+      return 0.187;
+   }
 
    /**
-    * Whether or not to use a line contact during the swing state. If false, will use a point contact instead.
+    * Whether to use a line contact during the swing state. If false, will use a point contact instead.
     */
    public boolean useToeOffLineContactInSwing()
    {
@@ -25,7 +36,7 @@ public abstract class ToeOffParameters
    }
 
    /**
-    * Whether or not to use a line contact during the transfer state. If false, will use a point contact instead.
+    * Whether to use a line contact during the transfer state. If false, will use a point contact instead.
     */
    public boolean useToeOffLineContactInTransfer()
    {
@@ -35,7 +46,10 @@ public abstract class ToeOffParameters
    /**
     * To enable that feature, {@link ToeOffParameters#doToeOffIfPossible()} return true is required. John parameter
     */
-   public abstract boolean doToeOffWhenHittingAnkleLimit();
+   public boolean doToeOffWhenHittingAnkleLimit()
+   {
+      return true;
+   }
 
    /**
     * Ankle limit that triggers {@link ToeOffParameters#doToeOffWhenHittingAnkleLimit()}.
@@ -59,7 +73,7 @@ public abstract class ToeOffParameters
     */
    public boolean doToeOffWhenHittingTrailingKneeLowerLimit()
    {
-      return false;
+      return true;
    }
 
    /**
@@ -77,13 +91,14 @@ public abstract class ToeOffParameters
     */
    public double getKneeLowerLimitToTriggerToeOff()
    {
-      return 0.0;
+      return 0.4;
    }
 
    /**
     * Sets an interpolation ratio for determining the toe off contact point. A ray is cast forward from the center
     * of the foot through this point, and where the ray intersects with the foot polygon is where the toe off contact is set.
     * This interpolation allows biasing between the ideal ICP plan by choosing only the exit CMP and the feedback CMP location.
+    *
     * @return interpolation ratio (0.0 = all exit cmp, 1.0 = all desired CoP)
     */
    public double getToeOffContactInterpolation()

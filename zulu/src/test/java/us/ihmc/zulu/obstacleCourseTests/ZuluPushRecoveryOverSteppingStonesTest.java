@@ -8,7 +8,6 @@ import us.ihmc.zulu.ZuluRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.AvatarPushRecoveryOverSteppingStonesTest;
-import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
@@ -64,7 +63,7 @@ public class ZuluPushRecoveryOverSteppingStonesTest extends AvatarPushRecoveryOv
                @Override
                public ToeOffParameters getToeOffParameters()
                {
-                  return new ZuluToeOffParameters(getPhysicalProperties())
+                  return new ToeOffParameters()
                   {
                      @Override
                      public double getAnkleLowerLimitToTriggerToeOff()

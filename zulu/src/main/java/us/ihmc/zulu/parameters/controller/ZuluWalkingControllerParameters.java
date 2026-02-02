@@ -98,7 +98,7 @@ public class ZuluWalkingControllerParameters extends WalkingControllerParameters
       this.jointMap = jointMap;
       this.physicalProperties = physicalProperties;
 
-      toeOffParameters = new ZuluToeOffParameters(physicalProperties);
+      toeOffParameters = new ToeOffParameters();
       momentumOptimizationSettings = new ZuluMomentumOptimizationSettings(target, jointMap, 2 + contactPointParameters.getAdditionalContactNames().size());
       swingTrajectoryParameters = new ZuluSwingTrajectoryParameters();
       steppingParameters = new ZuluSteppingParameters(physicalProperties);

@@ -3,7 +3,6 @@ package us.ihmc.zulu;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import us.ihmc.zulu.parameters.controller.ZuluSwingTrajectoryParameters;
-import us.ihmc.zulu.parameters.controller.ZuluToeOffParameters;
 import us.ihmc.zulu.parameters.controller.ZuluWalkingControllerParameters;
 import us.ihmc.avatar.AvatarFlatGroundQuickWalkingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -74,16 +73,10 @@ public class ZuluFlatGroundQuickWalkingTest extends AvatarFlatGroundQuickWalking
                @Override
                public ToeOffParameters getToeOffParameters()
                {
-                  return new ZuluToeOffParameters(getPhysicalProperties())
+                  return new ToeOffParameters()
                   {
                      @Override
                      public boolean doToeOffIfPossibleInSingleSupport()
-                     {
-                        return true;
-                     }
-
-                     @Override
-                     public boolean doToeOffWhenHittingTrailingKneeLowerLimit()
                      {
                         return true;
                      }
