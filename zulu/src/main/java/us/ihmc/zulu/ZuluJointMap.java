@@ -7,7 +7,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import us.ihmc.zulu.parameters.model.ZuluPhysicalProperties;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.partNames.ArmJointName;
@@ -18,6 +17,7 @@ import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.zulu.parameters.model.ZuluPhysicalProperties;
 
 public class ZuluJointMap implements HumanoidJointNameMap
 {

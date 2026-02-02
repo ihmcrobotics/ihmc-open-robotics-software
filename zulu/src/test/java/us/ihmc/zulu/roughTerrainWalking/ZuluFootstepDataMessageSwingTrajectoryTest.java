@@ -6,7 +6,6 @@ import us.ihmc.simulationConstructionSetTools.tools.CITools.SimpleRobotNameKeys;
 import us.ihmc.zulu.ZuluVersion;
 import us.ihmc.zulu.ZuluRobotModel;
 import us.ihmc.zulu.parameters.model.ZuluPhysicalProperties;
-import us.ihmc.zulu.parameters.model.ZuluPhysicalPropertiesV0;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.roughTerrainWalking.AvatarFootstepDataMessageSwingTrajectoryTest;
@@ -54,7 +53,7 @@ public class ZuluFootstepDataMessageSwingTrajectoryTest extends AvatarFootstepDa
    @Override
    public double getLegLength()
    {
-      ZuluPhysicalProperties physicalProperties = new ZuluPhysicalPropertiesV0();
+      ZuluPhysicalProperties physicalProperties = new ZuluPhysicalProperties();
       return physicalProperties.getShinLength() + physicalProperties.getThighLength();
    }
 }
