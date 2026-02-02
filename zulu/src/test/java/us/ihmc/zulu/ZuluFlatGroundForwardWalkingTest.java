@@ -3,12 +3,11 @@ package us.ihmc.zulu;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import us.ihmc.zulu.parameters.controller.ZuluICPControllerParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
 import us.ihmc.zulu.parameters.controller.ZuluWalkingControllerParameters;
 import us.ihmc.avatar.AvatarFlatGroundForwardWalkingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -25,23 +24,9 @@ public class ZuluFlatGroundForwardWalkingTest extends AvatarFlatGroundForwardWal
       {
          return new ZuluWalkingControllerParameters(version, target, jointMap, physicalProperties)
          {
-            @Override
-            public ICPControllerParameters getICPControllerParameters()
-            {
-               return new ZuluICPControllerParameters()
-               {
-                  @Override
-                  public boolean useAngularMomentum()
-                  {
-                     return true;
-                  }
-               };
-            }
          };
       }
-
    };
-
 
    private final int numberOfSteps = 8;
    private final double stepWidth = 0.25;

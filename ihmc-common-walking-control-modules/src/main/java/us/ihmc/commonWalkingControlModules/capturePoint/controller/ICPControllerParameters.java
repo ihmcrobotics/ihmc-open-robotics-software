@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
@@ -15,21 +16,28 @@ import us.ihmc.yoVariables.registry.YoRegistry;
  * with adjusting the feet or without adjusting the feet, using a feedback-based convex
  * optimization.
  */
-public abstract class ICPControllerParameters
+public class ICPControllerParameters
 {
    /**
     * The weight for tracking the nominal desired CMP. This weight penalizes using a large amount of
     * CMP control. Setting this weight high will make the robot behave similar to using point feet
     * control / minimal ankle torques and angular momentum.
     */
-   public abstract double getFeedbackForwardWeight();
+   public double getFeedbackForwardWeight()
+   {
+      return 0.5;
+   }
 
    /**
     * The weight for tracking the nominal desired CMP. This weight penalizes using a large amount of
     * CMP control. Setting this weight high will make the robot behave similar to using point feet
     * control / minimal ankle torques and angular momentum.
     */
-   public abstract double getFeedbackLateralWeight();
+   public double getFeedbackLateralWeight()
+   {
+      return 0.5;
+   }
+
 
    /**
     * Penalization on changes in the feedback CoP and CMP between control ticks. This weight is
@@ -44,7 +52,10 @@ public abstract class ICPControllerParameters
     * Penalization on changes in the total feedback between control ticks. This weight is normalized by
     * the control DT.
     */
-   public abstract double getFeedbackRateWeight();
+   public double getFeedbackRateWeight()
+   {
+      return 1e-8;
+   }
 
    /**
     * Penalization on changes in the total feedback between control ticks. This weight is normalized by
@@ -67,7 +78,15 @@ public abstract class ICPControllerParameters
     * Gains for the proportional ICP controller that is encoded into the optimization. Also includes
     * gains for the smart integrator that is used when the controller is stuck.
     */
-   public abstract ICPControlGainsReadOnly getICPFeedbackGains();
+   public ICPControlGainsReadOnly getICPFeedbackGains()
+   {
+      ICPControlGains gains = new ICPControlGains();
+      gains.setKpOrthogonalToMotion(2.0);
+      gains.setKpParallelToMotion(2.5);
+      gains.setKi(2.0);
+      return gains;
+   }
+
 
    public ICPControlGainsReadOnly getHighlyDampedICPFeedbackGains()
    {
@@ -80,7 +99,7 @@ public abstract class ICPControllerParameters
     */
    public boolean useSmartICPIntegrator()
    {
-      return false;
+      return true;
    }
 
    /**
@@ -88,7 +107,7 @@ public abstract class ICPControllerParameters
     */
    public double getICPVelocityThresholdForStuck()
    {
-      return 0.01;
+      return 0.06;
    }
 
    /**
@@ -96,13 +115,19 @@ public abstract class ICPControllerParameters
     * the CoP to be constrained inside the support polygon when not using step adjustment, and the step
     * lengths to be constrained when allowing step adjustment.
     */
-   public abstract double getDynamicsObjectiveWeight();
+   public double getDynamicsObjectiveWeight()
+   {
+      return 10000.0;
+   }
 
    /**
     * Weight on the use of angular momentum minimization. This is only utilized when it is specified to
     * use angular momentum in the feedback controller.
     */
-   public abstract double getAngularMomentumMinimizationWeight();
+   public double getAngularMomentumMinimizationWeight()
+   {
+      return 10.0;
+   }
 
    /**
     * Enabling this boolean causes the {@link #getFeedbackForwardWeight()} and
@@ -110,7 +135,10 @@ public abstract class ICPControllerParameters
     * allows tuning of the tendency to use feedback vs. step adjustment to be separated from the
     * feedback controller.
     */
-   public abstract boolean scaleFeedbackWeightWithGain();
+   public boolean scaleFeedbackWeightWithGain()
+   {
+      return true;
+   }
 
    /**
     * Enabling this boolean allows modifying the CMP offset from the CoP in the optimization.
@@ -132,11 +160,14 @@ public abstract class ICPControllerParameters
     * Enabling this boolean allows the CMP to exit the support polygon. The CoP will still be
     * constrained to lie inside the support polygon, however.
     */
-   public abstract boolean useAngularMomentum();
+   public boolean useAngularMomentum()
+   {
+      return true;
+   }
 
    public double getFeedbackDirectionWeight()
    {
-      return 0.0;
+      return 1e6;
    }
 
    /**
@@ -153,7 +184,7 @@ public abstract class ICPControllerParameters
     */
    public boolean getUseICPControlPolygons()
    {
-      return true;
+      return false;
    }
 
    /**

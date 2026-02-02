@@ -30,19 +30,6 @@ public class ZuluPushRecoveryOverSteppingStonesTest extends AvatarPushRecoveryOv
             return new ZuluWalkingControllerParameters(getRobotVersion(), RobotTarget.SCS, getJointMap(), getPhysicalProperties(), getContactPointParameters())
             {
                @Override
-               public ICPControllerParameters getICPControllerParameters()
-               {
-                  return new ZuluICPControllerParameters()
-                  {
-                     @Override
-                     public boolean useAngularMomentum()
-                     {
-                        return true;
-                     }
-                  };
-               }
-
-               @Override
                public StepAdjustmentParameters getStepAdjustmentParameters()
                {
                   return new ZuluStepAdjustmentParameters()
@@ -87,7 +74,6 @@ public class ZuluPushRecoveryOverSteppingStonesTest extends AvatarPushRecoveryOv
                   };
                }
             };
-
          }
       };
 
