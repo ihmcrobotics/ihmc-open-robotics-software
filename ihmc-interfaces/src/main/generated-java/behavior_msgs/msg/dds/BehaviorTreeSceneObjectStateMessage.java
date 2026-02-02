@@ -32,6 +32,10 @@ public class BehaviorTreeSceneObjectStateMessage extends Packet<BehaviorTreeScen
             * Used only for door panel
             */
    public behavior_msgs.msg.dds.PersistentDetectionStatusMessage door_panel_detection_;
+   /**
+            * Whether the object is frozen
+            */
+   public boolean frozen_;
 
    public BehaviorTreeSceneObjectStateMessage()
    {
@@ -57,6 +61,8 @@ public class BehaviorTreeSceneObjectStateMessage extends Packet<BehaviorTreeScen
       behavior_msgs.msg.dds.PersistentDetectionStatusMessagePubSubType.staticCopy(other.persistent_detection_, persistent_detection_);
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.transform_to_world_, transform_to_world_);
       behavior_msgs.msg.dds.PersistentDetectionStatusMessagePubSubType.staticCopy(other.door_panel_detection_, door_panel_detection_);
+      frozen_ = other.frozen_;
+
    }
 
 
@@ -116,6 +122,21 @@ public class BehaviorTreeSceneObjectStateMessage extends Packet<BehaviorTreeScen
       return door_panel_detection_;
    }
 
+   /**
+            * Whether the object is frozen
+            */
+   public void setFrozen(boolean frozen)
+   {
+      frozen_ = frozen;
+   }
+   /**
+            * Whether the object is frozen
+            */
+   public boolean getFrozen()
+   {
+      return frozen_;
+   }
+
 
    public static Supplier<BehaviorTreeSceneObjectStateMessagePubSubType> getPubSubType()
    {
@@ -141,6 +162,8 @@ public class BehaviorTreeSceneObjectStateMessage extends Packet<BehaviorTreeScen
       if (!this.persistent_detection_.epsilonEquals(other.persistent_detection_, epsilon)) return false;
       if (!this.transform_to_world_.epsilonEquals(other.transform_to_world_, epsilon)) return false;
       if (!this.door_panel_detection_.epsilonEquals(other.door_panel_detection_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.frozen_, other.frozen_, epsilon)) return false;
+
 
       return true;
    }
@@ -161,6 +184,8 @@ public class BehaviorTreeSceneObjectStateMessage extends Packet<BehaviorTreeScen
       if (!this.persistent_detection_.equals(otherMyClass.persistent_detection_)) return false;
       if (!this.transform_to_world_.equals(otherMyClass.transform_to_world_)) return false;
       if (!this.door_panel_detection_.equals(otherMyClass.door_panel_detection_)) return false;
+      if(this.frozen_ != otherMyClass.frozen_) return false;
+
 
       return true;
    }
@@ -182,7 +207,9 @@ public class BehaviorTreeSceneObjectStateMessage extends Packet<BehaviorTreeScen
       builder.append("transform_to_world=");
       builder.append(this.transform_to_world_);      builder.append(", ");
       builder.append("door_panel_detection=");
-      builder.append(this.door_panel_detection_);
+      builder.append(this.door_panel_detection_);      builder.append(", ");
+      builder.append("frozen=");
+      builder.append(this.frozen_);
       builder.append("}");
       return builder.toString();
    }

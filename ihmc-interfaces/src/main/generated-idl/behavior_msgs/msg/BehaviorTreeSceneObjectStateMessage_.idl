@@ -39,6 +39,10 @@ module behavior_msgs
          * Used only for door panel
          */
         behavior_msgs::msg::dds::PersistentDetectionStatusMessage door_panel_detection;
+        /**
+         * Whether the object is frozen
+         */
+        boolean frozen;
       };
     };
   };

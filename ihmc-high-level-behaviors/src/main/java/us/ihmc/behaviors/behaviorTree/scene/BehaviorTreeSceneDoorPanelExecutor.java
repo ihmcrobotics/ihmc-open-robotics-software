@@ -30,7 +30,7 @@ public class BehaviorTreeSceneDoorPanelExecutor extends BehaviorTreeSceneObjectE
    public void update()
    {
       PersistentDetection mechanismDetection = getPersistentDetection();
-      if (mechanismDetection != null && panelDetection != null && mechanismDetection.isStable() && panelDetection.isStable())
+      if (!frozen.getValue() && mechanismDetection != null && panelDetection != null && mechanismDetection.isStable() && panelDetection.isStable())
       {
          Vector3DBasics mechanismPosition = mechanismDetection.getFilteredTransform().getTranslation();
 
