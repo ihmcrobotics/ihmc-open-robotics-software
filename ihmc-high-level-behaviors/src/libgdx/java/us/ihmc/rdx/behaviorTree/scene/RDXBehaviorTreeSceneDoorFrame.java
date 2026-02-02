@@ -5,6 +5,7 @@ import behavior_msgs.msg.dds.BehaviorTreeSceneObjectStateMessage;
 import com.badlogic.gdx.graphics.Color;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorModelParameters;
@@ -44,17 +45,17 @@ public class RDXBehaviorTreeSceneDoorFrame extends RDXBehaviorTreeSceneObject
       if (hingePostPose.containsNaN() || latchPostPose.containsNaN())
          return;
 
-      RigidBodyTransform hingeToLatchTransform = new RigidBodyTransform(hingePostPose);
-      hingeToLatchTransform.multiplyInvertOther(latchPostPose);
+      Pose3D latchPoseInHingePostFrame = new Pose3D(latchPostPose);
+      ReferenceFrame.getWorldFrame().transformFromThisToDesiredFrame(referenceFrame, latchPoseInHingePostFrame);
 
       model = RDXModelBuilder.buildModel(modelBuilder ->
       {
          Vector3D hingePostModelTranslation = new Vector3D(0.0, 0.0, -0.5 * height);
-         Vector3D latchPostModelTranslation = new Vector3D(hingeToLatchTransform.getTranslation());
+         Vector3D latchPostModelTranslation = new Vector3D(latchPoseInHingePostFrame.getTranslation());
          latchPostModelTranslation.subZ(0.5 * height);
 
          modelBuilder.addCylinder(height, radius, hingePostModelTranslation, Color.BLUE);
-         modelBuilder.addCylinder(height, radius, latchPostModelTranslation, hingeToLatchTransform.getRotation(), Color.RED);
+         modelBuilder.addCylinder(height, radius, latchPostModelTranslation, Color.RED);
       });
 
       modelInstance = new RDXModelInstance(model);
@@ -66,7 +67,8 @@ public class RDXBehaviorTreeSceneDoorFrame extends RDXBehaviorTreeSceneObject
    {
       super.update();
 
-      modelInstance.setTransformToWorldFrame(new RigidBodyTransform(hingePostPose));
+      if (modelInstance != null)
+         modelInstance.setTransformToWorldFrame(new RigidBodyTransform(transform.getValueReadOnly()));
    }
 
    @Override

@@ -152,7 +152,7 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
       return switch (BehaviorTreeSceneObjectType.values()[definition.getObjectType()])
       {
          case DOOR_PANEL -> new BehaviorTreeSceneDoorPanelExecutor(id, crdtInfo, syncedRobot, definition);
-         case DOOR_FRAME -> new BehaviorTreeSceneDoorFrameExecutor(id, crdtInfo, syncedRobot, definition);
+         case DOOR_FRAME -> new BehaviorTreeSceneDoorFrameExecutor(id, crdtInfo, syncedRobot, definition, this);
          default -> new BehaviorTreeSceneObjectExecutor(id, crdtInfo, syncedRobot, definition);
       };
    }
