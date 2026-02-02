@@ -3,6 +3,7 @@ package us.ihmc.behaviors.behaviorTree.condition;
 import us.ihmc.behaviors.behaviorTree.condition.ShapeContainsConditionDefinition.ContainsType;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneExecutor;
 import us.ihmc.commons.thread.RepeatingTaskThread;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.RawImage;
@@ -21,8 +22,8 @@ public class ShapeContainsConditionExecutor
    private ReferenceFrame frame;
    private final FramePoint3D spherePose = new FramePoint3D();
    private final FramePoint3D framePose = new FramePoint3D();
-   private final CUDAShapePointCounter spherePointCounter = new CUDAShapePointCounter();
-   private final RepeatingTaskThread zedGrabThread = new RepeatingTaskThread("ZEDGrabThread", this::zedGrabThread);
+   private CUDAShapePointCounter spherePointCounter;
+   private RepeatingTaskThread zedGrabThread;
    private int pointsInSphereCUDAOutput = -1;
 
    public ShapeContainsConditionExecutor(ConditionNodeState state, BehaviorTreeSceneExecutor scene)
@@ -31,11 +32,26 @@ public class ShapeContainsConditionExecutor
       this.state = state;
       shapeDefinition = state.getDefinition().getShapeContains();
       shapeState = state.getShapeContains();
-      zedGrabThread.start();
+
+      ThreadTools.startAsDaemon(() -> spherePointCounter = new CUDAShapePointCounter(), "CreateShapePointCounter");
    }
 
    public void update()
    {
+      if (zedGrabThread == null)
+      {
+         if (spherePointCounter != null)
+         {
+            zedGrabThread = new RepeatingTaskThread("ZEDGrabThread", this::zedGrabThread);
+            zedGrabThread.start();
+         }
+         else
+         {
+            state.setCanExecute(false);
+            return;
+         }
+      }
+
       if (state.getIsNextForExecution())
          internalUpdate();
 
@@ -48,6 +64,9 @@ public class ShapeContainsConditionExecutor
 
    public void triggerExecution()
    {
+      if (zedGrabThread == null)
+         return;
+
       pointsInSphereCUDAOutput = -1;
       internalUpdate();
    }
