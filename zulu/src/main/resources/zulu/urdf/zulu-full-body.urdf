@@ -253,7 +253,7 @@
         </inertial>
         <visual>
             <geometry>
-                <mesh filename="package://zulu/meshes/legs/Pelvis.obj"/>
+                <mesh filename="zulu/meshes/legs/Pelvis.obj"/>
             </geometry>
             <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
         </visual>
@@ -313,7 +313,7 @@
         </inertial>
         <visual>
             <geometry>
-                <mesh filename="package://zulu/meshes/legs/LeftHipRollLink.obj"/>
+                <mesh filename="zulu/meshes/legs/LeftHipRollLink.obj"/>
             </geometry>
             <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
         </visual>
@@ -370,7 +370,7 @@
         </inertial>
         <visual>
             <geometry>
-                <mesh filename="package://zulu/meshes/legs/LeftHipYawLink.obj"/>
+                <mesh filename="zulu/meshes/legs/LeftHipYawLink.obj"/>
             </geometry>
             <origin rpy="0.0 0.0 0.0" xyz="0 0 0"/>
         </visual>
@@ -383,7 +383,7 @@
         </inertial>
         <visual>
             <geometry>
-                <mesh filename="package://zulu/meshes/legs/LeftThigh.obj"/>
+                <mesh filename="zulu/meshes/legs/LeftThigh.obj"/>
             </geometry>
             <origin rpy="0.0 0.0 0.0" xyz="0 0 0"/>
         </visual>
@@ -402,7 +402,7 @@
         </inertial>
         <visual>
             <geometry>
-                <mesh filename="package://zulu/meshes/legs/LeftShin.obj"/>
+                <mesh filename="zulu/meshes/legs/LeftShin.obj"/>
             </geometry>
             <origin rpy="0.0 0.0 0.0" xyz="0 0 0"/>
         </visual>
@@ -496,7 +496,7 @@
         </inertial>
         <visual>
             <geometry>
-                <mesh filename="package://zulu/meshes/legs/AnklePitchLink.obj"/>
+                <mesh filename="zulu/meshes/legs/AnklePitchLink.obj"/>
             </geometry>
             <origin rpy="0.0 0.0 0.0" xyz="0 0 0"/>
         </visual>
@@ -509,7 +509,7 @@
         </inertial>
         <visual>
             <geometry>
-                <mesh filename="package://zulu/meshes/legs/Foot.obj"/>
+                <mesh filename="zulu/meshes/legs/Foot.obj"/>
             </geometry>
             <origin rpy="0.0 0.0 0.0" xyz="0 0 0"/>
         </visual>
@@ -567,7 +567,7 @@
         </inertial>
         <visual>
             <geometry>
-                <mesh filename="package://zulu/meshes/legs/RightHipRollLink.obj"/>
+                <mesh filename="zulu/meshes/legs/RightHipRollLink.obj"/>
             </geometry>
             <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
         </visual>
@@ -624,7 +624,7 @@
         </inertial>
         <visual>
             <geometry>
-                <mesh filename="package://zulu/meshes/legs/RightHipYawLink.obj"/>
+                <mesh filename="zulu/meshes/legs/RightHipYawLink.obj"/>
             </geometry>
             <origin rpy="0.0 0.0 0.0" xyz="0 0 0"/>
         </visual>
@@ -637,7 +637,7 @@
         </inertial>
         <visual>
             <geometry>
-                <mesh filename="package://zulu/meshes/legs/RightThigh.obj"/>
+                <mesh filename="zulu/meshes/legs/RightThigh.obj"/>
             </geometry>
             <origin rpy="0.0 0.0 0.0" xyz="0 0 0"/>
         </visual>
@@ -694,7 +694,7 @@
         </inertial>
         <visual>
             <geometry>
-                <mesh filename="package://zulu/meshes/legs/RightShin.obj"/>
+                <mesh filename="zulu/meshes/legs/RightShin.obj"/>
             </geometry>
             <origin rpy="0.0 0.0 0.0" xyz="0 0 0"/>
         </visual>
@@ -751,7 +751,7 @@
         </inertial>
         <visual>
             <geometry>
-                <mesh filename="package://zulu/meshes/legs/AnklePitchLink.obj"/>
+                <mesh filename="zulu/meshes/legs/AnklePitchLink.obj"/>
             </geometry>
             <origin rpy="0.0 0.0 0.0" xyz="0 0 0"/>
         </visual>
@@ -764,7 +764,7 @@
         </inertial>
         <visual>
             <geometry>
-                <mesh filename="package://zulu/meshes/legs/Foot.obj"/>
+                <mesh filename="zulu/meshes/legs/Foot.obj"/>
             </geometry>
             <origin rpy="0.0 0.0 0.0" xyz="0 0 0"/>
         </visual>
@@ -822,7 +822,7 @@
         </inertial>
         <visual>
             <geometry>
-                <mesh filename="package://zulu/meshes/torso.obj"/>
+                <mesh filename="zulu/meshes/torso.obj"/>
             </geometry>
             <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.105063"/>
         </visual>
@@ -898,7 +898,7 @@
         </inertial>
         <visual>
             <geometry>
-                <mesh filename="package://zulu/meshes/ALX02_01_A02_HeadLink.obj"/>
+                <mesh filename="zulu/meshes/ALX02_01_A02_HeadLink.obj"/>
             </geometry>
             <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
         </visual>
@@ -958,7 +958,7 @@
         </inertial>
         <visual>
             <geometry>
-                <mesh filename="package://zulu/meshes/cycloidal_arm/LeftShoulderPitchLink.obj"/>
+                <mesh filename="zulu/meshes/cycloidal_arm/LeftShoulderPitchLink.obj"/>
             </geometry>
             <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
         </visual>
@@ -971,7 +971,7 @@
         </inertial>
         <visual>
             <geometry>
-                <mesh filename="package://zulu/meshes/cycloidal_arm/LeftShoulderRollLink_shortBicep.obj"/>
+                <mesh filename="zulu/meshes/cycloidal_arm/LeftShoulderRollLink_shortBicep.obj"/>
             </geometry>
             <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
         </visual>
@@ -984,7 +984,7 @@
         </inertial>
         <visual>
             <geometry>
-                <mesh filename="package://zulu/meshes/cycloidal_arm/LeftShoulderYawLink.obj"/>
+                <mesh filename="zulu/meshes/cycloidal_arm/LeftShoulderYawLink.obj"/>
             </geometry>
             <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0867"/>
         </visual>
@@ -1003,7 +1003,7 @@
         </inertial>
         <visual>
             <geometry>
-                <mesh filename="package://zulu/meshes/cycloidal_arm/LeftElbowPitchLink.obj"/>
+                <mesh filename="zulu/meshes/cycloidal_arm/LeftElbowPitchLink.obj"/>
             </geometry>
             <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
         </visual>
@@ -1016,7 +1016,7 @@
         </inertial>
         <visual>
             <geometry>
-                <mesh filename="package://zulu/meshes/cycloidal_arm/LeftWristYawLink.obj"/>
+                <mesh filename="zulu/meshes/cycloidal_arm/LeftWristYawLink.obj"/>
             </geometry>
             <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
         </visual>
@@ -1041,7 +1041,7 @@
         </inertial>
         <visual>
             <geometry>
-                <mesh filename="package://zulu/meshes/cycloidal_arm/LeftWristRollLink.obj"/>
+                <mesh filename="zulu/meshes/cycloidal_arm/LeftWristRollLink.obj"/>
             </geometry>
             <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
         </visual>
@@ -1056,7 +1056,7 @@
         </inertial>
         <visual>
             <geometry>
-                <mesh filename="package://zulu/meshes/cycloidal_arm/nub.obj"/>
+                <mesh filename="zulu/meshes/cycloidal_arm/nub.obj"/>
             </geometry>
             <origin rpy="0.0 1.57 0.0" xyz="0.0 0.0 0.0"/>
         </visual>
@@ -1230,7 +1230,7 @@
         </inertial>
         <visual>
             <geometry>
-                <mesh filename="package://zulu/meshes/cycloidal_arm/RightShoulderPitchLink.obj"/>
+                <mesh filename="zulu/meshes/cycloidal_arm/RightShoulderPitchLink.obj"/>
             </geometry>
             <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
         </visual>
@@ -1243,7 +1243,7 @@
         </inertial>
         <visual>
             <geometry>
-                <mesh filename="package://zulu/meshes/cycloidal_arm/RightShoulderRollLink_shortBicep.obj"/>
+                <mesh filename="zulu/meshes/cycloidal_arm/RightShoulderRollLink_shortBicep.obj"/>
             </geometry>
             <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
         </visual>
@@ -1256,7 +1256,7 @@
         </inertial>
         <visual>
             <geometry>
-                <mesh filename="package://zulu/meshes/cycloidal_arm/RightShoulderYawLink.obj"/>
+                <mesh filename="zulu/meshes/cycloidal_arm/RightShoulderYawLink.obj"/>
             </geometry>
             <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0867"/>
         </visual>
@@ -1275,7 +1275,7 @@
         </inertial>
         <visual>
             <geometry>
-                <mesh filename="package://zulu/meshes/cycloidal_arm/RightElbowPitchLink.obj"/>
+                <mesh filename="zulu/meshes/cycloidal_arm/RightElbowPitchLink.obj"/>
             </geometry>
             <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
         </visual>
@@ -1288,7 +1288,7 @@
         </inertial>
         <visual>
             <geometry>
-                <mesh filename="package://zulu/meshes/cycloidal_arm/RightWristYawLink.obj"/>
+                <mesh filename="zulu/meshes/cycloidal_arm/RightWristYawLink.obj"/>
             </geometry>
             <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
         </visual>
@@ -1313,7 +1313,7 @@
         </inertial>
         <visual>
             <geometry>
-                <mesh filename="package://zulu/meshes/cycloidal_arm/RightWristRollLink.obj"/>
+                <mesh filename="zulu/meshes/cycloidal_arm/RightWristRollLink.obj"/>
             </geometry>
             <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
         </visual>
@@ -1326,7 +1326,7 @@
         </inertial>
         <visual>
             <geometry>
-                <mesh filename="package://zulu/meshes/cycloidal_arm/nub.obj"/>
+                <mesh filename="zulu/meshes/cycloidal_arm/nub.obj"/>
             </geometry>
             <origin rpy="0.0 1.57 0.0" xyz="0.0 0.0 0.0"/>
         </visual>
@@ -1510,7 +1510,7 @@
         <visual name="wrist_mesh">
             <origin rpy="0 0 0" xyz="0 0 0"/>
             <geometry>
-                <mesh filename="package://zulu/meshes/wristmesh.obj"/>
+                <mesh filename="zulu/meshes/wristmesh.obj"/>
             </geometry>
         </visual>
         <inertial>   <!-- the mass and inertia here are NOT correct -->
@@ -1525,7 +1525,7 @@
         <visual name="wrist_mesh">
             <origin rpy="0 0 0" xyz="0 0 0"/>
             <geometry>
-                <mesh filename="package://zulu/meshes/wristmesh.obj"/>
+                <mesh filename="zulu/meshes/wristmesh.obj"/>
             </geometry>
         </visual>
         <inertial>    <!-- the mass and inertia here are NOT correct -->
