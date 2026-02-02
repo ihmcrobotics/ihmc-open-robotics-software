@@ -63,9 +63,6 @@ public class ZuluStateEstimatorParameters extends StateEstimatorParameters
    @Override
    public void configureSensorProcessing(SensorProcessing sensorProcessing)
    {
-      // 1 - Backlash compensation on joints.
-      // TODO maybe we don't need this?
-
       // 2 - Low pass filters on position and velocity
       DoubleProvider lowerBodyJointPositionAlphaFilter = sensorProcessing.createAlphaFilter("lowerBodyJointPositionFrequency", lowerBodyJointPositionFrequency);
       DoubleProvider lowerBodyJointVelocityAlphaFilter = sensorProcessing.createAlphaFilter("lowerBodyJointVelocityFrequency", lowerBodyJointVelocityFrequency);
