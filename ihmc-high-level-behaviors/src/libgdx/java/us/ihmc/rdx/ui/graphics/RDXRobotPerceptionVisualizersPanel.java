@@ -10,6 +10,7 @@ import us.ihmc.rdx.ui.graphics.ros2.RDXROS2HeightMapVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2KSTRobotVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2RobotVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.foundationPose.RDXIsaacROSFoundationPoseVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2ColoredPointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.yolo.RDXROS2YOLOv8Visualizer;
 import us.ihmc.ros2.ROS2Node;
@@ -35,7 +36,9 @@ public abstract class RDXRobotPerceptionVisualizersPanel extends RDXPerceptionVi
    protected RDXROS2ImageMessageVisualizer steppingCameraRightColorImageVisualizer;
    protected RDXROS2ImageMessageVisualizer steppingCameraDepthImageVisualizer;
    protected RDXROS2YOLOv8Visualizer yoloVisualizer;
+   protected RDXIsaacROSFoundationPoseVisualizer foundationPoseVisualizer;
    protected RDXROS2HeightMapVisualizer heightMapVisualizer;
+   protected RDXROS2HeightMapVisualizer yoloMapVisualizer;
    protected RDXDetectionManagerSettings detectionManagerSettings;
    protected RDXROS2FramePlanarRegionsVisualizer planarRegionsVisualizer;
 
@@ -138,9 +141,19 @@ public abstract class RDXRobotPerceptionVisualizersPanel extends RDXPerceptionVi
       return yoloVisualizer;
    }
 
+   public RDXIsaacROSFoundationPoseVisualizer getFoundationPoseVisualizer()
+   {
+      return foundationPoseVisualizer;
+   }
+
    public RDXROS2HeightMapVisualizer getHeightMapVisualizer()
    {
       return heightMapVisualizer;
+   }
+
+   public RDXROS2HeightMapVisualizer getYOLOObstacleMapVisualizer()
+   {
+      return yoloMapVisualizer;
    }
 
    public RDXROS2FramePlanarRegionsVisualizer getPlanarRegionsVisualizer()

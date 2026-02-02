@@ -7,7 +7,7 @@ import controller_msgs.msg.dds.AbortWalkingMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
-import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeDefinition.ConditionNodeType;
 import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeState;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
 import us.ihmc.behaviors.behaviorTree.LeafNodeState;
@@ -224,7 +224,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
                   {
                      AI2RActionFailureMessage failureMessage = statusMessage.getFailure();
                      failureMessage.setActionName(leaf.getDefinition().getName());
-                     if (conditionNodeState.getDefinition().getType().getValue() == ConditionNodeDefinition.Type.PROXIMITY)
+                     if (conditionNodeState.getDefinition().getConditionType().getValue() == ConditionNodeType.PROXIMITY)
                      {
                         failureMessage.setMissingFrame(actionFailureMissingFrame);
                         failureMessage.setActionFrame(conditionNodeState.getDefinition().getProximityCheck().getFrameNameA());

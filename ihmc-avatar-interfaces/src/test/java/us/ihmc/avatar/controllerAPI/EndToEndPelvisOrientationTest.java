@@ -416,7 +416,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
                                                                                               worldFrame,
                                                                                               worldFrame);
       simulationTestHelper.publishToController(chestMessage);
-      // This time had to be increased for Alexander. Because there is no spine pitch, the chest can't move to the position without the pelvis moving. However,
+      // This time had to be increased for Alex. Because there is no spine pitch, the chest can't move to the position without the pelvis moving. However,
       // The pelvis is just tracking the chest. So it's pretty laggy.
       simulationTestHelper.simulateNow(chestTrajectoryTime + 3.0);
 

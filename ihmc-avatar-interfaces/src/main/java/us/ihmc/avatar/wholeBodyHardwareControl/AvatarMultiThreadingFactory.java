@@ -259,7 +259,7 @@ public class AvatarMultiThreadingFactory
                                                            lowLevelOutputProcessor,
                                                            estimatorThread.get(),
                                                            controllerThread.get(),
-                                                           stepGeneratorThread.get(),
+                                                           stepGeneratorThread.hasValue() ? stepGeneratorThread.get() : null,
                                                            ikStreamingThread.hasValue() ? ikStreamingThread.get() : null,
                                                            affinity,
                                                            masterThreadDt,

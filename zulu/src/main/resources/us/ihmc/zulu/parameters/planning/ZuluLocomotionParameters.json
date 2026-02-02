@@ -1,0 +1,15 @@
+{
+  "title" : "ZuluLocomotionParameters",
+  "Swing time" : 0.8,
+  "Transfer time" : 0.4,
+  "Final Transfer time" : 0.5,
+  "Assume flat ground" : true,
+  "Perform A star search" : true,
+  "Are footsteps adjustable" : false,
+  "Plan swing trajectories" : false,
+  "Plan with body path" : false,
+  "Replan swing trajectories on change" : false,
+  "Initial stance side" : 0,
+  "Footstep planner timeout" : 12.0,
+  "Ideal goal footstep width" : 0.22
+}

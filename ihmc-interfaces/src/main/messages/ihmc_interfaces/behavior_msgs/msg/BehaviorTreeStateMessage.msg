@@ -19,16 +19,17 @@ byte AI2R_NODE = 9
 byte DOOR_TRAVERSAL = 10
 byte BUILDING_EXPLORATION = 11
 
-byte CHEST_ORIENTATION_ACTION = 12
-byte FOOTSTEP_PLAN_ACTION = 13
-byte SAKE_HAND_COMMAND_ACTION = 14
-byte ABILITY_HAND_ACTION = 15
-byte HAND_POSE_ACTION = 16
-byte HAND_WRENCH_ACTION = 17
-byte SCREW_PRIMITIVE_ACTION = 18
-byte PELVIS_HEIGHT_ORIENTATION_ACTION = 19
-byte WAIT_DURATION_ACTION = 20
-byte FOOT_POSE_ACTION = 21
+byte NECK_ACTION = 12
+byte CHEST_ORIENTATION_ACTION = 13
+byte FOOTSTEP_PLAN_ACTION = 14
+byte SAKE_HAND_COMMAND_ACTION = 15
+byte ABILITY_HAND_ACTION = 16
+byte HAND_POSE_ACTION = 17
+byte HAND_WRENCH_ACTION = 18
+byte SCREW_PRIMITIVE_ACTION = 19
+byte PELVIS_HEIGHT_ORIENTATION_ACTION = 20
+byte WAIT_DURATION_ACTION = 21
+byte FOOT_POSE_ACTION = 22
 
 # Monotonically increasing message ID that matches the CRDTInfo update number
 uint64 sequence_id
@@ -76,6 +77,8 @@ behavior_msgs/AI2RNodeStateMessage[<=1] ai2r_nodes
 behavior_msgs/DoorTraversalStateMessage[<=120] door_traversals
 
 behavior_msgs/BuildingExplorationStateMessage[<=120] building_explorations
+
+behavior_msgs/NeckActionStateMessage[<=120] neck_actions
 
 behavior_msgs/ChestOrientationActionStateMessage[<=120] chest_orientation_actions
 

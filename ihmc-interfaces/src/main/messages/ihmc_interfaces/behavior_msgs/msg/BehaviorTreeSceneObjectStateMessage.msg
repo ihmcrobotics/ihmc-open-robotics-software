@@ -13,3 +13,9 @@ behavior_msgs/PersistentDetectionStatusMessage persistent_detection
 
 # Transform of the object frame to world frame
 controller_msgs/RigidBodyTransformMessage transform_to_world
+
+# Used only for door panel
+behavior_msgs/PersistentDetectionStatusMessage door_panel_detection
+
+# Whether the object is frozen
+bool frozen

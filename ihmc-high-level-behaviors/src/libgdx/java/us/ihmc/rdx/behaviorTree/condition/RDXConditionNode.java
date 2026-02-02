@@ -2,7 +2,7 @@ package us.ihmc.rdx.behaviorTree.condition;
 
 import imgui.ImGui;
 import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeDefinition;
-import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeDefinition.Type;
+import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeDefinition.ConditionNodeType;
 import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeState;
 import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeRootNode;
 import us.ihmc.rdx.behaviorTree.RDXLeafNode;
@@ -42,14 +42,14 @@ public class RDXConditionNode extends RDXLeafNode<ConditionNodeState, ConditionN
    @Override
    protected void renderImGuiWidgetsInternal()
    {
-      Type currentType = definition.getType().getValue();
-      if (ImGui.beginCombo(labels.get("Type"), currentType.name()))
+      ConditionNodeType currentConditionType = definition.getConditionType().getValue();
+      if (ImGui.beginCombo(labels.get("Condition Type"), currentConditionType.name()))
       {
-         for (Type value : Type.values)
+         for (ConditionNodeType value : ConditionNodeType.values)
          {
-            if (ImGui.selectable(value.name(), value == currentType))
+            if (ImGui.selectable(value.name(), value == currentConditionType))
             {
-               definition.getType().setValue(value);
+               definition.getConditionType().setValue(value);
             }
          }
 
@@ -57,7 +57,7 @@ public class RDXConditionNode extends RDXLeafNode<ConditionNodeState, ConditionN
       }
 
 
-      switch (currentType)
+      switch (currentConditionType)
       {
          case COUNTER -> counter.renderImGuiWidgetsInternal();
          case LLM -> llm.renderImGuiWidgetsInternal();

@@ -64,9 +64,7 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
       updatePersistentDetections();
 
       for (BehaviorTreeSceneObjectExecutor object : objects)
-      {
          object.update();
-      }
    }
 
    private void triageInstantDetections(List<InstantDetection> newInstantDetections)
@@ -143,7 +141,10 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
    @Override
    protected BehaviorTreeSceneObjectState buildObject(long id, CRDTInfo crdtInfo, BehaviorTreeSceneObjectDefinitionMessage definition)
    {
-      return new BehaviorTreeSceneObjectExecutor(id, crdtInfo, syncedRobot, definition);
+      if (definition.getObjectType() == BehaviorTreeSceneObjectType.DOOR_PANEL.ordinal())
+         return new BehaviorTreeSceneDoorPanelExecutor(id, crdtInfo, syncedRobot, definition);
+      else
+         return new BehaviorTreeSceneObjectExecutor(id, crdtInfo, syncedRobot, definition);
    }
 
    @Override

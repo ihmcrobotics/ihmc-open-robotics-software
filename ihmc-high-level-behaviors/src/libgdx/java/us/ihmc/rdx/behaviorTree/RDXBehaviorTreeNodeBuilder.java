@@ -40,6 +40,7 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeBuilder<RDXBe
       REGISTRY.put(AI2RNodeDefinition.class, RDXAI2RNode::new);
       REGISTRY.put(DoorTraversalDefinition.class, RDXDoorTraversal::new);
       REGISTRY.put(BuildingExplorationDefinition.class, RDXBuildingExploration::new);
+      REGISTRY.put(NeckActionDefinition.class, RDXNeckAction::new);
       REGISTRY.put(ChestOrientationActionDefinition.class, RDXChestOrientationAction::new);
       REGISTRY.put(FootstepPlanActionDefinition.class, RDXFootstepPlanAction::new);
       REGISTRY.put(HandPoseActionDefinition.class, RDXHandPoseAction::new);

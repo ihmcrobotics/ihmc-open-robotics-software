@@ -43,6 +43,7 @@ public abstract class BehaviorTreeSceneState
       this.syncedRobot = syncedRobot;
 
       objectsModifiable = new LatestTimestampModifiable(crdtInfo);
+      objectsModifiable.setModifierName("Scene objects");
 
       addAll(Collections.singleton(ReferenceFrame.getWorldFrame()));
       addAll(syncedRobot.getReferenceFrames().getCommonReferenceFrames());
@@ -161,9 +162,24 @@ public abstract class BehaviorTreeSceneState
       return null;
    }
 
-   public LatestTimestampModifiable getObjectsModifiable()
+   public void addObject(BehaviorTreeSceneObjectState object)
    {
-      return objectsModifiable;
+      objects.add(object);
+      objectsModifiable.modify();
+   }
+
+   public void removeAllObjects()
+   {
+      objects.forEach(BehaviorTreeSceneObjectState::destroy);
+      objects.clear();
+      objectsModifiable.modify();
+   }
+
+   public void removeObject(BehaviorTreeSceneObjectState object)
+   {
+      object.destroy();
+      objects.remove(object);
+      objectsModifiable.modify();
    }
 
    public List<BehaviorTreeSceneObjectState> getObjects()

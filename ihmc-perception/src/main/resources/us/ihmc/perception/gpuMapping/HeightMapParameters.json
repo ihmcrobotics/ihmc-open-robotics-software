@@ -2,7 +2,6 @@
   "title": "HeightMapParameters",
   "Drift offset filter": true,
   "Flying points filter": false,
-  "Enable chunked map": false,
   "Log height map": false,
   "Min Depth To Accept": {
     "value": 0.88,
@@ -55,12 +54,12 @@
     "upperBound": 8.0
   },
   "Cell size": {
-    "value": 0.04,
+    "value": 0.02,
     "lowerBound": 0.01,
     "upperBound": 0.06
   },
   "Width in meters": {
-    "value": 3.0,
+    "value": 4.0,
     "lowerBound": 1.0,
     "upperBound": 4.5
   }

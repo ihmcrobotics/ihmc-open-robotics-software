@@ -15,7 +15,7 @@ public class ChunkedMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "2e1a45744b12f3b47e66e8a9d05db076ad303e50d3fa566b408e5f1db12ccdff";
+   		return "93fcb46d541927b6a9e1bd0105fbf0fbad77ea9f7f15466318b4c0f07d11859f";
    }
    
    @Override

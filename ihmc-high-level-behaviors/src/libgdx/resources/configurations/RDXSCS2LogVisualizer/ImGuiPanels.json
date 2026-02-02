@@ -1,0 +1,12 @@
+{
+  "dockspacePanels" : { },
+  "windows" : {
+    "3D View" : true,
+    "Perception Visualizers" : true,
+    "H1ZEDXMini###RDXImageVisualizer3:H1ZEDXMini" : true,
+    "Magewell Camera One###RDXImageVisualizer1:Magewell Camera One" : true,
+    "ROS 2 Stats" : false,
+    "SCS 2 Session" : true,
+    "YoVariable Search" : false
+  }
+}

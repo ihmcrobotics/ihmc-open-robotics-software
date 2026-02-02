@@ -10,6 +10,7 @@ import us.ihmc.behaviors.behaviorTree.control.FallbackNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneExecutor;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
@@ -33,14 +34,16 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
                                        ROS2SyncedRobotModel syncedRobot,
                                        ControllerStatusTracker controllerStatusTracker,
                                        SideDependentList<AbilityHandActionComms> abilityHandComms,
-                                       BehaviorTreeSceneExecutor scene)
+                                       BehaviorTreeSceneExecutor scene,
+                                       TerrainMapData terrainMapData)
    {
       super(new BehaviorTreeRootNodeState(id, crdtInfo, saveFileDirectory, syncedRobot.getRobotModel(), scene),
             ros2ControllerHelper,
             syncedRobot,
             controllerStatusTracker,
             abilityHandComms,
-            scene);
+            scene,
+            terrainMapData);
    }
 
    @Override
@@ -277,5 +280,10 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
    public BehaviorTreeSceneExecutor getScene()
    {
       return scene;
+   }
+
+   public TerrainMapData getTerrainMap()
+   {
+      return terrainMapData;
    }
 }

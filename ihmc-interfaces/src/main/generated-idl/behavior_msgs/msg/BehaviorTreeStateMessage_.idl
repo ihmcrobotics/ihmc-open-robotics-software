@@ -18,6 +18,7 @@
 #include "behavior_msgs/msg/./GotoNodeStateMessage_.idl"
 #include "behavior_msgs/msg/./HandPoseActionStateMessage_.idl"
 #include "behavior_msgs/msg/./HandWrenchActionStateMessage_.idl"
+#include "behavior_msgs/msg/./NeckActionStateMessage_.idl"
 #include "behavior_msgs/msg/./PelvisHeightOrientationActionStateMessage_.idl"
 #include "behavior_msgs/msg/./SakeHandCommandActionStateMessage_.idl"
 #include "behavior_msgs/msg/./SceneActionNodeStateMessage_.idl"
@@ -70,35 +71,38 @@ module behavior_msgs
       const octet BUILDING_EXPLORATION =
       11;
 
-      const octet CHEST_ORIENTATION_ACTION =
+      const octet NECK_ACTION =
       12;
 
-      const octet FOOTSTEP_PLAN_ACTION =
+      const octet CHEST_ORIENTATION_ACTION =
       13;
 
-      const octet SAKE_HAND_COMMAND_ACTION =
+      const octet FOOTSTEP_PLAN_ACTION =
       14;
 
-      const octet ABILITY_HAND_ACTION =
+      const octet SAKE_HAND_COMMAND_ACTION =
       15;
 
-      const octet HAND_POSE_ACTION =
+      const octet ABILITY_HAND_ACTION =
       16;
 
-      const octet HAND_WRENCH_ACTION =
+      const octet HAND_POSE_ACTION =
       17;
 
-      const octet SCREW_PRIMITIVE_ACTION =
+      const octet HAND_WRENCH_ACTION =
       18;
 
-      const octet PELVIS_HEIGHT_ORIENTATION_ACTION =
+      const octet SCREW_PRIMITIVE_ACTION =
       19;
 
-      const octet WAIT_DURATION_ACTION =
+      const octet PELVIS_HEIGHT_ORIENTATION_ACTION =
       20;
 
-      const octet FOOT_POSE_ACTION =
+      const octet WAIT_DURATION_ACTION =
       21;
+
+      const octet FOOT_POSE_ACTION =
+      22;
 
 
       /**
@@ -152,6 +156,7 @@ module behavior_msgs
         sequence<behavior_msgs::msg::dds::AI2RNodeStateMessage, 1> ai2r_nodes;
         sequence<behavior_msgs::msg::dds::DoorTraversalStateMessage, 120> door_traversals;
         sequence<behavior_msgs::msg::dds::BuildingExplorationStateMessage, 120> building_explorations;
+        sequence<behavior_msgs::msg::dds::NeckActionStateMessage, 120> neck_actions;
         sequence<behavior_msgs::msg::dds::ChestOrientationActionStateMessage, 120> chest_orientation_actions;
         sequence<behavior_msgs::msg::dds::FootstepPlanActionStateMessage, 120> footstep_plan_actions;
         sequence<behavior_msgs::msg::dds::SakeHandCommandActionStateMessage, 120> sake_hand_command_actions;

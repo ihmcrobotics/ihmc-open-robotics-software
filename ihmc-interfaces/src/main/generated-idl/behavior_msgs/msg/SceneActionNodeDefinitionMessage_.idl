@@ -9,9 +9,14 @@ module behavior_msgs
   {
     module dds
     {
+      const octet SETUP_OBJECT =
+      0;
+
+      const octet FREEZE_OBJECT =
+      1;
+
 
       /**
-       * TODO: Add other actions besides setting up an object
        * TODO: The following fields are work in progress:
        */
       @TypeCode(type="behavior_msgs::msg::dds_::SceneActionNodeDefinitionMessage_")
@@ -22,9 +27,21 @@ module behavior_msgs
          */
         behavior_msgs::msg::dds::ActionNodeDefinitionMessage definition;
         /**
+         * The type of action as defined above
+         */
+        octet type;
+        /**
          * Definition of the object to setup
          */
         behavior_msgs::msg::dds::BehaviorTreeSceneObjectDefinitionMessage scene_object_definition;
+        /**
+         * If this action can't do what it needs to do in this amount of time, give up.
+         */
+        float timeout;
+        /**
+         * Filter for persistent detection history size
+         */
+        unsigned short minimum_history_size;
         /**
          * YOLO confidence threshold
          */

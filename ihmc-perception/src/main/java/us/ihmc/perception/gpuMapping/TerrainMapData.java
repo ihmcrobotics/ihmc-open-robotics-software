@@ -4,11 +4,14 @@ import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 
 public class TerrainMapData
 {
+   public static final float NORMAL_MIN_MAX_XY = 1.0f;
+   public static final float NORMAL_MIN_Z = 0.0f;
+   public static final float NORMAL_MAX_Z = 1.0f;
+
    private final double cellSize;
    private final double mapSize;
    private double gridCenterX;
@@ -18,6 +21,7 @@ public class TerrainMapData
 
    private final float[] heightMap;
 
+   private final float[] obstacleClearanceScoreMap;
    private final float[] traversabilityScoreMap;
    private final byte[] traversabilityClassMap;
 
@@ -37,6 +41,7 @@ public class TerrainMapData
 
       heightMap = new float[cellsPerAxis * cellsPerAxis];
 
+      obstacleClearanceScoreMap = new float[cellsPerAxis * cellsPerAxis];
       traversabilityScoreMap = new float[cellsPerAxis * cellsPerAxis];
       traversabilityClassMap = new byte[cellsPerAxis * cellsPerAxis];
 
@@ -45,8 +50,8 @@ public class TerrainMapData
       snapNormalZMap = new byte[cellsPerAxis * cellsPerAxis];
 
       // Initialize the snap normal as ZUp
-      byte zUpNormalXY = packFloatAsByte(0.0f, -1.0f, 1.0f);
-      byte zUpNormalZ = packFloatAsByte(1.0f, 0.0f, 1.0f);
+      byte zUpNormalXY = packFloatAsByte(0.0f, -NORMAL_MIN_MAX_XY, NORMAL_MIN_MAX_XY);
+      byte zUpNormalZ = packFloatAsByte(1.0f, NORMAL_MIN_Z, NORMAL_MAX_Z);
       Arrays.fill(snapNormalXMap, zUpNormalXY);
       Arrays.fill(snapNormalYMap, zUpNormalXY);
       Arrays.fill(snapNormalZMap, zUpNormalZ);
@@ -66,6 +71,7 @@ public class TerrainMapData
 
       this.heightMap = Arrays.copyOf(other.heightMap, size);
 
+      this.obstacleClearanceScoreMap = Arrays.copyOf(other.obstacleClearanceScoreMap, size);
       this.traversabilityScoreMap = Arrays.copyOf(other.traversabilityScoreMap, size);
       this.traversabilityClassMap = Arrays.copyOf(other.traversabilityClassMap, size);
 
@@ -91,9 +97,9 @@ public class TerrainMapData
    public void setSnapNormal(double x, double y, double normalX, double normalY, double normalZ)
    {
       int key = HeightMapTools.coordinateToKey(x, y, gridCenterX, gridCenterY, cellSize, centerIndex);
-      snapNormalXMap[key] = packFloatAsByte((float) normalX, -1.0f, 1.0f);
-      snapNormalYMap[key] = packFloatAsByte((float) normalY, -1.0f, 1.0f);
-      snapNormalZMap[key] = packFloatAsByte((float) normalZ, 0.0f, 1.0f);
+      snapNormalXMap[key] = packFloatAsByte((float) normalX, -NORMAL_MIN_MAX_XY, NORMAL_MIN_MAX_XY);
+      snapNormalYMap[key] = packFloatAsByte((float) normalY, -NORMAL_MIN_MAX_XY, NORMAL_MIN_MAX_XY);
+      snapNormalZMap[key] = packFloatAsByte((float) normalZ, NORMAL_MIN_Z, NORMAL_MAX_Z);
    }
 
    public double getHeight(double x, double y)
@@ -129,6 +135,17 @@ public class TerrainMapData
       return minValue;
    }
 
+   public double getObstacleClearanceScore(double x, double y)
+   {
+      int xIndex = HeightMapTools.coordinateToIndex(x, gridCenterX, cellSize, centerIndex);
+      int yIndex = HeightMapTools.coordinateToIndex(y, gridCenterY, cellSize, centerIndex);
+      if (TerrainMapTools.isOutOfBounds(cellsPerAxis, xIndex, yIndex))
+         return Double.NaN;
+
+      int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
+      return obstacleClearanceScoreMap[key];
+   }
+
    /**
     * Returns a traversability score from 0 to 1, where 0 is non-traversable and 1 is perfectly flat and level terrain.
     */
@@ -162,14 +179,19 @@ public class TerrainMapData
          return Axis3D.Z;
 
       int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
-      return new UnitVector3D(unpackByteAsFloat(snapNormalXMap, key, -1.0f, 1.0f),
-                              unpackByteAsFloat(snapNormalYMap, key, -1.0f, 1.0f),
-                              unpackByteAsFloat(snapNormalZMap, key, 0.0f, 1.0f));
+      return new UnitVector3D(unpackByteAsFloat(snapNormalXMap, key, -NORMAL_MIN_MAX_XY, NORMAL_MIN_MAX_XY),
+                              unpackByteAsFloat(snapNormalYMap, key, -NORMAL_MIN_MAX_XY, NORMAL_MIN_MAX_XY),
+                              unpackByteAsFloat(snapNormalZMap, key, NORMAL_MIN_Z, NORMAL_MAX_Z));
    }
 
    public float[] getHeightMap()
    {
       return heightMap;
+   }
+
+   public float[] getObstacleClearanceScoreMap()
+   {
+      return obstacleClearanceScoreMap;
    }
 
    public float[] getTraversabilityScoreMap()
@@ -205,6 +227,11 @@ public class TerrainMapData
    public void setTraversabilityScoreMap(float[] traversabilityScoreMap)
    {
       System.arraycopy(traversabilityScoreMap, 0, this.traversabilityScoreMap, 0, this.traversabilityScoreMap.length);
+   }
+
+   public void setObstacleClearanceScoreMap(float[] obstacleClearanceScoreMap)
+   {
+      System.arraycopy(obstacleClearanceScoreMap, 0, this.obstacleClearanceScoreMap, 0, this.obstacleClearanceScoreMap.length);
    }
 
    public void setTraversabilityClassMap(byte[] traversabilityClassMap)

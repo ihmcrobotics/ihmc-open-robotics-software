@@ -1,0 +1,42 @@
+# 3ds Max Wavefront OBJ Exporter v0.99 - (c)2007 guruware
+# File Created: 08.01.2024 18:36:00
+
+newmtl Opaque_67_72_77_
+	illum 2
+	Ka 0.40 0.40 0.40
+	Kd 0.40 0.40 0.40
+	Ks 1 1 1
+	Ns 500
+
+
+newmtl Opaque_157_207_237_
+	illum 2
+	Ka 0.60 0.60 0.60
+	Kd 0.60 0.60 0.60
+	Ks 1 1 1
+	Ns 500
+
+
+newmtl Opaque_89_96_102_
+	illum 2
+	Ka 0.40 0.40 0.40
+	Kd 0.40 0.40 0.40
+	Ks 1 1 1
+	Ns 500
+
+newmtl Opaque_165_165_165_
+	illum 2
+	Ka 0.60 0.60 0.60
+	Kd 0.60 0.60 0.60
+	Ks 1 1 1
+	Ns 500
+
+newmtl Procedural_Car_paint
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.320000 0.320000 0.320000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3

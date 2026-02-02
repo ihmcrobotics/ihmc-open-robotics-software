@@ -1,7 +1,7 @@
 package us.ihmc.rdx.perception.sceneGraph;
 
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import org.bytedeco.opencl.global.OpenCL;
+import org.bytedeco.opencv.opencv_core.GpuMat;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.commons.thread.TypedNotification;
@@ -9,14 +9,12 @@ import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.property.ROS2StoredPropertySet;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
-import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.ImageSensorPublishThread;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.cuda.CUDATools;
 import us.ihmc.perception.detections.DetectionManager;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
-import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.rapidRegions.RapidRegionsExtractorParameters;
 import us.ihmc.perception.sceneGraph.SceneNode;
@@ -43,9 +41,9 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.sensors.zed.ROS2ZEDSVOPlaybackSensor;
 import us.ihmc.sensors.zed.ZEDImageSensor;
 import us.ihmc.sensors.zed.ZEDModelData;
-import us.ihmc.sensors.zed.ROS2ZEDSVOPlaybackSensor;
 
 import static us.ihmc.zed.global.zed.SL_DEPTH_MODE_NEURAL;
 import static us.ihmc.zed.global.zed.SL_DEPTH_MODE_PERFORMANCE;
@@ -77,7 +75,6 @@ public class RDXSceneGraphDemo
    private RapidPlanarRegionsExtractor planarRegionsExtractor;
    private ROS2StoredPropertySet<RapidRegionsExtractorParameters> planarRegionsExtractorParameterSync;
    private final TypedNotification<PlanarRegionsList> newPlanarRegions = new TypedNotification<>();
-   private final OpenCLManager planarRegionsOpenCLManager = new OpenCLManager();
 
    // ZED SVO sensor related things
    private ROS2ZEDSVOPlaybackSensor zedSVOPlayer;
@@ -189,30 +186,18 @@ public class RDXSceneGraphDemo
 
                if (planarRegionsExtractor == null)
                {
-                  int imageHeight = zedDepthImage.getHeight();
-                  int imageWidth = zedDepthImage.getWidth();
-                  double fx = zedDepthImage.getFocalLengthX();
-                  double fy = zedDepthImage.getFocalLengthY();
-                  double cx = zedDepthImage.getPrincipalPointX();
-                  double cy = zedDepthImage.getPrincipalPointY();
-                  planarRegionsExtractor = new RapidPlanarRegionsExtractor(planarRegionsOpenCLManager, imageHeight, imageWidth, fx, fy, cx, cy);
-                  planarRegionsExtractor.getDebugger().setEnabled(false);
-
+                  planarRegionsExtractor = new RapidPlanarRegionsExtractor(zedDepthImage.getIntrinsicsCopy());
                   planarRegionsExtractorParameterSync = new ROS2StoredPropertySet<>(ros2Node,
                                                                                     PerceptionComms.PERSPECTIVE_RAPID_REGION_PARAMETERS,
-                                                                                    planarRegionsExtractor.getParameters());
+                                                                                    planarRegionsExtractor.getRapidRegionsExtractorParameters());
                }
 
                planarRegionsExtractorParameterSync.updateAndPublishThrottledStatus();
 
                FramePlanarRegionsList framePlanarRegionsList = new FramePlanarRegionsList();
 
-               // TODO: Get rid of BytedecoImage, RapidPlanarRegionsExtractor requires it
-               BytedecoImage bytedecoImage = new BytedecoImage(zedDepthImage.getCpuImageMat().clone());
-               bytedecoImage.createOpenCLImage(planarRegionsOpenCLManager, OpenCL.CL_MEM_READ_WRITE);
-               planarRegionsExtractor.update(bytedecoImage, sensorFrame.getReferenceFrame(), framePlanarRegionsList);
-               planarRegionsExtractor.setProcessing(false);
-               bytedecoImage.destroy(planarRegionsOpenCLManager);
+               GpuMat depthImage = zedDepthImage.getGpuImageMat();
+               planarRegionsExtractor.update(depthImage, sensorFrame.getReferenceFrame(), framePlanarRegionsList);
 
                PlanarRegionsList planarRegionsInWorldFrame = framePlanarRegionsList.getPlanarRegionsList().copy();
                planarRegionsInWorldFrame.applyTransform(sensorFrame.getReferenceFrame().getTransformToWorldFrame());
@@ -269,8 +254,6 @@ public class RDXSceneGraphDemo
                zedSVOPlayer.close();
             if (zedPublishThread != null)
                zedPublishThread.kill();
-
-            planarRegionsOpenCLManager.destroy();
 
             perceptionVisualizerPanel.destroy();
             baseUI.dispose();

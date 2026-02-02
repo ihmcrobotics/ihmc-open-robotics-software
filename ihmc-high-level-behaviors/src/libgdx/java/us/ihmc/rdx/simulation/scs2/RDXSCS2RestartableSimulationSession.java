@@ -71,7 +71,7 @@ public class RDXSCS2RestartableSimulationSession extends RDXSCS2SimulationSessio
 
       for (String yoVariableName : variableWidgets)
       {
-         getPlotManager().addVariableWidget(yoVariableName);
+         getPlottingManager().addVariableWidget(yoVariableName);
       }
 
       for (String robotToHide : robotsToHide)

@@ -173,10 +173,13 @@ public final class PerceptionAPI
    /*
     * Height map
     */
+   public static final ROS2Topic<Empty> REQUEST_CHUNK_MAP = PERCEPTION_MODULE.withSuffix("request_chunk_map").withType(Empty.class);
    public static final ROS2Topic<Empty> REQUEST_HEIGHT_MAP = PERCEPTION_MODULE.withSuffix("request_height_map").withType(Empty.class);
    public static final ROS2Topic<Empty> REQUEST_HEIGHT_MAP_FOR_CONTROLLER = PERCEPTION_MODULE.withSuffix("request_height_map_for_controller").withType(Empty.class);
    public static final ROS2Topic<Empty> REQUEST_TERRAIN_MAP = PERCEPTION_MODULE.withSuffix("request_terrain_map").withType(Empty.class);
+   public static final ROS2Topic<Empty> REQUEST_YOLO_HEIGHT_MAP = PERCEPTION_MODULE.withSuffix("request_yolo_height_map").withType(Empty.class);
    public static final ROS2Topic<HeightMapMessage> HEIGHT_MAP_MESSAGE = HEIGHT_MAP_MODULE.withOutput().withTypeName(HeightMapMessage.class);
+   public static final ROS2Topic<HeightMapMessage> YOLO_HEIGHT_MAP = HEIGHT_MAP_MODULE.withSuffix("yolo").withOutput().withTypeName(HeightMapMessage.class);
    public static final ROS2Topic<ChunkMessage> CHUNK = PERCEPTION_MODULE.withOutput().withTypeName(ChunkMessage.class).withSuffix("chunk");
    public static final ROS2Topic<Empty> RESET_HEIGHT_MAP = PERCEPTION_MODULE.withSuffix("reset_height_map").withType(Empty.class);
    public static final ROS2Topic<Empty> LOWER_HEIGHT_MAP_BACKDROP = PERCEPTION_MODULE.withSuffix("lower_height_map_backdrop").withType(Empty.class);
@@ -185,6 +188,7 @@ public final class PerceptionAPI
     * Terrain map
     */
    public static final ROS2Topic<TerrainMapMessage> TERRAIN_MAP_MESSAGE = TERRAIN_MAP_MODULE.withOutput().withTypeName(TerrainMapMessage.class);
+   public static final ROS2Topic<TerrainMapMessage> YOLO_TERRAIN_MAP = TERRAIN_MAP_MODULE.withSuffix("yolo").withOutput().withTypeName(TerrainMapMessage.class);
 
    /*
     * SLAM (old, not used)

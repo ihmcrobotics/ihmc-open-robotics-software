@@ -15,7 +15,7 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "9643bf65b3921cd3391b7d97ccbba3c86c0147f4bd8895c2851f4ea0959918db";
+   		return "2aad2c31712e17c0136cf7bfbeb8bb9729ef3f560d326b281fc5ebef26d836f8";
    }
    
    @Override
@@ -54,7 +54,13 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
 
       current_alignment += behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
       current_alignment += behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -89,7 +95,16 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
 
       current_alignment += behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.getCdrSerializedSize(data.getDefinition(), current_alignment);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessagePubSubType.getCdrSerializedSize(data.getSceneObjectDefinition(), current_alignment);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -126,7 +141,13 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
    public static void write(behavior_msgs.msg.dds.SceneActionNodeDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
+      cdr.write_type_9(data.getType());
+
       behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessagePubSubType.write(data.getSceneObjectDefinition(), cdr);
+      cdr.write_type_5(data.getTimeout());
+
+      cdr.write_type_3(data.getMinimumHistorySize());
+
       cdr.write_type_5(data.getYoloConfidenceThreshold());
 
       cdr.write_type_5(data.getYoloMaskThreshold());
@@ -154,7 +175,13 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
    public static void read(behavior_msgs.msg.dds.SceneActionNodeDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
+      data.setType(cdr.read_type_9());
+      	
       behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessagePubSubType.read(data.getSceneObjectDefinition(), cdr);	
+      data.setTimeout(cdr.read_type_5());
+      	
+      data.setMinimumHistorySize(cdr.read_type_3());
+      	
       data.setYoloConfidenceThreshold(cdr.read_type_5());
       	
       data.setYoloMaskThreshold(cdr.read_type_5());
@@ -176,8 +203,11 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
    {
       ser.write_type_a("definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getDefinition());
 
+      ser.write_type_9("type", data.getType());
       ser.write_type_a("scene_object_definition", new behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessagePubSubType(), data.getSceneObjectDefinition());
 
+      ser.write_type_5("timeout", data.getTimeout());
+      ser.write_type_3("minimum_history_size", data.getMinimumHistorySize());
       ser.write_type_5("yolo_confidence_threshold", data.getYoloConfidenceThreshold());
       ser.write_type_5("yolo_mask_threshold", data.getYoloMaskThreshold());
       ser.write_type_3("segmentation_mask_erosion_radius", data.getSegmentationMaskErosionRadius());
@@ -193,8 +223,11 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
    {
       ser.read_type_a("definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getDefinition());
 
+      data.setType(ser.read_type_9("type"));
       ser.read_type_a("scene_object_definition", new behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessagePubSubType(), data.getSceneObjectDefinition());
 
+      data.setTimeout(ser.read_type_5("timeout"));
+      data.setMinimumHistorySize(ser.read_type_3("minimum_history_size"));
       data.setYoloConfidenceThreshold(ser.read_type_5("yolo_confidence_threshold"));
       data.setYoloMaskThreshold(ser.read_type_5("yolo_mask_threshold"));
       data.setSegmentationMaskErosionRadius(ser.read_type_3("segmentation_mask_erosion_radius"));
