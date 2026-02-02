@@ -3,16 +3,22 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
 public abstract class MomentumOptimizationSettings implements ControllerCoreOptimizationSettings
 {
+   private final Vector3D angularMomentumWeight = new Vector3D(0.0, 0.0, 0.1);
+   private final Vector3D linearMomentumWeight = new Vector3D(0.5, 0.5, 0.02);
+   private final Vector3D loadedFootLinearWeight = new Vector3D(50.0, 50.0, 50.0);
+   private final Vector3D loadedFootAngularWeight = new Vector3D(5.0, 5.0, 5.0);
+
    /**
     * Note: This method does not need to be overwritten if the values for this parameter are loaded from XML.
     */
    public Vector3DReadOnly getLinearMomentumWeight()
    {
-      return null;
+      return linearMomentumWeight;
    }
 
    /**
@@ -28,7 +34,7 @@ public abstract class MomentumOptimizationSettings implements ControllerCoreOpti
     */
    public Vector3DReadOnly getAngularMomentumWeight()
    {
-      return null;
+      return angularMomentumWeight;
    }
 
    /**
@@ -41,7 +47,7 @@ public abstract class MomentumOptimizationSettings implements ControllerCoreOpti
     */
    public Vector3DReadOnly getLoadedFootLinearWeight()
    {
-      return null;
+      return loadedFootLinearWeight;
    }
 
    /**
@@ -54,7 +60,7 @@ public abstract class MomentumOptimizationSettings implements ControllerCoreOpti
     */
    public Vector3DReadOnly getLoadedFootAngularWeight()
    {
-      return null;
+      return loadedFootAngularWeight;
    }
 
    /**
