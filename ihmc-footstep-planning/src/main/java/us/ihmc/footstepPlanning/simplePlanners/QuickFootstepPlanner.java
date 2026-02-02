@@ -4,7 +4,6 @@ import org.apache.commons.math3.util.Pair;
 import us.ihmc.euclid.Axis2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.Line3D;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -36,6 +35,7 @@ public class QuickFootstepPlanner
    private final Vector3D oppositeStanceToProjection = new Vector3D();
    private boolean transistionToGoal;
    private Runnable stepPlannedCallback = () -> {};
+   private double sidewaysness;
 
    public List<Pair<RobotSide, Pose3D>> plan(SideDependentList<Pose3D> stances, SideDependentList<Pose3D> goals)
    {
@@ -106,12 +106,13 @@ public class QuickFootstepPlanner
       directionToGoal.sub(goalMid.getPosition(), stanceMid.getPosition());
       directionToGoal.normalize();
 
+      // Compute sidewaysness: 1 straight sideways, 0.5 diagonal, 0 forward/backward
       Vector2D stanceToGoal = new Vector2D();
       stanceToGoal.sub(new Point2D(goalMid.getPosition()), new Point2D(stanceMid.getPosition()));
       stanceToGoal.normalize();
       Vector2D stanceMidForward = new Vector2D(Axis2D.X);
       stanceMid.getOrientation().transform(stanceMidForward);
-
+      sidewaysness = 1.0 - (2.0 / Math.PI) * Math.abs(Math.asin(stanceMidForward.dot(stanceToGoal)));
 
       SideDependentList<Double> distancesToGoalMid = new SideDependentList<>(side -> stances.get(side).getPosition().distance(goalMid.getPosition()));
       for (RobotSide side : RobotSide.values) // Take a step towards the goal
@@ -135,7 +136,7 @@ public class QuickFootstepPlanner
             oppositeStanceToProjection.sub(oppositeStanceMidlineProjection, stances.get(side.getOppositeSide()).getPosition());
             oppositeStanceToProjection.normalize();
 
-            double targetDistanceFromLine = 0.12;
+            double targetDistanceFromLine = (1.0 - sidewaysness) * 0.12;
             swingEnd.getPosition().scaleAdd(targetDistanceFromLine, oppositeStanceToProjection, midlinePoint);
 
             Quaternion swingEndOrientation = new Quaternion(stanceMid.getOrientation());
@@ -214,5 +215,10 @@ public class QuickFootstepPlanner
    public boolean getTransistionToGoal()
    {
       return transistionToGoal;
+   }
+
+   public double getSidewaysness()
+   {
+      return sidewaysness;
    }
 }

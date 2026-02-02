@@ -121,6 +121,8 @@ public class RDXQuickFootstepPlannerDemo
 
          private void renderImGuiWidgets()
          {
+            ImGui.text("Sidewaysness: %.3f".formatted(planner.getSidewaysness()));
+
             for (RobotSide side : RobotSide.values)
                ImGui.checkbox("Stance " + side.getPascalCaseName() + " Gizmo", stanceGizmos.get(side).getSelected());
 
@@ -194,9 +196,17 @@ public class RDXQuickFootstepPlannerDemo
                   if (planner.getTransistionToGoal())
                      b += 0.07f;
                   if (planner.getFootToSwing() == RobotSide.LEFT)
-                     r += 0.07f;
+                  {
+                     r = 0.6f;
+                     g = 0.2f;
+                     b = 0.3f;
+                  }
                   else
-                     g -= 0.07f;
+                  {
+                     r = 0.2f;
+                     g = 0.6f;
+                     b = 0.3f;
+                  }
                   Color color = new Color(r, g, b, 1.0f);
                   builder.addMultiLine(planner.getSwingEnd(), foothold.getPolygonVerticesView(), 0.01, color, true);
                   builder.addPolygon(planner.getSwingEnd(), foothold, color);
