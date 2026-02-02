@@ -1,5 +1,7 @@
 package us.ihmc.zulu.parameters.controller;
 
+import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitchFactory;
+import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.zulu.ZuluJointMap;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.robotics.partNames.ArmJointName;
@@ -175,6 +177,17 @@ public class ZuluStateEstimatorParameters extends StateEstimatorParameters
 
       return names.toArray(new String[0]);
    }
+
+   @Override
+   public FootSwitchFactory getFootSwitchFactory()
+   {
+      WrenchBasedFootSwitchFactory factory = new WrenchBasedFootSwitchFactory();
+      factory.setDefaultContactThresholdForce(50.0);
+      factory.setDefaultCoPThresholdDistance(4.0e-3);
+      factory.setDefaultSecondContactThresholdForceIgnoringCoP(75.0);
+      return factory;
+   }
+
 
    @Override
    public double getEstimatorDT()

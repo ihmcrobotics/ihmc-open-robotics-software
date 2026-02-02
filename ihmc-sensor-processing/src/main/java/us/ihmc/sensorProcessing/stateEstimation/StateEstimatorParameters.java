@@ -3,7 +3,6 @@ package us.ihmc.sensorProcessing.stateEstimation;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitchFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
@@ -284,11 +283,7 @@ public class StateEstimatorParameters
 
    public FootSwitchFactory getFootSwitchFactory()
    {
-      WrenchBasedFootSwitchFactory factory = new WrenchBasedFootSwitchFactory();
-      factory.setDefaultContactThresholdForce(50.0);
-      factory.setDefaultCoPThresholdDistance(4.0e-3);
-      factory.setDefaultSecondContactThresholdForceIgnoringCoP(75.0);
-      return factory;
+      return null;
    }
 
    public SideDependentList<FootSwitchFactory> getFootSwitchFactories()

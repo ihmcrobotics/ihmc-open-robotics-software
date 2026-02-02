@@ -392,6 +392,8 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       inputForceSensors = new ForceSensorDataHolder(forceSensorDefinitions);
       outputForceSensors = new ForceSensorDataHolder(forceSensorDefinitions);
 
+      stateEstimatorParameters.configureSensorProcessing(this);
+
       bindSensorOutputMap();
 
       parentRegistry.addChild(registry);
