@@ -62,7 +62,10 @@ public abstract class DiagnosticParameters
       return true;
    }
 
-   public abstract double getInitialJointSplineDuration();
+   public double getInitialJointSplineDuration()
+   {
+      return 1.0;
+   }
 
    /**
     * Override this method to limit the scope of the automated diagnostic. If not overridden, the
@@ -157,7 +160,7 @@ public abstract class DiagnosticParameters
 
    public boolean doIdleControlUntilRobotIsAlive()
    {
-      return false;
+      return true;
    }
 
    public double getIdleQdMax()

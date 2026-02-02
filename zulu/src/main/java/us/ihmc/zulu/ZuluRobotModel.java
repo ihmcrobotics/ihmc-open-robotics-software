@@ -151,7 +151,7 @@ public class ZuluRobotModel implements DRCRobotModel
                                                                         physicalProperties,
                                                                         contactPointParameters);
       highLevelControllerParameters = new ZuluHighLevelControllerParameters(robotVersion, jointMap, robotTarget);
-      diagnosticParameters = new ZuluDiagnosticParameters(robotTarget, jointMap, sensorInformation, highLevelControllerParameters);
+      diagnosticParameters = new ZuluDiagnosticParameters(jointMap, sensorInformation, highLevelControllerParameters);
       stateEstimatorParameters = new ZuluStateEstimatorParameters(getEstimatorDT(), robotTarget, jointMap);
 
       modelFactory = new ZuluModelFactory(robotVersion, jointMap, contactPointParameters, new ZuluRigidBodyMutator(getPhysicalProperties(), imusToIgnore));
