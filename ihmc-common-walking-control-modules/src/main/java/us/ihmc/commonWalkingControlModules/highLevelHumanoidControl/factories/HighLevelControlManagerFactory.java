@@ -3,8 +3,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
-import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.DefaultSplitFractionCalculatorParameters;
-import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
+import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParameters;
 import us.ihmc.commonWalkingControlModules.configurations.InertialEstimationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ParameterTools;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -23,7 +22,6 @@ import us.ihmc.commonWalkingControlModules.parameterEstimation.InertialParameter
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -77,7 +75,7 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
    private HighLevelHumanoidControllerToolbox controllerToolbox;
    private WalkingControllerParameters walkingControllerParameters;
    private CoPTrajectoryParameters copTrajectoryParameters;
-   private SplitFractionCalculatorParametersReadOnly splitFractionParameters = new DefaultSplitFractionCalculatorParameters();
+   private SplitFractionCalculatorParameters splitFractionParameters = new SplitFractionCalculatorParameters();
    private MomentumOptimizationSettings momentumOptimizationSettings;
    private final LoadBearingParameters loadBearingParameters = new LoadBearingParameters(registry);
    private InertialEstimationParameters inertialEstimationParameters;
@@ -156,7 +154,7 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
       this.copTrajectoryParameters = copTrajectoryParameters;
    }
 
-   public void setSplitFractionParameters(SplitFractionCalculatorParametersReadOnly splitFractionParameters)
+   public void setSplitFractionParameters(SplitFractionCalculatorParameters splitFractionParameters)
    {
       this.splitFractionParameters = splitFractionParameters;
    }

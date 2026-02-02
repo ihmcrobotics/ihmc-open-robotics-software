@@ -17,7 +17,7 @@ public class SplitFractionFromPositionCalculator
    private final FramePose3D stanceFootPose = new FramePose3D();
    private final FramePose3D nextFootPose = new FramePose3D();
 
-   private final SplitFractionCalculatorParametersReadOnly splitFractionParameters;
+   private final SplitFractionCalculatorParameters splitFractionParameters;
 
    private IntSupplier numberOfStepsProvider;
    private IntFunction<FramePose3DReadOnly> stepPoseGetter;
@@ -32,7 +32,7 @@ public class SplitFractionFromPositionCalculator
    private IntDoubleConsumer transferWeightDistributionConsumer;
    private IntDoubleConsumer transferSplitFractionConsumer;
 
-   public SplitFractionFromPositionCalculator(SplitFractionCalculatorParametersReadOnly splitFractionParameters)
+   public SplitFractionFromPositionCalculator(SplitFractionCalculatorParameters splitFractionParameters)
    {
       this.splitFractionParameters = splitFractionParameters;
    }

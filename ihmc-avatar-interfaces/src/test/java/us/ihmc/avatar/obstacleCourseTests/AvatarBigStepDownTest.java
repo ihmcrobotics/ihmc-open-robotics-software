@@ -12,8 +12,7 @@ import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
-import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.DefaultSplitFractionCalculatorParameters;
-import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
+import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commons.ContinuousIntegrationTools;
@@ -157,7 +156,7 @@ public abstract class AvatarBigStepDownTest implements MultiRobotTestInterface
       YoDouble percentageWeightOnLeftFoot = (YoDouble) simulationTestHelper.findVariable("percentageStandingWeightDistributionOnLeftFoot");
 
       // check that the split fraction parameters change in the correct walking states
-      SplitFractionCalculatorParametersReadOnly defaultSplitFractions = new DefaultSplitFractionCalculatorParameters();
+      SplitFractionCalculatorParameters defaultSplitFractions = new SplitFractionCalculatorParameters();
       processedSplitFraction.addListener(v -> checkSplitFractionParameters(currentWalkingState,
                                                                            rightFootState,
                                                                            processedSplitFraction,

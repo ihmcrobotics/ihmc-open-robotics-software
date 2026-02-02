@@ -6,7 +6,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.initialSetup.HumanoidRobotInitialSetup;
 import us.ihmc.avatar.kinematicsSimulation.SimulatedHandKinematicController;
-import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
+import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParameters;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
@@ -22,7 +22,6 @@ import us.ihmc.handsros2.abilityHand.AbilityHandModel;
 import us.ihmc.handsros2.ezGripper.EZGripperModel;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.zulu.parameters.controller.ZuluContactPointParameters;
-import us.ihmc.zulu.parameters.controller.ZuluICPSplitFractionCalculatorParameters;
 import us.ihmc.zulu.parameters.controller.ZuluHighLevelControllerParameters;
 import us.ihmc.zulu.parameters.controller.ZuluStateEstimatorParameters;
 import us.ihmc.zulu.parameters.controller.ZuluWalkingControllerParameters;
@@ -449,9 +448,9 @@ public class ZuluRobotModel implements DRCRobotModel
    }
 
    @Override
-   public SplitFractionCalculatorParametersReadOnly getSplitFractionCalculatorParameters()
+   public SplitFractionCalculatorParameters getSplitFractionCalculatorParameters()
    {
-      return new ZuluICPSplitFractionCalculatorParameters();
+      return new SplitFractionCalculatorParameters();
    }
 
    @Override

@@ -3,8 +3,7 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 import java.util.List;
 import java.util.function.Supplier;
 
-import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.DefaultSplitFractionCalculatorParameters;
-import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
+import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionFromAreaCalculator;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionFromPositionCalculator;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.YoSplitFractionCalculatorParameters;
@@ -73,7 +72,7 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator implem
    private final SplitFractionFromPositionCalculator positionSplitFractionCalculator;
    private final SplitFractionFromAreaCalculator areaSplitFractionCalculator;
 
-   private final YoSplitFractionCalculatorParameters splitFractionParameters;
+   private final YoSplitFractionCalculatorParameters yoSplitFractionCalculatorParameters;
 
    private int shiftFractionCounter = 0;
    private int weightDistributionCounter = 0;
@@ -86,11 +85,11 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator implem
                                         SideDependentList<? extends ConvexPolygon2DReadOnly> defaultSupportPolygons,
                                         YoRegistry parentRegistry)
    {
-      this(parameters, new DefaultSplitFractionCalculatorParameters(), defaultSupportPolygons, parentRegistry);
+      this(parameters, new SplitFractionCalculatorParameters(), defaultSupportPolygons, parentRegistry);
    }
 
    public WalkingCoPTrajectoryGenerator(CoPTrajectoryParameters parameters,
-                                        SplitFractionCalculatorParametersReadOnly defaultSplitFractionParameters,
+                                        SplitFractionCalculatorParameters splitFractionCalculatorParameters,
                                         SideDependentList<? extends ConvexPolygon2DReadOnly> defaultSupportPolygons,
                                         YoRegistry parentRegistry)
    {
@@ -100,7 +99,7 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator implem
       this.defaultSupportPolygons.set(side -> new ConvexPolygon2D(defaultSupportPolygons.get(side)));
 
       registry = new YoRegistry(getClass().getSimpleName());
-      splitFractionParameters = new YoSplitFractionCalculatorParameters(defaultSplitFractionParameters, registry);
+      yoSplitFractionCalculatorParameters = new YoSplitFractionCalculatorParameters(splitFractionCalculatorParameters, registry);
       for (RobotSide robotSide : RobotSide.values)
       {
          stepFrames.put(robotSide, new RecyclingArrayList<>(3, new Supplier<PoseReferenceFrame>()
@@ -121,9 +120,9 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator implem
       transferSplitFractions = new PreallocatedList<>(YoDouble.class, () -> new YoDouble("processedTransferSplitFraction" + shiftFractionCounter++, registry), parameters.getMaxNumberOfStepsToConsider());
       transferWeightDistributions = new PreallocatedList<>(YoDouble.class, () -> new YoDouble("processedTransferWeightDistribution" + weightDistributionCounter++, registry), parameters.getMaxNumberOfStepsToConsider());
 
-      positionSplitFractionCalculator = new SplitFractionFromPositionCalculator(splitFractionParameters);
+      positionSplitFractionCalculator = new SplitFractionFromPositionCalculator(splitFractionCalculatorParameters);
 
-      areaSplitFractionCalculator = new SplitFractionFromAreaCalculator(splitFractionParameters, defaultSupportPolygons);
+      areaSplitFractionCalculator = new SplitFractionFromAreaCalculator(splitFractionCalculatorParameters, defaultSupportPolygons);
 
       parentRegistry.addChild(registry);
       clear();
@@ -134,7 +133,7 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator implem
    {
       super.registerState(state);
 
-      state.registerStateToSave(splitFractionParameters);
+      state.registerStateToSave(yoSplitFractionCalculatorParameters);
 
       positionSplitFractionCalculator.setNumberOfStepsProvider(state::getNumberOfFootstep);
 
