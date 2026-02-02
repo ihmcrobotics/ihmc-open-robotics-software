@@ -332,7 +332,7 @@ public class ZuluRobotModel implements DRCRobotModel
    @Override
    public String getSimpleRobotName()
    {
-      return "Zulu"; // TODO Should this just be robotName? Confusing which one to use
+      return ZULUURDFParameters.URDF_MODEL_NAME;
    }
 
    @Override
