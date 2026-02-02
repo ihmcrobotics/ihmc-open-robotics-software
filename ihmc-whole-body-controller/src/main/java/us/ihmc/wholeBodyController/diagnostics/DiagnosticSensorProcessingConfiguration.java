@@ -14,13 +14,10 @@ import us.ihmc.sensorProcessing.diagnostic.PositionVelocity1DConsistencyChecker;
 import us.ihmc.sensorProcessing.diagnostic.WrenchSensorValidityChecker;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
-import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
-import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 
-public class DiagnosticSensorProcessingConfiguration implements SensorProcessingConfiguration
+public class DiagnosticSensorProcessingConfiguration extends StateEstimatorParameters
 {
-   private final SensorProcessingConfiguration sensorProcessingConfiguration;
-
    private Map<OneDoFJointBasics, OneDoFJointSensorValidityChecker> jointSensorValidityCheckers;
    private Map<String, IMUSensorValidityChecker> imuSensorValidityCheckers;
    private Map<ForceSensorDefinition, WrenchSensorValidityChecker> wrenchSensorValidityCheckers;
@@ -37,19 +34,13 @@ public class DiagnosticSensorProcessingConfiguration implements SensorProcessing
    private final DiagnosticParameters diagnosticParameters;
    private final boolean enableLogging;
 
+//   public DiagnosticSensorProcessingConfiguration(DiagnosticParameters diagnosticParameters, StateEstimatorParameters stateEstimatorParameters, JointDesiredOutputListReadOnly lowLevelOneDoFJointDesiredDataHolder)
+//   {
+//      this(diagnosticParameters, stateEstimatorParameters.getEstimatorDT(), lowLevelOneDoFJointDesiredDataHolder);
+//   }
+
    public DiagnosticSensorProcessingConfiguration(DiagnosticParameters diagnosticParameters, double dt, JointDesiredOutputListReadOnly lowLevelOneDoFJointDesiredDataHolder)
    {
-      this(diagnosticParameters, null, dt, lowLevelOneDoFJointDesiredDataHolder);
-   }
-
-   public DiagnosticSensorProcessingConfiguration(DiagnosticParameters diagnosticParameters, SensorProcessingConfiguration sensorProcessingConfiguration, JointDesiredOutputListReadOnly lowLevelOneDoFJointDesiredDataHolder)
-   {
-      this(diagnosticParameters, sensorProcessingConfiguration, sensorProcessingConfiguration.getEstimatorDT(), lowLevelOneDoFJointDesiredDataHolder);
-   }
-
-   private DiagnosticSensorProcessingConfiguration(DiagnosticParameters diagnosticParameters, SensorProcessingConfiguration sensorProcessingConfiguration, double dt, JointDesiredOutputListReadOnly lowLevelOneDoFJointDesiredDataHolder)
-   {
-      this.sensorProcessingConfiguration = sensorProcessingConfiguration;
       this.dt = dt;
       this.lowLevelOneDoFJointDesiredDataHolder = lowLevelOneDoFJointDesiredDataHolder;
       this.diagnosticParameters = diagnosticParameters;
@@ -59,9 +50,6 @@ public class DiagnosticSensorProcessingConfiguration implements SensorProcessing
    @Override
    public void configureSensorProcessing(SensorProcessing sensorProcessing)
    {
-      if (sensorProcessingConfiguration != null)
-         sensorProcessingConfiguration.configureSensorProcessing(sensorProcessing);
-
       List<String> jointsToIgnore = diagnosticParameters.getJointsToIgnoreDuringDiagnostic();
       double fftObservationWindow = diagnosticParameters.getFFTObservationWindow();
 
@@ -128,12 +116,6 @@ public class DiagnosticSensorProcessingConfiguration implements SensorProcessing
    public Map<OneDoFJointBasics, OneDoFJointFourierAnalysis> getJointFourierAnalysisMap()
    {
       return jointFourierAnalysisMap;
-   }
-
-   @Override
-   public SensorNoiseParameters getSensorNoiseParameters()
-   {
-      return null;
    }
 
    @Override

@@ -17,7 +17,6 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
@@ -28,10 +27,9 @@ import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
-import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
-import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -211,26 +209,15 @@ public class PelvisRotationalStateUpdaterTest
    
    private SensorProcessing buildSensorConfigurations(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, YoRegistry registry)
    {
-      SensorProcessingConfiguration sensorProcessingConfiguration = new SensorProcessingConfiguration()
+      StateEstimatorParameters stateEstimatorParameters = new StateEstimatorParameters()
       {
-         @Override
-         public SensorNoiseParameters getSensorNoiseParameters()
-         {
-            return null;
-         }
-         
          @Override
          public double getEstimatorDT()
          {
             return 1e-3;
          }
-         
-         @Override
-         public void configureSensorProcessing(SensorProcessing sensorProcessing)
-         {
-         }
       };
-      SensorProcessing sensorDataSource = new SensorProcessing(stateEstimatorSensorDefinitions, sensorProcessingConfiguration, registry);
+      SensorProcessing sensorDataSource = new SensorProcessing(stateEstimatorSensorDefinitions, stateEstimatorParameters, registry);
       
       imuSensors.clear();
       imuSensors.addAll(sensorDataSource.getIMUOutputs());

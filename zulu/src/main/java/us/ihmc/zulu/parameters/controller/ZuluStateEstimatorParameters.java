@@ -1,19 +1,14 @@
 package us.ihmc.zulu.parameters.controller;
 
 import us.ihmc.zulu.ZuluJointMap;
-import us.ihmc.zulu.ZuluSensorInformation;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitchFactory;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType;
-import us.ihmc.sensorProcessing.stateEstimation.IMUBasedJointStateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
@@ -23,12 +18,7 @@ import java.util.List;
 public class ZuluStateEstimatorParameters extends StateEstimatorParameters
 {
    private final double estimatorDT;
-   private final RobotTarget target;
    private final ZuluJointMap jointMap;
-
-   private final double kinematicsPelvisPositionFilterFreqInHertz;
-
-   private final SideDependentList<String> footForceSensorNames;
 
    private final double neckJointPositionFrequency;
    private final double neckJointVelocityFrequency;
@@ -45,18 +35,10 @@ public class ZuluStateEstimatorParameters extends StateEstimatorParameters
    private final double angularVelocityFrequency;
    private final double linearAccelerationFrequency;
 
-   protected final List<IMUBasedJointStateEstimatorParameters> imuBasedJointStateEstimatorParameters = new ArrayList<>();
-
-   private final ZuluSensorInformation sensorInformation;
-
-   public ZuluStateEstimatorParameters(double estimatorDT, RobotTarget target, ZuluSensorInformation sensorInformation, ZuluJointMap jointMap)
+   public ZuluStateEstimatorParameters(double estimatorDT, RobotTarget target, ZuluJointMap jointMap)
    {
-      this.target = target;
       this.estimatorDT = estimatorDT;
-      this.sensorInformation = sensorInformation;
       this.jointMap = jointMap;
-
-      this.footForceSensorNames = sensorInformation.getFeetForceSensorNames();
 
       spineJointPositionFrequency = target == RobotTarget.REAL_ROBOT ? 1000.0 : Double.POSITIVE_INFINITY;
       spineJointVelocityFrequency = target == RobotTarget.REAL_ROBOT ? 1000.0 : Double.POSITIVE_INFINITY;
@@ -76,8 +58,6 @@ public class ZuluStateEstimatorParameters extends StateEstimatorParameters
       orientationFrequency = target == RobotTarget.REAL_ROBOT ? 25.0 : Double.POSITIVE_INFINITY;
       angularVelocityFrequency = target == RobotTarget.REAL_ROBOT ? 25.0 : Double.POSITIVE_INFINITY;
       linearAccelerationFrequency = target == RobotTarget.REAL_ROBOT ? 25.0 : Double.POSITIVE_INFINITY;
-
-      kinematicsPelvisPositionFilterFreqInHertz = Double.POSITIVE_INFINITY;
    }
 
    @Override
@@ -123,11 +103,14 @@ public class ZuluStateEstimatorParameters extends StateEstimatorParameters
       sensorProcessing.addSensorAlphaFilter(linearAccelerationAlphaFilter, false, SensorType.IMU_LINEAR_ACCELERATION);
    }
 
-
-
    private String[] lowerBodyJoints()
    {
-      return toJointNameStrings(LegJointName.HIP_ROLL, LegJointName.HIP_YAW, LegJointName.HIP_PITCH, LegJointName.KNEE_PITCH, LegJointName.ANKLE_PITCH, LegJointName.ANKLE_ROLL);
+      return toJointNameStrings(LegJointName.HIP_ROLL,
+                                LegJointName.HIP_YAW,
+                                LegJointName.HIP_PITCH,
+                                LegJointName.KNEE_PITCH,
+                                LegJointName.ANKLE_PITCH,
+                                LegJointName.ANKLE_ROLL);
    }
 
    private String[] spineJoints()
@@ -176,7 +159,6 @@ public class ZuluStateEstimatorParameters extends StateEstimatorParameters
       return names.toArray(new String[0]);
    }
 
-
    private String[] toJointNameStrings(SpineJointName... spineJointNames)
    {
       List<String> names = new ArrayList<>();
@@ -201,151 +183,5 @@ public class ZuluStateEstimatorParameters extends StateEstimatorParameters
    public double getEstimatorDT()
    {
       return estimatorDT;
-   }
-
-   @Override
-   public boolean usePelvisLinearStateNewFusingFilter()
-   {
-      return true;
-   }
-
-   @Override
-   public double getKinematicsPelvisPositionFilterFreqInHertz()
-   {
-      return kinematicsPelvisPositionFilterFreqInHertz;
-   }
-
-   @Override
-   public double getCoPFilterFreqInHertz()
-   {
-      return Double.POSITIVE_INFINITY;
-   }
-
-   @Override
-   public boolean enableIMUBiasCompensation()
-   {
-      return true;
-   }
-
-   @Override
-   public double getIMUBiasFilterFreqInHertz()
-   {
-      return 0.04;
-   }
-
-   @Override
-   public double getIMUBiasVelocityThreshold()
-   {
-      return 0.035;
-   }
-
-   @Override
-   public boolean correctTrustedFeetPositions()
-   {
-      return true;
-   }
-
-   @Override
-   public boolean useAccelerometerForEstimation()
-   {
-      return true;
-   }
-
-   @Override
-   public boolean cancelGravityFromAccelerationMeasurement()
-   {
-      return true;
-   }
-
-   @Override
-   public double getPelvisPositionFusingFrequency()
-   {
-      // TODO Tune me
-      return 11.7893;
-   }
-
-   @Override
-   public double getPelvisLinearVelocityFusingFrequency()
-   {
-      // TODO Tune me
-      return 2.0146195328088035;
-   }
-
-   @Override
-   public double getDelayTimeForTrustingFoot()
-   {
-      // TODO Tune me
-      return 0.02;
-   }
-
-   @Override
-   public double getForceInPercentOfWeightThresholdToTrustFoot()
-   {
-      // TODO Tune me
-      return 0.3;
-   }
-
-   @Override
-   public boolean trustCoPAsNonSlippingContactPoint()
-   {
-      return true;
-   }
-
-   @Override
-   public double getPelvisLinearVelocityAlphaNewTwist()
-   {
-      return 0.2;
-   }
-
-   @Override
-   public boolean requestFootForceSensorCalibrationAtStart()
-   {
-      return false;
-   }
-
-   @Override
-   public SideDependentList<String> getFootForceSensorNames()
-   {
-      return footForceSensorNames;
-   }
-
-   @Override
-   public boolean getPelvisLinearStateUpdaterTrustImuWhenNoFeetAreInContact()
-   {
-      return true;
-   }
-
-   @Override
-   public double getCenterOfMassVelocityFusingFrequency()
-   {
-      return 0.4261;
-   }
-
-   @Override
-   public boolean useGroundReactionForcesToComputeCenterOfMassVelocity()
-   {
-      return false;
-   }
-
-   @Override
-   public FootSwitchFactory getFootSwitchFactory()
-   {
-      WrenchBasedFootSwitchFactory factory = new WrenchBasedFootSwitchFactory();
-      factory.setDefaultContactThresholdForce(50.0);
-      factory.setDefaultCoPThresholdDistance(4.0e-3);
-      factory.setDefaultSecondContactThresholdForceIgnoringCoP(75.0);
-      return factory;
-   }
-
-   @Override
-   public List<IMUBasedJointStateEstimatorParameters> getIMUBasedJointStateEstimatorParameters()
-   {
-      return imuBasedJointStateEstimatorParameters;
-   }
-
-   @Override
-   public MomentumEstimatorMode getMomentumEstimatorMode()
-   {
-      return MomentumEstimatorMode.SIMPLE;
    }
 }

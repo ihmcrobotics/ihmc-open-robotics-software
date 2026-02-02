@@ -6,7 +6,7 @@ import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.scs2.simulation.robot.controller.SimControllerInput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
-import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class SCS2SensorReaderFactory implements SensorReaderFactory
@@ -15,23 +15,23 @@ public class SCS2SensorReaderFactory implements SensorReaderFactory
    private SCS2SensorReader sensorReader;
 
    private final SimControllerInput controllerInput;
-   private final SensorProcessingConfiguration sensorProcessingConfiguration;
+   private final StateEstimatorParameters stateEstimatorParameters;
    private final boolean usePerfectSensors;
 
-   public static SCS2SensorReaderFactory newSensorReaderFactory(SimControllerInput controllerInput, SensorProcessingConfiguration sensorProcessingConfiguration)
+   public static SCS2SensorReaderFactory newSensorReaderFactory(SimControllerInput controllerInput, StateEstimatorParameters stateEstimatorParameters)
    {
-      return new SCS2SensorReaderFactory(controllerInput, sensorProcessingConfiguration, false);
+      return new SCS2SensorReaderFactory(controllerInput, stateEstimatorParameters, false);
    }
 
    public static SCS2SensorReaderFactory newPerfectSensorReaderFactory(SimControllerInput controllerInput)
    {
-      return new SCS2SensorReaderFactory(controllerInput, null, true);
+      return new SCS2SensorReaderFactory(controllerInput, new StateEstimatorParameters(), true);
    }
 
-   private SCS2SensorReaderFactory(SimControllerInput controllerInput, SensorProcessingConfiguration sensorProcessingConfiguration, boolean usePerfectSensors)
+   private SCS2SensorReaderFactory(SimControllerInput controllerInput, StateEstimatorParameters stateEstimatorParameters, boolean usePerfectSensors)
    {
       this.controllerInput = controllerInput;
-      this.sensorProcessingConfiguration = sensorProcessingConfiguration;
+      this.stateEstimatorParameters = stateEstimatorParameters;
       this.usePerfectSensors = usePerfectSensors;
    }
 
@@ -55,7 +55,7 @@ public class SCS2SensorReaderFactory implements SensorReaderFactory
                                                          rootJoint,
                                                          imuDefinitions,
                                                          forceSensorDataHolderToUpdate,
-                                                         sensorProcessingConfiguration);
+                                                         stateEstimatorParameters);
       parentRegistry.addChild(sensorReader.getRegistry());
    }
 

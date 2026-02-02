@@ -19,7 +19,7 @@ mainDependencies {
    api("com.github.wendykierp:JTransforms:3.1")
 
    api("us.ihmc:ihmc-communication:source")
-   api("us.ihmc:ihmc-robot-models:source")
+   api("us.ihmc:ihmc-common-walking-control-modules:source")
 }
 
 testDependencies {
