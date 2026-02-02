@@ -550,12 +550,10 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
       humanoidHighLevelControllerManager.addHighLevelStateChangedListener((from, to) ->
                                                                           {
-                                                                             if (from == null)
-                                                                                controlDT.set(highLevelControllerParameters.getControlDT(to));
-                                                                             else if (to == null)
+                                                                             if (to == null)
                                                                                 controlDT.set(highLevelControllerParameters.getControlDT(from));
                                                                              else
-                                                                                controlDT.set(Math.max(highLevelControllerParameters.getControlDT(from), highLevelControllerParameters.getControlDT(to)));
+                                                                                controlDT.set(highLevelControllerParameters.getControlDT(to));
                                                                           });
       attachHighLevelStateChangedListener(highLevelStateChangeListenersToAttach);
 

@@ -18,6 +18,7 @@ public class ControllerTask extends HumanoidRobotControlTask
    private final AvatarControllerThreadInterface controllerThread;
 
    private final ThreadTimer timer;
+   private final ThreadTimer loopTimer;
    private final YoLong ticksBehindScheduled;
 
    protected final List<Runnable> postControllerCallbacks = new ArrayList<>();
@@ -38,7 +39,8 @@ public class ControllerTask extends HumanoidRobotControlTask
       masterResolver = new CrossRobotCommandResolver(masterFullRobotModel);
 
       //      String prefix = "Controller";
-      timer = new ThreadTimer(prefix, schedulerDt * (int) Math.round(controllerThread.getCurrentDT() / schedulerDt), controllerThread.getYoVariableRegistry());
+      timer = new ThreadTimer(prefix, controllerThread::getCurrentDT, controllerThread.getYoVariableRegistry());
+      loopTimer = new ThreadTimer(prefix + "Loop", controllerThread::getCurrentDT, controllerThread.getYoVariableRegistry());
       ticksBehindScheduled = new YoLong(prefix + "TicksBehindScheduled", controllerThread.getYoVariableRegistry());
    }
 
@@ -47,6 +49,7 @@ public class ControllerTask extends HumanoidRobotControlTask
    {
       // For when the task gets reset, so we can observe when it gets triggered.
       timer.reset();
+      loopTimer.reset();
       ticksBehindScheduled.set(0);
       return super.initialize();
    }
@@ -54,6 +57,8 @@ public class ControllerTask extends HumanoidRobotControlTask
    @Override
    protected void execute()
    {
+      loopTimer.stop();
+      loopTimer.start();
       timer.start();
       long oldDivisor = getDivisor();
       long schedulerTick = controllerThread.getHumanoidRobotContextData().getSchedulerTick();
