@@ -1,7 +1,6 @@
 package us.ihmc.zulu.parameters.simulation;
 
 import us.ihmc.avatar.initialSetup.HumanoidRobotInitialSetup;
-import us.ihmc.zulu.ZuluVersion;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -12,7 +11,7 @@ import us.ihmc.scs2.definition.robot.RobotDefinition;
 
 public class ZuluInitialSetup extends HumanoidRobotInitialSetup
 {
-   public ZuluInitialSetup(ZuluVersion version, RobotDefinition robotDefinition, HumanoidJointNameMap jointMap)
+   public ZuluInitialSetup(RobotDefinition robotDefinition, HumanoidJointNameMap jointMap)
    {
       super(jointMap);
 

@@ -26,7 +26,6 @@ import us.ihmc.zulu.parameters.controller.ZuluHighLevelControllerParameters;
 import us.ihmc.zulu.parameters.controller.ZuluStateEstimatorParameters;
 import us.ihmc.zulu.parameters.controller.ZuluWalkingControllerParameters;
 import us.ihmc.zulu.parameters.diagnostic.ZuluDiagnosticParameters;
-import us.ihmc.zulu.parameters.model.ZuluKSTKinematicsCollisionModel;
 import us.ihmc.zulu.parameters.model.ZuluPhysicalProperties;
 import us.ihmc.zulu.parameters.model.ZuluSimulationCollisionModel;
 import us.ihmc.zulu.parameters.model.ZULUURDFParameters;
@@ -248,7 +247,7 @@ public class ZuluRobotModel implements DRCRobotModel
    @Override
    public HumanoidRobotInitialSetup getDefaultRobotInitialSetup()
    {
-      return new ZuluInitialSetup(getRobotVersion(), getRobotDefinition(), getJointMap());
+      return new ZuluInitialSetup(getRobotDefinition(), getJointMap());
    }
 
    @Override
@@ -376,7 +375,7 @@ public class ZuluRobotModel implements DRCRobotModel
    @Override
    public RobotCollisionModel getHumanoidRobotKinematicsCollisionModel()
    {
-      return new ZuluKSTKinematicsCollisionModel(getJointMap());
+      return new ZuluSimulationCollisionModel(getJointMap());
    }
 
    @Override
