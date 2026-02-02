@@ -6,7 +6,6 @@ import us.ihmc.simulationConstructionSetTools.tools.CITools.SimpleRobotNameKeys;
 import us.ihmc.zulu.ZuluVersion;
 import us.ihmc.zulu.ZuluRobotModel;
 import us.ihmc.zulu.parameters.controller.ZuluStepAdjustmentParameters;
-import us.ihmc.zulu.parameters.controller.ZuluSteppingParameters;
 import us.ihmc.zulu.parameters.controller.ZuluWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -59,7 +58,7 @@ public class ZuluPushRecoveryOverGapTest extends AvatarPushRecoveryOverGapTest
                @Override
                public SteppingParameters getSteppingParameters()
                {
-                  return new ZuluSteppingParameters(getPhysicalProperties())
+                  return new SteppingParameters()
                   {
                      @Override
                      public double getMaxStepLength()

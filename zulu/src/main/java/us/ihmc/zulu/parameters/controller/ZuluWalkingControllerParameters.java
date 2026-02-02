@@ -48,7 +48,7 @@ public class ZuluWalkingControllerParameters extends WalkingControllerParameters
    private final ZuluPhysicalProperties physicalProperties;
    private final ToeOffParameters toeOffParameters;
    private SwingTrajectoryParameters swingTrajectoryParameters;
-   private final ZuluSteppingParameters steppingParameters;
+   private final SteppingParameters steppingParameters;
    private final ICPControllerParameters icpControllerParameters;
    private final ZuluStepAdjustmentParameters stepAdjustmentParameters;
    private JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = new ZuluJointPrivilegedConfigurationParameters();
@@ -101,7 +101,7 @@ public class ZuluWalkingControllerParameters extends WalkingControllerParameters
       toeOffParameters = new ToeOffParameters();
       momentumOptimizationSettings = new ZuluMomentumOptimizationSettings(target, jointMap, 2 + contactPointParameters.getAdditionalContactNames().size());
       swingTrajectoryParameters = new SwingTrajectoryParameters();
-      steppingParameters = new ZuluSteppingParameters(physicalProperties);
+      steppingParameters = new SteppingParameters();
       icpControllerParameters = new ICPControllerParameters();
       stepAdjustmentParameters = new ZuluStepAdjustmentParameters();
 

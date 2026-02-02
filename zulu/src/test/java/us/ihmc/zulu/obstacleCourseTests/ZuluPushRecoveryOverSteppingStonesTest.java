@@ -12,8 +12,9 @@ import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjus
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.zulu.parameters.controller.*;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
+import us.ihmc.zulu.parameters.controller.ZuluStepAdjustmentParameters;
+import us.ihmc.zulu.parameters.controller.ZuluWalkingControllerParameters;
 
 @Tag("humanoid-obstacle-slow-3")
 public class ZuluPushRecoveryOverSteppingStonesTest extends AvatarPushRecoveryOverSteppingStonesTest
@@ -44,7 +45,7 @@ public class ZuluPushRecoveryOverSteppingStonesTest extends AvatarPushRecoveryOv
                @Override
                public SteppingParameters getSteppingParameters()
                {
-                  return new ZuluSteppingParameters(getPhysicalProperties())
+                  return new SteppingParameters()
                   {
                      @Override
                      public double getMaxStepLength()
