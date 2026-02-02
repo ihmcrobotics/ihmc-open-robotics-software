@@ -2,7 +2,6 @@ package us.ihmc.zulu;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import us.ihmc.zulu.parameters.controller.ZuluSwingTrajectoryParameters;
 import us.ihmc.zulu.parameters.controller.ZuluWalkingControllerParameters;
 import us.ihmc.avatar.AvatarFlatGroundQuickWalkingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -54,7 +53,7 @@ public class ZuluFlatGroundQuickWalkingTest extends AvatarFlatGroundQuickWalking
                @Override
                public SwingTrajectoryParameters getSwingTrajectoryParameters()
                {
-                  return new ZuluSwingTrajectoryParameters()
+                  return new SwingTrajectoryParameters()
                   {
                      @Override
                      public double getDesiredTouchdownHeightOffset()

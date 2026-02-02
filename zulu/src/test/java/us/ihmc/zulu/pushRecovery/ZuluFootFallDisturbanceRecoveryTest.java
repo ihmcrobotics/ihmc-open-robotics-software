@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import us.ihmc.zulu.ZuluVersion;
 import us.ihmc.zulu.ZuluRobotModel;
-import us.ihmc.zulu.parameters.controller.ZuluSwingTrajectoryParameters;
 import us.ihmc.zulu.parameters.controller.ZuluWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -46,7 +45,7 @@ public class ZuluFootFallDisturbanceRecoveryTest extends HumanoidFootFallDisturb
                @Override
                public SwingTrajectoryParameters getSwingTrajectoryParameters()
                {
-                  return new ZuluSwingTrajectoryParameters()
+                  return new SwingTrajectoryParameters()
                   {
                      @Override
                      public Tuple3DReadOnly getTouchdownVelocityWeight()
