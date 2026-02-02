@@ -20,7 +20,7 @@ public class ZuluLiftOffAndTouchDownTest
    @Test
    public void testForwardStepRotated() throws SimulationExceededMaximumTimeException
    {
-      DRCRobotModel robotModel = new ZuluRobotModel(ZuluVersion.V1_FULL_ROBOT)
+      DRCRobotModel robotModel = new ZuluRobotModel(ZuluVersion.V1_FULL_ROBOT);
       SCS2AvatarTestingSimulation testHelper = AvatarLiftOffAndTouchDownTest.setupTest(robotModel, Math.toRadians(90.0));
       // We need to turn off the CoP threshold fraction here. If it's left on, contact isn't triggered until the CoP is far enough within the foot. This means
       // that the detection of contact is significantly delayed. It then misses the cotnact timing, and also ahs a tendency to "slap" the foot onto the ground,
