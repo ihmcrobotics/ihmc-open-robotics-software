@@ -2,7 +2,7 @@
 <robot name="Zulu">
     <!-- LEFT LEG JOINTS -->
     <joint name="LEFT_HIP_X" type="revolute">
-        <origin xyz="0 0 0" rpy="-0.162	0.0595	-0.015"/>
+        <origin xyz="0.0 0.0 0.0"rpy="-0.162	0.0595	-0.015"/>
         <axis xyz="1 0 0"/>
         <parent link="PELVIS_LINK"/>
         <child link="LEFT_HIP_X_LINK"/>
@@ -10,7 +10,7 @@
         <dynamics damping="0.05" friction="0.0"/>
     </joint>
     <joint name="LEFT_HIP_Z" type="revolute">
-        <origin xyz="0 0 0" rpy="0.06	0.1	-0.08"/>
+        <origin xyz="0.0 0.0 0.0"rpy="0.06	0.1	-0.08"/>
         <axis xyz="0 0 1"/>
         <parent link="LEFT_HIP_X_LINK"/>
         <child link="LEFT_HIP_Z_LINK"/>
@@ -18,7 +18,7 @@
         <dynamics damping="0.05" friction="0.0"/>
     </joint>
     <joint name="LEFT_HIP_Y" type="revolute">
-        <origin xyz="0 0 0" rpy="0.1045	-0.0573	-0.0525"/>
+        <origin xyz="0.0 0.0 0.0"rpy="0.1045	-0.0573	-0.0525"/>
         <axis xyz="0 1 0"/>
         <parent link="LEFT_HIP_Z_LINK"/>
         <child link="LEFT_THIGH"/>
@@ -26,7 +26,7 @@
         <dynamics damping="0.05" friction="0.0"/>
     </joint>
     <joint name="LEFT_KNEE_Y" type="revolute">
-        <origin xyz="0 0 0" rpy="0	0.018	-0.32"/>
+        <origin xyz="0.0 0.0 0.0"rpy="0	0.018	-0.32"/>
         <axis xyz="0 1 0"/>
         <parent link="LEFT_THIGH"/>
         <child link="LEFT_SHIN"/>
@@ -34,7 +34,7 @@
         <dynamics damping="0.05" friction="0.0"/>
     </joint>
     <joint name="LEFT_ANKLE_Y" type="revolute">
-        <origin xyz="0 0 0" rpy="0	0	-0.41"/>
+        <origin xyz="0.0 0.0 0.0"rpy="0	0	-0.41"/>
         <axis xyz="0 1 0"/>
         <parent link="LEFT_SHIN"/>
         <child link="LEFT_ANKLE_Y_LINK"/>
@@ -42,7 +42,7 @@
         <dynamics damping="0.05" friction="0.0"/>
     </joint>
     <joint name="LEFT_ANKLE_X" type="revolute">
-        <origin xyz="0 0 0" rpy="0	0	-0.012"/>
+        <origin xyz="0.0 0.0 0.0"rpy="0	0	-0.012"/>
         <axis xyz="1 0 0"/>
         <parent link="LEFT_ANKLE_Y_LINK"/>
         <child link="LEFT_FOOT"/>
@@ -52,7 +52,7 @@
 
     <!-- RIGHT LEG JOINTS -->
     <joint name="RIGHT_HIP_X" type="revolute">
-        <origin xyz="0 0 0" rpy="-0.162	-0.0595	-0.015"/>
+        <origin xyz="0.0 0.0 0.0"rpy="-0.162	-0.0595	-0.015"/>
         <axis xyz="1 0 0"/>
         <parent link="PELVIS_LINK"/>
         <child link="RIGHT_HIP_X_LINK"/>
@@ -60,7 +60,7 @@
         <dynamics damping="0.05" friction="0.0"/>
     </joint>
     <joint name="RIGHT_HIP_Z" type="revolute">
-        <origin xyz="0 0 0" rpy="0.06	-0.1	-0.08"/>
+        <origin xyz="0.0 0.0 0.0"rpy="0.06	-0.1	-0.08"/>
         <axis xyz="0 0 1"/>
         <parent link="RIGHT_HIP_X_LINK"/>
         <child link="RIGHT_HIP_Z_LINK"/>
@@ -68,7 +68,7 @@
         <dynamics damping="0.05" friction="0.0"/>
     </joint>
     <joint name="RIGHT_HIP_Y" type="revolute">
-        <origin xyz="0 0 0" rpy="0.1045	0.0573	-0.0525"/>
+        <origin xyz="0.0 0.0 0.0"rpy="0.1045	0.0573	-0.0525"/>
         <axis xyz="0 1 0"/>
         <parent link="RIGHT_HIP_Z_LINK"/>
         <child link="RIGHT_THIGH"/>
@@ -76,7 +76,7 @@
         <dynamics damping="0.05" friction="0.0"/>
     </joint>
     <joint name="RIGHT_KNEE_Y" type="revolute">
-        <origin xyz="0 0 0" rpy="0	-0.018	-0.32"/>
+        <origin xyz="0.0 0.0 0.0"rpy="0	-0.018	-0.32"/>
         <axis xyz="0 1 0"/>
         <parent link="RIGHT_THIGH"/>
         <child link="RIGHT_SHIN"/>
@@ -84,7 +84,7 @@
         <dynamics damping="0.05" friction="0.0"/>
     </joint>
     <joint name="RIGHT_ANKLE_Y" type="revolute">
-        <origin xyz="0 0 0" rpy="0	0	-0.41"/>
+        <origin xyz="0.0 0.0 0.0"rpy="0	0	-0.41"/>
         <axis xyz="0 1 0"/>
         <parent link="RIGHT_SHIN"/>
         <child link="RIGHT_ANKLE_Y_LINK"/>
@@ -92,7 +92,7 @@
         <dynamics damping="0.05" friction="0.0"/>
     </joint>
     <joint name="RIGHT_ANKLE_X" type="revolute">
-        <origin xyz="0 0 0" rpy="0	0	-0.012"/>
+        <origin xyz="0.0 0.0 0.0"rpy="0	0	-0.012"/>
         <axis xyz="1 0 0"/>
         <parent link="RIGHT_ANKLE_Y_LINK"/>
         <child link="RIGHT_FOOT"/>
@@ -102,7 +102,7 @@
 
     <!-- SPINE JOINTS -->
     <joint name="SPINE_Z" type="revolute">
-        <origin xyz="0 0 0" rpy="0.0 0 0.018"/> <!-- check with CAD -->
+        <origin xyz="0.0 0.0 0.0"rpy="0.0 0 0.018"/> <!-- check with CAD -->
         <axis xyz="0 0 1"/>
         <parent link="PELVIS_LINK"/>
         <child link="TORSO_LINK"/>
@@ -170,7 +170,7 @@
 
     <!-- NECK JOINTS -->
     <joint name="NECK_Z" type="revolute">
-        <origin xyz="0 0 0" rpy="-0.015 0 0.450403"/>
+        <origin xyz="0.0 0.0 0.0"rpy="-0.015 0 0.450403"/>
         <axis xyz="0 0 1"/>
         <parent link="TORSO_LINK"/>
         <child link="NECK_Z_LINK"/>
@@ -178,7 +178,7 @@
         <dynamics damping="0.05" friction="0.0"/>
     </joint>
     <joint name="NECK_Y" type="revolute">
-        <origin xyz="0 0 0" rpy="0.025 0.01 0.189597"/>
+        <origin xyz="0.0 0.0 0.0"rpy="0.025 0.01 0.189597"/>
         <axis xyz="0 1 0"/>
         <parent link="NECK_Z_LINK"/>
         <child link="HEAD_LINK"/>
@@ -248,7 +248,7 @@
     <link name="PELVIS_LINK">
         <inertial>
             <mass value="9.50083635"/>
-            <origin xyz="0 0 0" rpy="-0.08354287 0.00005291 -0.03484828"/>
+            <origin xyz="0.0 0.0 0.0"rpy="-0.08354287 0.00005291 -0.03484828"/>
             <inertia ixx="0.03428688" ixy="0.00001151" ixz="0.00015935" iyy="0.05178848" iyz="0.00004514" izz="0.06001929"/>
         </inertial>
         <visual>
@@ -274,7 +274,7 @@
     <link name="PELVIS_IMU_LINK">
         <inertial>
             <mass value="0.0"/>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <origin xyz="0.0 0.0 0.0"rpy="0 0 0"/>
             <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0"/>
         </inertial>
     </link>
@@ -308,7 +308,7 @@
     <link name="LEFT_HIP_X_LINK">
         <inertial>
             <mass value="2.32977961"/>
-            <origin xyz="0 0 0" rpy="0.04350911	0.08708606 -0.03525761"/>
+            <origin xyz="0.0 0.0 0.0"rpy="0.04350911	0.08708606 -0.03525761"/>
             <inertia ixx="0.00467452" ixy="-0.00058626" ixz="0.00013124" iyy="0.00516613" iyz="0.00048141" izz="0.00553124"/>
         </inertial>
         <visual>
@@ -329,7 +329,7 @@
     <link name="LEFT_HIP_X_IMU_LINK">
         <inertial>
             <mass value="0"/>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <origin xyz="0.0 0.0 0.0"rpy="0 0 0"/>
             <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0"/>
         </inertial>
     </link>
@@ -365,7 +365,7 @@
     <link name="LEFT_HIP_Z_LINK">
         <inertial>
             <mass value="0.77281362"/>
-            <origin xyz="0 0 0" rpy="0.04549595	-0.00525571	-0.00937454"/>
+            <origin xyz="0.0 0.0 0.0"rpy="0.04549595	-0.00525571	-0.00937454"/>
             <inertia ixx="0.00317639" ixy="0.00005807" ixz="0.00080598" iyy="0.00345182" iyz="0.00047441" izz="0.00313245"/>
         </inertial>
         <visual>
@@ -378,7 +378,7 @@
     <link name="LEFT_THIGH">
         <inertial>
             <mass value="7.75"/><!-- CAD Mass 6.31087157 (Hacked April 1 2025 to match IRL Scale of whole robot) -->
-            <origin xyz="0 0 0" rpy="0.01417302	0.03268781	-0.10548314"/>
+            <origin xyz="0.0 0.0 0.0"rpy="0.01417302	0.03268781	-0.10548314"/>
             <inertia ixx="0.09264028" ixy="0.00038532" ixz="0.00916409" iyy="0.09733033" iyz="-0.0043516" izz="0.02803877"/>
         </inertial>
         <visual>
@@ -397,7 +397,7 @@
     <link name="LEFT_SHIN">
         <inertial>
             <mass value="6.31087157"/><!-- CAD Mass 6.31087157 (Hacked April 1 2025 to match IRL Scale of whole robot) -->
-            <origin xyz="0 0 0" rpy="0.03807965	-0.00108105	-0.12410027"/>
+            <origin xyz="0.0 0.0 0.0"rpy="0.03807965	-0.00108105	-0.12410027"/>
             <inertia ixx="0.08823148" ixy="-0.00054706" ixz="-0.00634132" iyy="0.09163264" iyz="0.00002714" izz="0.01569601"/>
         </inertial>
         <visual>
@@ -418,7 +418,7 @@
     <link name="LEFT_THIGH_IMU_LINK">
         <inertial>
             <mass value="0"/>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <origin xyz="0.0 0.0 0.0"rpy="0 0 0"/>
             <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0"/>
         </inertial>
     </link>
@@ -455,12 +455,12 @@
     <link name="LEFT_SHIN_IMU_LINK">
         <inertial>
             <mass value="0"/>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <origin xyz="0.0 0.0 0.0"rpy="0 0 0"/>
             <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0"/>
         </inertial>
     </link>
     <joint name="LEFT_SHIN_IMU_JOINT" type="fixed">
-        <origin rpy="1.403695170631842 0 -1.570796" xyz="0.05655120 0.00084826 -0.15664831"/>
+        <origin  xyz="0.05655120 0.00084826 -0.15664831" rpy="1.403695170631842 0 -1.570796"/>
         <axis xyz="0 0 1"/>
         <parent link="LEFT_SHIN"/>
         <child link="LEFT_SHIN_IMU_LINK"/>
@@ -491,33 +491,33 @@
     <link name="LEFT_ANKLE_Y_LINK">
         <inertial>
             <mass value="0.05045632"/>
-            <origin xyz="0 0 0" rpy="2.94E-07	2.22E-07	-0.00462997"/>
+            <origin xyz="0.0 0.0 0.0"rpy="2.94E-07 2.22E-07 -0.00462997"/>
             <inertia ixx="0.00001733" ixy="2.12E-10" ixz="-1.26E-10" iyy="0.00000714" iyz="-2.02E-11" izz="0.00001851"/>
         </inertial>
         <visual>
             <geometry>
                 <mesh filename="zulu/meshes/legs/AnklePitchLink.obj"/>
             </geometry>
-            <origin rpy="0.0 0.0 0.0" xyz="0 0 0"/>
+            <origin  xyz="0.0 0.0 0.0"rpy="0 0 0"/>
         </visual>
     </link>
     <link name="LEFT_FOOT">
         <inertial>
             <mass value="1.28288609"/>
-            <origin xyz="0 0 0" rpy="0.03793372	-0.00000219	-0.0443663"/>
+            <origin xyz="0.0 0.0 0.0"rpy="0.03793372	-0.00000219	-0.0443663"/>
             <inertia ixx="0.00131328" ixy="0.00001057" ixz="0.00036242" iyy="0.00385286" iyz="-0.0000069" izz="0.00406301"/>
         </inertial>
         <visual>
             <geometry>
                 <mesh filename="zulu/meshes/legs/Foot.obj"/>
             </geometry>
-            <origin rpy="0.0 0.0 0.0" xyz="0 0 0"/>
+            <origin xyz="0.0 0.0 0.0"rpy="0 0 0"/>
         </visual>
         <collision name="left_foot_collision">
             <geometry>
                 <box size="0.22 0.1 0.02"/>
             </geometry>
-            <origin xyz="0 0 0" rpy="0.05 0 -0.06"/>
+            <origin xyz="0.0 0.0 0.0"rpy="0.05 0 -0.06"/>
         </collision>
     </link>
 
@@ -525,12 +525,12 @@
     <link name="LEFT_FOOT_IMU_LINK">
         <inertial>
             <mass value="0"/>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <origin xyz="0.0 0.0 0.0"rpy="0 0 0"/>
             <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0"/>
         </inertial>
     </link>
     <joint name="LEFT_FOOT_IMU_JOINT" type="fixed">
-        <origin rpy="0 0 1.570796" xyz="-0.03575526 0.01180178 -0.04979705"/>
+        <origin xyz="-0.03575526 0.01180178 -0.04979705" rpy="0 0 1.570796"/>
         <axis xyz="0 0 1"/>
         <parent link="LEFT_FOOT"/>
         <child link="LEFT_FOOT_IMU_LINK"/>
@@ -562,7 +562,7 @@
     <link name="RIGHT_HIP_X_LINK">
         <inertial>
             <mass value="2.32977248"/>
-            <origin xyz="0 0 0" rpy="0.04351957	-0.08688935	-0.03525357"/>
+            <origin xyz="0.0 0.0 0.0"rpy="0.04351957	-0.08688935	-0.03525357"/>
             <inertia ixx="0.00467576" ixy="0.00061004" ixz="0.00013038" iyy="0.00516385" iyz="-0.00047381" izz="0.00552901"/>
         </inertial>
         <visual>
@@ -583,7 +583,7 @@
     <link name="RIGHT_HIP_X_IMU_LINK">
         <inertial>
             <mass value="0"/>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <origin xyz="0.0 0.0 0.0"rpy="0 0 0"/>
             <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0"/>
         </inertial>
     </link>
@@ -619,7 +619,7 @@
     <link name="RIGHT_HIP_Z_LINK">
         <inertial>
             <mass value="0.77281055"/>
-            <origin xyz="0 0 0" rpy="0.04549274	0.00525784	-0.00937505"/>
+            <origin xyz="0.0 0.0 0.0"rpy="0.04549274	0.00525784	-0.00937505"/>
             <inertia ixx="0.00317639" ixy="-0.00005765" ixz="0.00080587" iyy="0.00345166" iyz="-0.00047466" izz="0.00313223"/>
         </inertial>
         <visual>
@@ -632,7 +632,7 @@
     <link name="RIGHT_THIGH">
         <inertial>
             <mass value="7.75"/><!-- CAD Mass 6.31087157 (Hacked April 1 2025 to match IRL Scale of whole robot) -->
-            <origin xyz="0 0 0" rpy="0.01411846	-0.03282392	-0.10542795"/>
+            <origin xyz="0.0 0.0 0.0"rpy="0.01411846	-0.03282392	-0.10542795"/>
             <inertia ixx="0.09273162" ixy="-0.00026689" ixz="0.00921343" iyy="0.09738701" iyz="0.00422485" izz="0.02802165"/>
         </inertial>
         <visual>
@@ -653,7 +653,7 @@
     <link name="RIGHT_THIGH_IMU_LINK">
         <inertial>
             <mass value="0"/>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <origin xyz="0.0 0.0 0.0"rpy="0 0 0"/>
             <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0"/>
         </inertial>
     </link>
@@ -689,7 +689,7 @@
     <link name="RIGHT_SHIN">
         <inertial>
             <mass value="6.31087157"/><!-- CAD Mass 6.31087157 (Hacked April 1 2025 to match IRL Scale of whole robot) -->
-            <origin xyz="0 0 0" rpy="0.03807648	0.00113375	-0.12408765"/>
+            <origin xyz="0.0 0.0 0.0"rpy="0.03807648	0.00113375	-0.12408765"/>
             <inertia ixx="0.08705693" ixy="0.00057277" ixz="-0.00674654" iyy="0.090231" iyz="0.00028332" izz="0.01554032"/>
         </inertial>
         <visual>
@@ -702,7 +702,7 @@
             <geometry>
                 <cylinder radius="0.08" length="0.3"/>
             </geometry>
-            <origin xyz="0 0 0" rpy="0.04 0 -0.14"/> <!-- centered along the shin length -->
+            <origin xyz="0.0 0.0 0.0"rpy="0.04 0 -0.14"/> <!-- centered along the shin length -->
         </collision>
     </link>
 
@@ -710,7 +710,7 @@
     <link name="RIGHT_SHIN_IMU_LINK">
         <inertial>
             <mass value="0"/>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <origin xyz="0.0 0.0 0.0"rpy="0 0 0"/>
             <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0"/>
         </inertial>
     </link>
@@ -746,7 +746,7 @@
     <link name="RIGHT_ANKLE_Y_LINK">
         <inertial>
             <mass value="0.05045632"/>
-            <origin xyz="0 0 0" rpy="2.94E-07	2.22E-07	-0.00462997"/>
+            <origin xyz="0.0 0.0 0.0"rpy="2.94E-07	2.22E-07	-0.00462997"/>
             <inertia ixx="0.00001733" ixy="2.12E-10" ixz="-1.26E-10" iyy="0.00000714" iyz="-2.02E-11" izz="0.00001851"/>
         </inertial>
         <visual>
@@ -759,7 +759,7 @@
     <link name="RIGHT_FOOT">
         <inertial>
             <mass value="1.28288609"/>
-            <origin xyz="0 0 0" rpy="0.03793372	-0.00000219	-0.0443663"/>
+            <origin xyz="0.0 0.0 0.0"rpy="0.03793372	-0.00000219	-0.0443663"/>
             <inertia ixx="0.00131328" ixy="0.00001057" ixz="0.00036242" iyy="0.00385286" iyz="-0.0000069" izz="0.00406301"/>
         </inertial>
         <visual>
@@ -772,7 +772,7 @@
             <geometry>
                 <box size="0.22 0.1 0.02"/>
             </geometry>
-            <origin xyz="0 0 0" rpy="0.05 0 -0.06"/>
+            <origin xyz="0.0 0.0 0.0"rpy="0.05 0 -0.06"/>
         </collision>
     </link>
 
@@ -780,7 +780,7 @@
     <link name="RIGHT_FOOT_IMU_LINK">
         <inertial>
             <mass value="0"/>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <origin xyz="0.0 0.0 0.0"rpy="0 0 0"/>
             <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0"/>
         </inertial>
     </link>
@@ -817,7 +817,7 @@
     <link name="TORSO_LINK">
         <inertial>
             <mass value="7.0081"/> <!-- Original was 4.352, measured mass of whole robot and put delta into this torso mass (08/12/2025 Stefan and Robert)-->
-            <origin xyz="0 0 0" rpy="-0.034 0.0 0.297"/>
+            <origin xyz="0.0 0.0 0.0"rpy="-0.034 0.0 0.297"/>
             <inertia ixx="0.077" ixy="9.64E-06" ixz="0.008" iyy="0.068" iyz="7.24E-06" izz="0.033"/>
         </inertial>
         <visual>
@@ -845,7 +845,7 @@
     <link name="TORSO_IMU_LINK">
         <inertial>
             <mass value="0"/>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <origin xyz="0.0 0.0 0.0"rpy="0 0 0"/>
             <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0"/>
         </inertial>
     </link>
@@ -877,7 +877,7 @@
     <link name="NECK_Z_LINK">
         <inertial>
             <mass value="1.141"/>
-            <origin xyz="0 0 0" rpy="0.007143 0.006943 0.109823"/>
+            <origin xyz="0.0 0.0 0.0"rpy="0.007143 0.006943 0.109823"/>
             <inertia ixx="0.007475898" ixy="-0.000075723" ixz="-0.000745362" iyy="0.007407578" iyz="-0.000436948" izz="0.00109269"/>
         </inertial>
         <visual>
@@ -893,7 +893,7 @@
     <link name="HEAD_LINK">
         <inertial>
             <mass value="1.677"/>
-            <origin xyz="0 0 0" rpy="0.03237 -0.013568 0.007163"/>
+            <origin xyz="0.0 0.0 0.0"rpy="0.03237 -0.013568 0.007163"/>
             <inertia ixx="0.006026191" ixy="-0.000197484" ixz="0.001813659" iyy="0.008182071" iyz="-0.000042529" izz="0.00644909"/>
         </inertial>
         <visual>
@@ -921,7 +921,7 @@
     <link name="HEAD_IMU_LINK">
         <inertial>
             <mass value="0"/>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <origin xyz="0.0 0.0 0.0"rpy="0 0 0"/>
             <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0"/>
         </inertial>
     </link>
@@ -953,7 +953,7 @@
     <link name="LEFT_SHOULDER_Y_LINK">
         <inertial>
             <mass value="2.99"/>
-            <origin xyz="0 0 0" rpy="-0.00264 0.12135 -0.006824"/>
+            <origin xyz="0.0 0.0 0.0"rpy="-0.00264 0.12135 -0.006824"/>
             <inertia ixx="0.0111046" ixy="0.0002882" ixz="-0.000054" iyy="0.0051699" iyz="0.0009318" izz="0.01176"/>
         </inertial>
         <visual>
@@ -966,7 +966,7 @@
     <link name="LEFT_SHOULDER_X_LINK">
         <inertial>
             <mass value="0.972"/>
-            <origin xyz="0 0 0" rpy="0.01251711 0.0188309 -0.03849849"/>
+            <origin xyz="0.0 0.0 0.0"rpy="0.01251711 0.0188309 -0.03849849"/>
             <inertia ixx="0.0029485" ixy="0.0001386" ixz="-0.0003345" iyy="0.0023587" iyz="0.0005255" izz="0.0014366"/>
         </inertial>
         <visual>
@@ -979,7 +979,7 @@
     <link name="LEFT_SHOULDER_Z_LINK">
         <inertial>
             <mass value="2.91"/>
-            <origin xyz="0 0 0" rpy="0.00510403 0.00274 -0.21745"/>
+            <origin xyz="0.0 0.0 0.0"rpy="0.00510403 0.00274 -0.21745"/>
             <inertia ixx="0.0267829" ixy="-0.000011" ixz="0.0015998" iyy="0.0265514" iyz="0.0004426" izz="0.003052"/>
         </inertial>
         <visual>
@@ -998,7 +998,7 @@
     <link name="LEFT_ELBOW_Y_LINK">
         <inertial>
             <mass value="0.45"/>
-            <origin xyz="0 0 0" rpy="-0.01180322 -0.0035763 -0.04946747"/>
+            <origin xyz="0.0 0.0 0.0"rpy="-0.01180322 -0.0035763 -0.04946747"/>
             <inertia ixx="0.0007362" ixy="-0.0000088" ixz="-0.0000292" iyy="0.0006567" iyz="0.0001499" izz="0.0004897"/>
         </inertial>
         <visual>
@@ -1011,7 +1011,7 @@
     <link name="LEFT_WRIST_Z_LINK">
         <inertial>
             <mass value="1.547"/> <!-- This is a measured value. Refer to https://docs.google.com/spreadsheets/d/1VXWFJk3VJUsfkHrDaytB2INq94un1KytIOzcKJD0p44/edit?gid=0#gid=0  -->
-            <origin xyz="0 0 0" rpy="-0.00263832 -0.00050534 -0.13018376"/>
+            <origin xyz="0.0 0.0 0.0"rpy="-0.00263832 -0.00050534 -0.13018376"/>
             <inertia ixx="0.0037869" ixy="0.0000163" ixz="-0.0000252" iyy="0.004071" iyz="-0.0000924" izz="0.0015203"/>
         </inertial>
         <visual>
@@ -1036,7 +1036,7 @@
     <link name="LEFT_WRIST_X_LINK">
         <inertial>
             <mass value="0.909"/> <!-- This is a measured value. Refer to https://docs.google.com/spreadsheets/d/1VXWFJk3VJUsfkHrDaytB2INq94un1KytIOzcKJD0p44/edit?gid=0#gid=0  -->
-            <origin xyz="0 0 0" rpy="0.00004053 0.01038395 0.00035532"/>
+            <origin xyz="0.0 0.0 0.0"rpy="0.00004053 0.01038395 0.00035532"/>
             <inertia ixx="0.000477" ixy="-0.0000079" ixz="-0.0000097" iyy="0.0004902" iyz="-0.0000008" izz="0.000514"/>
         </inertial>
         <visual>
@@ -1072,7 +1072,7 @@
     <link name="LEFT_SHOULDER_Y_IMU_LINK">
         <inertial>
             <mass value="0"/>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <origin xyz="0.0 0.0 0.0"rpy="0 0 0"/>
             <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0"/>
         </inertial>
     </link>
@@ -1111,7 +1111,7 @@
     <link name="LEFT_SHOULDER_Z_IMU_LINK">
         <inertial>
             <mass value="0"/>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <origin xyz="0.0 0.0 0.0"rpy="0 0 0"/>
             <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0"/>
         </inertial>
     </link>
@@ -1155,7 +1155,7 @@
     <link name="LEFT_WRIST_Z_IMU_LINK">
         <inertial>
             <mass value="0"/>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <origin xyz="0.0 0.0 0.0"rpy="0 0 0"/>
             <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0"/>
         </inertial>
     </link>
@@ -1184,7 +1184,7 @@
     </gazebo>
 
     <joint name="LEFT_GRIPPER_Z_IMU_JOINT" type="fixed">
-        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <origin xyz="0.0 0.0 0.0"rpy="0 0 0"/>
         <axis xyz="0 0 1"/>
         <parent link="LEFT_GRIPPER_Z_LINK"/>
         <child link="LEFT_GRIPPER_Z_IMU_LINK"/>
@@ -1193,7 +1193,7 @@
     <link name="LEFT_GRIPPER_Z_IMU_LINK">
         <inertial>
             <mass value="0"/>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <origin xyz="0.0 0.0 0.0"rpy="0 0 0"/>
             <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0"/>
         </inertial>
     </link>
@@ -1225,7 +1225,7 @@
     <link name="RIGHT_SHOULDER_Y_LINK">
         <inertial>
             <mass value="2.99"/>
-            <origin xyz="0 0 0" rpy="-0.00264 -0.12135 -0.006824"/>
+            <origin xyz="0.0 0.0 0.0"rpy="-0.00264 -0.12135 -0.006824"/>
             <inertia ixx="0.0110394" ixy="-0.0003041" ixz="-0.0000594" iyy="0.0051097" iyz="-0.0009183" izz="0.0116925"/>
         </inertial>
         <visual>
@@ -1238,7 +1238,7 @@
     <link name="RIGHT_SHOULDER_X_LINK">
         <inertial>
             <mass value="0.972"/>
-            <origin xyz="0 0 0" rpy="0.012489 -0.01882 -0.0385"/>
+            <origin xyz="0.0 0.0 0.0"rpy="0.012489 -0.01882 -0.0385"/>
             <inertia ixx="0.002949" ixy="-0.000135" ixz="-0.0003358" iyy="0.0023603" iyz="-0.0005249" izz="0.0014377"/>
         </inertial>
         <visual>
@@ -1251,7 +1251,7 @@
     <link name="RIGHT_SHOULDER_Z_LINK">
         <inertial>
             <mass value="2.91"/>
-            <origin xyz="0 0 0" rpy="0.00524 -0.00274 -0.21745"/>
+            <origin xyz="0.0 0.0 0.0"rpy="0.00524 -0.00274 -0.21745"/>
             <inertia ixx="0.0248699" ixy="0.0000211" ixz="0.0000211" iyy="0.0245973" iyz="-0.0004444" izz="0.0029883"/>
         </inertial>
         <visual>
@@ -1321,7 +1321,7 @@
     <link name="RIGHT_GRIPPER_Z_LINK">
         <inertial>
             <mass value="0.251"/>
-            <origin xyz="0 0 0" rpy="-0.000217 -0.000349 0.009761"/>
+            <origin xyz="0.0 0.0 0.0"rpy="-0.000217 -0.000349 0.009761"/>
             <inertia ixx="0.0000722" ixy="-0.0000016" ixz="-0.0000037" iyy="0.0000747" iyz="0.0000004" izz="0.0000324"/>
         </inertial>
         <visual>
@@ -1349,7 +1349,7 @@
     <link name="RIGHT_SHOULDER_Y_IMU_LINK">
         <inertial>
             <mass value="0"/>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <origin xyz="0.0 0.0 0.0"rpy="0 0 0"/>
             <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0"/>
         </inertial>
     </link>
@@ -1387,7 +1387,7 @@
     <link name="RIGHT_SHOULDER_Z_IMU_LINK">
         <inertial>
             <mass value="0"/>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <origin xyz="0.0 0.0 0.0"rpy="0 0 0"/>
             <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0"/>
         </inertial>
     </link>
@@ -1425,7 +1425,7 @@
     <link name="RIGHT_WRIST_Z_IMU_LINK">
         <inertial>
             <mass value="0"/>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <origin xyz="0.0 0.0 0.0"rpy="0 0 0"/>
             <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0"/>
         </inertial>
     </link>
@@ -1454,7 +1454,7 @@
     </gazebo>
 
     <joint name="RIGHT_GRIPPER_Z_IMU_JOINT" type="fixed">
-        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <origin xyz="0.0 0.0 0.0"rpy="0 0 0"/>
         <axis xyz="0 0 1"/>
         <parent link="RIGHT_GRIPPER_Z_LINK"/>
         <child link="RIGHT_GRIPPER_Z_IMU_LINK"/>
@@ -1463,7 +1463,7 @@
     <link name="RIGHT_GRIPPER_Z_IMU_LINK">
         <inertial>
             <mass value="0"/>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <origin xyz="0.0 0.0 0.0"rpy="0 0 0"/>
             <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0"/>
         </inertial>
     </link>
@@ -1508,30 +1508,30 @@
     <!-- Left Psyonic Ability Hand -->
     <link name="LEFT_GRIPPER_ATTACHMENT_FIXED_LINK">
         <visual name="wrist_mesh">
-            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <origin xyz="0.0 0.0 0.0"rpy="0 0 0"/>
             <geometry>
                 <mesh filename="zulu/meshes/wristmesh.obj"/>
             </geometry>
         </visual>
         <inertial>   <!-- the mass and inertia here are NOT correct -->
             <mass value="1.00"/>
-            <inertia ixx="978.26e-6" ixy="87.34e-6" ixz="322.99e-6" iyy="1244.78e-6" iyz="244.74e-6" izz="456.22e-6"/>
             <origin xyz="22.41911e-3 -0.15798201e-3 -0.01319866e-3" rpy="0 0 0"/>
+            <inertia ixx="978.26e-6" ixy="87.34e-6" ixz="322.99e-6" iyy="1244.78e-6" iyz="244.74e-6" izz="456.22e-6"/>
         </inertial>
     </link>
 
     <!-- Right Psyonic Ability Hand -->
     <link name="RIGHT_GRIPPER_ATTACHMENT_FIXED_LINK">
         <visual name="wrist_mesh">
-            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <origin xyz="0.0 0.0 0.0"rpy="0 0 0"/>
             <geometry>
                 <mesh filename="zulu/meshes/wristmesh.obj"/>
             </geometry>
         </visual>
         <inertial>    <!-- the mass and inertia here are NOT correct -->
             <mass value="1.00"/>
-            <inertia ixx="978.26e-6" ixy="87.34e-6" ixz="322.99e-6" iyy="1244.78e-6" iyz="244.74e-6" izz="456.22e-6"/>
             <origin xyz="22.41911e-3 -0.15798201e-3 -0.01319866e-3" rpy="0 0 0"/>
+            <inertia ixx="978.26e-6" ixy="87.34e-6" ixz="322.99e-6" iyy="1244.78e-6" iyz="244.74e-6" izz="456.22e-6"/>
         </inertial>
     </link>
 </robot>
