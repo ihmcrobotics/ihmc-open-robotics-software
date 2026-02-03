@@ -349,7 +349,7 @@ public class ZuluRobotModel implements DRCRobotModel
 
    public String getParameterResourceName()
    {
-      return "/us/ihmc/zulu/parameters/controller.xml";
+      return "/zulu/parameters/controller.xml";
    }
 
    @Override
