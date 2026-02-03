@@ -53,7 +53,7 @@ public class RDX3DSituatedText implements RenderableProvider
    private String currentText;
    private final Font awtFont;
    private final Color awtColor;
-   private final float textHeightMeters;
+   private float textHeightMeters;
    private final transient RigidBodyTransform transform = new RigidBodyTransform();
 
    public RDX3DSituatedText()
@@ -237,5 +237,10 @@ public class RDX3DSituatedText implements RenderableProvider
    public String getCurrentText()
    {
       return currentText;
+   }
+
+   public void setTextHeight(float height)
+   {
+      textHeightMeters = height;
    }
 }

@@ -15,6 +15,7 @@ module behavior_msgs
        * COUNTER TYPE
        * LLM TYPE
        * PROXIMITY TYPE
+       * SHAPE CONTAINS TYPE
        */
       @TypeCode(type="behavior_msgs::msg::dds_::ConditionNodeStateMessage_")
       struct ConditionNodeStateMessage
@@ -47,6 +48,8 @@ module behavior_msgs
          * Whether frame B is present
          */
         boolean frame_b_is_present;
+        unsigned long number_of_points_contained;
+        boolean frame_is_contained;
       };
     };
   };

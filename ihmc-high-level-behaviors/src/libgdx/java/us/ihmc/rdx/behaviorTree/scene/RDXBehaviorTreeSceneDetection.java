@@ -17,9 +17,7 @@ import java.util.Random;
 public class RDXBehaviorTreeSceneDetection
 {
    private static final Random random = new Random();
-
    private final RDXBaseUI baseUI;
-
    private final PersistentDetectionStatusMessage message = new PersistentDetectionStatusMessage();
    private final ModelInstance frameGraphic;
    private final RDX3DSituatedText textLabel = new RDX3DSituatedText();
@@ -28,7 +26,8 @@ public class RDXBehaviorTreeSceneDetection
    {
       this.baseUI = baseUI;
 
-      frameGraphic = RDXModelBuilder.createCoordinateFrameInstance(0.2, LibGDXTools.toLibGDX(YoAppearance.randomColor(random)));
+      frameGraphic = RDXModelBuilder.createCoordinateFrameInstance(0.12, LibGDXTools.toLibGDX(YoAppearance.randomColor(random)));
+      textLabel.setTextHeight(0.05f);
    }
 
    public void update(PersistentDetectionStatusMessage status)

@@ -15,7 +15,6 @@ import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.cuda.CUDATools;
 import us.ihmc.perception.detections.DetectionManager;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
-import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.rapidRegions.RapidRegionsExtractorParameters;
 import us.ihmc.perception.sceneGraph.SceneNode;
@@ -76,7 +75,6 @@ public class RDXSceneGraphDemo
    private RapidPlanarRegionsExtractor planarRegionsExtractor;
    private ROS2StoredPropertySet<RapidRegionsExtractorParameters> planarRegionsExtractorParameterSync;
    private final TypedNotification<PlanarRegionsList> newPlanarRegions = new TypedNotification<>();
-   private final OpenCLManager planarRegionsOpenCLManager = new OpenCLManager();
 
    // ZED SVO sensor related things
    private ROS2ZEDSVOPlaybackSensor zedSVOPlayer;
@@ -256,8 +254,6 @@ public class RDXSceneGraphDemo
                zedSVOPlayer.close();
             if (zedPublishThread != null)
                zedPublishThread.kill();
-
-            planarRegionsOpenCLManager.destroy();
 
             perceptionVisualizerPanel.destroy();
             baseUI.dispose();
