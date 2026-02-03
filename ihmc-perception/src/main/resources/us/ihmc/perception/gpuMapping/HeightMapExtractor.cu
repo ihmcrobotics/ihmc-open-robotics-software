@@ -234,17 +234,6 @@ __global__ void heightMapRegistrationKernel(const float *__restrict__ localMeanM
     float3 cellInGlobal = transformPoint3D(queryPointInLocal, groundToWorldTranslation);
     int2 globalIndex = coordinate_to_indices(make_float2(cellInGlobal.x, cellInGlobal.y), make_float2(groundToWorldTranslation[3], groundToWorldTranslation[7]), params[CELL_SIZE], params[GLOBAL_CENTER_INDEX]);
 
-     if (xIndex == 100 && yIndex == 50) {
-         printf("Local Center Index: %f\n", params[LOCAL_CENTER_INDEX]);
-         printf("Local Index: %d, %d\n", localIndex.x, localIndex.y);
-         printf("Local Coordinate: %f, %f\n", localCoordinate.x, localCoordinate.y);
-         printf("Translation of Transform: %f, %f, %f\n", groundToWorldTranslation[3], groundToWorldTranslation[7], groundToWorldTranslation[11]);
-         printf("Global Coordinate: %f, %f, %f\n", cellInGlobal.x, cellInGlobal.y, cellInGlobal.z);
-         printf("Global Index: %d, %d\n", globalIndex.x, globalIndex.y);
-         printf("Cell Size: %f\n", params[CELL_SIZE]);
-         printf("Global Center Index: %f\n", params[GLOBAL_CENTER_INDEX]);
-     }
-
     if (globalIndex.x < 0 || globalIndex.x >= globalCellsPerAxis || globalIndex.y < 0 || globalIndex.y >= globalCellsPerAxis)
         return;
 
