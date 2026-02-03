@@ -3,13 +3,13 @@ package us.ihmc.behaviors.behaviorTree.scene;
 import behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage;
 import behavior_msgs.msg.dds.BehaviorTreeSceneObjectStateMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.behaviors.simulation.door.DoorModelParameters;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.cuda.CUDAShapePointCounter;
-import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorModelParameters;
 import us.ihmc.sensors.zed.ZEDImageSensor;
 
 public class BehaviorTreeSceneDoorFrameExecutor extends BehaviorTreeSceneObjectExecutor
@@ -25,9 +25,9 @@ public class BehaviorTreeSceneDoorFrameExecutor extends BehaviorTreeSceneObjectE
    private double panelWidth = DoorModelParameters.DOOR_PANEL_WIDTH;
    private double panelHeight = DoorModelParameters.DOOR_PANEL_HEIGHT;
    private double searchAngle = Math.PI;
-   private double searchAngleIncrement = Math.PI / 18;
-   private float searchCapsuleRadius = 0.1f;
-   private long minimumPoints = 10000;
+   private double searchAngleIncrement = Math.PI / 36;
+   private float searchCapsuleRadius = 0.07f;
+   private long minimumPoints = 1000;
 
    public BehaviorTreeSceneDoorFrameExecutor(long id,
                                              CRDTInfo crdtInfo,
@@ -72,7 +72,7 @@ public class BehaviorTreeSceneDoorFrameExecutor extends BehaviorTreeSceneObjectE
 
          // Variables used for the search for the latch post
          Pose3D latchPostSearchPose = new Pose3D();
-         Point3D frameBottom = new Point3D();
+         Point3D frameMiddle = new Point3D();
          Point3D frameTop = new Point3D();
 
          long maxPoints = 0;
@@ -84,13 +84,11 @@ public class BehaviorTreeSceneDoorFrameExecutor extends BehaviorTreeSceneObjectE
             latchPostSearchPose.appendYawRotation(angle);
             latchPostSearchPose.appendTranslation(-panelWidth - 0.2, 0.0, 0.0);
 
-            frameBottom.set(latchPostSearchPose.getPosition());
-            frameBottom.subZ(0.5 * panelHeight);
-
+            frameMiddle.set(latchPostSearchPose.getPosition());
             frameTop.set(latchPostSearchPose.getPosition());
             frameTop.addZ(0.5 * panelHeight);
 
-            long points = pointCounter.countPointsInCapsule(depthImage, frameBottom, frameTop, searchCapsuleRadius);
+            long points = pointCounter.countPointsInCapsule(depthImage, frameMiddle, frameTop, searchCapsuleRadius);
             if (points >= minimumPoints && points > maxPoints)
             {
                maxPoints = points;

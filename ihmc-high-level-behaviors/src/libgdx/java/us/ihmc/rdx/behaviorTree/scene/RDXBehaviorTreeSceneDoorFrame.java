@@ -3,12 +3,12 @@ package us.ihmc.rdx.behaviorTree.scene;
 import behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage;
 import behavior_msgs.msg.dds.BehaviorTreeSceneObjectStateMessage;
 import com.badlogic.gdx.graphics.Color;
+import us.ihmc.behaviors.simulation.door.DoorModelParameters;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorModelParameters;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -34,7 +34,7 @@ public class RDXBehaviorTreeSceneDoorFrame extends RDXBehaviorTreeSceneObject
    private void updateModel()
    {
       final double height = DoorModelParameters.DOOR_PANEL_HEIGHT;
-      final double radius = 0.1;
+      final double radius = 0.07;
 
       if (model != null)
       {
@@ -50,12 +50,16 @@ public class RDXBehaviorTreeSceneDoorFrame extends RDXBehaviorTreeSceneObject
 
       model = RDXModelBuilder.buildModel(modelBuilder ->
       {
-         Vector3D hingePostModelTranslation = new Vector3D(0.0, 0.0, -0.5 * height);
-         Vector3D latchPostModelTranslation = new Vector3D(latchPoseInHingePostFrame.getTranslation());
-         latchPostModelTranslation.subZ(0.5 * height);
+         modelBuilder.addCylinder(0.5 * height, radius, new Vector3D(), Color.BLUE);
+         modelBuilder.addSphere(radius, new Vector3D(0.0, 0.0, 0.5 * height), Color.BLUE);
+         modelBuilder.addSphere(radius, new Vector3D(), Color.BLUE);
 
-         modelBuilder.addCylinder(height, radius, hingePostModelTranslation, Color.BLUE);
-         modelBuilder.addCylinder(height, radius, latchPostModelTranslation, Color.RED);
+         Vector3D position = new Vector3D(latchPoseInHingePostFrame.getTranslation());
+         modelBuilder.addCylinder(0.5 * height, radius, position, Color.RED);
+         position.addZ(0.5 * height);
+         modelBuilder.addSphere(radius, position, Color.RED);
+         position.subZ(0.5 * height);
+         modelBuilder.addSphere(radius, position, Color.RED);
       });
 
       modelInstance = new RDXModelInstance(model);
