@@ -8,7 +8,6 @@ import perception_msgs.msg.dds.DetectedObjectPacket;
 import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.ImageMessage;
-import perception_msgs.msg.dds.IterativeClosestPointRequest;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import perception_msgs.msg.dds.SceneGraphMessage;
 import perception_msgs.msg.dds.TerrainMapMessage;
@@ -217,16 +216,6 @@ public final class PerceptionAPI
                                                         new ROS2IOTopicPair<>(TRANSFORM_TUNING_BASE_TOPIC.withSuffix(
                                                               "situational_awareness_right_camera_to_parent")));
    }
-
-   /*
-    * ICP (old, not used)
-    */
-   public static final ROS2Topic<IterativeClosestPointRequest> ICP_REQUEST = IHMC_ROOT.withModule("iterative_closest_point")
-                                                                                      .withSuffix("request")
-                                                                                      .withType(IterativeClosestPointRequest.class);
-   public static final ROS2Topic<DetectedObjectPacket> ICP_RESULT = IHMC_ROOT.withModule("iterative_closest_point")
-                                                                             .withSuffix("result")
-                                                                             .withType(DetectedObjectPacket.class);
 
    /*
     * YOLO
