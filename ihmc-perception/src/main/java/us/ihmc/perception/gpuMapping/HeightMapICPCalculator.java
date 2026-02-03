@@ -3,6 +3,7 @@ package us.ihmc.perception.gpuMapping;
 import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.cuda.cudart.dim3;
 import org.bytedeco.javacpp.FloatPointer;
+import org.bytedeco.javacpp.indexer.FloatIndexer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -129,18 +130,49 @@ public class HeightMapICPCalculator
          Mat cpuVectorMap = new Mat();
          vectorMap.download(cpuVectorMap);
 
-         // 1. Create a mask where localMap has height (is not 0.0)
-         Mat mask = new Mat();
-         Mat cpuLocalMean = new Mat();
-         localMeanMap.download(cpuLocalMean);
-         opencv_core.compare(cpuLocalMean, new Mat(new Scalar(0.0)), mask, opencv_core.CMP_NE);
+         // Use an Indexer for fast direct access to the pixel data
+         FloatIndexer indexer = cpuVectorMap.createIndexer();
 
-         // 2. Compute mean only for the pillar area
-         Scalar meanVector = opencv_core.mean(cpuVectorMap, mask);
+         double sumX = 0, sumY = 0, sumZ = 0;
+         long validCount = 0;
 
-         double dx = meanVector.get(0);
-         double dy = meanVector.get(1);
-         double dz = meanVector.get(2);
+         for (int y = 0; y < cpuVectorMap.rows(); y++)
+         {
+            for (int x = 0; x < cpuVectorMap.cols(); x++)
+            {
+               // The vectorMap has 3 channels (dx, dy, dz)
+               float vx = indexer.get(y, x, 0);
+               float vy = indexer.get(y, x, 1);
+               float vz = indexer.get(y, x, 2);
+
+               // check for NaN (points that didn't find a global match)
+               if (!Float.isNaN(vx) && !Float.isNaN(vy) && !Float.isNaN(vz))
+               {
+                  sumX += vx;
+                  sumY += vy;
+                  sumZ += vz;
+                  validCount++;
+               }
+            }
+         }
+         indexer.release();
+
+         double dx = 0, dy = 0, dz = 0;
+         if (validCount > 0)
+         {
+            dx = sumX / validCount;
+            dy = sumY / validCount;
+            dz = sumZ / validCount;
+         }
+         else
+         {
+            System.out.println("Iteration " + i + ": No correspondences found!");
+            break; // Exit if we lost tracking
+         }
+
+         System.out.println("Mean vector x: " + dx);
+         System.out.println("Mean vector y: " + dy);
+         System.out.println("Mean vector z: " + dz);
 
          applyCorrectionToGpuMatrix(groundToWorldTranslationDevicePointerCopy, dx, dy, dz, stream);
 
@@ -176,7 +208,7 @@ public class HeightMapICPCalculator
                           (float) globalCenterIndex,
                           (float) localCellsPerAxis,
                           (float) globalCellsPerAxis,
-                          35.0f};
+                          10.0f};
    }
 
    /**

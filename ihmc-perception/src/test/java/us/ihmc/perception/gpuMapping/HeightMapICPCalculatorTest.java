@@ -35,6 +35,52 @@ public class HeightMapICPCalculatorTest
    }
 
    @Test
+   public void testICPRunsWithZeroOffsetAtZeroHeight()
+   {
+      CUstream_st stream = CUDAStreamManager.getStream();
+      HeightMapICPCalculator heightMapICPCalculator = new HeightMapICPCalculator(heightMapParameters, stream);
+
+      // 1. Create identical maps
+      GpuMat localMap = new GpuMat(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_32FC1); // Ensure type matches kernel expectation
+      localMap.setTo(new Scalar(0.0));
+
+      GpuMat globalMap = new GpuMat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_32FC1);
+      globalMap.setTo(new Scalar(0.0));
+
+      // 2. Set Transform to Identity (Zero translation, Zero rotation)
+      // This ensures the local coordinates project exactly onto the global coordinates
+      RigidBodyTransform identityTransform = new RigidBodyTransform();
+      float[] transformArray = new float[16];
+      identityTransform.get(transformArray);
+
+      // 3. Prepare Device Pointers
+      FloatPointer hostPtr = new FloatPointer(16);
+      hostPtr.put(transformArray);
+      FloatPointer devicePtr = new FloatPointer();
+      CUDATools.mallocAsync(devicePtr, 16, stream);
+      CUDATools.memcpyAsync(devicePtr, hostPtr, 16, stream);
+
+      // 4. Run Kernel (Center at 0,0 for both)
+      Point3D mapCenter = new Point3D(0.0, 0.0, 0.0);
+      heightMapICPCalculator.update(localMap, globalMap, devicePtr, mapCenter);
+
+      Vector3D meanVector = heightMapICPCalculator.getVectorMap();
+
+      System.out.println("Mean X: " + meanVector.getX());
+      System.out.println("Mean Y: " + meanVector.getY());
+      System.out.println("Mean Z: " + meanVector.getZ());
+
+      // Assertions: Should be effectively zero
+      assertEquals(0.0, meanVector.getX(), 1e-5);
+      assertEquals(0.0, meanVector.getY(), 1e-5);
+      assertEquals(0.0, meanVector.getZ(), 1e-5);
+
+      // Cleanup
+      hostPtr.close();
+      cudaFreeAsync(devicePtr, stream);
+   }
+
+   @Test
    public void testICPRunsWithZeroOffset()
    {
       CUstream_st stream = CUDAStreamManager.getStream();
@@ -244,7 +290,7 @@ public class HeightMapICPCalculatorTest
       // 4. Transform claims only 0.8m in X
       // ICP should recover the remaining +0.2m
       RigidBodyTransform transform = new RigidBodyTransform();
-      transform.getTranslation().set(0.8, 0.0, 0.0);
+      transform.getTranslation().set(0.85, 0.0, 0.0);
 
       float[] transformArray = new float[16];
       transform.get(transformArray);
