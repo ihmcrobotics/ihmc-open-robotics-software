@@ -40,10 +40,6 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
    private final ImFloat yRadius = new ImFloat(DEFAULT_DIMENSION);
    private final ImFloat zRadius = new ImFloat(DEFAULT_DIMENSION);
 
-   private final RDXIterativeClosestPointOptions icpOptions;
-
-   private boolean wasPlacing = false;
-
    public RDXPrimitiveRigidBodySceneNode(PrimitiveRigidBodySceneNode primitiveRigidBodySceneNode, RDX3DPanel panel3D)
    {
       this(new Vector3D32(DEFAULT_DIMENSION, DEFAULT_DIMENSION, DEFAULT_DIMENSION),
@@ -91,16 +87,12 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
                                                                                       Color.WHITE));
       }
       modelInstance.setColor(GHOST_COLOR);
-
-      icpOptions = new RDXIterativeClosestPointOptions(this, labels);
    }
 
    @Override
    public void renderImGuiWidgets(SceneGraphModificationQueue modificationQueue, SceneGraph sceneGraph)
    {
       super.renderImGuiWidgets(modificationQueue, sceneGraph);
-
-      icpOptions.renderImGuiWidgets();
 
       ImGui.text("Modify shape:");
 
@@ -209,38 +201,12 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
 
       if (sceneLevels.contains(RDXSceneLevel.MODEL))
          modelInstance.getRenderables(renderables, pool);
-
-      icpOptions.getRenderables(renderables, pool);
    }
 
    @Override
    public RDXModelInstance getModelInstance()
    {
       return modelInstance;
-   }
-
-   @Override
-   public void destroy()
-   {
-      super.destroy();
-      icpOptions.destroy();
-   }
-
-   @Override
-   public void update(SceneGraph sceneGraph)
-   {
-      super.update(sceneGraph);
-
-      if (!wasPlacing && getPosePlacement().isPlaced())
-      {
-         icpOptions.stopICP();
-      }
-      else if (wasPlacing && !getPosePlacement().isPlaced())
-      {
-         icpOptions.runICP();
-      }
-
-      wasPlacing = getPosePlacement().isPlaced();
    }
 
    public Vector3D32 getLengths()
