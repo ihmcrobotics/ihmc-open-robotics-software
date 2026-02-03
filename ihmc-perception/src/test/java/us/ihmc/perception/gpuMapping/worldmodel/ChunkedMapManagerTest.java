@@ -28,7 +28,7 @@ public class ChunkedMapManagerTest
       ROS2Node ros2Node = new ROS2NodeBuilder().build("test_node");
       HeightMapParameters heightMapParameters = new HeightMapParameters();
       heightMapParameters.setCellSize(0.02);
-      heightMapParameters.setWidthInMeters(1.0);
+      heightMapParameters.setGlobalWidthInMeters(1.0);
       ChunkedMapManager chunkedMapManager = new ChunkedMapManager(ros2Node, heightMapParameters);
 
       // This test is setup so that all the chunks will be filled will values of100
@@ -44,7 +44,7 @@ public class ChunkedMapManagerTest
 
       chunkedMapManager.addHeightMap(heightMapMat,
                                      new Point3D(2.0, 2.0, 0.0),
-                                     heightMapParameters.getWidthInMeters(),
+                                     heightMapParameters.getGlobalWidthInMeters(),
                                      (float) heightMapParameters.getCellSize());
 
       Collection<Chunk> chunks = chunkedMapManager.getChunks();
