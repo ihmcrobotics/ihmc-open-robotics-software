@@ -15,9 +15,6 @@ import us.ihmc.ros2.ROS2Topic;
  */
 public class ROS2BehaviorTree<T extends BehaviorTreeNode<T, ? ,?>>
 {
-   /**
-    * The SYNC_FREQUENCY should be a multiple of the scene graph's update frequency.
-    */
    public static final double SYNC_FREQUENCY = 30.0;
 
    private final BehaviorTree<?, ?> behaviorTree;
