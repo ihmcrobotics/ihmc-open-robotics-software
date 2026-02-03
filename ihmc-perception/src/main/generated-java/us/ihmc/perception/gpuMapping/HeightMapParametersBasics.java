@@ -18,11 +18,6 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
       set(HeightMapParameters.flyingPointsFilter, flyingPointsFilter);
    }
 
-   default void setLogHeightMap(boolean logHeightMap)
-   {
-      set(HeightMapParameters.logHeightMap, logHeightMap);
-   }
-
    default void setMinDepthToAccept(double minDepthToAccept)
    {
       set(HeightMapParameters.minDepthToAccept, minDepthToAccept);
@@ -86,5 +81,15 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
    default void setGlobalWidthInMeters(double globalWidthInMeters)
    {
       set(HeightMapParameters.globalWidthInMeters, globalWidthInMeters);
+   }
+
+   default void setIcpMaxIterations(int icpMaxIterations)
+   {
+      set(HeightMapParameters.icpMaxIterations, icpMaxIterations);
+   }
+
+   default void setIcpConvergenceThreshold(double icpConvergenceThreshold)
+   {
+      set(HeightMapParameters.icpConvergenceThreshold, icpConvergenceThreshold);
    }
 }

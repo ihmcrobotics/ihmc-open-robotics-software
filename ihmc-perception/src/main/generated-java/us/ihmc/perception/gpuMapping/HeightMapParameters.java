@@ -20,7 +20,6 @@ public class HeightMapParameters extends StoredPropertySet implements HeightMapP
 
    public static final BooleanStoredPropertyKey driftOffsetFilter = keys.addBooleanKey("Drift offset filter");
    public static final BooleanStoredPropertyKey flyingPointsFilter = keys.addBooleanKey("Flying points filter");
-   public static final BooleanStoredPropertyKey logHeightMap = keys.addBooleanKey("Log height map");
    public static final DoubleStoredPropertyKey minDepthToAccept = keys.addDoubleKey("Min Depth To Accept");
    public static final DoubleStoredPropertyKey minHeightRegistration = keys.addDoubleKey("Min height registration");
    public static final DoubleStoredPropertyKey maxHeightRegistration = keys.addDoubleKey("Max height registration");
@@ -34,6 +33,8 @@ public class HeightMapParameters extends StoredPropertySet implements HeightMapP
    public static final DoubleStoredPropertyKey cellSize = keys.addDoubleKey("Cell size");
    public static final DoubleStoredPropertyKey localWidthInMeters = keys.addDoubleKey("Local width in meters");
    public static final DoubleStoredPropertyKey globalWidthInMeters = keys.addDoubleKey("Global width in meters");
+   public static final IntegerStoredPropertyKey icpMaxIterations = keys.addIntegerKey("Icp max iterations");
+   public static final DoubleStoredPropertyKey icpConvergenceThreshold = keys.addDoubleKey("Icp convergence threshold");
 
    /**
     * Loads this property set.

@@ -20,11 +20,6 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
       return get(flyingPointsFilter);
    }
 
-   default boolean getLogHeightMap()
-   {
-      return get(logHeightMap);
-   }
-
    default double getMinDepthToAccept()
    {
       return get(minDepthToAccept);
@@ -88,5 +83,15 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
    default double getGlobalWidthInMeters()
    {
       return get(globalWidthInMeters);
+   }
+
+   default int getIcpMaxIterations()
+   {
+      return get(icpMaxIterations);
+   }
+
+   default double getIcpConvergenceThreshold()
+   {
+      return get(icpConvergenceThreshold);
    }
 }

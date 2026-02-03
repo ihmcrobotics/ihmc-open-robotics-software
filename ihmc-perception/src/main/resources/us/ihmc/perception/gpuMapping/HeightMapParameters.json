@@ -2,7 +2,6 @@
   "title": "HeightMapParameters",
   "Drift offset filter": true,
   "Flying points filter": false,
-  "Log height map": false,
   "Min Depth To Accept": {
     "value": 0.88,
     "lowerBound": 0.0,
@@ -67,5 +66,15 @@
     "value": 4.0,
     "lowerBound": 1.0,
     "upperBound": 4.5
+  },
+  "Icp max iterations": {
+    "value": 10,
+    "lowerBound": 1,
+    "upperBound": 100
+  },
+  "Icp convergence threshold": {
+    "value": 0.001,
+    "lowerBound": 0.0001,
+    "upperBound": 1
   }
 }

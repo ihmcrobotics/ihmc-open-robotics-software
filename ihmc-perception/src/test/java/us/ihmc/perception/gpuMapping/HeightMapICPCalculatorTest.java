@@ -64,7 +64,7 @@ public class HeightMapICPCalculatorTest
       Point3D mapCenter = new Point3D(0.0, 0.0, 0.0);
       heightMapICPCalculator.update(localMap, globalMap, devicePtr, mapCenter);
 
-      Vector3D meanVector = heightMapICPCalculator.getVectorMap();
+      Vector3D meanVector = heightMapICPCalculator.getVectorMapGPU();
 
       System.out.println("Mean X: " + meanVector.getX());
       System.out.println("Mean Y: " + meanVector.getY());
@@ -110,7 +110,7 @@ public class HeightMapICPCalculatorTest
       Point3D mapCenter = new Point3D(0.0, 0.0, 0.0);
       heightMapICPCalculator.update(localMap, globalMap, devicePtr, mapCenter);
 
-      Vector3D meanVector = heightMapICPCalculator.getVectorMap();
+      Vector3D meanVector = heightMapICPCalculator.getVectorMapGPU();
 
       System.out.println("Mean X: " + meanVector.getX());
       System.out.println("Mean Y: " + meanVector.getY());
@@ -158,7 +158,7 @@ public class HeightMapICPCalculatorTest
       heightMapICPCalculator.update(localMap, globalMap, devicePtr, mapCenter);
 
       // 5. Download results and Verify
-      Vector3D meanVector = heightMapICPCalculator.getVectorMap();
+      Vector3D meanVector = heightMapICPCalculator.getVectorMapGPU();
 
       System.out.println("1m Z-offset test:");
       System.out.println("Mean X: " + meanVector.getX());
@@ -210,7 +210,7 @@ public class HeightMapICPCalculatorTest
       heightMapICPCalculator.update(localMap, globalMap, devicePtr, mapCenter);
 
       // 5. Download results and Verify
-      Vector3D meanVector = heightMapICPCalculator.getVectorMap();
+      Vector3D meanVector = heightMapICPCalculator.getVectorMapGPU();
 
       System.out.println("1m origin offset test:");
       System.out.println("Mean X: " + meanVector.getX());
@@ -307,7 +307,7 @@ public class HeightMapICPCalculatorTest
       heightMapICPCalculator.update(localMap, globalMap, devicePtr, globalMapCenter);
 
       // 7. Verify result
-      Vector3D meanVector = heightMapICPCalculator.getVectorMap();
+      Vector3D meanVector = heightMapICPCalculator.getVectorMapGPU();
 
       System.out.println("Pillar + conflicting transform test:");
       System.out.println("Mean X: " + meanVector.getX());
@@ -324,6 +324,4 @@ public class HeightMapICPCalculatorTest
       hostPtr.close();
       cudaFreeAsync(devicePtr, stream);
    }
-
-   //TODO need to add a test if all values are zeros, that shoulw be find but I think its causing problems
 }

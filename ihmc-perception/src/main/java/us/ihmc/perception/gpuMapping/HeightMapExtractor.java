@@ -188,11 +188,11 @@ public class HeightMapExtractor
       CUDATools.mallocAsync(parametersDevicePointer, parametersArray.length, stream);
       CUDATools.memcpyAsync(parametersDevicePointer, parametersHostPointer, parametersArray.length, stream);
 
-      // Remove rotation from transformation
+      // Step 1: Remove rotation from transformation
       RigidBodyTransform groundToWorldNoRotation = new RigidBodyTransform(groundToWorldTransform);
       groundToWorldNoRotation.getRotation().setIdentity();
 
-      // Invert translation-only transform
+      // Step 2: Invert translation-only transform
       RigidBodyTransform worldToGroundNoRotation = new RigidBodyTransform(groundToWorldNoRotation);
       worldToGroundNoRotation.invert();
 

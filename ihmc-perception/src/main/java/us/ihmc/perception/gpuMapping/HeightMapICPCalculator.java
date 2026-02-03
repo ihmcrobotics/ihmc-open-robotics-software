@@ -7,11 +7,11 @@ import org.bytedeco.javacpp.indexer.FloatIndexer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_core.Scalar;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
+import us.ihmc.perception.cuda.CUDAStreamManager;
 import us.ihmc.perception.cuda.CUDATools;
 
 import java.net.URL;
@@ -21,10 +21,6 @@ import static org.bytedeco.cuda.global.cudart.*;
 public class HeightMapICPCalculator
 {
    private static final boolean PRINT_TIMING_FOR_KERNELS = false;
-   /**
-    * The choice of 16 here is to utilize more SMs (Multi Processors) on the GPU.
-    * This was chosen based on GPU profiling and significantly effects performance.
-    */
    private static final int BLOCK_SIZE_XY = 8;
 
    private final int localCenterIndex;
@@ -38,13 +34,14 @@ public class HeightMapICPCalculator
    private final CUDAProgram heightMapICPProgram;
    private final dim3 blockSize;
 
-   private final CUDAKernel icpCoorespondenceKernel;
-   private final GpuMat vectorMap;
+   private final CUDAKernel iceCorrespondenceKernel;
+   private final GpuMat vectorMapGPU;
 
    private final FloatPointer parametersHostPointer;
    private final FloatPointer parametersDevicePointer;
-   private Vector3D meanVector3D;
-   private float[] finalMatrix;
+   private final FloatPointer groundToWorldTranslationDevicePointerCopy;
+
+   private Vector3D vectorMean;
 
    public HeightMapICPCalculator(HeightMapParameters heightMapParameters, CUstream_st stream)
    {
@@ -66,13 +63,15 @@ public class HeightMapICPCalculator
       {
          heightMapICPProgram = new CUDAProgram(kernelPath, heightMapUtilsHeaderPath, mathUtilsHeaderPath);
 
-         icpCoorespondenceKernel = heightMapICPProgram.loadKernel("heightMapICPKernel");
-         icpCoorespondenceKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
+         iceCorrespondenceKernel = heightMapICPProgram.loadKernel("heightMapICPKernel");
+         iceCorrespondenceKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
 
-         vectorMap = new GpuMat(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_32FC3);
+         vectorMapGPU = new GpuMat(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_32FC3);
 
          parametersHostPointer = new FloatPointer(6);
          parametersDevicePointer = new FloatPointer();
+
+         groundToWorldTranslationDevicePointerCopy = new FloatPointer();
       }
       catch (Exception e)
       {
@@ -82,16 +81,15 @@ public class HeightMapICPCalculator
 
    public void update(GpuMat localMeanMap, GpuMat globalMeanMap, FloatPointer groundToWorldTranslationDevicePointer, Point3D heightMapCenter)
    {
-      int maxIterations = 10;
-      double convergenceThreshold = 0.001;
+      int maxIterations = heightMapParameters.getIcpMaxIterations();
+      double convergenceThreshold = heightMapParameters.getIcpConvergenceThreshold();
 
-      FloatPointer groundToWorldTranslationDevicePointerCopy = new FloatPointer();
+      float[] parametersArray = populateParameterArray(heightMapParameters);
+      parametersHostPointer.put(parametersArray);
+      CUDATools.mallocAsync(parametersDevicePointer, parametersArray.length, stream);
+      CUDATools.memcpyAsync(parametersDevicePointer, parametersHostPointer, parametersArray.length, stream);
 
-      // 1. Allocate memory for the copy (16 floats for a 4x4 matrix)
       CUDATools.mallocAsync(groundToWorldTranslationDevicePointerCopy, 16, stream);
-
-      // 2. Perform the GPU-to-GPU copy
-      // cudaMemcpyDeviceToDevice is the standard way to clone data on the card
       int error = cudaMemcpyAsync(groundToWorldTranslationDevicePointerCopy,
                                   groundToWorldTranslationDevicePointer,
                                   16 * Float.BYTES,
@@ -99,84 +97,77 @@ public class HeightMapICPCalculator
                                   stream);
       CUDATools.checkCUDAError(error);
 
-      float[] parametersArray = populateParameterArray(heightMapParameters);
-      parametersHostPointer.put(parametersArray);
-      CUDATools.mallocAsync(parametersDevicePointer, parametersArray.length, stream);
-      CUDATools.memcpyAsync(parametersDevicePointer, parametersHostPointer, parametersArray.length, stream);
+      int gridDimX = (localMeanMap.rows() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
+      int gridDimY = (localMeanMap.cols() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
+      dim3 icpCorrespondenceDim = new dim3(gridDimX, gridDimY, 1);
+      Mat cpuVectorMap = new Mat();
 
       int i;
       double totalShift = 0.0;
       for (i = 0; i < maxIterations; i++)
       {
-         int gridDimX = (localMeanMap.rows() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
-         int gridDimY = (localMeanMap.cols() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
-         dim3 icpCorrespondenceDim = new dim3(gridDimX, gridDimY, 1);
+         iceCorrespondenceKernel.withPointer(localMeanMap.data()).withLong(localMeanMap.step());
+         iceCorrespondenceKernel.withPointer(globalMeanMap.data()).withLong(globalMeanMap.step());
+         iceCorrespondenceKernel.withPointer(groundToWorldTranslationDevicePointerCopy);
+         iceCorrespondenceKernel.withFloat(heightMapCenter.getX32());
+         iceCorrespondenceKernel.withFloat(heightMapCenter.getY32());
+         iceCorrespondenceKernel.withPointer(vectorMapGPU.data()).withLong(vectorMapGPU.step());
+         iceCorrespondenceKernel.withPointer(parametersDevicePointer);
 
-         icpCoorespondenceKernel.withPointer(localMeanMap.data()).withLong(localMeanMap.step());
-         icpCoorespondenceKernel.withPointer(globalMeanMap.data()).withLong(globalMeanMap.step());
-         icpCoorespondenceKernel.withPointer(groundToWorldTranslationDevicePointerCopy);
-         icpCoorespondenceKernel.withFloat(heightMapCenter.getX32());
-         icpCoorespondenceKernel.withFloat(heightMapCenter.getY32());
-         icpCoorespondenceKernel.withPointer(vectorMap.data()).withLong(vectorMap.step());
-         icpCoorespondenceKernel.withPointer(parametersDevicePointer);
-
-         icpCoorespondenceKernel.run(stream, icpCorrespondenceDim, blockSize, 0);
-
-         icpCorrespondenceDim.close();
+         iceCorrespondenceKernel.run(stream, icpCorrespondenceDim, blockSize, 0);
 
          error = cudaStreamSynchronize(stream);
          CUDATools.checkCUDAError(error);
 
-         Mat cpuVectorMap = new Mat();
-         vectorMap.download(cpuVectorMap);
-
-         // Use an Indexer for fast direct access to the pixel data
+         // Before we use things from the gpu we have to synchronize to make sure the gpu has finished
+         vectorMapGPU.download(cpuVectorMap);
          FloatIndexer indexer = cpuVectorMap.createIndexer();
 
-         double sumX = 0, sumY = 0, sumZ = 0;
-         long validCount = 0;
+         double sumX = 0;
+         double sumY = 0;
+         double sumZ = 0;
+         long validCellCount = 0;
 
+         // This gets the mean vector form the vector map
          for (int y = 0; y < cpuVectorMap.rows(); y++)
          {
             for (int x = 0; x < cpuVectorMap.cols(); x++)
             {
-               // The vectorMap has 3 channels (dx, dy, dz)
+               // The vectorMap has 3 axis (x, y, z)
                float vx = indexer.get(y, x, 0);
                float vy = indexer.get(y, x, 1);
                float vz = indexer.get(y, x, 2);
 
-               // check for NaN (points that didn't find a global match)
+               // Check for NaN (points that didn't find a global match)
                if (!Float.isNaN(vx) && !Float.isNaN(vy) && !Float.isNaN(vz))
                {
                   sumX += vx;
                   sumY += vy;
                   sumZ += vz;
-                  validCount++;
+                  validCellCount++;
                }
             }
          }
+
          indexer.release();
 
-         double dx = 0, dy = 0, dz = 0;
-         if (validCount > 0)
-         {
-            dx = sumX / validCount;
-            dy = sumY / validCount;
-            dz = sumZ / validCount;
-         }
-         else
+         if (validCellCount == 0)
          {
             System.out.println("Iteration " + i + ": No correspondences found!");
-            break; // Exit if we lost tracking
+            break;
          }
+
+         double dx = sumX / validCellCount;
+         double dy = sumY / validCellCount;
+         double dz = sumZ / validCellCount;
 
          System.out.println("Mean vector x: " + dx);
          System.out.println("Mean vector y: " + dy);
          System.out.println("Mean vector z: " + dz);
 
-         applyCorrectionToGpuMatrix(groundToWorldTranslationDevicePointerCopy, dx, dy, dz, stream);
+         applyCorrectionToTransform(groundToWorldTranslationDevicePointerCopy, dx, dy, dz, stream);
 
-         // 5. Check for convergence
+         // Check for convergence
          totalShift = Math.sqrt(dx * dx + dy * dy + dz * dz);
          if (totalShift < convergenceThreshold)
          {
@@ -184,21 +175,26 @@ public class HeightMapICPCalculator
          }
       }
 
+      // Finished our GPU kernels, close the objects related to that
+      icpCorrespondenceDim.close();
+      cpuVectorMap.close();
+
       // After the loop, check if we exited due to max iterations
       if (i == maxIterations)
       {
          System.out.println("Warning: Reached max iterations (" + maxIterations + ") without convergence. Last totalShift = " + totalShift);
       }
 
-      finalMatrix = new float[16];
-      FloatPointer hostPointer = new FloatPointer(finalMatrix);
-
       // Copy the final corrected matrix from GPU to CPU
-      CUDATools.memcpyAsync(hostPointer, groundToWorldTranslationDevicePointerCopy, 16, stream);
+      float[] finalCorrectedTransform = new float[16];
+      FloatPointer cpuFinalCorrectedTransformPointer = new FloatPointer(finalCorrectedTransform);
+      CUDATools.memcpyAsync(cpuFinalCorrectedTransformPointer, groundToWorldTranslationDevicePointerCopy, 16, stream);
       cudaStreamSynchronize(stream);
-      hostPointer.get(finalMatrix);
+      cpuFinalCorrectedTransformPointer.get(finalCorrectedTransform);
 
-      meanVector3D = new Vector3D(finalMatrix[3], finalMatrix[7], finalMatrix[11]);
+      vectorMean = new Vector3D(finalCorrectedTransform[3], finalCorrectedTransform[7], finalCorrectedTransform[11]);
+
+      cpuFinalCorrectedTransformPointer.close();
    }
 
    public float[] populateParameterArray(HeightMapParameters parameters)
@@ -219,19 +215,18 @@ public class HeightMapICPCalculator
     * @param dy The translation correction in Y
     * @param dz The translation correction in Z
     */
-   private void applyCorrectionToGpuMatrix(FloatPointer matrixPtr, double dx, double dy, double dz, CUstream_st stream)
+   private void applyCorrectionToTransform(FloatPointer matrixPtr, double dx, double dy, double dz, CUstream_st stream)
    {
-      // 1. Create a temporary host array to hold the 16 elements of a 4x4 matrix
+      // Create a temporary host array to hold the 16 elements of a 4x4 matrix
       float[] hostMatrix = new float[16];
       FloatPointer hostPointer = new FloatPointer(hostMatrix);
 
-      // 2. Copy the current matrix from GPU to CPU
+      // Copy the current matrix from GPU to CPU
       CUDATools.memcpyAsync(hostPointer, matrixPtr, 16, stream);
       cudaStreamSynchronize(stream);
       hostPointer.get(hostMatrix);
 
-      // 3. Apply the translation correction.
-      // In a row-major 4x4 matrix, translation is typically at indices 3, 7, and 11.
+      // In a row-major 4x4 matrix, translation is at indices 3, 7, and 11.
       // [ R R R Tx ]  -> Index 3
       // [ R R R Ty ]  -> Index 7
       // [ R R R Tz ]  -> Index 11
@@ -240,24 +235,28 @@ public class HeightMapICPCalculator
       hostMatrix[7] += (float) dy;
       hostMatrix[11] += (float) dz;
 
-      // 4. Copy the updated matrix back to the GPU
+      // Copy the updated matrix back to the GPU
       hostPointer.put(hostMatrix);
       CUDATools.memcpyAsync(matrixPtr, hostPointer, 16, stream);
    }
 
-   public float[] getFinalMatrix()
+   public Vector3D getVectorMapGPU()
    {
-      return finalMatrix;
-   }
-
-   public Vector3D getVectorMap()
-   {
-      return meanVector3D;
+      return vectorMean;
    }
 
    public void destroy()
    {
+      parametersHostPointer.close();
+      parametersDevicePointer.close();
+      groundToWorldTranslationDevicePointerCopy.close();
+      cudaFreeAsync(parametersHostPointer, stream);
+      cudaFreeAsync(groundToWorldTranslationDevicePointerCopy, stream);
+
       blockSize.close();
+      vectorMapGPU.close();
+      iceCorrespondenceKernel.close();
       heightMapICPProgram.close();
+      CUDAStreamManager.releaseStream(stream);
    }
 }
