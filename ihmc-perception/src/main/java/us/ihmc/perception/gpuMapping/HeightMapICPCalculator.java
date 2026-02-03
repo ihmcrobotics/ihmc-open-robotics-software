@@ -9,6 +9,7 @@ import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
 import us.ihmc.perception.cuda.CUDAStreamManager;
@@ -106,6 +107,7 @@ public class HeightMapICPCalculator
       double totalShift = 0.0;
       for (i = 0; i < maxIterations; i++)
       {
+         // We run the icp kernel with the latest transform we have, when things start this will be the transform we are given, on the next pass it will be updated.
          iceCorrespondenceKernel.withPointer(localMap.data()).withLong(localMap.step());
          iceCorrespondenceKernel.withPointer(globalMap.data()).withLong(globalMap.step());
          iceCorrespondenceKernel.withPointer(groundToWorldTranslationDevicePointerCopy);
@@ -149,11 +151,12 @@ public class HeightMapICPCalculator
             }
          }
 
+         // Don't wanna forget to free the memory!
          indexer.release();
 
          if (validCellCount == 0)
          {
-            System.out.println("Iteration " + i + ": No correspondences found!");
+            LogTools.info("Iteration " + i + ": No correspondences found!");
             break;
          }
 
@@ -161,9 +164,7 @@ public class HeightMapICPCalculator
          double dy = sumY / validCellCount;
          double dz = sumZ / validCellCount;
 
-         System.out.println("Mean vector x: " + dx);
-         System.out.println("Mean vector y: " + dy);
-         System.out.println("Mean vector z: " + dz);
+         LogTools.info("Mean vector on " + i + "th iteration: (" + dx + ", " + dy + ", " + dz + ")");
 
          applyCorrectionToTransform(groundToWorldTranslationDevicePointerCopy, dx, dy, dz, stream);
 
@@ -182,7 +183,7 @@ public class HeightMapICPCalculator
       // After the loop, check if we exited due to max iterations
       if (i == maxIterations)
       {
-         System.out.println("Warning: Reached max iterations (" + maxIterations + ") without convergence. Last totalShift = " + totalShift);
+         LogTools.info("Warning: Reached max iterations (" + maxIterations + ") without convergence. Last totalShift = " + totalShift);
       }
 
       // Copy the final corrected matrix from GPU to CPU

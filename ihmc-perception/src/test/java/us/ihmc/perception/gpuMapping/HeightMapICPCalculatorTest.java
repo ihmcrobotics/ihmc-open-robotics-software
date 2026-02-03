@@ -190,7 +190,6 @@ public class HeightMapICPCalculatorTest
       // Let's get the result and see how we did...
       Vector3D correctedTransform = heightMapICPCalculator.getCorrectedTransform();
 
-      System.out.println("1m Z-offset test:");
       System.out.println("Mean X: " + correctedTransform.getX());
       System.out.println("Mean Y: " + correctedTransform.getY());
       System.out.println("Mean Z: " + correctedTransform.getZ());
@@ -246,7 +245,6 @@ public class HeightMapICPCalculatorTest
       // Let's get the result and see how we did...
       Vector3D correctedTransform = heightMapICPCalculator.getCorrectedTransform();
 
-      System.out.println("1m origin offset test:");
       System.out.println("Mean X: " + correctedTransform.getX());
       System.out.println("Mean Y: " + correctedTransform.getY());
       System.out.println("Mean Z: " + correctedTransform.getZ());
@@ -333,7 +331,6 @@ public class HeightMapICPCalculatorTest
       // Let's get the result and see how we did...
       Vector3D correctedTransform = heightMapICPCalculator.getCorrectedTransform();
 
-      System.out.println("Pillar + conflicting transform test:");
       System.out.println("Mean X: " + correctedTransform.getX());
       System.out.println("Mean Y: " + correctedTransform.getY());
       System.out.println("Mean Z: " + correctedTransform.getZ());
