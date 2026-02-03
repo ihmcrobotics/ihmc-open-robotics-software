@@ -41,7 +41,7 @@ public class HeightMapICPCalculator
    private final FloatPointer parametersDevicePointer;
    private final FloatPointer groundToWorldTranslationDevicePointerCopy;
 
-   private Vector3D vectorMean;
+   private Vector3D correctedTransformTranslationOnly;
 
    public HeightMapICPCalculator(HeightMapParameters heightMapParameters, CUstream_st stream)
    {
@@ -79,7 +79,7 @@ public class HeightMapICPCalculator
       }
    }
 
-   public void update(GpuMat localMeanMap, GpuMat globalMeanMap, FloatPointer groundToWorldTranslationDevicePointer, Point3D heightMapCenter)
+   public void update(GpuMat localMap, GpuMat globalMap, FloatPointer groundToWorldTranslationDevicePointer, Point3D globalMapCenter)
    {
       int maxIterations = heightMapParameters.getIcpMaxIterations();
       double convergenceThreshold = heightMapParameters.getIcpConvergenceThreshold();
@@ -97,8 +97,8 @@ public class HeightMapICPCalculator
                                   stream);
       CUDATools.checkCUDAError(error);
 
-      int gridDimX = (localMeanMap.rows() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
-      int gridDimY = (localMeanMap.cols() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
+      int gridDimX = (localMap.rows() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
+      int gridDimY = (localMap.cols() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
       dim3 icpCorrespondenceDim = new dim3(gridDimX, gridDimY, 1);
       Mat cpuVectorMap = new Mat();
 
@@ -106,11 +106,11 @@ public class HeightMapICPCalculator
       double totalShift = 0.0;
       for (i = 0; i < maxIterations; i++)
       {
-         iceCorrespondenceKernel.withPointer(localMeanMap.data()).withLong(localMeanMap.step());
-         iceCorrespondenceKernel.withPointer(globalMeanMap.data()).withLong(globalMeanMap.step());
+         iceCorrespondenceKernel.withPointer(localMap.data()).withLong(localMap.step());
+         iceCorrespondenceKernel.withPointer(globalMap.data()).withLong(globalMap.step());
          iceCorrespondenceKernel.withPointer(groundToWorldTranslationDevicePointerCopy);
-         iceCorrespondenceKernel.withFloat(heightMapCenter.getX32());
-         iceCorrespondenceKernel.withFloat(heightMapCenter.getY32());
+         iceCorrespondenceKernel.withFloat(globalMapCenter.getX32());
+         iceCorrespondenceKernel.withFloat(globalMapCenter.getY32());
          iceCorrespondenceKernel.withPointer(vectorMapGPU.data()).withLong(vectorMapGPU.step());
          iceCorrespondenceKernel.withPointer(parametersDevicePointer);
 
@@ -192,7 +192,7 @@ public class HeightMapICPCalculator
       cudaStreamSynchronize(stream);
       cpuFinalCorrectedTransformPointer.get(finalCorrectedTransform);
 
-      vectorMean = new Vector3D(finalCorrectedTransform[3], finalCorrectedTransform[7], finalCorrectedTransform[11]);
+      correctedTransformTranslationOnly = new Vector3D(finalCorrectedTransform[3], finalCorrectedTransform[7], finalCorrectedTransform[11]);
 
       cpuFinalCorrectedTransformPointer.close();
    }
@@ -240,9 +240,9 @@ public class HeightMapICPCalculator
       CUDATools.memcpyAsync(matrixPtr, hostPointer, 16, stream);
    }
 
-   public Vector3D getVectorMapGPU()
+   public Vector3D getCorrectedTransform()
    {
-      return vectorMean;
+      return correctedTransformTranslationOnly;
    }
 
    public void destroy()
