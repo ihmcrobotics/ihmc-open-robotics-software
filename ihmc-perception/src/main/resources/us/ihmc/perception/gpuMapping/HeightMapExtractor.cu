@@ -3,26 +3,27 @@
 
 extern "C"
 #define CELL_SIZE 0
-#define CENTER_INDEX 1
-#define LOCAL_CELLS_PER_AXIS 2
-#define GLOBAL_CELLS_PER_AXIS 3
-#define DEPTH_INPUT_HEIGHT 4
-#define DEPTH_INPUT_WIDTH 5
-#define DEPTH_CX 6
-#define DEPTH_CY 7
-#define DEPTH_FX 8
-#define DEPTH_FY 9
-#define MIN_HEIGHT_REGISTRATION 10
-#define MAX_HEIGHT_REGISTRATION 11
-#define MIN_CLAMP_HEIGHT 12
-#define MAX_CLAMP_HEIGHT 13
-#define KALMAN_FILTER_PREDICTION_NOISE 14
-#define ADDITIONAL_TRANSLATIONAL_VARIANCE_ADDED 15
-#define VARIANCE_PER_METER 16
-#define VARIANCE_PER_TRANSLATION_SPEED 17
-#define VARIANCE_PER_ROTATION_SPEED 18
-#define GROUND_HEIGHT 19
-#define MIN_DEPTH_TO_ACCEPT 20
+#define LOCAL_CENTER_INDEX 1
+#define GLOBAL_CENTER_INDEX 2
+#define LOCAL_CELLS_PER_AXIS 3
+#define GLOBAL_CELLS_PER_AXIS 4
+#define DEPTH_INPUT_HEIGHT 5
+#define DEPTH_INPUT_WIDTH 6
+#define DEPTH_CX 7
+#define DEPTH_CY 8
+#define DEPTH_FX 9
+#define DEPTH_FY 10
+#define MIN_HEIGHT_REGISTRATION 11
+#define MAX_HEIGHT_REGISTRATION 12
+#define MIN_CLAMP_HEIGHT 13
+#define MAX_CLAMP_HEIGHT 14
+#define KALMAN_FILTER_PREDICTION_NOISE 15
+#define ADDITIONAL_TRANSLATIONAL_VARIANCE_ADDED 16
+#define VARIANCE_PER_METER 17
+#define VARIANCE_PER_TRANSLATION_SPEED 18
+#define VARIANCE_PER_ROTATION_SPEED 19
+#define GROUND_HEIGHT 20
+#define MIN_DEPTH_TO_ACCEPT 21
 
 __device__ float3 back_project_perspective(int2 pos, float Z, const float *params)
 {
@@ -57,7 +58,7 @@ __global__ void heightMapUpdateDataKernel(const unsigned short* __restrict__ dep
     const int depthHeight = static_cast<int>(params[DEPTH_INPUT_HEIGHT]);
     const int cellsPerAxis = static_cast<int>(params[LOCAL_CELLS_PER_AXIS]);
     const float cellSize = params[CELL_SIZE];
-    const int centerIndex = static_cast<int>(params[CENTER_INDEX]);
+    const int centerIndex = static_cast<int>(params[LOCAL_CENTER_INDEX]);
     const float varPerMeter = params[VARIANCE_PER_METER];
     const float varPerTranslationSpeed = params[VARIANCE_PER_TRANSLATION_SPEED];
     const float varPerRotationSpeed = params[VARIANCE_PER_ROTATION_SPEED];
@@ -231,9 +232,21 @@ __global__ void heightMapRegistrationKernel(const float *__restrict__ localMeanM
     const int globalCellsPerAxis = static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]);
 
     int2 localIndex = make_int2(xIndex, yIndex);
-    float3 queryPointInLocal = make_float3((float) localIndex.x, (float) localIndex.y, 0.0f);
+    float2 localCoordinate = indices_to_coordinate(localIndex, make_float2(0.0f, 0.0f), params[CELL_SIZE], params[LOCAL_CENTER_INDEX]);
+    float3 queryPointInLocal = make_float3(localCoordinate.x, localCoordinate.y, 0.0f);
     float3 cellInGlobal = transformPoint3D(queryPointInLocal, groundToWorldTranslation);
-    int2 globalIndex = make_int2(cellInGlobal.x, cellInGlobal.y);
+    int2 globalIndex = coordinate_to_indices(make_float2(cellInGlobal.x, cellInGlobal.y), make_float2(groundToWorldTranslation[3], groundToWorldTranslation[7]), params[CELL_SIZE], params[GLOBAL_CENTER_INDEX]);
+
+//     if (xIndex == 150 && yIndex == 100) {
+//         printf("Local Center Index: %f\n", params[LOCAL_CENTER_INDEX]);
+//         printf("Local Index: %d, %d\n", localIndex.x, localIndex.y);
+//         printf("Local Coordinate: %f, %f\n", localCoordinate.x, localCoordinate.y);
+//         printf("Translation of Transform: %f, %f, %f\n", groundToWorldTranslation[3], groundToWorldTranslation[7], groundToWorldTranslation[11]);
+//         printf("Global Coordinate: %f, %f, %f\n", cellInGlobal.x, cellInGlobal.y, cellInGlobal.z);
+//         printf("Global Index: %d, %d\n", globalIndex.x, globalIndex.y);
+//         printf("Cell Size: %f\n", params[CELL_SIZE]);
+//         printf("Global Center Index: %f\n", params[GLOBAL_CENTER_INDEX]);
+//     }
 
     if (globalIndex.x < 0 || globalIndex.x >= globalCellsPerAxis || globalIndex.y < 0 || globalIndex.y >= globalCellsPerAxis)
         return;

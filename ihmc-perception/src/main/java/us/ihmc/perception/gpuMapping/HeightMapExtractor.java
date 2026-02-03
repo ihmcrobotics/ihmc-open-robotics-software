@@ -145,7 +145,7 @@ public class HeightMapExtractor
          groundToWorldTranslationHostPointer = new FloatPointer(16);
          groundToWorldTranslationDevicePointer = new FloatPointer();
 
-         parametersHostPointer = new FloatPointer(20);
+         parametersHostPointer = new FloatPointer(21);
          parametersDevicePointer = new FloatPointer();
       }
       catch (Exception e)
@@ -286,7 +286,7 @@ public class HeightMapExtractor
          checkCUDAError();
       }
 
-      heightMapICPCalculator.update(localMeanMap, globalMeanMap, groundToWorldTranslationDevicePointer, heightMapCenter);
+//      heightMapICPCalculator.update(localMeanMap, globalMeanMap, groundToWorldTranslationDevicePointer, heightMapCenter);
 
       // ---------- Run the translate kernel ---------
       {
@@ -300,7 +300,7 @@ public class HeightMapExtractor
             globalMeanMap.copyTo(previousGlobalMeanMap);
             globalVarianceMap.copyTo(previousGlobalVarianceMap);
 
-            int translateKernelGridSizeXY = (localCellsPerAxis + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
+            int translateKernelGridSizeXY = (globalCellsPerAxis + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
             dim3 translateKernelGridDim = new dim3(translateKernelGridSizeXY, translateKernelGridSizeXY, 1);
 
             int shiftX = currentCellX - previousCellX;
@@ -409,6 +409,7 @@ public class HeightMapExtractor
    {
       return new float[] {(float) parameters.getCellSize(),
                           (float) localCenterIndex,
+                          (float) globalCenterIndex,
                           (float) localCellsPerAxis,
                           (float) globalCellsPerAxis,
                           (float) cameraIntrinsics.getHeight(),
