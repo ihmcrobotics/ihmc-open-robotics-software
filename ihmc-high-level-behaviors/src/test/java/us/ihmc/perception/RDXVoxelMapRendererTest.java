@@ -82,7 +82,7 @@ public class RDXVoxelMapRendererTest
                                      @Override
                                      public void render()
                                      {
-                                        voxelMapRenderer.update(vectors, voxelMapExtractor.getCellSize());
+                                        voxelMapRenderer.update(vectors, 0.5f * voxelMapExtractor.getCellSize());
                                         baseUI.renderBeforeOnScreenUI();
                                         baseUI.renderEnd();
                                      }
