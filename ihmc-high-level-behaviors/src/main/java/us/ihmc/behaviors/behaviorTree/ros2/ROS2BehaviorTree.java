@@ -6,7 +6,6 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNode;
 import us.ihmc.communication.AutonomyAPI;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
-import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.ros2.ROS2Topic;
 
 /**
@@ -19,7 +18,7 @@ public class ROS2BehaviorTree<T extends BehaviorTreeNode<T, ? ,?>>
    /**
     * The SYNC_FREQUENCY should be a multiple of the scene graph's update frequency.
     */
-   public static final double SYNC_FREQUENCY = SceneGraph.UPDATE_FREQUENCY / 2.0;
+   public static final double SYNC_FREQUENCY = 30.0;
 
    private final BehaviorTree<?, ?> behaviorTree;
    private final ROS2PublishSubscribeAPI ros2;

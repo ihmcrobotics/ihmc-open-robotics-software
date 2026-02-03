@@ -1,4 +1,4 @@
-package us.ihmc.perception.sceneGraph.rigidBody;
+package us.ihmc.behaviors.simulation;
 
 public class TableModelParameters
 {
