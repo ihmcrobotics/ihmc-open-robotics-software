@@ -11,77 +11,77 @@ permissions:
   contents: read
 
 jobs:
-  alex-allocation-slow:
+  zulu-allocation-slow:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
       subproject: 'zulu'
       test-category: 'allocation-slow'
-  alex-allocation-slow-2:
+  zulu-allocation-slow-2:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
       subproject: 'zulu'
       test-category: 'allocation-slow-2'
-  alex-controller-api-slow:
+  zulu-controller-api-slow:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
       subproject: 'zulu'
       test-category: 'controller-api-slow'
-  alex-controller-api-slow-3:
+  zulu-controller-api-slow-3:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
       subproject: 'zulu'
       test-category: 'controller-api-slow-3'
-  alex-controller-api-slow-4:
+  zulu-controller-api-slow-4:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
       subproject: 'zulu'
       test-category: 'controller-api-slow-4'
-  alex-humanoid-behaviors-slow:
+  zulu-humanoid-behaviors-slow:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
       subproject: 'zulu'
       test-category: 'humanoid-behaviors-slow'
-  alex-humanoid-flat-ground-slow-2:
+  zulu-humanoid-flat-ground-slow-2:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
       subproject: 'zulu'
       test-category: 'humanoid-flat-ground-slow-2'
-  alex-humanoid-flat-ground-slow-3:
+  zulu-humanoid-flat-ground-slow-3:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
       subproject: 'zulu'
       test-category: 'humanoid-flat-ground-slow-3'
-  alex-humanoid-flat-ground-slow-4:
+  zulu-humanoid-flat-ground-slow-4:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
       subproject: 'zulu'
       test-category: 'humanoid-flat-ground-slow-4'
-  alex-humanoid-obstacle-slow:
+  zulu-humanoid-obstacle-slow:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
       subproject: 'zulu'
       test-category: 'humanoid-obstacle-slow'
-  alex-humanoid-obstacle-slow-2:
+  zulu-humanoid-obstacle-slow-2:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
       subproject: 'zulu'
       test-category: 'humanoid-obstacle-slow-2'
-  alex-humanoid-obstacle-slow-3:
+  zulu-humanoid-obstacle-slow-3:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
       subproject: 'zulu'
       test-category: 'humanoid-obstacle-slow-3'
-  alex-humanoid-push-recovery-slow:
+  zulu-humanoid-push-recovery-slow:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
       subproject: 'zulu'
       test-category: 'humanoid-push-recovery-slow'
-  alex-humanoid-rough-terrain-slow:
+  zulu-humanoid-rough-terrain-slow:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
       subproject: 'zulu'
       test-category: 'humanoid-rough-terrain-slow'
-  alex-humanoid-stairs-slow:
+  zulu-humanoid-stairs-slow:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
       subproject: 'zulu'

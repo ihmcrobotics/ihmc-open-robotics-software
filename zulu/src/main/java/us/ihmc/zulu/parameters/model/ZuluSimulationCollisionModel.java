@@ -60,6 +60,11 @@ public class ZuluSimulationCollisionModel implements RobotCollisionModel
    public List<Collidable> getRobotCollidables(MultiBodySystemBasics multiBodySystem)
    {
       List<Collidable> collidables = new ArrayList<>();
+      if (helper == null)
+      {
+         helper = new CollidableHelper();
+      }
+      
       collisionMask = helper.getCollisionMask(robotCollisionMask);
       collisionGroup = helper.createCollisionGroup(otherCollisionMasks);
 
