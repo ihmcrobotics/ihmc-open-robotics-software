@@ -20,7 +20,7 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
    /**
             * The type of action as defined above
             */
-   public byte type_;
+   public byte scene_action_type_;
    /**
             * Definition of the object to setup
             */
@@ -86,7 +86,7 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
    public void set(SceneActionNodeDefinitionMessage other)
    {
       behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
-      type_ = other.type_;
+      scene_action_type_ = other.scene_action_type_;
 
       behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessagePubSubType.staticCopy(other.scene_object_definition_, scene_object_definition_);
       timeout_ = other.timeout_;
@@ -120,16 +120,16 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
    /**
             * The type of action as defined above
             */
-   public void setType(byte type)
+   public void setSceneActionType(byte scene_action_type)
    {
-      type_ = type;
+      scene_action_type_ = scene_action_type;
    }
    /**
             * The type of action as defined above
             */
-   public byte getType()
+   public byte getSceneActionType()
    {
-      return type_;
+      return scene_action_type_;
    }
 
 
@@ -292,7 +292,7 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
       if(other == this) return true;
 
       if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.type_, other.type_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.scene_action_type_, other.scene_action_type_, epsilon)) return false;
 
       if (!this.scene_object_definition_.epsilonEquals(other.scene_object_definition_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.timeout_, other.timeout_, epsilon)) return false;
@@ -329,7 +329,7 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
       SceneActionNodeDefinitionMessage otherMyClass = (SceneActionNodeDefinitionMessage) other;
 
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
-      if(this.type_ != otherMyClass.type_) return false;
+      if(this.scene_action_type_ != otherMyClass.scene_action_type_) return false;
 
       if (!this.scene_object_definition_.equals(otherMyClass.scene_object_definition_)) return false;
       if(this.timeout_ != otherMyClass.timeout_) return false;
@@ -361,8 +361,8 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
       builder.append("SceneActionNodeDefinitionMessage {");
       builder.append("definition=");
       builder.append(this.definition_);      builder.append(", ");
-      builder.append("type=");
-      builder.append(this.type_);      builder.append(", ");
+      builder.append("scene_action_type=");
+      builder.append(this.scene_action_type_);      builder.append(", ");
       builder.append("scene_object_definition=");
       builder.append(this.scene_object_definition_);      builder.append(", ");
       builder.append("timeout=");

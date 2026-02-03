@@ -9,6 +9,7 @@ import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseCommunicatorMap;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
 import us.ihmc.perception.gpuMapping.TerrainMapData;
+import us.ihmc.sensors.ImageSensor;
 
 /**
  * Top level class for the robot's behavior tree.
@@ -19,12 +20,13 @@ public class ROS2BehaviorTreeExecutor extends BehaviorTreeExecutor
 
    public ROS2BehaviorTreeExecutor(ROS2ControllerHelper ros2ControllerHelper,
                                    ROS2SyncedRobotModel syncedRobot,
+                                   ImageSensor imageSensor,
                                    YOLOv8DetectionExecutor yolo,
                                    IsaacROSFoundationPoseCommunicatorMap foundationPose,
                                    TerrainMapData terrainMapData,
                                    ROS2PeerClockOffsetEstimator peerClockEstimator)
    {
-      super(syncedRobot, peerClockEstimator, ros2ControllerHelper, yolo, foundationPose, terrainMapData);
+      super(syncedRobot, peerClockEstimator, ros2ControllerHelper, imageSensor, yolo, foundationPose, terrainMapData);
 
       ros2BehaviorTree = new ROS2BehaviorTree<>((BehaviorTree) this, ros2ControllerHelper); // FIXME
    }

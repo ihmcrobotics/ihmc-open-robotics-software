@@ -5,7 +5,7 @@ byte SETUP_OBJECT = 0
 byte FREEZE_OBJECT = 1
 
 # The type of action as defined above
-byte type
+byte scene_action_type
 
 # Definition of the object to setup
 behavior_msgs/BehaviorTreeSceneObjectDefinitionMessage scene_object_definition
