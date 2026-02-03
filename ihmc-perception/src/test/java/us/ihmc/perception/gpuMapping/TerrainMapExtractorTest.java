@@ -9,8 +9,6 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
-import us.ihmc.log.LogTools;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static us.ihmc.perception.gpuMapping.TerrainMapData.*;

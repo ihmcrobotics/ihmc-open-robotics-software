@@ -106,7 +106,6 @@ __global__ void heightMapUpdateDataKernel(const unsigned short* __restrict__ dep
     atomicAdd(motionVarPtr, motionVarianceF);
 }
 
-
 /**
  * @brief Compute Local Map KERNEL: The threads correspond to cell indices
  * Takes the maps that hold all the sums, and computes the mean, variance, and motion variance per cell
@@ -223,30 +222,17 @@ __global__ void heightMapRegistrationKernel(const float *__restrict__ localMeanM
     int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
 
     const int localCellsPerAxis = static_cast<int>(params[LOCAL_CELLS_PER_AXIS]);
+    const int globalCellsPerAxis = static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]);
 
     // Check bounds for global indices
     if (xIndex >= localCellsPerAxis || yIndex >= localCellsPerAxis)
         return;
-
-    // Compute global map size
-    const int globalCellsPerAxis = static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]);
 
     int2 localIndex = make_int2(xIndex, yIndex);
     float2 localCoordinate = indices_to_coordinate(localIndex, make_float2(0.0f, 0.0f), params[CELL_SIZE], params[LOCAL_CENTER_INDEX]);
     float3 queryPointInLocal = make_float3(localCoordinate.x, localCoordinate.y, 0.0f);
     float3 cellInGlobal = transformPoint3D(queryPointInLocal, groundToWorldTranslation);
     int2 globalIndex = coordinate_to_indices(make_float2(cellInGlobal.x, cellInGlobal.y), make_float2(groundToWorldTranslation[3], groundToWorldTranslation[7]), params[CELL_SIZE], params[GLOBAL_CENTER_INDEX]);
-
-//     if (xIndex == 150 && yIndex == 100) {
-//         printf("Local Center Index: %f\n", params[LOCAL_CENTER_INDEX]);
-//         printf("Local Index: %d, %d\n", localIndex.x, localIndex.y);
-//         printf("Local Coordinate: %f, %f\n", localCoordinate.x, localCoordinate.y);
-//         printf("Translation of Transform: %f, %f, %f\n", groundToWorldTranslation[3], groundToWorldTranslation[7], groundToWorldTranslation[11]);
-//         printf("Global Coordinate: %f, %f, %f\n", cellInGlobal.x, cellInGlobal.y, cellInGlobal.z);
-//         printf("Global Index: %d, %d\n", globalIndex.x, globalIndex.y);
-//         printf("Cell Size: %f\n", params[CELL_SIZE]);
-//         printf("Global Center Index: %f\n", params[GLOBAL_CENTER_INDEX]);
-//     }
 
     if (globalIndex.x < 0 || globalIndex.x >= globalCellsPerAxis || globalIndex.y < 0 || globalIndex.y >= globalCellsPerAxis)
         return;
@@ -292,21 +278,25 @@ __global__ void heightMapRegistrationKernel(const float *__restrict__ localMeanM
 extern "C"
 __global__ void heightMapEmptyRegistrationKernel(float *localMap, size_t pitchLocal,
                                                  float *globalMap, size_t pitchGlobal,
+                                                 float *groundToWorldTranslation,
                                                  float *params)
 {
     int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
     int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
 
     // Compute global map size
-    int localCellsPerAxis = static_cast<int>(params[LOCAL_CELLS_PER_AXIS]);
-    int globalCellsPerAxis = static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]);
+    const int localCellsPerAxis = static_cast<int>(params[LOCAL_CELLS_PER_AXIS]);
+    const int globalCellsPerAxis = static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]);
 
     // Check bounds for global indices
     if (xIndex >= localCellsPerAxis || yIndex >= localCellsPerAxis)
         return;
 
     int2 localIndex = make_int2(xIndex, yIndex);
-    int2 globalIndex = make_int2(xIndex, yIndex);
+    float2 localCoordinate = indices_to_coordinate(localIndex, make_float2(0.0f, 0.0f), params[CELL_SIZE], params[LOCAL_CENTER_INDEX]);
+    float3 queryPointInLocal = make_float3(localCoordinate.x, localCoordinate.y, 0.0f);
+    float3 cellInGlobal = transformPoint3D(queryPointInLocal, groundToWorldTranslation);
+    int2 globalIndex = coordinate_to_indices(make_float2(cellInGlobal.x, cellInGlobal.y), make_float2(groundToWorldTranslation[3], groundToWorldTranslation[7]), params[CELL_SIZE], params[GLOBAL_CENTER_INDEX]);
 
     if (globalIndex.x < 0 || globalIndex.x >= globalCellsPerAxis || globalIndex.y < 0 || globalIndex.y >= globalCellsPerAxis)
         return;

@@ -102,6 +102,7 @@ public class HeightMapExtractor
       localCellsPerAxis = 2 * localCenterIndex + 1;
       globalCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getGlobalWidthInMeters(), heightMapParameters.getCellSize());
       globalCellsPerAxis = 2 * globalCenterIndex + 1;
+
       blockSize = new dim3(BLOCK_SIZE_XY, BLOCK_SIZE_XY, 1);
 
       try
@@ -209,7 +210,7 @@ public class HeightMapExtractor
       groundToWorldNoRotation.get(groundToWorldNoRotationTransformArray);
       groundToWorldTranslationHostPointer.put(groundToWorldNoRotationTransformArray);
       CUDATools.mallocAsync(groundToWorldTranslationDevicePointer, groundToWorldNoRotationTransformArray.length, stream);
-      CUDATools.memcpyAsync(groundToWorldTranslationDevicePointer, groundToWorldTranslationHostPointer, groundToWorldNoRotationTransformArray.length, stream);
+      CUDATools.memcpyAsync(groundToWorldTranslationDevicePointer, groundToWorldTranslationHostPointer, groundToWorldNoRotationTransformArray.length, stream);      checkCUDAError();
       checkCUDAError();
 
       // --------- Run the temp and local kernel ---------
@@ -327,7 +328,7 @@ public class HeightMapExtractor
       float zeroValueForEmptySpaces = 0.0f;
       // ---------- Run the registration kernel for an empty global height map ----------
       {
-         int emptyRegistrationGridSizeXY = (localCellsPerAxis + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
+         int emptyRegistrationGridSizeXY = (globalCellsPerAxis + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
          dim3 registerKernelGridDim = new dim3(emptyRegistrationGridSizeXY, emptyRegistrationGridSizeXY, 1);
 
          // Need to reset the empty global map before using it so when its filled it starts with all "zero" values
@@ -335,6 +336,7 @@ public class HeightMapExtractor
 
          emptyRegisterKernel.withPointer(localMeanMap.data()).withLong(localMeanMap.step());
          emptyRegisterKernel.withPointer(emptyGlobalHeightMap.data()).withLong(emptyGlobalHeightMap.step());
+         emptyRegisterKernel.withPointer(groundToWorldTranslationDevicePointer);
          emptyRegisterKernel.withPointer(parametersDevicePointer);
 
          emptyRegisterKernel.run(stream, registerKernelGridDim, blockSize, 0);
@@ -345,7 +347,7 @@ public class HeightMapExtractor
 
       // ---------- Run the plan offset kernel ----------
       {
-         int planOffsetGridSizeXY = (localCellsPerAxis + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
+         int planOffsetGridSizeXY = (globalCellsPerAxis + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
          dim3 planOffsetKernelGridDim = new dim3(planOffsetGridSizeXY, planOffsetGridSizeXY, 1);
 
          // Run the plan offset kernel
@@ -383,6 +385,7 @@ public class HeightMapExtractor
 
       // All that memory we allocated on the GPU, need to free that up now
       cudaFreeAsync(parametersDevicePointer, stream);
+      cudaFreeAsync(groundToWorldTranslationDevicePointer, stream);
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
 
