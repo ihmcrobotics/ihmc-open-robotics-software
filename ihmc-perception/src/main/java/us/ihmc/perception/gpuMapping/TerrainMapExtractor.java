@@ -88,7 +88,7 @@ public class TerrainMapExtractor
 
       computeDerivedParameters();
 
-      terrainMapData = new TerrainMapData(heightMapParameters.getCellSize(), heightMapParameters.getWidthInMeters(), 0.0, 0.0);
+      terrainMapData = new TerrainMapData(heightMapParameters.getCellSize(), heightMapParameters.getGlobalWidthInMeters(), 0.0, 0.0);
 
       // Initialize matrices and images
       normalXMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
@@ -104,7 +104,7 @@ public class TerrainMapExtractor
     */
    private void computeDerivedParameters()
    {
-      int terrainCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getWidthInMeters(), heightMapParameters.getCellSize());
+      int terrainCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getGlobalWidthInMeters(), heightMapParameters.getCellSize());
       cellsPerAxisTerrain = 2 * terrainCenterIndex + 1;
    }
 
@@ -191,7 +191,7 @@ public class TerrainMapExtractor
    public float[] populationTerrainMapParameters()
    {
       return new float[] {(float) heightMapParameters.getCellSize(),
-                          (float) heightMapParameters.getWidthInMeters(),
+                          (float) heightMapParameters.getGlobalWidthInMeters(),
                           (float) terrainMapParameters.getNormalSearchRadius(),
                           (float) terrainMapParameters.getCliffSearchRadius(),
                           (float) terrainMapParameters.getCliffHeightThreshold(),
