@@ -2,7 +2,6 @@ package us.ihmc.perception.gpuMapping;
 
 import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.javacpp.FloatPointer;
-import org.bytedeco.javacpp.indexer.FloatIndexer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -35,19 +34,11 @@ public class HeightMapICPCalculatorTest
       globalCellsPerAxis = 2 * globalCenterIndex + 1;
    }
 
-
-
-
    @Test
    public void testICPRunsWithZeroOffset()
    {
       CUstream_st stream = CUDAStreamManager.getStream();
       HeightMapICPCalculator heightMapICPCalculator = new HeightMapICPCalculator(heightMapParameters, stream);
-
-//      int localCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getCellSize());
-//      int localCellsPerAxis = 2 * localCenterIndex + 1;
-//      int globalCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getGlobalWidthInMeters(), heightMapParameters.getCellSize());
-//      int globalCellsPerAxis = 2 * globalCenterIndex + 1;
 
       // 1. Create identical maps
       GpuMat localMap = new GpuMat(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_32FC1); // Ensure type matches kernel expectation
@@ -73,13 +64,6 @@ public class HeightMapICPCalculatorTest
       Point3D mapCenter = new Point3D(0.0, 0.0, 0.0);
       heightMapICPCalculator.update(localMap, globalMap, devicePtr, mapCenter);
 
-      // 5. Download results and Verify
-      //      GpuMat vectorMapGpu = heightMapICPCalculator.getVectorMap();
-      //      Mat vectorMapCpu = new Mat();
-      //      vectorMapGpu.download(vectorMapCpu);
-      //
-      //      Scalar meanVector = opencv_core.mean(vectorMapCpu);
-
       Vector3D meanVector = heightMapICPCalculator.getVectorMap();
 
       System.out.println("Mean X: " + meanVector.getX());
@@ -99,7 +83,6 @@ public class HeightMapICPCalculatorTest
    @Test
    public void testICPWithOneMeterZOffset()
    {
-      HeightMapParameters heightMapParameters = new HeightMapParameters();
       CUstream_st stream = CUDAStreamManager.getStream();
       HeightMapICPCalculator heightMapICPCalculator = new HeightMapICPCalculator(heightMapParameters, stream);
 
@@ -201,7 +184,6 @@ public class HeightMapICPCalculatorTest
    @Test
    public void testICPWithPillarAndConflictingTransformAndOrigin()
    {
-      HeightMapParameters heightMapParameters = new HeightMapParameters();
       CUstream_st stream = CUDAStreamManager.getStream();
       HeightMapICPCalculator heightMapICPCalculator = new HeightMapICPCalculator(heightMapParameters, stream);
 
@@ -211,32 +193,39 @@ public class HeightMapICPCalculatorTest
 
       // 2. Define Pillar Parameters
       float pillarHeight = 2.0f;
-      int startX = localCenterIndex - 2; // Centering a 5x5 pillar around the centerIndex
-      int startY = localCenterIndex - 2;
-      int size = 5;
-
-      // 3. Populate CPU Mat using Indexer (Faster than .ptr for loops)
-      FloatIndexer localIndexer = localMatCPU.createIndexer();
+      int startX = localCenterIndex / 2; // Centering a 5x5 pillar around the centerIndex
+      int startY = localCenterIndex / 2;
+      int size = 10;
 
       for (int y = startY; y < startY + size; y++)
       {
          for (int x = startX; x < startX + size; x++)
          {
-            localIndexer.put(y, x, pillarHeight);
+            localMatCPU.ptr(x, y).putFloat(pillarHeight);
          }
       }
 
-      startX = globalCenterIndex - 2; // Centering a 5x5 pillar around the centerIndex
-      startY = globalCenterIndex - 2;
-
-      // 3. Populate CPU Mat using Indexer (Faster than .ptr for loops)
-      FloatIndexer globalIndexer = globalMatCPU.createIndexer();
+      startX = globalCenterIndex / 2; // Centering a 5x5 pillar around the centerIndex
+      startY = globalCenterIndex / 2;
 
       for (int y = startY; y < startY + size; y++)
       {
          for (int x = startX; x < startX + size; x++)
          {
-            globalIndexer.put(y, x, pillarHeight);
+            globalMatCPU.ptr(y, x).putFloat(pillarHeight);
+         }
+      }
+
+      pillarHeight = 4.0f;
+      startX = localCenterIndex; // Centering a 5x5 pillar around the centerIndex
+      startY = localCenterIndex;
+      size = 10;
+
+      for (int y = startY; y < startY + size; y++)
+      {
+         for (int x = startX; x < startX + size; x++)
+         {
+            localMatCPU.ptr(x, y).putFloat(pillarHeight);
          }
       }
 
@@ -247,14 +236,10 @@ public class HeightMapICPCalculatorTest
       localMap.upload(localMatCPU);
       globalMap.upload(globalMatCPU);
 
-      // Cleanup indexers/mats if necessary (Java handles most, but good to be aware)
-      localIndexer.release();
-      globalIndexer.release();
-
       // 3. Map centers disagree
       // Local center = 0.0
       // Global center = 1.0
-      Point3D globalMapCenter = new Point3D(1.0, 0.0, 0.0);
+      Point3D globalMapCenter = new Point3D(0.9, 0.0, 0.0);
 
       // 4. Transform claims only 0.8m in X
       // ICP should recover the remaining +0.2m
@@ -293,4 +278,6 @@ public class HeightMapICPCalculatorTest
       hostPtr.close();
       cudaFreeAsync(devicePtr, stream);
    }
+
+   //TODO need to add a test if all values are zeros, that shoulw be find but I think its causing problems
 }

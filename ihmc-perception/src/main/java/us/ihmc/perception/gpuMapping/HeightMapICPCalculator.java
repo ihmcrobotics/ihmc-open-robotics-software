@@ -27,7 +27,9 @@ public class HeightMapICPCalculator
    private static final int BLOCK_SIZE_XY = 8;
 
    private final int localCenterIndex;
+   private final int globalCenterIndex;
    private final int localCellsPerAxis;
+   private final int globalCellsPerAxis;
 
    private final HeightMapParameters heightMapParameters;
    private final CUstream_st stream;
@@ -55,6 +57,8 @@ public class HeightMapICPCalculator
 
       localCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getCellSize());
       localCellsPerAxis = 2 * localCenterIndex + 1;
+      globalCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getCellSize());
+      globalCellsPerAxis = 2 * globalCenterIndex + 1;
       blockSize = new dim3(BLOCK_SIZE_XY, BLOCK_SIZE_XY, 1);
 
       try
@@ -66,7 +70,7 @@ public class HeightMapICPCalculator
 
          vectorMap = new GpuMat(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_32FC3);
 
-         parametersHostPointer = new FloatPointer(13);
+         parametersHostPointer = new FloatPointer(6);
          parametersDevicePointer = new FloatPointer();
       }
       catch (Exception e)
@@ -99,7 +103,9 @@ public class HeightMapICPCalculator
       CUDATools.mallocAsync(parametersDevicePointer, parametersArray.length, stream);
       CUDATools.memcpyAsync(parametersDevicePointer, parametersHostPointer, parametersArray.length, stream);
 
-      for (int i = 0; i < maxIterations; i++)
+      int i;
+      double totalShift = 0.0;
+      for (i = 0; i < maxIterations; i++)
       {
          int gridDimX = (localMeanMap.rows() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
          int gridDimY = (localMeanMap.cols() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
@@ -139,11 +145,17 @@ public class HeightMapICPCalculator
          applyCorrectionToGpuMatrix(groundToWorldTranslationDevicePointerCopy, dx, dy, dz, stream);
 
          // 5. Check for convergence
-         double totalShift = Math.sqrt(dx * dx + dy * dy + dz * dz);
+         totalShift = Math.sqrt(dx * dx + dy * dy + dz * dz);
          if (totalShift < convergenceThreshold)
          {
             break;
          }
+      }
+
+      // After the loop, check if we exited due to max iterations
+      if (i == maxIterations)
+      {
+         System.out.println("Warning: Reached max iterations (" + maxIterations + ") without convergence. Last totalShift = " + totalShift);
       }
 
       finalMatrix = new float[16];
@@ -159,7 +171,12 @@ public class HeightMapICPCalculator
 
    public float[] populateParameterArray(HeightMapParameters parameters)
    {
-      return new float[] {(float) parameters.getCellSize(), (float) localCenterIndex, (float) localCellsPerAxis, 5.0f};
+      return new float[] {(float) parameters.getCellSize(),
+                          (float) localCenterIndex,
+                          (float) globalCenterIndex,
+                          (float) localCellsPerAxis,
+                          (float) globalCellsPerAxis,
+                          35.0f};
    }
 
    /**
