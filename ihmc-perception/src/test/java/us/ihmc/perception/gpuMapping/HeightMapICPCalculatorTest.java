@@ -7,6 +7,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -19,21 +20,40 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class HeightMapICPCalculatorTest
 {
+   private final HeightMapParameters heightMapParameters = new HeightMapParameters();
+   private int localCellsPerAxis;
+   private int localCenterIndex;
+   private int globalCellsPerAxis;
+   private int globalCenterIndex;
+
+   @BeforeEach
+   public void setup()
+   {
+      localCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getCellSize());
+      localCellsPerAxis = 2 * localCenterIndex + 1;
+      globalCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getGlobalWidthInMeters(), heightMapParameters.getCellSize());
+      globalCellsPerAxis = 2 * globalCenterIndex + 1;
+   }
+
+
+
+
    @Test
    public void testICPRunsWithZeroOffset()
    {
-      HeightMapParameters heightMapParameters = new HeightMapParameters();
       CUstream_st stream = CUDAStreamManager.getStream();
       HeightMapICPCalculator heightMapICPCalculator = new HeightMapICPCalculator(heightMapParameters, stream);
 
-      int centerIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getWidthInMeters(), heightMapParameters.getCellSize());
-      int cellsPerAxis = 2 * centerIndex + 1;
+//      int localCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getCellSize());
+//      int localCellsPerAxis = 2 * localCenterIndex + 1;
+//      int globalCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getGlobalWidthInMeters(), heightMapParameters.getCellSize());
+//      int globalCellsPerAxis = 2 * globalCenterIndex + 1;
 
       // 1. Create identical maps
-      GpuMat localMap = new GpuMat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1); // Ensure type matches kernel expectation
+      GpuMat localMap = new GpuMat(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_32FC1); // Ensure type matches kernel expectation
       localMap.setTo(new Scalar(1.0));
 
-      GpuMat globalMap = new GpuMat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
+      GpuMat globalMap = new GpuMat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_32FC1);
       globalMap.setTo(new Scalar(1.0));
 
       // 2. Set Transform to Identity (Zero translation, Zero rotation)
@@ -83,16 +103,13 @@ public class HeightMapICPCalculatorTest
       CUstream_st stream = CUDAStreamManager.getStream();
       HeightMapICPCalculator heightMapICPCalculator = new HeightMapICPCalculator(heightMapParameters, stream);
 
-      int centerIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getWidthInMeters(), heightMapParameters.getCellSize());
-      int cellsPerAxis = 2 * centerIndex + 1;
-
       // 1. Create maps with 1 meter Z offset
       // Local map at height 1.0m
-      GpuMat localMap = new GpuMat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
+      GpuMat localMap = new GpuMat(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_32FC1);
       localMap.setTo(new Scalar(1));
 
       // Global map at height 2.0m (1 meter higher)
-      GpuMat globalMap = new GpuMat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
+      GpuMat globalMap = new GpuMat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_32FC1);
       globalMap.setTo(new Scalar(2));
 
       // 2. Identity transform (same origins in X,Y)
@@ -136,14 +153,11 @@ public class HeightMapICPCalculatorTest
       CUstream_st stream = CUDAStreamManager.getStream();
       HeightMapICPCalculator heightMapICPCalculator = new HeightMapICPCalculator(heightMapParameters, stream);
 
-      int centerIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getWidthInMeters(), heightMapParameters.getCellSize());
-      int cellsPerAxis = 2 * centerIndex + 1;
-
       // 1. Create identical height maps (same Z values)
-      GpuMat localMap = new GpuMat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
+      GpuMat localMap = new GpuMat(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_32FC1);
       localMap.setTo(new Scalar(1.0));
 
-      GpuMat globalMap = new GpuMat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
+      GpuMat globalMap = new GpuMat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_32FC1);
       globalMap.setTo(new Scalar(1.0));
 
       Point3D mapCenter = new Point3D(1.0, 0.0, 0.0); // +1m in X
@@ -190,28 +204,38 @@ public class HeightMapICPCalculatorTest
       HeightMapParameters heightMapParameters = new HeightMapParameters();
       CUstream_st stream = CUDAStreamManager.getStream();
       HeightMapICPCalculator heightMapICPCalculator = new HeightMapICPCalculator(heightMapParameters, stream);
-      int centerIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getWidthInMeters(), heightMapParameters.getCellSize());
-      int cellsPerAxis = 2 * centerIndex + 1;
 
       // 1. Create CPU Mats (Empty)
-      Mat localMatCPU = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1, new Scalar(0.0));
-      Mat globalMatCPU = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1, new Scalar(0.0));
+      Mat localMatCPU = new Mat(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_32FC1, new Scalar(0.0));
+      Mat globalMatCPU = new Mat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_32FC1, new Scalar(0.0));
 
       // 2. Define Pillar Parameters
       float pillarHeight = 2.0f;
-      int startX = centerIndex - 2; // Centering a 5x5 pillar around the centerIndex
-      int startY = centerIndex - 2;
+      int startX = localCenterIndex - 2; // Centering a 5x5 pillar around the centerIndex
+      int startY = localCenterIndex - 2;
       int size = 5;
 
       // 3. Populate CPU Mat using Indexer (Faster than .ptr for loops)
       FloatIndexer localIndexer = localMatCPU.createIndexer();
-      FloatIndexer globalIndexer = globalMatCPU.createIndexer();
 
       for (int y = startY; y < startY + size; y++)
       {
          for (int x = startX; x < startX + size; x++)
          {
             localIndexer.put(y, x, pillarHeight);
+         }
+      }
+
+      startX = globalCenterIndex - 2; // Centering a 5x5 pillar around the centerIndex
+      startY = globalCenterIndex - 2;
+
+      // 3. Populate CPU Mat using Indexer (Faster than .ptr for loops)
+      FloatIndexer globalIndexer = globalMatCPU.createIndexer();
+
+      for (int y = startY; y < startY + size; y++)
+      {
+         for (int x = startX; x < startX + size; x++)
+         {
             globalIndexer.put(y, x, pillarHeight);
          }
       }

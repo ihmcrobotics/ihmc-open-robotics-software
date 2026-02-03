@@ -26,8 +26,8 @@ public class HeightMapICPCalculator
     */
    private static final int BLOCK_SIZE_XY = 8;
 
-   private final int centerIndex;
-   private final int cellsPerAxis;
+   private final int localCenterIndex;
+   private final int localCellsPerAxis;
 
    private final HeightMapParameters heightMapParameters;
    private final CUstream_st stream;
@@ -53,8 +53,8 @@ public class HeightMapICPCalculator
       URL mathUtilsHeaderPath = getClass().getResource("/us/ihmc/perception/cuda/MathUtils.cuh");
       URL kernelPath = getClass().getResource("HeightMapICPFilter.cu");
 
-      centerIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getWidthInMeters(), heightMapParameters.getCellSize());
-      cellsPerAxis = 2 * centerIndex + 1;
+      localCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getCellSize());
+      localCellsPerAxis = 2 * localCenterIndex + 1;
       blockSize = new dim3(BLOCK_SIZE_XY, BLOCK_SIZE_XY, 1);
 
       try
@@ -64,7 +64,7 @@ public class HeightMapICPCalculator
          icpCoorespondenceKernel = heightMapICPProgram.loadKernel("heightMapICPKernel");
          icpCoorespondenceKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
 
-         vectorMap = new GpuMat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC3);
+         vectorMap = new GpuMat(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_32FC3);
 
          parametersHostPointer = new FloatPointer(13);
          parametersDevicePointer = new FloatPointer();
@@ -159,7 +159,7 @@ public class HeightMapICPCalculator
 
    public float[] populateParameterArray(HeightMapParameters parameters)
    {
-      return new float[] {(float) parameters.getCellSize(), (float) centerIndex, (float) cellsPerAxis, 5.0f};
+      return new float[] {(float) parameters.getCellSize(), (float) localCenterIndex, (float) localCellsPerAxis, 5.0f};
    }
 
    /**
