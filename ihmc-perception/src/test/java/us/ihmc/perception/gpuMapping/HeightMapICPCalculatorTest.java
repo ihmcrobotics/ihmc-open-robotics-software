@@ -14,6 +14,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.perception.cuda.CUDAStreamManager;
 import us.ihmc.perception.cuda.CUDATools;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 
 import static org.bytedeco.cuda.global.cudart.cudaFreeAsync;
 import static org.bytedeco.cuda.global.cudart.cudaStreamSynchronize;
