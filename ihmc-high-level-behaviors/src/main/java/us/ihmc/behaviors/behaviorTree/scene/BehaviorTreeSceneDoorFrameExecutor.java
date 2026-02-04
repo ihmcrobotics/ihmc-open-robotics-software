@@ -1,7 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.scene;
 
 import behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage;
-import behavior_msgs.msg.dds.BehaviorTreeSceneObjectStateMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.crdt.CRDTInfo;
@@ -19,16 +18,12 @@ public class BehaviorTreeSceneDoorFrameExecutor extends BehaviorTreeSceneObjectE
 {
    private static final double SEARCH_ANGLE = Math.PI;
    private static final double SEARCH_ANGLE_INCREMENT = SEARCH_ANGLE / 36.0;
-   private static final float SEARCH_CAPSULE_RADIUS = 0.07f;
-   private static final long MINIMUM_POINTS = 1000;
+   private static final float SEARCH_CAPSULE_RADIUS = 0.08f;
 
    private final BehaviorTreeSceneExecutor scene;
    private volatile CUDAShapePointCounter pointCounter = null;
 
    private BehaviorTreeSceneDoorPanelExecutor doorPanel;
-
-   private final Pose3D hingePostPose;
-   private final Pose3D latchPostPose;
 
    public BehaviorTreeSceneDoorFrameExecutor(long id,
                                              CRDTInfo crdtInfo,
@@ -41,12 +36,6 @@ public class BehaviorTreeSceneDoorFrameExecutor extends BehaviorTreeSceneObjectE
       ThreadTools.startAsDaemon(() -> pointCounter = new CUDAShapePointCounter(), "PointCounterInitializer");
 
       this.scene = scene;
-
-      hingePostPose = new Pose3D();
-      hingePostPose.setToNaN();
-
-      latchPostPose = new Pose3D();
-      latchPostPose.setToNaN();
    }
 
    @Override
@@ -66,8 +55,7 @@ public class BehaviorTreeSceneDoorFrameExecutor extends BehaviorTreeSceneObjectE
          RigidBodyTransform transformToWorld = transform.getValueAndModify();
          transformToWorld.set(doorPanel.getTransformToWorld());
          transformToWorld.appendTranslation(DOOR_PANEL_WIDTH + 0.04, 0.0, 0.0);
-
-         hingePostPose.set(transformToWorld);
+         transformToWorld.appendYawRotation(Math.PI);
 
          // Variables used for the search for the latch post
          Pose3D latchPostSearchPose = new Pose3D();
@@ -75,37 +63,31 @@ public class BehaviorTreeSceneDoorFrameExecutor extends BehaviorTreeSceneObjectE
          Point3D frameTop = new Point3D();
 
          long maxPoints = 0;
+         double yawToAppend = 0.0;
 
          // Search by looking on the other side of the door panel, then fan out in both directions until we find a post
          for (double angle = 0.0; angle < 0.5 * SEARCH_ANGLE; angle = angle > 0.0 ? -angle : -angle + SEARCH_ANGLE_INCREMENT)
          {
-            latchPostSearchPose.set(hingePostPose);
+            latchPostSearchPose.set(transformToWorld);
             latchPostSearchPose.appendYawRotation(angle);
-            latchPostSearchPose.appendTranslation(-DOOR_PANEL_WIDTH - 0.2, 0.0, 0.0);
+            latchPostSearchPose.appendTranslation(DOOR_PANEL_WIDTH + 0.2, 0.0, 0.0);
 
             frameMiddle.set(latchPostSearchPose.getPosition());
             frameTop.set(latchPostSearchPose.getPosition());
             frameTop.addZ(0.5 * DOOR_PANEL_HEIGHT);
 
             long points = pointCounter.countPointsInCapsule(depthImage, frameMiddle, frameTop, SEARCH_CAPSULE_RADIUS);
-            if (points >= MINIMUM_POINTS && points > maxPoints)
+            if (points > maxPoints)
             {
                maxPoints = points;
-               latchPostPose.set(latchPostSearchPose);
+               yawToAppend = angle;
             }
          }
 
+         transformToWorld.appendYawRotation(yawToAppend);
+
          depthImage.release();
       }
-   }
-
-   @Override
-   public void toMessage(BehaviorTreeSceneObjectStateMessage message)
-   {
-      super.toMessage(message);
-
-      message.getHingePostPose().set(hingePostPose);
-      message.getLatchPostPose().set(latchPostPose);
    }
 
    public void setDoorPanel(BehaviorTreeSceneDoorPanelExecutor doorPanel)

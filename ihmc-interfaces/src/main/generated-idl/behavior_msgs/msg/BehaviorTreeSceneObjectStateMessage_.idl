@@ -4,7 +4,6 @@
 #include "behavior_msgs/msg/./BehaviorTreeSceneObjectDefinitionMessage_.idl"
 #include "behavior_msgs/msg/./PersistentDetectionStatusMessage_.idl"
 #include "controller_msgs/msg/./RigidBodyTransformMessage_.idl"
-#include "geometry_msgs/msg/./Pose_.idl"
 #include "ihmc_common_msgs/msg/./LatestModificationMessage_.idl"
 module behavior_msgs
 {
@@ -40,11 +39,6 @@ module behavior_msgs
          * Used only for door panel
          */
         behavior_msgs::msg::dds::PersistentDetectionStatusMessage door_panel_detection;
-        /**
-         * Pose of door frames
-         */
-        geometry_msgs::msg::dds::Pose hinge_post_pose;
-        geometry_msgs::msg::dds::Pose latch_post_pose;
         /**
          * Whether the object is frozen
          */

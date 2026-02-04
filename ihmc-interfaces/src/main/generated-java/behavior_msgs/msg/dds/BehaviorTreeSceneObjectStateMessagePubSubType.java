@@ -15,7 +15,7 @@ public class BehaviorTreeSceneObjectStateMessagePubSubType implements us.ihmc.pu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "8702d0b4cb55dfe3fe87b766b8e1827074b5c10f13c068e572f5f6545508a09f";
+   		return "d4ba569e69f336ec7a74e1c091dc5df7cc514f4731ffccf818e95e5a82db8da7";
    }
    
    @Override
@@ -64,10 +64,6 @@ public class BehaviorTreeSceneObjectStateMessagePubSubType implements us.ihmc.pu
 
       current_alignment += behavior_msgs.msg.dds.PersistentDetectionStatusMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
-
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -96,10 +92,6 @@ public class BehaviorTreeSceneObjectStateMessagePubSubType implements us.ihmc.pu
 
       current_alignment += behavior_msgs.msg.dds.PersistentDetectionStatusMessagePubSubType.getCdrSerializedSize(data.getDoorPanelDetection(), current_alignment);
 
-      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getHingePostPose(), current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getLatchPostPose(), current_alignment);
-
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -116,8 +108,6 @@ public class BehaviorTreeSceneObjectStateMessagePubSubType implements us.ihmc.pu
       behavior_msgs.msg.dds.PersistentDetectionStatusMessagePubSubType.write(data.getPersistentDetection(), cdr);
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getTransformToWorld(), cdr);
       behavior_msgs.msg.dds.PersistentDetectionStatusMessagePubSubType.write(data.getDoorPanelDetection(), cdr);
-      geometry_msgs.msg.dds.PosePubSubType.write(data.getHingePostPose(), cdr);
-      geometry_msgs.msg.dds.PosePubSubType.write(data.getLatchPostPose(), cdr);
       cdr.write_type_7(data.getFrozen());
 
    }
@@ -131,8 +121,6 @@ public class BehaviorTreeSceneObjectStateMessagePubSubType implements us.ihmc.pu
       behavior_msgs.msg.dds.PersistentDetectionStatusMessagePubSubType.read(data.getPersistentDetection(), cdr);	
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getTransformToWorld(), cdr);	
       behavior_msgs.msg.dds.PersistentDetectionStatusMessagePubSubType.read(data.getDoorPanelDetection(), cdr);	
-      geometry_msgs.msg.dds.PosePubSubType.read(data.getHingePostPose(), cdr);	
-      geometry_msgs.msg.dds.PosePubSubType.read(data.getLatchPostPose(), cdr);	
       data.setFrozen(cdr.read_type_7());
       	
 
@@ -152,10 +140,6 @@ public class BehaviorTreeSceneObjectStateMessagePubSubType implements us.ihmc.pu
 
       ser.write_type_a("door_panel_detection", new behavior_msgs.msg.dds.PersistentDetectionStatusMessagePubSubType(), data.getDoorPanelDetection());
 
-      ser.write_type_a("hinge_post_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getHingePostPose());
-
-      ser.write_type_a("latch_post_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getLatchPostPose());
-
       ser.write_type_7("frozen", data.getFrozen());
    }
 
@@ -172,10 +156,6 @@ public class BehaviorTreeSceneObjectStateMessagePubSubType implements us.ihmc.pu
       ser.read_type_a("transform_to_world", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToWorld());
 
       ser.read_type_a("door_panel_detection", new behavior_msgs.msg.dds.PersistentDetectionStatusMessagePubSubType(), data.getDoorPanelDetection());
-
-      ser.read_type_a("hinge_post_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getHingePostPose());
-
-      ser.read_type_a("latch_post_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getLatchPostPose());
 
       data.setFrozen(ser.read_type_7("frozen"));
    }

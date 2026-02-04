@@ -17,9 +17,5 @@ controller_msgs/RigidBodyTransformMessage transform_to_world
 # Used only for door panel
 behavior_msgs/PersistentDetectionStatusMessage door_panel_detection
 
-# Pose of door frames
-geometry_msgs/Pose hinge_post_pose
-geometry_msgs/Pose latch_post_pose
-
 # Whether the object is frozen
 bool frozen
