@@ -213,7 +213,47 @@ public class HeightMapExtractor
       CUDATools.memcpyAsync(groundToWorldTranslationDevicePointer, groundToWorldTranslationHostPointer, groundToWorldNoRotationTransformArray.length, stream);      checkCUDAError();
       checkCUDAError();
 
+      // ---------- Run the translate kernel ---------
+      // This is the first thing we need to do, we are going to compare the newest local data to the global data.
+      // It won't line up if we don't first translate the global map to the latest translation
+      {
+         int currentCellX = (int) Math.round(heightMapCenter.getX32() / heightMapParameters.getCellSize());
+         int currentCellY = (int) Math.round(heightMapCenter.getY32() / heightMapParameters.getCellSize());
+
+         // This means we have moved more than 2cm. So each cell should shift to one of its neighboring cells
+         if (currentCellX != previousCellX || currentCellY != previousCellY)
+         {
+            // We will be updating the global height map with the applied translation of the data
+            globalMeanMap.copyTo(previousGlobalMeanMap);
+            globalVarianceMap.copyTo(previousGlobalVarianceMap);
+
+            int translateKernelGridSizeXY = (globalCellsPerAxis + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
+            dim3 translateKernelGridDim = new dim3(translateKernelGridSizeXY, translateKernelGridSizeXY, 1);
+
+            int shiftX = currentCellX - previousCellX;
+            int shiftY = currentCellY - previousCellY;
+
+            translateKernel.withPointer(previousGlobalMeanMap.data()).withLong(previousGlobalMeanMap.step());
+            translateKernel.withPointer(previousGlobalVarianceMap.data()).withLong(previousGlobalVarianceMap.step());
+            translateKernel.withPointer(globalMeanMap.data()).withLong(globalMeanMap.step());
+            translateKernel.withPointer(globalVarianceMap.data()).withLong(globalVarianceMap.step());
+            translateKernel.withInt(shiftX).withInt(shiftY);
+            translateKernel.withPointer(parametersDevicePointer);
+            translateKernel.withFloat(resetOffset);
+
+            translateKernel.run(stream, translateKernelGridDim, blockSize, 0);
+
+            translateKernelGridDim.close();
+            checkCUDAError();
+
+            previousCellX = currentCellX;
+            previousCellY = currentCellY;
+         }
+      }
+
       // --------- Run the temp and local kernel ---------
+      // Now we have all the data in the same "location" so we create our local height map
+      // We have to split up the kernels first, the first one fills all the maps with data, the second one actually makes the local map
       {
          // Compute "speed" of the point
          RigidBodyTransform previousToCurrentSensorOrigin = new RigidBodyTransform(previousSensorToWorld);
@@ -289,40 +329,27 @@ public class HeightMapExtractor
 
 //      heightMapICPCalculator.update(localMeanMap, globalMeanMap, groundToWorldTranslationDevicePointer, heightMapCenter);
 
-      // ---------- Run the translate kernel ---------
+      // ---------- Run the registration kernel ----------
+      // Ok so now we've got our local map, lets put that onto the global map
       {
-         int currentCellX = (int) Math.round(heightMapCenter.getX32() / heightMapParameters.getCellSize());
-         int currentCellY = (int) Math.round(heightMapCenter.getY32() / heightMapParameters.getCellSize());
+         int registerKernelGridSizeXY = (localCellsPerAxis + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
+         dim3 registerKernelGridDim = new dim3(registerKernelGridSizeXY, registerKernelGridSizeXY, 1);
 
-         // This means we have moved more than 2cm. So each cell should shift to one of its neighboring cells
-         if (currentCellX != previousCellX || currentCellY != previousCellY)
-         {
-            // We will be updating the global height map with the applied translation of the data
-            globalMeanMap.copyTo(previousGlobalMeanMap);
-            globalVarianceMap.copyTo(previousGlobalVarianceMap);
+         registerKernel.withPointer(localMeanMap.data()).withLong(localMeanMap.step());
+         registerKernel.withPointer(localVarianceMap.data()).withLong(localVarianceMap.step());
+         registerKernel.withPointer(localMotionVarianceMap.data()).withLong(localMotionVarianceMap.step());
+         registerKernel.withPointer(globalMeanMap.data()).withLong(globalMeanMap.step());
+         registerKernel.withPointer(globalVarianceMap.data()).withLong(globalVarianceMap.step());
+         registerKernel.withFloat(heightMapCenter.getX32());
+         registerKernel.withFloat(heightMapCenter.getY32());
+         registerKernel.withPointer(groundToWorldTranslationDevicePointer);
+         registerKernel.withPointer(parametersDevicePointer);
+         registerKernel.withFloat(resetOffset);
 
-            int translateKernelGridSizeXY = (globalCellsPerAxis + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
-            dim3 translateKernelGridDim = new dim3(translateKernelGridSizeXY, translateKernelGridSizeXY, 1);
+         registerKernel.run(stream, registerKernelGridDim, blockSize, 0);
 
-            int shiftX = currentCellX - previousCellX;
-            int shiftY = currentCellY - previousCellY;
-
-            translateKernel.withPointer(previousGlobalMeanMap.data()).withLong(previousGlobalMeanMap.step());
-            translateKernel.withPointer(previousGlobalVarianceMap.data()).withLong(previousGlobalVarianceMap.step());
-            translateKernel.withPointer(globalMeanMap.data()).withLong(globalMeanMap.step());
-            translateKernel.withPointer(globalVarianceMap.data()).withLong(globalVarianceMap.step());
-            translateKernel.withInt(shiftX).withInt(shiftY);
-            translateKernel.withPointer(parametersDevicePointer);
-            translateKernel.withFloat(resetOffset);
-
-            translateKernel.run(stream, translateKernelGridDim, blockSize, 0);
-
-            translateKernelGridDim.close();
-            checkCUDAError();
-
-            previousCellX = currentCellX;
-            previousCellY = currentCellY;
-         }
+         registerKernelGridDim.close();
+         checkCUDAError();
       }
 
       float zeroValueForEmptySpaces = 0.0f;
@@ -360,26 +387,6 @@ public class HeightMapExtractor
          planOffsetKernel.run(stream, planOffsetKernelGridDim, blockSize, 0);
 
          planOffsetKernelGridDim.close();
-         checkCUDAError();
-      }
-
-      // ---------- Run the registration kernel ----------
-      {
-         int registerKernelGridSizeXY = (localCellsPerAxis + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
-         dim3 registerKernelGridDim = new dim3(registerKernelGridSizeXY, registerKernelGridSizeXY, 1);
-
-         registerKernel.withPointer(localMeanMap.data()).withLong(localMeanMap.step());
-         registerKernel.withPointer(localVarianceMap.data()).withLong(localVarianceMap.step());
-         registerKernel.withPointer(localMotionVarianceMap.data()).withLong(localMotionVarianceMap.step());
-         registerKernel.withPointer(globalMeanMap.data()).withLong(globalMeanMap.step());
-         registerKernel.withPointer(globalVarianceMap.data()).withLong(globalVarianceMap.step());
-         registerKernel.withPointer(groundToWorldTranslationDevicePointer);
-         registerKernel.withPointer(parametersDevicePointer);
-         registerKernel.withFloat(resetOffset);
-
-         registerKernel.run(stream, registerKernelGridDim, blockSize, 0);
-
-         registerKernelGridDim.close();
          checkCUDAError();
       }
 

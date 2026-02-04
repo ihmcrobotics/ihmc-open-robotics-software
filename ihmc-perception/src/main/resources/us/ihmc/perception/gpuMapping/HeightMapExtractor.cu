@@ -215,6 +215,8 @@ __global__ void heightMapRegistrationKernel(const float *__restrict__ localMeanM
                                             const float *__restrict__ localMotionVarianceMap, size_t pitchLocalMotionVariance,
                                             float *__restrict__ globalMeanMap, size_t pitchGlobalMean,
                                             float *__restrict__ globalVarianceMap, size_t pitchGlobalVariance,
+                                            const float globalMapCenterX,
+											const float globalMapCenterY,
                                             const float *__restrict__ groundToWorldTranslation,
                                             const float *__restrict__ params, float resetOffset)
 {
@@ -232,7 +234,7 @@ __global__ void heightMapRegistrationKernel(const float *__restrict__ localMeanM
     float2 localCoordinate = indices_to_coordinate(localIndex, make_float2(0.0f, 0.0f), params[CELL_SIZE], params[LOCAL_CENTER_INDEX]);
     float3 queryPointInLocal = make_float3(localCoordinate.x, localCoordinate.y, 0.0f);
     float3 cellInGlobal = transformPoint3D(queryPointInLocal, groundToWorldTranslation);
-    int2 globalIndex = coordinate_to_indices(make_float2(cellInGlobal.x, cellInGlobal.y), make_float2(groundToWorldTranslation[3], groundToWorldTranslation[7]), params[CELL_SIZE], params[GLOBAL_CENTER_INDEX]);
+    int2 globalIndex = coordinate_to_indices(make_float2(cellInGlobal.x, cellInGlobal.y), make_float2(globalMapCenterX, globalMapCenterY), params[CELL_SIZE], params[GLOBAL_CENTER_INDEX]);
 
     if (globalIndex.x < 0 || globalIndex.x >= globalCellsPerAxis || globalIndex.y < 0 || globalIndex.y >= globalCellsPerAxis)
         return;
