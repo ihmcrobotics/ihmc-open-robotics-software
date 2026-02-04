@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -21,6 +22,7 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -47,6 +49,8 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
 
    private final YoFramePoint3D yoBracingPoint;
    private final YoFrameVector3D yoBracingNormal;
+   private final YoFramePose3D yoControlFrame;
+   private final FramePose3D controlFramePose = new FramePose3D();
 
    private final EuclideanTrajectoryControllerCommand trajectoryCommand = new EuclideanTrajectoryControllerCommand();
 
@@ -77,6 +81,9 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
 
       yoBracingPoint = new YoFramePoint3D(bodyToControl.getName() + "BracingPoint", ReferenceFrame.getWorldFrame(), registry);
       yoBracingNormal = new YoFrameVector3D(bodyToControl.getName() + "BracingNormal", ReferenceFrame.getWorldFrame(), registry);
+      yoControlFrame = new YoFramePose3D(bodyToControl.getName() + "ControlFrame", ReferenceFrame.getWorldFrame(), registry);
+
+      controlFramePose.setToZero(controlFrame);
    }
 
    public void setBracingPoint(Point3DReadOnly bracingPoint, Vector3DReadOnly bracingNormal, double trajectoryDuration)
@@ -109,6 +116,7 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
    public void doAction(double timeInState)
    {
       positionControlHelper.doAction(timeInState);
+      yoControlFrame.setMatchingFrame(controlFramePose);
    }
 
    @Override
@@ -121,11 +129,11 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
    @Override
    public boolean isDone(double timeInState)
    {
-      // sim
-      double epsilon = 0.005;
+      // sim (control frame and contact point are off for unknown reason, though this does help in adding model noise that can be helpful)
+      double epsilon = 0.012;
 
       // real robot TODO tune up
-//      double epsilon = 0.01;
+//      double epsilon = 0.02;
 
       distanceToPlane.set(bracingPlane.distance(positionControlHelper.getYoCurrentPosition()));
       return distanceToPlane.getValue() < epsilon;
@@ -181,6 +189,7 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
                                                                     yoBracingNormal,
                                                                     0.25,
                                                                     ColorDefinitions.Red()));
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicCoordinateSystem3D("controlFrame", yoControlFrame, 0.15));
       return group;
    }
 }

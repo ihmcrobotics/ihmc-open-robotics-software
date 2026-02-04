@@ -1,5 +1,6 @@
 package us.ihmc.avatar;
 
+import controller_msgs.msg.dds.HandContactMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.multiContact.pushRecovery.ReducedOrderRobotModel;
 import us.ihmc.avatar.multiContact.pushRecovery.StandingReactiveBracingPlanner;
@@ -61,7 +62,7 @@ public class AvatarStandingPushRecoveryThread implements AvatarControllerThreadI
    private final StandingReactiveBracingPlanner planner;
 
    private final SideDependentList<HandContactCommand> plannedHandContacts = new SideDependentList<>();
-   private final ReducedOrderRobotModel reducedOrderRobotModel = new ReducedOrderRobotModel();
+   private final ReducedOrderRobotModel reducedOrderRobotModel;
 
    public AvatarStandingPushRecoveryThread(ROS2Node ros2Node,
                                            DRCRobotModel robotModel,
@@ -76,6 +77,7 @@ public class AvatarStandingPushRecoveryThread implements AvatarControllerThreadI
       ROS2Topic<?> outputTopic = StandingPushRecoveryAPIDefinition.getOutputTopic(robotName);
 
       planner = robotModel.getReactiveBracingPlanner();
+      reducedOrderRobotModel = new ReducedOrderRobotModel(robotModel.getContactPointParameters(), registry);
 
       this.commandInputManager = new CommandInputManager(StandingPushRecoveryAPIDefinition.getPushRecoverySupportedCommands());
       this.statusOutputManager = new StatusMessageOutputManager(StandingPushRecoveryAPIDefinition.getPushRecoverySupportedStatusMessages());
@@ -145,20 +147,6 @@ public class AvatarStandingPushRecoveryThread implements AvatarControllerThreadI
          hasSentHandTrajectory = true;
          sendHandContactMessage.set(false);
 
-//         RobotSide robotSide = RobotSide.LEFT;
-//         Point3D point = new Point3D(1.041, -0.499, 1.300);
-//         Vector3D normal = new Vector3D(-0.887, 0.413, 0.208);
-//
-//         HandContactMessage handContactMessage = new HandContactMessage();
-//         handContactMessage.setRobotSide(robotSide.toByte());
-//         handContactMessage.setTrajectoryDuration(0.24);
-//         handContactMessage.getBracingPoint().set(point);
-//         handContactMessage.getBracingNormal().set(normal);
-//
-//         HandContactCommand handContactCommand = new HandContactCommand();
-//         handContactCommand.setFromMessage(handContactMessage);
-//         walkingCommandInputManager.submitCommand(handContactCommand);
-
          reducedOrderRobotModel.initialize(fullRobotModel, humanoidReferenceFrames, comVelocity);
 
          plannedHandContacts.clear();
@@ -166,9 +154,11 @@ public class AvatarStandingPushRecoveryThread implements AvatarControllerThreadI
 
          for (RobotSide robotSide : RobotSide.values)
          {
-            HandContactCommand handContactCommand = plannedHandContacts.get(RobotSide.LEFT);
+            HandContactCommand handContactCommand = plannedHandContacts.get(robotSide);
             if (handContactCommand != null)
+            {
                walkingCommandInputManager.submitCommand(handContactCommand);
+            }
          }
       }
    }

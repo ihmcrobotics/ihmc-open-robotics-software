@@ -137,11 +137,6 @@ public class PushRobotControllerSCS2 implements Controller
 
    public void addPushButtonToSCS(SimulationConstructionSet2 scs)
    {
-      addPushButtonToSCS(scs, null);
-   }
-
-   public void addPushButtonToSCS(SimulationConstructionSet2 scs, Runnable additionalRunnable)
-   {
       if (scs != null)
       {
          scs.executeOrScheduleVisualizerTask(() ->
@@ -150,9 +145,6 @@ public class PushRobotControllerSCS2 implements Controller
             button.setTooltip(new Tooltip("Click to push the robot as defined in the variables 'pushDirection' and 'pushMagnitude'"));
             button.setOnAction(e ->
             {
-               if (additionalRunnable != null)
-                  additionalRunnable.run();
-
                scheduledPushAction.set(() ->
                {
                   pushCondition = null;

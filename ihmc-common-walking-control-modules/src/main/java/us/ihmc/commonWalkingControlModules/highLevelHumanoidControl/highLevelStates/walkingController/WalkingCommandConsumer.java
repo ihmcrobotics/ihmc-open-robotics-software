@@ -444,6 +444,8 @@ public class WalkingCommandConsumer
 
       for (int i = 0; i < dynamicLoadBearingCommands.size(); i++)
       {
+         LogTools.info("\n\nReceived hand contact command!\n\n");
+
          HandContactCommand command = dynamicLoadBearingCommands.get(i);
          RobotSide robotSide = command.getRobotSide();
          RigidBodyControlManager handManager = handManagers.get(robotSide);
