@@ -109,6 +109,18 @@ __global__ void heightMapICPKernel(float *__restrict__ localMap, size_t pitchLoc
 
     float* localRow = (float*)((char*)localMap + xIndex * pitchLocal);
     float localHeight = localRow[yIndex];
+
+    // No real data
+    if (localHeight == 0.0f) {
+        float* vectorRow = (float *)((char *)vectorMap + xIndex * pitchvector);
+
+        vectorRow[3 * yIndex + 0] = 0.0f/0.0f;
+        vectorRow[3 * yIndex + 1] = 0.0f/0.0f;
+        vectorRow[3 * yIndex + 2] = 0.0f/0.0f;
+
+        return;
+    }
+
     float3 localCoordinatesInGlobalFrame = transformPoint3D(make_float3(localCoordinates.x, localCoordinates.y, localHeight), localToGlobalTransform);
 
     int2 globalIndices = coordinate_to_indices(make_float2(localCoordinatesInGlobalFrame.x, localCoordinatesInGlobalFrame.y),
