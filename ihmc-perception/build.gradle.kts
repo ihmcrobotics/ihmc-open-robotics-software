@@ -40,9 +40,9 @@ mainDependencies {
 
    api("com.vividsolutions:jts:1.13") // TODO Update to https://github.com/locationtech/jts
 
-   api("us.ihmc:joctomap:1.12.5")
+   api("us.ihmc:joctomap:1.12.7")
    api("us.ihmc:ihmc-graphics-javafx:source")
-   api("us.ihmc:ihmc-robot-data-logger:0.36.5")
+   api("us.ihmc:ihmc-robot-data-logger:0.37.0")
 
    // Previously used for HeightMapAutoencoder and FootstepPredictor
    // This is a very large dependency, only uncomment for testing purposes
