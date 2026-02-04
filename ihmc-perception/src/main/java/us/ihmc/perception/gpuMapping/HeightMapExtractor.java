@@ -330,6 +330,8 @@ public class HeightMapExtractor
       Vector3D correctedTransform = heightMapICPCalculator.getCorrectedTransform();
       LogTools.info(
             "HeightMapICPCalculator correctedTransform: " + correctedTransform.getX() + " " + correctedTransform.getY() + " " + correctedTransform.getZ());
+      LogTools.info("Actual Transform: " + groundToWorldNoRotation.getTranslationX() + " " + groundToWorldNoRotation.getTranslationY() + " "
+                    + groundToWorldNoRotation.getTranslationZ());
       //      heightMapICPCalculator.applyCorrectionToTransform(groundToWorldTranslationDevicePointer,
       //                                                        correctedTransform.getX(),
       //                                                        correctedTransform.getY(),

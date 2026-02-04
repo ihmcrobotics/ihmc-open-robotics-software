@@ -104,6 +104,7 @@ public class HeightMapICPCalculatorTest
       cudaFreeAsync(devicePtr, stream);
       localMap.close();
       globalMap.close();
+      heightMapICPCalculator.destroy();
    }
 
    /**
@@ -156,6 +157,7 @@ public class HeightMapICPCalculatorTest
       cudaFreeAsync(devicePtr, stream);
       localMap.close();
       globalMap.close();
+      heightMapICPCalculator.destroy();
    }
 
    /**
@@ -207,6 +209,7 @@ public class HeightMapICPCalculatorTest
       devicePtr.close();
       localMap.close();
       globalMap.close();
+      heightMapICPCalculator.destroy();
    }
 
    /**
@@ -261,6 +264,7 @@ public class HeightMapICPCalculatorTest
       devicePtr.close();
       localMap.close();
       globalMap.close();
+      heightMapICPCalculator.destroy();
    }
 
    @Test
@@ -271,15 +275,15 @@ public class HeightMapICPCalculatorTest
       heightMapParameters.setCellSize(0.1);
       HeightMapICPCalculator heightMapICPCalculator = new HeightMapICPCalculator(heightMapParameters, stream);
 
-      int localCenterIndex  = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getCellSize());
-      int globalCenterIndex  = HeightMapTools.computeCenterIndex(heightMapParameters.getGlobalWidthInMeters(), heightMapParameters.getCellSize());
+      int localCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getCellSize());
+      int globalCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getGlobalWidthInMeters(), heightMapParameters.getCellSize());
       int localCellsPerAxis = 2 * localCenterIndex + 1;
       int globalCellsPerAxis = 2 * globalCenterIndex + 1;
 
       int borderSize = globalCenterIndex - localCenterIndex; // space around local map in global map
 
       // Create local and global CPU mats
-      Mat localMatCPU  = new Mat(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_32FC1);
+      Mat localMatCPU = new Mat(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_32FC1);
       Mat globalMatCPU = new Mat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_32FC1, new Scalar(2.0f));
 
       // ---------------- Local map: linear slope in X ----------------
@@ -305,7 +309,7 @@ public class HeightMapICPCalculatorTest
       }
 
       // Upload to GPU
-      GpuMat localMap  = new GpuMat();
+      GpuMat localMap = new GpuMat();
       GpuMat globalMap = new GpuMat();
       localMap.upload(localMatCPU);
       globalMap.upload(globalMatCPU);
@@ -348,6 +352,7 @@ public class HeightMapICPCalculatorTest
       devicePtr.close();
       localMap.close();
       globalMap.close();
+      heightMapICPCalculator.destroy();
    }
 
    @Test
@@ -358,15 +363,15 @@ public class HeightMapICPCalculatorTest
       heightMapParameters.setCellSize(0.1);
       HeightMapICPCalculator heightMapICPCalculator = new HeightMapICPCalculator(heightMapParameters, stream);
 
-      int localCenterIndex  = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getCellSize());
-      int globalCenterIndex  = HeightMapTools.computeCenterIndex(heightMapParameters.getGlobalWidthInMeters(), heightMapParameters.getCellSize());
+      int localCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getCellSize());
+      int globalCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getGlobalWidthInMeters(), heightMapParameters.getCellSize());
       int localCellsPerAxis = 2 * localCenterIndex + 1;
       int globalCellsPerAxis = 2 * globalCenterIndex + 1;
 
       int borderSize = globalCenterIndex - localCenterIndex; // space around local map in global map
 
       // Create local and global CPU mats
-      Mat localMatCPU  = new Mat(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_32FC1, new Scalar(0.0f));
+      Mat localMatCPU = new Mat(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_32FC1, new Scalar(0.0f));
       Mat globalMatCPU = new Mat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_32FC1, new Scalar(2.0f));
 
       int halfLocalCellsPerAxis = localCellsPerAxis / 2;
@@ -394,7 +399,7 @@ public class HeightMapICPCalculatorTest
       }
 
       // Upload to GPU
-      GpuMat localMap  = new GpuMat();
+      GpuMat localMap = new GpuMat();
       GpuMat globalMap = new GpuMat();
       localMap.upload(localMatCPU);
       globalMap.upload(globalMatCPU);
@@ -437,5 +442,192 @@ public class HeightMapICPCalculatorTest
       devicePtr.close();
       localMap.close();
       globalMap.close();
+      heightMapICPCalculator.destroy();
+   }
+
+   @Test
+   public void testICPWithSlopedHeightMapHalfZerosXYOffset()
+   {
+      heightMapParameters.setLocalWidthInMeters(1.0);
+      heightMapParameters.setGlobalWidthInMeters(2.0);
+      heightMapParameters.setCellSize(0.1);
+      heightMapParameters.setIcpConvergenceThreshold(0.001);
+      heightMapParameters.setIcpMaxIterations(50);
+      HeightMapICPCalculator heightMapICPCalculator = new HeightMapICPCalculator(heightMapParameters, stream);
+
+      int localCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getCellSize());
+      int globalCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getGlobalWidthInMeters(), heightMapParameters.getCellSize());
+
+      int localCellsPerAxis = 2 * localCenterIndex + 1;
+      int globalCellsPerAxis = 2 * globalCenterIndex + 1;
+
+      int borderSize = globalCenterIndex - localCenterIndex;
+
+      // Create local and global CPU mats
+      Mat localMatCPU = new Mat(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_32FC1, new Scalar(0.0f));
+      Mat globalMatCPU = new Mat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_32FC1, new Scalar(2.0f));
+
+      int halfLocalCellsPerAxis = localCellsPerAxis / 2;
+
+      // ---------------- Local map: half zero, half sloped ----------------
+      for (int y = halfLocalCellsPerAxis; y < localCellsPerAxis; y++)
+      {
+         for (int x = halfLocalCellsPerAxis; x < localCellsPerAxis; x++)
+         {
+            float height = 5.0f + x + 2; // slope in +X
+            localMatCPU.ptr(y, x).putFloat(height);
+         }
+      }
+
+      // Known integer-cell offset inside global map
+      int offsetCellsX = 1; // 0.1 m
+      int offsetCellsY = 1; // 0.1 m
+
+      // ---------------- Global map: shifted copy of local ----------------
+      for (int y = halfLocalCellsPerAxis; y < localCellsPerAxis; y++)
+      {
+         for (int x = halfLocalCellsPerAxis; x < localCellsPerAxis; x++)
+         {
+            float height = localMatCPU.ptr(y, x).getFloat();
+            int globalX = borderSize + x + offsetCellsX;
+            int globalY = borderSize + y + offsetCellsY;
+            globalMatCPU.ptr(globalY, globalX).putFloat(height);
+         }
+      }
+
+      // Upload to GPU
+      GpuMat localMap = new GpuMat();
+      GpuMat globalMap = new GpuMat();
+      localMap.upload(localMatCPU);
+      globalMap.upload(globalMatCPU);
+
+      // Global map center (world frame)
+      Point3D globalMapCenter = new Point3D(0.0, 0.0, 0.0);
+
+      // Slightly wrong transform (ICP should correct +0.1 X and +0.1 Y)
+      RigidBodyTransform transform = new RigidBodyTransform();
+      transform.getTranslation().set(0.1, 0.1, 0.0);
+
+      float[] transformArray = new float[16];
+      transform.get(transformArray);
+
+      FloatPointer hostPtr = new FloatPointer(16);
+      hostPtr.put(transformArray);
+
+      FloatPointer devicePtr = new FloatPointer();
+      CUDATools.mallocAsync(devicePtr, 16, stream);
+      CUDATools.memcpyAsync(devicePtr, hostPtr, 16, stream);
+
+      // Run ICP
+      heightMapICPCalculator.update(localMap, globalMap, devicePtr, globalMapCenter);
+
+      Vector3D correctedTransform = heightMapICPCalculator.getCorrectedTransform();
+
+      System.out.println("Corrected X: " + correctedTransform.getX());
+      System.out.println("Corrected Y: " + correctedTransform.getY());
+      System.out.println("Corrected Z: " + correctedTransform.getZ());
+
+      // Expect ICP to recover both X and Y offsets
+      final double EPSILON = 0.01;
+      assertEquals(0.1, correctedTransform.getX(), EPSILON);
+      assertEquals(0.1, correctedTransform.getY(), EPSILON);
+      assertEquals(0.0, correctedTransform.getZ(), EPSILON);
+
+      // Cleanup
+      hostPtr.close();
+      cudaFreeAsync(devicePtr, stream);
+      devicePtr.close();
+      localMap.close();
+      globalMap.close();
+      heightMapICPCalculator.destroy();
+   }
+
+   @Test
+   public void testICP_FailsWithNaNInvalidation_WhenLocalMapHasZeros()
+   {
+      heightMapParameters.setLocalWidthInMeters(1.0);
+      heightMapParameters.setGlobalWidthInMeters(2.0);
+      heightMapParameters.setCellSize(0.1);
+      heightMapParameters.setIcpMaxIterations(5);
+      heightMapParameters.setIcpConvergenceThreshold(1e-6);
+
+      HeightMapICPCalculator heightMapICPCalculator = new HeightMapICPCalculator(heightMapParameters, stream);
+
+      int localCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getCellSize());
+      int globalCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getGlobalWidthInMeters(), heightMapParameters.getCellSize());
+
+      int localCellsPerAxis = 2 * localCenterIndex + 1;
+      int globalCellsPerAxis = 2 * globalCenterIndex + 1;
+
+      int borderSize = globalCenterIndex - localCenterIndex;
+
+      // ---------------- Local map: half zeros, half sloped ----------------
+      Mat localMatCPU = new Mat(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_32FC1, new Scalar(0.0f));
+
+      for (int y = localCellsPerAxis / 2; y < localCellsPerAxis; y++)
+      {
+         for (int x = localCellsPerAxis / 2; x < localCellsPerAxis; x++)
+         {
+            float height = 5.0f + x + y; // simple slope
+            localMatCPU.ptr(y, x).putFloat(height);
+         }
+      }
+
+      // ---------------- Global map: perfect match ----------------
+      Mat globalMatCPU = new Mat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_32FC1, new Scalar(2.0f));
+
+      for (int y = 0; y < localCellsPerAxis; y++)
+      {
+         for (int x = 0; x < localCellsPerAxis; x++)
+         {
+            float h = localMatCPU.ptr(y, x).getFloat();
+            if (h != 0.0f)
+            {
+               globalMatCPU.ptr(borderSize + y, borderSize + x).putFloat(h);
+            }
+         }
+      }
+
+      // Upload to GPU
+      GpuMat localMap = new GpuMat();
+      GpuMat globalMap = new GpuMat();
+      localMap.upload(localMatCPU);
+      globalMap.upload(globalMatCPU);
+
+      // ---------------- Known wrong transform ----------------
+      RigidBodyTransform transform = new RigidBodyTransform();
+      transform.getTranslation().set(0.1, 0.1, 0.0);
+
+      float[] transformArray = new float[16];
+      transform.get(transformArray);
+
+      FloatPointer hostPtr = new FloatPointer(16);
+      hostPtr.put(transformArray);
+
+      FloatPointer devicePtr = new FloatPointer();
+      CUDATools.mallocAsync(devicePtr, 16, stream);
+      CUDATools.memcpyAsync(devicePtr, hostPtr, 16, stream);
+
+      // ---------------- Run ICP ----------------
+      heightMapICPCalculator.update(localMap, globalMap, devicePtr, new Point3D());
+
+      Vector3D corrected = heightMapICPCalculator.getCorrectedTransform();
+
+      System.out.println("Corrected = " + corrected);
+
+      // ---------------- EXPECTED FAILURE ----------------
+      // With NaN-based invalidation, ICP does NOT recover the true shift.
+      // This assertion SHOULD FAIL.
+      assertEquals(0.1, corrected.getX(), 1e-2);
+      assertEquals(0.1, corrected.getY(), 1e-2);
+      assertEquals(0.0, corrected.getZ(), 1e-3);
+
+      // Cleanup
+      hostPtr.close();
+      cudaFreeAsync(devicePtr, stream);
+      devicePtr.close();
+      localMap.close();
+      globalMap.close();
+      heightMapICPCalculator.destroy();
    }
 }
