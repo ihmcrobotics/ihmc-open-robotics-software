@@ -215,24 +215,26 @@ __global__ void heightMapRegistrationKernel(const float *__restrict__ localMeanM
                                             const float *__restrict__ localMotionVarianceMap, size_t pitchLocalMotionVariance,
                                             float *__restrict__ globalMeanMap, size_t pitchGlobalMean,
                                             float *__restrict__ globalVarianceMap, size_t pitchGlobalVariance,
+                                            const float globalMapCenterX,
+											const float globalMapCenterY,
                                             const float *__restrict__ groundToWorldTranslation,
                                             const float *__restrict__ params, float resetOffset)
 {
     int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
     int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
 
-    const int cellsPerAxis = static_cast<int>(params[LOCAL_CELLS_PER_AXIS]);
+    const int localCellsPerAxis = static_cast<int>(params[LOCAL_CELLS_PER_AXIS]);
     const int globalCellsPerAxis = static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]);
 
     // Check bounds for global indices
-    if (xIndex >= cellsPerAxis || yIndex >= cellsPerAxis)
+    if (xIndex >= localCellsPerAxis || yIndex >= localCellsPerAxis)
         return;
 
     int2 localIndex = make_int2(xIndex, yIndex);
     float2 localCoordinate = indices_to_coordinate(localIndex, make_float2(0.0f, 0.0f), params[CELL_SIZE], params[LOCAL_CENTER_INDEX]);
     float3 queryPointInLocal = make_float3(localCoordinate.x, localCoordinate.y, 0.0f);
     float3 cellInGlobal = transformPoint3D(queryPointInLocal, groundToWorldTranslation);
-    int2 globalIndex = coordinate_to_indices(make_float2(cellInGlobal.x, cellInGlobal.y), make_float2(groundToWorldTranslation[3], groundToWorldTranslation[7]), params[CELL_SIZE], params[GLOBAL_CENTER_INDEX]);
+    int2 globalIndex = coordinate_to_indices(make_float2(cellInGlobal.x, cellInGlobal.y), make_float2(globalMapCenterX, globalMapCenterY), params[CELL_SIZE], params[GLOBAL_CENTER_INDEX]);
 
     if (globalIndex.x < 0 || globalIndex.x >= globalCellsPerAxis || globalIndex.y < 0 || globalIndex.y >= globalCellsPerAxis)
         return;
@@ -285,11 +287,11 @@ __global__ void heightMapEmptyRegistrationKernel(float *localMap, size_t pitchLo
     int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
 
     // Compute global map size
-    const int cellsPerAxis = static_cast<int>(params[LOCAL_CELLS_PER_AXIS]);
+    const int localCellsPerAxis = static_cast<int>(params[LOCAL_CELLS_PER_AXIS]);
     const int globalCellsPerAxis = static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]);
 
     // Check bounds for global indices
-    if (xIndex >= cellsPerAxis || yIndex >= cellsPerAxis)
+    if (xIndex >= localCellsPerAxis || yIndex >= localCellsPerAxis)
         return;
 
     int2 localIndex = make_int2(xIndex, yIndex);
