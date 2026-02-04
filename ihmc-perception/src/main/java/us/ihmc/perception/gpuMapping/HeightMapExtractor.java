@@ -13,7 +13,9 @@ import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
@@ -206,7 +208,8 @@ public class HeightMapExtractor
       groundToWorldNoRotation.get(groundToWorldNoRotationTransformArray);
       groundToWorldTranslationHostPointer.put(groundToWorldNoRotationTransformArray);
       CUDATools.mallocAsync(groundToWorldTranslationDevicePointer, groundToWorldNoRotationTransformArray.length, stream);
-      CUDATools.memcpyAsync(groundToWorldTranslationDevicePointer, groundToWorldTranslationHostPointer, groundToWorldNoRotationTransformArray.length, stream);      checkCUDAError();
+      CUDATools.memcpyAsync(groundToWorldTranslationDevicePointer, groundToWorldTranslationHostPointer, groundToWorldNoRotationTransformArray.length, stream);
+      checkCUDAError();
       checkCUDAError();
 
       // ---------- Run the translate kernel ---------
@@ -323,7 +326,15 @@ public class HeightMapExtractor
          checkCUDAError();
       }
 
-//      heightMapICPCalculator.update(localMeanMap, globalMeanMap, groundToWorldTranslationDevicePointer, heightMapCenter);
+      heightMapICPCalculator.update(localMeanMap, globalMeanMap, groundToWorldTranslationDevicePointer, heightMapCenter);
+      Vector3D correctedTransform = heightMapICPCalculator.getCorrectedTransform();
+      LogTools.info(
+            "HeightMapICPCalculator correctedTransform: " + correctedTransform.getX() + " " + correctedTransform.getY() + " " + correctedTransform.getZ());
+      //      heightMapICPCalculator.applyCorrectionToTransform(groundToWorldTranslationDevicePointer,
+      //                                                        correctedTransform.getX(),
+      //                                                        correctedTransform.getY(),
+      //                                                        correctedTransform.getZ(),
+      //                                                        stream);
 
       // ---------- Run the registration kernel ----------
       // Ok so now we've got our local map, lets put that onto the global map

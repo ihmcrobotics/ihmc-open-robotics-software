@@ -217,7 +217,7 @@ public class HeightMapICPCalculator
     * @param dy The translation correction in Y
     * @param dz The translation correction in Z
     */
-   private void applyCorrectionToTransform(FloatPointer matrixPtr, double dx, double dy, double dz, CUstream_st stream)
+   public void applyCorrectionToTransform(FloatPointer matrixPtr, double dx, double dy, double dz, CUstream_st stream)
    {
       // Create a temporary host array to hold the 16 elements of a 4x4 matrix
       float[] hostMatrix = new float[16];
