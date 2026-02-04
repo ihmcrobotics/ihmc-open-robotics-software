@@ -279,36 +279,36 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
          return false;
       }
 
-      state.getLogger().info("Found door panel scene object");
+      state.getLogger().info("Found door panel scene object: {} ({})", doorPanelSceneObject.getName(), doorPanelSceneObject.getID());
 
       // Check if a frame scene object already exists
-      BehaviorTreeSceneDoorFrameExecutor targetSceneObject = null;
+      BehaviorTreeSceneDoorFrameExecutor frameSceneObject = null;
       for (BehaviorTreeSceneObjectState object : scene.getObjects())
       {
          if (object instanceof BehaviorTreeSceneDoorFrameExecutor doorPanelExecutor)
          {
-            targetSceneObject = doorPanelExecutor;
+            frameSceneObject = doorPanelExecutor;
             break;
          }
       }
 
       // add object
-      if (targetSceneObject != null)
+      if (frameSceneObject != null)
       {
-         state.getLogger().info("Updating existing door panel scene object");
-         targetSceneObject.setPersistentDetection(doorPanelSceneObject.getDoorPanelPersistentDetection());
+         state.getLogger().info("Updating existing door frame scene object");
+         frameSceneObject.setPersistentDetection(doorPanelSceneObject.getDoorPanelPersistentDetection());
       }
       else
       {
-         state.getLogger().info("Creating new door panel scene object");
+         state.getLogger().info("Creating new door frame scene object");
 
          BehaviorTreeSceneObjectDefinitionMessage message = new BehaviorTreeSceneObjectDefinitionMessage();
          definition.getSceneObjectDefinition().toMessage(message);
-         targetSceneObject = (BehaviorTreeSceneDoorFrameExecutor) scene.createObject(message);
-         targetSceneObject.setPersistentDetection(doorPanelSceneObject.getDoorPanelPersistentDetection());
-         targetSceneObject.setDoorPanel(doorPanelSceneObject);
-         targetSceneObject.update();
-         scene.addObject(targetSceneObject);
+         frameSceneObject = (BehaviorTreeSceneDoorFrameExecutor) scene.createObject(message);
+         frameSceneObject.setPersistentDetection(doorPanelSceneObject.getDoorPanelPersistentDetection());
+         frameSceneObject.setDoorPanel(doorPanelSceneObject);
+         frameSceneObject.update();
+         scene.addObject(frameSceneObject);
       }
 
       return true;

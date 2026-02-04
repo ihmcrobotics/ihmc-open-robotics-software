@@ -3,7 +3,7 @@ package us.ihmc.behaviors.behaviorTree.scene;
 import behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage;
 import behavior_msgs.msg.dds.BehaviorTreeSceneObjectStateMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.simulation.door.DoorModelParameters;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -12,8 +12,16 @@ import us.ihmc.perception.RawImage;
 import us.ihmc.perception.cuda.CUDAShapePointCounter;
 import us.ihmc.sensors.zed.ZEDImageSensor;
 
+import static us.ihmc.behaviors.simulation.door.DoorModelParameters.DOOR_PANEL_HEIGHT;
+import static us.ihmc.behaviors.simulation.door.DoorModelParameters.DOOR_PANEL_WIDTH;
+
 public class BehaviorTreeSceneDoorFrameExecutor extends BehaviorTreeSceneObjectExecutor
 {
+   private static final double SEARCH_ANGLE = Math.PI;
+   private static final double SEARCH_ANGLE_INCREMENT = SEARCH_ANGLE / 36.0;
+   private static final float SEARCH_CAPSULE_RADIUS = 0.07f;
+   private static final long MINIMUM_POINTS = 1000;
+
    private final BehaviorTreeSceneExecutor scene;
    private volatile CUDAShapePointCounter pointCounter = null;
 
@@ -21,13 +29,6 @@ public class BehaviorTreeSceneDoorFrameExecutor extends BehaviorTreeSceneObjectE
 
    private final Pose3D hingePostPose;
    private final Pose3D latchPostPose;
-
-   private double panelWidth = DoorModelParameters.DOOR_PANEL_WIDTH;
-   private double panelHeight = DoorModelParameters.DOOR_PANEL_HEIGHT;
-   private double searchAngle = Math.PI;
-   private double searchAngleIncrement = Math.PI / 36;
-   private float searchCapsuleRadius = 0.07f;
-   private long minimumPoints = 1000;
 
    public BehaviorTreeSceneDoorFrameExecutor(long id,
                                              CRDTInfo crdtInfo,
@@ -37,9 +38,7 @@ public class BehaviorTreeSceneDoorFrameExecutor extends BehaviorTreeSceneObjectE
    {
       super(id, crdtInfo, syncedRobot, definition);
 
-      Thread pointCounterInitializerThread = new Thread(() -> pointCounter = new CUDAShapePointCounter(), "PointCounterInitializer");
-      pointCounterInitializerThread.setDaemon(true);
-      pointCounterInitializerThread.start();
+      ThreadTools.startAsDaemon(() -> pointCounter = new CUDAShapePointCounter(), "PointCounterInitializer");
 
       this.scene = scene;
 
@@ -66,7 +65,7 @@ public class BehaviorTreeSceneDoorFrameExecutor extends BehaviorTreeSceneObjectE
          // This object's transform to world will be the hinge post's pose
          RigidBodyTransform transformToWorld = transform.getValueAndModify();
          transformToWorld.set(doorPanel.getTransformToWorld());
-         transformToWorld.appendTranslation(panelWidth + 0.04, 0.0, 0.0);
+         transformToWorld.appendTranslation(DOOR_PANEL_WIDTH + 0.04, 0.0, 0.0);
 
          hingePostPose.set(transformToWorld);
 
@@ -78,18 +77,18 @@ public class BehaviorTreeSceneDoorFrameExecutor extends BehaviorTreeSceneObjectE
          long maxPoints = 0;
 
          // Search by looking on the other side of the door panel, then fan out in both directions until we find a post
-         for (double angle = 0.0; angle < 0.5 * searchAngle; angle = angle > 0.0 ? -angle : -angle + searchAngleIncrement)
+         for (double angle = 0.0; angle < 0.5 * SEARCH_ANGLE; angle = angle > 0.0 ? -angle : -angle + SEARCH_ANGLE_INCREMENT)
          {
             latchPostSearchPose.set(hingePostPose);
             latchPostSearchPose.appendYawRotation(angle);
-            latchPostSearchPose.appendTranslation(-panelWidth - 0.2, 0.0, 0.0);
+            latchPostSearchPose.appendTranslation(-DOOR_PANEL_WIDTH - 0.2, 0.0, 0.0);
 
             frameMiddle.set(latchPostSearchPose.getPosition());
             frameTop.set(latchPostSearchPose.getPosition());
-            frameTop.addZ(0.5 * panelHeight);
+            frameTop.addZ(0.5 * DOOR_PANEL_HEIGHT);
 
-            long points = pointCounter.countPointsInCapsule(depthImage, frameMiddle, frameTop, searchCapsuleRadius);
-            if (points >= minimumPoints && points > maxPoints)
+            long points = pointCounter.countPointsInCapsule(depthImage, frameMiddle, frameTop, SEARCH_CAPSULE_RADIUS);
+            if (points >= MINIMUM_POINTS && points > maxPoints)
             {
                maxPoints = points;
                latchPostPose.set(latchPostSearchPose);
@@ -107,36 +106,6 @@ public class BehaviorTreeSceneDoorFrameExecutor extends BehaviorTreeSceneObjectE
 
       message.getHingePostPose().set(hingePostPose);
       message.getLatchPostPose().set(latchPostPose);
-   }
-
-   public void setPanelWidth(double panelWidth)
-   {
-      this.panelWidth = panelWidth;
-   }
-
-   public void setPanelHeight(double panelHeight)
-   {
-      this.panelHeight = panelHeight;
-   }
-
-   public void setSearchAngle(double searchAngle)
-   {
-      this.searchAngle = searchAngle;
-   }
-
-   public void setSearchAngleIncrement(double searchAngleIncrement)
-   {
-      this.searchAngleIncrement = searchAngleIncrement;
-   }
-
-   public void setSearchCapsuleRadius(float searchCapsuleRadius)
-   {
-      this.searchCapsuleRadius = searchCapsuleRadius;
-   }
-
-   public void setMinimumPoints(long minimumPoints)
-   {
-      this.minimumPoints = minimumPoints;
    }
 
    public void setDoorPanel(BehaviorTreeSceneDoorPanelExecutor doorPanel)

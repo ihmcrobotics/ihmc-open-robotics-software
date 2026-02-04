@@ -12,6 +12,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
 
 public class RDXBehaviorTreeSceneDoorFrame extends RDXBehaviorTreeSceneObject
 {
@@ -50,20 +51,21 @@ public class RDXBehaviorTreeSceneDoorFrame extends RDXBehaviorTreeSceneObject
 
       model = RDXModelBuilder.buildModel(modelBuilder ->
       {
-         modelBuilder.addCylinder(0.5 * height, radius, new Vector3D(), Color.BLUE);
-         modelBuilder.addSphere(radius, new Vector3D(0.0, 0.0, 0.5 * height), Color.BLUE);
-         modelBuilder.addSphere(radius, new Vector3D(), Color.BLUE);
+         modelBuilder.addCylinder(0.5 * height, radius, new Vector3D(), Color.WHITE);
+         modelBuilder.addSphere(radius, new Vector3D(0.0, 0.0, 0.5 * height), Color.WHITE);
+         modelBuilder.addSphere(radius, new Vector3D(), Color.WHITE);
 
          Vector3D position = new Vector3D(latchPoseInHingePostFrame.getTranslation());
-         modelBuilder.addCylinder(0.5 * height, radius, position, Color.RED);
+         modelBuilder.addCylinder(0.5 * height, radius, position, Color.WHITE);
          position.addZ(0.5 * height);
-         modelBuilder.addSphere(radius, position, Color.RED);
+         modelBuilder.addSphere(radius, position, Color.WHITE);
          position.subZ(0.5 * height);
-         modelBuilder.addSphere(radius, position, Color.RED);
+         modelBuilder.addSphere(radius, position, Color.WHITE);
       });
 
       modelInstance = new RDXModelInstance(model);
-      modelInstance.setOpacity(0.2f);
+      modelInstance.setColor(ColorDefinitions.GreenYellow());
+      modelInstance.setOpacity(0.3f);
    }
 
    @Override
