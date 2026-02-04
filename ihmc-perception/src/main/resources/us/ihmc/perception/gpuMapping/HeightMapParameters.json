@@ -68,9 +68,9 @@
     "upperBound": 4.5
   },
   "Icp max iterations": {
-    "value": 10,
+    "value": 6,
     "lowerBound": 1,
-    "upperBound": 100
+    "upperBound": 50
   },
   "Icp convergence threshold": {
     "value": 0.001,

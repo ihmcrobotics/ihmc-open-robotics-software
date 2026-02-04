@@ -56,7 +56,7 @@ public class HeightMapICPCalculator
 
       localCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getCellSize());
       localCellsPerAxis = 2 * localCenterIndex + 1;
-      globalCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getCellSize());
+      globalCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getGlobalWidthInMeters(), heightMapParameters.getCellSize());
       globalCellsPerAxis = 2 * globalCenterIndex + 1;
       blockSize = new dim3(BLOCK_SIZE_XY, BLOCK_SIZE_XY, 1);
 
@@ -166,7 +166,8 @@ public class HeightMapICPCalculator
 
          LogTools.info("Mean vector on " + i + "th iteration: (" + dx + ", " + dy + ", " + dz + ")");
 
-         applyCorrectionToTransform(groundToWorldTranslationDevicePointerCopy, dx, dy, dz, stream);
+         double alpha = 1.0;
+         applyCorrectionToTransform(groundToWorldTranslationDevicePointerCopy, alpha * dx, alpha * dy, alpha * dz, stream);
 
          // Check for convergence
          totalShift = Math.sqrt(dx * dx + dy * dy + dz * dz);

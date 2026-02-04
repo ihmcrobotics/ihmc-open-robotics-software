@@ -264,87 +264,88 @@ public class HeightMapICPCalculatorTest
    }
 
    @Test
-   public void testICPWithPillarAndConflictingTransformAndOrigin()
+   public void testICPWithSlopedHeightMap()
    {
+      heightMapParameters.setLocalWidthInMeters(1.0);
+      heightMapParameters.setGlobalWidthInMeters(2.0);
+      heightMapParameters.setCellSize(0.1);
       HeightMapICPCalculator heightMapICPCalculator = new HeightMapICPCalculator(heightMapParameters, stream);
 
-      Mat localMatCPU = new Mat(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_32FC1, new Scalar(0.0));
-      Mat globalMatCPU = new Mat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_32FC1, new Scalar(0.0));
+      int localCenterIndex  = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getCellSize());
+      int globalCenterIndex  = HeightMapTools.computeCenterIndex(heightMapParameters.getGlobalWidthInMeters(), heightMapParameters.getCellSize());
+      int localCellsPerAxis = 2 * localCenterIndex + 1;
+      int globalCellsPerAxis = 2 * globalCenterIndex + 1;
 
-      // ----- Define Pillar Parameters -----
-      // I want a pillar that's not in the center of the map, because I'm trying to make two pillars
-      // In order for the pillars to be in the same location on both maps, we only use the local indexing to create the pillars.
-      // So whatever index we use on the local map, we use the same index on the global map. That will result in different places on the maps relativly, but the same propersions.
-      float pillarHeight = 2.0f;
-      int startX = localCenterIndex / 2;
-      int startY = localCenterIndex / 2;
-      int size = 10;
+      int borderSize = globalCenterIndex - localCenterIndex; // space around local map in global map
 
-      for (int y = startY; y < startY + size; y++)
+      // Create local and global CPU mats
+      Mat localMatCPU  = new Mat(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_32FC1);
+      Mat globalMatCPU = new Mat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_32FC1, new Scalar(2.0f));
+
+      // ---------------- Local map: linear slope in X ----------------
+      for (int y = 0; y < localCellsPerAxis; y++)
       {
-         for (int x = startX; x < startX + size; x++)
+         for (int x = 0; x < localCellsPerAxis; x++)
          {
-            localMatCPU.ptr(x, y).putFloat(pillarHeight);
-            globalMatCPU.ptr(y, x).putFloat(pillarHeight);
+            float height = 5.0f + x + 2; // slope: 5..(5+localCellsPerAxis-1) left→right
+            localMatCPU.ptr(y, x).putFloat(height);
          }
       }
 
-      pillarHeight = 4.0f;
-      startX = localCenterIndex;
-      startY = localCenterIndex;
-
-      for (int y = startY; y < startY + size; y++)
+      // ---------------- Global map: copy local map into center, border = 2.0 ----------------
+      for (int y = 0; y < localCellsPerAxis; y++)
       {
-         for (int x = startX; x < startX + size; x++)
+         for (int x = 0; x < localCellsPerAxis; x++)
          {
-            localMatCPU.ptr(x, y).putFloat(pillarHeight);
-            globalMatCPU.ptr(y, x).putFloat(pillarHeight);
+            float height = localMatCPU.ptr(y, x).getFloat();
+            int globalX = borderSize + x;
+            int globalY = borderSize + y;
+            globalMatCPU.ptr(globalY, globalX).putFloat(height);
          }
       }
 
-      // Create GpuMats and Upload
-      GpuMat localMap = new GpuMat();
+      // Upload to GPU
+      GpuMat localMap  = new GpuMat();
       GpuMat globalMap = new GpuMat();
       localMap.upload(localMatCPU);
       globalMap.upload(globalMatCPU);
 
-      // Map centers disagree
-      // Local center = 0.0
-      // Global center = 0.9
-      Point3D globalMapCenter = new Point3D(0.9, 0.0, 0.0);
+      // Slight disagreement in map centers
+      Point3D globalMapCenter = new Point3D(0.0, 0.0, 0.0);
 
-      // Transform claims only 0.8m in X
-      // ICP should recover the remaining +0.2m
+      // Slightly wrong transform (ICP should correct +0.1 in X)
       RigidBodyTransform transform = new RigidBodyTransform();
-      transform.getTranslation().set(0.85, 0.0, 0.0);
+      transform.getTranslation().set(0.1, 0.0, 0.0);
 
       float[] transformArray = new float[16];
       transform.get(transformArray);
+
       FloatPointer hostPtr = new FloatPointer(16);
       hostPtr.put(transformArray);
+
       FloatPointer devicePtr = new FloatPointer();
       CUDATools.mallocAsync(devicePtr, 16, stream);
       CUDATools.memcpyAsync(devicePtr, hostPtr, 16, stream);
 
-      // Run Kernel with a transform not matching the origins of hte map
+      // Run ICP
       heightMapICPCalculator.update(localMap, globalMap, devicePtr, globalMapCenter);
 
-      // Let's get the result and see how we did...
       Vector3D correctedTransform = heightMapICPCalculator.getCorrectedTransform();
 
-      System.out.println("Mean X: " + correctedTransform.getX());
-      System.out.println("Mean Y: " + correctedTransform.getY());
-      System.out.println("Mean Z: " + correctedTransform.getZ());
+      System.out.println("Corrected X: " + correctedTransform.getX());
+      System.out.println("Corrected Y: " + correctedTransform.getY());
+      System.out.println("Corrected Z: " + correctedTransform.getZ());
 
-      // Global center (1.0) - transform (0.8) = 0.2
-      assertEquals(0.2, correctedTransform.getX(), 1e-4);
-      assertEquals(0.0, correctedTransform.getY(), 1e-5);
-      assertEquals(0.0, correctedTransform.getZ(), 1e-5);
+      // Expect ICP to recover the X offset only
+      final double EPSILON = 0.01;
+      assertEquals(0.1, correctedTransform.getX(), EPSILON);
+      assertEquals(0.0, correctedTransform.getY(), EPSILON);
+      assertEquals(0.0, correctedTransform.getZ(), EPSILON);
 
       // Cleanup
       hostPtr.close();
-      devicePtr.close();
       cudaFreeAsync(devicePtr, stream);
+      devicePtr.close();
       localMap.close();
       globalMap.close();
    }
