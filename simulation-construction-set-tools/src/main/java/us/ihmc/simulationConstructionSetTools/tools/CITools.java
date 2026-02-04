@@ -10,8 +10,6 @@ public class CITools
 {
    private static final ExecutorService THREAD_POOL = Executors.newCachedThreadPool();
 
-   private static boolean WRITE_LOG_FILE_ON_SUCCESS = false;
-
    public static boolean isNightlyBuild()
    {
       String buildType = System.getProperty("build.type");
@@ -43,9 +41,7 @@ public class CITools
       String className = elements[stackDepthForRelevantCallingMethod].getClassName();
       className = className.substring(className.lastIndexOf('.') + 1);
 
-      String classAndMethodName = className + "." + methodName;
-
-      return classAndMethodName;
+      return className + "." + methodName;
    }
 
    private static void printStackTrace(int depth)
@@ -81,9 +77,7 @@ public class CITools
       long totalMemory = runtime.totalMemory();
       long usedMemory = totalMemory - freeMemory;
 
-      int usedMemoryMB = (int) (usedMemory / 1000000);
-
-      return usedMemoryMB;
+      return (int) (usedMemory / 1000000);
    }
 
    private static void sleep(long sleepMillis)
@@ -172,20 +166,12 @@ public class CITools
    {
       switch (key)
       {
-         case M2V2:
-            return "M2V2";
-         case R2:
-            return "R2";
          case VALKYRIE:
             return "Valkyrie";
          case ATLAS:
             return "Atlas";
          case NADIA:
             return "Nadia";
-         case BONO:
-            return "Bono";
-         case SPOKED_RUNNER:
-            return "SpokedRunner";
          case V2EXOSKELETON:
             return "V2Exoskeleton";
          case V3EXOSKELETON:
@@ -199,8 +185,8 @@ public class CITools
       }
    }
 
-   public static enum SimpleRobotNameKeys
+   public enum SimpleRobotNameKeys
    {
-      M2V2, R2, VALKYRIE, ATLAS, NADIA, BONO, SPOKED_RUNNER, V2EXOSKELETON, V3EXOSKELETON, ALEX, ZULU
+      VALKYRIE, ATLAS, NADIA, V2EXOSKELETON, V3EXOSKELETON, ALEX, ZULU
    }
 }

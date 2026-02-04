@@ -4,7 +4,6 @@ import behavior_msgs.msg.dds.BuildingExplorationStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.control.door.DoorTraversalState;
-import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 
 import javax.annotation.Nullable;
 import java.util.Stack;
@@ -13,8 +12,6 @@ public class BuildingExplorationState extends BehaviorTreeNodeState<BuildingExpl
 {
    @Nullable
    private DoorTraversalState doorTraversalState;
-   private final Stack<DoorNode> traversedDoorNodes = new Stack<>();
-   private DoorNode nextDoorNode;
 
    public BuildingExplorationState(long id, BehaviorTreeRootNodeState rootNode)
    {
@@ -54,20 +51,5 @@ public class BuildingExplorationState extends BehaviorTreeNodeState<BuildingExpl
    public DoorTraversalState getDoorTraversalState()
    {
       return doorTraversalState;
-   }
-
-   public Stack<DoorNode> getTraversedDoorNodes()
-   {
-      return traversedDoorNodes;
-   }
-
-   public DoorNode getNextDoorNode()
-   {
-      return nextDoorNode;
-   }
-
-   public void setNextDoorNode(DoorNode nextDoorNode)
-   {
-      this.nextDoorNode = nextDoorNode;
    }
 }
