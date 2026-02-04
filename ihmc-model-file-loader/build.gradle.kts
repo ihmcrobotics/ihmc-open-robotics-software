@@ -16,7 +16,7 @@ ihmc {
 
 mainDependencies {
 
-   api("us.ihmc:ihmc-robot-description:0.25.3")
+   api("us.ihmc:ihmc-robot-description:0.25.4")
    api("us.ihmc:ihmc-javafx-toolkit:17-0.23.0")
    api("us.ihmc:ihmc-robotics-toolkit:source")
 }

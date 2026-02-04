@@ -29,7 +29,7 @@ mainDependencies {
    api("us.ihmc:ihmc-commons:0.35.1")
    api("us.ihmc:ihmc-matrix-library:0.19.3")
    api("us.ihmc:ihmc-graphics-description:0.26.2")
-   api("us.ihmc:simulation-construction-set-utilities:0.25.3")
+   api("us.ihmc:simulation-construction-set-utilities:0.25.4")
    api("us.ihmc:ihmc-native-library-loader:2.0.6")
 
    api("us.ihmc:scs2-definition:17-0.32.0")
@@ -44,7 +44,7 @@ testDependencies {
    api("org.hamcrest:hamcrest:2.2")
 
    api("us.ihmc:euclid-test:0.22.4")
-   api("us.ihmc:simulation-construction-set:0.25.3")
+   api("us.ihmc:simulation-construction-set:0.25.4")
    api("us.ihmc:ihmc-matrix-library-test:0.19.3")
    api("us.ihmc:ihmc-math-linear-dynamic-systems:0.15.3")
    api("us.ihmc:ihmc-commons-testing:0.35.1")

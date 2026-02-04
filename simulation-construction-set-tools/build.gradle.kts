@@ -12,7 +12,7 @@ ihmc {
 }
 
 mainDependencies {
-   api("us.ihmc:simulation-construction-set:0.25.3")
+   api("us.ihmc:simulation-construction-set:0.25.4")
    api("us.ihmc:scs2-simulation-construction-set:17-0.32.0")
    api("us.ihmc:ihmc-parameter-optimization:source")
    api("us.ihmc:ihmc-java-toolkit:source")
@@ -22,5 +22,5 @@ mainDependencies {
 testDependencies {
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
 
-   api("us.ihmc:simulation-construction-set-test:0.25.3")
+   api("us.ihmc:simulation-construction-set-test:0.25.4")
 }
