@@ -196,10 +196,6 @@ public class HeightMapExtractor
       RigidBodyTransform worldToGroundNoRotation = new RigidBodyTransform(groundToWorldNoRotation);
       worldToGroundNoRotation.invert();
 
-      // This transformation only has rotation
-      RigidBodyTransform groundToWorldAlignedGround = new RigidBodyTransform(worldToGroundNoRotation);
-      groundToWorldAlignedGround.multiply(groundToWorldTransform);
-
       // Step 3: Multiply with full ground->world to keep rotation, giving aligned ground
       RigidBodyTransform sensorToWorldAlignedGround = new RigidBodyTransform(worldToGroundNoRotation);
       sensorToWorldAlignedGround.multiply(groundToWorldTransform);
