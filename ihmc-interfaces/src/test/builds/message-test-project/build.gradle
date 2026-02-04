@@ -6,7 +6,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "us.ihmc:ros2-msg-to-pubsub-generator:1.2.4"
+      classpath "us.ihmc:ros2-msg-to-pubsub-generator:1.2.5"
    }
 }
 
@@ -27,8 +27,8 @@ ihmc {
 }
 
 mainDependencies {
-   api("us.ihmc:ihmc-pub-sub:1.2.4")
-   api("us.ihmc:ros2-common-interfaces:1.2.4")
+   api("us.ihmc:ihmc-pub-sub:1.2.5")
+   api("us.ihmc:ros2-common-interfaces:1.2.5")
 }
 
 def generator = new us.ihmc.ros2.rosidl.ROS2InterfaceGenerator();
