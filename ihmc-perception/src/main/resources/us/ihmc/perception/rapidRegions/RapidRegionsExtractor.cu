@@ -92,7 +92,10 @@ __device__ bool isConnected(float3 pointA, float3 normalA, float3 pointB, float3
    bool isCloseAngular = normalDotProduct > params[MERGE_ANGULAR_THRESHOLD]; // both points have similar normals
    bool isNotTooCloseToCamera = distanceToNearPoint > 0.5f; // nearest point is not too close to the camera
 
-   return isCloseOrthogonal && isClosePerspective && isCloseAngular && isNotTooCloseToCamera;
+   // TODO remove or increase this threshold before merging
+   bool isNotTooFarFromCamera = distanceToFarPoint < 1.6f; // nearest point is not too far away (do not consider planar regions very far away)
+
+   return isCloseOrthogonal && isClosePerspective && isCloseAngular && isNotTooCloseToCamera && isNotTooFarFromCamera;
 }
 
 /**
