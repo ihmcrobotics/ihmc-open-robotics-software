@@ -8,6 +8,7 @@ public class ConditionNodeExecutor extends LeafNodeExecutor<ConditionNodeState, 
    private final CounterConditionExecutor counter;
    private LLMConditionExecutor llm;
    private final ProximityConditionExecutor proximityCheck;
+   private final ShapeContainsConditionExecutor shapeContains;
 
    public ConditionNodeExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
    {
@@ -16,6 +17,7 @@ public class ConditionNodeExecutor extends LeafNodeExecutor<ConditionNodeState, 
       counter = new CounterConditionExecutor(state);
       //      llm = new LLMConditionExecutor(state, scene);
       proximityCheck = new ProximityConditionExecutor(state, scene);
+      shapeContains = new ShapeContainsConditionExecutor(state, scene);
    }
 
    @Override
@@ -23,10 +25,11 @@ public class ConditionNodeExecutor extends LeafNodeExecutor<ConditionNodeState, 
    {
       super.update();
 
-      switch (definition.getType().getValue())
+      switch (definition.getConditionType().getValue())
       {
          //         case LLM -> llm.update();
          case PROXIMITY -> proximityCheck.update();
+         case SHAPE_CONTAINS -> shapeContains.update();
       }
    }
 
@@ -35,7 +38,7 @@ public class ConditionNodeExecutor extends LeafNodeExecutor<ConditionNodeState, 
    {
       super.triggerExecution();
 
-      switch (definition.getType().getValue())
+      switch (definition.getConditionType().getValue())
       {
          case ALWAYS_FAIL:
             state.setFailed(true);
@@ -45,17 +48,21 @@ public class ConditionNodeExecutor extends LeafNodeExecutor<ConditionNodeState, 
          case PROXIMITY:
             proximityCheck.triggerExecution();
             break;
+         case SHAPE_CONTAINS:
+            shapeContains.triggerExecution();
+            break;
       }
    }
 
    @Override
    public void updateCurrentlyExecuting()
    {
-      switch (definition.getType().getValue())
+      switch (definition.getConditionType().getValue())
       {
          case COUNTER -> counter.updateCurrentlyExecuting();
          //         case LLM -> llm.updateCurrentlyExecuting();
          case PROXIMITY -> proximityCheck.updateCurrentlyExecuting();
+         case SHAPE_CONTAINS -> shapeContains.updateCurrentlyExecuting();
       }
    }
 
@@ -79,5 +86,10 @@ public class ConditionNodeExecutor extends LeafNodeExecutor<ConditionNodeState, 
    public ProximityConditionExecutor getProximityCheck()
    {
       return proximityCheck;
+   }
+
+   public ShapeContainsConditionExecutor getShapeContains()
+   {
+      return shapeContains;
    }
 }

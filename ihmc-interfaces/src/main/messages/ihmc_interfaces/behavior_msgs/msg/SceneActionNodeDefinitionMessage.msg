@@ -1,16 +1,20 @@
 # Parent definition fields
 behavior_msgs/ActionNodeDefinitionMessage definition
 
-# TODO: Add other actions besides setting up an object
+byte SETUP_OBJECT = 0
+byte FREEZE_OBJECT = 1
+
+# The type of action as defined above
+byte scene_action_type
+
+# Definition of the object to setup
+behavior_msgs/BehaviorTreeSceneObjectDefinitionMessage scene_object_definition
 
 # If this action can't do what it needs to do in this amount of time, give up.
 float32 timeout
 
 # Filter for persistent detection history size
 uint16 minimum_history_size
-
-# Definition of the object to setup
-behavior_msgs/BehaviorTreeSceneObjectDefinitionMessage scene_object_definition
 
 # TODO: The following fields are work in progress:
 

@@ -18,7 +18,7 @@ import org.bytedeco.opencv.opencv_dnn.Net;
 import org.yaml.snakeyaml.Yaml;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.sensors.CameraIntrinsics;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDANonMaximumSuppression;
 import us.ihmc.perception.cuda.CUDAProgram;

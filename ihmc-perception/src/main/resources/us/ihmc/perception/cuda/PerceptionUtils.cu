@@ -45,4 +45,11 @@ namespace PerceptionUtils
         T* entry = row(column, pitch, rowIndex);
         *entry = value;
     }
+
+    __device__ float3 pixelDepthToPoint3D(int pixelX, int pixelY, float z, float fx, float fy, float cx, float cy)
+    {
+        float x = (pixelX - cx) / fx * z;
+        float y = (pixelY - cy) / fy * z;
+        return make_float3(z, -x, -y);
+    }
 }

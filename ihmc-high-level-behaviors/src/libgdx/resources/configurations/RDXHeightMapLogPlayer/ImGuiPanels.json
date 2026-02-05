@@ -2,7 +2,7 @@
   "dockspacePanels" : { },
   "windows" : {
     "3D View" : true,
-    "Height Map Renderer" : false,
+    "Height Map Renderer" : true,
     "ZED Point Cloud" : true,
     "ZED SVO" : true
   }

@@ -27,7 +27,7 @@ import java.util.HashSet;
  */
 public class ChunkedMapManager
 {
-   private static final int MAX_CHUNKS_TO_STORE = 100;
+   public static final int MAX_CHUNKS_TO_STORE = 100;
    private static final double CHUNK_PUBLISH_FREQUENCY = 8.0;
    private final HeightMapParameters heightMapParameters;
 
@@ -47,7 +47,7 @@ public class ChunkedMapManager
 
    public void update(Mat latestHeightMap, Point3DReadOnly heightMapCenterPoint)
    {
-      addHeightMap(latestHeightMap, heightMapCenterPoint, heightMapParameters.getWidthInMeters(), (float) heightMapParameters.getCellSize());
+      addHeightMap(latestHeightMap, heightMapCenterPoint, heightMapParameters.getGlobalWidthInMeters(), (float) heightMapParameters.getCellSize());
    }
 
    public void addHeightMap(Mat heightMap, Point3DReadOnly heightMapCenter, double gridSize, float resolution)

@@ -30,23 +30,20 @@ public class BehaviorTreeSceneDoorPanelExecutor extends BehaviorTreeSceneObjectE
    public void update()
    {
       PersistentDetection mechanismDetection = getPersistentDetection();
-
-      if (mechanismDetection != null && panelDetection != null)
+      if (!frozen.getValue() && mechanismDetection != null && panelDetection != null && mechanismDetection.isStable() && panelDetection.isStable())
       {
-         if (mechanismDetection.isStable() && panelDetection.isStable())
-         {
-            Vector3DBasics mechanismPosition = mechanismDetection.getFilteredTransform().getTranslation();
+         Vector3DBasics mechanismPosition = mechanismDetection.getFilteredTransform().getTranslation();
 
-            // Set orientation to Z-up, then yaw so Y axis points from mechanism to panel
-            mechanismToPanel.set(panelDetection.getFilteredTransform().getTranslation());
-            mechanismToPanel.sub(mechanismPosition);
-            double yaw = Math.atan2(mechanismToPanel.getY(), mechanismToPanel.getX());
-            orientation.setToYawOrientation(yaw);
+         // Set orientation to Z-up, then yaw so Y axis points from mechanism to panel
+         mechanismToPanel.set(panelDetection.getFilteredTransform().getTranslation());
+         mechanismToPanel.sub(mechanismPosition);
+         double yaw = Math.atan2(mechanismToPanel.getY(), mechanismToPanel.getX());
+         orientation.setToYawOrientation(yaw);
 
-            if (!(transform.getValueReadOnly().getRotation().geometricallyEquals(orientation, 1e-5)
-               && transform.getValueReadOnly().getTranslation().epsilonEquals(mechanismPosition, 1e-5)))
-               transform.getValueAndModify().set(orientation, mechanismPosition);
-         }
+         if ((!(transform.getValueReadOnly().getRotation().geometricallyEquals(orientation, 1e-5)
+             && transform.getValueReadOnly().getTranslation().epsilonEquals(mechanismPosition, 1e-5))))
+            transform.getValueAndModify().set(orientation, mechanismPosition);
+         referenceFrame.update();
       }
    }
 

@@ -10,6 +10,8 @@ import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseCommun
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseCommunicatorMap;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseObject;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
+import us.ihmc.sensors.ImageSensor;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -21,8 +23,10 @@ import java.util.function.LongSupplier;
 
 public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
 {
+   private final ImageSensor imageSensor;
    private final YOLOv8DetectionExecutor yolo;
    private final IsaacROSFoundationPoseCommunicatorMap foundationPose;
+   private final TerrainMapData terrainMapData;
 
    private final List<BehaviorTreeSceneObjectExecutor> objects;
 
@@ -35,13 +39,17 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
    public BehaviorTreeSceneExecutor(CRDTInfo crdtInfo,
                                     LongSupplier idSupplier,
                                     ROS2SyncedRobotModel syncedRobot,
+                                    ImageSensor imageSensor,
                                     YOLOv8DetectionExecutor yolo,
-                                    IsaacROSFoundationPoseCommunicatorMap foundationPose)
+                                    IsaacROSFoundationPoseCommunicatorMap foundationPose,
+                                    TerrainMapData terrainMapData)
    {
       super(crdtInfo, idSupplier, syncedRobot);
 
+      this.imageSensor = imageSensor;
       this.yolo = yolo;
       this.foundationPose = foundationPose;
+      this.terrainMapData = terrainMapData;
 
       objects = (List) super.objects;
 
@@ -161,5 +169,15 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
    public List<PersistentDetection> getPersistentDetections()
    {
       return persistentDetections;
+   }
+
+   public ImageSensor getImageSensor()
+   {
+      return imageSensor;
+   }
+
+   public TerrainMapData getTerrainMap()
+   {
+      return terrainMapData;
    }
 }
