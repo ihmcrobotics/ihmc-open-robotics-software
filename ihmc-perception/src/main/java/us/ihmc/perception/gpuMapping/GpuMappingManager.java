@@ -26,7 +26,7 @@ import java.util.List;
  */
 public class GpuMappingManager
 {
-   private final ReferenceFrame heightMapCenter;
+   private final ReferenceFrame globalHeightMapCenterFrame;
    private final HeightMapParameters heightMapParameters;
    private final HeightMapDriftOffset heightMapDriftOffset;
    private final HeightMapExtractor heightMapExtractor;
@@ -56,12 +56,12 @@ public class GpuMappingManager
                             ROS2Node ros2Node,
                             ReferenceFrame leftFootSoleFrame,
                             ReferenceFrame rightFootSoleFrame,
-                            ReferenceFrame heightMapCenter,
+                            ReferenceFrame globalHeightMapCenterFrame,
                             ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
                             HeightMapParameters heightMapParameters,
                             TerrainMapParameters terrainMapParameters)
    {
-      this.heightMapCenter = heightMapCenter;
+      this.globalHeightMapCenterFrame = globalHeightMapCenterFrame;
       this.heightMapParameters = heightMapParameters;
 
       footSoleFrames.add(leftFootSoleFrame);
@@ -116,8 +116,8 @@ public class GpuMappingManager
 
       // Update the sensor origin here with the latest reference frame
       // We are deep coping the frames here to avoid a data race condition, still possible but very small chance
-      RigidBodyTransform heightMapFrameToWorldFrame = new RigidBodyTransform(heightMapCenter.getTransformToWorldFrame());
-      Point3D heightMapCenterOrigin = new Point3D(heightMapFrameToWorldFrame.getTranslation());
+      RigidBodyTransform globalHeightMapFrameToWorldFrame = new RigidBodyTransform(globalHeightMapCenterFrame.getTransformToWorldFrame());
+      Point3D globalHeightMapCenter = new Point3D(globalHeightMapFrameToWorldFrame.getTranslation());
 
       // -------- Update the Height Map with the latest depth image from the sensor --------------
       // We expect to have knowledge of where the camera is in relation to the world so we can accurately display the height map
@@ -143,15 +143,15 @@ public class GpuMappingManager
                                 sensorToGround,
                                 groundToWorld,
                                 driftOffsetInZ,
-                                heightMapCenterOrigin,
+                                globalHeightMapCenter,
                                 computeFootHeight());
 
       terrainMapExtractor.update(heightMapExtractor.getHeightMap(), heightMapCenterPoint);
 
       // The center of this map should be centered in the world grid
       // The sensor origin isn't always at the center of a grid point, in fact it's often not in the center
-      double currentCellX = (int) Math.round(heightMapCenterOrigin.getX32() / heightMapParameters.getCellSize()) * heightMapParameters.getCellSize();
-      double currentCellY = (int) Math.round(heightMapCenterOrigin.getY32() / heightMapParameters.getCellSize()) * heightMapParameters.getCellSize();
+      double currentCellX = (int) Math.round(globalHeightMapCenter.getX32() / heightMapParameters.getCellSize()) * heightMapParameters.getCellSize();
+      double currentCellY = (int) Math.round(globalHeightMapCenter.getY32() / heightMapParameters.getCellSize()) * heightMapParameters.getCellSize();
       heightMapCenterPoint.set(currentCellX, currentCellY, 0.0);
    }
 

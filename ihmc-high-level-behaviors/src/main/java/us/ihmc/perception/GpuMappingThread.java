@@ -69,7 +69,7 @@ public class GpuMappingThread extends RepeatingTaskThread
       ReferenceFrame rightFootFrame = syncedRobotModel.getReferenceFrames().getSoleFrame(RobotSide.RIGHT);
       // TODO we don't have a great way to setup the height map if we are using more then one sensor
       // This will make the height map not appear correct cause the center is wrong
-      ReferenceFrame heightMapCenterFrame = syncedRobotModel.getReferenceFrames().getSteppingCameraFrame();
+      ReferenceFrame globalHeightMapCenterFrame = syncedRobotModel.getReferenceFrames().getSteppingCameraFrame();
 
       filteredDepthPublisher = ros2Node.createPublisher(PerceptionAPI.STEPPING_REALSENSE_DEPTH_FILTERED);
 
@@ -79,7 +79,7 @@ public class GpuMappingThread extends RepeatingTaskThread
                                                 ros2Node,
                                                 leftFootFrame,
                                                 rightFootFrame,
-                                                heightMapCenterFrame,
+                                                globalHeightMapCenterFrame,
                                                 controllerFootstepQueueMonitor,
                                                 heightMapParameters,
                                                 activeMappingParameterToolBox.getTerrainMapParameters());

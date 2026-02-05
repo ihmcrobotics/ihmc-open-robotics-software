@@ -21,6 +21,7 @@ import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
 import us.ihmc.perception.cuda.CUDAStreamManager;
 import us.ihmc.perception.cuda.CUDATools;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 
 import java.net.URL;
 
@@ -179,7 +180,7 @@ public class HeightMapExtractor
                       RigidBodyTransformReadOnly sensorToGroundTransform,
                       RigidBodyTransformReadOnly groundToWorldTransform,
                       float zDriftInMeters,
-                      Point3D heightMapCenter,
+                      Point3D globalHeightMapCenter,
                       double footHeight)
    {
       int error;
@@ -216,8 +217,8 @@ public class HeightMapExtractor
       // This is the first thing we need to do, we are going to compare the newest local data to the global data.
       // It won't line up if we don't first translate the global map to the latest translation
       {
-         int currentCellX = (int) Math.round(heightMapCenter.getX32() / heightMapParameters.getCellSize());
-         int currentCellY = (int) Math.round(heightMapCenter.getY32() / heightMapParameters.getCellSize());
+         int currentCellX = (int) Math.round(globalHeightMapCenter.getX32() / heightMapParameters.getCellSize());
+         int currentCellY = (int) Math.round(globalHeightMapCenter.getY32() / heightMapParameters.getCellSize());
 
          // This means we have moved more than 2cm. So each cell should shift to one of its neighboring cells
          if (currentCellX != previousCellX || currentCellY != previousCellY)
@@ -326,12 +327,13 @@ public class HeightMapExtractor
          checkCUDAError();
       }
 
-      heightMapICPCalculator.update(localMeanMap, globalMeanMap, groundToWorldTranslationDevicePointer, heightMapCenter);
+      heightMapICPCalculator.update(localMeanMap, globalMeanMap, groundToWorldTranslationDevicePointer, globalHeightMapCenter);
       Vector3D correctedTransform = heightMapICPCalculator.getCorrectedTransform();
       LogTools.info(
             "HeightMapICPCalculator correctedTransform: " + correctedTransform.getX() + " " + correctedTransform.getY() + " " + correctedTransform.getZ());
       LogTools.info("Actual Transform: " + groundToWorldNoRotation.getTranslationX() + " " + groundToWorldNoRotation.getTranslationY() + " "
                     + groundToWorldNoRotation.getTranslationZ());
+      LogTools.info("Global Center: " + globalHeightMapCenter.getX() + " " + globalHeightMapCenter.getY() + " " + globalHeightMapCenter.getZ(   ));
       //      heightMapICPCalculator.applyCorrectionToTransform(groundToWorldTranslationDevicePointer,
       //                                                        correctedTransform.getX(),
       //                                                        correctedTransform.getY(),
@@ -349,8 +351,8 @@ public class HeightMapExtractor
          registerKernel.withPointer(localMotionVarianceMap.data()).withLong(localMotionVarianceMap.step());
          registerKernel.withPointer(globalMeanMap.data()).withLong(globalMeanMap.step());
          registerKernel.withPointer(globalVarianceMap.data()).withLong(globalVarianceMap.step());
-         registerKernel.withFloat(heightMapCenter.getX32());
-         registerKernel.withFloat(heightMapCenter.getY32());
+         registerKernel.withFloat(globalHeightMapCenter.getX32());
+         registerKernel.withFloat(globalHeightMapCenter.getY32());
          registerKernel.withPointer(groundToWorldTranslationDevicePointer);
          registerKernel.withPointer(parametersDevicePointer);
          registerKernel.withFloat(resetOffset);
@@ -407,8 +409,8 @@ public class HeightMapExtractor
 
       // The center of this map should be centered in the world grid
       // The sensor origin isn't always at the center of a grid point, in fact it's often not in the center
-      double currentCellX = (int) Math.round(heightMapCenter.getX32() / heightMapParameters.getCellSize()) * heightMapParameters.getCellSize();
-      double currentCellY = (int) Math.round(heightMapCenter.getY32() / heightMapParameters.getCellSize()) * heightMapParameters.getCellSize();
+      double currentCellX = (int) Math.round(globalHeightMapCenter.getX32() / heightMapParameters.getCellSize()) * heightMapParameters.getCellSize();
+      double currentCellY = (int) Math.round(globalHeightMapCenter.getY32() / heightMapParameters.getCellSize()) * heightMapParameters.getCellSize();
       heightMapCenterPoint.set(currentCellX, currentCellY, 0.0);
 
       // Finished GPU kernels, let pack this into the height map data object
