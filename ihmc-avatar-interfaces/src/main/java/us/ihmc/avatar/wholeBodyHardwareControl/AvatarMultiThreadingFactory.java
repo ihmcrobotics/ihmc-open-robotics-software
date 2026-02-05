@@ -10,11 +10,9 @@ import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.IKStream
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
-import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextTools;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepValidityIndicator;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
@@ -24,7 +22,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Hi
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.CommandBlenderFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HumanoidSteppingPluginFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.JoystickBasedSteppingPlugin;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.JoystickBasedSteppingPluginFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.stateTransitions.FeetLoadedToWalkingStandTransition;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -35,7 +32,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
-import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.realtime.MonotonicTime;
@@ -46,8 +42,6 @@ import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
-import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateTransition;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
@@ -55,10 +49,8 @@ import us.ihmc.robotics.time.ThreadTimer;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
-import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
-import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.tools.TimestampProvider;
@@ -113,30 +105,31 @@ public class AvatarMultiThreadingFactory
    private final RealtimeROS2Node controllerRealtimeROS2Node;
    private final PeriodicThreadSchedulerFactory ros2ThreadFactory;
 
-   // The thread factories
-   private final HighLevelHumanoidControllerFactory controllerFactory;
-
-   // The primary thread runnables for each thread
-   private final AvatarEstimatorThread avatarEstimatorThread;
-   private final OptionalFactoryField<AvatarStepGeneratorThread> avatarStepGeneratorThread = new OptionalFactoryField<>("AvatarStepGeneratorThread");
+   // Estimator
+   private final AvatarEstimatorThread avatarEstimator;
    private final OptionalFactoryField<Map<HighLevelControllerName, StateEstimatorMode>> estimatorModeMapReference = new OptionalFactoryField<>("estimatorModeMapReference");
-   private final OptionalFactoryField<IKStreamingRTPluginFactory.IKStreamingRTThread> avatarIKStreamingThread = new OptionalFactoryField<>("AvatarIKStreamingThread");
-
-   // Some stuff for the step generator
-   private final HumanoidSteppingPluginEnvironmentalConstraints environmentalConstraints;
-   private final HumanoidSteppingPluginFactory humanoidSteppingPluginFactory;
-
-   // The pre and post runnables for controller and estimator threads
-   private final List<Runnable> preControllerRunnables = new ArrayList<>();
-   private final List<Runnable> postControllerRunnables = new ArrayList<>();
    private final List<Runnable> preEstimatorRunnables = new ArrayList<>();
    private final List<Runnable> postEstimatorRunnables = new ArrayList<>();
 
-   // The child threads and tasks
+   // Controller
+   private final HighLevelHumanoidControllerFactory avatarControllerFactory;
+   private AvatarControllerThread avatarController;
+   private final List<Runnable> preControllerRunnables = new ArrayList<>();
+   private final List<Runnable> postControllerRunnables = new ArrayList<>();
+
+   // Step Generator
+   private final OptionalFactoryField<AvatarStepGeneratorThread> avatarStepGenerator = new OptionalFactoryField<>("AvatarStepGeneratorThread");
+   private final HumanoidSteppingPluginEnvironmentalConstraints environmentalConstraints;
+   private final HumanoidSteppingPluginFactory humanoidSteppingPluginFactory;
+
+   // IK Streaming
+   private final OptionalFactoryField<IKStreamingRTPluginFactory.IKStreamingRTThread> avatarIKStreaming = new OptionalFactoryField<>("AvatarIKStreamingThread");
+
+   // List of all child threads and tasks
    private final List<Runnable> threads = new ArrayList<>();
    private final List<HumanoidRobotControlTask> tasks = new ArrayList<>();
 
-   // Optional externally set master thread
+   // Optional externally set master thread (for example EtherCAT thread)
    private final OptionalFactoryField<Runnable> externalMasterThread = new OptionalFactoryField<>("ExternallSetMasterThread");
 
    // Multi-threading manager
@@ -201,17 +194,16 @@ public class AvatarMultiThreadingFactory
       estimatorRealtimeROS2Node = new ROS2NodeBuilder().buildRealtime(IHMC_ROS_STATE_ESTIMATOR_NODE_NAME, ros2ThreadFactory);
       controllerRealtimeROS2Node = new ROS2NodeBuilder().buildRealtime(IHMC_ROS_CONTROLLER_NODE_NAME, ros2ThreadFactory);
 
-      // Create estimator thread
-      avatarEstimatorThread = createAvatarEstimatorThread(robotModel, sensorReaderFactory);
-      setupEstimatorTaskAndThread(masterRobotModel, avatarEstimatorThread, masterFullRobotModel, yoVariableServer);
+      // Create estimator and estimator thread
+      avatarEstimator = createAndAddEstimatorThread(robotModel, sensorReaderFactory);
 
-      // Setup state controller factory
-      controllerFactory = createHighLevelControllerFactory(robotModel,
-                                                           controllerRealtimeROS2Node,
-                                                           lowLevelOutputProcessor,
-                                                           standPrepStateFactory,
-                                                           freezeStateFactory);
-      controllerFactory.setListenToHighLevelStatePackets(true);
+      // Create high-level controller factory
+      avatarControllerFactory = createHighLevelControllerFactory(robotModel,
+                                                                 controllerRealtimeROS2Node,
+                                                                 lowLevelOutputProcessor,
+                                                                 standPrepStateFactory,
+                                                                 freezeStateFactory);
+      avatarControllerFactory.setListenToHighLevelStatePackets(true);
 
       // Some extra stuff for the step generator
       humanoidSteppingPluginFactory = new JoystickBasedSteppingPluginFactory();
@@ -223,70 +215,15 @@ public class AvatarMultiThreadingFactory
                                        masterFullRobotModel.getRootJoint().subtreeList(),
                                        null,
                                        new YoGraphicGroupDefinition(rootRegistry.getName()));
+
+      // Add estimator thread registry directly to the YoVariableServer (since it is in a separate thread)
+      yoVariableServer.addRegistry(avatarEstimator.getYoRegistry(), null, avatarEstimator.getSCS2YoGraphics());
    }
 
    public AvatarMultiThreadingManager buildThreadsAndThreadingManager()
    {
       // Create controller thread
-      if (estimatorModeMapReference.hasValue())
-      {
-         avatarEstimatorThread.setupHighLevelControllerCallback(controllerFactory, estimatorModeMapReference.get());
-      }
-      else
-      {
-         HashMap<HighLevelControllerName, StateEstimatorMode> stateModeMap = new HashMap<>();
-         Arrays.stream(HighLevelControllerName.values).forEach(name -> stateModeMap.put(name, StateEstimatorMode.FROZEN));
-         stateModeMap.put(STAND_TRANSITION_STATE, StateEstimatorMode.NORMAL);
-         stateModeMap.put(EXIT_WALKING, StateEstimatorMode.NORMAL);
-         stateModeMap.put(WALKING, StateEstimatorMode.NORMAL);
-         avatarEstimatorThread.setupHighLevelControllerCallback(controllerFactory, stateModeMap);
-      }
-      AvatarControllerThread avatarControllerThread = new AvatarControllerThread(masterRobotModel.getSimpleRobotName().toLowerCase(), masterRobotModel,
-                                                                                 null,
-                                                                                 masterRobotModel.getSensorInformation(),
-                                                                                 controllerFactory,
-                                                                                 controllerContextFactory,
-                                                                                 null,
-                                                                                 controllerRealtimeROS2Node,
-                                                                                 GRAVITY,
-                                                                                 false);
-      setupControllerTaskAndThread(masterRobotModel, avatarControllerThread, masterFullRobotModel, yoVariableServer);
-
-      // Add estimator thread registry directly to the YoVariableServer (since it is in a separate thread)
-      yoVariableServer.addRegistry(avatarEstimatorThread.getYoRegistry(), null, avatarEstimatorThread.getSCS2YoGraphics());
-
-      // Add controller thread registry directly to the YoVariableServer (since it is in a separate thread)
-      yoVariableServer.addRegistry(avatarControllerThread.getYoVariableRegistry(), null, avatarControllerThread.getSCS2YoGraphics());
-
-      // Add step generator thread registry directly to the YoVariableServer (since it is in a separate thread)
-      if (avatarStepGeneratorThread.hasValue())
-      {
-         yoVariableServer.addRegistry(avatarStepGeneratorThread.get().getYoVariableRegistry(), null, avatarStepGeneratorThread.get().getSCS2YoGraphics());
-      }
-      else
-      {
-         // sets up the environmental constraint manager as a height map consumer in the input manager
-         humanoidSteppingPluginFactory.addHeightMapCommandConsumer(environmentalConstraints);
-         // Adds functions that adjust the footholds based on the environment.
-         humanoidSteppingPluginFactory.setFootStepAdjustment(environmentalConstraints.getFootstepAdjustment());
-         // Adds checkers for footholds based on the environment
-         for (FootstepValidityIndicator footstepValidityIndicator : environmentalConstraints.getFootstepValidityIndicators())
-            humanoidSteppingPluginFactory.addFootstepValidityIndicator(footstepValidityIndicator);
-         // clear the environment at the beginning of every update
-         humanoidSteppingPluginFactory.addUpdatable(environmentalConstraints);
-
-         // create the callback listeners for the planar regions in the stepping plugin
-         humanoidSteppingPluginFactory.createStepGeneratorNetworkSubscriber(masterRobotModel.getSimpleRobotName().toLowerCase(), controllerRealtimeROS2Node);
-
-         controllerFactory.addControllerPlugin(humanoidSteppingPluginFactory);
-
-         // otherwise this would go into the step generator registry
-         avatarControllerThread.getYoVariableRegistry().addChild(environmentalConstraints.getRegistry());
-      }
-
-      // Add IK streaming thread registry directly to the YoVariableServer (since it is in a separate thread)
-      if (avatarIKStreamingThread.hasValue())
-         yoVariableServer.addRegistry(avatarIKStreamingThread.get().getYoVariableRegistry(), null, avatarIKStreamingThread.get().getSCS2YoGraphics());
+      avatarController = createAndAddControllerThread();
 
       // Create threading manager
       threadingManager.set(new AvatarMultiThreadingManager(masterRobotModel.getSimpleRobotName().toLowerCase(),
@@ -308,68 +245,19 @@ public class AvatarMultiThreadingFactory
       // Set up the block to prevent execution whenever there is no new state message.
       threadingManager.get().setBlockingProvider(() -> !hardwareCommunicationInterface.hasNewStateMessage());
 
-      //
+      // Set up runnable to update master robot model with master context
       threadingManager.get().addPostMasterThreadRunnable(()->HumanoidRobotContextTools.updateRobot(masterFullRobotModel, masterContext.getProcessedJointData()));
 
-      if (useLocalLogging)
-      {
-         // Setup logger
-         ArrayList<RegistrySendBufferBuilder> builders = new ArrayList<>();
-         builders.add(new RegistrySendBufferBuilder(rootRegistry,
-                                                    masterFullRobotModel.getRootJoint().subtreeList(),
-                                                    null,
-                                                    avatarEstimatorThread.getSCS2YoGraphics()));
-         builders.add(new RegistrySendBufferBuilder(avatarControllerThread.getYoVariableRegistry(),
-                                                    null,
-                                                    avatarControllerThread.getSCS2YoGraphics()));
-         if (avatarStepGeneratorThread.hasValue())
-         {
-            builders.add(new RegistrySendBufferBuilder(avatarStepGeneratorThread.get().getYoVariableRegistry(),
-                                                       null,
-                                                       avatarStepGeneratorThread.get().getSCS2YoGraphics()));
-         }
-         if (avatarIKStreamingThread.hasValue())
-         {
-            builders.add(new RegistrySendBufferBuilder(avatarIKStreamingThread.get().getYoVariableRegistry(),
-                                                       null,
-                                                       avatarIKStreamingThread.get().getSCS2YoGraphics()));
-         }
-
-         // FIXME add this back when a release of the logger is done.
-//         builders.add(new RegistrySendBufferBuilder(jvmStatisticsGenerator.getYoRegistry(), null));
-
-         // Logging locally on the robot
-         IntraprocessYoVariableLogger intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(builders,
-                                                                                                      masterRobotModel.getEstimatorDT(),
-                                                                                                      masterRobotModel.getSimpleRobotName().toLowerCase() + getClass().getSimpleName(), masterRobotModel.getLogModelProvider());
-
-         if (intraprocessYoVariableLogger.create())
-         {
-            LogTools.info("[Logging] Logging locally to disk");
-
-            threadingManager.get()
-                            .addPostMasterThreadRunnable(() -> intraprocessYoVariableLogger.update(avatarEstimatorThread.getHumanoidRobotContextData()
-                                                                                                                        .getTimestamp()));
-         }
-         else
-         {
-            LogTools.error("[Logging] Unable to log locally to disk");
-         }
-
-         LogTools.info("[Logging] Logging locally to disk");
-      }
-      else
-      {
-         LogTools.info("[Logging] Logging remote to logger server");
-      }
+      // Set up local logging
+      configureLoggingSettings();
 
       return threadingManager.get();
    }
 
    /**
-    * Create Estimator Factory
+    * Creates the state estimator module and thread, and adds it to the multi-threaded setup
     */
-   private AvatarEstimatorThread createAvatarEstimatorThread(DRCRobotModel robotModel, SensorReaderFactory sensorReaderFactory)
+   private AvatarEstimatorThread createAndAddEstimatorThread(DRCRobotModel robotModel, SensorReaderFactory sensorReaderFactory)
    {
       LogTools.info("The Squirrel estimates the number of acorns he needs for winter. Not many in Florida he thinks");
       HumanoidRobotContextDataFactory estimatorContextDataFactory = new HumanoidRobotContextDataFactory();
@@ -386,9 +274,126 @@ public class AvatarMultiThreadingFactory
       //         avatarEstimatorThreadFactory.addSecondaryStateEstimatorFactory(secondaryEstimatorFactory);
       StateEstimatorController stateEstimator = avatarEstimatorThreadFactory.getMainStateEstimator();
 
+      // Set up the task and thread for the state estimator
+      setupEstimatorTaskAndThread(masterRobotModel, avatarEstimator, masterFullRobotModel, yoVariableServer);
+
       return avatarEstimatorThreadFactory.createAvatarEstimatorThread();
    }
 
+   /**
+    * Creates the high-level controller module and thread, and adds it to the multi-threaded setup
+    */
+   private AvatarControllerThread createAndAddControllerThread()
+   {
+      // Set up map that links high-level control states to estimator modes
+      if (estimatorModeMapReference.hasValue())
+      {
+         avatarEstimator.setupHighLevelControllerCallback(avatarControllerFactory, estimatorModeMapReference.get());
+      }
+      else
+      {
+         HashMap<HighLevelControllerName, StateEstimatorMode> stateModeMap = new HashMap<>();
+         Arrays.stream(HighLevelControllerName.values).forEach(name -> stateModeMap.put(name, StateEstimatorMode.FROZEN));
+         stateModeMap.put(STAND_TRANSITION_STATE, StateEstimatorMode.NORMAL);
+         stateModeMap.put(EXIT_WALKING, StateEstimatorMode.NORMAL);
+         stateModeMap.put(WALKING, StateEstimatorMode.NORMAL);
+         avatarEstimator.setupHighLevelControllerCallback(avatarControllerFactory, stateModeMap);
+      }
+
+      // Set up this stuff
+      if (!avatarStepGenerator.hasValue())
+      {
+         // Sets up the environmental constraint manager as a height map consumer in the input manager
+         humanoidSteppingPluginFactory.addHeightMapCommandConsumer(environmentalConstraints);
+
+         // Adds functions that adjust the footholds based on the environment.
+         humanoidSteppingPluginFactory.setFootStepAdjustment(environmentalConstraints.getFootstepAdjustment());
+
+         // Adds checkers for footholds based on the environment
+         for (FootstepValidityIndicator footstepValidityIndicator : environmentalConstraints.getFootstepValidityIndicators())
+            humanoidSteppingPluginFactory.addFootstepValidityIndicator(footstepValidityIndicator);
+
+         // Clear the environment at the beginning of every update
+         humanoidSteppingPluginFactory.addUpdatable(environmentalConstraints);
+
+         // Create the callback listeners for the planar regions in the stepping plugin
+         humanoidSteppingPluginFactory.createStepGeneratorNetworkSubscriber(masterRobotModel.getSimpleRobotName().toLowerCase(), controllerRealtimeROS2Node);
+
+         avatarControllerFactory.addControllerPlugin(humanoidSteppingPluginFactory);
+      }
+
+      // Create the high-level controller
+      AvatarControllerThread avatarController = new AvatarControllerThread(masterRobotModel.getSimpleRobotName().toLowerCase(),
+                                                                                 masterRobotModel,
+                                                                                 null,
+                                                                                 masterRobotModel.getSensorInformation(),
+                                                                                 avatarControllerFactory,
+                                                                                 controllerContextFactory,
+                                                                                 null,
+                                                                                 controllerRealtimeROS2Node,
+                                                                                 GRAVITY,
+                                                                                 false);
+
+      // Add controller registry directly to the YoVariableServer (since it is in a separate thread)
+      yoVariableServer.addRegistry(avatarController.getYoVariableRegistry(), null, avatarController.getSCS2YoGraphics());
+
+      if (!avatarStepGenerator.hasValue())
+         avatarController.getYoVariableRegistry().addChild(environmentalConstraints.getRegistry());
+
+      // Set up the task and thread for the controller
+      setupControllerTaskAndThread(masterRobotModel, avatarController, masterFullRobotModel, yoVariableServer);
+
+      return avatarController;
+   }
+
+   /**
+    * An externally-facing API for creating the Step Generator module and thread, and for adding it to the multi-threaded setup
+    */
+   public AvatarStepGeneratorThread createAndAddStepGeneratorThread()
+   {
+      AvatarStepGeneratorThread stepGenerator = new AvatarStepGeneratorThread(humanoidSteppingPluginFactory,
+                                                                                    controllerContextFactory,
+                                                                                    avatarControllerFactory.getStatusOutputManager(),
+                                                                                    avatarControllerFactory.getCommandInputManager(),
+                                                                                    masterRobotModel,
+                                                                                    environmentalConstraints,
+                                                                                    controllerRealtimeROS2Node);
+
+      avatarStepGenerator.set(stepGenerator);
+
+      yoVariableServer.addRegistry(avatarStepGenerator.get().getYoVariableRegistry(), null, avatarStepGenerator.get().getSCS2YoGraphics());
+
+      setupStepGeneratorTaskAndThread(masterRobotModel,
+                                      stepGenerator,
+                                      masterFullRobotModel,
+                                      yoVariableServer);
+
+      return stepGenerator;
+   }
+
+   /**
+    * An externally-facing API for creating the IK Streaming module and thread, and for adding it to the multi-threaded setup
+    */
+   public IKStreamingRTPluginFactory.IKStreamingRTThread createAndAddIKStreamingThread(KinematicsStreamingToolboxParameters ikStreamingParameters)
+   {
+      avatarIKStreaming.set(new IKStreamingRTPluginFactory().createRTThread(masterRobotModel.getSimpleRobotName(),
+                                                                            estimatorRealtimeROS2Node,
+                                                                            avatarControllerFactory.getCommandInputManager(),
+                                                                            avatarControllerFactory.getStatusOutputManager(), masterRobotModel,
+                                                                            controllerContextFactory,
+                                                                            masterRobotModel.getHumanoidRobotKinematicsCollisionModel(),
+                                                                            ikStreamingParameters));
+
+      yoVariableServer.addRegistry(avatarIKStreaming.get().getYoVariableRegistry(), null, avatarIKStreaming.get().getSCS2YoGraphics());
+
+      setupIKStreamingTaskAndThread(avatarIKStreaming.get(), yoVariableServer);
+
+      return avatarIKStreaming.get();
+   }
+
+   /**
+    * Sets up the actual thread and thread task for the state estimator module
+    */
    private HumanoidRobotControlTask setupEstimatorTaskAndThread(DRCRobotModel robotModel,
                                                                 AvatarEstimatorThread estimatorThread,
                                                                 FullHumanoidRobotModel masterFullRobotModel,
@@ -413,10 +418,10 @@ public class AvatarMultiThreadingFactory
       YoDouble estimatorThreadUpdateRate = new YoDouble("estimatorThreadUpdateRate", rootRegistry);
       FrequencyCalculator estimatorThreadFrequencyCalculator = new FrequencyCalculator(false);
       estimatorTask.addCallbackPostTask(()->
-                                         {
-                                            estimatorThreadFrequencyCalculator.ping();
-                                            estimatorThreadUpdateRate.set(estimatorThreadFrequencyCalculator.getFrequency());
-                                         });
+                                        {
+                                           estimatorThreadFrequencyCalculator.ping();
+                                           estimatorThreadUpdateRate.set(estimatorThreadFrequencyCalculator.getFrequency());
+                                        });
 
       // Add post-task callback to hand sensor processor data to output processor in thread-safe manner
       estimatorTask.addCallbackPostTask(() ->
@@ -438,31 +443,31 @@ public class AvatarMultiThreadingFactory
 
       // Add estimatorr startup callback to start spinning node
       estimatorTask.addRunnableOnStartup(() ->
-                                          {
-                                             estimatorRealtimeROS2Node.spin();
-                                             LogTools.info("Estimator node has started spinning");
-                                          });
+                                         {
+                                            estimatorRealtimeROS2Node.spin();
+                                            LogTools.info("Estimator node has started spinning");
+                                         });
 
       // Add estimator cleanup callback to stop spinning node
       estimatorTask.addRunnableOnCleanup(() ->
-                                          {
-                                             estimatorRealtimeROS2Node.stopSpinning();
-                                             LogTools.info("Estimator node has stopped Spinning");
-                                          });
+                                         {
+                                            estimatorRealtimeROS2Node.stopSpinning();
+                                            LogTools.info("Estimator node has stopped Spinning");
+                                         });
 
       // Add estimator cleanup callback to destroy node
       estimatorTask.addRunnableOnCleanup(() ->
-                                          {
-                                             estimatorRealtimeROS2Node.destroy();
-                                             LogTools.info("Estimator node has been destroyed");
-                                          });
+                                         {
+                                            estimatorRealtimeROS2Node.destroy();
+                                            LogTools.info("Estimator node has been destroyed");
+                                         });
 
       // Set up estimator realtime or non-realtime thread
       if (useRealtimeThreads && useMultiThreading)
       {
          RealtimeThread estimatorRealtimeThread = new RealtimeThread(affinity.getEstimatorThreadPriority(),
-                                                                      estimatorTask,
-                                                                      estimatorTask.getClass().getSimpleName() + "Thread");
+                                                                     estimatorTask,
+                                                                     estimatorTask.getClass().getSimpleName() + "Thread");
          estimatorRealtimeThread.setAffinity(affinity.getEstimatorThreadProcessor());
          estimatorRealtimeThread.start();
 
@@ -481,9 +486,191 @@ public class AvatarMultiThreadingFactory
    }
 
    /**
-    * Create High Level Controller Factory
+    * Sets up the actual thread and thread task for the high-level control module
     */
-   // Adding quicksterWalking parameters
+   private HumanoidRobotControlTask setupControllerTaskAndThread(DRCRobotModel robotModel,
+                                                                 AvatarControllerThread controllerThread,
+                                                                 FullHumanoidRobotModel masterFullRobotModel,
+                                                                 YoVariableServer yoVariableServer)
+   {
+      // Set up Controller Task
+      int controllerDivisor = (int) Math.round(robotModel.getControllerDT() / masterThreadDt);
+      if (!Precision.equals(robotModel.getControllerDT() / masterThreadDt, controllerDivisor))
+         throw new RuntimeException("Controller DT must be multiple of master thread DT.");
+
+      ControllerTask controllerTask = new ControllerTask("Controller", controllerThread, controllerDivisor, masterThreadDt, masterFullRobotModel);
+
+      // Add post-controller callback to update YoVariable server with controller registry
+      if (yoVariableServer != null)
+         controllerTask.addCallbackPostTask(() -> yoVariableServer.update(controllerThread.getHumanoidRobotContextData().getTimestamp(),
+                                                                          controllerThread.getYoVariableRegistry()));
+
+      // Add pre-task callback to run all externally-set pre-controller runnables
+      controllerTask.addCallbackPreTask(() -> runAll(preControllerRunnables));
+
+      // Add post-controller callback to interpolate desired setpoints
+      controllerTask.addCallbackPostTask(lowLevelOutputProcessor::startDesiredsInterpolation);
+
+      // Add post-controller callback to update the thread frequency calculator and YoVariable (Hz)
+      YoDouble controllerThreadUpdateRate = new YoDouble("controllerThreadUpdateRate", rootRegistry);
+      FrequencyCalculator controllerThreadFrequencyCalculator = new FrequencyCalculator(false);
+      controllerTask.addCallbackPostTask(()->
+                                         {
+                                            controllerThreadFrequencyCalculator.ping();
+                                            controllerThreadUpdateRate.set(controllerThreadFrequencyCalculator.getFrequency());
+                                         });
+
+      // Add pre-task callback to run all externally-set post-controller runnables
+      controllerTask.addCallbackPostTask(() -> runAll(postControllerRunnables));
+
+      // Add controller startup callback to start spinning node
+      controllerTask.addRunnableOnStartup(() ->
+                                          {
+                                             controllerRealtimeROS2Node.spin();
+                                             LogTools.info("Controller node has started spinning");
+                                          });
+
+      // Add controller cleanup callback to stop spinning node
+      controllerTask.addRunnableOnCleanup(() ->
+                                          {
+                                             controllerRealtimeROS2Node.stopSpinning();
+                                             LogTools.info("Controller node has stopped Spinning");
+                                          });
+
+      // Add controller cleanup callback to destroy node
+      controllerTask.addRunnableOnCleanup(() ->
+                                          {
+                                             controllerRealtimeROS2Node.destroy();
+                                             LogTools.info("Controller node has been destroyed");
+                                          });
+
+      // Set up controller realtime or non-realtime thread
+      if (useRealtimeThreads && useMultiThreading)
+      {
+         RealtimeThread controllerRealtimeThread = new RealtimeThread(affinity.getControllerThreadPriority(),
+                                                                      controllerTask,
+                                                                      controllerTask.getClass().getSimpleName() + "Thread");
+         controllerRealtimeThread.setAffinity(affinity.getControllerThreadProcessor());
+         controllerRealtimeThread.start();
+
+         threads.add(controllerRealtimeThread);
+      }
+      else if (!useRealtimeThreads && useMultiThreading)
+      {
+         Thread controllerNonRealtimeThread = new Thread(controllerTask, controllerTask.getClass().getSimpleName() + "Thread");
+         controllerNonRealtimeThread.start();
+
+         threads.add(controllerNonRealtimeThread);
+      }
+
+      tasks.add(controllerTask);
+      return controllerTask;
+   }
+
+   /**
+    * Sets up the actual thread and thread task for the step generator module
+    */
+   private HumanoidRobotControlTask setupStepGeneratorTaskAndThread(DRCRobotModel robotModel,
+                                                                    AvatarStepGeneratorThread stepGeneratorThread,
+                                                                    FullHumanoidRobotModel masterFullRobotModel,
+                                                                    YoVariableServer yoVariableServer)
+   {
+      // Set up Step Generator Task
+      int stepGeneratorDivisor = (int) Math.round(robotModel.getStepGeneratorDT() / masterThreadDt);
+      if (!Precision.equals(robotModel.getStepGeneratorDT() / masterThreadDt, stepGeneratorDivisor))
+         throw new RuntimeException("Step generator DT must be multiple of master thread DT.");
+
+      StepGeneratorTask stepGeneratorTask = new StepGeneratorTask("StepGenerator", stepGeneratorThread, stepGeneratorDivisor, masterThreadDt, masterFullRobotModel);
+
+      // Add post-step generator callback to update YoVariable server with step generator registry
+      if (yoVariableServer != null)
+         stepGeneratorTask.addCallbackPostTask(() -> yoVariableServer.update(stepGeneratorThread.getHumanoidRobotContextData().getTimestamp(),
+                                                                             stepGeneratorThread.getYoVariableRegistry()));
+
+      // Add post-step generator callback to update the thread frequency calculator and YoVariable (Hz)
+      YoDouble stepGeneratorThreadUpdateRate = new YoDouble("stepGeneratorThreadUpdateRate", rootRegistry);
+      FrequencyCalculator stepGeneratorThreadFrequencyCalculator = new FrequencyCalculator(false);
+      stepGeneratorTask.addCallbackPostTask(()->
+                                            {
+                                               stepGeneratorThreadFrequencyCalculator.ping();
+                                               stepGeneratorThreadUpdateRate.set(stepGeneratorThreadFrequencyCalculator.getFrequency());
+                                            });
+
+      // Add callback on cleanup to close and destroy things
+      stepGeneratorTask.addRunnableOnCleanup(avatarStepGenerator.get()::destroy);
+
+      // Set up step generator realtime or non-realtime thread
+      if (useRealtimeThreads && useMultiThreading)
+      {
+         RealtimeThread stepGeneratorRealtimeThread = new RealtimeThread(affinity.getStepGeneratorThreadPriority(),
+                                                                         stepGeneratorTask,
+                                                                         stepGeneratorTask.getClass().getSimpleName() + "Thread");
+         stepGeneratorRealtimeThread.setAffinity(affinity.getStepGeneratorThreadProcessor());
+         stepGeneratorRealtimeThread.start();
+
+         threads.add(stepGeneratorRealtimeThread);
+      }
+      else if (!useRealtimeThreads && useMultiThreading)
+      {
+         Thread stepGeneratorNonRealtimeThread = new Thread(stepGeneratorTask, stepGeneratorTask.getClass().getSimpleName() + "Thread");
+         stepGeneratorNonRealtimeThread.start();
+
+         threads.add(stepGeneratorNonRealtimeThread);
+      }
+
+      tasks.add(stepGeneratorTask);
+      return stepGeneratorTask;
+   }
+
+   /**
+    * Sets up the actual thread and thread task for the IK streaming module
+    */
+   private HumanoidRobotControlTask setupIKStreamingTaskAndThread(IKStreamingRTPluginFactory.IKStreamingRTThread ikStreamingThread,
+                                                                  YoVariableServer yoVariableServer)
+   {
+      // Set up Step Generator Task
+      IKStreamingRTPluginFactory.IKStreamingRTTask ikStreamingTask = IKStreamingRTPluginFactory.createIKStreamingRTTask(ikStreamingThread, masterThreadDt);
+
+      // Add post-IK streaming callback to update YoVariable server with IK streaming registry
+      if (yoVariableServer != null)
+         ikStreamingTask.addCallbackPostTask(() -> yoVariableServer.update(ikStreamingThread.getHumanoidRobotContextData().getTimestamp(),
+                                                                           ikStreamingThread.getYoVariableRegistry()));
+
+      // Add post-IK streaming callback to update the thread frequency calculator and YoVariable (Hz)
+      YoDouble ikStreamingThreadUpdateRate = new YoDouble("ikStreamingThreadUpdateRate", rootRegistry);
+      FrequencyCalculator ikStreamingThreadFrequencyCalculator = new FrequencyCalculator(false);
+      ikStreamingTask.addCallbackPostTask(() ->
+                                          {
+                                             ikStreamingThreadFrequencyCalculator.ping();
+                                             ikStreamingThreadUpdateRate.set(ikStreamingThreadFrequencyCalculator.getFrequency());
+                                          });
+
+      // Set up IK streaming realtime or non-realtime thread
+      if (useRealtimeThreads && useMultiThreading)
+      {
+         RealtimeThread ikStreamingRealtimeThread = new RealtimeThread(affinity.getIKStreamingThreadPriority(),
+                                                                       ikStreamingTask,
+                                                                       ikStreamingTask.getClass().getSimpleName() + "Thread");
+         ikStreamingRealtimeThread.setAffinity(affinity.getIKStreamingThreadProcessor());
+         ikStreamingRealtimeThread.start();
+
+         threads.add(ikStreamingRealtimeThread);
+      }
+      else if (!useRealtimeThreads && useMultiThreading)
+      {
+         Thread ikStreamingNonRealtimeThread = new Thread(ikStreamingTask, ikStreamingTask.getClass().getSimpleName() + "Thread");
+         ikStreamingNonRealtimeThread.start();
+
+         threads.add(ikStreamingNonRealtimeThread);
+      }
+
+      tasks.add(ikStreamingTask);
+      return ikStreamingTask;
+   }
+
+   /**
+    * Creates and sets up factory for high-level controller
+    */
    private HighLevelHumanoidControllerFactory createHighLevelControllerFactory(DRCRobotModel robotModel,
                                                                                RealtimeROS2Node ros2Node,
                                                                                AvatarLowLevelOutputProcessor lowLevelOutputProcessor,
@@ -589,213 +776,6 @@ public class AvatarMultiThreadingFactory
       return controllerFactory;
    }
 
-   private HumanoidRobotControlTask setupControllerTaskAndThread(DRCRobotModel robotModel,
-                                                                 AvatarControllerThread controllerThread,
-                                                                 FullHumanoidRobotModel masterFullRobotModel,
-                                                                 YoVariableServer yoVariableServer)
-   {
-      // Set up Controller Task
-      int controllerDivisor = (int) Math.round(robotModel.getControllerDT() / masterThreadDt);
-      if (!Precision.equals(robotModel.getControllerDT() / masterThreadDt, controllerDivisor))
-         throw new RuntimeException("Controller DT must be multiple of master thread DT.");
-
-      ControllerTask controllerTask = new ControllerTask("Controller", controllerThread, controllerDivisor, masterThreadDt, masterFullRobotModel);
-
-      // Add post-controller callback to update YoVariable server with controller registry
-      if (yoVariableServer != null)
-         controllerTask.addCallbackPostTask(() -> yoVariableServer.update(controllerThread.getHumanoidRobotContextData().getTimestamp(),
-                                                                          controllerThread.getYoVariableRegistry()));
-
-      // Add pre-task callback to run all externally-set pre-controller runnables
-      controllerTask.addCallbackPreTask(() -> runAll(preControllerRunnables));
-
-      // Add post-controller callback to interpolate desired setpoints
-      controllerTask.addCallbackPostTask(lowLevelOutputProcessor::startDesiredsInterpolation);
-
-      // Add post-controller callback to update the thread frequency calculator and YoVariable (Hz)
-      YoDouble controllerThreadUpdateRate = new YoDouble("controllerThreadUpdateRate", rootRegistry);
-      FrequencyCalculator controllerThreadFrequencyCalculator = new FrequencyCalculator(false);
-      controllerTask.addCallbackPostTask(()->
-                                         {
-                                            controllerThreadFrequencyCalculator.ping();
-                                            controllerThreadUpdateRate.set(controllerThreadFrequencyCalculator.getFrequency());
-                                         });
-
-      // Add pre-task callback to run all externally-set post-controller runnables
-      controllerTask.addCallbackPostTask(() -> runAll(postControllerRunnables));
-
-      // Add controller startup callback to start spinning node
-      controllerTask.addRunnableOnStartup(() ->
-                                       {
-                                          controllerRealtimeROS2Node.spin();
-                                          LogTools.info("Controller node has started spinning");
-                                       });
-
-      // Add controller cleanup callback to stop spinning node
-      controllerTask.addRunnableOnCleanup(() ->
-                                       {
-                                          controllerRealtimeROS2Node.stopSpinning();
-                                          LogTools.info("Controller node has stopped Spinning");
-                                       });
-
-      // Add controller cleanup callback to destroy node
-      controllerTask.addRunnableOnCleanup(() ->
-                                       {
-                                          controllerRealtimeROS2Node.destroy();
-                                          LogTools.info("Controller node has been destroyed");
-                                       });
-
-      // Set up controller realtime or non-realtime thread
-      if (useRealtimeThreads && useMultiThreading)
-      {
-         RealtimeThread controllerRealtimeThread = new RealtimeThread(affinity.getControllerThreadPriority(),
-                                                                      controllerTask,
-                                                                      controllerTask.getClass().getSimpleName() + "Thread");
-         controllerRealtimeThread.setAffinity(affinity.getControllerThreadProcessor());
-         controllerRealtimeThread.start();
-
-         threads.add(controllerRealtimeThread);
-      }
-      else if (!useRealtimeThreads && useMultiThreading)
-      {
-         Thread controllerNonRealtimeThread = new Thread(controllerTask, controllerTask.getClass().getSimpleName() + "Thread");
-         controllerNonRealtimeThread.start();
-
-         threads.add(controllerNonRealtimeThread);
-      }
-
-      tasks.add(controllerTask);
-      return controllerTask;
-   }
-
-   /**
-    * Create Step Generator Thread
-    */
-   public void addStepGeneratorThread()
-   {
-      AvatarStepGeneratorThread stepGeneratorThread = new AvatarStepGeneratorThread(humanoidSteppingPluginFactory,
-                                                                                    controllerContextFactory,
-                                                                                    controllerFactory.getStatusOutputManager(),
-                                                                                    controllerFactory.getCommandInputManager(),
-                                                                                    masterRobotModel,
-                                                                                    environmentalConstraints,
-                                                                                    controllerRealtimeROS2Node);
-
-      avatarStepGeneratorThread.set(stepGeneratorThread);
-      setupStepGeneratorTaskAndThread(masterRobotModel,
-                                      stepGeneratorThread,
-                                      masterFullRobotModel,
-                                      yoVariableServer);
-   }
-
-   private HumanoidRobotControlTask setupStepGeneratorTaskAndThread(DRCRobotModel robotModel,
-                                                                    AvatarStepGeneratorThread stepGeneratorThread,
-                                                                    FullHumanoidRobotModel masterFullRobotModel,
-                                                                    YoVariableServer yoVariableServer)
-   {
-      // Set up Step Generator Task
-      int stepGeneratorDivisor = (int) Math.round(robotModel.getStepGeneratorDT() / masterThreadDt);
-      if (!Precision.equals(robotModel.getStepGeneratorDT() / masterThreadDt, stepGeneratorDivisor))
-         throw new RuntimeException("Step generator DT must be multiple of master thread DT.");
-
-      StepGeneratorTask stepGeneratorTask = new StepGeneratorTask("StepGenerator", stepGeneratorThread, stepGeneratorDivisor, masterThreadDt, masterFullRobotModel);
-
-      // Add post-step generator callback to update YoVariable server with step generator registry
-      if (yoVariableServer != null)
-         stepGeneratorTask.addCallbackPostTask(() -> yoVariableServer.update(stepGeneratorThread.getHumanoidRobotContextData().getTimestamp(),
-                                                                             stepGeneratorThread.getYoVariableRegistry()));
-
-      // Add post-step generator callback to update the thread frequency calculator and YoVariable (Hz)
-      YoDouble stepGeneratorThreadUpdateRate = new YoDouble("stepGeneratorThreadUpdateRate", rootRegistry);
-      FrequencyCalculator stepGeneratorThreadFrequencyCalculator = new FrequencyCalculator(false);
-      stepGeneratorTask.addCallbackPostTask(()->
-                                            {
-                                               stepGeneratorThreadFrequencyCalculator.ping();
-                                               stepGeneratorThreadUpdateRate.set(stepGeneratorThreadFrequencyCalculator.getFrequency());
-                                            });
-
-      // Add callback on cleanup to close and destroy things
-      stepGeneratorTask.addRunnableOnCleanup(avatarStepGeneratorThread.get()::destroy);
-
-      // Set up step generator realtime or non-realtime thread
-      if (useRealtimeThreads && useMultiThreading)
-      {
-         RealtimeThread stepGeneratorRealtimeThread = new RealtimeThread(affinity.getStepGeneratorThreadPriority(),
-                                                                         stepGeneratorTask,
-                                                                         stepGeneratorTask.getClass().getSimpleName() + "Thread");
-         stepGeneratorRealtimeThread.setAffinity(affinity.getStepGeneratorThreadProcessor());
-         stepGeneratorRealtimeThread.start();
-
-         threads.add(stepGeneratorRealtimeThread);
-      }
-      else if (!useRealtimeThreads && useMultiThreading)
-      {
-         Thread stepGeneratorNonRealtimeThread = new Thread(stepGeneratorTask, stepGeneratorTask.getClass().getSimpleName() + "Thread");
-         stepGeneratorNonRealtimeThread.start();
-
-         threads.add(stepGeneratorNonRealtimeThread);
-      }
-
-      tasks.add(stepGeneratorTask);
-      return stepGeneratorTask;
-   }
-
-   public void addIKStreamingThread(KinematicsStreamingToolboxParameters ikStreamingParameters)
-   {
-      avatarIKStreamingThread.set(new IKStreamingRTPluginFactory().createRTThread(masterRobotModel.getSimpleRobotName(),
-                                                                                  estimatorRealtimeROS2Node,
-                                                                                  controllerFactory.getCommandInputManager(),
-                                                                                  controllerFactory.getStatusOutputManager(), masterRobotModel,
-                                                                                  controllerContextFactory,
-                                                                                  masterRobotModel.getHumanoidRobotKinematicsCollisionModel(),
-                                                                                  ikStreamingParameters));
-
-      setupIKStreamingTaskAndThread(avatarIKStreamingThread.get(), yoVariableServer);
-   }
-
-   private HumanoidRobotControlTask setupIKStreamingTaskAndThread(IKStreamingRTPluginFactory.IKStreamingRTThread ikStreamingThread,
-                                                                  YoVariableServer yoVariableServer)
-   {
-      // Set up Step Generator Task
-      IKStreamingRTPluginFactory.IKStreamingRTTask ikStreamingTask = IKStreamingRTPluginFactory.createIKStreamingRTTask(ikStreamingThread, masterThreadDt);
-
-      // Add post-IK streaming callback to update YoVariable server with IK streaming registry
-      if (yoVariableServer != null)
-         ikStreamingTask.addCallbackPostTask(() -> yoVariableServer.update(ikStreamingThread.getHumanoidRobotContextData().getTimestamp(),
-                                                                           ikStreamingThread.getYoVariableRegistry()));
-
-      // Add post-IK streaming callback to update the thread frequency calculator and YoVariable (Hz)
-      YoDouble ikStreamingThreadUpdateRate = new YoDouble("ikStreamingThreadUpdateRate", rootRegistry);
-      FrequencyCalculator ikStreamingThreadFrequencyCalculator = new FrequencyCalculator(false);
-      ikStreamingTask.addCallbackPostTask(() ->
-                                          {
-                                             ikStreamingThreadFrequencyCalculator.ping();
-                                             ikStreamingThreadUpdateRate.set(ikStreamingThreadFrequencyCalculator.getFrequency());
-                                          });
-
-      // Set up IK streaming realtime or non-realtime thread
-      if (useRealtimeThreads && useMultiThreading)
-      {
-         RealtimeThread ikStreamingRealtimeThread = new RealtimeThread(affinity.getIKStreamingThreadPriority(),
-                                                                       ikStreamingTask,
-                                                                       ikStreamingTask.getClass().getSimpleName() + "Thread");
-         ikStreamingRealtimeThread.setAffinity(affinity.getIKStreamingThreadProcessor());
-         ikStreamingRealtimeThread.start();
-
-         threads.add(ikStreamingRealtimeThread);
-      }
-      else if (!useRealtimeThreads && useMultiThreading)
-      {
-         Thread ikStreamingNonRealtimeThread = new Thread(ikStreamingTask, ikStreamingTask.getClass().getSimpleName() + "Thread");
-         ikStreamingNonRealtimeThread.start();
-
-         threads.add(ikStreamingNonRealtimeThread);
-      }
-
-      tasks.add(ikStreamingTask);
-      return ikStreamingTask;
-   }
-
    /**
     * The transition to the STAND_TRANSITION state will happen when: 1- the STAND_PREP is done, i.e.
     * the ramp up ratio is at 1, AND 2- the feet loaded transition is satisfied is requested via the
@@ -860,34 +840,98 @@ public class AvatarMultiThreadingFactory
       };
    }
 
+   /**
+    * Configures everything needed for a local (on-robot) logging setup, and it will notify the operator
+    * of which logging setup (local or remote) they are currently using
+    */
+   private void configureLoggingSettings()
+   {
+      if (useLocalLogging)
+      {
+         // Setup logger
+         ArrayList<RegistrySendBufferBuilder> builders = new ArrayList<>();
+         builders.add(new RegistrySendBufferBuilder(rootRegistry,
+                                                    masterFullRobotModel.getRootJoint().subtreeList(),
+                                                    null,
+                                                    avatarEstimator.getSCS2YoGraphics()));
+
+         if (avatarController != null)
+         {
+            builders.add(new RegistrySendBufferBuilder(avatarController.getYoVariableRegistry(),
+                                                       null,
+                                                       avatarController.getSCS2YoGraphics()));
+         }
+
+         if (avatarStepGenerator.hasValue())
+         {
+            builders.add(new RegistrySendBufferBuilder(avatarStepGenerator.get().getYoVariableRegistry(),
+                                                       null,
+                                                       avatarStepGenerator.get().getSCS2YoGraphics()));
+         }
+         if (avatarIKStreaming.hasValue())
+         {
+            builders.add(new RegistrySendBufferBuilder(avatarIKStreaming.get().getYoVariableRegistry(),
+                                                       null,
+                                                       avatarIKStreaming.get().getSCS2YoGraphics()));
+         }
+
+         // FIXME add this back when a release of the logger is done.
+         //         builders.add(new RegistrySendBufferBuilder(jvmStatisticsGenerator.getYoRegistry(), null));
+
+         // Logging locally on the robot
+         IntraprocessYoVariableLogger intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(builders,
+                                                                                                      masterRobotModel.getEstimatorDT(),
+                                                                                                      masterRobotModel.getSimpleRobotName().toLowerCase() + getClass().getSimpleName(), masterRobotModel.getLogModelProvider());
+
+         if (intraprocessYoVariableLogger.create())
+         {
+            LogTools.info("[Logging] Logging locally to disk");
+
+            threadingManager.get()
+                            .addPostMasterThreadRunnable(() -> intraprocessYoVariableLogger.update(avatarEstimator.getHumanoidRobotContextData()
+                                                                                                                  .getTimestamp()));
+         }
+         else
+         {
+            LogTools.error("[Logging] Unable to log locally to disk");
+         }
+
+         LogTools.info("[Logging] Logging locally to disk");
+      }
+      else
+      {
+         LogTools.info("[Logging] Logging remote to logger server");
+      }
+   }
+
    public void addCustomControlState(HighLevelControllerStateFactory customControllerStateFactory)
    {
-      controllerFactory.addCustomControlState(customControllerStateFactory);
+      avatarControllerFactory.addCustomControlState(customControllerStateFactory);
    }
 
    public void addRequestableTransition(HighLevelControllerName currentControlStateEnum, HighLevelControllerName nextControlStateEnum)
    {
-      controllerFactory.addRequestableTransition(currentControlStateEnum, nextControlStateEnum);
+      avatarControllerFactory.addRequestableTransition(currentControlStateEnum, nextControlStateEnum);
    }
 
    public void addFinishedTransition(HighLevelControllerName currentControlStateEnum, HighLevelControllerName nextControlStateEnum)
    {
-      controllerFactory.addFinishedTransition(currentControlStateEnum, nextControlStateEnum);
+      avatarControllerFactory.addFinishedTransition(currentControlStateEnum, nextControlStateEnum);
    }
 
    public void addStandPrepStateTransition(HighLevelControllerName nextControlStateEnum)
    {
-      controllerFactory.addCustomStateTransition(createStandTransitionState(nextControlStateEnum, controllerFactory, true));
+      avatarControllerFactory.addCustomStateTransition(createStandTransitionState(nextControlStateEnum, avatarControllerFactory, true));
    }
 
    public void addFinishedTransition(HighLevelControllerName currentControlStateEnum, HighLevelControllerName nextControlStateEnum, boolean performNextStateOnEntry)
    {
-      controllerFactory.addFinishedTransition(currentControlStateEnum, nextControlStateEnum, performNextStateOnEntry);
+      avatarControllerFactory.addFinishedTransition(currentControlStateEnum, nextControlStateEnum, performNextStateOnEntry);
    }
 
    public void addSmoothTransitionState(String transitionName, HighLevelControllerName transitionStateEnum, HighLevelControllerName currentControlStateEnum, HighLevelControllerName nextControlStateEnum)
    {
-      controllerFactory.addCustomSmoothTransitionControlState(transitionName, transitionStateEnum, currentControlStateEnum, nextControlStateEnum);
+      avatarControllerFactory.addCustomSmoothTransitionControlState(transitionName, transitionStateEnum, currentControlStateEnum, nextControlStateEnum);
    }
 
    public void setHighLevelControllerCallbackForEstimator(Map<HighLevelControllerName, StateEstimatorMode> estimatorModeMap)
@@ -895,9 +939,45 @@ public class AvatarMultiThreadingFactory
       estimatorModeMapReference.set(estimatorModeMap);
    }
 
-   public Runnable addThread(String name, Runnable runnable, double threadDt, int priority, int core, YoRegistry registry, YoGraphicsListRegistry yoGraphicsRegistry)
+   /**
+    * External API to allow addition of a new thread given a runnable, update rate, and priority/core (for realtime threads)
+    */
+   public HumanoidRobotControlTask createAndAddThread(String name, Runnable runnable, double threadDt, int core, int priority, YoRegistry registry, YoGraphicsListRegistry yoGraphicsRegistry)
    {
-      // Set up Task
+      HumanoidRobotControlTask task = createAndAddTask(name, runnable, threadDt, registry, yoGraphicsRegistry);
+
+      // Set up realtime or non-realtime thread
+      if (useRealtimeThreads && useMultiThreading)
+         createAndAddRealtimeThread(name, task, core, priority);
+
+      else if (!useRealtimeThreads && useMultiThreading)
+         createAndAddNonRealtimeThread(name, task);
+
+      addTask(task);
+      return task;
+   }
+
+   public void createAndAddThread(String name, HumanoidRobotControlTask task, int core, int priority)
+   {
+      addTask(task);
+
+      // Set up realtime thread
+      if (useRealtimeThreads && useMultiThreading)
+         createAndAddRealtimeThread(name, task, core, priority);
+   }
+
+   public void createAndAddThread(String name, HumanoidRobotControlTask task)
+   {
+      addTask(task);
+
+      // Set up non-realtime thread
+      if (!useRealtimeThreads && useMultiThreading)
+         createAndAddNonRealtimeThread(name, task);
+   }
+
+   public HumanoidRobotControlTask createAndAddTask(String name, Runnable runnable, double threadDt, YoRegistry registry, YoGraphicsListRegistry yoGraphicsRegistry)
+   {
+      // Calculate task divisor
       int divisor = (int) Math.round(threadDt / masterThreadDt);
       if (!Precision.equals(threadDt / masterThreadDt, divisor))
          throw new RuntimeException("Thread DT must be multiple of master thread DT.");
@@ -950,9 +1030,8 @@ public class AvatarMultiThreadingFactory
       yoVariableServer.addRegistry(registry, yoGraphicsRegistry);
 
       // Add post-thread callback to update YoVariable server with thread registry
-      if (yoVariableServer != null)
-         task.addCallbackPostTask(() -> yoVariableServer.update(RealtimeThread.getCurrentMonotonicClockTime(),
-                                                                registry));
+      task.addCallbackPostTask(() -> yoVariableServer.update(RealtimeThread.getCurrentMonotonicClockTime(),
+                                                             registry));
 
       // Add post-thread callback to update the thread frequency calculator and YoVariable (Hz)
       YoDouble threadUpdateRate = new YoDouble(name + "ThreadUpdateRate", rootRegistry);
@@ -963,39 +1042,54 @@ public class AvatarMultiThreadingFactory
                                   threadUpdateRate.set(threadFrequencyCalculator.getFrequency());
                                });
 
-      Runnable retThread = null;
-      
-      // Set up realtime or non-realtime thread
-      if (useRealtimeThreads && useMultiThreading)
-      {
-         Processor threadProcessor = affinity.getSocket().getCore(affinity.checkCoreIsValid(core)).getDefaultProcessor();
-         PriorityParameters threadPriority = new PriorityParameters(priority);
-
-         RealtimeThread realtimeThread = new RealtimeThread(threadPriority, task, name + "Thread");
-         realtimeThread.setAffinity(threadProcessor);
-         realtimeThread.start();
-         
-         retThread = realtimeThread;
-         addThread(realtimeThread);
-      }
-      else if (!useRealtimeThreads && useMultiThreading)
-      {
-         Thread nonRealtimeThread = new Thread(task, name + "Thread");
-         nonRealtimeThread.start();
-
-         retThread = nonRealtimeThread;
-         addThread(nonRealtimeThread);
-      }
-
+      // Add task to list of all tasks so it can be handled by barrier scheduler
       addTask(task);
-      return retThread;
+
+      return task;
    }
 
+   /**
+    * Creates realtime thread, starts that thread, and adds that thread to the list of all threads
+    */
+   private RealtimeThread createAndAddRealtimeThread(String name, Runnable runnable, int core, int priority)
+   {
+      Processor threadProcessor = affinity.getSocket().getCore(affinity.checkCoreIsValid(core)).getDefaultProcessor();
+      PriorityParameters threadPriority = new PriorityParameters(priority);
+
+      RealtimeThread realtimeThread = new RealtimeThread(threadPriority, runnable, name + "Thread");
+      realtimeThread.setAffinity(threadProcessor);
+      realtimeThread.start();
+
+      addThread(realtimeThread);
+      return realtimeThread;
+   }
+
+   /**
+    * Creates non-realtime thread, starts that thread, and adds that thread to the list of all threads
+    */
+   private Thread createAndAddNonRealtimeThread(String name, Runnable runnable)
+   {
+      Thread nonRealtimeThread = new Thread(runnable, name + "Thread");
+      nonRealtimeThread.start();
+
+      addThread(nonRealtimeThread);
+      return nonRealtimeThread;
+   }
+
+   /**
+    * For adding a new thread task.
+    * IMPORTANT: this is required for any thread that runs in the multi-threaded architecture, since
+    * this will ensure that thread is added to the barrier scheduler
+    */
    public void addTask(HumanoidRobotControlTask task)
    {
-      tasks.add(task);
+      if (!tasks.contains(task))
+         tasks.add(task);
    }
 
+   /**
+    * TODO maybe we get rid of this??
+    */
    public void addThread(Runnable thread)
    {
       threads.add(thread);
@@ -1007,11 +1101,11 @@ public class AvatarMultiThreadingFactory
                                         HighLevelControllerName nextControlStateEnum,
                                         CommandBlenderFactory commandBlenderFactory)
    {
-      controllerFactory.addCustomSmoothTransitionControlState(transitionName,
-                                                              transitionStateEnum,
-                                                              currentControlStateEnum,
-                                                              nextControlStateEnum,
-                                                              commandBlenderFactory);
+      avatarControllerFactory.addCustomSmoothTransitionControlState(transitionName,
+                                                                    transitionStateEnum,
+                                                                    currentControlStateEnum,
+                                                                    nextControlStateEnum,
+                                                                    commandBlenderFactory);
    }
 
    public void setExternalMasterThread(RealtimeThread masterThread)
@@ -1026,17 +1120,17 @@ public class AvatarMultiThreadingFactory
 
    public HighLevelHumanoidControllerFactory getControllerFactory()
    {
-      return controllerFactory;
+      return avatarControllerFactory;
    }
 
    public YoRegistry getEstimatorRegistry()
    {
-      return avatarEstimatorThread.getYoRegistry();
+      return avatarEstimator.getYoRegistry();
    }
 
    public YoGraphicGroupDefinition getEstimatorYoGraphics()
    {
-      return avatarEstimatorThread.getSCS2YoGraphics();
+      return avatarEstimator.getSCS2YoGraphics();
    }
 
    public RealtimeROS2Node getEstimatorROS2Node()
@@ -1046,7 +1140,7 @@ public class AvatarMultiThreadingFactory
 
    public FullHumanoidRobotModel getEstimatorFullRobotModel()
    {
-      return avatarEstimatorThread.getFullRobotModel();
+      return avatarEstimator.getFullRobotModel();
    }
 
    public void addPreEstimatorThreadRunnable(Runnable runnable)

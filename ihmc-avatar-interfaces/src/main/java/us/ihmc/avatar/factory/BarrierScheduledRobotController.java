@@ -42,7 +42,7 @@ public class BarrierScheduledRobotController implements DisposableRobotControlle
       barrierScheduler.reset();
       for (int i = 0; i < tasks.size(); i++)
       {
-         //tasks.get(i).initialize();
+         tasks.get(i).initialize();
       }
       masterContext.setControllerRan(false);
       masterContext.setEstimatorRan(false);
