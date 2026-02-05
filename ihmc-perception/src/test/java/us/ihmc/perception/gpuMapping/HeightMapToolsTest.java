@@ -1,12 +1,17 @@
 package us.ihmc.perception.gpuMapping;
 
+import org.bytedeco.javacpp.FloatPointer;
+import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
+import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.perception.gpuMapping.HeightMapTools.FlattenedHeightMap;
 
 import java.util.Random;
 
@@ -225,5 +230,121 @@ public class HeightMapToolsTest
          int keyFromIndices = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
          Assertions.assertEquals(keyFromCoordinates, keyFromIndices);
       }
+   }
+
+   @Test
+   public void testFlatteningHeightMap()
+   {
+      int cellsPerAxis = 10;
+      Mat heightMapMat = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
+      for (int i = 0; i < cellsPerAxis; i++)
+      {
+         for (int j = 0; j < cellsPerAxis; j++)
+         {
+            heightMapMat.ptr(i, j).putFloat(1.0f);
+         }
+      }
+
+      GpuMat gpuHeightMapMat = new GpuMat(heightMapMat);
+      int centerIndex = HeightMapTools.computeCenterIndex(1.0, 0.1);
+
+      FlattenedHeightMap result =  HeightMapTools.flattenHeightMapToXYZ(gpuHeightMapMat, 0.0f, 0.0f, centerIndex, 0.1f, 0.0f);
+
+      int resultCount = result.pointCount();
+      assertEquals(100, resultCount);
+   }
+
+   @Test
+   public void testComputeTransformSVDTranslationOnly()
+   {
+      // 3 points forming a triangle in local frame
+      float[] localData = new float[] {
+            0f, 0f, 0f,
+            1f, 0f, 0f,
+            0f, 1f, 0f
+      };
+      FloatPointer localPoints = new FloatPointer(localData);
+
+      // Same points translated by (1, 2, 3) in global frame
+      float[] globalData = new float[] {
+            1f, 2f, 3f,
+            2f, 2f, 3f,
+            1f, 3f, 3f
+      };
+      FloatPointer globalPoints = new FloatPointer(globalData);
+
+      // Correspondences are 0->0, 1->1, 2->2
+      int[] corr = new int[] {0, 1, 2};
+      IntPointer correspondences = new IntPointer(corr);
+
+      int numPoints = 3;
+
+      // Call the method
+      DMatrixRMaj transform = HeightMapTools.computeTransformSVD(localPoints, globalPoints, correspondences, numPoints);
+
+      // Translation should be (1,2,3)
+      assertEquals(1.0, transform.get(0, 3), 1e-6);
+      assertEquals(2.0, transform.get(1, 3), 1e-6);
+      assertEquals(3.0, transform.get(2, 3), 1e-6);
+
+      // Rotation should be identity
+      assertEquals(1.0, transform.get(0, 0), 1e-6);
+      assertEquals(1.0, transform.get(1, 1), 1e-6);
+      assertEquals(1.0, transform.get(2, 2), 1e-6);
+
+      assertEquals(0.0, transform.get(0, 1), 1e-6);
+      assertEquals(0.0, transform.get(0, 2), 1e-6);
+      assertEquals(0.0, transform.get(1, 0), 1e-6);
+      assertEquals(0.0, transform.get(1, 2), 1e-6);
+      assertEquals(0.0, transform.get(2, 0), 1e-6);
+      assertEquals(0.0, transform.get(2, 1), 1e-6);
+   }
+
+   @Test
+   public void testComputeTransformSVDRotationAndTranslation()
+   {
+      // 3 points forming a triangle in local frame
+      float[] localData = new float[] {
+            0f, 0f, 0f,
+            1f, 0f, 0f,
+            0f, 1f, 0f
+      };
+      FloatPointer localPoints = new FloatPointer(localData);
+
+      // Apply 90° rotation around Z-axis + translation (1, 2, 3)
+      // Rotation 90° CCW around Z: x' = -y, y' = x, z' = z
+      float[] globalData = new float[] {
+            1f, 2f, 3f,  // (0,0,0) -> (0,0,0)+translation
+            1f, 3f, 3f,  // (1,0,0) -> (0,1,0)+translation
+            0f, 2f, 3f   // (0,1,0) -> (-1,0,0)+translation
+      };
+      FloatPointer globalPoints = new FloatPointer(globalData);
+
+      // Correspondences are 0->0, 1->1, 2->2
+      int[] corr = new int[] {0, 1, 2};
+      IntPointer correspondences = new IntPointer(corr);
+
+      int numPoints = 3;
+
+      // Call the method
+      DMatrixRMaj transform = HeightMapTools.computeTransformSVD(localPoints, globalPoints, correspondences, numPoints);
+
+      // Translation should be (1,2,3)
+      assertEquals(1.0, transform.get(0, 3), 1e-6);
+      assertEquals(2.0, transform.get(1, 3), 1e-6);
+      assertEquals(3.0, transform.get(2, 3), 1e-6);
+
+      // Rotation should be 90° around Z
+      assertEquals(0.0, transform.get(0, 0), 1e-6);
+      assertEquals(-1.0, transform.get(0, 1), 1e-6);
+      assertEquals(0.0, transform.get(0, 2), 1e-6);
+
+      assertEquals(1.0, transform.get(1, 0), 1e-6);
+      assertEquals(0.0, transform.get(1, 1), 1e-6);
+      assertEquals(0.0, transform.get(1, 2), 1e-6);
+
+      assertEquals(0.0, transform.get(2, 0), 1e-6);
+      assertEquals(0.0, transform.get(2, 1), 1e-6);
+      assertEquals(1.0, transform.get(2, 2), 1e-6);
    }
 }

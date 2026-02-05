@@ -150,6 +150,7 @@ public class HeightMapExtractor
          groundToWorldTranslationDevicePointer = new FloatPointer();
 
          parametersHostPointer = new FloatPointer(21);
+         //TODO this is a bug, you need to specficy the size of the float pointer, we get lucky here
          parametersDevicePointer = new FloatPointer();
       }
       catch (Exception e)

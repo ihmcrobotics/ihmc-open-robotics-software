@@ -1,9 +1,17 @@
 package us.ihmc.perception.gpuMapping;
 
 import org.bytedeco.javacpp.FloatPointer;
+import org.bytedeco.javacpp.IntPointer;
+import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
+import org.ejml.interfaces.decomposition.SingularValueDecomposition_F64;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 
 import java.nio.FloatBuffer;
 
@@ -173,4 +181,173 @@ public class HeightMapTools
 
       heightMapDataToPack.setHeights(values);
    }
+
+   public record FlattenedHeightMap(FloatPointer data, int pointCount) {}
+
+   public static FlattenedHeightMap flattenHeightMapToXYZ(GpuMat heightMap,
+                                                          double centerX,
+                                                          double centerY,
+                                                          int centerIndex,
+                                                          float cellSize,
+                                                          float invalidHeightValue)
+   {
+      int rows = heightMap.rows();
+      int cols = heightMap.cols();
+
+      // Download height map to CPU
+      Mat cpuMap = new Mat(rows, cols, opencv_core.CV_32FC1);
+      FloatPointer cpuHeights = new FloatPointer(cpuMap.data());
+      heightMap.download(cpuMap);
+
+      // Worst case: every cell is valid
+      FloatPointer xyz = new FloatPointer((long) rows * cols * 3);
+
+      int validCount = 0;
+
+      for (int row = 0; row < rows; row++)
+      {
+         for (int col = 0; col < cols; col++)
+         {
+            float z = cpuHeights.get((long) row * cols + col);
+
+            // Reject invalid heights
+            if (Float.isNaN(z) || z == invalidHeightValue)
+               continue;
+
+            // Convert grid coordinates to world coordinates
+            // Offset from center in grid cells, then convert to meters, then add center position
+            float x = (float) (centerX + (col - centerIndex) * cellSize);
+            float y = (float) (centerY + (row - centerIndex) * cellSize);
+
+            int base = validCount * 3;
+            xyz.put(base, x);
+            xyz.put(base + 1, y);
+            xyz.put(base + 2, z);
+
+            validCount++;
+         }
+      }
+
+      // Trim unused memory
+      FloatPointer trimmed = new FloatPointer(validCount * 3L);
+      trimmed.put(xyz.position(0).limit(validCount * 3L));
+
+      cpuHeights.close();
+      xyz.close();
+
+      return new FlattenedHeightMap(trimmed, validCount);
+   }
+
+   public static DMatrixRMaj computeTransformSVD(FloatPointer localPoints, FloatPointer globalPoints, IntPointer correspondences, int numPoints)
+   {
+      // Step 1: Compute centroids
+      double localCentroidX = 0, localCentroidY = 0, localCentroidZ = 0;
+      double globalCentroidX = 0, globalCentroidY = 0, globalCentroidZ = 0;
+
+      for (int i = 0; i < numPoints; i++)
+      {
+         int baseLocal = i * 3;
+         localCentroidX += localPoints.get(baseLocal + 0);
+         localCentroidY += localPoints.get(baseLocal + 1);
+         localCentroidZ += localPoints.get(baseLocal + 2);
+
+         int j = correspondences.get(i);
+         int baseGlobal = j * 3;
+         globalCentroidX += globalPoints.get(baseGlobal + 0);
+         globalCentroidY += globalPoints.get(baseGlobal + 1);
+         globalCentroidZ += globalPoints.get(baseGlobal + 2);
+      }
+
+      localCentroidX /= numPoints;
+      localCentroidY /= numPoints;
+      localCentroidZ /= numPoints;
+      globalCentroidX /= numPoints;
+      globalCentroidY /= numPoints;
+      globalCentroidZ /= numPoints;
+
+      // Step 2: Compute cross-covariance matrix H
+      DMatrixRMaj H = new DMatrixRMaj(3, 3);
+
+      for (int i = 0; i < numPoints; i++)
+      {
+         int baseLocal = i * 3;
+         double lx = localPoints.get(baseLocal + 0) - localCentroidX;
+         double ly = localPoints.get(baseLocal + 1) - localCentroidY;
+         double lz = localPoints.get(baseLocal + 2) - localCentroidZ;
+
+         int j = correspondences.get(i);
+         int baseGlobal = j * 3;
+         double gx = globalPoints.get(baseGlobal + 0) - globalCentroidX;
+         double gy = globalPoints.get(baseGlobal + 1) - globalCentroidY;
+         double gz = globalPoints.get(baseGlobal + 2) - globalCentroidZ;
+
+         // H += local_centered * global_centered^T
+         H.add(0, 0, lx * gx);
+         H.add(0, 1, lx * gy);
+         H.add(0, 2, lx * gz);
+         H.add(1, 0, ly * gx);
+         H.add(1, 1, ly * gy);
+         H.add(1, 2, ly * gz);
+         H.add(2, 0, lz * gx);
+         H.add(2, 1, lz * gy);
+         H.add(2, 2, lz * gz);
+      }
+
+      // Step 3: Compute SVD: H = U * S * V^T
+      SingularValueDecomposition_F64<DMatrixRMaj> svd = DecompositionFactory_DDRM.svd(3, 3, true, true, false);
+      svd.decompose(H);
+
+      DMatrixRMaj U = svd.getU(null, false);
+      DMatrixRMaj V = svd.getV(null, false);
+
+      // Step 4: Compute rotation: R = V * U^T
+      DMatrixRMaj Ut = new DMatrixRMaj(3, 3);
+      CommonOps_DDRM.transpose(U, Ut);
+
+      DMatrixRMaj R = new DMatrixRMaj(3, 3);
+      CommonOps_DDRM.mult(V, Ut, R);
+
+      // Step 5: Handle reflection case (det(R) < 0)
+      if (CommonOps_DDRM.det(R) < 0)
+      {
+         V.set(0, 2, -V.get(0, 2));
+         V.set(1, 2, -V.get(1, 2));
+         V.set(2, 2, -V.get(2, 2));
+         CommonOps_DDRM.mult(V, Ut, R);
+      }
+
+      // Step 6: Compute translation: t = centroid_global - R * centroid_local
+      DMatrixRMaj localCentroid = new DMatrixRMaj(new double[][] {{localCentroidX}, {localCentroidY}, {localCentroidZ}});
+      DMatrixRMaj globalCentroid = new DMatrixRMaj(new double[][] {{globalCentroidX}, {globalCentroidY}, {globalCentroidZ}});
+      DMatrixRMaj t = new DMatrixRMaj(3, 1);
+
+      CommonOps_DDRM.mult(R, localCentroid, t);
+      CommonOps_DDRM.subtract(globalCentroid, t, t);
+
+      // Step 7: Build 4x4 homogeneous transformation matrix
+      DMatrixRMaj transform = new DMatrixRMaj(4, 4);
+
+      // Copy rotation (top-left 3x3)
+      for (int i = 0; i < 3; i++)
+      {
+         for (int j = 0; j < 3; j++)
+         {
+            transform.set(i, j, R.get(i, j));
+         }
+      }
+
+      // Copy translation (top-right 3x1)
+      transform.set(0, 3, t.get(0, 0));
+      transform.set(1, 3, t.get(1, 0));
+      transform.set(2, 3, t.get(2, 0));
+
+      // Bottom row [0, 0, 0, 1]
+      transform.set(3, 0, 0);
+      transform.set(3, 1, 0);
+      transform.set(3, 2, 0);
+      transform.set(3, 3, 1);
+
+      return transform;
+   }
+
 }
