@@ -305,7 +305,6 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
          BehaviorTreeSceneObjectDefinitionMessage message = new BehaviorTreeSceneObjectDefinitionMessage();
          definition.getSceneObjectDefinition().toMessage(message);
          frameSceneObject = (BehaviorTreeSceneDoorFrameExecutor) scene.createObject(message);
-         frameSceneObject.setPersistentDetection(doorPanelSceneObject.getDoorPanelPersistentDetection());
          frameSceneObject.setDoorPanel(doorPanelSceneObject);
          frameSceneObject.update();
          scene.addObject(frameSceneObject);

@@ -162,6 +162,19 @@ public abstract class BehaviorTreeSceneState
       return null;
    }
 
+   public BehaviorTreeSceneObjectState getObject(BehaviorTreeSceneObjectType objectType)
+   {
+      for (BehaviorTreeSceneObjectState object : objects)
+      {
+         if (object.getObjectType() == objectType)
+         {
+            return object;
+         }
+      }
+
+      return null;
+   }
+
    public void addObject(BehaviorTreeSceneObjectState object)
    {
       objects.add(object);
