@@ -22,9 +22,9 @@ __global__ void findNearestNeighborsKernel(const float* local_map,
     if (idx >= local_size) return;
 
     // Access local point (x, y, z) from flat array
-    float local_x = local_map[idx + 0];
-    float local_y = local_map[idx + 1];
-    float local_z = local_map[idx + 2];
+    float local_x = local_map[idx * 3 + 0];
+    float local_y = local_map[idx * 3 + 1];
+    float local_z = local_map[idx * 3 + 2];
 
     float min_dist = 10000000;
     int min_idx = 0;
@@ -32,9 +32,9 @@ __global__ void findNearestNeighborsKernel(const float* local_map,
     for (int j = 0; j < global_size; ++j)
     {
         // Access global point (x, y, z) from flat array
-        float global_x = global_map[j + 0];
-        float global_y = global_map[j + 1];
-        float global_z = global_map[j + 2];
+        float global_x = global_map[j * 3 + 0];
+        float global_y = global_map[j * 3 + 1];
+        float global_z = global_map[j * 3 + 2];
 
         float dx = local_x - global_x;
         float dy = local_y - global_y;

@@ -88,11 +88,11 @@ public class HeightMapICPCalculator2
                                                                                    (float) heightMapParameters.getCellSize(),
                                                                                    0.0f);
 
-      FloatPointer cpuLocalDataPointer = flattenedLocalMap.data();
-      FloatPointer cpuGlobalDataPointer = flattenedGlobalMap.data();
+      updateInternal(flattenedLocalMap.data(), flattenedGlobalMap.pointCount(), flattenedGlobalMap.data(), flattenedGlobalMap.pointCount());
+   }
 
-      int localPoints = flattenedLocalMap.pointCount();
-      int globalPoints = flattenedGlobalMap.pointCount();
+   public void updateInternal(FloatPointer cpuLocalDataPointer, int localPoints, FloatPointer cpuGlobalDataPointer, int globalPoints)
+   {
       int localFloats = localPoints * 3;
       int globalFloats = globalPoints * 3;
 
@@ -193,6 +193,13 @@ public class HeightMapICPCalculator2
          double dy = incrementalTransform.get(1, 3);
          double dz = incrementalTransform.get(2, 3);
          double moveDist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+         System.out.println("Iteration " + i);
+         System.out.println("  Valid correspondences: " + validCount);
+         System.out.println("  Incremental dx: " + incrementalTransform.get(0, 3));
+         System.out.println("  Incremental dy: " + incrementalTransform.get(1, 3));
+         System.out.println("  Total dx so far: " + totalErrorTransform.get(0, 3));
+         System.out.println("  Move distance: " + moveDist);
 
          if (moveDist < translationThreshold)
          {
