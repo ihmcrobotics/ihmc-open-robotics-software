@@ -18,7 +18,7 @@ public class RDXBehaviorTreeSceneDoorFrame extends RDXBehaviorTreeSceneObject
       super(id, crdtInfo, definition, baseUI);
 
       final double height = DoorModelParameters.DOOR_PANEL_HEIGHT;
-      final double radius = 0.08;
+      final double radius = 0.05;
 
       model = RDXModelBuilder.buildModel(modelBuilder ->
       {
