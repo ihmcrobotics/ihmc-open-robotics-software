@@ -137,10 +137,20 @@ public class QuickFootstepPlanner
       SideDependentList<Double> distancesToGoalMid = new SideDependentList<>(side -> stances.get(side).getPosition().distance(goalMid.getPosition()));
       for (RobotSide side : RobotSide.values) // Take a step towards the goal
       {
-         if (distancesToGoalMid.get(side) >= distancesToGoalMid.get(side.getOppositeSide())) // Choose swing foot; furthest from goal
+         // Choose swing foot -- furthest foot from goal
+         boolean swingThisSide = distancesToGoalMid.get(side) >= distancesToGoalMid.get(side.getOppositeSide());
+
+         // When walking sideways, if feet are close together, swing foot closest to goal instead
+         if (sidewaysness > 0.5 && stances.get(side).getPosition().distance(stances.get(side.getOppositeSide()).getPosition()) < idealStepLength * 0.35)
+            swingThisSide = !swingThisSide;
+
+         // TODO: if going sideways and swinging furthest, we catch up to stance foot instead of passing it
+         //   Also, if sideways and stepping with closest, we step to full idealStepLength instead of 60%
+         //    maybe scale the 60% to 100% with sidewaysness
+
+         if (swingThisSide)
          {
             footToSwing = side;
-
 
             oppositeStance.set(stances.get(side.getOppositeSide()).getPosition());
             oppositeStanceMidlineProjection.set(stanceToGoalLine.orthogonalProjectionCopy(oppositeStance));
