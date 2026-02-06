@@ -185,6 +185,7 @@ public class HeightMapTools
    public static FlattenedHeightMap flattenHeightMapToXYZ(GpuMat heightMap,
                                                           double centerX,
                                                           double centerY,
+                                                          double centerZ, // Added parameter
                                                           int centerIndex,
                                                           float cellSize,
                                                           float invalidHeightValue)
@@ -192,30 +193,28 @@ public class HeightMapTools
       int rows = heightMap.rows();
       int cols = heightMap.cols();
 
-      // Download height map to CPU
       Mat cpuMap = new Mat(rows, cols, opencv_core.CV_32FC1);
       FloatPointer cpuHeights = new FloatPointer(cpuMap.data());
       heightMap.download(cpuMap);
 
-      // Worst case: every cell is valid
       FloatPointer xyzArray = new FloatPointer((long) rows * cols * 3);
-
       int validCount = 0;
 
       for (int row = 0; row < rows; row++)
       {
          for (int col = 0; col < cols; col++)
          {
-            float z = cpuHeights.get((long) row * cols + col);
+            float zRaw = cpuHeights.get((long) row * cols + col);
 
-            // Reject invalid heights
-            if (Float.isNaN(z) || z == invalidHeightValue)
+            if (Float.isNaN(zRaw) || zRaw == invalidHeightValue)
                continue;
 
-            // Convert grid coordinates to world coordinates
-            // Offset from center in grid cells, then convert to meters, then add center position
+            // X and Y are calculated relative to the grid center and then shifted to world coordinates
             float x = (float) (centerX + (col - centerIndex) * cellSize);
             float y = (float) (centerY + (row - centerIndex) * cellSize);
+
+            // Z is adjusted by the global Z offset (the drift/odometry height)
+            float z = (float) (zRaw + centerZ);
 
             int base = validCount * 3;
             xyzArray.put(base, x);
@@ -226,7 +225,6 @@ public class HeightMapTools
          }
       }
 
-      // Trim unused memory
       FloatPointer trimmed = new FloatPointer(validCount * 3L);
       trimmed.put(xyzArray.position(0).limit(validCount * 3L));
 

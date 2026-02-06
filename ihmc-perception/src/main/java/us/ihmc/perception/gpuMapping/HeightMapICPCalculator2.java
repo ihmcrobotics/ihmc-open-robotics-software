@@ -38,8 +38,8 @@ public class HeightMapICPCalculator2
    private final CUDAKernel transformPointsKernel;
    private final dim3 blockSize;
 
-   private DMatrixRMaj totalAccumulatedErrorTransform;
-   private DMatrixRMaj latestPointCloudErrorTransform;
+   private final DMatrixRMaj totalAccumulatedErrorTransform;
+   private final DMatrixRMaj latestPointCloudErrorTransform;
 
    public HeightMapICPCalculator2(HeightMapParameters heightMapParameters)
    {
@@ -55,6 +55,7 @@ public class HeightMapICPCalculator2
       globalCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getGlobalWidthInMeters(), heightMapParameters.getCellSize());
 
       totalAccumulatedErrorTransform = CommonOps_DDRM.identity(4);
+      latestPointCloudErrorTransform = CommonOps_DDRM.identity(4);
 
       try
       {
@@ -92,17 +93,19 @@ public class HeightMapICPCalculator2
       FlattenedHeightMap flattenedLocalMap = HeightMapTools.flattenHeightMapToXYZ(localMap,
                                                                                   correctedX,
                                                                                   correctedY,
+                                                                                  correctedZ,
                                                                                   localCenterIndex,
                                                                                   (float) heightMapParameters.getCellSize(),
                                                                                   0.0f);
       FlattenedHeightMap flattenedGlobalMap = HeightMapTools.flattenHeightMapToXYZ(globalMap,
                                                                                    globalMapCenter.getX32(),
                                                                                    globalMapCenter.getY32(),
+                                                                                   0.0,
                                                                                    globalCenterIndex,
                                                                                    (float) heightMapParameters.getCellSize(),
                                                                                    0.0f);
 
-      if (flattenedLocalMap.pointCount() == 0  || flattenedGlobalMap.pointCount() == 0)
+      if (flattenedLocalMap.pointCount() == 0 || flattenedGlobalMap.pointCount() == 0)
          return;
 
       computeICPFromPointClouds(flattenedLocalMap.data(), flattenedLocalMap.pointCount(), flattenedGlobalMap.data(), flattenedGlobalMap.pointCount());
@@ -139,9 +142,8 @@ public class HeightMapICPCalculator2
 
       double translationThreshold = heightMapParameters.getIcpConvergenceThreshold();
 
-      // --- INITIALIZATION (Before the loop) ---
       // Start with an Identity matrix (no movement)
-      latestPointCloudErrorTransform = CommonOps_DDRM.identity(4);
+      latestPointCloudErrorTransform.set(CommonOps_DDRM.identity(4));
 
       int gridSize = (localPoints + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
       dim3 gridDim = new dim3(gridSize, 1, 1);
@@ -213,12 +215,12 @@ public class HeightMapICPCalculator2
          double dz = incrementalTransform.get(2, 3);
          double moveDist = Math.sqrt(dx * dx + dy * dy + dz * dz);
 
-//         System.out.println("Iteration " + i);
-//         System.out.println("  Valid correspondences: " + validCount);
-//         System.out.println("  Incremental dx: " + incrementalTransform.get(0, 3));
-//         System.out.println("  Incremental dy: " + incrementalTransform.get(1, 3));
-//         System.out.println("  Total dx so far: " + latestPointCloudErrorTransform.get(0, 3));
-//         System.out.println("  Move distance: " + moveDist);
+         //         System.out.println("Iteration " + i);
+         //         System.out.println("  Valid correspondences: " + validCount);
+         //         System.out.println("  Incremental dx: " + incrementalTransform.get(0, 3));
+         //         System.out.println("  Incremental dy: " + incrementalTransform.get(1, 3));
+         //         System.out.println("  Total dx so far: " + latestPointCloudErrorTransform.get(0, 3));
+         //         System.out.println("  Move distance: " + moveDist);
 
          if (moveDist < translationThreshold)
          {
@@ -279,8 +281,7 @@ public class HeightMapICPCalculator2
    public Vector3D getLatestPointCloudErrorTransform()
    {
       Vector3D result = new Vector3D();
-      if (latestPointCloudErrorTransform != null)
-         result.set(latestPointCloudErrorTransform.get(0, 3), latestPointCloudErrorTransform.get(1, 3), latestPointCloudErrorTransform.get(2, 3));
+      result.set(latestPointCloudErrorTransform.get(0, 3), latestPointCloudErrorTransform.get(1, 3), latestPointCloudErrorTransform.get(2, 3));
       return result;
    }
 

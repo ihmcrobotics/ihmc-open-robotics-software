@@ -249,7 +249,7 @@ public class HeightMapToolsTest
       GpuMat gpuHeightMapMat = new GpuMat(heightMapMat);
       int centerIndex = HeightMapTools.computeCenterIndex(1.0, 0.1);
 
-      FlattenedHeightMap result = HeightMapTools.flattenHeightMapToXYZ(gpuHeightMapMat, 0.0f, 0.0f, centerIndex, 0.1f, 0.0f);
+      FlattenedHeightMap result = HeightMapTools.flattenHeightMapToXYZ(gpuHeightMapMat, 0.0f, 0.0f, 0.0f, centerIndex, 0.1f, 0.0f);
 
       int resultCount = result.pointCount();
       assertEquals(100, resultCount);
@@ -303,7 +303,7 @@ public class HeightMapToolsTest
       gpuMat.upload(hostMat);
 
       // 3. Run the method
-      FlattenedHeightMap result = HeightMapTools.flattenHeightMapToXYZ(gpuMat, centerX, centerY, centerIndex, cellSize, invalidValue);
+      FlattenedHeightMap result = HeightMapTools.flattenHeightMapToXYZ(gpuMat, centerX, centerY, 0.0f, centerIndex, cellSize, invalidValue);
 
       // 4. Assertions
       assertEquals(expectedValidPoints, result.pointCount(), "Number of points should match non-zero entries");
