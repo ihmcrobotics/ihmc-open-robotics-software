@@ -8,7 +8,6 @@ import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneDoorFrameExecutor;
 import us.ihmc.behaviors.simulation.door.DoorModelParameters;
 import us.ihmc.commons.UnitConversions;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.RDXModelInstance;
@@ -75,9 +74,6 @@ public class RDXBehaviorTreeSceneDoorFrame extends RDXBehaviorTreeSceneObject
                doorType = "Push";
          }
       }
-
-      if (modelInstance != null)
-         modelInstance.setTransformToWorldFrame(new RigidBodyTransform(transform.getValueReadOnly()));
    }
 
    @Override
