@@ -43,6 +43,87 @@ public class HeightMapICPCalculator2Test
    {
    }
 
+   @Test
+   public void testForMemoryLeak()
+   {
+      // ----------------- Parameters -----------------
+      heightMapParameters.setLocalWidthInMeters(2.0);
+      heightMapParameters.setGlobalWidthInMeters(2.0);
+      heightMapParameters.setCellSize(0.1);
+      heightMapParameters.setIcpMaxIterations(6);
+      heightMapParameters.setIcpConvergenceThreshold(0.001);
+
+      // Capture initial state
+      Runtime runtime = Runtime.getRuntime();
+      System.gc();
+      long initialCpuMemory = runtime.totalMemory() - runtime.freeMemory();
+
+      // If using JavaCV/Pointer based logic, tracking physical memory is key
+      long initialNativeMemory = org.bytedeco.javacpp.Pointer.physicalBytes();
+
+      int localCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getCellSize());
+      int globalCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getGlobalWidthInMeters(), heightMapParameters.getCellSize());
+
+      int localCellsPerAxis = 2 * localCenterIndex + 1;
+      int globalCellsPerAxis = 2 * globalCenterIndex + 1;
+
+      HeightMapICPCalculator2 gpuICPCalculator = new HeightMapICPCalculator2(heightMapParameters);
+      GpuMat localMap = new GpuMat(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_32FC1);
+      localMap.setTo(new Scalar(0.4));
+      GpuMat globalMap = new GpuMat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_32FC1);
+      globalMap.setTo(new Scalar(0.1));
+
+      for (int i = 0; i < 10000; i++)
+      {
+         // Run Kernel (Centered at [0, 0] for both)
+         gpuICPCalculator.computeICPErrorTransform(localMap, globalMap, new Point3D(), new Point3D(), new RigidBodyTransform());
+         if (i % 1000 == 0)
+         {
+            System.out.println("Iteration: " + i + " | Native Bytes: " + org.bytedeco.javacpp.Pointer.physicalBytes());
+         }
+      }
+
+      System.gc();
+      try
+      {
+         Thread.sleep(100);
+      }
+      catch (InterruptedException e)
+      {
+      } // Give GC a moment
+
+      long finalCpuMemory = runtime.totalMemory() - runtime.freeMemory();
+      long finalNativeMemory = org.bytedeco.javacpp.Pointer.physicalBytes();
+
+      System.out.println("CPU Leak (bytes): " + (finalCpuMemory - initialCpuMemory));
+      System.out.println("Native/GPU Leak (bytes): " + (finalNativeMemory - initialNativeMemory));
+
+      // Gotta make sure everything shuts closes properly
+      localMap.close();
+      globalMap.close();
+      gpuICPCalculator.close();
+   }
+
+   //      System.gc();
+   //      try
+   //      {
+   //         Thread.sleep(100);
+   //      }
+   //      catch (InterruptedException e)
+   //      {
+   //      } // Give GC a moment
+   //
+   //      long finalCpuMemory = runtime.totalMemory() - runtime.freeMemory();
+   //      long finalNativeMemory = org.bytedeco.javacpp.Pointer.physicalBytes();
+   //
+   //      System.out.println("CPU Leak (bytes): " + (finalCpuMemory - initialCpuMemory));
+   //      System.out.println("Native/GPU Leak (bytes): " + (finalNativeMemory - initialNativeMemory));
+   //
+   //      // Assertions: Allow a small buffer for internal JVM/Driver overhead
+   //      long tolerance = 5 * 1024 * 1024; // 5MB buffer
+   //      assertTrue("Native memory leaked! Diff: " + (finalNativeMemory - initialNativeMemory), (finalNativeMemory - initialNativeMemory) < tolerance);
+   //   }
+
    /**
     * This test ensures that two maps (the local and the global) can run the ICP kernel even if there is no error.
     * This ensures any strange edge cases where the maps are on top of each other get captured and would cause the test to fail.

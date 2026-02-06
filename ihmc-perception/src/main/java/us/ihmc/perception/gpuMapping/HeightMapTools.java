@@ -198,7 +198,7 @@ public class HeightMapTools
       heightMap.download(cpuMap);
 
       // Worst case: every cell is valid
-      FloatPointer xyz = new FloatPointer((long) rows * cols * 3);
+      FloatPointer xyzArray = new FloatPointer((long) rows * cols * 3);
 
       int validCount = 0;
 
@@ -218,9 +218,9 @@ public class HeightMapTools
             float y = (float) (centerY + (row - centerIndex) * cellSize);
 
             int base = validCount * 3;
-            xyz.put(base, x);
-            xyz.put(base + 1, y);
-            xyz.put(base + 2, z);
+            xyzArray.put(base, x);
+            xyzArray.put(base + 1, y);
+            xyzArray.put(base + 2, z);
 
             validCount++;
          }
@@ -228,10 +228,11 @@ public class HeightMapTools
 
       // Trim unused memory
       FloatPointer trimmed = new FloatPointer(validCount * 3L);
-      trimmed.put(xyz.position(0).limit(validCount * 3L));
+      trimmed.put(xyzArray.position(0).limit(validCount * 3L));
 
       cpuHeights.close();
-      xyz.close();
+      cpuMap.close();
+      xyzArray.close();
 
       return new FlattenedHeightMap(trimmed, validCount);
    }

@@ -329,11 +329,11 @@ public class HeightMapExtractor
 
       heightMapICPCalculator2.computeICPErrorTransform(localMeanMap, globalMeanMap, new Point3D(), globalHeightMapCenter, groundToWorldNoRotation);
       Vector3D correctedTransform = heightMapICPCalculator2.getLatestPointCloudErrorTransform();
-      LogTools.info(
-            "HeightMapICPCalculator correctedTransform: " + correctedTransform.getX() + " " + correctedTransform.getY() + " " + correctedTransform.getZ());
-      LogTools.info("Actual Transform: " + groundToWorldNoRotation.getTranslationX() + " " + groundToWorldNoRotation.getTranslationY() + " "
-                    + groundToWorldNoRotation.getTranslationZ());
-      LogTools.info("Global Center: " + globalHeightMapCenter.getX() + " " + globalHeightMapCenter.getY() + " " + globalHeightMapCenter.getZ(   ));
+//      LogTools.info(
+//            "HeightMapICPCalculator correctedTransform: " + correctedTransform.getX() + " " + correctedTransform.getY() + " " + correctedTransform.getZ());
+//      LogTools.info("Actual Transform: " + groundToWorldNoRotation.getTranslationX() + " " + groundToWorldNoRotation.getTranslationY() + " "
+//                    + groundToWorldNoRotation.getTranslationZ());
+//      LogTools.info("Global Center: " + globalHeightMapCenter.getX() + " " + globalHeightMapCenter.getY() + " " + globalHeightMapCenter.getZ(   ));
             heightMapICPCalculator2.applyCorrectionToTransform(groundToWorldTranslationDevicePointer,
                                                               correctedTransform.getX(),
                                                               correctedTransform.getY(),
