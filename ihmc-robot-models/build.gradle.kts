@@ -13,7 +13,7 @@ ihmc {
 mainDependencies {
    api("javax.vecmath:vecmath:1.5.2")
 
-   api("us.ihmc:ihmc-robot-description:0.25.3")
+   api("us.ihmc:ihmc-robot-description:0.25.4")
    api("us.ihmc:ihmc-robotics-toolkit:source")
 }
 
