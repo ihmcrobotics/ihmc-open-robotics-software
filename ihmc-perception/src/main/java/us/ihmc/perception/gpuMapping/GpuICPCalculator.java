@@ -20,28 +20,23 @@ import java.net.URL;
 
 import static org.bytedeco.cuda.global.cudart.*;
 
-public class HeightMapICPCalculator2
+public class GpuICPCalculator
 {
    private static final boolean PRINT_TIMING_FOR_KERNELS = false;
    private static final int BLOCK_SIZE_XY = 8;
    private final CUstream_st stream;
-
-   private final int localCenterIndex;
-   private final int globalCenterIndex;
+   private final dim3 blockSize;
 
    private final HeightMapParameters heightMapParameters;
-   //   private final CUstream_st stream;
 
    private final CUDAProgram heightMapICPProgram;
-
    private final CUDAKernel nearestNeighborsKernel;
    private final CUDAKernel transformPointsKernel;
-   private final dim3 blockSize;
 
    private final DMatrixRMaj totalAccumulatedErrorTransform;
    private final DMatrixRMaj latestPointCloudErrorTransform;
 
-   public HeightMapICPCalculator2(HeightMapParameters heightMapParameters)
+   public GpuICPCalculator(HeightMapParameters heightMapParameters)
    {
       this.heightMapParameters = heightMapParameters;
       stream = CUDAStreamManager.getStream();
@@ -49,10 +44,7 @@ public class HeightMapICPCalculator2
       // Load header and main file
       URL heightMapUtilsHeaderPath = getClass().getResource("HeightMapUtils.cuh");
       URL mathUtilsHeaderPath = getClass().getResource("/us/ihmc/perception/cuda/MathUtils.cuh");
-      URL kernelPath = getClass().getResource("HeightMapICPFilter2.cu");
-
-      localCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getCellSize());
-      globalCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getGlobalWidthInMeters(), heightMapParameters.getCellSize());
+      URL kernelPath = getClass().getResource("GpuICPCalculator.cu");
 
       totalAccumulatedErrorTransform = CommonOps_DDRM.identity(4);
       latestPointCloudErrorTransform = CommonOps_DDRM.identity(4);
@@ -79,6 +71,8 @@ public class HeightMapICPCalculator2
                                         GpuMat globalMap,
                                         Point3DReadOnly localMapCenter,
                                         Point3DReadOnly globalMapCenter,
+                                        int localCenterIndex,
+                                        int globalCenterIndex,
                                         RigidBodyTransform transformLocalToGlobalFromOdometry)
    {
 

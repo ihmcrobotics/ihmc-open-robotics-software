@@ -5,7 +5,6 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -14,17 +13,17 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class HeightMapICPCalculator2Test
+public class GpuICPCalculatorTest
 {
    private final HeightMapParameters heightMapParameters = new HeightMapParameters();
    private int localCellsPerAxis;
-   private int localCenterIndex;
    private int globalCellsPerAxis;
-   private int globalCenterIndex;
 
    // We don't want to depend on the default values of the parameters in case they change
    private static final double LOCAL_WIDTH_IN_METERS = 4.0;
    private static final double GLOBAL_WIDTH_IN_METERS = 4.0;
+   private int localCenterIndex;
+   private int globalCenterIndex;
 
    @BeforeEach
    public void setup()
@@ -37,92 +36,6 @@ public class HeightMapICPCalculator2Test
       globalCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getGlobalWidthInMeters(), heightMapParameters.getCellSize());
       globalCellsPerAxis = 2 * globalCenterIndex + 1;
    }
-
-   @AfterEach
-   public void shutdown()
-   {
-   }
-
-   @Test
-   public void testForMemoryLeak()
-   {
-      // ----------------- Parameters -----------------
-      heightMapParameters.setLocalWidthInMeters(2.0);
-      heightMapParameters.setGlobalWidthInMeters(2.0);
-      heightMapParameters.setCellSize(0.1);
-      heightMapParameters.setIcpMaxIterations(6);
-      heightMapParameters.setIcpConvergenceThreshold(0.001);
-
-      // Capture initial state
-      Runtime runtime = Runtime.getRuntime();
-      System.gc();
-      long initialCpuMemory = runtime.totalMemory() - runtime.freeMemory();
-
-      // If using JavaCV/Pointer based logic, tracking physical memory is key
-      long initialNativeMemory = org.bytedeco.javacpp.Pointer.physicalBytes();
-
-      int localCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getCellSize());
-      int globalCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getGlobalWidthInMeters(), heightMapParameters.getCellSize());
-
-      int localCellsPerAxis = 2 * localCenterIndex + 1;
-      int globalCellsPerAxis = 2 * globalCenterIndex + 1;
-
-      HeightMapICPCalculator2 gpuICPCalculator = new HeightMapICPCalculator2(heightMapParameters);
-      GpuMat localMap = new GpuMat(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_32FC1);
-      localMap.setTo(new Scalar(0.4));
-      GpuMat globalMap = new GpuMat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_32FC1);
-      globalMap.setTo(new Scalar(0.1));
-
-      for (int i = 0; i < 10000; i++)
-      {
-         // Run Kernel (Centered at [0, 0] for both)
-         gpuICPCalculator.computeICPErrorTransform(localMap, globalMap, new Point3D(), new Point3D(), new RigidBodyTransform());
-         if (i % 1000 == 0)
-         {
-            System.out.println("Iteration: " + i + " | Native Bytes: " + org.bytedeco.javacpp.Pointer.physicalBytes());
-         }
-      }
-
-      System.gc();
-      try
-      {
-         Thread.sleep(100);
-      }
-      catch (InterruptedException e)
-      {
-      } // Give GC a moment
-
-      long finalCpuMemory = runtime.totalMemory() - runtime.freeMemory();
-      long finalNativeMemory = org.bytedeco.javacpp.Pointer.physicalBytes();
-
-      System.out.println("CPU Leak (bytes): " + (finalCpuMemory - initialCpuMemory));
-      System.out.println("Native/GPU Leak (bytes): " + (finalNativeMemory - initialNativeMemory));
-
-      // Gotta make sure everything shuts closes properly
-      localMap.close();
-      globalMap.close();
-      gpuICPCalculator.close();
-   }
-
-   //      System.gc();
-   //      try
-   //      {
-   //         Thread.sleep(100);
-   //      }
-   //      catch (InterruptedException e)
-   //      {
-   //      } // Give GC a moment
-   //
-   //      long finalCpuMemory = runtime.totalMemory() - runtime.freeMemory();
-   //      long finalNativeMemory = org.bytedeco.javacpp.Pointer.physicalBytes();
-   //
-   //      System.out.println("CPU Leak (bytes): " + (finalCpuMemory - initialCpuMemory));
-   //      System.out.println("Native/GPU Leak (bytes): " + (finalNativeMemory - initialNativeMemory));
-   //
-   //      // Assertions: Allow a small buffer for internal JVM/Driver overhead
-   //      long tolerance = 5 * 1024 * 1024; // 5MB buffer
-   //      assertTrue("Native memory leaked! Diff: " + (finalNativeMemory - initialNativeMemory), (finalNativeMemory - initialNativeMemory) < tolerance);
-   //   }
 
    /**
     * This test ensures that two maps (the local and the global) can run the ICP kernel even if there is no error.
@@ -145,14 +58,20 @@ public class HeightMapICPCalculator2Test
       int localCellsPerAxis = 2 * localCenterIndex + 1;
       int globalCellsPerAxis = 2 * globalCenterIndex + 1;
 
-      HeightMapICPCalculator2 heightMapICPCalculator = new HeightMapICPCalculator2(heightMapParameters);
+      GpuICPCalculator heightMapICPCalculator = new GpuICPCalculator(heightMapParameters);
       GpuMat localMap = new GpuMat(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_32FC1);
       localMap.setTo(new Scalar(0.4));
       GpuMat globalMap = new GpuMat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_32FC1);
       globalMap.setTo(new Scalar(0.1));
 
       // Run Kernel (Centered at [0, 0] for both)
-      heightMapICPCalculator.computeICPErrorTransform(localMap, globalMap, new Point3D(), new Point3D(), new RigidBodyTransform());
+      heightMapICPCalculator.computeICPErrorTransform(localMap,
+                                                      globalMap,
+                                                      new Point3D(),
+                                                      new Point3D(),
+                                                      localCenterIndex,
+                                                      globalCenterIndex,
+                                                      new RigidBodyTransform());
 
       // Let's get the result and see how we did...
       Vector3D correctedTransform = heightMapICPCalculator.getLatestPointCloudErrorTransform();
@@ -179,7 +98,7 @@ public class HeightMapICPCalculator2Test
    @Test
    public void testICPWithIdenticalMaps()
    {
-      HeightMapICPCalculator2 heightMapICPCalculator = new HeightMapICPCalculator2(heightMapParameters);
+      GpuICPCalculator heightMapICPCalculator = new GpuICPCalculator(heightMapParameters);
       GpuMat localMap = new GpuMat(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_32FC1);
       localMap.setTo(new Scalar(0.0));
       GpuMat globalMap = new GpuMat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_32FC1);
@@ -195,7 +114,13 @@ public class HeightMapICPCalculator2Test
       Point3D globalMapCenter = new Point3D(0, 0, 0);
 
       // Run Kernel (Centered at [0, 0] for both)
-      heightMapICPCalculator.computeICPErrorTransform(localMap, globalMap, globalMapCenter, globalMapCenter, new RigidBodyTransform());
+      heightMapICPCalculator.computeICPErrorTransform(localMap,
+                                                      globalMap,
+                                                      globalMapCenter,
+                                                      globalMapCenter,
+                                                      localCenterIndex,
+                                                      globalCenterIndex,
+                                                      new RigidBodyTransform());
 
       // Let's get the result and see how we did...
       Vector3D correctedTransform = heightMapICPCalculator.getLatestPointCloudErrorTransform();
@@ -221,7 +146,7 @@ public class HeightMapICPCalculator2Test
    @Test
    public void testICPWithIdenticalMapsRealHeight()
    {
-      HeightMapICPCalculator2 heightMapICPCalculator = new HeightMapICPCalculator2(heightMapParameters);
+      GpuICPCalculator heightMapICPCalculator = new GpuICPCalculator(heightMapParameters);
 
       GpuMat localMap = new GpuMat(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_32FC1);
       localMap.setTo(new Scalar(1.0));
@@ -235,7 +160,13 @@ public class HeightMapICPCalculator2Test
       identityTransform.get(transformArray);
 
       // Run Kernel (Center at [0, 0] for both)
-      heightMapICPCalculator.computeICPErrorTransform(localMap, globalMap, new Point3D(), new Point3D(), new RigidBodyTransform());
+      heightMapICPCalculator.computeICPErrorTransform(localMap,
+                                                      globalMap,
+                                                      new Point3D(),
+                                                      new Point3D(),
+                                                      localCenterIndex,
+                                                      globalCenterIndex,
+                                                      new RigidBodyTransform());
 
       // Let's get the result and see how we did...
       Vector3D correctedTransform = heightMapICPCalculator.getLatestPointCloudErrorTransform();
@@ -260,7 +191,7 @@ public class HeightMapICPCalculator2Test
    @Test
    public void testICPSameOriginDifferentHeights()
    {
-      HeightMapICPCalculator2 heightMapICPCalculator = new HeightMapICPCalculator2(heightMapParameters);
+      GpuICPCalculator heightMapICPCalculator = new GpuICPCalculator(heightMapParameters);
 
       // The global map is higher than the local map
       GpuMat localMap = new GpuMat(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_32FC1);
@@ -274,7 +205,13 @@ public class HeightMapICPCalculator2Test
       identityTransform.get(transformArray);
 
       // Run Kernel (Center at [0, 0] for both)
-      heightMapICPCalculator.computeICPErrorTransform(localMap, globalMap, new Point3D(), new Point3D(), new RigidBodyTransform());
+      heightMapICPCalculator.computeICPErrorTransform(localMap,
+                                                      globalMap,
+                                                      new Point3D(),
+                                                      new Point3D(),
+                                                      localCenterIndex,
+                                                      globalCenterIndex,
+                                                      new RigidBodyTransform());
 
       // Let's get the result and see how we did...
       Vector3D correctedTransform = heightMapICPCalculator.getLatestPointCloudErrorTransform();
@@ -301,7 +238,7 @@ public class HeightMapICPCalculator2Test
    @Test
    public void testICPWithDirectPointClouds()
    {
-      HeightMapICPCalculator2 heightMapICPCalculator = new HeightMapICPCalculator2(heightMapParameters);
+      GpuICPCalculator heightMapICPCalculator = new GpuICPCalculator(heightMapParameters);
 
       int numPoints = 10;
 
@@ -361,7 +298,7 @@ public class HeightMapICPCalculator2Test
       heightMapParameters.setLocalWidthInMeters(1.0);
       heightMapParameters.setGlobalWidthInMeters(2.0);
       heightMapParameters.setCellSize(0.1);
-      HeightMapICPCalculator2 heightMapICPCalculator = new HeightMapICPCalculator2(heightMapParameters);
+      GpuICPCalculator heightMapICPCalculator = new GpuICPCalculator(heightMapParameters);
 
       int localCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getCellSize());
       int globalCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getGlobalWidthInMeters(), heightMapParameters.getCellSize());
@@ -406,7 +343,13 @@ public class HeightMapICPCalculator2Test
       Point3D localMapCenter = new Point3D(0.0, 0.0, 0.0);
 
       // Run ICP
-      heightMapICPCalculator.computeICPErrorTransform(localMap, globalMap, localMapCenter, new Point3D(0.1, 0.0, 0.0), new RigidBodyTransform());
+      heightMapICPCalculator.computeICPErrorTransform(localMap,
+                                                      globalMap,
+                                                      localMapCenter,
+                                                      new Point3D(0.1, 0.0, 0.0),
+                                                      localCenterIndex,
+                                                      globalCenterIndex,
+                                                      new RigidBodyTransform());
 
       Vector3D correctedTransform = heightMapICPCalculator.getLatestPointCloudErrorTransform();
 
@@ -435,7 +378,7 @@ public class HeightMapICPCalculator2Test
       heightMapParameters.setIcpMaxIterations(5);
       heightMapParameters.setIcpConvergenceThreshold(1e-6);
 
-      HeightMapICPCalculator2 heightMapICPCalculator = new HeightMapICPCalculator2(heightMapParameters);
+      GpuICPCalculator heightMapICPCalculator = new GpuICPCalculator(heightMapParameters);
 
       int localCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getCellSize());
       int globalCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getGlobalWidthInMeters(), heightMapParameters.getCellSize());
@@ -479,7 +422,13 @@ public class HeightMapICPCalculator2Test
       globalMap.upload(globalMatCPU);
 
       // ---------------- Run ICP ----------------
-      heightMapICPCalculator.computeICPErrorTransform(localMap, globalMap, new Point3D(), new Point3D(0.1, 0.1, 0.0), new RigidBodyTransform());
+      heightMapICPCalculator.computeICPErrorTransform(localMap,
+                                                      globalMap,
+                                                      new Point3D(),
+                                                      new Point3D(0.1, 0.1, 0.0),
+                                                      localCenterIndex,
+                                                      globalCenterIndex,
+                                                      new RigidBodyTransform());
 
       Vector3D corrected = heightMapICPCalculator.getLatestPointCloudErrorTransform();
 
@@ -508,7 +457,7 @@ public class HeightMapICPCalculator2Test
       heightMapParameters.setIcpMaxIterations(6);
       heightMapParameters.setIcpConvergenceThreshold(0.001);
 
-      HeightMapICPCalculator2 heightMapICPCalculator = new HeightMapICPCalculator2(heightMapParameters);
+      GpuICPCalculator heightMapICPCalculator = new GpuICPCalculator(heightMapParameters);
 
       int localCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getCellSize());
       int globalCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getGlobalWidthInMeters(), heightMapParameters.getCellSize());
@@ -587,7 +536,13 @@ public class HeightMapICPCalculator2Test
 
       // ----------------- Run ICP -----------------
       new Point3D(0.10512145566304529, -6.100405932460462E-4, 0.9680018063204976);
-      heightMapICPCalculator.computeICPErrorTransform(localMap, globalMap, new Point3D(), new Point3D(), new RigidBodyTransform());
+      heightMapICPCalculator.computeICPErrorTransform(localMap,
+                                                      globalMap,
+                                                      new Point3D(),
+                                                      new Point3D(),
+                                                      localCenterIndex,
+                                                      globalCenterIndex,
+                                                      new RigidBodyTransform());
       Vector3D corrected = heightMapICPCalculator.getLatestPointCloudErrorTransform();
       System.out.println("Corrected transform = " + corrected);
 

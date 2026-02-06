@@ -2,14 +2,6 @@
 #include "MathUtils.cuh"
 
 extern "C"
-#define CELL_SIZE 0
-#define LOCAL_CENTER_INDEX 1
-#define GLOBAL_CENTER_INDEX 2
-#define LOCAL_CELLS_PER_AXIS 3
-#define GLOBAL_CELLS_PER_AXIS 4
-#define SEARCH_RADIUS 5
-
-extern "C"
 __global__ void findNearestNeighborsKernel(const float* local_map,
                                            const float* global_map,
                                            int* correspondences,
