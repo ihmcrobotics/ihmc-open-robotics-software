@@ -43,7 +43,7 @@ testDependencies {
    api("org.jfree:jcommon:1.0.24")
    api("org.hamcrest:hamcrest:2.2")
 
-   api("us.ihmc:euclid-test:0.22.4")
+   api("us.ihmc:euclid-test:0.22.5")
    api("us.ihmc:simulation-construction-set:0.25.4")
    api("us.ihmc:ihmc-matrix-library-test:0.19.3")
    api("us.ihmc:ihmc-math-linear-dynamic-systems:0.15.7")

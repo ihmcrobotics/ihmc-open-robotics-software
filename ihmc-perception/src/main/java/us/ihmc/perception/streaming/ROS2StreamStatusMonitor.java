@@ -10,8 +10,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.perception.CameraModel;
-import us.ihmc.perception.camera.CameraIntrinsics;
-import us.ihmc.ros2.ROS2Input;
+import us.ihmc.sensors.CameraIntrinsics;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.Timer;
 
