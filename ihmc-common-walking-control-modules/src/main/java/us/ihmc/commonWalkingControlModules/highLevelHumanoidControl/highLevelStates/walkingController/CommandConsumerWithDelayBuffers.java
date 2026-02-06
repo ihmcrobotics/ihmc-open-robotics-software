@@ -81,6 +81,7 @@ public class CommandConsumerWithDelayBuffers
          for(int commandIndex = 0; commandIndex < newCommands.size(); commandIndex++)
          {
             C command = newCommands.get(commandIndex);
+            LogTools.info("Queueing command: %s".formatted(command.getClass().getSimpleName()));
 
             if(commandClass == ClearDelayQueueCommand.class)
             {
@@ -105,6 +106,8 @@ public class CommandConsumerWithDelayBuffers
          for(int commandIndex = 0; commandIndex < listOfSupportedCommands.size(); commandIndex++)
          {
             Class<? extends Command<?, ?>> commandClassToFlush = listOfSupportedCommands.get(commandIndex);
+
+            LogTools.info("Flushing command: %s".formatted(commandClassToFlush.getSimpleName()));
             clearDelayQueue(commandClassToFlush);
          }
       }
