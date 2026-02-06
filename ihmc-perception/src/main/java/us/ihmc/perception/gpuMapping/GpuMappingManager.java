@@ -13,7 +13,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
-import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.sensors.CameraIntrinsics;
 import us.ihmc.perception.gpuMapping.worldModel.ChunkedMapManager;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
@@ -26,8 +26,6 @@ import java.util.List;
  */
 public class GpuMappingManager
 {
-   private final HeightMapLogger heightMapLogger;
-
    private final ReferenceFrame heightMapCenter;
    private final HeightMapParameters heightMapParameters;
    private final HeightMapDriftOffset heightMapDriftOffset;
@@ -78,7 +76,6 @@ public class GpuMappingManager
       heightMapMessage = new HeightMapMessage();
       heightMapMessageForController = new HeightMapMessageForController();
       terrainMapMessage = new TerrainMapMessage();
-      heightMapLogger = new HeightMapLogger(heightMapParameters);
 
       // We use a notification to only call resetting the height map in one place
       heightMapMessagePublisher = ros2Node.createPublisher(PerceptionAPI.HEIGHT_MAP_MESSAGE);

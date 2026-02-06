@@ -55,7 +55,6 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
    private ControllerStatusTracker controllerStatusTracker;
    private SideDependentList<AbilityHandActionComms> abilityHandComms;
    private BehaviorTreeSceneExecutor scene;
-   private TerrainMapData terrainMapData;
 
    public void initialize(CRDTInfo crdtInfo,
                           WorkspaceResourceDirectory saveFileDirectory,
@@ -63,8 +62,7 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
                           ROS2SyncedRobotModel syncedRobot,
                           ControllerStatusTracker controllerStatusTracker,
                           SideDependentList<AbilityHandActionComms> abilityHandComms,
-                          BehaviorTreeSceneExecutor scene,
-                          TerrainMapData terrainMapData)
+                          BehaviorTreeSceneExecutor scene)
    {
       this.crdtInfo = crdtInfo;
       this.saveFileDirectory = saveFileDirectory;
@@ -73,7 +71,6 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
       this.controllerStatusTracker = controllerStatusTracker;
       this.abilityHandComms = abilityHandComms;
       this.scene = scene;
-      this.terrainMapData = terrainMapData;
    }
 
    @Override
@@ -86,8 +83,7 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
                                               syncedRobot,
                                               controllerStatusTracker,
                                               abilityHandComms,
-                                              scene,
-                                              terrainMapData);
+                                              scene);
    }
 
    @Override

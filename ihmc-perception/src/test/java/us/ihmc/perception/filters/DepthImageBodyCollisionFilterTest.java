@@ -21,7 +21,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.sensors.CameraIntrinsics;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.scs2.simulation.collision.Collidable;

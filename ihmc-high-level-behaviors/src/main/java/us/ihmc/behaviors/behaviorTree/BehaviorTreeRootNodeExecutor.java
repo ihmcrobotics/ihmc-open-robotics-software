@@ -34,16 +34,14 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
                                        ROS2SyncedRobotModel syncedRobot,
                                        ControllerStatusTracker controllerStatusTracker,
                                        SideDependentList<AbilityHandActionComms> abilityHandComms,
-                                       BehaviorTreeSceneExecutor scene,
-                                       TerrainMapData terrainMapData)
+                                       BehaviorTreeSceneExecutor scene)
    {
       super(new BehaviorTreeRootNodeState(id, crdtInfo, saveFileDirectory, syncedRobot.getRobotModel(), scene),
             ros2ControllerHelper,
             syncedRobot,
             controllerStatusTracker,
             abilityHandComms,
-            scene,
-            terrainMapData);
+            scene);
    }
 
    @Override
@@ -280,10 +278,5 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
    public BehaviorTreeSceneExecutor getScene()
    {
       return scene;
-   }
-
-   public TerrainMapData getTerrainMap()
-   {
-      return terrainMapData;
    }
 }

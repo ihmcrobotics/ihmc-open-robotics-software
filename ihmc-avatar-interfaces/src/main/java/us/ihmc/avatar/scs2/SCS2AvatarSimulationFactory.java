@@ -729,20 +729,13 @@ public class SCS2AvatarSimulationFactory
       if (logToFile.hasValue() && logToFile.get())
       {
          ArrayList<RegistrySendBufferBuilder> builders = new ArrayList<>();
-         builders.add(new RegistrySendBufferBuilder(estimatorThread.getYoRegistry(),
-                                                    estimatorThread.getFullRobotModel().getElevator(),
-                                                    null));
+         builders.add(new RegistrySendBufferBuilder(estimatorThread.getYoRegistry(), estimatorThread.getFullRobotModel().getElevator(), null));
          builders.add(new RegistrySendBufferBuilder(controllerThread.getYoVariableRegistry(),
-                                                    null,
                                                     controllerThread.getSCS2YoGraphics()));
-         builders.add(new RegistrySendBufferBuilder(stepGeneratorThread.getYoVariableRegistry(),
-                                                    null,
-                                                    stepGeneratorThread.getSCS2YoGraphics()));
+         builders.add(new RegistrySendBufferBuilder(stepGeneratorThread.getYoVariableRegistry(), stepGeneratorThread.getSCS2YoGraphics()));
          if (ikStreamingRTThread != null)
          {
-            builders.add(new RegistrySendBufferBuilder(ikStreamingRTThread.getYoVariableRegistry(),
-                                                       null,
-                                                       ikStreamingRTThread.getSCS2YoGraphics()));
+            builders.add(new RegistrySendBufferBuilder(ikStreamingRTThread.getYoVariableRegistry(), ikStreamingRTThread.getSCS2YoGraphics()));
          }
          intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(builders, robotModel.getEstimatorDT(), getClass().getSimpleName());
 
@@ -763,39 +756,27 @@ public class SCS2AvatarSimulationFactory
       if (yoVariableServer != null)
       {
          yoVariableServer.setMainRegistry(estimatorThread.getYoRegistry(),
-                                          createYoVariableServerJointList(estimatorThread.getFullRobotModel()
-                                                                                         .getElevator()),
-                                          null,
+                                          createYoVariableServerJointList(estimatorThread.getFullRobotModel().getElevator()),
                                           estimatorThread.getSCS2YoGraphics());
-         estimatorTask.addCallbackPostTask(() -> yoVariableServer.update(estimatorThread.getHumanoidRobotContextData()
-                                                                                        .getTimestamp(),
+         estimatorTask.addCallbackPostTask(() -> yoVariableServer.update(estimatorThread.getHumanoidRobotContextData().getTimestamp(),
                                                                          estimatorThread.getYoRegistry()));
 
-         yoVariableServer.addRegistry(controllerThread.getYoVariableRegistry(),
-                                      null,
-                                      controllerThread.getSCS2YoGraphics());
-         controllerTask.addCallbackPostTask(() -> yoVariableServer.update(controllerThread.getHumanoidRobotContextData()
-                                                                                          .getTimestamp(),
+         yoVariableServer.addRegistry(controllerThread.getYoVariableRegistry(), controllerThread.getSCS2YoGraphics());
+         controllerTask.addCallbackPostTask(() -> yoVariableServer.update(controllerThread.getHumanoidRobotContextData().getTimestamp(),
                                                                           controllerThread.getYoVariableRegistry()));
-         yoVariableServer.addRegistry(stepGeneratorThread.getYoVariableRegistry(),
-                                      null,
-                                      stepGeneratorThread.getSCS2YoGraphics());
-         stepGeneratorTask.addCallbackPostTask(() -> yoVariableServer.update(stepGeneratorThread.getHumanoidRobotContextData()
-                                                                                                .getTimestamp(),
+         yoVariableServer.addRegistry(stepGeneratorThread.getYoVariableRegistry(), stepGeneratorThread.getSCS2YoGraphics());
+         stepGeneratorTask.addCallbackPostTask(() -> yoVariableServer.update(stepGeneratorThread.getHumanoidRobotContextData().getTimestamp(),
                                                                              stepGeneratorThread.getYoVariableRegistry()));
          if (ikStreamingRTThread != null)
          {
-            yoVariableServer.addRegistry(ikStreamingRTThread.getYoVariableRegistry(),
-                                         null,
-                                         ikStreamingRTThread.getSCS2YoGraphics());
-            stepGeneratorTask.addCallbackPostTask(() -> yoVariableServer.update(ikStreamingRTThread.getHumanoidRobotContextData()
-                                                                                                   .getTimestamp(),
+            yoVariableServer.addRegistry(ikStreamingRTThread.getYoVariableRegistry(), ikStreamingRTThread.getSCS2YoGraphics());
+            stepGeneratorTask.addCallbackPostTask(() -> yoVariableServer.update(ikStreamingRTThread.getHumanoidRobotContextData().getTimestamp(),
                                                                                 ikStreamingRTThread.getYoVariableRegistry()));
          }
 
          if (handControlTask != null)
          {
-            yoVariableServer.addRegistry(handControlThread.getYoVariableRegistry(), null, null);
+            yoVariableServer.addRegistry(handControlThread.getYoVariableRegistry(), null);
             AvatarSimulatedHandControlThread finalHandControlThread = handControlThread;
             handControlTask.addCallbackPostTask(() -> yoVariableServer.update(finalHandControlThread.getHumanoidRobotContextData()
                                                                                                     .getTimestamp(),
@@ -804,23 +785,13 @@ public class SCS2AvatarSimulationFactory
       }
 
       List<MirroredYoVariableRegistry> mirroredRegistries = new ArrayList<>();
-      mirroredRegistries.add(setupWithMirroredRegistry(estimatorThread.getYoRegistry(),
-                                                       estimatorTask,
-                                                       robotController.getYoRegistry()));
-      mirroredRegistries.add(setupWithMirroredRegistry(controllerThread.getYoVariableRegistry(),
-                                                       controllerTask,
-                                                       robotController.getYoRegistry()));
-      mirroredRegistries.add(setupWithMirroredRegistry(stepGeneratorThread.getYoVariableRegistry(),
-                                                       stepGeneratorTask,
-                                                       robotController.getYoRegistry()));
+      mirroredRegistries.add(setupWithMirroredRegistry(estimatorThread.getYoRegistry(), estimatorTask, robotController.getYoRegistry()));
+      mirroredRegistries.add(setupWithMirroredRegistry(controllerThread.getYoVariableRegistry(), controllerTask, robotController.getYoRegistry()));
+      mirroredRegistries.add(setupWithMirroredRegistry(stepGeneratorThread.getYoVariableRegistry(), stepGeneratorTask, robotController.getYoRegistry()));
       if (ikStreamingRTTask != null)
-         mirroredRegistries.add(setupWithMirroredRegistry(ikStreamingRTThread.getYoVariableRegistry(),
-                                                          ikStreamingRTTask,
-                                                          robotController.getYoRegistry()));
+         mirroredRegistries.add(setupWithMirroredRegistry(ikStreamingRTThread.getYoVariableRegistry(), ikStreamingRTTask, robotController.getYoRegistry()));
       if (handControlThread != null)
-         mirroredRegistries.add(setupWithMirroredRegistry(handControlThread.getYoVariableRegistry(),
-                                                          handControlTask,
-                                                          robotController.getYoRegistry()));
+         mirroredRegistries.add(setupWithMirroredRegistry(handControlThread.getYoVariableRegistry(), handControlTask, robotController.getYoRegistry()));
       robot.getRegistry().addChild(robotController.getYoRegistry());
       robot.getControllerManager().addController(new Controller()
       {

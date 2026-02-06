@@ -209,7 +209,7 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
    {
       super.toMessage(message.getDefinition());
 
-      message.setType((byte) sceneActionType.toMessage().ordinal());
+      message.setSceneActionType(sceneActionType.toMessageOrdinal());
       sceneObjectDefinition.toMessage(message.getSceneObjectDefinition());
       message.setTimeout(timeout.toMessage());
       message.setMinimumHistorySize(minimumHistorySize.toMessage());
@@ -226,7 +226,7 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
    {
       super.fromMessage(message.getDefinition());
 
-      sceneActionType.fromMessage(SceneActionNodeType.values()[message.getType()]);
+      sceneActionType.fromMessageOrdinal(message.getSceneActionType(), SceneActionNodeType.values);
       sceneObjectDefinition.fromMessage(message.getSceneObjectDefinition());
       timeout.fromMessage(message.getTimeout());
       minimumHistorySize.fromMessage(message.getMinimumHistorySize());

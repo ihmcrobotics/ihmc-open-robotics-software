@@ -9,6 +9,7 @@ import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseCommun
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
 import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.sensors.ImageSensor;
 
 public class ROS2BehaviorTreeUpdateThread extends RepeatingTaskThread
 {
@@ -18,6 +19,7 @@ public class ROS2BehaviorTreeUpdateThread extends RepeatingTaskThread
    public ROS2BehaviorTreeUpdateThread(ROS2Node ros2Node,
                                        ROS2PeerClockOffsetEstimator peerClockOffsetEstimator,
                                        DRCRobotModel robotModel,
+                                       ImageSensor imageSensor,
                                        YOLOv8DetectionExecutor yolo,
                                        IsaacROSFoundationPoseCommunicatorMap foundationPose,
                                        TerrainMapData terrainMapData)
@@ -28,7 +30,7 @@ public class ROS2BehaviorTreeUpdateThread extends RepeatingTaskThread
       ROS2ControllerHelper ros2ControllerHelper = new ROS2ControllerHelper(ros2Node, robotModel);
       syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2ControllerHelper.getROS2Node());
 
-      executor = new ROS2BehaviorTreeExecutor(ros2ControllerHelper, syncedRobot, yolo, foundationPose, terrainMapData, peerClockOffsetEstimator);
+      executor = new ROS2BehaviorTreeExecutor(ros2ControllerHelper, syncedRobot, imageSensor, yolo, foundationPose, terrainMapData, peerClockOffsetEstimator);
    }
 
    @Override
