@@ -71,10 +71,10 @@ public class HeightMapICPCalculator2Test
       globalMap.setTo(new Scalar(0.1));
 
       // Run Kernel (Centered at [0, 0] for both)
-      heightMapICPCalculator.update(localMap, globalMap, new Point3D(), new Point3D());
+      heightMapICPCalculator.computeICPErrorTransform(localMap, globalMap, new Point3D(), new Point3D(), new RigidBodyTransform());
 
       // Let's get the result and see how we did...
-      Vector3D correctedTransform = heightMapICPCalculator.getTotalErrorTransform();
+      Vector3D correctedTransform = heightMapICPCalculator.getLatestPointCloudErrorTransform();
 
       System.out.println("Translation X: " + correctedTransform.getX());
       System.out.println("Translation Y: " + correctedTransform.getY());
@@ -114,10 +114,10 @@ public class HeightMapICPCalculator2Test
       Point3D globalMapCenter = new Point3D(0, 0, 0);
 
       // Run Kernel (Centered at [0, 0] for both)
-      heightMapICPCalculator.update(localMap, globalMap, globalMapCenter, globalMapCenter);
+      heightMapICPCalculator.computeICPErrorTransform(localMap, globalMap, globalMapCenter, globalMapCenter, new RigidBodyTransform());
 
       // Let's get the result and see how we did...
-      Vector3D correctedTransform = heightMapICPCalculator.getTotalErrorTransform();
+      Vector3D correctedTransform = heightMapICPCalculator.getLatestPointCloudErrorTransform();
 
       System.out.println("Translation X: " + correctedTransform.getX());
       System.out.println("Translation Y: " + correctedTransform.getY());
@@ -154,10 +154,10 @@ public class HeightMapICPCalculator2Test
       identityTransform.get(transformArray);
 
       // Run Kernel (Center at [0, 0] for both)
-      heightMapICPCalculator.update(localMap, globalMap, new Point3D(), new Point3D());
+      heightMapICPCalculator.computeICPErrorTransform(localMap, globalMap, new Point3D(), new Point3D(), new RigidBodyTransform());
 
       // Let's get the result and see how we did...
-      Vector3D correctedTransform = heightMapICPCalculator.getTotalErrorTransform();
+      Vector3D correctedTransform = heightMapICPCalculator.getLatestPointCloudErrorTransform();
 
       System.out.println("Mean X: " + correctedTransform.getX());
       System.out.println("Mean Y: " + correctedTransform.getY());
@@ -193,10 +193,10 @@ public class HeightMapICPCalculator2Test
       identityTransform.get(transformArray);
 
       // Run Kernel (Center at [0, 0] for both)
-      heightMapICPCalculator.update(localMap, globalMap, new Point3D(), new Point3D());
+      heightMapICPCalculator.computeICPErrorTransform(localMap, globalMap, new Point3D(), new Point3D(), new RigidBodyTransform());
 
       // Let's get the result and see how we did...
-      Vector3D correctedTransform = heightMapICPCalculator.getTotalErrorTransform();
+      Vector3D correctedTransform = heightMapICPCalculator.getLatestPointCloudErrorTransform();
 
       System.out.println("Mean X: " + correctedTransform.getX());
       System.out.println("Mean Y: " + correctedTransform.getY());
@@ -254,10 +254,10 @@ public class HeightMapICPCalculator2Test
       }
 
       // Run ICP
-      heightMapICPCalculator.updateInternal(localPoints, numPoints, globalPoints, numPoints);
+      heightMapICPCalculator.computeICPFromPointClouds(localPoints, numPoints, globalPoints, numPoints);
 
       // Get the result
-      Vector3D correctedTransform = heightMapICPCalculator.getTotalErrorTransform();
+      Vector3D correctedTransform = heightMapICPCalculator.getLatestPointCloudErrorTransform();
 
       System.out.println("Corrected X: " + correctedTransform.getX());
       System.out.println("Corrected Y: " + correctedTransform.getY());
@@ -322,12 +322,12 @@ public class HeightMapICPCalculator2Test
       globalMap.upload(globalMatCPU);
 
       // Slight disagreement in map centers
-      Point3D globalMapCenter = new Point3D(0.0, 0.0, 0.0);
+      Point3D localMapCenter = new Point3D(0.0, 0.0, 0.0);
 
       // Run ICP
-      heightMapICPCalculator.update(localMap, globalMap, globalMapCenter, new Point3D(0.1, 0.0, 0.0));
+      heightMapICPCalculator.computeICPErrorTransform(localMap, globalMap, localMapCenter, new Point3D(0.1, 0.0, 0.0), new RigidBodyTransform());
 
-      Vector3D correctedTransform = heightMapICPCalculator.getTotalErrorTransform();
+      Vector3D correctedTransform = heightMapICPCalculator.getLatestPointCloudErrorTransform();
 
       System.out.println("Corrected X: " + correctedTransform.getX());
       System.out.println("Corrected Y: " + correctedTransform.getY());
@@ -398,9 +398,9 @@ public class HeightMapICPCalculator2Test
       globalMap.upload(globalMatCPU);
 
       // ---------------- Run ICP ----------------
-      heightMapICPCalculator.update(localMap, globalMap, new Point3D(), new Point3D(0.1, 0.1, 0.0));
+      heightMapICPCalculator.computeICPErrorTransform(localMap, globalMap, new Point3D(), new Point3D(0.1, 0.1, 0.0), new RigidBodyTransform());
 
-      Vector3D corrected = heightMapICPCalculator.getTotalErrorTransform();
+      Vector3D corrected = heightMapICPCalculator.getLatestPointCloudErrorTransform();
 
       System.out.println("Corrected = " + corrected);
 
@@ -506,8 +506,8 @@ public class HeightMapICPCalculator2Test
 
       // ----------------- Run ICP -----------------
       new Point3D(0.10512145566304529, -6.100405932460462E-4, 0.9680018063204976);
-      heightMapICPCalculator.update(localMap, globalMap, new Point3D(), new Point3D());
-      Vector3D corrected = heightMapICPCalculator.getTotalErrorTransform();
+      heightMapICPCalculator.computeICPErrorTransform(localMap, globalMap, new Point3D(), new Point3D(), new RigidBodyTransform());
+      Vector3D corrected = heightMapICPCalculator.getLatestPointCloudErrorTransform();
       System.out.println("Corrected transform = " + corrected);
 
       // ----------------- EXPECTATION -----------------

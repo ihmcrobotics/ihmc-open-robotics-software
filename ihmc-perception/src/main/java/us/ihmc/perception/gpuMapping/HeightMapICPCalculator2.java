@@ -7,11 +7,11 @@ import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
-import us.ihmc.perception.cuda.CUDAStreamManager;
 import us.ihmc.perception.cuda.CUDATools;
 import us.ihmc.perception.gpuMapping.HeightMapTools.FlattenedHeightMap;
 
@@ -28,21 +28,24 @@ public class HeightMapICPCalculator2
    private final int globalCenterIndex;
 
    private final HeightMapParameters heightMapParameters;
-//   private final CUstream_st stream;
+   //   private final CUstream_st stream;
 
    private final CUDAProgram heightMapICPProgram;
 
    private final CUDAKernel nearestNeighborsKernel;
    private final CUDAKernel transformPointsKernel;
    private final dim3 blockSize;
-   private DMatrixRMaj totalErrorTransform;
+
+   private DMatrixRMaj totalAccumulatedErrorTransform;
+   private DMatrixRMaj latestPointCloudErrorTransform;
+
    private CUstream_st transformStream = new CUstream_st();
    private CUstream_st nearStream = new CUstream_st();
 
    public HeightMapICPCalculator2(HeightMapParameters heightMapParameters)
    {
       this.heightMapParameters = heightMapParameters;
-//      this.stream = CUDAStreamManager.getStream();
+      //      this.stream = CUDAStreamManager.getStream();
 
       // Load header and main file
       URL heightMapUtilsHeaderPath = getClass().getResource("HeightMapUtils.cuh");
@@ -51,6 +54,8 @@ public class HeightMapICPCalculator2
 
       localCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getCellSize());
       globalCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getGlobalWidthInMeters(), heightMapParameters.getCellSize());
+
+      totalAccumulatedErrorTransform = CommonOps_DDRM.identity(4);
 
       try
       {
@@ -70,11 +75,24 @@ public class HeightMapICPCalculator2
       }
    }
 
-   public void update(GpuMat localMap, GpuMat globalMap, Point3DReadOnly localMapCenter, Point3DReadOnly globalMapCenter)
+   public void computeICPErrorTransform(GpuMat localMap,
+                                        GpuMat globalMap,
+                                        Point3DReadOnly localMapCenter,
+                                        Point3DReadOnly globalMapCenter,
+                                        RigidBodyTransform transformLocalToGlobalFromOdometry)
    {
+
+      RigidBodyTransform correctedGlobalTransform = new RigidBodyTransform();
+      correctedGlobalTransform.set(totalAccumulatedErrorTransform);
+      correctedGlobalTransform.multiply(transformLocalToGlobalFromOdometry);
+
+      double correctedX = correctedGlobalTransform.getTranslationX();
+      double correctedY = correctedGlobalTransform.getTranslationY();
+      double correctedZ = correctedGlobalTransform.getTranslationZ();
+
       FlattenedHeightMap flattenedLocalMap = HeightMapTools.flattenHeightMapToXYZ(localMap,
-                                                                                  localMapCenter.getX32(),
-                                                                                  localMapCenter.getY32(),
+                                                                                  correctedX,
+                                                                                  correctedY,
                                                                                   localCenterIndex,
                                                                                   (float) heightMapParameters.getCellSize(),
                                                                                   0.0f);
@@ -85,10 +103,10 @@ public class HeightMapICPCalculator2
                                                                                    (float) heightMapParameters.getCellSize(),
                                                                                    0.0f);
 
-      updateInternal(flattenedLocalMap.data(), flattenedLocalMap.pointCount(), flattenedGlobalMap.data(), flattenedGlobalMap.pointCount());
+      computeICPFromPointClouds(flattenedLocalMap.data(), flattenedLocalMap.pointCount(), flattenedGlobalMap.data(), flattenedGlobalMap.pointCount());
    }
 
-   public void updateInternal(FloatPointer cpuLocalDataPointer, int localPoints, FloatPointer cpuGlobalDataPointer, int globalPoints)
+   public void computeICPFromPointClouds(FloatPointer cpuLocalDataPointer, int localPoints, FloatPointer cpuGlobalDataPointer, int globalPoints)
    {
       int localFloats = localPoints * 3;
       int globalFloats = globalPoints * 3;
@@ -119,7 +137,7 @@ public class HeightMapICPCalculator2
 
       // --- INITIALIZATION (Before the loop) ---
       // Start with an Identity matrix (no movement)
-      totalErrorTransform = CommonOps_DDRM.identity(4);
+      latestPointCloudErrorTransform = CommonOps_DDRM.identity(4);
 
       int gridSize = (localPoints + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
       dim3 gridDim = new dim3(gridSize, 1, 1);
@@ -182,8 +200,8 @@ public class HeightMapICPCalculator2
          filteredCorrespondences.close();
 
          DMatrixRMaj combined = new DMatrixRMaj(4, 4);
-         CommonOps_DDRM.mult(incrementalTransform, totalErrorTransform, combined);
-         totalErrorTransform.set(combined);
+         CommonOps_DDRM.mult(incrementalTransform, latestPointCloudErrorTransform, combined);
+         latestPointCloudErrorTransform.set(combined);
 
          // Extract translation vector length (Euclidean distance)
          double dx = incrementalTransform.get(0, 3);
@@ -195,7 +213,7 @@ public class HeightMapICPCalculator2
          System.out.println("  Valid correspondences: " + validCount);
          System.out.println("  Incremental dx: " + incrementalTransform.get(0, 3));
          System.out.println("  Incremental dy: " + incrementalTransform.get(1, 3));
-         System.out.println("  Total dx so far: " + totalErrorTransform.get(0, 3));
+         System.out.println("  Total dx so far: " + latestPointCloudErrorTransform.get(0, 3));
          System.out.println("  Move distance: " + moveDist);
 
          if (moveDist < translationThreshold)
@@ -248,13 +266,51 @@ public class HeightMapICPCalculator2
       cudaFree(gpuGlobalDataPointer);
       cudaFree(gpuCorrespondences);
       cudaFree(gpuDistances);
+
+      // Track the total drift we have accumulated while running ICP
+      DMatrixRMaj tempTotalAccumulatedErrorTransform = new DMatrixRMaj(4, 4);
+      CommonOps_DDRM.mult(totalAccumulatedErrorTransform, latestPointCloudErrorTransform, tempTotalAccumulatedErrorTransform);
+      totalAccumulatedErrorTransform.set(tempTotalAccumulatedErrorTransform);
    }
 
-   public Vector3D getTotalErrorTransform()
+   public Vector3D getLatestPointCloudErrorTransform()
    {
       Vector3D result = new Vector3D();
-      result.set(totalErrorTransform.get(0, 3), totalErrorTransform.get(1, 3), totalErrorTransform.get(2, 3));
+      result.set(latestPointCloudErrorTransform.get(0, 3), latestPointCloudErrorTransform.get(1, 3), latestPointCloudErrorTransform.get(2, 3));
       return result;
+   }
+
+   /**
+    * Updates the 4x4 transformation matrix on the GPU with the calculated translation residuals.
+    * * @param matrixPtr The pointer to the 4x4 float matrix on the GPU
+    *
+    * @param dx The translation correction in X
+    * @param dy The translation correction in Y
+    * @param dz The translation correction in Z
+    */
+   public void applyCorrectionToTransform(FloatPointer matrixPtr, double dx, double dy, double dz, CUstream_st stream)
+   {
+      // Create a temporary host array to hold the 16 elements of a 4x4 matrix
+      float[] hostMatrix = new float[16];
+      FloatPointer hostPointer = new FloatPointer(hostMatrix);
+
+      // Copy the current matrix from GPU to CPU
+      CUDATools.memcpyAsync(hostPointer, matrixPtr, 16, stream);
+      cudaStreamSynchronize(stream);
+      hostPointer.get(hostMatrix);
+
+      // In a row-major 4x4 matrix, translation is at indices 3, 7, and 11.
+      // [ R R R Tx ]  -> Index 3
+      // [ R R R Ty ]  -> Index 7
+      // [ R R R Tz ]  -> Index 11
+      // [ 0 0 0 1  ]
+      hostMatrix[3] += (float) dx;
+      hostMatrix[7] += (float) dy;
+      hostMatrix[11] += (float) dz;
+
+      // Copy the updated matrix back to the GPU
+      hostPointer.put(hostMatrix);
+      CUDATools.memcpyAsync(matrixPtr, hostPointer, 16, stream);
    }
 
    public void close()

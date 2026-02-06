@@ -21,7 +21,6 @@ import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
 import us.ihmc.perception.cuda.CUDAStreamManager;
 import us.ihmc.perception.cuda.CUDATools;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 
 import java.net.URL;
 
@@ -89,7 +88,7 @@ public class HeightMapExtractor
    private final HeightMapData heightMapData;
    private final Point3D heightMapCenterPoint = new Point3D();
 
-   private final HeightMapICPCalculator heightMapICPCalculator;
+   private final HeightMapICPCalculator2 heightMapICPCalculator2;
 
    public HeightMapExtractor(HeightMapParameters heightMapParameters)
    {
@@ -159,7 +158,7 @@ public class HeightMapExtractor
       }
 
       heightMapData = new HeightMapData(heightMapParameters.getCellSize(), heightMapParameters.getGlobalWidthInMeters(), 0.0, 0.0);
-      heightMapICPCalculator = new HeightMapICPCalculator(heightMapParameters, stream);
+      heightMapICPCalculator2 = new HeightMapICPCalculator2(heightMapParameters);
    }
 
    public void reset(double footHeight)
@@ -328,18 +327,18 @@ public class HeightMapExtractor
          checkCUDAError();
       }
 
-      heightMapICPCalculator.update(localMeanMap, globalMeanMap, groundToWorldTranslationDevicePointer, globalHeightMapCenter);
-      Vector3D correctedTransform = heightMapICPCalculator.getCorrectedTransform();
+      heightMapICPCalculator2.computeICPErrorTransform(localMeanMap, globalMeanMap, new Point3D(), globalHeightMapCenter, groundToWorldNoRotation);
+      Vector3D correctedTransform = heightMapICPCalculator2.getLatestPointCloudErrorTransform();
       LogTools.info(
             "HeightMapICPCalculator correctedTransform: " + correctedTransform.getX() + " " + correctedTransform.getY() + " " + correctedTransform.getZ());
       LogTools.info("Actual Transform: " + groundToWorldNoRotation.getTranslationX() + " " + groundToWorldNoRotation.getTranslationY() + " "
                     + groundToWorldNoRotation.getTranslationZ());
       LogTools.info("Global Center: " + globalHeightMapCenter.getX() + " " + globalHeightMapCenter.getY() + " " + globalHeightMapCenter.getZ(   ));
-      //      heightMapICPCalculator.applyCorrectionToTransform(groundToWorldTranslationDevicePointer,
-      //                                                        correctedTransform.getX(),
-      //                                                        correctedTransform.getY(),
-      //                                                        correctedTransform.getZ(),
-      //                                                        stream);
+            heightMapICPCalculator2.applyCorrectionToTransform(groundToWorldTranslationDevicePointer,
+                                                              correctedTransform.getX(),
+                                                              correctedTransform.getY(),
+                                                              correctedTransform.getZ(),
+                                                              stream);
 
       // ---------- Run the registration kernel ----------
       // Ok so now we've got our local map, lets put that onto the global map
@@ -460,7 +459,7 @@ public class HeightMapExtractor
 
    public void destroy()
    {
-      heightMapICPCalculator.destroy();
+      heightMapICPCalculator2.close();
 
       heightMapProgram.close();
       blockSize.close();
