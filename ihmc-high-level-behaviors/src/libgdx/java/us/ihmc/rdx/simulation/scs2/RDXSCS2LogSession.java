@@ -48,9 +48,8 @@ public class RDXSCS2LogSession extends RDXSCS2Session
    private YoLong yoTimestamp;
    private LogDataReader logDataReader;
 
-   private record ZEDLogVideo(ZEDSVOScrubber scrubber, RDXOpenCVVideoVisualizer visualizer) { }
+   private record ZEDLogVideo(ZEDSVOScrubber scrubber, RDXOpenCVVideoVisualizer colorVis, RDXOpenCVVideoVisualizer depthVis) { }
    private final List<ZEDLogVideo> zedLogVideos = new ArrayList<>();
-   private final List<ZEDSVODepthScrubber> zedDepthScrubbers = new ArrayList<>();
    private record MagewellLogVideo(MagewellScrubber scrubber, OpenCVFrameConverter.ToMat converter, RDXOpenCVVideoVisualizer visualizer) { }
    private final List<MagewellLogVideo> magewellLogVideos = new ArrayList<>();
    private record BlackmagicLogVideo(BlackMagicScrubber scrubber, RDXOpenCVVideoVisualizer visualizer) { }
@@ -101,18 +100,22 @@ public class RDXSCS2LogSession extends RDXSCS2Session
          }
          for (ZEDSVOScrubber zedSVOScrubber : logSession.getZedSVOScrubbers())
          {
-            RDXOpenCVVideoVisualizer visualizer = new RDXOpenCVVideoVisualizer(zedSVOScrubber.getName(), zedSVOScrubber.getName(), false);
-            perceptionVisualizersPanel.addVisualizer(visualizer);
-            ZEDLogVideo zedLogVideo = new ZEDLogVideo(zedSVOScrubber, visualizer);
-            zedLogVideos.add(zedLogVideo);
+            // Color panel
+            RDXOpenCVVideoVisualizer colorVis = new RDXOpenCVVideoVisualizer(zedSVOScrubber.getName() + " Color",
+                                               zedSVOScrubber.getName() + " Color", false);
+            perceptionVisualizersPanel.addVisualizer(colorVis);
+
+            // Depth panel
+            RDXOpenCVVideoVisualizer depthVis = new RDXOpenCVVideoVisualizer(zedSVOScrubber.getName() + " Depth",
+                                               zedSVOScrubber.getName() + " Depth", false);
+            perceptionVisualizersPanel.addVisualizer(depthVis);
+
+            // Add once
+            zedLogVideos.add(new ZEDLogVideo(zedSVOScrubber, colorVis, depthVis));
          }
 
          // Build depth-enabled ZED scrubbers
          File logDir = logSession.getLogDataReader().getLogDirectory();
-         for (File datFile : ZEDSVODepthScrubber.findZEDSensorDatFiles(logDir))
-         {
-            zedDepthScrubbers.add(new ZEDSVODepthScrubber(datFile));
-         }
 
          for (Runnable onSessionStartedRunnable : getOnSessionStartedRunnables())
          {
@@ -163,23 +166,41 @@ public class RDXSCS2LogSession extends RDXSCS2Session
             {
                zedLogVideo.scrubber.scrub(yoTimestamp.getLongValue());
 
-               int imageHeight = zedLogVideo.scrubber.getImageHeight();
-               int imageWidth = zedLogVideo.scrubber.getImageWidth();
-               zedLogVideo.visualizer.updateImageDimensions(imageWidth, imageHeight);
+               int h = zedLogVideo.scrubber.getImageHeight();
+               int w = zedLogVideo.scrubber.getImageWidth();
 
-               Pointer leftColorImageSlMatPointer = zedLogVideo.scrubber.getLeftColorImageSlMatPointer();
-               Mat mat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4, // BGRA8
-                                 sl_mat_get_ptr(leftColorImageSlMatPointer, SL_MEM_CPU),
-                                 sl_mat_get_step_bytes(leftColorImageSlMatPointer, SL_MEM_CPU));
-               zedLogVideo.visualizer.setImage(mat, opencv_imgproc.COLOR_BGR2RGBA);
-               mat.close();
-            }
-         }
-         for (ZEDSVODepthScrubber depthScrubber : zedDepthScrubbers)
-         {
-            synchronized (depthScrubber)
-            {
-               depthScrubber.scrub(yoTimestamp.getLongValue());
+               // color
+               zedLogVideo.colorVis.updateImageDimensions(w, h);
+               Pointer leftPtr = zedLogVideo.scrubber.getLeftColorImageSlMatPointer();
+               if (leftPtr != null && !leftPtr.isNull())
+               {
+                  Mat cBGRA = new Mat(h, w, opencv_core.CV_8UC4,
+                                      sl_mat_get_ptr(leftPtr, SL_MEM_CPU),
+                                      sl_mat_get_step_bytes(leftPtr, SL_MEM_CPU));
+                  zedLogVideo.colorVis.setImage(cBGRA, opencv_imgproc.COLOR_BGR2RGBA);
+                  cBGRA.close();
+               }
+
+               // depth
+               Pointer dPtr = zedLogVideo.scrubber.getDepthSlMatPointer();
+               if (dPtr != null && !dPtr.isNull())
+               {
+                  long step = sl_mat_get_step_bytes(dPtr, SL_MEM_CPU);
+                  if (step > 0)
+                  {
+                     Mat d16 = new Mat(h, w, opencv_core.CV_16UC1,
+                                       sl_mat_get_ptr(dPtr, SL_MEM_CPU), step);
+
+                     zedLogVideo.depthVis.updateImageDimensions(w, h);
+                     Mat d8 = new Mat();
+                     opencv_core.normalize(d16, d8, 0.0, 255.0,
+                                           opencv_core.NORM_MINMAX, opencv_core.CV_8UC1, null);
+                     opencv_imgproc.cvtColor(d8, zedLogVideo.depthVis.getRGBA8Mat(), opencv_imgproc.COLOR_GRAY2BGRA);
+                     zedLogVideo.depthVis.update();
+                     d8.close();
+                     d16.close();
+                  }
+               }
             }
          }
       }
@@ -246,10 +267,11 @@ public class RDXSCS2LogSession extends RDXSCS2Session
          magewellLogVideo.visualizer.destroy();
       for (BlackmagicLogVideo blackmagicLogVideo : blackmagicLogVideos)
          blackmagicLogVideo.visualizer.destroy();
-      for (ZEDLogVideo zedLogVideo : zedLogVideos)
-         zedLogVideo.visualizer.destroy();
-      for (ZEDSVODepthScrubber depthScrubber : zedDepthScrubbers)
-         depthScrubber.close();
+      for (ZEDLogVideo zedLogVideo : zedLogVideos) {
+         zedLogVideo.colorVis.destroy();
+         zedLogVideo.depthVis.destroy();
+      }
+
 
       session.shutdownSession();
 
@@ -262,14 +284,6 @@ public class RDXSCS2LogSession extends RDXSCS2Session
          return null;
       else
          return zedLogVideos.get(0).scrubber;
-   }
-
-   public ZEDSVODepthScrubber getFirstZEDDepthScrubber()
-   {
-      if (zedDepthScrubbers.isEmpty())
-         return null;
-      else
-         return zedDepthScrubbers.get(0);
    }
 
    @Override

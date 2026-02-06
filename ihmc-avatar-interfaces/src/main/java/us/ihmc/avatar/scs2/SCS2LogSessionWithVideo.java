@@ -73,7 +73,7 @@ public class SCS2LogSessionWithVideo extends LogSession
          for (File zedSensorDatFile : ZEDSVOScrubber.findZEDSensorDatFiles(logDirectory))
          {
             LogTools.info("Found ZED sensor: %s".formatted(zedSensorDatFile.getName()));
-            ZEDSVOScrubber zedSVOScrubber = new ZEDSVOScrubber(zedSensorDatFile);
+            ZEDSVOScrubber zedSVOScrubber = new ZEDSVOScrubber(zedSensorDatFile, true);
             zedSVOScrubbers.add(zedSVOScrubber);
          }
 
