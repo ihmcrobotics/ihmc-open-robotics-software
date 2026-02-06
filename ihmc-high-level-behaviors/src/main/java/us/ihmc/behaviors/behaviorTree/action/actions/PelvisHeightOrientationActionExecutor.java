@@ -3,7 +3,7 @@ package us.ihmc.behaviors.behaviorTree.action.actions;
 import controller_msgs.msg.dds.PelvisTrajectoryMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
-import us.ihmc.behaviors.behaviorTree.action.TaskspaceTrajectoryTrackingErrorCalculator;
+import us.ihmc.behaviors.behaviorTree.action.TrajectoryTrackingErrorCalculator;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -16,7 +16,7 @@ public class PelvisHeightOrientationActionExecutor extends ActionNodeExecutor<Pe
 
    private final FramePose3D desiredPelvisPose = new FramePose3D();
    private final FramePose3D syncedPelvisPose = new FramePose3D();
-   private final TaskspaceTrajectoryTrackingErrorCalculator trackingCalculator = new TaskspaceTrajectoryTrackingErrorCalculator();
+   private final TrajectoryTrackingErrorCalculator trackingCalculator = new TrajectoryTrackingErrorCalculator();
 
    public PelvisHeightOrientationActionExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
    {
