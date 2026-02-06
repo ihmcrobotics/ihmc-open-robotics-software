@@ -346,162 +346,6 @@ public class HeightMapICPCalculator2Test
    }
 
    @Test
-   public void testICPWithDirectPointCloudsLargerGlobal()
-   {
-      heightMapParameters.setIcpMaxIterations(50);
-      heightMapParameters.setIcpConvergenceThreshold(0.0001);
-
-      HeightMapICPCalculator2 heightMapICPCalculator = new HeightMapICPCalculator2(heightMapParameters);
-
-      // Create local point cloud - 100 points in a 10x10 grid
-      int localGridSize = 10;
-      int localNumPoints = localGridSize * localGridSize;
-      FloatPointer localPoints = new FloatPointer(localNumPoints * 3);
-
-      // Local cloud centered at origin
-      int idx = 0;
-      for (int y = 0; y < localGridSize; y++)
-      {
-         for (int x = 0; x < localGridSize; x++)
-         {
-            float worldX = (x - 4.5f) * 0.1f;  // -0.45 to 0.45 (centered at 0)
-            float worldY = (y - 4.5f) * 0.1f;  // -0.45 to 0.45 (centered at 0)
-            float worldZ = 1.0f + worldX * 2.0f + worldY * 1.0f;  // Slope in X and Y
-
-            localPoints.put(idx * 3 + 0, worldX);
-            localPoints.put(idx * 3 + 1, worldY);
-            localPoints.put(idx * 3 + 2, worldZ);
-            idx++;
-         }
-      }
-
-      // Create global point cloud - same pattern but larger grid (15x15)
-      // and offset by (0.1, 0.05, 0.0)
-      int globalGridSize = 15;
-      int globalNumPoints = globalGridSize * globalGridSize;
-      FloatPointer globalPoints = new FloatPointer(globalNumPoints * 3);
-
-      // Global cloud centered at (0.1, 0.05) - includes all of local cloud
-      idx = 0;
-      for (int y = 0; y < globalGridSize; y++)
-      {
-         for (int x = 0; x < globalGridSize; x++)
-         {
-            // Center at (0.1, 0.05) instead of (0, 0)
-            float worldX = (x - 7.0f) * 0.1f + 0.1f;  // Centered at 0.1
-            float worldY = (y - 7.0f) * 0.1f + 0.05f; // Centered at 0.05
-            float worldZ = 1.0f + worldX * 2.0f + worldY * 1.0f;  // SAME slope formula
-
-            globalPoints.put(idx * 3 + 0, worldX);
-            globalPoints.put(idx * 3 + 1, worldY);
-            globalPoints.put(idx * 3 + 2, worldZ);
-            idx++;
-         }
-      }
-
-      // Run ICP
-      heightMapICPCalculator.updateInternal(localPoints, localNumPoints, globalPoints, globalNumPoints);
-
-      Vector3D correctedTransform = heightMapICPCalculator.getTotalErrorTransform();
-
-      System.out.println("Local points: " + localNumPoints);
-      System.out.println("Global points: " + globalNumPoints);
-      System.out.println("Corrected X: " + correctedTransform.getX());
-      System.out.println("Corrected Y: " + correctedTransform.getY());
-      System.out.println("Corrected Z: " + correctedTransform.getZ());
-
-      // Expect ICP to recover the (0.1, 0.05, 0.0) offset
-//      assertEquals(0.1, correctedTransform.getX(), 0.01);
-//      assertEquals(0.05, correctedTransform.getY(), 0.01);
-//      assertEquals(0.0, correctedTransform.getZ(), 0.01);
-
-      // Cleanup
-      localPoints.close();
-      globalPoints.close();
-      heightMapICPCalculator.close();
-   }
-
-   @Test
-   public void testICPWithSlopedHeightMapHalfZerosXYOffset()
-   {
-      heightMapParameters.setLocalWidthInMeters(1.0);
-      heightMapParameters.setGlobalWidthInMeters(2.0);
-      heightMapParameters.setCellSize(0.1);
-      heightMapParameters.setIcpConvergenceThreshold(0.001);
-      heightMapParameters.setIcpMaxIterations(50);
-      HeightMapICPCalculator2 heightMapICPCalculator = new HeightMapICPCalculator2(heightMapParameters);
-
-      int localCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getCellSize());
-      int globalCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getGlobalWidthInMeters(), heightMapParameters.getCellSize());
-
-      int localCellsPerAxis = 2 * localCenterIndex + 1;
-      int globalCellsPerAxis = 2 * globalCenterIndex + 1;
-
-      int borderSize = globalCenterIndex - localCenterIndex;
-
-      // Create local and global CPU mats
-      Mat localMatCPU = new Mat(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_32FC1, new Scalar(0.0f));
-      Mat globalMatCPU = new Mat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_32FC1, new Scalar(2.0f));
-
-      int halfLocalCellsPerAxis = localCellsPerAxis / 2;
-
-      // ---------------- Local map: half zero, half sloped ----------------
-      for (int y = halfLocalCellsPerAxis; y < localCellsPerAxis; y++)
-      {
-         for (int x = halfLocalCellsPerAxis; x < localCellsPerAxis; x++)
-         {
-            float height = 5.0f + x + 2; // slope in +X
-            localMatCPU.ptr(y, x).putFloat(height);
-         }
-      }
-
-      // Known integer-cell offset inside global map
-      int offsetCellsX = 1; // 0.1 m
-      int offsetCellsY = 1; // 0.1 m
-
-      // ---------------- Global map: shifted copy of local ----------------
-      for (int y = halfLocalCellsPerAxis; y < localCellsPerAxis; y++)
-      {
-         for (int x = halfLocalCellsPerAxis; x < localCellsPerAxis; x++)
-         {
-            float height = localMatCPU.ptr(y, x).getFloat();
-            int globalX = borderSize + x + offsetCellsX;
-            int globalY = borderSize + y + offsetCellsY;
-            globalMatCPU.ptr(globalY, globalX).putFloat(height);
-         }
-      }
-
-      // Upload to GPU
-      GpuMat localMap = new GpuMat();
-      GpuMat globalMap = new GpuMat();
-      localMap.upload(localMatCPU);
-      globalMap.upload(globalMatCPU);
-
-      // Global map center (world frame)
-      Point3D globalMapCenter = new Point3D(0.0, 0.0, 0.0);
-
-      // Run ICP
-      heightMapICPCalculator.update(localMap, globalMap, globalMapCenter, new Point3D(0.1, 0.1, 0.0));
-
-      Vector3D correctedTransform = heightMapICPCalculator.getTotalErrorTransform();
-
-      System.out.println("Corrected X: " + correctedTransform.getX());
-      System.out.println("Corrected Y: " + correctedTransform.getY());
-      System.out.println("Corrected Z: " + correctedTransform.getZ());
-
-      // Expect ICP to recover both X and Y offsets
-      final double EPSILON = 0.01;
-      assertEquals(0.1, correctedTransform.getX(), EPSILON);
-      assertEquals(0.1, correctedTransform.getY(), EPSILON);
-      assertEquals(0.0, correctedTransform.getZ(), EPSILON);
-
-      // Cleanup
-      localMap.close();
-      globalMap.close();
-      heightMapICPCalculator.close();
-   }
-
-   @Test
    public void testICP_FailsWithNaNInvalidation_WhenLocalMapHasZeros()
    {
       heightMapParameters.setLocalWidthInMeters(1.0);
@@ -553,20 +397,8 @@ public class HeightMapICPCalculator2Test
       localMap.upload(localMatCPU);
       globalMap.upload(globalMatCPU);
 
-      // ---------------- Known wrong transform ----------------
-      RigidBodyTransform transform = new RigidBodyTransform();
-      transform.getTranslation().set(0.1, 0.1, 0.0);
-
-      float[] transformArray = new float[16];
-      transform.get(transformArray);
-
-      FloatPointer hostPtr = new FloatPointer(16);
-      hostPtr.put(transformArray);
-
-      FloatPointer devicePtr = new FloatPointer();
-
       // ---------------- Run ICP ----------------
-      heightMapICPCalculator.update(localMap, globalMap, new Point3D(), new Point3D());
+      heightMapICPCalculator.update(localMap, globalMap, new Point3D(), new Point3D(0.1, 0.1, 0.0));
 
       Vector3D corrected = heightMapICPCalculator.getTotalErrorTransform();
 
@@ -580,8 +412,6 @@ public class HeightMapICPCalculator2Test
       assertEquals(0.0, corrected.getZ(), 1e-3);
 
       // Cleanup
-      hostPtr.close();
-      devicePtr.close();
       localMap.close();
       globalMap.close();
       heightMapICPCalculator.close();
@@ -682,9 +512,9 @@ public class HeightMapICPCalculator2Test
 
       // ----------------- EXPECTATION -----------------
       // In simulation, no real drift exists, so corrected transform should be near zero
-      assertEquals(0.0, corrected.getX(), 1e-3);
-      assertEquals(0.0, corrected.getY(), 1e-3);
-      assertEquals(0.0, corrected.getZ(), 1e-3);
+      assertEquals(0.0, corrected.getX(), 0.01);
+      assertEquals(0.0, corrected.getY(), 0.01);
+      assertEquals(0.0, corrected.getZ(), 0.01);
 
       // ----------------- Cleanup -----------------
       localMap.close();

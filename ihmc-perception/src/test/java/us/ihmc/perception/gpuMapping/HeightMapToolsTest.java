@@ -256,6 +256,89 @@ public class HeightMapToolsTest
    }
 
    @Test
+   public void testFlattenHeightMapToXYZ_CountNonZero()
+   {
+      float cellSize = 0.1f;
+      float invalidValue = 0.0f;
+      int centerIndex = 5; // Center of an 11x11 grid
+      double centerX = 0.0;
+      double centerY = 0.0;
+
+      float[][] localData = new float[][] {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                                           {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                                           {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                                           {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                                           {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                                           {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                                           {0, 0, 0, 0.000873f, 0.001251f, 0.001077f, 0.000690f, 0.000308f, 0, 0, 0},
+                                           {0, 0, 0, 0.000201f, 0.000809f, 0.000206f, -0.000195f, 0.000819f, 0, 0, 0},
+                                           {0, 0, 0, 0.001001f, -0.000031f, 0.001301f, 0.001041f, 0.001480f, 0.000571f, 0, 0},
+                                           {0, 0, -0.000618f, 0.001075f, 0.076491f, 0.085750f, 0.089970f, 0.067645f, 0.087720f, 0, 0},
+                                           {0, -0.006122f, -0.006347f, -0.004396f, 0, 0, 0, 0, 0, 0, 0}};
+
+      // 1. Manually count non-zeroes to verify expected count
+      int expectedValidPoints = 0;
+      for (float[] row : localData)
+      {
+         for (float val : row)
+         {
+            if (val != 0.0f)
+               expectedValidPoints++;
+         }
+      }
+      // Based on the data provided, this should be 23
+
+      // 2. Prepare GPU memory
+      int rows = 11;
+      int cols = 11;
+      float[] flatData = new float[rows * cols];
+      for (int r = 0; r < rows; r++)
+      {
+         System.arraycopy(localData[r], 0, flatData, r * cols, cols);
+      }
+
+      Mat hostMat = new Mat(rows, cols, opencv_core.CV_32FC1);
+      new FloatPointer(hostMat.data()).put(flatData);
+      GpuMat gpuMat = new GpuMat(rows, cols, opencv_core.CV_32FC1);
+      gpuMat.upload(hostMat);
+
+      // 3. Run the method
+      FlattenedHeightMap result = HeightMapTools.flattenHeightMapToXYZ(gpuMat, centerX, centerY, centerIndex, cellSize, invalidValue);
+
+      // 4. Assertions
+      assertEquals(expectedValidPoints, result.pointCount(), "Number of points should match non-zero entries");
+
+      // Check that the buffer limit is exactly pointCount * 3
+      assertEquals(expectedValidPoints * 3L, result.data().limit(), "Pointer limit should be pointCount * 3");
+
+      // Verification of a specific point: localData[9][4] = 0.076491f
+      // col=4, row=9. CenterIndex=5.
+      // x = 0.0 + (4 - 5) * 0.1 = -0.1
+      // y = 0.0 + (9 - 5) * 0.1 = 0.4
+      boolean foundKnownPoint = false;
+      FloatPointer ptr = result.data();
+      for (int i = 0; i < result.pointCount(); i++)
+      {
+         float x = ptr.get(i * 3);
+         float y = ptr.get(i * 3 + 1);
+         float z = ptr.get(i * 3 + 2);
+
+         if (Math.abs(x - (-0.1f)) < 1e-5 && Math.abs(y - 0.4f) < 1e-5)
+         {
+            assertEquals(0.076491f, z, 1e-6);
+            foundKnownPoint = true;
+            break;
+         }
+      }
+      assertTrue(foundKnownPoint, "Should have correctly mapped localData[9][4] to world coordinates");
+
+      // Cleanup
+      gpuMat.close();
+      hostMat.close();
+      result.data().close();
+   }
+
+   @Test
    public void testComputeTransformSVDTranslationOnly()
    {
       // 3 points forming a triangle in local frame
