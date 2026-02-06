@@ -77,15 +77,20 @@ public class ReducedOrderRobotModel
 
    public ReducedOrderRobotModel(RobotContactPointParameters<RobotSide> contactPointParameters, YoRegistry registry)
    {
+      this("", contactPointParameters, registry);
+   }
+
+   public ReducedOrderRobotModel(String namePrefix, RobotContactPointParameters<RobotSide> contactPointParameters, YoRegistry registry)
+   {
       footContactPoints = contactPointParameters.getFootContactPoints();
-      comPosition = new YoFramePoint3D("comPosition", ReferenceFrame.getWorldFrame(), registry);
-      comVelocity = new YoFrameVector3D("comVelocity", ReferenceFrame.getWorldFrame(), registry);
-      capturePointPosition = new YoFramePoint2D("capturePointPosition", ReferenceFrame.getWorldFrame(), registry);
-      nominalFootPolygon = new YoFrameConvexPolygon2D("nominalFootPolygon", ReferenceFrame.getWorldFrame(), 8, registry);
+      comPosition = new YoFramePoint3D(namePrefix + "comPosition", ReferenceFrame.getWorldFrame(), registry);
+      comVelocity = new YoFrameVector3D(namePrefix + "comVelocity", ReferenceFrame.getWorldFrame(), registry);
+      capturePointPosition = new YoFramePoint2D(namePrefix + "capturePointPosition", ReferenceFrame.getWorldFrame(), registry);
+      nominalFootPolygon = new YoFrameConvexPolygon2D(namePrefix + "nominalFootPolygon", ReferenceFrame.getWorldFrame(), 8, registry);
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression() + "_";
+         String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression() + "_" + namePrefix;
 
          solePoses.put(robotSide, new YoFramePose3D(sidePrefix + "SolePose", ReferenceFrame.getWorldFrame(), registry));
          soleFrames.put(robotSide, new PoseReferenceFrame(sidePrefix + "SoleFrame", ReferenceFrame.getWorldFrame()));
@@ -270,8 +275,9 @@ public class ReducedOrderRobotModel
       for (RobotSide robotSide : RobotSide.values)
       {
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression() + "_";
-         group.addChild(YoGraphicDefinitionFactory.newYoGraphicCoordinateSystem3D(sidePrefix + "SolePose", solePoses.get(robotSide), 0.3, ColorDefinitions.Red()));
-         group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint3D(sidePrefix + "HandPosition", handPositions.get(robotSide), 0.03, ColorDefinitions.Red()));
+         group.addChild(YoGraphicDefinitionFactory.newYoGraphicCoordinateSystem3D(sidePrefix + "SolePose", solePoses.get(robotSide), 0.22, ColorDefinitions.Red()));
+         group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint3D(sidePrefix + "HandPosition", handPositions.get(robotSide), 0.02, ColorDefinitions.Red()));
+         group.addChild(YoGraphicDefinitionFactory.newYoGraphicArrow3D(sidePrefix + "HandNormal", handPositions.get(robotSide), handContactNormals.get(robotSide), 0.22, ColorDefinitions.Red()));
       }
 
       return group;
