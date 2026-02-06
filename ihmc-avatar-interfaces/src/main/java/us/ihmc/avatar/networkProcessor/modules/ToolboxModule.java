@@ -12,6 +12,7 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.graphicsDescription.conversion.YoGraphicConversionTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
@@ -194,11 +195,11 @@ public abstract class ToolboxModule implements CloseableAndDisposable
          {
             try
             {
+               YoGraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry).forEach(graphicGroupDefinition::addChild);
                LogTools.info("{}: Trying to start YoVariableServer using port: {}.", name, yoVariableServerSettings.getPort());
                yoVariableServer = new YoVariableServer(getClass(), modelProvider, yoVariableServerSettings, YO_VARIABLE_SERVER_DT);
                yoVariableServer.setMainRegistry(registry,
                                                 createYoVariableServerJointList(fullRobotModel.getElevator()),
-                                                yoGraphicsListRegistry,
                                                 graphicGroupDefinition);
                yoVariableServer.start();
                break;

@@ -193,7 +193,6 @@ public class StepGeneratorJavaFXController
       group.addChild(continuousStepController.getSCS2YoGraphics());
       yoVariableServer.setMainRegistry(continuousStepController.getRegistry(),
                                        javaFXRobotVisualizer.getFullRobotModel().getElevator(),
-                                       null,
                                        group);
       yoVariableServer.start();
    }
