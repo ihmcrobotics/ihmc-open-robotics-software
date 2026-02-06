@@ -4,15 +4,14 @@ import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.cuda.cudart.dim3;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.IntPointer;
-import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
+import us.ihmc.perception.cuda.CUDAStreamManager;
 import us.ihmc.perception.cuda.CUDATools;
 import us.ihmc.perception.gpuMapping.HeightMapTools.FlattenedHeightMap;
 
@@ -27,11 +26,9 @@ public class HeightMapICPCalculator2
 
    private final int localCenterIndex;
    private final int globalCenterIndex;
-   private final int localCellsPerAxis;
-   private final int globalCellsPerAxis;
 
    private final HeightMapParameters heightMapParameters;
-   private final CUstream_st stream;
+//   private final CUstream_st stream;
 
    private final CUDAProgram heightMapICPProgram;
 
@@ -39,11 +36,13 @@ public class HeightMapICPCalculator2
    private final CUDAKernel transformPointsKernel;
    private final dim3 blockSize;
    private DMatrixRMaj totalErrorTransform;
+   private CUstream_st transformStream = new CUstream_st();
+   private CUstream_st nearStream = new CUstream_st();
 
-   public HeightMapICPCalculator2(HeightMapParameters heightMapParameters, CUstream_st stream)
+   public HeightMapICPCalculator2(HeightMapParameters heightMapParameters)
    {
       this.heightMapParameters = heightMapParameters;
-      this.stream = stream;
+//      this.stream = CUDAStreamManager.getStream();
 
       // Load header and main file
       URL heightMapUtilsHeaderPath = getClass().getResource("HeightMapUtils.cuh");
@@ -51,9 +50,7 @@ public class HeightMapICPCalculator2
       URL kernelPath = getClass().getResource("HeightMapICPFilter2.cu");
 
       localCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getCellSize());
-      localCellsPerAxis = 2 * localCenterIndex + 1;
       globalCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getGlobalWidthInMeters(), heightMapParameters.getCellSize());
-      globalCellsPerAxis = 2 * globalCenterIndex + 1;
 
       try
       {
@@ -96,13 +93,13 @@ public class HeightMapICPCalculator2
       int localFloats = localPoints * 3;
       int globalFloats = globalPoints * 3;
 
-      FloatPointer gpuLocalDataPointer = new FloatPointer(cpuLocalDataPointer.limit() * Float.BYTES);
-      FloatPointer gpuGlobalDataPointer = new FloatPointer(cpuGlobalDataPointer.limit() * Float.BYTES);
+      FloatPointer gpuLocalDataPointer = new FloatPointer();
+      FloatPointer gpuGlobalDataPointer = new FloatPointer();
 
-      CUDATools.mallocAsync(gpuLocalDataPointer, cpuLocalDataPointer.limit() * Float.BYTES, stream);
-      CUDATools.memcpyAsync(gpuLocalDataPointer, cpuLocalDataPointer, cpuLocalDataPointer.limit() * Float.BYTES, stream);
-      CUDATools.mallocAsync(gpuGlobalDataPointer, cpuGlobalDataPointer.limit() * Float.BYTES, stream);
-      CUDATools.memcpyAsync(gpuGlobalDataPointer, cpuGlobalDataPointer, cpuGlobalDataPointer.limit() * Float.BYTES, stream);
+      cudaMalloc(gpuLocalDataPointer, cpuLocalDataPointer.limit() * Float.BYTES);
+      cudaMemcpy(gpuLocalDataPointer, cpuLocalDataPointer, cpuLocalDataPointer.limit() * Float.BYTES, cudaMemcpyHostToDevice);
+      cudaMalloc(gpuGlobalDataPointer, cpuGlobalDataPointer.limit() * Float.BYTES);
+      cudaMemcpy(gpuGlobalDataPointer, cpuGlobalDataPointer, cpuGlobalDataPointer.limit() * Float.BYTES, cudaMemcpyHostToDevice);
 
       // Allocate result buffers on GPU
       IntPointer gpuCorrespondences = new IntPointer();
@@ -115,8 +112,8 @@ public class HeightMapICPCalculator2
       FloatPointer cpuDistances = new FloatPointer(localPoints);
 
       cudaMemcpy(cpuGlobalMap, gpuGlobalDataPointer, (long) globalFloats * Float.BYTES, cudaMemcpyDeviceToHost);
-      CUDATools.mallocAsync(gpuCorrespondences, (long) localPoints * Integer.BYTES, stream);
-      CUDATools.mallocAsync(gpuDistances, (long) localPoints * Float.BYTES, stream);
+      cudaMalloc(gpuCorrespondences, (long) localPoints * Integer.BYTES);
+      cudaMalloc(gpuDistances, (long) localPoints * Float.BYTES);
 
       double translationThreshold = heightMapParameters.getIcpConvergenceThreshold();
 
@@ -139,9 +136,9 @@ public class HeightMapICPCalculator2
          nearestNeighborsKernel.withInt(localPoints);
          nearestNeighborsKernel.withInt(globalPoints);
 
-         nearestNeighborsKernel.run(stream, gridDim, blockSize, 0);
+         nearestNeighborsKernel.run(nearStream, gridDim, blockSize, 0);
 
-         int error = cudaStreamSynchronize(stream);
+         int error = cudaStreamSynchronize(nearStream);
          CUDATools.checkCUDAError(error);
 
          // Step 2: Download data from GPU to CPU
@@ -220,15 +217,9 @@ public class HeightMapICPCalculator2
          FloatPointer hostMatrixPtr = new FloatPointer(h_matrix);
          FloatPointer deviceMatrixPtr = new FloatPointer();
 
-         // 3. Allocate Device Memory (if not already done)
-         // Make sure to allocate BYTES: 16 * 4 = 64 bytes
-         if (deviceMatrixPtr.isNull())
-         {
-            CUDATools.mallocAsync(deviceMatrixPtr, 16 * Float.BYTES, stream);
-         }
-
          // 4. Copy to GPU
-         CUDATools.memcpyAsync(deviceMatrixPtr, hostMatrixPtr, 16 * Float.BYTES, stream);
+         cudaMalloc(deviceMatrixPtr, 16 * Float.BYTES);
+         cudaMemcpy(deviceMatrixPtr, hostMatrixPtr, 16 * Float.BYTES, cudaMemcpyHostToDevice);
 
          // 3. Update the Points on the GPU
 
@@ -239,14 +230,24 @@ public class HeightMapICPCalculator2
          transformPointsKernel.withPointer(deviceMatrixPtr);
          transformPointsKernel.withInt(localPoints);
 
-         transformPointsKernel.run(stream, transformGridDim, blockSize, 0);
-
-         error = cudaStreamSynchronize(stream);
-         CUDATools.checkCUDAError(error);
+         transformPointsKernel.run(transformStream, transformGridDim, blockSize, 0);
 
          hostMatrixPtr.close();
          deviceMatrixPtr.close();
+         cudaFree(deviceMatrixPtr);
+
+         CUDATools.checkCUDAError(error);
       }
+
+      cpuLocalTransformed.close();
+      cpuGlobalMap.close();
+      cpuCorrespondences.close();
+      cpuDistances.close();
+
+      cudaFree(gpuLocalDataPointer);
+      cudaFree(gpuGlobalDataPointer);
+      cudaFree(gpuCorrespondences);
+      cudaFree(gpuDistances);
    }
 
    public Vector3D getTotalErrorTransform()

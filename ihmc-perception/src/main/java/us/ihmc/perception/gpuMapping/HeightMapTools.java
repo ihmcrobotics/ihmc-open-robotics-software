@@ -182,8 +182,6 @@ public class HeightMapTools
       heightMapDataToPack.setHeights(values);
    }
 
-   public record FlattenedHeightMap(FloatPointer data, int pointCount) {}
-
    public static FlattenedHeightMap flattenHeightMapToXYZ(GpuMat heightMap,
                                                           double centerX,
                                                           double centerY,
@@ -238,19 +236,24 @@ public class HeightMapTools
       return new FlattenedHeightMap(trimmed, validCount);
    }
 
-   public static DMatrixRMaj computeTransformSVD(FloatPointer localPoints, FloatPointer globalPoints, IntPointer correspondences, int numPoints)
+   public static DMatrixRMaj computeTransformSVD(FloatPointer localPoints, FloatPointer globalPoints, IntPointer correspondences, int numberOfPoints)
    {
-      // Step 1: Compute centroids
+      // Compute centroids for both the local points and the global points
       double localCentroidX = 0, localCentroidY = 0, localCentroidZ = 0;
       double globalCentroidX = 0, globalCentroidY = 0, globalCentroidZ = 0;
 
-      for (int i = 0; i < numPoints; i++)
+      for (int i = 0; i < numberOfPoints; i++)
       {
+         // Because the points are stored in the float array as [x, y, z]
+         // We need to skip (i * 3) each time through the loop in order to get the 3D point
          int baseLocal = i * 3;
          localCentroidX += localPoints.get(baseLocal + 0);
          localCentroidY += localPoints.get(baseLocal + 1);
          localCentroidZ += localPoints.get(baseLocal + 2);
 
+         // The correspondence holds the global point index that corresponds to the local point index
+         // Because the points are stored in the float array as [x, y, z]
+         // We need to skip (i * 3) each time through the loop in order to get the 3D point
          int j = correspondences.get(i);
          int baseGlobal = j * 3;
          globalCentroidX += globalPoints.get(baseGlobal + 0);
@@ -258,23 +261,29 @@ public class HeightMapTools
          globalCentroidZ += globalPoints.get(baseGlobal + 2);
       }
 
-      localCentroidX /= numPoints;
-      localCentroidY /= numPoints;
-      localCentroidZ /= numPoints;
-      globalCentroidX /= numPoints;
-      globalCentroidY /= numPoints;
-      globalCentroidZ /= numPoints;
+      // We have the sum, so we divide that by the number of points to get the mean
+      localCentroidX /= numberOfPoints;
+      localCentroidY /= numberOfPoints;
+      localCentroidZ /= numberOfPoints;
+      globalCentroidX /= numberOfPoints;
+      globalCentroidY /= numberOfPoints;
+      globalCentroidZ /= numberOfPoints;
 
-      // Step 2: Compute cross-covariance matrix H
+      // Compute cross-covariance matrix H
       DMatrixRMaj H = new DMatrixRMaj(3, 3);
 
-      for (int i = 0; i < numPoints; i++)
+      for (int i = 0; i < numberOfPoints; i++)
       {
+         // Because the points are stored in the float array as [x, y, z]
+         // We need to skip (i * 3) each time through the loop in order to get the 3D point
          int baseLocal = i * 3;
          double lx = localPoints.get(baseLocal + 0) - localCentroidX;
          double ly = localPoints.get(baseLocal + 1) - localCentroidY;
          double lz = localPoints.get(baseLocal + 2) - localCentroidZ;
 
+         // The correspondence holds the global point index that corresponds to the local point index
+         // Because the points are stored in the float array as [x, y, z]
+         // We need to skip (i * 3) each time through the loop in order to get the 3D point
          int j = correspondences.get(i);
          int baseGlobal = j * 3;
          double gx = globalPoints.get(baseGlobal + 0) - globalCentroidX;
@@ -282,6 +291,8 @@ public class HeightMapTools
          double gz = globalPoints.get(baseGlobal + 2) - globalCentroidZ;
 
          // H += local_centered * global_centered^T
+         // (lx, ly, lz) refers to the local points
+         // (gx, gy, gz) refers to the global points
          H.add(0, 0, lx * gx);
          H.add(0, 1, lx * gy);
          H.add(0, 2, lx * gz);
@@ -293,38 +304,40 @@ public class HeightMapTools
          H.add(2, 2, lz * gz);
       }
 
-      // Step 3: Compute SVD: H = U * S * V^T
+      // Compute SVD: H = U * S * V^T
       SingularValueDecomposition_F64<DMatrixRMaj> svd = DecompositionFactory_DDRM.svd(3, 3, true, true, false);
       svd.decompose(H);
 
       DMatrixRMaj U = svd.getU(null, false);
       DMatrixRMaj V = svd.getV(null, false);
 
-      // Step 4: Compute rotation: R = V * U^T
+      // Compute rotation: rotation = V * U^T
       DMatrixRMaj Ut = new DMatrixRMaj(3, 3);
       CommonOps_DDRM.transpose(U, Ut);
 
-      DMatrixRMaj R = new DMatrixRMaj(3, 3);
-      CommonOps_DDRM.mult(V, Ut, R);
+      DMatrixRMaj rotation = new DMatrixRMaj(3, 3);
+      CommonOps_DDRM.mult(V, Ut, rotation);
 
-      // Step 5: Handle reflection case (det(R) < 0)
-      if (CommonOps_DDRM.det(R) < 0)
+      // Handle reflection case (det(rotation) < 0)
+      if (CommonOps_DDRM.det(rotation) < 0)
       {
          V.set(0, 2, -V.get(0, 2));
          V.set(1, 2, -V.get(1, 2));
          V.set(2, 2, -V.get(2, 2));
-         CommonOps_DDRM.mult(V, Ut, R);
+         CommonOps_DDRM.mult(V, Ut, rotation);
       }
 
-      // Step 6: Compute translation: t = centroid_global - R * centroid_local
+      // Compute translation: translation = globalCentroid - rotation * localCentroid
       DMatrixRMaj localCentroid = new DMatrixRMaj(new double[][] {{localCentroidX}, {localCentroidY}, {localCentroidZ}});
       DMatrixRMaj globalCentroid = new DMatrixRMaj(new double[][] {{globalCentroidX}, {globalCentroidY}, {globalCentroidZ}});
-      DMatrixRMaj t = new DMatrixRMaj(3, 1);
+      DMatrixRMaj rMultLocalCentroid = new DMatrixRMaj(3, 1);
+      DMatrixRMaj translation = new DMatrixRMaj(3, 1);
 
-      CommonOps_DDRM.mult(R, localCentroid, t);
-      CommonOps_DDRM.subtract(globalCentroid, t, t);
+      CommonOps_DDRM.mult(rotation, localCentroid, rMultLocalCentroid);
+      CommonOps_DDRM.subtract(globalCentroid, rMultLocalCentroid, translation);
 
-      // Step 7: Build 4x4 homogeneous transformation matrix
+      // We have our rotation and translation parts of the matrix
+      // Build 4x4 homogeneous transformation matrix
       DMatrixRMaj transform = new DMatrixRMaj(4, 4);
 
       // Copy rotation (top-left 3x3)
@@ -332,14 +345,14 @@ public class HeightMapTools
       {
          for (int j = 0; j < 3; j++)
          {
-            transform.set(i, j, R.get(i, j));
+            transform.set(i, j, rotation.get(i, j));
          }
       }
 
       // Copy translation (top-right 3x1)
-      transform.set(0, 3, t.get(0, 0));
-      transform.set(1, 3, t.get(1, 0));
-      transform.set(2, 3, t.get(2, 0));
+      transform.set(0, 3, translation.get(0, 0));
+      transform.set(1, 3, translation.get(1, 0));
+      transform.set(2, 3, translation.get(2, 0));
 
       // Bottom row [0, 0, 0, 1]
       transform.set(3, 0, 0);
@@ -350,4 +363,7 @@ public class HeightMapTools
       return transform;
    }
 
+   public record FlattenedHeightMap(FloatPointer data, int pointCount)
+   {
+   }
 }

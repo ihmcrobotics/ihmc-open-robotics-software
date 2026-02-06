@@ -17,48 +17,52 @@ __global__ void findNearestNeighborsKernel(const float* local_map,
                                            int local_size,
                                            int global_size)
 {
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    int index = blockIdx.x * blockDim.x + threadIdx.x;
 
-    if (idx >= local_size) return;
+    if (index >= local_size)
+        return;
 
     // Access local point (x, y, z) from flat array
-    float local_x = local_map[idx * 3 + 0];
-    float local_y = local_map[idx * 3 + 1];
-    float local_z = local_map[idx * 3 + 2];
+    float local_x = local_map[index * 3 + 0];
+    float local_y = local_map[index * 3 + 1];
+    float local_z = local_map[index * 3 + 2];
 
-    float min_dist = 10000000;
-    int min_idx = 0;
+    float minimum_distance = 10000000;
+    int index_of_minimum_distance_on_global_points = 0;
 
-    for (int j = 0; j < global_size; ++j)
+    for (int i = 0; i < global_size; ++i)
     {
         // Access global point (x, y, z) from flat array
-        float global_x = global_map[j * 3 + 0];
-        float global_y = global_map[j * 3 + 1];
-        float global_z = global_map[j * 3 + 2];
+        float global_x = global_map[i * 3 + 0];
+        float global_y = global_map[i * 3 + 1];
+        float global_z = global_map[i * 3 + 2];
 
         float dx = local_x - global_x;
         float dy = local_y - global_y;
         float dz = local_z - global_z;
-        float dist = dx*dx + dy*dy + dz*dz;
+        float distance = dx * dx + dy * dy + dz * dz;
 
-        if (dist < min_dist)
+        if (distance < minimum_distance)
         {
-            min_dist = dist;
-            min_idx = j;
+            // Keep track of the shortest distance from the local point to the global point
+            // Also note the index of this
+            minimum_distance = distance;
+            index_of_minimum_distance_on_global_points = i;
         }
     }
 
-    correspondences[idx] = min_idx;
-    distances[idx] = sqrtf(min_dist);
+    correspondences[index] = index_of_minimum_distance_on_global_points;
+    distances[index] = sqrtf(minimum_distance);
 }
 
 extern "C"
 __global__ void transformPointsKernel(float* points,
-                                    const float* transform,
-                                     int num_points)
+                                      const float* transform,
+                                      int num_points)
 {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    if (idx >= num_points) return;
+    if (idx >= num_points)
+        return;
 
     int base = idx * 3;
     float x = points[base + 0];
