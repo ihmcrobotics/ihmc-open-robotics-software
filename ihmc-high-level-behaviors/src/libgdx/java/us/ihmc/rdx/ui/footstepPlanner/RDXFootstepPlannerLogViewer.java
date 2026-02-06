@@ -6,6 +6,10 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
+import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.opencv_core.Mat;
+import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.TerrainMapMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.tools.MinimalFootstep;
 import us.ihmc.commons.nio.BasicPathVisitor;
@@ -25,6 +29,11 @@ import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.gpuMapping.HeightMapData;
+import us.ihmc.perception.gpuMapping.HeightMapMessageTools;
+import us.ihmc.perception.gpuMapping.HeightMapTools;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
+import us.ihmc.perception.gpuMapping.TerrainMapMessageTools;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -38,6 +47,7 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.rdx.imgui.ImGuiDirectory;
+import us.ihmc.rdx.ui.graphics.RDXHeightMapRenderer;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 import us.ihmc.rdx.visualizers.RDXSphereAndArrowGraphic;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
@@ -45,6 +55,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.io.File;
+import java.nio.FloatBuffer;
 import java.util.Set;
 
 public class RDXFootstepPlannerLogViewer
@@ -59,7 +70,7 @@ public class RDXFootstepPlannerLogViewer
    private final SideDependentList<RDXFootstepGraphic> goalFootPoses = new SideDependentList<>();
    private final RDXSphereAndArrowGraphic goalGraphic;
    private final Pose3D goalPose = new Pose3D();
-   private final RDXPlanarRegionsGraphic planarRegionsGraphic;
+   private final RDXHeightMapRenderer heightMapRenderer = new RDXHeightMapRenderer();
    private final RDXFootstepPlanGraphic footstepPlanGraphic;
    private FootstepPlan footstepPlan;
    private FootstepPlannerRejectionReasonReport rejectionReasonReport;
@@ -82,8 +93,7 @@ public class RDXFootstepPlannerLogViewer
       scene3D.addRenderableProvider(this::getRenderables);
       panel3D.addImGui3DViewInputProcessor(this::process3DViewInput);
 
-      planarRegionsGraphic = new RDXPlanarRegionsGraphic();
-      scene3D.addRenderableProvider(planarRegionsGraphic::getRenderables);
+      scene3D.addRenderableProvider(heightMapRenderer);
 
       probeSphere = new RDXModelInstance(RDXModelBuilder.createSphere(0.005f, Color.VIOLET));
       tooltip = new RDX3DPanelTooltip(panel3D);
@@ -134,8 +144,41 @@ public class RDXFootstepPlannerLogViewer
 
          // Move the camera to where the data is, so we don't have to find it.
          panel3D.getCamera3D().setCameraFocusPoint(footstepPlannerLog.getRequestPacket().getStartLeftFootPose().getPosition());
+
+         HeightMapMessage heightMapMessage = footstepPlannerLog.getRequestPacket().getHeightMapMessage();
+         TerrainMapMessage terrainMapMessage = footstepPlannerLog.getRequestPacket().getTerrainMapMessage();
+
+         HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(heightMapMessage);
+         TerrainMapData terrainMapData = TerrainMapMessageTools.unpackMessage(terrainMapMessage);
+
+         int cellsPerAxis = heightMapData.getCellsPerAxis();
+         Mat heightMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
+         Mat terrainMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
+
+         // Pack height map in Mat
+         HeightMapTools.convertHeightMapDataToMat(heightMap, heightMapData);
+
+         // Pack traversability in Mat
+         FloatBuffer traversabilityScoreBuffer = terrainMap.createBuffer();
+         traversabilityScoreBuffer.put(terrainMapData.getTraversabilityScoreMap());
+
+         // TODO add button
+         boolean colorBasedOnTraversability = false;
+
+         double heightMapCenterX = heightMapData.getGridCenter().getX();
+         double heightMapCenterY = heightMapData.getGridCenter().getY();
+         double cellSize = heightMapData.getCellSize();
+         int centerIndex = HeightMapTools.computeCenterIndex(heightMapData.getMapSize(), cellSize);
+
+         heightMapRenderer.update(heightMap,
+                                  terrainMap,
+                                  colorBasedOnTraversability,
+                                  (float) heightMapCenterX,
+                                  (float) heightMapCenterY,
+                                  centerIndex,
+                                  (float) cellSize);
       }
-      planarRegionsGraphic.update();
+
       footstepPlanGraphic.update();
 
       panel3D.setModelSceneMouseCollisionEnabled(probeMode.get());
