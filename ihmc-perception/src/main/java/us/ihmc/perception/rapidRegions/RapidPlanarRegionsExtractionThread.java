@@ -1,57 +1,54 @@
 package us.ihmc.perception.rapidRegions;
 
-import org.bytedeco.opencl.global.OpenCL;
+import org.bytedeco.opencv.opencv_core.GpuMat;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.property.ROS2StoredPropertySet;
+import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.RawImage;
+import us.ihmc.sensors.CameraIntrinsics;
 import us.ihmc.perception.comms.PerceptionComms;
-import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.tools.PerceptionMessageTools;
+import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.sensors.ImageSensor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
 import java.util.function.Consumer;
 
 public class RapidPlanarRegionsExtractionThread extends RepeatingTaskThread
 {
    private static final double UPDATE_FREQUENCY = 10.0;
 
-   private final ROS2Node ros2Node;
    private final ROS2Helper ros2Helper;
 
-   private final OpenCLManager openCLManager;
-
-   private final ImageSensor imageSensor;
-   private final int depthImageKey;
    private final MutableReferenceFrame sensorFrame;
+   private final BlockingQueue<RawImage> rawImageCollection;
 
    private RapidPlanarRegionsExtractor extractor;
-   private ROS2StoredPropertySet<RapidRegionsExtractorParameters> extractorParametersSync;
    private final FramePlanarRegionsList framePlanarRegions = new FramePlanarRegionsList();
+   private final ROS2StoredPropertySetGroup ros2StoredPropertySetGroup;
+
+   private RapidRegionsExtractorParameters rapidRegionsExtractorParameters;
+   private PolygonizerParameters polygonizerParameters;
+   private ConcaveHullFactoryParameters concaveHullFactoryParameters;
 
    private final List<Consumer<FramePlanarRegionsList>> consumers = new ArrayList<>();
 
-   public RapidPlanarRegionsExtractionThread(ROS2Node ros2Node, OpenCLManager openCLManager, ImageSensor imageSensor, int depthImageKey)
+   public RapidPlanarRegionsExtractionThread(ROS2Node ros2Node, BlockingQueue<RawImage> rawImageCollection)
    {
-      super(imageSensor.getSensorName() + RapidPlanarRegionsExtractionThread.class.getSimpleName());
+      super(RapidPlanarRegionsExtractionThread.class.getSimpleName());
       setFrequencyLimit(UPDATE_FREQUENCY);
 
-      this.ros2Node = ros2Node;
-      this.openCLManager = openCLManager;
-      this.imageSensor = imageSensor;
-      this.depthImageKey = depthImageKey;
-
-      ros2Helper = new ROS2Helper(ros2Node);
-
-      sensorFrame = new MutableReferenceFrame("PlanarRegionExtractionSensorFrame", ReferenceFrame.getWorldFrame());
+      this.rawImageCollection = rawImageCollection;
+      this.ros2StoredPropertySetGroup = new ROS2StoredPropertySetGroup(ros2Node);
+      this.ros2Helper = new ROS2Helper(ros2Node);
+      this.sensorFrame = new MutableReferenceFrame("PlanarRegionExtractionSensorFrame", ReferenceFrame.getWorldFrame());
    }
 
    public void addPlanarRegionsConsumer(Consumer<FramePlanarRegionsList> planarRegionsConsumer)
@@ -62,44 +59,52 @@ public class RapidPlanarRegionsExtractionThread extends RepeatingTaskThread
    @Override
    protected void runTask()
    {
-      // Get an image from the sensor
-      RawImage depthImage = imageSensor.getImage(depthImageKey);
-      if (depthImage == null)
-         return;
+      try
+      {
+         // Get an image from the sensor
+         RawImage depthImage = rawImageCollection.take();
 
-      // Initialize if not yet initialized
-      if (extractor == null)
-         initialize(depthImage);
+         // Initialize if not yet initialized
+         if (extractor == null)
+            initialize(depthImage);
 
-      // Update parameters
-      extractorParametersSync.updateAndPublishThrottledStatus();
+         // Update parameters
+         ros2StoredPropertySetGroup.update();
 
-      // Update the sensor frame using the depth image pose
-      sensorFrame.update(transformToWorld -> transformToWorld.set(depthImage.getTransformToWorld()));
+         // Update the sensor frame using the depth image pose
+         sensorFrame.update(transformToWorld -> transformToWorld.set(depthImage.getTransformToWorld()));
 
-      // Extract the planar regions
-      BytedecoImage bytedecoImage = new BytedecoImage(depthImage.getCpuImageMat().clone());
-      bytedecoImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
-      extractor.update(bytedecoImage, sensorFrame.getReferenceFrame(), framePlanarRegions);
-      extractor.setProcessing(false);
-      bytedecoImage.destroy(openCLManager);
+         // Extract the planar regions
+         GpuMat depthImageDevice = depthImage.getGpuImageMat();
+         extractor.update(depthImageDevice, sensorFrame.getReferenceFrame(), framePlanarRegions);
 
-      // Give copies to consumers
-      for (Consumer<FramePlanarRegionsList> consumer : consumers)
-         consumer.accept(framePlanarRegions.copy());
+         // Give copies to consumers
+         for (Consumer<FramePlanarRegionsList> consumer : consumers)
+            consumer.accept(framePlanarRegions.copy());
 
-      // Publish the frame planar regions
-      PerceptionMessageTools.publishFramePlanarRegionsList(framePlanarRegions, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, ros2Helper);
+         // Publish the frame planar regions
+         PerceptionMessageTools.publishFramePlanarRegionsList(framePlanarRegions, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, ros2Helper);
 
-      depthImage.release();
+         depthImage.release();
+      }
+      catch (InterruptedException e)
+      {
+         // Do nothing
+      }
    }
 
    private void initialize(RawImage depthImage)
    {
-      extractor = new RapidPlanarRegionsExtractor(openCLManager, depthImage.getIntrinsicsCopy());
-      extractor.getDebugger().setEnabled(false);
+      CameraIntrinsics cameraIntrinsics = depthImage.getIntrinsicsCopy();
+      extractor = new RapidPlanarRegionsExtractor(cameraIntrinsics);
 
-      extractorParametersSync = new ROS2StoredPropertySet<>(ros2Node, PerceptionComms.PERSPECTIVE_RAPID_REGION_PARAMETERS, extractor.getParameters());
+      rapidRegionsExtractorParameters = extractor.getRapidRegionsExtractorParameters();
+      polygonizerParameters = extractor.getPolygonizerParameters();
+      concaveHullFactoryParameters = extractor.getConcaveHullFactoryParameters();
+
+      ros2StoredPropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_RAPID_REGION_PARAMETERS, rapidRegionsExtractorParameters);
+      ros2StoredPropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_POLYGONIZER_PARAMETERS, polygonizerParameters);
+      ros2StoredPropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_CONCAVE_HULL_FACTORY_PARAMETERS, concaveHullFactoryParameters);
    }
 
    @Override
@@ -108,6 +113,13 @@ public class RapidPlanarRegionsExtractionThread extends RepeatingTaskThread
       super.kill();
 
       if (extractor != null)
+      {
          extractor.destroy();
+      }
+   }
+
+   public RapidPlanarRegionsExtractor getExtractor()
+   {
+      return extractor;
    }
 }

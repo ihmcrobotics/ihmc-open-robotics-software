@@ -12,11 +12,12 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.sensors.CameraIntrinsics;
 import us.ihmc.perception.imageMessage.CompressionType;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.opencv.OpenCVTools;
@@ -286,19 +287,27 @@ public class PerceptionMessageTools
       return typeString.toString();
    }
 
-   // TODO: Support non-rectified images and stereo images
    public static void packCameraInfo(RawImage image, String cameraFrameId, CameraInfo cameraInfoToPack)
    {
+      packCameraInfo(image.getAcquisitionTime(), image.getIntrinsicsCopy(), image.getTransformToWorld(), cameraFrameId, cameraInfoToPack);
+   }
+
+   // TODO: Support non-rectified images and stereo images
+   public static void packCameraInfo(Instant imageAcquisitionTime,
+                                     CameraIntrinsics intrinsics,
+                                     RigidBodyTransformReadOnly transformToWorld,
+                                     String cameraFrameId,
+                                     CameraInfo cameraInfoToPack)
+   {
       // Set the header
-      Instant imageAcquisitionTime = image.getAcquisitionTime();
       cameraInfoToPack.getHeader().getStamp().setSec((int) imageAcquisitionTime.getEpochSecond());
       cameraInfoToPack.getHeader().getStamp().setNanosec(imageAcquisitionTime.getNano());
       cameraInfoToPack.getHeader().setFrameId(cameraFrameId);
 
       // Set the calibration parameters
       // Image dimensions
-      cameraInfoToPack.setHeight(image.getHeight());
-      cameraInfoToPack.setWidth(image.getWidth());
+      cameraInfoToPack.setHeight(intrinsics.getHeight());
+      cameraInfoToPack.setWidth(intrinsics.getWidth());
 
       // Distortion model
       cameraInfoToPack.setDistortionModel("plumb_bob");
@@ -311,12 +320,12 @@ public class PerceptionMessageTools
        *  K = [ 0 fy cy]
        *      [ 0  0  1]
        */
-      cameraInfoToPack.getK()[0] = image.getFocalLengthX();
+      cameraInfoToPack.getK()[0] = intrinsics.getFx();
       cameraInfoToPack.getK()[1] = 0.0;
-      cameraInfoToPack.getK()[2] = image.getPrincipalPointX();
+      cameraInfoToPack.getK()[2] = intrinsics.getCx();
       cameraInfoToPack.getK()[3] = 0.0;
-      cameraInfoToPack.getK()[4] = image.getFocalLengthY();
-      cameraInfoToPack.getK()[5] = image.getPrincipalPointY();
+      cameraInfoToPack.getK()[4] = intrinsics.getFy();
+      cameraInfoToPack.getK()[5] = intrinsics.getCy();
       cameraInfoToPack.getK()[6] = 0.0;
       cameraInfoToPack.getK()[7] = 0.0;
       cameraInfoToPack.getK()[8] = 1.0;
@@ -340,13 +349,13 @@ public class PerceptionMessageTools
        * Since we're not using stereo images, Tx = Ty = 0
        * We also assume fx` = fx, cx` = cx, etc.
        */
-      cameraInfoToPack.getP()[0] = image.getFocalLengthX();
+      cameraInfoToPack.getP()[0] = intrinsics.getFx();
       cameraInfoToPack.getP()[1] = 0.0;
-      cameraInfoToPack.getP()[2] = image.getPrincipalPointX();
+      cameraInfoToPack.getP()[2] = intrinsics.getCx();
       cameraInfoToPack.getP()[3] = 0.0;
       cameraInfoToPack.getP()[4] = 0.0;
-      cameraInfoToPack.getP()[5] = image.getFocalLengthY();
-      cameraInfoToPack.getP()[6] = image.getPrincipalPointY();
+      cameraInfoToPack.getP()[5] = intrinsics.getFy();
+      cameraInfoToPack.getP()[6] = intrinsics.getCy();
       cameraInfoToPack.getP()[7] = 0.0;
       cameraInfoToPack.getP()[8] = 0.0;
       cameraInfoToPack.getP()[9] = 0.0;

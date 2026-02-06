@@ -15,7 +15,7 @@ import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXRenderableProvider;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2MultiTopicVisualizer;
-import us.ihmc.rdx.ui.graphics.ros2.RDXROS2OpenCVVideoVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2SingleTopicVisualizer;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
@@ -126,8 +126,8 @@ public abstract class RDXVisualizer implements RDXRenderableProvider
       {
          boolean deactivate = !getPanel().getIsShowing().get();
 
-         if (this instanceof RDXROS2OpenCVVideoVisualizer<?> openCVVideoVisualizer)
-            deactivate &= !openCVVideoVisualizer.getSubscriptionOnly().get();
+         if (this instanceof RDXROS2ImageVisualizer<?> imageVisualizer)
+            deactivate &= !imageVisualizer.getSubscriptionOnly().get();
 
          if (deactivate)
             setActive(false);

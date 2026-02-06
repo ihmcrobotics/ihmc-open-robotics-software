@@ -2,7 +2,6 @@ package us.ihmc.footstepPlanning.graphSearch.stepChecking;
 
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.collision.FootstepPlannerBodyCollisionDetector;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
@@ -12,7 +11,7 @@ import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
-import us.ihmc.footstepPlanning.steppableRegions.SnapResult;
+import us.ihmc.perception.gpuMapping.SnapResult;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -21,8 +20,6 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason.HEIGHT_MAP_NONTRAVERSABLE;
 
 public class HeightMapFootstepChecker implements FootstepCheckerInterface
 {
@@ -156,6 +153,9 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
    private BipedalFootstepPlannerNodeRejectionReason doValidityCheckForTerrainMap(DiscreteFootstep candidateStep)
    {
       SnapResult snapResult = environmentHandler.getTerrainMapData().getTraversabilityClass(candidateStep.getX(), candidateStep.getY());
+      if (snapResult == null)
+         return null;
+
       return switch (snapResult)
             {
                case SQUARED_ERROR -> BipedalFootstepPlannerNodeRejectionReason.RMS_ERROR_TOO_HIGH;
@@ -218,7 +218,7 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
       {
          try
          {
-            obstacleBetweenStepsChecker.setHeightMapData(environmentHandler.getHeightMapData());
+            obstacleBetweenStepsChecker.setTerrainMapData(environmentHandler.getTerrainMapData());
 
             if (!obstacleBetweenStepsChecker.isFootstepValid(candidateStep, stanceStep))
             {
@@ -252,7 +252,7 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
 
       double candidateStepHeight = DiscreteFootstepTools.getSnappedStepHeight(candidateStep, candidateStepSnapData.getSnapTransform());
       double stanceStepHeight = DiscreteFootstepTools.getSnappedStepHeight(stanceStep, stanceStepSnapData.getSnapTransform());
-      collisionDetector.setHeightMapData(environmentHandler.getHeightMapData());
+      collisionDetector.setTerrainMapData(environmentHandler.getTerrainMapData());
       boolean collisionDetected = collisionDetector.checkForCollision(candidateStep,
                                                                       stanceStep,
                                                                       candidateStepHeight,

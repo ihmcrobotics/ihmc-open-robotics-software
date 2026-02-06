@@ -1,39 +1,67 @@
 package us.ihmc.behaviors.behaviorTree;
 
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.behaviorTree.action.actions.AbilityHandActionComms;
+import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneExecutor;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
-import us.ihmc.behaviors.logic.condition.LLMConditionExecutor;
+import us.ihmc.behaviors.behaviorTree.condition.LLMConditionExecutor;
+import us.ihmc.behaviors.tools.interfaces.LogToolsLogger;
+import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.detections.DetectionManager;
-import us.ihmc.perception.sceneGraph.SceneGraph;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
+import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseCommunicatorMap;
+import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
+import us.ihmc.sensors.ImageSensor;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.tools.io.WorkspaceResourceFile;
 
-public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeNodeExecutor<?, ?>>
+public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeRootNodeExecutor, BehaviorTreeNodeExecutor<?, ?>>
 {
-   private BehaviorTreeRootNodeExecutor rootNode;
+   private final ControllerStatusTracker controllerStatusTracker;
+   private final BehaviorTreeSceneExecutor scene;
+   private final SideDependentList<AbilityHandActionComms> abilityHandComms = new SideDependentList<>();
 
-   public BehaviorTreeExecutor(DRCRobotModel robotModel,
-                               ROS2SyncedRobotModel syncedRobot,
+   public BehaviorTreeExecutor(ROS2SyncedRobotModel syncedRobot,
                                ROS2PeerClockOffsetEstimator peerClockEstimator,
-                               ReferenceFrameLibrary referenceFrameLibrary,
-                               SceneGraph sceneGraph,
-                               DetectionManager detectionManager,
-                               ROS2ControllerHelper ros2ControllerHelper)
+                               ROS2ControllerHelper ros2ControllerHelper,
+                               ImageSensor imageSensor,
+                               YOLOv8DetectionExecutor yolo,
+                               IsaacROSFoundationPoseCommunicatorMap foundationPose,
+                               TerrainMapData terrainMapData)
    {
-      super(ROS2ActorDesignation.ROBOT,
+      super(syncedRobot,
+            ROS2ActorDesignation.ROBOT,
             peerClockEstimator,
             new WorkspaceResourceDirectory(BehaviorTreeExecutor.class, "/behaviorTrees"),
-            new BehaviorTreeExecutorNodeBuilder(robotModel, ros2ControllerHelper, syncedRobot, referenceFrameLibrary, sceneGraph, detectionManager));
+            new BehaviorTreeExecutorNodeBuilder());
+
+      controllerStatusTracker = new ControllerStatusTracker(new LogToolsLogger(), ros2ControllerHelper.getROS2Node(), robotModel.getSimpleRobotName());
+      for (RobotSide robotSide : RobotSide.values)
+         abilityHandComms.put(robotSide, new AbilityHandActionComms(robotSide, ros2ControllerHelper.getROS2Node()));
+      scene = new BehaviorTreeSceneExecutor(crdtInfo, this::getAndIncrementNextID, syncedRobot, imageSensor, yolo, foundationPose, terrainMapData);
+      setScene(scene);
+
+      ((BehaviorTreeExecutorNodeBuilder) getNodeBuilder()).initialize(crdtInfo,
+                                                                      saveFileDirectory,
+                                                                      ros2ControllerHelper,
+                                                                      syncedRobot,
+                                                                      controllerStatusTracker,
+                                                                      abilityHandComms,
+                                                                      scene);
    }
 
    public void update()
    {
+      for (RobotSide side : abilityHandComms.sides())
+         abilityHandComms.get(side).update();
+
+      scene.update();
+
       if (rootNode != null)
       {
          rootNode.clock();
@@ -60,18 +88,6 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeNodeExecutor<
       LLMConditionExecutor.destroy();
    }
 
-   @Override
-   public void setRootNode(BehaviorTreeNodeExecutor<?, ?> rootNode)
-   {
-      this.rootNode = (BehaviorTreeRootNodeExecutor) rootNode;
-   }
-
-   @Override
-   public BehaviorTreeRootNodeExecutor getRootNode()
-   {
-      return rootNode;
-   }
-
    public void loadBehavior(String jsonFileName)
    {
       WorkspaceResourceFile file = new WorkspaceResourceFile(getSaveFileDirectory(), jsonFileName);
@@ -79,27 +95,17 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeNodeExecutor<
       {
          modifyTreeTopology(topologyOperationQueue ->
          {
-            BehaviorTreeNodeExecutor<?, ?> loadedNode = getFileLoader().loadFromFile(file, topologyOperationQueue);
+            if (this.rootNode == null)
+               topologyOperationQueue.queueDestroyEntireTree();
+
+            BehaviorTreeRootNodeExecutor rootNode = (BehaviorTreeRootNodeExecutor) getNodeBuilder().createRootNode(getAndIncrementNextID());
+            BehaviorTreeNodeExecutor<?, ?> loadedNode = getFileLoader().loadFromFile(rootNode, file, topologyOperationQueue);
 
             if (loadedNode != null)
             {
-               if (loadedNode instanceof BehaviorTreeRootNodeExecutor loadedRootNode) // If we loaded a root node, replace the existing one
-               {
-                  topologyOperationQueue.queueSetRootNodeModify(loadedRootNode);
-               }
-               else if (rootNode == null) // Automatically add a root node if there isn't one
-               {
-                  BehaviorTreeRootNodeExecutor newRootNode = new BehaviorTreeRootNodeExecutor(getAndIncrementNextID(),
-                                                                                              getCRDTInfo(),
-                                                                                              getSaveFileDirectory());
-                  newRootNode.getDefinition().modify();
-                  topologyOperationQueue.queueAppendChildModify(newRootNode, loadedNode);
-                  topologyOperationQueue.queueSetRootNodeModify(newRootNode);
-               }
-               else // Add the loaded node as a child of the root node
-               {
-                  topologyOperationQueue.queueAppendChildModify(rootNode, loadedNode);
-               }
+               rootNode.getDefinition().modify();
+               topologyOperationQueue.queueSetRootNodeModify(rootNode);
+               topologyOperationQueue.queueAppendChildModify(rootNode, loadedNode);
             }
          });
       }

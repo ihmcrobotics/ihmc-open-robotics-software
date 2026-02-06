@@ -22,7 +22,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -64,7 +63,6 @@ public abstract class AvatarSwingOverPlanarRegionsTest implements MultiRobotTest
       simulationTestHelper.setCameraFocusPosition(1.5, 0.0, 0.8);
 
       YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
 
@@ -83,11 +81,11 @@ public abstract class AvatarSwingOverPlanarRegionsTest implements MultiRobotTest
       }
       else
       {
-         swingOverPlanarRegionsTrajectoryExpander = new SwingOverPlanarRegionsTrajectoryExpander(walkingControllerParameters, registry, yoGraphicsListRegistry);
+         swingOverPlanarRegionsTrajectoryExpander = new SwingOverPlanarRegionsTrajectoryExpander(walkingControllerParameters, registry);
       }
 
       simulationTestHelper.getRootRegistry().addChild(registry);
-      simulationTestHelper.addYoGraphicsListRegistry(yoGraphicsListRegistry);
+      simulationTestHelper.addYoGraphicDefinition(swingOverPlanarRegionsTrajectoryExpander.getSCS2YoGraphics());
 
       simulationTestHelper.simulateNow(0.5);
 

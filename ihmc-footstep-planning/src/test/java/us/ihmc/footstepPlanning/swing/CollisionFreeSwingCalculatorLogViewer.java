@@ -1,6 +1,6 @@
 package us.ihmc.footstepPlanning.swing;
 
-import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.TerrainMapMessage;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
@@ -13,10 +13,10 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.idl.IDLSequence;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
+import us.ihmc.perception.gpuMapping.TerrainMapMessageTools;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.perception.heightMap.HeightMapData;
-import us.ihmc.perception.heightMap.HeightMapMessageTools;
-import us.ihmc.perception.heightMap.HeightMapTools;
+import us.ihmc.perception.gpuMapping.HeightMapTools;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
@@ -45,25 +45,25 @@ public class CollisionFreeSwingCalculatorLogViewer
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("Dummy"));
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
-      HeightMapMessage heightMapMessage = log.getRequestPacket().getHeightMapMessage();
-      HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(heightMapMessage);
+      TerrainMapMessage terrainMapMessage = log.getRequestPacket().getTerrainMapMessage();
+      TerrainMapData terrainMapData = TerrainMapMessageTools.unpackMessage(terrainMapMessage);
 
       Graphics3DObject terrainGraphics = new Graphics3DObject();
 
-      IDLSequence.Float heights = heightMapMessage.getHeights();
-      double gridResolutionXY = heightMapMessage.getCellSizeInMeters();
-      int centerIndex = HeightMapTools.computeCenterIndex(heightMapMessage.getWidthInMeters(), gridResolutionXY);
+      IDLSequence.Float heights = terrainMapMessage.getHeightMap();
+      double gridResolutionXY = terrainMapMessage.getCellSizeInMeters();
+      int centerIndex = HeightMapTools.computeCenterIndex(terrainMapMessage.getWidthInMeters(), gridResolutionXY);
 
       for (int key = 0; key < heights.size(); key++)
       {
          int xIndex = HeightMapTools.keyToXIndex(key, centerIndex);
          int yIndex = HeightMapTools.keyToYIndex(key, centerIndex);
-         double x = HeightMapTools.indexToCoordinate(xIndex, heightMapMessage.getGridCenterX(), gridResolutionXY, centerIndex);
-         double y = HeightMapTools.indexToCoordinate(yIndex, heightMapMessage.getGridCenterY(), gridResolutionXY, centerIndex);
+         double x = HeightMapTools.indexToCoordinate(xIndex, terrainMapMessage.getGridCenterX(), gridResolutionXY, centerIndex);
+         double y = HeightMapTools.indexToCoordinate(yIndex, terrainMapMessage.getGridCenterY(), gridResolutionXY, centerIndex);
          double height = heights.get(key);
 
          terrainGraphics.translate(x, y, 0.5 * height);
-         terrainGraphics.addCube(heightMapData.getCellSize(), heightMapData.getCellSize(), height, true, computeColorFromHeight(height));
+         terrainGraphics.addCube(terrainMapData.getCellSize(), terrainMapData.getCellSize(), height, true, computeColorFromHeight(height));
          terrainGraphics.identity();
       }
       
@@ -85,7 +85,7 @@ public class CollisionFreeSwingCalculatorLogViewer
       SideDependentList<Pose3D> initialFootPoses = new SideDependentList<>(log.getRequestPacket().getStartLeftFootPose(), log.getRequestPacket().getStartRightFootPose());
 
 //      swingCalculator.setPlanarRegionsList(planarRegionsList);
-      swingCalculator.setHeightMapData(heightMapData);
+      swingCalculator.setTerrainMapData(terrainMapData);
       swingCalculator.computeSwingTrajectories(initialFootPoses, footstepPlan);
       scs.cropBuffer();
    }

@@ -1,9 +1,7 @@
 package us.ihmc.footstepPlanning.ui.components;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import perception_msgs.msg.dds.HeightMapMessage;
 import javafx.animation.AnimationTimer;
-import map_sense.RawGPUPlanarRegionList;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.thread.ThreadTools;
@@ -18,29 +16,29 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.*;
+import us.ihmc.footstepPlanning.AStarBodyPathPlannerParameters;
+import us.ihmc.footstepPlanning.BodyPathPlanningResult;
+import us.ihmc.footstepPlanning.FootstepPlannerOutput;
+import us.ihmc.footstepPlanning.FootstepPlannerRequest;
+import us.ihmc.footstepPlanning.FootstepPlanningModule;
+import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
-import us.ihmc.footstepPlanning.tools.PlanarRegionToHeightMapConverter;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.perception.depthData.CollisionBoxProvider;
-import us.ihmc.perception.depthData.CollisionShapeTester;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.messager.Messager;
-import us.ihmc.robotEnvironmentAwareness.updaters.GPUPlanarRegionUpdater;
+import us.ihmc.perception.depthData.CollisionBoxProvider;
+import us.ihmc.perception.depthData.CollisionShapeTester;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.perception.heightMap.HeightMapData;
-import us.ihmc.perception.heightMap.HeightMapMessageTools;
-import us.ihmc.utilities.ros.RosNodeInterface;
-import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +47,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 
 public class HeightMapNavigationUpdater extends AnimationTimer
 {
@@ -59,6 +56,7 @@ public class HeightMapNavigationUpdater extends AnimationTimer
    private static final RobotSide initialStanceSide = RobotSide.RIGHT;
 
    private static final RigidBodyTransform transformChestToL515DepthCamera = new RigidBodyTransform();
+
    static
    {
       // TODO: Move this stuff to a file so it can be tuned and saved
@@ -77,10 +75,6 @@ public class HeightMapNavigationUpdater extends AnimationTimer
 
    private final AtomicReference<Point3D> goalPosition;
    private final AtomicReference<Quaternion> goalOrientation;
-   private final AtomicReference<HeightMapMessage> heightMapMessage;
-   private HeightMapData heightMapUsedForPlanning;
-
-   private final GPUPlanarRegionUpdater gpuPlanarRegionUpdater = new GPUPlanarRegionUpdater();
 
    private final FootstepPlannerRequest request = new FootstepPlannerRequest();
 
@@ -106,11 +100,7 @@ public class HeightMapNavigationUpdater extends AnimationTimer
 
    private enum State
    {
-      WAITING_TO_START,
-      PLAN_BODY_PATH,
-      PLAN_A_STEP,
-      APPROVE_AND_SEND,
-      WAIT_A_BIT
+      WAITING_TO_START, PLAN_BODY_PATH, PLAN_A_STEP, APPROVE_AND_SEND, WAIT_A_BIT
    }
 
    public HeightMapNavigationUpdater(Messager messager,
@@ -127,7 +117,6 @@ public class HeightMapNavigationUpdater extends AnimationTimer
       stopHeightMapNavigation = messager.createInput(FootstepPlannerMessagerAPI.StopHeightMapNavigation, false);
       goalPosition = messager.createInput(FootstepPlannerMessagerAPI.GoalMidFootPosition);
       goalOrientation = messager.createInput(FootstepPlannerMessagerAPI.GoalMidFootOrientation);
-      heightMapMessage = messager.createInput(FootstepPlannerMessagerAPI.HeightMapData);
       messager.addTopicListener(FootstepPlannerMessagerAPI.PlanarRegionData, planarRegions::set);
 
       footPolygons = new SideDependentList<>(side ->
@@ -139,19 +128,28 @@ public class HeightMapNavigationUpdater extends AnimationTimer
                                              });
 
       footstepPlannerParameters.setIdealFootstepLength(0.28);
-      planningModule = new FootstepPlanningModule("HeightMap", new AStarBodyPathPlannerParameters(), footstepPlannerParameters, new DefaultSwingPlannerParameters(), walkingControllerParameters, footPolygons, null);
+      planningModule = new FootstepPlanningModule("HeightMap",
+                                                  new AStarBodyPathPlannerParameters(),
+                                                  footstepPlannerParameters,
+                                                  new DefaultSwingPlannerParameters(),
+                                                  walkingControllerParameters,
+                                                  footPolygons,
+                                                  null);
       logger = new FootstepPlannerLogger(planningModule);
       planningModule.addCustomTerminationCondition((plannerTime, iterations, bestFinalStep, bestSecondToLastStep, bestPathSize) -> iterations > 1);
 
       messager.addTopicListener(FootstepPlannerMessagerAPI.ApproveStep, executeRequested::set);
       messager.addTopicListener(FootstepPlannerMessagerAPI.ReplanStep, replanRequested::set);
       messager.addTopicListener(FootstepPlannerMessagerAPI.WriteHeightMapLog, writeLog::set);
-      messager.addTopicListener(FootstepPlannerMessagerAPI.ResendLastStep, r -> messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanToRobot, footstepDataListMessageCache));
+      messager.addTopicListener(FootstepPlannerMessagerAPI.ResendLastStep,
+                                r -> messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanToRobot, footstepDataListMessageCache));
       messager.addTopicListener(FootstepPlannerMessagerAPI.ReconnectRos1Node, reconnectRos1Node::set);
 
       currentState.set(State.WAITING_TO_START);
 
-      steppingFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("steppingCamera", referenceFrames.getChestFrame(), transformChestToL515DepthCamera);
+      steppingFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("steppingCamera",
+                                                                                      referenceFrames.getChestFrame(),
+                                                                                      transformChestToL515DepthCamera);
 
       CollisionShapeTester shapeTester = new CollisionShapeTester();
       for (RobotSide robotSide : RobotSide.values)
@@ -163,21 +161,8 @@ public class HeightMapNavigationUpdater extends AnimationTimer
       }
    }
 
-   public static AbstractRosTopicSubscriber<RawGPUPlanarRegionList> createROS1Callback(String topic, RosNodeInterface ros1Node, Consumer<RawGPUPlanarRegionList> callback)
-   {
-      AbstractRosTopicSubscriber<RawGPUPlanarRegionList> subscriber = new AbstractRosTopicSubscriber<RawGPUPlanarRegionList>(RawGPUPlanarRegionList._TYPE)
-      {
-         @Override
-         public void onNewMessage(RawGPUPlanarRegionList rawGPUPlanarRegionList)
-         {
-            callback.accept(rawGPUPlanarRegionList);
-         }
-      };
-      ros1Node.attachSubscriber(topic, subscriber);
-      return subscriber;
-   }
-
    private static final RigidBodyTransform zForwardXRightToZUpXForward = new RigidBodyTransform();
+
    static
    {
       zForwardXRightToZUpXForward.appendPitchRotation(Math.PI / 2.0);
@@ -216,11 +201,6 @@ public class HeightMapNavigationUpdater extends AnimationTimer
             LogTools.error("Need to set goal before starting.");
             return;
          }
-         if (heightMapMessage.get() == null)
-         {
-            LogTools.error("Height map not received.");
-            return;
-         }
 
          reset();
          currentState.set(State.PLAN_BODY_PATH);
@@ -230,9 +210,6 @@ public class HeightMapNavigationUpdater extends AnimationTimer
       {
          // Plan body path
          setStartFootPosesToCurrent();
-
-         heightMapUsedForPlanning = HeightMapMessageTools.unpackMessageToHeightMapData(heightMapMessage.get());
-         request.setHeightMapData(heightMapUsedForPlanning);
 
          Pose3D goalPose = new Pose3D(goalPosition.get(), goalOrientation.get());
          request.setGoalFootPoses(0.2, goalPose);
@@ -289,7 +266,6 @@ public class HeightMapNavigationUpdater extends AnimationTimer
 
          request.setPlanBodyPath(false);
          request.setPerformAStarSearch(true);
-         request.setHeightMapData(HeightMapMessageTools.unpackMessageToHeightMapData(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegions.get())));
          request.setRequestedInitialStanceSide(lastStepSide);
 
          LogTools.info("Planning step");
@@ -300,22 +276,22 @@ public class HeightMapNavigationUpdater extends AnimationTimer
 
          footstepDataListMessage.getFootstepDataList().clear();
 
-//         if (footstep.getFoothold().isEmpty())
-//         {
-//            ConvexPolygon2D footPolygon = footPolygons.get(footstep.getRobotSide());
-//            for (int i = 0; i < footPolygon.getNumberOfVertices(); i++)
-//            {
-//               footstepDataMessage.getPredictedContactPoints2d().add().set(footPolygon.getVertex(i));
-//            }
-//         }
-//         else
-//         {
-//            ConvexPolygon2D footPolygon = footstep.getFoothold();
-//            for (int i = 0; i < footPolygon.getNumberOfVertices(); i++)
-//            {
-//               footstepDataMessage.getPredictedContactPoints2d().add().set(footPolygon.getVertex(i));
-//            }
-//         }
+         //         if (footstep.getFoothold().isEmpty())
+         //         {
+         //            ConvexPolygon2D footPolygon = footPolygons.get(footstep.getRobotSide());
+         //            for (int i = 0; i < footPolygon.getNumberOfVertices(); i++)
+         //            {
+         //               footstepDataMessage.getPredictedContactPoints2d().add().set(footPolygon.getVertex(i));
+         //            }
+         //         }
+         //         else
+         //         {
+         //            ConvexPolygon2D footPolygon = footstep.getFoothold();
+         //            for (int i = 0; i < footPolygon.getNumberOfVertices(); i++)
+         //            {
+         //               footstepDataMessage.getPredictedContactPoints2d().add().set(footPolygon.getVertex(i));
+         //            }
+         //         }
 
          logger.logSession();
 
@@ -363,7 +339,8 @@ public class HeightMapNavigationUpdater extends AnimationTimer
 
             firstStep.set(false);
             lastStepSide = lastStepSide.getOppositeSide();
-            lastStepPose.set(footstepDataListMessage.getFootstepDataList().get(0).getLocation(), footstepDataListMessage.getFootstepDataList().get(0).getOrientation());
+            lastStepPose.set(footstepDataListMessage.getFootstepDataList().get(0).getLocation(),
+                             footstepDataListMessage.getFootstepDataList().get(0).getOrientation());
             steps.add(new Pose3D(lastStepPose));
             previousStepMessageId = messageId;
             logger.logSession();
@@ -432,7 +409,6 @@ public class HeightMapNavigationUpdater extends AnimationTimer
          side = side.getOppositeSide();
       }
 
-      request.setHeightMapData(heightMapUsedForPlanning);
       logger.logSession();
    }
 

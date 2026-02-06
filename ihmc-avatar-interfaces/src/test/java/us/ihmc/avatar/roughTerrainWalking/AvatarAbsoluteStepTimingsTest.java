@@ -73,10 +73,10 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
       int steps = 20;
 
       WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
-      double stepWidth = (walkingControllerParameters.getSteppingParameters().getMinStepWidth()
-            + walkingControllerParameters.getSteppingParameters().getMaxStepWidth()) / 2.0;
-      double stepLength = walkingControllerParameters.getSteppingParameters().getDefaultStepLength() / 2.0;
-      stepLength = Math.max(walkingControllerParameters.getSteppingParameters().getActualFootLength() * 1.2, stepLength);
+      SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParametersForStepGeneration();
+      double stepWidth = (steppingParameters.getMinStepWidth() + steppingParameters.getMaxStepWidth()) / 2.0;
+      double stepLength = steppingParameters.getDefaultStepLength() / 2.0;
+      stepLength = Math.max(steppingParameters.getActualFootLength() * 1.2, stepLength);
       double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
       double defaultTransferTime = walkingControllerParameters.getDefaultTransferTime();
 

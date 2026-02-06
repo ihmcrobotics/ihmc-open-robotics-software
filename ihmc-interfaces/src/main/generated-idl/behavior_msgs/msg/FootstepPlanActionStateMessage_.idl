@@ -7,6 +7,7 @@
 #include "behavior_msgs/msg/./FootstepPlanActionFootstepStateMessage_.idl"
 #include "controller_msgs/msg/./RigidBodyTransformMessage_.idl"
 #include "geometry_msgs/msg/./Pose_.idl"
+#include "ihmc_common_msgs/msg/./LatestModificationMessage_.idl"
 #include "ihmc_common_msgs/msg/./SE3TrajectoryPointMessage_.idl"
 module behavior_msgs
 {
@@ -38,6 +39,10 @@ module behavior_msgs
          * Definition
          */
         behavior_msgs::msg::dds::FootstepPlanActionDefinitionMessage definition;
+        /**
+         * Additional synchronization mechanism to avoid feedback loop
+         */
+        ihmc_common_msgs::msg::dds::LatestModificationMessage latest_modification_state_data;
         /**
          * The footsteps, with a maximum of 50
          */

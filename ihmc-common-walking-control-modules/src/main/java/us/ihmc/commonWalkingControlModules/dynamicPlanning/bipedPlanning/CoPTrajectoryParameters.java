@@ -24,26 +24,26 @@ public class CoPTrajectoryParameters extends YoSaveableModuleState
    private static final boolean defaultPlanWithExitCMPOnToes = false;
    private static final boolean defaultPlanWithExitCMPOnToesWhenSteppingDown = true;
 
-   private static final double defaultEntryCMPMinX = -0.04;
+   private static final double defaultEntryCMPMinX = -0.035;
    private static final double defaultEntryCMPMaxX = 0.03;
 
    private static final double defaultBallCMPMinX = 0.0;
-   private static final double defaultBallCMPMaxX = 0.055;
+   private static final double defaultBallCMPMaxX = 0.05;
 
    private static final double defaultExitCMPMinX = 0.0;
-   private static final double defaultExitCMPMaxX = 0.1;
+   private static final double defaultExitCMPMaxX = 0.09;
 
    private static final double defaultDurationForContinuityMaintenanceSegment = 0.2;
    private static final double defaultExitCoPForwardSafetyMarginOnToes = 1.6e-2;
 
    private static final double defaultTransferSplitFraction = 0.5;
    private static final double defaultSwingSplitFraction = 0.5;
-   private static final double defaultSwingDurationShiftFraction = 0.85;
+   private static final double defaultSwingDurationShiftFraction = 0.9;
    private static final double defaultTransferWeightDistribution = 0.5;
 
-   private static final Vector2DReadOnly defaultEntryCMPOffset = new Vector2D(0.0, 0.005);
-   private static final Vector2DReadOnly defaultBallCMPOffset = new Vector2D(0.0, 0.005);
-   private static final Vector2DReadOnly defaultExitCMPOffset = new Vector2D(0.0, 0.01);
+   private static final Vector2DReadOnly defaultEntryCMPOffset = new Vector2D(0.0, 0.007);
+   private static final Vector2DReadOnly defaultBallCMPOffset = new Vector2D(0.0, 0.009);
+   private static final Vector2DReadOnly defaultExitCMPOffset = new Vector2D(0.0, 0.012);
 
    private static final double defaultEntryCMPLengthOffsetFactor = 1.0 / 3.0;
    private static final double defaultBallCMPLengthOffsetFactor = 1.0 / 8.0;

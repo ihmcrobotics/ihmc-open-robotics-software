@@ -30,7 +30,7 @@ public class ImGuiPlot
 
    public ImGuiPlot(String name, int bufferSize, int width, int height)
    {
-      this.name = ImGuiTools.uniqueLabel(getClass().getSimpleName() + ID.getAndIncrement(), name);
+      this.name = new ImGuiUniqueLabelMap(getClass()).get(name);
       this.bufferSize = bufferSize;
       values = new float[bufferSize];
       this.width = width;

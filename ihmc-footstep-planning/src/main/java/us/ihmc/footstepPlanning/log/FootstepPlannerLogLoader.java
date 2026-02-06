@@ -19,10 +19,6 @@ import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
-import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
-import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ClusterType;
-import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ExtrusionSide;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.*;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.variable.YoVariableType;
@@ -342,64 +338,6 @@ public class FootstepPlannerLogLoader
    public FootstepPlannerLog getLog()
    {
       return log;
-   }
-
-   private void loadVisibilityMap(BufferedReader dataFileReader, VisibilityMap visibilityMap) throws IOException
-   {
-      dataFileReader.readLine();
-
-      int numberOfConnections = getIntCSV(true, dataFileReader.readLine())[0];
-      for (int i = 0; i < numberOfConnections; i++)
-      {
-         double[] connectionPointData = getDoubleCSV(false, dataFileReader.readLine());
-         Connection connection = new Connection(new ConnectionPoint3D(connectionPointData[0], connectionPointData[1], connectionPointData[2], 0),
-                                                new ConnectionPoint3D(connectionPointData[3], connectionPointData[4], connectionPointData[5], 0));
-         visibilityMap.addConnection(connection);
-      }
-
-      int numberOfVertices = getIntCSV(true, dataFileReader.readLine())[0];
-      for (int i = 0; i < numberOfVertices; i++)
-      {
-         double[] vertexData = getDoubleCSV(false, dataFileReader.readLine());
-         visibilityMap.getVertices().add(new ConnectionPoint3D(vertexData[0], vertexData[1], vertexData[2], 0));
-      }
-   }
-
-   private VisibilityMapWithNavigableRegion loadNavigableRegion(BufferedReader dataFileReader, List<PlanarRegion> planarRegionsList) throws IOException
-   {
-      dataFileReader.readLine();
-
-      int mapId = getIntCSV(true, dataFileReader.readLine())[0];
-      ClusterType clusterType = ClusterType.fromByte((byte) getIntCSV(true, dataFileReader.readLine())[0]);
-      ExtrusionSide extrusionSide = ExtrusionSide.fromByte((byte) getIntCSV(true, dataFileReader.readLine())[0]);
-      Optional<PlanarRegion> region = planarRegionsList.stream().filter(r -> r.getRegionId() == mapId).findFirst();
-
-      if (region.isEmpty())
-      {
-         return null;
-      }
-
-      Cluster homeRegionCluster = new Cluster(extrusionSide, clusterType);
-
-      int numberOfNaviableExtrusions = getIntCSV(true, dataFileReader.readLine())[0];
-      for (int i = 0; i < numberOfNaviableExtrusions; i++)
-      {
-         homeRegionCluster.getNavigableExtrusionsInLocal().addPoint(readPoint2D(false, dataFileReader.readLine()));
-      }
-      int numberOfNonNaviableExtrusions = getIntCSV(true, dataFileReader.readLine())[0];
-      for (int i = 0; i < numberOfNonNaviableExtrusions; i++)
-      {
-         homeRegionCluster.getNonNavigableExtrusionsInLocal().addPoint(readPoint2D(false, dataFileReader.readLine()));
-      }
-
-      VisibilityMap visibilityMapInLocal = new VisibilityMap();
-      loadVisibilityMap(dataFileReader, visibilityMapInLocal);
-
-      VisibilityMapWithNavigableRegion visibilityMapWithNavigableRegion = new VisibilityMapWithNavigableRegion(new NavigableRegion(region.get(),
-                                                                                                                                   homeRegionCluster,
-                                                                                                                                   new ArrayList<>()));
-      visibilityMapWithNavigableRegion.setVisibilityMapInLocal(visibilityMapInLocal);
-      return visibilityMapWithNavigableRegion;
    }
 
    private static int[] getIntCSV(boolean removeKey, String dataFileLine)

@@ -15,6 +15,7 @@ import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -92,8 +93,9 @@ public abstract class HumanoidEndToEndSlopeTest implements MultiRobotTestInterfa
          throws Exception
    {
       DRCRobotModel robotModel = getRobotModel();
-      double footLength = robotModel.getWalkingControllerParameters().getSteppingParameters().getActualFootLength();
-      double footWidth = robotModel.getWalkingControllerParameters().getSteppingParameters().getActualFootWidth();
+      SteppingParameters steppingParameters = robotModel.getWalkingControllerParameters().getSteppingParameters();
+      double footLength = steppingParameters.getActualFootLength();
+      double footWidth = steppingParameters.getActualFootWidth();
       double slopeLength = 3.0;
       double topZ = Math.tan(slopeAngle) * slopeLength;
       double startX = (up ? 0.0 : 1.2 + slopeLength) + 0.3;

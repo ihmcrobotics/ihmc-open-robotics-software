@@ -90,7 +90,6 @@ public class JointTorqueCommandTest
                                                                                        controlledJoints,
                                                                                        centerOfMassFrame,
                                                                                        new JointTorqueTestOptimizationSettings(jointAccelerationWeight, 0),
-                                                                                       yoGraphicsListRegistry,
                                                                                        registry);
 
       controlCoreToolbox.setupForInverseDynamicsSolver(new ArrayList<>());
@@ -212,7 +211,6 @@ public class JointTorqueCommandTest
                                                                                        centerOfMassFrame,
                                                                                        new JointTorqueTestOptimizationSettings(jointAccelerationRegularizationWeight,
                                                                                                                                1),
-                                                                                       new YoGraphicsListRegistry(),
                                                                                        registry);
       controlCoreToolbox.setupForInverseDynamicsSolver(contactableBodies);
       JointDesiredOutputList lowLevelControllerCoreOutput = new JointDesiredOutputList(new OneDoFJointReadOnly[] {upperJoint});
@@ -342,7 +340,6 @@ public class JointTorqueCommandTest
                                                                                        controlledJoints,
                                                                                        centerOfMassFrame,
                                                                                        new JointTorqueTestOptimizationSettings(jointAccelerationWeight, 0),
-                                                                                       yoGraphicsListRegistry,
                                                                                        registry);
 
       controlCoreToolbox.setupForInverseDynamicsSolver(new ArrayList<>());
@@ -498,7 +495,6 @@ public class JointTorqueCommandTest
                                                                                        centerOfMassFrame,
                                                                                        new JointTorqueTestOptimizationSettings(jointAccelerationRegularizationWeight,
                                                                                                                                1),
-                                                                                       new YoGraphicsListRegistry(),
                                                                                        registry);
       controlCoreToolbox.setupForInverseDynamicsSolver(contactableBodies);
       JointDesiredOutputList lowLevelControllerCoreOutput = new JointDesiredOutputList(new OneDoFJointReadOnly[] {upperJoint});

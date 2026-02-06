@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.sensors.footSwitch;
 import java.util.Collection;
 
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
@@ -20,18 +19,26 @@ public class JointTorqueBasedFootSwitchFactory implements FootSwitchFactory
 {
    private double defaultContactThresholdTorque = 50.0;
    private double defaultHigherContactThresholdTorque = 100.0;
-   private double defaultContactThresholdForce = 50.0;
+   private double defaultContactThresholdForceLow = 50.0;
+   private double defaultContactThresholdForceHigh = 100.0;
+   private double defaultContactCoPThreshold = 0.01;
    private int defaultContactWindowSize = 10;
    private boolean defaultUseJacobianTranspose = false;
-   private double defaultHorizontalVelocityThreshold = 0.25;
+   private double defaultHorizontalVelocityThreshold = 0.5;
    private double defaultVerticalVelocityThreshold = 0.125;
+   private double defaultVerticalVelocityHighThreshold = 0.3;
+   private double defaultJacobianDeterminantSingularityThreshold = 2e-3;
 
    private DoubleProvider contactThresholdTorque;
    private DoubleProvider higherContactThresholdTorque;
-   private DoubleProvider contactForceThreshold;
+   private DoubleProvider contactForceThresholdLow;
+   private DoubleProvider contactForceThresholdHigh;
+   private DoubleProvider contactCoPThreshold;
    private BooleanProvider compensateGravity;
    private DoubleProvider horizontalVelocityThreshold;
    private DoubleProvider verticalVelocityThreshold;
+   private DoubleProvider verticalVelocityHighThreshold;
+   private DoubleProvider jacobianDeterminantSingularityThreshold;
    private YoInteger contactWindowSize;
    private BooleanProvider useJacobianTranspose;
 
@@ -65,9 +72,30 @@ public class JointTorqueBasedFootSwitchFactory implements FootSwitchFactory
       this.defaultContactWindowSize = defaultContactWindowSize;
    }
 
+   /**
+    * Call either {@link #setDefaultContactThresholdForceLow} or {@link #setDefaultContactThresholdForceHigh(double)}. This now links to
+    * {@link #setDefaultContactThresholdForceLow(double)}
+    * @param defaultContactThresholdForce
+    */
+   @Deprecated
    public void setDefaultContactThresholdForce(double defaultContactThresholdForce)
    {
-      this.defaultContactThresholdForce = defaultContactThresholdForce;
+      setDefaultContactThresholdForceLow(defaultContactThresholdForce);
+   }
+
+   public void setDefaultContactThresholdForceLow(double defaultContactThresholdForce)
+   {
+      this.defaultContactThresholdForceLow = defaultContactThresholdForce;
+   }
+
+   public void setDefaultContactThresholdForceHigh(double defaultContactThresholdForce)
+   {
+      this.defaultContactThresholdForceHigh = defaultContactThresholdForce;
+   }
+
+   public void setDefaultCoPThresholdDistance(double defaultContactCoPThreshold)
+   {
+      this.defaultContactCoPThreshold = defaultContactCoPThreshold;
    }
 
    public void setDefaultUseJacobianTranspose(boolean defaultUseJacobianTranspose)
@@ -85,6 +113,11 @@ public class JointTorqueBasedFootSwitchFactory implements FootSwitchFactory
       this.defaultVerticalVelocityThreshold = defaultVerticalVelocityThreshold;
    }
 
+   public void setDefaultJacobianDeterminantSingularityThreshold(double defaultJacobianDeterminantSingularityThreshold)
+   {
+      this.defaultJacobianDeterminantSingularityThreshold = defaultJacobianDeterminantSingularityThreshold;
+   }
+
    @Override
    public FootSwitchInterface newFootSwitch(String namePrefix,
                                             ContactablePlaneBody foot,
@@ -92,34 +125,41 @@ public class JointTorqueBasedFootSwitchFactory implements FootSwitchFactory
                                             RigidBodyBasics rootBody,
                                             ForceSensorDataReadOnly footForceSensor,
                                             double totalRobotWeight,
-                                            YoGraphicsListRegistry yoGraphicsListRegistry,
                                             YoRegistry registry)
    {
       if (contactThresholdTorque == null)
       {
          contactThresholdTorque = new DoubleParameter(namePrefix + "ContactThresholdJointTorque", registry, defaultContactThresholdTorque);
          higherContactThresholdTorque = new DoubleParameter(namePrefix + "HigherContactThresholdJointTorque", registry, defaultHigherContactThresholdTorque);
-         contactForceThreshold = new DoubleParameter(namePrefix + "JacobianTThresholdForce", registry, defaultContactThresholdForce);
+         contactForceThresholdLow = new DoubleParameter(namePrefix + "JacobianTThresholdForceLow", registry, defaultContactThresholdForceLow);
+         contactForceThresholdHigh = new DoubleParameter(namePrefix + "JacobianTThresholdForceHigh", registry, defaultContactThresholdForceHigh);
+         contactCoPThreshold = new DoubleParameter(namePrefix + "JacobianTThresholdContactCoP", registry, defaultContactCoPThreshold);
          contactWindowSize = new YoInteger(namePrefix + "ContactThresholdJointTorqueWindowSize", registry);
          contactWindowSize.set(defaultContactWindowSize);
          compensateGravity = new BooleanParameter(namePrefix + "JacobianTCompensateGravity", registry, true);
          useJacobianTranspose = new BooleanParameter(namePrefix + "UseJacobianTranspose", registry, defaultUseJacobianTranspose);
          verticalVelocityThreshold = new DoubleParameter(namePrefix + "VerticalVelocityThreshold", registry, defaultVerticalVelocityThreshold);
+         verticalVelocityHighThreshold = new DoubleParameter(namePrefix + "VerticalVelocityHighThreshold", registry, defaultVerticalVelocityHighThreshold);
          horizontalVelocityThreshold = new DoubleParameter(namePrefix + "HorizontalVelocityThreshold", registry, defaultHorizontalVelocityThreshold);
+         jacobianDeterminantSingularityThreshold = new DoubleParameter(namePrefix + "JacobianDeterminantSingularityThreshold", registry,
+                                                            defaultJacobianDeterminantSingularityThreshold);
       }
 
       return new JointTorqueBasedFootSwitch(namePrefix,
                                             jointDescriptionToCheck,
-                                            foot.getRigidBody(),
                                             rootBody,
-                                            (MovingReferenceFrame) foot.getContactFrame(),
+                                            foot,
                                             contactThresholdTorque,
                                             higherContactThresholdTorque,
-                                            contactForceThreshold,
+                                            contactForceThresholdLow,
+                                            contactForceThresholdHigh,
+                                            contactCoPThreshold,
                                             contactWindowSize,
                                             compensateGravity,
                                             horizontalVelocityThreshold,
                                             verticalVelocityThreshold,
+                                            verticalVelocityHighThreshold,
+                                            jacobianDeterminantSingularityThreshold,
                                             useJacobianTranspose,
                                             registry);
    }

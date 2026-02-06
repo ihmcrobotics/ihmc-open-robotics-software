@@ -51,7 +51,7 @@ public class RDXSCS2SimulationSession extends RDXSCS2Session
             bulletPhysicsDebugger.drawBulletDebugDrawings();
 
          // This technically belongs in RDXSCS2Session, but there's no after tick callback for a regular session
-         if (pauseAtEndOfBuffer.get() && yoManager.getCurrentIndex() == yoManager.getBufferSize() - 2)
+         if (pauseAtEndOfBuffer.get() && session.getBufferProperties().getCurrentIndex() == session.getBufferProperties().getSize() - 1)
          {
             session.setSessionMode(SessionMode.PAUSE);
          }

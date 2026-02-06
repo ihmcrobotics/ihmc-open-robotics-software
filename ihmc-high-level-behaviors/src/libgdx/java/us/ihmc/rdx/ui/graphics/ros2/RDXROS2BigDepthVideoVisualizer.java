@@ -5,6 +5,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.BigVideoPacket;
 import us.ihmc.idl.IDLSequence;
+import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
@@ -13,7 +14,7 @@ import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.string.StringTools;
 
-public class RDXROS2BigDepthVideoVisualizer extends RDXROS2OpenCVVideoVisualizer<BigVideoPacket>
+public class RDXROS2BigDepthVideoVisualizer extends RDXROS2ImageVisualizer<BigVideoPacket>
 {
    private final String titleBeforeAdditions;
    private final ROS2Topic<BigVideoPacket> topic;
@@ -58,7 +59,7 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXROS2OpenCVVideoVisualizer
             subscriber.takeNextData(videoPacket, sampleInfo);
 //            delayPlot.addValue(TimeTools.calculateDelay(videoPacket.getAcquisitionTimeSecondsSinceEpoch(), videoPacket.getAcquisitionTimeAdditionalNanos()));
          }
-         getOpenCVVideoVisualizer().doReceiveMessageOnThread(() ->
+         submitImageUpdate(imageVisualizer ->
          {
             synchronized (syncObject)
             {
@@ -95,8 +96,7 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXROS2OpenCVVideoVisualizer
 
             synchronized (this) // synchronize with the update method
             {
-               getOpenCVVideoVisualizer().updateImageDimensions(videoPacket.getImageWidth(), videoPacket.getImageHeight());
-               OpenCVTools.convert8BitGrayTo8BitRGBA(normalizedScaledImage, getOpenCVVideoVisualizer().getRGBA8Mat());
+               imageVisualizer.setImage(normalizedScaledImage, PixelFormat.GRAY8);
             }
          });
       });

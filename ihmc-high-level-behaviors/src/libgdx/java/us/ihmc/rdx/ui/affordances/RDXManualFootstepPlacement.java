@@ -21,8 +21,9 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerPar
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.rdx.imgui.ImGuiLabelMap;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.rdx.imgui.ImGuiTools;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
 import us.ihmc.rdx.tools.LibGDXTools;
@@ -30,7 +31,6 @@ import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.tools.factories.OptionalFactoryField;
 
 /**
@@ -42,7 +42,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    private final static boolean APPLY_REACHABLE_REGION_ELLIPTICAL_CONSTRAINT = false;
    private static final double MAX_DISTANCE_MULTIPLIER = 3.0;
 
-   private final ImGuiLabelMap labels = new ImGuiLabelMap();
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private RDXInteractableFootstep footstepBeingPlaced;
    private boolean footstepBeingPlacedIsReachable;
    private boolean modeNewlyActivated = false;
@@ -58,7 +58,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    private final FramePose3D tempFramePose = new FramePose3D();
    private RDX3DPanelTooltip tooltip;
    private final ImBoolean activeAdjustmentEnabled = new ImBoolean(false);
-   private HeightMapData latestHeightMapData;
+   private TerrainMapData latestHeightMapData;
    private final OptionalFactoryField<EllipticalStepPositionLimiter> stepPositionLimiter = new OptionalFactoryField<>("ManualFootstepPlacementLimiter");
 
    public void create(ROS2SyncedRobotModel syncedRobot,
@@ -454,8 +454,8 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       this.stepPositionLimiter.set(stepPositionLimiter);
    }
 
-   public void setHeightMapData(HeightMapData heightMapMessage)
+   public void setTerrainMapData(TerrainMapData terrainMapData)
    {
-      this.latestHeightMapData = heightMapMessage;
+      this.latestHeightMapData = terrainMapData;
    }
 }

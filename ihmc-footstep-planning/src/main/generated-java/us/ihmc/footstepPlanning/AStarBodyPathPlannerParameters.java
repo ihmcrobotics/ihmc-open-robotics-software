@@ -36,6 +36,8 @@ public class AStarBodyPathPlannerParameters extends StoredPropertySet implements
     * height are ignored when taking the average
     */
    public static final DoubleStoredPropertyKey minSnapHeightThreshold = keys.addDoubleKey("Min snap height threshold");
+
+   public static final DoubleStoredPropertyKey obstacleClearanceWeight = keys.addDoubleKey("Obstacle clearance cost weight");
    /**
     * This is the weight assigned to minimizing the inccline the path takes. The cost
     * is determined by the difference between the edge incline from the nominal

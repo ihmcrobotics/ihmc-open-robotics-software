@@ -1,7 +1,6 @@
 #ifndef __perception_msgs__msg__TerrainMapMessage__idl__
 #define __perception_msgs__msg__TerrainMapMessage__idl__
 
-#include "perception_msgs/msg/./HeightMapMessage_.idl"
 module perception_msgs
 {
   module msg
@@ -20,9 +19,33 @@ module perception_msgs
          */
         unsigned long long sequence_id;
         /**
-         * Height map message
+         * X coordinate of the center of the height map
          */
-        perception_msgs::msg::dds::HeightMapMessage height_map;
+        double grid_center_x;
+        /**
+         * Y coordinate of the center of the height map
+         */
+        double grid_center_y;
+        /**
+         * Width of the height map in meters
+         */
+        double width_in_meters;
+        /**
+         * Cell size in meters of an individual cell
+         */
+        double cell_size_in_meters;
+        /**
+         * Cells per axis
+         */
+        long cells_per_axis;
+        /**
+         * Height map in metric values
+         */
+        sequence<float, 255000> height_map;
+        /**
+         * Obstacle clearance score, on a 0 to 1 scale
+         */
+        sequence<float, 255000> obstacle_clearance_score;
         /**
          * Traversability score, on a 0 to 1 scale
          */

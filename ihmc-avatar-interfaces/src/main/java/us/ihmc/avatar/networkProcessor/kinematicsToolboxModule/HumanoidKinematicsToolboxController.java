@@ -16,7 +16,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMarginRegionCalculator;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.concurrent.ConcurrentCopier;
@@ -51,6 +50,8 @@ import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.yoVariables.euclid.YoVector2D;
@@ -183,7 +184,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
                                               StatusMessageOutputManager statusOutputManager,
                                               FullHumanoidRobotModel desiredFullRobotModel,
                                               double updateDT,
-                                              YoGraphicsListRegistry yoGraphicsListRegistry,
                                               YoRegistry parentRegistry)
    {
       this(commandInputManager,
@@ -191,7 +191,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
            desiredFullRobotModel,
            createListOfControllableRigidBodies(desiredFullRobotModel),
            updateDT,
-           yoGraphicsListRegistry,
            parentRegistry);
    }
 
@@ -203,7 +202,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
     * @param desiredFullRobotModel   the robot model the solver will be working on and storing the latest solution.
     * @param controllableRigidBodies the list of rigid-bodies that can be controlled by the solver. Mostly used for visualization.
     * @param updateDT                the time step used by the solver.
-    * @param yoGraphicsListRegistry  the registry used to store the graphics for visualization.
     * @param parentRegistry          the parent registry for this controller.
     */
    public HumanoidKinematicsToolboxController(CommandInputManager commandInputManager,
@@ -211,7 +209,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
                                               FullHumanoidRobotModel desiredFullRobotModel,
                                               Collection<? extends RigidBodyBasics> controllableRigidBodies,
                                               double updateDT,
-                                              YoGraphicsListRegistry yoGraphicsListRegistry,
                                               YoRegistry parentRegistry)
    {
       super(commandInputManager,
@@ -220,7 +217,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
             getAllJointsExcludingHands(desiredFullRobotModel),
             controllableRigidBodies,
             updateDT,
-            yoGraphicsListRegistry,
             parentRegistry);
 
       this.desiredFullRobotModel = desiredFullRobotModel;
@@ -232,7 +228,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       supportRigidBodyWeight.set(200.0);
       momentumWeight.set(0.001);
 
-      multiContactRegionCalculator = StabilityMarginRegionCalculator.createForCoPStabilityMargin("", desiredFullRobotModel.getTotalMass(), desiredReferenceFrames.getCenterOfMassFrame(), desiredReferenceFrames.getMidFeetZUpFrame(), registry, yoGraphicsListRegistry);
+      multiContactRegionCalculator = StabilityMarginRegionCalculator.createForCoPStabilityMargin("", desiredFullRobotModel.getTotalMass(), desiredReferenceFrames.getCenterOfMassFrame(), desiredReferenceFrames.getMidFeetZUpFrame(), registry, null);
       multiContactRegionCalculator.setupForStabilityMarginCalculation(() -> centerOfMass);
       wholeBodyContactState = new WholeBodyContactState(desiredOneDoFJoints, rootJoint);
 
@@ -260,10 +256,10 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       {
          String side = robotSide.getCamelCaseNameForMiddleOfExpression();
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
-         isFootInSupport.put(robotSide, new YoBoolean("is" + side + "FootInSupport", registry));
-         initialFootPoses.put(robotSide, new YoFramePose3D(sidePrefix + "FootInitial", worldFrame, registry));
          isHandInSupport.put(robotSide, new YoBoolean("is" + side + "HandInSupport", registry));
          initialHandPositions.put(robotSide, new YoFramePoint3D(sidePrefix + "HandInitial", worldFrame, registry));
+         isFootInSupport.put(robotSide, new YoBoolean("is" + side + "FootInSupport", registry));
+         initialFootPoses.put(robotSide, new YoFramePose3D(sidePrefix + "FootInitial", worldFrame, registry));
       }
 
       for (RobotSide robotSide : RobotSide.values)
@@ -421,8 +417,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       enableAutoSupportPolygon.set(true);
       holdCenterOfMassXYPosition.set(true);
       enableJointLimitReduction.set(true);
-      getSolution().setLeftFootInContact(true);
-      getSolution().setRightFootInContact(true);
+      getSolution().getLeftFootStatus().setFootInContact(true);
+      getSolution().getRightFootStatus().setFootInContact(true);
 
       status.setCurrentToolboxState(CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL);
       reportMessage(status);
@@ -533,9 +529,15 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       }
 
       super.updateInternal();
+
+      // Update anchor base (chest) pose - only needed for status message
+      RigidBodyTransform chestTransformToWorld = desiredFullRobotModel.getChest().getParentJoint().getFrameAfterJoint().getTransformToRoot();
+      getSolution().getDesiredTorsoPosition().set(chestTransformToWorld.getTranslation());
+      getSolution().getDesiredTorsoOrientation().set(chestTransformToWorld.getRotation());
+
       if (!isUserProvidingSupportPolygon() && isUpperBodyLoadBearing.getValue())
       {
-         // update actuation limits based on current configuration
+         // Update actuation limits based on current configuration
          wholeBodyContactState.updateActuationConstraintVector();
          wholeBodyContactState.updateActuationConstraintMatrix();
          multiContactRegionCalculator.updateContactState(wholeBodyContactState);
@@ -870,9 +872,9 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
    public void setIsFootInSupport(RobotSide side, boolean value)
    {
-         isFootInSupport.get(side).set(value);
-         getSolution().setLeftFootInContact(isFootInSupport.get(RobotSide.LEFT).getValue());
-         getSolution().setRightFootInContact(isFootInSupport.get(RobotSide.RIGHT).getValue());
+      isFootInSupport.get(side).set(value);
+      getSolution().getLeftFootStatus().setFootInContact(isFootInSupport.get(RobotSide.LEFT).getValue());
+      getSolution().getRightFootStatus().setFootInContact(isFootInSupport.get(RobotSide.RIGHT).getValue());
    }
 
    private final PoseReferenceFrame desiredFootFrame = new PoseReferenceFrame("desiredFootFrame", ReferenceFrame.getWorldFrame());
@@ -947,5 +949,14 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
       updateSupportPolygonConstraint(activeContactPointPositions);
       updateCoMPositionToHold();
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(super.getSCS2YoGraphics());
+      group.addChild(multiContactRegionCalculator.getSCS2YoGraphics());
+      return group;
    }
 }

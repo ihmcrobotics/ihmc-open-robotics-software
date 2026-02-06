@@ -1,9 +1,5 @@
 package us.ihmc.sensors.zed;
 
-import perception_msgs.msg.dds.ZEDSVOCurrentFileMessage;
-import us.ihmc.commons.thread.RepeatingTaskThread;
-import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.zed.SL_InitParameters;
 
 import java.nio.file.Files;
@@ -14,11 +10,9 @@ import static us.ihmc.zed.global.zed.*;
 public class ZEDSVOPlaybackSensor extends ZEDImageSensor
 {
    private final int cameraID;
-   private final String svoFileName;
-   private final ZEDSVOCurrentFileMessage svoStatusMessage = new ZEDSVOCurrentFileMessage();
-   private final RepeatingTaskThread publishInfoThread;
+   protected final String svoFileName;
 
-   public ZEDSVOPlaybackSensor(ROS2PublishSubscribeAPI ros2, int cameraID, ZEDModelData zedModel, int slDepthMode, String svoFileName)
+   public ZEDSVOPlaybackSensor(int cameraID, ZEDModelData zedModel, int slDepthMode, String svoFileName)
    {
       super(cameraID, zedModel, SL_INPUT_TYPE_SVO, slDepthMode);
       this.cameraID = cameraID;
@@ -26,31 +20,22 @@ public class ZEDSVOPlaybackSensor extends ZEDImageSensor
 
       if (!Files.exists(Path.of(svoFileName)))
          throw new RuntimeException("SVO file does not exist");
+   }
 
-      // Subscription to set position message
-      ros2.subscribeViaCallback(PerceptionAPI.ZED_SVO_SET_POSITION, position ->
-      {
-         setCurrentPosition((int) position.getData());
-         if (getGrabThread().getScheduled() == 0)
-            getGrabThread().setScheduled(1);
-      });
+   @Override
+   public boolean startSensor()
+   {
+      return super.startSensor();
+   }
 
-      // Subscribe for pause message
-      ros2.subscribeViaCallback(PerceptionAPI.ZED_SVO_PAUSE, () -> getGrabThread().stopRepeating());
+   public void play()
+   {
+      run(true);
+   }
 
-      // Subscribe to play message
-      ros2.subscribeViaCallback(PerceptionAPI.ZED_SVO_PLAY, () -> getGrabThread().startRepeating());
-
-      publishInfoThread = new RepeatingTaskThread("PublishSVOInfoThread", () ->
-      {
-         svoStatusMessage.setCurrentFileName(svoFileName);
-         svoStatusMessage.setRecordMode((byte) 1); // playback
-         svoStatusMessage.setCurrentPosition(getCurrentPosition());
-         svoStatusMessage.setLength(getLength());
-
-         ros2.publish(PerceptionAPI.ZED_SVO_CURRENT_FILE, svoStatusMessage);
-      }).setFrequencyLimit(sl_get_camera_fps(cameraID));
-      publishInfoThread.startRepeating();
+   public void pause()
+   {
+      run(false);
    }
 
    public void useTrackedPose(boolean useTrackedPose)
@@ -79,14 +64,6 @@ public class ZEDSVOPlaybackSensor extends ZEDImageSensor
       return sl_is_opened(cameraID);
    }
 
-   @Override
-   public void close()
-   {
-      publishInfoThread.blockingKill();
-
-      super.close();
-   }
-
    public int getLength()
    {
       return sl_get_svo_number_of_frames(getCameraID());
@@ -100,5 +77,10 @@ public class ZEDSVOPlaybackSensor extends ZEDImageSensor
    public void setCurrentPosition(int position)
    {
       sl_set_svo_position(getCameraID(), position);
+   }
+
+   public String getSVOFileName()
+   {
+      return svoFileName;
    }
 }

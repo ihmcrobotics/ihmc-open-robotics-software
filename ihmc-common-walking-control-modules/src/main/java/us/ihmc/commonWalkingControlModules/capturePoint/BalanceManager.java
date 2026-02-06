@@ -6,9 +6,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
-import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.CaptureRegionStepAdjustmentController;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.ErrorBasedStepAdjustmentController;
-import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentController;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
@@ -16,7 +14,12 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.*;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.AngularMomentumHandler;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryGeneratorState;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.FlamingoCoPTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.WalkingCoPTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMContinuousContinuityCalculator;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlanner;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
@@ -25,13 +28,20 @@ import us.ihmc.commonWalkingControlModules.messageHandlers.MomentumTrajectoryHan
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.referenceFrame.*;
-import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegionsList;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
@@ -71,12 +81,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.*;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.BlueViolet;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.DarkViolet;
 import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.*;
 
 public class BalanceManager implements SCS2YoGraphicHolder
 {
-   private static final boolean USE_ERROR_BASED_STEP_ADJUSTMENT = true;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final boolean viewCoPHistory = false;
    private static final FrameVector2D zeroVector = new FrameVector2D();
@@ -93,7 +103,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
    private final LinearMomentumRateControlModuleInput linearMomentumRateControlModuleInput = new LinearMomentumRateControlModuleInput();
 
    private final PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager;
-   private final StepAdjustmentController stepAdjustmentController;
+   private final ErrorBasedStepAdjustmentController stepAdjustmentController;
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
    private final YoFramePoint2D yoDesiredCapturePoint = new YoFramePoint2D("desiredICP", worldFrame, registry);
@@ -131,6 +141,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
    private final BagOfBalls perfectCMPTrajectory;
 
    private final YoBoolean useMomentumRecoveryModeForBalance = new YoBoolean("useMomentumRecoveryModeForBalance", registry);
+   private final YoBoolean isCoPDamped = new YoBoolean("isCoPDamped", registry);
 
    private final YoDouble yoTime;
    private final YoDouble icpErrorThresholdToAdjustTime = new YoDouble("icpErrorThresholdToAdjustTime", registry);
@@ -159,6 +170,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
 
    private final YoBoolean holdICPToCurrentCoMLocationInNextDoubleSupport = new YoBoolean("holdICPToCurrentCoMLocationInNextDoubleSupport", registry);
 
+   private final DoubleProvider icpErrorDeadband;
    private final YoDouble normalizedICPError = new YoDouble("normalizedICPError", registry);
    private final DoubleProvider maxICPErrorBeforeSingleSupportForwardX;
    private final DoubleProvider maxICPErrorBeforeSingleSupportBackwardX;
@@ -232,8 +244,6 @@ public class BalanceManager implements SCS2YoGraphicHolder
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
 
-      YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
-
       double gravityZ = controllerToolbox.getGravityZ();
       double totalMass = MultiBodySystemMissingTools.computeSubTreeMass(fullRobotModel.getElevator());
 
@@ -250,10 +260,9 @@ public class BalanceManager implements SCS2YoGraphicHolder
                                                             controllerToolbox,
                                                             controllerToolbox.getReferenceFrames().getSoleFrames(),
                                                             SettableContactStateProvider::new,
-                                                            registry,
-                                                            yoGraphicsListRegistry);
+                                                            registry);
 
-      walkingControllerParameters.getICPControllerParameters().createFeedbackAlphaCalculator(registry, null);
+      walkingControllerParameters.getICPControllerParameters().createFeedbackAlphaCalculator(registry);
       feedbackAlphaCalculator = walkingControllerParameters.getICPControllerParameters().getFeedbackAlphaCalculator();
 
       icpErrorThresholdToAdjustTime.set(walkingControllerParameters.getICPErrorThresholdToSpeedUpSwing());
@@ -262,7 +271,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
 
       bipedSupportPolygons = controllerToolbox.getBipedSupportPolygons();
       icpControlPlane = new ICPControlPlane(centerOfMassFrame, gravityZ, registry);
-      icpControlPolygons = new ICPControlPolygons(icpControlPlane, registry, yoGraphicsListRegistry);
+      icpControlPolygons = new ICPControlPolygons(icpControlPlane, registry);
 
       WalkingMessageHandler walkingMessageHandler = controllerToolbox.getWalkingMessageHandler();
       momentumTrajectoryHandler = walkingMessageHandler == null ? null : walkingMessageHandler.getMomentumTrajectoryHandler();
@@ -271,7 +280,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
       {
          CenterOfMassTrajectoryHandler comTrajectoryHandler = walkingMessageHandler.getComTrajectoryHandler();
          double dt = controllerToolbox.getControlDT();
-         precomputedICPPlanner = new PrecomputedICPPlanner(dt, comTrajectoryHandler, momentumTrajectoryHandler, registry, yoGraphicsListRegistry);
+         precomputedICPPlanner = new PrecomputedICPPlanner(dt, comTrajectoryHandler, momentumTrajectoryHandler, registry);
          precomputedICPPlanner.setOmega0(controllerToolbox.getOmega0());
          precomputedICPPlanner.setMass(totalMass);
          precomputedICPPlanner.setGravity(gravityZ);
@@ -284,6 +293,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
 
       distanceToShrinkSupportPolygonWhenHoldingCurrent.set(0.08);
 
+      icpErrorDeadband = new DoubleParameter("icpErrorDeadband", registry, walkingControllerParameters.getICPControllerParameters().getICPErrorDeadband());
       maxICPErrorBeforeSingleSupportForwardX = new DoubleParameter("maxICPErrorBeforeSingleSupportForwardX",
                                                                    registry,
                                                                    walkingControllerParameters.getMaxICPErrorBeforeSingleSupportForwardX());
@@ -322,24 +332,11 @@ public class BalanceManager implements SCS2YoGraphicHolder
 
       previousPrecomputedTrajectoryTime.setToNaN();
 
-      if (USE_ERROR_BASED_STEP_ADJUSTMENT)
-      {
-         stepAdjustmentController = new ErrorBasedStepAdjustmentController(walkingControllerParameters,
-                                                                           controllerToolbox.getReferenceFrames().getSoleZUpFrames(),
-                                                                           bipedSupportPolygons,
-                                                                           icpControlPolygons,
-                                                                           controllerToolbox.getContactableFeet(),
-                                                                           registry,
-                                                                           yoGraphicsListRegistry);
-      }
-      else
-      {
-         stepAdjustmentController = new CaptureRegionStepAdjustmentController(walkingControllerParameters,
-                                                                              controllerToolbox.getReferenceFrames().getSoleZUpFrames(),
-                                                                              bipedSupportPolygons,
-                                                                              registry,
-                                                                              yoGraphicsListRegistry);
-      }
+      stepAdjustmentController = new ErrorBasedStepAdjustmentController(walkingControllerParameters,
+                                                                        controllerToolbox.getReferenceFrames().getSoleZUpFrames(),
+                                                                        bipedSupportPolygons,
+                                                                        controllerToolbox.getContactableFeet(),
+                                                                        registry);
 
       if (walkingMessageHandler != null)
       {
@@ -356,52 +353,10 @@ public class BalanceManager implements SCS2YoGraphicHolder
          walkingMessageHandler.getRequestDisableCopFeedbackControl().addListener(qfpParameterListener);
       }
 
-      String graphicListName = getClass().getSimpleName();
-
-      if (yoGraphicsListRegistry != null)
+      if (viewCoPHistory)
       {
-         if (viewCoPHistory)
-         {
-            perfectCoPTrajectory = new BagOfBalls(150, 0.002, "perfectCoP", DarkViolet(), GraphicType.BALL_WITH_CROSS, registry, yoGraphicsListRegistry);
-            perfectCMPTrajectory = new BagOfBalls(150, 0.002, "perfectCMP", BlueViolet(), GraphicType.BALL, registry, yoGraphicsListRegistry);
-         }
-         else
-         {
-            perfectCoPTrajectory = null;
-            perfectCMPTrajectory = null;
-         }
-
-         // TODO Don't merge to develop as is
-         //         comTrajectoryPlanner.setCornerPointViewer(new CornerPointViewer(true, false, registry, yoGraphicsListRegistry));
-         //         copTrajectory.setWaypointViewer(new CoPPointViewer(registry, yoGraphicsListRegistry));
-
-         YoGraphicPosition desiredCapturePointViz = new YoGraphicPosition("Desired Capture Point",
-                                                                          yoDesiredCapturePoint,
-                                                                          0.01,
-                                                                          Yellow(),
-                                                                          GraphicType.BALL_WITH_ROTATED_CROSS);
-         YoGraphicPosition finalDesiredCapturePointViz = new YoGraphicPosition("Final Desired Capture Point",
-                                                                               yoFinalDesiredICP,
-                                                                               0.01,
-                                                                               Beige(),
-                                                                               GraphicType.BALL_WITH_ROTATED_CROSS);
-         YoGraphicPosition finalDesiredCoMViz = new YoGraphicPosition("Final Desired CoM",
-                                                                      yoFinalDesiredCoM,
-                                                                      0.01,
-                                                                      Black(),
-                                                                      GraphicType.BALL_WITH_ROTATED_CROSS);
-         YoGraphicPosition perfectCMPViz = new YoGraphicPosition("Perfect CMP", yoPerfectCMP, 0.002, BlueViolet());
-         YoGraphicPosition perfectCoPViz = new YoGraphicPosition("Perfect CoP", yoPerfectCoP, 0.002, DarkViolet(), GraphicType.BALL_WITH_CROSS);
-
-         yoGraphicsListRegistry.registerArtifact(graphicListName, desiredCapturePointViz.createArtifact());
-         yoGraphicsListRegistry.registerArtifact(graphicListName, finalDesiredCapturePointViz.createArtifact());
-         yoGraphicsListRegistry.registerArtifact(graphicListName, finalDesiredCoMViz.createArtifact());
-         YoArtifactPosition perfectCMPArtifact = perfectCMPViz.createArtifact();
-         perfectCMPArtifact.setVisible(false);
-         yoGraphicsListRegistry.registerArtifact(graphicListName, perfectCMPArtifact);
-         YoArtifactPosition perfectCoPArtifact = perfectCoPViz.createArtifact();
-         perfectCoPArtifact.setVisible(false);
-         yoGraphicsListRegistry.registerArtifact(graphicListName, perfectCoPArtifact);
+         perfectCoPTrajectory = new BagOfBalls(150, 0.002, "perfectCoP", DarkViolet(), GraphicType.BALL_WITH_CROSS, registry, null);
+         perfectCMPTrajectory = new BagOfBalls(150, 0.002, "perfectCMP", BlueViolet(), GraphicType.BALL, registry, null);
       }
       else
       {
@@ -433,6 +388,11 @@ public class BalanceManager implements SCS2YoGraphicHolder
       this.useMomentumRecoveryModeForBalance.set(useMomentumRecoveryModeForBalance);
    }
 
+   public void setIsCoPDamped(boolean isCoPDamped)
+   {
+      this.isCoPDamped.set(isCoPDamped);
+   }
+
    public void addFootstepToPlan(Footstep footstep, FootstepTiming timing)
    {
       copTrajectoryState.addFootstep(footstep);
@@ -455,10 +415,10 @@ public class BalanceManager implements SCS2YoGraphicHolder
    {
       boolean usingStepAdjustment = stepAdjustmentController.useStepAdjustment();
 
-      if (!usingStepAdjustment)
-      {
-         return false;
-      }
+//      if (!usingStepAdjustment)
+//      {
+//         return false;
+//      }
       // FIXME For now, only compute this at the beginning of swing. Once the step is adjusted, it should likely increase, and anecdotally, we want to prevent
       // FIXME this value from "running away" as the step continues to be adjusted. In theory, this should be ok, but it looks like it isn't. More
       // FIXME experimentation is necessary. RJG 07/27/2023
@@ -469,7 +429,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
 
       double omega0 = controllerToolbox.getOmega0();
 
-      if (useAngularCapturePoint.getBooleanValue())
+      if (useAngularCapturePoint.getValue())
          capturePoint2d.set(controllerToolbox.getAngularCapturePoint());
       else
          capturePoint2d.set(controllerToolbox.getCapturePoint());
@@ -523,7 +483,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
       // use 1.0 - feedback alpha, because 0.0 feedback alpha does nothing, while 1.0 should allow no feedback.
       stepAdjustmentController.compute(yoTime.getDoubleValue(), yoDesiredCapturePoint, capturePoint2d, omega0, yoEquivalentRemainingCoP, 1.0 - feedbackAlpha);
       boolean footstepWasAdjusted = stepAdjustmentController.wasFootstepAdjusted();
-      if (footstepWasAdjusted)
+      if (footstepWasAdjusted && usingStepAdjustment)
          footstep.setPose(stepAdjustmentController.getFootstepSolution());
 
       return footstepWasAdjusted;
@@ -678,6 +638,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
       linearMomentumRateControlModuleInput.setControlHeightWithMomentum(controlHeightWithMomentum);
       linearMomentumRateControlModuleInput.setOmega0(omega0);
       linearMomentumRateControlModuleInput.setUseMomentumRecoveryMode(useMomentumRecoveryModeForBalance.getBooleanValue());
+      linearMomentumRateControlModuleInput.setIsCoPDamped(isCoPDamped.getBooleanValue());
       linearMomentumRateControlModuleInput.setUseAngularCapturePoint(useAngularCapturePoint.getBooleanValue());
       linearMomentumRateControlModuleInput.setDesiredCapturePoint(desiredCapturePoint2d);
       linearMomentumRateControlModuleInput.setDesiredCapturePointVelocity(desiredCapturePointVelocity2d);
@@ -1083,6 +1044,13 @@ public class BalanceManager implements SCS2YoGraphicHolder
       getICPError(icpError2d);
       ReferenceFrame leadingSoleZUpFrame = controllerToolbox.getReferenceFrames().getSoleZUpFrame(transferToSide);
       icpError2d.changeFrame(leadingSoleZUpFrame);
+      // apply the deadband to the error
+      double icpErrorMagnitude = icpError2d.norm();
+      if (icpErrorMagnitude < icpErrorDeadband.getValue())
+         icpError2d.setToZero();
+      else
+         icpError2d.scale((icpErrorMagnitude - icpErrorDeadband.getValue()) / icpErrorMagnitude);
+
       boolean isICPErrorToTheInside = transferToSide == RobotSide.RIGHT ? icpError2d.getY() > 0.0 : icpError2d.getY() < 0.0;
       double maxICPErrorBeforeSingleSupportX = icpError2d.getX() > 0.0 ? maxICPErrorBeforeSingleSupportForwardX.getValue()
             : maxICPErrorBeforeSingleSupportBackwardX.getValue();

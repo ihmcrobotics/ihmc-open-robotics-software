@@ -465,9 +465,10 @@ public class MultiCubicSpline1DSolver
 
    public double computeAcceleration(double time, DMatrixRMaj solution)
    {
-      if (time <= 0.0)
+      // We don't want these bounds to be inclusive. The position and velocity bounds are not inclusive, as they return this trajectory at those bounds.
+      if (time < 0.0)
          return 0.0;
-      if (time >= 1.0)
+      if (time > 1.0)
          return 0.0;
 
       int index = findSolutionOffsetIndex(time, solution);

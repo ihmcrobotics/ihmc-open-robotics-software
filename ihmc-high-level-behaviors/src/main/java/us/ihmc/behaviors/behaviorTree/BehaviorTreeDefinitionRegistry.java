@@ -1,56 +1,59 @@
 package us.ihmc.behaviors.behaviorTree;
 
 import behavior_msgs.msg.dds.BehaviorTreeStateMessage;
-import us.ihmc.behaviors.ai2r.AI2RNodeDefinition;
-import us.ihmc.behaviors.buildingExploration.BuildingExplorationDefinition;
-import us.ihmc.behaviors.door.DoorTraversalDefinition;
-import us.ihmc.behaviors.sequence.actions.CheckPointNodeDefinition;
-import us.ihmc.behaviors.logic.ConditionNodeDefinition;
-import us.ihmc.behaviors.logic.GotoNodeDefinition;
-import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
-import us.ihmc.behaviors.sequence.FallbackNodeDefinition;
-import us.ihmc.behaviors.sequence.actions.*;
+import us.ihmc.behaviors.behaviorTree.control.ai2r.AI2RNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.control.buildingExploration.BuildingExplorationDefinition;
+import us.ihmc.behaviors.behaviorTree.control.door.DoorTraversalDefinition;
+import us.ihmc.behaviors.behaviorTree.action.actions.CheckPointNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.control.GotoNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.control.ActionSequenceDefinition;
+import us.ihmc.behaviors.behaviorTree.control.FallbackNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.action.actions.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class BehaviorTreeDefinitionRegistry
 {
-   private static final DefinitionMapping[] DEFINITIONS = new DefinitionMapping[]
+   private static final DefinitionMapping[] REGISTRY = new DefinitionMapping[]
    {
       new DefinitionMapping(BehaviorTreeRootNodeDefinition.class, BehaviorTreeStateMessage.ROOT_NODE),
       new DefinitionMapping(BehaviorTreeNodeDefinition.class, BehaviorTreeStateMessage.BASIC_NODE),
-      new DefinitionMapping(AI2RNodeDefinition.class, BehaviorTreeStateMessage.AI2R_NODE),
       new DefinitionMapping(ActionSequenceDefinition.class, BehaviorTreeStateMessage.ACTION_SEQUENCE),
       new DefinitionMapping(FallbackNodeDefinition.class, BehaviorTreeStateMessage.FALLBACK_NODE),
       new DefinitionMapping(ConditionNodeDefinition.class, BehaviorTreeStateMessage.CONDITION_NODE),
       new DefinitionMapping(GotoNodeDefinition.class, BehaviorTreeStateMessage.GOTO_NODE),
       new DefinitionMapping(CheckPointNodeDefinition.class, BehaviorTreeStateMessage.CHECKPOINT_NODE),
+      new DefinitionMapping(SceneActionNodeDefinition.class, BehaviorTreeStateMessage.SCENE_ACTION),
+      new DefinitionMapping(AI2RNodeDefinition.class, BehaviorTreeStateMessage.AI2R_NODE),
       new DefinitionMapping(DoorTraversalDefinition.class, BehaviorTreeStateMessage.DOOR_TRAVERSAL),
       new DefinitionMapping(BuildingExplorationDefinition.class, BehaviorTreeStateMessage.BUILDING_EXPLORATION),
 
+      new DefinitionMapping(NeckActionDefinition.class, BehaviorTreeStateMessage.NECK_ACTION),
       new DefinitionMapping(ChestOrientationActionDefinition.class, BehaviorTreeStateMessage.CHEST_ORIENTATION_ACTION),
       new DefinitionMapping(FootstepPlanActionDefinition.class, BehaviorTreeStateMessage.FOOTSTEP_PLAN_ACTION),
       new DefinitionMapping(HandPoseActionDefinition.class, BehaviorTreeStateMessage.HAND_POSE_ACTION),
       new DefinitionMapping(HandWrenchActionDefinition.class, BehaviorTreeStateMessage.HAND_WRENCH_ACTION),
       new DefinitionMapping(ScrewPrimitiveActionDefinition.class, BehaviorTreeStateMessage.SCREW_PRIMITIVE_ACTION),
       new DefinitionMapping(PelvisHeightOrientationActionDefinition.class, BehaviorTreeStateMessage.PELVIS_HEIGHT_ORIENTATION_ACTION),
+      new DefinitionMapping(AbilityHandActionDefinition.class, BehaviorTreeStateMessage.ABILITY_HAND_ACTION),
       new DefinitionMapping(SakeHandCommandActionDefinition.class, BehaviorTreeStateMessage.SAKE_HAND_COMMAND_ACTION),
       new DefinitionMapping(WaitDurationActionDefinition.class, BehaviorTreeStateMessage.WAIT_DURATION_ACTION),
-      new DefinitionMapping(FootPoseActionDefinition.class, BehaviorTreeStateMessage.FOOT_POSE_ACTION)
+      new DefinitionMapping(FootPoseActionDefinition.class, BehaviorTreeStateMessage.FOOT_POSE_ACTION),
    };
-   private static final Map<Class<?>, DefinitionMapping> DEFINITIONS_MAP = new HashMap<>();
+   private static final Map<Class<?>, DefinitionMapping> REGISTRY_MAP = new HashMap<>();
    static
    {
-      for (DefinitionMapping definitionEntry : DEFINITIONS)
+      for (DefinitionMapping definitionEntry : REGISTRY)
       {
-         DEFINITIONS_MAP.put(definitionEntry.getTypeClass(), definitionEntry);
+         REGISTRY_MAP.put(definitionEntry.getTypeClass(), definitionEntry);
       }
    }
 
    public static Class<?> getClassFromTypeName(String typeName)
    {
-      for (DefinitionMapping definitionEntry : DEFINITIONS)
+      for (DefinitionMapping definitionEntry : REGISTRY)
       {
          if (typeName.equals(definitionEntry.getTypeClass().getSimpleName()))
             return definitionEntry.getTypeClass();
@@ -60,7 +63,7 @@ public class BehaviorTreeDefinitionRegistry
 
    public static Class<?> getNodeDefinitionClass(byte nodeType)
    {
-      for (DefinitionMapping definitionEntry : DEFINITIONS)
+      for (DefinitionMapping definitionEntry : REGISTRY)
       {
          if (nodeType == definitionEntry.getMessageByte())
             return definitionEntry.getTypeClass();
@@ -71,7 +74,7 @@ public class BehaviorTreeDefinitionRegistry
 
    public static byte getMessageByte(Class<?> definitionClass)
    {
-      DefinitionMapping definitionMapping = DEFINITIONS_MAP.get(definitionClass);
+      DefinitionMapping definitionMapping = REGISTRY_MAP.get(definitionClass);
       if (definitionMapping != null)
       {
          return definitionMapping.getMessageByte();
@@ -82,7 +85,7 @@ public class BehaviorTreeDefinitionRegistry
 
    public static String getInitialName(Class<?> definitionClass)
    {
-      DefinitionMapping definitionMapping = DEFINITIONS_MAP.get(definitionClass);
+      DefinitionMapping definitionMapping = REGISTRY_MAP.get(definitionClass);
       if (definitionMapping != null)
       {
          return definitionMapping.getInitialName();

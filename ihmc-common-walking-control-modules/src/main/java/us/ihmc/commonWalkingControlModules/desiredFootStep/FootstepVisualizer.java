@@ -38,30 +38,23 @@ public class FootstepVisualizer
    private final RobotSide robotSide;
    private final List<Point2D> defaultContactPointsInSoleFrame = new ArrayList<>();
 
-   private final YoGraphicCoordinateSystem poseViz;
-   private final YoGraphicPolygon footholdViz;
-
    private final String name;
 
    private final Color footstepColor;
 
    public FootstepVisualizer(String name,
-                             String graphicListName,
                              RobotSide robotSide,
                              ContactablePlaneBody contactableFoot,
                              Color footstepColor,
-                             YoGraphicsListRegistry yoGraphicsListRegistry,
                              YoRegistry registry)
    {
-      this(name, graphicListName, robotSide, contactableFoot.getContactPoints2D(), footstepColor, yoGraphicsListRegistry, registry);
+      this(name, robotSide, contactableFoot.getContactPoints2D(), footstepColor, registry);
    }
 
    public FootstepVisualizer(String name,
-                             String graphicListName,
                              RobotSide robotSide,
                              List<? extends Point2DReadOnly> footPolygon,
                              Color footstepColor,
-                             YoGraphicsListRegistry yoGraphicsListRegistry,
                              YoRegistry registry)
    {
       this.name = name;
@@ -69,14 +62,6 @@ public class FootstepVisualizer
       this.footstepColor = footstepColor;
       yoFootstepPose = new YoFramePose3D(name + "Pose", worldFrame, registry);
       yoFoothold = new YoFrameConvexPolygon2D(name + "Foothold", "", worldFrame, footPolygon.size(), registry);
-
-      double coordinateSystemSize = 0.2;
-      double footholdScale = 1.0;
-      AppearanceDefinition footstepApp = new YoAppearanceRGBColor(footstepColor, 0.0);
-      poseViz = new YoGraphicCoordinateSystem(name + "Pose", yoFootstepPose, coordinateSystemSize, footstepApp);
-      footholdViz = new YoGraphicPolygon(name + "Foothold", yoFoothold, yoFootstepPose, footholdScale, footstepApp);
-      yoGraphicsListRegistry.registerYoGraphic(graphicListName, poseViz);
-      yoGraphicsListRegistry.registerYoGraphic(graphicListName, footholdViz);
 
       for (int i = 0; i < footPolygon.size(); i++)
          defaultContactPointsInSoleFrame.add(new Point2D(footPolygon.get(i)));
@@ -110,9 +95,6 @@ public class FootstepVisualizer
       foothold.update();
 
       yoFoothold.set(foothold);
-
-      poseViz.update();
-      footholdViz.update();
    }
 
    public void hide()

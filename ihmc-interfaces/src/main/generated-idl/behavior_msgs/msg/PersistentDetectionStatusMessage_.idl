@@ -1,0 +1,55 @@
+#ifndef __behavior_msgs__msg__PersistentDetectionStatusMessage__idl__
+#define __behavior_msgs__msg__PersistentDetectionStatusMessage__idl__
+
+#include "controller_msgs/msg/./RigidBodyTransformMessage_.idl"
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * Status of a persistent detection
+       */
+      @TypeCode(type="behavior_msgs::msg::dds_::PersistentDetectionStatusMessage_")
+      struct PersistentDetectionStatusMessage
+      {
+        /**
+         * Last 4 digits of UUID as a string
+         */
+        string id;
+        /**
+         * Instant detection simple class name (e.g. YOLO, FoundationPose)
+         */
+        string detection_type;
+        /**
+         * Object class name (e.g., "bottle")
+         */
+        string object_class;
+        /**
+         * Detection frequency (Hz) with decay
+         */
+        double decaying_frequency;
+        /**
+         * Number of detections in history
+         */
+        long history_size;
+        /**
+         * Whether the detection is stable
+         */
+        boolean is_stable;
+        /**
+         * Alpha filtered transform to world
+         */
+        controller_msgs::msg::dds::RigidBodyTransformMessage transform_to_world;
+        /**
+         * Alpha filtered transform to camera
+         */
+        controller_msgs::msg::dds::RigidBodyTransformMessage transform_to_camera;
+      };
+    };
+  };
+};
+
+#endif

@@ -1,7 +1,9 @@
 package us.ihmc.behaviors.behaviorTree;
 
 import behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.behaviorTree.log.BehaviorTreeNodeMessageLogger;
+import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.log.LogTools;
 
@@ -36,16 +38,37 @@ public class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition> impleme
     * The state's children. They can be any type that is a BehaviorTreeNodeState.
     */
    private final List<BehaviorTreeNodeState<?>> children = new ArrayList<>();
+   protected final BehaviorTreeRootNodeState rootNode;
    private transient BehaviorTreeNodeState<?> parent;
 
    private final BehaviorTreeNodeMessageLogger logger;
+   protected final CRDTInfo crdtInfo; // convenient to have readily available
+   protected final BehaviorTreeSceneState scene;
+   protected final DRCRobotModel robotModel;
 
-   public BehaviorTreeNodeState(long id, D definition, CRDTInfo crdtInfo)
+   public BehaviorTreeNodeState(long id, D definition, BehaviorTreeRootNodeState rootNode)
+   {
+      this(id, definition, rootNode, rootNode.getScene());
+   }
+
+   public BehaviorTreeNodeState(long id, D definition, BehaviorTreeRootNodeState rootNode, BehaviorTreeSceneState scene)
    {
       this.id = id;
       this.definition = definition;
+      this.crdtInfo = definition.getCRDTInfo();
+      if (rootNode == null)
+      {
+         this.rootNode = (BehaviorTreeRootNodeState) this;
+         this.robotModel = ((BehaviorTreeRootNodeDefinition) definition).getRobotModel();
+      }
+      else
+      {
+         this.rootNode = rootNode;
+         this.robotModel = rootNode.getDefinition().getRobotModel();
+      }
+      this.scene = scene;
 
-      logger = new BehaviorTreeNodeMessageLogger(crdtInfo);
+      logger = new BehaviorTreeNodeMessageLogger(definition.getCRDTInfo());
    }
 
    /** Used to determine if the node's full data needs to be sent. */
@@ -65,13 +88,14 @@ public class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition> impleme
    public void fromMessage(BehaviorTreeNodeStateMessage message)
    {
       if (id != message.getId())
-         LogTools.error("IDs should match! {} != {}", id, message.getId());
+         LogTools.error(("IDs should match! %s:%d != message.id: %d").formatted(definition.getName(), id, message.getId()));
 
       isActive = message.getIsActive();
 
       logger.fromMessage(message.getRecentLogMessages());
    }
 
+   /** Update the node's state. Should not have side effects if called multiple times per tick. */
    public void update()
    {
       definition.checkModified();

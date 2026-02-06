@@ -1,0 +1,24 @@
+# Current status of various CSG parameters
+
+bool is_walking
+bool is_in_unit_velocities
+
+float64 current_forward_velocity
+float64 current_lateral_velocity
+float64 current_turn_velocity
+
+float64 current_swing_height
+float64 current_swing_duration
+float64 current_transfer_duration
+
+float64 current_max_step_length_forwards
+float64 current_max_step_length_backwards
+float64 current_max_step_width
+float64 current_min_step_width
+float64 current_default_step_width
+float64 current_turn_max_angle_inward
+float64 current_turn_max_angle_outward
+
+bool are_steps_adjustable
+bool snapping_to_heightmap
+bool accounting_for_ground_drift

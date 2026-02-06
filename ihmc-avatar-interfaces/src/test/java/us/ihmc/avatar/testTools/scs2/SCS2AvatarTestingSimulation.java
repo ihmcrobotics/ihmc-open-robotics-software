@@ -87,12 +87,10 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
     *                                  {@code null}.
     * @param fullRobotModel            the robot to be associated as the controller robot for enabling
     *                                  convenience methods. Can be {@code null}.
-    * @param yoGraphicsListRegistry    graphics to be displayed in the GUI. Can be {@code null}.
     */
    public SCS2AvatarTestingSimulation(SimulationConstructionSet2 simulationConstructionSet,
                                       DRCRobotModel robotModel,
                                       FullHumanoidRobotModel fullRobotModel,
-                                      YoGraphicsListRegistry yoGraphicsListRegistry,
                                       SimulationTestingParameters parameters)
    {
       this(new SCS2AvatarSimulation());
@@ -106,8 +104,6 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
          avatarSimulation.setRobotModel(robotModel);
       if (fullRobotModel != null)
          avatarSimulation.setFullHumanoidRobotModel(fullRobotModel);
-      if (yoGraphicsListRegistry != null)
-         simulationConstructionSet.addYoGraphics(YoGraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry));
 
       if (parameters != null)
       {
@@ -511,18 +507,6 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    {
       checkSimulationSessionAlive();
       getSimulationConstructionSet().addYoGraphic(namespace, yoGraphicDefinition);
-   }
-
-   public void addYoGraphicsListRegistry(YoGraphicsListRegistry yoGraphicsListRegistry)
-   {
-      checkSimulationSessionAlive();
-      YoGraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry).forEach(this::addYoGraphicDefinition);
-   }
-
-   public void addYoGraphic(YoGraphic yoGraphic)
-   {
-      checkSimulationSessionAlive();
-      addYoGraphicDefinition(YoGraphicConversionTools.toYoGraphicDefinition(yoGraphic));
    }
 
    // Misc.

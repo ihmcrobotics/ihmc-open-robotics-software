@@ -7,12 +7,9 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.camera.CameraIntrinsics;
-import us.ihmc.perception.detections.centerPose.CenterPoseInstantDetection;
+import us.ihmc.sensors.CameraIntrinsics;
 import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
 import us.ihmc.perception.imageMessage.PixelFormat;
 
@@ -37,11 +34,9 @@ public class DetectionManagerTest
 
       // Generate test detection sets
       List<YOLOv8InstantDetection> testDetectionsA = createYoloDetections(3, Instant.now());
-      List<CenterPoseInstantDetection> testDetectionsB = createCenterposeDetections(3, Instant.now());
 
       // add the detection sets to detection manager
       assertDoesNotThrow(() -> detectionManager.addDetections(testDetectionsA));
-      assertDoesNotThrow(() -> detectionManager.addDetections(testDetectionsB));
 
       // check whether detection manager received the sets properly
       List<PersistentDetection> storedDetectionsA = detectionManager.getDetectionsOfType(YOLOv8InstantDetection.class);
@@ -50,14 +45,6 @@ public class DetectionManagerTest
       {
          assertNotNull(persistentDetection.getMostRecentDetection());
          assertTrue(testDetectionsA.contains(persistentDetection.getMostRecentDetection()));
-      }
-
-      List<PersistentDetection> storedDetectionsB = detectionManager.getDetectionsOfType(CenterPoseInstantDetection.class);
-      assertEquals(3, storedDetectionsB.size());
-      for (PersistentDetection persistentDetection : storedDetectionsB)
-      {
-         assertNotNull(persistentDetection.getMostRecentDetection());
-         assertTrue(testDetectionsB.contains(persistentDetection.getMostRecentDetection()));
       }
    }
 
@@ -120,26 +107,9 @@ public class DetectionManagerTest
             }
          }, "TestThreadA");
 
-         List<CenterPoseInstantDetection> detectionFrameB = createCenterposeDetections(2 * numToGenerate, Instant.now());
-         Thread threadB = new Thread (() ->
-         {
-            ThreadTools.sleep(random.nextInt(10));
-            try
-            {
-               detectionManager.addDetections(detectionFrameB);
-            }
-            catch (Exception e)
-            {
-               e.printStackTrace();
-               testPassed.set(false);
-            }
-         }, "TestThreadB");
-
          threadA.start();
-         threadB.start();
 
          threadA.join();
-         threadB.join();
 
          assertTrue(testPassed.get());
       }
@@ -147,9 +117,6 @@ public class DetectionManagerTest
       // Number of detections in detection manager should be correct after all runs
       List<PersistentDetection> detectionsA = detectionManager.getDetectionsOfType(YOLOv8InstantDetection.class);
       assertEquals(maxDetections, detectionsA.size());
-
-      List<PersistentDetection> detectionsB = detectionManager.getDetectionsOfType(CenterPoseInstantDetection.class);
-      assertEquals(2 * maxDetections, detectionsB.size());
    }
 
    /**
@@ -175,22 +142,13 @@ public class DetectionManagerTest
          }
       }, "AdditionThreadA");
 
-      Thread additionThreadB = new Thread(() ->
-      {
-         for (int i = 0; i < numRuns && testPassed.get(); ++i)
-         {
-            List<CenterPoseInstantDetection> detectionsB = createCenterposeDetections(100, Instant.now());
-            detectionManager.addDetections(detectionsB);
-         }
-      }, "AdditionThreadB");
 
       additionThreadA.start();
-      additionThreadB.start();
 
       boolean receivedDetectionsA = false;
       boolean receivedDetectionsB = false;
       // While the addition threads are running, attempt to access and update data
-      while (testPassed.get() && (additionThreadA.isAlive() || additionThreadB.isAlive()))
+      while (testPassed.get() && (additionThreadA.isAlive()))
       {
          detectionManager.updateDetections();
 
@@ -227,7 +185,6 @@ public class DetectionManagerTest
       try
       {
          additionThreadA.join();
-         additionThreadB.join();
       }
       catch (InterruptedException e)
       {
@@ -253,9 +210,6 @@ public class DetectionManagerTest
       {
          List<YOLOv8InstantDetection> testDetectionsA = createYoloDetections(5, startTime.minusSeconds(i));
          detectionManager.addDetections(testDetectionsA);
-
-         List<CenterPoseInstantDetection> testDetectionsB = createCenterposeDetections(5, startTime.minusSeconds(i));
-         detectionManager.addDetections(testDetectionsB);
       }
 
       detectionManager.updateDetections(startTime);
@@ -305,25 +259,6 @@ public class DetectionManagerTest
                                                                            createRawImage(now),
                                                                            new BoundingBox2D(0.0, 0.0, 1.0, 1.0),
                                                                            new ArrayList<>());
-         testDetections.add(testDetection);
-      }
-
-      return testDetections;
-   }
-
-   public static List<CenterPoseInstantDetection> createCenterposeDetections(int numberToGenerate, Instant now)
-   {
-      List<CenterPoseInstantDetection> testDetections = new ArrayList<>();
-
-      for (int i = 0; i < numberToGenerate; ++i)
-      {
-         CenterPoseInstantDetection testDetection = new CenterPoseInstantDetection("detection_" + i,
-                                                                                   "hotdog",
-                                                                                   1.0,
-                                                                                   new Pose3D(),
-                                                                                   now,
-                                                                                   new Point3D[3],
-                                                                                   new Point2D[4]);
          testDetections.add(testDetection);
       }
 

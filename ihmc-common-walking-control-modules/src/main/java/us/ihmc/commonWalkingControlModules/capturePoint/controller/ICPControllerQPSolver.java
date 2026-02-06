@@ -294,6 +294,18 @@ public class ICPControllerQPSolver
       this.controlDT = controlDT;
    }
 
+   public void removeFeedbackRateLimit()
+   {
+      this.maximumFeedbackRate = Double.POSITIVE_INFINITY;
+   }
+
+   public void removeMaximumFeedbackMagnitude()
+   {
+      CommonOps_DDRM.setIdentity(maxFeedbackTransform);
+      maxFeedbackXMagnitude = Double.POSITIVE_INFINITY;
+      maxFeedbackYMagnitude = Double.POSITIVE_INFINITY;
+   }
+
    /**
     * Zeros all the pertinent scalars, vectors, and matrices for the solver. Should be called at the beginning of every computation tick.
     */
@@ -355,6 +367,15 @@ public class ICPControllerQPSolver
       solverInput_bineq.reshape(numberOfInequalityConstraints, 1);
 
       solution.reshape(problemSize, 1);
+   }
+
+   public void resetFeedbackConditions()
+   {
+      resetCoPFeedbackConditions();
+      resetCMPFeedbackConditions();
+      resetFeedbackDirection();
+      removeFeedbackRateLimit();
+      removeMaximumFeedbackMagnitude();
    }
 
    /**

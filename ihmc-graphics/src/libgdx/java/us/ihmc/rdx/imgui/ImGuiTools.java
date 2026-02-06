@@ -221,21 +221,24 @@ public class ImGuiTools
 
    public static boolean volatileInputFloat(String label, ImFloat imFloat)
    {
-      int inputTextFlags = ImGuiInputTextFlags.None;
-      inputTextFlags += ImGuiInputTextFlags.EnterReturnsTrue;
-      return ImGui.inputFloat(label, imFloat, 0, 0, "%.3f", inputTextFlags);
+      return volatileInputFloat(label, imFloat, 0.0f, 0.0f);
    }
 
-   public static boolean volatileInputFloat(String label, ImFloat imFloat, float step)
+   public static boolean volatileInputFloat(String label, ImFloat imFloat, float step, float stepFast)
+   {
+      return volatileInputFloat(label, imFloat, step, stepFast, "%.3f");
+   }
+
+   public static boolean volatileInputFloat(String label, ImFloat imFloat, float step, float stepFast, String format)
    {
       int inputTextFlags = ImGuiInputTextFlags.None;
       inputTextFlags += ImGuiInputTextFlags.EnterReturnsTrue;
-      return ImGui.inputFloat(label, imFloat, step, 0, "%.3f", inputTextFlags);
+      return ImGui.inputFloat(label, imFloat, step, stepFast, format, inputTextFlags);
    }
 
    public static boolean volatileInputDouble(String label, ImDouble imDouble)
    {
-      return volatileInputDouble(label, imDouble, 0, 0);
+      return volatileInputDouble(label, imDouble, 0.0, 0.0);
    }
 
    public static boolean volatileInputDouble(String label, ImDouble imDouble, double step, double stepFast)
@@ -420,9 +423,9 @@ public class ImGuiTools
       float mousePosXInWidgetFrame = mousePosXInDesktopFrame - ImGui.getWindowPosX() + ImGui.getScrollX();
       float mousePosYInWidgetFrame = mousePosYInDesktopFrame - ImGui.getWindowPosY() + ImGui.getScrollY();
 
-      boolean isHovered = mousePosXInWidgetFrame >= ImGui.getCursorPosX();
+      boolean isHovered = mousePosXInWidgetFrame > ImGui.getCursorPosX();
       isHovered &= mousePosXInWidgetFrame <= ImGui.getCursorPosX() + itemWidth + ImGui.getStyle().getFramePaddingX();
-      isHovered &= mousePosYInWidgetFrame >= ImGui.getCursorPosY();
+      isHovered &= mousePosYInWidgetFrame > ImGui.getCursorPosY();
       isHovered &= mousePosYInWidgetFrame <= ImGui.getCursorPosY() + lineHeight;
       isHovered &= ImGui.isWindowHovered();
 
@@ -453,6 +456,22 @@ public class ImGuiTools
       }
 
       return isHovered;
+   }
+
+   /**
+    * This is a better way to detect a singular mouse click than any of the provided methods.
+    */
+   public static boolean mouseReleasedWithoutDrag(int button)
+   {
+      return mouseReleasedWithoutDrag(button, 0.0);
+   }
+
+   /**
+    * This is a better way to detect a singular mouse click than any of the provided methods.
+    */
+   public static boolean mouseReleasedWithoutDrag(int button, double allowableDrag)
+   {
+      return ImGui.getMouseDragDeltaX(button) <= allowableDrag && ImGui.getMouseDragDeltaY(button) <= allowableDrag && ImGui.isMouseReleased(button);
    }
 
    /**
@@ -558,23 +577,6 @@ public class ImGuiTools
       ImGui.setCursorPos(start.x, start.y);
 
       return new ImVec2(end.x - start.x, end.y - start.y);
-   }
-
-   /** @deprecated Use ImGuiUniqueLabelMap instead. */
-   public static String uniqueLabel(String label)
-   {
-      return label + "###GlobalWidgetIndex:" + nextWidgetIndex() + ":" + label;
-   }
-
-   public static String uniqueLabel(String id, String label)
-   {
-      return label + "###" + id + ":" + label;
-   }
-
-   /** @deprecated Use ImGuiUniqueLabelMap instead. */
-   public static String uniqueLabel(Object thisObject, String label)
-   {
-      return label + "###" + thisObject.getClass().getName() + ":" + label;
    }
 
    /**

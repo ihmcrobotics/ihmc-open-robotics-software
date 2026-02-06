@@ -1,19 +1,17 @@
 package us.ihmc.rdx.ui.graphics;
 
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
-import us.ihmc.perception.imageMessage.CompressionType;
-import us.ihmc.perception.streaming.ROS2SRTVideoStreamImageMessageRelay;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.ros2.RDXDetectionManagerSettings;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2FramePlanarRegionsVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.RDXROS2HeightMapVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2KSTRobotVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2RobotVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.foundationPose.RDXIsaacROSFoundationPoseVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2ColoredPointCloudVisualizer;
-import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
-import us.ihmc.rdx.ui.graphics.ros2.RDXROS2HeightMapVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.yolo.RDXROS2YOLOv8Visualizer;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensors.zed.ZEDModelData;
@@ -27,18 +25,20 @@ public abstract class RDXRobotPerceptionVisualizersPanel extends RDXPerceptionVi
    // Common — always present
    protected final RDXROS2RobotVisualizer robotVisualizer;
    protected final RDXROS2KSTRobotVisualizer kinematicsStreamingSolutionVisualizer;
-   protected final ROS2SRTVideoStreamImageMessageRelay videoStreamImageMessageRelay;
 
    // Optional — may be null in some robots
-   protected RDXROS2ColoredPointCloudVisualizer zedColoredPointCloudVisualizer;
-   protected RDXROS2ImageMessageVisualizer zedLeftColorImageVisualizer;
-   protected RDXROS2ImageMessageVisualizer zedRightColorImageVisualizer;
-   protected RDXROS2ImageMessageVisualizer zedDepthImageVisualizer;
-   protected RDXROS2ColoredPointCloudVisualizer realsenseColoredPointCloudVisualizer;
-   protected RDXROS2ImageMessageVisualizer realsenseDepthImageVisualizer;
-   protected RDXROS2ImageMessageVisualizer realsenseColorImageVisualizer;
+   protected RDXROS2ColoredPointCloudVisualizer experimentalCameraColoredPointCloudVisualizer;
+   protected RDXROS2ImageMessageVisualizer experimentalCameraLeftColorImageVisualizer;
+   protected RDXROS2ImageMessageVisualizer experimentalCameraRightColorImageVisualizer;
+   protected RDXROS2ImageMessageVisualizer experimentalCameraDepthImageVisualizer;
+   protected RDXROS2ColoredPointCloudVisualizer steppingCameraColoredPointCloudVisualizer;
+   protected RDXROS2ImageMessageVisualizer steppingCameraLeftColorImageVisualizer;
+   protected RDXROS2ImageMessageVisualizer steppingCameraRightColorImageVisualizer;
+   protected RDXROS2ImageMessageVisualizer steppingCameraDepthImageVisualizer;
    protected RDXROS2YOLOv8Visualizer yoloVisualizer;
+   protected RDXIsaacROSFoundationPoseVisualizer foundationPoseVisualizer;
    protected RDXROS2HeightMapVisualizer heightMapVisualizer;
+   protected RDXROS2HeightMapVisualizer yoloMapVisualizer;
    protected RDXDetectionManagerSettings detectionManagerSettings;
    protected RDXROS2FramePlanarRegionsVisualizer planarRegionsVisualizer;
 
@@ -57,10 +57,6 @@ public abstract class RDXRobotPerceptionVisualizersPanel extends RDXPerceptionVi
       // Kinematics streaming solution visualizer
       kinematicsStreamingSolutionVisualizer = new RDXROS2KSTRobotVisualizer(ros2Helper.getROS2Node(), syncedRobot.getRobotModel());
       addVisualizer(kinematicsStreamingSolutionVisualizer);
-
-      videoStreamImageMessageRelay = new ROS2SRTVideoStreamImageMessageRelay(PerceptionAPI.SRT_STREAM_IMAGE_MESSAGE_TOPIC_PAIRS,
-                                                                             ros2Node,
-                                                                             CompressionType.UNCOMPRESSED);
 
       // Additional visualizers instantiated in robot specific class
    }
@@ -92,7 +88,6 @@ public abstract class RDXRobotPerceptionVisualizersPanel extends RDXPerceptionVi
    public void destroy()
    {
       super.destroy();
-      videoStreamImageMessageRelay.destroy();
    }
 
    // Getters for common/optional visualizers
@@ -106,39 +101,39 @@ public abstract class RDXRobotPerceptionVisualizersPanel extends RDXPerceptionVi
       return kinematicsStreamingSolutionVisualizer;
    }
 
-   public RDXROS2ColoredPointCloudVisualizer getZedColoredPointCloudVisualizer()
+   public RDXROS2ColoredPointCloudVisualizer getExperimentalCameraColoredPointCloudVisualizer()
    {
-      return zedColoredPointCloudVisualizer;
+      return experimentalCameraColoredPointCloudVisualizer;
    }
 
-   public RDXROS2ImageMessageVisualizer getZedLeftColorImageVisualizer()
+   public RDXROS2ImageMessageVisualizer getExperimentalCameraLeftColorImageVisualizer()
    {
-      return zedLeftColorImageVisualizer;
+      return experimentalCameraLeftColorImageVisualizer;
    }
 
-   public RDXROS2ImageMessageVisualizer getZedRightColorImageVisualizer()
+   public RDXROS2ImageMessageVisualizer getExperimentalCameraRightColorImageVisualizer()
    {
-      return zedRightColorImageVisualizer;
+      return experimentalCameraRightColorImageVisualizer;
    }
 
-   public RDXROS2ImageMessageVisualizer getZedDepthImageVisualizer()
+   public RDXROS2ImageMessageVisualizer getExperimentalCameraDepthImageVisualizer()
    {
-      return zedDepthImageVisualizer;
+      return experimentalCameraDepthImageVisualizer;
    }
 
-   public RDXROS2ColoredPointCloudVisualizer getRealsenseColoredPointCloudVisualizer()
+   public RDXROS2ColoredPointCloudVisualizer getSteppingCameraColoredPointCloudVisualizer()
    {
-      return realsenseColoredPointCloudVisualizer;
+      return steppingCameraColoredPointCloudVisualizer;
    }
 
-   public RDXROS2ImageMessageVisualizer getRealsenseDepthImageVisualizer()
+   public RDXROS2ImageMessageVisualizer getSteppingCameraDepthImageVisualizer()
    {
-      return realsenseDepthImageVisualizer;
+      return steppingCameraDepthImageVisualizer;
    }
 
-   public RDXROS2ImageMessageVisualizer getRealsenseColorImageVisualizer()
+   public RDXROS2ImageMessageVisualizer getSteppingCameraLeftColorImageVisualizer()
    {
-      return realsenseColorImageVisualizer;
+      return steppingCameraLeftColorImageVisualizer;
    }
 
    public RDXROS2YOLOv8Visualizer getYoloVisualizer()
@@ -146,9 +141,19 @@ public abstract class RDXRobotPerceptionVisualizersPanel extends RDXPerceptionVi
       return yoloVisualizer;
    }
 
+   public RDXIsaacROSFoundationPoseVisualizer getFoundationPoseVisualizer()
+   {
+      return foundationPoseVisualizer;
+   }
+
    public RDXROS2HeightMapVisualizer getHeightMapVisualizer()
    {
       return heightMapVisualizer;
+   }
+
+   public RDXROS2HeightMapVisualizer getYOLOObstacleMapVisualizer()
+   {
+      return yoloMapVisualizer;
    }
 
    public RDXROS2FramePlanarRegionsVisualizer getPlanarRegionsVisualizer()

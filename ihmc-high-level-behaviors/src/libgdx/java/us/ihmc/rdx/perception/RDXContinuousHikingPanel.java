@@ -18,8 +18,8 @@ import imgui.type.ImBoolean;
 import std_msgs.msg.dds.Empty;
 import std_msgs.msg.dds.Float32;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.commons.thread.Throttler;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
-import us.ihmc.footstepPlanning.steppableRegions.SteppableRegionCalculatorParameters;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.behaviors.activeMapping.StancePoseCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
@@ -42,21 +42,24 @@ import us.ihmc.footstepPlanning.tools.SwingPlannerTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.filters.DepthImageFilteringParameters;
-import us.ihmc.footstepPlanning.steppableRegions.TerrainMapData;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
+import us.ihmc.perception.gpuMapping.TerrainMapParameters;
+import us.ihmc.perception.rapidRegions.RapidRegionsExtractorParameters;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.ImGuiRemoteROS2StoredPropertySetGroup;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
+import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotics.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.perception.heightMap.HeightMapData;
-import us.ihmc.perception.heightMap.HeightMapParameters;
+import us.ihmc.perception.gpuMapping.HeightMapParameters;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
 import java.util.ArrayList;
@@ -67,35 +70,52 @@ import static us.ihmc.communication.HumanoidControllerAPI.getTopic;
 
 public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProvider
 {
+   /**
+    * This defines the update thread rate for information being sent over ROS2. The reason this is a very low frequency is because
+    * we only have a limited amount of networking bandwidth when using WIFI.
+    */
+   private static final double THROTTLER_THREAD_HERTZ = 2.0;
    private static final boolean DEBUG = true;
+
+   private final Throttler ros2Throttler;
+
+   private final RDXStancePoseSelectionPanel stancePoseSelectionPanel;
+   private final RDXTerrainPlanningDebugger terrainPlanningDebugger;
+
    private static final int numberOfKnotPoints = 12;
    private static final int maxIterationsOptimization = 100;
-   private final ROS2Publisher<ContinuousHikingCommandMessage> commandPublisher;
-   private final ROS2Publisher<Empty> squareUpPublisher;
-   private final ContinuousHikingCommandMessage commandMessage = new ContinuousHikingCommandMessage();
-   private final RDXStancePoseSelectionPanel stancePoseSelectionPanel;
    private final PositionOptimizedTrajectoryGenerator positionTrajectoryGenerator = new PositionOptimizedTrajectoryGenerator(numberOfKnotPoints,
                                                                                                                              maxIterationsOptimization);
-   private final RDXTerrainPlanningDebugger terrainPlanningDebugger;
-   private final SwingTrajectoryParameters swingTrajectoryParameters;
-   private final RDXStoredPropertySetTuner continuousHikingParametersPanel = new RDXStoredPropertySetTuner("Continuous Hiking Parameters (CH)");
    private final ImGuiRemoteROS2StoredPropertySetGroup hostStoredPropertySets;
+   private final RDXStoredPropertySetTuner continuousHikingParametersPanel = new RDXStoredPropertySetTuner("Continuous Hiking Parameters (CH)");
+   private final ContinuousHikingParameters continuousHikingParameters;
+   private final SwingTrajectoryParameters swingTrajectoryParameters;
+
    private final ImBoolean squareUpToGoal = new ImBoolean(true);
    private final ImBoolean enableContinuousHiking = new ImBoolean(false);
    private final ImBoolean useAStarFootstepPlanner = new ImBoolean(true);
    private final ImBoolean useMonteCarloReference = new ImBoolean(false);
    private final ImBoolean useMonteCarloFootstepPlanner = new ImBoolean(false);
+
    private final ControllerFootstepQueueMonitor controllerFootstepQueueMonitorUI;
+   private final ContinuousHikingCommandMessage commandMessage = new ContinuousHikingCommandMessage();
+   private final ROS2Publisher<ContinuousHikingCommandMessage> commandPublisher;
+   private final ROS2Publisher<Empty> squareUpPublisher;
+   private final ROS2Publisher<Empty> clearGoalFootstepsPublisher;
+   private final ROS2Publisher<Empty> resetStateMachinePublisher;
+   private final ROS2Publisher<Float32> turn90DegreesPublisher;
    private final ROS2Publisher<PlanOffsetStatus> planOffsetStatusPublisher;
    private final ROS2Publisher<FootstepStatusMessage> footstepStatusMessagePublisher;
    private final ROS2Publisher<WalkingControllerFailureStatusMessage> walkingControllerFailureStatusPublisher;
-   private final ROS2Publisher<Empty> clearGoalFootstepsPublisher;
-   private final ROS2Publisher<Empty> resetStateMachinePublisher;
-   private final ContinuousHikingParameters continuousHikingParameters;
-   private final ROS2Publisher<Float32> turn90DegreesPublisher;
+
+   private final RapidRegionsExtractorParameters rapidRegionsExtractorParameters;
+   private final PolygonizerParameters polygonizerParameters;
+   private final ConcaveHullFactoryParameters concaveHullFactoryParameters;
+
    private SideDependentList<FramePose3D> startStancePose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
-   private FootstepPlan latestFootstepPlan;
    private List<EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories;
+   private FootstepPlan latestFootstepPlan;
+
    // When running in simulation only, these fields allow running the Continuous Hiking Process locally
    private double simulatedDriftInMeters = -0.1;
    private boolean previousRightBumper;
@@ -154,7 +174,12 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       hostStoredPropertySets = new ImGuiRemoteROS2StoredPropertySetGroup(ros2Node);
       continuousHikingParameters = new ContinuousHikingParameters();
       HeightMapParameters heightMapParameters = new HeightMapParameters();
-      SteppableRegionCalculatorParameters  steppableRegionCalculatorParameters = new SteppableRegionCalculatorParameters();
+      TerrainMapParameters terrainMapParameters = new TerrainMapParameters();
+
+      rapidRegionsExtractorParameters = new RapidRegionsExtractorParameters();
+      polygonizerParameters = new PolygonizerParameters();
+      concaveHullFactoryParameters = new ConcaveHullFactoryParameters();
+
       createParametersPanel(continuousHikingParameters,
                             continuousHikingParametersPanel,
                             hostStoredPropertySets,
@@ -169,15 +194,22 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
                             footstepPlanningParametersPanel,
                             hostStoredPropertySets,
                             ContinuousHikingAPI.FOOTSTEP_PLANNING_PARAMETERS);
+
+      RDXStoredPropertySetTuner rapidRegionsParametersPanel = new RDXStoredPropertySetTuner("Rapid Regions Parameters");
+      createParametersPanel(rapidRegionsExtractorParameters, rapidRegionsParametersPanel, hostStoredPropertySets, PerceptionComms.PERSPECTIVE_RAPID_REGION_PARAMETERS);
+
+      RDXStoredPropertySetTuner polygonizerParametersPanel = new RDXStoredPropertySetTuner("Polygonizer Parameters");
+      createParametersPanel(polygonizerParameters, polygonizerParametersPanel, hostStoredPropertySets, PerceptionComms.PERSPECTIVE_POLYGONIZER_PARAMETERS);
+
+      RDXStoredPropertySetTuner concaveHullParametersPanel = new RDXStoredPropertySetTuner("Concave Hull Parameters");
+      createParametersPanel(concaveHullFactoryParameters, concaveHullParametersPanel, hostStoredPropertySets, PerceptionComms.PERSPECTIVE_CONCAVE_HULL_FACTORY_PARAMETERS);
+
       RDXStoredPropertySetTuner swingPlannerParametersPanel = new RDXStoredPropertySetTuner("Swing Planner Parameters (CH)");
       createParametersPanel(swingPlannerParameters, swingPlannerParametersPanel, hostStoredPropertySets, ContinuousHikingAPI.SWING_PLANNING_PARAMETERS);
       RDXStoredPropertySetTuner heightMapParametersPanel = new RDXStoredPropertySetTuner("Height Map Parameters (CH)");
       createParametersPanel(heightMapParameters, heightMapParametersPanel, hostStoredPropertySets, PerceptionComms.HEIGHT_MAP_PARAMETERS);
-      RDXStoredPropertySetTuner steppableRegionCalculatorParametersPanel = new RDXStoredPropertySetTuner("Steppable Region Parameters (CH)");
-      createParametersPanel(steppableRegionCalculatorParameters,
-                            steppableRegionCalculatorParametersPanel,
-                            hostStoredPropertySets,
-                            ContinuousHikingAPI.STEPPABLE_REGION_CALCULATOR_PARAMETERS);
+      RDXStoredPropertySetTuner terrainMapParametersPanel = new RDXStoredPropertySetTuner("Terrain Map Parameters (CH)");
+      createParametersPanel(terrainMapParameters, terrainMapParametersPanel, hostStoredPropertySets, PerceptionComms.TERRAIN_MAP_PARAMETERS);
 
       RDXStoredPropertySetTuner depthImageFilteringParametersPanel = new RDXStoredPropertySetTuner("Depth Image Filtering Parameters");
       createParametersPanel(depthImageFilteringParameters,
@@ -186,6 +218,8 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
                             ContinuousHikingAPI.DEPTH_IMAGE_FILTERING_PARAMETERS);
 
       controllerFootstepQueueMonitorUI = new ControllerFootstepQueueMonitor(ros2Node, robotModel.getSimpleRobotName());
+
+      ros2Throttler = new Throttler().setFrequency(THROTTLER_THREAD_HERTZ);
    }
 
    /**
@@ -201,17 +235,20 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       this.addChild(storedPropertySetPanel);
    }
 
-   public void update(TerrainMapData terrainMapData, HeightMapData heightMapData)
+   public void update(TerrainMapData terrainMapData)
    {
-      updateRos2StoredPropertySets();
-
       if (latestFootstepPlan != null)
       {
          terrainPlanningDebugger.generateSwingGraphics(latestFootstepPlan, swingTrajectories);
       }
       latestFootstepPlan = null;
       terrainPlanningDebugger.update(terrainMapData);
-      stancePoseSelectionPanel.update(terrainMapData, heightMapData);
+      stancePoseSelectionPanel.update(terrainMapData);
+
+      if (ros2Throttler.run())
+      {
+         updateRos2StoredPropertySets();
+      }
    }
 
    /**

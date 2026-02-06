@@ -73,6 +73,10 @@ public class RDXZEDSVORecorderPanel
 
    public void render()
    {
+      // Because of threading, it's possible that we haven't received any message so we can't render anything yet
+      if (latestMessage == null)
+         return;
+
       ImGuiTools.textBold("Current SVO:");
       ImGui.sameLine();
       ImGui.textWrapped(latestMessage.getCurrentFileName().toString());
@@ -108,6 +112,20 @@ public class RDXZEDSVORecorderPanel
             ros2Helper.publish(paused ? PerceptionAPI.ZED_SVO_PLAY : PerceptionAPI.ZED_SVO_PAUSE);
             paused = !paused;
          }
+
+         ImGui.beginDisabled(!paused);
+         if (ImGui.button(labels.get("Previous Frame")))
+         {
+            requestedPosition.set((int) latestMessage.getCurrentPosition() - 1);
+            publishPositionRequest();
+         }
+         ImGui.sameLine();
+         if (ImGui.button(labels.get("Next Frame")))
+         {
+            requestedPosition.set((int) latestMessage.getCurrentPosition() + 1);
+            publishPositionRequest();
+         }
+         ImGui.endDisabled();
       }
    }
 

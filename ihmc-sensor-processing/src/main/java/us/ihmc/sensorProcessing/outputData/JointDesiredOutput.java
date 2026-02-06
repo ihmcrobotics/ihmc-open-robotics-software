@@ -24,7 +24,7 @@ public class JointDesiredOutput implements JointDesiredOutputBasics
 
    private double positionFeedbackMaxError = Double.NaN;
    private double velocityFeedbackMaxError = Double.NaN;
-   
+
    private double maxTorque = Double.NaN;
 
    public JointDesiredOutput()
@@ -56,7 +56,7 @@ public class JointDesiredOutput implements JointDesiredOutputBasics
 
       positionFeedbackMaxError = Double.NaN;
       velocityFeedbackMaxError = Double.NaN;
-      
+
       maxTorque = Double.NaN;
    }
 
@@ -144,7 +144,6 @@ public class JointDesiredOutput implements JointDesiredOutputBasics
       boolean resetIntegrators = this.resetIntegrators;
       this.resetIntegrators = false;
       return resetIntegrators;
-
    }
 
    @Override
@@ -303,6 +302,4 @@ public class JointDesiredOutput implements JointDesiredOutputBasics
    {
       this.maxTorque = feedbackMaxTorque;
    }
-   
-   
 }

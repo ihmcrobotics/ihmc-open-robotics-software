@@ -1,98 +1,56 @@
 package us.ihmc.behaviors.behaviorTree;
 
-import us.ihmc.behaviors.ai2r.AI2RNodeDefinition;
-import us.ihmc.behaviors.door.DoorTraversalDefinition;
-import us.ihmc.behaviors.buildingExploration.BuildingExplorationDefinition;
-import us.ihmc.behaviors.sequence.actions.CheckPointNodeDefinition;
-import us.ihmc.behaviors.logic.ConditionNodeDefinition;
-import us.ihmc.behaviors.logic.GotoNodeDefinition;
-import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
-import us.ihmc.behaviors.sequence.FallbackNodeDefinition;
-import us.ihmc.behaviors.sequence.actions.*;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.behaviors.behaviorTree.action.actions.*;
+import us.ihmc.behaviors.behaviorTree.condition.*;
+import us.ihmc.behaviors.behaviorTree.control.*;
+import us.ihmc.behaviors.behaviorTree.control.ai2r.*;
+import us.ihmc.behaviors.behaviorTree.control.buildingExploration.*;
+import us.ihmc.behaviors.behaviorTree.control.door.*;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
 
 public class BehaviorTreeDefinitionBuilder
 {
-   public static BehaviorTreeNodeDefinition createNode(Class<?> definitionType,
-                                                       CRDTInfo crdtInfo,
-                                                       WorkspaceResourceDirectory saveFileDirectory,
-                                                       DefaultFootstepPlannerParametersReadOnly defaultFootstepPlannerParameters)
+   private static final Map<Class<?>, Function<BehaviorTreeRootNodeDefinition, BehaviorTreeNodeDefinition>> MAP = new HashMap<>();
+   static
    {
-      if (definitionType == BehaviorTreeNodeDefinition.class)
-      {
-         return new BehaviorTreeNodeDefinition(crdtInfo, saveFileDirectory);
-      }
-      if (definitionType == AI2RNodeDefinition.class)
-      {
-         return new AI2RNodeDefinition(crdtInfo, saveFileDirectory);
-      }
-      if (definitionType == ActionSequenceDefinition.class)
-      {
-         return new ActionSequenceDefinition(crdtInfo, saveFileDirectory);
-      }
-      if (definitionType == FallbackNodeDefinition.class)
-      {
-         return new FallbackNodeDefinition(crdtInfo, saveFileDirectory);
-      }
-      if (definitionType == ConditionNodeDefinition.class)
-      {
-         return new ConditionNodeDefinition(crdtInfo, saveFileDirectory);
-      }
-      if (definitionType == GotoNodeDefinition.class)
-      {
-         return new GotoNodeDefinition(crdtInfo, saveFileDirectory);
-      }
-      if (definitionType == CheckPointNodeDefinition.class)
-      {
-         return new CheckPointNodeDefinition(crdtInfo, saveFileDirectory);
-      }
-      if (definitionType == DoorTraversalDefinition.class)
-      {
-         return new DoorTraversalDefinition(crdtInfo, saveFileDirectory);
-      }
-      if (definitionType == BuildingExplorationDefinition.class)
-      {
-         return new BuildingExplorationDefinition(crdtInfo, saveFileDirectory);
-      }
-      if (definitionType == ChestOrientationActionDefinition.class)
-      {
-         return new ChestOrientationActionDefinition(crdtInfo, saveFileDirectory);
-      }
-      if (definitionType == FootstepPlanActionDefinition.class)
-      {
-         return new FootstepPlanActionDefinition(crdtInfo, saveFileDirectory, new DefaultFootstepPlannerParameters(defaultFootstepPlannerParameters));
-      }
-      if (definitionType == HandPoseActionDefinition.class)
-      {
-         return new HandPoseActionDefinition(crdtInfo, saveFileDirectory);
-      }
-      if (definitionType == HandWrenchActionDefinition.class)
-      {
-         return new HandWrenchActionDefinition(crdtInfo, saveFileDirectory);
-      }
-      if (definitionType == PelvisHeightOrientationActionDefinition.class)
-      {
-         return new PelvisHeightOrientationActionDefinition(crdtInfo, saveFileDirectory);
-      }
-      if (definitionType == SakeHandCommandActionDefinition.class)
-      {
-         return new SakeHandCommandActionDefinition(crdtInfo, saveFileDirectory);
-      }
-      if (definitionType == ScrewPrimitiveActionDefinition.class)
-      {
-         return new ScrewPrimitiveActionDefinition(crdtInfo, saveFileDirectory);
-      }
-      if (definitionType == WaitDurationActionDefinition.class)
-      {
-         return new WaitDurationActionDefinition(crdtInfo, saveFileDirectory);
-      }
-      if (definitionType == FootPoseActionDefinition.class)
-      {
-         return new FootPoseActionDefinition(crdtInfo, saveFileDirectory);
-      }
+      MAP.put(BehaviorTreeNodeDefinition.class, BehaviorTreeNodeDefinition::new);
+      MAP.put(ActionSequenceDefinition.class, ActionSequenceDefinition::new);
+      MAP.put(FallbackNodeDefinition.class, FallbackNodeDefinition::new);
+      MAP.put(ConditionNodeDefinition.class, ConditionNodeDefinition::new);
+      MAP.put(GotoNodeDefinition.class, GotoNodeDefinition::new);
+      MAP.put(CheckPointNodeDefinition.class, CheckPointNodeDefinition::new);
+      MAP.put(SceneActionNodeDefinition.class, SceneActionNodeDefinition::new);
+      MAP.put(AI2RNodeDefinition.class, AI2RNodeDefinition::new);
+      MAP.put(DoorTraversalDefinition.class, DoorTraversalDefinition::new);
+      MAP.put(BuildingExplorationDefinition.class, BuildingExplorationDefinition::new);
+      MAP.put(NeckActionDefinition.class, NeckActionDefinition::new);
+      MAP.put(ChestOrientationActionDefinition.class, ChestOrientationActionDefinition::new);
+      MAP.put(FootstepPlanActionDefinition.class, FootstepPlanActionDefinition::new);
+      MAP.put(HandPoseActionDefinition.class, HandPoseActionDefinition::new);
+      MAP.put(HandWrenchActionDefinition.class, HandWrenchActionDefinition::new);
+      MAP.put(PelvisHeightOrientationActionDefinition.class, PelvisHeightOrientationActionDefinition::new);
+      MAP.put(AbilityHandActionDefinition.class, AbilityHandActionDefinition::new);
+      MAP.put(SakeHandCommandActionDefinition.class, SakeHandCommandActionDefinition::new);
+      MAP.put(ScrewPrimitiveActionDefinition.class, ScrewPrimitiveActionDefinition::new);
+      MAP.put(WaitDurationActionDefinition.class, WaitDurationActionDefinition::new);
+      MAP.put(FootPoseActionDefinition.class, FootPoseActionDefinition::new);
+   }
+
+   public static BehaviorTreeRootNodeDefinition createRootNode(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, DRCRobotModel robotModel)
+   {
+      return new BehaviorTreeRootNodeDefinition(crdtInfo, saveFileDirectory, robotModel);
+   }
+
+   public static BehaviorTreeNodeDefinition createNode(Class<?> definitionType, BehaviorTreeRootNodeDefinition rootNode)
+   {
+      if (MAP.containsKey(definitionType))
+         return MAP.get(definitionType).apply(rootNode);
 
       throw new RuntimeException("Node definition type not found: " + definitionType.getSimpleName());
    }

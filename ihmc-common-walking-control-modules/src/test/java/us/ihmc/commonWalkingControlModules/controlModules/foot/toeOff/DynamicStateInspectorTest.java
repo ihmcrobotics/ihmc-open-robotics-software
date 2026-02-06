@@ -118,7 +118,7 @@ public class DynamicStateInspectorTest
       currentICP.set(desiredICP);
       currentICP.subX(0.05);
 
-      inspector.checkICPLocations(parameters, RobotSide.RIGHT, leftFootPose, desiredICP, currentICP, toePosition);
+      inspector.checkICPLocations(parameters, RobotSide.RIGHT, leftFootPose, desiredICP, currentICP, null, null, toePosition, 0.5);
 
       double expectedICPX = 0.75 * stepLength - 0.05;
       double expectedICPY = 0.25 * stepWidth;
@@ -177,7 +177,7 @@ public class DynamicStateInspectorTest
       currentICP.set(desiredICP);
       currentICP.subX(0.15);
 
-      inspector.checkICPLocations(parameters, RobotSide.RIGHT, leftFootPose, desiredICP, currentICP, toePosition);
+      inspector.checkICPLocations(parameters, RobotSide.RIGHT, leftFootPose, desiredICP, currentICP, null, null, toePosition, 0.5);
 //      visualize(inspector);
 
       expectedICPX = 0.75 * stepLength - 0.15;
@@ -228,7 +228,7 @@ public class DynamicStateInspectorTest
       currentICP.set(desiredICP);
       currentICP.subY(0.05);
 
-      inspector.checkICPLocations(parameters, RobotSide.RIGHT, leftFootPose, desiredICP, currentICP, toePosition);
+      inspector.checkICPLocations(parameters, RobotSide.RIGHT, leftFootPose, desiredICP, currentICP, null, null, toePosition, 0.5);
       visualize(inspector);
 
       expectedICPX = 0.75 * stepLength;
@@ -315,7 +315,7 @@ public class DynamicStateInspectorTest
       leftFootPose.getOrientation().set(0.006, -0.009, -0.0226, 0.9997);
 
       inspector.setPolygons(leftPolygon, rightPolygon, onToesPolygon);
-      inspector.checkICPLocations(parameters, RobotSide.RIGHT, leftFootPose, desiredICP, currentICP, toePosition);
+      inspector.checkICPLocations(parameters, RobotSide.RIGHT, leftFootPose, desiredICP, currentICP, null, null, toePosition, 0.5);
 
       visualize(inspector);
 
@@ -424,7 +424,7 @@ public class DynamicStateInspectorTest
 
       inspector.setPolygons(rightPolygon, leftPolygon, onToesPolygon);
       for (int i = 0; i < 4; i++)
-         inspector.checkICPLocations(parameters, RobotSide.LEFT, rightFootPose, desiredICP, currentICP, toePosition);
+         inspector.checkICPLocations(parameters, RobotSide.LEFT, rightFootPose, desiredICP, currentICP, null, null, toePosition, 0.5);
 
       visualize(inspector);
 
@@ -525,7 +525,7 @@ public class DynamicStateInspectorTest
       leftFootPose.getOrientation().set(0.0007, -0.0034, 0.054, 0.9985);
 
       inspector.setPolygons(leftPolygon, rightPolygon, onToesPolygon);
-      inspector.checkICPLocations(parameters, RobotSide.RIGHT, leftFootPose, desiredICP, currentICP, toePosition);
+      inspector.checkICPLocations(parameters, RobotSide.RIGHT, leftFootPose, desiredICP, currentICP, null, null, toePosition, 0.5);
 
       visualize(inspector);
 
@@ -624,7 +624,7 @@ public class DynamicStateInspectorTest
       leftFootPose.getOrientation().set(0.0286, -0.0021, -0.1191, 0.9925);
 
       inspector.setPolygons(leftPolygon, rightPolygon, onToesPolygon);
-      inspector.checkICPLocations(parameters, RobotSide.RIGHT, leftFootPose, desiredICP, currentICP, toePosition);
+      inspector.checkICPLocations(parameters, RobotSide.RIGHT, leftFootPose, desiredICP, currentICP, null, null, toePosition, 0.5);
 
 //      visualize = true;
       visualize(inspector);
@@ -730,7 +730,7 @@ public class DynamicStateInspectorTest
       leftFootPose.getOrientation().set(-0.0048, -0.0063, -0.21, 0.9777);
 
       inspector.setPolygons(leftPolygon, rightPolygon, onToesPolygon);
-      inspector.checkICPLocations(parameters, RobotSide.RIGHT, leftFootPose, desiredICP, currentICP, toePosition);
+      inspector.checkICPLocations(parameters, RobotSide.RIGHT, leftFootPose, desiredICP, currentICP, null, null, toePosition, 0.5);
 
       assertFalse(inspector.areDynamicsOkForToeOff());
 
@@ -828,7 +828,7 @@ public class DynamicStateInspectorTest
       leftFootPose.getOrientation().set(0.0213, 0.0049, -0.0879, 0.9959);
 
       inspector.setPolygons(leftPolygon, rightPolygon, onToesPolygon);
-      inspector.checkICPLocations(parameters, RobotSide.RIGHT, leftFootPose, desiredICP, currentICP, toePosition);
+      inspector.checkICPLocations(parameters, RobotSide.RIGHT, leftFootPose, desiredICP, currentICP, null, null, toePosition, 0.5);
 
       assertFalse(inspector.areDynamicsOkForToeOff());
 
@@ -935,7 +935,7 @@ public class DynamicStateInspectorTest
       leftFootPose.getOrientation().set(-0.0046, -0.013, -0.1571, 0.9875);
 
       inspector.setPolygons(leftPolygon, rightPolygon, onToesPolygon);
-      inspector.checkICPLocations(parameters, RobotSide.RIGHT, leftFootPose, desiredICP, currentICP, toePosition);
+      inspector.checkICPLocations(parameters, RobotSide.RIGHT, leftFootPose, desiredICP, currentICP, null, null, toePosition, 0.5);
 
       visualize(inspector);
 
@@ -1038,7 +1038,7 @@ public class DynamicStateInspectorTest
       leftFootPose.getOrientation().set(0.0397, 0.0153, 0.0306, 0.9986);
 
       inspector.setPolygons(leftPolygon, rightPolygon, onToesPolygon);
-      inspector.checkICPLocations(parameters, RobotSide.RIGHT, leftFootPose, desiredICP, currentICP, toePosition);
+      inspector.checkICPLocations(parameters, RobotSide.RIGHT, leftFootPose, desiredICP, currentICP, null, null, toePosition, 0.5);
 
       visualize(inspector);
       assertFalse(inspector.areDynamicsOkForToeOff());
@@ -1330,7 +1330,7 @@ public class DynamicStateInspectorTest
          for (int heightIdx = 0; heightIdx < heightTicks; heightIdx++)
          {
             FramePoint2D currentICP = new FramePoint2D(worldFrame, topLeftX - heightIdx * gridRez, topLeftY - widthIdx * gridRez);
-            inspector.checkICPLocations(parameters, RobotSide.RIGHT, leadingFootPose, desiredICP, currentICP, toePosition);
+            inspector.checkICPLocations(parameters, RobotSide.RIGHT, leadingFootPose, desiredICP, currentICP, null, null, toePosition, 0.5);
 
             if (inspector.areDynamicsOkForToeOff())
             {

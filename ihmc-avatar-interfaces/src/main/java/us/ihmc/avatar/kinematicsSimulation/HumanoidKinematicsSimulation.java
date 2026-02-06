@@ -40,6 +40,7 @@ import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.graphicsDescription.conversion.YoGraphicConversionTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameMessageCommandConverter;
@@ -54,6 +55,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemStateIntegrator;
 import us.ihmc.robotDataLogger.YoVariableServer;
+import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
@@ -68,6 +70,8 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisher;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisherFactory;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
@@ -88,7 +92,6 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -96,7 +99,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * @deprecated Use {@link SCS2AvatarSimulationFactory#setKinematicsSimulation} instead.
+ * We built {@link SCS2AvatarSimulationFactory#setKinematicsSimulation} to replace this,
+ * but apparently this one still works better for some reason.
  */
 public class HumanoidKinematicsSimulation
 {
@@ -160,7 +164,10 @@ public class HumanoidKinematicsSimulation
       this.kinematicsSimulationParameters = kinematicsSimulationParameters;
 
       // instantiate some existing controller ROS2 API?
-      ros2Node = new ROS2NodeBuilder().build(HumanoidControllerAPI.HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME);
+      ROS2NodeBuilder nodeBuilder = kinematicsSimulationParameters.getRos2NodeBuilder();
+      if (nodeBuilder == null)
+         nodeBuilder = new ROS2NodeBuilder();
+      ros2Node = nodeBuilder.build(HumanoidControllerAPI.HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME);
       heartbeat = new ROS2Heartbeat(ros2Node, KINEMATICS_SIMULATION_HEARTBEAT);
 
       String robotName = robotModel.getSimpleRobotName();
@@ -223,7 +230,6 @@ public class HumanoidKinematicsSimulation
                                                                  false,
                                                                  Collections.emptyList(),
                                                                  allContactableBodies,
-                                                                 yoGraphicsListRegistry,
                                                                  jointsToIgnore);
       humanoidHighLevelControllerManagerRegistry.addChild(controllerToolbox.getYoVariableRegistry());
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
@@ -235,7 +241,6 @@ public class HumanoidKinematicsSimulation
                                                                               controllerToolbox.getContactableFeet(),
                                                                               walkingOutputManager,
                                                                               yoTime,
-                                                                              yoGraphicsListRegistry,
                                                                               controllerToolbox.getYoVariableRegistry());
       controllerToolbox.setWalkingMessageHandler(walkingMessageHandler);
       controllerToolbox.attachRobotMotionStatusChangedListener((newStatus, time) -> robotMotionStatusHolder.setCurrentRobotMotionStatus(newStatus));
@@ -261,7 +266,7 @@ public class HumanoidKinematicsSimulation
       walkingParentRegistry.addChild(walkingController.getYoVariableRegistry());
 
       // create controller network subscriber here!!
-      realtimeROS2Node = new ROS2NodeBuilder().buildRealtime(HumanoidControllerAPI.HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME + "_rt");
+      realtimeROS2Node = nodeBuilder.buildRealtime(HumanoidControllerAPI.HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME + "_rt");
       ROS2Topic inputTopic = HumanoidControllerAPI.getInputTopic(robotName);
       ROS2Topic outputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
       ControllerNetworkSubscriber controllerNetworkSubscriber = new ControllerNetworkSubscriber(inputTopic,
@@ -300,7 +305,6 @@ public class HumanoidKinematicsSimulation
                                                                                        controllerToolbox.getControlledJoints(),
                                                                                        controllerToolbox.getCenterOfMassFrame(),
                                                                                        walkingControllerParameters.getMomentumOptimizationSettings(),
-                                                                                       yoGraphicsListRegistry,
                                                                                        registry);
       controlCoreToolbox.setJointPrivilegedConfigurationParameters(walkingControllerParameters.getJointPrivilegedConfigurationParameters());
       controlCoreToolbox.setFeedbackControllerSettings(walkingControllerParameters.getFeedbackControllerSettings());
@@ -324,8 +328,7 @@ public class HumanoidKinematicsSimulation
                                                                             controllerToolbox.getWholeBodyAngularVelocityCalculator(),
                                                                             GRAVITY_Z,
                                                                             controllerToolbox.getControlDT(),
-                                                                            walkingParentRegistry,
-                                                                            yoGraphicsListRegistry);
+                                                                            walkingParentRegistry);
 
       ParameterLoaderHelper.loadParameters(this, robotModel, drcControllerThreadRegistry);
       YoVariable defaultHeight = registry.findVariable(PelvisHeightControlState.class.getSimpleName(),
@@ -335,26 +338,29 @@ public class HumanoidKinematicsSimulation
          throw new RuntimeException("Need to load a default height.");
       }
 
+      for (YoRegistry yoRegistry : kinematicsSimulationParameters.getRegistriesToInclude())
+         registry.addChild(yoRegistry);
+
       if (kinematicsSimulationParameters.getLogToFile())
       {
-         Path incomingLogsDirectory;
-         intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(getClass().getSimpleName(),
-                                                                         robotModel.getLogModelProvider(),
-                                                                         registry,
-                                                                         fullRobotModel.getElevator(),
-                                                                         yoGraphicsListRegistry,
-                                                                         100000,
-                                                                         0.01);
-         intraprocessYoVariableLogger.start();
+         YoGraphicGroupDefinition definitions = new YoGraphicGroupDefinition("SCS1Graphics", YoGraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry));
+         intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(List.of(new RegistrySendBufferBuilder(registry, fullRobotModel.getElevator(), definitions)),
+                                                                         0.01,
+                                                                         getClass().getSimpleName());
+         if (intraprocessYoVariableLogger.create())
+            LogTools.info("[Logging] Logging locally to disk");
+         else
+            LogTools.error("[Logging] Unable to log locally to disk");
       }
       if (kinematicsSimulationParameters.getCreateYoVariableServer())
       {
          LogTools.info("Starting YoVariable server...");
+         YoGraphicGroupDefinition definitions = new YoGraphicGroupDefinition("SCS1Graphics", YoGraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry));
          yoVariableServer = new YoVariableServer(getClass().getSimpleName(), robotModel.getLogModelProvider(), new DataServerSettings(false), 0.01);
          // Some robots have four bar linkages and need the `getSubtreeJointsIncludingFourBars` call
          yoVariableServer.setMainRegistry(registry,
                                           MultiBodySystemMissingTools.getSubtreeJointsIncludingFourBars(fullRobotModel.getElevator()),
-                                          yoGraphicsListRegistry);
+                                          definitions);
          yoVariableServer.start();
          LogTools.info("YoVariable server started.");
       }
@@ -599,6 +605,8 @@ public class HumanoidKinematicsSimulation
    public void destroy()
    {
       LogTools.info("Shutting down...");
+      if (intraprocessYoVariableLogger != null)
+         intraprocessYoVariableLogger.destroy();
       if (simulatedHandKinematicController != null)
          simulatedHandKinematicController.cleanup();
       controlThread.destroy();

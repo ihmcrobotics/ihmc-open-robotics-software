@@ -1,9 +1,12 @@
 package us.ihmc.behaviors.behaviorTree.ros2;
 
+import behavior_msgs.msg.dds.BehaviorTreeStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTree;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNode;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNode;
+import us.ihmc.communication.AutonomyAPI;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
-import us.ihmc.perception.sceneGraph.SceneGraph;
+import us.ihmc.ros2.ROS2Topic;
 
 /**
  * Manages syncing a behavior tree over ROS 2 as a CRDT.
@@ -12,25 +15,27 @@ import us.ihmc.perception.sceneGraph.SceneGraph;
  */
 public class ROS2BehaviorTree<T extends BehaviorTreeNode<T, ? ,?>>
 {
-   /**
-    * The SYNC_FREQUENCY should be a multiple of the scene graph's update frequency.
-    */
-   public static final double SYNC_FREQUENCY = SceneGraph.UPDATE_FREQUENCY / 2.0;
+   public static final double SYNC_FREQUENCY = 30.0;
 
-   private final BehaviorTree<T> behaviorTree;
-   private final ROS2BehaviorTreePublisher behaviorTreePublisher;
+   private final BehaviorTree<?, ?> behaviorTree;
+   private final ROS2PublishSubscribeAPI ros2;
+
+   private final ROS2Topic<BehaviorTreeStateMessage> publishTopic;
+   private final BehaviorTreeStateMessage publishMessage = new BehaviorTreeStateMessage();
+
    private final ROS2BehaviorTreeSubscription<T> behaviorTreeSubscription;
 
    /**
     * The complexity of this constructor is to support the UI having nodes that extend the base
     * on-robot ones.
     */
-   public ROS2BehaviorTree(BehaviorTree<T> behaviorTree, ROS2PublishSubscribeAPI ros2PublishSubscribeAPI)
+   public ROS2BehaviorTree(BehaviorTree<BehaviorTreeRootNode<T>, T> behaviorTree, ROS2PublishSubscribeAPI ros2)
    {
       this.behaviorTree = behaviorTree;
+      this.ros2 = ros2;
 
-      behaviorTreePublisher = new ROS2BehaviorTreePublisher(behaviorTree, ros2PublishSubscribeAPI);
-      behaviorTreeSubscription = new ROS2BehaviorTreeSubscription<>(behaviorTree, ros2PublishSubscribeAPI);
+      publishTopic = AutonomyAPI.BEHAVIOR_TREE.getTopic(behaviorTree.getCRDTInfo().getActorDesignation().getOutgoingQualifier());
+      behaviorTreeSubscription = new ROS2BehaviorTreeSubscription<>(behaviorTree, ros2);
    }
 
    /**
@@ -54,7 +59,8 @@ public class ROS2BehaviorTree<T extends BehaviorTreeNode<T, ? ,?>>
     */
    public void updatePublication()
    {
-      behaviorTreePublisher.publish();
+      behaviorTree.toMessage(publishMessage);
+      ros2.publish(publishTopic, publishMessage);
 
       // We increment the CRDT update number once per publication,
       // which done at the SYNC_FREQUENCY.
@@ -64,11 +70,6 @@ public class ROS2BehaviorTree<T extends BehaviorTreeNode<T, ? ,?>>
    public void destroy()
    {
       behaviorTreeSubscription.destroy();
-   }
-
-   public BehaviorTree<T> getBehaviorTree()
-   {
-      return behaviorTree;
    }
 
    public ROS2BehaviorTreeSubscription<T> getBehaviorTreeSubscription()

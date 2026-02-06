@@ -1,7 +1,6 @@
 package us.ihmc.footstepPlanning.ui.viewers;
 
 import com.google.common.util.concurrent.AtomicDouble;
-import perception_msgs.msg.dds.HeightMapMessage;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
@@ -9,6 +8,7 @@ import javafx.scene.paint.Material;
 import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
 import javafx.util.Pair;
+import perception_msgs.msg.dds.TerrainMapMessage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -18,7 +18,7 @@ import us.ihmc.idl.IDLSequence;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.perception.heightMap.HeightMapTools;
+import us.ihmc.perception.gpuMapping.HeightMapTools;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -66,7 +66,7 @@ public class HeightMapVisualizer extends AnimationTimer
       this.debugPosition.setElement(i, position);
    }
 
-   public void update(HeightMapMessage data)
+   public void update(TerrainMapMessage data)
    {
       if (!processing.getAndSet(true))
       {
@@ -90,13 +90,13 @@ public class HeightMapVisualizer extends AnimationTimer
       }
    }
 
-   private void computeMesh(HeightMapMessage heightMapMessage)
+   private void computeMesh(TerrainMapMessage terrainMapMessage)
    {
       /* Compute mesh */
       meshBuilder.clear();
-      IDLSequence.Float heights = heightMapMessage.getHeights();
-      double gridResolutionXY = heightMapMessage.getCellSizeInMeters();
-      int centerIndex = HeightMapTools.computeCenterIndex(heightMapMessage.getWidthInMeters(), gridResolutionXY);
+      IDLSequence.Float heights = terrainMapMessage.getHeightMap();
+      double gridResolutionXY = terrainMapMessage.getCellSizeInMeters();
+      int centerIndex = HeightMapTools.computeCenterIndex(terrainMapMessage.getWidthInMeters(), gridResolutionXY);
       double groundPlaneHeight = heights.min();
 
       ConvexPolygon2D heightMapCell = new ConvexPolygon2D();
@@ -110,8 +110,8 @@ public class HeightMapVisualizer extends AnimationTimer
       {
          int xIndex = HeightMapTools.keyToXIndex(key, centerIndex);
          int yIndex = HeightMapTools.keyToYIndex(key, centerIndex);
-         double x = HeightMapTools.indexToCoordinate(xIndex, heightMapMessage.getGridCenterX(), gridResolutionXY, centerIndex);
-         double y = HeightMapTools.indexToCoordinate(yIndex, heightMapMessage.getGridCenterY(), gridResolutionXY, centerIndex);
+         double x = HeightMapTools.indexToCoordinate(xIndex, terrainMapMessage.getGridCenterX(), gridResolutionXY, centerIndex);
+         double y = HeightMapTools.indexToCoordinate(yIndex, terrainMapMessage.getGridCenterY(), gridResolutionXY, centerIndex);
          double height = heights.get(key);
          double renderedHeight = height - groundPlaneHeight;
          double[] redGreenBlue = HeightMapTools.getRedGreenBlue(height);
@@ -150,10 +150,10 @@ public class HeightMapVisualizer extends AnimationTimer
       if (SHOW_GROUND_PLANE)
       {
          double renderedGroundPlaneHeight = 0.005;
-         meshBuilder.addBox(heightMapMessage.getWidthInMeters(),
-                            heightMapMessage.getWidthInMeters(),
+         meshBuilder.addBox(terrainMapMessage.getWidthInMeters(),
+                            terrainMapMessage.getWidthInMeters(),
                             renderedGroundPlaneHeight,
-                            new Point3D(heightMapMessage.getGridCenterX(), heightMapMessage.getGridCenterY(), groundPlaneHeight),
+                            new Point3D(terrainMapMessage.getGridCenterX(), terrainMapMessage.getGridCenterY(), groundPlaneHeight),
                             groundPlaneColor);
       }
 

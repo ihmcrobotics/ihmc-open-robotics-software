@@ -1,43 +1,38 @@
 package us.ihmc.footstepPlanning.tools;
 
-import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.TerrainMapMessage;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
+import us.ihmc.perception.gpuMapping.SnapResult;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.perception.heightMap.HeightMapTools;
+import us.ihmc.perception.gpuMapping.HeightMapTools;
 
 import java.util.List;
+
+import static us.ihmc.perception.gpuMapping.TerrainMapData.*;
 
 public class PlanarRegionToHeightMapConverter
 {
    public static final double defaultResolution = 0.02;
-   public static final double defaultEstimatedGroundHeight = 0.0;
 
-   public static HeightMapMessage convertFromPlanarRegionsToHeightMap(PlanarRegionsList planarRegionsList)
+   public static TerrainMapMessage convertFromPlanarRegionsToHeightMap(PlanarRegionsList planarRegionsList)
    {
       return convertFromPlanarRegionsToHeightMap(planarRegionsList, defaultResolution);
    }
 
-   public static HeightMapMessage convertFromPlanarRegionsToHeightMap(PlanarRegionsList planarRegionsList, double resolutionXY)
+   public static TerrainMapMessage convertFromPlanarRegionsToHeightMap(PlanarRegionsList planarRegionsList, double resolutionXY)
    {
       return convertFromPlanarRegionsToHeightMap(planarRegionsList.getPlanarRegionsAsList(), resolutionXY);
    }
 
-   public static HeightMapMessage convertFromPlanarRegionsToHeightMap(List<PlanarRegion> planarRegionList, double resolutionXY)
-   {
-      return convertFromPlanarRegionsToHeightMap(planarRegionList, resolutionXY, defaultEstimatedGroundHeight);
-   }
-
-   public static HeightMapMessage convertFromPlanarRegionsToHeightMap(PlanarRegionsList planarRegionsList, double resolutionXY, double estimatedGroundHeight)
-   {
-      return convertFromPlanarRegionsToHeightMap(planarRegionsList.getPlanarRegionsAsList(), resolutionXY, estimatedGroundHeight);
-   }
-
-   public static HeightMapMessage convertFromPlanarRegionsToHeightMap(List<PlanarRegion> planarRegionList, double resolutionXY, double estimatedGroundHeight)
+   public static TerrainMapMessage convertFromPlanarRegionsToHeightMap(List<PlanarRegion> planarRegionList, double resolutionXY)
    {
       BoundingBox2D occupiedArea = new BoundingBox2D();
       planarRegionList.forEach(planarRegion ->
@@ -57,7 +52,7 @@ public class PlanarRegionToHeightMapConverter
       double gridCenterY = 0.5 * (occupiedArea.getMaxY() + occupiedArea.getMinY());
       double sideLength = Math.max(width, height);
 
-      HeightMapMessage message = new HeightMapMessage();
+      TerrainMapMessage message = new TerrainMapMessage();
       message.setWidthInMeters(sideLength);
       message.setGridCenterX(gridCenterX);
       message.setGridCenterY(gridCenterY);
@@ -77,9 +72,31 @@ public class PlanarRegionToHeightMapConverter
             Point3D pointToProject = new Point3D(xPosition, yPosition, 0.0);
             Point3DReadOnly projectedPoint = PlanarRegionTools.projectPointToPlanesVertically(pointToProject, planarRegionList);
 
-            if (projectedPoint != null && Double.isFinite(projectedPoint.getZ()) && !MathTools.epsilonEquals(projectedPoint.getZ(), estimatedGroundHeight, 1e-2))
+            if (projectedPoint != null && Double.isFinite(projectedPoint.getZ()))
             {
-               message.getHeights().add((int) projectedPoint.getZ());
+               List<PlanarRegion> intersectingRegions = PlanarRegionTools.findPlanarRegionsContainingPoint(planarRegionList, projectedPoint, 1e-3);
+               message.getHeightMap().add((float) projectedPoint.getZ());
+               message.getTraversabilityScore().add(1.0f);
+               message.getTraversabilityClass().add(SnapResult.VALID.toByte());
+               UnitVector3DReadOnly normal = intersectingRegions.get(0).getNormal();
+               if (normal.getZ() < 0.0)
+               {
+                  UnitVector3D flippedNormal = new UnitVector3D(normal);
+                  flippedNormal.negate();
+                  normal = flippedNormal;
+               }
+               message.getSnappedNormalXData().add(TerrainMapData.packFloatAsByte(normal.getX32(), -NORMAL_MIN_MAX_XY, NORMAL_MIN_MAX_XY));
+               message.getSnappedNormalYData().add(TerrainMapData.packFloatAsByte(normal.getY32(), -NORMAL_MIN_MAX_XY, NORMAL_MIN_MAX_XY));
+               message.getSnappedNormalZData().add(TerrainMapData.packFloatAsByte(normal.getZ32(), NORMAL_MIN_Z, NORMAL_MAX_Z));
+            }
+            else
+            {
+               message.getHeightMap().add(Float.NaN);
+               message.getTraversabilityScore().add(0.0f);
+               message.getTraversabilityClass().add(SnapResult.SNAP_FAILED.toByte());
+               message.getSnappedNormalXData().add((byte) 0);
+               message.getSnappedNormalYData().add((byte) 0);
+               message.getSnappedNormalZData().add((byte) 0);
             }
          }
       }

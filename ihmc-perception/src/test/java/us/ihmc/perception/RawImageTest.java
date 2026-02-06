@@ -13,7 +13,7 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.sensors.CameraIntrinsics;
 import us.ihmc.perception.imageMessage.PixelFormat;
 
 import java.time.Instant;
@@ -48,6 +48,8 @@ public class RawImageTest
    public void closeMats()
    {
       mat8UC1.close();
+      mat8UC3.close();
+      mat16UC1.close();
       gpuMat8UC1.close();
    }
 

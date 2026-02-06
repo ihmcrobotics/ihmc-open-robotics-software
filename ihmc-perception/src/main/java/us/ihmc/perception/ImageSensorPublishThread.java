@@ -55,7 +55,12 @@ public class ImageSensorPublishThread extends RepeatingTaskThread
 
    public void addTopic(ROS2Topic<? extends Packet<?>> topicToPublishOn, int imageKey)
    {
-      publisherMap.put(new AsyncImagePublisher(ros2Node, topicToPublishOn), imageKey);
+      addTopic(topicToPublishOn, imageKey, 1.0);
+   }
+
+   public void addTopic(ROS2Topic<? extends Packet<?>> topicToPublishOn, int imageKey, double scale)
+   {
+      publisherMap.put(new AsyncImagePublisher(ros2Node, topicToPublishOn, scale), imageKey);
    }
 
    @Override
@@ -144,13 +149,13 @@ public class ImageSensorPublishThread extends RepeatingTaskThread
       // Ensure we've added these frames
       if (cameraFrame == null)
       {
-         cameraFrame = new ROS2FollowingFrame(ros2Node, "ros2_" + imageFrame.getName(), imageSensor.getSensorFrame(), imageFrame);
+         cameraFrame = new ROS2FollowingFrame("ros2_" + imageFrame.getName(), imageSensor.getSensorFrame(), imageFrame);
          ros2CameraFrames.put(imageKey, cameraFrame);
       }
 
       if (opticalFrame == null)
       {
-         opticalFrame = new ROS2StaticFrame(ros2Node, cameraFrame.getFrameId() + "_optical", cameraFrame, CAMERA_TO_OPTICAL_TRANSFORM);
+         opticalFrame = new ROS2StaticFrame(cameraFrame.getFrameId() + "_optical", cameraFrame, CAMERA_TO_OPTICAL_TRANSFORM);
          ros2OpticalFrames.put(imageKey, opticalFrame);
       }
 
@@ -160,8 +165,8 @@ public class ImageSensorPublishThread extends RepeatingTaskThread
          cameraFrame.remove();
          opticalFrame.remove();
 
-         cameraFrame = new ROS2FollowingFrame(ros2Node, "ros2_" + imageFrame.getName(), imageSensor.getSensorFrame(), imageFrame);
-         opticalFrame = new ROS2StaticFrame(ros2Node, cameraFrame.getFrameId() + "_optical", cameraFrame, CAMERA_TO_OPTICAL_TRANSFORM);
+         cameraFrame = new ROS2FollowingFrame("ros2_" + imageFrame.getName(), imageSensor.getSensorFrame(), imageFrame);
+         opticalFrame = new ROS2StaticFrame(cameraFrame.getFrameId() + "_optical", cameraFrame, CAMERA_TO_OPTICAL_TRANSFORM);
 
          ros2CameraFrames.replace(imageKey, cameraFrame);
          ros2OpticalFrames.replace(imageKey, opticalFrame);
@@ -198,10 +203,10 @@ public class ImageSensorPublishThread extends RepeatingTaskThread
       private final ExecutorService publishExecutor;
       private Future<?> publishFuture;
 
-      private AsyncImagePublisher(ROS2Node ros2Node, ROS2Topic<? extends Packet<?>> topic)
+      private AsyncImagePublisher(ROS2Node ros2Node, ROS2Topic<? extends Packet<?>> topic, double scale)
       {
          this.topic = topic;
-         publisher = new RawImagePublisher(ros2Node);
+         publisher = new RawImagePublisher(ros2Node, scale);
          publishExecutor = Executors.newSingleThreadExecutor(ThreadTools.createNamedThreadFactory(topic.getName() + getClass().getSimpleName()));
       }
 
@@ -215,7 +220,15 @@ public class ImageSensorPublishThread extends RepeatingTaskThread
          lastSequenceNumber = image.getSequenceNumber();
          publishFuture = publishExecutor.submit(() ->
          {
-            publisher.publishImage(topic, image, sensorFrame);
+            try
+            {
+               publisher.publishImage(topic, image, sensorFrame);
+            }
+            catch (Exception e)
+            {
+               LogTools.error(e);
+            }
+
             image.release();
          });
       }

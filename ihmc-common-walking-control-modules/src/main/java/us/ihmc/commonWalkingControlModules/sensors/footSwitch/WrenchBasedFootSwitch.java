@@ -11,6 +11,7 @@ import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.spatial.Wrench;
@@ -50,6 +51,7 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
    private final GlitchFilteredYoBoolean hasFootHitGroundFiltered;
    private final GlitchFilteredYoBoolean isPastCoPThresholdFiltered;
 
+   private final YoDouble copDistance;
    private final YoDouble footForceMagnitude;
    private final YoDouble alphaFootLoadFiltering;
    private final AlphaFilteredYoVariable footLoadPercentage;
@@ -59,7 +61,7 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
    private final YoFramePoint2D centerOfPressure;
    private final CenterOfPressureResolver copResolver = new CenterOfPressureResolver();
    private final ContactablePlaneBody contactablePlaneBody;
-   private final FrameConvexPolygon2D footPolygon;
+   private final FrameConvexPolygon2DReadOnly footPolygon;
 
    private final YoFixedFrameSpatialVector yoFootForceTorque;
    private final YoFixedFrameSpatialVector yoFootForceTorqueInSole;
@@ -93,7 +95,6 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
                                 DoubleProvider contactForceThresholdLow,
                                 DoubleProvider contactForceThresholdHigh,
                                 DoubleProvider contactCoPThreshold,
-                                YoGraphicsListRegistry yoGraphicsListRegistry,
                                 YoRegistry parentRegistry)
    {
       this.forceSensorData = forceSensorData;
@@ -115,6 +116,7 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
                                                                new YoFrameVector3D(namePrefix + "ForceWorldFrame", worldFrame, registry));
 
       footForceMagnitude = new YoDouble(namePrefix + "FootForceMag", registry);
+      copDistance = new YoDouble(namePrefix + "CoPDistance", registry);
 
       isPastForceThresholdLow = new YoBoolean(namePrefix + "IsPastForceThresholdLow", registry);
       isPastForceThresholdLowFiltered = new GlitchFilteredYoBoolean(namePrefix + "IsPastForceThresholdLowFiltered", registry, isPastForceThresholdLow, 2);
@@ -179,13 +181,15 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
       // Testing CoP threshold
       if (Double.isNaN(contactCoPThreshold.getValue()))
       {
+         copDistance.setToNaN();
          isPastCoPThreshold.set(true);
          isPastCoPThresholdFiltered.set(true);
       }
       else
       {
          double copThreshold = contactCoPThreshold.getValue();
-         isPastCoPThreshold.set(footPolygon.signedDistance(centerOfPressure) < -copThreshold);
+         copDistance.set(footPolygon.signedDistance(centerOfPressure));
+         isPastCoPThreshold.set(copDistance.getDoubleValue() < -copThreshold);
          isPastCoPThresholdFiltered.update();
       }
 
@@ -216,6 +220,12 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
    public double getFootLoadPercentage()
    {
       return footLoadPercentage.getDoubleValue();
+   }
+
+   @Override
+   public double getCenterOfPressureDistance()
+   {
+      return copDistance.getDoubleValue();
    }
 
    @Override

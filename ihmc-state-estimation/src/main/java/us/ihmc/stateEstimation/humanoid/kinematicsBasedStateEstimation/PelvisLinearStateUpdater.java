@@ -11,6 +11,8 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
@@ -88,11 +90,14 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
 
    private final YoInteger numberOfEndEffectorsTrusted = new YoInteger("numberOfEndEffectorsTrusted", registry);
    private final YoInteger numberOfEndEffectorsFilteredByLoad = new YoInteger("numberOfEndEffectorsFilteredByLoad", registry);
+   private final YoInteger numberOfEndEffectorsFilteredByVelocity = new YoInteger("numberOfEndEffectorsFilteredByVelocity", registry);
 
    private final Map<RigidBodyBasics, YoDouble> footForcesZInPercentOfTotalForce = new LinkedHashMap<>();
+   private final Map<RigidBodyBasics, YoDouble> footAngularVelocities = new LinkedHashMap<>();
    private final IntegerProvider optimalNumberOfTrustedFeet;
    private final DoubleProvider forceZInPercentThresholdToTrustFoot;
    private final DoubleProvider forceZInPercentThresholdToNotTrustFoot;
+   private final DoubleProvider angularVelocityToNotTrustFoot;
 
    private final Map<RigidBodyBasics, FootSwitchInterface> footSwitches;
    private final Map<RigidBodyBasics, FixedFrameVector3DBasics> footForces = new LinkedHashMap<>();
@@ -151,7 +156,6 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
                                    Map<RigidBodyBasics, ? extends ContactablePlaneBody> feetContactablePlaneBodies,
                                    double gravitationalAcceleration,
                                    StateEstimatorParameters stateEstimatorParameters,
-                                   YoGraphicsListRegistry yoGraphicsListRegistry,
                                    YoRegistry parentRegistry)
    {
       this.estimatorDT = stateEstimatorParameters.getEstimatorDT();
@@ -172,7 +176,6 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
                                                                                             centerOfPressureDataHolderFromController,
                                                                                             estimatorDT,
                                                                                             stateEstimatorParameters,
-                                                                                            yoGraphicsListRegistry,
                                                                                             registry);
 
       imuBasedLinearStateCalculator = new PelvisIMUBasedLinearStateCalculator(rootJoint,
@@ -182,7 +185,6 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
                                                                               estimatorDT,
                                                                               gravitationalAcceleration,
                                                                               stateEstimatorParameters,
-                                                                              yoGraphicsListRegistry,
                                                                               registry);
 
       imuAgainstKinematicsForVelocityBreakFrequency = new DoubleParameter("imuAgainstKinematicsForVelocityBreakFrequency",
@@ -200,6 +202,9 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
       forceZInPercentThresholdToNotTrustFoot = new DoubleParameter("forceZInPercentThresholdToNotTrustFoot",
                                                                    registry,
                                                                    stateEstimatorParameters.getForceInPercentOfWeightThresholdToNotTrustFoot());
+      angularVelocityToNotTrustFoot = new DoubleParameter("angularVelocityToNotTrustFoot",
+                                                          registry,
+                                                          stateEstimatorParameters.getAngularVelocityToNotTrustFoot());
       trustImuWhenNoFeetAreInContact = new BooleanParameter("trustImuWhenNoFeetAreInContact",
                                                             registry,
                                                             stateEstimatorParameters.getPelvisLinearStateUpdaterTrustImuWhenNoFeetAreInContact());
@@ -277,7 +282,9 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
          wereFeetTrustedLastTick.put(foot, wasFootTrusted);
 
          YoDouble footForceZInPercentOfTotalForce = new YoDouble(footPrefix + "FootForceZInPercentOfTotalForce", registry);
+         YoDouble footAngularVelocity = new YoDouble(footPrefix + "FootAngularVelocity", registry);
          footForcesZInPercentOfTotalForce.put(foot, footForceZInPercentOfTotalForce);
+         footAngularVelocities.put(foot, footAngularVelocity);
 
          footForces.put(foot, new FrameVector3D(worldFrame));
          footWrenches.put(foot, new Wrench());
@@ -359,6 +366,9 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
 
       numberOfEndEffectorsTrusted.set(setTrustedFeetUsingFootSwitches());
       numberOfEndEffectorsFilteredByLoad.set(0);
+      numberOfEndEffectorsFilteredByVelocity.set(0);
+
+      numberOfEndEffectorsTrusted.set(filterTrustedFeetBasedOnVelocity(numberOfEndEffectorsTrusted.getIntegerValue()));
 
       if (numberOfEndEffectorsTrusted.getIntegerValue() >= optimalNumberOfTrustedFeet.getValue())
       {
@@ -544,7 +554,7 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
       return 1;
    }
 
-   FramePoint3D tmpFramePoint = new FramePoint3D();
+   private final FramePoint3D tmpFramePoint = new FramePoint3D();
 
    private int findLowestFootInContact()
    {
@@ -586,6 +596,8 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
 
       int filteredNumberOfEndEffectorsTrusted = 0;
 
+      double highestLoad = Double.MIN_VALUE;
+      RigidBodyBasics highestLoadedFoot = null;
       for (int i = 0; i < feet.size(); i++)
       {
          RigidBodyBasics foot = feet.get(i);
@@ -611,13 +623,71 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
          else
             magnitudeForTrust = percentForceToTrustFootAgain;
 
-         if (footLoad.getValue() < magnitudeForTrust)
+         if (footLoad.getValue() > highestLoad)
+         {
+            highestLoad = footLoad.getValue();
+            highestLoadedFoot = foot;
+         }
+
+         double copDistance = footSwitches.get(foot).getCenterOfPressureDistance();
+         if (Double.isNaN(copDistance))
+            copDistance = 0.0;
+
+         if (footLoad.getValue() < magnitudeForTrust || copDistance > 0.01)
             areFeetTrusted.get(foot).set(false);
          else
             filteredNumberOfEndEffectorsTrusted++;
       }
 
+      if (filteredNumberOfEndEffectorsTrusted == 0 && highestLoadedFoot != null)
+      {
+         // This is a degenerate case. We want to leave one step.
+         areFeetTrusted.get(highestLoadedFoot).set(true);
+         filteredNumberOfEndEffectorsTrusted++;
+      }
+
       numberOfEndEffectorsFilteredByLoad.set(numberOfEndEffectorsTrusted - filteredNumberOfEndEffectorsTrusted);
+
+      return filteredNumberOfEndEffectorsTrusted;
+   }
+
+   private int filterTrustedFeetBasedOnVelocity(int numberOfEndEffectorsTrusted)
+   {
+      int filteredNumberOfEndEffectorsTrusted = 0;
+
+      double slowestVelocity = Double.POSITIVE_INFINITY;
+      RigidBodyBasics slowestFoot = null;
+
+      for (int i = 0; i < feet.size(); i++)
+      {
+         RigidBodyBasics foot = feet.get(i);
+         if (!areFeetTrusted.get(foot).getBooleanValue())
+            continue;
+
+         FrameVector3DReadOnly angularVelocity = foot.getBodyFixedFrame().getTwistOfFrame().getAngularPart();
+         double footAngularVelocity = EuclidCoreTools.norm(angularVelocity.getX(), angularVelocity.getY());
+         footAngularVelocities.get(foot).set(footAngularVelocity);
+
+         if (footAngularVelocity < slowestVelocity)
+         {
+            slowestVelocity = footAngularVelocity;
+            slowestFoot = foot;
+         }
+
+         if (footAngularVelocity > angularVelocityToNotTrustFoot.getValue())
+            areFeetTrusted.get(foot).set(false);
+         else
+            filteredNumberOfEndEffectorsTrusted++;
+      }
+
+      if (filteredNumberOfEndEffectorsTrusted == 0 && slowestFoot != null)
+      {
+         // This is a degenerate case. We want to leave one step.
+         areFeetTrusted.get(slowestFoot).set(true);
+         filteredNumberOfEndEffectorsTrusted++;
+      }
+
+      numberOfEndEffectorsFilteredByVelocity.set(numberOfEndEffectorsTrusted - filteredNumberOfEndEffectorsTrusted);
 
       return filteredNumberOfEndEffectorsTrusted;
    }

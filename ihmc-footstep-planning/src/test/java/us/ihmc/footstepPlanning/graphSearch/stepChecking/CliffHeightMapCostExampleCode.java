@@ -11,7 +11,7 @@ import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.perception.heightMap.HeightMapData;
+import us.ihmc.perception.gpuMapping.HeightMapData;
 
 public class CliffHeightMapCostExampleCode
 {
@@ -58,7 +58,6 @@ public class CliffHeightMapCostExampleCode
       ConvexPolygon2D candidateFootPolygon = new ConvexPolygon2D();
       DiscreteFootstepTools.getFootPolygon(footstep, footPolygon, candidateFootPolygon);
       EnvironmentHandler environmentHandler = new EnvironmentHandler();
-      environmentHandler.setHeightMapData(heightMapData);
 
       RigidBodyTransform snapTransform = heightMapSnapper.snapPolygonToHeightMap(candidateFootPolygon, environmentHandler);
       System.out.println("snap transform");

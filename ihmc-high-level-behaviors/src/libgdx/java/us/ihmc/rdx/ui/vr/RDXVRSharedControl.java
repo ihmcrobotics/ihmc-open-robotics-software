@@ -218,16 +218,6 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    @Override
    public void processFrameInformation(Pose3DReadOnly observedPose, String bodyPart)
    {
-//      if (sceneGraphSubscription.getMessageNotification().poll() && !proMPAssistant.startedProcessing())
-//      {
-//         DetectableSceneNodesMessage detectableSceneNodeMessage = sceneGraphSubscription.getMessageNotification().read();
-//         DetectableSceneNodeMessage selectedObject = null; // TODO: Search for desired object
-//         objectName = selectedObject.getNameAsString();
-//
-//         MessageTools.toEuclid(selectedObject.getTransformToWorld(), objectTransformToWorld);
-//         objectFrame.update();
-//      }
-
       if (proMPAssistant.startedProcessing())
       {
          enableStdDeviationVisualization(bodyPart);

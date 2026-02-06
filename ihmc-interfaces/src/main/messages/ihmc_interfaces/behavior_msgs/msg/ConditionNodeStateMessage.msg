@@ -16,8 +16,17 @@ bool request_reset_context
 
 # PROXIMITY TYPE
 
-# The current distance of the object from the reference frame
-float64 current_distance
+# The positional vector from frame B to frame A in world frame
+geometry_msgs/Vector3 b_to_a
 
-# Whether frame to evaluate the proximity is missing
-bool missing_frame
+# Whether frame A is present
+bool frame_a_is_present
+
+# Whether frame B is present
+bool frame_b_is_present
+
+# SHAPE CONTAINS TYPE
+
+uint32 number_of_points_contained
+
+bool frame_is_contained

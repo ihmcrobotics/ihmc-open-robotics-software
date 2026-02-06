@@ -1,10 +1,8 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.toeOff;
 
 import us.ihmc.yoVariables.listener.YoParameterChangedListener;
-import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 public class DynamicStateInspectorParameters
 {
@@ -28,6 +26,10 @@ public class DynamicStateInspectorParameters
    private final DoubleParameter maxRatioOfControlDecreaseFromToeingOff;
    private final DoubleParameter maxNormalizedErrorNeededForControl;
 
+   private final DoubleParameter maxDistanceToMoveECMP;
+   private final DoubleParameter loadThresholdToCheckCoP;
+   private final DoubleParameter maxDistanceToMoveCoP;
+
    public DynamicStateInspectorParameters(YoRegistry parentRegistry)
    {
       this("", parentRegistry);
@@ -43,15 +45,18 @@ public class DynamicStateInspectorParameters
       minFractionOfStrideFromTheToe = new DoubleParameter("minFractionOfStrideFromToe" + suffix, registry, 0.5);
 
       minDistanceAlongErrorFromOutsideEdge = new DoubleParameter("minDistAlongErrorFromOutEdge" + suffix, registry, -0.025);
-      minOrthogonalDistanceFromOutsideEdge = new DoubleParameter("minOrthoDistFromOutEdge" + suffix, registry, -0.015);
+      minOrthogonalDistanceFromOutsideEdge = new DoubleParameter("minOrthoDistFromOutEdge" + suffix, registry, -0.035);
       minDistanceAlongErrorFromInsideEdge = new DoubleParameter("minDistAlongErrorFromInEdge" + suffix, registry, -0.01);
-      minOrthogonalDistanceFromInsideEdge = new DoubleParameter("minOrthoDistFromInEdge" + suffix, registry, -0.0075);
+      minOrthogonalDistanceFromInsideEdge = new DoubleParameter("minOrthoDistFromInEdge" + suffix, registry, -0.025);
 
       minNormalizedDistanceFromOutsideEdge = new DoubleParameter("minNormDistFromOutEdge" + suffix, registry, 0.35);
       minNormalizedDistanceFromInsideEdge = new DoubleParameter("minNormDistFromInEdge" + suffix, registry, 0.3);
       maxRatioOfControlDecreaseFromToeingOff = new DoubleParameter("maxRatioOfControlDecreaseFromToeingOff" + suffix, registry, 2.0);
       maxNormalizedErrorNeededForControl = new DoubleParameter("maxNormErrorNeededForControl" + suffix, registry, 1.0);
 
+      maxDistanceToMoveECMP = new DoubleParameter("maxDistanceToMoveECMP" + suffix, registry, 0.02);
+      loadThresholdToCheckCoP = new DoubleParameter("loadThresholdToCheckCoP" + suffix, registry, 0.2);
+      maxDistanceToMoveCoP = new DoubleParameter("maxDistanceToMoveCoP" + suffix, registry, 0.05);
 
       parentRegistry.addChild(registry);
    }
@@ -111,6 +116,21 @@ public class DynamicStateInspectorParameters
       return maxRatioOfControlDecreaseFromToeingOff.getValue();
    }
 
+   public double getMaxDistanceToMoveECMP()
+   {
+      return maxDistanceToMoveECMP.getValue();
+   }
+
+   public double getMaxDistanceToMoveCoP()
+   {
+      return maxDistanceToMoveCoP.getValue();
+   }
+
+   public double getLoadThresholdToCheckCoP()
+   {
+      return loadThresholdToCheckCoP.getValue();
+   }
+
    public void attachParameterChangeListener(YoParameterChangedListener changedListener)
    {
       minLateralDistanceInside.addListener(changedListener);
@@ -124,5 +144,8 @@ public class DynamicStateInspectorParameters
       minNormalizedDistanceFromOutsideEdge.addListener(changedListener);
       maxRatioOfControlDecreaseFromToeingOff.addListener(changedListener);
       maxNormalizedErrorNeededForControl.addListener(changedListener);
+      maxDistanceToMoveECMP.addListener(changedListener);
+      maxDistanceToMoveCoP.addListener(changedListener);
+      loadThresholdToCheckCoP.addListener(changedListener);
    }
 }

@@ -3,17 +3,16 @@ package us.ihmc.avatar.drcRobot;
 import controller_msgs.msg.dds.HandJointAnglePacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.SpatialVectorMessage;
-import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.commonWalkingControlModules.contact.HandWrenchCalculator;
 import us.ihmc.euclid.exceptions.NotARotationMatrixException;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.handsros2.HandModel;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.partNames.HandJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -53,7 +52,7 @@ public abstract class CommunicationsSyncedRobotModel
       this.handModels = handModels;
       robotConfigurationData = new RobotConfigurationData();
       referenceFrames = new HumanoidReferenceFrames(fullRobotModel, sensorInformation);
-      allJoints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
+      allJoints = fullRobotModel.getOneDoFJoints();
 
       if (handModels != null)
          HandModelUtils.getHandJoints(handModels, fullRobotModel, handJoints);

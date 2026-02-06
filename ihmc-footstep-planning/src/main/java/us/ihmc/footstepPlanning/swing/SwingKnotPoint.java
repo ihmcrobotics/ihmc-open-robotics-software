@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.swing;
 
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FrameBox3D;
@@ -16,6 +17,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -23,7 +25,6 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.*;
-import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.yoVariables.euclid.YoVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
@@ -116,10 +117,11 @@ public class SwingKnotPoint implements SCS2YoGraphicHolder
                                               Vector3DBasics boxCenterInSoleFrameToPack)
    {
       // set default size
-      double footForwardOffset = walkingControllerParameters.getSteppingParameters().getFootForwardOffset();
-      double footBackwardOffset = walkingControllerParameters.getSteppingParameters().getFootBackwardOffset();
-      double boxSizeX = walkingControllerParameters.getSteppingParameters().getActualFootLength();
-      double boxSizeY = walkingControllerParameters.getSteppingParameters().getActualFootWidth();
+      SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
+      double footForwardOffset = steppingParameters.getFootForwardOffset();
+      double footBackwardOffset = steppingParameters.getFootBackwardOffset();
+      double boxSizeX = steppingParameters.getActualFootLength();
+      double boxSizeY = steppingParameters.getActualFootWidth();
       double boxSizeZ = collisionBoxHeight;
       collisionBoxToPack.getSize().set(boxSizeX, boxSizeY, boxSizeZ);
 
@@ -264,7 +266,7 @@ public class SwingKnotPoint implements SCS2YoGraphicHolder
       return percentage;
    }
 
-   public boolean doCollisionCheck(ExpandingPolytopeAlgorithm collisionDetector, PlanarRegionsList planarRegionsList, HeightMapData heightMapData)
+   public boolean doCollisionCheck(ExpandingPolytopeAlgorithm collisionDetector, PlanarRegionsList planarRegionsList, TerrainMapData terrainMapData)
    {
       this.collisionResult.setToZero();
       this.collisionResult.setSignedDistance(Double.POSITIVE_INFINITY);
@@ -285,9 +287,9 @@ public class SwingKnotPoint implements SCS2YoGraphicHolder
             }
          }
       }
-      if (heightMapData != null)
+      if (terrainMapData != null)
       {
-         EuclidShape3DCollisionResult collisionResult = HeightMapCollisionDetector.newEvaluateCollision(collisionBox, heightMapData);
+         EuclidShape3DCollisionResult collisionResult = HeightMapCollisionDetector.newEvaluateCollision(collisionBox, terrainMapData);
 
          if (collisionResult.getSignedDistance() < this.collisionResult.getSignedDistance())
          {

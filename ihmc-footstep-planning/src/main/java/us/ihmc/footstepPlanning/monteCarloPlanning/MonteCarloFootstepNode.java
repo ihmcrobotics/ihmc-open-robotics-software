@@ -59,8 +59,8 @@ public class MonteCarloFootstepNode extends MonteCarloTreeNode
 
       double previousHeight = request.getEnvironmentHandler()
                                      .getTerrainMapData()
-                                     .getHeightInWorld((float) previousPosition.getX(), (float) previousPosition.getY());
-      double currentHeight = request.getEnvironmentHandler().getTerrainMapData().getHeightInWorld((float) newPosition.getX(), (float) newPosition.getY());
+                                     .getHeight((float) previousPosition.getX(), (float) previousPosition.getY());
+      double currentHeight = request.getEnvironmentHandler().getTerrainMapData().getHeight((float) newPosition.getX(), (float) newPosition.getY());
 
       boolean valid = Math.abs(currentHeight - previousHeight) < parameters.getMaxTransferHeight();
       return valid;

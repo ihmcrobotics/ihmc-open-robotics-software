@@ -8,6 +8,7 @@ import us.ihmc.avatar.factory.DisposableRobotController;
 import us.ihmc.avatar.factory.HumanoidRobotControlTask;
 import us.ihmc.avatar.factory.SingleThreadedRobotController;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.IKStreamingRTPluginFactory;
+import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.IKStreamingRTPluginFactory.IKStreamingRTThread;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
@@ -20,8 +21,12 @@ import us.ihmc.realtime.MonotonicTime;
 import us.ihmc.realtime.PeriodicParameters;
 import us.ihmc.realtime.RealtimeThread;
 import us.ihmc.robotDataLogger.YoVariableServer;
+import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.tools.TimestampProvider;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -42,10 +47,13 @@ import java.util.List;
 public class AvatarMultiThreadingManager
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+   private final JVMStatisticsGenerator jvmStatisticsGenerator;
    private final YoRegistry rootRegistry;
    private final YoVariableServer yoVariableServer;
 
    private final YoBoolean isPaused = new YoBoolean("isPaused", registry);
+   private final YoBoolean listenToBlockingCondition = new YoBoolean("listenToBlockingCondition", registry);
+   private BooleanProvider blockingProvider;
 
    private final double masterThreadDt;
 
@@ -80,8 +88,12 @@ public class AvatarMultiThreadingManager
 
    private ControllerTask controllerTask;
    private StepGeneratorTask stepGeneratorTask;
+   private final AvatarStepGeneratorThread stepGeneratorThread;
 
    private final AvatarAffinityInterface affinity;
+
+   private final RealtimeROS2Node estimatorROS2Node;
+   private final RealtimeROS2Node controllerROS2Node;
 
    private final HumanoidRobotContextData masterContext;
 
@@ -97,6 +109,8 @@ public class AvatarMultiThreadingManager
 
    public AvatarMultiThreadingManager(String prefix,
                                       DRCRobotModel robotModel,
+                                      RealtimeROS2Node estimatorROS2Node,
+                                      RealtimeROS2Node controllerROS2Node,
                                       HumanoidRobotContextData masterContext,
                                       FullHumanoidRobotModel masterFullRobotModel,
                                       HardwareCommunicationInterface hardwareCommunicationInterface,
@@ -104,7 +118,7 @@ public class AvatarMultiThreadingManager
                                       AvatarEstimatorThread estimatorThread,
                                       AvatarControllerThread controllerThread,
                                       AvatarStepGeneratorThread stepGeneratorThread,
-                                      IKStreamingRTPluginFactory.IKStreamingRTThread ikStreamingThread,
+                                      IKStreamingRTThread ikStreamingThread,
                                       AvatarAffinityInterface affinity,
                                       double masterThreadDt,
                                       MonotonicTime period,
@@ -112,17 +126,22 @@ public class AvatarMultiThreadingManager
                                       boolean useRealtimeThreads,
                                       boolean useMultiThreading,
                                       YoVariableServer yoVariableServer,
+                                      JVMStatisticsGenerator jvmStatisticsGenerator,
                                       YoRegistry rootRegistry)
    {
+      this.estimatorROS2Node = estimatorROS2Node;
+      this.controllerROS2Node = controllerROS2Node;
       this.masterContext = masterContext;
       this.hardwareCommunicationInterface = hardwareCommunicationInterface;
       this.lowLevelOutputProcessor = lowLevelOutputProcessor;
       this.estimatorThread = estimatorThread;
+      this.stepGeneratorThread = stepGeneratorThread;
       this.affinity = affinity;
       this.masterThreadDt = masterThreadDt;
       this.monotonicTimeProvider = monotonicTimeProvider;
       this.useRealtimeThreads = useRealtimeThreads;
       this.useMultiThreading = useMultiThreading;
+      this.jvmStatisticsGenerator = jvmStatisticsGenerator;
       this.rootRegistry = rootRegistry;
       this.yoVariableServer = yoVariableServer;
 
@@ -191,6 +210,8 @@ public class AvatarMultiThreadingManager
       if (yoVariableServer != null)
          controllerTask.addCallbackPostTask(() -> yoVariableServer.update(controllerThread.getHumanoidRobotContextData().getTimestamp(),
                                                                           controllerThread.getYoVariableRegistry()));
+
+      controllerTask.addCallbackPostTask(lowLevelOutputProcessor::startDesiredsInterpolation);
 
       controllerTask.addCallbackPostTask(()->
                                          {
@@ -302,8 +323,22 @@ public class AvatarMultiThreadingManager
       return ikStreamingTask;
    }
 
+   public void setListenToBlockingCondition(boolean listenToBlockingCondition)
+   {
+      this.listenToBlockingCondition.set(listenToBlockingCondition);
+   }
+
+   public void setBlockingProvider(BooleanProvider blockingProvider)
+   {
+      this.blockingProvider = blockingProvider;
+   }
+
    public void start()
    {
+      estimatorROS2Node.spin();
+      controllerROS2Node.spin();
+      hardwareCommunicationInterface.start();
+      jvmStatisticsGenerator.start();
       if (useRealtimeThreads)
       {
          running = true;
@@ -326,11 +361,20 @@ public class AvatarMultiThreadingManager
 
    public void stop()
    {
+      estimatorROS2Node.stopSpinning();
+      controllerROS2Node.stopSpinning();
       hardwareCommunicationInterface.stop();
+      jvmStatisticsGenerator.stop();
    }
 
    public void destroy()
    {
+      estimatorROS2Node.destroy();
+      System.out.println("Estimator node has been destroyed");
+
+      controllerROS2Node.destroy();
+      System.out.println("Controller node has been destroyed");
+
       hardwareCommunicationInterface.destroy();
 
       ThreadTools.sleep(500L);
@@ -355,6 +399,9 @@ public class AvatarMultiThreadingManager
 
          ((RepeatingTaskThread) masterThread).stopRepeating();
       }
+
+      if (stepGeneratorThread != null)
+         stepGeneratorThread.destroy();
 
       ThreadTools.sleep(1000L);
 
@@ -385,6 +432,13 @@ public class AvatarMultiThreadingManager
    {
       if (isPaused.getBooleanValue())
          return;
+
+      if (blockingProvider != null && listenToBlockingCondition.getBooleanValue() && blockingProvider.getValue())
+      {
+         // publish the older control state.
+         hardwareCommunicationInterface.write(lowLevelOutputProcessor.getProcessedDesiredOutput(), lowLevelOutputProcessor.getMasterGain().getValue());
+         return;
+      }
 
       // Calculate update rate of master thread
       masterThreadFrequencyCalculator.ping();
@@ -426,6 +480,26 @@ public class AvatarMultiThreadingManager
       updateYoVariableServer();
    }
 
+   public YoRegistry getEstimatorRegistry()
+   {
+      return estimatorThread.getYoRegistry();
+   }
+
+   public YoGraphicGroupDefinition getEstimatorYoGraphics()
+   {
+      return estimatorThread.getSCS2YoGraphics();
+   }
+
+   public RealtimeROS2Node getEstimatorROS2Node()
+   {
+      return estimatorROS2Node;
+   }
+
+   public RealtimeROS2Node getControllerROS2Node()
+   {
+      return controllerROS2Node;
+   }
+
    public void addPreEstimatorThreadRunnable(Runnable runnable)
    {
       preEstimatorThreadRunnables.add(runnable);
@@ -462,5 +536,15 @@ public class AvatarMultiThreadingManager
          return;
 
       yoVariableServer.update(monotonicTimeProvider.getTimestamp(), rootRegistry);
+   }
+
+   public HardwareCommunicationInterface getHardwareCommunicationInterface()
+   {
+      return hardwareCommunicationInterface;
+   }
+
+   public AvatarLowLevelOutputProcessor getLowLevelOutputProcessor()
+   {
+      return lowLevelOutputProcessor;
    }
 }

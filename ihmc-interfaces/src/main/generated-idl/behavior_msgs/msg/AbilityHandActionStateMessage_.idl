@@ -1,0 +1,37 @@
+#ifndef __behavior_msgs__msg__AbilityHandActionStateMessage__idl__
+#define __behavior_msgs__msg__AbilityHandActionStateMessage__idl__
+
+#include "behavior_msgs/msg/./AbilityHandActionDefinitionMessage_.idl"
+#include "behavior_msgs/msg/./ActionNodeStateMessage_.idl"
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="behavior_msgs::msg::dds_::AbilityHandActionStateMessage_")
+      struct AbilityHandActionStateMessage
+      {
+        /**
+         * Parent state fields
+         */
+        behavior_msgs::msg::dds::ActionNodeStateMessage state;
+        /**
+         * Definition
+         */
+        behavior_msgs::msg::dds::AbilityHandActionDefinitionMessage definition;
+        /**
+         * Current finger positions
+         */
+        float current_finger_positions[6];
+        /**
+         * Desired finger positions
+         */
+        float desired_finger_positions[6];
+      };
+    };
+  };
+};
+
+#endif

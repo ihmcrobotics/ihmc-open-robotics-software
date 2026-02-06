@@ -13,8 +13,8 @@ public class PerceptionComms
    public static final StoredPropertySetROS2TopicPair PERSPECTIVE_RAPID_REGION_PARAMETERS
          = new StoredPropertySetROS2TopicPair(MODULE_NAME,"perspective_rapid_region_parameters");
 
-   public static final StoredPropertySetROS2TopicPair PERSPECTIVE_CONVEX_HULL_FACTORY_PARAMETERS
-         = new StoredPropertySetROS2TopicPair(MODULE_NAME,"perspective_convex_hull_factory_parameters");
+   public static final StoredPropertySetROS2TopicPair PERSPECTIVE_CONCAVE_HULL_FACTORY_PARAMETERS
+         = new StoredPropertySetROS2TopicPair(MODULE_NAME,"perspective_concave_hull_factory_parameters");
 
    public static final StoredPropertySetROS2TopicPair PERSPECTIVE_POLYGONIZER_PARAMETERS
          = new StoredPropertySetROS2TopicPair(MODULE_NAME,"perspective_polygonizer_parameters");
@@ -37,4 +37,7 @@ public class PerceptionComms
 
    public static final StoredPropertySetROS2TopicPair HEIGHT_MAP_PARAMETERS
          = new StoredPropertySetROS2TopicPair(MODULE_NAME,"height_map_parameters");
+
+   public static final StoredPropertySetROS2TopicPair TERRAIN_MAP_PARAMETERS
+         = new StoredPropertySetROS2TopicPair(MODULE_NAME,"terrain_map_parameters");
 }

@@ -796,6 +796,11 @@ public abstract class WalkingControllerParameters
     */
    public abstract SteppingParameters getSteppingParameters();
 
+   public SteppingParameters getSteppingParametersForStepGeneration()
+   {
+      return getSteppingParameters();
+   }
+
    /**
     * If this return {@code false} the leg singularity avoidance module will not be created.
     */

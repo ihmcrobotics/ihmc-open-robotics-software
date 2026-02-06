@@ -14,6 +14,8 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Size;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
@@ -21,25 +23,26 @@ import us.ihmc.perception.cuda.CUDADepthImageSegmenter;
 import us.ihmc.perception.cuda.CUDAPointCloudExtractor;
 import us.ihmc.perception.detections.yolo.YOLOv8Detection;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionList;
+import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
 import us.ihmc.perception.detections.yolo.YOLOv8Model;
 import us.ihmc.perception.detections.yolo.YOLOv8Tools;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer;
+import us.ihmc.rdx.ui.graphics.RDXImageVisualizer;
 import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudVisualizer;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.sensors.zed.ZEDImageSensor;
 import us.ihmc.sensors.zed.ZEDModelData;
-import us.ihmc.sensors.zed.ZEDSVOPlaybackSensor;
-import us.ihmc.tools.IHMCCommonPaths;
+import us.ihmc.sensors.zed.ROS2ZEDSVOPlaybackSensor;
 import us.ihmc.zed.global.zed;
 
 import java.io.File;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -50,18 +53,18 @@ import java.util.concurrent.TimeUnit;
 
 public class RDXYOLOv8PipelineDemo
 {
-   private static final String SVO_FILE = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20240715_103234_ZEDRecording_NewONRCourseWalk.svo2").toAbsolutePath().toString();
+   private static final String SVO_FILE = System.getProperty("user.home") + "/Downloads/20251217_151953_H1NewModelTest.svo2";
 
    private static final String SAVE_DIRECTORY = System.getProperty("user.home") + File.separator + "Documents" + File.separator;
 
    private final ROS2Node ros2Node = new ROS2NodeBuilder().build(RDXYOLOv8PipelineDemo.class.getSimpleName());
    private final ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
-   private final ZEDSVOPlaybackSensor zedPlaybackSensor = new ZEDSVOPlaybackSensor(ros2Helper, 0, ZEDModelData.ZED_2, zed.SL_DEPTH_MODE_PERFORMANCE, SVO_FILE);
+   private final ROS2ZEDSVOPlaybackSensor zedPlaybackSensor = new ROS2ZEDSVOPlaybackSensor(ros2Helper, 0, ZEDModelData.ZED_2, zed.SL_DEPTH_MODE_PERFORMANCE, SVO_FILE);
    private RawImage colorImage;
-   private final RDXOpenCVVideoVisualizer colorImageVisualizer = new RDXOpenCVVideoVisualizer("ZED Color", "ZED Color", false);
+   private final RDXImageVisualizer colorImageVisualizer = new RDXImageVisualizer("ZED Color", "ZED Color", false);
    private RawImage depthImage;
-   private final RDXOpenCVVideoVisualizer depthImageVisualizer = new RDXOpenCVVideoVisualizer("ZED Depth", "ZED Depth", false);
+   private final RDXImageVisualizer depthImageVisualizer = new RDXImageVisualizer("ZED Depth", "ZED Depth", false);
    private final RDXRawImagePointCloudVisualizer zedPointCloudVisualizer = new RDXRawImagePointCloudVisualizer("ZED Point Cloud", true);
    private final ImBoolean renderZEDPointCloud = new ImBoolean(true);
 
@@ -70,11 +73,11 @@ public class RDXYOLOv8PipelineDemo
    private final ImInt selectedDetector = new ImInt(0);
 
    private RawImage detectionMask;
-   private final RDXOpenCVVideoVisualizer detectionMaskVisualizer = new RDXOpenCVVideoVisualizer("Detection Mask", "Detection Mask", false);
+   private final RDXImageVisualizer detectionMaskVisualizer = new RDXImageVisualizer("Detection Mask", "Detection Mask", false);
    private RawImage erodedMask;
-   private final RDXOpenCVVideoVisualizer erodedMaskVisualizer = new RDXOpenCVVideoVisualizer("Eroded Mask", "Eroded Mask", false);
+   private final RDXImageVisualizer erodedMaskVisualizer = new RDXImageVisualizer("Eroded Mask", "Eroded Mask", false);
    private RawImage annotatedImage;
-   private final RDXOpenCVVideoVisualizer annotatedImageVisualizer = new RDXOpenCVVideoVisualizer("Annotated Image", "Annotated Image", false);
+   private final RDXImageVisualizer annotatedImageVisualizer = new RDXImageVisualizer("Annotated Image", "Annotated Image", false);
 
    private final ImFloat confidenceThreshold = new ImFloat(0.8f);
    private final ImFloat nmsThreshold = new ImFloat(0.1f);
@@ -83,7 +86,7 @@ public class RDXYOLOv8PipelineDemo
 
    private final CUDADepthImageSegmenter depthImageSegmenter;
    private RawImage segmentedDepth;
-   private final RDXOpenCVVideoVisualizer segmentedDepthVisualizer = new RDXOpenCVVideoVisualizer("Segmented Depth", "Segmented Depth", false);
+   private final RDXImageVisualizer segmentedDepthVisualizer = new RDXImageVisualizer("Segmented Depth", "Segmented Depth", false);
    private final RDXRawImagePointCloudVisualizer segmentedPointCloudVisualizer = new RDXRawImagePointCloudVisualizer("Segmented Point Cloud", true);
    private final ImBoolean renderSegmentedPointCloud = new ImBoolean(false);
 
@@ -295,10 +298,6 @@ public class RDXYOLOv8PipelineDemo
       YOLOv8Detection detection = results.get(0);
       detectionMask = detection.mask();
 
-      // Get an annotated image
-      annotatedImage = bgrImage.replaceImage(new Mat(bgrImage.getCpuImageMat().size(), bgrImage.getOpenCVType()));
-      YOLOv8Tools.annotateImage(bgrImage.getCpuImageMat(), annotatedImage.getCpuImageMat(), List.of(detection));
-
       // Get the eroded mask
       Mat erodedMat = new Mat();
       opencv_imgproc.erode(detectionMask.getCpuImageMat(),
@@ -310,6 +309,19 @@ public class RDXYOLOv8PipelineDemo
 
       // Segment depth using eroded mask
       segmentedDepth = depthImageSegmenter.removeBackground(depthImage, erodedMask);
+
+      // Get an annotated image
+      YOLOv8InstantDetection instantDetection = new YOLOv8InstantDetection(detection.objectClass(),
+                                                                           detection.confidence(),
+                                                                           new Pose3D(centroid, new RotationMatrix()),
+                                                                           Instant.now(),
+                                                                           bgrImage,
+                                                                           erodedMask,
+                                                                           depthImage,
+                                                                           detection.boundingBox(),
+                                                                           null);
+      annotatedImage = bgrImage.replaceImage(new Mat(bgrImage.getCpuImageMat().size(), bgrImage.getOpenCVType()));
+      YOLOv8Tools.annotateImage(bgrImage.getCpuImageMat(), annotatedImage.getCpuImageMat(), List.of(instantDetection));
 
       // Find the centroid of the segmented depth
       centroid.set(findCentroid(segmentedDepth));
@@ -335,19 +347,12 @@ public class RDXYOLOv8PipelineDemo
    private void updateRenderables()
    {
       // Render color
-      colorImageVisualizer.updateImageDimensions(colorImage.getWidth(), colorImage.getHeight());
-      colorImage.getPixelFormat().convertToRGBA(colorImage.getCpuImageMat(), colorImageVisualizer.getRGBA8Mat());
+      colorImageVisualizer.setImage(colorImage);
       colorImageVisualizer.update();
 
       // Render depth
-      depthImageVisualizer.updateImageDimensions(depthImage.getWidth(), depthImage.getHeight());
-      Mat grayDepth = new Mat();
-//      depthImage.getCpuImageMat().convertTo(grayDepth, opencv_core.CV_8UC1, 1.0 / 256.0, 0.0);
-//      opencv_core.subtract(new Scalar(255.0), grayDepth).asMat().copyTo(grayDepth);
-      opencv_core.normalize(depthImage.getCpuImageMat(), grayDepth, 0.0, 255.0, opencv_core.NORM_MINMAX, opencv_core.CV_8UC1, null);
-      opencv_imgproc.cvtColor(grayDepth, depthImageVisualizer.getRGBA8Mat(), opencv_imgproc.COLOR_GRAY2BGRA);
+      depthImageVisualizer.setImage(depthImage);
       depthImageVisualizer.update();
-      grayDepth.close();
 
       // Render ZED point cloud
       zedPointCloudVisualizer.setColorImage(colorImage);
@@ -357,11 +362,10 @@ public class RDXYOLOv8PipelineDemo
       // Render detection mask
       if (detectionMask != null)
       {
-         detectionMaskVisualizer.updateImageDimensions(detectionMask.getWidth(), detectionMask.getHeight());
          Mat grayMask = new Mat();
          detectionMask.getCpuImageMat().convertTo(grayMask, opencv_core.CV_8UC1);
          opencv_imgproc.threshold(grayMask, grayMask, 0.5, 255.0, opencv_imgproc.THRESH_BINARY);
-         opencv_imgproc.cvtColor(grayMask, detectionMaskVisualizer.getRGBA8Mat(), opencv_imgproc.COLOR_GRAY2RGBA);
+         detectionMaskVisualizer.setImage(grayMask, PixelFormat.GRAY8);
          detectionMaskVisualizer.update();
          grayMask.close();
       }
@@ -369,11 +373,10 @@ public class RDXYOLOv8PipelineDemo
       // Render eroded mask
       if (erodedMask != null)
       {
-         erodedMaskVisualizer.updateImageDimensions(erodedMask.getWidth(), erodedMask.getHeight());
          Mat grayErodedMask = new Mat();
          erodedMask.getCpuImageMat().convertTo(grayErodedMask, opencv_core.CV_8UC1);
          opencv_imgproc.threshold(grayErodedMask, grayErodedMask, 0.5, 255.0, opencv_imgproc.THRESH_BINARY);
-         opencv_imgproc.cvtColor(grayErodedMask, erodedMaskVisualizer.getRGBA8Mat(), opencv_imgproc.COLOR_GRAY2RGBA);
+         erodedMaskVisualizer.setImage(grayErodedMask, PixelFormat.GRAY8);
          erodedMaskVisualizer.update();
          grayErodedMask.close();
       }
@@ -381,14 +384,8 @@ public class RDXYOLOv8PipelineDemo
       // Render segmented depth
       if (segmentedDepth != null)
       {
-         segmentedDepthVisualizer.updateImageDimensions(segmentedDepth.getWidth(), segmentedDepth.getHeight());
-         Mat segmentedGrayDepth = new Mat();
-         //      segmentedDepth.getCpuImageMat().convertTo(segmentedGrayDepth, opencv_core.CV_8UC1, 1.0 / 256.0, 0.0);
-         //      opencv_core.subtract(new Scalar(255.0), segmentedGrayDepth).asMat().copyTo(segmentedGrayDepth);
-         opencv_core.normalize(segmentedDepth.getCpuImageMat(), segmentedGrayDepth, 0.0, 255.0, opencv_core.NORM_MINMAX, opencv_core.CV_8UC1, null);
-         opencv_imgproc.cvtColor(segmentedGrayDepth, segmentedDepthVisualizer.getRGBA8Mat(), opencv_imgproc.COLOR_GRAY2BGRA);
+         segmentedDepthVisualizer.setImage(segmentedDepth);
          segmentedDepthVisualizer.update();
-         segmentedGrayDepth.close();
       }
 
       // Render segmented point cloud
@@ -405,8 +402,7 @@ public class RDXYOLOv8PipelineDemo
       // Render annotated image
       if (annotatedImage != null)
       {
-         annotatedImageVisualizer.updateImageDimensions(annotatedImage.getWidth(), annotatedImage.getHeight());
-         annotatedImage.getPixelFormat().convertToRGBA(annotatedImage.getCpuImageMat(), annotatedImageVisualizer.getRGBA8Mat());
+         annotatedImageVisualizer.setImage(annotatedImage);
          annotatedImageVisualizer.update();
       }
    }

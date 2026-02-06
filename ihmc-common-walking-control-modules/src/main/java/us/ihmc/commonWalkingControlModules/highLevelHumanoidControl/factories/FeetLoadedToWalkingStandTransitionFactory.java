@@ -5,6 +5,7 @@ import java.util.EnumMap;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.stateTransitions.FeetLoadedToWalkingStandTransition;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
@@ -24,12 +25,15 @@ public class FeetLoadedToWalkingStandTransitionFactory implements ControllerStat
    private final YoEnum<HighLevelControllerName> requestedState;
    private final SideDependentList<String> feetForceSensors;
 
+   private final boolean waitForRequestToTransition;
+
    public FeetLoadedToWalkingStandTransitionFactory(HighLevelControllerName stateToAttachEnum, HighLevelControllerName nextStateEnum,
-                                                    YoEnum<HighLevelControllerName> requestedState, SideDependentList<String> feetForceSensors)
+                                                    YoEnum<HighLevelControllerName> requestedState, boolean waitForRequestToTransition, SideDependentList<String> feetForceSensors)
    {
       this.stateToAttachEnum = stateToAttachEnum;
       this.nextStateEnum = nextStateEnum;
       this.requestedState = requestedState;
+      this.waitForRequestToTransition = waitForRequestToTransition;
       this.feetForceSensors = feetForceSensors;
    }
 
@@ -41,15 +45,21 @@ public class FeetLoadedToWalkingStandTransitionFactory implements ControllerStat
       if (stateTransition != null)
          return stateTransition;
 
-      double totalMass = controllerFactoryHelper.getHighLevelHumanoidControllerToolbox().getFullRobotModel().getTotalMass();
-      double gravityZ = controllerFactoryHelper.getHighLevelHumanoidControllerToolbox().getGravityZ();
-      double controlDT = controllerFactoryHelper.getHighLevelHumanoidControllerToolbox().getControlDT();
-      ForceSensorDataHolderReadOnly forceSensorDataHolder = controllerFactoryHelper.getForceSensorDataHolder();
+      HighLevelHumanoidControllerToolbox controllerToolbox = controllerFactoryHelper.getHighLevelHumanoidControllerToolbox();
+      double totalMass = controllerToolbox.getFullRobotModel().getTotalMass();
+      double gravityZ = controllerToolbox.getGravityZ();
+      double controlDT = controllerToolbox.getControlDT();
       HighLevelControllerParameters highLevelControllerParameters = controllerFactoryHelper.getHighLevelControllerParameters();
 
-      StateTransitionCondition stateTransitionCondition = new FeetLoadedToWalkingStandTransition(nextStateEnum, requestedState, forceSensorDataHolder,
-                                                                                                 feetForceSensors, controlDT, totalMass, gravityZ,
-                                                                                                 highLevelControllerParameters, parentRegistry);
+      StateTransitionCondition stateTransitionCondition = new FeetLoadedToWalkingStandTransition(nextStateEnum,
+                                                                                                 requestedState,
+                                                                                                 waitForRequestToTransition,
+                                                                                                 controllerToolbox.getFootSwitches(),
+                                                                                                 controlDT,
+                                                                                                 totalMass,
+                                                                                                 gravityZ,
+                                                                                                 highLevelControllerParameters,
+                                                                                                 parentRegistry);
       stateTransition = new StateTransition<>(nextStateEnum, stateTransitionCondition);
 
       return stateTransition;

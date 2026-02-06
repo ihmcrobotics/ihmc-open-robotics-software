@@ -178,6 +178,20 @@ public class IntegratorBiasCompensatorYoFrameVector3D extends YoFrameVector3D im
       intermediateBias.changeFrame(getReferenceFrame());
 
       Vector3DBasics x_filt = this;
+      // Decreasing the kp term trusts the sensor that provides the raw rate more, trusting the integration.
+      // This algorithm words as follows:
+      // First, filter the raw rate measurement with the previous bias estimate and previous rate estimate:
+      // xd_filt_new = rawRate + bias_estimate_old
+      // xd_filt_new = 0.5 * (xd_filt_new + xd_filt_old) = 0.5 * (rawRate + bias_estimate_old + xd_filt_old)
+      // Second, predict the position based on the filtered rate:
+      // x_pred = x_filt_old + dt * xd_filt_new
+      // Third, correct the position estimate based on the raw position measurement (if available):
+      // x_filt = kp * (rawPosition - x_pred) + x_pred = kp * rawPosition + (1 - kp) * x_pred, which is the same as an alpha filter with alpha of kp.
+      // Fourth, update the bias estimate based on the position error:
+      // bias_estimate_new = ki * (rawPosition - x_pred) + bias_estimate_old
+      // Fifth, update the rate estimate based on the raw rate measurement and new bias estimate:
+      // xd_filt_old = rawRate + bias_estimate_new
+
       xd_filt.add(rawRate, intermediateBias); // = xd_filt_new
       xd_filt.interpolate(estimatedRate, 0.5); // = 0.5 * (xd_filt_new + xd_filt_old)
       x_pred.scaleAdd(dt, xd_filt, x_filt);

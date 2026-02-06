@@ -11,7 +11,7 @@ float64 swing_duration
 float64 transfer_duration
 
 # OVERRIDE (0) or QUEUE (1)
-int32 execution_mode
+byte execution_mode
 
 # Is using the footstep planner or manually placing
 bool is_manually_placed
@@ -51,6 +51,9 @@ bool planner_perform_a_star_search
 
 # Whether to walk, turning first, matching the goal orientation
 bool planner_walk_with_goal_orientation
+
+# Whether to use the body path planner or not
+bool planner_plan_with_body_path
 
 # The footstep planner parameters
 ihmc_common_msgs/PrimitiveDataVectorMessage planner_parameters

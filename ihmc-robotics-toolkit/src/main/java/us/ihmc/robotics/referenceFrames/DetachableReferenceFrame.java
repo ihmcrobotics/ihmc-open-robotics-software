@@ -5,6 +5,8 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 
+import java.util.function.Function;
+
 /**
  * This class provides support for having a reference frame that
  * doesn't always have it's designated parent available in the world
@@ -15,21 +17,21 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
  */
 public class DetachableReferenceFrame
 {
-   private transient final ReferenceFrameLibrary referenceFrameLibrary;
+   private transient final Function<String, ReferenceFrame> frameFunction;
 
    private final RigidBodyTransformReadOnly transformToParent;
    /** Never null, but does change. */
    private ReferenceFrame referenceFrame;
 
-   public DetachableReferenceFrame(ReferenceFrameLibrary referenceFrameLibrary, RigidBodyTransformReadOnly transformToParent)
+   public DetachableReferenceFrame(Function<String, ReferenceFrame> frameFunction, RigidBodyTransformReadOnly transformToParent)
    {
       this.transformToParent = transformToParent;
-      this.referenceFrameLibrary = referenceFrameLibrary;
+      this.frameFunction = frameFunction;
    }
 
    public void update(String parentFrameName)
    {
-      ReferenceFrame parentFrameInWorld = referenceFrameLibrary.findFrameByName(parentFrameName);
+      ReferenceFrame parentFrameInWorld = frameFunction.apply(parentFrameName);
 
       boolean shouldBeChildOfWorld = parentFrameInWorld != null;
 
@@ -75,7 +77,7 @@ public class DetachableReferenceFrame
    {
       if (referenceFrame != null)
       {
-         ReferenceFrame parentFrame = referenceFrameLibrary.findFrameByName(parentFrameName);
+         ReferenceFrame parentFrame = frameFunction.apply(parentFrameName);
          RigidBodyTransform newTransformToParent = new RigidBodyTransform();
 
          if (parentFrame != null && referenceFrame.getRootFrame() == parentFrame.getRootFrame()) // Attached to world frame tree

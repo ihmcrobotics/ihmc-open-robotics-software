@@ -1,14 +1,15 @@
 package us.ihmc.behaviors.behaviorTree.ros2;
 
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.behaviorTree.BehaviorTree;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeExecutor;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
-import us.ihmc.perception.detections.DetectionManager;
-import us.ihmc.perception.sceneGraph.SceneGraph;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
+import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseCommunicatorMap;
+import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
+import us.ihmc.sensors.ImageSensor;
 
 /**
  * Top level class for the robot's behavior tree.
@@ -18,16 +19,16 @@ public class ROS2BehaviorTreeExecutor extends BehaviorTreeExecutor
    private final ROS2BehaviorTree<BehaviorTreeNodeExecutor<?, ?>> ros2BehaviorTree;
 
    public ROS2BehaviorTreeExecutor(ROS2ControllerHelper ros2ControllerHelper,
-                                   DRCRobotModel robotModel,
                                    ROS2SyncedRobotModel syncedRobot,
-                                   ROS2PeerClockOffsetEstimator peerClockEstimator,
-                                   ReferenceFrameLibrary referenceFrameLibrary,
-                                   SceneGraph sceneGraph,
-                                   DetectionManager detectionManager)
+                                   ImageSensor imageSensor,
+                                   YOLOv8DetectionExecutor yolo,
+                                   IsaacROSFoundationPoseCommunicatorMap foundationPose,
+                                   TerrainMapData terrainMapData,
+                                   ROS2PeerClockOffsetEstimator peerClockEstimator)
    {
-      super(robotModel, syncedRobot, peerClockEstimator, referenceFrameLibrary, sceneGraph, detectionManager, ros2ControllerHelper);
+      super(syncedRobot, peerClockEstimator, ros2ControllerHelper, imageSensor, yolo, foundationPose, terrainMapData);
 
-      ros2BehaviorTree = new ROS2BehaviorTree<>(this, ros2ControllerHelper);
+      ros2BehaviorTree = new ROS2BehaviorTree<>((BehaviorTree) this, ros2ControllerHelper); // FIXME
    }
 
    /** Expected to be called at the {@link ROS2BehaviorTree#SYNC_FREQUENCY} */

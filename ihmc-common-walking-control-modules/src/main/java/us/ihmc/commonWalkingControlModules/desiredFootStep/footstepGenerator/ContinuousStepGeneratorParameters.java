@@ -9,10 +9,13 @@ public class ContinuousStepGeneratorParameters implements ContinuousStepGenerato
    private int ticksToUpdateTheEnvironment = DEFAULT_TICKS_TO_UPDATE_ENVIRONMENT;
    private double swingHeight;
    private double swingDuration, transferDuration;
-   private double maxStepLength;
+   private double maxStepLengthForwards;
+   private double maxStepLengthBackwards;
    private double defaultStepWidth, minStepWidth, maxStepWidth;
    private double turnMaxAngleInward, turnMaxAngleOutward;
    private boolean stepsAreAdjustable = DEFAULT_STEPS_ARE_ADJUSTABLE;
+   private boolean requestSnapToHeightMap = DEFAULT_REQUEST_SNAP_TO_HEIGHTMAP;
+   private boolean accountForGroundDrift = DEFAULT_ACCOUNT_FOR_GROUND_DRIFT;
    private boolean shiftUpcomingStepsWithTouchdown = DEFAULT_SHIFT_UPCOMING_STEPS_WITH_TOUCHDOWN;
 
    public ContinuousStepGeneratorParameters()
@@ -78,9 +81,15 @@ public class ContinuousStepGeneratorParameters implements ContinuousStepGenerato
    }
 
    @Override
-   public void setMaxStepLength(double maxStepLength)
+   public void setMaxStepLengthForwards(double maxStepLengthForwards)
    {
-      this.maxStepLength = maxStepLength;
+      this.maxStepLengthForwards = maxStepLengthForwards;
+   }
+
+   @Override
+   public void setMaxStepLengthBackwards(double maxStepLengthBackwards)
+   {
+      this.maxStepLengthBackwards = maxStepLengthBackwards;
    }
 
    @Override
@@ -111,6 +120,18 @@ public class ContinuousStepGeneratorParameters implements ContinuousStepGenerato
    public void setTurnMaxAngleOutward(double turnMaxAngleOutward)
    {
       this.turnMaxAngleOutward = turnMaxAngleOutward;
+   }
+
+   @Override
+   public void setRequestSnapToHeightmap(boolean requestSnapToHeightMap)
+   {
+      this.requestSnapToHeightMap = requestSnapToHeightMap;
+   }
+
+   @Override
+   public void setAccountForGroundDrift(boolean accountForGroundDrift)
+   {
+      this.accountForGroundDrift = accountForGroundDrift;
    }
 
    @Override
@@ -150,9 +171,15 @@ public class ContinuousStepGeneratorParameters implements ContinuousStepGenerato
    }
 
    @Override
-   public double getMaxStepLength()
+   public double getMaxStepLengthForwards()
    {
-      return maxStepLength;
+      return maxStepLengthForwards;
+   }
+
+   @Override
+   public double getMaxStepLengthBackwards()
+   {
+      return maxStepLengthBackwards;
    }
 
    @Override
@@ -192,6 +219,18 @@ public class ContinuousStepGeneratorParameters implements ContinuousStepGenerato
    }
 
    @Override
+   public boolean getRequestSnapToHeightmap()
+   {
+      return requestSnapToHeightMap;
+   }
+
+   @Override
+   public boolean getAccountForGroundDrift()
+   {
+      return accountForGroundDrift;
+   }
+
+   @Override
    public boolean getShiftUpcomingStepsWithTouchdown()
    {
       return shiftUpcomingStepsWithTouchdown;
@@ -200,10 +239,10 @@ public class ContinuousStepGeneratorParameters implements ContinuousStepGenerato
    @Override
    public String toString()
    {
-      return "number of footsteps to plan: " + numberOfFootstepsToPlan + ", number of fixed footsteps: " + numberOfFixedFootsteps +
-             "ticks to update the environment: " + ticksToUpdateTheEnvironment + ", swing height: "
-            + swingHeight + ", swing duration: " + swingDuration + ", transfer duration: " + transferDuration + ", max step length: " + maxStepLength
-            + ", default step width: " + defaultStepWidth + ", min step width: " + minStepWidth + ", max step width: " + maxStepWidth
-            + ", turn max angle inward: " + turnMaxAngleInward + ", turn max angle outward: " + turnMaxAngleOutward;
+      return "number of footsteps to plan: " + numberOfFootstepsToPlan + ", number of fixed footsteps: " + numberOfFixedFootsteps
+             + "ticks to update the environment: " + ticksToUpdateTheEnvironment + ", swing height: " + swingHeight + ", swing duration: " + swingDuration
+             + ", transfer duration: " + transferDuration + ", max step length (forwards): " + maxStepLengthForwards + ", max step length (backwards): "
+             + maxStepLengthBackwards + ", default step width: " + defaultStepWidth + ", min step width: " + minStepWidth + ", max step width: " + maxStepWidth
+             + ", turn max angle inward: " + turnMaxAngleInward + ", turn max angle outward: " + turnMaxAngleOutward;
    }
 }

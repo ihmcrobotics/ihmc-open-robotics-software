@@ -1,7 +1,7 @@
 package us.ihmc.rdx.ui;
 
 import com.badlogic.gdx.graphics.Texture;
-import imgui.internal.ImGui;
+import imgui.ImGui;
 import us.ihmc.rdx.imgui.RDXPanel;
 
 public class RDXImagePanel extends RDXPanel
@@ -39,16 +39,10 @@ public class RDXImagePanel extends RDXPanel
       mouseYDownFromTop = ImGui.getMousePosY() - rawWindowPosY;
 
       if (userImGuiImageInteraction != null)
-      {
          userImGuiImageInteraction.run();
-      }
 
       if (texture != null && isActive)
       {
-         //      float posX = ImGui.getWindowPosX() + ImGui.getWindowContentRegionMinX();
-         //      float posY = ImGui.getWindowPosY() + ImGui.getWindowContentRegionMinY();
-         //      float sizeX = ImGui.getWindowContentRegionMaxX();
-         //      float sizeY = ImGui.getWindowContentRegionMaxY();
          float tableHeader = 22.0f;
          float posX = rawWindowPosX;
          float posY = rawWindowPosY + tableHeader;

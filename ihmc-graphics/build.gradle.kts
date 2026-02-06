@@ -21,32 +21,27 @@ testDependencies {
 javafxDependencies {
    api(ihmc.sourceSetProject("main"))
 
-   api("us.ihmc:ihmc-javafx-toolkit:17-0.22.12")
+   api("us.ihmc:ihmc-javafx-toolkit:17-0.23.0")
    api("us.ihmc:simulation-construction-set-tools:source")
-}
-
-javafxTestDependencies {
-   api(ihmc.sourceSetProject("javafx"))
-}
-
-jmonkeyengineDependencies {
-   api(ihmc.sourceSetProject("main"))
-
-   api("us.ihmc:simulation-construction-set-tools:source")
-
-   var javaFXVersion = "17.0.8"
-   api(ihmc.javaFXModule("graphics", javaFXVersion)) // JFX Color
-}
-
-jmonkeyengineTestDependencies {
-   api(ihmc.sourceSetProject("jmonkeyengine"))
 }
 
 libgdxDependencies {
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
-   api("us.ihmc:ihmc-robot-data-logger:0.36.0")
-//   api("us.ihmc:ihmc-humanoid-robotics:source")
+
+   val openblasVersion = "0.3.28-1.5.11"
+   api("org.bytedeco:openblas:$openblasVersion")
+   api("org.bytedeco:openblas:$openblasVersion:linux-x86_64")
+   api("org.bytedeco:openblas:$openblasVersion:linux-arm64")
+   api("org.bytedeco:openblas:$openblasVersion:windows-x86_64")
+   val opencvVersion = "4.10.0-1.5.11-20260107-ihmc" // Hosted on https://robotlabfiles.ihmc.us/repository
+   api("us.ihmc:opencv:$opencvVersion")
+   api("us.ihmc:opencv:$opencvVersion:linux-arm64")
+   api("us.ihmc:opencv:$opencvVersion:linux-arm64-gpu") // Pretty much NVIDIA Orin specific
+   api("us.ihmc:opencv:$opencvVersion:linux-x86_64")
+   api("us.ihmc:opencv:$opencvVersion:linux-x86_64-gpu")
+   api("us.ihmc:opencv:$opencvVersion:windows-x86_64")
+   api("us.ihmc:opencv:$opencvVersion:windows-x86_64-gpu")
 
    val gdxVersion = "1.12.1"
    api("com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion")
@@ -75,9 +70,6 @@ libgdxDependencies {
    }
    api("io.github.spair:imgui-java-natives-macos-ft:$imguiVersion")
    api("io.github.spair:imgui-java-natives-windows-ft:$imguiVersion")
-
-   val javaFXVersion = "17.0.8"
-   api(ihmc.javaFXModule("graphics", javaFXVersion)) // JFX Color
 }
 
 libgdxTestDependencies {

@@ -15,7 +15,7 @@ public class DirectionalControlInputMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "a58203a892bc99f48fbccaeaebac3c8612c8b739f598be9d6ca5b0e4d9517a5c";
+   		return "ae806be89577bb090b9327045f7357a40286e07472ccbcdf818f60ae507e8305";
    }
    
    @Override
@@ -54,11 +54,15 @@ public class DirectionalControlInputMessagePubSubType implements us.ihmc.pubsub.
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
       return current_alignment - initial_alignment;
@@ -76,13 +80,19 @@ public class DirectionalControlInputMessagePubSubType implements us.ihmc.pubsub.
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
 
@@ -93,11 +103,15 @@ public class DirectionalControlInputMessagePubSubType implements us.ihmc.pubsub.
    {
       cdr.write_type_12(data.getSequenceId());
 
+      cdr.write_type_7(data.getWalk());
+
       cdr.write_type_6(data.getForward());
 
       cdr.write_type_6(data.getRight());
 
       cdr.write_type_6(data.getClockwise());
+
+      cdr.write_type_7(data.getUnitVelocities());
 
    }
 
@@ -105,11 +119,15 @@ public class DirectionalControlInputMessagePubSubType implements us.ihmc.pubsub.
    {
       data.setSequenceId(cdr.read_type_12());
       	
+      data.setWalk(cdr.read_type_7());
+      	
       data.setForward(cdr.read_type_6());
       	
       data.setRight(cdr.read_type_6());
       	
       data.setClockwise(cdr.read_type_6());
+      	
+      data.setUnitVelocities(cdr.read_type_7());
       	
 
    }
@@ -118,18 +136,22 @@ public class DirectionalControlInputMessagePubSubType implements us.ihmc.pubsub.
    public final void serialize(controller_msgs.msg.dds.DirectionalControlInputMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_12("sequence_id", data.getSequenceId());
+      ser.write_type_7("walk", data.getWalk());
       ser.write_type_6("forward", data.getForward());
       ser.write_type_6("right", data.getRight());
       ser.write_type_6("clockwise", data.getClockwise());
+      ser.write_type_7("unit_velocities", data.getUnitVelocities());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.DirectionalControlInputMessage data)
    {
       data.setSequenceId(ser.read_type_12("sequence_id"));
+      data.setWalk(ser.read_type_7("walk"));
       data.setForward(ser.read_type_6("forward"));
       data.setRight(ser.read_type_6("right"));
       data.setClockwise(ser.read_type_6("clockwise"));
+      data.setUnitVelocities(ser.read_type_7("unit_velocities"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.DirectionalControlInputMessage src, controller_msgs.msg.dds.DirectionalControlInputMessage dest)

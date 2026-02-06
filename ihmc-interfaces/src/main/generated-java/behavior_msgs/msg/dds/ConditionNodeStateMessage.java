@@ -10,6 +10,7 @@ import us.ihmc.pubsub.TopicDataType;
        * COUNTER TYPE
        * LLM TYPE
        * PROXIMITY TYPE
+       * SHAPE CONTAINS TYPE
        */
 public class ConditionNodeStateMessage extends Packet<ConditionNodeStateMessage> implements Settable<ConditionNodeStateMessage>, EpsilonComparable<ConditionNodeStateMessage>
 {
@@ -30,18 +31,25 @@ public class ConditionNodeStateMessage extends Packet<ConditionNodeStateMessage>
             */
    public boolean request_reset_context_;
    /**
-            * The current distance of the object from the reference frame
+            * The positional vector from frame B to frame A in world frame
             */
-   public double current_distance_;
+   public us.ihmc.euclid.tuple3D.Vector3D b_to_a_;
    /**
-            * Whether frame to evaluate the proximity is missing
+            * Whether frame A is present
             */
-   public boolean missing_frame_;
+   public boolean frame_a_is_present_;
+   /**
+            * Whether frame B is present
+            */
+   public boolean frame_b_is_present_;
+   public long number_of_points_contained_;
+   public boolean frame_is_contained_;
 
    public ConditionNodeStateMessage()
    {
       state_ = new behavior_msgs.msg.dds.LeafNodeStateMessage();
       definition_ = new behavior_msgs.msg.dds.ConditionNodeDefinitionMessage();
+      b_to_a_ = new us.ihmc.euclid.tuple3D.Vector3D();
    }
 
    public ConditionNodeStateMessage(ConditionNodeStateMessage other)
@@ -58,9 +66,14 @@ public class ConditionNodeStateMessage extends Packet<ConditionNodeStateMessage>
 
       request_reset_context_ = other.request_reset_context_;
 
-      current_distance_ = other.current_distance_;
+      geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.b_to_a_, b_to_a_);
+      frame_a_is_present_ = other.frame_a_is_present_;
 
-      missing_frame_ = other.missing_frame_;
+      frame_b_is_present_ = other.frame_b_is_present_;
+
+      number_of_points_contained_ = other.number_of_points_contained_;
+
+      frame_is_contained_ = other.frame_is_contained_;
 
    }
 
@@ -112,34 +125,61 @@ public class ConditionNodeStateMessage extends Packet<ConditionNodeStateMessage>
       return request_reset_context_;
    }
 
+
    /**
-            * The current distance of the object from the reference frame
+            * The positional vector from frame B to frame A in world frame
             */
-   public void setCurrentDistance(double current_distance)
+   public us.ihmc.euclid.tuple3D.Vector3D getBToA()
    {
-      current_distance_ = current_distance;
-   }
-   /**
-            * The current distance of the object from the reference frame
-            */
-   public double getCurrentDistance()
-   {
-      return current_distance_;
+      return b_to_a_;
    }
 
    /**
-            * Whether frame to evaluate the proximity is missing
+            * Whether frame A is present
             */
-   public void setMissingFrame(boolean missing_frame)
+   public void setFrameAIsPresent(boolean frame_a_is_present)
    {
-      missing_frame_ = missing_frame;
+      frame_a_is_present_ = frame_a_is_present;
    }
    /**
-            * Whether frame to evaluate the proximity is missing
+            * Whether frame A is present
             */
-   public boolean getMissingFrame()
+   public boolean getFrameAIsPresent()
    {
-      return missing_frame_;
+      return frame_a_is_present_;
+   }
+
+   /**
+            * Whether frame B is present
+            */
+   public void setFrameBIsPresent(boolean frame_b_is_present)
+   {
+      frame_b_is_present_ = frame_b_is_present;
+   }
+   /**
+            * Whether frame B is present
+            */
+   public boolean getFrameBIsPresent()
+   {
+      return frame_b_is_present_;
+   }
+
+   public void setNumberOfPointsContained(long number_of_points_contained)
+   {
+      number_of_points_contained_ = number_of_points_contained;
+   }
+   public long getNumberOfPointsContained()
+   {
+      return number_of_points_contained_;
+   }
+
+   public void setFrameIsContained(boolean frame_is_contained)
+   {
+      frame_is_contained_ = frame_is_contained;
+   }
+   public boolean getFrameIsContained()
+   {
+      return frame_is_contained_;
    }
 
 
@@ -166,9 +206,14 @@ public class ConditionNodeStateMessage extends Packet<ConditionNodeStateMessage>
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.request_reset_context_, other.request_reset_context_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.current_distance_, other.current_distance_, epsilon)) return false;
+      if (!this.b_to_a_.epsilonEquals(other.b_to_a_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.frame_a_is_present_, other.frame_a_is_present_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.missing_frame_, other.missing_frame_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.frame_b_is_present_, other.frame_b_is_present_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.number_of_points_contained_, other.number_of_points_contained_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.frame_is_contained_, other.frame_is_contained_, epsilon)) return false;
 
 
       return true;
@@ -189,9 +234,14 @@ public class ConditionNodeStateMessage extends Packet<ConditionNodeStateMessage>
 
       if(this.request_reset_context_ != otherMyClass.request_reset_context_) return false;
 
-      if(this.current_distance_ != otherMyClass.current_distance_) return false;
+      if (!this.b_to_a_.equals(otherMyClass.b_to_a_)) return false;
+      if(this.frame_a_is_present_ != otherMyClass.frame_a_is_present_) return false;
 
-      if(this.missing_frame_ != otherMyClass.missing_frame_) return false;
+      if(this.frame_b_is_present_ != otherMyClass.frame_b_is_present_) return false;
+
+      if(this.number_of_points_contained_ != otherMyClass.number_of_points_contained_) return false;
+
+      if(this.frame_is_contained_ != otherMyClass.frame_is_contained_) return false;
 
 
       return true;
@@ -211,10 +261,16 @@ public class ConditionNodeStateMessage extends Packet<ConditionNodeStateMessage>
       builder.append(this.count_);      builder.append(", ");
       builder.append("request_reset_context=");
       builder.append(this.request_reset_context_);      builder.append(", ");
-      builder.append("current_distance=");
-      builder.append(this.current_distance_);      builder.append(", ");
-      builder.append("missing_frame=");
-      builder.append(this.missing_frame_);
+      builder.append("b_to_a=");
+      builder.append(this.b_to_a_);      builder.append(", ");
+      builder.append("frame_a_is_present=");
+      builder.append(this.frame_a_is_present_);      builder.append(", ");
+      builder.append("frame_b_is_present=");
+      builder.append(this.frame_b_is_present_);      builder.append(", ");
+      builder.append("number_of_points_contained=");
+      builder.append(this.number_of_points_contained_);      builder.append(", ");
+      builder.append("frame_is_contained=");
+      builder.append(this.frame_is_contained_);
       builder.append("}");
       return builder.toString();
    }

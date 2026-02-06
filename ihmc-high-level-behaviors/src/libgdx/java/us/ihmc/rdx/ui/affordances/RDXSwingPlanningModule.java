@@ -13,8 +13,8 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerPar
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
@@ -24,7 +24,7 @@ public class RDXSwingPlanningModule
 {
    private final SwingPlanningModule swingPlanningModule;
    private final ROS2SyncedRobotModel syncedRobot;
-   private HeightMapData heightMapData;
+   private TerrainMapData terrainMapData;
    private SwingPlannerParametersReadOnly swingPlannerParameters;
 
    private final SideDependentList<FramePose3DBasics> startFootPoses = new SideDependentList<>(new FramePose3D(), new FramePose3D());
@@ -43,9 +43,9 @@ public class RDXSwingPlanningModule
       swingPlanningModule = new SwingPlanningModule(footstepPlannerParameters, swingPlannerParameters, walkingControllerParameters, footPolygons);
    }
 
-   public void setHeightMapData(HeightMapData heightMapData)
+   public void setTerrainMapData(TerrainMapData terrainMapData)
    {
-      this.heightMapData = heightMapData;
+      this.terrainMapData = terrainMapData;
    }
 
    public void setSwingPlannerParameters(SwingPlannerParametersReadOnly swingPlannerParameters)
@@ -69,7 +69,7 @@ public class RDXSwingPlanningModule
       setInitialFeet();
       FootstepPlan tempPlan = createFakeFootstepPlan(footstepPlan);
 
-      HeightMapData heightMapData = this.heightMapData;
+      TerrainMapData heightMapData = this.terrainMapData;
       swingPlanningModule.getSwingPlannerParameters().set(swingPlannerParameters);
       swingPlanningModule.computeSwingWaypoints(heightMapData,
                                                 tempPlan,

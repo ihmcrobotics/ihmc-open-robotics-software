@@ -1,6 +1,5 @@
 package us.ihmc.perception.rapidRegions;
 
-import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -12,7 +11,6 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.UnitVector3D;
-import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 
@@ -37,26 +35,28 @@ public class RapidPatchesDebugOutputGenerator
       debugImage = new Mat(height, width, opencv_core.CV_8UC4);
    }
 
-   public void drawRegionInternalPatches(RapidPlanarRegionIsland island, int patchHeight, int patchWidth)
+   public void drawRegionInternalPatches(RapidPlanarRegion planarRegion, int patchHeight, int patchWidth)
    {
       if (!enabled)
          return;
 
-      for (Point2D regionIndex : island.planarRegion.getRegionIndices())
+      for (Point2D regionIndex : planarRegion.getRegionIndices())
       {
          int x = (int) regionIndex.getX();
          int y = (int) regionIndex.getY();
-         int r = (island.planarRegionIslandIndex + 1) * 312 % 255;
-         int g = (island.planarRegionIslandIndex + 1) * 123 % 255;
-         int b = (island.planarRegionIslandIndex + 1) * 231 % 255;
-         BytePointer pixel = debugImage.ptr(y * patchHeight, x * patchWidth);
-         pixel.put(0, (byte) r);
-         pixel.put(1, (byte) g);
-         pixel.put(2, (byte) b);
+         int r = (planarRegion.getId() + 1) * 312 % 255;
+         int g = (planarRegion.getId() + 1) * 123 % 255;
+         int b = (planarRegion.getId() + 1) * 231 % 255;
+
+         // Draw a filled rectangle for the patch instead of a single pixel
+         Scalar color = new Scalar(r, g, b, 255);
+         Point topLeft = new Point(x * patchWidth, y * patchHeight);
+         Point bottomRight = new Point((x + 1) * patchWidth - 1, (y + 1) * patchHeight - 1);
+         opencv_imgproc.rectangle(debugImage, topLeft, bottomRight, color, -1, opencv_imgproc.LINE_8, 0);
       }
    }
 
-   public void drawRegionRing(RapidRegionRing regionRing, int patchHeight, int patchWidth)
+   public void drawRegionRing(RapidRegionRing regionRing, int patchSize)
    {
       if (!enabled)
          return;
@@ -68,10 +68,12 @@ public class RapidPatchesDebugOutputGenerator
          int r = (regionRing.getIndex() + 1) * 130 % 255;
          int g = (regionRing.getIndex() + 1) * 227 % 255;
          int b = (regionRing.getIndex() + 1) * 332 % 255;
-         BytePointer pixel = debugImage.ptr(y * patchHeight, x * patchWidth);
-         pixel.put(0, (byte) r);
-         pixel.put(1, (byte) g);
-         pixel.put(2, (byte) b);
+
+         // Draw a filled rectangle for the patch instead of a single pixel
+         Scalar color = new Scalar(r, g, b, 255);
+         Point topLeft = new Point(x * patchSize, y * patchSize);
+         Point bottomRight = new Point((x + 1) * patchSize - 1, (y + 1) * patchSize - 1);
+         opencv_imgproc.rectangle(debugImage, topLeft, bottomRight, color, -1, opencv_imgproc.LINE_8, 0);
       }
    }
 
@@ -97,99 +99,6 @@ public class RapidPatchesDebugOutputGenerator
             debugPoints.add().set(point);
             //LogTools.info("Point To Render: {} {} {}", cx, cy, cz);
          }
-      }
-   }
-
-   public void constructPointCloud(BytedecoImage cxImage, BytedecoImage cyImage, BytedecoImage czImage)
-   {
-      if (!enabled)
-         return;
-
-      FloatBuffer cxBuffer = cxImage.getBackingDirectByteBuffer().asFloatBuffer();
-      FloatBuffer cyBuffer = cyImage.getBackingDirectByteBuffer().asFloatBuffer();
-      FloatBuffer czBuffer = czImage.getBackingDirectByteBuffer().asFloatBuffer();
-
-      int rows = cxImage.getImageHeight();
-      int cols = cxImage.getImageWidth();
-
-      for (int y = 0; y < rows; y++)
-      {
-         for (int x = 0; x < cols; x++)
-         {
-            float cx = cxBuffer.get(y * cols + x);
-            float cy = cyBuffer.get(y * cols + x);
-            float cz = czBuffer.get(y * cols + x);
-
-            //LogTools.info(String.format("Centroid: %.2f,%.2f,%.2f,%.2f,%.2f,%.2f", cx, cy, cz, cv_cx, cv_cy, cv_cz));
-            if (!(cx == 0.0f && cy == 0.0f && cz == 0.0f))
-            {
-               debugPoints.add().set(cx, cy, cz);
-            }
-         }
-      }
-   }
-
-   public void constructCentroidSurfelCloud(BytedecoImage cxImage,
-                                            BytedecoImage cyImage,
-                                            BytedecoImage czImage,
-                                            BytedecoImage nxImage,
-                                            BytedecoImage nyImage,
-                                            BytedecoImage nzImage)
-   {
-
-      if (!enabled)
-         return;
-
-      FloatBuffer cxBuffer = cxImage.getBackingDirectByteBuffer().asFloatBuffer();
-      FloatBuffer cyBuffer = cyImage.getBackingDirectByteBuffer().asFloatBuffer();
-      FloatBuffer czBuffer = czImage.getBackingDirectByteBuffer().asFloatBuffer();
-
-      FloatBuffer nxBuffer = nxImage.getBackingDirectByteBuffer().asFloatBuffer();
-      FloatBuffer nyBuffer = nyImage.getBackingDirectByteBuffer().asFloatBuffer();
-      FloatBuffer nzBuffer = nzImage.getBackingDirectByteBuffer().asFloatBuffer();
-
-      int rows = cxImage.getImageHeight();
-      int cols = cxImage.getImageWidth();
-
-      for (int y = 0; y < rows; y++)
-      {
-         for (int x = 0; x < cols; x++)
-         {
-            float cx = cxBuffer.get(y * cols + x);
-            float cy = cyBuffer.get(y * cols + x);
-            float cz = czBuffer.get(y * cols + x);
-
-            float nx = cxBuffer.get(y * cols + x);
-            float ny = cyBuffer.get(y * cols + x);
-            float nz = czBuffer.get(y * cols + x);
-
-            if (!(cx == 0.0f && cy == 0.0f && cz == 0.0f))
-            {
-               debugPoints.add().set(cx, cy, cz);
-               debugNormals.add().set(nx, ny, nz);
-            }
-         }
-      }
-   }
-
-   public void printPatchGraph(BytedecoImage patchGraph)
-   {
-      if (!enabled)
-         return;
-
-      for (int i = 0; i < patchGraph.getImageHeight(); i++)
-      {
-         for (int j = 0; j < patchGraph.getImageWidth(); j++)
-         {
-            int value = patchGraph.getByteAsInteger(i, j);
-            if (value == 255)
-               System.out.print("o");
-            else if (value > 0)
-               System.out.print("+");
-            else
-               System.out.print(".");
-         }
-         System.out.println();
       }
    }
 
@@ -230,7 +139,7 @@ public class RapidPatchesDebugOutputGenerator
       debugImage.put(new Scalar(0, 0, 0, 0));
    }
 
-   public void update(Mat inputDepthImage, PatchFeatureGrid patchFeatureGrid, BytedecoImage patchGraph, FloatBuffer floatBuffer, RigidBodyTransform transform)
+   public void update(Mat inputDepthImage, FloatBuffer floatBuffer, RigidBodyTransform transform)
    {
       if (!enabled)
          return;

@@ -1,0 +1,51 @@
+#ifndef __behavior_msgs__msg__BehaviorTreeSceneObjectStateMessage__idl__
+#define __behavior_msgs__msg__BehaviorTreeSceneObjectStateMessage__idl__
+
+#include "behavior_msgs/msg/./BehaviorTreeSceneObjectDefinitionMessage_.idl"
+#include "behavior_msgs/msg/./PersistentDetectionStatusMessage_.idl"
+#include "controller_msgs/msg/./RigidBodyTransformMessage_.idl"
+#include "ihmc_common_msgs/msg/./LatestModificationMessage_.idl"
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * A behavior tree scene object
+       */
+      @TypeCode(type="behavior_msgs::msg::dds_::BehaviorTreeSceneObjectStateMessage_")
+      struct BehaviorTreeSceneObjectStateMessage
+      {
+        /**
+         * The timestamp and modifier ID of the latest modification to this object's data fields
+         */
+        ihmc_common_msgs::msg::dds::LatestModificationMessage latest_modification_to_data;
+        /**
+         * The object's unique ID
+         */
+        unsigned long id;
+        behavior_msgs::msg::dds::BehaviorTreeSceneObjectDefinitionMessage definition;
+        /**
+         * Persistent detection associated with this object
+         */
+        behavior_msgs::msg::dds::PersistentDetectionStatusMessage persistent_detection;
+        /**
+         * Transform of the object frame to world frame
+         */
+        controller_msgs::msg::dds::RigidBodyTransformMessage transform_to_world;
+        /**
+         * Used only for door panel
+         */
+        behavior_msgs::msg::dds::PersistentDetectionStatusMessage door_panel_detection;
+        /**
+         * Whether the object is frozen
+         */
+        boolean frozen;
+      };
+    };
+  };
+};
+
+#endif

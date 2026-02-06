@@ -7,9 +7,14 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_cudaarithm;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
-import org.bytedeco.opencv.opencv_core.*;
+import org.bytedeco.opencv.opencv_core.GpuMat;
+import org.bytedeco.opencv.opencv_core.GpuMatVector;
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.MatVector;
+import org.bytedeco.opencv.opencv_core.Scalar;
+import org.bytedeco.opencv.opencv_core.Size;
+import org.bytedeco.opencv.opencv_core.Stream;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.BytedecoImage;
 
 import java.awt.image.BufferedImage;
 
@@ -276,11 +281,6 @@ public class OpenCVTools
    public static void convertFloatToShort(Mat metricDepth, Mat shortDepthToPack, double scale, double delta)
    {
       metricDepth.convertTo(shortDepthToPack, opencv_core.CV_16UC1, scale, delta);
-   }
-
-   public static boolean dimensionsMatch(BytedecoImage a, BytedecoImage b)
-   {
-      return a.getImageWidth() == b.getImageWidth() && a.getImageHeight() == b.getImageHeight();
    }
 
    public static boolean dimensionsMatch(Mat a, int imageWidth, int imageHeight)

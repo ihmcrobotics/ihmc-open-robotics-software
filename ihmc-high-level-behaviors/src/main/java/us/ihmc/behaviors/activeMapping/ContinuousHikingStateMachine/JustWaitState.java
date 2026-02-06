@@ -236,7 +236,6 @@ public class JustWaitState implements State
                                   if (useEnvironmentData.get())
                                   {
                                      EnvironmentHandler environmentHandler = environmentHandlerSupplier.get();
-                                     footstepPlannerRequest.setHeightMapData(environmentHandler.getHeightMapData());
                                      footstepPlannerRequest.setTerrainMapData(environmentHandler.getTerrainMapData());
                                      footstepPlannerRequest.setSnapGoalSteps(useEnvironmentData.get());
                                   }

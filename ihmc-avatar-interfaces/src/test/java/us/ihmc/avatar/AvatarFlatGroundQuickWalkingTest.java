@@ -122,5 +122,7 @@ public abstract class AvatarFlatGroundQuickWalkingTest implements MultiRobotTest
       simulationTestHelper.start();
       ((YoBoolean) simulationTestHelper.findVariable("controllerAllowCrossOverSteps")).set(true);
       ((YoDouble) simulationTestHelper.findVariable("icpDistanceOutsideSupportForStep")).set(0.2);
+      ((YoBoolean) simulationTestHelper.findVariable("FootNeverHoldRotation")).set(false);
+      ((YoBoolean) simulationTestHelper.findVariable("FootNeverHoldPosition")).set(false);
    }
 }

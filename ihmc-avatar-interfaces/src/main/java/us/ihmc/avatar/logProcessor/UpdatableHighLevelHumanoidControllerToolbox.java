@@ -44,7 +44,6 @@ public class UpdatableHighLevelHumanoidControllerToolbox extends HighLevelHumano
                                                       double controlDT,
                                                       ArrayList<Updatable> updatables,
                                                       List<ContactablePlaneBody> contactableBodies,
-                                                      YoGraphicsListRegistry yoGraphicsListRegistry,
                                                       JointBasics... jointsToIgnore)
    {
       super(fullRobotModel,
@@ -60,7 +59,6 @@ public class UpdatableHighLevelHumanoidControllerToolbox extends HighLevelHumano
             false,
             updatables,
             contactableBodies,
-            yoGraphicsListRegistry,
             jointsToIgnore);
 
       if (UPDATE_CAPTURE_POINT_FROM_SCS)

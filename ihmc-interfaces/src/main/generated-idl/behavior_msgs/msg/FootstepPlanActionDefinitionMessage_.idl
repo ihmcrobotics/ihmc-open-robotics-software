@@ -34,7 +34,7 @@ module behavior_msgs
         /**
          * OVERRIDE (0) or QUEUE (1)
          */
-        long execution_mode;
+        octet execution_mode;
         /**
          * Is using the footstep planner or manually placing
          */
@@ -87,6 +87,10 @@ module behavior_msgs
          * Whether to walk, turning first, matching the goal orientation
          */
         boolean planner_walk_with_goal_orientation;
+        /**
+         * Whether to use the body path planner or not
+         */
+        boolean planner_plan_with_body_path;
         /**
          * The footstep planner parameters
          */

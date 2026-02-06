@@ -2,8 +2,8 @@ package us.ihmc.footstepPlanning.bodyPath;
 
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.perception.heightMap.HeightMapData;
-import us.ihmc.perception.heightMap.HeightMapTools;
+import us.ihmc.perception.gpuMapping.HeightMapTools;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
 
 /* package-private */
 class BodyPathCollisionDetector
@@ -23,11 +23,11 @@ class BodyPathCollisionDetector
    /**
     * Yaw index (0-15) represents the angle of the collision box and corresponds to a yaw rotation of (pi * yawIndex / 8)
     */
-   boolean collisionDetected(HeightMapData heightMapData, BodyPathLatticePoint latticePoint, int yawIndex, double height, double groundClearance)
+   boolean collisionDetected(TerrainMapData terrainMapData, BodyPathLatticePoint latticePoint, int yawIndex, double height, double groundClearance)
    {
-      int centerIndex = heightMapData.getCenterIndex();
-      int xIndex = HeightMapTools.coordinateToIndex(latticePoint.getX(), heightMapData.getGridCenter().getX(), heightMapData.getCellSize(), centerIndex);
-      int yIndex = HeightMapTools.coordinateToIndex(latticePoint.getY(), heightMapData.getGridCenter().getY(), heightMapData.getCellSize(), centerIndex);
+      int centerIndex = terrainMapData.getCenterIndex();
+      int xIndex = HeightMapTools.coordinateToIndex(latticePoint.getX(), terrainMapData.getGridCenterX(), terrainMapData.getCellSize(), centerIndex);
+      int yIndex = HeightMapTools.coordinateToIndex(latticePoint.getY(), terrainMapData.getGridCenterY(), terrainMapData.getCellSize(), centerIndex);
       double heightThreshold = height + groundClearance;
 
       TIntArrayList xOffsets = getOffsets(yawIndex, this.xOffsets);
@@ -37,7 +37,7 @@ class BodyPathCollisionDetector
       {
          int xQuery = xIndex + computeCollisionOffsetX(yawIndex, xOffsets.get(i), yOffsets.get(i));
          int yQuery = yIndex + computeCollisionOffsetY(yawIndex, xOffsets.get(i), yOffsets.get(i));
-         double heightQuery = heightMapData.getHeight(xQuery, yQuery);
+         double heightQuery = terrainMapData.getHeight(xQuery, yQuery);
          if (Double.isNaN(heightQuery))
          {
             continue;

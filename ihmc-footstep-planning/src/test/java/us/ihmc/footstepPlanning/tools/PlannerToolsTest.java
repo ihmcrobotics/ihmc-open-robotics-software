@@ -12,7 +12,6 @@ import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
-import us.ihmc.perception.heightMap.HeightMapMessageTools;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -158,7 +157,6 @@ public class PlannerToolsTest
 
       request.setStartFootPoses(footstepPlanningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), startPose);
       request.setGoalFootPoses(footstepPlanningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), goalPose);
-      request.setHeightMapData(HeightMapMessageTools.unpackMessageToHeightMapData(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(debrisDataSet.getPlanarRegionsList())));
 
       FootstepPlannerOutput footstepPlannerOutput = footstepPlanningModule.handleRequest(request);
       boolean collisionDetected = PlannerTools.doesPathContainBodyCollisions(startPose,

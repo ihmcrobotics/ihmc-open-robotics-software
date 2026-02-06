@@ -9,12 +9,12 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
+import us.ihmc.perception.gpuMapping.TerrainMapMessageTools;
 import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.perception.heightMap.HeightMapData;
-import us.ihmc.perception.heightMap.HeightMapMessageTools;
-import us.ihmc.perception.heightMap.HeightMapTools;
+import us.ihmc.perception.gpuMapping.HeightMapTools;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,11 +56,9 @@ public class PlanarRegionToHeightMapConverterTest
          planarRegion.set(transformToWorld, polygons);
 
          // get the planar region as a height map
-         HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList,
-                                                                                                                                                               PlanarRegionToHeightMapConverter.defaultResolution,
-                                                                                                                                                               Double.NaN));
-
-
+         TerrainMapData terrainMapData = TerrainMapMessageTools.unpackMessage(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(
+               planarRegionsList,
+               PlanarRegionToHeightMapConverter.defaultResolution));
 
          // get the desired normal from the input values
          Vector3D vertical = new Vector3D(0.0, 0.0, 1.0);
@@ -72,17 +70,17 @@ public class PlanarRegionToHeightMapConverterTest
             normal.negate();
 
          // fixme may be best to just fit Z?
-         Vector3DReadOnly heightMapNormal = getNormalOfHeightMap(heightMapData);
+         Vector3DReadOnly heightMapNormal = getNormalOfHeightMap(terrainMapData);
          if (heightMapNormal == null)
             continue;
          assertEquals(normal, heightMapNormal, 1e-3);
       }
    }
 
-   public static Vector3DReadOnly getNormalOfHeightMap(HeightMapData heightMapData)
+   public static Vector3DReadOnly getNormalOfHeightMap(TerrainMapData terrainMapData)
    {
       // convert this height map to a point cloud, so that we can do a plane fit.
-      List<Point3D> pointCloud = collectHeightMapAsPointCloud(heightMapData);
+      List<Point3D> pointCloud = collectHeightMapAsPointCloud(terrainMapData);
       if (pointCloud.size() < 3)
          return null;
 
@@ -97,19 +95,25 @@ public class PlanarRegionToHeightMapConverterTest
       return bestPlane.getNormal();
    }
 
-   private static List<Point3D> collectHeightMapAsPointCloud(HeightMapData heightMapData)
+   private static List<Point3D> collectHeightMapAsPointCloud(TerrainMapData terrainMapData)
    {
       List<Point3D> pointCloud = new ArrayList<>();
-      for (int xIndex = 0; xIndex < heightMapData.getCellsPerAxis(); xIndex++)
+      for (int xIndex = 0; xIndex < terrainMapData.getCellsPerAxis(); xIndex++)
       {
-         for (int yIndex = 0; yIndex < heightMapData.getCellsPerAxis(); yIndex++)
+         for (int yIndex = 0; yIndex < terrainMapData.getCellsPerAxis(); yIndex++)
          {
-            double x = HeightMapTools.indexToCoordinate(xIndex, heightMapData.getGridCenter().getX(), heightMapData.getCellSize(), heightMapData.getCenterIndex());
-            double y = HeightMapTools.indexToCoordinate(yIndex, heightMapData.getGridCenter().getY(), heightMapData.getCellSize(), heightMapData.getCenterIndex());
-            double height = heightMapData.getHeight(xIndex, yIndex);
+            double x = HeightMapTools.indexToCoordinate(xIndex,
+                                                        terrainMapData.getGridCenterX(),
+                                                        terrainMapData.getCellSize(),
+                                                        terrainMapData.getCenterIndex());
+            double y = HeightMapTools.indexToCoordinate(yIndex,
+                                                        terrainMapData.getGridCenterY(),
+                                                        terrainMapData.getCellSize(),
+                                                        terrainMapData.getCenterIndex());
+            double height = terrainMapData.getHeight(xIndex, yIndex);
 
             if (Double.isFinite(height))
-               pointCloud.add(new Point3D(x,  y, height));
+               pointCloud.add(new Point3D(x, y, height));
          }
       }
 

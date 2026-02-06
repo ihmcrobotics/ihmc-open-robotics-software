@@ -17,8 +17,10 @@ public class CenterOfMassDataHolder implements CenterOfMassDataHolderReadOnly
 {
    private boolean hasPosition = false;
    private boolean hasVelocity = false;
+   private boolean hasAngularMomentum = false;
    private final FramePoint3D centerOfMassPosition = new FramePoint3D();
    private final FrameVector3D centerOfMassVelocity = new FrameVector3D();
+   private final FrameVector3D angularMomentum = new FrameVector3D();
 
    public CenterOfMassDataHolder()
    {
@@ -29,8 +31,10 @@ public class CenterOfMassDataHolder implements CenterOfMassDataHolderReadOnly
    {
       hasPosition = false;
       hasVelocity = false;
+      hasAngularMomentum = false;
       centerOfMassPosition.setToNaN();
       centerOfMassVelocity.setToNaN();
+      angularMomentum.setToNaN();;
    }
 
    public void setCenterOfMassPosition(ReferenceFrame referenceFrame, Point3DReadOnly centerOfMassPosition)
@@ -55,12 +59,25 @@ public class CenterOfMassDataHolder implements CenterOfMassDataHolderReadOnly
       setCenterOfMassVelocity(centerOfMassVelocity.getReferenceFrame(), centerOfMassVelocity);
    }
 
+   public void setAngularMomentum(ReferenceFrame referenceFrame, Vector3DReadOnly angularMomentum)
+   {
+      hasAngularMomentum = true;
+      this.angularMomentum.setIncludingFrame(referenceFrame, angularMomentum);
+   }
+
+   public void setAngularMomentum(FrameVector3DReadOnly angularMomentum)
+   {
+      setAngularMomentum(angularMomentum.getReferenceFrame(), angularMomentum);
+   }
+
    public void set(CenterOfMassDataHolder other)
    {
       hasPosition = other.hasPosition;
       hasVelocity = other.hasVelocity;
+      hasAngularMomentum = other.hasAngularMomentum;
       centerOfMassPosition.setIncludingFrame(other.centerOfMassPosition);
       centerOfMassVelocity.setIncludingFrame(other.centerOfMassVelocity);
+      angularMomentum.setIncludingFrame(other.angularMomentum);
    }
 
    public void setHasCenterOfMassPosition(boolean hasPosition)
@@ -71,6 +88,11 @@ public class CenterOfMassDataHolder implements CenterOfMassDataHolderReadOnly
    public void setHasCenterOfMassVelocity(boolean hasVelocity)
    {
       this.hasVelocity = hasVelocity;
+   }
+
+   public void setHasAngularMomentum(boolean hasAngularMomentum)
+   {
+      this.hasAngularMomentum = hasAngularMomentum;
    }
 
    @Override
@@ -98,6 +120,18 @@ public class CenterOfMassDataHolder implements CenterOfMassDataHolderReadOnly
    }
 
    @Override
+   public boolean hasAngularMomentum()
+   {
+      return hasAngularMomentum;
+   }
+
+   @Override
+   public FrameVector3D getAngularMomentum()
+   {
+      return angularMomentum;
+   }
+
+   @Override
    public boolean equals(Object object)
    {
       if (object == this)
@@ -107,13 +141,17 @@ public class CenterOfMassDataHolder implements CenterOfMassDataHolderReadOnly
       else if (object instanceof CenterOfMassDataHolder)
       {
          CenterOfMassDataHolder other = (CenterOfMassDataHolder) object;
-         if (hasPosition != other.hasPosition)
+         if (hasPosition ^ other.hasPosition)
             return false;
-         if (hasVelocity != other.hasVelocity)
+         if (hasVelocity ^ other.hasVelocity)
+            return false;
+         if (hasAngularMomentum ^ other.hasAngularMomentum)
             return false;
          if (hasCenterOfMassPosition() && !centerOfMassPosition.equals(other.centerOfMassPosition))
             return false;
          if (hasCenterOfMassVelocity() && !centerOfMassVelocity.equals(other.centerOfMassVelocity))
+            return false;
+         if (hasAngularMomentum() && !angularMomentum.equals(other.angularMomentum))
             return false;
          return true;
       }
@@ -127,7 +165,9 @@ public class CenterOfMassDataHolder implements CenterOfMassDataHolderReadOnly
    {
       checksum.update(hasPosition);
       checksum.update(hasVelocity);
+      checksum.update(hasAngularMomentum);
       checksum.update(centerOfMassPosition);
       checksum.update(centerOfMassVelocity);
+      checksum.update(angularMomentum);
    }
 }

@@ -1,0 +1,44 @@
+#ifndef __vision_msgs__msg__Detection3D__idl__
+#define __vision_msgs__msg__Detection3D__idl__
+
+#include "std_msgs/msg/./Header_.idl"
+#include "vision_msgs/msg/./BoundingBox3D_.idl"
+#include "vision_msgs/msg/./ObjectHypothesisWithPose_.idl"
+module vision_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * Defines a 3D detection result.
+       * 
+       * This extends a basic 3D classification by including the pose of the
+       * detected object.
+       */
+      @TypeCode(type="vision_msgs::msg::dds_::Detection3D_")
+      struct Detection3D
+      {
+        std_msgs::msg::dds::Header header;
+        /**
+         * Class probabilities. Does not have to include hypotheses for all possible
+         * object ids, the scores for any ids not listed are assumed to be 0.
+         */
+        sequence<vision_msgs::msg::dds::ObjectHypothesisWithPose> results;
+        /**
+         * 3D bounding box surrounding the object.
+         */
+        vision_msgs::msg::dds::BoundingBox3D bbox;
+        /**
+         * ID used for consistency across multiple detection messages. Detections
+         * of the same object in different detection messages should have the same id.
+         * This field may be empty.
+         */
+        string id;
+      };
+    };
+  };
+};
+
+#endif

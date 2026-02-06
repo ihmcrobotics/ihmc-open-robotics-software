@@ -2,7 +2,6 @@ package us.ihmc.perception.detections;
 
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.property.ROS2StoredPropertySet;
-import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.ros2.ROS2Node;
 

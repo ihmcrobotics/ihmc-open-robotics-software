@@ -34,13 +34,13 @@ public class DynamicStateInspector
    private final YoDouble distanceAlongErrorToOutsideEdge = new YoDouble("distAlongErrorToOutTOEdge", registry);
    private final YoDouble normDistanceAlongErrorToOutsideEdge = new YoDouble("normDistAlongErrorToOutTOEdge", registry);
 
-   private final YoDouble currentOrthogonalDistanceToInsideEdge = new YoDouble("currentOrthoDistToInTOEdge", registry);
-   private final YoDouble desiredOrthogonalDistanceToInsideEdge = new YoDouble("desiredOrthoDistToInTOEdge", registry);
-   private final YoDouble distanceAlongErrorToInsideEdge = new YoDouble("distAlongErrorToInTOEdge", registry);
-   private final YoDouble normDistanceAlongErrorToInsideEdge = new YoDouble("normDistAlongErrorToInTOEdge", registry);
+   private final YoDouble currentOrthogonalDistanceToInsideEdge = new YoDouble("currentOrthoDistToInsideTOEdge", registry);
+   private final YoDouble desiredOrthogonalDistanceToInsideEdge = new YoDouble("desiredOrthoDistToInsideTOEdge", registry);
+   private final YoDouble distanceAlongErrorToInsideEdge = new YoDouble("distAlongErrorToInsideTOEdge", registry);
+   private final YoDouble normDistanceAlongErrorToInsideEdge = new YoDouble("normDistAlongErrorToInsideTOEdge", registry);
 
-   private final YoDouble distanceAlongErrorToFullSupport = new YoDouble("distAlongErrorToFS", registry);
-   private final YoDouble normDistanceAlongErrorToFullSupport = new YoDouble("normDistAlongErrorToFS", registry);
+   private final YoDouble distanceAlongErrorToFullSupport = new YoDouble("distAlongErrorToFullSupport", registry);
+   private final YoDouble normDistanceAlongErrorToFullSupport = new YoDouble("normDistAlongErrorToFullSupport", registry);
 
    private final YoBoolean currentIcpIsFarEnoughFromTheToe = new YoBoolean("currentIcpFarEnoughFromToe", registry);
    private final YoBoolean desiredIcpIsFarEnoughFromTheToe = new YoBoolean("desiredIcpFarEnoughFromToe", registry);
@@ -55,9 +55,11 @@ public class DynamicStateInspector
 
    private final YoDouble controlRatioInsideEdge = new YoDouble("controlRatioInEdge", registry);
    private final YoDouble controlRatioOutsideEdge = new YoDouble("controlRatioOutEdge", registry);
-   private final YoBoolean toeingOffLosesTooMuchControl = new YoBoolean("toeOffLosesTooMuchControl", registry);
+   private final YoBoolean toeOffLosesTooMuchControl = new YoBoolean("toeOffLosesTooMuchControl", registry);
 
    private final YoBoolean isDesiredICPOKForToeOff = new YoBoolean("isDesiredICPOKForToeOff", registry);
+   private final YoBoolean isDesiredECMPOKForToeOff = new YoBoolean("isDesiredECMPOKForToeOff", registry);
+   private final YoBoolean isCoPOKForToeOff = new YoBoolean("isCoPOKForToeOff", registry);
    private final YoBoolean isCurrentICPOKForToeOff = new YoBoolean("isCurrentICPOKForToeOff", registry);
 
    private final GlitchFilteredYoBoolean dynamicsAreOkForToeOff = new GlitchFilteredYoBoolean("dynamicsAreOKForToeOff", registry, 4);
@@ -69,6 +71,8 @@ public class DynamicStateInspector
    private final FrameConvexPolygon2D supportPolygon = new FrameConvexPolygon2D();
 
    private final FramePoint2D desiredICP = new FramePoint2D();
+   private final FramePoint2D currentCoP = new FramePoint2D();
+   private final FramePoint2D desiredECMP = new FramePoint2D();
    private final FramePoint2D currentICP = new FramePoint2D();
    private final FramePoint2D toeOffPoint = new FramePoint2D();
 
@@ -103,7 +107,7 @@ public class DynamicStateInspector
       currentIcpIsFarEnoughInsideInsideEdge.set(false);
       desiredIcpIsFarEnoughInsideInsideEdge.set(false);
 
-      toeingOffLosesTooMuchControl.set(false);
+      toeOffLosesTooMuchControl.set(false);
 
       isDesiredICPOKForToeOff.set(false);
       isCurrentICPOKForToeOff.set(false);
@@ -131,7 +135,10 @@ public class DynamicStateInspector
                                  FramePose3DReadOnly leadingFootPose,
                                  FramePoint2DReadOnly desiredICP,
                                  FramePoint2DReadOnly currentICP,
-                                 FramePoint2DReadOnly toeOffPoint)
+                                 FramePoint2DReadOnly desiredECMP,
+                                 FramePoint2DReadOnly currentCoP,
+                                 FramePoint2DReadOnly toeOffPoint,
+                                 double percentLoad)
    {
       leadingFootFrame.setPoseAndUpdate(leadingFootPose);
       leadingFootZUpFrame.update();
@@ -152,21 +159,41 @@ public class DynamicStateInspector
                                         && desiredIcpIsFarEnoughInsideOutsideEdge.getBooleanValue() && desiredIcpIsFarEnoughInsideInsideEdge.getBooleanValue();
       boolean isCurrentICPOKForToeOff = currentIcpIsFarEnoughFromTheToe.getBooleanValue() && currentIcpIsFarEnoughInside.getValue()
                                         && currentIcpIsFarEnoughInsideOutsideEdge.getBooleanValue() && currentIcpIsFarEnoughInsideInsideEdge.getBooleanValue()
-                                        && !toeingOffLosesTooMuchControl.getBooleanValue();
+                                        && !toeOffLosesTooMuchControl.getBooleanValue();
 
       this.isCurrentICPOKForToeOff.set(isCurrentICPOKForToeOff);
       this.isDesiredICPOKForToeOff.set(isDesiredICPOKForToeOff);
+      if (desiredECMP != null)
+      {
+         this.desiredECMP.setIncludingFrame(desiredECMP);
+         this.desiredECMP.changeFrameAndProjectToXYPlane(onToesPolygon.getReferenceFrame());
+         this.isDesiredECMPOKForToeOff.set(onToesPolygon.signedDistance(this.desiredECMP) < parameters.getMaxDistanceToMoveECMP());
+      }
+      else
+      {
+         this.isDesiredECMPOKForToeOff.set(true);
+      }
+      if (currentCoP != null && Double.isFinite(percentLoad) && percentLoad > parameters.getLoadThresholdToCheckCoP())
+      {
+         this.currentCoP.setIncludingFrame(currentCoP);
+         this.currentCoP.changeFrameAndProjectToXYPlane(onToesPolygon.getReferenceFrame());
+         this.isCoPOKForToeOff.set(onToesPolygon.signedDistance(this.currentCoP) < parameters.getLoadThresholdToCheckCoP());
+      }
+      else
+      {
+         this.isCoPOKForToeOff.set(true);
+      }
 
       dynamicsAreOkForToeOff.update(isCurrentICPOKForToeOff && isDesiredICPOKForToeOff);
 
       if (supportPolygon.isPointInside(currentICP) && supportPolygon.isPointInside(desiredICP))
       {
-         dynamicsAreDefinitelyNotOKForToeOff.update(!dynamicsAreOkForToeOff.getBooleanValue());
+         dynamicsAreDefinitelyNotOKForToeOff.update(!dynamicsAreOkForToeOff.getBooleanValue() || !isDesiredECMPOKForToeOff.getBooleanValue() || !isCoPOKForToeOff.getBooleanValue());
       }
       else
       {
          dynamicsAreDefinitelyNotOKForToeOff.update(
-               currentOrthogonalDistanceToInsideEdge.getDoubleValue() < 0.0 && desiredOrthogonalDistanceToInsideEdge.getDoubleValue() < 0.0);
+               currentOrthogonalDistanceToInsideEdge.getDoubleValue() < 0.0 && desiredOrthogonalDistanceToInsideEdge.getDoubleValue() < 0.0 || !isDesiredECMPOKForToeOff.getBooleanValue() || !isCoPOKForToeOff.getBooleanValue());
       }
    }
 
@@ -353,7 +380,7 @@ public class DynamicStateInspector
       {
          if (normDistanceAlongErrorToInsideEdge.getDoubleValue() > 0.0 || normDistanceAlongErrorToOutsideEdge.getDoubleValue() > 0.0)
          {
-            toeingOffLosesTooMuchControl.set(true);
+            toeOffLosesTooMuchControl.set(true);
          }
          else
          {
@@ -379,12 +406,12 @@ public class DynamicStateInspector
                insideEdgeWouldFail &= -normDistanceAlongErrorToInsideEdge.getDoubleValue() < parameters.getMaxNormalizedErrorNeededForControl();
                outsideEdgeWouldFail &= -normDistanceAlongErrorToOutsideEdge.getDoubleValue() < parameters.getMaxNormalizedErrorNeededForControl();
             }
-            toeingOffLosesTooMuchControl.set(insideEdgeWouldFail || outsideEdgeWouldFail);
+            toeOffLosesTooMuchControl.set(insideEdgeWouldFail || outsideEdgeWouldFail);
          }
       }
       else
       {
-         toeingOffLosesTooMuchControl.set(false);
+         toeOffLosesTooMuchControl.set(false);
       }
    }
 

@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.*;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.quicksterFootstepProvider.QuicksterFootstepProvider;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -30,6 +31,7 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
    private final OptionalFactoryField<Boolean> useHeadingAndVelocityScriptField = new OptionalFactoryField<>("useHeadingAndVelocityScript", false);
    private final OptionalFactoryField<HeadingAndVelocityEvaluationScriptParameters> headingAndVelocityEvaluationScriptParametersField = new OptionalFactoryField<>("headingAndVelocityEvaluationScriptParameters");
    private final OptionalFactoryField<StepGeneratorCommandInputManager> csgCommandInputManagerField = new OptionalFactoryField<>("csgCommandInputManagerField");
+   private final OptionalFactoryField<StatusMessageOutputManager> csgStatusMessageOutputManagerField = new OptionalFactoryField<>("csgStatusMessageOutputManagerField");
    private final OptionalFactoryField<Boolean> createSupportFootBasedFootstepAdjustment = new OptionalFactoryField<>("csgCreateSupportFootBasedFootstepAdjustment");
    /** This is used only when the support foot based footstep adjustment is created. */
    private final OptionalFactoryField<Boolean> adjustPitchAndRoll = new OptionalFactoryField<>("csgSupportFootBasedFootstepAdjustmentAdjustPitchAndRoll");
@@ -107,6 +109,11 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
       this.csgCommandInputManagerField.set(commandInputManager);
    }
 
+   public void setStepGeneratorStatusMessageOutputManager(StatusMessageOutputManager statusMessageOutputManager)
+   {
+      this.csgStatusMessageOutputManagerField.set(statusMessageOutputManager);
+   }
+
    @Override
    public StepGeneratorCommandInputManager getStepGeneratorCommandInputManager()
    {
@@ -117,13 +124,21 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
    }
 
    @Override
+   public StatusMessageOutputManager getStepGeneratorStatusMessageOutputManager()
+   {
+      if (!csgStatusMessageOutputManagerField.hasValue())
+         csgStatusMessageOutputManagerField.set(new StatusMessageOutputManager(StepGeneratorAPIDefinition.getStepGeneratorSupportedStatusMessages()));
+
+      return csgStatusMessageOutputManagerField.get();
+   }
+
+   @Override
    public ComponentBasedFootstepDataMessageGenerator buildPlugin(FullHumanoidRobotModel robotModel,
                                                                  CommonHumanoidReferenceFrames referenceFrames,
                                                                  double updateDT,
                                                                  WalkingControllerParameters walkingControllerParameters,
                                                                  StatusMessageOutputManager walkingStatusMessageOutputManager,
                                                                  CommandInputManager walkingCommandInputManager,
-                                                                 YoGraphicsListRegistry yoGraphicsListRegistry,
                                                                  SideDependentList<? extends ContactableBody> contactableFeet,
                                                                  DoubleProvider timeProvider)
    {
@@ -132,7 +147,7 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
 
       FactoryTools.checkAllFactoryFieldsAreSet(this);
 
-      ContinuousStepGenerator continuousStepGenerator = new ContinuousStepGenerator(registryField.get());
+      ContinuousStepGenerator continuousStepGenerator = new ContinuousStepGenerator(getStepGeneratorStatusMessageOutputManager(), registryField.get());
       continuousStepGenerator.setQuicksterFootstepProvider(new QuicksterFootstepProvider(robotModel,
                                                                                          referenceFrames,
                                                                                          updateDT,
@@ -175,8 +190,8 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
 
       continuousStepGenerator.setFootstepMessenger(walkingCommandInputManager::submitMessage);
 
-      if (yoGraphicsListRegistry != null && contactableFeet != null)
-         continuousStepGenerator.setupVisualization(contactableFeet, yoGraphicsListRegistry);
+      if (contactableFeet != null)
+         continuousStepGenerator.setupVisualization(contactableFeet);
 
       if (useHeadingAndVelocityScriptField.get())
       {

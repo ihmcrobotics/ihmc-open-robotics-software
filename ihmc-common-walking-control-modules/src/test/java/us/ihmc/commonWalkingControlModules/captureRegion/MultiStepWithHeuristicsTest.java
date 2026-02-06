@@ -56,8 +56,7 @@ public class MultiStepWithHeuristicsTest
                                                                                                   soleZUpFrames,
                                                                                                   false,
                                                                                                   "controller",
-                                                                                                  registry,
-                                                                                                  null);;
+                                                                                                  registry);
       CaptureRegionSafetyHeuristics heuristics = new CaptureRegionSafetyHeuristics(() -> maxLength, registry);
       StepAdjustmentReachabilityConstraint reachabilityConstraint = new StepAdjustmentReachabilityConstraint(soleZUpFrames,
                                                                                                              () -> maxLength,
@@ -70,7 +69,7 @@ public class MultiStepWithHeuristicsTest
                                                                                                              false,
                                                                                                              registry,
                                                                                                              null);
-      MultiStepCaptureRegionCalculator mutliStepCalculator = new MultiStepCaptureRegionCalculator(reachabilityConstraint, () -> false, registry);
+      MultiStepCaptureRegionCalculator mutliStepCalculator = new MultiStepCaptureRegionCalculator(reachabilityConstraint, () -> false, 10, registry);
       ((YoDouble) registry.findVariable("distanceIntoCaptureRegionForInside")).set(0.05);
       ((YoDouble) registry.findVariable("distanceIntoCaptureRegionForEverywhere")).set(0.02);
       ((YoDouble) registry.findVariable("extraDistanceToStepFromStanceFoot")).set(0.05);

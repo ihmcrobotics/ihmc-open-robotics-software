@@ -1,29 +1,25 @@
 package us.ihmc.avatar.logging;
 
-import com.google.common.collect.Lists;
-import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.FileTools;
-import us.ihmc.commons.nio.PathTools;
+import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.idl.serializers.extra.YAMLSerializer;
 import us.ihmc.log.LogTools;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
-import us.ihmc.robotDataLogger.*;
+import us.ihmc.robotDataLogger.Handshake;
+import us.ihmc.robotDataLogger.HandshakeFileType;
+import us.ihmc.robotDataLogger.HandshakePubSubType;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotDataLogger.handshake.YoVariableHandShakeBuilder;
 import us.ihmc.robotDataLogger.jointState.JointHolder;
 import us.ihmc.robotDataLogger.jointState.JointState;
 import us.ihmc.robotDataLogger.logger.LogPropertiesWriter;
 import us.ihmc.tools.compression.SnappyUtils;
-import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -31,12 +27,13 @@ import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.LongBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
 
 public class IntraprocessYoVariableLogger
 {
@@ -47,309 +44,287 @@ public class IntraprocessYoVariableLogger
    public static final String MODEL_FILENAME = "model.sdf";
    public static final String MODEL_RESOURCE_BUNDLE = "resources.zip";
    public static final String INDEX_FILENAME = "robotData.dat";
-   public static final String SUMMARY_FILENAME = "summary.csv";
-   public static final Path DEFAULT_INCOMING_LOGS_DIRECTORY;
-   static
-   {
-      Path incomingLogsDirectory = Paths.get(System.getProperty("user.home")).resolve(".ihmc");
-      if (ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
-      {
-         // TODO GITHUB WORKFLOWS
-//         incomingLogsDirectory = incomingLogsDirectory.resolve("bamboo-logs")
-//                                                      .resolve(System.getenv("bamboo_planKey"))
-//                                                      .resolve(System.getenv("bamboo_buildResultKey"));
-      }
-      else
-      {
-         incomingLogsDirectory = incomingLogsDirectory.resolve("logs");
-      }
-      DEFAULT_INCOMING_LOGS_DIRECTORY = incomingLogsDirectory;
-   }
+   public static final Path DEFAULT_INCOMING_LOGS_DIRECTORY = Paths.get(System.getProperty("user.home")).resolve(".ihmc").resolve("logs");
+   public static final Path BACKUP_INCOMING_LOGS_DIRECTORY = Paths.get(System.getProperty("user.home")).resolve(".ihmc").resolve("logs2");
 
-   private final String logName;
-   private final LogModelProvider logModelProvider;
    private final List<RegistrySendBufferBuilder> registrySendBufferBuilders;
-   private final int maxTicksToRecord;
    private final double dt;
-   private final Path incomingLogsFolder;
+   private final String logName;
+   @Nullable
+   private final LogModelProvider logModelProvider;
 
-   private String timestamp;
    private Path logFolder;
-   private ByteBuffer compressedBuffer;
-   private ByteBuffer indexBuffer = ByteBuffer.allocate(16);
-   private ArrayList<YoVariable> variables = new ArrayList<>();
+   private List<YoVariable> variables;
+   private long[] variableValues;
    private List<JointHolder> jointHolders;
    private ByteBuffer dataBuffer;
    private LongBuffer dataBufferAsLong;
+   private boolean destroyed;
+
+   /*
+    * Compression and serialization
+    */
+   private ByteBuffer compressedBuffer;
+   private ByteBuffer indexBuffer;
+   private ConcurrentRingBuffer<ByteBuffer> compressionBufferRing;
+   private final Object compressionThreadLock = new Object();
+   private RepeatingTaskThread compressionThread;
    private FileChannel dataChannel;
    private FileChannel indexChannel;
-   private volatile boolean shutdown = false;
 
-   private static final int CHANGED_BUFFER_CAPACITY = 128;
-   private ConcurrentRingBuffer<VariableChangedMessage> variableChanged = new ConcurrentRingBuffer<>(new VariableChangedMessage.Builder(),
-                                                                                                     CHANGED_BUFFER_CAPACITY);
-
-   public IntraprocessYoVariableLogger(String logName,
-                                       LogModelProvider logModelProvider,
-                                       YoRegistry registry,
-                                       RigidBodyBasics rootBody,
-                                       YoGraphicsListRegistry yoGraphicsListRegistry,
-                                       int maxTicksToRecord,
-                                       double dt)
+   public IntraprocessYoVariableLogger(List<RegistrySendBufferBuilder> registrySendBufferBuilders, double dt, String logName)
    {
-      this(logName,
-           logModelProvider,
-           Lists.newArrayList(new RegistrySendBufferBuilder(registry, rootBody, yoGraphicsListRegistry)),
-           maxTicksToRecord,
-           dt);
+      this(registrySendBufferBuilders, dt, logName, null);
    }
 
-   public IntraprocessYoVariableLogger(String logName,
-                                       YoRegistry registry,
-                                       int maxTicksToRecord,
-                                       double dt)
+   public IntraprocessYoVariableLogger(List<RegistrySendBufferBuilder> registrySendBufferBuilders,
+                                       double dt,
+                                       String logName,
+                                       @Nullable LogModelProvider logModelProvider)
    {
-      this(logName,
-           null,
-           Lists.newArrayList(new RegistrySendBufferBuilder(registry)),
-           maxTicksToRecord,
-           dt);
-   }
-
-   public IntraprocessYoVariableLogger(String logName,
-                                       LogModelProvider logModelProvider,
-                                       List<RegistrySendBufferBuilder> registrySendBufferBuilders,
-                                       int maxTicksToRecord,
-                                       double dt)
-   {
+      this.registrySendBufferBuilders = registrySendBufferBuilders;
+      this.dt = dt;
       this.logName = logName;
       this.logModelProvider = logModelProvider;
-      this.registrySendBufferBuilders = registrySendBufferBuilders;
-      this.maxTicksToRecord = maxTicksToRecord;
-      this.dt = dt;
-      this.incomingLogsFolder = DEFAULT_INCOMING_LOGS_DIRECTORY;
+
+      destroyed = true;
    }
 
-   public void start()
+   public boolean create()
    {
-      DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmssSSS");
-      Calendar calendar = Calendar.getInstance();
-      timestamp = dateFormat.format(calendar.getTime());
-      logFolder = incomingLogsFolder.resolve(timestamp + INTRAPROCESS_LOG_POSTFIX);
-      deleteOldLogs(incomingLogsFolder, 10);
-
-      YoVariableHandShakeBuilder handshakeBuilder = new YoVariableHandShakeBuilder("main", dt);  // might not want this
-      handshakeBuilder.setFrames(ReferenceFrame.getWorldFrame());
-      for (RegistrySendBufferBuilder registrySendBufferBuilder : registrySendBufferBuilders)
-      {
-         handshakeBuilder.addRegistryBuffer(registrySendBufferBuilder);
-      }
-      Handshake handshake = handshakeBuilder.getHandShake();
-
       try
       {
-         YAMLSerializer<Handshake> serializer = new YAMLSerializer<>(new HandshakePubSubType());
-         serializer.serialize(createFileInLogFolder(HANDSHAKE_FILENAME), handshake);
-      }
-      catch (Exception e)
-      {
-         e.printStackTrace();
-      }
+         DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmssSSS");
+         String fileTimestamp = dateFormat.format(Calendar.getInstance().getTime());
+         logFolder = DEFAULT_INCOMING_LOGS_DIRECTORY.resolve(fileTimestamp + logName + INTRAPROCESS_LOG_POSTFIX);
+         FileTools.ensureDirectoryExists(logFolder);
 
-      LogPropertiesWriter logProperties = new LogPropertiesWriter(createFileInLogFolder(PROPERTY_FILE));
-      logProperties.getVariables().setHandshake(HANDSHAKE_FILENAME);
-      logProperties.getVariables().setData(DATA_FILENAME);
-      logProperties.getVariables().setCompressed(true);
-      logProperties.getVariables().setTimestamped(true);
-      logProperties.getVariables().setIndex(INDEX_FILENAME);
-      logProperties.getVariables().setHandshakeFileType(HandshakeFileType.IDL_YAML);
-
-      logProperties.setName(logName);
-      logProperties.setTimestamp(timestamp);
-
-      // create resource zip
-      if (logModelProvider != null)
-      {
-         logProperties.getModel().setLoader(logModelProvider.getLoader().getCanonicalName());
-         logProperties.getModel().setName(logModelProvider.getModelName());
-         for (String resourceDirectory : logModelProvider.getTopLevelResourceDirectories())
+         Path tempFile = logFolder.resolve(".temp");
+         FileTools.deleteQuietly(tempFile);
+         if (!tempFile.toFile().createNewFile())
          {
-            logProperties.getModel().getResourceDirectoriesList().add(resourceDirectory);
-         }
-         logProperties.getModel().setPath(MODEL_FILENAME);
-         logProperties.getModel().setResourceBundle(MODEL_RESOURCE_BUNDLE);
+            // If we failed to create a temp file, try the backup logs dir
+            logFolder = BACKUP_INCOMING_LOGS_DIRECTORY;
+            FileTools.ensureDirectoryExists(logFolder);
 
-         File modelFile = createFileInLogFolder(MODEL_FILENAME);
-         File resourceFile = createFileInLogFolder(MODEL_RESOURCE_BUNDLE);
-         try
-         {
-            FileOutputStream modelStream = new FileOutputStream(modelFile, false);
-            modelStream.write(logModelProvider.getModel());
-            modelStream.getFD().sync();
-            modelStream.close();
-            FileOutputStream resourceStream = new FileOutputStream(resourceFile, false);
-            resourceStream.write(logModelProvider.getResourceZip());
-            resourceStream.getFD().sync();
-            resourceStream.close();
-         }
-         catch (IOException e)
-         {
-            throw new RuntimeException(e);
-         }
-      }
-
-      try
-      {
-         logProperties.store();
-      }
-      catch (IOException e)
-      {
-         e.printStackTrace();
-      }
-
-      int numberOfJointStates = 0;
-      for (int i = 0; i < handshake.getJoints().size(); i++)
-      {
-         JointDefinition joint = handshake.getJoints().get(i);
-         numberOfJointStates += JointState.getNumberOfVariables(joint.getType());
-      }
-
-      int stateVariables = 1 + maxTicksToRecord + numberOfJointStates; // for some reason yovariable registry doesn't have all the variables yet
-      int bufferSize = stateVariables * 8;
-
-      dataBuffer = ByteBuffer.allocate(bufferSize);
-      dataBufferAsLong = dataBuffer.asLongBuffer();
-      compressedBuffer = ByteBuffer.allocate(SnappyUtils.maxCompressedLength(bufferSize));
-      for (RegistrySendBufferBuilder registrySendBufferBuilder : registrySendBufferBuilders)
-      {
-         variables.addAll(registrySendBufferBuilder.getYoRegistry().collectSubtreeVariables());
-      }
-      jointHolders = handshakeBuilder.getJointHolders();
-
-      long numberOfYoGraphics = 0;
-      for (RegistrySendBufferBuilder registrySendBufferBuilder : registrySendBufferBuilders)
-      {
-         if (registrySendBufferBuilder.getSCS1YoGraphics() != null)
-         {
-            for (YoGraphicsList yoGraphicsList : registrySendBufferBuilder.getSCS1YoGraphics().getYoGraphicsLists())
+            if (!tempFile.toFile().createNewFile())
             {
-               numberOfYoGraphics += yoGraphicsList.getYoGraphics().size();
+               // We failed to use both the default and backup logs dir
+               return false;
             }
          }
-      }
-      LogTools.info("Buffer size: {}", bufferSize);
-      LogTools.info("Number of YoVariables: {}", variables.size());
-      LogTools.info("Number of YoGraphics: {}", numberOfYoGraphics);
-      LogTools.info("Number of joint states: {}", numberOfJointStates);
+         FileTools.deleteQuietly(tempFile);
 
-      try
-      {
+         YoVariableHandShakeBuilder handshakeBuilder = new YoVariableHandShakeBuilder("main", dt);
+         handshakeBuilder.setFrames(ReferenceFrame.getWorldFrame());
+
+         for (int i = 0; i < registrySendBufferBuilders.size(); i++)
+            handshakeBuilder.addRegistryBuffer(registrySendBufferBuilders.get(i));
+
+         Handshake handshake = handshakeBuilder.getHandShake();
+
+         YAMLSerializer<Handshake> serializer = new YAMLSerializer<>(new HandshakePubSubType());
+         serializer.serialize(createFileInLogFolder(HANDSHAKE_FILENAME), handshake);
+
+         LogPropertiesWriter logProperties = new LogPropertiesWriter(createFileInLogFolder(PROPERTY_FILE));
+         logProperties.getVariables().setHandshake(HANDSHAKE_FILENAME);
+         logProperties.getVariables().setData(DATA_FILENAME);
+         logProperties.getVariables().setCompressed(true);
+         logProperties.getVariables().setTimestamped(true);
+         logProperties.getVariables().setIndex(INDEX_FILENAME);
+         logProperties.getVariables().setHandshakeFileType(HandshakeFileType.IDL_YAML);
+         logProperties.setName(logName);
+         logProperties.setTimestamp(fileTimestamp);
+
+         if (logModelProvider != null)
+         {
+            logProperties.getModel().setLoader(logModelProvider.getLoader().getCanonicalName());
+            logProperties.getModel().setName(logModelProvider.getModelName());
+            for (int i = 0; i < logModelProvider.getTopLevelResourceDirectories().length; i++)
+            {
+               logProperties.getModel().getResourceDirectoriesList().add(logModelProvider.getTopLevelResourceDirectories()[i]);
+            }
+
+            logProperties.getModel().setPath(MODEL_FILENAME);
+            logProperties.getModel().setResourceBundle(MODEL_RESOURCE_BUNDLE);
+
+            try (FileOutputStream modelStream = new FileOutputStream(createFileInLogFolder(MODEL_FILENAME), false);
+                 FileOutputStream resourceStream = new FileOutputStream(createFileInLogFolder(MODEL_RESOURCE_BUNDLE), false))
+            {
+               modelStream.write(logModelProvider.getModel());
+               modelStream.getFD().sync();
+               resourceStream.write(logModelProvider.getResourceZip());
+               resourceStream.getFD().sync();
+            }
+         }
+
+         logProperties.store();
+
+         variables = new ArrayList<>();
+         for (int i = 0; i < registrySendBufferBuilders.size(); i++)
+         {
+            variables.addAll(registrySendBufferBuilders.get(i).getYoRegistry().collectSubtreeVariables());
+         }
+
+         int numJointStateVars = 0;
+         for (int i = 0; i < handshake.getJoints().size(); i++)
+         {
+            numJointStateVars += JointState.getNumberOfVariables(handshake.getJoints().get(i).getType());
+         }
+
+         int singleTickBufferSize = (1 + variables.size() + numJointStateVars) * Long.BYTES;
+         dataBuffer = ByteBuffer.allocate(singleTickBufferSize);
+         dataBufferAsLong = dataBuffer.asLongBuffer();
+         compressedBuffer = ByteBuffer.allocate(SnappyUtils.maxCompressedLength(singleTickBufferSize));
+         jointHolders = handshakeBuilder.getJointHolders();
+         variableValues = new long[variables.size()];
+
+         long numYoGraphics = registrySendBufferBuilders.stream()
+                                                        .filter(b -> b.getSCS2YoGraphics() != null)
+                                                        .mapToLong(b -> b.getSCS2YoGraphics().getChildren().size()).sum();
+
+         LogTools.info("Buffer size: {}", singleTickBufferSize);
+         LogTools.info("Number of YoVariables: {}", variables.size());
+         LogTools.info("Number of YoGraphics: {}", numYoGraphics);
+         LogTools.info("Number of joint states: {}", numJointStateVars);
+
+         /*
+          * Compression and serialization
+          */
+         indexBuffer = ByteBuffer.allocate(2 * Long.BYTES);
+         compressionBufferRing = new ConcurrentRingBuffer<>(() -> ByteBuffer.allocate(singleTickBufferSize), 2);
+         compressionThread = new RepeatingTaskThread("IntraprocessLoggerCompressionThread", () ->
+         {
+            synchronized (compressionThreadLock)
+            {
+               compressionThreadLock.wait();
+            }
+
+            if (compressionBufferRing.poll())
+            {
+               ByteBuffer data;
+
+               while ((data = compressionBufferRing.read()) != null)
+               {
+                  compressedBuffer.clear();
+                  data.position(0);
+                  SnappyUtils.compress(data, compressedBuffer);
+                  compressedBuffer.flip();
+
+                  long timestamp = data.getLong(0);
+
+                  indexBuffer.clear();
+                  indexBuffer.putLong(timestamp);
+                  indexBuffer.putLong(dataChannel.position());
+                  indexBuffer.flip();
+
+                  try
+                  {
+                     long ignored0 = indexChannel.write(indexBuffer);
+                     long ignored1 = dataChannel.write(compressedBuffer);
+                  }
+                  catch (IOException e)
+                  {
+                     LogTools.error("Could not log to: " + logFolder.toAbsolutePath());
+                     LogTools.error("Stopping Intraprocess logger...");
+
+                     destroy();
+
+                     compressionThread.blockingKill();
+                  }
+               }
+
+               compressionBufferRing.flush();
+            }
+         });
          dataChannel = new FileOutputStream(createFileInLogFolder(DATA_FILENAME), false).getChannel();
          indexChannel = new FileOutputStream(createFileInLogFolder(INDEX_FILENAME), false).getChannel();
          dataChannel.force(true);
          indexChannel.force(true);
+
+         compressionThread.startRepeating();
+
+         destroyed = false;
+
       }
       catch (Exception e)
       {
-         e.printStackTrace();
+         return false;
       }
 
-      Runtime.getRuntime().addShutdownHook(new Thread(() ->
-      {
-         shutdown = true;
-         synchronized (this)
-         {
-            try
-            {
-               LogTools.info("Closing data channel...");
-               dataChannel.close();
-               LogTools.info("Data channel closed.");
-               LogTools.info("Closing index channel...");
-               indexChannel.close();
-               LogTools.info("Index channel closed.");
-            }
-            catch (IOException e)
-            {
-               e.printStackTrace();
-            }
-         }
-      }, getClass().getSimpleName() + "Shutdown"));
+      return true;
    }
+
+   public boolean isDestroyed()
+   {
+      return destroyed;
+   }
+
+   public synchronized void destroy()
+   {
+      destroyed = true;
+      compressionThread.blockingKill();
+      try
+      {
+         dataChannel.close();
+         indexChannel.close();
+      }
+      catch (IOException e)
+      {
+         LogTools.error(e);
+      }
+   }
+
+   private final double[] jointData = new double[13];
 
    public synchronized void update(long timestamp)
    {
-      if (shutdown)
+      if (destroyed)
       {
-         LogTools.error("Logger has already shutdown!");
          return;
       }
 
       dataBuffer.clear();
       dataBufferAsLong.clear();
-
       dataBufferAsLong.put(timestamp);
-      for (int i = 0; i < variables.size(); i++)
+
+      try
       {
-         try
-         {
-            dataBufferAsLong.put(variables.get(i).getValueAsLongBits());
-         }
-         catch (BufferOverflowException e)
-         {
-            LogTools.error("Increase buffer size! yoVar # {}:  size: {}  {}", i, variables.size(), e.getMessage());
-         }
+         for (int i = 0; i < variables.size(); i++)
+            variableValues[i] = variables.get(i).getValueAsLongBits();
+
+         dataBufferAsLong.put(variableValues, 0, variables.size());
+      }
+      catch (BufferOverflowException e)
+      {
+         LogTools.error("Increase buffer size! size: {} {}", variables.size(), e.getMessage());
       }
 
-      double[] jointData = new double[13];
-      for (JointHolder jointHolder : jointHolders)
+      for (int i = 0; i < jointHolders.size(); i++)
       {
+         JointHolder jointHolder = jointHolders.get(i);
          jointHolder.get(jointData, 0);
-
-         for (int i = 0; i < jointHolder.getNumberOfStateVariables(); i++)
-         {
-            dataBufferAsLong.put(Double.doubleToLongBits(jointData[i]));
-         }
+         for (int j = 0; j < jointHolder.getNumberOfStateVariables(); j++)
+            dataBufferAsLong.put(Double.doubleToLongBits(jointData[j]));
       }
 
       dataBufferAsLong.flip();
       dataBuffer.position(0);
-      dataBuffer.limit(dataBufferAsLong.limit() * 8);
+      dataBuffer.limit(dataBufferAsLong.limit() * Long.BYTES);
 
-      try
+      ByteBuffer writeBuffer = compressionBufferRing.next();
+
+      if (writeBuffer != null)
       {
-         compressedBuffer.clear();
-         SnappyUtils.compress(dataBuffer, compressedBuffer);
-         compressedBuffer.flip();
+         writeBuffer.position(0);
+         writeBuffer.put(dataBuffer);
 
-         indexBuffer.clear();
-         indexBuffer.putLong(timestamp);
-         indexBuffer.putLong(dataChannel.position());
-         indexBuffer.flip();
-
-         indexChannel.write(indexBuffer);
-         dataChannel.write(compressedBuffer);
+         compressionBufferRing.commit();
       }
-      catch (IOException e)
-      {
-         e.printStackTrace();
-      }
-   }
 
-   public void deleteOldLogs(Path incomingLogsFolder, int numberOflogsToKeep)
-   {
-      SortedSet<Path> sortedSet = new TreeSet<>(Comparator.comparing(path1 -> path1.getFileName().toString()));
-      PathTools.walkFlat(incomingLogsFolder, (path, type) -> {
-         if (type == BasicPathVisitor.PathType.DIRECTORY && path.getFileName().toString().endsWith(INTRAPROCESS_LOG_POSTFIX))
-            sortedSet.add(path);
-         return FileVisitResult.CONTINUE;
-      });
-
-      while (sortedSet.size() > numberOflogsToKeep)
+      synchronized (compressionThreadLock)
       {
-         Path earliestLogDirectory = sortedSet.first();
-         LogTools.warn("Deleting old log {}", earliestLogDirectory);
-         FileTools.deleteQuietly(earliestLogDirectory);
-         sortedSet.remove(earliestLogDirectory);
+         compressionThreadLock.notify();
       }
    }
 

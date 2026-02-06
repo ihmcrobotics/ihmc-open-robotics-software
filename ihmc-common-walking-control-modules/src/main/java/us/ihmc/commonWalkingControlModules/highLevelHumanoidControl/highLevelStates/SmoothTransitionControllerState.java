@@ -3,13 +3,13 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.lists.PairList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
-import us.ihmc.commons.lists.PairList;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
@@ -26,7 +26,7 @@ public class SmoothTransitionControllerState extends HighLevelControllerState
    private final YoDouble standTransitionRatioCurrentValue;
    private final YoPolynomial transitionRatioTrajectory;
 
-   private final PairList<OneDoFJointBasics, JointControlBlender> jointCommandBlenders = new PairList<>();
+   private final PairList<OneDoFJointBasics, CommandBlender> jointCommandBlenders = new PairList<>();
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
    private final HighLevelControllerState initialControllerState;
@@ -41,6 +41,25 @@ public class SmoothTransitionControllerState extends HighLevelControllerState
                                           HighLevelControllerParameters highLevelControllerParameters,
                                           CommandInputManager commandInputManager)
    {
+      this(namePrefix,
+           controllerState,
+           initialControllerState,
+           finalControllerState,
+           controlledJoints,
+           highLevelControllerParameters,
+           commandInputManager,
+           new JointControlBlenderFactory());
+   }
+
+   public SmoothTransitionControllerState(String namePrefix,
+                                          HighLevelControllerName controllerState,
+                                          HighLevelControllerState initialControllerState,
+                                          HighLevelControllerState finalControllerState,
+                                          OneDoFJointBasics[] controlledJoints,
+                                          HighLevelControllerParameters highLevelControllerParameters,
+                                          CommandInputManager commandInputManager,
+                                          CommandBlenderFactory commandBlenderFactory)
+   {
       super(namePrefix, controllerState, controlledJoints);
 
       this.initialControllerState = initialControllerState;
@@ -51,7 +70,10 @@ public class SmoothTransitionControllerState extends HighLevelControllerState
                                                        "When true, the ramp up follows a linear time-based trajectory, when false, the user has to ramp up manually TransitionRatioCurrentValue through SCS.",
                                                        registry,
                                                        true);
-      standTransitionDuration = new DoubleParameter(namePrefix + "TransitionDuration", registry, highLevelControllerParameters.getTimeInStandTransition(controllerState));
+      standTransitionDuration = new DoubleParameter(namePrefix + "TransitionDuration",
+                                                    registry,
+                                                    highLevelControllerParameters.getTimeInStandTransition(
+                                                          controllerState));
       standTransitionRatioCurrentValue = new YoDouble(namePrefix + "TransitionRatioCurrentValue", registry);
       transitionRatioTrajectory = new YoPolynomial(namePrefix + "TransitionRatioTrajectory", 2, registry);
 
@@ -61,8 +83,8 @@ public class SmoothTransitionControllerState extends HighLevelControllerState
 
       for (OneDoFJointBasics controlledJoint : controlledJoints)
       {
-         JointControlBlender jointControlBlender = new JointControlBlender("_StandTransition", controlledJoint, registryForBlenders);
-         jointCommandBlenders.add(controlledJoint, jointControlBlender);
+         CommandBlender commandBlender = commandBlenderFactory.create(controlledJoint, registryForBlenders);
+         jointCommandBlenders.add(controlledJoint, commandBlender);
       }
    }
 
@@ -108,14 +130,14 @@ public class SmoothTransitionControllerState extends HighLevelControllerState
       for (int jointIndex = 0; jointIndex < jointCommandBlenders.size(); jointIndex++)
       {
          OneDoFJointBasics joint = jointCommandBlenders.get(jointIndex).getLeft();
-         JointControlBlender jointControlBlender = jointCommandBlenders.get(jointIndex).getRight();
+         CommandBlender commandBlender = jointCommandBlenders.get(jointIndex).getRight();
          JointDesiredOutputBasics lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
          lowLevelJointData.clear();
 
-         jointControlBlender.computeAndUpdateJointControl(lowLevelJointData,
-                                                          standReadyJointCommand.getJointDesiredOutput(joint),
-                                                          walkingJointCommand.getJointDesiredOutput(joint),
-                                                          gainRatio);
+         commandBlender.computeAndUpdateJointControl(lowLevelJointData,
+                                                     standReadyJointCommand.getJointDesiredOutput(joint),
+                                                     walkingJointCommand.getJointDesiredOutput(joint),
+                                                     gainRatio);
       }
    }
 

@@ -10,8 +10,8 @@ import ihmc_common_msgs.msg.dds.PoseListMessage;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import imgui.type.ImBoolean;
-import perception_msgs.msg.dds.HeightMapMessage;
-import perception_msgs.msg.dds.HeightMapMessagePubSubType;
+import perception_msgs.msg.dds.TerrainMapMessage;
+import perception_msgs.msg.dds.TerrainMapMessagePubSubType;
 import us.ihmc.behaviors.activeMapping.StancePoseCalculator;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -23,8 +23,8 @@ import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
 import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
-import us.ihmc.perception.heightMap.HeightMapMessageTools;
-import us.ihmc.footstepPlanning.steppableRegions.TerrainMapData;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
+import us.ihmc.perception.gpuMapping.TerrainMapMessageTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
@@ -39,7 +39,6 @@ import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.tools.IHMCCommonPaths;
 
 import java.io.File;
@@ -98,12 +97,11 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
       pickPointSphere = RDXModelBuilder.createSphere(0.04f, Color.CYAN);
    }
 
-   public void update(TerrainMapData latestTerrainMapData, HeightMapData latestHeightMapData)
+   public void update(TerrainMapData latestTerrainMapData)
    {
-      environmentHandler.setHeightMapData(latestHeightMapData);
       environmentHandler.setTerrainMapData(latestTerrainMapData);
 
-      if (environmentHandler.hasTerrainMapData() && environmentHandler.hasHeightMap())
+      if (environmentHandler.hasTerrainMapData())
       {
          TerrainMapData terrainMapData = environmentHandler.getTerrainMapData();
 
@@ -160,7 +158,7 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
    {
       if (ImGui.button("Save Height Map To File"))
       {
-         saveHeightMapToFile(environmentHandler.getHeightMapData());
+         saveHeightMapToFile(environmentHandler.getTerrainMapData());
       }
 
       // Allow for visualizing the stance pose grid
@@ -175,9 +173,9 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
 
       TerrainMapData terrainMapData = environmentHandler.getTerrainMapData();
       ImGui.text("World Point: " + latestPickPoint.getTranslation().toString("%.3f"));
-      if (terrainMapData != null && terrainMapData.getHeightMapData() != null)
+      if (terrainMapData != null)
       {
-         ImGui.text("Height: " + terrainMapData.getHeightInWorld(latestPickPoint.getTranslation().getX32(), latestPickPoint.getTranslation().getY32()));
+         ImGui.text("Height: " + terrainMapData.getHeight(latestPickPoint.getTranslation().getX32(), latestPickPoint.getTranslation().getY32()));
          ImGui.text(
                "Traversability Score: " + terrainMapData.getTraversabilityScore(latestPickPoint.getTranslation().getX32(), latestPickPoint.getTranslation().getY32()));
       }
@@ -270,12 +268,12 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
       rightSpheres.clear();
    }
 
-   public void saveHeightMapToFile(HeightMapData heightMapData)
+   public void saveHeightMapToFile(TerrainMapData terrainMapData)
    {
-      HeightMapMessage heightMapMessage = new HeightMapMessage();
-      HeightMapMessageTools.toMessage(heightMapData, heightMapMessage);
+      TerrainMapMessage terrainMapMessage = new TerrainMapMessage();
+      TerrainMapMessageTools.toMessage(terrainMapData, terrainMapMessage);
 
-      JSONSerializer<HeightMapMessage> heightMapSerializer = new JSONSerializer<>(new HeightMapMessagePubSubType());
+      JSONSerializer<TerrainMapMessage> heightMapSerializer = new JSONSerializer<>(new TerrainMapMessagePubSubType());
 
       String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss_SSS"));
       Path heightMapDirectory = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY;
@@ -289,7 +287,7 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
 
          String heightMapDirectoryString = heightMapDirectory.toString();
          File heightMapFile = new File(heightMapDirectoryString + "/" + timestamp + "_HeightMapData.json");
-         heightMapSerializer.serialize(heightMapFile, heightMapMessage);
+         heightMapSerializer.serialize(heightMapFile, terrainMapMessage);
       }
       catch (IOException e)
       {

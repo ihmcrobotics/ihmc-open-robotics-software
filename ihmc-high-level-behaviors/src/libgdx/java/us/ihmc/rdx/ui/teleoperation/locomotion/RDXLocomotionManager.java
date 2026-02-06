@@ -20,6 +20,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerPar
 import us.ihmc.footstepPlanning.graphSearch.parameters.InitialStanceSide;
 import us.ihmc.footstepPlanning.LocomotionParameters;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.rdx.imgui.ImGuiSliderDouble;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -34,9 +35,7 @@ import us.ihmc.rdx.ui.teleoperation.RDXLegControlMode;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.tools.Timer;
-import us.ihmc.tools.property.BooleanStoredPropertyKey;
 
 /**
  * This class provides easy access to everything that involves mobility for the robot's legs.
@@ -73,6 +72,7 @@ public class RDXLocomotionManager
    private ImGuiStoredPropertySetBooleanWidget planBodyPathCheckbox;
    private ImGuiStoredPropertySetDoubleWidget swingTimeSlider;
    private ImGuiStoredPropertySetDoubleWidget transferTimeSlider;
+   private ImGuiStoredPropertySetDoubleWidget swingHeightSlider;
    private ImGuiSliderDouble stepAggressivenessSlider;
    private ImGuiSliderDouble turnAggressivenessSlider;
    private ImGuiStoredPropertySetEnumWidget initialStanceSideRadioButtons;
@@ -157,6 +157,7 @@ public class RDXLocomotionManager
       planBodyPathCheckbox = locomotionParametersTuner.createBooleanCheckbox(LocomotionParameters.planWidthBodyPath);
       swingTimeSlider = locomotionParametersTuner.createDoubleSlider(LocomotionParameters.swingTime, "s", 0.3, 1.5, "%.2f", true);
       transferTimeSlider = locomotionParametersTuner.createDoubleSlider(LocomotionParameters.transferTime, "s", 0.1, 1.5, "%.2f", true);
+      swingHeightSlider = locomotionParametersTuner.createDoubleSlider(LocomotionParameters.swingHeight, "m", 0.1, 1.5, "%.2f", true);
       stepAggressivenessSlider = new ImGuiSliderDouble("Step Aggressiveness", "%.2f",aStarFootstepPlannerParameters.getIdealFootstepLength()
                                                                                      / aStarFootstepPlannerParameters.getMaxStepReach());
       turnAggressivenessSlider = new ImGuiSliderDouble("Turn Aggressiveness", "%.2f", 0.5);
@@ -378,6 +379,11 @@ public class RDXLocomotionManager
          ImGui.setCursorPosX(widgetStartX);
          ImGui.setNextItemWidth(-1);
          transferTimeSlider.renderImGuiWidget();
+         ImGui.text("Swing Height:");
+         ImGui.sameLine();
+         ImGui.setCursorPosX(widgetStartX);
+         ImGui.setNextItemWidth(-1);
+         swingHeightSlider.renderImGuiWidget();
          ImGui.text("Step Aggressiveness:");
          ImGui.sameLine();
          ImGui.setCursorPosX(widgetStartX);
@@ -559,11 +565,11 @@ public class RDXLocomotionManager
       }
    }
 
-   public void setHeightMapData(HeightMapData heightMapData)
+   public void setTerrainMapData(TerrainMapData terrainMapData)
    {
-      footstepPlanning.setHeightMapData(heightMapData);
-      interactableFootstepPlan.setHeightMapMessage(heightMapData);
-      manualFootstepPlacement.setHeightMapData(heightMapData);
+      footstepPlanning.setTerrainMapData(terrainMapData);
+      interactableFootstepPlan.setHeightMapMessage(terrainMapData);
+      manualFootstepPlacement.setTerrainMapData(terrainMapData);
    }
 
    public LocomotionParameters getLocomotionParameters()

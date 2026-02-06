@@ -39,7 +39,7 @@ public abstract class SingleSupportState extends WalkingState
       this.supportSide = singleSupportStateEnum.getSupportSide();
       swingSide = supportSide.getOppositeSide();
 
-      minimumSwingFraction.set(0.5);
+      minimumSwingFraction.set(0.6);
 
       this.walkingMessageHandler = walkingMessageHandler;
       walkingTrajectoryPath = controllerToolbox.getWalkingTrajectoryPath();

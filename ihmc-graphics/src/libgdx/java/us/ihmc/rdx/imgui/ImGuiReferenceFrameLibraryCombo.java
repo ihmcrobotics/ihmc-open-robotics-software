@@ -3,7 +3,6 @@ package us.ihmc.rdx.imgui;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import org.apache.commons.lang3.ArrayUtils;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -14,12 +13,14 @@ import java.util.function.Supplier;
  * Used to select between the reference frames in a library by human readable names.
  * It also includes any values that the user already might have and keeps those around
  * even if deselected. Also, this is done immediate mode style.
+ *
+ * TODO: Fix up with new design. Probably rename to be less general, like RDXBehaviorSceneFrameSelector...
  */
 public class ImGuiReferenceFrameLibraryCombo
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final String comboName;
-   private final ReferenceFrameLibrary referenceFrameLibrary;
+   private final Consumer<Consumer<String>> frameSupplier;
    private final Supplier<String> currentFrameNameGetter;
    private final Consumer<String> currentFrameNameSetter;
    private final SortedSet<String> referenceFrameLibraryNames = new TreeSet<>();
@@ -29,12 +30,12 @@ public class ImGuiReferenceFrameLibraryCombo
    private transient String[] selectableReferenceFrameNameArray = new String[0];
 
    public ImGuiReferenceFrameLibraryCombo(String comboName,
-                                          ReferenceFrameLibrary referenceFrameLibrary,
+                                          Consumer<Consumer<String>> frameSupplier,
                                           Supplier<String> currentFrameNameGetter,
                                           Consumer<String> currentFrameNameSetter)
    {
       this.comboName = comboName;
-      this.referenceFrameLibrary = referenceFrameLibrary;
+      this.frameSupplier = frameSupplier;
       this.currentFrameNameGetter = currentFrameNameGetter;
       this.currentFrameNameSetter = currentFrameNameSetter;
    }
@@ -42,7 +43,7 @@ public class ImGuiReferenceFrameLibraryCombo
    public void render()
    {
       referenceFrameLibraryNames.clear();
-      referenceFrameLibrary.getAllFrameNames(referenceFrameLibraryNames::add);
+      frameSupplier.accept(referenceFrameLibraryNames::add);
 
       selectableReferenceFrameNames.add(currentFrameNameGetter.get());
       selectableReferenceFrameNames.addAll(referenceFrameLibraryNames);

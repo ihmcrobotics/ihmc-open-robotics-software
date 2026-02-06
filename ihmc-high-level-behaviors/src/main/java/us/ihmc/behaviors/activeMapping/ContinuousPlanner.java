@@ -162,7 +162,6 @@ public class ContinuousPlanner
       request.setAssumeFlatGround(false);
       request.setPlanBodyPath(false);
       request.setRequestedInitialStanceSide(imminentFootstepSide);
-      request.setHeightMapData(environmentHandler.getHeightMapData());
       request.setTerrainMapData(environmentHandler.getTerrainMapData());
       request.setSnapGoalSteps(true);
       request.setAbortIfGoalStepSnappingFails(true);

@@ -5,14 +5,13 @@ import org.bytedeco.opencv.opencv_core.GpuMat;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.sensors.CameraIntrinsics;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.sensors.ImageSensor;
@@ -22,10 +21,13 @@ import us.ihmc.zed.SL_PositionalTrackingParameters;
 import us.ihmc.zed.SL_Quaternion;
 import us.ihmc.zed.SL_RuntimeParameters;
 import us.ihmc.zed.SL_Vector3;
+import us.ihmc.zed.ZEDException;
 import us.ihmc.zed.library.ZEDJavaAPINativeLibrary;
 
 import java.time.Instant;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import static us.ihmc.zed.ZEDTools.throwOnError;
 import static us.ihmc.zed.global.zed.*;
 
 public class ZEDImageSensor extends ImageSensor
@@ -35,7 +37,7 @@ public class ZEDImageSensor extends ImageSensor
       ZEDJavaAPINativeLibrary.load();
    }
 
-   private static int nextStreamingPort = 30000;
+   private static final AtomicInteger nextStreamingPort = new AtomicInteger(30000);
 
    public static final int LEFT_COLOR_IMAGE_KEY = 0;
    public static final int RIGHT_COLOR_IMAGE_KEY = 1;
@@ -48,6 +50,7 @@ public class ZEDImageSensor extends ImageSensor
    private static final float MILLIMETER_TO_METERS = 0.001f;
 
    private final int cameraID;
+   private final int serialNumber;
    private final ZEDModelData zedModel;
    private final int slInputType;
    private final int slDepthMode;
@@ -56,7 +59,7 @@ public class ZEDImageSensor extends ImageSensor
    private int bitrate;
    private String remoteStreamingAddress;
    private int remoteStreamingPort;
-   private final int localStreamingPort = nextStreamingPort++;
+   private final int localStreamingPort = nextStreamingPort.getAndAdd(2);
 
    private final RawImage[] grabbedImages = new RawImage[OUTPUT_IMAGE_COUNT];
    private final Pointer[] slMatPointers = new Pointer[OUTPUT_IMAGE_COUNT];
@@ -79,12 +82,18 @@ public class ZEDImageSensor extends ImageSensor
 
    private boolean positionalTrackingEnabled = false;
    private final MutableReferenceFrame trackedSensorFrame;
+   private final RigidBodyTransform trackedPoseOffset = new RigidBodyTransform();
    private final SL_Quaternion sensorRotation = new SL_Quaternion();
    private final SL_Vector3 sensorTranslation = new SL_Vector3();
 
    public ZEDImageSensor(int cameraID, ZEDModelData zedModel, int slInputType, int slDepthMode)
    {
       this(cameraID, zedModel, slInputType, slDepthMode, DEFAULT_RESOLUTION, DEFAULT_FPS);
+   }
+
+   public ZEDImageSensor(int cameraID, ZEDModelData zedModel, int slInputType, int slDepthMode, int resolution, int fps)
+   {
+      this(cameraID, 0, zedModel, slInputType, slDepthMode, resolution, fps);
    }
 
    /**
@@ -99,11 +108,12 @@ public class ZEDImageSensor extends ImageSensor
     *    <li>{@link us.ihmc.zed.global.zed#SL_RESOLUTION_VGA}</li>
     * </ul>
     */
-   public ZEDImageSensor(int cameraID, ZEDModelData zedModel, int slInputType, int slDepthMode, int resolution, int fps)
+   public ZEDImageSensor(int cameraID, int serialNumber, ZEDModelData zedModel, int slInputType, int slDepthMode, int resolution, int fps)
    {
       super(zedModel.name());
 
       this.cameraID = cameraID;
+      this.serialNumber = serialNumber;
       this.zedModel = zedModel;
       this.slInputType = slInputType;
       this.slDepthMode = slDepthMode;
@@ -118,7 +128,7 @@ public class ZEDImageSensor extends ImageSensor
       // Set runtime parameters to default values
       zedRuntimeParameters.reference_frame(SL_REFERENCE_FRAME_CAMERA);
       zedRuntimeParameters.enable_depth(slDepthMode != SL_DEPTH_MODE_NONE);
-      zedRuntimeParameters.confidence_threshold(70);
+      zedRuntimeParameters.confidence_threshold(50);
       zedRuntimeParameters.texture_confidence_threshold(100);
       zedRuntimeParameters.remove_saturated_areas(true);
       zedRuntimeParameters.enable_fill_mode(false);
@@ -133,6 +143,11 @@ public class ZEDImageSensor extends ImageSensor
 
       this.remoteStreamingAddress = remoteStreamingAddress;
       this.remoteStreamingPort = remoteStreamingPort;
+   }
+
+   public void setTrackedPoseOffset(RigidBodyTransformReadOnly offset)
+   {
+      trackedPoseOffset.set(offset);
    }
 
    private void updateReferenceFrames()
@@ -255,9 +270,9 @@ public class ZEDImageSensor extends ImageSensor
    protected int openCamera()
    {
       if (slInputType == SL_INPUT_TYPE_STREAM)
-         return sl_open_camera(cameraID, zedInitParameters, 0, "", remoteStreamingAddress, remoteStreamingPort, "", "", "");
+         return sl_open_camera(cameraID, zedInitParameters, serialNumber, "", remoteStreamingAddress, remoteStreamingPort, "", "", "");
       else
-         return sl_open_camera(cameraID, zedInitParameters, 0, "", "", 0, "", "", "");
+         return sl_open_camera(cameraID, zedInitParameters, serialNumber, "", "", 0, "", "", "");
    }
 
    @Override
@@ -291,7 +306,7 @@ public class ZEDImageSensor extends ImageSensor
                sensorTranslation.z(0.0f);
 
                sl_reset_positional_tracking(cameraID, sensorRotation, sensorTranslation);
-               trackedSensorFrame.update(RigidBodyTransformBasics::setToZero);
+               trackedSensorFrame.update(transform -> transform.set(trackedPoseOffset));
             }
 
             return false;
@@ -311,7 +326,12 @@ public class ZEDImageSensor extends ImageSensor
             Quaternion euclidRotation = new Quaternion(sensorRotation.x(), sensorRotation.y(), sensorRotation.z(), sensorRotation.w());
             Vector3D euclidTranslation = new Vector3D(sensorTranslation.x(), sensorTranslation.y(), sensorTranslation.z());
             if (!euclidRotation.containsNaN() && !euclidTranslation.containsNaN())
-               trackedSensorFrame.update(transformToWorld -> transformToWorld.set(euclidRotation, euclidTranslation));
+               trackedSensorFrame.update(transformToWorld ->
+                                         {
+                                            transformToWorld.set(euclidRotation, euclidTranslation);
+                                            transformToWorld.prependOrientation(trackedPoseOffset.getRotation());
+                                            transformToWorld.prependTranslation(trackedPoseOffset.getTranslation());
+                                         });
          }
 
          // Retrieve the grabbed depth image
@@ -452,80 +472,16 @@ public class ZEDImageSensor extends ImageSensor
          }
       }
 
-      for (RawImage image : grabbedImages)
-         if (image != null)
-            image.release();
+      synchronized (grabbedImages)
+      {
+         for (RawImage image : grabbedImages)
+            if (image != null)
+               image.release();
+      }
 
       sl_close_camera(cameraID);
 
       System.out.println("Closed " + getClass().getSimpleName());
-   }
-
-   private void throwOnError(int errorCode) throws ZEDException
-   {
-      if (errorCode != SL_ERROR_CODE_SUCCESS)
-         throw new ZEDException(errorCode);
-   }
-
-   private class ZEDException extends Exception
-   {
-      private final int zedErrorCode;
-
-      public ZEDException(int zedErrorCode)
-      {
-         this.zedErrorCode = zedErrorCode;
-      }
-
-      @Override
-      public String getMessage()
-      {
-         return "ZED Error (%d): %s".formatted(zedErrorCode, getZEDErrorName(zedErrorCode));
-      }
-   }
-
-   private String getZEDErrorName(int errorCode)
-   {
-      return switch (errorCode)
-      {
-         case SL_ERROR_CODE_CORRUPTED_FRAME -> "SL_ERROR_CODE_CORRUPTED_FRAME";
-         case SL_ERROR_CODE_CAMERA_REBOOTING -> "SL_ERROR_CODE_CAMERA_REBOOTING";
-         case SL_ERROR_CODE_SUCCESS -> "SL_ERROR_CODE_SUCCESS";
-         case SL_ERROR_CODE_FAILURE -> "SL_ERROR_CODE_FAILURE";
-         case SL_ERROR_CODE_NO_GPU_COMPATIBLE -> "SL_ERROR_CODE_NO_GPU_COMPATIBLE";
-         case SL_ERROR_CODE_NOT_ENOUGH_GPU_MEMORY -> "SL_ERROR_CODE_NOT_ENOUGH_GPU_MEMORY";
-         case SL_ERROR_CODE_CAMERA_NOT_DETECTED -> "SL_ERROR_CODE_CAMERA_NOT_DETECTED";
-         case SL_ERROR_CODE_SENSORS_NOT_INITIALIZED -> "SL_ERROR_CODE_SENSORS_NOT_INITIALIZED";
-         case SL_ERROR_CODE_SENSORS_NOT_AVAILABLE -> "SL_ERROR_CODE_SENSORS_NOT_AVAILABLE";
-         case SL_ERROR_CODE_INVALID_RESOLUTION -> "SL_ERROR_CODE_INVALID_RESOLUTION";
-         case SL_ERROR_CODE_LOW_USB_BANDWIDTH -> "SL_ERROR_CODE_LOW_USB_BANDWIDTH";
-         case SL_ERROR_CODE_CALIBRATION_FILE_NOT_AVAILABLE -> "SL_ERROR_CODE_CALIBRATION_FILE_NOT_AVAILABLE";
-         case SL_ERROR_CODE_INVALID_CALIBRATION_FILE -> "SL_ERROR_CODE_INVALID_CALIBRATION_FILE";
-         case SL_ERROR_CODE_INVALID_SVO_FILE -> "SL_ERROR_CODE_INVALID_SVO_FILE";
-         case SL_ERROR_CODE_SVO_RECORDING_ERROR -> "SL_ERROR_CODE_SVO_RECORDING_ERROR";
-         case SL_ERROR_CODE_SVO_UNSUPPORTED_COMPRESSION -> "SL_ERROR_CODE_SVO_UNSUPPORTED_COMPRESSION";
-         case SL_ERROR_CODE_END_OF_SVOFILE_REACHED -> "SL_ERROR_CODE_END_OF_SVOFILE_REACHED";
-         case SL_ERROR_CODE_INVALID_COORDINATE_SYSTEM -> "SL_ERROR_CODE_INVALID_COORDINATE_SYSTEM";
-         case SL_ERROR_CODE_INVALID_FIRMWARE -> "SL_ERROR_CODE_INVALID_FIRMWARE";
-         case SL_ERROR_CODE_INVALID_FUNCTION_PARAMETERS -> "SL_ERROR_CODE_INVALID_FUNCTION_PARAMETERS";
-         case SL_ERROR_CODE_CUDA_ERROR -> "SL_ERROR_CODE_CUDA_ERROR";
-         case SL_ERROR_CODE_CAMERA_NOT_INITIALIZED -> "SL_ERROR_CODE_CAMERA_NOT_INITIALIZED";
-         case SL_ERROR_CODE_NVIDIA_DRIVER_OUT_OF_DATE -> "SL_ERROR_CODE_NVIDIA_DRIVER_OUT_OF_DATE";
-         case SL_ERROR_CODE_INVALID_FUNCTION_CALL -> "SL_ERROR_CODE_INVALID_FUNCTION_CALL";
-         case SL_ERROR_CODE_CORRUPTED_SDK_INSTALLATION -> "SL_ERROR_CODE_CORRUPTED_SDK_INSTALLATION";
-         case SL_ERROR_CODE_INCOMPATIBLE_SDK_VERSION -> "SL_ERROR_CODE_INCOMPATIBLE_SDK_VERSION";
-         case SL_ERROR_CODE_INVALID_AREA_FILE -> "SL_ERROR_CODE_INVALID_AREA_FILE";
-         case SL_ERROR_CODE_INCOMPATIBLE_AREA_FILE -> "SL_ERROR_CODE_INCOMPATIBLE_AREA_FILE";
-         case SL_ERROR_CODE_CAMERA_FAILED_TO_SETUP -> "SL_ERROR_CODE_CAMERA_FAILED_TO_SETUP";
-         case SL_ERROR_CODE_CAMERA_DETECTION_ISSUE -> "SL_ERROR_CODE_CAMERA_DETECTION_ISSUE";
-         case SL_ERROR_CODE_CANNOT_START_CAMERA_STREAM -> "SL_ERROR_CODE_CANNOT_START_CAMERA_STREAM";
-         case SL_ERROR_CODE_NO_GPU_DETECTED -> "SL_ERROR_CODE_NO_GPU_DETECTED";
-         case SL_ERROR_CODE_PLANE_NOT_FOUND -> "SL_ERROR_CODE_PLANE_NOT_FOUND";
-         case SL_ERROR_CODE_MODULE_NOT_COMPATIBLE_WITH_CAMERA -> "SL_ERROR_CODE_MODULE_NOT_COMPATIBLE_WITH_CAMERA";
-         case SL_ERROR_CODE_MOTION_SENSORS_REQUIRED -> "SL_ERROR_CODE_MOTION_SENSORS_REQUIRED";
-         case SL_ERROR_CODE_MODULE_NOT_COMPATIBLE_WITH_CUDA_VERSION -> "SL_ERROR_CODE_MODULE_NOT_COMPATIBLE_WITH_CUDA_VERSION";
-         case SL_ERROR_CODE_SENSORS_DATA_REQUIRED -> "SL_ERROR_CODE_SENSORS_DATA_REQUIRED";
-         default -> "UNKNOWN";
-      };
    }
 
    private static int calculateBitrate(int width, int height, int fps)

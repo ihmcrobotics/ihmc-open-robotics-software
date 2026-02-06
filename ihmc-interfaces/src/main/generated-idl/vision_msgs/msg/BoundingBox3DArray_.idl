@@ -1,0 +1,23 @@
+#ifndef __vision_msgs__msg__BoundingBox3DArray__idl__
+#define __vision_msgs__msg__BoundingBox3DArray__idl__
+
+#include "std_msgs/msg/./Header_.idl"
+#include "vision_msgs/msg/./BoundingBox3D_.idl"
+module vision_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="vision_msgs::msg::dds_::BoundingBox3DArray_")
+      struct BoundingBox3DArray
+      {
+        std_msgs::msg::dds::Header header;
+        sequence<vision_msgs::msg::dds::BoundingBox3D> boxes;
+      };
+    };
+  };
+};
+
+#endif

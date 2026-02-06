@@ -1,6 +1,7 @@
 package us.ihmc.robotics.occupancyGrid;
 
-import com.esotericsoftware.kryo.util.IntMap;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -32,7 +33,7 @@ public class OccupancyGrid
 
    private final AtomicBoolean resetOccupancyGrid = new AtomicBoolean();
 
-   final IntMap<OccupancyGridCell> occupancyCellMap = new IntMap<>();
+   final TIntObjectMap<OccupancyGridCell> occupancyCellMap = new TIntObjectHashMap<>();
    final List<OccupancyGridCell> allCellsPool = new ArrayList<>();
    private final List<OccupancyGridCell> allActiveCells = new ArrayList<>();
 

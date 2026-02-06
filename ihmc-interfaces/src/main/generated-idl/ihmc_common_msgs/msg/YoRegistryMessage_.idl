@@ -1,0 +1,23 @@
+#ifndef __ihmc_common_msgs__msg__YoRegistryMessage__idl__
+#define __ihmc_common_msgs__msg__YoRegistryMessage__idl__
+
+module ihmc_common_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="ihmc_common_msgs::msg::dds_::YoRegistryMessage_")
+      struct YoRegistryMessage
+      {
+        /**
+         * Depth first ordered uncompressed long bits variables
+         */
+        sequence<octet, 10000> data;
+      };
+    };
+  };
+};
+
+#endif

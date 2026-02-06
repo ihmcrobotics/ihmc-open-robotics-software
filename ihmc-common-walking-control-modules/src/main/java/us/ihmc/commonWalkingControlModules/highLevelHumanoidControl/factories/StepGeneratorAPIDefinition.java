@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
+import controller_msgs.msg.dds.ContinuousStepGeneratorStatusMessage;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ContinuousStepGeneratorInputCommand;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ContinuousStepGeneratorParametersCommand;
 import us.ihmc.communication.HumanoidControllerAPI;
@@ -35,7 +36,7 @@ public class StepGeneratorAPIDefinition
       stepGeneratorSupportedCommands.forEach(command -> inputMessageClasses.add(ROS2TopicNameTools.newMessageInstance(command).getMessageClass()));
 
       List<Class<? extends Settable<?>>> statusMessages = new ArrayList<>();
-
+      statusMessages.add(ContinuousStepGeneratorStatusMessage.class);
 
       stepGeneratorSupportedStatusMessages = Collections.unmodifiableList(statusMessages);
       outputMessageClasses.addAll(stepGeneratorSupportedStatusMessages);
@@ -53,7 +54,7 @@ public class StepGeneratorAPIDefinition
 
    public static HashSet<Class<?>> getROS2StatusMessageTypes()
    {
-      return inputMessageClasses;
+      return outputMessageClasses;
    }
 
    public static List<Class<? extends Settable<?>>> getStepGeneratorSupportedStatusMessages()

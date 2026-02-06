@@ -78,10 +78,11 @@ public abstract class EndToEndFrameDataPublisherTest implements MultiRobotTestIn
       referenceFrames.updateFrames();
       MovingReferenceFrame midFeetFrame = referenceFrames.getMidFootZUpGroundFrame();
 
-      double maxStepWidth = robotModel.getWalkingControllerParameters().getSteppingParameters().getMaxStepWidth();
-      double minStepWidth = robotModel.getWalkingControllerParameters().getSteppingParameters().getMinStepWidth();
+      SteppingParameters steppingParameters = robotModel.getWalkingControllerParameters().getSteppingParametersForStepGeneration();
+      double maxStepWidth = steppingParameters.getMaxStepWidth();
+      double minStepWidth = steppingParameters.getMinStepWidth();
       double halfStepWidth = (maxStepWidth + minStepWidth) / 4.0;
-      double stepLength = robotModel.getWalkingControllerParameters().getSteppingParameters().getDefaultStepLength() * 0.5;
+      double stepLength = steppingParameters.getDefaultStepLength() * 0.5;
       double nominalSwingTime = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
       double nominalTransferTime = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
       Random random = new Random(24384523737236643L);
@@ -167,10 +168,11 @@ public abstract class EndToEndFrameDataPublisherTest implements MultiRobotTestIn
       ThreadTools.sleep(1000);
       assertTrue(simulationTestHelper.simulateNow(0.25));
 
-      double maxStepWidth = robotModel.getWalkingControllerParameters().getSteppingParameters().getMaxStepWidth();
-      double minStepWidth = robotModel.getWalkingControllerParameters().getSteppingParameters().getMinStepWidth();
+      SteppingParameters steppingParameters = robotModel.getWalkingControllerParameters().getSteppingParametersForStepGeneration();
+      double maxStepWidth = steppingParameters.getMaxStepWidth();
+      double minStepWidth = steppingParameters.getMinStepWidth();
       double halfStepWidth = (maxStepWidth + minStepWidth) / 4.0;
-      double stepLength = robotModel.getWalkingControllerParameters().getSteppingParameters().getDefaultStepLength() * 0.5;
+      double stepLength = steppingParameters.getDefaultStepLength() * 0.5;
       double nominalSwingTime = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
       double nominalTransferTime = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
       Random random = new Random(24384523737236643L);
@@ -179,8 +181,6 @@ public abstract class EndToEndFrameDataPublisherTest implements MultiRobotTestIn
 
       //            FootstepDataListMessage footStepDataListMessage = EndToEndTestTools.generateForwardSteps(stepSide,numberOfSteps, stepLength, stepWidth, swingTime, transferTime, new Pose3D(), false);
 
-      WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
-      SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
       FramePose3D startPose = new FramePose3D(simulationTestHelper.getControllerReferenceFrames().getMidFootZUpGroundFrame());
       startPose.changeFrame(worldFrame);
       //      FootstepDataListMessage steps = EndToEndTestTools.generateForwardSteps(RobotSide.LEFT,

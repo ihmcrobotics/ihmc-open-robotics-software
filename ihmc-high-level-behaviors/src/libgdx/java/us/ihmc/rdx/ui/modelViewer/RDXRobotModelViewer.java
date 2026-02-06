@@ -37,6 +37,7 @@ import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.collidables.RDXRobotCollisionModel;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
+import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.interactable.RDXInteractableSensor;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.SCS2DefinitionMissingTools;
@@ -84,6 +85,7 @@ public class RDXRobotModelViewer
    private final ImBoolean showHandControlFrames = new ImBoolean(true);
    private final ImBoolean showHandGraphicFrames = new ImBoolean(true);
    private final ImBoolean showHandGraphics = new ImBoolean(true);
+   private final ImBoolean showHandMultiBodies = new ImBoolean(true);
    private final SideDependentList<RDXRobotModelViewerHand> handViewers = new SideDependentList<>();
    private record RigidBodyVertexAnalysis(RDXRigidBody rdxRigidBody, long numberOfVisualVertices, long numberOfCollisionVertices) { };
    private boolean generatingGraphviz = false;
@@ -180,6 +182,20 @@ public class RDXRobotModelViewer
                baseUI.getPrimaryScene().addModelInstance(modelInstance);
             }
 
+            {
+               Model model = RDXModelLoader.load("environmentObjects/mustard/mustard.glb");
+               Pose3D pose = new Pose3D();
+               pose.getPosition().addX(-1.0);
+               pose.getPosition().addY(-0.5);
+               pose.getPosition().addZ(1.2);
+               RDXModelInstance modelInstance = new RDXModelInstance(model);
+               modelInstance.setPoseInWorldFrame(pose);
+               baseUI.getPrimaryScene().addModelInstance(modelInstance);
+               RDXReferenceFrameGraphic frameGraphic = new RDXReferenceFrameGraphic(0.2);
+               frameGraphic.setPoseInWorldFrame(pose);
+               baseUI.getPrimaryScene().addModelInstance(frameGraphic);
+            }
+
             baseUI.getPrimaryScene().addModelInstance(new RDXModelInstance(RDXModelLoader.load("environmentObjects/flatGround/FlatGround.g3dj")));
          }
 
@@ -232,7 +248,14 @@ public class RDXRobotModelViewer
             for (RobotSide side : RobotSide.values)
             {
                handViewers.get(side)
-                          .getRenderables(renderables, pool, sceneLevels, showHandFrames, showHandControlFrames, showHandGraphicFrames, showHandGraphics);
+                          .getRenderables(renderables,
+                                          pool,
+                                          sceneLevels,
+                                          showHandFrames,
+                                          showHandControlFrames,
+                                          showHandGraphicFrames,
+                                          showHandGraphics,
+                                          showHandMultiBodies);
             }
          }
 
@@ -248,6 +271,8 @@ public class RDXRobotModelViewer
             ImGui.checkbox(labels.get("Show hand/wrist frame"), showHandFrames);
             ImGui.checkbox(labels.get("Show hand control frame"), showHandControlFrames);
             ImGui.checkbox(labels.get("Show hand graphic frame"), showHandGraphicFrames);
+            ImGui.checkbox(labels.get("Show hand graphics"), showHandGraphics);
+            ImGui.checkbox(labels.get("Show hand multi-bodies"), showHandMultiBodies);
             for (RobotSide side : RobotSide.values)
             {
                ImGui.text("%s hand:".formatted(side.getPascalCaseName()));
@@ -316,7 +341,8 @@ public class RDXRobotModelViewer
                generatingGraphviz = true;
                ThreadTools.startAsDaemon(() ->
                {
-                  RobotDefinitionTreeRenderer robotDefinitionTreeRenderer = new RobotDefinitionTreeRenderer(robotModel.getRobotDefinition(), "");
+                  RobotDefinitionTreeRenderer robotDefinitionTreeRenderer = new RobotDefinitionTreeRenderer(robotModel.getRobotDefinition());
+                  robotDefinitionTreeRenderer.renderGraphviz();
                   generatingGraphviz = false;
                   generatedGraphviz = true;
                }, "RenderGraphvizTree");
@@ -347,6 +373,28 @@ public class RDXRobotModelViewer
                      }
                   }
                }
+            }
+
+            ImGui.text("Render ASCII:");
+            ImGui.sameLine();
+            if (ImGui.button(labels.get("Full")))
+            {
+               generatingGraphviz = true;
+               ThreadTools.startAsDaemon(() ->
+               {
+                  RobotDefinitionTreeRenderer robotDefinitionTreeRenderer = new RobotDefinitionTreeRenderer(robotModel.getRobotDefinition());
+                  robotDefinitionTreeRenderer.renderAscii();
+               }, "RenderAsciiTree");
+            }
+            ImGui.sameLine();
+            if (ImGui.button(labels.get("Minimal")))
+            {
+               generatingGraphviz = true;
+               ThreadTools.startAsDaemon(() ->
+               {
+                  RobotDefinitionTreeRenderer robotDefinitionTreeRenderer = new RobotDefinitionTreeRenderer(robotModel.getRobotDefinition());
+                  robotDefinitionTreeRenderer.renderAsciiMinimal();
+               }, "RenderAsciiMinimalTree");
             }
 
             for (RobotSide side : RobotSide.values)

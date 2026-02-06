@@ -46,6 +46,12 @@ public class SettableFootSwitch implements FootSwitchInterface
    }
 
    @Override
+   public double getCenterOfPressureDistance()
+   {
+      return Double.NaN;
+   }
+
+   @Override
    public WrenchReadOnly getMeasuredWrench()
    {
       footWrench.setToZero(getMeasurementFrame(), getMeasurementFrame());

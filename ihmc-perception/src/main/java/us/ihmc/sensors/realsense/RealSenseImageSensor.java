@@ -1,5 +1,6 @@
 package us.ihmc.sensors.realsense;
 
+import org.bytedeco.librealsense2.global.realsense2;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.thread.Notification;
@@ -9,7 +10,9 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
+import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.sensors.ImageSensor;
 
 import java.time.Instant;
@@ -20,27 +23,27 @@ public class RealSenseImageSensor extends ImageSensor
    public static final int DEPTH_IMAGE_KEY = 1;
    public static final int OUTPUT_IMAGE_COUNT = 2;
 
-   private static final double OUTPUT_FREQUENCY = 30.0;
-
-   private final RealSenseConfiguration realsenseConfiguration;
+   protected final RealSenseConfiguration realsenseConfiguration;
    private final RealSenseDeviceManager realsenseManager = new RealSenseDeviceManager();
-   private RealSenseDevice realsense = null;
+   protected RealSenseDevice realsense = null;
 
    private final RawImage[] grabbedImages = new RawImage[OUTPUT_IMAGE_COUNT];
    private long grabSequenceNumber = 0L;
-   private int grabFailureCount = 0;
+   protected int grabFailureCount = 0;
 
    private ReferenceFrame depthFrame;
    private ReferenceFrame colorFrame;
    private final Notification resetFrames = new Notification();
 
-   private final Throttler grabThrottler = new Throttler().setFrequency(OUTPUT_FREQUENCY);
+   private final Throttler grabThrottler;
 
    public RealSenseImageSensor(RealSenseConfiguration realsenseConfiguration)
    {
       super(realsenseConfiguration.name().split("_")[0]);
 
       this.realsenseConfiguration = realsenseConfiguration;
+
+      grabThrottler = new Throttler().setFrequency(realsenseConfiguration.getDepthFPS());
       resetFrames.set();
    }
 
@@ -83,7 +86,7 @@ public class RealSenseImageSensor extends ImageSensor
    @Override
    public boolean isSensorRunning()
    {
-      return realsense != null && realsense.getDevice() != null && grabFailureCount < OUTPUT_FREQUENCY;
+      return realsense != null && realsense.getDevice() != null && grabFailureCount < realsenseConfiguration.getDepthFPS();
    }
 
    @Override
@@ -126,11 +129,28 @@ public class RealSenseImageSensor extends ImageSensor
          {
             if (grabbedImages[COLOR_IMAGE_KEY] != null)
                grabbedImages[COLOR_IMAGE_KEY].release();
-            grabbedImages[COLOR_IMAGE_KEY] = RawImage.createWithBGRImage(bgrImage,
-                                                                         realsense.getColorCameraIntrinsics(),
-                                                                         colorFrame.getTransformToRoot(),
-                                                                         grabTime,
-                                                                         grabSequenceNumber);
+
+            // Detect the color format from the RealSense device and create the appropriate RawImage
+            int detectedFormat = realsense.getDetectedColorFormat();
+            PixelFormat pixelFormat = PixelFormat.BGR8; // Default to BGR8
+
+            if (detectedFormat == realsense2.RS2_FORMAT_RGB8)
+               pixelFormat = PixelFormat.RGB8;
+            else if (detectedFormat == realsense2.RS2_FORMAT_RGBA8)
+               pixelFormat = PixelFormat.RGBA8;
+            else if (detectedFormat == realsense2.RS2_FORMAT_BGRA8)
+               pixelFormat = PixelFormat.BGRA8;
+            // else defaults to BGR8
+
+            grabbedImages[COLOR_IMAGE_KEY] = new RawImage(bgrImage,
+                                                          null,
+                                                          pixelFormat,
+                                                          realsense.getColorCameraIntrinsics(),
+                                                          CameraModel.PINHOLE,
+                                                          colorFrame.getTransformToRoot(),
+                                                          grabTime,
+                                                          grabSequenceNumber,
+                                                          -1.0f);
 
             if (grabbedImages[DEPTH_IMAGE_KEY] != null)
                grabbedImages[DEPTH_IMAGE_KEY].release();
@@ -200,10 +220,15 @@ public class RealSenseImageSensor extends ImageSensor
             image.release();
 
       // Close the camera
-      if (realsense != null && realsense.getDevice() != null)
+      if (realsense != null)
+      {
          realsense.deleteDevice();
+         realsense = null;
+      }
 
-      realsenseManager.deleteContext();
+      // Don't delete context here - it can cause crashes with background threads
+      // The context will be cleaned up by the JVM when the application exits
+      // realsenseManager.deleteContext();
 
       System.out.println("Closed " + getClass().getSimpleName());
    }

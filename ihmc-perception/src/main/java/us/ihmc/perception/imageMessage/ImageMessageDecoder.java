@@ -13,7 +13,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.sensors.CameraIntrinsics;
 import us.ihmc.perception.cuda.CUDAJPEGProcessor;
 import us.ihmc.perception.cuda.CUDATools;
 
@@ -92,7 +92,7 @@ public class ImageMessageDecoder
          }
          case UNCOMPRESSED ->
          {
-            if (imageToPack.elemSize() != lastImagePixelFormat.bytesPerElement)
+            if (imageToPack.elemSize() != lastImagePixelFormat.bytesPerPixel)
             {
                Mat correctSizedMat = new Mat(messageToDecode.getImageHeight(), messageToDecode.getImageWidth(), lastImagePixelFormat.toOpenCVType());
                correctSizedMat.copyTo(imageToPack);
@@ -202,17 +202,11 @@ public class ImageMessageDecoder
 
    private void resizeToMessageDimensions(ImageMessage imageMessage, Mat imageToResize)
    {
-      if (imageToResize.cols() != imageMessage.getImageWidth())
-         imageToResize.cols(imageMessage.getImageWidth());
-      if (imageToResize.rows() != imageMessage.getImageHeight())
-         imageToResize.rows(imageMessage.getImageHeight());
+      imageToResize.create(imageMessage.getImageHeight(), imageMessage.getImageWidth(), PixelFormat.fromByte(imageMessage.getPixelFormat()).toOpenCVType());
    }
 
    private void resizeToMessageDimensions(ImageMessage imageMessage, GpuMat imageToResize)
    {
-      if (imageToResize.cols() != imageMessage.getImageWidth())
-         imageToResize.cols(imageMessage.getImageWidth());
-      if (imageToResize.rows() != imageMessage.getImageHeight())
-         imageToResize.rows(imageMessage.getImageHeight());
+      imageToResize.create(imageMessage.getImageHeight(), imageMessage.getImageWidth(), PixelFormat.fromByte(imageMessage.getPixelFormat()).toOpenCVType());
    }
 }

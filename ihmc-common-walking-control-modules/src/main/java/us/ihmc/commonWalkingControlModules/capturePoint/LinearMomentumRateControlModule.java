@@ -26,31 +26,34 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
-import us.ihmc.robotics.screwTheory.WholeBodyAngularVelocityCalculator;
-import us.ihmc.yoVariables.euclid.filters.FilteredFiniteDifferenceYoFrameVector2D;
-import us.ihmc.yoVariables.euclid.filters.RateLimitedYoFrameVector3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.robotics.screwTheory.WholeBodyAngularVelocityCalculator;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.DefaultPoint2DGraphic;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFrameVector3D;
+import us.ihmc.yoVariables.euclid.filters.FilteredFiniteDifferenceYoFrameVector2D;
+import us.ihmc.yoVariables.euclid.filters.RateLimitedYoFrameVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.filters.AlphaBasedOnBreakFrequencyProvider;
 import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
@@ -58,8 +61,8 @@ import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.*;
 import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicPoint2D;
 
 public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
@@ -160,6 +163,11 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
 
    private final LinearMomentumRateControlModuleOutput output = new LinearMomentumRateControlModuleOutput();
 
+   private final YoFrameVector3D yoAngularMomentum;
+
+   private final AlphaFilteredYoFrameVector3D filteredYoAngularMomentum;
+
+
    public LinearMomentumRateControlModule(HighLevelHumanoidControllerToolbox controllerToolbox,
                                           WalkingControllerParameters walkingControllerParameters,
                                           YoRegistry parentRegistry)
@@ -173,8 +181,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
            controllerToolbox.getWholeBodyAngularVelocityCalculator(),
            controllerToolbox.getGravityZ(),
            controllerToolbox.getControlDT(),
-           parentRegistry,
-           controllerToolbox.getYoGraphicsListRegistry());
+           parentRegistry);
    }
 
    public LinearMomentumRateControlModule(CenterOfMassStateProvider centerOfMassStateProvider,
@@ -186,8 +193,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
                                           WholeBodyAngularVelocityCalculator wholeBodyAngularVelocityCalculator,
                                           double gravityZ,
                                           double controlDT,
-                                          YoRegistry parentRegistry,
-                                          YoGraphicsListRegistry yoGraphicsListRegistry)
+                                          YoRegistry parentRegistry)
    {
       this.totalMassProvider = totalMassProvider;
       this.gravityZ = gravityZ;
@@ -225,23 +231,15 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
                                                                                                                        controlDT);
       capturePointVelocity = new FilteredFiniteDifferenceYoFrameVector2D("capturePointVelocity", "", capturePointVelocityAlpha, controlDT, registry, worldFrame);
 
-      if (yoGraphicsListRegistry != null)
-      {
-         YoGraphicPosition desiredCMPViz = new YoGraphicPosition("Desired CMP", yoDesiredCMP, 0.012, Purple(), GraphicType.BALL_WITH_CROSS);
-         YoGraphicPosition desiredCoPViz = new YoGraphicPosition("Desired CoP", yoDesiredCoP, 0.0075, Purple(), GraphicType.BALL);
-         YoGraphicPosition achievedCMPViz = new YoGraphicPosition("Achieved CMP", yoAchievedCMP, 0.005, DarkRed(), GraphicType.BALL_WITH_CROSS);
-         YoGraphicPosition achievedCoPViz = new YoGraphicPosition("Achieved CoP", yoAchievedCoP, 0.003, DarkRed(), GraphicType.BALL);
-         YoGraphicPosition centerOfMassViz = new YoGraphicPosition("Center Of Mass", yoCenterOfMass, 0.006, Black(), GraphicType.BALL_WITH_CROSS);
-         YoGraphicPosition capturePointViz = new YoGraphicPosition("Capture Point", yoCapturePoint, 0.01, Blue(), GraphicType.BALL_WITH_ROTATED_CROSS);
-         YoGraphicPosition angularCapturePointViz = new YoGraphicPosition("Angular Capture Point", yoAngularCapturePoint, 0.01, Red(), GraphicType.BALL_WITH_ROTATED_CROSS);
-         yoGraphicsListRegistry.registerArtifact("LinearMomentum", desiredCMPViz.createArtifact());
-         yoGraphicsListRegistry.registerArtifact("LinearMomentum", desiredCoPViz.createArtifact());
-         yoGraphicsListRegistry.registerArtifact("LinearMomentum", achievedCMPViz.createArtifact());
-         yoGraphicsListRegistry.registerArtifact("LinearMomentum", achievedCoPViz.createArtifact());
-         yoGraphicsListRegistry.registerArtifact("LinearMomentum", centerOfMassViz.createArtifact());
-         yoGraphicsListRegistry.registerArtifact("LinearMomentum", capturePointViz.createArtifact());
-         yoGraphicsListRegistry.registerArtifact("LinearMomentum", angularCapturePointViz.createArtifact());
-      }
+      // Filtered Momentum setup, this is exactly same from the {@Link HihgLevelHumanoidControllerToolbox}
+
+      yoAngularMomentum = new YoFrameVector3D("AngularMomentumInLMRCModule", centerOfMassFrame, registry);
+
+      YoDouble angularMomentumBreakFrequency = new YoDouble("angularMomentumBreakFrequency", registry);
+      angularMomentumBreakFrequency.set(20.0);
+      AlphaBasedOnBreakFrequencyProvider angularMomentumAlpha = new AlphaBasedOnBreakFrequencyProvider(angularMomentumBreakFrequency, controlDT);
+      filteredYoAngularMomentum = new AlphaFilteredYoFrameVector3D("filteredAngularMomentum", "", registry, angularMomentumAlpha, yoAngularMomentum);
+
       yoDesiredCMP.setToNaN();
       yoDesiredCoP.setToNaN();
       yoAchievedCMP.setToNaN();
@@ -251,22 +249,22 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
       yoAngularCapturePoint.setToNaN();
 
       icpControlPlane = new ICPControlPlane(centerOfMassFrame, gravityZ, registry);
-      icpControlPolygons = new ICPControlPolygons(icpControlPlane, registry, yoGraphicsListRegistry);
+      icpControlPolygons = new ICPControlPolygons(icpControlPlane, registry);
       /*
        * TODO: The following is not being visualized since it is a duplicate for now.
        */
-      bipedSupportPolygons = new BipedSupportPolygons(referenceFrames, registry, null);
+      bipedSupportPolygons = new BipedSupportPolygons(referenceFrames, registry);
 
       ICPControllerParameters icpControllerParameters = walkingControllerParameters.getICPControllerParameters();
 
       if (icpControllerParameters.getUseHeuristicICPController())
       {
-         icpController = new HeuristicICPController(icpControllerParameters, controlDT, registry, yoGraphicsListRegistry);
+         icpController = new HeuristicICPController(icpControllerParameters, registry);
       }
 
       else
       {
-         icpController = new ICPController(walkingControllerParameters, icpControlPolygons, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
+         icpController = new ICPController(walkingControllerParameters, icpControlPolygons, contactableFeet, controlDT, registry);
       }
 
       parentRegistry.addChild(registry);
@@ -275,6 +273,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
    public void reset()
    {
       desiredLinearMomentumRateWeight.set(linearMomentumRateWeight);
+      initializeOnStateChange = true;
 
       capturePointVelocity.reset();
       yoDesiredCMP.setToNaN();
@@ -321,6 +320,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
          this.contactStateCommands.get(robotSide).set(input.getContactStateCommands().get(robotSide));
       }
 
+      icpController.setUseHighCoPDamping(input.getIsCoPDamped());
       if (icpController instanceof ICPController)
          ((ICPController) icpController).setDisableCoPFeedbackControl(input.getDisableCoPFeedbackControl());
    }
@@ -423,6 +423,14 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
 
       centerOfPressureCommandCalculator.computeCenterOfPressureCommand(desiredCoP, contactStateCommands, bipedSupportPolygons.getFootPolygonsInSoleFrame());
 
+      if (centerOfPressureCommandCalculator.getCenterOfPressureWeight() > 0.0)
+      {
+         centerOfPressureCommand.setDesiredCoP(desiredCoP);
+         centerOfPressureCommand.setWeight(worldFrame,
+                                           centerOfPressureCommandCalculator.getCenterOfPressureWeight(),
+                                           centerOfPressureCommandCalculator.getCenterOfPressureWeight());
+      }
+
       return success;
    }
 
@@ -435,8 +443,12 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
       angularCapturePoint.set(capturePoint);
 
       FrameVector3DReadOnly angularMomentum = angularVelocityCalculator.getAngularMomentum();
-      angularCapturePoint.addX(1.0 / wmh * angularMomentum.getY());
-      angularCapturePoint.addY(-1.0 / wmh * angularMomentum.getX());
+      yoAngularMomentum.set(angularMomentum);
+
+      filteredYoAngularMomentum.update();
+
+      angularCapturePoint.addX(1.0 / wmh * filteredYoAngularMomentum.getY());
+      angularCapturePoint.addY(-1.0 / wmh * filteredYoAngularMomentum.getX());
    }
 
    /**
@@ -656,7 +668,9 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
       group.addChild(newYoGraphicPoint2D("Desired CMP", yoDesiredCMP, 0.024, ColorDefinitions.Purple(), DefaultPoint2DGraphic.CIRCLE_PLUS));
+      group.addChild(newYoGraphicPoint2D("Desired CoP", yoDesiredCoP, 0.015, ColorDefinitions.Purple(), DefaultPoint2DGraphic.CIRCLE));
       group.addChild(newYoGraphicPoint2D("Achieved CMP", yoAchievedCMP, 0.010, ColorDefinitions.DarkRed(), DefaultPoint2DGraphic.CIRCLE_PLUS));
+      group.addChild(newYoGraphicPoint2D("Achieved CoP", yoAchievedCoP, 0.006, ColorDefinitions.DarkRed(), DefaultPoint2DGraphic.CIRCLE));
       group.addChild(newYoGraphicPoint2D("Center Of Mass", yoCenterOfMass, 0.012, ColorDefinitions.Black(), DefaultPoint2DGraphic.CIRCLE_PLUS));
       group.addChild(newYoGraphicPoint2D("Capture Point", yoCapturePoint, 0.02, ColorDefinitions.Blue(), DefaultPoint2DGraphic.CIRCLE_CROSS));
       group.addChild(newYoGraphicPoint2D("Angular Capture Point", yoAngularCapturePoint, 0.02, ColorDefinitions.Red(), DefaultPoint2DGraphic.CIRCLE_CROSS));

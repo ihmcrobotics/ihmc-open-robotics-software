@@ -14,6 +14,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.math.filters.*;
 import us.ihmc.yoVariables.euclid.filters.BacklashProcessingYoFrameVector3D;
@@ -184,6 +185,9 @@ public class SensorProcessing implements SensorOutputMapReadOnly
    private final LinkedHashMap<OneDoFJointBasics, List<ProcessingYoVariable>> processedJointAccelerations = new LinkedHashMap<>();
    private final LinkedHashMap<OneDoFJointBasics, List<ProcessingYoVariable>> processedJointTaus = new LinkedHashMap<>();
 
+   private final LinkedHashMap<OneDoFJointReadOnly, List<OffsettingProcessorVariable>> jointPositionOffsets = new LinkedHashMap<>();
+   private final LinkedHashMap<OneDoFJointReadOnly, List<OffsettingProcessorVariable>> jointVelocityOffsets = new LinkedHashMap<>();
+
    private final LinkedHashMap<IMUDefinition, List<ProcessingYoVariable>> processedOrientations = new LinkedHashMap<>();
    private final LinkedHashMap<IMUDefinition, List<ProcessingYoVariable>> processedAngularVelocities = new LinkedHashMap<>();
    private final LinkedHashMap<IMUDefinition, List<ProcessingYoVariable>> processedLinearAccelerations = new LinkedHashMap<>();
@@ -294,6 +298,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          inputJointPositions.put(oneDoFJoint, rawJointPosition);
          outputJointPositions.put(oneDoFJoint, rawJointPosition);
          processedJointPositions.put(oneDoFJoint, new ArrayList<ProcessingYoVariable>());
+         jointPositionOffsets.put(oneDoFJoint, new ArrayList<>());
 
          prefix = JOINT_VELOCITY.getProcessorNamePrefix(RAW);
          suffix = JOINT_VELOCITY.getProcessorNameSuffix(jointName, -1);
@@ -301,6 +306,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          inputJointVelocities.put(oneDoFJoint, rawJointVelocity);
          outputJointVelocities.put(oneDoFJoint, rawJointVelocity);
          processedJointVelocities.put(oneDoFJoint, new ArrayList<ProcessingYoVariable>());
+         jointVelocityOffsets.put(oneDoFJoint, new ArrayList<>());
 
          prefix = JOINT_ACCELERATION.getProcessorNamePrefix(RAW);
          suffix = JOINT_ACCELERATION.getProcessorNameSuffix(jointName, -1);
@@ -396,7 +402,8 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       parentRegistry.addChild(registry);
    }
 
-   public void bindSensorOutputMap() {
+   public void bindSensorOutputMap()
+   {
       for (int i = 0; i < jointSensorDefinitions.size(); i++)
       {
          OneDoFJointBasics oneDoFJoint = jointSensorDefinitions.get(i);
@@ -936,14 +943,60 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          String prefix = JOINT_POSITION.getProcessorNamePrefix(AFFINE);
          String suffix = JOINT_POSITION.getProcessorNameSuffix(jointName, processors.size());
          YoDouble filteredJointPosition = new YoDouble(prefix + suffix, registry);
-         ProcessingYoVariable processor;
+         OffsettingProcessorVariable processor;
          if (scale == null)
-            processor = () -> filteredJointPosition.set(intermediateJointPosition.getDoubleValue() + bias.getValue());
+         {
+            processor = new OffsettingProcessorVariable()
+            {
+               @Override
+               public double getOffset()
+               {
+                  return -bias.getValue();
+               }
+
+               @Override
+               public void update()
+               {
+                  filteredJointPosition.set(intermediateJointPosition.getDoubleValue() + bias.getValue());
+               }
+            };
+         }
          else if (bias == null)
-            processor = () -> filteredJointPosition.set(scale.getValue() * intermediateJointPosition.getDoubleValue());
+         {
+            processor = new OffsettingProcessorVariable()
+            {
+               @Override
+               public double getOffset()
+               {
+                  return intermediateJointPosition.getValue() - filteredJointPosition.getValue();
+               }
+
+               @Override
+               public void update()
+               {
+                  filteredJointPosition.set(scale.getValue() * intermediateJointPosition.getDoubleValue());
+               }
+            };
+         }
          else
-            processor = () -> filteredJointPosition.set(scale.getValue() * intermediateJointPosition.getDoubleValue() + bias.getValue());
+         {
+            processor = new OffsettingProcessorVariable()
+            {
+               @Override
+               public double getOffset()
+               {
+                  return intermediateJointPosition.getValue() - filteredJointPosition.getValue();
+               }
+
+               @Override
+               public void update()
+               {
+                  filteredJointPosition.set(scale.getValue() * intermediateJointPosition.getDoubleValue() + bias.getValue());               }
+            };
+         }
          processors.add(processor);
+
+         jointPositionOffsets.get(oneDoFJoint).add(processor);
 
          if (!forVizOnly)
             outputJointPositions.put(oneDoFJoint, filteredJointPosition);
@@ -1015,6 +1068,8 @@ public class SensorProcessing implements SensorOutputMapReadOnly
                                                                                                  registry);
          processors.add(filteredJointPosition);
 
+         jointPositionOffsets.get(oneDoFJoint).add(filteredJointPosition);
+
          if (!forVizOnly)
             outputJointPositions.put(oneDoFJoint, filteredJointPosition);
       }
@@ -1024,7 +1079,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
                                                    DoubleProvider maximumDeflection,
                                                    boolean forVizOnly)
    {
-      addJointPositionElasticyCompensatorWithJointsToIgnore(stiffnesses, maximumDeflection, null, forVizOnly);
+      addJointPositionElasticityCompensatorWithJointsToIgnore(stiffnesses, maximumDeflection, null, forVizOnly);
    }
 
    public void addJointPositionElasticyCompensatorWithJointsToIgnore(Map<OneDoFJointBasics, ? extends DoubleProvider> stiffnesses,
@@ -1032,7 +1087,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
                                                                      boolean forVizOnly,
                                                                      String... jointsToIgnore)
    {
-      addJointPositionElasticyCompensatorWithJointsToIgnore(stiffnesses, maximumDeflection, null, forVizOnly, jointsToIgnore);
+      addJointPositionElasticityCompensatorWithJointsToIgnore(stiffnesses, maximumDeflection, null, forVizOnly, jointsToIgnore);
    }
 
    /**
@@ -1044,7 +1099,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
     * @param forVizOnly  if set to true, the result will not be used as the input of the next
     *                    processing stage, nor as the output of the sensor processing.
     */
-   public void addJointPositionElasticyCompensator(Map<OneDoFJointBasics, ? extends DoubleProvider> stiffnesses,
+   public void addJointPositionElasticityCompensator(Map<OneDoFJointBasics, ? extends DoubleProvider> stiffnesses,
                                                    DoubleProvider maximumDeflection,
                                                    Map<String, Integer> torqueProcessorIDs,
                                                    boolean forVizOnly)
@@ -1052,7 +1107,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       addJointPositionElasticyCompensatorWithJointsToIgnore(stiffnesses, maximumDeflection, forVizOnly);
    }
 
-   public void addJointPositionElasticyCompensatorOnlyForSpecifiedJoints(Map<OneDoFJointBasics, ? extends DoubleProvider> stiffnesses,
+   public void addJointPositionElasticityCompensatorOnlyForSpecifiedJoints(Map<OneDoFJointBasics, ? extends DoubleProvider> stiffnesses,
                                                                          DoubleProvider maximumDeflection,
                                                                          Map<String, Integer> torqueProcessorIDs,
                                                                          boolean forVizOnly,
@@ -1065,7 +1120,35 @@ public class SensorProcessing implements SensorOutputMapReadOnly
                                                             invertSensorSelection(allJointSensorNames, jointsToBeProcessed));
    }
 
+   /**
+    * replaced with {@link #addJointPositionElasticityCompensatorOnlyForSpecifiedJoints(Map, DoubleProvider, Map, boolean, String...)}
+    */
+   @Deprecated
+   public void addJointPositionElasticyCompensatorOnlyForSpecifiedJoints(Map<OneDoFJointBasics, ? extends DoubleProvider> stiffnesses,
+                                                                         DoubleProvider maximumDeflection,
+                                                                         Map<String, Integer> torqueProcessorIDs,
+                                                                         boolean forVizOnly,
+                                                                         String... jointsToBeProcessed)
+   {
+      addJointPositionElasticityCompensatorOnlyForSpecifiedJoints(stiffnesses,
+                                                                  maximumDeflection,
+                                                                  torqueProcessorIDs,
+                                                                  forVizOnly,
+                                                                  jointsToBeProcessed);
+   }
+
+   /** replaced with {@link #addJointPositionElasticityCompensatorWithJointsToIgnore(Map, DoubleProvider, Map, boolean, String...)} **/
+   @Deprecated
    public void addJointPositionElasticyCompensatorWithJointsToIgnore(Map<OneDoFJointBasics, ? extends DoubleProvider> stiffnesses,
+                                                                     DoubleProvider maximumDeflection,
+                                                                     Map<String, Integer> torqueProcessorIDs,
+                                                                     boolean forVizOnly,
+                                                                     String... jointsToIgnore)
+   {
+      addJointPositionElasticityCompensatorWithJointsToIgnore(stiffnesses, maximumDeflection, torqueProcessorIDs, forVizOnly, jointsToIgnore);
+   }
+
+   public void addJointPositionElasticityCompensatorWithJointsToIgnore(Map<OneDoFJointBasics, ? extends DoubleProvider> stiffnesses,
                                                                      DoubleProvider maximumDeflection,
                                                                      Map<String, Integer> torqueProcessorIDs,
                                                                      boolean forVizOnly,
@@ -1104,6 +1187,8 @@ public class SensorProcessing implements SensorOutputMapReadOnly
                                                                                                      intermediateJointTau,
                                                                                                      registry);
          processors.add(filteredJointPosition);
+
+         jointPositionOffsets.get(oneDoFJoint).add(filteredJointPosition);
 
          if (!forVizOnly)
             outputJointPositions.put(oneDoFJoint, filteredJointPosition);
@@ -1293,6 +1378,8 @@ public class SensorProcessing implements SensorOutputMapReadOnly
                                                                                                                      updateDT,
                                                                                                                      registry);
          processors.add(filteredJointVelocity);
+
+         jointVelocityOffsets.get(oneDoFJoint).add(filteredJointVelocity);
 
          if (!forVizOnly)
             outputJointVelocities.put(oneDoFJoint, filteredJointVelocity);
@@ -2242,7 +2329,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          case TORQUE_SENSOR:
             return processedTorques;
          default:
-            throw new RuntimeException("Expected a forcce/torque sensor.");
+            throw new RuntimeException("Expected a force/torque sensor.");
       }
    }
 
@@ -2255,7 +2342,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          case TORQUE_SENSOR:
             return intermediateTorques;
          default:
-            throw new RuntimeException("Expected a forcce/torque sensor.");
+            throw new RuntimeException("Expected a force/torque sensor.");
       }
    }
 
@@ -2355,6 +2442,43 @@ public class SensorProcessing implements SensorOutputMapReadOnly
 
       inputForceSensors.getData(forceSensorDefinition).setWrench(value);
    }
+
+   public double getTotalOffset(OneDoFJointBasics joint, SensorType sensorType)
+   {
+      if (sensorType == JOINT_POSITION)
+         return getTotalPositionOffset(joint);
+      else if (sensorType == JOINT_VELOCITY)
+         return getTotalVelocityOffset(joint);
+      else
+         return 0.0;
+   }
+
+   public double getTotalPositionOffset(OneDoFJointReadOnly joint)
+   {
+      List<OffsettingProcessorVariable> processors = jointPositionOffsets.get(joint);
+      if (processors == null)
+         return 0.0;
+
+      double offset = 0.0;
+      for (int i = 0; i < processors.size(); i++)
+         offset += processors.get(i).getOffset();
+
+      return offset;
+   }
+
+   public double getTotalVelocityOffset(OneDoFJointReadOnly joint)
+   {
+      List<OffsettingProcessorVariable> processors = jointVelocityOffsets.get(joint);
+      if (processors == null)
+         return 0.0;
+
+      double offset = 0.0;
+      for (int i = 0; i < processors.size(); i++)
+         offset += processors.get(i).getOffset();
+
+      return offset;
+   }
+
 
    public SensorOutputMapReadOnly getRawSensorOutputMap()
    {

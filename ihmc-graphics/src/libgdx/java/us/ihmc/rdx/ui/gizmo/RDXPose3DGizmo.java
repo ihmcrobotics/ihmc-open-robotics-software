@@ -43,6 +43,7 @@ import us.ihmc.rdx.input.ImGuiMouseDragData;
 import us.ihmc.rdx.mesh.RDXMeshBuilder;
 import us.ihmc.rdx.mesh.RDXMeshDataInterpreter;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
+import us.ihmc.rdx.sceneManager.RDXRenderableAdapter;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDX3DPanel;
@@ -51,7 +52,7 @@ import us.ihmc.robotics.interaction.*;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-import java.util.Random;
+import java.util.function.Consumer;
 
 import static us.ihmc.rdx.ui.gizmo.RDXGizmoTools.AXIS_COLORS;
 import static us.ihmc.rdx.ui.gizmo.RDXGizmoTools.AXIS_SELECTED_COLORS;
@@ -121,6 +122,10 @@ public class RDXPose3DGizmo implements RenderableProvider
    private boolean queuePopupToOpen = false;
    private boolean proportionsNeedUpdate = false;
    private FrameBasedGizmoModification frameBasedGizmoModification;
+   private Runnable overlayAddition;
+   private Consumer<ImGui3DViewInput> pickCalculator;
+   private Consumer<ImGui3DViewInput> inputProcessor;
+   private RDXRenderableAdapter renderableAdapter;
 
    /** Maintains it's own frame in World. */
    public RDXPose3DGizmo()
@@ -225,16 +230,33 @@ public class RDXPose3DGizmo implements RenderableProvider
    public void createAndSetupDefault(RDX3DPanel panel3D)
    {
       create(panel3D);
-      panel3D.addImGui3DViewPickCalculator(this::calculate3DViewPick);
-      panel3D.addImGui3DViewInputProcessor(this::process3DViewInput);
-      panel3D.getScene().addRenderableProvider(this, RDXSceneLevel.VIRTUAL);
+      pickCalculator = this::calculate3DViewPick;
+      panel3D.addImGui3DViewPickCalculator(pickCalculator, pickCalculator);
+      inputProcessor = this::process3DViewInput;
+      panel3D.addImGui3DViewInputProcessor(inputProcessor, inputProcessor);
+      renderableAdapter = panel3D.getScene().addRenderableProvider(this, RDXSceneLevel.VIRTUAL);
+   }
+
+   public void destroyDefault(RDX3DPanel panel3D)
+   {
+      panel3D.removeImGui3DViewInputProcessor(inputProcessor);
+      panel3D.removeImGui3DViewPickCalculator(pickCalculator);
+      panel3D.getScene().removeRenderableAdapter(renderableAdapter);
+      panel3D.removeImGuiOverlayAddition(overlayAddition);
+
+      centerSphereModel.dispose();
+      for (int i = 0; i < arrowModels.length; i++)
+         arrowModels[i].dispose();
+      for (int i = 0; i < torusModels.length; i++)
+         torusModels[i].dispose();
    }
 
    public void create(RDX3DPanel panel3D)
    {
       camera3D = panel3D.getCamera3D();
       frameBasedGizmoModification = new FrameBasedGizmoModification(this::getGizmoFrame, () -> gizmoFrame.getParent(), camera3D);
-      panel3D.addImGuiOverlayAddition(this::renderTooltipAndContextMenu);
+      overlayAddition = this::renderTooltipAndContextMenu;
+      panel3D.addImGuiOverlayAddition(overlayAddition);
 
       centerSphereModel.setMesh(meshBuilder -> meshBuilder.addSphere(centerSphereRadius.get(), RDXGizmoTools.CENTER_DEFAULT_COLOR));
 
@@ -757,6 +779,15 @@ public class RDXPose3DGizmo implements RenderableProvider
       this.resizeAutomatically.set(resizeAutomatically);
    }
 
+   public void setTorusRadius(double radius)
+   {
+      if (!EuclidCoreTools.epsilonEquals(radius, torusRadius.get(), 1e-5))
+      {
+         torusRadius.set((float) radius);
+         recreateGraphics();
+      }
+   }
+
    ClockFaceRotation3DMouseDragAlgorithm getClockFaceDragAlgorithm()
    {
       return clockFaceDragAlgorithm;
@@ -765,6 +796,11 @@ public class RDXPose3DGizmo implements RenderableProvider
    public Notification getGizmoModifiedByUser()
    {
       return gizmoModifiedByUser;
+   }
+
+   public boolean isBeingManipulated()
+   {
+      return isBeingManipulated;
    }
 
    public ImFloat getCenterSphereToTorusRatio()

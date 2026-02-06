@@ -7,10 +7,10 @@ import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.PlanarRegionToHeightMapConverter;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
+import us.ihmc.perception.gpuMapping.TerrainMapMessageTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.perception.heightMap.HeightMapData;
-import us.ihmc.perception.heightMap.HeightMapMessageTools;
 
 import java.util.Random;
 
@@ -21,9 +21,9 @@ public class FootstepSnapperTest
    private final Random random = new Random(320L);
    private final double epsilon = 1e-8;
 
-   private int[] xIndices = new int[]{-30, 0, 23, 87, -100, 42};
-   private int[] yIndices = new int[]{-35, 0, -777, 87, -50, 28};
-   private int[] yawIndices = new int[]{-2, 4, 0};
+   private int[] xIndices = new int[] {-30, 0, 23, 87, -100, 42};
+   private int[] yIndices = new int[] {-35, 0, -777, 87, -50, 28};
+   private int[] yawIndices = new int[] {-2, 4, 0};
 
    @Test
    public void testFootstepCacheing()
@@ -36,8 +36,9 @@ public class FootstepSnapperTest
       RigidBodyTransform transform = new RigidBodyTransform();
       transform.appendTranslation(0.0, 0.0, 0.10);
       planarRegionsList.getPlanarRegion(0).applyTransform(transform);
-      HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList));
-      environmentHandler.setHeightMapData(heightMapData);
+      TerrainMapData terrainMapData = TerrainMapMessageTools.unpackMessage(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(
+            planarRegionsList));
+      environmentHandler.setTerrainMapData(terrainMapData);
 
       for (int i = 0; i < xIndices.length; i++)
       {

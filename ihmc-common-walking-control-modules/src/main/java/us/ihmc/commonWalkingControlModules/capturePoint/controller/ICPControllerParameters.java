@@ -1,8 +1,10 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.*;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -45,10 +47,32 @@ public abstract class ICPControllerParameters
    public abstract double getFeedbackRateWeight();
 
    /**
+    * Penalization on changes in the total feedback between control ticks. This weight is normalized by
+    * the control DT.
+    */
+   public double getHighlyDampedFeedbackRateWeight()
+   {
+      return getFeedbackRateWeight();
+   }
+
+   /**
+    * This is a deadband applied to the icp error, in a magnitude manner, so along the vector of the error.
+    */
+   public double getICPErrorDeadband()
+   {
+      return 0.0;
+   }
+
+   /**
     * Gains for the proportional ICP controller that is encoded into the optimization. Also includes
     * gains for the smart integrator that is used when the controller is stuck.
     */
    public abstract ICPControlGainsReadOnly getICPFeedbackGains();
+
+   public ICPControlGainsReadOnly getHighlyDampedICPFeedbackGains()
+   {
+      return getICPFeedbackGains();
+   }
 
    /**
     * Sets whether the integration gains returned by {@link #getICPFeedbackGains()} is used to perform
@@ -151,15 +175,15 @@ public abstract class ICPControllerParameters
       return 0.06;
    }
 
-   public void createFeedForwardAlphaCalculator(YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public void createFeedForwardAlphaCalculator(YoRegistry registry)
    {
    }
 
-   public void createFeedbackAlphaCalculator(YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public void createFeedbackAlphaCalculator(YoRegistry registry)
    {
    }
 
-   public void createFeedbackProjectionOperator(YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public void createFeedbackProjectionOperator(YoRegistry registry)
    {
    }
 

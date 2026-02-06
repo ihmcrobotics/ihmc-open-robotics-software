@@ -38,11 +38,11 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
    /**
             * List of heights, which correspond to the list of keys
             */
-   public us.ihmc.idl.IDLSequence.Float  heights_;
+   public us.ihmc.idl.IDLSequence.Byte  heights_;
 
    public HeightMapMessage()
    {
-      heights_ = new us.ihmc.idl.IDLSequence.Float (255000, "type_5");
+      heights_ = new us.ihmc.idl.IDLSequence.Byte (255000, "type_9");
 
    }
 
@@ -163,7 +163,7 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
    /**
             * List of heights, which correspond to the list of keys
             */
-   public us.ihmc.idl.IDLSequence.Float  getHeights()
+   public us.ihmc.idl.IDLSequence.Byte  getHeights()
    {
       return heights_;
    }
@@ -198,7 +198,7 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.cells_per_axis_, other.cells_per_axis_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.heights_, other.heights_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.heights_, other.heights_, epsilon)) return false;
 
 
       return true;

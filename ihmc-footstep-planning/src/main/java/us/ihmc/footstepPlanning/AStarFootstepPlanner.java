@@ -29,10 +29,9 @@ import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
-import us.ihmc.footstepPlanning.steppableRegions.TerrainMapData;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -152,11 +151,9 @@ public class AStarFootstepPlanner
       result = FootstepPlanningResult.PLANNING;
 
       // Update what we should use for planning
-      boolean hasHeightMap = request.getEnvironmentHandler().getHeightMapData() != null;
       boolean hasTerrainMap = request.getEnvironmentHandler().getTerrainMapData() != null;
-      boolean flatGroundMode = request.getAssumeFlatGround() || (!hasHeightMap && !hasTerrainMap);
+      boolean flatGroundMode = request.getAssumeFlatGround() || (!hasTerrainMap);
 
-      HeightMapData heightMapData = flatGroundMode ? null : request.getEnvironmentHandler().getHeightMapData();
       TerrainMapData terrainMapData = flatGroundMode ? null : request.getEnvironmentHandler().getTerrainMapData();
 
       if (flatGroundMode)
@@ -166,7 +163,6 @@ public class AStarFootstepPlanner
       }
 
       snapper.clearSnapData();
-      environmentHandler.setHeightMapData(heightMapData);
       environmentHandler.setTerrainMapData(terrainMapData);
 
       double pathLength = bodyPathPlanHolder.computePathLength(0.0);
@@ -318,7 +314,7 @@ public class AStarFootstepPlanner
          outputToPack.getFootstepPlan().addFootstep(footstep);
       }
 
-      swingPlanningModule.computeSwingWaypoints(request.getEnvironmentHandler().getHeightMapData(),
+      swingPlanningModule.computeSwingWaypoints(request.getEnvironmentHandler().getTerrainMapData(),
                                                 outputToPack.getFootstepPlan(),
                                                 request.getStartFootPoses(),
                                                 request.getSwingPlannerType());

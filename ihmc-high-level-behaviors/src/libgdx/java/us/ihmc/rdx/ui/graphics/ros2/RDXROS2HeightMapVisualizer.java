@@ -15,19 +15,21 @@ import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.TerrainMapMessage;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
-import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
-import us.ihmc.footstepPlanning.steppableRegions.TerrainMapMessageTools;
-import us.ihmc.perception.heightMap.HeightMapMessageTools;
-import us.ihmc.perception.heightMap.HeightMapTools;
-import us.ihmc.footstepPlanning.steppableRegions.TerrainMapData;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
+import us.ihmc.perception.gpuMapping.TerrainMapMessageTools;
+import us.ihmc.perception.gpuMapping.HeightMapData;
+import us.ihmc.perception.gpuMapping.HeightMapMessageTools;
+import us.ihmc.perception.gpuMapping.HeightMapTools;
+import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXChunkedMapRenderer;
 import us.ihmc.rdx.ui.graphics.RDXHeightMapRenderer;
-import us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer;
+import us.ihmc.rdx.ui.graphics.RDXImageVisualizer;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
@@ -39,19 +41,29 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ResettableExceptionHandlingExecutorService executorService;
-   private final RDXOpenCVVideoVisualizer heightMapImageVisualizer = new RDXOpenCVVideoVisualizer("Height Map Image", "Height Map Image Panel", true);
+   private final RDXImageVisualizer heightMapImageVisualizer = new RDXImageVisualizer("Height Map Image", "Height Map Image Panel", true);
    private final RDXHeightMapRenderer heightMapRenderer = new RDXHeightMapRenderer();
    private final RDXChunkedMapRenderer chunkedMapRenderer;
+   private final ImBoolean requestChunkMap = new ImBoolean(false);
+   private final ImBoolean requestHeightMap = new ImBoolean(true);
+   private final ImBoolean requestTerrainMap = new ImBoolean(false);
+   private final ImBoolean requestHeightMapController = new ImBoolean(false);
    private final ImBoolean enableChunkedMapRenderer = new ImBoolean(false);
    private final ImBoolean enableHeightMapRenderer = new ImBoolean(true);
    private final ImBoolean colorBasedOnTraversability = new ImBoolean(false);
    private final Stopwatch stopwatch = new Stopwatch();
    private ROS2PublishSubscribeAPI ros2;
+   private ROS2Heartbeat chunkMapRequestHeartbeat;
+   private ROS2Heartbeat heightMapRequestHeartbeat;
+   private ROS2Heartbeat terrainMapRequestHeartbeat;
+   private ROS2Heartbeat heightMapControllerRequestHeartbeat;
    private Mat heightMap;
    private Mat traversabilityScore;
    private HeightMapData latestHeightMapData;
    private TerrainMapData latestTerrainMapData;
    private int cellsPerAxisOfChunks;
+   private ROS2Topic<HeightMapMessage> heightMapTopic = PerceptionAPI.HEIGHT_MAP_MESSAGE;
+   private ROS2Topic<TerrainMapMessage> terrainMapTopic = PerceptionAPI.TERRAIN_MAP_MESSAGE;
 
    public RDXROS2HeightMapVisualizer(String title)
    {
@@ -62,17 +74,26 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       executorService = MissingThreadTools.newSingleThreadExecutor("Height Map Visualizer Subscription", true, 1);
    }
 
+   public RDXROS2HeightMapVisualizer(String title,
+                                     ROS2Topic<HeightMapMessage> heightMapTopic,
+                                     ROS2Topic<TerrainMapMessage> terrainMapTopic)
+   {
+      this(title);
+      this.heightMapTopic = heightMapTopic;
+      this.terrainMapTopic = terrainMapTopic;
+   }
+
    @Override
    public List<ROS2Topic<?>> getTopics()
    {
-      return List.of(PerceptionAPI.HEIGHT_MAP_MESSAGE);
+      return List.of(heightMapTopic);
    }
 
    public void setupForImageMessage(ROS2PublishSubscribeAPI ros2)
    {
       this.ros2 = ros2;
-      ros2.subscribeViaCallback(PerceptionAPI.HEIGHT_MAP_MESSAGE, this::acceptHeightMapMessage);
-      ros2.subscribeViaCallback(ContinuousHikingAPI.TERRAIN_MAP, this::acceptTerrainMapMessage);
+      ros2.subscribeViaCallback(heightMapTopic, this::acceptHeightMapMessage);
+      ros2.subscribeViaCallback(terrainMapTopic, this::acceptTerrainMapMessage);
    }
 
    public void setupForChunkMessage(ROS2PublishSubscribeAPI ros2)
@@ -96,14 +117,11 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       if (!isActive())
          return;
 
-      if (!colorBasedOnTraversability.get())
-      {
-         executorService.clearQueueAndExecute(() ->
-                                              {
-                                                 HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(heightMapMessage);
-                                                 processHeightMapData(heightMapData);
-                                              });
-      }
+      executorService.clearQueueAndExecute(() ->
+                                           {
+                                              HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(heightMapMessage);
+                                              processHeightMapData(heightMapData);
+                                           });
 
       getFrequency(PerceptionAPI.HEIGHT_MAP_MESSAGE).ping();
    }
@@ -127,11 +145,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       Mat colorized = new Mat();
       opencv_imgproc.applyColorMap(normalized, colorized, opencv_imgproc.COLORMAP_JET);
 
-      // Convert to RGBA for display/publishing
-      Mat colorizedRGBA = new Mat();
-      opencv_imgproc.cvtColor(colorized, colorizedRGBA, opencv_imgproc.COLOR_BGR2RGBA);
-
-      heightMapImageVisualizer.setImage(colorizedRGBA);
+      heightMapImageVisualizer.setImage(colorized, PixelFormat.BGR8);
    }
 
    public void acceptTerrainMapMessage(TerrainMapMessage terrainMapMessage)
@@ -166,7 +180,6 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
    private void processTerrainMapData(TerrainMapMessage terrainMapMessage)
    {
       latestTerrainMapData = TerrainMapMessageTools.unpackMessage(terrainMapMessage);
-      processHeightMapData(latestTerrainMapData.getHeightMapData());
 
       if (traversabilityScore == null)
       {
@@ -197,6 +210,18 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
 
       if (ros2 != null && ImGui.button(labels.get("Lower Height Map Backdrop")))
          ros2.publish(PerceptionAPI.LOWER_HEIGHT_MAP_BACKDROP);
+
+      if (heightMapRequestHeartbeat != null && ImGui.checkbox(labels.get("Request Height Map"), requestHeightMap))
+         heightMapRequestHeartbeat.setAlive(requestHeightMap.get());
+
+      if (chunkMapRequestHeartbeat != null && ImGui.checkbox(labels.get("Request Chunk Map"), requestChunkMap))
+         chunkMapRequestHeartbeat.setAlive(requestChunkMap.get());
+
+      if (terrainMapRequestHeartbeat != null && ImGui.checkbox(labels.get("Request Terrain Map"), requestTerrainMap))
+         terrainMapRequestHeartbeat.setAlive(requestTerrainMap.get());
+
+      if (heightMapControllerRequestHeartbeat != null && ImGui.checkbox(labels.get("Send Height Map to Controller"), requestHeightMapController))
+         heightMapControllerRequestHeartbeat.setAlive(requestHeightMapController.get());
 
       if (ImGui.collapsingHeader(labels.get("Visualization Options")))
       {
@@ -238,7 +263,13 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
             double heightMapCenterY = latestHeightMapData.getGridCenter().getY();
             double cellSize = latestHeightMapData.getCellSize();
             int centerIndex = HeightMapTools.computeCenterIndex(latestHeightMapData.getMapSize(), cellSize);
-            heightMapRenderer.update(heightMap, traversabilityScore, colorBasedOnTraversability.get(), (float) heightMapCenterX, (float) heightMapCenterY, centerIndex, (float) cellSize);
+            heightMapRenderer.update(heightMap,
+                                     traversabilityScore,
+                                     colorBasedOnTraversability.get(),
+                                     (float) heightMapCenterX,
+                                     (float) heightMapCenterY,
+                                     centerIndex,
+                                     (float) cellSize);
          }
       }
 
@@ -278,6 +309,30 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       heightMapRenderer.dispose();
    }
 
+   public void setupChunkMapRequestHeartbeat(ROS2Node ros2Node)
+   {
+      chunkMapRequestHeartbeat = new ROS2Heartbeat(ros2Node, PerceptionAPI.REQUEST_CHUNK_MAP);
+      chunkMapRequestHeartbeat.setAlive(requestChunkMap.get());
+   }
+
+   public void setupHeightMapRequestHeartbeat(ROS2Node ros2Node)
+   {
+      heightMapRequestHeartbeat = new ROS2Heartbeat(ros2Node, PerceptionAPI.REQUEST_HEIGHT_MAP);
+      heightMapRequestHeartbeat.setAlive(requestHeightMap.get());
+   }
+
+   public void setupTerrainMapRequestHeartbeat(ROS2Node ros2Node)
+   {
+      terrainMapRequestHeartbeat = new ROS2Heartbeat(ros2Node, PerceptionAPI.REQUEST_TERRAIN_MAP);
+      terrainMapRequestHeartbeat.setAlive(requestTerrainMap.get());
+   }
+
+   public void setupHeightMapControllerRequestHeartbeat(ROS2Node ros2Node)
+   {
+      heightMapControllerRequestHeartbeat = new ROS2Heartbeat(ros2Node, PerceptionAPI.REQUEST_HEIGHT_MAP_FOR_CONTROLLER);
+      heightMapControllerRequestHeartbeat.setAlive(requestHeightMapController.get());
+   }
+
    public HeightMapData getLatestHeightMapData()
    {
       return isActive() ? latestHeightMapData : null;
@@ -288,7 +343,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       return isActive() ? latestTerrainMapData : null;
    }
 
-   public RDXOpenCVVideoVisualizer getHeightMapImageVisualizer()
+   public RDXImageVisualizer getHeightMapImageVisualizer()
    {
       return heightMapImageVisualizer;
    }

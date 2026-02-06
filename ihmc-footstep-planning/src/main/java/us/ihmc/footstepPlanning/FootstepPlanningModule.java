@@ -31,7 +31,7 @@ import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
+import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlan;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
@@ -173,8 +173,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       aStarFootstepPlanner.clearLoggedData();
       bodyPathPlanner.clearLoggedData();
 
-      boolean heightMapAvailable = request.getEnvironmentHandler().getHeightMapData() != null;
-
       startMidFootPose.interpolate(request.getStartFootPoses().get(RobotSide.LEFT), request.getStartFootPoses().get(RobotSide.RIGHT), 0.5);
       goalMidFootPose.interpolate(request.getGoalFootPoses().get(RobotSide.LEFT), request.getGoalFootPoses().get(RobotSide.RIGHT), 0.5);
 
@@ -182,7 +180,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       output.getPlannerTimings().setTimeBeforePlanningSeconds(stopwatch.lap());
       output.getPlannerTimings().setTotalElapsedSeconds(stopwatch.totalElapsed());
 
-      if (request.getPlanBodyPath() && heightMapAvailable)
+      if (request.getPlanBodyPath() && (request.isHeightMapAvailable()))
       {
          bodyPathPlanner.handleRequest(request, output);
          List<Pose3D> bodyPathWaypoints = output.getBodyPath();
@@ -242,7 +240,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          RobotSide initialStanceSide = request.getRequestedInitialStanceSide();
          FramePose3D initialStancePose = new FramePose3D(request.getStartFootPoses().get(initialStanceSide));
          planThenSnapPlanner.setInitialStanceFoot(initialStancePose, initialStanceSide);
-         planThenSnapPlanner.setHeightMapData(request.getEnvironmentHandler().getHeightMapData());
+         planThenSnapPlanner.setTerrainMapData(request.getEnvironmentHandler().getTerrainMapData());
          planThenSnapPlanner.setBodyPath(bodyPathPlanHolder);
 
          FootstepPlannerGoal goal = new FootstepPlannerGoal();
@@ -262,7 +260,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          output.getPlannerTimings().setTimePlanningStepsSeconds(stopwatch.lap());
 
          aStarFootstepPlanner.getSwingPlanningModule()
-                             .computeSwingWaypoints(request.getEnvironmentHandler().getHeightMapData(),
+                             .computeSwingWaypoints(request.getEnvironmentHandler().getTerrainMapData(),
                                                     output.getFootstepPlan(),
                                                     request.getStartFootPoses(),
                                                     request.getSwingPlannerType());
@@ -303,7 +301,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       try
       {
          swingReplanRequestCallbacks.forEach(callback -> callback.accept(swingPlannerType));
-         aStarFootstepPlanner.getSwingPlanningModule().computeSwingWaypoints(request.getEnvironmentHandler().getHeightMapData(),
+         aStarFootstepPlanner.getSwingPlanningModule().computeSwingWaypoints(request.getEnvironmentHandler().getTerrainMapData(),
                                                                              output.getFootstepPlan(),
                                                                              request.getStartFootPoses(),
                                                                              swingPlannerType);

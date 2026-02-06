@@ -15,7 +15,7 @@ public class ConditionNodeStateMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "794e00e31ec4c049131447afba3b15ae0203adf2ce44665948dce992b0f393ba";
+   		return "e6c29aef72e3b25e02583b8fed3bc283752ddb9dad74d81106e9c0c6abcff431";
    }
    
    @Override
@@ -60,7 +60,13 @@ public class ConditionNodeStateMessagePubSubType implements us.ihmc.pubsub.Topic
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -87,7 +93,15 @@ public class ConditionNodeStateMessagePubSubType implements us.ihmc.pubsub.Topic
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getBToA(), current_alignment);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -105,9 +119,14 @@ public class ConditionNodeStateMessagePubSubType implements us.ihmc.pubsub.Topic
 
       cdr.write_type_7(data.getRequestResetContext());
 
-      cdr.write_type_6(data.getCurrentDistance());
+      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getBToA(), cdr);
+      cdr.write_type_7(data.getFrameAIsPresent());
 
-      cdr.write_type_7(data.getMissingFrame());
+      cdr.write_type_7(data.getFrameBIsPresent());
+
+      cdr.write_type_4(data.getNumberOfPointsContained());
+
+      cdr.write_type_7(data.getFrameIsContained());
 
    }
 
@@ -119,9 +138,14 @@ public class ConditionNodeStateMessagePubSubType implements us.ihmc.pubsub.Topic
       	
       data.setRequestResetContext(cdr.read_type_7());
       	
-      data.setCurrentDistance(cdr.read_type_6());
+      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getBToA(), cdr);	
+      data.setFrameAIsPresent(cdr.read_type_7());
       	
-      data.setMissingFrame(cdr.read_type_7());
+      data.setFrameBIsPresent(cdr.read_type_7());
+      	
+      data.setNumberOfPointsContained(cdr.read_type_4());
+      	
+      data.setFrameIsContained(cdr.read_type_7());
       	
 
    }
@@ -135,8 +159,12 @@ public class ConditionNodeStateMessagePubSubType implements us.ihmc.pubsub.Topic
 
       ser.write_type_4("count", data.getCount());
       ser.write_type_7("request_reset_context", data.getRequestResetContext());
-      ser.write_type_6("current_distance", data.getCurrentDistance());
-      ser.write_type_7("missing_frame", data.getMissingFrame());
+      ser.write_type_a("b_to_a", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getBToA());
+
+      ser.write_type_7("frame_a_is_present", data.getFrameAIsPresent());
+      ser.write_type_7("frame_b_is_present", data.getFrameBIsPresent());
+      ser.write_type_4("number_of_points_contained", data.getNumberOfPointsContained());
+      ser.write_type_7("frame_is_contained", data.getFrameIsContained());
    }
 
    @Override
@@ -148,8 +176,12 @@ public class ConditionNodeStateMessagePubSubType implements us.ihmc.pubsub.Topic
 
       data.setCount(ser.read_type_4("count"));
       data.setRequestResetContext(ser.read_type_7("request_reset_context"));
-      data.setCurrentDistance(ser.read_type_6("current_distance"));
-      data.setMissingFrame(ser.read_type_7("missing_frame"));
+      ser.read_type_a("b_to_a", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getBToA());
+
+      data.setFrameAIsPresent(ser.read_type_7("frame_a_is_present"));
+      data.setFrameBIsPresent(ser.read_type_7("frame_b_is_present"));
+      data.setNumberOfPointsContained(ser.read_type_4("number_of_points_contained"));
+      data.setFrameIsContained(ser.read_type_7("frame_is_contained"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.ConditionNodeStateMessage src, behavior_msgs.msg.dds.ConditionNodeStateMessage dest)

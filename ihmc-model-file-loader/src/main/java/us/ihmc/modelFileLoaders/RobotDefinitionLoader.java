@@ -72,7 +72,6 @@ public class RobotDefinitionLoader
                robotDefinition.addSubtreeJointsToIgnore(jointName);
             adjustJointLimitStops(robotDefinition, jointNameMap);
          }
-         adjustRigidBodyInterias(robotDefinition);
 
          if (removeCollisionMeshes)
             removeCollisionShapeDefinitions(robotDefinition);
@@ -109,7 +108,6 @@ public class RobotDefinitionLoader
                robotDefinition.addSubtreeJointsToIgnore(jointName);
             adjustJointLimitStops(robotDefinition, jointNameMap);
          }
-         adjustRigidBodyInterias(robotDefinition);
 
          if (removeCollisionMeshes)
             removeCollisionShapeDefinitions(robotDefinition);
@@ -224,14 +222,25 @@ public class RobotDefinitionLoader
 
    public static void adjustRigidBodyInterias(RobotDefinition robotDefinition)
    {
-      for (JointDefinition joint : robotDefinition.getAllJoints())
-      {
-         if (isJointInNeedOfReducedGains(joint.getName()))
-         {
-            RigidBodyDefinition successor = joint.getSuccessor();
-            successor.getMomentOfInertia().scale(100.0);
-         }
-      }
+      RigidBodyDefinition[] rigidBodyDefinitionsToAdjust = robotDefinition.getAllRigidBodies()
+                                                                          .stream()
+                                                                          .filter(rigidBodyDefinition -> isJointInNeedOfReducedGains(rigidBodyDefinition.getParentJoint()
+                                                                                                                                                        .getName()))
+                                                                          .toArray(RigidBodyDefinition[]::new);
+
+      adjustRigidBodyInterias(100.0, rigidBodyDefinitionsToAdjust);
+   }
+
+   public static void adjustRigidBodyInterias(double scalar, RigidBodyDefinition[] rigidBodyDefinitionsToAdjust)
+   {
+      for (int i = 0; i < rigidBodyDefinitionsToAdjust.length; i++)
+         rigidBodyDefinitionsToAdjust[i].getMomentOfInertia().scale(scalar);
+   }
+
+   public static void adjustRigidBodyInterias(double scalar, JointDefinition[] jointDefinitions)
+   {
+      for (int i = 0; i < jointDefinitions.length; i++)
+         jointDefinitions[i].getSuccessor().getMomentOfInertia().scale(scalar);
    }
 
    private static boolean isJointInNeedOfReducedGains(String jointName)

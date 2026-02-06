@@ -12,7 +12,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotDataLogger.YoVariableClient;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
-import us.ihmc.robotDataVisualizer.BasicYoVariablesUpdatedListener;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
@@ -203,7 +202,7 @@ public class ROS2NetworkTest
 
          // start YoVariableServer
          yoVariableServer = new YoVariableServer(profile.getMachineName() + profileName, null, new DataServerSettings(false), UPDATE_PERIOD);
-         yoVariableServer.setMainRegistry(profile.getYoRegistry(), null);
+         yoVariableServer.setMainRegistry(profile.getYoRegistry());
          LogTools.info("Starting YoVariableServer...");
          yoVariableServer.start();
 

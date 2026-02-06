@@ -6,7 +6,7 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class VelocityElasticityCompensatorYoVariable extends YoDouble implements ProcessingYoVariable
+public class VelocityElasticityCompensatorYoVariable extends YoDouble implements OffsettingProcessorVariable
 {
    private final DoubleProvider stiffness;
    private final DoubleProvider rawJointVelocity;
@@ -72,5 +72,11 @@ public class VelocityElasticityCompensatorYoVariable extends YoDouble implements
    public void reset()
    {
       jointDeflectionPrevious.set(0.0);
+   }
+
+   @Override
+   public double getOffset()
+   {
+      return jointDeflectionDot.getDoubleValue();
    }
 }

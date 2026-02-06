@@ -1,0 +1,24 @@
+#ifndef __perception_msgs__msg__FoundationPoseParameters__idl__
+#define __perception_msgs__msg__FoundationPoseParameters__idl__
+
+#include "ihmc_common_msgs/msg/./LatestModificationMessage_.idl"
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="perception_msgs::msg::dds_::FoundationPoseParameters_")
+      struct FoundationPoseParameters
+      {
+        ihmc_common_msgs::msg::dds::LatestModificationMessage latest_timestamp_modifiable;
+        boolean enabled;
+        boolean auto_reset_enabled;
+        double reset_distance;
+      };
+    };
+  };
+};
+
+#endif

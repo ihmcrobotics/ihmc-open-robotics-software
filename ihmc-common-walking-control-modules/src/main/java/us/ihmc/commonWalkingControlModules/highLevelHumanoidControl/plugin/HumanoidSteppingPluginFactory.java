@@ -27,6 +27,8 @@ public interface HumanoidSteppingPluginFactory extends HighLevelHumanoidControll
 {
    StepGeneratorCommandInputManager getStepGeneratorCommandInputManager();
 
+   StatusMessageOutputManager getStepGeneratorStatusMessageOutputManager();
+
    void setFootStepAdjustment(FootstepAdjustment footstepAdjustment);
 
    void addFootstepValidityIndicator(FootstepValidityIndicator footstepValidityIndicator);
@@ -39,7 +41,8 @@ public interface HumanoidSteppingPluginFactory extends HighLevelHumanoidControll
    {
       ROS2Topic<?> baseTopic = ControllerAPI.getBaseTopic(HumanoidControllerAPI.HUMANOID_CONTROL_MODULE_NAME, robotName);
       StepGeneratorNetworkSubscriber stepGeneratorNetworkSubscriber = new StepGeneratorNetworkSubscriber(baseTopic,
-                                                                                                         getStepGeneratorCommandInputManager(),
+                                                                                                         getStepGeneratorCommandInputManager().getCommandInputManager(),
+                                                                                                         getStepGeneratorStatusMessageOutputManager(),
                                                                                                          realtimeROS2Node);
 
       stepGeneratorNetworkSubscriber.addMessageValidator(ControllerAPIDefinition.createDefaultMessageValidation());
@@ -56,7 +59,6 @@ public interface HumanoidSteppingPluginFactory extends HighLevelHumanoidControll
                          controllerFactoryHelper.getWalkingControllerParameters(),
                          controllerFactoryHelper.getStatusMessageOutputManager(),
                          controllerFactoryHelper.getCommandInputManager(),
-                         controllerToolbox.getYoGraphicsListRegistry(),
                          controllerToolbox.getContactableFeet(),
                          controllerToolbox.getYoTime());
    }
@@ -67,7 +69,6 @@ public interface HumanoidSteppingPluginFactory extends HighLevelHumanoidControll
                                       WalkingControllerParameters walkingControllerParameters,
                                       StatusMessageOutputManager walkingStatusMessageOutputManager,
                                       CommandInputManager walkingCommandInputManager,
-                                      YoGraphicsListRegistry yoGraphicsListRegistry,
                                       SideDependentList<? extends ContactableBody> contactableFeet,
                                       DoubleProvider timeProvider);
 }

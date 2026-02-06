@@ -17,6 +17,7 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationControlMode;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
@@ -415,7 +416,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
                                                                                               worldFrame,
                                                                                               worldFrame);
       simulationTestHelper.publishToController(chestMessage);
-      // This time had to be increased for Alexander. Because there is no spine pitch, the chest can't move to the position without the pelvis moving. However,
+      // This time had to be increased for Alex. Because there is no spine pitch, the chest can't move to the position without the pelvis moving. However,
       // The pelvis is just tracking the chest. So it's pretty laggy.
       simulationTestHelper.simulateNow(chestTrajectoryTime + 3.0);
 
@@ -554,7 +555,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
       double swingDuration = walkingControllerParameters.getDefaultSwingTime();
       double transferDuration = walkingControllerParameters.getDefaultTransferTime();
-      double stepWidth = walkingControllerParameters.getSteppingParameters().getDefaultStepLength() / 2.0;
+      double stepWidth = walkingControllerParameters.getSteppingParametersForStepGeneration().getDefaultStepLength() / 2.0;
       RobotSide robotSide = RobotSide.LEFT;
       ReferenceFrame midFootZUpGroundFrame = humanoidReferenceFrames.getMidFootZUpGroundFrame();
       double time = walkingControllerParameters.getDefaultInitialTransferTime();
@@ -584,10 +585,11 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
    private double createWalkingMessage(int steps, FootstepDataListMessage messageToPack, boolean squareUp)
    {
       WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
+      SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParametersForStepGeneration();
       double swingDuration = walkingControllerParameters.getDefaultSwingTime();
       double transferDuration = walkingControllerParameters.getDefaultTransferTime();
-      double stepLength = 0.6 * walkingControllerParameters.getSteppingParameters().getDefaultStepLength();
-      double stepWidth = walkingControllerParameters.getSteppingParameters().getInPlaceWidth();
+      double stepLength = 0.6 * steppingParameters.getDefaultStepLength();
+      double stepWidth = steppingParameters.getInPlaceWidth();
       RobotSide robotSide = RobotSide.LEFT;
       ReferenceFrame midFootZUpGroundFrame = humanoidReferenceFrames.getMidFootZUpGroundFrame();
       double time = walkingControllerParameters.getDefaultInitialTransferTime();

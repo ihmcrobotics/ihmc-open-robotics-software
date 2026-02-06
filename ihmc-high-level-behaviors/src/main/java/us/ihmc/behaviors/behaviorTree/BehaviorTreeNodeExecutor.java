@@ -1,7 +1,12 @@
 package us.ihmc.behaviors.behaviorTree;
 
-import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.behaviorTree.action.actions.AbilityHandActionComms;
+import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneExecutor;
+import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -23,21 +28,53 @@ public class BehaviorTreeNodeExecutor<S extends BehaviorTreeNodeState<D>,
    /** Convenient accessor to the definition to keep the code clean, available to all inheriting classes. */
    protected final D definition;
    private final List<BehaviorTreeNodeExecutor<?, ?>> children = new ArrayList<>();
+   protected final BehaviorTreeRootNodeExecutor rootNode;
    private transient BehaviorTreeNodeExecutor<?, ?> parent;
 
-   /** For extending types. */
-   public BehaviorTreeNodeExecutor(S state)
+   protected final DRCRobotModel robotModel;
+   protected final ROS2ControllerHelper ros2ControllerHelper;
+   protected final ROS2SyncedRobotModel syncedRobot;
+   protected final ControllerStatusTracker controllerStatusTracker;
+   protected final SideDependentList<AbilityHandActionComms> abilityHandComms;
+   protected final BehaviorTreeSceneExecutor scene;
+
+   /** For creating a basic node. */ // TODO: Should not exist???
+   public BehaviorTreeNodeExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
    {
-      this.state = state;
-      definition = state.getDefinition();
+      this((S) new BehaviorTreeNodeState<D>(id, (D) new BehaviorTreeNodeDefinition(rootNode.getDefinition()), rootNode.getState()), rootNode);
    }
 
-   /** For creating a basic node. */
-   @SuppressWarnings("unchecked")
-   public BehaviorTreeNodeExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   /** For extending types. */
+   public BehaviorTreeNodeExecutor(S state, BehaviorTreeRootNodeExecutor rootNode)
    {
-      definition = (D) new BehaviorTreeNodeDefinition(crdtInfo, saveFileDirectory);
-      this.state = (S) new BehaviorTreeNodeState<D>(id, definition, crdtInfo);
+      definition = state.getDefinition();
+      this.state = state;
+      this.rootNode = rootNode;
+      this.robotModel = rootNode.getDefinition().getRobotModel();
+      this.ros2ControllerHelper = rootNode.getRos2ControllerHelper();
+      this.syncedRobot = rootNode.getSyncedRobot();
+      this.controllerStatusTracker = rootNode.getControllerStatusTracker();
+      this.abilityHandComms = rootNode.getAbilityHandComms();
+      this.scene = rootNode.getScene();
+   }
+
+   /** Root node constructor. */
+   public BehaviorTreeNodeExecutor(S state,
+                                   ROS2ControllerHelper ros2ControllerHelper,
+                                   ROS2SyncedRobotModel syncedRobot,
+                                   ControllerStatusTracker controllerStatusTracker,
+                                   SideDependentList<AbilityHandActionComms> abilityHandComms,
+                                   BehaviorTreeSceneExecutor scene)
+   {
+      this.definition = state.getDefinition();
+      this.state = state;
+      this.rootNode = (BehaviorTreeRootNodeExecutor) this;
+      this.robotModel = syncedRobot.getRobotModel();
+      this.ros2ControllerHelper = ros2ControllerHelper;
+      this.syncedRobot = syncedRobot;
+      this.controllerStatusTracker = controllerStatusTracker;
+      this.abilityHandComms = abilityHandComms;
+      this.scene = scene;
    }
 
    /**
@@ -62,6 +99,11 @@ public class BehaviorTreeNodeExecutor<S extends BehaviorTreeNodeState<D>,
    public List<BehaviorTreeNodeExecutor<?, ?>> getChildren()
    {
       return children;
+   }
+
+   public BehaviorTreeRootNodeExecutor getRootNode()
+   {
+      return rootNode;
    }
 
    @Override

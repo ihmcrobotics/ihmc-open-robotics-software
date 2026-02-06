@@ -20,12 +20,12 @@ public class RDXInteractableRealsenseD455 extends RDXInteractableSensor
 
    public RDXInteractableRealsenseD455(RDX3DPanel panel3D)
    {
-      super(panel3D, "environmentObjects/d455Sensor/D455.g3dj");
+      super(panel3D, "environmentObjects/d455Sensor/D455.glb");
    }
 
    public RDXInteractableRealsenseD455(RDX3DPanel panel3D, ReferenceFrame referenceFrameToRepresent, RigidBodyTransform transformToParentToModify)
    {
-      super(panel3D, referenceFrameToRepresent, transformToParentToModify, "environmentObjects/d455Sensor/D455.g3dj");
+      super(panel3D, referenceFrameToRepresent, transformToParentToModify, "environmentObjects/d455Sensor/D455.glb");
    }
 
    @Override

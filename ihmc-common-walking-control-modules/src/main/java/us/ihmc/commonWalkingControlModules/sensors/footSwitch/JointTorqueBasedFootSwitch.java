@@ -7,6 +7,8 @@ import org.ejml.interfaces.linsol.LinearSolverDense;
 
 import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolver;
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
@@ -19,6 +21,7 @@ import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameWrench;
 import us.ihmc.robotics.MultiBodySystemMissingTools;
+import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
@@ -32,8 +35,11 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
+import java.util.List;
+
 public class JointTorqueBasedFootSwitch implements FootSwitchInterface
 {
+   private static final double GRAVITY_Z = -9.81;
    private final YoRegistry registry;
 
    private final BooleanProvider useJacobianTranspose;
@@ -44,21 +50,27 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
 
    public JointTorqueBasedFootSwitch(String namePrefix,
                                      String jointNameToCheck,
-                                     RigidBodyBasics foot,
                                      RigidBodyBasics rootBody,
-                                     MovingReferenceFrame soleFrame,
+                                     ContactablePlaneBody contactablePlaneBody,
                                      DoubleProvider torqueContactThreshold,
                                      DoubleProvider torqueSecondContactThreshold,
-                                     DoubleProvider contactForceThreshold,
+                                     DoubleProvider contactForceThresholdLow,
+                                     DoubleProvider contactForceThresholdHigh,
+                                     DoubleProvider contactCoPThreshold,
                                      YoInteger contactThresholdWindowSize,
                                      BooleanProvider compensateGravity,
                                      DoubleProvider horizontalVelocityThreshold,
                                      DoubleProvider verticalVelocityThreshold,
+                                     DoubleProvider verticalVelocityHighThreshold,
+                                     DoubleProvider jacobianDeterminantSingularityThreshold,
                                      BooleanProvider useJacobianTranspose,
                                      YoRegistry parentRegistry)
    {
-      this.soleFrame = soleFrame;
       this.useJacobianTranspose = useJacobianTranspose;
+
+      soleFrame = (MovingReferenceFrame) contactablePlaneBody.getContactFrame();
+
+      RigidBodyBasics foot = contactablePlaneBody.getRigidBody();
 
       if (rootBody == null)
       {
@@ -94,12 +106,17 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
       wrenchDetector = new JacobianBasedBasedTouchdownDetector(foot,
                                                                rootBody,
                                                                soleFrame,
-                                                               MultiBodySystemMissingTools.computeSubTreeMass(MultiBodySystemTools.getRootBody(rootBody)),
-                                                               contactForceThreshold,
+                                                               MultiBodySystemMissingTools.computeSubTreeMass(MultiBodySystemTools.getRootBody(rootBody)) * Math.abs(GRAVITY_Z),
+                                                               contactablePlaneBody,
+                                                               contactForceThresholdLow,
+                                                               contactForceThresholdHigh,
+                                                               contactCoPThreshold,
                                                                contactThresholdWindowSize,
                                                                compensateGravity,
                                                                horizontalVelocityThreshold,
                                                                verticalVelocityThreshold,
+                                                               verticalVelocityHighThreshold,
+                                                               jacobianDeterminantSingularityThreshold,
                                                                registry);
 
       parentRegistry.addChild(registry);
@@ -156,6 +173,15 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
          return wrenchDetector.getCenterOfPressure();
       else
          return null;
+   }
+
+   @Override
+   public double getCenterOfPressureDistance()
+   {
+      if (useJacobianTranspose.getValue())
+         return wrenchDetector.getCenterOfPressureDistance();
+      else
+         return Double.NaN;
    }
 
    @Override
@@ -284,37 +310,57 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
       private final BooleanProvider compensateGravity;
 
       private final double robotTotalWeight;
-      private final DoubleProvider contactForceThreshold;
+      private final DoubleProvider contactForceThresholdLow;
+      private final DoubleProvider contactForceThresholdHigh;
+      private final DoubleProvider contactCoPThreshold;
+
       private final DoubleProvider horizontalVelocityThreshold;
       private final DoubleProvider verticalVelocityThreshold;
-      private final YoBoolean isPastForceThreshold;
-      private final YoBoolean hasFootHitGround;
+      private final DoubleProvider verticalVelocityHighThreshold;
+      private final DoubleProvider jacobianDeterminantThreshold;
+      private final YoBoolean isPastForceThresholdLow;
+      private final GlitchFilteredYoBoolean isPastForceThresholdLowFiltered;
+      private final YoBoolean isPastForceThresholdHigh;
+      private final YoBoolean hasFootHitGround, isPastCoPThreshold;
       private final GlitchFilteredYoBoolean hasFootHitGroundFiltered;
+      private final GlitchFilteredYoBoolean isPastCoPThresholdFiltered;
 
+      private final YoDouble jacobianDeterminant;
+      private final YoDouble copDistance;
       private final YoDouble footForceMagnitude;
       private final YoDouble alphaFootLoadFiltering;
       private final AlphaFilteredYoVariable footLoadPercentage;
 
       private final YoFramePoint2D centerOfPressure;
       private final CenterOfPressureResolver copResolver = new CenterOfPressureResolver();
+      private final FrameConvexPolygon2D footPolygon;
 
       public JacobianBasedBasedTouchdownDetector(RigidBodyBasics foot,
                                                  RigidBodyBasics pelvis,
                                                  MovingReferenceFrame soleFrame,
                                                  double robotTotalWeight,
-                                                 DoubleProvider contactForceThreshold,
+                                                 ContactablePlaneBody contactablePlaneBody,
+                                                 DoubleProvider contactForceThresholdLow,
+                                                 DoubleProvider contactForceThresholdHigh,
+                                                 DoubleProvider contactCoPThreshold,
                                                  YoInteger contactThresholdWindowSize,
                                                  BooleanProvider compensateGravity,
                                                  DoubleProvider horizontalVelocityThreshold,
                                                  DoubleProvider verticalVelocityThreshold,
+                                                 DoubleProvider verticalVelocityHighThreshold,
+                                                 DoubleProvider jacobianDeterminantThreshold,
                                                  YoRegistry registry)
       {
          this.soleFrame = soleFrame;
          this.robotTotalWeight = robotTotalWeight;
-         this.contactForceThreshold = contactForceThreshold;
+         this.contactForceThresholdLow = contactForceThresholdLow;
+         this.contactForceThresholdHigh = contactForceThresholdHigh;
+         this.contactCoPThreshold = contactCoPThreshold;
          this.compensateGravity = compensateGravity;
          this.horizontalVelocityThreshold = horizontalVelocityThreshold;
          this.verticalVelocityThreshold = verticalVelocityThreshold;
+         this.verticalVelocityHighThreshold = verticalVelocityHighThreshold;
+         this.jacobianDeterminantThreshold = jacobianDeterminantThreshold;
 
          legJoints = MultiBodySystemTools.createOneDoFJointPath(pelvis, foot);
 
@@ -324,7 +370,7 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
          footJacobian = new GeometricJacobian(pelvis, foot, soleFrame);
          gravityTorqueCalculator = new InverseDynamicsCalculator(MultiBodySystemReadOnly.toMultiBodySystemInput(legJoints));
          gravityTorqueCalculator.setConsiderJointAccelerations(false);
-         gravityTorqueCalculator.setGravitionalAcceleration(-9.81); // TODO Extract me
+         gravityTorqueCalculator.setGravitionalAcceleration(GRAVITY_Z);
 
          legJointGravityTaus = new YoDouble[6];
          for (int i = 0; i < legJointGravityTaus.length; i++)
@@ -344,12 +390,20 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
          horizontalVelocity = new YoDouble(namePrefix + "HorizontalVelocity", registry);
          verticalVelocity = new YoDouble(namePrefix + "VerticalVelocity", registry);
 
-         isPastForceThreshold = new YoBoolean(namePrefix + "IsPastForceThreshold", registry);
+         isPastForceThresholdLow = new YoBoolean(namePrefix + "IsPastForceThresholdLow", registry);
+         isPastForceThresholdLowFiltered = new GlitchFilteredYoBoolean(namePrefix + "IsPastForceThresholdLowFiltered", registry, isPastForceThresholdLow, 2);
+         isPastForceThresholdHigh = new YoBoolean(namePrefix + "IsPastForceThresholdHigh", registry);
+         isPastCoPThreshold = new YoBoolean(namePrefix + "IsPastCoPThreshold", registry);
+         isPastCoPThresholdFiltered = new GlitchFilteredYoBoolean(namePrefix + "IsPastCoPThresholdFiltered", registry, isPastCoPThreshold, 3);
+
          footForceMagnitude = new YoDouble(namePrefix + "FootForceMag", registry);
+         copDistance = new YoDouble(namePrefix + "CoPDistance", registry);
+         jacobianDeterminant = new YoDouble(namePrefix + "JacobianDeterminant", registry);
 
          alphaFootLoadFiltering = new YoDouble(namePrefix + "AlphaFootLoadFiltering", registry);
          alphaFootLoadFiltering.set(0.1);
          footLoadPercentage = new AlphaFilteredYoVariable(namePrefix + "FootLoadPercentage", registry, alphaFootLoadFiltering);
+
 
          hasFootHitGround = new YoBoolean(namePrefix + "FootHitGround", registry);
          // Final variable to identify if the foot has hit the ground
@@ -359,6 +413,9 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
                                                                 contactThresholdWindowSize);
 
          centerOfPressure = new YoFramePoint2D(namePrefix + "CenterOfPressure", "", soleFrame, registry);
+
+         List<? extends FramePoint2DReadOnly> contactPoints = contactablePlaneBody.getContactPoints2D();
+         footPolygon = new FrameConvexPolygon2D(soleFrame, Vertex2DSupplier.asVertex2DSupplier(contactPoints));
       }
 
       public void calculate()
@@ -366,6 +423,9 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
          footJacobian.compute();
          jacobianTranspose.reshape(footJacobian.getNumberOfColumns(), 6);
          CommonOps_DDRM.transpose(footJacobian.getJacobianMatrix(), jacobianTranspose);
+
+         // Compute the determinant of the jacobian to help evaluate singular configurations.
+         jacobianDeterminant.set(CommonOps_DDRM.det(jacobianTranspose));
 
          for (int i = 0; i < legJoints.length; i++)
             torqueVector.set(i, 0, legJoints[i].getTau());
@@ -403,25 +463,61 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
          double fZPlus = MathTools.clamp(forceZUp, 0.0, Double.POSITIVE_INFINITY);
          footLoadPercentage.update(fZPlus / robotTotalWeight);
 
-         isPastForceThreshold.set(forceZUp > contactForceThreshold.getValue());
+         isPastForceThresholdLow.set(forceZUp > contactForceThresholdLow.getValue());
+         isPastForceThresholdLowFiltered.update();
 
-         // Looking at velocity thresholds
-         linearVelocity.setMatchingFrame(soleFrame.getTwistOfFrame().getLinearPart());
-         horizontalVelocity.set(EuclidCoreTools.norm(linearVelocity.getX(), linearVelocity.getY()));
-         verticalVelocity.set(linearVelocity.getZ());
-
-//       This is the former condition that we were using, we took out the horizontal velocity because the robot in single support was shaking too much
-//       hasFootHitGround.set(isPastForceThreshold.getValue() && horizontalVelocity.getValue() < horizontalVelocityThreshold.getValue()
-//                              && Math.abs(verticalVelocity.getValue()) < verticalVelocityThreshold.getValue());
-         hasFootHitGround.set(isPastForceThreshold.getValue()
-                              && Math.abs(verticalVelocity.getValue()) < verticalVelocityThreshold.getValue());
-         hasFootHitGroundFiltered.update();
+         if (contactForceThresholdHigh != null)
+         {
+            isPastForceThresholdHigh.set(forceZUp > contactForceThresholdHigh.getValue());
+         }
+         else
+         {
+            isPastForceThresholdHigh.set(false);
+         }
 
          // Computing Center of Pressure
          if (fZPlus < MIN_FORCE_TO_COMPUTE_COP)
             centerOfPressure.setToNaN();
          else
             copResolver.resolveCenterOfPressureAndNormalTorque(centerOfPressure, wrench, soleFrame);
+
+         // Testing CoP threshold
+         if (Double.isNaN(contactCoPThreshold.getValue()))
+         {
+            isPastCoPThreshold.set(true);
+            isPastCoPThresholdFiltered.set(true);
+            copDistance.setToNaN();
+         }
+         else
+         {
+            double copThreshold = contactCoPThreshold.getValue();
+            copDistance.set(footPolygon.signedDistance(centerOfPressure));
+            isPastCoPThreshold.set(copDistance.getDoubleValue() < -copThreshold);
+            isPastCoPThresholdFiltered.update();
+         }
+
+         // Looking at velocity thresholds
+         linearVelocity.setMatchingFrame(soleFrame.getTwistOfFrame().getLinearPart());
+         horizontalVelocity.set(EuclidCoreTools.norm(linearVelocity.getX(), linearVelocity.getY()));
+         verticalVelocity.set(linearVelocity.getZ());
+
+         if (jacobianDeterminant.getDoubleValue() > jacobianDeterminantThreshold.getValue())
+         { // The jacobian determinant is above the threshold, so it's not in a singular configuration
+            boolean validCoP = isPastCoPThresholdFiltered.getValue();
+            boolean hitGroundLow = isPastForceThresholdLowFiltered.getValue() && validCoP;
+            boolean allowableSpeed = horizontalVelocity.getValue() < horizontalVelocityThreshold.getValue()
+                                     && Math.abs(verticalVelocity.getValue()) < verticalVelocityThreshold.getValue();
+            boolean allowableHighSpeed = Math.abs(verticalVelocity.getValue()) < verticalVelocityHighThreshold.getValue();
+
+            hasFootHitGround.set((hitGroundLow && allowableSpeed) || (isPastForceThresholdHigh.getValue() && allowableHighSpeed));
+         }
+         else
+         { // The jacobian determinant is below the threshold, so the system is in a singular configuration. This means the forces can't be trusted.
+            boolean allowableSpeed = horizontalVelocity.getValue() < horizontalVelocityThreshold.getValue()
+                                     && Math.abs(verticalVelocity.getValue()) < verticalVelocityThreshold.getValue();
+            hasFootHitGround.set(allowableSpeed);
+         }
+         hasFootHitGroundFiltered.update();
       }
 
       public boolean hasFootHitGroundSensitive()
@@ -447,6 +543,11 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
       public FramePoint2DReadOnly getCenterOfPressure()
       {
          return centerOfPressure;
+      }
+
+      public double getCenterOfPressureDistance()
+      {
+         return copDistance.getDoubleValue();
       }
    }
 }

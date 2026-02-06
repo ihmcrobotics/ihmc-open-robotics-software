@@ -1,0 +1,11 @@
+{
+  "dockspacePanels" : { },
+  "windows" : {
+    "3D View" : false,
+    "BGR Panel###RDXImageVisualizer3:BGR Panel" : true,
+    "Depth Panel###RDXImageVisualizer9:Depth Panel" : true,
+    "GRAY Panel###RDXImageVisualizer7:GRAY Panel" : true,
+    "RGB Panel###RDXImageVisualizer1:RGB Panel" : true,
+    "YUV Panel###RDXImageVisualizer5:YUV Panel" : true
+  }
+}

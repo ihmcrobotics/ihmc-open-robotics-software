@@ -5,18 +5,14 @@ import imgui.flag.ImGuiTreeNodeFlags;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotVersion;
 import us.ihmc.handsros2.HandInterface;
-import us.ihmc.handsros2.HandROS2HardwareCommunication;
 import us.ihmc.handsros2.HandType;
-import us.ihmc.handsros2.abilityHand.AbilityHandROS2HardwareCommunication;
 import us.ihmc.handsros2.ezGripper.EZGripperROS2HardwareCommunication;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.hands.psyonicAbilityHand.RDXAbilityHand;
 import us.ihmc.rdx.ui.hands.sakeEZGripper.RDXEZGripper;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-
-import java.util.HashMap;
-import java.util.Map;
+import us.ihmc.ros2.ROS2Node;
 
 /**
  * Manages the UI for a humanoid robot's hands. A hand configuration is like "open", "closed", etc.
@@ -26,9 +22,9 @@ public class RDXHandManager
    private final SideDependentList<RDXHandInterface> rdxHands = new SideDependentList<>();
    private final SideDependentList<RDXHandQuickAccessButtons> quickAccessButtons = new SideDependentList<>();
 
-   private final Map<HandType, HandROS2HardwareCommunication<?, ?>> handCommunications = new HashMap<>();
+   private EZGripperROS2HardwareCommunication ezGripperCommunication = null;
 
-   public RDXHandManager(DRCRobotModel robotModel)
+   public RDXHandManager(DRCRobotModel robotModel, ROS2Node ros2Node)
    {
       RobotVersion robotVersion = robotModel.getRobotVersion();
       String robotName = robotModel.getSimpleRobotName();
@@ -39,31 +35,29 @@ public class RDXHandManager
          if (!robotVersion.hasHandWithFingers(side) || handType == null)
             continue;
 
-         if (!handCommunications.containsKey(handType))
-         {
-            HandROS2HardwareCommunication<?, ?> handCommunication = switch (handType)
-            {
-               case EZ_GRIPPER -> new EZGripperROS2HardwareCommunication(getClass().getSimpleName() + "EZGripperCommunication");
-               case ABILITY_HAND -> new AbilityHandROS2HardwareCommunication(getClass().getSimpleName() + "AbilityHandCommunication");
-            };
-            handCommunications.put(handType, handCommunication);
-         }
-
-         String handIdentifier = HandInterface.getSimpleIdentifier(robotName, side, handType);
          switch (handType)
          {
             case EZ_GRIPPER ->
-                  rdxHands.put(side, new RDXEZGripper(handIdentifier, side, (EZGripperROS2HardwareCommunication) handCommunications.get(handType)));
+            {
+               if (ezGripperCommunication == null)
+                  ezGripperCommunication = new EZGripperROS2HardwareCommunication(getClass().getSimpleName() + "EZGripperCommunication");
+            }
+         }
+
+         switch (handType)
+         {
+            case EZ_GRIPPER ->
+                  rdxHands.put(side, new RDXEZGripper(side, ezGripperCommunication));
             case ABILITY_HAND ->
-                  rdxHands.put(side, new RDXAbilityHand(handIdentifier, side, (AbilityHandROS2HardwareCommunication) handCommunications.get(handType)));
+                  rdxHands.put(side, new RDXAbilityHand(side, ros2Node));
          }
       }
    }
 
    public void create(RDXBaseUI baseUI)
    {
-      for (HandROS2HardwareCommunication<?, ?> handCommunication : handCommunications.values())
-         handCommunication.start();
+      if (ezGripperCommunication != null)
+         ezGripperCommunication.start();
 
       for (RobotSide side : rdxHands.sides())
          quickAccessButtons.put(side, new RDXHandQuickAccessButtons(baseUI, rdxHands.get(side)));
@@ -99,7 +93,7 @@ public class RDXHandManager
 
    public void destroy()
    {
-      for (HandROS2HardwareCommunication<?, ?> handCommunication : handCommunications.values())
-         handCommunication.shutdown();
+      if (ezGripperCommunication != null)
+         ezGripperCommunication.shutdown();
    }
 }

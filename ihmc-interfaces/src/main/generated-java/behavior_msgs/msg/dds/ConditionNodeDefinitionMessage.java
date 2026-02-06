@@ -10,15 +10,21 @@ import us.ihmc.pubsub.TopicDataType;
        * COUNTER TYPE
        * LLM TYPE
        * PROXIMITY TYPE
+       * SHAPE CONTAINS TYPE
        */
 public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefinitionMessage> implements Settable<ConditionNodeDefinitionMessage>, EpsilonComparable<ConditionNodeDefinitionMessage>
 {
    public static final byte COUNTER_TYPE = (byte) 0;
    public static final byte LLM_TYPE = (byte) 1;
    public static final byte PROXIMITY_TYPE = (byte) 2;
-   public static final byte PROXIMITY_XYZ = (byte) 0;
-   public static final byte PROXIMITY_XY = (byte) 1;
-   public static final byte PROXIMITY_Z = (byte) 2;
+   public static final byte SHAPE_CONTAINS = (byte) 3;
+   public static final byte ALWAYS_FAIL = (byte) 4;
+   public static final byte ALWAYS_SUCCEED = (byte) 5;
+   public static final byte XYZ = (byte) 0;
+   public static final byte XY = (byte) 1;
+   public static final byte Z = (byte) 2;
+   public static final byte CONTAINS_FRAME = (byte) 0;
+   public static final byte CONTAINS_POINTS = (byte) 1;
    /**
             * Parent definition fields
             */
@@ -26,7 +32,7 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
    /**
             * The type of condition as defined above
             */
-   public byte type_;
+   public byte condition_type_;
    /**
             * The number of times to fail before passing
             */
@@ -62,27 +68,51 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
    /**
             * The type of distance condition as defined above
             */
-   public byte proximity_distance_type_;
+   public byte distance_type_;
    /**
-            * Name of the object frame
+            * Name of frame A
             */
-   public java.lang.StringBuilder proximity_object_frame_name_;
+   public java.lang.StringBuilder frame_name_a_;
    /**
-            * Name of the frame the distance is expressed in
+            * Name of frame B
             */
-   public java.lang.StringBuilder proximity_reference_frame_name_;
+   public java.lang.StringBuilder frame_name_b_;
    /**
-            * The maximum distance between the object and the reference frame
+            * The minimum distance between the two frames
             */
-   public double proximity_distance_to_object_;
+   public double min_distance_;
    /**
-            * The maximum time that is spent in evaluating the condition
+            * The maximum distance between the two frames
             */
-   public double proximity_evaluation_time_;
+   public double max_distance_;
    /**
-            * Whether the failure of missing frame is handled internally by the condition node or not
+            * Timeout for waiting for the condition to be satisfied
             */
-   public boolean manage_missing_frame_internally_;
+   public double timeout_;
+   /**
+            * The type of shape contains condition as defined above
+            */
+   public byte shape_contains_type_;
+   /**
+            * Name of the frame the the shape's pose is expressed in
+            */
+   public java.lang.StringBuilder shape_parent_frame_name_;
+   /**
+            * Transform that expresses the pose of the shape in the parent frame
+            */
+   public controller_msgs.msg.dds.RigidBodyTransformMessage shape_transform_to_parent_;
+   /**
+            * Radius of the sphere used for checking containment
+            */
+   public float sphere_radius_;
+   /**
+            * Name of frame to check for containment
+            */
+   public java.lang.StringBuilder frame_name_;
+   /**
+            * Minimum number of points in the shape
+            */
+   public long min_points_;
 
    public ConditionNodeDefinitionMessage()
    {
@@ -90,8 +120,11 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
       system_ = new java.lang.StringBuilder(10000);
       prompt_ = new java.lang.StringBuilder(10000);
       response_matcher_ = new java.lang.StringBuilder(10000);
-      proximity_object_frame_name_ = new java.lang.StringBuilder(255);
-      proximity_reference_frame_name_ = new java.lang.StringBuilder(255);
+      frame_name_a_ = new java.lang.StringBuilder(255);
+      frame_name_b_ = new java.lang.StringBuilder(255);
+      shape_parent_frame_name_ = new java.lang.StringBuilder(255);
+      shape_transform_to_parent_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
+      frame_name_ = new java.lang.StringBuilder(255);
    }
 
    public ConditionNodeDefinitionMessage(ConditionNodeDefinitionMessage other)
@@ -103,7 +136,7 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
    public void set(ConditionNodeDefinitionMessage other)
    {
       behavior_msgs.msg.dds.LeafNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
-      type_ = other.type_;
+      condition_type_ = other.condition_type_;
 
       count_to_ = other.count_to_;
 
@@ -124,19 +157,32 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
       response_matcher_.setLength(0);
       response_matcher_.append(other.response_matcher_);
 
-      proximity_distance_type_ = other.proximity_distance_type_;
+      distance_type_ = other.distance_type_;
 
-      proximity_object_frame_name_.setLength(0);
-      proximity_object_frame_name_.append(other.proximity_object_frame_name_);
+      frame_name_a_.setLength(0);
+      frame_name_a_.append(other.frame_name_a_);
 
-      proximity_reference_frame_name_.setLength(0);
-      proximity_reference_frame_name_.append(other.proximity_reference_frame_name_);
+      frame_name_b_.setLength(0);
+      frame_name_b_.append(other.frame_name_b_);
 
-      proximity_distance_to_object_ = other.proximity_distance_to_object_;
+      min_distance_ = other.min_distance_;
 
-      proximity_evaluation_time_ = other.proximity_evaluation_time_;
+      max_distance_ = other.max_distance_;
 
-      manage_missing_frame_internally_ = other.manage_missing_frame_internally_;
+      timeout_ = other.timeout_;
+
+      shape_contains_type_ = other.shape_contains_type_;
+
+      shape_parent_frame_name_.setLength(0);
+      shape_parent_frame_name_.append(other.shape_parent_frame_name_);
+
+      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.shape_transform_to_parent_, shape_transform_to_parent_);
+      sphere_radius_ = other.sphere_radius_;
+
+      frame_name_.setLength(0);
+      frame_name_.append(other.frame_name_);
+
+      min_points_ = other.min_points_;
 
    }
 
@@ -152,16 +198,16 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
    /**
             * The type of condition as defined above
             */
-   public void setType(byte type)
+   public void setConditionType(byte condition_type)
    {
-      type_ = type;
+      condition_type_ = condition_type;
    }
    /**
             * The type of condition as defined above
             */
-   public byte getType()
+   public byte getConditionType()
    {
-      return type_;
+      return condition_type_;
    }
 
    /**
@@ -314,109 +360,211 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
    /**
             * The type of distance condition as defined above
             */
-   public void setProximityDistanceType(byte proximity_distance_type)
+   public void setDistanceType(byte distance_type)
    {
-      proximity_distance_type_ = proximity_distance_type;
+      distance_type_ = distance_type;
    }
    /**
             * The type of distance condition as defined above
             */
-   public byte getProximityDistanceType()
+   public byte getDistanceType()
    {
-      return proximity_distance_type_;
+      return distance_type_;
    }
 
    /**
-            * Name of the object frame
+            * Name of frame A
             */
-   public void setProximityObjectFrameName(java.lang.String proximity_object_frame_name)
+   public void setFrameNameA(java.lang.String frame_name_a)
    {
-      proximity_object_frame_name_.setLength(0);
-      proximity_object_frame_name_.append(proximity_object_frame_name);
+      frame_name_a_.setLength(0);
+      frame_name_a_.append(frame_name_a);
    }
 
    /**
-            * Name of the object frame
+            * Name of frame A
             */
-   public java.lang.String getProximityObjectFrameNameAsString()
+   public java.lang.String getFrameNameAAsString()
    {
-      return getProximityObjectFrameName().toString();
+      return getFrameNameA().toString();
    }
    /**
-            * Name of the object frame
+            * Name of frame A
             */
-   public java.lang.StringBuilder getProximityObjectFrameName()
+   public java.lang.StringBuilder getFrameNameA()
    {
-      return proximity_object_frame_name_;
-   }
-
-   /**
-            * Name of the frame the distance is expressed in
-            */
-   public void setProximityReferenceFrameName(java.lang.String proximity_reference_frame_name)
-   {
-      proximity_reference_frame_name_.setLength(0);
-      proximity_reference_frame_name_.append(proximity_reference_frame_name);
+      return frame_name_a_;
    }
 
    /**
-            * Name of the frame the distance is expressed in
+            * Name of frame B
             */
-   public java.lang.String getProximityReferenceFrameNameAsString()
+   public void setFrameNameB(java.lang.String frame_name_b)
    {
-      return getProximityReferenceFrameName().toString();
-   }
-   /**
-            * Name of the frame the distance is expressed in
-            */
-   public java.lang.StringBuilder getProximityReferenceFrameName()
-   {
-      return proximity_reference_frame_name_;
+      frame_name_b_.setLength(0);
+      frame_name_b_.append(frame_name_b);
    }
 
    /**
-            * The maximum distance between the object and the reference frame
+            * Name of frame B
             */
-   public void setProximityDistanceToObject(double proximity_distance_to_object)
+   public java.lang.String getFrameNameBAsString()
    {
-      proximity_distance_to_object_ = proximity_distance_to_object;
+      return getFrameNameB().toString();
    }
    /**
-            * The maximum distance between the object and the reference frame
+            * Name of frame B
             */
-   public double getProximityDistanceToObject()
+   public java.lang.StringBuilder getFrameNameB()
    {
-      return proximity_distance_to_object_;
-   }
-
-   /**
-            * The maximum time that is spent in evaluating the condition
-            */
-   public void setProximityEvaluationTime(double proximity_evaluation_time)
-   {
-      proximity_evaluation_time_ = proximity_evaluation_time;
-   }
-   /**
-            * The maximum time that is spent in evaluating the condition
-            */
-   public double getProximityEvaluationTime()
-   {
-      return proximity_evaluation_time_;
+      return frame_name_b_;
    }
 
    /**
-            * Whether the failure of missing frame is handled internally by the condition node or not
+            * The minimum distance between the two frames
             */
-   public void setManageMissingFrameInternally(boolean manage_missing_frame_internally)
+   public void setMinDistance(double min_distance)
    {
-      manage_missing_frame_internally_ = manage_missing_frame_internally;
+      min_distance_ = min_distance;
    }
    /**
-            * Whether the failure of missing frame is handled internally by the condition node or not
+            * The minimum distance between the two frames
             */
-   public boolean getManageMissingFrameInternally()
+   public double getMinDistance()
    {
-      return manage_missing_frame_internally_;
+      return min_distance_;
+   }
+
+   /**
+            * The maximum distance between the two frames
+            */
+   public void setMaxDistance(double max_distance)
+   {
+      max_distance_ = max_distance;
+   }
+   /**
+            * The maximum distance between the two frames
+            */
+   public double getMaxDistance()
+   {
+      return max_distance_;
+   }
+
+   /**
+            * Timeout for waiting for the condition to be satisfied
+            */
+   public void setTimeout(double timeout)
+   {
+      timeout_ = timeout;
+   }
+   /**
+            * Timeout for waiting for the condition to be satisfied
+            */
+   public double getTimeout()
+   {
+      return timeout_;
+   }
+
+   /**
+            * The type of shape contains condition as defined above
+            */
+   public void setShapeContainsType(byte shape_contains_type)
+   {
+      shape_contains_type_ = shape_contains_type;
+   }
+   /**
+            * The type of shape contains condition as defined above
+            */
+   public byte getShapeContainsType()
+   {
+      return shape_contains_type_;
+   }
+
+   /**
+            * Name of the frame the the shape's pose is expressed in
+            */
+   public void setShapeParentFrameName(java.lang.String shape_parent_frame_name)
+   {
+      shape_parent_frame_name_.setLength(0);
+      shape_parent_frame_name_.append(shape_parent_frame_name);
+   }
+
+   /**
+            * Name of the frame the the shape's pose is expressed in
+            */
+   public java.lang.String getShapeParentFrameNameAsString()
+   {
+      return getShapeParentFrameName().toString();
+   }
+   /**
+            * Name of the frame the the shape's pose is expressed in
+            */
+   public java.lang.StringBuilder getShapeParentFrameName()
+   {
+      return shape_parent_frame_name_;
+   }
+
+
+   /**
+            * Transform that expresses the pose of the shape in the parent frame
+            */
+   public controller_msgs.msg.dds.RigidBodyTransformMessage getShapeTransformToParent()
+   {
+      return shape_transform_to_parent_;
+   }
+
+   /**
+            * Radius of the sphere used for checking containment
+            */
+   public void setSphereRadius(float sphere_radius)
+   {
+      sphere_radius_ = sphere_radius;
+   }
+   /**
+            * Radius of the sphere used for checking containment
+            */
+   public float getSphereRadius()
+   {
+      return sphere_radius_;
+   }
+
+   /**
+            * Name of frame to check for containment
+            */
+   public void setFrameName(java.lang.String frame_name)
+   {
+      frame_name_.setLength(0);
+      frame_name_.append(frame_name);
+   }
+
+   /**
+            * Name of frame to check for containment
+            */
+   public java.lang.String getFrameNameAsString()
+   {
+      return getFrameName().toString();
+   }
+   /**
+            * Name of frame to check for containment
+            */
+   public java.lang.StringBuilder getFrameName()
+   {
+      return frame_name_;
+   }
+
+   /**
+            * Minimum number of points in the shape
+            */
+   public void setMinPoints(long min_points)
+   {
+      min_points_ = min_points;
+   }
+   /**
+            * Minimum number of points in the shape
+            */
+   public long getMinPoints()
+   {
+      return min_points_;
    }
 
 
@@ -438,7 +586,7 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
       if(other == this) return true;
 
       if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.type_, other.type_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.condition_type_, other.condition_type_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.count_to_, other.count_to_, epsilon)) return false;
 
@@ -456,17 +604,28 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.response_matcher_, other.response_matcher_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.proximity_distance_type_, other.proximity_distance_type_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.distance_type_, other.distance_type_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.proximity_object_frame_name_, other.proximity_object_frame_name_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.frame_name_a_, other.frame_name_a_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.proximity_reference_frame_name_, other.proximity_reference_frame_name_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.frame_name_b_, other.frame_name_b_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.proximity_distance_to_object_, other.proximity_distance_to_object_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.min_distance_, other.min_distance_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.proximity_evaluation_time_, other.proximity_evaluation_time_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.max_distance_, other.max_distance_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.manage_missing_frame_internally_, other.manage_missing_frame_internally_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.timeout_, other.timeout_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.shape_contains_type_, other.shape_contains_type_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.shape_parent_frame_name_, other.shape_parent_frame_name_, epsilon)) return false;
+
+      if (!this.shape_transform_to_parent_.epsilonEquals(other.shape_transform_to_parent_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sphere_radius_, other.sphere_radius_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.frame_name_, other.frame_name_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.min_points_, other.min_points_, epsilon)) return false;
 
 
       return true;
@@ -482,7 +641,7 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
       ConditionNodeDefinitionMessage otherMyClass = (ConditionNodeDefinitionMessage) other;
 
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
-      if(this.type_ != otherMyClass.type_) return false;
+      if(this.condition_type_ != otherMyClass.condition_type_) return false;
 
       if(this.count_to_ != otherMyClass.count_to_) return false;
 
@@ -500,17 +659,28 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
 
       if (!us.ihmc.idl.IDLTools.equals(this.response_matcher_, otherMyClass.response_matcher_)) return false;
 
-      if(this.proximity_distance_type_ != otherMyClass.proximity_distance_type_) return false;
+      if(this.distance_type_ != otherMyClass.distance_type_) return false;
 
-      if (!us.ihmc.idl.IDLTools.equals(this.proximity_object_frame_name_, otherMyClass.proximity_object_frame_name_)) return false;
+      if (!us.ihmc.idl.IDLTools.equals(this.frame_name_a_, otherMyClass.frame_name_a_)) return false;
 
-      if (!us.ihmc.idl.IDLTools.equals(this.proximity_reference_frame_name_, otherMyClass.proximity_reference_frame_name_)) return false;
+      if (!us.ihmc.idl.IDLTools.equals(this.frame_name_b_, otherMyClass.frame_name_b_)) return false;
 
-      if(this.proximity_distance_to_object_ != otherMyClass.proximity_distance_to_object_) return false;
+      if(this.min_distance_ != otherMyClass.min_distance_) return false;
 
-      if(this.proximity_evaluation_time_ != otherMyClass.proximity_evaluation_time_) return false;
+      if(this.max_distance_ != otherMyClass.max_distance_) return false;
 
-      if(this.manage_missing_frame_internally_ != otherMyClass.manage_missing_frame_internally_) return false;
+      if(this.timeout_ != otherMyClass.timeout_) return false;
+
+      if(this.shape_contains_type_ != otherMyClass.shape_contains_type_) return false;
+
+      if (!us.ihmc.idl.IDLTools.equals(this.shape_parent_frame_name_, otherMyClass.shape_parent_frame_name_)) return false;
+
+      if (!this.shape_transform_to_parent_.equals(otherMyClass.shape_transform_to_parent_)) return false;
+      if(this.sphere_radius_ != otherMyClass.sphere_radius_) return false;
+
+      if (!us.ihmc.idl.IDLTools.equals(this.frame_name_, otherMyClass.frame_name_)) return false;
+
+      if(this.min_points_ != otherMyClass.min_points_) return false;
 
 
       return true;
@@ -524,8 +694,8 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
       builder.append("ConditionNodeDefinitionMessage {");
       builder.append("definition=");
       builder.append(this.definition_);      builder.append(", ");
-      builder.append("type=");
-      builder.append(this.type_);      builder.append(", ");
+      builder.append("condition_type=");
+      builder.append(this.condition_type_);      builder.append(", ");
       builder.append("count_to=");
       builder.append(this.count_to_);      builder.append(", ");
       builder.append("reset_context_each_run=");
@@ -542,18 +712,30 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
       builder.append(this.prompt_);      builder.append(", ");
       builder.append("response_matcher=");
       builder.append(this.response_matcher_);      builder.append(", ");
-      builder.append("proximity_distance_type=");
-      builder.append(this.proximity_distance_type_);      builder.append(", ");
-      builder.append("proximity_object_frame_name=");
-      builder.append(this.proximity_object_frame_name_);      builder.append(", ");
-      builder.append("proximity_reference_frame_name=");
-      builder.append(this.proximity_reference_frame_name_);      builder.append(", ");
-      builder.append("proximity_distance_to_object=");
-      builder.append(this.proximity_distance_to_object_);      builder.append(", ");
-      builder.append("proximity_evaluation_time=");
-      builder.append(this.proximity_evaluation_time_);      builder.append(", ");
-      builder.append("manage_missing_frame_internally=");
-      builder.append(this.manage_missing_frame_internally_);
+      builder.append("distance_type=");
+      builder.append(this.distance_type_);      builder.append(", ");
+      builder.append("frame_name_a=");
+      builder.append(this.frame_name_a_);      builder.append(", ");
+      builder.append("frame_name_b=");
+      builder.append(this.frame_name_b_);      builder.append(", ");
+      builder.append("min_distance=");
+      builder.append(this.min_distance_);      builder.append(", ");
+      builder.append("max_distance=");
+      builder.append(this.max_distance_);      builder.append(", ");
+      builder.append("timeout=");
+      builder.append(this.timeout_);      builder.append(", ");
+      builder.append("shape_contains_type=");
+      builder.append(this.shape_contains_type_);      builder.append(", ");
+      builder.append("shape_parent_frame_name=");
+      builder.append(this.shape_parent_frame_name_);      builder.append(", ");
+      builder.append("shape_transform_to_parent=");
+      builder.append(this.shape_transform_to_parent_);      builder.append(", ");
+      builder.append("sphere_radius=");
+      builder.append(this.sphere_radius_);      builder.append(", ");
+      builder.append("frame_name=");
+      builder.append(this.frame_name_);      builder.append(", ");
+      builder.append("min_points=");
+      builder.append(this.min_points_);
       builder.append("}");
       return builder.toString();
    }

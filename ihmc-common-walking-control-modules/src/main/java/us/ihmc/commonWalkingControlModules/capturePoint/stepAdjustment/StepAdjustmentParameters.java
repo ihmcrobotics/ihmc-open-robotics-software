@@ -18,6 +18,14 @@ public abstract class StepAdjustmentParameters
    public abstract boolean allowStepAdjustment();
 
    /**
+    * Maximum number of steps to consider in the capture region calculation.
+    */
+   public int getMaximumNumberOfStepsToConsider()
+   {
+      return 10;
+   }
+
+   /**
     * Enabling this boolean enables the use of crossover steps when performing step adjustment.
     */
    public boolean allowCrossOverSteps()

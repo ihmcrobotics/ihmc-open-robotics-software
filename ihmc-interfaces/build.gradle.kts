@@ -1,11 +1,13 @@
 buildscript {
    repositories {
       maven { url = uri("https://plugins.gradle.org/m2/") }
+      maven { url = uri("https://robotlabfiles.ihmc.us/repository/") }
+      maven { url = uri("https://robotlabfiles.ihmc.us/repository/") }
       mavenCentral()
       mavenLocal()
    }
    dependencies {
-      classpath("us.ihmc:ros2-msg-to-pubsub-generator:1.2.3")
+      classpath("us.ihmc:ros2-msg-to-pubsub-generator:1.2.5")
    }
 }
 
@@ -27,8 +29,8 @@ ihmc {
 
 mainDependencies {
    api("us.ihmc:euclid-geometry:0.22.5")
-   api("us.ihmc:ihmc-pub-sub:1.2.3")
-   api("us.ihmc:ros2-common-interfaces:1.2.3") {
+   api("us.ihmc:ihmc-pub-sub:1.2.5")
+   api("us.ihmc:ros2-common-interfaces:1.2.5") {
       exclude(group = "org.junit.jupiter", module = "junit-jupiter-api")
       exclude(group = "org.junit.jupiter", module = "junit-jupiter-engine")
       exclude(group = "org.junit.platform", module = "junit-platform-commons")
@@ -38,13 +40,13 @@ mainDependencies {
 }
 
 testDependencies {
-   api("us.ihmc:ros2-library:1.2.3")
+   api("us.ihmc:ros2-library:1.2.5")
 }
 
 generatorDependencies {
    api("us.ihmc:euclid:0.22.5")
    api("us.ihmc:ihmc-commons:0.35.1")
-   api("us.ihmc:ros2-msg-to-pubsub-generator:1.2.3")
+   api("us.ihmc:ros2-msg-to-pubsub-generator:1.2.5")
 }
 
 val generator = us.ihmc.ros2.rosidl.ROS2InterfaceGenerator()
@@ -57,7 +59,8 @@ val msg_packages = listOf("ihmc_common_msgs",
                           "behavior_msgs",
                           "exoskeleton_msgs",
                           "atlas_msgs",
-                          "test_msgs")
+                          "test_msgs",
+                          "vision_msgs")
 
 tasks.create("generateMessages") {
    doFirst {
@@ -91,7 +94,6 @@ tasks.create("generateMessages") {
       generator.addPackageRootToIDLGenerator(file("build/tmp/generateMessages/ros2-common-interfaces/rcl_interfaces").toPath())
       generator.addPackageRootToIDLGenerator(file("build/tmp/generateMessages/ros2-common-interfaces/common_interfaces").toPath())
       generator.addPackageRootToIDLGenerator(file("src/main/messages/ihmc_interfaces").toPath())
-      generator.addPackageRootToROS1Generator(file("src/main/messages/ihmc_interfaces").toPath())
 
       generator.addCustomIDLFiles(file("build/tmp/generateMessages/ros2-common-interfaces/").toPath())
 
@@ -109,15 +111,9 @@ tasks.create("generateMessages") {
             from("build/tmp/generateMessages/generated-java/$packag")
             into("src/main/generated-java/$packag")
          }
-
-         copy {
-            from("build/tmp/generateMessages/generated-ros1/$packag")
-            into("src/main/messages/ros1/$packag")
-         }
       }
 
       us.ihmc.ros2.rosidl.ROS2InterfaceGenerator.convertDirectoryToUnixEOL(file("src/main/generated-idl").toPath())
       us.ihmc.ros2.rosidl.ROS2InterfaceGenerator.convertDirectoryToUnixEOL(file("src/main/generated-java").toPath())
-      us.ihmc.ros2.rosidl.ROS2InterfaceGenerator.convertDirectoryToUnixEOL(file("src/main/messages/ros1").toPath())
    }
 }

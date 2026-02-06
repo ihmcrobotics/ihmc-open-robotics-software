@@ -38,7 +38,6 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameMessageCommandConverter;
@@ -58,6 +57,9 @@ import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.taskExecutor.StateExecutor;
+import us.ihmc.scs2.definition.yoGraphic.SCS2YoGraphicHolder;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
@@ -70,7 +72,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-public class WalkingControllerPreviewToolboxController extends ToolboxController
+public class WalkingControllerPreviewToolboxController extends ToolboxController implements SCS2YoGraphicHolder
 {
    private final double gravityZ = 9.81;
    private final YoDouble previewTime;
@@ -112,7 +114,6 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
                                                     double integrationDT,
                                                     CommandInputManager toolboxInputManager,
                                                     StatusMessageOutputManager statusOutputManager,
-                                                    YoGraphicsListRegistry yoGraphicsListRegistry,
                                                     YoRegistry parentRegistry)
    {
       super(statusOutputManager, parentRegistry);
@@ -144,10 +145,10 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
       humanoidHighLevelControllerManager.addChild(walkingParentRegistry);
       humanoidHighLevelControllerManager.addChild(managerParentRegistry);
 
-      controllerToolbox = createHighLevelControllerToolbox(robotModel, yoGraphicsListRegistry);
+      controllerToolbox = createHighLevelControllerToolbox(robotModel);
       controllerToolbox.attachControllerFailureListener(fallingDirection -> hasControllerFailed.set(true));
       humanoidHighLevelControllerManager.addChild(controllerToolbox.getYoVariableRegistry());
-      setupWalkingMessageHandler(walkingControllerParameters, copTrajectoryParameters, yoGraphicsListRegistry);
+      setupWalkingMessageHandler(walkingControllerParameters);
       rootJoint = fullRobotModel.getRootJoint();
       allOneDoFJointsExcludingHands = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
 
@@ -167,7 +168,7 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
 
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-      WholeBodyControlCoreToolbox controlCoreToolbox = createControllerCoretoolbox(walkingControllerParameters, yoGraphicsListRegistry);
+      WholeBodyControlCoreToolbox controlCoreToolbox = createControllerCoreToolbox(walkingControllerParameters);
 
       FeedbackControllerTemplate feedbackControlTemplate = managerFactory.createFeedbackControlTemplate();
       JointDesiredOutputList jointDesiredOutputList = new JointDesiredOutputList(controllerToolbox.getControlledOneDoFJoints());
@@ -187,8 +188,7 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
                                                                             controllerToolbox.getWholeBodyAngularVelocityCalculator(),
                                                                             gravityZ,
                                                                             controlDT,
-                                                                            walkingParentRegistry,
-                                                                            yoGraphicsListRegistry);
+                                                                            walkingParentRegistry);
 
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -202,7 +202,7 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
       }
    }
 
-   private HighLevelHumanoidControllerToolbox createHighLevelControllerToolbox(DRCRobotModel robotModel, YoGraphicsListRegistry yoGraphicsListRegistry)
+   private HighLevelHumanoidControllerToolbox createHighLevelControllerToolbox(DRCRobotModel robotModel)
    {
       double omega0 = robotModel.getWalkingControllerParameters().getOmega0();
 
@@ -238,13 +238,10 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
                                                     false,
                                                     Collections.emptyList(),
                                                     allContactableBodies,
-                                                    yoGraphicsListRegistry,
                                                     jointsToIgnore);
    }
 
-   private void setupWalkingMessageHandler(WalkingControllerParameters walkingControllerParameters,
-                                           CoPTrajectoryParameters copTrajectoryParameters,
-                                           YoGraphicsListRegistry yoGraphicsListRegistry)
+   private void setupWalkingMessageHandler(WalkingControllerParameters walkingControllerParameters)
    {
       double defaultTransferTime = walkingControllerParameters.getDefaultTransferTime();
       double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
@@ -257,13 +254,11 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
                                                                               controllerToolbox.getContactableFeet(),
                                                                               walkingOutputManager,
                                                                               previewTime,
-                                                                              yoGraphicsListRegistry,
                                                                               controllerToolbox.getYoVariableRegistry());
       controllerToolbox.setWalkingMessageHandler(walkingMessageHandler);
    }
 
-   private WholeBodyControlCoreToolbox createControllerCoretoolbox(WalkingControllerParameters walkingControllerParameters,
-                                                                   YoGraphicsListRegistry yoGraphicsListRegistry)
+   private WholeBodyControlCoreToolbox createControllerCoreToolbox(WalkingControllerParameters walkingControllerParameters)
    {
       JointBasics[] controlledJoints = controllerToolbox.getControlledJoints();
       MomentumOptimizationSettings momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
@@ -276,7 +271,6 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
                                                                                        controlledJoints,
                                                                                        controllerToolbox.getCenterOfMassFrame(),
                                                                                        momentumOptimizationSettings,
-                                                                                       yoGraphicsListRegistry,
                                                                                        registry);
 
       controlCoreToolbox.setJointPrivilegedConfigurationParameters(jointPrivilegedConfigurationParameters);
@@ -464,5 +458,15 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
    public double getIntegrationDT()
    {
       return integrationDT;
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(controllerToolbox.getSCS2YoGraphics());
+      group.addChild(controllerCore.getSCS2YoGraphics());
+
+      return group;
    }
 }

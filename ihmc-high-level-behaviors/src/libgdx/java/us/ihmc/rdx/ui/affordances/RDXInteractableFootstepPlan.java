@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.behaviors.tools.CommunicationHelper;
@@ -20,6 +21,7 @@ import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepP
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.vr.RDXVRContext;
@@ -27,7 +29,6 @@ import us.ihmc.footstepPlanning.LocomotionParameters;
 import us.ihmc.robotics.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.perception.heightMap.HeightMapData;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -52,7 +53,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
    private LocomotionParameters locomotionParameters;
    private SwingPlannerParametersBasics swingPlannerParameters;
 
-   private final AtomicReference<HeightMapData> heightMapDataReference = new AtomicReference<>();
+   private final AtomicReference<TerrainMapData> terrainMapDataAtomicReference = new AtomicReference<>();
 
    private int previousPlanLength;
    private boolean wasPlanUpdated = false;
@@ -86,11 +87,11 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       clear();
    }
 
-   public void setHeightMapMessage(HeightMapData heightMapData)
+   public void setHeightMapMessage(TerrainMapData terrainMapData)
    {
-      heightMapDataReference.set(heightMapData);
+      terrainMapDataAtomicReference.set(terrainMapData);
       if (swingPlanningModule != null)
-         swingPlanningModule.setHeightMapData(heightMapData);
+         swingPlanningModule.setTerrainMapData(terrainMapData);
    }
 
    public void calculateVRPick(RDXVRContext vrContext)
@@ -219,9 +220,9 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
 
       if (wasPlanUpdated && locomotionParameters.getReplanSwingTrajectoryOnChange() && !swingPlanningModule.getIsCurrentlyPlanning())
       {
-         HeightMapData heightMapData = heightMapDataReference.getAndSet(null);
-         if (heightMapData != null)
-            swingPlanningModule.setHeightMapData(heightMapData);
+         TerrainMapData terrainMapData = terrainMapDataAtomicReference.getAndSet(null);
+         if (terrainMapData != null)
+            swingPlanningModule.setTerrainMapData(terrainMapData);
 
          swingPlanningModule.setSwingPlannerParameters(swingPlannerParameters);
          swingPlanningModule.updateAysnc(footsteps, SwingPlannerType.MULTI_WAYPOINT_POSITION);
@@ -260,9 +261,16 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
    public void walkFromSteps()
    {
       FootstepDataListMessage messageList = new FootstepDataListMessage();
+      double defaultHeight = locomotionParameters.getSwingHeight();
       for (RDXInteractableFootstep step : footsteps)
       {
-         messageList.getFootstepDataList().add().set(step.getPlannedFootstep().getAsMessage());
+         FootstepDataMessage data = messageList.getFootstepDataList().add();
+         data.set(step.getPlannedFootstep().getAsMessage());
+         if (step.getPlannedFootstep().getSwingHeight() < defaultHeight && defaultHeight > 0.0)
+         {
+            // The swing height may be set by the planner. Make sure only to use swing heights greater than the value set here.
+            data.setSwingHeight(defaultHeight);
+         }
       }
       // TODO figure out some better logic here. For example, when footstep planning from the current pose, or using the control ring, this is probably pretty
       // TODO dangerous. However when manually placing footsteps, this is great.

@@ -1,0 +1,183 @@
+package us.ihmc.rdx.behaviorTree;
+
+import imgui.ImGui;
+import imgui.flag.ImGuiMouseButton;
+import us.ihmc.behaviors.behaviorTree.control.ai2r.AI2RNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionDefinition;
+import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
+import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
+import us.ihmc.behaviors.behaviorTree.control.buildingExploration.BuildingExplorationDefinition;
+import us.ihmc.behaviors.behaviorTree.control.door.DoorTraversalDefinition;
+import us.ihmc.behaviors.behaviorTree.action.actions.CheckPointNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.control.GotoNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.control.ActionSequenceDefinition;
+import us.ihmc.behaviors.behaviorTree.control.FallbackNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.action.actions.*;
+import us.ihmc.behaviors.behaviorTree.action.actions.PelvisHeightOrientationActionDefinition;
+import us.ihmc.rdx.behaviorTree.scene.RDXBehaviorTreeScene;
+import us.ihmc.rdx.imgui.ImGuiTools;
+import us.ihmc.rdx.behaviorTree.actions.RDXActionNode;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
+
+import javax.annotation.Nullable;
+
+public class RDXBehaviorTreeNodeCreationMenu
+{
+   private final RDXBehaviorTree behaviorTree;
+   private final BehaviorTreeTopologyOperationQueue<RDXBehaviorTreeNode<?, ?>> topologyOperationQueue;
+   private final RDXAvailableBehaviorTreeDirectory behaviorTreesDirectory;
+
+   public RDXBehaviorTreeNodeCreationMenu(RDXBehaviorTree behaviorTree, WorkspaceResourceDirectory treeFilesDirectory, RDXBehaviorTreeScene scene)
+   {
+      this.behaviorTree = behaviorTree;
+
+      topologyOperationQueue = behaviorTree.getTopologyChangeQueue();
+
+      behaviorTreesDirectory = new RDXAvailableBehaviorTreeDirectory(treeFilesDirectory, behaviorTree, topologyOperationQueue, scene, this::complete);
+      behaviorTreesDirectory.reindexDirectory();
+   }
+
+   /**
+    * This method assumes that the insertion is valid for the relative node.
+    * For example, if the insertion requires modifying a parent, we assume it is not null.
+    */
+   public void renderImGuiWidgets(RDXBehaviorTreeNode<?, ?> relativeNode, BehaviorTreeNodeInsertionType insertionType)
+   {
+      if (relativeNode == null)
+      {
+         ImGui.pushFont(ImGuiTools.getSmallBoldFont());
+         ImGui.text("Start from scratch:");
+         ImGui.popFont();
+         ImGui.indent();
+
+         renderNodeCreationClickable(relativeNode, insertionType, "Root Node", BehaviorTreeRootNodeDefinition.class, null);
+      }
+      else
+      {
+         ImGui.pushFont(ImGuiTools.getSmallBoldFont());
+         ImGui.text("Control nodes:");
+         ImGui.popFont();
+         ImGui.indent();
+
+         renderNodeCreationClickable(relativeNode, insertionType, "Basic Node", BehaviorTreeNodeDefinition.class, null);
+         renderNodeCreationClickable(relativeNode, insertionType, "Action Sequence", ActionSequenceDefinition.class, null);
+         renderNodeCreationClickable(relativeNode, insertionType, "Fallback Node", FallbackNodeDefinition.class, null);
+         renderNodeCreationClickable(relativeNode, insertionType, "Condition Node", ConditionNodeDefinition.class, null);
+         renderNodeCreationClickable(relativeNode, insertionType, "Goto Node", GotoNodeDefinition.class, null);
+         renderNodeCreationClickable(relativeNode, insertionType, "Check Point Node", CheckPointNodeDefinition.class, null);
+         renderNodeCreationClickable(relativeNode, insertionType, "Scene Action", SceneActionNodeDefinition.class, null);
+         renderNodeCreationClickable(relativeNode, insertionType, "AI2R Node", AI2RNodeDefinition.class, null);
+         renderNodeCreationClickable(relativeNode, insertionType, "Door Traversal", DoorTraversalDefinition.class, null);
+         renderNodeCreationClickable(relativeNode, insertionType, "Building Exploration", BuildingExplorationDefinition.class, null);
+
+         ImGui.unindent();
+
+         ImGui.separator();
+
+         ImGui.pushFont(ImGuiTools.getSmallBoldFont());
+         ImGui.text("Actions:");
+         ImGui.popFont();
+         ImGui.indent();
+
+         renderNodeCreationClickable(relativeNode, insertionType, "Footstep Plan", FootstepPlanActionDefinition.class, null);
+         ImGui.text("Foot Pose: ");
+         for (RobotSide side : RobotSide.values)
+         {
+            ImGui.sameLine();
+            renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), FootPoseActionDefinition.class, side);
+         }
+         ImGui.text("Hand Pose: ");
+         for (RobotSide side : RobotSide.values)
+         {
+            ImGui.sameLine();
+            renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), HandPoseActionDefinition.class, side);
+         }
+         ImGui.text("Ability Hand: ");
+         for (RobotSide side : RobotSide.values)
+         {
+            ImGui.sameLine();
+            renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), AbilityHandActionDefinition.class, side);
+         }
+         ImGui.text("Sake Hand Command: ");
+         for (RobotSide side : RobotSide.values)
+         {
+            ImGui.sameLine();
+            renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), SakeHandCommandActionDefinition.class, side);
+         }
+         renderNodeCreationClickable(relativeNode, insertionType, "Neck", NeckActionDefinition.class, null);
+         renderNodeCreationClickable(relativeNode, insertionType, "Chest Orientation", ChestOrientationActionDefinition.class, null);
+         renderNodeCreationClickable(relativeNode, insertionType, "Pelvis Height", PelvisHeightOrientationActionDefinition.class, null);
+         renderNodeCreationClickable(relativeNode, insertionType, "Wait", WaitDurationActionDefinition.class, null);
+         ImGui.text("Screw Primitive: ");
+         for (RobotSide side : RobotSide.values)
+         {
+            ImGui.sameLine();
+            renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), ScrewPrimitiveActionDefinition.class, side);
+         }
+         ImGui.textDisabled("Hand Wrench: ");
+         for (RobotSide side : RobotSide.values)
+         {
+            ImGui.sameLine();
+            renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), HandWrenchActionDefinition.class, side);
+         }
+      }
+      ImGui.unindent();
+      ImGui.spacing();
+      ImGui.separator();
+
+      ImGui.pushFont(ImGuiTools.getSmallBoldFont());
+      ImGui.text("Load existing tree from file:");
+      ImGui.popFont();
+
+      ImGui.unindent();
+      behaviorTreesDirectory.renderImGuiWidgets(relativeNode, insertionType, true);
+      ImGui.indent();
+   }
+
+   private void renderNodeCreationClickable(RDXBehaviorTreeNode<?, ?> relativeNode,
+                                            BehaviorTreeNodeInsertionType insertionType,
+                                            String nodeTypeName,
+                                            Class<?> nodeType,
+                                            @Nullable RobotSide side)
+   {
+      if (ImGuiTools.textWithUnderlineOnHover(nodeTypeName))
+      {
+         if (ImGui.isMouseClicked(ImGuiMouseButton.Left))
+         {
+            RDXBehaviorTreeNode<?, ?> newNode;
+            if (insertionType == BehaviorTreeNodeInsertionType.INSERT_ROOT)
+               newNode = (RDXBehaviorTreeNode<?, ?>) behaviorTree.getNodeBuilder().createRootNode(behaviorTree.getAndIncrementNextID());
+            else
+               newNode = behaviorTree.getNodeBuilder().createNode(nodeType, behaviorTree.getAndIncrementNextID(), behaviorTree.getRootNode());
+            newNode.getDefinition().modify();
+            BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>> insertionDefinition
+                  = new BehaviorTreeNodeInsertionDefinition<>(insertionType, newNode, relativeNode);
+
+            if (insertionDefinition.getNodeToInsert() instanceof RDXActionNode<?, ?> newAction)
+            {
+               // We want to do best effort initialization
+               RDXBehaviorTreeRootNode actionSequenceOrNull = behaviorTree.getRootNode();
+               if (behaviorTree.getNodeBuilder() instanceof RDXBehaviorTreeNodeBuilder rdxNodeBuilder)
+                  rdxNodeBuilder.initializeActionNode(actionSequenceOrNull, newAction, insertionDefinition.getInsertionIndex(), side);
+            }
+
+            complete(insertionDefinition);
+         }
+      }
+   }
+
+   private void complete(BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>> insertionDefinition)
+   {
+      topologyOperationQueue.queueInsertNodeModify(insertionDefinition);
+      ImGui.closeCurrentPopup();
+   }
+
+   public void reindexDirectory()
+   {
+      behaviorTreesDirectory.reindexDirectory();
+   }
+}

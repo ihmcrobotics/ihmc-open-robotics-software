@@ -3,6 +3,7 @@ package us.ihmc.avatar.scs2;
 import us.ihmc.avatar.AvatarControllerThread;
 import us.ihmc.avatar.AvatarEstimatorThread;
 import us.ihmc.avatar.AvatarStepGeneratorThread;
+import us.ihmc.avatar.ControllerTask;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.avatar.factory.DisposableRobotController;
@@ -25,7 +26,6 @@ import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.state.interfaces.SixDoFJointStateBasics;
 import us.ihmc.scs2.simulation.robot.Robot;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
 import us.ihmc.simulationconstructionset.util.RobotController;
@@ -50,7 +50,6 @@ public class SCS2AvatarSimulation
    private AvatarControllerThread controllerThread;
    private AvatarStepGeneratorThread stepGeneratorThread;
    private IKStreamingRTThread ikStreamingRTThread;
-   private JointDesiredOutputWriter outputWriter;
    private SimulatedDRCRobotTimeProvider simulatedRobotTimeProvider;
    private FullHumanoidRobotModel controllerFullRobotModel;
    private RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup;
@@ -63,6 +62,7 @@ public class SCS2AvatarSimulation
    private boolean javaFXThreadImplicitExit = true;
 
    private boolean hasBeenDestroyed = false;
+   private ControllerTask controllerTask;
 
    public void start()
    {
@@ -83,7 +83,10 @@ public class SCS2AvatarSimulation
    {
       if (intraprocessYoVariableLogger != null)
       {
-         intraprocessYoVariableLogger.start();
+         if (intraprocessYoVariableLogger.create())
+            LogTools.info("[Logging] Logging locally to disk");
+         else
+            LogTools.error("[Logging] Unable to log locally to disk");
       }
       if (yoVariableServer != null)
       {
@@ -220,7 +223,9 @@ public class SCS2AvatarSimulation
    public void setCameraDefaultRobotView()
    {
       checkSimulationSessionAlive();
-      SixDoFJointStateBasics initialRootJointState = (SixDoFJointStateBasics) getRobotDefinition().getRootJointDefinitions().get(0).getInitialJointState();
+      SixDoFJointStateBasics initialRootJointState = (SixDoFJointStateBasics) getRobotDefinition().getRootJointDefinitions()
+                                                                                                  .get(0)
+                                                                                                  .getInitialJointState();
       if (initialRootJointState != null)
          initializeCamera(initialRootJointState.getOrientation(), initialRootJointState.getPosition());
    }
@@ -424,6 +429,16 @@ public class SCS2AvatarSimulation
       return controllerThread;
    }
 
+   public void setControllerTask(ControllerTask controllerTask)
+   {
+      this.controllerTask = controllerTask;
+   }
+
+   public ControllerTask getControllerTask()
+   {
+      return controllerTask;
+   }
+
    public void setStepGeneratorThread(AvatarStepGeneratorThread stepGeneratorThread)
    {
       this.stepGeneratorThread = stepGeneratorThread;
@@ -442,16 +457,6 @@ public class SCS2AvatarSimulation
    public IKStreamingRTThread getIKStreamingRTThread()
    {
       return ikStreamingRTThread;
-   }
-
-   public void setOutputWriter(JointDesiredOutputWriter outputWriter)
-   {
-      this.outputWriter = outputWriter;
-   }
-
-   public JointDesiredOutputWriter getOutputWriter()
-   {
-      return outputWriter;
    }
 
    public void setSimulatedRobotTimeProvider(SimulatedDRCRobotTimeProvider simulatedRobotTimeProvider)

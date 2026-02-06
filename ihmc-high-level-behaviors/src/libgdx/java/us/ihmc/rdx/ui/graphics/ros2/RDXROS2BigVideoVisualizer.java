@@ -3,9 +3,9 @@ package us.ihmc.rdx.ui.graphics.ros2;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
-import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.BigVideoPacket;
+import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
 import us.ihmc.ros2.ROS2NodeBuilder;
@@ -13,7 +13,7 @@ import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.string.StringTools;
 
-public class RDXROS2BigVideoVisualizer extends RDXROS2OpenCVVideoVisualizer<BigVideoPacket>
+public class RDXROS2BigVideoVisualizer extends RDXROS2ImageVisualizer<BigVideoPacket>
 {
    private final String titleBeforeAdditions;
    private final ROS2Topic<BigVideoPacket> topic;
@@ -60,7 +60,7 @@ public class RDXROS2BigVideoVisualizer extends RDXROS2OpenCVVideoVisualizer<BigV
             subscriber.takeNextData(videoPacket, sampleInfo);
             //            delayPlot.addValue(TimeTools.calculateDelay(videoPacket.getAcquisitionTimeSecondsSinceEpoch(), videoPacket.getAcquisitionTimeAdditionalNanos()));
          }
-         getOpenCVVideoVisualizer().doReceiveMessageOnThread(() ->
+         submitImageUpdate(imageVisualizer ->
          {
             synchronized (syncObject)
             {
@@ -79,9 +79,7 @@ public class RDXROS2BigVideoVisualizer extends RDXROS2OpenCVVideoVisualizer<BigV
 
             synchronized (this) // synchronize with the update method
             {
-               // YUV I420 has 1.5 times the height of the image
-               getOpenCVVideoVisualizer().updateImageDimensions(inputYUVI420Mat.cols(), (int) (inputYUVI420Mat.rows() / 1.5f));
-               opencv_imgproc.cvtColor(inputYUVI420Mat, getOpenCVVideoVisualizer().getRGBA8Mat(), opencv_imgproc.COLOR_YUV2RGBA_I420);
+               imageVisualizer.setImage(inputYUVI420Mat, PixelFormat.YUV_I420);
             }
 
             getFrequency().ping();

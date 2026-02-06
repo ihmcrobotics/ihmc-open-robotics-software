@@ -10,7 +10,6 @@ import perception_msgs.msg.dds.SRTStreamStatus;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.Throttler;
-import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -18,7 +17,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.RawImageTest;
-import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.sensors.CameraIntrinsics;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.ros2.ROS2Node;
@@ -268,7 +267,7 @@ public class SRTStreamerSubscriberTest
       throttler.setFrequency(FPS);
 
       // ROS2 topic for the streamer and subscriber
-      ROS2Topic<SRTStreamStatus> requestTopic = PerceptionAPI.SRT_STREAM_STATUS.withSuffix("ros2_srt_test");
+      ROS2Topic<SRTStreamStatus> requestTopic = new ROS2Topic<SRTStreamStatus>().withSuffix("srt_status_test").withType(SRTStreamStatus.class);
 
       float depthDescretization = -1.0f;
       CameraIntrinsics cameraIntrinsics = new CameraIntrinsics(sampleImage.rows(),

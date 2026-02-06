@@ -1,0 +1,35 @@
+#ifndef __vision_msgs__msg__Classification__idl__
+#define __vision_msgs__msg__Classification__idl__
+
+#include "std_msgs/msg/./Header_.idl"
+#include "vision_msgs/msg/./ObjectHypothesis_.idl"
+module vision_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * Defines a classification result.
+       * 
+       * This result does not contain any position information. It is designed for
+       * classifiers, which simply provide class probabilities given an instance of
+       * source data (e.g., an image or a point cloud).
+       */
+      @TypeCode(type="vision_msgs::msg::dds_::Classification_")
+      struct Classification
+      {
+        std_msgs::msg::dds::Header header;
+        /**
+         * A list of class probabilities. This list need not provide a probability for
+         * every possible class, just ones that are nonzero, or above some
+         * user-defined threshold.
+         */
+        sequence<vision_msgs::msg::dds::ObjectHypothesis> results;
+      };
+    };
+  };
+};
+
+#endif

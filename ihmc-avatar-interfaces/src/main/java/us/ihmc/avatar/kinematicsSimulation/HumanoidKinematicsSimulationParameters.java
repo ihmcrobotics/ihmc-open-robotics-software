@@ -1,10 +1,14 @@
 package us.ihmc.avatar.kinematicsSimulation;
 
-import us.ihmc.avatar.scs2.SCS2AvatarSimulationFactory;
 import us.ihmc.commons.UnitConversions;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.yoVariables.registry.YoRegistry;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * @deprecated Use {@link SCS2AvatarSimulationFactory#setKinematicsSimulation} instead.
+ * To be used with {@link HumanoidKinematicsSimulation}.
  */
 public class HumanoidKinematicsSimulationParameters
 {
@@ -20,6 +24,8 @@ public class HumanoidKinematicsSimulationParameters
    private double dt = UnitConversions.hertzToSeconds(70);
    private boolean runNoFasterThanMaxRealtimeRate = true;
    private double maxRealtimeRate = 2.0;
+   private ROS2NodeBuilder ros2NodeBuilder = null;
+   private final List<YoRegistry> registriesToInclude = new ArrayList<>();
 
    public double getInitialGroundHeight()
    {
@@ -60,7 +66,7 @@ public class HumanoidKinematicsSimulationParameters
    {
       this.initialRobotY = initialRobotY;
    }
-   
+
    public double getInitialRobotZ()
    {
       return initialRobotZ;
@@ -120,7 +126,7 @@ public class HumanoidKinematicsSimulationParameters
    {
       return runNoFasterThanMaxRealtimeRate;
    }
-   
+
    public void setMaxRealtimeRate(double maxRealtimeRate)
    {
       this.maxRealtimeRate = maxRealtimeRate;
@@ -139,5 +145,20 @@ public class HumanoidKinematicsSimulationParameters
    public void setEnablePeriodicThread(boolean createPeriodicThread)
    {
       this.createPeriodicThread = createPeriodicThread;
+   }
+
+   public void setRos2NodeBuilder(ROS2NodeBuilder ros2NodeBuilder)
+   {
+      this.ros2NodeBuilder = ros2NodeBuilder;
+   }
+
+   public ROS2NodeBuilder getRos2NodeBuilder()
+   {
+      return ros2NodeBuilder;
+   }
+
+   public List<YoRegistry> getRegistriesToInclude()
+   {
+      return registriesToInclude;
    }
 }

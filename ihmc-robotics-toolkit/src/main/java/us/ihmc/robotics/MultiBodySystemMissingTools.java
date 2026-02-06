@@ -248,4 +248,34 @@ public class MultiBodySystemMissingTools
 
       return ret;
    }
+
+   public static int getConfigurationVectorSize(JointReadOnly[] joints)
+   {
+      int size = 0;
+      for (JointReadOnly joint : joints)
+      {
+         size += joint.getConfigurationMatrixSize();
+      }
+      return size;
+   }
+
+   public static int getVelocityVectorSize(JointReadOnly[] joints)
+   {
+      return MultiBodySystemTools.computeDegreesOfFreedom(joints);
+   }
+
+   public static int getStateVectorSize(JointReadOnly[] joints)
+   {
+      return getConfigurationVectorSize(joints) + getVelocityVectorSize(joints);
+   }
+
+   public static int getStateDifferentialVectorSize(JointReadOnly[] joints)
+   {
+      return 2 * getVelocityVectorSize(joints);
+   }
+
+   public static int getControlVectorSize(OneDoFJointReadOnly[] joints)
+   {
+      return getVelocityVectorSize(joints);
+   }
 }

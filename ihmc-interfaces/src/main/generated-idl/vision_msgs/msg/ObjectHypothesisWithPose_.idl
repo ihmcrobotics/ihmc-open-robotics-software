@@ -1,0 +1,41 @@
+#ifndef __vision_msgs__msg__ObjectHypothesisWithPose__idl__
+#define __vision_msgs__msg__ObjectHypothesisWithPose__idl__
+
+#include "geometry_msgs/msg/./PoseWithCovariance_.idl"
+#include "vision_msgs/msg/./ObjectHypothesis_.idl"
+module vision_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * An object hypothesis that contains pose information.
+       * If you would like to define an array of ObjectHypothesisWithPose messages,
+       * please see the Detection2D or Detection3D message types.
+       */
+      @TypeCode(type="vision_msgs::msg::dds_::ObjectHypothesisWithPose_")
+      struct ObjectHypothesisWithPose
+      {
+        /**
+         * The object hypothesis (ID and score).
+         */
+        vision_msgs::msg::dds::ObjectHypothesis hypothesis;
+        /**
+         * The 6D pose of the object hypothesis. This pose should be
+         * defined as the pose of some fixed reference point on the object, such as
+         * the geometric center of the bounding box, the center of mass of the
+         * object or the origin of a reference mesh of the object.
+         * Note that this pose is not stamped; frame information can be defined by
+         * parent messages.
+         * Also note that different classes predicted for the same input data may have
+         * different predicted 6D poses.
+         */
+        geometry_msgs::msg::dds::PoseWithCovariance pose;
+      };
+    };
+  };
+};
+
+#endif

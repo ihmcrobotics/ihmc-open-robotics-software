@@ -23,6 +23,16 @@ public interface JointDesiredOutputListReadOnly
 
    int getNumberOfJointsWithDesiredOutput();
 
+   default boolean isEmpty()
+   {
+      for  (int i = 0; i < getNumberOfJointsWithDesiredOutput(); i++)
+      {
+         if (!getJointDesiredOutput(i).isEmpty())
+            return false;
+      }
+      return true;
+   }
+
    default void insertDesiredTorquesIntoOneDoFJoints(OneDoFJointBasics[] oneDoFJoints)
    {
       for (int i = 0; i < oneDoFJoints.length; i++)

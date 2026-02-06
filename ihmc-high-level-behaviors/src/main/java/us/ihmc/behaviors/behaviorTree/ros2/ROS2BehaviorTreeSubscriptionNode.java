@@ -14,17 +14,21 @@ public class ROS2BehaviorTreeSubscriptionNode
    private BehaviorTreeNodeDefinitionMessage behaviorTreeNodeDefinitionMessage;
    private BehaviorTreeNodeStateMessage behaviorTreeNodeStateMessage;
    private BehaviorTreeRootNodeStateMessage behaviorTreeRootNodeStateMessage;
-   private AI2RNodeStateMessage ai2rNodeStateMessage;
    private ActionSequenceStateMessage actionSequenceStateMessage;
    private FallbackNodeStateMessage fallbackNodeStateMessage;
    private ConditionNodeStateMessage conditionNodeStateMessage;
    private GotoNodeStateMessage gotoNodeStateMessage;
    private CheckPointNodeStateMessage checkPointNodeStateMessage;
+   private SceneActionNodeStateMessage sceneActionNodeStateMessage;
+   private AI2RNodeStateMessage ai2rNodeStateMessage;
    private DoorTraversalStateMessage doorTraversalStateMessage;
    private BuildingExplorationStateMessage buildingExplorationStateMessage;
+   private LeafNodeStateMessage leafNodeStateMessage;
    private ActionNodeStateMessage actionNodeStateMessage;
+   private NeckActionStateMessage neckActionStateMessage;
    private ChestOrientationActionStateMessage chestOrientationActionStateMessage;
    private FootstepPlanActionStateMessage footstepPlanActionStateMessage;
+   private AbilityHandActionStateMessage abilityHandActionStateMessage;
    private SakeHandCommandActionStateMessage sakeHandCommandActionStateMessage;
    private HandPoseActionStateMessage handPoseActionStateMessage;
    private HandWrenchActionStateMessage handWrenchActionStateMessage;
@@ -42,17 +46,21 @@ public class ROS2BehaviorTreeSubscriptionNode
       behaviorTreeNodeDefinitionMessage = null;
       behaviorTreeNodeStateMessage = null;
       behaviorTreeRootNodeStateMessage = null;
-      ai2rNodeStateMessage = null;
       actionSequenceStateMessage = null;
       fallbackNodeStateMessage = null;
       conditionNodeStateMessage = null;
       gotoNodeStateMessage = null;
       checkPointNodeStateMessage = null;
+      sceneActionNodeStateMessage = null;
+      ai2rNodeStateMessage = null;
       doorTraversalStateMessage = null;
       buildingExplorationStateMessage = null;
+      leafNodeStateMessage = null;
       actionNodeStateMessage = null;
+      neckActionStateMessage = null;
       chestOrientationActionStateMessage = null;
       footstepPlanActionStateMessage = null;
+      abilityHandActionStateMessage = null;
       sakeHandCommandActionStateMessage = null;
       handPoseActionStateMessage = null;
       handWrenchActionStateMessage = null;
@@ -119,14 +127,14 @@ public class ROS2BehaviorTreeSubscriptionNode
       this.behaviorTreeRootNodeStateMessage = behaviorTreeRootNodeStateMessage;
    }
 
-   public AI2RNodeStateMessage getAI2RNodeStateMessage()
+   public LeafNodeStateMessage getLeafNodeStateMessage()
    {
-      return ai2rNodeStateMessage;
+      return leafNodeStateMessage;
    }
 
-   public void setAI2RNodeStateMessage(AI2RNodeStateMessage ai2rNodeStateMessage)
+   public void setLeafNodeStateMessage(LeafNodeStateMessage leafNodeStateMessage)
    {
-      this.ai2rNodeStateMessage = ai2rNodeStateMessage;
+      this.leafNodeStateMessage = leafNodeStateMessage;
    }
 
    public ActionNodeStateMessage getActionNodeStateMessage()
@@ -189,6 +197,26 @@ public class ROS2BehaviorTreeSubscriptionNode
       this.checkPointNodeStateMessage = checkPointNodeStateMessage;
    }
 
+   public SceneActionNodeStateMessage getSceneActionNodeStateMessage()
+   {
+      return sceneActionNodeStateMessage;
+   }
+
+   public void setSceneActionNodeStateMessage(SceneActionNodeStateMessage sceneActionNodeStateMessage)
+   {
+      this.sceneActionNodeStateMessage = sceneActionNodeStateMessage;
+   }
+
+   public AI2RNodeStateMessage getAI2RNodeStateMessage()
+   {
+      return ai2rNodeStateMessage;
+   }
+
+   public void setAI2RNodeStateMessage(AI2RNodeStateMessage ai2rNodeStateMessage)
+   {
+      this.ai2rNodeStateMessage = ai2rNodeStateMessage;
+   }
+
    public DoorTraversalStateMessage getDoorTraversalStateMessage()
    {
       return doorTraversalStateMessage;
@@ -209,6 +237,16 @@ public class ROS2BehaviorTreeSubscriptionNode
       this.buildingExplorationStateMessage = buildingExplorationStateMessage;
    }
 
+   public NeckActionStateMessage getNeckActionStateMessage()
+   {
+      return neckActionStateMessage;
+   }
+
+   public void setNeckActionStateMessage(NeckActionStateMessage neckActionStateMessage)
+   {
+      this.neckActionStateMessage = neckActionStateMessage;
+   }
+
    public ChestOrientationActionStateMessage getChestOrientationActionStateMessage()
    {
       return chestOrientationActionStateMessage;
@@ -227,6 +265,16 @@ public class ROS2BehaviorTreeSubscriptionNode
    public void setFootstepPlanActionStateMessage(FootstepPlanActionStateMessage footstepPlanActionStateMessage)
    {
       this.footstepPlanActionStateMessage = footstepPlanActionStateMessage;
+   }
+
+   public AbilityHandActionStateMessage getAbilityHandActionStateMessage()
+   {
+      return abilityHandActionStateMessage;
+   }
+
+   public void setAbilityHandActionStateMessage(AbilityHandActionStateMessage abilityHandActionStateMessage)
+   {
+      this.abilityHandActionStateMessage = abilityHandActionStateMessage;
    }
 
    public SakeHandCommandActionStateMessage getSakeHandCommandActionStateMessage()

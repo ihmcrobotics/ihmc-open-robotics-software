@@ -36,4 +36,20 @@ public interface CenterOfMassDataHolderReadOnly
     * @return the estimated velocity of the center of mass if available.
     */
    FrameVector3DReadOnly getCenterOfMassVelocity();
+
+   /**
+    * Gets whether this data holder contains estimated angular momentum in the world. If this method
+    * returns {@code false}, the data contained in {@link #getAngularMomentum()} should
+    * <strong>not</strong> be consumed.
+    *
+    * @return whether this data holder contains estimated angular momentum.
+    */
+   boolean hasAngularMomentum();
+
+   /**
+    * Gets the estimated angular momentum if available.
+    *
+    * @return the estimated angular momentum, if available.
+    */
+   FrameVector3DReadOnly getAngularMomentum();
 }

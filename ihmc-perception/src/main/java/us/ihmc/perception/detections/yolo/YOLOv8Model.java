@@ -18,7 +18,7 @@ import org.bytedeco.opencv.opencv_dnn.Net;
 import org.yaml.snakeyaml.Yaml;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.sensors.CameraIntrinsics;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDANonMaximumSuppression;
 import us.ihmc.perception.cuda.CUDAProgram;
@@ -355,6 +355,9 @@ public class YOLOv8Model
                                                   cudaMemcpyDefault,
                                                   cudaStream));
 
+         // Ensure filtered detection count begins at 0
+         filteredDetectionCountPointer.put(0);
+
          // Calculate kernel launch dimensions
          blockDims.x(BLOCK_SIZE_1D);
          gridDims.x((unfilteredDetectionCount + BLOCK_SIZE_1D - 1) / BLOCK_SIZE_1D);
@@ -403,9 +406,13 @@ public class YOLOv8Model
 
          // Get some useful stuff
          CameraIntrinsics maskIntrinsics = computeMaskIntrinsics(bgrInputImage);
-         float scaleFactor = Math.min((float) bgrInputImage.getWidth() / DETECTION_SIZE.width(), (float) bgrInputImage.getHeight() / DETECTION_SIZE.height());
-         float offsetX = 0.5f * (bgrInputImage.getWidth() / scaleFactor - DETECTION_SIZE.width());
-         float offsetY = 0.5f * (bgrInputImage.getHeight() / scaleFactor - DETECTION_SIZE.height());
+         float widthScale = (float) bgrInputImage.getWidth() / DETECTION_SIZE.width();
+         float heightScale = (float) bgrInputImage.getHeight() / DETECTION_SIZE.height();
+         float scaleFactor = Math.min(widthScale, heightScale);
+         float scaledDetectionWidth = DETECTION_SIZE.width() * scaleFactor;
+         float scaledDetectionHeight = DETECTION_SIZE.height() * scaleFactor;
+         float offsetX = 0.5f * (bgrInputImage.getWidth() - scaledDetectionWidth);
+         float offsetY = 0.5f * (bgrInputImage.getHeight() - scaledDetectionHeight);
 
          // Create the list of YOLOv8Detections
          for (int i = 0; i < remainingDetectionCount; ++i)

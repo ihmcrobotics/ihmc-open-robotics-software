@@ -3,23 +3,31 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class JointControlBlender
+public class JointControlBlender implements CommandBlender
 {
    /** This is for hardware debug purposes only. */
    private static final boolean ENABLE_TAU_SCALE = false;
 
    private final YoDouble tauScale;
-   private final OneDoFJointBasics oneDoFJoint;
+   private final DoubleProvider currentPositionProvider;
+   private final DoubleProvider currentVelocityProvider;
 
-   public JointControlBlender(String nameSuffix, OneDoFJointBasics oneDoFJoint, YoRegistry parentRegistry)
+   public JointControlBlender(String nameSuffix, OneDoFJointReadOnly oneDoFJoint, YoRegistry parentRegistry)
    {
-      this.oneDoFJoint = oneDoFJoint;
-      String namePrefix = oneDoFJoint.getName();
+      this(oneDoFJoint.getName(), nameSuffix, oneDoFJoint::getQ, oneDoFJoint::getQd, parentRegistry);
+   }
+
+   public JointControlBlender(String namePrefix, String nameSuffix, DoubleProvider currentPositionProvider, DoubleProvider currentVelocityProvider, YoRegistry parentRegistry)
+   {
+      this.currentPositionProvider = currentPositionProvider;
+      this.currentVelocityProvider = currentVelocityProvider;
 
       YoRegistry registry = new YoRegistry(namePrefix + nameSuffix + "JointControlBlender");
 
@@ -79,16 +87,16 @@ public class JointControlBlender
 
       if (hasDesiredPosition(outputData0) || hasDesiredPosition(outputData1))
       {
-         double desiredPosition0 = hasDesiredPosition(outputData0) ? outputData0.getDesiredPosition() : oneDoFJoint.getQ();
-         double desiredPosition1 = hasDesiredPosition(outputData1) ? outputData1.getDesiredPosition() : oneDoFJoint.getQ();
+         double desiredPosition0 = hasDesiredPosition(outputData0) ? outputData0.getDesiredPosition() : currentPositionProvider.getValue();
+         double desiredPosition1 = hasDesiredPosition(outputData1) ? outputData1.getDesiredPosition() : currentPositionProvider.getValue();
          double desiredPosition = EuclidCoreTools.interpolate(desiredPosition0, desiredPosition1, blendingFactor);
          outputDataToPack.setDesiredPosition(desiredPosition);
       }
 
       if (hasDesiredVelocity(outputData0) || hasDesiredVelocity(outputData1))
       {
-         double desiredVelocity0 = hasDesiredVelocity(outputData0) ? outputData0.getDesiredVelocity() : oneDoFJoint.getQd();
-         double desiredVelocity1 = hasDesiredVelocity(outputData1) ? outputData1.getDesiredVelocity() : oneDoFJoint.getQd();
+         double desiredVelocity0 = hasDesiredVelocity(outputData0) ? outputData0.getDesiredVelocity() : currentVelocityProvider.getValue();
+         double desiredVelocity1 = hasDesiredVelocity(outputData1) ? outputData1.getDesiredVelocity() : currentVelocityProvider.getValue();
          double desiredVelocity = EuclidCoreTools.interpolate(desiredVelocity0, desiredVelocity1, blendingFactor);
          outputDataToPack.setDesiredVelocity(desiredVelocity);
       }

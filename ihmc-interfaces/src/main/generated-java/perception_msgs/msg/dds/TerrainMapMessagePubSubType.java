@@ -15,7 +15,7 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "92a21ed088aa2fbd828e2b9afe4f8ae27c71ec75d0941b4ed7b79e430e0adcc7";
+   		return "58027ab49a3814c637fa3dca90f82c4aa7d95823715f88a9bc234358a8109f06";
    }
    
    @Override
@@ -54,7 +54,19 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += perception_msgs.msg.dds.HeightMapMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (255000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (255000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (255000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -82,7 +94,28 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
-      current_alignment += perception_msgs.msg.dds.HeightMapMessagePubSubType.getCdrSerializedSize(data.getHeightMap(), current_alignment);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getHeightMap().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getObstacleClearanceScore().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getTraversabilityScore().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -112,7 +145,24 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    {
       cdr.write_type_12(data.getSequenceId());
 
-      perception_msgs.msg.dds.HeightMapMessagePubSubType.write(data.getHeightMap(), cdr);
+      cdr.write_type_6(data.getGridCenterX());
+
+      cdr.write_type_6(data.getGridCenterY());
+
+      cdr.write_type_6(data.getWidthInMeters());
+
+      cdr.write_type_6(data.getCellSizeInMeters());
+
+      cdr.write_type_2(data.getCellsPerAxis());
+
+      if(data.getHeightMap().size() <= 255000)
+      cdr.write_type_e(data.getHeightMap());else
+          throw new RuntimeException("height_map field exceeds the maximum length: %d > %d".formatted(data.getHeightMap().size(), 255000));
+
+      if(data.getObstacleClearanceScore().size() <= 255000)
+      cdr.write_type_e(data.getObstacleClearanceScore());else
+          throw new RuntimeException("obstacle_clearance_score field exceeds the maximum length: %d > %d".formatted(data.getObstacleClearanceScore().size(), 255000));
+
       if(data.getTraversabilityScore().size() <= 255000)
       cdr.write_type_e(data.getTraversabilityScore());else
           throw new RuntimeException("traversability_score field exceeds the maximum length: %d > %d".formatted(data.getTraversabilityScore().size(), 255000));
@@ -139,7 +189,18 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    {
       data.setSequenceId(cdr.read_type_12());
       	
-      perception_msgs.msg.dds.HeightMapMessagePubSubType.read(data.getHeightMap(), cdr);	
+      data.setGridCenterX(cdr.read_type_6());
+      	
+      data.setGridCenterY(cdr.read_type_6());
+      	
+      data.setWidthInMeters(cdr.read_type_6());
+      	
+      data.setCellSizeInMeters(cdr.read_type_6());
+      	
+      data.setCellsPerAxis(cdr.read_type_2());
+      	
+      cdr.read_type_e(data.getHeightMap());	
+      cdr.read_type_e(data.getObstacleClearanceScore());	
       cdr.read_type_e(data.getTraversabilityScore());	
       cdr.read_type_e(data.getTraversabilityClass());	
       cdr.read_type_e(data.getSnappedNormalXData());	
@@ -152,8 +213,13 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    public final void serialize(perception_msgs.msg.dds.TerrainMapMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_12("sequence_id", data.getSequenceId());
-      ser.write_type_a("height_map", new perception_msgs.msg.dds.HeightMapMessagePubSubType(), data.getHeightMap());
-
+      ser.write_type_6("grid_center_x", data.getGridCenterX());
+      ser.write_type_6("grid_center_y", data.getGridCenterY());
+      ser.write_type_6("width_in_meters", data.getWidthInMeters());
+      ser.write_type_6("cell_size_in_meters", data.getCellSizeInMeters());
+      ser.write_type_2("cells_per_axis", data.getCellsPerAxis());
+      ser.write_type_e("height_map", data.getHeightMap());
+      ser.write_type_e("obstacle_clearance_score", data.getObstacleClearanceScore());
       ser.write_type_e("traversability_score", data.getTraversabilityScore());
       ser.write_type_e("traversability_class", data.getTraversabilityClass());
       ser.write_type_e("snapped_normal_x_data", data.getSnappedNormalXData());
@@ -165,8 +231,13 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.TerrainMapMessage data)
    {
       data.setSequenceId(ser.read_type_12("sequence_id"));
-      ser.read_type_a("height_map", new perception_msgs.msg.dds.HeightMapMessagePubSubType(), data.getHeightMap());
-
+      data.setGridCenterX(ser.read_type_6("grid_center_x"));
+      data.setGridCenterY(ser.read_type_6("grid_center_y"));
+      data.setWidthInMeters(ser.read_type_6("width_in_meters"));
+      data.setCellSizeInMeters(ser.read_type_6("cell_size_in_meters"));
+      data.setCellsPerAxis(ser.read_type_2("cells_per_axis"));
+      ser.read_type_e("height_map", data.getHeightMap());
+      ser.read_type_e("obstacle_clearance_score", data.getObstacleClearanceScore());
       ser.read_type_e("traversability_score", data.getTraversabilityScore());
       ser.read_type_e("traversability_class", data.getTraversabilityClass());
       ser.read_type_e("snapped_normal_x_data", data.getSnappedNormalXData());

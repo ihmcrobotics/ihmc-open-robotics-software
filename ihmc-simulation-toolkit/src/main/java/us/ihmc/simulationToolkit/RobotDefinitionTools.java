@@ -262,6 +262,16 @@ public class RobotDefinitionTools
       RobotDefinitionLoader.adjustRigidBodyInterias(robotDefinition);
    }
 
+   public static void adjustRigidBodyInterias(double scalar, RigidBodyDefinition[] rigidBodyDefinitionsToAdjust)
+   {
+      RobotDefinitionLoader.adjustRigidBodyInterias(scalar, rigidBodyDefinitionsToAdjust);
+   }
+
+   public static void adjustRigidBodyInterias(double scalar, JointDefinition[] jointDefinitions)
+   {
+      RobotDefinitionLoader.adjustRigidBodyInterias(scalar, jointDefinitions);
+   }
+
    public static void addGroundContactPoints(RobotDefinition robotDefinition, ContactPointDefinitionHolder contactPointHolder)
    {
       RobotDefinitionLoader.addGroundContactPoints(robotDefinition, contactPointHolder);

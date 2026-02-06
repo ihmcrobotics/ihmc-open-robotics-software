@@ -149,6 +149,7 @@ public class RDXVRWholeBodyKinematicStreaming
    private final Throttler messageThrottler = new Throttler();
 
    private final ImBoolean controlArmsOnly = new ImBoolean(false);
+   private final ImBoolean lockPelvis = new ImBoolean(false);
    private final ImBoolean armScaling = new ImBoolean(false);
    private final ImBoolean comTracking = new ImBoolean(true);
    private final RDXVRMotionRetargeting motionRetargeting;
@@ -321,12 +322,18 @@ public class RDXVRWholeBodyKinematicStreaming
          KinematicsStreamingToolboxInputMessage toolboxInputMessage = new KinematicsStreamingToolboxInputMessage();
          processControllers(toolboxInputMessage);
          processTrackers(toolboxInputMessage);
+         processHeadset(toolboxInputMessage);
          retargetMotion(toolboxInputMessage);
          multiContact.doCoMControl(toolboxInputMessage);
 
          if (controlArmsOnly.get())
          { // If option 'Control Arms Only' is active, lock pelvis and chest to current pose
             lockChest(toolboxInputMessage);
+            lockPelvis(toolboxInputMessage);
+         }
+
+         if (lockPelvis.get())
+         {
             lockPelvis(toolboxInputMessage);
          }
 
@@ -530,6 +537,29 @@ public class RDXVRWholeBodyKinematicStreaming
       }
    }
 
+   private void processHeadset(KinematicsStreamingToolboxInputMessage messageToPack)
+   {
+      vrContext.getHeadset().runIfConnected(headset->
+      {
+         RigidBodyBasics controlledSegment = getControlledSegment(HEAD);
+         if (controlledSegment != null)
+         {
+            FramePose3D desiredPose = new FramePose3D();
+            desiredPose.setToZero(headset.getXForwardZUpHeadsetFrame());
+            desiredPose.changeFrame(ReferenceFrame.getWorldFrame());
+            KinematicsToolboxRigidBodyMessage message = createRigidBodyMessage(controlledSegment,
+                                                                               desiredPose,
+                                                                               headset.getAngularVelocity(),
+                                                                               headset.getLinearVelocity(),
+                                                                               retargetingParameters.getPositionWeight(HEAD),
+                                                                               retargetingParameters.getOrientationWeight(HEAD),
+                                                                               retargetingParameters.getLinearRateLimitation(HEAD),
+                                                                               retargetingParameters.getAngularRateLimitation(HEAD));
+            messageToPack.getInputs().add().set(message);
+         }
+      });
+   }
+
    private void retargetMotion(KinematicsStreamingToolboxInputMessage messageToPack)
    {
       if (armScaling.get())
@@ -608,6 +638,7 @@ public class RDXVRWholeBodyKinematicStreaming
          case LEFT_HAND, RIGHT_HAND -> ghostFullRobotModel.getHand(segmentType.getSegmentSide());
          case LEFT_ANKLE, RIGHT_ANKLE -> ghostFullRobotModel.getFoot(segmentType.getSegmentSide());
          case LEFT_WRIST, RIGHT_WRIST -> ghostFullRobotModel.getForearm(segmentType.getSegmentSide());
+         case HEAD -> ghostFullRobotModel.getHead();
          case CHEST -> ghostFullRobotModel.getChest();
          case WAIST -> ghostFullRobotModel.getPelvis();
       };
@@ -729,6 +760,7 @@ public class RDXVRWholeBodyKinematicStreaming
          setStreamToController(streamToController.get(), true);
       }
       ImGui.checkbox(labels.get("Control Arms Only"), controlArmsOnly);
+      ImGui.checkbox(labels.get("Lock Pelvis"), lockPelvis);
       Set<String> connectedTrackers = vrContext.getAssignedTrackerRoles();
       if (connectedTrackers.contains(WAIST.getSegmentName()) &&
           connectedTrackers.contains(LEFT_ANKLE.getSegmentName()) &&
@@ -772,7 +804,7 @@ public class RDXVRWholeBodyKinematicStreaming
       for (RobotSide side : RobotSide.values)
       {
          ImGui.text(side.getCamelCaseName() + " Hand:");
-         if (ImGui.radioButton(labels.get("None"), handControlModes.get(side) == RDXHandControlMode.NONE))
+         if (ImGui.radioButton(labels.get("None", side.ordinal()), handControlModes.get(side) == RDXHandControlMode.NONE))
          {
             handControlModes.put(side, RDXHandControlMode.NONE);
          }
@@ -780,11 +812,11 @@ public class RDXVRWholeBodyKinematicStreaming
          {
             ImGui.beginDisabled();
          }
-         if (ImGui.radioButton(labels.get("Hand Configuration"), handControlModes.get(side) == RDXHandControlMode.HAND_CONFIGURATION))
+         if (ImGui.radioButton(labels.get("Hand Configuration", side.ordinal()), handControlModes.get(side) == RDXHandControlMode.HAND_CONFIGURATION))
          {
             handControlModes.put(side, RDXHandControlMode.HAND_CONFIGURATION);
          }
-         if (ImGui.radioButton(labels.get("Finger Streaming"), handControlModes.get(side) == RDXHandControlMode.FINGER_STREAMING))
+         if (ImGui.radioButton(labels.get("Finger Streaming", side.ordinal()), handControlModes.get(side) == RDXHandControlMode.FINGER_STREAMING))
          {
             handControlModes.put(side, RDXHandControlMode.FINGER_STREAMING);
          }
@@ -792,7 +824,7 @@ public class RDXVRWholeBodyKinematicStreaming
          {
             ImGui.endDisabled();
          }
-         if (ImGui.radioButton(labels.get("Load Bearing"), handControlModes.get(side) == RDXHandControlMode.LOAD_BEARING))
+         if (ImGui.radioButton(labels.get("Load Bearing", side.ordinal()), handControlModes.get(side) == RDXHandControlMode.LOAD_BEARING))
          {
             handControlModes.put(side, RDXHandControlMode.LOAD_BEARING);
          }
@@ -968,5 +1000,15 @@ public class RDXVRWholeBodyKinematicStreaming
    public RDXMultiBodyGraphic getGhostRobotGraphic()
    {
       return ghostRobotGraphic;
+   }
+
+   public boolean getStreamToController()
+   {
+      return streamToController.get();
+   }
+
+   public boolean getShowGhosts()
+   {
+      return showGhosts.get();
    }
 }

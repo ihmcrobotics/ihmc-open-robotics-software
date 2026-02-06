@@ -22,8 +22,9 @@ import us.ihmc.mecano.tools.MecanoTestTools;
 import us.ihmc.robotics.screwTheory.MovingMidFootZUpGroundFrame;
 import us.ihmc.robotics.screwTheory.MovingZUpFrame;
 import us.ihmc.robotics.screwTheory.NumericalMovingReferenceFrame;
-import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class MovingWalkingReferenceFrameTest
 {
@@ -39,7 +40,7 @@ public class MovingWalkingReferenceFrameTest
       Random random = new Random(23423L);
 
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      SettableDoubleProvider timeProvider = new SettableDoubleProvider();
+      YoDouble timeProvider = new YoDouble("time", new YoRegistry(""));
       double updateDT = 1.0e-8;
 
       MovingReferenceFrame frameOne = createMovingReferenceFrame("frameOne", worldFrame, random, timeProvider);

@@ -171,7 +171,8 @@ public abstract class ImageSensor implements AutoCloseable
       return grabThread;
    }
 
-   private void grabAndNotify()
+   /** Call to grab a frame without using the thread. */
+   public void grabAndNotify()
    {
       // If the sensor is not running, try to start the sensor
       if (!isSensorRunning() && !startSensor())
@@ -197,6 +198,9 @@ public abstract class ImageSensor implements AutoCloseable
             imageQueues.get(imageKey).forEach(queue ->
             {
                RawImage image = getImage(imageKey);
+
+               if (image == null)
+                   return;
 
                if (!queue.offer(image))
                {

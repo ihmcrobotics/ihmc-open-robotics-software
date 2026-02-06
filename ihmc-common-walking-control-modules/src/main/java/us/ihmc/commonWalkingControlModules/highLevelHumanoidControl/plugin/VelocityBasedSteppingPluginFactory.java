@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.*;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.*;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -28,6 +29,7 @@ public class VelocityBasedSteppingPluginFactory implements HumanoidSteppingPlugi
 {
    private final RequiredFactoryField<YoRegistry> registryField = new RequiredFactoryField<>("registry");
    private final OptionalFactoryField<StepGeneratorCommandInputManager> csgCommandInputManagerField = new OptionalFactoryField<>("csgCommandInputManagerField");
+   private final OptionalFactoryField<StatusMessageOutputManager> csgStatusMessageOutputManagerField = new OptionalFactoryField<>("csgStatusMessageOutputManagerField");
    private final OptionalFactoryField<VelocityBasedSteppingParameters> inputParametersField = new OptionalFactoryField<>("inputParametersField");
    private final List<Updatable> updatables = new ArrayList<>();
 
@@ -56,6 +58,11 @@ public class VelocityBasedSteppingPluginFactory implements HumanoidSteppingPlugi
    public void setStepGeneratorCommandInputManager(StepGeneratorCommandInputManager commandInputManager)
    {
       this.csgCommandInputManagerField.set(commandInputManager);
+   }
+
+   public void setStepGeneratorStatusMessageOutputManager(StatusMessageOutputManager statusMessageOutputManager)
+   {
+      this.csgStatusMessageOutputManagerField.set(statusMessageOutputManager);
    }
 
    @Override
@@ -89,13 +96,21 @@ public class VelocityBasedSteppingPluginFactory implements HumanoidSteppingPlugi
    }
 
    @Override
+   public StatusMessageOutputManager getStepGeneratorStatusMessageOutputManager()
+   {
+      if (!csgStatusMessageOutputManagerField.hasValue())
+         csgStatusMessageOutputManagerField.set(new StatusMessageOutputManager(StepGeneratorAPIDefinition.getStepGeneratorSupportedStatusMessages()));
+
+      return csgStatusMessageOutputManagerField.get();
+   }
+
+   @Override
    public VelocityBasedSteppingPlugin buildPlugin(FullHumanoidRobotModel robotModel,
                                                   CommonHumanoidReferenceFrames referenceFrames,
                                                   double updateDT,
                                                   WalkingControllerParameters walkingControllerParameters,
                                                   StatusMessageOutputManager walkingStatusMessageOutputManager,
                                                   CommandInputManager walkingCommandInputManager,
-                                                  YoGraphicsListRegistry yoGraphicsListRegistry,
                                                   SideDependentList<? extends ContactableBody> contactableFeet,
                                                   DoubleProvider timeProvider)
    {

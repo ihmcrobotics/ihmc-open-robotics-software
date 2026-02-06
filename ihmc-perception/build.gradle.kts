@@ -25,29 +25,16 @@ mainDependencies {
 
    // ffmpeg, openblas, opencv, zed-java-api come from the logger
 
-   val cudaVersion = "12.6-9.5-1.5.11-ihmc-2"
-   api("us.ihmc:cuda:$cudaVersion")
-   api("us.ihmc:cuda:$cudaVersion:linux-arm64")
-   api("us.ihmc:cuda:$cudaVersion:linux-x86_64")
-   api("us.ihmc:cuda:$cudaVersion:windows-x86_64")
-   val openclVersion = "3.0-1.5.11-ihmc-2"
-   api("us.ihmc:opencl:$openclVersion")
-   api("us.ihmc:opencl:$openclVersion:linux-arm64")
-   api("us.ihmc:opencl:$openclVersion:linux-x86_64")
-   api("us.ihmc:opencl:$openclVersion:windows-x86_64")
-   val spinnakerVersion = "4.0.0.116-1.5.11-ihmc-2"
-   api("us.ihmc:spinnaker:$spinnakerVersion")
-   api("us.ihmc:spinnaker:$spinnakerVersion:linux-x86_64")
-   api("us.ihmc:spinnaker:$spinnakerVersion:windows-x86_64")
-   val librealsense2Version = "2.53.1-1.5.11-ihmc-2"
+   val cudaVersion = "12.6-9.5-1.5.11"
+   api("org.bytedeco:cuda:$cudaVersion")
+   api("org.bytedeco:cuda:$cudaVersion:linux-arm64")
+   api("org.bytedeco:cuda:$cudaVersion:linux-x86_64")
+   api("org.bytedeco:cuda:$cudaVersion:windows-x86_64")
+   val librealsense2Version = "2.53.1-1.5.11-ihmc-3" // https://robotlabfiles.ihmc.us/repository/us/ihmc/librealsense2/2.53.1-1.5.11-ihmc-3/
    api("us.ihmc:librealsense2:$librealsense2Version")
    api("us.ihmc:librealsense2:$librealsense2Version:linux-arm64")
    api("us.ihmc:librealsense2:$librealsense2Version:linux-x86_64")
    api("us.ihmc:librealsense2:$librealsense2Version:windows-x86_64")
-   val hdf5Version = "1.14.3-1.5.11-ihmc-2"
-   api("us.ihmc:hdf5:$hdf5Version")
-   api("us.ihmc:hdf5:$hdf5Version:linux-x86_64")
-   api("us.ihmc:hdf5:$hdf5Version:windows-x86_64")
 
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:robot-environment-awareness:source")
@@ -64,6 +51,8 @@ testDependencies {
 }
 
 slamWrapperDependencies {
-   api("us.ihmc:javacpp:1.5.11-ihmc-2")
+   api("org.bytedeco:javacpp:1.5.11")
    api("us.ihmc:ihmc-java-toolkit:source")
 }
+
+app.entrypoint("IsaacROSFoundationPoseDemo", "us.ihmc.perception.demo.IsaacROSFoundationPoseDemo")

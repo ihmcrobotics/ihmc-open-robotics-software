@@ -249,7 +249,6 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
       double controlDT = controllerToolbox.getControlDT();
 
       ContactablePlaneBody contactableBody = controllerToolbox.getContactableBody(bodyToControl);
-      YoGraphicsListRegistry graphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       RigidBodyControlMode defaultControlMode = walkingControllerParameters.getDefaultControlModesForRigidBodies().get(bodyName);
       boolean enableFunctionGenerators = walkingControllerParameters.enableFunctionGeneratorMode(bodyName);
 
@@ -272,7 +271,6 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
                                                                     controllerToolbox.getPostureAdjustmentProvider(),
                                                                     yoTime,
                                                                     controlDT,
-                                                                    graphicsListRegistry,
                                                                     registry);
       manager.setGains(jointGainMap);
       manager.setWeights(jointspaceWeightMap, userModeWeightMap);
@@ -333,8 +331,7 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
                                     holdFootGains,
                                     toeOffFootGains,
                                     flamingoFootControlManagers,
-                                    registry,
-                                    controllerToolbox.getYoGraphicsListRegistry());
+                                    registry);
 
       String footName = fullRobotModel.getFoot(RobotSide.LEFT).getName();
       Vector3DReadOnly angularWeight = taskspaceAngularWeightMap.get(footName);
@@ -520,6 +517,8 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
          for (RigidBodyControlManager rigidBodyControlManager : rigidBodyManagerMapByBodyName.values())
             group.addChild(rigidBodyControlManager.getSCS2YoGraphics());
       }
+      if (naturalPostureManager != null)
+         group.addChild(naturalPostureManager.getSCS2YoGraphics());
       return group;
    }
 }

@@ -18,8 +18,10 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.simulation.scs2.RDXSCS2LogSession;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.scs2.session.SessionMode;
 import us.ihmc.scs2.session.log.LogDataReader;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 
 import java.awt.*;
 import java.io.File;
@@ -36,10 +38,12 @@ import java.util.function.BooleanSupplier;
 public class RDXLeRobotDatasetCreator
 {
    private final RDXSCS2LogSession logSession;
+   private final HumanoidJointNameMap jointMap;
+   private final HumanoidRobotSensorInformation sensorInformation;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private transient final ImString datasetName = new ImString(512);
+   private transient final ImInt imTaskID = new ImInt();
    private transient final ImString imTaskName = new ImString(512);
-   private transient final ImInt logPosition = new ImInt();
    private transient final ImBoolean removalSelectionMode = new ImBoolean();
    private boolean[] episodesToRemove;
    private List<Path> datasets;
@@ -48,9 +52,14 @@ public class RDXLeRobotDatasetCreator
    private final ImBoolean keepGenerating = new ImBoolean(false);
    private int mouseHoveringEpisode = -1;
 
-   public RDXLeRobotDatasetCreator(RDXSCS2LogSession logSession, RDXBaseUI baseUI)
+   public RDXLeRobotDatasetCreator(RDXSCS2LogSession logSession,
+                                   RDXBaseUI baseUI,
+                                   HumanoidJointNameMap jointMap,
+                                   HumanoidRobotSensorInformation sensorInformation)
    {
       this.logSession = logSession;
+      this.jointMap = jointMap;
+      this.sensorInformation = sensorInformation;
 
       RDXPanel panel = new RDXPanel("LeRobot Dataset Creator", this::renderImGuiWidgets, false, true);
       panel.addChild(new RDXPanel("Log Scrubber", this::renderLogScrubberWidgets));
@@ -86,7 +95,7 @@ public class RDXLeRobotDatasetCreator
                {
                   if (dataset == null || !dataset.getDirectory().equals(datasetPath))
                   {
-                     dataset = new LeRobotDataset(datasetPath);
+                     dataset = new LeRobotDataset(datasetPath, jointMap, sensorInformation);
                      dataset.loadData();
                      if (!dataset.getTaskNames().isEmpty())
                         imTaskName.set(dataset.getTaskNames().get(dataset.getTaskNames().size() - 1));
@@ -102,7 +111,7 @@ public class RDXLeRobotDatasetCreator
             if (ImGui.menuItem(labels.get("Create Dataset")))
             {
                File logDirectory = logSession.getSession().getLogDirectory();
-               dataset = new LeRobotDataset(logDirectory.toPath().resolve(datasetName.get().trim()));
+               dataset = new LeRobotDataset(logDirectory.toPath().resolve(datasetName.get().trim()), jointMap, sensorInformation);
                dataset.mkdirs();
                dataset.writeMetaJson();
                datasetName.clear();
@@ -132,10 +141,6 @@ public class RDXLeRobotDatasetCreator
          if (logSession.getFirstZEDScrubber() != null)
          {
             ImGui.text("ZED SVO fps: %.3f".formatted(logSession.getFirstZEDScrubber().getFps()));
-            if (ImGui.checkbox(labels.get("Record perfect timestamps"), dataset.getUsePerfectTimestamps()))
-            {
-               dataset.setUsePerfectTimestamps(!dataset.getUsePerfectTimestamps());
-            }
          }
          ImGui.text("Dataset FPS: %.2f".formatted(dataset.getFps()));
 
@@ -143,6 +148,9 @@ public class RDXLeRobotDatasetCreator
 
          ImGui.text("Current task name:");
          ImGuiTools.inputTextMultiline(labels.getHidden("taskName"), imTaskName);
+
+         ImGui.setNextItemWidth(100.0f);
+         ImGui.inputInt(labels.get("Auto Scrub Task ID Filter"), imTaskID);
 
          ImGui.text("Add episode:");
          ImGui.sameLine();
@@ -156,7 +164,7 @@ public class RDXLeRobotDatasetCreator
          if (ImGui.button(labels.get("Auto Scrub")))
          {
             keepGenerating.set(true);
-            generating = dataset.addEpisodesAutomatically(imTaskName.get().trim(), logSession.getSession(), keepGenerating::get);
+            generating = dataset.addEpisodesAutomatically(imTaskName.get().trim(), imTaskID.get(), logSession.getSession(), keepGenerating::get);
          }
          ImGui.endDisabled();
          if (keepGenerating.get())

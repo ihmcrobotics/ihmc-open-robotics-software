@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 
-import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,6 +30,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 public class AngularMomentumHandlerTest
 {
    private static final double epsilon = 1e-4;
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    @Test
    public void testThreeStepsWithoutCoMPlanner()
@@ -55,8 +54,7 @@ public class AngularMomentumHandlerTest
                                                                                                                  null,
                                                                                                                  null,
                                                                                                                  SettableContactStateProvider::new,
-                                                                                                                 registry,
-                                                                                                                 null);
+                                                                                                                 registry);
 
       DefaultParameterReader parameterReader = new DefaultParameterReader();
       parameterReader.readParametersInRegistry(registry);
@@ -279,8 +277,7 @@ public class AngularMomentumHandlerTest
                                                                                                                  null,
                                                                                                                  null,
                                                                                                                  SettableContactStateProvider::new,
-                                                                                                                 registry,
-                                                                                                                 null);
+                                                                                                                 registry);
 
       CoMTrajectoryPlanner comTrajectoryPlanner = new CoMTrajectoryPlanner(gravityZ, 1.0, registry);
 

@@ -41,6 +41,8 @@ import us.ihmc.robotics.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.scs2.definition.yoGraphic.SCS2YoGraphicHolder;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -48,7 +50,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-public class SwingOverPlanarRegionsTrajectoryExpander
+public class SwingOverPlanarRegionsTrajectoryExpander implements SCS2YoGraphicHolder
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final double[] swingWaypointProportions;
@@ -137,6 +139,11 @@ public class SwingOverPlanarRegionsTrajectoryExpander
    }
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+
+   public SwingOverPlanarRegionsTrajectoryExpander(WalkingControllerParameters walkingControllerParameters, YoRegistry parentRegistry)
+   {
+      this(walkingControllerParameters, parentRegistry, null);
+   }
 
    public SwingOverPlanarRegionsTrajectoryExpander(WalkingControllerParameters walkingControllerParameters,
                                                    YoRegistry parentRegistry,
@@ -949,5 +956,11 @@ public class SwingOverPlanarRegionsTrajectoryExpander
                                                       Point3DBasics pointOnTrajectoryToPack,
                                                       Point3DBasics collisionPointOnFootToPack,
                                                       Point3DBasics nearestPointInWorldToPack);
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      return twoWaypointSwingGenerator.getSCS2YoGraphics();
    }
 }

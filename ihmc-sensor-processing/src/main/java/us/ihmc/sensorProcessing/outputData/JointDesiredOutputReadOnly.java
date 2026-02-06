@@ -9,6 +9,29 @@ import us.ihmc.commons.MathTools;
  */
 public interface JointDesiredOutputReadOnly
 {
+   default boolean isEmpty()
+   {
+      //@formatter:off
+      return !hasDesiredTorque() &&
+             !hasDesiredPosition() &&
+             !hasDesiredVelocity() &&
+             !hasDesiredAcceleration() &&
+             !peekResetIntegratorsRequest() &&
+             !hasControlMode() &&
+             !hasLoadMode() &&
+             !hasStiffness() &&
+             !hasDamping() &&
+             !hasMasterGain() &&
+             !hasVelocityScaling() &&
+             !hasVelocityIntegrationBreakFrequency() &&
+             !hasPositionIntegrationBreakFrequency() &&
+             !hasPositionIntegrationMaxError() &&
+             !hasVelocityIntegrationMaxError() &&
+             !hasPositionFeedbackMaxError() &&
+             !hasVelocityFeedbackMaxError() &&
+             !hasMaxTorque();
+      //@formatter:on
+   }
 
    default boolean hasDesiredTorque()
    {
@@ -44,7 +67,7 @@ public interface JointDesiredOutputReadOnly
 
    /**
     * Returns true if a desired control mode was set for this joint.
-    * 
+    *
     * @see #getControlMode()
     */
 
@@ -75,7 +98,7 @@ public interface JointDesiredOutputReadOnly
 
    /**
     * Returns true if a desired stiffness was set for this joint.
-    * 
+    *
     * @see #getStiffness()
     */
    default boolean hasStiffness()
@@ -94,7 +117,7 @@ public interface JointDesiredOutputReadOnly
 
    /**
     * Returns true if a desired damping was set for this joint.
-    * 
+    *
     * @see #getDamping()
     */
    default boolean hasDamping()
@@ -113,7 +136,7 @@ public interface JointDesiredOutputReadOnly
 
    /**
     * Returns true if a master gain was set for this joint.
-    * 
+    *
     * @see #getMasterGain()
     */
    default boolean hasMasterGain()
@@ -134,7 +157,7 @@ public interface JointDesiredOutputReadOnly
 
    /**
     * Returns true if a velocity scaling was set for this joint.
-    * 
+    *
     * @see #getVelocityScaling()
     */
    default boolean hasVelocityScaling()
@@ -158,7 +181,7 @@ public interface JointDesiredOutputReadOnly
    /**
     * Returns true if a break frequency for the integration of the desired acceleration to a desired
     * velocity was set for this joint.
-    * 
+    *
     * @see #getVelocityIntegrationBreakFrequency()
     */
    default boolean hasVelocityIntegrationBreakFrequency()
@@ -177,7 +200,7 @@ public interface JointDesiredOutputReadOnly
    /**
     * Returns true if a break frequency for the integration of the desired acceleration to a desired
     * position was set for this joint.
-    * 
+    *
     * @see #getPositionIntegrationBreakFrequency()
     */
    default boolean hasPositionIntegrationBreakFrequency()
@@ -246,8 +269,7 @@ public interface JointDesiredOutputReadOnly
     * @return the maximum position error for the joint feedback control.
     */
    double getPositionFeedbackMaxError();
-   
-   
+
    /**
     * Return true if a maximum torque was set for this joint.
     * @return
@@ -256,10 +278,10 @@ public interface JointDesiredOutputReadOnly
    {
       return !Double.isNaN(getMaxTorque());
    }
-   
+
    /**
     * Gets the maximum torque applied by the feedback controller plus the feedforward torque. 
-    * 
+    *
     * @return the maximum torque applied by the feedback controller
     */
    double getMaxTorque();
@@ -267,7 +289,7 @@ public interface JointDesiredOutputReadOnly
    /**
     * Convenience for clamping the desired position with {@link #getPositionFeedbackMaxError()} if it
     * is available.
-    * 
+    *
     * @param currentPosition the current joint position that is to be used in the feedback controller.
     * @return the desired position clamped such that
     *         {@code |error| = Math.abs(getDesiredPosition() - currentPosition) <= getPositionFeedbackMaxError()}.
@@ -311,7 +333,7 @@ public interface JointDesiredOutputReadOnly
    /**
     * Convenience for clamping the desired velocity with {@link #getVelocityFeedbackMaxError()} if it
     * is available.
-    * 
+    *
     * @param currentVelocity the current joint velocity that is to be used in the feedback controller.
     * @return the desired velocity clamped such that
     *         {@code |error| = Math.abs(getDesiredVelocity() - currentVelocity) <= getVelocityFeedbackMaxError()}.

@@ -16,9 +16,33 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
             */
    public long sequence_id_;
    /**
-            * Height map message
+            * X coordinate of the center of the height map
             */
-   public perception_msgs.msg.dds.HeightMapMessage height_map_;
+   public double grid_center_x_;
+   /**
+            * Y coordinate of the center of the height map
+            */
+   public double grid_center_y_;
+   /**
+            * Width of the height map in meters
+            */
+   public double width_in_meters_;
+   /**
+            * Cell size in meters of an individual cell
+            */
+   public double cell_size_in_meters_;
+   /**
+            * Cells per axis
+            */
+   public int cells_per_axis_;
+   /**
+            * Height map in metric values
+            */
+   public us.ihmc.idl.IDLSequence.Float  height_map_;
+   /**
+            * Obstacle clearance score, on a 0 to 1 scale
+            */
+   public us.ihmc.idl.IDLSequence.Float  obstacle_clearance_score_;
    /**
             * Traversability score, on a 0 to 1 scale
             */
@@ -42,7 +66,10 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
 
    public TerrainMapMessage()
    {
-      height_map_ = new perception_msgs.msg.dds.HeightMapMessage();
+      height_map_ = new us.ihmc.idl.IDLSequence.Float (255000, "type_5");
+
+      obstacle_clearance_score_ = new us.ihmc.idl.IDLSequence.Float (255000, "type_5");
+
       traversability_score_ = new us.ihmc.idl.IDLSequence.Float (255000, "type_5");
 
       traversability_class_ = new us.ihmc.idl.IDLSequence.Byte (255000, "type_9");
@@ -65,7 +92,18 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
    {
       sequence_id_ = other.sequence_id_;
 
-      perception_msgs.msg.dds.HeightMapMessagePubSubType.staticCopy(other.height_map_, height_map_);
+      grid_center_x_ = other.grid_center_x_;
+
+      grid_center_y_ = other.grid_center_y_;
+
+      width_in_meters_ = other.width_in_meters_;
+
+      cell_size_in_meters_ = other.cell_size_in_meters_;
+
+      cells_per_axis_ = other.cells_per_axis_;
+
+      height_map_.set(other.height_map_);
+      obstacle_clearance_score_.set(other.obstacle_clearance_score_);
       traversability_score_.set(other.traversability_score_);
       traversability_class_.set(other.traversability_class_);
       snapped_normal_x_data_.set(other.snapped_normal_x_data_);
@@ -88,13 +126,97 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
       return sequence_id_;
    }
 
+   /**
+            * X coordinate of the center of the height map
+            */
+   public void setGridCenterX(double grid_center_x)
+   {
+      grid_center_x_ = grid_center_x;
+   }
+   /**
+            * X coordinate of the center of the height map
+            */
+   public double getGridCenterX()
+   {
+      return grid_center_x_;
+   }
 
    /**
-            * Height map message
+            * Y coordinate of the center of the height map
             */
-   public perception_msgs.msg.dds.HeightMapMessage getHeightMap()
+   public void setGridCenterY(double grid_center_y)
+   {
+      grid_center_y_ = grid_center_y;
+   }
+   /**
+            * Y coordinate of the center of the height map
+            */
+   public double getGridCenterY()
+   {
+      return grid_center_y_;
+   }
+
+   /**
+            * Width of the height map in meters
+            */
+   public void setWidthInMeters(double width_in_meters)
+   {
+      width_in_meters_ = width_in_meters;
+   }
+   /**
+            * Width of the height map in meters
+            */
+   public double getWidthInMeters()
+   {
+      return width_in_meters_;
+   }
+
+   /**
+            * Cell size in meters of an individual cell
+            */
+   public void setCellSizeInMeters(double cell_size_in_meters)
+   {
+      cell_size_in_meters_ = cell_size_in_meters;
+   }
+   /**
+            * Cell size in meters of an individual cell
+            */
+   public double getCellSizeInMeters()
+   {
+      return cell_size_in_meters_;
+   }
+
+   /**
+            * Cells per axis
+            */
+   public void setCellsPerAxis(int cells_per_axis)
+   {
+      cells_per_axis_ = cells_per_axis;
+   }
+   /**
+            * Cells per axis
+            */
+   public int getCellsPerAxis()
+   {
+      return cells_per_axis_;
+   }
+
+
+   /**
+            * Height map in metric values
+            */
+   public us.ihmc.idl.IDLSequence.Float  getHeightMap()
    {
       return height_map_;
+   }
+
+
+   /**
+            * Obstacle clearance score, on a 0 to 1 scale
+            */
+   public us.ihmc.idl.IDLSequence.Float  getObstacleClearanceScore()
+   {
+      return obstacle_clearance_score_;
    }
 
 
@@ -162,7 +284,20 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-      if (!this.height_map_.epsilonEquals(other.height_map_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.grid_center_x_, other.grid_center_x_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.grid_center_y_, other.grid_center_y_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.width_in_meters_, other.width_in_meters_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.cell_size_in_meters_, other.cell_size_in_meters_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.cells_per_axis_, other.cells_per_axis_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.height_map_, other.height_map_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.obstacle_clearance_score_, other.obstacle_clearance_score_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.traversability_score_, other.traversability_score_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.traversability_class_, other.traversability_class_, epsilon)) return false;
@@ -188,7 +323,18 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
+      if(this.grid_center_x_ != otherMyClass.grid_center_x_) return false;
+
+      if(this.grid_center_y_ != otherMyClass.grid_center_y_) return false;
+
+      if(this.width_in_meters_ != otherMyClass.width_in_meters_) return false;
+
+      if(this.cell_size_in_meters_ != otherMyClass.cell_size_in_meters_) return false;
+
+      if(this.cells_per_axis_ != otherMyClass.cells_per_axis_) return false;
+
       if (!this.height_map_.equals(otherMyClass.height_map_)) return false;
+      if (!this.obstacle_clearance_score_.equals(otherMyClass.obstacle_clearance_score_)) return false;
       if (!this.traversability_score_.equals(otherMyClass.traversability_score_)) return false;
       if (!this.traversability_class_.equals(otherMyClass.traversability_class_)) return false;
       if (!this.snapped_normal_x_data_.equals(otherMyClass.snapped_normal_x_data_)) return false;
@@ -206,8 +352,20 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
       builder.append("TerrainMapMessage {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
+      builder.append("grid_center_x=");
+      builder.append(this.grid_center_x_);      builder.append(", ");
+      builder.append("grid_center_y=");
+      builder.append(this.grid_center_y_);      builder.append(", ");
+      builder.append("width_in_meters=");
+      builder.append(this.width_in_meters_);      builder.append(", ");
+      builder.append("cell_size_in_meters=");
+      builder.append(this.cell_size_in_meters_);      builder.append(", ");
+      builder.append("cells_per_axis=");
+      builder.append(this.cells_per_axis_);      builder.append(", ");
       builder.append("height_map=");
       builder.append(this.height_map_);      builder.append(", ");
+      builder.append("obstacle_clearance_score=");
+      builder.append(this.obstacle_clearance_score_);      builder.append(", ");
       builder.append("traversability_score=");
       builder.append(this.traversability_score_);      builder.append(", ");
       builder.append("traversability_class=");

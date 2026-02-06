@@ -1,32 +1,21 @@
 package us.ihmc.behaviors.behaviorTree;
 
 import behavior_msgs.msg.dds.BehaviorTreeRootNodeDefinitionMessage;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class BehaviorTreeRootNodeDefinition extends BehaviorTreeNodeDefinition
 {
-   // Seems to be nothing special here so far TODO Does that mean we delete it?
-
-   public BehaviorTreeRootNodeDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public BehaviorTreeRootNodeDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, DRCRobotModel robotModel)
    {
-      super(crdtInfo, saveFileDirectory);
-   }
-
-   /** We don't want to save the root node. */
-   @Override
-   public void saveToFile()
-   {
-      for (BehaviorTreeNodeDefinition child : getChildren())
-      {
-         child.saveToFile();
-      }
+      super(null, crdtInfo, saveFileDirectory, robotModel);
    }
 
    @Override
    public boolean hasChanges()
    {
-      return false;
+      return false; // Root node cannot be saved
    }
 
    public void toMessage(BehaviorTreeRootNodeDefinitionMessage message)
@@ -37,5 +26,17 @@ public class BehaviorTreeRootNodeDefinition extends BehaviorTreeNodeDefinition
    public void fromMessage(BehaviorTreeRootNodeDefinitionMessage message)
    {
       super.fromMessage(message.getDefinition());
+   }
+
+   // Getters are in here so there's not getters in base node for root stuff
+
+   public WorkspaceResourceDirectory getSaveFileDirectory()
+   {
+      return saveFileDirectory;
+   }
+
+   public DRCRobotModel getRobotModel()
+   {
+      return robotModel;
    }
 }

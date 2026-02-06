@@ -169,7 +169,6 @@ public abstract class HumanoidStepReachabilityCalculator
                                                                   statusOutputManager,
                                                                   desiredFullRobotModel,
                                                                   updateDT,
-                                                                  yoGraphicsListRegistry,
                                                                   mainRegistry);
       commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(desiredFullRobotModel, toolboxController.getDesiredReferenceFrames()));
       toolboxController.setInitialRobotConfiguration(robotModel);

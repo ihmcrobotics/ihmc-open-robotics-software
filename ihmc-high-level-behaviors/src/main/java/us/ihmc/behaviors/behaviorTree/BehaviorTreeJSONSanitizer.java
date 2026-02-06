@@ -2,10 +2,10 @@ package us.ihmc.behaviors.behaviorTree;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.lang3.mutable.MutableObject;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
-import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
@@ -25,13 +25,13 @@ import java.nio.file.Path;
  */
 public class BehaviorTreeJSONSanitizer
 {
-   private final DefaultFootstepPlannerParametersReadOnly defaultFootstepPlannerParameters;
    private final CRDTInfo crdtInfo;
    private final WorkspaceResourceDirectory treeFilesDirectory;
+   private final DRCRobotModel robotModel;
 
-   public BehaviorTreeJSONSanitizer(Class<?> classForFindingSourceSetDirectory, DefaultFootstepPlannerParametersReadOnly defaultFootstepPlannerParameters)
+   public BehaviorTreeJSONSanitizer(Class<?> classForFindingSourceSetDirectory, DRCRobotModel robotModel)
    {
-      this.defaultFootstepPlannerParameters = defaultFootstepPlannerParameters;
+      this.robotModel = robotModel;
 
       ROS2Node ros2Node = new ROS2NodeBuilder().specialTransportMode(SpecialTransportMode.INTRAPROCESS_ONLY).build("json_sanitizer");
       ROS2PeerClockOffsetEstimator peerClockEstimator = new ROS2PeerClockOffsetEstimator(ros2Node);
@@ -71,11 +71,12 @@ public class BehaviorTreeJSONSanitizer
          {
             // Try loading from file first, since maybe the user saved a new version
             Path filesystemFile = file.getFilesystemFile();
+            BehaviorTreeNodeDefinition finalParent = parentNode;
             if (filesystemFile != null && Files.exists(filesystemFile))
             {
                LogTools.info("Loading from file: {}", filesystemFile);
                JSONFileTools.load(file, childJsonNode ->
-                     loadedNode.setValue(loadFromFile(file, childJsonNode, parentNode)));
+                     loadedNode.setValue(loadFromFile(file, childJsonNode, finalParent)));
             }
             else
             {
@@ -84,7 +85,7 @@ public class BehaviorTreeJSONSanitizer
                {
                   LogTools.info("Loading from resource: {}", classpathResource);
                   JSONFileTools.load(classpathResource, childJsonNode ->
-                        loadedNode.setValue(loadFromFile(file, childJsonNode, parentNode)));
+                        loadedNode.setValue(loadFromFile(file, childJsonNode, finalParent)));
                }
             }
          }
@@ -103,10 +104,11 @@ public class BehaviorTreeJSONSanitizer
 
          Class<?> definitionType = BehaviorTreeDefinitionRegistry.getClassFromTypeName(typeName);
 
-         BehaviorTreeNodeDefinition node = BehaviorTreeDefinitionBuilder.createNode(definitionType,
-                                                                                    crdtInfo,
-                                                                                    treeFilesDirectory,
-                                                                                    defaultFootstepPlannerParameters);
+         if (parentNode == null)
+            parentNode = BehaviorTreeDefinitionBuilder.createRootNode(crdtInfo, treeFilesDirectory, robotModel);
+
+         BehaviorTreeRootNodeDefinition rootNode = BehaviorTreeTools.findRootNode(parentNode);
+         BehaviorTreeNodeDefinition node = BehaviorTreeDefinitionBuilder.createNode(definitionType, rootNode);
 
          node.loadFromFile(jsonNode);
 
@@ -136,11 +138,8 @@ public class BehaviorTreeJSONSanitizer
 
          LogTools.info("Creating node: {}", node.getName());
 
-         if (parentNode != null)
-         {
-            node.setParent(parentNode);
-            parentNode.getChildren().add(parentNode.getChildren().size(), node);
-         }
+         node.setParent(parentNode);
+         parentNode.getChildren().add(parentNode.getChildren().size(), node);
 
          JSONTools.forEachArrayElement(jsonNode, "children", childJsonNode ->
          {

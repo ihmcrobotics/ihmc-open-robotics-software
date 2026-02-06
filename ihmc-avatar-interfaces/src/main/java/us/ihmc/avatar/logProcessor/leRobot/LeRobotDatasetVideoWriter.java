@@ -63,7 +63,7 @@ public class LeRobotDatasetVideoWriter
       ExceptionTools.handle(() -> recorder.start(), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
    }
 
-   public void writeFrame(long videoTimestampMs, LeRobotDatasetEpisodeStatistics statistics, ZEDSVOScrubber zedSVOScrubber)
+   public void writeFrame(LeRobotDatasetEpisodeStatistics statistics, ZEDSVOScrubber zedSVOScrubber)
    {
       int imageHeight = zedSVOScrubber.getImageHeight();
       int imageWidth = zedSVOScrubber.getImageWidth();
@@ -104,7 +104,6 @@ public class LeRobotDatasetVideoWriter
       frame.opaque = croppedYuv420;
       cropSize.close();
 
-      recorder.setTimestamp(videoTimestampMs);
       ExceptionTools.handle(() -> recorder.record(frame, avutil.AV_PIX_FMT_YUV420P), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
       frame.close();
    }

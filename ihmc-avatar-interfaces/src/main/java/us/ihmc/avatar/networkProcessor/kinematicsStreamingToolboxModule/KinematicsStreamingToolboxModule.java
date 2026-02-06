@@ -70,11 +70,21 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
                                            boolean startYoVariableServer,
                                            YoRegistry childRegistry) // optional child registry to share the server
    {
+      this(robotModel, parameters, startYoVariableServer, childRegistry, null);
+   }
+
+   public KinematicsStreamingToolboxModule(DRCRobotModel robotModel,
+                                           KinematicsStreamingToolboxParameters parameters,
+                                           boolean startYoVariableServer,
+                                           YoRegistry childRegistry,  // optional child registry to share the server
+                                           ROS2Node ros2Node) // ros2 node to use instead of creating one
+   {
       super(robotModel.getSimpleRobotName(),
             robotModel.createFullRobotModel(),
             robotModel.getLogModelProvider(),
             startYoVariableServer,
-            (int) (parameters.getToolboxUpdatePeriod() * 1000));
+            (int) (parameters.getToolboxUpdatePeriod() * 1000),
+            ros2Node);
 
       setTimeWithoutInputsBeforeGoingToSleep(parameters.getTimeThresholdForSleeping());
       controller = new KinematicsStreamingToolboxController(commandInputManager,
@@ -82,8 +92,8 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
                                                             parameters,
                                                             fullRobotModel,
                                                             robotModel,
-                                                            yoGraphicsListRegistry,
                                                             registry);
+      graphicGroupDefinition.addChild(controller.getSCS2YoGraphics());
       controller.setRobotStateUpdater(robotStateUpdater);
       controller.setCollisionModel(robotModel.getHumanoidRobotKinematicsCollisionModel());
       List<String> inactiveJoints = parameters.getInactiveJoints();

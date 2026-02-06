@@ -9,7 +9,7 @@ import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.sensors.CameraIntrinsics;
 import us.ihmc.perception.imageMessage.PixelFormat;
 
 import javax.annotation.Nullable;
@@ -430,6 +430,11 @@ public class RawImage
    public boolean isAvailable()
    {
       return numberOfReferences.get() > 0;
+   }
+
+   public int getReferenceCount()
+   {
+      return numberOfReferences.get();
    }
 
    public RawImage get()

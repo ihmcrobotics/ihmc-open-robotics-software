@@ -40,13 +40,11 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
    private static final double maxSwingSpeed = 1.0;
 
    public FootstepDataListWithSwingOverTrajectoriesAssembler(HumanoidReferenceFrames humanoidReferenceFrames,
-                                                             WalkingControllerParameters walkingControllerParameters, YoRegistry parentRegistry,
-                                                             YoGraphicsListRegistry graphicsListRegistry)
+                                                             WalkingControllerParameters walkingControllerParameters, YoRegistry parentRegistry)
    {
       this.humanoidReferenceFrames = humanoidReferenceFrames;
 
-      swingOverPlanarRegionsTrajectoryExpander = new SwingOverPlanarRegionsTrajectoryExpander(walkingControllerParameters, parentRegistry,
-                                                                                              graphicsListRegistry);
+      swingOverPlanarRegionsTrajectoryExpander = new SwingOverPlanarRegionsTrajectoryExpander(walkingControllerParameters, parentRegistry);
 
       stanceFootPose = new FramePose3D();
       swingStartPose = new FramePose3D();
