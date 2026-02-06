@@ -145,6 +145,7 @@ public class QuickFootstepPlanner
             swingThisSide = !swingThisSide;
 
          // TODO: if going sideways and swinging furthest, we catch up to stance foot instead of passing it
+         //     catch up foot goes closer to stance foot at sidewaysness 1.0, farther towards 0.5
          //   Also, if sideways and stepping with closest, we step to full idealStepLength instead of 60%
          //    maybe scale the 60% to 100% with sidewaysness
 
