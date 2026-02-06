@@ -85,7 +85,7 @@ public class HeightMapICPCalculator2
                                                                                    (float) heightMapParameters.getCellSize(),
                                                                                    0.0f);
 
-      updateInternal(flattenedLocalMap.data(), flattenedGlobalMap.pointCount(), flattenedGlobalMap.data(), flattenedGlobalMap.pointCount());
+      updateInternal(flattenedLocalMap.data(), flattenedLocalMap.pointCount(), flattenedGlobalMap.data(), flattenedGlobalMap.pointCount());
    }
 
    public void updateInternal(FloatPointer cpuLocalDataPointer, int localPoints, FloatPointer cpuGlobalDataPointer, int globalPoints)
