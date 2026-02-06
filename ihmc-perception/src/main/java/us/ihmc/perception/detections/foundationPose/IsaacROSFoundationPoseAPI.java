@@ -4,6 +4,7 @@ import ihmc_common_msgs.msg.dds.Box3DMessage;
 import perception_msgs.msg.dds.FoundationPoseParameters;
 import sensor_msgs.msg.dds.CameraInfo;
 import sensor_msgs.msg.dds.Image;
+import std_msgs.msg.dds.Byte;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
@@ -37,6 +38,7 @@ public class IsaacROSFoundationPoseAPI
 
    // IHMC topics
    public static final ROS2Topic<Box3DMessage> IHMC_RESULT = FOUNDATION_POSE_TOPIC.withSuffix("ihmc/result").withType(Box3DMessage.class);
+   public static final ROS2Topic<Byte> IHMC_STATE = FOUNDATION_POSE_TOPIC.withSuffix("ihmc/state").withType(Byte.class);
    public static final ROS2Topic<FoundationPoseParameters> IHMC_PARAMETERS = FOUNDATION_POSE_TOPIC.withSuffix("ihmc/parameters")
                                                                                                   .withType(FoundationPoseParameters.class);
 }
