@@ -129,12 +129,16 @@ public class RDXQuickFootstepPlannerDemo
             for (RobotSide side : RobotSide.values)
                ImGui.checkbox("Goal " + side.getPascalCaseName() + " Gizmo", goalGizmos.get(side).getSelected());
 
-            ImGui.text("Stance footsteps: ");
             for (RobotSide side : RobotSide.values)
                ImGui.text("Stance " + side + ": " + stanceGizmos.get(side).getPoseGizmo().getTransformToParent().getTranslation()
                           + "  Yaw: (%.3f%s)".formatted(Math.toDegrees(stanceGizmos.get(side).getPoseGizmo().getTransformToParent().getRotation().getYaw()), EuclidCoreMissingTools.DEGREE_SYMBOL));
             ImGui.text("Stance distance: %.3f".formatted(stanceGizmos.get(RobotSide.LEFT).getPoseGizmo().getPose().getPosition()
                                                                .distance(stanceGizmos.get(RobotSide.RIGHT).getPoseGizmo().getPose().getPosition())));
+            for (RobotSide side : RobotSide.values)
+               ImGui.text("Goal " + side + ": " + goalGizmos.get(side).getPoseGizmo().getTransformToParent().getTranslation()
+                          + "  Yaw: (%.3f%s)".formatted(Math.toDegrees(goalGizmos.get(side).getPoseGizmo().getTransformToParent().getRotation().getYaw()), EuclidCoreMissingTools.DEGREE_SYMBOL));
+            ImGui.text("Goal distance: %.3f".formatted(goalGizmos.get(RobotSide.LEFT).getPoseGizmo().getPose().getPosition()
+                                                             .distance(goalGizmos.get(RobotSide.RIGHT).getPoseGizmo().getPose().getPosition())));
 
             ImGui.text("Planned Footsteps: " + footstepPlan.size());
             for (int i = 0; i < footstepPlan.size(); i++)
@@ -182,9 +186,9 @@ public class RDXQuickFootstepPlannerDemo
                visualModels.add(RDXModelBuilder.buildModelInstance(builder ->
                {
                   builder.addSphere(0.02f, planner.getGoalMid().getPosition(), Color.PURPLE);
-                  builder.addLine(planner.getStanceMid().getPosition(), planner.getGoalMid().getPosition(), 0.01, Color.WHITE);
+                  builder.addLine(planner.getStanceMid().getPosition(), planner.getApproachGoalMid(), 0.01, Color.WHITE);
                   builder.addLine(planner.getOppositeStance(), planner.getOppositeStanceMidlineProjection(), 0.01, Color.OLIVE);
-//                  builder.addLine(planner.getGoalMid().getPosition(), planner.getApproachGoalMid(), 0.01, Color.CHARTREUSE);
+                  builder.addLine(planner.getGoalMid().getPosition(), planner.getApproachGoalMid(), 0.01, Color.CHARTREUSE);
 
                   float r = 0.5294118f;
                   float g = 0.80784315f;
