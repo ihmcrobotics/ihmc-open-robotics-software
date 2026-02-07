@@ -133,6 +133,8 @@ public class RDXQuickFootstepPlannerDemo
             for (RobotSide side : RobotSide.values)
                ImGui.text("Stance " + side + ": " + stanceGizmos.get(side).getPoseGizmo().getTransformToParent().getTranslation()
                           + "  Yaw: (%.3f%s)".formatted(Math.toDegrees(stanceGizmos.get(side).getPoseGizmo().getTransformToParent().getRotation().getYaw()), EuclidCoreMissingTools.DEGREE_SYMBOL));
+            ImGui.text("Stance distance: %.3f".formatted(stanceGizmos.get(RobotSide.LEFT).getPoseGizmo().getPose().getPosition()
+                                                               .distance(stanceGizmos.get(RobotSide.RIGHT).getPoseGizmo().getPose().getPosition())));
 
             ImGui.text("Planned Footsteps: " + footstepPlan.size());
             for (int i = 0; i < footstepPlan.size(); i++)

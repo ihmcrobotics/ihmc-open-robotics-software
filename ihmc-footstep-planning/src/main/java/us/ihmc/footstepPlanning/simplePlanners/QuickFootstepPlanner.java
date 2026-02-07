@@ -24,6 +24,7 @@ import java.util.List;
  */
 public class QuickFootstepPlanner
 {
+   private int stepIndex;
    private final Pose3D swingEnd = new Pose3D();
    private RobotSide footToSwing = RobotSide.LEFT;
    private final Line3D stanceToGoalLine = new Line3D();
@@ -32,7 +33,7 @@ public class QuickFootstepPlanner
    private final Pose3D goalMid = new Pose3D();
    private final Point3D approachGoalMid = new Point3D();
    private final Point3D oppositeStance = new Point3D();
-   private final Point3D oppositeStanceMidlineProjection = new Point3D();
+   private final SideDependentList<Point3D> midlineProjections = new SideDependentList<>(side -> new Point3D());
    private final Point3D midlinePoint = new Point3D();
    private final Vector3D oppositeStanceToProjection = new Vector3D();
    private boolean transistionToGoal;
@@ -43,23 +44,16 @@ public class QuickFootstepPlanner
    {
       List<Pair<RobotSide, Pose3D>> footstepPlan = new ArrayList<>();
       var currentStances = new SideDependentList<>(side -> new Pose3D(stances.get(side)));
-
-      boolean reachedGoal = false;
-      int plannedSteps = 0;
-      int maxPlannedSteps = 100;
-
-      while (!reachedGoal && plannedSteps < maxPlannedSteps)
+      for (stepIndex = 0; stepIndex < 100; stepIndex++)
       {
-         reachedGoal = planStep(currentStances, goals);
-
-         if (!reachedGoal)
+         if (!planStep(currentStances, goals))
          {
             footstepPlan.add(new Pair<>(footToSwing, new Pose3D(swingEnd)));
             currentStances.get(footToSwing).set(swingEnd);
             stepPlannedCallback.run();
          }
-
-         plannedSteps++;
+         else
+            break;
       }
 
       return footstepPlan;
@@ -78,8 +72,8 @@ public class QuickFootstepPlanner
       if (atGoals.get(RobotSide.LEFT) && atGoals.get(RobotSide.RIGHT))
          return true;
 
-      double idealStepLength = 0.4;
-      double idealStepYaw = Math.toRadians(35.0);
+      double stepLength = 0.4;
+      double stepYaw = Math.toRadians(35.0);
       for (RobotSide side : RobotSide.values) // Step directly to goals if possible
       {
          if (!atGoals.get(side)) // One foot might already be at the goal
@@ -88,9 +82,9 @@ public class QuickFootstepPlanner
             double oppositeStanceYawToGoal = Math.abs(goals.get(side).getOrientation().distance(stances.get(side.getOppositeSide()).getOrientation()));
 
             // Avoid erroring out if goal feet are farther apart than the step length
-            double allowedLength = Math.max(idealStepLength, goals.get(side).getPosition().distance(goals.get(side.getOppositeSide()).getPosition()));
+            double allowedLength = Math.max(stepLength, goals.get(side).getPosition().distance(goals.get(side.getOppositeSide()).getPosition()));
             // Avoid erroring out if goal feet are more yawed than the step yaw
-            double allowedYaw = Math.max(idealStepYaw,
+            double allowedYaw = Math.max(stepYaw,
                                          Math.abs(goals.get(side).getOrientation().distance(stances.get(side.getOppositeSide()).getOrientation())));
 
             boolean stepDirectlyToGoal = oppositeStanceDistanceToGoal <= allowedLength && oppositeStanceYawToGoal <= allowedYaw;
@@ -119,7 +113,6 @@ public class QuickFootstepPlanner
          }
       }
 
-      double stepAlongMidline = idealStepLength * 0.6;
       stanceMid.interpolate(stances.get(RobotSide.LEFT), stances.get(RobotSide.RIGHT), 0.5);
       goalMid.interpolate(goals.get(RobotSide.LEFT), goals.get(RobotSide.RIGHT), 0.5);
       stanceToGoalLine.set(stanceMid.getPosition(), goalMid.getPosition());
@@ -134,37 +127,40 @@ public class QuickFootstepPlanner
       stanceMid.getOrientation().transform(stanceMidForward);
       sidewaysness = 1.0 - (2.0 / Math.PI) * Math.abs(Math.asin(stanceMidForward.dot(stanceToGoal)));
 
-      SideDependentList<Double> distancesToGoalMid = new SideDependentList<>(side -> stances.get(side).getPosition().distance(goalMid.getPosition()));
+      for (RobotSide side : RobotSide.values)
+         midlineProjections.get(side).set(stanceToGoalLine.orthogonalProjectionCopy(stances.get(side).getPosition()));
+      SideDependentList<Double> distancesToGoalMid = new SideDependentList<>(side -> midlineProjections.get(side).distance(goalMid.getPosition()));
+
       for (RobotSide side : RobotSide.values) // Take a step towards the goal
       {
          // Choose swing foot -- furthest foot from goal
-         boolean swingThisSide = distancesToGoalMid.get(side) >= distancesToGoalMid.get(side.getOppositeSide());
+         boolean isFurthest = distancesToGoalMid.get(side) >= distancesToGoalMid.get(side.getOppositeSide());
+         double stanceDistance = midlineProjections.get(side).distance(midlineProjections.get(side.getOppositeSide()));
 
          // When walking sideways, if feet are close together, swing foot closest to goal instead
-         if (sidewaysness > 0.5 && stances.get(side).getPosition().distance(stances.get(side.getOppositeSide()).getPosition()) < idealStepLength * 0.35)
-            swingThisSide = !swingThisSide;
-
-         // TODO: if going sideways and swinging furthest, we catch up to stance foot instead of passing it
-         //     catch up foot goes closer to stance foot at sidewaysness 1.0, farther towards 0.5
-         //   Also, if sideways and stepping with closest, we step to full idealStepLength instead of 60%
-         //    maybe scale the 60% to 100% with sidewaysness
-
-         if (swingThisSide)
+         if (sidewaysness > 0.5 ? (stanceDistance < 0.3) != isFurthest : isFurthest)
          {
             footToSwing = side;
-
             oppositeStance.set(stances.get(side.getOppositeSide()).getPosition());
-            oppositeStanceMidlineProjection.set(stanceToGoalLine.orthogonalProjectionCopy(oppositeStance));
 
-            // Scale down step length as we approach goal to avoid small final steps
-            double transitionDistance = 2.0 * idealStepLength * 0.6;
-            transistionToGoal = oppositeStanceMidlineProjection.distance(goalMid.getPosition()) < transitionDistance;
-            if (transistionToGoal)
-               stepAlongMidline = oppositeStanceMidlineProjection.distance(goalMid.getPosition()) / 2.0;
+            if (sidewaysness > 0.5 && isFurthest) // Swing up to stance foot
+            {
+               double x0 = 0.5, y0 = 0.24; // Feet farther apart when diagonal
+               double x1 = 1.0, y1 = 0.18; // Closer when straight sideways
+               double behindStanceFoot = y0 + (sidewaysness - x0) * (y1 - y0) / (x1 - x0);
+               midlinePoint.scaleAdd(-behindStanceFoot, directionToGoal, midlineProjections.get(side.getOppositeSide()));
+            }
+            else // Normal -- swing past stance foot
+            {
+               double stepAlongMidline = stepLength * (0.6 + 0.3 * sidewaysness);
+               // Scale down step length as we approach goal to avoid small final steps
+               transistionToGoal = distancesToGoalMid.get(side.getOppositeSide()) < 2.0 * stepAlongMidline;
+//               if (transistionToGoal)
+//                  stepAlongMidline = oppositeStanceMidlineProjection.distance(goalMid.getPosition()) / 2.0;
+               midlinePoint.scaleAdd(stepAlongMidline, directionToGoal, midlineProjections.get(side.getOppositeSide()));
+            }
 
-            midlinePoint.scaleAdd(stepAlongMidline, directionToGoal, oppositeStanceMidlineProjection);
-
-            oppositeStanceToProjection.sub(oppositeStanceMidlineProjection, stances.get(side.getOppositeSide()).getPosition());
+            oppositeStanceToProjection.sub(midlineProjections.get(side.getOppositeSide()), stances.get(side.getOppositeSide()).getPosition());
             oppositeStanceToProjection.normalize();
 
             double targetDistanceFromLine = (1.0 - sidewaysness) * 0.12;
@@ -238,9 +234,14 @@ public class QuickFootstepPlanner
       return oppositeStance;
    }
 
+   public SideDependentList<Point3D> getMidlineProjections()
+   {
+      return midlineProjections;
+   }
+
    public Point3D getOppositeStanceMidlineProjection()
    {
-      return oppositeStanceMidlineProjection;
+      return midlineProjections.get(footToSwing.getOppositeSide());
    }
 
    public boolean getTransistionToGoal()
