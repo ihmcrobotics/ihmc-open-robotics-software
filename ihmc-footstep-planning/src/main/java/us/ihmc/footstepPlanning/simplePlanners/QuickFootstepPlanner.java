@@ -1,7 +1,7 @@
 package us.ihmc.footstepPlanning.simplePlanners;
 
 import org.apache.commons.math3.util.Pair;
-import us.ihmc.euclid.Axis2D;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.Location;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.Line3D;
@@ -92,7 +92,7 @@ public class QuickFootstepPlanner
             if (!atGoals.get(side.getOppositeSide())) // Skip crossover check if the goals are a crossover
             {
                // Disallow crossover steps
-               Vector2D oppositeStanceForward = new Vector2D(Axis2D.X);
+               Vector3D oppositeStanceForward = new Vector3D(Axis3D.X);
                stances.get(side.getOppositeSide()).getOrientation().transform(oppositeStanceForward);
                Location location = EuclidGeometryTools.whichSideOfLine2DIsPoint2DOn(goals.get(side).getPosition().getX(),
                                                                                     goals.get(side).getPosition().getY(),
@@ -120,10 +120,10 @@ public class QuickFootstepPlanner
       directionToGoal.normalize();
 
       // Compute sidewaysness: 1 straight sideways, 0.5 diagonal, 0 forward/backward
-      Vector2D stanceToGoal = new Vector2D();
-      stanceToGoal.sub(new Point2D(goalMid.getPosition()), new Point2D(stanceMid.getPosition()));
+      Vector3D stanceToGoal = new Vector3D();
+      stanceToGoal.sub(goalMid.getPosition(), stanceMid.getPosition());
       stanceToGoal.normalize();
-      Vector2D stanceMidForward = new Vector2D(Axis2D.X);
+      Vector3D stanceMidForward = new Vector3D(Axis3D.X);
       stanceMid.getOrientation().transform(stanceMidForward);
       sidewaysness = 1.0 - (2.0 / Math.PI) * Math.abs(Math.asin(stanceMidForward.dot(stanceToGoal)));
 

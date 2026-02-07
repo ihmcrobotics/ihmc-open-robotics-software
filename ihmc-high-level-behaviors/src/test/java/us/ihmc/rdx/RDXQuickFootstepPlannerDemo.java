@@ -166,14 +166,8 @@ public class RDXQuickFootstepPlannerDemo
             }
 
             // Plan footsteps from stance to goal
-            SideDependentList<Pose3D> stances = new SideDependentList<>();
-            SideDependentList<Pose3D> goals = new SideDependentList<>();
-
-            for (RobotSide side : RobotSide.values)
-            {
-               stances.put(side, new Pose3D(stanceGizmos.get(side).getPoseGizmo().getTransformToParent()));
-               goals.put(side, new Pose3D(goalGizmos.get(side).getPoseGizmo().getTransformToParent()));
-            }
+            SideDependentList<Pose3D> stances = new SideDependentList<>(side -> new Pose3D(stanceGizmos.get(side).getPoseGizmo().getTransformToParent()));
+            SideDependentList<Pose3D> goals = new SideDependentList<>(side -> new Pose3D(goalGizmos.get(side).getPoseGizmo().getTransformToParent()));
 
             for (ModelInstance model : visualModels)
                model.model.dispose();
