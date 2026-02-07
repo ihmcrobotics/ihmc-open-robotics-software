@@ -1,4 +1,4 @@
-package us.ihmc.perception.camera;
+package us.ihmc.sensors;
 
 public class CameraIntrinsics
 {

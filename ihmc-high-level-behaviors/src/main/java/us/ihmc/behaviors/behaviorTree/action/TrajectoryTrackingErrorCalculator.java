@@ -4,12 +4,13 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 
 /**
  * This class provides methods for evaluating the tracking error of
- * pose trajectories executed by the robot.
+ * pose and/or jointspace trajectories executed by the robot.
  */
-public class TaskspaceTrajectoryTrackingErrorCalculator extends TrajectoryDurationTracker
+public class TrajectoryTrackingErrorCalculator extends TrajectoryDurationTracker
 {
    private double positionError;
    private double orientationError;
+   private double totalAbsoluteJointspaceError;
    private boolean isWithinPositionTolerance;
 
    public void reset()
@@ -18,6 +19,7 @@ public class TaskspaceTrajectoryTrackingErrorCalculator extends TrajectoryDurati
 
       positionError = Double.NaN;
       orientationError = Double.NaN;
+      totalAbsoluteJointspaceError = Double.NaN;
       isWithinPositionTolerance = false;
    }
 
@@ -27,6 +29,26 @@ public class TaskspaceTrajectoryTrackingErrorCalculator extends TrajectoryDurati
       orientationError = actual.getRotation().distance(desired.getRotation(), true);
 
       isWithinPositionTolerance = true;
+   }
+
+   public void resetJointspaceError()
+   {
+      totalAbsoluteJointspaceError = Double.NaN;
+      isWithinPositionTolerance = false;
+   }
+
+   /**
+    * The user may submit one or more joints' data by calling this sequentially.
+    * Absolute errors will be added up.
+    */
+   public void addJointData(double desired, double actual)
+   {
+      double singleJointError = Math.abs(actual - desired);
+
+      if (Double.isNaN(totalAbsoluteJointspaceError))
+         totalAbsoluteJointspaceError = singleJointError;
+      else
+         totalAbsoluteJointspaceError += singleJointError;
    }
 
    /** Factors in errors in x,z,y translational Euclidean (R3) space. */
@@ -39,6 +61,12 @@ public class TaskspaceTrajectoryTrackingErrorCalculator extends TrajectoryDurati
    public void factoryInSO3Errors(double orientationErrorTolerance)
    {
       isWithinPositionTolerance &= orientationError <= orientationErrorTolerance;
+   }
+
+   /** Factors in errors in jointspace. */
+   public void factorInJointspaceErrors(double totalErrorTolerance)
+   {
+      isWithinPositionTolerance = totalAbsoluteJointspaceError <= totalErrorTolerance;
    }
 
    /** This includes any of the factored in errors of position or orientation. */
@@ -55,5 +83,10 @@ public class TaskspaceTrajectoryTrackingErrorCalculator extends TrajectoryDurati
    public double getOrientationError()
    {
       return orientationError;
+   }
+
+   public double getTotalAbsoluteJointspaceError()
+   {
+      return totalAbsoluteJointspaceError;
    }
 }

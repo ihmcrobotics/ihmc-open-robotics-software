@@ -7,7 +7,7 @@ import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.sensors.CameraIntrinsics;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
