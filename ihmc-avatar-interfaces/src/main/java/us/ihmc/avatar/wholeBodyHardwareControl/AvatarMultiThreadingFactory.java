@@ -75,8 +75,13 @@ import static us.ihmc.avatar.wholeBodyHardwareControl.AvatarMultiThreadingManage
 import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.*;
 
 /**
- * This class is responsible for creating the estimator, controller, and step generator
- * threads, along with the multi-threading manager that handles the execution of those threads.
+ * This class is responsible for creating the estimator, controller, and optionally step generator and IK streaming modules.
+ * It will turn each of those into runnable tasks, and potentially into standalone threads (realtime or non-realtime) depending on if the
+ * desired threading setup is single-threaded or multi-threaded, and realtime or non-realtime (these settings can be configured using the
+ * constructor arguments {@link #useMultiThreading} and {@link #useRealtimeThreads}). In addition, this class allows for the creation and
+ * addition of custom runnable tasks, and it will turn those into standalone threads based on the aforementioned threading settings. Once
+ * the desired task/threading setup is complete, call {@link #buildThreadsAndThreadingManager()} to finish task/thread creation and to
+ * create an {@link AvatarMultiThreadingManager}, which handles the execution of all tasks and threads in a thread-safe manner.
  *
  * @author Stefan Fasano
  */
@@ -463,25 +468,8 @@ public class AvatarMultiThreadingFactory
                                          });
 
       // Set up estimator realtime or non-realtime thread
-      if (useRealtimeThreads && useMultiThreading)
-      {
-         RealtimeThread estimatorRealtimeThread = new RealtimeThread(affinity.getEstimatorThreadPriority(),
-                                                                     estimatorTask,
-                                                                     estimatorTask.getClass().getSimpleName() + "Thread");
-         estimatorRealtimeThread.setAffinity(affinity.getEstimatorThreadProcessor());
-         estimatorRealtimeThread.start();
+      createAndAddThread(estimatorTask.getClass().getSimpleName(), estimatorTask, affinity.getEstimatorThreadProcessor(), affinity.getEstimatorThreadPriority());
 
-         threads.add(estimatorRealtimeThread);
-      }
-      else if (!useRealtimeThreads && useMultiThreading)
-      {
-         Thread estimatorNonRealtimeThread = new Thread(estimatorTask, estimatorTask.getClass().getSimpleName() + "Thread");
-         estimatorNonRealtimeThread.start();
-
-         threads.add(estimatorNonRealtimeThread);
-      }
-
-      tasks.add(estimatorTask);
       return estimatorTask;
    }
 
@@ -544,26 +532,9 @@ public class AvatarMultiThreadingFactory
                                              LogTools.info("Controller node has been destroyed");
                                           });
 
-      // Set up controller realtime or non-realtime thread
-      if (useRealtimeThreads && useMultiThreading)
-      {
-         RealtimeThread controllerRealtimeThread = new RealtimeThread(affinity.getControllerThreadPriority(),
-                                                                      controllerTask,
-                                                                      controllerTask.getClass().getSimpleName() + "Thread");
-         controllerRealtimeThread.setAffinity(affinity.getControllerThreadProcessor());
-         controllerRealtimeThread.start();
+      // Set up and add controller realtime or non-realtime thread
+      createAndAddThread(controllerTask.getClass().getSimpleName(), controllerTask, affinity.getControllerThreadProcessor(), affinity.getControllerThreadPriority());
 
-         threads.add(controllerRealtimeThread);
-      }
-      else if (!useRealtimeThreads && useMultiThreading)
-      {
-         Thread controllerNonRealtimeThread = new Thread(controllerTask, controllerTask.getClass().getSimpleName() + "Thread");
-         controllerNonRealtimeThread.start();
-
-         threads.add(controllerNonRealtimeThread);
-      }
-
-      tasks.add(controllerTask);
       return controllerTask;
    }
 
@@ -599,26 +570,9 @@ public class AvatarMultiThreadingFactory
       // Add callback on cleanup to close and destroy things
       stepGeneratorTask.addRunnableOnCleanup(avatarStepGenerator.get()::destroy);
 
-      // Set up step generator realtime or non-realtime thread
-      if (useRealtimeThreads && useMultiThreading)
-      {
-         RealtimeThread stepGeneratorRealtimeThread = new RealtimeThread(affinity.getStepGeneratorThreadPriority(),
-                                                                         stepGeneratorTask,
-                                                                         stepGeneratorTask.getClass().getSimpleName() + "Thread");
-         stepGeneratorRealtimeThread.setAffinity(affinity.getStepGeneratorThreadProcessor());
-         stepGeneratorRealtimeThread.start();
+      // Set up and add step generator realtime or non-realtime thread
+      createAndAddThread(stepGeneratorTask.getClass().getSimpleName(), stepGeneratorTask, affinity.getStepGeneratorThreadProcessor(), affinity.getStepGeneratorThreadPriority());
 
-         threads.add(stepGeneratorRealtimeThread);
-      }
-      else if (!useRealtimeThreads && useMultiThreading)
-      {
-         Thread stepGeneratorNonRealtimeThread = new Thread(stepGeneratorTask, stepGeneratorTask.getClass().getSimpleName() + "Thread");
-         stepGeneratorNonRealtimeThread.start();
-
-         threads.add(stepGeneratorNonRealtimeThread);
-      }
-
-      tasks.add(stepGeneratorTask);
       return stepGeneratorTask;
    }
 
@@ -645,26 +599,9 @@ public class AvatarMultiThreadingFactory
                                              ikStreamingThreadUpdateRate.set(ikStreamingThreadFrequencyCalculator.getFrequency());
                                           });
 
-      // Set up IK streaming realtime or non-realtime thread
-      if (useRealtimeThreads && useMultiThreading)
-      {
-         RealtimeThread ikStreamingRealtimeThread = new RealtimeThread(affinity.getIKStreamingThreadPriority(),
-                                                                       ikStreamingTask,
-                                                                       ikStreamingTask.getClass().getSimpleName() + "Thread");
-         ikStreamingRealtimeThread.setAffinity(affinity.getIKStreamingThreadProcessor());
-         ikStreamingRealtimeThread.start();
+      // Set up and add IK streaming realtime or non-realtime thread
+      createAndAddThread(ikStreamingTask.getClass().getSimpleName(), ikStreamingTask, affinity.getIKStreamingThreadProcessor(), affinity.getIKStreamingThreadPriority());
 
-         threads.add(ikStreamingRealtimeThread);
-      }
-      else if (!useRealtimeThreads && useMultiThreading)
-      {
-         Thread ikStreamingNonRealtimeThread = new Thread(ikStreamingTask, ikStreamingTask.getClass().getSimpleName() + "Thread");
-         ikStreamingNonRealtimeThread.start();
-
-         threads.add(ikStreamingNonRealtimeThread);
-      }
-
-      tasks.add(ikStreamingTask);
       return ikStreamingTask;
    }
 
@@ -904,36 +841,74 @@ public class AvatarMultiThreadingFactory
       }
    }
 
+   /**
+    * External API for adding a custom controller state to the high-level controller
+    */
    public void addCustomControlState(HighLevelControllerStateFactory customControllerStateFactory)
    {
       avatarControllerFactory.addCustomControlState(customControllerStateFactory);
    }
 
+   /**
+    * External API for adding a requestable transition between two high-level control states
+    */
    public void addRequestableTransition(HighLevelControllerName currentControlStateEnum, HighLevelControllerName nextControlStateEnum)
    {
       avatarControllerFactory.addRequestableTransition(currentControlStateEnum, nextControlStateEnum);
    }
 
+   /**
+    * External API for adding a done transition between two high-level control states
+    */
    public void addFinishedTransition(HighLevelControllerName currentControlStateEnum, HighLevelControllerName nextControlStateEnum)
    {
       avatarControllerFactory.addFinishedTransition(currentControlStateEnum, nextControlStateEnum);
    }
 
-   public void addStandPrepStateTransition(HighLevelControllerName nextControlStateEnum)
-   {
-      avatarControllerFactory.addCustomStateTransition(createStandTransitionState(nextControlStateEnum, avatarControllerFactory, true));
-   }
-
+   /**
+    * External API for adding a done transition between two high-level control states
+    */
    public void addFinishedTransition(HighLevelControllerName currentControlStateEnum, HighLevelControllerName nextControlStateEnum, boolean performNextStateOnEntry)
    {
       avatarControllerFactory.addFinishedTransition(currentControlStateEnum, nextControlStateEnum, performNextStateOnEntry);
    }
 
+   /**
+    * External API for adding a high-level controller state that is automatically transitioned into from a previous state (in this case the STAND_PREP
+    * state), given logic that determines the trigger of that transition (in this case STAND_PREP is done, and feet are loaded)
+    */
+   public void addStandPrepStateTransition(HighLevelControllerName nextControlStateEnum)
+   {
+      avatarControllerFactory.addCustomStateTransition(createStandTransitionState(nextControlStateEnum, avatarControllerFactory, true));
+   }
+
+   /**
+    * External API for adding a high-level control state that does a smooth blended transition between two other high-level control states
+    */
    public void addSmoothTransitionState(String transitionName, HighLevelControllerName transitionStateEnum, HighLevelControllerName currentControlStateEnum, HighLevelControllerName nextControlStateEnum)
    {
       avatarControllerFactory.addCustomSmoothTransitionControlState(transitionName, transitionStateEnum, currentControlStateEnum, nextControlStateEnum);
    }
 
+   /**
+    * External API for adding a high-level control state that does a smooth blended transition between two other high-level control states
+    */
+   public void addSmoothTransitionState(String transitionName,
+                                        HighLevelControllerName transitionStateEnum,
+                                        HighLevelControllerName currentControlStateEnum,
+                                        HighLevelControllerName nextControlStateEnum,
+                                        CommandBlenderFactory commandBlenderFactory)
+   {
+      avatarControllerFactory.addCustomSmoothTransitionControlState(transitionName,
+                                                                    transitionStateEnum,
+                                                                    currentControlStateEnum,
+                                                                    nextControlStateEnum,
+                                                                    commandBlenderFactory);
+   }
+
+   /**
+    * External API for providing a custom map between high-level control states and their respective state estimator mode
+    */
    public void setHighLevelControllerCallbackForEstimator(Map<HighLevelControllerName, StateEstimatorMode> estimatorModeMap)
    {
       estimatorModeMapReference.set(estimatorModeMap);
@@ -941,31 +916,64 @@ public class AvatarMultiThreadingFactory
 
    /**
     * External API to allow addition of a new thread given a runnable, update rate, and priority/core (for realtime threads)
+    * This will create a runnable task, add that to the list of tasks, and if needed, make/start a thread from that task
     */
    public HumanoidRobotControlTask createAndAddThread(String name, Runnable runnable, double threadDt, int core, int priority, YoRegistry registry, YoGraphicsListRegistry yoGraphicsRegistry)
    {
       HumanoidRobotControlTask task = createAndAddTask(name, runnable, threadDt, registry, yoGraphicsRegistry);
 
-      // Set up realtime or non-realtime thread
-      if (useRealtimeThreads && useMultiThreading)
-         createAndAddRealtimeThread(name, task, core, priority);
+      createAndAddThread(name, task, core, priority);
 
-      else if (!useRealtimeThreads && useMultiThreading)
-         createAndAddNonRealtimeThread(name, task);
-
-      addTask(task);
       return task;
    }
 
+   /**
+    * External API to allow addition of a new thread given a runnable and update rate
+    * This will create a runnable task, add that to the list of tasks, and if needed, make/start a thread from that task
+    */
+   public HumanoidRobotControlTask createAndAddThread(String name, Runnable runnable, double threadDt, YoRegistry registry, YoGraphicsListRegistry yoGraphicsRegistry)
+   {
+      HumanoidRobotControlTask task = createAndAddTask(name, runnable, threadDt, registry, yoGraphicsRegistry);
+
+      createAndAddThread(name, task);
+
+      return task;
+   }
+
+   /**
+    * External API to allow addition of a new thread given a runnable task and priority/core (for realtime threads)
+    * This will add the task to the list of tasks, and if needed, make/start a thread from that task
+    */
    public void createAndAddThread(String name, HumanoidRobotControlTask task, int core, int priority)
    {
       addTask(task);
 
-      // Set up realtime thread
+      // Set up thread
       if (useRealtimeThreads && useMultiThreading)
          createAndAddRealtimeThread(name, task, core, priority);
+      else if (!useRealtimeThreads && useMultiThreading)
+         createAndAddNonRealtimeThread(name, task);
    }
 
+   /**
+    * External API to allow addition of a new thread given a runnable task, thread processor, and thread core (for realtime threads)
+    * This will add the task to the list of tasks, and if needed, make/start a thread from that task
+    */
+   public void createAndAddThread(String name, HumanoidRobotControlTask task, Processor threadProcessor, PriorityParameters threadPriority)
+   {
+      addTask(task);
+
+      // Set up thread
+      if (useRealtimeThreads && useMultiThreading)
+         createAndAddRealtimeThread(name, task, threadProcessor, threadPriority);
+      else if (!useRealtimeThreads && useMultiThreading)
+         createAndAddNonRealtimeThread(name, task);
+   }
+
+   /**
+    * External API to allow addition of a new thread given a runnable task
+    * This will add the task to the list of tasks, and if needed, make/start a thread from that task
+    */
    public void createAndAddThread(String name, HumanoidRobotControlTask task)
    {
       addTask(task);
@@ -975,6 +983,10 @@ public class AvatarMultiThreadingFactory
          createAndAddNonRealtimeThread(name, task);
    }
 
+   /**
+    * External API to enable the creation of a runnable task given a name for that task, the runnable to be
+    * run, and an update rate dt for that task
+    */
    public HumanoidRobotControlTask createAndAddTask(String name, Runnable runnable, double threadDt, YoRegistry registry, YoGraphicsListRegistry yoGraphicsRegistry)
    {
       // Calculate task divisor
@@ -1056,6 +1068,14 @@ public class AvatarMultiThreadingFactory
       Processor threadProcessor = affinity.getSocket().getCore(affinity.checkCoreIsValid(core)).getDefaultProcessor();
       PriorityParameters threadPriority = new PriorityParameters(priority);
 
+      return createAndAddRealtimeThread(name, runnable, threadProcessor, threadPriority);
+   }
+
+   /**
+    * Creates realtime thread, starts that thread, and adds that thread to the list of all threads
+    */
+   private RealtimeThread createAndAddRealtimeThread(String name, Runnable runnable, Processor threadProcessor, PriorityParameters threadPriority)
+   {
       RealtimeThread realtimeThread = new RealtimeThread(threadPriority, runnable, name + "Thread");
       realtimeThread.setAffinity(threadProcessor);
       realtimeThread.start();
@@ -1077,9 +1097,10 @@ public class AvatarMultiThreadingFactory
    }
 
    /**
-    * For adding a new thread task.
-    * IMPORTANT: this is required for any thread that runs in the multi-threaded architecture, since
-    * this will ensure that thread is added to the barrier scheduler
+    * For adding a new runnable task.
+    * IMPORTANT: this is required for any updatable that needs to be run, either in a sequential single-threaded format, or
+    * in a multi-threaded format. This is the list that is given to the task/runnable/thread scheduler, which in turn determines
+    * and dictates the execution of everything in this list
     */
    public void addTask(HumanoidRobotControlTask task)
    {
@@ -1093,19 +1114,6 @@ public class AvatarMultiThreadingFactory
    public void addThread(Runnable thread)
    {
       threads.add(thread);
-   }
-
-   public void addSmoothTransitionState(String transitionName,
-                                        HighLevelControllerName transitionStateEnum,
-                                        HighLevelControllerName currentControlStateEnum,
-                                        HighLevelControllerName nextControlStateEnum,
-                                        CommandBlenderFactory commandBlenderFactory)
-   {
-      avatarControllerFactory.addCustomSmoothTransitionControlState(transitionName,
-                                                                    transitionStateEnum,
-                                                                    currentControlStateEnum,
-                                                                    nextControlStateEnum,
-                                                                    commandBlenderFactory);
    }
 
    public void setExternalMasterThread(RealtimeThread masterThread)
