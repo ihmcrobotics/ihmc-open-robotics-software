@@ -34,23 +34,23 @@ public class QuickFootstepPlanner
    private final Pose3D stanceMid = new Pose3D();
    private final Pose3D goalMid = new Pose3D();
    private final Point3D approachGoalMid = new Point3D();
-   private final SideDependentList<Point3D> midlineProjections = new SideDependentList<>(side -> new Point3D());
+   private final SideDependentList<Point3D> midlineProjection = new SideDependentList<>(side -> new Point3D());
    private final Point3D midlinePoint = new Point3D();
    private final Vector3D oppositeStanceToProjection = new Vector3D();
    private boolean transistionToGoal;
    private Runnable stepPlannedCallback = () -> {};
    private double sidewaysness;
 
-   public List<Pair<RobotSide, Pose3D>> plan(SideDependentList<Pose3D> stances, SideDependentList<Pose3D> goals)
+   public List<Pair<RobotSide, Pose3D>> plan(SideDependentList<Pose3D> stance, SideDependentList<Pose3D> goal)
    {
       List<Pair<RobotSide, Pose3D>> footstepPlan = new ArrayList<>();
-      var currentStances = new SideDependentList<>(side -> new Pose3D(stances.get(side)));
+      var currentStance = new SideDependentList<>(side -> new Pose3D(stance.get(side)));
       for (stepIndex = 0; stepIndex < 50; stepIndex++)
       {
-         if (!planStep(currentStances, goals))
+         if (!planStep(currentStance, goal))
          {
             footstepPlan.add(new Pair<>(footToSwing, new Pose3D(swingEnd)));
-            currentStances.get(footToSwing).set(swingEnd);
+            currentStance.get(footToSwing).set(swingEnd);
             stepPlannedCallback.run();
          }
          else
@@ -65,9 +65,9 @@ public class QuickFootstepPlanner
       this.stances = stances;
       this.goals = goals;
 
-      var atGoals = new SideDependentList<>(side -> stances.get(side).getPosition().distance(goals.get(side).getPosition()) <= 0.01
-                                                 && stances.get(side).getOrientation().distance(goals.get(side).getOrientation()) <= Math.toRadians(5.0));
-      if (atGoals.get(RobotSide.LEFT) && atGoals.get(RobotSide.RIGHT))
+      var atGoal = new SideDependentList<>(side -> stances.get(side).getPosition().distance(goals.get(side).getPosition()) <= 0.01
+                                                && stances.get(side).getOrientation().distance(goals.get(side).getOrientation()) <= Math.toRadians(5.0));
+      if (atGoal.get(RobotSide.LEFT) && atGoal.get(RobotSide.RIGHT))
          return true;
 
       double stepLength = 0.4;
@@ -106,14 +106,23 @@ public class QuickFootstepPlanner
       directionToGoal.normalize();
 
       for (RobotSide side : RobotSide.values)
-         midlineProjections.get(side).set(stanceToGoalLine.orthogonalProjectionCopy(stances.get(side).getPosition()));
-      SideDependentList<Double> distancesToGoalMid = new SideDependentList<>(side -> midlineProjections.get(side).distance(approachGoalMid));
+         midlineProjection.get(side).set(stanceToGoalLine.orthogonalProjectionCopy(stances.get(side).getPosition()));
+      SideDependentList<Double> distanceToGoalMid = new SideDependentList<>(side -> midlineProjection.get(side).distance(approachGoalMid));
+
+      // TODO: Calculate data for each foot before deciding which foot to swing
+
+      // Evaluate criteria for swing side selection
+      for (RobotSide side : RobotSide.values)
+      {
+
+      }
+
 
       for (RobotSide side : RobotSide.values) // Take a step towards the goal
       {
-         if (atGoals.get(side)) // Never step a foot already at goal
+         if (atGoal.get(side)) // Never step a foot already at goal
             continue;
-         if (atGoals.get(side.getOppositeSide())) // Always take last goal step
+         if (atGoal.get(side.getOppositeSide())) // Always take last goal step
          {
             footToSwing = side;
             swingEnd.set(goals.get(side));
@@ -121,20 +130,20 @@ public class QuickFootstepPlanner
          }
 
          // Choose swing foot -- furthest foot from goal
-         boolean isFurthest = distancesToGoalMid.get(side) >= distancesToGoalMid.get(side.getOppositeSide());
-         double stanceDistance = midlineProjections.get(side).distance(midlineProjections.get(side.getOppositeSide()));
+         boolean isFurthest = distanceToGoalMid.get(side) >= distanceToGoalMid.get(side.getOppositeSide());
+         double stanceDistance = midlineProjection.get(side).distance(midlineProjection.get(side.getOppositeSide()));
 
          // When walking sideways, if feet are close together, swing foot closest to goal instead TODO: Make sidewaysness activation > 0.5
          if (sidewaysness > 0.5 ? (stanceDistance < 0.3) != isFurthest : isFurthest)
          {
             footToSwing = side;
 
-            if (sidewaysness > 0.5 && isFurthest) // Swing up to stance foot
+            if (sidewaysness > 0.5 && isFurthest.) // Swing up to stance foot
             {
                double x0 = 0.5, y0 = 0.12; // Diagonal
                double x1 = 1.0, y1 = 0.15; // Straight sideways
                double behindStanceFoot = y0 + (sidewaysness - x0) * (y1 - y0) / (x1 - x0);
-               midlinePoint.scaleAdd(-behindStanceFoot, directionToGoal, midlineProjections.get(side.getOppositeSide()));
+               midlinePoint.scaleAdd(-behindStanceFoot, directionToGoal, midlineProjection.get(side.getOppositeSide()));
             }
             else // Normal -- swing past stance foot
             {
@@ -164,16 +173,16 @@ public class QuickFootstepPlanner
                {
                   double stepAlongMidline = stepLength * (0.6 + 0.3 * sidewaysness);
                   // Scale down step length as we approach goal to avoid small final steps
-                  transistionToGoal = distancesToGoalMid.get(side.getOppositeSide()) < 2.0 * stepAlongMidline;
+                  transistionToGoal = distanceToGoalMid.get(side.getOppositeSide()) < 2.0 * stepAlongMidline;
    //               if (transistionToGoal)
    //                  stepAlongMidline = oppositeStanceMidlineProjection.distance(goalMid.getPosition()) / 2.0;
-                  midlinePoint.scaleAdd(stepAlongMidline, directionToGoal, midlineProjections.get(side.getOppositeSide()));
+                  midlinePoint.scaleAdd(stepAlongMidline, directionToGoal, midlineProjection.get(side.getOppositeSide()));
                }
             }
 
             // TODO: Increase this offset to avoid stance foot
             double midlineOffset = (1.0 - sidewaysness) * 0.12;
-            oppositeStanceToProjection.sub(midlineProjections.get(side.getOppositeSide()), stances.get(side.getOppositeSide()).getPosition());
+            oppositeStanceToProjection.sub(midlineProjection.get(side.getOppositeSide()), stances.get(side.getOppositeSide()).getPosition());
             oppositeStanceToProjection.normalize();
             swingEnd.getPosition().scaleAdd(midlineOffset, oppositeStanceToProjection, midlinePoint);
 
@@ -223,14 +232,14 @@ public class QuickFootstepPlanner
       return stances.get(footToSwing.getOppositeSide()).getPosition();
    }
 
-   public SideDependentList<Point3D> getMidlineProjections()
+   public SideDependentList<Point3D> getMidlineProjection()
    {
-      return midlineProjections;
+      return midlineProjection;
    }
 
    public Point3D getOppositeStanceMidlineProjection()
    {
-      return midlineProjections.get(footToSwing.getOppositeSide());
+      return midlineProjection.get(footToSwing.getOppositeSide());
    }
 
    public boolean getTransistionToGoal()
