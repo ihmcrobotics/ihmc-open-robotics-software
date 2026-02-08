@@ -72,45 +72,6 @@ public class QuickFootstepPlanner
 
       double stepLength = 0.4;
       double stepYaw = Math.toRadians(35.0);
-//      for (RobotSide side : RobotSide.values) // Step directly to goals if possible
-//      {
-//         if (!atGoals.get(side)) // One foot might already be at the goal
-//         {
-//            // Avoid erroring out if goal feet impose a more aggressive step
-//            double allowedLength = Math.max(stepLength, goals.get(side).getPosition().distance(goals.get(side.getOppositeSide()).getPosition()));
-//            double allowedYaw = Math.max(stepYaw, Math.abs(goals.get(side).getOrientation().distance(stances.get(side.getOppositeSide()).getOrientation())));
-//
-//            boolean stepDirectlyToGoal = stances.get(side.getOppositeSide()).getPosition().distance(goals.get(side).getPosition()) <= allowedLength
-//                      && Math.abs(goals.get(side).getOrientation().distance(stances.get(side.getOppositeSide()).getOrientation())) <= allowedYaw;
-//
-//            if (!atGoals.get(side.getOppositeSide())) // Skip crossover check if the goals are a crossover
-//            {
-//               // Disallow crossover steps
-//               Vector3D oppositeStanceForward = new Vector3D(Axis3D.X);
-//               stances.get(side.getOppositeSide()).getOrientation().transform(oppositeStanceForward);
-//               Location location = EuclidGeometryTools.whichSideOfLine2DIsPoint2DOn(goals.get(side).getPosition().getX(),
-//                                                                                    goals.get(side).getPosition().getY(),
-//                                                                                    stances.get(side.getOppositeSide()).getX(),
-//                                                                                    stances.get(side.getOppositeSide()).getY(),
-//                                                                                    oppositeStanceForward.getX(),
-//                                                                                    oppositeStanceForward.getY());
-//               stepDirectlyToGoal &= location != null;
-//               stepDirectlyToGoal &= side == RobotSide.LEFT && location == Location.LEFT || side == RobotSide.RIGHT && location == Location.RIGHT;
-//            }
-//
-//            // Need to disallow step if sideways and need to step closer foot
-//
-//            // Disallow step if it's within position of opposite stance foot
-//
-//            if (stepDirectlyToGoal)
-//            {
-//               footToSwing = side;
-//               swingEnd.set(goals.get(side));
-//               return false;
-//            }
-//         }
-//      }
-
       stanceMid.interpolate(stances.get(RobotSide.LEFT), stances.get(RobotSide.RIGHT), 0.5);
       goalMid.interpolate(goals.get(RobotSide.LEFT), goals.get(RobotSide.RIGHT), 0.5);
 
@@ -180,10 +141,23 @@ public class QuickFootstepPlanner
                // Avoid erroring out if goal feet impose a more aggressive step
                double allowedLength = Math.max(stepLength, goals.get(side).getPosition().distance(goals.get(side.getOppositeSide()).getPosition()));
                double allowedYaw = Math.max(stepYaw, Math.abs(goals.get(side).getOrientation().distance(stances.get(side.getOppositeSide()).getOrientation())));
-               if (stances.get(side.getOppositeSide()).getPosition().distance(goals.get(side).getPosition()) <= allowedLength
-                  && Math.abs(goals.get(side).getOrientation().distance(stances.get(side.getOppositeSide()).getOrientation())) <= allowedYaw)
-               { // Step directly to goal
-                  swingEnd.set(goals.get(side)); // TODO: Avoid stepping on stance foot
+               boolean stepDirectlyToGoal = stances.get(side.getOppositeSide()).getPosition().distance(goals.get(side).getPosition()) <= allowedLength
+                         && Math.abs(goals.get(side).getOrientation().distance(stances.get(side.getOppositeSide()).getOrientation())) <= allowedYaw;
+               // Disallow crossover steps
+               Vector3D oppositeStanceForward = new Vector3D(Axis3D.X);
+               stances.get(side.getOppositeSide()).getOrientation().transform(oppositeStanceForward);
+               Location location = EuclidGeometryTools.whichSideOfLine2DIsPoint2DOn(goals.get(side).getPosition().getX(),
+                                                                                    goals.get(side).getPosition().getY(),
+                                                                                    stances.get(side.getOppositeSide()).getX(),
+                                                                                    stances.get(side.getOppositeSide()).getY(),
+                                                                                    oppositeStanceForward.getX(),
+                                                                                    oppositeStanceForward.getY());
+               stepDirectlyToGoal &= location != null;
+               stepDirectlyToGoal &= side == RobotSide.LEFT && location == Location.LEFT || side == RobotSide.RIGHT && location == Location.RIGHT;
+               // TODO: Avoid stepping on stance foot
+               if (stepDirectlyToGoal)
+               {
+                  swingEnd.set(goals.get(side));
                   return false;
                }
                else
