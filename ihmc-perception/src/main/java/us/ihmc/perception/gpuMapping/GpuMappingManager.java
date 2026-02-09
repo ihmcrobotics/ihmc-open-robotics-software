@@ -123,7 +123,7 @@ public class GpuMappingManager
       // We expect to have knowledge of where the camera is in relation to the world so we can accurately display the height map
       RigidBodyTransform sensorToWorld = cameraFrame.getTransformToWorldFrame();
       RigidBodyTransform sensorToGround = cameraFrame.getTransformToDesiredFrame(cameraZUpFrame);
-      RigidBodyTransform groundToWorld = cameraZUpFrame.getTransformToWorldFrame();
+      RigidBodyTransform sensorToWorldZUp = cameraZUpFrame.getTransformToWorldFrame();
 
       // Update the Z translation of the sensor to match the world transform (to handle the sensor's vertical position)
       sensorToGround.getTranslation().setZ(sensorToWorld.getTranslation().getZ());
@@ -141,7 +141,7 @@ public class GpuMappingManager
                                 depthIntrinsics,
                                 sensorToWorld,
                                 sensorToGround,
-                                groundToWorld,
+                                sensorToWorldZUp,
                                 driftOffsetInZ,
                                 globalHeightMapCenter,
                                 computeFootHeight());

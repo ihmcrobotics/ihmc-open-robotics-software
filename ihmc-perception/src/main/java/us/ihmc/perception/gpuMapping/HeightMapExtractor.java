@@ -62,14 +62,14 @@ public class HeightMapExtractor
    private final CUDAKernel planOffsetKernel;
    private final CUDAKernel emptyRegisterKernel;
 
-   private final float[] groundToWorldNoRotationTransformArray = new float[16];
-   private final float[] sensorToWorldAlignedGroundTransformArray = new float[16];
+   private final float[] sensorToWorldNoRotationAsArray = new float[16];
+   private final float[] sensorToGroundZUpAsArray = new float[16];
 
-   private final FloatPointer sensorToWorldAlignedGroundTransformHostPointer;
-   private final FloatPointer sensorToWorldAlignedGroundTransformDevicePointer;
+   private final FloatPointer sensorToGroundZUpHost;
+   private final FloatPointer sensorToGroundZUpDevice;
 
-   private final FloatPointer groundToWorldTranslationHostPointer;
-   private final FloatPointer groundToWorldTranslationDevicePointer;
+   private final FloatPointer sensorToWorldNoRotationHost;
+   private final FloatPointer sensorToWorldNoRotationDevice;
 
    private final FloatPointer parametersHostPointer;
    private final FloatPointer parametersDevicePointer;
@@ -141,11 +141,11 @@ public class HeightMapExtractor
          emptyGlobalHeightMap = new GpuMat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_32FC1);
 
          // Initialize transformation pointers
-         sensorToWorldAlignedGroundTransformHostPointer = new FloatPointer(16);
-         sensorToWorldAlignedGroundTransformDevicePointer = new FloatPointer();
+         sensorToGroundZUpHost = new FloatPointer(16);
+         sensorToGroundZUpDevice = new FloatPointer();
 
-         groundToWorldTranslationHostPointer = new FloatPointer(16);
-         groundToWorldTranslationDevicePointer = new FloatPointer();
+         sensorToWorldNoRotationHost = new FloatPointer(16);
+         sensorToWorldNoRotationDevice = new FloatPointer();
 
          parametersHostPointer = new FloatPointer(21);
          //TODO this is a bug, you need to specficy the size of the float pointer, we get lucky here
@@ -177,7 +177,7 @@ public class HeightMapExtractor
                       CameraIntrinsics cameraIntrinsics,
                       RigidBodyTransformReadOnly sensorToWorldTransform,
                       RigidBodyTransformReadOnly sensorToGroundTransform,
-                      RigidBodyTransformReadOnly groundToWorldTransform,
+                      RigidBodyTransformReadOnly sensorToWorldZUp,
                       float zDriftInMeters,
                       Point3D globalHeightMapCenter,
                       double footHeight)
@@ -191,24 +191,24 @@ public class HeightMapExtractor
       CUDATools.memcpyAsync(parametersDevicePointer, parametersHostPointer, parametersArray.length, stream);
 
       // Step 1: Remove rotation from transformation
-      RigidBodyTransform groundToWorldNoRotation = new RigidBodyTransform(groundToWorldTransform);
-      groundToWorldNoRotation.getRotation().setIdentity();
+      RigidBodyTransform sensorToWorldNoRotation = new RigidBodyTransform(sensorToWorldTransform);
+      sensorToWorldNoRotation.getRotation().setIdentity();
 
       // Step 2: Invert translation-only transform
-      RigidBodyTransform worldToGroundNoRotation = new RigidBodyTransform(groundToWorldNoRotation);
-      worldToGroundNoRotation.invert();
+      RigidBodyTransform worldToSensorNoRotation = new RigidBodyTransform(sensorToWorldNoRotation);
+      worldToSensorNoRotation.invert();
 
       // Step 3: Multiply with full ground->world to keep rotation, giving aligned ground
-      RigidBodyTransform sensorToWorldAlignedGround = new RigidBodyTransform(worldToGroundNoRotation);
-      sensorToWorldAlignedGround.multiply(groundToWorldTransform);
+      RigidBodyTransform sensorToGroundZUp = new RigidBodyTransform();
+      sensorToGroundZUp.getRotation().set(sensorToWorldZUp.getRotation());
 
       // Step 4: Apply sensor->ground transform
-      sensorToWorldAlignedGround.multiply(sensorToGroundTransform);
+      sensorToGroundZUp.multiply(sensorToGroundTransform);
 
-      groundToWorldNoRotation.get(groundToWorldNoRotationTransformArray);
-      groundToWorldTranslationHostPointer.put(groundToWorldNoRotationTransformArray);
-      CUDATools.mallocAsync(groundToWorldTranslationDevicePointer, groundToWorldNoRotationTransformArray.length, stream);
-      CUDATools.memcpyAsync(groundToWorldTranslationDevicePointer, groundToWorldTranslationHostPointer, groundToWorldNoRotationTransformArray.length, stream);
+      sensorToWorldNoRotation.get(sensorToWorldNoRotationAsArray);
+      sensorToWorldNoRotationHost.put(sensorToWorldNoRotationAsArray);
+      CUDATools.mallocAsync(sensorToWorldNoRotationDevice, sensorToWorldNoRotationAsArray.length, stream);
+      CUDATools.memcpyAsync(sensorToWorldNoRotationDevice, sensorToWorldNoRotationHost, sensorToWorldNoRotationAsArray.length, stream);
       checkCUDAError();
       checkCUDAError();
 
@@ -266,13 +266,10 @@ public class HeightMapExtractor
          AxisAngle axisAngle = new AxisAngle(rotation);
          float angularMotionMagnitude = (float) Math.abs(axisAngle.getAngle());
 
-         sensorToWorldAlignedGround.get(this.sensorToWorldAlignedGroundTransformArray);
-         sensorToWorldAlignedGroundTransformHostPointer.put(this.sensorToWorldAlignedGroundTransformArray);
-         CUDATools.mallocAsync(sensorToWorldAlignedGroundTransformDevicePointer, this.sensorToWorldAlignedGroundTransformArray.length, stream);
-         CUDATools.memcpyAsync(sensorToWorldAlignedGroundTransformDevicePointer,
-                               sensorToWorldAlignedGroundTransformHostPointer,
-                               this.sensorToWorldAlignedGroundTransformArray.length,
-                               stream);
+         sensorToGroundZUp.get(sensorToGroundZUpAsArray);
+         sensorToGroundZUpHost.put(sensorToGroundZUpAsArray);
+         CUDATools.mallocAsync(sensorToGroundZUpDevice, sensorToGroundZUpAsArray.length, stream);
+         CUDATools.memcpyAsync(sensorToGroundZUpDevice, sensorToGroundZUpHost, sensorToGroundZUpAsArray.length, stream);
 
          // Clearing all the temp maps so they are ready for the next update call
          cudaMemset2DAsync(tempSumMap.data(), tempSumMap.step(), 0, (long) tempSumMap.cols() * Float.BYTES, tempSumMap.rows());
@@ -298,7 +295,7 @@ public class HeightMapExtractor
          updateTempMapsKernel.withPointer(tempSumOfSquaresMap.data()).withLong(tempSumOfSquaresMap.step());
          updateTempMapsKernel.withPointer(tempMotionVarianceMap.data()).withLong(tempMotionVarianceMap.step());
          updateTempMapsKernel.withPointer(parametersDevicePointer);
-         updateTempMapsKernel.withPointer(sensorToWorldAlignedGroundTransformDevicePointer);
+         updateTempMapsKernel.withPointer(sensorToGroundZUpDevice);
          updateTempMapsKernel.withFloat(linearMotionMagnitude);
          updateTempMapsKernel.withFloat(angularMotionMagnitude);
 
@@ -322,7 +319,7 @@ public class HeightMapExtractor
 
          updateTempMapsDim.close();
          localKernelDim.close();
-         cudaFreeAsync(sensorToWorldAlignedGroundTransformDevicePointer, stream);
+         cudaFreeAsync(sensorToGroundZUpDevice, stream);
          checkCUDAError();
       }
 
@@ -332,14 +329,14 @@ public class HeightMapExtractor
                                                 globalHeightMapCenter,
                                                 localCenterIndex,
                                                 globalCenterIndex,
-                                                groundToWorldNoRotation);
+                                                sensorToWorldNoRotation);
       Vector3D correctedTransform = gpuICPCalculator.getLatestPointCloudErrorTransform();
       //      LogTools.info(
       //            "gpuICPCalculator correctedTransform: " + correctedTransform.getX() + " " + correctedTransform.getY() + " " + correctedTransform.getZ());
       //      LogTools.info("Actual Transform: " + groundToWorldNoRotation.getTranslationX() + " " + groundToWorldNoRotation.getTranslationY() + " "
       //                    + groundToWorldNoRotation.getTranslationZ());
       //      LogTools.info("Global Center: " + globalHeightMapCenter.getX() + " " + globalHeightMapCenter.getY() + " " + globalHeightMapCenter.getZ(   ));
-      gpuICPCalculator.applyCorrectionToTransform(groundToWorldTranslationDevicePointer,
+      gpuICPCalculator.applyCorrectionToTransform(sensorToWorldNoRotationDevice,
                                                   correctedTransform.getX(),
                                                   correctedTransform.getY(),
                                                   correctedTransform.getZ(),
@@ -358,7 +355,7 @@ public class HeightMapExtractor
          registerKernel.withPointer(globalVarianceMap.data()).withLong(globalVarianceMap.step());
          registerKernel.withFloat(globalHeightMapCenter.getX32());
          registerKernel.withFloat(globalHeightMapCenter.getY32());
-         registerKernel.withPointer(groundToWorldTranslationDevicePointer);
+         registerKernel.withPointer(sensorToWorldNoRotationDevice);
          registerKernel.withPointer(parametersDevicePointer);
          registerKernel.withFloat(resetOffset);
 
@@ -379,7 +376,7 @@ public class HeightMapExtractor
 
          emptyRegisterKernel.withPointer(localMeanMap.data()).withLong(localMeanMap.step());
          emptyRegisterKernel.withPointer(emptyGlobalHeightMap.data()).withLong(emptyGlobalHeightMap.step());
-         emptyRegisterKernel.withPointer(groundToWorldTranslationDevicePointer);
+         emptyRegisterKernel.withPointer(sensorToWorldNoRotationDevice);
          emptyRegisterKernel.withPointer(parametersDevicePointer);
 
          emptyRegisterKernel.run(stream, registerKernelGridDim, blockSize, 0);
@@ -408,7 +405,7 @@ public class HeightMapExtractor
 
       // All that memory we allocated on the GPU, need to free that up now
       cudaFreeAsync(parametersDevicePointer, stream);
-      cudaFreeAsync(groundToWorldTranslationDevicePointer, stream);
+      cudaFreeAsync(sensorToWorldNoRotationDevice, stream);
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
 
@@ -477,8 +474,8 @@ public class HeightMapExtractor
       emptyRegisterKernel.close();
 
       // Clean up each resource
-      deallocateFloatPointer(sensorToWorldAlignedGroundTransformHostPointer, sensorToWorldAlignedGroundTransformDevicePointer, stream);
-      deallocateFloatPointer(groundToWorldTranslationHostPointer, groundToWorldTranslationDevicePointer, stream);
+      deallocateFloatPointer(sensorToGroundZUpHost, sensorToGroundZUpDevice, stream);
+      deallocateFloatPointer(sensorToWorldNoRotationHost, sensorToWorldNoRotationDevice, stream);
       deallocateFloatPointer(parametersHostPointer, parametersDevicePointer, stream);
 
       tempSumMap.close();
