@@ -1,6 +1,9 @@
 package us.ihmc.behaviors.behaviorTree;
 
+import org.apache.commons.lang3.function.TriFunction;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulation;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.action.actions.AbilityHandActionComms;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneExecutor;
@@ -10,10 +13,12 @@ import us.ihmc.behaviors.tools.interfaces.LogToolsLogger;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseCommunicatorMap;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
 import us.ihmc.perception.gpuMapping.TerrainMapData;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.sensors.ImageSensor;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -22,23 +27,28 @@ import us.ihmc.tools.io.WorkspaceResourceFile;
 
 public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeRootNodeExecutor, BehaviorTreeNodeExecutor<?, ?>>
 {
+   private final TriFunction<DRCRobotModel, ROS2NodeBuilder, RigidBodyTransformReadOnly, HumanoidKinematicsSimulation> kinematicsSimulationBuilder;
    private final ControllerStatusTracker controllerStatusTracker;
    private final BehaviorTreeSceneExecutor scene;
    private final SideDependentList<AbilityHandActionComms> abilityHandComms = new SideDependentList<>();
 
-   public BehaviorTreeExecutor(ROS2SyncedRobotModel syncedRobot,
-                               ROS2PeerClockOffsetEstimator peerClockEstimator,
-                               ROS2ControllerHelper ros2ControllerHelper,
-                               ImageSensor imageSensor,
-                               YOLOv8DetectionExecutor yolo,
-                               IsaacROSFoundationPoseCommunicatorMap foundationPose,
-                               TerrainMapData terrainMapData)
+   public BehaviorTreeExecutor(
+         ROS2SyncedRobotModel syncedRobot,
+         ROS2PeerClockOffsetEstimator peerClockEstimator,
+         ROS2ControllerHelper ros2ControllerHelper,
+         TriFunction<DRCRobotModel, ROS2NodeBuilder, RigidBodyTransformReadOnly, HumanoidKinematicsSimulation> kinematicsSimulationBuilder,
+         ImageSensor imageSensor,
+         YOLOv8DetectionExecutor yolo,
+         IsaacROSFoundationPoseCommunicatorMap foundationPose,
+         TerrainMapData terrainMapData)
    {
       super(syncedRobot,
             ROS2ActorDesignation.ROBOT,
             peerClockEstimator,
             new WorkspaceResourceDirectory(BehaviorTreeExecutor.class, "/behaviorTrees"),
             new BehaviorTreeExecutorNodeBuilder());
+
+      this.kinematicsSimulationBuilder = kinematicsSimulationBuilder;
 
       controllerStatusTracker = new ControllerStatusTracker(new LogToolsLogger(), ros2ControllerHelper.getROS2Node(), syncedRobot);
       for (RobotSide robotSide : RobotSide.values)
