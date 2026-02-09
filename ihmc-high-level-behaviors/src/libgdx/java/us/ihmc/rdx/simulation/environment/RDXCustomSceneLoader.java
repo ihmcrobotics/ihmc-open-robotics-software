@@ -16,7 +16,7 @@ public class RDXCustomSceneLoader
    {
       return switch (demoScene)
       {
-         case EXPLOSIVE_BREACHING_A -> "BreachingDemoA.json";
+         case EXPLOSIVE_BREACHING_A -> "BreachingDemo.json";
          case ROOM_WITH_OBJECTS -> "RoomWithObjects.json";
          case ROUGH_TERRAIN -> "HarderTerrain.json";
          default -> "FlatGround.json";
