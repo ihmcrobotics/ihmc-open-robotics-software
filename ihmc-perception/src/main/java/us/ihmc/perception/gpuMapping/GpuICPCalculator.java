@@ -84,9 +84,10 @@ public class GpuICPCalculator
       double correctedY = correctedGlobalTransform.getTranslationY();
       double correctedZ = correctedGlobalTransform.getTranslationZ();
 
+      // TODO need to use the total accumulated error transform rather then just the odometry
       FlattenedHeightMap flattenedLocalMap = HeightMapTools.flattenHeightMapToXYZ(localMap,
-                                                                                  correctedX,
-                                                                                  correctedY,
+                                                                                  transformLocalToGlobalFromOdometry.getTranslationX(),
+                                                                                  transformLocalToGlobalFromOdometry.getTranslationY(),
                                                                                   correctedZ,
                                                                                   localCenterIndex,
                                                                                   (float) heightMapParameters.getCellSize(),
