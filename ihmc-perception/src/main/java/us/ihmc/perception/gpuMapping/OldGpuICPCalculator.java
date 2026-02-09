@@ -3,7 +3,6 @@ package us.ihmc.perception.gpuMapping;
 import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.cuda.cudart.dim3;
 import org.bytedeco.javacpp.FloatPointer;
-import org.bytedeco.javacpp.indexer.ByteIndexer;
 import org.bytedeco.javacpp.indexer.FloatIndexer;
 import org.bytedeco.javacpp.indexer.UByteRawIndexer;
 import org.bytedeco.opencv.global.opencv_core;
@@ -14,14 +13,13 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
-import us.ihmc.perception.cuda.CUDAStreamManager;
 import us.ihmc.perception.cuda.CUDATools;
 
 import java.net.URL;
 
 import static org.bytedeco.cuda.global.cudart.*;
 
-public class HeightMapICPCalculator
+public class OldGpuICPCalculator
 {
    private static final boolean PRINT_TIMING_FOR_KERNELS = false;
    private static final int BLOCK_SIZE_XY = 8;
@@ -47,7 +45,7 @@ public class HeightMapICPCalculator
 
    private Vector3D correctedTransformTranslationOnly;
 
-   public HeightMapICPCalculator(HeightMapParameters heightMapParameters, CUstream_st stream)
+   public OldGpuICPCalculator(HeightMapParameters heightMapParameters, CUstream_st stream)
    {
       this.heightMapParameters = heightMapParameters;
       this.stream = stream;
@@ -55,7 +53,7 @@ public class HeightMapICPCalculator
       // Load header and main file
       URL heightMapUtilsHeaderPath = getClass().getResource("HeightMapUtils.cuh");
       URL mathUtilsHeaderPath = getClass().getResource("/us/ihmc/perception/cuda/MathUtils.cuh");
-      URL kernelPath = getClass().getResource("HeightMapICPFilter.cu");
+      URL kernelPath = getClass().getResource("OldGpuICPCalculator.cu");
 
       localCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getCellSize());
       localCellsPerAxis = 2 * localCenterIndex + 1;

@@ -335,7 +335,7 @@ public class HeightMapExtractor
                                                 groundToWorldNoRotation);
       Vector3D correctedTransform = gpuICPCalculator.getLatestPointCloudErrorTransform();
       //      LogTools.info(
-      //            "HeightMapICPCalculator correctedTransform: " + correctedTransform.getX() + " " + correctedTransform.getY() + " " + correctedTransform.getZ());
+      //            "gpuICPCalculator correctedTransform: " + correctedTransform.getX() + " " + correctedTransform.getY() + " " + correctedTransform.getZ());
       //      LogTools.info("Actual Transform: " + groundToWorldNoRotation.getTranslationX() + " " + groundToWorldNoRotation.getTranslationY() + " "
       //                    + groundToWorldNoRotation.getTranslationZ());
       //      LogTools.info("Global Center: " + globalHeightMapCenter.getX() + " " + globalHeightMapCenter.getY() + " " + globalHeightMapCenter.getZ(   ));

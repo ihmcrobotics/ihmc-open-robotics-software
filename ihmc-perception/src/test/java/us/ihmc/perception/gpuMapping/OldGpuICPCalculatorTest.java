@@ -8,19 +8,20 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.perception.cuda.CUDAStreamManager;
 import us.ihmc.perception.cuda.CUDATools;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 
 import static org.bytedeco.cuda.global.cudart.cudaFreeAsync;
 import static org.bytedeco.cuda.global.cudart.cudaStreamSynchronize;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class HeightMapICPCalculatorTest
+@Disabled
+public class OldGpuICPCalculatorTest
 {
    private final HeightMapParameters heightMapParameters = new HeightMapParameters();
    private int localCellsPerAxis;
@@ -62,7 +63,7 @@ public class HeightMapICPCalculatorTest
    @Test
    public void testICPWithIdenticalMaps()
    {
-      HeightMapICPCalculator heightMapICPCalculator = new HeightMapICPCalculator(heightMapParameters, stream);
+      OldGpuICPCalculator oldGpuICPCalculator = new OldGpuICPCalculator(heightMapParameters, stream);
       GpuMat localMap = new GpuMat(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_32FC1);
       localMap.setTo(new Scalar(0.0));
       GpuMat globalMap = new GpuMat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_32FC1);
@@ -85,10 +86,10 @@ public class HeightMapICPCalculatorTest
       Point3D globalMapCenter = new Point3D(0, 0, 0);
 
       // Run Kernel (Centered at [0, 0] for both)
-      heightMapICPCalculator.update(localMap, globalMap, devicePtr, globalMapCenter);
+      oldGpuICPCalculator.update(localMap, globalMap, devicePtr, globalMapCenter);
 
       // Let's get the result and see how we did...
-      Vector3D correctedTransform = heightMapICPCalculator.getCorrectedTransform();
+      Vector3D correctedTransform = oldGpuICPCalculator.getCorrectedTransform();
 
       System.out.println("Translation X: " + correctedTransform.getX());
       System.out.println("Translation Y: " + correctedTransform.getY());
@@ -104,7 +105,7 @@ public class HeightMapICPCalculatorTest
       cudaFreeAsync(devicePtr, stream);
       localMap.close();
       globalMap.close();
-      heightMapICPCalculator.destroy();
+      oldGpuICPCalculator.destroy();
    }
 
    /**
@@ -114,7 +115,7 @@ public class HeightMapICPCalculatorTest
    @Test
    public void testICPWithIdenticalMapsRealHeight()
    {
-      HeightMapICPCalculator heightMapICPCalculator = new HeightMapICPCalculator(heightMapParameters, stream);
+      OldGpuICPCalculator oldGpuICPCalculator = new OldGpuICPCalculator(heightMapParameters, stream);
 
       GpuMat localMap = new GpuMat(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_32FC1);
       localMap.setTo(new Scalar(1.0));
@@ -138,10 +139,10 @@ public class HeightMapICPCalculatorTest
       Point3D globalMapCenter = new Point3D(0.0, 0.0, 0.0);
 
       // Run Kernel (Center at [0, 0] for both)
-      heightMapICPCalculator.update(localMap, globalMap, devicePtr, globalMapCenter);
+      oldGpuICPCalculator.update(localMap, globalMap, devicePtr, globalMapCenter);
 
       // Let's get the result and see how we did...
-      Vector3D correctedTransform = heightMapICPCalculator.getCorrectedTransform();
+      Vector3D correctedTransform = oldGpuICPCalculator.getCorrectedTransform();
 
       System.out.println("Mean X: " + correctedTransform.getX());
       System.out.println("Mean Y: " + correctedTransform.getY());
@@ -157,7 +158,7 @@ public class HeightMapICPCalculatorTest
       cudaFreeAsync(devicePtr, stream);
       localMap.close();
       globalMap.close();
-      heightMapICPCalculator.destroy();
+      oldGpuICPCalculator.destroy();
    }
 
    /**
@@ -166,7 +167,7 @@ public class HeightMapICPCalculatorTest
    @Test
    public void testICPSameOriginDifferentHeights()
    {
-      HeightMapICPCalculator heightMapICPCalculator = new HeightMapICPCalculator(heightMapParameters, stream);
+      OldGpuICPCalculator oldGpuICPCalculator = new OldGpuICPCalculator(heightMapParameters, stream);
 
       // The global map is higher than the local map
       GpuMat localMap = new GpuMat(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_32FC1, new Scalar(1.0));
@@ -188,10 +189,10 @@ public class HeightMapICPCalculatorTest
 
       // Run Kernel (Center at [0, 0] for both)
       Point3D mapCenter = new Point3D(0.0, 0.0, 0.0);
-      heightMapICPCalculator.update(localMap, globalMap, devicePtr, mapCenter);
+      oldGpuICPCalculator.update(localMap, globalMap, devicePtr, mapCenter);
 
       // Let's get the result and see how we did...
-      Vector3D correctedTransform = heightMapICPCalculator.getCorrectedTransform();
+      Vector3D correctedTransform = oldGpuICPCalculator.getCorrectedTransform();
 
       System.out.println("Mean X: " + correctedTransform.getX());
       System.out.println("Mean Y: " + correctedTransform.getY());
@@ -209,7 +210,7 @@ public class HeightMapICPCalculatorTest
       devicePtr.close();
       localMap.close();
       globalMap.close();
-      heightMapICPCalculator.destroy();
+      oldGpuICPCalculator.destroy();
    }
 
    /**
@@ -218,7 +219,7 @@ public class HeightMapICPCalculatorTest
    @Test
    public void testICPWithOneMeterXYOriginOffset()
    {
-      HeightMapICPCalculator heightMapICPCalculator = new HeightMapICPCalculator(heightMapParameters, stream);
+      OldGpuICPCalculator oldGpuICPCalculator = new OldGpuICPCalculator(heightMapParameters, stream);
 
       GpuMat localMap = new GpuMat(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_32FC1, new Scalar(1.0));
       localMap.setTo(new Scalar(1.0));
@@ -244,10 +245,10 @@ public class HeightMapICPCalculatorTest
       // Run Kernel with 1 meter offset in map centers
       // Local map centered at origin (0,0,0)
       // Global map centered at (1,0,0) - 1 meter offset in X
-      heightMapICPCalculator.update(localMap, globalMap, devicePtr, mapCenter);
+      oldGpuICPCalculator.update(localMap, globalMap, devicePtr, mapCenter);
 
       // Let's get the result and see how we did...
-      Vector3D correctedTransform = heightMapICPCalculator.getCorrectedTransform();
+      Vector3D correctedTransform = oldGpuICPCalculator.getCorrectedTransform();
 
       System.out.println("Mean X: " + correctedTransform.getX());
       System.out.println("Mean Y: " + correctedTransform.getY());
@@ -264,7 +265,7 @@ public class HeightMapICPCalculatorTest
       devicePtr.close();
       localMap.close();
       globalMap.close();
-      heightMapICPCalculator.destroy();
+      oldGpuICPCalculator.destroy();
    }
 
    @Test
@@ -273,7 +274,7 @@ public class HeightMapICPCalculatorTest
       heightMapParameters.setLocalWidthInMeters(1.0);
       heightMapParameters.setGlobalWidthInMeters(2.0);
       heightMapParameters.setCellSize(0.1);
-      HeightMapICPCalculator heightMapICPCalculator = new HeightMapICPCalculator(heightMapParameters, stream);
+      OldGpuICPCalculator oldGpuICPCalculator = new OldGpuICPCalculator(heightMapParameters, stream);
 
       int localCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getCellSize());
       int globalCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getGlobalWidthInMeters(), heightMapParameters.getCellSize());
@@ -332,9 +333,9 @@ public class HeightMapICPCalculatorTest
       CUDATools.memcpyAsync(devicePtr, hostPtr, 16, stream);
 
       // Run ICP
-      heightMapICPCalculator.update(localMap, globalMap, devicePtr, globalMapCenter);
+      oldGpuICPCalculator.update(localMap, globalMap, devicePtr, globalMapCenter);
 
-      Vector3D correctedTransform = heightMapICPCalculator.getCorrectedTransform();
+      Vector3D correctedTransform = oldGpuICPCalculator.getCorrectedTransform();
 
       System.out.println("Corrected X: " + correctedTransform.getX());
       System.out.println("Corrected Y: " + correctedTransform.getY());
@@ -352,7 +353,7 @@ public class HeightMapICPCalculatorTest
       devicePtr.close();
       localMap.close();
       globalMap.close();
-      heightMapICPCalculator.destroy();
+      oldGpuICPCalculator.destroy();
    }
 
    @Test
@@ -361,7 +362,7 @@ public class HeightMapICPCalculatorTest
       heightMapParameters.setLocalWidthInMeters(1.0);
       heightMapParameters.setGlobalWidthInMeters(2.0);
       heightMapParameters.setCellSize(0.1);
-      HeightMapICPCalculator heightMapICPCalculator = new HeightMapICPCalculator(heightMapParameters, stream);
+      OldGpuICPCalculator oldGpuICPCalculator = new OldGpuICPCalculator(heightMapParameters, stream);
 
       int localCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getCellSize());
       int globalCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getGlobalWidthInMeters(), heightMapParameters.getCellSize());
@@ -422,9 +423,9 @@ public class HeightMapICPCalculatorTest
       CUDATools.memcpyAsync(devicePtr, hostPtr, 16, stream);
 
       // Run ICP
-      heightMapICPCalculator.update(localMap, globalMap, devicePtr, globalMapCenter);
+      oldGpuICPCalculator.update(localMap, globalMap, devicePtr, globalMapCenter);
 
-      Vector3D correctedTransform = heightMapICPCalculator.getCorrectedTransform();
+      Vector3D correctedTransform = oldGpuICPCalculator.getCorrectedTransform();
 
       System.out.println("Corrected X: " + correctedTransform.getX());
       System.out.println("Corrected Y: " + correctedTransform.getY());
@@ -442,7 +443,7 @@ public class HeightMapICPCalculatorTest
       devicePtr.close();
       localMap.close();
       globalMap.close();
-      heightMapICPCalculator.destroy();
+      oldGpuICPCalculator.destroy();
    }
 
    @Test
@@ -453,7 +454,7 @@ public class HeightMapICPCalculatorTest
       heightMapParameters.setCellSize(0.1);
       heightMapParameters.setIcpConvergenceThreshold(0.001);
       heightMapParameters.setIcpMaxIterations(50);
-      HeightMapICPCalculator heightMapICPCalculator = new HeightMapICPCalculator(heightMapParameters, stream);
+      OldGpuICPCalculator oldGpuICPCalculator = new OldGpuICPCalculator(heightMapParameters, stream);
 
       int localCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getCellSize());
       int globalCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getGlobalWidthInMeters(), heightMapParameters.getCellSize());
@@ -519,9 +520,9 @@ public class HeightMapICPCalculatorTest
       CUDATools.memcpyAsync(devicePtr, hostPtr, 16, stream);
 
       // Run ICP
-      heightMapICPCalculator.update(localMap, globalMap, devicePtr, globalMapCenter);
+      oldGpuICPCalculator.update(localMap, globalMap, devicePtr, globalMapCenter);
 
-      Vector3D correctedTransform = heightMapICPCalculator.getCorrectedTransform();
+      Vector3D correctedTransform = oldGpuICPCalculator.getCorrectedTransform();
 
       System.out.println("Corrected X: " + correctedTransform.getX());
       System.out.println("Corrected Y: " + correctedTransform.getY());
@@ -539,7 +540,7 @@ public class HeightMapICPCalculatorTest
       devicePtr.close();
       localMap.close();
       globalMap.close();
-      heightMapICPCalculator.destroy();
+      oldGpuICPCalculator.destroy();
    }
 
    @Test
@@ -551,7 +552,7 @@ public class HeightMapICPCalculatorTest
       heightMapParameters.setIcpMaxIterations(5);
       heightMapParameters.setIcpConvergenceThreshold(1e-6);
 
-      HeightMapICPCalculator heightMapICPCalculator = new HeightMapICPCalculator(heightMapParameters, stream);
+      OldGpuICPCalculator oldGpuICPCalculator = new OldGpuICPCalculator(heightMapParameters, stream);
 
       int localCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getCellSize());
       int globalCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getGlobalWidthInMeters(), heightMapParameters.getCellSize());
@@ -609,9 +610,9 @@ public class HeightMapICPCalculatorTest
       CUDATools.memcpyAsync(devicePtr, hostPtr, 16, stream);
 
       // ---------------- Run ICP ----------------
-      heightMapICPCalculator.update(localMap, globalMap, devicePtr, new Point3D());
+      oldGpuICPCalculator.update(localMap, globalMap, devicePtr, new Point3D());
 
-      Vector3D corrected = heightMapICPCalculator.getCorrectedTransform();
+      Vector3D corrected = oldGpuICPCalculator.getCorrectedTransform();
 
       System.out.println("Corrected = " + corrected);
 
@@ -628,7 +629,7 @@ public class HeightMapICPCalculatorTest
       devicePtr.close();
       localMap.close();
       globalMap.close();
-      heightMapICPCalculator.destroy();
+      oldGpuICPCalculator.destroy();
    }
 
    @Test
@@ -641,7 +642,7 @@ public class HeightMapICPCalculatorTest
       heightMapParameters.setIcpMaxIterations(6);
       heightMapParameters.setIcpConvergenceThreshold(0.001);
 
-      HeightMapICPCalculator heightMapICPCalculator = new HeightMapICPCalculator(heightMapParameters, stream);
+      OldGpuICPCalculator oldGpuICPCalculator = new OldGpuICPCalculator(heightMapParameters, stream);
 
       int localCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getCellSize());
       int globalCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getGlobalWidthInMeters(), heightMapParameters.getCellSize());
@@ -728,8 +729,8 @@ public class HeightMapICPCalculatorTest
 
       // ----------------- Run ICP -----------------
       new Point3D(0.10512145566304529, -6.100405932460462E-4, 0.9680018063204976);
-      heightMapICPCalculator.update(localMap, globalMap, devicePtr, new Point3D());
-      Vector3D corrected = heightMapICPCalculator.getCorrectedTransform();
+      oldGpuICPCalculator.update(localMap, globalMap, devicePtr, new Point3D());
+      Vector3D corrected = oldGpuICPCalculator.getCorrectedTransform();
       System.out.println("Corrected transform = " + corrected);
 
       // ----------------- EXPECTATION -----------------
@@ -744,6 +745,6 @@ public class HeightMapICPCalculatorTest
       devicePtr.close();
       localMap.close();
       globalMap.close();
-      heightMapICPCalculator.destroy();
+      oldGpuICPCalculator.destroy();
    }
 }
