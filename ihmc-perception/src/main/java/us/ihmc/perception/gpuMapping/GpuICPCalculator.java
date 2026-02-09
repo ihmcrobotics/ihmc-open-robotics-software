@@ -144,13 +144,13 @@ public class GpuICPCalculator
 
       for (int i = 0; i < heightMapParameters.getIcpMaxIterations(); i++)
       {
-         // Use the GPU pointers we grabbed in step 1
+         // Use the GPU pointers we made earlier
          nearestNeighborsKernel.withPointer(gpuLocalDataPointer);
          nearestNeighborsKernel.withPointer(gpuGlobalDataPointer);
          nearestNeighborsKernel.withPointer(gpuCorrespondences);
          nearestNeighborsKernel.withPointer(gpuDistances);
 
-         // IMPORTANT: Pass the number of POINTS, not the number of floats
+         // Note: Pass the number of points, not the number of floats
          nearestNeighborsKernel.withInt(localPoints);
          nearestNeighborsKernel.withInt(globalPoints);
 
@@ -159,23 +159,25 @@ public class GpuICPCalculator
          int error = cudaStreamSynchronize(stream);
          CUDATools.checkCUDAError(error);
 
-         // Step 2: Download data from GPU to CPU
+         // Download data from GPU to CPU
          CUDATools.memcpyAsync(cpuLocalTransformed, gpuLocalDataPointer, localFloats, stream);
          CUDATools.memcpyAsync(cpuCorrespondences, gpuCorrespondences, localPoints, stream);
          CUDATools.memcpyAsync(cpuDistances, gpuDistances, localPoints, stream);
 
-         float maxDistance = 2.5f;
+         float maxDistance = 1.0f;
          int validCount = 0;
 
          FloatPointer filteredLocal = new FloatPointer(localFloats);
          IntPointer filteredCorrespondences = new IntPointer(localPoints);
 
+         // This loop is going through the local points, and filtered any data out that doesn't make sense
+         // The result is the filtered local data, and the filtered correspondence
          for (int k = 0; k < localPoints; k++)
          {
             float d = cpuDistances.get(k);
 
             if (d > maxDistance || Float.isNaN(d) || Float.isInfinite(d))
-               continue; // reject correspondence
+               continue; // Reject correspondence
 
             // Copy local point (XYZ)
             int dstBase = validCount * 3;
@@ -193,7 +195,7 @@ public class GpuICPCalculator
          if (validCount < 10)
             break;
 
-         // Step 3: Compute transformation using SVD
+         // Compute transformation using SVD
          DMatrixRMaj incrementalTransform = HeightMapTools.computeTransformSVD(filteredLocal, cpuGlobalDataPointer, filteredCorrespondences, validCount);
 
          filteredLocal.close();
@@ -218,32 +220,27 @@ public class GpuICPCalculator
 
          if (moveDist < translationThreshold)
          {
-            break; // Stop if we moved less than 1mm
+            break; // Stop if we moved less then the threshold
          }
 
-         // Assuming incrementalTransform is 4x4 or 3x4
-         float[] h_matrix = new float[16];
-
-         // 1. Flatten and convert from Double to Float
+         // Flatten and convert from Double to Float
          // DMatrixRMaj stores data in a field called '.data'
+         float[] h_matrix = new float[16];
          for (int j = 0; j < incrementalTransform.data.length; j++)
          {
             h_matrix[j] = (float) incrementalTransform.data[j];
          }
 
-         // 2. Wrap in a Host Pointer
+         // Wrap in a Host Pointer
          FloatPointer hostMatrixPtr = new FloatPointer(h_matrix);
          FloatPointer deviceMatrixPtr = new FloatPointer();
-
-         // 4. Copy to GPU
          CUDATools.mallocAsync(deviceMatrixPtr, 16, stream);
          CUDATools.memcpyAsync(deviceMatrixPtr, hostMatrixPtr, 16, stream);
 
-         // 3. Update the Points on the GPU
-
+         // Update the Points on the GPU
          int transformGridSize = (validCount + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
          dim3 transformGridDim = new dim3(transformGridSize, 1, 1);
-         // We pass the R and t we just found into a new kernel
+
          transformPointsKernel.withPointer(gpuLocalDataPointer);
          transformPointsKernel.withPointer(deviceMatrixPtr);
          transformPointsKernel.withInt(localPoints);

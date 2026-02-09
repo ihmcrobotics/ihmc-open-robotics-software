@@ -185,7 +185,7 @@ public class HeightMapTools
    public static FlattenedHeightMap flattenHeightMapToXYZ(GpuMat heightMap,
                                                           double centerX,
                                                           double centerY,
-                                                          double centerZ, // Added parameter
+                                                          double centerZ,
                                                           int centerIndex,
                                                           float cellSize,
                                                           float invalidHeightValue)
@@ -235,6 +235,45 @@ public class HeightMapTools
       return new FlattenedHeightMap(trimmed, validCount);
    }
 
+   /**
+    * Computes the best-fit rigid-body transform (SE(3)) that aligns a set of local 3D points
+    * to a set of global 3D points using Singular Value Decomposition (SVD).
+    * <p>
+    * This method implements the standard point-to-point ICP alignment step:
+    * <ol>
+    *   <li>Compute centroids of the matched local and global point sets</li>
+    *   <li>Build the 3×3 cross-covariance matrix</li>
+    *   <li>Compute the optimal rotation using SVD (Umeyama / Horn method)</li>
+    *   <li>Compute the translation that aligns the centroids</li>
+    * </ol>
+    * The resulting transform minimizes:
+    * <pre>
+    *   Σ || R * p_i + t − q_{c(i)} ||²
+    * </pre>
+    * where {@code p_i} are local points and {@code q_{c(i)}} are their corresponding global points.
+    * <p>
+    * A reflection correction is applied if the computed rotation has a negative determinant.
+    *
+    * <h3>Data Layout</h3>
+    * Points are stored in flat arrays as:
+    * <pre>
+    *   [x0, y0, z0, x1, y1, z1, ..., xN, yN, zN]
+    * </pre>
+    * The {@code correspondences} array maps each local point index {@code i} to a global
+    * point index {@code j}.
+    *
+    * <h3>Usage Context</h3>
+    * This method is intended to be called inside an Iterative Closest Point (ICP) loop,
+    * where correspondences are recomputed each iteration and the returned transform is
+    * applied incrementally.
+    *
+    * @param localPoints     Pointer to the transformed local/source points (size = {@code numberOfPoints * 3})
+    * @param globalPoints    Pointer to the global/target points (size = {@code totalGlobalPoints * 3})
+    * @param correspondences For each local point {@code i}, contains the index {@code j} of the corresponding global point
+    * @param numberOfPoints  Number of valid point correspondences to use
+    * @return 4×4 homogeneous transformation matrix mapping local points into the global frame
+    * @throws IllegalArgumentException if {@code numberOfPoints < 3} (insufficient points to compute a unique transform)
+    */
    public static DMatrixRMaj computeTransformSVD(FloatPointer localPoints, FloatPointer globalPoints, IntPointer correspondences, int numberOfPoints)
    {
       // Compute centroids for both the local points and the global points
