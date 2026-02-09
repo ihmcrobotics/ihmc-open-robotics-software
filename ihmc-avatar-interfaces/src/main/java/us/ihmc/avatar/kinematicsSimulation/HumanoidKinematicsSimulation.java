@@ -5,6 +5,7 @@ import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
+import gnu.trove.map.TObjectDoubleMap;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.AvatarControllerThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -37,9 +38,11 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.graphicsDescription.conversion.YoGraphicConversionTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
@@ -70,7 +73,6 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisher;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisherFactory;
@@ -428,11 +430,6 @@ public class HumanoidKinematicsSimulation
       return rcdPublisherFactory.createRobotConfigurationDataPublisher();
    }
 
-   public void setState()
-   {
-
-   }
-
    public void setRunning(boolean running)
    {
       if(controlThread == null)
@@ -474,11 +471,14 @@ public class HumanoidKinematicsSimulation
 
    public void controllerTick()
    {
-      updateTimer.reset();
+      synchronized (this)
+      {
+         updateTimer.reset();
 
-      doControl();
+         doControl();
 
-      robotConfigurationDataPublisher.write();
+         robotConfigurationDataPublisher.write();
+      }
 
       if (kinematicsSimulationParameters.runNoFasterThanMaxRealtimeRate())
       {
@@ -584,6 +584,22 @@ public class HumanoidKinematicsSimulation
    private void processWalkingStatus(WalkingStatusMessage status)
    {
       latestWalkingStatus.set(WalkingStatus.fromByte(status.getWalkingStatus()));
+   }
+
+   public void reinitialize(RigidBodyTransformReadOnly rootJointTransform, TObjectDoubleMap<String> jointPositions) // TODO: Revisit arg type
+   {
+      synchronized (this)
+      {
+         fullRobotModel.getRootJoint().getJointPose().set(rootJointTransform);
+
+         for (OneDoFJointBasics joint : FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel))
+         {
+            if (jointPositions.containsKey(joint.getName()))
+               joint.setQ(jointPositions.get(joint.getName()));
+         }
+
+         initialize();
+      }
    }
 
    public void destroy()
