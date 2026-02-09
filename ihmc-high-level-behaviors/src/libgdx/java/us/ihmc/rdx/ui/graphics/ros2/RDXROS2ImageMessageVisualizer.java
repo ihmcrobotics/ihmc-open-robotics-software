@@ -45,7 +45,7 @@ public class RDXROS2ImageMessageVisualizer extends RDXROS2ImageVisualizer<ImageM
    {
       if (subscription != null)
          subscription.remove();
-      subscription = ros2Node.createSubscription(topic, subscriber -> queueRenderImage(subscriber.takeNextData()));
+      subscription = ros2Node.createSubscription2(topic, this::queueRenderImage);
    }
 
    private void unsubscribe()
