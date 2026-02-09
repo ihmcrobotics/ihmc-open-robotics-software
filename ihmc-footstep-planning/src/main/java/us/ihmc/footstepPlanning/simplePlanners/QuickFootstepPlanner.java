@@ -30,7 +30,7 @@ public class QuickFootstepPlanner
    private SideMap<Pose3D> goal;
    private final Pose3D swingEnd = new Pose3D();
    private RobotSide footToSwing = RobotSide.LEFT;
-   private final Line3D stanceToGoalLine = new Line3D();
+   private final Line3D midline = new Line3D();
    private final Vector3D directionToGoal = new Vector3D();
    private final Pose3D stanceMid = new Pose3D();
    private final Pose3D goalMid = new Pose3D();
@@ -83,6 +83,7 @@ public class QuickFootstepPlanner
       Vector3D stanceMidForward = new Vector3D(Axis3D.X);
       stanceMid.getOrientation().transform(stanceMidForward);
       sidewaysness = 1.0 - (2.0 / Math.PI) * Math.abs(Math.asin(stanceMidForward.dot(stanceToGoal)));
+      boolean sidestep = sidewaysness > 0.7;
 
       Vector2D bisectorDirection = new Vector2D();
       EuclidGeometryTools.perpendicularBisector2D(new Point2D(goals.get(RobotSide.RIGHT).getPosition()),
@@ -102,12 +103,12 @@ public class QuickFootstepPlanner
          bisectorDirection.negate();
       approachGoalMid.scaleAdd(stepLength * 0.3 * (1.0 - sidewaysness), new Vector3D(bisectorDirection), goalMid.getPosition());
 
-      stanceToGoalLine.set(stanceMid.getPosition(), approachGoalMid);
+      midline.set(stanceMid.getPosition(), approachGoalMid);
       directionToGoal.sub(approachGoalMid, stanceMid.getPosition());
       directionToGoal.normalize();
 
       for (RobotSide side : RobotSide.values)
-         midlineProjection.get(side).set(stanceToGoalLine.orthogonalProjectionCopy(stances.get(side).getPosition()));
+         midlineProjection.get(side).set(midline.orthogonalProjectionCopy(stances.get(side).getPosition()));
       SideMap<Double> distanceToGoalMid = new SideMap<>(side -> midlineProjection.get(side).distance(approachGoalMid));
 
       // TODO: Calculate data for each foot before deciding which foot to swing
@@ -115,6 +116,12 @@ public class QuickFootstepPlanner
       // Evaluate criteria for swing side selection
       SideMap<Boolean> canReachGoal = new SideMap<>();
       SideMap<Boolean> goalIsCrossover = new SideMap<>();
+      // TODO: Need "isBlocked" which is either crossover
+      //   or stepping on opposite stance or goal foot
+      //   In the case a footstep is blocked, we need to store the blocking Pose3D
+      //     and compute a modified step location, probably rotating the prospective
+      //     footstep about the stance foot away from the blocking step
+
       for (RobotSide side : RobotSide.values)
       {
          double allowedLength = Math.max(stepLength, goals.get(side).getPosition().distance(goals.get(side.getOppositeSide()).getPosition()));
