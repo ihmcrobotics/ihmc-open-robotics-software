@@ -7,15 +7,24 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * TODO: Add other actions besides setting up an object
        * TODO: The following fields are work in progress:
        */
 public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefinitionMessage> implements Settable<SceneActionNodeDefinitionMessage>, EpsilonComparable<SceneActionNodeDefinitionMessage>
 {
+   public static final byte SETUP_OBJECT = (byte) 0;
+   public static final byte FREEZE_OBJECT = (byte) 1;
    /**
             * Parent definition fields
             */
    public behavior_msgs.msg.dds.ActionNodeDefinitionMessage definition_;
+   /**
+            * The type of action as defined above
+            */
+   public byte scene_action_type_;
+   /**
+            * Definition of the object to setup
+            */
+   public behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage scene_object_definition_;
    /**
             * If this action can't do what it needs to do in this amount of time, give up.
             */
@@ -24,10 +33,6 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
             * Filter for persistent detection history size
             */
    public int minimum_history_size_;
-   /**
-            * Definition of the object to setup
-            */
-   public behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage scene_object_definition_;
    /**
             * YOLO confidence threshold
             */
@@ -81,11 +86,13 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
    public void set(SceneActionNodeDefinitionMessage other)
    {
       behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
+      scene_action_type_ = other.scene_action_type_;
+
+      behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessagePubSubType.staticCopy(other.scene_object_definition_, scene_object_definition_);
       timeout_ = other.timeout_;
 
       minimum_history_size_ = other.minimum_history_size_;
 
-      behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessagePubSubType.staticCopy(other.scene_object_definition_, scene_object_definition_);
       yolo_confidence_threshold_ = other.yolo_confidence_threshold_;
 
       yolo_mask_threshold_ = other.yolo_mask_threshold_;
@@ -108,6 +115,30 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
    public behavior_msgs.msg.dds.ActionNodeDefinitionMessage getDefinition()
    {
       return definition_;
+   }
+
+   /**
+            * The type of action as defined above
+            */
+   public void setSceneActionType(byte scene_action_type)
+   {
+      scene_action_type_ = scene_action_type;
+   }
+   /**
+            * The type of action as defined above
+            */
+   public byte getSceneActionType()
+   {
+      return scene_action_type_;
+   }
+
+
+   /**
+            * Definition of the object to setup
+            */
+   public behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage getSceneObjectDefinition()
+   {
+      return scene_object_definition_;
    }
 
    /**
@@ -138,15 +169,6 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
    public int getMinimumHistorySize()
    {
       return minimum_history_size_;
-   }
-
-
-   /**
-            * Definition of the object to setup
-            */
-   public behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage getSceneObjectDefinition()
-   {
-      return scene_object_definition_;
    }
 
    /**
@@ -270,11 +292,13 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
       if(other == this) return true;
 
       if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.scene_action_type_, other.scene_action_type_, epsilon)) return false;
+
+      if (!this.scene_object_definition_.epsilonEquals(other.scene_object_definition_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.timeout_, other.timeout_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_history_size_, other.minimum_history_size_, epsilon)) return false;
 
-      if (!this.scene_object_definition_.epsilonEquals(other.scene_object_definition_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.yolo_confidence_threshold_, other.yolo_confidence_threshold_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.yolo_mask_threshold_, other.yolo_mask_threshold_, epsilon)) return false;
@@ -305,11 +329,13 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
       SceneActionNodeDefinitionMessage otherMyClass = (SceneActionNodeDefinitionMessage) other;
 
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
+      if(this.scene_action_type_ != otherMyClass.scene_action_type_) return false;
+
+      if (!this.scene_object_definition_.equals(otherMyClass.scene_object_definition_)) return false;
       if(this.timeout_ != otherMyClass.timeout_) return false;
 
       if(this.minimum_history_size_ != otherMyClass.minimum_history_size_) return false;
 
-      if (!this.scene_object_definition_.equals(otherMyClass.scene_object_definition_)) return false;
       if(this.yolo_confidence_threshold_ != otherMyClass.yolo_confidence_threshold_) return false;
 
       if(this.yolo_mask_threshold_ != otherMyClass.yolo_mask_threshold_) return false;
@@ -335,12 +361,14 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
       builder.append("SceneActionNodeDefinitionMessage {");
       builder.append("definition=");
       builder.append(this.definition_);      builder.append(", ");
+      builder.append("scene_action_type=");
+      builder.append(this.scene_action_type_);      builder.append(", ");
+      builder.append("scene_object_definition=");
+      builder.append(this.scene_object_definition_);      builder.append(", ");
       builder.append("timeout=");
       builder.append(this.timeout_);      builder.append(", ");
       builder.append("minimum_history_size=");
       builder.append(this.minimum_history_size_);      builder.append(", ");
-      builder.append("scene_object_definition=");
-      builder.append(this.scene_object_definition_);      builder.append(", ");
       builder.append("yolo_confidence_threshold=");
       builder.append(this.yolo_confidence_threshold_);      builder.append(", ");
       builder.append("yolo_mask_threshold=");

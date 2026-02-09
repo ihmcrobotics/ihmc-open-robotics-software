@@ -1,9 +1,0 @@
-{
-  "dockspacePanels" : { },
-  "windows" : {
-    "3D View" : true,
-    "Door Detection UI" : true,
-    "YOLO Settings" : true,
-    "ZED SVO" : false
-  }
-}

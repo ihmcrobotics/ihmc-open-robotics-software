@@ -3,14 +3,10 @@ package us.ihmc.communication;
 import controller_msgs.msg.dds.RigidBodyTransformMessage;
 import perception_msgs.msg.dds.ArUcoMarkerPoses;
 import perception_msgs.msg.dds.ChunkMessage;
-import perception_msgs.msg.dds.DetectedDoorListMessage;
-import perception_msgs.msg.dds.DetectedObjectPacket;
 import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.ImageMessage;
-import perception_msgs.msg.dds.IterativeClosestPointRequest;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
-import perception_msgs.msg.dds.SceneGraphMessage;
 import perception_msgs.msg.dds.TerrainMapMessage;
 import perception_msgs.msg.dds.YOLOv8ExecutorParameters;
 import perception_msgs.msg.dds.ZEDSVOCurrentFileMessage;
@@ -33,22 +29,11 @@ public final class PerceptionAPI
 {
    public static final ROS2Topic<?> IHMC_ROOT = ROS2Tools.IHMC_ROOT;
    public static final ROS2Topic<?> PERCEPTION_MODULE = IHMC_ROOT.withModule("perception");
-   public static final ROS2Topic<?> SCENE_GRAPH_MODULE = IHMC_ROOT.withModule("scene_graph");
    public static final ROS2Topic<?> HEIGHT_MAP_MODULE = IHMC_ROOT.withModule("height_map");
    public static final ROS2Topic<?> TERRAIN_MAP_MODULE = IHMC_ROOT.withModule("terrain_map");
 
    public static final ROS2Topic<?> BEST_EFFORT = IHMC_ROOT.withQoS(ROS2QosProfile.BEST_EFFORT());
    public static final ROS2Topic<?> RELIABLE = IHMC_ROOT.withQoS(ROS2QosProfile.RELIABLE());
-
-   /*
-    * Scene graph
-    */
-   public static final ROS2IOTopicPair<SceneGraphMessage> SCENE_GRAPH = new ROS2IOTopicPair<>(SCENE_GRAPH_MODULE.withTypeName(SceneGraphMessage.class));
-
-   /*
-    * Doors
-    */
-   public static final ROS2Topic<DetectedDoorListMessage> DETECTED_DOORS = IHMC_ROOT.withModule("door_detection").withType(DetectedDoorListMessage.class);
 
    /*
     * Detection manager
@@ -217,16 +202,6 @@ public final class PerceptionAPI
                                                         new ROS2IOTopicPair<>(TRANSFORM_TUNING_BASE_TOPIC.withSuffix(
                                                               "situational_awareness_right_camera_to_parent")));
    }
-
-   /*
-    * ICP (old, not used)
-    */
-   public static final ROS2Topic<IterativeClosestPointRequest> ICP_REQUEST = IHMC_ROOT.withModule("iterative_closest_point")
-                                                                                      .withSuffix("request")
-                                                                                      .withType(IterativeClosestPointRequest.class);
-   public static final ROS2Topic<DetectedObjectPacket> ICP_RESULT = IHMC_ROOT.withModule("iterative_closest_point")
-                                                                             .withSuffix("result")
-                                                                             .withType(DetectedObjectPacket.class);
 
    /*
     * YOLO

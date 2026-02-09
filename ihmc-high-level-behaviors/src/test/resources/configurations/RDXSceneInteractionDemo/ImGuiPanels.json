@@ -1,0 +1,11 @@
+{
+  "dockspacePanels" : { },
+  "windows" : {
+    "3D View" : true,
+    "3D View 2" : true,
+    "Color Image" : true,
+    "Depth Image" : false,
+    "Environment" : false,
+    "Mouse Picking" : true
+  }
+}

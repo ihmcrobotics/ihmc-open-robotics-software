@@ -3,7 +3,7 @@ package us.ihmc.behaviors.behaviorTree.action.actions;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
-import us.ihmc.behaviors.behaviorTree.action.TaskspaceTrajectoryTrackingErrorCalculator;
+import us.ihmc.behaviors.behaviorTree.action.TrajectoryTrackingErrorCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.Throttler;
@@ -36,8 +36,8 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
    private final SideDependentList<FramePose3D> syncedFeetPoses = new SideDependentList<>(() -> new FramePose3D());
    private final SideDependentList<Integer> indexOfLastFoot = new SideDependentList<>();
    private double nominalExecutionDuration;
-   private final SideDependentList<TaskspaceTrajectoryTrackingErrorCalculator> trackingCalculators = new SideDependentList<>(
-         TaskspaceTrajectoryTrackingErrorCalculator::new);
+   private final SideDependentList<TrajectoryTrackingErrorCalculator> trackingCalculators = new SideDependentList<>(
+         TrajectoryTrackingErrorCalculator::new);
    private final FramePose3D solePose = new FramePose3D();
    private final FootstepPlan footstepPlanToExecute = new FootstepPlan();
    private final Throttler previewPlanningThrottler = new Throttler().setPeriod(1.0);
@@ -51,8 +51,8 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
 
       walkingControllerParameters = robotModel.getWalkingControllerParameters();
 
-      previewFootstepPlanningThread = new FootstepPlanActionPlanningThread(true, state, definition, rootNode.getTerrainMap());
-      executionFootstepPlanningThread = new FootstepPlanActionPlanningThread(false, state, definition, rootNode.getTerrainMap());
+      previewFootstepPlanningThread = new FootstepPlanActionPlanningThread(true, state, definition, scene.getTerrainMap());
+      executionFootstepPlanningThread = new FootstepPlanActionPlanningThread(false, state, definition, scene.getTerrainMap());
    }
 
    @Override

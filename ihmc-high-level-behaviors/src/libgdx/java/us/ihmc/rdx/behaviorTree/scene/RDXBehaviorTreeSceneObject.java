@@ -4,25 +4,34 @@ import behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage;
 import behavior_msgs.msg.dds.BehaviorTreeSceneObjectStateMessage;
 import behavior_msgs.msg.dds.PersistentDetectionStatusMessage;
 import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectState;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectType;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.rdx.RDX3DSituatedText;
 import us.ihmc.rdx.behaviorTree.RDXCRDTTools;
+import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 
+import java.util.Random;
+
 public class RDXBehaviorTreeSceneObject extends BehaviorTreeSceneObjectState
 {
+   private static final Random random = new Random();
    private final RDXBaseUI baseUI;
-
    private final RDXSelectablePose3DGizmo gizmo;
    protected Model model;
    protected RDXModelInstance modelInstance;
+   private final ModelInstance frameGraphic;
+   private final RDX3DSituatedText textLabel = new RDX3DSituatedText();
 
    private final PersistentDetectionStatusMessage persistentDetection = new PersistentDetectionStatusMessage();
 
@@ -36,6 +45,7 @@ public class RDXBehaviorTreeSceneObject extends BehaviorTreeSceneObjectState
       gizmo.createAndSetupDefault(baseUI.getPrimary3DPanel());
       gizmo.getPoseGizmo().setGizmoFrame(referenceFrame);
 
+      frameGraphic = RDXModelBuilder.createCoordinateFrameInstance(0.2, LibGDXTools.toLibGDX(YoAppearance.randomColor(random)));
       if (getObjectType() == BehaviorTreeSceneObjectType.FOUNDATION_POSE)
       {
          String modelName = getFoundationPoseObjectType().meshDirectory;
@@ -50,12 +60,22 @@ public class RDXBehaviorTreeSceneObject extends BehaviorTreeSceneObjectState
       RDXCRDTTools.syncGizmoWithBidirectionalField(gizmo.getPoseGizmo(), transform, this);
       if (model != null)
          modelInstance.setTransformToWorldFrame(transform.getValueUnsafe());
+
+      LibGDXTools.toLibGDX(transform.getValueUnsafe(), frameGraphic.transform);
+
+      textLabel.setTextWithoutCache(getName());
+      textLabel.setPositionFacingCamera(baseUI.getPrimary3DPanel().getCamera3D(),
+                                        transform.getValueReadOnly().getTranslation().getX(),
+                                        transform.getValueReadOnly().getTranslation().getY(),
+                                        transform.getValueReadOnly().getTranslation().getZ());
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       if (model != null)
          modelInstance.getRenderables(renderables, pool);
+      frameGraphic.getRenderables(renderables, pool);
+      textLabel.getRenderables(renderables, pool);
    }
 
    public void destroy()

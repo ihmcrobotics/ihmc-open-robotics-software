@@ -15,9 +15,9 @@ mainDependencies {
    api("us.ihmc:ihmc-convex-optimization:0.17.23")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-parameter-estimation:source")
-   api("us.ihmc:ihmc-robotics-tools:0.15.3")
-   api("us.ihmc:scs2-simulation:17-0.31.3")
-   api("us.ihmc:mecano-yovariables-filters:17-0.19.2")
+   api("us.ihmc:ihmc-robotics-tools:0.15.7")
+   api("us.ihmc:scs2-simulation:17-0.32.0")
+   api("us.ihmc:mecano-yovariables-filters:17-0.19.3")
 }
 
 testDependencies {
@@ -29,8 +29,8 @@ testDependencies {
 
 visualizersDependencies {
    api(ihmc.sourceSetProject("main"))
-   api("us.ihmc:simulation-construction-set:0.25.3")
-   api("us.ihmc:scs2-simulation-construction-set:17-0.31.3")
+   api("us.ihmc:simulation-construction-set:0.25.4")
+   api("us.ihmc:scs2-simulation-construction-set:17-0.32.0")
 
    var javaFXVersion = "17.0.8"
    api(ihmc.javaFXModule("base", javaFXVersion))

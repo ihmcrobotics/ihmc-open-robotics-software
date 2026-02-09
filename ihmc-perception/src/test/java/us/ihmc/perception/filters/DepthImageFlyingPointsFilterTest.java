@@ -8,7 +8,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.sensors.CameraIntrinsics;
 
 import java.io.IOException;
 import java.net.URISyntaxException;

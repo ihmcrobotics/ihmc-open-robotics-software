@@ -10,7 +10,7 @@ import org.bytedeco.opencv.opencv_objdetect.DetectorParameters;
 import org.bytedeco.opencv.opencv_objdetect.Dictionary;
 import org.bytedeco.opencv.opencv_objdetect.RefineParameters;
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.sensors.CameraIntrinsics;
 
 /**
  * Thin wrapper over OpenCV's {@link ArucoDetector} to make it

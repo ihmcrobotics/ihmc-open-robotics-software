@@ -4,7 +4,6 @@ import gnu.trove.iterator.TFloatIterator;
 import gnu.trove.list.TFloatList;
 import gnu.trove.list.linked.TFloatLinkedList;
 import us.ihmc.commons.thread.TypedNotification;
-import us.ihmc.perception.sceneGraph.SceneGraph;
 
 /**
  * This is for filtering the acceptance of detected objects in
@@ -27,7 +26,7 @@ public class DetectionFilter
 
    public DetectionFilter()
    {
-      this((int) SceneGraph.UPDATE_FREQUENCY, 0.6f);
+      this(60, 0.6f);
    }
 
    public DetectionFilter(int historyLength, float acceptanceThreshold)

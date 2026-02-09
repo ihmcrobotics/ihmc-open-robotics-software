@@ -8,7 +8,7 @@ import us.ihmc.euclid.referenceFrame.FrameCapsule3D;
 import us.ihmc.euclid.referenceFrame.FrameSphere3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.sensors.CameraIntrinsics;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
 import us.ihmc.perception.cuda.CUDAStreamManager;

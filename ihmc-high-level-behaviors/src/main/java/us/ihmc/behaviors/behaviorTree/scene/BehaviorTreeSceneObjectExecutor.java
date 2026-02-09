@@ -18,9 +18,7 @@ import java.time.Instant;
 public class BehaviorTreeSceneObjectExecutor extends BehaviorTreeSceneObjectState
 {
    protected final ROS2SyncedRobotModel syncedRobot;
-
    private PersistentDetection persistentDetection;
-
    private final PersistentDetectionMessageTool persistentDetectionMessageTool = new PersistentDetectionMessageTool();
 
    public BehaviorTreeSceneObjectExecutor(long id, CRDTInfo crdtInfo, ROS2SyncedRobotModel syncedRobot, BehaviorTreeSceneObjectDefinitionMessage definition)
@@ -32,7 +30,7 @@ public class BehaviorTreeSceneObjectExecutor extends BehaviorTreeSceneObjectStat
 
    public void update()
    {
-      if (persistentDetection != null && persistentDetection.isStable())
+      if (!frozen.getValue() && persistentDetection != null && persistentDetection.isStable())
       {
          Vector3DBasics translation = persistentDetection.getFilteredTransform().getTranslation();
 

@@ -15,35 +15,38 @@ import us.ihmc.communication.crdt.CRDTBidirectionalEnumField;
  */
 public class ConditionNodeDefinition extends LeafNodeDefinition
 {
-   public enum Type
+   public enum ConditionNodeType
    {
       COUNTER,
       LLM,
       PROXIMITY,
+      SHAPE_CONTAINS,
       ALWAYS_FAIL,
       ALWAYS_SUCCEED;
 
-      public static final Type[] values = values();
+      public static final ConditionNodeType[] values = values();
    }
 
-   private final CRDTBidirectionalEnumField<Type> type;
+   private final CRDTBidirectionalEnumField<ConditionNodeType> conditionType;
 
    private final CounterConditionDefinition counter;
    private final LLMConditionDefinition llm;
    private final ProximityConditionDefinition proximityCheck;
+   private final ShapeContainsConditionDefinition shapeContains;
 
-   private Type onDiskType;
+   private ConditionNodeType onDiskConditionType;
 
    public ConditionNodeDefinition(BehaviorTreeRootNodeDefinition rootNode)
    {
       super(rootNode);
 
-      type = new CRDTBidirectionalEnumField<>(this, Type.COUNTER);
+      conditionType = new CRDTBidirectionalEnumField<>(this, ConditionNodeType.COUNTER);
 
       // TODO: Do we create them all or only as needed?
       counter = new CounterConditionDefinition(this);
       llm = new LLMConditionDefinition(this);
       proximityCheck = new ProximityConditionDefinition(this);
+      shapeContains = new ShapeContainsConditionDefinition(this);
    }
 
    @Override
@@ -51,13 +54,14 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
    {
       super.saveToFile(jsonNode);
 
-      jsonNode.put("conditionType", type.getValue().name());
+      jsonNode.put("conditionType", conditionType.getValue().name());
 
-      switch (type.getValue())
+      switch (conditionType.getValue())
       {
          case COUNTER -> counter.saveToFile(jsonNode);
          case LLM -> llm.saveToFile(jsonNode);
          case PROXIMITY -> proximityCheck.saveToFile(jsonNode);
+         case SHAPE_CONTAINS -> shapeContains.saveToFile(jsonNode);
       }
    }
 
@@ -66,13 +70,14 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
    {
       super.loadFromFile(jsonNode);
 
-      type.setValue(Type.valueOf(jsonNode.get("conditionType").textValue()));
+      conditionType.setValue(ConditionNodeType.valueOf(jsonNode.get("conditionType").textValue()));
 
-      switch (type.getValue())
+      switch (conditionType.getValue())
       {
          case COUNTER -> counter.loadFromFile(jsonNode);
          case LLM -> llm.loadFromFile(jsonNode);
          case PROXIMITY -> proximityCheck.loadFromFile(jsonNode);
+         case SHAPE_CONTAINS -> shapeContains.loadFromFile(jsonNode);
       }
    }
 
@@ -81,13 +86,14 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
    {
       super.setOnDiskFields();
 
-      onDiskType = type.getValue();
+      onDiskConditionType = conditionType.getValue();
 
-      switch (type.getValue())
+      switch (conditionType.getValue())
       {
          case COUNTER -> counter.setOnDiskFields();
          case LLM -> llm.setOnDiskFields();
          case PROXIMITY -> proximityCheck.setOnDiskFields();
+         case SHAPE_CONTAINS -> shapeContains.setOnDiskFields();
       }
    }
 
@@ -98,13 +104,14 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
 
       if (isUndoAvailable())
       {
-         type.setValue(onDiskType);
+         conditionType.setValue(onDiskConditionType);
 
-         switch (type.getValue())
+         switch (conditionType.getValue())
          {
             case COUNTER -> counter.undoAllNontopologicalChanges();
             case LLM -> llm.undoAllNontopologicalChanges();
             case PROXIMITY -> proximityCheck.undoAllNontopologicalChanges();
+            case SHAPE_CONTAINS -> shapeContains.undoAllNontopologicalChanges();
          }
       }
    }
@@ -114,13 +121,14 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
    {
       boolean unchanged = !super.hasChanges();
 
-      unchanged &= type.getValue() == onDiskType;
+      unchanged &= conditionType.getValue() == onDiskConditionType;
 
-      switch (type.getValue())
+      switch (conditionType.getValue())
       {
          case COUNTER -> unchanged &= !counter.hasChanges();
          case LLM -> unchanged &= !llm.hasChanges();
          case PROXIMITY -> unchanged &= !proximityCheck.hasChanges();
+         case SHAPE_CONTAINS -> unchanged &= !shapeContains.hasChanges();
       }
 
       return !unchanged;
@@ -130,13 +138,14 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
    {
       super.toMessage(message.getDefinition());
 
-      message.setType((byte) type.toMessage().ordinal());
+      message.setConditionType(conditionType.toMessageOrdinal());
 
-      switch (type.getValue())
+      switch (conditionType.getValue())
       {
          case COUNTER -> counter.toMessage(message);
          case LLM -> llm.toMessage(message);
          case PROXIMITY -> proximityCheck.toMessage(message);
+         case SHAPE_CONTAINS -> shapeContains.toMessage(message);
       }
    }
 
@@ -144,19 +153,20 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
    {
       super.fromMessage(message.getDefinition());
 
-      type.fromMessage(Type.values()[message.getType()]);
+      conditionType.fromMessageOrdinal(message.getConditionType(), ConditionNodeType.values);
 
-      switch (type.getValue())
+      switch (conditionType.getValue())
       {
          case COUNTER -> counter.fromMessage(message);
          case LLM -> llm.fromMessage(message);
          case PROXIMITY -> proximityCheck.fromMessage(message);
+         case SHAPE_CONTAINS -> shapeContains.fromMessage(message);
       }
    }
 
-   public CRDTBidirectionalEnumField<Type> getType()
+   public CRDTBidirectionalEnumField<ConditionNodeType> getConditionType()
    {
-      return type;
+      return conditionType;
    }
 
    public CounterConditionDefinition getCounter()
@@ -172,5 +182,10 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
    public ProximityConditionDefinition getProximityCheck()
    {
       return proximityCheck;
+   }
+
+   public ShapeContainsConditionDefinition getShapeContains()
+   {
+      return shapeContains;
    }
 }

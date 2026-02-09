@@ -779,6 +779,15 @@ public class RDXPose3DGizmo implements RenderableProvider
       this.resizeAutomatically.set(resizeAutomatically);
    }
 
+   public void setTorusRadius(double radius)
+   {
+      if (!EuclidCoreTools.epsilonEquals(radius, torusRadius.get(), 1e-5))
+      {
+         torusRadius.set((float) radius);
+         recreateGraphics();
+      }
+   }
+
    ClockFaceRotation3DMouseDragAlgorithm getClockFaceDragAlgorithm()
    {
       return clockFaceDragAlgorithm;
