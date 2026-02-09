@@ -41,6 +41,7 @@ public class QuickFootstepPlanner
    private boolean transistionToGoal;
    private Runnable stepPlannedCallback = () -> {};
    private double sidewaysness;
+   private boolean sidestep;
 
    public List<Pair<RobotSide, Pose3D>> plan(EnumMap<RobotSide, Pose3D> stance, EnumMap<RobotSide, Pose3D> goal)
    {
@@ -83,25 +84,31 @@ public class QuickFootstepPlanner
       Vector3D stanceMidForward = new Vector3D(Axis3D.X);
       stanceMid.getOrientation().transform(stanceMidForward);
       sidewaysness = 1.0 - (2.0 / Math.PI) * Math.abs(Math.asin(stanceMidForward.dot(stanceToGoal)));
-      boolean sidestep = sidewaysness > 0.7;
+      sidestep = sidewaysness > 0.7;
+      // TODO: Sidewaysness can get weird at the end
 
-      Vector2D bisectorDirection = new Vector2D();
-      EuclidGeometryTools.perpendicularBisector2D(new Point2D(goals.get(RobotSide.RIGHT).getPosition()),
-                                                  new Point2D(goals.get(RobotSide.LEFT).getPosition()),
-                                                  new Point2D(), // Bisector start
-                                                  bisectorDirection);
-      Vector3D midFeetForward3D = new Vector3D(Axis3D.X);
-      goalMid.getOrientation().transform(midFeetForward3D);
-      Vector2D midFeetForward = new Vector2D(midFeetForward3D.getX(), midFeetForward3D.getY());
-      if (midFeetForward.dot(bisectorDirection) > 0.0)
-         bisectorDirection.negate();
-      Vector3D stanceForward3D = new Vector3D(Axis3D.X);
-      stanceMid.getOrientation().transform(stanceForward3D);
-      Vector3D stanceToGoalMid = new Vector3D();
-      stanceToGoalMid.sub(goalMid.getPosition(), stanceMid.getPosition());
-      if (stanceForward3D.dot(stanceToGoalMid) < 0.0)
-         bisectorDirection.negate();
-      approachGoalMid.scaleAdd(stepLength * 0.3 * (1.0 - sidewaysness), new Vector3D(bisectorDirection), goalMid.getPosition());
+      if (sidestep)
+         approachGoalMid.set(goalMid.getPosition());
+      else
+      {
+         Vector2D bisectorDirection = new Vector2D();
+         EuclidGeometryTools.perpendicularBisector2D(new Point2D(goals.get(RobotSide.RIGHT).getPosition()),
+                                                     new Point2D(goals.get(RobotSide.LEFT).getPosition()),
+                                                     new Point2D(), // Bisector start
+                                                     bisectorDirection);
+         Vector3D midFeetForward3D = new Vector3D(Axis3D.X);
+         goalMid.getOrientation().transform(midFeetForward3D);
+         Vector2D midFeetForward = new Vector2D(midFeetForward3D.getX(), midFeetForward3D.getY());
+         if (midFeetForward.dot(bisectorDirection) > 0.0)
+            bisectorDirection.negate();
+         Vector3D stanceForward3D = new Vector3D(Axis3D.X);
+         stanceMid.getOrientation().transform(stanceForward3D);
+         Vector3D stanceToGoalMid = new Vector3D();
+         stanceToGoalMid.sub(goalMid.getPosition(), stanceMid.getPosition());
+         if (stanceForward3D.dot(stanceToGoalMid) < 0.0)
+            bisectorDirection.negate();
+         approachGoalMid.scaleAdd(stepLength * 0.3, new Vector3D(bisectorDirection), goalMid.getPosition());
+      }
 
       midline.set(stanceMid.getPosition(), approachGoalMid);
       directionToGoal.sub(approachGoalMid, stanceMid.getPosition());
@@ -116,11 +123,16 @@ public class QuickFootstepPlanner
       // Evaluate criteria for swing side selection
       SideMap<Boolean> canReachGoal = new SideMap<>();
       SideMap<Boolean> goalIsCrossover = new SideMap<>();
+      SideMap<Boolean> overlapsOppositeStep = new SideMap<>();
       // TODO: Need "isBlocked" which is either crossover
       //   or stepping on opposite stance or goal foot
       //   In the case a footstep is blocked, we need to store the blocking Pose3D
       //     and compute a modified step location, probably rotating the prospective
       //     footstep about the stance foot away from the blocking step
+      /**
+       * If it's reachable and blocked by crossover, the step the blocking foot instead (don't perform crossover check for this foot)
+       * If you're stepping not to the goal, check if you are stepping on the opposite goal foot
+       */
 
       for (RobotSide side : RobotSide.values)
       {
@@ -139,6 +151,9 @@ public class QuickFootstepPlanner
                                                                               oppositeStanceForward.getY());
          goalIsCrossover.put(side, location == null || (side == RobotSide.LEFT && location == Location.RIGHT
                                                      || side == RobotSide.RIGHT && location == Location.LEFT));
+
+         // TODO Check opposite goal and stance
+
       }
 
       for (RobotSide side : RobotSide.values) // Take a step towards the goal
@@ -156,12 +171,12 @@ public class QuickFootstepPlanner
          boolean isFurthest = distanceToGoalMid.get(side) >= distanceToGoalMid.get(side.getOppositeSide());
          double stanceDistance = midlineProjection.get(side).distance(midlineProjection.get(side.getOppositeSide()));
 
-         // When walking sideways, if feet are close together, swing foot closest to goal instead TODO: Make sidewaysness activation > 0.5
-         if (sidewaysness > 0.5 ? (stanceDistance < 0.3) != isFurthest : isFurthest)
+         // When walking sideways, if feet are close together, swing foot closest to goal instead
+         if (sidestep ? (stanceDistance < 0.3) != isFurthest : isFurthest)
          {
             footToSwing = side;
 
-            if (sidewaysness > 0.5 && isFurthest) // Swing up to stance foot
+            if (sidestep && isFurthest) // Swing up to stance foot
             {
                double x0 = 0.5, y0 = 0.12; // Diagonal
                double x1 = 1.0, y1 = 0.15; // Straight sideways
@@ -172,6 +187,11 @@ public class QuickFootstepPlanner
             {
                // Avoid erroring out if goal feet impose a more aggressive step
                // Disallow crossover steps
+//               double allowedLength = Math.max(stepLength, goals.get(side).getPosition().distance(goals.get(side.getOppositeSide()).getPosition()));
+//               double allowedYaw = Math.max(stepYaw, Math.abs(goals.get(side).getOrientation().distance(stances.get(side.getOppositeSide()).getOrientation())));
+//               boolean stepDirectlyToGoal = stances.get(side.getOppositeSide()).getPosition().distance(goals.get(side).getPosition()) <= allowedLength
+//                                      && Math.abs(goals.get(side).getOrientation().distance(stances.get(side.getOppositeSide()).getOrientation())) <= allowedYaw);
+
                boolean stepDirectlyToGoal = canReachGoal.get(side) && !goalIsCrossover.get(side);
                // TODO: Avoid stepping on stance foot
                if (stepDirectlyToGoal)
@@ -260,5 +280,10 @@ public class QuickFootstepPlanner
    public double getSidewaysness()
    {
       return sidewaysness;
+   }
+
+   public boolean isSidestep()
+   {
+      return sidestep;
    }
 }
