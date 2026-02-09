@@ -218,11 +218,10 @@ public class AvatarMultiThreadingFactory
       // Set the root registry as the YoVariableServer's main registry
       yoVariableServer.setMainRegistry(rootRegistry,
                                        masterFullRobotModel.getRootJoint().subtreeList(),
-                                       null,
                                        new YoGraphicGroupDefinition(rootRegistry.getName()));
 
       // Add estimator thread registry directly to the YoVariableServer (since it is in a separate thread)
-      yoVariableServer.addRegistry(avatarEstimator.getYoRegistry(), null, avatarEstimator.getSCS2YoGraphics());
+      yoVariableServer.addRegistry(avatarEstimator.getYoRegistry(), avatarEstimator.getSCS2YoGraphics());
    }
 
    public AvatarMultiThreadingManager buildThreadsAndThreadingManager()
@@ -340,7 +339,7 @@ public class AvatarMultiThreadingFactory
                                                                                  false);
 
       // Add controller registry directly to the YoVariableServer (since it is in a separate thread)
-      yoVariableServer.addRegistry(avatarController.getYoVariableRegistry(), null, avatarController.getSCS2YoGraphics());
+      yoVariableServer.addRegistry(avatarController.getYoVariableRegistry(), avatarController.getSCS2YoGraphics());
 
       if (!avatarStepGenerator.hasValue())
          avatarController.getYoVariableRegistry().addChild(environmentalConstraints.getRegistry());
@@ -366,7 +365,7 @@ public class AvatarMultiThreadingFactory
 
       avatarStepGenerator.set(stepGenerator);
 
-      yoVariableServer.addRegistry(avatarStepGenerator.get().getYoVariableRegistry(), null, avatarStepGenerator.get().getSCS2YoGraphics());
+      yoVariableServer.addRegistry(avatarStepGenerator.get().getYoVariableRegistry(), avatarStepGenerator.get().getSCS2YoGraphics());
 
       setupStepGeneratorTaskAndThread(masterRobotModel,
                                       stepGenerator,
@@ -389,7 +388,7 @@ public class AvatarMultiThreadingFactory
                                                                             masterRobotModel.getHumanoidRobotKinematicsCollisionModel(),
                                                                             ikStreamingParameters));
 
-      yoVariableServer.addRegistry(avatarIKStreaming.get().getYoVariableRegistry(), null, avatarIKStreaming.get().getSCS2YoGraphics());
+      yoVariableServer.addRegistry(avatarIKStreaming.get().getYoVariableRegistry(), avatarIKStreaming.get().getSCS2YoGraphics());
 
       setupIKStreamingTaskAndThread(avatarIKStreaming.get(), yoVariableServer);
 
@@ -789,26 +788,22 @@ public class AvatarMultiThreadingFactory
          ArrayList<RegistrySendBufferBuilder> builders = new ArrayList<>();
          builders.add(new RegistrySendBufferBuilder(rootRegistry,
                                                     masterFullRobotModel.getRootJoint().subtreeList(),
-                                                    null,
                                                     avatarEstimator.getSCS2YoGraphics()));
 
          if (avatarController != null)
          {
             builders.add(new RegistrySendBufferBuilder(avatarController.getYoVariableRegistry(),
-                                                       null,
                                                        avatarController.getSCS2YoGraphics()));
          }
 
          if (avatarStepGenerator.hasValue())
          {
             builders.add(new RegistrySendBufferBuilder(avatarStepGenerator.get().getYoVariableRegistry(),
-                                                       null,
                                                        avatarStepGenerator.get().getSCS2YoGraphics()));
          }
          if (avatarIKStreaming.hasValue())
          {
             builders.add(new RegistrySendBufferBuilder(avatarIKStreaming.get().getYoVariableRegistry(),
-                                                       null,
                                                        avatarIKStreaming.get().getSCS2YoGraphics()));
          }
 
@@ -1039,7 +1034,7 @@ public class AvatarMultiThreadingFactory
       };
 
       // Add this thread's YoRegistry to the YoVariable server
-      yoVariableServer.addRegistry(registry, yoGraphicsRegistry);
+      yoVariableServer.addRegistry(registry);
 
       // Add post-thread callback to update YoVariable server with thread registry
       task.addCallbackPostTask(() -> yoVariableServer.update(RealtimeThread.getCurrentMonotonicClockTime(),

@@ -1,6 +1,5 @@
 package us.ihmc.avatar.wholeBodyHardwareControl;
 
-import org.bytedeco.opencl._cl_program;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoLowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.JointControlBlender;
 import us.ihmc.commons.Conversions;
