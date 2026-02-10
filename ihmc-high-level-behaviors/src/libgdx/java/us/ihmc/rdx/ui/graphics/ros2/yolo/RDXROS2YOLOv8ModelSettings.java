@@ -10,7 +10,9 @@ import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import imgui.type.ImString;
+import perception_msgs.msg.dds.YOLOv8ModelInfo;
 import us.ihmc.commons.MathTools;
+import us.ihmc.idl.IDLSequence.StringBuilderHolder;
 import us.ihmc.perception.detections.yolo.SyncedYOLOv8ModelParameters;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -42,18 +44,18 @@ public class RDXROS2YOLOv8ModelSettings
    // Adjustors for individual object classes
    private final RDXYOLOv8ModelClassSettings[] classSettings;
 
-   public RDXROS2YOLOv8ModelSettings(SyncedYOLOv8ModelParameters syncedParameters)
+   public RDXROS2YOLOv8ModelSettings(YOLOv8ModelInfo modelInfo, SyncedYOLOv8ModelParameters syncedParameters)
    {
+      this.modelName = modelInfo.getModelNameAsString();
       this.syncedParameters = syncedParameters;
-      this.modelName = syncedParameters.getModelName();
 
-      String[] detectableClasses = syncedParameters.getDetectableObjectClasses();
-      detectableObjectClassCount = detectableClasses.length;
+      StringBuilderHolder detectableClasses = modelInfo.getDetectableObjectClasses();
+      detectableObjectClassCount = detectableClasses.size();
 
       // Initialize parameters
       classSettings = new RDXYOLOv8ModelClassSettings[detectableObjectClassCount];
       for (int i = 0; i < detectableObjectClassCount; ++i)
-         classSettings[i] = new RDXYOLOv8ModelClassSettings(i, detectableClasses[i], syncedParameters);
+         classSettings[i] = new RDXYOLOv8ModelClassSettings(i, detectableClasses.getString(i), syncedParameters);
 
       Arrays.sort(classSettings, Comparator.comparing(settings -> settings.className));
    }
