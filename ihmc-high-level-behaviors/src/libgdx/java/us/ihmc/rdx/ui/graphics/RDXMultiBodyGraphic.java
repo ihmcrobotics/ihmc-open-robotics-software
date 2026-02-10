@@ -9,8 +9,6 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.simulation.scs2.RDXFrameGraphicsNode;
-import us.ihmc.rdx.simulation.scs2.RDXFrameNodePart;
 import us.ihmc.rdx.simulation.scs2.RDXMultiBodySystemFactories;
 import us.ihmc.rdx.simulation.scs2.RDXRigidBody;
 import us.ihmc.rdx.simulation.scs2.RDXVisualTools;
@@ -110,9 +108,9 @@ public class RDXMultiBodyGraphic extends RDXVisualizer
       multiBody.setDiffuseColorRecursive(color);
    }
 
-   public void setColorForBodies(String name, Color color)
+   public void setColorForBody(String name, Color color)
    {
-      multiBody.setDiffuseColorForBodies(name, color);
+      multiBody.setDiffuseColorForBody(name, color);
    }
 
    public boolean isRobotLoaded()

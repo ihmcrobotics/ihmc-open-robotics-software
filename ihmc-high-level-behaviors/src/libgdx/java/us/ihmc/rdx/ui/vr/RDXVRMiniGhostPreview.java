@@ -40,11 +40,6 @@ public class RDXVRMiniGhostPreview
    private ReferenceFrame miniGhostAdjustedFrame;
    private final RigidBodyTransform additionalOffset =  new RigidBodyTransform();
 
-   public RDXVRMiniGhostPreview(String robotName, RobotDefinition robotDefinition, FullHumanoidRobotModel miniGhostFullRobotModel, RDXVRContext vrContext)
-   {
-      this(robotName, robotDefinition, miniGhostFullRobotModel, vrContext, null, -1.0f);
-   }
-
    public RDXVRMiniGhostPreview(String robotName, RobotDefinition robotDefinition, FullHumanoidRobotModel miniGhostFullRobotModel, RDXVRContext vrContext, Color color, float opacity)
    {
       this.miniGhostFullRobotModel = miniGhostFullRobotModel;
@@ -150,11 +145,11 @@ public class RDXVRMiniGhostPreview
    private final RigidBodyTransform ghostToReal = new RigidBodyTransform();
    private final Vector3D tempTranslation = new Vector3D();
 
-   public void updateRootOffset(RigidBodyTransformReadOnly kstTransform, RigidBodyTransformReadOnly realRobotTransform)
+   public void updateRootOffset(RigidBodyTransformReadOnly kstRootTransform, RigidBodyTransformReadOnly realRootTransform)
    {
-      ghostToReal.set(kstTransform);
+      ghostToReal.set(kstRootTransform);
       ghostToReal.invert();
-      ghostToReal.multiply(realRobotTransform);
+      ghostToReal.multiply(realRootTransform);
 
       tempTranslation.set(ghostToReal.getTranslation());
       tempTranslation.scale(0.05);
@@ -162,6 +157,14 @@ public class RDXVRMiniGhostPreview
 
       additionalOffset.set(ghostToReal);
       miniGhostAdjustedFrame.update();
+   }
+
+   public void updateColor(boolean leftFootContact, boolean rightFootContact)
+   {
+      miniGhostRobotGraphic.setColorForBody(miniGhostFullRobotModel.getFoot(RobotSide.LEFT).getName(),
+                                            leftFootContact ? Color.RED : color);
+      miniGhostRobotGraphic.setColorForBody(miniGhostFullRobotModel.getFoot(RobotSide.RIGHT).getName(),
+                                            rightFootContact ? Color.RED : color);
    }
 
    public void setActive(boolean active)

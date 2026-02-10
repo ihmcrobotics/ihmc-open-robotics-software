@@ -218,7 +218,9 @@ public class RDXVRWholeBodyKinematicStreaming
       miniGhostKST = new RDXVRMiniGhostPreview(syncedRobot.getRobotModel().getSimpleRobotName() + " KST",
                                                miniGhostRobotDefinition,
                                                miniGhostFullRobotModel,
-                                               vrContext);
+                                               vrContext,
+                                               Color.YELLOW,
+                                               0.2f);
 
       FullHumanoidRobotModel miniGhostRealModel = new FullHumanoidRobotModelWrapper(miniGhostRobotDefinition, syncedRobot.getRobotModel().getJointMap(), false);
       miniGhostReal = new RDXVRMiniGhostPreview(syncedRobot.getRobotModel().getSimpleRobotName() + " Real",
@@ -764,17 +766,19 @@ public class RDXVRWholeBodyKinematicStreaming
                ghostFullRobotModel.getElevator().updateFramesRecursively();
             }
             multiContact.update(latestStatus);
+
+            if (miniGhostKST.isEnabled())
+            {
+               miniGhostKST.updateColor(latestStatus.getLeftFootInContact(), latestStatus.getRightFootInContact());
+               miniGhostKST.updatePose();
+               miniGhostReal.updateRootOffset(ghostFullRobotModel.getPelvis().getBodyFixedFrame().getTransformToRoot(),
+                                              syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame().getTransformToRoot());
+               miniGhostReal.updatePose();
+            }
          }
 
          if (ghostRobotGraphic.isActive())
             ghostRobotGraphic.update();
-         if (miniGhostKST.isEnabled())
-         {
-            miniGhostKST.updatePose();
-            miniGhostReal.updateRootOffset(ghostFullRobotModel.getPelvis().getBodyFixedFrame().getTransformToRoot(),
-                                           syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame().getTransformToRoot());
-            miniGhostReal.updatePose();
-         }
 
          if (recordRequest && recordingGraphics != null)
          {
