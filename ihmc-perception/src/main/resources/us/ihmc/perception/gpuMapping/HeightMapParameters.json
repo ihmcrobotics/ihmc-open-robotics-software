@@ -72,9 +72,14 @@
     "lowerBound": 1,
     "upperBound": 50
   },
-  "Icp convergence threshold": {
+  "Icp convergence": {
     "value": 0.001,
     "lowerBound": 0.0001,
+    "upperBound": 1
+  },
+  "Icp max distance": {
+    "value": 0.35,
+    "lowerBound": 0.01,
     "upperBound": 1
   }
 }

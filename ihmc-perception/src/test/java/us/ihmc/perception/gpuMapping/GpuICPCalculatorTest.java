@@ -49,7 +49,7 @@ public class GpuICPCalculatorTest
       heightMapParameters.setGlobalWidthInMeters(2.0);
       heightMapParameters.setCellSize(0.1);
       heightMapParameters.setIcpMaxIterations(6);
-      heightMapParameters.setIcpConvergenceThreshold(0.001);
+      heightMapParameters.setIcpConvergence(0.001);
 
       int localCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getCellSize());
       int globalCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getGlobalWidthInMeters(), heightMapParameters.getCellSize());
@@ -191,6 +191,7 @@ public class GpuICPCalculatorTest
    @Test
    public void testICPSameOriginDifferentHeights()
    {
+      heightMapParameters.setIcpMaxDistance(0.5);
       GpuICPCalculator heightMapICPCalculator = new GpuICPCalculator(heightMapParameters);
 
       // The global map is higher than the local map
@@ -198,11 +199,6 @@ public class GpuICPCalculatorTest
       localMap.setTo(new Scalar(1.4));
       GpuMat globalMap = new GpuMat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_32FC1);
       globalMap.setTo(new Scalar(1.0));
-
-      // Identity transform (same origins in X,Y)
-      RigidBodyTransform identityTransform = new RigidBodyTransform();
-      float[] transformArray = new float[16];
-      identityTransform.get(transformArray);
 
       // Run Kernel (Center at [0, 0] for both)
       heightMapICPCalculator.computeICPErrorTransform(localMap,
@@ -221,10 +217,9 @@ public class GpuICPCalculatorTest
       System.out.println("Mean Z: " + correctedTransform.getZ());
 
       // Assertions: X,Y should be zero, Z should be 1.0 (pointing from local to global)
-      final double EPSILON = 0.1;
-      assertEquals(0.0, correctedTransform.getX(), EPSILON);
-      assertEquals(0.0, correctedTransform.getY(), EPSILON);
-      assertEquals(-0.4, correctedTransform.getZ(), EPSILON);
+      assertEquals(0.0, correctedTransform.getX(), 1e-3);
+      assertEquals(0.0, correctedTransform.getY(), 1e-3);
+      assertEquals(-0.4, correctedTransform.getZ(), 1e-3);
 
       // Gotta make sure everything shuts closes properly
       localMap.close();
@@ -379,7 +374,7 @@ public class GpuICPCalculatorTest
       heightMapParameters.setGlobalWidthInMeters(2.0);
       heightMapParameters.setCellSize(0.1);
       heightMapParameters.setIcpMaxIterations(5);
-      heightMapParameters.setIcpConvergenceThreshold(1e-6);
+      heightMapParameters.setIcpConvergence(1e-6);
 
       GpuICPCalculator heightMapICPCalculator = new GpuICPCalculator(heightMapParameters);
 
@@ -458,7 +453,7 @@ public class GpuICPCalculatorTest
       heightMapParameters.setGlobalWidthInMeters(1.0);
       heightMapParameters.setCellSize(0.1);
       heightMapParameters.setIcpMaxIterations(6);
-      heightMapParameters.setIcpConvergenceThreshold(0.001);
+      heightMapParameters.setIcpConvergence(0.001);
 
       GpuICPCalculator heightMapICPCalculator = new GpuICPCalculator(heightMapParameters);
 

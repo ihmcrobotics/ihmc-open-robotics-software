@@ -452,7 +452,7 @@ public class OldGpuICPCalculatorTest
       heightMapParameters.setLocalWidthInMeters(1.0);
       heightMapParameters.setGlobalWidthInMeters(2.0);
       heightMapParameters.setCellSize(0.1);
-      heightMapParameters.setIcpConvergenceThreshold(0.001);
+      heightMapParameters.setIcpConvergence(0.001);
       heightMapParameters.setIcpMaxIterations(50);
       OldGpuICPCalculator oldGpuICPCalculator = new OldGpuICPCalculator(heightMapParameters, stream);
 
@@ -550,7 +550,7 @@ public class OldGpuICPCalculatorTest
       heightMapParameters.setGlobalWidthInMeters(2.0);
       heightMapParameters.setCellSize(0.1);
       heightMapParameters.setIcpMaxIterations(5);
-      heightMapParameters.setIcpConvergenceThreshold(1e-6);
+      heightMapParameters.setIcpConvergence(1e-6);
 
       OldGpuICPCalculator oldGpuICPCalculator = new OldGpuICPCalculator(heightMapParameters, stream);
 
@@ -640,7 +640,7 @@ public class OldGpuICPCalculatorTest
       heightMapParameters.setGlobalWidthInMeters(1.0);
       heightMapParameters.setCellSize(0.1);
       heightMapParameters.setIcpMaxIterations(6);
-      heightMapParameters.setIcpConvergenceThreshold(0.001);
+      heightMapParameters.setIcpConvergence(0.001);
 
       OldGpuICPCalculator oldGpuICPCalculator = new OldGpuICPCalculator(heightMapParameters, stream);
 

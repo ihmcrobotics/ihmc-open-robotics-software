@@ -85,7 +85,7 @@ public class OldGpuICPCalculator
    public void update(GpuMat localMap, GpuMat globalMap, FloatPointer groundToWorldTranslationDevicePointer, Point3D globalMapCenter)
    {
       int maxIterations = heightMapParameters.getIcpMaxIterations();
-      double convergenceThreshold = heightMapParameters.getIcpConvergenceThreshold();
+      double convergenceThreshold = heightMapParameters.getIcpConvergence();
 
       float[] parametersArray = populateParameterArray(heightMapParameters);
       parametersHostPointer.put(parametersArray);

@@ -135,7 +135,7 @@ public class GpuICPCalculator
       CUDATools.mallocAsync(gpuCorrespondences, localPoints, stream);
       CUDATools.mallocAsync(gpuDistances, localPoints, stream);
 
-      double translationThreshold = heightMapParameters.getIcpConvergenceThreshold();
+      double translationThreshold = heightMapParameters.getIcpConvergence();
 
       // Start with an Identity matrix (no movement)
       latestPointCloudErrorTransform.set(CommonOps_DDRM.identity(4));
@@ -165,7 +165,7 @@ public class GpuICPCalculator
          CUDATools.memcpyAsync(cpuCorrespondences, gpuCorrespondences, localPoints, stream);
          CUDATools.memcpyAsync(cpuDistances, gpuDistances, localPoints, stream);
 
-         float maxDistance = 1.0f;
+         float maxDistance = (float) heightMapParameters.getIcpMaxDistance();
          int validCount = 0;
 
          FloatPointer filteredLocal = new FloatPointer(localFloats);

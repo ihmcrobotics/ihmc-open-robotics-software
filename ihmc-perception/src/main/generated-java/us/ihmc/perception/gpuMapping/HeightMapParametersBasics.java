@@ -88,8 +88,13 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
       set(HeightMapParameters.icpMaxIterations, icpMaxIterations);
    }
 
-   default void setIcpConvergenceThreshold(double icpConvergenceThreshold)
+   default void setIcpConvergence(double icpConvergence)
    {
-      set(HeightMapParameters.icpConvergenceThreshold, icpConvergenceThreshold);
+      set(HeightMapParameters.icpConvergence, icpConvergence);
+   }
+
+   default void setIcpMaxDistance(double icpMaxDistance)
+   {
+      set(HeightMapParameters.icpMaxDistance, icpMaxDistance);
    }
 }

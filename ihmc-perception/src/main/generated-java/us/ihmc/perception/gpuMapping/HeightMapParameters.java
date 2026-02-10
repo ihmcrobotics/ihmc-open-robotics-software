@@ -34,7 +34,8 @@ public class HeightMapParameters extends StoredPropertySet implements HeightMapP
    public static final DoubleStoredPropertyKey localWidthInMeters = keys.addDoubleKey("Local width in meters");
    public static final DoubleStoredPropertyKey globalWidthInMeters = keys.addDoubleKey("Global width in meters");
    public static final IntegerStoredPropertyKey icpMaxIterations = keys.addIntegerKey("Icp max iterations");
-   public static final DoubleStoredPropertyKey icpConvergenceThreshold = keys.addDoubleKey("Icp convergence threshold");
+   public static final DoubleStoredPropertyKey icpConvergence = keys.addDoubleKey("Icp convergence");
+   public static final DoubleStoredPropertyKey icpMaxDistance = keys.addDoubleKey("Icp max distance");
 
    /**
     * Loads this property set.
