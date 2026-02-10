@@ -7,7 +7,9 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ClearDelayQueueCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.log.LogTools;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -81,7 +83,13 @@ public class CommandConsumerWithDelayBuffers
          for(int commandIndex = 0; commandIndex < newCommands.size(); commandIndex++)
          {
             C command = newCommands.get(commandIndex);
-            LogTools.info("Queueing command: %s".formatted(command.getClass().getSimpleName()));
+
+            if (command instanceof FootstepDataListCommand footstepDataListCommand)
+               LogTools.info("Queueing FootstepDataListCommand with %s steps".formatted(footstepDataListCommand.getNumberOfFootsteps()));
+            else if (command instanceof ArmTrajectoryCommand armTrajectoryCommand)
+               LogTools.info("Queueing %s ArmTrajectoryCommand".formatted(armTrajectoryCommand.getRobotSide().getPascalCaseName()));
+            else
+               LogTools.info("Queueing %s".formatted(command.getClass().getSimpleName()));
 
             if(commandClass == ClearDelayQueueCommand.class)
             {

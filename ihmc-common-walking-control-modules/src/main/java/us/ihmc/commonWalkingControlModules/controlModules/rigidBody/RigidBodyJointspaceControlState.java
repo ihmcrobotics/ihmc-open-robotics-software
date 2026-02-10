@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccele
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
@@ -116,6 +117,8 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
 
    public void holdCurrent()
    {
+      LogTools.info("%s holdCurrent".formatted(warningPrefix));
+
       jointControlHelper.overrideTrajectory();
       jointControlHelper.setWeightsToDefaults();
       resetLastCommandId();
@@ -129,6 +132,8 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
 
    public void holdCurrentDesired()
    {
+      LogTools.info("%s holdCurrentDesired".formatted(warningPrefix));
+
       jointControlHelper.overrideTrajectory();
       jointControlHelper.setWeightsToDefaults();
       resetLastCommandId();

@@ -568,6 +568,8 @@ public class WalkingCommandConsumer
 
       if (command != null)
       {
+         LogTools.info("Stopping all trajectories.");
+
          for (RobotSide robotSide : RobotSide.values)
          {
             if (handManagers.get(robotSide) != null)
