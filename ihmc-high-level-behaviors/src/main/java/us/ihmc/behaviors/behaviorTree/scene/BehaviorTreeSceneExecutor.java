@@ -3,23 +3,36 @@ package us.ihmc.behaviors.behaviorTree.scene;
 import behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage;
 import behavior_msgs.msg.dds.BehaviorTreeSceneStateMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.ros2.tf2.ROS2MutableFrame;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.perception.RawImage;
+import us.ihmc.perception.RawImagePublisher;
 import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseCommunicator;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseCommunicatorMap;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseObject;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
+import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
+import us.ihmc.perception.detections.yolo.YOLOv8Tools;
 import us.ihmc.perception.gpuMapping.TerrainMapData;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensors.ImageSensor;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.LongSupplier;
+
+import static us.ihmc.communication.ros2.tf2.ROS2FrameTools.CAMERA_TO_OPTICAL_ROTATION;
 
 public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
 {
@@ -36,7 +49,11 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
    private final List<PersistentDetection> oldUnstableDetections = new ArrayList<>();
    private final PersistentDetectionMessageTool persistentDetectionMessageTool = new PersistentDetectionMessageTool();
 
-   public BehaviorTreeSceneExecutor(CRDTInfo crdtInfo,
+   private final RawImagePublisher imagePublisher;
+   private final ROS2MutableFrame annotatedImageFrame;
+
+   public BehaviorTreeSceneExecutor(ROS2Node ros2Node,
+                                    CRDTInfo crdtInfo,
                                     LongSupplier idSupplier,
                                     ROS2SyncedRobotModel syncedRobot,
                                     ImageSensor imageSensor,
@@ -54,7 +71,9 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
       objects = (List) super.objects;
 
       if (yolo != null)
+      {
          yolo.addDetectionConsumerCallback(instantDetectionQueue::add);
+      }
 
       if (foundationPose != null)
       {
@@ -62,6 +81,9 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
          mustardCommunicator.enable(true);
          mustardCommunicator.addResultCallback(detection -> instantDetectionQueue.add(List.of(detection)));
       }
+
+      imagePublisher = new RawImagePublisher(ros2Node);
+      annotatedImageFrame = new ROS2MutableFrame("VLMAnnotatedImageFrame", ReferenceFrame.getWorldFrame());
    }
 
    public void update()
@@ -166,6 +188,59 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
       message.getPersistentDetections().clear();
       for (PersistentDetection persistentDetection : persistentDetections)
          persistentDetectionMessageTool.toMessage(syncedRobot, now, persistentDetection, message.getPersistentDetections().add());
+   }
+
+   public void publishYOLOAnnotatedImage()
+   {
+      List<YOLOv8InstantDetection> yoloDetections = new ArrayList<>();
+      Map<YOLOv8InstantDetection, BehaviorTreeSceneObjectExecutor> detectionObjectMap = new HashMap<>();
+      RawImage colorImage = null;
+      RawImage annotatedImage = null;
+
+      for (BehaviorTreeSceneObjectExecutor object : objects)
+      {
+         if (!object.isStable())
+            continue;
+
+         PersistentDetection persistentDetection = object.getPersistentDetection();
+         if (persistentDetection == null || persistentDetection.getInstantDetectionClass() != YOLOv8InstantDetection.class)
+            continue;
+
+         YOLOv8InstantDetection detection = (YOLOv8InstantDetection) persistentDetection.getMostRecentDetection();
+         if (colorImage == null)
+         {
+            colorImage = detection.getColorImage().get();
+            if (colorImage == null)
+               continue;
+
+            annotatedImage = new RawImage(colorImage);
+         }
+         yoloDetections.add(detection);
+         detectionObjectMap.put(detection, object);
+      }
+
+      if (annotatedImage == null)
+         return;
+
+      YOLOv8Tools.drawObjectOutlines(colorImage.getCpuImageMat(), annotatedImage.getCpuImageMat(), yoloDetections, detection ->
+      {
+         BehaviorTreeSceneObjectExecutor object = detectionObjectMap.get(detection);
+         if (object == null)
+            return "?: " + detection.getDetectedObjectName();
+
+         return object.getID() + ": " + object.getName();
+      });
+
+      RigidBodyTransform transformToWorld = new RigidBodyTransform(annotatedImage.getTransformToWorld());
+      transformToWorld.appendOrientation(CAMERA_TO_OPTICAL_ROTATION);
+      annotatedImageFrame.setNewTransformToParent(transformToWorld);
+      annotatedImageFrame.update();
+
+      imagePublisher.publishImage(PerceptionAPI.YOLO_VLM_ANNOTATED_IMAGE, annotatedImage, annotatedImageFrame);
+      imagePublisher.publishImage(PerceptionAPI.YOLO_VML_ANNOTATED_IMAGE_CAMERA_INFO, annotatedImage, annotatedImageFrame);
+
+      colorImage.release();
+      annotatedImage.release();
    }
 
    public List<PersistentDetection> getPersistentDetections()

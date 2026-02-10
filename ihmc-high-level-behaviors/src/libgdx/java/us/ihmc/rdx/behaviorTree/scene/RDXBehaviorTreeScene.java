@@ -174,7 +174,7 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
 
    private void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      if (!sceneLevels.contains(RDXSceneLevel.VIRTUAL))
+      if (!sceneLevels.contains(RDXSceneLevel.GROUND_TRUTH))
          return;
 
       if (showCameraFrame.get())
