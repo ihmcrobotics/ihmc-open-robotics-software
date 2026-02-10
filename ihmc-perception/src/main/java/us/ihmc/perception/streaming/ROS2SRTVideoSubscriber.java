@@ -6,7 +6,7 @@ import perception_msgs.msg.dds.SRTStreamStatus;
 import perception_msgs.msg.dds.VideoFrameExtraData;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
+import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
@@ -42,7 +42,7 @@ public class ROS2SRTVideoSubscriber
 
    private final VideoFrameExtraData frameDataMessage = new VideoFrameExtraData();
 
-   public ROS2SRTVideoSubscriber(ROS2PublishSubscribeAPI ros2, ROS2Topic<SRTStreamStatus> streamTopic, PixelFormat outputPixelFormat)
+   public ROS2SRTVideoSubscriber(ROS2Helper ros2, ROS2Topic<SRTStreamStatus> streamTopic, PixelFormat outputPixelFormat)
    {
       av_log_set_level(AV_LOG_FATAL); // silences no key frame errors which are 99% safe to ignore
 

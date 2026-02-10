@@ -4,7 +4,7 @@ import imgui.ImGui;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.BehaviorTree;
 import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTree;
-import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
+import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.rdx.imgui.ImGuiAveragedFrequencyText;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -31,7 +31,7 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
                               RobotCollisionModel selectionCollisionModel,
                               RDXBaseUI baseUI,
                               RDX3DPanel panel3D,
-                              ROS2ControllerPublishSubscribeAPI ros2)
+                              ROS2ControllerHelper ros2)
    {
       super(treeFilesDirectory, syncedRobot, peerClockEstimator, selectionCollisionModel, baseUI, panel3D);
 

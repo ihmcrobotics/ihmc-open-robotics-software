@@ -4,7 +4,6 @@ import ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessage;
 import org.apache.commons.lang3.mutable.MutableObject;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
-import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;

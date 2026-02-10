@@ -14,7 +14,7 @@ import us.ihmc.commons.thread.Throttler;
  */
 public class ROS2TunedRigidBodyTransform
 {
-   private final ROS2PublishSubscribeAPI ros2;
+   private final ROS2Helper ros2;
    private final ROS2IOTopicPair<RigidBodyTransformMessage> topicPair;
    private final RigidBodyTransform rigidBodyTransformToSync;
    private final ROS2Input<RigidBodyTransformMessage> frameUpdateSubscription;
@@ -24,14 +24,14 @@ public class ROS2TunedRigidBodyTransform
    private boolean acceptingUpdates = true;
    private boolean publishingStatus = true;
 
-   public static ROS2TunedRigidBodyTransform toBeTuned(ROS2PublishSubscribeAPI ros2,
+   public static ROS2TunedRigidBodyTransform toBeTuned(ROS2Helper ros2,
                                                        ROS2IOTopicPair<RigidBodyTransformMessage> topicPair,
                                                        RigidBodyTransform rigidBodyTransformToSync)
    {
       return new ROS2TunedRigidBodyTransform(ros2, topicPair, rigidBodyTransformToSync, false);
    }
 
-   public static ROS2TunedRigidBodyTransform remoteTuner(ROS2PublishSubscribeAPI ros2,
+   public static ROS2TunedRigidBodyTransform remoteTuner(ROS2Helper ros2,
                                                          ROS2IOTopicPair<RigidBodyTransformMessage> topicPair,
                                                          RigidBodyTransform rigidBodyTransformToSync)
    {
@@ -39,7 +39,7 @@ public class ROS2TunedRigidBodyTransform
    }
 
 
-   private ROS2TunedRigidBodyTransform(ROS2PublishSubscribeAPI ros2,
+   private ROS2TunedRigidBodyTransform(ROS2Helper ros2,
                                        ROS2IOTopicPair<RigidBodyTransformMessage> topicPair,
                                        RigidBodyTransform rigidBodyTransformToSync,
                                        boolean isRemoteTuner)
