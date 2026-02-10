@@ -58,9 +58,9 @@ public class IsaacROSFoundationPoseDemo
 
       foundationPoseCommunicators = new IsaacROSFoundationPoseCommunicatorMap(peerClockOffsetEstimator);
 
-      yoloExecutor = new YOLOv8DetectionExecutor(peerClockOffsetEstimator, () -> true);
+      yoloExecutor = new YOLOv8DetectionExecutor(ros2Node, peerClockOffsetEstimator, () -> true);
       yoloExecutor.addDetectionConsumerCallback(foundationPoseCommunicators::updatePoseEstimations);
-      yoloExecutor.disableAllModels();
+      yoloExecutor.disableModel();
 
       taskThread = new RepeatingTaskThread(getClass().getSimpleName() + "Thread", this::task);
       taskThread.startRepeating();
@@ -84,7 +84,7 @@ public class IsaacROSFoundationPoseDemo
          imagePublisher.publishImage(PerceptionAPI.EXPERIMENTAL_ZED_COLOR.get(RobotSide.LEFT), color);
 
          // Run YOLO using the color image
-         yoloExecutor.runNextEnabledModel(color, depth);
+         yoloExecutor.runModel(color, depth);
 
          // Update FoundationPose manager
          foundationPoseCommunicators.updateCommunicators();

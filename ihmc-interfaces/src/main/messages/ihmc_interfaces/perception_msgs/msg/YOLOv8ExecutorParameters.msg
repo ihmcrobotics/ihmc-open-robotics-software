@@ -6,7 +6,7 @@ ihmc_common_msgs/LatestModificationMessage latest_timestamp_modifiable
 perception_msgs/YOLOv8ModelInfo[<=16] available_yolo_models
 
 # List of models to run
-string[<=16] models_to_run
+string model_to_run
 
 # Settings for each model
-perception_msgs/YOLOv8ModelParameters[<=16] model_settings
+perception_msgs/YOLOv8ModelParameters model_settings

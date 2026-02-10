@@ -10,7 +10,7 @@ import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueu
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.UnitConversions;
 import us.ihmc.communication.AutonomyAPI;
-import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
+import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2Topic;
@@ -38,7 +38,7 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNode<T, ?, ?>>
    private final MutableInt subscriptionNodeDepthFirstIndex = new MutableInt();
    private final HashMap<Long, T> idToLocalNodesMap = new HashMap<>();
 
-   public ROS2BehaviorTreeSubscription(BehaviorTree<?, T> behaviorTree, ROS2PublishSubscribeAPI ros2PublishSubscribeAPI)
+   public ROS2BehaviorTreeSubscription(BehaviorTree<?, T> behaviorTree, ROS2Helper ros2PublishSubscribeAPI)
    {
       this.behaviorTree = behaviorTree;
 

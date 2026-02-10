@@ -206,8 +206,7 @@ public final class PerceptionAPI
    /*
     * YOLO
     */
-   public static final ROS2Topic<Empty> REQUEST_YOLO_REALSENSE = PERCEPTION_MODULE.withSuffix("request_yolo_realsense").withType(Empty.class);
-   public static final ROS2Topic<Empty> REQUEST_YOLO_ZED = PERCEPTION_MODULE.withSuffix("request_yolo_zed").withType(Empty.class);
+   public static final ROS2Topic<Empty> REQUEST_YOLO = PERCEPTION_MODULE.withSuffix("request_yolo").withType(Empty.class);
    public static final ROS2Topic<Empty> REQUEST_YOLO_ANNOTATED_IMAGE = PERCEPTION_MODULE.withSuffix("request_yolo_image").withType(Empty.class);
 
    /*

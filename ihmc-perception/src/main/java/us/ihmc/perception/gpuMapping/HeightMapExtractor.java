@@ -362,7 +362,6 @@ public class HeightMapExtractor
          registerKernel.withFloat(correctedTransform.getZ32());
          registerKernel.withPointer(sensorToWorldNoRotationDevice);
          registerKernel.withPointer(parametersDevicePointer);
-         registerKernel.withFloat(resetOffset);
 
          registerKernel.run(stream, registerKernelGridDim, blockSize, 0);
 
