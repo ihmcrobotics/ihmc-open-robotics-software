@@ -24,7 +24,7 @@ public abstract class HumanoidRobotControlTask extends Task<HumanoidRobotContext
    {
       runAll(startupRunnables);
 
-      return true;
+      return super.initialize();
    }
 
    @Override

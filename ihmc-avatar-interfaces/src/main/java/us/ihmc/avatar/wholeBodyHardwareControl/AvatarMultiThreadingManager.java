@@ -266,9 +266,6 @@ public class AvatarMultiThreadingManager
       }
       else
       {
-         for (int i = 0; i < childThreads.size(); i++)
-            ((RepeatingTaskThread) childThreads.get(i)).stopRepeating();
-
          ((RepeatingTaskThread) masterThread).stopRepeating();
       }
 

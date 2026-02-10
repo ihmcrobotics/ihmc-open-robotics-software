@@ -278,10 +278,13 @@ public class AvatarMultiThreadingFactory
       //         avatarEstimatorThreadFactory.addSecondaryStateEstimatorFactory(secondaryEstimatorFactory);
       StateEstimatorController stateEstimator = avatarEstimatorThreadFactory.getMainStateEstimator();
 
+      // Create state estimator from its factory
+      AvatarEstimatorThread avatarEstimator = avatarEstimatorThreadFactory.createAvatarEstimatorThread();
+
       // Set up the task and thread for the state estimator
       setupEstimatorTaskAndThread(masterRobotModel, avatarEstimator, masterFullRobotModel, yoVariableServer);
 
-      return avatarEstimatorThreadFactory.createAvatarEstimatorThread();
+      return avatarEstimator;
    }
 
    /**
@@ -1104,7 +1107,7 @@ public class AvatarMultiThreadingFactory
    }
 
    /**
-    * TODO maybe we get rid of this??
+    * TODO eventually we get rid of this
     */
    public void addThread(Runnable thread)
    {
