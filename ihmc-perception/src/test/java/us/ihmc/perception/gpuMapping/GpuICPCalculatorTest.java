@@ -38,12 +38,11 @@ public class GpuICPCalculatorTest
    }
 
    /**
-    * This test ensures that two maps (the local and the global) can run the ICP kernel even if there is no error.
+    * This test ensures that two maps (the local and the global) can run the ICP kernel with only drift in Z.
     * This ensures any strange edge cases where the maps are on top of each other get captured and would cause the test to fail.
-    * Examples of that could be some corrected transform that has some values when it should have zero, hence the test.
     */
    @Test
-   public void testICPWithIdenticalMapsSmall()
+   public void testICPWithIdenticalMapsSmallOffsetInZ()
    {
       // ----------------- Parameters -----------------
       heightMapParameters.setLocalWidthInMeters(2.0);
@@ -65,10 +64,11 @@ public class GpuICPCalculatorTest
       globalMap.setTo(new Scalar(0.1));
 
       // Run Kernel (Centered at [0, 0] for both)
+      Point3D mapCenters = new Point3D(0.0, 0.0, 0.0);
       heightMapICPCalculator.computeICPErrorTransform(localMap,
                                                       globalMap,
-                                                      new Point3D(),
-                                                      new Point3D(),
+                                                      mapCenters,
+                                                      mapCenters,
                                                       localCenterIndex,
                                                       globalCenterIndex,
                                                       new RigidBodyTransform());
@@ -82,9 +82,9 @@ public class GpuICPCalculatorTest
 
       assertEquals(0.0, correctedTransform.getX(), 1e-5);
       assertEquals(0.0, correctedTransform.getY(), 1e-5);
-      assertEquals(-0.3, correctedTransform.getZ(), 1e-3);
+      assertEquals(-0.3, correctedTransform.getZ(), 1e-5);
 
-      // Gotta make sure everything shuts closes properly
+      // Got to make sure everything shuts closes properly
       localMap.close();
       globalMap.close();
       heightMapICPCalculator.close();
@@ -111,13 +111,13 @@ public class GpuICPCalculatorTest
       identityTransform.get(transformArray);
 
       // Note: You would have to look in the kernel, but the local map is defined at (0, 0, 0), so we don't need to pass that in
-      Point3D globalMapCenter = new Point3D(0, 0, 0);
+      Point3D mapCenters = new Point3D(0, 0, 0);
 
       // Run Kernel (Centered at [0, 0] for both)
       heightMapICPCalculator.computeICPErrorTransform(localMap,
                                                       globalMap,
-                                                      globalMapCenter,
-                                                      globalMapCenter,
+                                                      mapCenters,
+                                                      mapCenters,
                                                       localCenterIndex,
                                                       globalCenterIndex,
                                                       new RigidBodyTransform());
@@ -236,7 +236,7 @@ public class GpuICPCalculatorTest
     * Make sure the expected X change is captured in ICP. The height values of the two maps are the same
     */
    @Test
-   public void testICPWithDirectPointClouds()
+   public void testICPWithDirectPointCloudsOffsetInXY()
    {
       GpuICPCalculator heightMapICPCalculator = new GpuICPCalculator(heightMapParameters);
 
@@ -260,10 +260,12 @@ public class GpuICPCalculatorTest
       // Create global point cloud - SAME PATTERN but offset by (0.1, 0.1, 0.0)
       FloatPointer globalPoints = new FloatPointer(numPoints * 3);
 
+      float offsetInX = 0.1f;
+      float offsetInY = 0.2f;
       for (int i = 0; i < numPoints; i++)
       {
-         float x = i * 0.1f + 0.1f;     // Offset by 0.1 in X
-         float y = i * 0.05f + 0.1f;    // Offset by 0.1 in Y
+         float x = i * 0.1f + offsetInX;     // Offset by 0.1 in X
+         float y = i * 0.05f + offsetInY;    // Offset by 0.1 in Y
          float z = (float) Math.sin(i * 0.5);  // Same height pattern
 
          globalPoints.put(i * 3 + 0, x);
@@ -282,9 +284,9 @@ public class GpuICPCalculatorTest
       System.out.println("Corrected Z: " + correctedTransform.getZ());
 
       // Should recover the (0.1, 0.1, 0.0) offset
-      assertEquals(0.1, correctedTransform.getX(), 0.01);
-      assertEquals(0.1, correctedTransform.getY(), 0.01);
-      assertEquals(0.0, correctedTransform.getZ(), 0.001);
+      assertEquals(offsetInX, correctedTransform.getX(), 1e-4);
+      assertEquals(offsetInY, correctedTransform.getY(), 1e-4);
+      assertEquals(0.0, correctedTransform.getZ(), 1e-4);
 
       // Cleanup
       localPoints.close();
@@ -293,7 +295,7 @@ public class GpuICPCalculatorTest
    }
 
    @Test
-   public void testICPWithSlopedHeightMap()
+   public void testICPWithSlopedHeightMapOffsetInX()
    {
       heightMapParameters.setLocalWidthInMeters(1.0);
       heightMapParameters.setGlobalWidthInMeters(2.0);
@@ -343,10 +345,11 @@ public class GpuICPCalculatorTest
       Point3D localMapCenter = new Point3D(0.0, 0.0, 0.0);
 
       // Run ICP
+      float offsetInX = 0.1f;
       heightMapICPCalculator.computeICPErrorTransform(localMap,
                                                       globalMap,
                                                       localMapCenter,
-                                                      new Point3D(0.1, 0.0, 0.0),
+                                                      new Point3D(offsetInX, 0.0, 0.0),
                                                       localCenterIndex,
                                                       globalCenterIndex,
                                                       new RigidBodyTransform());
@@ -358,7 +361,7 @@ public class GpuICPCalculatorTest
       System.out.println("Corrected Z: " + correctedTransform.getZ());
 
       // Expect ICP to recover the X offset only
-      final double EPSILON = 0.01;
+      final double EPSILON = 1e-4;
       assertEquals(0.1, correctedTransform.getX(), EPSILON);
       assertEquals(0.0, correctedTransform.getY(), EPSILON);
       assertEquals(0.0, correctedTransform.getZ(), EPSILON);
@@ -437,9 +440,9 @@ public class GpuICPCalculatorTest
       // ---------------- EXPECTED FAILURE ----------------
       // With NaN-based invalidation, ICP does NOT recover the true shift.
       // This assertion SHOULD FAIL.
-      assertEquals(0.1, corrected.getX(), 1e-2);
-      assertEquals(0.1, corrected.getY(), 1e-2);
-      assertEquals(0.0, corrected.getZ(), 1e-3);
+      assertEquals(0.1, corrected.getX(), 1e-4);
+      assertEquals(0.1, corrected.getY(), 1e-4);
+      assertEquals(0.0, corrected.getZ(), 1e-4);
 
       // Cleanup
       localMap.close();
@@ -465,6 +468,8 @@ public class GpuICPCalculatorTest
       int localCellsPerAxis = 2 * localCenterIndex + 1;
       int globalCellsPerAxis = 2 * globalCenterIndex + 1;
 
+      //TODO this is a bad test, should get the simulation with the sensor at 0 noise
+//      Fix after lunch
       // ----------------- Local map (mostly zeros) -----------------
       float[][] localData = new float[][] {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
                                            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -525,15 +530,6 @@ public class GpuICPCalculatorTest
       localMap.upload(localMatCPU);
       globalMap.upload(globalMatCPU);
 
-      // ----------------- Apply known transform -----------------
-      RigidBodyTransform transform = new RigidBodyTransform();
-      transform.getTranslation().set(0.10512145848794968, 0.03088995940675374, 0.9680018086657742); // actual transform from simulation
-
-      float[] transformArray = new float[16];
-      transform.get(transformArray);
-      FloatPointer hostPtr = new FloatPointer(16);
-      hostPtr.put(transformArray);
-
       // ----------------- Run ICP -----------------
       new Point3D(0.10512145566304529, -6.100405932460462E-4, 0.9680018063204976);
       heightMapICPCalculator.computeICPErrorTransform(localMap,
@@ -548,9 +544,10 @@ public class GpuICPCalculatorTest
 
       // ----------------- EXPECTATION -----------------
       // In simulation, no real drift exists, so corrected transform should be near zero
-      assertEquals(0.0, corrected.getX(), 0.01);
-      assertEquals(0.0, corrected.getY(), 0.01);
-      assertEquals(0.0, corrected.getZ(), 0.01);
+      // TODO this assert isn't specific enough
+      assertEquals(0.0, corrected.getX(), 1e-2);
+      assertEquals(0.0, corrected.getY(), 1e-2);
+      assertEquals(0.0, corrected.getZ(), 1e-2);
 
       // ----------------- Cleanup -----------------
       localMap.close();

@@ -47,11 +47,13 @@ public class GpuMappingThread extends RepeatingTaskThread
    private final ROS2DemandGraphNode publishHeightMap;
    private final ROS2DemandGraphNode publishHeightMapToController;
    private final ROS2DemandGraphNode publishTerrainMap;
+   ROS2SyncedRobotModel syncedRobotModel;
 
    public GpuMappingThread(ROS2Node ros2Node,
                            ROS2SyncedRobotModel syncedRobotModel,
                            RobotCollisionModel robotCollisionModel,
                            BlockingQueue<RawImage> rawImageCollection,
+                           ReferenceFrame zedDepthCameraFrame,
                            ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
                            ActiveMappingParameterToolBox activeMappingParameterToolBox)
    {
@@ -65,11 +67,11 @@ public class GpuMappingThread extends RepeatingTaskThread
       publishTerrainMap = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_TERRAIN_MAP);
 
       // At the highest level pass in the reference frames for the specific robot
+      this.syncedRobotModel = syncedRobotModel;
       ReferenceFrame leftFootFrame = syncedRobotModel.getReferenceFrames().getSoleFrame(RobotSide.LEFT);
       ReferenceFrame rightFootFrame = syncedRobotModel.getReferenceFrames().getSoleFrame(RobotSide.RIGHT);
       // TODO we don't have a great way to setup the height map if we are using more then one sensor
       // This will make the height map not appear correct cause the center is wrong
-      ReferenceFrame globalHeightMapCenterFrame = syncedRobotModel.getReferenceFrames().getSteppingCameraFrame();
 
       filteredDepthPublisher = ros2Node.createPublisher(PerceptionAPI.STEPPING_REALSENSE_DEPTH_FILTERED);
 
@@ -79,7 +81,7 @@ public class GpuMappingThread extends RepeatingTaskThread
                                                 ros2Node,
                                                 leftFootFrame,
                                                 rightFootFrame,
-                                                globalHeightMapCenterFrame,
+                                                zedDepthCameraFrame,
                                                 controllerFootstepQueueMonitor,
                                                 heightMapParameters,
                                                 activeMappingParameterToolBox.getTerrainMapParameters());

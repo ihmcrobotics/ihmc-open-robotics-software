@@ -6,6 +6,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2TunedRigidBodyTransform;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.perception.GpuMappingThread;
@@ -71,6 +72,7 @@ public class ContinuousHikingProcess
                                                  ros2SyncedRobot,
                                                  robotCollisionModel,
                                                  rawImageCollectionSteppingCamera,
+                                                 ros2ImageSensors.getSensor("Stepping Camera").getImageFrame(0),
                                                  controllerFootstepQueueMonitor,
                                                  activeMappingParameterToolBox);
 
