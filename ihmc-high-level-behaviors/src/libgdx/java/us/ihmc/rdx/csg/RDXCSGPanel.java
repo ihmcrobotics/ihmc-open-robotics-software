@@ -38,23 +38,23 @@ public class RDXCSGPanel extends RDXPanel
    private final ImBoolean accountForGroundDrift = new ImBoolean();
 
    // CSG ROS communication helper
-   private final CSGROS2CommunicationHelper communicationHelper;
+   private final CSGROS2CommunicationHelper controllerHelper;
 
    // CSG command and status messages
    private final ContinuousStepGeneratorInputMessage csgInputCommand = new ContinuousStepGeneratorInputMessage();
    private final ContinuousStepGeneratorParametersMessage csgParametersCommand;
    private final ContinuousStepGeneratorStatusMessage csgStatusMessage;
 
-   public RDXCSGPanel(CSGROS2CommunicationHelper communicationHelper)
+   public RDXCSGPanel(CSGROS2CommunicationHelper controllerHelper)
    {
       super("CSG Controls");
       super.setRenderMethod(this::renderImGuiWidgets);
 
-      this.communicationHelper = communicationHelper;
-      communicationHelper.addVolatileCSGStatusCallbackSubscription(this::reset);
+      this.controllerHelper = controllerHelper;
+      controllerHelper.addVolatileCSGStatusCallbackSubscription(this::reset);
 
-      csgParametersCommand = communicationHelper.getCSGParametersCommand();
-      csgStatusMessage = communicationHelper.getCSGStatusMessage();
+      csgParametersCommand = controllerHelper.getCSGParametersCommand();
+      csgStatusMessage = controllerHelper.getCSGStatusMessage();
    }
 
    public void renderImGuiWidgets()
@@ -172,7 +172,7 @@ public class RDXCSGPanel extends RDXPanel
       {
          forwardVelocity.set(0.0);
          csgInputCommand.setForwardVelocity(0.0);
-         communicationHelper.publish(csgInputCommand);
+         controllerHelper.publish(csgInputCommand);
          publishCSGInputCommand = false;
       }
 
@@ -180,7 +180,7 @@ public class RDXCSGPanel extends RDXPanel
       {
          lateralVelocity.set(0.0);
          csgInputCommand.setLateralVelocity(0.0);
-         communicationHelper.publish(csgInputCommand);
+         controllerHelper.publish(csgInputCommand);
          publishCSGInputCommand = false;
       }
 
@@ -188,15 +188,15 @@ public class RDXCSGPanel extends RDXPanel
       {
          turningVelocity.set(0.0);
          csgInputCommand.setTurnVelocity(0.0);
-         communicationHelper.publish(csgInputCommand);
+         controllerHelper.publish(csgInputCommand);
          publishCSGInputCommand = false;
       }
 
       if (publishCSGInputCommand)
-         communicationHelper.publishAtThrottledRate(csgInputCommand);
+         controllerHelper.publishAtThrottledRate(csgInputCommand);
 
       if (publishCSGParametersCommand)
-         communicationHelper.publishAtThrottledRate(csgParametersCommand);
+         controllerHelper.publishAtThrottledRate(csgParametersCommand);
    }
 
    private void reset(ContinuousStepGeneratorStatusMessage csgStatusMessage)

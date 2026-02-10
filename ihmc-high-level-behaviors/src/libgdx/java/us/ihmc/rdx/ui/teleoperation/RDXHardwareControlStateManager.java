@@ -12,7 +12,7 @@ import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
 import us.ihmc.avatar.arm.PresetArmConfiguration;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.behaviors.tools.CommunicationHelper;
+import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -29,7 +29,7 @@ import us.ihmc.tools.Timer;
 public class RDXHardwareControlStateManager
 {
    protected final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   protected final CommunicationHelper communicationHelper;
+   protected final ROS2ControllerHelper controllerHelper;
    protected final Timer estopMasterGainStatusTimer = new Timer();
    protected final ImBoolean estop = new ImBoolean();
    protected final ImDouble desiredMasterGain = new ImDouble();
@@ -37,18 +37,18 @@ public class RDXHardwareControlStateManager
    protected final EStopMasterGainStatusMessage hardwareStatusMessage = new EStopMasterGainStatusMessage();
    protected HighLevelControllerName currentHighLevelState = null;
 
-   public RDXHardwareControlStateManager(CommunicationHelper communicationHelper)
+   public RDXHardwareControlStateManager(ROS2ControllerHelper controllerHelper)
    {
-      this.communicationHelper = communicationHelper;
+      this.controllerHelper = controllerHelper;
 
-      communicationHelper.subscribeToControllerViaVolatileCallback(EStopMasterGainStatusMessage.class, message ->
+      controllerHelper.subscribeToControllerViaVolatileCallback(EStopMasterGainStatusMessage.class, message ->
       {
          hardwareStatusMessage.set(message);
          consumeHardwareStatusMessage(hardwareStatusMessage);
 
          estopMasterGainStatusTimer.reset();
       });
-      communicationHelper.subscribeToControllerViaVolatileCallback(HighLevelStateChangeStatusMessage.class, message ->
+      controllerHelper.subscribeToControllerViaVolatileCallback(HighLevelStateChangeStatusMessage.class, message ->
       {  // TODO: Create a HighLevelStateStatusMessage that is periodically published, so we can always know current state
          currentHighLevelState = HighLevelControllerName.fromByte(message.getEndHighLevelControllerName());
       });
@@ -83,7 +83,7 @@ public class RDXHardwareControlStateManager
             hardwareCommandMessage.setDesiredMasterGain(desiredMasterGain.get());
             hardwareCommandMessage.setServoRobot(servoRobot);
             hardwareCommandMessage.setUnservoQuickly(unservoSlowly);
-            communicationHelper.publishToController(hardwareCommandMessage);
+            controllerHelper.publishToController(hardwareCommandMessage);
          }
       }
 
@@ -97,7 +97,7 @@ public class RDXHardwareControlStateManager
       {
          HighLevelStateMessage highLevelStateMessage = new HighLevelStateMessage();
          highLevelStateMessage.setHighLevelControllerName(HighLevelControllerName.CALIBRATION.toByte());
-         communicationHelper.publishToController(highLevelStateMessage);
+         controllerHelper.publishToController(highLevelStateMessage);
       }
       ImGui.sameLine();
       if (ImGui.button(labels.get("Freeze")))
@@ -129,25 +129,25 @@ public class RDXHardwareControlStateManager
          homeLeftArm.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_ARM);
          homeLeftArm.setRobotSide(GoHomeMessage.ROBOT_SIDE_LEFT);
          homeLeftArm.setTrajectoryTime(trajectoryTime);
-         communicationHelper.publishToController(homeLeftArm);
+         controllerHelper.publishToController(homeLeftArm);
 
          GoHomeMessage homeRightArm = new GoHomeMessage();
          homeRightArm.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_ARM);
          homeRightArm.setRobotSide(GoHomeMessage.ROBOT_SIDE_RIGHT);
          homeRightArm.setTrajectoryTime(trajectoryTime);
-         communicationHelper.publishToController(homeRightArm);
+         controllerHelper.publishToController(homeRightArm);
 
          GoHomeMessage homePelvis = new GoHomeMessage();
          homePelvis.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_PELVIS);
          homePelvis.setTrajectoryTime(trajectoryTime);
-         communicationHelper.publishToController(homePelvis);
+         controllerHelper.publishToController(homePelvis);
 
          GoHomeMessage homeChest = new GoHomeMessage();
          homeChest.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_CHEST);
          homeChest.setTrajectoryTime(trajectoryTime);
 
          RDXBaseUI.pushNotification("Commanding home pose...");
-         communicationHelper.publishToController(homeChest);
+         controllerHelper.publishToController(homeChest);
       }
       ImGui.sameLine();
       if (ImGui.button(labels.get("N-Pose")))
@@ -160,7 +160,7 @@ public class RDXHardwareControlStateManager
       {
          RDXBaseUI.pushNotification("Commanding stop all trajectories...");
          StopAllTrajectoryMessage stopAllTrajectoryMessage = new StopAllTrajectoryMessage();
-         communicationHelper.publishToController(stopAllTrajectoryMessage);
+         controllerHelper.publishToController(stopAllTrajectoryMessage);
       }
    }
 
@@ -179,7 +179,7 @@ public class RDXHardwareControlStateManager
          {
             desiredNeckJointValues[i] = 0.0; // TODO make 0 robot agnostic
          }
-         communicationHelper.publishToController(HumanoidMessageTools.createHeadJointspaceTaskspaceTrajectoryMessage(referenceFrames,
+         controllerHelper.publishToController(HumanoidMessageTools.createHeadJointspaceTaskspaceTrajectoryMessage(referenceFrames,
                                                                                                             neckJointNamesArray,
                                                                                                             desiredNeckJointValues,
                                                                                                             trajectoryTime));
@@ -188,12 +188,12 @@ public class RDXHardwareControlStateManager
       FramePose3D pelvisPose = new FramePose3D(referenceFrames.getMidFeetZUpFrame());
       pelvisPose.getTranslation().addZ(maxPelvisHeight - 0.02);
       pelvisPose.changeFrame(ReferenceFrame.getWorldFrame());
-      communicationHelper.publishToController(HumanoidMessageTools.createPelvisTrajectoryMessage(trajectoryTime, pelvisPose));
+      controllerHelper.publishToController(HumanoidMessageTools.createPelvisTrajectoryMessage(trajectoryTime, pelvisPose));
 
       GoHomeMessage homeChest = new GoHomeMessage();
       homeChest.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_CHEST);
       homeChest.setTrajectoryTime(trajectoryTime);
-      communicationHelper.publishToController(homeChest);
+      controllerHelper.publishToController(homeChest);
       RDXBaseUI.pushNotification("Commanding N-pose...");
    }
 
@@ -201,34 +201,34 @@ public class RDXHardwareControlStateManager
    {
       HighLevelStateMessage highLevelStateMessage = new HighLevelStateMessage();
       highLevelStateMessage.setHighLevelControllerName(HighLevelControllerName.STAND_PREP_STATE.toByte());
-      communicationHelper.publishToController(highLevelStateMessage);
+      controllerHelper.publishToController(highLevelStateMessage);
    }
 
    public void sendStandPrepTransitionRequest()
    {
       HighLevelStateMessage highLevelStateMessage = new HighLevelStateMessage();
       highLevelStateMessage.setHighLevelControllerName(HighLevelControllerName.STAND_TRANSITION_STATE.toByte());
-      communicationHelper.publishToController(highLevelStateMessage);
+      controllerHelper.publishToController(highLevelStateMessage);
    }
 
    public void sendFreezeRequest()
    {
       HighLevelStateMessage highLevelStateMessage = new HighLevelStateMessage();
       highLevelStateMessage.setHighLevelControllerName(HighLevelControllerName.FREEZE_STATE.toByte());
-      communicationHelper.publishToController(highLevelStateMessage);
+      controllerHelper.publishToController(highLevelStateMessage);
    }
 
    public void sendDoNothingRequest()
    {
       HighLevelStateMessage highLevelStateMessage = new HighLevelStateMessage();
       highLevelStateMessage.setHighLevelControllerName(HighLevelControllerName.DO_NOTHING_BEHAVIOR.toByte());
-      communicationHelper.publishToController(highLevelStateMessage);
+      controllerHelper.publishToController(highLevelStateMessage);
    }
 
    public void sendExitWalkingRequest()
    {
       HighLevelStateMessage highLevelStateMessage = new HighLevelStateMessage();
       highLevelStateMessage.setHighLevelControllerName(HighLevelControllerName.EXIT_WALKING.toByte());
-      communicationHelper.publishToController(highLevelStateMessage);
+      controllerHelper.publishToController(highLevelStateMessage);
    }
 }

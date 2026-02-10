@@ -18,7 +18,7 @@ import us.ihmc.avatar.arm.PresetArmConfiguration;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
-import us.ihmc.behaviors.tools.CommunicationHelper;
+import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
@@ -61,7 +61,7 @@ public class RDXArmManager
    private final static double SAKE_HAND_SAFEE_FINGER_ANGLE = 15.0;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final CommunicationHelper communicationHelper;
+   private final ROS2ControllerHelper controllerHelper;
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobot;
    private final RDXDesiredRobot desiredRobot;
@@ -89,7 +89,7 @@ public class RDXArmManager
 
    private final TypedNotification<RobotSide> showWarningNotification = new TypedNotification<>();
 
-   public RDXArmManager(CommunicationHelper communicationHelper,
+   public RDXArmManager(ROS2ControllerHelper controllerHelper,
                         DRCRobotModel robotModel,
                         ROS2SyncedRobotModel syncedRobot,
                         RDXDesiredRobot desiredRobot,
@@ -97,7 +97,7 @@ public class RDXArmManager
                         SideDependentList<RDXInteractableHand> interactableHands,
                         BooleanSupplier enableWholeBodyIK)
    {
-      this.communicationHelper = communicationHelper;
+      this.controllerHelper = controllerHelper;
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
       this.desiredRobot = desiredRobot;
@@ -121,7 +121,7 @@ public class RDXArmManager
          armConfigurationNames[i] = PresetArmConfiguration.values[i].name();
       }
 
-      handManager = new RDXHandManager(robotModel, communicationHelper.getROS2Node());
+      handManager = new RDXHandManager(robotModel, controllerHelper.getROS2Node());
    }
 
    public void create(RDXBaseUI baseUI)
@@ -305,7 +305,7 @@ public class RDXArmManager
          armHomeMessage.setRobotSide(GoHomeMessage.ROBOT_SIDE_RIGHT);
 
       armHomeMessage.setTrajectoryTime(teleoperationParameters.getTrajectoryTime());
-      communicationHelper.publishToController(armHomeMessage);
+      controllerHelper.publishToController(armHomeMessage);
    }
 
    public void executeArmAngles(RobotSide side, PresetArmConfiguration presetArmConfiguration, double trajectoryTime)
@@ -315,7 +315,7 @@ public class RDXArmManager
       ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(side,
                                                                                                   trajectoryTime,
                                                                                                   jointAngles);
-      communicationHelper.publishToController(armTrajectoryMessage);
+      controllerHelper.publishToController(armTrajectoryMessage);
    }
 
    public void executeDesiredArmCommand(RobotSide robotSide)
@@ -356,7 +356,7 @@ public class RDXArmManager
             armTrajectoryMessage.setRobotSide(robotSide.toByte());
             armTrajectoryMessage.getJointspaceTrajectory().set(jointspaceTrajectoryMessage);
             RDXBaseUI.pushNotification("Commanding arm jointspace trajectory...");
-            communicationHelper.publishToController(armTrajectoryMessage);
+            controllerHelper.publishToController(armTrajectoryMessage);
          }
          case TASKSPACE ->
          {
@@ -366,7 +366,7 @@ public class RDXArmManager
             handHybridJointspaceTaskspaceTrajectoryMessage.getTaskspaceTrajectoryMessage().set(se3TrajectoryMessage);
             handHybridJointspaceTaskspaceTrajectoryMessage.getJointspaceTrajectoryMessage().set(jointspaceTrajectoryMessage);
             RDXBaseUI.pushNotification("Commanding arm hybrid jointspace taskpace trajectory...");
-            communicationHelper.publishToController(handHybridJointspaceTaskspaceTrajectoryMessage);
+            controllerHelper.publishToController(handHybridJointspaceTaskspaceTrajectoryMessage);
          }
       }
    }

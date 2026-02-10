@@ -17,17 +17,24 @@ import java.util.function.Function;
 
 public class ROS2ControllerHelper extends ROS2Helper implements ROS2ControllerPublishSubscribeAPI
 {
-   protected final ROS2ControllerPublisherMap ros2ControllerPublisherMap;
+   private final DRCRobotModel robotModel;
    private final String simpleRobotName;
+   protected final ROS2ControllerPublisherMap ros2ControllerPublisherMap;
 
    public ROS2ControllerHelper(ROS2Node ros2Node, DRCRobotModel robotModel)
    {
-      this(ros2Node, robotModel.getSimpleRobotName());
+      this(ros2Node, robotModel.getSimpleRobotName(), robotModel);
    }
 
    public ROS2ControllerHelper(ROS2Node ros2Node, String simpleRobotName)
    {
+      this(ros2Node, simpleRobotName, null);
+   }
+
+   private ROS2ControllerHelper(ROS2Node ros2Node, String simpleRobotName, DRCRobotModel robotModel)
+   {
       super(ros2Node);
+      this.robotModel = robotModel;
       this.simpleRobotName = simpleRobotName;
       ros2ControllerPublisherMap = new ROS2ControllerPublisherMap(simpleRobotName, ros2PublisherMap);
    }
@@ -97,5 +104,10 @@ public class ROS2ControllerHelper extends ROS2Helper implements ROS2ControllerPu
    public String getRobotName()
    {
       return simpleRobotName;
+   }
+
+   public DRCRobotModel getRobotModel()
+   {
+      return robotModel;
    }
 }
