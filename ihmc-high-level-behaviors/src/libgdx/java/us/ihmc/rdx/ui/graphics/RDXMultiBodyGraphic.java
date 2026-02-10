@@ -110,6 +110,11 @@ public class RDXMultiBodyGraphic extends RDXVisualizer
       multiBody.setDiffuseColorRecursive(color);
    }
 
+   public void setColorForBodies(String name, Color color)
+   {
+      multiBody.setDiffuseColorForBodies(name, color);
+   }
+
    public boolean isRobotLoaded()
    {
       return robotLoadedActivator.poll();

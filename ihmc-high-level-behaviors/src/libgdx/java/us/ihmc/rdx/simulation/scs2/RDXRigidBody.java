@@ -127,6 +127,15 @@ public class RDXRigidBody implements RigidBodyBasics
       }
    }
 
+   public void setDiffuseColorForBodies(String nameKey, Color color)
+   {
+      for (RDXRigidBody rigidBody : subtreeIterable())
+      {
+         if (rigidBody.getName().contains(nameKey))
+            rigidBody.setDiffuseColor(color);
+      }
+   }
+
    public void setOpacityRecursive(float opacity)
    {
       for (RDXRigidBody rigidBody : subtreeIterable())
