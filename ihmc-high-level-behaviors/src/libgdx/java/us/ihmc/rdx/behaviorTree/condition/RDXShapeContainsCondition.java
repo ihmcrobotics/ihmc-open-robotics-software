@@ -26,7 +26,9 @@ import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 
 public class RDXShapeContainsCondition
 {
+   private final RDXConditionNode parent;
    private final ConditionNodeDefinition definition;
+   private final ConditionNodeState state;
    private final ShapeContainsConditionState shapeState;
    private final ShapeContainsConditionDefinition shapeDefinition;
    private final RDXSelectablePose3DGizmo poseGizmo;
@@ -39,9 +41,12 @@ public class RDXShapeContainsCondition
    private ModelInstance sphereModel;
    private double lastSphereRadius = Double.NaN;
 
-   public RDXShapeContainsCondition(ConditionNodeState state, BehaviorTreeSceneState scene, RDX3DPanel panel3D)
+   public RDXShapeContainsCondition(RDXConditionNode parent, BehaviorTreeSceneState scene, RDX3DPanel panel3D)
    {
-      definition = state.getDefinition();
+      this.parent = parent;
+      this.definition = parent.getDefinition();
+      this.state = parent.getState();
+
       shapeState = state.getShapeContains();
       shapeDefinition = definition.getShapeContains();
 
@@ -139,9 +144,10 @@ public class RDXShapeContainsCondition
          poseGizmo.process3DViewInput(input);
    }
 
-   public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool, boolean renderSphere)
+   public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (shapeState.getShapeFrame().isChildOfWorld() && sphereModel != null)
+      if ((state.getIsNextForExecution() || parent.getSelected())
+         && shapeState.getShapeFrame().isChildOfWorld() && sphereModel != null)
       {
          sphereModel.getRenderables(renderables, pool);
          poseGizmo.getVirtualRenderables(renderables, pool);
