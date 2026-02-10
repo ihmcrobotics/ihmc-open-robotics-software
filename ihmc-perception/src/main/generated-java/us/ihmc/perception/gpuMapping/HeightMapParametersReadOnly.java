@@ -15,6 +15,11 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
       return get(driftOffsetFilter);
    }
 
+   default boolean getICPFilter()
+   {
+      return get(icpFilter);
+   }
+
    default boolean getFlyingPointsFilter()
    {
       return get(flyingPointsFilter);

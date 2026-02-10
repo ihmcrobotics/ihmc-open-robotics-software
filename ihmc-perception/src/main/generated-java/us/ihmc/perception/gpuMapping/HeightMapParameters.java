@@ -19,6 +19,7 @@ public class HeightMapParameters extends StoredPropertySet implements HeightMapP
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
    public static final BooleanStoredPropertyKey driftOffsetFilter = keys.addBooleanKey("Drift offset filter");
+   public static final BooleanStoredPropertyKey icpFilter = keys.addBooleanKey("ICP filter");
    public static final BooleanStoredPropertyKey flyingPointsFilter = keys.addBooleanKey("Flying points filter");
    public static final DoubleStoredPropertyKey minDepthToAccept = keys.addDoubleKey("Min Depth To Accept");
    public static final DoubleStoredPropertyKey minHeightRegistration = keys.addDoubleKey("Min height registration");

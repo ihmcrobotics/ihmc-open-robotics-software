@@ -13,6 +13,11 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
       set(HeightMapParameters.driftOffsetFilter, driftOffsetFilter);
    }
 
+   default void setICPFilter(boolean icpFilter)
+   {
+      set(HeightMapParameters.icpFilter, icpFilter);
+   }
+
    default void setFlyingPointsFilter(boolean flyingPointsFilter)
    {
       set(HeightMapParameters.flyingPointsFilter, flyingPointsFilter);

@@ -323,24 +323,27 @@ public class HeightMapExtractor
          checkCUDAError();
       }
 
-      gpuICPCalculator.computeICPErrorTransform(localMeanMap,
-                                                globalMeanMap,
-                                                new Point3D(),
-                                                globalHeightMapCenter,
-                                                localCenterIndex,
-                                                globalCenterIndex,
-                                                sensorToWorldNoRotation);
-      Vector3D correctedTransform = gpuICPCalculator.getLatestPointCloudErrorTransform();
-      //      LogTools.info(
-      //            "gpuICPCalculator correctedTransform: " + correctedTransform.getX() + " " + correctedTransform.getY() + " " + correctedTransform.getZ());
-      //      LogTools.info("Actual Transform: " + groundToWorldNoRotation.getTranslationX() + " " + groundToWorldNoRotation.getTranslationY() + " "
-      //                    + groundToWorldNoRotation.getTranslationZ());
-      //      LogTools.info("Global Center: " + globalHeightMapCenter.getX() + " " + globalHeightMapCenter.getY() + " " + globalHeightMapCenter.getZ(   ));
-      gpuICPCalculator.applyCorrectionToTransform(sensorToWorldNoRotationDevice,
-                                                  correctedTransform.getX(),
-                                                  correctedTransform.getY(),
-                                                  correctedTransform.getZ(),
-                                                  stream);
+      if (heightMapParameters.getICPFilter())
+      {
+         gpuICPCalculator.computeICPErrorTransform(localMeanMap,
+                                                   globalMeanMap,
+                                                   new Point3D(),
+                                                   globalHeightMapCenter,
+                                                   localCenterIndex,
+                                                   globalCenterIndex,
+                                                   sensorToWorldNoRotation);
+         Vector3D correctedTransform = gpuICPCalculator.getLatestPointCloudErrorTransform();
+         //      LogTools.info(
+         //            "gpuICPCalculator correctedTransform: " + correctedTransform.getX() + " " + correctedTransform.getY() + " " + correctedTransform.getZ());
+         //      LogTools.info("Actual Transform: " + groundToWorldNoRotation.getTranslationX() + " " + groundToWorldNoRotation.getTranslationY() + " "
+         //                    + groundToWorldNoRotation.getTranslationZ());
+         //      LogTools.info("Global Center: " + globalHeightMapCenter.getX() + " " + globalHeightMapCenter.getY() + " " + globalHeightMapCenter.getZ(   ));
+         gpuICPCalculator.applyCorrectionToTransform(sensorToWorldNoRotationDevice,
+                                                     correctedTransform.getX(),
+                                                     correctedTransform.getY(),
+                                                     correctedTransform.getZ(),
+                                                     stream);
+      }
 
       // ---------- Run the registration kernel ----------
       // Ok so now we've got our local map, lets put that onto the global map

@@ -1,6 +1,7 @@
 {
   "title": "HeightMapParameters",
   "Drift offset filter": true,
+  "ICP filter": true,
   "Flying points filter": false,
   "Min Depth To Accept": {
     "value": 0.88,
