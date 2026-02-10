@@ -1,21 +1,18 @@
 package us.ihmc.avatar.multiContact.pushRecovery;
 
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -29,7 +26,6 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -66,8 +62,8 @@ public class ReducedOrderRobotModel
    private final YoFramePoint2D capturePointPosition;
 
    private final SideDependentList<YoFramePose3D> solePoses = new SideDependentList<>();
-   private final SideDependentList<PoseReferenceFrame> soleFrames = new SideDependentList<>();
-   private final MidFrameZUpFrame midFeetZUpFrame;
+   private final FramePose3D centroidalPose = new FramePose3D();
+   private final PoseReferenceFrame centroidalFrame = new PoseReferenceFrame("centroidalFrame", ReferenceFrame.getWorldFrame());
 
    private final SideDependentList<YoBoolean> handInContact = new SideDependentList<>();
    private final SideDependentList<YoFramePoint3D> handPositions = new SideDependentList<>();
@@ -93,15 +89,13 @@ public class ReducedOrderRobotModel
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression() + "_" + namePrefix;
 
          solePoses.put(robotSide, new YoFramePose3D(sidePrefix + "SolePose", ReferenceFrame.getWorldFrame(), registry));
-         soleFrames.put(robotSide, new PoseReferenceFrame(sidePrefix + "SoleFrame", ReferenceFrame.getWorldFrame()));
-
          handInContact.put(robotSide, new YoBoolean(sidePrefix + "HandInContact", registry));
          handPositions.put(robotSide, new YoFramePoint3D(sidePrefix + "HandPosition", ReferenceFrame.getWorldFrame(), registry));
          handVelocities.put(robotSide, new YoFrameVector3D(sidePrefix + "HandVelocity", ReferenceFrame.getWorldFrame(), registry));
          handContactNormals.put(robotSide, new YoFrameVector3D(sidePrefix + "HandContactNormal", ReferenceFrame.getWorldFrame(), registry));
-      }
 
-      midFeetZUpFrame = new MidFrameZUpFrame("midFeetZUpFrame", ReferenceFrame.getWorldFrame(), soleFrames.get(RobotSide.LEFT), soleFrames.get(RobotSide.RIGHT));
+         shoulderPositions.get(robotSide).setIncludingFrame(centroidalFrame, SHOULDER_COM_OFFSET_X, robotSide.negateIfRightSide(SHOULDER_COM_OFFSET_Y), SHOULDER_COM_OFFSET_Z);
+      }
    }
 
    public void set(ReducedOrderRobotModel other)
@@ -119,34 +113,22 @@ public class ReducedOrderRobotModel
          handContactNormals.get(robotSide).set(other.handContactNormals.get(robotSide));
       }
 
-      updateFootFrames();
-      updateShoulders();
-      updateSupportPolygon();
+      nominalFootPolygon.set(other.nominalFootPolygon);
+      centroidalPose.set(other.centroidalPose);
+      centroidalFrame.setPoseAndUpdate(centroidalPose);
+
       updateCapturePoint();
    }
 
-   private void updateFootFrames()
+   private void updateCentroidalFrame(HumanoidReferenceFrames referenceFrames)
    {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         soleFrames.get(robotSide).setPoseAndUpdate(solePoses.get(robotSide));
-      }
-
-      midFeetZUpFrame.update();
+      centroidalPose.setToZero(referenceFrames.getMidFeetZUpFrame());
+      centroidalPose.changeFrame(ReferenceFrame.getWorldFrame());
+      centroidalPose.getPosition().set(comPosition);
+      centroidalFrame.setPoseAndUpdate(centroidalPose);
    }
 
-   private void updateShoulders()
-   {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         FramePoint3D shoulder = shoulderPositions.get(robotSide);
-         shoulder.setIncludingFrame(comPosition);
-         shoulder.changeFrame(midFeetZUpFrame);
-         shoulder.add(SHOULDER_COM_OFFSET_X, robotSide.negateIfRightSide(SHOULDER_COM_OFFSET_Y), SHOULDER_COM_OFFSET_Z);
-      }
-   }
-
-   private void updateSupportPolygon()
+   private void updateSupportPolygon(HumanoidReferenceFrames referenceFrames)
    {
       nominalFootPolygon.clear();
 
@@ -155,7 +137,7 @@ public class ReducedOrderRobotModel
          ArrayList<Point2D> contactPoints = footContactPoints.get(robotSide);
          for (int i = 0; i < contactPoints.size(); i++)
          {
-            FramePoint3D contactPoint = new FramePoint3D(soleFrames.get(robotSide), contactPoints.get(i));
+            FramePoint3D contactPoint = new FramePoint3D(referenceFrames.getSoleFrame(robotSide), contactPoints.get(i));
             nominalFootPolygon.addVertexMatchingFrame(contactPoint);
          }
       }
@@ -211,9 +193,9 @@ public class ReducedOrderRobotModel
       return comVelocity;
    }
 
-   public ReferenceFrame getMidFeetZUpFrame()
+   public ReferenceFrame getCentroidalFrame()
    {
-      return midFeetZUpFrame;
+      return centroidalFrame;
    }
 
    public FrameConvexPolygon2DReadOnly getNominalFootPolygon()
@@ -240,15 +222,14 @@ public class ReducedOrderRobotModel
          this.handContactNormals.get(robotSide).setToNaN();
       }
 
-      updateFootFrames();
-      updateShoulders();
-      updateSupportPolygon();
+      updateCentroidalFrame(referenceFrames);
+      updateSupportPolygon(referenceFrames);
       updateCapturePoint();
    }
 
    public boolean isReachable(RobotSide robotSide, FramePoint3DReadOnly contactPoint)
    {
-      FramePoint3D shoulderToContactPoint = new FramePoint3D(midFeetZUpFrame);
+      FramePoint3D shoulderToContactPoint = new FramePoint3D(centroidalFrame);
       shoulderToContactPoint.setMatchingFrame(contactPoint);
       shoulderToContactPoint.sub(shoulderPositions.get(robotSide));
 
@@ -264,8 +245,8 @@ public class ReducedOrderRobotModel
    public YoGraphicDefinition getSCS2YoGraphics()
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
-      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint3D("comPosition", comPosition, 0.02, ColorDefinitions.Blue()));
-      group.addChild(YoGraphicDefinitionFactory.newYoGraphicArrow3D("comVelocity", comPosition, comVelocity, 0.4, ColorDefinitions.Blue()));
+//      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint3D("comPosition", comPosition, 0.02, ColorDefinitions.Blue()));
+//      group.addChild(YoGraphicDefinitionFactory.newYoGraphicArrow3D("comVelocity", comPosition, comVelocity, 0.4, ColorDefinitions.Blue()));
 
       group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D("comPosition2d", comPosition, 0.01, ColorDefinitions.Blue(), DefaultPoint2DGraphic.CIRCLE_CROSS));
       group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D("capturePointPosition2d", capturePointPosition, 0.01, ColorDefinitions.Red(), DefaultPoint2DGraphic.CIRCLE));
