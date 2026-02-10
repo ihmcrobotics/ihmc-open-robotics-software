@@ -88,6 +88,7 @@ public class HeightMapExtractor
    private final Point3D heightMapCenterPoint = new Point3D();
 
    private final GpuICPCalculator gpuICPCalculator;
+   private Vector3D correctedTransform;
 
    public HeightMapExtractor(HeightMapParameters heightMapParameters)
    {
@@ -332,7 +333,7 @@ public class HeightMapExtractor
                                                    localCenterIndex,
                                                    globalCenterIndex,
                                                    sensorToWorldNoRotation);
-         Vector3D correctedTransform = gpuICPCalculator.getLatestPointCloudErrorTransform();
+         correctedTransform = gpuICPCalculator.getLatestPointCloudErrorTransform();
          //      LogTools.info(
          //            "gpuICPCalculator correctedTransform: " + correctedTransform.getX() + " " + correctedTransform.getY() + " " + correctedTransform.getZ());
          //      LogTools.info("Actual Transform: " + groundToWorldNoRotation.getTranslationX() + " " + groundToWorldNoRotation.getTranslationY() + " "
@@ -358,6 +359,7 @@ public class HeightMapExtractor
          registerKernel.withPointer(globalVarianceMap.data()).withLong(globalVarianceMap.step());
          registerKernel.withFloat(globalHeightMapCenter.getX32());
          registerKernel.withFloat(globalHeightMapCenter.getY32());
+         registerKernel.withFloat(correctedTransform.getZ32());
          registerKernel.withPointer(sensorToWorldNoRotationDevice);
          registerKernel.withPointer(parametersDevicePointer);
          registerKernel.withFloat(resetOffset);

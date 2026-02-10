@@ -219,6 +219,7 @@ __global__ void heightMapRegistrationKernel(const float *__restrict__ localMeanM
                                             float *__restrict__ globalVarianceMap, size_t pitchGlobalVariance,
                                             const float globalMapCenterX,
 											const float globalMapCenterY,
+											const float correctedDriftZ,
                                             const float *__restrict__ groundToWorldTranslation,
                                             const float *__restrict__ params, float resetOffset)
 {
@@ -233,15 +234,30 @@ __global__ void heightMapRegistrationKernel(const float *__restrict__ localMeanM
         return;
 
     int2 localCell = make_int2(xIndex, yIndex);
+    float *localMean = (float *)((char *)localMeanMap + localCell.x * pitchLocalMean) + localCell.y;
+    float localMeanF = static_cast<float>(*localMean);
+
     float2 localCoordinate = indices_to_coordinate(localCell, make_float2(0.0f, 0.0f), params[CELL_SIZE], params[LOCAL_CENTER_INDEX]);
-    float3 pointInLocalFrame = make_float3(localCoordinate.x, localCoordinate.y, 0.0f);
+    float3 pointInLocalFrame = make_float3(localCoordinate.x, localCoordinate.y, localMeanF);
     float3 pointInGlobalFrame = transformPoint3D(pointInLocalFrame, groundToWorldTranslation);
     int2 globalCell = coordinate_to_indices(make_float2(pointInGlobalFrame.x, pointInGlobalFrame.y), make_float2(globalMapCenterX, globalMapCenterY), params[CELL_SIZE], params[GLOBAL_CENTER_INDEX]);
+
+//     if (xIndex == 120 && yIndex ==120)
+//     {
+//         printf("point in local frame: %f, %f, %f \n", pointInLocalFrame.x, pointInLocalFrame.y, pointInLocalFrame.z);
+//         printf("ground to world transflation: %f, %f, %f\n", groundToWorldTranslation[3], groundToWorldTranslation[7], groundToWorldTranslation[11]);
+//         printf("point in global frame: %f, %f, %f \n", pointInGlobalFrame.x, pointInGlobalFrame.y, pointInGlobalFrame.z);
+//         printf("Drift in z: %f\n", correctedDriftZ);
+//         printf("New local height: %f\n", localMeanF - correctedDriftZ);
+//
+//
+//
+//     }
 
     if (globalCell.x < 0 || globalCell.x >= globalCellsPerAxis || globalCell.y < 0 || globalCell.y >= globalCellsPerAxis)
         return;
 
-    float *localMean = (float *)((char *)localMeanMap + localCell.x * pitchLocalMean) + localCell.y;
+//     float *localMean = (float *)((char *)localMeanMap + localCell.x * pitchLocalMean) + localCell.y;
     float *localVariance = (float *)((char *)localVarianceMap + localCell.x * pitchLocalVariance) + localCell.y;
     float *localMotionVariance = (float *)((char *)localMotionVarianceMap + localCell.x * pitchLocalMotionVariance) + localCell.y;
 
@@ -251,7 +267,6 @@ __global__ void heightMapRegistrationKernel(const float *__restrict__ localMeanM
     float *globalMean = (float *)((char *)globalMeanMap + globalCell.x * pitchGlobalMean) + globalCell.y;
     float *globalVariance = (float *)((char *)globalVarianceMap + globalCell.x * pitchGlobalVariance) + globalCell.y;
 
-    float localMeanF = static_cast<float>(*localMean);
     float localVarianceF = static_cast<float>(*localVariance);
     float localMotionVarianceF = static_cast<float>(*localMotionVariance);
     float globalMeanF = static_cast<float>(*globalMean);
@@ -271,7 +286,7 @@ __global__ void heightMapRegistrationKernel(const float *__restrict__ localMeanM
 
         // Update step of the filter
         float kalmanGain = predictedVariance / (predictedVariance + localVarianceF + localMotionVarianceF);
-        float updatedMean = predictedMean + kalmanGain * (localMeanF - predictedMean);
+        float updatedMean = predictedMean + kalmanGain * ((localMeanF - correctedDriftZ) - predictedMean);
         float updatedVariance = (1.0f - kalmanGain) * predictedVariance;
 
         *globalMean = updatedMean;
