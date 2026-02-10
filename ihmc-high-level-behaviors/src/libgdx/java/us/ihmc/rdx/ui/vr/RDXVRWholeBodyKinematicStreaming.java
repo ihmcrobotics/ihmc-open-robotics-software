@@ -20,6 +20,7 @@ import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import imgui.type.ImString;
 import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
+import org.jetbrains.annotations.NotNull;
 import org.lwjgl.openvr.InputDigitalActionData;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxContactConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInitialConfigurationMessage;
@@ -72,6 +73,7 @@ import us.ihmc.rdx.ui.hands.RDXHandManager;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRHardwareModel;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullHumanoidRobotModelWrapper;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LimbName;
@@ -111,7 +113,8 @@ public class RDXVRWholeBodyKinematicStreaming
    private final RDXROS2RobotVisualizer robotVisualizer;
    private float userRobotOpacity = 1.0f; // store this so we can avoid overriding the user
    private final RDXMultiBodyGraphic ghostRobotGraphic;
-   private final RDXVRMiniGhostPreview miniGhost;
+   private final RDXVRMiniGhostPreview miniGhostKST;
+   private final RDXVRMiniGhostPreview miniGhostReal;
    private final ImBoolean showGhosts = new ImBoolean(true);
    private final ImBoolean showMiniGhost = new ImBoolean(true);
    private final FullHumanoidRobotModel ghostFullRobotModel;
@@ -135,7 +138,7 @@ public class RDXVRWholeBodyKinematicStreaming
    private final KinematicsToolboxConfigurationMessage ikSolverConfigurationMessage = new KinematicsToolboxConfigurationMessage();
 
    private final ROS2Input<KinematicsToolboxOutputStatus> status;
-   private final double streamPeriod = UnitConversions.hertzToSeconds(120.0);
+   private final double streamPeriod = UnitConversions.hertzToSeconds(1000.0);
    private final Throttler toolboxInputStreamRateLimiter = new Throttler();
    private final ImGuiFrequencyPlot statusFrequencyPlot = new ImGuiFrequencyPlot();
    private final ImGuiFrequencyPlot outputFrequencyPlot = new ImGuiFrequencyPlot();
@@ -183,7 +186,6 @@ public class RDXVRWholeBodyKinematicStreaming
                                            boolean createToolbox,
                                            boolean recordKSTOutput,
                                            RDXHandManager handManager,
-                                           FullHumanoidRobotModel miniGhostFullRobotModel,
                                            RobotDefinition miniGhostRobotDefinition,
                                            ROS2LogReplay replayer)
    {
@@ -212,10 +214,19 @@ public class RDXVRWholeBodyKinematicStreaming
          RobotDefinition.forEachRigidBodyDefinition(miniGhostRobotDefinition.getRootBodyDefinition(),
                                                     body -> body.getVisualDefinitions().forEach(visual -> visual.setMaterialDefinition(material)));
       }
-      miniGhost = new RDXVRMiniGhostPreview(syncedRobot.getRobotModel().getSimpleRobotName(),
-                                            miniGhostRobotDefinition,
-                                            miniGhostFullRobotModel,
-                                            vrContext);
+      FullHumanoidRobotModel miniGhostFullRobotModel = new FullHumanoidRobotModelWrapper(miniGhostRobotDefinition, syncedRobot.getRobotModel().getJointMap(), false);
+      miniGhostKST = new RDXVRMiniGhostPreview(syncedRobot.getRobotModel().getSimpleRobotName() + " KST",
+                                               miniGhostRobotDefinition,
+                                               miniGhostFullRobotModel,
+                                               vrContext);
+
+      FullHumanoidRobotModel miniGhostRealModel = new FullHumanoidRobotModelWrapper(miniGhostRobotDefinition, syncedRobot.getRobotModel().getJointMap(), false);
+      miniGhostReal = new RDXVRMiniGhostPreview(syncedRobot.getRobotModel().getSimpleRobotName() + " Real",
+                                                miniGhostRobotDefinition,
+                                                miniGhostRealModel,
+                                                vrContext,
+                                                Color.BLACK,
+                                                0.8f);
       if (recordKSTOutput)
       {
          ModelBuilder modelBuilder = new ModelBuilder();
@@ -722,7 +733,8 @@ public class RDXVRWholeBodyKinematicStreaming
             if (showGhosts.get())
                robotVisualizer.setOpacity(0.5f);
          }
-         miniGhost.setActive(showGhosts.get() && showMiniGhost.get());
+         miniGhostKST.setActive(showGhosts.get() && showMiniGhost.get());
+         miniGhostReal.setActive(showGhosts.get() && showMiniGhost.get());
 
          if (status.getMessageNotification().poll())
          {
@@ -744,7 +756,10 @@ public class RDXVRWholeBodyKinematicStreaming
                for (int i = 0; i < ghostOneDoFJointsExcludingHands.length; i++)
                {
                   ghostOneDoFJointsExcludingHands[i].setQ(latestStatus.getDesiredJointAngles().get(i));
-                  miniGhost.setJoint(i, latestStatus.getDesiredJointAngles().get(i));
+                  miniGhostKST.setJoint(i, latestStatus.getDesiredJointAngles().get(i));
+                  OneDoFJointBasics realJoint = syncedRobot.getFullRobotModel().getOneDoFJoints()[i];
+                  double realQ = realJoint.getQ();
+                  miniGhostReal.setJoint(i, realQ);
                }
                ghostFullRobotModel.getElevator().updateFramesRecursively();
             }
@@ -753,7 +768,17 @@ public class RDXVRWholeBodyKinematicStreaming
 
          if (ghostRobotGraphic.isActive())
             ghostRobotGraphic.update();
-         miniGhost.updatePose();
+         if (miniGhostKST.isEnabled())
+         {
+            miniGhostKST.updatePose();
+            RigidBodyTransform ghostToReal = getRobotToGhostTransform();
+            Vector3D translation = new Vector3D();
+            translation.set(ghostToReal.getTranslation());
+            translation.scale(0.05);
+            ghostToReal.getTranslation().set(translation);
+            miniGhostReal.setGhostAdjustmentOffset(ghostToReal);
+            miniGhostReal.updatePose();
+         }
 
          if (recordRequest && recordingGraphics != null)
          {
@@ -765,6 +790,16 @@ public class RDXVRWholeBodyKinematicStreaming
             LibGDXTools.toLibGDX(graphicsTransform, recordingGraphics.transform);
          }
       }
+   }
+
+   @NotNull
+   private RigidBodyTransform getRobotToGhostTransform()
+   {
+      RigidBodyTransform ghostToReal = new RigidBodyTransform();
+      ghostToReal.set(ghostFullRobotModel.getPelvis().getBodyFixedFrame().getTransformToRoot());
+      ghostToReal.invert();
+      ghostToReal.multiply(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame().getTransformToRoot());
+      return ghostToReal;
    }
 
    public void renderImGuiWidgets()
@@ -796,7 +831,7 @@ public class RDXVRWholeBodyKinematicStreaming
 
       ImGuiTools.separatorText("Visualization Options", ImGuiTools.getSmallBoldFont());
       ImGui.checkbox(labels.get("Show Robot Ghosts during Control"), showGhosts);
-      if (miniGhost.isEnabled())
+      if (miniGhostKST.isEnabled())
       {
          ImGui.checkbox(labels.get("Show Mini Robot Ghost"), showMiniGhost);
       }
@@ -914,13 +949,15 @@ public class RDXVRWholeBodyKinematicStreaming
          initialize();
          reinitializeToolboxRobotConfiguration();
          ghostRobotGraphic.setActive(true);
-         miniGhost.setActive(true);
+         miniGhostKST.setActive(true);
+         miniGhostReal.setActive(true);
       }
       else // Disable
       {
          sleepToolbox();
          ghostRobotGraphic.setActive(false);
-         miniGhost.setActive(false);
+         miniGhostKST.setActive(false);
+         miniGhostReal.setActive(false);
          setStreamToController(false, false);
       }
 
@@ -940,7 +977,8 @@ public class RDXVRWholeBodyKinematicStreaming
             robotVisualizer.setOpacity(userRobotOpacity);
             robotVisualizer.setActive(true);
             ghostRobotGraphic.setActive(true);
-            miniGhost.setActive(true);
+            miniGhostKST.setActive(true);
+            miniGhostReal.setActive(true);
             performingDemonstration.set(-1);
          }
          sendRLStateTransitionRequest(enabled);
@@ -1030,7 +1068,8 @@ public class RDXVRWholeBodyKinematicStreaming
       if (status.hasReceivedFirstMessage())
       {
          ghostRobotGraphic.getRenderables(renderables, pool, sceneLevels);
-         miniGhost.getRenderables(renderables, pool, sceneLevels);
+         miniGhostKST.getRenderables(renderables, pool, sceneLevels);
+         miniGhostReal.getRenderables(renderables, pool, sceneLevels);
       }
 
       if (showReferenceFrameGraphics.get())
@@ -1072,7 +1111,8 @@ public class RDXVRWholeBodyKinematicStreaming
       if (toolbox != null)
          toolbox.closeAndDispose();
       ghostRobotGraphic.destroy();
-      miniGhost.destroy();
+      miniGhostKST.destroy();
+      miniGhostReal.destroy();
       chestFrameGraphics.dispose();
       for (RobotSide side : RobotSide.values)
       {
