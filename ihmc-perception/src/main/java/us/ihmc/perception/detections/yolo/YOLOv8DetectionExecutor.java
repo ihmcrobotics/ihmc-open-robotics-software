@@ -32,7 +32,6 @@ import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.perception.tools.RawImageTools;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Publisher;
 
 import java.net.URL;
@@ -45,8 +44,6 @@ import java.util.function.Consumer;
 
 public class YOLOv8DetectionExecutor
 {
-   private final ROS2Node ros2Node = new ROS2NodeBuilder().build("yolo_detection_manager");
-
    private final CUDAPointCloudExtractor extractor;
    private final CUDADepthImageSegmenter segmenter;
 
@@ -61,12 +58,17 @@ public class YOLOv8DetectionExecutor
 
    private final List<Consumer<List<InstantDetection>>> detectionConsumerCallbacks = new ArrayList<>();
 
-   private final ROS2Publisher<ImageMessage> annotatedImagePublisher = ros2Node.createPublisher(PerceptionAPI.YOLO_ANNOTATED_IMAGE);
+   private final ROS2Publisher<ImageMessage> annotatedImagePublisher;
    private final BooleanSupplier annotatedImageDemanded;
    private final RepeatingTaskThread annotatedImagePublishedThread;
    private final TypedNotification<RawImage> newestColorImage = new TypedNotification<>();
 
-   public YOLOv8DetectionExecutor(ROS2PeerClockOffsetEstimator peerClockEstimator, BooleanSupplier annotatedImageDemanded)
+   public void addDetectionConsumerCallback(Consumer<List<InstantDetection>> callback)
+   {
+      detectionConsumerCallbacks.add(callback);
+   }
+
+   public YOLOv8DetectionExecutor(ROS2Node ros2Node, ROS2PeerClockOffsetEstimator peerClockEstimator, BooleanSupplier annotatedImageDemanded)
    {
       this.annotatedImageDemanded = annotatedImageDemanded;
 
@@ -117,16 +119,12 @@ public class YOLOv8DetectionExecutor
       updateThread.setDaemon(true);
       updateThread.startRepeating();
 
+      annotatedImagePublisher = ros2Node.createPublisher(PerceptionAPI.YOLO_ANNOTATED_IMAGE);
       annotatedImagePublishedThread = new RepeatingTaskThread("YOLOAnnotatedImagePublisher",
                                                               this::annotateAndPublishImage,
                                                               DefaultExceptionHandler.RUNTIME_EXCEPTION);
       annotatedImagePublishedThread.setDaemon(true);
       annotatedImagePublishedThread.startRepeating();
-   }
-
-   public void addDetectionConsumerCallback(Consumer<List<InstantDetection>> callback)
-   {
-      detectionConsumerCallbacks.add(callback);
    }
 
    public List<String> getAvailableModelNames()
@@ -238,8 +236,6 @@ public class YOLOv8DetectionExecutor
    {
       System.out.println("Destroying " + getClass().getSimpleName());
       updateThread.blockingKill();
-
-      ros2Node.destroy();
 
       annotatedImagePublishedThread.kill();
       newestColorImage.set(null);

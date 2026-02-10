@@ -6,6 +6,7 @@ import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.perception.imageMessage.PixelFormat;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensors.ImageSensor;
 
 import java.util.List;
@@ -20,11 +21,11 @@ public class YOLOv8DetectionThread extends RepeatingTaskThread
    private int colorImageKey;
    private int depthImageKey;
 
-   public YOLOv8DetectionThread(ROS2PeerClockOffsetEstimator clockOffsetEstimator, BooleanSupplier annotatedImageDemandSupplier)
+   public YOLOv8DetectionThread(ROS2Node ros2Node, ROS2PeerClockOffsetEstimator clockOffsetEstimator, BooleanSupplier annotatedImageDemandSupplier)
    {
       super(YOLOv8DetectionThread.class.getSimpleName());
 
-      yoloExecutor = new YOLOv8DetectionExecutor(clockOffsetEstimator, annotatedImageDemandSupplier);
+      yoloExecutor = new YOLOv8DetectionExecutor(ros2Node, clockOffsetEstimator, annotatedImageDemandSupplier);
    }
 
    public void addDetectionConsumerCallback(Consumer<List<InstantDetection>> consumer)

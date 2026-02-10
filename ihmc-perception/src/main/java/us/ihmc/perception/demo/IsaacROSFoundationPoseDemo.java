@@ -58,7 +58,7 @@ public class IsaacROSFoundationPoseDemo
 
       foundationPoseCommunicators = new IsaacROSFoundationPoseCommunicatorMap(peerClockOffsetEstimator);
 
-      yoloExecutor = new YOLOv8DetectionExecutor(peerClockOffsetEstimator, () -> true);
+      yoloExecutor = new YOLOv8DetectionExecutor(ros2Node, peerClockOffsetEstimator, () -> true);
       yoloExecutor.addDetectionConsumerCallback(foundationPoseCommunicators::updatePoseEstimations);
       yoloExecutor.disableModel();
 
