@@ -185,8 +185,10 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
 
    public boolean handleTrajectoryCommand(JointspaceTrajectoryCommand command, double[] initialJointPositions)
    {
+      LogTools.info("%s handleTrajectoryCommand".formatted(warningPrefix));
       if (!handleCommandInternal(command))
       {
+         LogTools.info("%s could not handle command".formatted(warningPrefix));
          return false;
       }
       else if (jointControlHelper.handleTrajectoryCommand(command, initialJointPositions))
@@ -196,6 +198,7 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
       }
       else
       {
+         LogTools.info("%s ???".formatted(warningPrefix));
          return false;
       }
    }

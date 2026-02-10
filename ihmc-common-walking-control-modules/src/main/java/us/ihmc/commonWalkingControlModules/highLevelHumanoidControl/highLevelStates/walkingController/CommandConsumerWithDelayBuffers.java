@@ -84,13 +84,6 @@ public class CommandConsumerWithDelayBuffers
          {
             C command = newCommands.get(commandIndex);
 
-            if (command instanceof FootstepDataListCommand footstepDataListCommand)
-               LogTools.info("Queueing FootstepDataListCommand with %s steps".formatted(footstepDataListCommand.getNumberOfFootsteps()));
-            else if (command instanceof ArmTrajectoryCommand armTrajectoryCommand)
-               LogTools.info("Queueing %s ArmTrajectoryCommand".formatted(armTrajectoryCommand.getRobotSide().getPascalCaseName()));
-            else
-               LogTools.info("Queueing %s".formatted(command.getClass().getSimpleName()));
-
             if(commandClass == ClearDelayQueueCommand.class)
             {
                ClearDelayQueueCommand clearDelayQueueCommand = (ClearDelayQueueCommand) command;
@@ -114,7 +107,6 @@ public class CommandConsumerWithDelayBuffers
          for(int commandIndex = 0; commandIndex < listOfSupportedCommands.size(); commandIndex++)
          {
             Class<? extends Command<?, ?>> commandClassToFlush = listOfSupportedCommands.get(commandIndex);
-
             LogTools.info("Flushing command: %s".formatted(commandClassToFlush.getSimpleName()));
             clearDelayQueue(commandClassToFlush);
          }
@@ -123,12 +115,14 @@ public class CommandConsumerWithDelayBuffers
       if(messageClassToClear != null)
       {
          Class<? extends Command<?, ?>> commandClassToClear = messageToCommandMap.get(messageClassToClear);
+         LogTools.info("Clearing command: %s".formatted(commandClassToClear.getSimpleName()));
          clearDelayQueueCommand.setCommandClassToClear(commandClassToClear);
       }
 
       Class<? extends Command<?, ?>> classToClear = clearDelayQueueCommand.getCommandClassToClear();
       if(classToClear != null)
       {
+         LogTools.info("Clearing command: %s".formatted(classToClear.getSimpleName()));
          clearDelayQueue(classToClear);
       }
    }
@@ -175,7 +169,7 @@ public class CommandConsumerWithDelayBuffers
       PriorityQueue<Command<?, ?>> priorityQueue = priorityQueues.get(command.getClass());
       if(priorityQueue.size() >= NUMBER_OF_COMMANDS_TO_QUEUE)
       {
-//         LogTools.error("Tried to add {} to the delay queue, but the queue was full. Try increasing the queue size", command.getClass().getSimpleName());
+         LogTools.error("Skipping %s because priority queue is full. %d/%d".formatted(command.getClass().getSimpleName(), priorityQueue.size(), NUMBER_OF_COMMANDS_TO_QUEUE));
          return;
       }
       RecyclingArrayList<? extends Command<?, ?>> recyclingArrayList = queuedCommands.get(command.getClass());
@@ -187,6 +181,14 @@ public class CommandConsumerWithDelayBuffers
       {
          commandCopy.setExecutionTime(commandCopy.getExecutionDelayTime() + yoTime.getValue());
       }
+
+      if (command instanceof FootstepDataListCommand footstepDataListCommand)
+         LogTools.info("Queueing FootstepDataListCommand with %s steps".formatted(footstepDataListCommand.getNumberOfFootsteps()));
+      else if (command instanceof ArmTrajectoryCommand armTrajectoryCommand)
+         LogTools.info("Queueing %s ArmTrajectoryCommand".formatted(armTrajectoryCommand.getRobotSide().getPascalCaseName()));
+      else
+         LogTools.info("Queueing %s".formatted(command.getClass().getSimpleName()));
+
       priorityQueue.add(commandCopy);
    }
    
@@ -205,6 +207,7 @@ public class CommandConsumerWithDelayBuffers
          PriorityQueue<Command<?, ?>> priorityQueue = priorityQueues.get(commandClassToPoll);
          Command<?, ?> command = priorityQueue.poll();
          recyclingArrayList.remove(command);
+         LogTools.info("Polling %s".formatted(command == null ? "null" : command.getClass().getSimpleName()));
          return (C) command;
       }
       
@@ -230,6 +233,7 @@ public class CommandConsumerWithDelayBuffers
       {
          Command<?, ?> queuedCommand =  priorityQueue.poll();
          recyclingArrayList.remove(queuedCommand);
+         LogTools.info("Polling %s".formatted(queuedCommand == null ? "null" : queuedCommand.getClass().getSimpleName()));
          commands.add().set((C) queuedCommand);
       }
       
