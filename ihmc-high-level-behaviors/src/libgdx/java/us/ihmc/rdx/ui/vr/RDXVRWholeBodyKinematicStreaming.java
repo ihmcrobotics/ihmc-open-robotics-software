@@ -771,12 +771,8 @@ public class RDXVRWholeBodyKinematicStreaming
          if (miniGhostKST.isEnabled())
          {
             miniGhostKST.updatePose();
-            RigidBodyTransform ghostToReal = getRobotToGhostTransform();
-            Vector3D translation = new Vector3D();
-            translation.set(ghostToReal.getTranslation());
-            translation.scale(0.05);
-            ghostToReal.getTranslation().set(translation);
-            miniGhostReal.setGhostAdjustmentOffset(ghostToReal);
+            miniGhostReal.updateRootOffset(ghostFullRobotModel.getPelvis().getBodyFixedFrame().getTransformToRoot(),
+                                           syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame().getTransformToRoot());
             miniGhostReal.updatePose();
          }
 
@@ -790,16 +786,6 @@ public class RDXVRWholeBodyKinematicStreaming
             LibGDXTools.toLibGDX(graphicsTransform, recordingGraphics.transform);
          }
       }
-   }
-
-   @NotNull
-   private RigidBodyTransform getRobotToGhostTransform()
-   {
-      RigidBodyTransform ghostToReal = new RigidBodyTransform();
-      ghostToReal.set(ghostFullRobotModel.getPelvis().getBodyFixedFrame().getTransformToRoot());
-      ghostToReal.invert();
-      ghostToReal.multiply(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame().getTransformToRoot());
-      return ghostToReal;
    }
 
    public void renderImGuiWidgets()

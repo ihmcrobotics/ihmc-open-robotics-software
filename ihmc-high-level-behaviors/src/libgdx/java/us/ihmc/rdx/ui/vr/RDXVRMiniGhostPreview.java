@@ -6,6 +6,8 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -145,6 +147,23 @@ public class RDXVRMiniGhostPreview
       miniGhostFullRobotModel.getElevator().updateFramesRecursively();
    }
 
+   private final RigidBodyTransform ghostToReal = new RigidBodyTransform();
+   private final Vector3D tempTranslation = new Vector3D();
+
+   public void updateRootOffset(RigidBodyTransformReadOnly kstTransform, RigidBodyTransformReadOnly realRobotTransform)
+   {
+      ghostToReal.set(kstTransform);
+      ghostToReal.invert();
+      ghostToReal.multiply(realRobotTransform);
+
+      tempTranslation.set(ghostToReal.getTranslation());
+      tempTranslation.scale(0.05);
+      ghostToReal.getTranslation().set(tempTranslation);
+
+      additionalOffset.set(ghostToReal);
+      miniGhostAdjustedFrame.update();
+   }
+
    public void setActive(boolean active)
    {
       if (isEnabled())
@@ -160,12 +179,6 @@ public class RDXVRMiniGhostPreview
    public boolean isEnabled()
    {
       return miniGhostFullRobotModel != null;
-   }
-
-   public void setGhostAdjustmentOffset(RigidBodyTransform otherTransform)
-   {
-      additionalOffset.set(otherTransform);
-      miniGhostAdjustedFrame.update();
    }
 
    public void destroy()
