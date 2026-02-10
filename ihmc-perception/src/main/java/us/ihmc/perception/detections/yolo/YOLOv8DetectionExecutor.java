@@ -51,7 +51,7 @@ public class YOLOv8DetectionExecutor
    private final CUDADepthImageSegmenter segmenter;
 
    private final Map<String, YOLOv8Model> availableModels = new LinkedHashMap<>();
-   private List<YOLOv8InstantDetection> annotatedImageDetections = new ArrayList<>();
+   private final TypedNotification<List<YOLOv8InstantDetection>> annotationNotification = new TypedNotification<>();
 
    private final SyncedYOLOv8ExecutorParameters parameters;
    private boolean requestingFullData;
@@ -221,13 +221,11 @@ public class YOLOv8DetectionExecutor
       {
          detectionConsumerCallbacks.forEach(callback -> callback.accept(yoloInstantDetections));
 
-         synchronized (annotatedImagePublishedThread)
-         {
-            List<YOLOv8InstantDetection> previousAnnotatedImageDetections = this.annotatedImageDetections;
-            this.annotatedImageDetections = annotatedImageDetections;
-            for (YOLOv8InstantDetection previousAnnotatedImageDetection : previousAnnotatedImageDetections)
+         if (annotationNotification.poll())
+            for (YOLOv8InstantDetection previousAnnotatedImageDetection : annotationNotification.read())
                previousAnnotatedImageDetection.destroy();
-         }
+
+         annotationNotification.set(annotatedImageDetections);
       }
 
       yoloResults.destroy();
@@ -273,20 +271,22 @@ public class YOLOv8DetectionExecutor
 
    private void annotateAndPublishImage()
    {
-      RawImage colorImage = newestColorImage.blockingPoll();
+      annotationNotification.blockingPoll();
+      List<YOLOv8InstantDetection> detectionsToAnnotate = annotationNotification.read();
+
+      RawImage colorImage = detectionsToAnnotate.get(0).getColorImage().get();
       if (colorImage == null)
          return;
 
       if (!annotatedImageDemanded.getAsBoolean())
       {
-         colorImage.release();
          return;
       }
 
       Mat resultMat = new Mat();
       synchronized (annotatedImagePublishedThread)
       {
-         YOLOv8Tools.annotateImage(colorImage.getCpuImageMat(), resultMat, annotatedImageDetections);
+         YOLOv8Tools.annotateImage(colorImage.getCpuImageMat(), resultMat, detectionsToAnnotate);
       }
 
       BytePointer annotatedImagePointer = new BytePointer();
