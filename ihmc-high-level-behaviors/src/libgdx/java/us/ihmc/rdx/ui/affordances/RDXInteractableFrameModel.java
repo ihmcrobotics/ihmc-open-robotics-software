@@ -11,7 +11,7 @@ import imgui.ImGui;
 import imgui.type.ImString;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.ros2.ROS2IOTopicPair;
-import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
+import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2TunedRigidBodyTransform;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -77,7 +77,7 @@ public class RDXInteractableFrameModel
       panel3D.addImGuiOverlayAddition(this, this::renderTooltipsAndContextMenu);
    }
 
-   public void addRemoteTuning(ROS2PublishSubscribeAPI ros2, ROS2IOTopicPair<RigidBodyTransformMessage> topicPair, RigidBodyTransform rigidBodyTransformToSync)
+   public void addRemoteTuning(ROS2Helper ros2, ROS2IOTopicPair<RigidBodyTransformMessage> topicPair, RigidBodyTransform rigidBodyTransformToSync)
    {
       syncedTransformForTuning = ROS2TunedRigidBodyTransform.remoteTuner(ros2, topicPair, rigidBodyTransformToSync);
    }

@@ -4,7 +4,7 @@ import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import perception_msgs.msg.dds.SRTStreamStatus;
 import us.ihmc.commons.Conversions;
-import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
+import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.streaming.ROS2SRTVideoSubscriber;
@@ -22,7 +22,7 @@ public class RDXROS2SRTVideoStreamVisualizer extends RDXROS2ImageVisualizer<SRTS
    private float alphaFilteredDelayMS = 0.0f;
    private final ImGuiPlot delayPlot = new ImGuiPlot(DELAY_PLOT_TEXT, 1000, -1, 20);
 
-   public RDXROS2SRTVideoStreamVisualizer(ROS2PublishSubscribeAPI ros2, String title, ROS2Topic<SRTStreamStatus> streamTopic)
+   public RDXROS2SRTVideoStreamVisualizer(ROS2Helper ros2, String title, ROS2Topic<SRTStreamStatus> streamTopic)
    {
       super(title, title, false);
 
