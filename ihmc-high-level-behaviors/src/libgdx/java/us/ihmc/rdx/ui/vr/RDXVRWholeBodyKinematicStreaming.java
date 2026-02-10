@@ -20,6 +20,7 @@ import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import imgui.type.ImString;
 import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
+import org.jetbrains.annotations.NotNull;
 import org.lwjgl.openvr.InputDigitalActionData;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxContactConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInitialConfigurationMessage;
@@ -767,8 +768,17 @@ public class RDXVRWholeBodyKinematicStreaming
 
          if (ghostRobotGraphic.isActive())
             ghostRobotGraphic.update();
-         miniGhostKST.updatePose();
-         miniGhostReal.updatePose();
+         if (miniGhostKST.isEnabled())
+         {
+            miniGhostKST.updatePose();
+            RigidBodyTransform ghostToReal = getRobotToGhostTransform();
+            Vector3D translation = new Vector3D();
+            translation.set(ghostToReal.getTranslation());
+            translation.scale(0.05);
+            ghostToReal.getTranslation().set(translation);
+            miniGhostReal.setGhostAdjustmentOffset(ghostToReal);
+            miniGhostReal.updatePose();
+         }
 
          if (recordRequest && recordingGraphics != null)
          {
@@ -780,6 +790,16 @@ public class RDXVRWholeBodyKinematicStreaming
             LibGDXTools.toLibGDX(graphicsTransform, recordingGraphics.transform);
          }
       }
+   }
+
+   @NotNull
+   private RigidBodyTransform getRobotToGhostTransform()
+   {
+      RigidBodyTransform ghostToReal = new RigidBodyTransform();
+      ghostToReal.set(ghostFullRobotModel.getPelvis().getBodyFixedFrame().getTransformToRoot());
+      ghostToReal.invert();
+      ghostToReal.multiply(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame().getTransformToRoot());
+      return ghostToReal;
    }
 
    public void renderImGuiWidgets()
