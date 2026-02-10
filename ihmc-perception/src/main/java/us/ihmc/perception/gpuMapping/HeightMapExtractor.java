@@ -335,7 +335,6 @@ public class HeightMapExtractor
          registerKernel.withFloat(heightMapCenter.getY32());
          registerKernel.withPointer(groundToWorldTranslationDevicePointer);
          registerKernel.withPointer(parametersDevicePointer);
-         registerKernel.withFloat(resetOffset);
 
          registerKernel.run(stream, registerKernelGridDim, blockSize, 0);
 
