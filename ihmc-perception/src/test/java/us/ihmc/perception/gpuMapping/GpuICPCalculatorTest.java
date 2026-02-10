@@ -468,29 +468,26 @@ public class GpuICPCalculatorTest
       int localCellsPerAxis = 2 * localCenterIndex + 1;
       int globalCellsPerAxis = 2 * globalCenterIndex + 1;
 
-      //TODO this is a bad test, should get the simulation with the sensor at 0 noise
-//      Fix after lunch
       // ----------------- Local map (mostly zeros) -----------------
-      float[][] localData = new float[][] {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                                           {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                                           {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                                           {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                                           {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                                           {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                                           {0, 0, 0, 0.000873f, 0.001251f, 0.001077f, 0.000690f, 0.000308f, 0, 0, 0},
-                                           {0, 0, 0, 0.000201f, 0.000809f, 0.000206f, -0.000195f, 0.000819f, 0, 0, 0},
-                                           {0, 0, 0, 0.001001f, -0.000031f, 0.001301f, 0.001041f, 0.001480f, 0.000571f, 0, 0},
-                                           {0, 0, -0.000618f, 0.001075f, 0.076491f, 0.085750f, 0.089970f, 0.067645f, 0.087720f, 0, 0},
-                                           {0, -0.006122f, -0.006347f, -0.004396f, 0, 0, 0, 0, 0, 0, 0}};
+      float[][] localData = new float[][] {
+            {0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f},
+            {0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f},
+            {0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f},
+            {0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f},
+            {0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f},
+            {0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f},
+            {0.000000f, 0.000000f, 0.000000f, 0.000433f, 0.000434f, 0.000434f, 0.000434f, 0.000434f, 0.000000f, 0.000000f, 0.000000f},
+            {0.000000f, 0.000000f, 0.000000f, 0.000508f, 0.000510f, 0.000508f, 0.000510f, 0.000508f, 0.000000f, 0.000000f, 0.000000f},
+            {0.000000f, 0.000000f, 0.000534f, 0.000533f, 0.000535f, 0.000534f, 0.000535f, 0.000533f, 0.000534f, 0.000000f, 0.000000f},
+            {0.000000f, 0.000000f, 0.000802f, 0.000803f, 0.076585f, 0.085295f, 0.091000f, 0.066076f, 0.085295f, 0.000000f, 0.000000f},
+            {0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f}
+      };
 
       // 1. Flatten the 2D array into a 1D float array
       float[] flatLocalData = new float[localCellsPerAxis * localCellsPerAxis];
       for (int y = 0; y < localCellsPerAxis; y++)
       {
-         for (int x = 0; x < localCellsPerAxis; x++)
-         {
-            flatLocalData[y * localCellsPerAxis + x] = localData[y][x];
-         }
+         System.arraycopy(localData[y], 0, flatLocalData, y * localCellsPerAxis, localCellsPerAxis);
       }
 
       Mat localMatCPU = new Mat(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_32FC1);
@@ -498,26 +495,25 @@ public class GpuICPCalculatorTest
       localFloatArrayPointer.put(flatLocalData);
 
       // ----------------- Global map (matches local) -----------------
-      float[][] globalData = new float[][] {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                                            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                                            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                                            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                                            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                                            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                                            {0, 0, 0, 0.000523f, 0.000482f, 0.000336f, 0.000484f, 0.000418f, 0, 0, 0},
-                                            {0, 0, 0, 0.000593f, 0.000586f, 0.000557f, 0.000568f, 0.000534f, 0, 0, 0},
-                                            {0, 0, 0, 0.000502f, 0.000502f, 0.000477f, 0.000716f, 0.000628f, 0.000564f, 0.000489f, 0},
-                                            {0, 0, 0, 0.000894f, 0.000889f, 0.002925f, 0.078416f, 0.085725f, 0.082217f, 0.081014f, 0},
-                                            {0, -0.007268f, -0.007584f, -0.007432f, 0.013890f, 0, 0, 0, 0, 0, 0}};
+      float[][] globalData = new float[][] {
+            {0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f},
+            {0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f},
+            {0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f},
+            {0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f},
+            {0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f},
+            {0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f},
+            {0.000000f, 0.000000f, 0.000000f, 0.000433f, 0.000434f, 0.000434f, 0.000434f, 0.000434f, 0.000000f, 0.000000f, 0.000000f},
+            {0.000000f, 0.000000f, 0.000000f, 0.000508f, 0.000510f, 0.000508f, 0.000510f, 0.000508f, 0.000000f, 0.000000f, 0.000000f},
+            {0.000000f, 0.000000f, 0.000534f, 0.000533f, 0.000535f, 0.000534f, 0.000535f, 0.000533f, 0.000534f, 0.000000f, 0.000000f},
+            {0.000000f, 0.000000f, 0.000802f, 0.000803f, 0.076585f, 0.085295f, 0.091000f, 0.066076f, 0.085295f, 0.000000f, 0.000000f},
+            {0.000000f, 0.000815f, 0.000814f, 0.000815f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f}
+      };
 
       // 1. Flatten the 2D array into a 1D float array
       float[] flattenedGlobalData = new float[globalCellsPerAxis * globalCellsPerAxis];
       for (int y = 0; y < globalCellsPerAxis; y++)
       {
-         for (int x = 0; x < globalCellsPerAxis; x++)
-         {
-            flattenedGlobalData[y * globalCellsPerAxis + x] = globalData[y][x];
-         }
+         System.arraycopy(globalData[y], 0, flattenedGlobalData, y * globalCellsPerAxis, globalCellsPerAxis);
       }
 
       Mat globalMatCPU = new Mat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_32FC1);
@@ -531,7 +527,6 @@ public class GpuICPCalculatorTest
       globalMap.upload(globalMatCPU);
 
       // ----------------- Run ICP -----------------
-      new Point3D(0.10512145566304529, -6.100405932460462E-4, 0.9680018063204976);
       heightMapICPCalculator.computeICPErrorTransform(localMap,
                                                       globalMap,
                                                       new Point3D(),
@@ -543,11 +538,10 @@ public class GpuICPCalculatorTest
       System.out.println("Corrected transform = " + corrected);
 
       // ----------------- EXPECTATION -----------------
-      // In simulation, no real drift exists, so corrected transform should be near zero
-      // TODO this assert isn't specific enough
-      assertEquals(0.0, corrected.getX(), 1e-2);
-      assertEquals(0.0, corrected.getY(), 1e-2);
-      assertEquals(0.0, corrected.getZ(), 1e-2);
+      // In simulation, no real drift exists, so corrected transform should be zero
+      assertEquals(0.0, corrected.getX(), 1e-5);
+      assertEquals(0.0, corrected.getY(), 1e-5);
+      assertEquals(0.0, corrected.getZ(), 1e-5);
 
       // ----------------- Cleanup -----------------
       localMap.close();
