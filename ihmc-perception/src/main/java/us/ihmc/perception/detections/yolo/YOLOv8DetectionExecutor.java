@@ -48,20 +48,21 @@ public class YOLOv8DetectionExecutor
    private final CUDADepthImageSegmenter segmenter;
 
    private final Map<String, YOLOv8Model> availableModels = new LinkedHashMap<>();
-   private final TypedNotification<List<YOLOv8InstantDetection>> annotationNotification = new TypedNotification<>();
-
    private final SyncedYOLOv8ExecutorParameters parameters;
-   private boolean requestingFullData;
-   private final ROS2Publisher<YOLOv8ExecutorParameters> parametersPublisher;
    private final YOLOv8ExecutorParameters parametersMessage;
-   private final RepeatingTaskThread updateThread;
 
-   private final List<Consumer<List<InstantDetection>>> detectionConsumerCallbacks = new ArrayList<>();
-
+   private final ROS2Publisher<YOLOv8ExecutorParameters> parametersPublisher;
    private final ROS2Publisher<ImageMessage> annotatedImagePublisher;
    private final BooleanSupplier annotatedImageDemanded;
+
+   private final RepeatingTaskThread updateThread;
    private final RepeatingTaskThread annotatedImagePublishedThread;
+
+   private final TypedNotification<List<YOLOv8InstantDetection>> annotationNotification = new TypedNotification<>();
+   private final List<Consumer<List<InstantDetection>>> detectionConsumerCallbacks = new ArrayList<>();
    private final TypedNotification<RawImage> newestColorImage = new TypedNotification<>();
+
+   private boolean requestingFullData;
 
    public void addDetectionConsumerCallback(Consumer<List<InstantDetection>> callback)
    {
@@ -127,21 +128,47 @@ public class YOLOv8DetectionExecutor
       annotatedImagePublishedThread.startRepeating();
    }
 
+   /**
+    * Returns the names of all YOLOv8 models that are currently available to this executor.
+    *
+    * @return a new list containing the names of all loaded YOLOv8 models
+    */
    public List<String> getAvailableModelNames()
    {
       return new ArrayList<>(availableModels.keySet());
    }
 
+   /**
+    * Selects the YOLOv8 model to run for subsequent detection calls.
+    * If the specified model name does not correspond to a loaded model,
+    * {@link #runModel(RawImage, RawImage)} will act as a no-op.
+    *
+    * @param modelName the name of the YOLOv8 model to enable, as returned by {@link #getAvailableModelNames()}
+    */
    public void enableModel(String modelName)
    {
       parameters.getModelToRun().setValue(modelName);
    }
 
+   /**
+    * Disables the currently selected YOLOv8 model.
+    * After calling this method, {@link #runModel(RawImage, RawImage)} will not perform detections
+    * until a model is enabled again via {@link #enableModel(String)}.
+    */
    public void disableModel()
    {
       parameters.getModelToRun().setValue(null);
    }
 
+   /**
+    * Runs the currently enabled YOLOv8 model on the given color and depth images, producing
+    * 3D detections and invoking all registered detection callbacks.
+    * <p>
+    * If no model is enabled or either image is invalid, the method returns without producing detections.
+    *
+    * @param colorImage the raw color image to be used as input to YOLOv8 and for annotation
+    * @param depthImage the raw depth image used to compute 3D information for each detection
+    */
    public void runModel(RawImage colorImage, RawImage depthImage)
    {
       // Acquire the images
