@@ -32,14 +32,15 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.bytedeco.opencv.opencv_core.AbstractScalar.*;
+
 public class YOLOv8Tools
 {
    private static final int FONT = opencv_imgproc.FONT_HERSHEY_DUPLEX;
    private static final int FONT_THICKNESS = 2;
    private static final double FONT_SCALE = 1.5;
+   private static final int TEXT_LINE_TYPE = opencv_imgproc.LINE_AA;
    private static final int LINE_TYPE = opencv_imgproc.LINE_4;
-   private static final Scalar GREEN = new Scalar(0.0, 196.0, 0.0, 255.0);
-   private static final Scalar WHITE = new Scalar(255.0, 255.0, 255.0, 255.0);
    private static final ThreadLocal<Mat> GREEN_MAT = ThreadLocal.withInitial(() -> new Mat(1, 1, opencv_core.CV_8UC3, GREEN));
 
    public static final String CLASS_NAME_FILE_NAME = "class_names.yaml";
@@ -174,7 +175,7 @@ public class YOLOv8Tools
 
          // Draw the text
          Point textLocation = new Point(textBoxClampedX, textBoxClampedY + textSize.height());
-         opencv_imgproc.putText(annotatedImage, text, textLocation, FONT, FONT_SCALE, WHITE, FONT_THICKNESS, LINE_TYPE, false);
+         opencv_imgproc.putText(annotatedImage, text, textLocation, FONT, FONT_SCALE, WHITE, FONT_THICKNESS, TEXT_LINE_TYPE, false);
 
          // Add green tint to show mask
          RawImage mask = detection.getObjectMask();
@@ -182,15 +183,15 @@ public class YOLOv8Tools
 
          // Account for aspect ratio by scaling to match annotatedImage width
          Size scaleSize = annotatedImage.rows() > maskMat.rows() ?
-                                new Size(annotatedImage.cols(), maskMat.rows() * annotatedImage.cols() / maskMat.cols())
-                              : new Size(maskMat.cols() * annotatedImage.rows() / maskMat.rows(), annotatedImage.rows());
+               new Size(annotatedImage.cols(), maskMat.rows() * annotatedImage.cols() / maskMat.cols()) :
+               new Size(maskMat.cols() * annotatedImage.rows() / maskMat.rows(), annotatedImage.rows());
          Mat scaledMask = new Mat(scaleSize, maskMat.type());
          opencv_imgproc.resize(maskMat, scaledMask, scaleSize);
          Scalar scalar = new Scalar(0);
          Mat paddedMask = new Mat(annotatedImage.rows(), annotatedImage.cols(), maskMat.type(), scalar);
          Rect roi = annotatedImage.rows() > maskMat.rows() ?
-                          new Rect(0, (annotatedImage.rows() - scaledMask.rows()) / 2, scaledMask.cols(), scaledMask.rows())
-                        : new Rect((annotatedImage.cols() - scaledMask.cols()) / 2, 0, scaledMask.cols(), scaledMask.rows());
+               new Rect(0, (annotatedImage.rows() - scaledMask.rows()) / 2, scaledMask.cols(), scaledMask.rows()) :
+               new Rect((annotatedImage.cols() - scaledMask.cols()) / 2, 0, scaledMask.cols(), scaledMask.rows());
          Mat paddedMaskCenter = new Mat(paddedMask, roi);
          scaledMask.copyTo(paddedMaskCenter);
          scaleSize.close();

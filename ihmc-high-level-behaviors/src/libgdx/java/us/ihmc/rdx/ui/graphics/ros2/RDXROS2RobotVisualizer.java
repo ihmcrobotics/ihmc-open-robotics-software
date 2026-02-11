@@ -12,7 +12,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.MinimalFootstep;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.StateEstimatorAPI;
-import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
+import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -39,7 +39,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class RDXROS2RobotVisualizer extends RDXROS2SingleTopicVisualizer<RobotConfigurationData>
 {
-   private final ROS2PublishSubscribeAPI ros2;
+   private final ROS2Helper ros2;
    private final RDXMultiBodyGraphic multiBodyGraphic;
    private final ROS2Topic<RobotConfigurationData> topic;
    private final ImBoolean trackRobot = new ImBoolean(false);
@@ -61,7 +61,7 @@ public class RDXROS2RobotVisualizer extends RDXROS2SingleTopicVisualizer<RobotCo
    private final RDXFootstepPlanGraphic footstepHistoryGraphic;
    private final ArrayList<RDXInteractableFrameModel> interactableFrameModels = new ArrayList<>();
 
-   public RDXROS2RobotVisualizer(ROS2PublishSubscribeAPI ros2, ROS2SyncedRobotModel syncedRobot)
+   public RDXROS2RobotVisualizer(ROS2Helper ros2, ROS2SyncedRobotModel syncedRobot)
    {
       super(syncedRobot.getRobotModel().getSimpleRobotName() + " Robot Visualizer");
 

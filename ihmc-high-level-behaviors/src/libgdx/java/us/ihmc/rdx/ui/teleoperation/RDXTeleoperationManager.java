@@ -12,7 +12,6 @@ import us.ihmc.avatar.arm.PresetArmConfiguration;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
-import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.behaviors.tools.interfaces.LogToolsLogger;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
@@ -142,9 +141,9 @@ public class RDXTeleoperationManager extends RDXPanel
    /**
     * For use without interactables available. May crash if a YoVariableClient is needed.
     */
-   public RDXTeleoperationManager(ROS2SyncedRobotModel syncedRobot, CommunicationHelper communicationHelper)
+   public RDXTeleoperationManager(ROS2SyncedRobotModel syncedRobot, ROS2ControllerHelper controllerHelper)
    {
-      this(syncedRobot, communicationHelper, null, null, null);
+      this(syncedRobot, controllerHelper, null, null, null);
    }
 
    /**
@@ -152,16 +151,16 @@ public class RDXTeleoperationManager extends RDXPanel
     * some robots.
     */
    public RDXTeleoperationManager(ROS2SyncedRobotModel syncedRobot,
-                                  CommunicationHelper communicationHelper,
+                                  ROS2ControllerHelper controllerHelper,
                                   RobotCollisionModel robotSelfCollisionModel,
                                   RobotCollisionModel robotSelectionCollisionModel,
                                   YoVariableClientHelper yoVariableClientHelper)
    {
-      this(syncedRobot, communicationHelper, robotSelfCollisionModel, robotSelectionCollisionModel, yoVariableClientHelper, new RDXHardwareControlStateManager(communicationHelper));
+      this(syncedRobot, controllerHelper, robotSelfCollisionModel, robotSelectionCollisionModel, yoVariableClientHelper, new RDXHardwareControlStateManager(controllerHelper));
    }
 
    public RDXTeleoperationManager(ROS2SyncedRobotModel syncedRobot,
-                                  CommunicationHelper communicationHelper,
+                                  ROS2ControllerHelper controllerHelper,
                                   RobotCollisionModel robotSelfCollisionModel,
                                   RobotCollisionModel robotSelectionCollisionModel,
                                   YoVariableClientHelper yoVariableClientHelper,
@@ -176,7 +175,7 @@ public class RDXTeleoperationManager extends RDXPanel
       this.syncedRobot = syncedRobot;
 
       addChild(teleoperationParametersTuner);
-      robotModel = communicationHelper.getRobotModel();
+      robotModel = controllerHelper.getRobotModel();
       hasHead = robotModel.getRobotVersion().hasHead();
       for (RobotSide side : RobotSide.values)
       {
@@ -184,7 +183,7 @@ public class RDXTeleoperationManager extends RDXPanel
          hasEitherArm |= hasArm;
          hasArms.put(side, hasArm);
       }
-      ros2Helper = communicationHelper.getControllerHelper();
+      ros2Helper = controllerHelper;
       this.yoVariableClientHelper = yoVariableClientHelper;
 
       teleoperationParameters = new RDXTeleoperationParameters(robotModel.getSimpleRobotName());
@@ -195,7 +194,7 @@ public class RDXTeleoperationManager extends RDXPanel
 
       controllerStatusTracker = new ControllerStatusTracker(logToolsLogger, ros2Helper.getROS2Node(), robotModel.getSimpleRobotName());
 
-      locomotionManager = new RDXLocomotionManager(robotModel, communicationHelper, syncedRobot, controllerStatusTracker, this);
+      locomotionManager = new RDXLocomotionManager(robotModel, controllerHelper, syncedRobot, controllerStatusTracker, this);
 
       interactablesAvailable = robotSelfCollisionModel != null;
       if (interactablesAvailable)
@@ -207,7 +206,7 @@ public class RDXTeleoperationManager extends RDXPanel
       wholeBodyIKManager = new RDXWholeBodyIKManager(robotModel, teleoperationParameters, desiredRobot, ros2Helper, syncedRobot, controllerStatusTracker);
 
       // create the manager for the desired arm setpoints
-      armManager = new RDXArmManager(communicationHelper,
+      armManager = new RDXArmManager(controllerHelper,
                                      robotModel,
                                      syncedRobot,
                                      desiredRobot,

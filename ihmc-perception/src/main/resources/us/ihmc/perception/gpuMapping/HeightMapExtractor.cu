@@ -218,7 +218,7 @@ __global__ void heightMapRegistrationKernel(const float *__restrict__ localMeanM
                                             const float globalMapCenterX,
 											const float globalMapCenterY,
                                             const float *__restrict__ groundToWorldTranslation,
-                                            const float *__restrict__ params, float resetOffset)
+                                            const float *__restrict__ params)
 {
     int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
     int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
@@ -226,48 +226,58 @@ __global__ void heightMapRegistrationKernel(const float *__restrict__ localMeanM
     const int localCellsPerAxis = static_cast<int>(params[LOCAL_CELLS_PER_AXIS]);
     const int globalCellsPerAxis = static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]);
 
-    // Check bounds for global indices
+    // Check bounds for local indices
     if (xIndex >= localCellsPerAxis || yIndex >= localCellsPerAxis)
         return;
 
-    int2 localIndex = make_int2(xIndex, yIndex);
-    float2 localCoordinate = indices_to_coordinate(localIndex, make_float2(0.0f, 0.0f), params[CELL_SIZE], params[LOCAL_CENTER_INDEX]);
-    float3 queryPointInLocal = make_float3(localCoordinate.x, localCoordinate.y, 0.0f);
-    float3 cellInGlobal = transformPoint3D(queryPointInLocal, groundToWorldTranslation);
-    int2 globalIndex = coordinate_to_indices(make_float2(cellInGlobal.x, cellInGlobal.y), make_float2(globalMapCenterX, globalMapCenterY), params[CELL_SIZE], params[GLOBAL_CENTER_INDEX]);
+    // Doing (y, x) allows for coalesced memory access when going to global memory
+    int2 localCell = make_int2(yIndex, xIndex);
+    float *localMean = (float *)((char *)localMeanMap + localCell.x * pitchLocalMean) + localCell.y;
+    // Global memory access is asychronious and takes a long time, tell the bus to go grab some memory
+    float localMeanF = *localMean;
 
-    if (globalIndex.x < 0 || globalIndex.x >= globalCellsPerAxis || globalIndex.y < 0 || globalIndex.y >= globalCellsPerAxis)
+    // While the global memory is being fetched, convert the local cell into the global cell so we can register the data
+    float2 localCoordinate = indices_to_coordinate(localCell, make_float2(0.0f, 0.0f), params[CELL_SIZE], params[LOCAL_CENTER_INDEX]);
+    float3 pointInLocalFrame = make_float3(localCoordinate.x, localCoordinate.y, 0.0f);
+    float3 pointInGlobalFrame = transformPoint3D(pointInLocalFrame, groundToWorldTranslation);
+    int2 globalCell = coordinate_to_indices(make_float2(pointInGlobalFrame.x, pointInGlobalFrame.y), make_float2(globalMapCenterX, globalMapCenterY), params[CELL_SIZE], params[GLOBAL_CENTER_INDEX]);
+
+    if (globalCell.x < 0 || globalCell.x >= globalCellsPerAxis || globalCell.y < 0 || globalCell.y >= globalCellsPerAxis)
         return;
 
-    float *localMean = (float *)((char *)localMeanMap + localIndex.x * pitchLocalMean) + localIndex.y;
-    float *localVariance = (float *)((char *)localVarianceMap + localIndex.x * pitchLocalVariance) + localIndex.y;
-    float *localMotionVariance = (float *)((char *)localMotionVarianceMap + localIndex.x * pitchLocalMotionVariance) + localIndex.y;
+    // The work done so far by the kernel is very small, so the local mean global memory access hasn't finished yet.
+    // Setup the correct address for the data we want to use later
+    float *localVariance = (float *)((char *)localVarianceMap + localCell.x * pitchLocalVariance) + localCell.y;
+    float *localMotionVariance = (float *)((char *)localMotionVarianceMap + localCell.x * pitchLocalMotionVariance) + localCell.y;
+    float *globalMean = (float *)((char *)globalMeanMap + globalCell.x * pitchGlobalMean) + globalCell.y;
+    float *globalVariance = (float *)((char *)globalVarianceMap + globalCell.x * pitchGlobalVariance) + globalCell.y;
 
-    if (*localMean == 0)
+    // After trying to do as much work as possible in parallel to the global memory access. We ran out of stuff to do.
+    // Check the result of global memory for invalid data, and return if not valid
+    if (localMeanF == 0)
         return;
 
-    float *globalMean = (float *)((char *)globalMeanMap + globalIndex.x * pitchGlobalMean) + globalIndex.y;
-    float *globalVariance = (float *)((char *)globalVarianceMap + globalIndex.x * pitchGlobalVariance) + globalIndex.y;
-
-    float localMeanF = static_cast<float>(*localMean);
-    float localVarianceF = static_cast<float>(*localVariance);
-    float localMotionVarianceF = static_cast<float>(*localMotionVariance);
-    float globalMeanF = static_cast<float>(*globalMean);
-    float globalVarianceF = static_cast<float>(*globalVariance);
+    // Access the rest of the global memory needed for the filtering, there is no other work to do
+    float localVarianceF = *localVariance;
+    float globalMeanF = *globalMean;
+    float globalVarianceF = *globalVariance;
 
     // If we have no real data, we don't apply the kalman filter, just take the new real data
-    if (globalMeanF == resetOffset || globalVarianceF <= 0.0f)
+    if (globalVarianceF <= 0.0f)
     {
-        *globalMean = *localMean;
-        *globalVariance = *localVariance;
+        *globalMean = localMeanF;
+        *globalVariance = localVarianceF;
     }
     else
     {
-        // Predict step of the filter
+        // Too many global memory access's at once seems to overwhelm the memory bus, do the last global memory access here to space things out a little
+        float localMotionVarianceF = *localMotionVariance;
+
+        // Predict step of the kalman filter
         float predictedMean = globalMeanF;
         float predictedVariance = globalVarianceF + params[KALMAN_FILTER_PREDICTION_NOISE];
 
-        // Update step of the filter
+        // Update step of the kalman filter
         float kalmanGain = predictedVariance / (predictedVariance + localVarianceF + localMotionVarianceF);
         float updatedMean = predictedMean + kalmanGain * (localMeanF - predictedMean);
         float updatedVariance = (1.0f - kalmanGain) * predictedVariance;

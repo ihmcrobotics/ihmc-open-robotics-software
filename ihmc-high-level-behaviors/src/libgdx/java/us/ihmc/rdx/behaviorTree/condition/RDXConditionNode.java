@@ -30,7 +30,7 @@ public class RDXConditionNode extends RDXLeafNode<ConditionNodeState, ConditionN
       counter = new RDXCounterCondition(state);
       llm = new RDXLLMCondition(state);
       proximityCheck = new RDXProximityCondition(state, scene);
-      shapeContains = new RDXShapeContainsCondition(state, scene, panel3D);
+      shapeContains = new RDXShapeContainsCondition(this, scene, panel3D);
    }
 
    @Override
@@ -95,7 +95,7 @@ public class RDXConditionNode extends RDXLeafNode<ConditionNodeState, ConditionN
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       if (definition.getConditionType().getValue() == ConditionNodeType.SHAPE_CONTAINS)
-         shapeContains.getVirtualRenderables(renderables, pool, getSelected());
+         shapeContains.getVirtualRenderables(renderables, pool);
    }
 
    @Override
