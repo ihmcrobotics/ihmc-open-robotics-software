@@ -5,8 +5,10 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.realtime.MonotonicTime;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
@@ -16,6 +18,8 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.LinkedHashMap;
 
 /**
  * This class is responsible for applying a master gain to all low-level desired outputs.
@@ -32,6 +36,7 @@ public class AvatarLowLevelOutputProcessor
    private static final double DEFAULT_SERVO_DURATION = 2.0; // In units of seconds
    private static final double LOW_MASTER_GAIN = 0.0;
    private static final double HIGH_MASTER_GAIN = 1.00;
+   private final static boolean DEFAULT_OFFSET_DESIREDS_BY_FILTERS = false;
 
    private final double updateDt;
    private DoubleProvider yoTime;
@@ -49,11 +54,17 @@ public class AvatarLowLevelOutputProcessor
    private final YoDouble interpolateDuration = new YoDouble("interpolateDuration", registry);
    private final YoDouble interpolationStartTime = new YoDouble("interpolationTime", registry);
    private final YoDouble interpolationRatio = new YoDouble("interpolationRatio", registry);
+   private final YoBoolean offsetsDesiredsByFilters = new YoBoolean("offsetsDesiredsByFilters", registry);
 
    private final YoDouble timeFromEstimator = new YoDouble("timeFromEstimator", registry);
    private TimestampProvider monotonicTime;
 
+   private final LinkedHashMap<OneDoFJointReadOnly, YoDouble> jointPositionOffsets = new LinkedHashMap<>();
+   private final LinkedHashMap<OneDoFJointReadOnly, YoDouble> jointVelocityOffsets = new LinkedHashMap<>();
+
    private final JointControlBlender[] jointControlBlenders;
+
+   private final OneDoFJointReadOnly[] controlledJoints;
 
    private final YoLowLevelOneDoFJointDesiredDataHolder unprocessedDesireds;
    private final YoLowLevelOneDoFJointDesiredDataHolder previousDesireds;
@@ -76,6 +87,7 @@ public class AvatarLowLevelOutputProcessor
 
    public AvatarLowLevelOutputProcessor(String robotName, OneDoFJointReadOnly[] controlledJoints, double updateDt, DoubleProvider yoTime, TimestampProvider monotonicTime, YoRegistry parentRegistry)
    {
+      this.controlledJoints = controlledJoints;
       this.updateDt = updateDt;
       this.yoTime = yoTime;
 
@@ -91,6 +103,7 @@ public class AvatarLowLevelOutputProcessor
          jointControlBlenders[i] = new JointControlBlender("LowLevelOutputInterpolator", controlledJoints[i], registry);
 
       servoDuration.set(DEFAULT_SERVO_DURATION);
+      offsetsDesiredsByFilters.set(DEFAULT_OFFSET_DESIREDS_BY_FILTERS);
 
       addServoListener(change ->
                        {
@@ -157,8 +170,13 @@ public class AvatarLowLevelOutputProcessor
       if (isUnservoing.getBooleanValue())
          computeMasterGainForUnservo();
 
-      for (int i = 0; i < processedDesireds.getNumberOfJointsWithDesiredOutput(); i++)
-         processedDesireds.getJointDesiredOutput(i).setMasterGain(masterGain.getDoubleValue());
+      for (OneDoFJointReadOnly controlledJoint : controlledJoints)
+      {
+         JointDesiredOutputBasics jointDesiredOutput = processedDesireds.getJointDesiredOutput(controlledJoint);
+         jointDesiredOutput.setMasterGain(masterGain.getDoubleValue());
+         jointDesiredOutput.setDesiredPosition(jointDesiredOutput.getDesiredPosition() + getJointPositionOffset(controlledJoint));
+         jointDesiredOutput.setDesiredVelocity(jointDesiredOutput.getDesiredVelocity() + getJointVelocityOffset(controlledJoint));
+      }
    }
 
    public void enableInterpolation(boolean enable)
@@ -263,6 +281,47 @@ public class AvatarLowLevelOutputProcessor
       double alpha = servoTime / servoDuration;
       double masterGain = InterpolationTools.linearInterpolate(startGain, endGain, alpha);
       return MathTools.clamp(masterGain, LOW_MASTER_GAIN, HIGH_MASTER_GAIN);
+   }
+
+   public void setJointPositionOffset(OneDoFJointReadOnly joint, double positionOffset)
+   {
+      getYoJointPositionOffset(joint).set(positionOffset);
+   }
+
+   public void setJointVelocityOffset(OneDoFJointReadOnly joint, double velocityOffset)
+   {
+      getYoJointVelocityOffset(joint).set(velocityOffset);
+   }
+
+   public double getJointPositionOffset(OneDoFJointReadOnly joint)
+   {
+      return getYoJointPositionOffset(joint).getDoubleValue();
+   }
+
+   public double getJointVelocityOffset(OneDoFJointReadOnly joint)
+   {
+      return getYoJointVelocityOffset(joint).getDoubleValue();
+   }
+
+   public YoDouble getYoJointPositionOffset(OneDoFJointReadOnly joint)
+   {
+      if (!jointPositionOffsets.containsKey(joint))
+         jointPositionOffsets.put(joint, new YoDouble(joint.getName() + "_PositionOffset", registry));
+
+      return jointPositionOffsets.get(joint);
+   }
+
+   public YoDouble getYoJointVelocityOffset(OneDoFJointReadOnly joint)
+   {
+      if (!jointVelocityOffsets.containsKey(joint))
+         jointVelocityOffsets.put(joint, new YoDouble(joint.getName() + "_VelocityOffset", registry));
+
+      return jointVelocityOffsets.get(joint);
+   }
+
+   public boolean getOffsetDesiredsByFilters()
+   {
+      return offsetsDesiredsByFilters.getBooleanValue();
    }
 
    public JointDesiredOutputListBasics getProcessedDesiredOutput()
