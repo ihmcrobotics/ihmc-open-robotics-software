@@ -44,11 +44,6 @@ public abstract class SimpleConcaveHullFactory
    private static final boolean VERBOSE = false;
    private static final boolean REPORT_TIME = false;
 
-   public static ConcaveHullCollection createConcaveHullCollection(List<? extends Point2DReadOnly> pointCloud2d, ConcaveHullFactoryParameters parameters)
-   {
-      return createConcaveHullCollection(pointCloud2d, Collections.emptyList(), parameters);
-   }
-
    public static ConcaveHullCollection createConcaveHullCollection(List<? extends Point2DReadOnly> pointCloud2d,
                                                                    List<? extends LineSegment2DReadOnly> lineConstraints,
                                                                    ConcaveHullFactoryParameters parameters)
@@ -61,11 +56,6 @@ public abstract class SimpleConcaveHullFactory
          return new ConcaveHullCollection();
       else
          return concaveHull.getConcaveHullCollection();
-   }
-
-   public static ConcaveHullFactoryResult createConcaveHull(List<? extends Point2DReadOnly> pointCloud2d, ConcaveHullFactoryParameters parameters)
-   {
-      return createConcaveHull(pointCloud2d, Collections.emptyList(), parameters);
    }
 
    public static ConcaveHullFactoryResult createConcaveHull(List<? extends Point2DReadOnly> pointCloud2d,

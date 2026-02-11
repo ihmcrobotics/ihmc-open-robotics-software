@@ -1,19 +1,10 @@
 package us.ihmc.robotEnvironmentAwareness.planarRegion.slam;
 
-import java.util.*;
-
 import gnu.trove.list.array.TIntArrayList;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.ejml.data.DMatrixRMaj;
-import org.ejml.dense.row.CommonOps_DDRM;
-import org.ejml.dense.row.linsol.svd.SolvePseudoInverseSvd_DDRM;
-import org.ejml.interfaces.decomposition.SingularValueDecomposition_F64;
-
+import us.ihmc.commons.lists.PairList;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.BoundingBox3D;
-import us.ihmc.euclid.geometry.Plane3D;
-import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.shape.collision.EuclidShape3DCollisionResult;
 import us.ihmc.euclid.shape.collision.gjk.GilbertJohnsonKeerthiCollisionDetector;
 import us.ihmc.euclid.shape.primitives.Box3D;
@@ -27,179 +18,23 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ConcaveHullMerger;
 import us.ihmc.robotics.EuclidGeometryMissingTools;
-import us.ihmc.robotics.geometry.*;
-import us.ihmc.commons.lists.PairList;
+import us.ihmc.robotics.geometry.GeometryTools;
+import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionTools;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class PlanarRegionSLAMTools
 {
    private static boolean verbose = false;
-
-   /**
-    * Uses the algorithm on the slides at
-    * http://resources.mpi-inf.mpg.de/deformableShapeMatching/EG2011_Tutorial/slides/2.1%20Rigid%20ICP.pdf
-    * pages 12-14
-    *
-    * @param matchesWithReferencePoints
-    * @return
-    */
-   public static RigidBodyTransform findDriftCorrectionTransform(Map<PlanarRegion, PairList<PlanarRegion, Point2D>> matchesWithReferencePoints,
-                                                                 PlanarRegionSLAMParameters parameters,
-                                                                 RigidBodyTransform referenceTransform)
-   {
-      RigidBodyTransform bigT = new RigidBodyTransform();
-
-      SolvePseudoInverseSvd_DDRM solver = new SolvePseudoInverseSvd_DDRM();
-
-      int numberOfMatches = 0;
-      for (PairList<PlanarRegion, Point2D> newDataRegionWithReferencePoints : matchesWithReferencePoints.values())
-      {
-         numberOfMatches += newDataRegionWithReferencePoints.size();
-      }
-
-      if (numberOfMatches == 0)
-         return new RigidBodyTransform();
-
-      DMatrixRMaj A = new DMatrixRMaj(numberOfMatches, 6);
-      DMatrixRMaj b = new DMatrixRMaj(numberOfMatches, 1); // negative distance to planes
-
-      int i = 0;
-      for (PlanarRegion mapRegion : matchesWithReferencePoints.keySet())
-      {
-         Plane3D planarRegionPlane3D = mapRegion.getPlane();
-         Vector3DReadOnly normal = planarRegionPlane3D.getNormal();
-         Vector3D normalInReferenceFrame = null;
-
-         if (referenceTransform != null)
-         {
-            normalInReferenceFrame = new Vector3D(normal);
-            referenceTransform.inverseTransform(normalInReferenceFrame);
-         }
-
-         for (ImmutablePair<PlanarRegion, Point2D> newDataRegionWithReferencePoint : matchesWithReferencePoints.get(mapRegion))
-         {
-            PlanarRegion newPlanarRegion = newDataRegionWithReferencePoint.getLeft();
-            Point2D referencePointInNewDataLocal = newDataRegionWithReferencePoint.getRight();
-
-            Point3D referencePointInWorld = new Point3D(referencePointInNewDataLocal);
-            RigidBodyTransform transformFromNewDataToWorld = new RigidBodyTransform();
-            newPlanarRegion.getTransformToWorld(transformFromNewDataToWorld);
-            transformFromNewDataToWorld.transform(referencePointInWorld);
-
-            Vector3D cross = new Vector3D();
-
-            if (referenceTransform != null)
-            {
-               Point3D referencePointInReferenceFrame = new Point3D(referencePointInWorld);
-               referenceTransform.inverseTransform(referencePointInReferenceFrame);
-               cross.cross(referencePointInReferenceFrame, normalInReferenceFrame);
-            }
-            else
-            {
-               cross.cross(referencePointInWorld, normal);
-            }
-
-            A.set(i, 0, cross.getX());
-            A.set(i, 1, cross.getY());
-            A.set(i, 2, cross.getZ());
-
-            if (referenceTransform != null)
-            {
-               A.set(i, 3, normalInReferenceFrame.getX());
-               A.set(i, 4, normalInReferenceFrame.getY());
-               A.set(i, 5, normalInReferenceFrame.getZ());
-            }
-            else
-            {
-               A.set(i, 3, normal.getX());
-               A.set(i, 4, normal.getY());
-               A.set(i, 5, normal.getZ());
-            }
-
-            double signedDistanceFromPointToPlane = planarRegionPlane3D.signedDistance(referencePointInWorld);
-
-            //TODO: Reject outliers that have a large distance to the plane.
-            if (verbose && Math.abs(signedDistanceFromPointToPlane) > 0.05)
-            {
-               System.err.println("\n\n*******************\nsignedDistanceFromPointToPlane = " + signedDistanceFromPointToPlane);
-               System.err.println("referencePointInWorld = " + referencePointInWorld);
-               System.err.println("planarRegionPlane3D = " + planarRegionPlane3D);
-               System.err.println("mapRegion = " + mapRegion);
-               System.err.println("newPlanarRegion = " + newPlanarRegion);
-               System.err.println("normal = " + normal);
-               System.err.println("normalOfNewPlanarRegion = " + newPlanarRegion.getNormal());
-            }
-
-            b.set(i, 0, -signedDistanceFromPointToPlane);
-
-            ++i;
-         }
-      }
-      if (verbose)
-      {
-         LogTools.info("numberReferencePoints: {}", i);
-         LogTools.info("A: {}", A);
-         LogTools.info("b: {}", b);
-      }
-
-      DMatrixRMaj x = new DMatrixRMaj(6, 1);
-
-      DMatrixRMaj ATransposeTimesA = new DMatrixRMaj(6, 6);
-      CommonOps_DDRM.multInner(A, ATransposeTimesA);
-
-      DMatrixRMaj ATransposeB = new DMatrixRMaj(6, 1);
-      CommonOps_DDRM.multTransA(A, b, ATransposeB);
-
-      // Use damped least squares (also called regularized least squares) to prevent blow up when data is sparse.
-      // See https://www2.math.uconn.edu/~leykekhman/courses/MARN_5898/Lectures/Linear_least_squares_reg.pdf
-      DMatrixRMaj lambdaI = CommonOps_DDRM.identity(6);
-      CommonOps_DDRM.scale(parameters.getDampedLeastSquaresLambda(), lambdaI);
-
-      DMatrixRMaj ATransposeTimesAPlusLambdaI = new DMatrixRMaj(6, 6);
-      CommonOps_DDRM.add(ATransposeTimesA, lambdaI, ATransposeTimesAPlusLambdaI);
-
-      solver.setA(ATransposeTimesAPlusLambdaI);
-
-      solver.solve(ATransposeB, x);
-
-      if (verbose)
-      {
-         SingularValueDecomposition_F64<DMatrixRMaj> decomposition = solver.getDecomposition();
-         double[] singularValues = decomposition.getSingularValues();
-         LogTools.info("singularValues = " + doubleArrayToString(singularValues));
-         LogTools.info("ATransposeTimesA: {}", ATransposeTimesA);
-         LogTools.info("ATransposeB: {}", ATransposeTimesA);
-         LogTools.info("x: {}", x);
-      }
-
-      double rx = x.get(0, 0);
-      double ry = x.get(1, 0);
-      double rz = x.get(2, 0);
-      double tx = x.get(3, 0);
-      double ty = x.get(4, 0);
-      double tz = x.get(5, 0);
-
-      RotationMatrix rotationMatrix = new RotationMatrix(new Vector3D(rx, ry, rz));
-      Vector3D translation = new Vector3D(tx, ty, tz);
-
-      bigT.set(rotationMatrix, translation);
-
-      if (referenceTransform != null)
-      {
-         RigidBodyTransform transformToReturn = new RigidBodyTransform(bigT);
-         transformToReturn.preMultiply(referenceTransform);
-         transformToReturn.multiplyInvertOther(referenceTransform);
-         return transformToReturn;
-      }
-      else
-      {
-         return bigT;
-      }
-   }
 
    private static String doubleArrayToString(double[] singularValues)
    {

@@ -1,4 +1,4 @@
-package us.ihmc.robotEnvironmentAwareness.ui.io;
+package us.ihmc.footstepPlanning.ui.components;
 
 import java.io.File;
 import java.nio.file.Files;

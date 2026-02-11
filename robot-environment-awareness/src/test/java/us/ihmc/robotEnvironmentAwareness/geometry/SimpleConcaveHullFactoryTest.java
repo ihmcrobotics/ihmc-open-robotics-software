@@ -1,30 +1,7 @@
 package us.ihmc.robotEnvironmentAwareness.geometry;
 
-import static org.junit.jupiter.api.Assertions.assertTimeout;
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.assertNull;
-import static us.ihmc.robotics.Assert.assertTrue;
-
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import org.apache.commons.lang3.mutable.MutableBoolean;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import com.sun.javafx.application.PlatformImpl;
-
-import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.Axis3D;
@@ -45,72 +22,37 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.SharedMemoryMessager;
-import us.ihmc.messager.javafx.JavaFXMessager;
-import us.ihmc.messager.javafx.SharedMemoryJavaFXMessager;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
 import us.ihmc.robotEnvironmentAwareness.polygonizer.Polygonizer;
 import us.ihmc.robotEnvironmentAwareness.polygonizer.Polygonizer.Output;
 import us.ihmc.robotEnvironmentAwareness.polygonizer.PolygonizerManager;
-import us.ihmc.robotEnvironmentAwareness.polygonizer.PolygonizerVisualizerUI;
+
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertNull;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 public class SimpleConcaveHullFactoryTest
 {
-   private static boolean VISUALIZE = false;
-
    private Messager messager;
-   private MutableBoolean uiIsGoingDown = new MutableBoolean(false);
 
    @BeforeEach
    public void setup() throws Exception
    {
-      uiIsGoingDown.setFalse();
-
-      if (VISUALIZE)
-      {
-         SharedMemoryJavaFXMessager jfxMessager = new SharedMemoryJavaFXMessager(PolygonizerVisualizerUI.getMessagerAPI());
-         messager = jfxMessager;
-         createVisualizer(jfxMessager);
-      }
-      else
-      {
-         messager = new SharedMemoryMessager(PolygonizerVisualizerUI.getMessagerAPI());
-         messager.startMessager();
-         new PolygonizerManager(messager);
-      }
-   }
-
-   private void createVisualizer(JavaFXMessager messager)
-   {
-      AtomicReference<PolygonizerVisualizerUI> ui = new AtomicReference<>(null);
-
-      PlatformImpl.startup(() ->
-      {
-         try
-         {
-            Stage primaryStage = new Stage();
-            primaryStage.addEventHandler(WindowEvent.WINDOW_CLOSE_REQUEST, event -> uiIsGoingDown.setTrue());
-
-            ui.set(new PolygonizerVisualizerUI(messager, primaryStage));
-            ui.get().show();
-         }
-         catch (Exception e)
-         {
-            e.printStackTrace();
-         }
-      });
-
-      while (ui.get() == null)
-         ThreadTools.sleep(200);
-   }
-
-   @AfterEach
-   public void tearDown()
-   {
-      if (VISUALIZE)
-      {
-         while (!uiIsGoingDown.booleanValue())
-            ThreadTools.sleep(100);
-      }
+      messager = new SharedMemoryMessager(PolygonizerManager.API);
+      messager.startMessager();
+      new PolygonizerManager(messager);
    }
 
    @Test

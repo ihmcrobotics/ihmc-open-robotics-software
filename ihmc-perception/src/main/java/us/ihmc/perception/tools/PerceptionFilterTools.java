@@ -5,22 +5,13 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.log.LogTools;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.perception.depthData.CollisionBoxProvider;
-import us.ihmc.perception.depthData.CollisionShapeTester;
-import us.ihmc.perception.filters.CollidingScanRegionFilter;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHull;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullDecomposition;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullPruningFilteringTools;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,49 +21,6 @@ import java.util.List;
  */
 public class PerceptionFilterTools
 {
-   /**
-    * Creates a colliding scan region filter that will filter out planar regions that are in collision with the robot's shin.
-    *
-    * @param fullRobotModel
-    * @param collisionBoxProvider
-    * @return colliding scan region filter
-    */
-   public static CollidingScanRegionFilter createHumanoidShinCollisionFilter(FullHumanoidRobotModel fullRobotModel, CollisionBoxProvider collisionBoxProvider)
-   {
-      CollisionShapeTester shapeTester = new CollisionShapeTester(fullRobotModel, collisionBoxProvider);
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         List<JointBasics> joints = new ArrayList<>();
-         RigidBodyBasics shin = fullRobotModel.getFoot(robotSide).getParentJoint().getPredecessor().getParentJoint().getPredecessor();
-         MultiBodySystemTools.collectJointPath(fullRobotModel.getPelvis(), shin, joints);
-         joints.forEach(joint -> shapeTester.addJoint(collisionBoxProvider, joint));
-      }
-      return new CollidingScanRegionFilter(shapeTester);
-   }
-
-   /**
-    * Filters out planar regions that intersect with the collision meshes in the CollidingScanRegionFilter passed in. Used to remove regions that
-    * collide with robot body. Performs parallel stream processing for fast and efficient CPU usage.
-    *
-    * @param framePlanarRegionsList
-    * @param collisionFilter
-    */
-   public static void filterCollidingPlanarRegions(FramePlanarRegionsList framePlanarRegionsList, CollidingScanRegionFilter collisionFilter)
-   {
-      collisionFilter.update();
-      PlanarRegionsList planarRegionsList = framePlanarRegionsList.getPlanarRegionsList();
-
-      List<PlanarRegion> filteredPlanarRegions = planarRegionsList.getPlanarRegionsAsList().parallelStream().filter(region ->
-      {
-         PlanarRegion regionInWorld = region.copy();
-         regionInWorld.applyTransform(framePlanarRegionsList.getSensorToWorldFrameTransform());
-         return collisionFilter.test(0, regionInWorld);
-      }).toList();
-
-      framePlanarRegionsList.getPlanarRegionsList().clear();
-      framePlanarRegionsList.getPlanarRegionsList().addPlanarRegions(filteredPlanarRegions);
-   }
-
    /**
     * Applies a bounding box filter on the planar region lists by chopping off parts of the regions that are outside the bounding box. Performs
     * a plane-by-plane chopping tool for each plane on the bounding box.

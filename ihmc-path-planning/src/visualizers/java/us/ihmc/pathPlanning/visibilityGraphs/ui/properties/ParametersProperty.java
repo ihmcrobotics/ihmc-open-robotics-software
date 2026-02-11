@@ -1,4 +1,4 @@
-package us.ihmc.robotEnvironmentAwareness.ui.properties;
+package us.ihmc.pathPlanning.visibilityGraphs.ui.properties;
 
 import java.util.HashMap;
 import java.util.Map;

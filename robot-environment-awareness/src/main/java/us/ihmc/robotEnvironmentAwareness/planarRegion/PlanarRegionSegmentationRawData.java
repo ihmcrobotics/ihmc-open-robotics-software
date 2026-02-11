@@ -1,12 +1,5 @@
 package us.ihmc.robotEnvironmentAwareness.planarRegion;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
@@ -19,9 +12,12 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.jOctoMap.node.NormalOcTreeNode;
-import us.ihmc.robotEnvironmentAwareness.communication.converters.REAPlanarRegionsConverter;
-import us.ihmc.robotEnvironmentAwareness.communication.packets.PlanarRegionSegmentationMessage;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class PlanarRegionSegmentationRawData
 {
@@ -36,16 +32,6 @@ public class PlanarRegionSegmentationRawData
    public PlanarRegionSegmentationRawData(int regionId, Vector3DReadOnly normal, Point3DReadOnly origin)
    {
       this(regionId, normal, origin, Collections.emptyList());
-   }
-
-   public PlanarRegionSegmentationRawData(PlanarRegionSegmentationNodeData nodeData)
-   {
-      this(nodeData.getId(), nodeData.getNormal(), nodeData.getOrigin(), nodeData.nodeStream().map(NormalOcTreeNode::getHitLocationCopy), null);
-   }
-
-   public PlanarRegionSegmentationRawData(PlanarRegionSegmentationMessage message)
-   {
-      this(message.getRegionId(), message.getNormal(), message.getOrigin(), Arrays.stream(message.getHitLocations()), null);
    }
 
    public PlanarRegionSegmentationRawData(int regionId, Vector3DReadOnly normal, Point3DReadOnly origin, List<? extends Point3DReadOnly> pointCloud)
@@ -181,15 +167,5 @@ public class PlanarRegionSegmentationRawData
    private LineSegment2D toLineSegmentInPlane(LineSegment3D lineSegmentInWorld)
    {
       return PolygonizerTools.toLineSegmentInPlane(lineSegmentInWorld, origin, orientation);
-   }
-
-   public PlanarRegionSegmentationMessage toMessage()
-   {
-      return REAPlanarRegionsConverter.createPlanarRegionSegmentationMessage(regionId, origin, normal, null, pointCloud);
-   }
-
-   public static PlanarRegionSegmentationMessage[] toMessageArray(List<PlanarRegionSegmentationRawData> rawData)
-   {
-      return rawData.stream().map(PlanarRegionSegmentationRawData::toMessage).toArray(PlanarRegionSegmentationMessage[]::new);
    }
 }
