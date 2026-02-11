@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryExecutionStatus;
+import us.ihmc.log.LogTools;
 
 /**
  * 
@@ -20,6 +21,7 @@ public abstract class TrajectoryStatusMessageHelper<M>
 
    public void clear()
    {
+      LogTools.info("Clearing trajectory.");
       inputs.clear();
       currentTrajectoryStatus.sequenceID = -1L;
       currentTrajectoryStatus.timeInTrajectory = 0.0;
