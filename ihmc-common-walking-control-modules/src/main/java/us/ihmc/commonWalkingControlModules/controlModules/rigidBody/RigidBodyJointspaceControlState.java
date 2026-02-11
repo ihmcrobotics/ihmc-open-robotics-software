@@ -11,7 +11,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParameters;
-import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
@@ -174,8 +173,6 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
       trajectoryDone.set(false);
    }
 
-   double timeLastPrinted = 0.0;
-
    @Override
    public void doAction(double timeInState)
    {
@@ -184,18 +181,10 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
       statusHelper.updateWithTimeInTrajectory(timeInTrajectory);
 
       trajectoryDone.set(jointControlHelper.doAction(timeInTrajectory));
-
-      double currentTime = Conversions.nanosecondsToSeconds(System.nanoTime());
-      if (currentTime - timeLastPrinted > 0.5)
-      {
-         timeLastPrinted = currentTime;
-         LogTools.info("%s timeInTrajectory = %.3f done = %b".formatted(warningPrefix, timeInTrajectory, trajectoryDone.getBooleanValue()));
-      }
    }
 
    public boolean handleTrajectoryCommand(JointspaceTrajectoryCommand command, double[] initialJointPositions)
    {
-      timeLastPrinted = Conversions.nanosecondsToSeconds(System.nanoTime());
       if (!handleCommandInternal(command))
       {
          LogTools.info("%s could not handle command".formatted(warningPrefix));
