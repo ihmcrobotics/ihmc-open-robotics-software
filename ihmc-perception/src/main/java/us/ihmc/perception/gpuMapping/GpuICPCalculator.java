@@ -202,6 +202,12 @@ public class GpuICPCalculator
          filteredLocal.close();
          filteredCorrespondences.close();
 
+         // ALPHA FILTERING (e.g., take only 20% of the calculated move)
+         double alpha = heightMapParameters.getIcpAlphaFilter();
+         incrementalTransform.set(0, 3, incrementalTransform.get(0, 3) * alpha); // dx
+         incrementalTransform.set(1, 3, incrementalTransform.get(1, 3) * alpha); // dy
+         incrementalTransform.set(2, 3, incrementalTransform.get(2, 3) * alpha); // dz
+
          DMatrixRMaj combined = new DMatrixRMaj(4, 4);
          CommonOps_DDRM.mult(incrementalTransform, latestPointCloudErrorTransform, combined);
          latestPointCloudErrorTransform.set(combined);
@@ -212,12 +218,12 @@ public class GpuICPCalculator
          double dz = incrementalTransform.get(2, 3);
          double moveDist = Math.sqrt(dx * dx + dy * dy + dz * dz);
 
-//         System.out.println("Iteration " + i);
-//         System.out.println("  Valid correspondences: " + validCount);
-//         System.out.println("  Incremental dx: " + incrementalTransform.get(0, 3));
-//         System.out.println("  Incremental dy: " + incrementalTransform.get(1, 3));
-//         System.out.println("  Incremental dz: " + incrementalTransform.get(2, 3));
-//         System.out.println("  Move distance: " + moveDist);
+         System.out.println("Iteration " + i);
+         System.out.println("  Valid correspondences: " + validCount);
+         System.out.println("  Incremental dx: " + incrementalTransform.get(0, 3));
+         System.out.println("  Incremental dy: " + incrementalTransform.get(1, 3));
+         System.out.println("  Incremental dz: " + incrementalTransform.get(2, 3));
+         System.out.println("  Move distance: " + moveDist);
 
          if (moveDist < translationThreshold)
          {

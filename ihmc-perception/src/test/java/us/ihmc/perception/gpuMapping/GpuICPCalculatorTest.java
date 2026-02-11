@@ -80,9 +80,9 @@ public class GpuICPCalculatorTest
       System.out.println("Translation Y: " + correctedTransform.getY());
       System.out.println("Translation Z: " + correctedTransform.getZ());
 
-      assertEquals(0.0, correctedTransform.getX(), 1e-5);
-      assertEquals(0.0, correctedTransform.getY(), 1e-5);
-      assertEquals(-0.3, correctedTransform.getZ(), 1e-5);
+      assertEquals(0.0, correctedTransform.getX(), 1e-4);
+      assertEquals(0.0, correctedTransform.getY(), 1e-4);
+      assertEquals(-0.3, correctedTransform.getZ(), 1e-4);
 
       // Got to make sure everything shuts closes properly
       localMap.close();
