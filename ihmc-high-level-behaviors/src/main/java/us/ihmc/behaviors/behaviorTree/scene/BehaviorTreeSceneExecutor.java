@@ -71,9 +71,7 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
       objects = (List) super.objects;
 
       if (yolo != null)
-      {
          yolo.addDetectionConsumerCallback(instantDetectionQueue::add);
-      }
 
       if (foundationPose != null)
       {
