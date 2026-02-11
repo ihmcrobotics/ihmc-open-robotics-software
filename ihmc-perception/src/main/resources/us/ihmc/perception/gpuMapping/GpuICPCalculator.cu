@@ -2,6 +2,109 @@
 #include "MathUtils.cuh"
 
 extern "C"
+#define CELL_SIZE 0
+#define LOCAL_CENTER_INDEX 1
+#define GLOBAL_CENTER_INDEX 2
+#define LOCAL_CELLS_PER_AXIS 3
+#define GLOBAL_CELLS_PER_AXIS 4
+#define SEARCH_RADIUS 5
+
+extern "C"
+__global__ void v2(float *__restrict__ localMap, size_t pitchLocal,
+                   float *__restrict__ globalMap, size_t pitchGlobal,
+                   int *__restrict__ localKeys,
+                   int *__restrict__ globalKeys,
+                   float* distances,
+                   int* validCounter,
+                   const float *__restrict__ localToGlobalTransform,
+                   const float globalMapCenterX,
+                   const float globalMapCenterY,
+                   const float *__restrict__ params)
+{
+    int lx = blockIdx.x * blockDim.x + threadIdx.x;
+    int ly = blockIdx.y * blockDim.y + threadIdx.y;
+
+    const int localCellsPerAxis = static_cast<int>(params[LOCAL_CELLS_PER_AXIS]);
+    const int globalCellsPerAxis = static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]);
+
+    // Check bounds for local indices
+    if (lx >= localCellsPerAxis || ly >= localCellsPerAxis)
+        return;
+
+    // Doing (y, x) allows for coalesced memory access when going to global memory
+    int2 localCell = make_int2(ly, lx);
+    float *localMean = (float *)((char *)localMap + localCell.x * pitchLocal) + localCell.y;
+    // Global memory access is asynchronous and takes a long time, tell the bus to go grab some memory
+    float localMeanF = *localMean;
+
+    // While the global memory is being fetched, convert the local cell into the global cell so we can register the data
+    float2 localCoordinate = indices_to_coordinate(localCell, make_float2(0.0f, 0.0f), params[CELL_SIZE], params[LOCAL_CENTER_INDEX]);
+    float3 pointInLocalFrame = make_float3(localCoordinate.x, localCoordinate.y, localMeanF);
+    float3 pointInGlobalFrame = transformPoint3D(pointInLocalFrame, localToGlobalTransform);
+    int2 globalCell = coordinate_to_indices(make_float2(pointInGlobalFrame.x, pointInGlobalFrame.y), make_float2(globalMapCenterX, globalMapCenterY), params[CELL_SIZE], params[GLOBAL_CENTER_INDEX]);
+
+    if (globalCell.x < 0 || globalCell.x >= globalCellsPerAxis || globalCell.y < 0 || globalCell.y >= globalCellsPerAxis)
+        return;
+
+    // After trying to do as much work as possible in parallel to the global memory access. We ran out of stuff to do.
+    // Check the result of global memory for invalid data, and return if not valid
+    if (localMeanF == 0)
+        return;
+
+    int searchRadius = params[SEARCH_RADIUS];
+    int best_global_key = -1;
+    float minimum_distance = 1e10f;
+
+    for (int dx = -searchRadius; dx <= searchRadius; dx++)
+    {
+        for (int dy = -searchRadius; dy <= searchRadius; dy++)
+        {
+            int searchX = globalCell.x + dx;
+            int searchY = globalCell.y + dy;
+
+            if (searchX >= 0 && searchX < params[GLOBAL_CELLS_PER_AXIS] &&
+                searchY >= 0 && searchY < params[GLOBAL_CELLS_PER_AXIS])
+            {
+                float* globalRow = (float*)((char*)globalMap + searchY * pitchGlobal);
+                float globalHeight = globalRow[searchX];
+                float2 globalCellCoords = indices_to_coordinate(
+                    make_int2(searchX, searchY),
+                    make_float2(localToGlobalTransform[3], localToGlobalTransform[7]),
+                    params[CELL_SIZE],
+                    params[GLOBAL_CENTER_INDEX]);
+
+                float3 candidatePoint = make_float3(globalCellCoords.x, globalCellCoords.y, globalHeight);
+
+                float deltaX = pointInGlobalFrame.x - candidatePoint.x;
+                float deltaY = pointInGlobalFrame.y - candidatePoint.y;
+                float deltaZ = pointInGlobalFrame.z - candidatePoint.z;
+                float distance = deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ;
+
+                if (distance < minimum_distance)
+                {
+                    // Keep track of the shortest distance from the local point to the global point
+                    // Also note the index of this
+                    minimum_distance = distance;
+                    int globalCells = static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]);
+                    best_global_key = searchX * globalCells + searchY; // Using your indicesToKey logic
+                }
+            }
+        }
+    }
+
+    if (best_global_key != -1)
+    {
+        // atomicAdd returns the OLD value and increments the memory by 1
+        int writeIndex = atomicAdd(validCounter, 1);
+
+        int localCells = static_cast<int>(params[LOCAL_CELLS_PER_AXIS]);
+        localKeys[writeIndex] = lx * localCells + ly; // indicesToKey logic
+        globalKeys[writeIndex] = best_global_key;
+        distances[writeIndex] = sqrtf(minimum_distance);
+    }
+}
+
+extern "C"
 __global__ void findNearestNeighborsKernel(const float* local_map,
                                            const float* global_map,
                                            int* correspondences,
