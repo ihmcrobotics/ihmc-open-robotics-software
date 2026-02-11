@@ -5,6 +5,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import sensor_msgs.msg.dds.CameraInfo;
 import sensor_msgs.msg.dds.Image;
+import std_msgs.msg.dds.Byte;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.crdt.CRDTInfo;
@@ -46,11 +47,14 @@ public class IsaacROSFoundationPoseCommunicator implements AutoCloseable
    private final RawImagePublisher imagePublisher;
    private final ROS2Publisher<Empty> resetRequestPublisher;
    private final ROS2Publisher<Box3DMessage> resultRelayPublisher;
+   private final ROS2Publisher<Byte> statePublisher;
    private final ROS2Subscription<Detection3DArray> poseEstimationResultSubscription;
    private final ROS2Subscription<Detection3DArray> trackingResultSubscription;
+   private final ROS2Subscription<Empty> resetRequestSubscription;
 
    private final SyncedIsaacROSFoundationPoseParameters parameters;
-   private boolean wasEnabled;
+   private State state;
+   private State previousState;
 
    private final ROS2MutableFrame sensorFrame;
 
@@ -72,12 +76,15 @@ public class IsaacROSFoundationPoseCommunicator implements AutoCloseable
       imagePublisher = new RawImagePublisher(ros2Node, 0.5);
       resetRequestPublisher = ros2Node.createPublisher(objectToTrack.topics.reset());
       resultRelayPublisher = ros2Node.createPublisher(objectToTrack.topics.ihmcResult());
+      statePublisher = ros2Node.createPublisher(objectToTrack.topics.ihmcState());
       poseEstimationResultSubscription = ros2Node.createSubscription2(objectToTrack.topics.poseEstimationOutput(), this::updateLatestResult);
       trackingResultSubscription = ros2Node.createSubscription2(objectToTrack.topics.trackingOutput(), this::updateLatestResult);
+      resetRequestSubscription = ros2Node.createSubscription2(objectToTrack.topics.reset(), message -> changeState(State.ESTIMATING_POSE));
 
       parameters = new SyncedIsaacROSFoundationPoseParameters(ros2Node, crdtInfo, objectToTrack);
       parameters.getEnabled().setValue(false);
-      wasEnabled = false;
+      state = State.DISABLED;
+      previousState = state;
 
       sensorFrame = new ROS2MutableFrame(objectToTrack.meshDirectory + "_ImageFrame", ReferenceFrame.getWorldFrame());
 
@@ -90,6 +97,13 @@ public class IsaacROSFoundationPoseCommunicator implements AutoCloseable
    public void update()
    {
       parameters.update();
+
+      boolean enabled = parameters.getEnabled().getValue();
+
+      if (!enabled && previousState != State.DISABLED)
+         changeState(State.DISABLED);
+      else if (enabled && previousState == State.DISABLED)
+         resetTracking();
    }
 
    private void updateLatestResult(Detection3DArray results)
@@ -110,6 +124,9 @@ public class IsaacROSFoundationPoseCommunicator implements AutoCloseable
       // Update the latest result
       latestResult = new IsaacROSFoundationPoseInstantDetection(objectToTrack, new Box3D(poseInWorld, result.getBbox().getSize()), Instant.now());
 
+      if (state != State.TRACKING)
+         changeState(State.TRACKING);
+
       // Relay the result using IHMC coordinates
       Box3DMessage resultRelayMessage = new Box3DMessage();
       resultRelayMessage.getPose().set(poseInWorld);
@@ -119,6 +136,16 @@ public class IsaacROSFoundationPoseCommunicator implements AutoCloseable
       // Run the callbacks
       for (Consumer<IsaacROSFoundationPoseInstantDetection> resultCallback : resultCallbacks)
          resultCallback.accept(latestResult);
+   }
+
+   private synchronized void changeState(State newState)
+   {
+      previousState = state;
+      state = newState;
+
+      Byte stateMessage = new Byte();
+      stateMessage.setData(state.toByte());
+      statePublisher.publish(stateMessage);
    }
 
    /**
@@ -138,13 +165,8 @@ public class IsaacROSFoundationPoseCommunicator implements AutoCloseable
    public void updatePoseEstimation(List<InstantDetection> detections)
    {
       // Do nothing if pose estimation is not enabled
-      boolean enabled = parameters.getEnabled().getValue();
-      if (enabled)
+      if (state != State.DISABLED)
       {
-         // If it just got enabled reset the tracking
-         if (!wasEnabled)
-            resetTracking();
-
          // Update the target point
          if (newTargetPoint.poll())
             targetPoint.set(newTargetPoint.read());
@@ -165,15 +187,13 @@ public class IsaacROSFoundationPoseCommunicator implements AutoCloseable
             YOLOv8InstantDetection detection = (YOLOv8InstantDetection) closestYOLODetection.get();
 
             double resetDistance = parameters.getResetDistance().getValue();
-            if (parameters.getAutoResetEnabled().getValue() && latestResult != null
+            if (parameters.getAutoResetEnabled().getValue() && latestResult != null && state == State.TRACKING
                 && detection.getPose().getPosition().distanceSquared(latestResult.getPose().getPosition()) > resetDistance * resetDistance)
                resetTracking();
 
             updatePoseEstimation(detection);
          }
       }
-
-      wasEnabled = enabled;
    }
 
    /**
@@ -295,9 +315,28 @@ public class IsaacROSFoundationPoseCommunicator implements AutoCloseable
       parameters.close();
       poseEstimationResultSubscription.remove();
       trackingResultSubscription.remove();
+      resetRequestSubscription.remove();
       resetRequestPublisher.remove();
       resultRelayPublisher.remove();
+      statePublisher.remove();
       imagePublisher.close();
       ros2Node.destroy();
+   }
+
+   public enum State
+   {
+      DISABLED,
+      ESTIMATING_POSE,
+      TRACKING;
+
+      public byte toByte()
+      {
+         return (byte) ordinal();
+      }
+
+      public static State fromByte(byte ordinal)
+      {
+         return values()[ordinal];
+      }
    }
 }
