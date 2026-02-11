@@ -182,13 +182,6 @@ public class CommandConsumerWithDelayBuffers
          commandCopy.setExecutionTime(commandCopy.getExecutionDelayTime() + yoTime.getValue());
       }
 
-      if (command instanceof FootstepDataListCommand footstepDataListCommand)
-         LogTools.info("Queueing FootstepDataListCommand with %s steps".formatted(footstepDataListCommand.getNumberOfFootsteps()));
-      else if (command instanceof ArmTrajectoryCommand armTrajectoryCommand)
-         LogTools.info("Queueing %s ArmTrajectoryCommand".formatted(armTrajectoryCommand.getRobotSide().getPascalCaseName()));
-      else
-         LogTools.info("Queueing %s".formatted(command.getClass().getSimpleName()));
-
       priorityQueue.add(commandCopy);
    }
    
@@ -207,7 +200,12 @@ public class CommandConsumerWithDelayBuffers
          PriorityQueue<Command<?, ?>> priorityQueue = priorityQueues.get(commandClassToPoll);
          Command<?, ?> command = priorityQueue.poll();
          recyclingArrayList.remove(command);
-         LogTools.info("Polling %s".formatted(command == null ? "null" : command.getClass().getSimpleName()));
+         if (command instanceof FootstepDataListCommand footstepDataListCommand)
+            LogTools.info("Polling FootstepDataListCommand with %s steps".formatted(footstepDataListCommand.getNumberOfFootsteps()));
+         else if (command instanceof ArmTrajectoryCommand armTrajectoryCommand)
+            LogTools.info("Polling %s ArmTrajectoryCommand".formatted(armTrajectoryCommand.getRobotSide().getPascalCaseName()));
+         else
+            LogTools.info("Polling %s".formatted(command.getClass().getSimpleName()));
          return (C) command;
       }
       
@@ -233,7 +231,12 @@ public class CommandConsumerWithDelayBuffers
       {
          Command<?, ?> queuedCommand =  priorityQueue.poll();
          recyclingArrayList.remove(queuedCommand);
-         LogTools.info("Polling %s".formatted(queuedCommand == null ? "null" : queuedCommand.getClass().getSimpleName()));
+         if (queuedCommand instanceof FootstepDataListCommand footstepDataListCommand)
+            LogTools.info("Polling FootstepDataListCommand with %s steps".formatted(footstepDataListCommand.getNumberOfFootsteps()));
+         else if (queuedCommand instanceof ArmTrajectoryCommand armTrajectoryCommand)
+            LogTools.info("Polling %s ArmTrajectoryCommand".formatted(armTrajectoryCommand.getRobotSide().getPascalCaseName()));
+         else
+            LogTools.info("Polling %s".formatted(queuedCommand.getClass().getSimpleName()));
          commands.add().set((C) queuedCommand);
       }
       

@@ -547,6 +547,7 @@ public class RigidBodyJointControlHelper
 
    public void startTrajectoryExecution()
    {
+      LogTools.info("Starting trajectory.");
       trajectoryDone.set(false);
    }
 
