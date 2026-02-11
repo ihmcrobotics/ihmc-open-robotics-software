@@ -174,7 +174,7 @@ public class RDXBehaviorTestFacilitator
       YOLOv8DetectionExecutor yolo;
       if (runPerception)
       {
-         zedSensor = new ZEDSVOPlaybackSensor(0, ZEDModelData.ZED_2I, zed.SL_DEPTH_MODE_PERFORMANCE, svoFile);
+         zedSensor = new ZEDSVOPlaybackSensor(0, ZEDModelData.ZED_2I, zed.SL_DEPTH_MODE_NEURAL_LIGHT, svoFile);
          zedSensor.setSensorFrame(syncedRobot.getReferenceFrames().getExperimentalCameraFrame());
          zedSensor.startSensor();
          ros2Node.createSubscription2(ZED_PLAY, empty -> zedSensor.play());

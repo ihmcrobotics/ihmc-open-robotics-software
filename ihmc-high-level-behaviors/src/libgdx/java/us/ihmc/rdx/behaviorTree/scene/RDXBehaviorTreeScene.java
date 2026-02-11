@@ -34,6 +34,7 @@ import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDXBaseUI;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.function.LongSupplier;
@@ -125,36 +126,20 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
       ImGui.text("Objects:");
       ImGui.indent();
       RDXBehaviorTreeSceneObject remove = null;
-      for (int i = 0; i < objects.size(); i++)
-      {
-         RDXBehaviorTreeSceneObject object = objects.get(i);
-         ImGui.text("%s %d%s".formatted(object.getName(), object.getID(), object.isFrozen() ? " (FROZEN)" : ""));
-         ImGui.sameLine();
-         if (ImGuiTools.smallCheckbox(labels.getHidden("Select%s%d".formatted(object.getName(), object.getID())), object.getGizmo().isSelected()))
-            object.getGizmo().setSelected(!object.getGizmo().isSelected());
-         ImGui.sameLine();
-         ImGui.pushStyleColor(ImGuiCol.Text, ImGuiTools.DARK_RED);
-         if (ImGuiTools.textWithUnderlineOnHover("X") && ImGui.isMouseClicked(ImGuiMouseButton.Left))
-            remove = object;
-         ImGui.popStyleColor();
-         ImGui.indent();
-         ImGui.text("World frame: (%.2f, %.2f, %.2f) YPR: (%.2f, %.2f, %.2f)".formatted(
-               object.getTransformToWorld().getTranslationX(), object.getTransformToWorld().getTranslation().getY(), object.getTransformToWorld().getTranslation().getZ(),
-               object.getTransformToWorld().getRotation().getYaw(), object.getTransformToWorld().getRotation().getPitch(), object.getTransformToWorld().getRotation().getRoll()
-         ));
-         renderPersistentDetection(object.getPersistentDetection());
-         if (object instanceof RDXBehaviorTreeSceneDoorPanel doorPanel)
-            renderPersistentDetection(doorPanel.getDoorPanelPersistentDetection());
-         ImGui.unindent();
-      }
-      ImGui.unindent();
 
-      if (remove != null)
+      Iterator<RDXBehaviorTreeSceneObject> iterator = objects.iterator();
+      while (iterator.hasNext())
       {
-         objects.remove(remove);
-         objectsModifiable.modify();
-         remove.destroy();
+         RDXBehaviorTreeSceneObject object = iterator.next();
+         if (object.renderImGuiWidgets())
+         {
+            iterator.remove();
+            objectsModifiable.modify();
+            object.destroy();
+         }
       }
+
+      ImGui.unindent();
 
       ImGui.text("Stable Detections:");
       ImGui.indent();
@@ -163,7 +148,7 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
       ImGui.unindent();
    }
 
-   private static void renderPersistentDetection(PersistentDetectionStatusMessage message)
+   static void renderPersistentDetection(PersistentDetectionStatusMessage message)
    {
       String type = "(?)";
       if (message.getDetectionTypeAsString().equals(IsaacROSFoundationPoseInstantDetection.class.getSimpleName()))
@@ -211,10 +196,18 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
    @Override
    protected BehaviorTreeSceneObjectState buildObject(long id, CRDTInfo crdtInfo, BehaviorTreeSceneObjectDefinitionMessage definition)
    {
-      if (definition.getObjectType() == BehaviorTreeSceneObjectType.DOOR_PANEL.ordinal())
-         return new RDXBehaviorTreeSceneDoorPanel(id, crdtInfo, definition, baseUI);
-      else
-         return new RDXBehaviorTreeSceneObject(id, crdtInfo, definition, baseUI);
+      return switch (BehaviorTreeSceneObjectType.values()[definition.getObjectType()])
+      {
+         case DOOR_PANEL -> new RDXBehaviorTreeSceneDoorPanel(id, crdtInfo, definition, baseUI);
+         case DOOR_FRAME ->
+         {
+            RDXBehaviorTreeSceneDoorFrame doorFrame = new RDXBehaviorTreeSceneDoorFrame(id, crdtInfo, definition, baseUI);
+            RDXBehaviorTreeSceneDoorPanel doorPanel = (RDXBehaviorTreeSceneDoorPanel) getObject(BehaviorTreeSceneObjectType.DOOR_PANEL);
+            doorFrame.setDoorPanel(doorPanel);
+            yield doorFrame;
+         }
+         default -> new RDXBehaviorTreeSceneObject(id, crdtInfo, definition, baseUI);
+      };
    }
 
    @Override
