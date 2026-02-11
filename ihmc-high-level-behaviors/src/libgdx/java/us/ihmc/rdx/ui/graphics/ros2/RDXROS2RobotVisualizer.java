@@ -61,6 +61,8 @@ public class RDXROS2RobotVisualizer extends RDXROS2SingleTopicVisualizer<RobotCo
    private final RDXFootstepPlanGraphic footstepHistoryGraphic;
    private final ArrayList<RDXInteractableFrameModel> interactableFrameModels = new ArrayList<>();
 
+   private boolean snappedToRobotOnStart = false;
+
    public RDXROS2RobotVisualizer(ROS2Helper ros2, ROS2SyncedRobotModel syncedRobot)
    {
       super(syncedRobot.getRobotModel().getSimpleRobotName() + " Robot Visualizer");
@@ -143,6 +145,12 @@ public class RDXROS2RobotVisualizer extends RDXROS2SingleTopicVisualizer<RobotCo
             interactableFrameModel.setShowing(!hideChest.get());
             interactableFrameModel.update();
          }
+      }
+
+      if (!snappedToRobotOnStart && syncedRobot.hasReceivedFirstMessage())
+      {
+         teleportCameraToRobotPelvis();
+         snappedToRobotOnStart = true;
       }
 
       syncedRobot.getReferenceFrames().getPelvisFrame().getTransformToDesiredFrame(currentHistoryPelvisPose, ReferenceFrame.getWorldFrame());
