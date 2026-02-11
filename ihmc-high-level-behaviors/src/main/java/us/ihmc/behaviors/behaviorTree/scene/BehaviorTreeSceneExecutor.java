@@ -193,17 +193,13 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
    public void publishYOLOAnnotatedImage()
    {
       List<YOLOv8InstantDetection> yoloDetections = new ArrayList<>();
-      Map<YOLOv8InstantDetection, BehaviorTreeSceneObjectExecutor> detectionObjectMap = new HashMap<>();
+      Map<YOLOv8InstantDetection, Integer> detectionIdMap = new HashMap<>();
       RawImage colorImage = null;
       RawImage annotatedImage = null;
 
-      for (BehaviorTreeSceneObjectExecutor object : objects)
+      for (PersistentDetection persistentDetection : persistentDetections)
       {
-         if (!object.isStable())
-            continue;
-
-         PersistentDetection persistentDetection = object.getPersistentDetection();
-         if (persistentDetection == null || persistentDetection.getInstantDetectionClass() != YOLOv8InstantDetection.class)
+         if (persistentDetection.getInstantDetectionClass() != YOLOv8InstantDetection.class || !persistentDetection.isStable())
             continue;
 
          YOLOv8InstantDetection detection = (YOLOv8InstantDetection) persistentDetection.getMostRecentDetection();
@@ -216,7 +212,7 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
             annotatedImage = new RawImage(colorImage);
          }
          yoloDetections.add(detection);
-         detectionObjectMap.put(detection, object);
+         detectionIdMap.put(detection, persistentDetection.getID());
       }
 
       if (annotatedImage == null)
@@ -224,11 +220,8 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
 
       YOLOv8Tools.drawObjectOutlines(colorImage.getCpuImageMat(), annotatedImage.getCpuImageMat(), yoloDetections, detection ->
       {
-         BehaviorTreeSceneObjectExecutor object = detectionObjectMap.get(detection);
-         if (object == null)
-            return "?: " + detection.getDetectedObjectName();
-
-         return object.getID() + ": " + object.getName();
+         int id = detectionIdMap.get(detection);
+         return id + ": " + detection.getDetectedObjectName();
       });
 
       RigidBodyTransform transformToWorld = new RigidBodyTransform(annotatedImage.getTransformToWorld());
