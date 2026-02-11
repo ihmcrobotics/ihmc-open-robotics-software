@@ -156,11 +156,11 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
       else if (message.getDetectionTypeAsString().equals(YOLOv8InstantDetection.class.getSimpleName()))
          type = "(YOLOv8)";
       ImGui.beginDisabled(!message.getIsStable());
-      ImGui.text("%s %s %.2f Hz Size: %d ID.%s".formatted(type,
+      ImGui.text("%s %s %.2f Hz Size: %d ID.%d".formatted(type,
                                                           message.getObjectClassAsString(),
                                                           message.getDecayingFrequency(),
                                                           message.getHistorySize(),
-                                                          message.getIdAsString()));
+                                                          message.getId()));
       ImGui.indent();
       RigidBodyTransform transform = new RigidBodyTransform();
       MessageTools.toEuclid(message.getTransformToCamera(), transform);
