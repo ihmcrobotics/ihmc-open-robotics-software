@@ -111,6 +111,8 @@ public class RDXTerrainPlanningDebugger implements RenderableProvider
             normalArrows.add(RDXModelBuilder.createArrow(0.01f, Color.YELLOW));
          }
       }
+
+      reset();
    }
 
    public void generateStartAndGoalFootstepGraphics(SideDependentList<FramePose3D> startStancePose, SideDependentList<FramePose3D> goalStancePose)
@@ -298,10 +300,12 @@ public class RDXTerrainPlanningDebugger implements RenderableProvider
       footstepPlanGraphic.clear();
       monteCarloPlanGraphic.clear();
 
-      goalFootstepGraphics.get(RobotSide.LEFT).setPose(new FramePose3D());
-      goalFootstepGraphics.get(RobotSide.RIGHT).setPose(new FramePose3D());
-      startFootstepGraphics.get(RobotSide.LEFT).setPose(new FramePose3D());
-      startFootstepGraphics.get(RobotSide.RIGHT).setPose(new FramePose3D());
+      Pose3D poseNaN = new Pose3D();
+      poseNaN.setToNaN();
+      goalFootstepGraphics.get(RobotSide.LEFT).setPose(poseNaN);
+      goalFootstepGraphics.get(RobotSide.RIGHT).setPose(poseNaN);
+      startFootstepGraphics.get(RobotSide.LEFT).setPose(poseNaN);
+      startFootstepGraphics.get(RobotSide.RIGHT).setPose(poseNaN);
    }
 
    public void destroy()
