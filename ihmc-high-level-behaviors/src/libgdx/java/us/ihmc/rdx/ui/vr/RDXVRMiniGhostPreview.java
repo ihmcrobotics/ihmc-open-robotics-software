@@ -30,14 +30,14 @@ public class RDXVRMiniGhostPreview
    private static final double CONTROL_JOYSTICK_THRESHOLD = 0.7;
    private final RDXVRContext vrContext;
    private final FullHumanoidRobotModel miniGhostFullRobotModel;
-   private ReferenceFrame miniGhostFrame;
-   private OneDoFJointBasics[] miniGhostOneDoFJointsExcludingHands;
-   private RDXMultiBodyGraphic miniGhostRobotGraphic;
+   private final ReferenceFrame miniGhostFrame;
+   private final OneDoFJointBasics[] miniGhostOneDoFJointsExcludingHands;
+   private final RDXMultiBodyGraphic miniGhostRobotGraphic;
    private boolean graphicsInitialized = false;
    private final float opacity;
    private final Color color;
    private final RigidBodyTransform ghostHeadsetOffset =  new RigidBodyTransform();
-   private ReferenceFrame miniGhostAdjustedFrame;
+   private final ReferenceFrame miniGhostAdjustedFrame;
    private final RigidBodyTransform additionalOffset =  new RigidBodyTransform();
 
    public RDXVRMiniGhostPreview(String robotName, RobotDefinition robotDefinition, FullHumanoidRobotModel miniGhostFullRobotModel, RDXVRContext vrContext, Color color, float opacity)
@@ -47,28 +47,25 @@ public class RDXVRMiniGhostPreview
       this.color = color;
       this.opacity = opacity;
 
-      if (isEnabled())
-      {
-         miniGhostOneDoFJointsExcludingHands = FullRobotModelUtils.getAllJointsExcludingHands(miniGhostFullRobotModel);
-         miniGhostRobotGraphic = new RDXMultiBodyGraphic(robotName + " (Mini Preview Ghost)");
-         miniGhostRobotGraphic.loadRobotModelAndGraphics(robotDefinition, miniGhostFullRobotModel.getElevator(), 0.05, false);
-         miniGhostRobotGraphic.setActive(true);
-         miniGhostRobotGraphic.create();
+      miniGhostOneDoFJointsExcludingHands = FullRobotModelUtils.getAllJointsExcludingHands(miniGhostFullRobotModel);
+      miniGhostRobotGraphic = new RDXMultiBodyGraphic(robotName + " (Mini Preview Ghost)");
+      miniGhostRobotGraphic.loadRobotModelAndGraphics(robotDefinition, miniGhostFullRobotModel.getElevator(), 0.05, false);
+      miniGhostRobotGraphic.setActive(true);
+      miniGhostRobotGraphic.create();
 
-         ReferenceFrame headsetFrame = vrContext.getHeadset().getXForwardZUpHeadsetFrame();
-         ghostHeadsetOffset.set(headsetFrame.getTransformToRoot());
-         ghostHeadsetOffset.getTranslation().addX(GHOST_X_HEADSET_OFFSET);
-         ghostHeadsetOffset.getTranslation().addY(GHOST_Y_HEADSET_OFFSET);
-         ghostHeadsetOffset.getTranslation().addZ(GHOST_Z_HEADSET_OFFSET);
-         ghostHeadsetOffset.getRotation().setYawPitchRoll(3 * Math.PI / 4, 0.0, 0.0);
-         miniGhostFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(headsetFrame, ghostHeadsetOffset);
-         miniGhostAdjustedFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(miniGhostFrame, additionalOffset);
-      }
+      ReferenceFrame headsetFrame = vrContext.getHeadset().getXForwardZUpHeadsetFrame();
+      ghostHeadsetOffset.set(headsetFrame.getTransformToRoot());
+      ghostHeadsetOffset.getTranslation().addX(GHOST_X_HEADSET_OFFSET);
+      ghostHeadsetOffset.getTranslation().addY(GHOST_Y_HEADSET_OFFSET);
+      ghostHeadsetOffset.getTranslation().addZ(GHOST_Z_HEADSET_OFFSET);
+      ghostHeadsetOffset.getRotation().setYawPitchRoll(3 * Math.PI / 4, 0.0, 0.0);
+      miniGhostFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(headsetFrame, ghostHeadsetOffset);
+      miniGhostAdjustedFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(miniGhostFrame, additionalOffset);
    }
 
    public void setJoint(int index, double q)
    {
-      if (isEnabled() && miniGhostRobotGraphic.isActive())
+      if (miniGhostRobotGraphic.isActive())
       {
          miniGhostOneDoFJointsExcludingHands[index].setQ(q);
       }
@@ -76,7 +73,7 @@ public class RDXVRMiniGhostPreview
 
    public void updatePose()
    {
-      if (!isEnabled() || !miniGhostRobotGraphic.isActive())
+      if (!miniGhostRobotGraphic.isActive())
          return;
 
       // Initialize visual tweaks once the RDXRigidBody is actually available
@@ -169,24 +166,17 @@ public class RDXVRMiniGhostPreview
 
    public void setActive(boolean active)
    {
-      if (isEnabled())
-         miniGhostRobotGraphic.setActive(active);
+      miniGhostRobotGraphic.setActive(active);
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      if (isEnabled() && miniGhostRobotGraphic.isActive())
+      if (miniGhostRobotGraphic.isActive())
          miniGhostRobotGraphic.getRenderables(renderables, pool, sceneLevels);
-   }
-
-   public boolean isEnabled()
-   {
-      return miniGhostFullRobotModel != null;
    }
 
    public void destroy()
    {
-      if (miniGhostFullRobotModel != null)
-         miniGhostRobotGraphic.destroy();
+      miniGhostRobotGraphic.destroy();
    }
 }

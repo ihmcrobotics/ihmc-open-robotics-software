@@ -20,7 +20,6 @@ import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import imgui.type.ImString;
 import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
-import org.jetbrains.annotations.NotNull;
 import org.lwjgl.openvr.InputDigitalActionData;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxContactConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInitialConfigurationMessage;
@@ -113,8 +112,9 @@ public class RDXVRWholeBodyKinematicStreaming
    private final RDXROS2RobotVisualizer robotVisualizer;
    private float userRobotOpacity = 1.0f; // store this so we can avoid overriding the user
    private final RDXMultiBodyGraphic ghostRobotGraphic;
-   private RDXVRMiniGhostPreview miniGhostKST;
-   private RDXVRMiniGhostPreview miniGhostReal;
+   private final RDXVRMiniGhostPreview miniGhostKST;
+   private final RDXVRMiniGhostPreview miniGhostReal;
+   private boolean miniGhostEnabled;
    private final ImBoolean showGhosts = new ImBoolean(true);
    private final ImBoolean showMiniGhost = new ImBoolean(true);
    private final FullHumanoidRobotModel ghostFullRobotModel;
@@ -233,7 +233,15 @@ public class RDXVRWholeBodyKinematicStreaming
                                                    vrContext,
                                                    Color.BLACK,
                                                    0.8f);
+         miniGhostEnabled = true;
       }
+      else
+      {
+         miniGhostKST = null;
+         miniGhostReal = null;
+         miniGhostEnabled = false;
+      }
+
       if (recordKSTOutput)
       {
          ModelBuilder modelBuilder = new ModelBuilder();
@@ -740,7 +748,7 @@ public class RDXVRWholeBodyKinematicStreaming
             if (showGhosts.get())
                robotVisualizer.setOpacity(0.5f);
          }
-         if (miniGhostKST != null)
+         if (miniGhostEnabled)
          {
             miniGhostKST.setActive(showGhosts.get() && showMiniGhost.get());
             miniGhostReal.setActive(showGhosts.get() && showMiniGhost.get());
@@ -775,7 +783,7 @@ public class RDXVRWholeBodyKinematicStreaming
             }
             multiContact.update(latestStatus);
 
-            if (miniGhostKST.isEnabled())
+            if (miniGhostEnabled)
             {
                miniGhostKST.updateColor(latestStatus.getLeftFootInContact(), latestStatus.getRightFootInContact());
                miniGhostKST.updatePose();
@@ -829,7 +837,7 @@ public class RDXVRWholeBodyKinematicStreaming
 
       ImGuiTools.separatorText("Visualization Options", ImGuiTools.getSmallBoldFont());
       ImGui.checkbox(labels.get("Show Robot Ghosts during Control"), showGhosts);
-      if (miniGhostKST != null)
+      if (miniGhostEnabled)
       {
          ImGui.checkbox(labels.get("Show Mini Robot Ghost"), showMiniGhost);
       }
@@ -947,7 +955,7 @@ public class RDXVRWholeBodyKinematicStreaming
          initialize();
          reinitializeToolboxRobotConfiguration();
          ghostRobotGraphic.setActive(true);
-         if (miniGhostKST != null)
+         if (miniGhostEnabled)
          {
             miniGhostKST.setActive(true);
             miniGhostReal.setActive(true);
@@ -957,7 +965,7 @@ public class RDXVRWholeBodyKinematicStreaming
       {
          sleepToolbox();
          ghostRobotGraphic.setActive(false);
-         if (miniGhostKST != null)
+         if (miniGhostEnabled)
          {
             miniGhostKST.setActive(false);
             miniGhostReal.setActive(false);
@@ -981,7 +989,7 @@ public class RDXVRWholeBodyKinematicStreaming
             robotVisualizer.setOpacity(userRobotOpacity);
             robotVisualizer.setActive(true);
             ghostRobotGraphic.setActive(true);
-            if (miniGhostKST != null)
+            if (miniGhostEnabled)
             {
                miniGhostKST.setActive(true);
                miniGhostReal.setActive(true);
@@ -1121,7 +1129,7 @@ public class RDXVRWholeBodyKinematicStreaming
       if (toolbox != null)
          toolbox.closeAndDispose();
       ghostRobotGraphic.destroy();
-      if (miniGhostKST != null)
+      if (miniGhostEnabled)
       {
          miniGhostKST.destroy();
          miniGhostReal.destroy();
