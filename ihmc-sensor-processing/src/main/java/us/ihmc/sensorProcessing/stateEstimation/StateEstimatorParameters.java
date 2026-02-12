@@ -1,20 +1,32 @@
 package us.ihmc.sensorProcessing.stateEstimation;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.commons.UnitConversions;
+import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 
-public abstract class StateEstimatorParameters implements SensorProcessingConfiguration
+public class StateEstimatorParameters
 {
    public static final double ROBOT_CONFIGURATION_DATA_PUBLISH_DT = UnitConversions.hertzToSeconds(120.0);
+   private static final double DEFAULT_ESTIMATE_DT = 0.001;
 
-   @Override
-   public abstract double getEstimatorDT();
+   public void configureSensorProcessing(SensorProcessing sensorProcessing)
+   {
+   }
 
-   public abstract boolean trustCoPAsNonSlippingContactPoint();
+   public double getEstimatorDT()
+   {
+      return DEFAULT_ESTIMATE_DT;
+   }
+
+   public boolean trustCoPAsNonSlippingContactPoint()
+   {
+      return true;
+   }
 
    public boolean useControllerDesiredCenterOfPressure()
    {
@@ -23,7 +35,7 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
 
    public List<IMUBasedJointStateEstimatorParameters> getIMUBasedJointStateEstimatorParameters()
    {
-      return Collections.emptyList();
+      return new ArrayList<>();
    }
 
    public boolean requestWristForceSensorCalibrationAtStart()
@@ -36,19 +48,34 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
       return null;
    }
 
-   public abstract boolean requestFootForceSensorCalibrationAtStart();
+   public boolean requestFootForceSensorCalibrationAtStart()
+   {
+      return false;
+   }
 
    public boolean requestFrozenModeAtStart()
    {
       return false;
    }
 
-   public abstract SideDependentList<String> getFootForceSensorNames();
+   public SideDependentList<String> getFootForceSensorNames()
+   {
+      SideDependentList<String> footSwitch = new SideDependentList<>();
+      footSwitch.put(RobotSide.LEFT, "leftFootFTSensor");
+      footSwitch.put(RobotSide.RIGHT, "rightFootFTSensor");
+      return footSwitch;
+   }
 
    // Parameters related to the kinematics based state estimator
-   public abstract double getKinematicsPelvisPositionFilterFreqInHertz();
+   public double getKinematicsPelvisPositionFilterFreqInHertz()
+   {
+      return Double.POSITIVE_INFINITY;
+   }
 
-   public abstract double getCoPFilterFreqInHertz();
+   public double getCoPFilterFreqInHertz()
+   {
+      return Double.POSITIVE_INFINITY;
+   }
 
    /**
     * Used to enable/disabled the IMUYawDriftEstimator
@@ -103,20 +130,41 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
       return 1.5e-3;
    }
 
-   public abstract boolean enableIMUBiasCompensation();
+   public boolean enableIMUBiasCompensation()
+   {
+      return true;
+   }
 
-   public abstract double getIMUBiasFilterFreqInHertz();
+   public double getIMUBiasFilterFreqInHertz()
+   {
+      return 0.04;
+   }
 
-   public abstract double getIMUBiasVelocityThreshold();
+   public double getIMUBiasVelocityThreshold()
+   {
+      return 0.035;
+   }
 
-   public abstract boolean useAccelerometerForEstimation();
+   public boolean useAccelerometerForEstimation()
+   {
+      return true;
+   }
 
-   public abstract boolean cancelGravityFromAccelerationMeasurement();
+   public boolean cancelGravityFromAccelerationMeasurement()
+   {
+      return true;
+   }
 
-   public abstract double getPelvisPositionFusingFrequency();
+   public double getPelvisPositionFusingFrequency()
+   {
+      return 11.7893;
+   }
 
    /** The smaller the value, the more it trusts the IMU **/
-   public abstract double getPelvisLinearVelocityFusingFrequency();
+   public double getPelvisLinearVelocityFusingFrequency()
+   {
+      return 2.0146195328088035;
+   }
 
    /**
     * The new fusing filter continuously estimates the bias from the accelerometer when integrating
@@ -124,14 +172,14 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
     */
    public boolean usePelvisLinearStateNewFusingFilter()
    {
-      return false;
+      return true;
    }
 
    /**
     * Parameter for the new pelvis linear state fusing filter.
-    * 
+    *
     * @return proportional gain to correct the integrated linear velocity using the information from
-    *         the kinematics. A lower value means less correction, thus trusting more the IMU.
+    *       the kinematics. A lower value means less correction, thus trusting more the IMU.
     */
    public double getPelvisPositionNewFusingFilterKp()
    {
@@ -140,9 +188,9 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
 
    /**
     * Parameter for the new pelvis linear state fusing filter.
-    * 
+    *
     * @return integral gain used to estimate the linear velocity bias. A lower value means a slower
-    *         update of the bias.
+    *       update of the bias.
     */
    public double getPelvisPositionNewFusingFilterKi()
    {
@@ -151,9 +199,9 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
 
    /**
     * Parameter for the new pelvis linear state fusing filter.
-    * 
+    *
     * @return proportional gain to correct the integrated linear acceleration using the information
-    *         from the kinematics. A lower value means less correction, thus trusting more the IMU.
+    *       from the kinematics. A lower value means less correction, thus trusting more the IMU.
     */
    public double getPelvisLinearVelocityNewFusingFilterKp()
    {
@@ -162,9 +210,9 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
 
    /**
     * Parameter for the new pelvis linear state fusing filter.
-    * 
+    *
     * @return integral gain used to estimate the linear acceleration bias. A lower value means a slower
-    *         update of the bias.
+    *       update of the bias.
     */
    public double getPelvisLinearVelocityNewFusingFilterKi()
    {
@@ -173,7 +221,7 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
 
    public MomentumEstimatorMode getMomentumEstimatorMode()
    {
-      return MomentumEstimatorMode.NONE;
+      return MomentumEstimatorMode.SIMPLE;
    }
 
    /**
@@ -198,11 +246,20 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
    }
 
    /** The smaller the value, the more it trusts the IMU **/
-   public abstract double getCenterOfMassVelocityFusingFrequency();
+   public double getCenterOfMassVelocityFusingFrequency()
+   {
+      return 0.4261;
+   }
 
-   public abstract double getDelayTimeForTrustingFoot();
+   public double getDelayTimeForTrustingFoot()
+   {
+      return 0.02;
+   }
 
-   public abstract double getForceInPercentOfWeightThresholdToTrustFoot();
+   public double getForceInPercentOfWeightThresholdToTrustFoot()
+   {
+      return 0.3;
+   }
 
    public double getForceInPercentOfWeightThresholdToNotTrustFoot()
    {
@@ -214,14 +271,20 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
       return Double.POSITIVE_INFINITY;
    }
 
-   public abstract double getPelvisLinearVelocityAlphaNewTwist();
+   public double getPelvisLinearVelocityAlphaNewTwist()
+   {
+      return 0.2;
+   }
 
    public boolean createFootWrenchSensorDriftEstimator()
    {
       return false;
    }
 
-   public abstract FootSwitchFactory getFootSwitchFactory();
+   public FootSwitchFactory getFootSwitchFactory()
+   {
+      return null;
+   }
 
    public SideDependentList<FootSwitchFactory> getFootSwitchFactories()
    {
@@ -229,13 +292,19 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
       return new SideDependentList<>(footSwitchFactory, footSwitchFactory);
    }
 
-   public abstract boolean getPelvisLinearStateUpdaterTrustImuWhenNoFeetAreInContact();
+   public boolean getPelvisLinearStateUpdaterTrustImuWhenNoFeetAreInContact()
+   {
+      return true;
+   }
 
-   public abstract boolean useGroundReactionForcesToComputeCenterOfMassVelocity();
+   public boolean useGroundReactionForcesToComputeCenterOfMassVelocity()
+   {
+      return false;
+   }
 
    public boolean correctTrustedFeetPositions()
    {
-      return false;
+      return true;
    }
 
    public enum MomentumEstimatorMode
@@ -244,7 +313,10 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
       NONE,
       /** Old implementation from Georg and Jerry: estimates the CoM acceleration from F/T sensors and uses that to refines the momentum estimate. */
       SIMPLE,
-      /** Effective when the robot has many IMUs and the kinematics is not trusted (unsensed backlash or elasticity). Exploit as much as possible measurements from IMUs to refine every rigid-body state. */
+      /**
+       * Effective when the robot has many IMUs and the kinematics is not trusted (unsensed backlash or elasticity). Exploit as much as possible measurements
+       * from IMUs to refine every rigid-body state.
+       */
       DISTRIBUTED_IMUS,
       /** Similar to the {@link #SIMPLE} estimator, version from the paper: "Humanoid Momentum Estimation Using Sensed Contact Wrenches". */
       WRENCH_BASED

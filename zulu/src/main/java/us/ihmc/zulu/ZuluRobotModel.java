@@ -6,7 +6,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.initialSetup.HumanoidRobotInitialSetup;
 import us.ihmc.avatar.kinematicsSimulation.SimulatedHandKinematicController;
-import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
+import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParameters;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
@@ -22,15 +22,13 @@ import us.ihmc.handsros2.abilityHand.AbilityHandModel;
 import us.ihmc.handsros2.ezGripper.EZGripperModel;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.zulu.parameters.controller.ZuluContactPointParameters;
-import us.ihmc.zulu.parameters.controller.ZuluICPSplitFractionCalculatorParameters;
 import us.ihmc.zulu.parameters.controller.ZuluHighLevelControllerParameters;
 import us.ihmc.zulu.parameters.controller.ZuluStateEstimatorParameters;
 import us.ihmc.zulu.parameters.controller.ZuluWalkingControllerParameters;
 import us.ihmc.zulu.parameters.diagnostic.ZuluDiagnosticParameters;
-import us.ihmc.zulu.parameters.model.ZuluKSTKinematicsCollisionModel;
 import us.ihmc.zulu.parameters.model.ZuluPhysicalProperties;
 import us.ihmc.zulu.parameters.model.ZuluSimulationCollisionModel;
-import us.ihmc.zulu.parameters.model.ZULUURDFParameters;
+import us.ihmc.zulu.parameters.model.ZuluURDFParameters;
 import us.ihmc.zulu.parameters.planning.ZuluFootstepPlannerParameters;
 import us.ihmc.zulu.parameters.planning.ZuluLocomotionParameters;
 import us.ihmc.zulu.parameters.planning.ZuluSwingPlannerParameters;
@@ -152,8 +150,8 @@ public class ZuluRobotModel implements DRCRobotModel
                                                                         physicalProperties,
                                                                         contactPointParameters);
       highLevelControllerParameters = new ZuluHighLevelControllerParameters(robotVersion, jointMap, robotTarget);
-      diagnosticParameters = new ZuluDiagnosticParameters(robotTarget, jointMap, sensorInformation, highLevelControllerParameters);
-      stateEstimatorParameters = new ZuluStateEstimatorParameters(getEstimatorDT(), robotTarget, sensorInformation, jointMap);
+      diagnosticParameters = new ZuluDiagnosticParameters(jointMap, sensorInformation, highLevelControllerParameters);
+      stateEstimatorParameters = new ZuluStateEstimatorParameters(getEstimatorDT(), robotTarget, jointMap);
 
       modelFactory = new ZuluModelFactory(robotVersion, jointMap, contactPointParameters, new ZuluRigidBodyMutator(getPhysicalProperties(), imusToIgnore));
       logModelProvider = modelFactory.createLogModelProvider();
@@ -243,13 +241,13 @@ public class ZuluRobotModel implements DRCRobotModel
    @Override
    public String toString()
    {
-      return ZULUURDFParameters.URDF_MODEL_NAME;
+      return ZuluURDFParameters.URDF_MODEL_NAME;
    }
 
    @Override
    public HumanoidRobotInitialSetup getDefaultRobotInitialSetup()
    {
-      return new ZuluInitialSetup(getRobotVersion(), getRobotDefinition(), getJointMap());
+      return new ZuluInitialSetup(getRobotDefinition(), getJointMap());
    }
 
    @Override
@@ -334,7 +332,7 @@ public class ZuluRobotModel implements DRCRobotModel
    @Override
    public String getSimpleRobotName()
    {
-      return "Zulu"; // TODO Should this just be robotName? Confusing which one to use
+      return ZuluURDFParameters.URDF_MODEL_NAME;
    }
 
    @Override
@@ -351,7 +349,7 @@ public class ZuluRobotModel implements DRCRobotModel
 
    public String getParameterResourceName()
    {
-      return "/us/ihmc/zulu/parameters/controller.xml";
+      return "/zulu/parameters/controller.xml";
    }
 
    @Override
@@ -377,7 +375,7 @@ public class ZuluRobotModel implements DRCRobotModel
    @Override
    public RobotCollisionModel getHumanoidRobotKinematicsCollisionModel()
    {
-      return new ZuluKSTKinematicsCollisionModel(getJointMap());
+      return new ZuluSimulationCollisionModel(getJointMap());
    }
 
    @Override
@@ -449,9 +447,9 @@ public class ZuluRobotModel implements DRCRobotModel
    }
 
    @Override
-   public SplitFractionCalculatorParametersReadOnly getSplitFractionCalculatorParameters()
+   public SplitFractionCalculatorParameters getSplitFractionCalculatorParameters()
    {
-      return new ZuluICPSplitFractionCalculatorParameters();
+      return new SplitFractionCalculatorParameters();
    }
 
    @Override

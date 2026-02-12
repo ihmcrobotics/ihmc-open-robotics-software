@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 
 import us.ihmc.zulu.ZuluJointMap;
-import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
@@ -22,17 +21,14 @@ import static us.ihmc.wholeBodyController.parameters.HighLevelParametersTools.ge
 
 public class ZuluDiagnosticParameters extends DiagnosticParameters
 {
-   private final RobotTarget target;
    private final ZuluJointMap jointMap;
    private final HumanoidRobotSensorInformation sensorInformation;
    private final HighLevelControllerParameters highLevelControllerParameters;
 
-   public ZuluDiagnosticParameters(RobotTarget target,
-                                   ZuluJointMap jointMap,
+   public ZuluDiagnosticParameters(ZuluJointMap jointMap,
                                    HumanoidRobotSensorInformation sensorInformation,
                                    HighLevelControllerParameters highLevelControllerParameters)
    {
-      this.target = target;
       this.jointMap = jointMap;
       this.sensorInformation = sensorInformation;
       this.highLevelControllerParameters = highLevelControllerParameters;
@@ -42,29 +38,7 @@ public class ZuluDiagnosticParameters extends DiagnosticParameters
    public void scheduleCheckUps(AutomatedDiagnosticConfiguration configuration)
    {
       configuration.addWait(1.0);
-      //      configuration.addJointCheckUps(defaultJointCheckUpConfiguration(jointMap));
       configuration.addPelvisIMUCheckUpDiagnostic(DiagnosticParameters.defaultPelvisIMUCheckUp(sensorInformation, jointMap));
-   }
-
-   public static List<List<String>> defaultJointCheckUpConfiguration(HumanoidJointNameMap jointMap)
-   {
-      List<List<String>> jointNames = new ArrayList<>();
-      jointNames.add(getLeftAndRightJointNames(jointMap, LegJointName.ANKLE_ROLL));
-      jointNames.add(getLeftAndRightJointNames(jointMap, LegJointName.ANKLE_PITCH));
-      jointNames.add(getLeftAndRightJointNames(jointMap, LegJointName.KNEE_PITCH));
-      jointNames.add(getLeftAndRightJointNames(jointMap, LegJointName.HIP_PITCH));
-      jointNames.add(getLeftAndRightJointNames(jointMap, LegJointName.HIP_ROLL));
-      jointNames.add(getLeftAndRightJointNames(jointMap, LegJointName.HIP_YAW));
-      jointNames.add(Collections.singletonList(jointMap.getSpineJointName(SpineJointName.SPINE_YAW)));
-      jointNames.add(Collections.singletonList(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH)));
-      jointNames.add(Collections.singletonList(jointMap.getSpineJointName(SpineJointName.SPINE_ROLL)));
-      return jointNames;
-   }
-
-   @Override
-   public double getInitialJointSplineDuration()
-   {
-      return target == RobotTarget.REAL_ROBOT ? 1.0 : 1.0;
    }
 
    @Override
@@ -77,23 +51,5 @@ public class ZuluDiagnosticParameters extends DiagnosticParameters
    public WholeBodySetpointParameters getDiagnosticSetpoints()
    {
       return highLevelControllerParameters.getStandPrepParameters();
-   }
-
-   @Override
-   public boolean doIdleControlUntilRobotIsAlive()
-   {
-      return true;
-   }
-
-   @Override
-   public double getCheckUpOscillationPositionFrequency()
-   {
-      return target == RobotTarget.REAL_ROBOT ? 5.0 : 5.0; // 10.0Hz seems to give better delay estimation
-   }
-
-   @Override
-   public double getCheckUpOscillationPositionAmplitude()
-   {
-      return target == RobotTarget.REAL_ROBOT ? 0.01 : 0.05;
    }
 }

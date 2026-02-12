@@ -13,11 +13,12 @@ import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSol
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolverWithInactiveVariables;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
-import us.ihmc.robotics.partNames.ArmJointName;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 public interface ControllerCoreOptimizationSettings
 {
+   Vector2D copRateDefaultWeight = new Vector2D(0.00000064, 0.00000064);
+   Vector2D copRateHighWeight = new Vector2D(0.00008, 0.00032);
+   Vector2D copWeight =  new Vector2D(0.002, 0.004);
    /**
     * Gets the weight specifying how much high joint velocity values should be penalized in the
     * optimization problem.
@@ -61,7 +62,11 @@ public interface ControllerCoreOptimizationSettings
     *
     * @return the weight to use for joint acceleration regularization.
     */
-   double getJointAccelerationWeight();
+   default double getJointAccelerationWeight()
+   {
+      return 0.005;
+   }
+
 
    /**
     * Gets the maximum value for the absolute joint accelerations in the optimization problem.
@@ -95,7 +100,10 @@ public interface ControllerCoreOptimizationSettings
     *
     * @return the weight to use for joint jerk regularization.
     */
-   double getJointJerkWeight();
+   default double getJointJerkWeight()
+   {
+      return 1.6E-6;
+   }
 
    /**
     * Gets the weight specifying how much high joint torque values should be penalized in the
@@ -250,7 +258,10 @@ public interface ControllerCoreOptimizationSettings
     *
     * @return the weight to use for contact force regularization.
     */
-   double getRhoWeight();
+   default double getRhoWeight()
+   {
+      return 5e-6;
+   }
 
    /**
     * Gets the minimum force value to apply at each basis vector of each contact point.
@@ -277,7 +288,10 @@ public interface ControllerCoreOptimizationSettings
     *
     * @return the minimum value for each component of rho.
     */
-   double getRhoMin();
+   default double getRhoMin()
+   {
+      return 2.0;
+   }
 
    /**
     * Gets the default weight specifying how much high variations of contact forces should be penalized
@@ -298,7 +312,10 @@ public interface ControllerCoreOptimizationSettings
     *
     * @return the weight to use for the regularization of the rate of change of contact forces.
     */
-   double getRhoRateDefaultWeight();
+   default double getRhoRateDefaultWeight()
+   {
+      return 1E-8;
+   }
 
    /**
     * When required, the controller core can switch to temporarily use a higher weight to regulate
@@ -308,7 +325,7 @@ public interface ControllerCoreOptimizationSettings
     */
    default double getRhoRateHighWeight()
    {
-      return getRhoRateDefaultWeight();
+      return 1.6E-6;
    }
 
    /**
@@ -328,7 +345,10 @@ public interface ControllerCoreOptimizationSettings
     *
     * @return the regularization weight to use on the center of pressure location.
     */
-   Vector2D getCoPWeight();
+   default Vector2D getCoPWeight()
+   {
+      return copWeight;
+   }
 
    /**
     * Gets the default weight specifying how much variations of the desired center of pressure should
@@ -346,7 +366,10 @@ public interface ControllerCoreOptimizationSettings
     *
     * @return the regularization weight to use for center of pressure variations.
     */
-   Vector2D getCoPRateDefaultWeight();
+   default Vector2D getCoPRateDefaultWeight()
+   {
+      return copRateDefaultWeight;
+   }
 
    /**
     * When required, the controller core can switch to temporarily use a higher weight to regulate
@@ -356,7 +379,7 @@ public interface ControllerCoreOptimizationSettings
     */
    default Vector2D getCoPRateHighWeight()
    {
-      return getCoPRateDefaultWeight();
+      return copRateHighWeight;
    }
 
    /**
@@ -380,7 +403,10 @@ public interface ControllerCoreOptimizationSettings
     *
     * @return the number of basis vectors to use per contact point.
     */
-   int getNumberOfBasisVectorsPerContactPoint();
+   default int getNumberOfBasisVectorsPerContactPoint()
+   {
+      return 4;
+   }
 
    /**
     * Gets the maximum number of contact points that each contactable body can have.
@@ -396,7 +422,10 @@ public interface ControllerCoreOptimizationSettings
     *
     * @return the maximum number of contact points to use per contactable body.
     */
-   int getNumberOfContactPointsPerContactableBody();
+   default int getNumberOfContactPointsPerContactableBody()
+   {
+      return 4;
+   }
 
    /**
     * Gets the number of contactable bodies for the entire robot, i.e. the number of bodies that can be
@@ -461,7 +490,7 @@ public interface ControllerCoreOptimizationSettings
     */
    default boolean useWarmStartInSolver()
    {
-      return false;
+      return true;
    }
 
    /**

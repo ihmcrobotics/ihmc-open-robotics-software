@@ -1,6 +1,5 @@
 package us.ihmc.zulu.parameters.model;
 
-import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FrameBox3D;
 import us.ihmc.euclid.referenceFrame.FrameCapsule3D;
@@ -25,10 +24,6 @@ import java.util.List;
 
 /**
  * Collision model for Zulu used for simulating shape-to-shape collisions.
- * {@link DRCSCSInitialSetup#setUseExperimentalPhysicsEngine(boolean)}.
- * </p>
- *
- * @author Sylvain Bertrand
  */
 public class ZuluSimulationCollisionModel implements RobotCollisionModel
 {
@@ -65,8 +60,6 @@ public class ZuluSimulationCollisionModel implements RobotCollisionModel
    public List<Collidable> getRobotCollidables(MultiBodySystemBasics multiBodySystem)
    {
       List<Collidable> collidables = new ArrayList<>();
-      collisionMask = helper.getCollisionMask(robotCollisionMask);
-      collisionGroup = helper.createCollisionGroup(otherCollisionMasks);
 
       RigidBodyBasics head = RobotCollisionModel.findRigidBody(jointMap.getHeadName(), multiBodySystem);
       RigidBodyBasics torso = RobotCollisionModel.findRigidBody(jointMap.getChestName(), multiBodySystem);

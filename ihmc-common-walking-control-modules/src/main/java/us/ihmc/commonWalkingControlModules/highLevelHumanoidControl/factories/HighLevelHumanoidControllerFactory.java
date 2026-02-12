@@ -8,8 +8,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
-import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.DefaultSplitFractionCalculatorParameters;
-import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
+import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParameters;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.InertialEstimationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -132,7 +131,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
            highLevelControllerParameters,
            walkingControllerParameters,
            copTrajectoryParameters,
-           new DefaultSplitFractionCalculatorParameters());
+           new SplitFractionCalculatorParameters());
    }
 
    public HighLevelHumanoidControllerFactory(ContactableBodiesFactory<RobotSide> contactableBodiesFactory,
@@ -141,7 +140,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                              HighLevelControllerParameters highLevelControllerParameters,
                                              WalkingControllerParameters walkingControllerParameters,
                                              CoPTrajectoryParameters copTrajectoryParameters,
-                                             SplitFractionCalculatorParametersReadOnly splitFractionCalculatorParameters)
+                                             SplitFractionCalculatorParameters splitFractionCalculatorParameters)
    {
       this.highLevelControllerParameters = highLevelControllerParameters;
       this.walkingControllerParameters = walkingControllerParameters;

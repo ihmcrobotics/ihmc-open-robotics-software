@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 
 import org.junit.jupiter.api.Test;
-import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.DefaultSplitFractionCalculatorParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParameters;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -134,9 +134,7 @@ public class WalkingCoPTrajectoryGeneratorTest
       SideDependentList<FrameConvexPolygon2D> polygons = new SideDependentList<>();
 
       CoPTrajectoryParameters parameters = new CoPTrajectoryParameters();
-      DefaultSplitFractionCalculatorParameters splitFractionCalculatorParameters = new DefaultSplitFractionCalculatorParameters();
-      splitFractionCalculatorParameters.setCalculateSplitFractionsFromPositions(true);
-      splitFractionCalculatorParameters.setCalculateSplitFractionsFromArea(false);
+      SplitFractionCalculatorParameters splitFractionCalculatorParameters = new SplitFractionCalculatorParameters();
 
       registry.addChild(parameters.getRegistry());
       WalkingCoPTrajectoryGenerator copTrajectory = new WalkingCoPTrajectoryGenerator(parameters,
@@ -227,9 +225,7 @@ public class WalkingCoPTrajectoryGeneratorTest
       SideDependentList<FrameConvexPolygon2D> polygons = new SideDependentList<>();
 
       CoPTrajectoryParameters parameters = new CoPTrajectoryParameters();
-      DefaultSplitFractionCalculatorParameters splitFractionCalculatorParameters = new DefaultSplitFractionCalculatorParameters();
-      splitFractionCalculatorParameters.setCalculateSplitFractionsFromPositions(true);
-      splitFractionCalculatorParameters.setCalculateSplitFractionsFromArea(false);
+      SplitFractionCalculatorParameters splitFractionCalculatorParameters = new SplitFractionCalculatorParameters();
 
       registry.addChild(parameters.getRegistry());
       WalkingCoPTrajectoryGenerator copTrajectory = new WalkingCoPTrajectoryGenerator(parameters,
@@ -319,14 +315,7 @@ public class WalkingCoPTrajectoryGeneratorTest
       SideDependentList<FrameConvexPolygon2D> polygons = new SideDependentList<>();
 
       CoPTrajectoryParameters parameters = new CoPTrajectoryParameters();
-      DefaultSplitFractionCalculatorParameters splitFractionCalculatorParameters = new DefaultSplitFractionCalculatorParameters();
-      splitFractionCalculatorParameters.setCalculateSplitFractionsFromPositions(true);
-      splitFractionCalculatorParameters.setCalculateSplitFractionsFromArea(false);
-      splitFractionCalculatorParameters.setStepHeightForLargeStepDown(0.1);
-      splitFractionCalculatorParameters.setLargestStepDownHeight(0.15);
-      splitFractionCalculatorParameters.setTransferSplitFractionAtFullDepth(0.3);
-      splitFractionCalculatorParameters.setTransferWeightDistributionAtFullDepth(0.75);
-      splitFractionCalculatorParameters.setTransferFinalWeightDistributionAtFullDepth(0.8);
+      SplitFractionCalculatorParameters splitFractionCalculatorParameters = new SplitFractionCalculatorParameters();
 
       registry.addChild(parameters.getRegistry());
       WalkingCoPTrajectoryGenerator copTrajectory = new WalkingCoPTrajectoryGenerator(parameters,

@@ -17,6 +17,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.math.filters.*;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.yoVariables.euclid.filters.BacklashProcessingYoFrameVector3D;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
@@ -26,10 +27,8 @@ import us.ihmc.robotics.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.sensorProcessing.diagnostic.*;
 import us.ihmc.sensorProcessing.imu.IMUSensor;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
-import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
-import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
 import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFrameVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
@@ -274,10 +273,10 @@ public class SensorProcessing implements SensorOutputMapReadOnly
    };
 
    public SensorProcessing(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions,
-                           SensorProcessingConfiguration sensorProcessingConfiguration,
+                           StateEstimatorParameters stateEstimatorParameters,
                            YoRegistry parentRegistry)
    {
-      this.updateDT = sensorProcessingConfiguration.getEstimatorDT();
+      this.updateDT = stateEstimatorParameters.getEstimatorDT();
 
       jointSensorDefinitions = stateEstimatorSensorDefinitions.getJointSensorDefinitions();
       imuSensorDefinitions = stateEstimatorSensorDefinitions.getIMUSensorDefinitions();
@@ -336,8 +335,6 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          inputJointSensorMap.put(oneDoFJoint, rawSensorOutput);
       }
 
-      SensorNoiseParameters sensorNoiseParameters = sensorProcessingConfiguration.getSensorNoiseParameters();
-
       for (int i = 0; i < imuSensorDefinitions.size(); i++)
       {
          IMUDefinition imuDefinition = imuSensorDefinitions.get(i);
@@ -366,8 +363,8 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          intermediateLinearAccelerations.put(imuDefinition, rawLinearAcceleration);
          processedLinearAccelerations.put(imuDefinition, new ArrayList<ProcessingYoVariable>());
 
-         inputIMUs.add(new IMUSensor(imuDefinition, sensorNoiseParameters));
-         outputIMUs.add(new IMUSensor(imuDefinition, sensorNoiseParameters));
+         inputIMUs.add(new IMUSensor(imuDefinition, null));
+         outputIMUs.add(new IMUSensor(imuDefinition, null));
       }
 
       for (int i = 0; i < forceSensorDefinitions.size(); i++)
@@ -395,7 +392,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       inputForceSensors = new ForceSensorDataHolder(forceSensorDefinitions);
       outputForceSensors = new ForceSensorDataHolder(forceSensorDefinitions);
 
-      sensorProcessingConfiguration.configureSensorProcessing(this);
+      stateEstimatorParameters.configureSensorProcessing(this);
 
       bindSensorOutputMap();
 

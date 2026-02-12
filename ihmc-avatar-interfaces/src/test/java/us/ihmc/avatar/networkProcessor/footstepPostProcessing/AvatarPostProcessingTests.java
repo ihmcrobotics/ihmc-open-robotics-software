@@ -46,9 +46,6 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerPar
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.PlanarRegionToHeightMapConverter;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
@@ -221,11 +218,6 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       ((YoDouble) simulationTestHelper.findVariable("fractionTimeOnFootIfFootHasFullSupport")).set(0.6);
       ((YoDouble) simulationTestHelper.findVariable("fractionLoadIfOtherFootHasNoWidth")).set(0.7);
       ((YoDouble) simulationTestHelper.findVariable("fractionTimeOnFootIfOtherFootHasNoWidth")).set(0.7);
-      //      SplitFractionCalculatorParametersBasics parameters = footstepPlanningModule.getSplitFractionParameters();
-      //      parameters.setFractionLoadIfFootHasFullSupport(0.6);
-      //      parameters.setFractionTimeOnFootIfFootHasFullSupport(0.6);
-      //      parameters.setFractionLoadIfOtherFootHasNoWidth(0.7);
-      //      parameters.setFractionTimeOnFootIfOtherFootHasNoWidth(0.7);
 
       // increase ankle damping to match the real robot better
       YoDouble damping_l_akx = (YoDouble) simulationTestHelper.findVariable("damping_" + getLeftAnkleXName());

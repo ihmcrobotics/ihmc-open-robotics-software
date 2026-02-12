@@ -16,10 +16,6 @@ package us.ihmc.commonWalkingControlModules.configurations;
  */
 public class JointPrivilegedConfigurationParameters
 {
-   public JointPrivilegedConfigurationParameters()
-   {
-   }
-
    /**
     * To compute the nullspace of the high-level control objectives, a matrix inversion has to be
     * calculated. To improve stability, a damped-least square pseudo-inverse is used, which in turn
@@ -65,7 +61,7 @@ public class JointPrivilegedConfigurationParameters
     */
    public double getDefaultVelocityGain()
    {
-      return 6.0;
+      return 2.0;
    }
 
    /**

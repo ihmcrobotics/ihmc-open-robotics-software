@@ -3,8 +3,7 @@ package us.ihmc.zulu;
 import us.ihmc.avatar.drcRobot.RobotVersion;
 import us.ihmc.handsros2.HandType;
 import us.ihmc.zulu.parameters.model.ZuluPhysicalProperties;
-import us.ihmc.zulu.parameters.model.ZuluPhysicalPropertiesV0;
-import us.ihmc.zulu.parameters.model.ZULUURDFParameters;
+import us.ihmc.zulu.parameters.model.ZuluURDFParameters;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -13,9 +12,7 @@ import java.util.List;
 
 public enum ZuluVersion implements RobotVersion
 {
-   V1_FULL_ROBOT(ZuluVersion.V1_RESOURCE_DIRECTORY, List.of(ZULUURDFParameters.URDF_FULL_BODY), null);
-
-   private static final String V1_RESOURCE_DIRECTORY = "us/ihmc/zulu/";
+   V1_FULL_ROBOT(ZuluURDFParameters.RESOURCE_DIRECTORY, List.of(ZuluURDFParameters.URDF_FULL_BODY), null);
 
    private final String robotModelResourceDirectory;
 
@@ -28,7 +25,7 @@ public enum ZuluVersion implements RobotVersion
    private ZuluJointMap jointMap;
    private ZuluPhysicalProperties physicalProperties;
    private ZuluSensorInformation sensorInformation;
-   private ZULUURDFParameters urdfParameters;
+   private ZuluURDFParameters urdfParameters;
 
    ZuluVersion(String robotModelResourceDirectory, Collection<String> urdfResources, Collection<String> xmlResources)
    {
@@ -200,7 +197,7 @@ public enum ZuluVersion implements RobotVersion
       switch (this)
       {
          case V1_FULL_ROBOT:
-            physicalProperties = new ZuluPhysicalPropertiesV0();
+            physicalProperties = new ZuluPhysicalProperties();
             break;
          default:
             break;
@@ -208,11 +205,11 @@ public enum ZuluVersion implements RobotVersion
       return physicalProperties;
    }
 
-   public ZULUURDFParameters getURDFParameters()
+   public ZuluURDFParameters getURDFParameters()
    {
       if (urdfParameters != null)
          return urdfParameters;
-      urdfParameters = new ZULUURDFParameters(this);
+      urdfParameters = new ZuluURDFParameters(this);
       return urdfParameters;
    }
 }

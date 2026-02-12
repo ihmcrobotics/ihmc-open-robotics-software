@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import us.ihmc.simulationConstructionSetTools.tools.CITools.SimpleRobotNameKeys;
-import us.ihmc.zulu.parameters.controller.ZuluToeOffParameters;
 import us.ihmc.zulu.parameters.controller.ZuluWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -98,7 +97,7 @@ public class ZuluToeOffTest extends AvatarToeOffTest
                     @Override
                     public ToeOffParameters getToeOffParameters()
                     {
-                        return new ZuluToeOffParameters(getPhysicalProperties())
+                        return new ToeOffParameters()
                         {
                             @Override
                             public boolean doToeOffIfPossibleInSingleSupport()

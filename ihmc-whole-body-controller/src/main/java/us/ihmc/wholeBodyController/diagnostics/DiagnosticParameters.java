@@ -12,7 +12,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
-import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.wholeBodyController.diagnostics.PelvisIMUCheckUpDiagnosticTask.PelvisIMUCheckUpParameters;
 
 public abstract class DiagnosticParameters
@@ -39,14 +39,14 @@ public abstract class DiagnosticParameters
    {
    }
 
-   public DiagnosticSensorProcessingConfiguration getOrCreateSensorProcessingConfiguration(SensorProcessingConfiguration sensorProcessingConfiguration,
+   public DiagnosticSensorProcessingConfiguration getOrCreateSensorProcessingConfiguration(StateEstimatorParameters stateEstimatorParameters,
                                                                                            JointDesiredOutputListReadOnly jointDesiredOutput)
    {
       if (this.sensorProcessingConfiguration == null)
       {
          if (sensorProcessingConfiguration == null || jointDesiredOutput == null)
             throw new IllegalStateException("The configuration has not been created yet. It needs to be created and used to configure the SensorProcessing first.");
-         this.sensorProcessingConfiguration = new DiagnosticSensorProcessingConfiguration(this, sensorProcessingConfiguration, jointDesiredOutput);
+         this.sensorProcessingConfiguration = new DiagnosticSensorProcessingConfiguration(this, stateEstimatorParameters.getEstimatorDT(), jointDesiredOutput);
       }
       return this.sensorProcessingConfiguration;
    }
@@ -62,7 +62,10 @@ public abstract class DiagnosticParameters
       return true;
    }
 
-   public abstract double getInitialJointSplineDuration();
+   public double getInitialJointSplineDuration()
+   {
+      return 1.0;
+   }
 
    /**
     * Override this method to limit the scope of the automated diagnostic. If not overridden, the
@@ -157,7 +160,7 @@ public abstract class DiagnosticParameters
 
    public boolean doIdleControlUntilRobotIsAlive()
    {
-      return false;
+      return true;
    }
 
    public double getIdleQdMax()

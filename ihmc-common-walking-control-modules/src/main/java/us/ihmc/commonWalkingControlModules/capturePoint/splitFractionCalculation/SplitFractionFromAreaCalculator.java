@@ -17,7 +17,7 @@ public class SplitFractionFromAreaCalculator
    private final ConvexPolygon2D previousPolygon = new ConvexPolygon2D();
    private final ConvexPolygon2D currentPolygon = new ConvexPolygon2D();
 
-   private final SplitFractionCalculatorParametersReadOnly splitFractionParameters;
+   private final SplitFractionCalculatorParameters splitFractionParameters;
    private final SideDependentList<? extends ConvexPolygon2DReadOnly> defaultFootPolygons;
 
    private IntSupplier numberOfStepsProvider;
@@ -33,7 +33,7 @@ public class SplitFractionFromAreaCalculator
    private IntDoubleConsumer transferWeightDistributionConsumer;
    private IntDoubleConsumer transferSplitFractionConsumer;
 
-   public SplitFractionFromAreaCalculator(SplitFractionCalculatorParametersReadOnly splitFractionParameters,
+   public SplitFractionFromAreaCalculator(SplitFractionCalculatorParameters splitFractionParameters,
                                           SideDependentList<? extends ConvexPolygon2DReadOnly> defaultFootPolygons)
    {
       this.splitFractionParameters = splitFractionParameters;

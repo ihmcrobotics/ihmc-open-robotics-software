@@ -8,13 +8,11 @@ import us.ihmc.zulu.ZuluRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.AvatarPushRecoveryOverSteppingStonesTest;
-import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
-import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.zulu.parameters.controller.*;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
+import us.ihmc.zulu.parameters.controller.ZuluWalkingControllerParameters;
 
 @Tag("humanoid-obstacle-slow-3")
 public class ZuluPushRecoveryOverSteppingStonesTest extends AvatarPushRecoveryOverSteppingStonesTest
@@ -30,35 +28,9 @@ public class ZuluPushRecoveryOverSteppingStonesTest extends AvatarPushRecoveryOv
             return new ZuluWalkingControllerParameters(getRobotVersion(), RobotTarget.SCS, getJointMap(), getPhysicalProperties(), getContactPointParameters())
             {
                @Override
-               public ICPControllerParameters getICPControllerParameters()
-               {
-                  return new ZuluICPControllerParameters()
-                  {
-                     @Override
-                     public boolean useAngularMomentum()
-                     {
-                        return true;
-                     }
-                  };
-               }
-
-               @Override
-               public StepAdjustmentParameters getStepAdjustmentParameters()
-               {
-                  return new ZuluStepAdjustmentParameters()
-                  {
-                     @Override
-                     public boolean allowStepAdjustment()
-                     {
-                        return true;
-                     }
-                  };
-               }
-
-               @Override
                public SteppingParameters getSteppingParameters()
                {
-                  return new ZuluSteppingParameters(getPhysicalProperties())
+                  return new SteppingParameters()
                   {
                      @Override
                      public double getMaxStepLength()
@@ -77,7 +49,7 @@ public class ZuluPushRecoveryOverSteppingStonesTest extends AvatarPushRecoveryOv
                @Override
                public ToeOffParameters getToeOffParameters()
                {
-                  return new ZuluToeOffParameters(getPhysicalProperties())
+                  return new ToeOffParameters()
                   {
                      @Override
                      public double getAnkleLowerLimitToTriggerToeOff()
@@ -87,7 +59,6 @@ public class ZuluPushRecoveryOverSteppingStonesTest extends AvatarPushRecoveryOv
                   };
                }
             };
-
          }
       };
 

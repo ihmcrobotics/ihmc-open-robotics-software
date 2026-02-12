@@ -1,7 +1,6 @@
 package us.ihmc.zulu;
 
 import us.ihmc.log.LogTools;
-import us.ihmc.zulu.parameters.model.ZuluPhysicalProperties;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
@@ -15,6 +14,7 @@ import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.robot.SensorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
+import us.ihmc.zulu.parameters.model.ZuluPhysicalProperties;
 
 import java.util.Arrays;
 import java.util.Random;

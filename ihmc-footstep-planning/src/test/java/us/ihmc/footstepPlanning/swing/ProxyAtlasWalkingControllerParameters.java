@@ -225,7 +225,7 @@ public class ProxyAtlasWalkingControllerParameters extends WalkingControllerPara
       }
    }
 
-   private static class ProxyAtlasSteppingParameters implements SteppingParameters
+   private static class ProxyAtlasSteppingParameters extends SteppingParameters
    {
       @Override
       public double getFootForwardOffset()

@@ -61,7 +61,7 @@ public class ZuluAbsoluteStepTimingsTest extends AvatarAbsoluteStepTimingsTest
          @Override
          public HumanoidRobotInitialSetup getDefaultRobotInitialSetup()
          {
-            ZuluInitialSetup initialSetup = new ZuluInitialSetup(robotVersion, getRobotDefinition(), getJointMap());
+            ZuluInitialSetup initialSetup = new ZuluInitialSetup(getRobotDefinition(), getJointMap());
             initialSetup.setOffset(new Vector3D(-0.05, 0.0, 0.0));
             return initialSetup;
          }

@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import us.ihmc.zulu.ZuluVersion;
 import us.ihmc.zulu.ZuluRobotModel;
-import us.ihmc.zulu.parameters.model.ZuluPhysicalPropertiesV0;
+import us.ihmc.zulu.parameters.model.ZuluPhysicalProperties;
 import us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -133,7 +133,7 @@ public class ZuluEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajector
    @Override
    public double getLegLength()
    {
-      ZuluPhysicalPropertiesV0 physicalProperties = new ZuluPhysicalPropertiesV0();
+      ZuluPhysicalProperties physicalProperties = new ZuluPhysicalProperties();
       return physicalProperties.getShinLength() + physicalProperties.getThighLength();
    }
 }

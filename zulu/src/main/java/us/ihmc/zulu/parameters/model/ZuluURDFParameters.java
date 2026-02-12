@@ -13,30 +13,24 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * This class contains the paths to the individual URDF files that will be used to build the robot. It also holds some simple methods to combine the different
- * files into one input stream that will be used to build the URDF.
+ * This class contains the paths to the URDF file that will be used to build the robot.
  */
-public class ZULUURDFParameters implements HumanoidURDFParameterInterface
+public class ZuluURDFParameters
 {
+   public static final String RESOURCE_DIRECTORY = "zulu/";
    public static final String URDF_MODEL_NAME = "Zulu";
    private static final String[] RESOURCE_DIRECTORIES = new String[] {"zulu/", "zulu/urdf/", "zulu/meshes/"};
 
-   private static final String[] LOGGED_RESOURCES = {"zulu/"};
-
    public static final String URDF_FULL_BODY = "zulu-full-body.urdf";
 
-   private final String[] robotModelResourceDirectory = new String[1];
    private final String[] urdfResourceDirectories;
    private final String[] urdfResourcesWithPath;
 
    private final URDFTools.URDFParserProperties urdfParserProperties = new URDFTools.URDFParserProperties();
 
-   public ZULUURDFParameters(ZuluVersion zuluVersion)
+   public ZuluURDFParameters(ZuluVersion zuluVersion)
    {
       urdfParserProperties.setHandleImplicitJointDefinitions(false);
-
-      // Directory containing all robot model resources for the given robot version
-      robotModelResourceDirectory[0] = zuluVersion.getRobotModelResourceDirectory();
 
       // List of directories containing robot model URDF resources for the given robot version
       List<String> urdfResourceDirectoriesList = new ArrayList<>();
@@ -61,25 +55,21 @@ public class ZULUURDFParameters implements HumanoidURDFParameterInterface
       urdfResourcesWithPath = urdfResourcesWithPathList.toArray(new String[0]);
    }
 
-   @Override
    public String getURDFModelName()
    {
       return URDF_MODEL_NAME;
    }
 
-   @Override
    public String[] getResourceDirectories()
    {
       return RESOURCE_DIRECTORIES;
    }
 
-   @Override
    public String[] getLoggedResources()
    {
-      return LOGGED_RESOURCES;
+      return new String[] {RESOURCE_DIRECTORY};
    }
 
-   @Override
    public InputStream getURDFAsInputStream()
    {
       List<InputStream> inputStreamList = new ArrayList<>();

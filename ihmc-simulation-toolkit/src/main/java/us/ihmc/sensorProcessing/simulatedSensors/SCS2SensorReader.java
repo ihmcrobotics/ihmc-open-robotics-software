@@ -35,7 +35,7 @@ import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointStateReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
-import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoLong;
 
@@ -77,9 +77,9 @@ public class SCS2SensorReader implements SensorReader
                                                   FloatingJointBasics rootJoint,
                                                   IMUDefinition[] imuDefinitions,
                                                   ForceSensorDataHolder forceSensorDataHolder,
-                                                  SensorProcessingConfiguration sensorProcessingConfiguration)
+                                                  StateEstimatorParameters stateEstimatorParameters)
    {
-      return new SCS2SensorReader(controllerInput, rootJoint, imuDefinitions, forceSensorDataHolder, sensorProcessingConfiguration, false);
+      return new SCS2SensorReader(controllerInput, rootJoint, imuDefinitions, forceSensorDataHolder, stateEstimatorParameters, false);
    }
 
    public static SCS2SensorReader newPerfectSensorReader(SimControllerInput controllerInput,
@@ -94,14 +94,14 @@ public class SCS2SensorReader implements SensorReader
                                                          IMUDefinition[] imuDefinitions,
                                                          ForceSensorDataHolder forceSensorDataHolderToUpdate)
    {
-      return new SCS2SensorReader(controllerInput, rootJoint, imuDefinitions, forceSensorDataHolderToUpdate, null, true);
+      return new SCS2SensorReader(controllerInput, rootJoint, imuDefinitions, forceSensorDataHolderToUpdate, new StateEstimatorParameters(), true);
    }
 
    private SCS2SensorReader(SimControllerInput controllerInput,
                             FloatingJointBasics rootJoint,
                             IMUDefinition[] imuDefinitions,
                             ForceSensorDataHolder forceSensorDataHolder,
-                            SensorProcessingConfiguration sensorProcessingConfiguration,
+                            StateEstimatorParameters stateEstimatorParameters,
                             boolean usePerfectSensor)
    {
       this.controllerInput = controllerInput;
@@ -185,7 +185,7 @@ public class SCS2SensorReader implements SensorReader
       {
          addIMUSensors(imuDefinitions);
          addWrenchSensors(forceSensorDataHolder);
-         sensorProcessing = new SensorProcessing(stateEstimatorSensorDefinitions, sensorProcessingConfiguration, registry);
+         sensorProcessing = new SensorProcessing(stateEstimatorSensorDefinitions, stateEstimatorParameters, registry);
          simJointList.remove(0);
          controllerJointList.remove(0);
          controllerIMUSensors = null;

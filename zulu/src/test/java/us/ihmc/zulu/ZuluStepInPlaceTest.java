@@ -2,7 +2,6 @@ package us.ihmc.zulu;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import us.ihmc.zulu.parameters.controller.ZuluStepAdjustmentParameters;
 import us.ihmc.zulu.parameters.controller.ZuluWalkingControllerParameters;
 import us.ihmc.avatar.AvatarStepInPlaceTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -24,7 +23,7 @@ public class ZuluStepInPlaceTest extends AvatarStepInPlaceTest
             @Override
             public StepAdjustmentParameters getStepAdjustmentParameters()
             {
-               return new ZuluStepAdjustmentParameters()
+               return new StepAdjustmentParameters()
                {
                   @Override
                   public double getMinICPErrorForStepAdjustment()

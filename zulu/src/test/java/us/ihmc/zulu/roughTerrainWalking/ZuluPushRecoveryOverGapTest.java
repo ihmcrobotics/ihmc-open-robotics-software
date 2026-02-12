@@ -5,13 +5,10 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.simulationConstructionSetTools.tools.CITools.SimpleRobotNameKeys;
 import us.ihmc.zulu.ZuluVersion;
 import us.ihmc.zulu.ZuluRobotModel;
-import us.ihmc.zulu.parameters.controller.ZuluStepAdjustmentParameters;
-import us.ihmc.zulu.parameters.controller.ZuluSteppingParameters;
 import us.ihmc.zulu.parameters.controller.ZuluWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.roughTerrainWalking.AvatarPushRecoveryOverGapTest;
-import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
@@ -59,25 +56,12 @@ public class ZuluPushRecoveryOverGapTest extends AvatarPushRecoveryOverGapTest
                @Override
                public SteppingParameters getSteppingParameters()
                {
-                  return new ZuluSteppingParameters(getPhysicalProperties())
+                  return new SteppingParameters()
                   {
                      @Override
                      public double getMaxStepLength()
                      {
                         return 1.0;
-                     }
-                  };
-               }
-
-               @Override
-               public StepAdjustmentParameters getStepAdjustmentParameters()
-               {
-                  return new ZuluStepAdjustmentParameters()
-                  {
-                     @Override
-                     public boolean allowStepAdjustment()
-                     {
-                        return true;
                      }
                   };
                }
