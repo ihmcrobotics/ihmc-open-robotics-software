@@ -4,7 +4,6 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.graphics.ros2.RDXDetectionManagerSettings;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2FramePlanarRegionsVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2HeightMapVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
@@ -39,7 +38,6 @@ public abstract class RDXRobotPerceptionVisualizersPanel extends RDXPerceptionVi
    protected RDXIsaacROSFoundationPoseVisualizer foundationPoseVisualizer;
    protected RDXROS2HeightMapVisualizer heightMapVisualizer;
    protected RDXROS2HeightMapVisualizer yoloMapVisualizer;
-   protected RDXDetectionManagerSettings detectionManagerSettings;
    protected RDXROS2FramePlanarRegionsVisualizer planarRegionsVisualizer;
 
    protected RDXRobotPerceptionVisualizersPanel(ROS2Node ros2Node, ROS2SyncedRobotModel syncedRobot, ROS2PeerClockOffsetEstimator peerClockOffsetEstimator)

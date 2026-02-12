@@ -5,7 +5,6 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox2DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.detections.DetectionManager;
 import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
@@ -97,18 +96,6 @@ public class FoundationPoseManager
          objectsToTrack.addAll(FoundationPoseTools.getAvailableMeshes());
       else
          objectsToTrack.clear();
-   }
-
-   /**
-    * Register callbacks between this class and the {@link DetectionManager}.
-    *
-    * @param detectionManager The {@link DetectionManager}.
-    */
-   public void registerDetectionManagerCallbacks(DetectionManager detectionManager)
-   {
-      addResultCallback(detectionManager::addDetections);
-      detectionManager.addNewlyValidDetectionCallback(this::onNewDetection);
-      detectionManager.addDetectionRemovedCallback(this::onDetectionRemoved);
    }
 
    private void onNewDetection(PersistentDetection detection)
