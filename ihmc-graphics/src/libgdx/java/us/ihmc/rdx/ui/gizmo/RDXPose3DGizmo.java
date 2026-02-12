@@ -803,6 +803,12 @@ public class RDXPose3DGizmo implements RenderableProvider
       return isBeingManipulated;
    }
 
+   public void setCenterSphereToTorusRatio(float centerSphereToTorusRatio)
+   {
+      this.centerSphereToTorusRatio.set(centerSphereToTorusRatio);
+      recreateGraphics();
+   }
+
    public ImFloat getCenterSphereToTorusRatio()
    {
       return centerSphereToTorusRatio;
