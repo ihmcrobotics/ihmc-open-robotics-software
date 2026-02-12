@@ -252,6 +252,7 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
       if (targetSceneObject != null)
       {
          state.getLogger().info("Updating existing door panel scene object");
+         targetSceneObject.unfreeze();
          targetSceneObject.setPersistentDetection(openingMechanismDetection);
          targetSceneObject.setDoorPanelPersistentDetection(doorPanelDetection);
       }
@@ -308,6 +309,7 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
       if (frameSceneObject != null)
       {
          state.getLogger().info("Updating existing door frame scene object");
+         frameSceneObject.unfreeze();
          frameSceneObject.setPersistentDetection(doorPanelSceneObject.getDoorPanelPersistentDetection());
       }
       else
@@ -426,6 +428,7 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
       if (targetSceneObject != null)
       {
          state.getLogger().info("Updating existing scene object for type: {}", definition.getSceneObjectDefinition().getName());
+         targetSceneObject.unfreeze();
          targetSceneObject.setPersistentDetection(bestDetection);
       }
       else
