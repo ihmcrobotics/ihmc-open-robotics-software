@@ -110,10 +110,10 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
          jsonNode.put("holdPoseInWorldLater", holdPoseInWorldLater.getValue());
          jsonNode.put("linearPositionWeight", linearPositionWeight.getValue());
          jsonNode.put("angularPositionWeight", angularPositionWeight.getValue());
-         jsonNode.put("positionErrorTolerance", Double.parseDouble("%.3f".formatted(positionErrorTolerance.getValue())));
          jsonNode.put("orientationErrorToleranceDegrees", Double.parseDouble("%.3f".formatted(Math.toDegrees(orientationErrorTolerance.getValue()))));
       }
 
+      jsonNode.put("positionErrorTolerance", Double.parseDouble("%.3f".formatted(positionErrorTolerance.getValue())));
       jsonNode.put("jointspaceWeight", jointspaceWeight.getValue());
    }
 
@@ -146,10 +146,10 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
          jointspaceOnly.setValue(jsonNode.get("jointspaceOnly").asBoolean());
          linearPositionWeight.setValue(jsonNode.get("linearPositionWeight").asDouble());
          angularPositionWeight.setValue(jsonNode.get("angularPositionWeight").asDouble());
-         positionErrorTolerance.setValue(jsonNode.get("positionErrorTolerance").asDouble());
          orientationErrorTolerance.setValue(Math.toRadians(jsonNode.get("orientationErrorToleranceDegrees").asDouble()));
       }
 
+      positionErrorTolerance.setValue(jsonNode.get("positionErrorTolerance").asDouble());
       jointspaceWeight.setValue(jsonNode.get("jointspaceWeight").asDouble());
    }
 
@@ -224,10 +224,10 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
          unchanged &= palmTransformToParent.getValueReadOnly().equals(onDiskPalmTransformToParent);
          unchanged &= linearPositionWeight.getValue() == onDiskLinearPositionWeight;
          unchanged &= angularPositionWeight.getValue() == onDiskAngularPositionWeight;
-         unchanged &= positionErrorTolerance.getValue() == onDiskPositionErrorTolerance;
          unchanged &= orientationErrorTolerance.getValue() == onDiskOrientationErrorTolerance;
       }
 
+      unchanged &= positionErrorTolerance.getValue() == onDiskPositionErrorTolerance;
       unchanged &= jointspaceWeight.getValue() == onDiskJointspaceWeight;
 
       return !unchanged;
