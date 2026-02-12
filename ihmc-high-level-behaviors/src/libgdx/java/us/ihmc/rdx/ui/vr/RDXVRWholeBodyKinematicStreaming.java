@@ -113,8 +113,8 @@ public class RDXVRWholeBodyKinematicStreaming
    private final RDXROS2RobotVisualizer robotVisualizer;
    private float userRobotOpacity = 1.0f; // store this so we can avoid overriding the user
    private final RDXMultiBodyGraphic ghostRobotGraphic;
-   private final RDXVRMiniGhostPreview miniGhostKST;
-   private final RDXVRMiniGhostPreview miniGhostReal;
+   private RDXVRMiniGhostPreview miniGhostKST;
+   private RDXVRMiniGhostPreview miniGhostReal;
    private final ImBoolean showGhosts = new ImBoolean(true);
    private final ImBoolean showMiniGhost = new ImBoolean(true);
    private final FullHumanoidRobotModel ghostFullRobotModel;
@@ -213,22 +213,27 @@ public class RDXVRWholeBodyKinematicStreaming
       {
          RobotDefinition.forEachRigidBodyDefinition(miniGhostRobotDefinition.getRootBodyDefinition(),
                                                     body -> body.getVisualDefinitions().forEach(visual -> visual.setMaterialDefinition(material)));
-      }
-      FullHumanoidRobotModel miniGhostFullRobotModel = new FullHumanoidRobotModelWrapper(miniGhostRobotDefinition, syncedRobot.getRobotModel().getJointMap(), false);
-      miniGhostKST = new RDXVRMiniGhostPreview(syncedRobot.getRobotModel().getSimpleRobotName() + " KST",
-                                               miniGhostRobotDefinition,
-                                               miniGhostFullRobotModel,
-                                               vrContext,
-                                               Color.YELLOW,
-                                               0.2f);
 
-      FullHumanoidRobotModel miniGhostRealModel = new FullHumanoidRobotModelWrapper(miniGhostRobotDefinition, syncedRobot.getRobotModel().getJointMap(), false);
-      miniGhostReal = new RDXVRMiniGhostPreview(syncedRobot.getRobotModel().getSimpleRobotName() + " Real",
-                                                miniGhostRobotDefinition,
-                                                miniGhostRealModel,
-                                                vrContext,
-                                                Color.BLACK,
-                                                0.8f);
+         FullHumanoidRobotModel miniGhostFullRobotModel = new FullHumanoidRobotModelWrapper(miniGhostRobotDefinition,
+                                                                                            syncedRobot.getRobotModel().getJointMap(),
+                                                                                            false);
+         miniGhostKST = new RDXVRMiniGhostPreview(syncedRobot.getRobotModel().getSimpleRobotName() + " KST",
+                                                  miniGhostRobotDefinition,
+                                                  miniGhostFullRobotModel,
+                                                  vrContext,
+                                                  Color.YELLOW,
+                                                  0.2f);
+
+         FullHumanoidRobotModel miniGhostRealModel = new FullHumanoidRobotModelWrapper(miniGhostRobotDefinition,
+                                                                                       syncedRobot.getRobotModel().getJointMap(),
+                                                                                       false);
+         miniGhostReal = new RDXVRMiniGhostPreview(syncedRobot.getRobotModel().getSimpleRobotName() + " Real",
+                                                   miniGhostRobotDefinition,
+                                                   miniGhostRealModel,
+                                                   vrContext,
+                                                   Color.BLACK,
+                                                   0.8f);
+      }
       if (recordKSTOutput)
       {
          ModelBuilder modelBuilder = new ModelBuilder();
@@ -735,8 +740,11 @@ public class RDXVRWholeBodyKinematicStreaming
             if (showGhosts.get())
                robotVisualizer.setOpacity(0.5f);
          }
-         miniGhostKST.setActive(showGhosts.get() && showMiniGhost.get());
-         miniGhostReal.setActive(showGhosts.get() && showMiniGhost.get());
+         if (miniGhostKST != null)
+         {
+            miniGhostKST.setActive(showGhosts.get() && showMiniGhost.get());
+            miniGhostReal.setActive(showGhosts.get() && showMiniGhost.get());
+         }
 
          if (status.getMessageNotification().poll())
          {
@@ -821,7 +829,7 @@ public class RDXVRWholeBodyKinematicStreaming
 
       ImGuiTools.separatorText("Visualization Options", ImGuiTools.getSmallBoldFont());
       ImGui.checkbox(labels.get("Show Robot Ghosts during Control"), showGhosts);
-      if (miniGhostKST.isEnabled())
+      if (miniGhostKST != null)
       {
          ImGui.checkbox(labels.get("Show Mini Robot Ghost"), showMiniGhost);
       }
@@ -939,15 +947,21 @@ public class RDXVRWholeBodyKinematicStreaming
          initialize();
          reinitializeToolboxRobotConfiguration();
          ghostRobotGraphic.setActive(true);
-         miniGhostKST.setActive(true);
-         miniGhostReal.setActive(true);
+         if (miniGhostKST != null)
+         {
+            miniGhostKST.setActive(true);
+            miniGhostReal.setActive(true);
+         }
       }
       else // Disable
       {
          sleepToolbox();
          ghostRobotGraphic.setActive(false);
-         miniGhostKST.setActive(false);
-         miniGhostReal.setActive(false);
+         if (miniGhostKST != null)
+         {
+            miniGhostKST.setActive(false);
+            miniGhostReal.setActive(false);
+         }
          setStreamToController(false, false);
       }
 
@@ -967,8 +981,11 @@ public class RDXVRWholeBodyKinematicStreaming
             robotVisualizer.setOpacity(userRobotOpacity);
             robotVisualizer.setActive(true);
             ghostRobotGraphic.setActive(true);
-            miniGhostKST.setActive(true);
-            miniGhostReal.setActive(true);
+            if (miniGhostKST != null)
+            {
+               miniGhostKST.setActive(true);
+               miniGhostReal.setActive(true);
+            }
             performingDemonstration.set(-1);
          }
          sendRLStateTransitionRequest(enabled);
@@ -1058,8 +1075,11 @@ public class RDXVRWholeBodyKinematicStreaming
       if (status.hasReceivedFirstMessage())
       {
          ghostRobotGraphic.getRenderables(renderables, pool, sceneLevels);
-         miniGhostKST.getRenderables(renderables, pool, sceneLevels);
-         miniGhostReal.getRenderables(renderables, pool, sceneLevels);
+         if (miniGhostKST != null)
+         {
+            miniGhostKST.getRenderables(renderables, pool, sceneLevels);
+            miniGhostReal.getRenderables(renderables, pool, sceneLevels);
+         }
       }
 
       if (showReferenceFrameGraphics.get())
@@ -1101,8 +1121,11 @@ public class RDXVRWholeBodyKinematicStreaming
       if (toolbox != null)
          toolbox.closeAndDispose();
       ghostRobotGraphic.destroy();
-      miniGhostKST.destroy();
-      miniGhostReal.destroy();
+      if (miniGhostKST != null)
+      {
+         miniGhostKST.destroy();
+         miniGhostReal.destroy();
+      }
       chestFrameGraphics.dispose();
       for (RobotSide side : RobotSide.values)
       {
