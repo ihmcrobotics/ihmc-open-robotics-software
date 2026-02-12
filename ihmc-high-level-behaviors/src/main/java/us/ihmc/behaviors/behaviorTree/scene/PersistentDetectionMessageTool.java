@@ -17,8 +17,7 @@ public class PersistentDetectionMessageTool
 
    public void toMessage(ROS2SyncedRobotModel syncedRobot, Instant now, PersistentDetection persistentDetection, PersistentDetectionStatusMessage message)
    {
-      String last4Digits = String.format("%04d", Math.abs(persistentDetection.getID().getLeastSignificantBits() % 10000));
-      message.setId(last4Digits);
+      message.setId(persistentDetection.getID());
       message.setDetectionType(persistentDetection.getMostRecentDetection().getClass().getSimpleName());
       message.setObjectClass(persistentDetection.getDetectedObjectClass());
       message.setDecayingFrequency(persistentDetection.getDetectionFrequencyDecaying(now));

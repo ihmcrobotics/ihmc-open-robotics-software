@@ -3,7 +3,12 @@ package us.ihmc.communication.ros2.tf2;
 import builtin_interfaces.msg.dds.Time;
 import geometry_msgs.msg.dds.TransformStamped;
 import tf2_msgs.msg.dds.TFMessage;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 
@@ -13,6 +18,10 @@ public class ROS2FrameTools
    public static final ROS2Topic<TFMessage> TF_STATIC_TOPIC = new ROS2Topic<>().withModule("tf_static")
                                                                                .withQoS(ROS2QosProfile.KEEP_HISTORY(1))
                                                                                .withType(TFMessage.class);
+
+   // Read about optical frames here: https://ros.org/reps/rep-0103.html#suffix-frames
+   public static final Orientation3DReadOnly CAMERA_TO_OPTICAL_ROTATION = new YawPitchRoll(-0.5 * Math.PI, 0.0, -0.5 * Math.PI);
+   public static final RigidBodyTransformReadOnly CAMERA_TO_OPTICAL_TRANSFORM = new RigidBodyTransform(CAMERA_TO_OPTICAL_ROTATION, new Vector3D());
 
    public static void packTransformMessage(ReferenceFrame frame, Time timestamp, TransformStamped messageToPack)
    {

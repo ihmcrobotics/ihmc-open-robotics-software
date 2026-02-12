@@ -58,6 +58,14 @@ public final class PerceptionAPI
    public static final ROS2Topic<YOLOv8ExecutorParameters> YOLO_PARAMETERS = IHMC_ROOT.withModule("yolo")
                                                                                       .withSuffix("settings")
                                                                                       .withType(YOLOv8ExecutorParameters.class);
+   public static final ROS2Topic<Image> YOLO_VLM_ANNOTATED_IMAGE = IHMC_ROOT.withModule("yolo")
+                                                                            .withSuffix("vlm/image")
+                                                                            .withType(Image.class)
+                                                                            .withQoS(ROS2QosProfile.RELIABLE());
+   public static final ROS2Topic<CameraInfo> YOLO_VML_ANNOTATED_IMAGE_CAMERA_INFO = IHMC_ROOT.withModule("yolo")
+                                                                                             .withSuffix("vlm/camera_Info")
+                                                                                             .withType(CameraInfo.class)
+                                                                                             .withQoS(ROS2QosProfile.RELIABLE());
 
    /*
     * Aruco markers

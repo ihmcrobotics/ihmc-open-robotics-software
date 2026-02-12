@@ -36,7 +36,7 @@ public class RDXBehaviorTreeSceneDetection
 
       RDXCRDTTools.toLibGDX(status.getTransformToWorld(), frameGraphic.transform);
 
-      textLabel.setTextWithoutCache(status.getObjectClassAsString() + " " + status.getIdAsString());
+      textLabel.setTextWithoutCache(status.getObjectClassAsString() + " " + status.getId());
       textLabel.setPositionFacingCamera(baseUI.getPrimary3DPanel().getCamera3D(),
                                         status.getTransformToWorld().getX(),
                                         status.getTransformToWorld().getY(),
