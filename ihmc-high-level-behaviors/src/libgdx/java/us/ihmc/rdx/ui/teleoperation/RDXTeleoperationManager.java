@@ -192,7 +192,7 @@ public class RDXTeleoperationManager extends RDXPanel
       desiredRobot = new RDXDesiredRobot(robotModel);
       desiredRobot.setSceneLevels(RDXSceneLevel.VIRTUAL);
 
-      controllerStatusTracker = new ControllerStatusTracker(logToolsLogger, ros2Helper.getROS2Node(), robotModel.getSimpleRobotName());
+      controllerStatusTracker = new ControllerStatusTracker(logToolsLogger, ros2Helper.getROS2Node(), syncedRobot);
 
       locomotionManager = new RDXLocomotionManager(robotModel, controllerHelper, syncedRobot, controllerStatusTracker, this);
 
