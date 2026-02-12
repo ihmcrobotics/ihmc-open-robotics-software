@@ -26,6 +26,6 @@ public class FootstepPlannerLogLoaderTest
       FootstepPlannerRequest request = new FootstepPlannerRequest();
       request.setFromPacket(log.getRequestPacket());
 
-      TerrainMapData terrainMapData = request.getEnvironmentHandler().getTerrainMapData();
+      TerrainMapData terrainMapData = request.getTerrainMapData();
    }
 }

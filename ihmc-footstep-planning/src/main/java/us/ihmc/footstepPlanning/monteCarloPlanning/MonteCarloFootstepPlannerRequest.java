@@ -4,11 +4,10 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
+import us.ihmc.perception.gpuMapping.HeightMapData;
 import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.perception.gpuMapping.HeightMapData;
 
 public class MonteCarloFootstepPlannerRequest
 {
@@ -60,7 +59,7 @@ public class MonteCarloFootstepPlannerRequest
    /**
     * Holds the data for the {@link HeightMapData} and the {@link TerrainMapData}
     */
-   private EnvironmentHandler environmentHandler;
+   private TerrainMapData terrainMapData;
 
    public MonteCarloFootstepPlannerRequest()
    {
@@ -204,20 +203,14 @@ public class MonteCarloFootstepPlannerRequest
       return snapHeightThreshold;
    }
 
-   public void setEnvironmentHandler(EnvironmentHandler environmentHandler)
-   {
-      this.environmentHandler = environmentHandler;
-   }
-
    public void setTerrainMapData(TerrainMapData terrainMapData)
    {
-      environmentHandler.setTerrainMapData(terrainMapData);
+      this.terrainMapData = terrainMapData;
    }
 
-
-   public EnvironmentHandler getEnvironmentHandler()
+   public TerrainMapData getTerrainMapData()
    {
-      return environmentHandler;
+      return terrainMapData;
    }
 
    public void setPacket(MonteCarloFootstepPlannerRequest requestPacket)

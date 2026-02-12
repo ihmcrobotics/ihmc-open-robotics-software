@@ -9,7 +9,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
-import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
@@ -27,16 +26,16 @@ public class HeightMapPolygonSnapper
       this.snapAreaResolution = snapAreaResolution;
    }
 
-   public FootstepSnapData computeSnapData(DiscreteFootstep footstep, ConvexPolygon2DReadOnly polygonInStepFrame, EnvironmentHandler environmentHandler)
+   public FootstepSnapData computeSnapData(DiscreteFootstep footstep, ConvexPolygon2DReadOnly polygonInStepFrame, TerrainMapData terrainMapData)
    {
-      return computeSnapData(footstep.getX(), footstep.getY(), footstep.getYaw(), polygonInStepFrame, environmentHandler);
+      return computeSnapData(footstep.getX(), footstep.getY(), footstep.getYaw(), polygonInStepFrame, terrainMapData);
    }
 
    public FootstepSnapData computeSnapData(double stepX,
                                            double stepY,
                                            double stepYaw,
                                            ConvexPolygon2DReadOnly polygonInStepFrame,
-                                           EnvironmentHandler environmentHandler)
+                                           TerrainMapData terrainMapData)
    {
       RigidBodyTransform footstepTransform = new RigidBodyTransform();
       DiscreteFootstepTools.getStepTransform(stepX, stepY, stepYaw, footstepTransform);
@@ -44,7 +43,7 @@ public class HeightMapPolygonSnapper
       ConvexPolygon2D footPolygonInWorld = new ConvexPolygon2D(polygonInStepFrame);
       footPolygonInWorld.applyTransform(footstepTransform);
 
-      RigidBodyTransform snapTransform = snapPolygonToHeightMap(footPolygonInWorld, environmentHandler);
+      RigidBodyTransform snapTransform = snapPolygonToHeightMap(footPolygonInWorld, terrainMapData);
 
       if (snapTransform == null)
       {
@@ -69,11 +68,9 @@ public class HeightMapPolygonSnapper
     * - Any cells with heights below minimumHeightToConsider are ignored.
     * - Any cells with heights below maxZ - snapHeightThreshold are ignored, where maxZ is the max height within the polygon
     */
-   public RigidBodyTransform snapPolygonToHeightMap(ConvexPolygon2DReadOnly polygonToSnap, EnvironmentHandler environmentHandler)
+   public RigidBodyTransform snapPolygonToHeightMap(ConvexPolygon2DReadOnly polygonToSnap, TerrainMapData terrainMapData)
    {
       RigidBodyTransform transformToReturn = new RigidBodyTransform();
-
-      TerrainMapData terrainMapData = environmentHandler.getTerrainMapData();
 
       Point2DReadOnly centroid = polygonToSnap.getCentroid();
 

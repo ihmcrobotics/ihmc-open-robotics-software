@@ -191,7 +191,7 @@ public class AStarBodyPathPlanner
       iterationData.clear();
       edgeDataMap.clear();
       gridHeightMap.clear();
-      setTerrainMapData(request.getEnvironmentHandler().getTerrainMapData());
+      setTerrainMapData(request.getTerrainMapData());
 
       packRadialOffsets(terrainMapData, plannerParameters.getSnapRadius(), xSnapOffsets, ySnapOffsets);
 

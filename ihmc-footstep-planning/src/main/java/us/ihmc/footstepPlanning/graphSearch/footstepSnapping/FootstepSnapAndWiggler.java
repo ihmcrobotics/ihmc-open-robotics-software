@@ -9,13 +9,13 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
-import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapSnapWiggler;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
@@ -36,32 +36,28 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
 
    private final HashSet<DiscreteFootstep> snappedFootsteps = new HashSet<>();
    private final HashMap<DiscreteFootstep, FootstepSnapData> manuallySnappedFootsteps = new HashMap<>();
-
-   private final EnvironmentHandler environmentHandler;
+   private TerrainMapData terrainMapData;
 
    private final HeightMapPolygonSnapper heightMapSnapper = new HeightMapPolygonSnapper();
    private final HeightMapSnapWiggler heightMapSnapWiggler;
 
    // Use this by default
    public FootstepSnapAndWiggler(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame,
-                                 DefaultFootstepPlannerParametersReadOnly parameters,
-                                 EnvironmentHandler environmentHandler)
+                                 DefaultFootstepPlannerParametersReadOnly parameters)
    {
-      this(footPolygonsInSoleFrame, parameters, null, environmentHandler, null, null);
+      this(footPolygonsInSoleFrame, parameters, null, null, null);
    }
 
    // Call this constructor only for testing
    public FootstepSnapAndWiggler(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame,
                                  DefaultFootstepPlannerParametersReadOnly parameters,
                                  TickAndUpdatable tickAndUpdatable,
-                                 EnvironmentHandler environmentHandler,
                                  YoGraphicsListRegistry graphicsListRegistry,
                                  YoRegistry parentRegistry)
    {
       this.footPolygonsInSoleFrame = footPolygonsInSoleFrame;
       this.parameters = parameters;
       this.heightMapSnapWiggler = new HeightMapSnapWiggler(footPolygonsInSoleFrame, wiggleParameters);
-      this.environmentHandler = environmentHandler;
    }
 
    public void setFlatGroundHeight(double flatGroundHeight)
@@ -112,7 +108,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
       }
       else
       {
-         if (environmentHandler.flatGroundMode())
+         if (terrainMapData == null)
          {
             return FootstepSnapData.identityData(flatGroundHeight);
          }
@@ -138,7 +134,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
 
    protected FootstepSnapData computeSnapTransform(DiscreteFootstep footstepToSnap, DiscreteFootstep stanceStep)
    {
-      return heightMapSnapper.computeSnapData(footstepToSnap, footPolygonsInSoleFrame.get(footstepToSnap.getRobotSide()), environmentHandler);
+      return heightMapSnapper.computeSnapData(footstepToSnap, footPolygonsInSoleFrame.get(footstepToSnap.getRobotSide()), terrainMapData);
    }
 
    /**
@@ -153,7 +149,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
 
    protected void computeWiggleTransform(DiscreteFootstep footstepToWiggle, DiscreteFootstep stanceStep, FootstepSnapData snapData)
    {
-      heightMapSnapWiggler.computeWiggleTransform(footstepToWiggle, environmentHandler, snapData);
+      heightMapSnapWiggler.computeWiggleTransform(footstepToWiggle, terrainMapData, snapData);
 
       if (stanceStep != null && stanceStep.hasSnapData())
       {
@@ -199,7 +195,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
       snappedFootPolygonInWorld.applyTransform(transformToFootPose, false);
 
       heightMapSnapper.computeFootPointsInTheEnvironment(snappedFootPolygonInWorld,
-                                                         environmentHandler.getTerrainMapData(),
+                                                         terrainMapData,
                                                          parameters.getHeightMapSnapThreshold(),
                                                          parameters.getMinSurfaceIncline(),
                                                          -Double.MAX_VALUE,
@@ -297,53 +293,8 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
       clearSnapData();
    }
 
-   public static void main(String[] args)
+   public void setTerrainMapData(TerrainMapData terrainMapData)
    {
-      List<Point2D> points = new ArrayList<>();
-      points.add(new Point2D(0.10749938776083733, 0.02999771516261329));  // 0
-      points.add(new Point2D(0.06449944944584798, 0.033497945367126664)); // 1
-      points.add(new Point2D(0.021499511130858618, 0.03699817557164005)); // 2
-      points.add(new Point2D(-0.021500427184130748, 0.04049840577615344)); // 3
-      points.add(new Point2D(-0.06450036549912008, 0.04399863598066683)); // 4
-      points.add(new Point2D(-0.10750030381410944, 0.04749886618518021)); // 5
-      points.add(new Point2D(0.10749948003264906, 0.017998059515111544)); // 6
-      points.add(new Point2D(0.0644995524827044, 0.02009832989408306)); // 7
-      points.add(new Point2D(0.02149962493275975, 0.022198600273054574)); // 8
-      points.add(new Point2D(-0.021500302617184913, 0.024298870652026083)); //9
-      points.add(new Point2D(-0.06450023016712958, 0.026399141030997587)); //10
-      points.add(new Point2D(-0.1075001577170742, 0.02849941140996912)); //11
-      points.add(new Point2D(0.10749957230446079, 0.0059984038676098046)); //12
-      points.add(new Point2D(0.06449965551956086, 0.006698714421039443)); //13
-      points.add(new Point2D(0.021499738734660895, 0.007399024974469082)); //14
-      points.add(new Point2D(-0.021500178050239065, 0.008099335527898733)); //15
-      points.add(new Point2D(-0.06450009483513901, 0.008799646081328378)); //16
-      points.add(new Point2D(-0.10750001162003894, 0.00949995663475803)); //17
-      points.add(new Point2D(0.10749966457627252, -0.006001251779891947)); //18
-      points.add(new Point2D(0.06449975855641729, -0.006700901052004176)); //19
-      points.add(new Point2D(0.021499852536562034, -0.0074005503241163974)); //20
-
-      points.add(new Point2D(-0.021500053483293216, -0.008100199596228616)); //21
-      points.add(new Point2D(-0.06449995950314846, -0.008799848868340851)); //22
-      points.add(new Point2D(-0.10749986552300368, -0.009499498140453073)); //23
-      points.add(new Point2D(0.10749975684808429, -0.018000907427393683)); //24
-      points.add(new Point2D(0.06449986159327373, -0.020100516525047785)); //25
-      points.add(new Point2D(0.02149996633846318, -0.022200125622701867)); //26
-      points.add(new Point2D(-0.021499928916347368, -0.02429973472035595)); //27
-      points.add(new Point2D(-0.06449982417115792, -0.026399343818010065)); //28
-      points.add(new Point2D(-0.10749971942596843, -0.02849895291566415)); //29
-
-      points.add(new Point2D(0.10749984911989602, -0.030000563074895428)); //30
-      points.add(new Point2D(0.06449996463013016, -0.03350013199809138)); //31
-      points.add(new Point2D(0.021500080140364322, -0.03699970092128736)); //32
-      points.add(new Point2D(-0.021499804349401512, -0.040499269844483314)); //33
-      points.add(new Point2D(-0.06449968883916736, -0.04399883876767927)); //34
-      points.add(new Point2D(-0.10749957332893317, -0.04749840769087523)); //35
-
-      ConvexPolygon2D polygon2D = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(points));
-
-      for (Point2D point : points)
-      {
-         assert (polygon2D.signedDistance(point) < 1e-3);
-      }
+      this.terrainMapData = terrainMapData;
    }
 }

@@ -10,7 +10,6 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.graphSearch.AStarFootstepPlannerIterationConductor;
 import us.ihmc.footstepPlanning.graphSearch.AStarIterationData;
-import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerHeuristicCalculator;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
@@ -48,7 +47,6 @@ public class AStarFootstepPlanner
 
    private final AStarFootstepPlannerIterationConductor iterationConductor;
    private final DefaultFootstepPlannerParametersBasics footstepPlannerParameters;
-   private final EnvironmentHandler environmentHandler = new EnvironmentHandler();
    private final FootstepSnapAndWiggler snapper;
    private final ParameterBasedStepExpansion nominalExpansion;
    private final HeightMapFootstepChecker heightMapFootstepChecker;
@@ -95,9 +93,9 @@ public class AStarFootstepPlanner
       this.stopwatch = stopwatch;
       this.statusCallbacks = statusCallbacks;
 
-      this.snapper = new FootstepSnapAndWiggler(footPolygons, footstepPlannerParameters, environmentHandler);
-      this.heightMapFootstepChecker = new HeightMapFootstepChecker(footstepPlannerParameters, footPolygons, environmentHandler, snapper, stepReachabilityData, registry);
-      this.idealStepCalculator = new IdealStepCalculator(footstepPlannerParameters, heightMapFootstepChecker, bodyPathPlanHolder, environmentHandler, registry);
+      this.snapper = new FootstepSnapAndWiggler(footPolygons, footstepPlannerParameters);
+      this.heightMapFootstepChecker = new HeightMapFootstepChecker(footstepPlannerParameters, footPolygons, snapper, stepReachabilityData, registry);
+      this.idealStepCalculator = new IdealStepCalculator(footstepPlannerParameters, heightMapFootstepChecker, bodyPathPlanHolder, registry);
       this.referenceBasedIdealStepCalculator = new ReferenceBasedIdealStepCalculator(footstepPlannerParameters, idealStepCalculator, registry);
 
       this.nominalExpansion = new ParameterBasedStepExpansion(footstepPlannerParameters, referenceBasedIdealStepCalculator, footPolygons);
@@ -107,7 +105,6 @@ public class AStarFootstepPlanner
                                                       snapper,
                                                       referenceBasedIdealStepCalculator,
                                                       distanceAndYawHeuristics::compute,
-                                                      environmentHandler,
                                                       registry);
 
       this.iterationConductor = new AStarFootstepPlannerIterationConductor(nominalExpansion,
@@ -150,11 +147,10 @@ public class AStarFootstepPlanner
       haltRequested.set(false);
       result = FootstepPlanningResult.PLANNING;
 
-      // Update what we should use for planning
-      boolean hasTerrainMap = request.getEnvironmentHandler().getTerrainMapData() != null;
-      boolean flatGroundMode = request.getAssumeFlatGround() || (!hasTerrainMap);
+      // Update flat ground mode
+      boolean flatGroundMode = request.getAssumeFlatGround() || !request.isHeightMapAvailable();
 
-      TerrainMapData terrainMapData = flatGroundMode ? null : request.getEnvironmentHandler().getTerrainMapData();
+      TerrainMapData terrainMapData = flatGroundMode ? null : request.getTerrainMapData();
 
       if (flatGroundMode)
       {
@@ -163,7 +159,10 @@ public class AStarFootstepPlanner
       }
 
       snapper.clearSnapData();
-      environmentHandler.setTerrainMapData(terrainMapData);
+      idealStepCalculator.setTerrainMapData(terrainMapData);
+      snapper.setTerrainMapData(terrainMapData);
+      heightMapFootstepChecker.setTerrainMapData(terrainMapData);
+      stepCostCalculator.setTerrainMapData(terrainMapData);
 
       double pathLength = bodyPathPlanHolder.computePathLength(0.0);
       boolean imposeHorizonLength =
@@ -314,7 +313,7 @@ public class AStarFootstepPlanner
          outputToPack.getFootstepPlan().addFootstep(footstep);
       }
 
-      swingPlanningModule.computeSwingWaypoints(request.getEnvironmentHandler().getTerrainMapData(),
+      swingPlanningModule.computeSwingWaypoints(request.getTerrainMapData(),
                                                 outputToPack.getFootstepPlan(),
                                                 request.getStartFootPoses(),
                                                 request.getSwingPlannerType());

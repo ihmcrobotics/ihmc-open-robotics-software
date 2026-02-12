@@ -4,7 +4,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
-import us.ihmc.footstepPlanning.graphSearch.stepChecking.FootstepChecker;
+import us.ihmc.footstepPlanning.graphSearch.stepChecking.HeightMapFootstepChecker;
 import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
 import us.ihmc.footstepPlanning.log.FootstepPlannerIterationData;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLog;
@@ -41,7 +41,7 @@ public class FootstepPlannerRejectionReasonReport
       this.iterationDataList = iterationDataList;
       VariableDescriptor rejectionReasonVariableDescriptor = variableDescriptors.stream()
                                                                                 .filter(v -> v.getName()
-                                                                                              .equalsIgnoreCase(FootstepChecker.rejectionReasonVariable))
+                                                                                              .equalsIgnoreCase(HeightMapFootstepChecker.rejectionReasonVariable))
                                                                                 .findFirst()
                                                                                 .get();
       rejectionReasonIndex = variableDescriptors.indexOf(rejectionReasonVariableDescriptor);

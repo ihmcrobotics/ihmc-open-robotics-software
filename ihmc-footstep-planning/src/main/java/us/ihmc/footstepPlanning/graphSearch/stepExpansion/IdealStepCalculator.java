@@ -8,11 +8,11 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.footstepPlanning.FootstepPlanHeading;
-import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
-import us.ihmc.footstepPlanning.graphSearch.stepChecking.FootstepCheckerInterface;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.stepChecking.FootstepCheckerInterface;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -39,8 +39,8 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
    private final HashMap<DiscreteFootstep, DiscreteFootstep> idealStepMap = new HashMap<>();
    private final DefaultFootstepPlannerParametersReadOnly parameters;
    private final WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder;
-   private final EnvironmentHandler environmentHandler;
    private final FootstepCheckerInterface nodeChecker;
+   private TerrainMapData terrainMapData;
 
    private SideDependentList<DiscreteFootstep> goalSteps;
    private final YoDouble desiredRelativeHeading;
@@ -65,13 +65,11 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
    public IdealStepCalculator(DefaultFootstepPlannerParametersReadOnly parameters,
                               FootstepCheckerInterface nodeChecker,
                               WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder,
-                              EnvironmentHandler environmentHandler,
                               YoRegistry registry)
    {
       this.parameters = parameters;
       this.nodeChecker = nodeChecker;
       this.bodyPathPlanHolder = bodyPathPlanHolder;
-      this.environmentHandler = environmentHandler;
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -187,7 +185,7 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
    {
       // If goal node is reachable, it's the ideal step
       DiscreteFootstep goalStep = goalSteps.get(stanceStep.getRobotSide().getOppositeSide());
-      if (!environmentHandler.flatGroundMode() && nodeChecker.isStepValid(goalStep, stanceStep, null))
+      if (terrainMapData != null && nodeChecker.isStepValid(goalStep, stanceStep, null))
       {
          return goalStep;
       }
@@ -308,5 +306,10 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
       double pathYaw = bodyPathPlanHolder.getSegmentYaw(bodyPathPlanHolder.getSegmentIndexFromAlpha(alpha)) + desiredRelativeHeading.getValue();
       double currentYaw = midFootPose.getYaw();
       correctiveYaw.set(MathTools.clamp(AngleTools.computeAngleDifferenceMinusPiToPi(pathYaw, currentYaw), maxYawAdjustmentTowardsPath));
+   }
+
+   public void setTerrainMapData(TerrainMapData terrainMapData)
+   {
+      this.terrainMapData = terrainMapData;
    }
 }

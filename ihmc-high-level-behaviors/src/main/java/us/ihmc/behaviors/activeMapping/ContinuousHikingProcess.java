@@ -6,7 +6,6 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2TunedRigidBodyTransform;
-import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.perception.GpuMappingThread;
 import us.ihmc.perception.ROS2ImageSensors;
@@ -30,7 +29,6 @@ public class ContinuousHikingProcess
    public static final String SYNCED_ROBOT_THREAD = "SyncedRobotThread";
    public static final String SENSOR_TUNABLE_TRANSFORM_UPDATE_THREAD = "SensorTunableTransformUpdateThread";
 
-   private final EnvironmentHandler environmentHandler = new EnvironmentHandler();
    private final ActiveMappingParameterToolBox activeMappingParameterToolBox;
    private final ContinuousPlanningStateMachine continuousPlanningStateMachine;
    private final RapidPlanarRegionsExtractionThread rapidPlanarRegionsExtractionThread;
@@ -107,8 +105,7 @@ public class ContinuousHikingProcess
       activeMappingParameterToolBox.update();
 
       // Update environment
-      environmentHandler.setTerrainMapData(gpuMappingThread.getlatestTerrainMapData());
-      continuousPlanningStateMachine.setLatestEnvironmentHandler(environmentHandler);
+      continuousPlanningStateMachine.setTerrainMapData(gpuMappingThread.getlatestTerrainMapData());
    }
 
    public void destroy()

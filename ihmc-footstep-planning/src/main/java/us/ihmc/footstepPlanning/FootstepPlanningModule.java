@@ -240,7 +240,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          RobotSide initialStanceSide = request.getRequestedInitialStanceSide();
          FramePose3D initialStancePose = new FramePose3D(request.getStartFootPoses().get(initialStanceSide));
          planThenSnapPlanner.setInitialStanceFoot(initialStancePose, initialStanceSide);
-         planThenSnapPlanner.setTerrainMapData(request.getEnvironmentHandler().getTerrainMapData());
+         planThenSnapPlanner.setTerrainMapData(request.getTerrainMapData());
          planThenSnapPlanner.setBodyPath(bodyPathPlanHolder);
 
          FootstepPlannerGoal goal = new FootstepPlannerGoal();
@@ -260,7 +260,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          output.getPlannerTimings().setTimePlanningStepsSeconds(stopwatch.lap());
 
          aStarFootstepPlanner.getSwingPlanningModule()
-                             .computeSwingWaypoints(request.getEnvironmentHandler().getTerrainMapData(),
+                             .computeSwingWaypoints(request.getTerrainMapData(),
                                                     output.getFootstepPlan(),
                                                     request.getStartFootPoses(),
                                                     request.getSwingPlannerType());
@@ -301,7 +301,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       try
       {
          swingReplanRequestCallbacks.forEach(callback -> callback.accept(swingPlannerType));
-         aStarFootstepPlanner.getSwingPlanningModule().computeSwingWaypoints(request.getEnvironmentHandler().getTerrainMapData(),
+         aStarFootstepPlanner.getSwingPlanningModule().computeSwingWaypoints(request.getTerrainMapData(),
                                                                              output.getFootstepPlan(),
                                                                              request.getStartFootPoses(),
                                                                              swingPlannerType);

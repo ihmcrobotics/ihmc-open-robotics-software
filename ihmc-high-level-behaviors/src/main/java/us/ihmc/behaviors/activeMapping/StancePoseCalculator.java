@@ -10,7 +10,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
-import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
 import us.ihmc.footstepPlanning.polygonSnapping.PolygonSnapperTools;
 import us.ihmc.perception.gpuMapping.TerrainMapData;
@@ -43,14 +42,13 @@ public class StancePoseCalculator
    }
 
    public SideDependentList<FramePose3D> getStancePoses(FramePose3DReadOnly midStancePose,
-                                                        TerrainMapData terrainMap,
-                                                        EnvironmentHandler environmentHandler)
+                                                        TerrainMapData terrainMap)
    {
       reset();
       populationCandidatePoses(leftPoses, midStancePose, RobotSide.LEFT);
       populationCandidatePoses(rightPoses, midStancePose, RobotSide.RIGHT);
       searchForOptimalGoalStance(leftPoses, rightPoses, midStancePose, terrainMap);
-      snapPosesToEnvironment(environmentHandler);
+      snapPosesToEnvironment(terrainMap);
       return new SideDependentList<>(new FramePose3D(bestFramePoses.get(RobotSide.LEFT)), new FramePose3D(bestFramePoses.get(RobotSide.RIGHT)));
    }
 
@@ -179,21 +177,21 @@ public class StancePoseCalculator
       return cost;
    }
 
-   public void snapPosesToEnvironment(EnvironmentHandler environmentHandler)
+   public void snapPosesToEnvironment(TerrainMapData terrainMapData)
    {
       for (RobotSide side : RobotSide.values)
       {
-         snapToEnvironment(environmentHandler, bestFramePoses.get(side), side);
+         snapToEnvironment(terrainMapData, bestFramePoses.get(side), side);
       }
    }
 
-   private void snapToEnvironment(EnvironmentHandler environmentHandler, FramePose3D poseToSnap, RobotSide side)
+   private void snapToEnvironment(TerrainMapData terrainMapData, FramePose3D poseToSnap, RobotSide side)
    {
       // Transform the polygon to be surrounding the pose we want to step on
       ConvexPolygon2D footPolygon = new ConvexPolygon2D(footPolygons.get(side));
       footPolygon.applyTransform(poseToSnap);
 
-      RigidBodyTransform snapTransform = heightMapPolygonSnapper.snapPolygonToHeightMap(footPolygon, environmentHandler);
+      RigidBodyTransform snapTransform = heightMapPolygonSnapper.snapPolygonToHeightMap(footPolygon, terrainMapData);
 
       if (snapTransform != null)
       {

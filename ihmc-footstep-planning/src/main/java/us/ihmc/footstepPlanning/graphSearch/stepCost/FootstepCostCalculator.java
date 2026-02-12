@@ -2,14 +2,14 @@ package us.ihmc.footstepPlanning.graphSearch.stepCost;
 
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapDataReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
-import us.ihmc.footstepPlanning.graphSearch.stepExpansion.IdealStepCalculatorInterface;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.stepExpansion.IdealStepCalculatorInterface;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -23,7 +23,7 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
    private final FootstepSnapperReadOnly snapper;
    private final IdealStepCalculatorInterface idealStepCalculator;
    private final ToDoubleFunction<FootstepGraphNode> heuristics;
-   private final EnvironmentHandler environmentHandler;
+   private TerrainMapData terrainMapData;
 
    private final RigidBodyTransform stanceStepTransform = new RigidBodyTransform();
    private final RigidBodyTransform idealStepTransform = new RigidBodyTransform();
@@ -44,14 +44,12 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
                                  FootstepSnapperReadOnly snapper,
                                  IdealStepCalculatorInterface idealStepCalculator,
                                  ToDoubleFunction<FootstepGraphNode> heuristics,
-                                 EnvironmentHandler environmentHandler,
                                  YoRegistry parentRegistry)
    {
       this.parameters = parameters;
       this.snapper = snapper;
       this.idealStepCalculator = idealStepCalculator;
       this.heuristics = heuristics;
-      this.environmentHandler = environmentHandler;
 
       parentRegistry.addChild(registry);
    }
@@ -87,10 +85,10 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
       edgeCost.add(Math.abs(pitchOffset.getValue() * parameters.getPitchWeight()));
       edgeCost.add(Math.abs(rollOffset.getValue() * parameters.getRollWeight()));
 
-      if (environmentHandler != null && environmentHandler.hasTerrainMapData())
+      if (terrainMapData != null)
       {
          // cost: 0 (level, flat) - 1 (rough, inclined)
-         double traversabilityCost = 1.0 - environmentHandler.getTerrainMapData().getTraversabilityScore(candidateStep.getX(), candidateStep.getY());
+         double traversabilityCost = 1.0 - terrainMapData.getTraversabilityScore(candidateStep.getX(), candidateStep.getY());
 
          // hard-coding for now, TODO add as param
          double traversabilityScale = 0.8;
@@ -123,5 +121,10 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
       edgeCost.setToNaN();
       totalCost.setToNaN();
       heuristicCost.setToNaN();
+   }
+
+   public void setTerrainMapData(TerrainMapData terrainMapData)
+   {
+      this.terrainMapData = terrainMapData;
    }
 }

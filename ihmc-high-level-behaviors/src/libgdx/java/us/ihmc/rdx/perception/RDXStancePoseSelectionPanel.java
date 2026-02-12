@@ -20,7 +20,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
-import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.perception.gpuMapping.TerrainMapData;
@@ -67,7 +66,7 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
    private final SideDependentList<RDXFootstepGraphic> footstepGraphics;
 
    private final StancePoseCalculator stancePoseCalculator;
-   private final EnvironmentHandler environmentHandler = new EnvironmentHandler();
+   private TerrainMapData terrainMapData;
 
    private boolean selectionActive = false; // Important for determining when to detect collisions or not
    private final ImBoolean calculateStancePose = new ImBoolean(false);
@@ -99,15 +98,13 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
 
    public void update(TerrainMapData latestTerrainMapData)
    {
-      environmentHandler.setTerrainMapData(latestTerrainMapData);
+      this.terrainMapData = latestTerrainMapData;
 
-      if (environmentHandler.hasTerrainMapData())
+      if (terrainMapData != null)
       {
-         TerrainMapData terrainMapData = environmentHandler.getTerrainMapData();
-
          if (selectionActive)
          {
-            stancePoses.set(stancePoseCalculator.getStancePoses(latestPickPoint, terrainMapData, environmentHandler));
+            stancePoses.set(stancePoseCalculator.getStancePoses(latestPickPoint, terrainMapData));
             for (RobotSide robotSide : RobotSide.values)
             {
                footstepGraphics.get(robotSide).setPose(stancePoses.get(robotSide));
@@ -158,7 +155,7 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
    {
       if (ImGui.button("Save Height Map To File"))
       {
-         saveHeightMapToFile(environmentHandler.getTerrainMapData());
+         saveHeightMapToFile(terrainMapData);
       }
 
       // Allow for visualizing the stance pose grid
@@ -171,7 +168,6 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
          selectionActive = false;
       }
 
-      TerrainMapData terrainMapData = environmentHandler.getTerrainMapData();
       ImGui.text("World Point: " + latestPickPoint.getTranslation().toString("%.3f"));
       if (terrainMapData != null)
       {

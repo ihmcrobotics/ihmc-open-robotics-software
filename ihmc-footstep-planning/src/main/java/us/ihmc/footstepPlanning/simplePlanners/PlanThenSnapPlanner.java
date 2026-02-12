@@ -4,8 +4,10 @@ import us.ihmc.commonWalkingControlModules.polygonWiggling.WiggleParameters;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
-import us.ihmc.footstepPlanning.*;
-import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
+import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.footstepPlanning.FootstepPlannerGoal;
+import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
@@ -21,7 +23,6 @@ public class PlanThenSnapPlanner
 {
    private final TurnWalkTurnPlanner turnWalkTurnPlanner;
    private final SideDependentList<ConvexPolygon2D> footPolygons;
-   private final EnvironmentHandler internalEnvironmentHandler = new EnvironmentHandler();
    private TerrainMapData terrainMapData;
    private final HeightMapPolygonSnapper snapper;
    private final HeightMapSnapWiggler wiggler;
@@ -48,7 +49,6 @@ public class PlanThenSnapPlanner
 
    public void setTerrainMapData(TerrainMapData terrainMapData)
    {
-      internalEnvironmentHandler.setTerrainMapData(terrainMapData);
       this.terrainMapData = terrainMapData;
    }
 
@@ -69,7 +69,7 @@ public class PlanThenSnapPlanner
       FootstepPlanningResult result = turnWalkTurnPlanner.plan();
       footstepPlan = turnWalkTurnPlanner.getPlan();
 
-      if (!internalEnvironmentHandler.hasTerrainMapData())
+      if (terrainMapData == null)
          return result;
 
       int numberOfFootsteps = footstepPlan.getNumberOfSteps();
@@ -78,12 +78,10 @@ public class PlanThenSnapPlanner
          PlannedFootstep footstep = footstepPlan.getFootstep(i);
          FramePose3D solePose = footstep.getFootstepPose();
          ConvexPolygon2D footPolygon = footPolygons.get(footstep.getRobotSide());
-         double snapHeightThreshold = 0.04;
-         double minSurfaceIncline = Math.toRadians(45.0);
 
          DiscreteFootstep discreteFootstep = getAsDiscreteFootstep(footstep);
-         FootstepSnapData snapData = snapper.computeSnapData(discreteFootstep, footPolygon, internalEnvironmentHandler);
-         wiggler.computeWiggleTransform(discreteFootstep, internalEnvironmentHandler, snapData);
+         FootstepSnapData snapData = snapper.computeSnapData(discreteFootstep, footPolygon, terrainMapData);
+         wiggler.computeWiggleTransform(discreteFootstep, terrainMapData, snapData);
          ConvexPolygon2D footHold = snapData.getCroppedFoothold();
          solePose.set(snapData.getSnappedStepTransform(discreteFootstep));
 

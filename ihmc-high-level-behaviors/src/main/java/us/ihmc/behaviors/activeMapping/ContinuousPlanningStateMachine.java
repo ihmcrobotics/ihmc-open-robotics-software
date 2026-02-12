@@ -3,14 +3,22 @@ package us.ihmc.behaviors.activeMapping;
 import behavior_msgs.msg.dds.ContinuousHikingCommandMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.activeMapping.ContinuousHikingStateMachine.*;
+import us.ihmc.behaviors.activeMapping.ContinuousHikingStateMachine.ContinuousHikingState;
+import us.ihmc.behaviors.activeMapping.ContinuousHikingStateMachine.DoNothingState;
+import us.ihmc.behaviors.activeMapping.ContinuousHikingStateMachine.JustWaitState;
+import us.ihmc.behaviors.activeMapping.ContinuousHikingStateMachine.PlanAgainTransitionCondition;
+import us.ihmc.behaviors.activeMapping.ContinuousHikingStateMachine.ReadyToPlanState;
+import us.ihmc.behaviors.activeMapping.ContinuousHikingStateMachine.SquareUpTransitionCondition;
+import us.ihmc.behaviors.activeMapping.ContinuousHikingStateMachine.StartContinuousHikingTransitionCondition;
+import us.ihmc.behaviors.activeMapping.ContinuousHikingStateMachine.StopContinuousHikingTransitionCondition;
+import us.ihmc.behaviors.activeMapping.ContinuousHikingStateMachine.WaitingToLandState;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
-import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.State;
@@ -39,7 +47,7 @@ public class ContinuousPlanningStateMachine
                                                                                                           getClass(),
                                                                                                           ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
    public StateMachine<ContinuousHikingState, State> stateMachine;
-   private EnvironmentHandler environmentHandler;
+   private final AtomicReference<TerrainMapData> terrainMapData = new AtomicReference<>();
 
    private final AtomicBoolean resetStateMachine = new AtomicBoolean(false);
 
@@ -82,7 +90,7 @@ public class ContinuousPlanningStateMachine
                                                     continuousPlanner,
                                                     controllerFootstepQueueMonitor,
                                                     activeMappingParameterObject.getContinuousHikingParameters(),
-                                                    this::getEnvironmentHandler,
+                                                    this::getTerrainMapData,
                                                     debugger,
                                                     continuousHikingLogger);
       State waitingtoLandState = new WaitingToLandState(ros2Helper,
@@ -98,7 +106,7 @@ public class ContinuousPlanningStateMachine
                                               controllerFootstepQueueMonitor,
                                               debugger,
                                               activeMappingParameterObject,
-                                              this::getEnvironmentHandler);
+                                              this::getTerrainMapData);
 
       // Adding the different states
       stateMachineFactory.addState(ContinuousHikingState.DO_NOTHING, notStartedState);
@@ -177,11 +185,6 @@ public class ContinuousPlanningStateMachine
       resetStateMachine.set(true);
    }
 
-   public EnvironmentHandler getEnvironmentHandler()
-   {
-      return environmentHandler;
-   }
-
    /**
     * Runs the continuous hiking state machine every {@link #CONTINUOUS_PLANNING_DELAY_MS} milliseconds.
     * The state is stored in the {@link ContinuousHikingState}
@@ -191,9 +194,14 @@ public class ContinuousPlanningStateMachine
       stateMachine.doActionAndTransition();
    }
 
-   public void setLatestEnvironmentHandler(EnvironmentHandler environmentHandler)
+   public void setTerrainMapData(TerrainMapData terrainMapData)
    {
-      this.environmentHandler = environmentHandler;
+      this.terrainMapData.set(terrainMapData);
+   }
+
+   public TerrainMapData getTerrainMapData()
+   {
+      return terrainMapData.get();
    }
 
    public void destroy()

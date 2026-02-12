@@ -48,7 +48,6 @@ import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
@@ -86,10 +85,8 @@ public class FootstepPlannerLogVisualizerController
    private List<FootstepPlannerIterationData> iterationDataList;
    private Map<GraphEdge<FootstepGraphNode>, FootstepPlannerEdgeData> edgeDataMap;
    private List<VariableDescriptor> variableDescriptors;
-   private final EnvironmentHandler environmentHandler = new EnvironmentHandler();
    private FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(PlannerTools.createDefaultFootPolygons(),
-                                                                       new DefaultFootstepPlannerParameters(),
-                                                                       environmentHandler); // TODO
+                                                                       new DefaultFootstepPlannerParameters()); // TODO
 
    private final AtomicBoolean loadingLog = new AtomicBoolean();
    private final List<VariableDescriptor> variablesToChart = new ArrayList<>();
@@ -291,7 +288,7 @@ public class FootstepPlannerLogVisualizerController
                                                                                    List<Point2D> footPoints = defaultContactPoints.get(side);
                                                                                    return new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(footPoints));
                                                                                 });
-      snapper = new FootstepSnapAndWiggler(footPolygons, new DefaultFootstepPlannerParameters(), environmentHandler);
+      snapper = new FootstepSnapAndWiggler(footPolygons, new DefaultFootstepPlannerParameters());
    }
 
    public void loadLog(LoadRequestType loadRequestType)
@@ -416,7 +413,7 @@ public class FootstepPlannerLogVisualizerController
       this.iterationDataList = iterationData;
       this.edgeDataMap = edgeDataMap;
       this.variableDescriptors = variableDescriptors;
-      environmentHandler.setTerrainMapData(terrainMapData);
+      snapper.setTerrainMapData(terrainMapData);
 
       parentNodeStack.clear();
       selectedRow.set(null);

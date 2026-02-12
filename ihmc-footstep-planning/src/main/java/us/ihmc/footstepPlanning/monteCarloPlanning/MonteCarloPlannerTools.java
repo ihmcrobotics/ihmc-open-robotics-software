@@ -20,11 +20,10 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D32;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
-import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -327,8 +326,6 @@ public class MonteCarloPlannerTools
       LogTools.info("Optimal Path Size: {}", path.size());
 
       HeightMapPolygonSnapper heightMapSnapper = new HeightMapPolygonSnapper();
-      EnvironmentHandler environmentHandler = new EnvironmentHandler();
-      environmentHandler.setTerrainMapData(request.getEnvironmentHandler().getTerrainMapData());
 
       FootstepPlan footstepPlan = new FootstepPlan();
       for (MonteCarloTreeNode node : path)
@@ -337,14 +334,14 @@ public class MonteCarloPlannerTools
 
          float nodeX = (float) (footstepNode.getState().getX32() / parameters.getNodesPerMeter());
          float nodeY = (float) (footstepNode.getState().getY32() / parameters.getNodesPerMeter());
-         float nodeZ = (float) request.getEnvironmentHandler().getTerrainMapData().getHeight(nodeX, nodeY);
+         float nodeZ = (float) request.getTerrainMapData().getHeight(nodeX, nodeY);
          float nodeYaw = footstepNode.getState().getZ32();
 
          ConvexPolygon2D footPolygon = PlannerTools.createFootPolygon(0.25, 0.12, 0.08);
          FramePose3D footstepPose = getFramePose3D(nodeX, nodeY, nodeZ, nodeYaw);
          footPolygon.applyTransform(footstepPose);
 
-         MonteCarloPlannerTools.snapFootPoseToHeightMap(environmentHandler, footstepPose, heightMapSnapper, request.getEnvironmentHandler().getTerrainMapData(), footPolygons.get(footstepNode.getRobotSide()));
+         MonteCarloPlannerTools.snapFootPoseToHeightMap(request.getTerrainMapData(), footstepPose, heightMapSnapper, footPolygons.get(footstepNode.getRobotSide()));
          footstepPlan.addFootstep(footstepNode.getRobotSide(), footstepPose);
 
          LogTools.debug("Footstep Node -> Position: {}, Yaw: {}", footstepPose.getPosition(), footstepPose.getYaw());
@@ -352,11 +349,11 @@ public class MonteCarloPlannerTools
       return footstepPlan;
    }
 
-   public static void snapFootPoseToHeightMap(EnvironmentHandler environmentHandler, FramePose3D poseToSnap, HeightMapPolygonSnapper snapper, TerrainMapData terrainMapData, ConvexPolygon2D footPolygon)
+   public static void snapFootPoseToHeightMap(TerrainMapData terrainMapData, FramePose3D poseToSnap, HeightMapPolygonSnapper snapper, ConvexPolygon2D footPolygon)
    {
       ConvexPolygon2D footPolygonInWorld = new ConvexPolygon2D(footPolygon);
       footPolygonInWorld.applyTransform(poseToSnap);
-      RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(footPolygonInWorld, environmentHandler);
+      RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(footPolygonInWorld, terrainMapData);
 
       double minTraversability = 0.2;
       if (snapTransform != null && (terrainMapData.getTraversabilityScore(footPolygonInWorld.getCentroid().getX(), footPolygonInWorld.getCentroid().getY()) > minTraversability))
@@ -510,7 +507,7 @@ public class MonteCarloPlannerTools
 
       double goalReward = parameters.getGoalReward() * progressToGoal;
 
-      double contactValue = request.getEnvironmentHandler().getTerrainMapData().getTraversabilityScore(currentPosition.getX32(), currentPosition.getY32());
+      double contactValue = request.getTerrainMapData().getTraversabilityScore(currentPosition.getX32(), currentPosition.getY32());
       contactValue = MathTools.clamp(contactValue, parameters.getMinimumContactValue(), parameters.getMaximumContactValue());
       contactValue /= parameters.getMaximumContactValue();
       double contactReward = (contactValue) * parameters.getFeasibleContactReward();

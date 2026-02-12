@@ -6,14 +6,13 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
-import us.ihmc.perception.gpuMapping.TerrainMapMessageTools;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
+import us.ihmc.perception.gpuMapping.HeightMapData;
 import us.ihmc.perception.gpuMapping.TerrainMapData;
+import us.ihmc.perception.gpuMapping.TerrainMapMessageTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.perception.gpuMapping.HeightMapData;
 
 import java.util.ArrayList;
 
@@ -97,7 +96,7 @@ public class FootstepPlannerRequest
    /**
     * Holds the data for the {@link HeightMapData} and the {@link TerrainMapData}
     */
-   private final EnvironmentHandler environmentHandler = new EnvironmentHandler();
+   private TerrainMapData terrainMapData = null;
 
    /**
     * If true, will ignore planar regions and plan on flat ground.
@@ -147,7 +146,7 @@ public class FootstepPlannerRequest
       timeout = 5.0;
       maximumIterations = -1;
       horizonLength = Double.MAX_VALUE;
-      environmentHandler.clear();
+      terrainMapData = null;
       assumeFlatGround = false;
       bodyPathWaypoints.clear();
       statusPublishPeriod = 1.0;
@@ -272,7 +271,7 @@ public class FootstepPlannerRequest
 
    public void setTerrainMapData(TerrainMapData terrainMapData)
    {
-      environmentHandler.setTerrainMapData(terrainMapData);
+      this.terrainMapData = terrainMapData;
    }
 
    public void setAssumeFlatGround(boolean assumeFlatGround)
@@ -373,14 +372,14 @@ public class FootstepPlannerRequest
       return horizonLength;
    }
 
-   public EnvironmentHandler getEnvironmentHandler()
+   public TerrainMapData getTerrainMapData()
    {
-      return environmentHandler;
+      return terrainMapData;
    }
 
    public boolean isHeightMapAvailable()
    {
-      return getEnvironmentHandler().getTerrainMapData() != null;
+      return terrainMapData != null;
    }
 
    public boolean getAssumeFlatGround()
@@ -488,10 +487,10 @@ public class FootstepPlannerRequest
          requestPacket.getBodyPathWaypoints().add().set(bodyPathWaypoints.get(i));
       }
 
-      if (getEnvironmentHandler().getTerrainMapData() != null)
+      if (terrainMapData != null)
       {
          TerrainMapMessage terrainMapMessage = new TerrainMapMessage();
-         TerrainMapMessageTools.toMessage(getEnvironmentHandler().getTerrainMapData(), terrainMapMessage);
+         TerrainMapMessageTools.toMessage(terrainMapData, terrainMapMessage);
          requestPacket.getTerrainMapMessage().set(terrainMapMessage);
       }
 
@@ -527,20 +526,12 @@ public class FootstepPlannerRequest
       this.assumeFlatGround = other.assumeFlatGround;
       this.statusPublishPeriod = other.statusPublishPeriod;
       this.swingPlannerType = other.swingPlannerType;
+      this.terrainMapData = other.terrainMapData == null ? null : new TerrainMapData(other.terrainMapData);
 
       for (int i = 0; i < other.bodyPathWaypoints.size(); i++)
       {
          this.bodyPathWaypoints.add(new Pose3D(other.bodyPathWaypoints.get(i)));
       }
-
-      if (other.getEnvironmentHandler().getTerrainMapData() != null)
-         environmentHandler.setTerrainMapData(new TerrainMapData(other.getEnvironmentHandler().getTerrainMapData()));
-
-      if (other.environmentHandler.getTerrainMapData() != null)
-         environmentHandler.setTerrainMapData(other.getEnvironmentHandler().getTerrainMapData());
-      else if (other.getEnvironmentHandler().getTerrainMapData() != null)
-         environmentHandler.setTerrainMapData(new TerrainMapData(other.getEnvironmentHandler().getTerrainMapData()));
-
       if (other.referencePlan != null)
          this.referencePlan = new FootstepPlan(other.referencePlan);
    }

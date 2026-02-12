@@ -6,7 +6,6 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
@@ -48,9 +47,8 @@ public class RDXFootstepChecker
       this.syncedRobot = syncedRobot;
       this.controllerStatusTracker = controllerStatusTracker;
       baseUI.getPrimary3DPanel().addImGuiOverlayAddition(this::renderTooltips);
-      EnvironmentHandler environmentHandler = new EnvironmentHandler();
       tooltip = new RDX3DPanelTooltip(baseUI.getPrimary3DPanel());
-      snapper = new FootstepSnapAndWiggler(footPolygons, footstepPlannerParameters, environmentHandler);
+      snapper = new FootstepSnapAndWiggler(footPolygons, footstepPlannerParameters);
       stepChecker = new FootstepPoseHeuristicChecker(footstepPlannerParameters, snapper, registry);
    }
 

@@ -86,9 +86,9 @@ public class TerrainPlanningDebugger
          return;
 
       this.request = request;
-      this.offsetX = (int) (request.getEnvironmentHandler().getTerrainMapData().getGridCenterX() * parameters.getNodesPerMeter());
-      this.offsetY = (int) (request.getEnvironmentHandler().getTerrainMapData().getGridCenterY() * parameters.getNodesPerMeter());
-      refresh(request.getEnvironmentHandler().getTerrainMapData());
+      this.offsetX = (int) (request.getTerrainMapData().getGridCenterX() * parameters.getNodesPerMeter());
+      this.offsetY = (int) (request.getTerrainMapData().getGridCenterY() * parameters.getNodesPerMeter());
+      refresh(request.getTerrainMapData());
    }
 
    public void refresh(TerrainMapData terrainMapData)
@@ -96,8 +96,8 @@ public class TerrainPlanningDebugger
       if (!enabled)
          return;
 
-      this.offsetX = (int) (request.getEnvironmentHandler().getTerrainMapData().getGridCenterX() * parameters.getNodesPerMeter());
-      this.offsetY = (int) (request.getEnvironmentHandler().getTerrainMapData().getGridCenterY() * parameters.getNodesPerMeter());
+      this.offsetX = (int) (request.getTerrainMapData().getGridCenterX() * parameters.getNodesPerMeter());
+      this.offsetY = (int) (request.getTerrainMapData().getGridCenterY() * parameters.getNodesPerMeter());
 
       //TODO this is hella broken
 //      PerceptionDebugTools.convertDepthCopyToColor(terrainMapData.getHeightMap().clone(), heightMapColorImage);

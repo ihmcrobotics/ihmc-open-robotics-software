@@ -605,7 +605,7 @@ public class SwingOverHeightMapTest
       };
       swingPlannerParameters.set(originalSwingPlannerParameters);
 
-      TerrainMapData terrainMapData = request.getEnvironmentHandler().getTerrainMapData();
+      TerrainMapData terrainMapData = request.getTerrainMapData();
 
       for (double time = 0.0; time <= 1.0; time += dt)
       {

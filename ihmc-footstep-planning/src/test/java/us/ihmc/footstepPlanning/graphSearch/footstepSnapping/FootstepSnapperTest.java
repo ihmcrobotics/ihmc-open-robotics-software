@@ -2,7 +2,6 @@ package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.PlanarRegionToHeightMapConverter;
@@ -28,8 +27,7 @@ public class FootstepSnapperTest
    @Test
    public void testFootstepCacheing()
    {
-      EnvironmentHandler environmentHandler = new EnvironmentHandler();
-      TestSnapper testSnapper = new TestSnapper(environmentHandler);
+      TestSnapper testSnapper = new TestSnapper();
       PlanarRegionsList planarRegionsList = PlanarRegionsList.flatGround(1.0);
       // Applying this transform is necessary to make the height map get populated. Otherwise, the height map is left with unoccupied cells, as it's at zero
       // height which is equivalent to the groun dheight.
@@ -38,7 +36,7 @@ public class FootstepSnapperTest
       planarRegionsList.getPlanarRegion(0).applyTransform(transform);
       TerrainMapData terrainMapData = TerrainMapMessageTools.unpackMessage(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(
             planarRegionsList));
-      environmentHandler.setTerrainMapData(terrainMapData);
+      testSnapper.setTerrainMapData(terrainMapData);
 
       for (int i = 0; i < xIndices.length; i++)
       {
@@ -67,8 +65,7 @@ public class FootstepSnapperTest
    @Test
    public void testWithoutPlanarRegions()
    {
-      EnvironmentHandler environmentHandler = new EnvironmentHandler();
-      TestSnapper testSnapper = new TestSnapper(environmentHandler);
+      TestSnapper testSnapper = new TestSnapper();
 
       for (int i = 0; i < xIndices.length; i++)
       {
@@ -92,9 +89,9 @@ public class FootstepSnapperTest
    {
       boolean dirtyBit = false;
 
-      public TestSnapper(EnvironmentHandler environmentHandler)
+      public TestSnapper()
       {
-         super(PlannerTools.createDefaultFootPolygons(), new DefaultFootstepPlannerParameters(), environmentHandler);
+         super(PlannerTools.createDefaultFootPolygons(), new DefaultFootstepPlannerParameters());
       }
 
       @Override

@@ -6,10 +6,10 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.perception.gpuMapping.HeightMapData;
 
@@ -57,9 +57,8 @@ public class CliffHeightMapCostExampleCode
 
       ConvexPolygon2D candidateFootPolygon = new ConvexPolygon2D();
       DiscreteFootstepTools.getFootPolygon(footstep, footPolygon, candidateFootPolygon);
-      EnvironmentHandler environmentHandler = new EnvironmentHandler();
 
-      RigidBodyTransform snapTransform = heightMapSnapper.snapPolygonToHeightMap(candidateFootPolygon, environmentHandler);
+      RigidBodyTransform snapTransform = heightMapSnapper.snapPolygonToHeightMap(candidateFootPolygon, new TerrainMapData());
       System.out.println("snap transform");
       System.out.println(snapTransform);
 
