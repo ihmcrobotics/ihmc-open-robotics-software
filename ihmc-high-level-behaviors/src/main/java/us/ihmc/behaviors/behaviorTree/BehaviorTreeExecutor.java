@@ -40,7 +40,7 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeRootNodeExecu
             new WorkspaceResourceDirectory(BehaviorTreeExecutor.class, "/behaviorTrees"),
             new BehaviorTreeExecutorNodeBuilder());
 
-      controllerStatusTracker = new ControllerStatusTracker(new LogToolsLogger(), ros2ControllerHelper.getROS2Node(), robotModel.getSimpleRobotName());
+      controllerStatusTracker = new ControllerStatusTracker(new LogToolsLogger(), ros2ControllerHelper.getROS2Node(), syncedRobot);
       for (RobotSide robotSide : RobotSide.values)
          abilityHandComms.put(robotSide, new AbilityHandActionComms(robotSide, ros2ControllerHelper.getROS2Node()));
       scene = new BehaviorTreeSceneExecutor(crdtInfo, this::getAndIncrementNextID, syncedRobot, imageSensor, yolo, foundationPose, terrainMapData);

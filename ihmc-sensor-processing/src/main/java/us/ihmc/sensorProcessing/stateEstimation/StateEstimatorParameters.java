@@ -9,7 +9,7 @@ import us.ihmc.commons.UnitConversions;
 
 public abstract class StateEstimatorParameters implements SensorProcessingConfiguration
 {
-   public static final double ROBOT_CONFIGURATION_DATA_PUBLISH_DT = UnitConversions.hertzToSeconds(120.0);
+   public static final double ROBOT_CONFIGURATION_DATA_PUBLISH_DT = UnitConversions.hertzToSeconds(50.0);
 
    @Override
    public abstract double getEstimatorDT();

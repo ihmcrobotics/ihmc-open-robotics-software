@@ -7,9 +7,9 @@ import controller_msgs.msg.dds.PlanOffsetStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.Throttler;
-import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
@@ -48,14 +48,16 @@ public class ControllerStatusTracker
    private final List<Notification> abortedListeners = new ArrayList<>();
    private CapturabilityBasedStatus latestCapturabilityBasedStatus;
 
-   public ControllerStatusTracker(LogToolsWriteOnly statusLogger, ROS2Node ros2Node, String robotName)
+   public ControllerStatusTracker(LogToolsWriteOnly statusLogger, ROS2Node ros2Node, ROS2SyncedRobotModel robotModel)
    {
       this.statusLogger = statusLogger;
+
+      String robotName = robotModel.getRobotModel().getSimpleRobotName();
       footstepTracker = new WalkingFootstepTracker(ros2Node, robotName);
 
       finishedWalkingNotification.set();
 
-      ros2Node.createSubscription2(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName), this::acceptRobotConfigurationData);
+      robotModel.addRobotConfigurationDataReceivedCallback(this::acceptRobotConfigurationData);
       ros2Node.createSubscription2(getTopic(HighLevelStateChangeStatusMessage.class, robotName), this::acceptHighLevelStateChangeStatusMessage);
       ros2Node.createSubscription2(getTopic(WalkingControllerFailureStatusMessage.class, robotName), this::acceptWalkingControllerFailureStatusMessage);
       ros2Node.createSubscription2(getTopic(PlanOffsetStatus.class, robotName), this::acceptPlanOffsetStatus);
@@ -198,7 +200,7 @@ public class ControllerStatusTracker
          }
       }
    }
-   
+
    public void addNotWalkingStateAnymoreCallback(Runnable callback)
    {
       notWalkingStateAnymoreCallbacks.add(callback);
