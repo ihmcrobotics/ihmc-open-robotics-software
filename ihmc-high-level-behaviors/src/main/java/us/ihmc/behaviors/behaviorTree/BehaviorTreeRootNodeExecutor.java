@@ -130,10 +130,10 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
          for (FallbackNodeExecutor fallbackNode : fallbackNodes)
             if (fallbackNode.tryLeafIsBlocking(leafToExecute))
                break executionLoop;
-         // Break if anything earlier than effective after execute is still going
-         for (int i = effectiveExecuteAfterLeafIndex(leafToExecute); i >= 0; i--)
-            if (state.getOrderedLeaves().get(i).getIsExecuting())
-               break executionLoop;
+         // Break if the action to execute after is still executing
+         int after = effectiveExecuteAfterLeafIndex(leafToExecute);
+         if (after >= 0 && orderedLeaves.get(after).getState().getIsExecuting())
+            break;
 
          leafToExecute.update(); // Make sure can execute is up to date
          if (leafToExecute.getState().getCanExecute())
@@ -213,9 +213,6 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
          return i - 1;
 
       int after = leaf.getState().getExecuteAfterLeafIndex();
-
-      for (int j = after + 1; j < i; j++) // Might have to wait on nearer leaves
-         after = Math.max(after, state.getOrderedLeaves().get(j).getExecuteAfterLeafIndex());
 
       for (FallbackNodeExecutor fallbackNode : fallbackNodes) // catch group can't execute with anything above catch
          if (fallbackNode.getCatchLeaves().contains(leaf))
