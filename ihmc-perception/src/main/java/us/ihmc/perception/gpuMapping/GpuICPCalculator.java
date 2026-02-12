@@ -5,9 +5,11 @@ import org.bytedeco.cuda.cudart.dim3;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencv.opencv_core.GpuMat;
+import org.bytedeco.opencv.opencv_core.Mat;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.cuda.CUDAKernel;
@@ -15,6 +17,7 @@ import us.ihmc.perception.cuda.CUDAProgram;
 import us.ihmc.perception.cuda.CUDAStreamManager;
 import us.ihmc.perception.cuda.CUDATools;
 import us.ihmc.perception.gpuMapping.HeightMapTools.FlattenedHeightMap;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 
 import java.net.URL;
 
@@ -35,6 +38,13 @@ public class GpuICPCalculator
 
    private final DMatrixRMaj totalAccumulatedErrorTransform;
    private final DMatrixRMaj latestPointCloudErrorTransform;
+   private final int localCenterIndex;
+   private final int localCellsPerAxis;
+   private final int globalCenterIndex;
+   private final int globalCellsPerAxis;
+
+   private final FloatPointer parametersHostPointer;
+   private final FloatPointer parametersDevicePointer;
 
    public GpuICPCalculator(HeightMapParameters heightMapParameters)
    {
@@ -49,17 +59,25 @@ public class GpuICPCalculator
       totalAccumulatedErrorTransform = CommonOps_DDRM.identity(4);
       latestPointCloudErrorTransform = CommonOps_DDRM.identity(4);
 
+      localCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getCellSize());
+      localCellsPerAxis = 2 * localCenterIndex + 1;
+      globalCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getGlobalWidthInMeters(), heightMapParameters.getCellSize());
+      globalCellsPerAxis = 2 * globalCenterIndex + 1;
+
       try
       {
          heightMapICPProgram = new CUDAProgram(kernelPath, heightMapUtilsHeaderPath, mathUtilsHeaderPath);
 
-         nearestNeighborsKernel = heightMapICPProgram.loadKernel("findNearestNeighborsKernel");
+         nearestNeighborsKernel = heightMapICPProgram.loadKernel("v2");
          transformPointsKernel = heightMapICPProgram.loadKernel("transformPointsKernel");
 
          nearestNeighborsKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
          transformPointsKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
 
-         blockSize = new dim3(BLOCK_SIZE_XY, 1, 1);
+         parametersHostPointer = new FloatPointer(6);
+         parametersDevicePointer = new FloatPointer();
+
+         blockSize = new dim3(BLOCK_SIZE_XY, BLOCK_SIZE_XY, 1);
       }
       catch (Exception e)
       {
@@ -69,141 +87,180 @@ public class GpuICPCalculator
 
    public void computeICPErrorTransform(GpuMat localMap,
                                         GpuMat globalMap,
-                                        Point3DReadOnly localMapCenter,
-                                        Point3DReadOnly globalMapCenter,
-                                        int localCenterIndex,
-                                        int globalCenterIndex,
-                                        RigidBodyTransform transformLocalToGlobalFromOdometry)
+                                        Point3D localMapCenter,
+                                        Point3D globalMapCenter,
+                                        FloatPointer transformLocalToGlobalFromOdometry)
    {
 
-      RigidBodyTransform correctedGlobalTransform = new RigidBodyTransform();
-      correctedGlobalTransform.set(totalAccumulatedErrorTransform);
-      correctedGlobalTransform.multiply(transformLocalToGlobalFromOdometry);
+//      RigidBodyTransform correctedGlobalTransform = new RigidBodyTransform();
+//      correctedGlobalTransform.set(totalAccumulatedErrorTransform);
+//      correctedGlobalTransform.multiply(transformLocalToGlobalFromOdometry);
 
-      double correctedX = correctedGlobalTransform.getTranslationX();
-      double correctedY = correctedGlobalTransform.getTranslationY();
-      double correctedZ = correctedGlobalTransform.getTranslationZ();
+//      double correctedX = correctedGlobalTransform.getTranslationX();
+//      double correctedY = correctedGlobalTransform.getTranslationY();
+//      double correctedZ = correctedGlobalTransform.getTranslationZ();
 
       // TODO need to use the total accumulated error transform rather then just the odometry
-      FlattenedHeightMap flattenedLocalMap = HeightMapTools.flattenHeightMapToXYZ(localMap,
-                                                                                  transformLocalToGlobalFromOdometry.getTranslationX(),
-                                                                                  transformLocalToGlobalFromOdometry.getTranslationY(),
-                                                                                  transformLocalToGlobalFromOdometry.getTranslationZ(),
-                                                                                  localCenterIndex,
-                                                                                  (float) heightMapParameters.getCellSize(),
-                                                                                  0.0f);
-      FlattenedHeightMap flattenedGlobalMap = HeightMapTools.flattenHeightMapToXYZ(globalMap,
-                                                                                   globalMapCenter.getX32(),
-                                                                                   globalMapCenter.getY32(),
-                                                                                   globalMapCenter.getZ32(),
-                                                                                   globalCenterIndex,
-                                                                                   (float) heightMapParameters.getCellSize(),
-                                                                                   0.0f);
+//      FlattenedHeightMap flattenedLocalMap = HeightMapTools.flattenHeightMapToXYZ(localMap,
+//                                                                                  transformLocalToGlobalFromOdometry.getTranslationX(),
+//                                                                                  transformLocalToGlobalFromOdometry.getTranslationY(),
+//                                                                                  transformLocalToGlobalFromOdometry.getTranslationZ(),
+//                                                                                  localCenterIndex,
+//                                                                                  (float) heightMapParameters.getCellSize(),
+//                                                                                  0.0f);
+//      FlattenedHeightMap flattenedGlobalMap = HeightMapTools.flattenHeightMapToXYZ(globalMap,
+//                                                                                   globalMapCenter.getX32(),
+//                                                                                   globalMapCenter.getY32(),
+//                                                                                   globalMapCenter.getZ32(),
+//                                                                                   globalCenterIndex,
+//                                                                                   (float) heightMapParameters.getCellSize(),
+//                                                                                   0.0f);
 
-      if (flattenedLocalMap.pointCount() == 0 || flattenedGlobalMap.pointCount() == 0)
-         return;
+//      if (flattenedLocalMap.pointCount() == 0 || flattenedGlobalMap.pointCount() == 0)
+//         return;
 
-      computeICPFromPointClouds(flattenedLocalMap.data(), flattenedLocalMap.pointCount(), flattenedGlobalMap.data(), flattenedGlobalMap.pointCount());
+      computeICPFromPointClouds(localMap, globalMap, localMapCenter, globalMapCenter, transformLocalToGlobalFromOdometry);
 
-      flattenedLocalMap.data().close();
-      flattenedGlobalMap.data().close();
+//      computeICPFromPointClouds(flattenedLocalMap.data(), flattenedLocalMap.pointCount(), flattenedGlobalMap.data(), flattenedGlobalMap.pointCount());
+
+//      flattenedLocalMap.data().close();
+//      flattenedGlobalMap.data().close();
    }
 
-   public void computeICPFromPointClouds(FloatPointer cpuLocalDataPointer, int localPoints, FloatPointer cpuGlobalDataPointer, int globalPoints)
+   public void computeICPFromPointClouds(GpuMat localMap, GpuMat globalMap, Point3D localCenter, Point3D globalCenter, FloatPointer localToGlobalTransform)
    {
-      int localFloats = localPoints * 3;
-      int globalFloats = globalPoints * 3;
-
-      FloatPointer gpuLocalDataPointer = new FloatPointer();
-      FloatPointer gpuGlobalDataPointer = new FloatPointer();
-
-      CUDATools.mallocAsync(gpuLocalDataPointer, cpuLocalDataPointer.limit(), stream);
-      CUDATools.memcpyAsync(gpuLocalDataPointer, cpuLocalDataPointer, cpuLocalDataPointer.limit(), stream);
-
-      CUDATools.mallocAsync(gpuGlobalDataPointer, cpuGlobalDataPointer.limit(), stream);
-      CUDATools.memcpyAsync(gpuGlobalDataPointer, cpuGlobalDataPointer, cpuGlobalDataPointer.limit(), stream);
-
-      // Allocate result buffers on GPU
-      IntPointer gpuCorrespondences = new IntPointer();
-      FloatPointer gpuDistances = new FloatPointer();
-
-      // Allocate CPU buffers for downloading data
-      FloatPointer cpuLocalTransformed = new FloatPointer(localFloats);
-      IntPointer cpuCorrespondences = new IntPointer(localPoints);
-      FloatPointer cpuDistances = new FloatPointer(localPoints);
-
-      CUDATools.mallocAsync(gpuCorrespondences, localPoints, stream);
-      CUDATools.mallocAsync(gpuDistances, localPoints, stream);
-
+//      Mat what = new Mat();
+//      globalMap.download(what);
+//      PerceptionDebugTools.printMat("s", what, 10);
       double translationThreshold = heightMapParameters.getIcpConvergence();
+      float xCorrectedDrift = 0.0f;
+      float yCorrectedDrift = 0.0f;
+      float zCorrectedDrift = 0.0f;
 
       // Start with an Identity matrix (no movement)
       latestPointCloudErrorTransform.set(CommonOps_DDRM.identity(4));
 
-      int gridSize = (localPoints + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
-      dim3 gridDim = new dim3(gridSize, 1, 1);
+      float[] parametersArray = populateParameterArray(heightMapParameters);
+      parametersHostPointer.put(parametersArray);
+      CUDATools.mallocAsync(parametersDevicePointer, parametersArray.length, stream);
+      CUDATools.memcpyAsync(parametersDevicePointer, parametersHostPointer, parametersArray.length, stream);
+
+      IntPointer gpuLocalKeys = new IntPointer();
+      IntPointer gpuGlobalKeys = new IntPointer();
+      CUDATools.mallocAsync(gpuLocalKeys, (long) localCellsPerAxis * localCellsPerAxis, stream);
+      CUDATools.mallocAsync(gpuGlobalKeys, (long) localCellsPerAxis * localCellsPerAxis, stream);
+
+      FloatPointer gpuDistances = new FloatPointer();
+      CUDATools.mallocAsync(gpuDistances, (long) localCellsPerAxis * localCellsPerAxis, stream);
+
+      IntPointer gpuValidCounter = new IntPointer();
+      CUDATools.mallocAsync(gpuValidCounter, 1, stream);
+
+      int gridSize = (localCellsPerAxis + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
+      dim3 gridDim = new dim3(gridSize, gridSize, 1);
+
+      float[] transformHostArray = new float[16];
+      FloatPointer transformHostPointer = new FloatPointer(transformHostArray);
+      DMatrixRMaj currentTransform = new DMatrixRMaj(4, 4);
+      DMatrixRMaj updatedTransform = new DMatrixRMaj(4, 4);
+
+      int error = cudaStreamSynchronize(stream);
+      CUDATools.checkCUDAError(error);
 
       for (int i = 0; i < heightMapParameters.getIcpMaxIterations(); i++)
       {
-         // Use the GPU pointers we made earlier
-         nearestNeighborsKernel.withPointer(gpuLocalDataPointer);
-         nearestNeighborsKernel.withPointer(gpuGlobalDataPointer);
-         nearestNeighborsKernel.withPointer(gpuCorrespondences);
-         nearestNeighborsKernel.withPointer(gpuDistances);
+         cudaMemsetAsync(gpuValidCounter, 0, Integer.BYTES, stream);
 
-         // Note: Pass the number of points, not the number of floats
-         nearestNeighborsKernel.withInt(localPoints);
-         nearestNeighborsKernel.withInt(globalPoints);
+         nearestNeighborsKernel.withPointer(localMap.data()).withLong(localMap.step());
+         nearestNeighborsKernel.withPointer(globalMap.data()).withLong(globalMap.step());
+         nearestNeighborsKernel.withPointer(gpuLocalKeys);
+         nearestNeighborsKernel.withPointer(gpuGlobalKeys);
+         nearestNeighborsKernel.withPointer(gpuDistances);
+         nearestNeighborsKernel.withPointer(gpuValidCounter);
+         nearestNeighborsKernel.withPointer(localToGlobalTransform);
+         nearestNeighborsKernel.withFloat(globalCenter.getX32());
+         nearestNeighborsKernel.withFloat(globalCenter.getY32());
+         nearestNeighborsKernel.withPointer(parametersDevicePointer);
+         nearestNeighborsKernel.withFloat(zCorrectedDrift);
 
          nearestNeighborsKernel.run(stream, gridDim, blockSize, 0);
 
-         int error = cudaStreamSynchronize(stream);
+         error = cudaStreamSynchronize(stream);
          CUDATools.checkCUDAError(error);
 
-         // Download data from GPU to CPU
-         CUDATools.memcpyAsync(cpuLocalTransformed, gpuLocalDataPointer, localFloats, stream);
-         CUDATools.memcpyAsync(cpuCorrespondences, gpuCorrespondences, localPoints, stream);
-         CUDATools.memcpyAsync(cpuDistances, gpuDistances, localPoints, stream);
+         IntPointer cpuValidCounter = new IntPointer(1);
+         CUDATools.memcpyAsync(cpuValidCounter, gpuValidCounter, 1, stream);
+         cudaStreamSynchronize(stream);
 
-         float maxDistance = (float) heightMapParameters.getIcpMaxDistance();
-         int validCount = 0;
+         IntPointer cpuLocalKeys = new IntPointer((long) localCellsPerAxis * localCellsPerAxis);
+         CUDATools.memcpyAsync(cpuLocalKeys, gpuLocalKeys, (long) localCellsPerAxis * localCellsPerAxis, stream);
+         IntPointer cpuGlobalKeys = new IntPointer((long) localCellsPerAxis * localCellsPerAxis);
+         CUDATools.memcpyAsync(cpuGlobalKeys, gpuGlobalKeys, (long) localCellsPerAxis * localCellsPerAxis, stream);
+         cudaStreamSynchronize(stream);
 
-         FloatPointer filteredLocal = new FloatPointer(localFloats);
-         IntPointer filteredCorrespondences = new IntPointer(localPoints);
+         // Number of valid correspondences
+         int validCount = cpuValidCounter.get(0);
 
-         // This loop is going through the local points, and filtered any data out that doesn't make sense
-         // The result is the filtered local data, and the filtered correspondence
-         for (int k = 0; k < localPoints; k++)
+         if (validCount <= 0)
          {
-            float d = cpuDistances.get(k);
-
-            if (d > maxDistance || Float.isNaN(d) || Float.isInfinite(d))
-               continue; // Reject correspondence
-
-            // Copy local point (XYZ)
-            int dstBase = validCount * 3;
-            int srcBase = k * 3;
-            filteredLocal.put(dstBase + 0, cpuLocalTransformed.get(srcBase + 0));
-            filteredLocal.put(dstBase + 1, cpuLocalTransformed.get(srcBase + 1));
-            filteredLocal.put(dstBase + 2, cpuLocalTransformed.get(srcBase + 2));
-
-            // Copy correspondence index
-            filteredCorrespondences.put(validCount, cpuCorrespondences.get(k));
-
-            validCount++;
+            System.out.println("No valid correspondences.");
+            return;
          }
 
-         if (validCount < 10)
-            break;
+         // Compute center indices from map dimensions
+         int localCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getCellSize());
 
-         // Compute transformation using SVD
-         DMatrixRMaj incrementalTransform = HeightMapTools.computeTransformSVD(filteredLocal, cpuGlobalDataPointer, filteredCorrespondences, validCount);
+         int globalCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getGlobalWidthInMeters(), heightMapParameters.getCellSize());
 
-         filteredLocal.close();
-         filteredCorrespondences.close();
+         double resolution = heightMapParameters.getCellSize();
+
+         // Allocate aligned point clouds (Nx3)
+         float[] localCloud = new float[validCount * 3];
+         float[] globalCloud = new float[validCount * 3];
+
+         Mat cpuLocalMap = new Mat();
+         localMap.download(cpuLocalMap);
+         Mat cpuGlobalMap = new Mat();
+         globalMap.download(cpuGlobalMap);
+         cudaStreamSynchronize(stream);
+
+//         PerceptionDebugTools.printMat("l", cpuLocalMap, 20);
+//         PerceptionDebugTools.printMat("g", cpuGlobalMap, 20);
+
+
+         for (int j = 0; j < validCount; j++)
+         {
+            int localKey = cpuLocalKeys.get(j);
+            int globalKey = cpuGlobalKeys.get(j);
+
+            double localX = HeightMapTools.keyToXCoordinate(localKey, 0.0, resolution, localCenterIndex);
+            double localY = HeightMapTools.keyToYCoordinate(localKey, 0.0, resolution, localCenterIndex);
+            double globalX = HeightMapTools.keyToXCoordinate(globalKey, globalCenter.getX(), resolution, globalCenterIndex);
+            double globalY = HeightMapTools.keyToYCoordinate(globalKey, globalCenter.getY(), resolution, globalCenterIndex);
+            float localZ = cpuLocalMap.data().getFloat((long) localKey * Float.BYTES);
+            float globalZ = cpuGlobalMap.data().getFloat((long) globalKey * Float.BYTES);
+
+            globalX -= xCorrectedDrift;
+            globalY -= yCorrectedDrift;
+            globalZ -= zCorrectedDrift;
+
+            int base = j * 3;
+
+            localCloud[base] = (float) localX;
+            localCloud[base + 1] = (float) localY;
+            localCloud[base + 2] = localZ;
+
+            globalCloud[base] = (float) globalX;
+            globalCloud[base + 1] = (float) globalY;
+            globalCloud[base + 2] = globalZ;
+         }
+
+         FloatPointer filteredLocal = new FloatPointer(localCloud);
+         FloatPointer filteredGlobal = new FloatPointer(globalCloud);
+         DMatrixRMaj incrementalTransform = HeightMapTools.computeTransformSVD(filteredLocal, filteredGlobal, validCount);
 
          // ALPHA FILTERING (e.g., take only 20% of the calculated move)
-         double alpha = heightMapParameters.getIcpAlphaFilter();
+         double alpha = 1.0;//heightMapParameters.getIcpAlphaFilter();
          incrementalTransform.set(0, 3, incrementalTransform.get(0, 3) * alpha); // dx
          incrementalTransform.set(1, 3, incrementalTransform.get(1, 3) * alpha); // dy
          incrementalTransform.set(2, 3, incrementalTransform.get(2, 3) * alpha); // dz
@@ -218,6 +275,11 @@ public class GpuICPCalculator
          double dz = incrementalTransform.get(2, 3);
          double moveDist = Math.sqrt(dx * dx + dy * dy + dz * dz);
 
+         xCorrectedDrift += (float) dx;
+         yCorrectedDrift += (float) dy;
+         zCorrectedDrift += (float) dz;
+
+
          System.out.println("Iteration " + i);
          System.out.println("  Valid correspondences: " + validCount);
          System.out.println("  Incremental dx: " + incrementalTransform.get(0, 3));
@@ -225,49 +287,49 @@ public class GpuICPCalculator
          System.out.println("  Incremental dz: " + incrementalTransform.get(2, 3));
          System.out.println("  Move distance: " + moveDist);
 
+         // -----------------------------
+         // Update localToGlobalTransform
+         // -----------------------------
+
+         // Copy current transform from GPU → CPU
+         CUDATools.memcpyAsync(transformHostPointer, localToGlobalTransform, 16, stream);
+         cudaStreamSynchronize(stream);
+         transformHostPointer.get(transformHostArray);
+
+         // Convert float[16] → DMatrixRMaj (row-major)
+         for (int r = 0; r < 4; r++)
+         {
+            for (int c = 0; c < 4; c++)
+            {
+               currentTransform.set(r, c, transformHostArray[r * 4 + c]);
+            }
+         }
+
+         // Compose: T_new = ΔT * T_old
+         CommonOps_DDRM.mult(incrementalTransform, currentTransform, updatedTransform);
+
+         // Convert back to float[16]
+         for (int r = 0; r < 4; r++)
+         {
+            for (int c = 0; c < 4; c++)
+            {
+               transformHostArray[r * 4 + c] = (float) updatedTransform.get(r, c);
+            }
+         }
+
+         // Copy updated transform CPU → GPU
+         transformHostPointer.put(transformHostArray);
+         CUDATools.memcpyAsync(localToGlobalTransform, transformHostPointer, 16, stream);
+         cudaStreamSynchronize(stream);
+
          if (moveDist < translationThreshold)
          {
             break; // Stop if we moved less then the threshold
          }
 
-         // Flatten and convert from Double to Float
-         // DMatrixRMaj stores data in a field called '.data'
-         float[] h_matrix = new float[16];
-         for (int j = 0; j < incrementalTransform.data.length; j++)
-         {
-            h_matrix[j] = (float) incrementalTransform.data[j];
-         }
-
-         // Wrap in a Host Pointer
-         FloatPointer hostMatrixPtr = new FloatPointer(h_matrix);
-         FloatPointer deviceMatrixPtr = new FloatPointer();
-         CUDATools.mallocAsync(deviceMatrixPtr, 16, stream);
-         CUDATools.memcpyAsync(deviceMatrixPtr, hostMatrixPtr, 16, stream);
-
-         // Update the Points on the GPU
-         int transformGridSize = (validCount + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
-         dim3 transformGridDim = new dim3(transformGridSize, 1, 1);
-
-         transformPointsKernel.withPointer(gpuLocalDataPointer);
-         transformPointsKernel.withPointer(deviceMatrixPtr);
-         transformPointsKernel.withInt(localPoints);
-
-         transformPointsKernel.run(stream, transformGridDim, blockSize, 0);
-
-         hostMatrixPtr.close();
-         deviceMatrixPtr.close();
-         cudaFreeAsync(deviceMatrixPtr, stream);
-
          CUDATools.checkCUDAError(error);
       }
 
-      cpuLocalTransformed.close();
-      cpuCorrespondences.close();
-      cpuDistances.close();
-
-      cudaFreeAsync(gpuLocalDataPointer, stream);
-      cudaFreeAsync(gpuGlobalDataPointer, stream);
-      cudaFreeAsync(gpuCorrespondences, stream);
       cudaFreeAsync(gpuDistances, stream);
 
       // Track the total drift we have accumulated while running ICP
@@ -317,6 +379,16 @@ public class GpuICPCalculator
       hostPointer.close();
    }
 
+   public float[] populateParameterArray(HeightMapParameters parameters)
+   {
+      return new float[] {(float) parameters.getCellSize(),
+                          (float) localCenterIndex,
+                          (float) globalCenterIndex,
+                          (float) localCellsPerAxis,
+                          (float) globalCellsPerAxis,
+                          (float) heightMapParameters.getIcpSearchRadius()};
+   }
+
    public void close()
    {
       nearestNeighborsKernel.close();
@@ -324,5 +396,10 @@ public class GpuICPCalculator
       blockSize.close();
       heightMapICPProgram.close();
       CUDAStreamManager.releaseStream(stream);
+   }
+
+   public CUstream_st getStream()
+   {
+      return stream;
    }
 }

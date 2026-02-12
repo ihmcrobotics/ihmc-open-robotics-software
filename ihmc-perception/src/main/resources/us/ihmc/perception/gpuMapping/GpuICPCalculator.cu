@@ -16,10 +16,11 @@ __global__ void v2(float *__restrict__ localMap, size_t pitchLocal,
                    int *__restrict__ globalKeys,
                    float* distances,
                    int* validCounter,
-                   const float *__restrict__ localToGlobalTransform,
+                   const float *localToGlobalTransform,
                    const float globalMapCenterX,
                    const float globalMapCenterY,
-                   const float *__restrict__ params)
+                   const float *__restrict__ params,
+                   const float zCorrectedDrift)
 {
     int lx = blockIdx.x * blockDim.x + threadIdx.x;
     int ly = blockIdx.y * blockDim.y + threadIdx.y;
@@ -32,10 +33,13 @@ __global__ void v2(float *__restrict__ localMap, size_t pitchLocal,
         return;
 
     // Doing (y, x) allows for coalesced memory access when going to global memory
-    int2 localCell = make_int2(ly, lx);
-    float *localMean = (float *)((char *)localMap + localCell.x * pitchLocal) + localCell.y;
+    int2 localCell = make_int2(lx, ly);
+    float *localMean = (float *)((char *)localMap + localCell.y * pitchLocal) + localCell.x;
     // Global memory access is asynchronous and takes a long time, tell the bus to go grab some memory
     float localMeanF = *localMean;
+
+    if (localMeanF == 0)
+        return;
 
     // While the global memory is being fetched, convert the local cell into the global cell so we can register the data
     float2 localCoordinate = indices_to_coordinate(localCell, make_float2(0.0f, 0.0f), params[CELL_SIZE], params[LOCAL_CENTER_INDEX]);
@@ -46,12 +50,7 @@ __global__ void v2(float *__restrict__ localMap, size_t pitchLocal,
     if (globalCell.x < 0 || globalCell.x >= globalCellsPerAxis || globalCell.y < 0 || globalCell.y >= globalCellsPerAxis)
         return;
 
-    // After trying to do as much work as possible in parallel to the global memory access. We ran out of stuff to do.
-    // Check the result of global memory for invalid data, and return if not valid
-    if (localMeanF == 0)
-        return;
-
-    int searchRadius = params[SEARCH_RADIUS];
+    int searchRadius = static_cast<int>(params[SEARCH_RADIUS]);
     int best_global_key = -1;
     float minimum_distance = 1e10f;
 
@@ -62,18 +61,18 @@ __global__ void v2(float *__restrict__ localMap, size_t pitchLocal,
             int searchX = globalCell.x + dx;
             int searchY = globalCell.y + dy;
 
-            if (searchX >= 0 && searchX < params[GLOBAL_CELLS_PER_AXIS] &&
-                searchY >= 0 && searchY < params[GLOBAL_CELLS_PER_AXIS])
+            if (searchX >= 0 && searchX < globalCellsPerAxis &&
+                searchY >= 0 && searchY < globalCellsPerAxis)
             {
                 float* globalRow = (float*)((char*)globalMap + searchY * pitchGlobal);
                 float globalHeight = globalRow[searchX];
                 float2 globalCellCoords = indices_to_coordinate(
                     make_int2(searchX, searchY),
-                    make_float2(localToGlobalTransform[3], localToGlobalTransform[7]),
+                    make_float2(globalMapCenterX, globalMapCenterY),
                     params[CELL_SIZE],
                     params[GLOBAL_CENTER_INDEX]);
 
-                float3 candidatePoint = make_float3(globalCellCoords.x, globalCellCoords.y, globalHeight);
+                float3 candidatePoint = make_float3(globalCellCoords.x, globalCellCoords.y, globalHeight + zCorrectedDrift);
 
                 float deltaX = pointInGlobalFrame.x - candidatePoint.x;
                 float deltaY = pointInGlobalFrame.y - candidatePoint.y;
@@ -86,7 +85,7 @@ __global__ void v2(float *__restrict__ localMap, size_t pitchLocal,
                     // Also note the index of this
                     minimum_distance = distance;
                     int globalCells = static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]);
-                    best_global_key = searchX * globalCells + searchY; // Using your indicesToKey logic
+                    best_global_key = searchY * globalCells + searchX; // Using your indicesToKey logic
                 }
             }
         }
@@ -98,7 +97,7 @@ __global__ void v2(float *__restrict__ localMap, size_t pitchLocal,
         int writeIndex = atomicAdd(validCounter, 1);
 
         int localCells = static_cast<int>(params[LOCAL_CELLS_PER_AXIS]);
-        localKeys[writeIndex] = lx * localCells + ly; // indicesToKey logic
+        localKeys[writeIndex] = ly * localCells + lx; // indicesToKey logic
         globalKeys[writeIndex] = best_global_key;
         distances[writeIndex] = sqrtf(minimum_distance);
     }

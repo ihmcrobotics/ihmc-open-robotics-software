@@ -326,24 +326,26 @@ public class HeightMapExtractor
 
       if (heightMapParameters.getICPFilter())
       {
+         long start = System.nanoTime();
          gpuICPCalculator.computeICPErrorTransform(localMeanMap,
                                                    globalMeanMap,
                                                    new Point3D(),
                                                    globalHeightMapCenter,
-                                                   localCenterIndex,
-                                                   globalCenterIndex,
-                                                   sensorToWorldNoRotation);
+                                                   sensorToWorldNoRotationDevice);
          correctedTransform = gpuICPCalculator.getLatestPointCloudErrorTransform();
+         long end = System.nanoTime();
+         double mills = (double) (end - start) / 1_000_000;
+         System.out.println(mills);
          //      LogTools.info(
          //            "gpuICPCalculator correctedTransform: " + correctedTransform.getX() + " " + correctedTransform.getY() + " " + correctedTransform.getZ());
          //      LogTools.info("Actual Transform: " + groundToWorldNoRotation.getTranslationX() + " " + groundToWorldNoRotation.getTranslationY() + " "
          //                    + groundToWorldNoRotation.getTranslationZ());
          //      LogTools.info("Global Center: " + globalHeightMapCenter.getX() + " " + globalHeightMapCenter.getY() + " " + globalHeightMapCenter.getZ(   ));
-         gpuICPCalculator.applyCorrectionToTransform(sensorToWorldNoRotationDevice,
-                                                     correctedTransform.getX(),
-                                                     correctedTransform.getY(),
-                                                     correctedTransform.getZ(),
-                                                     stream);
+//         gpuICPCalculator.applyCorrectionToTransform(sensorToWorldNoRotationDevice,
+//                                                     correctedTransform.getX(),
+//                                                     correctedTransform.getY(),
+//                                                     correctedTransform.getZ(),
+//                                                     stream);
       }
 
       // ---------- Run the registration kernel ----------

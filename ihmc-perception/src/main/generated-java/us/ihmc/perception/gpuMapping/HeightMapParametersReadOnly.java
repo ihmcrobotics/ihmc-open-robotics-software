@@ -109,4 +109,9 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
    {
       return get(icpAlphaFilter);
    }
+
+   default double getIcpSearchRadius()
+   {
+      return get(icpSearchRadius);
+   }
 }

@@ -107,4 +107,9 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
    {
       set(HeightMapParameters.icpAlphaFilter, icpAlphaFilter);
    }
+
+   default void setIcpSearchRadius(double icpSearchRadius)
+   {
+      set(HeightMapParameters.icpSearchRadius, icpSearchRadius);
+   }
 }

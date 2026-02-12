@@ -87,5 +87,10 @@
     "value" : 0.8,
     "lowerBound" : 0.01,
     "upperBound" : 1.0
+  },
+  "Icp search radius" : {
+    "value": 4.0,
+    "lowerBound" : 1.0,
+    "upperBound" : 100
   }
 }
