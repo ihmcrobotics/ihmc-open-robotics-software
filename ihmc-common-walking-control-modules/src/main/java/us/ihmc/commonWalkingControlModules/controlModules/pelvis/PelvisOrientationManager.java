@@ -49,7 +49,7 @@ public class PelvisOrientationManager implements SCS2YoGraphicHolder
 
       stateMachine = setupStateMachine(namePrefix, yoTime);
 
-      enableUserPelvisControlDuringWalking.set(false);
+      enableUserPelvisControlDuringWalking.set(true);
    }
 
    private StateMachine<PelvisOrientationControlMode, PelvisOrientationControlState> setupStateMachine(String namePrefix, DoubleProvider timeProvider)
