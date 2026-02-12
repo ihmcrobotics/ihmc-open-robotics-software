@@ -54,7 +54,8 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
    {
       state.setElapsedExecutionTime(timer.getElapsedTime());
 
-      if (definition.getSceneActionType().getValue() == SceneActionNodeType.FREEZE_OBJECT)
+      if (definition.getSceneActionType().getValue() == SceneActionNodeType.FREEZE_OBJECT
+       || definition.getSceneActionType().getValue() == SceneActionNodeType.DELETE_OBJECT)
       {
          BehaviorTreeSceneObjectState matchedObject = null;
          for (BehaviorTreeSceneObjectState object : scene.getObjects())
@@ -80,18 +81,29 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
          }
 
          if (matchedObject == null)
-            state.getLogger().error("Failed to find a suitable object to freeze: %s".formatted(definition.getSceneObjectDefinition().getName()));
+         {
+            if (definition.getSceneActionType().getValue() == SceneActionNodeType.FREEZE_OBJECT)
+               state.getLogger().error("Failed to find a suitable object to freeze: %s".formatted(definition.getSceneObjectDefinition().getName()));
+            else
+               state.getLogger().error("Failed to find a suitable object to delete: %s".formatted(definition.getSceneObjectDefinition().getName()));
+         }
          else
          {
-            state.getLogger().info("Freezing object: %s".formatted(matchedObject.getName()));
-            matchedObject.freeze();
+            if (definition.getSceneActionType().getValue() == SceneActionNodeType.FREEZE_OBJECT)
+            {
+               state.getLogger().info("Freezing object: %s".formatted(matchedObject.getName()));
+               matchedObject.freeze();
+            }
+            else
+            {
+               state.getLogger().info("Deleting object: %s".formatted(matchedObject.getName()));
+               scene.removeObject(matchedObject);
+            }
          }
          state.setFailed(matchedObject == null);
          state.setIsExecuting(false);
-
-         state.getLogger().info("Freezing object: %s".formatted(definition.getSceneObjectDefinition().getName()));
       }
-      else
+      else // Setup object
       {
          double timeout = definition.getTimeout();
          if (!timer.isRunning(timeout))
