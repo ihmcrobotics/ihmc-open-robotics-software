@@ -9,8 +9,6 @@ import us.ihmc.behaviors.behaviorTree.action.actions.AbilityHandActionComms;
 import us.ihmc.behaviors.behaviorTree.control.FallbackNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneExecutor;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
-import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
@@ -20,6 +18,7 @@ import java.util.List;
 public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<BehaviorTreeRootNodeState, BehaviorTreeRootNodeDefinition>
       implements BehaviorTreeRootNode<BehaviorTreeNodeExecutor<?, ?>>
 {
+   private final BehaviorTreeExecutor tree;
    private final List<LeafNodeExecutor<?, ?>> orderedLeaves = new ArrayList<>();
    private final List<ActionNodeExecutor<?, ?>> orderedActions = new ArrayList<>();
    private final List<FallbackNodeExecutor> fallbackNodes = new ArrayList<>();
@@ -28,7 +27,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
    private final List<LeafNodeExecutor<?, ?>> successfulLeaves = new ArrayList<>();
 
    public BehaviorTreeRootNodeExecutor(long id,
-                                       CRDTInfo crdtInfo,
+                                       BehaviorTreeExecutor tree,
                                        WorkspaceResourceDirectory saveFileDirectory,
                                        ROS2ControllerHelper ros2ControllerHelper,
                                        ROS2SyncedRobotModel syncedRobot,
@@ -36,12 +35,14 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
                                        SideDependentList<AbilityHandActionComms> abilityHandComms,
                                        BehaviorTreeSceneExecutor scene)
    {
-      super(new BehaviorTreeRootNodeState(id, crdtInfo, saveFileDirectory, syncedRobot.getRobotModel(), scene),
+      super(new BehaviorTreeRootNodeState(id, tree.getCRDTInfo(), saveFileDirectory, syncedRobot.getRobotModel(), scene),
             ros2ControllerHelper,
             syncedRobot,
             controllerStatusTracker,
             abilityHandComms,
             scene);
+
+      this.tree = tree;
    }
 
    @Override
@@ -254,6 +255,11 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
    }
 
    // Getters are in here so there's not getters in base node for root stuff
+
+   public BehaviorTreeExecutor getTree()
+   {
+      return tree;
+   }
 
    public ROS2ControllerHelper getRos2ControllerHelper()
    {

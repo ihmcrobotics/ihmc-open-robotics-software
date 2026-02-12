@@ -46,7 +46,7 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeRootNodeExecu
       scene = new BehaviorTreeSceneExecutor(crdtInfo, this::getAndIncrementNextID, syncedRobot, imageSensor, yolo, foundationPose, terrainMapData);
       setScene(scene);
 
-      ((BehaviorTreeExecutorNodeBuilder) getNodeBuilder()).initialize(crdtInfo,
+      ((BehaviorTreeExecutorNodeBuilder) getNodeBuilder()).initialize(this,
                                                                       saveFileDirectory,
                                                                       ros2ControllerHelper,
                                                                       syncedRobot,
@@ -95,7 +95,7 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeRootNodeExecu
       {
          modifyTreeTopology(topologyOperationQueue ->
          {
-            if (this.rootNode == null)
+            if (rootNode == null)
                topologyOperationQueue.queueDestroyEntireTree();
 
             BehaviorTreeRootNodeExecutor rootNode = (BehaviorTreeRootNodeExecutor) getNodeBuilder().createRootNode(getAndIncrementNextID());

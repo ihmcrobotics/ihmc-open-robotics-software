@@ -4,17 +4,15 @@ import behavior_msgs.msg.dds.AI2RActionFailureMessage;
 import behavior_msgs.msg.dds.AI2RObjectMessage;
 import behavior_msgs.msg.dds.AI2RStatusMessage;
 import controller_msgs.msg.dds.AbortWalkingMessage;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
+import us.ihmc.behaviors.behaviorTree.*;
 import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeDefinition.ConditionNodeType;
 import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeState;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
-import us.ihmc.behaviors.behaviorTree.LeafNodeState;
 import us.ihmc.behaviors.behaviorTree.action.actions.ChestOrientationActionState;
 import us.ihmc.behaviors.behaviorTree.action.actions.FootstepPlanActionState;
 import us.ihmc.behaviors.behaviorTree.action.actions.HandPoseActionState;
 import us.ihmc.behaviors.behaviorTree.action.actions.WaitDurationActionState;
+import us.ihmc.behaviors.behaviorTree.control.GotoNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectState;
 import us.ihmc.communication.AutonomyAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -128,6 +126,29 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
       }
       endSequenceAfterBehaviorExecution();
       executeBehaviorLogic();
+   }
+
+   private void addNode()
+   {
+      BehaviorTreeExecutor tree = rootNode.getTree();
+      BehaviorTreeNodeExecutor<?, ?> node = tree.getNodeBuilder().createNode(GotoNodeDefinition.class, tree.getAndIncrementNextID(), rootNode);
+      node.getDefinition().modify();
+      LogTools.info("Creating node: {}:{}", node.getDefinition().getName(), node.getState().getID());
+      tree.getTopologyChangeQueue().queueAppendChildModify(this, node);
+      tree.modifyTreeTopology();
+   }
+
+   private void removeNode(String nodeName)
+   {
+      for (BehaviorTreeNodeExecutor<?, ?> child : getChildren())
+         if (child.getDefinition().getName().equals(nodeName))
+         {
+            BehaviorTreeExecutor tree = rootNode.getTree();
+            LogTools.info("Removing node: {}:{}", child.getDefinition().getName(), child.getState().getID());
+            tree.getTopologyChangeQueue().queueDetachChildModify(child);
+            tree.modifyTreeTopology();
+            child.destroy();
+         }
    }
 
    private void setSceneInfo()
