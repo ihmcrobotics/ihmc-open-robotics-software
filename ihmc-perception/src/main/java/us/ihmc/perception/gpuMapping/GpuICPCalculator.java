@@ -23,7 +23,7 @@ import static org.bytedeco.cuda.global.cudart.*;
 public class GpuICPCalculator
 {
    private static final boolean PRINT_TIMING_FOR_KERNELS = false;
-   private static final int BLOCK_SIZE_XY = 8;
+   private static final int BLOCK_SIZE_XY = 256;
    private final CUstream_st stream;
    private final dim3 blockSize;
 
@@ -75,7 +75,6 @@ public class GpuICPCalculator
                                         int globalCenterIndex,
                                         RigidBodyTransform transformLocalToGlobalFromOdometry)
    {
-
       RigidBodyTransform correctedGlobalTransform = new RigidBodyTransform();
       correctedGlobalTransform.set(totalAccumulatedErrorTransform);
       correctedGlobalTransform.multiply(transformLocalToGlobalFromOdometry);
@@ -122,6 +121,8 @@ public class GpuICPCalculator
 
       CUDATools.mallocAsync(gpuGlobalDataPointer, cpuGlobalDataPointer.limit(), stream);
       CUDATools.memcpyAsync(gpuGlobalDataPointer, cpuGlobalDataPointer, cpuGlobalDataPointer.limit(), stream);
+      float[] globalPointsArr = new float[globalFloats];
+      cpuGlobalDataPointer.get(globalPointsArr);
 
       // Allocate result buffers on GPU
       IntPointer gpuCorrespondences = new IntPointer();
@@ -166,38 +167,56 @@ public class GpuICPCalculator
          CUDATools.memcpyAsync(cpuDistances, gpuDistances, localPoints, stream);
 
          float maxDistance = (float) heightMapParameters.getIcpMaxDistance();
+
+         // 1. Pre-allocate Java arrays and perform bulk JNI copies
+         float[] distancesArr = new float[localPoints];
+         int[] correspondencesArr = new int[localPoints];
+         float[] localTransformedArr = new float[localPoints * 3];
+
+         cpuDistances.get(distancesArr);
+         cpuCorrespondences.get(correspondencesArr);
+         cpuLocalTransformed.get(localTransformedArr);
+
+         // 2. Prepare destination arrays on the Java heap
+         float[] filteredLocalArr = new float[localPoints * 3];
+         int[] filteredCorrArr = new int[localPoints];
+
          int validCount = 0;
 
-         FloatPointer filteredLocal = new FloatPointer(localFloats);
-         IntPointer filteredCorrespondences = new IntPointer(localPoints);
-
-         // This loop is going through the local points, and filtered any data out that doesn't make sense
-         // The result is the filtered local data, and the filtered correspondence
          for (int k = 0; k < localPoints; k++)
          {
-            float d = cpuDistances.get(k);
+            float d = distancesArr[k];
 
+            // Perform the checks on the local array
             if (d > maxDistance || Float.isNaN(d) || Float.isInfinite(d))
-               continue; // Reject correspondence
+               continue;
 
-            // Copy local point (XYZ)
+            // Copy local point (XYZ) using array indices
             int dstBase = validCount * 3;
             int srcBase = k * 3;
-            filteredLocal.put(dstBase + 0, cpuLocalTransformed.get(srcBase + 0));
-            filteredLocal.put(dstBase + 1, cpuLocalTransformed.get(srcBase + 1));
-            filteredLocal.put(dstBase + 2, cpuLocalTransformed.get(srcBase + 2));
+            filteredLocalArr[dstBase + 0] = localTransformedArr[srcBase + 0];
+            filteredLocalArr[dstBase + 1] = localTransformedArr[srcBase + 1];
+            filteredLocalArr[dstBase + 2] = localTransformedArr[srcBase + 2];
 
             // Copy correspondence index
-            filteredCorrespondences.put(validCount, cpuCorrespondences.get(k));
+            filteredCorrArr[validCount] = correspondencesArr[k];
 
             validCount++;
          }
 
+         // 3. Early exit check
          if (validCount < 10)
             break;
 
+         // 4. Wrap or copy results back to native pointers for the SVD step
+         FloatPointer filteredLocal = new FloatPointer(validCount * 3L);
+         IntPointer filteredCorrespondences = new IntPointer(validCount);
+
+         filteredLocal.put(filteredLocalArr, 0, validCount * 3);
+         filteredCorrespondences.put(filteredCorrArr, 0, validCount);
+
          // Compute transformation using SVD
-         DMatrixRMaj incrementalTransform = HeightMapTools.computeTransformSVD(filteredLocal, cpuGlobalDataPointer, filteredCorrespondences, validCount);
+         DMatrixRMaj incrementalTransform = HeightMapTools.computeTransformSVD(filteredLocalArr, globalPointsArr, filteredCorrArr, validCount);
 
          filteredLocal.close();
          filteredCorrespondences.close();
@@ -218,12 +237,12 @@ public class GpuICPCalculator
          double dz = incrementalTransform.get(2, 3);
          double moveDist = Math.sqrt(dx * dx + dy * dy + dz * dz);
 
-         System.out.println("Iteration " + i);
-         System.out.println("  Valid correspondences: " + validCount);
-         System.out.println("  Incremental dx: " + incrementalTransform.get(0, 3));
-         System.out.println("  Incremental dy: " + incrementalTransform.get(1, 3));
-         System.out.println("  Incremental dz: " + incrementalTransform.get(2, 3));
-         System.out.println("  Move distance: " + moveDist);
+         //         System.out.println("Iteration " + i);
+         //         System.out.println("  Valid correspondences: " + validCount);
+         //         System.out.println("  Incremental dx: " + incrementalTransform.get(0, 3));
+         //         System.out.println("  Incremental dy: " + incrementalTransform.get(1, 3));
+         //         System.out.println("  Incremental dz: " + incrementalTransform.get(2, 3));
+         //         System.out.println("  Move distance: " + moveDist);
 
          if (moveDist < translationThreshold)
          {

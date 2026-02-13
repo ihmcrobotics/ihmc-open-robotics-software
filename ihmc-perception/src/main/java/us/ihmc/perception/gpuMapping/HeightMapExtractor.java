@@ -48,6 +48,8 @@ public class HeightMapExtractor
    private final GpuMat localVarianceMap;
    private final GpuMat localMotionVarianceMap;
 
+   private final GpuMat previousGlobalMapForICP;
+
    // These are the mats required to keep a global map
    private final GpuMat globalMeanMap;
    private final GpuMat globalVarianceMap;
@@ -135,6 +137,8 @@ public class HeightMapExtractor
          localVarianceMap = new GpuMat(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_32FC1);
          localMotionVarianceMap = new GpuMat(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_32FC1);
 
+         previousGlobalMapForICP = new GpuMat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_32FC1);
+
          globalMeanMap = new GpuMat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_32FC1);
          globalVarianceMap = new GpuMat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_32FC1);
          previousGlobalMeanMap = new GpuMat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_32FC1);
@@ -171,6 +175,7 @@ public class HeightMapExtractor
       resetOffset = (float) footHeight;
       resetOffset -= loweredValue;
 
+      previousGlobalMapForICP.setTo(new Scalar(resetOffset));
       globalMeanMap.setTo(new Scalar(resetOffset));
    }
 
@@ -235,6 +240,7 @@ public class HeightMapExtractor
 
             translateKernel.withPointer(previousGlobalMeanMap.data()).withLong(previousGlobalMeanMap.step());
             translateKernel.withPointer(previousGlobalVarianceMap.data()).withLong(previousGlobalVarianceMap.step());
+            translateKernel.withPointer(previousGlobalMapForICP.data()).withLong(previousGlobalMapForICP.step());
             translateKernel.withPointer(globalMeanMap.data()).withLong(globalMeanMap.step());
             translateKernel.withPointer(globalVarianceMap.data()).withLong(globalVarianceMap.step());
             translateKernel.withInt(shiftX).withInt(shiftY);
@@ -327,7 +333,7 @@ public class HeightMapExtractor
       if (heightMapParameters.getICPFilter())
       {
          gpuICPCalculator.computeICPErrorTransform(localMeanMap,
-                                                   globalMeanMap,
+                                                   previousGlobalMapForICP,
                                                    new Point3D(),
                                                    globalHeightMapCenter,
                                                    localCenterIndex,
@@ -349,12 +355,19 @@ public class HeightMapExtractor
       // ---------- Run the registration kernel ----------
       // Ok so now we've got our local map, lets put that onto the global map
       {
+         cudaMemset2DAsync(previousGlobalMapForICP.data(),
+                           previousGlobalMapForICP.step(),
+                           0,
+                           (long) previousGlobalMapForICP.cols() * Float.BYTES,
+                           previousGlobalMapForICP.rows());
+
          int registerKernelGridSizeXY = (localCellsPerAxis + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
          dim3 registerKernelGridDim = new dim3(registerKernelGridSizeXY, registerKernelGridSizeXY, 1);
 
          registerKernel.withPointer(localMeanMap.data()).withLong(localMeanMap.step());
          registerKernel.withPointer(localVarianceMap.data()).withLong(localVarianceMap.step());
          registerKernel.withPointer(localMotionVarianceMap.data()).withLong(localMotionVarianceMap.step());
+         registerKernel.withPointer(previousGlobalMapForICP.data()).withLong(previousGlobalMapForICP.step());
          registerKernel.withPointer(globalMeanMap.data()).withLong(globalMeanMap.step());
          registerKernel.withPointer(globalVarianceMap.data()).withLong(globalVarianceMap.step());
          registerKernel.withFloat(globalHeightMapCenter.getX32());

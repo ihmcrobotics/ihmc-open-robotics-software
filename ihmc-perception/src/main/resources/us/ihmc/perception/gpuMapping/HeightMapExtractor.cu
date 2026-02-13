@@ -171,6 +171,7 @@ __global__ void computeLocalMap(const float* __restrict__ sumMap, size_t pitchSu
 extern "C"
 __global__ void translateHeightMapKernel(float *oldHeightMapMean, size_t pitchOldHeightMapMean,
                                          float *oldHeightMapVariance, size_t pitchOldHeightMapVariance,
+                                         float *previousGlobalForICP, size_t pitchPreviousGlobalForICP,
                                          float *newMeanMap, size_t pitchNewMean,
                                          float *newVarianceMap, size_t pitchNewVariance,
                                          int shiftX, int shiftY, float *params, float defaultValue)
@@ -193,8 +194,10 @@ __global__ void translateHeightMapKernel(float *oldHeightMapMean, size_t pitchOl
 
         float* newMeanRow = (float*)((char*)newMeanMap + x * pitchNewMean);
         float* newVarianceRow = (float*)((char*)newVarianceMap + x * pitchNewVariance);
+        float* newPreviousRow = (float*)((char*)previousGlobalForICP + x * pitchPreviousGlobalForICP);
 
         newMeanRow[y] = oldMeanRow[srcY];
+        newPreviousRow[y] = oldMeanRow[srcY];
 
         // Add variance due to the translation
         float increasedVariance = oldVarianceRow[srcY] + params[ADDITIONAL_TRANSLATIONAL_VARIANCE_ADDED];
@@ -205,9 +208,11 @@ __global__ void translateHeightMapKernel(float *oldHeightMapMean, size_t pitchOl
     {
         float* newMeanRow = (float*)((char*)newMeanMap + x * pitchNewMean);
         float* newVarianceRow = (float*)((char*)newVarianceMap + x * pitchNewVariance);
+        float* newPreviousRow = (float*)((char*)previousGlobalForICP + x * pitchPreviousGlobalForICP);
 
         newMeanRow[y] = defaultValue;
         newVarianceRow[y] = defaultValue;
+        newPreviousRow[y] = defaultValue;
     }
 }
 
@@ -215,6 +220,7 @@ extern "C"
 __global__ void heightMapRegistrationKernel(const float *__restrict__ localMeanMap, size_t pitchLocalMean,
                                             const float *__restrict__ localVarianceMap, size_t pitchLocalVariance,
                                             const float *__restrict__ localMotionVarianceMap, size_t pitchLocalMotionVariance,
+                                            float *__restrict__ previousGlobalMap, size_t pitchPreviousGlobal,
                                             float *__restrict__ globalMeanMap, size_t pitchGlobalMean,
                                             float *__restrict__ globalVarianceMap, size_t pitchGlobalVariance,
                                             const float globalMapCenterX,
@@ -254,6 +260,7 @@ __global__ void heightMapRegistrationKernel(const float *__restrict__ localMeanM
     float *localMotionVariance = (float *)((char *)localMotionVarianceMap + localCell.x * pitchLocalMotionVariance) + localCell.y;
     float *globalMean = (float *)((char *)globalMeanMap + globalCell.x * pitchGlobalMean) + globalCell.y;
     float *globalVariance = (float *)((char *)globalVarianceMap + globalCell.x * pitchGlobalVariance) + globalCell.y;
+    float *previousGlobal = (float *)((char *)previousGlobalMap + globalCell.x * pitchPreviousGlobal) + globalCell.y;
 
     // After trying to do as much work as possible in parallel to the global memory access. We ran out of stuff to do.
     // Check the result of global memory for invalid data, and return if not valid
@@ -270,6 +277,7 @@ __global__ void heightMapRegistrationKernel(const float *__restrict__ localMeanM
     {
         *globalMean = localMeanF;
         *globalVariance = localVarianceF;
+        *previousGlobal = localMeanF;
     }
     else
     {
@@ -287,6 +295,7 @@ __global__ void heightMapRegistrationKernel(const float *__restrict__ localMeanM
 
         *globalMean = updatedMean;
         *globalVariance = updatedVariance;
+        *previousGlobal = updatedMean;
     }
 }
 

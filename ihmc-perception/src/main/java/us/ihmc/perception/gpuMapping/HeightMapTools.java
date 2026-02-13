@@ -192,45 +192,54 @@ public class HeightMapTools
    {
       int rows = heightMap.rows();
       int cols = heightMap.cols();
+      int totalPixels = rows * cols;
 
+      // 1. Download to Mat and perform one bulk copy to a Java array
       Mat cpuMap = new Mat(rows, cols, opencv_core.CV_32FC1);
-      FloatPointer cpuHeights = new FloatPointer(cpuMap.data());
       heightMap.download(cpuMap);
 
-      FloatPointer xyzArray = new FloatPointer((long) rows * cols * 3);
+      float[] zHeights = new float[totalPixels];
+      FloatPointer cpuDataPointer = new FloatPointer(cpuMap.data());
+      cpuDataPointer.get(zHeights); // Bulk JNI transfer
+
+      // 2. Prepare a local array for the XYZ results
+      // Size is totalPixels * 3 because we don't know validCount yet
+      float[] xyzBuffer = new float[totalPixels * 3];
       int validCount = 0;
 
+      // 3. Process data using local array access (very fast)
       for (int row = 0; row < rows; row++)
       {
+         int rowOffset = row * cols;
          for (int col = 0; col < cols; col++)
          {
-            float zRaw = cpuHeights.get((long) row * cols + col);
+            float zRaw = zHeights[rowOffset + col];
 
             if (Float.isNaN(zRaw) || zRaw == invalidHeightValue)
                continue;
 
-            // X and Y are calculated relative to the grid center and then shifted to world coordinates
+            // Calculate world coordinates
             float x = (float) (centerX + (col - centerIndex) * cellSize);
             float y = (float) (centerY + (row - centerIndex) * cellSize);
-
-            // Z is adjusted by the global Z offset (the drift/odometry height)
             float z = (float) (zRaw + centerZ);
 
             int base = validCount * 3;
-            xyzArray.put(base, x);
-            xyzArray.put(base + 1, y);
-            xyzArray.put(base + 2, z);
+            xyzBuffer[base] = x;
+            xyzBuffer[base + 1] = y;
+            xyzBuffer[base + 2] = z;
 
             validCount++;
          }
       }
 
-      FloatPointer trimmed = new FloatPointer(validCount * 3L);
-      trimmed.put(xyzArray.position(0).limit(validCount * 3L));
+      // 4. Create the final trimmed FloatPointer and perform one bulk put
+      int finalElementCount = validCount * 3;
+      FloatPointer trimmed = new FloatPointer((long) finalElementCount);
+      trimmed.put(xyzBuffer, 0, finalElementCount); // Bulk JNI transfer
 
-      cpuHeights.close();
+      // Cleanup
+      cpuDataPointer.close();
       cpuMap.close();
-      xyzArray.close();
 
       return new FlattenedHeightMap(trimmed, validCount);
    }
@@ -241,65 +250,59 @@ public class HeightMapTools
     * <p>
     * This method implements the standard point-to-point ICP alignment step:
     * <ol>
-    *   <li>Compute centroids of the matched local and global point sets</li>
-    *   <li>Build the 3×3 cross-covariance matrix</li>
-    *   <li>Compute the optimal rotation using SVD (Umeyama / Horn method)</li>
-    *   <li>Compute the translation that aligns the centroids</li>
+    * <li>Compute centroids of the matched local and global point sets</li>
+    * <li>Build the 3×3 cross-covariance matrix</li>
+    * <li>Compute the optimal rotation using SVD (Umeyama / Horn method)</li>
+    * <li>Compute the translation that aligns the centroids</li>
     * </ol>
     * The resulting transform minimizes:
     * <pre>
-    *   Σ || R * p_i + t − q_{c(i)} ||²
+    * Σ || R * p_i + t − q_{c(i)} ||²
     * </pre>
     * where {@code p_i} are local points and {@code q_{c(i)}} are their corresponding global points.
     * <p>
     * A reflection correction is applied if the computed rotation has a negative determinant.
     *
     * <h3>Data Layout</h3>
-    * Points are stored in flat arrays as:
+    * Points are stored in flat float arrays as:
     * <pre>
-    *   [x0, y0, z0, x1, y1, z1, ..., xN, yN, zN]
+    * [x0, y0, z0, x1, y1, z1, ..., xN, yN, zN]
     * </pre>
-    * The {@code correspondences} array maps each local point index {@code i} to a global
+    * The {@code corrArray} maps each local point index {@code i} to a global
     * point index {@code j}.
     *
     * <h3>Usage Context</h3>
-    * This method is intended to be called inside an Iterative Closest Point (ICP) loop,
-    * where correspondences are recomputed each iteration and the returned transform is
-    * applied incrementally.
+    * This method is optimized for high-frequency calls by using Java heap arrays to avoid
+    * JNI overhead. It is intended for use inside an ICP loop where correspondences are
+    * recomputed each iteration.
     *
-    * @param localPoints     Pointer to the transformed local/source points (size = {@code numberOfPoints * 3})
-    * @param globalPoints    Pointer to the global/target points (size = {@code totalGlobalPoints * 3})
-    * @param correspondences For each local point {@code i}, contains the index {@code j} of the corresponding global point
-    * @param numberOfPoints  Number of valid point correspondences to use
+    * @param localArray     Flat array containing the local/source points (size = {@code numberOfPoints * 3})
+    * @param globalArray    Flat array containing the global/target points (size >= max(correspondence_index) * 3)
+    * @param corrArray      For each local point {@code i}, contains the index {@code j} of the corresponding global point
+    * @param numberOfPoints Number of valid point correspondences to use
     * @return 4×4 homogeneous transformation matrix mapping local points into the global frame
     * @throws IllegalArgumentException if {@code numberOfPoints < 3} (insufficient points to compute a unique transform)
     */
-   public static DMatrixRMaj computeTransformSVD(FloatPointer localPoints, FloatPointer globalPoints, IntPointer correspondences, int numberOfPoints)
+   public static DMatrixRMaj computeTransformSVD(float[] localArray, float[] globalArray, int[] corrArray, int numberOfPoints)
    {
-      // Compute centroids for both the local points and the global points
+      // Compute centroids
       double localCentroidX = 0, localCentroidY = 0, localCentroidZ = 0;
       double globalCentroidX = 0, globalCentroidY = 0, globalCentroidZ = 0;
 
       for (int i = 0; i < numberOfPoints; i++)
       {
-         // Because the points are stored in the float array as [x, y, z]
-         // We need to skip (i * 3) each time through the loop in order to get the 3D point
          int baseLocal = i * 3;
-         localCentroidX += localPoints.get(baseLocal + 0);
-         localCentroidY += localPoints.get(baseLocal + 1);
-         localCentroidZ += localPoints.get(baseLocal + 2);
+         localCentroidX += localArray[baseLocal + 0];
+         localCentroidY += localArray[baseLocal + 1];
+         localCentroidZ += localArray[baseLocal + 2];
 
-         // The correspondence holds the global point index that corresponds to the local point index
-         // Because the points are stored in the float array as [x, y, z]
-         // We need to skip (i * 3) each time through the loop in order to get the 3D point
-         int j = correspondences.get(i);
+         int j = corrArray[i];
          int baseGlobal = j * 3;
-         globalCentroidX += globalPoints.get(baseGlobal + 0);
-         globalCentroidY += globalPoints.get(baseGlobal + 1);
-         globalCentroidZ += globalPoints.get(baseGlobal + 2);
+         globalCentroidX += globalArray[baseGlobal + 0];
+         globalCentroidY += globalArray[baseGlobal + 1];
+         globalCentroidZ += globalArray[baseGlobal + 2];
       }
 
-      // We have the sum, so we divide that by the number of points to get the mean
       localCentroidX /= numberOfPoints;
       localCentroidY /= numberOfPoints;
       localCentroidZ /= numberOfPoints;
@@ -312,51 +315,42 @@ public class HeightMapTools
 
       for (int i = 0; i < numberOfPoints; i++)
       {
-         // Because the points are stored in the float array as [x, y, z]
-         // We need to skip (i * 3) each time through the loop in order to get the 3D point
          int baseLocal = i * 3;
-         double lx = localPoints.get(baseLocal + 0) - localCentroidX;
-         double ly = localPoints.get(baseLocal + 1) - localCentroidY;
-         double lz = localPoints.get(baseLocal + 2) - localCentroidZ;
+         double lx = localArray[baseLocal + 0] - localCentroidX;
+         double ly = localArray[baseLocal + 1] - localCentroidY;
+         double lz = localArray[baseLocal + 2] - localCentroidZ;
 
-         // The correspondence holds the global point index that corresponds to the local point index
-         // Because the points are stored in the float array as [x, y, z]
-         // We need to skip (i * 3) each time through the loop in order to get the 3D point
-         int j = correspondences.get(i);
+         int j = corrArray[i];
          int baseGlobal = j * 3;
-         double gx = globalPoints.get(baseGlobal + 0) - globalCentroidX;
-         double gy = globalPoints.get(baseGlobal + 1) - globalCentroidY;
-         double gz = globalPoints.get(baseGlobal + 2) - globalCentroidZ;
+         double gx = globalArray[baseGlobal + 0] - globalCentroidX;
+         double gy = globalArray[baseGlobal + 1] - globalCentroidY;
+         double gz = globalArray[baseGlobal + 2] - globalCentroidZ;
 
-         // H += local_centered * global_centered^T
-         // (lx, ly, lz) refers to the local points
-         // (gx, gy, gz) refers to the global points
-         H.add(0, 0, lx * gx);
-         H.add(0, 1, lx * gy);
-         H.add(0, 2, lx * gz);
-         H.add(1, 0, ly * gx);
-         H.add(1, 1, ly * gy);
-         H.add(1, 2, ly * gz);
-         H.add(2, 0, lz * gx);
-         H.add(2, 1, lz * gy);
-         H.add(2, 2, lz * gz);
+         // Accumulate H matrix values
+         H.data[0] += lx * gx;
+         H.data[1] += lx * gy;
+         H.data[2] += lx * gz;
+         H.data[3] += ly * gx;
+         H.data[4] += ly * gy;
+         H.data[5] += ly * gz;
+         H.data[6] += lz * gx;
+         H.data[7] += lz * gy;
+         H.data[8] += lz * gz;
       }
 
-      // Compute SVD: H = U * S * V^T
+      // --- SVD and Rotation Logic (Remains largely the same) ---
       SingularValueDecomposition_F64<DMatrixRMaj> svd = DecompositionFactory_DDRM.svd(3, 3, true, true, false);
-      svd.decompose(H);
+      if (!svd.decompose(H))
+         return null; // Good practice to check
 
       DMatrixRMaj U = svd.getU(null, false);
       DMatrixRMaj V = svd.getV(null, false);
-
-      // Compute rotation: rotation = V * U^T
       DMatrixRMaj Ut = new DMatrixRMaj(3, 3);
       CommonOps_DDRM.transpose(U, Ut);
 
       DMatrixRMaj rotation = new DMatrixRMaj(3, 3);
       CommonOps_DDRM.mult(V, Ut, rotation);
 
-      // Handle reflection case (det(rotation) < 0)
       if (CommonOps_DDRM.det(rotation) < 0)
       {
          V.set(0, 2, -V.get(0, 2));
@@ -365,38 +359,18 @@ public class HeightMapTools
          CommonOps_DDRM.mult(V, Ut, rotation);
       }
 
-      // Compute translation: translation = globalCentroid - rotation * localCentroid
-      DMatrixRMaj localCentroid = new DMatrixRMaj(new double[][] {{localCentroidX}, {localCentroidY}, {localCentroidZ}});
-      DMatrixRMaj globalCentroid = new DMatrixRMaj(new double[][] {{globalCentroidX}, {globalCentroidY}, {globalCentroidZ}});
-      DMatrixRMaj rMultLocalCentroid = new DMatrixRMaj(3, 1);
+      // Translation calculation
+      DMatrixRMaj localCentroidVec = new DMatrixRMaj(new double[][] {{localCentroidX}, {localCentroidY}, {localCentroidZ}});
+      DMatrixRMaj globalCentroidVec = new DMatrixRMaj(new double[][] {{globalCentroidX}, {globalCentroidY}, {globalCentroidZ}});
       DMatrixRMaj translation = new DMatrixRMaj(3, 1);
 
-      CommonOps_DDRM.mult(rotation, localCentroid, rMultLocalCentroid);
-      CommonOps_DDRM.subtract(globalCentroid, rMultLocalCentroid, translation);
+      CommonOps_DDRM.mult(rotation, localCentroidVec, translation);
+      CommonOps_DDRM.subtract(globalCentroidVec, translation, translation);
 
-      // We have our rotation and translation parts of the matrix
-      // Build 4x4 homogeneous transformation matrix
-      DMatrixRMaj transform = new DMatrixRMaj(4, 4);
-
-      // Copy rotation (top-left 3x3)
-      for (int i = 0; i < 3; i++)
-      {
-         for (int j = 0; j < 3; j++)
-         {
-            transform.set(i, j, rotation.get(i, j));
-         }
-      }
-
-      // Copy translation (top-right 3x1)
-      transform.set(0, 3, translation.get(0, 0));
-      transform.set(1, 3, translation.get(1, 0));
-      transform.set(2, 3, translation.get(2, 0));
-
-      // Bottom row [0, 0, 0, 1]
-      transform.set(3, 0, 0);
-      transform.set(3, 1, 0);
-      transform.set(3, 2, 0);
-      transform.set(3, 3, 1);
+      // Final 4x4 Transformation Matrix
+      DMatrixRMaj transform = CommonOps_DDRM.identity(4);
+      CommonOps_DDRM.insert(rotation, transform, 0, 0);
+      CommonOps_DDRM.insert(translation, transform, 0, 3);
 
       return transform;
    }
