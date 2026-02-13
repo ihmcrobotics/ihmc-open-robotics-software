@@ -123,6 +123,7 @@ public class RDXHardwareControlStateManager
          RDXBaseUI.pushNotification("Commanding EXIT_WALKING...");
          sendExitWalkingRequest();
       }
+      ImGui.setCursorPosX(widgetStartX);
       if (ImGui.button(labels.get("RL Transition")))
       {
          RDXBaseUI.pushNotification("Commanding RL transition...");
