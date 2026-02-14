@@ -144,6 +144,20 @@ public class GpuICPCalculator
       int gridSize = (localPoints + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
       dim3 gridDim = new dim3(gridSize, 1, 1);
 
+      float[] distancesArr = new float[localPoints];
+      int[] correspondencesArr = new int[localPoints];
+      float[] localTransformedArr = new float[localPoints * 3];
+      float[] filteredLocalArr = new float[localPoints * 3];
+      int[] filteredCorrArr = new int[localPoints];
+
+      // Allocate once on the Host (CPU)
+      float[] h_matrix = new float[16];
+      FloatPointer hostMatrixPtr = new FloatPointer(h_matrix);
+
+      // Allocate once on the Device (GPU)
+      FloatPointer deviceMatrixPtr = new FloatPointer();
+      CUDATools.mallocAsync(deviceMatrixPtr, 16, stream);
+
       for (int i = 0; i < heightMapParameters.getIcpMaxIterations(); i++)
       {
          // Use the GPU pointers we made earlier
@@ -158,31 +172,21 @@ public class GpuICPCalculator
 
          nearestNeighborsKernel.run(stream, gridDim, blockSize, 0);
 
-         int error = cudaStreamSynchronize(stream);
-         CUDATools.checkCUDAError(error);
-
          // Download data from GPU to CPU
          CUDATools.memcpyAsync(cpuLocalTransformed, gpuLocalDataPointer, localFloats, stream);
          CUDATools.memcpyAsync(cpuCorrespondences, gpuCorrespondences, localPoints, stream);
          CUDATools.memcpyAsync(cpuDistances, gpuDistances, localPoints, stream);
 
-         float maxDistance = (float) heightMapParameters.getIcpMaxDistance();
-
-         // 1. Pre-allocate Java arrays and perform bulk JNI copies
-         float[] distancesArr = new float[localPoints];
-         int[] correspondencesArr = new int[localPoints];
-         float[] localTransformedArr = new float[localPoints * 3];
+         int error = cudaStreamSynchronize(stream);
+         CUDATools.checkCUDAError(error);
 
          cpuDistances.get(distancesArr);
          cpuCorrespondences.get(correspondencesArr);
          cpuLocalTransformed.get(localTransformedArr);
 
-         // 2. Prepare destination arrays on the Java heap
-         float[] filteredLocalArr = new float[localPoints * 3];
-         int[] filteredCorrArr = new int[localPoints];
-
          int validCount = 0;
 
+         float maxDistance = (float) heightMapParameters.getIcpMaxDistance();
          for (int k = 0; k < localPoints; k++)
          {
             float d = distancesArr[k];
@@ -208,18 +212,8 @@ public class GpuICPCalculator
          if (validCount < 10)
             break;
 
-         // 4. Wrap or copy results back to native pointers for the SVD step
-         FloatPointer filteredLocal = new FloatPointer(validCount * 3L);
-         IntPointer filteredCorrespondences = new IntPointer(validCount);
-
-         filteredLocal.put(filteredLocalArr, 0, validCount * 3);
-         filteredCorrespondences.put(filteredCorrArr, 0, validCount);
-
          // Compute transformation using SVD
          DMatrixRMaj incrementalTransform = HeightMapTools.computeTransformSVD(filteredLocalArr, globalPointsArr, filteredCorrArr, validCount);
-
-         filteredLocal.close();
-         filteredCorrespondences.close();
 
          // ALPHA FILTERING (e.g., take only 20% of the calculated move)
          double alpha = heightMapParameters.getIcpAlphaFilter();
@@ -250,17 +244,11 @@ public class GpuICPCalculator
          }
 
          // Flatten and convert from Double to Float
-         // DMatrixRMaj stores data in a field called '.data'
-         float[] h_matrix = new float[16];
          for (int j = 0; j < incrementalTransform.data.length; j++)
          {
             h_matrix[j] = (float) incrementalTransform.data[j];
          }
-
-         // Wrap in a Host Pointer
-         FloatPointer hostMatrixPtr = new FloatPointer(h_matrix);
-         FloatPointer deviceMatrixPtr = new FloatPointer();
-         CUDATools.mallocAsync(deviceMatrixPtr, 16, stream);
+         hostMatrixPtr.put(h_matrix);
          CUDATools.memcpyAsync(deviceMatrixPtr, hostMatrixPtr, 16, stream);
 
          // Update the Points on the GPU
@@ -273,10 +261,6 @@ public class GpuICPCalculator
 
          transformPointsKernel.run(stream, transformGridDim, blockSize, 0);
 
-         hostMatrixPtr.close();
-         deviceMatrixPtr.close();
-         cudaFreeAsync(deviceMatrixPtr, stream);
-
          CUDATools.checkCUDAError(error);
       }
 
@@ -284,10 +268,18 @@ public class GpuICPCalculator
       cpuCorrespondences.close();
       cpuDistances.close();
 
+      hostMatrixPtr.close();
+      cudaFreeAsync(deviceMatrixPtr, stream);
+      deviceMatrixPtr.close();
+
       cudaFreeAsync(gpuLocalDataPointer, stream);
       cudaFreeAsync(gpuGlobalDataPointer, stream);
       cudaFreeAsync(gpuCorrespondences, stream);
       cudaFreeAsync(gpuDistances, stream);
+      gpuLocalDataPointer.close();
+      gpuGlobalDataPointer.close();
+      gpuCorrespondences.close();
+      gpuDistances.close();
 
       // Track the total drift we have accumulated while running ICP
       DMatrixRMaj tempTotalAccumulatedErrorTransform = new DMatrixRMaj(4, 4);
