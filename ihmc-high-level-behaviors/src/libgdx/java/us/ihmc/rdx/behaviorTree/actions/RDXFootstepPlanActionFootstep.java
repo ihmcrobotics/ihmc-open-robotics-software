@@ -24,6 +24,7 @@ public class RDXFootstepPlanActionFootstep
    private final FootstepPlanActionFootstepState state;
    private final FootstepPlanActionFootstepDefinition definition;
    private RDXInteractableFootstep interactableFootstep;
+   private RDXPose3DGizmo gizmo;
    private RDXFootstepGraphic flatFootstepGraphic;
 
    public RDXFootstepPlanActionFootstep(RDXBaseUI baseUI,
@@ -44,24 +45,20 @@ public class RDXFootstepPlanActionFootstep
       state.update();
 
       if (interactableFootstep == null
-          || state.getIndex() != interactableFootstep.getIndex()
-          || definition.getSide() != interactableFootstep.getFootstepSide())
-      {
+       || state.getIndex() != interactableFootstep.getIndex()
+       || definition.getSide() != interactableFootstep.getFootstepSide())
          recreateGraphics();
-      }
 
       if (state.getSoleFrame().isChildOfWorld())
       {
-         if (getGizmo().getGizmoFrame().getParent() != state.getSoleFrame().getReferenceFrame().getParent())
-         {
-            getGizmo().changeParentFrameWithoutMoving(state.getSoleFrame().getReferenceFrame().getParent());
-         }
+         if (gizmo.getGizmoFrame().getParent() != state.getSoleFrame().getReferenceFrame().getParent())
+            gizmo.changeParentFrameWithoutMoving(state.getSoleFrame().getReferenceFrame().getParent());
 
-         RDXCRDTTools.syncGizmoWithBidirectionalField(getGizmo(), definition.getSoleToPlanFrameTransform(), footstepPlan.getDefinition());
+         RDXCRDTTools.syncGizmoWithBidirectionalField(gizmo, definition.getSoleToPlanFrameTransform(), footstepPlan.getDefinition());
 
          interactableFootstep.update();
 
-         flatFootstepGraphic.setPoseFromReferenceFrame(getState().getSoleFrame().getReferenceFrame());
+         flatFootstepGraphic.setPoseFromReferenceFrame(state.getSoleFrame().getReferenceFrame());
       }
    }
 
@@ -69,6 +66,7 @@ public class RDXFootstepPlanActionFootstep
    private void recreateGraphics()
    {
       interactableFootstep = new RDXInteractableFootstep(baseUI, definition.getSide(), state.getIndex(), null);
+      gizmo = interactableFootstep.getSelectablePose3DGizmo().getPoseGizmo();
       flatFootstepGraphic = new RDXFootstepGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints(), definition.getSide());
       flatFootstepGraphic.create();
    }
@@ -100,9 +98,10 @@ public class RDXFootstepPlanActionFootstep
       }
    }
 
-   private RDXPose3DGizmo getGizmo()
+   public void updateGizmo()
    {
-      return interactableFootstep.getSelectablePose3DGizmo().getPoseGizmo();
+      gizmo.getTransformToParent().set(definition.getSoleToPlanFrameTransform().getValueReadOnly());
+      interactableFootstep.update();
    }
 
    public RDXInteractableFootstep getInteractableFootstep()
