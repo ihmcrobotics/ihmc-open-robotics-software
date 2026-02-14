@@ -18,7 +18,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.sensors.CameraIntrinsics;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
-import us.ihmc.perception.cuda.CUDAStreamManager;
 import us.ihmc.perception.cuda.CUDATools;
 
 import java.net.URL;
@@ -27,16 +26,24 @@ import static org.bytedeco.cuda.global.cudart.*;
 
 public class HeightMapExtractor
 {
+   /**
+    * When profiling the kernels with NSight Compute, running kernels on parallel streams can affect the GPU's performance on a given kernel.
+    * We don't want to do that because we want to know the true statistics of an individual kernel. Use NSight Systems to check out the multiple
+    * streams perform.
+    */
+   private static final boolean PROFILING_KERNELS = false;
+
    private static final boolean PRINT_TIMING_FOR_KERNELS = false;
    /**
-    * The choice of 16 here is to utilize more SMs (Multi Processors) on the GPU.
+    * The choice of 8 here is to utilize more SMs (Multi Processors) on the GPU.
     * This was chosen based on GPU profiling and significantly effects performance.
     */
    private static final int BLOCK_SIZE_XY = 8;
 
    private final HeightMapParameters heightMapParameters;
-   private final CUstream_st cuStream;
-   private final Stream wrappedStream;
+   private final CUstream_st streamMain;
+   private final CUstream_st streamSecondary;
+   private final Stream streamThird;
    private final CUDAProgram heightMapProgram;
    private final dim3 blockSize;
 
@@ -81,18 +88,18 @@ public class HeightMapExtractor
    private final int globalCellsPerAxis;
 
    private final RigidBodyTransform previousSensorToWorld = new RigidBodyTransform();
+   private final HeightMapData heightMapData;
+   private final Point3D heightMapCenterPoint = new Point3D();
    private int previousCellX;
    private int previousCellY;
    private float resetOffset;
 
-   private final HeightMapData heightMapData;
-   private final Point3D heightMapCenterPoint = new Point3D();
-
    public HeightMapExtractor(HeightMapParameters heightMapParameters)
    {
       this.heightMapParameters = heightMapParameters;
-      cuStream = CUDAStreamManager.getStream();
-      wrappedStream = new Stream(cuStream);
+      streamMain = new CUstream_st(); // (S1)
+      streamSecondary = new CUstream_st(); // (S2)
+      streamThird = new Stream(); // (S3)
 
       // Load header and main file
       URL heightMapUtilsHeaderPath = getClass().getResource("HeightMapUtils.cuh");
@@ -149,7 +156,7 @@ public class HeightMapExtractor
 
          parametersHostPointer = new FloatPointer(22);
          parametersDevicePointer = new FloatPointer();
-         CUDATools.mallocAsync(parametersDevicePointer, parametersHostPointer.limit(), cuStream);
+         CUDATools.mallocAsync(parametersDevicePointer, parametersHostPointer.limit(), streamMain);
          checkCUDAError();
       }
       catch (Exception e)
@@ -187,7 +194,8 @@ public class HeightMapExtractor
       // Populate parameter buffers with the necessary values
       float[] parametersArray = populateParameterArray(heightMapParameters, cameraIntrinsics, footHeight);
       parametersHostPointer.put(parametersArray);
-      CUDATools.memcpyAsync(parametersDevicePointer, parametersHostPointer, parametersArray.length, cuStream);
+      // This runs on the main stream (S1)
+      CUDATools.memcpyAsync(parametersDevicePointer, parametersHostPointer, parametersArray.length, streamMain);
 
       // Step 1: Remove rotation from transformation
       RigidBodyTransform groundToWorldNoRotation = new RigidBodyTransform(groundToWorldTransform);
@@ -206,8 +214,12 @@ public class HeightMapExtractor
 
       groundToWorldNoRotation.get(groundToWorldNoRotationTransformArray);
       groundToWorldTranslationHostPointer.put(groundToWorldNoRotationTransformArray);
-      CUDATools.mallocAsync(groundToWorldTranslationDevicePointer, groundToWorldNoRotationTransformArray.length, cuStream);
-      CUDATools.memcpyAsync(groundToWorldTranslationDevicePointer, groundToWorldTranslationHostPointer, groundToWorldNoRotationTransformArray.length, cuStream);
+      // This runs on the secondary stream (S2)
+      CUDATools.mallocAsync(groundToWorldTranslationDevicePointer, groundToWorldNoRotationTransformArray.length, streamMain);
+      CUDATools.memcpyAsync(groundToWorldTranslationDevicePointer,
+                            groundToWorldTranslationHostPointer,
+                            groundToWorldNoRotationTransformArray.length,
+                            streamMain);
       checkCUDAError();
 
       // ---------- Run the translate kernel ---------
@@ -221,8 +233,8 @@ public class HeightMapExtractor
          if (currentCellX != previousCellX || currentCellY != previousCellY)
          {
             // We will be updating the global height map with the applied translation of the data
-            globalMeanMap.copyTo(previousGlobalMeanMap);
-            globalVarianceMap.copyTo(previousGlobalVarianceMap);
+            globalMeanMap.copyTo(previousGlobalMeanMap, streamThird);
+            globalVarianceMap.copyTo(previousGlobalVarianceMap, streamThird);
 
             int translateKernelGridSizeXY = (globalCellsPerAxis + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
             dim3 translateKernelGridDim = new dim3(translateKernelGridSizeXY, translateKernelGridSizeXY, 1);
@@ -238,7 +250,11 @@ public class HeightMapExtractor
             translateKernel.withPointer(parametersDevicePointer);
             translateKernel.withFloat(resetOffset);
 
-            translateKernel.run(cuStream, translateKernelGridDim, blockSize, 0);
+            // This runs on the main stream (S1)
+            // Whatever stream this kernel runs on, all the parameters need to be finished on that stream
+            // That's why we need to wait for the third stream to finish its work (S3)
+            streamThird.waitForCompletion();
+            translateKernel.run(streamMain, translateKernelGridDim, blockSize, 0);
 
             translateKernelGridDim.close();
             checkCUDAError();
@@ -266,24 +282,29 @@ public class HeightMapExtractor
 
          sensorToWorldAlignedGround.get(this.sensorToWorldAlignedGroundTransformArray);
          sensorToWorldAlignedGroundTransformHostPointer.put(this.sensorToWorldAlignedGroundTransformArray);
-         CUDATools.mallocAsync(sensorToWorldAlignedGroundTransformDevicePointer, this.sensorToWorldAlignedGroundTransformArray.length, cuStream);
+         CUDATools.mallocAsync(sensorToWorldAlignedGroundTransformDevicePointer,
+                               this.sensorToWorldAlignedGroundTransformArray.length,
+                               PROFILING_KERNELS ? streamSecondary : streamMain);
          CUDATools.memcpyAsync(sensorToWorldAlignedGroundTransformDevicePointer,
                                sensorToWorldAlignedGroundTransformHostPointer,
-                               this.sensorToWorldAlignedGroundTransformArray.length, cuStream);
+                               this.sensorToWorldAlignedGroundTransformArray.length,
+                               PROFILING_KERNELS ? streamSecondary : streamMain);
 
          // Clearing all the temp maps so they are ready for the next update call
-         cudaMemset2DAsync(tempSumMap.data(), tempSumMap.step(), 0, (long) tempSumMap.cols() * Float.BYTES, tempSumMap.rows());
-         cudaMemset2DAsync(tempCountMap.data(), tempCountMap.step(), 0, (long) tempCountMap.cols() * Integer.BYTES, tempCountMap.rows());
+         cudaMemset2DAsync(tempSumMap.data(), tempSumMap.step(), 0, (long) tempSumMap.cols() * Float.BYTES, tempSumMap.rows(), streamSecondary);
+         cudaMemset2DAsync(tempCountMap.data(), tempCountMap.step(), 0, (long) tempCountMap.cols() * Integer.BYTES, tempCountMap.rows(), streamSecondary);
          cudaMemset2DAsync(tempSumOfSquaresMap.data(),
                            tempSumOfSquaresMap.step(),
                            0,
                            (long) tempSumOfSquaresMap.cols() * Float.BYTES,
-                           tempSumOfSquaresMap.rows());
+                           tempSumOfSquaresMap.rows(),
+                           PROFILING_KERNELS ? streamSecondary : streamMain);
          cudaMemset2DAsync(tempMotionVarianceMap.data(),
                            tempMotionVarianceMap.step(),
                            0,
                            (long) tempMotionVarianceMap.cols() * Float.BYTES,
-                           tempMotionVarianceMap.rows());
+                           tempMotionVarianceMap.rows(),
+                           PROFILING_KERNELS ? streamSecondary : streamMain);
 
          int gridDimX = (latestDepthImageGPU.cols() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
          int gridDimY = (latestDepthImageGPU.rows() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
@@ -299,7 +320,8 @@ public class HeightMapExtractor
          updateTempMapsKernel.withFloat(linearMotionMagnitude);
          updateTempMapsKernel.withFloat(angularMotionMagnitude);
 
-         updateTempMapsKernel.run(cuStream, updateTempMapsDim, blockSize, 0);
+         // Run this kernel (and all the parameters that got setup) on the secondary stream. (S2)
+         updateTempMapsKernel.run(PROFILING_KERNELS ? streamSecondary : streamMain, updateTempMapsDim, blockSize, 0);
 
          // That is the end of kernel one, now onto the local kernel
 
@@ -315,11 +337,12 @@ public class HeightMapExtractor
          int computeLocalKernelGridXY = (localCellsPerAxis + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
          dim3 localKernelDim = new dim3(computeLocalKernelGridXY, computeLocalKernelGridXY, 1);
 
-         localMapKernel.run(cuStream, localKernelDim, blockSize, 0);
+         // Run this kernel (and all the parameters that got setup) on the secondary stream. (S2)
+         localMapKernel.run(PROFILING_KERNELS ? streamSecondary : streamMain, localKernelDim, blockSize, 0);
 
          updateTempMapsDim.close();
          localKernelDim.close();
-         cudaFreeAsync(sensorToWorldAlignedGroundTransformDevicePointer, cuStream);
+         cudaFreeAsync(sensorToWorldAlignedGroundTransformDevicePointer, streamMain);
          checkCUDAError();
       }
 
@@ -339,11 +362,15 @@ public class HeightMapExtractor
          registerKernel.withPointer(groundToWorldTranslationDevicePointer);
          registerKernel.withPointer(parametersDevicePointer);
 
-         registerKernel.run(cuStream, registerKernelGridDim, blockSize, 0);
+         // This kernel depends on results from the secondary stream, so need to use that here
+         registerKernel.run(PROFILING_KERNELS ? streamSecondary : streamMain, registerKernelGridDim, blockSize, 0);
 
          registerKernelGridDim.close();
          checkCUDAError();
       }
+
+      // We want to run the next two kernels in parallel but need the data from this stream, so it needs to have finished
+      cudaStreamSynchronize(PROFILING_KERNELS ? streamSecondary : streamMain);
 
       float zeroValueForEmptySpaces = 0.0f;
       // ---------- Run the registration kernel for an empty global height map ----------
@@ -352,6 +379,7 @@ public class HeightMapExtractor
          dim3 registerKernelGridDim = new dim3(emptyRegistrationGridSizeXY, emptyRegistrationGridSizeXY, 1);
 
          // Need to reset the empty global map before using it so when its filled it starts with all "zero" values
+         // TODO blocking call
          emptyGlobalHeightMap.setTo(new Scalar(zeroValueForEmptySpaces));
 
          emptyRegisterKernel.withPointer(localMeanMap.data()).withLong(localMeanMap.step());
@@ -359,7 +387,7 @@ public class HeightMapExtractor
          emptyRegisterKernel.withPointer(groundToWorldTranslationDevicePointer);
          emptyRegisterKernel.withPointer(parametersDevicePointer);
 
-         emptyRegisterKernel.run(cuStream, registerKernelGridDim, blockSize, 0);
+         emptyRegisterKernel.run(streamMain, registerKernelGridDim, blockSize, 0);
 
          registerKernelGridDim.close();
          checkCUDAError();
@@ -377,14 +405,14 @@ public class HeightMapExtractor
          planOffsetKernel.withFloat(zeroValueForEmptySpaces);
          planOffsetKernel.withPointer(parametersDevicePointer);
 
-         planOffsetKernel.run(cuStream, planOffsetKernelGridDim, blockSize, 0);
+         planOffsetKernel.run(PROFILING_KERNELS ? streamSecondary : streamMain, planOffsetKernelGridDim, blockSize, 0);
 
          planOffsetKernelGridDim.close();
          checkCUDAError();
       }
 
       // All that memory we allocated on the GPU, need to free that up now
-      cudaFreeAsync(groundToWorldTranslationDevicePointer, cuStream);
+      cudaFreeAsync(groundToWorldTranslationDevicePointer, streamMain);
 
       // The center of this map should be centered in the world grid
       // The sensor origin isn't always at the center of a grid point, in fact it's often not in the center
@@ -394,10 +422,10 @@ public class HeightMapExtractor
 
       // Finished GPU kernels, let pack this into the height map data object
       Mat hostHeightMap = new Mat();
-      globalMeanMap.download(hostHeightMap, wrappedStream);
+      globalMeanMap.download(hostHeightMap, streamThird);
 
       // Synchronize with the GPU when we actually want to use the data from the GPU, lets more work get done on the CPU before we wait for the GPU result
-      error = cudaStreamSynchronize(cuStream);
+      error = cudaStreamSynchronize(null); // Passing in null hear uses the default stream, which is blocking for all streams
       CUDATools.checkCUDAError(error);
 
       HeightMapTools.convertToHeightMapData(hostHeightMap,
@@ -453,9 +481,9 @@ public class HeightMapExtractor
       planOffsetKernel.close();
       emptyRegisterKernel.close();
 
-      deallocateFloatPointer(sensorToWorldAlignedGroundTransformHostPointer, sensorToWorldAlignedGroundTransformDevicePointer, cuStream);
-      deallocateFloatPointer(groundToWorldTranslationHostPointer, groundToWorldTranslationDevicePointer, cuStream);
-      deallocateFloatPointer(parametersHostPointer, parametersDevicePointer, cuStream);
+      deallocateFloatPointer(sensorToWorldAlignedGroundTransformHostPointer, sensorToWorldAlignedGroundTransformDevicePointer, streamMain);
+      deallocateFloatPointer(groundToWorldTranslationHostPointer, groundToWorldTranslationDevicePointer, streamMain);
+      deallocateFloatPointer(parametersHostPointer, parametersDevicePointer, streamMain);
 
       tempSumMap.close();
       tempCountMap.close();
@@ -473,8 +501,9 @@ public class HeightMapExtractor
       emptyGlobalHeightMap.close();
 
       // At the end we have to destroy the stream to release the memory
-      wrappedStream.close();
-      CUDAStreamManager.releaseStream(cuStream);
+      streamMain.close();
+      streamSecondary.close();
+      streamThird.close();
    }
 
    /**
@@ -487,7 +516,7 @@ public class HeightMapExtractor
       if (PRINT_TIMING_FOR_KERNELS)
       {
          // Check for errors after the async calls
-         error = cudaStreamSynchronize(cuStream);
+         error = cudaStreamSynchronize(streamMain);
          CUDATools.checkCUDAError(error);
       }
    }

@@ -6,6 +6,7 @@ import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Stream;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
@@ -30,12 +31,13 @@ public class TerrainMapExtractor
    private final HeightMapParameters heightMapParameters;
    private final TerrainMapParameters terrainMapParameters;
 
+   private final Stream downloadStreamOne;
+   private final Stream downloadStreamTwo;
    private final CUstream_st stream;
    private final CUDAProgram terrainMapProgram;
    private final CUDAKernel terrainMapKernel;
 
-   private dim3 terrainKernelGridDim;
-   private dim3 blockSize;
+   private final dim3 blockSize;
    private int cellsPerAxisTerrain;
 
    private final FloatPointer terrainMapParametersHostPointer;
@@ -63,6 +65,8 @@ public class TerrainMapExtractor
       this.heightMapParameters = heightMapParameters;
       this.terrainMapParameters = terrainMapParameters;
 
+      downloadStreamOne = new Stream();
+      downloadStreamTwo = new Stream();
       stream = CUDAStreamManager.getStream();
 
       // We have to try to load the kernel inside this try catch cause it may throw an exception
@@ -76,6 +80,8 @@ public class TerrainMapExtractor
          terrainMapProgram = new CUDAProgram(kernelPath, heightMapUtilsHeaderPath, mathUtilsHeaderPath);
          terrainMapKernel = terrainMapProgram.loadKernel("computeTerrainData");
          terrainMapKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
+
+         blockSize = new dim3(BLOCK_SIZE_XY, BLOCK_SIZE_XY, 1);
       }
       catch (Exception e)
       {
@@ -83,8 +89,9 @@ public class TerrainMapExtractor
       }
 
       // This is the number of parameters being passed in as floats to the kernel
-      terrainMapParametersHostPointer = new FloatPointer(18);
+      terrainMapParametersHostPointer = new FloatPointer(11);
       terrainMapParametersDevicePointer = new FloatPointer();
+      CUDATools.mallocAsync(terrainMapParametersDevicePointer, terrainMapParametersHostPointer.limit(), stream);
 
       computeDerivedParameters();
 
@@ -117,7 +124,6 @@ public class TerrainMapExtractor
       terrainMapParametersHostPointer.put(terrainMapParametersArray);
 
       // Handle memory allocation and copy values to the GPU
-      CUDATools.mallocAsync(terrainMapParametersDevicePointer, terrainMapParametersArray.length, stream);
       CUDATools.memcpyAsync(terrainMapParametersDevicePointer, terrainMapParametersHostPointer, terrainMapParametersArray.length, stream);
       checkCUDAError();
 
@@ -132,39 +138,41 @@ public class TerrainMapExtractor
 
       // Compute the correct number of threads to run with the kernel
       int terrainMapKernelGridSizeXY = (cellsPerAxisTerrain + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
-      terrainKernelGridDim = new dim3(terrainMapKernelGridSizeXY, terrainMapKernelGridSizeXY, 1);
-      blockSize = new dim3(BLOCK_SIZE_XY, BLOCK_SIZE_XY, 1);
+      dim3 terrainKernelGridDim = new dim3(terrainMapKernelGridSizeXY, terrainMapKernelGridSizeXY, 1);
 
       // Run the kernel and check for errors
       terrainMapKernel.run(stream, terrainKernelGridDim, blockSize, 0);
       checkCUDAError();
 
       // This has to be done because we start to download to the CPU, so the data on the GPU needs to be finalized
+      // We need to synchronize here so we can download the data to the CPU on other threads, fast
       error = cudaStreamSynchronize(stream);
-      blockSize.close();
       terrainKernelGridDim.close();
       CUDATools.checkCUDAError(error);
 
       // --------------------------- Download all the data from the GPU and set the terrain data object ----------------------------
       {
          Mat cpuHeightMap = new Mat();
-         gpuHeightMap.download(cpuHeightMap);
+         gpuHeightMap.download(cpuHeightMap, downloadStreamOne);
 
          Mat cpuNormalXMap = new Mat();
-         normalXMat.download(cpuNormalXMap);
+         normalXMat.download(cpuNormalXMap, downloadStreamTwo);
 
          Mat cpuNormalYMap = new Mat();
-         normalYMat.download(cpuNormalYMap);
+         normalYMat.download(cpuNormalYMap, downloadStreamOne);
 
          Mat cpuNormalZMap = new Mat();
-         normalZMat.download(cpuNormalZMap);
+         normalZMat.download(cpuNormalZMap, downloadStreamTwo);
 
          Mat cpuTraversabilityMap = new Mat();
-         traversabilityMat.download(cpuTraversabilityMap);
+         traversabilityMat.download(cpuTraversabilityMap, downloadStreamOne);
 
          Mat cpuTraversabilityClassMap = new Mat();
-         traversabilityClassMat.download(cpuTraversabilityClassMap);
+         traversabilityClassMat.download(cpuTraversabilityClassMap, downloadStreamTwo);
 
+         // Going to start using the data on the CPU so let's make sure its actually on the CPU
+         downloadStreamTwo.waitForCompletion();
+         downloadStreamTwo.waitForCompletion();
          TerrainMapTools.convertToTerrainMapData(cpuHeightMap,
                                                  cpuNormalXMap,
                                                  cpuNormalYMap,
@@ -214,13 +222,16 @@ public class TerrainMapExtractor
       traversabilityMat.close();
       traversabilityClassMat.close();
 
+      int error = cudaFree(terrainMapParametersDevicePointer);
       terrainMapParametersHostPointer.close();
       terrainMapParametersDevicePointer.close();
 
-      int error = cudaFree(terrainMapParametersDevicePointer);
+      blockSize.close();
       CUDATools.checkCUDAError(error);
 
       // At the end we have to destroy the stream to release the memory
+      downloadStreamOne.close();
+      downloadStreamTwo.close();
       CUDAStreamManager.releaseStream(stream);
    }
 
