@@ -117,14 +117,6 @@ public class RDXQuickFootstepPlannerDemo
 
          private void renderImGuiWidgets()
          {
-            ImGui.text("Sidewaysness: %.3f".formatted(planner.getSidewaysness()));
-
-//            for (RobotSide side : RobotSide.values)
-//               ImGui.checkbox("Stance " + side.getPascalCaseName() + " Gizmo", stanceGizmos.get(side).getSelected());
-//
-//            for (RobotSide side : RobotSide.values)
-//               ImGui.checkbox("Goal " + side.getPascalCaseName() + " Gizmo", goalGizmos.get(side).getSelected());
-
             ImGui.pushItemWidth(ImGui.getColumnWidth());
             if (ImGui.sliderInt("###Max Steps", maxSteps, 1, 25, "Max steps: %d"))
                planner.setMaxSteps(maxSteps[0]);
@@ -186,12 +178,6 @@ public class RDXQuickFootstepPlannerDemo
                int footstepIndex = footstepIndexCounter++;
                visualModels.add(RDXModelBuilder.buildModelInstance(builder ->
                {
-//                  builder.addSphere(0.02f, planner.getGoalMid().getPosition(), Color.PURPLE);
-//                  builder.addLine(planner.getStanceMid().getPosition(), planner.getApproachGoalMid(), 0.01, Color.WHITE);
-//                  builder.addLine(planner.getOppositeStance(), planner.getOppositeStanceMidlineProjection(), 0.01, Color.OLIVE);
-//                  if (!planner.isSidestep())
-//                     builder.addLine(planner.getGoalMid().getPosition(), planner.getApproachGoalMid(), 0.01, Color.CHARTREUSE);
-
                   SideMap<Point3D> stanceHipAir = new SideMap<>(() -> new Point3D());
                   SideMap<Point3D> goalHipAir = new SideMap<>(() -> new Point3D());
                   for (RobotSide side : RobotSide.values)
@@ -209,8 +195,6 @@ public class RDXQuickFootstepPlannerDemo
                   float r = 0.5294118f;
                   float g = 0.80784315f;
                   float b = 0.92156863f;
-                  if (planner.getTransistionToGoal())
-                     b += 0.07f;
                   if (planner.getFootToSwing() == RobotSide.LEFT)
                   {
                      r = 0.6f;
