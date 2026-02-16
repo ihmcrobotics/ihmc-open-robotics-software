@@ -43,6 +43,7 @@ public class RDXQuickFootstepPlannerDemo
                                                                                                               tempTransform);
    private final FramePose3D textFramePose = new FramePose3D();
    private int footstepIndexCounter = 0;
+   private final int[] maxSteps = {50};
 
    public RDXQuickFootstepPlannerDemo()
    {
@@ -123,11 +124,16 @@ public class RDXQuickFootstepPlannerDemo
          {
             ImGui.text("Sidewaysness: %.3f".formatted(planner.getSidewaysness()));
 
-            for (RobotSide side : RobotSide.values)
-               ImGui.checkbox("Stance " + side.getPascalCaseName() + " Gizmo", stanceGizmos.get(side).getSelected());
+//            for (RobotSide side : RobotSide.values)
+//               ImGui.checkbox("Stance " + side.getPascalCaseName() + " Gizmo", stanceGizmos.get(side).getSelected());
+//
+//            for (RobotSide side : RobotSide.values)
+//               ImGui.checkbox("Goal " + side.getPascalCaseName() + " Gizmo", goalGizmos.get(side).getSelected());
 
-            for (RobotSide side : RobotSide.values)
-               ImGui.checkbox("Goal " + side.getPascalCaseName() + " Gizmo", goalGizmos.get(side).getSelected());
+            ImGui.pushItemWidth(ImGui.getColumnWidth());
+            if (ImGui.sliderInt("###Max Steps", maxSteps, 1, 25, "Max steps: %d"))
+               planner.setMaxSteps(maxSteps[0]);
+            ImGui.popItemWidth();
 
             for (RobotSide side : RobotSide.values)
                ImGui.text("Stance " + side + ": " + stanceGizmos.get(side).getPoseGizmo().getTransformToParent().getTranslation()
@@ -190,6 +196,12 @@ public class RDXQuickFootstepPlannerDemo
                   builder.addLine(planner.getOppositeStance(), planner.getOppositeStanceMidlineProjection(), 0.01, Color.OLIVE);
                   if (!planner.isSidestep())
                      builder.addLine(planner.getGoalMid().getPosition(), planner.getApproachGoalMid(), 0.01, Color.CHARTREUSE);
+
+                  for (RobotSide side : RobotSide.values)
+                  {
+                     builder.addSphere(0.03, planner.getStanceHip().get(side), Color.TEAL);
+                     builder.addSphere(0.03, planner.getGoalHip().get(side), Color.WHITE);
+                  }
 
                   float r = 0.5294118f;
                   float g = 0.80784315f;
