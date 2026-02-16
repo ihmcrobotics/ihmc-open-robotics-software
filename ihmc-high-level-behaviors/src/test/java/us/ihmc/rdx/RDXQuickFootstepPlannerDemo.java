@@ -57,7 +57,7 @@ public class RDXQuickFootstepPlannerDemo
          {
             baseUI.create();
 
-            foothold = planner.createFootPolygon(new Pose3D());
+            foothold = planner.createFootPolygon(new Pose3D(), 0.0);
 
             // Initialize stance feet graphics and gizmos near origin
             for (RobotSide side : RobotSide.values)
@@ -188,7 +188,7 @@ public class RDXQuickFootstepPlannerDemo
                      goalHipAir.get(side).set(planner.getGoalHip().get(side));
                      goalHipAir.get(side).addZ(0.8f);
                      builder.addSphere(0.03, goalHipAir.get(side), Color.WHITE);
-                     builder.addLine(stanceHipAir.get(side), goalHipAir.get(side), 0.01, Color.WHITE);
+                     builder.addLine(stanceHipAir.get(side), goalHipAir.get(side), 0.01, Color.SKY);
                   }
                   builder.addLine(stanceHipAir.get(planner.getFootToSwing()), planner.getSwingEnd().getPosition(), 0.01, Color.WHITE);
 
