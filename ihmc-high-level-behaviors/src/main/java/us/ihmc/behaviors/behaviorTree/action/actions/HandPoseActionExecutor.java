@@ -128,20 +128,21 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
          state.setCanExecute(state.getPalmFrame().isChildOfWorld());
 
          if (state.getPalmFrame().isChildOfWorld() && state.getIsNextForExecution())
-         {
-            ArmIKSolver armIKSolver = armIKSolvers.get(definition.getSide());
-            armIKSolver.copySourceToWork();
-            armIKSolver.update(state.getGoalChestFrame(), state.getPalmFrame().getReferenceFrame());
-            armIKSolver.solve();
-
-            // Send the solution back to the UI so the user knows what's gonna happen with the arm.
-            state.setSolutionQuality(armIKSolver.getQuality());
-            for (int i = 0; i < armIKSolver.getSolutionOneDoFJoints().length; i++)
-            {
-               state.getPreviewJointAngles().accessValue()[i] = armIKSolver.getSolutionOneDoFJoints()[i].getQ();
-            }
-         }
+            solveIK();
       }
+   }
+
+   private void solveIK()
+   {
+      ArmIKSolver armIKSolver = armIKSolvers.get(definition.getSide());
+      armIKSolver.copySourceToWork();
+      armIKSolver.update(state.getGoalChestFrame(), state.getPalmFrame().getReferenceFrame());
+      armIKSolver.solve();
+
+      // Send the solution back to the UI so the user knows what's gonna happen with the arm.
+      state.setSolutionQuality(armIKSolver.getQuality());
+      for (int i = 0; i < armIKSolver.getSolutionOneDoFJoints().length; i++)
+         state.getPreviewJointAngles().accessValue()[i] = armIKSolver.getSolutionOneDoFJoints()[i].getQ();
    }
 
    @Override
@@ -159,6 +160,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
       }
       else if (state.getPalmFrame().isChildOfWorld())
       {
+         solveIK();
          JointspaceTrajectoryMessage jointspaceTrajectoryMessage = buildJointspaceTrajectoryMessage();
 
          if (definition.getJointspaceOnly())
