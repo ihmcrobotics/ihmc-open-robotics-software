@@ -1,0 +1,244 @@
+package us.ihmc.rdx;
+
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import imgui.ImGui;
+import org.apache.commons.math3.util.Pair;
+import us.ihmc.behaviors.tools.MinimalFootstep;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.footstepPlanning.simplePlanners.QuickFootstepPlanner;
+import us.ihmc.rdx.tools.LibGDXApplicationCreator;
+import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.rdx.tools.RDXModelBuilder;
+import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
+import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
+import us.ihmc.robotics.EuclidCoreMissingTools;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class RDXQuickFootstepPlannerDemo
+{
+   private final RDXBaseUI baseUI = new RDXBaseUI("Quick Footstep Planner Demo");
+   private final SideDependentList<RDXFootstepPlanGraphic> stanceFeet = new SideDependentList<>();
+   private final SideDependentList<RDXFootstepPlanGraphic> goalFeet = new SideDependentList<>();
+   private final SideDependentList<RDXSelectablePose3DGizmo> stanceGizmos = new SideDependentList<>();
+   private final SideDependentList<RDXSelectablePose3DGizmo> goalGizmos = new SideDependentList<>();
+   private ConvexPolygon2D foothold;
+   private final QuickFootstepPlanner planner = new QuickFootstepPlanner();
+   private List<Pair<RobotSide, Pose3D>> footstepPlan;
+   private final List<ModelInstance> visualModels = new ArrayList<>();
+   private final List<RDX3DSituatedText> footstepIndexTexts = new ArrayList<>();
+   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
+   private final ReferenceFrame footstepFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("footstepFrame",
+                                                                                                              ReferenceFrame.getWorldFrame(),
+                                                                                                              tempTransform);
+   private final FramePose3D textFramePose = new FramePose3D();
+   private int footstepIndexCounter = 0;
+
+   public RDXQuickFootstepPlannerDemo()
+   {
+      LibGDXApplicationCreator.launchGDXApplication(new Lwjgl3ApplicationAdapter()
+      {
+         @Override
+         public void create()
+         {
+            baseUI.create();
+
+            // Create foot polygon
+            foothold = new ConvexPolygon2D();
+            double halfLength = 0.1;
+            double halfWidth = 0.05;
+            foothold.addVertex(halfLength, -halfWidth);
+            foothold.addVertex(halfLength, halfWidth);
+            foothold.addVertex(-halfLength, halfWidth);
+            foothold.addVertex(-halfLength, -halfWidth);
+            foothold.update();
+
+            // Initialize stance feet graphics and gizmos near origin
+            for (RobotSide side : RobotSide.values)
+            {
+               RDXFootstepPlanGraphic stanceGraphic = new RDXFootstepPlanGraphic();
+               ArrayList<MinimalFootstep> stanceFootsteps = new ArrayList<>();
+               Pose3D stancePose = new Pose3D();
+               stancePose.setY(side == RobotSide.LEFT ? 0.1 : -0.1);
+               stanceFootsteps.add(new MinimalFootstep(side, stancePose, foothold, "Stance " + side.getPascalCaseName()));
+               stanceGraphic.generateMeshes(stanceFootsteps);
+               stanceFeet.put(side, stanceGraphic);
+               baseUI.getPrimaryScene().addRenderableProvider(stanceGraphic);
+
+               RDXSelectablePose3DGizmo stanceGizmo = new RDXSelectablePose3DGizmo();
+               stanceGizmo.createAndSetupDefault(baseUI.getPrimary3DPanel());
+               stanceGizmo.getPoseGizmo().getTransformToParent().getTranslation().set(0.0, side == RobotSide.LEFT ? 0.1 : -0.1, 0.0);
+               stanceGizmo.getPoseGizmo().setResizeAutomatically(false);
+               stanceGizmo.getPoseGizmo().setCenterSphereToTorusRatio(0.8f);
+               stanceGizmo.setSelected(true);
+               stanceGizmos.put(side, stanceGizmo);
+            }
+
+            // Initialize goal feet graphics and gizmos at 0.5m forward
+            for (RobotSide side : RobotSide.values)
+            {
+               RDXFootstepPlanGraphic goalGraphic = new RDXFootstepPlanGraphic();
+               ArrayList<MinimalFootstep> goalFootsteps = new ArrayList<>();
+               Pose3D goalPose = new Pose3D();
+               goalPose.setX(0.5);
+               goalPose.setY(side == RobotSide.LEFT ? 0.1 : -0.1);
+               goalFootsteps.add(new MinimalFootstep(side, goalPose, foothold, "Goal " + side.getPascalCaseName()));
+               goalGraphic.generateMeshes(goalFootsteps);
+               goalFeet.put(side, goalGraphic);
+               baseUI.getPrimaryScene().addRenderableProvider(goalGraphic);
+
+               RDXSelectablePose3DGizmo goalGizmo = new RDXSelectablePose3DGizmo();
+               goalGizmo.createAndSetupDefault(baseUI.getPrimary3DPanel());
+               goalGizmo.getPoseGizmo().getTransformToParent().getTranslation().set(0.5, side == RobotSide.LEFT ? 0.1 : -0.1, 0.0);
+               goalGizmo.getPoseGizmo().setResizeAutomatically(false);
+               goalGizmo.getPoseGizmo().setCenterSphereToTorusRatio(0.8f);
+               goalGizmo.setSelected(true);
+               goalGizmos.put(side, goalGizmo);
+            }
+
+            baseUI.getImGuiPanelManager().addPanel("Quick Footstep Planner", this::renderImGuiWidgets);
+            baseUI.getPrimaryScene().addRenderableProvider((renderables, pool) ->
+            {
+               for (ModelInstance model : visualModels)
+                  model.getRenderables(renderables, pool);
+            });
+            baseUI.getPrimaryScene().addRenderableProvider((renderables, pool) ->
+            {
+               for (RDX3DSituatedText text : footstepIndexTexts)
+                  text.getRenderables(renderables, pool);
+            });
+         }
+
+         private void renderImGuiWidgets()
+         {
+            for (RobotSide side : RobotSide.values)
+               ImGui.checkbox("Stance " + side.getPascalCaseName() + " Gizmo", stanceGizmos.get(side).getSelected());
+
+            for (RobotSide side : RobotSide.values)
+               ImGui.checkbox("Goal " + side.getPascalCaseName() + " Gizmo", goalGizmos.get(side).getSelected());
+
+            ImGui.text("Stance footsteps: ");
+            for (RobotSide side : RobotSide.values)
+               ImGui.text("Stance " + side + ": " + stanceGizmos.get(side).getPoseGizmo().getTransformToParent().getTranslation()
+                          + "  Yaw: (%.3f%s)".formatted(Math.toDegrees(stanceGizmos.get(side).getPoseGizmo().getTransformToParent().getRotation().getYaw()), EuclidCoreMissingTools.DEGREE_SYMBOL));
+
+            ImGui.text("Planned Footsteps: " + footstepPlan.size());
+            for (int i = 0; i < footstepPlan.size(); i++)
+               ImGui.text("Step " + i + ": " + footstepPlan.get(i).getFirst() + " to " + footstepPlan.get(i).getSecond().getPosition()
+               + "  Yaw: (%.3f%s)".formatted(Math.toDegrees(footstepPlan.get(i).getSecond().getYaw()), EuclidCoreMissingTools.DEGREE_SYMBOL));
+         }
+
+         @Override
+         public void render()
+         {
+            // Update stance feet to match gizmo transforms
+            for (RobotSide side : RobotSide.values)
+            {
+               ArrayList<MinimalFootstep> stanceFootsteps = new ArrayList<>();
+               Pose3D stancePose = new Pose3D(stanceGizmos.get(side).getPoseGizmo().getTransformToParent());
+               stanceFootsteps.add(new MinimalFootstep(side, stancePose, foothold, "Stance " + side.getPascalCaseName()));
+               stanceFeet.get(side).generateMeshes(stanceFootsteps);
+               stanceFeet.get(side).update();
+            }
+
+            // Update goal feet to match gizmo transforms
+            for (RobotSide side : RobotSide.values)
+            {
+               ArrayList<MinimalFootstep> goalFootsteps = new ArrayList<>();
+               Pose3D goalPose = new Pose3D(goalGizmos.get(side).getPoseGizmo().getTransformToParent());
+               goalFootsteps.add(new MinimalFootstep(side, goalPose, foothold, "Goal " + side.getPascalCaseName()));
+               goalFeet.get(side).generateMeshes(goalFootsteps);
+               goalFeet.get(side).update();
+            }
+
+            // Plan footsteps from stance to goal
+            SideDependentList<Pose3D> stances = new SideDependentList<>();
+            SideDependentList<Pose3D> goals = new SideDependentList<>();
+
+            for (RobotSide side : RobotSide.values)
+            {
+               stances.put(side, new Pose3D(stanceGizmos.get(side).getPoseGizmo().getTransformToParent()));
+               goals.put(side, new Pose3D(goalGizmos.get(side).getPoseGizmo().getTransformToParent()));
+            }
+
+            for (ModelInstance model : visualModels)
+               model.model.dispose();
+            visualModels.clear();
+            for (RDX3DSituatedText text : footstepIndexTexts)
+               text.dispose();
+            footstepIndexTexts.clear();
+            footstepIndexCounter = 0;
+            planner.setStepPlannedCallback(() ->
+            {
+               int footstepIndex = footstepIndexCounter++;
+               visualModels.add(RDXModelBuilder.buildModelInstance(builder ->
+               {
+                  builder.addSphere(0.02f, planner.getGoalMid().getPosition(), Color.PURPLE);
+                  builder.addLine(planner.getStanceMid().getPosition(), planner.getApproachGoalMid(), 0.01, Color.WHITE);
+                  builder.addLine(planner.getOppositeStance(), planner.getOppositeStanceMidlineProjection(), 0.01, Color.OLIVE);
+                  builder.addLine(planner.getGoalMid().getPosition(), planner.getApproachGoalMid(), 0.01, Color.CHARTREUSE);
+
+                  float r = 0.5294118f;
+                  float g = 0.80784315f;
+                  float b = 0.92156863f;
+                  if (planner.getTransistionToGoal())
+                     b += 0.07f;
+                  if (planner.getFootToSwing() == RobotSide.LEFT)
+                     r += 0.07f;
+                  else
+                     g -= 0.07f;
+                  Color color = new Color(r, g, b, 1.0f);
+                  builder.addMultiLine(planner.getSwingEnd(), foothold.getPolygonVerticesView(), 0.01, color, true);
+                  builder.addPolygon(planner.getSwingEnd(), foothold, color);
+               }));
+
+               float textHeight = 0.08f;
+               RDX3DSituatedText footstepIndexText = new RDX3DSituatedText(String.valueOf(footstepIndex), textHeight);
+               planner.getSwingEnd().get(tempTransform);
+               footstepFrame.update();
+               textFramePose.setToZero(footstepFrame);
+               textFramePose.getOrientation().prependYawRotation(-Math.PI / 2.0);
+               textFramePose.getPosition().addZ(0.01);
+               textFramePose.getPosition().addY(textHeight / 4.0);
+               textFramePose.getPosition().addX(-textHeight / 2.0);
+               textFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+               LibGDXTools.toLibGDX(textFramePose, tempTransform, footstepIndexText.getModelTransform());
+               footstepIndexTexts.add(footstepIndexText);
+            });
+
+            footstepPlan = planner.plan(stances, goals);
+
+            baseUI.renderBeforeOnScreenUI();
+            baseUI.renderEnd();
+         }
+
+         @Override
+         public void dispose()
+         {
+            for (RobotSide side : RobotSide.values)
+            {
+               stanceFeet.get(side).destroy();
+               goalFeet.get(side).destroy();
+            }
+            for (RDX3DSituatedText text : footstepIndexTexts)
+               text.dispose();
+            baseUI.dispose();
+         }
+      }, getClass());
+   }
+
+   public static void main(String[] args)
+   {
+      new RDXQuickFootstepPlannerDemo();
+   }
+}

@@ -80,8 +80,13 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
       return get(cellSize);
    }
 
-   default double getWidthInMeters()
+   default double getLocalWidthInMeters()
    {
-      return get(widthInMeters);
+      return get(localWidthInMeters);
+   }
+
+   default double getGlobalWidthInMeters()
+   {
+      return get(globalWidthInMeters);
    }
 }

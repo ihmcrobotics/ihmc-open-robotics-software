@@ -14,6 +14,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseCommunicatorMap;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
 import us.ihmc.perception.gpuMapping.TerrainMapData;
+import us.ihmc.sensors.ImageSensor;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -28,6 +29,7 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeRootNodeExecu
    public BehaviorTreeExecutor(ROS2SyncedRobotModel syncedRobot,
                                ROS2PeerClockOffsetEstimator peerClockEstimator,
                                ROS2ControllerHelper ros2ControllerHelper,
+                               ImageSensor imageSensor,
                                YOLOv8DetectionExecutor yolo,
                                IsaacROSFoundationPoseCommunicatorMap foundationPose,
                                TerrainMapData terrainMapData)
@@ -38,20 +40,19 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeRootNodeExecu
             new WorkspaceResourceDirectory(BehaviorTreeExecutor.class, "/behaviorTrees"),
             new BehaviorTreeExecutorNodeBuilder());
 
-      controllerStatusTracker = new ControllerStatusTracker(new LogToolsLogger(), ros2ControllerHelper.getROS2Node(), robotModel.getSimpleRobotName());
+      controllerStatusTracker = new ControllerStatusTracker(new LogToolsLogger(), ros2ControllerHelper.getROS2Node(), syncedRobot);
       for (RobotSide robotSide : RobotSide.values)
          abilityHandComms.put(robotSide, new AbilityHandActionComms(robotSide, ros2ControllerHelper.getROS2Node()));
-      scene = new BehaviorTreeSceneExecutor(crdtInfo, this::getAndIncrementNextID, syncedRobot, yolo, foundationPose);
+      scene = new BehaviorTreeSceneExecutor(crdtInfo, this::getAndIncrementNextID, syncedRobot, imageSensor, yolo, foundationPose, terrainMapData);
       setScene(scene);
 
-      ((BehaviorTreeExecutorNodeBuilder) getNodeBuilder()).initialize(crdtInfo,
+      ((BehaviorTreeExecutorNodeBuilder) getNodeBuilder()).initialize(this,
                                                                       saveFileDirectory,
                                                                       ros2ControllerHelper,
                                                                       syncedRobot,
                                                                       controllerStatusTracker,
                                                                       abilityHandComms,
-                                                                      scene,
-                                                                      terrainMapData);
+                                                                      scene);
    }
 
    public void update()
@@ -94,7 +95,7 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeRootNodeExecu
       {
          modifyTreeTopology(topologyOperationQueue ->
          {
-            if (this.rootNode == null)
+            if (rootNode == null)
                topologyOperationQueue.queueDestroyEntireTree();
 
             BehaviorTreeRootNodeExecutor rootNode = (BehaviorTreeRootNodeExecutor) getNodeBuilder().createRootNode(getAndIncrementNextID());

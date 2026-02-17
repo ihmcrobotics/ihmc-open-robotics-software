@@ -8,7 +8,6 @@ import us.ihmc.behaviors.behaviorTree.action.actions.ScrewPrimitiveActionState;
 import us.ihmc.behaviors.behaviorTree.action.actions.WaitDurationActionState;
 import us.ihmc.communication.crdt.CRDTStatusDouble;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
-import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -22,9 +21,6 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
    public static final String PULL_SCREW_PRIMITIVE = "Pull Screw primitive";
    public static final String POST_PULL_DOOR = "Post pull door evaluation";
    public static final String POST_GRASP_HANDLE = "Evaluate grasp";
-
-   @Nullable
-   private DoorNode doorNode;
 
    private final BehaviorTreeRootNodeState actionSequence;
    private final List<WaitDurationActionState> setStaticForApproachActions = new ArrayList<>();
@@ -143,17 +139,6 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
       isValid &= postGraspEvaluationAction != null;
       isValid &= postPullDoorEvaluationAction != null;
       return isValid;
-   }
-
-   @Nullable
-   public DoorNode getDoorNode()
-   {
-      return doorNode;
-   }
-
-   public void setDoorNode(@Nullable DoorNode doorNode)
-   {
-      this.doorNode = doorNode;
    }
 
    public BehaviorTreeRootNodeState getActionSequence()

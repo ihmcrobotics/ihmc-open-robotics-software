@@ -69,7 +69,7 @@ public class MultiplySmallMatricesALotTask extends BarrierSchedulerLoadTestTask
       RandomMatrices_DDRM.fillUniform(matrixA, random);
       RandomMatrices_DDRM.fillUniform(matrixB, random);
       timingInformation.initialize(System.nanoTime(), actualDTMillis);
-      return true;
+      return super.initialize();
    }
 
    /**

@@ -2,7 +2,7 @@ package us.ihmc.rdx.ui;
 
 import imgui.ImGui;
 import us.ihmc.communication.property.StoredPropertySetROS2TopicPair;
-import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
+import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.property.StoredPropertySetBasics;

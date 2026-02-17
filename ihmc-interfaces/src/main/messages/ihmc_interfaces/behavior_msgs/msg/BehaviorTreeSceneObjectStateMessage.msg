@@ -16,3 +16,9 @@ controller_msgs/RigidBodyTransformMessage transform_to_world
 
 # Used only for door panel
 behavior_msgs/PersistentDetectionStatusMessage door_panel_detection
+
+# Used only for door frame
+uint32 points_in_capsule
+
+# Whether the object is frozen
+bool frozen

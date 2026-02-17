@@ -4,11 +4,12 @@ behavior_msgs/LeafNodeDefinitionMessage definition
 byte COUNTER_TYPE = 0
 byte LLM_TYPE = 1
 byte PROXIMITY_TYPE = 2
-byte ALWAYS_FAIL = 3
-byte ALWAYS_SUCCEED = 4
+byte SHAPE_CONTAINS = 3
+byte ALWAYS_FAIL = 4
+byte ALWAYS_SUCCEED = 5
 
 # The type of condition as defined above
-byte type
+byte condition_type
 
 # COUNTER TYPE
 
@@ -61,3 +62,26 @@ float64 max_distance
 
 # Timeout for waiting for the condition to be satisfied
 float64 timeout
+
+# SHAPE CONTAINS TYPE
+
+byte CONTAINS_FRAME = 0
+byte CONTAINS_POINTS = 1
+
+# The type of shape contains condition as defined above
+byte shape_contains_type
+
+# Name of the frame the the shape's pose is expressed in
+string shape_parent_frame_name
+
+# Transform that expresses the pose of the shape in the parent frame
+controller_msgs/RigidBodyTransformMessage shape_transform_to_parent
+
+# Radius of the sphere used for checking containment
+float32 sphere_radius
+
+# Name of frame to check for containment
+string frame_name
+
+# Minimum number of points in the shape
+uint32 min_points

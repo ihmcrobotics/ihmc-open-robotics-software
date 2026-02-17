@@ -25,9 +25,9 @@ import java.util.function.Consumer;
  * Supports:
  * - Publishing on the fly without having to first create publishers
  * - Disabling and enabling all the publishers and subscribers created here
- * TODO: Remove this class and combine into ROS2Node directly
+ * TODO: A lot of simplification will happen when we switch to jros2
  */
-public class ROS2Helper implements ROS2PublishSubscribeAPI
+public class ROS2Helper
 {
    protected final ROS2Node ros2Node;
    protected final ROS2PublisherMap ros2PublisherMap;
@@ -43,37 +43,40 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
       ros2PublisherMap = new ROS2PublisherMap(ros2Node);
    }
 
-   @Override
    public <T> void subscribeViaCallback(ROS2Topic<T> topic, Consumer<T> callback)
    {
       ros2Node.createSubscription2(topic, callback);
    }
 
-   @Override
+   /**
+    * Allocation free callback where the user only has access to the message in the callback.
+    * The user should not take up any significant time in the callback to not slow down the ROS 2
+    * thread.
+    */
    public <T> void subscribeViaVolatileCallback(ROS2Topic<T> topic, Consumer<T> callback)
    {
       ROS2Tools.createVolatileCallbackSubscription(ros2Node, topic, callback);
    }
 
-   @Override
+   /** Use when you only need the latest message and need allocation free. */
    public <T> SwapReference<T> subscribeViaSwapReference(ROS2Topic<T> topic, Consumer<T> callback)
    {
       return ROS2Tools.createSwapReferenceSubscription(ros2Node, topic, callback);
    }
 
-   @Override
+   /** Use when you only need the latest message and need allocation free. */
    public <T> SwapReference<T> subscribeViaSwapReference(ROS2Topic<T> topic, Notification callback)
    {
       return ROS2Tools.createSwapReferenceSubscription(ros2Node, topic, callback);
    }
 
-   @Override
+   /** Allocation free version with size 16 ring buffer. */
    public <T> ConcurrentRingBuffer<T> subscribeViaQueue(ROS2Topic<T> topic)
    {
       return subscribeViaQueue(topic, 16, message -> { });
    }
 
-   @Override
+   /** Allocation free version with size 16 ring buffer. Callback allows immediate temporary access to message. */
    public <T> ConcurrentRingBuffer<T> subscribeViaQueue(ROS2Topic<T> topic, int queueSize, Consumer<T> callback)
    {
       TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(topic.getType());
@@ -108,25 +111,21 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
       return concurrentQueue;
    }
 
-   @Override
    public void subscribeViaCallback(ROS2Topic<Empty> topic, Runnable callback)
    {
       ros2Node.createSubscription2(topic, message -> callback.run());
    }
 
-   @Override
    public <T> ROS2Input<T> subscribe(ROS2Topic<T> topic)
    {
       return new ROS2Input<>(ros2Node, topic.getType(), topic);
    }
 
-   @Override
    public <T> ROS2Input<T> subscribe(ROS2Topic<T> topic, ROS2Input.MessageFilter<T> messageFilter)
    {
       return new ROS2Input<>(ros2Node, topic.getType(), topic, messageFilter);
    }
 
-   @Override
    public Notification subscribeViaNotification(ROS2Topic<Empty> topic)
    {
       Notification notification = new Notification();
@@ -134,13 +133,11 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
       return notification;
    }
 
-   @Override
    public <T> TypedNotification<T> subscribeViaTypedNotification(ROS2Topic<T> topic)
    {
       return ROS2Tools.createNotificationSubscription(ros2Node, topic);
    }
 
-   @Override
    public TypedNotification<Boolean> subscribeViaBooleanNotification(ROS2Topic<Bool> topic)
    {
       TypedNotification<Boolean> typedNotification = new TypedNotification<>();
@@ -148,19 +145,16 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
       return typedNotification;
    }
 
-   @Override
    public <T> void createPublisher(ROS2Topic<T> topic)
    {
       ros2PublisherMap.getOrCreatePublisher(topic);
    }
 
-   @Override
    public <T> void publish(ROS2Topic<T> topic, T message)
    {
       ros2PublisherMap.publish(topic, message);
    }
 
-   @Override
    public void publish(ROS2Topic<std_msgs.msg.dds.String> topic, String message)
    {
       std_msgs.msg.dds.String stringMessage = new std_msgs.msg.dds.String();
@@ -168,13 +162,11 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
       ros2PublisherMap.publish(topic, stringMessage);
    }
 
-   @Override
    public void publish(ROS2Topic<Pose3D> topic, Pose3D message)
    {
       ros2PublisherMap.publish(topic, message);
    }
 
-   @Override
    public void publish(ROS2Topic<Empty> topic)
    {
       ros2PublisherMap.publish(topic);
@@ -187,7 +179,6 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
       ros2PublisherMap.publish(topic, message);
    }
 
-   @Override
    public void publish(ROS2Topic<Bool> topic, boolean message)
    {
       ros2PublisherMap.publish(topic, message);

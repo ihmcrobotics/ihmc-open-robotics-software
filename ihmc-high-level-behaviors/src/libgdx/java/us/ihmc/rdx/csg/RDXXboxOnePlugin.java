@@ -36,10 +36,10 @@ public class RDXXboxOnePlugin
    private boolean publishNewCommand = false;
 
    // CSG thread ROS communication helper
-   private final CSGROS2CommunicationHelper csgCommunicationHelper;
+   private final CSGROS2CommunicationHelper csgROS2ControllerHelper;
 
    // Controller thread ROS communication helper
-   private final ROS2ControllerHelper controllerCommunicationHelper;
+   private final ROS2ControllerHelper controllerROS2ControllerHelper;
 
    // CSG thread command and status messages
    private final ContinuousStepGeneratorInputMessage csgInputCommand;
@@ -54,19 +54,19 @@ public class RDXXboxOnePlugin
       this(new CSGROS2CommunicationHelper(robotModel.getSimpleRobotName(), ros2Node, robotModel.getWalkingControllerParameters()), new ROS2ControllerHelper(ros2Node, robotModel));
    }
 
-   public RDXXboxOnePlugin(CSGROS2CommunicationHelper csgCommunicationHelper, ROS2ControllerHelper controllerCommunicationHelper)
+   public RDXXboxOnePlugin(CSGROS2CommunicationHelper csgROS2ControllerHelper, ROS2ControllerHelper controllerROS2ControllerHelper)
    {
-      this(csgCommunicationHelper, controllerCommunicationHelper, DEFAULT_PARAMETER_INCREMENT, DEFAULT_USE_DEADMAN_SWITCH);
+      this(csgROS2ControllerHelper, controllerROS2ControllerHelper, DEFAULT_PARAMETER_INCREMENT, DEFAULT_USE_DEADMAN_SWITCH);
    }
 
-   public RDXXboxOnePlugin(CSGROS2CommunicationHelper csgCommunicationHelper, ROS2ControllerHelper controllerCommunicationHelper, double parameterIncrement, boolean useDeadmanSwitch)
+   public RDXXboxOnePlugin(CSGROS2CommunicationHelper csgROS2ControllerHelper, ROS2ControllerHelper controllerROS2ControllerHelper, double parameterIncrement, boolean useDeadmanSwitch)
    {
-      this.csgCommunicationHelper = csgCommunicationHelper;
-      this.controllerCommunicationHelper = controllerCommunicationHelper;
+      this.csgROS2ControllerHelper = csgROS2ControllerHelper;
+      this.controllerROS2ControllerHelper = controllerROS2ControllerHelper;
 
-      csgInputCommand = csgCommunicationHelper.getCSGInputCommand();
-      csgParametersCommand = csgCommunicationHelper.getCSGParametersCommand();
-      csgStatusMessage = csgCommunicationHelper.getCSGStatusMessage();
+      csgInputCommand = csgROS2ControllerHelper.getCSGInputCommand();
+      csgParametersCommand = csgROS2ControllerHelper.getCSGParametersCommand();
+      csgStatusMessage = csgROS2ControllerHelper.getCSGStatusMessage();
 
       directionalControlInputMessage = new DirectionalControlInputMessage();
 
@@ -105,7 +105,7 @@ public class RDXXboxOnePlugin
                else if (buttonCode == controller.getMapping().buttonDpadUp)
                   csgParametersCommand.setSwingHeight(csgStatusMessage.getCurrentSwingHeight() + parameterIncrement);
 
-               csgCommunicationHelper.publish(csgParametersCommand);
+               csgROS2ControllerHelper.publish(csgParametersCommand);
             }
             return false;
          }
@@ -143,8 +143,8 @@ public class RDXXboxOnePlugin
 
       if (publishNewCommand)
       {
-         csgCommunicationHelper.publishAtThrottledRate(csgInputCommand);
-         controllerCommunicationHelper.publishToController(directionalControlInputMessage);
+         csgROS2ControllerHelper.publishAtThrottledRate(csgInputCommand);
+         controllerROS2ControllerHelper.publishToController(directionalControlInputMessage);
       }
    }
 
@@ -199,24 +199,24 @@ public class RDXXboxOnePlugin
       csgInputCommand.setLateralVelocity(0.0);
       csgInputCommand.setTurnVelocity(0.0);
 
-      csgCommunicationHelper.publish(csgInputCommand);
-      controllerCommunicationHelper.publishToController(directionalControlInputMessage);
+      csgROS2ControllerHelper.publish(csgInputCommand);
+      controllerROS2ControllerHelper.publishToController(directionalControlInputMessage);
    }
 
    public void shutDownXboxJoystick()
    {
       sendStopWalkingCommands();
 
-      csgCommunicationHelper.destroy();
+      csgROS2ControllerHelper.destroy();
    }
 
-   public CSGROS2CommunicationHelper getCsgCommunicationHelper()
+   public CSGROS2CommunicationHelper getCsgROS2ControllerHelper()
    {
-      return csgCommunicationHelper;
+      return csgROS2ControllerHelper;
    }
 
-   public ROS2ControllerHelper getControllerCommunicationHelper()
+   public ROS2ControllerHelper getControllerROS2ControllerHelper()
    {
-      return controllerCommunicationHelper;
+      return controllerROS2ControllerHelper;
    }
 }

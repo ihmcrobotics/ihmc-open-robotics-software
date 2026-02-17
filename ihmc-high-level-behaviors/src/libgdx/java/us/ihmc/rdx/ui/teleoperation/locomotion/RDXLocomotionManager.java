@@ -9,7 +9,7 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.tools.CommunicationHelper;
+import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.subscribers.FilteredNotification;
@@ -47,7 +47,7 @@ public class RDXLocomotionManager
    private RDXBaseUI baseUI;
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobot;
-   private final CommunicationHelper communicationHelper;
+   private final ROS2ControllerHelper controllerHelper;
    private final LocomotionParameters locomotionParameters;
    private final DefaultFootstepPlannerParametersBasics aStarFootstepPlannerParameters;
    private final DefaultFootstepPlannerParametersBasics footstepPlannerParametersToUse = new DefaultFootstepPlannerParameters();
@@ -103,13 +103,13 @@ public class RDXLocomotionManager
    private boolean wasPlanning = false;
 
    public RDXLocomotionManager(DRCRobotModel robotModel,
-                               CommunicationHelper communicationHelper,
+                               ROS2ControllerHelper controllerHelper,
                                ROS2SyncedRobotModel syncedRobot,
                                ControllerStatusTracker controllerStatusTracker,
                                RDXPanel teleoperationPanel)
    {
       this.robotModel = robotModel;
-      this.communicationHelper = communicationHelper;
+      this.controllerHelper = controllerHelper;
       this.syncedRobot = syncedRobot;
       this.controllerStatusTracker = controllerStatusTracker;
 
@@ -167,7 +167,7 @@ public class RDXLocomotionManager
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(ballAndArrowMidFeetPosePlacement::processImGui3DViewInput);
 
       interactableFootstepPlan.create(baseUI,
-                                      communicationHelper,
+                                      controllerHelper,
                                       syncedRobot,
                                       locomotionParameters,
                                       footstepPlannerParametersToUse,
@@ -501,16 +501,16 @@ public class RDXLocomotionManager
 
    public void sendAbortWalkingMessage()
    {
-      communicationHelper.publishToController(abortWalkingMessage);
+      controllerHelper.publishToController(abortWalkingMessage);
       // The abort walking message can only be process when the controller is in walking state, this forces the abort to go through
       pauseWalkingMessage.setPause(false);
-      communicationHelper.publishToController(pauseWalkingMessage);
+      controllerHelper.publishToController(pauseWalkingMessage);
    }
 
    public void setPauseWalkingAndPublish(boolean pauseWalking)
    {
       pauseWalkingMessage.setPause(pauseWalking);
-      communicationHelper.publishToController(pauseWalkingMessage);
+      controllerHelper.publishToController(pauseWalkingMessage);
 
       if (pauseWalking)
          RDXBaseUI.pushNotification("Commanding pause walking...");

@@ -9,7 +9,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.imageMessage.ImageMessageDecoder;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.ros2.ROS2Node;

@@ -18,4 +18,8 @@ public interface AvatarControllerThreadInterface extends SCS2YoGraphicHolder
 
    @Override
    YoGraphicGroupDefinition getSCS2YoGraphics();
+
+   default void destroy()
+   {
+   }
 }

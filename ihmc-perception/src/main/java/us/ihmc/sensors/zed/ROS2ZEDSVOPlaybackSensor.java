@@ -2,14 +2,14 @@ package us.ihmc.sensors.zed;
 
 import perception_msgs.msg.dds.ZEDSVOCurrentFileMessage;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
+import us.ihmc.communication.ros2.ROS2Helper;
 
 public class ROS2ZEDSVOPlaybackSensor extends ZEDSVOPlaybackSensor
 {
    private final ZEDSVOCurrentFileMessage svoStatusMessage = new ZEDSVOCurrentFileMessage();
-   private final ROS2PublishSubscribeAPI ros2;
+   private final ROS2Helper ros2;
 
-   public ROS2ZEDSVOPlaybackSensor(ROS2PublishSubscribeAPI ros2, int cameraID, ZEDModelData zedModel, int slDepthMode, String svoFileName)
+   public ROS2ZEDSVOPlaybackSensor(ROS2Helper ros2, int cameraID, ZEDModelData zedModel, int slDepthMode, String svoFileName)
    {
       super(cameraID, zedModel, slDepthMode, svoFileName);
 

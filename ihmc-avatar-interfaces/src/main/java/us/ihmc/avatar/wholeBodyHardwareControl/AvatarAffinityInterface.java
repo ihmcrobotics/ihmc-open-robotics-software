@@ -1,5 +1,6 @@
 package us.ihmc.avatar.wholeBodyHardwareControl;
 
+import us.ihmc.affinity.Package;
 import us.ihmc.affinity.Processor;
 import us.ihmc.realtime.PriorityParameters;
 
@@ -11,6 +12,10 @@ import us.ihmc.realtime.PriorityParameters;
  */
 public interface AvatarAffinityInterface
 {
+   int checkCoreIsValid(int core);
+
+   Package getSocket();
+
    Processor getMasterThreadProcessor();
 
    Processor getEstimatorThreadProcessor();

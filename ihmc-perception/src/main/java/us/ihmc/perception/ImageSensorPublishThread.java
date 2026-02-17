@@ -25,12 +25,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import static us.ihmc.communication.ros2.tf2.ROS2FrameTools.CAMERA_TO_OPTICAL_TRANSFORM;
+
 public class ImageSensorPublishThread extends RepeatingTaskThread
 {
-   // Read about optical frames here: https://ros.org/reps/rep-0103.html
-   private static final RigidBodyTransformReadOnly CAMERA_TO_OPTICAL_TRANSFORM = new RigidBodyTransform(new YawPitchRoll(-0.5 * Math.PI, 0.0, -0.5 * Math.PI),
-                                                                                                        new Vector3D());
-
    private final ROS2Node ros2Node;
 
    private final Map<AsyncImagePublisher, Integer> publisherMap = new HashMap<>();

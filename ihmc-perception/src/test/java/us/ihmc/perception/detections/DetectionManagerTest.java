@@ -9,7 +9,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.sensors.CameraIntrinsics;
 import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
 import us.ihmc.perception.imageMessage.PixelFormat;
 

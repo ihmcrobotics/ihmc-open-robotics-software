@@ -5,7 +5,7 @@ import us.ihmc.avatar.sakeGripper.ROS2SakeHandStatus;
 import us.ihmc.avatar.sakeGripper.SakeHandParameters;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
-import us.ihmc.behaviors.behaviorTree.action.JointspaceTrajectoryTrackingErrorCalculator;
+import us.ihmc.behaviors.behaviorTree.action.TrajectoryTrackingErrorCalculator;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.SakeHandAPI;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
@@ -23,7 +23,7 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
    private static final double NOMINAL_TRAJECTORY_DURATION = 1.0;
 
    private final SideDependentList<ROS2SakeHandStatus> sakeHandStatus = new SideDependentList<>();
-   private final JointspaceTrajectoryTrackingErrorCalculator trackingCalculator = new JointspaceTrajectoryTrackingErrorCalculator();
+   private final TrajectoryTrackingErrorCalculator trackingCalculator = new TrajectoryTrackingErrorCalculator();
    private final SideDependentList<RevoluteJoint> x1KnuckleJoints = new SideDependentList<>();
    private final SideDependentList<RevoluteJoint> x2KnuckleJoints = new SideDependentList<>();
    private final SakeHandDesiredCommandMessage sakeHandDesiredCommandMessage = new SakeHandDesiredCommandMessage();
@@ -78,11 +78,10 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
 
       trackingCalculator.reset();
 
-      trackingCalculator.resetErrorMeasurement();
       double goalKnuckleJointAngle = SakeHandParameters.handOpenAngleToKnuckleJointAngle(definition.getHandOpenAngle());
       trackingCalculator.addJointData(x1KnuckleJoints.get(definition.getSide()).getQ(), goalKnuckleJointAngle);
       trackingCalculator.addJointData(x2KnuckleJoints.get(definition.getSide()).getQ(), goalKnuckleJointAngle);
-      trackingCalculator.applyTolerance(definition.getInitialSatisfactionHandAngleTolerance());
+      trackingCalculator.factorInJointspaceErrors(definition.getInitialSatisfactionHandAngleTolerance());
 
       state.getLogger().info("x1: %.2f%s  x2: %.2f%s  Goal open angle: %.2f%s Error: %.2f%s"
                           .formatted(Math.toDegrees(x1KnuckleJoints.get(definition.getSide()).getQ()),
@@ -91,13 +90,13 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
                                      EuclidCoreMissingTools.DEGREE_SYMBOL,
                                      Math.toDegrees(definition.getHandOpenAngle()),
                                      EuclidCoreMissingTools.DEGREE_SYMBOL,
-                                     Math.toDegrees(trackingCalculator.getTotalAbsolutePositionError()),
+                                     Math.toDegrees(trackingCalculator.getTotalAbsoluteJointspaceError()),
                                      EuclidCoreMissingTools.DEGREE_SYMBOL));
 
       if (trackingCalculator.isWithinPositionTolerance())
       {
          state.getLogger().info("Gripper is already at the desired position. Proceeding to next action. (Error: %.2f)"
-                             .formatted(trackingCalculator.getTotalAbsolutePositionError()));
+                             .formatted(trackingCalculator.getTotalAbsoluteJointspaceError()));
          state.setNominalExecutionDuration(0.0);
          state.setPositionDistanceToGoalTolerance(definition.getInitialSatisfactionHandAngleTolerance());
       }
@@ -144,12 +143,12 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
       }
       else if (!state.getCommandedJointTrajectories().isEmpty())
       {
-         trackingCalculator.resetErrorMeasurement();
+         trackingCalculator.resetJointspaceError();
          trackingCalculator.addJointData(x1KnuckleJoints.get(definition.getSide()).getQ(),
                                          state.getCommandedJointTrajectories().getLastValueReadOnly(0).getPosition());
          trackingCalculator.addJointData(x2KnuckleJoints.get(definition.getSide()).getQ(),
                                          state.getCommandedJointTrajectories().getLastValueReadOnly(1).getPosition());
-         trackingCalculator.applyTolerance(state.getPositionDistanceToGoalTolerance());
+         trackingCalculator.factorInJointspaceErrors(state.getPositionDistanceToGoalTolerance());
 
          boolean meetsDesiredCompletionCriteria = trackingCalculator.isWithinPositionTolerance();
          meetsDesiredCompletionCriteria &= trackingCalculator.getTimeIsUp();

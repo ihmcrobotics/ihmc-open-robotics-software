@@ -9,7 +9,6 @@ import us.ihmc.behaviors.behaviorTree.control.*;
 import us.ihmc.behaviors.behaviorTree.control.ai2r.*;
 import us.ihmc.behaviors.behaviorTree.control.buildingExploration.*;
 import us.ihmc.behaviors.behaviorTree.control.door.*;
-import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.rdx.behaviorTree.actions.*;
 import us.ihmc.rdx.behaviorTree.condition.*;
 import us.ihmc.rdx.behaviorTree.control.*;
@@ -53,7 +52,7 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeBuilder<RDXBe
       REGISTRY.put(FootPoseActionDefinition.class, RDXFootPoseAction::new);
    }
 
-   private CRDTInfo crdtInfo;
+   private RDXBehaviorTree tree;
    private WorkspaceResourceDirectory saveFileDirectory;
    private ROS2SyncedRobotModel syncedRobot;
    private RDXBehaviorTreeScene scene;
@@ -61,7 +60,7 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeBuilder<RDXBe
    private RDXBaseUI baseUI;
    private RDX3DPanel panel3D;
 
-   public void initialize(CRDTInfo crdtInfo,
+   public void initialize(RDXBehaviorTree tree,
                           WorkspaceResourceDirectory saveFileDirectory,
                           ROS2SyncedRobotModel syncedRobot,
                           RDXBehaviorTreeScene scene,
@@ -69,7 +68,7 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeBuilder<RDXBe
                           RDXBaseUI baseUI,
                           RDX3DPanel panel3D)
    {
-      this.crdtInfo = crdtInfo;
+      this.tree = tree;
       this.saveFileDirectory = saveFileDirectory;
       this.syncedRobot = syncedRobot;
       this.scene = scene;
@@ -82,7 +81,7 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeBuilder<RDXBe
    public BehaviorTreeRootNode<RDXBehaviorTreeNode<?, ?>> createRootNode(long id)
    {
       return new RDXBehaviorTreeRootNode(id,
-                                         crdtInfo,
+                                         tree,
                                          saveFileDirectory,
                                          syncedRobot,
                                          scene,

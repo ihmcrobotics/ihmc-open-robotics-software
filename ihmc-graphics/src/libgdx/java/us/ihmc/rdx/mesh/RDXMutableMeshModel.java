@@ -38,7 +38,11 @@ public class RDXMutableMeshModel
 
       if (emptyModel)
       {
-         modelInstance = null;
+         if (modelInstance != null)
+         {
+            modelInstance.model.dispose();
+            modelInstance = null;
+         }
       }
       else
       {
@@ -56,6 +60,8 @@ public class RDXMutableMeshModel
 
          if (initialOrLargerModelNeeded)
          {
+            if (modelInstance != null)
+               modelInstance.model.dispose();
             modelInstance = new RDXModelInstance(RDXModelBuilder.buildModelInstance(meshBuilder -> meshBuilder.addMesh(meshDataHolder, color)));
          }
          else

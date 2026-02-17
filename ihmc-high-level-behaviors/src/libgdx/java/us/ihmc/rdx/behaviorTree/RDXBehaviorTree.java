@@ -59,7 +59,7 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
       scene = new RDXBehaviorTreeScene(crdtInfo, this::getAndIncrementNextID, syncedRobot, baseUI, panel);
       setScene(scene);
 
-      ((RDXBehaviorTreeNodeBuilder) getNodeBuilder()).initialize(crdtInfo,
+      ((RDXBehaviorTreeNodeBuilder) getNodeBuilder()).initialize(this,
                                                                  saveFileDirectory,
                                                                  syncedRobot,
                                                                  scene,

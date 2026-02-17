@@ -88,7 +88,7 @@ public class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition> impleme
    public void fromMessage(BehaviorTreeNodeStateMessage message)
    {
       if (id != message.getId())
-         LogTools.error("IDs should match! {} != {}", id, message.getId());
+         LogTools.error(("IDs should match! %s:%d != message.id: %d").formatted(definition.getName(), id, message.getId()));
 
       isActive = message.getIsActive();
 

@@ -5,8 +5,7 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTree;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNode;
 import us.ihmc.communication.AutonomyAPI;
-import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
-import us.ihmc.perception.sceneGraph.SceneGraph;
+import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.ros2.ROS2Topic;
 
 /**
@@ -16,13 +15,10 @@ import us.ihmc.ros2.ROS2Topic;
  */
 public class ROS2BehaviorTree<T extends BehaviorTreeNode<T, ? ,?>>
 {
-   /**
-    * The SYNC_FREQUENCY should be a multiple of the scene graph's update frequency.
-    */
-   public static final double SYNC_FREQUENCY = SceneGraph.UPDATE_FREQUENCY / 2.0;
+   public static final double SYNC_FREQUENCY = 30.0;
 
    private final BehaviorTree<?, ?> behaviorTree;
-   private final ROS2PublishSubscribeAPI ros2;
+   private final ROS2Helper ros2;
 
    private final ROS2Topic<BehaviorTreeStateMessage> publishTopic;
    private final BehaviorTreeStateMessage publishMessage = new BehaviorTreeStateMessage();
@@ -33,7 +29,7 @@ public class ROS2BehaviorTree<T extends BehaviorTreeNode<T, ? ,?>>
     * The complexity of this constructor is to support the UI having nodes that extend the base
     * on-robot ones.
     */
-   public ROS2BehaviorTree(BehaviorTree<BehaviorTreeRootNode<T>, T> behaviorTree, ROS2PublishSubscribeAPI ros2)
+   public ROS2BehaviorTree(BehaviorTree<BehaviorTreeRootNode<T>, T> behaviorTree, ROS2Helper ros2)
    {
       this.behaviorTree = behaviorTree;
       this.ros2 = ros2;

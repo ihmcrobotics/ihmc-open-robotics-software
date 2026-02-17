@@ -40,6 +40,7 @@ import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.graphicsDescription.conversion.YoGraphicConversionTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameMessageCommandConverter;
@@ -69,6 +70,8 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisher;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisherFactory;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
@@ -340,7 +343,8 @@ public class HumanoidKinematicsSimulation
 
       if (kinematicsSimulationParameters.getLogToFile())
       {
-         intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(List.of(new RegistrySendBufferBuilder(registry, fullRobotModel.getElevator(), yoGraphicsListRegistry)),
+         YoGraphicGroupDefinition definitions = new YoGraphicGroupDefinition("SCS1Graphics", YoGraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry));
+         intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(List.of(new RegistrySendBufferBuilder(registry, fullRobotModel.getElevator(), definitions)),
                                                                          0.01,
                                                                          getClass().getSimpleName());
          if (intraprocessYoVariableLogger.create())
@@ -351,11 +355,12 @@ public class HumanoidKinematicsSimulation
       if (kinematicsSimulationParameters.getCreateYoVariableServer())
       {
          LogTools.info("Starting YoVariable server...");
+         YoGraphicGroupDefinition definitions = new YoGraphicGroupDefinition("SCS1Graphics", YoGraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry));
          yoVariableServer = new YoVariableServer(getClass().getSimpleName(), robotModel.getLogModelProvider(), new DataServerSettings(false), 0.01);
          // Some robots have four bar linkages and need the `getSubtreeJointsIncludingFourBars` call
          yoVariableServer.setMainRegistry(registry,
                                           MultiBodySystemMissingTools.getSubtreeJointsIncludingFourBars(fullRobotModel.getElevator()),
-                                          yoGraphicsListRegistry);
+                                          definitions);
          yoVariableServer.start();
          LogTools.info("YoVariable server started.");
       }

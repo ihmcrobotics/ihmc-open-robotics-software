@@ -1,7 +1,7 @@
 package us.ihmc.rdx.ui.graphics.ros2;
 
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
+import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.perception.detections.DetectionManagerSettings;
 import us.ihmc.rdx.ui.ImGuiRemoteROS2StoredPropertySet;
 import us.ihmc.rdx.ui.graphics.RDXVisualizer;

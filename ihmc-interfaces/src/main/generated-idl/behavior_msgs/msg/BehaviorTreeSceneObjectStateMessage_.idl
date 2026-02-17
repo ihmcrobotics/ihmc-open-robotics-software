@@ -39,6 +39,14 @@ module behavior_msgs
          * Used only for door panel
          */
         behavior_msgs::msg::dds::PersistentDetectionStatusMessage door_panel_detection;
+        /**
+         * Used only for door frame
+         */
+        unsigned long points_in_capsule;
+        /**
+         * Whether the object is frozen
+         */
+        boolean frozen;
       };
     };
   };
