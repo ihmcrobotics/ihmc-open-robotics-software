@@ -105,6 +105,11 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
       return get(icpMaxDistance);
    }
 
+   default int getIcpValidPoints()
+   {
+      return get(icpValidPoints);
+   }
+
    default double getIcpAlphaFilter()
    {
       return get(icpAlphaFilter);

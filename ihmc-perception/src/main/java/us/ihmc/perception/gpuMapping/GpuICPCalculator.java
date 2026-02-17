@@ -12,7 +12,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
-import us.ihmc.perception.cuda.CUDAStreamManager;
 import us.ihmc.perception.cuda.CUDATools;
 import us.ihmc.perception.gpuMapping.HeightMapTools.FlattenedHeightMap;
 
@@ -24,7 +23,6 @@ public class GpuICPCalculator
 {
    private static final boolean PRINT_TIMING_FOR_KERNELS = false;
    private static final int BLOCK_SIZE_XY = 256;
-   private final CUstream_st stream;
    private final dim3 blockSize;
 
    private final HeightMapParameters heightMapParameters;
@@ -39,7 +37,6 @@ public class GpuICPCalculator
    public GpuICPCalculator(HeightMapParameters heightMapParameters)
    {
       this.heightMapParameters = heightMapParameters;
-      stream = CUDAStreamManager.getStream();
 
       // Load header and main file
       URL heightMapUtilsHeaderPath = getClass().getResource("HeightMapUtils.cuh");
@@ -73,7 +70,8 @@ public class GpuICPCalculator
                                         Point3DReadOnly globalMapCenter,
                                         int localCenterIndex,
                                         int globalCenterIndex,
-                                        RigidBodyTransform transformLocalToGlobalFromOdometry)
+                                        RigidBodyTransform transformLocalToGlobalFromOdometry,
+                                        CUstream_st stream)
    {
       RigidBodyTransform correctedGlobalTransform = new RigidBodyTransform();
       correctedGlobalTransform.set(totalAccumulatedErrorTransform);
@@ -102,13 +100,17 @@ public class GpuICPCalculator
       if (flattenedLocalMap.pointCount() == 0 || flattenedGlobalMap.pointCount() == 0)
          return;
 
-      computeICPFromPointClouds(flattenedLocalMap.data(), flattenedLocalMap.pointCount(), flattenedGlobalMap.data(), flattenedGlobalMap.pointCount());
+      computeICPFromPointClouds(flattenedLocalMap.data(), flattenedLocalMap.pointCount(), flattenedGlobalMap.data(), flattenedGlobalMap.pointCount(), stream);
 
       flattenedLocalMap.data().close();
       flattenedGlobalMap.data().close();
    }
 
-   public void computeICPFromPointClouds(FloatPointer cpuLocalDataPointer, int localPoints, FloatPointer cpuGlobalDataPointer, int globalPoints)
+   public void computeICPFromPointClouds(FloatPointer cpuLocalDataPointer,
+                                         int localPoints,
+                                         FloatPointer cpuGlobalDataPointer,
+                                         int globalPoints,
+                                         CUstream_st stream)
    {
       int localFloats = localPoints * 3;
       int globalFloats = globalPoints * 3;
@@ -209,7 +211,7 @@ public class GpuICPCalculator
          }
 
          // 3. Early exit check
-         if (validCount < 10)
+         if (validCount < heightMapParameters.getIcpValidPoints())
             break;
 
          // Compute transformation using SVD
@@ -231,12 +233,12 @@ public class GpuICPCalculator
          double dz = incrementalTransform.get(2, 3);
          double moveDist = Math.sqrt(dx * dx + dy * dy + dz * dz);
 
-         //         System.out.println("Iteration " + i);
-         //         System.out.println("  Valid correspondences: " + validCount);
-         //         System.out.println("  Incremental dx: " + incrementalTransform.get(0, 3));
-         //         System.out.println("  Incremental dy: " + incrementalTransform.get(1, 3));
-         //         System.out.println("  Incremental dz: " + incrementalTransform.get(2, 3));
-         //         System.out.println("  Move distance: " + moveDist);
+//                  System.out.println("Iteration " + i);
+//                  System.out.println("  Valid correspondences: " + validCount);
+//                  System.out.println("  Incremental dx: " + incrementalTransform.get(0, 3));
+//                  System.out.println("  Incremental dy: " + incrementalTransform.get(1, 3));
+//                  System.out.println("  Incremental dz: " + incrementalTransform.get(2, 3));
+//                  System.out.println("  Move distance: " + moveDist);
 
          if (moveDist < translationThreshold)
          {
@@ -282,6 +284,7 @@ public class GpuICPCalculator
       gpuDistances.close();
 
       // Track the total drift we have accumulated while running ICP
+      cudaStreamSynchronize(stream);
       DMatrixRMaj tempTotalAccumulatedErrorTransform = new DMatrixRMaj(4, 4);
       CommonOps_DDRM.mult(totalAccumulatedErrorTransform, latestPointCloudErrorTransform, tempTotalAccumulatedErrorTransform);
       totalAccumulatedErrorTransform.set(tempTotalAccumulatedErrorTransform);
@@ -334,6 +337,5 @@ public class GpuICPCalculator
       transformPointsKernel.close();
       blockSize.close();
       heightMapICPProgram.close();
-      CUDAStreamManager.releaseStream(stream);
    }
 }

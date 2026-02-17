@@ -1,5 +1,6 @@
 package us.ihmc.perception.gpuMapping;
 
+import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.perception.cuda.CUDAStreamManager;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -25,11 +27,14 @@ public class GpuICPCalculatorTest
    private int localCenterIndex;
    private int globalCenterIndex;
 
+   private final CUstream_st stream = CUDAStreamManager.getStream();
+
    @BeforeEach
    public void setup()
    {
       heightMapParameters.setLocalWidthInMeters(LOCAL_WIDTH_IN_METERS);
       heightMapParameters.setGlobalWidthInMeters(GLOBAL_WIDTH_IN_METERS);
+      heightMapParameters.setIcpMaxDistance(0.04);
 
       localCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getCellSize());
       localCellsPerAxis = 2 * localCenterIndex + 1;
@@ -71,7 +76,8 @@ public class GpuICPCalculatorTest
                                                       mapCenters,
                                                       localCenterIndex,
                                                       globalCenterIndex,
-                                                      new RigidBodyTransform());
+                                                      new RigidBodyTransform(),
+                                                      stream);
 
       // Let's get the result and see how we did...
       Vector3D correctedTransform = heightMapICPCalculator.getLatestPointCloudErrorTransform();
@@ -120,7 +126,8 @@ public class GpuICPCalculatorTest
                                                       mapCenters,
                                                       localCenterIndex,
                                                       globalCenterIndex,
-                                                      new RigidBodyTransform());
+                                                      new RigidBodyTransform(),
+                                                      stream);
 
       // Let's get the result and see how we did...
       Vector3D correctedTransform = heightMapICPCalculator.getLatestPointCloudErrorTransform();
@@ -166,7 +173,8 @@ public class GpuICPCalculatorTest
                                                       new Point3D(),
                                                       localCenterIndex,
                                                       globalCenterIndex,
-                                                      new RigidBodyTransform());
+                                                      new RigidBodyTransform(),
+                                                      stream);
 
       // Let's get the result and see how we did...
       Vector3D correctedTransform = heightMapICPCalculator.getLatestPointCloudErrorTransform();
@@ -207,7 +215,8 @@ public class GpuICPCalculatorTest
                                                       new Point3D(),
                                                       localCenterIndex,
                                                       globalCenterIndex,
-                                                      new RigidBodyTransform());
+                                                      new RigidBodyTransform(),
+                                                      stream);
 
       // Let's get the result and see how we did...
       Vector3D correctedTransform = heightMapICPCalculator.getLatestPointCloudErrorTransform();
@@ -269,7 +278,7 @@ public class GpuICPCalculatorTest
       }
 
       // Run ICP
-      heightMapICPCalculator.computeICPFromPointClouds(localPoints, numPoints, globalPoints, numPoints);
+      heightMapICPCalculator.computeICPFromPointClouds(localPoints, numPoints, globalPoints, numPoints, stream);
 
       // Get the result
       Vector3D correctedTransform = heightMapICPCalculator.getLatestPointCloudErrorTransform();
@@ -347,7 +356,8 @@ public class GpuICPCalculatorTest
                                                       new Point3D(offsetInX, 0.0, 0.0),
                                                       localCenterIndex,
                                                       globalCenterIndex,
-                                                      new RigidBodyTransform());
+                                                      new RigidBodyTransform(),
+                                                      stream);
 
       Vector3D correctedTransform = heightMapICPCalculator.getLatestPointCloudErrorTransform();
 
@@ -426,7 +436,8 @@ public class GpuICPCalculatorTest
                                                       new Point3D(0.1, 0.1, 0.0),
                                                       localCenterIndex,
                                                       globalCenterIndex,
-                                                      new RigidBodyTransform());
+                                                      new RigidBodyTransform(),
+                                                      stream);
 
       Vector3D corrected = heightMapICPCalculator.getLatestPointCloudErrorTransform();
 
@@ -528,7 +539,8 @@ public class GpuICPCalculatorTest
                                                       new Point3D(),
                                                       localCenterIndex,
                                                       globalCenterIndex,
-                                                      new RigidBodyTransform());
+                                                      new RigidBodyTransform(),
+                                                      stream);
       Vector3D corrected = heightMapICPCalculator.getLatestPointCloudErrorTransform();
       System.out.println("Corrected transform = " + corrected);
 

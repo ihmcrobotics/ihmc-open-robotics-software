@@ -48,6 +48,7 @@ public class HeightMapExtractor
    private final GpuMat localVarianceMap;
    private final GpuMat localMotionVarianceMap;
 
+   private final GpuMat oldPreviousGlobalMapForICP;
    private final GpuMat previousGlobalMapForICP;
 
    // These are the mats required to keep a global map
@@ -91,6 +92,7 @@ public class HeightMapExtractor
 
    private final GpuICPCalculator gpuICPCalculator;
    private Vector3D correctedTransform;
+   private boolean performICP = true;
 
    public HeightMapExtractor(HeightMapParameters heightMapParameters)
    {
@@ -137,6 +139,7 @@ public class HeightMapExtractor
          localVarianceMap = new GpuMat(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_32FC1);
          localMotionVarianceMap = new GpuMat(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_32FC1);
 
+         oldPreviousGlobalMapForICP = new GpuMat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_32FC1);
          previousGlobalMapForICP = new GpuMat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_32FC1);
 
          globalMeanMap = new GpuMat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_32FC1);
@@ -174,6 +177,7 @@ public class HeightMapExtractor
    {
       resetOffset = (float) footHeight;
       resetOffset -= loweredValue;
+      performICP = false;
 
       previousGlobalMapForICP.setTo(new Scalar(resetOffset));
       globalMeanMap.setTo(new Scalar(resetOffset));
@@ -218,6 +222,9 @@ public class HeightMapExtractor
       checkCUDAError();
       checkCUDAError();
 
+      double currentCellXCoordinate = (int) Math.round(globalHeightMapCenter.getX32() / heightMapParameters.getCellSize()) * heightMapParameters.getCellSize();
+      double currentCellYCoordinate = (int) Math.round(globalHeightMapCenter.getY32() / heightMapParameters.getCellSize()) * heightMapParameters.getCellSize();
+
       // ---------- Run the translate kernel ---------
       // This is the first thing we need to do, we are going to compare the newest local data to the global data.
       // It won't line up if we don't first translate the global map to the latest translation
@@ -232,6 +239,8 @@ public class HeightMapExtractor
             globalMeanMap.copyTo(previousGlobalMeanMap);
             globalVarianceMap.copyTo(previousGlobalVarianceMap);
 
+            previousGlobalMapForICP.copyTo(oldPreviousGlobalMapForICP);
+
             int translateKernelGridSizeXY = (globalCellsPerAxis + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
             dim3 translateKernelGridDim = new dim3(translateKernelGridSizeXY, translateKernelGridSizeXY, 1);
 
@@ -240,6 +249,7 @@ public class HeightMapExtractor
 
             translateKernel.withPointer(previousGlobalMeanMap.data()).withLong(previousGlobalMeanMap.step());
             translateKernel.withPointer(previousGlobalVarianceMap.data()).withLong(previousGlobalVarianceMap.step());
+            translateKernel.withPointer(oldPreviousGlobalMapForICP.data()).withLong(oldPreviousGlobalMapForICP.step());
             translateKernel.withPointer(previousGlobalMapForICP.data()).withLong(previousGlobalMapForICP.step());
             translateKernel.withPointer(globalMeanMap.data()).withLong(globalMeanMap.step());
             translateKernel.withPointer(globalVarianceMap.data()).withLong(globalVarianceMap.step());
@@ -279,18 +289,20 @@ public class HeightMapExtractor
          CUDATools.memcpyAsync(sensorToGroundZUpDevice, sensorToGroundZUpHost, sensorToGroundZUpAsArray.length, stream);
 
          // Clearing all the temp maps so they are ready for the next update call
-         cudaMemset2DAsync(tempSumMap.data(), tempSumMap.step(), 0, (long) tempSumMap.cols() * Float.BYTES, tempSumMap.rows());
-         cudaMemset2DAsync(tempCountMap.data(), tempCountMap.step(), 0, (long) tempCountMap.cols() * Integer.BYTES, tempCountMap.rows());
+         cudaMemset2DAsync(tempSumMap.data(), tempSumMap.step(), 0, (long) tempSumMap.cols() * Float.BYTES, tempSumMap.rows(), stream);
+         cudaMemset2DAsync(tempCountMap.data(), tempCountMap.step(), 0, (long) tempCountMap.cols() * Integer.BYTES, tempCountMap.rows(), stream);
          cudaMemset2DAsync(tempSumOfSquaresMap.data(),
                            tempSumOfSquaresMap.step(),
                            0,
                            (long) tempSumOfSquaresMap.cols() * Float.BYTES,
-                           tempSumOfSquaresMap.rows());
+                           tempSumOfSquaresMap.rows(),
+                           stream);
          cudaMemset2DAsync(tempMotionVarianceMap.data(),
                            tempMotionVarianceMap.step(),
                            0,
                            (long) tempMotionVarianceMap.cols() * Float.BYTES,
-                           tempMotionVarianceMap.rows());
+                           tempMotionVarianceMap.rows(),
+                           stream);
 
          int gridDimX = (latestDepthImageGPU.cols() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
          int gridDimY = (latestDepthImageGPU.rows() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
@@ -330,27 +342,44 @@ public class HeightMapExtractor
          checkCUDAError();
       }
 
-      if (heightMapParameters.getICPFilter())
+      if (heightMapParameters.getICPFilter() && performICP)
       {
+         Point3D globalHeightMapCenterOnGrid = new Point3D(currentCellXCoordinate, currentCellYCoordinate, globalHeightMapCenter.getZ32());
          gpuICPCalculator.computeICPErrorTransform(localMeanMap,
                                                    previousGlobalMapForICP,
                                                    new Point3D(),
-                                                   globalHeightMapCenter,
+                                                   globalHeightMapCenterOnGrid,
                                                    localCenterIndex,
                                                    globalCenterIndex,
-                                                   sensorToWorldNoRotation);
+                                                   sensorToWorldNoRotation,
+                                                   stream);
          correctedTransform = gpuICPCalculator.getLatestPointCloudErrorTransform();
          //      LogTools.info(
          //            "gpuICPCalculator correctedTransform: " + correctedTransform.getX() + " " + correctedTransform.getY() + " " + correctedTransform.getZ());
          //      LogTools.info("Actual Transform: " + groundToWorldNoRotation.getTranslationX() + " " + groundToWorldNoRotation.getTranslationY() + " "
          //                    + groundToWorldNoRotation.getTranslationZ());
          //      LogTools.info("Global Center: " + globalHeightMapCenter.getX() + " " + globalHeightMapCenter.getY() + " " + globalHeightMapCenter.getZ(   ));
-         gpuICPCalculator.applyCorrectionToTransform(sensorToWorldNoRotationDevice,
-                                                     correctedTransform.getX(),
-                                                     correctedTransform.getY(),
-                                                     correctedTransform.getZ(),
-                                                     stream);
+
+         double dx = correctedTransform.getX();
+         double dy = correctedTransform.getY();
+         double dz = correctedTransform.getZ();
+
+         // Apply a 1mm threshold (0.001 meters)
+         if (Math.abs(dx) < 0.001)
+            dx = 0.0;
+         if (Math.abs(dy) < 0.001)
+            dy = 0.0;
+         if (Math.abs(dz) < 0.001)
+            dz = 0.0;
+
+         gpuICPCalculator.applyCorrectionToTransform(sensorToWorldNoRotationDevice, dx, dy, dz, stream);
       }
+      else
+      {
+         performICP = true;
+      }
+
+      //      LogTools.info("Corrected transform:" + correctedTransform.getX() + " - " + correctedTransform.getY() + " - " + correctedTransform.getZ());
 
       // ---------- Run the registration kernel ----------
       // Ok so now we've got our local map, lets put that onto the global map
@@ -359,7 +388,8 @@ public class HeightMapExtractor
                            previousGlobalMapForICP.step(),
                            0,
                            (long) previousGlobalMapForICP.cols() * Float.BYTES,
-                           previousGlobalMapForICP.rows());
+                           previousGlobalMapForICP.rows(),
+                           stream);
 
          int registerKernelGridSizeXY = (localCellsPerAxis + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
          dim3 registerKernelGridDim = new dim3(registerKernelGridSizeXY, registerKernelGridSizeXY, 1);
@@ -370,8 +400,8 @@ public class HeightMapExtractor
          registerKernel.withPointer(previousGlobalMapForICP.data()).withLong(previousGlobalMapForICP.step());
          registerKernel.withPointer(globalMeanMap.data()).withLong(globalMeanMap.step());
          registerKernel.withPointer(globalVarianceMap.data()).withLong(globalVarianceMap.step());
-         registerKernel.withFloat(globalHeightMapCenter.getX32());
-         registerKernel.withFloat(globalHeightMapCenter.getY32());
+         registerKernel.withFloat((float) currentCellXCoordinate);
+         registerKernel.withFloat((float) currentCellYCoordinate);
          registerKernel.withFloat(correctedTransform.getZ32());
          registerKernel.withPointer(sensorToWorldNoRotationDevice);
          registerKernel.withPointer(parametersDevicePointer);
@@ -428,9 +458,7 @@ public class HeightMapExtractor
 
       // The center of this map should be centered in the world grid
       // The sensor origin isn't always at the center of a grid point, in fact it's often not in the center
-      double currentCellX = (int) Math.round(globalHeightMapCenter.getX32() / heightMapParameters.getCellSize()) * heightMapParameters.getCellSize();
-      double currentCellY = (int) Math.round(globalHeightMapCenter.getY32() / heightMapParameters.getCellSize()) * heightMapParameters.getCellSize();
-      heightMapCenterPoint.set(currentCellX, currentCellY, 0.0);
+      heightMapCenterPoint.set(currentCellXCoordinate, currentCellYCoordinate, 0.0);
 
       // Finished GPU kernels, let pack this into the height map data object
       Mat hostHeightMap = new Mat();

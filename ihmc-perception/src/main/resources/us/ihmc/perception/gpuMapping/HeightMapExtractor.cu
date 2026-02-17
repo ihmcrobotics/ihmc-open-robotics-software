@@ -171,6 +171,7 @@ __global__ void computeLocalMap(const float* __restrict__ sumMap, size_t pitchSu
 extern "C"
 __global__ void translateHeightMapKernel(float *oldHeightMapMean, size_t pitchOldHeightMapMean,
                                          float *oldHeightMapVariance, size_t pitchOldHeightMapVariance,
+                                         float *oldPreviousGlobalForICP, size_t pitchOldPreviousGlobalForICP,
                                          float *previousGlobalForICP, size_t pitchPreviousGlobalForICP,
                                          float *newMeanMap, size_t pitchNewMean,
                                          float *newVarianceMap, size_t pitchNewVariance,
@@ -191,13 +192,14 @@ __global__ void translateHeightMapKernel(float *oldHeightMapMean, size_t pitchOl
     {
         float* oldMeanRow = (float*)((char*)oldHeightMapMean + srcX * pitchOldHeightMapMean);
         float* oldVarianceRow = (float *)((char*)oldHeightMapVariance + srcX * pitchOldHeightMapVariance);
+        float* oldICPRow = (float *)((char*)oldPreviousGlobalForICP + srcX * pitchOldPreviousGlobalForICP);
 
         float* newMeanRow = (float*)((char*)newMeanMap + x * pitchNewMean);
         float* newVarianceRow = (float*)((char*)newVarianceMap + x * pitchNewVariance);
         float* newPreviousRow = (float*)((char*)previousGlobalForICP + x * pitchPreviousGlobalForICP);
 
         newMeanRow[y] = oldMeanRow[srcY];
-        newPreviousRow[y] = oldMeanRow[srcY];
+        newPreviousRow[y] = oldICPRow[srcY];
 
         // Add variance due to the translation
         float increasedVariance = oldVarianceRow[srcY] + params[ADDITIONAL_TRANSLATIONAL_VARIANCE_ADDED];
@@ -285,12 +287,12 @@ __global__ void heightMapRegistrationKernel(const float *__restrict__ localMeanM
         float localMotionVarianceF = *localMotionVariance;
 
         // Predict step of the kalman filter
-        float predictedMean = globalMeanF;
+        float predictedMean = globalMeanF + correctedDriftZ;
         float predictedVariance = globalVarianceF + params[KALMAN_FILTER_PREDICTION_NOISE];
 
         // Update step of the kalman filter
         float kalmanGain = predictedVariance / (predictedVariance + localVarianceF + localMotionVarianceF);
-        float updatedMean = predictedMean + kalmanGain * ((localMeanF - correctedDriftZ) - predictedMean);
+        float updatedMean = predictedMean + kalmanGain * (localMeanF - predictedMean);
         float updatedVariance = (1.0f - kalmanGain) * predictedVariance;
 
         *globalMean = updatedMean;

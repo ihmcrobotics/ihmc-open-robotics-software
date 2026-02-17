@@ -19,7 +19,7 @@
     "upperBound" : 10.0
   },
   "Kalman filter prediction noise" : {
-    "value" : 0.01,
+    "value" : 0.06,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
@@ -34,12 +34,12 @@
     "upperBound" : 1.0
   },
   "Variance per translation speed" : {
-    "value" : 0.01,
+    "value" : 0.1,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
   "Variance per rotation speed" : {
-    "value" : 0.01,
+    "value" : 0.1,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
@@ -79,9 +79,14 @@
     "upperBound" : 1.0
   },
   "Icp max distance" : {
-    "value" : 0.35,
+    "value" : 0.06,
     "lowerBound" : 0.01,
     "upperBound" : 1.0
+  },
+  "Icp valid points" : {
+    "value" : 1000,
+    "lowerBound" : 10,
+    "upperBound" : 10000
   },
   "Icp alpha filter" : {
     "value" : 0.8,

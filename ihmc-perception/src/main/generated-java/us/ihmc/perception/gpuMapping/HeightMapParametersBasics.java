@@ -103,6 +103,11 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
       set(HeightMapParameters.icpMaxDistance, icpMaxDistance);
    }
 
+   default void setIcpValidPoints(int icpValidPoints)
+   {
+      set(HeightMapParameters.icpValidPoints, icpValidPoints);
+   }
+
    default void setIcpAlphaFilter(double icpAlphaFilter)
    {
       set(HeightMapParameters.icpAlphaFilter, icpAlphaFilter);

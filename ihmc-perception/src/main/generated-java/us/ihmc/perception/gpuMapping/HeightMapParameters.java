@@ -37,6 +37,7 @@ public class HeightMapParameters extends StoredPropertySet implements HeightMapP
    public static final IntegerStoredPropertyKey icpMaxIterations = keys.addIntegerKey("Icp max iterations");
    public static final DoubleStoredPropertyKey icpConvergence = keys.addDoubleKey("Icp convergence");
    public static final DoubleStoredPropertyKey icpMaxDistance = keys.addDoubleKey("Icp max distance");
+   public static final IntegerStoredPropertyKey icpValidPoints = keys.addIntegerKey("Icp valid points");
    public static final DoubleStoredPropertyKey icpAlphaFilter = keys.addDoubleKey("Icp alpha filter");
 
    /**
