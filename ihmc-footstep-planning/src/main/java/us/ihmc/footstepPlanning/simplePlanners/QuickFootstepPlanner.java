@@ -35,7 +35,7 @@ public class QuickFootstepPlanner
    private final SideMap<Line3D> hipLine = new SideMap<>(() -> new Line3D());
    private final Pose3D stanceMid = new Pose3D();
    private final Pose3D goalMid = new Pose3D();
-   private final SideMap<Point3D> stanceHip = new SideMap<>(() -> new Point3D());
+   private final SideMap<Point3D> swingHip = new SideMap<>(() -> new Point3D());
    private final SideMap<Point3D> goalHip = new SideMap<>(() -> new Point3D());
    private Runnable stepPlannedCallback = () -> {};
    private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
@@ -77,14 +77,13 @@ public class QuickFootstepPlanner
       goalMid.interpolate(goal.get(RobotSide.LEFT), goal.get(RobotSide.RIGHT), 0.5);
 
       double hipWidth = 0.12;
-      double hipHeight = 0.8;
       for (RobotSide side : RobotSide.values)
       {
-         stanceHip.get(side).set(0.0, side.negateIfRightSide(hipWidth), 0.0);
-         stanceMid.transform(stanceHip.get(side));
+         swingHip.get(side).set(0.0, side.negateIfRightSide(2.0 * hipWidth), 0.0);
+         stance.get(side.getOppositeSide()).transform(swingHip.get(side));
          goalHip.get(side).set(0.0, side.negateIfRightSide(hipWidth), 0.0);
          goalMid.transform(goalHip.get(side));
-         hipLine.get(side).set(stanceHip.get(side), goalHip.get(side)); // Maybe not needed?
+         hipLine.get(side).set(swingHip.get(side), goalHip.get(side)); // Maybe not needed?
       }
 
       Quaternion swingEndOrientation = new Quaternion(stanceMid.getOrientation());
@@ -99,33 +98,34 @@ public class QuickFootstepPlanner
          candidate.get(side).getOrientation().set(swingEndOrientation);
 
          outer:
-         for (double distance = 0.02; ; distance += 0.02)
+         for (double distance = 0.02; distance < stepLength + 0.05; distance += 0.02)
          {
-            candidate.get(side).getPosition().scaleAdd(distance, hipLine.get(side).getDirection(), stanceHip.get(side));
+            candidate.get(side).getPosition().scaleAdd(distance, hipLine.get(side).getDirection(), swingHip.get(side));
 
             boolean isCrossover = isCrossover(stance.get(side.getOppositeSide()), candidate.get(side), side);
-            if (isCrossover || distance >= stepLength) // Done, check collision
+            if (isCrossover || distance > stepLength) // Done, check collision
             {
                Vector3D stanceForward = new Vector3D(Axis3D.X);
                stanceMid.getOrientation().transform(stanceForward);
                double direction = stanceForward.dot(hipLine.get(side).getDirection()) >= 0.0 ? 1.0 : -1.0;
 
-               for (int i = 0; i < 16; i++) // Revolve away from collision about hip
+               double resolution = 16;
+               for (int i = 0; i < resolution; i++) // Revolve away from collision about hip
                {
-                  Vector3D ray = new Vector3D();
-                  ray.sub(candidate.get(side).getPosition(), stanceHip.get(side));
-                  AxisAngle axisAngle = new AxisAngle(Axis3D.Z, Math.PI / 16.0 * direction);
-                  axisAngle.transform(ray);
-
                   ConvexPolygon2D candidatePolygon = createFootPolygon(candidate.get(side), 0.0);
-                  ConvexPolygon2D stancePolygon = createFootPolygon(stance.get(side.getOppositeSide()), 0.02);
-                  ConvexPolygon2D oppositeGoalPolygon = createFootPolygon(goal.get(side.getOppositeSide()), 0.02);
-                  if (!convexPolygonTools.doPolygonsIntersect(candidatePolygon, stancePolygon)
-                      && !convexPolygonTools.doPolygonsIntersect(candidatePolygon, oppositeGoalPolygon))
+                  ConvexPolygon2D stancePolygon = createFootPolygon(stance.get(side.getOppositeSide()), 0.04);
+                  ConvexPolygon2D oppositeGoalPolygon = createFootPolygon(goal.get(side.getOppositeSide()), 0.04);
+                  if (convexPolygonTools.doPolygonsIntersect(candidatePolygon, stancePolygon)
+                   || convexPolygonTools.doPolygonsIntersect(candidatePolygon, oppositeGoalPolygon))
                   {
-                     candidate.get(side).getPosition().add(stanceHip.get(side), ray);
-                     break outer;
+                     Vector3D ray = new Vector3D();
+                     ray.sub(candidate.get(side).getPosition(), swingHip.get(side));
+                     AxisAngle axisAngle = new AxisAngle(Axis3D.Z, Math.PI / resolution * side.negateIfRightSide(direction));
+                     axisAngle.transform(ray);
+                     candidate.get(side).getPosition().add(swingHip.get(side), ray);
                   }
+                  else
+                     break outer;
                }
             }
          }
@@ -133,10 +133,10 @@ public class QuickFootstepPlanner
          double allowedLength = Math.max(stepLength, goal.get(side).getPosition().distance(goal.get(side.getOppositeSide()).getPosition()));
          goalstepPossible.put(side, false);
          Pose3D goalStep = new Pose3D(goal.get(side));
-         Line3D goalLine = new Line3D(stanceHip.get(side), goal.get(side).getPosition());
+         Line3D goalLine = new Line3D(swingHip.get(side), goal.get(side).getPosition());
          for (double distance = 0.02; distance < allowedLength; distance += 0.02)
          {
-            goalStep.getPosition().scaleAdd(distance, goalLine.getDirection(), stanceHip.get(side));
+            goalStep.getPosition().scaleAdd(distance, goalLine.getDirection(), swingHip.get(side));
 
             if (isCrossover(stance.get(side.getOppositeSide()), goalStep, side))
                break;
@@ -144,7 +144,7 @@ public class QuickFootstepPlanner
             if (goalStep.getPosition().distance(goal.get(side).getPosition()) < 0.05)
             {
                ConvexPolygon2D goalStepPolygon = createFootPolygon(goalStep, 0.0);
-               ConvexPolygon2D stancePolygon = createFootPolygon(stance.get(side.getOppositeSide()), 0.02);
+               ConvexPolygon2D stancePolygon = createFootPolygon(stance.get(side.getOppositeSide()), 0.04);
                if (!convexPolygonTools.doPolygonsIntersect(goalStepPolygon, stancePolygon))
                {
                   goalstepPossible.put(side, true);
@@ -235,9 +235,9 @@ public class QuickFootstepPlanner
       return goalMid;
    }
 
-   public SideMap<Point3D> getStanceHip()
+   public SideMap<Point3D> getSwingHip()
    {
-      return stanceHip;
+      return swingHip;
    }
 
    public SideMap<Point3D> getGoalHip()

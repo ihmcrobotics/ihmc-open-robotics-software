@@ -178,19 +178,20 @@ public class RDXQuickFootstepPlannerDemo
                int footstepIndex = footstepIndexCounter++;
                visualModels.add(RDXModelBuilder.buildModelInstance(builder ->
                {
-                  SideMap<Point3D> stanceHipAir = new SideMap<>(() -> new Point3D());
+                  SideMap<Point3D> swingHipAir = new SideMap<>(() -> new Point3D());
                   SideMap<Point3D> goalHipAir = new SideMap<>(() -> new Point3D());
                   for (RobotSide side : RobotSide.values)
                   {
-                     stanceHipAir.get(side).set(planner.getStanceHip().get(side));
-                     stanceHipAir.get(side).addZ(0.8f);
-                     builder.addSphere(0.03, stanceHipAir.get(side), RDXFootstepGraphic.FOOT_COLORS.get(side));
+                     swingHipAir.get(side).set(planner.getSwingHip().get(side));
+                     swingHipAir.get(side).addZ(0.8f);
+                     builder.addSphere(0.03, swingHipAir.get(side), RDXFootstepGraphic.FOOT_COLORS.get(side));
                      goalHipAir.get(side).set(planner.getGoalHip().get(side));
                      goalHipAir.get(side).addZ(0.8f);
                      builder.addSphere(0.03, goalHipAir.get(side), Color.WHITE);
-                     builder.addLine(stanceHipAir.get(side), goalHipAir.get(side), 0.01, Color.SKY);
+                     builder.addLine(swingHipAir.get(side), goalHipAir.get(side), 0.01, Color.SKY);
                   }
-                  builder.addLine(stanceHipAir.get(planner.getFootToSwing()), planner.getSwingEnd().getPosition(), 0.01, Color.WHITE);
+                  builder.addLine(swingHipAir.get(planner.getFootToSwing()), planner.getSwingEnd().getPosition(), 0.01, Color.WHITE);
+                  builder.addSphere(0.02, planner.getSwingHip().get(planner.getFootToSwing()), RDXFootstepGraphic.FOOT_COLORS.get(planner.getFootToSwing()));
 
                   float r = 0.5294118f;
                   float g = 0.80784315f;
