@@ -8,7 +8,6 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
-import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiMouseButton;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -47,6 +46,7 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
 
    private final List<RDXBehaviorTreeSceneObject> objects;
    private final ImBoolean showDetections = new ImBoolean(true);
+   private final ImBoolean createFoundationPose = new ImBoolean(false);
    private final RecyclingArrayList<RDXBehaviorTreeSceneDetection> persistentDetections;
 
    private final ImBoolean showCameraFrame = new ImBoolean(false);
@@ -106,19 +106,39 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
       ImGuiTools.smallCheckbox(labels.get("Show detections"), showDetections);
       ImGui.separator();
       ImGui.text("Add virtual:");
+      ImGui.sameLine();
+      ImGuiTools.smallCheckbox(labels.get("FoundationPose"), createFoundationPose);
       ImGui.indent();
+      BehaviorTreeSceneObjectDefinitionMessage objectDefinition = null;
       for (IsaacROSFoundationPoseObject objectType : IsaacROSFoundationPoseObject.values())
       {
          if (ImGuiTools.textWithUnderlineOnHover(objectType.titleCaseName) && ImGui.isMouseClicked(ImGuiMouseButton.Left))
          {
-            BehaviorTreeSceneObjectDefinitionMessage message = new BehaviorTreeSceneObjectDefinitionMessage();
-            message.setObjectType((byte) BehaviorTreeSceneObjectType.FOUNDATION_POSE.ordinal());
-            message.setFoundationPoseObjectType((byte) objectType.ordinal());
-            beingPlaced = (RDXBehaviorTreeSceneObject) createObject(message);
-            objects.add(beingPlaced);
-            objectsModifiable.modify();
-            needToInitializePlacementHeight = true;
+            objectDefinition = new BehaviorTreeSceneObjectDefinitionMessage();
+            if (createFoundationPose.get())
+            {
+               objectDefinition.setObjectType((byte) BehaviorTreeSceneObjectType.FOUNDATION_POSE.ordinal());
+               objectDefinition.setFoundationPoseObjectType((byte) objectType.ordinal());
+            }
+            else
+               objectDefinition.setObjectType((byte) BehaviorTreeSceneObjectType.YOLO_ONLY.ordinal());
+            objectDefinition.setYoloModelName("best_multi_01_16_2026");
+            objectDefinition.setYoloClassName(objectType.yoloClass);
          }
+      }
+      if (ImGuiTools.textWithUnderlineOnHover("Person") && ImGui.isMouseClicked(ImGuiMouseButton.Left))
+      {
+         objectDefinition = new BehaviorTreeSceneObjectDefinitionMessage();
+         objectDefinition.setObjectType((byte) BehaviorTreeSceneObjectType.YOLO_ONLY.ordinal());
+         objectDefinition.setYoloModelName("best_multi_01_16_2026");
+         objectDefinition.setYoloClassName("person");
+      }
+      if (objectDefinition != null)
+      {
+         beingPlaced = (RDXBehaviorTreeSceneObject) createObject(objectDefinition);
+         objects.add(beingPlaced);
+         objectsModifiable.modify();
+         needToInitializePlacementHeight = true;
       }
       ImGui.unindent();
       ImGui.separator();
@@ -150,6 +170,9 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
 
    static void renderPersistentDetection(PersistentDetectionStatusMessage message)
    {
+      if (message.getDetectionTypeAsString().isEmpty())
+         return;
+
       String type = "(?)";
       if (message.getDetectionTypeAsString().equals(IsaacROSFoundationPoseInstantDetection.class.getSimpleName()))
          type = "(FoundationPose)";
