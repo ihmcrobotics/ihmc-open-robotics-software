@@ -3,3 +3,6 @@
 **/log**
 **/src**
 **/__pycache__**
+modules/ros2-env/
+modules/vlm/test/models/
+modules/failure_info.json

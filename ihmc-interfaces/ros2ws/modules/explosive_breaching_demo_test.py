@@ -1,165 +1,183 @@
-import os
-import time
-import threading
-
 import rclpy
 from rclpy.node import Node
 from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
-from geometry_msgs.msg import Point
-from geometry_msgs.msg import Quaternion
 from behavior_msgs.msg import AI2RCommandMessage
-from behavior_msgs.msg import AI2RObjectMessage
 from behavior_msgs.msg import AI2RStatusMessage
 from behavior_msgs.msg import AI2RNavigationMessage
 from behavior_msgs.msg import AI2RReceiveObjectMessage
 
-import cv2
 import numpy as np
-from typing import List
 import json
 
-ros2 = {}
-initialized = False
-loggedFailure = False
 
-behavior_counter = 0
-behaviors_baseline = ["SCAN", "GOTO", "RECEIVE OBJECT", "GOTO", "PLACE CHARGE ON DOOR", "GOTO"]
+class ExplosiveBreachingDemoNode(Node):
+    def __init__(self):
+        super().__init__('behavior_coordination_node')
 
-goto_person_param = ("Person1", AI2RNavigationMessage.DEFAULT, "")
-goto_door_param = ("DoorPanel1", AI2RNavigationMessage.FRONT, "")
-goto_barrier_param = ("Barrier1", AI2RNavigationMessage.BEHIND, "")
-receive_charge_param = ("Charge1",)
-parameters = [None, goto_person_param, receive_charge_param, goto_door_param, None, goto_barrier_param]
+        self.behavior_counter = 0
+        self.initialized = False
+        self.logged_failure = False
+        self.last_commanded_behavior = None
+        self.last_printed_completion = None
+        self.demo_complete = False
 
-def behavior_message_callback(msg):
-    global initialized  # Access the global variables
-    global loggedFailure
-    global behavior_counter
-    global behaviors_baseline
-    global parameters
-    robot_pose = msg.robot_mid_feet_under_pelvis_pose_in_world
+        self.behaviors_baseline = [
+            "SCAN", "GOTO", "RECEIVE OBJECT", "GOTO", "PLACE CHARGE ON DOOR", "GOTO"
+        ]
 
-    if not initialized:
-        # --------- Scene -----------
-        scene_objects = msg.objects
-        print("Objects in the scene:")
-        if scene_objects:  # This checks if the list is not empty
-           for obj in scene_objects:
-               id = obj.object_name
-               print(f"{id}")
-               pose_in_world = obj.object_pose_in_world
-               pose_wrt_robot = obj.object_pose_in_robot_frame # This is the pose specified wrt to robot_pose
-        else:
-           print("-")
+        goto_person_param = ("Person1", AI2RNavigationMessage.DEFAULT, "")
+        goto_door_param = ("DoorPanel1", AI2RNavigationMessage.FRONT, "")
+        goto_barrier_param = ("Barrier1", AI2RNavigationMessage.BEHIND, "")
+        receive_charge_param = ("Charge1",)
+        self.parameters = [
+            None, goto_person_param, receive_charge_param,
+            goto_door_param, None, goto_barrier_param
+        ]
 
-        # --------- Behaviors -----------
-        behaviors = msg.available_behaviors
-        print("Available behaviors:")
-        if behaviors:
-            for behavior in behaviors:
-                print(behavior)
-        else:
-            print("-")
+        qos_profile_best_effort = QoSProfile(
+            reliability=QoSReliabilityPolicy.BEST_EFFORT,
+            history=QoSHistoryPolicy.KEEP_LAST,
+            depth=1
+        )
+        qos_profile_reliable = QoSProfile(
+            reliability=QoSReliabilityPolicy.RELIABLE,
+            history=QoSHistoryPolicy.KEEP_LAST,
+            depth=1
+        )
 
-    # --------- Monitoring -----------
-    #if (msg.completed_behavior != "-"):
-    print("Completed Behavior: " , msg.completed_behavior, " behavior_in_progress: " , msg.behavior_in_progress)
-    failed_behavior = msg.failed_behavior
-    failure = msg.failure
-    if failed_behavior != "-" and loggedFailure == False:
-        print("[FAILURE] -----------")
-        print("Failed behavior: " + failed_behavior)
+        self.behavior_subscriber = self.create_subscription(
+            AI2RStatusMessage,
+            '/ihmc/behavior_tree/ai2r_status',
+            self.behavior_message_callback,
+            qos_profile_best_effort
+        )
 
-        failure_info = {
-            "Failed behavior": failed_behavior,
-            "Description": failure.action_name,
-            "Type": failure.action_type
-        }
+        self.behavior_publisher = self.create_publisher(
+            AI2RCommandMessage,
+            '/ihmc/behavior_tree/ai2r_command',
+            qos_profile_reliable
+        )
 
-        if failure.missing_frame:
-            failure_info["Missing Frame"] = failure.reference_frame
-        if failure.collision_name != "-":
-            failure_info["Collision with"] = failure.collision_name
-        position_error = failure.position_error
-        error_vector = np.array([position_error.x, position_error.y, position_error.z])
-        norm = np.linalg.norm(error_vector)
-        if norm > failure.position_tolerance:
-            failure_info["Position error"] = norm
+    def behavior_message_callback(self, msg):
+        if self.demo_complete:
+            return
 
-        json_filename = 'failure_info.json'
-        with open(json_filename, 'a') as json_file:
-            json.dump(failure_info, json_file, indent=4)
-        loggedFailure = True
+        if not self.initialized:
+            # --------- Scene -----------
+            scene_objects = msg.objects
+            print("Objects in the scene:")
+            if scene_objects:
+                for obj in scene_objects:
+                    print(f"{obj.object_name}")
+            else:
+                print("-")
 
-    # --------- Coordination -----------
-    waiting_for_command = False
-    if msg.behavior_in_progress == "-":
-       waiting_for_command  = True
+            # --------- Behaviors -----------
+            behaviors = msg.available_behaviors
+            print("Available behaviors:")
+            if behaviors:
+                for behavior in behaviors:
+                    print(behavior)
+            else:
+                print("-")
 
-    if waiting_for_command or not initialized:
-        behavior_command = AI2RCommandMessage()
-        # DECIDE what behavior to execute based on reasoning. For example can decide to scan environment to detect objects
-        behavior_command.behavior_to_execute = behaviors_baseline[behavior_counter]
-        behavior_command.adapting_behavior = False
+        # --------- Monitoring -----------
+        if (msg.completed_behavior != "-"
+                and msg.behavior_in_progress == "-"
+                and msg.completed_behavior != self.last_printed_completion):
+            print("Completed Behavior:", msg.completed_behavior)
+            self.last_printed_completion = msg.completed_behavior
 
-        if (behavior_command.behavior_to_execute == "GOTO"):
-            behavior_command.adapting_behavior = True
-            new_goto_behavior = AI2RNavigationMessage()
-            goto_parameters = parameters[behavior_counter]
+        failed_behavior = msg.failed_behavior
+        failure = msg.failure
+        if failed_behavior != "-" and not self.logged_failure:
+            print("[FAILURE] -----------")
+            print("Failed behavior: " + failed_behavior)
 
-            # Set the reference frame name - can copy from scene_objects.obj_name
-            new_goto_behavior.target_object = goto_parameters[0]
-            # Set the distance to the object
-            new_goto_behavior.distance_to_object = 1.0
-            new_goto_behavior.pov_object = goto_parameters[2]
-            new_goto_behavior.spatial_relation = goto_parameters[1]
-            if new_goto_behavior.spatial_relation == AI2RNavigationMessage.DEFAULT or goto_parameters[2] == "":
-                new_goto_behavior.pov_object = "walkingFrame"
+            failure_info = {
+                "Failed behavior": failed_behavior,
+                "Description": failure.action_name,
+                "Type": failure.action_type
+            }
 
-            behavior_command.navigation = new_goto_behavior
+            if failure.missing_frame:
+                failure_info["Missing Frame"] = failure.reference_frame
+            if failure.collision_name != "-":
+                failure_info["Collision with"] = failure.collision_name
+            position_error = failure.position_error
+            error_vector = np.array([position_error.x, position_error.y, position_error.z])
+            norm = np.linalg.norm(error_vector)
+            if norm > failure.position_tolerance:
+                failure_info["Position error"] = norm
 
-        if (behavior_command.behavior_to_execute == "RECEIVE OBJECT"):
-            behavior_command.adapting_behavior = True
-            new_receive_behavior = AI2RReceiveObjectMessage()
-            new_receive_behavior.object_name = parameters[behavior_counter][0]
-            new_receive_behavior.side =  bytes([1])
+            json_filename = 'failure_info.json'
+            with open(json_filename, 'a') as json_file:
+                json.dump(failure_info, json_file, indent=4)
+            self.logged_failure = True
 
-            behavior_command.receive_object = new_receive_behavior
+        # --------- Coordination -----------
+        waiting_for_command = msg.behavior_in_progress == "-"
 
-        print("Commanded Behavior: " + behavior_command.behavior_to_execute)
-        ros2["behavior_publisher"].publish(behavior_command)
-        initialized = True
-        loggedFailure = False
-        behavior_counter += 1
-        print("Completed Behavior: " , msg.completed_behavior, " behavior_in_progress: " , msg.behavior_in_progress)
+        # Verify the last commanded behavior completed before sending the next
+        if self.last_commanded_behavior is not None and not waiting_for_command:
+            return
+        if self.last_commanded_behavior is not None and waiting_for_command:
+            if msg.completed_behavior != self.last_commanded_behavior:
+                return
+
+        if self.behavior_counter >= len(self.behaviors_baseline):
+            if not self.demo_complete:
+                print("Demo complete. All behaviors executed successfully.")
+                self.demo_complete = True
+            return
+
+        if waiting_for_command or not self.initialized:
+            behavior_command = AI2RCommandMessage()
+            behavior_command.behavior_to_execute = self.behaviors_baseline[self.behavior_counter]
+            behavior_command.adapting_behavior = False
+
+            if behavior_command.behavior_to_execute == "GOTO":
+                behavior_command.adapting_behavior = True
+                new_goto_behavior = AI2RNavigationMessage()
+                goto_parameters = self.parameters[self.behavior_counter]
+
+                new_goto_behavior.target_object = goto_parameters[0]
+                new_goto_behavior.distance_to_object = 1.0
+                new_goto_behavior.pov_object = goto_parameters[2]
+                new_goto_behavior.spatial_relation = goto_parameters[1]
+                if new_goto_behavior.spatial_relation == AI2RNavigationMessage.DEFAULT or goto_parameters[2] == "":
+                    new_goto_behavior.pov_object = "walkingFrame"
+
+                behavior_command.navigation = new_goto_behavior
+
+            if behavior_command.behavior_to_execute == "RECEIVE OBJECT":
+                behavior_command.adapting_behavior = True
+                new_receive_behavior = AI2RReceiveObjectMessage()
+                new_receive_behavior.object_name = self.parameters[self.behavior_counter][0]
+                new_receive_behavior.side = bytes([1])
+
+                behavior_command.receive_object = new_receive_behavior
+
+            print("Commanded Behavior: " + behavior_command.behavior_to_execute)
+            self.behavior_publisher.publish(behavior_command)
+            self.last_commanded_behavior = behavior_command.behavior_to_execute
+            self.initialized = True
+            self.logged_failure = False
+            self.behavior_counter += 1
+
 
 def main(args=None):
     rclpy.init(args=args)
-    
-    qos_profile_reliable = QoSProfile(
-        reliability=QoSReliabilityPolicy.BEST_EFFORT,
-        history=QoSHistoryPolicy.KEEP_LAST,
-        depth=1
-    )
+    node = ExplosiveBreachingDemoNode()
 
-    node = rclpy.create_node('behavior_coordination_node')
-    ros2["node"] = node
-
-    behavior_subscriber = node.create_subscription(AI2RStatusMessage,
-                                            '/ihmc/behavior_tree/ai2r_status',
-                                            behavior_message_callback, qos_profile_reliable)
-    ros2["behavior_subscriber"] = behavior_subscriber
-
-    behavior_publisher = node.create_publisher(AI2RCommandMessage,
-                                    '/ihmc/behavior_tree/ai2r_command',
-                                    qos_profile_reliable)
-    ros2["behavior_publisher"] = behavior_publisher
-
-    # Wait until interrupt
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:
+        pass
+    finally:
         node.destroy_node()
+        rclpy.shutdown()
+
 
 if __name__ == '__main__':
     main()
