@@ -71,7 +71,7 @@ public class QuickFootstepPlanner
       if (atGoal.get(RobotSide.LEFT) && atGoal.get(RobotSide.RIGHT))
          return true;
 
-      double stepLength = 0.38;
+      double stepLength = 0.33;
       double stepYaw = Math.toRadians(35.0);
       stanceMid.interpolate(stance.get(RobotSide.LEFT), stance.get(RobotSide.RIGHT), 0.5);
       goalMid.interpolate(goal.get(RobotSide.LEFT), goal.get(RobotSide.RIGHT), 0.5);
