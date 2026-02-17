@@ -71,7 +71,7 @@ public class QuickFootstepPlanner
       if (atGoal.get(RobotSide.LEFT) && atGoal.get(RobotSide.RIGHT))
          return true;
 
-      double stepLength = 0.4;
+      double stepLength = 0.38;
       double stepYaw = Math.toRadians(35.0);
       stanceMid.interpolate(stance.get(RobotSide.LEFT), stance.get(RobotSide.RIGHT), 0.5);
       goalMid.interpolate(goal.get(RobotSide.LEFT), goal.get(RobotSide.RIGHT), 0.5);
@@ -89,7 +89,6 @@ public class QuickFootstepPlanner
       Quaternion swingEndOrientation = new Quaternion(stanceMid.getOrientation());
       swingEnd.getOrientation().set(swingEndOrientation);
 
-      // TODO: Store concept of candidate being possible? If no valid steps, we gotta do something else, like step in an orthogonal direction
       SideMap<Pose3D> candidate = new SideMap<>(() -> new Pose3D());
       SideMap<Boolean> goalstepPossible = new SideMap<>();
       for (RobotSide side : RobotSide.values)
@@ -97,7 +96,7 @@ public class QuickFootstepPlanner
          candidate.get(side).set(stance.get(side));
          candidate.get(side).getOrientation().set(swingEndOrientation);
 
-         outer:
+         outer: // Calculate some possible steps toward the goal
          for (double distance = 0.02; distance < stepLength + 0.05; distance += 0.02)
          {
             candidate.get(side).getPosition().scaleAdd(distance, hipLine.get(side).getDirection(), swingHip.get(side));
@@ -130,6 +129,7 @@ public class QuickFootstepPlanner
             }
          }
 
+         // Calculate if direct step to goal is possible
          double allowedLength = Math.max(stepLength, goal.get(side).getPosition().distance(goal.get(side.getOppositeSide()).getPosition()));
          goalstepPossible.put(side, false);
          Pose3D goalStep = new Pose3D(goal.get(side));
