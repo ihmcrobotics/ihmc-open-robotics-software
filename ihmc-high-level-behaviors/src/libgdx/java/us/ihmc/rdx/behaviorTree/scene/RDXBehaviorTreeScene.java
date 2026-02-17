@@ -122,7 +122,6 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
             }
             else
                objectDefinition.setObjectType((byte) BehaviorTreeSceneObjectType.YOLO_ONLY.ordinal());
-            objectDefinition.setYoloModelName("best_multi_01_16_2026");
             objectDefinition.setYoloClassName(objectType.yoloClass);
          }
       }
@@ -130,7 +129,6 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
       {
          objectDefinition = new BehaviorTreeSceneObjectDefinitionMessage();
          objectDefinition.setObjectType((byte) BehaviorTreeSceneObjectType.YOLO_ONLY.ordinal());
-         objectDefinition.setYoloModelName("best_multi_01_16_2026");
          objectDefinition.setYoloClassName("person");
       }
       if (objectDefinition != null)
