@@ -296,10 +296,18 @@ public class YOLOv8DetectionExecutor
 
       RawImage colorImage = detectionsToAnnotate.get(0).getColorImage().get();
       if (colorImage == null)
+      {
+         for (YOLOv8InstantDetection detection : detectionsToAnnotate)
+            detection.destroy();
+
          return;
+      }
 
       if (!annotatedImageDemanded.getAsBoolean())
       {
+         for (YOLOv8InstantDetection detection : detectionsToAnnotate)
+            detection.destroy();
+
          return;
       }
 
@@ -316,6 +324,8 @@ public class YOLOv8DetectionExecutor
       PerceptionMessageTools.packImageMessage(colorImage, annotatedImagePointer, CompressionType.JPEG, imageMessage);
       annotatedImagePublisher.publish(imageMessage);
 
+      for (YOLOv8InstantDetection detection : detectionsToAnnotate)
+         detection.destroy();
       resultMat.close();
       colorImage.release();
    }
