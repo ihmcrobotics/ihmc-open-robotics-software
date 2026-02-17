@@ -4,7 +4,7 @@
   "ICP filter" : true,
   "Flying points filter" : false,
   "Min Depth To Accept" : {
-    "value" : 0.88,
+    "value" : 0.5,
     "lowerBound" : 0.0,
     "upperBound" : 2.0
   },
