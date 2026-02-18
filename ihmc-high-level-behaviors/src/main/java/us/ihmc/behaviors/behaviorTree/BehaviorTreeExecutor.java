@@ -114,4 +114,9 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeRootNodeExecu
          LogTools.error("Cannot load behavior: {}", jsonFileName);
       }
    }
+
+   public BehaviorTreeSceneExecutor getScene()
+   {
+      return scene;
+   }
 }

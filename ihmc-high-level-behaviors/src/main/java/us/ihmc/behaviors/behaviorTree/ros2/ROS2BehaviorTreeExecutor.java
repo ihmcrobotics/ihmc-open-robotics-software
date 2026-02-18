@@ -1,14 +1,23 @@
 package us.ihmc.behaviors.behaviorTree.ros2;
 
+import behavior_msgs.msg.dds.BehaviorTreeYoDataMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
-import us.ihmc.behaviors.behaviorTree.BehaviorTree;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeExecutor;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
+import us.ihmc.behaviors.behaviorTree.*;
+import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
+import us.ihmc.behaviors.behaviorTree.action.actions.HandPoseActionExecutor;
+import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneExecutor;
+import us.ihmc.communication.AutonomyAPI;
+import us.ihmc.communication.crdt.CRDTStatusSE3Trajectory;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseCommunicatorMap;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
 import us.ihmc.perception.gpuMapping.TerrainMapData;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.sensors.ImageSensor;
 
 /**
@@ -17,6 +26,9 @@ import us.ihmc.sensors.ImageSensor;
 public class ROS2BehaviorTreeExecutor extends BehaviorTreeExecutor
 {
    private final ROS2BehaviorTree<BehaviorTreeNodeExecutor<?, ?>> ros2BehaviorTree;
+
+   private final BehaviorTreeYoDataMessage yoDataMessage = new BehaviorTreeYoDataMessage();
+   private final ROS2Publisher<BehaviorTreeYoDataMessage> yoDataPublisher;
 
    public ROS2BehaviorTreeExecutor(ROS2ControllerHelper ros2ControllerHelper,
                                    ROS2SyncedRobotModel syncedRobot,
@@ -28,12 +40,99 @@ public class ROS2BehaviorTreeExecutor extends BehaviorTreeExecutor
    {
       super(syncedRobot, peerClockEstimator, ros2ControllerHelper, imageSensor, yolo, foundationPose, terrainMapData);
 
-      ros2BehaviorTree = new ROS2BehaviorTree<>((BehaviorTree) this, ros2ControllerHelper); // FIXME
+      ros2BehaviorTree = new ROS2BehaviorTree<>((BehaviorTree) this, ros2ControllerHelper);
+
+      yoDataPublisher = ros2ControllerHelper.getROS2Node().createPublisher(AutonomyAPI.BEHAVIOR_YO_DATA);
    }
 
    /** Expected to be called at the {@link ROS2BehaviorTree#SYNC_FREQUENCY} */
    public void update()
    {
+      BehaviorTreeExecutor tree = (BehaviorTreeExecutor) ros2BehaviorTree.getBehaviorTree();
+      BehaviorTreeSceneExecutor scene = tree.getScene();
+
+      yoDataMessage.setNumberOfPersistentDetections((byte) scene.getPersistentDetections().size());
+      yoDataMessage.setNumberOfSceneObjects((byte) scene.getObjects().size());
+
+      for (int i = 0; i < yoDataMessage.getSceneObjectX().length; i++)
+      {
+         if (scene.getObjects().size() > i)
+         {
+            RigidBodyTransformReadOnly pose = scene.getObjects().get(i).getTransformToWorld();
+            yoDataMessage.getSceneObjectX()[i] = (float) pose.getTranslation().getX();
+            yoDataMessage.getSceneObjectY()[i] = (float) pose.getTranslation().getY();
+            yoDataMessage.getSceneObjectZ()[i] = (float) pose.getTranslation().getZ();
+            yoDataMessage.getSceneObjectYaw()[i] = (float) pose.getRotation().getYaw();
+            yoDataMessage.getSceneObjectPitch()[i] = (float) pose.getRotation().getPitch();
+            yoDataMessage.getSceneObjectRoll()[i] = (float) pose.getRotation().getRoll();
+         }
+         else
+         {
+            yoDataMessage.getSceneObjectX()[i] = Float.NaN;
+            yoDataMessage.getSceneObjectY()[i] = Float.NaN;
+            yoDataMessage.getSceneObjectZ()[i] = Float.NaN;
+            yoDataMessage.getSceneObjectYaw()[i] = Float.NaN;
+            yoDataMessage.getSceneObjectPitch()[i] = Float.NaN;
+            yoDataMessage.getSceneObjectRoll()[i] = Float.NaN;
+         }
+      }
+
+      BehaviorTreeRootNodeExecutor rootNode = tree.getRootNode();
+      if (rootNode != null)
+      {
+         yoDataMessage.setAutomaticExecution(rootNode.getState().getAutomaticExecution());
+         yoDataMessage.setExecutionNextIndex((byte) rootNode.getState().getExecutionNextIndex());
+         yoDataMessage.setConcurrencyEnabled(rootNode.getState().getConcurrencyEnabled());
+         yoDataMessage.setNumberOfExecutingActions((byte) rootNode.getCurrentlyExecutingLeaves().size());
+         yoDataMessage.setNumberOfFailedActions((byte) rootNode.getFailedLeaves().size());
+         
+         for (int i = 0; i < yoDataMessage.getExecutingActionType().length; i++)
+         {
+            if (rootNode.getCurrentlyExecutingLeaves().size() > i)
+            {
+               yoDataMessage.getExecutingActionType()[i]
+                     = BehaviorTreeDefinitionRegistry.getMessageByte(rootNode.getCurrentlyExecutingLeaves().get(i).getDefinition().getClass());
+               yoDataMessage.getExecutingActionId()[i] = (short) rootNode.getCurrentlyExecutingLeaves().get(i).getState().getID();
+               if (rootNode.getCurrentlyExecutingLeaves().get(i).getState() instanceof ActionNodeState<?> actionState)
+                  yoDataMessage.getElapsedExecutionTime()[i] = (float) actionState.getElapsedExecutionTime();
+            }
+            else
+            {
+               yoDataMessage.getExecutingActionType()[i] = -1;
+               yoDataMessage.getExecutingActionId()[i] = -1;
+               yoDataMessage.getElapsedExecutionTime()[i] = Float.NaN;
+            }
+         }
+
+         SideDependentList<HandPoseActionExecutor> lastHandPoseActions = new SideDependentList<>();
+         for (LeafNodeExecutor<?, ?> leaf : rootNode.getCurrentlyExecutingLeaves())
+            if (leaf instanceof HandPoseActionExecutor handPoseAction)
+               lastHandPoseActions.put(handPoseAction.getDefinition().getSide(), handPoseAction);
+         for (RobotSide side : lastHandPoseActions.sides())
+         {
+            HandPoseActionExecutor action = lastHandPoseActions.get(side);
+            Pose3DReadOnly currentPose = action.getState().getCurrentPose().getValueReadOnly();
+            yoDataMessage.getCurrentHandX()[side.ordinal()] = (float) currentPose.getX();
+            yoDataMessage.getCurrentHandY()[side.ordinal()] = (float) currentPose.getY();
+            yoDataMessage.getCurrentHandZ()[side.ordinal()] = (float) currentPose.getZ();
+            yoDataMessage.getCurrentHandYaw()[side.ordinal()] = (float) currentPose.getYaw();
+            yoDataMessage.getCurrentHandPitch()[side.ordinal()] = (float) currentPose.getPitch();
+            yoDataMessage.getCurrentHandRoll()[side.ordinal()] = (float) currentPose.getRoll();
+            CRDTStatusSE3Trajectory commandedTrajectory = action.getState().getCommandedTrajectory();
+            if (!commandedTrajectory.isEmpty())
+            {
+               yoDataMessage.getGoalHandX()[side.ordinal()] = (float) commandedTrajectory.getLastValueReadOnly().getPositionX();
+               yoDataMessage.getGoalHandY()[side.ordinal()] = (float) commandedTrajectory.getLastValueReadOnly().getPositionY();
+               yoDataMessage.getGoalHandZ()[side.ordinal()] = (float) commandedTrajectory.getLastValueReadOnly().getPositionZ();
+               yoDataMessage.getGoalHandYaw()[side.ordinal()] = (float) commandedTrajectory.getLastValueReadOnly().getOrientation().getYaw();
+               yoDataMessage.getGoalHandPitch()[side.ordinal()] = (float) commandedTrajectory.getLastValueReadOnly().getOrientation().getPitch();
+               yoDataMessage.getGoalHandRoll()[side.ordinal()] = (float) commandedTrajectory.getLastValueReadOnly().getOrientation().getRoll();
+            }
+         }
+      }
+      
+      yoDataPublisher.publish(yoDataMessage);
+
       ros2BehaviorTree.updatePublication();
       ros2BehaviorTree.updateSubscription();
 

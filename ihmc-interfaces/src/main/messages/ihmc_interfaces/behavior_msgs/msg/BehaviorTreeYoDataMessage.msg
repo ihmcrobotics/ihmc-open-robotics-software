@@ -23,8 +23,8 @@ uint8 number_of_executing_actions
 
 uint8 number_of_failed_actions
 
-uint8[5] executing_action_type
-uint16[5] executing_action_id
+int8[5] executing_action_type
+int16[5] executing_action_id
 float32[5] elapsed_execution_time
 
 float32[2] current_hand_x

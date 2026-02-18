@@ -1,0 +1,52 @@
+#ifndef __behavior_msgs__msg__BehaviorTreeYoDataMessage__idl__
+#define __behavior_msgs__msg__BehaviorTreeYoDataMessage__idl__
+
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * A message used to send behavior tree data from the automomy process
+       * to the controller process in order to be stored as YoVariables.
+       * Currently 221 bytes, try to keep this under 250.
+       */
+      @TypeCode(type="behavior_msgs::msg::dds_::BehaviorTreeYoDataMessage_")
+      struct BehaviorTreeYoDataMessage
+      {
+        octet number_of_persistent_detections;
+        octet number_of_scene_objects;
+        float scene_object_x[3];
+        float scene_object_y[3];
+        float scene_object_z[3];
+        float scene_object_yaw[3];
+        float scene_object_pitch[3];
+        float scene_object_roll[3];
+        boolean automatic_execution;
+        unsigned short execution_next_index;
+        boolean concurrency_enabled;
+        octet number_of_executing_actions;
+        octet number_of_failed_actions;
+        octet executing_action_type[5];
+        short executing_action_id[5];
+        float elapsed_execution_time[5];
+        float current_hand_x[2];
+        float current_hand_y[2];
+        float current_hand_z[2];
+        float current_hand_yaw[2];
+        float current_hand_pitch[2];
+        float current_hand_roll[2];
+        float goal_hand_x[2];
+        float goal_hand_y[2];
+        float goal_hand_z[2];
+        float goal_hand_yaw[2];
+        float goal_hand_pitch[2];
+        float goal_hand_roll[2];
+      };
+    };
+  };
+};
+
+#endif
