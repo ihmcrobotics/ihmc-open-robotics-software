@@ -13,7 +13,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideMap;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -28,15 +28,15 @@ public class QuickFootstepPlanner
 {
    private int stepIndex;
    private int maxSteps = 50;
-   private final SideMap<Pose3D> stance = new SideMap<>(() -> new Pose3D());
-   private final SideMap<Pose3D> goal = new SideMap<>(() -> new Pose3D());
+   private final SideDependentList<Pose3D> stance = new SideDependentList<>(() -> new Pose3D());
+   private final SideDependentList<Pose3D> goal = new SideDependentList<>(() -> new Pose3D());
    private final Pose3D swingEnd = new Pose3D();
    private RobotSide footToSwing = RobotSide.LEFT;
-   private final SideMap<Line3D> hipLine = new SideMap<>(() -> new Line3D());
+   private final SideDependentList<Line3D> hipLine = new SideDependentList<>(() -> new Line3D());
    private final Pose3D stanceMid = new Pose3D();
    private final Pose3D goalMid = new Pose3D();
-   private final SideMap<Point3D> swingHip = new SideMap<>(() -> new Point3D());
-   private final SideMap<Point3D> goalHip = new SideMap<>(() -> new Point3D());
+   private final SideDependentList<Point3D> swingHip = new SideDependentList<>(() -> new Point3D());
+   private final SideDependentList<Point3D> goalHip = new SideDependentList<>(() -> new Point3D());
    private Runnable stepPlannedCallback = () -> {};
    private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
 
@@ -66,7 +66,7 @@ public class QuickFootstepPlanner
 
    private boolean planStep()
    {
-      SideMap<Boolean> atGoal = new SideMap<>(side -> stance.get(side).getPosition().distance(goal.get(side).getPosition()) <= 0.01
+      SideDependentList<Boolean> atGoal = new SideDependentList<>(side -> stance.get(side).getPosition().distance(goal.get(side).getPosition()) <= 0.01
                                                 && stance.get(side).getOrientation().distance(goal.get(side).getOrientation()) <= Math.toRadians(5.0));
       if (atGoal.get(RobotSide.LEFT) && atGoal.get(RobotSide.RIGHT))
          return true;
@@ -89,8 +89,8 @@ public class QuickFootstepPlanner
       Quaternion swingEndOrientation = new Quaternion(stanceMid.getOrientation());
       swingEnd.getOrientation().set(swingEndOrientation);
 
-      SideMap<Pose3D> candidate = new SideMap<>(() -> new Pose3D());
-      SideMap<Boolean> goalstepPossible = new SideMap<>();
+      SideDependentList<Pose3D> candidate = new SideDependentList<>(() -> new Pose3D());
+      SideDependentList<Boolean> goalstepPossible = new SideDependentList<>();
       for (RobotSide side : RobotSide.values)
       {
          candidate.get(side).set(stance.get(side));
@@ -119,7 +119,7 @@ public class QuickFootstepPlanner
                   {
                      Vector3D ray = new Vector3D();
                      ray.sub(candidate.get(side).getPosition(), swingHip.get(side));
-                     AxisAngle axisAngle = new AxisAngle(Axis3D.Z, Math.PI / resolution * side.negateIfRightSide(direction));
+                     AxisAngle axisAngle = new AxisAngle(Axis3D.Z, Math.PI / 2.0 / resolution * side.negateIfRightSide(direction));
                      axisAngle.transform(ray);
                      candidate.get(side).getPosition().add(swingHip.get(side), ray);
                   }
@@ -164,7 +164,6 @@ public class QuickFootstepPlanner
             swingEnd.set(goal.get(side));
             return false;
          }
-
       }
 
       // Step the candidate that's a bigger step
@@ -235,17 +234,17 @@ public class QuickFootstepPlanner
       return goalMid;
    }
 
-   public SideMap<Point3D> getSwingHip()
+   public SideDependentList<Point3D> getSwingHip()
    {
       return swingHip;
    }
 
-   public SideMap<Point3D> getGoalHip()
+   public SideDependentList<Point3D> getGoalHip()
    {
       return goalHip;
    }
 
-   public SideMap<Line3D> getHipLine()
+   public SideDependentList<Line3D> getHipLine()
    {
       return hipLine;
    }

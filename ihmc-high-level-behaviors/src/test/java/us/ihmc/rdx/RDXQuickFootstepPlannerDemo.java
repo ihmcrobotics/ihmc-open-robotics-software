@@ -23,7 +23,7 @@ import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.robotSide.SideMap;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -178,8 +178,8 @@ public class RDXQuickFootstepPlannerDemo
                int footstepIndex = footstepIndexCounter++;
                visualModels.add(RDXModelBuilder.buildModelInstance(builder ->
                {
-                  SideMap<Point3D> swingHipAir = new SideMap<>(() -> new Point3D());
-                  SideMap<Point3D> goalHipAir = new SideMap<>(() -> new Point3D());
+                  SideDependentList<Point3D> swingHipAir = new SideDependentList<>(() -> new Point3D());
+                  SideDependentList<Point3D> goalHipAir = new SideDependentList<>(() -> new Point3D());
                   for (RobotSide side : RobotSide.values)
                   {
                      swingHipAir.get(side).set(planner.getSwingHip().get(side));
