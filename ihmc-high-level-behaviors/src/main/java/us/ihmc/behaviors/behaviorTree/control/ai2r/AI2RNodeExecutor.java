@@ -145,6 +145,11 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
          setFailedBehaviors();
          ros2ControllerHelper.publish(AutonomyAPI.AI2R_STATUS, statusMessage);
       }
+      if (/*some condition*/ true)
+      {
+         publishYOLOAnnotatedImage();
+      }
+
       endSequenceAfterBehaviorExecution();
       executeBehaviorLogic();
    }

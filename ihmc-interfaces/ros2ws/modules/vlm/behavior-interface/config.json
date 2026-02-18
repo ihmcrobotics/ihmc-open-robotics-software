@@ -1,0 +1,52 @@
+{
+    "description": "Mission planner: translates a task description into an ordered behavior sequence.",
+
+    "api_base": "http://localhost:8000/v1",
+    "model": "auto",
+    "temperature": 0.0,
+    "max_tokens": 512,
+    "top_p": 1.0,
+    "supports_vision": false,
+    "image": null,
+    "prompt_type": "mission_planner",
+
+    "system_prompt": [
+        "You are an intelligent assistant for a robot operating in a dynamic, partially observable environment.",
+        "Your role is to produce an ordered sequence of behaviors for the robot to execute.",
+        "Use the provided task_description, scene_objects, and available_behaviors to build the plan.",
+        "When multiple behaviors are valid, choose the earliest one in available_behaviors.",
+        "The robot may have previously executed behaviors or encountered failures — use that context to advance the plan."
+    ],
+
+    "task_description": [
+        "1. SCAN the environment to populate scene_objects.",
+        "2. Go to the person to the right of the barrier.",
+        "3. Receive the explosive charge from the person.",
+        "4. Go to the front of the DoorPanel.",
+        "5. Place the charge on the DoorPanel.",
+        "6. Go behind the barrier."
+    ],
+
+    "examples": [
+        "Example:",
+        "  task_description:",
+        "    1. Go to the person in front of the wall.",
+        "    2. Receive the pen from the person.",
+        "  scene_objects: [Person1, Wall1, Pen1]",
+        "  available_behaviors: [GOTO, SCAN, RECEIVE OBJECT]",
+        "",
+        "  Output:",
+        "  behavior_list = [",
+        "      GOTO (to the person in front of the wall),",
+        "      RECEIVE OBJECT (the pen from the person)",
+        "  ]"
+    ],
+
+    "immediate_task": "From the available_behaviors, produce the full ordered behavior sequence for the task.",
+    "precognition": "Think step by step before answering.",
+    "output_format": [
+        "Return a Python-style list assigned to behavior_list:",
+        "  behavior_list = [ BEHAVIOR (description), ... ]",
+        "No code, no explanations."
+    ]
+}

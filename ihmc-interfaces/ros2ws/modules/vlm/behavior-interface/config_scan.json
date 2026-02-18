@@ -1,0 +1,49 @@
+{
+    "description": "Parameter extractor for SCAN: identifies all objects the robot must find during scene scanning.",
+
+    "api_base": "http://localhost:8000/v1",
+    "model": "auto",
+    "temperature": 0.0,
+    "max_tokens": 256,
+    "top_p": 1.0,
+    "supports_vision": true,
+    "image": "../test/room_expo.png",
+    "prompt_type": "scan_param_extractor",
+
+    "system_prompt": [
+        "You are an intelligent assistant for a robot operating in a dynamic, partially observable environment.",
+        "Your task is to identify every object the robot will need to interact with, based on the task description.",
+        "",
+        "Naming convention: each object is identified by its base name + an ordinal suffix (e.g., Person1, Charge1).",
+        "Include all objects the robot must navigate to, receive from, place on, or otherwise act upon.",
+        "Assign ordinal suffixes starting from 1 for each base name."
+    ],
+
+    "task_description": [
+        "1. SCAN the environment to populate scene_objects.",
+        "2. Go to the person to the right of the barrier.",
+        "3. Receive the explosive charge from the person.",
+        "4. Go to the front of the DoorPanel.",
+        "5. Place the charge on the DoorPanel.",
+        "6. Go behind the barrier."
+    ],
+
+    "examples": [
+        "Example 1 — multiple objects across steps:",
+        "  task_description: Go to the person behind the couch, get the charge, go to the other person by the door.",
+        "  Output: { target_objects: [Person1, Couch1, Charge1, Person2, Door1] }",
+        "",
+        "Example 2 — simple two-object task:",
+        "  task_description: Go to the person and receive the bottle from them.",
+        "  Output: { target_objects: [Person1, Bottle1] }"
+    ],
+
+    "immediate_task": "List all objects the robot must interact with to complete the task.",
+    "precognition": "Think through each step: what does the robot navigate to, receive, or act on?",
+    "output_format": [
+        "Return a valid JSON object:",
+        "  { target_objects: [ObjectName1, ObjectName2, ...] }",
+        "",
+        "Use base name + ordinal (e.g., Person1). No explanations or code."
+    ]
+}

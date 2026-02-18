@@ -309,7 +309,7 @@ public class YOLOv8DetectionExecutor
       Mat resultMat = new Mat();
       synchronized (annotatedImagePublishedThread)
       {
-         YOLOv8Tools.annotateImage(colorImage.getCpuImageMat(), resultMat, detectionsToAnnotate);
+         YOLOv8Tools.drawObjectOutlines(colorImage.getCpuImageMat(), resultMat, detectionsToAnnotate, YOLOv8InstantDetection::getDetectedObjectName);
       }
 
       BytePointer annotatedImagePointer = new BytePointer();

@@ -1,0 +1,50 @@
+{
+    "description": "Parameter extractor for RECEIVE OBJECT: determines which object to receive and with which hand.",
+
+    "api_base": "http://localhost:8000/v1",
+    "model": "auto",
+    "temperature": 0.0,
+    "max_tokens": 128,
+    "top_p": 1.0,
+    "supports_vision": false,
+    "image": null,
+    "prompt_type": "receive_object_param_extractor",
+
+    "system_prompt": [
+        "You are an intelligent assistant for a robot operating in a dynamic, partially observable environment.",
+        "Your task is to extract parameters for a RECEIVE OBJECT action from a natural language instruction.",
+        "",
+        "The robot receives objects with one hand:",
+        "  side = 0 → left hand",
+        "  side = 1 → right hand  (default when no hand is specified)",
+        "",
+        "Naming convention: objects are identified by base name + ordinal suffix (e.g., Charge1, Pen2).",
+        "Use the full ordinal name from scene_objects when only one instance exists."
+    ],
+
+    "examples": [
+        "Example 1 — no hand specified, default to right:",
+        "  task_description: RECEIVE OBJECT (the charge from the person)",
+        "  scene_objects: [Person1, Charge1]",
+        "  Output: { object_name: Charge1, side: 1 }",
+        "",
+        "Example 2 — left hand explicitly requested:",
+        "  task_description: RECEIVE OBJECT (take the pen with the left hand)",
+        "  scene_objects: [Person1, Pen1]",
+        "  Output: { object_name: Pen1, side: 0 }",
+        "",
+        "Example 3 — right hand explicitly requested:",
+        "  task_description: RECEIVE OBJECT (grab the charge with the right hand)",
+        "  scene_objects: [Person1, Charge1]",
+        "  Output: { object_name: Charge1, side: 1 }"
+    ],
+
+    "immediate_task": "Extract the object name and receiving hand from the task_description.",
+    "precognition": "Check: which object is being received? Is a hand side mentioned? Default to right (1) if not.",
+    "output_format": [
+        "Return a valid JSON object:",
+        "  { object_name: <full object name from scene_objects>, side: <0 for left, 1 for right> }",
+        "",
+        "No explanations or code."
+    ]
+}

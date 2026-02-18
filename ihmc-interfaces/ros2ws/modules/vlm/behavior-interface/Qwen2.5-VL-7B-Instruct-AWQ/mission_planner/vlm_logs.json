@@ -1,0 +1,154 @@
+[
+    {
+        "timestamp": "2026-02-18T13:32:36.513753",
+        "model": "/home/sramishetty/alex/repository-group/ihmc-open-robotics-software/ihmc-interfaces/ros2ws/modules/vlm/test/models/Qwen2.5-VL-7B-Instruct-AWQ",
+        "api_base": "http://localhost:8000/v1",
+        "temperature": 0.0,
+        "max_tokens": 512,
+        "top_p": 1.0,
+        "supports_vision": false,
+        "description": "Mission planner: translates a task description into an ordered behavior sequence.",
+        "prompt_type": "mission_planner",
+        "system_prompt": "You are an intelligent assistant for a robot operating in a dynamic, partially observable environment.\nYour role is to produce an ordered sequence of behaviors for the robot to execute.\nUse the provided task_description, scene_objects, and available_behaviors to build the plan.\nWhen multiple behaviors are valid, choose the earliest one in available_behaviors.\nThe robot may have previously executed behaviors or encountered failures \u2014 use that context to advance the plan.",
+        "prompt": "\nTask Description:\n1. SCAN the environment to populate scene_objects.\n2. Go to the person to the right of the barrier.\n3. Receive the explosive charge from the person.\n4. Go to the front of the DoorPanel.\n5. Place the charge on the DoorPanel.\n6. Go behind the barrier.\n\nExamples:\nExample:\n  task_description:\n    1. Go to the person in front of the wall.\n    2. Receive the pen from the person.\n  scene_objects: [Person1, Wall1, Pen1]\n  available_behaviors: [GOTO, SCAN, RECEIVE OBJECT]\n\n  Output:\n  behavior_list = [\n      GOTO (to the person in front of the wall),\n      RECEIVE OBJECT (the pen from the person)\n  ]\n\nImmediate Task: From the available_behaviors, produce the full ordered behavior sequence for the task.\n\nNote: Think step by step before answering.\n\nOutput Format:\nReturn a Python-style list assigned to behavior_list:\n  behavior_list = [ BEHAVIOR (description), ... ]\nNo code, no explanations.",
+        "input": "scene_objects: []\navailable_behaviors: ['GOTO', 'SCAN', 'RECEIVE OBJECT', 'PLACE CHARGE ON DOOR']\npreviously_executed: \nfailed_behaviors: "
+    },
+    {
+        "timestamp": "2026-02-18T13:32:36.931596",
+        "prompt": "scene_objects: []\navailable_behaviors: ['GOTO', 'SCAN', 'RECEIVE OBJECT', 'PLACE CHARGE ON DOOR']\npreviously_executed: \nfailed_behaviors: \nTask Description:\n1. SCAN the environment to populate scene_objects.\n2. Go to the person to the right of the barrier.\n3. Receive the explosive charge from the person.\n4. Go to the front of the DoorPanel.\n5. Place the charge on the DoorPanel.\n6. Go behind the barrier.\n\nExamples:\nExample:\n  task_description:\n    1. Go to the person in front of the wall.\n    2. Receive the pen from the person.\n  scene_objects: [Person1, Wall1, Pen1]\n  available_behaviors: [GOTO, SCAN, RECEIVE OBJECT]\n\n  Output:\n  behavior_list = [\n      GOTO (to the person in front of the wall),\n      RECEIVE OBJECT (the pen from the person)\n  ]\n\nImmediate Task: From the available_behaviors, produce the full ordered behavior sequence for the task.\n\nNote: Think step by step before answering.\n\nOutput Format:\nReturn a Python-style list assigned to behavior_list:\n  behavior_list = [ BEHAVIOR (description), ... ]\nNo code, no explanations.",
+        "output": "behavior_list = [SCAN, GOTO, RECEIVE OBJECT, PLACE CHARGE ON DOOR, GOTO]"
+    },
+    {
+        "timestamp": "2026-02-18T13:33:18.884648",
+        "model": "/home/sramishetty/alex/repository-group/ihmc-open-robotics-software/ihmc-interfaces/ros2ws/modules/vlm/test/models/Qwen2.5-VL-7B-Instruct-AWQ",
+        "api_base": "http://localhost:8000/v1",
+        "temperature": 0.0,
+        "max_tokens": 512,
+        "top_p": 1.0,
+        "supports_vision": false,
+        "description": "Mission planner: translates a task description into an ordered behavior sequence.",
+        "prompt_type": "mission_planner",
+        "system_prompt": "You are an intelligent assistant for a robot operating in a dynamic, partially observable environment.\nYour role is to produce an ordered sequence of behaviors for the robot to execute.\nUse the provided task_description, scene_objects, and available_behaviors to build the plan.\nWhen multiple behaviors are valid, choose the earliest one in available_behaviors.\nThe robot may have previously executed behaviors or encountered failures \u2014 use that context to advance the plan.",
+        "prompt": "\nTask Description:\n1. SCAN the environment to populate scene_objects.\n2. Go to the person to the right of the barrier.\n3. Receive the explosive charge from the person.\n4. Go to the front of the DoorPanel.\n5. Place the charge on the DoorPanel.\n6. Go behind the barrier.\n\nExamples:\nExample:\n  task_description:\n    1. Go to the person in front of the wall.\n    2. Receive the pen from the person.\n  scene_objects: [Person1, Wall1, Pen1]\n  available_behaviors: [GOTO, SCAN, RECEIVE OBJECT]\n\n  Output:\n  behavior_list = [\n      GOTO (to the person in front of the wall),\n      RECEIVE OBJECT (the pen from the person)\n  ]\n\nImmediate Task: From the available_behaviors, produce the full ordered behavior sequence for the task.\n\nNote: Think step by step before answering.\n\nOutput Format:\nReturn a Python-style list assigned to behavior_list:\n  behavior_list = [ BEHAVIOR (description), ... ]\nNo code, no explanations.",
+        "input": "scene_objects: ['Person1', 'Barrier1', 'Charge1', 'DoorPanel1', 'DoorPullHandle1']\navailable_behaviors: ['GOTO', 'SCAN', 'RECEIVE OBJECT', 'PLACE CHARGE ON DOOR']\npreviously_executed: \nfailed_behaviors: "
+    },
+    {
+        "timestamp": "2026-02-18T13:33:19.507274",
+        "prompt": "scene_objects: ['Person1', 'Barrier1', 'Charge1', 'DoorPanel1', 'DoorPullHandle1']\navailable_behaviors: ['GOTO', 'SCAN', 'RECEIVE OBJECT', 'PLACE CHARGE ON DOOR']\npreviously_executed: \nfailed_behaviors: \nTask Description:\n1. SCAN the environment to populate scene_objects.\n2. Go to the person to the right of the barrier.\n3. Receive the explosive charge from the person.\n4. Go to the front of the DoorPanel.\n5. Place the charge on the DoorPanel.\n6. Go behind the barrier.\n\nExamples:\nExample:\n  task_description:\n    1. Go to the person in front of the wall.\n    2. Receive the pen from the person.\n  scene_objects: [Person1, Wall1, Pen1]\n  available_behaviors: [GOTO, SCAN, RECEIVE OBJECT]\n\n  Output:\n  behavior_list = [\n      GOTO (to the person in front of the wall),\n      RECEIVE OBJECT (the pen from the person)\n  ]\n\nImmediate Task: From the available_behaviors, produce the full ordered behavior sequence for the task.\n\nNote: Think step by step before answering.\n\nOutput Format:\nReturn a Python-style list assigned to behavior_list:\n  behavior_list = [ BEHAVIOR (description), ... ]\nNo code, no explanations.",
+        "output": "behavior_list = [SCAN, GOTO(Person1), RECEIVE OBJECT(Charge1), GOTO(DoorPanel1), PLACE CHARGE ON DOOR(Charge1), GOTO(BARRIER1)]"
+    },
+    {
+        "timestamp": "2026-02-18T13:37:19.318717",
+        "model": "/home/sramishetty/alex/repository-group/ihmc-open-robotics-software/ihmc-interfaces/ros2ws/modules/vlm/test/models/Qwen2.5-VL-7B-Instruct-AWQ",
+        "api_base": "http://localhost:8000/v1",
+        "temperature": 0.0,
+        "max_tokens": 512,
+        "top_p": 1.0,
+        "supports_vision": false,
+        "description": "Mission planner: translates a task description into an ordered behavior sequence.",
+        "prompt_type": "mission_planner",
+        "system_prompt": "You are an intelligent assistant for a robot operating in a dynamic, partially observable environment.\nYour role is to produce an ordered sequence of behaviors for the robot to execute.\nUse the provided task_description, scene_objects, and available_behaviors to build the plan.\nWhen multiple behaviors are valid, choose the earliest one in available_behaviors.\nThe robot may have previously executed behaviors or encountered failures \u2014 use that context to advance the plan.",
+        "prompt": "\nTask Description:\n1. SCAN the environment to populate scene_objects.\n2. Go to the person to the right of the barrier.\n3. Receive the explosive charge from the person.\n4. Go to the front of the DoorPanel.\n5. Place the charge on the DoorPanel.\n6. Go behind the barrier.\n\nExamples:\nExample:\n  task_description:\n    1. Go to the person in front of the wall.\n    2. Receive the pen from the person.\n  scene_objects: [Person1, Wall1, Pen1]\n  available_behaviors: [GOTO, SCAN, RECEIVE OBJECT]\n\n  Output:\n  behavior_list = [\n      GOTO (to the person in front of the wall),\n      RECEIVE OBJECT (the pen from the person)\n  ]\n\nImmediate Task: From the available_behaviors, produce the full ordered behavior sequence for the task.\n\nNote: Think step by step before answering.\n\nOutput Format:\nReturn a Python-style list assigned to behavior_list:\n  behavior_list = [ BEHAVIOR (description), ... ]\nNo code, no explanations.",
+        "input": "scene_objects: ['Person1', 'Barrier1', 'Charge1', 'DoorPanel1', 'DoorPullHandle1']\navailable_behaviors: ['GOTO', 'SCAN', 'RECEIVE OBJECT', 'PLACE CHARGE ON DOOR']\npreviously_executed: \nfailed_behaviors: "
+    },
+    {
+        "timestamp": "2026-02-18T13:37:19.884212",
+        "prompt": "scene_objects: ['Person1', 'Barrier1', 'Charge1', 'DoorPanel1', 'DoorPullHandle1']\navailable_behaviors: ['GOTO', 'SCAN', 'RECEIVE OBJECT', 'PLACE CHARGE ON DOOR']\npreviously_executed: \nfailed_behaviors: \nTask Description:\n1. SCAN the environment to populate scene_objects.\n2. Go to the person to the right of the barrier.\n3. Receive the explosive charge from the person.\n4. Go to the front of the DoorPanel.\n5. Place the charge on the DoorPanel.\n6. Go behind the barrier.\n\nExamples:\nExample:\n  task_description:\n    1. Go to the person in front of the wall.\n    2. Receive the pen from the person.\n  scene_objects: [Person1, Wall1, Pen1]\n  available_behaviors: [GOTO, SCAN, RECEIVE OBJECT]\n\n  Output:\n  behavior_list = [\n      GOTO (to the person in front of the wall),\n      RECEIVE OBJECT (the pen from the person)\n  ]\n\nImmediate Task: From the available_behaviors, produce the full ordered behavior sequence for the task.\n\nNote: Think step by step before answering.\n\nOutput Format:\nReturn a Python-style list assigned to behavior_list:\n  behavior_list = [ BEHAVIOR (description), ... ]\nNo code, no explanations.",
+        "output": "behavior_list = [SCAN, GOTO(Person1), RECEIVE OBJECT(Charge1), GOTO(DoorPanel1), PLACE CHARGE ON DOOR(Charge1), GOTO(BARRIER1)]"
+    },
+    {
+        "timestamp": "2026-02-18T13:37:46.213876",
+        "model": "/home/sramishetty/alex/repository-group/ihmc-open-robotics-software/ihmc-interfaces/ros2ws/modules/vlm/test/models/Qwen2.5-VL-7B-Instruct-AWQ",
+        "api_base": "http://localhost:8000/v1",
+        "temperature": 0.0,
+        "max_tokens": 512,
+        "top_p": 1.0,
+        "supports_vision": false,
+        "description": "Mission planner: translates a task description into an ordered behavior sequence.",
+        "prompt_type": "mission_planner",
+        "system_prompt": "You are an intelligent assistant for a robot operating in a dynamic, partially observable environment.\nYour role is to produce an ordered sequence of behaviors for the robot to execute.\nUse the provided task_description, scene_objects, and available_behaviors to build the plan.\nWhen multiple behaviors are valid, choose the earliest one in available_behaviors.\nThe robot may have previously executed behaviors or encountered failures \u2014 use that context to advance the plan.",
+        "prompt": "\nTask Description:\n1. SCAN the environment to populate scene_objects.\n2. Go to the person to the right of the barrier.\n3. Receive the explosive charge from the person.\n4. Go to the front of the DoorPanel.\n5. Place the charge on the DoorPanel.\n6. Go behind the barrier.\n\nExamples:\nExample:\n  task_description:\n    1. Go to the person in front of the wall.\n    2. Receive the pen from the person.\n  scene_objects: [Person1, Wall1, Pen1]\n  available_behaviors: [GOTO, SCAN, RECEIVE OBJECT]\n\n  Output:\n  behavior_list = [\n      GOTO (to the person in front of the wall),\n      RECEIVE OBJECT (the pen from the person)\n  ]\n\nImmediate Task: From the available_behaviors, produce the full ordered behavior sequence for the task.\n\nNote: Think step by step before answering.\n\nOutput Format:\nReturn a Python-style list assigned to behavior_list:\n  behavior_list = [ BEHAVIOR (description), ... ]\nNo code, no explanations.",
+        "input": "scene_objects: []\navailable_behaviors: ['GOTO', 'SCAN', 'RECEIVE OBJECT', 'PLACE CHARGE ON DOOR']\npreviously_executed: \nfailed_behaviors: "
+    },
+    {
+        "timestamp": "2026-02-18T13:37:46.533867",
+        "prompt": "scene_objects: []\navailable_behaviors: ['GOTO', 'SCAN', 'RECEIVE OBJECT', 'PLACE CHARGE ON DOOR']\npreviously_executed: \nfailed_behaviors: \nTask Description:\n1. SCAN the environment to populate scene_objects.\n2. Go to the person to the right of the barrier.\n3. Receive the explosive charge from the person.\n4. Go to the front of the DoorPanel.\n5. Place the charge on the DoorPanel.\n6. Go behind the barrier.\n\nExamples:\nExample:\n  task_description:\n    1. Go to the person in front of the wall.\n    2. Receive the pen from the person.\n  scene_objects: [Person1, Wall1, Pen1]\n  available_behaviors: [GOTO, SCAN, RECEIVE OBJECT]\n\n  Output:\n  behavior_list = [\n      GOTO (to the person in front of the wall),\n      RECEIVE OBJECT (the pen from the person)\n  ]\n\nImmediate Task: From the available_behaviors, produce the full ordered behavior sequence for the task.\n\nNote: Think step by step before answering.\n\nOutput Format:\nReturn a Python-style list assigned to behavior_list:\n  behavior_list = [ BEHAVIOR (description), ... ]\nNo code, no explanations.",
+        "output": "behavior_list = [SCAN, GOTO, RECEIVE OBJECT, PLACE CHARGE ON DOOR, GOTO]"
+    },
+    {
+        "timestamp": "2026-02-18T13:55:05.488872",
+        "model": "/home/sramishetty/alex/repository-group/ihmc-open-robotics-software/ihmc-interfaces/ros2ws/modules/vlm/test/models/Qwen2.5-VL-7B-Instruct-AWQ",
+        "api_base": "http://localhost:8000/v1",
+        "temperature": 0.0,
+        "max_tokens": 512,
+        "top_p": 1.0,
+        "supports_vision": false,
+        "description": "Mission planner: translates a task description into an ordered behavior sequence.",
+        "prompt_type": "mission_planner",
+        "system_prompt": "You are an intelligent assistant for a robot operating in a dynamic, partially observable environment.\nYour role is to produce an ordered sequence of behaviors for the robot to execute.\nUse the provided task_description, scene_objects, and available_behaviors to build the plan.\nWhen multiple behaviors are valid, choose the earliest one in available_behaviors.\nThe robot may have previously executed behaviors or encountered failures \u2014 use that context to advance the plan.",
+        "prompt": "\nTask Description:\n1. SCAN the environment to populate scene_objects.\n2. Go to the person to the right of the barrier.\n3. Receive the explosive charge from the person.\n4. Go to the front of the DoorPanel.\n5. Place the charge on the DoorPanel.\n6. Go behind the barrier.\n\nExamples:\nExample:\n  task_description:\n    1. Go to the person in front of the wall.\n    2. Receive the pen from the person.\n  scene_objects: [Person1, Wall1, Pen1]\n  available_behaviors: [GOTO, SCAN, RECEIVE OBJECT]\n\n  Output:\n  behavior_list = [\n      GOTO (to the person in front of the wall),\n      RECEIVE OBJECT (the pen from the person)\n  ]\n\nImmediate Task: From the available_behaviors, produce the full ordered behavior sequence for the task.\n\nNote: Think step by step before answering.\n\nOutput Format:\nReturn a Python-style list assigned to behavior_list:\n  behavior_list = [ BEHAVIOR (description), ... ]\nNo code, no explanations.",
+        "input": "scene_objects: ['Person1', 'Barrier1', 'Charge1', 'DoorPanel1', 'DoorPullHandle1']\navailable_behaviors: ['GOTO', 'SCAN', 'RECEIVE OBJECT', 'PLACE CHARGE ON DOOR']\npreviously_executed: \nfailed_behaviors: "
+    },
+    {
+        "timestamp": "2026-02-18T13:55:05.970285",
+        "prompt": "scene_objects: ['Person1', 'Barrier1', 'Charge1', 'DoorPanel1', 'DoorPullHandle1']\navailable_behaviors: ['GOTO', 'SCAN', 'RECEIVE OBJECT', 'PLACE CHARGE ON DOOR']\npreviously_executed: \nfailed_behaviors: \nTask Description:\n1. SCAN the environment to populate scene_objects.\n2. Go to the person to the right of the barrier.\n3. Receive the explosive charge from the person.\n4. Go to the front of the DoorPanel.\n5. Place the charge on the DoorPanel.\n6. Go behind the barrier.\n\nExamples:\nExample:\n  task_description:\n    1. Go to the person in front of the wall.\n    2. Receive the pen from the person.\n  scene_objects: [Person1, Wall1, Pen1]\n  available_behaviors: [GOTO, SCAN, RECEIVE OBJECT]\n\n  Output:\n  behavior_list = [\n      GOTO (to the person in front of the wall),\n      RECEIVE OBJECT (the pen from the person)\n  ]\n\nImmediate Task: From the available_behaviors, produce the full ordered behavior sequence for the task.\n\nNote: Think step by step before answering.\n\nOutput Format:\nReturn a Python-style list assigned to behavior_list:\n  behavior_list = [ BEHAVIOR (description), ... ]\nNo code, no explanations.",
+        "output": "behavior_list = [SCAN, GOTO(Person1), RECEIVE OBJECT(Charge1), GOTO(DoorPanel1), PLACE CHARGE ON DOOR(Charge1), GOTO(BARRIER1)]"
+    },
+    {
+        "timestamp": "2026-02-18T13:58:27.814665",
+        "model": "/home/sramishetty/alex/repository-group/ihmc-open-robotics-software/ihmc-interfaces/ros2ws/modules/vlm/test/models/Qwen2.5-VL-7B-Instruct-AWQ",
+        "api_base": "http://localhost:8000/v1",
+        "temperature": 0.0,
+        "max_tokens": 512,
+        "top_p": 1.0,
+        "supports_vision": false,
+        "description": "Mission planner: translates a task description into an ordered behavior sequence.",
+        "prompt_type": "mission_planner",
+        "system_prompt": "You are an intelligent assistant for a robot operating in a dynamic, partially observable environment.\nYour role is to produce an ordered sequence of behaviors for the robot to execute.\nUse the provided task_description, scene_objects, and available_behaviors to build the plan.\nWhen multiple behaviors are valid, choose the earliest one in available_behaviors.\nThe robot may have previously executed behaviors or encountered failures \u2014 use that context to advance the plan.",
+        "prompt": "\nTask Description:\n1. SCAN the environment to populate scene_objects.\n2. Go to the person to the right of the barrier.\n3. Receive the explosive charge from the person.\n4. Go to the front of the DoorPanel.\n5. Place the charge on the DoorPanel.\n6. Go behind the barrier.\n\nExamples:\nExample:\n  task_description:\n    1. Go to the person in front of the wall.\n    2. Receive the pen from the person.\n  scene_objects: [Person1, Wall1, Pen1]\n  available_behaviors: [GOTO, SCAN, RECEIVE OBJECT]\n\n  Output:\n  behavior_list = [\n      GOTO (to the person in front of the wall),\n      RECEIVE OBJECT (the pen from the person)\n  ]\n\nImmediate Task: From the available_behaviors, produce the full ordered behavior sequence for the task.\n\nNote: Think step by step before answering.\n\nOutput Format:\nReturn a Python-style list assigned to behavior_list:\n  behavior_list = [ BEHAVIOR (description), ... ]\nNo code, no explanations.",
+        "input": "scene_objects: ['Person1', 'Barrier1', 'Charge1', 'DoorPanel1', 'DoorPullHandle1']\navailable_behaviors: ['GOTO', 'SCAN', 'RECEIVE OBJECT', 'PLACE CHARGE ON DOOR']\npreviously_executed: \nfailed_behaviors: "
+    },
+    {
+        "timestamp": "2026-02-18T13:58:28.297146",
+        "prompt": "scene_objects: ['Person1', 'Barrier1', 'Charge1', 'DoorPanel1', 'DoorPullHandle1']\navailable_behaviors: ['GOTO', 'SCAN', 'RECEIVE OBJECT', 'PLACE CHARGE ON DOOR']\npreviously_executed: \nfailed_behaviors: \nTask Description:\n1. SCAN the environment to populate scene_objects.\n2. Go to the person to the right of the barrier.\n3. Receive the explosive charge from the person.\n4. Go to the front of the DoorPanel.\n5. Place the charge on the DoorPanel.\n6. Go behind the barrier.\n\nExamples:\nExample:\n  task_description:\n    1. Go to the person in front of the wall.\n    2. Receive the pen from the person.\n  scene_objects: [Person1, Wall1, Pen1]\n  available_behaviors: [GOTO, SCAN, RECEIVE OBJECT]\n\n  Output:\n  behavior_list = [\n      GOTO (to the person in front of the wall),\n      RECEIVE OBJECT (the pen from the person)\n  ]\n\nImmediate Task: From the available_behaviors, produce the full ordered behavior sequence for the task.\n\nNote: Think step by step before answering.\n\nOutput Format:\nReturn a Python-style list assigned to behavior_list:\n  behavior_list = [ BEHAVIOR (description), ... ]\nNo code, no explanations.",
+        "output": "behavior_list = [SCAN, GOTO(Person1), RECEIVE OBJECT(Charge1), GOTO(DoorPanel1), PLACE CHARGE ON DOOR(Charge1), GOTO(BARRIER1)]"
+    },
+    {
+        "timestamp": "2026-02-18T13:59:20.865098",
+        "model": "/home/sramishetty/alex/repository-group/ihmc-open-robotics-software/ihmc-interfaces/ros2ws/modules/vlm/test/models/Qwen2.5-VL-7B-Instruct-AWQ",
+        "api_base": "http://localhost:8000/v1",
+        "temperature": 0.0,
+        "max_tokens": 512,
+        "top_p": 1.0,
+        "supports_vision": false,
+        "description": "Mission planner: translates a task description into an ordered behavior sequence.",
+        "prompt_type": "mission_planner",
+        "system_prompt": "You are an intelligent assistant for a robot operating in a dynamic, partially observable environment.\nYour role is to produce an ordered sequence of behaviors for the robot to execute.\nUse the provided task_description, scene_objects, and available_behaviors to build the plan.\nWhen multiple behaviors are valid, choose the earliest one in available_behaviors.\nThe robot may have previously executed behaviors or encountered failures \u2014 use that context to advance the plan.",
+        "prompt": "\nTask Description:\n1. SCAN the environment to populate scene_objects.\n2. Go to the person to the right of the barrier.\n3. Receive the explosive charge from the person.\n4. Go to the front of the DoorPanel.\n5. Place the charge on the DoorPanel.\n6. Go behind the barrier.\n\nExamples:\nExample:\n  task_description:\n    1. Go to the person in front of the wall.\n    2. Receive the pen from the person.\n  scene_objects: [Person1, Wall1, Pen1]\n  available_behaviors: [GOTO, SCAN, RECEIVE OBJECT]\n\n  Output:\n  behavior_list = [\n      GOTO (to the person in front of the wall),\n      RECEIVE OBJECT (the pen from the person)\n  ]\n\nImmediate Task: From the available_behaviors, produce the full ordered behavior sequence for the task.\n\nNote: Think step by step before answering.\n\nOutput Format:\nReturn a Python-style list assigned to behavior_list:\n  behavior_list = [ BEHAVIOR (description), ... ]\nNo code, no explanations.",
+        "input": "scene_objects: []\navailable_behaviors: ['GOTO', 'SCAN', 'RECEIVE OBJECT', 'PLACE CHARGE ON DOOR']\npreviously_executed: \nfailed_behaviors: "
+    },
+    {
+        "timestamp": "2026-02-18T13:59:21.184850",
+        "prompt": "scene_objects: []\navailable_behaviors: ['GOTO', 'SCAN', 'RECEIVE OBJECT', 'PLACE CHARGE ON DOOR']\npreviously_executed: \nfailed_behaviors: \nTask Description:\n1. SCAN the environment to populate scene_objects.\n2. Go to the person to the right of the barrier.\n3. Receive the explosive charge from the person.\n4. Go to the front of the DoorPanel.\n5. Place the charge on the DoorPanel.\n6. Go behind the barrier.\n\nExamples:\nExample:\n  task_description:\n    1. Go to the person in front of the wall.\n    2. Receive the pen from the person.\n  scene_objects: [Person1, Wall1, Pen1]\n  available_behaviors: [GOTO, SCAN, RECEIVE OBJECT]\n\n  Output:\n  behavior_list = [\n      GOTO (to the person in front of the wall),\n      RECEIVE OBJECT (the pen from the person)\n  ]\n\nImmediate Task: From the available_behaviors, produce the full ordered behavior sequence for the task.\n\nNote: Think step by step before answering.\n\nOutput Format:\nReturn a Python-style list assigned to behavior_list:\n  behavior_list = [ BEHAVIOR (description), ... ]\nNo code, no explanations.",
+        "output": "behavior_list = [SCAN, GOTO, RECEIVE OBJECT, PLACE CHARGE ON DOOR, GOTO]"
+    },
+    {
+        "timestamp": "2026-02-18T14:00:35.435625",
+        "model": "/home/sramishetty/alex/repository-group/ihmc-open-robotics-software/ihmc-interfaces/ros2ws/modules/vlm/test/models/Qwen2.5-VL-7B-Instruct-AWQ",
+        "api_base": "http://localhost:8000/v1",
+        "temperature": 0.0,
+        "max_tokens": 512,
+        "top_p": 1.0,
+        "supports_vision": false,
+        "description": "Mission planner: translates a task description into an ordered behavior sequence.",
+        "prompt_type": "mission_planner",
+        "system_prompt": "You are an intelligent assistant for a robot operating in a dynamic, partially observable environment.\nYour role is to produce an ordered sequence of behaviors for the robot to execute.\nUse the provided task_description, scene_objects, and available_behaviors to build the plan.\nWhen multiple behaviors are valid, choose the earliest one in available_behaviors.\nThe robot may have previously executed behaviors or encountered failures \u2014 use that context to advance the plan.",
+        "prompt": "\nTask Description:\n1. SCAN the environment to populate scene_objects.\n2. Go to the person to the right of the barrier.\n3. Receive the explosive charge from the person.\n4. Go to the front of the DoorPanel.\n5. Place the charge on the DoorPanel.\n6. Go behind the barrier.\n\nExamples:\nExample:\n  task_description:\n    1. Go to the person in front of the wall.\n    2. Receive the pen from the person.\n  scene_objects: [Person1, Wall1, Pen1]\n  available_behaviors: [GOTO, SCAN, RECEIVE OBJECT]\n\n  Output:\n  behavior_list = [\n      GOTO (to the person in front of the wall),\n      RECEIVE OBJECT (the pen from the person)\n  ]\n\nImmediate Task: From the available_behaviors, produce the full ordered behavior sequence for the task.\n\nNote: Think step by step before answering.\n\nOutput Format:\nReturn a Python-style list assigned to behavior_list:\n  behavior_list = [ BEHAVIOR (description), ... ]\nNo code, no explanations.",
+        "input": "scene_objects: []\navailable_behaviors: ['GOTO', 'SCAN', 'RECEIVE OBJECT', 'PLACE CHARGE ON DOOR']\npreviously_executed: \nfailed_behaviors: "
+    },
+    {
+        "timestamp": "2026-02-18T14:00:35.769735",
+        "prompt": "scene_objects: []\navailable_behaviors: ['GOTO', 'SCAN', 'RECEIVE OBJECT', 'PLACE CHARGE ON DOOR']\npreviously_executed: \nfailed_behaviors: \nTask Description:\n1. SCAN the environment to populate scene_objects.\n2. Go to the person to the right of the barrier.\n3. Receive the explosive charge from the person.\n4. Go to the front of the DoorPanel.\n5. Place the charge on the DoorPanel.\n6. Go behind the barrier.\n\nExamples:\nExample:\n  task_description:\n    1. Go to the person in front of the wall.\n    2. Receive the pen from the person.\n  scene_objects: [Person1, Wall1, Pen1]\n  available_behaviors: [GOTO, SCAN, RECEIVE OBJECT]\n\n  Output:\n  behavior_list = [\n      GOTO (to the person in front of the wall),\n      RECEIVE OBJECT (the pen from the person)\n  ]\n\nImmediate Task: From the available_behaviors, produce the full ordered behavior sequence for the task.\n\nNote: Think step by step before answering.\n\nOutput Format:\nReturn a Python-style list assigned to behavior_list:\n  behavior_list = [ BEHAVIOR (description), ... ]\nNo code, no explanations.",
+        "output": "behavior_list = [SCAN, GOTO, RECEIVE OBJECT, PLACE CHARGE ON DOOR, GOTO]"
+    }
+]
