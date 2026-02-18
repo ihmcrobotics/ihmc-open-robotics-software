@@ -9,7 +9,7 @@ import us.ihmc.pubsub.TopicDataType;
 /**
        * A message used to send behavior tree data from the automomy process
        * to the controller process in order to be stored as YoVariables.
-       * Currently 221 bytes, try to keep this under 250.
+       * Currently 211 bytes, try to keep this under 250.
        */
 public class BehaviorTreeYoDataMessage extends Packet<BehaviorTreeYoDataMessage> implements Settable<BehaviorTreeYoDataMessage>, EpsilonComparable<BehaviorTreeYoDataMessage>
 {
