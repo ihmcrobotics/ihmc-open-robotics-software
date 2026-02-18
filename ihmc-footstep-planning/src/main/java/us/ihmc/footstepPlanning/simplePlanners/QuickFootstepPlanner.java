@@ -1,17 +1,22 @@
 package us.ihmc.footstepPlanning.simplePlanners;
 
 import org.apache.commons.math3.util.Pair;
+import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.Location;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
+import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
 
 /**
@@ -21,196 +26,192 @@ import java.util.List;
  */
 public class QuickFootstepPlanner
 {
+   private int stepIndex;
+   private int maxSteps = 50;
+   private final SideDependentList<Pose3D> stance = new SideDependentList<>(() -> new Pose3D());
+   private final SideDependentList<Pose3D> goal = new SideDependentList<>(() -> new Pose3D());
    private final Pose3D swingEnd = new Pose3D();
    private RobotSide footToSwing = RobotSide.LEFT;
-   private final Line3D stanceToGoalLine = new Line3D();
-   private final Vector3D directionToGoal = new Vector3D();
+   private final SideDependentList<Line3D> hipLine = new SideDependentList<>(() -> new Line3D());
    private final Pose3D stanceMid = new Pose3D();
    private final Pose3D goalMid = new Pose3D();
-   private final Point3D approachGoalMid = new Point3D();
-   private final Point3D oppositeStance = new Point3D();
-   private final Point3D oppositeStanceMidlineProjection = new Point3D();
-   private final Point3D midlinePoint = new Point3D();
-   private final Vector3D oppositeStanceToProjection = new Vector3D();
-   private boolean transistionToGoal;
+   private final SideDependentList<Point3D> swingHip = new SideDependentList<>(() -> new Point3D());
+   private final SideDependentList<Point3D> goalHip = new SideDependentList<>(() -> new Point3D());
    private Runnable stepPlannedCallback = () -> {};
+   private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
 
-   public List<Pair<RobotSide, Pose3D>> plan(SideDependentList<Pose3D> stances, SideDependentList<Pose3D> goals)
+   public List<Pair<RobotSide, Pose3D>> plan(EnumMap<RobotSide, Pose3D> stance, EnumMap<RobotSide, Pose3D> goal)
    {
-      List<Pair<RobotSide, Pose3D>> footstepPlan = new java.util.ArrayList<>();
-
-      SideDependentList<Pose3D> currentStances = new SideDependentList<>();
       for (RobotSide side : RobotSide.values)
       {
-         currentStances.put(side, new Pose3D(stances.get(side)));
+         this.goal.get(side).set(goal.get(side));
+         this.stance.get(side).set(stance.get(side));
       }
 
-      boolean reachedGoal = false;
-      int maxIterations = 100;
-      int iteration = 0;
-
-      while (!reachedGoal && iteration < maxIterations)
+      List<Pair<RobotSide, Pose3D>> footstepPlan = new ArrayList<>();
+      for (stepIndex = 0; stepIndex < maxSteps; stepIndex++)
       {
-         reachedGoal = planStep(currentStances, goals);
-
-         if (!reachedGoal)
+         if (!planStep())
          {
             footstepPlan.add(new Pair<>(footToSwing, new Pose3D(swingEnd)));
-            currentStances.get(footToSwing).set(swingEnd);
+            this.stance.get(footToSwing).set(swingEnd);
             stepPlannedCallback.run();
          }
-
-         iteration++;
+         else
+            break;
       }
 
       return footstepPlan;
    }
 
-   public boolean planStep(SideDependentList<Pose3D> stances, SideDependentList<Pose3D> goals)
+   private boolean planStep()
    {
-      double positionThreshold = 0.01;
-      double orientationThreshold = Math.toRadians(5.0);
-
-      SideDependentList<Double> positionErrors
-            = new SideDependentList<>(side -> stances.get(side).getPosition().distance(goals.get(side).getPosition()));
-      SideDependentList<Double> orientationErrors
-            = new SideDependentList<>(side -> stances.get(side).getOrientation().distance(goals.get(side).getOrientation()));
-      SideDependentList<Boolean> atGoals = new SideDependentList<>(side -> positionErrors.get(side) <= positionThreshold
-                                                                        && orientationErrors.get(side) <= orientationThreshold);
-
-      if (atGoals.get(RobotSide.LEFT) && atGoals.get(RobotSide.RIGHT))
+      SideDependentList<Boolean> atGoal = new SideDependentList<>(side -> stance.get(side).getPosition().distance(goal.get(side).getPosition()) <= 0.01
+                                                && stance.get(side).getOrientation().distance(goal.get(side).getOrientation()) <= Math.toRadians(5.0));
+      if (atGoal.get(RobotSide.LEFT) && atGoal.get(RobotSide.RIGHT))
          return true;
 
-      double idealStepLength = 0.4;
-      double idealStepYaw = Math.toRadians(35.0);
-      for (RobotSide side : RobotSide.values) // Step directly to goals if possible
-      {
-         if (!atGoals.get(side))
-         {
-            double oppositeStanceDistanceToGoal = stances.get(side.getOppositeSide()).getPosition().distance(goals.get(side).getPosition());
-            double oppositeStanceYawToGoal = Math.abs(goals.get(side).getOrientation().distance(stances.get(side.getOppositeSide()).getOrientation()));
+      double stepLength = 0.33;
+      double stepYaw = Math.toRadians(35.0);
+      stanceMid.interpolate(stance.get(RobotSide.LEFT), stance.get(RobotSide.RIGHT), 0.5);
+      goalMid.interpolate(goal.get(RobotSide.LEFT), goal.get(RobotSide.RIGHT), 0.5);
 
-            // Avoid erroring out if goal feet are farther apart than the step length
-            double allowedLength = Math.max(idealStepLength, goals.get(side).getPosition().distance(goals.get(side.getOppositeSide()).getPosition()));
-            // Avoid erroring out if goal feet are more yawed than the step yaw
-            double allowedYaw = Math.max(idealStepYaw,
-                                         Math.abs(goals.get(side).getOrientation().distance(stances.get(side.getOppositeSide()).getOrientation())));
-            if (oppositeStanceDistanceToGoal <= allowedLength && oppositeStanceYawToGoal <= allowedYaw)
+      double hipWidth = 0.12;
+      for (RobotSide side : RobotSide.values)
+      {
+         swingHip.get(side).set(0.0, side.negateIfRightSide(2.0 * hipWidth), 0.0);
+         stance.get(side.getOppositeSide()).transform(swingHip.get(side));
+         goalHip.get(side).set(0.0, side.negateIfRightSide(hipWidth), 0.0);
+         goalMid.transform(goalHip.get(side));
+         hipLine.get(side).set(swingHip.get(side), goalHip.get(side)); // Maybe not needed?
+      }
+
+      Quaternion swingEndOrientation = new Quaternion(stanceMid.getOrientation());
+      swingEnd.getOrientation().set(swingEndOrientation);
+
+      SideDependentList<Pose3D> candidate = new SideDependentList<>(() -> new Pose3D());
+      SideDependentList<Boolean> goalstepPossible = new SideDependentList<>();
+      for (RobotSide side : RobotSide.values)
+      {
+         candidate.get(side).set(stance.get(side));
+         candidate.get(side).getOrientation().set(swingEndOrientation);
+
+         outer: // Calculate some possible steps toward the goal
+         for (double distance = 0.02; distance < stepLength + 0.05; distance += 0.02)
+         {
+            candidate.get(side).getPosition().scaleAdd(distance, hipLine.get(side).getDirection(), swingHip.get(side));
+
+            boolean isCrossover = isCrossover(stance.get(side.getOppositeSide()), candidate.get(side), side);
+            if (isCrossover || distance > stepLength) // Done, check collision
             {
-               footToSwing = side;
-               swingEnd.set(goals.get(side));
-               return false;
+               Vector3D stanceForward = new Vector3D(Axis3D.X);
+               stanceMid.getOrientation().transform(stanceForward);
+               double direction = stanceForward.dot(hipLine.get(side).getDirection()) >= 0.0 ? 1.0 : -1.0;
+
+               double resolution = 16;
+               for (int i = 0; i < resolution; i++) // Revolve away from collision about hip
+               {
+                  ConvexPolygon2D candidatePolygon = createFootPolygon(candidate.get(side), 0.0);
+                  ConvexPolygon2D stancePolygon = createFootPolygon(stance.get(side.getOppositeSide()), 0.04);
+                  ConvexPolygon2D oppositeGoalPolygon = createFootPolygon(goal.get(side.getOppositeSide()), 0.04);
+                  if (convexPolygonTools.doPolygonsIntersect(candidatePolygon, stancePolygon)
+                   || convexPolygonTools.doPolygonsIntersect(candidatePolygon, oppositeGoalPolygon))
+                  {
+                     Vector3D ray = new Vector3D();
+                     ray.sub(candidate.get(side).getPosition(), swingHip.get(side));
+                     AxisAngle axisAngle = new AxisAngle(Axis3D.Z, Math.PI / 2.0 / resolution * side.negateIfRightSide(direction));
+                     axisAngle.transform(ray);
+                     candidate.get(side).getPosition().add(swingHip.get(side), ray);
+                  }
+                  else
+                     break outer;
+               }
+            }
+         }
+
+         // Calculate if direct step to goal is possible
+         double allowedLength = Math.max(stepLength, goal.get(side).getPosition().distance(goal.get(side.getOppositeSide()).getPosition()));
+         goalstepPossible.put(side, false);
+         Pose3D goalStep = new Pose3D(goal.get(side));
+         Line3D goalLine = new Line3D(swingHip.get(side), goal.get(side).getPosition());
+         for (double distance = 0.02; distance < allowedLength; distance += 0.02)
+         {
+            goalStep.getPosition().scaleAdd(distance, goalLine.getDirection(), swingHip.get(side));
+
+            if (isCrossover(stance.get(side.getOppositeSide()), goalStep, side))
+               break;
+
+            if (goalStep.getPosition().distance(goal.get(side).getPosition()) < 0.05)
+            {
+               ConvexPolygon2D goalStepPolygon = createFootPolygon(goalStep, 0.0);
+               ConvexPolygon2D stancePolygon = createFootPolygon(stance.get(side.getOppositeSide()), 0.04);
+               if (!convexPolygonTools.doPolygonsIntersect(goalStepPolygon, stancePolygon))
+               {
+                  goalstepPossible.put(side, true);
+                  break;
+               }
             }
          }
       }
 
-      SideDependentList<Double> distancesToGoalMid = new SideDependentList<>(side -> stances.get(side).getPosition().distance(goalMid.getPosition()));
       for (RobotSide side : RobotSide.values) // Take a step towards the goal
       {
-         if (distancesToGoalMid.get(side) >= distancesToGoalMid.get(side.getOppositeSide())) // Choose swing foot; furthest from goal
+         if (atGoal.get(side)) // Never step a foot already at goal
+            continue;
+         if (atGoal.get(side.getOppositeSide()) || goalstepPossible.get(side)) // Always take last goal step
          {
             footToSwing = side;
-
-            double stepAlongMidline = idealStepLength * 0.6;
-
-            stanceMid.interpolate(stances.get(side), stances.get(side.getOppositeSide()), 0.5);
-            goalMid.interpolate(goals.get(side), goals.get(side.getOppositeSide()), 0.5);
-
-            Point2D bisectorStart = new Point2D();
-            Vector2D bisectorDirection = new Vector2D();
-            EuclidGeometryTools.perpendicularBisector2D(new Point2D(goals.get(RobotSide.RIGHT).getPosition()),
-                                                        new Point2D(goals.get(RobotSide.LEFT).getPosition()),
-                                                        bisectorStart,
-                                                        bisectorDirection);
-            Vector3D midFeetForward3D = new Vector3D(1.0, 0.0, 0.0);
-            goalMid.getOrientation().transform(midFeetForward3D);
-            Vector2D midFeetForward = new Vector2D(midFeetForward3D.getX(), midFeetForward3D.getY());
-            if (midFeetForward.dot(bisectorDirection) > 0.0)
-               bisectorDirection.negate();
-            Vector3D stanceForward3D = new Vector3D(1.0, 0.0, 0.0);
-            stanceMid.getOrientation().transform(stanceForward3D);
-            Vector3D stanceToGoalMid = new Vector3D();
-            stanceToGoalMid.sub(goalMid.getPosition(), stanceMid.getPosition());
-            if (stanceForward3D.dot(stanceToGoalMid) < 0.0)
-               bisectorDirection.negate();
-
-            approachGoalMid.scaleAdd(idealStepLength * 0.3, new Vector3D(bisectorDirection), goalMid.getPosition());
-
-            stanceToGoalLine.set(stanceMid.getPosition(), approachGoalMid);
-            directionToGoal.sub(approachGoalMid, stanceMid.getPosition());
-            directionToGoal.normalize();
-
-            oppositeStance.set(stances.get(side.getOppositeSide()).getPosition());
-            oppositeStanceMidlineProjection.set(stanceToGoalLine.orthogonalProjectionCopy(oppositeStance));
-
-            // Scale down step length as we approach goal to avoid small final steps
-            double transitionDistance = 2.0 * idealStepLength * 0.6;
-            transistionToGoal = oppositeStanceMidlineProjection.distance(approachGoalMid) < transitionDistance;
-            if (transistionToGoal)
-               stepAlongMidline = oppositeStanceMidlineProjection.distance(approachGoalMid) / 2.0;
-
-            midlinePoint.scaleAdd(stepAlongMidline, directionToGoal, oppositeStanceMidlineProjection);
-
-            oppositeStanceToProjection.sub(oppositeStanceMidlineProjection, stances.get(side.getOppositeSide()).getPosition());
-            oppositeStanceToProjection.normalize();
-
-            double targetDistanceFromLine = 0.12;
-            swingEnd.getPosition().scaleAdd(targetDistanceFromLine, oppositeStanceToProjection, midlinePoint);
-
-            Quaternion swingEndOrientation = new Quaternion(stanceMid.getOrientation());
-            // Always average in stance feet
-            if (midlinePoint.distance(approachGoalMid) < 1.0) // If close to goal, average in goal feet
-               swingEndOrientation.interpolate(swingEndOrientation, goalMid.getOrientation(), 0.5);
-//            else // If far from goal, average in yaw along line
-//            {
-//               double yawAlongLine = Math.atan2(stanceToGoalLine.getDirection().getY(), stanceToGoalLine.getDirection().getX());
-//               if (Math.abs(yawAlongLine) > Math.PI / 2.0)
-//                  yawAlongLine -= Math.copySign(Math.PI, yawAlongLine);
-//               Quaternion alongLineOrientation = new Quaternion();
-//               alongLineOrientation.setYawPitchRoll(0.0, 0.0, yawAlongLine);
-//               swingEndOrientation.interpolate(swingEndOrientation, alongLineOrientation, 0.5);
-//            }
-
-//            double yawSum = 0.0;
-//            int yawWeight = 0;
-//            for (RobotSide side2 : RobotSide.values) // Always average in stance feet
-//            {
-//               yawSum += stances.get(side2).getOrientation().getYaw();
-//               ++yawWeight;
-//            }
-//            if (midlinePoint.distance(approachGoalMid) < 1.0) // If close to goal, average in goal feet
-//            {
-//               for (RobotSide side2 : RobotSide.values)
-//               {
-//                  yawSum += goals.get(side2).getOrientation().getYaw();
-//                  ++yawWeight;
-//               }
-//            }
-//            else // If far from goal, average in yaw along line
-//            {
-//               double yawAlongLine = Math.atan2(stanceToGoalLine.getDirection().getY(), stanceToGoalLine.getDirection().getX());
-//               if (Math.abs(yawAlongLine) > Math.PI / 2.0)
-//                  yawAlongLine -= Math.copySign(Math.PI, yawAlongLine);
-//               yawSum += yawAlongLine;
-//               ++yawWeight;
-//            }
-//
-//            double yaw = yawSum / yawWeight;
-//
-//            double yawAmount = EuclidCoreTools.angleDifferenceMinusPiToPi(yaw, stances.get(side.getOppositeSide()).getOrientation().getYaw());
-//            if (yawAmount > idealStepYaw) // Clamp yaw amount
-//               yaw = stances.get(side.getOppositeSide()).getOrientation().getYaw() + Math.copySign(idealStepYaw, yawAmount);
-
-            swingEnd.getOrientation().set(swingEndOrientation);
+            swingEnd.set(goal.get(side));
+            return false;
          }
       }
 
+      // Step the candidate that's a bigger step
+      footToSwing = RobotSide.LEFT;
+      double distance = stance.get(footToSwing).getPosition().distance(candidate.get(footToSwing).getPosition());
+      double oppositeDistance = stance.get(footToSwing.getOppositeSide()).getPosition().distance(candidate.get(footToSwing.getOppositeSide()).getPosition());
+      if (oppositeDistance > distance)
+         footToSwing = footToSwing.getOppositeSide();
+      swingEnd.set(candidate.get(footToSwing));
       return false;
+   }
+
+   public ConvexPolygon2D createFootPolygon(Pose3D pose, double boundary)
+   {
+      ConvexPolygon2D polygon = new ConvexPolygon2D();
+      double halfLength = 0.1 + boundary;
+      double halfWidth = 0.05 + boundary;
+      polygon.addVertex(halfLength, -halfWidth);
+      polygon.addVertex(halfLength, halfWidth);
+      polygon.addVertex(-halfLength, halfWidth);
+      polygon.addVertex(-halfLength, -halfWidth);
+      polygon.update();
+      polygon.applyTransform(pose, false);
+      return polygon;
+   }
+
+   private boolean isCrossover(Pose3D stance, Pose3D step, RobotSide stepSide)
+   {
+      Vector3D stanceForward = new Vector3D(Axis3D.X);
+      stance.getOrientation().transform(stanceForward);
+      Location location = EuclidGeometryTools.whichSideOfLine2DIsPoint2DOn(step.getPosition().getX(),
+                                                                           step.getPosition().getY(),
+                                                                           stance.getX(),
+                                                                           stance.getY(),
+                                                                           stanceForward.getX(),
+                                                                           stanceForward.getY());
+      return location == null || (stepSide == RobotSide.LEFT && location == Location.RIGHT
+                               || stepSide == RobotSide.RIGHT && location == Location.LEFT);
    }
 
    public void setStepPlannedCallback(Runnable stepPlannedCallback)
    {
       this.stepPlannedCallback = stepPlannedCallback;
+   }
+
+   public void setMaxSteps(int maxSteps)
+   {
+      this.maxSteps = maxSteps;
    }
 
    public RobotSide getFootToSwing()
@@ -233,23 +234,23 @@ public class QuickFootstepPlanner
       return goalMid;
    }
 
-   public Point3D getApproachGoalMid()
+   public SideDependentList<Point3D> getSwingHip()
    {
-      return approachGoalMid;
+      return swingHip;
+   }
+
+   public SideDependentList<Point3D> getGoalHip()
+   {
+      return goalHip;
+   }
+
+   public SideDependentList<Line3D> getHipLine()
+   {
+      return hipLine;
    }
 
    public Point3D getOppositeStance()
    {
-      return oppositeStance;
-   }
-
-   public Point3D getOppositeStanceMidlineProjection()
-   {
-      return oppositeStanceMidlineProjection;
-   }
-
-   public boolean getTransistionToGoal()
-   {
-      return transistionToGoal;
+      return stance.get(footToSwing.getOppositeSide()).getPosition();
    }
 }
