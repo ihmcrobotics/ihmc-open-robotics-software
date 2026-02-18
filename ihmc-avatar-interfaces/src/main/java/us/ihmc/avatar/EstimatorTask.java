@@ -1,8 +1,5 @@
 package us.ihmc.avatar;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import us.ihmc.avatar.factory.HumanoidRobotControlTask;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.CrossRobotCommandResolver;
@@ -20,10 +17,6 @@ public class EstimatorTask extends HumanoidRobotControlTask
    private final long divisor;
    private final ThreadTimer timer;
    private final YoLong ticksBehindScheduled;
-
-   private final List<Runnable> preEstimatorCallbacks = new ArrayList<>();
-   private final List<Runnable> postEstimatorCallbacks = new ArrayList<>();
-   private final List<Runnable> schedulerThreadRunnables = new ArrayList<>();
 
    // This is needed for the single threaded mode as the master context will be updated after the first execute call.
    private boolean masterContextUpdated = false;
@@ -59,9 +52,9 @@ public class EstimatorTask extends HumanoidRobotControlTask
       {
          long schedulerTick = estimatorThread.getHumanoidRobotContextData().getSchedulerTick();
          ticksBehindScheduled.set(schedulerTick - timer.getTickCount() * divisor);
-         runAll(preEstimatorCallbacks);
+         runAll(preTaskCallbacks);
          estimatorThread.run();
-         runAll(postEstimatorCallbacks);
+         runAll(postTaskCallbacks);
       }
       timer.stop();
    }
@@ -79,24 +72,6 @@ public class EstimatorTask extends HumanoidRobotControlTask
    {
       estimatorResolver.resolveHumanoidRobotContextDataScheduler(masterContext, estimatorThread.getHumanoidRobotContextData());
       estimatorResolver.resolveHumanoidRobotContextDataController(masterContext, estimatorThread.getHumanoidRobotContextData());
-   }
-
-   @Override
-   public void addCallbackPreTask(Runnable callback)
-   {
-      preEstimatorCallbacks.add(callback);
-   }
-
-   @Override
-   public void addCallbackPostTask(Runnable runnable)
-   {
-      postEstimatorCallbacks.add(runnable);
-   }
-
-   @Override
-   public void addRunnableOnSchedulerThread(Runnable runnable)
-   {
-      schedulerThreadRunnables.add(runnable);
    }
 
 }

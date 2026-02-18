@@ -371,7 +371,9 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
       {
          if (definition.getIsManuallyPlaced())
          {
-            ImGui.checkbox(labels.get("Edit Manually Placed Steps"), editManuallyPlacedSteps);
+            if (ImGui.checkbox(labels.get("Edit Manually Placed Steps"), editManuallyPlacedSteps))
+               for (RDXFootstepPlanActionFootstep manuallyPlacedFootstep : manuallyPlacedFootsteps)
+                  manuallyPlacedFootstep.updateGizmo();
 
             ImGui.sameLine();
             if (editManuallyPlacedSteps.get() && ImGui.button("Select All Footsteps"))

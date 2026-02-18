@@ -56,6 +56,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.WrenchTrajec
 import us.ihmc.humanoidRobotics.communication.directionalControlToolboxAPI.DirectionalControlInputCommand;
 import us.ihmc.humanoidRobotics.communication.fastWalkingAPI.FastWalkingGaitParametersCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -492,6 +493,7 @@ public class WalkingCommandConsumer
 
       if (balanceManager.getICPErrorMagnitude() > icpErrorThresholdToAbortManipulation.getDoubleValue())
       {
+         LogTools.error("Aborted manipulation: %.3f > %.3f".formatted(balanceManager.getICPErrorMagnitude(), icpErrorThresholdToAbortManipulation.getDoubleValue()));
          hasManipulationBeenAborted.set(true);
 
          for (RobotSide robotSide : RobotSide.values)

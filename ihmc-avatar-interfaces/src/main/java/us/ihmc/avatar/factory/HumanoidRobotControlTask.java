@@ -1,5 +1,6 @@
 package us.ihmc.avatar.factory;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
@@ -7,6 +8,12 @@ import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.Task;
 
 public abstract class HumanoidRobotControlTask extends Task<HumanoidRobotContextData>
 {
+   protected final List<Runnable> preTaskCallbacks = new ArrayList<>();
+   protected final List<Runnable> postTaskCallbacks = new ArrayList<>();
+   protected final List<Runnable> startupRunnables = new ArrayList<>();
+   protected final List<Runnable> cleanupRunnables = new ArrayList<>();
+   protected final List<Runnable> schedulerThreadRunnables = new ArrayList<>();
+
    public HumanoidRobotControlTask(long divisor)
    {
       super(divisor);
@@ -15,12 +22,15 @@ public abstract class HumanoidRobotControlTask extends Task<HumanoidRobotContext
    @Override
    protected boolean initialize()
    {
+      runAll(startupRunnables);
+
       return super.initialize();
    }
 
    @Override
    protected void cleanup()
    {
+      runAll(cleanupRunnables);
    }
 
    /**
@@ -28,7 +38,7 @@ public abstract class HumanoidRobotControlTask extends Task<HumanoidRobotContext
     */
    public void addCallbackPreTask(Runnable callback)
    {
-      throw new UnsupportedOperationException(getClass().getSimpleName() + " does not support this operation.");
+      preTaskCallbacks.add(callback);
    }
 
    /**
@@ -36,7 +46,7 @@ public abstract class HumanoidRobotControlTask extends Task<HumanoidRobotContext
     */
    public void addCallbackPostTask(Runnable callback)
    {
-      throw new UnsupportedOperationException(getClass().getSimpleName() + " does not support this operation.");
+      postTaskCallbacks.add(callback);
    }
 
    /**
@@ -48,7 +58,27 @@ public abstract class HumanoidRobotControlTask extends Task<HumanoidRobotContext
     */
    public void addRunnableOnSchedulerThread(Runnable runnable)
    {
-      throw new UnsupportedOperationException(getClass().getSimpleName() + " does not support this operation.");
+      schedulerThreadRunnables.add(runnable);
+   }
+
+   /**
+    * This will cause the provided runnable to be executed on initialize().
+    *
+    * @param runnable
+    */
+   public void addRunnableOnStartup(Runnable runnable)
+   {
+      startupRunnables.add(runnable);
+   }
+
+   /**
+    * This will cause the provided runnable to be executed on cleanup().
+    *
+    * @param runnable
+    */
+   public void addRunnableOnCleanup(Runnable runnable)
+   {
+      cleanupRunnables.add(runnable);
    }
 
    protected static void runAll(List<Runnable> runnables)

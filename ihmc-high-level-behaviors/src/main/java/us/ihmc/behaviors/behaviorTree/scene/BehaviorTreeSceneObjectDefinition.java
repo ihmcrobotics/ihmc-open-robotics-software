@@ -119,6 +119,7 @@ public class BehaviorTreeSceneObjectDefinition extends LatestTimestampModifiable
          case YOLO_ONLY -> yoloClassName.getValue();
          case FOUNDATION_POSE -> foundationPoseObjectType.getValue().titleCaseName;
          case DOOR_PANEL -> "Door Panel";
+         case DOOR_FRAME -> "Door Frame";
       };
    }
 

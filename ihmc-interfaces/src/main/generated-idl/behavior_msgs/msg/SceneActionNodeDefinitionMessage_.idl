@@ -15,6 +15,9 @@ module behavior_msgs
       const octet FREEZE_OBJECT =
       1;
 
+      const octet DELETE_OBJECT =
+      2;
+
 
       /**
        * TODO: The following fields are work in progress:

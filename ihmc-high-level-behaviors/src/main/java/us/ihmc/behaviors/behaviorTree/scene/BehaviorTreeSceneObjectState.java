@@ -62,6 +62,11 @@ public class BehaviorTreeSceneObjectState extends BehaviorTreeSceneObjectDefinit
       frozen.setValue(true);
    }
 
+   public void unfreeze()
+   {
+      frozen.setValue(false);
+   }
+
    public boolean isFrozen()
    {
       return frozen.getValue();

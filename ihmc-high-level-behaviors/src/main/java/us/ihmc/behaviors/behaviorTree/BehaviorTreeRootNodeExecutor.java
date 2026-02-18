@@ -9,8 +9,6 @@ import us.ihmc.behaviors.behaviorTree.action.actions.AbilityHandActionComms;
 import us.ihmc.behaviors.behaviorTree.control.FallbackNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneExecutor;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
-import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
@@ -20,6 +18,7 @@ import java.util.List;
 public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<BehaviorTreeRootNodeState, BehaviorTreeRootNodeDefinition>
       implements BehaviorTreeRootNode<BehaviorTreeNodeExecutor<?, ?>>
 {
+   private final BehaviorTreeExecutor tree;
    private final List<LeafNodeExecutor<?, ?>> orderedLeaves = new ArrayList<>();
    private final List<ActionNodeExecutor<?, ?>> orderedActions = new ArrayList<>();
    private final List<FallbackNodeExecutor> fallbackNodes = new ArrayList<>();
@@ -28,7 +27,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
    private final List<LeafNodeExecutor<?, ?>> successfulLeaves = new ArrayList<>();
 
    public BehaviorTreeRootNodeExecutor(long id,
-                                       CRDTInfo crdtInfo,
+                                       BehaviorTreeExecutor tree,
                                        WorkspaceResourceDirectory saveFileDirectory,
                                        ROS2ControllerHelper ros2ControllerHelper,
                                        ROS2SyncedRobotModel syncedRobot,
@@ -36,12 +35,14 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
                                        SideDependentList<AbilityHandActionComms> abilityHandComms,
                                        BehaviorTreeSceneExecutor scene)
    {
-      super(new BehaviorTreeRootNodeState(id, crdtInfo, saveFileDirectory, syncedRobot.getRobotModel(), scene),
+      super(new BehaviorTreeRootNodeState(id, tree.getCRDTInfo(), saveFileDirectory, syncedRobot.getRobotModel(), scene),
             ros2ControllerHelper,
             syncedRobot,
             controllerStatusTracker,
             abilityHandComms,
             scene);
+
+      this.tree = tree;
    }
 
    @Override
@@ -129,10 +130,10 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
          for (FallbackNodeExecutor fallbackNode : fallbackNodes)
             if (fallbackNode.tryLeafIsBlocking(leafToExecute))
                break executionLoop;
-         // Break if anything earlier than effective after execute is still going
-         for (int i = effectiveExecuteAfterLeafIndex(leafToExecute); i >= 0; i--)
-            if (state.getOrderedLeaves().get(i).getIsExecuting())
-               break executionLoop;
+         // Break if the action to execute after is still executing
+         int after = effectiveExecuteAfterLeafIndex(leafToExecute);
+         if (after >= 0 && orderedLeaves.get(after).getState().getIsExecuting())
+            break;
 
          leafToExecute.update(); // Make sure can execute is up to date
          if (leafToExecute.getState().getCanExecute())
@@ -213,9 +214,6 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
 
       int after = leaf.getState().getExecuteAfterLeafIndex();
 
-      for (int j = after + 1; j < i; j++) // Might have to wait on nearer leaves
-         after = Math.max(after, state.getOrderedLeaves().get(j).getExecuteAfterLeafIndex());
-
       for (FallbackNodeExecutor fallbackNode : fallbackNodes) // catch group can't execute with anything above catch
          if (fallbackNode.getCatchLeaves().contains(leaf))
             after = Math.max(after, fallbackNode.getCatchLeaves().get(0).getState().getLeafIndex() - 1);
@@ -254,6 +252,11 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
    }
 
    // Getters are in here so there's not getters in base node for root stuff
+
+   public BehaviorTreeExecutor getTree()
+   {
+      return tree;
+   }
 
    public ROS2ControllerHelper getRos2ControllerHelper()
    {

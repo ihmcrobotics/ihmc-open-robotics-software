@@ -41,7 +41,8 @@ public enum IsaacROSFoundationPoseObject
                                       ROS2Topic<Detection3DArray> poseEstimationOutput, ROS2Topic<Image> trackingDepthImage, ROS2Topic<Image> trackingRGBImage,
                                       ROS2Topic<CameraInfo> trackingCameraInfo, ROS2Topic<Detection3DArray> trackingOutput, ROS2Topic<Image> depthImage,
                                       ROS2Topic<Image> rgbImage, ROS2Topic<Image> segmentation, ROS2Topic<CameraInfo> cameraInfo, ROS2Topic<Empty> reset,
-                                      ROS2Topic<Box3DMessage> ihmcResult, ROS2Topic<FoundationPoseParameters> ihmcParameters)
+                                      ROS2Topic<Box3DMessage> ihmcResult, ROS2Topic<std_msgs.msg.dds.Byte> ihmcState,
+                                      ROS2Topic<FoundationPoseParameters> ihmcParameters)
    {
       public FoundationPoseTopics(String object)
       {
@@ -60,6 +61,7 @@ public enum IsaacROSFoundationPoseObject
               CAMERA_INFO.withModule(object),
               RESET.withModule(object),
               IHMC_RESULT.withModule(object),
+              IHMC_STATE.withModule(object),
               IHMC_PARAMETERS.withModule(object));
       }
    }

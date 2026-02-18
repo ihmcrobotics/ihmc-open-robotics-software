@@ -47,6 +47,13 @@ public class RDXBehaviorTreeSceneDoorPanel extends RDXBehaviorTreeSceneObject
    }
 
    @Override
+   public void renderDetectionInfo()
+   {
+      RDXBehaviorTreeScene.renderPersistentDetection(getPersistentDetection());
+      RDXBehaviorTreeScene.renderPersistentDetection(getDoorPanelPersistentDetection());
+   }
+
+   @Override
    public void fromMessage(BehaviorTreeSceneObjectStateMessage message)
    {
       super.fromMessage(message);

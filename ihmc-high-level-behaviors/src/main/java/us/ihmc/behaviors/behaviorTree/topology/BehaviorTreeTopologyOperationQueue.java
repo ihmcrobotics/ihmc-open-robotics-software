@@ -141,6 +141,11 @@ public class BehaviorTreeTopologyOperationQueue<T extends BehaviorTreeNode<T, ?,
       topologyOperationQueue.add(() -> clearImmediateChildren(node));
    }
 
+   public void queueDetachChildModify(T child)
+   {
+      topologyOperationQueue.add(() -> detachChildModify(child));
+   }
+
    public void queueAppendChild(T parent, T child)
    {
       topologyOperationQueue.add(() -> appendChild(parent, child));

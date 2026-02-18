@@ -8,12 +8,17 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import imgui.ImGui;
+import imgui.flag.ImGuiCol;
+import imgui.flag.ImGuiMouseButton;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectState;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectType;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.rdx.RDX3DSituatedText;
 import us.ihmc.rdx.behaviorTree.RDXCRDTTools;
+import us.ihmc.rdx.imgui.ImGuiTools;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.RDXModelInstance;
@@ -27,6 +32,7 @@ public class RDXBehaviorTreeSceneObject extends BehaviorTreeSceneObjectState
 {
    private static final Random random = new Random();
    private final RDXBaseUI baseUI;
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(RDXBehaviorTreeSceneObject.class);
    private final RDXSelectablePose3DGizmo gizmo;
    protected Model model;
    protected RDXModelInstance modelInstance;
@@ -68,6 +74,35 @@ public class RDXBehaviorTreeSceneObject extends BehaviorTreeSceneObjectState
                                         transform.getValueReadOnly().getTranslation().getX(),
                                         transform.getValueReadOnly().getTranslation().getY(),
                                         transform.getValueReadOnly().getTranslation().getZ());
+   }
+
+   public boolean renderImGuiWidgets()
+   {
+      boolean remove = false;
+
+      ImGui.text("%s %d%s".formatted(getName(), getID(), isFrozen() ? " (FROZEN)" : ""));
+      ImGui.sameLine();
+      if (ImGuiTools.smallCheckbox(labels.getHidden("Select%s%d".formatted(getName(), getID())), getGizmo().isSelected()))
+         getGizmo().setSelected(!getGizmo().isSelected());
+      ImGui.sameLine();
+      ImGui.pushStyleColor(ImGuiCol.Text, ImGuiTools.DARK_RED);
+      if (ImGuiTools.textWithUnderlineOnHover("X") && ImGui.isMouseClicked(ImGuiMouseButton.Left))
+         remove = true;
+      ImGui.popStyleColor();
+      ImGui.indent();
+      ImGui.text("World frame: (%.2f, %.2f, %.2f) YPR: (%.2f, %.2f, %.2f)".formatted(
+            getTransformToWorld().getTranslationX(), getTransformToWorld().getTranslation().getY(), getTransformToWorld().getTranslation().getZ(),
+            getTransformToWorld().getRotation().getYaw(), getTransformToWorld().getRotation().getPitch(), getTransformToWorld().getRotation().getRoll()
+      ));
+      renderDetectionInfo();
+      ImGui.unindent();
+
+      return remove;
+   }
+
+   protected void renderDetectionInfo()
+   {
+      RDXBehaviorTreeScene.renderPersistentDetection(getPersistentDetection());
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)

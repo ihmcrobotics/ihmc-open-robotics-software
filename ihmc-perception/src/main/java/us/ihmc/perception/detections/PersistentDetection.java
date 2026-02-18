@@ -14,22 +14,21 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.SortedSet;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 public class PersistentDetection
 {
-   public static final UUID NULL_DETECTION_ID = new UUID(0L, 0L);
-
    // The first element of this set is the oldest detection, and the last element is the most recent detection
    private final SortedSet<InstantDetection> detectionHistory = new ConcurrentSkipListSet<>(Comparator.comparing(InstantDetection::getDetectionTime));
    private final InstantDetection firstDetection;
    private Duration historyDuration;
-   private final UUID id = UUID.randomUUID();
+   private final int id = IdProvider.nextID();
 
    /** An alpha filtered frame representing the pose of the latest detection. */
-   private final MutableReferenceFrame filteredDetectionFrame = new MutableReferenceFrame("persistentDetection_" + id.toString().substring(0, 5),
+   private final MutableReferenceFrame filteredDetectionFrame = new MutableReferenceFrame("persistentDetection_" + id,
                                                                                           ReferenceFrame.getWorldFrame());
    private double filterAlpha;
 
@@ -265,6 +264,7 @@ public class PersistentDetection
       {
          instantDetection.destroy();
       }
+      IdProvider.markAvailable(id);
       destroyed = true;
    }
 
@@ -288,7 +288,7 @@ public class PersistentDetection
       this.stabilityDetectionFrequency = stabilityDetectionFrequency;
    }
 
-   public UUID getID()
+   public int getID()
    {
       return id;
    }
@@ -301,5 +301,24 @@ public class PersistentDetection
    public ReferenceFrame getFilteredDetectionFrame()
    {
       return filteredDetectionFrame.getReferenceFrame();
+   }
+
+   private static class IdProvider
+   {
+      private static int nextID = 0;
+      private static final Queue<Integer> availableIDs = new LinkedList<>();
+
+      public synchronized static int nextID()
+      {
+         if (availableIDs.isEmpty())
+            return nextID++;
+
+         return availableIDs.remove();
+      }
+
+      public synchronized static void markAvailable(int id)
+      {
+         availableIDs.add(id);
+      }
    }
 }

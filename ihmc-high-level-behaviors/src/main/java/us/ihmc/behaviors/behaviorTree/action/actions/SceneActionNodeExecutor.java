@@ -4,6 +4,7 @@ import behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionNodeDefinition.SceneActionNodeType;
+import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneDoorFrameExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneDoorPanelExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectDefinition;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectExecutor;
@@ -46,9 +47,6 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
       state.getLogger().info("Executing scene action for object type: {}", definition.getName());
 
       timer.reset();
-
-      if (definition.getSceneActionType().getValue() == SceneActionNodeType.SETUP_OBJECT)
-         scene.removeAllObjects(); // Temporary measure until we have a use case for more persistent objects
    }
 
    @Override
@@ -56,7 +54,8 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
    {
       state.setElapsedExecutionTime(timer.getElapsedTime());
 
-      if (definition.getSceneActionType().getValue() == SceneActionNodeType.FREEZE_OBJECT)
+      if (definition.getSceneActionType().getValue() == SceneActionNodeType.FREEZE_OBJECT
+       || definition.getSceneActionType().getValue() == SceneActionNodeType.DELETE_OBJECT)
       {
          BehaviorTreeSceneObjectState matchedObject = null;
          for (BehaviorTreeSceneObjectState object : scene.getObjects())
@@ -82,18 +81,29 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
          }
 
          if (matchedObject == null)
-            state.getLogger().error("Failed to find a suitable object to freeze: %s".formatted(definition.getSceneObjectDefinition().getName()));
+         {
+            if (definition.getSceneActionType().getValue() == SceneActionNodeType.FREEZE_OBJECT)
+               state.getLogger().error("Failed to find a suitable object to freeze: %s".formatted(definition.getSceneObjectDefinition().getName()));
+            else
+               state.getLogger().error("Failed to find a suitable object to delete: %s".formatted(definition.getSceneObjectDefinition().getName()));
+         }
          else
          {
-            state.getLogger().info("Freezing object: %s".formatted(matchedObject.getName()));
-            matchedObject.freeze();
+            if (definition.getSceneActionType().getValue() == SceneActionNodeType.FREEZE_OBJECT)
+            {
+               state.getLogger().info("Freezing object: %s".formatted(matchedObject.getName()));
+               matchedObject.freeze();
+            }
+            else
+            {
+               state.getLogger().info("Deleting object: %s".formatted(matchedObject.getName()));
+               scene.removeObject(matchedObject);
+            }
          }
          state.setFailed(matchedObject == null);
          state.setIsExecuting(false);
-
-         state.getLogger().info("Freezing object: %s".formatted(definition.getSceneObjectDefinition().getName()));
       }
-      else
+      else // Setup object
       {
          double timeout = definition.getTimeout();
          if (!timer.isRunning(timeout))
@@ -107,12 +117,12 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
          printDebug = throttler.run();
          cameraPosition.set(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getExperimentalCameraFrame).getTranslation());
 
-         boolean success = false;
-
-         if (definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.DOOR_PANEL)
-            success |= setupDoorPanelDetection();
-         else
-            success |= setupSinglePersistentDetection();
+         boolean success = switch (definition.getSceneObjectDefinition().getObjectType())
+         {
+            case DOOR_PANEL -> setupDoorPanelDetection();
+            case DOOR_FRAME -> setupDoorFrameDetection();
+            default -> setupSinglePersistentDetection();
+         };
 
          if (success)
             state.setIsExecuting(false);
@@ -242,6 +252,7 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
       if (targetSceneObject != null)
       {
          state.getLogger().info("Updating existing door panel scene object");
+         targetSceneObject.unfreeze();
          targetSceneObject.setPersistentDetection(openingMechanismDetection);
          targetSceneObject.setDoorPanelPersistentDetection(doorPanelDetection);
       }
@@ -256,6 +267,61 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
          targetSceneObject.setDoorPanelPersistentDetection(doorPanelDetection);
          targetSceneObject.update();
          scene.addObject(targetSceneObject);
+      }
+
+      return true;
+   }
+
+   private boolean setupDoorFrameDetection()
+   {
+      // First, find a stable door panel
+      BehaviorTreeSceneDoorPanelExecutor doorPanelSceneObject = null;
+      for (BehaviorTreeSceneObjectState object : scene.getObjects())
+      {
+         if (object instanceof BehaviorTreeSceneDoorPanelExecutor doorPanelExecutor && doorPanelExecutor.isStable())
+         {
+            doorPanelSceneObject = doorPanelExecutor;
+            break;
+         }
+      }
+
+      if (doorPanelSceneObject == null)
+      {
+         if (printDebug)
+            state.getLogger().warn("No suitable door panel scene object found.");
+         return false;
+      }
+
+      state.getLogger().info("Found door panel scene object: {} ({})", doorPanelSceneObject.getName(), doorPanelSceneObject.getID());
+
+      // Check if a frame scene object already exists
+      BehaviorTreeSceneDoorFrameExecutor frameSceneObject = null;
+      for (BehaviorTreeSceneObjectState object : scene.getObjects())
+      {
+         if (object instanceof BehaviorTreeSceneDoorFrameExecutor doorPanelExecutor)
+         {
+            frameSceneObject = doorPanelExecutor;
+            break;
+         }
+      }
+
+      // add object
+      if (frameSceneObject != null)
+      {
+         state.getLogger().info("Updating existing door frame scene object");
+         frameSceneObject.unfreeze();
+         frameSceneObject.setPersistentDetection(doorPanelSceneObject.getDoorPanelPersistentDetection());
+      }
+      else
+      {
+         state.getLogger().info("Creating new door frame scene object");
+
+         BehaviorTreeSceneObjectDefinitionMessage message = new BehaviorTreeSceneObjectDefinitionMessage();
+         definition.getSceneObjectDefinition().toMessage(message);
+         frameSceneObject = (BehaviorTreeSceneDoorFrameExecutor) scene.createObject(message);
+         frameSceneObject.setDoorPanel(doorPanelSceneObject);
+         frameSceneObject.update();
+         scene.addObject(frameSceneObject);
       }
 
       return true;
@@ -362,6 +428,7 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
       if (targetSceneObject != null)
       {
          state.getLogger().info("Updating existing scene object for type: {}", definition.getSceneObjectDefinition().getName());
+         targetSceneObject.unfreeze();
          targetSceneObject.setPersistentDetection(bestDetection);
       }
       else
