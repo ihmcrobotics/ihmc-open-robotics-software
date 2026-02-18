@@ -81,7 +81,7 @@ public class GpuMappingThread extends RepeatingTaskThread
                                                 ros2Node,
                                                 leftFootFrame,
                                                 rightFootFrame,
-                                                zedDepthCameraFrame,
+                                                syncedRobotModel.getReferenceFrames().getSteppingCameraFrame(),
                                                 controllerFootstepQueueMonitor,
                                                 heightMapParameters,
                                                 activeMappingParameterToolBox.getTerrainMapParameters());
@@ -163,6 +163,7 @@ public class GpuMappingThread extends RepeatingTaskThread
       }
       catch (Exception e)
       {
+         e.printStackTrace();
          LogTools.error(e);
       }
    }

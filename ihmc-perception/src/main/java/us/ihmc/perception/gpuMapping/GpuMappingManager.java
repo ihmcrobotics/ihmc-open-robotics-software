@@ -10,8 +10,11 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.sensors.CameraIntrinsics;
 import us.ihmc.perception.gpuMapping.worldModel.ChunkedMapManager;
@@ -51,6 +54,8 @@ public class GpuMappingManager
    private long heightMapForControllerSequenceId = 0;
    private final TerrainMapMessage terrainMapMessage;
    private long terrainMapSequenceId = 0;
+
+   private ReferenceFrame leftSensorFrame = null;
 
    public GpuMappingManager(String robotName,
                             ROS2Node ros2Node,
@@ -114,9 +119,13 @@ public class GpuMappingManager
          }
       }
 
+      RigidBodyTransform leftSensorTransform = new RigidBodyTransform(new Quaternion(), new Vector3D(0.0, 0.025, 0.0));
+      leftSensorFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("ZED_X_Mini" + "_left",
+                                                                                          globalHeightMapCenterFrame,
+                                                                                          leftSensorTransform);
       // Update the sensor origin here with the latest reference frame
       // We are deep coping the frames here to avoid a data race condition, still possible but very small chance
-      RigidBodyTransform globalHeightMapFrameToWorldFrame = new RigidBodyTransform(globalHeightMapCenterFrame.getTransformToWorldFrame());
+      RigidBodyTransform globalHeightMapFrameToWorldFrame = new RigidBodyTransform(leftSensorFrame.getTransformToWorldFrame());
       Point3D globalHeightMapCenter = new Point3D(globalHeightMapFrameToWorldFrame.getTranslation());
 
       // -------- Update the Height Map with the latest depth image from the sensor --------------
@@ -170,29 +179,28 @@ public class GpuMappingManager
       HeightMapMessageTools.toMessageForController(heightMapExtractor.getHeightMapData(), heightMapMessageForController);
       heightMapMessageForController.setSequenceId(heightMapForControllerSequenceId++);
       controllerHeightMapMessagePublisher.publish(heightMapMessageForController);
-
    }
 
-    public void publishTerrainMap()
-    {
-        TerrainMapMessageTools.toMessage(terrainMapExtractor.getTerrainMapData(), terrainMapMessage);
-        terrainMapMessage.setSequenceId(terrainMapSequenceId++);
+   public void publishTerrainMap()
+   {
+      TerrainMapMessageTools.toMessage(terrainMapExtractor.getTerrainMapData(), terrainMapMessage);
+      terrainMapMessage.setSequenceId(terrainMapSequenceId++);
 
-        terrainMapMessagePublisher.publish(terrainMapMessage);
-    }
+      terrainMapMessagePublisher.publish(terrainMapMessage);
+   }
 
-    public void updateChunkedMap()
-    {
-       // Publish the height map to anyone who is subscribing
-       Mat hostGlobalHeightMap = new Mat();
-       // Don't destroy this mat as its being used in the extractor till that finish's
-       GpuMat deviceGlobalHeightMap = heightMapExtractor.getHeightMap();
-       deviceGlobalHeightMap.download(hostGlobalHeightMap);
+   public void updateChunkedMap()
+   {
+      // Publish the height map to anyone who is subscribing
+      Mat hostGlobalHeightMap = new Mat();
+      // Don't destroy this mat as its being used in the extractor till that finish's
+      GpuMat deviceGlobalHeightMap = heightMapExtractor.getHeightMap();
+      deviceGlobalHeightMap.download(hostGlobalHeightMap);
 
-       chunkedMapManager.update(hostGlobalHeightMap, heightMapCenterPoint);
+      chunkedMapManager.update(hostGlobalHeightMap, heightMapCenterPoint);
 
-       hostGlobalHeightMap.close();
-    }
+      hostGlobalHeightMap.close();
+   }
 
    public void publishChunkedMap()
    {
@@ -206,7 +214,7 @@ public class GpuMappingManager
 
    public TerrainMapData getLatestTerrainMapData()
    {
-       return terrainMapExtractor.getTerrainMapData();
+      return terrainMapExtractor.getTerrainMapData();
    }
 
    private double computeFootHeight()
