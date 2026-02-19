@@ -1,8 +1,7 @@
 package us.ihmc.avatar;
 
+import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.multiContact.pushRecovery.ReducedOrderRobotModel;
-import us.ihmc.avatar.multiContact.pushRecovery.StandingReactiveBracingPlanner;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
@@ -12,19 +11,14 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLe
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MultiContactGaitGenerator;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandContactCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
+import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
-import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.ros2.ROS2Node;
@@ -32,20 +26,23 @@ import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicReference;
 
-public class AvatarStandingPushRecoveryThread implements AvatarControllerThreadInterface
+public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerThreadInterface
 {
-   private final YoRegistry registry = new YoRegistry("standingPushRecoveryRegistry");
+   private static final int NUMBER_OF_PREVIEW_STEPS = 3;
 
+   private final YoRegistry registry = new YoRegistry("multiContactGaitGeneratorThread");
    private final FullHumanoidRobotModel fullRobotModel;
-
    private final HumanoidRobotContextData humanoidRobotContextData;
    private final HumanoidReferenceFrames humanoidReferenceFrames;
-   private final CenterOfMassJacobian centerOfMassJacobian;
 
    private final CommandInputManager commandInputManager;
    private final StatusMessageOutputManager statusOutputManager;
@@ -53,29 +50,33 @@ public class AvatarStandingPushRecoveryThread implements AvatarControllerThreadI
    private final CommandInputManager walkingCommandInputManager;
    private final StatusMessageOutputManager walkingOutputManager;
 
-   private final YoBoolean isHandRecoveryContactEnabled = new YoBoolean("isHandRecoveryContactEnabled", registry);
-   private final YoBoolean isFalling = new YoBoolean("isFalling", registry);
-   private final YoBoolean sendHandContactMessage = new YoBoolean("sendHandContactMessage", registry);
-   private boolean hasSentHandTrajectory = false;
-   private final StandingReactiveBracingPlanner planner;
+   private final YoBoolean walkPrev = new YoBoolean("walkMCGSPrev", registry);
+   private final YoBoolean walk = new YoBoolean("walkMCGS", registry);
+   private final YoDouble nominalSwingDuration = new YoDouble("nominalSwingDuration", registry);
+   private final YoDouble nominalTransferDuration = new YoDouble("nominalTransferDuration", registry);
+   private final YoDouble desiredWalkingVelocityX = new YoDouble("desiredWalkingVelocityX", registry);
+   private final YoDouble desiredWalkingVelocityY = new YoDouble("desiredWalkingVelocityY", registry);
+   private final YoDouble desiredWalkingVelocityYaw = new YoDouble("desiredWalkingVelocityYaw", registry);
 
-   private final SideDependentList<HandContactCommand> plannedHandContacts = new SideDependentList<>();
-   private final ReducedOrderRobotModel reducedOrderRobotModel;
+   private final YoEnum<RobotSide> currentSwingSide = new YoEnum<>("currentSwingSide", registry, RobotSide.class, true);
+   private final YoFramePose3D currentTouchdownPose = new YoFramePose3D("currentTouchdownPose", ReferenceFrame.getWorldFrame(), registry);
+   private final AtomicReference<WalkingStatusMessage> walkingStatusMessage = new AtomicReference<>();
 
-   public AvatarStandingPushRecoveryThread(ROS2Node ros2Node,
-                                           DRCRobotModel robotModel,
-                                           HumanoidRobotContextDataFactory contextDataFactory,
-                                           StatusMessageOutputManager walkingOutputManager,
-                                           CommandInputManager walkingCommandInputManager)
+   private final double stanceWidth;
+   private final FramePose3D tempPose = new FramePose3D();
+   private final FootstepDataListCommand footstepDataListCommand = new FootstepDataListCommand();
+
+   public AvatarMultiContactGaitGeneratorThread(ROS2Node ros2Node,
+                                                DRCRobotModel robotModel,
+                                                HumanoidRobotContextDataFactory contextDataFactory,
+                                                StatusMessageOutputManager walkingOutputManager,
+                                                CommandInputManager walkingCommandInputManager)
    {
       this.fullRobotModel = robotModel.createFullRobotModel();
 
       String robotName = robotModel.getSimpleRobotName();
       ROS2Topic<?> inputTopic = MultiContactGaitGenerator.getInputTopic(robotName);
       ROS2Topic<?> outputTopic = MultiContactGaitGenerator.getOutputTopic(robotName);
-
-      planner = robotModel.getReactiveBracingPlanner();
-      reducedOrderRobotModel = new ReducedOrderRobotModel(robotModel.getContactPointParameters(), registry);
 
       this.commandInputManager = new CommandInputManager(MultiContactGaitGenerator.getSupportedCommands());
       this.statusOutputManager = new StatusMessageOutputManager(MultiContactGaitGenerator.getSupportedStatusMessages());
@@ -100,15 +101,10 @@ public class AvatarStandingPushRecoveryThread implements AvatarControllerThreadI
       this.walkingOutputManager = walkingOutputManager;
       this.walkingCommandInputManager = walkingCommandInputManager;
 
-      this.centerOfMassJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator(), ReferenceFrame.getWorldFrame());
+      statusOutputManager.attachStatusMessageListener(WalkingStatusMessage.class, walkingStatusMessage::set);
 
-      isHandRecoveryContactEnabled.set(true);
-   }
-
-   public void initialize()
-   {
-      humanoidRobotContextData.setControllerRan(false);
-      humanoidRobotContextData.setEstimatorRan(false);
+      nominalSwingDuration.set(robotModel.getWalkingControllerParameters().getDefaultSwingTime());
+      nominalTransferDuration.set(robotModel.getWalkingControllerParameters().getDefaultTransferTime());
    }
 
    @Override
@@ -117,48 +113,46 @@ public class AvatarStandingPushRecoveryThread implements AvatarControllerThreadI
       if (!humanoidRobotContextData.getEstimatorRan())
          return;
 
+      if (!isWalking())
+      {
+         currentSwingSide.set(null);
+         currentTouchdownPose.setToNaN();
+      }
+
+      boolean walk = this.walk.getValue();
+      boolean walkPrev = this.walkPrev.getValue();
+      this.walkPrev.set(walk);
+
+      if (!walk)
+         return;
+
       HumanoidRobotContextTools.updateRobot(fullRobotModel, humanoidRobotContextData.getProcessedJointData());
       humanoidReferenceFrames.updateFrames();
-      centerOfMassJacobian.reset();
 
-      FrameVector3DReadOnly comVelocity = centerOfMassJacobian.getCenterOfMassVelocity();
-      isFalling.set(EuclidCoreTools.norm(comVelocity.getX(), comVelocity.getY()) > 0.07); // TODO make this better
-
-      FramePoint3D centerOfMass = new FramePoint3D(humanoidReferenceFrames.getCenterOfMassFrame());
-      FramePoint3D shoulder = new FramePoint3D(fullRobotModel.getOneDoFJointByName("LEFT_SHOULDER_Y").getFrameBeforeJoint());
-
-      centerOfMass.changeFrame(humanoidReferenceFrames.getMidFeetZUpFrame());
-      shoulder.changeFrame(humanoidReferenceFrames.getMidFeetZUpFrame());
-
-      FrameVector3D comToShoulder = new FrameVector3D(humanoidReferenceFrames.getMidFeetZUpFrame());
-      comToShoulder.sub(shoulder, centerOfMass);
-
-      if (commandInputManager.isNewCommandAvailable(PlanarRegionsListCommand.class))
+      if (!walkPrev)
       {
-         PlanarRegionsListCommand planarRegionsListCommand = commandInputManager.pollNewestCommand(PlanarRegionsListCommand.class);
-//         LogTools.info("Received planar regions command! number of regions: " + planarRegionsListCommand.getNumberOfPlanarRegions());
-         planner.setPlanarRegions(planarRegionsListCommand);
+         // Initialize based on current stance
+         RobotSide initialStanceSide = RobotSide.RIGHT;
+         currentSwingSide.set(initialStanceSide);
+         tempPose.setToZero(humanoidReferenceFrames.getSoleFrame(initialStanceSide));
+         tempPose.changeFrame(ReferenceFrame.getWorldFrame());
+         currentTouchdownPose.set(tempPose);
       }
 
-      if (!hasSentHandTrajectory && isFalling.getValue() && isHandRecoveryContactEnabled.getValue())
+      footstepDataListCommand.getFootsteps().clear();
+      for (int i = 0; i < NUMBER_OF_PREVIEW_STEPS; i++)
       {
-         hasSentHandTrajectory = true;
-         sendHandContactMessage.set(false);
 
-         reducedOrderRobotModel.initialize(fullRobotModel, humanoidReferenceFrames, comVelocity);
-
-         plannedHandContacts.clear();
-         planner.plan(reducedOrderRobotModel, plannedHandContacts);
-
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            HandContactCommand handContactCommand = plannedHandContacts.get(robotSide);
-            if (handContactCommand != null)
-            {
-               walkingCommandInputManager.submitCommand(handContactCommand);
-            }
-         }
       }
+   }
+
+   private boolean isWalking()
+   {
+      WalkingStatusMessage walkingStatusMessage = this.walkingStatusMessage.get();
+      if (walkingStatusMessage == null)
+         return false;
+      WalkingStatus walkingStatus = WalkingStatus.fromByte(walkingStatusMessage.getWalkingStatus());
+      return walkingStatus == WalkingStatus.STARTED || walkingStatus == WalkingStatus.RESUMED;
    }
 
    @Override
