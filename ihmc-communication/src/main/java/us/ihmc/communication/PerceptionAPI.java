@@ -36,11 +36,6 @@ public final class PerceptionAPI
    public static final ROS2Topic<?> RELIABLE = IHMC_ROOT.withQoS(ROS2QosProfile.RELIABLE());
 
    /*
-    * Detection manager
-    */
-   public static final StoredPropertySetROS2TopicPair DETECTION_MANAGER_SETTINGS = new StoredPropertySetROS2TopicPair("detections", "settings");
-
-   /*
     * ZED SVO
     */
    public static final ROS2Topic<ZEDSVOCurrentFileMessage> ZED_SVO_CURRENT_FILE = PERCEPTION_MODULE.withSuffix("zed_svo_current_file")
@@ -58,6 +53,14 @@ public final class PerceptionAPI
    public static final ROS2Topic<YOLOv8ExecutorParameters> YOLO_PARAMETERS = IHMC_ROOT.withModule("yolo")
                                                                                       .withSuffix("settings")
                                                                                       .withType(YOLOv8ExecutorParameters.class);
+   public static final ROS2Topic<Image> YOLO_VLM_ANNOTATED_IMAGE = IHMC_ROOT.withModule("yolo")
+                                                                            .withSuffix("vlm/image")
+                                                                            .withType(Image.class)
+                                                                            .withQoS(ROS2QosProfile.RELIABLE());
+   public static final ROS2Topic<CameraInfo> YOLO_VML_ANNOTATED_IMAGE_CAMERA_INFO = IHMC_ROOT.withModule("yolo")
+                                                                                             .withSuffix("vlm/camera_Info")
+                                                                                             .withType(CameraInfo.class)
+                                                                                             .withQoS(ROS2QosProfile.RELIABLE());
 
    /*
     * Aruco markers
@@ -206,8 +209,7 @@ public final class PerceptionAPI
    /*
     * YOLO
     */
-   public static final ROS2Topic<Empty> REQUEST_YOLO_REALSENSE = PERCEPTION_MODULE.withSuffix("request_yolo_realsense").withType(Empty.class);
-   public static final ROS2Topic<Empty> REQUEST_YOLO_ZED = PERCEPTION_MODULE.withSuffix("request_yolo_zed").withType(Empty.class);
+   public static final ROS2Topic<Empty> REQUEST_YOLO = PERCEPTION_MODULE.withSuffix("request_yolo").withType(Empty.class);
    public static final ROS2Topic<Empty> REQUEST_YOLO_ANNOTATED_IMAGE = PERCEPTION_MODULE.withSuffix("request_yolo_image").withType(Empty.class);
 
    /*

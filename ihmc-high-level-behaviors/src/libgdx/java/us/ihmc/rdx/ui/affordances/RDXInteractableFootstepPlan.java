@@ -8,7 +8,7 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
-import us.ihmc.behaviors.tools.CommunicationHelper;
+import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -45,7 +45,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
    private final RecyclingArrayList<RDXInteractableFootstep> footsteps = new RecyclingArrayList<>(this::newPlannedFootstep);
    private RDXInteractableFootstep selectedFootstep;
    private RDXBaseUI baseUI;
-   private CommunicationHelper communicationHelper;
+   private ROS2ControllerHelper controllerHelper;
    private ROS2SyncedRobotModel syncedRobot;
    private RDXFootstepChecker stepChecker;
    private RDXSwingPlanningModule swingPlanningModule;
@@ -65,24 +65,24 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
    }
 
    public void create(RDXBaseUI baseUI,
-                      CommunicationHelper communicationHelper,
+                      ROS2ControllerHelper controllerHelper,
                       ROS2SyncedRobotModel syncedRobot,
                       LocomotionParameters locomotionParameters,
                       DefaultFootstepPlannerParametersReadOnly footstepPlannerParameters,
                       SwingPlannerParametersBasics swingFootPlannerParameters)
    {
       this.baseUI = baseUI;
-      this.communicationHelper = communicationHelper;
+      this.controllerHelper = controllerHelper;
       this.syncedRobot = syncedRobot;
       this.locomotionParameters = locomotionParameters;
       this.swingPlannerParameters = swingFootPlannerParameters;
 
-      defaultPolygons = FootstepPlanningModuleLauncher.createFootPolygons(communicationHelper.getRobotModel());
+      defaultPolygons = FootstepPlanningModuleLauncher.createFootPolygons(controllerHelper.getRobotModel());
       stepChecker = new RDXFootstepChecker(baseUI, syncedRobot, controllerStatusTracker, defaultPolygons, footstepPlannerParameters);
       swingPlanningModule = new RDXSwingPlanningModule(syncedRobot,
                                                        footstepPlannerParameters,
-                                                       communicationHelper.getRobotModel().getSwingPlannerParameters(),
-                                                       communicationHelper.getRobotModel().getWalkingControllerParameters(),
+                                                       controllerHelper.getRobotModel().getSwingPlannerParameters(),
+                                                       controllerHelper.getRobotModel().getWalkingControllerParameters(),
                                                        defaultPolygons);
       clear();
    }
@@ -282,7 +282,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       messageList.setAreFootstepsAdjustable(locomotionParameters.getAreFootstepsAdjustable());
 
       RDXBaseUI.pushNotification("Commanding %d footsteps...".formatted(messageList.getFootstepDataList().size()));
-      communicationHelper.publishToController(messageList);
+      controllerHelper.publishToController(messageList);
 
       clear();
    }

@@ -7,7 +7,9 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ClearDelayQueueCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.log.LogTools;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -164,7 +166,7 @@ public class CommandConsumerWithDelayBuffers
       PriorityQueue<Command<?, ?>> priorityQueue = priorityQueues.get(command.getClass());
       if(priorityQueue.size() >= NUMBER_OF_COMMANDS_TO_QUEUE)
       {
-//         LogTools.error("Tried to add {} to the delay queue, but the queue was full. Try increasing the queue size", command.getClass().getSimpleName());
+         LogTools.error("Skipping %s because priority queue is full. %d/%d".formatted(command.getClass().getSimpleName(), priorityQueue.size(), NUMBER_OF_COMMANDS_TO_QUEUE));
          return;
       }
       RecyclingArrayList<? extends Command<?, ?>> recyclingArrayList = queuedCommands.get(command.getClass());
@@ -194,6 +196,12 @@ public class CommandConsumerWithDelayBuffers
          PriorityQueue<Command<?, ?>> priorityQueue = priorityQueues.get(commandClassToPoll);
          Command<?, ?> command = priorityQueue.poll();
          recyclingArrayList.remove(command);
+         if (command instanceof FootstepDataListCommand footstepDataListCommand)
+            LogTools.info("Polling FootstepDataListCommand with %s steps".formatted(footstepDataListCommand.getNumberOfFootsteps()));
+         else if (command instanceof ArmTrajectoryCommand armTrajectoryCommand)
+            LogTools.info("Polling %s ArmTrajectoryCommand".formatted(armTrajectoryCommand.getRobotSide().getPascalCaseName()));
+         else
+            LogTools.info("Polling %s".formatted(command.getClass().getSimpleName()));
          return (C) command;
       }
       
@@ -219,6 +227,12 @@ public class CommandConsumerWithDelayBuffers
       {
          Command<?, ?> queuedCommand =  priorityQueue.poll();
          recyclingArrayList.remove(queuedCommand);
+         if (queuedCommand instanceof FootstepDataListCommand footstepDataListCommand)
+            LogTools.info("Polling FootstepDataListCommand with %s steps".formatted(footstepDataListCommand.getNumberOfFootsteps()));
+         else if (queuedCommand instanceof ArmTrajectoryCommand armTrajectoryCommand)
+            LogTools.info("Polling %s ArmTrajectoryCommand".formatted(armTrajectoryCommand.getRobotSide().getPascalCaseName()));
+         else
+            LogTools.info("Polling %s".formatted(queuedCommand.getClass().getSimpleName()));
          commands.add().set((C) queuedCommand);
       }
       

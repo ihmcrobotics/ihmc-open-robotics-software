@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import perception_msgs.msg.dds.ArUcoMarkerPoses;
-import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
+import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.rdx.imgui.ImGuiAveragedFrequencyText;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -27,7 +27,7 @@ public class RDXROS2ArUcoMarkerPosesVisualizer extends RDXROS2SingleTopicVisuali
    private final ArrayList<RDXModelInstance> markerCoordinateFrames = new ArrayList<>();
    private final Pose3D markerPose = new Pose3D();
 
-   public RDXROS2ArUcoMarkerPosesVisualizer(String title, ROS2PublishSubscribeAPI ros2, ROS2Topic<ArUcoMarkerPoses> topic)
+   public RDXROS2ArUcoMarkerPosesVisualizer(String title, ROS2Helper ros2, ROS2Topic<ArUcoMarkerPoses> topic)
    {
       super(title);
       this.topic = topic;

@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OneDoFJointFeedbackControlCommand;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 
 public class JointspaceTrajectoryStatusMessageHelper extends TrajectoryStatusMessageHelper<JointspaceTrajectoryStatusMessage>
@@ -39,10 +40,12 @@ public class JointspaceTrajectoryStatusMessageHelper extends TrajectoryStatusMes
       if (command.getExecutionMode() == ExecutionMode.OVERRIDE)
       {
          clear();
+         LogTools.info("Overriding trajectory for jointspace trajectory command. Trajectory end time: %.3f".formatted(command.getTrajectoryEndTime()));
          registerNewTrajectory(command.getSequenceId(), 0.0, command.getTrajectoryEndTime());
       }
       else
       {
+         LogTools.info("Appending trajectory for jointspace trajectory command. Trajectory start time: %.3f, trajectory end time: %.3f".formatted(command.getTrajectoryStartTime(), command.getTrajectoryEndTime()));
          registerNewTrajectory(command.getSequenceId(), command.getTrajectoryStartTime(), command.getTrajectoryEndTime());
       }
    }

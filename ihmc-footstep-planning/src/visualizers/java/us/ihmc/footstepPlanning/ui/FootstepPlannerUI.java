@@ -1,10 +1,5 @@
 package us.ihmc.footstepPlanning.ui;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
-
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -14,7 +9,6 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
-import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.TerrainMapMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -53,7 +47,6 @@ import us.ihmc.footstepPlanning.ui.viewers.HeightMapVisualizer;
 import us.ihmc.footstepPlanning.ui.viewers.RobotIKVisualizer;
 import us.ihmc.footstepPlanning.ui.viewers.StartGoalPositionViewer;
 import us.ihmc.footstepPlanning.ui.viewers.SwingPlanMeshViewer;
-import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javaFXToolkit.shapes.JavaFXCoordinateSystem;
 import us.ihmc.javafx.JavaFXRobotVisualizer;
@@ -63,13 +56,17 @@ import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pathPlanning.HeightMapDataSetName;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.StartGoalPositionEditor;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.OcTreeViewer;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.PlanarRegionViewer;
+import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.wholeBodyController.RobotContactPointParameters;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
 
@@ -90,7 +87,6 @@ public class FootstepPlannerUI
    private final BorderPane mainPane;
 
    private final PlanarRegionViewer planarRegionViewer;
-   private final OcTreeViewer ocTreeViewer;
    private final StartGoalPositionEditor startGoalEditor;
    private final StartGoalPositionViewer startGoalPositionViewer;
    private final GoalOrientationViewer goalOrientationViewer;
@@ -246,7 +242,6 @@ public class FootstepPlannerUI
       Pane subScene = view3dFactory.getSubSceneWrappedInsidePane();
 
       this.planarRegionViewer = new PlanarRegionViewer(messager, PlanarRegionData, ShowPlanarRegions);
-      this.ocTreeViewer = new OcTreeViewer();
       this.startGoalPositionViewer = new StartGoalPositionViewer(messager, null, GoalPositionEditModeEnabled, null, LowLevelGoalPosition, GoalMidFootPosition);
       this.goalOrientationViewer = new GoalOrientationViewer(messager);
       this.goalOrientationViewer.setPlannerParameters(plannerParameters);
@@ -272,7 +267,6 @@ public class FootstepPlannerUI
       startGoalPositionViewer.setShowStartGoalTopics(ShowStart, ShowGoal, ShowGoal);
 
       view3dFactory.addNodeToView(planarRegionViewer.getRoot());
-      view3dFactory.addNodeToView(ocTreeViewer.getRoot());
       view3dFactory.addNodeToView(startGoalPositionViewer.getRoot());
       view3dFactory.addNodeToView(goalOrientationViewer.getRoot());
       view3dFactory.addNodeToView(pathViewer.getRoot());
@@ -326,11 +320,7 @@ public class FootstepPlannerUI
       goalOrientationViewer.setDefaultContactPoints(defaultContactPoints);
       footstepPlannerLogVisualizerController.setContactPointParameters(defaultContactPoints);
 
-      messager.addTopicListener(ShowOcTree, ocTreeViewer::setEnabled);
-      messager.addTopicListener(OcTreeData, ocTreeViewer::submitOcTreeData);
-
       planarRegionViewer.start();
-      ocTreeViewer.start();
       startGoalPositionViewer.start();
       goalOrientationViewer.start();
       startGoalEditor.start();
@@ -464,7 +454,6 @@ public class FootstepPlannerUI
       shutdownHooks.forEach(Runnable::run);
 
       planarRegionViewer.stop();
-      ocTreeViewer.stop();
       startGoalPositionViewer.stop();
       goalOrientationViewer.stop();
       startGoalEditor.stop();

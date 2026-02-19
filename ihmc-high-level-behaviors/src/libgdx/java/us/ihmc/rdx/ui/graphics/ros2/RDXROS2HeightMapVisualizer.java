@@ -16,7 +16,7 @@ import perception_msgs.msg.dds.TerrainMapMessage;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
-import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
+import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.perception.gpuMapping.TerrainMapMessageTools;
 import us.ihmc.perception.gpuMapping.HeightMapData;
@@ -52,7 +52,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
    private final ImBoolean enableHeightMapRenderer = new ImBoolean(true);
    private final ImBoolean colorBasedOnTraversability = new ImBoolean(false);
    private final Stopwatch stopwatch = new Stopwatch();
-   private ROS2PublishSubscribeAPI ros2;
+   private ROS2Helper ros2;
    private ROS2Heartbeat chunkMapRequestHeartbeat;
    private ROS2Heartbeat heightMapRequestHeartbeat;
    private ROS2Heartbeat terrainMapRequestHeartbeat;
@@ -89,14 +89,14 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       return List.of(heightMapTopic);
    }
 
-   public void setupForImageMessage(ROS2PublishSubscribeAPI ros2)
+   public void setupForImageMessage(ROS2Helper ros2)
    {
       this.ros2 = ros2;
       ros2.subscribeViaCallback(heightMapTopic, this::acceptHeightMapMessage);
       ros2.subscribeViaCallback(terrainMapTopic, this::acceptTerrainMapMessage);
    }
 
-   public void setupForChunkMessage(ROS2PublishSubscribeAPI ros2)
+   public void setupForChunkMessage(ROS2Helper ros2)
    {
       this.ros2 = ros2;
       ros2.subscribeViaCallback(PerceptionAPI.CHUNK, this::acceptChunkMessage);

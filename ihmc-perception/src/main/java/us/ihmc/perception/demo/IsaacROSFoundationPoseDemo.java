@@ -33,7 +33,7 @@ import us.ihmc.zed.global.zed;
  */
 public class IsaacROSFoundationPoseDemo
 {
-   private static final String SVO_FILE = "/home/robotlab/Downloads/20251020_ZEDXMini_DoorChargeBarrierBottle.svo2";
+   private static final String SVO_FILE = "/opt/ihmc/LogData/UserFolders/TomaszFolder/20251020_ZEDXMini_DoorChargeBarrierBottle.svo2";
 
    private final ROS2Node ros2Node = new ROS2NodeBuilder().build(getClass().getSimpleName().toLowerCase());
    private final ROS2PeerClockOffsetEstimator peerClockOffsetEstimator = new ROS2PeerClockOffsetEstimator(ros2Node);
@@ -58,9 +58,9 @@ public class IsaacROSFoundationPoseDemo
 
       foundationPoseCommunicators = new IsaacROSFoundationPoseCommunicatorMap(peerClockOffsetEstimator);
 
-      yoloExecutor = new YOLOv8DetectionExecutor(peerClockOffsetEstimator, () -> true);
+      yoloExecutor = new YOLOv8DetectionExecutor(ros2Node, peerClockOffsetEstimator, () -> true);
       yoloExecutor.addDetectionConsumerCallback(foundationPoseCommunicators::updatePoseEstimations);
-      yoloExecutor.disableAllModels();
+      yoloExecutor.disableModel();
 
       taskThread = new RepeatingTaskThread(getClass().getSimpleName() + "Thread", this::task);
       taskThread.startRepeating();
@@ -84,7 +84,7 @@ public class IsaacROSFoundationPoseDemo
          imagePublisher.publishImage(PerceptionAPI.EXPERIMENTAL_ZED_COLOR.get(RobotSide.LEFT), color);
 
          // Run YOLO using the color image
-         yoloExecutor.runNextEnabledModel(color, depth);
+         yoloExecutor.runModel(color, depth);
 
          // Update FoundationPose manager
          foundationPoseCommunicators.updateCommunicators();

@@ -422,7 +422,10 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
    public void prepareForLocomotion()
    {
       if (doPrepareForLocomotion.getValue())
+      {
+         LogTools.info("Preparing %s for locomotion by holding current desired.".formatted(bodyName));
          holdCurrentDesired();
+      }
    }
 
    public void holdInJointspace()

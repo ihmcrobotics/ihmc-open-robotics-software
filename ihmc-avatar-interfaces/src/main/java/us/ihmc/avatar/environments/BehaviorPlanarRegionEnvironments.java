@@ -7,19 +7,18 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.PlannerTestEnvironments;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAM;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParameters;
 import us.ihmc.robotics.PlanarRegionFileTools;
-import us.ihmc.robotics.geometry.*;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.simulationConstructionSetTools.util.planarRegions.PlanarRegionsListExamples;
 
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.Random;
 
-import static us.ihmc.avatar.environments.RealisticLabTerrainBuilder.*;
+import static us.ihmc.avatar.environments.RealisticLabTerrainBuilder.MEDIUM_CINDER_BLOCK_HEIGHT;
+import static us.ihmc.avatar.environments.RealisticLabTerrainBuilder.MEDIUM_CINDER_BLOCK_LENGTH;
 
 public class BehaviorPlanarRegionEnvironments extends PlannerTestEnvironments
 {
@@ -565,21 +564,5 @@ public class BehaviorPlanarRegionEnvironments extends PlannerTestEnvironments
    {
       PlanarRegionsList roughUpAndDownStairsWithFlatTop = createRoughUpAndDownStepsWithFlatTop();
       PlanarRegionFileTools.exportPlanarRegionData(Paths.get(System.getProperty("user.home") + File.separator + "PlanarRegions" + File.separator), roughUpAndDownStairsWithFlatTop);
-   }
-
-   public static PlanarRegionsList realDataFromAtlasSLAMDataset20190710()
-   {
-      PlanarRegionsList map = PlanarRegionsList.flatGround(10.0);
-      PlanarRegionSLAMParameters parameters = new PlanarRegionSLAMParameters();
-      map = PlanarRegionSLAM.slam(map, loadDataSet("20190710_174025_PlanarRegion"), parameters).getMergedMap();
-      map = PlanarRegionSLAM.slam(map, loadDataSet("IntentionallyDrifted"), parameters).getMergedMap();
-      map = PlanarRegionSLAM.slam(map, loadDataSet("20190710_174422_PlanarRegion"), parameters).getMergedMap();
-      return map;
-   }
-
-   private static PlanarRegionsList loadDataSet(String dataSetName)
-   {
-      return PlanarRegionFileTools.importPlanarRegionData(ClassLoader.getSystemClassLoader(),
-                                                          DataSetIOTools.DATA_SET_DIRECTORY_PATH + "/20190710_SLAM_PlanarRegionFittingExamples/" + dataSetName);
    }
 }

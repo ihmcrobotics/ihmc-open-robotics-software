@@ -27,6 +27,7 @@ import java.util.List;
 public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRootNodeState, BehaviorTreeRootNodeDefinition>
    implements BehaviorTreeRootNode<RDXBehaviorTreeNode<?, ?>>
 {
+   private final RDXBehaviorTree tree;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBooleanWrapper automaticExecutionCheckbox;
    private final ImBooleanWrapper concurrencyEnabledCheckbox;
@@ -39,7 +40,7 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
    private final ImGuiRootIconWidget rootIconWidget = new ImGuiRootIconWidget();
 
    public RDXBehaviorTreeRootNode(long id,
-                                  CRDTInfo crdtInfo,
+                                  RDXBehaviorTree tree,
                                   WorkspaceResourceDirectory saveFileDirectory,
                                   ROS2SyncedRobotModel syncedRobot,
                                   RDXBehaviorTreeScene scene,
@@ -47,12 +48,14 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
                                   RDXBaseUI baseUI,
                                   RDX3DPanel panel3D)
    {
-      super(new BehaviorTreeRootNodeState(id, crdtInfo, saveFileDirectory, syncedRobot.getRobotModel(), scene),
+      super(new BehaviorTreeRootNodeState(id, tree.getCRDTInfo(), saveFileDirectory, syncedRobot.getRobotModel(), scene),
             syncedRobot,
             scene,
             selectionCollisionModel,
             baseUI,
             panel3D);
+
+      this.tree = tree;
 
       automaticExecutionCheckbox = new ImBooleanWrapper(state::getAutomaticExecution,
                                                         state::setAutomaticExecution,
@@ -220,6 +223,11 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
    }
 
    // Getters are in here so there's not getters in base node for root stuff
+
+   public RDXBehaviorTree getTree()
+   {
+      return tree;
+   }
 
    public ROS2SyncedRobotModel getSyncedRobot()
    {

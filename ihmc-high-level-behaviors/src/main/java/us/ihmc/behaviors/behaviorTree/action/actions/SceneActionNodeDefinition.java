@@ -22,7 +22,8 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
    public enum SceneActionNodeType
    {
       SETUP_OBJECT,
-      FREEZE_OBJECT;
+      FREEZE_OBJECT,
+      DELETE_OBJECT;
 
       public static final SceneActionNodeType[] values = values();
    }

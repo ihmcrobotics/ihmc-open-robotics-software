@@ -1,18 +1,18 @@
 package us.ihmc.behaviors.tools.perception;
 
-import java.awt.Color;
-import java.util.List;
-
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotEnvironmentAwareness.tools.ConcaveHullMerger;
-import us.ihmc.robotEnvironmentAwareness.tools.ConcaveHullMergerListener;
+import us.ihmc.perception.geometry.ConcaveHullMerger;
+import us.ihmc.perception.geometry.ConcaveHullMergerListener;
 import us.ihmc.robotics.geometry.FrameGeometry2dPlotter;
 import us.ihmc.robotics.geometry.FrameGeometryTestFrame;
+
+import java.awt.*;
+import java.util.List;
 
 public class ConcaveHullGraphicalMergerListener implements ConcaveHullMergerListener
 {

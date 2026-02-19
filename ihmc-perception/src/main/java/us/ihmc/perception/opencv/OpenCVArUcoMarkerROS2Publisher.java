@@ -7,7 +7,7 @@ import gnu.trove.set.hash.TIntHashSet;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ArUcoMarkerPoses;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
+import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.filters.DetectionFilter;
 import us.ihmc.commons.time.FrequencyCalculator;
@@ -31,7 +31,7 @@ public class OpenCVArUcoMarkerROS2Publisher
 {
    private final OpenCVArUcoMarkerDetectionResults arUcoMarkerDetectionResults;
    private final ArUcoMarkerPoses arUcoMarkerPoses = new ArUcoMarkerPoses();
-   private final ROS2PublishSubscribeAPI ros2;
+   private final ROS2Helper ros2;
    private final Function<Integer, Double> markerSizes;
    private final ReferenceFrame sensorFrame;
    private final TIntObjectMap<DetectionFilter> detectionFilters = new TIntObjectHashMap<>();
@@ -39,7 +39,7 @@ public class OpenCVArUcoMarkerROS2Publisher
    private final FrequencyCalculator updateFrequencyCalculator = new FrequencyCalculator();
 
    public OpenCVArUcoMarkerROS2Publisher(OpenCVArUcoMarkerDetectionResults arUcoMarkerDetectionResults,
-                                         ROS2PublishSubscribeAPI ros2,
+                                         ROS2Helper ros2,
                                          Function<Integer, Double> markerSizes,
                                          ReferenceFrame sensorFrame)
    {

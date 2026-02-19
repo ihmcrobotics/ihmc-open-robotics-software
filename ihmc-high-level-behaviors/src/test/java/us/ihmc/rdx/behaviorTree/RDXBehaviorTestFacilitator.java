@@ -174,7 +174,7 @@ public class RDXBehaviorTestFacilitator
       YOLOv8DetectionExecutor yolo;
       if (runPerception)
       {
-         zedSensor = new ZEDSVOPlaybackSensor(0, ZEDModelData.ZED_2I, zed.SL_DEPTH_MODE_PERFORMANCE, svoFile);
+         zedSensor = new ZEDSVOPlaybackSensor(0, ZEDModelData.ZED_2I, zed.SL_DEPTH_MODE_NEURAL_LIGHT, svoFile);
          zedSensor.setSensorFrame(syncedRobot.getReferenceFrames().getExperimentalCameraFrame());
          zedSensor.startSensor();
          ros2Node.createSubscription2(ZED_PLAY, empty -> zedSensor.play());
@@ -187,7 +187,7 @@ public class RDXBehaviorTestFacilitator
 
          foundationPose = new IsaacROSFoundationPoseCommunicatorMap(peerClockEstimator);
 
-         yolo = new YOLOv8DetectionExecutor(peerClockEstimator, () -> true);
+         yolo = new YOLOv8DetectionExecutor(ros2Node, peerClockEstimator, () -> true);
          yolo.enableModel("best_multi_01_16_2026");
          yolo.addDetectionConsumerCallback(foundationPose::updatePoseEstimations);
       }
@@ -213,7 +213,7 @@ public class RDXBehaviorTestFacilitator
                colorImage.release();
                colorImage = colorImage.replaceImage(bgrMat, PixelFormat.BGR8);
             }
-            yolo.runNextEnabledModel(colorImage, depthImage);
+            yolo.runModel(colorImage, depthImage);
             foundationPose.updateCommunicators();
             if (pointCloudVisualizer != null)
             {

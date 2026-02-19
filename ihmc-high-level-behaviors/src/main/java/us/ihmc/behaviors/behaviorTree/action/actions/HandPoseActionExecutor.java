@@ -12,12 +12,13 @@ import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.LeafNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
-import us.ihmc.behaviors.behaviorTree.action.TaskspaceTrajectoryTrackingErrorCalculator;
+import us.ihmc.behaviors.behaviorTree.action.TrajectoryTrackingErrorCalculator;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -26,19 +27,22 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
    private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
    private final FramePose3D desiredHandControlPose = new FramePose3D();
    private final FramePose3D syncedHandControlPose = new FramePose3D();
-   private final TaskspaceTrajectoryTrackingErrorCalculator trackingCalculator = new TaskspaceTrajectoryTrackingErrorCalculator();
+   private final TrajectoryTrackingErrorCalculator trackingCalculator = new TrajectoryTrackingErrorCalculator();
    private final RigidBodyTransform chestToPelvisZeroAngles = new RigidBodyTransform();
    private final FramePose3D chestInPelvis = new FramePose3D();
    private final FramePose3D goalChestFrame = new FramePose3D();
+   private final double[] desiredJointAngles;
+   private final ArmJointName[] armJointNames;
 
    public HandPoseActionExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
    {
       super(new HandPoseActionState(id, rootNode.getState()), rootNode);
 
+      desiredJointAngles = new double[state.getNumberOfJoints()];
+      armJointNames = robotModel.getJointMap().getArmJointNames(definition.getSide());
+
       for (RobotSide side : RobotSide.values)
-      {
          armIKSolvers.put(side, new ArmIKSolver(side, robotModel.getJointMap(), syncedRobot.getFullRobotModel()));
-      }
 
       FramePose3D chestAfterJointToPelvis = new FramePose3D();
       chestAfterJointToPelvis.setToZero(syncedRobot.getReferenceFrames().getChestFrame());
@@ -124,20 +128,21 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
          state.setCanExecute(state.getPalmFrame().isChildOfWorld());
 
          if (state.getPalmFrame().isChildOfWorld() && state.getIsNextForExecution())
-         {
-            ArmIKSolver armIKSolver = armIKSolvers.get(definition.getSide());
-            armIKSolver.copySourceToWork();
-            armIKSolver.update(state.getGoalChestFrame(), state.getPalmFrame().getReferenceFrame());
-            armIKSolver.solve();
-
-            // Send the solution back to the UI so the user knows what's gonna happen with the arm.
-            state.setSolutionQuality(armIKSolver.getQuality());
-            for (int i = 0; i < armIKSolver.getSolutionOneDoFJoints().length; i++)
-            {
-               state.getPreviewJointAngles().accessValue()[i] = armIKSolver.getSolutionOneDoFJoints()[i].getQ();
-            }
-         }
+            solveIK();
       }
+   }
+
+   private void solveIK()
+   {
+      ArmIKSolver armIKSolver = armIKSolvers.get(definition.getSide());
+      armIKSolver.copySourceToWork();
+      armIKSolver.update(state.getGoalChestFrame(), state.getPalmFrame().getReferenceFrame());
+      armIKSolver.solve();
+
+      // Send the solution back to the UI so the user knows what's gonna happen with the arm.
+      state.setSolutionQuality(armIKSolver.getQuality());
+      for (int i = 0; i < armIKSolver.getSolutionOneDoFJoints().length; i++)
+         state.getPreviewJointAngles().accessValue()[i] = armIKSolver.getSolutionOneDoFJoints()[i].getQ();
    }
 
    @Override
@@ -155,6 +160,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
       }
       else if (state.getPalmFrame().isChildOfWorld())
       {
+         solveIK();
          JointspaceTrajectoryMessage jointspaceTrajectoryMessage = buildJointspaceTrajectoryMessage();
 
          if (definition.getJointspaceOnly())
@@ -236,7 +242,25 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
 
       if (definition.getUsePredefinedJointAngles())
       {
-         state.setIsExecuting(!trackingCalculator.getTimeIsUp());
+         trackingCalculator.resetJointspaceError();
+
+         for (int i = 0; i < desiredJointAngles.length; i++)
+         {
+            double desired = desiredJointAngles[i];
+            double current = syncedRobot.getFullRobotModel().getArmJoint(definition.getSide(), armJointNames[i]).getQ();
+            trackingCalculator.addJointData(desired, current);
+         }
+         trackingCalculator.factorInJointspaceErrors(definition.getPositionErrorTolerance());
+
+         if (trackingCalculator.getTimeIsUp())
+         {
+            state.setIsExecuting(false);
+            if (!trackingCalculator.isWithinPositionTolerance())
+            {
+               state.getLogger().error("Total jointspace error: %.3f deg".formatted(Math.toDegrees(trackingCalculator.getTotalAbsoluteJointspaceError())));
+               state.setFailed(true);
+            }
+         }
       }
       else if (state.getPalmFrame().isChildOfWorld())
       {
@@ -278,16 +302,14 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
       JointspaceTrajectoryMessage jointspaceTrajectoryMessage = new JointspaceTrajectoryMessage();
       jointspaceTrajectoryMessage.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
 
-      double[] jointAngles = new double[state.getNumberOfJoints()];
-
       if (definition.getUsePredefinedJointAngles())
-         for (int i = 0; i < jointAngles.length; i++)
-            jointAngles[i] = definition.getJointAngles().getValueReadOnly(i);
+         for (int i = 0; i < desiredJointAngles.length; i++)
+            desiredJointAngles[i] = definition.getJointAngles().getValueReadOnly(i);
       else
-         for (int i = 0; i < jointAngles.length; i++)
-            jointAngles[i] = armIKSolvers.get(definition.getSide()).getSolutionOneDoFJoints()[i].getQ();
+         for (int i = 0; i < desiredJointAngles.length; i++)
+            desiredJointAngles[i] = armIKSolvers.get(definition.getSide()).getSolutionOneDoFJoints()[i].getQ();
 
-      for (double q : jointAngles)
+      for (double q : desiredJointAngles)
       {
          OneDoFJointTrajectoryMessage oneDoFJointTrajectoryMessage = jointspaceTrajectoryMessage.getJointTrajectoryMessages().add();
          oneDoFJointTrajectoryMessage.setWeight(definition.getJointspaceWeight());

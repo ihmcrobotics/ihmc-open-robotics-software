@@ -15,7 +15,7 @@ public class SceneActionNodeStateMessagePubSubType implements us.ihmc.pubsub.Top
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "f36af77a0dc5e60d5b44b586e2d2708724482ca5d7ce4bb13644252c151369ec";
+   		return "062a957c4f15430900248b69de1337845c11907789f2530c508f0fa871d352e1";
    }
    
    @Override

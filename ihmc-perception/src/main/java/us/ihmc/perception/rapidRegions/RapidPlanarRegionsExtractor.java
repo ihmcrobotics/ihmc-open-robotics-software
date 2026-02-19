@@ -21,8 +21,7 @@ import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
 import us.ihmc.perception.cuda.CUDAStreamManager;
 import us.ihmc.perception.cuda.CUDATools;
-import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
+import us.ihmc.perception.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 
 import java.net.URL;

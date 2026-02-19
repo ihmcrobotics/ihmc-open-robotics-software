@@ -9,7 +9,6 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
-import perception_msgs.msg.dds.REAStateRequestMessage;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.ui.UIAuxiliaryRobotData;
@@ -17,7 +16,6 @@ import us.ihmc.javaFXToolkit.JavaFXTools;
 import us.ihmc.messager.javafx.JavaFXMessager;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
-import us.ihmc.ros2.ROS2Publisher;
 
 public class RobotOperationTabController
 {
@@ -34,8 +32,6 @@ public class RobotOperationTabController
    @FXML private CheckBox enableSupportRegions;
    @FXML private Spinner<Double> supportRegionScale;
    @FXML private HBox robotOperationHBox;
-
-   private ROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher;
 
    private final RobotIKUI robotIKUI = new RobotIKUI();
 
@@ -135,14 +131,6 @@ public class RobotOperationTabController
       messager.submitMessage(FootstepPlannerMessagerAPI.BipedalSupportRegionsParameters, supportPlanarRegionParametersMessage);
    }
 
-   @FXML
-   public void clearREA()
-   {
-      REAStateRequestMessage clearMessage = new REAStateRequestMessage();
-      clearMessage.setRequestClear(true);
-      reaStateRequestPublisher.publish(clearMessage);
-   }
-
    public void attachMessager(JavaFXMessager messager)
    {
       this.messager = messager;
@@ -153,11 +141,6 @@ public class RobotOperationTabController
    {
       this.robotLowLevelMessenger = robotLowLevelMessenger;
       updateButtons();
-   }
-
-   public void setREAStateRequestPublisher(ROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher)
-   {
-      this.reaStateRequestPublisher = reaStateRequestPublisher;
    }
 
    public void setAuxiliaryRobotData(UIAuxiliaryRobotData auxiliaryRobotData)

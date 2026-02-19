@@ -10,9 +10,6 @@ import us.ihmc.behaviors.behaviorTree.control.buildingExploration.*;
 import us.ihmc.behaviors.behaviorTree.control.door.*;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneExecutor;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
-import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.perception.detections.yolo.YOLOTerrainMapIntegrator;
-import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
@@ -48,7 +45,7 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
       REGISTRY.put(FootPoseActionDefinition.class, FootPoseActionExecutor::new);
    }
 
-   private CRDTInfo crdtInfo;
+   private BehaviorTreeExecutor tree;
    private WorkspaceResourceDirectory saveFileDirectory;
    private ROS2ControllerHelper ros2ControllerHelper;
    private ROS2SyncedRobotModel syncedRobot;
@@ -56,7 +53,7 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
    private SideDependentList<AbilityHandActionComms> abilityHandComms;
    private BehaviorTreeSceneExecutor scene;
 
-   public void initialize(CRDTInfo crdtInfo,
+   public void initialize(BehaviorTreeExecutor tree,
                           WorkspaceResourceDirectory saveFileDirectory,
                           ROS2ControllerHelper ros2ControllerHelper,
                           ROS2SyncedRobotModel syncedRobot,
@@ -64,7 +61,7 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
                           SideDependentList<AbilityHandActionComms> abilityHandComms,
                           BehaviorTreeSceneExecutor scene)
    {
-      this.crdtInfo = crdtInfo;
+      this.tree = tree;
       this.saveFileDirectory = saveFileDirectory;
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
@@ -77,7 +74,7 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
    public BehaviorTreeRootNodeExecutor createRootNode(long id)
    {
       return new BehaviorTreeRootNodeExecutor(id,
-                                              crdtInfo,
+                                              tree,
                                               saveFileDirectory,
                                               ros2ControllerHelper,
                                               syncedRobot,
