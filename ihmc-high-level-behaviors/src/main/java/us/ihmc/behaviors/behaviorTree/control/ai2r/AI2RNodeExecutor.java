@@ -293,7 +293,6 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
 
    private void executeBehaviorLogic()
    {
-      boolean trackingObjectsInProgress = false;
       leavesLoop:
       for (var leaf : actionSequence.getOrderedLeaves())
       {
@@ -308,34 +307,12 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
             }
          }
 
-         // Check if we are executing Receive or pick up  object action
-         if (leaf.getParent().getDefinition().getName().contains("ReceiveObject") || leaf.getParent().getDefinition().getName().contains("PickUpObject"))
-         {
-            trackingObjectsInProgress |= leaf.getIsExecuting();
-            if (leaf.getDefinition().getName().contains("Grasp") && leaf.getIsExecuting())
-            {
-               String objectGrasped = skillEditor.getObjectGrasped();
-               RobotSide graspSide = skillEditor.getGraspSide();
-               statusMessage.setObjectGrasped(objectGrasped);
-               statusMessage.setGraspSide(graspSide.toByte());
-               MovingReferenceFrame handControlFrame = syncedRobot.getFullRobotModel().getHandControlFrame(graspSide);
-               RigidBodyTransform objectPoseInHandFrame = scene.getObject(objectGrasped).getReferenceFrame().getTransformToDesiredFrame(handControlFrame);
-               statusMessage.getTransformGraspedObjectHand().set(objectPoseInHandFrame);
-            }
-         }
-
          if (leaf.getParent().getDefinition().getName().contains("Place"))
          {
             if (leaf.getDefinition().getName().contains("Release") && leaf.getIsExecuting())
             {
                statusMessage.setObjectGrasped("");
             }
-         }
-
-         // Check if we are executing Scan action and active/de-active foundationPose tracking
-         if (leaf.getDefinition().getName().contains("SCANNING") && leaf instanceof WaitDurationActionState waitActionState)
-         {
-            trackingObjectsInProgress |= waitActionState.getIsExecuting();
          }
 
          // Check if Goto action is executing and if next steps are colliding with objects in the scene

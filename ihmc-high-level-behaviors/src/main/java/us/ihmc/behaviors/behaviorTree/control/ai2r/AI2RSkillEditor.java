@@ -2,18 +2,21 @@ package us.ihmc.behaviors.behaviorTree.control.ai2r;
 
 import behavior_msgs.msg.dds.AI2RCommandMessage;
 import behavior_msgs.msg.dds.AI2RNavigationMessage;
-import behavior_msgs.msg.dds.AI2RPickUpObjectMessage;
 import behavior_msgs.msg.dds.AI2RReceiveObjectMessage;
+import behavior_msgs.msg.dds.AI2RScanMessage;
+import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionNodeState;
 import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeState;
 import us.ihmc.behaviors.behaviorTree.action.actions.FootstepPlanActionDefinition;
 import us.ihmc.behaviors.behaviorTree.action.actions.FootstepPlanActionFootstepState;
 import us.ihmc.behaviors.behaviorTree.action.actions.FootstepPlanActionState;
-import us.ihmc.behaviors.behaviorTree.action.actions.HandPoseActionState;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * AI2RSkillEditor is responsible for adapting and updating skill behaviors in the AI2R framework.
@@ -60,10 +63,41 @@ public class AI2RSkillEditor
    public void adaptSkills(String behaviorToExecuteName, AI2RNodeState state, AI2RCommandMessage message, int commandedBehaviorIndex)
    {
       this.commandedBehaviorIndex = commandedBehaviorIndex;
+      updateScan(behaviorToExecuteName, state, message);
       updateGoTo(behaviorToExecuteName, state, message);
       updateReceiveObject(behaviorToExecuteName, state, message);
-      updatePickUpObject(behaviorToExecuteName, state, message);
-//      updatePickAndPlace(behaviorToExecuteName, state, message);
+   }
+
+   private void updateScan(String behaviorToExecuteName, AI2RNodeState state, AI2RCommandMessage message)
+   {
+      if (behaviorToExecuteName.contains("SCAN") && message.getAdaptingBehavior())
+      {
+         AI2RScanMessage scanMessage = message.getScan();
+         var objectsToScan = scanMessage.getObjectNames();
+
+         List<SceneActionNodeState> setupActions = new ArrayList<>();
+         for (var leaf : state.getActionSequence().getOrderedLeaves())
+         {
+            if (leaf instanceof SceneActionNodeState sceneActionState
+                && leaf.getDefinition().getName().toLowerCase().contains("setup object"))
+            {
+               setupActions.add(sceneActionState);
+            }
+         }
+
+         for (int i = 0; i < objectsToScan.size(); i++)
+         {
+            String objectName = objectsToScan.get(i).toString();
+
+            SceneActionNodeState targetState;
+            if (i < setupActions.size())
+            {
+               targetState = setupActions.get(i);
+               if (targetState.getDefinition().getName().contains(""+i+1))
+                  targetState.getDefinition().getSceneObjectDefinition().setYoloClassName(objectName);
+            }
+         }
+      }
    }
 
    private void updateGoTo(String behaviorToExecuteName, AI2RNodeState state, AI2RCommandMessage message)
@@ -179,29 +213,6 @@ public class AI2RSkillEditor
                {
                   conditionNodeState.getDefinition().getProximityCheck().setFrameNameA(objectGrasped);
                   conditionNodeState.getDefinition().getProximityCheck().setFrameNameB(RobotSide.fromByte(receiveMessage.getSide()) == RobotSide.LEFT ? "leftHandZUp" : "rightHandZUp");
-               }
-            }
-         }
-      }
-   }
-
-   private void updatePickUpObject(String behaviorToExecuteName, AI2RNodeState state, AI2RCommandMessage message)
-   {
-      if (behaviorToExecuteName.contains("PICK") && message.getAdaptingBehavior())
-      {
-         AI2RPickUpObjectMessage pickUpMessage = message.getPickupObject();
-         String targetObject = pickUpMessage.getObjectNameAsString();
-         if (!targetObject.isEmpty())
-         {
-            objectGrasped = targetObject;
-         }
-         for (var leaf : state.getActionSequence().getOrderedLeaves())
-         {
-            if (leaf instanceof HandPoseActionState handPoseActionStateNodeState)
-            {
-               if (handPoseActionStateNodeState.getDefinition().getName().contains("Grasp"))
-               {
-                  handPoseActionStateNodeState.getDefinition().setPalmParentFrameName(targetObject);
                }
             }
          }
