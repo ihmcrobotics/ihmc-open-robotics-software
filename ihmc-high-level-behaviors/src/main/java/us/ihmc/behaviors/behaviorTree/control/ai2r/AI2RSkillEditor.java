@@ -87,7 +87,7 @@ public class AI2RSkillEditor
 
          for (int i = 0; i < objectsToScan.size(); i++)
          {
-            String objectName = objectsToScan.get(i).toString();
+            String objectName = objectsToScan.getString(i);
 
             SceneActionNodeState targetState;
             if (i < setupActions.size())
