@@ -1,8 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
 import controller_msgs.msg.dds.ContinuousStepGeneratorStatusMessage;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ContinuousStepGeneratorInputCommand;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ContinuousStepGeneratorParametersCommand;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
@@ -16,10 +14,10 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
-public class StandingPushRecoveryAPIDefinition
+public class MultiContactGaitGenerator
 {
-   private static final List<Class<? extends Command<?, ?>>> pushRecoverySupportedCommands;
-   private static final List<Class<? extends Settable<?>>> pushRecoverySupportedStatusMessages;
+   private static final List<Class<? extends Command<?, ?>>> supportedCommands;
+   private static final List<Class<? extends Settable<?>>> supportedStatusMessages;
    private static final HashSet<Class<?>> inputMessageClasses = new HashSet<>();
    private static final HashSet<Class<?>> outputMessageClasses = new HashSet<>();
 
@@ -30,19 +28,19 @@ public class StandingPushRecoveryAPIDefinition
       commands.add(PlanarRegionsListCommand.class);
       commands.add(HeightMapCommand.class);
 
-      pushRecoverySupportedCommands = Collections.unmodifiableList(commands);
-      pushRecoverySupportedCommands.forEach(command -> inputMessageClasses.add(ROS2TopicNameTools.newMessageInstance(command).getMessageClass()));
+      supportedCommands = Collections.unmodifiableList(commands);
+      supportedCommands.forEach(command -> inputMessageClasses.add(ROS2TopicNameTools.newMessageInstance(command).getMessageClass()));
 
       List<Class<? extends Settable<?>>> statusMessages = new ArrayList<>();
       statusMessages.add(ContinuousStepGeneratorStatusMessage.class);
 
-      pushRecoverySupportedStatusMessages = Collections.unmodifiableList(statusMessages);
-      outputMessageClasses.addAll(pushRecoverySupportedStatusMessages);
+      supportedStatusMessages = Collections.unmodifiableList(statusMessages);
+      outputMessageClasses.addAll(supportedStatusMessages);
    }
 
-   public static List<Class<? extends Command<?, ?>>> getPushRecoverySupportedCommands()
+   public static List<Class<? extends Command<?, ?>>> getSupportedCommands()
    {
-      return pushRecoverySupportedCommands;
+      return supportedCommands;
    }
 
    public static HashSet<Class<?>> getROS2CommandMessageTypes()
@@ -55,9 +53,9 @@ public class StandingPushRecoveryAPIDefinition
       return outputMessageClasses;
    }
 
-   public static List<Class<? extends Settable<?>>> getPushRecoverySupportedStatusMessages()
+   public static List<Class<? extends Settable<?>>> getSupportedStatusMessages()
    {
-      return pushRecoverySupportedStatusMessages;
+      return supportedStatusMessages;
    }
 
    public static ROS2Topic<?> getInputTopic(String robotName)
