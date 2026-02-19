@@ -246,13 +246,6 @@ jobs:
     with:
       subproject: 'ihmc-whole-body-controller'
       test-category: 'fast'
-  robot-environment-awareness:
-    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
-    secrets:
-      ROSIE_PERSONAL_ACCESS_TOKEN: ${{ secrets.ROSIE_PERSONAL_ACCESS_TOKEN }}
-    with:
-      subproject: 'robot-environment-awareness'
-      test-category: 'fast'
   simulation-construction-set-tools:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     secrets:

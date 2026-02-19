@@ -22,7 +22,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.geometry.PlanarLandmark;
 import us.ihmc.perception.geometry.PlanarLandmarkList;
 import us.ihmc.perception.mapping.PlanarRegionMappingParameters;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.RotationTools;

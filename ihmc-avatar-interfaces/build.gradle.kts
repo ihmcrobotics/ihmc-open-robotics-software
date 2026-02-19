@@ -25,7 +25,6 @@ mainDependencies {
    api("us.ihmc:ihmc-footstep-planning:source")
    api("us.ihmc:ihmc-manipulation-planning:source")
    api("us.ihmc:ihmc-simulation-toolkit:source")
-   api("us.ihmc:robot-environment-awareness-visualizers:source")
 
    api("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:2.2.3") // for CSG plugin
 }
@@ -43,7 +42,6 @@ testDependencies {
 visualizersDependencies {
    api(ihmc.sourceSetProject("main"))
 
-   api("us.ihmc:robot-environment-awareness-application:source")
    api("us.ihmc:ihmc-path-planning-visualizers:source")
    api("us.ihmc:ihmc-footstep-planning-visualizers:source")
 }
