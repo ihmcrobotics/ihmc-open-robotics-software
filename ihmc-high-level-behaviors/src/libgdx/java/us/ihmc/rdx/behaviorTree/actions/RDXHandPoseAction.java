@@ -447,7 +447,6 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
          jointspaceWeightWidget.renderImGuiWidget();
          ImGui.pushItemWidth(ImGui.getFontSize() * 10.0f);
          positionErrorToleranceInput.renderImGuiWidget();
-         orientationErrorToleranceDegreesInput.renderImGuiWidget();
          ImGui.popItemWidth();
       }
       else
@@ -467,8 +466,10 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
          if (definition.getJointspaceOnly())
             ImGui.endDisabled();
          jointspaceWeightWidget.renderImGuiWidget();
+         ImGui.pushItemWidth(ImGui.getFontSize() * 10.0f);
          positionErrorToleranceInput.renderImGuiWidget();
          orientationErrorToleranceDegreesInput.renderImGuiWidget();
+         ImGui.popItemWidth();
          ImGui.text("IK Solution Quality: %.2f".formatted(state.getSolutionQuality()));
          ImGui.sameLine();
          if (ImGui.button(labels.get("Set Pose to Synced Hand")))
