@@ -1,18 +1,11 @@
 package us.ihmc.behaviors.behaviorTree.ros2;
 
-import behavior_msgs.msg.dds.ActionNodeStateMessage;
-import behavior_msgs.msg.dds.BehaviorTreeRootNodeStateMessage;
-import behavior_msgs.msg.dds.BehaviorTreeStateMessage;
-import behavior_msgs.msg.dds.HandPoseActionStateMessage;
-import behavior_msgs.msg.dds.LeafNodeStateMessage;
-import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
+import behavior_msgs.msg.dds.BehaviorTreeYoDataMessage;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.AutonomyAPI;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -26,21 +19,14 @@ import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoLong;
 
 /**
- * Enabled logging behavior data synchronized with control data.
- *
- * TODO:
- *   hand pose desired, current
+ * Injects behavior tree data into YoVariables so it can be logged.
  */
 public class ROS2BehaviorTreeYoRegistry
 {
    private final FullHumanoidRobotModel fullRobotModel;
    private final YoRegistry registry = new YoRegistry("BehaviorTreeExecutor");
    private final Notification notification = new Notification();
-   private final SwapReference<BehaviorTreeStateMessage> subscription;
-
-   private final ROS2BehaviorTreeSubscriptionNode subscriptionRootNode = new ROS2BehaviorTreeSubscriptionNode();
-   private int depthFirstIndex = 0;
-   private int executingActionIndex = 0;
+   private final SwapReference<BehaviorTreeYoDataMessage> subscription;
 
    private final YoLong messagesReceived = new YoLong("messagesReceived", registry);
    private final YoInteger persistentDetections = new YoInteger("persistentDetections", registry);
@@ -51,11 +37,9 @@ public class ROS2BehaviorTreeYoRegistry
    private final YoBoolean concurrencyEnabled = new YoBoolean("concurrencyEnabled", registry);
    private final YoInteger executingActions = new YoInteger("executingActions", registry);
    private final YoInteger failedActions = new YoInteger("failedActions", registry);
-   private final YoLong actionStatesReceived = new YoLong("actionStatesReceived", registry);
    private final YoInteger[] executingActionTypes = new YoInteger[5];
    private final YoInteger[] executingActionIDs = new YoInteger[5];
    private final YoDouble[] elapsedExecutionTimes = new YoDouble[5];
-   private final SideDependentList<YoLong> handActionStatesReceived = new SideDependentList<>();
    private final RigidBodyTransform transform = new RigidBodyTransform();
    private final YoPose3D estimatorChestPose;
    private final SideDependentList<YoPose3D> estimatorHandPoses = new SideDependentList<>();
@@ -66,7 +50,7 @@ public class ROS2BehaviorTreeYoRegistry
    {
       this.fullRobotModel = fullRobotModel;
 
-      subscription = ROS2Tools.createSwapReferenceSubscription(ros2Node, AutonomyAPI.BEHAVIOR_TREE.getStatusTopic(), notification);
+      subscription = ROS2Tools.createSwapReferenceSubscription(ros2Node, AutonomyAPI.BEHAVIOR_YO_DATA, notification);
 
       for (int i = 0; i < sceneObjectPoses.length; i++)
          sceneObjectPoses[i] = new YoPose3D("sceneObject" + i, registry);
@@ -82,7 +66,6 @@ public class ROS2BehaviorTreeYoRegistry
       for (RobotSide side : RobotSide.values)
       {
          estimatorHandPoses.put(side, new YoPose3D("estimatorHandPose" + side.getPascalCaseName(), registry));
-         handActionStatesReceived.put(side, new YoLong("handActionStatesReceived" + side.getPascalCaseName(), registry));
          currentHandPoses.put(side, new YoPose3D("currentHandPose" + side.getPascalCaseName(), registry));
          goalHandPoses.put(side, new YoPose3D("goalHandPose" + side.getPascalCaseName(), registry));
       }
@@ -107,44 +90,32 @@ public class ROS2BehaviorTreeYoRegistry
          {
             synchronized (subscription)
             {
-               BehaviorTreeStateMessage state = subscription.getForThreadTwo();
+               BehaviorTreeYoDataMessage data = subscription.getForThreadTwo();
 
                messagesReceived.increment();
-               persistentDetections.set(state.getScene().getPersistentDetections().size());
-               sceneObjects.set(state.getScene().getObjects().size());
+               persistentDetections.set(data.getNumberOfPersistentDetections());
+               sceneObjects.set(data.getNumberOfSceneObjects());
 
                for (int i = 0; i < sceneObjectPoses.length; i++)
-               {
-                  if (i < state.getScene().getObjects().size())
-                  {
-                     MessageTools.toEuclid(state.getScene().getObjects().get(i).getTransformToWorld(), transform);
-                     sceneObjectPoses[i].set(transform);
-                  }
-                  else
-                     sceneObjectPoses[i].setToNaN();
-               }
+                  sceneObjectPoses[i].set(data.getSceneObjectPose()[i]);
 
-               subscriptionRootNode.clear();
-               depthFirstIndex = 0;
-               executingActionIndex = 0;
-               executingActions.set(0);
+               automaticExecution.set(data.getAutomaticExecution());
+               executionNextIndex.set(data.getExecutionNextIndex());
+               concurrencyEnabled.set(data.getConcurrencyEnabled());
+               executingActions.set(data.getNumberOfExecutingActions());
+               failedActions.set(data.getNumberOfFailedActions());
+
                for (int i = 0; i < executingActionTypes.length; i++)
                {
-                  executingActionTypes[i].set(-1);
-                  executingActionIDs[i].set(-1);
-                  elapsedExecutionTimes[i].set(Double.NaN);
+                  executingActionTypes[i].set(data.getExecutingActionType()[i]);
+                  executingActionIDs[i].set(data.getExecutingActionId()[i]);
+                  elapsedExecutionTimes[i].set(data.getElapsedExecutionTime()[i]);
                }
+
                for (RobotSide side : RobotSide.values)
                {
-                  currentHandPoses.get(side).setToNaN();
-                  goalHandPoses.get(side).setToNaN();
-               }
-               failedActions.set(0);
-
-               if (!state.getBehaviorTreeTypes().isEmpty())
-               {
-                  buildSubscriptionTree(state, subscriptionRootNode);
-                  processNode(subscriptionRootNode);
+                  currentHandPoses.get(side).set(data.getCurrentHandPose()[side.ordinal()]);
+                  goalHandPoses.get(side).set(data.getGoalHandPose()[side.ordinal()]);
                }
             }
          }
@@ -152,83 +123,6 @@ public class ROS2BehaviorTreeYoRegistry
       catch (Throwable t)
       {
          t.printStackTrace();
-      }
-   }
-
-   private void processNode(ROS2BehaviorTreeSubscriptionNode node)
-   {
-      BehaviorTreeRootNodeStateMessage rootState = node.getBehaviorTreeRootNodeStateMessage();
-      if (rootState != null)
-      {
-         automaticExecution.set(rootState.getAutomaticExecution());
-         concurrencyEnabled.set(rootState.getConcurrencyEnabled());
-         executionNextIndex.set(rootState.getExecutionNextIndex());
-      }
-
-      LeafNodeStateMessage leafNodeState = node.getLeafNodeStateMessage();
-      if (leafNodeState != null)
-      {
-         if (leafNodeState.getIsExecuting())
-         {
-            executingActions.increment();
-            executingActionTypes[executingActionIndex].set(node.getPackedType());
-            executingActionIDs[executingActionIndex].set((int) node.getBehaviorTreeNodeStateMessage().getId());
-
-            ActionNodeStateMessage actionState = node.getActionNodeStateMessage();
-            if (actionState != null)
-            {
-               actionStatesReceived.increment();
-               elapsedExecutionTimes[executingActionIndex].set(actionState.getElapsedExecutionTime());
-            }
-
-            HandPoseActionStateMessage handPoseState = node.getHandPoseActionStateMessage();
-            if (handPoseState != null)
-            {
-               RobotSide side = RobotSide.fromByte(handPoseState.getDefinition().getRobotSide());
-
-               handActionStatesReceived.get(side).increment();
-               currentHandPoses.get(side).set(handPoseState.getState().getCurrentPose());
-
-               Object<SE3TrajectoryPointMessage> trajectory = handPoseState.getState().getCommandedTrajectory();
-               if (!trajectory.isEmpty())
-               {
-                  SE3TrajectoryPointMessage lastPose = trajectory.get(trajectory.size() - 1);
-                  goalHandPoses.get(side).getPosition().set(lastPose.getPosition());
-                  goalHandPoses.get(side).getOrientation().set(lastPose.getOrientation());
-               }
-            }
-
-            ++executingActionIndex;
-         }
-
-         if (leafNodeState.getFailed())
-         {
-            failedActions.increment();
-         }
-      }
-
-      for (ROS2BehaviorTreeSubscriptionNode child : node.getChildren())
-      {
-         processNode(child);
-      }
-   }
-
-   private void buildSubscriptionTree(BehaviorTreeStateMessage behaviorTreeStateMessage, ROS2BehaviorTreeSubscriptionNode subscriptionNode)
-   {
-      subscriptionNode.setSequenceId(behaviorTreeStateMessage.getSequenceId());
-      subscriptionNode.setPackedType(behaviorTreeStateMessage.getBehaviorTreeTypes().get(depthFirstIndex));
-
-      ROS2BehaviorTreeMessageTools.packSubscriptionNode(behaviorTreeStateMessage.getBehaviorTreeTypes().get(depthFirstIndex),
-                                                        (int) behaviorTreeStateMessage.getBehaviorTreeIndices().get(depthFirstIndex),
-                                                        behaviorTreeStateMessage,
-                                                        subscriptionNode);
-
-      for (int i = 0; i < subscriptionNode.getBehaviorTreeNodeDefinitionMessage().getNumberOfChildren(); i++)
-      {
-         ++depthFirstIndex;
-         ROS2BehaviorTreeSubscriptionNode subscriptionTreeChildNode = new ROS2BehaviorTreeSubscriptionNode();
-         buildSubscriptionTree(behaviorTreeStateMessage, subscriptionTreeChildNode);
-         subscriptionNode.getChildren().add(subscriptionTreeChildNode);
       }
    }
 
