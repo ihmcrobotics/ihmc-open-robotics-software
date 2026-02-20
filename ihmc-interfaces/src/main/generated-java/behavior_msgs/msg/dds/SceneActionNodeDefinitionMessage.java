@@ -51,6 +51,10 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
             */
    public float outlier_threshold_;
    /**
+            * Whether to replace an existing scene object of the same class when setting up a new one
+            */
+   public boolean replace_object_;
+   /**
             * YOLO models that should be enabled at this point
             */
    public us.ihmc.idl.IDLSequence.StringBuilderHolder  enabled_yolo_models_;
@@ -101,6 +105,8 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
       segmentation_mask_erosion_radius_ = other.segmentation_mask_erosion_radius_;
 
       outlier_threshold_ = other.outlier_threshold_;
+
+      replace_object_ = other.replace_object_;
 
       enabled_yolo_models_.set(other.enabled_yolo_models_);
       ignored_yolo_class_indices_.set(other.ignored_yolo_class_indices_);
@@ -232,6 +238,21 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
       return outlier_threshold_;
    }
 
+   /**
+            * Whether to replace an existing scene object of the same class when setting up a new one
+            */
+   public void setReplaceObject(boolean replace_object)
+   {
+      replace_object_ = replace_object;
+   }
+   /**
+            * Whether to replace an existing scene object of the same class when setting up a new one
+            */
+   public boolean getReplaceObject()
+   {
+      return replace_object_;
+   }
+
 
    /**
             * YOLO models that should be enabled at this point
@@ -308,6 +329,8 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.outlier_threshold_, other.outlier_threshold_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.replace_object_, other.replace_object_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilderSequence(this.enabled_yolo_models_, other.enabled_yolo_models_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.ignored_yolo_class_indices_, other.ignored_yolo_class_indices_, epsilon)) return false;
@@ -345,6 +368,8 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
 
       if(this.outlier_threshold_ != otherMyClass.outlier_threshold_) return false;
 
+      if(this.replace_object_ != otherMyClass.replace_object_) return false;
+
       if (!this.enabled_yolo_models_.equals(otherMyClass.enabled_yolo_models_)) return false;
       if (!this.ignored_yolo_class_indices_.equals(otherMyClass.ignored_yolo_class_indices_)) return false;
       if(this.foundation_pose_object_type_ != otherMyClass.foundation_pose_object_type_) return false;
@@ -378,6 +403,8 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
       builder.append(this.segmentation_mask_erosion_radius_);      builder.append(", ");
       builder.append("outlier_threshold=");
       builder.append(this.outlier_threshold_);      builder.append(", ");
+      builder.append("replace_object=");
+      builder.append(this.replace_object_);      builder.append(", ");
       builder.append("enabled_yolo_models=");
       builder.append(this.enabled_yolo_models_);      builder.append(", ");
       builder.append("ignored_yolo_class_indices=");

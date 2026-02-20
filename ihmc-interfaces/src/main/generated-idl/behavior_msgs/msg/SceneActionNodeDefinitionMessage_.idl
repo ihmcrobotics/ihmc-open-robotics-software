@@ -62,6 +62,10 @@ module behavior_msgs
          */
         float outlier_threshold;
         /**
+         * Whether to replace an existing scene object of the same class when setting up a new one
+         */
+        boolean replace_object;
+        /**
          * YOLO models that should be enabled at this point
          */
         sequence<string, 10> enabled_yolo_models;

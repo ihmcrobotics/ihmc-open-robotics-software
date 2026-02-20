@@ -15,7 +15,7 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "15a0d545152464d21af39667d27079b7c62dbc4d93f580859970bc289a742a37";
+   		return "04eb4669ac2daef8c8e30b7cdf3c59b31859251332ae88a9a1969c52f4714fab";
    }
    
    @Override
@@ -70,6 +70,8 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 10; ++i0)
       {
         current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
@@ -118,6 +120,9 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getEnabledYoloModels().size(); ++i0)
       {
@@ -156,6 +161,8 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
 
       cdr.write_type_5(data.getOutlierThreshold());
 
+      cdr.write_type_7(data.getReplaceObject());
+
       if(data.getEnabledYoloModels().size() <= 10)
       cdr.write_type_e(data.getEnabledYoloModels());else
           throw new RuntimeException("enabled_yolo_models field exceeds the maximum length: %d > %d".formatted(data.getEnabledYoloModels().size(), 10));
@@ -190,6 +197,8 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
       	
       data.setOutlierThreshold(cdr.read_type_5());
       	
+      data.setReplaceObject(cdr.read_type_7());
+      	
       cdr.read_type_e(data.getEnabledYoloModels());	
       cdr.read_type_e(data.getIgnoredYoloClassIndices());	
       data.setFoundationPoseObjectType(cdr.read_type_9());
@@ -212,6 +221,7 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
       ser.write_type_5("yolo_mask_threshold", data.getYoloMaskThreshold());
       ser.write_type_3("segmentation_mask_erosion_radius", data.getSegmentationMaskErosionRadius());
       ser.write_type_5("outlier_threshold", data.getOutlierThreshold());
+      ser.write_type_7("replace_object", data.getReplaceObject());
       ser.write_type_e("enabled_yolo_models", data.getEnabledYoloModels());
       ser.write_type_e("ignored_yolo_class_indices", data.getIgnoredYoloClassIndices());
       ser.write_type_9("foundation_pose_object_type", data.getFoundationPoseObjectType());
@@ -232,6 +242,7 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
       data.setYoloMaskThreshold(ser.read_type_5("yolo_mask_threshold"));
       data.setSegmentationMaskErosionRadius(ser.read_type_3("segmentation_mask_erosion_radius"));
       data.setOutlierThreshold(ser.read_type_5("outlier_threshold"));
+      data.setReplaceObject(ser.read_type_7("replace_object"));
       ser.read_type_e("enabled_yolo_models", data.getEnabledYoloModels());
       ser.read_type_e("ignored_yolo_class_indices", data.getIgnoredYoloClassIndices());
       data.setFoundationPoseObjectType(ser.read_type_9("foundation_pose_object_type"));

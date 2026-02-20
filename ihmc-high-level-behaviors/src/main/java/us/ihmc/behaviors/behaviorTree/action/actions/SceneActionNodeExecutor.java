@@ -425,7 +425,7 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
          }
       }
 
-      if (targetSceneObject != null)
+      if (targetSceneObject != null && definition.getReplaceObject())
       {
          state.getLogger().info("Updating existing scene object for type: {}", definition.getSceneObjectDefinition().getName());
          targetSceneObject.unfreeze();

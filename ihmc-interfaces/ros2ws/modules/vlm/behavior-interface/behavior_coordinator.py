@@ -27,6 +27,7 @@ from behavior_msgs.msg import (
     AI2RStatusMessage,
     AI2RNavigationMessage,
     AI2RReceiveObjectMessage,
+    AI2RScanMessage
 )
 
 from vlm_interface import VLMInterface
@@ -352,6 +353,7 @@ class BehaviorCoordinator(Node):
     def _build_scan(self, cmd, description, msg):
         # SCAN has no extra message parameters — the robot does a general scene scan.
         # We still call the VLM to log which objects it expects to find.
+        cmd.adapting_behavior = True
         scene_names, _ = parse_scene(msg)
         vlm_input = (
             f"scene_objects: {scene_names}\n"
@@ -359,6 +361,16 @@ class BehaviorCoordinator(Node):
         )
         response = self.vlm_scan.call_model(vlm_input)
         self.get_logger().info(f"SCAN expected targets:\n{response}")
+
+        try:
+            data = parse_json_response(response)
+        except json.JSONDecodeError as e:
+            self.get_logger().error(f"Could not parse SCAN response ({e}).")
+        scanMessage = AI2RScanMessage()
+        data["target_objects"] = ["person",  "charge", "door_panel"]
+        scanMessage.object_names =  data["target_objects"]
+        cmd.scan = scanMessage
+
         return cmd
 
     def _build_goto(self, cmd, description, msg):

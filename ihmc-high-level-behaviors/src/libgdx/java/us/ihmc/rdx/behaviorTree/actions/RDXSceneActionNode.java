@@ -12,6 +12,7 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseObject;
 import us.ihmc.perception.detections.yolo.YOLOv8Tools;
 import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeRootNode;
+import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImFloatWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImIntegerWrapper;
@@ -35,6 +36,7 @@ public class RDXSceneActionNode extends RDXActionNode<SceneActionNodeState, Scen
    private final String[][] availableYOLOClasses;
    private final ImFloatWrapper timeoutWidget;
    private final ImIntegerWrapper minHistorySizeWidget;
+   private final ImBooleanWrapper replaceObjectWrapper;
 
    public RDXSceneActionNode(long id, RDXBehaviorTreeRootNode rootNode)
    {
@@ -77,6 +79,9 @@ public class RDXSceneActionNode extends RDXActionNode<SceneActionNodeState, Scen
       minHistorySizeWidget = new ImIntegerWrapper(definition::getMinimumHistorySize,
                                                   definition::setMinimumHistorySize,
                                                   imInteger -> ImGui.inputInt(labels.get("Minimum History Size"), imInteger));
+      replaceObjectWrapper = new ImBooleanWrapper(definition::getReplaceObject,
+                                                  definition::setReplaceObject,
+                                                  imBoolean -> ImGui.checkbox(labels.get("Replace Object"), imBoolean));
    }
 
    @Override
@@ -132,6 +137,8 @@ public class RDXSceneActionNode extends RDXActionNode<SceneActionNodeState, Scen
       ImGui.pushItemWidth(100.0f);
       timeoutWidget.renderImGuiWidget();
       minHistorySizeWidget.renderImGuiWidget();
+      if (definition.getSceneActionType().getValue() == SceneActionNodeType.SETUP_OBJECT)
+         replaceObjectWrapper.renderImGuiWidget();
       ImGui.popItemWidth();
    }
 

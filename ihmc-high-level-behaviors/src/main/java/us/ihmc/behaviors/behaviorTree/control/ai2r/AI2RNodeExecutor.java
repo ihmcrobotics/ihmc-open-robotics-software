@@ -2,6 +2,7 @@ package us.ihmc.behaviors.behaviorTree.control.ai2r;
 
 import behavior_msgs.msg.dds.AI2RActionFailureMessage;
 import behavior_msgs.msg.dds.AI2RObjectMessage;
+import behavior_msgs.msg.dds.AI2RScanMessage;
 import behavior_msgs.msg.dds.AI2RStatusMessage;
 import controller_msgs.msg.dds.AbortWalkingMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeExecutor;
@@ -28,6 +29,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.idl.IDLSequence.StringBuilderHolder;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.perception.RawImage;
@@ -59,7 +61,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
    private boolean navigationFailureForObstacle = false;
    private String navigationFailureObstacleName;
    private boolean actionFailureMissingFrame = false;
-   private final AI2RSkillEditor skillEditor = new AI2RSkillEditor();
+   private final AI2RSkillEditor skillEditor;
 
    private final RawImagePublisher imagePublisher;
    private final ROS2MutableFrame annotatedImageFrame;
@@ -72,6 +74,8 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
 
       imagePublisher = new RawImagePublisher(ros2ControllerHelper.getROS2Node());
       annotatedImageFrame = new ROS2MutableFrame("vlm_annotated_image_frame", ReferenceFrame.getWorldFrame());
+
+      skillEditor = new AI2RSkillEditor(this, rootNode);
 
       resetStatusMessage();
 
@@ -212,7 +216,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
             for (int i = state.getCheckPoints().size() - 1; i >= 0; i--)
             {
                var checkpoint = state.getCheckPoints().get(i);
-
+               String checkPointName = checkpoint.getDefinition().getName();
                // Check if the checkpoint is before the failed leaf
                if (checkpoint.getLeafIndex() < leaf.getLeafIndex())
                {
