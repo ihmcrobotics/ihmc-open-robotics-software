@@ -14,6 +14,7 @@ import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
 import us.ihmc.behaviors.behaviorTree.action.actions.ChestOrientationActionState;
 import us.ihmc.behaviors.behaviorTree.action.actions.FootstepPlanActionState;
 import us.ihmc.behaviors.behaviorTree.action.actions.HandPoseActionState;
+import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionNodeState;
 import us.ihmc.behaviors.behaviorTree.action.actions.WaitDurationActionState;
 import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeDefinition.ConditionNodeType;
 import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeState;
@@ -85,6 +86,10 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
 
          // Prepare commanded behavior
          String behaviorToExecuteName = message.getBehaviorToExecuteAsString();
+         if (behaviorToExecuteName.toLowerCase().contains("scan"))
+         {
+            publishYOLOAnnotatedImage();
+         }
          int commandedBehaviorIndex = -1;
          for (int i = 0; i < state.getCheckPoints().size(); i++)
          {
@@ -141,6 +146,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
    {
       super.update();
 
+      failedLeaves.clear();
       if (statusThrottler.run())
       {
          statusMessage.getRobotMidFeetUnderPelvisPoseInWorld().set(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame));
@@ -148,10 +154,6 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
          setAvailableBehaviors();
          setFailedBehaviors();
          ros2ControllerHelper.publish(AutonomyAPI.AI2R_STATUS, statusMessage);
-      }
-      if (/*some condition*/ true)
-      {
-         publishYOLOAnnotatedImage();
       }
 
       endSequenceAfterBehaviorExecution();
@@ -216,13 +218,11 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
             for (int i = state.getCheckPoints().size() - 1; i >= 0; i--)
             {
                var checkpoint = state.getCheckPoints().get(i);
-               String checkPointName = checkpoint.getDefinition().getName();
                // Check if the checkpoint is before the failed leaf
                if (checkpoint.getLeafIndex() < leaf.getLeafIndex())
                {
                   // Retrieve the name of the closest previous checkpoint
                   String checkpointName = checkpoint.getDefinition().getName();
-
                   LogTools.info("Leaf failed at index: {}, closest previous checkpoint: {}", leaf.getLeafIndex(), checkpointName);
 
                   statusMessage.setFailedBehavior(checkpointName);
@@ -373,6 +373,24 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
             LogTools.info("Completed behavior: {}", statusMessage.getCompletedBehavior());
             // Jump to end of sequence
             actionSequence.setExecutionNextIndex(state.getCheckPoints().get(state.getCheckPoints().size() - 1).getLeafIndex());
+
+            // TODO do something if scan cannot find all objects, first support list of objects to find in setup object
+            // If SCAN failed to find certain objects, reset failure
+            if (state.getCheckPoints().get(i).getDefinition().getName().contains("SCAN"))
+            {
+               for (var leaf : actionSequence.getOrderedLeaves())
+               {
+                  if (leaf.getFailed() && leaf instanceof SceneActionNodeState)
+                  {
+                     leaf.setFailed(false);
+                  }
+               }
+               failedLeaves.clear();
+               statusMessage.setFailedBehavior("-");
+               statusMessage.getFailure().setActionName("-");
+               statusMessage.getFailure().setActionType("-");
+               statusMessage.getFailure().setCollisionName("-");
+            }
          }
       }
    }

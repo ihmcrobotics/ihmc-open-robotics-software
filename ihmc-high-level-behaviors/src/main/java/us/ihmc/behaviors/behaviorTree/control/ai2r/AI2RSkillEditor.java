@@ -3,11 +3,8 @@ package us.ihmc.behaviors.behaviorTree.control.ai2r;
 import behavior_msgs.msg.dds.AI2RCommandMessage;
 import behavior_msgs.msg.dds.AI2RNavigationMessage;
 import behavior_msgs.msg.dds.AI2RReceiveObjectMessage;
-import behavior_msgs.msg.dds.AI2RScanMessage;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeExecutor;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
-import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionNodeState;
 import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeState;
 import us.ihmc.behaviors.behaviorTree.action.actions.FootstepPlanActionDefinition;
@@ -83,90 +80,51 @@ public class AI2RSkillEditor
 
    private void updateScan(String behaviorToExecuteName, AI2RNodeState state, AI2RCommandMessage message)
    {
-      if (behaviorToExecuteName.contains("SCAN") && message.getAdaptingBehavior())
+      if (!behaviorToExecuteName.contains("SCAN") || !message.getAdaptingBehavior())
+         return;
+
+      StringBuilderHolder objectsToScan = message.getScan().getObjectNames();
+
+      // Collect all existing "Setup object" SceneActions
+      List<SceneActionNodeState> allSetupActions = new ArrayList<>();
+      for (var leaf : state.getActionSequence().getOrderedLeaves())
       {
-         StringBuilderHolder objectsToScan = message.getScan().getObjectNames();
-
-         // Collect all existing "Setup object" SceneActions
-         List<SceneActionNodeState> allSetupActions = new ArrayList<>();
-         for (var leaf : state.getActionSequence().getOrderedLeaves())
+         if (leaf instanceof SceneActionNodeState sceneActionState
+             && leaf.getDefinition().getName().toLowerCase().contains("setup object"))
          {
-            if (leaf instanceof SceneActionNodeState sceneActionState
-                && leaf.getDefinition().getName().toLowerCase().contains("setup object"))
-            {
-               allSetupActions.add(sceneActionState);
-            }
+            allSetupActions.add(sceneActionState);
          }
-         if (allSetupActions.isEmpty())
-            return;
+      }
+      if (allSetupActions.isEmpty())
+         return;
 
-         // Helper to get or create the 3 actions for a given object index
-         for (int i = 0; i < objectsToScan.size(); i++)
+      // For each object i, try to update its left/right/front if they exist
+      for (int i = 0; i < objectsToScan.size(); i++)
+      {
+         String objectName = objectsToScan.getString(i);
+         String idToken = Integer.toString(i + 1); // "1", "2", ...
+
+         SceneActionNodeState left  = null;
+         SceneActionNodeState right = null;
+         SceneActionNodeState front = null;
+
+         for (SceneActionNodeState s : allSetupActions)
          {
-            String objectName = objectsToScan.getString(i);
-            String idToken = Integer.toString(i + 1); // "1", "2", ...
-
-            // Find existing three for this id
-            SceneActionNodeState left = null;
-            SceneActionNodeState right = null;
-            SceneActionNodeState front = null;
-
-            for (SceneActionNodeState s : allSetupActions)
+            String nameLower = s.getDefinition().getName().toLowerCase();
+            if (nameLower.contains("setup object" + idToken))
             {
-               String name = s.getDefinition().getName();
-               if (name.contains("Setup object" + idToken))
-               {
-                  if (name.toLowerCase().contains("left"))
-                     left = s;
-                  else if (name.toLowerCase().contains("right"))
-                     right = s;
-                  else if (name.toLowerCase().contains("front"))
-                     front = s;
-               }
-            }
-
-            // If we only had id==1 initially, for id > 1 we will create clones after the last setup node
-            int insertIndex = allSetupActions.get(allSetupActions.size() - 1).getLeafIndex() + 1;
-
-            if (left == null)
-            {
-               addNode(insertIndex);
-               var newLeaf = state.getActionSequence().getOrderedLeaves().get(insertIndex);
-               if (newLeaf instanceof SceneActionNodeState s)
-               {
+               if (nameLower.contains("left"))
                   left = s;
-                  allSetupActions.add(s);
-               }
-            }
-            if (right == null)
-            {
-               addNode(insertIndex);
-               var newLeaf = state.getActionSequence().getOrderedLeaves().get(insertIndex);
-               if (newLeaf instanceof SceneActionNodeState s)
-               {
+               else if (nameLower.contains("right"))
                   right = s;
-                  allSetupActions.add(s);
-               }
-            }
-            if (front == null)
-            {
-               addNode(insertIndex);
-               var newLeaf = state.getActionSequence().getOrderedLeaves().get(insertIndex);
-               if (newLeaf instanceof SceneActionNodeState s)
-               {
+               else if (nameLower.contains("front"))
                   front = s;
-                  allSetupActions.add(s);
-               }
             }
-
-            // Update YOLO class for all three directions of this object
-            if (left != null)
-               left.getDefinition().getSceneObjectDefinition().setYoloClassName(objectName);
-            if (right != null)
-               right.getDefinition().getSceneObjectDefinition().setYoloClassName(objectName);
-            if (front != null)
-               front.getDefinition().getSceneObjectDefinition().setYoloClassName(objectName);
          }
+
+         if (left  != null) left.getDefinition().getSceneObjectDefinition().setYoloClassName(objectName);
+         if (right != null) right.getDefinition().getSceneObjectDefinition().setYoloClassName(objectName);
+         if (front != null) front.getDefinition().getSceneObjectDefinition().setYoloClassName(objectName);
       }
    }
 
@@ -340,16 +298,6 @@ public class AI2RSkillEditor
 //         }
 //      }
 //   }
-
-   private void addNode(int index)
-   {
-      BehaviorTreeExecutor tree = rootNode.getTree();
-      BehaviorTreeNodeExecutor<?, ?> node = tree.getNodeBuilder().createNode(SceneActionNodeDefinition.class, tree.getAndIncrementNextID(), rootNode);
-      node.getDefinition().modify();
-      LogTools.info("Creating node: {}:{}", node.getDefinition().getName(), node.getState().getID());
-      tree.getTopologyChangeQueue().queueAppendChildModify(parentNode, node);
-      tree.modifyTreeTopology();
-   }
 
    public String getObjectGrasped()
    {
