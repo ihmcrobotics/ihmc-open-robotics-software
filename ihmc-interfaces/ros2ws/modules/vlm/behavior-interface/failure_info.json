@@ -1,0 +1,26 @@
+[
+    {
+        "failed_behavior": "SCAN",
+        "action_name": "Chest right",
+        "action_type": "ChestOrientationActionDefinition",
+        "missing_frame": null,
+        "collision_with": null,
+        "position_error": null
+    },
+    {
+        "failed_behavior": "LOOKING LEFT",
+        "action_name": "Setup object1 - front",
+        "action_type": "-",
+        "missing_frame": null,
+        "collision_with": null,
+        "position_error": null
+    },
+    {
+        "failed_behavior": "LOOKING LEFT",
+        "action_name": "Setup object1 - front",
+        "action_type": "-",
+        "missing_frame": null,
+        "collision_with": null,
+        "position_error": null
+    }
+]

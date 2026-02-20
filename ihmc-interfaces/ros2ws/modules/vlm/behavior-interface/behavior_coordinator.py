@@ -14,6 +14,7 @@ Usage:
 import os
 import re
 import json
+import time
 from pathlib import Path
 from typing import List, Optional
 
@@ -31,7 +32,6 @@ from behavior_msgs.msg import (
 )
 
 from vlm_interface import VLMInterface
-
 CONFIG_DIR = Path(__file__).parent
 
 
@@ -328,8 +328,10 @@ class BehaviorCoordinator(Node):
 
         self.get_logger().info("Calling VLM mission planner...")
         self.vlm_planner.first_log_interaction(vlm_input)
+        t0 = time.perf_counter()
         response = self.vlm_planner.call_model(vlm_input)
-        self.get_logger().info(f"VLM plan:\n{response}")
+        self.get_logger().info(f"VLM mission planner response time: {time.perf_counter() - t0:.2f}s")
+        self.get_logger().info(f"VLM plan ````````:\n{response}")
 
         self.plan_queue = behavior_list_to_planqueue(response)
         if not self.plan_queue:
@@ -359,7 +361,9 @@ class BehaviorCoordinator(Node):
             f"scene_objects: {scene_names}\n"
             f"task_description: {description}"
         )
+        t0 = time.perf_counter()
         response = self.vlm_scan.call_model(vlm_input)
+        self.get_logger().info(f"VLM SCAN response time: {time.perf_counter() - t0:.2f}s")
         self.get_logger().info(f"SCAN expected targets:\n{response}")
 
         try:
@@ -383,7 +387,9 @@ class BehaviorCoordinator(Node):
             f"scene_objects: {scene_names}\n"
             f"task_description: {description}"
         )
+        t0 = time.perf_counter()
         response = self.vlm_goto.call_model(vlm_input)
+        self.get_logger().info(f"VLM GOTO response time: {time.perf_counter() - t0:.2f}s")
         self.get_logger().info(f"GOTO params:\n{response}")
 
         try:
@@ -431,7 +437,9 @@ class BehaviorCoordinator(Node):
             f"scene_objects: {scene_names}\n"
             f"task_description: {description}"
         )
+        t0 = time.perf_counter()
         response = self.vlm_receive.call_model(vlm_input)
+        self.get_logger().info(f"VLM RECEIVE OBJECT response time: {time.perf_counter() - t0:.2f}s")
         self.get_logger().info(f"RECEIVE OBJECT params:\n{response}")
 
         try:

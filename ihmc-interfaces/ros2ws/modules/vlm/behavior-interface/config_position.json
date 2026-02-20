@@ -1,5 +1,5 @@
 {
-    "description": "Parameter extractor for SCAN: identifies all objects the robot must find during scene scanning.",
+    "description": "Parameter extractor for POSITION: identifies all object's postion w.r.t robot frame.",
 
     "api_base": "http://localhost:8000/v1",
     "model": "auto",
@@ -8,7 +8,7 @@
     "top_p": 1.0,
     "supports_vision": true,
     "image": "../test/Barrier.png",
-    "prompt_type": "scan_param_extractor",
+    "prompt_type": "postion_param_extractor",
 
     "system_prompt": [
         "You are an intelligent assistant for a robot operating in a dynamic, partially observable environment.",
@@ -30,20 +30,20 @@
 
     "examples": [
         "Example 1 — multiple objects across steps:",
-        "  task_description: Go to the person behind the couch, get the charge, go to the other person by the door.",
-        "  Output: { target_objects: [Person1, Couch1, Charge1, Person2, Door1] }",
+        "  task_description: What is the door postion from person w.r.t robot frame based on the image",
+        "  Output: { position: [behind] }",
         "",
         "Example 2 — simple two-object task:",
-        "  task_description: Go to the person and receive the bottle from them.",
-        "  Output: { target_objects: [Person1, Bottle1] }"
+        "  task_description: What is the barrier postion from couch w.r.t robot frame based on the image",
+        "  Output: { position: [front] }"
     ],
 
-    "immediate_task": "List all objects the robot must interact with to complete the task.",
+    "immediate_task": "List the object position w.r.t the robot frame.",
     "precognition": "Think through each step: what does the robot navigate to, receive, or act on?",
     "output_format": [
         "Return a valid JSON object:",
-        "  { target_objects: [ObjectName1, ObjectName2, ...] }",
+        "  { position: [front] }",
         "",
-        "Use base name + ordinal (e.g., Person1). No explanations or code."
+        "Use right, left, front, back as position. No explanations or code."
     ]
 }
