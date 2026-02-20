@@ -107,16 +107,13 @@ public class BehaviorTreeSceneDoorFrameExecutor extends BehaviorTreeSceneObjectE
          }
 
          hingeRecessPoints = 0;
-         for (RobotSide side : RobotSide.values)
-         {
-            Point3D hingeRecessPoint = new Point3D(-0.1, side.negateIfRightSide(0.1), 0.0);
-            transform.getValueReadOnly().transform(hingeRecessPoint);
-            capsuleBottom.set(hingeRecessPoint);
-            capsuleBottom.addZ(-0.3);
-            capsuleTop.set(hingeRecessPoint);
-            capsuleTop.addZ(0.3);
-            hingeRecessPoints += pointCounter.countPointsInCapsule(depthImage, capsuleBottom, capsuleTop, 0.05f);
-         }
+         Point3D hingeRecessPoint = new Point3D(-0.1, hingeSide.negateIfLeftSide(0.1), 0.0);
+         transform.getValueReadOnly().transform(hingeRecessPoint);
+         capsuleBottom.set(hingeRecessPoint);
+         capsuleBottom.addZ(-0.3);
+         capsuleTop.set(hingeRecessPoint);
+         capsuleTop.addZ(0.3);
+         hingeRecessPoints += pointCounter.countPointsInCapsule(depthImage, capsuleBottom, capsuleTop, 0.05f);
 
          if (Math.abs(doorOpenAngle) > Math.toRadians(7.0))
             doorType = (hingeSide == RobotSide.LEFT ? doorOpenAngle > 0 : doorOpenAngle < 0) ? DOOR_TYPE_PUSH : DOOR_TYPE_PULL;
