@@ -25,6 +25,8 @@ public class BehaviorTreeSceneDoorFrameExecutor extends BehaviorTreeSceneObjectE
    private BehaviorTreeSceneDoorPanelExecutor doorPanel;
 
    private long pointsInCapsule = 0;
+   private byte doorType = BehaviorTreeSceneObjectStateMessage.DOOR_TYPE_UNKNOWN;
+   private float doorOpenAngle = Float.NaN;
 
    public BehaviorTreeSceneDoorFrameExecutor(long id,
                                              CRDTInfo crdtInfo,
@@ -87,6 +89,14 @@ public class BehaviorTreeSceneDoorFrameExecutor extends BehaviorTreeSceneObjectE
                frameTransform.getTranslation().set(hingePoint);
                EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.X, searchHingeToLatchPost, frameTransform.getRotation());
                referenceFrame.update();
+
+               if (angle > Math.toRadians(7.0)) // TODO: Will need to flip based on hinge side, this is for left hinge side
+                  doorType = BehaviorTreeSceneObjectStateMessage.DOOR_TYPE_PULL;
+               else if (angle < -Math.toRadians(7.0))
+                  doorType = BehaviorTreeSceneObjectStateMessage.DOOR_TYPE_PUSH;
+
+               doorOpenAngle = (float) angle;
+
                break;
             }
          }
@@ -108,6 +118,8 @@ public class BehaviorTreeSceneDoorFrameExecutor extends BehaviorTreeSceneObjectE
 
       message.getPersistentDetection().setIsStable(isStable());
       message.setPointsInCapsule(pointsInCapsule);
+      message.setDoorType(doorType);
+      message.setDoorOpenAngle(doorOpenAngle);
    }
 
    @Override

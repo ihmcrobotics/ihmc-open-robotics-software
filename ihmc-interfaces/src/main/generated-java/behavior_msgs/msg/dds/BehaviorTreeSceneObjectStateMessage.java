@@ -11,6 +11,9 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class BehaviorTreeSceneObjectStateMessage extends Packet<BehaviorTreeSceneObjectStateMessage> implements Settable<BehaviorTreeSceneObjectStateMessage>, EpsilonComparable<BehaviorTreeSceneObjectStateMessage>
 {
+   public static final byte DOOR_TYPE_UNKNOWN = (byte) 0;
+   public static final byte DOOR_TYPE_PUSH = (byte) 1;
+   public static final byte DOOR_TYPE_PULL = (byte) 2;
    /**
             * The timestamp and modifier ID of the latest modification to this object's data fields
             */
@@ -36,6 +39,14 @@ public class BehaviorTreeSceneObjectStateMessage extends Packet<BehaviorTreeScen
             * Used only for door frame
             */
    public long points_in_capsule_;
+   /**
+            * The open angle of the door hinge (0 = closed, Zup yaw)
+            */
+   public float door_open_angle_;
+   /**
+            * Door type as defined above
+            */
+   public byte door_type_;
    /**
             * Whether the object is frozen
             */
@@ -66,6 +77,10 @@ public class BehaviorTreeSceneObjectStateMessage extends Packet<BehaviorTreeScen
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.transform_to_world_, transform_to_world_);
       behavior_msgs.msg.dds.PersistentDetectionStatusMessagePubSubType.staticCopy(other.door_panel_detection_, door_panel_detection_);
       points_in_capsule_ = other.points_in_capsule_;
+
+      door_open_angle_ = other.door_open_angle_;
+
+      door_type_ = other.door_type_;
 
       frozen_ = other.frozen_;
 
@@ -144,6 +159,36 @@ public class BehaviorTreeSceneObjectStateMessage extends Packet<BehaviorTreeScen
    }
 
    /**
+            * The open angle of the door hinge (0 = closed, Zup yaw)
+            */
+   public void setDoorOpenAngle(float door_open_angle)
+   {
+      door_open_angle_ = door_open_angle;
+   }
+   /**
+            * The open angle of the door hinge (0 = closed, Zup yaw)
+            */
+   public float getDoorOpenAngle()
+   {
+      return door_open_angle_;
+   }
+
+   /**
+            * Door type as defined above
+            */
+   public void setDoorType(byte door_type)
+   {
+      door_type_ = door_type;
+   }
+   /**
+            * Door type as defined above
+            */
+   public byte getDoorType()
+   {
+      return door_type_;
+   }
+
+   /**
             * Whether the object is frozen
             */
    public void setFrozen(boolean frozen)
@@ -185,6 +230,10 @@ public class BehaviorTreeSceneObjectStateMessage extends Packet<BehaviorTreeScen
       if (!this.door_panel_detection_.epsilonEquals(other.door_panel_detection_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.points_in_capsule_, other.points_in_capsule_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.door_open_angle_, other.door_open_angle_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.door_type_, other.door_type_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.frozen_, other.frozen_, epsilon)) return false;
 
 
@@ -208,6 +257,10 @@ public class BehaviorTreeSceneObjectStateMessage extends Packet<BehaviorTreeScen
       if (!this.transform_to_world_.equals(otherMyClass.transform_to_world_)) return false;
       if (!this.door_panel_detection_.equals(otherMyClass.door_panel_detection_)) return false;
       if(this.points_in_capsule_ != otherMyClass.points_in_capsule_) return false;
+
+      if(this.door_open_angle_ != otherMyClass.door_open_angle_) return false;
+
+      if(this.door_type_ != otherMyClass.door_type_) return false;
 
       if(this.frozen_ != otherMyClass.frozen_) return false;
 
@@ -235,6 +288,10 @@ public class BehaviorTreeSceneObjectStateMessage extends Packet<BehaviorTreeScen
       builder.append(this.door_panel_detection_);      builder.append(", ");
       builder.append("points_in_capsule=");
       builder.append(this.points_in_capsule_);      builder.append(", ");
+      builder.append("door_open_angle=");
+      builder.append(this.door_open_angle_);      builder.append(", ");
+      builder.append("door_type=");
+      builder.append(this.door_type_);      builder.append(", ");
       builder.append("frozen=");
       builder.append(this.frozen_);
       builder.append("}");

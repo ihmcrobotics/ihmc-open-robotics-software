@@ -20,5 +20,15 @@ behavior_msgs/PersistentDetectionStatusMessage door_panel_detection
 # Used only for door frame
 uint32 points_in_capsule
 
+# The open angle of the door hinge (0 = closed, Zup yaw)
+float32 door_open_angle
+
+byte DOOR_TYPE_UNKNOWN = 0
+byte DOOR_TYPE_PUSH = 1
+byte DOOR_TYPE_PULL = 2
+
+# Door type as defined above
+byte door_type
+
 # Whether the object is frozen
 bool frozen

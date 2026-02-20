@@ -11,6 +11,15 @@ module behavior_msgs
   {
     module dds
     {
+      const octet DOOR_TYPE_UNKNOWN =
+      0;
+
+      const octet DOOR_TYPE_PUSH =
+      1;
+
+      const octet DOOR_TYPE_PULL =
+      2;
+
 
       /**
        * A behavior tree scene object
@@ -43,6 +52,14 @@ module behavior_msgs
          * Used only for door frame
          */
         unsigned long points_in_capsule;
+        /**
+         * The open angle of the door hinge (0 = closed, Zup yaw)
+         */
+        float door_open_angle;
+        /**
+         * Door type as defined above
+         */
+        octet door_type;
         /**
          * Whether the object is frozen
          */
