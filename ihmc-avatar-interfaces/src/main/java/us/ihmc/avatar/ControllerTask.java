@@ -7,9 +7,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.time.ThreadTimer;
 import us.ihmc.yoVariables.variable.YoLong;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class ControllerTask extends HumanoidRobotControlTask
 {
    private final CrossRobotCommandResolver controllerResolver;
@@ -20,9 +17,6 @@ public class ControllerTask extends HumanoidRobotControlTask
    private final ThreadTimer timer;
    private final ThreadTimer loopTimer;
    private final YoLong ticksBehindScheduled;
-
-   protected final List<Runnable> postControllerCallbacks = new ArrayList<>();
-   protected final List<Runnable> schedulerThreadRunnables = new ArrayList<>();
 
    private final double schedulerDt;
 
@@ -85,17 +79,5 @@ public class ControllerTask extends HumanoidRobotControlTask
    {
       controllerResolver.resolveHumanoidRobotContextDataScheduler(masterContext, controllerThread.getHumanoidRobotContextData());
       controllerResolver.resolveHumanoidRobotContextDataEstimator(masterContext, controllerThread.getHumanoidRobotContextData());
-   }
-
-   @Override
-   public void addCallbackPostTask(Runnable runnable)
-   {
-      postControllerCallbacks.add(runnable);
-   }
-
-   @Override
-   public void addRunnableOnSchedulerThread(Runnable runnable)
-   {
-      schedulerThreadRunnables.add(runnable);
    }
 }
