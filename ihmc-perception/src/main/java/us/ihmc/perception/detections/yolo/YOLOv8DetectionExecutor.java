@@ -281,13 +281,10 @@ public class YOLOv8DetectionExecutor
       Mat erosionElement = opencv_imgproc.getStructuringElement(opencv_imgproc.CV_SHAPE_RECT,
                                                                 new Size(2 * erosionKernelRadius + 1, 2 * erosionKernelRadius + 1),
                                                                 new Point(erosionKernelRadius, erosionKernelRadius));
-      Filter erosionFilter = opencv_cudafilters.createMorphologyFilter(opencv_imgproc.MORPH_ERODE, opencv_core.CV_8U, erosionElement);
-
-      GpuMat erodedMask = new GpuMat(objectMask.getHeight(), objectMask.getWidth(), objectMask.getOpenCVType());
-      erosionFilter.apply(objectMask.getGpuImageMat(), erodedMask);
+      Mat erodedMask = new Mat(objectMask.getHeight(), objectMask.getWidth(), objectMask.getOpenCVType());
+      opencv_imgproc.erode(objectMask.getCpuImageMat(), erodedMask, erosionElement);
 
       erosionElement.close();
-      erosionFilter.close();
 
       return objectMask.replaceImage(erodedMask);
    }
@@ -299,10 +296,18 @@ public class YOLOv8DetectionExecutor
 
       RawImage colorImage = detectionsToAnnotate.get(0).getColorImage().get();
       if (colorImage == null)
+      {
+         for (YOLOv8InstantDetection detection : detectionsToAnnotate)
+            detection.destroy();
+
          return;
+      }
 
       if (!annotatedImageDemanded.getAsBoolean())
       {
+         for (YOLOv8InstantDetection detection : detectionsToAnnotate)
+            detection.destroy();
+
          return;
       }
 
@@ -319,6 +324,8 @@ public class YOLOv8DetectionExecutor
       PerceptionMessageTools.packImageMessage(colorImage, annotatedImagePointer, CompressionType.JPEG, imageMessage);
       annotatedImagePublisher.publish(imageMessage);
 
+      for (YOLOv8InstantDetection detection : detectionsToAnnotate)
+         detection.destroy();
       resultMat.close();
       colorImage.release();
    }

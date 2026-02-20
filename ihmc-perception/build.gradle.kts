@@ -37,7 +37,12 @@ mainDependencies {
    api("us.ihmc:librealsense2:$librealsense2Version:windows-x86_64")
 
    api("us.ihmc:ihmc-humanoid-robotics:source")
-   api("us.ihmc:robot-environment-awareness:source")
+
+   api("com.vividsolutions:jts:1.13") // TODO Update to https://github.com/locationtech/jts
+
+   api("us.ihmc:joctomap:1.12.7")
+   api("us.ihmc:ihmc-graphics-javafx:source")
+   api("us.ihmc:ihmc-robot-data-logger:0.37.0")
 
    // Previously used for HeightMapAutoencoder and FootstepPredictor
    // This is a very large dependency, only uncomment for testing purposes

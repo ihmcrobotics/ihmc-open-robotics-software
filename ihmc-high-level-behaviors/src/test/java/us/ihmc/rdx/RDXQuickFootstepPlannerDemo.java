@@ -11,15 +11,18 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.simplePlanners.QuickFootstepPlanner;
 import us.ihmc.rdx.tools.LibGDXApplicationCreator;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
+import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
@@ -43,6 +46,7 @@ public class RDXQuickFootstepPlannerDemo
                                                                                                               tempTransform);
    private final FramePose3D textFramePose = new FramePose3D();
    private int footstepIndexCounter = 0;
+   private final int[] maxSteps = {50};
 
    public RDXQuickFootstepPlannerDemo()
    {
@@ -53,15 +57,7 @@ public class RDXQuickFootstepPlannerDemo
          {
             baseUI.create();
 
-            // Create foot polygon
-            foothold = new ConvexPolygon2D();
-            double halfLength = 0.1;
-            double halfWidth = 0.05;
-            foothold.addVertex(halfLength, -halfWidth);
-            foothold.addVertex(halfLength, halfWidth);
-            foothold.addVertex(-halfLength, halfWidth);
-            foothold.addVertex(-halfLength, -halfWidth);
-            foothold.update();
+            foothold = planner.createFootPolygon(new Pose3D(), 0.0);
 
             // Initialize stance feet graphics and gizmos near origin
             for (RobotSide side : RobotSide.values)
@@ -121,16 +117,21 @@ public class RDXQuickFootstepPlannerDemo
 
          private void renderImGuiWidgets()
          {
-            for (RobotSide side : RobotSide.values)
-               ImGui.checkbox("Stance " + side.getPascalCaseName() + " Gizmo", stanceGizmos.get(side).getSelected());
+            ImGui.pushItemWidth(ImGui.getColumnWidth());
+            if (ImGui.sliderInt("###Max Steps", maxSteps, 1, 25, "Max steps: %d"))
+               planner.setMaxSteps(maxSteps[0]);
+            ImGui.popItemWidth();
 
-            for (RobotSide side : RobotSide.values)
-               ImGui.checkbox("Goal " + side.getPascalCaseName() + " Gizmo", goalGizmos.get(side).getSelected());
-
-            ImGui.text("Stance footsteps: ");
             for (RobotSide side : RobotSide.values)
                ImGui.text("Stance " + side + ": " + stanceGizmos.get(side).getPoseGizmo().getTransformToParent().getTranslation()
                           + "  Yaw: (%.3f%s)".formatted(Math.toDegrees(stanceGizmos.get(side).getPoseGizmo().getTransformToParent().getRotation().getYaw()), EuclidCoreMissingTools.DEGREE_SYMBOL));
+            ImGui.text("Stance distance: %.3f".formatted(stanceGizmos.get(RobotSide.LEFT).getPoseGizmo().getPose().getPosition()
+                                                               .distance(stanceGizmos.get(RobotSide.RIGHT).getPoseGizmo().getPose().getPosition())));
+            for (RobotSide side : RobotSide.values)
+               ImGui.text("Goal " + side + ": " + goalGizmos.get(side).getPoseGizmo().getTransformToParent().getTranslation()
+                          + "  Yaw: (%.3f%s)".formatted(Math.toDegrees(goalGizmos.get(side).getPoseGizmo().getTransformToParent().getRotation().getYaw()), EuclidCoreMissingTools.DEGREE_SYMBOL));
+            ImGui.text("Goal distance: %.3f".formatted(goalGizmos.get(RobotSide.LEFT).getPoseGizmo().getPose().getPosition()
+                                                             .distance(goalGizmos.get(RobotSide.RIGHT).getPoseGizmo().getPose().getPosition())));
 
             ImGui.text("Planned Footsteps: " + footstepPlan.size());
             for (int i = 0; i < footstepPlan.size(); i++)
@@ -162,14 +163,8 @@ public class RDXQuickFootstepPlannerDemo
             }
 
             // Plan footsteps from stance to goal
-            SideDependentList<Pose3D> stances = new SideDependentList<>();
-            SideDependentList<Pose3D> goals = new SideDependentList<>();
-
-            for (RobotSide side : RobotSide.values)
-            {
-               stances.put(side, new Pose3D(stanceGizmos.get(side).getPoseGizmo().getTransformToParent()));
-               goals.put(side, new Pose3D(goalGizmos.get(side).getPoseGizmo().getTransformToParent()));
-            }
+            SideDependentList<Pose3D> stances = new SideDependentList<>(side -> new Pose3D(stanceGizmos.get(side).getPoseGizmo().getTransformToParent()));
+            SideDependentList<Pose3D> goals = new SideDependentList<>(side -> new Pose3D(goalGizmos.get(side).getPoseGizmo().getTransformToParent()));
 
             for (ModelInstance model : visualModels)
                model.model.dispose();
@@ -183,20 +178,36 @@ public class RDXQuickFootstepPlannerDemo
                int footstepIndex = footstepIndexCounter++;
                visualModels.add(RDXModelBuilder.buildModelInstance(builder ->
                {
-                  builder.addSphere(0.02f, planner.getGoalMid().getPosition(), Color.PURPLE);
-                  builder.addLine(planner.getStanceMid().getPosition(), planner.getApproachGoalMid(), 0.01, Color.WHITE);
-                  builder.addLine(planner.getOppositeStance(), planner.getOppositeStanceMidlineProjection(), 0.01, Color.OLIVE);
-                  builder.addLine(planner.getGoalMid().getPosition(), planner.getApproachGoalMid(), 0.01, Color.CHARTREUSE);
+                  SideDependentList<Point3D> swingHipAir = new SideDependentList<>(() -> new Point3D());
+                  SideDependentList<Point3D> goalHipAir = new SideDependentList<>(() -> new Point3D());
+                  for (RobotSide side : RobotSide.values)
+                  {
+                     swingHipAir.get(side).set(planner.getSwingHip().get(side));
+                     swingHipAir.get(side).addZ(0.8f);
+                     builder.addSphere(0.03, swingHipAir.get(side), RDXFootstepGraphic.FOOT_COLORS.get(side));
+                     goalHipAir.get(side).set(planner.getGoalHip().get(side));
+                     goalHipAir.get(side).addZ(0.8f);
+                     builder.addSphere(0.03, goalHipAir.get(side), Color.WHITE);
+                     builder.addLine(swingHipAir.get(side), goalHipAir.get(side), 0.01, Color.SKY);
+                  }
+                  builder.addLine(swingHipAir.get(planner.getFootToSwing()), planner.getSwingEnd().getPosition(), 0.01, Color.WHITE);
+                  builder.addSphere(0.02, planner.getSwingHip().get(planner.getFootToSwing()), RDXFootstepGraphic.FOOT_COLORS.get(planner.getFootToSwing()));
 
                   float r = 0.5294118f;
                   float g = 0.80784315f;
                   float b = 0.92156863f;
-                  if (planner.getTransistionToGoal())
-                     b += 0.07f;
                   if (planner.getFootToSwing() == RobotSide.LEFT)
-                     r += 0.07f;
+                  {
+                     r = 0.6f;
+                     g = 0.2f;
+                     b = 0.3f;
+                  }
                   else
-                     g -= 0.07f;
+                  {
+                     r = 0.2f;
+                     g = 0.6f;
+                     b = 0.3f;
+                  }
                   Color color = new Color(r, g, b, 1.0f);
                   builder.addMultiLine(planner.getSwingEnd(), foothold.getPolygonVerticesView(), 0.01, color, true);
                   builder.addPolygon(planner.getSwingEnd(), foothold, color);

@@ -2,7 +2,6 @@ package us.ihmc.pathPlanning.visibilityGraphs.ui.properties;
 
 import javafx.beans.property.Property;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotEnvironmentAwareness.ui.properties.ParametersProperty;
 
 public class YawProperty extends ParametersProperty<Quaternion>
 {

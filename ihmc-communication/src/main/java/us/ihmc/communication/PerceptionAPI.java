@@ -36,11 +36,6 @@ public final class PerceptionAPI
    public static final ROS2Topic<?> RELIABLE = IHMC_ROOT.withQoS(ROS2QosProfile.RELIABLE());
 
    /*
-    * Detection manager
-    */
-   public static final StoredPropertySetROS2TopicPair DETECTION_MANAGER_SETTINGS = new StoredPropertySetROS2TopicPair("detections", "settings");
-
-   /*
     * ZED SVO
     */
    public static final ROS2Topic<ZEDSVOCurrentFileMessage> ZED_SVO_CURRENT_FILE = PERCEPTION_MODULE.withSuffix("zed_svo_current_file")
