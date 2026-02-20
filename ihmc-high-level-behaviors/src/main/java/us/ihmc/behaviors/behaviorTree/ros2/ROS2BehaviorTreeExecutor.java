@@ -10,8 +10,6 @@ import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneExecutor;
 import us.ihmc.communication.AutonomyAPI;
 import us.ihmc.communication.crdt.CRDTStatusSE3Trajectory;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseCommunicatorMap;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
 import us.ihmc.perception.gpuMapping.TerrainMapData;
@@ -54,27 +52,12 @@ public class ROS2BehaviorTreeExecutor extends BehaviorTreeExecutor
       yoDataMessage.setNumberOfPersistentDetections((byte) scene.getPersistentDetections().size());
       yoDataMessage.setNumberOfSceneObjects((byte) scene.getObjects().size());
 
-      for (int i = 0; i < yoDataMessage.getSceneObjectX().length; i++)
+      for (int i = 0; i < yoDataMessage.getSceneObjectPose().length; i++)
       {
          if (scene.getObjects().size() > i)
-         {
-            RigidBodyTransformReadOnly pose = scene.getObjects().get(i).getTransformToWorld();
-            yoDataMessage.getSceneObjectX()[i] = (float) pose.getTranslation().getX();
-            yoDataMessage.getSceneObjectY()[i] = (float) pose.getTranslation().getY();
-            yoDataMessage.getSceneObjectZ()[i] = (float) pose.getTranslation().getZ();
-            yoDataMessage.getSceneObjectYaw()[i] = (float) pose.getRotation().getYaw();
-            yoDataMessage.getSceneObjectPitch()[i] = (float) pose.getRotation().getPitch();
-            yoDataMessage.getSceneObjectRoll()[i] = (float) pose.getRotation().getRoll();
-         }
+            yoDataMessage.getSceneObjectPose()[i].set(scene.getObjects().get(i).getTransformToWorld());
          else
-         {
-            yoDataMessage.getSceneObjectX()[i] = Float.NaN;
-            yoDataMessage.getSceneObjectY()[i] = Float.NaN;
-            yoDataMessage.getSceneObjectZ()[i] = Float.NaN;
-            yoDataMessage.getSceneObjectYaw()[i] = Float.NaN;
-            yoDataMessage.getSceneObjectPitch()[i] = Float.NaN;
-            yoDataMessage.getSceneObjectRoll()[i] = Float.NaN;
-         }
+            yoDataMessage.getSceneObjectPose()[i].setToNaN();
       }
 
       BehaviorTreeRootNodeExecutor rootNode = tree.getRootNode();
@@ -111,23 +94,11 @@ public class ROS2BehaviorTreeExecutor extends BehaviorTreeExecutor
          for (RobotSide side : lastHandPoseActions.sides())
          {
             HandPoseActionExecutor action = lastHandPoseActions.get(side);
-            Pose3DReadOnly currentPose = action.getState().getCurrentPose().getValueReadOnly();
-            yoDataMessage.getCurrentHandX()[side.ordinal()] = (float) currentPose.getX();
-            yoDataMessage.getCurrentHandY()[side.ordinal()] = (float) currentPose.getY();
-            yoDataMessage.getCurrentHandZ()[side.ordinal()] = (float) currentPose.getZ();
-            yoDataMessage.getCurrentHandYaw()[side.ordinal()] = (float) currentPose.getYaw();
-            yoDataMessage.getCurrentHandPitch()[side.ordinal()] = (float) currentPose.getPitch();
-            yoDataMessage.getCurrentHandRoll()[side.ordinal()] = (float) currentPose.getRoll();
+            yoDataMessage.getCurrentHandPose()[side.ordinal()].set(action.getState().getCurrentPose().getValueReadOnly());
             CRDTStatusSE3Trajectory commandedTrajectory = action.getState().getCommandedTrajectory();
             if (!commandedTrajectory.isEmpty())
-            {
-               yoDataMessage.getGoalHandX()[side.ordinal()] = (float) commandedTrajectory.getLastValueReadOnly().getPositionX();
-               yoDataMessage.getGoalHandY()[side.ordinal()] = (float) commandedTrajectory.getLastValueReadOnly().getPositionY();
-               yoDataMessage.getGoalHandZ()[side.ordinal()] = (float) commandedTrajectory.getLastValueReadOnly().getPositionZ();
-               yoDataMessage.getGoalHandYaw()[side.ordinal()] = (float) commandedTrajectory.getLastValueReadOnly().getOrientation().getYaw();
-               yoDataMessage.getGoalHandPitch()[side.ordinal()] = (float) commandedTrajectory.getLastValueReadOnly().getOrientation().getPitch();
-               yoDataMessage.getGoalHandRoll()[side.ordinal()] = (float) commandedTrajectory.getLastValueReadOnly().getOrientation().getRoll();
-            }
+               yoDataMessage.getGoalHandPose()[side.ordinal()].set(commandedTrajectory.getLastValueReadOnly().getOrientation(),
+                                                                   commandedTrajectory.getLastValueReadOnly().getPosition());
          }
       }
       

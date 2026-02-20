@@ -1,6 +1,7 @@
 #ifndef __behavior_msgs__msg__BehaviorTreeYoDataMessage__idl__
 #define __behavior_msgs__msg__BehaviorTreeYoDataMessage__idl__
 
+#include "geometry_msgs/msg/./Pose_.idl"
 module behavior_msgs
 {
   module msg
@@ -11,19 +12,14 @@ module behavior_msgs
       /**
        * A message used to send behavior tree data from the automomy process
        * to the controller process in order to be stored as YoVariables.
-       * Currently 211 bytes, try to keep this under 250.
+       * Try to keep this mesage as small as possible.
        */
       @TypeCode(type="behavior_msgs::msg::dds_::BehaviorTreeYoDataMessage_")
       struct BehaviorTreeYoDataMessage
       {
         octet number_of_persistent_detections;
         octet number_of_scene_objects;
-        float scene_object_x[3];
-        float scene_object_y[3];
-        float scene_object_z[3];
-        float scene_object_yaw[3];
-        float scene_object_pitch[3];
-        float scene_object_roll[3];
+        geometry_msgs::msg::dds::Pose scene_object_pose[3];
         boolean automatic_execution;
         unsigned short execution_next_index;
         boolean concurrency_enabled;
@@ -32,18 +28,8 @@ module behavior_msgs
         octet executing_action_type[5];
         short executing_action_id[5];
         float elapsed_execution_time[5];
-        float current_hand_x[2];
-        float current_hand_y[2];
-        float current_hand_z[2];
-        float current_hand_yaw[2];
-        float current_hand_pitch[2];
-        float current_hand_roll[2];
-        float goal_hand_x[2];
-        float goal_hand_y[2];
-        float goal_hand_z[2];
-        float goal_hand_yaw[2];
-        float goal_hand_pitch[2];
-        float goal_hand_roll[2];
+        geometry_msgs::msg::dds::Pose current_hand_pose[2];
+        geometry_msgs::msg::dds::Pose goal_hand_pose[2];
       };
     };
   };

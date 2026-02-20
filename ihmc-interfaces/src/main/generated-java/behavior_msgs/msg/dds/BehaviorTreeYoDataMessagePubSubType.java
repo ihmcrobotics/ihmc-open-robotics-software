@@ -15,7 +15,7 @@ public class BehaviorTreeYoDataMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "5e41e24d021796402ad1608a8e6b366631ff7d0b50d32eb62e0892c17e308cf7";
+   		return "094c3b7f7dabaf4523837623fe0a4e5e692b0a966162fc41462ea72c6f569415";
    }
    
    @Override
@@ -56,18 +56,9 @@ public class BehaviorTreeYoDataMessagePubSubType implements us.ihmc.pubsub.Topic
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += ((3) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-      current_alignment += ((3) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-      current_alignment += ((3) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-      current_alignment += ((3) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-      current_alignment += ((3) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-      current_alignment += ((3) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
+      for(int i0 = 0; i0 < (3); ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
@@ -84,30 +75,12 @@ public class BehaviorTreeYoDataMessagePubSubType implements us.ihmc.pubsub.Topic
 
       current_alignment += ((5) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += ((2) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-      current_alignment += ((2) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-      current_alignment += ((2) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-      current_alignment += ((2) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-      current_alignment += ((2) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-      current_alignment += ((2) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-      current_alignment += ((2) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-      current_alignment += ((2) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-      current_alignment += ((2) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-      current_alignment += ((2) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-      current_alignment += ((2) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-      current_alignment += ((2) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
+      for(int i0 = 0; i0 < (2); ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);}
+      for(int i0 = 0; i0 < (2); ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);}
 
       return current_alignment - initial_alignment;
    }
@@ -127,12 +100,10 @@ public class BehaviorTreeYoDataMessagePubSubType implements us.ihmc.pubsub.Topic
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += ((3) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += ((3) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += ((3) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += ((3) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += ((3) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += ((3) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getSceneObjectPose().length; ++i0)
+      {
+              current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getSceneObjectPose()[i0], current_alignment);
+      }
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -151,18 +122,14 @@ public class BehaviorTreeYoDataMessagePubSubType implements us.ihmc.pubsub.Topic
       current_alignment += ((5) * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
       current_alignment += ((5) * 2) + us.ihmc.idl.CDR.alignment(current_alignment, 2);
       current_alignment += ((5) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += ((2) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += ((2) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += ((2) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += ((2) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += ((2) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += ((2) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += ((2) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += ((2) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += ((2) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += ((2) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += ((2) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += ((2) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getCurrentHandPose().length; ++i0)
+      {
+              current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getCurrentHandPose()[i0], current_alignment);
+      }
+      for(int i0 = 0; i0 < data.getGoalHandPose().length; ++i0)
+      {
+              current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getGoalHandPose()[i0], current_alignment);
+      }
 
       return current_alignment - initial_alignment;
    }
@@ -173,34 +140,9 @@ public class BehaviorTreeYoDataMessagePubSubType implements us.ihmc.pubsub.Topic
 
       cdr.write_type_9(data.getNumberOfSceneObjects());
 
-      for(int i0 = 0; i0 < data.getSceneObjectX().length; ++i0)
+      for(int i0 = 0; i0 < data.getSceneObjectPose().length; ++i0)
       {
-        	cdr.write_type_5(data.getSceneObjectX()[i0]);	
-      }
-
-      for(int i0 = 0; i0 < data.getSceneObjectY().length; ++i0)
-      {
-        	cdr.write_type_5(data.getSceneObjectY()[i0]);	
-      }
-
-      for(int i0 = 0; i0 < data.getSceneObjectZ().length; ++i0)
-      {
-        	cdr.write_type_5(data.getSceneObjectZ()[i0]);	
-      }
-
-      for(int i0 = 0; i0 < data.getSceneObjectYaw().length; ++i0)
-      {
-        	cdr.write_type_5(data.getSceneObjectYaw()[i0]);	
-      }
-
-      for(int i0 = 0; i0 < data.getSceneObjectPitch().length; ++i0)
-      {
-        	cdr.write_type_5(data.getSceneObjectPitch()[i0]);	
-      }
-
-      for(int i0 = 0; i0 < data.getSceneObjectRoll().length; ++i0)
-      {
-        	cdr.write_type_5(data.getSceneObjectRoll()[i0]);	
+        	geometry_msgs.msg.dds.PosePubSubType.write(data.getSceneObjectPose()[i0], cdr);		
       }
 
       cdr.write_type_7(data.getAutomaticExecution());
@@ -228,64 +170,14 @@ public class BehaviorTreeYoDataMessagePubSubType implements us.ihmc.pubsub.Topic
         	cdr.write_type_5(data.getElapsedExecutionTime()[i0]);	
       }
 
-      for(int i0 = 0; i0 < data.getCurrentHandX().length; ++i0)
+      for(int i0 = 0; i0 < data.getCurrentHandPose().length; ++i0)
       {
-        	cdr.write_type_5(data.getCurrentHandX()[i0]);	
+        	geometry_msgs.msg.dds.PosePubSubType.write(data.getCurrentHandPose()[i0], cdr);		
       }
 
-      for(int i0 = 0; i0 < data.getCurrentHandY().length; ++i0)
+      for(int i0 = 0; i0 < data.getGoalHandPose().length; ++i0)
       {
-        	cdr.write_type_5(data.getCurrentHandY()[i0]);	
-      }
-
-      for(int i0 = 0; i0 < data.getCurrentHandZ().length; ++i0)
-      {
-        	cdr.write_type_5(data.getCurrentHandZ()[i0]);	
-      }
-
-      for(int i0 = 0; i0 < data.getCurrentHandYaw().length; ++i0)
-      {
-        	cdr.write_type_5(data.getCurrentHandYaw()[i0]);	
-      }
-
-      for(int i0 = 0; i0 < data.getCurrentHandPitch().length; ++i0)
-      {
-        	cdr.write_type_5(data.getCurrentHandPitch()[i0]);	
-      }
-
-      for(int i0 = 0; i0 < data.getCurrentHandRoll().length; ++i0)
-      {
-        	cdr.write_type_5(data.getCurrentHandRoll()[i0]);	
-      }
-
-      for(int i0 = 0; i0 < data.getGoalHandX().length; ++i0)
-      {
-        	cdr.write_type_5(data.getGoalHandX()[i0]);	
-      }
-
-      for(int i0 = 0; i0 < data.getGoalHandY().length; ++i0)
-      {
-        	cdr.write_type_5(data.getGoalHandY()[i0]);	
-      }
-
-      for(int i0 = 0; i0 < data.getGoalHandZ().length; ++i0)
-      {
-        	cdr.write_type_5(data.getGoalHandZ()[i0]);	
-      }
-
-      for(int i0 = 0; i0 < data.getGoalHandYaw().length; ++i0)
-      {
-        	cdr.write_type_5(data.getGoalHandYaw()[i0]);	
-      }
-
-      for(int i0 = 0; i0 < data.getGoalHandPitch().length; ++i0)
-      {
-        	cdr.write_type_5(data.getGoalHandPitch()[i0]);	
-      }
-
-      for(int i0 = 0; i0 < data.getGoalHandRoll().length; ++i0)
-      {
-        	cdr.write_type_5(data.getGoalHandRoll()[i0]);	
+        	geometry_msgs.msg.dds.PosePubSubType.write(data.getGoalHandPose()[i0], cdr);		
       }
 
    }
@@ -296,40 +188,9 @@ public class BehaviorTreeYoDataMessagePubSubType implements us.ihmc.pubsub.Topic
       	
       data.setNumberOfSceneObjects(cdr.read_type_9());
       	
-      for(int i0 = 0; i0 < data.getSceneObjectX().length; ++i0)
+      for(int i0 = 0; i0 < data.getSceneObjectPose().length; ++i0)
       {
-        	data.getSceneObjectX()[i0] = cdr.read_type_5();
-        	
-      }
-      	
-      for(int i0 = 0; i0 < data.getSceneObjectY().length; ++i0)
-      {
-        	data.getSceneObjectY()[i0] = cdr.read_type_5();
-        	
-      }
-      	
-      for(int i0 = 0; i0 < data.getSceneObjectZ().length; ++i0)
-      {
-        	data.getSceneObjectZ()[i0] = cdr.read_type_5();
-        	
-      }
-      	
-      for(int i0 = 0; i0 < data.getSceneObjectYaw().length; ++i0)
-      {
-        	data.getSceneObjectYaw()[i0] = cdr.read_type_5();
-        	
-      }
-      	
-      for(int i0 = 0; i0 < data.getSceneObjectPitch().length; ++i0)
-      {
-        	data.getSceneObjectPitch()[i0] = cdr.read_type_5();
-        	
-      }
-      	
-      for(int i0 = 0; i0 < data.getSceneObjectRoll().length; ++i0)
-      {
-        	data.getSceneObjectRoll()[i0] = cdr.read_type_5();
-        	
+        	geometry_msgs.msg.dds.PosePubSubType.read(data.getSceneObjectPose()[i0], cdr);	
       }
       	
       data.setAutomaticExecution(cdr.read_type_7());
@@ -360,76 +221,14 @@ public class BehaviorTreeYoDataMessagePubSubType implements us.ihmc.pubsub.Topic
         	
       }
       	
-      for(int i0 = 0; i0 < data.getCurrentHandX().length; ++i0)
+      for(int i0 = 0; i0 < data.getCurrentHandPose().length; ++i0)
       {
-        	data.getCurrentHandX()[i0] = cdr.read_type_5();
-        	
+        	geometry_msgs.msg.dds.PosePubSubType.read(data.getCurrentHandPose()[i0], cdr);	
       }
       	
-      for(int i0 = 0; i0 < data.getCurrentHandY().length; ++i0)
+      for(int i0 = 0; i0 < data.getGoalHandPose().length; ++i0)
       {
-        	data.getCurrentHandY()[i0] = cdr.read_type_5();
-        	
-      }
-      	
-      for(int i0 = 0; i0 < data.getCurrentHandZ().length; ++i0)
-      {
-        	data.getCurrentHandZ()[i0] = cdr.read_type_5();
-        	
-      }
-      	
-      for(int i0 = 0; i0 < data.getCurrentHandYaw().length; ++i0)
-      {
-        	data.getCurrentHandYaw()[i0] = cdr.read_type_5();
-        	
-      }
-      	
-      for(int i0 = 0; i0 < data.getCurrentHandPitch().length; ++i0)
-      {
-        	data.getCurrentHandPitch()[i0] = cdr.read_type_5();
-        	
-      }
-      	
-      for(int i0 = 0; i0 < data.getCurrentHandRoll().length; ++i0)
-      {
-        	data.getCurrentHandRoll()[i0] = cdr.read_type_5();
-        	
-      }
-      	
-      for(int i0 = 0; i0 < data.getGoalHandX().length; ++i0)
-      {
-        	data.getGoalHandX()[i0] = cdr.read_type_5();
-        	
-      }
-      	
-      for(int i0 = 0; i0 < data.getGoalHandY().length; ++i0)
-      {
-        	data.getGoalHandY()[i0] = cdr.read_type_5();
-        	
-      }
-      	
-      for(int i0 = 0; i0 < data.getGoalHandZ().length; ++i0)
-      {
-        	data.getGoalHandZ()[i0] = cdr.read_type_5();
-        	
-      }
-      	
-      for(int i0 = 0; i0 < data.getGoalHandYaw().length; ++i0)
-      {
-        	data.getGoalHandYaw()[i0] = cdr.read_type_5();
-        	
-      }
-      	
-      for(int i0 = 0; i0 < data.getGoalHandPitch().length; ++i0)
-      {
-        	data.getGoalHandPitch()[i0] = cdr.read_type_5();
-        	
-      }
-      	
-      for(int i0 = 0; i0 < data.getGoalHandRoll().length; ++i0)
-      {
-        	data.getGoalHandRoll()[i0] = cdr.read_type_5();
-        	
+        	geometry_msgs.msg.dds.PosePubSubType.read(data.getGoalHandPose()[i0], cdr);	
       }
       	
 
@@ -440,12 +239,7 @@ public class BehaviorTreeYoDataMessagePubSubType implements us.ihmc.pubsub.Topic
    {
       ser.write_type_9("number_of_persistent_detections", data.getNumberOfPersistentDetections());
       ser.write_type_9("number_of_scene_objects", data.getNumberOfSceneObjects());
-      ser.write_type_f("scene_object_x", data.getSceneObjectX());
-      ser.write_type_f("scene_object_y", data.getSceneObjectY());
-      ser.write_type_f("scene_object_z", data.getSceneObjectZ());
-      ser.write_type_f("scene_object_yaw", data.getSceneObjectYaw());
-      ser.write_type_f("scene_object_pitch", data.getSceneObjectPitch());
-      ser.write_type_f("scene_object_roll", data.getSceneObjectRoll());
+      ser.write_type_f("scene_object_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getSceneObjectPose());
       ser.write_type_7("automatic_execution", data.getAutomaticExecution());
       ser.write_type_3("execution_next_index", data.getExecutionNextIndex());
       ser.write_type_7("concurrency_enabled", data.getConcurrencyEnabled());
@@ -454,18 +248,8 @@ public class BehaviorTreeYoDataMessagePubSubType implements us.ihmc.pubsub.Topic
       ser.write_type_f("executing_action_type", data.getExecutingActionType());
       ser.write_type_f("executing_action_id", data.getExecutingActionId());
       ser.write_type_f("elapsed_execution_time", data.getElapsedExecutionTime());
-      ser.write_type_f("current_hand_x", data.getCurrentHandX());
-      ser.write_type_f("current_hand_y", data.getCurrentHandY());
-      ser.write_type_f("current_hand_z", data.getCurrentHandZ());
-      ser.write_type_f("current_hand_yaw", data.getCurrentHandYaw());
-      ser.write_type_f("current_hand_pitch", data.getCurrentHandPitch());
-      ser.write_type_f("current_hand_roll", data.getCurrentHandRoll());
-      ser.write_type_f("goal_hand_x", data.getGoalHandX());
-      ser.write_type_f("goal_hand_y", data.getGoalHandY());
-      ser.write_type_f("goal_hand_z", data.getGoalHandZ());
-      ser.write_type_f("goal_hand_yaw", data.getGoalHandYaw());
-      ser.write_type_f("goal_hand_pitch", data.getGoalHandPitch());
-      ser.write_type_f("goal_hand_roll", data.getGoalHandRoll());
+      ser.write_type_f("current_hand_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getCurrentHandPose());
+      ser.write_type_f("goal_hand_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getGoalHandPose());
    }
 
    @Override
@@ -473,12 +257,7 @@ public class BehaviorTreeYoDataMessagePubSubType implements us.ihmc.pubsub.Topic
    {
       data.setNumberOfPersistentDetections(ser.read_type_9("number_of_persistent_detections"));
       data.setNumberOfSceneObjects(ser.read_type_9("number_of_scene_objects"));
-      ser.read_type_f("scene_object_x", data.getSceneObjectX());
-      ser.read_type_f("scene_object_y", data.getSceneObjectY());
-      ser.read_type_f("scene_object_z", data.getSceneObjectZ());
-      ser.read_type_f("scene_object_yaw", data.getSceneObjectYaw());
-      ser.read_type_f("scene_object_pitch", data.getSceneObjectPitch());
-      ser.read_type_f("scene_object_roll", data.getSceneObjectRoll());
+      ser.read_type_f("scene_object_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getSceneObjectPose());
       data.setAutomaticExecution(ser.read_type_7("automatic_execution"));
       data.setExecutionNextIndex(ser.read_type_3("execution_next_index"));
       data.setConcurrencyEnabled(ser.read_type_7("concurrency_enabled"));
@@ -487,18 +266,8 @@ public class BehaviorTreeYoDataMessagePubSubType implements us.ihmc.pubsub.Topic
       ser.read_type_f("executing_action_type", data.getExecutingActionType());
       ser.read_type_f("executing_action_id", data.getExecutingActionId());
       ser.read_type_f("elapsed_execution_time", data.getElapsedExecutionTime());
-      ser.read_type_f("current_hand_x", data.getCurrentHandX());
-      ser.read_type_f("current_hand_y", data.getCurrentHandY());
-      ser.read_type_f("current_hand_z", data.getCurrentHandZ());
-      ser.read_type_f("current_hand_yaw", data.getCurrentHandYaw());
-      ser.read_type_f("current_hand_pitch", data.getCurrentHandPitch());
-      ser.read_type_f("current_hand_roll", data.getCurrentHandRoll());
-      ser.read_type_f("goal_hand_x", data.getGoalHandX());
-      ser.read_type_f("goal_hand_y", data.getGoalHandY());
-      ser.read_type_f("goal_hand_z", data.getGoalHandZ());
-      ser.read_type_f("goal_hand_yaw", data.getGoalHandYaw());
-      ser.read_type_f("goal_hand_pitch", data.getGoalHandPitch());
-      ser.read_type_f("goal_hand_roll", data.getGoalHandRoll());
+      ser.read_type_f("current_hand_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getCurrentHandPose());
+      ser.read_type_f("goal_hand_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getGoalHandPose());
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.BehaviorTreeYoDataMessage src, behavior_msgs.msg.dds.BehaviorTreeYoDataMessage dest)

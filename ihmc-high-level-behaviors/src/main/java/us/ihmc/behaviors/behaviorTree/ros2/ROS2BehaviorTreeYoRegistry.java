@@ -97,12 +97,7 @@ public class ROS2BehaviorTreeYoRegistry
                sceneObjects.set(data.getNumberOfSceneObjects());
 
                for (int i = 0; i < sceneObjectPoses.length; i++)
-                  sceneObjectPoses[i].set(data.getSceneObjectX()[i],
-                                          data.getSceneObjectY()[i],
-                                          data.getSceneObjectZ()[i],
-                                          data.getSceneObjectYaw()[i],
-                                          data.getSceneObjectPitch()[i],
-                                          data.getSceneObjectRoll()[i]);
+                  sceneObjectPoses[i].set(data.getSceneObjectPose()[i]);
 
                automaticExecution.set(data.getAutomaticExecution());
                executionNextIndex.set(data.getExecutionNextIndex());
@@ -119,18 +114,8 @@ public class ROS2BehaviorTreeYoRegistry
 
                for (RobotSide side : RobotSide.values)
                {
-                  currentHandPoses.get(side).set(data.getCurrentHandX()[side.ordinal()],
-                                                 data.getCurrentHandY()[side.ordinal()],
-                                                 data.getCurrentHandZ()[side.ordinal()],
-                                                 data.getCurrentHandYaw()[side.ordinal()],
-                                                 data.getCurrentHandPitch()[side.ordinal()],
-                                                 data.getCurrentHandRoll()[side.ordinal()]);
-                  goalHandPoses.get(side).set(data.getGoalHandX()[side.ordinal()],
-                                              data.getGoalHandY()[side.ordinal()],
-                                              data.getGoalHandZ()[side.ordinal()],
-                                              data.getGoalHandYaw()[side.ordinal()],
-                                              data.getGoalHandPitch()[side.ordinal()],
-                                              data.getGoalHandRoll()[side.ordinal()]);
+                  currentHandPoses.get(side).set(data.getCurrentHandPose()[side.ordinal()]);
+                  goalHandPoses.get(side).set(data.getGoalHandPose()[side.ordinal()]);
                }
             }
          }
