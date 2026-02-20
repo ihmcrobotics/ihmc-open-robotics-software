@@ -402,12 +402,15 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
          else
          {
             ImGui.text("Planning goal gizmo adjustment:");
-            ImGui.checkbox(labels.get("Stance Point"), goalStancePointGizmo.getSelected());
+            if (ImGui.checkbox(labels.get("Stance Point"), goalStancePointGizmo.getSelected()))
+               goalStancePointGizmo.getPoseGizmo().getTransformToParent().getTranslation().set(definition.getGoalStancePoint().getValueReadOnly());
             ImGui.sameLine();
-            ImGui.checkbox(labels.get("Focal Point"), goalFocalPointGizmo.getSelected());
+            if (ImGui.checkbox(labels.get("Focal Point"), goalFocalPointGizmo.getSelected()))
+               goalFocalPointGizmo.getPoseGizmo().getTransformToParent().getTranslation().set(definition.getGoalFocalPoint().getValueReadOnly());
             for (RobotSide side : RobotSide.values)
             {
-               ImGui.checkbox(labels.get(side.getPascalCaseName() + " Foot to Goal"), goalFeet.get(side).getGizmo().getSelected());
+               if (ImGui.checkbox(labels.get(side.getPascalCaseName() + " Foot to Goal"), goalFeet.get(side).getGizmo().getSelected()))
+                  state.copyDefinitionToGoalFootstepToGoalTransform(side);
                if (side == RobotSide.LEFT)
                   ImGui.sameLine();
             }

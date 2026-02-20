@@ -16,6 +16,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 /** UI for the behavior footstep plan action's modifiable goal footstep, used by the footstep planner. */
 public class RDXFootstepPlanActionGoalFootstep
 {
+   private final RobotSide side;
    private final FootstepPlanActionDefinition definition;
    private final FootstepPlanActionState state;
 
@@ -28,6 +29,7 @@ public class RDXFootstepPlanActionGoalFootstep
                                             FootstepPlanActionState state,
                                             DRCRobotModel robotModel)
    {
+      this.side = side;
       this.definition = definition;
       this.state = state;
 
@@ -47,7 +49,15 @@ public class RDXFootstepPlanActionGoalFootstep
    public void updatePoses()
    {
       gizmo.getPoseGizmo().update();
-      graphic.setPose(gizmo.getPoseGizmo().getPose());
+
+      graphic.setPose(transform ->
+      {
+         transform.setToZero();
+         transform.getTranslation().setX(definition.getGoalFootstepToGoalX(side).getValue());
+         transform.getTranslation().setY(definition.getGoalFootstepToGoalY(side).getValue());
+         transform.getRotation().setToYawOrientation(definition.getGoalFootstepToGoalYaw(side).getValue());
+         state.getGoalFrame().getReferenceFrame().getTransformToRoot().transform(transform);
+      });
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)
