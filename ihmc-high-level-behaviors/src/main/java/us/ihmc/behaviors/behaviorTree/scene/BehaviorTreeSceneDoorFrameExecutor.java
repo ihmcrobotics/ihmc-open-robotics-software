@@ -13,20 +13,26 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.cuda.CUDAShapePointCounter;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensors.zed.ZEDImageSensor;
+
+import static behavior_msgs.msg.dds.BehaviorTreeSceneObjectStateMessage.*;
 
 public class BehaviorTreeSceneDoorFrameExecutor extends BehaviorTreeSceneObjectExecutor
 {
-   public static final long MINIMUM_POINTS = 300;
+   public static final long MIN_POST_POINTS = 400;
+   public static final long MIN_RECESS_POINTS = 3000;
 
    private final BehaviorTreeSceneExecutor scene;
    private volatile CUDAShapePointCounter pointCounter = null;
 
    private BehaviorTreeSceneDoorPanelExecutor doorPanel;
 
-   private long pointsInCapsule = 0;
-   private byte doorType = BehaviorTreeSceneObjectStateMessage.DOOR_TYPE_UNKNOWN;
-   private float doorOpenAngle = Float.NaN;
+   private RobotSide hingeSide;
+   private long latchPostPoints = 0;
+   private long hingeRecessPoints = 0;
+   private byte doorType = DOOR_TYPE_UNKNOWN;
+   private float doorOpenAngle = 0.0f;
 
    public BehaviorTreeSceneDoorFrameExecutor(long id,
                                              CRDTInfo crdtInfo,
@@ -54,7 +60,13 @@ public class BehaviorTreeSceneDoorFrameExecutor extends BehaviorTreeSceneObjectE
       if (!frozen.getValue() && pointCounter != null
        && (depthImage = scene.getImageSensor().getImage(ZEDImageSensor.DEPTH_IMAGE_KEY)) != null)
       {
-         pointsInCapsule = 0;
+         latchPostPoints = 0;
+
+         Vector3D panelY = new Vector3D(Axis3D.Y);
+         doorPanel.getTransformToWorld().getRotation().transform(panelY);
+         Vector3D chestX = new Vector3D(Axis3D.X);
+         syncedRobot.getReferenceFrames().getChestFrame().getTransformToWorldFrame().getRotation().transform(chestX);
+         hingeSide = panelY.dot(chestX) > 0.0 ? RobotSide.RIGHT : RobotSide.LEFT;
 
          double mechanismToHinge = 0.8; // TODO: Will break with different mechanisms
          Point3D hingePoint = new Point3D(mechanismToHinge, 0.0, 0.0);
@@ -78,28 +90,38 @@ public class BehaviorTreeSceneDoorFrameExecutor extends BehaviorTreeSceneObjectE
             searchLatchPostPoint.add(hingePoint, searchHingeToLatchPost);
 
             capsuleBottom.set(searchLatchPostPoint);
-            capsuleBottom.addZ(-0.2);
+            capsuleBottom.addZ(-0.3);
             capsuleTop.set(searchLatchPostPoint);
-            capsuleTop.addZ(0.2);
+            capsuleTop.addZ(0.3);
 
-            pointsInCapsule = Math.max(pointsInCapsule, pointCounter.countPointsInCapsule(depthImage, capsuleBottom, capsuleTop, 0.05f));
-            if (pointsInCapsule > MINIMUM_POINTS)
+            latchPostPoints = Math.max(latchPostPoints, pointCounter.countPointsInCapsule(depthImage, capsuleBottom, capsuleTop, 0.05f));
+            if (latchPostPoints > MIN_POST_POINTS)
             {
+               doorOpenAngle = (float) angle;
                RigidBodyTransform frameTransform = transform.getValueAndModify();
                frameTransform.getTranslation().set(hingePoint);
                EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.X, searchHingeToLatchPost, frameTransform.getRotation());
                referenceFrame.update();
-
-               if (angle > Math.toRadians(7.0)) // TODO: Will need to flip based on hinge side, this is for left hinge side
-                  doorType = BehaviorTreeSceneObjectStateMessage.DOOR_TYPE_PULL;
-               else if (angle < -Math.toRadians(7.0))
-                  doorType = BehaviorTreeSceneObjectStateMessage.DOOR_TYPE_PUSH;
-
-               doorOpenAngle = (float) angle;
-
                break;
             }
          }
+
+         hingeRecessPoints = 0;
+         for (RobotSide side : RobotSide.values)
+         {
+            Point3D hingeRecessPoint = new Point3D(-0.1, side.negateIfRightSide(0.1), 0.0);
+            transform.getValueReadOnly().transform(hingeRecessPoint);
+            capsuleBottom.set(hingeRecessPoint);
+            capsuleBottom.addZ(-0.3);
+            capsuleTop.set(hingeRecessPoint);
+            capsuleTop.addZ(0.3);
+            hingeRecessPoints += pointCounter.countPointsInCapsule(depthImage, capsuleBottom, capsuleTop, 0.05f);
+         }
+
+         if (Math.abs(doorOpenAngle) > Math.toRadians(7.0))
+            doorType = (hingeSide == RobotSide.LEFT ? doorOpenAngle > 0 : doorOpenAngle < 0) ? DOOR_TYPE_PUSH : DOOR_TYPE_PULL;
+         else
+            doorType = hingeRecessPoints > MIN_RECESS_POINTS ? DOOR_TYPE_PUSH : DOOR_TYPE_PULL;
 
          depthImage.release();
       }
@@ -108,7 +130,7 @@ public class BehaviorTreeSceneDoorFrameExecutor extends BehaviorTreeSceneObjectE
    @Override
    public boolean isStable()
    {
-      return pointsInCapsule > MINIMUM_POINTS; // TODO: Filter points in capsule for stable check
+      return latchPostPoints > MIN_POST_POINTS; // TODO: Filter points in capsule for stable check
    }
 
    @Override
@@ -117,8 +139,10 @@ public class BehaviorTreeSceneDoorFrameExecutor extends BehaviorTreeSceneObjectE
       super.toMessage(message);
 
       message.getPersistentDetection().setIsStable(isStable());
-      message.setPointsInCapsule(pointsInCapsule);
+      message.setLatchPostPoints(latchPostPoints);
+      message.setHingeRecessPoints(hingeRecessPoints);
       message.setDoorType(doorType);
+      message.setHingeSide(hingeSide == null ? -1 : hingeSide.toByte());
       message.setDoorOpenAngle(doorOpenAngle);
    }
 

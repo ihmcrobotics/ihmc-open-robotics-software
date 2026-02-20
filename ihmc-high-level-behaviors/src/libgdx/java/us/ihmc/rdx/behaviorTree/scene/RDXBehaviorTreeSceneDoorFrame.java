@@ -10,17 +10,20 @@ import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 
 import static behavior_msgs.msg.dds.BehaviorTreeSceneObjectStateMessage.*;
-import static us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneDoorFrameExecutor.MINIMUM_POINTS;
+import static us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneDoorFrameExecutor.*;
 
 public class RDXBehaviorTreeSceneDoorFrame extends RDXBehaviorTreeSceneObject
 {
    private RDXBehaviorTreeSceneDoorPanel doorPanel;
 
    private String panelNameID = "Unknown";
-   private long pointsInCapsule = 0;
+   private RobotSide hingeSide;
+   private long latchPostPoints = 0;
+   private long hingeRecessPoints = 0;
    private String doorType = "Unknown";
    private float doorOpenAngle = Float.NaN;
 
@@ -38,10 +41,14 @@ public class RDXBehaviorTreeSceneDoorFrame extends RDXBehaviorTreeSceneObject
    @Override
    public void update()
    {
-      if (model == null && pointsInCapsule > MINIMUM_POINTS) // Don't show until valid
+      if (model == null && latchPostPoints > MIN_POST_POINTS) // Don't show until valid
       {
-         model = RDXModelBuilder.buildModel(modelBuilder -> modelBuilder.addCapsule(0.4, 0.05, new Vector3D(0.8 + 0.16, 0.0, 0.0),
-                                                                                    LibGDXTools.toLibGDX(ColorDefinitions.GreenYellow())));
+         model = RDXModelBuilder.buildModel(modelBuilder ->
+         {
+            modelBuilder.addCapsule(0.6, 0.05, new Vector3D(0.8 + 0.16, 0.0, 0.0), LibGDXTools.toLibGDX(ColorDefinitions.GreenYellow()));
+            modelBuilder.addCapsule(0.6, 0.05, new Vector3D(-0.1, 0.1, 0.0), LibGDXTools.toLibGDX(ColorDefinitions.GreenYellow()));
+            modelBuilder.addCapsule(0.6, 0.05, new Vector3D(-0.1, -0.1, 0.0), LibGDXTools.toLibGDX(ColorDefinitions.GreenYellow()));
+         });
          modelInstance = new RDXModelInstance(model);
          modelInstance.setOpacity(0.3f);
       }
@@ -57,9 +64,13 @@ public class RDXBehaviorTreeSceneDoorFrame extends RDXBehaviorTreeSceneObject
       ImGui.endDisabled();
 
       ImGui.beginDisabled(!getPersistentDetection().getIsStable());
+      ImGui.text("Hinge side: %s".formatted(hingeSide == null ? "null" : hingeSide.getPascalCaseName()));
       ImGui.text("Door type: %s".formatted(doorType));
       ImGui.text("Door open angle: %.2f%s".formatted(Math.toDegrees(doorOpenAngle), UnitConversions.DEGREE_SYMBOL));
-      ImGui.text("Points in capsule: %d / %d".formatted(pointsInCapsule, MINIMUM_POINTS));
+      ImGui.text("Latch post points: %d / %d".formatted(latchPostPoints, MIN_POST_POINTS));
+      ImGui.endDisabled();
+      ImGui.beginDisabled(hingeRecessPoints <= MIN_RECESS_POINTS);
+      ImGui.text("Hinge recess points: %d / %d".formatted(hingeRecessPoints, MIN_RECESS_POINTS));
       ImGui.endDisabled();
    }
 
@@ -68,7 +79,9 @@ public class RDXBehaviorTreeSceneDoorFrame extends RDXBehaviorTreeSceneObject
    {
       super.fromMessage(message);
 
-      pointsInCapsule = message.getPointsInCapsule();
+      hingeSide = RobotSide.fromByte(message.getHingeSide());
+      latchPostPoints = message.getLatchPostPoints();
+      hingeRecessPoints = message.getHingeRecessPoints();
       doorType = switch (message.getDoorType())
       {
          case DOOR_TYPE_PULL -> "Pull";

@@ -49,9 +49,13 @@ module behavior_msgs
          */
         behavior_msgs::msg::dds::PersistentDetectionStatusMessage door_panel_detection;
         /**
-         * Used only for door frame
+         * Number of points in the latch post detection capsule
          */
-        unsigned long points_in_capsule;
+        unsigned long latch_post_points;
+        /**
+         * Number of points in the hinge side recess detection capsule
+         */
+        unsigned long hinge_recess_points;
         /**
          * The open angle of the door hinge (0 = closed, Zup yaw)
          */
@@ -60,6 +64,10 @@ module behavior_msgs
          * Door type as defined above
          */
         octet door_type;
+        /**
+         * Hinge side from the view of the robot
+         */
+        octet hinge_side;
         /**
          * Whether the object is frozen
          */
