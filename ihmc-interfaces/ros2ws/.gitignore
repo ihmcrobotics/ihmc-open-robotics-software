@@ -2,6 +2,7 @@
 **/install**
 **/log**
 **/src**
+**/vllm**
 **/__pycache__**
 modules/ros2-env/
 modules/vlm/test/models/
