@@ -1,6 +1,8 @@
 package us.ihmc.robotics.time;
 
 import us.ihmc.commons.Conversions;
+import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.yoVariables.providers.LongProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
@@ -9,7 +11,7 @@ public class ThreadTimer
 {
    private static final int REALTIME_RATE_SAMPLES = 100;
 
-   private final long expectedDTNanos;
+   private final LongProvider expectedDTNanos;
 
    private final YoLong tick;
    private final YoDouble dt;
@@ -32,7 +34,19 @@ public class ThreadTimer
     */
    public ThreadTimer(String name, double expectedDt, YoRegistry registry)
    {
-      expectedDTNanos = Conversions.secondsToNanoseconds(expectedDt);
+      this(name, () -> expectedDt, registry);
+   }
+
+   /**
+    * Creates a periodic thread timer including Jitter estimation.
+    *
+    * @param name prefix for the timing variables in the registry
+    * @param expectedDt of the periodic execution for Jitter estimation in seconds
+    * @param registry to attach timing variables to
+    */
+   public ThreadTimer(String name, DoubleProvider expectedDt, YoRegistry registry)
+   {
+      expectedDTNanos = () -> Conversions.secondsToNanoseconds(expectedDt.getValue());
 
       tick = new YoLong(name + "Tick", registry);
       dt = new YoDouble(name + "DT", registry);
@@ -52,7 +66,7 @@ public class ThreadTimer
     */
    public ThreadTimer(String name, YoRegistry registry)
    {
-      expectedDTNanos = 0;
+      expectedDTNanos = () -> 0L;
       jitter = null;
       realtimeRate = null;
       elapsedSystemTime = null;
@@ -90,7 +104,7 @@ public class ThreadTimer
          if (systemInitialTime != 0 && elapsedSystemTime != null)
          {
             elapsedSystemTime.set(Conversions.nanosecondsToSeconds(startTime - systemInitialTime));
-            realtimeRate.set(Conversions.nanosecondsToSeconds(REALTIME_RATE_SAMPLES * expectedDTNanos) / elapsedSystemTime.getValue());
+            realtimeRate.set(Conversions.nanosecondsToSeconds(REALTIME_RATE_SAMPLES * expectedDTNanos.getValue()) / elapsedSystemTime.getValue());
          }
          realtimeRateCounter = REALTIME_RATE_SAMPLES;
          systemInitialTime = startTime;
@@ -105,7 +119,7 @@ public class ThreadTimer
 
       // Jitter computation as done in the EtherCAT master.
       // As suggested in RFC1889 the estimate is filtered using a magic number.
-      long delta = startTime - lastStartTime - expectedDTNanos;
+      long delta = startTime - lastStartTime - expectedDTNanos.getValue();
       if (delta < 0)
          delta = -delta;
       jitter.add((delta - jitter.getValue()) / 16);

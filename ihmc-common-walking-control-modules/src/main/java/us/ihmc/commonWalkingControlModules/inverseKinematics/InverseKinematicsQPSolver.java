@@ -9,6 +9,7 @@ import us.ihmc.convexOptimization.exceptions.NoConvergenceException;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolverWithInactiveVariablesInterface;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -55,9 +56,9 @@ public class InverseKinematicsQPSolver
    private boolean useWarmStart = false;
    private int maxNumberOfIterations = 100;
 
-   private final double dt;
+   private final DoubleProvider dt;
 
-   public InverseKinematicsQPSolver(ActiveSetQPSolverWithInactiveVariablesInterface qpSolver, int numberOfDoFs, double dt, YoRegistry parentRegistry)
+   public InverseKinematicsQPSolver(ActiveSetQPSolverWithInactiveVariablesInterface qpSolver, int numberOfDoFs, DoubleProvider dt, YoRegistry parentRegistry)
    {
       this.qpSolver = qpSolver;
       this.numberOfDoFs = numberOfDoFs;
@@ -139,7 +140,7 @@ public class InverseKinematicsQPSolver
 
    private void addJointAccelerationRegularization()
    {
-      double factor = jointAccelerationRegularization.getDoubleValue() / (dt * dt);
+      double factor = jointAccelerationRegularization.getDoubleValue() / (dt.getValue() * dt.getValue());
       for (int i = 0; i < numberOfDoFs; i++)
       {
          solverInput_H.add(i, i, factor);

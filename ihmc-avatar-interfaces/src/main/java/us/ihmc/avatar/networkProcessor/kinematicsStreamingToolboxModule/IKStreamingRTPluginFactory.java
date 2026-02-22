@@ -294,6 +294,12 @@ public class IKStreamingRTPluginFactory
       private long initialTime = -1L;
 
       @Override
+      public double getCurrentDT()
+      {
+         return kinematicsStreamingToolboxController.getDT();
+      }
+
+      @Override
       public void run()
       {
          ToolboxState newToolboxStateRequested = newToolboxStateRequestedRef.getAndSet(null);

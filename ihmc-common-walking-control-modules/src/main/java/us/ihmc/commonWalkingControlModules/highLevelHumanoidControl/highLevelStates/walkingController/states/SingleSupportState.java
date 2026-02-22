@@ -32,9 +32,10 @@ public abstract class SingleSupportState extends WalkingState
                              WalkingMessageHandler walkingMessageHandler,
                              HighLevelHumanoidControllerToolbox controllerToolbox,
                              HighLevelControlManagerFactory managerFactory,
+                             double controlDT,
                              YoRegistry parentRegistry)
    {
-      super(singleSupportStateEnum, managerFactory, controllerToolbox, parentRegistry);
+      super(singleSupportStateEnum, managerFactory, controllerToolbox, controlDT, parentRegistry);
 
       this.supportSide = singleSupportStateEnum.getSupportSide();
       swingSide = supportSide.getOppositeSide();
@@ -46,7 +47,7 @@ public abstract class SingleSupportState extends WalkingState
       footSwitches = controllerToolbox.getFootSwitches();
       fullRobotModel = controllerToolbox.getFullRobotModel();
 
-      comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
+      comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager(controlDT);
    }
 
    public RobotSide getSwingSide()

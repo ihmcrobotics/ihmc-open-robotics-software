@@ -6,6 +6,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.robotics.dataStructures.GrowableRingIntBuffer;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
@@ -26,7 +27,6 @@ public class FootShakiesEstimator
    private static final double MIN_WEIGHT_FRACTION_FOR_CONTROL_SCALING = 0.32;
    private static final int COP_FORWARD_SWITCHES_FOR_SHAKIES = 4;
    private static final int COP_SIDEWAYS_SWITCHES_FOR_SHAKIES = 3;
-
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -67,10 +67,10 @@ public class FootShakiesEstimator
    private final SideDependentList<YoInteger> copForwardSwitches = new SideDependentList<>();
    private final SideDependentList<YoInteger> copSidewaysSwitches = new SideDependentList<>();
 
-   private final SideDependentList<int[]> copInForwardWindows = new SideDependentList<>();
-   private final SideDependentList<int[]> copInSidewaysWindows = new SideDependentList<>();
-   private final SideDependentList<int[]> filteredCopInForwardWindows = new SideDependentList<>();
-   private final SideDependentList<int[]> filteredCopInSidewaysWindows = new SideDependentList<>();
+   private final SideDependentList<GrowableRingIntBuffer> copInForwardWindows = new SideDependentList<>();
+   private final SideDependentList<GrowableRingIntBuffer> copInSidewaysWindows = new SideDependentList<>();
+   private final SideDependentList<GrowableRingIntBuffer> filteredCopInForwardWindows = new SideDependentList<>();
+   private final SideDependentList<GrowableRingIntBuffer> filteredCopInSidewaysWindows = new SideDependentList<>();
 
    // Variables computed by this estimator
    private final SideDependentList<YoFrameVector2D> yoCoPError = new SideDependentList<>();
@@ -82,16 +82,14 @@ public class FootShakiesEstimator
    private final double footLength;
    private final double footWidth;
 
-   private final double controlDT;
-   private int writeIndex = -1;
+   private final DoubleProvider controlDT;
    private int windowCurrentSize = 0;
-   private final int windowMaxSize;
 
    public FootShakiesEstimator(SideDependentList<ContactableFoot> feet,
                                SideDependentList<? extends FootSwitchInterface> footSwitches,
                                DoubleProvider time,
                                DoubleProvider totalMass,
-                               double controlDT,
+                               DoubleProvider controlDT,
                                double gravityZ,
                                YoRegistry parentRegistry)
    {
@@ -105,7 +103,7 @@ public class FootShakiesEstimator
       copWindowDuration.set(COP_WINDOW_DURATION);
       copSegmentGlitchDuration.set(COP_SEGMENT_GLITCH_DURATION);
       copMiddleSegmentFraction.set(COP_MIDDLE_SEGMENT_FRACTION);
-      windowMaxSize = (int) Math.ceil(copWindowDuration.getDoubleValue() / controlDT);
+      int windowMaxSize = (int) Math.ceil(copWindowDuration.getDoubleValue() / controlDT.getValue());
       minWeightFractionForControlScaling.set(MIN_WEIGHT_FRACTION_FOR_CONTROL_SCALING);
       copForwardSwitchesForShakies.set(COP_FORWARD_SWITCHES_FOR_SHAKIES);
       copSidewaysSwitchesForShakies.set(COP_SIDEWAYS_SWITCHES_FOR_SHAKIES);
@@ -119,10 +117,10 @@ public class FootShakiesEstimator
          copForwardSwitches.put(robotSide, new YoInteger(robotSide.getCamelCaseNameForStartOfExpression() + "CopForwardSwitches", registry));
          copSidewaysSwitches.put(robotSide, new YoInteger(robotSide.getCamelCaseNameForStartOfExpression() + "CopSidewaysSwitches", registry));
 
-         copInForwardWindows.put(robotSide, new int[windowMaxSize]);
-         copInSidewaysWindows.put(robotSide, new int[windowMaxSize]);
-         filteredCopInForwardWindows.put(robotSide, new int[windowMaxSize]);
-         filteredCopInSidewaysWindows.put(robotSide, new int[windowMaxSize]);
+         copInForwardWindows.put(robotSide, new GrowableRingIntBuffer(windowMaxSize));
+         copInSidewaysWindows.put(robotSide, new GrowableRingIntBuffer(windowMaxSize));
+         filteredCopInForwardWindows.put(robotSide, new GrowableRingIntBuffer(windowMaxSize));
+         filteredCopInSidewaysWindows.put(robotSide, new GrowableRingIntBuffer(windowMaxSize));
       }
 
 
@@ -141,7 +139,7 @@ public class FootShakiesEstimator
       footWidth = maxY - minY;
 
       copRateBreakFrequency.set(30.0);
-      DoubleProvider copRateAlpha = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(copRateBreakFrequency.getDoubleValue(), controlDT);
+      DoubleProvider copRateAlpha = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(copRateBreakFrequency.getDoubleValue(), controlDT.getValue());
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -242,15 +240,12 @@ public class FootShakiesEstimator
 
    private void updateCoPSwitchingCounters(SideDependentList<? extends FramePoint2DReadOnly> desiredCoPs)
    {
-      int glitchFilterSize = (int) Math.ceil(copSegmentGlitchDuration.getDoubleValue() / controlDT);
+      int glitchFilterSize = (int) Math.ceil(copSegmentGlitchDuration.getDoubleValue() / controlDT.getValue());
 
       double minZForceForCoPControlScaling = minWeightFractionForControlScaling.getDoubleValue() * totalMass.getValue() * gravityZ;
 
-      // Get the next index
-      int oldIndex = writeIndex;
-      writeIndex = nextWindowIndex(writeIndex);
-      // Record whether the cop is in different segments of the foot.
 
+      // Record whether the cop is in different segments of the foot.
       double xThreshold = footLength * copMiddleSegmentFraction.getValue() / 2.0;
       double yThreshold = footWidth * copMiddleSegmentFraction.getValue() / 2.0;
 
@@ -262,80 +257,80 @@ public class FootShakiesEstimator
 
          if (footForceVector.getZ() > minZForceForCoPControlScaling)
          {
+            GrowableRingIntBuffer copInForwardWindow = copInForwardWindows.get(robotSide);
+            GrowableRingIntBuffer copInSidewaysWindow = copInSidewaysWindows.get(robotSide);
+
             if (copActual.getX() > xThreshold || copDesired.getX() > xThreshold)
-               copInForwardWindows.get(robotSide)[writeIndex] = 1;
+               copInForwardWindows.get(robotSide).add(1);
             else if (copActual.getX() < -xThreshold || copDesired.getX() < -xThreshold)
-               copInForwardWindows.get(robotSide)[writeIndex] = -1;
+               copInForwardWindows.get(robotSide).add(-1);
             else
-               copInForwardWindows.get(robotSide)[writeIndex] = 0;
+               copInForwardWindows.get(robotSide).add(0);
 
             if (copActual.getY() > yThreshold || copDesired.getY() > yThreshold)
-               copInSidewaysWindows.get(robotSide)[writeIndex] = 1;
+               copInSidewaysWindow.add(1);
             else if (copActual.getY() < -yThreshold || copDesired.getY() < -yThreshold)
-               copInSidewaysWindows.get(robotSide)[writeIndex] = -1;
+               copInSidewaysWindow.add(-1);
             else
-               copInSidewaysWindows.get(robotSide)[writeIndex] = 0;
+               copInSidewaysWindow.add(0);
 
+            GrowableRingIntBuffer filteredCopInForwardWindow = filteredCopInForwardWindows.get(robotSide);
+            GrowableRingIntBuffer filteredCopInSidewaysWindow = filteredCopInSidewaysWindows.get(robotSide);
+            YoInteger copForwardGlitchCounter = copForwardGlitchCounters.get(robotSide);
+            YoInteger copSidewaysGlitchCounter = copSidewaysGlitchCounters.get(robotSide);
             // Update the glitch filter counters
-            if (oldIndex < 0 || filteredCopInForwardWindows.get(robotSide)[oldIndex] != copInForwardWindows.get(robotSide)[writeIndex])
-               copForwardGlitchCounters.get(robotSide).increment();
+            if (filteredCopInForwardWindow.getCurrentSize() == 0 || filteredCopInForwardWindow.getEnd() != copInForwardWindow.getEnd())
+               copForwardGlitchCounter.increment();
             else
-               copForwardGlitchCounters.get(robotSide).set(0);
+               copForwardGlitchCounter.set(0);
 
-            if (oldIndex < 0 || filteredCopInSidewaysWindows.get(robotSide)[oldIndex] != copInSidewaysWindows.get(robotSide)[writeIndex])
-               copSidewaysGlitchCounters.get(robotSide).increment();
+            if (filteredCopInSidewaysWindow.getCurrentSize() == 0 || filteredCopInSidewaysWindow.getEnd() != copInSidewaysWindow.getEnd())
+               copSidewaysGlitchCounter.increment();
             else
-               copSidewaysGlitchCounters.get(robotSide).set(0);
+               copSidewaysGlitchCounter.set(0);
 
             // Update the glitch filter windows
-            if (copForwardGlitchCounters.get(robotSide).getValue() >= glitchFilterSize || oldIndex < 0)
-               filteredCopInForwardWindows.get(robotSide)[writeIndex] = copInForwardWindows.get(robotSide)[writeIndex];
+            if (copForwardGlitchCounter.getValue() >= glitchFilterSize || filteredCopInForwardWindow.getCurrentSize() == 0)
+               filteredCopInForwardWindow.add(copInForwardWindow.getEnd());
             else
-               filteredCopInForwardWindows.get(robotSide)[writeIndex] = filteredCopInForwardWindows.get(robotSide)[oldIndex];
-            if (copSidewaysGlitchCounters.get(robotSide).getValue() >= glitchFilterSize || oldIndex < 0)
-               filteredCopInSidewaysWindows.get(robotSide)[writeIndex] = copInSidewaysWindows.get(robotSide)[writeIndex];
+               filteredCopInForwardWindow.add(filteredCopInForwardWindow.getEnd());
+            if (copSidewaysGlitchCounter.getValue() >= glitchFilterSize || filteredCopInSidewaysWindow.getCurrentSize() == 0)
+               filteredCopInSidewaysWindow.add(copInSidewaysWindow.getEnd());
             else
-               filteredCopInSidewaysWindows.get(robotSide)[writeIndex] = filteredCopInSidewaysWindows.get(robotSide)[oldIndex];
+               filteredCopInSidewaysWindow.add(filteredCopInSidewaysWindow.getEnd());
          }
          else
          { // We're not in contact, so set everything to the middle.
-            copInForwardWindows.get(robotSide)[writeIndex] = 0;
-            copInSidewaysWindows.get(robotSide)[writeIndex] = 0;
+            copInForwardWindows.get(robotSide).add(0);
+            copInSidewaysWindows.get(robotSide).add(0);
 
             copForwardGlitchCounters.get(robotSide).set(0);
             copSidewaysGlitchCounters.get(robotSide).set(0);
 
-            filteredCopInForwardWindows.get(robotSide)[writeIndex] = 0;
-            filteredCopInSidewaysWindows.get(robotSide)[writeIndex] = 0;
+            filteredCopInForwardWindows.get(robotSide).add(0);
+            filteredCopInSidewaysWindows.get(robotSide).add(0);
          }
 
          // Update a data holder with the value.
-         copForwardSegments.get(robotSide).set(filteredCopInForwardWindows.get(robotSide)[writeIndex]);
-         copSidewaysSegments.get(robotSide).set(filteredCopInSidewaysWindows.get(robotSide)[writeIndex]);
+         copForwardSegments.get(robotSide).set(filteredCopInForwardWindows.get(robotSide).getEnd());
+         copSidewaysSegments.get(robotSide).set(filteredCopInSidewaysWindows.get(robotSide).getEnd());
       }
-
-      // Update the size of the window to reflect the change.
-      windowCurrentSize = Math.min(windowMaxSize, windowCurrentSize + 1);
 
       // Count the number of times it switches sides
       for (RobotSide robotSide : RobotSide.values)
       {
-         int[] forwardWindows = filteredCopInForwardWindows.get(robotSide);
-         int[] sidewaysWindows = filteredCopInSidewaysWindows.get(robotSide);
-
-         int currentIndex = getStartOfWindowIndex();
+         GrowableRingIntBuffer forwardWindows = filteredCopInForwardWindows.get(robotSide);
+         GrowableRingIntBuffer sidewaysWindows = filteredCopInSidewaysWindows.get(robotSide);
 
          int copForwardSwitches = 0;
          int copSidewaysSwitches = 0;
-         int currentForwardStatus = forwardWindows[currentIndex];
-         int currentSidewaysStatus = sidewaysWindows[currentIndex];
+         int currentForwardStatus = forwardWindows.getStart();
+         int currentSidewaysStatus = sidewaysWindows.getStart();
 
-         while (currentIndex != writeIndex)
+         for (int currentIndex = 0; currentIndex < forwardWindows.getCurrentSize(); currentIndex++)
          {
-            currentIndex = nextWindowIndex(currentIndex);
-
-            int candidateForwardStatus = forwardWindows[currentIndex];
-            int candidateSidewaysStatus = sidewaysWindows[currentIndex];
+            int candidateForwardStatus = forwardWindows.get(currentIndex);
+            int candidateSidewaysStatus = sidewaysWindows.get(currentIndex);
 
             if (candidateForwardStatus != currentForwardStatus)
             {  // the zone where the cop has changed. We should assess that.
@@ -371,27 +366,6 @@ public class FootShakiesEstimator
 
          this.copForwardSwitches.get(robotSide).set(copForwardSwitches);
          this.copSidewaysSwitches.get(robotSide).set(copSidewaysSwitches);
-      }
-   }
-
-   private int nextWindowIndex(int currentIndex)
-   {
-      if (currentIndex == windowMaxSize - 1)
-         return 0;
-      return currentIndex + 1;
-   }
-
-   private int getStartOfWindowIndex()
-   {
-      if (windowCurrentSize == windowMaxSize)
-      {
-         // the buffer is full, so get the next write index, as it's the start
-         return nextWindowIndex(writeIndex);
-      }
-      else
-      {
-         // the buffer isn't full, so get the first field
-         return 0;
       }
    }
 }

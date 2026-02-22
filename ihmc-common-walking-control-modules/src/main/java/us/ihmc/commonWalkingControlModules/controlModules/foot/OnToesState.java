@@ -83,7 +83,7 @@ public class OnToesState extends AbstractFootControlState
                                                                  contactPoint.getNameSuffix() + "Limited",
                                                                  registry,
                                                                  maxContactPointRate,
-                                                                 controllerToolbox.getControlDT(),
+                                                                 footControlHelper.getControlDT(),
                                                                  contactPoint.getReferenceFrame()));
       }
 

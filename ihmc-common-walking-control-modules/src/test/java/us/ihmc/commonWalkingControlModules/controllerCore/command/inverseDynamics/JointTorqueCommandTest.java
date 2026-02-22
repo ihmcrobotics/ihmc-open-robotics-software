@@ -84,7 +84,7 @@ public class JointTorqueCommandTest
       spatialAccelerationCommand.setAsHardConstraint();
       spatialAccelerationCommand.getDesiredLinearAcceleration().setY(1.0);
 
-      WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(0.01,
+      WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(() -> 0.01,
                                                                                        9.81,
                                                                                        null,
                                                                                        controlledJoints,
@@ -204,7 +204,7 @@ public class JointTorqueCommandTest
       JointBasics[] controlledJoints = new JointBasics[] {floatingJoint, upperJoint, lowerJoint};
       CenterOfMassReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", ReferenceFrame.getWorldFrame(), elevator);
 
-      WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(0.01,
+      WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(() -> 0.01,
                                                                                        9.81,
                                                                                        floatingJoint,
                                                                                        controlledJoints,
@@ -334,7 +334,7 @@ public class JointTorqueCommandTest
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       PoseReferenceFrame controlFrame = new PoseReferenceFrame("controlFrame", link2.getBodyFixedFrame());
 
-      WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(0.01,
+      WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(() -> 0.01,
                                                                                        9.81,
                                                                                        null,
                                                                                        controlledJoints,
@@ -488,7 +488,7 @@ public class JointTorqueCommandTest
       JointBasics[] controlledJoints = new JointBasics[] {floatingJoint, upperJoint, lowerJoint};
       CenterOfMassReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", ReferenceFrame.getWorldFrame(), elevator);
 
-      WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(0.01,
+      WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(() -> 0.01,
                                                                                        9.81,
                                                                                        floatingJoint,
                                                                                        controlledJoints,

@@ -33,6 +33,7 @@ public class WholeBodyControllerCoreFactory
    private WholeBodyControllerCore controllerCore;
    private WholeBodyControlCoreToolbox toolbox;
 
+   private DoubleProvider controlDT;
    private HighLevelHumanoidControllerToolbox controllerToolbox;
    private WalkingControllerParameters walkingControllerParameters;
    private final FeedbackControllerTemplate template = new FeedbackControllerTemplate();
@@ -40,6 +41,14 @@ public class WholeBodyControllerCoreFactory
    public WholeBodyControllerCoreFactory(YoRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
+   }
+
+   private boolean hasControlDTProvider(Class<?> managerClass)
+   {
+      if (controlDT != null)
+         return true;
+      missingObjectWarning(DoubleProvider.class, managerClass);
+      return false;
    }
 
    private boolean hasHighLevelHumanoidControllerToolbox(Class<?> managerClass)
@@ -61,6 +70,11 @@ public class WholeBodyControllerCoreFactory
    private void missingObjectWarning(Class<?> missingObjectClass, Class<?> managerClass)
    {
       LogTools.warn(missingObjectClass.getSimpleName() + " has not been set, cannot create: " + managerClass.getSimpleName());
+   }
+
+   public void setControlDTProvider(DoubleProvider controlDT)
+   {
+      this.controlDT = controlDT;
    }
 
    public void setHighLevelHumanoidControllerToolbox(HighLevelHumanoidControllerToolbox controllerToolbox)
@@ -86,6 +100,8 @@ public class WholeBodyControllerCoreFactory
       if (toolbox != null)
          return toolbox;
 
+      if (!hasControlDTProvider(WholeBodyControllerCore.class))
+         return null;
       if (!hasHighLevelHumanoidControllerToolbox(WholeBodyControllerCore.class))
          return null;
       if (!hasWalkingControllerParameters(WholeBodyControllerCore.class))
@@ -96,7 +112,7 @@ public class WholeBodyControllerCoreFactory
 
       FloatingJointBasics rootJoint = fullRobotModel.getRootJoint();
       ReferenceFrame centerOfMassFrame = controllerToolbox.getCenterOfMassFrame();
-      toolbox = new WholeBodyControlCoreToolbox(controllerToolbox.getControlDT(),
+      toolbox = new WholeBodyControlCoreToolbox(controlDT,
                                                 controllerToolbox.getGravityZ(),
                                                 rootJoint,
                                                 jointsToOptimizeFor,
@@ -156,6 +172,8 @@ public class WholeBodyControllerCoreFactory
       if (linearMomentumRateControlModule != null)
          return linearMomentumRateControlModule;
 
+      if (!hasControlDTProvider(LinearMomentumRateControlModule.class))
+         return null;
       if (!hasHighLevelHumanoidControllerToolbox(LinearMomentumRateControlModule.class))
          return null;
       if (!hasWalkingControllerParameters(LinearMomentumRateControlModule.class))
@@ -163,7 +181,6 @@ public class WholeBodyControllerCoreFactory
 
       CenterOfMassStateProvider centerOfMassStateProvider = controllerToolbox;
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
-      double controlDT = controllerToolbox.getControlDT();
       double gravityZ = controllerToolbox.getGravityZ();
       DoubleProvider totalMassProvider = controllerToolbox.getTotalMassProvider();
       RigidBodyBasics elevator = fullRobotModel.getElevator();

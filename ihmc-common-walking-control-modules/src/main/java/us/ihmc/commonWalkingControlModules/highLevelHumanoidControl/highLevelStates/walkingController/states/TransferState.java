@@ -50,9 +50,10 @@ public abstract class TransferState extends WalkingState
                         WalkingFailureDetectionControlModule failureDetectionControlModule,
                         DoubleProvider unloadFraction,
                         DoubleProvider rhoMin,
+                        double controlDT,
                         YoRegistry parentRegistry)
    {
-      super(transferStateEnum, managerFactory, controllerToolbox, parentRegistry);
+      super(transferStateEnum, managerFactory, controllerToolbox, controlDT, parentRegistry);
 
       this.transferToSide = transferStateEnum.getTransferToSide();
       this.walkingMessageHandler = walkingMessageHandler;
@@ -61,8 +62,8 @@ public abstract class TransferState extends WalkingState
       this.rhoMin = rhoMin;
 
       walkingTrajectoryPath = controllerToolbox.getWalkingTrajectoryPath();
-      comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
-      feetManager = managerFactory.getOrCreateFeetManager();
+      comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager(controlDT);
+      feetManager = managerFactory.getOrCreateFeetManager(controlDT);
 
       if (unloadFraction != null)
       {

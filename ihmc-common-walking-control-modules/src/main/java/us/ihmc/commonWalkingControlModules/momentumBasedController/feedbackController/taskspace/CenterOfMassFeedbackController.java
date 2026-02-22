@@ -69,10 +69,10 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
    private final YoPID3DGains gains;
    private final Matrix3D tempGainMatrix = new Matrix3D();
 
-   private ReferenceFrame centerOfMassFrame;
-   private CentroidalMomentumRateCalculator centroidalMomentumHandler;
+   private final ReferenceFrame centerOfMassFrame;
+   private final CentroidalMomentumRateCalculator centroidalMomentumHandler;
 
-   private final double dt;
+   private final DoubleProvider dt;
    private final DoubleProvider totalMassProvider;
    private final boolean computeIntegralTerm;
 
@@ -414,7 +414,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       }
 
       feedbackTermToPack.setIncludingFrame(yoErrorPosition);
-      feedbackTermToPack.scale(dt);
+      feedbackTermToPack.scale(dt.getValue());
       feedbackTermToPack.add(yoErrorPositionIntegrated);
       selectionMatrix.applyLinearSelection(feedbackTermToPack);
       feedbackTermToPack.clipToMaxNorm(maximumIntegralError);

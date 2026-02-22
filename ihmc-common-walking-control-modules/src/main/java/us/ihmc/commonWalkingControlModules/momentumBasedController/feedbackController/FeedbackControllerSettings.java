@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackCont
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public interface FeedbackControllerSettings
@@ -30,7 +31,7 @@ public interface FeedbackControllerSettings
     * @param registry  the registry to which the filter variables are to be added.
     * @return the filter to apply to the error velocity. If {@code null}, no filter will be applied.
     */
-   default FilterDouble1D getVelocity1DErrorFilter(String jointName, double dt, YoRegistry registry)
+   default FilterDouble1D getVelocity1DErrorFilter(String jointName, DoubleProvider dt, YoRegistry registry)
    {
       return null;
    }
@@ -48,7 +49,7 @@ public interface FeedbackControllerSettings
     * @param registry        the registry to which the filter variables are to be added.
     * @return the filter to apply to the error velocity. If {@code null}, no filter will be applied.
     */
-   default FilterVector3D getAngularVelocity3DErrorFilter(String endEffectorName, double dt, YoRegistry registry)
+   default FilterVector3D getAngularVelocity3DErrorFilter(String endEffectorName, DoubleProvider dt, YoRegistry registry)
    {
       return null;
    }
@@ -66,7 +67,7 @@ public interface FeedbackControllerSettings
     * @param registry        the registry to which the filter variables are to be added.
     * @return the filter to apply to the error velocity. If {@code null}, no filter will be applied.
     */
-   default FilterVector3D getLinearVelocity3DErrorFilter(String endEffectorName, double dt, YoRegistry registry)
+   default FilterVector3D getLinearVelocity3DErrorFilter(String endEffectorName, DoubleProvider dt, YoRegistry registry)
    {
       return null;
    }

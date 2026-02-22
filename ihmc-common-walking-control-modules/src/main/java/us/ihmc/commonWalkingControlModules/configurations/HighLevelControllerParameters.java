@@ -11,6 +11,8 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 
 public interface HighLevelControllerParameters
 {
+   double getControlDT(HighLevelControllerName controllerName);
+
    WholeBodySetpointParameters getStandPrepParameters();
 
    HighLevelControllerName getDefaultInitialControllerState();
