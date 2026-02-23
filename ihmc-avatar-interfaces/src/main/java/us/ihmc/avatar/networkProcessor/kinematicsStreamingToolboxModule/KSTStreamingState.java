@@ -535,7 +535,7 @@ public class KSTStreamingState implements State
             if (startTime.isNaN())
             {
                startTime.set(timeInState);
-               rigidBodyInitialPoseMap.get(rigidBodyName).set(desiredRigidBodies.get(rigidBodyName).getBodyFixedFrame().getTransformToRoot());
+               rigidBodyInitialPoseMap.get(rigidBodyName).setFromReferenceFrame(desiredRigidBodies.get(rigidBodyName).getBodyFixedFrame());
             }
             blendWeightMatrix(rigidBodyInput.getWeightMatrix(), timeInState, startTime.getValue(), streamingBlendingDuration.getValue());
 

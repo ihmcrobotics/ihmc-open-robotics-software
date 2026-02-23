@@ -1875,7 +1875,7 @@ public class KinematicsToolboxController extends ToolboxController implements SC
       return centerOfMassSafeMargin;
    }
 
-   public FramePoint3D getCenterOfMass()
+   public FramePoint3DReadOnly getCenterOfMass()
    {
       return centerOfMass;
    }
