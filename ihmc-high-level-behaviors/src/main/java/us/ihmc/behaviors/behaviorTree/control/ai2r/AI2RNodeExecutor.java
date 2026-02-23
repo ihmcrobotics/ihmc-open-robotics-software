@@ -223,8 +223,6 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
                {
                   // Retrieve the name of the closest previous checkpoint
                   String checkpointName = checkpoint.getDefinition().getName();
-                  LogTools.info("Leaf failed at index: {}, closest previous checkpoint: {}", leaf.getLeafIndex(), checkpointName);
-
                   statusMessage.setFailedBehavior(checkpointName);
                   statusMessage.setBehaviorInProgress("-");
                   if (leaf instanceof ActionNodeState<?> action)
