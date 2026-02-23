@@ -6,11 +6,15 @@ import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class PlanarRegionsListGenerator
@@ -182,17 +186,17 @@ public class PlanarRegionsListGenerator
       transformGenerator.identity();
    }
 
-   public void rotateEuler(Vector3D eulerAngles)
+   public void rotateEuler(Vector3DReadOnly eulerAngles)
    {
       transformGenerator.rotateEuler(eulerAngles);
    }
 
-   public void rotate(RotationMatrix rotation)
+   public void rotate(RotationMatrixReadOnly rotation)
    {
       transformGenerator.rotate(rotation);
    }
 
-   public void rotate(Quaternion rotation)
+   public void rotate(QuaternionReadOnly rotation)
    {
       transformGenerator.rotate(rotation);
    }
@@ -202,7 +206,7 @@ public class PlanarRegionsListGenerator
       transformGenerator.rotate(rotationAngle, axis);
    }
 
-   public void setTransform(RigidBodyTransform transform)
+   public void setTransform(RigidBodyTransformReadOnly transform)
    {
       transformGenerator.setTransform(transform);
    }

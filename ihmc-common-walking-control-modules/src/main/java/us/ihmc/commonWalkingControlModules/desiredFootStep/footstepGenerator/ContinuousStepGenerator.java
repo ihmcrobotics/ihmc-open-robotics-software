@@ -575,20 +575,20 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
       csgStatusMessage.setSnappingToHeightmap(snapToHeightmap);
    }
 
-   private static void calculateNextFootstepPose2D(double stepTime,
-                                                   double desiredVelocityX,
-                                                   double desiredVelocityY,
-                                                   double desiredTurningVelocity,
-                                                   RobotSide swingSide,
-                                                   double maxStepLengthForwards,
-                                                   double maxStepLengthBackwards,
-                                                   double maxStepWidth,
-                                                   double defaultStepWidth,
-                                                   double minStepWidth,
-                                                   double turnMaxAngleInward,
-                                                   double turnMaxAngleOutward,
-                                                   FramePose2D stanceFootPose2D,
-                                                   FramePose2D nextFootstepPose2DToPack)
+   public static void calculateNextFootstepPose2D(double stepTime,
+                                                  double desiredVelocityX,
+                                                  double desiredVelocityY,
+                                                  double desiredTurningVelocity,
+                                                  RobotSide swingSide,
+                                                  double maxStepLengthForwards,
+                                                  double maxStepLengthBackwards,
+                                                  double maxStepWidth,
+                                                  double defaultStepWidth,
+                                                  double minStepWidth,
+                                                  double turnMaxAngleInward,
+                                                  double turnMaxAngleOutward,
+                                                  FramePose2D stanceFootPose2D,
+                                                  FramePose2D nextFootstepPose2DToPack)
    {
       double xDisplacement = MathTools.clamp(stepTime * desiredVelocityX, -maxStepLengthBackwards, maxStepLengthForwards);
       double yDisplacement = stepTime * desiredVelocityY + swingSide.negateIfRightSide(defaultStepWidth);

@@ -198,6 +198,11 @@ public class WalkingControllerState extends HighLevelControllerState
       return walkingController.getWalkingStateEnum();
    }
 
+   public WalkingHighLevelHumanoidController getWalkingController()
+   {
+      return walkingController;
+   }
+
    @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {

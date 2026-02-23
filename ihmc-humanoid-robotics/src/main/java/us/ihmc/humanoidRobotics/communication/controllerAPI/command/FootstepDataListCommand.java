@@ -125,6 +125,11 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
       this.defaultTransferDuration = defaultTransferDuration;
    }
 
+   public void setFinalTransferDuration(double finalTransferDuration)
+   {
+      this.finalTransferDuration = finalTransferDuration;
+   }
+
    public double getDefaultSwingDuration()
    {
       return defaultSwingDuration;

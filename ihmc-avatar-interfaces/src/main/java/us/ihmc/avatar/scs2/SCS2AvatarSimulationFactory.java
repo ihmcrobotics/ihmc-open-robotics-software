@@ -4,14 +4,15 @@ import gnu.trove.map.TObjectDoubleMap;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import us.ihmc.avatar.AvatarControllerThread;
+import us.ihmc.avatar.AvatarControllerThreadInterface;
 import us.ihmc.avatar.AvatarEstimatorThread;
 import us.ihmc.avatar.AvatarEstimatorThreadFactory;
+import us.ihmc.avatar.AvatarMultiContactGaitGeneratorThread;
 import us.ihmc.avatar.AvatarSimulatedHandControlThread;
-import us.ihmc.avatar.AvatarStandingPushRecoveryThread;
 import us.ihmc.avatar.AvatarStepGeneratorThread;
 import us.ihmc.avatar.ControllerTask;
 import us.ihmc.avatar.EstimatorTask;
-import us.ihmc.avatar.StandingPushRecoveryControlTask;
+import us.ihmc.avatar.MultiContactGaitGeneratorTask;
 import us.ihmc.avatar.StepGeneratorTask;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
@@ -198,7 +199,7 @@ public class SCS2AvatarSimulationFactory
    private final OptionalFactoryField<Boolean> createIKStreamingRealTimeController = new OptionalFactoryField<>(
          "createIKStreamingRealTimeController",
          false);
-   private final OptionalFactoryField<Boolean> createStandingPushRecoveryController = new OptionalFactoryField<>(
+   private final OptionalFactoryField<Boolean> createMultiContactGaitGenerator = new OptionalFactoryField<>(
          "createStandingPushRecoveryController",
          false);
    private final OptionalFactoryField<KinematicsStreamingToolboxParameters> ikStreamingParameters = new OptionalFactoryField<>(
@@ -218,7 +219,7 @@ public class SCS2AvatarSimulationFactory
    protected AvatarEstimatorThread estimatorThread;
    protected AvatarControllerThread controllerThread;
    protected AvatarStepGeneratorThread stepGeneratorThread;
-   protected AvatarStandingPushRecoveryThread standingPushRecoveryThread;
+   protected AvatarControllerThreadInterface multiContactGaitGeneratorThread;
    protected IKStreamingRTThread ikStreamingRTThread;
    protected DisposableRobotController robotController;
    protected SimulatedDRCRobotTimeProvider simulatedRobotTimeProvider;
@@ -249,7 +250,7 @@ public class SCS2AvatarSimulationFactory
       setupControllerThread();
       setupStepGeneratorThread();
       setupIKStreamingRTControllerThread();
-      setupStandingPushRecoveryThread();
+      setupMultiContactGaitGenerator();
       setupMultiThreadedRobotController();
       setupLidarController();
       initializeStateEstimatorToActual();
@@ -590,17 +591,18 @@ public class SCS2AvatarSimulationFactory
       simulationConstructionSet.addYoGraphic(ikStreamingRTThread.getSCS2YoGraphics());
    }
 
-   private void setupStandingPushRecoveryThread()
+   private void setupMultiContactGaitGenerator()
    {
-      if (!createStandingPushRecoveryController.get())
+      if (!createMultiContactGaitGenerator.get())
          return;
 
       HumanoidRobotContextDataFactory contextDataFactory = new HumanoidRobotContextDataFactory();
-      standingPushRecoveryThread = new AvatarStandingPushRecoveryThread(realtimeROS2Node.get(),
-                                                                        robotModel.get(),
-                                                                        contextDataFactory,
-                                                                        highLevelHumanoidControllerFactory.get().getStatusOutputManager(),
-                                                                        highLevelHumanoidControllerFactory.get().getCommandInputManager());
+
+      multiContactGaitGeneratorThread = new AvatarMultiContactGaitGeneratorThread(realtimeROS2Node.get(),
+                                                                                  robotModel.get(),
+                                                                                  contextDataFactory,
+                                                                                  highLevelHumanoidControllerFactory.get().getStatusOutputManager(),
+                                                                                  highLevelHumanoidControllerFactory.get().getCommandInputManager());
    }
 
    private void setupMultiThreadedRobotController()
@@ -634,13 +636,13 @@ public class SCS2AvatarSimulationFactory
       else
          ikStreamingRTTask = null;
 
-      HumanoidRobotControlTask standingPushRecoveryRTTask = null;
-      if (createStandingPushRecoveryController.get())
-         standingPushRecoveryRTTask = new StandingPushRecoveryControlTask("StandingPushRecovery",
-                                                                          standingPushRecoveryThread,
-                                                                          controllerDivisor,
-                                                                          simulationDT.get(),
-                                                                          masterFullRobotModel);
+      HumanoidRobotControlTask multiContactGaitGeneratorTask = null;
+      if (createMultiContactGaitGenerator.get())
+         multiContactGaitGeneratorTask = new MultiContactGaitGeneratorTask("MCGG",
+                                                                        multiContactGaitGeneratorThread,
+                                                                        controllerDivisor,
+                                                                        simulationDT.get(),
+                                                                        masterFullRobotModel);
 
       SimulatedHandControlTask handControlTask = null;
       AvatarSimulatedHandControlThread handControlThread = null;
@@ -713,8 +715,8 @@ public class SCS2AvatarSimulationFactory
          tasks.add(ikStreamingRTTask);
       if (handControlTask != null)
          tasks.add(handControlTask);
-      if (standingPushRecoveryRTTask != null)
-         tasks.add(standingPushRecoveryRTTask);
+      if (multiContactGaitGeneratorTask != null)
+         tasks.add(multiContactGaitGeneratorTask);
 
       // Create the controller that will run the tasks.
       String controllerName = "DRCSimulation";
@@ -781,9 +783,9 @@ public class SCS2AvatarSimulationFactory
             stepGeneratorTask.addCallbackPostTask(() -> yoVariableServer.update(ikStreamingRTThread.getHumanoidRobotContextData().getTimestamp(),
                                                                                 ikStreamingRTThread.getYoVariableRegistry()));
          }
-         if (standingPushRecoveryThread != null)
+         if (multiContactGaitGeneratorThread != null)
          {
-            yoVariableServer.addRegistry(standingPushRecoveryThread.getYoVariableRegistry(),
+            yoVariableServer.addRegistry(multiContactGaitGeneratorThread.getYoVariableRegistry(),
                                          ikStreamingRTThread.getSCS2YoGraphics());
 //            standingPushRecoveryRTTask.addCallbackPostTask(() -> yoVariableServer.update(ikStreamingRTThread.getHumanoidRobotContextData()
 //                                                                                                   .getTimestamp(),
@@ -806,9 +808,9 @@ public class SCS2AvatarSimulationFactory
       mirroredRegistries.add(setupWithMirroredRegistry(stepGeneratorThread.getYoVariableRegistry(), stepGeneratorTask, robotController.getYoRegistry()));
       if (ikStreamingRTTask != null)
          mirroredRegistries.add(setupWithMirroredRegistry(ikStreamingRTThread.getYoVariableRegistry(), ikStreamingRTTask, robotController.getYoRegistry()));
-      if (standingPushRecoveryRTTask != null)
-         mirroredRegistries.add(setupWithMirroredRegistry(standingPushRecoveryThread.getYoVariableRegistry(),
-                                                          standingPushRecoveryRTTask,
+      if (multiContactGaitGeneratorTask != null)
+         mirroredRegistries.add(setupWithMirroredRegistry(multiContactGaitGeneratorThread.getYoVariableRegistry(),
+                                                          multiContactGaitGeneratorTask,
                                                           robotController.getYoRegistry()));
       if (handControlThread != null)
          mirroredRegistries.add(setupWithMirroredRegistry(handControlThread.getYoVariableRegistry(), handControlTask, robotController.getYoRegistry()));
@@ -833,8 +835,6 @@ public class SCS2AvatarSimulationFactory
             controllerThread.initialize();
             stepGeneratorThread.initialize();
             //            ikStreamingRTThread.initialize(); // TODO Not sure if that's needed.
-            if (standingPushRecoveryThread != null)
-               standingPushRecoveryThread.initialize();
             masterContext.set(estimatorThread.getHumanoidRobotContextData());
 
             robotController.initialize();
@@ -1216,9 +1216,9 @@ public class SCS2AvatarSimulationFactory
       this.createIKStreamingRealTimeController.set(createIKStreamingRealTimeController);
    }
 
-   public void createStandingPushRecoveryController(boolean standingPushRecoveryController)
+   public void createMultiContactGaitGenerator(boolean createMultiContactGaitGenerator)
    {
-      this.createStandingPushRecoveryController.set(standingPushRecoveryController);
+      this.createMultiContactGaitGenerator.set(createMultiContactGaitGenerator);
    }
 
    public void setIKStreamingParameters(KinematicsStreamingToolboxParameters ikStreamingParameters)

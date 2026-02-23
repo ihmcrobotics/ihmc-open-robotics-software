@@ -3,6 +3,7 @@ package us.ihmc.avatar.drcRobot;
 import us.ihmc.avatar.AvatarSimulatedHandControlThread;
 import us.ihmc.avatar.arm.PresetArmConfiguration;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
+import us.ihmc.avatar.multiContact.pushRecovery.ReactiveBracingPlanner;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
@@ -235,7 +236,7 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
       return new RigidBodyTransform();
    }
 
-   default StandingReactiveBracingPlanner getReactiveBracingPlanner()
+   default ReactiveBracingPlanner getReactiveBracingPlanner()
    {
       return null;
    }
