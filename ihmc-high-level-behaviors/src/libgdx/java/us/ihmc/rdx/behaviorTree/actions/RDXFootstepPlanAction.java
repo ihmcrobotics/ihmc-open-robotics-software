@@ -285,7 +285,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    @Override
    public void calculateVRPick(RDXVRContext vrContext)
    {
-      if (state.areFramesInWorld())
+      if (getSelected() && state.areFramesInWorld())
       {
          // TODO: VR support for Pose3DGizmo
       }
@@ -294,7 +294,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    @Override
    public void processVRInput(RDXVRContext vrContext)
    {
-      if (state.areFramesInWorld())
+      if (getSelected() && state.areFramesInWorld())
       {
          if (!definition.getIsManuallyPlaced())
          {
@@ -306,7 +306,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    @Override
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
-      if (state.areFramesInWorld())
+      if (getSelected() && state.areFramesInWorld())
       {
          if (definition.getIsManuallyPlaced())
          {
@@ -328,7 +328,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    @Override
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      if (state.areFramesInWorld())
+      if (getSelected() && state.areFramesInWorld())
       {
          if (definition.getIsManuallyPlaced())
          {
@@ -463,29 +463,22 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (state.getIsNextForExecution())
+      if ((state.getIsNextForExecution() || getSelected() || state.getIsExecuting()) && state.areFramesInWorld())
       {
-         if (state.areFramesInWorld())
+         if (definition.getIsManuallyPlaced())
+            for (RDXFootstepPlanActionFootstep footstep : manuallyPlacedFootsteps)
+               footstep.getVirtualRenderables(renderables, pool);
+         else
          {
-            if (definition.getIsManuallyPlaced())
-            {
-               for (RDXFootstepPlanActionFootstep footstep : manuallyPlacedFootsteps)
-               {
-                  footstep.getVirtualRenderables(renderables, pool);
-               }
-            }
-            else
-            {
-               goalArrowGraphic.getRenderables(renderables, pool);
+            goalArrowGraphic.getRenderables(renderables, pool);
 
-               goalStancePointGizmo.getVirtualRenderables(renderables, pool);
-               goalFocalPointGizmo.getVirtualRenderables(renderables, pool);
-               for (RobotSide side : RobotSide.values)
-                  goalFeet.get(side).getRenderables(renderables, pool, footstepsWidget.getIsHovered().get(side));
+            goalStancePointGizmo.getVirtualRenderables(renderables, pool);
+            goalFocalPointGizmo.getVirtualRenderables(renderables, pool);
+            for (RobotSide side : RobotSide.values)
+               goalFeet.get(side).getRenderables(renderables, pool, footstepsWidget.getIsHovered().get(side));
 
-               if (state.getIsNextForExecution())
-                  previewFootstepPlan.getRenderables(renderables, pool);
-            }
+            if (state.getIsNextForExecution() || state.getIsExecuting())
+               previewFootstepPlan.getRenderables(renderables, pool);
          }
       }
    }
