@@ -153,6 +153,9 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
             }
          }
 
+         if (ImGui.isWindowAppearing())
+            ImGui.setScrollHereY(1.0f);
+
          ImGui.endCombo();
       }
 
