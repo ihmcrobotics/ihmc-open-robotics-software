@@ -23,6 +23,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -286,9 +287,19 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       }
    }
 
+   public void updateContactNormal(Vector3DReadOnly contactNormalInWorldFrame)
+   {
+      this.contactNormal.set(contactNormalInWorldFrame);
+
+      // Update contact frame
+      EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.Z, contactNormalInWorldFrame, desiredContactPoseWorld.getOrientation());
+      desiredContactPoseWorld.getPosition().setMatchingFrame(this.contactPointInBody);
+      desiredContactFrameFixedInWorld.setPoseAndUpdate(desiredContactPoseWorld);
+   }
+
    public void load(double coefficientOfFriction,
-                    Point3D contactPointInBodyFrame,
-                    Vector3D contactNormalInWorldFrame,
+                    Point3DReadOnly contactPointInBodyFrame,
+                    Vector3DReadOnly contactNormalInWorldFrame,
                     boolean jointspaceControlActive,
                     boolean orientationControlActive)
    {
