@@ -201,7 +201,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     */
    public FBAlphaFilteredVector3D getOrCreateCenterOfMassAlphaFilteredVectorData(Type rawDataType,
                                                                                  SpaceData3D space,
-                                                                                 double dt,
+                                                                                 DoubleProvider dt,
                                                                                  DoubleProvider breakFrequencyProvider,
                                                                                  BooleanProvider activeFlag,
                                                                                  boolean isRequiredVariable)
@@ -239,7 +239,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     */
    public FBRateLimitedVector3D getOrCreateCenterOfMassRateLimitedVectorData(Type rawDataType,
                                                                              SpaceData3D space,
-                                                                             double dt,
+                                                                             DoubleProvider dt,
                                                                              YoDouble maximumRate,
                                                                              BooleanProvider activeFlag,
                                                                              boolean isRequiredVariable)
@@ -250,7 +250,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
       return rateLimitedVectorData;
    }
 
-   public FilterVector3D getOrCreateCenterOfMassLinearVelocityErrorFilter(double dt)
+   public FilterVector3D getOrCreateCenterOfMassLinearVelocityErrorFilter(DoubleProvider dt)
    {
       SingleFeedbackControllerDataPool dataPool = getOrCreateCenterOfMassDataPool();
       return dataPool.getOrCreateLinearVelocityErrorFilter(dt);
@@ -441,7 +441,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
                                                                    int controllerIndex,
                                                                    Type rawDataType,
                                                                    SpaceData3D space,
-                                                                   double dt,
+                                                                   DoubleProvider dt,
                                                                    YoDouble maximumRate,
                                                                    BooleanProvider activeFlag,
                                                                    boolean isRequiredVariable)
@@ -490,7 +490,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
                                                                        int controllerIndex,
                                                                        Type rawDataType,
                                                                        SpaceData3D space,
-                                                                       double dt,
+                                                                       DoubleProvider dt,
                                                                        DoubleProvider breakFrequencyProvider,
                                                                        BooleanProvider activeFlag,
                                                                        boolean isRequiredVariable)
@@ -505,13 +505,13 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
       return alphaFilteredVectorData;
    }
 
-   public FilterVector3D getOrCreateAngularVelocityErrorFilter(RigidBodyBasics endEffector, int controllerIndex, double dt)
+   public FilterVector3D getOrCreateAngularVelocityErrorFilter(RigidBodyBasics endEffector, int controllerIndex, DoubleProvider dt)
    {
       SingleFeedbackControllerDataPool dataPool = getOrCreateEndEffectorDataPool(endEffector, controllerIndex);
       return dataPool.getOrCreateAngularVelocityErrorFilter(dt);
    }
 
-   public FilterVector3D getOrCreateLinearVelocityErrorFilter(RigidBodyBasics endEffector, int controllerIndex, double dt)
+   public FilterVector3D getOrCreateLinearVelocityErrorFilter(RigidBodyBasics endEffector, int controllerIndex, DoubleProvider dt)
    {
       SingleFeedbackControllerDataPool dataPool = getOrCreateEndEffectorDataPool(endEffector, controllerIndex);
       return dataPool.getOrCreateLinearVelocityErrorFilter(dt);
@@ -600,7 +600,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
                                                                        int controllerIndex,
                                                                        Type rawDataType,
                                                                        SpaceData6D space,
-                                                                       double dt,
+                                                                       DoubleProvider dt,
                                                                        DoubleProvider breakFrequencyAngularPart,
                                                                        DoubleProvider breakFrequencyLinearPart,
                                                                        BooleanProvider activeFlag,
@@ -655,7 +655,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
                                                                    int controllerIndex,
                                                                    Type rawDataType,
                                                                    SpaceData6D space,
-                                                                   double dt,
+                                                                   DoubleProvider dt,
                                                                    YoDouble maximumAngularRate,
                                                                    YoDouble maximumLinearRate,
                                                                    BooleanProvider activeFlag,
@@ -807,7 +807,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
       }
    }
 
-   public FilterDouble1D getOrCreateVelocityErrorFilterDouble1D(String jointName, double dt)
+   public FilterDouble1D getOrCreateVelocityErrorFilterDouble1D(String jointName, DoubleProvider dt)
    {
       FilterDouble1D filter = jointNameToVelocityErrorFilter.get(jointName);
       if (filter == null)
@@ -1032,7 +1032,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
       public FBAlphaFilteredVector3D getOrCreateAlphaFilteredVectorData(Type type,
                                                                         SpaceData3D space,
                                                                         DoubleProvider breakFrequency,
-                                                                        double dt,
+                                                                        DoubleProvider dt,
                                                                         boolean isRequiredVariable)
       {
          EnumMap<SpaceData3D, FBAlphaFilteredVector3D> filteredVectorDataSubMap = getSubEnumMap(filteredVectorDataMap, type, SpaceData3D.class);
@@ -1058,7 +1058,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
       public FBRateLimitedVector3D getOrCreateRateLimitedVectorData(Type type,
                                                                     SpaceData3D space,
                                                                     DoubleProvider maximumRate,
-                                                                    double dt,
+                                                                    DoubleProvider dt,
                                                                     boolean isRequiredVariable)
       {
          EnumMap<SpaceData3D, FBRateLimitedVector3D> rateLimitedVectorDataSubMap = getSubEnumMap(rateLimitedVectorDataMap, type, SpaceData3D.class);
@@ -1081,14 +1081,14 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
          return rateLimitedVectorData;
       }
 
-      public FilterVector3D getOrCreateAngularVelocityErrorFilter(double dt)
+      public FilterVector3D getOrCreateAngularVelocityErrorFilter(DoubleProvider dt)
       {
          if (angularVelocityErrorFilter == null)
             angularVelocityErrorFilter = settings.getAngularVelocity3DErrorFilter(endEffectorName, dt, registry);
          return angularVelocityErrorFilter;
       }
 
-      public FilterVector3D getOrCreateLinearVelocityErrorFilter(double dt)
+      public FilterVector3D getOrCreateLinearVelocityErrorFilter(DoubleProvider dt)
       {
          if (linearVelocityErrorFilter == null)
             linearVelocityErrorFilter = settings.getLinearVelocity3DErrorFilter(endEffectorName, dt, registry);

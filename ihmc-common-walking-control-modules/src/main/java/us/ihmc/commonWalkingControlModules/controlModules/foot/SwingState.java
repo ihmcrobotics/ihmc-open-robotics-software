@@ -162,6 +162,7 @@ public class SwingState extends AbstractFootControlState
    {
       super(footControlHelper);
       this.gains = gains;
+      this.controlDT = footControlHelper.getControlDT();
 
       this.workspaceLimiterControlModule = footControlHelper.getWorkspaceLimiterControlModule();
 
@@ -200,8 +201,6 @@ public class SwingState extends AbstractFootControlState
       kneeJoint = fullRobotModel.getLegJoint(footControlHelper.getRobotSide(), LegJointName.KNEE_PITCH);
 
       touchdownDesiredLinearVelocity = new YoFrameVector3D(namePrefix + "TouchdownDesiredLinearVelocity", worldFrame, registry);
-
-      controlDT = footControlHelper.getHighLevelHumanoidControllerToolbox().getControlDT();
 
       WalkingControllerParameters walkingControllerParameters = footControlHelper.getWalkingControllerParameters();
 

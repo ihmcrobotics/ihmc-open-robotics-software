@@ -126,7 +126,7 @@ public class ContactWrenchMatrixCalculatorTest
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", ReferenceFrame.getWorldFrame(), rootBody);
       YoRegistry registry = new YoRegistry("Dummy");
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-      return new WholeBodyControlCoreToolbox(controlDT,
+      return new WholeBodyControlCoreToolbox(() -> controlDT,
                                              gravityZ,
                                              rootJoint,
                                              rootJoint.subtreeArray(),

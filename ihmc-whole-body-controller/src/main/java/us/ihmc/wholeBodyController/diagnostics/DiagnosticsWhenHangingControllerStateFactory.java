@@ -56,7 +56,9 @@ public class DiagnosticsWhenHangingControllerStateFactory implements HighLevelCo
    {
       controller = new DiagnosticsWhenHangingControllerState(humanoidJointPoseList, useArms, robotIsHanging,
                                                              controllerFactoryHelper.getHighLevelHumanoidControllerToolbox(),
-                                                             controllerFactoryHelper.getHighLevelControllerParameters(), this.torqueOffsetPrinter);
+                                                             controllerFactoryHelper.getHighLevelControllerParameters(),
+                                                             this.torqueOffsetPrinter,
+                                                             controllerFactoryHelper.getHighLevelControllerParameters().getControlDT(getStateEnum()));
 
       controller.addUpdatables(updatables);
 

@@ -13,11 +13,13 @@ import us.ihmc.parameterEstimation.inertial.RigidBodyInertialParameters;
 import us.ihmc.parameterEstimation.inertial.RigidBodyInertialParametersTools;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.MatrixMissingTools;
+import us.ihmc.yoVariables.filters.AlphaFilterTools;
 import us.ihmc.yoVariables.filters.AlphaFilteredYoMatrix;
 import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.math.YoMatrix;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
@@ -70,7 +72,7 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
 
    private final AlphaFilteredYoMatrix filteredResidual;
 
-   public InertialPhysicallyConsistentKalmanFilter(FullRobotModel model, InertialEstimationParameters parameters, double dt, YoRegistry parentRegistry)
+   public InertialPhysicallyConsistentKalmanFilter(FullRobotModel model, InertialEstimationParameters parameters, DoubleProvider dt, YoRegistry parentRegistry)
    {
       super(parameters.getURDFParameters(parameters.getBasisSets()),
             CommonOps_DDRM.identity(parameters.getNumberOfParameters()),
@@ -129,7 +131,7 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
 
       measurement = new DMatrixRMaj(nDoFs, 1);
 
-      double postProcessingAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForPostProcessing(), dt);
+      DoubleProvider postProcessingAlpha = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForPostProcessing(), dt.getValue());
       filteredResidual = new AlphaFilteredYoMatrix("filteredResidual_", postProcessingAlpha, nDoFs, 1, parameters.getMeasurementNames(), null, registry);
 
       setNormalizedInnovationThreshold(parameters.getNormalizedInnovationThreshold());

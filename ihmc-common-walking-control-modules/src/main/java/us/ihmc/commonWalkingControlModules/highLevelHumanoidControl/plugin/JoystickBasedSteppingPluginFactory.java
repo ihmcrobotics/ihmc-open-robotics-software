@@ -89,7 +89,7 @@ public class JoystickBasedSteppingPluginFactory implements HumanoidSteppingPlugi
    @Override
    public JoystickBasedSteppingPlugin buildPlugin(FullHumanoidRobotModel robotModel,
                                                   CommonHumanoidReferenceFrames referenceFrames,
-                                                  double updateDT,
+                                                  DoubleProvider updateDT,
                                                   WalkingControllerParameters walkingControllerParameters,
                                                   StatusMessageOutputManager walkingStatusMessageOutputManager,
                                                   CommandInputManager walkingCommandInputManager,

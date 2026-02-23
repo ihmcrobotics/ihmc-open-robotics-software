@@ -36,12 +36,12 @@ public class DiagnosticAnalysisProcessor implements LogDataProcessorFunction
    private final YoVariableHolder logYoVariableHolder;
    private final double dt;
 
-   private DiagnosticParameters diagnosticParameters;
+   private final DiagnosticParameters diagnosticParameters;
 
-   public DiagnosticAnalysisProcessor(LogDataProcessorHelper logDataProcessorHelper, DRCRobotModel drcRobotModel)
+   public DiagnosticAnalysisProcessor(LogDataProcessorHelper logDataProcessorHelper, DRCRobotModel drcRobotModel, DiagnosticParameters diagnosticParameters)
    {
       this.logDataProcessorHelper = logDataProcessorHelper;
-      diagnosticParameters = drcRobotModel.getDiagnoticParameters();
+      this.diagnosticParameters = diagnosticParameters;
       fullRobotModel = logDataProcessorHelper.getFullRobotModel();
       dt = drcRobotModel.getEstimatorDT();
       logYoVariableHolder = logDataProcessorHelper.getLogYoVariableHolder();

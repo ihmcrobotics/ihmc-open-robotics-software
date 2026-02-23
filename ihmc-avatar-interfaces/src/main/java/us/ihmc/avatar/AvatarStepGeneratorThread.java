@@ -24,6 +24,7 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.ros2.RealtimeROS2Node;
@@ -36,7 +37,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
 
-public class AvatarStepGeneratorThread implements AvatarControllerThreadInterface
+public class AvatarStepGeneratorThread implements SCS2YoGraphicHolder
 {
    private final YoRegistry csgRegistry = new YoRegistry("csgRegistry");
 
@@ -106,7 +107,7 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
       humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       continuousStepGeneratorPlugin = pluginFactory.buildPlugin(fullRobotModel,
                                                                 humanoidReferenceFrames,
-                                                                drcRobotModel.getStepGeneratorDT(),
+                                                                drcRobotModel::getStepGeneratorDT,
                                                                 drcRobotModel.getWalkingControllerParameters(),
                                                                 walkingOutputManager,
                                                                 walkingCommandInputManager,
@@ -133,7 +134,6 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
    {
    }
 
-   @Override
    public void run()
    {
       runCSG.set(humanoidRobotContextData.getEstimatorRan());
@@ -175,14 +175,11 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
       return continuousStepGeneratorPlugin;
    }
 
-   @Override
    public YoRegistry getYoVariableRegistry()
    {
       return csgRegistry;
    }
 
-
-   @Override
    public YoGraphicGroupDefinition getSCS2YoGraphics()
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
@@ -192,13 +189,11 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
       return group.isEmpty() ? null : group;
    }
 
-   @Override
    public FullHumanoidRobotModel getFullRobotModel()
    {
       return fullRobotModel;
    }
 
-   @Override
    public HumanoidRobotContextData getHumanoidRobotContextData()
    {
       return humanoidRobotContextData;

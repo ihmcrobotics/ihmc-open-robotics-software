@@ -90,17 +90,18 @@ public class WalkingSingleSupportState extends SingleSupportState
                                     HighLevelControlManagerFactory managerFactory,
                                     WalkingControllerParameters walkingControllerParameters,
                                     WalkingFailureDetectionControlModule failureDetectionControlModule,
+                                    double controlDT,
                                     YoRegistry parentRegistry)
    {
-      super(stateEnum, walkingMessageHandler, controllerToolbox, managerFactory, parentRegistry);
+      super(stateEnum, walkingMessageHandler, controllerToolbox, managerFactory, controlDT, parentRegistry);
 
       this.controllerToolbox = controllerToolbox;
       this.failureDetectionControlModule = failureDetectionControlModule;
       this.touchdownErrorCompensator = touchdownErrorCompensator;
 
-      comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
+      comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager(controlDT);
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
-      feetManager = managerFactory.getOrCreateFeetManager();
+      feetManager = managerFactory.getOrCreateFeetManager(controlDT);
 
       finishWhenICPPlannerIsDone = ParameterProvider.getOrCreateParameter(parentRegistry.getName(),
                                                                           getClass().getSimpleName(),

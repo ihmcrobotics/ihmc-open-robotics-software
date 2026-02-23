@@ -107,7 +107,7 @@ public class VelocityBasedSteppingPluginFactory implements HumanoidSteppingPlugi
    @Override
    public VelocityBasedSteppingPlugin buildPlugin(FullHumanoidRobotModel robotModel,
                                                   CommonHumanoidReferenceFrames referenceFrames,
-                                                  double updateDT,
+                                                  DoubleProvider updateDT,
                                                   WalkingControllerParameters walkingControllerParameters,
                                                   StatusMessageOutputManager walkingStatusMessageOutputManager,
                                                   CommandInputManager walkingCommandInputManager,

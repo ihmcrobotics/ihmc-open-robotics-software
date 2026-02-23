@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
+import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.ManipulationControllerState;
@@ -23,7 +24,7 @@ public class ManipulationControllerStateFactory implements HighLevelControllerSt
       {
          manipulationControllerState = new ManipulationControllerState(controllerFactoryHelper.getCommandInputManager(),
                                                                        controllerFactoryHelper.getStatusMessageOutputManager(),
-                                                                       controllerFactoryHelper.getHighLevelHumanoidControllerToolbox().getControlDT(),
+                                                                       controllerFactoryHelper.getHighLevelControllerParameters().getControlDT(getStateEnum()),
                                                                        jointNameMap,
                                                                        controllerFactoryHelper.getHighLevelControllerParameters(),
                                                                        controllerFactoryHelper.getWalkingControllerParameters(),

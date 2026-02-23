@@ -187,7 +187,7 @@ public class ManipulationControllerState extends HighLevelControllerState
       registry.addChild(comHeightGainRegistry);
 
       centerOfMassFrame = new MovingCenterOfMassReferenceFrame("centerOfMass", elevator.getBodyFixedFrame(), elevator);
-      controlCoreToolbox = new WholeBodyControlCoreToolbox(controlDT,
+      controlCoreToolbox = new WholeBodyControlCoreToolbox(() -> controlDT,
                                                            gravityZ,
                                                            null,
                                                            controlledJoints,

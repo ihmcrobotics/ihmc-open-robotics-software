@@ -68,7 +68,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
 
       List<TaskspaceTrajectoryStatusMessage> statusMessages = new ArrayList<>();
       simulationTestHelper.createSubscriberFromController(TaskspaceTrajectoryStatusMessage.class, statusMessages::add);
-      double controllerDT = getRobotModel().getControllerDT();
+      double controllerDT = simulationTestHelper.getCurrentControlDT();
 
       ThreadTools.sleep(1000);
       boolean success = simulationTestHelper.simulateNow(0.5);

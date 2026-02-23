@@ -1,14 +1,14 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.data;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoMutableFrameVector3D;
-import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
+import us.ihmc.yoVariables.filters.AlphaFilterTools;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @see FeedbackControllerData
@@ -20,7 +20,12 @@ public class FBAlphaFilteredVector3D extends AlphaFilteredYoMutableFrameVector3D
    private final SpaceData3D space;
    private int commandId;
 
-   public FBAlphaFilteredVector3D(String namePrefix, Type type, SpaceData3D space, DoubleProvider breakFrequency, double dt, FrameVector3DReadOnly rawVector,
+   public FBAlphaFilteredVector3D(String namePrefix,
+                                  Type type,
+                                  SpaceData3D space,
+                                  DoubleProvider breakFrequency,
+                                  DoubleProvider dt,
+                                  FrameVector3DReadOnly rawVector,
                                   YoRegistry registry)
    {
       super(FeedbackControllerData.createNamePrefix(namePrefix + "Filtered", type, space), "", registry, toAlpha(breakFrequency, dt), rawVector);
@@ -29,9 +34,9 @@ public class FBAlphaFilteredVector3D extends AlphaFilteredYoMutableFrameVector3D
       this.space = space;
    }
 
-   private static DoubleProvider toAlpha(DoubleProvider breakFrequency, double dt)
+   private static DoubleProvider toAlpha(DoubleProvider breakFrequency, DoubleProvider dt)
    {
-      return () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(breakFrequency.getValue(), dt);
+      return () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(breakFrequency.getValue(), dt.getValue());
    }
 
    @Override

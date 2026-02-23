@@ -113,7 +113,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
       externalForcePointOffset.set(0.0, 0.0, 0.05);
 
       MovingBaseRobotArm robot = new MovingBaseRobotArm(controlDT);
-      MovingBaseRobotArmController controller = new MovingBaseRobotArmController(robot, controlDT, yoGraphicsListRegistry);
+      MovingBaseRobotArmController controller = new MovingBaseRobotArmController(robot, () -> controlDT, yoGraphicsListRegistry);
 
       robot.setController(controller);
       joints = controller.getControlCoreToolbox().getJointIndexHandler().getIndexedOneDoFJoints();

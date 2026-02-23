@@ -122,7 +122,7 @@ public class RelativeEndEffectorControlTest
    {
       optimizationSettings = new KinematicsToolboxOptimizationSettings();
       centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", worldFrame, rootBody);
-      controllerCoreToolbox = new WholeBodyControlCoreToolbox(controlDT,
+      controllerCoreToolbox = new WholeBodyControlCoreToolbox(() -> controlDT,
                                                               0.0,
                                                               desiredFullRobotModel.getKey(),
                                                               desiredFullRobotModel.getRight(),

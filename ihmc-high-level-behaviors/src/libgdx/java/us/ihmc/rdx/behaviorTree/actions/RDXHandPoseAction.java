@@ -210,9 +210,27 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
                                                             definition::setJointspaceWeight);
       jointspaceWeightWidget.addButton("Use Default Weights", () -> definition.setJointspaceWeight(-1.0));
       jointspaceWeightWidget.addWidgetAligner(widgetAligner);
-      positionErrorToleranceInput = new ImDoubleWrapper(definition::getPositionErrorTolerance,
-                                                        definition::setPositionErrorTolerance,
-                                                        imDouble -> ImGui.inputDouble(labels.get("Position Error Tolerance"), imDouble));
+      positionErrorToleranceInput = new ImDoubleWrapper(() ->
+                                                        {
+                                                           if (getDefinition().getUsePredefinedJointAngles())
+                                                              return Math.toDegrees(definition.getPositionErrorTolerance());
+                                                           else
+                                                              return definition.getPositionErrorTolerance();
+                                                        },
+                                                        positionErrorTolerance ->
+                                                        {
+                                                           if (definition.getUsePredefinedJointAngles())
+                                                              definition.setPositionErrorTolerance(Math.toRadians(positionErrorTolerance));
+                                                           else
+                                                              definition.setPositionErrorTolerance(positionErrorTolerance);
+                                                        },
+                                                        imDouble ->
+                                                        {
+                                                           if (definition.getUsePredefinedJointAngles())
+                                                              ImGui.inputDouble(labels.get("Position Error Tolerance (%s)".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL)), imDouble);
+                                                           else
+                                                              ImGui.inputDouble(labels.get("Position Error Tolerance"), imDouble);
+                                                        });
       orientationErrorToleranceDegreesInput = new ImDoubleWrapper(
             () -> Math.toDegrees(definition.getOrientationErrorTolerance()),
             orientationErrorToleranceDegrees -> definition.setOrientationErrorTolerance(Math.toRadians(orientationErrorToleranceDegrees)),
@@ -427,8 +445,9 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
             }
          }
          jointspaceWeightWidget.renderImGuiWidget();
+         ImGui.pushItemWidth(ImGui.getFontSize() * 10.0f);
          positionErrorToleranceInput.renderImGuiWidget();
-         orientationErrorToleranceDegreesInput.renderImGuiWidget();
+         ImGui.popItemWidth();
       }
       else
       {
@@ -447,8 +466,10 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
          if (definition.getJointspaceOnly())
             ImGui.endDisabled();
          jointspaceWeightWidget.renderImGuiWidget();
+         ImGui.pushItemWidth(ImGui.getFontSize() * 10.0f);
          positionErrorToleranceInput.renderImGuiWidget();
          orientationErrorToleranceDegreesInput.renderImGuiWidget();
+         ImGui.popItemWidth();
          ImGui.text("IK Solution Quality: %.2f".formatted(state.getSolutionQuality()));
          ImGui.sameLine();
          if (ImGui.button(labels.get("Set Pose to Synced Hand")))

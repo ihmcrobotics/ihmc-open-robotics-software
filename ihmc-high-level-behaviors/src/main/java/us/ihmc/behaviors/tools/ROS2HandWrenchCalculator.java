@@ -17,7 +17,7 @@ public class ROS2HandWrenchCalculator extends HandWrenchCalculator
       super(side,
             syncedRobot.getFullRobotModel(),
             new YoRegistry(ROS2HandWrenchCalculator.class.getSimpleName() + side.getPascalCaseName()),
-            StateEstimatorParameters.ROBOT_CONFIGURATION_DATA_PUBLISH_DT);
+            () -> StateEstimatorParameters.ROBOT_CONFIGURATION_DATA_PUBLISH_DT);
       syncedRobot.addRobotConfigurationDataReceivedCallback(robotConfigurationSyncNotification::set);
    }
 

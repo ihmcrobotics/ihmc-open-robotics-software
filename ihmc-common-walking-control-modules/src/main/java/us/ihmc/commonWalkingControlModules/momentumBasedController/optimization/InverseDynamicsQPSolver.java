@@ -8,6 +8,7 @@ import us.ihmc.matrixlib.NativeMatrix;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -85,13 +86,13 @@ public class InverseDynamicsQPSolver
    private boolean useWarmStart = false;
    private int maxNumberOfIterations = 100;
 
-   private final double dt;
+   private final DoubleProvider dt;
 
    public InverseDynamicsQPSolver(NativeActiveSetQPSolverWithInactiveVariablesInterface qpSolver,
                                   int numberOfDoFs,
                                   int rhoSize,
                                   boolean hasFloatingBase,
-                                  double dt,
+                                  DoubleProvider dt,
                                   YoRegistry parentRegistry)
    {
       this.qpSolver = qpSolver;
@@ -276,7 +277,7 @@ public class InverseDynamicsQPSolver
 
    private void addJointJerkRegularization()
    {
-      double factor = dt * dt / jointJerkRegularization.getDoubleValue();
+      double factor = dt.getValue() * dt.getValue() / jointJerkRegularization.getDoubleValue();
       solver_H.addDiagonal(0, 0, numberOfDoFs, 1.0 / factor);
       solver_f.addBlock(solverOutput_jointAccelerations, 0, 0, 0, 0, numberOfDoFs, 1, -1.0 / factor);
    }

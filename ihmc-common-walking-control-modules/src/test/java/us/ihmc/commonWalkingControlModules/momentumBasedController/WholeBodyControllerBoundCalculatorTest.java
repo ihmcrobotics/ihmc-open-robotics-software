@@ -11,7 +11,7 @@ import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-import static us.ihmc.robotics.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class WholeBodyControllerBoundCalculatorTest
 {
@@ -29,7 +29,7 @@ public class WholeBodyControllerBoundCalculatorTest
       joint.setJointLimitLower(qMin);
       joint.setJointLimitUpper(qMax);
 
-      WholeBodyControllerBoundCalculator calculator = new WholeBodyControllerBoundCalculator(indexHandler, dt, true, new YoRegistry("test"));
+      WholeBodyControllerBoundCalculator calculator = new WholeBodyControllerBoundCalculator(indexHandler, () -> dt, true, new YoRegistry("test"));
 
 
       joint.setQ(0.0);
@@ -69,7 +69,7 @@ public class WholeBodyControllerBoundCalculatorTest
 
          calculator.computeJointAccelerationLimits(qddotAbsolute, qddotMin, qddotMax);
 
-         assertEquals("error at q = " + q, qddMaxExpected, qddotMax.get(0, 0), 1e-6);
+         assertEquals(qddMaxExpected, qddotMax.get(0, 0), 1e-6, "error at q = " + q);
       }
    }
 }

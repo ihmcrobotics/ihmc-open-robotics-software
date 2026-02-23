@@ -85,7 +85,7 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
     * @param parameters script parameters.
     * @param parentRegistry registry to attach this script {@code YoVariable}s
     */
-   public HeadingAndVelocityEvaluationScript(double controlDT, DoubleProvider timeProvider, HeadingAndVelocityEvaluationScriptParameters parameters,
+   public HeadingAndVelocityEvaluationScript(DoubleProvider controlDT, DoubleProvider timeProvider, HeadingAndVelocityEvaluationScriptParameters parameters,
                                              YoRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);

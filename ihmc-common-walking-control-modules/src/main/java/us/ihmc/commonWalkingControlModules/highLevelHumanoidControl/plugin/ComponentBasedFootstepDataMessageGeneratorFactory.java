@@ -135,7 +135,7 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
    @Override
    public ComponentBasedFootstepDataMessageGenerator buildPlugin(FullHumanoidRobotModel robotModel,
                                                                  CommonHumanoidReferenceFrames referenceFrames,
-                                                                 double updateDT,
+                                                                 DoubleProvider updateDT,
                                                                  WalkingControllerParameters walkingControllerParameters,
                                                                  StatusMessageOutputManager walkingStatusMessageOutputManager,
                                                                  CommandInputManager walkingCommandInputManager,

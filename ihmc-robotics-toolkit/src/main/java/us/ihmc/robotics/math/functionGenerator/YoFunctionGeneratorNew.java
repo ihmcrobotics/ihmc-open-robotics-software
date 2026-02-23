@@ -88,7 +88,7 @@ public class YoFunctionGeneratorNew
       this(namePrefix, () -> dt, null, registry);
    }
 
-   private YoFunctionGeneratorNew(String namePrefix, DoubleProvider dt, DoubleProvider time, YoRegistry registry)
+   public YoFunctionGeneratorNew(String namePrefix, DoubleProvider dt, DoubleProvider time, YoRegistry registry)
    {
       this.dt = dt;
       timeToDTConverter = new TimeToDTConverter(time);

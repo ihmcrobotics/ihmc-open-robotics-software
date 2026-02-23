@@ -1,6 +1,5 @@
 package us.ihmc.zulu.parameters.model;
 
-import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FrameBox3D;
 import us.ihmc.euclid.referenceFrame.FrameCapsule3D;
@@ -25,8 +24,6 @@ import java.util.List;
 
 /**
  * Collision model for Zulu used for simulating shape-to-shape collisions.
- * {@link DRCSCSInitialSetup#setUseExperimentalPhysicsEngine(boolean)}.
- * </p>
  *
  * @author Sylvain Bertrand
  */
@@ -68,9 +65,9 @@ public class ZuluSimulationCollisionModel implements RobotCollisionModel
       collisionMask = helper.getCollisionMask(robotCollisionMask);
       collisionGroup = helper.createCollisionGroup(otherCollisionMasks);
 
-      RigidBodyBasics head = RobotCollisionModel.findRigidBody(jointMap.getHeadName(), multiBodySystem);
-      RigidBodyBasics torso = RobotCollisionModel.findRigidBody(jointMap.getChestName(), multiBodySystem);
-      RigidBodyBasics pelvis = RobotCollisionModel.findRigidBody(jointMap.getPelvisName(), multiBodySystem);
+      RigidBodyBasics head = multiBodySystem.findRigidBody(jointMap.getHeadName());
+      RigidBodyBasics torso = multiBodySystem.findRigidBody(jointMap.getChestName());
+      RigidBodyBasics pelvis = multiBodySystem.findRigidBody(jointMap.getPelvisName());
       // Head ---------------------------------------------------------------------
       if (head != null)
       {
@@ -102,7 +99,7 @@ public class ZuluSimulationCollisionModel implements RobotCollisionModel
       for (RobotSide robotSide : RobotSide.values)
       {
          { // Hand
-            RigidBodyBasics hand = RobotCollisionModel.findRigidBody(jointMap.getHandName(robotSide), multiBodySystem);
+            RigidBodyBasics hand = multiBodySystem.findRigidBody(jointMap.getHandName(robotSide));
             if (hand != null)
             {
                ReferenceFrame handFrame = hand.getParentJoint().getFrameAfterJoint();
@@ -113,7 +110,7 @@ public class ZuluSimulationCollisionModel implements RobotCollisionModel
             }
          }
          { // Foot
-            JointBasics ankleRoll = RobotCollisionModel.findJoint(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_ROLL), multiBodySystem);
+            JointBasics ankleRoll = multiBodySystem.findJoint(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_ROLL));
             if (ankleRoll != null)
             {
                MovingReferenceFrame ankleRollFrame = ankleRoll.getFrameAfterJoint();
