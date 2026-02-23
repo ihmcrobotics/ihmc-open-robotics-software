@@ -46,7 +46,8 @@ __global__ void heightMapUpdateDataKernel(const unsigned short* __restrict__ dep
                                           float* __restrict__ sumOfSquaresMap, size_t pitchSumSq,
                                           float* __restrict__ motionVarianceSumMap, size_t pitchMotionVar,
                                           const float* __restrict__ params,
-                                          const float* __restrict__ sensorToZUpFrameTf,
+                                          float* sensorToZUpFrameTf,
+                                          float* sensorToWorldFrameTf,
                                           const float linearMotionMagnitude,
                                           const float angularMotionMagnitude)
 {
@@ -79,9 +80,29 @@ __global__ void heightMapUpdateDataKernel(const unsigned short* __restrict__ dep
     float3 queryPointInSensorFrame = back_project_perspective(make_int2(xIndex, yIndex), depth, params);
     float3 queryPointInZUpFrame = transformPoint3D(queryPointInSensorFrame, sensorToZUpFrameTf);
 
+    // 1. Get the raw world position from the transform matrix
+    float worldCamX = sensorToWorldFrameTf[3];
+    float worldCamY = sensorToWorldFrameTf[7];
+
+    // 2. Calculate the "Snapped" position (the nearest grid intersection)
+    // Using floor ensures the grid lines stay at multiples of cellSize (0.0, 0.1, 0.2...)
+    float snappedCenterX = (floorf(worldCamX / cellSize) * cellSize);
+    float snappedCenterY = (floorf(worldCamY / cellSize) * cellSize);
+
+    // 3. Calculate the sub-cell offset
+    // This is how far the camera has "strayed" from the snapped grid point
+    float subCellOffsetX = worldCamX - snappedCenterX;
+    float subCellOffsetY = worldCamY - snappedCenterY;
+
+    // 4. Apply the offset to the point relative to the sensor
+    // This "stabilizes" the point against the camera's sub-pixel movement
+    float2 stableXY;
+    stableXY.x = queryPointInZUpFrame.x + subCellOffsetX;
+    stableXY.y = queryPointInZUpFrame.y + subCellOffsetY;
+
     // Get the correct cell index for the maps
     float2 xyCoords = make_float2(queryPointInZUpFrame.x, queryPointInZUpFrame.y);
-    int2 cellIndex = coordinate_to_indices(xyCoords, make_float2(0.0f, 0.0f), cellSize, centerIndex);
+    int2 cellIndex = coordinate_to_indices(stableXY, make_float2(0.0f, 0.0f), cellSize, centerIndex);
 
     // Bounds check against the local map dimensions because we are scanning the entire depth image
     if (cellIndex.x < 0 || cellIndex.x >= cellsPerAxis || cellIndex.y < 0 || cellIndex.y >= cellsPerAxis)
@@ -251,7 +272,12 @@ __global__ void heightMapRegistrationKernel(const float *__restrict__ localMeanM
     float2 localCoordinate = indices_to_coordinate(localCell, make_float2(0.0f, 0.0f), params[CELL_SIZE], params[LOCAL_CENTER_INDEX]);
     float3 pointInLocalFrame = make_float3(localCoordinate.x, localCoordinate.y, 0.0f);
     float3 pointInGlobalFrame = transformPoint3D(pointInLocalFrame, groundToWorldTranslation);
-    int2 globalCell = coordinate_to_indices(make_float2(pointInGlobalFrame.x, pointInGlobalFrame.y), make_float2(globalMapCenterX, globalMapCenterY), params[CELL_SIZE], params[GLOBAL_CENTER_INDEX]);
+
+    // Snap to cell grid to match how the local map was built
+    float snappedGlobalX = floorf(pointInGlobalFrame.x / params[CELL_SIZE]) * params[CELL_SIZE];
+    float snappedGlobalY = floorf(pointInGlobalFrame.y / params[CELL_SIZE]) * params[CELL_SIZE];
+
+    int2 globalCell = coordinate_to_indices(make_float2(snappedGlobalX, snappedGlobalY), make_float2(globalMapCenterX, globalMapCenterY), params[CELL_SIZE], params[GLOBAL_CENTER_INDEX]);
 
     if (globalCell.x < 0 || globalCell.x >= globalCellsPerAxis || globalCell.y < 0 || globalCell.y >= globalCellsPerAxis)
         return;

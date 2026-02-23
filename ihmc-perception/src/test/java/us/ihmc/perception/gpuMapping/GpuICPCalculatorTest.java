@@ -34,7 +34,9 @@ public class GpuICPCalculatorTest
    {
       heightMapParameters.setLocalWidthInMeters(LOCAL_WIDTH_IN_METERS);
       heightMapParameters.setGlobalWidthInMeters(GLOBAL_WIDTH_IN_METERS);
-      heightMapParameters.setIcpMaxDistance(0.04);
+      heightMapParameters.setIcpMaxDistance(0.4);
+      heightMapParameters.setIcpAlphaFilter(1.0);
+      heightMapParameters.setIcpValidPoints(0);
 
       localCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getCellSize());
       localCellsPerAxis = 2 * localCenterIndex + 1;

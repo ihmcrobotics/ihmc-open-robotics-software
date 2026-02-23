@@ -77,15 +77,19 @@ public class GpuICPCalculator
       correctedGlobalTransform.set(totalAccumulatedErrorTransform);
       correctedGlobalTransform.multiply(transformLocalToGlobalFromOdometry);
 
+      float localCenterX = (float) (((float) transformLocalToGlobalFromOdometry.getTranslationX()) - localMapCenter.getX());
+      float localCenterY = (float) (((float) transformLocalToGlobalFromOdometry.getTranslationY()) - localMapCenter.getY());
+      float localCenterZ = (float) ((float) transformLocalToGlobalFromOdometry.getTranslationZ());
+
       double correctedX = correctedGlobalTransform.getTranslationX();
       double correctedY = correctedGlobalTransform.getTranslationY();
       double correctedZ = correctedGlobalTransform.getTranslationZ();
 
       // TODO need to use the total accumulated error transform rather then just the odometry
       FlattenedHeightMap flattenedLocalMap = HeightMapTools.flattenHeightMapToXYZ(localMap,
-                                                                                  transformLocalToGlobalFromOdometry.getTranslationX(),
-                                                                                  transformLocalToGlobalFromOdometry.getTranslationY(),
-                                                                                  transformLocalToGlobalFromOdometry.getTranslationZ(),
+                                                                                  localCenterX,
+                                                                                  localCenterY,
+                                                                                  localCenterZ,
                                                                                   localCenterIndex,
                                                                                   (float) heightMapParameters.getCellSize(),
                                                                                   0.0f);
@@ -233,12 +237,12 @@ public class GpuICPCalculator
          double dz = incrementalTransform.get(2, 3);
          double moveDist = Math.sqrt(dx * dx + dy * dy + dz * dz);
 
-//                  System.out.println("Iteration " + i);
-//                  System.out.println("  Valid correspondences: " + validCount);
-//                  System.out.println("  Incremental dx: " + incrementalTransform.get(0, 3));
-//                  System.out.println("  Incremental dy: " + incrementalTransform.get(1, 3));
-//                  System.out.println("  Incremental dz: " + incrementalTransform.get(2, 3));
-//                  System.out.println("  Move distance: " + moveDist);
+         System.out.println("Iteration " + i);
+         System.out.println("  Valid correspondences: " + validCount);
+         System.out.println("  Incremental dx: " + incrementalTransform.get(0, 3));
+         System.out.println("  Incremental dy: " + incrementalTransform.get(1, 3));
+         System.out.println("  Incremental dz: " + incrementalTransform.get(2, 3));
+         System.out.println("  Move distance: " + moveDist);
 
          if (moveDist < translationThreshold)
          {
