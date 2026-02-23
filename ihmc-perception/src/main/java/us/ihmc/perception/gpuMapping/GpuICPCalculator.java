@@ -33,6 +33,7 @@ public class GpuICPCalculator
 
    private final DMatrixRMaj totalAccumulatedErrorTransform;
    private final DMatrixRMaj latestPointCloudErrorTransform;
+   private boolean endedWithoutEnoughValidPoints;
 
    public GpuICPCalculator(HeightMapParameters heightMapParameters)
    {
@@ -118,6 +119,7 @@ public class GpuICPCalculator
    {
       int localFloats = localPoints * 3;
       int globalFloats = globalPoints * 3;
+      endedWithoutEnoughValidPoints = false;
 
       FloatPointer gpuLocalDataPointer = new FloatPointer();
       FloatPointer gpuGlobalDataPointer = new FloatPointer();
@@ -216,7 +218,10 @@ public class GpuICPCalculator
 
          // 3. Early exit check
          if (validCount < heightMapParameters.getIcpValidPoints())
+         {
+            endedWithoutEnoughValidPoints = true;
             break;
+         }
 
          // Compute transformation using SVD
          DMatrixRMaj incrementalTransform = HeightMapTools.computeTransformSVD(filteredLocalArr, globalPointsArr, filteredCorrArr, validCount);
@@ -237,12 +242,12 @@ public class GpuICPCalculator
          double dz = incrementalTransform.get(2, 3);
          double moveDist = Math.sqrt(dx * dx + dy * dy + dz * dz);
 
-         System.out.println("Iteration " + i);
-         System.out.println("  Valid correspondences: " + validCount);
-         System.out.println("  Incremental dx: " + incrementalTransform.get(0, 3));
-         System.out.println("  Incremental dy: " + incrementalTransform.get(1, 3));
-         System.out.println("  Incremental dz: " + incrementalTransform.get(2, 3));
-         System.out.println("  Move distance: " + moveDist);
+//         System.out.println("Iteration " + i);
+//         System.out.println("  Valid correspondences: " + validCount);
+//         System.out.println("  Incremental dx: " + incrementalTransform.get(0, 3));
+//         System.out.println("  Incremental dy: " + incrementalTransform.get(1, 3));
+//         System.out.println("  Incremental dz: " + incrementalTransform.get(2, 3));
+//         System.out.println("  Move distance: " + moveDist);
 
          if (moveDist < translationThreshold)
          {
@@ -333,6 +338,11 @@ public class GpuICPCalculator
       hostPointer.put(hostMatrix);
       CUDATools.memcpyAsync(matrixPtr, hostPointer, 16, stream);
       hostPointer.close();
+   }
+
+   public boolean isEndedWithoutEnoughValidPoints()
+   {
+      return endedWithoutEnoughValidPoints;
    }
 
    public void close()

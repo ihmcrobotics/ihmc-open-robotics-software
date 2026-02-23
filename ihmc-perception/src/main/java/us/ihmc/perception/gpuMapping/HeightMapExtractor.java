@@ -15,6 +15,7 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.log.LogTools;
 import us.ihmc.sensors.CameraIntrinsics;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
@@ -91,7 +92,7 @@ public class HeightMapExtractor
    private final Point3D heightMapCenterPoint = new Point3D();
 
    private final GpuICPCalculator gpuICPCalculator;
-   private Vector3D correctedTransform;
+   private Vector3D correctedTransform = new Vector3D();
    private boolean performICP = true;
 
    public HeightMapExtractor(HeightMapParameters heightMapParameters)
@@ -394,26 +395,36 @@ public class HeightMapExtractor
                                                    globalCenterIndex,
                                                    sensorToWorldNoRotation,
                                                    stream);
-         correctedTransform = gpuICPCalculator.getLatestPointCloudErrorTransform();
          //      LogTools.info(
          //            "gpuICPCalculator correctedTransform: " + correctedTransform.getX() + " " + correctedTransform.getY() + " " + correctedTransform.getZ());
          //      LogTools.info("Actual Transform: " + groundToWorldNoRotation.getTranslationX() + " " + groundToWorldNoRotation.getTranslationY() + " "
          //                    + groundToWorldNoRotation.getTranslationZ());
          //      LogTools.info("Global Center: " + globalHeightMapCenter.getX() + " " + globalHeightMapCenter.getY() + " " + globalHeightMapCenter.getZ(   ));
 
-         double dx = correctedTransform.getX();
-         double dy = correctedTransform.getY();
-         double dz = correctedTransform.getZ();
+         if (!gpuICPCalculator.isEndedWithoutEnoughValidPoints())
+         {
+            correctedTransform = gpuICPCalculator.getLatestPointCloudErrorTransform();
+            double dx = correctedTransform.getX();
+            double dy = correctedTransform.getY();
+            double dz = correctedTransform.getZ();
 
-         // Apply a 1mm threshold (0.001 meters)
-         if (Math.abs(dx) < 0.001)
-            dx = 0.0;
-         if (Math.abs(dy) < 0.001)
-            dy = 0.0;
-         if (Math.abs(dz) < 0.001)
-            dz = 0.0;
+            // Zero out tiny corrections (<1 mm)
+            if (Math.abs(dx) < 0.001) dx = 0.0;
+            if (Math.abs(dy) < 0.001) dy = 0.0;
+            if (Math.abs(dz) < 0.001) dz = 0.0;
 
-         gpuICPCalculator.applyCorrectionToTransform(sensorToWorldNoRotationDevice, dx, dy, dz, stream);
+            // --- Reject or clamp large drifts ---
+            double MAX_DRIFT = 0.02; // 2 cm
+            if (Math.abs(dx) > MAX_DRIFT || Math.abs(dy) > MAX_DRIFT || Math.abs(dz) > MAX_DRIFT)
+            {
+               LogTools.info("ICP drift too large! Ignoring correction.");
+               dx = 0.0;
+               dy = 0.0;
+               dz = 0.0;
+            }
+
+            gpuICPCalculator.applyCorrectionToTransform(sensorToWorldNoRotationDevice, dx, dy, dz, stream);
+         }
       }
       else
       {
