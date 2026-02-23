@@ -16,7 +16,7 @@ import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.tools.PerceptionEuclidTools;
 import us.ihmc.perception.tools.PlanarRegionCuttingTools;
 import us.ihmc.perception.tools.PlaneRegistrationTools;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMTools;
+import us.ihmc.perception.tools.PlanarRegionSLAMTools;
 import us.ihmc.robotics.geometry.*;
 
 import java.util.*;

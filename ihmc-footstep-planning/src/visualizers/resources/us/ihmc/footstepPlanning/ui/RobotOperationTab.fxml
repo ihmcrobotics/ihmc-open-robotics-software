@@ -35,13 +35,6 @@
       				<Button fx:id="sendSupportRegionParameters" onAction="#sendSupportRegionParameters" text="Send parameters" GridPane.columnIndex="2" GridPane.rowIndex="3" />
       				<CheckBox fx:id="enableSupportRegions" prefHeight="18.0" prefWidth="454.0" GridPane.columnIndex="3" GridPane.rowIndex="1" />
       				<Spinner fx:id="supportRegionScale" editable="true" prefWidth="130.0" GridPane.columnIndex="3" GridPane.rowIndex="2" />
-                  <Label text="REA" GridPane.columnIndex="5">
-                     <font>
-                        <Font name="System Bold" size="13.0" />
-                     </font>
-                  </Label>
-                  <Button fx:id="clearREA" mnemonicParsing="false" onAction="#clearREA" text="Clear" GridPane.columnIndex="5" GridPane.rowIndex="1" />
-      
                   </children>
                   <columnConstraints>
                       <ColumnConstraints />
