@@ -86,10 +86,10 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
 
          // Prepare commanded behavior
          String behaviorToExecuteName = message.getBehaviorToExecuteAsString();
-         if (behaviorToExecuteName.toLowerCase().contains("scan"))
-         {
-            publishYOLOAnnotatedImage();
-         }
+//         if (behaviorToExecuteName.toLowerCase().contains("scan"))
+//         {
+//            publishYOLOAnnotatedImage();
+//         }
          int commandedBehaviorIndex = -1;
          for (int i = 0; i < state.getCheckPoints().size(); i++)
          {
