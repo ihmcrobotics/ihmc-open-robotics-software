@@ -6,6 +6,8 @@ import java.util.List;
 
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.RobotDesiredConfigurationData;
+import gnu.trove.list.array.TDoubleArrayList;
+import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModule;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -15,15 +17,19 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJ
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoLowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.*;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingControllerState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HighLevelHumanoidControllerPlugin;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HighLevelHumanoidControllerPluginFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.parameterEstimation.InertialParameterManager;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.ControllerCrashLocation;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HighLevelControllerStateCommand;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
@@ -336,6 +342,17 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
       {
          controllerToolbox.getDesiredCenterOfPressure(contactableFeet.get(robotSide), desiredFootCoPs.get(robotSide));
          centerOfPressureDataHolderForEstimator.setCenterOfPressure(desiredFootCoPs.get(robotSide), fullHumanoidRobotModel.getFoot(robotSide));
+      }
+
+      if (stateMachine.getCurrentStateKey() == HighLevelControllerName.WALKING)
+      {
+         TDoubleArrayList capturePointWaypointTimes = centerOfPressureDataHolderForEstimator.getCapturePointWaypointTimes();
+         RecyclingArrayList<FramePoint2D> capturePointPositionWaypoints = centerOfPressureDataHolderForEstimator.getCapturePointPositionWaypoints();
+         RecyclingArrayList<FrameVector2D> capturePointVelocityWaypoints = centerOfPressureDataHolderForEstimator.getCapturePointVelocityWaypoints();
+
+         WalkingHighLevelHumanoidController walkingController = ((WalkingControllerState) stateMachine.getCurrentState()).getWalkingController();
+         BalanceManager balanceManager = walkingController.getBalanceManager();
+         balanceManager.packCapturePointTrajectoryWaypoints(capturePointWaypointTimes, capturePointPositionWaypoints, capturePointVelocityWaypoints);
       }
    }
 

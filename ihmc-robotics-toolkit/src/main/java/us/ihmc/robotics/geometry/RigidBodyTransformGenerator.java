@@ -3,6 +3,7 @@ package us.ihmc.robotics.geometry;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -41,7 +42,7 @@ public class RigidBodyTransformGenerator
       this.transform.set(transformGenerator.transform);
    }
 
-   public void setTransform(RigidBodyTransform transform)
+   public void setTransform(RigidBodyTransformReadOnly transform)
    {
       this.transform.set(transform);
    }

@@ -570,7 +570,7 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
          csgStatusMessageOutputManager.reportStatusMessage(csgStatusMessage);
    }
 
-   private static void calculateNextFootstepPose2D(double stepTime,
+   public static void calculateNextFootstepPose2D(double stepTime,
                                                    double desiredVelocityX,
                                                    double desiredVelocityY,
                                                    double desiredTurningVelocity,
