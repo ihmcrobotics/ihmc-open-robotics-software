@@ -4,6 +4,7 @@
 **/src**
 **/vllm**
 **/__pycache__**
+echo "**/vlm_logs.json" >> ihmc-interfaces/ros2ws/.gitignore
 modules/ros2-env/
 modules/vlm/test/models/
 modules/failure_info.json
