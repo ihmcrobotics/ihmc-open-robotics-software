@@ -136,89 +136,25 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
 
          if (state.getIsNextForExecution())
          {
-            if (definition.getPlannerPerformAStarSearch().getValue())
+            if (previewPlanningThrottler.run())
             {
-               if (previewPlanningThrottler.run())
-               {
-                  previewFootstepPlanningThread.triggerPlan(syncedRobot, liveGoalFeetPoses);
-               }
-
-               if (previewFootstepPlanningThread.getResultNotification().poll())
-               {
-                  FootstepPlan footstepPlan = previewFootstepPlanningThread.getResultNotification().read();
-
-                  var footstepsMessage = state.getPreviewFootsteps().accessValue();
-                  footstepsMessage.clear();
-
-                  for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
-                  {
-                     var messageFootstep = footstepsMessage.add();
-                     messageFootstep.setRobotSide(footstepPlan.getFootstep(i).getRobotSide().toByte());
-                     messageFootstep.getSolePose().set(footstepPlan.getFootstep(i).getFootstepPose());
-                  }
-               }
-            }
-            else
-            {
-               if (previewPlanningThrottler.run())
-               {
-                  List<Pair<RobotSide, Pose3D>> footstepPlan;
-
-                  SideDependentList<Pose3D> stanceFeet = new SideDependentList<>(() -> new Pose3D());
-                  SideDependentList<Pose3D> goalFeet   = new SideDependentList<>(() -> new Pose3D());
-                  for (RobotSide side : RobotSide.values)
-                  {
-                     stanceFeet.get(side).set(syncedFeetPoses.get(side));
-                     goalFeet.get(side).set(liveGoalFeetPoses.get(side));
-                  }
-
-                  if (definition.getPlannerPlanWithBodyPath().getValue())
-                  {
-                     // build EnumMap ...
-                     EnumMap<RobotSide, Pose3D> stanceMap = new EnumMap<>(RobotSide.class);
-                     EnumMap<RobotSide, Pose3D> goalMap   = new EnumMap<>(RobotSide.class);
-                     for (RobotSide side : RobotSide.values)
-                     {
-                        stanceMap.put(side, new Pose3D(stanceFeet.get(side)));
-                        goalMap.put(side,   new Pose3D(goalFeet.get(side)));
-                     }
-
-                     List<Pose3D> bodyPath = computeBodyPathOnly(stanceMap, goalMap);
-
-                     if (bodyPath != null && !bodyPath.isEmpty())
-                     {
-                        footstepPlan = quickFootstepPlanner.plan(stanceMap, goalMap, bodyPath);
-                     }
-                     else
-                     {
-                        // Fallback: straight-line quick planner
-                        footstepPlan = quickFootstepPlanner.plan(stanceMap, goalMap);
-                     }
-                  }
-                  else
-                  {
-                     EnumMap<RobotSide, Pose3D> stanceMap = new EnumMap<>(RobotSide.class);
-                     EnumMap<RobotSide, Pose3D> goalMap   = new EnumMap<>(RobotSide.class);
-                     for (RobotSide side : RobotSide.values)
-                     {
-                        stanceMap.put(side, new Pose3D(syncedFeetPoses.get(side)));
-                        goalMap.put(side,   new Pose3D(liveGoalFeetPoses.get(side)));
-                     }
-                     footstepPlan = quickFootstepPlanner.plan(stanceMap, goalMap);
-                  }
-
-
-                  var footstepsMessage = state.getPreviewFootsteps().accessValue();
-                  footstepsMessage.clear();
-                  for (Pair<RobotSide, Pose3D> footstep : footstepPlan)
-                  {
-                     var messageFootstep = footstepsMessage.add();
-                     messageFootstep.setRobotSide(footstep.getFirst().toByte());
-                     messageFootstep.getSolePose().set(footstep.getSecond());
-                  }
-               }
+               previewFootstepPlanningThread.triggerPlan(syncedRobot, liveGoalFeetPoses);
             }
 
+            if (previewFootstepPlanningThread.getResultNotification().poll())
+            {
+               FootstepPlan footstepPlan = previewFootstepPlanningThread.getResultNotification().read();
+
+               var footstepsMessage = state.getPreviewFootsteps().accessValue();
+               footstepsMessage.clear();
+
+               for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
+               {
+                  var messageFootstep = footstepsMessage.add();
+                  messageFootstep.setRobotSide(footstepPlan.getFootstep(i).getRobotSide().toByte());
+                  messageFootstep.getSolePose().set(footstepPlan.getFootstep(i).getFootstepPose());
+               }
+            }
          }
       }
       else
@@ -270,41 +206,6 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
                packManuallyPlacedFootstepsIntoPlan();
                state.getExecutionState().setValue(FootstepPlanActionExecutionState.PLANNING_SUCCEEDED);
             }
-         }
-         else if (!definition.getPlannerPerformAStarSearch().getValue())
-         {
-            List<Pair<RobotSide, Pose3D>> footstepPlan;
-
-            EnumMap<RobotSide, Pose3D> stanceMap = new EnumMap<>(RobotSide.class);
-            EnumMap<RobotSide, Pose3D> goalMap   = new EnumMap<>(RobotSide.class);
-            for (RobotSide side : RobotSide.values)
-            {
-               stanceMap.put(side, new Pose3D(syncedFeetPoses.get(side)));
-               goalMap.put(side,   new Pose3D(liveGoalFeetPoses.get(side)));
-            }
-
-            if (definition.getPlannerPlanWithBodyPath().getValue())
-            {
-               List<Pose3D> bodyPath = computeBodyPathOnly(stanceMap, goalMap);
-               if (bodyPath != null && !bodyPath.isEmpty())
-               {
-                  footstepPlan = quickFootstepPlanner.plan(stanceMap, goalMap, bodyPath);
-               }
-               else
-               {
-                  state.getLogger().warn("Execution: body path unavailable, using straight-line quick planner.");
-                  footstepPlan = quickFootstepPlanner.plan(stanceMap, goalMap);
-               }
-            }
-            else
-            {
-               footstepPlan = quickFootstepPlanner.plan(stanceMap, goalMap);
-            }
-
-            footstepPlanToExecute.clear();
-            for (Pair<RobotSide, Pose3D> footstep : footstepPlan)
-               footstepPlanToExecute.addFootstep(footstep.getFirst(), new FramePose3D(footstep.getSecond()));
-            state.getExecutionState().setValue(FootstepPlanActionExecutionState.PLANNING_SUCCEEDED);
          }
          else
          {

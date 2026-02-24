@@ -22,5 +22,29 @@
         "missing_frame": null,
         "collision_with": null,
         "position_error": null
+    },
+    {
+        "failed_behavior": "GOTO",
+        "action_name": "Go to Action",
+        "action_type": "FootstepPlanActionDefinition",
+        "missing_frame": null,
+        "collision_with": null,
+        "position_error": null
+    },
+    {
+        "failed_behavior": "RECEIVE CHARGE",
+        "action_name": "Track charge",
+        "action_type": "-",
+        "missing_frame": null,
+        "collision_with": null,
+        "position_error": null
+    },
+    {
+        "failed_behavior": "GOTO",
+        "action_name": "Go to Action",
+        "action_type": "FootstepPlanActionDefinition",
+        "missing_frame": null,
+        "collision_with": null,
+        "position_error": null
     }
 ]

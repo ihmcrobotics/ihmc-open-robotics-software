@@ -201,6 +201,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          {
             reportBodyPathPlan(BodyPathPlanningResult.NO_PATH_EXISTS);
             output.setBodyPathPlanningResult(BodyPathPlanningResult.NO_PATH_EXISTS);
+            LogTools.warn("Body path plan does not exist");
             statusCallbacks.forEach(callback -> callback.accept(output));
             return;
          }
@@ -257,7 +258,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          RobotSide initialStanceSide = request.getRequestedInitialStanceSide();
          FramePose3D initialStancePose = new FramePose3D(request.getStartFootPoses().get(initialStanceSide));
          planThenSnapPlanner.setInitialStanceFoot(initialStancePose, initialStanceSide);
-         planThenSnapPlanner.setTerrainMapData(request.getEnvironmentHandler().getTerrainMapData());
          planThenSnapPlanner.setBodyPath(bodyPathPlanHolder);
 
          FootstepPlannerGoal goal = new FootstepPlannerGoal();

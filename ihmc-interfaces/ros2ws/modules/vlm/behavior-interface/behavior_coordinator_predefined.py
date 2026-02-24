@@ -70,7 +70,7 @@ PREDEFINED_GOTO = {
     "barrier": {
         "target_object":          "traffic_barrier",
         "spatial_relation_goto":  "BEHIND",
-        "pov_object_goto":        "-",
+        "pov_object_goto":        "door_panel",
         "spatially_related_object": "-",
         "spatial_relation_obj":   "-",
         "class_discriminator":    "CLOSE",
