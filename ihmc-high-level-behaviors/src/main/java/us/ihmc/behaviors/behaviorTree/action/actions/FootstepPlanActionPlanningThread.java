@@ -1,5 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
+import behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -106,7 +107,7 @@ public class FootstepPlanActionPlanningThread
          footstepPlannerRequest.setRequestedInitialStanceSide(leftStartToGoal < rightStartToGoal ? RobotSide.LEFT : RobotSide.RIGHT);
       }
 
-      footstepPlannerRequest.setPerformAStarSearch(definition.getPlannerPerformAStarSearch().getValue());
+      footstepPlannerRequest.setPerformAStarSearch(definition.getPlannerType().getValue() == FootstepPlanActionDefinitionMessage.A_STAR);
       footstepPlanner.getFootstepPlannerParameters().set(definition.getPlannerParametersReadOnly());
       boolean planWithBodyPath = definition.getPlannerPlanWithBodyPath().getValue();
       footstepPlannerRequest.setPlanBodyPath(planWithBodyPath);

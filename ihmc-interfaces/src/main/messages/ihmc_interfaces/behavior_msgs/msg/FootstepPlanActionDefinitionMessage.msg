@@ -46,11 +46,15 @@ float64 right_goal_foot_yaw_to_gizmo
 # Initial stance side when planning
 byte planner_initial_stance_side
 
-# Whether to perform A* search in the planner
-bool planner_perform_a_star_search
+# Quick footstep planner
+byte QUICK = 0
+# Turn walk turn planner
+byte TURN_WALK_TURN = 1
+# A star planner
+byte A_STAR = 2
 
-# Whether to use quick footstep planner
-bool use_quick_footstep_planner
+# The type of planner as defined above
+byte planner
 
 # Whether to walk, turning first, matching the goal orientation
 bool planner_walk_with_goal_orientation

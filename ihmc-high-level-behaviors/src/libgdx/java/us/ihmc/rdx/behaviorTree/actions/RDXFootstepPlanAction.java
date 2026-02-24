@@ -43,6 +43,8 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
 
+import static behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessage.*;
+
 public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState, FootstepPlanActionDefinition>
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -51,8 +53,6 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    private final ImBooleanWrapper manuallyPlaceStepsWrapper;
    private final ImDoubleWrapper swingDurationWidget;
    private final ImDoubleWrapper transferDurationWidget;
-   private final ImBooleanWrapper performAStarSearchWidget;
-   private final ImBooleanWrapper useQuickFootstepPlannerWidget;
    private final ImBooleanWrapper walkWithGoalOrientationWidget;
    private final ImBooleanWrapper planWithBodyPathWidget;
    private final RDXStoredPropertySetTuner plannerParametersWidgets;
@@ -121,12 +121,6 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
       transferDurationWidget = new ImDoubleWrapper(definition::getTransferDuration,
                                                    definition::setTransferDuration,
                                                    imDouble -> ImGui.inputDouble(labels.get("Transfer duration"), imDouble));
-      performAStarSearchWidget = new ImBooleanWrapper(definition.getPlannerPerformAStarSearch()::getValue,
-                                                      definition.getPlannerPerformAStarSearch()::setValue,
-                                                      imBoolean -> ImGui.checkbox(labels.get("Perform A* search"), imBoolean));
-      useQuickFootstepPlannerWidget = new ImBooleanWrapper(definition.getUseQuickFootstepPlanner()::getValue,
-                                                           definition.getUseQuickFootstepPlanner()::setValue,
-                                                           imBoolean -> ImGui.checkbox(labels.get("Use quick footstep planner"), imBoolean));
       walkWithGoalOrientationWidget = new ImBooleanWrapper(definition.getPlannerWalkWithGoalOrientation()::getValue,
                                                            definition.getPlannerWalkWithGoalOrientation()::setValue,
                                                            imBoolean -> ImGui.checkbox(labels.get("Walk with goal orientation"), imBoolean));
@@ -426,10 +420,16 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
                   definition.getPlannerInitialStanceSide().setValue(initialStanceSide);
             }
 
-            useQuickFootstepPlannerWidget.renderImGuiWidget();
-            performAStarSearchWidget.renderImGuiWidget();
+            if (ImGui.radioButton(labels.get("Quick"), definition.getPlannerType().getValue() == QUICK))
+               definition.getPlannerType().setValue(QUICK);
+            ImGui.sameLine();
+            if (ImGui.radioButton(labels.get("Turn walk turn"), definition.getPlannerType().getValue() == TURN_WALK_TURN))
+               definition.getPlannerType().setValue(TURN_WALK_TURN);
+            ImGui.sameLine();
+            if (ImGui.radioButton(labels.get("A*"), definition.getPlannerType().getValue() == A_STAR))
+               definition.getPlannerType().setValue(A_STAR);
 
-            ImGui.beginDisabled(!definition.getPlannerPerformAStarSearch().getValue());
+            ImGui.beginDisabled(definition.getPlannerType().getValue() == QUICK);
             walkWithGoalOrientationWidget.renderImGuiWidget();
             ImGui.endDisabled();
 

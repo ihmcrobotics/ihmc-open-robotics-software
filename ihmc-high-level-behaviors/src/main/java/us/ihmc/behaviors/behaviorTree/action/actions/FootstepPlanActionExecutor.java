@@ -30,6 +30,8 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import java.util.List;
 import java.util.UUID;
 
+import static behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessage.*;
+
 public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanActionState, FootstepPlanActionDefinition>
 {
    public static final double POSITION_TOLERANCE = 0.15;
@@ -132,7 +134,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
 
          if (state.getIsNextForExecution())
          {
-            if (definition.getUseQuickFootstepPlanner().getValue())
+            if (definition.getPlannerType().getValue() == QUICK)
             {
                if (previewPlanningThrottler.run())
                {
@@ -224,7 +226,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
                state.getExecutionState().setValue(FootstepPlanActionExecutionState.PLANNING_SUCCEEDED);
             }
          }
-         else if (definition.getUseQuickFootstepPlanner().getValue())
+         else if (definition.getPlannerType().getValue() == QUICK)
          {
             List<Pair<RobotSide, Pose3D>> footstepPlan
                   = quickFootstepPlanner.plan(new SideDependentList<>(side -> new Pose3D(syncedFeetPoses.get(side))),
