@@ -4,8 +4,8 @@ import controller_msgs.msg.dds.ContinuousStepGeneratorStatusMessage;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HeightMapCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.TerrainMapCommand;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.ROS2TopicNameTools;
 
@@ -24,9 +24,8 @@ public class MultiContactGaitGenerator
    static
    {
       List<Class<? extends Command<?, ?>>> commands = new ArrayList<>();
-
       commands.add(PlanarRegionsListCommand.class);
-      commands.add(HeightMapCommand.class);
+      commands.add(TerrainMapCommand.class);
 
       supportedCommands = Collections.unmodifiableList(commands);
       supportedCommands.forEach(command -> inputMessageClasses.add(ROS2TopicNameTools.newMessageInstance(command).getMessageClass()));
