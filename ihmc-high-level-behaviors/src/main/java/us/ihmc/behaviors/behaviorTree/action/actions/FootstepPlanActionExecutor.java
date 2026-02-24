@@ -27,6 +27,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -140,6 +141,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
                {
                   List<Pair<RobotSide, Pose3D>> footstepPlan
                         = quickFootstepPlanner.plan(new SideDependentList<>(side -> new Pose3D(syncedFeetPoses.get(side))),
+                                                    new ArrayList<>(),
                                                     new SideDependentList<>(side -> new Pose3D(liveGoalFeetPoses.get(side))));
 
                   var footstepsMessage = state.getPreviewFootsteps().accessValue();
@@ -230,6 +232,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
          {
             List<Pair<RobotSide, Pose3D>> footstepPlan
                   = quickFootstepPlanner.plan(new SideDependentList<>(side -> new Pose3D(syncedFeetPoses.get(side))),
+                                              new ArrayList<>(),
                                               new SideDependentList<>(side -> new Pose3D(liveGoalFeetPoses.get(side))));
 
             footstepPlanToExecute.clear();
