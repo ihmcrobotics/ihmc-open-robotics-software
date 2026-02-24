@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleInput;
@@ -37,6 +38,9 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelCo
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
+import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
@@ -141,6 +145,28 @@ public class CrossRobotCommandResolver
       }
    }
 
+   public void resolveCapturabilityData(CenterOfPressureDataHolder in, CenterOfPressureDataHolder out)
+   {
+      TDoubleArrayList inputTimes = in.getCapturePointWaypointTimes();
+      RecyclingArrayList<FramePoint2D> inputPositions = in.getCapturePointPositionWaypoints();
+      RecyclingArrayList<FrameVector2D> inputVelocities = in.getCapturePointVelocityWaypoints();
+
+      TDoubleArrayList outputTimes = out.getCapturePointWaypointTimes();
+      RecyclingArrayList<FramePoint2D> outputPositions = out.getCapturePointPositionWaypoints();
+      RecyclingArrayList<FrameVector2D> outputVelocities = out.getCapturePointVelocityWaypoints();
+
+      outputTimes.reset();
+      outputPositions.clear();
+      outputVelocities.clear();
+
+      for (int i = 0; i < inputTimes.size(); i++)
+      {
+         outputTimes.add(inputTimes.get(i));
+         resolveFrameTuple2D(inputPositions.get(i), outputPositions.add());
+         resolveFrameTuple2D(inputVelocities.get(i), outputVelocities.add());
+      }
+   }
+
    public void resolveDesiredExternalWrenchHolder(DesiredExternalWrenchHolder in, DesiredExternalWrenchHolder out)
    {
       out.clear();
@@ -234,6 +260,11 @@ public class CrossRobotCommandResolver
       resolveForceSensorDataHolder(in.getForceSensorDataHolder(), out.getForceSensorDataHolder());
       resolveCenterOfMassDataHolder(in.getCenterOfMassDataHolder(), out.getCenterOfMassDataHolder());
       out.setEstimatorRan(in.getEstimatorRan());
+   }
+
+   public void resolveHumanoidRobotContextDataPlanner(HumanoidRobotContextData in, HumanoidRobotContextData out)
+   {
+      resolveCapturabilityData(in.getCenterOfPressureDataHolder(), out.getCenterOfPressureDataHolder());
    }
 
    public void resolveSensorDataContext(SensorDataContext in, SensorDataContext out)

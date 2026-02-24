@@ -1,13 +1,20 @@
 package us.ihmc.avatar;
 
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.CrossRobotCommandResolver;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 
 public class MultiContactGaitGeneratorTask extends ControllerTask
 {
-   public MultiContactGaitGeneratorTask(String prefix, AvatarControllerThreadInterface controllerThread, long divisor, double schedulerDt, FullHumanoidRobotModel masterFullRobotModel)
+   private final AvatarControllerThreadInterface plannerThread;
+   private final CrossRobotCommandResolver plannerResolver;
+
+   public MultiContactGaitGeneratorTask(String prefix, AvatarControllerThreadInterface plannerThread, long divisor, double schedulerDt, FullHumanoidRobotModel masterFullRobotModel)
    {
-      super(prefix, controllerThread, divisor, schedulerDt, masterFullRobotModel);
+      super(prefix, plannerThread, divisor, schedulerDt, masterFullRobotModel);
+
+      this.plannerThread = plannerThread;
+      plannerResolver = new CrossRobotCommandResolver(plannerThread.getFullRobotModel());
    }
 
    @Override
@@ -15,4 +22,12 @@ public class MultiContactGaitGeneratorTask extends ControllerTask
    {
       runAll(schedulerThreadRunnables);
    }
+
+   @Override
+   protected void updateLocalContext(HumanoidRobotContextData masterContext)
+   {
+      super.updateLocalContext(masterContext);
+      plannerResolver.resolveHumanoidRobotContextDataPlanner(masterContext, plannerThread.getHumanoidRobotContextData());
+   }
+
 }

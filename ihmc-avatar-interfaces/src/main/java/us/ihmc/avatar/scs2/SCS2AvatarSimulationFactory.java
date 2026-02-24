@@ -624,6 +624,7 @@ public class SCS2AvatarSimulationFactory
                                                                                   contextDataFactory,
                                                                                   highLevelHumanoidControllerFactory.get().getStatusOutputManager(),
                                                                                   highLevelHumanoidControllerFactory.get().getCommandInputManager());
+      simulationConstructionSet.addYoGraphic(multiContactGaitGeneratorThread.getSCS2YoGraphics());
    }
 
    private void setupMultiThreadedRobotController()

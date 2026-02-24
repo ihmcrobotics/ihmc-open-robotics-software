@@ -78,6 +78,7 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoLong;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -1217,9 +1218,9 @@ public class BalanceManager implements SCS2YoGraphicHolder
       capturePointPositions.clear();
       capturePointVelocities.clear();
 
-      double t0 = contactStateManager.getCurrentStateDuration();
+      double t0 = 0.0; // contactStateManager.getCurrentStateDuration();
       double dt = 0.15;
-      int n = 20;
+      int n = 25;
 
       for (int i = 0; i < n; i++)
       {
