@@ -77,6 +77,10 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
             */
    public boolean planner_perform_a_star_search_;
    /**
+            * Whether to use quick footstep planner
+            */
+   public boolean use_quick_footstep_planner_;
+   /**
             * Whether to walk, turning first, matching the goal orientation
             */
    public boolean planner_walk_with_goal_orientation_;
@@ -138,6 +142,8 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
       planner_initial_stance_side_ = other.planner_initial_stance_side_;
 
       planner_perform_a_star_search_ = other.planner_perform_a_star_search_;
+
+      use_quick_footstep_planner_ = other.use_quick_footstep_planner_;
 
       planner_walk_with_goal_orientation_ = other.planner_walk_with_goal_orientation_;
 
@@ -387,6 +393,21 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
    }
 
    /**
+            * Whether to use quick footstep planner
+            */
+   public void setUseQuickFootstepPlanner(boolean use_quick_footstep_planner)
+   {
+      use_quick_footstep_planner_ = use_quick_footstep_planner;
+   }
+   /**
+            * Whether to use quick footstep planner
+            */
+   public boolean getUseQuickFootstepPlanner()
+   {
+      return use_quick_footstep_planner_;
+   }
+
+   /**
             * Whether to walk, turning first, matching the goal orientation
             */
    public void setPlannerWalkWithGoalOrientation(boolean planner_walk_with_goal_orientation)
@@ -479,6 +500,8 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.planner_perform_a_star_search_, other.planner_perform_a_star_search_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.use_quick_footstep_planner_, other.use_quick_footstep_planner_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.planner_walk_with_goal_orientation_, other.planner_walk_with_goal_orientation_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.planner_plan_with_body_path_, other.planner_plan_with_body_path_, epsilon)) return false;
@@ -526,6 +549,8 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
       if(this.planner_initial_stance_side_ != otherMyClass.planner_initial_stance_side_) return false;
 
       if(this.planner_perform_a_star_search_ != otherMyClass.planner_perform_a_star_search_) return false;
+
+      if(this.use_quick_footstep_planner_ != otherMyClass.use_quick_footstep_planner_) return false;
 
       if(this.planner_walk_with_goal_orientation_ != otherMyClass.planner_walk_with_goal_orientation_) return false;
 
@@ -576,6 +601,8 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
       builder.append(this.planner_initial_stance_side_);      builder.append(", ");
       builder.append("planner_perform_a_star_search=");
       builder.append(this.planner_perform_a_star_search_);      builder.append(", ");
+      builder.append("use_quick_footstep_planner=");
+      builder.append(this.use_quick_footstep_planner_);      builder.append(", ");
       builder.append("planner_walk_with_goal_orientation=");
       builder.append(this.planner_walk_with_goal_orientation_);      builder.append(", ");
       builder.append("planner_plan_with_body_path=");

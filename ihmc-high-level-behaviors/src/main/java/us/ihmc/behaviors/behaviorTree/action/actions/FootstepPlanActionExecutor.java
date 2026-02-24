@@ -132,7 +132,25 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
 
          if (state.getIsNextForExecution())
          {
-            if (definition.getPlannerPerformAStarSearch().getValue())
+            if (definition.getUseQuickFootstepPlanner().getValue())
+            {
+               if (previewPlanningThrottler.run())
+               {
+                  List<Pair<RobotSide, Pose3D>> footstepPlan
+                        = quickFootstepPlanner.plan(new SideDependentList<>(side -> new Pose3D(syncedFeetPoses.get(side))),
+                                                    new SideDependentList<>(side -> new Pose3D(liveGoalFeetPoses.get(side))));
+
+                  var footstepsMessage = state.getPreviewFootsteps().accessValue();
+                  footstepsMessage.clear();
+                  for (Pair<RobotSide, Pose3D> footstep : footstepPlan)
+                  {
+                     var messageFootstep = footstepsMessage.add();
+                     messageFootstep.setRobotSide(footstep.getFirst().toByte());
+                     messageFootstep.getSolePose().set(footstep.getSecond());
+                  }
+               }
+            }
+            else
             {
                if (previewPlanningThrottler.run())
                {
@@ -151,24 +169,6 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
                      var messageFootstep = footstepsMessage.add();
                      messageFootstep.setRobotSide(footstepPlan.getFootstep(i).getRobotSide().toByte());
                      messageFootstep.getSolePose().set(footstepPlan.getFootstep(i).getFootstepPose());
-                  }
-               }
-            }
-            else
-            {
-               if (previewPlanningThrottler.run())
-               {
-                  List<Pair<RobotSide, Pose3D>> footstepPlan
-                        = quickFootstepPlanner.plan(new SideDependentList<>(side -> new Pose3D(syncedFeetPoses.get(side))),
-                                                    new SideDependentList<>(side -> new Pose3D(liveGoalFeetPoses.get(side))));
-
-                  var footstepsMessage = state.getPreviewFootsteps().accessValue();
-                  footstepsMessage.clear();
-                  for (Pair<RobotSide, Pose3D> footstep : footstepPlan)
-                  {
-                     var messageFootstep = footstepsMessage.add();
-                     messageFootstep.setRobotSide(footstep.getFirst().toByte());
-                     messageFootstep.getSolePose().set(footstep.getSecond());
                   }
                }
             }
@@ -224,7 +224,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
                state.getExecutionState().setValue(FootstepPlanActionExecutionState.PLANNING_SUCCEEDED);
             }
          }
-         else if (!definition.getPlannerPerformAStarSearch().getValue())
+         else if (definition.getUseQuickFootstepPlanner().getValue())
          {
             List<Pair<RobotSide, Pose3D>> footstepPlan
                   = quickFootstepPlanner.plan(new SideDependentList<>(side -> new Pose3D(syncedFeetPoses.get(side))),

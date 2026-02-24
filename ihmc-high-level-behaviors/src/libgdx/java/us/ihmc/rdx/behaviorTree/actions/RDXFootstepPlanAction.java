@@ -52,6 +52,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    private final ImDoubleWrapper swingDurationWidget;
    private final ImDoubleWrapper transferDurationWidget;
    private final ImBooleanWrapper performAStarSearchWidget;
+   private final ImBooleanWrapper useQuickFootstepPlannerWidget;
    private final ImBooleanWrapper walkWithGoalOrientationWidget;
    private final ImBooleanWrapper planWithBodyPathWidget;
    private final RDXStoredPropertySetTuner plannerParametersWidgets;
@@ -123,6 +124,9 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
       performAStarSearchWidget = new ImBooleanWrapper(definition.getPlannerPerformAStarSearch()::getValue,
                                                       definition.getPlannerPerformAStarSearch()::setValue,
                                                       imBoolean -> ImGui.checkbox(labels.get("Perform A* search"), imBoolean));
+      useQuickFootstepPlannerWidget = new ImBooleanWrapper(definition.getUseQuickFootstepPlanner()::getValue,
+                                                           definition.getUseQuickFootstepPlanner()::setValue,
+                                                           imBoolean -> ImGui.checkbox(labels.get("Use quick footstep planner"), imBoolean));
       walkWithGoalOrientationWidget = new ImBooleanWrapper(definition.getPlannerWalkWithGoalOrientation()::getValue,
                                                            definition.getPlannerWalkWithGoalOrientation()::setValue,
                                                            imBoolean -> ImGui.checkbox(labels.get("Walk with goal orientation"), imBoolean));
@@ -422,6 +426,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
                   definition.getPlannerInitialStanceSide().setValue(initialStanceSide);
             }
 
+            useQuickFootstepPlannerWidget.renderImGuiWidget();
             performAStarSearchWidget.renderImGuiWidget();
 
             ImGui.beginDisabled(!definition.getPlannerPerformAStarSearch().getValue());

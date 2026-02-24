@@ -38,6 +38,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
    private final SideDependentList<CRDTBidirectionalDouble> goalFootstepToGoalYaws;
    private final CRDTBidirectionalImmutableField<InitialStanceSide> plannerInitialStanceSide;
    private final CRDTBidirectionalBoolean plannerPerformAStarSearch;
+   private final CRDTBidirectionalBoolean useQuickFootstepPlanner;
    private final CRDTBidirectionalBoolean plannerWalkWithGoalOrientation;
    private final CRDTBidirectionalBoolean plannerPlanWithBodyPath;
    private final BehaviorStoredPropertySetDefinition plannerParameters;
@@ -56,6 +57,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
    private final SideDependentList<Double> onDiskGoalFootstepToGoalYaws = new SideDependentList<>(() -> 0.0);
    private InitialStanceSide onDiskPlannerInitialStanceSide;
    private boolean onDiskPlannerPerformAStarSearch;
+   private boolean onDiskUseQuickFootstepPlanner;
    private boolean onDiskPlannerWalkWithGoalOrientation;
    private boolean onDiskPlannerPlanWithBodyPath;
 
@@ -76,6 +78,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       goalFootstepToGoalYaws = new SideDependentList<>(() -> new CRDTBidirectionalDouble(this, 0.0));
       plannerInitialStanceSide = new CRDTBidirectionalImmutableField<>(this, InitialStanceSide.AUTO);
       plannerPerformAStarSearch = new CRDTBidirectionalBoolean(this, false);
+      useQuickFootstepPlanner = new CRDTBidirectionalBoolean(this, false);
       plannerWalkWithGoalOrientation = new CRDTBidirectionalBoolean(this, true);
       plannerPlanWithBodyPath = new CRDTBidirectionalBoolean(this, false);
       plannerParameters = new BehaviorStoredPropertySetDefinition(this, "plannerParameters", robotModel.getFootstepPlannerParameters());
@@ -114,6 +117,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
          }
          jsonNode.put("plannerInitialStanceSide", plannerInitialStanceSide.getValue().name());
          jsonNode.put("plannerPerformAStarSearch", plannerPerformAStarSearch.getValue());
+         jsonNode.put("useQuickFootstepPlanner", useQuickFootstepPlanner.getValue());
          if (plannerPerformAStarSearch.getValue())
             jsonNode.put("plannerWalkWithGoalOrientation", plannerWalkWithGoalOrientation.getValue());
          jsonNode.put("plannerPlanWithBodyPath", plannerPlanWithBodyPath.getValue());
@@ -153,6 +157,8 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
             plannerInitialStanceSide.setValue(InitialStanceSide.valueOf(textNode.textValue()));
          if (jsonNode.get("plannerPerformAStarSearch") instanceof BooleanNode booleanNode)
             plannerPerformAStarSearch.setValue(booleanNode.booleanValue());
+         if (jsonNode.get("useQuickFootstepPlanner") instanceof BooleanNode booleanNode)
+            useQuickFootstepPlanner.setValue(booleanNode.booleanValue());
          if (jsonNode.get("plannerWalkWithGoalOrientation") instanceof BooleanNode booleanNode)
             plannerWalkWithGoalOrientation.setValue(booleanNode.booleanValue());
          if (jsonNode.get("plannerPlanWithBodyPath") instanceof BooleanNode booleanNode)
@@ -185,6 +191,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
          manuallyPlacedFootsteps.getValueReadOnly(i).setOnDiskFields();
       onDiskPlannerInitialStanceSide = plannerInitialStanceSide.getValue();
       onDiskPlannerPerformAStarSearch = plannerPerformAStarSearch.getValue();
+      onDiskUseQuickFootstepPlanner = useQuickFootstepPlanner.getValue();
       onDiskPlannerWalkWithGoalOrientation = plannerWalkWithGoalOrientation.getValue();
       onDiskPlannerPlanWithBodyPath = plannerPlanWithBodyPath.getValue();
       plannerParameters.setOnDiskFields();
@@ -218,6 +225,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
             manuallyPlacedFootsteps.getValueAndModify().get(i).undoAllNontopologicalChanges();
          plannerInitialStanceSide.setValue(onDiskPlannerInitialStanceSide);
          plannerPerformAStarSearch.setValue(onDiskPlannerPerformAStarSearch);
+         useQuickFootstepPlanner.setValue(onDiskUseQuickFootstepPlanner);
          plannerWalkWithGoalOrientation.setValue(onDiskPlannerWalkWithGoalOrientation);
          plannerPlanWithBodyPath.setValue(onDiskPlannerPlanWithBodyPath);
          plannerParameters.undoAllNontopologicalChanges();
@@ -251,6 +259,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
             unchanged &= !manuallyPlacedFootsteps.getValueReadOnly(i).hasChanges();
       unchanged &= plannerInitialStanceSide.getValue() == onDiskPlannerInitialStanceSide;
       unchanged &= plannerPerformAStarSearch.getValue() == onDiskPlannerPerformAStarSearch;
+      unchanged &= useQuickFootstepPlanner.getValue() == onDiskUseQuickFootstepPlanner;
       unchanged &= plannerWalkWithGoalOrientation.getValue() == onDiskPlannerWalkWithGoalOrientation;
       unchanged &= plannerPlanWithBodyPath.getValue() == onDiskPlannerPlanWithBodyPath;
       unchanged &= plannerParameters.isUnchanged();
@@ -283,6 +292,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       message.setRightGoalFootYawToGizmo(goalFootstepToGoalYaws.get(RobotSide.RIGHT).toMessage());
       message.setPlannerInitialStanceSide(plannerInitialStanceSide.toMessage().toByte());
       message.setPlannerPerformAStarSearch(plannerPerformAStarSearch.toMessage());
+      message.setUseQuickFootstepPlanner(useQuickFootstepPlanner.toMessage());
       message.setPlannerWalkWithGoalOrientation(plannerWalkWithGoalOrientation.toMessage());
       message.setPlannerPlanWithBodyPath(plannerPlanWithBodyPath.toMessage());
       plannerParameters.toMessage(message.getPlannerParameters());
@@ -316,6 +326,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       goalFootstepToGoalYaws.get(RobotSide.RIGHT).fromMessage(message.getRightGoalFootYawToGizmo());
       plannerInitialStanceSide.fromMessage(InitialStanceSide.fromByte(message.getPlannerInitialStanceSide()));
       plannerPerformAStarSearch.fromMessage(message.getPlannerPerformAStarSearch());
+      useQuickFootstepPlanner.fromMessage(message.getUseQuickFootstepPlanner());
       plannerWalkWithGoalOrientation.fromMessage(message.getPlannerWalkWithGoalOrientation());
       plannerPlanWithBodyPath.fromMessage(message.getPlannerPlanWithBodyPath());
       plannerParameters.fromMessage(message.getPlannerParameters());
@@ -409,6 +420,11 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
    public CRDTBidirectionalBoolean getPlannerPerformAStarSearch()
    {
       return plannerPerformAStarSearch;
+   }
+
+   public CRDTBidirectionalBoolean getUseQuickFootstepPlanner()
+   {
+      return useQuickFootstepPlanner;
    }
 
    public CRDTBidirectionalBoolean getPlannerWalkWithGoalOrientation()

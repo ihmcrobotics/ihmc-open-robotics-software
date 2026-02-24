@@ -15,7 +15,7 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "1876cd66c3d26c7965d4ec779dcc8b363e32b8b5f567817355fb9b20b9cb8952";
+   		return "97c1dc59aca00f48f2cccde59b581fd7ecb841ee664dd39159ce25e544346ea0";
    }
    
    @Override
@@ -81,6 +81,8 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -160,6 +162,9 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessagePubSubType.getCdrSerializedSize(data.getPlannerParameters(), current_alignment);
 
 
@@ -203,6 +208,8 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
 
       cdr.write_type_7(data.getPlannerPerformAStarSearch());
 
+      cdr.write_type_7(data.getUseQuickFootstepPlanner());
+
       cdr.write_type_7(data.getPlannerWalkWithGoalOrientation());
 
       cdr.write_type_7(data.getPlannerPlanWithBodyPath());
@@ -241,6 +248,8 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
       	
       data.setPlannerPerformAStarSearch(cdr.read_type_7());
       	
+      data.setUseQuickFootstepPlanner(cdr.read_type_7());
+      	
       data.setPlannerWalkWithGoalOrientation(cdr.read_type_7());
       	
       data.setPlannerPlanWithBodyPath(cdr.read_type_7());
@@ -272,6 +281,7 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
       ser.write_type_6("right_goal_foot_yaw_to_gizmo", data.getRightGoalFootYawToGizmo());
       ser.write_type_9("planner_initial_stance_side", data.getPlannerInitialStanceSide());
       ser.write_type_7("planner_perform_a_star_search", data.getPlannerPerformAStarSearch());
+      ser.write_type_7("use_quick_footstep_planner", data.getUseQuickFootstepPlanner());
       ser.write_type_7("planner_walk_with_goal_orientation", data.getPlannerWalkWithGoalOrientation());
       ser.write_type_7("planner_plan_with_body_path", data.getPlannerPlanWithBodyPath());
       ser.write_type_a("planner_parameters", new ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessagePubSubType(), data.getPlannerParameters());
@@ -301,6 +311,7 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
       data.setRightGoalFootYawToGizmo(ser.read_type_6("right_goal_foot_yaw_to_gizmo"));
       data.setPlannerInitialStanceSide(ser.read_type_9("planner_initial_stance_side"));
       data.setPlannerPerformAStarSearch(ser.read_type_7("planner_perform_a_star_search"));
+      data.setUseQuickFootstepPlanner(ser.read_type_7("use_quick_footstep_planner"));
       data.setPlannerWalkWithGoalOrientation(ser.read_type_7("planner_walk_with_goal_orientation"));
       data.setPlannerPlanWithBodyPath(ser.read_type_7("planner_plan_with_body_path"));
       ser.read_type_a("planner_parameters", new ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessagePubSubType(), data.getPlannerParameters());

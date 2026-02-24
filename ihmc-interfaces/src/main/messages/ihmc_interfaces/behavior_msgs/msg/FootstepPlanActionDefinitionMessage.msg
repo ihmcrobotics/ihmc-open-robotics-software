@@ -49,6 +49,9 @@ byte planner_initial_stance_side
 # Whether to perform A* search in the planner
 bool planner_perform_a_star_search
 
+# Whether to use quick footstep planner
+bool use_quick_footstep_planner
+
 # Whether to walk, turning first, matching the goal orientation
 bool planner_walk_with_goal_orientation
 

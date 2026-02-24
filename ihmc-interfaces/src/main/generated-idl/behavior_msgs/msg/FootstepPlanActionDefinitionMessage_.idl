@@ -84,6 +84,10 @@ module behavior_msgs
          */
         boolean planner_perform_a_star_search;
         /**
+         * Whether to use quick footstep planner
+         */
+        boolean use_quick_footstep_planner;
+        /**
          * Whether to walk, turning first, matching the goal orientation
          */
         boolean planner_walk_with_goal_orientation;
