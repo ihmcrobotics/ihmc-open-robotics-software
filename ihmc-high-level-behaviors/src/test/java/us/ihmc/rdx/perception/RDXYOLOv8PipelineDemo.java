@@ -53,7 +53,8 @@ import java.util.concurrent.TimeUnit;
 
 public class RDXYOLOv8PipelineDemo
 {
-   private static final String SVO_FILE = System.getProperty("user.home") + "/Downloads/20251217_151953_H1NewModelTest.svo2";
+//   private static final String SVO_FILE = System.getProperty("user.home") + "/Downloads/20251217_151953_H1NewModelTest.svo2";
+   private final String SVO_FILE = "/opt/ihmc/LogData/H1/Arghya/20250902_133905_H1HardwareControlProcess/perception/20250902_134118_H1ZEDXMini.svo2";
 
    private static final String SAVE_DIRECTORY = System.getProperty("user.home") + File.separator + "Documents" + File.separator;
 

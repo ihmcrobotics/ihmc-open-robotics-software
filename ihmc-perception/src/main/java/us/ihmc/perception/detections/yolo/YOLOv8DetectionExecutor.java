@@ -67,6 +67,8 @@ public class YOLOv8DetectionExecutor
    private final RepeatingTaskThread annotatedImagePublishedThread;
    private final TypedNotification<RawImage> newestColorImage = new TypedNotification<>();
 
+   private final BoTSortTracker botSortTracker = new BoTSortTracker();
+
    private final BlockingQueue<Runnable> taskQueue;
    private final RepeatingTaskThread taskExecutorThread = new RepeatingTaskThread("YOLOExecutor", this::executeTasks, DefaultExceptionHandler.RUNTIME_EXCEPTION);
 
@@ -221,7 +223,8 @@ public class YOLOv8DetectionExecutor
 
             // Create list of instant detections from results
             List<InstantDetection> yoloInstantDetections = new ArrayList<>();
-            List<YOLOv8InstantDetection> annotatedImageDetections = new ArrayList<>();
+            List<YOLOv8InstantDetection> trackableDetections = new ArrayList<>();
+            List<YOLOv8InstantDetection> newAnnotatedImageDetections = new ArrayList<>();
             for (YOLOv8Detection detection : yoloResults)
             {
                RawImage objectMask = detection.mask();
@@ -240,7 +243,10 @@ public class YOLOv8DetectionExecutor
                // Get the segmented depth image
                RawImage segmentedDepth = segmenter.removeBackground(depthImage, erodedObjectMask);
                if (segmentedDepth == null)
+               {
+                  erodedObjectMask.release();
                   continue;
+               }
                // Get the point cloud
                List<Point3D32> pointCloud = extractor.extractPointCloud(segmentedDepth);
                // Filter out outliers from the point cloud
@@ -251,16 +257,16 @@ public class YOLOv8DetectionExecutor
                {
                   Point3D32 centroid = YOLOv8Tools.computeCentroidOfPointCloud(filteredPoints, 128);
 
-                  annotatedImageDetections.add(new YOLOv8InstantDetection(detection.objectClass(),
-                                                                          detection.confidence(),
-                                                                          new Pose3D(centroid, new RotationMatrix()),
-                                                                          erodedObjectMask.getAcquisitionTime(),
-                                                                          bgrImage,
-                                                                          erodedObjectMask,
-                                                                          depthImage,
-                                                                          detection.boundingBox(),
-                                                                          filteredPoints));
-                  yoloInstantDetections.add(new YOLOv8InstantDetection(detection.objectClass(),
+//                  annotatedImageDetections.add(new YOLOv8InstantDetection(detection.objectClass(),
+//                                                                          detection.confidence(),
+//                                                                          new Pose3D(centroid, new RotationMatrix()),
+//                                                                          erodedObjectMask.getAcquisitionTime(),
+//                                                                          bgrImage,
+//                                                                          erodedObjectMask,
+//                                                                          depthImage,
+//                                                                          detection.boundingBox(),
+//                                                                          filteredPoints));
+                  YOLOv8InstantDetection det = new YOLOv8InstantDetection(detection.objectClass(),
                                                                        detection.confidence(),
                                                                        new Pose3D(centroid, new RotationMatrix()),
                                                                        erodedObjectMask.getAcquisitionTime(),
@@ -268,25 +274,43 @@ public class YOLOv8DetectionExecutor
                                                                        erodedObjectMask,
                                                                        depthImage,
                                                                        detection.boundingBox(),
-                                                                       filteredPoints));
+                                                                       filteredPoints);
+                  trackableDetections.add(det);
+                  yoloInstantDetections.add(det);
+                  newAnnotatedImageDetections.add(det);
                }
                erodedObjectMask.release();
                segmentedDepth.release();
             }
 
-            // Process callbacks
-            if (!yoloInstantDetections.isEmpty())
-            {
-               detectionConsumerCallbacks.forEach(callback -> callback.accept(yoloInstantDetections));
+            // Track IDs
+            botSortTracker.update(trackableDetections);
 
-               synchronized (annotatedImagePublishedThread)
-               {
-                  List<YOLOv8InstantDetection> previousAnnotatedImageDetections = this.annotatedImageDetections;
-                  this.annotatedImageDetections = annotatedImageDetections;
-                  for (YOLOv8InstantDetection previousAnnotatedImageDetection : previousAnnotatedImageDetections)
-                     previousAnnotatedImageDetection.destroy();
-               }
+            // Callbacks exactly once
+            detectionConsumerCallbacks.forEach(cb -> cb.accept(yoloInstantDetections));
+
+            // Update annotated detections list (destroy previous)
+            synchronized (annotatedImagePublishedThread)
+            {
+               List<YOLOv8InstantDetection> previous = this.annotatedImageDetections;
+               this.annotatedImageDetections = newAnnotatedImageDetections;
+               for (YOLOv8InstantDetection old : previous)
+                  old.destroy();
             }
+
+            // Process callbacks
+//            if (!yoloInstantDetections.isEmpty())
+//            {
+//               detectionConsumerCallbacks.forEach(callback -> callback.accept(yoloInstantDetections));
+//
+//               synchronized (annotatedImagePublishedThread)
+//               {
+//                  List<YOLOv8InstantDetection> previousAnnotatedImageDetections = this.annotatedImageDetections;
+//                  this.annotatedImageDetections = annotatedImageDetections;
+//                  for (YOLOv8InstantDetection previousAnnotatedImageDetection : previousAnnotatedImageDetections)
+//                     previousAnnotatedImageDetection.destroy();
+//               }
+//            }
 
             yoloResults.destroy();
             bgrImage.release();
