@@ -134,24 +134,18 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
       if (ImGui.beginCombo(labels.get("Execute after"), definition.getExecuteAfterLeafName()))
       {
          if (ImGui.selectable(labels.get("Previous"), definition.getExecuteAfterPrevious()))
-         {
             definition.setExecuteAfterPrevious();
-         }
          if (ImGui.selectable(labels.get("Beginning"), definition.getExecuteAfterBeginning()))
-         {
             definition.setExecuteAfterBeginning();
-         }
 
          for (LeafNodeState<?> leafNode : rootNode.getState().getOrderedLeaves())
-         {
             if (leafNode.getLeafIndex() < state.getLeafIndex())
-            {
-               if (ImGui.selectable(labels.get(leafNode.getDefinition().getName()), definition.getExecuteAfterNodeID() == leafNode.getID()))
-               {
+               if (ImGui.selectable(labels.get(leafNode.getDefinition().getName(), leafNode.getLeafIndex()),
+                                    definition.getExecuteAfterNodeID() == leafNode.getID()))
                   definition.setExecuteAfterLeaf(leafNode.getID(), leafNode.getDefinition().getName());
-               }
-            }
-         }
+
+         if (ImGui.isWindowAppearing())
+            ImGui.setScrollHereY(1.0f);
 
          ImGui.endCombo();
       }

@@ -134,20 +134,20 @@ public class RDXShapeContainsCondition
 
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
-      if (shapeState.getShapeFrame().isChildOfWorld())
+      if (parent.getSelected() && shapeState.getShapeFrame().isChildOfWorld())
          poseGizmo.calculate3DViewPick(input);
    }
 
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      if (shapeState.getShapeFrame().isChildOfWorld())
+      if (parent.getSelected() && shapeState.getShapeFrame().isChildOfWorld())
          poseGizmo.process3DViewInput(input);
    }
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if ((state.getIsNextForExecution() || parent.getSelected())
-         && shapeState.getShapeFrame().isChildOfWorld() && sphereModel != null)
+      if ((state.getIsNextForExecution() || parent.getSelected() || state.getIsExecuting()) && shapeState.getShapeFrame().isChildOfWorld()
+          && sphereModel != null)
       {
          sphereModel.getRenderables(renderables, pool);
          poseGizmo.getVirtualRenderables(renderables, pool);
