@@ -117,7 +117,6 @@ public class HumanoidKinematicsSimulation
    private final RobotConfigurationDataPublisher robotConfigurationDataPublisher;
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-   private final SimulatedHandKinematicController simulatedHandKinematicController;
    private final RobotMotionStatusHolder robotMotionStatusHolder = new RobotMotionStatusHolder(RobotMotionStatus.UNKNOWN);
    private double yoVariableServerTime = 0.0;
    private final Stopwatch monotonicTimer = new Stopwatch();
@@ -226,7 +225,7 @@ public class HumanoidKinematicsSimulation
                                                                  GRAVITY_Z,
                                                                  robotModel.getWalkingControllerParameters().getOmega0(),
                                                                  feet,
-                                                                 kinematicsSimulationParameters.getDt(),
+                                                                 kinematicsSimulationParameters::getDt,
                                                                  false,
                                                                  Collections.emptyList(),
                                                                  allContactableBodies,
@@ -262,7 +261,8 @@ public class HumanoidKinematicsSimulation
                                                                  walkingOutputManager,
                                                                  managerFactory,
                                                                  walkingControllerParameters,
-                                                                 controllerToolbox);
+                                                                 controllerToolbox,
+                                                                 kinematicsSimulationParameters.getDt());
       walkingParentRegistry.addChild(walkingController.getYoVariableRegistry());
 
       // create controller network subscriber here!!
@@ -293,13 +293,11 @@ public class HumanoidKinematicsSimulation
       controllerNetworkSubscriber.addMessageCollectors(ControllerAPIDefinition.createDefaultMessageIDExtractor(), 3);
       controllerNetworkSubscriber.addMessageValidator(ControllerAPIDefinition.createDefaultMessageValidation());
 
-      simulatedHandKinematicController = robotModel.createSimulatedHandKinematicController(fullRobotModel, realtimeROS2Node, yoTime);
-      
       robotConfigurationDataPublisher = createRobotConfigurationDataPublisher(robotModel.getSimpleRobotName());
 
       realtimeROS2Node.spin();
 
-      WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(kinematicsSimulationParameters.getDt(),
+      WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(kinematicsSimulationParameters::getDt,
                                                                                        GRAVITY_Z,
                                                                                        fullRobotModel.getRootJoint(),
                                                                                        controllerToolbox.getControlledJoints(),
@@ -327,7 +325,7 @@ public class HumanoidKinematicsSimulation
                                                                             controllerToolbox.getTotalMassProvider(),
                                                                             controllerToolbox.getWholeBodyAngularVelocityCalculator(),
                                                                             GRAVITY_Z,
-                                                                            controllerToolbox.getControlDT(),
+                                                                            kinematicsSimulationParameters::getDt,
                                                                             walkingParentRegistry);
 
       ParameterLoaderHelper.loadParameters(this, robotModel, drcControllerThreadRegistry);
@@ -471,9 +469,6 @@ public class HumanoidKinematicsSimulation
                                  KinematicsSimulationContactStateHolder.holdAtCurrent(controllerToolbox.getFootContactStates().get(robotSide)));
       }
 
-      if (simulatedHandKinematicController != null)
-         simulatedHandKinematicController.initialize();
-
       monotonicTimer.start();
    }
 
@@ -507,7 +502,7 @@ public class HumanoidKinematicsSimulation
       }
 
       // Trigger footstep completion based on swing time alone
-      if (contactStateHolders.sides().length == 1 && managerFactory.getOrCreateBalanceManager().isICPPlanDone())
+      if (contactStateHolders.sides().length == 1 && managerFactory.getOrCreateBalanceManager(kinematicsSimulationParameters.getDt()).isICPPlanDone())
       {
          footSwitches.get(contactStateHolders.sides()[0].getOppositeSide()).setFootContactState(true);
       }
@@ -542,17 +537,6 @@ public class HumanoidKinematicsSimulation
 
       integrator.setIntegrationDT(kinematicsSimulationParameters.getDt());
       integrator.doubleIntegrateFromAcceleration(Arrays.asList(controllerToolbox.getControlledJoints()));
-
-      // spin lidar
-      JointBasics hokuyoJoint = fullRobotModel.getLidarJoint("head_hokuyo_sensor");
-      if (hokuyoJoint instanceof RevoluteJoint)
-      {
-         RevoluteJoint revoluteHokuyoJoint = (RevoluteJoint) hokuyoJoint;
-         revoluteHokuyoJoint.setQ(revoluteHokuyoJoint.getQ() + LIDAR_SPINDLE_SPEED * kinematicsSimulationParameters.getUpdatePeriod());
-      }
-
-      if (simulatedHandKinematicController != null)
-         simulatedHandKinematicController.doControl();
 
       yoVariableServerTime += Conversions.millisecondsToSeconds(1);
       if (kinematicsSimulationParameters.getLogToFile())
@@ -607,8 +591,6 @@ public class HumanoidKinematicsSimulation
       LogTools.info("Shutting down...");
       if (intraprocessYoVariableLogger != null)
          intraprocessYoVariableLogger.destroy();
-      if (simulatedHandKinematicController != null)
-         simulatedHandKinematicController.cleanup();
       controlThread.destroy();
       heartbeat.destroy();
       ros2Node.destroy();

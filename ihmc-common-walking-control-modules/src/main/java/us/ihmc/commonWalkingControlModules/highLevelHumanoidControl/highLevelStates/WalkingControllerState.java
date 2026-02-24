@@ -55,7 +55,8 @@ public class WalkingControllerState extends HighLevelControllerState
                                  WholeBodyControllerCoreFactory controllerCoreFactory,
                                  HighLevelHumanoidControllerToolbox controllerToolbox,
                                  HighLevelControllerParameters highLevelControllerParameters,
-                                 WalkingControllerParameters walkingControllerParameters)
+                                 WalkingControllerParameters walkingControllerParameters,
+                                 double controlDT)
    {
       super(controllerState,
             highLevelControllerParameters,
@@ -67,7 +68,8 @@ public class WalkingControllerState extends HighLevelControllerState
                                                                  statusOutputManager,
                                                                  managerFactory,
                                                                  walkingControllerParameters,
-                                                                 controllerToolbox);
+                                                                 controllerToolbox,
+                                                                 controlDT);
 
       // create controller core
       controllerCoreFactory.setFeedbackControllerTemplate(managerFactory.createFeedbackControlTemplate());

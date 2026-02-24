@@ -14,6 +14,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
@@ -27,13 +28,13 @@ public class AngularExcursionCalculator
    private final YoFrameVector3D wholeBodyAngularVelocity;
    private final YoFrameVector3D wholeBodyAngularMomentum;
    private final YoBoolean zeroAngularExcursionFlag;
-   private final double dt;
+   private final DoubleProvider dt;
 
    private final Vector3D tempVector = new Vector3D();
    private final YoFramePose3D comPose;
    private final ReferenceFrame centerOfMassFrame;
 
-   public AngularExcursionCalculator(ReferenceFrame centerOfMassFrame, RigidBodyBasics rootBody, double dt, YoRegistry registry,
+   public AngularExcursionCalculator(ReferenceFrame centerOfMassFrame, RigidBodyBasics rootBody, DoubleProvider dt, YoRegistry registry,
                                      YoGraphicsListRegistry graphicsListRegistry)
    {
       this.dt = dt;
@@ -85,7 +86,7 @@ public class AngularExcursionCalculator
       wholeBodyAngularMomentum.set(angularVelocityCalculator.getAngularMomentum());
 
 
-      axisAngle.setAndScale(dt, wholeBodyAngularVelocity);
+      axisAngle.setAndScale(dt.getValue(), wholeBodyAngularVelocity);
       angularExcursion.inverseTransform(axisAngle);
       rotation.setRotationVector(axisAngle);
 

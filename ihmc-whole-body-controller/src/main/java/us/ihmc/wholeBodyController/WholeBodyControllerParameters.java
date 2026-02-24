@@ -12,18 +12,6 @@ import java.io.InputStream;
 
 public interface WholeBodyControllerParameters<E extends Enum<E> & RobotSegment<E>>
 {
-   double getControllerDT();
-
-   default double getSimulatedHandControlDT()
-   {
-      return getControllerDT();
-   }
-
-   default double getFeedbackControllerDT()
-   {
-      return 0.0;
-   }
-
    StateEstimatorParameters getStateEstimatorParameters();
 
    CoPTrajectoryParameters getCoPTrajectoryParameters();

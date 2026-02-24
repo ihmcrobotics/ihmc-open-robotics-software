@@ -15,7 +15,9 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.mecano.yoVariables.filters.AlphaFilteredYoSpatialVector;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.yoVariables.filters.AlphaFilterTools;
 import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.List;
@@ -39,7 +41,7 @@ public class HandWrenchCalculator
    private final DMatrixRMaj armJacobianTransposeDagger;
    private final DampedLeastSquaresSolver dampedPseudoInverseSolver;
 
-   public HandWrenchCalculator(RobotSide side, FullHumanoidRobotModel fullRobotModel, YoRegistry parentRegistry, double expectedComputeDT)
+   public HandWrenchCalculator(RobotSide side, FullHumanoidRobotModel fullRobotModel, YoRegistry parentRegistry, DoubleProvider expectedComputeDT)
    {
       registry = new YoRegistry(HandWrenchCalculator.class.getSimpleName() + side.getPascalCaseName());
 
@@ -60,14 +62,14 @@ public class HandWrenchCalculator
 
       inverseDynamicsCalculator = new InverseDynamicsCalculator(MultiBodySystemReadOnly.toMultiBodySystemInput(armJoints));
       inverseDynamicsCalculator.setConsiderCoriolisAndCentrifugalForces(false);
-      inverseDynamicsCalculator.setGravitionalAcceleration(-9.81);
+      inverseDynamicsCalculator.setGravitationalAcceleration(-9.81);
 
-      double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(BREAK_FREQUENCY, expectedComputeDT);
+      DoubleProvider alpha = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(BREAK_FREQUENCY, expectedComputeDT.getValue());
       yoFilteredWrench = new AlphaFilteredYoSpatialVector("filteredWrench",
                                                           side.toString(),
                                                           registry,
-                                                          () -> alpha,
-                                                          () -> alpha,
+                                                          alpha,
+                                                          alpha,
                                                           unfilteredWrench.getAngularPart(),
                                                           unfilteredWrench.getLinearPart());
       if (parentRegistry != null)

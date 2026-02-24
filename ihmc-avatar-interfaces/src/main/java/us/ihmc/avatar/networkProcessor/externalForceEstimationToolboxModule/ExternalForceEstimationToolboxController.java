@@ -109,7 +109,7 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
 
       double updateDT = Conversions.millisecondsToSeconds(updateRateMillis);
       JointBasics[] joints = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullRobotModel);
-      WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(robotModel.getControllerDT(),
+      WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(() -> updateDT,
                                                                 9.81,
                                                                 fullRobotModel.getRootJoint(),
                                                                 joints,

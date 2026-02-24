@@ -118,7 +118,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       simulationTestHelper.start();
 
       if (CHECK_ICP_CONTINUITY)
-         simulationTestHelper.addDesiredICPContinuityAssertion(3.0 * robotModel.getControllerDT());
+         simulationTestHelper.addDesiredICPContinuityAssertion(3.0 * simulationTestHelper.getCurrentControlDT());
 
       simulateAndAssertGoodWalking(simulationTestHelper, doPelvisWarmup);
 
@@ -151,7 +151,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       simulationTestHelper.start();
 
       if (CHECK_ICP_CONTINUITY)
-         simulationTestHelper.addDesiredICPContinuityAssertion(3.0 * robotModel.getControllerDT());
+         simulationTestHelper.addDesiredICPContinuityAssertion(3.0 * simulationTestHelper.getCurrentControlDT());
 
       simulateAndAssertGoodWalking(simulationTestHelper, doPelvisWarmup);
 

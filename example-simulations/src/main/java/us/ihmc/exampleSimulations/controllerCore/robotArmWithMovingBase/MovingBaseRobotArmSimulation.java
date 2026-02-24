@@ -14,7 +14,7 @@ public class MovingBaseRobotArmSimulation
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
       MovingBaseRobotArm robotArm = new MovingBaseRobotArm(controlDT);
-      MovingBaseRobotArmController robotArmController = new MovingBaseRobotArmController(robotArm, controlDT, yoGraphicsListRegistry);
+      MovingBaseRobotArmController robotArmController = new MovingBaseRobotArmController(robotArm, () -> controlDT, yoGraphicsListRegistry);
       robotArmController.registerControllerCoreModeChangedListener((mode) -> robotArm.setDynamic(mode == WholeBodyControllerCoreMode.INVERSE_DYNAMICS));
       robotArm.setController(robotArmController);
 

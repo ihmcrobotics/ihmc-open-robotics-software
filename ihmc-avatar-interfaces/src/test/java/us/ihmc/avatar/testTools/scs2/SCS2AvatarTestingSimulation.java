@@ -127,6 +127,11 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
       avatarSimulation.setJavaFXThreadImplicitExit(false);
    }
 
+   public double getCurrentControlDT()
+   {
+      return avatarSimulation.getCurrentControlDT();
+   }
+
    public void setCreateVideo(boolean createVideo)
    {
       this.createVideo = createVideo;

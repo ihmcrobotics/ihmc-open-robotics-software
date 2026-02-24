@@ -64,7 +64,7 @@ public class RDXBehaviorTreeSceneObject extends BehaviorTreeSceneObjectState
    public void update()
    {
       RDXCRDTTools.syncGizmoWithBidirectionalField(gizmo.getPoseGizmo(), transform, this);
-      if (model != null)
+      if (modelInstance != null)
          modelInstance.setTransformToWorldFrame(transform.getValueUnsafe());
 
       LibGDXTools.toLibGDX(transform.getValueUnsafe(), frameGraphic.transform);
@@ -107,7 +107,7 @@ public class RDXBehaviorTreeSceneObject extends BehaviorTreeSceneObjectState
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (model != null)
+      if (modelInstance != null)
          modelInstance.getRenderables(renderables, pool);
       frameGraphic.getRenderables(renderables, pool);
       textLabel.getRenderables(renderables, pool);

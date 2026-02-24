@@ -13,6 +13,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.controllers.pidGains.PDGainsReadOnly;
 import us.ihmc.yoVariables.filters.RateLimitedYoVariable;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -76,7 +77,7 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
       isEnabled = new YoBoolean("control_enabled_" + jointName, registry);
       isEnabled.set(false);
 
-      double dt = toolbox.getControlDT();
+      DoubleProvider dt = toolbox.getControlDT();
 
       YoRegistry debugVariableRegistry = WholeBodyControllerCore.REDUCE_YOVARIABLES ? null : registry;
 

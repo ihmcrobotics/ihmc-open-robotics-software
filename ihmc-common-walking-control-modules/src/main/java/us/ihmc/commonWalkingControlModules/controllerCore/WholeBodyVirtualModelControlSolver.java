@@ -104,7 +104,7 @@ public class WholeBodyVirtualModelControlSolver implements SCS2YoGraphicHolder
       rootJoint = toolbox.getRootJoint();
       optimizationControlModule = new VirtualModelControlOptimizationControlModule(toolbox, registry);
 
-      if (SubtreeStreams.fromChildren(toolbox.getRootBody()).filter(JointReadOnly::isLoopClosure).findFirst().isPresent())
+      if (SubtreeStreams.fromChildren(toolbox.getRootBody()).anyMatch(JointReadOnly::isLoopClosure))
          throw new UnsupportedOperationException("The virtual model control does not support kinematic loops yet.");
 
       jointIndexHandler = toolbox.getJointIndexHandler();
@@ -127,7 +127,7 @@ public class WholeBodyVirtualModelControlSolver implements SCS2YoGraphicHolder
 
       jointAccelerationIntegrationCalculator = new JointAccelerationIntegrationCalculator(toolbox.getRootBody(), toolbox.getControlDT(), registry);
       forwardDynamicsCalculator = new ForwardDynamicsCalculator(toolbox.getRootBody());
-      forwardDynamicsCalculator.setGravitionalAcceleration(-Math.abs(toolbox.getGravityZ()));
+      forwardDynamicsCalculator.setGravitationalAcceleration(-Math.abs(toolbox.getGravityZ()));
 
       yoResidualRootJointForce = toolbox.getYoResidualRootJointForce();
       yoResidualRootJointTorque = toolbox.getYoResidualRootJointTorque();

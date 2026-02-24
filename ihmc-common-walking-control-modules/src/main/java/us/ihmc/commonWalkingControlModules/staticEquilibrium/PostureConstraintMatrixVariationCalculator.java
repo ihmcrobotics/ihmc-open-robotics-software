@@ -48,7 +48,7 @@ public class PostureConstraintMatrixVariationCalculator
       this.controlledJoints = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullRobotModel);
       this.wholeBodyContactState = wholeBodyContactState;
       this.stabilityMarginOptimizationModule = stabilityMarginOptimizationModule;
-      this.integrator = new RobotJointVelocityAccelerationIntegrator(integrationDT);
+      this.integrator = new RobotJointVelocityAccelerationIntegrator(() -> integrationDT);
       this.integrationDT = integrationDT;
 
       for (RobotSide robotSide : RobotSide.values)

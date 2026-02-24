@@ -5,7 +5,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.zulu.ZuluJointMap;
+import us.ihmc.zulu.ZuluRobotModel;
 import us.ihmc.zulu.ZuluVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
@@ -32,6 +34,7 @@ public class ZuluHighLevelControllerParameters implements HighLevelControllerPar
    protected final ZuluJointMap jointMap;
    protected final RobotTarget target;
    private final ZuluStandPrepSetPoints standPrepSetPoints;
+   private final TObjectDoubleHashMap<HighLevelControllerName> controlDTs = new TObjectDoubleHashMap<>();
 
    public ZuluHighLevelControllerParameters(ZuluVersion zuluVersion, ZuluJointMap jointMap, RobotTarget target)
    {
@@ -39,6 +42,27 @@ public class ZuluHighLevelControllerParameters implements HighLevelControllerPar
       this.jointMap = jointMap;
       this.target = target;
       standPrepSetPoints = new ZuluStandPrepSetPoints(jointMap);
+      controlDTs.put(HighLevelControllerName.WALKING, ZuluRobotModel.DEFAULT_CONTROL_DT);
+      controlDTs.put(HighLevelControllerName.CUSTOM1, ZuluRobotModel.DEFAULT_CONTROL_DT);
+      controlDTs.put(HighLevelControllerName.QUICKSTER, ZuluRobotModel.DEFAULT_CONTROL_DT);
+      controlDTs.put(HighLevelControllerName.DO_NOTHING_BEHAVIOR, ZuluRobotModel.DEFAULT_CONTROL_DT);
+      controlDTs.put(HighLevelControllerName.STAND_PREP_STATE, ZuluRobotModel.DEFAULT_CONTROL_DT);
+      controlDTs.put(HighLevelControllerName.STAND_READY, ZuluRobotModel.DEFAULT_CONTROL_DT);
+      controlDTs.put(HighLevelControllerName.STAND_TRANSITION_STATE, ZuluRobotModel.DEFAULT_CONTROL_DT);
+      controlDTs.put(HighLevelControllerName.EXIT_WALKING, ZuluRobotModel.DEFAULT_CONTROL_DT);
+      controlDTs.put(HighLevelControllerName.FREEZE_STATE, ZuluRobotModel.DEFAULT_CONTROL_DT);
+      controlDTs.put(HighLevelControllerName.CUSTOM1, ZuluRobotModel.DEFAULT_CONTROL_DT);
+   }
+
+   @Override
+   public double getControlDT(HighLevelControllerName state)
+   {
+      return controlDTs.get(state);
+   }
+
+   public void setControlDT(HighLevelControllerName state, double controlDT)
+   {
+      controlDTs.put(state, controlDT);
    }
 
    @Override

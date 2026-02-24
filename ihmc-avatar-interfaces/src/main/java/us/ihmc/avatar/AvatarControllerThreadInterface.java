@@ -10,6 +10,8 @@ public interface AvatarControllerThreadInterface extends SCS2YoGraphicHolder
 {
    void run();
 
+   double getCurrentDT();
+
    YoRegistry getYoVariableRegistry();
 
    FullHumanoidRobotModel getFullRobotModel();

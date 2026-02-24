@@ -32,6 +32,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameMessageCommandConverter;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
@@ -90,7 +91,7 @@ public abstract class HumanoidControllerWarmup
    public HumanoidControllerWarmup(DRCRobotModel robotModel)
    {
       this.robotModel = robotModel;
-      controlDT = robotModel.getControllerDT();
+      controlDT = robotModel.getFastestControllerDT();
 
       setupController();
       controllerToolbox.initialize();
@@ -145,7 +146,7 @@ public abstract class HumanoidControllerWarmup
       // update viz and advance time
       fullRobotModel.updateFrames();
       referenceFrames.updateFrames();
-      yoTime.add(robotModel.getControllerDT());
+      yoTime.add(controlDT);
    }
 
    private final Quaternion newOrientation = new Quaternion();
@@ -269,6 +270,7 @@ public abstract class HumanoidControllerWarmup
       SideDependentList<FootSwitchInterface> footSwitches = createFootSwitches(feet, totalRobotWeight, referenceFrames.getSoleZUpFrames());
       JointBasics[] jointsToIgnore = AvatarControllerThread.createListOfJointsToIgnore(fullRobotModel, robotModel, robotModel.getSensorInformation());
 
+      double controlDT = robotModel.getHighLevelControllerParameters().getControlDT(HighLevelControllerName.WALKING);
       controllerToolbox = new HighLevelHumanoidControllerToolbox(fullRobotModel,
                                                                  centerOfMassStateProvider,
                                                                  referenceFrames,
@@ -278,7 +280,7 @@ public abstract class HumanoidControllerWarmup
                                                                  gravityZ,
                                                                  omega0,
                                                                  feet,
-                                                                 controlDT,
+                                                                 () -> controlDT,
                                                                  false,
                                                                  null,
                                                                  contactableBodies,
@@ -306,6 +308,7 @@ public abstract class HumanoidControllerWarmup
       controllerCoreFactory = new WholeBodyControllerCoreFactory(managerFactoryParent);
       controllerCoreFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
       controllerCoreFactory.setWalkingControllerParameters(walkingControllerParameters);
+      controllerCoreFactory.setControlDTProvider(() -> controlDT);
 
       walkingControllerState = new WalkingControllerState(commandInputManager,
                                                           statusOutputManager,
@@ -313,7 +316,8 @@ public abstract class HumanoidControllerWarmup
                                                           controllerCoreFactory,
                                                           controllerToolbox,
                                                           robotModel.getHighLevelControllerParameters(),
-                                                          robotModel.getWalkingControllerParameters());
+                                                          robotModel.getWalkingControllerParameters(),
+                                                          controlDT);
    }
 
    @SuppressWarnings("unchecked")

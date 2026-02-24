@@ -163,7 +163,8 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
                                                                  walkingOutputManager,
                                                                  managerFactory,
                                                                  walkingControllerParameters,
-                                                                 controllerToolbox);
+                                                                 controllerToolbox,
+                                                                 integrationDT);
       walkingParentRegistry.addChild(walkingController.getYoVariableRegistry());
 
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -176,7 +177,6 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
       controllerCore = new WholeBodyControllerCore(controlCoreToolbox, feedbackControlTemplate, jointDesiredOutputList, walkingParentRegistry);
       walkingController.setControllerCoreOutput(controllerCore.getOutputForHighLevelController());
 
-      double controlDT = controllerToolbox.getControlDT();
       RigidBodyBasics elevator = fullRobotModel.getElevator();
       SideDependentList<ContactableFoot> contactableFeet = controllerToolbox.getContactableFeet();
       linearMomentumRateControlModule = new LinearMomentumRateControlModule(controllerToolbox,
@@ -187,7 +187,7 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
                                                                             controllerToolbox.getTotalMassProvider(),
                                                                             controllerToolbox.getWholeBodyAngularVelocityCalculator(),
                                                                             gravityZ,
-                                                                            controlDT,
+                                                                            () -> integrationDT,
                                                                             walkingParentRegistry);
 
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -234,7 +234,7 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
                                                     gravityZ,
                                                     omega0,
                                                     feet,
-                                                    integrationDT,
+                                                    () -> integrationDT,
                                                     false,
                                                     Collections.emptyList(),
                                                     allContactableBodies,
@@ -265,7 +265,7 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
       JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = walkingControllerParameters.getJointPrivilegedConfigurationParameters();
       FeedbackControllerSettings feedbackControllerSettings = walkingControllerParameters.getFeedbackControllerSettings();
 
-      WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(integrationDT,
+      WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(() -> integrationDT,
                                                                                        gravityZ,
                                                                                        fullRobotModel.getRootJoint(),
                                                                                        controlledJoints,
@@ -358,13 +358,13 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
       {
          initializeInternal();
          WalkingControllerPreviewInputCommand command = toolboxInputManager.pollNewestCommand(WalkingControllerPreviewInputCommand.class);
-         FootstepDataListCommand foostepCommand = command.getFoostepCommand();
+         FootstepDataListCommand footstepCommand = command.getFoostepCommand();
          taskExecutor.submit(new FootstepListPreviewTask(fullRobotModel.getRootJoint(),
-                                                         foostepCommand,
+                                                         footstepCommand,
                                                          walkingInputManager,
                                                          walkingOutputManager,
                                                          controllerToolbox.getFootContactStates(),
-                                                         managerFactory.getOrCreateBalanceManager(),
+                                                         managerFactory.getOrCreateBalanceManager(integrationDT),
                                                          footSwitches));
       }
       else

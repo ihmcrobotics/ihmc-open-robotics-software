@@ -7,6 +7,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
+import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
@@ -32,7 +33,6 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static us.ihmc.robotics.Assert.assertTrue;
 
 public abstract class EndToEndGoHomeMessageTest implements MultiRobotTestInterface
 {
@@ -41,6 +41,7 @@ public abstract class EndToEndGoHomeMessageTest implements MultiRobotTestInterfa
    private SimulationTestingParameters simulationTestingParameters;
    private SCS2AvatarTestingSimulation testHelper;
 
+   @Test
    public void testGoHomeArms() throws SimulationExceededMaximumTimeException
    {
       createSimulation();
@@ -71,6 +72,7 @@ public abstract class EndToEndGoHomeMessageTest implements MultiRobotTestInterfa
       AvatarCommonAsserts.assertArmPositions(rightHome, RobotSide.RIGHT, robot, Math.toRadians(15.0));
    }
 
+   @Test
    public void testGoHomeChest() throws SimulationExceededMaximumTimeException
    {
       createSimulation();
@@ -96,6 +98,7 @@ public abstract class EndToEndGoHomeMessageTest implements MultiRobotTestInterfa
       AvatarCommonAsserts.assertChestOrientation(chestHome, robot, Math.toRadians(1.0));
    }
 
+   @Test
    public void testGoHomePelvis() throws SimulationExceededMaximumTimeException
    {
       createSimulation();
@@ -148,7 +151,7 @@ public abstract class EndToEndGoHomeMessageTest implements MultiRobotTestInterfa
       Map<String, Pose3D> bodyHome = robotModel.getWalkingControllerParameters().getOrCreateBodyHomeConfiguration();
       Map<String, RigidBodyControlMode> defaultControlModes = robotModel.getWalkingControllerParameters().getDefaultControlModesForRigidBodies();
       assertEquals(RigidBodyControlMode.TASKSPACE, defaultControlModes.get(chest.getName()),"This test assumes the chest is controlled in taskspace by default.");
-      assertTrue("Bodies controlled in taskspace by default must specify a home pose.", bodyHome.containsKey(chest.getName()));
+      assertTrue(bodyHome.containsKey(chest.getName()), "Bodies controlled in taskspace by default must specify a home pose.");
 
       return bodyHome.get(chest.getName());
    }
@@ -161,7 +164,7 @@ public abstract class EndToEndGoHomeMessageTest implements MultiRobotTestInterfa
       factory.setStartingLocationOffset(new OffsetAndYawRobotInitialSetup(EuclidCoreRandomTools.nextDouble(random, Math.PI)));
       testHelper = factory.createAvatarTestingSimulation();
       testHelper.start();
-      assertTrue(testHelper.simulateNow(0.25));
+      assertTrue(testHelper.simulateNow(0.25 + testHelper.getRobotModel().getWalkingControllerParameters().getDefaultFinalTransferTime()));
    }
 
    @BeforeEach

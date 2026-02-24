@@ -83,16 +83,20 @@ public class FeetManager implements SCS2YoGraphicHolder
    private final CoMHeightTimeDerivativesDataBasics rightLegCoMHeightData = new CoMHeightTimeDerivativesData();
    private final SideDependentList<CoMHeightTimeDerivativesDataBasics> legComHeightData = new SideDependentList<>(leftLegCoMHeightData, rightLegCoMHeightData);
 
+   private final double controlDT;
+
    public FeetManager(HighLevelHumanoidControllerToolbox controllerToolbox,
                       WalkingControllerParameters walkingControllerParameters,
                       PIDSE3GainsReadOnly swingFootGains,
                       PIDSE3GainsReadOnly holdFootGains,
                       PIDSE3GainsReadOnly toeOffFootGains,
                       SideDependentList<RigidBodyControlManager> flamingoFootControlManagers,
+                      double controlDT,
                       YoRegistry parentRegistry)
    {
       this.controllerToolbox = controllerToolbox;
       this.toeOffParameters = walkingControllerParameters.getToeOffParameters();
+      this.controlDT = controlDT;
       feet = controllerToolbox.getContactableFeet();
 
       extraCoMMaxHeightWithToes = new DoubleParameter("extraCoMMaxHeightWithToes", registry, extraCoMHeightWithToes);
@@ -162,6 +166,7 @@ public class FeetManager implements SCS2YoGraphicHolder
                                                                      minWeightFractionPerFoot,
                                                                      maxWeightFractionPerFoot,
                                                                      unloadedFinalRhoWeight,
+                                                                     controlDT,
                                                                      registry);
 
          footControlModules.put(robotSide, footControlModule);
@@ -171,6 +176,11 @@ public class FeetManager implements SCS2YoGraphicHolder
       blindFootstepsHeightOffset = new DoubleParameter("blindFootstepsHeightOffset", registry, defaultBlindFootstepsHeightOffset);
 
       parentRegistry.addChild(registry);
+   }
+
+   public double getControlDT()
+   {
+      return controlDT;
    }
 
    public void setWeights(Vector3DReadOnly loadedFootAngularWeight,

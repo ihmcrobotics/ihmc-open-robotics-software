@@ -14,7 +14,7 @@ public class CrossFourBarLinkageSimulation
       RobotFromDescription robot = new RobotFromDescription(robotDefinition);
 
       double dt = 1.0e-5;
-      robot.setController(new CrossFourBarOneDoFJointWBCController(robotDefinition, robot, dt));
+      robot.setController(new CrossFourBarOneDoFJointWBCController(robotDefinition, robot, () -> dt));
 //      robot.setController(new CrossFourBarLinkageIDController(robotDefinition, robot));
 //      robot.setController(new CrossFourBarLinkageWBCController(robotDefinition, robot, dt));
 

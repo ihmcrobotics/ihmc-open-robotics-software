@@ -25,6 +25,7 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
    private final ImGuiFlashingText flashingDescriptionColor = new ImGuiFlashingText(ImGuiTools.RED);
 
    private float lineStartX = Float.NaN;
+   private boolean wasExecuting = false;
 
    public RDXLeafNode(S state, RDXBehaviorTreeRootNode rootNode)
    {
@@ -49,6 +50,15 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
    public void renderRowBeginning()
    {
       super.renderRowBeginning();
+
+      float normalizedVisiblePosY = (ImGui.getCursorPosY() - ImGui.getScrollY()) / ImGui.getWindowHeight();
+      if (wasExecuting != state.getIsExecuting())
+      {
+         wasExecuting = state.getIsExecuting();
+
+         if (normalizedVisiblePosY > 0.6)
+            ImGui.setScrollHereY(0.6f);
+      }
 
       // Give the arrow a little space to the left, like the other icons
       ImGui.setCursorPosX(ImGui.getCursorPosX() + ImGui.getStyle().getItemSpacingX());
@@ -124,24 +134,18 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
       if (ImGui.beginCombo(labels.get("Execute after"), definition.getExecuteAfterLeafName()))
       {
          if (ImGui.selectable(labels.get("Previous"), definition.getExecuteAfterPrevious()))
-         {
             definition.setExecuteAfterPrevious();
-         }
          if (ImGui.selectable(labels.get("Beginning"), definition.getExecuteAfterBeginning()))
-         {
             definition.setExecuteAfterBeginning();
-         }
 
          for (LeafNodeState<?> leafNode : rootNode.getState().getOrderedLeaves())
-         {
             if (leafNode.getLeafIndex() < state.getLeafIndex())
-            {
-               if (ImGui.selectable(labels.get(leafNode.getDefinition().getName()), definition.getExecuteAfterNodeID() == leafNode.getID()))
-               {
+               if (ImGui.selectable(labels.get(leafNode.getDefinition().getName(), leafNode.getLeafIndex()),
+                                    definition.getExecuteAfterNodeID() == leafNode.getID()))
                   definition.setExecuteAfterLeaf(leafNode.getID(), leafNode.getDefinition().getName());
-               }
-            }
-         }
+
+         if (ImGui.isWindowAppearing())
+            ImGui.setScrollHereY(1.0f);
 
          ImGui.endCombo();
       }

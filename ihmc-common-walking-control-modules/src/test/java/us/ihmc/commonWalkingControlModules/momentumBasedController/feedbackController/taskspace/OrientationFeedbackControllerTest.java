@@ -72,7 +72,7 @@ public class OrientationFeedbackControllerTest
       JointBasics[] jointsToOptimizeFor = MultiBodySystemTools.collectSupportAndSubtreeJoints(elevator);
       double controlDT = 0.004;
 
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null, registry);
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(() -> controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null, registry);
       toolbox.setupForInverseDynamicsSolver(null);
 
       FeedbackControllerToolbox feedbackControllerToolbox = new FeedbackControllerToolbox(registry);
@@ -98,7 +98,7 @@ public class OrientationFeedbackControllerTest
       DMatrixRMaj jInverse = new DMatrixRMaj(numberOfDoFs, 6);
       MotionQPInputCalculator motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
       DMatrixRMaj jointAccelerations = new DMatrixRMaj(numberOfDoFs, 1);
-      RobotJointVelocityAccelerationIntegrator integrator = new RobotJointVelocityAccelerationIntegrator(controlDT);
+      RobotJointVelocityAccelerationIntegrator integrator = new RobotJointVelocityAccelerationIntegrator(() -> controlDT);
 
       FrameQuaternion currentOrientation = new FrameQuaternion();
       FrameQuaternion errorOrientation = new FrameQuaternion();
@@ -153,7 +153,7 @@ public class OrientationFeedbackControllerTest
       JointBasics[] jointsToOptimizeFor = MultiBodySystemTools.collectSupportAndSubtreeJoints(elevator);
       double controlDT = 0.004;
 
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null, registry);
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(() -> controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null, registry);
       toolbox.setupForInverseDynamicsSolver(null);
       // Making the controllers to run with different instances of the toolbox so they don't share variables.
       OrientationFeedbackController orientationFeedbackController = new OrientationFeedbackController(endEffector,

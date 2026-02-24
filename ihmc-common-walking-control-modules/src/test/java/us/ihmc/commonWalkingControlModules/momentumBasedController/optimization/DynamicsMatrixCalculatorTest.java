@@ -355,7 +355,7 @@ public class DynamicsMatrixCalculatorTest
       
       FloatingJointBasics rootJoint = fullHumanoidRobotModel.getRootJoint();
       ReferenceFrame centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
-      toolbox = new WholeBodyControlCoreToolbox(controlDT, gravityZ, rootJoint, jointsToOptimizeFor, centerOfMassFrame, momentumOptimizationSettings,
+      toolbox = new WholeBodyControlCoreToolbox(() -> controlDT, gravityZ, rootJoint, jointsToOptimizeFor, centerOfMassFrame, momentumOptimizationSettings,
                                                  registry);
       toolbox.setupForInverseDynamicsSolver(contactablePlaneBodies);
 
