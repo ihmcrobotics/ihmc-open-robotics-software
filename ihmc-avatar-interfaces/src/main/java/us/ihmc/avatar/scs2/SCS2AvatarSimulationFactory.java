@@ -598,7 +598,8 @@ public class SCS2AvatarSimulationFactory
 
       HumanoidRobotContextDataFactory contextDataFactory = new HumanoidRobotContextDataFactory();
 
-      multiContactGaitGeneratorThread = new AvatarMultiContactGaitGeneratorThread(realtimeROS2Node.get(),
+      multiContactGaitGeneratorThread = new AvatarMultiContactGaitGeneratorThread(robotModel.get().getMultiContactPlannerDT(),
+                                                                                  realtimeROS2Node.get(),
                                                                                   robotModel.get(),
                                                                                   contextDataFactory,
                                                                                   highLevelHumanoidControllerFactory.get().getStatusOutputManager(),
@@ -619,6 +620,8 @@ public class SCS2AvatarSimulationFactory
       int estimatorDivisor = (int) Math.round(robotModel.getEstimatorDT() / simulationDT.get());
       int stepGeneratorDivisor = (int) Math.round(robotModel.getStepGeneratorDT() / simulationDT.get());
       int handControlDivisor = (int) Math.round(robotModel.getSimulatedHandControlDT() / simulationDT.get());
+      int multiContactPlannerDivisor = (int) Math.round(robotModel.getMultiContactPlannerDT() / simulationDT.get());
+
       HumanoidRobotControlTask estimatorTask = new EstimatorTask(estimatorThread,
                                                                  estimatorDivisor,
                                                                  simulationDT.get(),
@@ -640,10 +643,9 @@ public class SCS2AvatarSimulationFactory
       HumanoidRobotControlTask multiContactGaitGeneratorTask = null;
       if (createMultiContactGaitGenerator.get())
          multiContactGaitGeneratorTask = new MultiContactGaitGeneratorTask("MCGG",
-                                                                        multiContactGaitGeneratorThread,
-                                                                        controllerDivisor,
-                                                                        simulationDT.get(),
-                                                                        masterFullRobotModel);
+                                                                           multiContactGaitGeneratorThread,
+                                                                           simulationDT.get(),
+                                                                           masterFullRobotModel);
 
       SimulatedHandControlTask handControlTask = null;
       AvatarSimulatedHandControlThread handControlThread = null;

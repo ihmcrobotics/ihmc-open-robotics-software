@@ -126,7 +126,7 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
             float snap_height_threshold = interpolate(params[MIN_SNAP_HEIGHT_THRESHOLD], params[SNAP_HEIGHT_THRESHOLD_AT_SEARCH_EDGE], alpha_edge);
             float min_height_under_foot_to_consider = max_height_in_radius - snap_height_threshold;
 
-            if (query_height >= min_height_under_foot_to_consider)
+//             if (query_height >= min_height_under_foot_to_consider)
             {
                 // Using query_height yields very high squared errors for large heights due to numerical errors in the matrix inversion when plane fitting
                 // Since only the relative z values are important, we subtract relative to the max height

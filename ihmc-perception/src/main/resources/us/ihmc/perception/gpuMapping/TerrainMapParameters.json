@@ -1,12 +1,12 @@
 {
   "title" : "SteppableRegionCalculatorParameters",
-  "Normal search radius" : 0.1,
+  "Normal search radius" : 0.14,
   "Cliff search radius" : 0.1,
   "Cliff height threshold" : 0.1,
   "Cliff height tolerance" : 0.02,
   "Min support area fraction" : 0.88,
-  "Min snap height threshold" : 0.04,
-  "Snap height threshold at search edge" : 0.07,
+  "Min snap height threshold" : 0.1,
+  "Snap height threshold at search edge" : 0.15,
   "Stepping cosine threshold" : 0.8,
   "Squared error threshold" : 4.0E-4
 }
