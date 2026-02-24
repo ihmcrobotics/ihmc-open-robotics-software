@@ -20,6 +20,7 @@ import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeDefinition.Conditio
 import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeState;
 import us.ihmc.behaviors.behaviorTree.control.GotoNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectState;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.AutonomyAPI;
 import us.ihmc.communication.PerceptionAPI;
@@ -64,6 +65,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
    private boolean actionFailureMissingFrame = false;
    private final AI2RSkillEditor skillEditor;
 
+   private final Notification publishAnnotatedImage = new Notification();
    private final RawImagePublisher imagePublisher;
    private final ROS2MutableFrame annotatedImageFrame;
 
@@ -86,10 +88,10 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
 
          // Prepare commanded behavior
          String behaviorToExecuteName = message.getBehaviorToExecuteAsString();
-//         if (behaviorToExecuteName.toLowerCase().contains("scan"))
-//         {
-//            publishYOLOAnnotatedImage();
-//         }
+         if (behaviorToExecuteName.toLowerCase().contains("scan"))
+         {
+            publishAnnotatedImage.set();
+         }
          int commandedBehaviorIndex = -1;
          for (int i = 0; i < state.getCheckPoints().size(); i++)
          {
@@ -155,6 +157,9 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
          setFailedBehaviors();
          ros2ControllerHelper.publish(AutonomyAPI.AI2R_STATUS, statusMessage);
       }
+
+      if (publishAnnotatedImage.poll())
+         publishYOLOAnnotatedImage();
 
       endSequenceAfterBehaviorExecution();
       executeBehaviorLogic();
