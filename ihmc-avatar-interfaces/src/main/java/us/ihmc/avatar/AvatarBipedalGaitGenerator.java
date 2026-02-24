@@ -7,16 +7,24 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.YoC
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.TerrainMapCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.log.LogTools;
+import us.ihmc.perception.gpuMapping.HeightMapTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -29,7 +37,7 @@ import static us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenera
 
 public class AvatarBipedalGaitGenerator
 {
-   private static final int NUMBER_OF_STEPS_TO_PLAN = 3;
+   private static final int NUMBER_OF_STEPS_TO_PLAN = 5;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final String variableNameSuffix = "MCGG";
@@ -47,6 +55,8 @@ public class AvatarBipedalGaitGenerator
    private final YoDouble desiredWalkingVelocityX = new YoDouble("desiredWalkingVelocityX", registry);
    private final YoDouble desiredWalkingVelocityY = new YoDouble("desiredWalkingVelocityY", registry);
    private final YoDouble desiredWalkingVelocityYaw = new YoDouble("desiredWalkingVelocityYaw", registry);
+   private final YoDouble[] traversabilityValues = new YoDouble[NUMBER_OF_STEPS_TO_PLAN];
+   private final YoFramePose3D[] stepPoses = new YoFramePose3D[NUMBER_OF_STEPS_TO_PLAN];
 
    private final YoEnum<RobotSide> currentSupportSide = new YoEnum<>("currentSupportSide", registry, RobotSide.class, false);
    private final YoFramePose3D currentSupportPose = new YoFramePose3D("currentSupportPose", ReferenceFrame.getWorldFrame(), registry);
@@ -60,6 +70,8 @@ public class AvatarBipedalGaitGenerator
    private final FramePose3D nextFootstepPose3D = new FramePose3D();
    private final FramePose3D previousFootstepPose = new FramePose3D();
    private final FramePose3D nextFootstepPose3DViz = new FramePose3D();
+
+   private TerrainMapCommand terrainMapCommand;
 
    public AvatarBipedalGaitGenerator(CommandInputManager commandInputManager,
                                      StatusMessageOutputManager statusOutputManager,
@@ -79,6 +91,12 @@ public class AvatarBipedalGaitGenerator
 
       walkingOutputManager.attachStatusMessageListener(WalkingStatusMessage.class, walkingStatusMessage::set);
       walkingOutputManager.attachStatusMessageListener(FootstepStatusMessage.class, footstepStatusMessage::set);
+
+      for (int i = 0; i < NUMBER_OF_STEPS_TO_PLAN; i++)
+      {
+         traversabilityValues[i] = new YoDouble("traversabilityStep" + i, registry);
+         stepPoses[i] = new YoFramePose3D("step" + i, ReferenceFrame.getWorldFrame(), registry);
+      }
 
       parentRegistry.addChild(registry);
    }
@@ -142,7 +160,7 @@ public class AvatarBipedalGaitGenerator
          footstep.getPosition().set(nextFootstepPose2D.getPosition());
          footstep.getOrientation().set(nextFootstepPose2D.getOrientation());
          footstep.setRobotSide(swingSide);
-         snap(footstep);
+         snap(i, footstep);
 
          footstepPose2D.set(nextFootstepPose2D);
          swingSide = swingSide.getOppositeSide();
@@ -168,10 +186,48 @@ public class AvatarBipedalGaitGenerator
       return parameters.getSwingDuration() + parameters.getTransferDuration();
    }
 
-   private void snap(FootstepDataCommand footstep)
+   public void setTerrainMapCommand(TerrainMapCommand terrainMapCommand)
+   {
+      this.terrainMapCommand = terrainMapCommand;
+      LogTools.info("Received terrain map command");
+   }
+
+   private void snap(int stepIndex, FootstepDataCommand footstep)
+   {
+      boolean success = snapToTerrainMap(stepIndex, footstep);
+      if (!success)
+         snapToStanceFoot(stepIndex, footstep);
+      stepPoses[stepIndex].set(footstep.getPosition(), footstep.getOrientation());
+   }
+
+   private boolean snapToTerrainMap(int stepIndex, FootstepDataCommand footstep)
+   {
+      if (terrainMapCommand == null)
+         return false;
+
+      FramePoint3D footstepPosition = footstep.getPosition();
+      Point2DReadOnly gridCenter = terrainMapCommand.getGridCenter();
+      double cellSize = terrainMapCommand.getCellSize();
+      double gridWidth = terrainMapCommand.getGridWidth();
+      int centerIndex = HeightMapTools.computeCenterIndex(gridWidth, cellSize);
+      int key = HeightMapTools.coordinateToKey(footstepPosition.getX(), footstepPosition.getY(), gridCenter.getX(), gridCenter.getY(), cellSize, centerIndex);
+      if (key < 0 || key >= terrainMapCommand.getMapSize())
+         return false;
+
+      footstepPosition.setZ(terrainMapCommand.getHeightAt(key));
+      FrameQuaternion footstepOrientation = footstep.getOrientation();
+
+      EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.Z, terrainMapCommand.getNormalAt(key), footstepOrientation);
+      traversabilityValues[stepIndex].set(terrainMapCommand.getTraversabilityAt(key));
+
+      return true;
+   }
+
+   private void snapToStanceFoot(int stepIndex, FootstepDataCommand footstep)
    {
       FramePoint3D position = footstep.getPosition();
       position.setZ(currentSupportPose.getZ());
+      traversabilityValues[stepIndex].setToNaN();
    }
 
    private boolean isWalking()

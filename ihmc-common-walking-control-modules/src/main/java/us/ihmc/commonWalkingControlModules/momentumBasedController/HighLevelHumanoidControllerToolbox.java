@@ -109,6 +109,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    private final YoDouble yoTime;
    private final double gravity;
    private final boolean kinematicsSimulation;
+   private final DoubleProvider controlDT;
 
    private final SideDependentList<CenterOfMassReferenceFrame> handCenterOfMassFrames;
    private final SideDependentList<YoFrameVector3D> wristRawMeasuredForces;
@@ -192,6 +193,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
                                              JointBasics... jointsToIgnore)
    {
       this.centerOfMassStateProvider = centerOfMassStateProvider;
+      this.controlDT = controlDT;
 
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
 
@@ -547,6 +549,11 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    public SpatialVectorReadOnly getEstimatedExternalHandWrench(RobotSide robotSide)
    {
       return handWrenchCalculators == null ? null : handWrenchCalculators.get(robotSide).getFilteredWrench();
+   }
+
+   public double getControlDT()
+   {
+      return controlDT.getValue();
    }
 
    public void addUpdatable(Updatable updatable)

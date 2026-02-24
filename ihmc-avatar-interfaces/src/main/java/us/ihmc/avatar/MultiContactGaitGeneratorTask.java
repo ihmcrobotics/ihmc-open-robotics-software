@@ -9,9 +9,9 @@ public class MultiContactGaitGeneratorTask extends ControllerTask
    private final AvatarControllerThreadInterface plannerThread;
    private final CrossRobotCommandResolver plannerResolver;
 
-   public MultiContactGaitGeneratorTask(String prefix, AvatarControllerThreadInterface plannerThread, long divisor, double schedulerDt, FullHumanoidRobotModel masterFullRobotModel)
+   public MultiContactGaitGeneratorTask(String prefix, AvatarControllerThreadInterface plannerThread, double schedulerDt, FullHumanoidRobotModel masterFullRobotModel)
    {
-      super(prefix, plannerThread, divisor, schedulerDt, masterFullRobotModel);
+      super(prefix, plannerThread, schedulerDt, masterFullRobotModel);
 
       this.plannerThread = plannerThread;
       plannerResolver = new CrossRobotCommandResolver(plannerThread.getFullRobotModel());

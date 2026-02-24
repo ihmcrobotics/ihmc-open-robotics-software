@@ -82,9 +82,9 @@ public class RDXEnvironmentExporter
    public static void main(String[] args)
    {
 //      String selectedEnvironmentFile = "LookAndStepEasy.json";
-      String selectedEnvironmentFile = "LookAndStepHard.json";
+//      String selectedEnvironmentFile = "LookAndStepHard.json";
 //      String selectedEnvironmentFile = "LookAndStepWide.json";
-//      String selectedEnvironmentFile = "FootstepPlannerTrainingTerrainGenerated.json";
+      String selectedEnvironmentFile = "FootstepPlannerTrainingTerrainGenerated.json";
 //      String selectedEnvironmentFile = "FootstepPlannerTrainingTerrainGenerated_1.json";
 
       new RDXEnvironmentExporter(selectedEnvironmentFile);

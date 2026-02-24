@@ -5,7 +5,9 @@ import perception_msgs.msg.dds.TerrainMapMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
 public class TerrainMapCommand implements Command<TerrainMapCommand, TerrainMapMessage>
 {
@@ -46,6 +48,52 @@ public class TerrainMapCommand implements Command<TerrainMapCommand, TerrainMapM
          normal.setY(unpackByteAsFloat(message.getSnappedNormalYData().get(i), -1.0f, 1.0f));
          normal.setZ(unpackByteAsFloat(message.getSnappedNormalZData().get(i), 0.0f, 1.0f));
       }
+   }
+
+   public Point2DReadOnly getGridCenter()
+   {
+      return gridCenter;
+   }
+
+   public double getGridWidth()
+   {
+      return gridWidth;
+   }
+
+   public double getCellSize()
+   {
+      return cellSize;
+   }
+
+   public int getCellsPerAxis()
+   {
+      return cellsPerAxis;
+   }
+
+   public double getHeightAt(int key)
+   {
+      if (key < 0 || key >= heightMap.size())
+         return Double.NaN;
+      return heightMap.get(key);
+   }
+
+   public double getTraversabilityAt(int key)
+   {
+      if (key < 0 || key >= traversabilityMap.size())
+         return Double.NaN;
+      return traversabilityMap.get(key);
+   }
+
+   public Vector3DReadOnly getNormalAt(int key)
+   {
+      if (key < 0 || key >= normalMap.size())
+         return null;
+      return normalMap.get(key);
+   }
+
+   public int getMapSize()
+   {
+      return heightMap.size();
    }
 
    public static float unpackByteAsFloat(byte val, float minValue, float maxValue)

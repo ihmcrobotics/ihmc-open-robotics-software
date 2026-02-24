@@ -121,6 +121,10 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
       return 0.0;
    }
 
+   default double getMultiContactPlannerDT()
+   {
+      return getFastestControllerDT();
+   }
 
    public abstract double getSimulateDT();
 
