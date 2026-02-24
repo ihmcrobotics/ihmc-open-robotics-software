@@ -29,9 +29,9 @@ import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
+import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlan;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
-import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlan;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
@@ -54,6 +54,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    private final String name;
    private ROS2Node ros2Node;
    private boolean manageROS2Node = false;
+
    private final AStarBodyPathPlannerParametersBasics aStarBodyPathPlannerParameters;
    private final DefaultFootstepPlannerParametersBasics footstepPlannerParameters;
 
@@ -108,6 +109,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       this.aStarBodyPathPlannerParameters = aStarBodyPathPlannerParameters;
       this.footstepPlannerParameters = footstepPlannerParameters;
       this.footPolygons = footPolygons;
+
       this.bodyPathPlanner = new AStarBodyPathPlanner(aStarBodyPathPlannerParameters, stopwatch);
       this.planThenSnapPlanner = new PlanThenSnapPlanner(footstepPlannerParameters, footPolygons);
       this.aStarFootstepPlanner = new AStarFootstepPlanner(footstepPlannerParameters,
@@ -127,6 +129,12 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       return handleRequest(request, false);
    }
 
+   /**
+    * Supports three main modes:
+    * - Body path only: planBodyPath=true, planFootsteps=false
+    * - Body path + A*:  planBodyPath=true/false, planFootsteps=true, performAStarSearch=true
+    * - Body path + PlanThenSnap: planBodyPath=true/false, planFootsteps=true, performAStarSearch=false
+    */
    public FootstepPlannerOutput handleRequest(FootstepPlannerRequest request, boolean quiet)
    {
       if (isPlanning.getAndSet(true))
@@ -167,20 +175,24 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       this.request.set(request);
       requestCallbacks.forEach(callback -> callback.accept(request));
       output.setRequestId(request.getRequestId());
-      output.setRequestId(request.getRequestId());
       bodyPathPlanHolder.getPlan().clear();
 
       aStarFootstepPlanner.clearLoggedData();
       bodyPathPlanner.clearLoggedData();
 
-      startMidFootPose.interpolate(request.getStartFootPoses().get(RobotSide.LEFT), request.getStartFootPoses().get(RobotSide.RIGHT), 0.5);
-      goalMidFootPose.interpolate(request.getGoalFootPoses().get(RobotSide.LEFT), request.getGoalFootPoses().get(RobotSide.RIGHT), 0.5);
+      startMidFootPose.interpolate(request.getStartFootPoses().get(RobotSide.LEFT),
+                                   request.getStartFootPoses().get(RobotSide.RIGHT),
+                                   0.5);
+      goalMidFootPose.interpolate(request.getGoalFootPoses().get(RobotSide.LEFT),
+                                  request.getGoalFootPoses().get(RobotSide.RIGHT),
+                                  0.5);
 
-      // record time
+      // record time before any planning happens
       output.getPlannerTimings().setTimeBeforePlanningSeconds(stopwatch.lap());
       output.getPlannerTimings().setTotalElapsedSeconds(stopwatch.totalElapsed());
 
-      if (request.getPlanBodyPath() && (request.isHeightMapAvailable()))
+      // ----- BODY PATH STAGE -----
+      if (request.getPlanBodyPath() && request.isHeightMapAvailable())
       {
          bodyPathPlanner.handleRequest(request, output);
          List<Pose3D> bodyPathWaypoints = output.getBodyPath();
@@ -211,6 +223,8 @@ public class FootstepPlanningModule implements CloseableAndDisposable
             double alphaIntermediateGoal = request.getHorizonLength() / pathLength;
             bodyPathPlanHolder.getPointAlongPath(alphaIntermediateGoal, goalMidFootPose);
          }
+
+         reportBodyPathPlan(BodyPathPlanningResult.FOUND_SOLUTION);
       }
       else
       {
@@ -231,12 +245,15 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          reportBodyPathPlan(BodyPathPlanningResult.FOUND_SOLUTION);
       }
 
+      // ----- FOOTSTEP STAGE -----
       if (request.getPlanFootsteps() && request.getPerformAStarSearch())
       {
+         // A* footstep planner
          aStarFootstepPlanner.handleRequest(request, output);
       }
       else if (request.getPlanFootsteps())
       {
+         // Plan-then-snap using body path
          RobotSide initialStanceSide = request.getRequestedInitialStanceSide();
          FramePose3D initialStancePose = new FramePose3D(request.getStartFootPoses().get(initialStanceSide));
          planThenSnapPlanner.setInitialStanceFoot(initialStancePose, initialStanceSide);
@@ -279,7 +296,8 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    }
 
    /**
-    * Requires that {@link #handleRequest(FootstepPlannerRequest)} has already been called. Replans the swing waypoints for the last planned path.
+    * Requires that {@link #handleRequest(FootstepPlannerRequest)} has already been called.
+    * Replans the swing waypoints for the last planned path.
     */
    public FootstepPlan recomputeSwingTrajectories(SwingPlannerType swingPlannerType)
    {
@@ -301,10 +319,11 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       try
       {
          swingReplanRequestCallbacks.forEach(callback -> callback.accept(swingPlannerType));
-         aStarFootstepPlanner.getSwingPlanningModule().computeSwingWaypoints(request.getEnvironmentHandler().getTerrainMapData(),
-                                                                             output.getFootstepPlan(),
-                                                                             request.getStartFootPoses(),
-                                                                             swingPlannerType);
+         aStarFootstepPlanner.getSwingPlanningModule()
+                             .computeSwingWaypoints(request.getEnvironmentHandler().getTerrainMapData(),
+                                                    output.getFootstepPlan(),
+                                                    request.getStartFootPoses(),
+                                                    swingPlannerType);
          swingReplanStatusCallbacks.forEach(callback -> callback.accept(output.getFootstepPlan()));
          return output.getFootstepPlan();
       }
