@@ -262,7 +262,7 @@ public class QuickFootstepPlanner
             return false;
          }
       }
-      
+
       // Step the candidate that's a bigger step
       if (useBodyPath && aligningToBodyPath)
       {
@@ -273,16 +273,45 @@ public class QuickFootstepPlanner
       {
          // Original rule: step the candidate that's a bigger step
          footToSwing = RobotSide.LEFT;
-         double distance = stance.get(footToSwing).getPosition().distance(candidate.get(footToSwing).getPosition());
-         double oppositeDistance = stance.get(footToSwing.getOppositeSide()).getPosition().distance(candidate.get(footToSwing.getOppositeSide()).getPosition());
+         double distance = translationDistance(stance.get(footToSwing), candidate.get(footToSwing));
+         double oppositeDistance = translationDistance(stance.get(footToSwing.getOppositeSide()),
+                                                       candidate.get(footToSwing.getOppositeSide()));
          if (oppositeDistance > distance)
             footToSwing = footToSwing.getOppositeSide();
       }
 
+      // Default: use the planned candidate
       swingEnd.set(candidate.get(footToSwing));
+
+      // --- Body-path only: avoid steps that are effectively in place ---
+      if (useBodyPath && !aligningToBodyPath)
+      {
+         double minStepDistance = 0.03; // 3 cm minimum translation
+         double move = translationDistance(stance.get(footToSwing), swingEnd);
+
+         if (move < minStepDistance)
+         {
+            // Push the foot a bit along the path direction at currentS
+            Pose3D stancePose = stance.get(footToSwing);
+            Pose3D adjusted = new Pose3D(stancePose);
+
+            // Use path tangent at currentS as forward direction
+            double pathYaw = computePathYawAtS(currentS);
+            Vector3D forward = new Vector3D(1.0, 0.0, 0.0);
+            Quaternion q = new Quaternion();
+            q.setToYawOrientation(pathYaw);
+            q.transform(forward);
+            forward.scale(minStepDistance);
+
+            adjusted.getPosition().add(forward);
+            adjusted.getOrientation().setToYawOrientation(pathYaw);
+
+            swingEnd.set(adjusted);
+         }
+      }
+
       lastFootSwung = footToSwing; // remember for next step
       return false;
-
    }
 
    public ConvexPolygon2D createFootPolygon(Pose3D pose, double boundary)
