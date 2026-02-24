@@ -17,7 +17,7 @@ public class RDXBottleObject extends RDXEnvironmentObject
    public RDXBottleObject()
    {
       super(NAME, FACTORY);
-      Model realisticModel = RDXModelLoader.load("environmentObjects/bottle/water_bottle.g3dj");
+      Model realisticModel = RDXModelLoader.load("environmentObjects/mustard/mustard.glb");
       setRealisticModel(realisticModel);
 
       double sizeX = 0.2;
