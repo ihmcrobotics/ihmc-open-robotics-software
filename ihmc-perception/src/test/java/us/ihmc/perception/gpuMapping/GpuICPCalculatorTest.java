@@ -12,6 +12,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.perception.cuda.CUDAStreamManager;
+import us.ihmc.perception.gpuMapping.GpuICPCalculator.FlattenedHeightMap;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -250,7 +251,7 @@ public class GpuICPCalculatorTest
 
       // Create local point cloud with a distinct 3D pattern
       // Pattern: points arranged in a line with varying heights
-      FloatPointer localPoints = new FloatPointer(numPoints * 3);
+      float[] localPoints = new float[numPoints * 3];
 
       for (int i = 0; i < numPoints; i++)
       {
@@ -258,13 +259,13 @@ public class GpuICPCalculatorTest
          float y = i * 0.05f;          // 0.0, 0.05, 0.1, ... 0.45
          float z = (float) Math.sin(i * 0.5);  // Varying height pattern
 
-         localPoints.put(i * 3 + 0, x);
-         localPoints.put(i * 3 + 1, y);
-         localPoints.put(i * 3 + 2, z);
+         localPoints[i * 3 + 0] = x;
+         localPoints[i * 3 + 1] = y;
+         localPoints[i * 3 + 2] = z;
       }
 
       // Create global point cloud - SAME PATTERN but offset by (0.1, 0.1, 0.0)
-      FloatPointer globalPoints = new FloatPointer(numPoints * 3);
+      float[] globalPoints = new float[numPoints * 3];
 
       float offsetInX = 0.1f;
       float offsetInY = 0.2f;
@@ -274,9 +275,9 @@ public class GpuICPCalculatorTest
          float y = i * 0.05f + offsetInY;    // Offset by 0.1 in Y
          float z = (float) Math.sin(i * 0.5);  // Same height pattern
 
-         globalPoints.put(i * 3 + 0, x);
-         globalPoints.put(i * 3 + 1, y);
-         globalPoints.put(i * 3 + 2, z);
+         globalPoints[i * 3 + 0] = x;
+         globalPoints[i * 3 + 1] = y;
+         globalPoints[i * 3 + 2] = z;
       }
 
       // Run ICP
@@ -295,8 +296,6 @@ public class GpuICPCalculatorTest
       assertEquals(0.0, correctedTransform.getZ(), 1e-4);
 
       // Cleanup
-      localPoints.close();
-      globalPoints.close();
       heightMapICPCalculator.close();
    }
 
@@ -556,5 +555,110 @@ public class GpuICPCalculatorTest
       localMap.close();
       globalMap.close();
       heightMapICPCalculator.close();
+   }
+
+
+   @Test
+   public void testFlatteningHeightMap()
+   {
+      int cellsPerAxis = 10;
+      Mat heightMapMat = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
+      for (int i = 0; i < cellsPerAxis; i++)
+      {
+         for (int j = 0; j < cellsPerAxis; j++)
+         {
+            heightMapMat.ptr(i, j).putFloat(1.0f);
+         }
+      }
+
+      GpuMat gpuHeightMapMat = new GpuMat(heightMapMat);
+      int centerIndex = HeightMapTools.computeCenterIndex(1.0, 0.1);
+
+      FlattenedHeightMap result = GpuICPCalculator.flattenHeightMapToXYZ(gpuHeightMapMat, 0.0f, 0.0f, 0.0f, centerIndex, 0.1f, 0.0f);
+
+      int resultCount = result.getCount();
+      assertEquals(100, resultCount);
+   }
+
+   @Test
+   public void testFlattenHeightMapToXYZ_CountNonZero()
+   {
+      float cellSize = 0.1f;
+      float invalidValue = 0.0f;
+      int centerIndex = 5; // Center of an 11x11 grid
+      double centerX = 0.0;
+      double centerY = 0.0;
+
+      float[][] localData = new float[][] {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                                           {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                                           {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                                           {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                                           {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                                           {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                                           {0, 0, 0, 0.000873f, 0.001251f, 0.001077f, 0.000690f, 0.000308f, 0, 0, 0},
+                                           {0, 0, 0, 0.000201f, 0.000809f, 0.000206f, -0.000195f, 0.000819f, 0, 0, 0},
+                                           {0, 0, 0, 0.001001f, -0.000031f, 0.001301f, 0.001041f, 0.001480f, 0.000571f, 0, 0},
+                                           {0, 0, -0.000618f, 0.001075f, 0.076491f, 0.085750f, 0.089970f, 0.067645f, 0.087720f, 0, 0},
+                                           {0, -0.006122f, -0.006347f, -0.004396f, 0, 0, 0, 0, 0, 0, 0}};
+
+      // 1. Manually count non-zeroes to verify expected count
+      int expectedValidPoints = 0;
+      for (float[] row : localData)
+      {
+         for (float val : row)
+         {
+            if (val != 0.0f)
+               expectedValidPoints++;
+         }
+      }
+      // Based on the data provided, this should be 23
+
+      // 2. Prepare GPU memory
+      int rows = 11;
+      int cols = 11;
+      float[] flatData = new float[rows * cols];
+      for (int r = 0; r < rows; r++)
+      {
+         System.arraycopy(localData[r], 0, flatData, r * cols, cols);
+      }
+
+      Mat hostMat = new Mat(rows, cols, opencv_core.CV_32FC1);
+      new FloatPointer(hostMat.data()).put(flatData);
+      GpuMat gpuMat = new GpuMat(rows, cols, opencv_core.CV_32FC1);
+      gpuMat.upload(hostMat);
+
+      // 3. Run the method
+      FlattenedHeightMap result = GpuICPCalculator.flattenHeightMapToXYZ(gpuMat, centerX, centerY, 0.0f, centerIndex, cellSize, invalidValue);
+
+      // 4. Assertions
+      assertEquals(expectedValidPoints, result.getCount(), "Number of points should match non-zero entries");
+
+      // Check that the buffer limit is exactly pointCount * 3
+      assertEquals(expectedValidPoints *3L, result.getData().length, "Pointer limit should be pointCount * 3");
+
+      // Verification of a specific point: localData[9][4] = 0.076491f
+      // col=4, row=9. CenterIndex=5.
+      // x = 0.0 + (4 - 5) * 0.1 = -0.1
+      // y = 0.0 + (9 - 5) * 0.1 = 0.4
+      boolean foundKnownPoint = false;
+      FloatPointer ptr = new FloatPointer(result.getData());
+      for (int i = 0; i < result.getCount(); i++)
+      {
+         float x = ptr.get(i * 3);
+         float y = ptr.get(i * 3 + 1);
+         float z = ptr.get(i * 3 + 2);
+
+         if (Math.abs(x - (-0.1f)) < 1e-5 && Math.abs(y - 0.4f) < 1e-5)
+         {
+            assertEquals(0.076491f, z, 1e-6);
+            foundKnownPoint = true;
+            break;
+         }
+      }
+      assertTrue(foundKnownPoint, "Should have correctly mapped localData[9][4] to world coordinates");
+
+      // Cleanup
+      gpuMat.close();
+      hostMat.close();
    }
 }

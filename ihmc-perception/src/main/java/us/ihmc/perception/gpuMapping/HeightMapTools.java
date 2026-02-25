@@ -182,68 +182,6 @@ public class HeightMapTools
       heightMapDataToPack.setHeights(values);
    }
 
-   public static FlattenedHeightMap flattenHeightMapToXYZ(GpuMat heightMap,
-                                                          double centerX,
-                                                          double centerY,
-                                                          double centerZ,
-                                                          int centerIndex,
-                                                          float cellSize,
-                                                          float invalidHeightValue)
-   {
-      int rows = heightMap.rows();
-      int cols = heightMap.cols();
-      int totalPixels = rows * cols;
-
-      // 1. Download to Mat and perform one bulk copy to a Java array
-      Mat cpuMap = new Mat(rows, cols, opencv_core.CV_32FC1);
-      heightMap.download(cpuMap);
-
-      float[] zHeights = new float[totalPixels];
-      FloatPointer cpuDataPointer = new FloatPointer(cpuMap.data());
-      cpuDataPointer.get(zHeights); // Bulk JNI transfer
-
-      // 2. Prepare a local array for the XYZ results
-      // Size is totalPixels * 3 because we don't know validCount yet
-      float[] xyzBuffer = new float[totalPixels * 3];
-      int validCount = 0;
-
-      // 3. Process data using local array access (very fast)
-      for (int row = 0; row < rows; row++)
-      {
-         int rowOffset = row * cols;
-         for (int col = 0; col < cols; col++)
-         {
-            float zRaw = zHeights[rowOffset + col];
-
-            if (Float.isNaN(zRaw) || zRaw == invalidHeightValue)
-               continue;
-
-            // Calculate world coordinates
-            float x = (float) (centerX + (col - centerIndex) * cellSize);
-            float y = (float) (centerY + (row - centerIndex) * cellSize);
-            float z = (float) (zRaw + centerZ);
-
-            int base = validCount * 3;
-            xyzBuffer[base] = x;
-            xyzBuffer[base + 1] = y;
-            xyzBuffer[base + 2] = z;
-
-            validCount++;
-         }
-      }
-
-      // 4. Create the final trimmed FloatPointer and perform one bulk put
-      int finalElementCount = validCount * 3;
-      FloatPointer trimmed = new FloatPointer((long) finalElementCount);
-      trimmed.put(xyzBuffer, 0, finalElementCount); // Bulk JNI transfer
-
-      // Cleanup
-      cpuDataPointer.close();
-      cpuMap.close();
-
-      return new FlattenedHeightMap(trimmed, validCount);
-   }
-
    /**
     * Computes the best-fit rigid-body transform (SE(3)) that aligns a set of local 3D points
     * to a set of global 3D points using Singular Value Decomposition (SVD).
@@ -373,9 +311,5 @@ public class HeightMapTools
       CommonOps_DDRM.insert(translation, transform, 0, 3);
 
       return transform;
-   }
-
-   public record FlattenedHeightMap(FloatPointer data, int pointCount)
-   {
    }
 }

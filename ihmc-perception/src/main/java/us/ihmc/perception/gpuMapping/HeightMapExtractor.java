@@ -505,9 +505,9 @@ public class HeightMapExtractor
          checkCUDAError();
       }
 
-      // All that memory we allocated on the GPU in the update loop, need to free that up now
-      error = cudaStreamSynchronize(stream);
-      CUDATools.checkCUDAError(error);
+      // We don't need to synchronize the stream because the GpuMat.download(Mat) method is blocking when it is performed on the default stream
+      // error = cudaStreamSynchronize(stream);
+      // CUDATools.checkCUDAError(error);
 
       // The center of this map should be centered in the world grid
       // The sensor origin isn't always at the center of a grid point, in fact it's often not in the center
@@ -613,8 +613,8 @@ public class HeightMapExtractor
    private void deallocateFloatPointer(FloatPointer hostPointer, Pointer devicePointer, CUstream_st stream)
    {
       hostPointer.close();
-      devicePointer.close();
       cudaFreeAsync(devicePointer, stream);
+      devicePointer.close();
    }
 
    public GpuMat getHeightMap()

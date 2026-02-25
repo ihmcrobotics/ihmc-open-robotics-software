@@ -4,7 +4,9 @@ import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.cuda.cudart.dim3;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.IntPointer;
+import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
+import org.bytedeco.opencv.opencv_core.Mat;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -13,9 +15,9 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
 import us.ihmc.perception.cuda.CUDATools;
-import us.ihmc.perception.gpuMapping.HeightMapTools.FlattenedHeightMap;
 
 import java.net.URL;
+import java.util.Arrays;
 
 import static org.bytedeco.cuda.global.cudart.*;
 
@@ -87,39 +89,42 @@ public class GpuICPCalculator
       double correctedZ = correctedGlobalTransform.getTranslationZ();
 
       // TODO need to use the total accumulated error transform rather then just the odometry
-      FlattenedHeightMap flattenedLocalMap = HeightMapTools.flattenHeightMapToXYZ(localMap,
-                                                                                  localCenterX,
-                                                                                  localCenterY,
-                                                                                  localCenterZ,
-                                                                                  localCenterIndex,
-                                                                                  (float) heightMapParameters.getCellSize(),
-                                                                                  0.0f);
-      FlattenedHeightMap flattenedGlobalMap = HeightMapTools.flattenHeightMapToXYZ(globalMap,
-                                                                                   globalMapCenter.getX32(),
-                                                                                   globalMapCenter.getY32(),
-                                                                                   globalMapCenter.getZ32(),
-                                                                                   globalCenterIndex,
-                                                                                   (float) heightMapParameters.getCellSize(),
-                                                                                   0.0f);
+      FlattenedHeightMap flattenedLocalMap = flattenHeightMapToXYZ(localMap,
+                                                                   localCenterX,
+                                                                   localCenterY,
+                                                                   localCenterZ,
+                                                                   localCenterIndex,
+                                                                   (float) heightMapParameters.getCellSize(),
+                                                                   0.0f);
+      FlattenedHeightMap flattenedGlobalMap = flattenHeightMapToXYZ(globalMap,
+                                                                    globalMapCenter.getX32(),
+                                                                    globalMapCenter.getY32(),
+                                                                    globalMapCenter.getZ32(),
+                                                                    globalCenterIndex,
+                                                                    (float) heightMapParameters.getCellSize(),
+                                                                    0.0f);
 
-      if (flattenedLocalMap.pointCount() == 0 || flattenedGlobalMap.pointCount() == 0)
+      if (flattenedLocalMap.getCount() == 0 || flattenedGlobalMap.getCount() == 0)
          return;
 
-      computeICPFromPointClouds(flattenedLocalMap.data(), flattenedLocalMap.pointCount(), flattenedGlobalMap.data(), flattenedGlobalMap.pointCount(), stream);
+      computeICPFromPointClouds(flattenedLocalMap.getData(), flattenedLocalMap.getCount(), flattenedGlobalMap.getData(), flattenedGlobalMap.getCount(), stream);
 
-      flattenedLocalMap.data().close();
-      flattenedGlobalMap.data().close();
+//      flattenedLocalMap.data().close();
+//      flattenedGlobalMap.data().close();
    }
 
-   public void computeICPFromPointClouds(FloatPointer cpuLocalDataPointer,
+   public void computeICPFromPointClouds(float[] cpuLocalData,
                                          int localPoints,
-                                         FloatPointer cpuGlobalDataPointer,
+                                         float[] cpuGlobalData,
                                          int globalPoints,
                                          CUstream_st stream)
    {
       int localFloats = localPoints * 3;
       int globalFloats = globalPoints * 3;
       endedWithoutEnoughValidPoints = false;
+
+      FloatPointer cpuLocalDataPointer = new FloatPointer(cpuLocalData);
+      FloatPointer cpuGlobalDataPointer = new FloatPointer(cpuGlobalData);
 
       FloatPointer gpuLocalDataPointer = new FloatPointer();
       FloatPointer gpuGlobalDataPointer = new FloatPointer();
@@ -278,6 +283,8 @@ public class GpuICPCalculator
       cpuLocalTransformed.close();
       cpuCorrespondences.close();
       cpuDistances.close();
+      cpuLocalDataPointer.close();
+      cpuGlobalDataPointer.close();
 
       hostMatrixPtr.close();
       cudaFreeAsync(deviceMatrixPtr, stream);
@@ -304,6 +311,68 @@ public class GpuICPCalculator
       Vector3D result = new Vector3D();
       result.set(latestPointCloudErrorTransform.get(0, 3), latestPointCloudErrorTransform.get(1, 3), latestPointCloudErrorTransform.get(2, 3));
       return result;
+   }
+
+   public static FlattenedHeightMap flattenHeightMapToXYZ(GpuMat heightMap,
+                                                          double centerX,
+                                                          double centerY,
+                                                          double centerZ,
+                                                          int centerIndex,
+                                                          float cellSize,
+                                                          float invalidHeightValue)
+   {
+      int rows = heightMap.rows();
+      int cols = heightMap.cols();
+      int totalPixels = rows * cols;
+
+      // 1. Download to Mat and perform one bulk copy to a Java array
+      Mat cpuMap = new Mat(rows, cols, opencv_core.CV_32FC1);
+      heightMap.download(cpuMap);
+
+      float[] zHeights = new float[totalPixels];
+      FloatPointer cpuDataPointer = new FloatPointer(cpuMap.data());
+      cpuDataPointer.get(zHeights); // Bulk JNI transfer
+
+      // 2. Prepare a local array for the XYZ results
+      // Size is totalPixels * 3 because we don't know validCount yet
+      float[] xyzBuffer = new float[totalPixels * 3];
+      int validCount = 0;
+
+      // 3. Process data using local array access (very fast)
+      for (int row = 0; row < rows; row++)
+      {
+         int rowOffset = row * cols;
+         for (int col = 0; col < cols; col++)
+         {
+            float zRaw = zHeights[rowOffset + col];
+
+            if (Float.isNaN(zRaw) || zRaw == invalidHeightValue)
+               continue;
+
+            // Calculate world coordinates
+            float x = (float) (centerX + (col - centerIndex) * cellSize);
+            float y = (float) (centerY + (row - centerIndex) * cellSize);
+            float z = (float) (zRaw + centerZ);
+
+            int base = validCount * 3;
+            xyzBuffer[base] = x;
+            xyzBuffer[base + 1] = y;
+            xyzBuffer[base + 2] = z;
+
+            validCount++;
+         }
+      }
+
+      // 4. Create the final trimmed FloatPointer and perform one bulk put
+      int finalElementCount = validCount * 3;
+
+      // Cleanup
+      cpuDataPointer.close();
+      cpuMap.close();
+
+      float[] trimmed = Arrays.copyOf(xyzBuffer, finalElementCount);
+
+      return new FlattenedHeightMap(trimmed, validCount);
    }
 
    /**
@@ -351,5 +420,33 @@ public class GpuICPCalculator
       transformPointsKernel.close();
       blockSize.close();
       heightMapICPProgram.close();
+   }
+
+   public static class FlattenedHeightMap
+   {
+      private float[] data;
+      private int count;
+
+      public FlattenedHeightMap(float[] data, int count)
+      {
+         this.data = data;
+         this.count = count;
+      }
+
+      public void set(float[] data, int count)
+      {
+         this.data = data;
+         this.count = count;
+      }
+
+      public float[] getData()
+      {
+         return data;
+      }
+
+      public int getCount()
+      {
+         return count;
+      }
    }
 }

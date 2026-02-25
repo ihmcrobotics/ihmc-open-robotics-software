@@ -34,9 +34,8 @@ public class TerrainMapExtractor
    private final CUDAProgram terrainMapProgram;
    private final CUDAKernel terrainMapKernel;
 
-   private dim3 terrainKernelGridDim;
-   private dim3 blockSize;
-   private int cellsPerAxisTerrain;
+   private final dim3 blockSize;
+   private final int cellsPerAxisTerrain;
 
    private final FloatPointer terrainMapParametersHostPointer;
    private final FloatPointer terrainMapParametersDevicePointer;
@@ -82,11 +81,16 @@ public class TerrainMapExtractor
          throw new RuntimeException(e);
       }
 
-      // This is the number of parameters being passed in as floats to the kernel
-      terrainMapParametersHostPointer = new FloatPointer(18);
-      terrainMapParametersDevicePointer = new FloatPointer();
+      blockSize = new dim3(BLOCK_SIZE_XY, BLOCK_SIZE_XY, 1);
 
-      computeDerivedParameters();
+      // This is the number of parameters being passed in as floats to the kernel
+      terrainMapParametersHostPointer = new FloatPointer(11);
+      terrainMapParametersDevicePointer = new FloatPointer();
+      // Allocate the GPU memory in the constructor, doing this in the update is much slower
+      CUDATools.mallocAsync(terrainMapParametersDevicePointer, terrainMapParametersHostPointer.limit(), stream);
+
+      int terrainCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getGlobalWidthInMeters(), heightMapParameters.getCellSize());
+      cellsPerAxisTerrain = 2 * terrainCenterIndex + 1;
 
       terrainMapData = new TerrainMapData(heightMapParameters.getCellSize(), heightMapParameters.getGlobalWidthInMeters(), 0.0, 0.0);
 
@@ -98,16 +102,6 @@ public class TerrainMapExtractor
       traversabilityClassMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
    }
 
-   /**
-    * Compute the value of the Mat objects based on the height map parameters.
-    * This needs to be an odd number of the indexing will be messed up
-    */
-   private void computeDerivedParameters()
-   {
-      int terrainCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getGlobalWidthInMeters(), heightMapParameters.getCellSize());
-      cellsPerAxisTerrain = 2 * terrainCenterIndex + 1;
-   }
-
    public void update(GpuMat gpuHeightMap, Point3DReadOnly gridCenter)
    {
       int error;
@@ -116,8 +110,7 @@ public class TerrainMapExtractor
       float[] terrainMapParametersArray = populationTerrainMapParameters();
       terrainMapParametersHostPointer.put(terrainMapParametersArray);
 
-      // Handle memory allocation and copy values to the GPU
-      CUDATools.mallocAsync(terrainMapParametersDevicePointer, terrainMapParametersArray.length, stream);
+      // Copy values to the GPU
       CUDATools.memcpyAsync(terrainMapParametersDevicePointer, terrainMapParametersHostPointer, terrainMapParametersArray.length, stream);
       checkCUDAError();
 
@@ -132,8 +125,7 @@ public class TerrainMapExtractor
 
       // Compute the correct number of threads to run with the kernel
       int terrainMapKernelGridSizeXY = (cellsPerAxisTerrain + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
-      terrainKernelGridDim = new dim3(terrainMapKernelGridSizeXY, terrainMapKernelGridSizeXY, 1);
-      blockSize = new dim3(BLOCK_SIZE_XY, BLOCK_SIZE_XY, 1);
+      dim3 terrainKernelGridDim = new dim3(terrainMapKernelGridSizeXY, terrainMapKernelGridSizeXY, 1);
 
       // Run the kernel and check for errors
       terrainMapKernel.run(stream, terrainKernelGridDim, blockSize, 0);
@@ -141,7 +133,6 @@ public class TerrainMapExtractor
 
       // This has to be done because we start to download to the CPU, so the data on the GPU needs to be finalized
       error = cudaStreamSynchronize(stream);
-      blockSize.close();
       terrainKernelGridDim.close();
       CUDATools.checkCUDAError(error);
 
@@ -208,17 +199,19 @@ public class TerrainMapExtractor
       terrainMapProgram.close();
       terrainMapKernel.close();
 
+      blockSize.close();
+
       normalXMat.close();
       normalYMat.close();
       normalZMat.close();
       traversabilityMat.close();
       traversabilityClassMat.close();
 
-      terrainMapParametersHostPointer.close();
-      terrainMapParametersDevicePointer.close();
-
       int error = cudaFree(terrainMapParametersDevicePointer);
       CUDATools.checkCUDAError(error);
+
+      terrainMapParametersHostPointer.close();
+      terrainMapParametersDevicePointer.close();
 
       // At the end we have to destroy the stream to release the memory
       CUDAStreamManager.releaseStream(stream);
