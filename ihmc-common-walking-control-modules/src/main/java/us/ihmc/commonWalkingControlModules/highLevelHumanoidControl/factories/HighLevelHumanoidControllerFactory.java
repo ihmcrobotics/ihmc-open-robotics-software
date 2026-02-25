@@ -69,6 +69,7 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -478,6 +479,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                                forceSensorDataHolder,
                                                                                fullRobotModel.getRootBody(),
                                                                                totalRobotWeight,
+                                                                               controlDT,
                                                                                kinematicsSimulation,
                                                                                registry);
       SideDependentList<ForceSensorDataReadOnly> wristForceSensors = createWristForceSensors(forceSensorDataHolder);
@@ -569,6 +571,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                      ForceSensorDataHolderReadOnly forceSensorDataHolder,
                                                                      RigidBodyBasics rootBody,
                                                                      double totalRobotWeight,
+                                                                     DoubleProvider controlDT,
                                                                      boolean kinematicsSimulation,
                                                                      YoRegistry registry)
    {
@@ -598,6 +601,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                              rootBody,
                                                                              footForceSensor,
                                                                              totalRobotWeight,
+                                                                             controlDT,
                                                                              registry);
             footSwitches.put(robotSide, footSwitch);
          }

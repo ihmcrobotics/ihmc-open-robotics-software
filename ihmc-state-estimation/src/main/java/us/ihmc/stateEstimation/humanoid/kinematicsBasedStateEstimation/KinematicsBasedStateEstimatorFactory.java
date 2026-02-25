@@ -31,6 +31,7 @@ import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsSt
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
@@ -121,7 +122,7 @@ public class KinematicsBasedStateEstimatorFactory
       return this;
    }
 
-   public DRCKinematicsBasedStateEstimator createStateEstimator(YoRegistry stateEstimatorRegistry)
+   public DRCKinematicsBasedStateEstimator createStateEstimator(YoRegistry stateEstimatorRegistry, DoubleProvider estimatorDT)
    {
       FactoryTools.checkAllFactoryFieldsAreSet(this);
 
@@ -165,6 +166,7 @@ public class KinematicsBasedStateEstimatorFactory
                                                                           fullRobotModel.getRootBody(),
                                                                           footForceSensorForEstimator,
                                                                           totalRobotWeight,
+                                                                          estimatorDT,
                                                                           stateEstimatorRegistry);
          footSwitchMap.put(foot, footSwitch);
       }
