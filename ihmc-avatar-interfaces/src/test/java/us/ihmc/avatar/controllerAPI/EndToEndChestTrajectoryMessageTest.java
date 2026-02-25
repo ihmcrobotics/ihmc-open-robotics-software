@@ -195,7 +195,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       simulationTestHelper.createSubscriberFromController(TaskspaceTrajectoryStatusMessage.class, statusMessages::add);
       double controllerDT = simulationTestHelper.getCurrentControlDT();
 
-      boolean success = simulationTestHelper.simulateNow(0.5);
+      boolean success = simulationTestHelper.simulateNow(0.25 + simulationTestHelper.getRobotModel().getWalkingControllerParameters().getDefaultFinalTransferTime());
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
@@ -222,7 +222,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       chestTrajectoryMessage.setSequenceId(random.nextLong());
       simulationTestHelper.publishToController(chestTrajectoryMessage);
 
-      assertTrue(simulationTestHelper.simulateNow(2.0 * controllerDT));
+      assertTrue(simulationTestHelper.simulateNow(20.0 * controllerDT));
 
       // Give a little time for the message to make it through.
       ThreadTools.sleep(10);
@@ -253,7 +253,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
                                                         desiredRandomChestOrientation,
                                                         chest.getName(),
                                                         statusMessages.remove(0),
-                                                        1.0e-4,
+                                                        EPSILON_FOR_DESIREDS,
                                                         controllerDT);
    }
 
@@ -524,6 +524,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       //      assertSingleWaypointExecuted(desiredRandomChestOrientation, simulationTestHelper, chest);
    }
 
+   @Test
    public void testMultipleTrajectoryPoints() throws Exception
    {
       CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -549,7 +550,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
                                                           });
       double controllerDT = simulationTestHelper.getCurrentControlDT();
 
-      boolean success = simulationTestHelper.simulateNow(0.5);
+      boolean success = simulationTestHelper.simulateNow(0.25 + simulationTestHelper.getRobotModel().getWalkingControllerParameters().getDefaultFinalTransferTime());
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
@@ -933,6 +934,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       return Axis3D.Y;
    }
 
+   @Test
    public void testQueuedMessages() throws Exception
    {
       CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -948,7 +950,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       simulationTestHelper.createSubscriberFromController(TaskspaceTrajectoryStatusMessage.class, statusMessages::add);
       double controllerDT = simulationTestHelper.getCurrentControlDT();
 
-      boolean success = simulationTestHelper.simulateNow(0.5);
+      boolean success = simulationTestHelper.simulateNow(0.25 + simulationTestHelper.getRobotModel().getWalkingControllerParameters().getDefaultFinalTransferTime());
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();

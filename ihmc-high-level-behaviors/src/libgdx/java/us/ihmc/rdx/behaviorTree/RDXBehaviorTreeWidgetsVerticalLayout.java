@@ -5,6 +5,7 @@ import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiMouseButton;
 import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
 import us.ihmc.commons.thread.TypedNotification;
@@ -123,6 +124,11 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
             {
                if (node.getSelected() && lastRendereredNode != null) // Select previous node so layout doesn't jump
                   lastRendereredNode.setSelected();
+
+               int nodeIndex = BehaviorTreeTools.getNodeIndexDFS(node);
+               int executionNextIndex = behaviorTree.getRootNode().getState().getExecutionNextIndex();
+               if (nodeIndex < executionNextIndex) // Keep the execution next index set to the same node
+                  behaviorTree.getRootNode().getState().setExecutionNextIndex(executionNextIndex - 1);
 
                topologyOperationQueue.queueDestroySubtreeModify(node);
             }

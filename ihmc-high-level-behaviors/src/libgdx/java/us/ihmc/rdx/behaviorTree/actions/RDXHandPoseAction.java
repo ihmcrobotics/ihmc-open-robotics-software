@@ -503,7 +503,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
    @Override
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
-      if (state.getPalmFrame().isChildOfWorld())
+      if (getSelected() && state.getPalmFrame().isChildOfWorld())
       {
          poseGizmo.calculate3DViewPick(input);
 
@@ -525,7 +525,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
    @Override
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      if (state.getPalmFrame().isChildOfWorld())
+      if (getSelected() && state.getPalmFrame().isChildOfWorld())
       {
          isMouseHovering = input.getClosestPick() == pickResult;
 
@@ -544,13 +544,13 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (state.getPalmFrame().isChildOfWorld())
+      if ((state.getIsNextForExecution() || getSelected() || state.getIsExecuting()) && state.getPalmFrame().isChildOfWorld())
       {
          if (!definition.getUsePredefinedJointAngles() && (getSelected() || poseGizmo.isSelected() || armIconWidget.getIsHovered()))
             highlightModels.get(definition.getSide()).getRenderables(renderables, pool);
          poseGizmo.getVirtualRenderables(renderables, pool);
 
-         if (state.getIsNextForExecution())
+         if (state.getIsNextForExecution() || state.getIsExecuting())
          {
             armMultiBodyGraphics.get(definition.getSide()).getRootBody().getVisualRenderables(renderables, pool);
             if (showAbilityHand && abilityHands.containsKey(definition.getSide()))

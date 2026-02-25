@@ -87,9 +87,10 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
 
       trackingCalculator.update(Conversions.nanosecondsToSeconds(syncedRobot.getTimestamp()));
 
-      state.setCanExecute(state.getScrewFrame().isChildOfWorld());
+      boolean definitionInvalid = definition.getRotation() == 0.0 && definition.getTranslation() == 0.0;
+      state.setCanExecute(state.getScrewFrame().isChildOfWorld() && !definitionInvalid);
 
-      if (state.getScrewFrame().isChildOfWorld())
+      if (state.getScrewFrame().isChildOfWorld() && !definitionInvalid)
       {
          BehaviorTreeRootNodeState actionSequence = rootNode.getState();
          if (actionSequence.getExecutionNextIndex() <= state.getLeafIndex())
@@ -283,7 +284,8 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
 
       // Fail if invalid
       if (Double.isNaN(state.getPreviewTrajectoryLinearVelocity().getValue())
-       || Double.isNaN(state.getPreviewTrajectoryAngularVelocity().getValue()))
+       || Double.isNaN(state.getPreviewTrajectoryAngularVelocity().getValue())
+       || (definition.getRotation() == 0.0 && definition.getTranslation() == 0.0))
       {
          state.setFailed(true);
          state.getLogger().error("Cannot execute screw primitive with velocities:   Velocity %.2f m/s  %.2f %s/s"
