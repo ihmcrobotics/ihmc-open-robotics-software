@@ -4,7 +4,6 @@ import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.cuda.cudart.dim3;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.IntPointer;
-import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.ejml.data.DMatrixRMaj;
@@ -108,9 +107,6 @@ public class GpuICPCalculator
          return;
 
       computeICPFromPointClouds(flattenedLocalMap.getData(), flattenedLocalMap.getCount(), flattenedGlobalMap.getData(), flattenedGlobalMap.getCount(), stream);
-
-//      flattenedLocalMap.data().close();
-//      flattenedGlobalMap.data().close();
    }
 
    public void computeICPFromPointClouds(float[] cpuLocalData,
@@ -119,8 +115,8 @@ public class GpuICPCalculator
                                          int globalPoints,
                                          CUstream_st stream)
    {
-      int localFloats = localPoints * 3;
-      int globalFloats = globalPoints * 3;
+      int localFloats = localPoints * 4;
+      int globalFloats = globalPoints * 4;
       endedWithoutEnoughValidPoints = false;
 
       FloatPointer cpuLocalDataPointer = new FloatPointer(cpuLocalData);
@@ -159,8 +155,8 @@ public class GpuICPCalculator
 
       float[] distancesArr = new float[localPoints];
       int[] correspondencesArr = new int[localPoints];
-      float[] localTransformedArr = new float[localPoints * 3];
-      float[] filteredLocalArr = new float[localPoints * 3];
+      float[] localTransformedArr = new float[localPoints * 4];
+      float[] filteredLocalArr = new float[localPoints * 4];
       int[] filteredCorrArr = new int[localPoints];
 
       // Allocate once on the Host (CPU)
@@ -209,8 +205,8 @@ public class GpuICPCalculator
                continue;
 
             // Copy local point (XYZ) using array indices
-            int dstBase = validCount * 3;
-            int srcBase = k * 3;
+            int dstBase = validCount * 4;
+            int srcBase = k * 4;
             filteredLocalArr[dstBase + 0] = localTransformedArr[srcBase + 0];
             filteredLocalArr[dstBase + 1] = localTransformedArr[srcBase + 1];
             filteredLocalArr[dstBase + 2] = localTransformedArr[srcBase + 2];
@@ -326,7 +322,7 @@ public class GpuICPCalculator
       int totalPixels = rows * cols;
 
       // 1. Download to Mat and perform one bulk copy to a Java array
-      Mat cpuMap = new Mat(rows, cols, opencv_core.CV_32FC1);
+      Mat cpuMap = new Mat(rows, cols, heightMap.type());
       heightMap.download(cpuMap);
 
       float[] zHeights = new float[totalPixels];
@@ -334,14 +330,17 @@ public class GpuICPCalculator
       cpuDataPointer.get(zHeights); // Bulk JNI transfer
 
       // 2. Prepare a local array for the XYZ results
-      // Size is totalPixels * 3 because we don't know validCount yet
-      float[] xyzBuffer = new float[totalPixels * 3];
+      // Size is totalPixels * 4 because we don't know validCount yet
+      // Each point is a float4 on the GPU
+      float[] xyzBuffer = new float[totalPixels * 4];
       int validCount = 0;
 
       // 3. Process data using local array access (very fast)
       for (int row = 0; row < rows; row++)
       {
          int rowOffset = row * cols;
+         float y = (float) (centerY + (row - centerIndex) * cellSize);
+
          for (int col = 0; col < cols; col++)
          {
             float zRaw = zHeights[rowOffset + col];
@@ -351,20 +350,20 @@ public class GpuICPCalculator
 
             // Calculate world coordinates
             float x = (float) (centerX + (col - centerIndex) * cellSize);
-            float y = (float) (centerY + (row - centerIndex) * cellSize);
             float z = (float) (zRaw + centerZ);
 
-            int base = validCount * 3;
+            int base = validCount * 4;
             xyzBuffer[base] = x;
             xyzBuffer[base + 1] = y;
             xyzBuffer[base + 2] = z;
+            xyzBuffer[base + 3] = 0.0f;
 
             validCount++;
          }
       }
 
       // 4. Create the final trimmed FloatPointer and perform one bulk put
-      int finalElementCount = validCount * 3;
+      int finalElementCount = validCount * 4;
 
       // Cleanup
       cpuDataPointer.close();

@@ -79,7 +79,7 @@
     "upperBound" : 1.0
   },
   "Icp max distance" : {
-    "value" : 0.06,
+    "value" : 0.0036,
     "lowerBound" : 0.01,
     "upperBound" : 1.0
   },

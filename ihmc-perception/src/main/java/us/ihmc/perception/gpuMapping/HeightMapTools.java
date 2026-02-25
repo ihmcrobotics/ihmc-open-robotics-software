@@ -223,19 +223,21 @@ public class HeightMapTools
     */
    public static DMatrixRMaj computeTransformSVD(float[] localArray, float[] globalArray, int[] corrArray, int numberOfPoints)
    {
+      final int stride = 4; // 4 floats per point (x, y, z, w)
+
       // Compute centroids
       double localCentroidX = 0, localCentroidY = 0, localCentroidZ = 0;
       double globalCentroidX = 0, globalCentroidY = 0, globalCentroidZ = 0;
 
       for (int i = 0; i < numberOfPoints; i++)
       {
-         int baseLocal = i * 3;
+         int baseLocal = i * stride;
          localCentroidX += localArray[baseLocal + 0];
          localCentroidY += localArray[baseLocal + 1];
          localCentroidZ += localArray[baseLocal + 2];
 
          int j = corrArray[i];
-         int baseGlobal = j * 3;
+         int baseGlobal = j * stride;
          globalCentroidX += globalArray[baseGlobal + 0];
          globalCentroidY += globalArray[baseGlobal + 1];
          globalCentroidZ += globalArray[baseGlobal + 2];
@@ -253,13 +255,13 @@ public class HeightMapTools
 
       for (int i = 0; i < numberOfPoints; i++)
       {
-         int baseLocal = i * 3;
+         int baseLocal = i * stride;
          double lx = localArray[baseLocal + 0] - localCentroidX;
          double ly = localArray[baseLocal + 1] - localCentroidY;
          double lz = localArray[baseLocal + 2] - localCentroidZ;
 
          int j = corrArray[i];
-         int baseGlobal = j * 3;
+         int baseGlobal = j * stride;
          double gx = globalArray[baseGlobal + 0] - globalCentroidX;
          double gy = globalArray[baseGlobal + 1] - globalCentroidY;
          double gz = globalArray[baseGlobal + 2] - globalCentroidZ;
@@ -276,10 +278,10 @@ public class HeightMapTools
          H.data[8] += lz * gz;
       }
 
-      // --- SVD and Rotation Logic (Remains largely the same) ---
+      // --- SVD and Rotation Logic ---
       SingularValueDecomposition_F64<DMatrixRMaj> svd = DecompositionFactory_DDRM.svd(3, 3, true, true, false);
       if (!svd.decompose(H))
-         return null; // Good practice to check
+         return null;
 
       DMatrixRMaj U = svd.getU(null, false);
       DMatrixRMaj V = svd.getV(null, false);

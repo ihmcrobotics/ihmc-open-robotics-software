@@ -105,8 +105,8 @@ __global__ void v2(float *__restrict__ localMap, size_t pitchLocal,
 }
 
 extern "C"
-__global__ void findNearestNeighborsKernel(const float* __restrict__ local_map,
-                                           const float* __restrict__ global_map,
+__global__ void findNearestNeighborsKernel(const float4* __restrict__ local_map,
+                                           const float4* __restrict__ global_map,
                                            int* correspondences,
                                            float* distances,
                                            int local_size,
@@ -114,44 +114,48 @@ __global__ void findNearestNeighborsKernel(const float* __restrict__ local_map,
 {
     // Use a fixed tile size for shared memory
     const int TILE_SIZE = 256;
-    __shared__ float shared_global[TILE_SIZE * 3];
+    __shared__ float4 shared_global[TILE_SIZE];
 
     int index = blockIdx.x * blockDim.x + threadIdx.x;
 
     float local_x, local_y, local_z;
-    if (index < local_size) {
-        local_x = local_map[index * 3 + 0];
-        local_y = local_map[index * 3 + 1];
-        local_z = local_map[index * 3 + 2];
+    if (index < local_size)
+    {
+        float4 local = local_map[index];
+        local_x = local.x;
+        local_y = local.y;
+        local_z = local.z;
     }
 
     float min_dist_sq = 1e20f; // Use a large float constant
     int min_idx = 0;
 
     // Loop through global map in tiles
-    for (int tile_start = 0; tile_start < global_size; tile_start += TILE_SIZE) {
-
+    for (int tile_start = 0; tile_start < global_size; tile_start += TILE_SIZE)
+    {
         // Coalesced load into shared memory
         int threads_to_load = min(TILE_SIZE, global_size - tile_start);
-        if (threadIdx.x < threads_to_load) {
-            int g_idx = (tile_start + threadIdx.x) * 3;
-            shared_global[threadIdx.x * 3 + 0] = global_map[g_idx + 0];
-            shared_global[threadIdx.x * 3 + 1] = global_map[g_idx + 1];
-            shared_global[threadIdx.x * 3 + 2] = global_map[g_idx + 2];
+        if (threadIdx.x < threads_to_load)
+        {
+            shared_global[threadIdx.x] = global_map[tile_start + threadIdx.x];
         }
 
         // Wait for all threads to finish loading the tile
         __syncthreads();
 
         // If this thread represents a valid local point, compare against the tile
-        if (index < local_size) {
-            for (int i = 0; i < threads_to_load; ++i) {
-                float dx = local_x - shared_global[i * 3 + 0];
-                float dy = local_y - shared_global[i * 3 + 1];
-                float dz = local_z - shared_global[i * 3 + 2];
+        if (index < local_size)
+        {
+            for (int i = 0; i < threads_to_load; ++i)
+            {
+                float4 g = shared_global[i];
+                float dx = local_x - g.x;
+                float dy = local_y - g.y;
+                float dz = local_z - g.z;
                 float d_sq = dx * dx + dy * dy + dz * dz;
 
-                if (d_sq < min_dist_sq) {
+                if (d_sq < min_dist_sq)
+                {
                     min_dist_sq = d_sq;
                     min_idx = tile_start + i;
                 }
@@ -162,14 +166,15 @@ __global__ void findNearestNeighborsKernel(const float* __restrict__ local_map,
         __syncthreads();
     }
 
-    if (index < local_size) {
+    if (index < local_size)
+    {
         correspondences[index] = min_idx;
-        distances[index] = sqrtf(min_dist_sq);
+        distances[index] = min_dist_sq;
     }
 }
 
 extern "C"
-__global__ void transformPointsKernel(float* points,
+__global__ void transformPointsKernel(float4* points,
                                       const float* transform,
                                       int num_points)
 {
@@ -177,10 +182,12 @@ __global__ void transformPointsKernel(float* points,
     if (idx >= num_points)
         return;
 
-    int base = idx * 3;
-    float x = points[base + 0];
-    float y = points[base + 1];
-    float z = points[base + 2];
+    // Load full point (16-byte aligned load)
+    float4 p = points[idx];
+
+    float x = p.x;
+    float y = p.y;
+    float z = p.z;
 
     // transform[0-3]   is row 0 (R00, R01, R02, Tx)
     // transform[4-7]   is row 1 (R10, R11, R12, Ty)
@@ -190,7 +197,6 @@ __global__ void transformPointsKernel(float* points,
     float new_y = transform[4] * x + transform[5] * y + transform[6] * z + transform[7];
     float new_z = transform[8] * x + transform[9] * y + transform[10] * z + transform[11];
 
-    points[base + 0] = new_x;
-    points[base + 1] = new_y;
-    points[base + 2] = new_z;
+    // Store back as float4 (keep padding zero)
+    points[idx] = make_float4(new_x, new_y, new_z, 0.0f);
 }

@@ -248,36 +248,38 @@ public class GpuICPCalculatorTest
       GpuICPCalculator heightMapICPCalculator = new GpuICPCalculator(heightMapParameters);
 
       int numPoints = 10;
+      final int stride = 4; // 4 floats per point (x, y, z, w)
 
       // Create local point cloud with a distinct 3D pattern
-      // Pattern: points arranged in a line with varying heights
-      float[] localPoints = new float[numPoints * 3];
-
+      float[] localPoints = new float[numPoints * stride];
       for (int i = 0; i < numPoints; i++)
       {
          float x = i * 0.1f;           // 0.0, 0.1, 0.2, ... 0.9
          float y = i * 0.05f;          // 0.0, 0.05, 0.1, ... 0.45
          float z = (float) Math.sin(i * 0.5);  // Varying height pattern
 
-         localPoints[i * 3 + 0] = x;
-         localPoints[i * 3 + 1] = y;
-         localPoints[i * 3 + 2] = z;
+         int base = i * stride;
+         localPoints[base + 0] = x;
+         localPoints[base + 1] = y;
+         localPoints[base + 2] = z;
+         localPoints[base + 3] = 1.0f;  // Padding (w)
       }
 
-      // Create global point cloud - SAME PATTERN but offset by (0.1, 0.1, 0.0)
-      float[] globalPoints = new float[numPoints * 3];
-
+      // Create global point cloud - SAME PATTERN but offset by (0.1, 0.2, 0.0)
+      float[] globalPoints = new float[numPoints * stride];
       float offsetInX = 0.1f;
       float offsetInY = 0.2f;
       for (int i = 0; i < numPoints; i++)
       {
-         float x = i * 0.1f + offsetInX;     // Offset by 0.1 in X
-         float y = i * 0.05f + offsetInY;    // Offset by 0.1 in Y
-         float z = (float) Math.sin(i * 0.5);  // Same height pattern
+         float x = i * 0.1f + offsetInX;
+         float y = i * 0.05f + offsetInY;
+         float z = (float) Math.sin(i * 0.5);
 
-         globalPoints[i * 3 + 0] = x;
-         globalPoints[i * 3 + 1] = y;
-         globalPoints[i * 3 + 2] = z;
+         int base = i * stride;
+         globalPoints[base + 0] = x;
+         globalPoints[base + 1] = y;
+         globalPoints[base + 2] = z;
+         globalPoints[base + 3] = 1.0f; // Padding (w)
       }
 
       // Run ICP
@@ -290,7 +292,7 @@ public class GpuICPCalculatorTest
       System.out.println("Corrected Y: " + correctedTransform.getY());
       System.out.println("Corrected Z: " + correctedTransform.getZ());
 
-      // Should recover the (0.1, 0.1, 0.0) offset
+      // Should recover the (0.1, 0.2, 0.0) offset
       assertEquals(offsetInX, correctedTransform.getX(), 1e-4);
       assertEquals(offsetInY, correctedTransform.getY(), 1e-4);
       assertEquals(0.0, correctedTransform.getZ(), 1e-4);
@@ -634,7 +636,7 @@ public class GpuICPCalculatorTest
       assertEquals(expectedValidPoints, result.getCount(), "Number of points should match non-zero entries");
 
       // Check that the buffer limit is exactly pointCount * 3
-      assertEquals(expectedValidPoints *3L, result.getData().length, "Pointer limit should be pointCount * 3");
+      assertEquals(expectedValidPoints *4L, result.getData().length, "Pointer limit should be pointCount * 3");
 
       // Verification of a specific point: localData[9][4] = 0.076491f
       // col=4, row=9. CenterIndex=5.
