@@ -21,6 +21,7 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.filters.GlitchFilteredYoBoolean;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -71,10 +72,13 @@ public class PushRecoveryControlModule implements SCS2YoGraphicHolder
    private final FramePoint3D projectedCapturePoint = new FramePoint3D();
    private final FramePoint2D projectedCapturePoint2d = new FramePoint2D();
 
-   public PushRecoveryControlModule(BipedSupportPolygons bipedSupportPolygons, HighLevelHumanoidControllerToolbox controllerToolbox,
-                                    WalkingControllerParameters recoveryControllerParameters, YoRegistry parentRegistry)
+   public PushRecoveryControlModule(BipedSupportPolygons bipedSupportPolygons,
+                                    HighLevelHumanoidControllerToolbox controllerToolbox,
+                                    WalkingControllerParameters recoveryControllerParameters,
+                                    double controlDT,
+                                    YoRegistry parentRegistry)
    {
-      controlDT = controllerToolbox.getControlDT();
+      this.controlDT = controlDT;
       this.bipedSupportPolygon = bipedSupportPolygons;
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       feet = controllerToolbox.getContactableFeet();

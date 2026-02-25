@@ -123,6 +123,7 @@ public class FootControlModule implements SCS2YoGraphicHolder
                             DoubleProvider minWeightFractionPerFoot,
                             DoubleProvider maxWeightFractionPerFoot,
                             DoubleProvider unloadedFinalRhoWeight,
+                            double controlDT,
                             YoRegistry parentRegistry)
    {
       contactableFoot = controllerToolbox.getContactableFeet().get(robotSide);
@@ -140,6 +141,7 @@ public class FootControlModule implements SCS2YoGraphicHolder
                                                 explorationParameters,
                                                 footholdRotationParameters,
                                                 supportStateParameters,
+                                                controlDT,
                                                 registry);
 
       this.controllerToolbox = controllerToolbox;

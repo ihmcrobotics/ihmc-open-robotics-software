@@ -5,7 +5,6 @@ import us.ihmc.avatar.arm.PresetArmConfiguration;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.initialSetup.HumanoidRobotInitialSetup;
-import us.ihmc.avatar.kinematicsSimulation.SimulatedHandKinematicController;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -20,6 +19,7 @@ import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.handsros2.HandModel;
 import us.ihmc.handsros2.abilityHand.AbilityHandModel;
 import us.ihmc.handsros2.ezGripper.EZGripperModel;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.zulu.parameters.controller.ZuluContactPointParameters;
 import us.ihmc.zulu.parameters.controller.ZuluICPSplitFractionCalculatorParameters;
@@ -55,7 +55,6 @@ import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobo
 import us.ihmc.simulationToolkit.RobotDefinitionTools;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
-import us.ihmc.yoVariables.providers.DoubleProvider;
 
 import java.io.InputStream;
 import java.util.List;
@@ -66,26 +65,21 @@ public class ZuluRobotModel implements DRCRobotModel
 
    private static final double DEFAULT_SIMULATE_DT = 0.0002;
    private static final double DEFAULT_ESTIMATE_DT = 0.001;
-   private static final double DEFAULT_CONTROL_DT = 0.003;
+   public static final double DEFAULT_CONTROL_DT = 0.003;
    private static final double DEFAULT_FEEDBACK_CONTROLLER_DT = 0.002;
-   private static final double DEFAULT_PERCEPTION_DT = 0.003;
-   private static final double ETHERCAT_DT = 0.001;
 
    private double simulateDT = DEFAULT_SIMULATE_DT;
    private double estimatorDT = DEFAULT_ESTIMATE_DT;
-   private double controllerDT = DEFAULT_CONTROL_DT;
    private double feedbackControllerDT = DEFAULT_FEEDBACK_CONTROLLER_DT;
-   private double perceptionDT = DEFAULT_PERCEPTION_DT;
-   private double stepGeneratorDT = 10 * controllerDT;
+   private double stepGeneratorDT = 10 * DEFAULT_CONTROL_DT;
 
    protected final ZuluPhysicalProperties physicalProperties;
    protected final WalkingControllerParameters walkingControllerParameters;
-   private final HighLevelControllerParameters highLevelControllerParameters;
+   private final ZuluHighLevelControllerParameters highLevelControllerParameters;
    private final ZuluSensorInformation sensorInformation;
    protected final ZuluJointMap jointMap;
    protected final RobotContactPointParameters<RobotSide> contactPointParameters;
    private final CoPTrajectoryParameters copTrajectoryParameters = new CoPTrajectoryParameters();
-   private final ZuluDiagnosticParameters diagnosticParameters;
    private final StateEstimatorParameters stateEstimatorParameters;
 
    private final RobotDefinition scs1RobotDefinition;
@@ -152,7 +146,6 @@ public class ZuluRobotModel implements DRCRobotModel
                                                                         physicalProperties,
                                                                         contactPointParameters);
       highLevelControllerParameters = new ZuluHighLevelControllerParameters(robotVersion, jointMap, robotTarget);
-      diagnosticParameters = new ZuluDiagnosticParameters(robotTarget, jointMap, sensorInformation, highLevelControllerParameters);
       stateEstimatorParameters = new ZuluStateEstimatorParameters(getEstimatorDT(), robotTarget, sensorInformation, jointMap);
 
       modelFactory = new ZuluModelFactory(robotVersion, jointMap, contactPointParameters, new ZuluRigidBodyMutator(getPhysicalProperties(), imusToIgnore));
@@ -308,12 +301,6 @@ public class ZuluRobotModel implements DRCRobotModel
    }
 
    @Override
-   public double getControllerDT()
-   {
-      return controllerDT;
-   }
-
-   @Override
    public double getFeedbackControllerDT()
    {
       return feedbackControllerDT;
@@ -335,12 +322,6 @@ public class ZuluRobotModel implements DRCRobotModel
    public String getSimpleRobotName()
    {
       return "Zulu"; // TODO Should this just be robotName? Confusing which one to use
-   }
-
-   @Override
-   public CollisionBoxProvider getCollisionBoxProvider()
-   {
-      return null;
    }
 
    @Override
@@ -384,20 +365,6 @@ public class ZuluRobotModel implements DRCRobotModel
    public AvatarSimulatedHandControlThread createSimulatedHandController(RealtimeROS2Node realtimeROS2Node, boolean kinematicsSimulation)
    {
       return null;
-   }
-
-   @Override
-   public SimulatedHandKinematicController createSimulatedHandKinematicController(FullHumanoidRobotModel fullHumanoidRobotModel,
-                                                                                  RealtimeROS2Node realtimeROS2Node,
-                                                                                  DoubleProvider controllerTime)
-   {
-      return null;
-   }
-
-   @Override
-   public DiagnosticParameters getDiagnoticParameters()
-   {
-      return diagnosticParameters;
    }
 
    @Override
@@ -476,9 +443,9 @@ public class ZuluRobotModel implements DRCRobotModel
       return chestGraphicToFrameTransform;
    }
 
-   public void setControllerDT(double controllerDT)
+   public void setControllerDT(HighLevelControllerName controllerName, double controllerDT)
    {
-      this.controllerDT = controllerDT;
+      highLevelControllerParameters.setControlDT(controllerName, controllerDT);
    }
 
    public void setFeedbackControllerDT(double feedbackControllerDT)

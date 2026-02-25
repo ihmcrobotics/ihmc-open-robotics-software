@@ -97,8 +97,11 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
 
    private Vector3DReadOnly pelvisTaskpaceFeedbackWeight;
 
+   private final double controlDT;
+
    public CenterOfMassHeightControlState(HighLevelHumanoidControllerToolbox controllerToolbox,
                                          WalkingControllerParameters walkingControllerParameters,
+                                         double controlDT,
                                          YoRegistry parentRegistry)
    {
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
@@ -107,6 +110,7 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
       centerOfMassStateProvider = controllerToolbox;
       pelvisFrame = referenceFrames.getPelvisFrame();
       postureAdjustmentProvider = controllerToolbox.getPostureAdjustmentProvider();
+      this.controlDT = controlDT;
 
       centerOfMassTrajectoryGenerator = createTrajectoryGenerator(controllerToolbox, walkingControllerParameters, referenceFrames);
 
@@ -114,7 +118,6 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
       controlPelvisHeightInsteadOfCoMHeight.set(walkingControllerParameters.controlPelvisHeightInsteadOfCoMHeight());
       controlHeightWithMomentum.set(walkingControllerParameters.controlHeightWithMomentum());
 
-      double controlDT = controllerToolbox.getControlDT();
       comHeightTimeDerivativesSmoother = new CoMHeightTimeDerivativesSmoother(controlDT, registry);
 
       currentTime = controllerToolbox.getYoTime();
@@ -128,6 +131,11 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
       comHeightControlCommand.setSelectionMatrix(selectionMatrix);
 
       parentRegistry.addChild(registry);
+   }
+
+   public double getControlDT()
+   {
+      return controlDT;
    }
 
    public LookAheadCoMHeightTrajectoryGenerator createTrajectoryGenerator(HighLevelHumanoidControllerToolbox controllerToolbox,

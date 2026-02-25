@@ -2,7 +2,6 @@ package us.ihmc.pathPlanning.visibilityGraphs.ui.properties;
 
 import javafx.beans.property.Property;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotEnvironmentAwareness.ui.properties.ParametersProperty;
 
 public class Point3DProperty extends ParametersProperty<Point3D>
 {

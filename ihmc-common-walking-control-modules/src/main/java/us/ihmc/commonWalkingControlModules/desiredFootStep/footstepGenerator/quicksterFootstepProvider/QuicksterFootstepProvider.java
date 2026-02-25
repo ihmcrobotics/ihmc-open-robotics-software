@@ -46,7 +46,7 @@ public class QuicksterFootstepProvider implements Updatable
    private final FullHumanoidRobotModel robotModel;
    private final CommonHumanoidReferenceFrames referenceFrames;
 
-   private final double updateDT;
+   private final DoubleProvider updateDT;
    private final double gravity = 9.81;
 
    // Estimates
@@ -91,7 +91,7 @@ public class QuicksterFootstepProvider implements Updatable
    private DesiredVelocityProvider desiredVelocityProvider = () -> zero2D;
    private DesiredTurningVelocityProvider desiredTurningVelocityProvider = () -> 0.0;
 
-   public QuicksterFootstepProvider(FullHumanoidRobotModel robotModel, CommonHumanoidReferenceFrames referenceFrames, double updateDT, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, DoubleProvider yoTime)
+   public QuicksterFootstepProvider(FullHumanoidRobotModel robotModel, CommonHumanoidReferenceFrames referenceFrames, DoubleProvider updateDT, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, DoubleProvider yoTime)
    {
       this.robotModel = robotModel;
       this.referenceFrames = referenceFrames;
@@ -222,7 +222,7 @@ public class QuicksterFootstepProvider implements Updatable
 
    private void updateEstimates()
    {
-      desiredPelvisOrientation.appendYawRotation(desiredTurningVelocity.getDoubleValue() * updateDT);
+      desiredPelvisOrientation.appendYawRotation(desiredTurningVelocity.getDoubleValue() * updateDT.getValue());
 
       inDoubleSupport.set(footStates.get(RobotSide.LEFT).getEnumValue() == FootState.SUPPORT &&
                           footStates.get(RobotSide.RIGHT).getEnumValue() == FootState.SUPPORT);

@@ -15,7 +15,7 @@ public class BehaviorTreeSceneObjectStateMessagePubSubType implements us.ihmc.pu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "46a3766fae93a33aa65eb2e2081ddbb9454afe7ef5f06f97740e4672cb1e2d73";
+   		return "8e0fb673adac176f93a09c5b1751680c986bbe6cf63f24b9571646437150b77f";
    }
    
    @Override
@@ -66,6 +66,14 @@ public class BehaviorTreeSceneObjectStateMessagePubSubType implements us.ihmc.pu
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -97,6 +105,18 @@ public class BehaviorTreeSceneObjectStateMessagePubSubType implements us.ihmc.pu
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -113,7 +133,15 @@ public class BehaviorTreeSceneObjectStateMessagePubSubType implements us.ihmc.pu
       behavior_msgs.msg.dds.PersistentDetectionStatusMessagePubSubType.write(data.getPersistentDetection(), cdr);
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getTransformToWorld(), cdr);
       behavior_msgs.msg.dds.PersistentDetectionStatusMessagePubSubType.write(data.getDoorPanelDetection(), cdr);
-      cdr.write_type_4(data.getPointsInCapsule());
+      cdr.write_type_4(data.getLatchPostPoints());
+
+      cdr.write_type_4(data.getHingeRecessPoints());
+
+      cdr.write_type_5(data.getDoorOpenAngle());
+
+      cdr.write_type_9(data.getDoorType());
+
+      cdr.write_type_9(data.getHingeSide());
 
       cdr.write_type_7(data.getFrozen());
 
@@ -128,7 +156,15 @@ public class BehaviorTreeSceneObjectStateMessagePubSubType implements us.ihmc.pu
       behavior_msgs.msg.dds.PersistentDetectionStatusMessagePubSubType.read(data.getPersistentDetection(), cdr);	
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getTransformToWorld(), cdr);	
       behavior_msgs.msg.dds.PersistentDetectionStatusMessagePubSubType.read(data.getDoorPanelDetection(), cdr);	
-      data.setPointsInCapsule(cdr.read_type_4());
+      data.setLatchPostPoints(cdr.read_type_4());
+      	
+      data.setHingeRecessPoints(cdr.read_type_4());
+      	
+      data.setDoorOpenAngle(cdr.read_type_5());
+      	
+      data.setDoorType(cdr.read_type_9());
+      	
+      data.setHingeSide(cdr.read_type_9());
       	
       data.setFrozen(cdr.read_type_7());
       	
@@ -149,7 +185,11 @@ public class BehaviorTreeSceneObjectStateMessagePubSubType implements us.ihmc.pu
 
       ser.write_type_a("door_panel_detection", new behavior_msgs.msg.dds.PersistentDetectionStatusMessagePubSubType(), data.getDoorPanelDetection());
 
-      ser.write_type_4("points_in_capsule", data.getPointsInCapsule());
+      ser.write_type_4("latch_post_points", data.getLatchPostPoints());
+      ser.write_type_4("hinge_recess_points", data.getHingeRecessPoints());
+      ser.write_type_5("door_open_angle", data.getDoorOpenAngle());
+      ser.write_type_9("door_type", data.getDoorType());
+      ser.write_type_9("hinge_side", data.getHingeSide());
       ser.write_type_7("frozen", data.getFrozen());
    }
 
@@ -167,7 +207,11 @@ public class BehaviorTreeSceneObjectStateMessagePubSubType implements us.ihmc.pu
 
       ser.read_type_a("door_panel_detection", new behavior_msgs.msg.dds.PersistentDetectionStatusMessagePubSubType(), data.getDoorPanelDetection());
 
-      data.setPointsInCapsule(ser.read_type_4("points_in_capsule"));
+      data.setLatchPostPoints(ser.read_type_4("latch_post_points"));
+      data.setHingeRecessPoints(ser.read_type_4("hinge_recess_points"));
+      data.setDoorOpenAngle(ser.read_type_5("door_open_angle"));
+      data.setDoorType(ser.read_type_9("door_type"));
+      data.setHingeSide(ser.read_type_9("hinge_side"));
       data.setFrozen(ser.read_type_7("frozen"));
    }
 

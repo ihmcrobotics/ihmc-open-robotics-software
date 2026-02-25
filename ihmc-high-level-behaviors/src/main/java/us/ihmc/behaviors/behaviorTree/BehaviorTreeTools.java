@@ -2,7 +2,9 @@ package us.ihmc.behaviors.behaviorTree;
 
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeDefinition;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -91,6 +93,34 @@ public class BehaviorTreeTools
          node = node.getParent();
       }
       return depth;
+   }
+
+   public static <T extends BehaviorTreeNode<T, ?, ?>> int getNodeIndexDFS(T node)
+   {
+      Deque<T> stack = new ArrayDeque<>();
+
+      T rootNode = node;
+      while (!rootNode.isRootNode())
+         rootNode = rootNode.getParent();
+
+      stack.push(rootNode);
+      int index = 0;
+      while (!stack.isEmpty())
+      {
+         T current = stack.pop();
+
+         if (current == node)
+            break;
+
+         index++;
+
+         // Push children in reverse order so the first child is processed first
+         List<T> children = current.getChildren();
+         for (int i = children.size() - 1; i >= 0; i--)
+            stack.push(children.get(i));
+      }
+
+      return index;
    }
 
    public static int getChildIndex(BehaviorTreeNodeState<?> node)

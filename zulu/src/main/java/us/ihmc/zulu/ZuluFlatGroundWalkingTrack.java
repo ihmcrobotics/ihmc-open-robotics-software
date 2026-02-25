@@ -26,7 +26,7 @@ public class ZuluFlatGroundWalkingTrack
       DRCRobotModel robotModel = new ZuluRobotModel(ZuluVersion.V1_FULL_ROBOT, RobotTarget.SCS);
       FlatGroundEnvironment environment = new FlatGroundEnvironment();
 
-      int recordFrequency = (int) Math.max(1.0, Math.round(robotModel.getControllerDT() / robotModel.getSimulateDT()));
+      int recordFrequency = (int) Math.max(1.0, Math.round(robotModel.getFastestControllerDT() / robotModel.getSimulateDT()));
 
       boolean useVelocityAndHeadingScript = true;
       HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters = new HeadingAndVelocityEvaluationScriptParameters();

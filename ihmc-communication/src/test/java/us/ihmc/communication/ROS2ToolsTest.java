@@ -3,7 +3,7 @@ package us.ihmc.communication;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import perception_msgs.msg.dds.REAStateRequestMessage;
+import sensor_msgs.msg.dds.CameraInfo;
 import std_msgs.msg.dds.Float64;
 import std_msgs.msg.dds.Int64;
 import test_msgs.msg.dds.LongString;
@@ -33,19 +33,19 @@ class ROS2ToolsTest
    @Test
    public void testTopicNameStuff()
    {
-      assertEquals("/ihmc/rea_state_request", ROS2Tools.IHMC_ROOT.withTypeName(REAStateRequestMessage.class).toString());
-      assertEquals("/ihmc/atlas/rea_state_request", ROS2Tools.IHMC_ROOT.withTypeName(REAStateRequestMessage.class).withRobot("atlas").toString());
-      assertEquals("/ihmc/atlas/rea/input/rea_state_request",
-                   ROS2Tools.IHMC_ROOT.withTypeName(REAStateRequestMessage.class).withRobot("atlas").withModule("rea").withInput().toString());
+      assertEquals("/ihmc/camera_info", ROS2Tools.IHMC_ROOT.withTypeName(CameraInfo.class).toString());
+      assertEquals("/ihmc/atlas/camera_info", ROS2Tools.IHMC_ROOT.withTypeName(CameraInfo.class).withRobot("atlas").toString());
+      assertEquals("/ihmc/atlas/rea/input/camera_info",
+                   ROS2Tools.IHMC_ROOT.withTypeName(CameraInfo.class).withRobot("atlas").withModule("rea").withInput().toString());
 
       ROS2Topic<?> defaultTopicName = ROS2Tools.IHMC_ROOT;
-      assertEquals("/ihmc/rea_state_request", defaultTopicName.withTypeName(REAStateRequestMessage.class).toString());
+      assertEquals("/ihmc/camera_info", defaultTopicName.withTypeName(CameraInfo.class).toString());
 
       ROS2Topic<?> defaultTopicNameWithRobot = ROS2Tools.IHMC_ROOT.withRobot("atlas");
-      assertEquals("/ihmc/atlas/rea_state_request", defaultTopicNameWithRobot.withTypeName(REAStateRequestMessage.class).toString());
+      assertEquals("/ihmc/atlas/camera_info", defaultTopicNameWithRobot.withTypeName(CameraInfo.class).toString());
 
       ROS2Topic<?> defaultTopicName3 = ROS2Tools.IHMC_ROOT.withRobot("atlas").withModule("rea").withOutput();
-      assertEquals("/ihmc/atlas/rea/output/rea_state_request", defaultTopicName3.withTypeName(REAStateRequestMessage.class).toString());
+      assertEquals("/ihmc/atlas/rea/output/camera_info", defaultTopicName3.withTypeName(CameraInfo.class).toString());
 
       assertEquals("/ihmc/atlas/toolbox/teleop/step_teleop/output", ToolboxAPIs.STEP_TELEOP_TOOLBOX.withRobot("atlas").withOutput().toString());
    }

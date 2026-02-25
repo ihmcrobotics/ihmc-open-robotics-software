@@ -23,7 +23,6 @@ import us.ihmc.commonWalkingControlModules.parameterEstimation.InertialParameter
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -166,10 +165,14 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
       this.inertialEstimationParameters = inertialEstimatorParameters;
    }
 
-   public BalanceManager getOrCreateBalanceManager()
+   public BalanceManager getOrCreateBalanceManager(double controlDT)
    {
       if (balanceManager != null)
+      {
+         if (balanceManager.getControlDT() != controlDT)
+            throw new IllegalArgumentException("Trying to create a manager at a different control rate " + controlDT + " than what was previously created " + balanceManager.getControlDT());
          return balanceManager;
+      }
 
       if (!hasHighLevelHumanoidControllerToolbox(BalanceManager.class))
          return null;
@@ -180,14 +183,18 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
       if (!hasMomentumOptimizationSettings(BalanceManager.class))
          return null;
 
-      balanceManager = new BalanceManager(controllerToolbox, walkingControllerParameters, copTrajectoryParameters, splitFractionParameters, registry);
+      balanceManager = new BalanceManager(controllerToolbox, walkingControllerParameters, copTrajectoryParameters, splitFractionParameters, controlDT, registry);
       return balanceManager;
    }
 
-   public CenterOfMassHeightManager getOrCreateCenterOfMassHeightManager()
+   public CenterOfMassHeightManager getOrCreateCenterOfMassHeightManager(double controlDT)
    {
       if (centerOfMassHeightManager != null)
+      {
+         if (centerOfMassHeightManager.getControlDT() != controlDT)
+            throw new IllegalArgumentException("Trying to create a center of mass height manager at a different control rate " + controlDT + " than what was previously created " + centerOfMassHeightManager.getControlDT());
          return centerOfMassHeightManager;
+      }
 
       if (!hasHighLevelHumanoidControllerToolbox(CenterOfMassHeightManager.class))
          return null;
@@ -196,7 +203,7 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
 
       String pelvisName = controllerToolbox.getFullRobotModel().getPelvis().getName();
       Vector3DReadOnly pelvisLinearWeight = taskspaceLinearWeightMap.get(pelvisName);
-      centerOfMassHeightManager = new CenterOfMassHeightManager(controllerToolbox, walkingControllerParameters, registry);
+      centerOfMassHeightManager = new CenterOfMassHeightManager(controllerToolbox, walkingControllerParameters, controlDT, registry);
       centerOfMassHeightManager.setPelvisTaskspaceWeights(pelvisLinearWeight);
       centerOfMassHeightManager.setPrepareForLocomotion(walkingControllerParameters.doPreparePelvisForLocomotion());
       centerOfMassHeightManager.setComHeightGains(walkingControllerComHeightGains, walkingControllerMaxComHeightVelocity, userModeComHeightGains);
@@ -214,7 +221,8 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
    public RigidBodyControlManager getOrCreateRigidBodyManager(RigidBodyBasics bodyToControl,
                                                               RigidBodyBasics baseBody,
                                                               ReferenceFrame controlFrame,
-                                                              ReferenceFrame baseFrame)
+                                                              ReferenceFrame baseFrame,
+                                                              double controlDT)
    {
       if (bodyToControl == null)
          return null;
@@ -224,7 +232,11 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
       {
          RigidBodyControlManager manager = rigidBodyManagerMapByBodyName.get(bodyName);
          if (manager != null)
+         {
+            if (manager.getControlDT() != controlDT)
+               throw new IllegalArgumentException("Trying to create a manager at a different control rate " + controlDT + " than what was previously created " + manager.getControlDT());
             return manager;
+         }
       }
 
       if (!hasWalkingControllerParameters(RigidBodyControlManager.class))
@@ -246,7 +258,6 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
       Pose3D homePose = walkingControllerParameters.getOrCreateBodyHomeConfiguration().get(bodyName);
       RigidBodyBasics elevator = controllerToolbox.getFullRobotModel().getElevator();
       YoDouble yoTime = controllerToolbox.getYoTime();
-      double controlDT = controllerToolbox.getControlDT();
 
       ContactablePlaneBody contactableBody = controllerToolbox.getContactableBody(bodyToControl);
       RigidBodyControlMode defaultControlMode = walkingControllerParameters.getDefaultControlModesForRigidBodies().get(bodyName);
@@ -279,10 +290,14 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
       return manager;
    }
 
-   public FeetManager getOrCreateFeetManager()
+   public FeetManager getOrCreateFeetManager(double controlDT)
    {
       if (feetManager != null)
+      {
+         if (feetManager.getControlDT() != controlDT)
+            throw new IllegalArgumentException("Trying to create a feet manager at a different control rate " + controlDT + " than what was previously created " + feetManager.getControlDT());
          return feetManager;
+      }
 
       if (!hasHighLevelHumanoidControllerToolbox(FeetManager.class))
          return null;
@@ -321,7 +336,8 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
          RigidBodyControlManager controlManager = getOrCreateRigidBodyManager(foot,
                                                                               pelvis,
                                                                               foot.getParentJoint().getFrameAfterJoint(),
-                                                                              pelvis.getBodyFixedFrame());
+                                                                              pelvis.getBodyFixedFrame(),
+                                                                              controlDT);
          flamingoFootControlManagers.put(robotSide, controlManager);
       }
 
@@ -331,6 +347,7 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
                                     holdFootGains,
                                     toeOffFootGains,
                                     flamingoFootControlManagers,
+                                    controlDT,
                                     registry);
 
       String footName = fullRobotModel.getFoot(RobotSide.LEFT).getName();
@@ -372,10 +389,15 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
       return pelvisOrientationManager;
    }
 
-   public NaturalPostureManager getOrCreateNaturalPostureManager()
+   public NaturalPostureManager getOrCreateNaturalPostureManager(double controlDT)
    {
       if (naturalPostureManager != null)
+      {
+         if (naturalPostureManager.getControlDT() != controlDT)
+            throw new IllegalArgumentException("Trying to create a natural posture manager at a different control rate " + controlDT + " than what was previously created " + naturalPostureManager.getControlDT());
          return naturalPostureManager;
+      }
+
 
       if (!hasHighLevelHumanoidControllerToolbox(NaturalPostureManager.class))
          return null;
@@ -390,22 +412,24 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
             return null;
       }
       
-      naturalPostureManager = new NaturalPostureManager(walkingControllerParameters.getNaturalPostureParameters(), controllerToolbox, registry);
+      naturalPostureManager = new NaturalPostureManager(walkingControllerParameters.getNaturalPostureParameters(), controllerToolbox, controlDT, registry);
 
       return naturalPostureManager;
    }
 
-   public InertialParameterManager getOrCreateInertialParameterManager()
+   public InertialParameterManager getOrCreateInertialParameterManager(DoubleProvider dt)
    {
       if (inertialParameterManager != null)
+      {
          return inertialParameterManager;
+      }
 
       if (!hasHighLevelHumanoidControllerToolbox(InertialParameterManager.class))
          return null;
       if (!hasInertialEstimatorParameters(InertialParameterManager.class))
          return null;
 
-      inertialParameterManager = new InertialParameterManager(controllerToolbox, inertialEstimationParameters, registry);
+      inertialParameterManager = new InertialParameterManager(controllerToolbox, inertialEstimationParameters, dt, registry);
 
       return inertialParameterManager;
    }

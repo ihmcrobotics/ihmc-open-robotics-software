@@ -11,9 +11,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalculator;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.algorithms.*;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
@@ -41,7 +38,7 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
-   private final double controlDT;
+   private final DoubleProvider controlDT;
    private final double gravityZ;
    private DoubleProvider totalMassProvider;
    private final FloatingJointBasics rootJoint;
@@ -146,7 +143,7 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
     * @param parentRegistry                     registry to which this toolbox will attach its own
     *                                           registry.
     */
-   public WholeBodyControlCoreToolbox(double controlDT,
+   public WholeBodyControlCoreToolbox(DoubleProvider controlDT,
                                       double gravityZ,
                                       FloatingJointBasics rootJoint,
                                       JointBasics[] controlledJoints,
@@ -174,7 +171,7 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
 
       jointIndexHandler = new JointIndexHandler(controlledJoints);
       inverseDynamicsCalculator = new InverseDynamicsCalculator(multiBodySystemInput);
-      inverseDynamicsCalculator.setGravitionalAcceleration(-gravityZ); // Watch out for the sign here, it changed with the switch to Mecano.
+      inverseDynamicsCalculator.setGravitationalAcceleration(-gravityZ); // Watch out for the sign here, it changed with the switch to Mecano.
       rigidBodyAccelerationProvider = inverseDynamicsCalculator.getAccelerationProvider();
       rigidBodyTwistCalculator = new RigidBodyTwistCalculator(multiBodySystemInput);
 
@@ -523,7 +520,7 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
       return vmcMainBody;
    }
 
-   public double getControlDT()
+   public DoubleProvider getControlDT()
    {
       return controlDT;
    }

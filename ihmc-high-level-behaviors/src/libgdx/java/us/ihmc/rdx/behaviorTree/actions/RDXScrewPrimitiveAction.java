@@ -215,7 +215,7 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
    @Override
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
-      if (state.getScrewFrame().isChildOfWorld())
+      if (getSelected() && state.getScrewFrame().isChildOfWorld())
       {
          screwAxisGizmo.calculate3DViewPick(input);
       }
@@ -224,7 +224,7 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
    @Override
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      if (state.getScrewFrame().isChildOfWorld())
+      if (getSelected() && state.getScrewFrame().isChildOfWorld())
       {
          screwAxisGizmo.process3DViewInput(input);
       }
@@ -233,13 +233,13 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (state.getScrewFrame().isChildOfWorld())
+      if ((state.getIsNextForExecution() || getSelected() || state.getIsExecuting()) && state.getScrewFrame().isChildOfWorld())
       {
          screwAxisGizmo.getVirtualRenderables(renderables, pool);
          screwAxisGraphic.getRenderables(renderables, pool);
          trajectoryGraphic.getRenderables(renderables, pool);
 
-         if (state.getIsNextForExecution())
+         if (state.getIsNextForExecution() || state.getIsExecuting())
             armMultiBodyGraphics.get(definition.getSide()).getRootBody().getVisualRenderables(renderables, pool);
       }
    }

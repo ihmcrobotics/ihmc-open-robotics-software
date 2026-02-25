@@ -151,39 +151,45 @@ public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationAct
    @Override
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
-      poseGizmo.calculate3DViewPick(input);
-
-      pickResult.reset();
-      for (MouseCollidable mouseCollidable : mouseCollidables)
+      if (getSelected() && state.getChestFrame().isChildOfWorld())
       {
-         double collision = mouseCollidable.collide(input.getPickRayInWorld(), collisionShapeFrame.getReferenceFrame());
-         if (!Double.isNaN(collision))
-            pickResult.addPickCollision(collision);
+         poseGizmo.calculate3DViewPick(input);
+
+         pickResult.reset();
+         for (MouseCollidable mouseCollidable : mouseCollidables)
+         {
+            double collision = mouseCollidable.collide(input.getPickRayInWorld(), collisionShapeFrame.getReferenceFrame());
+            if (!Double.isNaN(collision))
+               pickResult.addPickCollision(collision);
+         }
+         if (pickResult.getPickCollisionWasAddedSinceReset())
+            input.addPickResult(pickResult);
       }
-      if (pickResult.getPickCollisionWasAddedSinceReset())
-         input.addPickResult(pickResult);
    }
 
    @Override
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      isMouseHovering = input.getClosestPick() == pickResult;
-
-      boolean isClickedOn = isMouseHovering && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
-      if (isClickedOn)
+      if (getSelected() && state.getChestFrame().isChildOfWorld())
       {
-         poseGizmo.setSelected(true);
+         isMouseHovering = input.getClosestPick() == pickResult;
+
+         boolean isClickedOn = isMouseHovering && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
+         if (isClickedOn)
+         {
+            poseGizmo.setSelected(true);
+         }
+
+         poseGizmo.process3DViewInput(input, isMouseHovering);
+
+         tooltip.setInput(input);
       }
-
-      poseGizmo.process3DViewInput(input, isMouseHovering);
-
-      tooltip.setInput(input);
    }
 
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (state.getChestFrame().isChildOfWorld() && (state.getIsNextForExecution() || getSelected()))
+      if ((state.getIsNextForExecution() || getSelected() || state.getIsExecuting()) && state.getChestFrame().isChildOfWorld())
       {
          highlightModel.getRenderables(renderables, pool);
          poseGizmo.getVirtualRenderables(renderables, pool);

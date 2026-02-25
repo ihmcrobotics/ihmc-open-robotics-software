@@ -62,8 +62,6 @@ public class YOLOv8DetectionExecutor
    private final List<Consumer<List<InstantDetection>>> detectionConsumerCallbacks = new ArrayList<>();
    private final TypedNotification<RawImage> newestColorImage = new TypedNotification<>();
 
-   private boolean requestingFullData;
-
    public void addDetectionConsumerCallback(Consumer<List<InstantDetection>> callback)
    {
       detectionConsumerCallbacks.add(callback);
@@ -103,18 +101,20 @@ public class YOLOv8DetectionExecutor
       parameters = new SyncedYOLOv8ExecutorParameters(crdtInfo);
       parameters.setAvailableModels(availableModels.values());
       parameters.requestSendFullData();
-      requestingFullData = true;
 
       // Subscribe to YOLO parameters messages
       ros2Node.createSubscription2(PerceptionAPI.YOLO_PARAMETERS, message ->
       {
          parameters.fromMessage(message);
          parameters.confirmReceivedFullData();
-         requestingFullData = false;
       });
 
       parametersPublisher = ros2Node.createPublisher(PerceptionAPI.YOLO_PARAMETERS);
       parametersMessage = new YOLOv8ExecutorParameters();
+
+      parameters.toMessage(parametersMessage);
+      parametersPublisher.publish(parametersMessage);
+
       updateThread = new RepeatingTaskThread(getClass().getSimpleName() + "Updater", this::update);
       updateThread.setFrequencyLimit(10.0);
       updateThread.setDaemon(true);
@@ -340,7 +340,7 @@ public class YOLOv8DetectionExecutor
       if (modelParameters.isModified())
          modelParameters.applyToModel(availableModels.get(parameters.getModelToRun().getValue()));
 
-      if (requestingFullData || parameters.pollNeedSendFullData() || modelParameters.pollNeedSendFullData())
+      if (parameters.pollNeedSendFullData() || modelParameters.pollNeedSendFullData())
       {
          parameters.toMessage(parametersMessage);
          parametersPublisher.publish(parametersMessage);

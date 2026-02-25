@@ -504,6 +504,11 @@ public class RDXMultiColorMeshBuilder
       addLine(start.getX(), start.getY(), start.getZ(), end.getX(), end.getY(), end.getZ(), lineWidth, startColor, endColor);
    }
 
+   public void addCapsule(double height, double radius, Tuple3DReadOnly offset, Color color)
+   {
+      addMesh(MeshDataGenerator.Capsule(height, radius, radius, radius, DEFAULT_RES, DEFAULT_RES), offset, color);
+   }
+
    public void addCapsule(double height, double xRadius, double yRadius, double zRadius, int latitudeN, int longitudeN, Color color)
    {
       addCapsule((float) height, (float) xRadius, (float) yRadius, (float) zRadius, latitudeN, longitudeN, color);

@@ -348,7 +348,7 @@ public class AvatarMultiThreadingFactory
          avatarController.getYoVariableRegistry().addChild(environmentalConstraints.getRegistry());
 
       // Set up the task and thread for the controller
-      setupControllerTaskAndThread(masterRobotModel, avatarController, masterFullRobotModel, yoVariableServer);
+      setupControllerTaskAndThread(avatarController, masterFullRobotModel, yoVariableServer);
 
       return avatarController;
    }
@@ -372,7 +372,6 @@ public class AvatarMultiThreadingFactory
 
       setupStepGeneratorTaskAndThread(masterRobotModel,
                                       stepGenerator,
-                                      masterFullRobotModel,
                                       yoVariableServer);
 
       return stepGenerator;
@@ -478,17 +477,12 @@ public class AvatarMultiThreadingFactory
    /**
     * Sets up the actual thread and thread task for the high-level control module
     */
-   private HumanoidRobotControlTask setupControllerTaskAndThread(DRCRobotModel robotModel,
-                                                                 AvatarControllerThread controllerThread,
+   private HumanoidRobotControlTask setupControllerTaskAndThread(AvatarControllerThread controllerThread,
                                                                  FullHumanoidRobotModel masterFullRobotModel,
                                                                  YoVariableServer yoVariableServer)
    {
       // Set up Controller Task
-      int controllerDivisor = (int) Math.round(robotModel.getControllerDT() / masterThreadDt);
-      if (!Precision.equals(robotModel.getControllerDT() / masterThreadDt, controllerDivisor))
-         throw new RuntimeException("Controller DT must be multiple of master thread DT.");
-
-      ControllerTask controllerTask = new ControllerTask("Controller", controllerThread, controllerDivisor, masterThreadDt, masterFullRobotModel);
+      ControllerTask controllerTask = new ControllerTask("Controller", controllerThread, masterThreadDt, masterFullRobotModel);
 
       // Add post-controller callback to update YoVariable server with controller registry
       if (yoVariableServer != null)
@@ -545,7 +539,6 @@ public class AvatarMultiThreadingFactory
     */
    private HumanoidRobotControlTask setupStepGeneratorTaskAndThread(DRCRobotModel robotModel,
                                                                     AvatarStepGeneratorThread stepGeneratorThread,
-                                                                    FullHumanoidRobotModel masterFullRobotModel,
                                                                     YoVariableServer yoVariableServer)
    {
       // Set up Step Generator Task
@@ -553,7 +546,7 @@ public class AvatarMultiThreadingFactory
       if (!Precision.equals(robotModel.getStepGeneratorDT() / masterThreadDt, stepGeneratorDivisor))
          throw new RuntimeException("Step generator DT must be multiple of master thread DT.");
 
-      StepGeneratorTask stepGeneratorTask = new StepGeneratorTask("StepGenerator", stepGeneratorThread, stepGeneratorDivisor, masterThreadDt, masterFullRobotModel);
+      StepGeneratorTask stepGeneratorTask = new StepGeneratorTask("StepGenerator", stepGeneratorThread, stepGeneratorDivisor, masterThreadDt);
 
       // Add post-step generator callback to update YoVariable server with step generator registry
       if (yoVariableServer != null)
@@ -694,7 +687,9 @@ public class AvatarMultiThreadingFactory
          controllerFactory.addFinishedTransition(STAND_TRANSITION_STATE, WALKING, false);
          controllerFactory.addFinishedTransition(EXIT_WALKING, FREEZE_STATE);
 
-         controllerFactory.addCustomStateTransition(createStandTransitionState(STAND_TRANSITION_STATE, controllerFactory,  !highLevelControllerParameters.automaticallyTransitionToWalkingWhenReady()));
+         controllerFactory.addCustomStateTransition(createStandTransitionState(STAND_TRANSITION_STATE,
+                                                                               controllerFactory,
+                                                                               !highLevelControllerParameters.automaticallyTransitionToWalkingWhenReady()));
 
          // Transition to DO_NOTHING in the event of a fault
          hardwareCommunicationInterface.addFaultListener(change ->
@@ -740,7 +735,6 @@ public class AvatarMultiThreadingFactory
             HighLevelHumanoidControllerToolbox controllerToolbox = controllerFactory.getHighLevelHumanoidControllerToolbox();
             double totalMass = controllerToolbox.getFullRobotModel().getTotalMass();
             double gravityZ = controllerToolbox.getGravityZ();
-            double controlDT = controllerToolbox.getControlDT();
             YoEnum<HighLevelControllerName> requestedState = controllerFactory.getRequestedControlStateEnum();
             HighLevelControllerParameters highLevelControllerParameters = controllerFactoryHelper.getHighLevelControllerParameters();
 
@@ -748,7 +742,7 @@ public class AvatarMultiThreadingFactory
                                                                                                    requestedState,
                                                                                                    waitForRequestToTransition,
                                                                                                    controllerToolbox.getFootSwitches(),
-                                                                                                   controlDT,
+                                                                                                   highLevelControllerParameters.getControlDT(STAND_PREP_STATE),
                                                                                                    totalMass,
                                                                                                    gravityZ,
                                                                                                    highLevelControllerParameters,

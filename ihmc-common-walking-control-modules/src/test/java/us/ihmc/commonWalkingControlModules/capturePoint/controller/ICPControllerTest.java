@@ -33,7 +33,6 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.PIDSE3Configuration;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
@@ -42,6 +41,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -100,7 +100,7 @@ public class ICPControllerTest
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
       FrameConvexPolygon2DReadOnly supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
 
-      double controlDT = 0.001;
+      DoubleProvider controlDT = () -> 0.001;
       ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters, null, contactableFeet, controlDT, registry);
       new DefaultParameterReader().readParametersInRegistry(registry);
 
@@ -123,7 +123,7 @@ public class ICPControllerTest
       controller.initialize();
       controller.compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, new FramePoint2D(), perfectCMP, currentICP, currentCoMPosition, omega);
 
-      Assert.assertTrue(controller.getDesiredCMP().epsilonEquals(perfectCMP, epsilon));
+      assertTrue(controller.getDesiredCMP().epsilonEquals(perfectCMP, epsilon));
    }
 
    @Test
@@ -155,7 +155,7 @@ public class ICPControllerTest
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
       FrameConvexPolygon2DReadOnly supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
 
-      double controlDT = 0.001;
+      DoubleProvider controlDT = () -> 0.001;
       ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters, null, contactableFeet, controlDT, registry);
       new DefaultParameterReader().readParametersInRegistry(registry);
 
@@ -202,7 +202,7 @@ public class ICPControllerTest
 
       FrameVector2D delta = new FrameVector2D();
       delta.sub(unclampedCMP, expectedCMP);
-      delta.clipToMaxNorm(maxRate * controlDT);
+      delta.clipToMaxNorm(maxRate * controlDT.getValue());
 
       FramePoint2D expectedClampedCMP = new FramePoint2D();
 
@@ -228,7 +228,7 @@ public class ICPControllerTest
          unclampedCMP.add(perfectCMP);
 
          delta.sub(unclampedCMP, expectedClampedCMP);
-         delta.clipToMaxNorm(maxRate * controlDT);
+         delta.clipToMaxNorm(maxRate * controlDT.getValue());
 
          expectedClampedCMP.add(delta);
 
@@ -261,7 +261,7 @@ public class ICPControllerTest
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
       FrameConvexPolygon2DReadOnly supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
 
-      double controlDT = 0.001;
+      DoubleProvider controlDT = () -> 0.001;
       ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters, null, contactableFeet, controlDT, registry);
       new DefaultParameterReader().readParametersInRegistry(registry);
 
@@ -564,7 +564,7 @@ public class ICPControllerTest
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
       FrameConvexPolygon2DReadOnly supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
 
-      double controlDT = 0.001;
+      DoubleProvider controlDT = () -> 0.001;
       ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters, null, contactableFeet, controlDT, registry);
       new DefaultParameterReader().readParametersInRegistry(registry);
 
@@ -588,7 +588,7 @@ public class ICPControllerTest
       controller.initialize();
       controller.compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, new FramePoint2D(), perfectCMP, currentICP, currentCoM, omega);
 
-      Assert.assertTrue(controller.getDesiredCMP().epsilonEquals(perfectCMP, epsilon));
+      assertTrue(controller.getDesiredCMP().epsilonEquals(perfectCMP, epsilon));
    }
 
    @Test
@@ -628,7 +628,7 @@ public class ICPControllerTest
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
       FrameConvexPolygon2DReadOnly supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
 
-      double controlDT = 0.001;
+      DoubleProvider controlDT = () -> 0.001;
       ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters, null, contactableFeet, controlDT, registry);
       new DefaultParameterReader().readParametersInRegistry(registry);
 
@@ -701,7 +701,7 @@ public class ICPControllerTest
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
       FrameConvexPolygon2DReadOnly supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
 
-      double controlDT = 0.001;
+      DoubleProvider controlDT = () -> 0.001;
       ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters, null, contactableFeet, controlDT, registry);
       new DefaultParameterReader().readParametersInRegistry(registry);
 
@@ -783,7 +783,7 @@ public class ICPControllerTest
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
       FrameConvexPolygon2DReadOnly supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
 
-      double controlDT = 0.001;
+      DoubleProvider controlDT = () -> 0.001;
       ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters, null, contactableFeet, controlDT, registry);
       new DefaultParameterReader().readParametersInRegistry(registry);
 
