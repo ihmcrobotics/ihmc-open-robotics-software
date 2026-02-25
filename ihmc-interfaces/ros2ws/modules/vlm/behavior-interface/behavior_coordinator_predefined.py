@@ -56,7 +56,7 @@ PREDEFINED_GOTO = {
         "spatial_relation_goto":  "DEFAULT",
         "pov_object_goto":        "-",
         "spatially_related_object": "traffic_barrier",
-        "spatial_relation_obj":   "RIGHT",
+        "spatial_relation_obj":   "LEFT",
         "class_discriminator":    "CLOSE",
     },
     "doorpanel": {
