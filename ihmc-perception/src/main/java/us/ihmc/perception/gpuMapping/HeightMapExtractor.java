@@ -156,9 +156,14 @@ public class HeightMapExtractor
          sensorToWorldNoRotationHost = new FloatPointer(16);
          sensorToWorldNoRotationDevice = new FloatPointer();
 
-         parametersHostPointer = new FloatPointer(21);
-         //TODO this is a bug, you need to specficy the size of the float pointer, we get lucky here
+         parametersHostPointer = new FloatPointer(22);
          parametersDevicePointer = new FloatPointer();
+
+         // Allocate the GPU memory in the constructor, doing this in the update is much slower
+         CUDATools.mallocAsync(sensorToWorldNoRotationDevice, sensorToWorldNoRotationHost.limit(), stream);
+         CUDATools.mallocAsync(sensorToGroundZUpDevice, sensorToGroundZUpHost.limit(), stream);
+         CUDATools.mallocAsync(parametersDevicePointer, parametersHostPointer.limit(), stream);
+         checkCUDAError();
       }
       catch (Exception e)
       {
@@ -198,8 +203,7 @@ public class HeightMapExtractor
       // Populate parameter buffers with the necessary values
       float[] parametersArray = populateParameterArray(heightMapParameters, cameraIntrinsics, footHeight);
       parametersHostPointer.put(parametersArray);
-      CUDATools.mallocAsync(parametersDevicePointer, parametersArray.length, stream);
-      CUDATools.memcpyAsync(parametersDevicePointer, parametersHostPointer, parametersArray.length, stream);
+      CUDATools.memcpyAsync(parametersDevicePointer, parametersHostPointer, parametersHostPointer.limit(), stream);
 
       // Step 1: Remove rotation from transformation
       RigidBodyTransform sensorToWorldNoRotation = new RigidBodyTransform(sensorToWorldTransform);
@@ -218,7 +222,6 @@ public class HeightMapExtractor
 
       sensorToWorldNoRotation.get(sensorToWorldNoRotationAsArray);
       sensorToWorldNoRotationHost.put(sensorToWorldNoRotationAsArray);
-      CUDATools.mallocAsync(sensorToWorldNoRotationDevice, sensorToWorldNoRotationAsArray.length, stream);
       CUDATools.memcpyAsync(sensorToWorldNoRotationDevice, sensorToWorldNoRotationHost, sensorToWorldNoRotationAsArray.length, stream);
       checkCUDAError();
 
@@ -228,7 +231,6 @@ public class HeightMapExtractor
             (int) Math.floor(sensorToWorldZUp.getTranslation().getX32() / heightMapParameters.getCellSize()) * heightMapParameters.getCellSize();
       double currentCellCordY =
             (int) Math.floor(sensorToWorldZUp.getTranslation().getY32() / heightMapParameters.getCellSize()) * heightMapParameters.getCellSize();
-
 
       // 1. Get the raw world position from the transform matrix
       float worldCamX = sensorToWorldNoRotation.getTranslation().getX32();
@@ -248,9 +250,9 @@ public class HeightMapExtractor
 
       // 4. Apply the offset to the point relative to the sensor
       // This "stabilizes" the point against the camera's sub-pixel movement
-//      float2 stableXY;
-//      stableXY.x = queryPointInZUpFrame.x + subCellOffsetX;
-//      stableXY.y = queryPointInZUpFrame.y + subCellOffsetY;
+      //      float2 stableXY;
+      //      stableXY.x = queryPointInZUpFrame.x + subCellOffsetX;
+      //      stableXY.y = queryPointInZUpFrame.y + subCellOffsetY;
 
       // ---------- Run the translate kernel ---------
       // This is the first thing we need to do, we are going to compare the newest local data to the global data.
@@ -326,7 +328,6 @@ public class HeightMapExtractor
 
          sensorToGroundZUp.get(sensorToGroundZUpAsArray);
          sensorToGroundZUpHost.put(sensorToGroundZUpAsArray);
-         CUDATools.mallocAsync(sensorToGroundZUpDevice, sensorToGroundZUpAsArray.length, stream);
          CUDATools.memcpyAsync(sensorToGroundZUpDevice, sensorToGroundZUpHost, sensorToGroundZUpAsArray.length, stream);
 
          // Clearing all the temp maps so they are ready for the next update call
@@ -380,7 +381,6 @@ public class HeightMapExtractor
 
          updateTempMapsDim.close();
          localKernelDim.close();
-         cudaFreeAsync(sensorToGroundZUpDevice, stream);
          checkCUDAError();
       }
 
@@ -409,9 +409,12 @@ public class HeightMapExtractor
             double dz = correctedTransform.getZ();
 
             // Zero out tiny corrections (<1 mm)
-            if (Math.abs(dx) < 0.001) dx = 0.0;
-            if (Math.abs(dy) < 0.001) dy = 0.0;
-            if (Math.abs(dz) < 0.001) dz = 0.0;
+            if (Math.abs(dx) < 0.001)
+               dx = 0.0;
+            if (Math.abs(dy) < 0.001)
+               dy = 0.0;
+            if (Math.abs(dz) < 0.001)
+               dz = 0.0;
 
             // --- Reject or clamp large drifts ---
             double MAX_DRIFT = 0.02; // 2 cm
@@ -502,9 +505,7 @@ public class HeightMapExtractor
          checkCUDAError();
       }
 
-      // All that memory we allocated on the GPU, need to free that up now
-      cudaFreeAsync(parametersDevicePointer, stream);
-      cudaFreeAsync(sensorToWorldNoRotationDevice, stream);
+      // All that memory we allocated on the GPU in the update loop, need to free that up now
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
 
