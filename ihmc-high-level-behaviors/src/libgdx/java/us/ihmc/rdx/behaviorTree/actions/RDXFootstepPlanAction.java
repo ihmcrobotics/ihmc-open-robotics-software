@@ -285,7 +285,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    @Override
    public void calculateVRPick(RDXVRContext vrContext)
    {
-      if (state.areFramesInWorld())
+      if (getSelected() && state.areFramesInWorld())
       {
          // TODO: VR support for Pose3DGizmo
       }
@@ -294,7 +294,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    @Override
    public void processVRInput(RDXVRContext vrContext)
    {
-      if (state.areFramesInWorld())
+      if (getSelected() && state.areFramesInWorld())
       {
          if (!definition.getIsManuallyPlaced())
          {
@@ -306,7 +306,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    @Override
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
-      if (state.areFramesInWorld())
+      if (getSelected() && state.areFramesInWorld())
       {
          if (definition.getIsManuallyPlaced())
          {
@@ -328,7 +328,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    @Override
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      if (state.areFramesInWorld())
+      if (getSelected() && state.areFramesInWorld())
       {
          if (definition.getIsManuallyPlaced())
          {
@@ -371,7 +371,9 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
       {
          if (definition.getIsManuallyPlaced())
          {
-            ImGui.checkbox(labels.get("Edit Manually Placed Steps"), editManuallyPlacedSteps);
+            if (ImGui.checkbox(labels.get("Edit Manually Placed Steps"), editManuallyPlacedSteps))
+               for (RDXFootstepPlanActionFootstep manuallyPlacedFootstep : manuallyPlacedFootsteps)
+                  manuallyPlacedFootstep.updateGizmo();
 
             ImGui.sameLine();
             if (editManuallyPlacedSteps.get() && ImGui.button("Select All Footsteps"))
@@ -400,12 +402,15 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
          else
          {
             ImGui.text("Planning goal gizmo adjustment:");
-            ImGui.checkbox(labels.get("Stance Point"), goalStancePointGizmo.getSelected());
+            if (ImGui.checkbox(labels.get("Stance Point"), goalStancePointGizmo.getSelected()))
+               goalStancePointGizmo.getPoseGizmo().getTransformToParent().getTranslation().set(definition.getGoalStancePoint().getValueReadOnly());
             ImGui.sameLine();
-            ImGui.checkbox(labels.get("Focal Point"), goalFocalPointGizmo.getSelected());
+            if (ImGui.checkbox(labels.get("Focal Point"), goalFocalPointGizmo.getSelected()))
+               goalFocalPointGizmo.getPoseGizmo().getTransformToParent().getTranslation().set(definition.getGoalFocalPoint().getValueReadOnly());
             for (RobotSide side : RobotSide.values)
             {
-               ImGui.checkbox(labels.get(side.getPascalCaseName() + " Foot to Goal"), goalFeet.get(side).getGizmo().getSelected());
+               if (ImGui.checkbox(labels.get(side.getPascalCaseName() + " Foot to Goal"), goalFeet.get(side).getGizmo().getSelected()))
+                  state.copyDefinitionToGoalFootstepToGoalTransform(side);
                if (side == RobotSide.LEFT)
                   ImGui.sameLine();
             }
@@ -458,29 +463,22 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (state.getIsNextForExecution())
+      if ((state.getIsNextForExecution() || getSelected() || state.getIsExecuting()) && state.areFramesInWorld())
       {
-         if (state.areFramesInWorld())
+         if (definition.getIsManuallyPlaced())
+            for (RDXFootstepPlanActionFootstep footstep : manuallyPlacedFootsteps)
+               footstep.getVirtualRenderables(renderables, pool);
+         else
          {
-            if (definition.getIsManuallyPlaced())
-            {
-               for (RDXFootstepPlanActionFootstep footstep : manuallyPlacedFootsteps)
-               {
-                  footstep.getVirtualRenderables(renderables, pool);
-               }
-            }
-            else
-            {
-               goalArrowGraphic.getRenderables(renderables, pool);
+            goalArrowGraphic.getRenderables(renderables, pool);
 
-               goalStancePointGizmo.getVirtualRenderables(renderables, pool);
-               goalFocalPointGizmo.getVirtualRenderables(renderables, pool);
-               for (RobotSide side : RobotSide.values)
-                  goalFeet.get(side).getRenderables(renderables, pool, footstepsWidget.getIsHovered().get(side));
+            goalStancePointGizmo.getVirtualRenderables(renderables, pool);
+            goalFocalPointGizmo.getVirtualRenderables(renderables, pool);
+            for (RobotSide side : RobotSide.values)
+               goalFeet.get(side).getRenderables(renderables, pool, footstepsWidget.getIsHovered().get(side));
 
-               if (state.getIsNextForExecution())
-                  previewFootstepPlan.getRenderables(renderables, pool);
-            }
+            if (state.getIsNextForExecution() || state.getIsExecuting())
+               previewFootstepPlan.getRenderables(renderables, pool);
          }
       }
    }

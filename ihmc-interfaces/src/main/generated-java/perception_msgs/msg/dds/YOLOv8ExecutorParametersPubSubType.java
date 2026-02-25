@@ -15,7 +15,7 @@ public class YOLOv8ExecutorParametersPubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "ab05dddf8e29e69c4b552ccd84013a75437de0d09fac1e451a16453aa0658b0a";
+   		return "fc7b89fee0f03248ab471cde48d3155317edd8b26ac2581f7c9abee6f2405d70";
    }
    
    @Override
@@ -57,13 +57,9 @@ public class YOLOv8ExecutorParametersPubSubType implements us.ihmc.pubsub.TopicD
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 16; ++i0)
       {
           current_alignment += perception_msgs.msg.dds.YOLOv8ModelInfoPubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 16; ++i0)
-      {
-        current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
-      }
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 16; ++i0)
-      {
-          current_alignment += perception_msgs.msg.dds.YOLOv8ModelParametersPubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      current_alignment += perception_msgs.msg.dds.YOLOv8ModelParametersPubSubType.getMaxCdrSerializedSize(current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -84,15 +80,9 @@ public class YOLOv8ExecutorParametersPubSubType implements us.ihmc.pubsub.TopicD
       {
           current_alignment += perception_msgs.msg.dds.YOLOv8ModelInfoPubSubType.getCdrSerializedSize(data.getAvailableYoloModels().get(i0), current_alignment);}
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for(int i0 = 0; i0 < data.getModelsToRun().size(); ++i0)
-      {
-          current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getModelsToRun().get(i0).length() + 1;
-      }
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for(int i0 = 0; i0 < data.getModelSettings().size(); ++i0)
-      {
-          current_alignment += perception_msgs.msg.dds.YOLOv8ModelParametersPubSubType.getCdrSerializedSize(data.getModelSettings().get(i0), current_alignment);}
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getModelToRun().length() + 1;
+
+      current_alignment += perception_msgs.msg.dds.YOLOv8ModelParametersPubSubType.getCdrSerializedSize(data.getModelSettings(), current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -105,22 +95,19 @@ public class YOLOv8ExecutorParametersPubSubType implements us.ihmc.pubsub.TopicD
       cdr.write_type_e(data.getAvailableYoloModels());else
           throw new RuntimeException("available_yolo_models field exceeds the maximum length: %d > %d".formatted(data.getAvailableYoloModels().size(), 16));
 
-      if(data.getModelsToRun().size() <= 16)
-      cdr.write_type_e(data.getModelsToRun());else
-          throw new RuntimeException("models_to_run field exceeds the maximum length: %d > %d".formatted(data.getModelsToRun().size(), 16));
+      if(data.getModelToRun().length() <= 255)
+      cdr.write_type_d(data.getModelToRun());else
+          throw new RuntimeException("model_to_run field exceeds the maximum length: %d > %d".formatted(data.getModelToRun().length(), 255));
 
-      if(data.getModelSettings().size() <= 16)
-      cdr.write_type_e(data.getModelSettings());else
-          throw new RuntimeException("model_settings field exceeds the maximum length: %d > %d".formatted(data.getModelSettings().size(), 16));
-
+      perception_msgs.msg.dds.YOLOv8ModelParametersPubSubType.write(data.getModelSettings(), cdr);
    }
 
    public static void read(perception_msgs.msg.dds.YOLOv8ExecutorParameters data, us.ihmc.idl.CDR cdr)
    {
       ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.read(data.getLatestTimestampModifiable(), cdr);	
       cdr.read_type_e(data.getAvailableYoloModels());	
-      cdr.read_type_e(data.getModelsToRun());	
-      cdr.read_type_e(data.getModelSettings());	
+      cdr.read_type_d(data.getModelToRun());	
+      perception_msgs.msg.dds.YOLOv8ModelParametersPubSubType.read(data.getModelSettings(), cdr);	
 
    }
 
@@ -130,8 +117,9 @@ public class YOLOv8ExecutorParametersPubSubType implements us.ihmc.pubsub.TopicD
       ser.write_type_a("latest_timestamp_modifiable", new ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType(), data.getLatestTimestampModifiable());
 
       ser.write_type_e("available_yolo_models", data.getAvailableYoloModels());
-      ser.write_type_e("models_to_run", data.getModelsToRun());
-      ser.write_type_e("model_settings", data.getModelSettings());
+      ser.write_type_d("model_to_run", data.getModelToRun());
+      ser.write_type_a("model_settings", new perception_msgs.msg.dds.YOLOv8ModelParametersPubSubType(), data.getModelSettings());
+
    }
 
    @Override
@@ -140,8 +128,9 @@ public class YOLOv8ExecutorParametersPubSubType implements us.ihmc.pubsub.TopicD
       ser.read_type_a("latest_timestamp_modifiable", new ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType(), data.getLatestTimestampModifiable());
 
       ser.read_type_e("available_yolo_models", data.getAvailableYoloModels());
-      ser.read_type_e("models_to_run", data.getModelsToRun());
-      ser.read_type_e("model_settings", data.getModelSettings());
+      ser.read_type_d("model_to_run", data.getModelToRun());
+      ser.read_type_a("model_settings", new perception_msgs.msg.dds.YOLOv8ModelParametersPubSubType(), data.getModelSettings());
+
    }
 
    public static void staticCopy(perception_msgs.msg.dds.YOLOv8ExecutorParameters src, perception_msgs.msg.dds.YOLOv8ExecutorParameters dest)

@@ -322,7 +322,7 @@ public class CoPObjectiveCalculatorTest
       JointBasics[] jointsToOptimizeFor = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullHumanoidRobotModel, new JointBasics[0]);
 
       FloatingJointBasics rootJoint = fullHumanoidRobotModel.getRootJoint();
-      toolbox = new WholeBodyControlCoreToolbox(controlDT,
+      toolbox = new WholeBodyControlCoreToolbox(() -> controlDT,
                                                 gravityZ,
                                                 rootJoint,
                                                 jointsToOptimizeFor,

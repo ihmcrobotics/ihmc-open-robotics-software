@@ -5,6 +5,7 @@ import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiMouseButton;
 import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
 import us.ihmc.commons.thread.TypedNotification;
@@ -23,6 +24,7 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
    private RDXBehaviorTreeNode<?, ?> modalPopupNode;
    private final TypedNotification<Runnable> queuePopupModal = new TypedNotification<>();
    private RDXBehaviorTreeNode<?, ?> draggedNode = null;
+   private RDXBehaviorTreeNode<?, ?> lastRendereredNode = null;
 
    public RDXBehaviorTreeWidgetsVerticalLayout(RDXBehaviorTree behaviorTree)
    {
@@ -33,6 +35,7 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
 
    public void renderImGuiWidgets()
    {
+      lastRendereredNode = null;
       renderImGuiWidgets(behaviorTree.getRootNode());
 
       if (!ImGui.isMouseDown(ImGuiMouseButton.Left))
@@ -118,7 +121,17 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
             if (node.isRootNode())
                topologyOperationQueue.queueDestroyEntireTreeModify();
             else
+            {
+               if (node.getSelected() && lastRendereredNode != null) // Select previous node so layout doesn't jump
+                  lastRendereredNode.setSelected();
+
+               int nodeIndex = BehaviorTreeTools.getNodeIndexDFS(node);
+               int executionNextIndex = behaviorTree.getRootNode().getState().getExecutionNextIndex();
+               if (nodeIndex < executionNextIndex) // Keep the execution next index set to the same node
+                  behaviorTree.getRootNode().getState().setExecutionNextIndex(executionNextIndex - 1);
+
                topologyOperationQueue.queueDestroySubtreeModify(node);
+            }
          }
          ImGui.popStyleColor();
 
@@ -135,6 +148,7 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
 
       renderNodeCreationModalDialog(node);
 
+      lastRendereredNode = node;
       if (node.getTreeWidgetExpanded())
       {
          float indentAmount = ImGui.getFontSize() * 0.7f;

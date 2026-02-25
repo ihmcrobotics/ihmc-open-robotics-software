@@ -30,14 +30,14 @@ public class AngularMomentumIntegrator
    private final DoubleProvider thresholdForStuck;
 
 
-   private final double controlDT;
+   private final DoubleProvider controlDT;
 
-   public AngularMomentumIntegrator(String prefix, ICPControllerParameters icpOptimizationParameters, ICPControlGainsReadOnly feedbackGains, double controlDT, YoRegistry registry)
+   public AngularMomentumIntegrator(String prefix, ICPControllerParameters icpOptimizationParameters, ICPControlGainsReadOnly feedbackGains, DoubleProvider controlDT, YoRegistry registry)
    {
       this.controlDT = controlDT;
       this.feedbackGains = feedbackGains;
 
-      isICPStuck = new GlitchFilteredYoBoolean(prefix + "IsICPStuck", registry, (int) (0.03 / controlDT));
+      isICPStuck = new GlitchFilteredYoBoolean(prefix + "IsICPStuck", registry, (int) (0.03 / controlDT.getValue()));
       currentCoMVelocityMagnitude = new YoDouble(prefix + "CurrentCoMVelocityMagnitude", registry);
       desiredICPVelocityMagnitude = new YoDouble(prefix + "DesiredICPVelocityMagnitude", registry);
 
@@ -54,7 +54,7 @@ public class AngularMomentumIntegrator
 
    public void update(FrameVector2DReadOnly desiredICPVelocity, FrameVector2DReadOnly currentCoMVelocity, FrameVector2DReadOnly icpError)
    {
-      desiredICPVelocityMagnitude.set(desiredICPVelocity.length());
+      desiredICPVelocityMagnitude.set(desiredICPVelocity.norm());
       if (desiredICPVelocityMagnitude.getDoubleValue() > thresholdForStuck.getValue())
       {
          isICPStuck.set(false);
@@ -62,19 +62,19 @@ public class AngularMomentumIntegrator
          return;
       }
 
-      currentCoMVelocityMagnitude.set(currentCoMVelocity.length());
+      currentCoMVelocityMagnitude.set(currentCoMVelocity.norm());
       if (currentCoMVelocityMagnitude.getDoubleValue() < thresholdForStuck.getValue())
          isICPStuck.set(true);
 
       if (useSmartICPIntegrator.getValue() && isICPStuck.getBooleanValue())
       {
          tempVector2d.set(icpError);
-         tempVector2d.scale(controlDT * feedbackGains.getKi());
+         tempVector2d.scale(controlDT.getValue() * feedbackGains.getKi());
 
-         feedbackCMPIntegral.scale(Math.pow(feedbackGains.getIntegralLeakRatio(), controlDT));
+         feedbackCMPIntegral.scale(Math.pow(feedbackGains.getIntegralLeakRatio(), controlDT.getValue()));
          feedbackCMPIntegral.add(tempVector2d);
 
-         double length = feedbackCMPIntegral.length();
+         double length = feedbackCMPIntegral.norm();
          double maxLength = feedbackGains.getMaxIntegralError();
          if (length > maxLength)
             feedbackCMPIntegral.scale(maxLength / length);

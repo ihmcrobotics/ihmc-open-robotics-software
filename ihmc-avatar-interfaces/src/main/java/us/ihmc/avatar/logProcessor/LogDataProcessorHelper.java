@@ -81,7 +81,7 @@ public class LogDataProcessorHelper
 
       inverseDynamicsStructure = new FullInverseDynamicsStructure(fullRobotModel.getElevator(), fullRobotModel.getPelvis(), fullRobotModel.getRootJoint());
 
-      controllerDT = model.getControllerDT();
+      controllerDT = model.getFastestControllerDT();
       this.walkingControllerParameters = model.getWalkingControllerParameters();
 
       RobotContactPointParameters<RobotSide> contactPointParameters = model.getContactPointParameters();
@@ -146,7 +146,7 @@ public class LogDataProcessorHelper
                                                                           gravityZ,
                                                                           omega0,
                                                                           contactableFeet,
-                                                                          controllerDT,
+                                                                          () -> controllerDT,
                                                                           updatables,
                                                                           null,
                                                                           null);

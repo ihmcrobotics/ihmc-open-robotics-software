@@ -12,6 +12,7 @@ import imgui.flag.ImGuiTableColumnFlags;
 import imgui.flag.ImGuiTableFlags;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.euclid.shape.primitives.Box3D;
+import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseCommunicator.State;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseObject;
 import us.ihmc.rdx.imgui.ImGuiAveragedFrequencyText;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -138,6 +139,10 @@ public class RDXIsaacROSFoundationPoseVisualizer extends RDXROS2MultiTopicVisual
    {
       private final ROS2Subscription<Box3DMessage> resultSubscription;
       private final Box3D latestResult;
+
+      private final ROS2Subscription<std_msgs.msg.dds.Byte> stateSubscription;
+      private State state;
+
       private final RDXBoxVisualizer boxVisualizer;
       private final RDXReferenceFrameGraphic referenceFrameGraphic;
 
@@ -146,11 +151,15 @@ public class RDXIsaacROSFoundationPoseVisualizer extends RDXROS2MultiTopicVisual
          latestResult = new Box3D();
          latestResult.setToNaN();
 
+         state = State.DISABLED;
+
          boxVisualizer = new RDXBoxVisualizer();
          boxVisualizer.setColor(Color.RED);
          boxVisualizer.setLineWidth(0.01);
 
          referenceFrameGraphic = new RDXReferenceFrameGraphic(0.1);
+
+         stateSubscription = ros2Node.createSubscription2(object.topics.ihmcState(), message -> state = State.fromByte(message.getData()));
 
          resultSubscription = ros2Node.createSubscription2(object.topics.ihmcResult(), message ->
          {
@@ -158,13 +167,19 @@ public class RDXIsaacROSFoundationPoseVisualizer extends RDXROS2MultiTopicVisual
 
             latestResult.getPose().set(message.getPose());
             latestResult.getSize().set(message.getSize());
-            boxVisualizer.generateMesh(latestResult);
             referenceFrameGraphic.getFramePose3D().set(message.getPose());
          });
       }
 
       public void update()
       {
+         boxVisualizer.setColor(switch (state)
+                                {
+                                   case DISABLED -> Color.RED;
+                                   case ESTIMATING_POSE -> Color.ORANGE;
+                                   case TRACKING -> Color.GREEN;
+                                });
+         boxVisualizer.generateMesh(latestResult);
          boxVisualizer.update();
          referenceFrameGraphic.updateFromFramePose();
       }
@@ -181,6 +196,7 @@ public class RDXIsaacROSFoundationPoseVisualizer extends RDXROS2MultiTopicVisual
          boxVisualizer.dispose();
          referenceFrameGraphic.dispose();
          resultSubscription.remove();
+         stateSubscription.remove();
       }
    }
 }

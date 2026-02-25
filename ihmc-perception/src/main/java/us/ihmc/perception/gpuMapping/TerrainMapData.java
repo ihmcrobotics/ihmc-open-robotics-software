@@ -8,6 +8,10 @@ import java.util.Arrays;
 
 public class TerrainMapData
 {
+   public static final float NORMAL_MIN_MAX_XY = 1.0f;
+   public static final float NORMAL_MIN_Z = 0.0f;
+   public static final float NORMAL_MAX_Z = 1.0f;
+
    private final double cellSize;
    private final double mapSize;
    private double gridCenterX;
@@ -46,8 +50,8 @@ public class TerrainMapData
       snapNormalZMap = new byte[cellsPerAxis * cellsPerAxis];
 
       // Initialize the snap normal as ZUp
-      byte zUpNormalXY = packFloatAsByte(0.0f, -1.0f, 1.0f);
-      byte zUpNormalZ = packFloatAsByte(1.0f, 0.0f, 1.0f);
+      byte zUpNormalXY = packFloatAsByte(0.0f, -NORMAL_MIN_MAX_XY, NORMAL_MIN_MAX_XY);
+      byte zUpNormalZ = packFloatAsByte(1.0f, NORMAL_MIN_Z, NORMAL_MAX_Z);
       Arrays.fill(snapNormalXMap, zUpNormalXY);
       Arrays.fill(snapNormalYMap, zUpNormalXY);
       Arrays.fill(snapNormalZMap, zUpNormalZ);
@@ -93,9 +97,9 @@ public class TerrainMapData
    public void setSnapNormal(double x, double y, double normalX, double normalY, double normalZ)
    {
       int key = HeightMapTools.coordinateToKey(x, y, gridCenterX, gridCenterY, cellSize, centerIndex);
-      snapNormalXMap[key] = packFloatAsByte((float) normalX, -1.0f, 1.0f);
-      snapNormalYMap[key] = packFloatAsByte((float) normalY, -1.0f, 1.0f);
-      snapNormalZMap[key] = packFloatAsByte((float) normalZ, 0.0f, 1.0f);
+      snapNormalXMap[key] = packFloatAsByte((float) normalX, -NORMAL_MIN_MAX_XY, NORMAL_MIN_MAX_XY);
+      snapNormalYMap[key] = packFloatAsByte((float) normalY, -NORMAL_MIN_MAX_XY, NORMAL_MIN_MAX_XY);
+      snapNormalZMap[key] = packFloatAsByte((float) normalZ, NORMAL_MIN_Z, NORMAL_MAX_Z);
    }
 
    public double getHeight(double x, double y)
@@ -175,9 +179,9 @@ public class TerrainMapData
          return Axis3D.Z;
 
       int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
-      return new UnitVector3D(unpackByteAsFloat(snapNormalXMap, key, -1.0f, 1.0f),
-                              unpackByteAsFloat(snapNormalYMap, key, -1.0f, 1.0f),
-                              unpackByteAsFloat(snapNormalZMap, key, 0.0f, 1.0f));
+      return new UnitVector3D(unpackByteAsFloat(snapNormalXMap, key, -NORMAL_MIN_MAX_XY, NORMAL_MIN_MAX_XY),
+                              unpackByteAsFloat(snapNormalYMap, key, -NORMAL_MIN_MAX_XY, NORMAL_MIN_MAX_XY),
+                              unpackByteAsFloat(snapNormalZMap, key, NORMAL_MIN_Z, NORMAL_MAX_Z));
    }
 
    public float[] getHeightMap()

@@ -69,7 +69,7 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
       headTrajectoryMessage.getSo3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(ReferenceFrame.getWorldFrame()));
       simulationTestHelper.publishToController(headTrajectoryMessage);
 
-      boolean success = simulationTestHelper.simulateNow(getRobotModel().getControllerDT()); // Trick to get frames synchronized with the controller.
+      boolean success = simulationTestHelper.simulateNow(simulationTestHelper.getCurrentControlDT()); // Trick to get frames synchronized with the controller.
       assertTrue(success);
 
       CommonHumanoidReferenceFrames humanoidReferenceFrames = simulationTestHelper.getControllerReferenceFrames();

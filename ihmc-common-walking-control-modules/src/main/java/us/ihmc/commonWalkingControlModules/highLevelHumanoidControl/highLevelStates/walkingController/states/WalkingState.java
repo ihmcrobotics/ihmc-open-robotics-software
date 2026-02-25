@@ -23,12 +23,13 @@ public abstract class WalkingState implements State
    public WalkingState(WalkingStateEnum stateEnum,
                        HighLevelControlManagerFactory managerFactory,
                        HighLevelHumanoidControllerToolbox controllerToolbox,
+                       double controlDT,
                        YoRegistry parentRegistry)
    {
       this.walkingStateEnum = stateEnum;
       this.controllerToolbox = controllerToolbox;
 
-      balanceManager = managerFactory.getOrCreateBalanceManager();
+      balanceManager = managerFactory.getOrCreateBalanceManager(controlDT);
 
       registry = new YoRegistry(FormattingTools.underscoredToCamelCase(stateEnum.toString(), true));
       parentRegistry.addChild(registry);

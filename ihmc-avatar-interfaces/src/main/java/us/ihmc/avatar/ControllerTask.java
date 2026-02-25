@@ -1,8 +1,5 @@
 package us.ihmc.avatar;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import us.ihmc.avatar.factory.HumanoidRobotControlTask;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.CrossRobotCommandResolver;
@@ -17,24 +14,27 @@ public class ControllerTask extends HumanoidRobotControlTask
 
    private final AvatarControllerThreadInterface controllerThread;
 
-   private final long divisor;
    private final ThreadTimer timer;
+   private final ThreadTimer loopTimer;
    private final YoLong ticksBehindScheduled;
 
-   protected final List<Runnable> postControllerCallbacks = new ArrayList<>();
-   protected final List<Runnable> schedulerThreadRunnables = new ArrayList<>();
+   private final double schedulerDt;
 
-   public ControllerTask(String prefix, AvatarControllerThreadInterface controllerThread, long divisor, double schedulerDt, FullHumanoidRobotModel masterFullRobotModel)
+   public ControllerTask(String prefix,
+                         AvatarControllerThreadInterface controllerThread,
+                         double schedulerDt,
+                         FullHumanoidRobotModel masterFullRobotModel)
    {
-      super(divisor);
-      this.divisor = divisor;
+      super((int) Math.round(controllerThread.getCurrentDT() / schedulerDt));
       this.controllerThread = controllerThread;
+      this.schedulerDt = schedulerDt;
 
       controllerResolver = new CrossRobotCommandResolver(controllerThread.getFullRobotModel());
       masterResolver = new CrossRobotCommandResolver(masterFullRobotModel);
 
-//      String prefix = "Controller";
-      timer = new ThreadTimer(prefix, schedulerDt * divisor, controllerThread.getYoVariableRegistry());
+      //      String prefix = "Controller";
+      timer = new ThreadTimer(prefix, controllerThread::getCurrentDT, controllerThread.getYoVariableRegistry());
+      loopTimer = new ThreadTimer(prefix + "Loop", controllerThread::getCurrentDT, controllerThread.getYoVariableRegistry());
       ticksBehindScheduled = new YoLong(prefix + "TicksBehindScheduled", controllerThread.getYoVariableRegistry());
    }
 
@@ -43,6 +43,7 @@ public class ControllerTask extends HumanoidRobotControlTask
    {
       // For when the task gets reset, so we can observe when it gets triggered.
       timer.reset();
+      loopTimer.reset();
       ticksBehindScheduled.set(0);
       return super.initialize();
    }
@@ -50,11 +51,19 @@ public class ControllerTask extends HumanoidRobotControlTask
    @Override
    protected void execute()
    {
+      loopTimer.stop();
+      loopTimer.start();
       timer.start();
+      long oldDivisor = getDivisor();
       long schedulerTick = controllerThread.getHumanoidRobotContextData().getSchedulerTick();
+      int divisor = (int) Math.round(controllerThread.getCurrentDT() / schedulerDt);
+      if (divisor != oldDivisor)
+         setDivisor(divisor);
+      ticksBehindScheduled.set(schedulerTick - timer.getTickCount() * oldDivisor);
       ticksBehindScheduled.set(schedulerTick - timer.getTickCount() * divisor);
+      runAll(preTaskCallbacks);
       controllerThread.run();
-      runAll(postControllerCallbacks);
+      runAll(postTaskCallbacks);
       timer.stop();
    }
 
@@ -71,17 +80,4 @@ public class ControllerTask extends HumanoidRobotControlTask
       controllerResolver.resolveHumanoidRobotContextDataScheduler(masterContext, controllerThread.getHumanoidRobotContextData());
       controllerResolver.resolveHumanoidRobotContextDataEstimator(masterContext, controllerThread.getHumanoidRobotContextData());
    }
-
-   @Override
-   public void addCallbackPostTask(Runnable runnable)
-   {
-      postControllerCallbacks.add(runnable);
-   }
-
-   @Override
-   public void addRunnableOnSchedulerThread(Runnable runnable)
-   {
-      schedulerThreadRunnables.add(runnable);
-   }
-
 }

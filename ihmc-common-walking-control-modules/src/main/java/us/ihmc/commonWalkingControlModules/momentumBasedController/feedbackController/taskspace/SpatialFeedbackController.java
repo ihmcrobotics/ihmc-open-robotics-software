@@ -25,6 +25,7 @@ import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -131,7 +132,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    protected final RigidBodyBasics endEffector;
    protected final YoSE3OffsetFrame controlFrame;
 
-   protected final double dt;
+   protected final DoubleProvider dt;
    protected final boolean isRootBody;
    protected final boolean computeIntegralTerm;
 
@@ -807,7 +808,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          }
 
          linearFeedbackTermToPack.setIncludingFrame(yoErrorVector.getLinearPart());
-         linearFeedbackTermToPack.scale(dt);
+         linearFeedbackTermToPack.scale(dt.getValue());
          linearFeedbackTermToPack.add(yoErrorPositionIntegrated);
          linearFeedbackTermToPack.changeFrame(controlFrame);
          selectionMatrix.applyLinearSelection(linearFeedbackTermToPack);
@@ -860,7 +861,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          errorOrientationCumulated.normalizeAndLimitToPi();
 
          errorOrientationCumulated.getRotationVector(angularFeedbackTermToPack);
-         angularFeedbackTermToPack.scale(dt);
+         angularFeedbackTermToPack.scale(dt.getValue());
          angularFeedbackTermToPack.changeFrame(controlFrame);
          selectionMatrix.applyAngularSelection(angularFeedbackTermToPack);
          angularFeedbackTermToPack.clipToMaxNorm(maximumAngularIntegralError);

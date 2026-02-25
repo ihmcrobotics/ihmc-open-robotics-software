@@ -1,14 +1,16 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import org.apache.commons.math3.util.Pair;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
-import us.ihmc.behaviors.behaviorTree.action.TaskspaceTrajectoryTrackingErrorCalculator;
+import us.ihmc.behaviors.behaviorTree.action.TrajectoryTrackingErrorCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -19,11 +21,13 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
+import us.ihmc.footstepPlanning.simplePlanners.QuickFootstepPlanner;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
+import java.util.List;
 import java.util.UUID;
 
 public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanActionState, FootstepPlanActionDefinition>
@@ -36,11 +40,12 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
    private final SideDependentList<FramePose3D> syncedFeetPoses = new SideDependentList<>(() -> new FramePose3D());
    private final SideDependentList<Integer> indexOfLastFoot = new SideDependentList<>();
    private double nominalExecutionDuration;
-   private final SideDependentList<TaskspaceTrajectoryTrackingErrorCalculator> trackingCalculators = new SideDependentList<>(
-         TaskspaceTrajectoryTrackingErrorCalculator::new);
+   private final SideDependentList<TrajectoryTrackingErrorCalculator> trackingCalculators = new SideDependentList<>(
+         TrajectoryTrackingErrorCalculator::new);
    private final FramePose3D solePose = new FramePose3D();
    private final FootstepPlan footstepPlanToExecute = new FootstepPlan();
    private final Throttler previewPlanningThrottler = new Throttler().setPeriod(1.0);
+   private final QuickFootstepPlanner quickFootstepPlanner = new QuickFootstepPlanner();
    private final FootstepPlanActionPlanningThread previewFootstepPlanningThread;
    private final FootstepPlanActionPlanningThread executionFootstepPlanningThread;
    private final SideDependentList<FramePose3D> liveGoalFeetPoses = new SideDependentList<>(() -> new FramePose3D());
@@ -51,8 +56,8 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
 
       walkingControllerParameters = robotModel.getWalkingControllerParameters();
 
-      previewFootstepPlanningThread = new FootstepPlanActionPlanningThread(true, state, definition, rootNode.getTerrainMap());
-      executionFootstepPlanningThread = new FootstepPlanActionPlanningThread(false, state, definition, rootNode.getTerrainMap());
+      previewFootstepPlanningThread = new FootstepPlanActionPlanningThread(true, state, definition, scene.getTerrainMap());
+      executionFootstepPlanningThread = new FootstepPlanActionPlanningThread(false, state, definition, scene.getTerrainMap());
    }
 
    @Override
@@ -127,23 +132,44 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
 
          if (state.getIsNextForExecution())
          {
-            if (previewPlanningThrottler.run())
+            if (definition.getPlannerPerformAStarSearch().getValue())
             {
-               previewFootstepPlanningThread.triggerPlan(syncedRobot, liveGoalFeetPoses);
-            }
-
-            if (previewFootstepPlanningThread.getResultNotification().poll())
-            {
-               FootstepPlan footstepPlan = previewFootstepPlanningThread.getResultNotification().read();
-
-               var footstepsMessage = state.getPreviewFootsteps().accessValue();
-               footstepsMessage.clear();
-
-               for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
+               if (previewPlanningThrottler.run())
                {
-                  var messageFootstep = footstepsMessage.add();
-                  messageFootstep.setRobotSide(footstepPlan.getFootstep(i).getRobotSide().toByte());
-                  messageFootstep.getSolePose().set(footstepPlan.getFootstep(i).getFootstepPose());
+                  previewFootstepPlanningThread.triggerPlan(syncedRobot, liveGoalFeetPoses);
+               }
+
+               if (previewFootstepPlanningThread.getResultNotification().poll())
+               {
+                  FootstepPlan footstepPlan = previewFootstepPlanningThread.getResultNotification().read();
+
+                  var footstepsMessage = state.getPreviewFootsteps().accessValue();
+                  footstepsMessage.clear();
+
+                  for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
+                  {
+                     var messageFootstep = footstepsMessage.add();
+                     messageFootstep.setRobotSide(footstepPlan.getFootstep(i).getRobotSide().toByte());
+                     messageFootstep.getSolePose().set(footstepPlan.getFootstep(i).getFootstepPose());
+                  }
+               }
+            }
+            else
+            {
+               if (previewPlanningThrottler.run())
+               {
+                  List<Pair<RobotSide, Pose3D>> footstepPlan
+                        = quickFootstepPlanner.plan(new SideDependentList<>(side -> new Pose3D(syncedFeetPoses.get(side))),
+                                                    new SideDependentList<>(side -> new Pose3D(liveGoalFeetPoses.get(side))));
+
+                  var footstepsMessage = state.getPreviewFootsteps().accessValue();
+                  footstepsMessage.clear();
+                  for (Pair<RobotSide, Pose3D> footstep : footstepPlan)
+                  {
+                     var messageFootstep = footstepsMessage.add();
+                     messageFootstep.setRobotSide(footstep.getFirst().toByte());
+                     messageFootstep.getSolePose().set(footstep.getSecond());
+                  }
                }
             }
          }
@@ -197,6 +223,17 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
                packManuallyPlacedFootstepsIntoPlan();
                state.getExecutionState().setValue(FootstepPlanActionExecutionState.PLANNING_SUCCEEDED);
             }
+         }
+         else if (!definition.getPlannerPerformAStarSearch().getValue())
+         {
+            List<Pair<RobotSide, Pose3D>> footstepPlan
+                  = quickFootstepPlanner.plan(new SideDependentList<>(side -> new Pose3D(syncedFeetPoses.get(side))),
+                                              new SideDependentList<>(side -> new Pose3D(liveGoalFeetPoses.get(side))));
+
+            footstepPlanToExecute.clear();
+            for (Pair<RobotSide, Pose3D> footstep : footstepPlan)
+               footstepPlanToExecute.addFootstep(footstep.getFirst(), new FramePose3D(footstep.getSecond()));
+            state.getExecutionState().setValue(FootstepPlanActionExecutionState.PLANNING_SUCCEEDED);
          }
          else
          {

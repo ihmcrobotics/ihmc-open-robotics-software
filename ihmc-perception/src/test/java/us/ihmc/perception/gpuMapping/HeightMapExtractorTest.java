@@ -6,7 +6,7 @@ import org.bytedeco.opencv.opencv_core.Scalar;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.sensors.CameraIntrinsics;
 
 public class HeightMapExtractorTest
 {

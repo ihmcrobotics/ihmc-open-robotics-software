@@ -21,6 +21,7 @@ import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class UpdatableHighLevelHumanoidControllerToolbox extends HighLevelHumanoidControllerToolbox
@@ -41,7 +42,7 @@ public class UpdatableHighLevelHumanoidControllerToolbox extends HighLevelHumano
                                                       double gravityZ,
                                                       double omega0,
                                                       SideDependentList<ContactableFoot> feet,
-                                                      double controlDT,
+                                                      DoubleProvider controlDT,
                                                       ArrayList<Updatable> updatables,
                                                       List<ContactablePlaneBody> contactableBodies,
                                                       JointBasics... jointsToIgnore)

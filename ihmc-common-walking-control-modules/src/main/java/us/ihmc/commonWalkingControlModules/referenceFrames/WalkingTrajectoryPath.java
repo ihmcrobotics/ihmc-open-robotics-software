@@ -143,11 +143,11 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
 
    private final DoubleParameter filterBreakFrequency;
 
-   private final double dt;
+   private final DoubleProvider dt;
    private final ExecutionTimer timer = new ExecutionTimer(namePrefix + "Timer", registry);
 
    public WalkingTrajectoryPath(DoubleProvider time,
-                                double updateDT,
+                                DoubleProvider updateDT,
                                 SideDependentList<MovingReferenceFrame> soleFrames,
                                 YoGraphicsListRegistry yoGraphicsListRegistry,
                                 YoRegistry parentRegistry)
@@ -490,7 +490,7 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
          tempFootPoses.get(robotSide).set(supportFootPoses.get(robotSide));
       }
 
-      double filterAlpha = AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(filterBreakFrequency.getValue(), dt);
+      double filterAlpha = AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(filterBreakFrequency.getValue(), dt.getValue());
 
       WaypointData firstWaypoint = waypoints.getFirst();
 

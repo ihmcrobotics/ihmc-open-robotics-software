@@ -197,7 +197,7 @@ public class OneStepCaptureRegionCalculator implements SCS2YoGraphicHolder
 
    /**
     * This method computes the one step capture region. It uses the algorithm outlined in "Capturability-based analysis and control of legged locomotion,
-    * Part 2: Application to M2V2, a lower-body humanoid", where the visible vertices of the foot, which are visible to {@param icp} and the vertices contained
+    * Part 2: Application to a lower-body humanoid", where the visible vertices of the foot, which are visible to {@param icp} and the vertices contained
     * in {@param footPolygon}, are used to compute the edges of the capture region using the remaining time {@param swingTimeRemaining} and time constant
     * {@param omega0}. The rigid is then limited to the distance defined in the constructor, {@link OneStepCaptureRegionCalculator#kinematicStepRange}.
     * {@param swingSide} defines a cut-off for the width of the region relative to the stance foot.

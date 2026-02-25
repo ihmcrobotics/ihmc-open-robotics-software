@@ -56,6 +56,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.WrenchTrajec
 import us.ihmc.humanoidRobotics.communication.directionalControlToolboxAPI.DirectionalControlInputCommand;
 import us.ihmc.humanoidRobotics.communication.fastWalkingAPI.FastWalkingGaitParametersCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -102,6 +103,7 @@ public class WalkingCommandConsumer
                                  HighLevelHumanoidControllerToolbox controllerToolbox,
                                  HighLevelControlManagerFactory managerFactory,
                                  WalkingControllerParameters walkingControllerParameters,
+                                 double controlDT,
                                  YoRegistry parentRegistry)
    {
       this(commandInputManager,
@@ -112,6 +114,7 @@ public class WalkingCommandConsumer
            controllerToolbox.getPelvisZUpFrame(),
            managerFactory,
            walkingControllerParameters,
+           controlDT,
            parentRegistry);
    }
 
@@ -123,6 +126,7 @@ public class WalkingCommandConsumer
                                  ReferenceFrame pelvisZUpFrame,
                                  HighLevelControlManagerFactory managerFactory,
                                  WalkingControllerParameters walkingControllerParameters,
+                                 double controlDT,
                                  YoRegistry parentRegistry)
    {
       this.walkingMessageHandler = walkingMessageHandler;
@@ -173,7 +177,7 @@ public class WalkingCommandConsumer
       if (chest != null)
       {
          chestBodyFrame = chest.getBodyFixedFrame();
-         chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis, chestBodyFrame, pelvisZUpFrame);
+         chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis, chestBodyFrame, pelvisZUpFrame, controlDT);
          chestManager.setDoPrepareForLocomotion(walkingControllerParameters.doPrepareManipulationForLocomotion());
       }
       else
@@ -184,7 +188,7 @@ public class WalkingCommandConsumer
       if (head != null)
       {
          ReferenceFrame headBodyFrame = head.getBodyFixedFrame();
-         this.headManager = managerFactory.getOrCreateRigidBodyManager(head, chest, headBodyFrame, chestBodyFrame);
+         this.headManager = managerFactory.getOrCreateRigidBodyManager(head, chest, headBodyFrame, chestBodyFrame, controlDT);
       }
       else
       {
@@ -197,16 +201,16 @@ public class WalkingCommandConsumer
          if (hand != null)
          {
             ReferenceFrame handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
-            RigidBodyControlManager handManager = managerFactory.getOrCreateRigidBodyManager(hand, chest, handControlFrame, chestBodyFrame);
+            RigidBodyControlManager handManager = managerFactory.getOrCreateRigidBodyManager(hand, chest, handControlFrame, chestBodyFrame, controlDT);
             handManager.setDoPrepareForLocomotion(walkingControllerParameters.doPrepareManipulationForLocomotion());
             handManagers.put(robotSide, handManager);
          }
       }
 
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
-      feetManager = managerFactory.getOrCreateFeetManager();
-      balanceManager = managerFactory.getOrCreateBalanceManager();
-      comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
+      feetManager = managerFactory.getOrCreateFeetManager(controlDT);
+      balanceManager = managerFactory.getOrCreateBalanceManager(controlDT);
+      comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager(controlDT);
 
       isAutomaticManipulationAbortEnabled.set(walkingControllerParameters.allowAutomaticManipulationAbort());
       icpErrorThresholdToAbortManipulation.set(walkingControllerParameters.getICPErrorThresholdForManipulationAbort());
@@ -492,6 +496,7 @@ public class WalkingCommandConsumer
 
       if (balanceManager.getICPErrorMagnitude() > icpErrorThresholdToAbortManipulation.getDoubleValue())
       {
+         LogTools.error("Aborted manipulation: %.3f > %.3f".formatted(balanceManager.getICPErrorMagnitude(), icpErrorThresholdToAbortManipulation.getDoubleValue()));
          hasManipulationBeenAborted.set(true);
 
          for (RobotSide robotSide : RobotSide.values)

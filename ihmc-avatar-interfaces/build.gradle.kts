@@ -18,14 +18,13 @@ mainDependencies {
    api("com.github.sh0nk:matplotlib4j:0.5.0")
    api("com.jerolba:carpet-record:0.3.0") // Used for huggingface data exports
 
-   api("us.ihmc:mecano-graphviz:17-0.19.2")
-   api("us.ihmc:scs2-bullet-simulation:17-0.31.3")
+   api("us.ihmc:mecano-graphviz:17-0.19.3")
+   api("us.ihmc:scs2-bullet-simulation:17-0.32.0")
    api("us.ihmc:ihmc_hands_ros2:0.2.2")
 
    api("us.ihmc:ihmc-footstep-planning:source")
    api("us.ihmc:ihmc-manipulation-planning:source")
    api("us.ihmc:ihmc-simulation-toolkit:source")
-   api("us.ihmc:robot-environment-awareness-visualizers:source")
 
    api("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:2.2.3") // for CSG plugin
 }
@@ -43,7 +42,6 @@ testDependencies {
 visualizersDependencies {
    api(ihmc.sourceSetProject("main"))
 
-   api("us.ihmc:robot-environment-awareness-application:source")
    api("us.ihmc:ihmc-path-planning-visualizers:source")
    api("us.ihmc:ihmc-footstep-planning-visualizers:source")
 }

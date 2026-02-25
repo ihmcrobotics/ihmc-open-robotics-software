@@ -224,7 +224,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
    @Test
    public void testStepsInPlacePreviewAtControllerDT()
    {
-      setup(getRobotModel().getControllerDT());
+      setup(getRobotModel().getFastestControllerDT());
       createGhostRobot();
       simulationTestingParameters.setRunMultiThreaded(false);
       simulationTestingParameters.setUsePefectSensors(true);
@@ -338,7 +338,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
    { // We check that the preview properly snaps to the current robot configuration before starting the preview.
       Random random = new Random(4720615);
 
-      setup(getRobotModel().getControllerDT());
+      setup(getRobotModel().getFastestControllerDT());
       createGhostRobot();
       simulationTestingParameters.setRunMultiThreaded(false);
       simulationTestingParameters.setUsePefectSensors(true);

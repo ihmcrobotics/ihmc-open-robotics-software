@@ -3,7 +3,7 @@ package us.ihmc.rdx.ui.graphics;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import toolbox_msgs.msg.dds.WalkingControllerPreviewOutputMessage;
 import us.ihmc.communication.ToolboxAPIs;
-import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
+import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.commons.MathTools;
 import us.ihmc.ros2.ROS2Input;
 import us.ihmc.log.LogTools;
@@ -26,7 +26,7 @@ public class RDXWalkingPreviewPlaybackManager
    // whether to animate ghost robot
    private final AtomicBoolean playbackModeActive = new AtomicBoolean(false);
 
-   public RDXWalkingPreviewPlaybackManager(ROS2ControllerPublishSubscribeAPI helper)
+   public RDXWalkingPreviewPlaybackManager(ROS2ControllerHelper helper)
    {
       walkingPreviewOutput = helper.subscribe(ToolboxAPIs.getControllerPreviewOutputTopic(helper.getRobotName()));
    }

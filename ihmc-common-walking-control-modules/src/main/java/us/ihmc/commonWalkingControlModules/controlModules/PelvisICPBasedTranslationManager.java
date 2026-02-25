@@ -118,12 +118,13 @@ public class PelvisICPBasedTranslationManager
    public PelvisICPBasedTranslationManager(HighLevelHumanoidControllerToolbox controllerToolbox,
                                            double pelvisTranslationICPSupportPolygonSafeMargin,
                                            BipedSupportPolygons bipedSupportPolygons,
+                                           double controlDT,
                                            YoRegistry parentRegistry)
    {
+      this.controlDT = controlDT;
       supportPolygonSafeMargin.set(pelvisTranslationICPSupportPolygonSafeMargin);
 
       yoTime = controllerToolbox.getYoTime();
-      controlDT = controllerToolbox.getControlDT();
       pelvisZUpFrame = controllerToolbox.getPelvisZUpFrame();
       midFeetZUpFrame = controllerToolbox.getReferenceFrames().getMidFeetZUpFrame();
       soleZUpFrames = controllerToolbox.getReferenceFrames().getSoleZUpFrames();

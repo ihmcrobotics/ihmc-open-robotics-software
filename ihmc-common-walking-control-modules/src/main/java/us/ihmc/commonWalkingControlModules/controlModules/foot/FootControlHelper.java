@@ -46,6 +46,8 @@ public class FootControlHelper implements SCS2YoGraphicHolder
    private final SwingTrajectoryCalculator swingTrajectoryCalculator;
    private final YoSwingTrajectoryParameters swingTrajectoryParameters;
 
+   private final double controlDT;
+
    public FootControlHelper(RobotSide robotSide,
                             WalkingControllerParameters walkingControllerParameters,
                             YoSwingTrajectoryParameters swingTrajectoryParameters,
@@ -54,6 +56,7 @@ public class FootControlHelper implements SCS2YoGraphicHolder
                             ExplorationParameters explorationParameters,
                             YoPartialFootholdModuleParameters footholdRotationParameters,
                             SupportStateParameters supportStateParameters,
+                            double controlDT,
                             YoRegistry registry)
    {
       this.robotSide = robotSide;
@@ -62,6 +65,7 @@ public class FootControlHelper implements SCS2YoGraphicHolder
       this.explorationParameters = explorationParameters;
       this.footholdRotationParameters = footholdRotationParameters;
       this.supportStateParameters = supportStateParameters;
+      this.controlDT = controlDT;
 
       this.swingTrajectoryParameters = swingTrajectoryParameters;
       this.swingTrajectoryCalculator = new SwingTrajectoryCalculator(robotSide.getCamelCaseNameForStartOfExpression(),
@@ -81,6 +85,7 @@ public class FootControlHelper implements SCS2YoGraphicHolder
                                                                          controllerToolbox,
                                                                          walkingControllerParameters,
                                                                          explorationParameters,
+                                                                         controlDT,
                                                                          registry);
       }
       else
@@ -112,7 +117,6 @@ public class FootControlHelper implements SCS2YoGraphicHolder
 
       if (walkingControllerParameters.enableToeOffSlippingDetection())
       {
-         double controlDT = controllerToolbox.getControlDT();
          FootSwitchInterface footSwitch = controllerToolbox.getFootSwitches().get(robotSide);
          toeSlippingDetector = new ToeSlippingDetector(namePrefix, controlDT, foot, footSwitch, registry);
          toeSlippingDetector.configure(walkingControllerParameters.getToeSlippingDetectorParameters());
@@ -121,6 +125,11 @@ public class FootControlHelper implements SCS2YoGraphicHolder
       {
          toeSlippingDetector = null;
       }
+   }
+
+   public double getControlDT()
+   {
+      return controlDT;
    }
 
    private final FramePoint2D desiredCoP = new FramePoint2D();

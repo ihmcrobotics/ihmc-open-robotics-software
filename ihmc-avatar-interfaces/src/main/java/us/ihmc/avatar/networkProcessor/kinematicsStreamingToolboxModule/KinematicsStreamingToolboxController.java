@@ -66,6 +66,7 @@ public class KinematicsStreamingToolboxController extends ToolboxController impl
 
    private final ExecutionTimer executionTimer = new ExecutionTimer("IKStreamingTimer", registry);
    private KSTTimeProvider timeProvider;
+   private final double dt;
    private final YoDouble time = new YoDouble("time", registry);
    private final StateMachine<KSTState, State> stateMachine;
 
@@ -85,6 +86,7 @@ public class KinematicsStreamingToolboxController extends ToolboxController impl
    {
       super(statusOutputManager, parentRegistry);
 
+      dt = parameters.getToolboxUpdatePeriod();
       if (parameters.getClockType() == ClockType.CPU_CLOCK)
          timeProvider = KSTTimeProvider.createCPUClockBased();
       else if (parameters.getClockType() == ClockType.FIXED_DT)
@@ -114,6 +116,11 @@ public class KinematicsStreamingToolboxController extends ToolboxController impl
       // All the commands that are supported by the IK solver will automatically be forwarded to the IK solver.
       List<Class<? extends Command<?, ?>>> ikSolverCommands = KinematicsToolboxModule.supportedCommands();
       commandTypesToForward = commandInputManager.getListOfSupportedCommands().stream().filter(ikSolverCommands::contains).toArray(Class[]::new);
+   }
+
+   public double getDT()
+   {
+      return dt;
    }
 
    /**

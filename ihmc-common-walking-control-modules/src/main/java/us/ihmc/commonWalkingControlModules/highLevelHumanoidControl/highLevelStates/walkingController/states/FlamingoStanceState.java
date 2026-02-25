@@ -43,16 +43,17 @@ public class FlamingoStanceState extends SingleSupportState
                               HighLevelHumanoidControllerToolbox controllerToolbox,
                               HighLevelControlManagerFactory managerFactory,
                               WalkingFailureDetectionControlModule failureDetectionControlModule,
+                              double controlDT,
                               YoRegistry parentRegistry)
    {
-      super(stateEnum, walkingMessageHandler, controllerToolbox, managerFactory, parentRegistry);
+      super(stateEnum, walkingMessageHandler, controllerToolbox, managerFactory, controlDT, parentRegistry);
       this.controllerToolbox = controllerToolbox;
 
       bipedSupportPolygons = controllerToolbox.getBipedSupportPolygons();
       this.failureDetectionControlModule = failureDetectionControlModule;
 
-      comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
-      feetManager = managerFactory.getOrCreateFeetManager();
+      comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager(controlDT);
+      feetManager = managerFactory.getOrCreateFeetManager(controlDT);
 
       String namePrefix = supportSide.getOppositeSide().getLowerCaseName();
       loadFoot = new YoBoolean(namePrefix + "LoadFoot", registry);

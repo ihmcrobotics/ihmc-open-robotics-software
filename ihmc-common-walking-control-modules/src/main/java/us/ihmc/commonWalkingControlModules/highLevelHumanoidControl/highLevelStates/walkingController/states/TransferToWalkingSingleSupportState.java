@@ -64,9 +64,10 @@ public class TransferToWalkingSingleSupportState extends TransferState
                                               DoubleProvider minimumTransferTime,
                                               DoubleProvider unloadFraction,
                                               DoubleProvider rhoMin,
+                                              double controlDT,
                                               YoRegistry parentRegistry)
    {
-      super(stateEnum, walkingMessageHandler, controllerToolbox, managerFactory, failureDetectionControlModule, unloadFraction, rhoMin, parentRegistry);
+      super(stateEnum, walkingMessageHandler, controllerToolbox, managerFactory, failureDetectionControlModule, unloadFraction, rhoMin, controlDT, parentRegistry);
 
       this.minimumTransferTime = minimumTransferTime;
       this.touchdownErrorCompensator = touchdownErrorCompensator;

@@ -18,11 +18,6 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
       set(HeightMapParameters.flyingPointsFilter, flyingPointsFilter);
    }
 
-   default void setEnableChunkedMap(boolean enableChunkedMap)
-   {
-      set(HeightMapParameters.enableChunkedMap, enableChunkedMap);
-   }
-
    default void setLogHeightMap(boolean logHeightMap)
    {
       set(HeightMapParameters.logHeightMap, logHeightMap);
@@ -83,8 +78,13 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
       set(HeightMapParameters.cellSize, cellSize);
    }
 
-   default void setWidthInMeters(double widthInMeters)
+   default void setLocalWidthInMeters(double localWidthInMeters)
    {
-      set(HeightMapParameters.widthInMeters, widthInMeters);
+      set(HeightMapParameters.localWidthInMeters, localWidthInMeters);
+   }
+
+   default void setGlobalWidthInMeters(double globalWidthInMeters)
+   {
+      set(HeightMapParameters.globalWidthInMeters, globalWidthInMeters);
    }
 }

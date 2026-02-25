@@ -43,10 +43,10 @@ public class StandingState extends WalkingState
                         HighLevelHumanoidControllerToolbox controllerToolbox,
                         HighLevelControlManagerFactory managerFactory,
                         WalkingFailureDetectionControlModule failureDetectionControlModule,
-                        WalkingControllerParameters walkingControllerParameters,
+                        double controlDT,
                         YoRegistry parentRegistry)
    {
-      super(WalkingStateEnum.STANDING, managerFactory, controllerToolbox, parentRegistry);
+      super(WalkingStateEnum.STANDING, managerFactory, controllerToolbox, controlDT, parentRegistry);
 
       this.commandInputManager = commandInputManager;
       this.walkingMessageHandler = walkingMessageHandler;
@@ -61,7 +61,7 @@ public class StandingState extends WalkingState
             handManagers.put(robotSide, managerFactory.getRigidBodyManager(hand));
       }
 
-      comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
+      comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager(controlDT);
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
 
       RigidBodyBasics chest = fullRobotModel.getChest();
@@ -70,7 +70,7 @@ public class StandingState extends WalkingState
       else
          chestManager = null;
 
-      feetManager = managerFactory.getOrCreateFeetManager();
+      feetManager = managerFactory.getOrCreateFeetManager(controlDT);
    }
 
    @Override

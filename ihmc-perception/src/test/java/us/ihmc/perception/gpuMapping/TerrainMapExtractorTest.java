@@ -9,9 +9,9 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.log.LogTools;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static us.ihmc.perception.gpuMapping.TerrainMapData.*;
 
 public class TerrainMapExtractorTest
 {
@@ -58,9 +58,9 @@ public class TerrainMapExtractorTest
       double gridResolution = 0.02;
       double terrainWidthXY = 1.0;
       heightMapParameters.setCellSize(gridResolution);
-      heightMapParameters.setWidthInMeters(terrainWidthXY);
+      heightMapParameters.setGlobalWidthInMeters(terrainWidthXY);
 
-      int centerIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getWidthInMeters(), gridResolution);
+      int centerIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getGlobalWidthInMeters(), gridResolution);
       int cellsPerAxis = (centerIndex * 2) + 1;
 
       TerrainMapParameters steppableRegionParameters = new TerrainMapParameters();
@@ -105,8 +105,8 @@ public class TerrainMapExtractorTest
       Plane3D plane = new Plane3D(gridCenter, normal);
 
       heightMapParameters.setCellSize(gridResolution);
-      heightMapParameters.setWidthInMeters(terrainWidthXY);
-      int centerIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getWidthInMeters(), gridResolution);
+      heightMapParameters.setGlobalWidthInMeters(terrainWidthXY);
+      int centerIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getGlobalWidthInMeters(), gridResolution);
       int cellsPerAxis = 2 * centerIndex + 1;
 
       Mat heightMat = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
@@ -115,7 +115,7 @@ public class TerrainMapExtractorTest
       {
          for (int col = 0; col < cellsPerAxis; col++)
          {
-            int key = row * cellsPerAxis + col;
+            int key = HeightMapTools.indicesToKey(row, col, centerIndex);
             double x = HeightMapTools.keyToXCoordinate(key, gridCenter.getX(), gridResolution, centerIndex);
             double y = HeightMapTools.keyToYCoordinate(key, gridCenter.getY(), gridResolution, centerIndex);
 
@@ -137,16 +137,19 @@ public class TerrainMapExtractorTest
       byte[] snapNormalYMap = terrainMapData.getSnapNormalYMap();
       byte[] snapNormalZMap = terrainMapData.getSnapNormalZMap();
 
-      LogTools.info("normal: " + terrainMapData.getNormal(0.3, 0.0));
-      System.out.println(terrainMapData.getTraversabilityClass(0.3, 0.0));
+      byte expectedNormalX = TerrainMapData.packFloatAsByte(normal.getX32(), -NORMAL_MIN_MAX_XY, NORMAL_MIN_MAX_XY);
+      byte expectedNormalY = TerrainMapData.packFloatAsByte(normal.getY32(), -NORMAL_MIN_MAX_XY, NORMAL_MIN_MAX_XY);
+      byte expectedNormalZ = TerrainMapData.packFloatAsByte(normal.getZ32(), NORMAL_MIN_Z, NORMAL_MAX_Z);
 
-      for (int i = 0; i < cellsPerAxis; i++)
+      for (int row = 0; row < cellsPerAxis; row++)
       {
-         for (int j = 0; j < cellsPerAxis; j++)
+         for (int col = 0; col < cellsPerAxis; col++)
          {
-            assertEquals(108, snapNormalXMap[i * cellsPerAxis + j], "Normal x value is: (" + snapNormalXMap[i * cellsPerAxis + j] + ")");
-            assertEquals(127, snapNormalYMap[i * cellsPerAxis + j], "Normal y value is: (" + snapNormalYMap[i * cellsPerAxis + j] + ")");
-            assertEquals(-4, snapNormalZMap[i * cellsPerAxis + j], "Normal z value is: (" + snapNormalZMap[i * cellsPerAxis + j] + ")");
+            int key = HeightMapTools.indicesToKey(row, col, centerIndex);
+
+            assertEquals(expectedNormalX, snapNormalXMap[key], "Normal x value is: (" + snapNormalXMap[key] + ")");
+            assertEquals(expectedNormalY, snapNormalYMap[key], "Normal y value is: (" + snapNormalYMap[key] + ")");
+            assertEquals(expectedNormalZ, snapNormalZMap[key], "Normal z value is: (" + snapNormalZMap[key] + ")");
          }
       }
 

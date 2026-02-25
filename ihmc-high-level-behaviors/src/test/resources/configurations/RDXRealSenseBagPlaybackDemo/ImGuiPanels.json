@@ -1,0 +1,9 @@
+{
+  "dockspacePanels" : { },
+  "windows" : {
+    "3D View" : true,
+    "Color Panel###RDXImageVisualizer1:Color Panel" : true,
+    "Depth Panel###RDXImageVisualizer3:Depth Panel" : true,
+    "Options" : true
+  }
+}

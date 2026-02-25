@@ -30,7 +30,7 @@ public class NaturalPostureManager implements SCS2YoGraphicHolder
    private final YoBoolean useBodyManagerCommands = new YoBoolean("useBodyManagerCommandsForNaturalPosture", registry);
    private final YoBoolean usePelvisOrientationCommand = new YoBoolean("usePelvisOrientationCommandForNaturalPosture", registry);
 
-   public NaturalPostureManager(NaturalPostureParameters parameters, HighLevelHumanoidControllerToolbox controllerToolbox, YoRegistry parentRegistry)
+   public NaturalPostureManager(NaturalPostureParameters parameters, HighLevelHumanoidControllerToolbox controllerToolbox, double controlDT, YoRegistry parentRegistry)
    {
       // This must be true to use Natural Posture
       enableNaturalPosture.set(false);
@@ -41,7 +41,7 @@ public class NaturalPostureManager implements SCS2YoGraphicHolder
 
       parentRegistry.addChild(registry);
 
-      controller = new NaturalPostureController(parameters, controllerToolbox, registry);
+      controller = new NaturalPostureController(parameters, controllerToolbox, controlDT, registry);
       privilegedConfigurationController = new NaturalPosturePrivilegedConfigurationController(parameters, controllerToolbox.getFullRobotModel(), registry);
 
       timer = new ExecutionTimer("naturalPostureTimer", registry);
@@ -59,6 +59,11 @@ public class NaturalPostureManager implements SCS2YoGraphicHolder
             throw new RuntimeException("Must define joint limit parameters for joint " + joint.getName() + " if using joints with restrictive limits.");
          jointLimitEnforcementMethodCommand.addLimitEnforcementMethod(joint, JointLimitEnforcement.RESTRICTIVE, limitParameters);
       }
+   }
+
+   public double getControlDT()
+   {
+      return controller.getControlDT();
    }
 
    public boolean isEnabled()
