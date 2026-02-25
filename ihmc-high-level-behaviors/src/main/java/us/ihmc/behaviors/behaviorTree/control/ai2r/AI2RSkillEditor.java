@@ -58,6 +58,7 @@ public class AI2RSkillEditor
 
       public static final AI2RSkillEditor.SpatialRelationType[] values = values();
    }
+   private static final List<String> SCAN_ACTION_TYPES = List.of("setup object", "freeze object");
    private String objectGrasped = "";
    private RobotSide graspSide = RobotSide.RIGHT;
    private int commandedBehaviorIndex;
@@ -89,10 +90,15 @@ public class AI2RSkillEditor
       List<SceneActionNodeState> allSetupActions = new ArrayList<>();
       for (var leaf : state.getActionSequence().getOrderedLeaves())
       {
-         if (leaf instanceof SceneActionNodeState sceneActionState
-             && leaf.getDefinition().getName().toLowerCase().contains("setup object"))
+         if (leaf instanceof SceneActionNodeState sceneActionState)
          {
-            allSetupActions.add(sceneActionState);
+            String nameLower = leaf.getDefinition().getName().toLowerCase();
+
+            if (nameLower.contains("setup object") ||
+                nameLower.contains("freeze object"))
+            {
+               allSetupActions.add(sceneActionState);
+            }
          }
       }
       if (allSetupActions.isEmpty())
@@ -111,7 +117,7 @@ public class AI2RSkillEditor
          for (SceneActionNodeState s : allSetupActions)
          {
             String nameLower = s.getDefinition().getName().toLowerCase();
-            if (nameLower.contains("setup object" + idToken))
+            if (nameLower.contains("setup object" + idToken) || nameLower.contains("freeze object" + idToken))
             {
                if (nameLower.contains("left"))
                   left = s;
