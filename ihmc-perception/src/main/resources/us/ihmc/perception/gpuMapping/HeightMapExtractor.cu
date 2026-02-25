@@ -323,7 +323,7 @@ __global__ void heightMapRegistrationKernel(const float *__restrict__ localMeanM
 
         *globalMean = updatedMean;
         *globalVariance = updatedVariance;
-        *previousGlobal = updatedMean;
+        *previousGlobal = localMeanF;
     }
 }
 

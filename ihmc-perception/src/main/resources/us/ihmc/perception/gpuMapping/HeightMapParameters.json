@@ -78,9 +78,14 @@
     "lowerBound" : 1.0E-4,
     "upperBound" : 1.0
   },
-  "Icp max distance" : {
+  "Icp max point distance" : {
     "value" : 0.0036,
     "lowerBound" : 0.01,
+    "upperBound" : 1.0
+  },
+  "Icp max drift distance" : {
+    "value" : 0.04,
+    "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
   "Icp valid points" : {

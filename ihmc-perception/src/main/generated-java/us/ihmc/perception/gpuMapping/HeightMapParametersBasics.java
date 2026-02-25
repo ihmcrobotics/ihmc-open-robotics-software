@@ -98,9 +98,14 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
       set(HeightMapParameters.icpConvergence, icpConvergence);
    }
 
-   default void setIcpMaxDistance(double icpMaxDistance)
+   default void setIcpMaxPointDistance(double icpMaxPointDistance)
    {
-      set(HeightMapParameters.icpMaxDistance, icpMaxDistance);
+      set(HeightMapParameters.icpMaxPointDistance, icpMaxPointDistance);
+   }
+
+   default void setIcpMaxDriftDistance(double icpMaxDriftDistance)
+   {
+      set(HeightMapParameters.icpMaxDriftDistance, icpMaxDriftDistance);
    }
 
    default void setIcpValidPoints(int icpValidPoints)

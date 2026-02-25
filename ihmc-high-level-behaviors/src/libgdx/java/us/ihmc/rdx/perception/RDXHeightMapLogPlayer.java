@@ -68,7 +68,7 @@ public class RDXHeightMapLogPlayer
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
       baseUI = new RDXBaseUI();
 
-      zedPlaybackSensor = new ROS2ZEDSVOPlaybackSensor(ros2Helper, 0, ZEDModelData.ZED_X_MINI, zed.SL_DEPTH_MODE_NEURAL_PLUS, SVO_FILE);
+      zedPlaybackSensor = new ROS2ZEDSVOPlaybackSensor(ros2Helper, 0, ZEDModelData.ZED_X_MINI, zed.SL_DEPTH_MODE_NEURAL, SVO_FILE);
       zedPlaybackSensor.setTrackedPoseOffset(new Pose3D(0.0, 0.0, 1.0, 0.0, 0.0, 0.0));
       zedPlaybackSensor.useTrackedPose(true);
       BlockingQueue<RawImage> rawImageCollection = new LinkedBlockingQueue<>(ImageSensor.DEFAULT_IMAGE_QUEUE_CAPACITY);

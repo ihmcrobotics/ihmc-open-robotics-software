@@ -195,7 +195,7 @@ public class GpuICPCalculator
 
          int validCount = 0;
 
-         float maxDistance = (float) heightMapParameters.getIcpMaxDistance();
+         float maxDistance = (float) heightMapParameters.getIcpMaxPointDistance();
          for (int k = 0; k < localPoints; k++)
          {
             float d = distancesArr[k];

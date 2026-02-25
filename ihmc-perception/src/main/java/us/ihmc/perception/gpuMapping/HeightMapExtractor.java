@@ -326,6 +326,56 @@ public class HeightMapExtractor
          AxisAngle axisAngle = new AxisAngle(rotation);
          float angularMotionMagnitude = (float) Math.abs(axisAngle.getAngle());
 
+         if (heightMapParameters.getICPFilter() && performICP)
+         {
+            Point3D globalHeightMapCenterOnGrid = new Point3D(currentCellCordX, currentCellCordY, globalHeightMapCenter.getZ32());
+            gpuICPCalculator.computeICPErrorTransform(localMeanMap,
+                                                      previousGlobalMapForICP,
+                                                      localCenterMapForICP,
+                                                      globalHeightMapCenterOnGrid,
+                                                      localCenterIndex,
+                                                      globalCenterIndex,
+                                                      sensorToWorldNoRotation,
+                                                      stream);
+            //      LogTools.info(
+            //            "gpuICPCalculator correctedTransform: " + correctedTransform.getX() + " " + correctedTransform.getY() + " " + correctedTransform.getZ());
+            //      LogTools.info("Actual Transform: " + groundToWorldNoRotation.getTranslationX() + " " + groundToWorldNoRotation.getTranslationY() + " "
+            //                    + groundToWorldNoRotation.getTranslationZ());
+            //      LogTools.info("Global Center: " + globalHeightMapCenter.getX() + " " + globalHeightMapCenter.getY() + " " + globalHeightMapCenter.getZ(   ));
+
+            if (!gpuICPCalculator.isEndedWithoutEnoughValidPoints())
+            {
+               correctedTransform = gpuICPCalculator.getLatestPointCloudErrorTransform();
+               double dx = correctedTransform.getX();
+               double dy = correctedTransform.getY();
+               double dz = correctedTransform.getZ();
+
+               // Zero out tiny corrections (<1 mm)
+               if (Math.abs(dx) < 0.001)
+                  dx = 0.0;
+               if (Math.abs(dy) < 0.001)
+                  dy = 0.0;
+               if (Math.abs(dz) < 0.001)
+                  dz = 0.0;
+
+               // --- Reject or clamp large drifts ---
+               double MAX_DRIFT = heightMapParameters.getIcpMaxDriftDistance();
+               if (Math.abs(dx) > MAX_DRIFT || Math.abs(dy) > MAX_DRIFT || Math.abs(dz) > MAX_DRIFT)
+               {
+                  LogTools.info("ICP drift too large! Ignoring correction.");
+                  dx = 0.0;
+                  dy = 0.0;
+                  dz = 0.0;
+               }
+
+               gpuICPCalculator.applyCorrectionToTransform(sensorToGroundZUpDevice, dx, dy, dz, stream);
+            }
+         }
+         else
+         {
+            performICP = true;
+         }
+
          sensorToGroundZUp.get(sensorToGroundZUpAsArray);
          sensorToGroundZUpHost.put(sensorToGroundZUpAsArray);
          CUDATools.memcpyAsync(sensorToGroundZUpDevice, sensorToGroundZUpHost, sensorToGroundZUpAsArray.length, stream);
@@ -384,58 +434,6 @@ public class HeightMapExtractor
          checkCUDAError();
       }
 
-      if (heightMapParameters.getICPFilter() && performICP)
-      {
-         Point3D globalHeightMapCenterOnGrid = new Point3D(currentCellCordX, currentCellCordY, globalHeightMapCenter.getZ32());
-         gpuICPCalculator.computeICPErrorTransform(localMeanMap,
-                                                   previousGlobalMapForICP,
-                                                   localCenterMapForICP,
-                                                   globalHeightMapCenterOnGrid,
-                                                   localCenterIndex,
-                                                   globalCenterIndex,
-                                                   sensorToWorldNoRotation,
-                                                   stream);
-         //      LogTools.info(
-         //            "gpuICPCalculator correctedTransform: " + correctedTransform.getX() + " " + correctedTransform.getY() + " " + correctedTransform.getZ());
-         //      LogTools.info("Actual Transform: " + groundToWorldNoRotation.getTranslationX() + " " + groundToWorldNoRotation.getTranslationY() + " "
-         //                    + groundToWorldNoRotation.getTranslationZ());
-         //      LogTools.info("Global Center: " + globalHeightMapCenter.getX() + " " + globalHeightMapCenter.getY() + " " + globalHeightMapCenter.getZ(   ));
-
-         if (!gpuICPCalculator.isEndedWithoutEnoughValidPoints())
-         {
-            correctedTransform = gpuICPCalculator.getLatestPointCloudErrorTransform();
-            double dx = correctedTransform.getX();
-            double dy = correctedTransform.getY();
-            double dz = correctedTransform.getZ();
-
-            // Zero out tiny corrections (<1 mm)
-            if (Math.abs(dx) < 0.001)
-               dx = 0.0;
-            if (Math.abs(dy) < 0.001)
-               dy = 0.0;
-            if (Math.abs(dz) < 0.001)
-               dz = 0.0;
-
-            // --- Reject or clamp large drifts ---
-            double MAX_DRIFT = 0.02; // 2 cm
-            if (Math.abs(dx) > MAX_DRIFT || Math.abs(dy) > MAX_DRIFT || Math.abs(dz) > MAX_DRIFT)
-            {
-               LogTools.info("ICP drift too large! Ignoring correction.");
-               dx = 0.0;
-               dy = 0.0;
-               dz = 0.0;
-            }
-
-            gpuICPCalculator.applyCorrectionToTransform(sensorToWorldNoRotationDevice, dx, dy, dz, stream);
-         }
-      }
-      else
-      {
-         performICP = true;
-      }
-
-      //      LogTools.info("Corrected transform:" + correctedTransform.getX() + " - " + correctedTransform.getY() + " - " + correctedTransform.getZ());
-
       // ---------- Run the registration kernel ----------
       // Ok so now we've got our local map, lets put that onto the global map
       {
@@ -457,7 +455,7 @@ public class HeightMapExtractor
          registerKernel.withPointer(globalVarianceMap.data()).withLong(globalVarianceMap.step());
          registerKernel.withFloat((float) currentCellCordX);
          registerKernel.withFloat((float) currentCellCordY);
-         registerKernel.withFloat(correctedTransform.getZ32());
+         registerKernel.withFloat(0.0f);
          registerKernel.withPointer(sensorToWorldNoRotationDevice);
          registerKernel.withPointer(parametersDevicePointer);
 
