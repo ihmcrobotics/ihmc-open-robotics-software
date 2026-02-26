@@ -15,7 +15,7 @@ public class HandContactMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "c8f1c46f231733cb7a6e4f28b357e8154da505c64e9baaf26f3ade9640e8c668";
+   		return "ceabe84670f982966a2408e20b5184f31a1595c844ae23cf9577277b2bb3a44c";
    }
    
    @Override
@@ -56,6 +56,8 @@ public class HandContactMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
@@ -81,6 +83,9 @@ public class HandContactMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
@@ -96,6 +101,8 @@ public class HandContactMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    {
       cdr.write_type_12(data.getSequenceId());
 
+      cdr.write_type_7(data.getLoad());
+
       cdr.write_type_9(data.getRobotSide());
 
       cdr.write_type_6(data.getTrajectoryDuration());
@@ -107,6 +114,8 @@ public class HandContactMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    public static void read(controller_msgs.msg.dds.HandContactMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_12());
+      	
+      data.setLoad(cdr.read_type_7());
       	
       data.setRobotSide(cdr.read_type_9());
       	
@@ -121,6 +130,7 @@ public class HandContactMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    public final void serialize(controller_msgs.msg.dds.HandContactMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_12("sequence_id", data.getSequenceId());
+      ser.write_type_7("load", data.getLoad());
       ser.write_type_9("robot_side", data.getRobotSide());
       ser.write_type_6("trajectory_duration", data.getTrajectoryDuration());
       ser.write_type_a("bracing_point", new geometry_msgs.msg.dds.PointPubSubType(), data.getBracingPoint());
@@ -133,6 +143,7 @@ public class HandContactMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.HandContactMessage data)
    {
       data.setSequenceId(ser.read_type_12("sequence_id"));
+      data.setLoad(ser.read_type_7("load"));
       data.setRobotSide(ser.read_type_9("robot_side"));
       data.setTrajectoryDuration(ser.read_type_6("trajectory_duration"));
       ser.read_type_a("bracing_point", new geometry_msgs.msg.dds.PointPubSubType(), data.getBracingPoint());

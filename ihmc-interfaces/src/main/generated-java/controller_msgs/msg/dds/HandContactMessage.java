@@ -19,6 +19,10 @@ public class HandContactMessage extends Packet<HandContactMessage> implements Se
             */
    public long sequence_id_;
    /**
+            * If true it will load the contact point, otherwise the hand will stop bearing load.
+            */
+   public boolean load_;
+   /**
             * Specifies which hand will execute the trajectory.
             */
    public byte robot_side_ = (byte) 255;
@@ -51,6 +55,8 @@ public class HandContactMessage extends Packet<HandContactMessage> implements Se
    {
       sequence_id_ = other.sequence_id_;
 
+      load_ = other.load_;
+
       robot_side_ = other.robot_side_;
 
       trajectory_duration_ = other.trajectory_duration_;
@@ -72,6 +78,21 @@ public class HandContactMessage extends Packet<HandContactMessage> implements Se
    public long getSequenceId()
    {
       return sequence_id_;
+   }
+
+   /**
+            * If true it will load the contact point, otherwise the hand will stop bearing load.
+            */
+   public void setLoad(boolean load)
+   {
+      load_ = load;
+   }
+   /**
+            * If true it will load the contact point, otherwise the hand will stop bearing load.
+            */
+   public boolean getLoad()
+   {
+      return load_;
    }
 
    /**
@@ -142,6 +163,8 @@ public class HandContactMessage extends Packet<HandContactMessage> implements Se
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.load_, other.load_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.trajectory_duration_, other.trajectory_duration_, epsilon)) return false;
@@ -163,6 +186,8 @@ public class HandContactMessage extends Packet<HandContactMessage> implements Se
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
+      if(this.load_ != otherMyClass.load_) return false;
+
       if(this.robot_side_ != otherMyClass.robot_side_) return false;
 
       if(this.trajectory_duration_ != otherMyClass.trajectory_duration_) return false;
@@ -181,6 +206,8 @@ public class HandContactMessage extends Packet<HandContactMessage> implements Se
       builder.append("HandContactMessage {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
+      builder.append("load=");
+      builder.append(this.load_);      builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);      builder.append(", ");
       builder.append("trajectory_duration=");

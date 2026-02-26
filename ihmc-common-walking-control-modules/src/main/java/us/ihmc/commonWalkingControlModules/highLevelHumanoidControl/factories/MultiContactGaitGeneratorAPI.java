@@ -14,7 +14,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
-public class MultiContactGaitGenerator
+public class MultiContactGaitGeneratorAPI
 {
    private static final List<Class<? extends Command<?, ?>>> supportedCommands;
    private static final List<Class<? extends Settable<?>>> supportedStatusMessages;

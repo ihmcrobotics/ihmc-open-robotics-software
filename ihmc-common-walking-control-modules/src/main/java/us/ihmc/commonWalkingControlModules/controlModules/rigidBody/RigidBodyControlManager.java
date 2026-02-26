@@ -606,17 +606,17 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
 
    public void unload()
    {
-      if (stateMachine.getCurrentStateKey() == RigidBodyControlMode.LOADBEARING)
+      if (isLoadBearing())
       {
-         if (defaultControlMode.getValue() == RigidBodyControlMode.JOINTSPACE && loadBearingControlState.isJointspaceControlActive())
-         { // Maintain current desired joint angles if possible
-            jointspaceControlState.holdCurrentDesired();
-            requestState(jointspaceControlState.getControlMode());
-         }
-         else
-         { // Otherwise hold current taskspace pose
-            hold();
-         }
+         requestState(jointspaceControlState.getControlMode());
+
+         //         if (defaultControlMode.getValue() == RigidBodyControlMode.JOINTSPACE && loadBearingControlState.isJointspaceControlActive())
+//         { // Maintain current desired joint angles if possible
+//         }
+//         else
+//         { // Otherwise hold current taskspace pose
+//            hold();
+//         }
       }
    }
 

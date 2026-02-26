@@ -14,6 +14,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 public class HandContactCommand implements Command<HandContactCommand, HandContactMessage>
 {
    private long sequenceId;
+   private boolean load;
    private double trajectoryDuration;
    private RobotSide robotSide;
    private final FramePoint3D bracingPoint = new FramePoint3D();
@@ -23,6 +24,7 @@ public class HandContactCommand implements Command<HandContactCommand, HandConta
    public void clear()
    {
       robotSide = null;
+      load = false;
       trajectoryDuration = Double.NaN;
       bracingPoint.setToNaN();
       bracingNormal.setToNaN();
@@ -32,6 +34,7 @@ public class HandContactCommand implements Command<HandContactCommand, HandConta
    public void setFromMessage(HandContactMessage message)
    {
       sequenceId = message.getSequenceId();
+      load = message.getLoad();
       robotSide = RobotSide.fromByte(message.getRobotSide());
       trajectoryDuration = message.getTrajectoryDuration();
       bracingPoint.set(ReferenceFrame.getWorldFrame(), message.getBracingPoint());
@@ -60,9 +63,20 @@ public class HandContactCommand implements Command<HandContactCommand, HandConta
    public void set(HandContactCommand other)
    {
       robotSide = other.robotSide;
+      load = other.load;
       trajectoryDuration = other.trajectoryDuration;
       bracingPoint.set(other.bracingPoint);
       bracingNormal.set(other.bracingNormal);
+   }
+
+   public void setLoad(boolean load)
+   {
+      this.load = load;
+   }
+
+   public boolean load()
+   {
+      return load;
    }
 
    public void setTrajectoryDuration(double trajectoryDuration)
