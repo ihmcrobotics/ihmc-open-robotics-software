@@ -145,6 +145,11 @@ public class ZEDImageSensor extends ImageSensor
       this.remoteStreamingPort = remoteStreamingPort;
    }
 
+   public void setInitParameters(ZEDInitParametersHolder zedInitParametersHolder)
+   {
+      zedInitParametersHolder.applyTo(zedInitParameters);
+   }
+
    public void setTrackedPoseOffset(RigidBodyTransformReadOnly offset)
    {
       trackedPoseOffset.set(offset);
@@ -180,7 +185,7 @@ public class ZEDImageSensor extends ImageSensor
          sl_create_camera(cameraID);
 
          // Set the initialization parameters
-         setInitParameters(zedInitParameters);
+//         setInitParameters(zedInitParameters);
 
          // Open the camera
          int returnCode = openCamera();
@@ -254,9 +259,7 @@ public class ZEDImageSensor extends ImageSensor
       if (slDepthMode == SL_DEPTH_MODE_NEURAL || slDepthMode == SL_DEPTH_MODE_NEURAL_PLUS)
          LogTools.info("ZED SDK will use neural depth mode. This uses significant GPU resources.");
       parametersToSet.depth_mode(slDepthMode);
-      int value = 100;
-      LogTools.info("Setting to : " + value);
-      parametersToSet.depth_stabilization(value);
+      parametersToSet.depth_stabilization(30);
       parametersToSet.depth_maximum_distance(zedModel.getMaximumDepthDistance());
       parametersToSet.depth_minimum_distance(zedModel.getMinimumDepthDistance());
       parametersToSet.coordinate_unit(SL_UNIT_METER);
