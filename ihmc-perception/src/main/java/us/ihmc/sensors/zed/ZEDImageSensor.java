@@ -80,7 +80,7 @@ public class ZEDImageSensor extends ImageSensor
    protected final SL_InitParameters zedInitParameters = new SL_InitParameters();
    protected final SL_RuntimeParameters zedRuntimeParameters = new SL_RuntimeParameters();
 
-   private boolean positionalTrackingEnabled = false;
+   private boolean positionalTrackingEnabled = true;
    private final MutableReferenceFrame trackedSensorFrame;
    private final RigidBodyTransform trackedPoseOffset = new RigidBodyTransform();
    private final SL_Quaternion sensorRotation = new SL_Quaternion();
@@ -128,7 +128,7 @@ public class ZEDImageSensor extends ImageSensor
       // Set runtime parameters to default values
       zedRuntimeParameters.reference_frame(SL_REFERENCE_FRAME_CAMERA);
       zedRuntimeParameters.enable_depth(slDepthMode != SL_DEPTH_MODE_NONE);
-      zedRuntimeParameters.confidence_threshold(50);
+      zedRuntimeParameters.confidence_threshold(80);
       zedRuntimeParameters.texture_confidence_threshold(100);
       zedRuntimeParameters.remove_saturated_areas(true);
       zedRuntimeParameters.enable_fill_mode(false);
@@ -254,7 +254,7 @@ public class ZEDImageSensor extends ImageSensor
       if (slDepthMode == SL_DEPTH_MODE_NEURAL || slDepthMode == SL_DEPTH_MODE_NEURAL_PLUS)
          LogTools.info("ZED SDK will use neural depth mode. This uses significant GPU resources.");
       parametersToSet.depth_mode(slDepthMode);
-      parametersToSet.depth_stabilization(1);
+      parametersToSet.depth_stabilization(30);
       parametersToSet.depth_maximum_distance(zedModel.getMaximumDepthDistance());
       parametersToSet.depth_minimum_distance(zedModel.getMinimumDepthDistance());
       parametersToSet.coordinate_unit(SL_UNIT_METER);
