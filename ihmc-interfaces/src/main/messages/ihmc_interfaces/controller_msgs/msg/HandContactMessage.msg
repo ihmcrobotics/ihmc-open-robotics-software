@@ -7,6 +7,9 @@ byte ROBOT_SIDE_RIGHT = 1
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint64 sequence_id
 
+# If true it will load the contact point, otherwise the hand will stop bearing load.
+bool load false
+
 # Specifies which hand will execute the trajectory.
 byte robot_side 255
 

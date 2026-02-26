@@ -14,6 +14,7 @@ import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
@@ -38,6 +39,7 @@ import static us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenera
 public class AvatarBipedalGaitGenerator
 {
    private static final int NUMBER_OF_STEPS_TO_PLAN = 5;
+   private static final int NULL_KEY = -1;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final String variableNameSuffix = "MCGG";
@@ -162,7 +164,7 @@ public class AvatarBipedalGaitGenerator
          footstep.setRobotSide(swingSide);
          snap(i, footstep);
 
-         footstepPose2D.set(nextFootstepPose2D);
+         footstepPose2D.set(footstep.getPosition().getX(), footstep.getPosition().getY(), footstep.getOrientation().getYaw());
          swingSide = swingSide.getOppositeSide();
       }
 
@@ -205,22 +207,104 @@ public class AvatarBipedalGaitGenerator
       if (terrainMapCommand == null)
          return false;
 
-      FramePoint3D footstepPosition = footstep.getPosition();
+      int key = findOptimalFoothold(footstep);
+      if (key == NULL_KEY)
+         return false;
+
+      // Footstep position
+      footstep.getPosition().setX(keyToXCoordinate(key));
+      footstep.getPosition().setY(keyToYCoordinate(key));
+      footstep.getPosition().setZ(terrainMapCommand.getHeightAt(key));
+
+      // Footstep orientation
+      EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.Z, terrainMapCommand.getNormalAt(key), footstep.getOrientation());
+
+      // Set traversability
+      double traversability = terrainMapCommand.getTraversabilityAt(key);
+      traversabilityValues[stepIndex].set(traversability);
+
+      return true;
+   }
+
+   private int findOptimalFoothold(FootstepDataCommand footstep)
+   {
+      double nominalX = footstep.getPosition().getX();
+      double nominalY = footstep.getPosition().getY();
+      double nominalYaw = footstep.getOrientation().getYaw();
+
+      int sampleWindowX = 4;
+      int sampleWindowY = 3;
+      double sampleDiscretization = 0.06;
+
+      int optimalKey = NULL_KEY;
+      double optimalScore = Double.NEGATIVE_INFINITY;
+
+      for (int di_x = -sampleWindowX; di_x <= sampleWindowX; di_x++)
+      {
+         for (int di_y = -sampleWindowY; di_y <= sampleWindowY; di_y++)
+         {
+            double dxLocal = di_x * sampleDiscretization;
+            double dyLocal = di_y * sampleDiscretization;
+
+            double dxWorld = dxLocal * Math.cos(nominalYaw) - dyLocal * Math.sin(nominalYaw);
+            double dyWorld = dxLocal * Math.sin(nominalYaw) + dyLocal * Math.cos(nominalYaw);
+
+            double xQuery = nominalX + dxWorld;
+            double yQuery = nominalY + dyWorld;
+
+            int key = coordinateToKey(xQuery, yQuery);
+            if (key == NULL_KEY)
+               continue;
+
+            double traversability = terrainMapCommand.getTraversabilityAt(key);
+            double offset = EuclidCoreTools.norm(dxWorld, dyWorld);
+            double offsetDotProduct = Math.abs(offset) < 1e-3 ? 0.0 : (desiredWalkingVelocityX.getValue() * dxWorld + desiredWalkingVelocityY.getValue() * dyWorld) / offset;
+
+            double traversabilityWeight = 3.0;
+            double offsetWeight = -1.0;
+            double dotProductWeight = 0.5;
+
+            double score = traversabilityWeight * traversability + offsetWeight * offset + dotProductWeight * offsetDotProduct;
+            if (score > optimalScore)
+            {
+               optimalScore = score;
+               optimalKey = key;
+            }
+         }
+      }
+
+      return optimalKey;
+   }
+
+   private int coordinateToKey(double x, double y)
+   {
       Point2DReadOnly gridCenter = terrainMapCommand.getGridCenter();
       double cellSize = terrainMapCommand.getCellSize();
       double gridWidth = terrainMapCommand.getGridWidth();
       int centerIndex = HeightMapTools.computeCenterIndex(gridWidth, cellSize);
-      int key = HeightMapTools.coordinateToKey(footstepPosition.getX(), footstepPosition.getY(), gridCenter.getX(), gridCenter.getY(), cellSize, centerIndex);
+      int key = HeightMapTools.coordinateToKey(x, y, gridCenter.getX(), gridCenter.getY(), cellSize, centerIndex);
       if (key < 0 || key >= terrainMapCommand.getMapSize())
-         return false;
+         return NULL_KEY;
+      else
+         return key;
+   }
 
-      footstepPosition.setZ(terrainMapCommand.getHeightAt(key));
-      FrameQuaternion footstepOrientation = footstep.getOrientation();
+   private double keyToXCoordinate(int key)
+   {
+      Point2DReadOnly gridCenter = terrainMapCommand.getGridCenter();
+      double cellSize = terrainMapCommand.getCellSize();
+      double gridWidth = terrainMapCommand.getGridWidth();
+      int centerIndex = HeightMapTools.computeCenterIndex(gridWidth, cellSize);
+      return HeightMapTools.keyToXCoordinate(key, gridCenter.getX(), cellSize, centerIndex);
+   }
 
-      EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.Z, terrainMapCommand.getNormalAt(key), footstepOrientation);
-      traversabilityValues[stepIndex].set(terrainMapCommand.getTraversabilityAt(key));
-
-      return true;
+   private double keyToYCoordinate(int key)
+   {
+      Point2DReadOnly gridCenter = terrainMapCommand.getGridCenter();
+      double cellSize = terrainMapCommand.getCellSize();
+      double gridWidth = terrainMapCommand.getGridWidth();
+      int centerIndex = HeightMapTools.computeCenterIndex(gridWidth, cellSize);
+      return HeightMapTools.keyToYCoordinate(key, gridCenter.getY(), cellSize, centerIndex);
    }
 
    private void snapToStanceFoot(int stepIndex, FootstepDataCommand footstep)

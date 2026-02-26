@@ -198,6 +198,8 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
 
    public void clear()
    {
+      feasibleRegion.clear();
+
       for (int vertex_idx = 0; vertex_idx < DIRECTIONS_TO_OPTIMIZE; vertex_idx++)
       {
          optimizedVertices[vertex_idx].setToNaN();

@@ -21,7 +21,7 @@ public class RDXEnvironmentExporter
       StringBuilder stringBuilder = new StringBuilder();
 
       String environmentName = selectedEnvironmentFile.split("\\.")[0];
-      stringBuilder.append("\tprivate static void add" + environmentName + "(CombinedTerrainObject3D terrain)\n\t{\n");
+      stringBuilder.append("\tprivate static void add" + environmentName + "(EnvironmentDefinition environment)\n\t{\n");
 
       JSONFileTools.load(new WorkspaceResourceFile(environmentFilesDirectory, selectedEnvironmentFile),
                          node ->
@@ -37,7 +37,7 @@ public class RDXEnvironmentExporter
                                   stringBuilder.append("\t\tQuaternion orientation" + index + " = new Quaternion(" + objectNode.get("qx") + ", " + objectNode.get("qy") + ", " + objectNode.get("qz") + "," + objectNode.get("qs") + ");\n");
                                   stringBuilder.append("\t\tVector3D size" + index + " = new Vector3D(" + size.getX() + ", " + size.getY() + ", " + size.getZ() + ");\n");
                                   stringBuilder.append("\t\tBox3D box" + index + " = new Box3D(position" + index + ", orientation" + index + ", size" + index  + ");\n");
-                                  stringBuilder.append("\t\tterrain.addRotatableBox(box" + index + ", YoAppearance.DarkGray());\n");
+                                  stringBuilder.append("\t\tenvironment.addGroundBox(box" + index + ");\n");
                                   stringBuilder.append("\n");
 
                                   index.increment();
@@ -81,10 +81,10 @@ public class RDXEnvironmentExporter
 
    public static void main(String[] args)
    {
-//      String selectedEnvironmentFile = "LookAndStepEasy.json";
+      String selectedEnvironmentFile = "LookAndStepEasy.json";
 //      String selectedEnvironmentFile = "LookAndStepHard.json";
 //      String selectedEnvironmentFile = "LookAndStepWide.json";
-      String selectedEnvironmentFile = "FootstepPlannerTrainingTerrainGenerated.json";
+//      String selectedEnvironmentFile = "FootstepPlannerTrainingTerrainGenerated.json";
 //      String selectedEnvironmentFile = "FootstepPlannerTrainingTerrainGenerated_1.json";
 
       new RDXEnvironmentExporter(selectedEnvironmentFile);

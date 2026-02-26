@@ -28,6 +28,10 @@ module controller_msgs
          */
         unsigned long long sequence_id;
         /**
+         * If true it will load the contact point, otherwise the hand will stop bearing load.
+         */
+        boolean load;
+        /**
          * Specifies which hand will execute the trajectory.
          */
         @defaultValue(value=255)

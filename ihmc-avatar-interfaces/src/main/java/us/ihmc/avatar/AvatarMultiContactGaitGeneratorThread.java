@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.multiContact.pushRecovery.ReactiveBracingPlanner;
 import us.ihmc.avatar.multiContact.pushRecovery.ReducedOrderRobotModel;
+import us.ihmc.avatar.visualization.YoPerceptionVisualizer;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
@@ -11,7 +12,7 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.BipedTimedStep;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MultiContactGaitGenerator;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MultiContactGaitGeneratorAPI;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -54,7 +55,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerThreadInterface
 {
-   private static final boolean VISUALIZE_HEIGHT_MAP = false;
+   private static final boolean VISUALIZE_PERCEPTION_DATA = true;
+
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final double dt;
@@ -75,6 +77,7 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
    private final YoBoolean isHandRecoveryContactEnabled = new YoBoolean("isHandRecoveryContactEnabled", registry);
    private final YoBoolean isFalling = new YoBoolean("isFalling", registry);
    private final YoBoolean triggerFall = new YoBoolean("triggerFall", registry);
+   private final YoBoolean triggerUnload = new YoBoolean("triggerUnload", registry);
    private final YoBoolean sendHandContactMessage = new YoBoolean("sendHandContactMessage", registry);
    private boolean hasSentHandTrajectory = false;
    private final ReactiveBracingPlanner planner;
@@ -93,7 +96,7 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
    private final AtomicReference<CapturabilityBasedStatus> capturabilityBasedStatus = new AtomicReference<>();
 
    private final YoFramePoint2D[] yoCapturePointWaypoints = new YoFramePoint2D[25];
-   private final YoFramePoint3D[] heights;
+   private final YoPerceptionVisualizer perceptionVisualizer;
 
    public AvatarMultiContactGaitGeneratorThread(double dt,
                                                 ROS2Node ros2Node,
@@ -106,14 +109,14 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
       this.fullRobotModel = robotModel.createFullRobotModel();
 
       String robotName = robotModel.getSimpleRobotName();
-      ROS2Topic<?> inputTopic = MultiContactGaitGenerator.getInputTopic(robotName);
-      ROS2Topic<?> outputTopic = MultiContactGaitGenerator.getOutputTopic(robotName);
+      ROS2Topic<?> inputTopic = MultiContactGaitGeneratorAPI.getInputTopic(robotName);
+      ROS2Topic<?> outputTopic = MultiContactGaitGeneratorAPI.getOutputTopic(robotName);
 
       planner = robotModel.getReactiveBracingPlanner();
       reducedOrderRobotModel = new ReducedOrderRobotModel(robotModel.getContactPointParameters(), registry);
 
-      this.commandInputManager = new CommandInputManager(MultiContactGaitGenerator.getSupportedCommands());
-      this.statusOutputManager = new StatusMessageOutputManager(MultiContactGaitGenerator.getSupportedStatusMessages());
+      this.commandInputManager = new CommandInputManager(MultiContactGaitGeneratorAPI.getSupportedCommands());
+      this.statusOutputManager = new StatusMessageOutputManager(MultiContactGaitGeneratorAPI.getSupportedStatusMessages());
       new ControllerNetworkSubscriber(inputTopic, commandInputManager, outputTopic, statusOutputManager, ros2Node);
 
       HumanoidRobotContextJointData processedJointData = new HumanoidRobotContextJointData(fullRobotModel.getOneDoFJoints().length);
@@ -158,17 +161,13 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
          yoCapturePointWaypoints[i] = new YoFramePoint2D("capturePointWP" + i, ReferenceFrame.getWorldFrame(), registry);
       }
 
-      if (VISUALIZE_HEIGHT_MAP)
+      if (VISUALIZE_PERCEPTION_DATA)
       {
-         heights = new YoFramePoint3D[8000];
-         for (int i = 0; i < heights.length; i++)
-         {
-            heights[i] = new YoFramePoint3D("height" + i, ReferenceFrame.getWorldFrame(), registry);
-         }
+         perceptionVisualizer = new YoPerceptionVisualizer(registry);
       }
       else
       {
-         heights = null;
+         perceptionVisualizer = null;
       }
    }
 
@@ -218,13 +217,15 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
          PlanarRegionsListCommand planarRegionsListCommand = commandInputManager.pollNewestCommand(PlanarRegionsListCommand.class);
 //         LogTools.info("Received planar regions command! number of regions: " + planarRegionsListCommand.getNumberOfPlanarRegions());
          planner.setPlanarRegions(planarRegionsListCommand);
+         if (VISUALIZE_PERCEPTION_DATA)
+            perceptionVisualizer.visualizePlanarRegions(planarRegionsListCommand);
       }
       if (commandInputManager.isNewCommandAvailable(TerrainMapCommand.class))
       {
          TerrainMapCommand terrainMapCommand = commandInputManager.pollNewestCommand(TerrainMapCommand.class);
          bipedalGaitGenerator.setTerrainMapCommand(terrainMapCommand);
-         if (VISUALIZE_HEIGHT_MAP)
-            visualizeHeightMap(terrainMapCommand);
+         if (VISUALIZE_PERCEPTION_DATA)
+            perceptionVisualizer.visualizeHeightMap(terrainMapCommand);
       }
 
       if (triggerFall.getValue() || (!hasSentHandTrajectory && isFalling.getValue() && isHandRecoveryContactEnabled.getValue()))
@@ -244,6 +245,21 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
             if (handContactCommand != null)
             {
                LogTools.info("Sending " + robotSide + " hand bracing command!");
+               walkingCommandInputManager.submitCommand(handContactCommand);
+            }
+         }
+      }
+      if (triggerUnload.getValue())
+      {
+         triggerUnload.set(false);
+         LogTools.info("Unloading hands");
+
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            HandContactCommand handContactCommand = plannedHandContacts.get(robotSide);
+            if (handContactCommand != null)
+            {
+               handContactCommand.setLoad(false);
                walkingCommandInputManager.submitCommand(handContactCommand);
             }
          }
@@ -297,29 +313,6 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
       return humanoidRobotContextData;
    }
 
-   private boolean hasUpdatedHeightMapVisualization = false;
-
-   private void visualizeHeightMap(TerrainMapCommand terrainMapCommand)
-   {
-      if (!hasUpdatedHeightMapVisualization)
-      {
-         Point2DReadOnly gridCenter = terrainMapCommand.getGridCenter();
-         double cellSize = terrainMapCommand.getCellSize();
-         double gridWidth = terrainMapCommand.getGridWidth();
-         int centerIndex = HeightMapTools.computeCenterIndex(gridWidth, cellSize);
-
-         for (int i = 0; i < heights.length; i++)
-         {
-            int key = 3 * i;
-            double x = HeightMapTools.keyToXCoordinate(key, gridCenter.getX(), cellSize, centerIndex);
-            double y = HeightMapTools.keyToYCoordinate(key, gridCenter.getY(), cellSize, centerIndex);
-            double z = terrainMapCommand.getHeightAt(key);
-            heights[i].set(x, y, z);
-         }
-         hasUpdatedHeightMapVisualization = true;
-      }
-   }
-
    @Override
    public YoGraphicGroupDefinition getSCS2YoGraphics()
    {
@@ -330,12 +323,9 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
          group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D("capturePointWP" + i, yoCapturePointWaypoints[i], 0.003, ColorDefinitions.DarkBlue(), DefaultPoint2DGraphic.PLUS));
       }
 
-      if (VISUALIZE_HEIGHT_MAP)
+      if (VISUALIZE_PERCEPTION_DATA)
       {
-         for (int i = 0; i < heights.length; i++)
-         {
-            group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint3D("height" + i, heights[i], 0.003, ColorDefinitions.DarkBlue()));
-         }
+         group.addChild(perceptionVisualizer.getSCS2YoGraphics());
       }
 
       return group;
