@@ -34,10 +34,6 @@ public class ZEDInitParametersHolder
    private float grabComputeCappingFps = 0.0f;
    private boolean enableImageValidityCheck = false;
 
-   // Resolution override (0,0 means native resolution)
-   private int maximumWorkingResolutionWidth = 0;
-   private int maximumWorkingResolutionHeight = 0;
-
    public ZEDInitParametersHolder()
    {
    }
@@ -154,10 +150,4 @@ public class ZEDInitParametersHolder
 
    public boolean isEnableImageValidityCheck() { return enableImageValidityCheck; }
    public void setEnableImageValidityCheck(boolean enableImageValidityCheck) { this.enableImageValidityCheck = enableImageValidityCheck; }
-
-   public int getMaximumWorkingResolutionWidth() { return maximumWorkingResolutionWidth; }
-   public void setMaximumWorkingResolutionWidth(int width) { this.maximumWorkingResolutionWidth = width; }
-
-   public int getMaximumWorkingResolutionHeight() { return maximumWorkingResolutionHeight; }
-   public void setMaximumWorkingResolutionHeight(int height) { this.maximumWorkingResolutionHeight = height; }
 }
