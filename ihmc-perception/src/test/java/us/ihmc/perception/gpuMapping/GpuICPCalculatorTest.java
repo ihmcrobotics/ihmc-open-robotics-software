@@ -35,7 +35,7 @@ public class GpuICPCalculatorTest
    {
       heightMapParameters.setLocalWidthInMeters(LOCAL_WIDTH_IN_METERS);
       heightMapParameters.setGlobalWidthInMeters(GLOBAL_WIDTH_IN_METERS);
-      heightMapParameters.setIcpMaxDistance(0.4);
+      heightMapParameters.setIcpMaxDriftDistance(0.4);
       heightMapParameters.setIcpAlphaFilter(1.0);
       heightMapParameters.setIcpValidPoints(0);
 
@@ -202,7 +202,7 @@ public class GpuICPCalculatorTest
    @Test
    public void testICPSameOriginDifferentHeights()
    {
-      heightMapParameters.setIcpMaxDistance(0.5);
+      heightMapParameters.setIcpMaxDriftDistance(0.5);
       GpuICPCalculator heightMapICPCalculator = new GpuICPCalculator(heightMapParameters);
 
       // The global map is higher than the local map
