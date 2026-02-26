@@ -92,7 +92,7 @@ public class HeightMapExtractor
    private final Point3D heightMapCenterPoint = new Point3D();
 
    private final GpuICPCalculator gpuICPCalculator;
-   private Vector3D correctedTransform = new Vector3D();
+   private final RigidBodyTransform totalCorrectedTransform = new RigidBodyTransform();
    private boolean performICP = true;
 
    public HeightMapExtractor(HeightMapParameters heightMapParameters)
@@ -232,6 +232,13 @@ public class HeightMapExtractor
       double currentCellCordY =
             (int) Math.floor(sensorToWorldZUp.getTranslation().getY32() / heightMapParameters.getCellSize()) * heightMapParameters.getCellSize();
 
+      double correctedCurrentCellCordX =
+            (int) Math.floor(totalCorrectedTransform.getTranslationX() + sensorToWorldZUp.getTranslationX() / heightMapParameters.getCellSize())
+            * heightMapParameters.getCellSize();
+      double correctedCurrentCellCordY =
+            (int) Math.floor(totalCorrectedTransform.getTranslationY() + sensorToWorldZUp.getTranslationY() / heightMapParameters.getCellSize())
+            * heightMapParameters.getCellSize();
+
       // 1. Get the raw world position from the transform matrix
       float worldCamX = sensorToWorldNoRotation.getTranslation().getX32();
       float worldCamY = sensorToWorldNoRotation.getTranslation().getY32();
@@ -328,7 +335,7 @@ public class HeightMapExtractor
 
          if (heightMapParameters.getICPFilter() && performICP)
          {
-            Point3D globalHeightMapCenterOnGrid = new Point3D(currentCellCordX, currentCellCordY, globalHeightMapCenter.getZ32());
+            Point3D globalHeightMapCenterOnGrid = new Point3D(correctedCurrentCellCordX, correctedCurrentCellCordY, globalHeightMapCenter.getZ32());
             gpuICPCalculator.computeICPErrorTransform(localMeanMap,
                                                       previousGlobalMapForICP,
                                                       localCenterMapForICP,
@@ -345,7 +352,7 @@ public class HeightMapExtractor
 
             if (!gpuICPCalculator.isEndedWithoutEnoughValidPoints())
             {
-               correctedTransform = gpuICPCalculator.getLatestPointCloudErrorTransform();
+               Vector3D correctedTransform = gpuICPCalculator.getLatestPointCloudErrorTransform();
                double dx = correctedTransform.getX();
                double dy = correctedTransform.getY();
                double dz = correctedTransform.getZ();
@@ -368,7 +375,8 @@ public class HeightMapExtractor
                   dz = 0.0;
                }
 
-               gpuICPCalculator.applyCorrectionToTransform(sensorToGroundZUpDevice, dx, dy, dz, stream);
+               totalCorrectedTransform.appendTranslation(dx, dy, dz);
+               gpuICPCalculator.applyCorrectionToTransform(sensorToWorldNoRotationDevice, dx, dy, dz, stream);
             }
          }
          else
@@ -453,8 +461,8 @@ public class HeightMapExtractor
          registerKernel.withPointer(previousGlobalMapForICP.data()).withLong(previousGlobalMapForICP.step());
          registerKernel.withPointer(globalMeanMap.data()).withLong(globalMeanMap.step());
          registerKernel.withPointer(globalVarianceMap.data()).withLong(globalVarianceMap.step());
-         registerKernel.withFloat((float) currentCellCordX);
-         registerKernel.withFloat((float) currentCellCordY);
+         registerKernel.withFloat((float) correctedCurrentCellCordX);
+         registerKernel.withFloat((float) correctedCurrentCellCordY);
          registerKernel.withFloat(0.0f);
          registerKernel.withPointer(sensorToWorldNoRotationDevice);
          registerKernel.withPointer(parametersDevicePointer);
@@ -509,7 +517,7 @@ public class HeightMapExtractor
 
       // The center of this map should be centered in the world grid
       // The sensor origin isn't always at the center of a grid point, in fact it's often not in the center
-      heightMapCenterPoint.set(currentCellCordX, currentCellCordY, 0.0);
+      heightMapCenterPoint.set(correctedCurrentCellCordX, correctedCurrentCellCordY, 0.0);
 
       // Finished GPU kernels, let pack this into the height map data object
       Mat hostHeightMap = new Mat();
