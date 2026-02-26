@@ -9,6 +9,18 @@ import us.ihmc.pubsub.TopicDataType;
 public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActionDefinitionMessage> implements Settable<FootstepPlanActionDefinitionMessage>, EpsilonComparable<FootstepPlanActionDefinitionMessage>
 {
    /**
+          * Quick footstep planner
+          */
+   public static final byte QUICK = (byte) 0;
+   /**
+          * Turn walk turn planner
+          */
+   public static final byte TURN_WALK_TURN = (byte) 1;
+   /**
+          * A star planner
+          */
+   public static final byte A_STAR = (byte) 2;
+   /**
             * Parent definition fields
             */
    public behavior_msgs.msg.dds.ActionNodeDefinitionMessage definition_;
@@ -73,9 +85,9 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
             */
    public byte planner_initial_stance_side_;
    /**
-            * Whether to perform A* search in the planner
+            * The type of planner as defined above
             */
-   public boolean planner_perform_a_star_search_;
+   public byte planner_;
    /**
             * Whether to walk, turning first, matching the goal orientation
             */
@@ -137,7 +149,7 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
 
       planner_initial_stance_side_ = other.planner_initial_stance_side_;
 
-      planner_perform_a_star_search_ = other.planner_perform_a_star_search_;
+      planner_ = other.planner_;
 
       planner_walk_with_goal_orientation_ = other.planner_walk_with_goal_orientation_;
 
@@ -372,18 +384,18 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
    }
 
    /**
-            * Whether to perform A* search in the planner
+            * The type of planner as defined above
             */
-   public void setPlannerPerformAStarSearch(boolean planner_perform_a_star_search)
+   public void setPlanner(byte planner)
    {
-      planner_perform_a_star_search_ = planner_perform_a_star_search;
+      planner_ = planner;
    }
    /**
-            * Whether to perform A* search in the planner
+            * The type of planner as defined above
             */
-   public boolean getPlannerPerformAStarSearch()
+   public byte getPlanner()
    {
-      return planner_perform_a_star_search_;
+      return planner_;
    }
 
    /**
@@ -477,7 +489,7 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.planner_initial_stance_side_, other.planner_initial_stance_side_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.planner_perform_a_star_search_, other.planner_perform_a_star_search_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.planner_, other.planner_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.planner_walk_with_goal_orientation_, other.planner_walk_with_goal_orientation_, epsilon)) return false;
 
@@ -525,7 +537,7 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
 
       if(this.planner_initial_stance_side_ != otherMyClass.planner_initial_stance_side_) return false;
 
-      if(this.planner_perform_a_star_search_ != otherMyClass.planner_perform_a_star_search_) return false;
+      if(this.planner_ != otherMyClass.planner_) return false;
 
       if(this.planner_walk_with_goal_orientation_ != otherMyClass.planner_walk_with_goal_orientation_) return false;
 
@@ -574,8 +586,8 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
       builder.append(this.right_goal_foot_yaw_to_gizmo_);      builder.append(", ");
       builder.append("planner_initial_stance_side=");
       builder.append(this.planner_initial_stance_side_);      builder.append(", ");
-      builder.append("planner_perform_a_star_search=");
-      builder.append(this.planner_perform_a_star_search_);      builder.append(", ");
+      builder.append("planner=");
+      builder.append(this.planner_);      builder.append(", ");
       builder.append("planner_walk_with_goal_orientation=");
       builder.append(this.planner_walk_with_goal_orientation_);      builder.append(", ");
       builder.append("planner_plan_with_body_path=");
