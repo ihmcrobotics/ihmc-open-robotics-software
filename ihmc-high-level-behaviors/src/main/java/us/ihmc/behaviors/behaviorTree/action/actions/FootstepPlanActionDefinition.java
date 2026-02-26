@@ -23,6 +23,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.JSONTools;
 
+import static behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessage.*;
+
 public class FootstepPlanActionDefinition extends ActionNodeDefinition
 {
    private final CRDTBidirectionalDouble swingDuration;
@@ -37,7 +39,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
    private final SideDependentList<CRDTBidirectionalDouble> goalFootstepToGoalYs;
    private final SideDependentList<CRDTBidirectionalDouble> goalFootstepToGoalYaws;
    private final CRDTBidirectionalImmutableField<InitialStanceSide> plannerInitialStanceSide;
-   private final CRDTBidirectionalBoolean plannerPerformAStarSearch;
+   private final CRDTBidirectionalInteger plannerType;
    private final CRDTBidirectionalBoolean plannerWalkWithGoalOrientation;
    private final CRDTBidirectionalBoolean plannerPlanWithBodyPath;
    private final BehaviorStoredPropertySetDefinition plannerParameters;
@@ -55,7 +57,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
    private final SideDependentList<Double> onDiskGoalFootstepToGoalYs = new SideDependentList<>(() -> 0.0);
    private final SideDependentList<Double> onDiskGoalFootstepToGoalYaws = new SideDependentList<>(() -> 0.0);
    private InitialStanceSide onDiskPlannerInitialStanceSide;
-   private boolean onDiskPlannerPerformAStarSearch;
+   private int onDiskPlannerType;
    private boolean onDiskPlannerWalkWithGoalOrientation;
    private boolean onDiskPlannerPlanWithBodyPath;
 
@@ -75,7 +77,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       goalFootstepToGoalYs = new SideDependentList<>(() -> new CRDTBidirectionalDouble(this, 0.0));
       goalFootstepToGoalYaws = new SideDependentList<>(() -> new CRDTBidirectionalDouble(this, 0.0));
       plannerInitialStanceSide = new CRDTBidirectionalImmutableField<>(this, InitialStanceSide.AUTO);
-      plannerPerformAStarSearch = new CRDTBidirectionalBoolean(this, false);
+      plannerType = new CRDTBidirectionalInteger(this, QUICK);
       plannerWalkWithGoalOrientation = new CRDTBidirectionalBoolean(this, true);
       plannerPlanWithBodyPath = new CRDTBidirectionalBoolean(this, false);
       plannerParameters = new BehaviorStoredPropertySetDefinition(this, "plannerParameters", robotModel.getFootstepPlannerParameters());
@@ -113,8 +115,8 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
             goalFootNode.put("yawInDegrees", (float) MathTools.roundToPrecision(Math.toDegrees(goalFootstepToGoalYaws.get(side).getValue()), 0.02));
          }
          jsonNode.put("plannerInitialStanceSide", plannerInitialStanceSide.getValue().name());
-         jsonNode.put("plannerPerformAStarSearch", plannerPerformAStarSearch.getValue());
-         if (plannerPerformAStarSearch.getValue())
+         jsonNode.put("planner", plannerType.getValue());
+         if (plannerType.getValue() == A_STAR)
             jsonNode.put("plannerWalkWithGoalOrientation", plannerWalkWithGoalOrientation.getValue());
          jsonNode.put("plannerPlanWithBodyPath", plannerPlanWithBodyPath.getValue());
          plannerParameters.toJSON(jsonNode);
@@ -152,7 +154,9 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
          if (jsonNode.get("plannerInitialStanceSide") instanceof TextNode textNode)
             plannerInitialStanceSide.setValue(InitialStanceSide.valueOf(textNode.textValue()));
          if (jsonNode.get("plannerPerformAStarSearch") instanceof BooleanNode booleanNode)
-            plannerPerformAStarSearch.setValue(booleanNode.booleanValue());
+            plannerType.setValue(booleanNode.booleanValue() ? A_STAR : QUICK);
+         if (jsonNode.get("planner") != null)
+            plannerType.setValue(jsonNode.get("planner").asInt());
          if (jsonNode.get("plannerWalkWithGoalOrientation") instanceof BooleanNode booleanNode)
             plannerWalkWithGoalOrientation.setValue(booleanNode.booleanValue());
          if (jsonNode.get("plannerPlanWithBodyPath") instanceof BooleanNode booleanNode)
@@ -184,7 +188,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       for (int i = 0; i < manuallyPlacedFootsteps.getSize(); i++)
          manuallyPlacedFootsteps.getValueReadOnly(i).setOnDiskFields();
       onDiskPlannerInitialStanceSide = plannerInitialStanceSide.getValue();
-      onDiskPlannerPerformAStarSearch = plannerPerformAStarSearch.getValue();
+      onDiskPlannerType = plannerType.getValue();
       onDiskPlannerWalkWithGoalOrientation = plannerWalkWithGoalOrientation.getValue();
       onDiskPlannerPlanWithBodyPath = plannerPlanWithBodyPath.getValue();
       plannerParameters.setOnDiskFields();
@@ -217,7 +221,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
          for (int i = 0; i < manuallyPlacedFootsteps.getSize(); i++)
             manuallyPlacedFootsteps.getValueAndModify().get(i).undoAllNontopologicalChanges();
          plannerInitialStanceSide.setValue(onDiskPlannerInitialStanceSide);
-         plannerPerformAStarSearch.setValue(onDiskPlannerPerformAStarSearch);
+         plannerType.setValue(onDiskPlannerType);
          plannerWalkWithGoalOrientation.setValue(onDiskPlannerWalkWithGoalOrientation);
          plannerPlanWithBodyPath.setValue(onDiskPlannerPlanWithBodyPath);
          plannerParameters.undoAllNontopologicalChanges();
@@ -250,7 +254,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
          for (int i = 0; i < manuallyPlacedFootsteps.getSize(); i++)
             unchanged &= !manuallyPlacedFootsteps.getValueReadOnly(i).hasChanges();
       unchanged &= plannerInitialStanceSide.getValue() == onDiskPlannerInitialStanceSide;
-      unchanged &= plannerPerformAStarSearch.getValue() == onDiskPlannerPerformAStarSearch;
+      unchanged &= plannerType.getValue() == onDiskPlannerType;
       unchanged &= plannerWalkWithGoalOrientation.getValue() == onDiskPlannerWalkWithGoalOrientation;
       unchanged &= plannerPlanWithBodyPath.getValue() == onDiskPlannerPlanWithBodyPath;
       unchanged &= plannerParameters.isUnchanged();
@@ -282,7 +286,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       message.setRightGoalFootYToGizmo(goalFootstepToGoalYs.get(RobotSide.RIGHT).toMessage());
       message.setRightGoalFootYawToGizmo(goalFootstepToGoalYaws.get(RobotSide.RIGHT).toMessage());
       message.setPlannerInitialStanceSide(plannerInitialStanceSide.toMessage().toByte());
-      message.setPlannerPerformAStarSearch(plannerPerformAStarSearch.toMessage());
+      message.setPlanner((byte) plannerType.toMessage());
       message.setPlannerWalkWithGoalOrientation(plannerWalkWithGoalOrientation.toMessage());
       message.setPlannerPlanWithBodyPath(plannerPlanWithBodyPath.toMessage());
       plannerParameters.toMessage(message.getPlannerParameters());
@@ -315,7 +319,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       goalFootstepToGoalYs.get(RobotSide.RIGHT).fromMessage(message.getRightGoalFootYToGizmo());
       goalFootstepToGoalYaws.get(RobotSide.RIGHT).fromMessage(message.getRightGoalFootYawToGizmo());
       plannerInitialStanceSide.fromMessage(InitialStanceSide.fromByte(message.getPlannerInitialStanceSide()));
-      plannerPerformAStarSearch.fromMessage(message.getPlannerPerformAStarSearch());
+      plannerType.fromMessage(message.getPlanner());
       plannerWalkWithGoalOrientation.fromMessage(message.getPlannerWalkWithGoalOrientation());
       plannerPlanWithBodyPath.fromMessage(message.getPlannerPlanWithBodyPath());
       plannerParameters.fromMessage(message.getPlannerParameters());
@@ -406,9 +410,9 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       return plannerInitialStanceSide;
    }
 
-   public CRDTBidirectionalBoolean getPlannerPerformAStarSearch()
+   public CRDTBidirectionalInteger getPlannerType()
    {
-      return plannerPerformAStarSearch;
+      return plannerType;
    }
 
    public CRDTBidirectionalBoolean getPlannerWalkWithGoalOrientation()
