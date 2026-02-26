@@ -14,36 +14,44 @@
         "You are an intelligent assistant for a robot operating in a dynamic, partially observable environment.",
         "Your task is to identify every object the robot will need to interact with, based on the task description.",
         "",
-        "Naming convention: each object is identified by its base name + an ordinal suffix (e.g., Person1, Charge1).",
-        "Include all objects the robot must navigate to, receive from, place on, or otherwise act upon.",
-        "Assign ordinal suffixes starting from 1 for each base name."
+        "Naming convention: each object is identified by its base name (e.g., person, charge).",
+        "Include all objects the robot must navigate to, receive from, place on, or otherwise act upon."
     ],
 
     "task_description": [
         "1. SCAN the environment to populate scene_objects.",
-        "2. Go to the person to the right of the barrier.",
-        "3. Receive the explosive charge from the person.",
-        "4. Go to the front of the DoorPanel.",
-        "5. Place the charge on the DoorPanel.",
-        "6. Go behind the barrier."
+        "2. GOTO (to the person to the right of the barrier).",
+        "3. RECEIVE CHARGE.",
+        "4. GOTO (to the front of the DoorPanel).",
+        "5. PLACE CHARGE ON DOOR.",
+        "6. GOTO (behind the barrier)."
     ],
 
     "examples": [
-        "Example 1 — multiple objects across steps:",
-        "  task_description: Go to the person behind the couch, get the charge, go to the other person by the door.",
-        "  Output: { target_objects: [Person1, Couch1, Charge1, Person2, Door1] }",
+        "Example 1:",
+        "  task_description:",
+        "    1. SCAN the environment.",
+        "    2. GOTO (to the person behind the couch).",
+        "    3. RECEIVE CHARGE.",
+        "    4. GOTO (to the front of the door_panel).",
+        "    5. PLACE CHARGE ON DOOR.",
+        "    6. GOTO (behind the couch).",
+        "  Output: { \"target_objects\": [\"person\", \"couch\", \"charge\", \"door_panel\"] }",
         "",
-        "Example 2 — simple two-object task:",
-        "  task_description: Go to the person and receive the bottle from them.",
-        "  Output: { target_objects: [Person1, Bottle1] }"
+        "Example 2:",
+        "  task_description:",
+        "    1. SCAN the environment.",
+        "    2. GOTO (to the person in front of the wall).",
+        "    3. RECEIVE CHARGE.",
+        "  Output: { \"target_objects\": [\"person\", \"wall\", \"charge\"] }"
     ],
 
     "immediate_task": "List all objects the robot must interact with to complete the task.",
     "precognition": "Think through each step: what does the robot navigate to, receive, or act on?",
     "output_format": [
         "Return a valid JSON object:",
-        "  { target_objects: [ObjectName1, ObjectName2, ...] }",
+        "  { target_objects: [objectName, objectName, ...] }",
         "",
-        "Use base name + ordinal (e.g., Person1). No explanations or code."
+        "Use base name with no numbers(e.g., person). No explanations or code."
     ]
 }

@@ -1,14 +1,11 @@
 """
-Behavior Coordinator for the explosive breaching demo.
+Predefined Behavior Coordinator for the explosive breaching demo.
 
-Uses Qwen2.5-VL (served via vLLM) for all decision-making:
-  - config.json               → plan the full behavior sequence
-  - config_goto.json          → extract GOTO navigation parameters
-  - config_scan.json          → extract SCAN target objects  (+ optional image)
-  - config_receive_object.json→ extract RECEIVE OBJECT parameters
+All LLM calls are replaced with hardcoded responses taken directly from
+real VLM logs (Qwen2.5-VL-7B-Instruct-AWQ). No model server is required.
 
 Usage:
-    python behavior_coordinator.py
+    python behavior_coordinator_predefined.py
 """
 
 import os
@@ -28,26 +25,81 @@ from behavior_msgs.msg import (
     AI2RStatusMessage,
     AI2RNavigationMessage,
     AI2RReceiveObjectMessage,
-    AI2RScanMessage
+    AI2RScanMessage,
 )
-
-from vlm_interface import VLMInterface
-CONFIG_DIR = Path(__file__).parent
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Scene utilities
+# Hardcoded VLM responses (copied verbatim from vlm_logs.json)
+# ──────────────────────────────────────────────────────────────────────────────
+
+PREDEFINED_PLAN = (
+    "behavior_list = ["
+    "SCAN, "
+    "GOTO (to the bottle), "
+    "PICK UP BOTTLE, "
+    "GOTO (to the trashcan), "
+    "PUT IN TRASHCAN, "
+    "GOTO (to the doorpanel), "
+    "DOOR TRAVERSAL"
+    "]"
+)
+
+PREDEFINED_SCAN = {
+    "target_objects": ["bottle", "trash_can", "door_panel"]
+}
+
+# Keyed by a substring of the step description (lowercase).
+# The coordinator matches the first key that appears in the description.
+PREDEFINED_GOTO = {
+    "bottle": {
+        "target_object":          "bottle",
+        "spatial_relation_goto":  "DEFAULT",
+        "pov_object_goto":        "-",
+        "spatially_related_object": "-",
+        "spatial_relation_obj":   "-",
+        "class_discriminator":    "CLOSE",
+    },
+    "trashcan": {
+        "target_object":          "trash_can",
+        "spatial_relation_goto":  "FRONT",
+        "pov_object_goto":        "-",
+        "spatially_related_object": "-",
+        "spatial_relation_obj":   "-",
+        "class_discriminator":    "CLOSE",
+    },
+    "doorpanel": {
+        "target_object":          "door_panel",
+        "spatial_relation_goto":  "DEFAULT",
+        "pov_object_goto":        "-",
+        "spatially_related_object": "-",
+        "spatial_relation_obj":   "-",
+        "class_discriminator":    "CLOSE",
+    },
+}
+
+PREDEFINED_PICK_UP_BOTTLE = {
+    "object_name": "bottle",
+    "side": 1,
+}
+
+PREDEFINED_RECEIVE_BOTTLE = {
+    "object_name": "bottle",
+    "side": 1,
+}
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Scene utilities  (unchanged from behavior_coordinator.py)
 # ──────────────────────────────────────────────────────────────────────────────
 
 def parse_scene(msg):
-    """Return (object_names, available_behaviors) from a status message."""
     names     = [obj.object_name for obj in msg.objects] if msg.objects else []
     behaviors = list(msg.available_behaviors) if msg.available_behaviors else []
     return names, behaviors
 
 
 def log_failure(msg, log_file="failure_info.json"):
-    """Extract failure info, append to JSON log, and return the info dict."""
     if msg.failed_behavior == "-":
         return None
 
@@ -79,43 +131,13 @@ def log_failure(msg, log_file="failure_info.json"):
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Response parsing
-# ──────────────────────────────────────────────────────────────────────────────
-
-def parse_json_response(response: str) -> dict:
-    """
-    Parse a JSON object from a VLM response that may be wrapped in markdown code fences.
-    Handles both:
-        ```json { ... } ```
-        { ... }
-    """
-    # Strip markdown code fences if present
-    stripped = re.sub(r"^```[a-z]*\n?", "", response.strip(), flags=re.IGNORECASE)
-    stripped = re.sub(r"\n?```$", "", stripped.strip())
-    # Normalize single quotes to double quotes for robustness
-    stripped = stripped.replace("'", '"')
-    return json.loads(stripped)
-
-
-# ──────────────────────────────────────────────────────────────────────────────
-# Plan parsing
+# Plan parsing  (unchanged from behavior_coordinator.py)
 # ──────────────────────────────────────────────────────────────────────────────
 
 def behavior_list_to_planqueue(response: str) -> List[List[str]]:
-    """
-    Parse VLM output into [[behavior_name, full_step], ...].
-
-    Expects the model to return something like:
-        behavior_list = [
-            SCAN,
-            GOTO (to the person to the right of the barrier),
-            RECEIVE OBJECT (the charge from the person),
-            ...
-        ]
-    """
     match = re.search(r"behavior_list\s*=\s*\[(.*?)\]", response, re.DOTALL)
     if not match:
-        print("Warning: no behavior_list found in VLM response.")
+        print("Warning: no behavior_list found.")
         return []
 
     list_block = match.group(1)
@@ -132,19 +154,14 @@ def behavior_list_to_planqueue(response: str) -> List[List[str]]:
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Spatial object selection  (ported from behavior_nl_action.py)
+# Spatial object selection  (unchanged from behavior_coordinator.py)
 # ──────────────────────────────────────────────────────────────────────────────
 
 def _point_to_numpy(point: Point) -> np.ndarray:
     return np.array([point.x, point.y, point.z])
 
 
-def _get_pose_by_name(
-    name: str,
-    scene_names: List[str],
-    scene_poses: List[Point],
-    robot_pose: Optional[Point] = None,
-) -> Optional[Point]:
+def _get_pose_by_name(name, scene_names, scene_poses, robot_pose=None):
     if name.lower() == "robot" and robot_pose:
         return robot_pose
     if name in ("-", ""):
@@ -156,15 +173,9 @@ def _get_pose_by_name(
 
 
 def select_target_object(
-    base_name: str,
-    spatially_related_object: str,
-    spatial_relation: str,
-    class_discriminator: str,
-    scene_object_names: List[str],
-    scene_object_positions: List[Point],
-    robot_pose: Optional[Point] = None,
+    base_name, spatially_related_object, spatial_relation, class_discriminator,
+    scene_object_names, scene_object_positions, robot_pose=None,
 ) -> Optional[str]:
-    """Resolve an ambiguous base name to a specific scene object using spatial geometry."""
     candidates = [
         (name, pose)
         for name, pose in zip(scene_object_names, scene_object_positions)
@@ -213,21 +224,15 @@ def select_target_object(
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Behavior Coordinator
+# Behavior Coordinator (predefined — no LLM calls)
 # ──────────────────────────────────────────────────────────────────────────────
 
 class BehaviorCoordinator(Node):
     def __init__(self):
         super().__init__("behavior_coordination_node")
 
-        # One VLMInterface per config
-        self.vlm_planner = VLMInterface(CONFIG_DIR / "config.json")
-        self.vlm_goto    = VLMInterface(CONFIG_DIR / "config_goto.json")
-        self.vlm_scan    = VLMInterface(CONFIG_DIR / "config_scan.json")
-        self.vlm_receive = VLMInterface(CONFIG_DIR / "config_receive_object.json")
-
         # State
-        self.plan_queue       = []   # [[behavior_name, full_description], ...]
+        self.plan_queue       = []
         self.initialized      = False
         self.logged_failure   = False
         self.next_behavior    = ""
@@ -257,7 +262,7 @@ class BehaviorCoordinator(Node):
             qos_rel,
         )
 
-        self.get_logger().info("BehaviorCoordinator ready.")
+        self.get_logger().info("BehaviorCoordinator (predefined) ready.")
 
     # ------------------------------------------------------------------
     # Status callback
@@ -266,41 +271,34 @@ class BehaviorCoordinator(Node):
     def on_status(self, msg):
         scene_names, available_behaviors = parse_scene(msg)
 
-        # Print scene on first message
         if not self.initialized:
             self.get_logger().info(f"Scene objects:       {scene_names}")
             self.get_logger().info(f"Available behaviors: {available_behaviors}")
 
-        # Print each new completion
         if msg.completed_behavior != "-" and msg.completed_behavior != self.last_completion:
             self.get_logger().info(f"Completed: {msg.completed_behavior}")
             self.last_completion = msg.completed_behavior
 
-        # Log failures once
         if msg.failed_behavior != "-" and not self.logged_failure:
             info = log_failure(msg)
             self.get_logger().warn(f"[FAILURE] {json.dumps(info, indent=2)}")
             self.logged_failure = True
 
-        # Wait until robot is idle
         if msg.behavior_in_progress != "-":
             return
 
-        # Wait for the last commanded behavior to be acknowledged as complete
         if self.next_behavior and msg.completed_behavior != self.next_behavior:
             return
 
-        # Build the plan on the first idle tick
         if not self.plan_queue:
             if self.initialized:
                 self.get_logger().info("Mission complete. All behaviors executed.")
                 return
-            self._plan_mission(msg)
+            self._plan_mission()
 
         if not self.plan_queue:
             return
 
-        # Send next command
         self.next_behavior, self.next_description = self.plan_queue.pop(0)
         self.get_logger().info(
             f"Commanding [{self.next_behavior}]: {self.next_description}  "
@@ -313,29 +311,15 @@ class BehaviorCoordinator(Node):
         self.logged_failure = False
 
     # ------------------------------------------------------------------
-    # Mission planning
+    # Mission planning — hardcoded
     # ------------------------------------------------------------------
 
-    def _plan_mission(self, msg):
-        scene_names, available_behaviors = parse_scene(msg)
-
-        vlm_input = (
-            f"scene_objects: {scene_names}\n"
-            f"available_behaviors: {available_behaviors}\n"
-            f"previously_executed: {msg.completed_behavior if msg.completed_behavior != '-' else ''}\n"
-            f"failed_behaviors: {msg.failed_behavior if msg.failed_behavior != '-' else ''}"
-        )
-
-        self.get_logger().info("Calling VLM mission planner...")
-        self.vlm_planner.first_log_interaction(vlm_input)
-        t0 = time.perf_counter()
-        response = self.vlm_planner.call_model(vlm_input)
-        self.get_logger().info(f"VLM mission planner response time: {time.perf_counter() - t0:.2f}s")
-        self.get_logger().info(f"VLM plan ````````:\n{response}")
-
-        self.plan_queue = behavior_list_to_planqueue(response)
+    def _plan_mission(self):
+        self.get_logger().info("[PREDEFINED] Using hardcoded mission plan.")
+        self.get_logger().info(f"Plan: {PREDEFINED_PLAN}")
+        self.plan_queue = behavior_list_to_planqueue(PREDEFINED_PLAN)
         if not self.plan_queue:
-            self.get_logger().error("VLM returned no parseable behavior list.")
+            self.get_logger().error("Failed to parse predefined plan.")
 
     # ------------------------------------------------------------------
     # Command builders
@@ -348,33 +332,17 @@ class BehaviorCoordinator(Node):
 
         if   behavior == "SCAN":           return self._build_scan(cmd, description, msg)
         elif behavior == "GOTO":           return self._build_goto(cmd, description, msg)
-        elif behavior == "RECEIVE OBJECT": return self._build_receive_object(cmd, description, msg)
-        # PLACE CHARGE ON DOOR and any other simple behaviors need no extra params
+        elif behavior == "PICK UP BOTTLE": return self._build_pick_up_bottle(cmd, description, msg)
         return cmd
 
     def _build_scan(self, cmd, description, msg):
-        # SCAN has no extra message parameters — the robot does a general scene scan.
-        # We still call the VLM to log which objects it expects to find.
         cmd.adapting_behavior = True
-        scene_names, _ = parse_scene(msg)
-        vlm_input = (
-            f"scene_objects: {scene_names}\n"
-            f"task_description: {description}"
-        )
-        t0 = time.perf_counter()
-        response = self.vlm_scan.call_model(vlm_input)
-        self.get_logger().info(f"VLM SCAN response time: {time.perf_counter() - t0:.2f}s")
-        self.get_logger().info(f"SCAN expected targets:\n{response}")
+        data = PREDEFINED_SCAN
+        self.get_logger().info(f"[PREDEFINED] SCAN targets: {data['target_objects']}")
 
-        try:
-            data = parse_json_response(response)
-        except json.JSONDecodeError as e:
-            self.get_logger().error(f"Could not parse SCAN response ({e}).")
-        scanMessage = AI2RScanMessage()
-        # data["target_objects"] = ["person",  "charge", "door_panel"]
-        scanMessage.object_names =  data["target_objects"]
-        cmd.scan = scanMessage
-
+        scan_msg = AI2RScanMessage()
+        scan_msg.object_names = data["target_objects"]
+        cmd.scan = scan_msg
         return cmd
 
     def _build_goto(self, cmd, description, msg):
@@ -383,20 +351,19 @@ class BehaviorCoordinator(Node):
         scene_poses    = [obj.object_pose_in_world.position for obj in msg.objects]
         robot_pos      = msg.robot_mid_feet_under_pelvis_pose_in_world.position
 
-        vlm_input = (
-            f"scene_objects: {scene_names}\n"
-            f"task_description: {description}"
-        )
-        t0 = time.perf_counter()
-        response = self.vlm_goto.call_model(vlm_input)
-        self.get_logger().info(f"VLM GOTO response time: {time.perf_counter() - t0:.2f}s")
-        self.get_logger().info(f"GOTO params:\n{response}")
+        # Match predefined response by keyword in description
+        desc_lower = description.lower()
+        data = None
+        for keyword, response in PREDEFINED_GOTO.items():
+            if keyword in desc_lower:
+                data = response
+                break
 
-        try:
-            data = parse_json_response(response)
-        except json.JSONDecodeError as e:
-            self.get_logger().error(f"Could not parse GOTO response ({e}).")
+        if data is None:
+            self.get_logger().error(f"No predefined GOTO response for: '{description}'")
             return cmd
+
+        self.get_logger().info(f"[PREDEFINED] GOTO params: {data}")
 
         target = data["target_object"]
         if target not in scene_names:
@@ -429,28 +396,15 @@ class BehaviorCoordinator(Node):
         cmd.navigation = nav
         return cmd
 
-    def _build_receive_object(self, cmd, description, msg):
+    def _build_pick_up_bottle(self, cmd, description, msg):
         cmd.adapting_behavior = True
-        scene_names, _ = parse_scene(msg)
+        data = PREDEFINED_PICK_UP_BOTTLE
+        self.get_logger().info(f"[PREDEFINED] RECEIVE OBJECT params: {data}")
 
-        vlm_input = (
-            f"scene_objects: {scene_names}\n"
-            f"task_description: {description}"
-        )
-        t0 = time.perf_counter()
-        response = self.vlm_receive.call_model(vlm_input)
-        self.get_logger().info(f"VLM RECEIVE OBJECT response time: {time.perf_counter() - t0:.2f}s")
-        self.get_logger().info(f"RECEIVE OBJECT params:\n{response}")
-
-        try:
-            data = parse_json_response(response)
-            receive_msg = AI2RReceiveObjectMessage()
-            receive_msg.object_name = data["object_name"]
-            receive_msg.side        = bytes([int(data["side"])])
-            cmd.receive_object      = receive_msg
-        except (json.JSONDecodeError, KeyError) as e:
-            self.get_logger().warn(f"Could not parse RECEIVE OBJECT response ({e}).")
-
+        receive_msg = AI2RReceiveObjectMessage()
+        receive_msg.object_name = data["object_name"]
+        receive_msg.side        = bytes([int(data["side"])])
+        cmd.receive_object      = receive_msg
         return cmd
 
 
