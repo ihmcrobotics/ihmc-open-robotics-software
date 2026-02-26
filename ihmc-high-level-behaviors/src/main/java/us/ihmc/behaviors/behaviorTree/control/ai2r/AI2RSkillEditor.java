@@ -126,11 +126,10 @@ public class AI2RSkillEditor
                else if (nameLower.contains("front"))
                   front = s;
             }
+            if (left  != null) left.getDefinition().getSceneObjectDefinition().setYoloClassName(objectName);
+            if (right != null) right.getDefinition().getSceneObjectDefinition().setYoloClassName(objectName);
+            if (front != null) front.getDefinition().getSceneObjectDefinition().setYoloClassName(objectName);
          }
-
-         if (left  != null) left.getDefinition().getSceneObjectDefinition().setYoloClassName(objectName);
-         if (right != null) right.getDefinition().getSceneObjectDefinition().setYoloClassName(objectName);
-         if (front != null) front.getDefinition().getSceneObjectDefinition().setYoloClassName(objectName);
       }
    }
 
