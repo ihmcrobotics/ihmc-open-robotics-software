@@ -79,7 +79,7 @@ public class YOLOv8InstantDetection extends InstantDetection implements Trackabl
    @Override
    public boolean has3D()
    {
-      // In your pipeline pose should always exist, but keep it safe
+      // Pose should always exist, but keep it safe
       return getPose() != null;
    }
 

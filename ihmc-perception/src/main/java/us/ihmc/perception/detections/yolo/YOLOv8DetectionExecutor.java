@@ -1,11 +1,12 @@
 package us.ihmc.perception.detections.yolo;
 
 import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.opencv.opencv_core.Point;
+import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Size;
 import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.YOLOv8ExecutorParameters;
@@ -64,10 +65,22 @@ public class YOLOv8DetectionExecutor
 
    private final ROS2Publisher<ImageMessage> annotatedImagePublisher = ros2Node.createPublisher(PerceptionAPI.YOLO_ANNOTATED_IMAGE);
    private final BooleanSupplier annotatedImageDemanded;
+   private final Object annotatedDetectionsLock = new Object();
    private final RepeatingTaskThread annotatedImagePublishedThread;
    private final TypedNotification<RawImage> newestColorImage = new TypedNotification<>();
 
    private final BoTSortTracker botSortTracker = new BoTSortTracker();
+
+   private final Target2DTracker target2DTracker = new Target2DTracker(
+         80,
+         0.7f, 0.05f,
+         10,
+         50,
+         0.05f, 0.4f,
+         0.0f, 0.35f,
+         100,
+         new Target2DTracker.Weights()
+   );
 
    private final BlockingQueue<Runnable> taskQueue;
    private final RepeatingTaskThread taskExecutorThread = new RepeatingTaskThread("YOLOExecutor", this::executeTasks, DefaultExceptionHandler.RUNTIME_EXCEPTION);
@@ -177,7 +190,7 @@ public class YOLOv8DetectionExecutor
             return;
          }
 
-         annotatedImageDetections.remove(model);
+         //         annotatedImageDetections.remove(model);
       }
 
       while (modelIterator.hasNext())
@@ -190,134 +203,201 @@ public class YOLOv8DetectionExecutor
             return;
          }
 
-         annotatedImageDetections.remove(model);
+         //         annotatedImageDetections.remove(model);
       }
    }
 
    /**
     * Non-blocking call to run YOLO on the provided images
-    * @param colorImage BGR color image, used for YOLO detection
+    * @param colorImage BGR color image (or convertible), used for YOLO detection
     * @param depthImage 16UC1 depth image, used to get points of detected objects
     */
    private void runYOLODetection(YOLOv8Model yoloModel, RawImage colorImage, RawImage depthImage)
    {
-      if (taskQueue.remainingCapacity() > 0)
+      // If the queue is full, just drop this frame (keeps realtime behavior)
+      if (taskQueue.remainingCapacity() <= 0)
+         return;
+
+      // IMPORTANT:
+      // Retain references NOW (on the producer thread) so the runnable owns valid images
+      // even if the caller releases immediately after runNextEnabledModel() returns.
+      RawImage colorRef = colorImage.get();
+      RawImage depthRef = depthImage.get();
+
+      if (colorRef == null || depthRef == null)
       {
-         // Acquire the images
-         if (colorImage.get() == null || depthImage.get() == null)
-            return;
-
-         taskQueue.add(() ->
-         {
-            // Run YOLO to get results
-            GpuMat bgrMat = new GpuMat();
-            colorImage.getPixelFormat().convertToPixelFormat(colorImage.getGpuImageMat(), bgrMat, PixelFormat.BGR8);
-            RawImage bgrImage = colorImage.replaceImage(bgrMat, PixelFormat.BGR8);
-            YOLOv8DetectionList yoloResults = yoloModel.run(bgrImage);
-
-            if (newestColorImage.poll())
-               newestColorImage.read().release();
-            newestColorImage.set(bgrImage.get());
-
-            SyncedYOLOv8ModelParameters modelParameters = parameters.getModelParameters().get(yoloModel.getName());
-
-            // Create list of instant detections from results
-            List<InstantDetection> yoloInstantDetections = new ArrayList<>();
-            List<YOLOv8InstantDetection> trackableDetections = new ArrayList<>();
-            List<YOLOv8InstantDetection> newAnnotatedImageDetections = new ArrayList<>();
-            for (YOLOv8Detection detection : yoloResults)
-            {
-               RawImage objectMask = detection.mask();
-
-               // Erode mask to get better segmentation
-               int erosionKernelRadius = modelParameters.getErosionKernelRadii().getValueReadOnly(detection.objectClassID());
-               Mat erodedMask = new Mat(objectMask.getHeight(), objectMask.getWidth(), objectMask.getOpenCVType());
-               opencv_imgproc.erode(objectMask.getCpuImageMat(),
-                                    erodedMask,
-                                    opencv_imgproc.getStructuringElement(opencv_imgproc.CV_SHAPE_RECT,
-                                                                         new Size(2 * erosionKernelRadius + 1, 2 * erosionKernelRadius + 1),
-                                                                         new Point(erosionKernelRadius, erosionKernelRadius)));
-               RawImage erodedObjectMask = objectMask.replaceImage(erodedMask);
-               objectMask.release();
-
-               // Get the segmented depth image
-               RawImage segmentedDepth = segmenter.removeBackground(depthImage, erodedObjectMask);
-               if (segmentedDepth == null)
-               {
-                  erodedObjectMask.release();
-                  continue;
-               }
-               // Get the point cloud
-               List<Point3D32> pointCloud = extractor.extractPointCloud(segmentedDepth);
-               // Filter out outliers from the point cloud
-               float outlierThreshold = modelParameters.getOutlierThresholds().getValueReadOnly(detection.objectClassID());
-               List<Point3D32> filteredPoints = YOLOv8Tools.filterOutliers(pointCloud, outlierThreshold, 128);
-
-               if (!filteredPoints.isEmpty())
-               {
-                  Point3D32 centroid = YOLOv8Tools.computeCentroidOfPointCloud(filteredPoints, 128);
-
-//                  annotatedImageDetections.add(new YOLOv8InstantDetection(detection.objectClass(),
-//                                                                          detection.confidence(),
-//                                                                          new Pose3D(centroid, new RotationMatrix()),
-//                                                                          erodedObjectMask.getAcquisitionTime(),
-//                                                                          bgrImage,
-//                                                                          erodedObjectMask,
-//                                                                          depthImage,
-//                                                                          detection.boundingBox(),
-//                                                                          filteredPoints));
-                  YOLOv8InstantDetection det = new YOLOv8InstantDetection(detection.objectClass(),
-                                                                       detection.confidence(),
-                                                                       new Pose3D(centroid, new RotationMatrix()),
-                                                                       erodedObjectMask.getAcquisitionTime(),
-                                                                       bgrImage,
-                                                                       erodedObjectMask,
-                                                                       depthImage,
-                                                                       detection.boundingBox(),
-                                                                       filteredPoints);
-                  trackableDetections.add(det);
-                  yoloInstantDetections.add(det);
-                  newAnnotatedImageDetections.add(det);
-               }
-               erodedObjectMask.release();
-               segmentedDepth.release();
-            }
-
-            // Track IDs
-            botSortTracker.update(trackableDetections);
-
-            // Callbacks exactly once
-            detectionConsumerCallbacks.forEach(cb -> cb.accept(yoloInstantDetections));
-
-            // Update annotated detections list (destroy previous)
-            synchronized (annotatedImagePublishedThread)
-            {
-               List<YOLOv8InstantDetection> previous = this.annotatedImageDetections;
-               this.annotatedImageDetections = newAnnotatedImageDetections;
-               for (YOLOv8InstantDetection old : previous)
-                  old.destroy();
-            }
-
-            // Process callbacks
-//            if (!yoloInstantDetections.isEmpty())
-//            {
-//               detectionConsumerCallbacks.forEach(callback -> callback.accept(yoloInstantDetections));
-//
-//               synchronized (annotatedImagePublishedThread)
-//               {
-//                  List<YOLOv8InstantDetection> previousAnnotatedImageDetections = this.annotatedImageDetections;
-//                  this.annotatedImageDetections = annotatedImageDetections;
-//                  for (YOLOv8InstantDetection previousAnnotatedImageDetection : previousAnnotatedImageDetections)
-//                     previousAnnotatedImageDetection.destroy();
-//               }
-//            }
-
-            yoloResults.destroy();
-            bgrImage.release();
-            colorImage.release();
-            depthImage.release();
-         });
+         // If either image is already dead, clean up the other retain (if any)
+         if (colorRef != null) colorRef.release();
+         if (depthRef != null) depthRef.release();
+         return;
       }
+
+      taskQueue.add(() ->
+                    {
+                       RawImage bgrImage = null;
+                       try
+                       {
+                          // --- Convert to BGR8 on GPU (or keep as-is) ---
+                          // YOLO expects BGR8. We create a new GPU mat and wrap it in a new RawImage
+                          // that shares metadata (intrinsics, pose, timestamps).
+                          GpuMat bgrMat = new GpuMat();
+                          colorRef.getPixelFormat().convertToPixelFormat(colorRef.getGpuImageMat(), bgrMat, PixelFormat.BGR8);
+                          bgrImage = colorRef.replaceImage(bgrMat, PixelFormat.BGR8);
+
+                          // --- Run YOLO ---
+                          YOLOv8DetectionList yoloResults = yoloModel.run(bgrImage);
+
+                          // Publish newest color image for the annotated-image thread
+                          // Store a RETAINED reference in newestColorImage
+                          RawImage newest = bgrImage.get(); // ref++
+                          if (newest != null)
+                          {
+                             // Release previous retained image (if any)
+                             if (newestColorImage.poll())
+                                newestColorImage.read().release();
+                             newestColorImage.set(newest);
+                          }
+
+                          SyncedYOLOv8ModelParameters modelParameters = parameters.getModelParameters().get(yoloModel.getName());
+
+                          // Build detections
+                          List<InstantDetection> yoloInstantDetections = new ArrayList<>();
+                          List<YOLOv8InstantDetection> trackableDetections = new ArrayList<>();
+                          List<YOLOv8InstantDetection> newAnnotatedImageDetections = new ArrayList<>();
+
+                          for (YOLOv8Detection detection : yoloResults)
+                          {
+                             RawImage objectMask = detection.mask();
+
+                             // Erode mask to get better segmentation
+                             int erosionKernelRadius = modelParameters.getErosionKernelRadii().getValueReadOnly(detection.objectClassID());
+                             Mat erodedMask = new Mat(objectMask.getHeight(), objectMask.getWidth(), objectMask.getOpenCVType());
+                             opencv_imgproc.erode(objectMask.getCpuImageMat(),
+                                                  erodedMask,
+                                                  opencv_imgproc.getStructuringElement(opencv_imgproc.CV_SHAPE_RECT,
+                                                                                       new Size(2 * erosionKernelRadius + 1, 2 * erosionKernelRadius + 1),
+                                                                                       new Point(erosionKernelRadius, erosionKernelRadius)));
+                             RawImage erodedObjectMask = objectMask.replaceImage(erodedMask);
+                             objectMask.release();
+
+                             // Segment depth
+                             RawImage segmentedDepth = segmenter.removeBackground(depthRef, erodedObjectMask);
+                             if (segmentedDepth == null)
+                             {
+                                erodedObjectMask.release();
+                                continue;
+                             }
+
+                             // Point cloud
+                             List<Point3D32> pointCloud = extractor.extractPointCloud(segmentedDepth);
+
+                             // Filter outliers
+                             float outlierThreshold = modelParameters.getOutlierThresholds().getValueReadOnly(detection.objectClassID());
+                             List<Point3D32> filteredPoints = YOLOv8Tools.filterOutliers(pointCloud, outlierThreshold, 128);
+
+                             if (!filteredPoints.isEmpty())
+                             {
+                                Point3D32 centroid = YOLOv8Tools.computeCentroidOfPointCloud(filteredPoints, 128);
+
+                                // One instance for tracker + callbacks (may be destroyed by consumers)
+                                YOLOv8InstantDetection detForTrackingAndCallbacks =
+                                      new YOLOv8InstantDetection(detection.objectClass(),
+                                                                 detection.confidence(),
+                                                                 new Pose3D(centroid, new RotationMatrix()),
+                                                                 erodedObjectMask.getAcquisitionTime(),
+                                                                 bgrImage,
+                                                                 erodedObjectMask,
+                                                                 depthRef,
+                                                                 detection.boundingBox(),
+                                                                 filteredPoints);
+
+                                // Separate instance ONLY for annotation thread (owned by YOLO executor)
+                                YOLOv8InstantDetection detForAnnotation =
+                                      new YOLOv8InstantDetection(detection.objectClass(),
+                                                                 detection.confidence(),
+                                                                 new Pose3D(centroid, new RotationMatrix()),
+                                                                 erodedObjectMask.getAcquisitionTime(),
+                                                                 bgrImage,
+                                                                 erodedObjectMask,
+                                                                 depthRef,
+                                                                 detection.boundingBox(),
+                                                                 filteredPoints);
+
+                                trackableDetections.add(detForTrackingAndCallbacks);
+                                yoloInstantDetections.add(detForTrackingAndCallbacks);
+
+                                newAnnotatedImageDetections.add(detForAnnotation);
+                             }
+
+                             erodedObjectMask.release();
+                             segmentedDepth.release();
+                          }
+
+                          // Track IDs
+                          botSortTracker.update(trackableDetections);
+
+                          LogTools.info("tracked=" + botSortTracker.getTrackedCount() +
+                                        " lost=" + botSortTracker.getLostCount() +
+                                        " dets=" + trackableDetections.size());
+
+                          for (YOLOv8InstantDetection d : trackableDetections)
+                             LogTools.info("Track: class=" + d.getDetectedObjectClass() + " id=" + d.getTrackId());
+
+                          int frameW = bgrImage.getWidth();
+                          int frameH = bgrImage.getHeight();
+
+                          List<Target2DTracker.Obs> obs = new ArrayList<>();
+                          for (YOLOv8InstantDetection d : trackableDetections)
+                          {
+                             float[] bbox = new float[] { d.getX1(), d.getY1(), d.getX2(), d.getY2() };
+
+                             // IMPORTANT: what is "mask" in your Java? You currently have RawImage objectMask inside YOLOv8InstantDetection.
+                             // You can pass the RawImage ref (but be careful about lifetime), or pass something lighter later.
+                             Object mask = d.getObjectMask(); // RawImage
+
+                             int trackId = d.getTrackId();
+                             float prob = (float) d.getConfidence();
+                             String name = d.getObjectClass();
+
+                             float texture = 0.0f; // start with 0 until you implement it (or compute mean intensity inside bbox/mask)
+                             obs.add(new Target2DTracker.Obs(mask, bbox, trackId, prob, name, texture));
+                          }
+
+                          List<Target2D> published = target2DTracker.update(frameW, frameH, obs);
+
+                          // Optionally: attach published targetId back onto detections if you add a new field.
+                          // Or: keep a map trackId->targetId for overlay/logging.
+
+                          // Callbacks exactly once (FoundationPose, etc.)
+                          detectionConsumerCallbacks.forEach(cb -> cb.accept(yoloInstantDetections));
+
+                          // Swap annotated detections list (destroy previous)
+                          synchronized (annotatedDetectionsLock)
+                          {
+                             List<YOLOv8InstantDetection> previous = this.annotatedImageDetections;
+                             this.annotatedImageDetections = newAnnotatedImageDetections;
+                             for (YOLOv8InstantDetection old : previous)
+                                old.destroy();
+                          }
+
+                          // Cleanup YOLO outputs
+                          yoloResults.destroy();
+                       }
+                       catch (Throwable t)
+                       {
+                          LogTools.error("YOLO task crashed", t);
+                       }
+                       finally
+                       {
+                          // Release bgrImage wrapper (and its GPU mat) if created
+                          if (bgrImage != null)
+                             bgrImage.release();
+
+                          // Release the retained refs from the producer thread
+                          colorRef.release();
+                          depthRef.release();
+                       }
+                    });
    }
 
    public void destroy()
@@ -331,6 +411,10 @@ public class YOLOv8DetectionExecutor
       taskExecutorThread.interrupt();
 
       annotatedImagePublishedThread.kill();
+
+      // release retained image (if any)
+      if (newestColorImage.poll())
+         newestColorImage.read().release();
       newestColorImage.set(null);
 
       for (YOLOv8Model yoloModel : availableModels.values())
@@ -346,7 +430,15 @@ public class YOLOv8DetectionExecutor
    {
       try
       {
-         taskQueue.take().run();
+         Runnable r = taskQueue.take();
+         try
+         {
+            r.run();
+         }
+         catch (Throwable t)
+         {
+            LogTools.error("YOLO task executor caught exception", t);
+         }
       }
       catch (InterruptedException ignored) {}
    }
@@ -357,38 +449,86 @@ public class YOLOv8DetectionExecutor
       if (colorImage == null)
          return;
 
-      if (!annotatedImageDemanded.getAsBoolean())
+      try
+      {
+         if (!annotatedImageDemanded.getAsBoolean())
+         {
+            LogTools.warn("YOLO annotated image NOT demanded; dropping frame");
+            return;
+         }
+
+         Mat src = colorImage.getCpuImageMat();
+         if (src == null || src.isNull())
+         {
+            LogTools.error("Annotated publisher got NULL CPU Mat. seq=" + colorImage.getSequenceNumber()
+                           + " refs=" + colorImage.getReferenceCount());
+            return;
+         }
+
+         Mat resultMat = new Mat();
+         BytePointer annotatedImagePointer = null;
+
+         try
+         {
+            synchronized (annotatedDetectionsLock)
+            {
+               YOLOv8Tools.annotateImage(src, resultMat, annotatedImageDetections);
+            }
+
+            List<BoTSortTracker.TrackViz> tracks = botSortTracker.getActiveTracks();
+            for (BoTSortTracker.TrackViz t : tracks)
+            {
+               int x1 = Math.round(t.x1);
+               int y1 = Math.round(t.y1);
+               int x2 = Math.round(t.x2);
+               int y2 = Math.round(t.y2);
+
+               int r = (t.id * 37) % 255;
+               int g = (t.id * 17) % 255;
+               int b = (t.id * 97) % 255;
+
+               opencv_imgproc.rectangle(resultMat, new Point(x1, y1), new Point(x2, y2), new Scalar(b, g, r, 0),
+                     2, opencv_imgproc.LINE_8, 0);
+
+               opencv_imgproc.putText(resultMat, "ID: " + t.id, new Point(x1, y1 - 5), opencv_imgproc.FONT_HERSHEY_SIMPLEX,
+                     0.6, new Scalar(b, g, r, 0), 2, opencv_imgproc.LINE_AA, false);
+            }
+
+
+            annotatedImagePointer = new BytePointer();
+            opencv_imgcodecs.imencode(".jpg", resultMat, annotatedImagePointer);
+
+            ImageMessage imageMessage = new ImageMessage();
+            PerceptionMessageTools.packImageMessage(colorImage, annotatedImagePointer, CompressionType.JPEG, imageMessage);
+            annotatedImagePublisher.publish(imageMessage);
+         }
+         finally
+         {
+            if (annotatedImagePointer != null)
+               annotatedImagePointer.deallocate(); // or close()
+
+            resultMat.close();
+         }
+      }
+      catch (Throwable t)
+      {
+         LogTools.error("YOLOAnnotatedImagePublisher crashed", t);
+      }
+      finally
       {
          colorImage.release();
-         return;
       }
-
-      Mat resultMat = new Mat();
-      synchronized (annotatedImagePublishedThread)
-      {
-         YOLOv8Tools.annotateImage(colorImage.getCpuImageMat(), resultMat, annotatedImageDetections);
-      }
-
-      BytePointer annotatedImagePointer = new BytePointer();
-      opencv_imgcodecs.imencode(".jpg", resultMat, annotatedImagePointer); // for some reason using CUDAImageEncoder broke YOLO's CUDNN
-
-      ImageMessage imageMessage = new ImageMessage();
-      PerceptionMessageTools.packImageMessage(colorImage, annotatedImagePointer, CompressionType.JPEG, imageMessage);
-      annotatedImagePublisher.publish(imageMessage);
-
-      resultMat.close();
-      colorImage.release();
    }
 
    private void update()
    {
       parameters.checkModified();
       parameters.getModelParameters().forEach((modelName, modelParameters) ->
-      {
-         modelParameters.checkModified();
-         if (modelParameters.isModified())
-            modelParameters.applyToModel(availableModels.get(modelName));
-      });
+                                              {
+                                                 modelParameters.checkModified();
+                                                 if (modelParameters.isModified())
+                                                    modelParameters.applyToModel(availableModels.get(modelName));
+                                              });
 
       if (requestingFullData || parameters.pollNeedSendFullData() || parameters.getModelParameters().values().stream().anyMatch(LatestTimestampModifiable::pollNeedSendFullData))
       {
