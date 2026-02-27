@@ -20,7 +20,7 @@ public class JointTorqueBasedFootSwitchFactory implements FootSwitchFactory
    private double defaultContactThresholdForceLow = 50.0;
    private double defaultContactThresholdForceHigh = 100.0;
    private double defaultContactCoPThreshold = 0.01;
-   private double defaultContactWindow = 0.05; // slightly higher than previous WBCC-specific window of 0.03s
+   private double defaultContactWindowDuration = 0.05; // previous WBCC-specific window size = 0.03s, estimator-specific window size = 0.025s
    private boolean defaultUseJacobianTranspose = false;
    private double defaultHorizontalVelocityThreshold = 0.5;
    private double defaultVerticalVelocityThreshold = 0.125;
@@ -64,9 +64,9 @@ public class JointTorqueBasedFootSwitchFactory implements FootSwitchFactory
       this.defaultHigherContactThresholdTorque = defaultHigherContactThresholdTorque;
    }
 
-   public void setDefaultContactWindow(double window)
+   public void setDefaultContactWindowDuration(double window)
    {
-      this.defaultContactWindow = window;
+      this.defaultContactWindowDuration = window;
    }
 
    /**
@@ -150,7 +150,7 @@ public class JointTorqueBasedFootSwitchFactory implements FootSwitchFactory
                                             contactForceThresholdLow,
                                             contactForceThresholdHigh,
                                             contactCoPThreshold,
-                                            defaultContactWindow,
+                                            defaultContactWindowDuration,
                                             switchDT,
                                             compensateGravity,
                                             horizontalVelocityThreshold,

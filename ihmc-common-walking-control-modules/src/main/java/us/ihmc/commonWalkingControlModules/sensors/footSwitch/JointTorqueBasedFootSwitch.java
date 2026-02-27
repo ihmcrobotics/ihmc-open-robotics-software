@@ -50,7 +50,7 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
    private final JacobianBasedBasedTouchdownDetector wrenchDetector;
 
    private final YoInteger contactThresholdWindowSize;
-   private final YoDouble contactThresholdWindow;
+   private final YoDouble contactThresholdWindowDuration;
    private final DoubleProvider switchDT;
 
    private final MovingReferenceFrame soleFrame;
@@ -64,7 +64,7 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
                                      DoubleProvider contactForceThresholdLow,
                                      DoubleProvider contactForceThresholdHigh,
                                      DoubleProvider contactCoPThreshold,
-                                     double contactWindowLength,
+                                     double contactWindowDuration,
                                      DoubleProvider switchDT,
                                      BooleanProvider compensateGravity,
                                      DoubleProvider horizontalVelocityThreshold,
@@ -106,10 +106,10 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
 
       this.switchDT = switchDT;
 
-      contactThresholdWindow = new YoDouble(namePrefix + "ContactThresholdWindow", registry);
-      contactThresholdWindow.set(contactWindowLength);
+      contactThresholdWindowDuration = new YoDouble(namePrefix + "ContactThresholdWindowDuration", registry);
+      contactThresholdWindowDuration.set(contactWindowDuration);
       contactThresholdWindowSize = new YoInteger(namePrefix + "ContactThresholdWindowSize", registry);
-      contactThresholdWindowSize.set(Math.max(1, (int) Math.ceil(contactWindowLength / switchDT.getValue())));
+      contactThresholdWindowSize.set(Math.max(MINIMUM_WINDOW_SIZE, (int) Math.ceil(contactWindowDuration / switchDT.getValue())));
 
       touchdownDetector = new JointTorqueBasedTouchdownDetector(namePrefix,
                                                                 jointToRead,
@@ -148,7 +148,7 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
    public void update()
    {
       // Account for any changes in the DT by updating the window size to maintain a consistent time window for contact detection.
-      contactThresholdWindowSize.set(Math.max(MINIMUM_WINDOW_SIZE, (int) Math.ceil(contactThresholdWindow.getDoubleValue() / switchDT.getValue())));
+      contactThresholdWindowSize.set(Math.max(MINIMUM_WINDOW_SIZE, (int) Math.ceil(contactThresholdWindowDuration.getDoubleValue() / switchDT.getValue())));
 
       touchdownDetector.update();
 
