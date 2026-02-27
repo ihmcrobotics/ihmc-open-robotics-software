@@ -23,8 +23,8 @@ import java.util.function.LongSupplier;
 
 public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
 {
-   private final ImageSensor imageSensor;
-   private final YOLOv8DetectionExecutor yolo;
+//   private final ImageSensor imageSensor;
+//   private final YOLOv8DetectionExecutor yolo;
    private final IsaacROSFoundationPoseCommunicatorMap foundationPose;
    private final TerrainMapData terrainMapData;
 
@@ -46,8 +46,8 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
    {
       super(crdtInfo, idSupplier, syncedRobot);
 
-      this.imageSensor = imageSensor;
-      this.yolo = yolo;
+//      this.imageSensor = imageSensor;
+//      this.yolo = yolo;
       this.foundationPose = foundationPose;
       this.terrainMapData = terrainMapData;
 
@@ -175,7 +175,7 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
 
    public ImageSensor getImageSensor()
    {
-      return imageSensor;
+      return null;
    }
 
    public TerrainMapData getTerrainMap()

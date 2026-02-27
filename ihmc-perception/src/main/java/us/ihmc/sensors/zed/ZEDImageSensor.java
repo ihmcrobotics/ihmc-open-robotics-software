@@ -85,6 +85,7 @@ public class ZEDImageSensor extends ImageSensor
    private final RigidBodyTransform trackedPoseOffset = new RigidBodyTransform();
    private final SL_Quaternion sensorRotation = new SL_Quaternion();
    private final SL_Vector3 sensorTranslation = new SL_Vector3();
+   private ZEDInitParametersHolder zedInitParametersHolder;
 
    public ZEDImageSensor(int cameraID, ZEDModelData zedModel, int slInputType, int slDepthMode)
    {
@@ -124,6 +125,8 @@ public class ZEDImageSensor extends ImageSensor
       this.slDepthMode = slDepthMode;
       this.resolution = resolution;
       this.fps = fps;
+
+      zedInitParametersHolder = initParametersHolder;
 
       initParametersHolder.configureFromSensor(cameraID, zedModel, slInputType, slDepthMode, resolution, fps);
       initParametersHolder.applyTo(zedInitParameters);
@@ -255,6 +258,8 @@ public class ZEDImageSensor extends ImageSensor
 
          return false;
       }
+
+      sl_set_camera_settings_min_max(cameraID, SL_VIDEO_SETTINGS_AUTO_EXPOSURE_TIME_RANGE, 0, zedInitParametersHolder.getMaxExposureTime());
 
       lastGrabFailed = false;
       return true;

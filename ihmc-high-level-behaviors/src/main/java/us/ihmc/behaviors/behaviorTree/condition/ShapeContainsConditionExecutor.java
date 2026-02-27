@@ -42,8 +42,8 @@ public class ShapeContainsConditionExecutor
       {
          if (spherePointCounter != null)
          {
-            zedGrabThread = new RepeatingTaskThread("ZEDGrabThread", this::zedGrabThread);
-            zedGrabThread.start();
+//            zedGrabThread = new RepeatingTaskThread("ZEDGrabThread", this::zedGrabThread);
+//            zedGrabThread.start();
          }
          else
          {

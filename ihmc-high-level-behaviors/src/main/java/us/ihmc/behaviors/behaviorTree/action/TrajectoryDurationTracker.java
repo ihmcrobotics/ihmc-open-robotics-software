@@ -29,7 +29,7 @@ public class TrajectoryDurationTracker
 
    public void computeExecutionTimings(double nominalExecutionDuration)
    {
-      computeExecutionTimings(nominalExecutionDuration, nominalExecutionDuration * 1.5);
+      computeExecutionTimings(nominalExecutionDuration, nominalExecutionDuration * 3.5);
    }
 
    public void computeExecutionTimings(double nominalExecutionDuration, double timeout)

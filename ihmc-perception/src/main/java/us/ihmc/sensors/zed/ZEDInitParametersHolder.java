@@ -28,6 +28,8 @@ public class ZEDInitParametersHolder
    private boolean enableRightSideMeasure = false;
    private float openTimeoutSec = 5.0f;
    private boolean asyncGrabCameraRecovery = false;
+   private int grabComputeCappingFPS = 0;
+   private int maxExposureTime = 20000;
 
    // ---------- SDK defaults not explicitly set before ----------
    private boolean svoRealTimeMode = false;
@@ -68,6 +70,7 @@ public class ZEDInitParametersHolder
       params.camera_image_flip(cameraImageFlip);
       params.camera_disable_self_calib(cameraDisableSelfCalib);
       params.enable_right_side_measure(enableRightSideMeasure);
+      params.grab_compute_capping_fps(grabComputeCappingFPS);
       params.svo_real_time_mode(svoRealTimeMode);
       params.depth_mode(depthMode);
       params.depth_stabilization(depthStabilization);
@@ -150,4 +153,24 @@ public class ZEDInitParametersHolder
 
    public boolean isEnableImageValidityCheck() { return enableImageValidityCheck; }
    public void setEnableImageValidityCheck(boolean enableImageValidityCheck) { this.enableImageValidityCheck = enableImageValidityCheck; }
+
+   public int getGrabComputeCappingFPS()
+   {
+      return grabComputeCappingFPS;
+   }
+
+   public void setGrabComputeCappingFPS(int grabComputeCappingFPS)
+   {
+      this.grabComputeCappingFPS = grabComputeCappingFPS;
+   }
+
+   public int getMaxExposureTime()
+   {
+      return maxExposureTime;
+   }
+
+   public void setMaxExposureTime(int maxExposureTime)
+   {
+      this.maxExposureTime = maxExposureTime;
+   }
 }

@@ -57,7 +57,7 @@ public class BehaviorTreeSceneDoorFrameExecutor extends BehaviorTreeSceneObjectE
    {
       RawImage depthImage;
 
-      if (!frozen.getValue() && pointCounter != null
+      if (false && !frozen.getValue() && pointCounter != null
        && (depthImage = scene.getImageSensor().getImage(ZEDImageSensor.DEPTH_IMAGE_KEY)) != null)
       {
          latchPostPoints = 0;
