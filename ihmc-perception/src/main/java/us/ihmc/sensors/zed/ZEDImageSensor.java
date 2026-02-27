@@ -110,6 +110,11 @@ public class ZEDImageSensor extends ImageSensor
     */
    public ZEDImageSensor(int cameraID, int serialNumber, ZEDModelData zedModel, int slInputType, int slDepthMode, int resolution, int fps)
    {
+      this(cameraID, 0, zedModel, slInputType, slDepthMode, resolution, fps, new ZEDInitParametersHolder());
+   }
+
+   public ZEDImageSensor(int cameraID, int serialNumber, ZEDModelData zedModel, int slInputType, int slDepthMode, int resolution, int fps, ZEDInitParametersHolder initParametersHolder)
+   {
       super(zedModel.name());
 
       this.cameraID = cameraID;
@@ -119,6 +124,9 @@ public class ZEDImageSensor extends ImageSensor
       this.slDepthMode = slDepthMode;
       this.resolution = resolution;
       this.fps = fps;
+
+      initParametersHolder.configureFromSensor(cameraID, zedModel, slInputType, slDepthMode, resolution, fps);
+      initParametersHolder.applyTo(zedInitParameters);
 
       trackedSensorFrame = new MutableReferenceFrame(getSensorName() + "_tracked", ReferenceFrameTools.getWorldFrame());
 
@@ -143,11 +151,6 @@ public class ZEDImageSensor extends ImageSensor
 
       this.remoteStreamingAddress = remoteStreamingAddress;
       this.remoteStreamingPort = remoteStreamingPort;
-   }
-
-   public void setInitParameters(ZEDInitParametersHolder zedInitParametersHolder)
-   {
-      zedInitParametersHolder.applyTo(zedInitParameters);
    }
 
    public void setTrackedPoseOffset(RigidBodyTransformReadOnly offset)
@@ -187,6 +190,9 @@ public class ZEDImageSensor extends ImageSensor
          // Set the initialization parameters
 //         setInitParameters(zedInitParameters);
 
+         System.out.println("here 1");
+
+
          // Open the camera
          int returnCode = openCamera();
          throwOnError(returnCode);
@@ -196,6 +202,7 @@ public class ZEDImageSensor extends ImageSensor
             SL_PositionalTrackingParameters positionalTrackingParameters = sl_get_positional_tracking_parameters(cameraID);
             sl_enable_positional_tracking(cameraID, positionalTrackingParameters, "");
          }
+         System.out.println("here 1.1");
 
          // Get camera intrinsics
          SL_CalibrationParameters sensorIntrinsics = sl_get_calibration_parameters(cameraID, false);
@@ -204,6 +211,9 @@ public class ZEDImageSensor extends ImageSensor
          fps = (int) sl_get_camera_fps(cameraID);
          bitrate = calculateBitrate(imageWidth, imageHeight, fps);
 
+         System.out.println("here 1.2");
+
+
          if (slInputType != SL_INPUT_TYPE_STREAM)
          {
             int gopSize = -1;
@@ -211,6 +221,8 @@ public class ZEDImageSensor extends ImageSensor
             int chunkSize = 16084;
             sl_enable_streaming(cameraID, SL_STREAMING_CODEC_H264, bitrate, (short) localStreamingPort, gopSize, adaptativeBitrate, chunkSize, fps);
          }
+
+         System.out.println("here 2");
 
          leftSensorIntrinsics.setWidth(imageWidth);
          leftSensorIntrinsics.setHeight(imageHeight);
@@ -225,6 +237,7 @@ public class ZEDImageSensor extends ImageSensor
          rightSensorIntrinsics.setFy(sensorIntrinsics.right_cam().fy());
          rightSensorIntrinsics.setCx(sensorIntrinsics.right_cam().cx());
          rightSensorIntrinsics.setCy(sensorIntrinsics.right_cam().cy());
+
 
          sensorCenterToCameraDistanceY = -0.5f * sensorIntrinsics.translation().y();
          sensorIntrinsics.close();
