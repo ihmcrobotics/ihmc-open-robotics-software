@@ -69,6 +69,7 @@ public class WrenchBasedFootSwitchFactory implements FootSwitchFactory
                                             RigidBodyBasics rootBody,
                                             ForceSensorDataReadOnly footForceSensor,
                                             double totalRobotWeight,
+                                            DoubleProvider switchDT,
                                             YoRegistry registry)
    {
       if (contactThresholdForceParameter == null)
