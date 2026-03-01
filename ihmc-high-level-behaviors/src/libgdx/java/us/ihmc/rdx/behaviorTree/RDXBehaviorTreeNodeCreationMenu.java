@@ -23,6 +23,7 @@ import us.ihmc.rdx.behaviorTree.actions.RDXActionNode;
 import us.ihmc.rdx.ui.widgets.ImGuiArmIconWidget;
 import us.ihmc.rdx.ui.widgets.ImGuiCheckpointNodeWidget;
 import us.ihmc.rdx.ui.widgets.ImGuiConditionNodeWidget;
+import us.ihmc.rdx.ui.widgets.ImGuiDoorNodeWidget;
 import us.ihmc.rdx.ui.widgets.ImGuiFallbackWidget;
 import us.ihmc.rdx.ui.widgets.ImGuiFootstepsWidget;
 import us.ihmc.rdx.ui.widgets.ImGuiGotoNodeWidget;
@@ -44,6 +45,7 @@ public class RDXBehaviorTreeNodeCreationMenu
    private final ImGuiConditionNodeWidget conditionIcon = new ImGuiConditionNodeWidget();
    private final ImGuiGotoNodeWidget gotoIcon = new ImGuiGotoNodeWidget();
    private final ImGuiCheckpointNodeWidget checkpointIcon = new ImGuiCheckpointNodeWidget();
+   private final ImGuiDoorNodeWidget doorIcon = new ImGuiDoorNodeWidget();
    private final ImGuiFootstepsWidget footstepsIcon = new ImGuiFootstepsWidget();
    private final ImGuiArmIconWidget armIcon = new ImGuiArmIconWidget();
    private final ImGuiHandWidget handIcon = new ImGuiHandWidget();
@@ -111,6 +113,9 @@ public class RDXBehaviorTreeNodeCreationMenu
          renderNodeCreationClickable(relativeNode, insertionType, "Scene Action", SceneActionNodeDefinition.class, null);
          ImGui.setCursorPosX(align);
          renderNodeCreationClickable(relativeNode, insertionType, "AI2R Node", AI2RNodeDefinition.class, null);
+         ImGui.setCursorPosX(ImGui.getCursorPosX() + ImGui.getFontSize() * 0.3f);
+         doorIcon.render();
+         ImGui.sameLine();
          ImGui.setCursorPosX(align);
          renderNodeCreationClickable(relativeNode, insertionType, "Door Traversal", DoorTraversalDefinition.class, null);
          ImGui.setCursorPosX(align);
