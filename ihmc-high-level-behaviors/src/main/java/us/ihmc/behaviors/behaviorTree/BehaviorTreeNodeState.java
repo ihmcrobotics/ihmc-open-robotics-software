@@ -34,6 +34,9 @@ public class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition> impleme
     */
    private boolean isActive = false;
 
+   /** The index is not CRDT synced because it's a simple local calculation. */
+   private int depthFirstIndex = -1;
+
    /**
     * The state's children. They can be any type that is a BehaviorTreeNodeState.
     */
@@ -126,6 +129,17 @@ public class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition> impleme
    public boolean getIsActive()
    {
       return isActive;
+   }
+
+   public void setDepthFirstIndex(int depthFirstIndex)
+   {
+      this.depthFirstIndex = depthFirstIndex;
+   }
+
+   /** The index of the node, depth first over the entire tree. The root is 0. */
+   public int getDepthFirstIndex()
+   {
+      return depthFirstIndex;
    }
 
    @Override
