@@ -12,7 +12,11 @@ public class ImGuiSequenceIconWidget
 {
    public boolean render()
    {
-      float lineHeight = ImGui.getFrameHeight();
+      return render(ImGui.getFrameHeight());
+   }
+
+   public boolean render(float lineHeight)
+   {
       float fontSize = ImGui.getFontSize();
       float scale = 0.7f * fontSize;
 
