@@ -66,11 +66,6 @@ public class RDXBehaviorTestFacilitator
    /** Disable perception if CUDA 12.9.1 is not installed or not working */
    private final boolean runPerception = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() && CUDATools.hasNVJPEG();
    private final String svoFile;
-   /** Enables advanced mode where FoundationPose and this program to be running on a Jetson.
-    *  Must run deployJetsonTestbed and run this process also on the Jetson. */
-   private final boolean foundationPose = Boolean.parseBoolean(System.getProperty("foundationpose", "false"));
-   /** If FOUNDATION_POSE mode is true, this boolean is true for the process on the Jetson and false for the local one. */
-   private final boolean jetson = Boolean.parseBoolean(System.getProperty("jetson", "false"));
    private final Supplier<DRCRobotModel> robotModelBuilder;
    private final TriFunction<DRCRobotModel, ROS2NodeBuilder, RigidBodyTransformReadOnly, HumanoidKinematicsSimulation> kinematicsSimulationBuilder;
    private final Supplier<RDXBaseUI> baseUIBuilder;
@@ -120,14 +115,10 @@ public class RDXBehaviorTestFacilitator
             return new ROS2NodeBuilder().specialTransportMode(SpecialTransportMode.INTRAPROCESS_ONLY);
       };
 
-      if (!this.runPerception || !this.foundationPose || !this.jetson)
-      {
-         ThreadTools.startAThread(this::startSimulation, "StartSimulation");
-         if (!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
-            ThreadTools.startAThread(() -> ExceptionTools.handle(this::launchRDXUI, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE), "RDX");
-      }
-      if (!this.runPerception || !this.foundationPose || this.jetson)
-         ThreadTools.startAThread(this::startBehaviorTree, "StartBehaviorTree");
+      ThreadTools.startAThread(this::startSimulation, "StartSimulation");
+      if (!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
+         ThreadTools.startAThread(() -> ExceptionTools.handle(this::launchRDXUI, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE), "RDX");
+      ThreadTools.startAThread(this::startBehaviorTree, "StartBehaviorTree");
 
       ros2ControllerHelper = new ROS2ControllerHelper(ros2NodeBuilder.get().build("facilitator"), robotName);
    }
@@ -345,7 +336,6 @@ public class RDXBehaviorTestFacilitator
                                                      baseUI.getPrimary3DPanel(),
                                                      ros2);
             behaviorTreeUI.createAndSetupDefault(baseUI);
-            RDXBehaviorTreeNode.logNotifications = runPerception && foundationPose; // Prevent duplicate entries
          }
 
          @Override
