@@ -29,6 +29,7 @@ import us.ihmc.rdx.ui.widgets.ImGuiFootstepsWidget;
 import us.ihmc.rdx.ui.widgets.ImGuiGotoNodeWidget;
 import us.ihmc.rdx.ui.widgets.ImGuiGripperWidget;
 import us.ihmc.rdx.ui.widgets.ImGuiHandWidget;
+import us.ihmc.rdx.ui.widgets.ImGuiSceneActionWidget;
 import us.ihmc.rdx.ui.widgets.ImGuiSequenceIconWidget;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -45,6 +46,7 @@ public class RDXBehaviorTreeNodeCreationMenu
    private final ImGuiConditionNodeWidget conditionIcon = new ImGuiConditionNodeWidget();
    private final ImGuiGotoNodeWidget gotoIcon = new ImGuiGotoNodeWidget();
    private final ImGuiCheckpointNodeWidget checkpointIcon = new ImGuiCheckpointNodeWidget();
+   private final ImGuiSceneActionWidget sceneActionIcon = new ImGuiSceneActionWidget();
    private final ImGuiDoorNodeWidget doorIcon = new ImGuiDoorNodeWidget();
    private final ImGuiFootstepsWidget footstepsIcon = new ImGuiFootstepsWidget();
    private final ImGuiArmIconWidget armIcon = new ImGuiArmIconWidget();
@@ -109,6 +111,9 @@ public class RDXBehaviorTreeNodeCreationMenu
          ImGui.sameLine();
          ImGui.setCursorPosX(align);
          renderNodeCreationClickable(relativeNode, insertionType, "Check Point Node", CheckPointNodeDefinition.class, null);
+         ImGui.setCursorPosX(ImGui.getCursorPosX() + ImGui.getFontSize() * 0.3f);
+         sceneActionIcon.render();
+         ImGui.sameLine();
          ImGui.setCursorPosX(align);
          renderNodeCreationClickable(relativeNode, insertionType, "Scene Action", SceneActionNodeDefinition.class, null);
          ImGui.setCursorPosX(align);
