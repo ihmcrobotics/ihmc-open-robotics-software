@@ -7,10 +7,7 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import org.apache.commons.lang3.function.TriFunction;
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.bytedeco.opencv.opencv_core.GpuMat;
-import std_msgs.msg.dds.Empty;
-import std_msgs.msg.dds.Int32;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulation;
@@ -50,7 +47,6 @@ import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2NodeBuilder.SpecialTransportMode;
-import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.scs2.simulation.collision.CollidableHelper;
 import us.ihmc.sensors.zed.ZEDImageSensor;
 import us.ihmc.sensors.zed.ZEDModelData;
@@ -86,11 +82,6 @@ public class RDXBehaviorTestFacilitator
    private final Notification robotReady = new Notification();
 
    private ZEDSVOPlaybackSensor zedSensor;
-   private final ROS2Topic<Empty> ZED_PLAY = new ROS2Topic<>().withType(Empty.class).withSuffix("bt/zed/play");
-   private final ROS2Topic<Empty> ZED_PAUSE = new ROS2Topic<>().withType(Empty.class).withSuffix("bt/zed/pause");
-   private final ROS2Topic<Int32> ZED_SEEK = new ROS2Topic<>().withType(Int32.class).withSuffix("bt/zed/seek");
-   private final ROS2Topic<Int32> ZED_POSITION = new ROS2Topic<>().withType(Int32.class).withSuffix("bt/zed/position");
-   private final ROS2Topic<Int32> ZED_LENGTH = new ROS2Topic<>().withType(Int32.class).withSuffix("bt/zed/length");
 
    private ROS2BehaviorTreeExecutor behaviorTree;
    private Function<ROS2BehaviorTreeExecutor, Notification> behaviorTreeAccessorOneTime = null;
@@ -177,13 +168,6 @@ public class RDXBehaviorTestFacilitator
          zedSensor = new ZEDSVOPlaybackSensor(0, ZEDModelData.ZED_2I, zed.SL_DEPTH_MODE_NEURAL_LIGHT, svoFile);
          zedSensor.setSensorFrame(syncedRobot.getReferenceFrames().getExperimentalCameraFrame());
          zedSensor.startSensor();
-         ros2Node.createSubscription2(ZED_PLAY, empty -> zedSensor.play());
-         ros2Node.createSubscription2(ZED_PAUSE, empty -> zedSensor.pause());
-         ros2Node.createSubscription2(ZED_SEEK, int32 ->
-         {
-            zedSensor.setCurrentPosition(int32.getData() + zedSensor.getFps());
-            zedSensor.grabAndNotify();
-         });
 
          foundationPose = new IsaacROSFoundationPoseCommunicatorMap(peerClockEstimator);
 
@@ -229,12 +213,6 @@ public class RDXBehaviorTestFacilitator
 
       RepeatingTaskThread thread = new RepeatingTaskThread("behavior_tree", () ->
       {
-         if (zedSensor != null)
-         {
-            ros2.publish(ZED_POSITION, zedSensor.getCurrentPosition());
-            ros2.publish(ZED_LENGTH, zedSensor.getLength());
-         }
-
          syncedRobot.update();
 
          if (behaviorTreeAccessorOneTime != null)
@@ -323,10 +301,6 @@ public class RDXBehaviorTestFacilitator
 
             ImBoolean play = new ImBoolean(false);
             ImInt requestedPosition = new ImInt();
-            MutableInt currentPosition = new MutableInt();
-            MutableInt zedLength = new MutableInt();
-            ros2Node.createSubscription2(ZED_POSITION, int32 -> currentPosition.setValue(int32.getData()));
-            ros2Node.createSubscription2(ZED_LENGTH, int32 -> zedLength.setValue(int32.getData()));
             ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
             baseUI.getImGuiPanelManager().addPanel("Facilitator", () ->
             {
@@ -337,20 +311,28 @@ public class RDXBehaviorTestFacilitator
                   startSimulation();
                }
                ImGui.endDisabled();
-               ImGui.sameLine();
-               if (ImGui.checkbox(labels.get("ZED Playback"), play))
+               if (zedSensor != null)
                {
+                  ImGui.sameLine();
+                  if (ImGui.checkbox(labels.get("ZED Playback"), play) && zedSensor != null)
+                  {
+                     if (play.get())
+                        zedSensor.play();
+                     else
+                        zedSensor.pause();
+                  }
+                  ImGui.beginDisabled(play.get());
+                  int currentPosition = zedSensor.getCurrentPosition();
+                  int zedLength = zedSensor.getLength();
                   if (play.get())
-                     ros2.publish(ZED_PLAY);
-                  else
-                     ros2.publish(ZED_PAUSE);
+                     requestedPosition.set(currentPosition);
+                  if (ImGuiTools.sliderInt(labels.get("Position"), requestedPosition, 0, Math.max(zedLength, 0)))
+                  {
+                     zedSensor.setCurrentPosition(requestedPosition.get() + zedSensor.getFps());
+                     zedSensor.grabAndNotify();
+                  }
+                  ImGui.endDisabled();
                }
-               ImGui.beginDisabled(play.get());
-               if (play.get())
-                  requestedPosition.set(currentPosition.getValue());
-               if (ImGuiTools.sliderInt(labels.get("Position"), requestedPosition, 0, Math.max(zedLength.getValue(), 0)))
-                  ros2.publish(ZED_SEEK, requestedPosition.get());
-               ImGui.endDisabled();
             });
 
             RobotCollisionModel selectionCollisionModel = selectionCollisionModelBuilder.apply(robotModel);
