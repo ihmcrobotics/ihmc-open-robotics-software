@@ -9,6 +9,7 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
@@ -27,6 +28,7 @@ public class SmoothTransitionControllerState extends HighLevelControllerState
    private final YoPolynomial transitionRatioTrajectory;
 
    private final PairList<OneDoFJointBasics, CommandBlender> jointCommandBlenders = new PairList<>();
+   private final JointDesiredOutputListReadOnly highLevelControllerOutput;
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
    private final HighLevelControllerState initialControllerState;
@@ -39,6 +41,7 @@ public class SmoothTransitionControllerState extends HighLevelControllerState
                                           HighLevelControllerState finalControllerState,
                                           OneDoFJointBasics[] controlledJoints,
                                           HighLevelControllerParameters highLevelControllerParameters,
+                                          JointDesiredOutputListReadOnly highLevelControllerOutput,
                                           CommandInputManager commandInputManager)
    {
       this(namePrefix,
@@ -47,6 +50,7 @@ public class SmoothTransitionControllerState extends HighLevelControllerState
            finalControllerState,
            controlledJoints,
            highLevelControllerParameters,
+           highLevelControllerOutput,
            commandInputManager,
            new JointControlBlenderFactory());
    }
@@ -57,6 +61,7 @@ public class SmoothTransitionControllerState extends HighLevelControllerState
                                           HighLevelControllerState finalControllerState,
                                           OneDoFJointBasics[] controlledJoints,
                                           HighLevelControllerParameters highLevelControllerParameters,
+                                          JointDesiredOutputListReadOnly highLevelControllerOutput,
                                           CommandInputManager commandInputManager,
                                           CommandBlenderFactory commandBlenderFactory)
    {
@@ -65,6 +70,7 @@ public class SmoothTransitionControllerState extends HighLevelControllerState
       this.initialControllerState = initialControllerState;
       this.finalControllerState = finalControllerState;
       this.commandInputManager = commandInputManager;
+      this.highLevelControllerOutput = highLevelControllerOutput;
 
       enableTimeBasedTransition = new BooleanParameter(namePrefix + "EnableTimeBasedTransition",
                                                        "When true, the ramp up follows a linear time-based trajectory, when false, the user has to ramp up manually TransitionRatioCurrentValue through SCS.",
@@ -91,6 +97,15 @@ public class SmoothTransitionControllerState extends HighLevelControllerState
    @Override
    public void onEntry()
    {
+      JointDesiredOutputListBasics initialJointCommand = (JointDesiredOutputListBasics) highLevelControllerOutput;
+
+      for (int jointIndex = 0; jointIndex < jointCommandBlenders.size(); jointIndex++)
+      {
+         OneDoFJointBasics joint = jointCommandBlenders.get(jointIndex).getLeft();
+         CommandBlender commandBlender = jointCommandBlenders.get(jointIndex).getRight();
+         commandBlender.initialize(initialJointCommand.getJointDesiredOutput(joint));
+      }
+
       finalControllerState.onEntry();
       transitionRatioTrajectory.setLinear(0.0, standTransitionDuration.getValue(), 0.0, 1.0);
       standTransitionRatioCurrentValue.set(0.0);
@@ -124,8 +139,8 @@ public class SmoothTransitionControllerState extends HighLevelControllerState
       else
          gainRatio = MathTools.clamp(gainRatio, 0.0, 1.0);
 
-      JointDesiredOutputListReadOnly standReadyJointCommand = initialControllerState.getOutputForLowLevelController();
-      JointDesiredOutputListReadOnly walkingJointCommand = finalControllerState.getOutputForLowLevelController();
+      JointDesiredOutputListReadOnly initialJointCommand = initialControllerState.getOutputForLowLevelController();
+      JointDesiredOutputListReadOnly finalJointCommand = finalControllerState.getOutputForLowLevelController();
 
       for (int jointIndex = 0; jointIndex < jointCommandBlenders.size(); jointIndex++)
       {
@@ -135,8 +150,8 @@ public class SmoothTransitionControllerState extends HighLevelControllerState
          lowLevelJointData.clear();
 
          commandBlender.computeAndUpdateJointControl(lowLevelJointData,
-                                                     standReadyJointCommand.getJointDesiredOutput(joint),
-                                                     walkingJointCommand.getJointDesiredOutput(joint),
+                                                     initialJointCommand.getJointDesiredOutput(joint),
+                                                     finalJointCommand.getJointDesiredOutput(joint),
                                                      gainRatio);
       }
    }

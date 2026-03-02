@@ -8,6 +8,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.motionRetargeting.RetargetingParameters;
 import us.ihmc.motionRetargeting.VRTrackedSegmentType;
@@ -364,22 +365,38 @@ public class RDXVRMotionRetargeting
                offset.sub(initialFootTrackerTransformsToWorld.get(side).getTranslation(), initialFootTransformsToWorld.get(side).getTranslation());
                ikControlFrameOffsetPosition.put(footSegment, new Point3D(offset));
             }
+            steppingTracker.processVRInput(side, trackerReferenceFrames.get(footName).getReferenceFrame().getTransformToWorldFrame());
 
             // Concatenate the initial foot transform with the variation
             RigidBodyTransform footTrackerTransform = new RigidBodyTransform(trackerReferenceFrames.get(footName)
                                                                                                    .getReferenceFrame()
                                                                                                    .getTransformToWorldFrame());
-
             newFootFramePoses.get(side).set(footTrackerTransform);
-            // Zero roll and pitch orientation variation as it can lead to unfeasible robot foot motions
-            newFootFramePoses.get(side).changeFrame(initialFootFrames.get(side));
-            newFootFramePoses.get(side).getRotation().setYawPitchRoll(newFootFramePoses.get(side).getRotation().getYaw(), 0.0,0.0);
-            newFootFramePoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
+
+            // Build a constrained pose with yaw-only orientation in the initial foot frame
+            FramePose3D constrainedFootPose = new FramePose3D(newFootFramePoses.get(side));
+            constrainedFootPose.changeFrame(initialFootFrames.get(side));
+            constrainedFootPose.getRotation().setYawPitchRoll(newFootFramePoses.get(side).getRotation().getYaw(), 0.0,0.0);
+            constrainedFootPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+            double alpha = steppingTracker.getLandingBlendFactor(side);
+            if (alpha > 0.0)
+            {
+               Quaternion fullQ = new Quaternion();
+               Quaternion constrainedQ = new Quaternion();
+               Quaternion blendedQ = new Quaternion();
+
+               fullQ.set(newFootFramePoses.get(side).getOrientation());
+               constrainedQ.set(constrainedFootPose.getOrientation());
+
+               // alpha=0 -> fullQ, alpha=1 -> constrainedQ
+               blendedQ.interpolate(constrainedQ, fullQ, 1.0 - alpha);
+
+               newFootFramePoses.get(side).getOrientation().set(blendedQ);
+            }
             constrainedFootFrames.get(side).update();
 
-            steppingTracker.processVRInput(side, trackerReferenceFrames.get(footName).getReferenceFrame().getTransformToWorldFrame());
             isFootInContact.put(side, steppingTracker.isFootInContact(side));
-
             if (!steppingTracker.isFootInContact(side))
             {
                retargetedFrames.put(side == RobotSide.LEFT ? LEFT_ANKLE : RIGHT_ANKLE, constrainedFootFrames.get(side));

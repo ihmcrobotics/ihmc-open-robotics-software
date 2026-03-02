@@ -1,10 +1,13 @@
 package us.ihmc.rdx.ui.vr;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -26,38 +29,43 @@ public class RDXVRMiniGhostPreview
    private static final double DEGREE_JOYSTICK_INCREMENT = 1.0;
    private static final double CONTROL_JOYSTICK_THRESHOLD = 0.7;
    private final RDXVRContext vrContext;
-   private Pose3D ghostPoseHeadsetOffset;
    private final FullHumanoidRobotModel miniGhostFullRobotModel;
-   private ReferenceFrame miniGhostFrame;
-   private OneDoFJointBasics[] miniGhostOneDoFJointsExcludingHands;
-   private RDXMultiBodyGraphic miniGhostRobotGraphic;
+   private final ReferenceFrame miniGhostFrame;
+   private final OneDoFJointBasics[] miniGhostOneDoFJointsExcludingHands;
+   private final RDXMultiBodyGraphic miniGhostRobotGraphic;
+   private boolean graphicsInitialized = false;
+   private final float opacity;
+   private final Color color;
+   private final RigidBodyTransform ghostHeadsetOffset =  new RigidBodyTransform();
+   private final ReferenceFrame miniGhostAdjustedFrame;
+   private final RigidBodyTransform additionalOffset =  new RigidBodyTransform();
 
-   public RDXVRMiniGhostPreview(String robotName, RobotDefinition robotDefinition, FullHumanoidRobotModel miniGhostFullRobotModel, RDXVRContext vrContext)
+   public RDXVRMiniGhostPreview(String robotName, RobotDefinition robotDefinition, FullHumanoidRobotModel miniGhostFullRobotModel, RDXVRContext vrContext, Color color, float opacity)
    {
       this.miniGhostFullRobotModel = miniGhostFullRobotModel;
       this.vrContext  = vrContext;
+      this.color = color;
+      this.opacity = opacity;
 
-      if (isEnabled())
-      {
-         miniGhostOneDoFJointsExcludingHands = FullRobotModelUtils.getAllJointsExcludingHands(miniGhostFullRobotModel);
-         miniGhostRobotGraphic = new RDXMultiBodyGraphic(robotName + " (Mini Preview Ghost)");
-         miniGhostRobotGraphic.loadRobotModelAndGraphics(robotDefinition, miniGhostFullRobotModel.getElevator(), 0.05, false);
-         miniGhostRobotGraphic.setActive(true);
-         miniGhostRobotGraphic.create();
+      miniGhostOneDoFJointsExcludingHands = FullRobotModelUtils.getAllJointsExcludingHands(miniGhostFullRobotModel);
+      miniGhostRobotGraphic = new RDXMultiBodyGraphic(robotName + " (Mini Preview Ghost)");
+      miniGhostRobotGraphic.loadRobotModelAndGraphics(robotDefinition, miniGhostFullRobotModel.getElevator(), 0.05, false);
+      miniGhostRobotGraphic.setActive(true);
+      miniGhostRobotGraphic.create();
 
-         ReferenceFrame headsetFrame= vrContext.getHeadset().getXForwardZUpHeadsetFrame();
-         ghostPoseHeadsetOffset = new Pose3D(headsetFrame.getTransformToRoot());
-         ghostPoseHeadsetOffset.getTranslation().addX(GHOST_X_HEADSET_OFFSET);
-         ghostPoseHeadsetOffset.getTranslation().addY(GHOST_Y_HEADSET_OFFSET);
-         ghostPoseHeadsetOffset.getTranslation().addZ(GHOST_Z_HEADSET_OFFSET);
-         ghostPoseHeadsetOffset.getRotation().setYawPitchRoll(3 * Math.PI / 4, 0.0, 0.0);
-         miniGhostFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(headsetFrame, ghostPoseHeadsetOffset);
-      }
+      ReferenceFrame headsetFrame = vrContext.getHeadset().getXForwardZUpHeadsetFrame();
+      ghostHeadsetOffset.set(headsetFrame.getTransformToRoot());
+      ghostHeadsetOffset.getTranslation().addX(GHOST_X_HEADSET_OFFSET);
+      ghostHeadsetOffset.getTranslation().addY(GHOST_Y_HEADSET_OFFSET);
+      ghostHeadsetOffset.getTranslation().addZ(GHOST_Z_HEADSET_OFFSET);
+      ghostHeadsetOffset.getRotation().setYawPitchRoll(3 * Math.PI / 4, 0.0, 0.0);
+      miniGhostFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(headsetFrame, ghostHeadsetOffset);
+      miniGhostAdjustedFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(miniGhostFrame, additionalOffset);
    }
 
    public void setJoint(int index, double q)
    {
-      if (isEnabled() && miniGhostRobotGraphic.isActive())
+      if (miniGhostRobotGraphic.isActive())
       {
          miniGhostOneDoFJointsExcludingHands[index].setQ(q);
       }
@@ -65,12 +73,22 @@ public class RDXVRMiniGhostPreview
 
    public void updatePose()
    {
-      if (isEnabled() && miniGhostRobotGraphic.isActive())
+      if (!miniGhostRobotGraphic.isActive())
+         return;
+
+      // Initialize visual tweaks once the RDXRigidBody is actually available
+      if (!graphicsInitialized)
       {
-         updateGhostPoseWithJoystick();
-         updateGhostPitchBasedOnFeet();
-         miniGhostRobotGraphic.update();
+         if (color != null)
+            miniGhostRobotGraphic.setColor(color);
+         if (opacity >= 0.0f)
+            miniGhostRobotGraphic.setOpacity(opacity);
+         graphicsInitialized = true;
       }
+
+      updateGhostPoseWithJoystick();
+      updateGhostPitchBasedOnFeet();
+      miniGhostRobotGraphic.update();
    }
 
    private void updateGhostPoseWithJoystick()
@@ -79,7 +97,7 @@ public class RDXVRMiniGhostPreview
       {
          float lateralJoystick  = controller.getJoystickActionData().x();
          if (Math.abs(lateralJoystick) > CONTROL_JOYSTICK_THRESHOLD)
-            ghostPoseHeadsetOffset.getRotation().appendYawRotation(Math.signum(lateralJoystick) * Math.toRadians(DEGREE_JOYSTICK_INCREMENT));
+            ghostHeadsetOffset.getRotation().appendYawRotation(Math.signum(lateralJoystick) * Math.toRadians(DEGREE_JOYSTICK_INCREMENT));
          miniGhostFrame.update();
       });
    }
@@ -92,7 +110,7 @@ public class RDXVRMiniGhostPreview
    {
       miniGhostFullRobotModel.getElevator().updateFramesRecursively();
 
-      Quaternion rootJointInitialOrientation = new Quaternion(miniGhostFrame.getTransformToRoot().getRotation());
+      Quaternion rootJointInitialOrientation = new Quaternion(miniGhostAdjustedFrame.getTransformToRoot().getRotation());
       // Get the rotations of the sole frames.
       Quaternion rightSoleQuat = new Quaternion(miniGhostFullRobotModel.getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame().getRotation());
       Quaternion leftSoleQuat = new Quaternion(miniGhostFullRobotModel.getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame().getRotation());
@@ -116,29 +134,49 @@ public class RDXVRMiniGhostPreview
       finalRootJointOrientation.multiply(rootJointInitialOrientation, pitchAdjustment);
 
       miniGhostFullRobotModel.getRootJoint().setJointOrientation(finalRootJointOrientation);
-      miniGhostFullRobotModel.getRootJoint().setJointPosition(miniGhostFrame.getTransformToRoot().getTranslation());
+      miniGhostFullRobotModel.getRootJoint().setJointPosition(miniGhostAdjustedFrame.getTransformToRoot().getTranslation());
+
+      miniGhostFullRobotModel.getElevator().updateFramesRecursively();
+   }
+
+   private final RigidBodyTransform ghostToReal = new RigidBodyTransform();
+   private final Vector3D tempTranslation = new Vector3D();
+
+   public void updateRootOffset(RigidBodyTransformReadOnly kstRootTransform, RigidBodyTransformReadOnly realRootTransform)
+   {
+      ghostToReal.set(kstRootTransform);
+      ghostToReal.invert();
+      ghostToReal.multiply(realRootTransform);
+
+      tempTranslation.set(ghostToReal.getTranslation());
+      tempTranslation.scale(0.05);
+      ghostToReal.getTranslation().set(tempTranslation);
+
+      additionalOffset.set(ghostToReal);
+      miniGhostAdjustedFrame.update();
+   }
+
+   public void updateColor(boolean leftFootContact, boolean rightFootContact)
+   {
+      miniGhostRobotGraphic.setColorForBody(miniGhostFullRobotModel.getFoot(RobotSide.LEFT).getName(),
+                                            leftFootContact ? Color.RED : color);
+      miniGhostRobotGraphic.setColorForBody(miniGhostFullRobotModel.getFoot(RobotSide.RIGHT).getName(),
+                                            rightFootContact ? Color.RED : color);
    }
 
    public void setActive(boolean active)
    {
-      if (isEnabled())
-         miniGhostRobotGraphic.setActive(active);
+      miniGhostRobotGraphic.setActive(active);
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      if (isEnabled() && miniGhostRobotGraphic.isActive())
+      if (miniGhostRobotGraphic.isActive())
          miniGhostRobotGraphic.getRenderables(renderables, pool, sceneLevels);
-   }
-
-   public boolean isEnabled()
-   {
-      return miniGhostFullRobotModel != null;
    }
 
    public void destroy()
    {
-      if (miniGhostFullRobotModel != null)
-         miniGhostRobotGraphic.destroy();
+      miniGhostRobotGraphic.destroy();
    }
 }
