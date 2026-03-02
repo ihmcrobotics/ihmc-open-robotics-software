@@ -36,6 +36,7 @@ public class KinematicsBasedFootSwitchFactory implements FootSwitchFactory
                                             RigidBodyBasics rootBody,
                                             ForceSensorDataReadOnly footForceSensor,
                                             double totalRobotWeight,
+                                            DoubleProvider switchDT,
                                             YoRegistry registry)
    {
       if (contactThresholdHeight == null)

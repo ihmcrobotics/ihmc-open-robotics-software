@@ -2,9 +2,9 @@ package us.ihmc.robotics.sensors;
 
 import java.util.Collection;
 
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public interface FootSwitchFactory
@@ -14,9 +14,10 @@ public interface FootSwitchFactory
                                              Collection<? extends ContactablePlaneBody> otherFeet,
                                              ForceSensorDataReadOnly footForceSensor,
                                              double totalRobotWeight,
+                                             DoubleProvider switchDT,
                                              YoRegistry registry)
    {
-      return newFootSwitch(namePrefix, foot, otherFeet, null, footForceSensor, totalRobotWeight, registry);
+      return newFootSwitch(namePrefix, foot, otherFeet, null, footForceSensor, totalRobotWeight, switchDT, registry);
    }
 
    FootSwitchInterface newFootSwitch(String namePrefix,
@@ -25,5 +26,6 @@ public interface FootSwitchFactory
                                      RigidBodyBasics rootBody,
                                      ForceSensorDataReadOnly footForceSensor,
                                      double totalRobotWeight,
+                                     DoubleProvider switchDT,
                                      YoRegistry registry);
 }

@@ -79,7 +79,7 @@ public class ImGuiReferenceFrameLibraryCombo
             if (!libraryContainsFrame)
                ImGui.pushStyleColor(ImGuiCol.Text, ImGuiTools.RED);
 
-            if (ImGui.selectable(referenceFrameName, selectedFrameIndex == i))
+            if (ImGui.selectable(referenceFrameName.isEmpty() ? "<Empty>" : referenceFrameName, selectedFrameIndex == i))
             {
                selectedFrameIndex = i;
                currentFrameNameSetter.accept(referenceFrameName); // Keep the user's copy up to date
