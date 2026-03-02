@@ -4,7 +4,6 @@
 #include "geometry_msgs/msg/./Point_.idl"
 #include "geometry_msgs/msg/./Quaternion_.idl"
 #include "geometry_msgs/msg/./Vector3_.idl"
-#include "toolbox_msgs/msg/./KinematicsToolboxFootStatus_.idl"
 module toolbox_msgs
 {
   module msg
@@ -83,11 +82,19 @@ module toolbox_msgs
         sequence<geometry_msgs::msg::dds::Point, 32> support_region;
         geometry_msgs::msg::dds::Point desired_torso_position;
         geometry_msgs::msg::dds::Quaternion desired_torso_orientation;
+        geometry_msgs::msg::dds::Vector3 desired_torso_linear_velocity;
+        geometry_msgs::msg::dds::Vector3 desired_torso_angular_velocity;
+        sequence<string> rigid_body_names;
+        sequence<geometry_msgs::msg::dds::Point> rigid_body_positions;
+        sequence<geometry_msgs::msg::dds::Quaternion> rigid_body_orientations;
+        sequence<geometry_msgs::msg::dds::Vector3> rigid_body_linear_velocities;
+        sequence<geometry_msgs::msg::dds::Vector3> rigid_body_angular_velocities;
+        float com_offset;
         /**
          * Legged robot-specific contact information (false if not a legged robot)
          */
-        toolbox_msgs::msg::dds::KinematicsToolboxFootStatus left_foot_status;
-        toolbox_msgs::msg::dds::KinematicsToolboxFootStatus right_foot_status;
+        boolean left_foot_in_contact;
+        boolean right_foot_in_contact;
         @defaultValue(value=-1.0)
         double solution_quality;
       };
