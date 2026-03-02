@@ -76,7 +76,7 @@ public class OrderedLogicalSequence
          currentLogicalElement++;
 
       // If we have incremented to the end of the list of elements, we are finished
-      if (currentLogicalElement >= logicalElements.size() - 1)
+      if (currentLogicalElement >= logicalElements.size())
          finished = true;
    }
 
