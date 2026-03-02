@@ -79,6 +79,10 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private static final double EPSILON_FOR_DESIREDS = 5.0e-4;
+   /**
+    * SO3TrajectoryMessage.taskspace_trajectory_points is IDL-bounded to 50.
+    */
+   private static final int MAX_SO3_TRAJECTORY_POINTS_PER_MESSAGE = 50;
 
    private SCS2AvatarTestingSimulation simulationTestHelper;
 
@@ -689,7 +693,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
 
       double timePerWaypoint = 0.05;
-      int numberOfTrajectoryPoints = 65;
+      int numberOfTrajectoryPoints = MAX_SO3_TRAJECTORY_POINTS_PER_MESSAGE;
       double trajectoryTime = numberOfTrajectoryPoints * timePerWaypoint;
       RigidBodyBasics chest = fullRobotModel.getChest();
       CommonHumanoidReferenceFrames humanoidReferenceFrames = simulationTestHelper.getControllerReferenceFrames();
@@ -818,7 +822,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
 
       double timePerWaypoint = 0.05;
-      int numberOfTrajectoryPoints = 65;
+      int numberOfTrajectoryPoints = MAX_SO3_TRAJECTORY_POINTS_PER_MESSAGE;
       double trajectoryTime = numberOfTrajectoryPoints * timePerWaypoint;
       RigidBodyBasics chest = fullRobotModel.getChest();
       CommonHumanoidReferenceFrames humanoidReferenceFrames = simulationTestHelper.getControllerReferenceFrames();
