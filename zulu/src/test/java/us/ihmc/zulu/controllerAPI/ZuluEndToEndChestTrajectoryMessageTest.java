@@ -42,6 +42,18 @@ public class ZuluEndToEndChestTrajectoryMessageTest extends EndToEndChestTraject
    }
 
    @Override
+   public int getExpectedTaskspaceWaypointsAfterQueueWithUsingDifferentTrajectoryFrameWithoutOverride()
+   {
+      return 0;
+   }
+
+   @Override
+   public int getExpectedTaskspaceWaypointsAfterStopAllTrajectory()
+   {
+      return 0;
+   }
+
+   @Override
    public Axis3D getAxisToMoveForALotOfMessages()
    {
       return Axis3D.Z;

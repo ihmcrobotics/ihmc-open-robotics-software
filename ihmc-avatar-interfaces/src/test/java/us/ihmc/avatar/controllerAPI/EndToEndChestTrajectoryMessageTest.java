@@ -943,6 +943,16 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       return 1;
    }
 
+   public int getExpectedTaskspaceWaypointsAfterQueueWithUsingDifferentTrajectoryFrameWithoutOverride()
+   {
+      return 1;
+   }
+
+   public int getExpectedTaskspaceWaypointsAfterStopAllTrajectory()
+   {
+      return 1;
+   }
+
    @Test
    public void testQueuedMessages() throws Exception
    {
@@ -1310,7 +1320,10 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
          defaultControlMode = RigidBodyControlMode.JOINTSPACE;
       }
       assertEquals(defaultControlMode, EndToEndTestTools.findRigidBodyControlManagerState(chest.getName(), simulationTestHelper));
-      EndToEndTestTools.assertTotalNumberOfWaypointsInTaskspaceManager(chest.getName(), prefix, 1, simulationTestHelper);
+      EndToEndTestTools.assertTotalNumberOfWaypointsInTaskspaceManager(chest.getName(),
+                                                                       prefix,
+                                                                       getExpectedTaskspaceWaypointsAfterQueueWithUsingDifferentTrajectoryFrameWithoutOverride(),
+                                                                       simulationTestHelper);
 
       simulationTestHelper.publishToController(lookRightMessage);
       assertTrue(simulationTestHelper.simulateNow(simulationTestHelper.getCurrentControlDT() * 2.0));
@@ -1320,7 +1333,10 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       assertTrue(simulationTestHelper.simulateNow(simulationTestHelper.getCurrentControlDT() * 2.0));
 
       assertEquals(defaultControlMode, EndToEndTestTools.findRigidBodyControlManagerState(chest.getName(), simulationTestHelper));
-      EndToEndTestTools.assertTotalNumberOfWaypointsInTaskspaceManager(chest.getName(), prefix, 1, simulationTestHelper);
+      EndToEndTestTools.assertTotalNumberOfWaypointsInTaskspaceManager(chest.getName(),
+                                                                       prefix,
+                                                                       getExpectedTaskspaceWaypointsAfterQueueWithUsingDifferentTrajectoryFrameWithoutOverride(),
+                                                                       simulationTestHelper);
 
       simulationTestHelper.publishToController(lookStraightAheadMessage);
       assertTrue(simulationTestHelper.simulateNow(simulationTestHelper.getCurrentControlDT() * 2.0));
@@ -1590,7 +1606,10 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
          defaultControlMode = RigidBodyControlMode.JOINTSPACE;
       }
       assertEquals(defaultControlMode, EndToEndTestTools.findRigidBodyControlManagerState(chest.getName(), simulationTestHelper));
-      EndToEndTestTools.assertTotalNumberOfWaypointsInTaskspaceManager(chest.getName(), prefix, 1, simulationTestHelper);
+      EndToEndTestTools.assertTotalNumberOfWaypointsInTaskspaceManager(chest.getName(),
+                                                                       prefix,
+                                                                       getExpectedTaskspaceWaypointsAfterStopAllTrajectory(),
+                                                                       simulationTestHelper);
 
       EuclidCoreTestTools.assertEquals(desiredOrientationBeforeStop, desiredOrientationAfterStop, 1.0e-3);
       assertControlErrorIsLow(simulationTestHelper, chest, 1.0e-2, getRobotModel().getJointMap().getSpineJointNames());
