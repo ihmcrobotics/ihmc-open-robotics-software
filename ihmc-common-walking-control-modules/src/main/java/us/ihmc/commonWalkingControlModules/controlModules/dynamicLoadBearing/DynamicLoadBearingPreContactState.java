@@ -124,6 +124,10 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
    {
       positionControlHelper.setGains(defaultPositionGains);
       positionControlHelper.setWeights(defaultPositionWeights);
+
+      yoBracingPoint.setToNaN();
+      yoBracingNormal.setToNaN();
+      yoControlFrame.setToNaN();
    }
 
    @Override
@@ -172,6 +176,12 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
 
    @Override
    public FeedbackControlCommand<?> createFeedbackControlTemplate()
+   {
+      return null;
+   }
+
+   @Override
+   public InverseDynamicsCommand<?> getTransitionOutOfStateCommand()
    {
       return null;
    }

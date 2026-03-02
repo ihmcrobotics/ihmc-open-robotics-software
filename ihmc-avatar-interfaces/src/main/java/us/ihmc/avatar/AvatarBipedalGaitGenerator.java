@@ -12,12 +12,12 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalkingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.TerrainMapCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -25,7 +25,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.gpuMapping.HeightMapTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -50,6 +49,7 @@ public class AvatarBipedalGaitGenerator
    private final CommandInputManager commandInputManager;
    private final StatusMessageOutputManager statusOutputManager;
    private final CommandInputManager walkingCommandInputManager;
+   private final PauseWalkingCommand pauseWalkingCommand = new PauseWalkingCommand();
 
    private final YoContinuousStepGeneratorParameters parameters = new YoContinuousStepGeneratorParameters(variableNameSuffix, registry);
    private final YoBoolean walkPrev = new YoBoolean("walkMCGSPrev", registry);
@@ -111,6 +111,13 @@ public class AvatarBipedalGaitGenerator
 
       if (!walk)
       {
+         if (!walkPrev)
+         {
+            pauseWalkingCommand.setPauseRequested(true);
+            pauseWalkingCommand.setClearRemainingFootstepQueue(true);
+            walkingCommandInputManager.submitCommand(pauseWalkingCommand);
+         }
+
          footstepDataListCommand.clear();
          return;
       }

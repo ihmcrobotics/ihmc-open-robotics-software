@@ -313,6 +313,11 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
       return humanoidRobotContextData;
    }
 
+   public CommandInputManager getCommandInputManager()
+   {
+      return commandInputManager;
+   }
+
    @Override
    public YoGraphicGroupDefinition getSCS2YoGraphics()
    {
