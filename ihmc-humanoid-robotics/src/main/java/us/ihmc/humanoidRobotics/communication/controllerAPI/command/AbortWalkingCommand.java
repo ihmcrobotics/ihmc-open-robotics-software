@@ -30,6 +30,11 @@ public class AbortWalkingCommand implements Command<AbortWalkingCommand, AbortWa
       abortWalkingRequested = true;
    }
 
+   public void setAbortWalkingRequested(boolean abortWalkingRequested)
+   {
+      this.abortWalkingRequested = abortWalkingRequested;
+   }
+
    public boolean isAbortWalkingRequested()
    {
       return abortWalkingRequested;

@@ -41,7 +41,7 @@ import java.util.ArrayList;
  */
 public class ReducedOrderRobotModel
 {
-   public static final double MAX_HAND_ACCELERATION = 15.0;
+   public static final double MAX_HAND_ACCELERATION = 9.0; // 15.0;
 
    /* Nominal offset in mid-feet zup frame from CoM to shoulder position, taken at default standing home pose */
    private static final double SHOULDER_COM_OFFSET_X = -0.02;

@@ -47,6 +47,11 @@ public class PauseWalkingCommand implements Command<PauseWalkingCommand, PauseWa
       this.isPauseRequested = isPauseRequested;
    }
 
+   public void setClearRemainingFootstepQueue(boolean clearRemainingFootstepQueue)
+   {
+      this.clearRemainingFootstepQueue = clearRemainingFootstepQueue;
+   }
+
    public boolean getClearRemainingFootstepQueue()
    {
       return clearRemainingFootstepQueue;

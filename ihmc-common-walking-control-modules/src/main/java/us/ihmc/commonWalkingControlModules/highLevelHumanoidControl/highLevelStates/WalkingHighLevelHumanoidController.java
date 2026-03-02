@@ -847,10 +847,10 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
    private void updateWholeBodyContactState()
    {
-      if (!hasContactStateChanged())
-      {
-         return;
-      }
+//      if (!hasContactStateChanged())
+//      {
+//         return;
+//      }
 
       WholeBodyContactState wholeBodyContactState = controllerToolbox.getWholeBodyContactState();
       wholeBodyContactState.clear();

@@ -1286,4 +1286,9 @@ public class SCS2AvatarSimulationFactory
                                                                           .getHighLevelControllerParameters()
                                                                           .getFallbackControllerState());
    }
+
+   public AvatarControllerThreadInterface getMultiContactGaitGeneratorThread()
+   {
+      return multiContactGaitGeneratorThread;
+   }
 }

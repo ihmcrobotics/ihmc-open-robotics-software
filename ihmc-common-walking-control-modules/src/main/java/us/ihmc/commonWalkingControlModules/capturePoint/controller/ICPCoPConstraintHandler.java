@@ -51,6 +51,11 @@ public class ICPCoPConstraintHandler
 
       if (copIsConstrainedByMultiContactRegion.getValue())
       {
+         /* Assume the support polygon is always changing when in multi-contact */
+         hasSupportPolygonChanged = true;
+
+         // TODO add area check?
+
          return multiContactStabilityRegion;
       }
       else

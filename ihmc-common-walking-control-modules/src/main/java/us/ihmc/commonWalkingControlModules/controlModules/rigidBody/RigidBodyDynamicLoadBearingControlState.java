@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.dynamicLoadBearing.Dyn
 import us.ihmc.commonWalkingControlModules.controlModules.dynamicLoadBearing.DynamicLoadBearingPreContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.dynamicLoadBearing.DynamicLoadBearingState;
 import us.ihmc.commonWalkingControlModules.controlModules.dynamicLoadBearing.DynamicLoadBearingStateEnum;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
@@ -31,11 +32,16 @@ public class RigidBodyDynamicLoadBearingControlState extends RigidBodyControlSta
    private final StateMachine<DynamicLoadBearingStateEnum, DynamicLoadBearingState> stateMachine;
    private final DynamicLoadBearingPreContactState preContactState;
    private final DynamicLoadBearingPostContactState postContactState;
+   private final RigidBodyJointControlHelper jointControlHelper;
+   private final Runnable onExitRunnable;
 
    public RigidBodyDynamicLoadBearingControlState(RigidBodyBasics bodyToControl,
                                                   RigidBodyBasics baseBody,
                                                   RigidBodyBasics elevator,
+                                                  LoadBearingParameters loadBearingParameters,
                                                   YoDouble yoTime,
+                                                  Runnable onExitRunnable,
+                                                  RigidBodyJointControlHelper jointControlHelper,
                                                   RigidBodyPositionControlHelper positionControlHelper,
                                                   RigidBodyOrientationControlHelper orientationControlHelper,
                                                   ReferenceFrame controlFrame,
@@ -48,9 +54,12 @@ public class RigidBodyDynamicLoadBearingControlState extends RigidBodyControlSta
       String namePrefix = bodyName + "Bracing";
 
       preContactState = new DynamicLoadBearingPreContactState(bodyToControl, positionControlHelper, controlFrame, registry);
-      postContactState = new DynamicLoadBearingPostContactState(bodyToControl, baseBody, elevator, controlFrame, hasContactChanged, registry);
+      postContactState = new DynamicLoadBearingPostContactState(loadBearingParameters, bodyToControl, baseBody, elevator, controlFrame, hasContactChanged, registry);
 
       stateMachine = setupStateMachine(namePrefix, yoTime);
+
+      this.onExitRunnable = onExitRunnable;
+      this.jointControlHelper = jointControlHelper;
    }
 
    private StateMachine<DynamicLoadBearingStateEnum, DynamicLoadBearingState> setupStateMachine(String namePrefix, DoubleProvider timeProvider)
@@ -86,13 +95,13 @@ public class RigidBodyDynamicLoadBearingControlState extends RigidBodyControlSta
    @Override
    public void onExit(double timeInState)
    {
-
+      onExitRunnable.run();
    }
 
    @Override
    public boolean isDone(double timeInState)
    {
-      return false;
+      return stateMachine.getCurrentStateKey() == DynamicLoadBearingStateEnum.POST_CONTACT && stateMachine.getCurrentState().isDone(stateMachine.getTimeInCurrentState());
    }
 
    @Override
@@ -126,6 +135,17 @@ public class RigidBodyDynamicLoadBearingControlState extends RigidBodyControlSta
       {
          postContactState.packContactData(contactPointList, contactNormalToPack);
       }
+   }
+
+   public void setControllerCoreOutput(ControllerCoreOutputReadOnly controllerCoreOutput)
+   {
+      postContactState.setControllerCoreOutput(controllerCoreOutput);
+   }
+
+   @Override
+   public InverseDynamicsCommand<?> getTransitionOutOfStateCommand()
+   {
+      return stateMachine.getCurrentState().getTransitionOutOfStateCommand();
    }
 
    @Override

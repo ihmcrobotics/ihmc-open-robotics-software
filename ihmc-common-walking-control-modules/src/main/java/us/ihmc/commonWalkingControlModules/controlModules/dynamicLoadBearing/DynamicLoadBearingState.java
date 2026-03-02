@@ -13,5 +13,7 @@ public interface DynamicLoadBearingState extends State
 
    FeedbackControlCommand<?> createFeedbackControlTemplate();
 
+   InverseDynamicsCommand<?> getTransitionOutOfStateCommand();
+
    YoGraphicDefinition getSCS2YoGraphics();
 }
