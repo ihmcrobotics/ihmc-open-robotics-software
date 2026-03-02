@@ -35,7 +35,7 @@ public class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition> impleme
    private boolean isActive = false;
 
    /** The index is not CRDT synced because it's a simple local calculation. */
-   private int depthFirstIndex = -1;
+   protected int depthFirstIndex = -1;
 
    /**
     * The state's children. They can be any type that is a BehaviorTreeNodeState.

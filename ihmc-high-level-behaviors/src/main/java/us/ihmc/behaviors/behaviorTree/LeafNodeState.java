@@ -27,17 +27,17 @@ public class LeafNodeState<D extends LeafNodeDefinition> extends BehaviorTreeNod
       failed = new CRDTStatusBoolean(ROS2ActorDesignation.ROBOT, crdtInfo, false);
    }
 
-   public void validateDefinition(List<LeafNodeState<?>> leaves)
+   public void validateDefinition(List<BehaviorTreeNodeState<?>> nodes)
    {
       if (definition.getExecuteAfterIsInvalid())
       {
          // We need to find the node by name
          // This happens when we load from JSON
-         for (int j = leafIndex - 1; j >= 0; j--) // Search backwards from previous
+         for (int j = depthFirstIndex - 1; j >= 0; j--) // Search backwards from previous
          {
-            if (leaves.get(j).getDefinition().getName().equals(definition.getExecuteAfterLeafName()))
+            if (nodes.get(j).getDefinition().getName().equals(definition.getExecuteAfterLeafName()))
             {
-               definition.setExecuteAfterLeaf(leaves.get(j).getID(), definition.getExecuteAfterLeafName());
+               definition.setExecuteAfterLeaf(nodes.get(j).getID(), definition.getExecuteAfterLeafName());
                break;
             }
          }
@@ -46,13 +46,9 @@ public class LeafNodeState<D extends LeafNodeDefinition> extends BehaviorTreeNod
       {
          // Dynamically update the node name -- it can change independently of the node's ID
          // This is necessary for saving the definition
-         for (int j = leafIndex - 1; j >= 0; j--) // Search backwards from previous
-         {
-            if (leaves.get(j).getID() == definition.getExecuteAfterNodeID())
-            {
-               definition.setExecuteAfterLeafName(leaves.get(j).getDefinition().getName());
-            }
-         }
+         for (int j = depthFirstIndex - 1; j >= 0; j--) // Search backwards from previous
+            if (nodes.get(j).getID() == definition.getExecuteAfterNodeID())
+               definition.setExecuteAfterLeafName(nodes.get(j).getDefinition().getName());
       }
    }
 
@@ -151,26 +147,20 @@ public class LeafNodeState<D extends LeafNodeDefinition> extends BehaviorTreeNod
       }
       else if (!definition.getExecuteAfterPrevious())
       {
-         LeafNodeState<?> executeAfterNode = getExecuteAfterLeaf();
+         BehaviorTreeNodeState<?> executeAfterNode = rootNode.getIDToNodeMap().get(definition.getExecuteAfterNodeID());
+         if (executeAfterNode == null)
+            LogTools.error("Node \"%s\" refers to execute after node that doesn't exist: \"%s\"".formatted(definition.getName(),
+                                                                                                           definition.getExecuteAfterLeafName()));
+         else // Allow execute after to point to non-leaf nodes
+         {
+            while (!(executeAfterNode instanceof LeafNodeState<?>) && executeAfterNode.getDepthFirstIndex() < rootNode.getOrderedNodes().size() - 1)
+               executeAfterNode = rootNode.getOrderedNodes().get(executeAfterNode.getDepthFirstIndex() + 1);
 
-         if (executeAfterNode != null)
-            return executeAfterNode.getLeafIndex();
+            if (executeAfterNode instanceof LeafNodeState<?> leafNodeState)
+               return leafNodeState.getLeafIndex();
+         }
       }
 
       return leafIndex - 1; // previous
-   }
-
-   /** @return the leaf to execute after as part of the concurrency system */
-   public LeafNodeState<?> getExecuteAfterLeaf()
-   {
-      if (rootNode.getIDToNodeMap().get(definition.getExecuteAfterNodeID()) instanceof LeafNodeState<?> executeAfterNode)
-      {
-         return executeAfterNode;
-      }
-
-      LogTools.error("Node \"%s\" refers to execute after node that doesn't exist: \"%s\""
-                           .formatted(definition.getName(), definition.getExecuteAfterLeafName()));
-
-      return null;
    }
 }

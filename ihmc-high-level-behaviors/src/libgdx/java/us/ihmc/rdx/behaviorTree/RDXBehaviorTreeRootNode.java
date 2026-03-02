@@ -78,7 +78,7 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
       updateNodeListsRecursive(this);
 
       for (RDXLeafNode<?, ?> leaf : orderedLeaves)
-         leaf.getState().validateDefinition(state.getOrderedLeaves());
+         leaf.getState().validateDefinition(state.getOrderedNodes());
    }
 
    public void updateNodeListsRecursive(RDXBehaviorTreeNode<?, ?> node)

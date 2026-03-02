@@ -90,7 +90,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       updateNodeListsRecursive(this);
 
       for (LeafNodeExecutor<?, ?> leaf : orderedLeaves)
-         leaf.getState().validateDefinition(state.getOrderedLeaves());
+         leaf.getState().validateDefinition(state.getOrderedNodes());
 
       // Determine the concurrent group
       int next = state.getExecutionNextIndex();

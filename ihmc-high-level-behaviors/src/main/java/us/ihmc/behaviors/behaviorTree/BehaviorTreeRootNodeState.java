@@ -29,6 +29,7 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
    private final TLongObjectHashMap<BehaviorTreeNodeState<?>> idToNodeMap = new TLongObjectHashMap<>();
    private transient final MutableInt depthFirstIndexAssignment = new MutableInt();
    private transient final MutableInt leafIndexAssignment = new MutableInt();
+   private final List<BehaviorTreeNodeState<?>> orderedNodes = new ArrayList<>();
    private final List<LeafNodeState<?>> orderedLeaves = new ArrayList<>();
    private final List<ActionNodeState<?>> orderedActions = new ArrayList<>();
 
@@ -55,6 +56,7 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
       idToNodeMap.clear();
       depthFirstIndexAssignment.setValue(0);
       leafIndexAssignment.setValue(0);
+      orderedNodes.clear();
       orderedLeaves.clear();
       orderedActions.clear();
       updateSubtree(this, depthFirstIndexAssignment, leafIndexAssignment);
@@ -64,6 +66,7 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
    {
       idToNodeMap.put(node.getID(), node);
       node.setDepthFirstIndex(depthFirstIndex.getAndIncrement());
+      orderedNodes.add(node);
 
       for (BehaviorTreeNodeState<?> child : node.getChildren())
       {
@@ -202,6 +205,11 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
    public TLongObjectHashMap<BehaviorTreeNodeState<?>> getIDToNodeMap()
    {
       return idToNodeMap;
+   }
+
+   public List<BehaviorTreeNodeState<?>> getOrderedNodes()
+   {
+      return orderedNodes;
    }
 
    public List<LeafNodeState<?>> getOrderedLeaves()
