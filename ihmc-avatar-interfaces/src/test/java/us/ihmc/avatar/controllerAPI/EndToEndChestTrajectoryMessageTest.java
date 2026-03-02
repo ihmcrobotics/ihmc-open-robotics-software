@@ -938,6 +938,11 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       return Axis3D.Y;
    }
 
+   public int getExpectedTaskspaceWaypointsAfterQueueWithWrongPreviousId()
+   {
+      return 1;
+   }
+
    @Test
    public void testQueuedMessages() throws Exception
    {
@@ -1222,7 +1227,10 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
          defaultControlMode = RigidBodyControlMode.JOINTSPACE;
       }
       assertEquals(defaultControlMode, EndToEndTestTools.findRigidBodyControlManagerState(chest.getName(), simulationTestHelper));
-      EndToEndTestTools.assertTotalNumberOfWaypointsInTaskspaceManager(chest.getName(), prefix, 1, simulationTestHelper);
+      EndToEndTestTools.assertTotalNumberOfWaypointsInTaskspaceManager(chest.getName(),
+                                                                       prefix,
+                                                                       getExpectedTaskspaceWaypointsAfterQueueWithWrongPreviousId(),
+                                                                       simulationTestHelper);
    }
 
    public void testQueueWithUsingDifferentTrajectoryFrameWithoutOverride() throws Exception
