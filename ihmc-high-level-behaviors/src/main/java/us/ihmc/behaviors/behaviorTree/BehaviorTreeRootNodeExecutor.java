@@ -7,6 +7,7 @@ import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
 import us.ihmc.behaviors.behaviorTree.action.actions.AbilityHandActionComms;
 import us.ihmc.behaviors.behaviorTree.control.FallbackNodeExecutor;
+import us.ihmc.behaviors.behaviorTree.control.GotoNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneExecutor;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -142,7 +143,8 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
                                                                           leafToExecute.getDefinition().getName(),
                                                                           leafToExecute.getClass().getSimpleName()));
             leafToExecute.triggerExecution();
-            state.stepForwardNextExecutionIndex();
+            if (!(leafToExecute instanceof GotoNodeExecutor))
+               state.stepForwardNextExecutionIndex();
             if (!leafToExecute.getState().getIsExecuting()) // Handle immediately ceased execution
             {
                boolean isTryLeaf = leafCeasedExecution(leafToExecute);
