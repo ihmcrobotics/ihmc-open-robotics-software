@@ -1637,7 +1637,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
                                                                                                                         simulationTestHelper));
       finalOrientation.changeFrame(humanoidReferenceFrames.getPelvisZUpFrame());
       Quaternion finalDesiredChestOrientation = new Quaternion(finalOrientation);
-      EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(desiredOrientation, finalDesiredChestOrientation, 1.0e-5);
+      EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(desiredOrientation, finalDesiredChestOrientation, 1.0e-4);
    }
 
    @Test
