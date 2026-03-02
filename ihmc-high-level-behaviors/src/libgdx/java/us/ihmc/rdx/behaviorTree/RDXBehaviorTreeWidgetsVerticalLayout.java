@@ -1,13 +1,18 @@
 package us.ihmc.rdx.behaviorTree;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiMouseButton;
 import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
+import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionDefinition;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -80,6 +85,22 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
             if (ImGui.menuItem(labels.get("Insert Node After...")))
             {
                queuePopupModal.set(() -> popNodeCreationModalDialog(node, BehaviorTreeNodeInsertionType.INSERT_AFTER));
+            }
+            if (node instanceof RDXLeafNode<?, ?> && ImGui.menuItem(labels.get("Duplicate Node")))
+            {
+               BehaviorTreeNodeInsertionType insertionType = BehaviorTreeNodeInsertionType.INSERT_AFTER;
+               Class<?> nodeType = node.getDefinition().getClass();
+               RDXBehaviorTreeNode<?, ?> newNode = behaviorTree.getNodeBuilder().createNode(nodeType,
+                                                                                            behaviorTree.getAndIncrementNextID(),
+                                                                                            behaviorTree.getRootNode());
+               ObjectMapper mapper = new ObjectMapper();
+               ObjectNode saveNode = mapper.createObjectNode();
+               node.getDefinition().saveToFile(saveNode); // exploit the JSON methods to copy the definition
+               ObjectNode loadNode = (ObjectNode) ExceptionTools.handle(() ->
+                            mapper.readTree(mapper.writeValueAsString(saveNode)), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+               newNode.getDefinition().loadFromFile(loadNode);
+               newNode.getDefinition().setName(node.getDefinition().getName() + " (Copy)");
+               topologyOperationQueue.queueInsertNodeModify(new BehaviorTreeNodeInsertionDefinition<>(insertionType, newNode, node));
             }
          }
          if (!(node instanceof RDXActionNode<?, ?>))
