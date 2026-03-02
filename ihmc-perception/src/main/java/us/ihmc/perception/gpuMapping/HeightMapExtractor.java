@@ -232,13 +232,16 @@ public class HeightMapExtractor
       double currentCellCordY =
             (int) Math.floor(sensorToWorldZUp.getTranslation().getY32() / heightMapParameters.getCellSize()) * heightMapParameters.getCellSize();
 
-      double correctedCurrentCellCordX =
-            (int) Math.floor(totalCorrectedTransform.getTranslationX() + sensorToWorldZUp.getTranslationX() / heightMapParameters.getCellSize())
+      double correctedCurrentCellCordXRaw =
+            (int) Math.round(totalCorrectedTransform.getTranslationX() + sensorToWorldZUp.getTranslationX() / heightMapParameters.getCellSize())
             * heightMapParameters.getCellSize();
-      double correctedCurrentCellCordY =
-            (int) Math.floor(totalCorrectedTransform.getTranslationY() + sensorToWorldZUp.getTranslationY() / heightMapParameters.getCellSize())
+      double correctedCurrentCellCordYRaw =
+            (int) Math.round(totalCorrectedTransform.getTranslationY() + sensorToWorldZUp.getTranslationY() / heightMapParameters.getCellSize())
             * heightMapParameters.getCellSize();
 
+
+      double correctedCurrentCellCordX = Math.round(correctedCurrentCellCordXRaw * 100.0) / 100.0;
+      double correctedCurrentCellCordY = Math.round(correctedCurrentCellCordYRaw * 100.0) / 100.0;
       // 1. Get the raw world position from the transform matrix
       float worldCamX = sensorToWorldNoRotation.getTranslation().getX32();
       float worldCamY = sensorToWorldNoRotation.getTranslation().getY32();
@@ -265,8 +268,8 @@ public class HeightMapExtractor
       // This is the first thing we need to do, we are going to compare the newest local data to the global data.
       // It won't line up if we don't first translate the global map to the latest translation
       {
-         int currentCellX = (int) Math.floor(sensorToWorldZUp.getTranslation().getX32() / heightMapParameters.getCellSize());
-         int currentCellY = (int) Math.floor(sensorToWorldZUp.getTranslation().getY32() / heightMapParameters.getCellSize());
+         int currentCellX = (int) Math.round(correctedCurrentCellCordX / heightMapParameters.getCellSize());
+         int currentCellY = (int) Math.round(correctedCurrentCellCordY / heightMapParameters.getCellSize());
 
          // This means we have moved more than 2cm. So each cell should shift to one of its neighboring cells
          if (currentCellX != previousCellX || currentCellY != previousCellY)

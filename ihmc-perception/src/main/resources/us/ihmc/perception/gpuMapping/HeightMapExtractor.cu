@@ -155,7 +155,7 @@ __global__ void computeLocalMap(const float* __restrict__ sumMap, size_t pitchSu
     const float* sumSqPtr = (const float*)((const char*)sumOfSquaresMap + yIndex * pitchSumSq) + xIndex;
     const float* motionVarPtr = (const float*)((const char*)motionVarianceSumMap + yIndex * pitchMotionVar) + xIndex;
 
-    float count = *countPtr;
+    int count = *countPtr;
     float mean = 0.0f;
     float variance = 0.0f;
     float motionVariance = 0.0f;
@@ -292,7 +292,7 @@ __global__ void heightMapRegistrationKernel(const float *__restrict__ localMeanM
 
     // After trying to do as much work as possible in parallel to the global memory access. We ran out of stuff to do.
     // Check the result of global memory for invalid data, and return if not valid
-    if (localMeanF == 0)
+    if (localMeanF == 0.0f)
         return;
 
     // Access the rest of the global memory needed for the filtering, there is no other work to do
