@@ -1,5 +1,6 @@
 package us.ihmc.tools;
 
+import us.ihmc.log.LogTools;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ public class OrderedLogicalSequence
    private final ArrayList<BooleanProvider> completionConditions = new ArrayList<>();
 
    private int currentLogicalElement = 0;
+   private int lastLogicalElementRun = -1;
    private boolean started = false;
    private boolean finished = false;
 
@@ -29,9 +31,9 @@ public class OrderedLogicalSequence
 
    /**
     * Adds a logical element to this ordered logical sequence
-    * @param runnable---------------The main logic to run
-    * @param preRequisiteCondition--Prerequisite logic that must be true before running main logic
-    * @param completionCondition----Completion logic that must be true before moving to the next element
+    * @param runnable               The main logic to run
+    * @param preRequisiteCondition  Prerequisite logic that must be true before running main logic
+    * @param completionCondition    Completion logic that must be true before moving to the next element
     */
    public void addLogicalElement(Runnable runnable, BooleanProvider preRequisiteCondition, BooleanProvider completionCondition)
    {
@@ -68,11 +70,14 @@ public class OrderedLogicalSequence
          return;
 
       // If the prerequisite condition has been met for this element, run the runnable logic of this element
-      if (preRequisiteConditions.get(currentLogicalElement) != null && preRequisiteConditions.get(currentLogicalElement).getValue())
+      if (preRequisiteConditions.get(currentLogicalElement) == null || preRequisiteConditions.get(currentLogicalElement).getValue() && currentLogicalElement != lastLogicalElementRun)
+      {
          logicalElements.get(currentLogicalElement).run();
+         lastLogicalElementRun = currentLogicalElement;
+      }
 
       // If the completion condition has been met for this element, increment to the next element
-      if (completionConditions.get(currentLogicalElement) != null && completionConditions.get(currentLogicalElement).getValue())
+      if (completionConditions.get(currentLogicalElement) == null || completionConditions.get(currentLogicalElement).getValue())
          currentLogicalElement++;
 
       // If we have incremented to the end of the list of elements, we are finished
