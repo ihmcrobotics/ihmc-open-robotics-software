@@ -15,7 +15,7 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "1876cd66c3d26c7965d4ec779dcc8b363e32b8b5f567817355fb9b20b9cb8952";
+   		return "3af738f59c443fec655140ab7004ab60d46fb82bc84cd4d6859842f43dfe96b0";
    }
    
    @Override
@@ -201,7 +201,7 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
 
       cdr.write_type_9(data.getPlannerInitialStanceSide());
 
-      cdr.write_type_7(data.getPlannerPerformAStarSearch());
+      cdr.write_type_9(data.getPlanner());
 
       cdr.write_type_7(data.getPlannerWalkWithGoalOrientation());
 
@@ -239,7 +239,7 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
       	
       data.setPlannerInitialStanceSide(cdr.read_type_9());
       	
-      data.setPlannerPerformAStarSearch(cdr.read_type_7());
+      data.setPlanner(cdr.read_type_9());
       	
       data.setPlannerWalkWithGoalOrientation(cdr.read_type_7());
       	
@@ -271,7 +271,7 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
       ser.write_type_6("right_goal_foot_y_to_gizmo", data.getRightGoalFootYToGizmo());
       ser.write_type_6("right_goal_foot_yaw_to_gizmo", data.getRightGoalFootYawToGizmo());
       ser.write_type_9("planner_initial_stance_side", data.getPlannerInitialStanceSide());
-      ser.write_type_7("planner_perform_a_star_search", data.getPlannerPerformAStarSearch());
+      ser.write_type_9("planner", data.getPlanner());
       ser.write_type_7("planner_walk_with_goal_orientation", data.getPlannerWalkWithGoalOrientation());
       ser.write_type_7("planner_plan_with_body_path", data.getPlannerPlanWithBodyPath());
       ser.write_type_a("planner_parameters", new ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessagePubSubType(), data.getPlannerParameters());
@@ -300,7 +300,7 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
       data.setRightGoalFootYToGizmo(ser.read_type_6("right_goal_foot_y_to_gizmo"));
       data.setRightGoalFootYawToGizmo(ser.read_type_6("right_goal_foot_yaw_to_gizmo"));
       data.setPlannerInitialStanceSide(ser.read_type_9("planner_initial_stance_side"));
-      data.setPlannerPerformAStarSearch(ser.read_type_7("planner_perform_a_star_search"));
+      data.setPlanner(ser.read_type_9("planner"));
       data.setPlannerWalkWithGoalOrientation(ser.read_type_7("planner_walk_with_goal_orientation"));
       data.setPlannerPlanWithBodyPath(ser.read_type_7("planner_plan_with_body_path"));
       ser.read_type_a("planner_parameters", new ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessagePubSubType(), data.getPlannerParameters());
