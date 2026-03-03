@@ -69,7 +69,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       swingDuration = new CRDTBidirectionalDouble(this, 0.8);
       transferDuration = new CRDTBidirectionalDouble(this, 0.5);
       executionMode = new CRDTBidirectionalEnumField<>(this, ExecutionMode.OVERRIDE);
-      parentFrameName = new CRDTBidirectionalString(this, ReferenceFrame.getWorldFrame().getName());
+      parentFrameName = new CRDTBidirectionalString(this, "Walking");
       isManuallyPlaced = new CRDTBidirectionalBoolean(this, false);
       manuallyPlacedFootsteps = new CRDTBidirectionalRecyclingArrayList<>(this, new RecyclingArrayList<>(() -> new FootstepPlanActionFootstepDefinition(this)));
       goalStancePoint = new CRDTBidirectionalPoint3D(this);

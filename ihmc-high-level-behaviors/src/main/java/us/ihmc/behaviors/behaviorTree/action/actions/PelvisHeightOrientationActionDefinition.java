@@ -30,7 +30,7 @@ public class PelvisHeightOrientationActionDefinition extends ActionNodeDefinitio
       super(rootNode);
 
       trajectoryDuration = new CRDTBidirectionalDouble(this, 4.0);
-      parentFrameName = new CRDTBidirectionalString(this, ReferenceFrame.getWorldFrame().getName());
+      parentFrameName = new CRDTBidirectionalString(this, "Walking");
       pelvisToParentTransform = new CRDTBidirectionalRigidBodyTransform(this);
    }
 

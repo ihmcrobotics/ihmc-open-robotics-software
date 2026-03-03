@@ -32,7 +32,7 @@ public class FootPoseActionDefinition extends ActionNodeDefinition implements Si
 
       side = new CRDTBidirectionalEnumField<>(this, RobotSide.LEFT);
       trajectoryDuration = new CRDTBidirectionalDouble(this, 4.0);
-      parentFrameName = new CRDTBidirectionalString(this, ReferenceFrame.getWorldFrame().getName());
+      parentFrameName = new CRDTBidirectionalString(this, "Right Foot Sole");
       footToParentTransform = new CRDTBidirectionalRigidBodyTransform(this);
    }
 
