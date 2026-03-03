@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.Locale;
 
 public class YOLOv8Tools
 {
@@ -232,6 +233,30 @@ public class YOLOv8Tools
 
          boundingBox.close();
          textBox.close();
+      }
+   }
+
+   public static void annotateTargets(Mat image, List<AnnotatedTarget2D> targets)
+   {
+      for (AnnotatedTarget2D t : targets)
+      {
+         if (t.bbox == null) continue;
+
+         int x1 = Math.round(t.bbox[0]);
+         int y1 = Math.round(t.bbox[1]);
+         int x2 = Math.round(t.bbox[2]);
+         int y2 = Math.round(t.bbox[3]);
+
+         Scalar color = colorForId(t.targetId); // nice stable per targetId
+
+         opencv_imgproc.rectangle(image, new Point(x1, y1), new Point(x2, y2), color, 2, LINE_TYPE, 0);
+
+         String label = "T" + t.targetId + " (trk " + t.trackId + ") " +
+                        String.format("%.2f", t.score) + " " + t.name;
+
+         opencv_imgproc.putText(image, label,
+                                new Point(x1, Math.max(0, y1 - 5)),
+                                FONT, 0.8, WHITE, 2, LINE_TYPE, false);
       }
    }
 

@@ -35,6 +35,7 @@ import us.ihmc.ros2.ROS2Publisher;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -62,6 +63,9 @@ public class YOLOv8DetectionExecutor
    private final RepeatingTaskThread updateThread;
 
    private final List<Consumer<List<InstantDetection>>> detectionConsumerCallbacks = new ArrayList<>();
+
+   private List<AnnotatedTarget2D> annotatedTargets = new ArrayList<>();
+   private final Object annotatedTargetsLock = new Object();
 
    private final ROS2Publisher<ImageMessage> annotatedImagePublisher = ros2Node.createPublisher(PerceptionAPI.YOLO_ANNOTATED_IMAGE);
    private final BooleanSupplier annotatedImageDemanded;
@@ -398,8 +402,32 @@ public class YOLOv8DetectionExecutor
 
                           List<Target2D> published = target2DTracker.update(frameW, frameH, obs);
 
-                          // Optionally: attach published targetId back onto detections if you add a new field.
-                          // Or: keep a map trackId->targetId for overlay/logging.
+                          // Attach published targetId back onto detections
+                          List<AnnotatedTarget2D> newAnnotatedTargets = new ArrayList<>(published.size());
+
+                          for (Target2D t : published)
+                          {
+                             float[] bb = (t.latestBbox != null) ? Arrays.copyOf(t.latestBbox, 4) : null;
+                             RawImage mask = (t.latestMask != null) ? t.latestMask.get() : null;
+
+                             newAnnotatedTargets.add(new AnnotatedTarget2D(
+                                   t.targetId,
+                                   t.lastTrackId,
+                                   t.name,
+                                   t.score,
+                                   bb,
+                                   mask
+                             ));
+                          }
+
+                          // Swap list atomically and release old retained masks
+                          synchronized (annotatedTargetsLock)
+                          {
+                             List<AnnotatedTarget2D> prev = annotatedTargets;
+                             annotatedTargets = newAnnotatedTargets;
+                             for (AnnotatedTarget2D at : prev)
+                                at.destroy();
+                          }
 
                           // Callbacks exactly once (FoundationPose, etc.)
                           detectionConsumerCallbacks.forEach(cb -> cb.accept(yoloInstantDetections));
@@ -506,6 +534,11 @@ public class YOLOv8DetectionExecutor
             synchronized (annotatedDetectionsLock)
             {
                YOLOv8Tools.annotateImage(src, resultMat, annotatedImageDetections);
+            }
+
+            synchronized (annotatedTargetsLock)
+            {
+               YOLOv8Tools.annotateTargets(resultMat, annotatedTargets);
             }
 
             annotatedImagePointer = new BytePointer();
