@@ -10,11 +10,8 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.sensors.CameraIntrinsics;
 import us.ihmc.perception.gpuMapping.worldModel.ChunkedMapManager;
@@ -29,7 +26,6 @@ import java.util.List;
  */
 public class GpuMappingManager
 {
-   private final ReferenceFrame globalHeightMapCenterFrame;
    private final HeightMapParameters heightMapParameters;
    private final HeightMapDriftOffset heightMapDriftOffset;
    private final HeightMapExtractor heightMapExtractor;
@@ -55,18 +51,14 @@ public class GpuMappingManager
    private final TerrainMapMessage terrainMapMessage;
    private long terrainMapSequenceId = 0;
 
-   private ReferenceFrame leftSensorFrame = null;
-
    public GpuMappingManager(String robotName,
                             ROS2Node ros2Node,
                             ReferenceFrame leftFootSoleFrame,
                             ReferenceFrame rightFootSoleFrame,
-                            ReferenceFrame globalHeightMapCenterFrame,
                             ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
                             HeightMapParameters heightMapParameters,
                             TerrainMapParameters terrainMapParameters)
    {
-      this.globalHeightMapCenterFrame = globalHeightMapCenterFrame;
       this.heightMapParameters = heightMapParameters;
 
       footSoleFrames.add(leftFootSoleFrame);
@@ -119,15 +111,6 @@ public class GpuMappingManager
          }
       }
 
-      RigidBodyTransform leftSensorTransform = new RigidBodyTransform(new Quaternion(), new Vector3D(0.0, 0.025, 0.0));
-      leftSensorFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("ZED_X_Mini" + "_left",
-                                                                                          globalHeightMapCenterFrame,
-                                                                                          leftSensorTransform);
-      // Update the sensor origin here with the latest reference frame
-      // We are deep coping the frames here to avoid a data race condition, still possible but very small chance
-      RigidBodyTransform globalHeightMapFrameToWorldFrame = new RigidBodyTransform(leftSensorFrame.getTransformToWorldFrame());
-      Point3D globalHeightMapCenter = new Point3D(globalHeightMapFrameToWorldFrame.getTranslation());
-
       // -------- Update the Height Map with the latest depth image from the sensor --------------
       // We expect to have knowledge of where the camera is in relation to the world so we can accurately display the height map
       RigidBodyTransform sensorToWorld = cameraFrame.getTransformToWorldFrame();
@@ -146,29 +129,16 @@ public class GpuMappingManager
       }
 
       // Perform update, this actually creates the height map
-      heightMapExtractor.update(latestDepthImage,
-                                depthIntrinsics,
-                                sensorToWorld,
-                                sensorToGround,
-                                sensorToWorldZUp,
-                                driftOffsetInZ,
-                                globalHeightMapCenter,
-                                computeFootHeight());
+      heightMapExtractor.update(latestDepthImage, depthIntrinsics, sensorToWorld, sensorToGround, sensorToWorldZUp, driftOffsetInZ, computeFootHeight());
 
-      terrainMapExtractor.update(heightMapExtractor.getHeightMap(), heightMapCenterPoint);
-
-      // The center of this map should be centered in the world grid
-      // The sensor origin isn't always at the center of a grid point, in fact it's often not in the center
-      double currentCellX = (int) Math.round(globalHeightMapCenter.getX32() / heightMapParameters.getCellSize()) * heightMapParameters.getCellSize();
-      double currentCellY = (int) Math.round(globalHeightMapCenter.getY32() / heightMapParameters.getCellSize()) * heightMapParameters.getCellSize();
-      heightMapCenterPoint.set(currentCellX, currentCellY, 0.0);
+      Point3D heightMapCenter = heightMapExtractor.getHeightMapCenter();
+      terrainMapExtractor.update(heightMapExtractor.getHeightMap(), heightMapCenter);
+      heightMapCenterPoint.set(heightMapCenter);
    }
 
    public void publishHeightMap()
    {
       HeightMapMessageTools.toMessage(heightMapExtractor.getHeightMapData(), heightMapMessage);
-
-      //      heightMapLogger.logHeightMap(globalHeightMap, heightMapCenterPoint);
 
       heightMapMessage.setSequenceId(heightMapSequenceId++);
       heightMapMessagePublisher.publish(heightMapMessage);

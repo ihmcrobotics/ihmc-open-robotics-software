@@ -53,7 +53,6 @@ public class GpuMappingThread extends RepeatingTaskThread
                            ROS2SyncedRobotModel syncedRobotModel,
                            RobotCollisionModel robotCollisionModel,
                            BlockingQueue<RawImage> rawImageCollection,
-                           ReferenceFrame zedDepthCameraFrame,
                            ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
                            ActiveMappingParameterToolBox activeMappingParameterToolBox)
    {
@@ -81,7 +80,6 @@ public class GpuMappingThread extends RepeatingTaskThread
                                                 ros2Node,
                                                 leftFootFrame,
                                                 rightFootFrame,
-                                                syncedRobotModel.getReferenceFrames().getSteppingCameraFrame(),
                                                 controllerFootstepQueueMonitor,
                                                 heightMapParameters,
                                                 activeMappingParameterToolBox.getTerrainMapParameters());

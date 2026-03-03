@@ -179,6 +179,12 @@ __global__ void computeLocalMap(const float* __restrict__ sumMap, size_t pitchSu
         }
     }
 
+    if (count < 40)
+    {
+        // If the count is too low, invalidate the mean, we don't want to record this cell as it doesn't have enough data
+        mean = 0.0f;
+    }
+
     // Write final results to the output maps
     float* meanHeight = (float*)((char*)localMeanMap + xIndex * pitchLocalMean) + yIndex;
     float* var = (float*)((char*)localVarianceMap + xIndex * pitchLocalVariance) + yIndex;

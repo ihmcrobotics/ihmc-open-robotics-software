@@ -95,6 +95,9 @@ public class HeightMapExtractor
    private final RigidBodyTransform totalCorrectedTransform = new RigidBodyTransform();
    private boolean performICP = true;
 
+   private double correctedCurrentCellCordX;
+   private double correctedCurrentCellCordY;
+
    public HeightMapExtractor(HeightMapParameters heightMapParameters)
    {
       this.heightMapParameters = heightMapParameters;
@@ -195,11 +198,8 @@ public class HeightMapExtractor
                       RigidBodyTransformReadOnly sensorToGroundTransform,
                       RigidBodyTransformReadOnly sensorToWorldZUp,
                       float zDriftInMeters,
-                      Point3D globalHeightMapCenter,
                       double footHeight)
    {
-      int error;
-
       // Populate parameter buffers with the necessary values
       float[] parametersArray = populateParameterArray(heightMapParameters, cameraIntrinsics, footHeight);
       parametersHostPointer.put(parametersArray);
@@ -225,13 +225,7 @@ public class HeightMapExtractor
       CUDATools.memcpyAsync(sensorToWorldNoRotationDevice, sensorToWorldNoRotationHost, sensorToWorldNoRotationAsArray.length, stream);
       checkCUDAError();
 
-      // The center of this map should be centered in the world grid
       // The sensor origin isn't always at the center of a grid point, in fact it's often not in the center
-      double currentCellCordX =
-            (int) Math.floor(sensorToWorldZUp.getTranslation().getX32() / heightMapParameters.getCellSize()) * heightMapParameters.getCellSize();
-      double currentCellCordY =
-            (int) Math.floor(sensorToWorldZUp.getTranslation().getY32() / heightMapParameters.getCellSize()) * heightMapParameters.getCellSize();
-
       double correctedCurrentCellCordXRaw =
             (int) Math.round(totalCorrectedTransform.getTranslationX() + sensorToWorldZUp.getTranslationX() / heightMapParameters.getCellSize())
             * heightMapParameters.getCellSize();
@@ -239,30 +233,24 @@ public class HeightMapExtractor
             (int) Math.round(totalCorrectedTransform.getTranslationY() + sensorToWorldZUp.getTranslationY() / heightMapParameters.getCellSize())
             * heightMapParameters.getCellSize();
 
+      correctedCurrentCellCordX = Math.round(correctedCurrentCellCordXRaw * 100.0) / 100.0;
+      correctedCurrentCellCordY = Math.round(correctedCurrentCellCordYRaw * 100.0) / 100.0;
 
-      double correctedCurrentCellCordX = Math.round(correctedCurrentCellCordXRaw * 100.0) / 100.0;
-      double correctedCurrentCellCordY = Math.round(correctedCurrentCellCordYRaw * 100.0) / 100.0;
-      // 1. Get the raw world position from the transform matrix
+      // Get the raw world position from the transform matrix
       float worldCamX = sensorToWorldNoRotation.getTranslation().getX32();
       float worldCamY = sensorToWorldNoRotation.getTranslation().getY32();
 
-      // 2. Calculate the "Snapped" position (the nearest grid intersection)
+      // Calculate the "Snapped" position (the nearest grid intersection)
       // Using floor ensures the grid lines stay at multiples of cellSize (0.0, 0.1, 0.2...)
       float snappedCenterX = (float) (Math.floor(worldCamX / heightMapParameters.getCellSize()) * heightMapParameters.getCellSize());
       float snappedCenterY = (float) (Math.floor(worldCamY / heightMapParameters.getCellSize()) * heightMapParameters.getCellSize());
 
-      // 3. Calculate the sub-cell offset
+      // Calculate the sub-cell offset
       // This is how far the camera has "strayed" from the snapped grid point
       float subCellOffsetX = worldCamX - snappedCenterX;
       float subCellOffsetY = worldCamY - snappedCenterY;
 
       Point3D localCenterMapForICP = new Point3D(subCellOffsetX, subCellOffsetY, 0.0f);
-
-      // 4. Apply the offset to the point relative to the sensor
-      // This "stabilizes" the point against the camera's sub-pixel movement
-      //      float2 stableXY;
-      //      stableXY.x = queryPointInZUpFrame.x + subCellOffsetX;
-      //      stableXY.y = queryPointInZUpFrame.y + subCellOffsetY;
 
       // ---------- Run the translate kernel ---------
       // This is the first thing we need to do, we are going to compare the newest local data to the global data.
@@ -338,7 +326,7 @@ public class HeightMapExtractor
 
          if (heightMapParameters.getICPFilter() && performICP)
          {
-            Point3D globalHeightMapCenterOnGrid = new Point3D(correctedCurrentCellCordX, correctedCurrentCellCordY, globalHeightMapCenter.getZ32());
+            Point3D globalHeightMapCenterOnGrid = new Point3D(correctedCurrentCellCordX, correctedCurrentCellCordY, 0.0f);
             gpuICPCalculator.computeICPErrorTransform(localMeanMap,
                                                       previousGlobalMapForICP,
                                                       localCenterMapForICP,
@@ -629,5 +617,10 @@ public class HeightMapExtractor
    public GpuMat getHeightMap()
    {
       return globalMeanMap;
+   }
+
+   public Point3D getHeightMapCenter()
+   {
+      return new Point3D(correctedCurrentCellCordX, correctedCurrentCellCordY, 0.0f);
    }
 }

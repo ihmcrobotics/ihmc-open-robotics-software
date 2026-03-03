@@ -174,14 +174,7 @@ public class RDXHeightMapLogPlayer
          // Update the Z translation of the sensor to match the world transform (to handle the sensor's vertical position)
          sensorToGround.getTranslation().setZ(sensorToWorld.getTranslation().getZ());
 
-         heightMapExtractor.update(depthImage.getGpuImageMat(),
-                                   depthImage.getIntrinsicsCopy(),
-                                   sensorToWorld,
-                                   sensorToGround,
-                                   groundToWorld,
-                                   0,
-                                   heightMapCenterOrigin,
-                                   0);
+         heightMapExtractor.update(depthImage.getGpuImageMat(), depthImage.getIntrinsicsCopy(), sensorToWorld, sensorToGround, groundToWorld, 0, 0);
 
          // Publish the height map to anyone who is subscribing
          Mat hostGlobalHeightMap = new Mat();
