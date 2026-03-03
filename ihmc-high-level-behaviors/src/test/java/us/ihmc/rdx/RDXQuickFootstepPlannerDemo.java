@@ -40,6 +40,7 @@ public class RDXQuickFootstepPlannerDemo
    private ConvexPolygon2D foothold;
    private final QuickFootstepPlanner planner = new QuickFootstepPlanner();
    private List<Pair<RobotSide, Pose3D>> footstepPlan;
+   private final List<Double> swingDistances = new ArrayList<>();
    private final List<ModelInstance> visualModels = new ArrayList<>();
    private final List<RDX3DSituatedText> footstepIndexTexts = new ArrayList<>();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
@@ -163,7 +164,9 @@ public class RDXQuickFootstepPlannerDemo
             ImGui.text("Planned Footsteps: " + footstepPlan.size());
             for (int i = 0; i < footstepPlan.size(); i++)
                ImGui.text("Step " + i + ": " + footstepPlan.get(i).getFirst() + " to " + footstepPlan.get(i).getSecond().getPosition()
-               + "  Yaw: (%.3f%s)".formatted(Math.toDegrees(footstepPlan.get(i).getSecond().getYaw()), EuclidCoreMissingTools.DEGREE_SYMBOL));
+               + "  Yaw: (%.3f%s)%n\tDistance: %.3f".formatted(Math.toDegrees(footstepPlan.get(i).getSecond().getYaw()),
+                                                               EuclidCoreMissingTools.DEGREE_SYMBOL,
+                                                               swingDistances.get(i)));
          }
 
          @Override
@@ -203,6 +206,7 @@ public class RDXQuickFootstepPlannerDemo
             planner.setStepPlannedCallback(() ->
             {
                int footstepIndex = footstepIndexCounter++;
+               swingDistances.add(planner.getSwingDistance());
                visualModels.add(RDXModelBuilder.buildModelInstance(builder ->
                {
                   SideDependentList<Point3D> swingHipAir = new SideDependentList<>(() -> new Point3D());
@@ -276,6 +280,7 @@ public class RDXQuickFootstepPlannerDemo
             List<Pose3D> waypoints = new ArrayList<>();
             for (int i = 0; i < numberOfWaypoints[0]; i++)
                waypoints.add(new Pose3D(waypointGizmos.get(i).getGizmoFrame().getTransformToRoot()));
+            swingDistances.clear();
             footstepPlan = planner.plan(stances, waypoints, goals);
 
             baseUI.renderBeforeOnScreenUI();

@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import gnu.trove.list.array.TDoubleArrayList;
 import org.apache.commons.math3.util.Pair;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
@@ -24,6 +25,7 @@ import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.simplePlanners.QuickFootstepPlanner;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -48,6 +50,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
    private final FramePose3D solePose = new FramePose3D();
    private final FootstepPlan footstepPlanToExecute = new FootstepPlan();
    private final Throttler previewPlanningThrottler = new Throttler().setPeriod(1.0);
+   private final TDoubleArrayList swingDistances = new TDoubleArrayList();
    private final QuickFootstepPlanner quickFootstepPlanner = new QuickFootstepPlanner();
    private final FootstepPlanActionPlanningThread previewFootstepPlanningThread;
    private final FootstepPlanActionPlanningThread executionFootstepPlanningThread;
@@ -61,6 +64,11 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
 
       previewFootstepPlanningThread = new FootstepPlanActionPlanningThread(true, state, definition, scene.getTerrainMap());
       executionFootstepPlanningThread = new FootstepPlanActionPlanningThread(false, state, definition, scene.getTerrainMap());
+
+      quickFootstepPlanner.setStepPlannedCallback(() ->
+      {
+         swingDistances.add(quickFootstepPlanner.getSwingDistance());
+      });
    }
 
    @Override
@@ -230,14 +238,29 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
          }
          else if (definition.getPlannerType().getValue() == QUICK)
          {
+            swingDistances.clear();
             List<Pair<RobotSide, Pose3D>> footstepPlan
                   = quickFootstepPlanner.plan(new SideDependentList<>(side -> new Pose3D(syncedFeetPoses.get(side))),
                                               new ArrayList<>(),
                                               new SideDependentList<>(side -> new Pose3D(liveGoalFeetPoses.get(side))));
 
             footstepPlanToExecute.clear();
-            for (Pair<RobotSide, Pose3D> footstep : footstepPlan)
-               footstepPlanToExecute.addFootstep(footstep.getFirst(), new FramePose3D(footstep.getSecond()));
+            for (int i = 0; i < footstepPlan.size(); i++)
+            {
+               PlannedFootstep simpleFootstep = new PlannedFootstep(footstepPlan.get(i).getFirst(), new FramePose3D(footstepPlan.get(i).getSecond()));
+               // Increase swing duration for longer steps
+               double minDistance = 0.3;
+               double maxDistance = 0.7;
+               double minTime = 0.8;
+               double maxTime = 1.2;
+               double distance = swingDistances.get(i);
+               double time = (distance <= minDistance) ? minTime : // Min
+                                 (distance >= maxDistance) ? maxTime : // Max
+                                      minTime + ((distance - minDistance) / (maxDistance - minDistance)) * (maxTime - minTime); // Interpolate
+               LogTools.info("Swing time: %.2f".formatted(time));
+               simpleFootstep.setSwingDuration(time);
+               footstepPlanToExecute.addFootstep(simpleFootstep);
+            }
             state.getExecutionState().setValue(FootstepPlanActionExecutionState.PLANNING_SUCCEEDED);
          }
          else

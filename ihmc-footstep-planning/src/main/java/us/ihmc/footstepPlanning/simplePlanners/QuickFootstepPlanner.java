@@ -14,7 +14,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -42,6 +41,7 @@ public class QuickFootstepPlanner
    private final SideDependentList<Pose3D> pelvis = new SideDependentList<>(() -> new Pose3D());
    private final SideDependentList<Pose3D> nextPelvis = new SideDependentList<>(() -> new Pose3D());
    private final SideDependentList<Pose3D> swingHip = new SideDependentList<>(() -> new Pose3D());
+   private double swingDistance;
    private Runnable stepPlannedCallback = () -> {};
    private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
    private final Notification notification = new Notification();
@@ -90,8 +90,12 @@ public class QuickFootstepPlanner
    private boolean planStep()
    {
       double hipWidth = 0.12;
-      double stepLength = 0.28;
-      double stepYaw = Math.toRadians(35.0); // TODO: Change to hip yaw?
+      double stepLength = 0.28; // 0.33
+      double nextPelvisYawLimit = Math.toRadians(35.0);
+      double inwardLimit = 10.0;
+      double outwardLimit = 45.0; // 60
+      double stepAngleLimit = Math.toRadians(100); // 110
+
       if (waypoint.containsNaN())
          goalMid.interpolate(goal.get(RobotSide.LEFT), goal.get(RobotSide.RIGHT), 0.5);
       else
@@ -142,9 +146,9 @@ public class QuickFootstepPlanner
          EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.X, toGoalFacing, toGoalFacingOrientation);
          boolean inGoalRange = pelvis.get(side).getPosition().distance(goalMid.getPosition()) < 2.0 * stepLength;
          Quaternion desiredOrientation = new Quaternion(inGoalRange ? goalMid.getOrientation() : toGoalFacingOrientation);
-         if (pelvis.get(side).getOrientation().distance(desiredOrientation) > stepYaw)
+         if (pelvis.get(side).getOrientation().distance(desiredOrientation) > nextPelvisYawLimit)
             new AxisAngle(Axis3D.Z, Math.signum(cross(forward(pelvis.get(side)),
-                                                      forward(desiredOrientation)).getZ()) * stepYaw).transform(nextPelvis.get(side).getOrientation());
+                                                      forward(desiredOrientation)).getZ()) * nextPelvisYawLimit).transform(nextPelvis.get(side).getOrientation());
          else
             nextPelvis.get(side).getOrientation().set(desiredOrientation);
 
@@ -154,17 +158,11 @@ public class QuickFootstepPlanner
 
          candidate.get(side).set(swingHip.get(side)); // Plan from the hip
 
-         double footYaw = Math.toRadians(0.0); // inward 10 to outward 60
-         double length = 0.0; // 0 to stepLength
-         double stepAngle = Math.toRadians(0.0); // +/- 100  TODO tune min/max by looking at knee collisions
-
          // Get step yaw calculated and clamped, so we can work with it, pretty much always take the max yaw
          Vector3D swingHipForward = forward(swingHip.get(side));
          Vector3D candidateHipForward = forward(candidateHip);
-         footYaw = yaw(swingHipForward, candidateHipForward);
+         double footYaw = yaw(swingHipForward, candidateHipForward);
 
-         double inwardLimit = 2.0;
-         double outwardLimit = 60.0;
          double footYawMin = side == RobotSide.LEFT ? Math.toRadians(-inwardLimit) : Math.toRadians(-outwardLimit);
          double footYawMax = side == RobotSide.LEFT ? Math.toRadians(outwardLimit) : Math.toRadians(inwardLimit);
          footYaw = MathTools.clamp(footYaw, footYawMin, footYawMax);
@@ -172,10 +170,10 @@ public class QuickFootstepPlanner
          Vector3D swingHipLateral = new Vector3D(0.0, side.negateIfRightSide(1.0), 0.0);
          swingHip.get(side).transform(swingHipLateral);
          Vector3D toCandidateHip = sub(candidateHip.getPosition(), swingHip.get(side).getPosition());
-         stepAngle = yaw(swingHipLateral, toCandidateHip);
+         double stepAngle = yaw(swingHipLateral, toCandidateHip);
 
          // crossovers naturally limited by stepAngle min/max
-         double stepAngleLimit = Math.toRadians(110);
+         double length;
          if (stepAngle < -stepAngleLimit || stepAngle > stepAngleLimit) // can't step in the direction we want
             length = 0.03; // step a tiny bit to inside of hip / penalize taking a step with this side
          else
@@ -237,6 +235,8 @@ public class QuickFootstepPlanner
             {
                footToSwing = side;
                swingEnd.set(goal.get(side));
+               swingDistance = stance.get(side).getPosition().distance(goal.get(side).getPosition());
+               swingDistance += stance.get(side).getOrientation().distance(goal.get(side).getOrientation()) * 0.1 / Math.toRadians(45.0);
                return false;
             }
          }
@@ -250,6 +250,7 @@ public class QuickFootstepPlanner
                                 .distance(candidate.get(footToSwing.getOppositeSide()).getOrientation()) * 0.1 / Math.toRadians(45.0);
       if (oppositeDistance > distance)
          footToSwing = footToSwing.getOppositeSide();
+      swingDistance = Math.max(distance, oppositeDistance);
       swingEnd.set(candidate.get(footToSwing));
       return false;
    }
@@ -379,6 +380,11 @@ public class QuickFootstepPlanner
    public Point3D getOppositeStance()
    {
       return stance.get(footToSwing.getOppositeSide()).getPosition();
+   }
+
+   public double getSwingDistance()
+   {
+      return swingDistance;
    }
 
    public Notification getPrintNotification()
