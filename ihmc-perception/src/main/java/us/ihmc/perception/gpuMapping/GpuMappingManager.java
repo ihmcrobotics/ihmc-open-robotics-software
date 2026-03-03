@@ -9,6 +9,7 @@ import perception_msgs.msg.dds.TerrainMapMessage;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -89,7 +90,7 @@ public class GpuMappingManager
    /**
     * Update the Height Map with the latest depth image from the sensor
     */
-   public void update(GpuMat latestDepthImage, CameraIntrinsics depthIntrinsics, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame)
+   public void update(GpuMat latestDepthImage, CameraIntrinsics depthIntrinsics, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame, ReferenceFrame midFeetZUpFrame)
    {
       // Option that gets triggered from a message sent from the user
       if (lowerHeightMapBackdropRequested.poll())
@@ -113,6 +114,11 @@ public class GpuMappingManager
             heightMapDriftOffset.reset();
          }
       }
+
+      // Get robot yaw
+      FrameQuaternion robotOrientation = new FrameQuaternion(midFeetZUpFrame);
+      robotOrientation.changeFrame(ReferenceFrame.getWorldFrame());
+      double robotYaw = robotOrientation.getYaw();
 
       // Update the sensor origin here with the latest reference frame
       // We are deep coping the frames here to avoid a data race condition, still possible but very small chance
@@ -146,7 +152,7 @@ public class GpuMappingManager
                                 heightMapCenterOrigin,
                                 computeFootHeight());
 
-      terrainMapExtractor.update(heightMapExtractor.getHeightMap(), heightMapCenterPoint);
+      terrainMapExtractor.update(heightMapExtractor.getHeightMap(), heightMapCenterPoint, robotYaw);
 
       // The center of this map should be centered in the world grid
       // The sensor origin isn't always at the center of a grid point, in fact it's often not in the center

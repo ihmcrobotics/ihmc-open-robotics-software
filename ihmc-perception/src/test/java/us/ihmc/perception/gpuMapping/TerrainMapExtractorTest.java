@@ -36,7 +36,7 @@ public class TerrainMapExtractorTest
       for (int i = 0; i < iterations; i++)
       {
          long startTime = System.nanoTime();
-         terrainMapExtractor.update(heightMap, new Point3D(0.0, 0.0, 0.0));
+         terrainMapExtractor.update(heightMap, new Point3D(0.0, 0.0, 0.0), 0.0);
          long endTime = System.nanoTime();
 
          totalTimeNano += (endTime - startTime);
@@ -72,7 +72,7 @@ public class TerrainMapExtractorTest
       Mat what = new Mat();
       heightMap.download(what);
 
-      terrainMapExtractor.update(heightMap, new Point3D(0.0, 0.0, 0.0));
+      terrainMapExtractor.update(heightMap, new Point3D(0.0, 0.0, 0.0), 0.0);
 
       TerrainMapData terrainMapData = terrainMapExtractor.getTerrainMapData();
       float[] traversabilityScoreMap = terrainMapData.getTraversabilityScoreMap();
@@ -129,7 +129,7 @@ public class TerrainMapExtractorTest
 
       TerrainMapExtractor terrainMapExtractor = new TerrainMapExtractor(heightMapParameters, steppableRegionParameters);
 
-      terrainMapExtractor.update(gpuHeightMap, new Point3D(0.0, 0.0, 0.0));
+      terrainMapExtractor.update(gpuHeightMap, new Point3D(0.0, 0.0, 0.0), 0.0);
 
       TerrainMapData terrainMapData = terrainMapExtractor.getTerrainMapData();
 

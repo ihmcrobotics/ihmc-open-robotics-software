@@ -38,6 +38,7 @@ public class GpuMappingThread extends RepeatingTaskThread
    private final DepthImageFlyingPointsFilter flyingPointsFilter;
    private final GpuMappingManager gpuMappingManager;
    private final Object terrainMapLock = new Object();
+   private final ReferenceFrame midFeetZUpFrame;
 
    private final HeightMapParameters heightMapParameters;
    private final ROS2Publisher<ImageMessage> filteredDepthPublisher;
@@ -58,6 +59,7 @@ public class GpuMappingThread extends RepeatingTaskThread
       super(GpuMappingThread.class.getSimpleName());
       this.rawImageCollection = rawImageCollection;
       this.heightMapParameters = activeMappingParameterToolBox.getHeightMapParameters();
+      midFeetZUpFrame = syncedRobotModel.getReferenceFrames().getMidFeetZUpFrame();
 
       publishChunkMap = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_CHUNK_MAP);
       publishHeightMap = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_HEIGHT_MAP);
@@ -135,7 +137,7 @@ public class GpuMappingThread extends RepeatingTaskThread
          // Update height map
          synchronized (terrainMapLock)
          {
-            gpuMappingManager.update(filteredDepthImage, depthIntrinsicsCopy, cameraFrameInWorld, cameraZUpFrameInWorld);
+            gpuMappingManager.update(filteredDepthImage, depthIntrinsicsCopy, cameraFrameInWorld, cameraZUpFrameInWorld, midFeetZUpFrame);
          }
 
          // Publish the updated maps if demanded

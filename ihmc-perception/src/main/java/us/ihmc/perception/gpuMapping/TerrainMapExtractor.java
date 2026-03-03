@@ -108,7 +108,7 @@ public class TerrainMapExtractor
       cellsPerAxisTerrain = 2 * terrainCenterIndex + 1;
    }
 
-   public void update(GpuMat gpuHeightMap, Point3DReadOnly gridCenter)
+   public void update(GpuMat gpuHeightMap, Point3DReadOnly gridCenter, double robotYaw)
    {
       int error;
 
@@ -125,6 +125,7 @@ public class TerrainMapExtractor
       terrainMapKernel.withPointer(gpuHeightMap.data()).withLong(gpuHeightMap.step());
       terrainMapKernel.withPointer(traversabilityMat.data()).withLong(traversabilityMat.step());
       terrainMapKernel.withPointer(traversabilityClassMat.data()).withLong(traversabilityClassMat.step());
+      terrainMapKernel.withFloat((float) robotYaw);
       terrainMapKernel.withPointer(normalXMat.data()).withLong(normalXMat.step());
       terrainMapKernel.withPointer(normalYMat.data()).withLong(normalYMat.step());
       terrainMapKernel.withPointer(normalZMat.data()).withLong(normalZMat.step());
@@ -190,6 +191,12 @@ public class TerrainMapExtractor
     */
    public float[] populationTerrainMapParameters()
    {
+      // defaults for bounding box
+      float boundingBoxSizeX = 0.65f;
+      float boundingBoxSizeY = 1.1f;
+      float boundingBoxOffsetX = 0.1f;
+      float boundingBoxOffsetZ = 0.4f;
+
       return new float[] {(float) heightMapParameters.getCellSize(),
                           (float) heightMapParameters.getGlobalWidthInMeters(),
                           (float) terrainMapParameters.getNormalSearchRadius(),
@@ -200,7 +207,11 @@ public class TerrainMapExtractor
                           (float) terrainMapParameters.getMinSnapHeightThreshold(),
                           (float) terrainMapParameters.getSnapHeightThresholdAtSearchEdge(),
                           (float) terrainMapParameters.getSteppingCosineThreshold(),
-                          (float) terrainMapParameters.getSquaredErrorThreshold()};
+                          (float) terrainMapParameters.getSquaredErrorThreshold(),
+                          boundingBoxSizeX,
+                          boundingBoxSizeY,
+                          boundingBoxOffsetX,
+                          boundingBoxOffsetZ};
    }
 
    public void destroy()

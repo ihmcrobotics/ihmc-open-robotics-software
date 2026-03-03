@@ -14,6 +14,10 @@ extern "C"
 #define SNAP_HEIGHT_THRESHOLD_AT_SEARCH_EDGE 8
 #define STEPPING_COSINE_THRESHOLD 9
 #define SQUARED_ERROR_THRESHOLD 10
+#define BOUNDING_BOX_SIZE_X 11
+#define BOUNDING_BOX_SIZE_Y 12
+#define BOUNDING_BOX_OFFSET_X 13
+#define BOUNDING_BOX_OFFSET_Z 14
 
 // Reason for 0 traversability, in order it's checked
 #define VALID 0
@@ -35,6 +39,7 @@ extern "C"
 __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
                                    float *traversabilityMap, size_t pitchTraversability,
                                    unsigned short *traversabilityClassMap, size_t pitchTraversabilityClass,
+                                   float robotYaw,
                                    unsigned short *snapNormalXMap, size_t pitchSnapNormalX,
                                    unsigned short *snapNormalYMap, size_t pitchSnapNormalY,
                                    unsigned short *snapNormalZMap, size_t pitchSnapNormalZ,
@@ -126,12 +131,58 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
             float snap_height_threshold = interpolate(params[MIN_SNAP_HEIGHT_THRESHOLD], params[SNAP_HEIGHT_THRESHOLD_AT_SEARCH_EDGE], alpha_edge);
             float min_height_under_foot_to_consider = max_height_in_radius - snap_height_threshold;
 
-//             if (query_height >= min_height_under_foot_to_consider)
+             if (query_height >= min_height_under_foot_to_consider)
             {
                 // Using query_height yields very high squared errors for large heights due to numerical errors in the matrix inversion when plane fitting
                 // Since only the relative z values are important, we subtract relative to the max height
                 float z_relative = query_height - max_height_in_radius;
                 covarianceData.registerPoint(point_query.x, point_query.y, z_relative);
+            }
+        }
+    }
+
+    float boundingBoxOffsetX = params[BOUNDING_BOX_OFFSET_X];
+    float2 boxCenterCoordinate = foot_position + transformToWorld(make_float2(boundingBoxOffsetX, 0.0f), robotYaw);
+    int2 boxCenterIndices = coordinate_to_indices(boxCenterCoordinate, terrain_map_center, map_resolution, terrain_map_center_index);
+
+    float boundingBoxHalfSizeX = 0.5f * params[BOUNDING_BOX_SIZE_X];
+    float boundingBoxHalfSizeY = 0.5f * params[BOUNDING_BOX_SIZE_Y];
+    float boundingBoxSearchRadiusSquared = boundingBoxHalfSizeX * boundingBoxHalfSizeX + boundingBoxHalfSizeY * boundingBoxHalfSizeY;
+    float boundingBoxSearchRadius = sqrt(boundingBoxSearchRadiusSquared);
+    int boundingBoxIndexOffset = static_cast<int>(ceilf(boundingBoxSearchRadius / map_resolution));
+
+    int bounding_box_search_min_x = max(boxCenterIndices.x - boundingBoxIndexOffset, 0);
+    int bounding_box_search_max_x = min(boxCenterIndices.x + boundingBoxIndexOffset + 1, cells_per_axis_for_checking);
+    int bounding_box_search_min_y = max(boxCenterIndices.y - boundingBoxIndexOffset, 0);
+    int bounding_box_search_max_y = min(boxCenterIndices.y + boundingBoxIndexOffset + 1, cells_per_axis_for_checking);
+
+    // This is the maximum height allowed in the box, otherwise it will trigger a collision and be deemed non-traversable
+    float heightThreshold = max_height_in_radius + params[BOUNDING_BOX_OFFSET_Z];
+    bool collisionDetected = false;
+    float collisionTraversability = 1.0f;
+
+    // Outer loop
+    for (int x_query = bounding_box_search_min_x; x_query < bounding_box_search_max_x && !collisionDetected; ++x_query)
+    {
+        // Inner loop
+        for (int y_query = bounding_box_search_min_y; y_query < bounding_box_search_max_y && !collisionDetected; ++y_query)
+        {
+            float2 offsetVector = make_float2(static_cast<float>(x_query - boxCenterIndices.x) * map_resolution,
+                                              static_cast<float>(y_query - boxCenterIndices.y) * map_resolution);
+
+            float2 localOffsetVector = transformFromWorld(offsetVector, robotYaw);
+            if (fabsf(localOffsetVector.x) > params[BOUNDING_BOX_SIZE_X] || fabsf(localOffsetVector.y) > params[BOUNDING_BOX_SIZE_Y])
+            {
+                continue;
+            }
+
+            int2 query_key = make_int2(x_query, y_query);
+
+            float *query_height_float = (float *)((char *)heightMap + query_key.y * pitchHeightMap) + query_key.x;
+            if (*query_height_float > heightThreshold)
+            {
+                collisionDetected = true;
+                collisionTraversability = 0.0f;
             }
         }
     }
@@ -271,8 +322,8 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
     unsigned char *snappedNormalZMapElement = (unsigned char *)((char *)snapNormalZMap + y_index * pitchSnapNormalZ) + x_index;
     *snappedNormalZMapElement = normal_z_char;
 
-    // Squared error is best indication of overall traversability
-    float traversability = squared_error_traversability;
+    // Squared error + collision is best indication of overall traversability
+    float traversability = squared_error_traversability * collisionTraversability;
 
     if (traversability_result != VALID)
     {

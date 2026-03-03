@@ -6,6 +6,30 @@ const float EPSILON_D = 1e-6;
 const float PI_F = 3.1415927f;
 
 __device__ __forceinline__
+float2 operator+(const float2& a, const float2& b)
+{
+    return make_float2(a.x + b.x, a.y + b.y);
+}
+
+__device__ __forceinline__
+float2 operator-(const float2& a, const float2& b)
+{
+    return make_float2(a.x - b.x, a.y - b.y);
+}
+
+__device__ __forceinline__
+float2 operator*(const float2& a, const float scalar)
+{
+    return make_float2(a.x * scalar, a.y * scalar);
+}
+
+__device__ __forceinline__
+float2 operator/(const float2& a, const float divisor)
+{
+    return make_float2(a.x / divisor, a.y / divisor);
+}
+
+__device__ __forceinline__
 float3 operator+(const float3& a, const float3& b)
 {
     return make_float3(a.x + b.x, a.y + b.y, a.z + b.z);
@@ -133,6 +157,18 @@ __device__ float3 cross3(const float3 &a, const float3 &b)
         a.z * b.x - a.x * b.z,
         a.x * b.y - a.y * b.x
     );
+}
+
+__device__ float2 transformToWorld(const float2 &coordinate, float frameYaw)
+{
+    float sinYaw = sin(frameYaw);
+    float cosYaw = cos(frameYaw);
+    return make_float2(coordinate.x * cosYaw - coordinate.y * sinYaw, coordinate.x * sinYaw + coordinate.y * cosYaw);
+}
+
+__device__ float2 transformFromWorld(const float2 &coordinate, float frameYaw)
+{
+    return transformToWorld(coordinate, -frameYaw);
 }
 
 /**
