@@ -10,6 +10,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
+import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -19,8 +20,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 public class QuickFootstepPlannerTest
 {
-   private static final double DEFAULT_LEFT_Y = 0.1;
-   private static final double DEFAULT_RIGHT_Y = -0.1;
+   private static final double HIP_WIDTH = 0.12;
+   private static final double DEFAULT_LEFT_Y = HIP_WIDTH;
+   private static final double DEFAULT_RIGHT_Y = -HIP_WIDTH;
    private static final double POSITION_EPS = 0.011;
    private static final double ORIENTATION_EPS = Math.toRadians(5.0) + 1.0e-6;
 
@@ -29,7 +31,8 @@ public class QuickFootstepPlannerTest
    {
       QuickFootstepPlanner planner = new QuickFootstepPlanner();
       EnumMap<RobotSide, Pose3D> stance = stance(pose(0.0, DEFAULT_LEFT_Y, 0.0), pose(0.0, DEFAULT_RIGHT_Y, 0.0));
-      EnumMap<RobotSide, Pose3D> goal = stance(pose(1.2, DEFAULT_LEFT_Y, 0.0), pose(1.2, DEFAULT_RIGHT_Y, 0.0));
+      Pose3D goalMid = pose(1.2, 0.0, 0.0);
+      EnumMap<RobotSide, Pose3D> goal = goalFromMidPose(goalMid);
 
       List<Pose3D> waypoints = new ArrayList<>();
       planAndAssert(planner, stance, waypoints, goal, 25);
@@ -40,7 +43,8 @@ public class QuickFootstepPlannerTest
    {
       QuickFootstepPlanner planner = new QuickFootstepPlanner();
       EnumMap<RobotSide, Pose3D> stance = stance(pose(0.0, DEFAULT_LEFT_Y, 0.0), pose(0.0, DEFAULT_RIGHT_Y, 0.0));
-      EnumMap<RobotSide, Pose3D> goal = stance(pose(-0.9, DEFAULT_LEFT_Y, 0.0), pose(-0.9, DEFAULT_RIGHT_Y, 0.0));
+      Pose3D goalMid = pose(-0.9, 0.0, 0.0);
+      EnumMap<RobotSide, Pose3D> goal = goalFromMidPose(goalMid);
 
       List<Pose3D> waypoints = new ArrayList<>();
       planAndAssert(planner, stance, waypoints, goal, 25);
@@ -51,7 +55,8 @@ public class QuickFootstepPlannerTest
    {
       QuickFootstepPlanner planner = new QuickFootstepPlanner();
       EnumMap<RobotSide, Pose3D> stance = stance(pose(0.0, DEFAULT_LEFT_Y, 0.0), pose(0.0, DEFAULT_RIGHT_Y, 0.0));
-      EnumMap<RobotSide, Pose3D> goal = stance(pose(0.0, 0.7, 0.0), pose(0.0, 0.5, 0.0));
+      Pose3D goalMid = pose(0.0, 0.6, 0.0);
+      EnumMap<RobotSide, Pose3D> goal = goalFromMidPose(goalMid);
 
       List<Pose3D> waypoints = new ArrayList<>();
       planAndAssert(planner, stance, waypoints, goal, 25);
@@ -63,7 +68,8 @@ public class QuickFootstepPlannerTest
       QuickFootstepPlanner planner = new QuickFootstepPlanner();
       EnumMap<RobotSide, Pose3D> stance = stance(pose(0.0, DEFAULT_LEFT_Y, 0.0), pose(0.0, DEFAULT_RIGHT_Y, 0.0));
       double yaw = Math.toRadians(180.0);
-      EnumMap<RobotSide, Pose3D> goal = stance(pose(0.0, DEFAULT_RIGHT_Y, yaw), pose(0.0, DEFAULT_LEFT_Y, yaw));
+      Pose3D goalMid = pose(0.0, 0.0, yaw);
+      EnumMap<RobotSide, Pose3D> goal = goalFromMidPose(goalMid);
 
       List<Pose3D> waypoints = new ArrayList<>();
       planAndAssert(planner, stance, waypoints, goal, 25);
@@ -74,11 +80,115 @@ public class QuickFootstepPlannerTest
    {
       QuickFootstepPlanner planner = new QuickFootstepPlanner();
       EnumMap<RobotSide, Pose3D> stance = stance(pose(0.0, DEFAULT_LEFT_Y, 0.0), pose(0.0, DEFAULT_RIGHT_Y, 0.0));
-      EnumMap<RobotSide, Pose3D> goal = stance(pose(1.0, 0.25, Math.toRadians(15.0)), pose(0.8, -0.05, Math.toRadians(-5.0)));
+      Pose3D goalMid = pose(0.9, 0.1, Math.toRadians(15.0));
+      EnumMap<RobotSide, Pose3D> goal = goalFromMidPose(goalMid);
+      goal.get(RobotSide.LEFT).appendTranslation(0.08, 0.03, 0.0);
+      goal.get(RobotSide.LEFT).appendYawRotation(Math.toRadians(8.0));
+      goal.get(RobotSide.RIGHT).appendTranslation(-0.04, -0.02, 0.0);
+      goal.get(RobotSide.RIGHT).appendYawRotation(Math.toRadians(-6.0));
 
       List<Pose3D> waypoints = new ArrayList<>();
       waypoints.add(pose(0.6, 0.2, Math.toRadians(20.0)));
       planAndAssert(planner, stance, waypoints, goal, 30);
+   }
+
+   @Test
+   public void testRandomGoals()
+   {
+      QuickFootstepPlanner planner = new QuickFootstepPlanner();
+      EnumMap<RobotSide, Pose3D> stance = stance(pose(0.0, DEFAULT_LEFT_Y, 0.0), pose(0.0, DEFAULT_RIGHT_Y, 0.0));
+      Random random = new Random(1738L);
+      ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
+      List<Pose3D> waypoints = new ArrayList<>();
+
+      int planned = 0;
+      int attempts = 0;
+      while (planned < 100 && attempts < 1000)
+      {
+         attempts++;
+         Pose3D goalMid = pose(randomRange(random, -2.5, 2.5),
+                               randomRange(random, -2.5, 2.5),
+                               randomRange(random, -Math.PI, Math.PI));
+         EnumMap<RobotSide, Pose3D> goal = goalFromMidPose(goalMid);
+         for (RobotSide side : RobotSide.values)
+         {
+            goal.get(side).appendTranslation(randomRange(random, -0.1, 0.1), randomRange(random, -0.1, 0.1), 0.0);
+            goal.get(side).appendYawRotation(randomRange(random, Math.toRadians(-5.0), Math.toRadians(5.0)));
+         }
+
+         if (!goalsSeparated(planner, convexPolygonTools, goal))
+            continue;
+
+         planAndAssert(planner, stance, waypoints, goal, 50);
+         planned++;
+      }
+
+      assertTrue(planned == 100, "Expected 100 random goals, planned " + planned + " after " + attempts + " attempts.");
+   }
+
+   @Test
+   public void testDiagonalBackLeftWithWindyWaypointsAndTurn()
+   {
+      QuickFootstepPlanner planner = new QuickFootstepPlanner();
+      EnumMap<RobotSide, Pose3D> stance = stance(pose(0.0, DEFAULT_LEFT_Y, 0.0), pose(0.0, DEFAULT_RIGHT_Y, 0.0));
+
+      List<Pose3D> waypoints = new ArrayList<>();
+      waypoints.add(pose(-0.4, 0.35, Math.toRadians(20.0)));
+      waypoints.add(pose(-0.85, 0.05, Math.toRadians(-15.0)));
+
+      Pose3D goalMid = pose(-1.25, 0.65, Math.toRadians(180.0));
+      EnumMap<RobotSide, Pose3D> goal = goalFromMidPose(goalMid);
+
+      planAndAssert(planner, stance, waypoints, goal, 40);
+   }
+
+   @Test
+   public void testForwardLeftArcToNinetyDegrees()
+   {
+      QuickFootstepPlanner planner = new QuickFootstepPlanner();
+      EnumMap<RobotSide, Pose3D> stance = stance(pose(0.0, DEFAULT_LEFT_Y, 0.0), pose(0.0, DEFAULT_RIGHT_Y, 0.0));
+
+      List<Pose3D> waypoints = new ArrayList<>();
+      waypoints.add(pose(0.5, 0.2, Math.toRadians(20.0)));
+      waypoints.add(pose(1.0, 0.6, Math.toRadians(45.0)));
+
+      Pose3D goalMid = pose(1.3, 1.0, Math.toRadians(90.0));
+      EnumMap<RobotSide, Pose3D> goal = goalFromMidPose(goalMid);
+
+      planAndAssert(planner, stance, waypoints, goal, 40);
+   }
+
+   @Test
+   public void testSideStepRightThenBackWithTurn()
+   {
+      QuickFootstepPlanner planner = new QuickFootstepPlanner();
+      EnumMap<RobotSide, Pose3D> stance = stance(pose(0.0, DEFAULT_LEFT_Y, 0.0), pose(0.0, DEFAULT_RIGHT_Y, 0.0));
+
+      List<Pose3D> waypoints = new ArrayList<>();
+      waypoints.add(pose(0.2, -0.5, Math.toRadians(-15.0)));
+      waypoints.add(pose(-0.3, -0.7, Math.toRadians(-35.0)));
+
+      Pose3D goalMid = pose(-0.9, -0.8, Math.toRadians(-90.0));
+      EnumMap<RobotSide, Pose3D> goal = goalFromMidPose(goalMid);
+
+      planAndAssert(planner, stance, waypoints, goal, 40);
+   }
+
+   @Test
+   public void testZigZagForwardWithTurnaround()
+   {
+      QuickFootstepPlanner planner = new QuickFootstepPlanner();
+      EnumMap<RobotSide, Pose3D> stance = stance(pose(0.0, DEFAULT_LEFT_Y, 0.0), pose(0.0, DEFAULT_RIGHT_Y, 0.0));
+
+      List<Pose3D> waypoints = new ArrayList<>();
+      waypoints.add(pose(0.4, 0.25, Math.toRadians(10.0)));
+      waypoints.add(pose(0.8, -0.2, Math.toRadians(-10.0)));
+      waypoints.add(pose(1.2, 0.3, Math.toRadians(15.0)));
+
+      Pose3D goalMid = pose(1.4, 0.2, Math.toRadians(180.0));
+      EnumMap<RobotSide, Pose3D> goal = goalFromMidPose(goalMid);
+
+      planAndAssert(planner, stance, waypoints, goal, 45);
    }
 
    private List<Pair<RobotSide, Pose3D>> planAndAssert(QuickFootstepPlanner planner,
@@ -88,10 +198,14 @@ public class QuickFootstepPlannerTest
                                                       int maxSteps)
    {
       planner.setMaxSteps(maxSteps);
+      long startTime = System.nanoTime();
       List<Pair<RobotSide, Pose3D>> plan = planner.plan(stance, waypoints, goal);
+      long endTime = System.nanoTime();
+      double elapsedMs = (endTime - startTime) / 1_000_000.0;
 
       printAsciiPlan(stance, waypoints, plan, goal);
       printPlanDetails(stance, waypoints, plan, goal);
+      System.out.printf("Planner time: %.3f ms%n", elapsedMs);
       assertGoalFeetSeparated(planner, goal);
       assertTrue(plan.size() < maxSteps, "Planner hit max steps: " + maxSteps);
       assertNoSelfCollision(planner, stance, plan);
@@ -142,6 +256,13 @@ public class QuickFootstepPlannerTest
       assertFeetSeparated(planner, convexPolygonTools, stance, -1, -1);
    }
 
+   private boolean goalsSeparated(QuickFootstepPlanner planner, ConvexPolygonTools convexPolygonTools, EnumMap<RobotSide, Pose3D> goal)
+   {
+      ConvexPolygon2D leftPolygon = planner.createFootPolygon(goal.get(RobotSide.LEFT), 0.0);
+      ConvexPolygon2D rightPolygon = planner.createFootPolygon(goal.get(RobotSide.RIGHT), 0.0);
+      return !convexPolygonTools.doPolygonsIntersect(leftPolygon, rightPolygon);
+   }
+
    private void assertFinalStanceClose(EnumMap<RobotSide, Pose3D> initialStance,
                                        List<Pair<RobotSide, Pose3D>> plan,
                                        EnumMap<RobotSide, Pose3D> goal)
@@ -175,6 +296,18 @@ public class QuickFootstepPlannerTest
       for (RobotSide side : RobotSide.values)
          copy.put(side, new Pose3D(stance.get(side)));
       return copy;
+   }
+
+   private EnumMap<RobotSide, Pose3D> goalFromMidPose(Pose3D goalMid)
+   {
+      EnumMap<RobotSide, Pose3D> goal = new EnumMap<>(RobotSide.class);
+      for (RobotSide side : RobotSide.values)
+      {
+         Pose3D goalStep = new Pose3D(0.0, side.negateIfRightSide(HIP_WIDTH), 0.0, 0.0, 0.0, 0.0);
+         goalMid.transform(goalStep);
+         goal.put(side, goalStep);
+      }
+      return goal;
    }
 
    private Pose3D pose(double x, double y, double yaw)
@@ -449,6 +582,11 @@ public class QuickFootstepPlannerTest
       double distance = stance.getPosition().distance(step.getPosition());
       distance += stance.getOrientation().distance(step.getOrientation()) * 0.1 / Math.toRadians(45.0);
       return distance;
+   }
+
+   private double randomRange(Random random, double min, double max)
+   {
+      return min + random.nextDouble() * (max - min);
    }
 
    private String formatCell(String token, int cellWidth, String empty)
