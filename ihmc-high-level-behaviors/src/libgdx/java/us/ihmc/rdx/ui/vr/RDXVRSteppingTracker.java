@@ -19,6 +19,10 @@ public class RDXVRSteppingTracker
    private static final double LANDING_HEIGHT_THRESHOLD = 0.1;
    private static final double LANDING_BLEND_START_HEIGHT = 0.25;
 
+   private static final double ERROR_RECOVERY_HEIGHT_TOLERANCE = 0.05; // 5 cm
+   private static final int ERROR_RECOVERY_STABILITY_ITERATIONS = 50;
+   private final SideDependentList<Integer> errorRecoveryStableCounts = new SideDependentList<>();
+
     private final SideDependentList<Boolean> isUserStepping = new SideDependentList<>();
     private final SideDependentList<RigidBodyTransform> initialTrackersTransform = new SideDependentList<>();
     private final SideDependentList<RigidBodyTransform> previousTrackersTransform = new SideDependentList<>();
@@ -40,6 +44,7 @@ public class RDXVRSteppingTracker
             previousTrackersTransform.put(side, new RigidBodyTransform());
             initialTrackersTransform.put(side, null);
             landedFoot.put(side, new Notification());
+            errorRecoveryStableCounts.put(side, 0);
         }
     }
 
@@ -67,7 +72,7 @@ public class RDXVRSteppingTracker
                     && translationTracker.getZ() >= LIFT_THRESHOLD)
             {
                 isUserStepping.put(side, true);
-                LogTools.info("User stepping with {}", side);
+                LogTools.debug("User stepping with {}", side);
                 // Avoid false stepping detection when already in swing with one side
                 isUserStepping.put(side.getOppositeSide(), false);
             }
@@ -92,7 +97,7 @@ public class RDXVRSteppingTracker
                     if (stableCount >= STABILITY_ITERATIONS)
                     {
                         resetSide(side, currentTrackerTransform);
-                        LogTools.info("User completed stepping with {}", side);
+                        LogTools.debug("User completed stepping with {}", side);
                         landedFoot.get(side).set();
                     }
                 }
@@ -104,6 +109,43 @@ public class RDXVRSteppingTracker
                 previousTrackersTransform.put(side, new RigidBodyTransform(currentTrackerTransform));
             }
         }
+
+       // -------------------------------
+       // Error recovery / re-sync logic
+       // -------------------------------
+       // If the tracker height is close to the initial height (+/- 5 cm)
+       // and not moving much overall, count stable iterations and then reset.
+       if (initialTrackerTransform != null)
+       {
+          double heightError = Math.abs(currentTrackerTransform.getTranslationZ() - initialTrackerTransform.getTranslationZ());
+
+          // Compare full 3D translation between current and previous poses
+          Vector3D translationFromPreviousPosition = new Vector3D();
+          translationFromPreviousPosition.sub(currentTrackerTransform.getTranslation(),
+                                              previousTrackersTransform.get(side).getTranslation());
+
+          if (heightError <= ERROR_RECOVERY_HEIGHT_TOLERANCE
+              && translationFromPreviousPosition.norm() <= STABILITY_THRESHOLD)
+          {
+             int count = errorRecoveryStableCounts.get(side);
+             count++;
+             errorRecoveryStableCounts.put(side, count);
+
+             if (count >= ERROR_RECOVERY_STABILITY_ITERATIONS)
+             {
+                // Re-sync this tracker as if this pose were the new \"standing\" pose
+                resetSide(side, currentTrackerTransform);
+                LogTools.debug("Error recovery reset for {}", side);
+                // Also clear the error-recovery counter
+                errorRecoveryStableCounts.put(side, 0);
+             }
+          }
+          else
+          {
+             errorRecoveryStableCounts.put(side, 0);
+          }
+       }
+       // -------------------------------
     }
 
     private void resetSide(RobotSide side, RigidBodyTransform currentTrackerTransform)

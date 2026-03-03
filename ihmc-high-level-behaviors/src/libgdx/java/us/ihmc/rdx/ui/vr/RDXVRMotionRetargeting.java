@@ -180,15 +180,22 @@ public class RDXVRMotionRetargeting
                                                           newPelvisFramePose.getRotation().getRoll());
 
          // --- Low-pass filter pelvis pose (position + orientation) ---
-         // Position EMA
-         filteredPelvisFramePose.getPosition().interpolate(filteredPelvisFramePose.getPosition(),
-                                                           newPelvisFramePose.getPosition(),
-                                                           PELVIS_ALPHA);
+         // Position EMA, but DO NOT filter Z
+         var filteredPos = filteredPelvisFramePose.getPosition();
+         var newPos      = newPelvisFramePose.getPosition();
+
+         // Filter X/Y
+         filteredPos.setX((1.0 - PELVIS_ALPHA) * filteredPos.getX() + PELVIS_ALPHA * newPos.getX());
+         filteredPos.setY((1.0 - PELVIS_ALPHA) * filteredPos.getY() + PELVIS_ALPHA * newPos.getY());
+         // Pass-through Z (no interpolation)
+         filteredPos.setZ(newPos.getZ());
+
          // Orientation EMA (slerp)
          filteredPelvisFramePose.getOrientation().interpolate(filteredPelvisFramePose.getOrientation(),
                                                               newPelvisFramePose.getOrientation(),
                                                               PELVIS_ALPHA);
          // ------------------------------------------------------------
+
 
          constrainedPelvisFrame.update();
          retargetedFrames.put(WAIST, constrainedPelvisFrame);
