@@ -81,6 +81,9 @@ public class RDXVRMotionRetargeting
    private final SideDependentList<Boolean> isFootInContact = new SideDependentList<>();
    private boolean controllingFeet = false;
 
+   private static final double PELVIS_ALPHA = 0.05;
+   private final FramePose3D filteredPelvisFramePose = new FramePose3D(); // low-pass state
+
    /**
     * Constructor for the motion retargeting class.
     *
@@ -140,31 +143,54 @@ public class RDXVRMotionRetargeting
       {
          if (initialPelvisFrame == null)
          {
-            RigidBodyTransform initialWaistTrackerTransform  = trackerReferenceFrames.get(WAIST.getSegmentName()).getReferenceFrame().getTransformToWorldFrame();
+            RigidBodyTransform initialWaistTrackerTransform = trackerReferenceFrames.get(WAIST.getSegmentName())
+                                                                                    .getReferenceFrame()
+                                                                                    .getTransformToWorldFrame();
             initialPelvisTransformToWorld.set(realRobotModel.getPelvis().getBodyFixedFrame().getTransformToWorldFrame());
             initialPelvisFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(),
                                                                                                           initialPelvisTransformToWorld);
 
-            constrainedPelvisFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(), newPelvisFramePose);
+            constrainedPelvisFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
+                                                                                                            filteredPelvisFramePose);
 
             Vector3D offset = new Vector3D();
             offset.sub(initialWaistTrackerTransform.getTranslation(), initialPelvisTransformToWorld.getTranslation());
             ikControlFrameOffsetPosition.put(WAIST, new Point3D(offset));
+
+            // Initialize filtered pose at current pelvis
+            filteredPelvisFramePose.set(initialPelvisTransformToWorld);
          }
+
          // Calculate the variation of the tracker's frame from its initial value
          RigidBodyTransform waistTrackerTransform = new RigidBodyTransform(trackerReferenceFrames.get(WAIST.getSegmentName())
-                                                                                                                 .getReferenceFrame()
-                                                                                                                 .getTransformToWorldFrame());
+                                                                                                 .getReferenceFrame()
+                                                                                                 .getTransformToWorldFrame());
 
          newPelvisFramePose.set(waistTrackerTransform);
-         // Zero roll and pitch orientation variation as it can lead to very unnatural motions (at least when in double support)
+
+         // Zero roll and pitch orientation variation as it can lead to very unnatural motions
          newPelvisFramePose.changeFrame(initialPelvisFrame);
          newPelvisFramePose.getRotation().setYawPitchRoll(0.0, 0.0, 0.0);
          newPelvisFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-         double midFeetYaw = 0.5 * (ghostRobotModel.getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame().getRotation().getYaw() + ghostRobotModel.getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame().getRotation().getYaw());
-         newPelvisFramePose.getRotation().setYawPitchRoll(midFeetYaw, newPelvisFramePose.getRotation().getPitch(), newPelvisFramePose.getRotation().getRoll());
-         constrainedPelvisFrame.update();
 
+         double midFeetYaw = 0.5 * (ghostRobotModel.getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame().getRotation().getYaw()
+                                    + ghostRobotModel.getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame().getRotation().getYaw());
+         newPelvisFramePose.getRotation().setYawPitchRoll(midFeetYaw,
+                                                          newPelvisFramePose.getRotation().getPitch(),
+                                                          newPelvisFramePose.getRotation().getRoll());
+
+         // --- Low-pass filter pelvis pose (position + orientation) ---
+         // Position EMA
+         filteredPelvisFramePose.getPosition().interpolate(filteredPelvisFramePose.getPosition(),
+                                                           newPelvisFramePose.getPosition(),
+                                                           PELVIS_ALPHA);
+         // Orientation EMA (slerp)
+         filteredPelvisFramePose.getOrientation().interpolate(filteredPelvisFramePose.getOrientation(),
+                                                              newPelvisFramePose.getOrientation(),
+                                                              PELVIS_ALPHA);
+         // ------------------------------------------------------------
+
+         constrainedPelvisFrame.update();
          retargetedFrames.put(WAIST, constrainedPelvisFrame);
       }
    }
@@ -227,22 +253,13 @@ public class RDXVRMotionRetargeting
             {
                normalizedOffset = 0.0;
             }
-            // Filter value
-//            double filteredNormalizedOffset = 0.5 - 0.1 * (Math.log10((1 - normalizedOffset) / normalizedOffset));
-//            if (filteredNormalizedOffset >= 1.0)
-//               filteredNormalizedOffset = 1.0;
-//            else if (filteredNormalizedOffset <= 0.0)
-//            {
-//               filteredNormalizedOffset = 0.0;
-//            }
-//            if (Double.isNaN(filteredNormalizedOffset))
-//            {
-//               filteredNormalizedOffset = previousOffsetValue;
-//            }
-            else
-            {
-               previousOffsetValue = normalizedOffset;
-            }
+            // Apply a low-pass filter to smooth normalized offset fluctuations
+            double alpha = 0.15; // tuning parameter: smaller = smoother, larger = more responsive
+            double filteredNormalizedOffset = previousOffsetValue + alpha * (normalizedOffset - previousOffsetValue);
+            // Clamp to [0,1]
+            filteredNormalizedOffset = Math.max(0.0, Math.min(1.0, filteredNormalizedOffset));
+            // Store for next iteration
+            previousOffsetValue = filteredNormalizedOffset;
 
             if (leftFootXYInWorld == null || rightFootXYInWorld == null)
             {
@@ -255,7 +272,7 @@ public class RDXVRMotionRetargeting
             feetVector.sub(rightFootXYInWorld, leftFootXYInWorld);
 
             centerOfMassDesiredXYInWorld.set(feetVector);
-            centerOfMassDesiredXYInWorld.scale(normalizedOffset);
+            centerOfMassDesiredXYInWorld.scale(filteredNormalizedOffset);
             centerOfMassDesiredXYInWorld.add(leftFootXYInWorld);
          }
       }

@@ -167,6 +167,10 @@ public class RDXVRWholeBodyKinematicStreaming
    private final RigidBodyTransform initialPelvisTransformToWorld = new RigidBodyTransform();
    private ReferenceFrame initialChestFrame;
    private final RigidBodyTransform initialChestTransformToWorld = new RigidBodyTransform();
+   private final Map<VRTrackedSegmentType, FramePose3D> filteredDesiredPoses = new HashMap<>();
+   private final Map<VRTrackedSegmentType, FrameVector3D> filteredDesiredAngularVelocities = new HashMap<>();
+   private final Map<VRTrackedSegmentType, FrameVector3D> filteredDesiredLinearVelocities = new HashMap<>();
+
 
    private final ImBoolean replayMotion = new ImBoolean(false);
    private final ImBoolean pauseReplay = new ImBoolean(true);
@@ -566,10 +570,43 @@ public class RDXVRWholeBodyKinematicStreaming
 
                if (controlledSegment != null)
                {
+                  double alpha = 0.2; // tune: 0.1–0.3 typical
+                  FramePose3D filteredPose = filteredDesiredPoses.get(segmentType);
+                  if (filteredPose == null)
+                  {
+                     filteredPose = new FramePose3D(desiredPose);
+                     filteredDesiredPoses.put(segmentType, filteredPose);
+                  }
+                  else
+                  {
+                     filteredPose.getPosition().interpolate(filteredPose.getPosition(), desiredPose.getPosition(), alpha);
+                     filteredPose.getOrientation().interpolate(filteredPose.getOrientation(), desiredPose.getOrientation(), alpha);
+                  }
+                  FrameVector3D filteredAngularVel = filteredDesiredAngularVelocities.get(segmentType);
+                  if (filteredAngularVel == null)
+                  {
+                     filteredAngularVel = new FrameVector3D(desiredAngularVelocity);
+                     filteredDesiredAngularVelocities.put(segmentType, filteredAngularVel);
+                  }
+                  else
+                  {
+                     filteredAngularVel.interpolate(filteredAngularVel, desiredAngularVelocity, alpha);
+                  }
+                  FrameVector3D filteredLinearVel = filteredDesiredLinearVelocities.get(segmentType);
+                  if (filteredLinearVel == null)
+                  {
+                     filteredLinearVel = new FrameVector3D(desiredLinearVelocity);
+                     filteredDesiredLinearVelocities.put(segmentType, filteredLinearVel);
+                  }
+                  else
+                  {
+                     filteredLinearVel.interpolate(filteredLinearVel, desiredLinearVelocity, alpha);
+                  }
+
                   KinematicsToolboxRigidBodyMessage message = createRigidBodyMessage(controlledSegment,
-                                                                                     desiredPose,
-                                                                                     desiredAngularVelocity,
-                                                                                     desiredLinearVelocity,
+                                                                                     filteredPose,
+                                                                                     filteredAngularVel,
+                                                                                     filteredLinearVel,
                                                                                      retargetingParameters.getPositionWeight(segmentType),
                                                                                      retargetingParameters.getOrientationWeight(segmentType),
                                                                                      retargetingParameters.getLinearRateLimitation(segmentType),
@@ -577,6 +614,7 @@ public class RDXVRWholeBodyKinematicStreaming
                   messageToPack.getInputs().add().set(message);
                }
             }
+
          }
       }
    }
