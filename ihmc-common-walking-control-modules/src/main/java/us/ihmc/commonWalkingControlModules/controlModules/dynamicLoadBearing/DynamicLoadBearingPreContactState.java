@@ -104,6 +104,7 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
       trajectoryCommand.getTrajectoryPointList().clear();
       trajectoryCommand.addTrajectoryPoint(trajectoryDuration.getValue(), desiredPosition, terminalVelocity);
       positionControlHelper.handleTrajectoryCommand(trajectoryCommand, null);
+      positionControlHelper.doAction(0.0);
 
       defaultPositionGains = positionControlHelper.getGains();
       defaultPositionWeights = positionControlHelper.getDefaultWeight();

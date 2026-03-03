@@ -34,6 +34,7 @@ public class RigidBodyDynamicLoadBearingControlState extends RigidBodyControlSta
    private final DynamicLoadBearingPostContactState postContactState;
    private final RigidBodyJointControlHelper jointControlHelper;
    private final Runnable onExitRunnable;
+   private final LoadBearingParameters loadBearingParameters = new LoadBearingParameters(registry);
 
    public RigidBodyDynamicLoadBearingControlState(RigidBodyBasics bodyToControl,
                                                   RigidBodyBasics baseBody,
@@ -45,6 +46,7 @@ public class RigidBodyDynamicLoadBearingControlState extends RigidBodyControlSta
                                                   RigidBodyPositionControlHelper positionControlHelper,
                                                   RigidBodyOrientationControlHelper orientationControlHelper,
                                                   ReferenceFrame controlFrame,
+                                                  double nominalRhoWeight,
                                                   MutableBoolean hasContactChanged,
                                                   YoRegistry parentRegistry)
    {
@@ -54,7 +56,15 @@ public class RigidBodyDynamicLoadBearingControlState extends RigidBodyControlSta
       String namePrefix = bodyName + "Bracing";
 
       preContactState = new DynamicLoadBearingPreContactState(bodyToControl, positionControlHelper, controlFrame, registry);
-      postContactState = new DynamicLoadBearingPostContactState(loadBearingParameters, bodyToControl, baseBody, elevator, controlFrame, hasContactChanged, registry);
+      postContactState = new DynamicLoadBearingPostContactState(bodyToControl,
+                                                                baseBody,
+                                                                elevator,
+                                                                controlFrame,
+                                                                orientationControlHelper,
+                                                                loadBearingParameters,
+                                                                nominalRhoWeight,
+                                                                hasContactChanged,
+                                                                registry);
 
       stateMachine = setupStateMachine(namePrefix, yoTime);
 
@@ -70,6 +80,7 @@ public class RigidBodyDynamicLoadBearingControlState extends RigidBodyControlSta
       factory.addState(DynamicLoadBearingStateEnum.PRE_CONTACT, preContactState);
       factory.addState(DynamicLoadBearingStateEnum.POST_CONTACT, postContactState);
       factory.addDoneTransition(DynamicLoadBearingStateEnum.PRE_CONTACT, DynamicLoadBearingStateEnum.POST_CONTACT);
+//      factory.addDoneTransition(DynamicLoadBearingStateEnum.POST_CONTACT, DynamicLoadBearingStateEnum.PRE_CONTACT);
 
       return factory.build(DynamicLoadBearingStateEnum.PRE_CONTACT);
    }
@@ -83,7 +94,7 @@ public class RigidBodyDynamicLoadBearingControlState extends RigidBodyControlSta
    @Override
    public void onEntry()
    {
-      stateMachine.resetToInitialState();
+      stateMachine.performTransition(DynamicLoadBearingStateEnum.PRE_CONTACT, false, true);
    }
 
    @Override
@@ -101,7 +112,8 @@ public class RigidBodyDynamicLoadBearingControlState extends RigidBodyControlSta
    @Override
    public boolean isDone(double timeInState)
    {
-      return stateMachine.getCurrentStateKey() == DynamicLoadBearingStateEnum.POST_CONTACT && stateMachine.getCurrentState().isDone(stateMachine.getTimeInCurrentState());
+      return stateMachine.getCurrentStateKey() == DynamicLoadBearingStateEnum.POST_CONTACT && stateMachine.getCurrentState()
+                                                                                                          .isDone(stateMachine.getTimeInCurrentState());
    }
 
    @Override
@@ -153,6 +165,7 @@ public class RigidBodyDynamicLoadBearingControlState extends RigidBodyControlSta
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
       group.addChild(preContactState.getSCS2YoGraphics());
+      group.addChild(postContactState.getSCS2YoGraphics());
       return group;
    }
 
