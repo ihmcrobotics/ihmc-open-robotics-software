@@ -33,7 +33,8 @@ import us.ihmc.zed.global.zed;
  */
 public class IsaacROSFoundationPoseDemo
 {
-   private static final String SVO_FILE = "/home/robotlab/Downloads/20251020_ZEDXMini_DoorChargeBarrierBottle.svo2";
+//   private static final String SVO_FILE = "/home/robotlab/Downloads/20251020_ZEDXMini_DoorChargeBarrierBottle.svo2";
+   private static final String SVO_FILE = "/opt/ihmc/LogData/H1/Arghya/20250903_154735_H1HardwareControlProcess/perception/20250903_154750_H1ZEDXMini.svo2";
 
    private final ROS2Node ros2Node = new ROS2NodeBuilder().build(getClass().getSimpleName().toLowerCase());
    private final ROS2PeerClockOffsetEstimator peerClockOffsetEstimator = new ROS2PeerClockOffsetEstimator(ros2Node);

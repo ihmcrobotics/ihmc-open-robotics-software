@@ -180,6 +180,12 @@ public class KalmanFilter
       return out;
    }
 
+   public void setXY(float cx, float cy)
+   {
+      mean[0] = cx;
+      mean[1] = cy;
+   }
+
    // ---------------- helpers ----------------
 
    private static float[] subVec(float[] a, float[] b)

@@ -2,6 +2,7 @@ package us.ihmc.perception.detections.yolo;
 
 import java.util.*;
 import static java.lang.Math.*;
+import org.bytedeco.opencv.opencv_core.Mat;
 
 /**
  * Minimal BoT-SORT / ByteTrack-style tracker (NO ReID, NO GMC).
@@ -31,13 +32,13 @@ public class BoTSortTracker
 {
    // ---------------- Tunables (ByteTrack / BoT-SORT style) ----------------
    /** Detections >= trackHighThresh go to first association. */
-   public float trackHighThresh = 0.6f;
+   public float trackHighThresh = 0.4f;
 
    /** Detections in [trackLowThresh, trackHighThresh) go to second association. */
-   public float trackLowThresh = 0.1f;
+   public float trackLowThresh = 0.2f;
 
    /** Remaining unmatched HIGH detections >= newTrackThresh start new tracks. */
-   public float newTrackThresh = 0.7f;
+   public float newTrackThresh = 0.5f;
 
    /**
     * Association threshold in COST space (python uses lapjv cost_limit=match_thresh).
@@ -45,7 +46,7 @@ public class BoTSortTracker
     * matchThresh=0.8  allows IoU >= 0.2
     * matchThresh=0.3  allows IoU >= 0.7
     */
-   public float matchThresh = 0.8f;
+   public float matchThresh = 0.4f;
 
    /** Second-stage association threshold for LOW detections (often ~0.5 in codebases). */
    public float secondMatchThresh = 0.5f;
@@ -54,7 +55,7 @@ public class BoTSortTracker
    public float unconfirmedMatchThresh = 0.7f;
 
    /** Frames to keep LOST tracks before removing. */
-   public int trackBuffer = 30;
+   public int trackBuffer = 100;
 
    private int baseTrackBuffer = 30; // unscaled "30fps-equivalent" buffer
 
@@ -64,6 +65,8 @@ public class BoTSortTracker
       this.trackBuffer = trackBufferAt30fps;
    }
 
+   private final GMC gmc = new GMC(GMC.Method.sparseOptFlow, 2); // downscale=2
+
    /** Call ONCE at init (e.g., when you know camera fps). */
    public void setFrameRate(float fps)
    {
@@ -71,11 +74,12 @@ public class BoTSortTracker
    }
 
    /** If true, fuse detection score into cost (similar to matching.fuse_score). */
-   public boolean fuseScore = true;
+   public boolean fuseScore = false;
 
    // ---------------- Internal state ----------------
    private int nextTrackId = 1;
    private int frameId = 0;
+   private final Object lock = new Object();
 
    private final List<STrack> tracked = new ArrayList<>();   // active confirmed tracks
    private final List<STrack> lost = new ArrayList<>();      // temporarily lost
@@ -96,207 +100,227 @@ public class BoTSortTracker
       return removed.size();
    }
 
+   public void update(List<? extends TrackableDetection> detections)
+   {
+      update(null, detections);
+   }
+
    /**
     * Update tracker with detections for the current frame.
     * This sets track IDs into detections via d.setTrackId(...).
     */
-   public void update(List<? extends TrackableDetection> detections)
+   public void update(Mat bgrFrame, List<? extends TrackableDetection> detections)
    {
-      frameId++;
-
-      // ---- Split detections: high and low ----
-      List<TrackableDetection> high = new ArrayList<>();
-      List<TrackableDetection> low = new ArrayList<>();
-      for (TrackableDetection d : detections)
+      synchronized (lock)
       {
-         double c = d.getConfidence();
-         if (c >= trackHighThresh)
-            high.add(d);
-         else if (c >= trackLowThresh)
-            low.add(d);
-      }
+         frameId++;
 
-      // ---- Split tracks into confirmed tracked vs unconfirmed (only 1 hit) ----
-      List<STrack> unconfirmed = new ArrayList<>();
-      List<STrack> confirmedTracked = new ArrayList<>();
-      for (STrack t : tracked)
-      {
-         if (!t.isActivated)
-            unconfirmed.add(t);
-         else
-            confirmedTracked.add(t);
-      }
+         // ---- GMC (compute once per frame) ----
+         Mat H = (bgrFrame != null && !bgrFrame.empty()) ? gmc.apply(bgrFrame) : null;
 
-      // ---- Predict all states ----
-      for (STrack t : confirmedTracked)
-         t.predict();
-      for (STrack t : unconfirmed)
-         t.predict();
-      for (STrack t : lost)
-         t.predict();
-
-      // ---- First association: (confirmed tracked + lost) <-> HIGH ----
-      List<STrack> strackPool = new ArrayList<>(confirmedTracked);
-      strackPool.addAll(lost);
-
-      AssocResult a1 = associate(strackPool, high, matchThresh, fuseScore);
-
-      List<STrack> activated = new ArrayList<>();
-      List<STrack> refound = new ArrayList<>();
-      List<STrack> newlyLost = new ArrayList<>();
-      List<STrack> newlyRemoved = new ArrayList<>();
-
-      // Apply matches
-      for (IntPair m : a1.matches)
-      {
-         STrack t = strackPool.get(m.i);
-         TrackableDetection d = high.get(m.j);
-
-         if (t.state == TrackState.Tracked)
+         try
          {
-            t.update(d, frameId);
-            activated.add(t);
+            // ---- Split detections: high and low ----
+            List<TrackableDetection> high = new ArrayList<>();
+            List<TrackableDetection> low = new ArrayList<>();
+            for (TrackableDetection d : detections)
+            {
+               double c = d.getConfidence();
+               if (c >= trackHighThresh)
+                  high.add(d);
+               else if (c >= trackLowThresh)
+                  low.add(d);
+            }
+
+            // ---- Split tracks into confirmed tracked vs unconfirmed (only 1 hit) ----
+            List<STrack> unconfirmed = new ArrayList<>();
+            List<STrack> confirmedTracked = new ArrayList<>();
+            for (STrack t : tracked)
+            {
+               if (!t.isActivated)
+                  unconfirmed.add(t);
+               else
+                  confirmedTracked.add(t);
+            }
+
+            // ---- Predict all states ----
+            for (STrack t : confirmedTracked) t.predict();
+            for (STrack t : unconfirmed) t.predict();
+            for (STrack t : lost) t.predict();
+
+            // ---- Apply GMC AFTER predict, BEFORE association ----
+            if (H != null)
+            {
+               for (STrack t : confirmedTracked) t.applyGmc(H);
+               for (STrack t : unconfirmed) t.applyGmc(H);
+               for (STrack t : lost) t.applyGmc(H);
+            }
+
+            // ---- First association: (confirmed tracked + lost) <-> HIGH ----
+            List<STrack> strackPool = new ArrayList<>(confirmedTracked);
+            strackPool.addAll(lost);
+
+            AssocResult a1 = associate(strackPool, high, matchThresh, fuseScore);
+
+            List<STrack> activated = new ArrayList<>();
+            List<STrack> refound = new ArrayList<>();
+            List<STrack> newlyLost = new ArrayList<>();
+            List<STrack> newlyRemoved = new ArrayList<>();
+
+            // Apply matches
+            for (IntPair m : a1.matches)
+            {
+               STrack t = strackPool.get(m.i);
+               TrackableDetection d = high.get(m.j);
+
+               if (t.state == TrackState.Tracked)
+               {
+                  t.update(d, frameId);
+                  activated.add(t);
+               }
+               else
+               {
+                  // was Lost -> refind
+                  t.reActivate(d, frameId, false);
+                  refound.add(t);
+               }
+               d.setTrackId(t.id);
+            }
+
+            // Unmatched tracks from pool after high association
+            List<STrack> uTrack1 = new ArrayList<>();
+            for (int ti : a1.unmatchedTrackIdx)
+               uTrack1.add(strackPool.get(ti));
+
+            // ---- Second association: remaining TRACKED (only) <-> LOW ----
+            // In python they restrict to those with state==Tracked
+            List<STrack> rTracked = new ArrayList<>();
+            for (STrack t : uTrack1)
+               if (t.state == TrackState.Tracked)
+                  rTracked.add(t);
+
+            AssocResult a2 = associate(rTracked, low, secondMatchThresh, false);
+
+            for (IntPair m : a2.matches)
+            {
+               STrack t = rTracked.get(m.i);
+               TrackableDetection d = low.get(m.j);
+               t.update(d, frameId);
+               activated.add(t);
+               d.setTrackId(t.id);
+            }
+
+            // Remaining unmatched rTracked -> mark lost
+            Set<Integer> matchedRTracked = new HashSet<>();
+            for (IntPair m : a2.matches)
+               matchedRTracked.add(m.i);
+            for (int i = 0; i < rTracked.size(); i++)
+            {
+               if (!matchedRTracked.contains(i))
+               {
+                  STrack t = rTracked.get(i);
+                  t.markLost();
+                  newlyLost.add(t);
+               }
+            }
+
+            // ---- Unconfirmed association with remaining HIGH detections ----
+            // Use the leftover HIGH detections from a1
+            List<TrackableDetection> remainingHigh = new ArrayList<>();
+            for (int di : a1.unmatchedDetIdx)
+               remainingHigh.add(high.get(di));
+
+            AssocResult a3 = associate(unconfirmed, remainingHigh, unconfirmedMatchThresh, fuseScore);
+
+            for (IntPair m : a3.matches)
+            {
+               STrack t = unconfirmed.get(m.i);
+               TrackableDetection d = remainingHigh.get(m.j);
+               t.update(d, frameId);
+               activated.add(t);
+               d.setTrackId(t.id);
+            }
+
+            // Unmatched unconfirmed -> remove
+            Set<Integer> matchedUnconfirmed = new HashSet<>();
+            for (IntPair m : a3.matches)
+               matchedUnconfirmed.add(m.i);
+            for (int i = 0; i < unconfirmed.size(); i++)
+            {
+               if (!matchedUnconfirmed.contains(i))
+               {
+                  STrack t = unconfirmed.get(i);
+                  t.markRemoved();
+                  newlyRemoved.add(t);
+               }
+            }
+
+            // ---- Init new tracks from remaining HIGH detections (unmatched in a3) ----
+            Set<Integer> matchedRemainingHigh = new HashSet<>();
+            for (IntPair m : a3.matches)
+               matchedRemainingHigh.add(m.j);
+
+            for (int j = 0; j < remainingHigh.size(); j++)
+            {
+               if (matchedRemainingHigh.contains(j))
+                  continue;
+
+               TrackableDetection d = remainingHigh.get(j);
+               if (d.getConfidence() < newTrackThresh)
+                  continue;
+
+               STrack nt = new STrack(nextTrackId++, d, frameId);
+               activated.add(nt);
+               d.setTrackId(nt.id);
+            }
+
+            // ---- Age out old lost tracks ----
+            for (STrack t : lost)
+            {
+               if (frameId - t.endFrame() > trackBuffer)
+               {
+                  t.markRemoved();
+                  newlyRemoved.add(t);
+               }
+            }
+
+            // ---- Merge / update global lists (same spirit as python joint/sub/remove-dup) ----
+            // Keep only currently Tracked in tracked
+            tracked.removeIf(t -> t.state != TrackState.Tracked);
+
+            // Add activated + refound
+            jointUniqueById(tracked, activated);
+            jointUniqueById(tracked, refound);
+
+            // Update lost: remove anything that is now tracked
+            subById(lost, tracked);
+
+            // Add new lost
+            jointUniqueById(lost, newlyLost);
+
+            // Remove anything that is removed
+            subById(lost, newlyRemoved);
+
+            // Add removed
+            jointUniqueById(removed, newlyRemoved);
+
+            // Optional: remove duplicates between tracked and lost
+            removeDuplicates(tracked, lost, 0.15f);
+
+            // Final invariants
+            tracked.removeIf(t -> t.state != TrackState.Tracked);
+            lost.removeIf(t -> t.state != TrackState.Lost);
+            removed.removeIf(t -> t.state != TrackState.Removed);
+
+            // ensure no id appears in both lists
+            subById(lost, tracked);
          }
-         else
+         finally
          {
-            // was Lost -> refind
-            t.reActivate(d, frameId, false);
-            refound.add(t);
-         }
-         d.setTrackId(t.id);
-      }
-
-      // Unmatched tracks from pool after high association
-      List<STrack> uTrack1 = new ArrayList<>();
-      for (int ti : a1.unmatchedTrackIdx)
-         uTrack1.add(strackPool.get(ti));
-
-      // ---- Second association: remaining TRACKED (only) <-> LOW ----
-      // In python they restrict to those with state==Tracked
-      List<STrack> rTracked = new ArrayList<>();
-      for (STrack t : uTrack1)
-         if (t.state == TrackState.Tracked)
-            rTracked.add(t);
-
-      AssocResult a2 = associate(rTracked, low, secondMatchThresh, false);
-
-      for (IntPair m : a2.matches)
-      {
-         STrack t = rTracked.get(m.i);
-         TrackableDetection d = low.get(m.j);
-         t.update(d, frameId);
-         activated.add(t);
-         d.setTrackId(t.id);
-      }
-
-      // Remaining unmatched rTracked -> mark lost
-      Set<Integer> matchedRTracked = new HashSet<>();
-      for (IntPair m : a2.matches)
-         matchedRTracked.add(m.i);
-      for (int i = 0; i < rTracked.size(); i++)
-      {
-         if (!matchedRTracked.contains(i))
-         {
-            STrack t = rTracked.get(i);
-            t.markLost();
-            newlyLost.add(t);
+            if (H != null)
+               H.release(); // important: prevent leaks
          }
       }
-
-      // ---- Unconfirmed association with remaining HIGH detections ----
-      // Use the leftover HIGH detections from a1
-      List<TrackableDetection> remainingHigh = new ArrayList<>();
-      for (int di : a1.unmatchedDetIdx)
-         remainingHigh.add(high.get(di));
-
-      AssocResult a3 = associate(unconfirmed, remainingHigh, unconfirmedMatchThresh, fuseScore);
-
-      for (IntPair m : a3.matches)
-      {
-         STrack t = unconfirmed.get(m.i);
-         TrackableDetection d = remainingHigh.get(m.j);
-         t.update(d, frameId);
-         activated.add(t);
-         d.setTrackId(t.id);
-      }
-
-      // Unmatched unconfirmed -> remove
-      Set<Integer> matchedUnconfirmed = new HashSet<>();
-      for (IntPair m : a3.matches)
-         matchedUnconfirmed.add(m.i);
-      for (int i = 0; i < unconfirmed.size(); i++)
-      {
-         if (!matchedUnconfirmed.contains(i))
-         {
-            STrack t = unconfirmed.get(i);
-            t.markRemoved();
-            newlyRemoved.add(t);
-         }
-      }
-
-      // ---- Init new tracks from remaining HIGH detections (unmatched in a3) ----
-      Set<Integer> matchedRemainingHigh = new HashSet<>();
-      for (IntPair m : a3.matches)
-         matchedRemainingHigh.add(m.j);
-
-      for (int j = 0; j < remainingHigh.size(); j++)
-      {
-         if (matchedRemainingHigh.contains(j))
-            continue;
-
-         TrackableDetection d = remainingHigh.get(j);
-         if (d.getConfidence() < newTrackThresh)
-            continue;
-
-         STrack nt = new STrack(nextTrackId++, d, frameId);
-         activated.add(nt);
-         d.setTrackId(nt.id);
-      }
-
-      // ---- Age out old lost tracks ----
-      for (STrack t : lost)
-      {
-         if (frameId - t.endFrame() > trackBuffer)
-         {
-            t.markRemoved();
-            newlyRemoved.add(t);
-         }
-      }
-
-      // ---- Merge / update global lists (same spirit as python joint/sub/remove-dup) ----
-      // tracked = (tracked that are Tracked) U activated U refound
-      // lost    = (lost - tracked) U newlyLost  (then remove removed)
-      // removed = removed U newlyRemoved
-
-      // Keep only currently Tracked in tracked
-      tracked.removeIf(t -> t.state != TrackState.Tracked);
-
-      // Add activated + refound
-      jointUniqueById(tracked, activated);
-      jointUniqueById(tracked, refound);
-
-      // Update lost: remove anything that is now tracked
-      subById(lost, tracked);
-
-      // Add new lost
-      jointUniqueById(lost, newlyLost);
-
-      // Remove anything that is removed
-      subById(lost, newlyRemoved);
-
-      // Add removed
-      jointUniqueById(removed, newlyRemoved);
-
-      // Optional: remove duplicates between tracked and lost
-      removeDuplicates(tracked, lost, 0.15f);
-
-      // Final invariants
-      tracked.removeIf(t -> t.state != TrackState.Tracked);
-      lost.removeIf(t -> t.state != TrackState.Lost);
-      removed.removeIf(t -> t.state != TrackState.Removed);
-
-      // ensure no id appears in both lists
-      subById(lost, tracked);
    }
 
    // ---------------- Association ----------------
@@ -548,13 +572,14 @@ public class BoTSortTracker
 
    public List<TrackViz> getActiveTracks()
    {
-      List<TrackViz> out = new ArrayList<>();
-      for (STrack t : tracked)
+      synchronized (lock)
       {
-         if (t.state == TrackState.Tracked)
-            out.add(new TrackViz(t.id, t.getTlbr()));
+         List<TrackViz> out = new ArrayList<>();
+         for (STrack t : tracked)
+            if (t.state == TrackState.Tracked)
+               out.add(new TrackViz(t.id, t.getTlbr()));
+         return out;
       }
-      return out;
    }
 
    private static void jointUniqueById(List<STrack> dst, List<STrack> add)
@@ -723,6 +748,32 @@ public class BoTSortTracker
          kf.predict();
          tlbr = meanToTLBR(kf.getMean());
          timeSinceUpdate++;
+      }
+
+      void applyGmc(Mat H)
+      {
+         if (H == null) return;
+
+         // H is 2x3 (double). Read affine params.
+         double a  = H.ptr(0, 0).getDouble();
+         double b  = H.ptr(0, 1).getDouble();
+         double tx = H.ptr(0, 2).getDouble();
+         double c  = H.ptr(1, 0).getDouble();
+         double d  = H.ptr(1, 1).getDouble();
+         double ty = H.ptr(1, 2).getDouble();
+
+         float[] mean = kf.getMean();   // [cx, cy, w, h, ...]
+         double cx = mean[0];
+         double cy = mean[1];
+
+         double ncx = a * cx + b * cy + tx;
+         double ncy = c * cx + d * cy + ty;
+
+         // You MUST write back to KF state. Add a setter in KalmanFilter if needed.
+         kf.setXY((float) ncx, (float) ncy);
+
+         // refresh cached box
+         tlbr = meanToTLBR(kf.getMean());
       }
 
       void update(TrackableDetection det, int fid)

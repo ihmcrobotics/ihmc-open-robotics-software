@@ -13,7 +13,7 @@ public class Target2D
 
    // Latest observation (retained)
    public RawImage latestMask;      // may be null
-   public float[] latestBbox;       // [x1,y1,x2,y2]
+   public float[] latestBbox;       // [x1,y1,x2,y2] (defensive-copied)
 
    // Lifecycle / scoring history
    public int missedFrames = 0;
@@ -27,7 +27,7 @@ public class Target2D
                    int initialTrackId,
                    String name,
                    RawImage mask,          // may be null
-                   float[] bbox,
+                   float[] bbox,           // expected length 4
                    float prob,
                    float texture,
                    int historySize)
@@ -38,7 +38,9 @@ public class Target2D
 
       // retain mask
       this.latestMask = (mask == null) ? null : mask.get();
-      this.latestBbox = bbox;
+
+      // defensive copy bbox (prevents caller-side mutation bugs)
+      this.latestBbox = (bbox == null) ? null : bbox.clone();
 
       this.frameCount = new ArrayDeque<>(historySize);
       this.probHistory = new ArrayDeque<>(historySize);
@@ -52,14 +54,16 @@ public class Target2D
    public void update(int trackId,
                       String name,
                       RawImage mask,        // may be null
-                      float[] bbox,
+                      float[] bbox,         // expected length 4
                       float prob,
                       float texture,
                       int historySize)
    {
       this.lastTrackId = trackId;
       this.name = name;
-      this.latestBbox = bbox;
+
+      // defensive copy bbox
+      this.latestBbox = (bbox == null) ? null : bbox.clone();
 
       // swap retained mask safely
       RawImage newMaskRef = (mask == null) ? null : mask.get();
@@ -94,11 +98,13 @@ public class Target2D
          latestMask.release();
          latestMask = null;
       }
+      latestBbox = null;
    }
 
    private static <T> void pushCapped(Deque<T> q, T v, int cap)
    {
-      if (q.size() >= cap) q.removeFirst();
+      if (q.size() >= cap)
+         q.removeFirst();
       q.addLast(v);
    }
 }

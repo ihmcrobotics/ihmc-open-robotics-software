@@ -137,6 +137,18 @@ public class YOLOv8Tools
       return centroid;
    }
 
+   private static Scalar colorForId(int id)
+   {
+      if (id < 0)
+         return GREEN;
+
+      int r = (id * 37) % 255;
+      int g = (id * 17) % 255;
+      int b = (id * 97) % 255;
+
+      return new Scalar(b, g, r, 255.0);
+   }
+
    /**
     * Annotates the {@code inputImage} using the {@code detections} and puts the result in {@code annotatedImage}.
     *
@@ -154,14 +166,22 @@ public class YOLOv8Tools
 
       for (YOLOv8InstantDetection detection : detections)
       {
-         String text = String.format("%s: %.2f", detection.getDetectedObjectClass(), detection.getConfidence());
+
+         int trackId = detection.getTrackId(); // assume -1 if none
+         String text = (trackId >= 0)
+               ? String.format("ID:%d %s %.2f", trackId, detection.getDetectedObjectClass(), detection.getConfidence())
+               : String.format("%s %.2f", detection.getDetectedObjectClass(), detection.getConfidence());
 
          // Draw the bounding box
          Rect boundingBox = new Rect((int) Math.round(detection.getBoundingBox().getMinX()),
                                      (int) Math.round(detection.getBoundingBox().getMinY()),
                                      (int) Math.round(detection.getBoundingBox().getMaxX() - detection.getBoundingBox().getMinX()),
                                      (int) Math.round(detection.getBoundingBox().getMaxY() - detection.getBoundingBox().getMinY()));
-         opencv_imgproc.rectangle(annotatedImage, boundingBox, GREEN, 5, LINE_TYPE, 0);
+//         opencv_imgproc.rectangle(annotatedImage, boundingBox, GREEN, 5, LINE_TYPE, 0);
+
+         Scalar color = colorForId(trackId);
+
+         opencv_imgproc.rectangle(annotatedImage, boundingBox, color, 5, LINE_TYPE, 0);
 
          // Draw text background
          Size textSize = opencv_imgproc.getTextSize(text, FONT, FONT_SCALE, FONT_THICKNESS, new IntPointer());
@@ -170,7 +190,8 @@ public class YOLOv8Tools
          int textBoxClampedY = MathTools.clamp(boundingBox.y() - textSize.height(), 0, annotatedImage.rows() - textSize.height());
 
          Rect textBox = new Rect(textBoxClampedX, textBoxClampedY, textSize.width(), textSize.height());
-         opencv_imgproc.rectangle(annotatedImage, textBox, GREEN, opencv_imgproc.FILLED, LINE_TYPE, 0);
+//         opencv_imgproc.rectangle(annotatedImage, textBox, GREEN, opencv_imgproc.FILLED, LINE_TYPE, 0);
+         opencv_imgproc.rectangle(annotatedImage, textBox, color, opencv_imgproc.FILLED, LINE_TYPE, 0);
 
          // Draw the text
          Point textLocation = new Point(textBoxClampedX, textBoxClampedY + textSize.height());
@@ -178,28 +199,36 @@ public class YOLOv8Tools
 
          // Add green tint to show mask
          RawImage mask = detection.getObjectMask();
-         Mat maskMat = mask.getCpuImageMat();
+         if (mask != null)
+         {
+            Mat maskMat = mask.getCpuImageMat();
+            if (maskMat != null && !maskMat.isNull())
+            {
+               // Ensure mask matches frame size
+               Mat maskAligned = maskMat;
+               Mat resizedMask = null;
 
-         // Account for aspect ratio by scaling to match annotatedImage width
-         Size scaleSize = annotatedImage.rows() > maskMat.rows() ?
-                                new Size(annotatedImage.cols(), maskMat.rows() * annotatedImage.cols() / maskMat.cols())
-                              : new Size(maskMat.cols() * annotatedImage.rows() / maskMat.rows(), annotatedImage.rows());
-         Mat scaledMask = new Mat(scaleSize, maskMat.type());
-         opencv_imgproc.resize(maskMat, scaledMask, scaleSize);
-         Scalar scalar = new Scalar(0);
-         Mat paddedMask = new Mat(annotatedImage.rows(), annotatedImage.cols(), maskMat.type(), scalar);
-         Rect roi = annotatedImage.rows() > maskMat.rows() ?
-                          new Rect(0, (annotatedImage.rows() - scaledMask.rows()) / 2, scaledMask.cols(), scaledMask.rows())
-                        : new Rect((annotatedImage.cols() - scaledMask.cols()) / 2, 0, scaledMask.cols(), scaledMask.rows());
-         Mat paddedMaskCenter = new Mat(paddedMask, roi);
-         scaledMask.copyTo(paddedMaskCenter);
-         scaleSize.close();
-         paddedMaskCenter.close();
-         scalar.close();
-         roi.close();
+               if (maskMat.cols() != annotatedImage.cols() || maskMat.rows() != annotatedImage.rows())
+               {
+                  resizedMask = new Mat();
+                  opencv_imgproc.resize(maskMat,
+                                        resizedMask,
+                                        annotatedImage.size(),
+                                        0, 0,
+                                        opencv_imgproc.INTER_NEAREST);
+                  maskAligned = resizedMask;
+               }
 
-         opencv_core.add(annotatedImage, greenMat, annotatedImage, paddedMask, -1);
-         paddedMask.close();
+               // Color overlay image
+               Mat colorMat = new Mat(annotatedImage.rows(), annotatedImage.cols(), annotatedImage.type(), color);
+
+               // Add colored tint only where mask is non-zero
+               opencv_core.add(annotatedImage, colorMat, annotatedImage, maskAligned, -1);
+
+               colorMat.release();
+               if (resizedMask != null) resizedMask.release();
+            }
+         }
 
          boundingBox.close();
          textBox.close();

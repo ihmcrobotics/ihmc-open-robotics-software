@@ -334,11 +334,18 @@ public class YOLOv8DetectionExecutor
                           }
 
                           // Track IDs
-                          botSortTracker.update(trackableDetections);
+                          Mat frameForGmc = bgrImage.getCpuImageMat(); // CPU BGR
+                          botSortTracker.update(frameForGmc, trackableDetections);
 
                           LogTools.info("tracked=" + botSortTracker.getTrackedCount() +
                                         " lost=" + botSortTracker.getLostCount() +
                                         " dets=" + trackableDetections.size());
+
+                          // Copy track ids to annotation detections
+                          for (int i = 0; i < trackableDetections.size(); i++)
+                          {
+                             newAnnotatedImageDetections.get(i).setTrackId(trackableDetections.get(i).getTrackId());
+                          }
 
                           for (YOLOv8InstantDetection d : trackableDetections)
                              LogTools.info("Track: class=" + d.getDetectedObjectClass() + " id=" + d.getTrackId());
@@ -347,21 +354,47 @@ public class YOLOv8DetectionExecutor
                           int frameH = bgrImage.getHeight();
 
                           List<Target2DTracker.Obs> obs = new ArrayList<>();
+
+                          Mat bgrCpu = bgrImage.getCpuImageMat();
+                          Mat textureMap01 = TextureTools.computeTextureMap01(bgrCpu); // compute once
+
                           for (YOLOv8InstantDetection d : trackableDetections)
                           {
-                             float[] bbox = new float[] { d.getX1(), d.getY1(), d.getX2(), d.getY2() };
+                             float[] bbox = { d.getX1(), d.getY1(), d.getX2(), d.getY2() };
 
-                             // IMPORTANT: what is "mask" in your Java? You currently have RawImage objectMask inside YOLOv8InstantDetection.
-                             // You can pass the RawImage ref (but be careful about lifetime), or pass something lighter later.
-                             Object mask = d.getObjectMask(); // RawImage
+                             RawImage maskRaw = d.getObjectMask();
+                             Mat maskCpu = (maskRaw != null) ? maskRaw.getCpuImageMat() : null;
 
-                             int trackId = d.getTrackId();
-                             float prob = (float) d.getConfidence();
-                             String name = d.getObjectClass();
+                             // --- ALIGN MASK RESOLUTION TO TEXTURE MAP RESOLUTION ---
+                             Mat maskAligned = maskCpu;
+                             Mat resized = null;
 
-                             float texture = 0.0f; // start with 0 until you implement it (or compute mean intensity inside bbox/mask)
-                             obs.add(new Target2DTracker.Obs(mask, bbox, trackId, prob, name, texture));
+                             if (textureMap01 != null && maskCpu != null
+                                 && (maskCpu.cols() != textureMap01.cols() || maskCpu.rows() != textureMap01.rows()))
+                             {
+                                resized = new Mat();
+                                opencv_imgproc.resize(maskCpu,
+                                                      resized,
+                                                      new Size(textureMap01.cols(), textureMap01.rows()),
+                                                      0, 0,
+                                                      opencv_imgproc.INTER_NEAREST);
+                                maskAligned = resized;
+                             }
+
+                             // --- TEXTURE ---
+                             float texture01 = 0f;
+                             if (textureMap01 != null && maskAligned != null)
+                                texture01 = TextureTools.meanTextureInMask(textureMap01, maskAligned, bbox);
+
+                             // IMPORTANT: release temporary resized mask (if created)
+                             if (resized != null)
+                                resized.release();
+
+                             obs.add(new Target2DTracker.Obs(maskRaw, bbox, d.getTrackId(),
+                                                             (float) d.getConfidence(), d.getObjectClass(), texture01));
                           }
+
+                          if (textureMap01 != null) textureMap01.release();
 
                           List<Target2D> published = target2DTracker.update(frameW, frameH, obs);
 
@@ -474,26 +507,6 @@ public class YOLOv8DetectionExecutor
             {
                YOLOv8Tools.annotateImage(src, resultMat, annotatedImageDetections);
             }
-
-            List<BoTSortTracker.TrackViz> tracks = botSortTracker.getActiveTracks();
-            for (BoTSortTracker.TrackViz t : tracks)
-            {
-               int x1 = Math.round(t.x1);
-               int y1 = Math.round(t.y1);
-               int x2 = Math.round(t.x2);
-               int y2 = Math.round(t.y2);
-
-               int r = (t.id * 37) % 255;
-               int g = (t.id * 17) % 255;
-               int b = (t.id * 97) % 255;
-
-               opencv_imgproc.rectangle(resultMat, new Point(x1, y1), new Point(x2, y2), new Scalar(b, g, r, 0),
-                     2, opencv_imgproc.LINE_8, 0);
-
-               opencv_imgproc.putText(resultMat, "ID: " + t.id, new Point(x1, y1 - 5), opencv_imgproc.FONT_HERSHEY_SIMPLEX,
-                     0.6, new Scalar(b, g, r, 0), 2, opencv_imgproc.LINE_AA, false);
-            }
-
 
             annotatedImagePointer = new BytePointer();
             opencv_imgcodecs.imencode(".jpg", resultMat, annotatedImagePointer);
