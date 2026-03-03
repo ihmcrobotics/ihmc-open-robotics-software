@@ -30,6 +30,8 @@ public class RDXVRManager
 
    private final RDXVRContext context = new RDXVRContext();
    private boolean contextInitialized = false;
+   private boolean failedInitialization = false;
+   private boolean headsetlessTestMode = false;
    private boolean skipHeadset = false;
    private final ImBoolean showScenePoseGizmo = new ImBoolean(false);
    private RDXPose3DGizmo scenePoseGizmo;
@@ -56,7 +58,7 @@ public class RDXVRManager
    public void pollEventsAndRender(RDXBaseUI baseUI, RDX3DScene scene)
    {
       pollEvents(baseUI);
-      if (isVRReady())
+      if (isVRReady() && !headsetlessTestMode)
       {
          skipHeadset = true;
          vrFPSCalculator.ping();
@@ -68,76 +70,83 @@ public class RDXVRManager
 
    private void pollEvents(RDXBaseUI baseUI)
    {
-      // Close VR if it was previously initialized and now was disabled
-      if (!vrEnabled.get() && contextInitialized)
+      if (!failedInitialization)
       {
-         dispose();
-      }
-      else if (vrEnabled.get())
-      {
-         if (!contextInitialized)
+         // Close VR if it was previously initialized and now was disabled
+         if (!vrEnabled.get() && contextInitialized)
          {
-            context.initSystem(); // May block for a bit
-            context.setupEyes();
-
-            scenePoseGizmo = new RDXPose3DGizmo(context.getTeleportFrameIHMCZUp(), context.getTeleportIHMCZUpToIHMCZUpWorld());
-            scenePoseGizmo.create(baseUI.getPrimary3DPanel());
-            contextInitialized = true;
+            dispose();
          }
-
-         context.waitGetPoses();
-         waitGetToRenderStopwatch.reset();
-
-         // pollEventsFrequencyCalculator.ping();
-         context.pollEvents();
-
-         // A tracker has disconnected
-         List<String> removedTrackersSerialNumbers = context.getRemovedTrackersSerialNumbers();
-         Iterator<RDXVRTrackerRoleManager> trackerIterator = trackerRoleManagers.iterator();
-         while (trackerIterator.hasNext())
+         else if (vrEnabled.get())
          {
-            RDXVRTrackerRoleManager tracker = trackerIterator.next();
-
-            if (removedTrackersSerialNumbers.contains(tracker.getTrackerSerialNumber()))
+            if (!contextInitialized)
             {
-               trackerIterator.remove();
+               if(!context.initSystem()) // May block for a bit
+               {
+                  failedInitialization = true;
+                  return;
+               }
+               context.setupEyes();
 
-               LogTools.warn("Tracker {} removed", tracker.getTrackerSerialNumber());
+               scenePoseGizmo = new RDXPose3DGizmo(context.getTeleportFrameIHMCZUp(), context.getTeleportIHMCZUpToIHMCZUpWorld());
+               scenePoseGizmo.create(baseUI.getPrimary3DPanel());
+               contextInitialized = true;
             }
-         }
 
-         // A new tracker has been detected
-         List<String> newTrackersSerialNumbers = context.getNewTrackersSerialNumbers();
-         for (String newSerialNumber : newTrackersSerialNumbers)
-         {
-            trackerRoleManagers.add(new RDXVRTrackerRoleManager(context, context.getTrackers().get(newSerialNumber)));
-         }
+            context.waitGetPoses();
+            waitGetToRenderStopwatch.reset();
 
-         // A reset of roles has been triggered from the UI
-         if (context.getRolesResetNotification().poll())
-         {
-            for (var trackerRoleManager : trackerRoleManagers)
+            // pollEventsFrequencyCalculator.ping();
+            context.pollEvents();
+
+            // A tracker has disconnected
+            List<String> removedTrackersSerialNumbers = context.getRemovedTrackersSerialNumbers();
+            Iterator<RDXVRTrackerRoleManager> trackerIterator = trackerRoleManagers.iterator();
+            while (trackerIterator.hasNext())
             {
-               trackerRoleManager.reset();
-            }
-         }
+               RDXVRTrackerRoleManager tracker = trackerIterator.next();
 
-         // A loading of preset roles has been triggered from the UI
-         if (context.getLoadingRolesNotification().poll())
-         {
-            var trackerRoleMap = context.getTrackersRoleMap();
-            for (var trackerRole : trackerRoleMap.entrySet())
+               if (removedTrackersSerialNumbers.contains(tracker.getTrackerSerialNumber()))
+               {
+                  trackerIterator.remove();
+
+                  LogTools.warn("Tracker {} removed", tracker.getTrackerSerialNumber());
+               }
+            }
+
+            // A new tracker has been detected
+            List<String> newTrackersSerialNumbers = context.getNewTrackersSerialNumbers();
+            for (String newSerialNumber : newTrackersSerialNumbers)
+            {
+               trackerRoleManagers.add(new RDXVRTrackerRoleManager(context, context.getTrackers().get(newSerialNumber)));
+            }
+
+            // A reset of roles has been triggered from the UI
+            if (context.getRolesResetNotification().poll())
             {
                for (var trackerRoleManager : trackerRoleManagers)
                {
-                  // if serial numbers match
-                  if (trackerRole.getValue().equals(trackerRoleManager.getTrackerSerialNumber()))
-                  {
-                     trackerRoleManager.setActive(trackerRole.getKey());
-                  }
+                  trackerRoleManager.reset();
                }
             }
-            LogTools.info("Loaded roles");
+
+            // A loading of preset roles has been triggered from the UI
+            if (context.getLoadingRolesNotification().poll())
+            {
+               var trackerRoleMap = context.getTrackersRoleMap();
+               for (var trackerRole : trackerRoleMap.entrySet())
+               {
+                  for (var trackerRoleManager : trackerRoleManagers)
+                  {
+                     // if serial numbers match
+                     if (trackerRole.getValue().equals(trackerRoleManager.getTrackerSerialNumber()))
+                     {
+                        trackerRoleManager.setActive(trackerRole.getKey());
+                     }
+                  }
+               }
+               LogTools.info("Loaded roles");
+            }
          }
       }
    }
@@ -227,7 +236,7 @@ public class RDXVRManager
    public boolean isVRReady()
    {
       // Wait for VR setup to be ready. This is the primary indicator, called only when the headset is connected
-      return vrEnabled.get() && contextInitialized && context.getHeadset().isConnected();
+      return headsetlessTestMode || vrEnabled.get() && contextInitialized && context.getHeadset().isConnected();
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)
@@ -304,5 +313,10 @@ public class RDXVRManager
    public List<RDXVRTrackerRoleManager> getTrackerRoleManagers()
    {
       return trackerRoleManagers;
+   }
+
+   public void setHeadsetlessTestMode(boolean enable)
+   {
+      headsetlessTestMode = enable;
    }
 }

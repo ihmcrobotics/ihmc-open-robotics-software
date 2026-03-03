@@ -68,11 +68,19 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  support_region_;
    public us.ihmc.euclid.tuple3D.Point3D desired_torso_position_;
    public us.ihmc.euclid.tuple4D.Quaternion desired_torso_orientation_;
+   public us.ihmc.euclid.tuple3D.Vector3D desired_torso_linear_velocity_;
+   public us.ihmc.euclid.tuple3D.Vector3D desired_torso_angular_velocity_;
+   public us.ihmc.idl.IDLSequence.StringBuilderHolder  rigid_body_names_;
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  rigid_body_positions_;
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple4D.Quaternion>  rigid_body_orientations_;
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Vector3D>  rigid_body_linear_velocities_;
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Vector3D>  rigid_body_angular_velocities_;
+   public float com_offset_;
    /**
             * Legged robot-specific contact information (false if not a legged robot)
             */
-   public toolbox_msgs.msg.dds.KinematicsToolboxFootStatus left_foot_status_;
-   public toolbox_msgs.msg.dds.KinematicsToolboxFootStatus right_foot_status_;
+   public boolean left_foot_in_contact_;
+   public boolean right_foot_in_contact_;
    public double solution_quality_ = -1.0;
 
    public KinematicsToolboxOutputStatus()
@@ -88,8 +96,13 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       support_region_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (32, new geometry_msgs.msg.dds.PointPubSubType());
       desired_torso_position_ = new us.ihmc.euclid.tuple3D.Point3D();
       desired_torso_orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
-      left_foot_status_ = new toolbox_msgs.msg.dds.KinematicsToolboxFootStatus();
-      right_foot_status_ = new toolbox_msgs.msg.dds.KinematicsToolboxFootStatus();
+      desired_torso_linear_velocity_ = new us.ihmc.euclid.tuple3D.Vector3D();
+      desired_torso_angular_velocity_ = new us.ihmc.euclid.tuple3D.Vector3D();
+      rigid_body_names_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (100, "type_d");
+      rigid_body_positions_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (100, new geometry_msgs.msg.dds.PointPubSubType());
+      rigid_body_orientations_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple4D.Quaternion> (100, new geometry_msgs.msg.dds.QuaternionPubSubType());
+      rigid_body_linear_velocities_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Vector3D> (100, new geometry_msgs.msg.dds.Vector3PubSubType());
+      rigid_body_angular_velocities_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Vector3D> (100, new geometry_msgs.msg.dds.Vector3PubSubType());
 
    }
 
@@ -116,8 +129,19 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       support_region_.set(other.support_region_);
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.desired_torso_position_, desired_torso_position_);
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.desired_torso_orientation_, desired_torso_orientation_);
-      toolbox_msgs.msg.dds.KinematicsToolboxFootStatusPubSubType.staticCopy(other.left_foot_status_, left_foot_status_);
-      toolbox_msgs.msg.dds.KinematicsToolboxFootStatusPubSubType.staticCopy(other.right_foot_status_, right_foot_status_);
+      geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.desired_torso_linear_velocity_, desired_torso_linear_velocity_);
+      geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.desired_torso_angular_velocity_, desired_torso_angular_velocity_);
+      rigid_body_names_.set(other.rigid_body_names_);
+      rigid_body_positions_.set(other.rigid_body_positions_);
+      rigid_body_orientations_.set(other.rigid_body_orientations_);
+      rigid_body_linear_velocities_.set(other.rigid_body_linear_velocities_);
+      rigid_body_angular_velocities_.set(other.rigid_body_angular_velocities_);
+      com_offset_ = other.com_offset_;
+
+      left_foot_in_contact_ = other.left_foot_in_contact_;
+
+      right_foot_in_contact_ = other.right_foot_in_contact_;
+
       solution_quality_ = other.solution_quality_;
 
    }
@@ -237,18 +261,78 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
    }
 
 
-   /**
-            * Legged robot-specific contact information (false if not a legged robot)
-            */
-   public toolbox_msgs.msg.dds.KinematicsToolboxFootStatus getLeftFootStatus()
+   public us.ihmc.euclid.tuple3D.Vector3D getDesiredTorsoLinearVelocity()
    {
-      return left_foot_status_;
+      return desired_torso_linear_velocity_;
    }
 
 
-   public toolbox_msgs.msg.dds.KinematicsToolboxFootStatus getRightFootStatus()
+   public us.ihmc.euclid.tuple3D.Vector3D getDesiredTorsoAngularVelocity()
    {
-      return right_foot_status_;
+      return desired_torso_angular_velocity_;
+   }
+
+
+   public us.ihmc.idl.IDLSequence.StringBuilderHolder  getRigidBodyNames()
+   {
+      return rigid_body_names_;
+   }
+
+
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  getRigidBodyPositions()
+   {
+      return rigid_body_positions_;
+   }
+
+
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple4D.Quaternion>  getRigidBodyOrientations()
+   {
+      return rigid_body_orientations_;
+   }
+
+
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Vector3D>  getRigidBodyLinearVelocities()
+   {
+      return rigid_body_linear_velocities_;
+   }
+
+
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Vector3D>  getRigidBodyAngularVelocities()
+   {
+      return rigid_body_angular_velocities_;
+   }
+
+   public void setComOffset(float com_offset)
+   {
+      com_offset_ = com_offset;
+   }
+   public float getComOffset()
+   {
+      return com_offset_;
+   }
+
+   /**
+            * Legged robot-specific contact information (false if not a legged robot)
+            */
+   public void setLeftFootInContact(boolean left_foot_in_contact)
+   {
+      left_foot_in_contact_ = left_foot_in_contact;
+   }
+   /**
+            * Legged robot-specific contact information (false if not a legged robot)
+            */
+   public boolean getLeftFootInContact()
+   {
+      return left_foot_in_contact_;
+   }
+
+   public void setRightFootInContact(boolean right_foot_in_contact)
+   {
+      right_foot_in_contact_ = right_foot_in_contact;
+   }
+   public boolean getRightFootInContact()
+   {
+      return right_foot_in_contact_;
    }
 
    public void setSolutionQuality(double solution_quality)
@@ -301,8 +385,44 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
 
       if (!this.desired_torso_position_.epsilonEquals(other.desired_torso_position_, epsilon)) return false;
       if (!this.desired_torso_orientation_.epsilonEquals(other.desired_torso_orientation_, epsilon)) return false;
-      if (!this.left_foot_status_.epsilonEquals(other.left_foot_status_, epsilon)) return false;
-      if (!this.right_foot_status_.epsilonEquals(other.right_foot_status_, epsilon)) return false;
+      if (!this.desired_torso_linear_velocity_.epsilonEquals(other.desired_torso_linear_velocity_, epsilon)) return false;
+      if (!this.desired_torso_angular_velocity_.epsilonEquals(other.desired_torso_angular_velocity_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilderSequence(this.rigid_body_names_, other.rigid_body_names_, epsilon)) return false;
+
+      if (this.rigid_body_positions_.size() != other.rigid_body_positions_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.rigid_body_positions_.size(); i++)
+         {  if (!this.rigid_body_positions_.get(i).epsilonEquals(other.rigid_body_positions_.get(i), epsilon)) return false; }
+      }
+
+      if (this.rigid_body_orientations_.size() != other.rigid_body_orientations_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.rigid_body_orientations_.size(); i++)
+         {  if (!this.rigid_body_orientations_.get(i).epsilonEquals(other.rigid_body_orientations_.get(i), epsilon)) return false; }
+      }
+
+      if (this.rigid_body_linear_velocities_.size() != other.rigid_body_linear_velocities_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.rigid_body_linear_velocities_.size(); i++)
+         {  if (!this.rigid_body_linear_velocities_.get(i).epsilonEquals(other.rigid_body_linear_velocities_.get(i), epsilon)) return false; }
+      }
+
+      if (this.rigid_body_angular_velocities_.size() != other.rigid_body_angular_velocities_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.rigid_body_angular_velocities_.size(); i++)
+         {  if (!this.rigid_body_angular_velocities_.get(i).epsilonEquals(other.rigid_body_angular_velocities_.get(i), epsilon)) return false; }
+      }
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.com_offset_, other.com_offset_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.left_foot_in_contact_, other.left_foot_in_contact_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.right_foot_in_contact_, other.right_foot_in_contact_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.solution_quality_, other.solution_quality_, epsilon)) return false;
 
 
@@ -333,8 +453,19 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       if (!this.support_region_.equals(otherMyClass.support_region_)) return false;
       if (!this.desired_torso_position_.equals(otherMyClass.desired_torso_position_)) return false;
       if (!this.desired_torso_orientation_.equals(otherMyClass.desired_torso_orientation_)) return false;
-      if (!this.left_foot_status_.equals(otherMyClass.left_foot_status_)) return false;
-      if (!this.right_foot_status_.equals(otherMyClass.right_foot_status_)) return false;
+      if (!this.desired_torso_linear_velocity_.equals(otherMyClass.desired_torso_linear_velocity_)) return false;
+      if (!this.desired_torso_angular_velocity_.equals(otherMyClass.desired_torso_angular_velocity_)) return false;
+      if (!this.rigid_body_names_.equals(otherMyClass.rigid_body_names_)) return false;
+      if (!this.rigid_body_positions_.equals(otherMyClass.rigid_body_positions_)) return false;
+      if (!this.rigid_body_orientations_.equals(otherMyClass.rigid_body_orientations_)) return false;
+      if (!this.rigid_body_linear_velocities_.equals(otherMyClass.rigid_body_linear_velocities_)) return false;
+      if (!this.rigid_body_angular_velocities_.equals(otherMyClass.rigid_body_angular_velocities_)) return false;
+      if(this.com_offset_ != otherMyClass.com_offset_) return false;
+
+      if(this.left_foot_in_contact_ != otherMyClass.left_foot_in_contact_) return false;
+
+      if(this.right_foot_in_contact_ != otherMyClass.right_foot_in_contact_) return false;
+
       if(this.solution_quality_ != otherMyClass.solution_quality_) return false;
 
 
@@ -371,10 +502,26 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       builder.append(this.desired_torso_position_);      builder.append(", ");
       builder.append("desired_torso_orientation=");
       builder.append(this.desired_torso_orientation_);      builder.append(", ");
-      builder.append("left_foot_status=");
-      builder.append(this.left_foot_status_);      builder.append(", ");
-      builder.append("right_foot_status=");
-      builder.append(this.right_foot_status_);      builder.append(", ");
+      builder.append("desired_torso_linear_velocity=");
+      builder.append(this.desired_torso_linear_velocity_);      builder.append(", ");
+      builder.append("desired_torso_angular_velocity=");
+      builder.append(this.desired_torso_angular_velocity_);      builder.append(", ");
+      builder.append("rigid_body_names=");
+      builder.append(this.rigid_body_names_);      builder.append(", ");
+      builder.append("rigid_body_positions=");
+      builder.append(this.rigid_body_positions_);      builder.append(", ");
+      builder.append("rigid_body_orientations=");
+      builder.append(this.rigid_body_orientations_);      builder.append(", ");
+      builder.append("rigid_body_linear_velocities=");
+      builder.append(this.rigid_body_linear_velocities_);      builder.append(", ");
+      builder.append("rigid_body_angular_velocities=");
+      builder.append(this.rigid_body_angular_velocities_);      builder.append(", ");
+      builder.append("com_offset=");
+      builder.append(this.com_offset_);      builder.append(", ");
+      builder.append("left_foot_in_contact=");
+      builder.append(this.left_foot_in_contact_);      builder.append(", ");
+      builder.append("right_foot_in_contact=");
+      builder.append(this.right_foot_in_contact_);      builder.append(", ");
       builder.append("solution_quality=");
       builder.append(this.solution_quality_);
       builder.append("}");

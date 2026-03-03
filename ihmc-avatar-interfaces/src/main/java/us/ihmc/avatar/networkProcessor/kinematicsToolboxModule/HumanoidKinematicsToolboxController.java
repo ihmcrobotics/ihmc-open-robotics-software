@@ -35,14 +35,17 @@ import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.HumanoidKinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.mecano.algorithms.CentroidalMomentumCalculator;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -179,6 +182,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    private StabilityMarginKinematicsCostCalculator stabilityCostCalculator;
    private final FramePoint3D tempContactPoint = new FramePoint3D();
    private final FrameVector3D tempContactNormal = new FrameVector3D();
+   private final List<RigidBodyBasics> rigidBodiesList = new ArrayList<>();
 
    public HumanoidKinematicsToolboxController(CommandInputManager commandInputManager,
                                               StatusMessageOutputManager statusOutputManager,
@@ -269,6 +273,17 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       }
 
       populateDefaultJointLimitReductionFactors();
+
+      RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(desiredFullRobotModel.getElevator());
+      for (RigidBodyBasics rigidBody : rootBody.subtreeIterable())
+      {
+         rigidBodiesList.add(rigidBody);
+         getSolution().getRigidBodyNames().add(rigidBody.getName());
+         getSolution().getRigidBodyPositions().add().setToZero();
+         getSolution().getRigidBodyOrientations().add().setToZero();
+         getSolution().getRigidBodyLinearVelocities().add().setToZero();
+         getSolution().getRigidBodyAngularVelocities().add().setToZero();
+      }
    }
 
    /**
@@ -417,8 +432,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       enableAutoSupportPolygon.set(true);
       holdCenterOfMassXYPosition.set(true);
       enableJointLimitReduction.set(true);
-      getSolution().getLeftFootStatus().setFootInContact(true);
-      getSolution().getRightFootStatus().setFootInContact(true);
+      getSolution().setLeftFootInContact(true);
+      getSolution().setRightFootInContact(true);
 
       status.setCurrentToolboxState(CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL);
       reportMessage(status);
@@ -531,9 +546,28 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       super.updateInternal();
 
       // Update anchor base (chest) pose - only needed for status message
-      RigidBodyTransform chestTransformToWorld = desiredFullRobotModel.getChest().getParentJoint().getFrameAfterJoint().getTransformToRoot();
-      getSolution().getDesiredTorsoPosition().set(chestTransformToWorld.getTranslation());
-      getSolution().getDesiredTorsoOrientation().set(chestTransformToWorld.getRotation());
+      MovingReferenceFrame chestFrame = desiredFullRobotModel.getChest().getParentJoint().getFrameAfterJoint();
+      getSolution().getDesiredTorsoPosition().set(chestFrame.getTransformToRoot().getTranslation());
+      getSolution().getDesiredTorsoOrientation().set(chestFrame.getTransformToRoot().getRotation());
+      MovingReferenceFrame chestFrameCoM = desiredFullRobotModel.getChest().getBodyFixedFrame();
+      getSolution().getDesiredTorsoLinearVelocity().set(chestFrameCoM.getTwistOfFrame().getLinearPart());
+      getSolution().getDesiredTorsoAngularVelocity().set(chestFrameCoM.getTwistOfFrame().getAngularPart());
+      
+      // Update rigid body pose - only needed for status message
+      for (int i = 0; i < rigidBodiesList.size(); i++)
+      {
+         if (!rigidBodiesList.get(i).equals(rootBody))
+         {
+            MovingReferenceFrame bodyFrame = rigidBodiesList.get(i).getParentJoint().getFrameAfterJoint();
+            getSolution().getRigidBodyPositions().get(i).set(bodyFrame.getTransformToRoot().getTranslation());
+            getSolution().getRigidBodyOrientations().get(i).set(bodyFrame.getTransformToRoot().getRotation());
+            MovingReferenceFrame bodyFrameCoM = rigidBodiesList.get(i).getBodyFixedFrame();
+            getSolution().getRigidBodyLinearVelocities().get(i).set(bodyFrameCoM.getTwistOfFrame().getLinearPart());
+            getSolution().getRigidBodyAngularVelocities().get(i).set(bodyFrameCoM.getTwistOfFrame().getAngularPart());
+         }
+      }
+      // Com offset - only needed for status message
+      getSolution().setComOffset(computeCenterOfMassOffset());
 
       if (!isUserProvidingSupportPolygon() && isUpperBodyLoadBearing.getValue())
       {
@@ -873,8 +907,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    public void setIsFootInSupport(RobotSide side, boolean value)
    {
       isFootInSupport.get(side).set(value);
-      getSolution().getLeftFootStatus().setFootInContact(isFootInSupport.get(RobotSide.LEFT).getValue());
-      getSolution().getRightFootStatus().setFootInContact(isFootInSupport.get(RobotSide.RIGHT).getValue());
+      getSolution().setLeftFootInContact(isFootInSupport.get(RobotSide.LEFT).getValue());
+      getSolution().setRightFootInContact(isFootInSupport.get(RobotSide.RIGHT).getValue());
    }
 
    private final PoseReferenceFrame desiredFootFrame = new PoseReferenceFrame("desiredFootFrame", ReferenceFrame.getWorldFrame());
@@ -949,6 +983,37 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
       updateSupportPolygonConstraint(activeContactPointPositions);
       updateCoMPositionToHold();
+   }
+
+   private final Point3D leftFootXYInWorld = new Point3D();
+   private final Point3D rightFootXYInWorld = new Point3D();
+   private final Vector3D feetVector = new Vector3D();
+   private final Vector3D comProjectionVector = new Vector3D();
+
+   private float computeCenterOfMassOffset()
+   {
+      MovingReferenceFrame leftFootFrame = desiredFullRobotModel.getFoot(RobotSide.LEFT).getParentJoint().getFrameAfterJoint();
+      MovingReferenceFrame rightFootFrame = desiredFullRobotModel.getFoot(RobotSide.RIGHT).getParentJoint().getFrameAfterJoint();
+      leftFootXYInWorld.set(leftFootFrame.getTransformToWorldFrame().getTranslation());
+      leftFootXYInWorld.setZ(0.0);
+      rightFootXYInWorld.set(rightFootFrame.getTransformToWorldFrame().getTranslation());
+      rightFootXYInWorld.setZ(0.0);
+
+      // Calculate the vector between the ankles (feet)
+      feetVector.sub(rightFootXYInWorld, leftFootXYInWorld);
+
+      // Project the waist tracker ground projection onto the line between the feet
+      comProjectionVector.set(desiredReferenceFrames.getCenterOfMassFrame().getTransformToWorldFrame().getTranslation());
+      comProjectionVector.setZ(0.0);
+      comProjectionVector.sub(leftFootXYInWorld);
+      double dotProduct = comProjectionVector.dot(feetVector);
+      double normSqFeetVector = feetVector.lengthSquared();
+
+      // Calculate normalized offset along the line connecting the feet
+      float normalizedOffset = (float) (dotProduct / normSqFeetVector);
+      normalizedOffset = Math.min(1.0f, Math.max(0.0f, normalizedOffset));
+
+      return normalizedOffset;
    }
 
    @Override

@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
@@ -123,6 +124,18 @@ public class RDXRigidBody implements RigidBodyBasics
                ((RDXRigidBody) fourBarJoint.getJointA().getSuccessor()).setDiffuseColor(color);
                ((RDXRigidBody) fourBarJoint.getJointB().getSuccessor()).setDiffuseColor(color);
             }
+         }
+      }
+   }
+
+   public void setDiffuseColorForBody(String name, Color color)
+   {
+      for (RDXRigidBody rigidBody : subtreeIterable())
+      {
+         if (rigidBody.getName().equals(name))
+         {
+            rigidBody.setDiffuseColor(color);
+            return;
          }
       }
    }

@@ -1,6 +1,7 @@
 package us.ihmc.rdx.ui.graphics;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -8,8 +9,6 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.simulation.scs2.RDXFrameGraphicsNode;
-import us.ihmc.rdx.simulation.scs2.RDXFrameNodePart;
 import us.ihmc.rdx.simulation.scs2.RDXMultiBodySystemFactories;
 import us.ihmc.rdx.simulation.scs2.RDXRigidBody;
 import us.ihmc.rdx.simulation.scs2.RDXVisualTools;
@@ -102,6 +101,16 @@ public class RDXMultiBodyGraphic extends RDXVisualizer
    public void setOpacity(float opacity)
    {
       multiBody.setOpacityRecursive(opacity);
+   }
+
+   public void setColor(Color color)
+   {
+      multiBody.setDiffuseColorRecursive(color);
+   }
+
+   public void setColorForBody(String name, Color color)
+   {
+      multiBody.setDiffuseColorForBody(name, color);
    }
 
    public boolean isRobotLoaded()
