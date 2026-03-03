@@ -151,13 +151,17 @@ public class LeafNodeState<D extends LeafNodeDefinition> extends BehaviorTreeNod
          if (executeAfterNode == null)
             LogTools.error("Node \"%s\" refers to execute after node that doesn't exist: \"%s\"".formatted(definition.getName(),
                                                                                                            definition.getExecuteAfterLeafName()));
-         else // Allow execute after to point to non-leaf nodes
+         else
          {
-            while (!(executeAfterNode instanceof LeafNodeState<?>) && executeAfterNode.getDepthFirstIndex() < rootNode.getOrderedNodes().size() - 1)
-               executeAfterNode = rootNode.getOrderedNodes().get(executeAfterNode.getDepthFirstIndex() + 1);
-
-            if (executeAfterNode instanceof LeafNodeState<?> leafNodeState)
-               return leafNodeState.getLeafIndex();
+            if (executeAfterNode instanceof LeafNodeState<?> executeAfterLeaf)
+               return executeAfterLeaf.getLeafIndex();
+            else // Allow execute after to point to non-leaf nodes, in which case return previous to the next leaf
+            {
+               while (!(executeAfterNode instanceof LeafNodeState<?>) && executeAfterNode.getDepthFirstIndex() < rootNode.getOrderedNodes().size() - 1)
+                  executeAfterNode = rootNode.getOrderedNodes().get(executeAfterNode.getDepthFirstIndex() + 1);
+               if (executeAfterNode instanceof LeafNodeState<?> leafNodeState)
+                  return leafNodeState.getLeafIndex() - 1;
+            }
          }
       }
 
