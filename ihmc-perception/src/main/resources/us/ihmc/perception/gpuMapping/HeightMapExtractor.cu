@@ -179,6 +179,7 @@ __global__ void computeLocalMap(const float* __restrict__ sumMap, size_t pitchSu
         }
     }
 
+    // This is going to depend on the cell size, as the larger the cell more pixels will fall into the cell
     if (count < 40)
     {
         // If the count is too low, invalidate the mean, we don't want to record this cell as it doesn't have enough data
