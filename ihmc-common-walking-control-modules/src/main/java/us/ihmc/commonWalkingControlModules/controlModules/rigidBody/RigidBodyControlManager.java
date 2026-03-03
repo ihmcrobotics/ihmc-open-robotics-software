@@ -220,6 +220,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                                                                       taskspaceControlState.getPositionControlHelper(),
                                                                                       taskspaceControlState.getOrientationControlHelper(),
                                                                                       controlFrame,
+                                                                                      nominalRhoWeight,
                                                                                       hasContactStateChanged,
                                                                                       registry);
       }
