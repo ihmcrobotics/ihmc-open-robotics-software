@@ -148,7 +148,7 @@ public class RDXBehaviorTreeNodeCreationMenu
             renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), FootPoseActionDefinition.class, side);
          }
          ImGui.setCursorPosX(ImGui.getCursorPosX() + ImGui.getFontSize() * 0.3f);
-         armIcon.render(RobotSide.LEFT, false);
+         armIcon.render(RobotSide.LEFT, false, false);
          ImGui.sameLine();
          ImGui.setCursorPosX(align);
          ImGui.text("Hand Pose: ");
