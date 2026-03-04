@@ -1,6 +1,5 @@
 package us.ihmc.footstepPlanning.simplePlanners;
 
-import org.apache.commons.math3.util.Pair;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.Axis3D;
@@ -48,13 +47,13 @@ public class QuickFootstepPlanner
    private boolean print;
 
    /** Plan to each waypoint and then to goal **/
-   public List<Pair<RobotSide, Pose3D>> plan(EnumMap<RobotSide, Pose3D> stance, List<Pose3D> waypoints, EnumMap<RobotSide, Pose3D> goal)
+   public List<QuickFootstep> plan(EnumMap<RobotSide, Pose3D> stance, List<Pose3D> waypoints, EnumMap<RobotSide, Pose3D> goal)
    {
       print = notification.poll();
       stepIndex = 0;
       for (RobotSide side : RobotSide.values)
          this.stance.get(side).set(stance.get(side));
-      List<Pair<RobotSide, Pose3D>> footstepPlan = new ArrayList<>();
+      List<QuickFootstep> footstepPlan = new ArrayList<>();
 
       for (Pose3D waypoint : waypoints) // Plan to each waypoint without squaring up, facing waypoint X direction
       {
@@ -71,13 +70,13 @@ public class QuickFootstepPlanner
       return footstepPlan;
    }
 
-   private List<Pair<RobotSide, Pose3D>> plan()
+   private List<QuickFootstep> plan()
    {
-      List<Pair<RobotSide, Pose3D>> footstepPlan = new ArrayList<>();
+      List<QuickFootstep> footstepPlan = new ArrayList<>();
       for (; stepIndex < maxSteps; stepIndex++)
          if (!planStep())
          {
-            footstepPlan.add(new Pair<>(footToSwing, new Pose3D(swingEnd)));
+            footstepPlan.add(new QuickFootstep(footToSwing, swingEnd, swingDistance));
             this.stance.get(footToSwing).set(swingEnd);
             stepPlannedCallback.run();
          }
@@ -375,16 +374,6 @@ public class QuickFootstepPlanner
    public SideDependentList<Vector3D> getToGoalLinear()
    {
       return toGoalLinear;
-   }
-
-   public Point3D getOppositeStance()
-   {
-      return stance.get(footToSwing.getOppositeSide()).getPosition();
-   }
-
-   public double getSwingDistance()
-   {
-      return swingDistance;
    }
 
    public Notification getPrintNotification()

@@ -1,6 +1,5 @@
 package us.ihmc.footstepPlanning.simplePlanners;
 
-import org.apache.commons.math3.util.Pair;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -191,15 +190,15 @@ public class QuickFootstepPlannerTest
       planAndAssert(planner, stance, waypoints, goal, 45);
    }
 
-   private List<Pair<RobotSide, Pose3D>> planAndAssert(QuickFootstepPlanner planner,
-                                                      EnumMap<RobotSide, Pose3D> stance,
-                                                      List<Pose3D> waypoints,
-                                                      EnumMap<RobotSide, Pose3D> goal,
-                                                      int maxSteps)
+   private List<QuickFootstep> planAndAssert(QuickFootstepPlanner planner,
+                                             EnumMap<RobotSide, Pose3D> stance,
+                                             List<Pose3D> waypoints,
+                                             EnumMap<RobotSide, Pose3D> goal,
+                                             int maxSteps)
    {
       planner.setMaxSteps(maxSteps);
       long startTime = System.nanoTime();
-      List<Pair<RobotSide, Pose3D>> plan = planner.plan(stance, waypoints, goal);
+      List<QuickFootstep> plan = planner.plan(stance, waypoints, goal);
       long endTime = System.nanoTime();
       double elapsedMs = (endTime - startTime) / 1_000_000.0;
 
@@ -215,7 +214,7 @@ public class QuickFootstepPlannerTest
 
    private void assertNoSelfCollision(QuickFootstepPlanner planner,
                                       EnumMap<RobotSide, Pose3D> initialStance,
-                                      List<Pair<RobotSide, Pose3D>> plan)
+                                      List<QuickFootstep> plan)
    {
       ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
       EnumMap<RobotSide, Pose3D> stance = copyStance(initialStance);
@@ -225,9 +224,9 @@ public class QuickFootstepPlannerTest
 
       for (int i = 0; i < plan.size(); i++)
       {
-         Pair<RobotSide, Pose3D> step = plan.get(i);
-         stance.put(step.getFirst(), new Pose3D(step.getSecond()));
-         if (step.getFirst() == RobotSide.LEFT)
+         QuickFootstep step = plan.get(i);
+         stance.put(step.getSwingSide(), new Pose3D(step.getSwingEnd()));
+         if (step.getSwingSide() == RobotSide.LEFT)
             leftIndex = i;
          else
             rightIndex = i;
@@ -264,12 +263,12 @@ public class QuickFootstepPlannerTest
    }
 
    private void assertFinalStanceClose(EnumMap<RobotSide, Pose3D> initialStance,
-                                       List<Pair<RobotSide, Pose3D>> plan,
+                                       List<QuickFootstep> plan,
                                        EnumMap<RobotSide, Pose3D> goal)
    {
       EnumMap<RobotSide, Pose3D> stance = copyStance(initialStance);
-      for (Pair<RobotSide, Pose3D> step : plan)
-         stance.put(step.getFirst(), new Pose3D(step.getSecond()));
+      for (QuickFootstep step : plan)
+         stance.put(step.getSwingSide(), new Pose3D(step.getSwingEnd()));
 
       for (RobotSide side : RobotSide.values)
       {
@@ -319,7 +318,7 @@ public class QuickFootstepPlannerTest
 
    private void printAsciiPlan(EnumMap<RobotSide, Pose3D> initialStance,
                                List<Pose3D> waypoints,
-                               List<Pair<RobotSide, Pose3D>> plan,
+                               List<QuickFootstep> plan,
                                EnumMap<RobotSide, Pose3D> goal)
    {
       int width = 30;
@@ -353,9 +352,9 @@ public class QuickFootstepPlannerTest
          minY = Math.min(minY, waypoint.getY());
          maxY = Math.max(maxY, waypoint.getY());
       }
-      for (Pair<RobotSide, Pose3D> step : plan)
+      for (QuickFootstep step : plan)
       {
-         Pose3D pose = step.getSecond();
+         Pose3D pose = step.getSwingEnd();
          minX = Math.min(minX, pose.getX());
          maxX = Math.max(maxX, pose.getX());
          minY = Math.min(minY, pose.getY());
@@ -394,11 +393,11 @@ public class QuickFootstepPlannerTest
 
       for (int i = 0; i < plan.size(); i++)
       {
-         Pair<RobotSide, Pose3D> step = plan.get(i);
-         char arrow = orientationArrow(step.getSecond());
-         String mark = (step.getFirst() == RobotSide.LEFT ? "l" : "r") + i + arrow;
+         QuickFootstep step = plan.get(i);
+         char arrow = orientationArrow(step.getSwingEnd());
+         String mark = (step.getSwingSide() == RobotSide.LEFT ? "l" : "r") + i + arrow;
          placePose(grid,
-                   step.getSecond(),
+                   step.getSwingEnd(),
                    minX,
                    maxX,
                    minY,
@@ -427,7 +426,7 @@ public class QuickFootstepPlannerTest
       int lastRight = -1;
       for (int i = 0; i < plan.size(); i++)
       {
-         RobotSide side = plan.get(i).getFirst();
+         RobotSide side = plan.get(i).getSwingSide();
          if (side == RobotSide.LEFT)
             lastLeft = i;
          else
@@ -475,7 +474,7 @@ public class QuickFootstepPlannerTest
 
    private void printPlanDetails(EnumMap<RobotSide, Pose3D> initialStance,
                                  List<Pose3D> waypoints,
-                                 List<Pair<RobotSide, Pose3D>> plan,
+                                 List<QuickFootstep> plan,
                                  EnumMap<RobotSide, Pose3D> goal)
    {
       StringBuilder builder = new StringBuilder();
@@ -498,17 +497,15 @@ public class QuickFootstepPlannerTest
 
       builder.append("Planned Footsteps: ").append(plan.size()).append('\n');
 
-      EnumMap<RobotSide, Pose3D> stance = copyStance(initialStance);
       for (int i = 0; i < plan.size(); i++)
       {
-         Pair<RobotSide, Pose3D> step = plan.get(i);
-         double swingDistance = swingDistance(stance.get(step.getFirst()), step.getSecond());
+         QuickFootstep step = plan.get(i);
+         double swingDistance = step.getSwingDistance();
          builder.append("Step ").append(i)
-                .append(": ").append(step.getFirst())
-                .append(" to ").append(formatPose(step.getSecond()))
+                .append(": ").append(step.getSwingSide())
+                .append(" to ").append(formatPose(step.getSwingEnd()))
                 .append("  Distance: ").append(String.format("%.3f", swingDistance))
                 .append('\n');
-         stance.put(step.getFirst(), new Pose3D(step.getSecond()));
       }
 
       System.out.print(builder);
@@ -575,13 +572,6 @@ public class QuickFootstepPlannerTest
    private String formatPose(Pose3D pose)
    {
       return pose.getPosition().toString() + "  Yaw: " + String.format("%.3f deg", Math.toDegrees(pose.getYaw()));
-   }
-
-   private double swingDistance(Pose3D stance, Pose3D step)
-   {
-      double distance = stance.getPosition().distance(step.getPosition());
-      distance += stance.getOrientation().distance(step.getOrientation()) * 0.1 / Math.toRadians(45.0);
-      return distance;
    }
 
    private double randomRange(Random random, double min, double max)

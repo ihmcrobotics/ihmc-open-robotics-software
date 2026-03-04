@@ -3,7 +3,6 @@ package us.ihmc.rdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import imgui.ImGui;
-import org.apache.commons.math3.util.Pair;
 import us.ihmc.behaviors.tools.MinimalFootstep;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -14,6 +13,7 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.footstepPlanning.simplePlanners.QuickFootstep;
 import us.ihmc.footstepPlanning.simplePlanners.QuickFootstepPlanner;
 import us.ihmc.rdx.tools.LibGDXApplicationCreator;
 import us.ihmc.rdx.tools.LibGDXTools;
@@ -39,8 +39,7 @@ public class RDXQuickFootstepPlannerDemo
    private final List<RDXPose3DGizmo> waypointGizmos = new ArrayList<>();
    private ConvexPolygon2D foothold;
    private final QuickFootstepPlanner planner = new QuickFootstepPlanner();
-   private List<Pair<RobotSide, Pose3D>> footstepPlan;
-   private final List<Double> swingDistances = new ArrayList<>();
+   private List<QuickFootstep> footstepPlan;
    private final List<ModelInstance> visualModels = new ArrayList<>();
    private final List<RDX3DSituatedText> footstepIndexTexts = new ArrayList<>();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
@@ -163,10 +162,10 @@ public class RDXQuickFootstepPlannerDemo
 
             ImGui.text("Planned Footsteps: " + footstepPlan.size());
             for (int i = 0; i < footstepPlan.size(); i++)
-               ImGui.text("Step " + i + ": " + footstepPlan.get(i).getFirst() + " to " + footstepPlan.get(i).getSecond().getPosition()
-               + "  Yaw: (%.3f%s)%n\tDistance: %.3f".formatted(Math.toDegrees(footstepPlan.get(i).getSecond().getYaw()),
+               ImGui.text("Step " + i + ": " + footstepPlan.get(i).getSwingSide() + " to " + footstepPlan.get(i).getSwingEnd().getPosition()
+               + "  Yaw: (%.3f%s)%n\tDistance: %.3f".formatted(Math.toDegrees(footstepPlan.get(i).getSwingEnd().getYaw()),
                                                                EuclidCoreMissingTools.DEGREE_SYMBOL,
-                                                               swingDistances.get(i)));
+                                                               footstepPlan.get(i).getSwingDistance()));
          }
 
          @Override
@@ -206,7 +205,6 @@ public class RDXQuickFootstepPlannerDemo
             planner.setStepPlannedCallback(() ->
             {
                int footstepIndex = footstepIndexCounter++;
-               swingDistances.add(planner.getSwingDistance());
                visualModels.add(RDXModelBuilder.buildModelInstance(builder ->
                {
                   SideDependentList<Point3D> swingHipAir = new SideDependentList<>(() -> new Point3D());
@@ -280,7 +278,6 @@ public class RDXQuickFootstepPlannerDemo
             List<Pose3D> waypoints = new ArrayList<>();
             for (int i = 0; i < numberOfWaypoints[0]; i++)
                waypoints.add(new Pose3D(waypointGizmos.get(i).getGizmoFrame().getTransformToRoot()));
-            swingDistances.clear();
             footstepPlan = planner.plan(stances, waypoints, goals);
 
             baseUI.renderBeforeOnScreenUI();
