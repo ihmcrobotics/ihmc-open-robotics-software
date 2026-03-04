@@ -107,6 +107,7 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
    /**
             * Quick footstep planner parameters
             */
+   public boolean quick_waypoint_only_;
    public double quick_hip_width_;
    public double quick_step_length_;
    public double quick_next_pelvis_yaw_limit_;
@@ -175,6 +176,8 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
       planner_plan_with_body_path_ = other.planner_plan_with_body_path_;
 
       ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessagePubSubType.staticCopy(other.planner_parameters_, planner_parameters_);
+      quick_waypoint_only_ = other.quick_waypoint_only_;
+
       quick_hip_width_ = other.quick_hip_width_;
 
       quick_step_length_ = other.quick_step_length_;
@@ -488,13 +491,22 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
    /**
             * Quick footstep planner parameters
             */
-   public void setQuickHipWidth(double quick_hip_width)
+   public void setQuickWaypointOnly(boolean quick_waypoint_only)
    {
-      quick_hip_width_ = quick_hip_width;
+      quick_waypoint_only_ = quick_waypoint_only;
    }
    /**
             * Quick footstep planner parameters
             */
+   public boolean getQuickWaypointOnly()
+   {
+      return quick_waypoint_only_;
+   }
+
+   public void setQuickHipWidth(double quick_hip_width)
+   {
+      quick_hip_width_ = quick_hip_width;
+   }
    public double getQuickHipWidth()
    {
       return quick_hip_width_;
@@ -647,6 +659,8 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.planner_plan_with_body_path_, other.planner_plan_with_body_path_, epsilon)) return false;
 
       if (!this.planner_parameters_.epsilonEquals(other.planner_parameters_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.quick_waypoint_only_, other.quick_waypoint_only_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.quick_hip_width_, other.quick_hip_width_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.quick_step_length_, other.quick_step_length_, epsilon)) return false;
@@ -716,6 +730,8 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
       if(this.planner_plan_with_body_path_ != otherMyClass.planner_plan_with_body_path_) return false;
 
       if (!this.planner_parameters_.equals(otherMyClass.planner_parameters_)) return false;
+      if(this.quick_waypoint_only_ != otherMyClass.quick_waypoint_only_) return false;
+
       if(this.quick_hip_width_ != otherMyClass.quick_hip_width_) return false;
 
       if(this.quick_step_length_ != otherMyClass.quick_step_length_) return false;
@@ -788,6 +804,8 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
       builder.append(this.planner_plan_with_body_path_);      builder.append(", ");
       builder.append("planner_parameters=");
       builder.append(this.planner_parameters_);      builder.append(", ");
+      builder.append("quick_waypoint_only=");
+      builder.append(this.quick_waypoint_only_);      builder.append(", ");
       builder.append("quick_hip_width=");
       builder.append(this.quick_hip_width_);      builder.append(", ");
       builder.append("quick_step_length=");

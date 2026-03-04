@@ -69,6 +69,7 @@ bool planner_plan_with_body_path
 ihmc_common_msgs/PrimitiveDataVectorMessage planner_parameters
 
 # Quick footstep planner parameters
+bool quick_waypoint_only
 float64 quick_hip_width
 float64 quick_step_length
 float64 quick_next_pelvis_yaw_limit

@@ -432,8 +432,11 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
          framePose.changeFrame(ReferenceFrame.getWorldFrame());
          waypoints.add(new Pose3D(framePose));
       }
+      if (definition.getQuickWaypointOnly().getValue())
+         waypoints.add(new Pose3D(state.getGoalFrame().getReferenceFrame().getTransformToWorldFrame()));
       return quickFootstepPlanner.plan(new SideDependentList<>(side -> new Pose3D(syncedFeetPoses.get(side))),
                                        waypoints,
-                                       new SideDependentList<>(side -> new Pose3D(liveGoalFeetPoses.get(side))));
+                                       definition.getQuickWaypointOnly().getValue() ? null
+                                          : new SideDependentList<>(side -> new Pose3D(liveGoalFeetPoses.get(side))));
    }
 }

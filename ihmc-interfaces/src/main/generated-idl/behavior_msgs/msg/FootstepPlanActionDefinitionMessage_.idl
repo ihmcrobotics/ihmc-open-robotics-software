@@ -121,6 +121,7 @@ module behavior_msgs
         /**
          * Quick footstep planner parameters
          */
+        boolean quick_waypoint_only;
         double quick_hip_width;
         double quick_step_length;
         double quick_next_pelvis_yaw_limit;

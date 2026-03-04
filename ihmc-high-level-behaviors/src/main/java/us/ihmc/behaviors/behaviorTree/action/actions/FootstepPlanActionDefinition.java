@@ -47,6 +47,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
    private final CRDTBidirectionalBoolean plannerWalkWithGoalOrientation;
    private final CRDTBidirectionalBoolean plannerPlanWithBodyPath;
    private final BehaviorStoredPropertySetDefinition plannerParameters;
+   private final CRDTBidirectionalBoolean quickWaypointOnly;
    private final CRDTBidirectionalDouble quickHipWidth;
    private final CRDTBidirectionalDouble quickStepLength;
    private final CRDTBidirectionalDouble quickNextPelvisYawLimit;
@@ -75,6 +76,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
    private int onDiskPlannerType;
    private boolean onDiskPlannerWalkWithGoalOrientation;
    private boolean onDiskPlannerPlanWithBodyPath;
+   private boolean onDiskQuickWaypointOnly;
    private double onDiskQuickHipWidth;
    private double onDiskQuickStepLength;
    private double onDiskQuickNextPelvisYawLimit;
@@ -107,6 +109,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       plannerWalkWithGoalOrientation = new CRDTBidirectionalBoolean(this, true);
       plannerPlanWithBodyPath = new CRDTBidirectionalBoolean(this, false);
       plannerParameters = new BehaviorStoredPropertySetDefinition(this, "plannerParameters", robotModel.getFootstepPlannerParameters());
+      quickWaypointOnly = new CRDTBidirectionalBoolean(this, false);
       quickHipWidth = new CRDTBidirectionalDouble(this, 0.12);
       quickStepLength = new CRDTBidirectionalDouble(this, 0.28);
       quickNextPelvisYawLimit = new CRDTBidirectionalDouble(this, Math.toRadians(35.0));
@@ -168,6 +171,8 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
                for (int i = 0; i < waypoints.getSize(); i++)
                   JSONTools.toJSON(waypointsArray.addObject(), waypoints.getValueReadOnly(i));
             }
+            if (quickWaypointOnly.getValue())
+               jsonNode.put("quickWaypointOnly", true);
             if (Math.abs(quickHipWidth.getValue() - 0.12) > 0.005)
                jsonNode.put("quickHipWidth", quickHipWidth.getValue());
             if (Math.abs(quickStepLength.getValue() - 0.28) > 0.005)
@@ -249,6 +254,8 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
             plannerPlanWithBodyPath.setValue(booleanNode.booleanValue());
          if (plannerType.getValue() == QUICK)
          {
+            if (jsonNode.get("quickWaypointOnly") != null)
+               quickWaypointOnly.setValue(jsonNode.get("quickWaypointOnly").asBoolean());
             if (jsonNode.get("quickHipWidth") != null)
                quickHipWidth.setValue(jsonNode.get("quickHipWidth").asDouble());
             if (jsonNode.get("quickStepLength") != null)
@@ -303,6 +310,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       onDiskPlannerType = plannerType.getValue();
       onDiskPlannerWalkWithGoalOrientation = plannerWalkWithGoalOrientation.getValue();
       onDiskPlannerPlanWithBodyPath = plannerPlanWithBodyPath.getValue();
+      onDiskQuickWaypointOnly = quickWaypointOnly.getValue();
       onDiskQuickHipWidth = quickHipWidth.getValue();
       onDiskQuickStepLength = quickStepLength.getValue();
       onDiskQuickNextPelvisYawLimit = quickNextPelvisYawLimit.getValue();
@@ -349,6 +357,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
          plannerType.setValue(onDiskPlannerType);
          plannerWalkWithGoalOrientation.setValue(onDiskPlannerWalkWithGoalOrientation);
          plannerPlanWithBodyPath.setValue(onDiskPlannerPlanWithBodyPath);
+         quickWaypointOnly.setValue(onDiskQuickWaypointOnly);
          quickHipWidth.setValue(onDiskQuickHipWidth);
          quickStepLength.setValue(onDiskQuickStepLength);
          quickNextPelvisYawLimit.setValue(onDiskQuickNextPelvisYawLimit);
@@ -400,6 +409,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       unchanged &= plannerType.getValue() == onDiskPlannerType;
       unchanged &= plannerWalkWithGoalOrientation.getValue() == onDiskPlannerWalkWithGoalOrientation;
       unchanged &= plannerPlanWithBodyPath.getValue() == onDiskPlannerPlanWithBodyPath;
+      unchanged &= quickWaypointOnly.getValue() == onDiskQuickWaypointOnly;
       unchanged &= quickHipWidth.getValue() == onDiskQuickHipWidth;
       unchanged &= quickStepLength.getValue() == onDiskQuickStepLength;
       unchanged &= quickNextPelvisYawLimit.getValue() == onDiskQuickNextPelvisYawLimit;
@@ -444,6 +454,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       message.setPlannerWalkWithGoalOrientation(plannerWalkWithGoalOrientation.toMessage());
       message.setPlannerPlanWithBodyPath(plannerPlanWithBodyPath.toMessage());
       plannerParameters.toMessage(message.getPlannerParameters());
+      message.setQuickWaypointOnly(quickWaypointOnly.toMessage());
       message.setQuickHipWidth(quickHipWidth.toMessage());
       message.setQuickStepLength(quickStepLength.toMessage());
       message.setQuickNextPelvisYawLimit(quickNextPelvisYawLimit.toMessage());
@@ -491,6 +502,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       plannerWalkWithGoalOrientation.fromMessage(message.getPlannerWalkWithGoalOrientation());
       plannerPlanWithBodyPath.fromMessage(message.getPlannerPlanWithBodyPath());
       plannerParameters.fromMessage(message.getPlannerParameters());
+      quickWaypointOnly.fromMessage(message.getQuickWaypointOnly());
       quickHipWidth.fromMessage(message.getQuickHipWidth());
       quickStepLength.fromMessage(message.getQuickStepLength());
       quickNextPelvisYawLimit.fromMessage(message.getQuickNextPelvisYawLimit());
@@ -621,6 +633,11 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
    public DefaultFootstepPlannerParametersBasics getPlannerParametersUnsafe()
    {
       return (DefaultFootstepPlannerParametersBasics) plannerParameters.getValueUnsafe();
+   }
+
+   public CRDTBidirectionalBoolean getQuickWaypointOnly()
+   {
+      return quickWaypointOnly;
    }
 
    public CRDTBidirectionalDouble getQuickHipWidth()

@@ -62,6 +62,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    private final ImDoubleWrapper transferDurationWidget;
    private final ImBooleanWrapper walkWithGoalOrientationWidget;
    private final ImBooleanWrapper planWithBodyPathWidget;
+   private final ImBooleanWrapper quickWaypointOnlyWidget;
    private final ImIntegerWrapper quickHipWidthWidget;
    private final ImIntegerWrapper quickStepLengthWidget;
    private final ImIntegerWrapper quickNextPelvisYawLimitWidget;
@@ -153,6 +154,9 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
       planWithBodyPathWidget = new ImBooleanWrapper(definition.getPlannerPlanWithBodyPath()::getValue,
                                                     definition.getPlannerPlanWithBodyPath()::setValue,
                                                     imBoolean -> ImGui.checkbox(labels.get("Plan with body path"), imBoolean));
+      quickWaypointOnlyWidget = new ImBooleanWrapper(definition.getQuickWaypointOnly()::getValue,
+                                                     definition.getQuickWaypointOnly()::setValue,
+                                                     imBoolean -> ImGui.checkbox(labels.get("Quick waypoint only"), imBoolean));
       quickHipWidthWidget = new ImIntegerWrapper(() -> (int) Math.round(definition.getQuickHipWidth().getValue() * 100.0),
                                                  value -> definition.getQuickHipWidth().setValue(value / 100.0),
                                                  imInt -> ImGui.inputInt(labels.get("Quick hip width (cm)"), imInt, 1, 5));
@@ -568,6 +572,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
                ImGui.pushItemWidth(ImGui.getFontSize() * 8.0f);
                if (definition.getPlannerType().getValue() == QUICK)
                {
+                  quickWaypointOnlyWidget.renderImGuiWidget();
                   quickHipWidthWidget.renderImGuiWidget();
                   quickStepLengthWidget.renderImGuiWidget();
                   quickNextPelvisYawLimitWidget.renderImGuiWidget();
