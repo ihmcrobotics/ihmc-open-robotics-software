@@ -8,5 +8,9 @@
   "Min snap height threshold" : 0.1,
   "Snap height threshold at search edge" : 0.15,
   "Stepping cosine threshold" : 0.8,
-  "Squared error threshold" : 6.0E-4
+  "Squared error threshold" : 6.0E-4,
+  "Bounding box size x" : 0.65,
+  "Bounding box size y" : 1.1,
+  "Bounding box offset x" : 0.1,
+  "Bounding box offset z" : 0.1
 }

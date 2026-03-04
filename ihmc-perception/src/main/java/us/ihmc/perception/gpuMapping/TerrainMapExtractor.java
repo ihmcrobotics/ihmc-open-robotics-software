@@ -50,6 +50,7 @@ public class TerrainMapExtractor
    private final GpuMat normalZMat;
    private final GpuMat traversabilityMat;
    private final GpuMat traversabilityClassMat;
+   private final GpuMat collisionMat;
 
    /**
     * This class extracts terrain data from a height map.
@@ -96,6 +97,7 @@ public class TerrainMapExtractor
       normalZMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
       traversabilityMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_32FC1);
       traversabilityClassMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
+      collisionMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_32FC1);
    }
 
    /**
@@ -125,6 +127,7 @@ public class TerrainMapExtractor
       terrainMapKernel.withPointer(gpuHeightMap.data()).withLong(gpuHeightMap.step());
       terrainMapKernel.withPointer(traversabilityMat.data()).withLong(traversabilityMat.step());
       terrainMapKernel.withPointer(traversabilityClassMat.data()).withLong(traversabilityClassMat.step());
+      terrainMapKernel.withPointer(collisionMat.data()).withLong(collisionMat.step());
       terrainMapKernel.withFloat((float) robotYaw);
       terrainMapKernel.withPointer(normalXMat.data()).withLong(normalXMat.step());
       terrainMapKernel.withPointer(normalYMat.data()).withLong(normalYMat.step());
@@ -166,12 +169,16 @@ public class TerrainMapExtractor
          Mat cpuTraversabilityClassMap = new Mat();
          traversabilityClassMat.download(cpuTraversabilityClassMap);
 
+         Mat cpuCollisionMap = new Mat();
+         collisionMat.download(cpuCollisionMap);
+
          TerrainMapTools.convertToTerrainMapData(cpuHeightMap,
                                                  cpuNormalXMap,
                                                  cpuNormalYMap,
                                                  cpuNormalZMap,
                                                  cpuTraversabilityMap,
                                                  cpuTraversabilityClassMap,
+                                                 cpuCollisionMap,
                                                  gridCenter,
                                                  terrainMapData);
 
@@ -181,6 +188,7 @@ public class TerrainMapExtractor
          cpuNormalZMap.close();
          cpuTraversabilityMap.close();
          cpuTraversabilityClassMap.close();
+         cpuCollisionMap.close();
       }
    }
 
@@ -191,12 +199,6 @@ public class TerrainMapExtractor
     */
    public float[] populationTerrainMapParameters()
    {
-      // defaults for bounding box
-      float boundingBoxSizeX = 0.65f;
-      float boundingBoxSizeY = 1.1f;
-      float boundingBoxOffsetX = 0.1f;
-      float boundingBoxOffsetZ = 0.4f;
-
       return new float[] {(float) heightMapParameters.getCellSize(),
                           (float) heightMapParameters.getGlobalWidthInMeters(),
                           (float) terrainMapParameters.getNormalSearchRadius(),
@@ -208,10 +210,10 @@ public class TerrainMapExtractor
                           (float) terrainMapParameters.getSnapHeightThresholdAtSearchEdge(),
                           (float) terrainMapParameters.getSteppingCosineThreshold(),
                           (float) terrainMapParameters.getSquaredErrorThreshold(),
-                          boundingBoxSizeX,
-                          boundingBoxSizeY,
-                          boundingBoxOffsetX,
-                          boundingBoxOffsetZ};
+                          (float) terrainMapParameters.getBoundingBoxSizeX(),
+                          (float) terrainMapParameters.getBoundingBoxSizeY(),
+                          (float) terrainMapParameters.getBoundingBoxOffsetX(),
+                          (float) terrainMapParameters.getBoundingBoxOffsetZ()};
    }
 
    public void destroy()

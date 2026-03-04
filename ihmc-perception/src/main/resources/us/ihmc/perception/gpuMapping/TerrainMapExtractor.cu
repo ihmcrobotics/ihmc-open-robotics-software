@@ -39,6 +39,7 @@ extern "C"
 __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
                                    float *traversabilityMap, size_t pitchTraversability,
                                    unsigned short *traversabilityClassMap, size_t pitchTraversabilityClass,
+                                   float *collisionMap, size_t pitchCollision,
                                    float robotYaw,
                                    unsigned short *snapNormalXMap, size_t pitchSnapNormalX,
                                    unsigned short *snapNormalYMap, size_t pitchSnapNormalY,
@@ -142,7 +143,11 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
     }
 
     float boundingBoxOffsetX = params[BOUNDING_BOX_OFFSET_X];
-    float2 boxCenterCoordinate = foot_position + transformToWorld(make_float2(boundingBoxOffsetX, 0.0f), robotYaw);
+
+    // the xIndex and yIndex from CUDA are switched from the indices in world, so they are switched here.
+    float2 boundingBoxOffset = make_float2(0.0f, boundingBoxOffsetX);
+
+    float2 boxCenterCoordinate = foot_position + transformToWorld(boundingBoxOffset, -robotYaw);
     int2 boxCenterIndices = coordinate_to_indices(boxCenterCoordinate, terrain_map_center, map_resolution, terrain_map_center_index);
 
     float boundingBoxHalfSizeX = 0.5f * params[BOUNDING_BOX_SIZE_X];
@@ -170,8 +175,10 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
             float2 offsetVector = make_float2(static_cast<float>(x_query - boxCenterIndices.x) * map_resolution,
                                               static_cast<float>(y_query - boxCenterIndices.y) * map_resolution);
 
-            float2 localOffsetVector = transformFromWorld(offsetVector, robotYaw);
-            if (fabsf(localOffsetVector.x) > params[BOUNDING_BOX_SIZE_X] || fabsf(localOffsetVector.y) > params[BOUNDING_BOX_SIZE_Y])
+            float2 localOffsetVector = transformFromWorld(offsetVector, -robotYaw);
+
+            // the xIndex and yIndex from CUDA are switched from the indices in world, so they are switched here
+            if (fabsf(localOffsetVector.x) > params[BOUNDING_BOX_SIZE_Y] || fabsf(localOffsetVector.y) > params[BOUNDING_BOX_SIZE_X])
             {
                 continue;
             }
@@ -186,6 +193,9 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
             }
         }
     }
+
+    float *collisionMapElement = (float *)((char *)collisionMap + y_index * pitchCollision) + x_index;
+    *collisionMapElement = collisionTraversability;
 
     // Traversability scores: support area, squared error, and incline.
     // If any are 0.0, traversability_result contains the first detected cause
@@ -322,8 +332,8 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
     unsigned char *snappedNormalZMapElement = (unsigned char *)((char *)snapNormalZMap + y_index * pitchSnapNormalZ) + x_index;
     *snappedNormalZMapElement = normal_z_char;
 
-    // Squared error + collision is best indication of overall traversability
-    float traversability = squared_error_traversability * collisionTraversability;
+    // Squared error is best indication of overall traversability
+    float traversability = squared_error_traversability;
 
     if (traversability_result != VALID)
     {

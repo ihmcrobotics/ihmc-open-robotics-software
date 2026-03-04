@@ -21,6 +21,7 @@ public class TerrainMapTools
                                               Mat snapNormalZMap,
                                               Mat traversabilityMap,
                                               Mat traversabilityClassMap,
+                                              Mat collisionMap,
                                               Point3DReadOnly gridCenter,
                                               TerrainMapData terrainMapData)
    {
@@ -47,5 +48,8 @@ public class TerrainMapTools
 
       BytePointer bytePointerForTraversabilityClassMap = new BytePointer(traversabilityClassMap.data());
       bytePointerForTraversabilityClassMap.get(terrainMapData.getTraversabilityClassMap());
+
+      FloatPointer floatPointerForCollisionMap = new FloatPointer(collisionMap.data());
+      floatPointerForCollisionMap.get(terrainMapData.getObstacleClearanceScoreMap());
    }
 }

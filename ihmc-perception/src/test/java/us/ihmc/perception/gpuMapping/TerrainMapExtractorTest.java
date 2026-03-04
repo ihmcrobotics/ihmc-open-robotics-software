@@ -100,7 +100,7 @@ public class TerrainMapExtractorTest
       double terrainWidthXY = 4.0;
 
       Point3D gridCenter = new Point3D(0.0, 0.0, 0.0);
-      Vector3D normal = new Vector3D(-0.15, 0.0, 1.0);
+      Vector3D normal = new Vector3D(-0.15, 0.3, 1.0);
       normal.normalize();
       Plane3D plane = new Plane3D(gridCenter, normal);
 

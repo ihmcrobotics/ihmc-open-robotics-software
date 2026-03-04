@@ -47,6 +47,7 @@ public class RDXHeightMapRenderer implements RenderableProvider
    private final Vector2 gridCenter = new Vector2();
    private float cellSize;
    private int colorBasedOnTraversability;
+   private int colorBasedOnCollisions;
    private boolean hasBeenCreated;
 
    public void create(int maxCells)
@@ -113,13 +114,13 @@ public class RDXHeightMapRenderer implements RenderableProvider
       rdxShader.registerUniform(colorBasedOnTraversabilityUniform);
    }
 
-   public void update(Mat heightMapImage, Mat traversabilityMapImage, boolean colorBasedOnTraversability, float gridCenterX, float gridCenterY, int centerIndex, float cellSizeXYInMeters)
+   public void update(Mat heightMapImage, Mat traversabilityMapImage, Mat collisionMapImage, boolean colorBasedOnTraversability, boolean colorBasedOnCollisions, float gridCenterX, float gridCenterY, int centerIndex, float cellSizeXYInMeters)
    {
       // Update uniforms
       this.gridCenter.set(gridCenterX, gridCenterY);
       this.centerIndex = centerIndex;
       this.cellSize = cellSizeXYInMeters;
-      this.colorBasedOnTraversability = colorBasedOnTraversability ? 1 : 0;
+      this.colorBasedOnTraversability = (colorBasedOnTraversability || colorBasedOnCollisions) ? 1 : 0;
 
       // Get the vertices buffer (contains the data sent to GPU for the vertex attribute)
       FloatBuffer dataBuffer = renderable.meshPart.mesh.getVerticesBuffer(true);
@@ -142,6 +143,8 @@ public class RDXHeightMapRenderer implements RenderableProvider
       opencv_core.insertChannel(heightMapImage, interleaved, HEIGHT_CHANNEL);
       if (colorBasedOnTraversability && traversabilityMapImage != null)
          opencv_core.insertChannel(traversabilityMapImage, interleaved, TRAVERSABILITY_CHANNEL);
+      if (colorBasedOnCollisions && collisionMapImage != null)
+         opencv_core.insertChannel(collisionMapImage, interleaved, TRAVERSABILITY_CHANNEL);
 
       bufferPointer.close();
       interleaved.close();

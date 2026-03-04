@@ -51,6 +51,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
    private final ImBoolean enableChunkedMapRenderer = new ImBoolean(false);
    private final ImBoolean enableHeightMapRenderer = new ImBoolean(true);
    private final ImBoolean colorBasedOnTraversability = new ImBoolean(false);
+   private final ImBoolean colorBasedOnCollisions = new ImBoolean(false);
    private final Stopwatch stopwatch = new Stopwatch();
    private ROS2Helper ros2;
    private ROS2Heartbeat chunkMapRequestHeartbeat;
@@ -59,6 +60,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
    private ROS2Heartbeat heightMapControllerRequestHeartbeat;
    private Mat heightMap;
    private Mat traversabilityScore;
+   private Mat collisionDetected;
    private HeightMapData latestHeightMapData;
    private TerrainMapData latestTerrainMapData;
    private int cellsPerAxisOfChunks;
@@ -154,7 +156,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       if (!isActive())
          return;
 
-      if (colorBasedOnTraversability.get())
+      if (colorBasedOnTraversability.get() || colorBasedOnCollisions.get())
       {
          executorService.clearQueueAndExecute(() -> processTerrainMapData(terrainMapMessage));
       }
@@ -185,10 +187,18 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       {
          traversabilityScore = new Mat(latestHeightMapData.getCellsPerAxis(), latestHeightMapData.getCellsPerAxis(), opencv_core.CV_32FC1);
       }
+      if (collisionDetected == null)
+      {
+         collisionDetected = new Mat(latestHeightMapData.getCellsPerAxis(), latestHeightMapData.getCellsPerAxis(), opencv_core.CV_32FC1);
+      }
 
       float[] traversabilityScoreMap = latestTerrainMapData.getTraversabilityScoreMap();
       FloatBuffer traversabilityScoreBuffer = traversabilityScore.createBuffer();
       traversabilityScoreBuffer.put(traversabilityScoreMap);
+
+      float[] collisionDetectionMap = latestTerrainMapData.getObstacleClearanceScoreMap();
+      FloatBuffer collisionDetectionBuffer = collisionDetected.createBuffer();
+      collisionDetectionBuffer.put(collisionDetectionMap);
    }
 
    @Override
@@ -228,6 +238,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
          ImGui.checkbox(labels.get("Enable Height Map"), enableHeightMapRenderer);
          ImGui.checkbox(labels.get("Enable Chunked Map"), enableChunkedMapRenderer);
          ImGui.checkbox(labels.get("Show Traversability"), colorBasedOnTraversability);
+         ImGui.checkbox(labels.get("Show Collisions"), colorBasedOnCollisions);
       }
       ImGui.unindent();
    }
@@ -265,7 +276,9 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
             int centerIndex = HeightMapTools.computeCenterIndex(latestHeightMapData.getMapSize(), cellSize);
             heightMapRenderer.update(heightMap,
                                      traversabilityScore,
+                                     collisionDetected,
                                      colorBasedOnTraversability.get(),
+                                     colorBasedOnCollisions.get(),
                                      (float) heightMapCenterX,
                                      (float) heightMapCenterY,
                                      centerIndex,

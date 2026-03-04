@@ -30,6 +30,7 @@ public class TerrainMapMessageToolsTest
       Mat snapNormalZMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(3));
       Mat traversabilityMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1, new Scalar(4));
       Mat traversabilityClassMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(5));
+      Mat collisionMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(6));
 
       TerrainMapTools.convertToTerrainMapData(heightMap,
                                               snapNormalXMap,
@@ -37,6 +38,7 @@ public class TerrainMapMessageToolsTest
                                               snapNormalZMap,
                                               traversabilityMap,
                                               traversabilityClassMap,
+                                              collisionMap,
                                               new Point3D(0.0, 0.0, 0.0),
                                               terrainMapData);
 
@@ -82,6 +84,7 @@ public class TerrainMapMessageToolsTest
       Mat snapNormalZMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(3));
       Mat traversabilityMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1, new Scalar(4));
       Mat traversabilityClassMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(5));
+      Mat collisionMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(6));
 
       TerrainMapTools.convertToTerrainMapData(heightMap,
                                               snapNormalXMap,
@@ -89,6 +92,7 @@ public class TerrainMapMessageToolsTest
                                               snapNormalZMap,
                                               traversabilityMap,
                                               traversabilityClassMap,
+                                              collisionMap,
                                               new Point3D(0.0, 0.0, 0.0),
                                               terrainMapData);
 
@@ -128,6 +132,7 @@ public class TerrainMapMessageToolsTest
       Mat snapNormalZMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(3));
       Mat traversabilityMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1, new Scalar(4));
       Mat traversabilityClassMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(5));
+      Mat collisionMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(6));
 
       TerrainMapTools.convertToTerrainMapData(heightMap,
                                               snapNormalXMap,
@@ -135,6 +140,7 @@ public class TerrainMapMessageToolsTest
                                               snapNormalZMap,
                                               traversabilityMap,
                                               traversabilityClassMap,
+                                              collisionMap,
                                               new Point3D(0.0, 0.0, 0.0),
                                               terrainMapData);
 

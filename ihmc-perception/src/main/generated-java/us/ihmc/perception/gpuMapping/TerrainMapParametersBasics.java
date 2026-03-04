@@ -52,4 +52,24 @@ public interface TerrainMapParametersBasics extends TerrainMapParametersReadOnly
    {
       set(TerrainMapParameters.squaredErrorThreshold, squaredErrorThreshold);
    }
+
+   default void setBoundingBoxSizeX(double boundingBoxSizeX)
+   {
+      set(TerrainMapParameters.boundingBoxSizeX, boundingBoxSizeX);
+   }
+
+   default void setBoundingBoxSizeY(double boundingBoxSizeY)
+   {
+      set(TerrainMapParameters.boundingBoxSizeY, boundingBoxSizeY);
+   }
+
+   default void setBoundingBoxOffsetX(double boundingBoxOffsetX)
+   {
+      set(TerrainMapParameters.boundingBoxOffsetX, boundingBoxOffsetX);
+   }
+
+   default void setBoundingBoxOffsetZ(double boundingBoxOffsetZ)
+   {
+      set(TerrainMapParameters.boundingBoxOffsetZ, boundingBoxOffsetZ);
+   }
 }

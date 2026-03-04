@@ -54,4 +54,24 @@ public interface TerrainMapParametersReadOnly extends StoredPropertySetReadOnly
    {
       return get(squaredErrorThreshold);
    }
+
+   default double getBoundingBoxSizeX()
+   {
+      return get(boundingBoxSizeX);
+   }
+
+   default double getBoundingBoxSizeY()
+   {
+      return get(boundingBoxSizeY);
+   }
+
+   default double getBoundingBoxOffsetX()
+   {
+      return get(boundingBoxOffsetX);
+   }
+
+   default double getBoundingBoxOffsetZ()
+   {
+      return get(boundingBoxOffsetZ);
+   }
 }
