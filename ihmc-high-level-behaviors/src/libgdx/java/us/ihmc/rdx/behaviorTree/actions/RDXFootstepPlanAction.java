@@ -2,6 +2,7 @@ package us.ihmc.rdx.behaviorTree.actions;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
@@ -21,6 +22,7 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.graphSearch.parameters.InitialStanceSide;
 import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeRootNode;
@@ -32,6 +34,8 @@ import us.ihmc.rdx.imgui.ImGuiReferenceFrameLibraryCombo;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.mesh.RDXMutableArrowModel;
+import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
@@ -52,6 +56,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
    private final ImBoolean editManuallyPlacedSteps = new ImBoolean();
+   private final ImBoolean editWaypoints = new ImBoolean();
    private final ImBooleanWrapper manuallyPlaceStepsWrapper;
    private final ImDoubleWrapper swingDurationWidget;
    private final ImDoubleWrapper transferDurationWidget;
@@ -78,7 +83,15 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    private final RDXSelectablePose3DGizmo goalStancePointGizmo = new RDXSelectablePose3DGizmo();
    private final RDXSelectablePose3DGizmo goalFocalPointGizmo = new RDXSelectablePose3DGizmo();
    private final SideDependentList<RDXFootstepPlanActionGoalFootstep> goalFeet = new SideDependentList<>();
+   private final FramePose3D waypointFramePose = new FramePose3D();
+   private final RigidBodyTransform waypointTransform = new RigidBodyTransform();
    private final ArrayList<RDXPose3DGizmo> waypointGizmos = new ArrayList<>();
+   private final RecyclingArrayList<ModelInstance> waypointGraphics = new RecyclingArrayList<>(() ->
+         RDXModelBuilder.buildModelInstance(meshBuilder ->
+         {
+            meshBuilder.addSphere(0.015f, Color.WHITE);
+            meshBuilder.addLine(0.0, 0.0, 0.0, 0.05, 0.0, 0.0, 0.01, Color.WHITE);
+         }));
    private final RDX3DPanelTooltip tooltip;
    private final ImGuiFootstepsWidget footstepsWidget = new ImGuiFootstepsWidget();
    private final RDXFootstepPlanGraphic previewFootstepPlan;
@@ -264,19 +277,25 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
                gizmo.setResizeAutomatically(false);
                gizmo.setCenterSphereToTorusRatio(0.8f);
                waypointGizmos.add(gizmo);
+               waypointGraphics.add();
             }
 
             for (int i = 0; i < definition.getWaypoints().getSize(); i++)
             {
+               Pose3D waypoint = definition.getWaypoints().getValueReadOnly(i);
                RDXPose3DGizmo gizmo = waypointGizmos.get(i);
                gizmo.setParentFrame(parentFrame);
 
                if (gizmo.getGizmoModifiedByUser().poll())
                   definition.getWaypoints().getValueAndModify().get(i).set(gizmo.getTransformToParent());
-               else if (definition.isModified())
-                  gizmo.getTransformToParent().set(definition.getWaypoints().getValueReadOnly(i));
+               else if (!gizmo.isBeingManipulated())
+                  gizmo.getTransformToParent().set(waypoint);
 
                gizmo.update();
+
+               waypointFramePose.setMatchingFrame(parentFrame, waypoint);
+               waypointFramePose.get(waypointTransform);
+               LibGDXTools.toLibGDX(waypointTransform, waypointGraphics.get(i).transform);
             }
          }
 
@@ -387,7 +406,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
             goalFocalPointGizmo.calculate3DViewPick(input);
             for (RobotSide side : RobotSide.values)
                goalFeet.get(side).calculate3DViewPick(input);
-            if (definition.getPlannerType().getValue() == QUICK)
+            if (definition.getPlannerType().getValue() == QUICK && editWaypoints.get())
             {
                int waypointCount = Math.min(waypointGizmos.size(), definition.getWaypoints().getSize());
                for (int i = 0; i < waypointCount; i++)
@@ -416,7 +435,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
             tooltip.setInput(input);
             for (RobotSide side : RobotSide.values)
                goalFeet.get(side).process3DViewInput(input);
-            if (definition.getPlannerType().getValue() == QUICK)
+            if (definition.getPlannerType().getValue() == QUICK && editWaypoints.get())
             {
                int waypointCount = Math.min(waypointGizmos.size(), definition.getWaypoints().getSize());
                for (int i = 0; i < waypointCount; i++)
@@ -538,6 +557,8 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
                   if (ImGui.button(labels.get("Remove", "Waypoint")))
                      RecyclingArrayListTools.removeLast(definition.getWaypoints().getValueAndModify());
                }
+               ImGui.sameLine();
+               ImGui.checkbox(labels.get("Edit"), editWaypoints);
             }
 
             ImGui.text("Preview steps: %d".formatted(state.getPreviewFootsteps().getSize()));
@@ -607,8 +628,16 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
                for (RobotSide side : RobotSide.values)
                   goalFeet.get(side).getRenderables(renderables, pool, footstepsWidget.getIsHovered().get(side));
                if (definition.getPlannerType().getValue() == QUICK)
-                  for (int i = 0; i < Math.min(waypointGizmos.size(), definition.getWaypoints().getSize()); i++)
-                     waypointGizmos.get(i).getRenderables(renderables, pool);
+               {
+                  int waypointCount = Math.min(waypointGraphics.size(), definition.getWaypoints().getSize());
+                  for (int i = 0; i < waypointCount; i++)
+                     waypointGraphics.get(i).getRenderables(renderables, pool);
+                  if (editWaypoints.get())
+                  {
+                     for (int i = 0; i < Math.min(waypointGizmos.size(), definition.getWaypoints().getSize()); i++)
+                        waypointGizmos.get(i).getRenderables(renderables, pool);
+                  }
+               }
             }
 
             if (state.getIsNextForExecution() || state.getIsExecuting())
@@ -646,6 +675,19 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
          frameFocalPoint = new FramePoint3D(newParent, definition.getGoalFocalPoint().getValueReadOnly());
       }
 
+      if (newParent.getRootFrame() == state.getParentFrame().getRootFrame())
+      {
+         for (int i = 0; i < definition.getWaypoints().getSize(); i++)
+         {
+            Pose3D waypoint = definition.getWaypoints().getValueReadOnly(i);
+            FramePose3D frameWaypoint = new FramePose3D(state.getParentFrame());
+            frameWaypoint.getPosition().set(waypoint.getPosition());
+            frameWaypoint.getOrientation().set(waypoint.getOrientation());
+            frameWaypoint.changeFrame(newParent);
+            definition.getWaypoints().getValueAndModify().get(i).set(frameWaypoint);
+         }
+      }
+
       definition.getGoalStancePoint().getValueAndModify().set(frameStancePoint);
       definition.getGoalFocalPoint().getValueAndModify().set(frameFocalPoint);
       goalStancePointGizmo.getPoseGizmo().setParentFrame(newParent);
@@ -665,6 +707,8 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    public void destroy()
    {
       super.destroy();
+      for (ModelInstance waypointGraphic : waypointGraphics)
+         waypointGraphic.model.dispose();
       previewFootstepPlan.destroy(); // It is important to destroy this because its thread needs to be shutdown
    }
 

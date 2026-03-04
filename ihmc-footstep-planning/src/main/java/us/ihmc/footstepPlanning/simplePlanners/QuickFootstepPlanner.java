@@ -8,6 +8,7 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -158,6 +159,8 @@ public class QuickFootstepPlanner
          nextPelvis.get(side).transform(candidateHip);
 
          candidate.get(side).set(swingHip.get(side)); // Plan from the hip
+         candidate.get(side).getPosition().setZ(EuclidCoreTools.interpolate(candidate.get(side).getPosition().getZ(), // Keep Z from drifting
+                                                                            nextPelvis.get(side).getZ(), 0.5));
 
          // Get step yaw calculated and clamped, so we can work with it, pretty much always take the max yaw
          Vector3D swingHipForward = forward(swingHip.get(side));
