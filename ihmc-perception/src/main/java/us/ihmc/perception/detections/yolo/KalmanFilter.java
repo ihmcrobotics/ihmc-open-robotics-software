@@ -26,8 +26,8 @@ package us.ihmc.perception.detections.yolo;
  *     [pos*w, pos*h, pos*w, pos*h]^2
  *
  * update():
- *   uses Cholesky solve implicitly (here: we implement a stable-ish 4x4 inverse with pivoting).
- *   If you have EJML available, use it instead for S^-1 / solves.
+ *   uses Cholesky solve implicitly (we implement a stable-ish 4x4 inverse with pivoting).
+ *   If EJML available, we should use it instead for S^-1 / solves.
  */
 
 public class KalmanFilter
@@ -167,7 +167,7 @@ public class KalmanFilter
       for (int i = 0; i < dimX; i++)
          mean[i] += Ky[i];
 
-      // cov = cov - K*S*K^T   (matches python: cov - K*projected_cov*K^T ; here S is projected_cov+innov)
+      // cov = cov - K*S*K^T   (cov - K*projected_cov*K^T ; here S is projected_cov+innov)
       float[][] KSKt = mul(mul(K, S), transpose(K)); // 8x8
       float[][] newCov = sub(cov, KSKt);
       copy(newCov, cov);
@@ -268,7 +268,7 @@ public class KalmanFilter
             dst[i][j] = A[i][j] + B[i][j];
    }
 
-   // 4x4 inverse with partial pivoting (ok for KF; EJML would be better)
+   // 4x4 inverse with partial pivoting
    private static float[][] inv4(float[][] A)
    {
       int n = 4;
