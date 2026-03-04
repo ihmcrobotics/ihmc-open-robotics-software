@@ -105,8 +105,8 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       quickHipWidth = new CRDTBidirectionalDouble(this, 0.12);
       quickStepLength = new CRDTBidirectionalDouble(this, 0.28);
       quickNextPelvisYawLimit = new CRDTBidirectionalDouble(this, Math.toRadians(35.0));
-      quickInwardLimit = new CRDTBidirectionalDouble(this, 10.0);
-      quickOutwardLimit = new CRDTBidirectionalDouble(this, 45.0);
+      quickInwardLimit = new CRDTBidirectionalDouble(this, Math.toRadians(10.0));
+      quickOutwardLimit = new CRDTBidirectionalDouble(this, Math.toRadians(45.0));
       quickStepAngleLimit = new CRDTBidirectionalDouble(this, Math.toRadians(100.0));
       quickSwingTimeDistanceLower = new CRDTBidirectionalDouble(this, 0.3);
       quickSwingTimeDistanceUpper = new CRDTBidirectionalDouble(this, 0.7);
@@ -157,16 +157,26 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
          jsonNode.put("plannerPlanWithBodyPath", plannerPlanWithBodyPath.getValue());
          if (plannerType.getValue() == QUICK)
          {
-            jsonNode.put("quickHipWidth", quickHipWidth.getValue());
-            jsonNode.put("quickStepLength", quickStepLength.getValue());
-            jsonNode.put("quickNextPelvisYawLimit", quickNextPelvisYawLimit.getValue());
-            jsonNode.put("quickInwardLimit", quickInwardLimit.getValue());
-            jsonNode.put("quickOutwardLimit", quickOutwardLimit.getValue());
-            jsonNode.put("quickStepAngleLimit", quickStepAngleLimit.getValue());
-            jsonNode.put("quickSwingTimeDistanceLower", quickSwingTimeDistanceLower.getValue());
-            jsonNode.put("quickSwingTimeDistanceUpper", quickSwingTimeDistanceUpper.getValue());
-            jsonNode.put("quickMinSwingTime", quickMinSwingTime.getValue());
-            jsonNode.put("quickMaxSwingTime", quickMaxSwingTime.getValue());
+            if (Math.abs(quickHipWidth.getValue() - 0.12) > 0.005)
+               jsonNode.put("quickHipWidth", quickHipWidth.getValue());
+            if (Math.abs(quickStepLength.getValue() - 0.28) > 0.005)
+               jsonNode.put("quickStepLength", quickStepLength.getValue());
+            if (Math.abs(quickNextPelvisYawLimit.getValue() - Math.toRadians(35.0)) > Math.toRadians(0.5))
+               jsonNode.put("quickNextPelvisYawLimit", Math.toDegrees(quickNextPelvisYawLimit.getValue()));
+            if (Math.abs(quickInwardLimit.getValue() - Math.toRadians(10.0)) > Math.toRadians(0.5))
+               jsonNode.put("quickInwardLimit", Math.toDegrees(quickInwardLimit.getValue()));
+            if (Math.abs(quickOutwardLimit.getValue() - Math.toRadians(45.0)) > Math.toRadians(0.5))
+               jsonNode.put("quickOutwardLimit", Math.toDegrees(quickOutwardLimit.getValue()));
+            if (Math.abs(quickStepAngleLimit.getValue() - Math.toRadians(100.0)) > Math.toRadians(0.5))
+               jsonNode.put("quickStepAngleLimit", Math.toDegrees(quickStepAngleLimit.getValue()));
+            if (Math.abs(quickSwingTimeDistanceLower.getValue() - 0.3) > 0.005)
+               jsonNode.put("quickSwingTimeDistanceLower", quickSwingTimeDistanceLower.getValue());
+            if (Math.abs(quickSwingTimeDistanceUpper.getValue() - 0.7) > 0.005)
+               jsonNode.put("quickSwingTimeDistanceUpper", quickSwingTimeDistanceUpper.getValue());
+            if (Math.abs(quickMinSwingTime.getValue() - 0.8) > 1.0e-3)
+               jsonNode.put("quickMinSwingTime", quickMinSwingTime.getValue());
+            if (Math.abs(quickMaxSwingTime.getValue() - 1.2) > 1.0e-3)
+               jsonNode.put("quickMaxSwingTime", quickMaxSwingTime.getValue());
          }
          plannerParameters.toJSON(jsonNode);
       }
@@ -229,13 +239,13 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
             if (jsonNode.get("quickStepLength") != null)
                quickStepLength.setValue(jsonNode.get("quickStepLength").asDouble());
             if (jsonNode.get("quickNextPelvisYawLimit") != null)
-               quickNextPelvisYawLimit.setValue(jsonNode.get("quickNextPelvisYawLimit").asDouble());
+               quickNextPelvisYawLimit.setValue(Math.toRadians(jsonNode.get("quickNextPelvisYawLimit").asDouble()));
             if (jsonNode.get("quickInwardLimit") != null)
-               quickInwardLimit.setValue(jsonNode.get("quickInwardLimit").asDouble());
+               quickInwardLimit.setValue(Math.toRadians(jsonNode.get("quickInwardLimit").asDouble()));
             if (jsonNode.get("quickOutwardLimit") != null)
-               quickOutwardLimit.setValue(jsonNode.get("quickOutwardLimit").asDouble());
+               quickOutwardLimit.setValue(Math.toRadians(jsonNode.get("quickOutwardLimit").asDouble()));
             if (jsonNode.get("quickStepAngleLimit") != null)
-               quickStepAngleLimit.setValue(jsonNode.get("quickStepAngleLimit").asDouble());
+               quickStepAngleLimit.setValue(Math.toRadians(jsonNode.get("quickStepAngleLimit").asDouble()));
             if (jsonNode.get("quickSwingTimeDistanceLower") != null)
                quickSwingTimeDistanceLower.setValue(jsonNode.get("quickSwingTimeDistanceLower").asDouble());
             if (jsonNode.get("quickSwingTimeDistanceUpper") != null)

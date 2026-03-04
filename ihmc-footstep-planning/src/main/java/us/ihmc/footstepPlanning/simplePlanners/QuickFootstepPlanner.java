@@ -33,8 +33,8 @@ public class QuickFootstepPlanner
    private double hipWidth = 0.12;
    private double stepLength = 0.28; // 0.33
    private double nextPelvisYawLimit = Math.toRadians(35.0);
-   private double inwardLimit = 10.0;
-   private double outwardLimit = 45.0; // 60
+   private double inwardLimit = Math.toRadians(10.0);
+   private double outwardLimit = Math.toRadians(45.0); // 60
    private double stepAngleLimit = Math.toRadians(100); // 110
    private final Pose3D waypoint = new Pose3D();
    private final SideDependentList<Pose3D> stance = new SideDependentList<>(() -> new Pose3D());
@@ -164,8 +164,8 @@ public class QuickFootstepPlanner
          Vector3D candidateHipForward = forward(candidateHip);
          double footYaw = yaw(swingHipForward, candidateHipForward);
 
-         double footYawMin = side == RobotSide.LEFT ? Math.toRadians(-inwardLimit) : Math.toRadians(-outwardLimit);
-         double footYawMax = side == RobotSide.LEFT ? Math.toRadians(outwardLimit) : Math.toRadians(inwardLimit);
+         double footYawMin = side == RobotSide.LEFT ? -inwardLimit : -outwardLimit;
+         double footYawMax = side == RobotSide.LEFT ? outwardLimit : inwardLimit;
          footYaw = MathTools.clamp(footYaw, footYawMin, footYawMax);
 
          Vector3D swingHipLateral = new Vector3D(0.0, side.negateIfRightSide(1.0), 0.0);

@@ -140,28 +140,28 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
                                                     imBoolean -> ImGui.checkbox(labels.get("Plan with body path"), imBoolean));
       quickHipWidthWidget = new ImDoubleWrapper(() -> definition.getQuickHipWidth().getValue() * 100.0,
                                                 value -> definition.getQuickHipWidth().setValue(value / 100.0),
-                                                imDouble -> ImGui.inputDouble(labels.get("Quick hip width (cm)"), imDouble, 1.0, 5.0, "%.2f", 0));
+                                                imDouble -> ImGui.inputDouble(labels.get("Quick hip width (cm)"), imDouble, 1.0, 5.0, "%.0f", 0));
       quickStepLengthWidget = new ImDoubleWrapper(() -> definition.getQuickStepLength().getValue() * 100.0,
                                                   value -> definition.getQuickStepLength().setValue(value / 100.0),
-                                                  imDouble -> ImGui.inputDouble(labels.get("Quick step length (cm)"), imDouble, 1.0, 5.0, "%.2f", 0));
+                                                  imDouble -> ImGui.inputDouble(labels.get("Quick step length (cm)"), imDouble, 1.0, 5.0, "%.0f", 0));
       quickNextPelvisYawLimitWidget = new ImDoubleWrapper(() -> Math.toDegrees(definition.getQuickNextPelvisYawLimit().getValue()),
                                                           value -> definition.getQuickNextPelvisYawLimit().setValue(Math.toRadians(value)),
-                                                          imDouble -> ImGui.inputDouble(labels.get("Quick next pelvis yaw limit (%s)".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL)), imDouble, 1.0, 5.0, "%.2f", 0));
-      quickInwardLimitWidget = new ImDoubleWrapper(definition.getQuickInwardLimit()::getValue,
-                                                   definition.getQuickInwardLimit()::setValue,
-                                                   imDouble -> ImGui.inputDouble(labels.get("Quick inward limit (%s)".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL)), imDouble, 1.0, 5.0, "%.2f", 0));
-      quickOutwardLimitWidget = new ImDoubleWrapper(definition.getQuickOutwardLimit()::getValue,
-                                                    definition.getQuickOutwardLimit()::setValue,
-                                                    imDouble -> ImGui.inputDouble(labels.get("Quick outward limit (%s)".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL)), imDouble, 1.0, 5.0, "%.2f", 0));
+                                                          imDouble -> ImGui.inputDouble(labels.get("Quick next pelvis yaw limit (%s)".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL)), imDouble, 1.0, 5.0, "%.0f", 0));
+      quickInwardLimitWidget = new ImDoubleWrapper(() -> Math.toDegrees(definition.getQuickInwardLimit().getValue()),
+                                                   value -> definition.getQuickInwardLimit().setValue(Math.toRadians(value)),
+                                                   imDouble -> ImGui.inputDouble(labels.get("Quick inward limit (%s)".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL)), imDouble, 1.0, 5.0, "%.0f", 0));
+      quickOutwardLimitWidget = new ImDoubleWrapper(() -> Math.toDegrees(definition.getQuickOutwardLimit().getValue()),
+                                                    value -> definition.getQuickOutwardLimit().setValue(Math.toRadians(value)),
+                                                    imDouble -> ImGui.inputDouble(labels.get("Quick outward limit (%s)".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL)), imDouble, 1.0, 5.0, "%.0f", 0));
       quickStepAngleLimitWidget = new ImDoubleWrapper(() -> Math.toDegrees(definition.getQuickStepAngleLimit().getValue()),
                                                       value -> definition.getQuickStepAngleLimit().setValue(Math.toRadians(value)),
-                                                      imDouble -> ImGui.inputDouble(labels.get("Quick step angle limit (%s)".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL)), imDouble, 1.0, 5.0, "%.2f", 0));
+                                                      imDouble -> ImGui.inputDouble(labels.get("Quick step angle limit (%s)".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL)), imDouble, 1.0, 5.0, "%.0f", 0));
       quickSwingTimeDistanceLowerWidget = new ImDoubleWrapper(() -> definition.getQuickSwingTimeDistanceLower().getValue() * 100.0,
                                                               value -> definition.getQuickSwingTimeDistanceLower().setValue(value / 100.0),
-                                                              imDouble -> ImGui.inputDouble(labels.get("Quick swing time distance lower (cm)"), imDouble, 1.0, 5.0, "%.2f", 0));
+                                                              imDouble -> ImGui.inputDouble(labels.get("Quick swing time distance lower (cm)"), imDouble, 1.0, 5.0, "%.0f", 0));
       quickSwingTimeDistanceUpperWidget = new ImDoubleWrapper(() -> definition.getQuickSwingTimeDistanceUpper().getValue() * 100.0,
                                                               value -> definition.getQuickSwingTimeDistanceUpper().setValue(value / 100.0),
-                                                              imDouble -> ImGui.inputDouble(labels.get("Quick swing time distance upper (cm)"), imDouble, 1.0, 5.0, "%.2f", 0));
+                                                              imDouble -> ImGui.inputDouble(labels.get("Quick swing time distance upper (cm)"), imDouble, 1.0, 5.0, "%.0f", 0));
       quickMinSwingTimeWidget = new ImDoubleWrapper(definition.getQuickMinSwingTime()::getValue,
                                                     definition.getQuickMinSwingTime()::setValue,
                                                     imDouble -> ImGui.inputDouble(labels.get("Quick min swing time (s)"), imDouble, 0.05, 0.2, "%.3f", 0));
@@ -481,7 +481,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
 
             if (ImGui.collapsingHeader(labels.get("Planner Parameters")))
             {
-               ImGui.pushItemWidth(140.0f);
+               ImGui.pushItemWidth(ImGui.getFontSize() * 8.0f);
                if (definition.getPlannerType().getValue() == QUICK)
                {
                   quickHipWidthWidget.renderImGuiWidget();
