@@ -19,7 +19,7 @@
     "upperBound" : 10.0
   },
   "Kalman filter prediction noise" : {
-    "value" : 0.1,
+    "value" : 0.08,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
@@ -29,7 +29,7 @@
     "upperBound" : 1.0
   },
   "Variance per meter" : {
-    "value" : 0.1,
+    "value" : 0.4,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
