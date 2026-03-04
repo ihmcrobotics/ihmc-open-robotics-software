@@ -19,6 +19,7 @@ public class OrderedLogicalSequence
    private final ArrayList<Runnable> logicalElements = new ArrayList<>();
    private final ArrayList<BooleanProvider> preRequisiteConditions = new ArrayList<>();
    private final ArrayList<BooleanProvider> completionConditions = new ArrayList<>();
+   private final ArrayList<Boolean> allowRepetitiveExecution = new ArrayList<>();
 
    private int currentLogicalElement = 0;
    private int lastLogicalElementRun = -1;
@@ -37,9 +38,22 @@ public class OrderedLogicalSequence
     */
    public void addLogicalElement(Runnable runnable, BooleanProvider preRequisiteCondition, BooleanProvider completionCondition)
    {
+      addLogicalElement(runnable, preRequisiteCondition, completionCondition, false);
+   }
+
+   /**
+    * Adds a logical element to this ordered logical sequence
+    * @param runnable                  The main logic to run
+    * @param preRequisiteCondition     Prerequisite logic that must be true before running main logic
+    * @param completionCondition       Completion logic that must be true before moving to the next element
+    * @param allowRepetitiveExecution  If true, main logic will run every update tick until completion condition is met
+    */
+   public void addLogicalElement(Runnable runnable, BooleanProvider preRequisiteCondition, BooleanProvider completionCondition, boolean allowRepetitiveExecution)
+   {
       logicalElements.add(runnable);
       preRequisiteConditions.add(preRequisiteCondition);
       completionConditions.add(completionCondition);
+      this.allowRepetitiveExecution.add(allowRepetitiveExecution);
    }
 
    /**
@@ -70,7 +84,8 @@ public class OrderedLogicalSequence
          return;
 
       // If the prerequisite condition has been met for this element, run the runnable logic of this element
-      if (preRequisiteConditions.get(currentLogicalElement) == null || preRequisiteConditions.get(currentLogicalElement).getValue() && currentLogicalElement != lastLogicalElementRun)
+      if ((preRequisiteConditions.get(currentLogicalElement) == null || preRequisiteConditions.get(currentLogicalElement).getValue()) &&
+          (allowRepetitiveExecution.get(currentLogicalElement) || currentLogicalElement != lastLogicalElementRun))
       {
          logicalElements.get(currentLogicalElement).run();
          lastLogicalElementRun = currentLogicalElement;
