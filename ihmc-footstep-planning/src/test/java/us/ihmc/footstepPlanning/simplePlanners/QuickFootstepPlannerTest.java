@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning.simplePlanners;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -190,6 +191,25 @@ public class QuickFootstepPlannerTest
       planAndAssert(planner, stance, waypoints, goal, 45);
    }
 
+   @Test
+   public void testPlanToWaypointOnly()
+   {
+      QuickFootstepPlanner planner = new QuickFootstepPlanner();
+      EnumMap<RobotSide, Pose3D> stance = stance(pose(0.0, DEFAULT_LEFT_Y, 0.0), pose(0.0, DEFAULT_RIGHT_Y, 0.0));
+
+      List<Pose3D> waypoints = new ArrayList<>();
+      Pose3D waypoint = pose(0.8, 0.2, Math.toRadians(15.0));
+      waypoints.add(waypoint);
+
+      int maxSteps = 30;
+      planner.setMaxSteps(maxSteps);
+      List<QuickFootstep> plan = planner.plan(stance, waypoints, null);
+
+      assertTrue(plan.size() < maxSteps, "Planner hit max steps: " + maxSteps);
+      assertNoSelfCollision(planner, stance, plan);
+      assertWaypointMidClose(stance, plan, waypoint, 0.25);
+   }
+
    private List<QuickFootstep> planAndAssert(QuickFootstepPlanner planner,
                                              EnumMap<RobotSide, Pose3D> stance,
                                              List<Pose3D> waypoints,
@@ -232,6 +252,23 @@ public class QuickFootstepPlannerTest
             rightIndex = i;
          assertFeetSeparated(planner, convexPolygonTools, stance, leftIndex, rightIndex);
       }
+   }
+
+   private void assertWaypointMidClose(EnumMap<RobotSide, Pose3D> initialStance,
+                                       List<QuickFootstep> plan,
+                                       Pose3D waypoint,
+                                       double positionTolerance)
+   {
+      EnumMap<RobotSide, Pose3D> stance = copyStance(initialStance);
+      for (QuickFootstep step : plan)
+         stance.put(step.getSwingSide(), new Pose3D(step.getSwingEnd()));
+
+      Point3D mid = new Point3D(stance.get(RobotSide.LEFT).getPosition());
+      mid.add(stance.get(RobotSide.RIGHT).getPosition());
+      mid.scale(0.5);
+
+      assertTrue(mid.distance(waypoint.getPosition()) <= positionTolerance,
+                 "Mid-feet position not near waypoint.");
    }
 
    private void assertFeetSeparated(QuickFootstepPlanner planner,

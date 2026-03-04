@@ -55,18 +55,21 @@ public class QuickFootstepPlanner
          this.stance.get(side).set(stance.get(side));
       List<QuickFootstep> footstepPlan = new ArrayList<>();
 
+      for (RobotSide side : RobotSide.values)
+         this.goal.get(side).setToNaN();
       for (Pose3D waypoint : waypoints) // Plan to each waypoint without squaring up, facing waypoint X direction
       {
          this.waypoint.set(waypoint);
-         for (RobotSide side : RobotSide.values)
-            this.goal.get(side).setToNaN();
          footstepPlan.addAll(plan());
       }
 
       waypoint.setToNaN(); // Plan to exact goal footsteps
-      for (RobotSide side : RobotSide.values)
-         this.goal.get(side).set(goal.get(side));
-      footstepPlan.addAll(plan());
+      if (goal != null) // Allow just planning to waypoint
+      {
+         for (RobotSide side : RobotSide.values)
+            this.goal.get(side).set(goal.get(side));
+         footstepPlan.addAll(plan());
+      }
       return footstepPlan;
    }
 

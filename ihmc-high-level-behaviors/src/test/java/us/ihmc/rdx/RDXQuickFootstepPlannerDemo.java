@@ -3,6 +3,7 @@ package us.ihmc.rdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import imgui.ImGui;
+import imgui.type.ImBoolean;
 import us.ihmc.behaviors.tools.MinimalFootstep;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -50,6 +51,7 @@ public class RDXQuickFootstepPlannerDemo
    private int footstepIndexCounter = 0;
    private final int[] maxSteps = {50};
    private final int[] numberOfWaypoints = {0};
+   private final ImBoolean includeGoalSteps = new ImBoolean(true);
 
    public RDXQuickFootstepPlannerDemo()
    {
@@ -139,6 +141,7 @@ public class RDXQuickFootstepPlannerDemo
             if (ImGui.sliderInt("###Max Steps", maxSteps, 1, 25, "Max steps: %d"))
                planner.setMaxSteps(maxSteps[0]);
             ImGui.sliderInt("###Waypoints", numberOfWaypoints, 0, 5, "Waypoints: %d");
+            ImGui.checkbox("Plan to goal", includeGoalSteps);
             ImGui.popItemWidth();
 
             if (ImGui.button("Print Debug"))
@@ -278,7 +281,7 @@ public class RDXQuickFootstepPlannerDemo
             List<Pose3D> waypoints = new ArrayList<>();
             for (int i = 0; i < numberOfWaypoints[0]; i++)
                waypoints.add(new Pose3D(waypointGizmos.get(i).getGizmoFrame().getTransformToRoot()));
-            footstepPlan = planner.plan(stances, waypoints, goals);
+            footstepPlan = planner.plan(stances, waypoints, includeGoalSteps.get() ? goals : null);
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
