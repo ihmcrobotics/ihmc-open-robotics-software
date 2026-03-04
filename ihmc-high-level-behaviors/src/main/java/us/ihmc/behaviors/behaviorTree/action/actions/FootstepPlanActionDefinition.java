@@ -44,6 +44,16 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
    private final CRDTBidirectionalBoolean plannerWalkWithGoalOrientation;
    private final CRDTBidirectionalBoolean plannerPlanWithBodyPath;
    private final BehaviorStoredPropertySetDefinition plannerParameters;
+   private final CRDTBidirectionalDouble quickHipWidth;
+   private final CRDTBidirectionalDouble quickStepLength;
+   private final CRDTBidirectionalDouble quickNextPelvisYawLimit;
+   private final CRDTBidirectionalDouble quickInwardLimit;
+   private final CRDTBidirectionalDouble quickOutwardLimit;
+   private final CRDTBidirectionalDouble quickStepAngleLimit;
+   private final CRDTBidirectionalDouble quickSwingTimeDistanceLower;
+   private final CRDTBidirectionalDouble quickSwingTimeDistanceUpper;
+   private final CRDTBidirectionalDouble quickMinSwingTime;
+   private final CRDTBidirectionalDouble quickMaxSwingTime;
 
    // On disk fields
    private double onDiskSwingDuration;
@@ -61,6 +71,16 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
    private int onDiskPlannerType;
    private boolean onDiskPlannerWalkWithGoalOrientation;
    private boolean onDiskPlannerPlanWithBodyPath;
+   private double onDiskQuickHipWidth;
+   private double onDiskQuickStepLength;
+   private double onDiskQuickNextPelvisYawLimit;
+   private double onDiskQuickInwardLimit;
+   private double onDiskQuickOutwardLimit;
+   private double onDiskQuickStepAngleLimit;
+   private double onDiskQuickSwingTimeDistanceLower;
+   private double onDiskQuickSwingTimeDistanceUpper;
+   private double onDiskQuickMinSwingTime;
+   private double onDiskQuickMaxSwingTime;
 
    public FootstepPlanActionDefinition(BehaviorTreeRootNodeDefinition rootNode)
    {
@@ -82,6 +102,16 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       plannerWalkWithGoalOrientation = new CRDTBidirectionalBoolean(this, true);
       plannerPlanWithBodyPath = new CRDTBidirectionalBoolean(this, false);
       plannerParameters = new BehaviorStoredPropertySetDefinition(this, "plannerParameters", robotModel.getFootstepPlannerParameters());
+      quickHipWidth = new CRDTBidirectionalDouble(this, 0.12);
+      quickStepLength = new CRDTBidirectionalDouble(this, 0.28);
+      quickNextPelvisYawLimit = new CRDTBidirectionalDouble(this, Math.toRadians(35.0));
+      quickInwardLimit = new CRDTBidirectionalDouble(this, 10.0);
+      quickOutwardLimit = new CRDTBidirectionalDouble(this, 45.0);
+      quickStepAngleLimit = new CRDTBidirectionalDouble(this, Math.toRadians(100.0));
+      quickSwingTimeDistanceLower = new CRDTBidirectionalDouble(this, 0.3);
+      quickSwingTimeDistanceUpper = new CRDTBidirectionalDouble(this, 0.7);
+      quickMinSwingTime = new CRDTBidirectionalDouble(this, 0.8);
+      quickMaxSwingTime = new CRDTBidirectionalDouble(this, 1.2);
    }
 
    @Override
@@ -125,6 +155,19 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
          if (plannerType.getValue() == A_STAR)
             jsonNode.put("plannerWalkWithGoalOrientation", plannerWalkWithGoalOrientation.getValue());
          jsonNode.put("plannerPlanWithBodyPath", plannerPlanWithBodyPath.getValue());
+         if (plannerType.getValue() == QUICK)
+         {
+            jsonNode.put("quickHipWidth", quickHipWidth.getValue());
+            jsonNode.put("quickStepLength", quickStepLength.getValue());
+            jsonNode.put("quickNextPelvisYawLimit", quickNextPelvisYawLimit.getValue());
+            jsonNode.put("quickInwardLimit", quickInwardLimit.getValue());
+            jsonNode.put("quickOutwardLimit", quickOutwardLimit.getValue());
+            jsonNode.put("quickStepAngleLimit", quickStepAngleLimit.getValue());
+            jsonNode.put("quickSwingTimeDistanceLower", quickSwingTimeDistanceLower.getValue());
+            jsonNode.put("quickSwingTimeDistanceUpper", quickSwingTimeDistanceUpper.getValue());
+            jsonNode.put("quickMinSwingTime", quickMinSwingTime.getValue());
+            jsonNode.put("quickMaxSwingTime", quickMaxSwingTime.getValue());
+         }
          plannerParameters.toJSON(jsonNode);
       }
    }
@@ -179,6 +222,29 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
             plannerWalkWithGoalOrientation.setValue(booleanNode.booleanValue());
          if (jsonNode.get("plannerPlanWithBodyPath") instanceof BooleanNode booleanNode)
             plannerPlanWithBodyPath.setValue(booleanNode.booleanValue());
+         if (plannerType.getValue() == QUICK)
+         {
+            if (jsonNode.get("quickHipWidth") != null)
+               quickHipWidth.setValue(jsonNode.get("quickHipWidth").asDouble());
+            if (jsonNode.get("quickStepLength") != null)
+               quickStepLength.setValue(jsonNode.get("quickStepLength").asDouble());
+            if (jsonNode.get("quickNextPelvisYawLimit") != null)
+               quickNextPelvisYawLimit.setValue(jsonNode.get("quickNextPelvisYawLimit").asDouble());
+            if (jsonNode.get("quickInwardLimit") != null)
+               quickInwardLimit.setValue(jsonNode.get("quickInwardLimit").asDouble());
+            if (jsonNode.get("quickOutwardLimit") != null)
+               quickOutwardLimit.setValue(jsonNode.get("quickOutwardLimit").asDouble());
+            if (jsonNode.get("quickStepAngleLimit") != null)
+               quickStepAngleLimit.setValue(jsonNode.get("quickStepAngleLimit").asDouble());
+            if (jsonNode.get("quickSwingTimeDistanceLower") != null)
+               quickSwingTimeDistanceLower.setValue(jsonNode.get("quickSwingTimeDistanceLower").asDouble());
+            if (jsonNode.get("quickSwingTimeDistanceUpper") != null)
+               quickSwingTimeDistanceUpper.setValue(jsonNode.get("quickSwingTimeDistanceUpper").asDouble());
+            if (jsonNode.get("quickMinSwingTime") != null)
+               quickMinSwingTime.setValue(jsonNode.get("quickMinSwingTime").asDouble());
+            if (jsonNode.get("quickMaxSwingTime") != null)
+               quickMaxSwingTime.setValue(jsonNode.get("quickMaxSwingTime").asDouble());
+         }
          plannerParameters.fromJSON(jsonNode);
       }
    }
@@ -209,6 +275,16 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       onDiskPlannerType = plannerType.getValue();
       onDiskPlannerWalkWithGoalOrientation = plannerWalkWithGoalOrientation.getValue();
       onDiskPlannerPlanWithBodyPath = plannerPlanWithBodyPath.getValue();
+      onDiskQuickHipWidth = quickHipWidth.getValue();
+      onDiskQuickStepLength = quickStepLength.getValue();
+      onDiskQuickNextPelvisYawLimit = quickNextPelvisYawLimit.getValue();
+      onDiskQuickInwardLimit = quickInwardLimit.getValue();
+      onDiskQuickOutwardLimit = quickOutwardLimit.getValue();
+      onDiskQuickStepAngleLimit = quickStepAngleLimit.getValue();
+      onDiskQuickSwingTimeDistanceLower = quickSwingTimeDistanceLower.getValue();
+      onDiskQuickSwingTimeDistanceUpper = quickSwingTimeDistanceUpper.getValue();
+      onDiskQuickMinSwingTime = quickMinSwingTime.getValue();
+      onDiskQuickMaxSwingTime = quickMaxSwingTime.getValue();
       plannerParameters.setOnDiskFields();
    }
 
@@ -242,6 +318,16 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
          plannerType.setValue(onDiskPlannerType);
          plannerWalkWithGoalOrientation.setValue(onDiskPlannerWalkWithGoalOrientation);
          plannerPlanWithBodyPath.setValue(onDiskPlannerPlanWithBodyPath);
+         quickHipWidth.setValue(onDiskQuickHipWidth);
+         quickStepLength.setValue(onDiskQuickStepLength);
+         quickNextPelvisYawLimit.setValue(onDiskQuickNextPelvisYawLimit);
+         quickInwardLimit.setValue(onDiskQuickInwardLimit);
+         quickOutwardLimit.setValue(onDiskQuickOutwardLimit);
+         quickStepAngleLimit.setValue(onDiskQuickStepAngleLimit);
+         quickSwingTimeDistanceLower.setValue(onDiskQuickSwingTimeDistanceLower);
+         quickSwingTimeDistanceUpper.setValue(onDiskQuickSwingTimeDistanceUpper);
+         quickMinSwingTime.setValue(onDiskQuickMinSwingTime);
+         quickMaxSwingTime.setValue(onDiskQuickMaxSwingTime);
          plannerParameters.undoAllNontopologicalChanges();
       }
    }
@@ -275,6 +361,16 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       unchanged &= plannerType.getValue() == onDiskPlannerType;
       unchanged &= plannerWalkWithGoalOrientation.getValue() == onDiskPlannerWalkWithGoalOrientation;
       unchanged &= plannerPlanWithBodyPath.getValue() == onDiskPlannerPlanWithBodyPath;
+      unchanged &= quickHipWidth.getValue() == onDiskQuickHipWidth;
+      unchanged &= quickStepLength.getValue() == onDiskQuickStepLength;
+      unchanged &= quickNextPelvisYawLimit.getValue() == onDiskQuickNextPelvisYawLimit;
+      unchanged &= quickInwardLimit.getValue() == onDiskQuickInwardLimit;
+      unchanged &= quickOutwardLimit.getValue() == onDiskQuickOutwardLimit;
+      unchanged &= quickStepAngleLimit.getValue() == onDiskQuickStepAngleLimit;
+      unchanged &= quickSwingTimeDistanceLower.getValue() == onDiskQuickSwingTimeDistanceLower;
+      unchanged &= quickSwingTimeDistanceUpper.getValue() == onDiskQuickSwingTimeDistanceUpper;
+      unchanged &= quickMinSwingTime.getValue() == onDiskQuickMinSwingTime;
+      unchanged &= quickMaxSwingTime.getValue() == onDiskQuickMaxSwingTime;
       unchanged &= plannerParameters.isUnchanged();
 
       return !unchanged;
@@ -308,6 +404,16 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       message.setPlannerWalkWithGoalOrientation(plannerWalkWithGoalOrientation.toMessage());
       message.setPlannerPlanWithBodyPath(plannerPlanWithBodyPath.toMessage());
       plannerParameters.toMessage(message.getPlannerParameters());
+      message.setQuickHipWidth(quickHipWidth.toMessage());
+      message.setQuickStepLength(quickStepLength.toMessage());
+      message.setQuickNextPelvisYawLimit(quickNextPelvisYawLimit.toMessage());
+      message.setQuickInwardLimit(quickInwardLimit.toMessage());
+      message.setQuickOutwardLimit(quickOutwardLimit.toMessage());
+      message.setQuickStepAngleLimit(quickStepAngleLimit.toMessage());
+      message.setQuickSwingTimeDistanceLower(quickSwingTimeDistanceLower.toMessage());
+      message.setQuickSwingTimeDistanceUpper(quickSwingTimeDistanceUpper.toMessage());
+      message.setQuickMinSwingTime(quickMinSwingTime.toMessage());
+      message.setQuickMaxSwingTime(quickMaxSwingTime.toMessage());
    }
 
    public void fromMessage(FootstepPlanActionDefinitionMessage message)
@@ -341,6 +447,16 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       plannerWalkWithGoalOrientation.fromMessage(message.getPlannerWalkWithGoalOrientation());
       plannerPlanWithBodyPath.fromMessage(message.getPlannerPlanWithBodyPath());
       plannerParameters.fromMessage(message.getPlannerParameters());
+      quickHipWidth.fromMessage(message.getQuickHipWidth());
+      quickStepLength.fromMessage(message.getQuickStepLength());
+      quickNextPelvisYawLimit.fromMessage(message.getQuickNextPelvisYawLimit());
+      quickInwardLimit.fromMessage(message.getQuickInwardLimit());
+      quickOutwardLimit.fromMessage(message.getQuickOutwardLimit());
+      quickStepAngleLimit.fromMessage(message.getQuickStepAngleLimit());
+      quickSwingTimeDistanceLower.fromMessage(message.getQuickSwingTimeDistanceLower());
+      quickSwingTimeDistanceUpper.fromMessage(message.getQuickSwingTimeDistanceUpper());
+      quickMinSwingTime.fromMessage(message.getQuickMinSwingTime());
+      quickMaxSwingTime.fromMessage(message.getQuickMaxSwingTime());
    }
 
    public double getSwingDuration()
@@ -456,5 +572,55 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
    public DefaultFootstepPlannerParametersBasics getPlannerParametersUnsafe()
    {
       return (DefaultFootstepPlannerParametersBasics) plannerParameters.getValueUnsafe();
+   }
+
+   public CRDTBidirectionalDouble getQuickHipWidth()
+   {
+      return quickHipWidth;
+   }
+
+   public CRDTBidirectionalDouble getQuickStepLength()
+   {
+      return quickStepLength;
+   }
+
+   public CRDTBidirectionalDouble getQuickNextPelvisYawLimit()
+   {
+      return quickNextPelvisYawLimit;
+   }
+
+   public CRDTBidirectionalDouble getQuickInwardLimit()
+   {
+      return quickInwardLimit;
+   }
+
+   public CRDTBidirectionalDouble getQuickOutwardLimit()
+   {
+      return quickOutwardLimit;
+   }
+
+   public CRDTBidirectionalDouble getQuickStepAngleLimit()
+   {
+      return quickStepAngleLimit;
+   }
+
+   public CRDTBidirectionalDouble getQuickSwingTimeDistanceLower()
+   {
+      return quickSwingTimeDistanceLower;
+   }
+
+   public CRDTBidirectionalDouble getQuickSwingTimeDistanceUpper()
+   {
+      return quickSwingTimeDistanceUpper;
+   }
+
+   public CRDTBidirectionalDouble getQuickMinSwingTime()
+   {
+      return quickMinSwingTime;
+   }
+
+   public CRDTBidirectionalDouble getQuickMaxSwingTime()
+   {
+      return quickMaxSwingTime;
    }
 }

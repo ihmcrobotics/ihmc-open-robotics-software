@@ -38,6 +38,7 @@ import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.rdx.ui.widgets.ImGuiFootstepsWidget;
 import us.ihmc.rdx.vr.RDXVRContext;
+import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -55,6 +56,16 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    private final ImDoubleWrapper transferDurationWidget;
    private final ImBooleanWrapper walkWithGoalOrientationWidget;
    private final ImBooleanWrapper planWithBodyPathWidget;
+   private final ImDoubleWrapper quickHipWidthWidget;
+   private final ImDoubleWrapper quickStepLengthWidget;
+   private final ImDoubleWrapper quickNextPelvisYawLimitWidget;
+   private final ImDoubleWrapper quickInwardLimitWidget;
+   private final ImDoubleWrapper quickOutwardLimitWidget;
+   private final ImDoubleWrapper quickStepAngleLimitWidget;
+   private final ImDoubleWrapper quickSwingTimeDistanceLowerWidget;
+   private final ImDoubleWrapper quickSwingTimeDistanceUpperWidget;
+   private final ImDoubleWrapper quickMinSwingTimeWidget;
+   private final ImDoubleWrapper quickMaxSwingTimeWidget;
    private final RDXStoredPropertySetTuner plannerParametersWidgets;
    private int numberOfAllocatedFootsteps = 0;
    private final RecyclingArrayList<RDXFootstepPlanActionFootstep> manuallyPlacedFootsteps;
@@ -127,6 +138,36 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
       planWithBodyPathWidget = new ImBooleanWrapper(definition.getPlannerPlanWithBodyPath()::getValue,
                                                     definition.getPlannerPlanWithBodyPath()::setValue,
                                                     imBoolean -> ImGui.checkbox(labels.get("Plan with body path"), imBoolean));
+      quickHipWidthWidget = new ImDoubleWrapper(() -> definition.getQuickHipWidth().getValue() * 100.0,
+                                                value -> definition.getQuickHipWidth().setValue(value / 100.0),
+                                                imDouble -> ImGui.inputDouble(labels.get("Quick hip width (cm)"), imDouble, 1.0, 5.0, "%.2f", 0));
+      quickStepLengthWidget = new ImDoubleWrapper(() -> definition.getQuickStepLength().getValue() * 100.0,
+                                                  value -> definition.getQuickStepLength().setValue(value / 100.0),
+                                                  imDouble -> ImGui.inputDouble(labels.get("Quick step length (cm)"), imDouble, 1.0, 5.0, "%.2f", 0));
+      quickNextPelvisYawLimitWidget = new ImDoubleWrapper(() -> Math.toDegrees(definition.getQuickNextPelvisYawLimit().getValue()),
+                                                          value -> definition.getQuickNextPelvisYawLimit().setValue(Math.toRadians(value)),
+                                                          imDouble -> ImGui.inputDouble(labels.get("Quick next pelvis yaw limit (%s)".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL)), imDouble, 1.0, 5.0, "%.2f", 0));
+      quickInwardLimitWidget = new ImDoubleWrapper(definition.getQuickInwardLimit()::getValue,
+                                                   definition.getQuickInwardLimit()::setValue,
+                                                   imDouble -> ImGui.inputDouble(labels.get("Quick inward limit (%s)".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL)), imDouble, 1.0, 5.0, "%.2f", 0));
+      quickOutwardLimitWidget = new ImDoubleWrapper(definition.getQuickOutwardLimit()::getValue,
+                                                    definition.getQuickOutwardLimit()::setValue,
+                                                    imDouble -> ImGui.inputDouble(labels.get("Quick outward limit (%s)".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL)), imDouble, 1.0, 5.0, "%.2f", 0));
+      quickStepAngleLimitWidget = new ImDoubleWrapper(() -> Math.toDegrees(definition.getQuickStepAngleLimit().getValue()),
+                                                      value -> definition.getQuickStepAngleLimit().setValue(Math.toRadians(value)),
+                                                      imDouble -> ImGui.inputDouble(labels.get("Quick step angle limit (%s)".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL)), imDouble, 1.0, 5.0, "%.2f", 0));
+      quickSwingTimeDistanceLowerWidget = new ImDoubleWrapper(() -> definition.getQuickSwingTimeDistanceLower().getValue() * 100.0,
+                                                              value -> definition.getQuickSwingTimeDistanceLower().setValue(value / 100.0),
+                                                              imDouble -> ImGui.inputDouble(labels.get("Quick swing time distance lower (cm)"), imDouble, 1.0, 5.0, "%.2f", 0));
+      quickSwingTimeDistanceUpperWidget = new ImDoubleWrapper(() -> definition.getQuickSwingTimeDistanceUpper().getValue() * 100.0,
+                                                              value -> definition.getQuickSwingTimeDistanceUpper().setValue(value / 100.0),
+                                                              imDouble -> ImGui.inputDouble(labels.get("Quick swing time distance upper (cm)"), imDouble, 1.0, 5.0, "%.2f", 0));
+      quickMinSwingTimeWidget = new ImDoubleWrapper(definition.getQuickMinSwingTime()::getValue,
+                                                    definition.getQuickMinSwingTime()::setValue,
+                                                    imDouble -> ImGui.inputDouble(labels.get("Quick min swing time (s)"), imDouble, 0.05, 0.2, "%.3f", 0));
+      quickMaxSwingTimeWidget = new ImDoubleWrapper(definition.getQuickMaxSwingTime()::getValue,
+                                                    definition.getQuickMaxSwingTime()::setValue,
+                                                    imDouble -> ImGui.inputDouble(labels.get("Quick max swing time (s)"), imDouble, 0.05, 0.2, "%.3f", 0));
       plannerParametersWidgets = new RDXStoredPropertySetTuner("Planner Parameters");
       plannerParametersWidgets.create(definition.getPlannerParametersUnsafe(), false);
 
@@ -435,11 +476,30 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
 
             planWithBodyPathWidget.renderImGuiWidget();
 
+
             ImGui.text("Preview steps: %d".formatted(state.getPreviewFootsteps().getSize()));
 
             if (ImGui.collapsingHeader(labels.get("Planner Parameters")))
-               if (plannerParametersWidgets.renderImGuiWidgetsSimple())
-                  definition.getAndModifyPlannerParameters();
+            {
+               ImGui.pushItemWidth(140.0f);
+               if (definition.getPlannerType().getValue() == QUICK)
+               {
+                  quickHipWidthWidget.renderImGuiWidget();
+                  quickStepLengthWidget.renderImGuiWidget();
+                  quickNextPelvisYawLimitWidget.renderImGuiWidget();
+                  quickInwardLimitWidget.renderImGuiWidget();
+                  quickOutwardLimitWidget.renderImGuiWidget();
+                  quickStepAngleLimitWidget.renderImGuiWidget();
+                  quickSwingTimeDistanceLowerWidget.renderImGuiWidget();
+                  quickSwingTimeDistanceUpperWidget.renderImGuiWidget();
+                  quickMinSwingTimeWidget.renderImGuiWidget();
+                  quickMaxSwingTimeWidget.renderImGuiWidget();
+               }
+               else
+                  if (plannerParametersWidgets.renderImGuiWidgetsSimple())
+                     definition.getAndModifyPlannerParameters();
+               ImGui.popItemWidth();
+            }
          }
       }
    }

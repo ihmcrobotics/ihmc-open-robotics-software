@@ -15,7 +15,7 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "3af738f59c443fec655140ab7004ab60d46fb82bc84cd4d6859842f43dfe96b0";
+   		return "651600f2360df86fa6cf246ed360190ed68ff16a370394b80f05d1a8889e03dd";
    }
    
    @Override
@@ -92,6 +92,26 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
 
       current_alignment += ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -162,6 +182,36 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
 
       current_alignment += ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessagePubSubType.getCdrSerializedSize(data.getPlannerParameters(), current_alignment);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -208,6 +258,26 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
       cdr.write_type_7(data.getPlannerPlanWithBodyPath());
 
       ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessagePubSubType.write(data.getPlannerParameters(), cdr);
+      cdr.write_type_6(data.getQuickHipWidth());
+
+      cdr.write_type_6(data.getQuickStepLength());
+
+      cdr.write_type_6(data.getQuickNextPelvisYawLimit());
+
+      cdr.write_type_6(data.getQuickInwardLimit());
+
+      cdr.write_type_6(data.getQuickOutwardLimit());
+
+      cdr.write_type_6(data.getQuickStepAngleLimit());
+
+      cdr.write_type_6(data.getQuickSwingTimeDistanceLower());
+
+      cdr.write_type_6(data.getQuickSwingTimeDistanceUpper());
+
+      cdr.write_type_6(data.getQuickMinSwingTime());
+
+      cdr.write_type_6(data.getQuickMaxSwingTime());
+
    }
 
    public static void read(behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
@@ -246,6 +316,26 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
       data.setPlannerPlanWithBodyPath(cdr.read_type_7());
       	
       ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessagePubSubType.read(data.getPlannerParameters(), cdr);	
+      data.setQuickHipWidth(cdr.read_type_6());
+      	
+      data.setQuickStepLength(cdr.read_type_6());
+      	
+      data.setQuickNextPelvisYawLimit(cdr.read_type_6());
+      	
+      data.setQuickInwardLimit(cdr.read_type_6());
+      	
+      data.setQuickOutwardLimit(cdr.read_type_6());
+      	
+      data.setQuickStepAngleLimit(cdr.read_type_6());
+      	
+      data.setQuickSwingTimeDistanceLower(cdr.read_type_6());
+      	
+      data.setQuickSwingTimeDistanceUpper(cdr.read_type_6());
+      	
+      data.setQuickMinSwingTime(cdr.read_type_6());
+      	
+      data.setQuickMaxSwingTime(cdr.read_type_6());
+      	
 
    }
 
@@ -276,6 +366,16 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
       ser.write_type_7("planner_plan_with_body_path", data.getPlannerPlanWithBodyPath());
       ser.write_type_a("planner_parameters", new ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessagePubSubType(), data.getPlannerParameters());
 
+      ser.write_type_6("quick_hip_width", data.getQuickHipWidth());
+      ser.write_type_6("quick_step_length", data.getQuickStepLength());
+      ser.write_type_6("quick_next_pelvis_yaw_limit", data.getQuickNextPelvisYawLimit());
+      ser.write_type_6("quick_inward_limit", data.getQuickInwardLimit());
+      ser.write_type_6("quick_outward_limit", data.getQuickOutwardLimit());
+      ser.write_type_6("quick_step_angle_limit", data.getQuickStepAngleLimit());
+      ser.write_type_6("quick_swing_time_distance_lower", data.getQuickSwingTimeDistanceLower());
+      ser.write_type_6("quick_swing_time_distance_upper", data.getQuickSwingTimeDistanceUpper());
+      ser.write_type_6("quick_min_swing_time", data.getQuickMinSwingTime());
+      ser.write_type_6("quick_max_swing_time", data.getQuickMaxSwingTime());
    }
 
    @Override
@@ -305,6 +405,16 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
       data.setPlannerPlanWithBodyPath(ser.read_type_7("planner_plan_with_body_path"));
       ser.read_type_a("planner_parameters", new ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessagePubSubType(), data.getPlannerParameters());
 
+      data.setQuickHipWidth(ser.read_type_6("quick_hip_width"));
+      data.setQuickStepLength(ser.read_type_6("quick_step_length"));
+      data.setQuickNextPelvisYawLimit(ser.read_type_6("quick_next_pelvis_yaw_limit"));
+      data.setQuickInwardLimit(ser.read_type_6("quick_inward_limit"));
+      data.setQuickOutwardLimit(ser.read_type_6("quick_outward_limit"));
+      data.setQuickStepAngleLimit(ser.read_type_6("quick_step_angle_limit"));
+      data.setQuickSwingTimeDistanceLower(ser.read_type_6("quick_swing_time_distance_lower"));
+      data.setQuickSwingTimeDistanceUpper(ser.read_type_6("quick_swing_time_distance_upper"));
+      data.setQuickMinSwingTime(ser.read_type_6("quick_min_swing_time"));
+      data.setQuickMaxSwingTime(ser.read_type_6("quick_max_swing_time"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessage src, behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessage dest)

@@ -141,10 +141,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
             {
                if (previewPlanningThrottler.run())
                {
-                  List<QuickFootstep> footstepPlan
-                        = quickFootstepPlanner.plan(new SideDependentList<>(side -> new Pose3D(syncedFeetPoses.get(side))),
-                                                    new ArrayList<>(),
-                                                    new SideDependentList<>(side -> new Pose3D(liveGoalFeetPoses.get(side))));
+                  List<QuickFootstep> footstepPlan = planQuickFootsteps();
 
                   var footstepsMessage = state.getPreviewFootsteps().accessValue();
                   footstepsMessage.clear();
@@ -232,10 +229,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
          }
          else if (definition.getPlannerType().getValue() == QUICK)
          {
-            List<QuickFootstep> footstepPlan
-                  = quickFootstepPlanner.plan(new SideDependentList<>(side -> new Pose3D(syncedFeetPoses.get(side))),
-                                              new ArrayList<>(),
-                                              new SideDependentList<>(side -> new Pose3D(liveGoalFeetPoses.get(side))));
+            List<QuickFootstep> footstepPlan = planQuickFootsteps();
 
             footstepPlanToExecute.clear();
             for (int i = 0; i < footstepPlan.size(); i++)
@@ -243,10 +237,10 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
                QuickFootstep quickFootstep = footstepPlan.get(i);
                PlannedFootstep simpleFootstep = new PlannedFootstep(quickFootstep.getSwingSide(), new FramePose3D(quickFootstep.getSwingEnd()));
                // Increase swing duration for longer steps
-               double minDistance = 0.3;
-               double maxDistance = 0.7;
-               double minTime = 0.8;
-               double maxTime = 1.2;
+               double minDistance = definition.getQuickSwingTimeDistanceLower().getValue();
+               double maxDistance = definition.getQuickSwingTimeDistanceUpper().getValue();
+               double minTime = definition.getQuickMinSwingTime().getValue();
+               double maxTime = definition.getQuickMaxSwingTime().getValue();
                double distance = quickFootstep.getSwingDistance();
                double time = (distance <= minDistance) ? minTime : // Min
                                  (distance >= maxDistance) ? maxTime : // Max
@@ -421,5 +415,18 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
       {
          state.getCurrentFootPoses().get(side).accessValue().set(syncedFeetPoses.get(side));
       }
+   }
+
+   private List<QuickFootstep> planQuickFootsteps()
+   {
+      quickFootstepPlanner.setHipWidth(definition.getQuickHipWidth().getValue());
+      quickFootstepPlanner.setStepLength(definition.getQuickStepLength().getValue());
+      quickFootstepPlanner.setNextPelvisYawLimit(definition.getQuickNextPelvisYawLimit().getValue());
+      quickFootstepPlanner.setInwardLimit(definition.getQuickInwardLimit().getValue());
+      quickFootstepPlanner.setOutwardLimit(definition.getQuickOutwardLimit().getValue());
+      quickFootstepPlanner.setStepAngleLimit(definition.getQuickStepAngleLimit().getValue());
+      return quickFootstepPlanner.plan(new SideDependentList<>(side -> new Pose3D(syncedFeetPoses.get(side))),
+                                       new ArrayList<>(),
+                                       new SideDependentList<>(side -> new Pose3D(liveGoalFeetPoses.get(side))));
    }
 }
