@@ -15,7 +15,7 @@ public class DoorTraversalDefinitionMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "3787f026206e4640b387fd18638e2b3c2870237e6655a7eb09ef910ed4c2474e";
+   		return "65f04d00207bdb69e64ac8936c59bd87b2ec1f2e3e0d38b4e692bda0153ee690";
    }
    
    @Override
@@ -54,10 +54,6 @@ public class DoorTraversalDefinitionMessagePubSubType implements us.ihmc.pubsub.
 
       current_alignment += behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
 
       return current_alignment - initial_alignment;
    }
@@ -73,32 +69,17 @@ public class DoorTraversalDefinitionMessagePubSubType implements us.ihmc.pubsub.
 
       current_alignment += behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.getCdrSerializedSize(data.getDefinition(), current_alignment);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
 
       return current_alignment - initial_alignment;
    }
 
    public static void write(behavior_msgs.msg.dds.DoorTraversalDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
-      behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
-      cdr.write_type_6(data.getLostGraspDetectionHandOpenAngle());
-
-      cdr.write_type_6(data.getOpenedDoorHandleDistanceFromStart());
-
-   }
+      behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.write(data.getDefinition(), cdr);   }
 
    public static void read(behavior_msgs.msg.dds.DoorTraversalDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
-      data.setLostGraspDetectionHandOpenAngle(cdr.read_type_6());
-      	
-      data.setOpenedDoorHandleDistanceFromStart(cdr.read_type_6());
-      	
 
    }
 
@@ -107,17 +88,12 @@ public class DoorTraversalDefinitionMessagePubSubType implements us.ihmc.pubsub.
    {
       ser.write_type_a("definition", new behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType(), data.getDefinition());
 
-      ser.write_type_6("lost_grasp_detection_hand_open_angle", data.getLostGraspDetectionHandOpenAngle());
-      ser.write_type_6("opened_door_handle_distance_from_start", data.getOpenedDoorHandleDistanceFromStart());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.DoorTraversalDefinitionMessage data)
    {
       ser.read_type_a("definition", new behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType(), data.getDefinition());
-
-      data.setLostGraspDetectionHandOpenAngle(ser.read_type_6("lost_grasp_detection_hand_open_angle"));
-      data.setOpenedDoorHandleDistanceFromStart(ser.read_type_6("opened_door_handle_distance_from_start"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.DoorTraversalDefinitionMessage src, behavior_msgs.msg.dds.DoorTraversalDefinitionMessage dest)

@@ -15,6 +15,7 @@ import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeRootNode;
 import us.ihmc.rdx.imgui.ImFloatWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImIntegerWrapper;
+import us.ihmc.rdx.ui.widgets.ImGuiSceneActionWidget;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,6 +28,7 @@ import java.util.regex.Pattern;
 public class RDXSceneActionNode extends RDXActionNode<SceneActionNodeState, SceneActionNodeDefinition>
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final ImGuiSceneActionWidget widget = new ImGuiSceneActionWidget();
    private final ImInt imYOLOModel = new ImInt(0);
    private final ImInt imYOLOClass = new ImInt(0);
    private final ImInt imFPType = new ImInt(0);
@@ -77,6 +79,16 @@ public class RDXSceneActionNode extends RDXActionNode<SceneActionNodeState, Scen
       minHistorySizeWidget = new ImIntegerWrapper(definition::getMinimumHistorySize,
                                                   definition::setMinimumHistorySize,
                                                   imInteger -> ImGui.inputInt(labels.get("Minimum History Size"), imInteger));
+   }
+
+   @Override
+   public void renderTreeViewRow()
+   {
+      super.renderRowBeginning();
+      super.renderEditableName();
+      ImGui.sameLine();
+      widget.render();
+      renderRowEnd();
    }
 
    @Override

@@ -53,7 +53,7 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
       super(rootNode);
 
       side = new CRDTBidirectionalEnumField<>(this, RobotSide.LEFT);
-      objectFrameName = new CRDTBidirectionalString(this, ReferenceFrame.getWorldFrame().getName());
+      objectFrameName = new CRDTBidirectionalString(this, "Chest");
       screwAxisPoseInObjectFrame = new CRDTBidirectionalRigidBodyTransform(this);
       translation = new CRDTBidirectionalDouble(this, 0.1);
       rotation = new CRDTBidirectionalDouble(this, 0.0);
