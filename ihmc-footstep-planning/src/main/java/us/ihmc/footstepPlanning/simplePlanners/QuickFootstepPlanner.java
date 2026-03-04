@@ -35,8 +35,8 @@ public class QuickFootstepPlanner
    private double stepLength = 0.28; // 0.33
    private double nextPelvisYawLimit = Math.toRadians(35.0);
    private double inwardLimit = Math.toRadians(10.0);
-   private double outwardLimit = Math.toRadians(45.0); // 60
-   private double stepAngleLimit = Math.toRadians(100); // 110
+   private double outwardLimit = Math.toRadians(50.0); // 60
+   private double stepAngleLimit = Math.toRadians(115); // 110
    private final Pose3D waypoint = new Pose3D();
    private final SideDependentList<Pose3D> stance = new SideDependentList<>(() -> new Pose3D());
    private final SideDependentList<Pose3D> goal = new SideDependentList<>(() -> new Pose3D());
@@ -161,6 +161,7 @@ public class QuickFootstepPlanner
          candidate.get(side).set(swingHip.get(side)); // Plan from the hip
          candidate.get(side).getPosition().setZ(EuclidCoreTools.interpolate(candidate.get(side).getPosition().getZ(), // Keep Z from drifting
                                                                             nextPelvis.get(side).getZ(), 0.5));
+         Point3D startingPosition = new Point3D(candidate.get(side).getPosition());
 
          // Get step yaw calculated and clamped, so we can work with it, pretty much always take the max yaw
          Vector3D swingHipForward = forward(swingHip.get(side));
@@ -199,6 +200,19 @@ public class QuickFootstepPlanner
             // Theres only sometimes you care about this, it's really a thing to sometimes save 1 step when approaching a diagonal stance
             // TODO: Implement collision avoidance
             //   could be rotating away from the collision, rotating the foot, or bringing foot closer to hip (basically the 3 parameters, lol)
+            while (collision && stepAngle >= -stepAngleLimit && stepAngle <= stepAngleLimit)
+            {
+               stepAngle += (side == RobotSide.LEFT ? 1.0 : -1.0) * Math.toRadians(5.0);
+
+               adjustedAngle = stepAngle + (side == RobotSide.LEFT ? Math.PI : 0.0);
+               toStepPosition = new Vector3D(length * Math.sin(adjustedAngle), length * -Math.cos(adjustedAngle), 0.0);
+               swingHip.get(side).transform(toStepPosition);
+               candidate.get(side).getPosition().set(startingPosition);
+               candidate.get(side).getPosition().add(toStepPosition);
+
+               candidatePolygon = createFootPolygon(candidate.get(side), 0.0);
+               collision = convexPolygonTools.doPolygonsIntersect(candidatePolygon, createFootPolygon(goal.get(side.getOppositeSide()), 0.04));
+            }
 
             // Calculate if direct step to goal is possible
             Vector3D goalForward = forward(goal.get(side));
@@ -223,8 +237,10 @@ public class QuickFootstepPlanner
             double requiredLength = swingHip.get(side).getPosition().distance(goal.get(side).getPosition());
 
             boolean possible = requiredFootYaw >= goalFootYawMin && requiredFootYaw <= goalFootYawMax;
-            possible &= requiredStepAngle >= goalStepAngleMin && requiredStepAngle <= goalStepAngleMax;
+//            possible &= requiredStepAngle >= goalStepAngleMin && requiredStepAngle <= goalStepAngleMax;
             possible &= requiredLength <= goalStepLengthMax;
+            ConvexPolygon2D goalPolygon = createFootPolygon(goal.get(side), 0.0);
+            possible &= !convexPolygonTools.doPolygonsIntersect(goalPolygon, createFootPolygon(stance.get(side.getOppositeSide()), 0.04));
 
             goalstepPossible.put(side, possible);
          }
