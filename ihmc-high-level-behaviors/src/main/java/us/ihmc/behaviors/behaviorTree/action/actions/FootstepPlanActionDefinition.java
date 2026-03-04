@@ -15,7 +15,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.crdt.*;
 import us.ihmc.communication.packets.ExecutionMode;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
@@ -23,6 +23,8 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.InitialStanceSide;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.JSONTools;
+
+import java.util.ArrayList;
 
 import static behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessage.*;
 
@@ -33,6 +35,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
    private final CRDTBidirectionalEnumField<ExecutionMode> executionMode;
    private final CRDTBidirectionalString parentFrameName;
    private final CRDTBidirectionalBoolean isManuallyPlaced;
+   private final CRDTBidirectionalRecyclingArrayList<Pose3D> waypoints;
    private final CRDTBidirectionalRecyclingArrayList<FootstepPlanActionFootstepDefinition> manuallyPlacedFootsteps;
    private final CRDTBidirectionalPoint3D goalStancePoint;
    private final CRDTBidirectionalPoint3D goalFocalPoint;
@@ -61,6 +64,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
    private ExecutionMode onDiskExecutionMode;
    private String onDiskParentFrameName;
    private boolean onDiskIsManuallyPlaced;
+   private final ArrayList<Pose3D> onDiskWaypoints = new ArrayList<>();
    private int onDiskNumberOfFootsteps;
    private final Point3D onDiskGoalStancePoint = new Point3D();
    private final Point3D onDiskGoalFocalPoint = new Point3D();
@@ -91,6 +95,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       executionMode = new CRDTBidirectionalEnumField<>(this, ExecutionMode.OVERRIDE);
       parentFrameName = new CRDTBidirectionalString(this, "Walking");
       isManuallyPlaced = new CRDTBidirectionalBoolean(this, false);
+      waypoints = new CRDTBidirectionalRecyclingArrayList<>(this, new RecyclingArrayList<>(Pose3D::new));
       manuallyPlacedFootsteps = new CRDTBidirectionalRecyclingArrayList<>(this, new RecyclingArrayList<>(() -> new FootstepPlanActionFootstepDefinition(this)));
       goalStancePoint = new CRDTBidirectionalPoint3D(this);
       goalFocalPoint = new CRDTBidirectionalPoint3D(this);
@@ -157,6 +162,12 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
          jsonNode.put("plannerPlanWithBodyPath", plannerPlanWithBodyPath.getValue());
          if (plannerType.getValue() == QUICK)
          {
+            if (waypoints.getSize() > 0)
+            {
+               ArrayNode waypointsArray = jsonNode.putArray("waypoints");
+               for (int i = 0; i < waypoints.getSize(); i++)
+                  JSONTools.toJSON(waypointsArray.addObject(), waypoints.getValueReadOnly(i));
+            }
             if (Math.abs(quickHipWidth.getValue() - 0.12) > 0.005)
                jsonNode.put("quickHipWidth", quickHipWidth.getValue());
             if (Math.abs(quickStepLength.getValue() - 0.28) > 0.005)
@@ -194,12 +205,16 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       isManuallyPlaced.setValue(jsonNode.get("footsteps") != null);
 
       manuallyPlacedFootsteps.getValueAndModify().clear();
+      waypoints.getValueAndModify().clear();
       if (isManuallyPlaced.getValue())
-      {
          JSONTools.forEachArrayElement(jsonNode, "footsteps", footstepNode -> manuallyPlacedFootsteps.getValueAndModify().add().loadFromFile(footstepNode));
-      }
       else
       {
+         if (jsonNode.get("waypoints") != null)
+            JSONTools.forEachArrayElement(jsonNode, "waypoints", waypointNode ->
+            {
+               JSONTools.toEuclid(waypointNode, waypoints.getValueAndModify().add());
+            });
          JSONTools.toEuclid(jsonNode, "goalStancePoint", goalStancePoint.getValueAndModify());
          JSONTools.toEuclid(jsonNode, "goalFocalPoint", goalFocalPoint.getValueAndModify());
 
@@ -269,6 +284,9 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       onDiskExecutionMode = executionMode.getValue();
       onDiskParentFrameName = parentFrameName.getValue();
       onDiskIsManuallyPlaced = isManuallyPlaced.getValue();
+      onDiskWaypoints.clear();
+      for (int i = 0; i < waypoints.getSize(); i++)
+         onDiskWaypoints.add(new Pose3D(waypoints.getValueReadOnly(i)));
       onDiskNumberOfFootsteps = manuallyPlacedFootsteps.getSize();
       onDiskGoalStancePoint.set(goalStancePoint.getValueReadOnly());
       onDiskGoalFocalPoint.set(goalFocalPoint.getValueReadOnly());
@@ -307,10 +325,13 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       {
          swingDuration.setValue(onDiskSwingDuration);
          transferDuration.setValue(onDiskTransferDuration);
-         executionMode.setValue(onDiskExecutionMode);
-         parentFrameName.setValue(onDiskParentFrameName);
-         isManuallyPlaced.setValue(onDiskIsManuallyPlaced);
-         manuallyPlacedFootsteps.getValueAndModify().clear();
+        executionMode.setValue(onDiskExecutionMode);
+        parentFrameName.setValue(onDiskParentFrameName);
+        isManuallyPlaced.setValue(onDiskIsManuallyPlaced);
+         waypoints.getValueAndModify().clear();
+         for (Pose3D waypoint : onDiskWaypoints)
+            waypoints.getValueAndModify().add().set(waypoint);
+        manuallyPlacedFootsteps.getValueAndModify().clear();
          for (int i = 0; i < onDiskNumberOfFootsteps; i++)
             manuallyPlacedFootsteps.getValueAndModify().add();
          goalStancePoint.getValueAndModify().set(onDiskGoalStancePoint);
@@ -352,6 +373,14 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       unchanged &= executionMode.getValue() == onDiskExecutionMode;
       unchanged &= parentFrameName.getValue().equals(onDiskParentFrameName);
       unchanged &= isManuallyPlaced.getValue() == onDiskIsManuallyPlaced;
+      unchanged &= waypoints.getSize() == onDiskWaypoints.size();
+      if (unchanged)
+         for (int i = 0; i < waypoints.getSize(); i++)
+            if (!waypoints.getValueReadOnly(i).equals(onDiskWaypoints.get(i)))
+            {
+               unchanged = false;
+               break;
+            }
       unchanged &= goalStancePoint.getValueReadOnly().equals(onDiskGoalStancePoint);
       unchanged &= goalFocalPoint.getValueReadOnly().equals(onDiskGoalFocalPoint);
       for (RobotSide side : goalFootstepToGoalXs.sides())
@@ -396,11 +425,12 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       message.setParentFrameName(parentFrameName.toMessage());
       message.setIsManuallyPlaced(isManuallyPlaced.toMessage());
 
+      message.getWaypoints().clear();
+      for (int i = 0; i < waypoints.getSize(); i++)
+         message.getWaypoints().add().set(waypoints.getValueReadOnly(i));
       message.getFootsteps().clear();
       for (int i = 0; i < manuallyPlacedFootsteps.getSize(); i++)
-      {
          manuallyPlacedFootsteps.getValueReadOnly(i).toMessage(message.getFootsteps().add());
-      }
       goalStancePoint.toMessage(message.getGoalStancePoint());
       goalFocalPoint.toMessage(message.getGoalFocalPoint());
       message.setLeftGoalFootXToGizmo(goalFootstepToGoalXs.get(RobotSide.LEFT).toMessage());
@@ -436,13 +466,17 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       parentFrameName.fromMessage(message.getParentFrameNameAsString());
       isManuallyPlaced.fromMessage(message.getIsManuallyPlaced());
 
+      waypoints.fromMessage(writableList ->
+      {
+         writableList.clear();
+         for (Pose3D waypoint : message.getWaypoints())
+            writableList.add().set(waypoint);
+      });
       manuallyPlacedFootsteps.fromMessage(writableList ->
       {
          writableList.clear();
          for (FootstepPlanActionFootstepDefinitionMessage footstepMessage : message.getFootsteps())
-         {
             writableList.add().fromMessage(footstepMessage);
-         }
       });
       goalStancePoint.fromMessage(message.getGoalStancePoint());
       goalFocalPoint.fromMessage(message.getGoalFocalPoint());
@@ -522,6 +556,11 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
    public CRDTBidirectionalRecyclingArrayList<FootstepPlanActionFootstepDefinition> getManuallyPlacedFootsteps()
    {
       return manuallyPlacedFootsteps;
+   }
+
+   public CRDTBidirectionalRecyclingArrayList<Pose3D> getWaypoints()
+   {
+      return waypoints;
    }
 
    public CRDTBidirectionalPoint3D getGoalStancePoint()

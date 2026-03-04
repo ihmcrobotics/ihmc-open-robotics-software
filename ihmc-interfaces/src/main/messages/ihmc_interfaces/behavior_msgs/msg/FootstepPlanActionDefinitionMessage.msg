@@ -16,6 +16,9 @@ byte execution_mode
 # Is using the footstep planner or manually placing
 bool is_manually_placed
 
+# Pose waypoints to hit along the way (may be none)
+geometry_msgs/Pose[<=40] waypoints
+
 # The footsteps, with a maximum of 50
 behavior_msgs/FootstepPlanActionFootstepDefinitionMessage[<=50] footsteps
 

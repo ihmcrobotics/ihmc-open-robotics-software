@@ -45,6 +45,10 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
             */
    public boolean is_manually_placed_;
    /**
+            * Pose waypoints to hit along the way (may be none)
+            */
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  waypoints_;
+   /**
             * The footsteps, with a maximum of 50
             */
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessage>  footsteps_;
@@ -118,6 +122,7 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
    {
       definition_ = new behavior_msgs.msg.dds.ActionNodeDefinitionMessage();
       parent_frame_name_ = new java.lang.StringBuilder(255);
+      waypoints_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D> (40, new geometry_msgs.msg.dds.PosePubSubType());
       footsteps_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessage> (50, new behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessagePubSubType());
       goal_stance_point_ = new us.ihmc.euclid.tuple3D.Point3D();
       goal_focal_point_ = new us.ihmc.euclid.tuple3D.Point3D();
@@ -145,6 +150,7 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
 
       is_manually_placed_ = other.is_manually_placed_;
 
+      waypoints_.set(other.waypoints_);
       footsteps_.set(other.footsteps_);
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.goal_stance_point_, goal_stance_point_);
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.goal_focal_point_, goal_focal_point_);
@@ -282,6 +288,15 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
    public boolean getIsManuallyPlaced()
    {
       return is_manually_placed_;
+   }
+
+
+   /**
+            * Pose waypoints to hit along the way (may be none)
+            */
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  getWaypoints()
+   {
+      return waypoints_;
    }
 
 
@@ -595,6 +610,13 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_manually_placed_, other.is_manually_placed_, epsilon)) return false;
 
+      if (this.waypoints_.size() != other.waypoints_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.waypoints_.size(); i++)
+         {  if (!this.waypoints_.get(i).epsilonEquals(other.waypoints_.get(i), epsilon)) return false; }
+      }
+
       if (this.footsteps_.size() != other.footsteps_.size()) { return false; }
       else
       {
@@ -669,6 +691,7 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
 
       if(this.is_manually_placed_ != otherMyClass.is_manually_placed_) return false;
 
+      if (!this.waypoints_.equals(otherMyClass.waypoints_)) return false;
       if (!this.footsteps_.equals(otherMyClass.footsteps_)) return false;
       if (!this.goal_stance_point_.equals(otherMyClass.goal_stance_point_)) return false;
       if (!this.goal_focal_point_.equals(otherMyClass.goal_focal_point_)) return false;
@@ -735,6 +758,8 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
       builder.append(this.execution_mode_);      builder.append(", ");
       builder.append("is_manually_placed=");
       builder.append(this.is_manually_placed_);      builder.append(", ");
+      builder.append("waypoints=");
+      builder.append(this.waypoints_);      builder.append(", ");
       builder.append("footsteps=");
       builder.append(this.footsteps_);      builder.append(", ");
       builder.append("goal_stance_point=");

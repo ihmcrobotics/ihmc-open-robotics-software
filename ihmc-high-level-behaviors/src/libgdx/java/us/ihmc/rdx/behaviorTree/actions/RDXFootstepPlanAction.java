@@ -78,6 +78,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    private final RDXSelectablePose3DGizmo goalStancePointGizmo = new RDXSelectablePose3DGizmo();
    private final RDXSelectablePose3DGizmo goalFocalPointGizmo = new RDXSelectablePose3DGizmo();
    private final SideDependentList<RDXFootstepPlanActionGoalFootstep> goalFeet = new SideDependentList<>();
+   private final ArrayList<RDXPose3DGizmo> waypointGizmos = new ArrayList<>();
    private final RDX3DPanelTooltip tooltip;
    private final ImGuiFootstepsWidget footstepsWidget = new ImGuiFootstepsWidget();
    private final RDXFootstepPlanGraphic previewFootstepPlan;
@@ -254,6 +255,31 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
          for (RobotSide side : RobotSide.values)
             goalFeet.get(side).setParentFrame();
 
+         if (!definition.getIsManuallyPlaced() && definition.getPlannerType().getValue() == QUICK)
+         {
+            while (waypointGizmos.size() < definition.getWaypoints().getSize())
+            {
+               RDXPose3DGizmo gizmo = new RDXPose3DGizmo();
+               gizmo.create(baseUI.getPrimary3DPanel());
+               gizmo.setResizeAutomatically(false);
+               gizmo.setCenterSphereToTorusRatio(0.8f);
+               waypointGizmos.add(gizmo);
+            }
+
+            for (int i = 0; i < definition.getWaypoints().getSize(); i++)
+            {
+               RDXPose3DGizmo gizmo = waypointGizmos.get(i);
+               gizmo.setParentFrame(parentFrame);
+
+               if (gizmo.getGizmoModifiedByUser().poll())
+                  definition.getWaypoints().getValueAndModify().get(i).set(gizmo.getTransformToParent());
+               else if (definition.isModified())
+                  gizmo.getTransformToParent().set(definition.getWaypoints().getValueReadOnly(i));
+
+               gizmo.update();
+            }
+         }
+
          RDXCRDTTools.syncGizmoWithBidirectionalField(goalStancePointGizmo.getPoseGizmo(), definition.getGoalStancePoint(), definition);
          RDXCRDTTools.syncGizmoWithBidirectionalField(goalFocalPointGizmo.getPoseGizmo(), definition.getGoalFocalPoint(), definition);
 
@@ -361,6 +387,12 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
             goalFocalPointGizmo.calculate3DViewPick(input);
             for (RobotSide side : RobotSide.values)
                goalFeet.get(side).calculate3DViewPick(input);
+            if (definition.getPlannerType().getValue() == QUICK)
+            {
+               int waypointCount = Math.min(waypointGizmos.size(), definition.getWaypoints().getSize());
+               for (int i = 0; i < waypointCount; i++)
+                  waypointGizmos.get(i).calculate3DViewPick(input);
+            }
          }
       }
    }
@@ -384,6 +416,12 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
             tooltip.setInput(input);
             for (RobotSide side : RobotSide.values)
                goalFeet.get(side).process3DViewInput(input);
+            if (definition.getPlannerType().getValue() == QUICK)
+            {
+               int waypointCount = Math.min(waypointGizmos.size(), definition.getWaypoints().getSize());
+               for (int i = 0; i < waypointCount; i++)
+                  waypointGizmos.get(i).process3DViewInput(input);
+            }
          }
       }
    }
@@ -477,6 +515,30 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
 
             planWithBodyPathWidget.renderImGuiWidget();
 
+            if (definition.getPlannerType().getValue() == QUICK)
+            {
+               ImGui.text("Waypoints: %d".formatted(definition.getWaypoints().getSize()));
+               ImGui.sameLine();
+               if (ImGui.button(labels.get("Add", "Waypoint")))
+               {
+                  Pose3D waypoint = definition.getWaypoints().getValueAndModify().add();
+                  if (definition.getWaypoints().getSize() > 1)
+                  {
+                     waypoint.set(definition.getWaypoints().getValueReadOnly(definition.getWaypoints().getSize() - 2));
+                     waypoint.appendTranslation(0.1, 0.0, 0.0);
+                  }
+                  else
+                  {
+                     waypoint.getPosition().set(definition.getGoalStancePoint().getValueReadOnly());
+                  }
+               }
+               if (definition.getWaypoints().getSize() > 0)
+               {
+                  ImGui.sameLine();
+                  if (ImGui.button(labels.get("Remove", "Waypoint")))
+                     RecyclingArrayListTools.removeLast(definition.getWaypoints().getValueAndModify());
+               }
+            }
 
             ImGui.text("Preview steps: %d".formatted(state.getPreviewFootsteps().getSize()));
 
@@ -536,12 +598,18 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
                footstep.getVirtualRenderables(renderables, pool);
          else
          {
-            goalArrowGraphic.getRenderables(renderables, pool);
+            if (!state.getIsExecuting())
+            {
+               goalArrowGraphic.getRenderables(renderables, pool);
 
-            goalStancePointGizmo.getVirtualRenderables(renderables, pool);
-            goalFocalPointGizmo.getVirtualRenderables(renderables, pool);
-            for (RobotSide side : RobotSide.values)
-               goalFeet.get(side).getRenderables(renderables, pool, footstepsWidget.getIsHovered().get(side));
+               goalStancePointGizmo.getVirtualRenderables(renderables, pool);
+               goalFocalPointGizmo.getVirtualRenderables(renderables, pool);
+               for (RobotSide side : RobotSide.values)
+                  goalFeet.get(side).getRenderables(renderables, pool, footstepsWidget.getIsHovered().get(side));
+               if (definition.getPlannerType().getValue() == QUICK)
+                  for (int i = 0; i < Math.min(waypointGizmos.size(), definition.getWaypoints().getSize()); i++)
+                     waypointGizmos.get(i).getRenderables(renderables, pool);
+            }
 
             if (state.getIsNextForExecution() || state.getIsExecuting())
                previewFootstepPlan.getRenderables(renderables, pool);

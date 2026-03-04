@@ -15,7 +15,7 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "651600f2360df86fa6cf246ed360190ed68ff16a370394b80f05d1a8889e03dd";
+   		return "1162142a57833461f3f9fae47ce146ed87c7b0f018a191d49eb9433af783154d";
    }
    
    @Override
@@ -63,6 +63,9 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 40; ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
@@ -140,6 +143,11 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getWaypoints().size(); ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getWaypoints().get(i0), current_alignment);}
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getFootsteps().size(); ++i0)
@@ -231,6 +239,10 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
 
       cdr.write_type_7(data.getIsManuallyPlaced());
 
+      if(data.getWaypoints().size() <= 40)
+      cdr.write_type_e(data.getWaypoints());else
+          throw new RuntimeException("waypoints field exceeds the maximum length: %d > %d".formatted(data.getWaypoints().size(), 40));
+
       if(data.getFootsteps().size() <= 50)
       cdr.write_type_e(data.getFootsteps());else
           throw new RuntimeException("footsteps field exceeds the maximum length: %d > %d".formatted(data.getFootsteps().size(), 50));
@@ -292,6 +304,7 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
       	
       data.setIsManuallyPlaced(cdr.read_type_7());
       	
+      cdr.read_type_e(data.getWaypoints());	
       cdr.read_type_e(data.getFootsteps());	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getGoalStancePoint(), cdr);	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getGoalFocalPoint(), cdr);	
@@ -349,6 +362,7 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
       ser.write_type_6("transfer_duration", data.getTransferDuration());
       ser.write_type_9("execution_mode", data.getExecutionMode());
       ser.write_type_7("is_manually_placed", data.getIsManuallyPlaced());
+      ser.write_type_e("waypoints", data.getWaypoints());
       ser.write_type_e("footsteps", data.getFootsteps());
       ser.write_type_a("goal_stance_point", new geometry_msgs.msg.dds.PointPubSubType(), data.getGoalStancePoint());
 
@@ -388,6 +402,7 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
       data.setTransferDuration(ser.read_type_6("transfer_duration"));
       data.setExecutionMode(ser.read_type_9("execution_mode"));
       data.setIsManuallyPlaced(ser.read_type_7("is_manually_placed"));
+      ser.read_type_e("waypoints", data.getWaypoints());
       ser.read_type_e("footsteps", data.getFootsteps());
       ser.read_type_a("goal_stance_point", new geometry_msgs.msg.dds.PointPubSubType(), data.getGoalStancePoint());
 

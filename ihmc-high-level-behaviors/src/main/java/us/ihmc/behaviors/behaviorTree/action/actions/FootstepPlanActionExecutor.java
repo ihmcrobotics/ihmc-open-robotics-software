@@ -425,8 +425,15 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
       quickFootstepPlanner.setInwardLimit(definition.getQuickInwardLimit().getValue());
       quickFootstepPlanner.setOutwardLimit(definition.getQuickOutwardLimit().getValue());
       quickFootstepPlanner.setStepAngleLimit(definition.getQuickStepAngleLimit().getValue());
+      ArrayList<Pose3D> waypoints = new ArrayList<>();
+      for (int i = 0; i < definition.getWaypoints().getSize(); i++)
+      {
+         FramePose3D framePose = new FramePose3D(state.getParentFrame(), definition.getWaypoints().getValueReadOnly(i));
+         framePose.changeFrame(ReferenceFrame.getWorldFrame());
+         waypoints.add(new Pose3D(framePose));
+      }
       return quickFootstepPlanner.plan(new SideDependentList<>(side -> new Pose3D(syncedFeetPoses.get(side))),
-                                       new ArrayList<>(),
+                                       waypoints,
                                        new SideDependentList<>(side -> new Pose3D(liveGoalFeetPoses.get(side))));
    }
 }
