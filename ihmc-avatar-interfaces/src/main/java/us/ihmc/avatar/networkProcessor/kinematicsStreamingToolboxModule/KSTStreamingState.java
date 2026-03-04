@@ -13,17 +13,25 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tools.QuaternionTools;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
@@ -123,8 +131,10 @@ public class KSTStreamingState implements State
     * activate the corresponding objective.
     */
    private final Map<RigidBodyBasics, YoDouble> rigidBodyControlStartTimeMap = new HashMap<>();
+   private final Map<String, FramePose3D> rigidBodyInitialPoseMap = new HashMap<>();
    private final YoDouble[] rigidBodyControlStartTimeArray;
    private final YoDouble centerOfMassControlStartTime = new YoDouble("centerOfMassControlStartTime", registry);
+   private final FramePoint3D centerOfMassInitialPosition = new FramePoint3D();
 
    /**
     * Buffer of commands used to slowly decay objectives for end-effector that have been discontinued.
@@ -169,6 +179,8 @@ public class KSTStreamingState implements State
    private final YoEnum<InputStateEstimatorType> activeInputStateEstimator = new YoEnum<>("activeInputStateEstimator", registry, InputStateEstimatorType.class);
    private final Map<InputStateEstimatorType, KSTInputStateEstimator> inputStateEstimatorsMap = new EnumMap<>(InputStateEstimatorType.class);
    private final KSTInputStateEstimator[] inputStateEstimators;
+
+   private final Map<String, RigidBodyBasics> desiredRigidBodies = new HashMap<>();
 
    public KSTStreamingState(KSTTools tools)
    {
@@ -294,7 +306,12 @@ public class KSTStreamingState implements State
       for (RigidBodyBasics rigidBody : controllableRigidBodies)
       {
          rigidBodyControlStartTimeMap.put(rigidBody, new YoDouble(rigidBody.getName() + "ControlStartTime", registry));
+         rigidBodyInitialPoseMap.put(rigidBody.getName(), new FramePose3D());
       }
+
+      RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(desiredFullRobotModel.getElevator());
+      for (RigidBodyBasics rigidBody : rootBody.subtreeIterable())
+         desiredRigidBodies.put(rigidBody.getName(), rigidBody);
 
       rigidBodyControlStartTimeArray = new YoDouble[controllableRigidBodies.size()];
 
@@ -514,8 +531,12 @@ public class KSTStreamingState implements State
 
             // Update time for which each rigid body started being controlled.
             YoDouble startTime = rigidBodyControlStartTimeMap.get(rigidBodyInput.getEndEffector());
+            String rigidBodyName = rigidBodyInput.getEndEffector().getName();
             if (startTime.isNaN())
+            {
                startTime.set(timeInState);
+               rigidBodyInitialPoseMap.get(rigidBodyName).setFromReferenceFrame(desiredRigidBodies.get(rigidBodyName).getBodyFixedFrame());
+            }
             blendWeightMatrix(rigidBodyInput.getWeightMatrix(), timeInState, startTime.getValue(), streamingBlendingDuration.getValue());
 
             // Update the list of bodies that are not controlled this tick
@@ -533,7 +554,10 @@ public class KSTStreamingState implements State
             // TODO Maybe the CoM task should have its own default weight value.
             setDefaultWeightIfNeeded(centerOfMassInput.getSelectionMatrix(), centerOfMassInput.getWeightMatrix(), defaultLinearWeight);
             if (centerOfMassControlStartTime.isNaN())
+            {
                centerOfMassControlStartTime.set(timeInState);
+               centerOfMassInitialPosition.set(ikController.getCenterOfMass());
+            }
             blendWeightMatrix(centerOfMassInput.getWeightMatrix(), timeInState, centerOfMassControlStartTime.getValue(), streamingBlendingDuration.getValue());
          }
          else
@@ -822,7 +846,7 @@ public class KSTStreamingState implements State
    private static void blendWeightMatrix(WeightMatrix3D weightMatrix, double currentTime, double startTime, double blendingDuration)
    {
       double controlDuration = currentTime - startTime;
-      if (controlDuration < blendingDuration)
+      if (controlDuration < blendingDuration * 1000)
       { // Blend the weight matrix to smoothly activate the objective.
          double blendingFactor = MathTools.clamp(controlDuration / blendingDuration, 0.0, 1.0);
          weightMatrix.scale(blendingFactor);

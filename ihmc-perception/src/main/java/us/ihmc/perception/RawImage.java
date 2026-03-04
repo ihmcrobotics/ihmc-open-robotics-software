@@ -9,12 +9,14 @@ import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.sensors.CameraIntrinsics;
 import us.ihmc.perception.imageMessage.PixelFormat;
+import us.ihmc.sensors.CameraIntrinsics;
 
 import javax.annotation.Nullable;
 import java.time.Instant;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * <p>
@@ -48,10 +50,10 @@ public class RawImage
     */
    @Nullable
    private Mat cpuImageMat = null;
-   private final Object cpuImageMutex = new Object();
+   private final Lock cpuImageLock = new ReentrantLock();
    @Nullable
    private GpuMat gpuImageMat = null;
-   private final Object gpuImageMutex = new Object();
+   private final Lock gpuImageLock = new ReentrantLock();
    private final PixelFormat pixelFormat;
    private final CameraIntrinsics cameraIntrinsics;
    private final CameraModel cameraModel;
@@ -283,13 +285,18 @@ public class RawImage
     */
    public Mat getCpuImageMat()
    {
-      synchronized (cpuImageMutex)
+      cpuImageLock.lock();
+      try
       {
-         if (cpuImageMat == null && !gpuImageMat.isNull())
+         if (cpuImageMat == null)
          {
             cpuImageMat = new Mat(gpuImageMat.size(), gpuImageMat.type());
             gpuImageMat.download(cpuImageMat);
          }
+      }
+      finally
+      {
+         cpuImageLock.unlock();
       }
 
       return cpuImageMat;
@@ -308,13 +315,18 @@ public class RawImage
     */
    public GpuMat getGpuImageMat()
    {
-      synchronized (gpuImageMutex)
+      gpuImageLock.lock();
+      try
       {
          if (gpuImageMat == null)
          {
             gpuImageMat = new GpuMat(cpuImageMat.size(), cpuImageMat.type());
             gpuImageMat.upload(cpuImageMat);
          }
+      }
+      finally
+      {
+         gpuImageLock.unlock();
       }
 
       return gpuImageMat;
