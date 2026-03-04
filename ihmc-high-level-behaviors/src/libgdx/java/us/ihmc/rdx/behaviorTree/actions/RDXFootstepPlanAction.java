@@ -27,6 +27,7 @@ import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeRootNode;
 import us.ihmc.rdx.behaviorTree.RDXCRDTTools;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
+import us.ihmc.rdx.imgui.ImIntegerWrapper;
 import us.ihmc.rdx.imgui.ImGuiReferenceFrameLibraryCombo;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -56,14 +57,14 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    private final ImDoubleWrapper transferDurationWidget;
    private final ImBooleanWrapper walkWithGoalOrientationWidget;
    private final ImBooleanWrapper planWithBodyPathWidget;
-   private final ImDoubleWrapper quickHipWidthWidget;
-   private final ImDoubleWrapper quickStepLengthWidget;
-   private final ImDoubleWrapper quickNextPelvisYawLimitWidget;
-   private final ImDoubleWrapper quickInwardLimitWidget;
-   private final ImDoubleWrapper quickOutwardLimitWidget;
-   private final ImDoubleWrapper quickStepAngleLimitWidget;
-   private final ImDoubleWrapper quickSwingTimeDistanceLowerWidget;
-   private final ImDoubleWrapper quickSwingTimeDistanceUpperWidget;
+   private final ImIntegerWrapper quickHipWidthWidget;
+   private final ImIntegerWrapper quickStepLengthWidget;
+   private final ImIntegerWrapper quickNextPelvisYawLimitWidget;
+   private final ImIntegerWrapper quickInwardLimitWidget;
+   private final ImIntegerWrapper quickOutwardLimitWidget;
+   private final ImIntegerWrapper quickStepAngleLimitWidget;
+   private final ImIntegerWrapper quickSwingTimeDistanceLowerWidget;
+   private final ImIntegerWrapper quickSwingTimeDistanceUpperWidget;
    private final ImDoubleWrapper quickMinSwingTimeWidget;
    private final ImDoubleWrapper quickMaxSwingTimeWidget;
    private final RDXStoredPropertySetTuner plannerParametersWidgets;
@@ -138,30 +139,30 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
       planWithBodyPathWidget = new ImBooleanWrapper(definition.getPlannerPlanWithBodyPath()::getValue,
                                                     definition.getPlannerPlanWithBodyPath()::setValue,
                                                     imBoolean -> ImGui.checkbox(labels.get("Plan with body path"), imBoolean));
-      quickHipWidthWidget = new ImDoubleWrapper(() -> definition.getQuickHipWidth().getValue() * 100.0,
-                                                value -> definition.getQuickHipWidth().setValue(value / 100.0),
-                                                imDouble -> ImGui.inputDouble(labels.get("Quick hip width (cm)"), imDouble, 1.0, 5.0, "%.0f", 0));
-      quickStepLengthWidget = new ImDoubleWrapper(() -> definition.getQuickStepLength().getValue() * 100.0,
-                                                  value -> definition.getQuickStepLength().setValue(value / 100.0),
-                                                  imDouble -> ImGui.inputDouble(labels.get("Quick step length (cm)"), imDouble, 1.0, 5.0, "%.0f", 0));
-      quickNextPelvisYawLimitWidget = new ImDoubleWrapper(() -> Math.toDegrees(definition.getQuickNextPelvisYawLimit().getValue()),
-                                                          value -> definition.getQuickNextPelvisYawLimit().setValue(Math.toRadians(value)),
-                                                          imDouble -> ImGui.inputDouble(labels.get("Quick next pelvis yaw limit (%s)".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL)), imDouble, 1.0, 5.0, "%.0f", 0));
-      quickInwardLimitWidget = new ImDoubleWrapper(() -> Math.toDegrees(definition.getQuickInwardLimit().getValue()),
-                                                   value -> definition.getQuickInwardLimit().setValue(Math.toRadians(value)),
-                                                   imDouble -> ImGui.inputDouble(labels.get("Quick inward limit (%s)".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL)), imDouble, 1.0, 5.0, "%.0f", 0));
-      quickOutwardLimitWidget = new ImDoubleWrapper(() -> Math.toDegrees(definition.getQuickOutwardLimit().getValue()),
-                                                    value -> definition.getQuickOutwardLimit().setValue(Math.toRadians(value)),
-                                                    imDouble -> ImGui.inputDouble(labels.get("Quick outward limit (%s)".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL)), imDouble, 1.0, 5.0, "%.0f", 0));
-      quickStepAngleLimitWidget = new ImDoubleWrapper(() -> Math.toDegrees(definition.getQuickStepAngleLimit().getValue()),
-                                                      value -> definition.getQuickStepAngleLimit().setValue(Math.toRadians(value)),
-                                                      imDouble -> ImGui.inputDouble(labels.get("Quick step angle limit (%s)".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL)), imDouble, 1.0, 5.0, "%.0f", 0));
-      quickSwingTimeDistanceLowerWidget = new ImDoubleWrapper(() -> definition.getQuickSwingTimeDistanceLower().getValue() * 100.0,
-                                                              value -> definition.getQuickSwingTimeDistanceLower().setValue(value / 100.0),
-                                                              imDouble -> ImGui.inputDouble(labels.get("Quick swing time distance lower (cm)"), imDouble, 1.0, 5.0, "%.0f", 0));
-      quickSwingTimeDistanceUpperWidget = new ImDoubleWrapper(() -> definition.getQuickSwingTimeDistanceUpper().getValue() * 100.0,
-                                                              value -> definition.getQuickSwingTimeDistanceUpper().setValue(value / 100.0),
-                                                              imDouble -> ImGui.inputDouble(labels.get("Quick swing time distance upper (cm)"), imDouble, 1.0, 5.0, "%.0f", 0));
+      quickHipWidthWidget = new ImIntegerWrapper(() -> (int) Math.round(definition.getQuickHipWidth().getValue() * 100.0),
+                                                 value -> definition.getQuickHipWidth().setValue(value / 100.0),
+                                                 imInt -> ImGui.inputInt(labels.get("Quick hip width (cm)"), imInt, 1, 5));
+      quickStepLengthWidget = new ImIntegerWrapper(() -> (int) Math.round(definition.getQuickStepLength().getValue() * 100.0),
+                                                   value -> definition.getQuickStepLength().setValue(value / 100.0),
+                                                   imInt -> ImGui.inputInt(labels.get("Quick step length (cm)"), imInt, 1, 5));
+      quickNextPelvisYawLimitWidget = new ImIntegerWrapper(() -> (int) Math.round(Math.toDegrees(definition.getQuickNextPelvisYawLimit().getValue())),
+                                                           value -> definition.getQuickNextPelvisYawLimit().setValue(Math.toRadians(value)),
+                                                           imInt -> ImGui.inputInt(labels.get("Quick next pelvis yaw limit (%s)".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL)), imInt, 1, 5));
+      quickInwardLimitWidget = new ImIntegerWrapper(() -> (int) Math.round(Math.toDegrees(definition.getQuickInwardLimit().getValue())),
+                                                    value -> definition.getQuickInwardLimit().setValue(Math.toRadians(value)),
+                                                    imInt -> ImGui.inputInt(labels.get("Quick inward limit (%s)".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL)), imInt, 1, 5));
+      quickOutwardLimitWidget = new ImIntegerWrapper(() -> (int) Math.round(Math.toDegrees(definition.getQuickOutwardLimit().getValue())),
+                                                     value -> definition.getQuickOutwardLimit().setValue(Math.toRadians(value)),
+                                                     imInt -> ImGui.inputInt(labels.get("Quick outward limit (%s)".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL)), imInt, 1, 5));
+      quickStepAngleLimitWidget = new ImIntegerWrapper(() -> (int) Math.round(Math.toDegrees(definition.getQuickStepAngleLimit().getValue())),
+                                                       value -> definition.getQuickStepAngleLimit().setValue(Math.toRadians(value)),
+                                                       imInt -> ImGui.inputInt(labels.get("Quick step angle limit (%s)".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL)), imInt, 1, 5));
+      quickSwingTimeDistanceLowerWidget = new ImIntegerWrapper(() -> (int) Math.round(definition.getQuickSwingTimeDistanceLower().getValue() * 100.0),
+                                                               value -> definition.getQuickSwingTimeDistanceLower().setValue(value / 100.0),
+                                                               imInt -> ImGui.inputInt(labels.get("Quick swing time distance lower (cm)"), imInt, 1, 5));
+      quickSwingTimeDistanceUpperWidget = new ImIntegerWrapper(() -> (int) Math.round(definition.getQuickSwingTimeDistanceUpper().getValue() * 100.0),
+                                                               value -> definition.getQuickSwingTimeDistanceUpper().setValue(value / 100.0),
+                                                               imInt -> ImGui.inputInt(labels.get("Quick swing time distance upper (cm)"), imInt, 1, 5));
       quickMinSwingTimeWidget = new ImDoubleWrapper(definition.getQuickMinSwingTime()::getValue,
                                                     definition.getQuickMinSwingTime()::setValue,
                                                     imDouble -> ImGui.inputDouble(labels.get("Quick min swing time (s)"), imDouble, 0.05, 0.2, "%.3f", 0));
