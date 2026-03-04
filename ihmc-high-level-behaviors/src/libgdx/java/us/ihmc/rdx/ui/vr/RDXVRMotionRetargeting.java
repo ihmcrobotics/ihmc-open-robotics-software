@@ -10,6 +10,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
+import us.ihmc.log.LogTools;
 import us.ihmc.motionRetargeting.RetargetingParameters;
 import us.ihmc.motionRetargeting.VRTrackedSegmentType;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
@@ -84,6 +85,17 @@ public class RDXVRMotionRetargeting
    private static final double PELVIS_ALPHA = 0.05;
    private final FramePose3D filteredPelvisFramePose = new FramePose3D(); // low-pass state
 
+   // Foot height blending
+   private final SideDependentList<Double> swingTargetFootHeight = new SideDependentList<>();
+   private final SideDependentList<Double> blendedFootHeight = new SideDependentList<>();
+   private final SideDependentList<Boolean> wasFootInContact = new SideDependentList<>();
+   // Tune these
+   private static final double MIN_SWING_LIFT = 0.2; // above initial height
+   private static final double SWING_TARGET_CATCHUP_ALPHA = 0.2; // how fast swing target chases tracker
+   private static final double SWING_Z_BLEND_ALPHA = 0.2;        // how fast blended Z chases swing target
+   private static final double LANDING_Z_BLEND_ALPHA = 0.8;      // how fast blended Z chases tracker during landing
+
+
    /**
     * Constructor for the motion retargeting class.
     *
@@ -116,6 +128,9 @@ public class RDXVRMotionRetargeting
          initialFootTransformsToWorld.put(side, new RigidBodyTransform());
          newFootFramePoses.put(side, new FramePose3D());
          isFootInContact.put(side, true);
+         swingTargetFootHeight.put(side, 0.0);
+         blendedFootHeight.put(side, 0.0);
+         wasFootInContact.put(side, true);
       }
    }
 
@@ -403,7 +418,74 @@ public class RDXVRMotionRetargeting
             constrainedFootPose.getRotation().setYawPitchRoll(newFootFramePoses.get(side).getRotation().getYaw(), 0.0,0.0);
             constrainedFootPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-            double alpha = steppingTracker.getLandingBlendFactor(side);
+            // --- Z retargeting logic ---
+            // Current contact state from stepping tracker
+            boolean inContact = steppingTracker.isFootInContact(side);
+            boolean wasInContact = wasFootInContact.get(side);
+            wasFootInContact.put(side, inContact);
+            double initialHeight = initialFootTransformsToWorld.get(side).getTranslationZ();
+            double trackerHeight = footTrackerTransform.getTranslationZ();
+
+            // Initialize blended height once
+            if (initialFootFrames.get(side) != null && blendedFootHeight.get(side) == 0.0)
+            {
+               blendedFootHeight.put(side, initialHeight);
+               swingTargetFootHeight.put(side, initialHeight + MIN_SWING_LIFT);
+            }
+
+            double currentBlendedHeight = blendedFootHeight.get(side);
+            double currentSwingTarget = swingTargetFootHeight.get(side);
+            // 1) Contact -> Swing transition: set minimum swing target
+            if (wasInContact && !inContact)
+            {
+               // start swing at at least MIN_SWING_LIFT
+               double minSwing = initialHeight + MIN_SWING_LIFT;
+               currentSwingTarget = Math.max(trackerHeight, minSwing);
+               if (side == RobotSide.LEFT)
+                  LogTools.info("Swing target: {}", currentSwingTarget);
+            }
+
+            // 2) High swing: let target chase tracker if tracker goes higher
+            if (!inContact && trackerHeight > currentSwingTarget)
+            {
+               // smooth catch-up of swing target to tracker
+               currentSwingTarget = currentSwingTarget + SWING_TARGET_CATCHUP_ALPHA * (trackerHeight - currentSwingTarget);
+               if (side == RobotSide.LEFT)
+                  LogTools.info("HIGH swing target TRACKER ABOVE: {}", currentSwingTarget);
+            }
+
+            // 3) Landing: blend Z towards tracker when landing is detected
+            if (steppingTracker.isFootLanding(side))
+            {
+               currentBlendedHeight = currentBlendedHeight
+                                      + LANDING_Z_BLEND_ALPHA * (trackerHeight - currentBlendedHeight);
+               if (side == RobotSide.LEFT)
+                  LogTools.error("LANDING currentBlendedHeight: {}", currentBlendedHeight);
+            }
+            else if (!inContact)
+            {
+               // Swing phase, blend towards swing target
+               currentBlendedHeight = currentBlendedHeight
+                                      + SWING_Z_BLEND_ALPHA * (currentSwingTarget - currentBlendedHeight);
+               if (side == RobotSide.LEFT)
+                  LogTools.info("SWINGING currentBlendedHeight: {}", currentBlendedHeight);
+               steppingTracker.setIsSwinging(side, true);
+            }
+            else
+            {
+               // Hard contact: lock to tracker height
+               currentBlendedHeight = trackerHeight;
+               if (side == RobotSide.LEFT)
+                  LogTools.info("CONTACT currentBlendedHeight: {}", currentBlendedHeight);
+               steppingTracker.setIsSwinging(side, false);
+            }
+            swingTargetFootHeight.put(side, currentSwingTarget);
+            blendedFootHeight.put(side, currentBlendedHeight);
+            // Apply blended Z back to pose (keep X/Y from constrained pose)
+            newFootFramePoses.get(side).getPosition().set(constrainedFootPose.getPosition());
+            newFootFramePoses.get(side).getPosition().setZ(currentBlendedHeight);
+
+            double alpha = steppingTracker.getCloseToGroundBlendFactor(side);
             if (alpha > 0.0)
             {
                Quaternion fullQ = new Quaternion();
@@ -456,6 +538,9 @@ public class RDXVRMotionRetargeting
          initialHandPositionsInWorld.put(side, null);
          initialFootFrames.put(side, null);
          isFootInContact.put(side, true);
+         swingTargetFootHeight.put(side, 0.0);
+         blendedFootHeight.put(side, 0.0);
+         wasFootInContact.put(side, true);
       }
       retargetedFrames.clear();
       centerOfMassDesiredXYInWorld = null;

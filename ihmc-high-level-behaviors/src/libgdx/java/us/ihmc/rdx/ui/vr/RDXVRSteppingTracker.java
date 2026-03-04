@@ -16,8 +16,8 @@ public class RDXVRSteppingTracker
     private static final double STABILITY_THRESHOLD = 0.01;
     private static final int STABILITY_ITERATIONS = 3;
 
-   private static final double LANDING_HEIGHT_THRESHOLD = 0.1;
-   private static final double LANDING_BLEND_START_HEIGHT = 0.25;
+   private static final double CLOSE_TO_GROUND_HEIGHT_THRESHOLD = 0.1;
+   private static final double CLOSE_TO_GROUND_BLEND_START_HEIGHT = 0.25;
 
    private static final double ERROR_RECOVERY_HEIGHT_TOLERANCE = 0.05; // 5 cm
    private static final int ERROR_RECOVERY_STABILITY_ITERATIONS = 50;
@@ -29,6 +29,7 @@ public class RDXVRSteppingTracker
     private final SideDependentList<Integer> stableIterationCounts = new SideDependentList<>();
     private final SideDependentList<Notification> landedFoot = new SideDependentList<>();
    private final SideDependentList<Double> currentFootHeight = new SideDependentList<>();
+   private final SideDependentList<Boolean> isSwinging = new SideDependentList<>();
 
     public RDXVRSteppingTracker()
     {
@@ -45,6 +46,7 @@ public class RDXVRSteppingTracker
             initialTrackersTransform.put(side, null);
             landedFoot.put(side, new Notification());
             errorRecoveryStableCounts.put(side, 0);
+            isSwinging.put(side, false);
         }
     }
 
@@ -162,21 +164,40 @@ public class RDXVRSteppingTracker
 
    public boolean isFootLanding(RobotSide side)
    {
+      if (side == RobotSide.LEFT)
+         LogTools.warn(currentFootHeight.get(side));
+      // landing = not in contact, was swinging at least once, and now below 5 cm
+      if (!isUserStepping.get(side))
+         return false;
+
+      if (!isSwinging.get(side))
+         return false;
+
+      return currentFootHeight.get(side) <= 0.04;
+   }
+
+   public void setIsSwinging(RobotSide side, boolean value)
+   {
+      isSwinging.put(side, value);
+   }
+
+   public boolean isFootCloseToGround(RobotSide side)
+   {
       if (!isUserStepping.get(side))
          return false;
 
       double height = currentFootHeight.get(side);
-      return height <= LANDING_BLEND_START_HEIGHT;
+      return height <= CLOSE_TO_GROUND_BLEND_START_HEIGHT;
    }
 
-   public double getLandingBlendFactor(RobotSide side)
+   public double getCloseToGroundBlendFactor(RobotSide side)
    {
-      if (!isFootLanding(side))
+      if (!isFootCloseToGround(side))
          return 0.0;
 
       double height = currentFootHeight.get(side);
-      double start = LANDING_BLEND_START_HEIGHT;
-      double end = LANDING_HEIGHT_THRESHOLD;
+      double start = CLOSE_TO_GROUND_BLEND_START_HEIGHT;
+      double end = CLOSE_TO_GROUND_HEIGHT_THRESHOLD;
 
       if (height >= start)
          return 0.0;
