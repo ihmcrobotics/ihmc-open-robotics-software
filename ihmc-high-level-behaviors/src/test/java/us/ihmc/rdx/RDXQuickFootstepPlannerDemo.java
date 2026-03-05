@@ -6,6 +6,7 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.behaviors.tools.MinimalFootstep;
 import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -52,6 +53,12 @@ public class RDXQuickFootstepPlannerDemo
    private final int[] maxSteps = {50};
    private final int[] numberOfWaypoints = {0};
    private final ImBoolean includeGoalSteps = new ImBoolean(true);
+   private final float[] hipWidthCm = {12.0f};
+   private final float[] stepLengthCm = {28.0f};
+   private final int[] nextPelvisYawLimitDeg = {35};
+   private final int[] inwardLimitDeg = {10};
+   private final int[] outwardLimitDeg = {50};
+   private final int[] stepAngleLimitDeg = {115};
 
    public RDXQuickFootstepPlannerDemo()
    {
@@ -137,9 +144,57 @@ public class RDXQuickFootstepPlannerDemo
 
          private void renderImGuiWidgets()
          {
-            ImGui.pushItemWidth(ImGui.getColumnWidth());
+            ImGui.pushItemWidth(15.0f * ImGui.getFontSize());
             if (ImGui.sliderInt("###Max Steps", maxSteps, 1, 25, "Max steps: %d"))
                planner.setMaxSteps(maxSteps[0]);
+            if (ImGui.sliderFloat("###Hip Width", hipWidthCm, 0.0f, 24.0f, "Hip width: %.1f cm"))
+               planner.setHipWidth(hipWidthCm[0] / 100.0);
+            ImGui.sameLine();
+            if (ImGui.button("Default##HipWidth"))
+            {
+               hipWidthCm[0] = 12.0f;
+               planner.setHipWidth(0.12);
+            }
+            if (ImGui.sliderFloat("###Step Length", stepLengthCm, 0.0f, 56.0f, "Step length: %.1f cm"))
+               planner.setStepLength(stepLengthCm[0] / 100.0);
+            ImGui.sameLine();
+            if (ImGui.button("Default##StepLength"))
+            {
+               stepLengthCm[0] = 28.0f;
+               planner.setStepLength(0.28);
+            }
+            if (ImGui.sliderInt("###Next Pelvis Yaw Limit", nextPelvisYawLimitDeg, 0, 70, "Next pelvis yaw limit: %d deg"))
+               planner.setNextPelvisYawLimit(Math.toRadians(nextPelvisYawLimitDeg[0]));
+            ImGui.sameLine();
+            if (ImGui.button("Default##NextPelvisYawLimit"))
+            {
+               nextPelvisYawLimitDeg[0] = 35;
+               planner.setNextPelvisYawLimit(Math.toRadians(35));
+            }
+            if (ImGui.sliderInt("###Inward Limit", inwardLimitDeg, 0, 20, "Inward limit: %d deg"))
+               planner.setInwardLimit(Math.toRadians(inwardLimitDeg[0]));
+            ImGui.sameLine();
+            if (ImGui.button("Default##InwardLimit"))
+            {
+               inwardLimitDeg[0] = 10;
+               planner.setInwardLimit(Math.toRadians(10));
+            }
+            if (ImGui.sliderInt("###Outward Limit", outwardLimitDeg, 0, 100, "Outward limit: %d deg"))
+               planner.setOutwardLimit(Math.toRadians(outwardLimitDeg[0]));
+            ImGui.sameLine();
+            if (ImGui.button("Default##OutwardLimit"))
+            {
+               outwardLimitDeg[0] = 50;
+               planner.setOutwardLimit(Math.toRadians(50));
+            }
+            if (ImGui.sliderInt("###Step Angle Limit", stepAngleLimitDeg, 0, 230, "Step angle limit: %d deg"))
+               planner.setStepAngleLimit(Math.toRadians(stepAngleLimitDeg[0]));
+            ImGui.sameLine();
+            if (ImGui.button("Default##StepAngleLimit"))
+            {
+               stepAngleLimitDeg[0] = 115;
+               planner.setStepAngleLimit(Math.toRadians(115));
+            }
             ImGui.sliderInt("###Waypoints", numberOfWaypoints, 0, 5, "Waypoints: %d");
             ImGui.checkbox("Plan to goal", includeGoalSteps);
             ImGui.popItemWidth();
@@ -225,8 +280,8 @@ public class RDXQuickFootstepPlannerDemo
                      builder.addLine(swingHipAir.get(side), goalDirectionAir.get(side), 0.01, Color.SKY);
                   }
                   builder.addLine(swingHipAir.get(planner.getFootToSwing()), planner.getSwingEnd().getPosition(), 0.01, Color.WHITE);
-                  builder.addSphere(0.015, planner.getSwingHip().get(planner.getFootToSwing()).getPosition(),
-                                    RDXFootstepGraphic.FOOT_COLORS.get(planner.getFootToSwing()));
+//                  builder.addSphere(0.015, planner.getSwingHip().get(planner.getFootToSwing()).getPosition(),
+//                                    RDXFootstepGraphic.FOOT_COLORS.get(planner.getFootToSwing()));
                   builder.addSphere(0.01, planner.getPelvis().get(planner.getFootToSwing()).getPosition(), Color.WHITE);
                   Vector3D pelvisForward = new Vector3D(Axis3D.X);
                   planner.getPelvis().get(planner.getFootToSwing()).transform(pelvisForward);
@@ -263,6 +318,38 @@ public class RDXQuickFootstepPlannerDemo
                });
                LibGDXTools.toLibGDX(planner.getGoalMid().getPosition(), boundaryModel.transform);
                visualModels.add(boundaryModel);
+
+               RobotSide hipSide = planner.getFootToSwing().getOppositeSide();
+               Pose3D swingHip = planner.getSwingHip().get(hipSide);
+               ModelInstance steppableAreaModel = RDXModelBuilder.buildModelInstance(builder ->
+               {
+                  List<Point3D> points = new ArrayList<>();
+                  Point3D start = new Point3D();
+                  points.add(start);
+                  Vector3D swingHipLateral = new Vector3D(0.0, hipSide.negateIfRightSide(1.0), 0.0);
+                  double stepLength = stepLengthCm[0] / 100.0;
+                  swingHipLateral.scale(stepLength);
+                  Vector3D frontBoundVector = new Vector3D(swingHipLateral);
+                  Vector3D backBoundVector = new Vector3D(swingHipLateral);
+                  double stepAngleLimit = Math.toRadians(stepAngleLimitDeg[0]);
+                  new AxisAngle(Axis3D.Z, (hipSide == RobotSide.LEFT ? -1.0 : 1.0) * stepAngleLimit).transform(frontBoundVector);
+                  new AxisAngle(Axis3D.Z, (hipSide == RobotSide.LEFT ? 1.0 : -1.0) * stepAngleLimit).transform(backBoundVector);
+                  Point3D frontBound = new Point3D(start);
+                  frontBound.add(frontBoundVector);
+                  points.add(frontBound);
+                  Point3D backBound = new Point3D(start);
+                  backBound.add(backBoundVector);
+                  points.add(backBound);
+
+                  builder.addLine(start, frontBound, 0.002, Color.WHITE);
+                  builder.addLine(start, backBound, 0.002, Color.WHITE);
+                  if (hipSide == RobotSide.LEFT)
+                     builder.addArcTorus(-stepAngleLimit + Math.PI / 2.0, stepAngleLimit + Math.PI / 2.0, stepLength, 0.002, Color.WHITE);
+                  else
+                     builder.addArcTorus(-stepAngleLimit - Math.PI / 2.0, stepAngleLimit - Math.PI / 2.0, stepLength, 0.002, Color.WHITE);
+               });
+               LibGDXTools.toLibGDX(new RigidBodyTransform(swingHip), steppableAreaModel.transform);
+               visualModels.add(steppableAreaModel);
 
                float textHeight = 0.08f;
                RDX3DSituatedText footstepIndexText = new RDX3DSituatedText(String.valueOf(footstepIndex), textHeight);
