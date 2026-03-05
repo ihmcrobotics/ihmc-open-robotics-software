@@ -32,8 +32,8 @@ public class BehaviorTreeNodeExecutor<S extends BehaviorTreeNodeState<D>,
    private transient BehaviorTreeNodeExecutor<?, ?> parent;
 
    protected final DRCRobotModel robotModel;
-   protected final ROS2ControllerHelper ros2ControllerHelper;
-   protected final ROS2SyncedRobotModel syncedRobot;
+   protected ROS2ControllerHelper ros2ControllerHelper;
+   protected ROS2SyncedRobotModel syncedRobot;
    protected final ControllerStatusTracker controllerStatusTracker;
    protected final SideDependentList<AbilityHandActionComms> abilityHandComms;
    protected final BehaviorTreeSceneExecutor scene;
@@ -75,6 +75,12 @@ public class BehaviorTreeNodeExecutor<S extends BehaviorTreeNodeState<D>,
       this.controllerStatusTracker = controllerStatusTracker;
       this.abilityHandComms = abilityHandComms;
       this.scene = scene;
+   }
+
+   public void swapActiveRobot(ROS2ControllerHelper ros2ControllerHelper, ROS2SyncedRobotModel syncedRobot)
+   {
+       this.ros2ControllerHelper = ros2ControllerHelper;
+       this.syncedRobot = syncedRobot;
    }
 
    /**
