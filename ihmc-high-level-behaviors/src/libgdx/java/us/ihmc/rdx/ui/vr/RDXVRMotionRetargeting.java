@@ -1,5 +1,6 @@
 package us.ihmc.rdx.ui.vr;
 
+import org.jfree.util.Log;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -82,6 +83,7 @@ public class RDXVRMotionRetargeting
    private final SideDependentList<Boolean> isFootInContact = new SideDependentList<>();
    private boolean controllingFeet = false;
 
+   private static final double COM_ALPHA = 0.15;
    private static final double PELVIS_ALPHA = 0.05;
    private final FramePose3D filteredPelvisFramePose = new FramePose3D(); // low-pass state
 
@@ -89,12 +91,12 @@ public class RDXVRMotionRetargeting
    private final SideDependentList<Double> swingTargetFootHeight = new SideDependentList<>();
    private final SideDependentList<Double> blendedFootHeight = new SideDependentList<>();
    private final SideDependentList<Boolean> wasFootInContact = new SideDependentList<>();
-   // Tune these
-   private static final double MIN_SWING_LIFT = 0.2; // above initial height
+   private final SideDependentList<Boolean> hasReachedMinSwing = new SideDependentList<>();
+   private static final double MIN_SWING_LIFT = 0.4; // above initial height
    private static final double SWING_TARGET_CATCHUP_ALPHA = 0.2; // how fast swing target chases tracker
    private static final double SWING_Z_BLEND_ALPHA = 0.2;        // how fast blended Z chases swing target
-   private static final double LANDING_Z_BLEND_ALPHA = 0.8;      // how fast blended Z chases tracker during landing
-
+   private static final double LANDING_Z_BLEND_ALPHA = 0.2;      // how fast blended Z chases tracker during landing
+   private static final double CONTACT_Z_BLEND_ALPHA = 0.2;
 
    /**
     * Constructor for the motion retargeting class.
@@ -131,6 +133,7 @@ public class RDXVRMotionRetargeting
          swingTargetFootHeight.put(side, 0.0);
          blendedFootHeight.put(side, 0.0);
          wasFootInContact.put(side, true);
+         hasReachedMinSwing.put(side, false);
       }
    }
 
@@ -276,8 +279,7 @@ public class RDXVRMotionRetargeting
                normalizedOffset = 0.0;
             }
             // Apply a low-pass filter to smooth normalized offset fluctuations
-            double alpha = 0.15; // tuning parameter: smaller = smoother, larger = more responsive
-            double filteredNormalizedOffset = previousOffsetValue + alpha * (normalizedOffset - previousOffsetValue);
+            double filteredNormalizedOffset = previousOffsetValue + COM_ALPHA * (normalizedOffset - previousOffsetValue);
             // Clamp to [0,1]
             filteredNormalizedOffset = Math.max(0.0, Math.min(1.0, filteredNormalizedOffset));
             // Store for next iteration
@@ -441,42 +443,55 @@ public class RDXVRMotionRetargeting
                // start swing at at least MIN_SWING_LIFT
                double minSwing = initialHeight + MIN_SWING_LIFT;
                currentSwingTarget = Math.max(trackerHeight, minSwing);
-               if (side == RobotSide.LEFT)
-                  LogTools.info("Swing target: {}", currentSwingTarget);
+               isFootInContact.put(side, false);
             }
 
+            double minSwingThreshold = initialHeight + MIN_SWING_LIFT;
             // 2) High swing: let target chase tracker if tracker goes higher
-            if (!inContact && trackerHeight > currentSwingTarget)
+            if (!inContact && trackerHeight > minSwingThreshold)
             {
                // smooth catch-up of swing target to tracker
                currentSwingTarget = currentSwingTarget + SWING_TARGET_CATCHUP_ALPHA * (trackerHeight - currentSwingTarget);
-               if (side == RobotSide.LEFT)
-                  LogTools.info("HIGH swing target TRACKER ABOVE: {}", currentSwingTarget);
+               isFootInContact.put(side, false);
             }
 
             // 3) Landing: blend Z towards tracker when landing is detected
-            if (steppingTracker.isFootLanding(side))
+            if (steppingTracker.isFootLanding(side) && hasReachedMinSwing.get(side))
             {
                currentBlendedHeight = currentBlendedHeight
                                       + LANDING_Z_BLEND_ALPHA * (trackerHeight - currentBlendedHeight);
-               if (side == RobotSide.LEFT)
-                  LogTools.error("LANDING currentBlendedHeight: {}", currentBlendedHeight);
+               isFootInContact.put(side, false);
             }
             else if (!inContact)
             {
                // Swing phase, blend towards swing target
                currentBlendedHeight = currentBlendedHeight
                                       + SWING_Z_BLEND_ALPHA * (currentSwingTarget - currentBlendedHeight);
-               if (side == RobotSide.LEFT)
-                  LogTools.info("SWINGING currentBlendedHeight: {}", currentBlendedHeight);
                steppingTracker.setIsSwinging(side, true);
+               isFootInContact.put(side, false);
+               // Mark that we are high enough to allow landing
+               if (!hasReachedMinSwing.get(side) && currentBlendedHeight >= minSwingThreshold - 0.01)
+                  hasReachedMinSwing.put(side, true);
             }
             else
             {
-               // Hard contact: lock to tracker height
-               currentBlendedHeight = trackerHeight;
-               if (side == RobotSide.LEFT)
-                  LogTools.info("CONTACT currentBlendedHeight: {}", currentBlendedHeight);
+               // Contact phase: keep blending until we're close enough, then lock
+               double heightError = trackerHeight - currentBlendedHeight;
+               double heightErrorAbs = Math.abs(heightError);
+               double lockEpsilon = 0.02; // 2 cm, tune as needed
+
+               if (heightErrorAbs > lockEpsilon)
+               {
+                  currentBlendedHeight = currentBlendedHeight
+                                         + CONTACT_Z_BLEND_ALPHA * heightError;
+                  isFootInContact.put(side, false);
+               }
+               else
+               {
+                  currentBlendedHeight = trackerHeight;
+                  isFootInContact.put(side, true);
+                  hasReachedMinSwing.put(side, false);
+               }
                steppingTracker.setIsSwinging(side, false);
             }
             swingTargetFootHeight.put(side, currentSwingTarget);
@@ -502,7 +517,6 @@ public class RDXVRMotionRetargeting
             }
             constrainedFootFrames.get(side).update();
 
-            isFootInContact.put(side, steppingTracker.isFootInContact(side));
             if (!steppingTracker.isFootInContact(side))
             {
                retargetedFrames.put(side == RobotSide.LEFT ? LEFT_ANKLE : RIGHT_ANKLE, constrainedFootFrames.get(side));
@@ -541,6 +555,7 @@ public class RDXVRMotionRetargeting
          swingTargetFootHeight.put(side, 0.0);
          blendedFootHeight.put(side, 0.0);
          wasFootInContact.put(side, true);
+         hasReachedMinSwing.put(side, false);
       }
       retargetedFrames.clear();
       centerOfMassDesiredXYInWorld = null;

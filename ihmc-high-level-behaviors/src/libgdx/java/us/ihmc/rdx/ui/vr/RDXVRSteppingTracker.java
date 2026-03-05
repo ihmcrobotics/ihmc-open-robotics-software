@@ -13,6 +13,7 @@ public class RDXVRSteppingTracker
 {
     private static final double STEP_THRESHOLD = 0.02;
     private static final double LIFT_THRESHOLD = 0.02;
+   private static final double LANDING_THRESHOLD = 0.04;
     private static final double STABILITY_THRESHOLD = 0.01;
     private static final int STABILITY_ITERATIONS = 3;
 
@@ -173,7 +174,7 @@ public class RDXVRSteppingTracker
       if (!isSwinging.get(side))
          return false;
 
-      return currentFootHeight.get(side) <= 0.04;
+      return currentFootHeight.get(side) <= LANDING_THRESHOLD;
    }
 
    public void setIsSwinging(RobotSide side, boolean value)

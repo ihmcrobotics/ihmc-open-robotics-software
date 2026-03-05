@@ -570,7 +570,7 @@ public class RDXVRWholeBodyKinematicStreaming
 
                if (controlledSegment != null)
                {
-                  double alpha = 0.2; // tune: 0.1–0.3 typical
+                  double alpha = 0.2;
                   FramePose3D filteredPose = filteredDesiredPoses.get(segmentType);
                   if (filteredPose == null)
                   {
