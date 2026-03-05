@@ -215,7 +215,7 @@ public class QuickFootstepPlanner
                // Theres only sometimes you care about this, it's really a thing to sometimes save 1 step when approaching a diagonal stance
                while (collision && stepAngle >= -stepAngleLimit && stepAngle <= stepAngleLimit)
                {
-                  stepAngle += (side == RobotSide.LEFT ? 1.0 : -1.0) * Math.toRadians(5.0);
+                  stepAngle += (side == RobotSide.LEFT ? 1.0 : -1.0) * Math.toRadians(5.0); // TODO: Fix when going backwards
 
                   adjustedAngle = stepAngle + (side == RobotSide.LEFT ? Math.PI : 0.0);
                   toStepPosition = new Vector3D(length * Math.sin(adjustedAngle), length * -Math.cos(adjustedAngle), 0.0);
@@ -265,7 +265,7 @@ public class QuickFootstepPlanner
          {
             if (atGoal.get(side)) // Never step a foot already at goal
                continue;
-            if (atGoal.get(side.getOppositeSide()) || goalstepPossible.get(side)) // Always take last goal step
+            if (atGoal.get(side.getOppositeSide()) || goalstepPossible.get(side)) // Always take last goal step TODO Look at this
             {
                footToSwing = side;
                swingEnd.set(goal.get(side));
