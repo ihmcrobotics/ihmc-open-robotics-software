@@ -48,6 +48,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
@@ -101,6 +102,7 @@ public class RDXVRWholeBodyKinematicStreaming
 {
    public static final boolean ENABLE_YO_VARIABLE_TOOLBOX_SERVER = false;
    public static final double FRAME_AXIS_GRAPHICS_LENGTH = 0.2;
+   private static final double HEAD_GHOST_HIDE_DISTANCE = 0.25;
 
    private final RDXVRMultiContact multiContact;
    private final RDXVRHandControl handControl;
@@ -119,6 +121,7 @@ public class RDXVRWholeBodyKinematicStreaming
    private final ImBoolean showMiniGhost = new ImBoolean(true);
    private final FullHumanoidRobotModel ghostFullRobotModel;
    private final OneDoFJointBasics[] ghostOneDoFJointsExcludingHands;
+   private boolean hideGhostHead = false;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final RetargetingParameters retargetingParameters;
    private final ImBoolean isKSTEnabled = new ImBoolean(false);
@@ -639,6 +642,14 @@ public class RDXVRWholeBodyKinematicStreaming
                                                                                retargetingParameters.getAngularRateLimitation(HEAD));
             messageToPack.getInputs().add().set(message);
          }
+
+         if (getShowGhosts())
+         {
+            Point3D headsetInWorld = new Point3D(headset.getXForwardZUpHeadsetFrame().getTransformToRoot().getTranslation());
+            Point3D headInWorld = new Point3D(ghostFullRobotModel.getHead().getBodyFixedFrame().getTransformToWorldFrame().getTranslation());
+            double distance = headsetInWorld.distance(headInWorld);
+            hideGhostHead = distance < HEAD_GHOST_HIDE_DISTANCE;
+         }
       });
    }
 
@@ -831,6 +842,11 @@ public class RDXVRWholeBodyKinematicStreaming
             }
             if (ghostRobotGraphic.isActive())
             {
+               if (hideGhostHead)
+                  ghostRobotGraphic.setOpacityForBody(ghostFullRobotModel.getHead().getName(), 0.0);
+               else
+                  ghostRobotGraphic.setOpacityForBody(ghostFullRobotModel.getHead().getName(), 0.3);
+
                ghostRobotGraphic.setOpacityForBody(ghostFullRobotModel.getFoot(RobotSide.LEFT).getName(),
                                                  latestStatus.getLeftFootInContact() ? 1.0 : 0.3);
                ghostRobotGraphic.setOpacityForBody(ghostFullRobotModel.getFoot(RobotSide.RIGHT).getName(),
