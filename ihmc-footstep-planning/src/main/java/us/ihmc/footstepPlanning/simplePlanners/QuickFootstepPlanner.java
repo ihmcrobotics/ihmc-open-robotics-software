@@ -48,6 +48,7 @@ public class QuickFootstepPlanner
    private final SideDependentList<Pose3D> nextPelvis = new SideDependentList<>(() -> new Pose3D());
    private final SideDependentList<Pose3D> swingHip = new SideDependentList<>(() -> new Pose3D());
    private double swingDistance;
+   private double sidewaysness;
    private Runnable stepPlannedCallback = () -> {};
    private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
    private final Notification notification = new Notification();
@@ -132,6 +133,11 @@ public class QuickFootstepPlanner
          toGoalLinear.get(side).sub(goalMid.getPosition(), pelvis.get(side).getPosition());
          toGoalLinear.get(side).normalize();
 
+         // Compute sidewaysness: 1 straight sideways, 0.5 diagonal, 0 forward/backward
+         sidewaysness = 1.0 - (2.0 / Math.PI) * Math.abs(Math.asin(forward(pelvis.get(side)).dot(toGoalLinear.get(side))));
+         if (Double.isNaN(sidewaysness))
+            sidewaysness = 0.0;
+
          // Looking for a candidate hip
          // If close to goal, rotate to or toward goal orientation, else rotate to or toward path to goal
          nextPelvis.get(side).set(pelvis.get(side));
@@ -147,7 +153,7 @@ public class QuickFootstepPlanner
             toGoalFacing.negate();
          EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.X, toGoalFacing, toGoalFacingOrientation);
          boolean inGoalRange = pelvis.get(side).getPosition().distance(goalMid.getPosition()) < 2.0 * stepLength;
-         Quaternion desiredOrientation = new Quaternion(inGoalRange ? goalMid.getOrientation() : toGoalFacingOrientation);
+         Quaternion desiredOrientation = new Quaternion((inGoalRange || sidewaysness > 0.8) ? goalMid.getOrientation() : toGoalFacingOrientation);
          if (pelvis.get(side).getOrientation().distance(desiredOrientation) > nextPelvisYawLimit)
             new AxisAngle(Axis3D.Z, Math.signum(cross(forward(pelvis.get(side)),
                                                       forward(desiredOrientation)).getZ()) * nextPelvisYawLimit).transform(nextPelvis.get(side).getOrientation());
@@ -180,9 +186,16 @@ public class QuickFootstepPlanner
          // crossovers naturally limited by stepAngle min/max
          double length;
          if (stepAngle < -stepAngleLimit || stepAngle > stepAngleLimit) // can't step in the direction we want
-            length = 0.03; // step a tiny bit to inside of hip / penalize taking a step with this side
+            length = 0.05; // step a tiny bit to inside of hip / penalize taking a step with this side
          else
+         {
             length = Math.min(stepLength, swingHip.get(side).getPosition().distance(candidateHip.getPosition()));
+            if (waypoint.containsNaN())
+            { // Only step halfway to goal step to avoid tiny end steps
+               double distanceToGoal = swingHip.get(side).getPosition().distance(goal.get(side).getPosition());
+               length = Math.min(length, distanceToGoal / 2.0);
+            }
+         }
 
          // compute candidate pose from the 3 values
          double adjustedAngle = stepAngle + (side == RobotSide.LEFT ? Math.PI : 0.0);
@@ -193,25 +206,26 @@ public class QuickFootstepPlanner
 
          if (waypoint.containsNaN())
          {
-            // collision avoidance maneuvering. we can't step on our own feet given the 3 parameter model,
-            // but we could avoid stepping on the opposite goal foot (not applicable when going to waypoints)
-            ConvexPolygon2D candidatePolygon = createFootPolygon(candidate.get(side), 0.0);
-            boolean collision = convexPolygonTools.doPolygonsIntersect(candidatePolygon, createFootPolygon(goal.get(side.getOppositeSide()), 0.04));
-            // Theres only sometimes you care about this, it's really a thing to sometimes save 1 step when approaching a diagonal stance
-            // TODO: Implement collision avoidance
-            //   could be rotating away from the collision, rotating the foot, or bringing foot closer to hip (basically the 3 parameters, lol)
-            while (collision && stepAngle >= -stepAngleLimit && stepAngle <= stepAngleLimit)
+            if (sidewaysness < 0.8)
             {
-               stepAngle += (side == RobotSide.LEFT ? 1.0 : -1.0) * Math.toRadians(5.0);
+               // Collision avoidance maneuvering. we can't step on our own feet given the 3 parameter model,
+               // but we could avoid stepping on the opposite goal foot (not applicable when going to waypoints)
+               ConvexPolygon2D candidatePolygon = createFootPolygon(candidate.get(side), 0.0);
+               boolean collision = convexPolygonTools.doPolygonsIntersect(candidatePolygon, createFootPolygon(goal.get(side.getOppositeSide()), 0.04));
+               // Theres only sometimes you care about this, it's really a thing to sometimes save 1 step when approaching a diagonal stance
+               while (collision && stepAngle >= -stepAngleLimit && stepAngle <= stepAngleLimit)
+               {
+                  stepAngle += (side == RobotSide.LEFT ? 1.0 : -1.0) * Math.toRadians(5.0);
 
-               adjustedAngle = stepAngle + (side == RobotSide.LEFT ? Math.PI : 0.0);
-               toStepPosition = new Vector3D(length * Math.sin(adjustedAngle), length * -Math.cos(adjustedAngle), 0.0);
-               swingHip.get(side).transform(toStepPosition);
-               candidate.get(side).getPosition().set(startingPosition);
-               candidate.get(side).getPosition().add(toStepPosition);
+                  adjustedAngle = stepAngle + (side == RobotSide.LEFT ? Math.PI : 0.0);
+                  toStepPosition = new Vector3D(length * Math.sin(adjustedAngle), length * -Math.cos(adjustedAngle), 0.0);
+                  swingHip.get(side).transform(toStepPosition);
+                  candidate.get(side).getPosition().set(startingPosition);
+                  candidate.get(side).getPosition().add(toStepPosition);
 
-               candidatePolygon = createFootPolygon(candidate.get(side), 0.0);
-               collision = convexPolygonTools.doPolygonsIntersect(candidatePolygon, createFootPolygon(goal.get(side.getOppositeSide()), 0.04));
+                  candidatePolygon = createFootPolygon(candidate.get(side), 0.0);
+                  collision = convexPolygonTools.doPolygonsIntersect(candidatePolygon, createFootPolygon(goal.get(side.getOppositeSide()), 0.04));
+               }
             }
 
             // Calculate if direct step to goal is possible
@@ -303,14 +317,6 @@ public class QuickFootstepPlanner
       return location == null || (stepSide == RobotSide.LEFT && location == Location.RIGHT
                                || stepSide == RobotSide.RIGHT && location == Location.LEFT);
    }
-
-   // Compute sidewaysness: 1 straight sideways, 0.5 diagonal, 0 forward/backward
-   // Vector2D stanceToGoal = new Vector2D();
-   // stanceToGoal.sub(new Point2D(goalMid.getPosition()), new Point2D(stanceMid.getPosition()));
-   // stanceToGoal.normalize();
-   // Vector2D stanceMidForward = new Vector2D(Axis2D.X);
-   // stanceMid.getOrientation().transform(stanceMidForward);
-   // sidewaysness = 1.0 - (2.0 / Math.PI) * Math.abs(Math.asin(stanceMidForward.dot(stanceToGoal)));
 
    private Vector3D forward(Pose3D pose)
    {

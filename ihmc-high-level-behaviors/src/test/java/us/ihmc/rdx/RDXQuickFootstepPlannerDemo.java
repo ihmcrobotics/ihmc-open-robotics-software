@@ -344,9 +344,15 @@ public class RDXQuickFootstepPlannerDemo
                   builder.addLine(start, frontBound, 0.002, Color.WHITE);
                   builder.addLine(start, backBound, 0.002, Color.WHITE);
                   if (hipSide == RobotSide.LEFT)
+                  {
                      builder.addArcTorus(-stepAngleLimit + Math.PI / 2.0, stepAngleLimit + Math.PI / 2.0, stepLength, 0.002, Color.WHITE);
+                     builder.addArcTorus(-(1.5 * Math.PI - stepAngleLimit), 0.5 * Math.PI - stepAngleLimit, 0.05, 0.002, Color.WHITE);
+                  }
                   else
+                  {
                      builder.addArcTorus(-stepAngleLimit - Math.PI / 2.0, stepAngleLimit - Math.PI / 2.0, stepLength, 0.002, Color.WHITE);
+                     builder.addArcTorus(-(0.5 * Math.PI - stepAngleLimit), 1.5 * Math.PI - stepAngleLimit, 0.05, 0.002, Color.WHITE);
+                  }
                });
                LibGDXTools.toLibGDX(new RigidBodyTransform(swingHip), steppableAreaModel.transform);
                visualModels.add(steppableAreaModel);
