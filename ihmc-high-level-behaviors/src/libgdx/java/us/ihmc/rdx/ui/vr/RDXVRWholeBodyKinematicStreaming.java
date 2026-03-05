@@ -842,10 +842,10 @@ public class RDXVRWholeBodyKinematicStreaming
             }
             if (ghostRobotGraphic.isActive())
             {
-               if (hideGhostHead)
-                  ghostRobotGraphic.setOpacityForBody(ghostFullRobotModel.getHead().getName(), 0.0);
-               else
-                  ghostRobotGraphic.setOpacityForBody(ghostFullRobotModel.getHead().getName(), 0.3);
+//               if (hideGhostHead)
+//                  ghostRobotGraphic.setOpacityForBody(ghostFullRobotModel.getHead().getName(), 0.0);
+//               else
+//                  ghostRobotGraphic.setOpacityForBody(ghostFullRobotModel.getHead().getName(), 0.3);
 
                ghostRobotGraphic.setOpacityForBody(ghostFullRobotModel.getFoot(RobotSide.LEFT).getName(),
                                                  latestStatus.getLeftFootInContact() ? 1.0 : 0.3);

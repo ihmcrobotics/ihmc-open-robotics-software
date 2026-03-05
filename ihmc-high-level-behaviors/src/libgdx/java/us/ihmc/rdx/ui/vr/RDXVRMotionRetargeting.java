@@ -92,7 +92,7 @@ public class RDXVRMotionRetargeting
    private final SideDependentList<Double> blendedFootHeight = new SideDependentList<>();
    private final SideDependentList<Boolean> wasFootInContact = new SideDependentList<>();
    private final SideDependentList<Boolean> hasReachedMinSwing = new SideDependentList<>();
-   private static final double MIN_SWING_LIFT = 0.4; // above initial height
+   private static final double MIN_SWING_LIFT = 0.15; // above initial height
    private static final double SWING_TARGET_CATCHUP_ALPHA = 0.2; // how fast swing target chases tracker
    private static final double SWING_Z_BLEND_ALPHA = 0.2;        // how fast blended Z chases swing target
    private static final double LANDING_Z_BLEND_ALPHA = 0.2;      // how fast blended Z chases tracker during landing

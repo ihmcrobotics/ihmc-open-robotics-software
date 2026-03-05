@@ -165,8 +165,6 @@ public class RDXVRSteppingTracker
 
    public boolean isFootLanding(RobotSide side)
    {
-      if (side == RobotSide.LEFT)
-         LogTools.warn(currentFootHeight.get(side));
       // landing = not in contact, was swinging at least once, and now below 5 cm
       if (!isUserStepping.get(side))
          return false;
