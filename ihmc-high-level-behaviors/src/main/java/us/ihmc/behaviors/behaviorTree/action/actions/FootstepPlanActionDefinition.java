@@ -114,8 +114,8 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       quickStepLength = new CRDTBidirectionalDouble(this, 0.28);
       quickNextPelvisYawLimit = new CRDTBidirectionalDouble(this, Math.toRadians(35.0));
       quickInwardLimit = new CRDTBidirectionalDouble(this, Math.toRadians(10.0));
-      quickOutwardLimit = new CRDTBidirectionalDouble(this, Math.toRadians(45.0));
-      quickStepAngleLimit = new CRDTBidirectionalDouble(this, Math.toRadians(100.0));
+      quickOutwardLimit = new CRDTBidirectionalDouble(this, Math.toRadians(50.0));
+      quickStepAngleLimit = new CRDTBidirectionalDouble(this, Math.toRadians(115.0));
       quickSwingTimeDistanceLower = new CRDTBidirectionalDouble(this, 0.3);
       quickSwingTimeDistanceUpper = new CRDTBidirectionalDouble(this, 0.7);
       quickMinSwingTime = new CRDTBidirectionalDouble(this, 0.8);
@@ -181,9 +181,9 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
                jsonNode.put("quickNextPelvisYawLimit", Math.toDegrees(quickNextPelvisYawLimit.getValue()));
             if (Math.abs(quickInwardLimit.getValue() - Math.toRadians(10.0)) > Math.toRadians(0.5))
                jsonNode.put("quickInwardLimit", Math.toDegrees(quickInwardLimit.getValue()));
-            if (Math.abs(quickOutwardLimit.getValue() - Math.toRadians(45.0)) > Math.toRadians(0.5))
+            if (Math.abs(quickOutwardLimit.getValue() - Math.toRadians(50.0)) > Math.toRadians(0.5))
                jsonNode.put("quickOutwardLimit", Math.toDegrees(quickOutwardLimit.getValue()));
-            if (Math.abs(quickStepAngleLimit.getValue() - Math.toRadians(100.0)) > Math.toRadians(0.5))
+            if (Math.abs(quickStepAngleLimit.getValue() - Math.toRadians(115.0)) > Math.toRadians(0.5))
                jsonNode.put("quickStepAngleLimit", Math.toDegrees(quickStepAngleLimit.getValue()));
             if (Math.abs(quickSwingTimeDistanceLower.getValue() - 0.3) > 0.005)
                jsonNode.put("quickSwingTimeDistanceLower", quickSwingTimeDistanceLower.getValue());
