@@ -82,7 +82,7 @@ public class RemoteHumanoidRobotInterface
       this.robotModel = robotModel;
       robotName = robotModel.getSimpleRobotName();
       jointMap = robotModel.getJointMap();
-      topicName = HumanoidControllerAPI.HUMANOID_CONTROLLER.withRobot(robotName);
+      topicName = HumanoidControllerAPI.getBaseTopic(robotName);
 
       controllerPublisherMap = new ROS2ControllerPublisherMap(ros2Node, robotName);
       publisherMap = new ROS2PublisherMap(ros2Node);
