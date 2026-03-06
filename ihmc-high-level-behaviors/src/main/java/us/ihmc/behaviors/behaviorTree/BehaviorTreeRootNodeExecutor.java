@@ -1,7 +1,12 @@
 package us.ihmc.behaviors.behaviorTree;
 
+import gnu.trove.map.TObjectDoubleMap;
+import gnu.trove.map.hash.TObjectDoubleHashMap;
+import org.apache.commons.lang3.function.TriFunction;
 import org.apache.logging.log4j.Level;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulation;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
@@ -10,7 +15,11 @@ import us.ihmc.behaviors.behaviorTree.control.FallbackNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.control.GotoNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneExecutor;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.util.ArrayList;
@@ -20,6 +29,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       implements BehaviorTreeRootNode<BehaviorTreeNodeExecutor<?, ?>>
 {
    private final BehaviorTreeExecutor tree;
+   private final TriFunction<DRCRobotModel, ROS2NodeBuilder, RigidBodyTransformReadOnly, HumanoidKinematicsSimulation> kinematicsSimulationBuilder;
    private final List<LeafNodeExecutor<?, ?>> orderedLeaves = new ArrayList<>();
    private final List<ActionNodeExecutor<?, ?>> orderedActions = new ArrayList<>();
    private final List<FallbackNodeExecutor> fallbackNodes = new ArrayList<>();
@@ -27,10 +37,20 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
    private final List<LeafNodeExecutor<?, ?>> failedLeaves = new ArrayList<>();
    private final List<LeafNodeExecutor<?, ?>> successfulLeaves = new ArrayList<>();
 
+   private ROS2Node previewROS2Node;
+   private ROS2ControllerHelper realROS2ControllerHelper;
+   private ROS2SyncedRobotModel realSyncedRobot;
+   private ROS2ControllerHelper previewROS2ControllerHelper;
+   private ROS2SyncedRobotModel previewSyncedRobot;
+   private boolean previewNeedsReset = false;
+   private final TObjectDoubleMap<String> resetJointAngles = new TObjectDoubleHashMap<>();
+   private HumanoidKinematicsSimulation previewSimulation;
+
    public BehaviorTreeRootNodeExecutor(long id,
                                        BehaviorTreeExecutor tree,
                                        WorkspaceResourceDirectory saveFileDirectory,
                                        ROS2ControllerHelper ros2ControllerHelper,
+                                       TriFunction<DRCRobotModel, ROS2NodeBuilder, RigidBodyTransformReadOnly, HumanoidKinematicsSimulation> kinematicsSimulationBuilder,
                                        ROS2SyncedRobotModel syncedRobot,
                                        ControllerStatusTracker controllerStatusTracker,
                                        SideDependentList<AbilityHandActionComms> abilityHandComms,
@@ -44,6 +64,9 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
             scene);
 
       this.tree = tree;
+      this.kinematicsSimulationBuilder = kinematicsSimulationBuilder;
+      this.realROS2ControllerHelper = ros2ControllerHelper;
+      this.realSyncedRobot = syncedRobot;
    }
 
    @Override
@@ -81,6 +104,40 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
    public void update()
    {
       super.update();
+
+      if (state.getPreviewModeEnabled())
+      {
+         if (previewSimulation == null)
+         {
+            // Put preview simulation on a different domain ID
+            ROS2NodeBuilder ros2NodeBuilder = new ROS2NodeBuilder().domainId(165); // TODO: Decide what domain is better
+            previewROS2Node = ros2NodeBuilder.build("behavior_preview");
+            previewROS2ControllerHelper = new ROS2ControllerHelper(previewROS2Node, robotModel.getSimpleRobotName());
+            previewSyncedRobot = new ROS2SyncedRobotModel(rootNode.robotModel, previewROS2Node);
+            for (OneDoFJointBasics oneDoFJoint : previewSyncedRobot.getFullRobotModel().getOneDoFJoints())
+                resetJointAngles.put(oneDoFJoint.getName(), oneDoFJoint.getQ());
+            RigidBodyTransformReadOnly walkingFrame = syncedRobot.getReferenceFrames().getMidFeetUnderPelvisFrame().getTransformToWorldFrame();
+            previewSimulation = kinematicsSimulationBuilder.apply(robotModel, ros2NodeBuilder, walkingFrame);
+         }
+
+         previewSyncedRobot.update();
+
+         if (previewNeedsReset)
+         {
+            previewNeedsReset = false;
+            for (OneDoFJointBasics oneDoFJoint : realSyncedRobot.getFullRobotModel().getOneDoFJoints())
+               resetJointAngles.put(oneDoFJoint.getName(), oneDoFJoint.getQ());
+            previewSimulation.reinitialize(realSyncedRobot.getReferenceFrames().getPelvisFrame().getTransformToRoot(), resetJointAngles);
+         }
+      }
+      else
+         previewNeedsReset = true;
+
+      BehaviorTreeTools.runForSubtreeNodes(this, node ->
+      {
+         node.ros2ControllerHelper = state.getPreviewModeEnabled() ? previewROS2ControllerHelper : realROS2ControllerHelper;
+         node.syncedRobot = state.getPreviewModeEnabled() ? previewSyncedRobot : realSyncedRobot;
+      });
 
       orderedLeaves.clear();
       orderedActions.clear();
@@ -221,6 +278,16 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
             after = Math.max(after, fallbackNode.getCatchLeaves().get(0).getState().getLeafIndex() - 1);
 
       return after;
+   }
+
+   @Override
+   public void destroy()
+   {
+      super.destroy();
+
+      previewROS2Node.destroy();
+      previewSyncedRobot.destroy();
+      previewSimulation.destroy();
    }
 
    public boolean isEndOfSequence()
