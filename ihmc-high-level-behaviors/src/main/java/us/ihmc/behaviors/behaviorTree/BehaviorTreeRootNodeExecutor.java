@@ -117,7 +117,6 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
             for (OneDoFJointBasics oneDoFJoint : previewSyncedRobot.getFullRobotModel().getOneDoFJoints())
                 resetJointAngles.put(oneDoFJoint.getName(), oneDoFJoint.getQ());
             RigidBodyTransformReadOnly walkingFrame = syncedRobot.getReferenceFrames().getMidFeetUnderPelvisFrame().getTransformToWorldFrame();
-            // TODO: Probably only make this the first time its made
             previewSimulation = kinematicsSimulationBuilder.apply(robotModel, ros2NodeBuilder, walkingFrame);
          }
 
