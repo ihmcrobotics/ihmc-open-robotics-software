@@ -1,7 +1,10 @@
 package us.ihmc.behaviors.behaviorTree;
 
+import org.apache.commons.lang3.function.TriFunction;
 import org.apache.logging.log4j.Level;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulation;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
@@ -10,7 +13,10 @@ import us.ihmc.behaviors.behaviorTree.control.FallbackNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.control.GotoNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneExecutor;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.util.ArrayList;
@@ -20,6 +26,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       implements BehaviorTreeRootNode<BehaviorTreeNodeExecutor<?, ?>>
 {
    private final BehaviorTreeExecutor tree;
+   private final TriFunction<DRCRobotModel, ROS2NodeBuilder, RigidBodyTransformReadOnly, HumanoidKinematicsSimulation> kinematicsSimulationBuilder;
    private final List<LeafNodeExecutor<?, ?>> orderedLeaves = new ArrayList<>();
    private final List<ActionNodeExecutor<?, ?>> orderedActions = new ArrayList<>();
    private final List<FallbackNodeExecutor> fallbackNodes = new ArrayList<>();
@@ -27,10 +34,16 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
    private final List<LeafNodeExecutor<?, ?>> failedLeaves = new ArrayList<>();
    private final List<LeafNodeExecutor<?, ?>> successfulLeaves = new ArrayList<>();
 
+   private ROS2Node previewROS2Node;
+   private ROS2ControllerHelper previewROS2ControllerHelper;
+   private ROS2SyncedRobotModel previewSyncedRobot;
+   private HumanoidKinematicsSimulation previewSimulation;
+
    public BehaviorTreeRootNodeExecutor(long id,
                                        BehaviorTreeExecutor tree,
                                        WorkspaceResourceDirectory saveFileDirectory,
                                        ROS2ControllerHelper ros2ControllerHelper,
+                                       TriFunction<DRCRobotModel, ROS2NodeBuilder, RigidBodyTransformReadOnly, HumanoidKinematicsSimulation> kinematicsSimulationBuilder,
                                        ROS2SyncedRobotModel syncedRobot,
                                        ControllerStatusTracker controllerStatusTracker,
                                        SideDependentList<AbilityHandActionComms> abilityHandComms,
@@ -44,6 +57,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
             scene);
 
       this.tree = tree;
+      this.kinematicsSimulationBuilder = kinematicsSimulationBuilder;
    }
 
    @Override
@@ -81,6 +95,18 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
    public void update()
    {
       super.update();
+
+      if (state.getPreviewModeEnabled() && previewSimulation == null)
+      {
+         // Put preview simulation on a different domain ID
+         ROS2NodeBuilder ros2NodeBuilder = new ROS2NodeBuilder().domainId(232); // TODO: Decide what domain is better
+         previewROS2Node = ros2NodeBuilder.build("behavior_preview");
+         previewROS2ControllerHelper = new ROS2ControllerHelper(previewROS2Node, robotModel.getSimpleRobotName());
+         previewSyncedRobot = new ROS2SyncedRobotModel(rootNode.robotModel, previewROS2Node);
+         RigidBodyTransformReadOnly walkingFrame = syncedRobot.getReferenceFrames().getMidFeetUnderPelvisFrame().getTransformToWorldFrame();
+         // TODO: Probably only make this the first time its made
+         previewSimulation = kinematicsSimulationBuilder.apply(robotModel, ros2NodeBuilder, walkingFrame);
+      }
 
       orderedLeaves.clear();
       orderedActions.clear();

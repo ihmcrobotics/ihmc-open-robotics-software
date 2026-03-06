@@ -7,7 +7,6 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.condition.BehaviorTreeLLMEncoding;
-import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.behaviorTree.scene.RDXBehaviorTreeScene;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
@@ -31,6 +30,7 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBooleanWrapper automaticExecutionCheckbox;
    private final ImBooleanWrapper concurrencyEnabledCheckbox;
+   private final ImBooleanWrapper previewModeCheckbox;
    private final TLongObjectHashMap<RDXBehaviorTreeNode<?, ?>> idToNodeMap = new TLongObjectHashMap<>();
    private final List<RDXLeafNode<?, ?>> orderedLeaves = new ArrayList<>();
    private final List<RDXActionNode<?, ?>> orderedActions = new ArrayList<>();
@@ -63,6 +63,12 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
       concurrencyEnabledCheckbox = new ImBooleanWrapper(state::getConcurrencyEnabled,
                                                         state::setConcurrencyEnabled,
                                                         imBoolean -> ImGui.checkbox(labels.get("Concurrency Enabled"), imBoolean));
+      previewModeCheckbox = new ImBooleanWrapper(state::getPreviewModeEnabled,
+                                                 state::setPreviewModeEnabled,
+                                                 imBoolean -> ImGui.checkbox(labels.get("Preview Mode"), imBoolean));
+      previewModeCheckbox.set(false);
+
+      ///  create ghost robot
    }
 
    @Override
@@ -169,6 +175,8 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
 
       ImGui.sameLine();
       concurrencyEnabledCheckbox.renderImGuiWidget();
+      ImGui.sameLine();
+      previewModeCheckbox.renderImGuiWidget();
 
       if (currentlyExecutingLeaves.isEmpty())
       {

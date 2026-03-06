@@ -28,14 +28,9 @@ import us.ihmc.tools.io.WorkspaceResourceFile;
 
 public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeRootNodeExecutor, BehaviorTreeNodeExecutor<?, ?>>
 {
-   private final TriFunction<DRCRobotModel, ROS2NodeBuilder, RigidBodyTransformReadOnly, HumanoidKinematicsSimulation> kinematicsSimulationBuilder;
    private final ControllerStatusTracker controllerStatusTracker;
    private final BehaviorTreeSceneExecutor scene;
    private final SideDependentList<AbilityHandActionComms> abilityHandComms = new SideDependentList<>();
-   private final ROS2Node previewROS2Node;
-   private final ROS2ControllerHelper previewROS2ControllerHelper;
-   private final ROS2SyncedRobotModel previewSyncedRobot;
-   private HumanoidKinematicsSimulation previewSimulation;
 
    public BehaviorTreeExecutor(
          ROS2SyncedRobotModel syncedRobot,
@@ -53,26 +48,16 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeRootNodeExecu
             new WorkspaceResourceDirectory(BehaviorTreeExecutor.class, "/behaviorTrees"),
             new BehaviorTreeExecutorNodeBuilder());
 
-      this.kinematicsSimulationBuilder = kinematicsSimulationBuilder;
-
       controllerStatusTracker = new ControllerStatusTracker(new LogToolsLogger(), ros2ControllerHelper.getROS2Node(), syncedRobot);
       for (RobotSide robotSide : RobotSide.values)
          abilityHandComms.put(robotSide, new AbilityHandActionComms(robotSide, ros2ControllerHelper.getROS2Node()));
       scene = new BehaviorTreeSceneExecutor(crdtInfo, this::getAndIncrementNextID, syncedRobot, imageSensor, yolo, foundationPose, terrainMapData);
       setScene(scene);
 
-      // Put preview simulation on a different domain ID
-      ROS2NodeBuilder ros2NodeBuilder = new ROS2NodeBuilder().domainId(232); // TODO: Decide what domain is better
-      previewROS2Node = ros2NodeBuilder.build("behavior_preview");
-      previewROS2ControllerHelper = new ROS2ControllerHelper(previewROS2Node, robotModel.getSimpleRobotName());
-      previewSyncedRobot = new ROS2SyncedRobotModel(rootNode.robotModel, previewROS2Node);
-      RigidBodyTransformReadOnly walkingFrame = syncedRobot.getReferenceFrames().getMidFeetUnderPelvisFrame().getTransformToWorldFrame();
-      // TODO: Probably only make this the first time its made
-      previewSimulation = kinematicsSimulationBuilder.apply(robotModel, ros2NodeBuilder, walkingFrame);
-
       ((BehaviorTreeExecutorNodeBuilder) getNodeBuilder()).initialize(this,
                                                                       saveFileDirectory,
                                                                       ros2ControllerHelper,
+                                                                      kinematicsSimulationBuilder,
                                                                       syncedRobot,
                                                                       controllerStatusTracker,
                                                                       abilityHandComms,
