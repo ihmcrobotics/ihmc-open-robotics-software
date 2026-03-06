@@ -3,7 +3,6 @@ package us.ihmc.footstepPlanning.simplePlanners;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.Axis3D;
-import us.ihmc.euclid.Location;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -307,21 +306,6 @@ public class QuickFootstepPlanner
       return polygon;
    }
 
-   private boolean isCrossover(Pose3D stance, Pose3D step, RobotSide stepSide, double more)
-   {
-      Vector3D stanceForward = forward(stance);
-      Point3D checkPosition = new Point3D(0.0, stepSide.negateIfLeftSide(more), 0.0);
-      stance.transform(checkPosition);
-      Location location = EuclidGeometryTools.whichSideOfLine2DIsPoint2DOn(step.getPosition().getX(),
-                                                                           step.getPosition().getY(),
-                                                                           checkPosition.getX(),
-                                                                           checkPosition.getY(),
-                                                                           stanceForward.getX(),
-                                                                           stanceForward.getY());
-      return location == null || (stepSide == RobotSide.LEFT && location == Location.RIGHT
-                               || stepSide == RobotSide.RIGHT && location == Location.LEFT);
-   }
-
    private Vector3D forward(Pose3D pose)
    {
       Vector3D forward = new Vector3D(Axis3D.X);
@@ -341,13 +325,6 @@ public class QuickFootstepPlanner
       Vector3D sub = new Vector3D();
       sub.sub(tuple1, tuple2);
       return sub;
-   }
-
-   private Vector3D direction(Tuple3DReadOnly tuple1, Tuple3DReadOnly tuple2)
-   {
-      Vector3D direction = sub(tuple1, tuple2);
-      direction.normalize();
-      return direction;
    }
 
    private Vector3D cross(Tuple3DReadOnly tuple1, Tuple3DReadOnly tuple2)
