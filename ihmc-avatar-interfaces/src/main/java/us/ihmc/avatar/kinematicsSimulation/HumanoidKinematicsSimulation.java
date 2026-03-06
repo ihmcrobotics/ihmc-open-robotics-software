@@ -586,7 +586,7 @@ public class HumanoidKinematicsSimulation
       latestWalkingStatus.set(WalkingStatus.fromByte(status.getWalkingStatus()));
    }
 
-   public void reinitialize(RigidBodyTransformReadOnly rootJointTransform, TObjectDoubleMap<String> jointPositions) // TODO: Revisit arg type
+   public void reinitialize(RigidBodyTransformReadOnly rootJointTransform, TObjectDoubleMap<String> jointPositions)
    {
       synchronized (this)
       {

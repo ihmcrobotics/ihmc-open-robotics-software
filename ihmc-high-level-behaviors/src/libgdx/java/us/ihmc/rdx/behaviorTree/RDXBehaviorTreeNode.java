@@ -72,7 +72,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
 
    protected final DRCRobotModel robotModel;
    protected final RDXBehaviorTreeScene scene;
-   protected final ROS2SyncedRobotModel syncedRobot;
+   protected ROS2SyncedRobotModel syncedRobot;
    protected final RobotCollisionModel selectionCollisionModel;
    protected final RDXBaseUI baseUI;
    protected final RDX3DPanel panel3D;

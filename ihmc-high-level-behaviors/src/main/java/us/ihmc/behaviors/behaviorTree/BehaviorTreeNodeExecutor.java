@@ -77,12 +77,6 @@ public class BehaviorTreeNodeExecutor<S extends BehaviorTreeNodeState<D>,
       this.scene = scene;
    }
 
-   public void swapActiveRobot(ROS2ControllerHelper ros2ControllerHelper, ROS2SyncedRobotModel syncedRobot)
-   {
-       this.ros2ControllerHelper = ros2ControllerHelper;
-       this.syncedRobot = syncedRobot;
-   }
-
    /**
     * A method that should be called before each {@link #tick}
     * in order for nodes to know when they are no longer being selected.
