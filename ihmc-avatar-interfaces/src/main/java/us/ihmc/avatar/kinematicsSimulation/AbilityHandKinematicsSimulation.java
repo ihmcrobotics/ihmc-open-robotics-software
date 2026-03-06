@@ -37,6 +37,9 @@ public class AbilityHandKinematicsSimulation
 
       ros2Node.createSubscription2(AbilityHandROS2API.COMMAND_TOPICS.get(side), commandNotification::set);
       statePublisher = ros2Node.createPublisher(AbilityHandROS2API.STATE_TOPICS.get(side));
+
+      applyGripTargets(AbilityHandGrip.RELAX);
+      applyDesiredPositionsToJoints();
    }
 
    public void update()
@@ -50,38 +53,13 @@ public class AbilityHandKinematicsSimulation
             desiredActuatorVelocitiesDeg[i1] = commandMessage.getGoalVelocities()[i1];
          if (controlMode == AbilityHandControlMode.GRIP)
          {
-            AbilityHandGrip grip = AbilityHandGrip.fromByte(commandMessage.getGrip());
-            gripStage = Math.max(0, grip.getNumberOfStages() - 1);
-            for (int i1 = 0; i1 < ACTUATOR_COUNT; i1++)
-               desiredActuatorPositionsDeg[i1] = 0.0;
-            for (int stage = 0; stage < grip.getNumberOfStages(); stage++)
-               for (int i1 = 0; i1 < grip.getFingersInStage(stage); i1++)
-               {
-                  int finger = grip.getStageFingerIndex(stage, i1);
-                  desiredActuatorPositionsDeg[finger] = grip.getStageFingerPosition(stage, i1);
-               }
+            applyGripTargets(AbilityHandGrip.fromByte(commandMessage.getGrip()));
          }
          else
             for (int i1 = 0; i1 < ACTUATOR_COUNT; i1++)
                desiredActuatorPositionsDeg[i1] = commandMessage.getGoalPositions()[i1];
 
-         double indexQ1 = Math.toRadians(desiredActuatorPositionsDeg[0]);
-         double middleQ1 = Math.toRadians(desiredActuatorPositionsDeg[1]);
-         double ringQ1 = Math.toRadians(desiredActuatorPositionsDeg[2]);
-         double pinkyQ1 = Math.toRadians(desiredActuatorPositionsDeg[3]);
-         double thumbQ1 = Math.toRadians(desiredActuatorPositionsDeg[5]);
-         double thumbQ2 = Math.toRadians(desiredActuatorPositionsDeg[4]);
-
-         joints[AbilityHandJointName.INDEX_Q1.ordinal()].setQ(indexQ1);
-         joints[AbilityHandJointName.INDEX_Q2.ordinal()].setQ(AbilityHandJointName.getQ2Position(indexQ1));
-         joints[AbilityHandJointName.MIDDLE_Q1.ordinal()].setQ(middleQ1);
-         joints[AbilityHandJointName.MIDDLE_Q2.ordinal()].setQ(AbilityHandJointName.getQ2Position(middleQ1));
-         joints[AbilityHandJointName.RING_Q1.ordinal()].setQ(ringQ1);
-         joints[AbilityHandJointName.RING_Q2.ordinal()].setQ(AbilityHandJointName.getQ2Position(ringQ1));
-         joints[AbilityHandJointName.PINKY_Q1.ordinal()].setQ(pinkyQ1);
-         joints[AbilityHandJointName.PINKY_Q2.ordinal()].setQ(AbilityHandJointName.getQ2Position(pinkyQ1));
-         joints[AbilityHandJointName.THUMB_Q1.ordinal()].setQ(thumbQ1);
-         joints[AbilityHandJointName.THUMB_Q2.ordinal()].setQ(thumbQ2);
+         applyDesiredPositionsToJoints();
       }
 
       actuatorPositionsDeg[0] = Math.toDegrees(joints[AbilityHandJointName.INDEX_Q1.ordinal()].getQ());
@@ -102,5 +80,39 @@ public class AbilityHandKinematicsSimulation
 
       if (stateThrottler.run())
          statePublisher.publish(stateMessage);
+   }
+
+   private void applyGripTargets(AbilityHandGrip grip)
+   {
+      gripStage = Math.max(0, grip.getNumberOfStages() - 1);
+      for (int i = 0; i < ACTUATOR_COUNT; i++)
+         desiredActuatorPositionsDeg[i] = 0.0;
+      for (int stage = 0; stage < grip.getNumberOfStages(); stage++)
+         for (int i = 0; i < grip.getFingersInStage(stage); i++)
+         {
+            int finger = grip.getStageFingerIndex(stage, i);
+            desiredActuatorPositionsDeg[finger] = grip.getStageFingerPosition(stage, i);
+         }
+   }
+
+   private void applyDesiredPositionsToJoints()
+   {
+      double indexQ1 = Math.toRadians(desiredActuatorPositionsDeg[0]);
+      double middleQ1 = Math.toRadians(desiredActuatorPositionsDeg[1]);
+      double ringQ1 = Math.toRadians(desiredActuatorPositionsDeg[2]);
+      double pinkyQ1 = Math.toRadians(desiredActuatorPositionsDeg[3]);
+      double thumbQ1 = Math.toRadians(desiredActuatorPositionsDeg[5]);
+      double thumbQ2 = Math.toRadians(desiredActuatorPositionsDeg[4]);
+
+      joints[AbilityHandJointName.INDEX_Q1.ordinal()].setQ(indexQ1);
+      joints[AbilityHandJointName.INDEX_Q2.ordinal()].setQ(AbilityHandJointName.getQ2Position(indexQ1));
+      joints[AbilityHandJointName.MIDDLE_Q1.ordinal()].setQ(middleQ1);
+      joints[AbilityHandJointName.MIDDLE_Q2.ordinal()].setQ(AbilityHandJointName.getQ2Position(middleQ1));
+      joints[AbilityHandJointName.RING_Q1.ordinal()].setQ(ringQ1);
+      joints[AbilityHandJointName.RING_Q2.ordinal()].setQ(AbilityHandJointName.getQ2Position(ringQ1));
+      joints[AbilityHandJointName.PINKY_Q1.ordinal()].setQ(pinkyQ1);
+      joints[AbilityHandJointName.PINKY_Q2.ordinal()].setQ(AbilityHandJointName.getQ2Position(pinkyQ1));
+      joints[AbilityHandJointName.THUMB_Q1.ordinal()].setQ(thumbQ1);
+      joints[AbilityHandJointName.THUMB_Q2.ordinal()].setQ(thumbQ2);
    }
 }
