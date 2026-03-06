@@ -122,8 +122,10 @@ public class QuickFootstepPlanner
       {
          swingHip.get(side).set(0.0, side.negateIfRightSide(2.0 * hipWidth), 0.0, 0.0, 0.0, 0.0);
          stance.get(side.getOppositeSide()).transform(swingHip.get(side));
+         swingHip.get(side).getOrientation().setToYawOrientation(swingHip.get(side).getYaw()); // Keep pelvis Z up
          pelvis.get(side).set(0.0, side.negateIfRightSide(hipWidth), 0.0, 0.0, 0.0, 0.0);
          stance.get(side.getOppositeSide()).transform(pelvis.get(side));
+         pelvis.get(side).getOrientation().setToYawOrientation(pelvis.get(side).getYaw()); // Keep pelvis Z up
 
          if (!waypoint.containsNaN() // Check if we hit a waypoint
           && pelvis.get(side).getPosition().distance(goalMid.getPosition()) < goalPositionTolerance
