@@ -15,7 +15,6 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.footstepPlanning.simplePlanners.QuickFootstep;
 import us.ihmc.footstepPlanning.simplePlanners.QuickFootstepPlanner;
 import us.ihmc.rdx.tools.LibGDXApplicationCreator;
 import us.ihmc.rdx.tools.LibGDXTools;
@@ -31,6 +30,8 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import java.util.ArrayList;
 import java.util.List;
 
+import static us.ihmc.footstepPlanning.simplePlanners.QuickFootstepPlanner.Footstep;
+
 public class RDXQuickFootstepPlannerDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI("Quick Footstep Planner Demo");
@@ -41,7 +42,7 @@ public class RDXQuickFootstepPlannerDemo
    private final List<RDXPose3DGizmo> waypointGizmos = new ArrayList<>();
    private ConvexPolygon2D foothold;
    private final QuickFootstepPlanner planner = new QuickFootstepPlanner();
-   private List<QuickFootstep> footstepPlan;
+   private List<Footstep> footstepPlan;
    private final List<ModelInstance> visualModels = new ArrayList<>();
    private final List<RDX3DSituatedText> footstepIndexTexts = new ArrayList<>();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
@@ -220,10 +221,10 @@ public class RDXQuickFootstepPlannerDemo
 
             ImGui.text("Planned Footsteps: " + footstepPlan.size());
             for (int i = 0; i < footstepPlan.size(); i++)
-               ImGui.text("Step " + i + ": " + footstepPlan.get(i).getSwingSide() + " to " + footstepPlan.get(i).getSwingEnd().getPosition()
-               + "  Yaw: (%.3f%s)%n\tDistance: %.3f".formatted(Math.toDegrees(footstepPlan.get(i).getSwingEnd().getYaw()),
+               ImGui.text("Step " + i + ": " + footstepPlan.get(i).swingSide() + " to " + footstepPlan.get(i).swingEnd().getPosition()
+               + "  Yaw: (%.3f%s)%n\tDistance: %.3f".formatted(Math.toDegrees(footstepPlan.get(i).swingEnd().getYaw()),
                                                                EuclidCoreMissingTools.DEGREE_SYMBOL,
-                                                               footstepPlan.get(i).getSwingDistance()));
+                                                               footstepPlan.get(i).swingDistance()));
          }
 
          @Override

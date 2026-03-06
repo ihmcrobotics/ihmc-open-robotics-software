@@ -20,7 +20,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
-import us.ihmc.footstepPlanning.simplePlanners.QuickFootstep;
 import us.ihmc.footstepPlanning.simplePlanners.QuickFootstepPlanner;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -33,6 +32,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessage.*;
+import static us.ihmc.footstepPlanning.simplePlanners.QuickFootstepPlanner.Footstep;
 
 public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanActionState, FootstepPlanActionDefinition>
 {
@@ -141,15 +141,15 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
             {
                if (previewPlanningThrottler.run())
                {
-                  List<QuickFootstep> footstepPlan = planQuickFootsteps();
+                  List<Footstep> footstepPlan = planQuickFootsteps();
 
                   var footstepsMessage = state.getPreviewFootsteps().accessValue();
                   footstepsMessage.clear();
-                  for (QuickFootstep footstep : footstepPlan)
+                  for (Footstep footstep : footstepPlan)
                   {
                      var messageFootstep = footstepsMessage.add();
-                     messageFootstep.setRobotSide(footstep.getSwingSide().toByte());
-                     messageFootstep.getSolePose().set(footstep.getSwingEnd());
+                     messageFootstep.setRobotSide(footstep.swingSide().toByte());
+                     messageFootstep.getSolePose().set(footstep.swingEnd());
                   }
                }
             }
@@ -229,19 +229,19 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
          }
          else if (definition.getPlannerType().getValue() == QUICK)
          {
-            List<QuickFootstep> footstepPlan = planQuickFootsteps();
+            List<Footstep> footstepPlan = planQuickFootsteps();
 
             footstepPlanToExecute.clear();
             for (int i = 0; i < footstepPlan.size(); i++)
             {
-               QuickFootstep quickFootstep = footstepPlan.get(i);
-               PlannedFootstep simpleFootstep = new PlannedFootstep(quickFootstep.getSwingSide(), new FramePose3D(quickFootstep.getSwingEnd()));
+               Footstep quickFootstep = footstepPlan.get(i);
+               PlannedFootstep simpleFootstep = new PlannedFootstep(quickFootstep.swingSide(), new FramePose3D(quickFootstep.swingEnd()));
                // Increase swing duration for longer steps
                double minDistance = definition.getQuickSwingTimeDistanceLower().getValue();
                double maxDistance = definition.getQuickSwingTimeDistanceUpper().getValue();
                double minTime = definition.getQuickMinSwingTime().getValue();
                double maxTime = definition.getQuickMaxSwingTime().getValue();
-               double distance = quickFootstep.getSwingDistance();
+               double distance = quickFootstep.swingDistance();
                double time = (distance <= minDistance) ? minTime : // Min
                                  (distance >= maxDistance) ? maxTime : // Max
                                       minTime + ((distance - minDistance) / (maxDistance - minDistance)) * (maxTime - minTime); // Interpolate
@@ -417,7 +417,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
       }
    }
 
-   private List<QuickFootstep> planQuickFootsteps()
+   private List<Footstep> planQuickFootsteps()
    {
       quickFootstepPlanner.setHipWidth(definition.getQuickHipWidth().getValue());
       quickFootstepPlanner.setStepLength(definition.getQuickStepLength().getValue());

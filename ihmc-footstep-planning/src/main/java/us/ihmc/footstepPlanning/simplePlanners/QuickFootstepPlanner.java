@@ -29,6 +29,7 @@ import java.util.List;
  */
 public class QuickFootstepPlanner
 {
+   public record Footstep(RobotSide swingSide, Pose3D swingEnd, double swingDistance) {}
    private int stepIndex;
    private int maxSteps = 50;
    private double hipWidth = 0.12;
@@ -55,13 +56,13 @@ public class QuickFootstepPlanner
    private boolean print;
 
    /** Plan to each waypoint and then to goal **/
-   public List<QuickFootstep> plan(EnumMap<RobotSide, Pose3D> stance, List<Pose3D> waypoints, EnumMap<RobotSide, Pose3D> goal)
+   public List<Footstep> plan(EnumMap<RobotSide, Pose3D> stance, List<Pose3D> waypoints, EnumMap<RobotSide, Pose3D> goal)
    {
       print = notification.poll();
       stepIndex = 0;
       for (RobotSide side : RobotSide.values)
          this.stance.get(side).set(stance.get(side));
-      List<QuickFootstep> footstepPlan = new ArrayList<>();
+      List<Footstep> footstepPlan = new ArrayList<>();
 
       for (RobotSide side : RobotSide.values)
          this.goal.get(side).setToNaN();
@@ -81,13 +82,13 @@ public class QuickFootstepPlanner
       return footstepPlan;
    }
 
-   private List<QuickFootstep> plan()
+   private List<Footstep> plan()
    {
-      List<QuickFootstep> footstepPlan = new ArrayList<>();
+      List<Footstep> footstepPlan = new ArrayList<>();
       for (; stepIndex < maxSteps; stepIndex++)
          if (!planStep())
          {
-            footstepPlan.add(new QuickFootstep(footToSwing, swingEnd, swingDistance));
+            footstepPlan.add(new Footstep(footToSwing, new Pose3D(swingEnd), swingDistance));
             this.stance.get(footToSwing).set(swingEnd);
             stepPlannedCallback.run();
          }
