@@ -213,9 +213,10 @@ public class QuickFootstepPlanner
                ConvexPolygon2D candidatePolygon = createFootPolygon(candidate.get(side), 0.0);
                boolean collision = convexPolygonTools.doPolygonsIntersect(candidatePolygon, createFootPolygon(goal.get(side.getOppositeSide()), 0.04));
                // Theres only sometimes you care about this, it's really a thing to sometimes save 1 step when approaching a diagonal stance
+               double direction = stepAngle < 0 ? 1.0 : -1.0; // Always go toward 0
                while (collision && stepAngle >= -stepAngleLimit && stepAngle <= stepAngleLimit)
                {
-                  stepAngle += (side == RobotSide.LEFT ? 1.0 : -1.0) * Math.toRadians(5.0); // TODO: Fix when going backwards
+                  stepAngle += direction * Math.toRadians(5.0);
 
                   adjustedAngle = stepAngle + (side == RobotSide.LEFT ? Math.PI : 0.0);
                   toStepPosition = new Vector3D(length * Math.sin(adjustedAngle), length * -Math.cos(adjustedAngle), 0.0);
@@ -265,7 +266,7 @@ public class QuickFootstepPlanner
          {
             if (atGoal.get(side)) // Never step a foot already at goal
                continue;
-            if (atGoal.get(side.getOppositeSide()) || goalstepPossible.get(side)) // Always take last goal step TODO Look at this
+            if (goalstepPossible.get(side) || atGoal.get(side.getOppositeSide())) // Take goal step if possible, but always take last goal step
             {
                footToSwing = side;
                swingEnd.set(goal.get(side));
