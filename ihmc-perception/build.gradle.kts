@@ -60,4 +60,5 @@ slamWrapperDependencies {
    api("us.ihmc:ihmc-java-toolkit:source")
 }
 
+app.entrypoint("DemoZEDImageSensor", "us.ihmc.perception.demo.DemoZEDImageSensor")
 app.entrypoint("IsaacROSFoundationPoseDemo", "us.ihmc.perception.demo.IsaacROSFoundationPoseDemo")

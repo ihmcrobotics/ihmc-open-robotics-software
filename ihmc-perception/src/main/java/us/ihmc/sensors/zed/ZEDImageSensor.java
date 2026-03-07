@@ -1,5 +1,6 @@
 package us.ihmc.sensors.zed;
 
+import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -22,6 +23,7 @@ import us.ihmc.zed.SL_Quaternion;
 import us.ihmc.zed.SL_RuntimeParameters;
 import us.ihmc.zed.SL_Vector3;
 import us.ihmc.zed.ZEDException;
+import us.ihmc.zed.global.zed;
 import us.ihmc.zed.library.ZEDJavaAPINativeLibrary;
 
 import java.time.Instant;
@@ -61,8 +63,12 @@ public class ZEDImageSensor extends ImageSensor
    private int remoteStreamingPort;
    private final int localStreamingPort = nextStreamingPort.getAndAdd(2);
 
+   // Double buffering for performance
+   private final RawImage[][] imagePool = new RawImage[2][OUTPUT_IMAGE_COUNT];
+   private final Pointer[][] slMatPointersPool = new Pointer[2][OUTPUT_IMAGE_COUNT];
+   private int writeIndex = 0;
    private final RawImage[] grabbedImages = new RawImage[OUTPUT_IMAGE_COUNT];
-   private final Pointer[] slMatPointers = new Pointer[OUTPUT_IMAGE_COUNT];
+
    private final CameraIntrinsics leftSensorIntrinsics = new CameraIntrinsics();
    private final CameraIntrinsics rightSensorIntrinsics = new CameraIntrinsics();
    private int imageWidth;
@@ -85,6 +91,9 @@ public class ZEDImageSensor extends ImageSensor
    private final RigidBodyTransform trackedPoseOffset = new RigidBodyTransform();
    private final SL_Quaternion sensorRotation = new SL_Quaternion();
    private final SL_Vector3 sensorTranslation = new SL_Vector3();
+   private final PixelFormat colorPixelFormat = PixelFormat.BGRA8;
+   private final PixelFormat depthPixelFormat = PixelFormat.GRAY16;
+   private TransformBuffer transformBuffer;
 
    public ZEDImageSensor(int cameraID, ZEDModelData zedModel, int slInputType, int slDepthMode)
    {
@@ -96,19 +105,23 @@ public class ZEDImageSensor extends ImageSensor
       this(cameraID, 0, zedModel, slInputType, slDepthMode, resolution, fps);
    }
 
+   public ZEDImageSensor(int cameraID, int serialNumber, ZEDModelData zedModel, int slInputType, int slDepthMode, int resolution, int fps)
+   {
+      this(cameraID, serialNumber, zedModel, slInputType, slDepthMode, resolution, fps, null);
+   }
    /**
     * See the documentation for the available resolutions and frame rates:
     * <ul>
-    *    <li>{@link us.ihmc.zed.global.zed#SL_RESOLUTION_QHDPLUS}</li>
-    *    <li>{@link us.ihmc.zed.global.zed#SL_RESOLUTION_HD2K}</li>
-    *    <li>{@link us.ihmc.zed.global.zed#SL_RESOLUTION_HD1080}</li>
-    *    <li>{@link us.ihmc.zed.global.zed#SL_RESOLUTION_HD1200}</li>
-    *    <li>{@link us.ihmc.zed.global.zed#SL_RESOLUTION_HD720}</li>
-    *    <li>{@link us.ihmc.zed.global.zed#SL_RESOLUTION_SVGA}</li>
-    *    <li>{@link us.ihmc.zed.global.zed#SL_RESOLUTION_VGA}</li>
+    *    <li>{@link zed#SL_RESOLUTION_QHDPLUS}</li>
+    *    <li>{@link zed#SL_RESOLUTION_HD2K}</li>
+    *    <li>{@link zed#SL_RESOLUTION_HD1080}</li>
+    *    <li>{@link zed#SL_RESOLUTION_HD1200}</li>
+    *    <li>{@link zed#SL_RESOLUTION_HD720}</li>
+    *    <li>{@link zed#SL_RESOLUTION_SVGA}</li>
+    *    <li>{@link zed#SL_RESOLUTION_VGA}</li>
     * </ul>
     */
-   public ZEDImageSensor(int cameraID, int serialNumber, ZEDModelData zedModel, int slInputType, int slDepthMode, int resolution, int fps)
+   public ZEDImageSensor(int cameraID, int serialNumber, ZEDModelData zedModel, int slInputType, int slDepthMode, int resolution, int fps, TransformBuffer transformBuffer)
    {
       super(zedModel.name());
 
@@ -119,6 +132,7 @@ public class ZEDImageSensor extends ImageSensor
       this.slDepthMode = slDepthMode;
       this.resolution = resolution;
       this.fps = fps;
+      this.transformBuffer = transformBuffer;
 
       trackedSensorFrame = new MutableReferenceFrame(getSensorName() + "_tracked", ReferenceFrameTools.getWorldFrame());
 
@@ -226,10 +240,59 @@ public class ZEDImageSensor extends ImageSensor
 
          updateReferenceFrames();
 
-         // Create image retrieval pointers
-         slMatPointers[LEFT_COLOR_IMAGE_KEY] = sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_U8_C4, SL_MEM_GPU);
-         slMatPointers[RIGHT_COLOR_IMAGE_KEY] = sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_U8_C4, SL_MEM_GPU);
-         slMatPointers[DEPTH_IMAGE_KEY] = sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_U16_C1, SL_MEM_GPU);
+         for (int b = 0; b < 2; b++)
+         {
+            Pointer[] slMatPointers = slMatPointersPool[b];
+            // Create image retrieval pointers
+            slMatPointers[LEFT_COLOR_IMAGE_KEY] = sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_U8_C4, SL_MEM_GPU);
+            slMatPointers[RIGHT_COLOR_IMAGE_KEY] = sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_U8_C4, SL_MEM_GPU);
+            slMatPointers[DEPTH_IMAGE_KEY] = sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_U16_C1, SL_MEM_GPU);
+
+            GpuMat gpuMatLeft = new GpuMat(imageHeight,
+                                           imageWidth,
+                                           colorPixelFormat.toOpenCVType(),
+                                           sl_mat_get_ptr(slMatPointers[LEFT_COLOR_IMAGE_KEY], SL_MEM_GPU),
+                                           sl_mat_get_step_bytes(slMatPointers[LEFT_COLOR_IMAGE_KEY], SL_MEM_GPU));
+            imagePool[b][LEFT_COLOR_IMAGE_KEY] = new RawImage(null,
+                                                              gpuMatLeft,
+                                                              PixelFormat.GRAY16,
+                                                              leftSensorIntrinsics,
+                                                              CameraModel.PINHOLE,
+                                                              new RigidBodyTransform(),
+                                                              Instant.now(),
+                                                              -1,
+                                                              MILLIMETER_TO_METERS);
+
+            GpuMat gpuMatright = new GpuMat(imageHeight,
+                                            imageWidth,
+                                            colorPixelFormat.toOpenCVType(),
+                                            sl_mat_get_ptr(slMatPointers[RIGHT_COLOR_IMAGE_KEY], SL_MEM_GPU),
+                                            sl_mat_get_step_bytes(slMatPointers[RIGHT_COLOR_IMAGE_KEY], SL_MEM_GPU));
+            imagePool[b][RIGHT_COLOR_IMAGE_KEY] = new RawImage(null,
+                                                               gpuMatright,
+                                                               PixelFormat.GRAY16,
+                                                               rightSensorIntrinsics,
+                                                               CameraModel.PINHOLE,
+                                                               new RigidBodyTransform(),
+                                                               Instant.now(),
+                                                               -1,
+                                                               MILLIMETER_TO_METERS);
+
+            GpuMat gpuMatDepth = new GpuMat(imageHeight,
+                                            imageWidth,
+                                            depthPixelFormat.toOpenCVType(),
+                                            sl_mat_get_ptr(slMatPointers[DEPTH_IMAGE_KEY], SL_MEM_GPU),
+                                            sl_mat_get_step_bytes(slMatPointers[DEPTH_IMAGE_KEY], SL_MEM_GPU));
+            imagePool[b][DEPTH_IMAGE_KEY] = new RawImage(null,
+                                                         gpuMatDepth,
+                                                         PixelFormat.GRAY16,
+                                                         leftSensorIntrinsics,
+                                                         CameraModel.PINHOLE,
+                                                         new RigidBodyTransform(),
+                                                         Instant.now(),
+                                                         -1,
+                                                         MILLIMETER_TO_METERS);
+         }
       }
       catch (ZEDException exception)
       {
@@ -290,9 +353,11 @@ public class ZEDImageSensor extends ImageSensor
       {
          // Grab images now
          returnCode = sl_grab(cameraID, zedRuntimeParameters);
-         RigidBodyTransform leftSensorTransformAtGrab = leftSensorFrame.getTransformToWorldFrame();
-         RigidBodyTransform rightSensorTransformAtGrab = rightSensorFrame.getTransformToWorldFrame();
-         Instant grabTime = Instant.now();
+         long grabTime = System.currentTimeMillis();
+         Instant grabTimeInstant = Instant.now();
+         long start = System.nanoTime();
+//         RigidBodyTransform leftSensorTransformAtGrab = leftSensorFrame.getTransformToWorldFrame();
+//         RigidBodyTransform rightSensorTransformAtGrab = rightSensorFrame.getTransformToWorldFrame();
          if (returnCode == SL_ERROR_CODE_END_OF_SVOFILE_REACHED)
          {
             sl_set_svo_position(0, 0);
@@ -316,7 +381,37 @@ public class ZEDImageSensor extends ImageSensor
          }
 
          throwOnError(returnCode);
-         lastGrabTime = grabTime;
+
+         RigidBodyTransform leftSensorTransformAtGrab;
+         RigidBodyTransform rightSensorTransformAtGrab;
+         RigidBodyTransform latestCameraTransform = null;
+
+         if (transformBuffer != null)
+         {
+            latestCameraTransform = transformBuffer.lookup(grabTime);
+         }
+
+         if (latestCameraTransform != null)
+         {
+            RigidBodyTransform leftSensorTransform = new RigidBodyTransform(new Quaternion(), new Vector3D(0.0, sensorCenterToCameraDistanceY, 0.0));
+            RigidBodyTransform rightSensorTransform = new RigidBodyTransform(new Quaternion(), new Vector3D(0.0, -sensorCenterToCameraDistanceY, 0.0));
+
+
+            leftSensorTransformAtGrab = new RigidBodyTransform(latestCameraTransform);
+            rightSensorTransformAtGrab = new RigidBodyTransform(latestCameraTransform);
+            leftSensorTransformAtGrab.appendTranslation(leftSensorTransform.getTranslation());
+            rightSensorTransformAtGrab.appendTranslation(rightSensorTransform.getTranslation());
+
+            System.out.println("Unsynced Left Sensor Frame: " + leftSensorFrame.getTransformToWorldFrame().getRotation().getYaw());
+            System.out.println("YES!!! Synced Left Sensor Frame: " + leftSensorTransformAtGrab.getRotation().getYaw());
+         }
+         else
+         {
+            leftSensorTransformAtGrab = leftSensorFrame.getTransformToWorldFrame();
+            rightSensorTransformAtGrab = rightSensorFrame.getTransformToWorldFrame();
+         }
+
+         lastGrabTime = grabTimeInstant;
          ++grabSequenceNumber;
 
          lastGrabTimestamp = sl_get_current_timestamp(cameraID);
@@ -337,6 +432,10 @@ public class ZEDImageSensor extends ImageSensor
                                          });
          }
 
+         int nextWriteIndex = (writeIndex + 1) % 2;
+         RawImage[] bufferToFill = imagePool[nextWriteIndex];
+         Pointer[] slMatPointers = slMatPointersPool[nextWriteIndex];
+
          // Retrieve the grabbed depth image
          Pointer depthImagePointer = slMatPointers[DEPTH_IMAGE_KEY];
          returnCode = sl_retrieve_measure(cameraID, depthImagePointer, SL_MEASURE_DEPTH_U16_MM, SL_MEM_GPU, imageWidth, imageHeight, null); // TODO: Pass custream
@@ -352,23 +451,38 @@ public class ZEDImageSensor extends ImageSensor
          returnCode = sl_retrieve_image(cameraID, rightColorImagePointer, SL_VIEW_RIGHT, SL_MEM_GPU, imageWidth, imageHeight, null); // TODO: Pass custream
          throwOnError(returnCode);
 
+         updateRawImageFromSlMat(bufferToFill[LEFT_COLOR_IMAGE_KEY],
+                                 colorPixelFormat,
+                                 leftColorImagePointer,
+                                 leftSensorTransformAtGrab,
+                                 lastGrabTime,
+                                 grabSequenceNumber);
+         updateRawImageFromSlMat(bufferToFill[RIGHT_COLOR_IMAGE_KEY],
+                                 colorPixelFormat,
+                                 rightColorImagePointer,
+                                 rightSensorTransformAtGrab,
+                                 lastGrabTime,
+                                 grabSequenceNumber);
+         updateRawImageFromSlMat(bufferToFill[DEPTH_IMAGE_KEY],
+                                 depthPixelFormat,
+                                 depthImagePointer,
+                                 leftSensorTransformAtGrab,
+                                 lastGrabTime,
+                                 grabSequenceNumber);
+
          synchronized (grabbedImages)
-         {  // Create RawImages from the grabbed retrieved slMats
-            if (grabbedImages[LEFT_COLOR_IMAGE_KEY] != null)
-               grabbedImages[LEFT_COLOR_IMAGE_KEY].release();
-            grabbedImages[LEFT_COLOR_IMAGE_KEY] = slMatToRawImage(leftColorImagePointer, PixelFormat.BGRA8, leftSensorIntrinsics, leftSensorTransformAtGrab);
-
-            if (grabbedImages[RIGHT_COLOR_IMAGE_KEY] != null)
-               grabbedImages[RIGHT_COLOR_IMAGE_KEY].release();
-            grabbedImages[RIGHT_COLOR_IMAGE_KEY] = slMatToRawImage(rightColorImagePointer,
-                                                                   PixelFormat.BGRA8,
-                                                                   rightSensorIntrinsics,
-                                                                   rightSensorTransformAtGrab);
-
-            if (grabbedImages[DEPTH_IMAGE_KEY] != null)
-               grabbedImages[DEPTH_IMAGE_KEY].release();
-            grabbedImages[DEPTH_IMAGE_KEY] = slMatToRawImage(depthImagePointer, PixelFormat.GRAY16, leftSensorIntrinsics, leftSensorTransformAtGrab);
+         {
+            for (int i = 0; i < OUTPUT_IMAGE_COUNT; i++)
+            {
+               grabbedImages[i] = bufferToFill[i];
+            }
+            writeIndex = nextWriteIndex;
          }
+
+         long end = System.nanoTime();
+         double diff = end - start;
+
+//         System.out.println("Grab time in millis: " + diff / 1000000.0);
       }
       catch (ZEDException exception)
       {
@@ -381,25 +495,25 @@ public class ZEDImageSensor extends ImageSensor
       return true;
    }
 
-   private RawImage slMatToRawImage(Pointer slMatPointer,
-                                    PixelFormat imagePixelFormat,
-                                    CameraIntrinsics cameraIntrinsics,
-                                    RigidBodyTransformReadOnly sensorTransform)
+   private void updateRawImageFromSlMat(RawImage rawImageToSet,
+                                        PixelFormat pixelFormat,
+                                        Pointer slMatPointer,
+                                        RigidBodyTransform transform,
+                                        Instant lastGrabTimestamp,
+                                        long sequenceNumber)
    {
-      GpuMat imageGpuMat = new GpuMat(imageHeight,
-                                      imageWidth,
-                                      imagePixelFormat.toOpenCVType(),
-                                      sl_mat_get_ptr(slMatPointer, SL_MEM_GPU),
-                                      sl_mat_get_step_bytes(slMatPointer, SL_MEM_GPU));
-      return new RawImage(null,
-                          imageGpuMat.clone(),
-                          imagePixelFormat,
-                          cameraIntrinsics,
-                          CameraModel.PINHOLE,
-                          sensorTransform,
-                          lastGrabTime,
-                          grabSequenceNumber,
-                          MILLIMETER_TO_METERS);
+      try (GpuMat tempHeader = new GpuMat(imageHeight,
+                                          imageWidth,
+                                          pixelFormat.toOpenCVType(),
+                                          sl_mat_get_ptr(slMatPointer, SL_MEM_GPU),
+                                          sl_mat_get_step_bytes(slMatPointer, SL_MEM_GPU)))
+      {
+         tempHeader.copyTo(rawImageToSet.getGpuMat());
+      }
+
+      rawImageToSet.setTransformToWorld(transform);
+      rawImageToSet.setAcquisitionTime(lastGrabTimestamp);
+      rawImageToSet.setSequenceNumber(sequenceNumber);
    }
 
    @Override
@@ -463,15 +577,17 @@ public class ZEDImageSensor extends ImageSensor
       System.out.println("Closing " + getClass().getSimpleName());
       super.close();
 
-      for (Pointer slMat : slMatPointers)
+      for (Pointer[] slMatPointers : slMatPointersPool)
       {
-         if (slMat != null && !slMat.isNull())
+         for (Pointer slMat : slMatPointers)
          {
-            sl_mat_free(slMat, SL_MEM_GPU);
-            slMat.close();
+            if (slMat != null && !slMat.isNull())
+            {
+               sl_mat_free(slMat, SL_MEM_GPU);
+               slMat.close();
+            }
          }
       }
-
       synchronized (grabbedImages)
       {
          for (RawImage image : grabbedImages)

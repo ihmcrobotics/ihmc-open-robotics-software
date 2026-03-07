@@ -58,9 +58,9 @@ public class RawImage
    private final CameraIntrinsics cameraIntrinsics;
    private final CameraModel cameraModel;
    private final float depthDiscretization;
-   private final long sequenceNumber;
-   private final Instant acquisitionTime;
-   private final RigidBodyTransformReadOnly sensorToWorldTransform;
+   private long sequenceNumber;
+   private Instant acquisitionTime;
+   private final RigidBodyTransform sensorToWorldTransform;
 
    private final AtomicInteger numberOfReferences = new AtomicInteger(1);
 
@@ -414,6 +414,21 @@ public class RawImage
       return sensorToWorldTransform;
    }
 
+   public void setTransformToWorld(RigidBodyTransform transform)
+   {
+      sensorToWorldTransform.set(transform);
+   }
+
+   public void setAcquisitionTime(Instant acquisitionTime)
+   {
+      this.acquisitionTime = acquisitionTime;
+   }
+
+   public void setSequenceNumber(long sequenceNumber)
+   {
+      this.sequenceNumber = sequenceNumber;
+   }
+
    public Tuple3DReadOnly getTranslation()
    {
       return sensorToWorldTransform.getTranslation();
@@ -461,6 +476,11 @@ public class RawImage
    {
       if (numberOfReferences.decrementAndGet() <= 0)
          destroy();
+   }
+
+   public GpuMat getGpuMat()
+   {
+      return gpuImageMat;
    }
 
    private void destroy()
