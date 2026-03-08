@@ -7,8 +7,7 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiTableFlags;
-import imgui.internal.ImGui;
-import imgui.internal.flag.ImGuiItemFlags;
+import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
 import imgui.type.ImInt;
@@ -123,6 +122,7 @@ public class RDXBaseUI
    private ImGuiSliderDoubleWrapper directionalLightIntensitySlider;
    private final RDXImGuiLayoutManager layoutManager;
    private final RDXKeyBindings keyBindings = new RDXKeyBindings();
+   private final RDXStatusBar statusBar = new RDXStatusBar();
    private long renderIndex = 0;
    private final double isoZoomOut = 0.7;
    private enum Theme
@@ -322,10 +322,9 @@ public class RDXBaseUI
       imGuiWindowAndDockSystem.beforeWindowManagement(settings.getlockPanelsWithinWindows());
       primary3DPanel.render();
       for (RDX3DPanel additional3DPanel : additional3DPanels)
-      {
          additional3DPanel.render();
-      }
       renderMenuBar();
+      statusBar.render();
 
       keyBindings.renderKeyBindingsTable();
    }
@@ -432,7 +431,7 @@ public class RDXBaseUI
             // If vsync is enabled, disable the FPS limit slider
             if (vsync.get())
             {
-               ImGui.pushItemFlag(ImGuiItemFlags.Disabled, true);
+               ImGui.beginDisabled();
                ImGui.pushStyleVar(ImGuiStyleVar.Alpha, ImGui.getStyle().getAlpha() * 0.5f);
             }
             ImGui.tableSetColumnIndex(1);
@@ -450,7 +449,7 @@ public class RDXBaseUI
             if (vsync.get())
             {
                ImGui.popStyleVar();
-               ImGui.popItemFlag();
+               ImGui.endDisabled();
             }
 
             // Fifth row (font size)
@@ -703,6 +702,11 @@ public class RDXBaseUI
    public Theme getTheme()
    {
       return theme;
+   }
+
+   public RDXStatusBar getStatusBar()
+   {
+      return statusBar;
    }
 
    public static void pushNotification(String text)

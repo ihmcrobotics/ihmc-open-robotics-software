@@ -58,6 +58,7 @@ public class RDXPanel extends RDXPanelSizeHandler
    {
       renderMenuItem("");
    }
+
    /* package-private */ void renderMenuItem(String indent)
    {
       ImGui.menuItem(indent + panelName, "", isShowing);
