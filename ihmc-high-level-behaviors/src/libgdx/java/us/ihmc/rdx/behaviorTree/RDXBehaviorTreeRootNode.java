@@ -277,9 +277,12 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
    {
       super.destroy();
 
-      previewROS2Node.destroy();
-      previewSyncedRobot.destroy();
-      previewRobot.destroy();
+      if (previewROS2Node != null)
+         previewROS2Node.destroy();
+      if (previewSyncedRobot != null)
+         previewSyncedRobot.destroy();
+      if (previewRobot != null)
+         previewRobot.destroy();
    }
 
    public TLongObjectHashMap<RDXBehaviorTreeNode<?, ?>> getIDToNodeMap()
