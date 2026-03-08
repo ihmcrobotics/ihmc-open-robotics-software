@@ -38,13 +38,13 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.graphicsDescription.conversion.YoGraphicConversionTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.handsros2.HandType;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameMessageCommandConverter;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
@@ -52,7 +52,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
 import us.ihmc.log.LogTools;
-import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
@@ -147,6 +146,7 @@ public class HumanoidKinematicsSimulation
    private YoVariableServer yoVariableServer = null;
    private IntraprocessYoVariableLogger intraprocessYoVariableLogger;
    private JointDesiredOutputListReadOnly jointDesiredOutputList;
+   private final SideDependentList<AbilityHandKinematicsSimulation> abilityHands = new SideDependentList<>();
 
    public static HumanoidKinematicsSimulation create(DRCRobotModel robotModel, HumanoidKinematicsSimulationParameters kinematicsSimulationParameters)
    {
@@ -295,6 +295,10 @@ public class HumanoidKinematicsSimulation
       controllerNetworkSubscriber.addMessageCollectors(ControllerAPIDefinition.createDefaultMessageIDExtractor(), 3);
       controllerNetworkSubscriber.addMessageValidator(ControllerAPIDefinition.createDefaultMessageValidation());
 
+      for (RobotSide side : RobotSide.values)
+         if (robotModel.getRobotVersion().getHandType(side) == HandType.ABILITY_HAND)
+            abilityHands.put(side, new AbilityHandKinematicsSimulation(side, ros2Node, fullRobotModel));
+
       robotConfigurationDataPublisher = createRobotConfigurationDataPublisher(robotModel.getSimpleRobotName());
 
       realtimeROS2Node.spin();
@@ -406,7 +410,7 @@ public class HumanoidKinematicsSimulation
       FloatingJointStateReadOnly rootJointStateOutput = FloatingJointStateReadOnly.fromFloatingJoint(fullRobotModel.getRootJoint());
       List<OneDoFJointStateReadOnly> jointSensorOutputs = new ArrayList<>();
 
-      for (OneDoFJointReadOnly joint : FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel))
+      for (OneDoFJointReadOnly joint : fullRobotModel.getOneDoFJoints())
       {
          jointSensorOutputs.add(OneDoFJointStateReadOnly.createFromOneDoFJoint(joint, true));
       }
@@ -476,6 +480,9 @@ public class HumanoidKinematicsSimulation
          updateTimer.reset();
 
          doControl();
+
+         for (RobotSide side : abilityHands.sides())
+            abilityHands.get(side).update();
 
          robotConfigurationDataPublisher.write();
       }
