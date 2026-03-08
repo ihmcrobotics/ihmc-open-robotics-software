@@ -125,6 +125,7 @@ public class YOLOv8DetectionExecutor
                                                               this::annotateAndPublishImage,
                                                               DefaultExceptionHandler.RUNTIME_EXCEPTION);
       annotatedImagePublishedThread.setDaemon(true);
+      annotatedImagePublishedThread.setFrequencyLimit(10.0);
       annotatedImagePublishedThread.startRepeating();
    }
 
@@ -291,8 +292,7 @@ public class YOLOv8DetectionExecutor
 
    private void annotateAndPublishImage()
    {
-      annotationNotification.blockingPoll();
-      List<YOLOv8InstantDetection> detectionsToAnnotate = annotationNotification.read();
+      List<YOLOv8InstantDetection> detectionsToAnnotate = annotationNotification.blockingPoll();
 
       RawImage colorImage = detectionsToAnnotate.get(0).getColorImage().get();
       if (colorImage == null)
@@ -315,6 +315,11 @@ public class YOLOv8DetectionExecutor
       synchronized (annotatedImagePublishedThread)
       {
          YOLOv8Tools.annotateImage(colorImage.getCpuImageMat(), resultMat, detectionsToAnnotate);
+         int maxWidth = 400;
+         int maxHeight = 200;
+         double scale = Math.min((double) maxWidth / resultMat.cols(), (double) maxHeight / resultMat.rows());
+         opencv_imgproc.resize(resultMat, resultMat, new Size(Math.max(1, (int) Math.round(resultMat.cols() * scale)),
+                                                              Math.max(1, (int) Math.round(resultMat.rows() * scale))));
       }
 
       BytePointer annotatedImagePointer = new BytePointer();
