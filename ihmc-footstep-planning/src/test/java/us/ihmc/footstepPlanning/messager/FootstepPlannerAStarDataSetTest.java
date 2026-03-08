@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.messager;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.footstepPlanning.FootstepPlannerDataSetTest;
@@ -44,6 +45,7 @@ public class FootstepPlannerAStarDataSetTest extends FootstepPlannerDataSetTest
 
    @Override
    @Test
+   @Tag("ihmc-footstep-planning-2")
    public void testDataSets()
    {
       super.testDataSets();

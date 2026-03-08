@@ -4,6 +4,7 @@ import gnu.trove.list.array.TDoubleArrayList;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -73,6 +74,7 @@ public class ParameterBasedStepExpansionTest
    }
 
    @Test
+   @Tag("ihmc-footstep-planning-2")
    public void testExpansionAlongBoundsFromOriginWithRight()
    {
       ParameterBasedStepExpansion expansion = new ParameterBasedStepExpansion(parameters, null, PlannerTools.createDefaultFootPolygons());
@@ -155,6 +157,7 @@ public class ParameterBasedStepExpansionTest
    }
 
    @Test
+   @Tag("ihmc-footstep-planning-2")
    public void testExpansionAlongBoundsFromOrigin()
    {
       ParameterBasedStepExpansion expansion = new ParameterBasedStepExpansion(parameters, null, PlannerTools.createDefaultFootPolygons());

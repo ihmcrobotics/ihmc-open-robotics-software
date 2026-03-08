@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.bodyPath;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -13,6 +14,7 @@ public class BodyPathCollisionDetectorTest
    private final Random random = new Random(2930);
 
    @Test
+   @Tag("ihmc-footstep-planning-2")
    public void testCollisionDetector()
    {
       BodyPathCollisionDetector collisionDetector = new BodyPathCollisionDetector();

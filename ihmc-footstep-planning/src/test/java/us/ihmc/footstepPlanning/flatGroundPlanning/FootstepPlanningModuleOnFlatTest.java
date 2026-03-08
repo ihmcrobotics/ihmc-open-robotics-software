@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.flatGroundPlanning;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -105,6 +106,7 @@ public class FootstepPlanningModuleOnFlatTest
    }
 
    @Test
+   @Tag("ihmc-footstep-planning-2")
    public void testJustTurnInPlace()
    {
       double xGoal = 0.0;

@@ -89,6 +89,7 @@ public class AStarBodyPathFrameworkTest
    }
 
    @Test
+   @Tag("ihmc-footstep-planning-2")
    public void testDatasetsWithoutOcclusion()
    {
       Predicate<DataSet> dataSetFilter = dataSet ->

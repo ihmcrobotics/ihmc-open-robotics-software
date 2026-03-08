@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -73,6 +74,7 @@ public class ReferencedAStarFootStepPlannerTest
     * x, the y and a rotation about the yaw axis.
     */
    @Test
+   @Tag("ihmc-footstep-planning-2")
    public void testReferenceAlphaXYAndYaw()
    {
       // Here we take the nominal plan (the expected plan given no reference plan) and we save the first step in that plan to compare against later
