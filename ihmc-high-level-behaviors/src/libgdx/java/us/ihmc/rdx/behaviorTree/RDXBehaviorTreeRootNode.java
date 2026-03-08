@@ -53,6 +53,7 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
    private final List<RDXActionNode<?, ?>> orderedActions = new ArrayList<>();
    private final List<RDXLeafNode<?, ?>> nextForExecutionLeaves = new ArrayList<>();
    private final List<RDXLeafNode<?, ?>> currentlyExecutingLeaves = new ArrayList<>();
+   private RDXBehaviorTreeNode<?, ?> selectedNode = null;
    private final RDXActionProgressWidgetsManager progressWidgetsManager = new RDXActionProgressWidgetsManager();
    private final ImGuiRootIconWidget rootIconWidget = new ImGuiRootIconWidget();
 
@@ -123,6 +124,7 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
       orderedActions.clear();
       nextForExecutionLeaves.clear();
       currentlyExecutingLeaves.clear();
+      selectedNode = null;
       updateNodeListsRecursive(this);
 
       for (RDXLeafNode<?, ?> leaf : orderedLeaves)
@@ -132,6 +134,8 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
    public void updateNodeListsRecursive(RDXBehaviorTreeNode<?, ?> node)
    {
       idToNodeMap.put(node.getState().getID(), node);
+      if (node.getSelected())
+         selectedNode = node;
 
       for (RDXBehaviorTreeNode<?, ?> child : node.getChildren())
       {
@@ -238,19 +242,13 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
       progressWidgetsManager.getActionNodesToRender().clear();
       int lastIndex = 0;
       for (RDXLeafNode<?, ?> currentlyExecutingLeaf : currentlyExecutingLeaves)
-      {
          if (currentlyExecutingLeaf instanceof RDXActionNode<?, ?> currentlyExecutingAction)
          {
             progressWidgetsManager.getActionNodesToRender().add(currentlyExecutingAction);
             lastIndex = Math.max(lastIndex, currentlyExecutingAction.getState().getLeafIndex());
          }
-      }
-      for (RDXLeafNode<?, ?> nextForExecutionLeaf : nextForExecutionLeaves)
-      {
-         if (nextForExecutionLeaf instanceof RDXActionNode<?, ?> nextForExecutionAction)
-            if (currentlyExecutingLeaves.isEmpty() || nextForExecutionAction.getState().getLeafIndex() < lastIndex)
-               progressWidgetsManager.getActionNodesToRender().add(nextForExecutionAction);
-      }
+      if (currentlyExecutingLeaves.isEmpty() && selectedNode instanceof RDXActionNode<?, ?> selectedAction)
+         progressWidgetsManager.getActionNodesToRender().add(selectedAction);
       progressWidgetsManager.render();
    }
 
