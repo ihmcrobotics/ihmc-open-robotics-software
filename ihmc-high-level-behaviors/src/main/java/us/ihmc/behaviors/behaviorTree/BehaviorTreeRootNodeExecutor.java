@@ -285,9 +285,12 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
    {
       super.destroy();
 
-      previewROS2Node.destroy();
-      previewSyncedRobot.destroy();
-      previewSimulation.destroy();
+      if (previewROS2Node != null)
+         previewROS2Node.destroy();
+      if (previewSyncedRobot != null)
+         previewSyncedRobot.destroy();
+      if (previewSimulation != null)
+         previewSimulation.destroy();
    }
 
    public boolean isEndOfSequence()
