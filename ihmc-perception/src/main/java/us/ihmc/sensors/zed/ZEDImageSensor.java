@@ -9,6 +9,7 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.BufferedCameraTransform;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
 import us.ihmc.sensors.CameraIntrinsics;
@@ -71,6 +72,7 @@ public class ZEDImageSensor extends ImageSensor
    private float sensorCenterToCameraDistanceY;
    private ReferenceFrame leftSensorFrame = null;
    private ReferenceFrame rightSensorFrame = null;
+   private BufferedCameraTransform bufferedCameraTransform;
 
    private long grabSequenceNumber = 0L;
    private Instant lastGrabTime;
@@ -96,6 +98,11 @@ public class ZEDImageSensor extends ImageSensor
       this(cameraID, 0, zedModel, slInputType, slDepthMode, resolution, fps);
    }
 
+   public ZEDImageSensor(int cameraID, int serialNumber, ZEDModelData zedModel, int slInputType, int slDepthMode, int resolution, int fps)
+   {
+      this(cameraID, serialNumber, zedModel, slInputType, slDepthMode, resolution, fps, null);
+   }
+
    /**
     * See the documentation for the available resolutions and frame rates:
     * <ul>
@@ -108,7 +115,14 @@ public class ZEDImageSensor extends ImageSensor
     *    <li>{@link us.ihmc.zed.global.zed#SL_RESOLUTION_VGA}</li>
     * </ul>
     */
-   public ZEDImageSensor(int cameraID, int serialNumber, ZEDModelData zedModel, int slInputType, int slDepthMode, int resolution, int fps)
+   public ZEDImageSensor(int cameraID,
+                         int serialNumber,
+                         ZEDModelData zedModel,
+                         int slInputType,
+                         int slDepthMode,
+                         int resolution,
+                         int fps,
+                         BufferedCameraTransform bufferedCameraTransform)
    {
       super(zedModel.name());
 
@@ -119,6 +133,7 @@ public class ZEDImageSensor extends ImageSensor
       this.slDepthMode = slDepthMode;
       this.resolution = resolution;
       this.fps = fps;
+      this.bufferedCameraTransform = bufferedCameraTransform;
 
       trackedSensorFrame = new MutableReferenceFrame(getSensorName() + "_tracked", ReferenceFrameTools.getWorldFrame());
 
@@ -290,9 +305,8 @@ public class ZEDImageSensor extends ImageSensor
       {
          // Grab images now
          returnCode = sl_grab(cameraID, zedRuntimeParameters);
-         RigidBodyTransform leftSensorTransformAtGrab = leftSensorFrame.getTransformToWorldFrame();
-         RigidBodyTransform rightSensorTransformAtGrab = rightSensorFrame.getTransformToWorldFrame();
-         Instant grabTime = Instant.now();
+         long grabTime = System.currentTimeMillis();
+         Instant grabTimeInstant = Instant.now();
          if (returnCode == SL_ERROR_CODE_END_OF_SVOFILE_REACHED)
          {
             sl_set_svo_position(0, 0);
@@ -316,7 +330,7 @@ public class ZEDImageSensor extends ImageSensor
          }
 
          throwOnError(returnCode);
-         lastGrabTime = grabTime;
+         lastGrabTime = grabTimeInstant;
          ++grabSequenceNumber;
 
          lastGrabTimestamp = sl_get_current_timestamp(cameraID);
@@ -335,6 +349,33 @@ public class ZEDImageSensor extends ImageSensor
                                             transformToWorld.prependOrientation(trackedPoseOffset.getRotation());
                                             transformToWorld.prependTranslation(trackedPoseOffset.getTranslation());
                                          });
+         }
+
+         RigidBodyTransform leftSensorTransformAtGrab;
+         RigidBodyTransform rightSensorTransformAtGrab;
+         RigidBodyTransform latestCameraTransform = null;
+
+         if (bufferedCameraTransform != null)
+            latestCameraTransform = bufferedCameraTransform.lookup(grabTime);
+
+         if (latestCameraTransform != null)
+         {
+            RigidBodyTransform leftSensorTransform = new RigidBodyTransform(new Quaternion(), new Vector3D(0.0, sensorCenterToCameraDistanceY, 0.0));
+            RigidBodyTransform rightSensorTransform = new RigidBodyTransform(new Quaternion(), new Vector3D(0.0, -sensorCenterToCameraDistanceY, 0.0));
+
+
+            leftSensorTransformAtGrab = new RigidBodyTransform(latestCameraTransform);
+            rightSensorTransformAtGrab = new RigidBodyTransform(latestCameraTransform);
+            leftSensorTransformAtGrab.appendTranslation(leftSensorTransform.getTranslation());
+            rightSensorTransformAtGrab.appendTranslation(rightSensorTransform.getTranslation());
+
+            System.out.println("Unsynced Left Sensor Frame: " + leftSensorFrame.getTransformToWorldFrame().getRotation().getYaw());
+            System.out.println("YES!!! Synced Left Sensor Frame: " + leftSensorTransformAtGrab.getRotation().getYaw());
+         }
+         else
+         {
+            leftSensorTransformAtGrab = leftSensorFrame.getTransformToWorldFrame();
+            rightSensorTransformAtGrab = rightSensorFrame.getTransformToWorldFrame();
          }
 
          // Retrieve the grabbed depth image
