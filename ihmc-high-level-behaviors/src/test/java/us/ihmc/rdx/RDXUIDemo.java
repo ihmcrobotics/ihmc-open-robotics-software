@@ -2,7 +2,7 @@ package us.ihmc.rdx;
 
 import com.badlogic.gdx.graphics.g3d.Model;
 import imgui.flag.ImGuiMouseButton;
-import imgui.internal.ImGui;
+import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import org.apache.logging.log4j.Level;
@@ -17,6 +17,8 @@ import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.tools.ImGuiScrollableLogArea;
 import us.ihmc.rdx.ui.widgets.ImGuiHandWidget;
+import us.ihmc.rdx.ui.widgets.ImGuiRootIconWidget;
+import us.ihmc.rdx.ui.widgets.ImGuiSequenceIconWidget;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.string.StringTools;
 
@@ -86,6 +88,42 @@ public class RDXUIDemo
             logArea.submitEntry(Level.TRACE, "Test trace level.");
 
             textForArea.set("Text for area");
+
+            ImGuiHandWidget icon = new ImGuiHandWidget();
+            ImGuiRootIconWidget rootIcon = new ImGuiRootIconWidget();
+            ImGuiSequenceIconWidget sequenceIcon = new ImGuiSequenceIconWidget();
+            baseUI.getStatusBar().add(() ->
+            {
+               ImGui.pushFont(ImGuiTools.getBigFont());
+               ImGui.text("Content 1");
+               ImGui.popFont();
+            },
+            () -> 100.0f,
+            selected -> rootIcon.render());
+            baseUI.getStatusBar().add(() ->
+            {
+               ImGui.pushFont(ImGuiTools.getBigFont());
+               ImGui.text("Content 2");
+               ImGui.popFont();
+            },
+            () -> 300.0f,
+            selected -> sequenceIcon.render());
+            baseUI.getStatusBar().add(() ->
+            {
+               ImGui.pushFont(ImGuiTools.getBigFont());
+               ImGui.text("Content 3");
+               ImGui.popFont();
+            },
+            () -> 150.0f,
+            selected -> icon.render(RobotSide.LEFT, ImGui.getTextLineHeight(), selected));
+            baseUI.getStatusBar().add(() ->
+            {
+               ImGui.pushFont(ImGuiTools.getBigFont());
+               ImGui.text("Content 4");
+               ImGui.popFont();
+            },
+            () -> 200.0f,
+            selected -> icon.render(RobotSide.RIGHT, ImGui.getTextLineHeight(), selected));
          }
 
          @Override
