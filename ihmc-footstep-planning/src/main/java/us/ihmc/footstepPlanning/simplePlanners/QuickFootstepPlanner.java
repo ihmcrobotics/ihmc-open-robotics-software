@@ -201,7 +201,7 @@ public class QuickFootstepPlanner
                                                                            stanceForward.getX(),
                                                                            stanceForward.getY());
       return location == null || (stepSide == RobotSide.LEFT && location == Location.RIGHT
-                                  || stepSide == RobotSide.RIGHT && location == Location.LEFT);
+                              || stepSide == RobotSide.RIGHT && location == Location.LEFT);
    }
 
    public void setStepPlannedCallback(Runnable stepPlannedCallback)
