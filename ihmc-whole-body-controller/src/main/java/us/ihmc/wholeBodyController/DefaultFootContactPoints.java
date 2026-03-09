@@ -121,7 +121,6 @@ public class DefaultFootContactPoints<E extends Enum<E> & RobotSegment<E>> imple
    @Override
    public boolean useSoftContactPointParameters()
    {
-      return false;
+      return true; // false; //
    }
-
 }
