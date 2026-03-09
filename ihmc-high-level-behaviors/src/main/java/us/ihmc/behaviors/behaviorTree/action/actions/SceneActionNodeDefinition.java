@@ -8,7 +8,6 @@ import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectDefinition;
-import us.ihmc.communication.crdt.CRDTBidirectionalBoolean;
 import us.ihmc.communication.crdt.CRDTBidirectionalEnumField;
 import us.ihmc.communication.crdt.CRDTBidirectionalFloat;
 import us.ihmc.communication.crdt.CRDTBidirectionalInteger;
@@ -40,7 +39,6 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
    private final CRDTBidirectionalStringList enabledYoloModels;
    private final CRDTBidirectionalIntegerList ignoredYoloClassIndices;
    private final CRDTBidirectionalIntegerList enabledFoundationPoseModels;
-   private final CRDTBidirectionalBoolean replaceObject;
 
    private SceneActionNodeType onDiskSceneActionType;
    private float onDiskTimeout;
@@ -52,7 +50,6 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
    private final List<String> onDiskEnabledYoloModels = new ArrayList<>();
    private final TIntArrayList onDiskIgnoredYoloClassIndices = new TIntArrayList();
    private final TIntArrayList onDiskEnabledFoundationPoseModels = new TIntArrayList();
-   private boolean onDiskReplaceObject;
 
    public SceneActionNodeDefinition(BehaviorTreeRootNodeDefinition rootNode)
    {
@@ -66,7 +63,6 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
       yoloMaskThreshold = new CRDTBidirectionalFloat(this, 0.0f);
       segmentationMaskErosionRadius = new CRDTBidirectionalInteger(this, 1);
       outlierThreshold = new CRDTBidirectionalFloat(this, 2.0f);
-      replaceObject = new CRDTBidirectionalBoolean(this, true);
       enabledYoloModels = new CRDTBidirectionalStringList(this);
       ignoredYoloClassIndices = new CRDTBidirectionalIntegerList(this);
       enabledFoundationPoseModels = new CRDTBidirectionalIntegerList(this);
@@ -86,7 +82,6 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
       jsonNode.put("yoloMaskThreshold", yoloMaskThreshold.getValue());
       jsonNode.put("segmentationMaskErosionRadius", segmentationMaskErosionRadius.getValue());
       jsonNode.put("outlierThreshold", outlierThreshold.getValue());
-      jsonNode.put("replaceObject", replaceObject.getValue());
 
       ArrayNode enabledYoloModelsArray = jsonNode.putArray("enabledYoloModels");
       for (int i = 0; i < enabledYoloModels.getSize(); i++)
@@ -114,9 +109,6 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
       yoloMaskThreshold.setValue((float) jsonNode.get("yoloMaskThreshold").asDouble());
       segmentationMaskErosionRadius.setValue(jsonNode.get("segmentationMaskErosionRadius").asInt());
       outlierThreshold.setValue((float) jsonNode.get("outlierThreshold").asDouble());
-      JsonNode replaceNode = jsonNode.get("replaceObject");
-      boolean replaceValue = (replaceNode == null) || replaceNode.asBoolean(true);
-      replaceObject.setValue(replaceValue);
 
       ArrayNode enabledYoloModelsArray = (ArrayNode) jsonNode.get("enabledYoloModels");
       enabledYoloModels.clear();
@@ -147,7 +139,6 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
       onDiskYoloMaskThreshold = yoloMaskThreshold.getValue();
       onDiskSegmentationMaskErosionRadius = segmentationMaskErosionRadius.getValue();
       onDiskOutlierThreshold = outlierThreshold.getValue();
-      onDiskReplaceObject = replaceObject.getValue();
 
       onDiskEnabledYoloModels.clear();
       onDiskEnabledYoloModels.addAll(enabledYoloModels.getValue());
@@ -174,7 +165,6 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
          yoloMaskThreshold.setValue(onDiskYoloMaskThreshold);
          segmentationMaskErosionRadius.setValue(onDiskSegmentationMaskErosionRadius);
          outlierThreshold.setValue(onDiskOutlierThreshold);
-         replaceObject.setValue(onDiskReplaceObject);
 
          enabledYoloModels.clear();
          enabledYoloModels.getValue().addAll(onDiskEnabledYoloModels);
@@ -200,7 +190,6 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
       unchanged &= yoloMaskThreshold.getValue() == onDiskYoloMaskThreshold;
       unchanged &= segmentationMaskErosionRadius.getValue() == onDiskSegmentationMaskErosionRadius;
       unchanged &= outlierThreshold.getValue() == onDiskOutlierThreshold;
-      unchanged &= replaceObject.getValue() == onDiskReplaceObject;
 
       unchanged &= enabledYoloModels.getSize() == onDiskEnabledYoloModels.size();
       for (int i = 0; unchanged && i < enabledYoloModels.getSize(); i++)
@@ -229,7 +218,6 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
       message.setYoloMaskThreshold(yoloMaskThreshold.toMessage());
       message.setSegmentationMaskErosionRadius(segmentationMaskErosionRadius.toMessage());
       message.setOutlierThreshold(outlierThreshold.toMessage());
-      message.setReplaceObject(replaceObject.toMessage());
       enabledYoloModels.toMessage(message.getEnabledYoloModels());
       ignoredYoloClassIndices.toMessage(message.getIgnoredYoloClassIndices());
       enabledFoundationPoseModels.toMessage(message.getEnabledFoundationPoseModels());
@@ -247,7 +235,6 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
       yoloMaskThreshold.fromMessage(message.getYoloMaskThreshold());
       segmentationMaskErosionRadius.fromMessage(message.getSegmentationMaskErosionRadius());
       outlierThreshold.fromMessage(message.getOutlierThreshold());
-      replaceObject.fromMessage(message.getReplaceObject());
       enabledYoloModels.fromMessage(message.getEnabledYoloModels());
       ignoredYoloClassIndices.fromMessage(message.getIgnoredYoloClassIndices());
       enabledFoundationPoseModels.fromMessage(message.getEnabledFoundationPoseModels());
@@ -321,16 +308,6 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
    public void setOutlierThreshold(float outlierThreshold)
    {
       this.outlierThreshold.setValue(outlierThreshold);
-   }
-
-   public boolean getReplaceObject()
-   {
-      return replaceObject.getValue();
-   }
-
-   public void setReplaceObject(boolean value)
-   {
-      replaceObject.setValue(value);
    }
 
    public CRDTBidirectionalStringList getEnabledYoloModels()

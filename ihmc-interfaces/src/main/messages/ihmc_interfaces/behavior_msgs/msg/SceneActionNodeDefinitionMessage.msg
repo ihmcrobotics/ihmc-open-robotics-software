@@ -31,9 +31,6 @@ uint16 segmentation_mask_erosion_radius
 # Threshold for removing outlier points of segmented point cloud
 float32 outlier_threshold
 
-# Whether to replace an existing scene object of the same class when setting up a new one
-bool replace_object
-
 # YOLO models that should be enabled at this point
 string[<=10] enabled_yolo_models
 
