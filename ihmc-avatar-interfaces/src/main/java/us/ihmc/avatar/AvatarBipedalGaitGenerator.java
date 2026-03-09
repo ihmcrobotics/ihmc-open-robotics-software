@@ -14,6 +14,7 @@ import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
@@ -66,6 +67,7 @@ public class AvatarBipedalGaitGenerator
    private final AtomicReference<FootstepStatusMessage> footstepStatusMessage = new AtomicReference<>();
 
    private final FootstepDataListCommand footstepDataListCommand = new FootstepDataListCommand();
+   private final FootstepDataListCommand previousFootstepDataListCommand = new FootstepDataListCommand();
 
    private final FramePose2D footstepPose2D = new FramePose2D();
    private final FramePose2D nextFootstepPose2D = new FramePose2D();
@@ -100,6 +102,14 @@ public class AvatarBipedalGaitGenerator
          stepPoses[i] = new YoFramePose3D("step" + i, ReferenceFrame.getWorldFrame(), registry);
       }
 
+      currentSupportSide.addListener(v ->
+                                     {
+                                        if (!footstepDataListCommand.getFootsteps().isEmpty())
+                                        {
+                                           footstepDataListCommand.removeFootstep(0);
+                                        }
+                                     });
+
       parentRegistry.addChild(registry);
    }
 
@@ -111,13 +121,13 @@ public class AvatarBipedalGaitGenerator
 
       if (!walk)
       {
-         if (!walkPrev)
+         if (walkPrev)
          {
             pauseWalkingCommand.setPauseRequested(true);
             pauseWalkingCommand.setClearRemainingFootstepQueue(true);
             walkingCommandInputManager.submitCommand(pauseWalkingCommand);
          }
-
+         
          footstepDataListCommand.clear();
          return;
       }
@@ -133,6 +143,7 @@ public class AvatarBipedalGaitGenerator
       }
 
       currentSupportPose.setFromReferenceFrame(humanoidReferenceFrames.getSoleFrame(currentSupportSide.getValue()));
+      previousFootstepDataListCommand.set(footstepDataListCommand);
       footstepDataListCommand.getFootsteps().clear();
       RobotSide swingSide = currentSupportSide.getValue().getOppositeSide();
       footstepPose2D.setIncludingFrame(currentSupportPose);
@@ -169,7 +180,7 @@ public class AvatarBipedalGaitGenerator
          footstep.getPosition().set(nextFootstepPose2D.getPosition());
          footstep.getOrientation().set(nextFootstepPose2D.getOrientation());
          footstep.setRobotSide(swingSide);
-         snap(i, footstep);
+         adjustStep(i, footstep);
 
          footstepPose2D.set(footstep.getPosition().getX(), footstep.getPosition().getY(), footstep.getOrientation().getYaw());
          swingSide = swingSide.getOppositeSide();
@@ -201,20 +212,20 @@ public class AvatarBipedalGaitGenerator
       LogTools.info("Received terrain map command");
    }
 
-   private void snap(int stepIndex, FootstepDataCommand footstep)
+   private void adjustStep(int stepIndex, FootstepDataCommand footstep)
    {
-      boolean success = snapToTerrainMap(stepIndex, footstep);
+      boolean success = adjustToTerrain(stepIndex, footstep);
       if (!success)
          snapToStanceFoot(stepIndex, footstep);
       stepPoses[stepIndex].set(footstep.getPosition(), footstep.getOrientation());
    }
 
-   private boolean snapToTerrainMap(int stepIndex, FootstepDataCommand footstep)
+   private boolean adjustToTerrain(int stepIndex, FootstepDataCommand footstep)
    {
       if (terrainMapCommand == null)
          return false;
 
-      int key = findOptimalFoothold(footstep);
+      int key = findOptimalFoothold(stepIndex, footstep);
       if (key == NULL_KEY)
          return false;
 
@@ -233,7 +244,9 @@ public class AvatarBipedalGaitGenerator
       return true;
    }
 
-   private int findOptimalFoothold(FootstepDataCommand footstep)
+   private final Point2D tempPoint = new Point2D();
+
+   private int findOptimalFoothold(int stepIndex, FootstepDataCommand footstep)
    {
       double nominalX = footstep.getPosition().getX();
       double nominalY = footstep.getPosition().getY();
@@ -245,6 +258,14 @@ public class AvatarBipedalGaitGenerator
 
       int optimalKey = NULL_KEY;
       double optimalScore = Double.NEGATIVE_INFINITY;
+
+      boolean hasPreviousStep = previousFootstepDataListCommand.getFootsteps().size() >= stepIndex + 1;
+      double previousStepWeight = -8.0 * Math.pow(2.5, -stepIndex);
+      
+      if (hasPreviousStep && previousFootstepDataListCommand.getFootsteps().get(stepIndex).getRobotSide() != footstep.getRobotSide())
+      {
+         throw new RuntimeException("Invalid step sides");
+      }
 
       for (int di_x = -sampleWindowX; di_x <= sampleWindowX; di_x++)
       {
@@ -272,6 +293,12 @@ public class AvatarBipedalGaitGenerator
             double dotProductWeight = 0.5;
 
             double score = traversabilityWeight * traversability + offsetWeight * offset + dotProductWeight * offsetDotProduct;
+            if (hasPreviousStep)
+            {
+               tempPoint.set(xQuery, yQuery);
+               score += previousStepWeight * previousFootstepDataListCommand.getFootsteps().get(stepIndex).getPosition().distanceXY(tempPoint);
+            }
+
             if (score > optimalScore)
             {
                optimalScore = score;

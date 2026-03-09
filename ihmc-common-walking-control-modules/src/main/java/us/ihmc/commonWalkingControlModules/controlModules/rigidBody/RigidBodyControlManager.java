@@ -106,6 +106,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                   boolean enableFunctionGenerators,
                                   double nominalRhoWeight,
                                   WholeBodyPostureAdjustmentProvider postureAdjustmentProvider,
+                                  DoubleProvider capturePointErrorProvider,
                                   YoDouble yoTime,
                                   double controlDT,
                                   YoRegistry parentRegistry)
@@ -221,6 +222,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                                                                       taskspaceControlState.getOrientationControlHelper(),
                                                                                       controlFrame,
                                                                                       nominalRhoWeight,
+                                                                                      capturePointErrorProvider,
                                                                                       hasContactStateChanged,
                                                                                       registry);
       }

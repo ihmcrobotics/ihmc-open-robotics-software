@@ -325,7 +325,8 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
          wholeBodyContactState = new WholeBodyContactState(controlledOneDoFJoints, fullRobotModel.getRootJoint());
          multiContactStabilityRegionCalculator = StabilityMarginRegionCalculator.createForCoPStabilityMargin("cop_", totalMass.getValue(), centerOfMassFrame, referenceFrames.getMidFeetZUpFrame(), registry, null);
          //         multiContactStabilityRegionCalculator = StabilityMarginRegionCalculator.createForCoMStabilityMargin("cop_", totalMass.getValue(), registry, yoGraphicsListRegistry);
-         multiContactStabilityRegionCalculator.setupForStabilityMarginCalculation(centerOfMassStateProvider::getCenterOfMassPosition);
+//         multiContactStabilityRegionCalculator.setupForStabilityMarginCalculation(centerOfMassStateProvider::getCenterOfMassPosition);
+         multiContactStabilityRegionCalculator.setupForStabilityMarginCalculation(() -> yoCapturePoint);
       }
       else
       {

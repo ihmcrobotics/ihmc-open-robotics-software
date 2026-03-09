@@ -66,7 +66,7 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
       bracingPositionWeights = new YoFrameVector3D("bracingPositionWeights", ReferenceFrame.getWorldFrame(), registry);
       bracingOrientationWeights = new YoFrameVector3D("bracingOrientationWeights", ReferenceFrame.getWorldFrame(), registry);
 
-      bracingPositionWeights.set(4.0, 4.0, 4.0);
+      bracingPositionWeights.set(10.0, 10.0, 10.0);
       bracingOrientationWeights.set(0.0, 0.0, 0.0);
 
       bracingFeedbackGains = new DefaultYoPIDSE3Gains("PosDynamicLoadBearing", GainCoupling.XYZ, false, registry);
