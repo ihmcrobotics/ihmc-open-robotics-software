@@ -64,7 +64,7 @@ public class ROS2SyncedRobotModel extends CommunicationsSyncedRobotModel
    public void addTimestampCallback(TransformBuffer transformBuffer)
    {
       robotConfigurationDataInput.addCallback(message -> {
-         transformBuffer.add(message.getLastReceivedPacketRobotTimestamp(), getReferenceFrames().getSteppingCameraFrame().getTransformToRoot());
+         transformBuffer.add(message.getWallTime(), getReferenceFrames().getSteppingCameraFrame().getTransformToRoot());
       });
    }
 
