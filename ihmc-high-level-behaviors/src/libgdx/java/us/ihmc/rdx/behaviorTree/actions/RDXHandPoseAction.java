@@ -402,10 +402,8 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
 
       ImGui.sameLine();
       boolean gizmoWasSelected = poseGizmo.getSelected().get();
-      if (armIconWidget.render(definition.getSide(), gizmoWasSelected))
-      {
+      if (armIconWidget.render(definition.getSide(), gizmoWasSelected, definition.getUsePredefinedJointAngles()))
          poseGizmo.setSelected(!gizmoWasSelected);
-      }
 
       renderRowEnd();
    }

@@ -3,6 +3,7 @@ package us.ihmc.behaviors.behaviorTree.scene;
 import behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage;
 import behavior_msgs.msg.dds.BehaviorTreeSceneObjectStateMessage;
 import behavior_msgs.msg.dds.BehaviorTreeSceneStateMessage;
+import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.LatestTimestampModifiable;
@@ -11,8 +12,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +29,7 @@ public abstract class BehaviorTreeSceneState
    protected final LongSupplier idSupplier;
    protected final ROS2SyncedRobotModel syncedRobot;
 
-   private final List<ReferenceFrame> robotFrames = new ArrayList<>();
+   private final List<Pair<String, ReferenceFrame>> robotFrames = new ArrayList<>();
    private final Map<String, ReferenceFrame> robotFrameMap = new HashMap<>();
 
    protected final LatestTimestampModifiable objectsModifiable;
@@ -45,17 +44,21 @@ public abstract class BehaviorTreeSceneState
       objectsModifiable = new LatestTimestampModifiable(crdtInfo);
       objectsModifiable.setModifierName("Scene objects");
 
-      addAll(Collections.singleton(ReferenceFrame.getWorldFrame()));
-      addAll(syncedRobot.getReferenceFrames().getCommonReferenceFrames());
+      add("Chest", syncedRobot.getReferenceFrames().getChestFrame());
+      add("Pelvis", syncedRobot.getReferenceFrames().getPelvisFrame());
+      add("Walking", syncedRobot.getReferenceFrames().getMidFeetUnderPelvisFrame());
       for (RobotSide side : RobotSide.values)
+      {
          if (syncedRobot.getRobotModel().getRobotVersion().hasArm(side))
-            addAll(Collections.singleton(syncedRobot.getReferenceFrames().getHandZUpFrame(side)));
+            add(side.getPascalCaseName() + " Hand", syncedRobot.getReferenceFrames().getHandFrame(side));
+         add(side.getPascalCaseName() + " Foot Sole", syncedRobot.getReferenceFrames().getSoleFrame(side));
+      }
    }
 
-   private void addAll(Collection<ReferenceFrame> referenceFrames)
+   private void add(String name, ReferenceFrame referenceFrame)
    {
-      robotFrames.addAll(referenceFrames);
-      referenceFrames.forEach(referenceFrame -> robotFrameMap.put(referenceFrame.getName(), referenceFrame));
+      robotFrames.add(Pair.of(name, referenceFrame));
+      robotFrameMap.put(name, referenceFrame);
    }
 
    public boolean containsFrame(String referenceFrameName)
@@ -86,9 +89,9 @@ public abstract class BehaviorTreeSceneState
 
    public void getAllFrameNames(Consumer<String> frameNameConsumer)
    {
-      for (ReferenceFrame frame : robotFrames)
+      for (Pair<String, ReferenceFrame> frame : robotFrames)
       {
-         frameNameConsumer.accept(frame.getName());
+         frameNameConsumer.accept(frame.getKey());
       }
 
       for (BehaviorTreeSceneObjectState object : objects)
