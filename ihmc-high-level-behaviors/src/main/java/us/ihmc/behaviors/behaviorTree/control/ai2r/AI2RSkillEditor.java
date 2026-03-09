@@ -58,10 +58,6 @@ public class AI2RSkillEditor
 
       public static final AI2RSkillEditor.SpatialRelationType[] values = values();
    }
-   private static final List<String> SCAN_ACTION_TYPES = List.of("setup object", "freeze object");
-   private String objectGrasped = "";
-   private RobotSide graspSide = RobotSide.RIGHT;
-   private int commandedBehaviorIndex;
    private final BehaviorTreeRootNodeExecutor rootNode;
    private final BehaviorTreeNodeExecutor parentNode;
 
@@ -71,16 +67,14 @@ public class AI2RSkillEditor
       this.parentNode = parentNode;
    }
 
-   public void adaptSkills(String behaviorToExecuteName, AI2RNodeState state, AI2RCommandMessage message, int commandedBehaviorIndex)
+   public void adaptSkills(String behaviorToExecuteName, AI2RNodeState state, AI2RCommandMessage message)
    {
-      this.commandedBehaviorIndex = commandedBehaviorIndex;
       updateScan(behaviorToExecuteName, state, message);
       updateGoTo(behaviorToExecuteName, state, message);
-      updateReceiveObject(behaviorToExecuteName, state, message);
    }
 
    private void updateScan(String behaviorToExecuteName, AI2RNodeState state, AI2RCommandMessage message)
-   {
+   { // TODO Support list of objects to set up in scene action node
       if (!behaviorToExecuteName.contains("SCAN") || !message.getAdaptingBehavior())
          return;
 
@@ -228,30 +222,6 @@ public class AI2RSkillEditor
       }
    }
 
-   private void updateReceiveObject(String behaviorToExecuteName, AI2RNodeState state, AI2RCommandMessage message)
-   {
-      if (behaviorToExecuteName.contains("RECEIVE") && message.getAdaptingBehavior())
-      {
-         AI2RReceiveObjectMessage receiveMessage = message.getReceiveObject();
-         String receiveObject = receiveMessage.getObjectNameAsString();
-         if (!receiveObject.isEmpty())
-         {
-            objectGrasped = receiveObject;
-         }
-         for (var leaf : state.getActionSequence().getOrderedLeaves())
-         {
-            if (leaf instanceof ConditionNodeState conditionNodeState)
-            {
-               if (conditionNodeState.getParent().getDefinition().getName().contains("ReceiveObject"))
-               {
-                  conditionNodeState.getDefinition().getProximityCheck().setFrameNameA(objectGrasped);
-                  conditionNodeState.getDefinition().getProximityCheck().setFrameNameB(RobotSide.fromByte(receiveMessage.getSide()) == RobotSide.LEFT ? "leftHandZUp" : "rightHandZUp");
-               }
-            }
-         }
-      }
-   }
-
    private void changeParentFrameGoToNode(FootstepPlanActionDefinition definition, FootstepPlanActionState state, String newParentFrameName)
    {
       definition.setParentFrameName(newParentFrameName);
@@ -282,40 +252,5 @@ public class AI2RSkillEditor
       {
          footstepState.getSoleFrame().changeFrame(newParentFrameName);
       }
-   }
-
-//   private void updatePickAndPlace(String behaviorToExecuteName, AI2RNodeState state, AI2RCommandMessage message)
-//   {
-//      if (behaviorToExecuteName.contains("PICKUP") || behaviorToExecuteName.contains("PLACE") && message.getAdaptingBehavior())
-//      {
-//         AI2RHandPoseAdaptationMessage handMessage = message.getHandPoseAdaptation();
-//         for (var leaf : state.getActionSequence().getOrderedLeaves())
-//         {
-//            if (leaf.getLeafIndex() > commandedBehaviorIndex &&
-//                leaf.getDefinition().getName().contains(handMessage.getActionName()) &&
-//                leaf instanceof HandPoseActionState handPoseActionState)
-//            {
-//               handPoseActionState.getDefinition().setPalmParentFrameName(handMessage.getReferenceFrameNameAsString());
-//               RigidBodyTransform adaptedPose = new RigidBodyTransform(handMessage.getNewOrientation(), handMessage.getNewPosition());
-//               handPoseActionState.getDefinition().getPalmTransformToParent().setValue(adaptedPose ,1e-5);
-//               break;
-//            }
-//         }
-//      }
-//   }
-
-   public String getObjectGrasped()
-   {
-      return objectGrasped;
-   }
-
-   public RobotSide getGraspSide()
-   {
-      return graspSide;
-   }
-
-   public int getCommandedBehaviorIndex()
-   {
-      return commandedBehaviorIndex;
    }
 }

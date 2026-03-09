@@ -140,7 +140,7 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
    // Temporary variables
    private final FramePoint3D footPositionInWorld = new FramePoint3D();
 
-   private final BooleanProvider trustOnlyLowestFoot = new BooleanParameter("TrustOnlyLowestFoot", registry, true);
+   private final BooleanProvider trustOnlyLowestFoot = new BooleanParameter("TrustOnlyLowestFoot", registry, false);
    private final IntegerProvider lowestFootWindowSize = new IntegerParameter("LowestFootWindowSize", registry, 0);
    private final GlitchFilteredYoInteger lowestFootInContactIndex = new GlitchFilteredYoInteger("LowestFootInContact", lowestFootWindowSize, registry);
 

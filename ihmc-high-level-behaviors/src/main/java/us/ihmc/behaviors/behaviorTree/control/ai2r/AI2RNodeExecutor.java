@@ -103,7 +103,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
          }
 
          // Generic adaptable skills
-         skillEditor.adaptSkills(behaviorToExecuteName, state, message, commandedBehaviorIndex);
+         skillEditor.adaptSkills(behaviorToExecuteName, state, message);
 
          // Trigger commanded behavior
          if (commandedBehaviorIndex >= 0)
@@ -314,14 +314,6 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
             }
          }
 
-         if (leaf.getParent().getDefinition().getName().contains("Place"))
-         {
-            if (leaf.getDefinition().getName().contains("Release") && leaf.getIsExecuting())
-            {
-               statusMessage.setObjectGrasped("");
-            }
-         }
-
          // Check if Goto action is executing and if next steps are colliding with objects in the scene
          if (CHECK_COLLISION_WITH_OBJECTS)
          {
@@ -370,15 +362,14 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
          if (state.getCheckPoints().get(i).getDefinition().getName().contains("END OF") && state.getCheckPoints().get(i).getIsExecuting())
          {
             // ! WARNING !
-            // Assuming checkpoints are only used at the beginning and end of a behaviors
+            // Assuming checkpoints are only used at the beginning and end of a behavior
             statusMessage.setCompletedBehavior(state.getCheckPoints().get(i - 1).getDefinition().getName());
             statusMessage.setBehaviorInProgress("-");
-            LogTools.info("Completed behavior: {}", statusMessage.getCompletedBehavior());
             // Jump to end of sequence
             actionSequence.setExecutionNextIndex(state.getCheckPoints().get(state.getCheckPoints().size() - 1).getLeafIndex());
 
-            // TODO do something if scan cannot find all objects, first support list of objects to find in setup object
             // If SCAN failed to find certain objects, reset failure
+            // TODO do something else if scan cannot find all objects?
             if (state.getCheckPoints().get(i).getDefinition().getName().contains("SCAN"))
             {
                for (var leaf : actionSequence.getOrderedLeaves())

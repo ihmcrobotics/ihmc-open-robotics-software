@@ -1,7 +1,0 @@
-[
-    {
-        "timestamp": "2026-02-18T13:58:30.351299",
-        "prompt": "scene_objects: ['Person1', 'Charge1']\ntask_description: RECEIVE OBJECT (the explosive charge from the person)\n\nExamples:\nExample 1 \u2014 no hand specified, default to right:\n  task_description: RECEIVE OBJECT (the charge from the person)\n  scene_objects: [Person1, Charge1]\n  Output: { object_name: Charge1, side: 1 }\n\nExample 2 \u2014 left hand explicitly requested:\n  task_description: RECEIVE OBJECT (take the pen with the left hand)\n  scene_objects: [Person1, Pen1]\n  Output: { object_name: Pen1, side: 0 }\n\nExample 3 \u2014 right hand explicitly requested:\n  task_description: RECEIVE OBJECT (grab the charge with the right hand)\n  scene_objects: [Person1, Charge1]\n  Output: { object_name: Charge1, side: 1 }\n\nImmediate Task: Extract the object name and receiving hand from the task_description.\n\nNote: Check: which object is being received? Is a hand side mentioned? Default to right (1) if not.\n\nOutput Format:\nReturn a valid JSON object:\n  { object_name: <full object name from scene_objects>, side: <0 for left, 1 for right> }\n\nNo explanations or code.",
-        "output": "{\n  \"object_name\": \"Charge1\",\n  \"side\": 1\n}"
-    }
-]
