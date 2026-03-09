@@ -38,7 +38,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class RDXHeightMapLogPlayer
 {
 //   private static final String SVO_FILE = "/opt/ihmc/LogData/UserFolders/TomaszFolder/heightmap_test.svo2";
-   private static final String SVO_FILE = "/opt/ihmc/LogData/UserFolders/DexFolder/FrameGrabber9000/01262026/ZED_Recording_58123737_20260126_152719.svo";
+   private static final String SVO_FILE = "/opt/ihmc/LogData/incoming/20260309_135533_AlexUnifiedControlProcess/perception/20260309_135537_AlexSteppingZEDXMini.svo2";
 
    private final RDXBaseUI baseUI;
    private final ROS2Node ros2Node;

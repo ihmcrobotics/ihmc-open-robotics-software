@@ -12,6 +12,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Input;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.sensors.zed.TransformBuffer;
 
 import java.util.function.Consumer;
 
@@ -57,6 +58,13 @@ public class ROS2SyncedRobotModel extends CommunicationsSyncedRobotModel
                                                                    message -> robotSide.toByte() == message.getRobotSide()));
          sakeHandStatus.put(robotSide, new ROS2SakeHandStatus(ros2Node, robotModel.getSimpleRobotName(), robotSide));
       }
+   }
+
+   public void addTimestampCallback(TransformBuffer transformBuffer)
+   {
+      robotConfigurationDataInput.addCallback(message -> {
+         transformBuffer.add(message.getWallTime() / 1000000L, getReferenceFrames().getSteppingCameraFrame().getTransformToRoot());
+      });
    }
 
    @Override
