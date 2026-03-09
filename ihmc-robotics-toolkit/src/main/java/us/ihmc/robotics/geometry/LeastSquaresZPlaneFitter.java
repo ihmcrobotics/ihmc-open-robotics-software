@@ -70,7 +70,22 @@ public class LeastSquaresZPlaneFitter implements PlaneFitter
       planeToPack.getPoint().set(planePoint);
       return squareError;
    }
-   
+
+   public double getA()
+   {
+      return coefficients.get(0);
+   }
+
+   public double getB()
+   {
+      return coefficients.get(1);
+   }
+
+   public double getC()
+   {
+      return coefficients.get(2);
+   }
+
    @Override
    public double fitPlaneToPoints(List<? extends Point3DReadOnly> pointList, Plane3D planeToPack)
    {
