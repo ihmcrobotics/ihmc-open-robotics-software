@@ -67,7 +67,7 @@ public class QuickFootstepPlanner
    private boolean planStep()
    {
       SideDependentList<Boolean> atGoal = new SideDependentList<>(side -> stance.get(side).getPosition().distance(goal.get(side).getPosition()) <= 0.01
-                                                                          && stance.get(side).getOrientation().distance(goal.get(side).getOrientation()) <= Math.toRadians(5.0));
+                                                && stance.get(side).getOrientation().distance(goal.get(side).getOrientation()) <= Math.toRadians(5.0));
       if (atGoal.get(RobotSide.LEFT) && atGoal.get(RobotSide.RIGHT))
          return true;
 
@@ -115,7 +115,7 @@ public class QuickFootstepPlanner
                   ConvexPolygon2D stancePolygon = createFootPolygon(stance.get(side.getOppositeSide()), 0.04);
                   ConvexPolygon2D oppositeGoalPolygon = createFootPolygon(goal.get(side.getOppositeSide()), 0.04);
                   if (convexPolygonTools.doPolygonsIntersect(candidatePolygon, stancePolygon)
-                      || convexPolygonTools.doPolygonsIntersect(candidatePolygon, oppositeGoalPolygon))
+                   || convexPolygonTools.doPolygonsIntersect(candidatePolygon, oppositeGoalPolygon))
                   {
                      Vector3D ray = new Vector3D();
                      ray.sub(candidate.get(side).getPosition(), swingHip.get(side));
@@ -201,7 +201,7 @@ public class QuickFootstepPlanner
                                                                            stanceForward.getX(),
                                                                            stanceForward.getY());
       return location == null || (stepSide == RobotSide.LEFT && location == Location.RIGHT
-                              || stepSide == RobotSide.RIGHT && location == Location.LEFT);
+                               || stepSide == RobotSide.RIGHT && location == Location.LEFT);
    }
 
    public void setStepPlannedCallback(Runnable stepPlannedCallback)
