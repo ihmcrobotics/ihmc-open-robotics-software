@@ -75,6 +75,9 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
       baseUI.getVRManager().getContext().addVRInputProcessor(this::processVRInput);
       baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(this::calculate3DViewPick);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::process3DViewInput);
+      baseUI.getStatusBar().add(() -> RDXBehaviorTreeTimeline.render(rootNode),
+                                RDXBehaviorTreeTimeline::heightNeeded,
+                                RDXBehaviorTreeTimeline::renderIcon);
    }
 
    public void update()

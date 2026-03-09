@@ -66,8 +66,8 @@ public class RDXStatusBar
          selected.renderContent.run();
 
       ImGui.setCursorPosY(ImGui.getWindowHeight() - ImGui.getFrameHeight() + size * 0.2f);
-      ImGui.text("Ready");
-      ImGui.sameLine();
+//      ImGui.text("Ready");
+//      ImGui.sameLine(); // TODO Probably show log messages or something?
 
       for (int i = 0; i < elements.size(); i++)
       {
