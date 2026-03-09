@@ -1,7 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import org.apache.commons.math3.util.Pair;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.TrajectoryTrackingErrorCalculator;
@@ -24,13 +23,16 @@ import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.simplePlanners.QuickFootstepPlanner;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import static behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessage.*;
+import static us.ihmc.footstepPlanning.simplePlanners.QuickFootstepPlanner.Footstep;
 
 public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanActionState, FootstepPlanActionDefinition>
 {
@@ -60,6 +62,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
 
       previewFootstepPlanningThread = new FootstepPlanActionPlanningThread(true, state, definition, scene.getTerrainMap());
       executionFootstepPlanningThread = new FootstepPlanActionPlanningThread(false, state, definition, scene.getTerrainMap());
+
    }
 
    @Override
@@ -138,17 +141,15 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
             {
                if (previewPlanningThrottler.run())
                {
-                  List<Pair<RobotSide, Pose3D>> footstepPlan
-                        = quickFootstepPlanner.plan(new SideDependentList<>(side -> new Pose3D(syncedFeetPoses.get(side))),
-                                                    new SideDependentList<>(side -> new Pose3D(liveGoalFeetPoses.get(side))));
+                  List<Footstep> footstepPlan = planQuickFootsteps();
 
                   var footstepsMessage = state.getPreviewFootsteps().accessValue();
                   footstepsMessage.clear();
-                  for (Pair<RobotSide, Pose3D> footstep : footstepPlan)
+                  for (Footstep footstep : footstepPlan)
                   {
                      var messageFootstep = footstepsMessage.add();
-                     messageFootstep.setRobotSide(footstep.getFirst().toByte());
-                     messageFootstep.getSolePose().set(footstep.getSecond());
+                     messageFootstep.setRobotSide(footstep.swingSide().toByte());
+                     messageFootstep.getSolePose().set(footstep.swingEnd());
                   }
                }
             }
@@ -228,13 +229,26 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
          }
          else if (definition.getPlannerType().getValue() == QUICK)
          {
-            List<Pair<RobotSide, Pose3D>> footstepPlan
-                  = quickFootstepPlanner.plan(new SideDependentList<>(side -> new Pose3D(syncedFeetPoses.get(side))),
-                                              new SideDependentList<>(side -> new Pose3D(liveGoalFeetPoses.get(side))));
+            List<Footstep> footstepPlan = planQuickFootsteps();
 
             footstepPlanToExecute.clear();
-            for (Pair<RobotSide, Pose3D> footstep : footstepPlan)
-               footstepPlanToExecute.addFootstep(footstep.getFirst(), new FramePose3D(footstep.getSecond()));
+            for (int i = 0; i < footstepPlan.size(); i++)
+            {
+               Footstep quickFootstep = footstepPlan.get(i);
+               PlannedFootstep simpleFootstep = new PlannedFootstep(quickFootstep.swingSide(), new FramePose3D(quickFootstep.swingEnd()));
+               // Increase swing duration for longer steps
+               double minDistance = definition.getQuickSwingTimeDistanceLower().getValue();
+               double maxDistance = definition.getQuickSwingTimeDistanceUpper().getValue();
+               double minTime = definition.getQuickMinSwingTime().getValue();
+               double maxTime = definition.getQuickMaxSwingTime().getValue();
+               double distance = quickFootstep.swingDistance();
+               double time = (distance <= minDistance) ? minTime : // Min
+                                 (distance >= maxDistance) ? maxTime : // Max
+                                      minTime + ((distance - minDistance) / (maxDistance - minDistance)) * (maxTime - minTime); // Interpolate
+               LogTools.info("Swing time: %.2f".formatted(time));
+               simpleFootstep.setSwingDuration(time);
+               footstepPlanToExecute.addFootstep(simpleFootstep);
+            }
             state.getExecutionState().setValue(FootstepPlanActionExecutionState.PLANNING_SUCCEEDED);
          }
          else
@@ -401,5 +415,28 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
       {
          state.getCurrentFootPoses().get(side).accessValue().set(syncedFeetPoses.get(side));
       }
+   }
+
+   private List<Footstep> planQuickFootsteps()
+   {
+      quickFootstepPlanner.setHipWidth(definition.getQuickHipWidth().getValue());
+      quickFootstepPlanner.setStepLength(definition.getQuickStepLength().getValue());
+      quickFootstepPlanner.setNextPelvisYawLimit(definition.getQuickNextPelvisYawLimit().getValue());
+      quickFootstepPlanner.setInwardLimit(definition.getQuickInwardLimit().getValue());
+      quickFootstepPlanner.setOutwardLimit(definition.getQuickOutwardLimit().getValue());
+      quickFootstepPlanner.setStepAngleLimit(definition.getQuickStepAngleLimit().getValue());
+      ArrayList<Pose3D> waypoints = new ArrayList<>();
+      for (int i = 0; i < definition.getWaypoints().getSize(); i++)
+      {
+         FramePose3D framePose = new FramePose3D(state.getParentFrame(), definition.getWaypoints().getValueReadOnly(i));
+         framePose.changeFrame(ReferenceFrame.getWorldFrame());
+         waypoints.add(new Pose3D(framePose));
+      }
+      if (definition.getQuickWaypointOnly().getValue())
+         waypoints.add(new Pose3D(state.getGoalFrame().getReferenceFrame().getTransformToWorldFrame()));
+      return quickFootstepPlanner.plan(new SideDependentList<>(side -> new Pose3D(syncedFeetPoses.get(side))),
+                                       waypoints,
+                                       definition.getQuickWaypointOnly().getValue() ? null
+                                          : new SideDependentList<>(side -> new Pose3D(liveGoalFeetPoses.get(side))));
    }
 }
