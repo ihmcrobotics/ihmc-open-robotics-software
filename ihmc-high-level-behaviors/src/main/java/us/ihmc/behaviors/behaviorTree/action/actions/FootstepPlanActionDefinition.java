@@ -5,6 +5,7 @@ import behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.BooleanNode;
+import com.fasterxml.jackson.databind.node.IntNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
@@ -68,7 +69,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       swingDuration = new CRDTBidirectionalDouble(this, 0.8);
       transferDuration = new CRDTBidirectionalDouble(this, 0.5);
       executionMode = new CRDTBidirectionalEnumField<>(this, ExecutionMode.OVERRIDE);
-      parentFrameName = new CRDTBidirectionalString(this, ReferenceFrame.getWorldFrame().getName());
+      parentFrameName = new CRDTBidirectionalString(this, "Walking");
       isManuallyPlaced = new CRDTBidirectionalBoolean(this, false);
       manuallyPlacedFootsteps = new CRDTBidirectionalRecyclingArrayList<>(this, new RecyclingArrayList<>(() -> new FootstepPlanActionFootstepDefinition(this)));
       goalStancePoint = new CRDTBidirectionalPoint3D(this);
@@ -115,7 +116,12 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
             goalFootNode.put("yawInDegrees", (float) MathTools.roundToPrecision(Math.toDegrees(goalFootstepToGoalYaws.get(side).getValue()), 0.02));
          }
          jsonNode.put("plannerInitialStanceSide", plannerInitialStanceSide.getValue().name());
-         jsonNode.put("planner", plannerType.getValue());
+         jsonNode.put("planner", switch (plannerType.getValue())
+         {
+            case TURN_WALK_TURN -> "TURN_WALK_TURN";
+            case A_STAR -> "A_STAR";
+            default -> "QUICK";
+         });
          if (plannerType.getValue() == A_STAR)
             jsonNode.put("plannerWalkWithGoalOrientation", plannerWalkWithGoalOrientation.getValue());
          jsonNode.put("plannerPlanWithBodyPath", plannerPlanWithBodyPath.getValue());
@@ -156,7 +162,19 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
          if (jsonNode.get("plannerPerformAStarSearch") instanceof BooleanNode booleanNode)
             plannerType.setValue(booleanNode.booleanValue() ? A_STAR : QUICK);
          if (jsonNode.get("planner") != null)
-            plannerType.setValue(jsonNode.get("planner").asInt());
+         {
+            if (jsonNode.get("planner") instanceof IntNode intNode)
+               plannerType.setValue(intNode.intValue());
+            else if (jsonNode.get("planner") instanceof TextNode textNode)
+            {
+               if (textNode.textValue().equals("QUICK"))
+                  plannerType.setValue(QUICK);
+               if (textNode.textValue().equals("TURN_WALK_TURN"))
+                  plannerType.setValue(TURN_WALK_TURN);
+               if (textNode.textValue().equals("A_STAR"))
+                  plannerType.setValue(A_STAR);
+            }
+         }
          if (jsonNode.get("plannerWalkWithGoalOrientation") instanceof BooleanNode booleanNode)
             plannerWalkWithGoalOrientation.setValue(booleanNode.booleanValue());
          if (jsonNode.get("plannerPlanWithBodyPath") instanceof BooleanNode booleanNode)

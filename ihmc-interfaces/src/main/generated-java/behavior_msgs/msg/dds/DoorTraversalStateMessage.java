@@ -16,8 +16,6 @@ public class DoorTraversalStateMessage extends Packet<DoorTraversalStateMessage>
             * Definition
             */
    public behavior_msgs.msg.dds.DoorTraversalDefinitionMessage definition_;
-   public double door_hinge_joint_angle_;
-   public double door_handle_distance_from_start_;
 
    public DoorTraversalStateMessage()
    {
@@ -35,10 +33,6 @@ public class DoorTraversalStateMessage extends Packet<DoorTraversalStateMessage>
    {
       behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType.staticCopy(other.state_, state_);
       behavior_msgs.msg.dds.DoorTraversalDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
-      door_hinge_joint_angle_ = other.door_hinge_joint_angle_;
-
-      door_handle_distance_from_start_ = other.door_handle_distance_from_start_;
-
    }
 
 
@@ -57,24 +51,6 @@ public class DoorTraversalStateMessage extends Packet<DoorTraversalStateMessage>
    public behavior_msgs.msg.dds.DoorTraversalDefinitionMessage getDefinition()
    {
       return definition_;
-   }
-
-   public void setDoorHingeJointAngle(double door_hinge_joint_angle)
-   {
-      door_hinge_joint_angle_ = door_hinge_joint_angle;
-   }
-   public double getDoorHingeJointAngle()
-   {
-      return door_hinge_joint_angle_;
-   }
-
-   public void setDoorHandleDistanceFromStart(double door_handle_distance_from_start)
-   {
-      door_handle_distance_from_start_ = door_handle_distance_from_start;
-   }
-   public double getDoorHandleDistanceFromStart()
-   {
-      return door_handle_distance_from_start_;
    }
 
 
@@ -97,10 +73,6 @@ public class DoorTraversalStateMessage extends Packet<DoorTraversalStateMessage>
 
       if (!this.state_.epsilonEquals(other.state_, epsilon)) return false;
       if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.door_hinge_joint_angle_, other.door_hinge_joint_angle_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.door_handle_distance_from_start_, other.door_handle_distance_from_start_, epsilon)) return false;
-
 
       return true;
    }
@@ -116,10 +88,6 @@ public class DoorTraversalStateMessage extends Packet<DoorTraversalStateMessage>
 
       if (!this.state_.equals(otherMyClass.state_)) return false;
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
-      if(this.door_hinge_joint_angle_ != otherMyClass.door_hinge_joint_angle_) return false;
-
-      if(this.door_handle_distance_from_start_ != otherMyClass.door_handle_distance_from_start_) return false;
-
 
       return true;
    }
@@ -133,11 +101,7 @@ public class DoorTraversalStateMessage extends Packet<DoorTraversalStateMessage>
       builder.append("state=");
       builder.append(this.state_);      builder.append(", ");
       builder.append("definition=");
-      builder.append(this.definition_);      builder.append(", ");
-      builder.append("door_hinge_joint_angle=");
-      builder.append(this.door_hinge_joint_angle_);      builder.append(", ");
-      builder.append("door_handle_distance_from_start=");
-      builder.append(this.door_handle_distance_from_start_);
+      builder.append(this.definition_);
       builder.append("}");
       return builder.toString();
    }

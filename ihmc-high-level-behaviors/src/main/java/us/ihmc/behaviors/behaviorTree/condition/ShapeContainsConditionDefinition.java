@@ -40,9 +40,9 @@ public class ShapeContainsConditionDefinition
    public ShapeContainsConditionDefinition(LatestTimestampModifiable latestTimestampModifiable)
    {
       containsType = new CRDTBidirectionalEnumField<>(latestTimestampModifiable, ContainsType.CONTAINS_FRAME);
-      frameName = new CRDTBidirectionalString(latestTimestampModifiable, ReferenceFrame.getWorldFrame().getName());
+      frameName = new CRDTBidirectionalString(latestTimestampModifiable, "Chest");
       minPoints = new CRDTBidirectionalInteger(latestTimestampModifiable, 0);
-      shapeParentFrameName = new CRDTBidirectionalString(latestTimestampModifiable, ReferenceFrame.getWorldFrame().getName());
+      shapeParentFrameName = new CRDTBidirectionalString(latestTimestampModifiable, "Chest");
       shapeTransformToParent = new CRDTBidirectionalRigidBodyTransform(latestTimestampModifiable);
       sphereRadius = new CRDTBidirectionalDouble(latestTimestampModifiable, 0.5);
    }

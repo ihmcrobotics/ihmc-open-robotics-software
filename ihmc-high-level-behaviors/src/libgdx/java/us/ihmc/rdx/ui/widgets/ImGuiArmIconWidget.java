@@ -14,7 +14,7 @@ public class ImGuiArmIconWidget
    private boolean isHovered;
    private RobotSide side;
 
-   public boolean render(RobotSide side, boolean isSelected)
+   public boolean render(RobotSide side, boolean isSelected, boolean jointAngles)
    {
       this.side = side;
 
@@ -53,6 +53,16 @@ public class ImGuiArmIconWidget
                                         offsetX + flip(0.27f) * scale, offsetY + 0.2f * scale, lineColor);
       ImGui.getWindowDrawList().addLine(offsetX + flip(0.7f ) * scale, offsetY + .3f * scale,
                                         offsetX + flip(0.4f ) * scale, offsetY + 0.1f * scale, lineColor);
+
+      if (jointAngles)
+      {
+         int grayedOut = ImGui.getColorU32(ImGuiCol.TextDisabled);
+         float centerX = offsetX + 1.3f * scale + flip(0.4f * scale);
+         float centerY = offsetY + 0.5f * scale;
+         float radius = 0.35f * scale;
+         ImGui.getWindowDrawList().addCircle(centerX, centerY, radius, grayedOut);
+         ImGui.getWindowDrawList().addLine(centerX - radius, centerY - 0.5f, centerX + radius - 0.5f, centerY - 0.5f, grayedOut);
+      }
 
       ImGui.setCursorPosX(ImGui.getCursorPosX() + itemWidth);
       ImGui.newLine();

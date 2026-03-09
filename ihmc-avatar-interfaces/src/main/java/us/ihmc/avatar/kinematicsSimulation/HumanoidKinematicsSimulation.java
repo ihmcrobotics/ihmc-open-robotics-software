@@ -5,6 +5,7 @@ import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
+import gnu.trove.map.TObjectDoubleMap;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.AvatarControllerThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -40,8 +41,10 @@ import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.graphicsDescription.conversion.YoGraphicConversionTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.handsros2.HandType;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameMessageCommandConverter;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
@@ -49,7 +52,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
 import us.ihmc.log.LogTools;
-import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
@@ -70,7 +72,6 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisher;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisherFactory;
@@ -145,6 +146,7 @@ public class HumanoidKinematicsSimulation
    private YoVariableServer yoVariableServer = null;
    private IntraprocessYoVariableLogger intraprocessYoVariableLogger;
    private JointDesiredOutputListReadOnly jointDesiredOutputList;
+   private final SideDependentList<AbilityHandKinematicsSimulation> abilityHands = new SideDependentList<>();
 
    public static HumanoidKinematicsSimulation create(DRCRobotModel robotModel, HumanoidKinematicsSimulationParameters kinematicsSimulationParameters)
    {
@@ -293,6 +295,10 @@ public class HumanoidKinematicsSimulation
       controllerNetworkSubscriber.addMessageCollectors(ControllerAPIDefinition.createDefaultMessageIDExtractor(), 3);
       controllerNetworkSubscriber.addMessageValidator(ControllerAPIDefinition.createDefaultMessageValidation());
 
+      for (RobotSide side : RobotSide.values)
+         if (robotModel.getRobotVersion().getHandType(side) == HandType.ABILITY_HAND)
+            abilityHands.put(side, new AbilityHandKinematicsSimulation(side, ros2Node, fullRobotModel));
+
       robotConfigurationDataPublisher = createRobotConfigurationDataPublisher(robotModel.getSimpleRobotName());
 
       realtimeROS2Node.spin();
@@ -404,7 +410,7 @@ public class HumanoidKinematicsSimulation
       FloatingJointStateReadOnly rootJointStateOutput = FloatingJointStateReadOnly.fromFloatingJoint(fullRobotModel.getRootJoint());
       List<OneDoFJointStateReadOnly> jointSensorOutputs = new ArrayList<>();
 
-      for (OneDoFJointReadOnly joint : FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel))
+      for (OneDoFJointReadOnly joint : fullRobotModel.getOneDoFJoints())
       {
          jointSensorOutputs.add(OneDoFJointStateReadOnly.createFromOneDoFJoint(joint, true));
       }
@@ -426,11 +432,6 @@ public class HumanoidKinematicsSimulation
       rcdPublisherFactory.setROS2Info(realtimeROS2Node, HumanoidControllerAPI.getOutputTopic(robotName));
 
       return rcdPublisherFactory.createRobotConfigurationDataPublisher();
-   }
-
-   public void setState()
-   {
-
    }
 
    public void setRunning(boolean running)
@@ -474,11 +475,17 @@ public class HumanoidKinematicsSimulation
 
    public void controllerTick()
    {
-      updateTimer.reset();
+      synchronized (this)
+      {
+         updateTimer.reset();
 
-      doControl();
+         doControl();
 
-      robotConfigurationDataPublisher.write();
+         for (RobotSide side : abilityHands.sides())
+            abilityHands.get(side).update();
+
+         robotConfigurationDataPublisher.write();
+      }
 
       if (kinematicsSimulationParameters.runNoFasterThanMaxRealtimeRate())
       {
@@ -584,6 +591,22 @@ public class HumanoidKinematicsSimulation
    private void processWalkingStatus(WalkingStatusMessage status)
    {
       latestWalkingStatus.set(WalkingStatus.fromByte(status.getWalkingStatus()));
+   }
+
+   public void reinitialize(RigidBodyTransformReadOnly rootJointTransform, TObjectDoubleMap<String> jointPositions)
+   {
+      synchronized (this)
+      {
+         fullRobotModel.getRootJoint().getJointPose().set(rootJointTransform);
+
+         for (OneDoFJointBasics joint : FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel))
+         {
+            if (jointPositions.containsKey(joint.getName()))
+               joint.setQ(jointPositions.get(joint.getName()));
+         }
+
+         initialize();
+      }
    }
 
    public void destroy()
