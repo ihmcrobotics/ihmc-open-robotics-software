@@ -3,14 +3,19 @@ package us.ihmc.footstepPlanning;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import perception_msgs.msg.dds.TerrainMapMessage;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
+import us.ihmc.footstepPlanning.tools.PlanarRegionToHeightMapConverter;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.PlannerInput;
+import us.ihmc.perception.gpuMapping.HeightMapTools;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
+import us.ihmc.perception.gpuMapping.TerrainMapMessageTools;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -145,7 +150,10 @@ public abstract class FootstepPlannerDataSetTest
       SideDependentList<Pose3D> goalSteps = PlannerTools.createSquaredUpFootsteps(plannerInput.getGoalPosition(),
                                                                                   goalYaw,
                                                                                   planningModule.getFootstepPlannerParameters().getIdealFootstepWidth());
+      TerrainMapMessage terrainMapMessage = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(dataset.getPlanarRegionsList(), 0.05, true);
+      TerrainMapData terrainMapData = TerrainMapMessageTools.unpackMessage(terrainMapMessage);
 
+      request.setTerrainMapData(terrainMapData);
       request.setStartFootPoses(startSteps.get(RobotSide.LEFT), startSteps.get(RobotSide.RIGHT));
       request.setGoalFootPoses(goalSteps.get(RobotSide.LEFT), goalSteps.get(RobotSide.RIGHT));
       request.setPlanBodyPath(getPlanBodyPath());
