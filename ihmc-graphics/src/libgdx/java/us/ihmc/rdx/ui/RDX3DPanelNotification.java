@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 
 public class RDX3DPanelNotification extends RDX3DPanelTooltip
 {
-   public static final double NOTIFICATION_DURATION = 1.0;
+   public static final double NOTIFICATION_DURATION = 3.0;
 
    private final Timer timer = new Timer();
    private String text;
