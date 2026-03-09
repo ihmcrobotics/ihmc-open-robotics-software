@@ -25,6 +25,7 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
    private final CRDTBidirectionalNotification manualExecutionRequested;
    private final CRDTBidirectionalNotification failureResetRequested;
    private final CRDTBidirectionalBoolean concurrencyEnabled;
+   private final CRDTBidirectionalBoolean previewModeEnabled;
 
    private final TLongObjectHashMap<BehaviorTreeNodeState<?>> idToNodeMap = new TLongObjectHashMap<>();
    private transient final MutableInt depthFirstIndexAssignment = new MutableInt();
@@ -45,6 +46,7 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
       executionNextIndex = new CRDTBidirectionalInteger(definition, 0);
       manualExecutionRequested = new CRDTBidirectionalNotification(definition);
       concurrencyEnabled = new CRDTBidirectionalBoolean(definition, true);
+      previewModeEnabled = new CRDTBidirectionalBoolean(definition, false);
       failureResetRequested = new CRDTBidirectionalNotification(definition);
    }
 
@@ -93,6 +95,7 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
       message.setExecutionNextIndex(executionNextIndex.toMessage());
       message.setManualExecutionRequested(manualExecutionRequested.toMessage());
       message.setConcurrencyEnabled(concurrencyEnabled.toMessage());
+      message.setPreviewModeEnabled(previewModeEnabled.toMessage());
       message.setFailureResetRequested(failureResetRequested.toMessage());
    }
 
@@ -106,6 +109,7 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
       executionNextIndex.fromMessage(message.getExecutionNextIndex());
       manualExecutionRequested.fromMessage(message.getManualExecutionRequested());
       concurrencyEnabled.fromMessage(message.getConcurrencyEnabled());
+      previewModeEnabled.fromMessage(message.getPreviewModeEnabled());
       failureResetRequested.fromMessage(message.getFailureResetRequested());
    }
 
@@ -200,6 +204,16 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
    public void setConcurrencyEnabled(boolean concurrencyEnabled)
    {
       this.concurrencyEnabled.setValue(concurrencyEnabled);
+   }
+
+   public boolean getPreviewModeEnabled()
+   {
+      return previewModeEnabled.getValue();
+   }
+
+   public void setPreviewModeEnabled(boolean previewModeEnabled)
+   {
+      this.previewModeEnabled.setValue(previewModeEnabled);
    }
 
    public TLongObjectHashMap<BehaviorTreeNodeState<?>> getIDToNodeMap()
