@@ -84,7 +84,7 @@ public class RigidBodySceneObjectDefinitions
    public static final RigidBodyTransform CHARGE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
 
    public static final String PERSON_NAME = "Person";
-   public static final String PERSON_VISUAL_MODEL_FILE_PATH = "environmentObjects/person/person.g3dj";
+   public static final String PERSON_VISUAL_MODEL_FILE_PATH = "environmentObjects/person/person.glb";
    public static final RigidBodyTransform PERSON_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
 
    public static final String BARRIER_NAME = "Barrier";

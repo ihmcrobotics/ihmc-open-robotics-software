@@ -192,12 +192,6 @@ public class YOLOTerrainMapIntegrator
                                                    yoloTerrain.getGridCenterY());
       copyTerrainContents(yoloTerrain, snapshot);
 
-      // Publish from the snapshot
-      TerrainMapMessage terrainMsg = new TerrainMapMessage();
-      TerrainMapMessageTools.toMessage(snapshot, terrainMsg);
-      terrainMsg.setSequenceId(yoloTerrainMapSequenceId++);
-      yoloTerrainMapPublisher.publish(terrainMsg);
-
       HeightMapMessage heightMsg = new HeightMapMessage();
       toHeightMapMessageFromTerrain(snapshot, heightMsg);
       heightMsg.setSequenceId(yoloHeightMapSequenceId++);
