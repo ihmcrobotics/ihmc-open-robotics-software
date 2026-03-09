@@ -38,8 +38,8 @@ public class ProximityConditionDefinition
    public ProximityConditionDefinition(LatestTimestampModifiable latestTimestampModifiable)
    {
       distanceType = new CRDTBidirectionalEnumField<>(latestTimestampModifiable, DistanceType.XYZ);
-      frameNameA = new CRDTBidirectionalString(latestTimestampModifiable, ReferenceFrame.getWorldFrame().getName());
-      frameNameB = new CRDTBidirectionalString(latestTimestampModifiable, ReferenceFrame.getWorldFrame().getName());
+      frameNameA = new CRDTBidirectionalString(latestTimestampModifiable, "Pelvis");
+      frameNameB = new CRDTBidirectionalString(latestTimestampModifiable, "Chest");
       minDistance = new CRDTBidirectionalDouble(latestTimestampModifiable, 0.0);
       maxDistance = new CRDTBidirectionalDouble(latestTimestampModifiable, 1.0);
       timeout = new CRDTBidirectionalDouble(latestTimestampModifiable, 5.0);

@@ -16,19 +16,19 @@ public class GotoNodeState extends LeafNodeState<GotoNodeDefinition>
    }
 
    @Override
-   public void validateDefinition(List<LeafNodeState<?>> leaves)
+   public void validateDefinition(List<BehaviorTreeNodeState<?>> nodes)
    {
-      super.validateDefinition(leaves);
+      super.validateDefinition(nodes);
 
       if (definition.getNodeToGotoIsInvalid())
       {
          // We need to find the node by name
          // This happens when we load from JSON
-         for (BehaviorTreeNodeState<?> leaf : leaves)
+         for (BehaviorTreeNodeState<?> node : nodes)
          {
-            if (leaf.getDefinition().getName().equals(definition.getNodeToGotoName()))
+            if (node.getDefinition().getName().equals(definition.getNodeToGotoName()))
             {
-               definition.setNodeToGoto(leaf.getID(), definition.getNodeToGotoName());
+               definition.setNodeToGoto(node.getID(), definition.getNodeToGotoName());
                break;
             }
          }
@@ -37,11 +37,11 @@ public class GotoNodeState extends LeafNodeState<GotoNodeDefinition>
       {
          // Dynamically update the node name -- it can change independently of the node's ID
          // This is necessary for saving the definition
-         for (BehaviorTreeNodeState<?> leaf : leaves)
+         for (BehaviorTreeNodeState<?> node : nodes)
          {
-            if (leaf.getID() == definition.getNodeToGotoID())
+            if (node.getID() == definition.getNodeToGotoID())
             {
-               definition.setNodeToGotoName(leaf.getDefinition().getName());
+               definition.setNodeToGotoName(node.getDefinition().getName());
             }
          }
       }
@@ -67,17 +67,13 @@ public class GotoNodeState extends LeafNodeState<GotoNodeDefinition>
       super.fromMessage(message.getState());
    }
 
-   public LeafNodeState<?> findNodeToGoto()
+   public BehaviorTreeNodeState<?> findNodeToGoto()
    {
       BehaviorTreeNodeState<?> nodeToGoto = rootNode.getIDToNodeMap().get(definition.getNodeToGotoID());
-      if (nodeToGoto instanceof LeafNodeState<?> leafState)
-      {
-         return leafState;
-      }
-      else
-      {
+
+      if (nodeToGoto == null)
          LogTools.error("Node to goto is not a leaf node.");
-         return null;
-      }
+
+      return nodeToGoto;
    }
 }

@@ -290,6 +290,9 @@ public class ZEDImageSensor extends ImageSensor
       {
          // Grab images now
          returnCode = sl_grab(cameraID, zedRuntimeParameters);
+         RigidBodyTransform leftSensorTransformAtGrab = leftSensorFrame.getTransformToWorldFrame();
+         RigidBodyTransform rightSensorTransformAtGrab = rightSensorFrame.getTransformToWorldFrame();
+         Instant grabTime = Instant.now();
          if (returnCode == SL_ERROR_CODE_END_OF_SVOFILE_REACHED)
          {
             sl_set_svo_position(0, 0);
@@ -313,7 +316,7 @@ public class ZEDImageSensor extends ImageSensor
          }
 
          throwOnError(returnCode);
-         lastGrabTime = Instant.now();
+         lastGrabTime = grabTime;
          ++grabSequenceNumber;
 
          lastGrabTimestamp = sl_get_current_timestamp(cameraID);
@@ -353,21 +356,18 @@ public class ZEDImageSensor extends ImageSensor
          {  // Create RawImages from the grabbed retrieved slMats
             if (grabbedImages[LEFT_COLOR_IMAGE_KEY] != null)
                grabbedImages[LEFT_COLOR_IMAGE_KEY].release();
-            grabbedImages[LEFT_COLOR_IMAGE_KEY] = slMatToRawImage(leftColorImagePointer,
-                                                                  PixelFormat.BGRA8,
-                                                                  leftSensorIntrinsics,
-                                                                  leftSensorFrame.getTransformToRoot());
+            grabbedImages[LEFT_COLOR_IMAGE_KEY] = slMatToRawImage(leftColorImagePointer, PixelFormat.BGRA8, leftSensorIntrinsics, leftSensorTransformAtGrab);
 
             if (grabbedImages[RIGHT_COLOR_IMAGE_KEY] != null)
                grabbedImages[RIGHT_COLOR_IMAGE_KEY].release();
             grabbedImages[RIGHT_COLOR_IMAGE_KEY] = slMatToRawImage(rightColorImagePointer,
                                                                    PixelFormat.BGRA8,
                                                                    rightSensorIntrinsics,
-                                                                   rightSensorFrame.getTransformToRoot());
+                                                                   rightSensorTransformAtGrab);
 
             if (grabbedImages[DEPTH_IMAGE_KEY] != null)
                grabbedImages[DEPTH_IMAGE_KEY].release();
-            grabbedImages[DEPTH_IMAGE_KEY] = slMatToRawImage(depthImagePointer, PixelFormat.GRAY16, leftSensorIntrinsics, leftSensorFrame.getTransformToRoot());
+            grabbedImages[DEPTH_IMAGE_KEY] = slMatToRawImage(depthImagePointer, PixelFormat.GRAY16, leftSensorIntrinsics, leftSensorTransformAtGrab);
          }
       }
       catch (ZEDException exception)

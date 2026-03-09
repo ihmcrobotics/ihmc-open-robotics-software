@@ -18,7 +18,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class RDXROS2YOLOv8Settings
 {
    private final SyncedYOLOv8ExecutorParameters parameters;
-   private boolean requestingFullData;
 
    private String[] availableModels = new String[]{"None"};
    private final ImInt selectedModel = new ImInt();
@@ -33,15 +32,16 @@ public class RDXROS2YOLOv8Settings
       CRDTInfo crdtInfo = new CRDTInfo(ROS2ActorDesignation.OPERATOR, ros2ClockOffsetEstimator);
       parameters = new SyncedYOLOv8ExecutorParameters(crdtInfo);
       parameters.requestSendFullData();
-      requestingFullData = true;
 
       parametersPublisher = ros2Node.createPublisher(PerceptionAPI.YOLO_PARAMETERS);
       ros2Node.createSubscription2(PerceptionAPI.YOLO_PARAMETERS, message ->
       {
          parameters.fromMessage(message);
          parameters.confirmReceivedFullData();
-         requestingFullData = false;
       });
+
+      parameters.toMessage(parametersMessage);
+      parametersPublisher.publish(parametersMessage);
    }
 
    public void update()
@@ -78,7 +78,7 @@ public class RDXROS2YOLOv8Settings
       if (selectedModel.get() != 0)
          rdxModelSettings.get(selectedModel.get() - 1).update();
 
-      if (requestingFullData || parameters.pollNeedSendFullData() || parameters.getModelParameters().pollNeedSendFullData())
+      if (parameters.pollNeedSendFullData() || parameters.getModelParameters().pollNeedSendFullData())
       {
          parameters.toMessage(parametersMessage);
          parametersPublisher.publish(parametersMessage);

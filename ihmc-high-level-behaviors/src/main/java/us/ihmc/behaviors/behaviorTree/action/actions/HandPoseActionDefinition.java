@@ -72,7 +72,7 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
       usePredefinedJointAngles = new CRDTBidirectionalBoolean(this, DEFAULT_USE_PREDEFINED_JOINT_ANGLES);
       preset = new CRDTBidirectionalEnumField<>(this, PresetArmConfiguration.HOME);
       jointAngles = new CRDTBidirectionalDoubleArray(this, MAX_NUMBER_OF_JOINTS);
-      palmParentFrameName = new CRDTBidirectionalString(this, ReferenceFrame.getWorldFrame().getName());
+      palmParentFrameName = new CRDTBidirectionalString(this, "Chest");
       palmTransformToParent = new CRDTBidirectionalRigidBodyTransform(this);
       linearPositionWeight = new CRDTBidirectionalDouble(this, DEFAULT_LINEAR_POSITION_WEIGHT);
       angularPositionWeight = new CRDTBidirectionalDouble(this, DEFAULT_ANGULAR_POSITION_WEIGHT);

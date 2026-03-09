@@ -1,15 +1,11 @@
 package us.ihmc.perception.detections.yolo;
 
 import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.opencv.global.opencv_core;
-import org.bytedeco.opencv.global.opencv_cudafilters;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
-import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Size;
-import org.bytedeco.opencv.opencv_cudafilters.Filter;
 import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.YOLOv8ExecutorParameters;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
@@ -60,9 +56,6 @@ public class YOLOv8DetectionExecutor
 
    private final TypedNotification<List<YOLOv8InstantDetection>> annotationNotification = new TypedNotification<>();
    private final List<Consumer<List<InstantDetection>>> detectionConsumerCallbacks = new ArrayList<>();
-   private final TypedNotification<RawImage> newestColorImage = new TypedNotification<>();
-
-   private boolean requestingFullData;
 
    public void addDetectionConsumerCallback(Consumer<List<InstantDetection>> callback)
    {
@@ -103,18 +96,20 @@ public class YOLOv8DetectionExecutor
       parameters = new SyncedYOLOv8ExecutorParameters(crdtInfo);
       parameters.setAvailableModels(availableModels.values());
       parameters.requestSendFullData();
-      requestingFullData = true;
 
       // Subscribe to YOLO parameters messages
       ros2Node.createSubscription2(PerceptionAPI.YOLO_PARAMETERS, message ->
       {
          parameters.fromMessage(message);
          parameters.confirmReceivedFullData();
-         requestingFullData = false;
       });
 
       parametersPublisher = ros2Node.createPublisher(PerceptionAPI.YOLO_PARAMETERS);
       parametersMessage = new YOLOv8ExecutorParameters();
+
+      parameters.toMessage(parametersMessage);
+      parametersPublisher.publish(parametersMessage);
+
       updateThread = new RepeatingTaskThread(getClass().getSimpleName() + "Updater", this::update);
       updateThread.setFrequencyLimit(10.0);
       updateThread.setDaemon(true);
@@ -182,10 +177,6 @@ public class YOLOv8DetectionExecutor
       // Run YOLO to get results
       RawImage bgrImage = RawImageTools.convertColor(colorImage, PixelFormat.BGR8);
       YOLOv8DetectionList yoloResults = yoloModel.run(bgrImage);
-
-      if (newestColorImage.poll())
-         newestColorImage.read().release();
-      newestColorImage.set(bgrImage.get());
 
       SyncedYOLOv8ModelParameters modelParameters = parameters.getModelParameters();
 
@@ -265,7 +256,6 @@ public class YOLOv8DetectionExecutor
       updateThread.blockingKill();
 
       annotatedImagePublishedThread.kill();
-      newestColorImage.set(null);
 
       for (YOLOv8Model yoloModel : availableModels.values())
          yoloModel.destroy();
@@ -340,7 +330,7 @@ public class YOLOv8DetectionExecutor
       if (modelParameters.isModified())
          modelParameters.applyToModel(availableModels.get(parameters.getModelToRun().getValue()));
 
-      if (requestingFullData || parameters.pollNeedSendFullData() || modelParameters.pollNeedSendFullData())
+      if (parameters.pollNeedSendFullData() || modelParameters.pollNeedSendFullData())
       {
          parameters.toMessage(parametersMessage);
          parametersPublisher.publish(parametersMessage);

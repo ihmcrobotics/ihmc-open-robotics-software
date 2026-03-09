@@ -20,8 +20,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.FootstepPlannerOutput;
-import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.simplePlanners.QuickFootstepPlanner;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
@@ -29,10 +27,10 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.List;
 import java.util.UUID;
+
+import static behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessage.*;
 
 public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanActionState, FootstepPlanActionDefinition>
 {
@@ -136,23 +134,44 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
 
          if (state.getIsNextForExecution())
          {
-            if (previewPlanningThrottler.run())
+            if (definition.getPlannerType().getValue() == QUICK)
             {
-               previewFootstepPlanningThread.triggerPlan(syncedRobot, liveGoalFeetPoses);
-            }
-
-            if (previewFootstepPlanningThread.getResultNotification().poll())
-            {
-               FootstepPlan footstepPlan = previewFootstepPlanningThread.getResultNotification().read();
-
-               var footstepsMessage = state.getPreviewFootsteps().accessValue();
-               footstepsMessage.clear();
-
-               for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
+               if (previewPlanningThrottler.run())
                {
-                  var messageFootstep = footstepsMessage.add();
-                  messageFootstep.setRobotSide(footstepPlan.getFootstep(i).getRobotSide().toByte());
-                  messageFootstep.getSolePose().set(footstepPlan.getFootstep(i).getFootstepPose());
+                  List<Pair<RobotSide, Pose3D>> footstepPlan
+                        = quickFootstepPlanner.plan(new SideDependentList<>(side -> new Pose3D(syncedFeetPoses.get(side))),
+                                                    new SideDependentList<>(side -> new Pose3D(liveGoalFeetPoses.get(side))));
+
+                  var footstepsMessage = state.getPreviewFootsteps().accessValue();
+                  footstepsMessage.clear();
+                  for (Pair<RobotSide, Pose3D> footstep : footstepPlan)
+                  {
+                     var messageFootstep = footstepsMessage.add();
+                     messageFootstep.setRobotSide(footstep.getFirst().toByte());
+                     messageFootstep.getSolePose().set(footstep.getSecond());
+                  }
+               }
+            }
+            else
+            {
+               if (previewPlanningThrottler.run())
+               {
+                  previewFootstepPlanningThread.triggerPlan(syncedRobot, liveGoalFeetPoses);
+               }
+
+               if (previewFootstepPlanningThread.getResultNotification().poll())
+               {
+                  FootstepPlan footstepPlan = previewFootstepPlanningThread.getResultNotification().read();
+
+                  var footstepsMessage = state.getPreviewFootsteps().accessValue();
+                  footstepsMessage.clear();
+
+                  for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
+                  {
+                     var messageFootstep = footstepsMessage.add();
+                     messageFootstep.setRobotSide(footstepPlan.getFootstep(i).getRobotSide().toByte());
+                     messageFootstep.getSolePose().set(footstepPlan.getFootstep(i).getFootstepPose());
+                  }
                }
             }
          }
@@ -207,6 +226,17 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
                state.getExecutionState().setValue(FootstepPlanActionExecutionState.PLANNING_SUCCEEDED);
             }
          }
+         else if (definition.getPlannerType().getValue() == QUICK)
+         {
+            List<Pair<RobotSide, Pose3D>> footstepPlan
+                  = quickFootstepPlanner.plan(new SideDependentList<>(side -> new Pose3D(syncedFeetPoses.get(side))),
+                                              new SideDependentList<>(side -> new Pose3D(liveGoalFeetPoses.get(side))));
+
+            footstepPlanToExecute.clear();
+            for (Pair<RobotSide, Pose3D> footstep : footstepPlan)
+               footstepPlanToExecute.addFootstep(footstep.getFirst(), new FramePose3D(footstep.getSecond()));
+            state.getExecutionState().setValue(FootstepPlanActionExecutionState.PLANNING_SUCCEEDED);
+         }
          else
          {
             executionFootstepPlanningThread.triggerPlan(syncedRobot, liveGoalFeetPoses);
@@ -260,35 +290,6 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
          }
       }
    }
-
-   private List<Pose3D> computeBodyPathOnly(EnumMap<RobotSide, Pose3D> stanceFeet,
-                                            EnumMap<RobotSide, Pose3D> goalFeet)
-   {
-      FootstepPlannerRequest request = new FootstepPlannerRequest();
-
-      for (RobotSide side : RobotSide.values)
-      {
-         FramePose3D start = new FramePose3D(ReferenceFrame.getWorldFrame(), stanceFeet.get(side));
-         FramePose3D goal  = new FramePose3D(ReferenceFrame.getWorldFrame(), goalFeet.get(side));
-         request.setStartFootPose(side, start);
-         request.setGoalFootPose(side,  goal);
-      }
-
-      request.setPlanBodyPath(true);
-      request.setPlanFootsteps(false);
-      if (scene.getTerrainMap() != null)
-         request.setTerrainMapData(scene.getTerrainMap());
-
-      FootstepPlannerOutput output = executionFootstepPlanningThread.getFootstepPlanner().handleRequest(request, true);
-      if (output == null || output.getBodyPath().isEmpty())
-      {
-         state.getLogger().warn("Body path planning failed or returned empty path. Falling back to straight-line quick planner.");
-         return null; // use null to mean "no body path"
-      }
-
-      return new ArrayList<>(output.getBodyPath());
-   }
-
 
    private void packManuallyPlacedFootstepsIntoPlan()
    {
