@@ -4,6 +4,7 @@ import org.apache.commons.lang3.mutable.MutableBoolean;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.LoadBearingParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyJointControlHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyOrientationControlHelper;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyPositionControlHelper;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
@@ -107,6 +108,7 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
    private final YoFrameQuaternion yoDesiredContactOrientation;
 
    /* Trajectory handlers */
+   private final RigidBodyPositionControlHelper positionControlHelper;
    private final RigidBodyOrientationControlHelper orientationControlHelper;
    private final SO3TrajectoryControllerCommand orientationTrajectoryCommand = new SO3TrajectoryControllerCommand();
 
@@ -119,14 +121,15 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
    private final MutableBoolean hasContactStateChanged;
 
    public DynamicLoadBearingPostContactState(RigidBodyBasics bodyToControl,
-                                           RigidBodyBasics baseBody,
-                                           RigidBodyBasics elevator,
-                                           ReferenceFrame controlFrame,
-                                           RigidBodyOrientationControlHelper orientationControlHelper,
-                                           LoadBearingParameters loadBearingParameters,
-                                           double nominalRhoWeight,
-                                           MutableBoolean hasContactStateChanged,
-                                           YoRegistry registry)
+                                             RigidBodyBasics baseBody,
+                                             RigidBodyBasics elevator,
+                                             ReferenceFrame controlFrame,
+                                             RigidBodyPositionControlHelper positionControlHelper,
+                                             RigidBodyOrientationControlHelper orientationControlHelper,
+                                             LoadBearingParameters loadBearingParameters,
+                                             double nominalRhoWeight,
+                                             MutableBoolean hasContactStateChanged,
+                                             YoRegistry registry)
    {
       this.bodyToControl = bodyToControl;
       this.bodyFrame = bodyToControl.getBodyFixedFrame();
@@ -161,6 +164,7 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
 
       planeContactStateCommand.setContactingRigidBody(bodyToControl);
 
+      this.positionControlHelper = positionControlHelper;
       this.orientationControlHelper = orientationControlHelper;
 
       String prefix = bodyToControl.getParentJoint().getName().split("_")[0];
@@ -307,8 +311,11 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
       yoDesiredContactOrientation.setToNaN();
       currentContactPointInWorld.setToNaN();
 
+      // hide graphics from taskspace controller
+      positionControlHelper.getYoDesiredPosition().setToNaN();
+      positionControlHelper.getYoCurrentPosition().setToNaN();
+
       orientationControlHelper.clear();
-      hasContactStateChanged.setValue(true);
    }
 
    @Override
@@ -379,15 +386,15 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
    @Override
    public boolean isDone(double time)
    {
-//      double positionErrorSquared = EuclidCoreTools.normSquared(positionError.getX(), positionError.getY(), positionError.getZ());
-//      double linearTrackingSlipThresholdSquared = EuclidCoreTools.square(loadBearingParameters.getLinearTrackingSlipThreshold());
-//      if (positionErrorSquared > linearTrackingSlipThresholdSquared)
-//         return true;
+      double positionErrorSquared = EuclidCoreTools.normSquared(positionError.getX(), positionError.getY(), positionError.getZ());
+      double linearTrackingSlipThresholdSquared = EuclidCoreTools.square(loadBearingParameters.getLinearTrackingSlipThreshold());
+      if (positionErrorSquared > linearTrackingSlipThresholdSquared)
+         return true;
 
-//       Check if near reachability limit
-      shoulderPointInWorld.setToZero(jointPath[0].getFrameBeforeJoint());
+      // Check if near reachability limit
+      shoulderPointInWorld.setToZero(jointPath[1].getFrameBeforeJoint());
       shoulderPointInWorld.changeFrame(ReferenceFrame.getWorldFrame());
-      double distanceThreshold = 0.78;
+      double distanceThreshold = 0.7;
       if (shoulderPointInWorld.distanceSquared(currentContactPointInWorld) > distanceThreshold * distanceThreshold)
          return true;
 

@@ -29,12 +29,15 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class RigidBodyDynamicLoadBearingControlState extends RigidBodyControlState
 {
+   private static final double MINIMUM_TIME_IN_CONTACT = 0.4;
+   private static final double CAPTURE_POINT_ERROR_THRESHOLD_TO_REMAIN_IN_STATE = 0.025;
+
    private final StateMachine<DynamicLoadBearingStateEnum, DynamicLoadBearingState> stateMachine;
    private final DynamicLoadBearingPreContactState preContactState;
    private final DynamicLoadBearingPostContactState postContactState;
    private final RigidBodyJointControlHelper jointControlHelper;
    private final Runnable onExitRunnable;
-   private final LoadBearingParameters loadBearingParameters = new LoadBearingParameters(registry);
+   private final DoubleProvider capturePointErrorProvider;
 
    public RigidBodyDynamicLoadBearingControlState(RigidBodyBasics bodyToControl,
                                                   RigidBodyBasics baseBody,
@@ -47,6 +50,7 @@ public class RigidBodyDynamicLoadBearingControlState extends RigidBodyControlSta
                                                   RigidBodyOrientationControlHelper orientationControlHelper,
                                                   ReferenceFrame controlFrame,
                                                   double nominalRhoWeight,
+                                                  DoubleProvider capturePointErrorProvider,
                                                   MutableBoolean hasContactChanged,
                                                   YoRegistry parentRegistry)
    {
@@ -60,6 +64,7 @@ public class RigidBodyDynamicLoadBearingControlState extends RigidBodyControlSta
                                                                 baseBody,
                                                                 elevator,
                                                                 controlFrame,
+                                                                positionControlHelper,
                                                                 orientationControlHelper,
                                                                 loadBearingParameters,
                                                                 nominalRhoWeight,
@@ -70,6 +75,7 @@ public class RigidBodyDynamicLoadBearingControlState extends RigidBodyControlSta
 
       this.onExitRunnable = onExitRunnable;
       this.jointControlHelper = jointControlHelper;
+      this.capturePointErrorProvider = capturePointErrorProvider;
    }
 
    private StateMachine<DynamicLoadBearingStateEnum, DynamicLoadBearingState> setupStateMachine(String namePrefix, DoubleProvider timeProvider)
@@ -107,13 +113,25 @@ public class RigidBodyDynamicLoadBearingControlState extends RigidBodyControlSta
    public void onExit(double timeInState)
    {
       onExitRunnable.run();
+      postContactState.onExit(0.0);
    }
 
    @Override
    public boolean isDone(double timeInState)
    {
-      return stateMachine.getCurrentStateKey() == DynamicLoadBearingStateEnum.POST_CONTACT && stateMachine.getCurrentState()
-                                                                                                          .isDone(stateMachine.getTimeInCurrentState());
+      // Do not exit while in pre-contact phase
+      if (stateMachine.getCurrentStateKey() != DynamicLoadBearingStateEnum.POST_CONTACT)
+         return false;
+
+      // If the has is slipping or the arm is straightened, exit this state
+      boolean isSlippingOrAtSingularity = stateMachine.getCurrentState().isDone(stateMachine.getTimeInCurrentState());
+      if (isSlippingOrAtSingularity)
+         return true;
+
+      // If the robot has reached a high level of stability, exit this state
+      boolean isRecovered = capturePointErrorProvider.getValue() < CAPTURE_POINT_ERROR_THRESHOLD_TO_REMAIN_IN_STATE;
+      boolean hasSpentSufficientTimeInContact = stateMachine.getTimeInCurrentState() > MINIMUM_TIME_IN_CONTACT;
+      return isRecovered && hasSpentSufficientTimeInContact;
    }
 
    @Override

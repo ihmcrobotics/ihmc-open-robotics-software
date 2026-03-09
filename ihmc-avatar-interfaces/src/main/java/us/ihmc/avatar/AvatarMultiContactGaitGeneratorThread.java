@@ -20,7 +20,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandContactCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.TerrainMapCommand;
@@ -28,7 +27,6 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
-import us.ihmc.perception.gpuMapping.HeightMapTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -43,7 +41,6 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -56,6 +53,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerThreadInterface
 {
    private static final boolean VISUALIZE_PERCEPTION_DATA = true;
+   private static final double CAPTURE_POINT_ERROR_THRESHOLD_FOR_HAND_CONTACT = 0.04;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -79,7 +77,6 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
    private final YoBoolean triggerFall = new YoBoolean("triggerFall", registry);
    private final YoBoolean triggerUnload = new YoBoolean("triggerUnload", registry);
    private final YoBoolean sendHandContactMessage = new YoBoolean("sendHandContactMessage", registry);
-   private boolean hasSentHandTrajectory = false;
    private final ReactiveBracingPlanner planner;
 
    private final FramePoint3D centerOfMassPosition = new FramePoint3D();
@@ -98,6 +95,9 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
    private final YoFramePoint2D[] yoCapturePointWaypoints = new YoFramePoint2D[25];
    private final YoPerceptionVisualizer perceptionVisualizer;
 
+   // TODO convert to time-based, or somehow check if a hand is in recovery
+   private final YoBoolean hasSentRecoveryMessage = new YoBoolean("hasSentRecoveryMessage", registry);
+
    public AvatarMultiContactGaitGeneratorThread(double dt,
                                                 ROS2Node ros2Node,
                                                 DRCRobotModel robotModel,
@@ -113,6 +113,8 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
       ROS2Topic<?> outputTopic = MultiContactGaitGeneratorAPI.getOutputTopic(robotName);
 
       planner = robotModel.getReactiveBracingPlanner();
+      registry.addChild(planner.getRegistry());
+
       reducedOrderRobotModel = new ReducedOrderRobotModel(robotModel.getContactPointParameters(), registry);
 
       this.commandInputManager = new CommandInputManager(MultiContactGaitGeneratorAPI.getSupportedCommands());
@@ -194,7 +196,7 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
       centerOfMassJacobian.reset();
 
       // Update bipedal gait generator
-      bipedalGaitGenerator.update();
+//      bipedalGaitGenerator.update();
 
       // Update capturability status
       CapturabilityBasedStatus capturabilityBasedStatus = this.capturabilityBasedStatus.get();
@@ -209,8 +211,7 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
 
       capturePointError.sub(currentCapturePoint, desiredCapturePoint);
 
-      double capturePointErrorThreshold = 0.09;
-      isFalling.set(capturePointError.norm() > capturePointErrorThreshold);
+      isFalling.set(capturePointError.norm() > CAPTURE_POINT_ERROR_THRESHOLD_FOR_HAND_CONTACT);
 
       if (commandInputManager.isNewCommandAvailable(PlanarRegionsListCommand.class))
       {
@@ -228,10 +229,10 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
             perceptionVisualizer.visualizeHeightMap(terrainMapCommand);
       }
 
-      if (triggerFall.getValue() || (!hasSentHandTrajectory && isFalling.getValue() && isHandRecoveryContactEnabled.getValue()))
+      if (triggerFall.getValue() || (isFalling.getValue() && !hasSentRecoveryMessage.getValue() && isHandRecoveryContactEnabled.getValue()))
       {
+         hasSentRecoveryMessage.set(true);
          triggerFall.set(false);
-         hasSentHandTrajectory = true;
          sendHandContactMessage.set(false);
 
          reducedOrderRobotModel.initialize(fullRobotModel, humanoidReferenceFrames, centerOfMassVelocity);
@@ -249,6 +250,7 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
             }
          }
       }
+
       if (triggerUnload.getValue())
       {
          triggerUnload.set(false);

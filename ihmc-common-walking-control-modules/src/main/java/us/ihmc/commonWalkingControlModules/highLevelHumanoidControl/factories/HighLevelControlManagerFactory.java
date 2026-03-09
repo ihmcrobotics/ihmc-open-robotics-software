@@ -262,6 +262,7 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
       ContactablePlaneBody contactableBody = controllerToolbox.getContactableBody(bodyToControl);
       RigidBodyControlMode defaultControlMode = walkingControllerParameters.getDefaultControlModesForRigidBodies().get(bodyName);
       boolean enableFunctionGenerators = walkingControllerParameters.enableFunctionGeneratorMode(bodyName);
+      DoubleProvider capturePointErrorProvider = this::getICPErrorMagnitude;
 
       RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl,
                                                                     baseBody,
@@ -280,6 +281,7 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
                                                                     enableFunctionGenerators,
                                                                     momentumOptimizationSettings.getRhoWeight(),
                                                                     controllerToolbox.getPostureAdjustmentProvider(),
+                                                                    capturePointErrorProvider,
                                                                     yoTime,
                                                                     controlDT,
                                                                     registry);
@@ -288,6 +290,11 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
 
       rigidBodyManagerMapByBodyName.put(bodyName, manager);
       return manager;
+   }
+
+   private double getICPErrorMagnitude()
+   {
+      return balanceManager.getICPErrorMagnitude();
    }
 
    public FeetManager getOrCreateFeetManager(double controlDT)

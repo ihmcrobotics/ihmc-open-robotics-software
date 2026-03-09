@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.BipedTi
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandContactCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.List;
 
@@ -18,4 +19,9 @@ public interface ReactiveBracingPlanner
     * Sets the detected list of planar regions
     */
    void setPlanarRegions(PlanarRegionsListCommand planarRegionsListCommand);
+
+   /**
+    * YoRegistry for graphics, etc.
+    */
+   YoRegistry getRegistry();
 }
