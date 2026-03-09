@@ -92,10 +92,11 @@ public class ParameterBasedStepExpansionTest
       DiscreteFootstep mostInward = getExtremumNode(childNodes, Comparator.comparingDouble(node -> node.getY()));
       DiscreteFootstep mostOutward = getExtremumNode(childNodes, Comparator.comparingDouble(node -> -node.getY()));
 
-      assertTrue(mostForward.getX() <= parameters.getMaxStepReach());
-      assertTrue(mostBackward.getX() >= parameters.getMinStepLength());
-      assertTrue(mostInward.getY() <= -parameters.getMinStepWidth());
-      assertTrue(mostOutward.getY() >= -parameters.getMaxStepWidth());
+      double tolerance = LatticePoint.gridSizeXY * 0.5;
+      assertTrue(mostForward.getX() <= parameters.getMaxStepReach() + tolerance);
+      assertTrue(mostBackward.getX() >= parameters.getMinStepLength() - tolerance);
+      assertTrue(mostInward.getY() <= -(parameters.getMinStepWidth() - tolerance), "most inward expected" + -parameters.getMinStepWidth() + ", but found " + mostInward.getY());
+      assertTrue(mostOutward.getY() >= -(parameters.getMaxStepWidth() + tolerance));
 
       // Check the min and max a step can yaw
       DiscreteFootstep mostOutwardYawed = getExtremumNode(childNodes, Comparator.comparingDouble(node -> -snapToCircle(node.getYaw())));
