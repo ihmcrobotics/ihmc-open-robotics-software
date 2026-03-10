@@ -2,7 +2,9 @@ package us.ihmc.rdx.ui.graphics.ros2.yolo;
 
 import imgui.ImGui;
 import imgui.type.ImInt;
+import org.apache.poi.ss.formula.functions.T;
 import perception_msgs.msg.dds.YOLOv8ExecutorParameters;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
@@ -18,6 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class RDXROS2YOLOv8Settings
 {
    private final SyncedYOLOv8ExecutorParameters parameters;
+   private final TypedNotification<YOLOv8ExecutorParameters> parametersMessageNotification = new TypedNotification<>();
 
    private String[] availableModels = new String[]{"None"};
    private final ImInt selectedModel = new ImInt();
@@ -34,11 +37,7 @@ public class RDXROS2YOLOv8Settings
       parameters.requestSendFullData();
 
       parametersPublisher = ros2Node.createPublisher(PerceptionAPI.YOLO_PARAMETERS);
-      ros2Node.createSubscription2(PerceptionAPI.YOLO_PARAMETERS, message ->
-      {
-         parameters.fromMessage(message);
-         parameters.confirmReceivedFullData();
-      });
+      ros2Node.createSubscription2(PerceptionAPI.YOLO_PARAMETERS, parametersMessageNotification::set);
 
       parameters.toMessage(parametersMessage);
       parametersPublisher.publish(parametersMessage);
@@ -46,6 +45,13 @@ public class RDXROS2YOLOv8Settings
 
    public void update()
    {
+      if (parametersMessageNotification.poll())
+      {
+         YOLOv8ExecutorParameters message = parametersMessageNotification.read();
+         parameters.fromMessage(message);
+         parameters.confirmReceivedFullData();
+      }
+
       parameters.checkModified();
       if (rdxModelSettings.size() != parameters.getAvailableModels().getSize())
       {
