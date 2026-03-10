@@ -30,4 +30,5 @@ public class MultiContactGaitGeneratorTask extends ControllerTask
       plannerResolver.resolveHumanoidRobotContextDataPlanner(masterContext, plannerThread.getHumanoidRobotContextData());
    }
 
+
 }

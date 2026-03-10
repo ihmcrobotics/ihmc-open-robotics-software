@@ -44,6 +44,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,7 +53,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerThreadInterface
 {
-   private static final boolean VISUALIZE_PERCEPTION_DATA = true;
+   private static final boolean VISUALIZE_PERCEPTION_DATA = false;
    private static final double CAPTURE_POINT_ERROR_THRESHOLD_FOR_HAND_CONTACT = 0.04;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
@@ -98,14 +99,16 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
    // TODO convert to time-based, or somehow check if a hand is in recovery
    private final YoBoolean hasSentRecoveryMessage = new YoBoolean("hasSentRecoveryMessage", registry);
 
-   public AvatarMultiContactGaitGeneratorThread(double dt,
+   private final YoBoolean triggerInferenceCall = new YoBoolean("triggerInferenceCall", registry);
+   private final YoInteger numberOfInferenceCallsForTest = new YoInteger("numberOfInferenceCallsForTest", registry);
+
+   public AvatarMultiContactGaitGeneratorThread(DRCRobotModel robotModel,
                                                 ROS2Node ros2Node,
-                                                DRCRobotModel robotModel,
                                                 HumanoidRobotContextDataFactory contextDataFactory,
-                                                StatusMessageOutputManager walkingOutputManager,
-                                                CommandInputManager walkingCommandInputManager)
+                                                CommandInputManager walkingCommandInputManager,
+                                                StatusMessageOutputManager walkingOutputManager)
    {
-      this.dt = dt;
+      this.dt = robotModel.getMultiContactPlannerDT();
       this.fullRobotModel = robotModel.createFullRobotModel();
 
       String robotName = robotModel.getSimpleRobotName();
@@ -171,6 +174,9 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
       {
          perceptionVisualizer = null;
       }
+
+      triggerInferenceCall.set(true);
+      numberOfInferenceCallsForTest.set(1);
    }
 
    @Override
@@ -178,6 +184,16 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
    {
       if (!humanoidRobotContextData.getEstimatorRan())
          return;
+
+      if (triggerInferenceCall.getValue())
+      {
+         for (int i = 0; i < numberOfInferenceCallsForTest.getValue(); i++)
+         {
+            planner.triggerDiagnosticInference();
+         }
+
+         return;
+      }
 
       // Update capture point preview trajectory
       RecyclingArrayList<FramePoint2D> capturePointPositionWaypoints = centerOfPressureDataHolder.getCapturePointPositionWaypoints();

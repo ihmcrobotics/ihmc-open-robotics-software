@@ -24,4 +24,9 @@ public interface ReactiveBracingPlanner
     * YoRegistry for graphics, etc.
     */
    YoRegistry getRegistry();
+
+   default void triggerDiagnosticInference()
+   {
+      // do nothing
+   }
 }
