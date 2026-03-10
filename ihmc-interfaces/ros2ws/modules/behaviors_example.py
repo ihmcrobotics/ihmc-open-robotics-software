@@ -16,44 +16,45 @@ import cv2
 import numpy as np
 
 ros2 = {}
+first_command = True
 
 def behavior_message_callback(msg):
-   print("Received AI2R Status Message")
+   global first_command
    robot_pose = msg.robot_mid_feet_under_pelvis_pose_in_world
 
-   # --------- Behaviors -----------
-   behaviors = msg.available_behaviors
-   print("Available behaviors:")
-   if behaviors:
-        for behavior in behaviors:
-            print(behavior)
-   else:
-        print("-")
+   if first_command:
+       # --------- Behaviors -----------
+       behaviors = msg.available_behaviors
+       print("Available behaviors:")
+       if behaviors:
+            for behavior in behaviors:
+                print(behavior)
+       else:
+            print("-")
 
-   # --------- Scene -----------
-   scene_objects = msg.objects
-   print("Objects in the scene:")
-   if scene_objects:  # This checks if the list is not empty
-       for obj in scene_objects:
-           id = obj.object_name
-           print(f"{id}")
-           pose_in_world = obj.object_pose_in_world
-           pose_wrt_robot = obj.object_pose_in_robot_frame # This is the pose specified wrt to robot_pose
-   else:
-       print("-")
+       # --------- Scene -----------
+       scene_objects = msg.objects
+       print("Objects in the scene:")
+       if scene_objects:  # This checks if the list is not empty
+           for obj in scene_objects:
+               id = obj.object_name
+               print(f"{id}")
+               pose_in_world = obj.object_pose_in_world
+               pose_wrt_robot = obj.object_pose_in_robot_frame # This is the pose specified wrt to robot_pose
+       else:
+           print("-")
 
    # --------- Monitoring -----------
    completed_behavior = msg.completed_behavior
-   print("Completed Behavior: " + completed_behavior)
    failed_behavior = msg.failed_behavior
-   if failed_behavior:
+   if failed_behavior != "-":
        print("[FAILURE] Failed behavior: " + failed_behavior)
        # Failure details
        failure = msg.failure
        print("Description: " + failure.action_name)
        print("Type: " + failure.action_type)
        print("Frame: " + failure.action_frame)
-       print("Missing Frame: " + failure.missing_frame)
+       print("Missing Frame: " + str(failure.missing_frame))
        print("Navigation Collision Frame Name: " + failure.collision_name)
 
        position_error = failure.position_error
@@ -68,26 +69,30 @@ def behavior_message_callback(msg):
        orientation_tolerance = failure.orientation_tolerance
 
    # --------- Coordination / Adaptation -----------
-   behavior_command = AI2RCommandMessage()
-   # DECIDE what behavior to execute based on reasoning. For example can decide to navigate to a specific object
-   behavior_command.behavior_to_execute = "GOTO"
+   if completed_behavior != "-" or first_command:
+       print("Completed Behavior: " + completed_behavior)
+       first_command = False
+       behavior_command = AI2RCommandMessage()
+       # DECIDE what behavior to execute based on reasoning.
+       behavior_command.behavior_to_execute = "GOTO"
 
-   # Update the go to behavior to navigate to whatever object or whenever in space according to reasoning
-   new_goto_behavior = AI2RNavigationMessage()
-   # Set the reference frame name - can copy from scene_objects.obj_name
-   new_goto_behavior.reference_frame_name = "Table1"
-   # Set the distance to the object
-   new_goto_behavior.distance_to_frame = 0.6
-   behavior_command.navigation = new_goto_behavior
+       # Update the go to behavior to navigate to whatever object or whenever in space according to reasoning
+       new_goto_behavior = AI2RNavigationMessage()
+       # Set the reference frame name - can copy from scene_objects.obj_name
+       new_goto_behavior.target_object = "Walking"
+       # Set the distance to the object
+       new_goto_behavior.distance_to_object = 0.6
+       behavior_command.navigation = new_goto_behavior
+       print("Commanding behavior: " + behavior_command.behavior_to_execute)
 
-   ros2["behavior_publisher"].publish(behavior_command)
+       ros2["behavior_publisher"].publish(behavior_command)
 
 
 def main(args=None):
     rclpy.init(args=args)
     
     qos_profile_reliable = QoSProfile(
-        reliability=QoSReliabilityPolicy.BEST_EFFORT,
+        reliability=QoSReliabilityPolicy.RELIABLE,
         history=QoSHistoryPolicy.KEEP_LAST,
         depth=1
     )

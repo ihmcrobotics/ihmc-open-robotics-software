@@ -376,7 +376,10 @@ public class YOLOv8Model
          // Ensure that we have valid detections
          int filteredDetectionCount = filteredDetectionCountPointer.get();
          if (filteredDetectionCount == 0)
+         {
+            bgrInputImage.release();
             return result;
+         }
 
          // Copy boxes into separate memory to run NMS
          cudaMemcpy2DAsync(boxes,
@@ -394,7 +397,11 @@ public class YOLOv8Model
 
          // Ensure we still have detections
          if (remainingDetectionCount == 0)
+         {
+            includedRows.close();
+            bgrInputImage.release();
             return result;
+         }
 
          // Upload prototype masks to GPU
          long totalMaskFloats = (long) output1Blob.size(1) * output1Blob.size(2) * output1Blob.size(3);

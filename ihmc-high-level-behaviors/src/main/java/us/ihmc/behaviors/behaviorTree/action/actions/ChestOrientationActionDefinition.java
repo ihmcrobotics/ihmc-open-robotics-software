@@ -31,7 +31,7 @@ public class ChestOrientationActionDefinition extends ActionNodeDefinition
 
       trajectoryDuration = new CRDTBidirectionalDouble(this, 4.0);
       holdPoseInWorldLater = new CRDTBidirectionalBoolean(this, false);
-      parentFrameName = new CRDTBidirectionalString(this, ReferenceFrame.getWorldFrame().getName());
+      parentFrameName = new CRDTBidirectionalString(this, "Pelvis");
       chestToParentTransform = new CRDTBidirectionalRigidBodyTransform(this);
    }
 

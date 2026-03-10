@@ -4,6 +4,7 @@
 #include "behavior_msgs/msg/./ActionNodeDefinitionMessage_.idl"
 #include "behavior_msgs/msg/./FootstepPlanActionFootstepDefinitionMessage_.idl"
 #include "geometry_msgs/msg/./Point_.idl"
+#include "geometry_msgs/msg/./Pose_.idl"
 #include "ihmc_common_msgs/msg/./PrimitiveDataVectorMessage_.idl"
 module behavior_msgs
 {
@@ -57,6 +58,10 @@ module behavior_msgs
          * Is using the footstep planner or manually placing
          */
         boolean is_manually_placed;
+        /**
+         * Pose waypoints to hit along the way (may be none)
+         */
+        sequence<geometry_msgs::msg::dds::Pose, 40> waypoints;
         /**
          * The footsteps, with a maximum of 50
          */
@@ -113,6 +118,20 @@ module behavior_msgs
          * The footstep planner parameters
          */
         ihmc_common_msgs::msg::dds::PrimitiveDataVectorMessage planner_parameters;
+        /**
+         * Quick footstep planner parameters
+         */
+        boolean quick_waypoint_only;
+        double quick_hip_width;
+        double quick_step_length;
+        double quick_next_pelvis_yaw_limit;
+        double quick_inward_limit;
+        double quick_outward_limit;
+        double quick_step_angle_limit;
+        double quick_swing_time_distance_lower;
+        double quick_swing_time_distance_upper;
+        double quick_min_swing_time;
+        double quick_max_swing_time;
       };
     };
   };

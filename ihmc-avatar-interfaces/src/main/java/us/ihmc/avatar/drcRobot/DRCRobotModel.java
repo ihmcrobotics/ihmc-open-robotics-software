@@ -2,12 +2,7 @@ package us.ihmc.avatar.drcRobot;
 
 import us.ihmc.avatar.AvatarSimulatedHandControlThread;
 import us.ihmc.avatar.arm.PresetArmConfiguration;
-import us.ihmc.avatar.factory.DefaultSimulatedHandOutputWriter;
-import us.ihmc.avatar.factory.DefaultSimulatedHandSensorReader;
-import us.ihmc.avatar.factory.SimulatedHandOutputWriter;
-import us.ihmc.avatar.factory.SimulatedHandSensorReader;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
-import us.ihmc.avatar.kinematicsSimulation.SimulatedHandKinematicController;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
@@ -21,9 +16,7 @@ import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.handsros2.HandModel;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
-import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -33,15 +26,10 @@ import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.simulation.collision.Collidable;
 import us.ihmc.scs2.simulation.collision.CollidableHelper;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJointHolder;
 import us.ihmc.wholeBodyController.SimulatedFullHumanoidRobotModelFactory;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
-import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticAnalysisController;
-import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
-import us.ihmc.yoVariables.providers.DoubleProvider;
 
 import java.nio.file.Path;
-import java.util.List;
 
 public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, WholeBodyControllerParameters<RobotSide>
 {
