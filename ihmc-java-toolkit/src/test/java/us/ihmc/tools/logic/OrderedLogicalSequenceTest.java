@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class OrderedLogicalSequenceTest
 {
@@ -239,6 +240,48 @@ public class OrderedLogicalSequenceTest
 
       // Ensure sequence has finished
       assertFalse(orderedLogicalSequence.hasFinished(), "Logical sequence has finished, but it SHOULD NOT have!");
+
+      // Reset logical sequence and ensure that worked
+      orderedLogicalSequence.reset();
+      assertFalse(orderedLogicalSequence.hasStarted(), "Logical sequence hasStarted() returns true, despite logical sequence being reset");
+      assertFalse(orderedLogicalSequence.hasFinished(), "Logical sequence hasFinished() returns true, despite logical sequence being reset");
+   }
+
+   /**
+    * Test to ensure functionality of repetitive execution of a logical element
+    */
+   @Test
+   public void testRepetitiveExecution()
+   {
+      OrderedLogicalSequence orderedLogicalSequence = new OrderedLogicalSequence();
+
+      AtomicInteger logicalElement1 = new AtomicInteger(0);
+      AtomicInteger logicalElement2 = new AtomicInteger(0);
+
+      // Set up logical sequence
+      orderedLogicalSequence.addLogicalElement(() -> logicalElement1.set(logicalElement1.get() + 1), null, () -> logicalElement1.get() == 10, true);
+      orderedLogicalSequence.addLogicalElement(() -> logicalElement2.set(logicalElement2.get() + 1), () -> logicalElement1.get() == 10, () -> logicalElement2.get() == 25, true);
+
+      // Start sequence and check if it started
+      orderedLogicalSequence.start();
+      assertTrue(orderedLogicalSequence.hasStarted(), "Logical sequence has not started, but it should have!");
+
+      // Make sure we are starting on the correct logical element index
+      assertEquals(0, orderedLogicalSequence.getCurrentLogicalElement(), "Current logical element should be 0, instead it is: " + orderedLogicalSequence.getCurrentLogicalElement());
+
+      // Update the sequence an arbitrarily large amount of times
+      for (int i = 0; i < 60; i ++)
+         orderedLogicalSequence.update();
+
+      // Make sure the value of the logical elements are exactly what they should be, regardless of how many times the sequence is updated
+      assertEquals(10, logicalElement1.get(), "Value of Logical Element 1 should be 10, instead it is: " + logicalElement1.get());
+      assertEquals(25, logicalElement2.get(), "Value of Logical Element 2 should be 25, instead it is: " + logicalElement2.get());
+
+      // Make sure we are finishing on the correct logical element index
+      assertEquals(2, orderedLogicalSequence.getCurrentLogicalElement(), "Current logical element should be 3, instead it is: " + orderedLogicalSequence.getCurrentLogicalElement());
+
+      // Ensure sequence has finished
+      assertTrue(orderedLogicalSequence.hasFinished(), "Logical sequence has not finished, but it should have!");
 
       // Reset logical sequence and ensure that worked
       orderedLogicalSequence.reset();
