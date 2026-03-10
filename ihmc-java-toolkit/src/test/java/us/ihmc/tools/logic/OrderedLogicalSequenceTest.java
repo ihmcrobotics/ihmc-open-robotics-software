@@ -1,10 +1,9 @@
 package us.ihmc.tools.logic;
 
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class OrderedLogicalSequenceTest
 {
