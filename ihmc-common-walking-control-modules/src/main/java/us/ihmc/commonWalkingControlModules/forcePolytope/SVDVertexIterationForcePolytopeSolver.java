@@ -61,7 +61,7 @@ class SVDVertexIterationForcePolytopeSolver implements ForcePolytopeSolver
       solver = LinearSolverFactory_DDRM.linear(2 * dofs);
       tau.reshape(dofs, 1);
       f.reshape(3, 1);
-      psuedoInverseSolver.setThreshold(singularValueThreshold);
+      psuedoInverseSolver.setThreshold(DEFAULT_SINGULAR_VALUE_THRESHOLD);
    }
 
    @Override
@@ -83,7 +83,7 @@ class SVDVertexIterationForcePolytopeSolver implements ForcePolytopeSolver
 
       for (int i = 0; i < singularValuesNonThresholded.length; i++)
       {
-         if (singularValuesNonThresholded[i] < singularValueThreshold)
+         if (singularValuesNonThresholded[i] < DEFAULT_SINGULAR_VALUE_THRESHOLD)
             break;
 
          singularValues.add(singularValuesNonThresholded[i]);

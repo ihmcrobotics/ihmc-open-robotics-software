@@ -4,6 +4,8 @@ import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
+import org.ejml.interfaces.decomposition.SingularValueDecomposition_F64;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -87,6 +89,8 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
    /* Array of joints being validated for torque feasibility */
    private final List<OneDoFJointBasics> torqueValidatedJoints = new ArrayList<>();
 
+   private boolean computeSVDQuality = false;
+
    public WholeBodyContactState(OneDoFJointBasics[] oneDoFJoints, JointBasics rootJoint)
    {
       this.oneDoFJoints = oneDoFJoints;
@@ -128,6 +132,11 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
       setupForSelectedJoints(name -> true);
    }
 
+   public void setComputeSVDQuality(boolean computeSVDQuality)
+   {
+      this.computeSVDQuality = computeSVDQuality;
+   }
+
    public void clear()
    {
       contactPoints.clear();
@@ -137,18 +146,6 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
       contactJacobian.zero();
       contactJacobianTranspose.zero();
       graspMatrixJacobianTranspose.zero();
-   }
-
-   public void copyAndIgnoreIndex(int indexToIgnore, WholeBodyContactState other)
-   {
-      clear();
-
-      for (int contactPointIndex = 0; contactPointIndex < other.getNumberOfContactPoints(); contactPointIndex++)
-      {
-         if (contactPointIndex == indexToIgnore)
-            continue;
-         contactPoints.add().set(other.contactPoints.get(contactPointIndex));
-      }
    }
 
    public void addContactPoints(PlaneContactState planeContactState)
@@ -307,6 +304,15 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
 
          CommonOps_DDRM.transpose(contactJacobian, contactJacobianTranspose);
          MatrixTools.setMatrixBlock(graspMatrixJacobianTranspose, 0, LINEAR_DIMENSIONS * contactPointIndex, contactJacobianTranspose, 0, 0, contactJacobianTranspose.getNumRows(), contactJacobianTranspose.getNumCols(), 1.0);
+
+         if (computeSVDQuality)
+         {
+            int numRows = contactJacobian.getNumRows();
+            int numColumns = contactJacobian.getNumCols();
+            SingularValueDecomposition_F64<DMatrixRMaj> svd = DecompositionFactory_DDRM.svd(numRows, numColumns, true, true, false);
+            svd.decompose(contactJacobian);
+            contactPoint.setSingularValues(svd.getSingularValues());
+         }
       }
 
       stackedConstraintMatrix.reshape(getNumberOfActuationConstraints(), nContactForceVariables);
@@ -347,12 +353,34 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
       return 2 * numberOfTorqueValidatedJoints;
    }
 
+   public double getSVDJacobianQuality(int contactPointIndex)
+   {
+      if (!computeSVDQuality)
+         return Double.NaN;
+
+      ContactPoint contactPoint = contactPoints.get(contactPointIndex);
+      double[] singularValues = contactPoint.getSingularValues();
+      if (singularValues == null)
+         return Double.NaN;
+
+      double min = singularValues[0];
+      double max = singularValues[0];
+      for (int i = 0; i < singularValues.length; i++)
+      {
+         min = Math.min(min, singularValues[i]);
+         max = Math.max(max, singularValues[i]);
+      }
+
+      return min / max;
+   }
+
    private static class ContactPoint
    {
       private RigidBodyBasics contactingBody;
       private final FramePose3D contactPose = new FramePose3D();
       private final PoseReferenceFrame contactFrame;
       private double coefficientOfFriction;
+      private double[] singularValues;
 
       ContactPoint(int index)
       {
@@ -365,12 +393,14 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
          contactingBody = null;
          contactPose.setToNaN();
          coefficientOfFriction = Double.NaN;
+         singularValues = null;
       }
 
       void set(RigidBodyBasics contactingBody, FrameTuple3DReadOnly contactPoint, FrameVector3DReadOnly surfaceNormal, double coefficientOfFriction)
       {
          this.contactingBody = contactingBody;
          this.coefficientOfFriction = coefficientOfFriction;
+         singularValues = null;
 
          // Set orientation in given frame
          contactPose.setReferenceFrame(surfaceNormal.getReferenceFrame());
@@ -380,16 +410,24 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
          contactPose.getPosition().setMatchingFrame(contactPoint);
       }
 
-      void set(ContactPoint other)
-      {
-         this.contactingBody = other.contactingBody;
-         this.contactPose.set(other.contactPose);
-      }
-
       void update()
       {
          contactPose.changeFrame(ReferenceFrame.getWorldFrame());
          contactFrame.setPoseAndUpdate(contactPose);
+      }
+
+      public void setSingularValues(double[] singularValues)
+      {
+         this.singularValues = new double[singularValues.length];
+         for (int i = 0; i < singularValues.length; i++)
+         {
+            this.singularValues[i] = singularValues[i];
+         }
+      }
+
+      public double[] getSingularValues()
+      {
+         return singularValues;
       }
    }
 

@@ -4,14 +4,11 @@ import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.convexOptimization.linearProgram.LinearProgramSolver;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
@@ -41,7 +38,7 @@ import java.util.Arrays;
 import java.util.function.Supplier;
 
 import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.*;
-import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.*;
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicPoint2D;
 
 /**
  * Helper class for using {@link StabilityMarginOptimizationModule} to update and manage a multi-contact stability region.
@@ -51,7 +48,7 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
    private static final int NULL_INDEX = -1;
    private static final double VERTEX_EPS = 1.0e-4;
 
-   public static final int DIRECTIONS_TO_OPTIMIZE = 16;
+   public static final int DIRECTIONS_TO_OPTIMIZE = 18;
    private final static double DELTA_ANGLE = 2.0 * Math.PI / DIRECTIONS_TO_OPTIMIZE;
    private static final double[] QUERY_X = new double[DIRECTIONS_TO_OPTIMIZE];
    private static final double[] QUERY_Y = new double[DIRECTIONS_TO_OPTIMIZE];
@@ -85,7 +82,7 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
    private final int[] fromEuclidPolygonIndexMap = new int[DIRECTIONS_TO_OPTIMIZE];
 
    /* YoVariablized CoM for margin visualization */
-   private final YoFramePoint2D yoCenterOfMass;
+   private final YoFramePoint2D yoStabilityReference;
    private final YoFramePoint2D yoStabilityMarginPoint;
 
    /* Fields to monitor the nearest constraint edge */
@@ -101,7 +98,7 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
    /* Entry i corresponds to the distance of the CoM to the line segment connecting vertex (i) and (i+1) */
    private final YoDouble[] comEdgeMargin = new YoDouble[DIRECTIONS_TO_OPTIMIZE];
 
-   private Supplier<FramePoint3DReadOnly> centerOfMassSupplier = null;
+   private Supplier<FramePoint3DReadOnly> stabilityReference = null;
    private boolean showNearestSupportEdgeGraphic = true;
 
    public StabilityMarginRegionCalculator(StabilityMarginOptimizationModule optimizationModule, YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
@@ -146,7 +143,7 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
       lowestMarginEdgeIndex.set(NULL_INDEX);
       stabilityMargin.set(Double.POSITIVE_INFINITY);
 
-      yoCenterOfMass = new YoFramePoint2D("centerOfMass", ReferenceFrame.getWorldFrame(), registry);
+      yoStabilityReference = new YoFramePoint2D("stabilityReference", ReferenceFrame.getWorldFrame(), registry);
       yoStabilityMarginPoint = new YoFramePoint2D("stabilityMarginPoint", ReferenceFrame.getWorldFrame(), registry);
 
       if (parentRegistry != null)
@@ -157,8 +154,8 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
          YoArtifactPolygon multiContactCoMRegionArtifact = new YoArtifactPolygon(namePrefix + " Multi-Contact Region", feasibleRegion, Color.BLACK, false, 5);
          graphicsListRegistry.registerArtifact(getClass().getSimpleName(), multiContactCoMRegionArtifact);
 
-         YoArtifactPosition com = new YoArtifactPosition(namePrefix + "CenterOfMass", yoCenterOfMass, GraphicType.BALL_WITH_CROSS, Color.BLACK, 0.01);
-         graphicsListRegistry.registerArtifact(getClass().getSimpleName(), com);
+         YoArtifactPosition stabilityReference = new YoArtifactPosition(namePrefix + "StabilityReference", yoStabilityReference, GraphicType.BALL_WITH_CROSS, Color.BLACK, 0.01);
+         graphicsListRegistry.registerArtifact(getClass().getSimpleName(), stabilityReference);
 
          for (int vertex_idx = 0; vertex_idx < DIRECTIONS_TO_OPTIMIZE; vertex_idx++)
          {
@@ -217,9 +214,9 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
       stabilityMargin.set(Double.POSITIVE_INFINITY);
    }
 
-   public void setupForStabilityMarginCalculation(Supplier<FramePoint3DReadOnly> centerOfMassSupplier)
+   public void setupForStabilityMarginCalculation(Supplier<FramePoint3DReadOnly> stabilityReference)
    {
-      this.centerOfMassSupplier = centerOfMassSupplier;
+      this.stabilityReference = stabilityReference;
    }
 
    public void updateContactState(WholeBodyContactStateInterface contactState, boolean contactPointsHaveChanged)
@@ -365,10 +362,13 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
     */
    private void updateMinimumMarginEdge()
    {
-      FramePoint3DReadOnly centerOfMass = centerOfMassSupplier.get();
-      double comX = centerOfMass.getX();
-      double comY = centerOfMass.getY();
-      yoCenterOfMass.set(comX, comY);
+      FramePoint3DReadOnly stabilityReference = this.stabilityReference.get();
+      if (stabilityReference == null)
+         return;
+
+      double stabilityReferenceX = stabilityReference.getX();
+      double stabilityReferenceY = stabilityReference.getY();
+      yoStabilityReference.set(stabilityReferenceX, stabilityReferenceY);
 
       boolean isQueryOutsidePolygon = false;
       int insideIndex = -1;
@@ -381,9 +381,9 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
          Point2DReadOnly edgeStart = feasibleRegion.getVertex(edgeIndex);
          Point2DReadOnly edgeEnd = feasibleRegion.getNextVertex(edgeIndex);
 
-         double distanceSquared = distanceSquaredFromPoint2DToLineSegment2D(comX, comY, edgeStart, edgeEnd);
+         double distanceSquared = distanceSquaredFromPoint2DToLineSegment2D(stabilityReferenceX, stabilityReferenceY, edgeStart, edgeEnd);
 
-         boolean isOutsideEdge = isPoint2DOnSideOfLine2D(comX, comY, edgeStart, edgeEnd, feasibleRegion.isClockwiseOrdered());
+         boolean isOutsideEdge = isPoint2DOnSideOfLine2D(stabilityReferenceX, stabilityReferenceY, edgeStart, edgeEnd, feasibleRegion.isClockwiseOrdered());
          isQueryOutsidePolygon |= isOutsideEdge;
 
          /*
@@ -413,7 +413,7 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
 
       FramePoint2DReadOnly v1 = feasibleRegion.getVertex(lowestMarginEdgeIndex.getValue());
       FramePoint2DReadOnly v2 = feasibleRegion.getNextVertex(lowestMarginEdgeIndex.getValue());
-      EuclidGeometryTools.orthogonalProjectionOnLineSegment2D(comX, comY, v1.getX(), v1.getY(), v2.getX(), v2.getY(), yoStabilityMarginPoint);
+      EuclidGeometryTools.orthogonalProjectionOnLineSegment2D(stabilityReferenceX, stabilityReferenceY, v1.getX(), v1.getY(), v2.getX(), v2.getY(), yoStabilityMarginPoint);
 
       for (int vertex_idx = 0; vertex_idx < DIRECTIONS_TO_OPTIMIZE; vertex_idx++)
       {
@@ -520,7 +520,7 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
 
    public FramePoint3DReadOnly getCenterOfMass()
    {
-      return centerOfMassSupplier.get();
+      return stabilityReference.get();
    }
 
    public LinearProgramSolver getSolver()
@@ -631,10 +631,10 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
             group.addChild(nearestSegmentGraphic);
 
             YoGraphicPoint2DDefinition vertexGraphic = newYoGraphicPoint2D(namePrefix + "Point" + vertex_idx,
-                                                                                                      optimizedVertices[vertex_idx],
-                                                                                                      0.003,
-                                                                                                      ColorDefinitions.Blue(),
-                                                                                                      DefaultPoint2DGraphic.CIRCLE_FILLED);
+                                                                           optimizedVertices[vertex_idx],
+                                                                           0.003,
+                                                                           ColorDefinitions.Blue(),
+                                                                           DefaultPoint2DGraphic.CIRCLE_FILLED);
             group.addChild(vertexGraphic);
          }
       }

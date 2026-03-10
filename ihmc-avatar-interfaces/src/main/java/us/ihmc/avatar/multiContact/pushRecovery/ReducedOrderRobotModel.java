@@ -75,7 +75,7 @@ public class ReducedOrderRobotModel
 
    // Hand and reachability data
    private final SideDependentList<YoFramePoint3D> handPositions = new SideDependentList<>();
-   private final SideDependentList<FramePoint3D> shoulderPositions = new SideDependentList<>(new FramePoint3D(), new FramePoint3D());
+   private final SideDependentList<YoFramePoint3D> shoulderPositions = new SideDependentList<>();
 
    private final FramePoint3D tempPoint = new FramePoint3D();
    private final FrameQuaternion tempOrientation = new FrameQuaternion();
@@ -98,7 +98,8 @@ public class ReducedOrderRobotModel
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression() + "_" + namePrefix;
 
          handPositions.put(robotSide, new YoFramePoint3D(sidePrefix + "HandPosition", ReferenceFrame.getWorldFrame(), registry));
-         shoulderPositions.get(robotSide).setIncludingFrame(centroidalFrame, SHOULDER_COM_OFFSET_X, robotSide.negateIfRightSide(SHOULDER_COM_OFFSET_Y), SHOULDER_COM_OFFSET_Z);
+         shoulderPositions.put(robotSide, new YoFramePoint3D(sidePrefix + "ShoulderPosition", centroidalFrame, registry));
+         shoulderPositions.get(robotSide).set(SHOULDER_COM_OFFSET_X, robotSide.negateIfRightSide(SHOULDER_COM_OFFSET_Y), SHOULDER_COM_OFFSET_Z);
 
          defaultFootPolygons.put(robotSide, new YoFrameConvexPolygon2D(sidePrefix + "FootPolygon", ReferenceFrame.getWorldFrame(), 4, registry));
          ArrayList<Point2D> contactPoints = footContactPoints.get(robotSide);
@@ -168,6 +169,11 @@ public class ReducedOrderRobotModel
       return handPositions.get(robotSide);
    }
 
+   public FixedFramePoint3DBasics getShoulderPosition(RobotSide robotSide)
+   {
+      return shoulderPositions.get(robotSide);
+   }
+
    public FixedFramePoint3DBasics getComPosition()
    {
       return centroidalPose.getPosition();
@@ -229,13 +235,16 @@ public class ReducedOrderRobotModel
       return isReachable(robotSide, contactPoint, 0.0);
    }
 
-   private final FramePoint3D shoulderToContactPoint = new FramePoint3D();
-
    public boolean isReachable(RobotSide robotSide, FramePoint3DReadOnly contactPoint, double epsilon)
+   {
+      return isReachable(robotSide, contactPoint, centroidalFrame, tempPoint, epsilon);
+   }
+
+   public static boolean isReachable(RobotSide robotSide, FramePoint3DReadOnly contactPoint, ReferenceFrame centroidalFrame, FramePoint3D shoulderToContactPoint, double epsilon)
    {
       shoulderToContactPoint.setToZero(centroidalFrame);
       shoulderToContactPoint.setMatchingFrame(contactPoint);
-      shoulderToContactPoint.sub(shoulderPositions.get(robotSide));
+      shoulderToContactPoint.sub(SHOULDER_COM_OFFSET_X, robotSide.negateIfRightSide(SHOULDER_COM_OFFSET_Y), SHOULDER_COM_OFFSET_Z);
 
       double shoulderToContactPointNorm = shoulderToContactPoint.norm();
       if (shoulderToContactPointNorm < REACHABILITY_RADIUS_MIN - epsilon)
@@ -246,6 +255,16 @@ public class ReducedOrderRobotModel
          return false;
 
       return true;
+   }
+
+   public static double getArmExtension(RobotSide robotSide, FramePoint3DReadOnly contactPoint, ReferenceFrame centroidalFrame, FramePoint3D shoulderToContactPoint)
+   {
+      shoulderToContactPoint.setToZero(centroidalFrame);
+      shoulderToContactPoint.setMatchingFrame(contactPoint);
+      shoulderToContactPoint.sub(SHOULDER_COM_OFFSET_X, robotSide.negateIfRightSide(SHOULDER_COM_OFFSET_Y), SHOULDER_COM_OFFSET_Z);
+
+      double shoulderToContactPointNorm = shoulderToContactPoint.norm();
+      return shoulderToContactPointNorm;
    }
 
    public YoGraphicDefinition getSCS2YoGraphics()

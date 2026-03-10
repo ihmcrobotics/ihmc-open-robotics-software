@@ -50,7 +50,7 @@ class LPSupportingVertexForcePolytopeSolver implements ForcePolytopeSolver
 
       for (int i = 0; i < singularValuesNonThresholded.length; i++)
       {
-         if (singularValuesNonThresholded[i] < singularValueThreshold)
+         if (singularValuesNonThresholded[i] < DEFAULT_SINGULAR_VALUE_THRESHOLD)
             break;
 
          singularValues.add(singularValuesNonThresholded[i]);
