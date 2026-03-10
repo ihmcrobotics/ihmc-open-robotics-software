@@ -1,6 +1,5 @@
-package us.ihmc.tools;
+package us.ihmc.tools.logic;
 
-import us.ihmc.log.LogTools;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 
 import java.util.ArrayList;
@@ -89,11 +88,11 @@ public class OrderedLogicalSequence
       {
          logicalElements.get(currentLogicalElement).run();
          lastLogicalElementRun = currentLogicalElement;
-      }
 
-      // If the completion condition has been met for this element, increment to the next element
-      if (completionConditions.get(currentLogicalElement) == null || completionConditions.get(currentLogicalElement).getValue())
-         currentLogicalElement++;
+         // If the completion condition has been met for this element, increment to the next element
+         if (completionConditions.get(currentLogicalElement) == null || completionConditions.get(currentLogicalElement).getValue())
+            currentLogicalElement++;
+      }
 
       // If we have incremented to the end of the list of elements, we are finished
       if (currentLogicalElement >= logicalElements.size())
@@ -114,5 +113,13 @@ public class OrderedLogicalSequence
    public boolean hasFinished()
    {
       return finished;
+   }
+
+   /**
+    * @return {@link OrderedLogicalSequence#currentLogicalElement}: index of the current logical element
+    */
+   public int getCurrentLogicalElement()
+   {
+      return currentLogicalElement;
    }
 }
