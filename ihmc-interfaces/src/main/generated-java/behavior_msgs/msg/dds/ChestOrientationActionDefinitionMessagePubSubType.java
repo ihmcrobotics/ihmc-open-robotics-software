@@ -15,7 +15,7 @@ public class ChestOrientationActionDefinitionMessagePubSubType implements us.ihm
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "82aeee3249d5c08330786e368c0b74ec5412b1cec9971241b00f84cd8ff8ce0a";
+   		return "ebab46325d490007bed7f75545d0e78ee4ca87c65da90199d3c622e2f5458bad";
    }
    
    @Override
@@ -55,9 +55,13 @@ public class ChestOrientationActionDefinitionMessagePubSubType implements us.ihm
       current_alignment += behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
-      current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
-
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += ((3) * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -78,10 +82,14 @@ public class ChestOrientationActionDefinitionMessagePubSubType implements us.ihm
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getParentFrameName().length() + 1;
 
-      current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getCdrSerializedSize(data.getChestTransformToParent(), current_alignment);
-
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += ((3) * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getCdrSerializedSize(data.getChestTransformToParent(), current_alignment);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -97,9 +105,16 @@ public class ChestOrientationActionDefinitionMessagePubSubType implements us.ihm
       cdr.write_type_d(data.getParentFrameName());else
           throw new RuntimeException("parent_frame_name field exceeds the maximum length: %d > %d".formatted(data.getParentFrameName().length(), 255));
 
-      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getChestTransformToParent(), cdr);
       cdr.write_type_6(data.getTrajectoryDuration());
 
+      cdr.write_type_7(data.getJointspaceOnly());
+
+      for(int i0 = 0; i0 < data.getJointAngles().length; ++i0)
+      {
+        	cdr.write_type_6(data.getJointAngles()[i0]);	
+      }
+
+      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getChestTransformToParent(), cdr);
       cdr.write_type_7(data.getHoldPoseInWorld());
 
    }
@@ -108,9 +123,17 @@ public class ChestOrientationActionDefinitionMessagePubSubType implements us.ihm
    {
       behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
       cdr.read_type_d(data.getParentFrameName());	
-      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getChestTransformToParent(), cdr);	
       data.setTrajectoryDuration(cdr.read_type_6());
       	
+      data.setJointspaceOnly(cdr.read_type_7());
+      	
+      for(int i0 = 0; i0 < data.getJointAngles().length; ++i0)
+      {
+        	data.getJointAngles()[i0] = cdr.read_type_6();
+        	
+      }
+      	
+      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getChestTransformToParent(), cdr);	
       data.setHoldPoseInWorld(cdr.read_type_7());
       	
 
@@ -122,9 +145,11 @@ public class ChestOrientationActionDefinitionMessagePubSubType implements us.ihm
       ser.write_type_a("definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getDefinition());
 
       ser.write_type_d("parent_frame_name", data.getParentFrameName());
+      ser.write_type_6("trajectory_duration", data.getTrajectoryDuration());
+      ser.write_type_7("jointspace_only", data.getJointspaceOnly());
+      ser.write_type_f("joint_angles", data.getJointAngles());
       ser.write_type_a("chest_transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getChestTransformToParent());
 
-      ser.write_type_6("trajectory_duration", data.getTrajectoryDuration());
       ser.write_type_7("hold_pose_in_world", data.getHoldPoseInWorld());
    }
 
@@ -134,9 +159,11 @@ public class ChestOrientationActionDefinitionMessagePubSubType implements us.ihm
       ser.read_type_a("definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getDefinition());
 
       ser.read_type_d("parent_frame_name", data.getParentFrameName());
+      data.setTrajectoryDuration(ser.read_type_6("trajectory_duration"));
+      data.setJointspaceOnly(ser.read_type_7("jointspace_only"));
+      ser.read_type_f("joint_angles", data.getJointAngles());
       ser.read_type_a("chest_transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getChestTransformToParent());
 
-      data.setTrajectoryDuration(ser.read_type_6("trajectory_duration"));
       data.setHoldPoseInWorld(ser.read_type_7("hold_pose_in_world"));
    }
 
