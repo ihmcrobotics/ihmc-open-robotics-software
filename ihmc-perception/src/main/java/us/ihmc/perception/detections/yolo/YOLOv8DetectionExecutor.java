@@ -7,7 +7,6 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Size;
 import perception_msgs.msg.dds.ImageMessage;
-import perception_msgs.msg.dds.YOLOv8ExecutorParameters;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.commons.thread.TypedNotification;
@@ -45,9 +44,7 @@ public class YOLOv8DetectionExecutor
 
    private final Map<String, YOLOv8Model> availableModels = new LinkedHashMap<>();
    private final SyncedYOLOv8ExecutorParameters parameters;
-   private final YOLOv8ExecutorParameters parametersMessage;
 
-   private final ROS2Publisher<YOLOv8ExecutorParameters> parametersPublisher;
    private final ROS2Publisher<ImageMessage> annotatedImagePublisher;
    private final BooleanSupplier annotatedImageDemanded;
 
@@ -93,22 +90,8 @@ public class YOLOv8DetectionExecutor
          LogTools.error("No YOLO models found. YOLO will not run.");
 
       // Create YOLO parameters
-      parameters = new SyncedYOLOv8ExecutorParameters(crdtInfo);
+      parameters = new SyncedYOLOv8ExecutorParameters(ros2Node, crdtInfo);
       parameters.setAvailableModels(availableModels.values());
-      parameters.requestSendFullData();
-
-      // Subscribe to YOLO parameters messages
-      ros2Node.createSubscription2(PerceptionAPI.YOLO_PARAMETERS, message ->
-      {
-         parameters.fromMessage(message);
-         parameters.confirmReceivedFullData();
-      });
-
-      parametersPublisher = ros2Node.createPublisher(PerceptionAPI.YOLO_PARAMETERS);
-      parametersMessage = new YOLOv8ExecutorParameters();
-
-      parameters.toMessage(parametersMessage);
-      parametersPublisher.publish(parametersMessage);
 
       updateThread = new RepeatingTaskThread(getClass().getSimpleName() + "Updater", this::update);
       updateThread.setFrequencyLimit(10.0);
@@ -263,6 +246,8 @@ public class YOLOv8DetectionExecutor
       extractor.close();
       segmenter.close();
 
+      parameters.close();
+
       System.out.println("Destroyed " + getClass().getSimpleName());
    }
 
@@ -322,18 +307,11 @@ public class YOLOv8DetectionExecutor
 
    private void update()
    {
-      parameters.checkModified();
+      parameters.checkModifiedAndUpdate();
 
       SyncedYOLOv8ModelParameters modelParameters = parameters.getModelParameters();
       modelParameters.checkModified();
-
       if (modelParameters.isModified())
          modelParameters.applyToModel(availableModels.get(parameters.getModelToRun().getValue()));
-
-      if (parameters.pollNeedSendFullData() || modelParameters.pollNeedSendFullData())
-      {
-         parameters.toMessage(parametersMessage);
-         parametersPublisher.publish(parametersMessage);
-      }
    }
 }
