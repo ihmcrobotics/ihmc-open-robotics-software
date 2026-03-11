@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
+import controller_msgs.msg.dds.SpineTrajectoryMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.TrajectoryTrackingErrorCalculator;
@@ -11,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.robotics.partNames.SpineJointName;
 
 public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrientationActionState, ChestOrientationActionDefinition>
 {
@@ -19,10 +21,13 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
    private final FramePose3D desiredChestPose = new FramePose3D();
    private final FramePose3D syncedChestPose = new FramePose3D();
    private final TrajectoryTrackingErrorCalculator trackingCalculator = new TrajectoryTrackingErrorCalculator();
+   private final SpineJointName[] spineJointNames;
 
    public ChestOrientationActionExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
    {
       super(new ChestOrientationActionState(id, rootNode.getState()), rootNode);
+
+      spineJointNames = syncedRobot.getRobotModel().getJointMap().getSpineJointNames();
    }
 
    @Override
@@ -42,19 +47,31 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
 
       if (state.getChestFrame().isChildOfWorld())
       {
-         FrameQuaternion frameChestQuaternion = new FrameQuaternion(state.getChestFrame().getReferenceFrame());
-         frameChestQuaternion.changeFrame(ReferenceFrame.getWorldFrame());
+         if (definition.getJointspaceOnly())
+         {
+            SpineTrajectoryMessage message = new SpineTrajectoryMessage();
+            double[] jointAngles = new double[spineJointNames.length];
+            for (int i = 0; i < spineJointNames.length; i++)
+               jointAngles[i] = definition.getJointAngles().getValueReadOnly(i);
+            message.getJointspaceTrajectory().set(HumanoidMessageTools.createJointspaceTrajectoryMessage(definition.getTrajectoryDuration(), jointAngles));
+            ros2ControllerHelper.publishToController(message);
+         }
+         else
+         {
+            FrameQuaternion frameChestQuaternion = new FrameQuaternion(state.getChestFrame().getReferenceFrame());
+            frameChestQuaternion.changeFrame(ReferenceFrame.getWorldFrame());
 
-         ChestTrajectoryMessage message = new ChestTrajectoryMessage();
-         message.getSo3Trajectory()
-                .set(HumanoidMessageTools.createSO3TrajectoryMessage(definition.getTrajectoryDuration(),
-                                                                     frameChestQuaternion,
-                                                                     EuclidCoreTools.zeroVector3D,
-                                                                     ReferenceFrame.getWorldFrame()));
-         long frameId = MessageTools.toFrameId(ReferenceFrame.getWorldFrame());
-         message.getSo3Trajectory().getFrameInformation().setDataReferenceFrameId(frameId);
+            ChestTrajectoryMessage message = new ChestTrajectoryMessage();
+            message.getSo3Trajectory()
+                   .set(HumanoidMessageTools.createSO3TrajectoryMessage(definition.getTrajectoryDuration(),
+                                                                        frameChestQuaternion,
+                                                                        EuclidCoreTools.zeroVector3D,
+                                                                        ReferenceFrame.getWorldFrame()));
+            long frameId = MessageTools.toFrameId(ReferenceFrame.getWorldFrame());
+            message.getSo3Trajectory().getFrameInformation().setDataReferenceFrameId(frameId);
 
-         ros2ControllerHelper.publishToController(message);
+            ros2ControllerHelper.publishToController(message);
+         }
 
          trackingCalculator.reset();
 
@@ -83,7 +100,31 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
          return;
       }
 
-      if (state.getChestFrame().isChildOfWorld())
+      if (definition.getJointspaceOnly())
+      {
+         trackingCalculator.resetJointspaceError();
+
+         for (int i = 0; i < spineJointNames.length; i++)
+         {
+            double desired = definition.getJointAngles().getValueReadOnly(i);
+            double current = syncedRobot.getFullRobotModel().getSpineJoint(spineJointNames[i]).getQ();
+            trackingCalculator.addJointData(desired, current);
+            state.getCurrentJointAngles().setValue(i, current);
+         }
+         trackingCalculator.factorInJointspaceErrors(ORIENTATION_TOLERANCE);
+
+         if (trackingCalculator.getTimeIsUp())
+         {
+            state.setIsExecuting(false);
+            if (!trackingCalculator.isWithinPositionTolerance())
+            {
+               state.setFailed(true);
+               state.getLogger().error("Total jointspace error: %.3f deg"
+                                             .formatted(Math.toDegrees(trackingCalculator.getTotalAbsoluteJointspaceError())));
+            }
+         }
+      }
+      else if (state.getChestFrame().isChildOfWorld())
       {
          desiredChestPose.setFromReferenceFrame(state.getChestFrame().getReferenceFrame());
          syncedChestPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getChest().getBodyFixedFrame());
@@ -100,10 +141,8 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
          {
             state.setIsExecuting(false);
 
-            if (!definition.getHoldPoseInWorldLater())
-            {
+            if (!definition.getJointspaceOnly() && !definition.getHoldPoseInWorldLater())
                disengageHoldPoseInWorld();
-            }
          }
 
          state.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);

@@ -22,13 +22,21 @@ module behavior_msgs
          */
         string parent_frame_name;
         /**
-         * Transform that expresses the chest pose in the parent frame
-         */
-        controller_msgs::msg::dds::RigidBodyTransformMessage chest_transform_to_parent;
-        /**
          * Duration of the trajectory
          */
         double trajectory_duration;
+        /**
+         * Whether the action is jointspace only
+         */
+        boolean jointspace_only;
+        /**
+         * Jointspace values
+         */
+        double joint_angles[3];
+        /**
+         * Transform that expresses the chest pose in the parent frame
+         */
+        controller_msgs::msg::dds::RigidBodyTransformMessage chest_transform_to_parent;
         /**
          * Whether maintaining the rigid body controlled in world after the action is complete
          */
