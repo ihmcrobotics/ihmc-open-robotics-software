@@ -3,6 +3,7 @@ package us.ihmc.perception.detections.yolo;
 import java.util.*;
 import static java.lang.Math.*;
 import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.log.LogTools;
 
 /**
  * Minimal BoT-SORT / ByteTrack-style tracker (NO ReID, NO GMC).
@@ -67,7 +68,7 @@ public class BoTSortTracker
 
    private final GMC gmc = new GMC(GMC.Method.sparseOptFlow, 2); // downscale=2
 
-   /** Call ONCE at init (e.g., when you know camera fps). */
+   /** Call ONCE at init (e.g., when camera fps is known). */
    public void setFrameRate(float fps)
    {
       this.trackBuffer = Math.max(1, Math.round((fps / 30.0f) * baseTrackBuffer));
@@ -474,7 +475,7 @@ public class BoTSortTracker
       int n = a.length;
       int m = a[0].length;
 
-      // If n > m, you should transpose; in our use n <= m (because of dummy cols)
+      // If n > m, transpose; in our use n <= m (because of dummy cols)
       if (n > m)
          throw new IllegalArgumentException("Hungarian expects n <= m (rows <= cols).");
 
@@ -769,7 +770,7 @@ public class BoTSortTracker
          double ncx = a * cx + b * cy + tx;
          double ncy = c * cx + d * cy + ty;
 
-         // You MUST write back to KF state. Add a setter in KalmanFilter if needed.
+         // Write back to KF state. Add a setter in KalmanFilter if needed.
          kf.setXY((float) ncx, (float) ncy);
 
          // refresh cached box
@@ -823,13 +824,17 @@ public class BoTSortTracker
          float cx = x1 + 0.5f * w;
          float cy = y1 + 0.5f * h;
 
-         // THIS MUST BE (cx, cy, w, h) for BoT-SORT's KF variant you showed.
+         LogTools.info(String.format(
+               "TRACKER INPUT: x1=%.3f y1=%.3f x2=%.3f y2=%.3f -> cx=%.3f cy=%.3f",
+               x1, y1, x2, y2, cx, cy));
+
+
          return new float[] {cx, cy, w, h};
       }
 
       static float[] meanToTLBR(float[] mean)
       {
-         // mean[0]=cx mean[1]=cy mean[2]=w mean[3]=h (as in your python KF)
+         // mean[0]=cx mean[1]=cy mean[2]=w mean[3]=h
          float cx = mean[0], cy = mean[1], w = max(1f, mean[2]), h = max(1f, mean[3]);
 
          float x1 = cx - 0.5f * w;

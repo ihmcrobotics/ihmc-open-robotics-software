@@ -8,6 +8,7 @@ import us.ihmc.communication.crdt.LatestTimestampModifiable;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Subscription;
+import us.ihmc.ros2.ROS2Topic;
 
 public class SyncedIsaacROSFoundationPoseParameters extends LatestTimestampModifiable
 {
@@ -22,13 +23,24 @@ public class SyncedIsaacROSFoundationPoseParameters extends LatestTimestampModif
 
    public SyncedIsaacROSFoundationPoseParameters(ROS2Node ros2Node, CRDTInfo crdtInfo, IsaacROSFoundationPoseObject object)
    {
+      this(ros2Node,
+           crdtInfo,
+           "FoundationPose " + object.name() + " Parameters",
+           object.topics.ihmcParameters());
+   }
+
+   public SyncedIsaacROSFoundationPoseParameters(ROS2Node ros2Node,
+                                                 CRDTInfo crdtInfo,
+                                                 String modifierName,
+                                                 ROS2Topic<FoundationPoseParameters> parametersTopic)
+   {
       super(crdtInfo);
-      setModifierName("FoundationPose " + object.name() + " Parameters");
+      setModifierName(modifierName);
 
       message = new FoundationPoseParameters();
 
-      subscription = ros2Node.createSubscription2(object.topics.ihmcParameters(), this::fromMessage);
-      publisher = ros2Node.createPublisher(object.topics.ihmcParameters());
+      subscription = ros2Node.createSubscription2(parametersTopic, this::fromMessage);
+      publisher = ros2Node.createPublisher(parametersTopic);
 
       enabled = new CRDTBidirectionalBoolean(this, true);
       autoResetEnabled = new CRDTBidirectionalBoolean(this, true);
