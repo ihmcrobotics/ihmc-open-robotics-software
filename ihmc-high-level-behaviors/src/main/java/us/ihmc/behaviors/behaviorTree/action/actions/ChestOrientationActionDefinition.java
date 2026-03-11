@@ -15,8 +15,6 @@ import us.ihmc.tools.io.JSONTools;
 
 public class ChestOrientationActionDefinition extends ActionNodeDefinition
 {
-   private static final int JOINT_ANGLES_SIZE = 3;
-
    private final CRDTBidirectionalString parentFrameName;
    private final CRDTBidirectionalDouble trajectoryDuration;
    private final CRDTBidirectionalBoolean jointspaceOnly;
@@ -28,7 +26,7 @@ public class ChestOrientationActionDefinition extends ActionNodeDefinition
    private String onDiskParentFrameName;
    private double onDiskTrajectoryDuration;
    private boolean onDiskJointspaceOnly;
-   private final double[] onDiskJointAngles = new double[JOINT_ANGLES_SIZE];
+   private final double[] onDiskJointAngles = new double[3];
    private final RigidBodyTransform onDiskChestToParentTransform = new RigidBodyTransform();
    private boolean onDiskHoldPoseInWorldLater;
 
@@ -39,7 +37,7 @@ public class ChestOrientationActionDefinition extends ActionNodeDefinition
       parentFrameName = new CRDTBidirectionalString(this, "Pelvis");
       trajectoryDuration = new CRDTBidirectionalDouble(this, 4.0);
       jointspaceOnly = new CRDTBidirectionalBoolean(this, true);
-      jointAngles = new CRDTBidirectionalDoubleArray(this, JOINT_ANGLES_SIZE);
+      jointAngles = new CRDTBidirectionalDoubleArray(this, 3);
       chestToParentTransform = new CRDTBidirectionalRigidBodyTransform(this);
       holdPoseInWorldLater = new CRDTBidirectionalBoolean(this, false);
    }
