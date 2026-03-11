@@ -67,7 +67,7 @@ public class FootstepPlannerAStarDataSetTest extends FootstepPlannerDataSetTest
 //      20171215_211034_DoorwayNoCeiling
 
       FootstepPlannerAStarDataSetTest test = new FootstepPlannerAStarDataSetTest();
-      DataSetName dataSetName = DataSetName._20171215_211034_DoorwayNoCeiling;
+      DataSetName dataSetName = DataSetName._20190219_182005_Staircase;
       test.testDataSets(Arrays.asList(DataSetIOTools.loadDataSet(dataSetName)));
    }
 }
