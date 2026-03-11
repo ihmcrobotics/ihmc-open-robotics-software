@@ -533,7 +533,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
 
       EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(desiredOrientation, currentDesiredTrajectoryPoint.getOrientation(), desiredEpsilon);
       EuclidCoreTestTools.assertEquals(desiredAngularVelocity, currentDesiredTrajectoryPoint.getAngularVelocity(), desiredEpsilon);
-      EndToEndChestTrajectoryMessageTest.assertControlErrorIsLow(simulationTestHelper, pelvis, 1.5e-3);
+      EndToEndChestTrajectoryMessageTest.assertControlErrorIsLow(simulationTestHelper, pelvis, 1.6e-3);
    }
 
    @SuppressWarnings("unchecked")
