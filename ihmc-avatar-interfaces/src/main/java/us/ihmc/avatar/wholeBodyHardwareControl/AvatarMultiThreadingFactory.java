@@ -602,9 +602,9 @@ public class AvatarMultiThreadingFactory
          throw new RuntimeException("Multi-contact planning DT must be multiple of master thread DT.");
 
       MultiContactGaitGeneratorTask multiContactGaitGeneratorTask = new MultiContactGaitGeneratorTask("MCGG",
-                                                                        multiContactPlanningThread,
-                                                                        multiContactPlanningDivisor,
-                                                                        masterFullRobotModel);
+                                                                                                      multiContactPlanningThread,
+                                                                                                      multiContactPlanningDivisor,
+                                                                                                      masterThreadDt);
 
       // Add post-step generator callback to update YoVariable server with step generator registry
       if (yoVariableServer != null)

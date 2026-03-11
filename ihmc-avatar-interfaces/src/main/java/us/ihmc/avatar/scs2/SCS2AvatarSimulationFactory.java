@@ -664,8 +664,8 @@ public class SCS2AvatarSimulationFactory
       if (createMultiContactGaitGenerator.get())
          multiContactGaitGeneratorTask = new MultiContactGaitGeneratorTask("MCGG",
                                                                            multiContactGaitGeneratorThread,
-                                                                           simulationDT.get(),
-                                                                           masterFullRobotModel);
+                                                                           multiContactPlannerDivisor,
+                                                                           simulationDT.get());
 
       SimulatedHandControlTask handControlTask = null;
       AvatarSimulatedHandControlThread handControlThread = null;

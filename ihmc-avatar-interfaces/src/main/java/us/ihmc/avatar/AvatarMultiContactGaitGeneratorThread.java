@@ -191,8 +191,6 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
          {
             planner.triggerDiagnosticInference();
          }
-
-         return;
       }
 
       // Update capture point preview trajectory
@@ -256,12 +254,12 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
          plannedHandContacts.clear();
          planner.plan(reducedOrderRobotModel, plannedFootSteps, plannedHandContacts);
 
-         for (RobotSide robotSide : RobotSide.values)
+//         for (RobotSide robotSide : RobotSide.values)
          {
-            HandContactCommand handContactCommand = plannedHandContacts.get(robotSide);
+            HandContactCommand handContactCommand = plannedHandContacts.get(RobotSide.LEFT);
             if (handContactCommand != null)
             {
-               LogTools.info("Sending " + robotSide + " hand bracing command!");
+//               LogTools.info("Sending " + robotSide + " hand bracing command!");
                walkingCommandInputManager.submitCommand(handContactCommand);
             }
          }
@@ -270,7 +268,6 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
       if (triggerUnload.getValue())
       {
          triggerUnload.set(false);
-         LogTools.info("Unloading hands");
 
          for (RobotSide robotSide : RobotSide.values)
          {
