@@ -447,6 +447,7 @@ public class KinematicsToolboxController extends ToolboxController implements SC
     * @param desiredOneDoFJoints        the actuated joints of the system. The inverse kinematics will
     *                                   only use these joints during the optimization.
     * @param desiredOneDoFJointIndices  the indices of the actuated joints of the system.
+    *                                                             Can pass null if there are no fingers in the robot model.
     * @param controllableRigidBodies    the sublist of rigid-bodies that can be controlled by the user.
     *                                   Can be {@code null} in the case all rigid-body should be
     *                                   controllable.
