@@ -22,7 +22,7 @@ import java.util.function.Consumer;
 
 public class RapidPlanarRegionsExtractionThread extends RepeatingTaskThread
 {
-   private static final double UPDATE_FREQUENCY = 10.0;
+   private static final double UPDATE_FREQUENCY = 5.0;
 
    private final ROS2Helper ros2Helper;
 
