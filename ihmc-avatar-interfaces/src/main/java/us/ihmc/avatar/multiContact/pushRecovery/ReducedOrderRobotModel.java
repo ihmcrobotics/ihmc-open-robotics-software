@@ -57,7 +57,7 @@ public class ReducedOrderRobotModel
    public static final double REACHABILITY_RADIUS_MAX = 0.72;
 
    /* Maximum inward reaching distance, to prevent too much cross-over */
-   public static final double MAX_INWARD_DISTANCE = 0.0;
+   public static final double MAX_INWARD_DISTANCE = 0.15;
 
    public static final double NOMINAL_COM_HEIGHT = 0.9;
    public static final double OMEGA = Math.sqrt(9.81 / NOMINAL_COM_HEIGHT);
