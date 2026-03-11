@@ -173,20 +173,32 @@ public class KinematicsToolboxHelper
                                                               List<Integer> oneDoFJointsIndices)
    {
       TFloatArrayList newJointAngles = robotConfigurationData.getJointAngles();
-
-      List<Float> filteredJoints = new ArrayList<>();
-      for (int i = 0; i < newJointAngles.size(); i++)
+      if (oneDoFJointsIndices != null)
       {
-         if (oneDoFJointsIndices != null && oneDoFJointsIndices.contains(i))
-            filteredJoints.add(newJointAngles.get(i));
+         List<Float> filteredJoints = new ArrayList<>();
+         for (int i = 0; i < newJointAngles.size(); i++)
+         {
+            if (oneDoFJointsIndices.contains(i))
+               filteredJoints.add(newJointAngles.get(i));
 
+         }
+         for (int i = 0; i < oneDoFJoints.length; i++)
+         {
+            oneDoFJoints[i].setQ(filteredJoints.get(i));
+            oneDoFJoints[i].setQd(0.0);
+            oneDoFJoints[i].updateFrame();
+         }
       }
-      for (int i = 0; i < oneDoFJoints.length; i++)
+      else
       {
-         oneDoFJoints[i].setQ(filteredJoints.get(i));
-         oneDoFJoints[i].setQd(0.0);
-         oneDoFJoints[i].updateFrame();
+         for (int i = 0; i < newJointAngles.size(); i++)
+         {
+            oneDoFJoints[i].setQ(newJointAngles.get(i));
+            oneDoFJoints[i].setQd(0.0);
+            oneDoFJoints[i].updateFrame();
+         }
       }
+
 
       if (rootJoint != null)
       {
