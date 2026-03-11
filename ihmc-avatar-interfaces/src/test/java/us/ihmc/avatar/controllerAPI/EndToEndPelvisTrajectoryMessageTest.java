@@ -1045,7 +1045,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       simulationTestHelper.start();
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateNow(0.5);
+      boolean success = simulationTestHelper.simulateNow(1.0);
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();

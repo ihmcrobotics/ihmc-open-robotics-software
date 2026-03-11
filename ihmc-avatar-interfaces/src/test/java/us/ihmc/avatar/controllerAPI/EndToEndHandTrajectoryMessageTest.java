@@ -1543,7 +1543,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          }
       });
 
-      success = simulationTestHelper.simulateNow(0.5 * trajectoryTime.getValue());
+      success = simulationTestHelper.simulateNow(1.5 * trajectoryTime.getValue());
       assertTrue(success);
 
       double desiredEpsilon = 6.0e-3;
