@@ -51,6 +51,8 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
+import us.ihmc.handsros2.HandType;
+import us.ihmc.handsros2.abilityHand.AbilityHandModel.AbilityHandJointName;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.log.LogTools;
@@ -75,6 +77,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelWrapper;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
@@ -90,6 +93,7 @@ import javax.annotation.Nullable;
 import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -119,6 +123,7 @@ public class RDXVRWholeBodyKinematicStreaming
    private final ImBoolean showMiniGhost = new ImBoolean(true);
    private final FullHumanoidRobotModel ghostFullRobotModel;
    private final OneDoFJointBasics[] ghostOneDoFJointsExcludingHands;
+   private final int[] ghostOneDoFJointExcludingHandsIndices;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final RetargetingParameters retargetingParameters;
    private final ImBoolean isKSTEnabled = new ImBoolean(false);
@@ -202,8 +207,21 @@ public class RDXVRWholeBodyKinematicStreaming
       RobotDefinition.forEachRigidBodyDefinition(ghostRobotDefinition.getRootBodyDefinition(),
                                                  body -> body.getVisualDefinitions().forEach(visual -> visual.setMaterialDefinition(material)));
 
+      RobotVersion robotVersion = syncedRobot.getRobotModel().getRobotVersion();
       ghostFullRobotModel = syncedRobot.getRobotModel().createFullRobotModel();
       ghostOneDoFJointsExcludingHands = FullRobotModelUtils.getAllJointsExcludingHands(ghostFullRobotModel);
+      HumanoidJointNameMap jointMap = syncedRobot.getRobotModel().getJointMap();
+      OneDoFJointBasics[] oneDoFJoints = ghostFullRobotModel.getOneDoFJoints();
+      Set<String> fingerNames = new HashSet<>();
+      for (RobotSide side : RobotSide.values)
+         if (robotVersion.getHandType(side) == HandType.ABILITY_HAND)
+            for (AbilityHandJointName jointName : AbilityHandJointName.values)
+               fingerNames.add(jointName.getJointName(side));
+      int j = 0;
+      ghostOneDoFJointExcludingHandsIndices = new int[oneDoFJoints.length - fingerNames.size()];
+      for (int i = 0; i < oneDoFJoints.length; i++)
+         if (!fingerNames.contains(oneDoFJoints[i].getName()))
+            ghostOneDoFJointExcludingHandsIndices[j++] = i;
       ghostRobotGraphic = new RDXMultiBodyGraphic(syncedRobot.getRobotModel().getSimpleRobotName() + " (IK Preview Ghost)");
       ghostRobotGraphic.loadRobotModelAndGraphics(ghostRobotDefinition, ghostFullRobotModel.getElevator());
       ghostRobotGraphic.setActive(true);
@@ -214,9 +232,7 @@ public class RDXVRWholeBodyKinematicStreaming
          RobotDefinition.forEachRigidBodyDefinition(miniGhostRobotDefinition.getRootBodyDefinition(),
                                                     body -> body.getVisualDefinitions().forEach(visual -> visual.setMaterialDefinition(material)));
 
-         FullHumanoidRobotModel miniGhostFullRobotModel = new FullHumanoidRobotModelWrapper(miniGhostRobotDefinition,
-                                                                                            syncedRobot.getRobotModel().getJointMap(),
-                                                                                            false);
+         FullHumanoidRobotModel miniGhostFullRobotModel = new FullHumanoidRobotModelWrapper(miniGhostRobotDefinition, jointMap, false);
          miniGhostKST = new RDXVRMiniGhostPreview(syncedRobot.getRobotModel().getSimpleRobotName() + " KST",
                                                   miniGhostRobotDefinition,
                                                   miniGhostFullRobotModel,
@@ -224,9 +240,7 @@ public class RDXVRWholeBodyKinematicStreaming
                                                   Color.YELLOW,
                                                   0.2f);
 
-         FullHumanoidRobotModel miniGhostRealModel = new FullHumanoidRobotModelWrapper(miniGhostRobotDefinition,
-                                                                                       syncedRobot.getRobotModel().getJointMap(),
-                                                                                       false);
+         FullHumanoidRobotModel miniGhostRealModel = new FullHumanoidRobotModelWrapper(miniGhostRobotDefinition, jointMap, false);
          miniGhostReal = new RDXVRMiniGhostPreview(syncedRobot.getRobotModel().getSimpleRobotName() + " Real",
                                                    miniGhostRobotDefinition,
                                                    miniGhostRealModel,
@@ -302,7 +316,6 @@ public class RDXVRWholeBodyKinematicStreaming
          RDXBaseUI.getInstance().getKeyBindings().register("Process user motion", "Left B button");
       }
 
-      RobotVersion robotVersion = syncedRobot.getRobotModel().getRobotVersion();
       for (RobotSide side : RobotSide.values)
       {
          if (!robotVersion.hasHandWithFingers(side))
@@ -773,7 +786,7 @@ public class RDXVRWholeBodyKinematicStreaming
                ghostFullRobotModel.getRootJoint().setJointOrientation(latestStatus.getDesiredRootOrientation());
                for (int i = 0; i < ghostOneDoFJointsExcludingHands.length; i++)
                {
-                  ghostOneDoFJointsExcludingHands[i].setQ(latestStatus.getDesiredJointAngles().get(i));
+                  ghostOneDoFJointsExcludingHands[i].setQ(latestStatus.getDesiredJointAngles().get(ghostOneDoFJointExcludingHandsIndices[i]));
                   if (miniGhostEnabled)
                   {
                      miniGhostKST.setJoint(i, latestStatus.getDesiredJointAngles().get(i));
