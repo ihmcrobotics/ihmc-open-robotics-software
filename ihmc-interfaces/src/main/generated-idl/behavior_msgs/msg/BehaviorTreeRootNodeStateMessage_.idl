@@ -38,6 +38,10 @@ module behavior_msgs
          */
         boolean concurrency_enabled;
         /**
+         * Preview mode enabled
+         */
+        boolean preview_mode_enabled;
+        /**
          * Request failures reset
          */
         boolean failure_reset_requested;

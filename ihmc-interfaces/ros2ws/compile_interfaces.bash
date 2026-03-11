@@ -5,4 +5,4 @@
 rm -rf src
 mkdir src
 cp -r ../src/main/messages/ihmc_interfaces src/
-colcon build
+colcon build --packages-skip vllm_extensions

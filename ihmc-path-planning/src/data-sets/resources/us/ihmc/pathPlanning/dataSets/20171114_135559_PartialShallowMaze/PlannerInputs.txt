@@ -2,7 +2,7 @@ start_position -0.0020882954242782414 -3.136047186899849 0.05478876850441505
 goal_position -1.9128902478638765 -3.9628298719246895 0.05336732177421055
 start_yaw 3.141
 goal_yaw 3.141
-vis_graph_status test
+vis_graph_status dev
 step_planner_status test
 plan_then_snap_status test
 a_star_iteration_limit 50

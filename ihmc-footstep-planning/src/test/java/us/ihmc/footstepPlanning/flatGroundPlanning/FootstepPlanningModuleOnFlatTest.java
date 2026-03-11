@@ -9,13 +9,14 @@ import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.simplePlanners.FlatGroundPlanningUtils;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.Random;
 
-import static us.ihmc.robotics.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class FootstepPlanningModuleOnFlatTest
 {
@@ -123,12 +124,17 @@ public class FootstepPlanningModuleOnFlatTest
       FramePose3D initialMidFootPose = FlatGroundPlanningUtils.poseFormPose2d(initialMidFootPose2d);
       FramePose3D goalPose3d = FlatGroundPlanningUtils.poseFormPose2d(goalPose);
       FootstepPlannerRequest request = new FootstepPlannerRequest();
+
+      DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
+      parameters.setCostPerStep(0.05);
+
       request.setAssumeFlatGround(true);
       request.setGoalFootPoses(idealStanceWidth, goalPose3d);
       request.setRequestedInitialStanceSide(initialStanceFootSide);
       request.setStartFootPoses(idealStanceWidth, initialMidFootPose);
+      request.setTimeout(5.0);
 
-      runTest(goalPose3d, request);
+      runTest(goalPose3d, request, parameters);
    }
 
    @Test
@@ -160,22 +166,29 @@ public class FootstepPlanningModuleOnFlatTest
 
    private void runTest(FramePose3D goalPose3d, FootstepPlannerRequest request)
    {
+      runTest(goalPose3d, request, new DefaultFootstepPlannerParameters());
+   }
+   private void runTest(FramePose3D goalPose3d, FootstepPlannerRequest request, DefaultFootstepPlannerParametersBasics parameters)
+   {
+      FootstepPlanningModule planner = new FootstepPlanningModule(getClass().getSimpleName());
+      planner.getFootstepPlannerParameters().set(parameters);
+
       // test without A*
       request.setPerformAStarSearch(false);
       request.setPlanBodyPath(false);
-      FootstepPlannerOutput plannerOutput = new FootstepPlanningModule(getClass().getSimpleName()).handleRequest(request);
+      FootstepPlannerOutput plannerOutput = planner.handleRequest(request);
       assertTrue(PlannerTools.isGoalNextToLastStep(goalPose3d, plannerOutput.getFootstepPlan()));
 
       // test with A* without body path
       request.setPerformAStarSearch(true);
       request.setPlanBodyPath(false);
-      plannerOutput = new FootstepPlanningModule(getClass().getSimpleName()).handleRequest(request);
+      plannerOutput = planner.handleRequest(request);
       assertTrue(PlannerTools.isGoalNextToLastStep(goalPose3d, plannerOutput.getFootstepPlan()));
 
       // test with A* and body path
       request.setPerformAStarSearch(true);
       request.setPlanBodyPath(true);
-      plannerOutput = new FootstepPlanningModule(getClass().getSimpleName()).handleRequest(request);
+      plannerOutput = planner.handleRequest(request);
       assertTrue(PlannerTools.isGoalNextToLastStep(goalPose3d, plannerOutput.getFootstepPlan()));
    }
 }
