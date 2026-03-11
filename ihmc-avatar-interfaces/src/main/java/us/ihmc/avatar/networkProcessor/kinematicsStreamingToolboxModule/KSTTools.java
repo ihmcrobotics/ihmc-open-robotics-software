@@ -31,7 +31,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.QuaternionTools;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxContactConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
@@ -86,6 +85,7 @@ public class KSTTools implements SCS2YoGraphicHolder
    private final FullHumanoidRobotModel currentFullRobotModel;
    private final FloatingJointBasics currentRootJoint;
    private final OneDoFJointBasics[] currentOneDoFJoint;
+   private final List<Integer> currentOneDoFJointIndices;
 
    private final HumanoidKinematicsToolboxController ikController;
    private final KSTStreamingMessageFactory streamingMessageFactory;
@@ -154,6 +154,7 @@ public class KSTTools implements SCS2YoGraphicHolder
       currentFullRobotModel = robotModel.createFullRobotModel();
       currentRootJoint = currentFullRobotModel.getRootJoint();
       currentOneDoFJoint = FullRobotModelUtils.getAllJointsExcludingHands(currentFullRobotModel);
+      currentOneDoFJointIndices = FullRobotModelUtils.getAllJointsExcludingHandsIndices(currentFullRobotModel);
 
       if (parameters.getJointCustomPositionLowerLimits() != null)
       {
@@ -306,7 +307,7 @@ public class KSTTools implements SCS2YoGraphicHolder
          ikController.updateSupportPolygon(isFootInSupport, steppingParameters.getFootLength(), steppingParameters.getFootWidth(), true);
       }
 
-      boolean wasRobotUpdated = robotStateUpdater.updateRobotConfiguration(currentRootJoint, currentOneDoFJoint);
+      boolean wasRobotUpdated = robotStateUpdater.updateRobotConfiguration(currentRootJoint, currentOneDoFJoint, currentOneDoFJointIndices);
 
       if (wasRobotUpdated)
       {

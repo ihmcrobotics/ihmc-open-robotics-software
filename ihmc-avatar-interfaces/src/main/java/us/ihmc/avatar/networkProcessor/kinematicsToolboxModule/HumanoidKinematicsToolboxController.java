@@ -35,8 +35,6 @@ import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
-import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.HumanoidKinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -75,6 +73,7 @@ import java.util.Objects;
 import static toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_FAILURE_MISSING_RCD;
 import static toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL;
 import static us.ihmc.robotModels.FullRobotModelUtils.getAllJointsExcludingHands;
+import static us.ihmc.robotModels.FullRobotModelUtils.getAllJointsExcludingHandsIndices;
 
 public class HumanoidKinematicsToolboxController extends KinematicsToolboxController
 {
@@ -219,6 +218,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
             statusOutputManager,
             desiredFullRobotModel.getRootJoint(),
             getAllJointsExcludingHands(desiredFullRobotModel),
+            getAllJointsExcludingHandsIndices(desiredFullRobotModel),
             controllableRigidBodies,
             updateDT,
             parentRegistry);
@@ -379,7 +379,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
       resetInternalData();
 
-      boolean wasRobotUpdated = desiredRobotStateUpdater.updateRobotConfiguration(rootJoint, desiredOneDoFJoints);
+      boolean wasRobotUpdated = desiredRobotStateUpdater.updateRobotConfiguration(rootJoint, desiredOneDoFJoints, desiredOneDoFJointIndices);
       if (!wasRobotUpdated)
       {
          commandInputManager.clearAllCommands();
