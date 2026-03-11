@@ -323,7 +323,8 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
       // Initializes this desired robot to the most recent robot configuration data received from the walking controller.
       KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(robotConfigurationData,
                                                                       rootJoint,
-                                                                      FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel));
+                                                                      FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel),
+                                                                      null);
 
       for (JointBasics joint : fullRobotModel.getElevator().childrenSubtreeIterable())
       {

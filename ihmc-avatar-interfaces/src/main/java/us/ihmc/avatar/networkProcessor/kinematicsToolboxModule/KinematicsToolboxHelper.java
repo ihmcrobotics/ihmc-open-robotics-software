@@ -29,6 +29,7 @@ import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class KinematicsToolboxHelper
@@ -168,13 +169,21 @@ public class KinematicsToolboxHelper
     */
    public static void setRobotStateFromRobotConfigurationData(RobotConfigurationData robotConfigurationData,
                                                               FloatingJointBasics rootJoint,
-                                                              OneDoFJointBasics[] oneDoFJoints)
+                                                              OneDoFJointBasics[] oneDoFJoints,
+                                                              List<Integer> oneDoFJointsIndices)
    {
       TFloatArrayList newJointAngles = robotConfigurationData.getJointAngles();
 
+      List<Float> filteredJoints = new ArrayList<>();
       for (int i = 0; i < newJointAngles.size(); i++)
       {
-         oneDoFJoints[i].setQ(newJointAngles.get(i));
+         if (oneDoFJointsIndices != null && oneDoFJointsIndices.contains(i))
+            filteredJoints.add(newJointAngles.get(i));
+
+      }
+      for (int i = 0; i < oneDoFJoints.length; i++)
+      {
+         oneDoFJoints[i].setQ(filteredJoints.get(i));
          oneDoFJoints[i].setQd(0.0);
          oneDoFJoints[i].updateFrame();
       }

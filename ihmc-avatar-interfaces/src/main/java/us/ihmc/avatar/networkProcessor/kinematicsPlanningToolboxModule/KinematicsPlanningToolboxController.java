@@ -133,7 +133,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController imple
                                                              fullRobotModel,
                                                              updateDT,
                                                              parentRegistry);
-      ikController.setDesiredRobotStateUpdater(((rootJoint, oneDoFJoints) -> true)); // Sharing the same desired robot state with the IK controller. Just need to notify it that it gets updated.
+      ikController.setDesiredRobotStateUpdater(((rootJoint, oneDoFJoints, oneDoFJointIndices) -> true)); // Sharing the same desired robot state with the IK controller. Just need to notify it that it gets updated.
       ikCommandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(fullRobotModel, ikController.getDesiredReferenceFrames()));
       initialRobotConfiguration = MessageTools.createKinematicsToolboxOutputStatus(ikController.getDesiredOneDoFJoints());
 
@@ -592,7 +592,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController imple
 
       FloatingJointBasics rootJoint = getDesiredFullRobotModel().getRootJoint();
       OneDoFJointBasics[] allJointsExcludingHands = FullRobotModelUtils.getAllJointsExcludingHands(getDesiredFullRobotModel());
-      KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(currentRobotConfiguration, rootJoint, allJointsExcludingHands);
+      KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(currentRobotConfiguration, rootJoint, allJointsExcludingHands, null);
       MessageTools.packDesiredJointState(initialRobotConfiguration, rootJoint, allJointsExcludingHands);
 
       CapturabilityBasedStatus capturabilityBasedStatus = latestCapturabilityBasedStatusReference.get();

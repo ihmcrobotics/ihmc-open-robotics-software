@@ -399,7 +399,7 @@ public class IKStreamingRTPluginFactory
       }
 
       @Override
-      public boolean updateRobotConfiguration(FloatingJointBasics rootJoint, OneDoFJointBasics[] oneDoFJoints)
+      public boolean updateRobotConfiguration(FloatingJointBasics rootJoint, OneDoFJointBasics[] oneDoFJoints, List<Integer> oneDoFJointIndices)
       {
          if (!contextData.getEstimatorRan())
             return false;

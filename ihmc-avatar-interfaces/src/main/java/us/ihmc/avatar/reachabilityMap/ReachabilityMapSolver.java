@@ -90,6 +90,7 @@ public class ReachabilityMapSolver implements SCS2YoGraphicHolder
                                                                     statusOutputManager,
                                                                     null,
                                                                     robotArmJoints,
+                                                                    null,
                                                                     Collections.singleton(endEffector),
                                                                     1.0e-3,
                                                                     registry);
