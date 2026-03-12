@@ -56,19 +56,22 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
    private final RecyclingArrayList<FrameVector3D> angularVelocities = new RecyclingArrayList<>(FrameVector3D::new);
    private final TDoubleArrayList trajectoryTimes = new TDoubleArrayList();
    private final int numberOfJoints = HandPoseActionDefinition.MAX_NUMBER_OF_JOINTS;
-   private int numberOfPoints;
-   private double rotationRadius;
-   private double signedTotalRotation;
-   private double signedTotalTranslation;
-   private double signedRadialDistance;
-   private double totalLinearDistanceOfHand;
-   private double durationForRotation;
-   private double durationForTranslation;
-   private double movementDuration;
-   private double segmentDuration;
-   private double tangentialVelocity;
-   private double axialVelocity;
-   private double rotationalVelocity;
+   private final ScrewTrajectoryData trajectoryData = new ScrewTrajectoryData();
+
+   private static final class ScrewTrajectoryData
+   {
+      int numberOfPoints;
+      double rotationRadius;
+      double signedTotalRotation;
+      double signedTotalTranslation;
+      double signedRadialDistance;
+      double totalLinearDistanceOfHand;
+      double movementDuration;
+      double segmentDuration;
+      double tangentialVelocity;
+      double axialVelocity;
+      double rotationalVelocity;
+   }
 
    public ScrewPrimitiveActionExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
    {
@@ -93,136 +96,136 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
       if (state.getScrewFrame().isChildOfWorld() && !definitionInvalid)
       {
          BehaviorTreeRootNodeState actionSequence = rootNode.getState();
-         if (actionSequence.getExecutionNextIndex() <= state.getLeafIndex())
-         {
-            ReferenceFrame initialHandFrame = null;
+         if (actionSequence.getExecutionNextIndex() > state.getLeafIndex())
+            return;
 
-            if (state.getIsNextForExecution())
-            {
-               initialHandFrame = syncedRobot.getReferenceFrames().getHandFrame(definition.getSide());
-            }
-            else
-            {
-               HandPoseActionState previousHandPose = actionSequence.findNextPreviousLeaf(HandPoseActionState.class,
-                                                                                          state.getLeafIndex(),
-                                                                                          definition.getSide());
-               if (previousHandPose != null && previousHandPose.getPalmFrame().isChildOfWorld())
-               {
-                  initialHandFrame = previousHandPose.getPalmFrame().getReferenceFrame();
-               }
-            }
+         ReferenceFrame initialHandFrame = resolveInitialHandFrame(actionSequence);
+         if (initialHandFrame == null)
+            return;
 
-            if (initialHandFrame != null)
-            {
-               RecyclingArrayList<Pose3D> trajectoryPoses = state.getPreviewTrajectory().accessValue();
-               trajectoryPoses.clear();
-               Pose3D firstPose = trajectoryPoses.add();
-               workPose.setToZero(initialHandFrame);
-               workPose.changeFrame(ReferenceFrame.getWorldFrame());
-               firstPose.set(workPose);
+         if (!buildPreviewTrajectory(initialHandFrame))
+            return;
 
-               // These contants could be adjusted
-               double rotationPerPoint = Math.toRadians(10);
-               double translationPerPoint = 0.05;
-               int segments = (int) Math.ceil(Math.abs(definition.getRotation()) / rotationPerPoint
-                                            + Math.abs(definition.getTranslation()) / translationPerPoint);
+         if (!computeTrajectoryData(trajectoryData))
+            return;
 
-               double rotationPerSegment = definition.getRotation() / segments;
-               double translationPerSegment = definition.getTranslation() / segments;
+         updatePreviewMetrics(trajectoryData);
 
-               if (segments > ScrewPrimitiveActionState.TRAJECTORY_SIZE_LIMIT - 1)
-               {
-                  segments = ScrewPrimitiveActionState.TRAJECTORY_SIZE_LIMIT - 1; // We have to fit within the message size limit
-               }
-
-               // Generate the trajectory poses
-               for (int i = 0; i < segments; i++)
-               {
-                  Pose3D previousPose = trajectoryPoses.getLast();
-                  Pose3D currentPose = trajectoryPoses.add();
-
-                  workPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), previousPose);
-                  workPose.changeFrame(state.getScrewFrame().getReferenceFrame());
-
-                  workPose.prependRollRotation(rotationPerSegment);
-                  workPose.prependTranslation(translationPerSegment, 0.0, 0.0);
-
-                  workPose.changeFrame(ReferenceFrame.getWorldFrame());
-                  currentPose.set(workPose);
-               }
-
-               numberOfPoints = state.getPreviewTrajectory().getSize();
-
-               syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(definition.getSide()));
-               syncedHandControlPose.changeFrame(state.getScrewFrame().getReferenceFrame());
-               // This is always the radial distance.
-               rotationRadius = EuclidCoreTools.norm(syncedHandControlPose.getY(), syncedHandControlPose.getZ());
-               syncedHandControlPose.changeFrame(ReferenceFrame.getWorldFrame());
-
-               signedTotalRotation = definition.getRotation();
-               signedTotalTranslation = definition.getTranslation();
-               // This is the distance the hand must travel along the screw portion
-               signedRadialDistance = signedTotalRotation * rotationRadius;
-               totalLinearDistanceOfHand = EuclidCoreTools.norm(signedRadialDistance, signedTotalTranslation);
-
-               // Computing the movement duration, which is clamped by the max movement speed
-               durationForRotation = Math.abs(signedTotalRotation) / definition.getMaxAngularVelocity();
-               durationForTranslation = totalLinearDistanceOfHand / definition.getMaxLinearVelocity();
-               movementDuration = Math.max(durationForRotation, durationForTranslation);
-               segmentDuration = movementDuration / (numberOfPoints - 1);
-
-               // The way the screw frame is defined, x is always the axis of rotation and translation.
-               // This means that the tangential velocity is normal to the x axis and the vector yz
-               tangentialVelocity = signedRadialDistance / movementDuration;
-               axialVelocity = signedTotalTranslation / movementDuration;
-               rotationalVelocity = signedTotalRotation / movementDuration;
-
-               movementDuration += 2.0 * segmentDuration;
-
-               state.getPreviewTrajectoryDuration().setValue(movementDuration);
-               state.getPreviewTrajectoryLinearVelocity().setValue(totalLinearDistanceOfHand / movementDuration);
-               state.getPreviewTrajectoryAngularVelocity().setValue(rotationalVelocity);
-
-               if (state.getIsNextForExecution())
-               {
-                  // These calculations are used for both preview and execution
-                  calculateTrajectoryTimesAndVelocities();
-
-                  // Calculate preview for operator
-                  ArmIKSolver armIKSolver = armIKSolvers.get(definition.getSide());
-                  armIKSolver.copySourceToWork(); // Initialize the command, since we're not going to be far.
-
-                  poseTrajectoryGenerator.clear(ReferenceFrame.getWorldFrame());
-                  for (int i = 0; i < numberOfPoints; i++)
-                  {
-                     currentPose.set(state.getPreviewTrajectory().getValueReadOnly(i));
-                     poseTrajectoryGenerator.appendPoseWaypoint(trajectoryTimes.get(i), currentPose, linearVelocities.get(i), angularVelocities.get(i));
-                  }
-
-                  poseTrajectoryGenerator.initialize();
-                  poseTrajectoryGenerator.compute(movementDuration * state.getPreviewRequestedTime().getValue());
-
-                  currentPoseFrame.getTransformToParent().set(poseTrajectoryGenerator.getPose());
-                  currentPoseFrame.getReferenceFrame().update();
-                  linearVelocity.set(poseTrajectoryGenerator.getVelocity());
-                  angularVelocity.set(poseTrajectoryGenerator.getAngularVelocity());
-
-                  armIKSolver.update(syncedRobot.getReferenceFrames().getChestFrame(), currentPoseFrame.getReferenceFrame());
-                  armIKSolver.solve(angularVelocity, linearVelocity);
-
-                  // Send the solution back to the UI so the user knows what's gonna happen with the arm.
-                  state.getPreviewSolutionQuality().setValue(armIKSolver.getQuality());
-                  for (int i = 0; i < armIKSolver.getSolutionOneDoFJoints().length; i++)
-                  {
-                     state.getPreviewJointAngles().setValue(i, armIKSolver.getSolutionOneDoFJoints()[i].getQ());
-                  }
-               }
-            }
-         }
+         if (state.getIsNextForExecution())
+            buildTrajectory(trajectoryData, true);
       }
    }
 
-   private void calculateTrajectoryTimesAndVelocities()
+   private ReferenceFrame resolveInitialHandFrame(BehaviorTreeRootNodeState actionSequence)
+   {
+      if (state.getIsNextForExecution())
+         return syncedRobot.getReferenceFrames().getHandFrame(definition.getSide());
+
+      HandPoseActionState previousHandPose = actionSequence.findNextPreviousLeaf(HandPoseActionState.class, state.getLeafIndex(), definition.getSide());
+      if (previousHandPose != null && previousHandPose.getPalmFrame().isChildOfWorld())
+         return previousHandPose.getPalmFrame().getReferenceFrame();
+
+      return null;
+   }
+
+   private boolean buildPreviewTrajectory(ReferenceFrame initialHandFrame)
+   {
+      RecyclingArrayList<Pose3D> trajectoryPoses = state.getPreviewTrajectory().accessValue();
+      trajectoryPoses.clear();
+      Pose3D firstPose = trajectoryPoses.add();
+      workPose.setToZero(initialHandFrame);
+      workPose.changeFrame(ReferenceFrame.getWorldFrame());
+      firstPose.set(workPose);
+
+      // These contants could be adjusted
+      double rotationPerPoint = Math.toRadians(10);
+      double translationPerPoint = 0.05;
+      int segments = (int) Math.ceil(Math.abs(definition.getRotation()) / rotationPerPoint
+                                   + Math.abs(definition.getTranslation()) / translationPerPoint);
+
+      if (segments <= 0)
+         return false;
+
+      double rotationPerSegment = definition.getRotation() / segments;
+      double translationPerSegment = definition.getTranslation() / segments;
+
+      if (segments > ScrewPrimitiveActionState.TRAJECTORY_SIZE_LIMIT - 1)
+      {
+         segments = ScrewPrimitiveActionState.TRAJECTORY_SIZE_LIMIT - 1; // We have to fit within the message size limit
+      }
+
+      // Generate the trajectory poses
+      for (int i = 0; i < segments; i++)
+      {
+         Pose3D previousPose = trajectoryPoses.getLast();
+         Pose3D currentPose = trajectoryPoses.add();
+
+         workPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), previousPose);
+         workPose.changeFrame(state.getScrewFrame().getReferenceFrame());
+
+         workPose.prependRollRotation(rotationPerSegment);
+         workPose.prependTranslation(translationPerSegment, 0.0, 0.0);
+
+         workPose.changeFrame(ReferenceFrame.getWorldFrame());
+         currentPose.set(workPose);
+      }
+
+      return true;
+   }
+
+   private boolean computeTrajectoryData(ScrewTrajectoryData data)
+   {
+      int previewSize = state.getPreviewTrajectory().getSize();
+      if (previewSize < 2)
+      {
+         state.getLogger().error("Cannot execute screw primitive. Preview trajectory has %d point(s).".formatted(previewSize));
+         return false;
+      }
+
+      data.numberOfPoints = previewSize;
+
+      syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(definition.getSide()));
+      syncedHandControlPose.changeFrame(state.getScrewFrame().getReferenceFrame());
+      data.rotationRadius = EuclidCoreTools.norm(syncedHandControlPose.getY(), syncedHandControlPose.getZ());
+      syncedHandControlPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+      data.signedTotalRotation = definition.getRotation();
+      data.signedTotalTranslation = definition.getTranslation();
+      data.signedRadialDistance = data.signedTotalRotation * data.rotationRadius;
+      data.totalLinearDistanceOfHand = EuclidCoreTools.norm(data.signedRadialDistance, data.signedTotalTranslation);
+
+      double durationForRotation = Math.abs(data.signedTotalRotation) / definition.getMaxAngularVelocity();
+      double durationForTranslation = data.totalLinearDistanceOfHand / definition.getMaxLinearVelocity();
+      double baseMovementDuration = Math.max(durationForRotation, durationForTranslation);
+      if (!Double.isFinite(baseMovementDuration) || baseMovementDuration <= 0.0)
+      {
+         state.getLogger().error("Cannot execute screw primitive. Invalid movement duration: %.3f".formatted(baseMovementDuration));
+         return false;
+      }
+
+      data.segmentDuration = baseMovementDuration / (data.numberOfPoints - 1);
+      if (!Double.isFinite(data.segmentDuration) || data.segmentDuration <= 0.0)
+      {
+         state.getLogger().error("Cannot execute screw primitive. Invalid segment duration: %.6f".formatted(data.segmentDuration));
+         return false;
+      }
+
+      data.tangentialVelocity = data.signedRadialDistance / baseMovementDuration;
+      data.axialVelocity = data.signedTotalTranslation / baseMovementDuration;
+      data.rotationalVelocity = data.signedTotalRotation / baseMovementDuration;
+      data.movementDuration = baseMovementDuration + 2.0 * data.segmentDuration;
+
+      return true;
+   }
+
+   private void updatePreviewMetrics(ScrewTrajectoryData data)
+   {
+      state.getPreviewTrajectoryDuration().setValue(data.movementDuration);
+      state.getPreviewTrajectoryLinearVelocity().setValue(data.totalLinearDistanceOfHand / data.movementDuration);
+      state.getPreviewTrajectoryAngularVelocity().setValue(data.rotationalVelocity);
+   }
+
+   private void computeTrajectoryTimesAndVelocities(ScrewTrajectoryData data)
    {
       ReferenceFrame screwAxisFrame = state.getScrewFrame().getReferenceFrame();
 
@@ -235,8 +238,8 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
       linearVelocities.add().setToZero();
       trajectoryTimes.add(0.0);
 
-      double time = 2.0 * segmentDuration; // Make the first segment twice as long to allow smooth acceleration
-      for (int i = 1; i < numberOfPoints - 1; i++)
+      double time = 2.0 * data.segmentDuration; // Make the first segment twice as long to allow smooth acceleration
+      for (int i = 1; i < data.numberOfPoints - 1; i++)
       {
          Pose3DReadOnly waypointPose = state.getPreviewTrajectory().getValueReadOnly(i);
 
@@ -255,26 +258,102 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
          FrameVector3D linearVelocity = linearVelocities.add();
          linearVelocity.setToZero(screwAxisFrame);
          // Set the tangent velocity in the linear velocity
-         linearVelocity.setAndScale(tangentialVelocity, tangentVector);
+         linearVelocity.setAndScale(data.tangentialVelocity, tangentVector);
          // Set the axial velocity
-         linearVelocity.setX(axialVelocity);
+         linearVelocity.setX(data.axialVelocity);
          linearVelocity.changeFrame(ReferenceFrame.getWorldFrame());
 
          // Set the angular velocity
          FrameVector3D angularVelocity = angularVelocities.add();
          angularVelocity.setToZero(screwAxisFrame);
-         angularVelocity.setX(rotationalVelocity);
+         angularVelocity.setX(data.rotationalVelocity);
          angularVelocity.changeFrame(ReferenceFrame.getWorldFrame());
 
          // Add the time into the array
          trajectoryTimes.add(time);
-         time += segmentDuration;
+         time += data.segmentDuration;
       }
 
       // Set the final velocity as zeros and time as the duration
       angularVelocities.add().setToZero();
       linearVelocities.add().setToZero();
-      trajectoryTimes.add(movementDuration); // Makes the last segment twice as long to allow for smooth deceleration
+      trajectoryTimes.add(data.movementDuration); // Makes the last segment twice as long to allow for smooth deceleration
+   }
+
+   private void buildTrajectory(ScrewTrajectoryData data, boolean forPreview)
+   {
+      computeTrajectoryTimesAndVelocities(data);
+      if (forPreview)
+         updatePreviewForOperator(data);
+   }
+
+   private void updatePreviewForOperator(ScrewTrajectoryData data)
+   {
+      ArmIKSolver armIKSolver = armIKSolvers.get(definition.getSide());
+      armIKSolver.copySourceToWork(); // Initialize the command, since we're not going to be far.
+
+      poseTrajectoryGenerator.clear(ReferenceFrame.getWorldFrame());
+      for (int i = 0; i < data.numberOfPoints; i++)
+      {
+         currentPose.set(state.getPreviewTrajectory().getValueReadOnly(i));
+         poseTrajectoryGenerator.appendPoseWaypoint(trajectoryTimes.get(i), currentPose, linearVelocities.get(i), angularVelocities.get(i));
+      }
+
+      poseTrajectoryGenerator.initialize();
+      poseTrajectoryGenerator.compute(data.movementDuration * state.getPreviewRequestedTime().getValue());
+
+      currentPoseFrame.getTransformToParent().set(poseTrajectoryGenerator.getPose());
+      currentPoseFrame.getReferenceFrame().update();
+      linearVelocity.set(poseTrajectoryGenerator.getVelocity());
+      angularVelocity.set(poseTrajectoryGenerator.getAngularVelocity());
+
+      armIKSolver.update(syncedRobot.getReferenceFrames().getChestFrame(), currentPoseFrame.getReferenceFrame());
+      armIKSolver.solve(angularVelocity, linearVelocity);
+
+      // Send the solution back to the UI so the user knows what's gonna happen with the arm.
+      state.getPreviewSolutionQuality().setValue(armIKSolver.getQuality());
+      for (int i = 0; i < armIKSolver.getSolutionOneDoFJoints().length; i++)
+      {
+         state.getPreviewJointAngles().setValue(i, armIKSolver.getSolutionOneDoFJoints()[i].getQ());
+      }
+   }
+
+   private JointspaceTrajectoryMessage prepareJointspaceTrajectoryMessage()
+   {
+      jointspaceOnlyTrajectoryMessage.setRobotSide(definition.getSide().toByte());
+      jointspaceOnlyTrajectoryMessage.setForceExecution(true);
+      handHybridTrajectoryMessage.setRobotSide(definition.getSide().toByte());
+      handHybridTrajectoryMessage.setForceExecution(true);
+
+      JointspaceTrajectoryMessage jointspaceTrajectoryMessage = handHybridTrajectoryMessage.getJointspaceTrajectoryMessage();
+      jointspaceTrajectoryMessage.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
+      jointspaceTrajectoryMessage.getJointTrajectoryMessages().clear();
+
+      // Start setting up the joint space trajectory
+      for (int jointNumber = 0; jointNumber < numberOfJoints; jointNumber++)
+      {
+         OneDoFJointTrajectoryMessage oneDoFJointTrajectoryMessage = jointspaceTrajectoryMessage.getJointTrajectoryMessages().add();
+         oneDoFJointTrajectoryMessage.getTrajectoryPoints().clear();
+         oneDoFJointTrajectoryMessage.setWeight(definition.getJointspaceWeight());
+      }
+
+      return jointspaceTrajectoryMessage;
+   }
+
+   private SE3TrajectoryMessage prepareTaskspaceTrajectoryMessage()
+   {
+      SE3TrajectoryMessage taskspaceTrajectoryMessage = handHybridTrajectoryMessage.getTaskspaceTrajectoryMessage();
+      taskspaceTrajectoryMessage.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
+      taskspaceTrajectoryMessage.getLinearWeightMatrix().setXWeight(definition.getLinearPositionWeight());
+      taskspaceTrajectoryMessage.getLinearWeightMatrix().setYWeight(definition.getLinearPositionWeight());
+      taskspaceTrajectoryMessage.getLinearWeightMatrix().setZWeight(definition.getLinearPositionWeight());
+      taskspaceTrajectoryMessage.getAngularWeightMatrix().setXWeight(definition.getAngularPositionWeight());
+      taskspaceTrajectoryMessage.getAngularWeightMatrix().setYWeight(definition.getAngularPositionWeight());
+      taskspaceTrajectoryMessage.getAngularWeightMatrix().setZWeight(definition.getAngularPositionWeight());
+      taskspaceTrajectoryMessage.getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(ReferenceFrame.getWorldFrame()));
+      taskspaceTrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(ReferenceFrame.getWorldFrame()));
+      taskspaceTrajectoryMessage.getTaskspaceTrajectoryPoints().clear();
+      return taskspaceTrajectoryMessage;
    }
 
    @Override
@@ -298,41 +377,23 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
       // Compute smooth trajectory and publish command
       if (state.getScrewFrame().isChildOfWorld())
       {
+         if (!computeTrajectoryData(trajectoryData))
+         {
+            state.setFailed(true);
+            return;
+         }
+
+         buildTrajectory(trajectoryData, false);
+
          state.getCommandedTrajectory().accessValue().clear();
 
-         jointspaceOnlyTrajectoryMessage.setRobotSide(definition.getSide().toByte());
-         jointspaceOnlyTrajectoryMessage.setForceExecution(true);
-         handHybridTrajectoryMessage.setRobotSide(definition.getSide().toByte());
-         handHybridTrajectoryMessage.setForceExecution(true);
-
-         JointspaceTrajectoryMessage jointspaceTrajectoryMessage = handHybridTrajectoryMessage.getJointspaceTrajectoryMessage();
-         jointspaceTrajectoryMessage.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
-         jointspaceTrajectoryMessage.getJointTrajectoryMessages().clear();
-
-         SE3TrajectoryMessage taskspaceTrajectoryMessage = handHybridTrajectoryMessage.getTaskspaceTrajectoryMessage();
-         taskspaceTrajectoryMessage.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
-         taskspaceTrajectoryMessage.getLinearWeightMatrix().setXWeight(definition.getLinearPositionWeight());
-         taskspaceTrajectoryMessage.getLinearWeightMatrix().setYWeight(definition.getLinearPositionWeight());
-         taskspaceTrajectoryMessage.getLinearWeightMatrix().setZWeight(definition.getLinearPositionWeight());
-         taskspaceTrajectoryMessage.getAngularWeightMatrix().setXWeight(definition.getAngularPositionWeight());
-         taskspaceTrajectoryMessage.getAngularWeightMatrix().setYWeight(definition.getAngularPositionWeight());
-         taskspaceTrajectoryMessage.getAngularWeightMatrix().setZWeight(definition.getAngularPositionWeight());
-         taskspaceTrajectoryMessage.getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(ReferenceFrame.getWorldFrame()));
-         taskspaceTrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(ReferenceFrame.getWorldFrame()));
-         taskspaceTrajectoryMessage.getTaskspaceTrajectoryPoints().clear();
-
-         // Start setting up the joint space trajectory
-         for (int jointNumber = 0; jointNumber < numberOfJoints; jointNumber++)
-         {
-            OneDoFJointTrajectoryMessage oneDoFJointTrajectoryMessage = jointspaceTrajectoryMessage.getJointTrajectoryMessages().add();
-            oneDoFJointTrajectoryMessage.getTrajectoryPoints().clear();
-            oneDoFJointTrajectoryMessage.setWeight(definition.getJointspaceWeight());
-         }
+         JointspaceTrajectoryMessage jointspaceTrajectoryMessage = prepareJointspaceTrajectoryMessage();
+         SE3TrajectoryMessage taskspaceTrajectoryMessage = prepareTaskspaceTrajectoryMessage();
 
          ArmIKSolver armIKSolver = armIKSolvers.get(definition.getSide());
          armIKSolver.copySourceToWork(); // Initialize the command, since we're not going to be far.
 
-         for (int i = 0; i < numberOfPoints; i++)
+         for (int i = 0; i < trajectoryData.numberOfPoints; i++)
          {
             // For the first point, they are the same -- the initial hand pose. For the last point, they're the same.
             Pose3DReadOnly desiredPose = state.getPreviewTrajectory().getValueReadOnly(i);
@@ -377,7 +438,7 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
          }
 
          // Perform smoothing from the jointspace velocities
-         for (int i = 1; i < numberOfPoints - 1; i++)
+         for (int i = 1; i < trajectoryData.numberOfPoints - 1; i++)
          {
             for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
             {
@@ -393,19 +454,21 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
 
          if (definition.getJointspaceOnly())
          {
-            state.getLogger().info("Commanding %.3f s jointspace only trajectory with %d points".formatted(movementDuration, numberOfPoints));
+            state.getLogger().info("Commanding %.3f s jointspace only trajectory with %d points"
+                                   .formatted(trajectoryData.movementDuration, trajectoryData.numberOfPoints));
             jointspaceOnlyTrajectoryMessage.getJointspaceTrajectory().set(jointspaceTrajectoryMessage);
             ros2ControllerHelper.publishToController(jointspaceOnlyTrajectoryMessage);
          }
          else
          {
-            state.getLogger().info("Commanding %.3f s hybrid trajectory with %d points".formatted(movementDuration, numberOfPoints));
+            state.getLogger().info("Commanding %.3f s hybrid trajectory with %d points"
+                                   .formatted(trajectoryData.movementDuration, trajectoryData.numberOfPoints));
             ros2ControllerHelper.publishToController(handHybridTrajectoryMessage);
          }
 
          trackingCalculator.reset();
 
-         state.setNominalExecutionDuration(movementDuration);
+         state.setNominalExecutionDuration(trajectoryData.movementDuration);
       }
       else
       {
