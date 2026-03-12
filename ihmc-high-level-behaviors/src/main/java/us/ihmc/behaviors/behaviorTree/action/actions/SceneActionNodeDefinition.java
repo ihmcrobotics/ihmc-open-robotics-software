@@ -12,9 +12,9 @@ import us.ihmc.communication.crdt.CRDTBidirectionalEnumField;
 import us.ihmc.communication.crdt.CRDTBidirectionalFloat;
 import us.ihmc.communication.crdt.CRDTBidirectionalInteger;
 import us.ihmc.communication.crdt.CRDTBidirectionalIntegerList;
-import us.ihmc.communication.crdt.CRDTBidirectionalPose3D;
+import us.ihmc.communication.crdt.CRDTBidirectionalRigidBodyTransform;
 import us.ihmc.communication.crdt.CRDTBidirectionalStringList;
-import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.tools.io.JSONTools;
 
 import java.util.ArrayList;
@@ -35,7 +35,7 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
    private final BehaviorTreeSceneObjectDefinition sceneObjectDefinition;
    private final CRDTBidirectionalFloat timeout;
    private final CRDTBidirectionalInteger minimumHistorySize;
-   private final CRDTBidirectionalPose3D nominalObjectPose;
+   private final CRDTBidirectionalRigidBodyTransform nominalObjectPose;
    private final CRDTBidirectionalFloat yoloConfidenceThreshold;
    private final CRDTBidirectionalFloat yoloMaskThreshold;
    private final CRDTBidirectionalInteger segmentationMaskErosionRadius;
@@ -47,7 +47,7 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
    private SceneActionNodeType onDiskSceneActionType;
    private float onDiskTimeout;
    private int onDiskMinimumHistorySize;
-   private final Pose3D onDiskNominalObjectPose = new Pose3D();
+   private final RigidBodyTransform onDiskNominalObjectPose = new RigidBodyTransform();
    private float onDiskYoloConfidenceThreshold;
    private float onDiskYoloMaskThreshold;
    private int onDiskSegmentationMaskErosionRadius;
@@ -64,7 +64,7 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
       sceneObjectDefinition = new BehaviorTreeSceneObjectDefinition(this);
       timeout = new CRDTBidirectionalFloat(this, 5.0f);
       minimumHistorySize = new CRDTBidirectionalInteger(this, 5);
-      nominalObjectPose = new CRDTBidirectionalPose3D(this);
+      nominalObjectPose = new CRDTBidirectionalRigidBodyTransform(this);
       yoloConfidenceThreshold = new CRDTBidirectionalFloat(this, 0.7f);
       yoloMaskThreshold = new CRDTBidirectionalFloat(this, 0.0f);
       segmentationMaskErosionRadius = new CRDTBidirectionalInteger(this, 1);
@@ -284,7 +284,7 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
       this.minimumHistorySize.setValue(minimumHistorySize);
    }
 
-   public CRDTBidirectionalPose3D getNominalObjectPose()
+   public CRDTBidirectionalRigidBodyTransform getNominalObjectPose()
    {
       return nominalObjectPose;
    }

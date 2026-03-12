@@ -1,5 +1,8 @@
 package us.ihmc.rdx.behaviorTree.actions;
 
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImInt;
 import org.yaml.snakeyaml.Yaml;
@@ -9,13 +12,17 @@ import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionNodeState;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectDefinition;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectType;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseObject;
 import us.ihmc.perception.detections.yolo.YOLOv8Tools;
 import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeRootNode;
+import us.ihmc.rdx.behaviorTree.RDXCRDTTools;
 import us.ihmc.rdx.imgui.ImFloatWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImIntegerWrapper;
+import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.widgets.ImGuiSceneActionWidget;
+import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,10 +44,14 @@ public class RDXSceneActionNode extends RDXActionNode<SceneActionNodeState, Scen
    private final String[][] availableYOLOClasses;
    private final ImFloatWrapper timeoutWidget;
    private final ImIntegerWrapper minHistorySizeWidget;
+   private final RDXSelectablePose3DGizmo nominalObjectPoseGizmo;
 
    public RDXSceneActionNode(long id, RDXBehaviorTreeRootNode rootNode)
    {
       super(new SceneActionNodeState(id, rootNode.getState()), rootNode);
+
+      nominalObjectPoseGizmo = new RDXSelectablePose3DGizmo(definition.getNominalObjectPose().getValueUnsafe(), scene.findFrameByName("Walking"));
+      nominalObjectPoseGizmo.create(panel3D);
 
       IsaacROSFoundationPoseObject[] values = IsaacROSFoundationPoseObject.values();
       fpTypeNames = new String[values.length];
@@ -79,6 +90,14 @@ public class RDXSceneActionNode extends RDXActionNode<SceneActionNodeState, Scen
       minHistorySizeWidget = new ImIntegerWrapper(definition::getMinimumHistorySize,
                                                   definition::setMinimumHistorySize,
                                                   imInteger -> ImGui.inputInt(labels.get("Minimum History Size"), imInteger));
+   }
+
+   @Override
+   public void update()
+   {
+      super.update();
+
+      RDXCRDTTools.syncGizmoWithBidirectionalField(nominalObjectPoseGizmo.getPoseGizmo(), definition.getNominalObjectPose(), definition);
    }
 
    @Override
@@ -144,7 +163,37 @@ public class RDXSceneActionNode extends RDXActionNode<SceneActionNodeState, Scen
       ImGui.pushItemWidth(100.0f);
       timeoutWidget.renderImGuiWidget();
       minHistorySizeWidget.renderImGuiWidget();
+      ImGui.checkbox(labels.get("Adjust Nominal Object Pose"), nominalObjectPoseGizmo.getSelected());
       ImGui.popItemWidth();
+   }
+
+   @Override
+   public void deselectGizmos()
+   {
+      nominalObjectPoseGizmo.setSelected(false);
+   }
+
+   @Override
+   public void calculate3DViewPick(ImGui3DViewInput input)
+   {
+      if (getSelected())
+         nominalObjectPoseGizmo.calculate3DViewPick(input);
+   }
+
+   @Override
+   public void process3DViewInput(ImGui3DViewInput input)
+   {
+      if (getSelected())
+         nominalObjectPoseGizmo.process3DViewInput(input);
+   }
+
+   @Override
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+      if (getSelected())
+      {
+         nominalObjectPoseGizmo.getVirtualRenderables(renderables, pool);
+      }
    }
 
    @Override

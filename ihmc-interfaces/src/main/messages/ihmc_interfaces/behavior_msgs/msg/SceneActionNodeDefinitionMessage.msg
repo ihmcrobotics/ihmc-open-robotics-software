@@ -18,7 +18,7 @@ float32 timeout
 uint16 minimum_history_size
 
 # The nominal object pose for behavior previewing
-geometry_msgs/Pose nominal_object_pose
+controller_msgs/RigidBodyTransformMessage nominal_object_pose
 
 # TODO: The following fields are work in progress:
 

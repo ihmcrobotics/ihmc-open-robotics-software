@@ -37,7 +37,7 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
    /**
             * The nominal object pose for behavior previewing
             */
-   public us.ihmc.euclid.geometry.Pose3D nominal_object_pose_;
+   public controller_msgs.msg.dds.RigidBodyTransformMessage nominal_object_pose_;
    /**
             * YOLO confidence threshold
             */
@@ -75,7 +75,7 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
    {
       definition_ = new behavior_msgs.msg.dds.ActionNodeDefinitionMessage();
       scene_object_definition_ = new behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage();
-      nominal_object_pose_ = new us.ihmc.euclid.geometry.Pose3D();
+      nominal_object_pose_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
       enabled_yolo_models_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (10, "type_d");
       ignored_yolo_class_indices_ = new us.ihmc.idl.IDLSequence.Byte (256, "type_9");
 
@@ -99,7 +99,7 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
 
       minimum_history_size_ = other.minimum_history_size_;
 
-      geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.nominal_object_pose_, nominal_object_pose_);
+      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.nominal_object_pose_, nominal_object_pose_);
       yolo_confidence_threshold_ = other.yolo_confidence_threshold_;
 
       yolo_mask_threshold_ = other.yolo_mask_threshold_;
@@ -182,7 +182,7 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
    /**
             * The nominal object pose for behavior previewing
             */
-   public us.ihmc.euclid.geometry.Pose3D getNominalObjectPose()
+   public controller_msgs.msg.dds.RigidBodyTransformMessage getNominalObjectPose()
    {
       return nominal_object_pose_;
    }

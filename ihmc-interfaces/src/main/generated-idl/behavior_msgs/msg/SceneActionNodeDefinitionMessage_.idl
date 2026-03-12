@@ -3,7 +3,7 @@
 
 #include "behavior_msgs/msg/./ActionNodeDefinitionMessage_.idl"
 #include "behavior_msgs/msg/./BehaviorTreeSceneObjectDefinitionMessage_.idl"
-#include "geometry_msgs/msg/./Pose_.idl"
+#include "controller_msgs/msg/./RigidBodyTransformMessage_.idl"
 module behavior_msgs
 {
   module msg
@@ -49,7 +49,7 @@ module behavior_msgs
         /**
          * The nominal object pose for behavior previewing
          */
-        geometry_msgs::msg::dds::Pose nominal_object_pose;
+        controller_msgs::msg::dds::RigidBodyTransformMessage nominal_object_pose;
         /**
          * YOLO confidence threshold
          */
