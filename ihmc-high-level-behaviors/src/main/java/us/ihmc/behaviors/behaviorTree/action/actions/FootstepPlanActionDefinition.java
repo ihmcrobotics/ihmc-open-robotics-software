@@ -11,7 +11,6 @@ import com.fasterxml.jackson.databind.node.TextNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeDefinition;
 import us.ihmc.behaviors.tools.BehaviorStoredPropertySetDefinition;
-import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.crdt.*;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -143,15 +142,15 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       }
       else
       {
-         JSONTools.toJSON(jsonNode, "goalStancePoint", goalStancePoint.getValueReadOnly());
-         JSONTools.toJSON(jsonNode, "goalFocalPoint", goalFocalPoint.getValueReadOnly());
+         JSONTools.toJSON(jsonNode.putObject("goalStancePoint"), goalStancePoint.getValueReadOnly());
+         JSONTools.toJSON(jsonNode.putObject("goalFocalPoint"), goalFocalPoint.getValueReadOnly());
 
          for (RobotSide side : RobotSide.values)
          {
             ObjectNode goalFootNode = jsonNode.putObject(side.getCamelCaseName() + "GoalFootToGoal");
-            goalFootNode.put("x", (float) MathTools.roundToPrecision(goalFootstepToGoalXs.get(side).getValue(), 0.0005));
-            goalFootNode.put("y", (float) MathTools.roundToPrecision(goalFootstepToGoalYs.get(side).getValue(), 0.0005));
-            goalFootNode.put("yawInDegrees", (float) MathTools.roundToPrecision(Math.toDegrees(goalFootstepToGoalYaws.get(side).getValue()), 0.02));
+            goalFootNode.put("x", JSONTools.toJsonMeters(goalFootstepToGoalXs.get(side).getValue()));
+            goalFootNode.put("y", JSONTools.toJsonMeters(goalFootstepToGoalYs.get(side).getValue()));
+            goalFootNode.put("yawInDegrees", JSONTools.toJsonRadians(goalFootstepToGoalYaws.get(side).getValue()));
          }
          jsonNode.put("plannerInitialStanceSide", plannerInitialStanceSide.getValue().name());
          jsonNode.put("planner", switch (plannerType.getValue())
@@ -220,8 +219,10 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
             {
                JSONTools.toEuclid(waypointNode, waypoints.getValueAndModify().add());
             });
-         JSONTools.toEuclid(jsonNode, "goalStancePoint", goalStancePoint.getValueAndModify());
-         JSONTools.toEuclid(jsonNode, "goalFocalPoint", goalFocalPoint.getValueAndModify());
+         if (jsonNode.get("goalStancePoint") instanceof ObjectNode objectNode)
+            JSONTools.toEuclid(objectNode, goalStancePoint.getValueAndModify());
+         if (jsonNode.get("goalFocalPoint") instanceof ObjectNode objectNode)
+            JSONTools.toEuclid(objectNode, goalFocalPoint.getValueAndModify());
 
          for (RobotSide side : RobotSide.values)
          {

@@ -53,7 +53,7 @@ public class ShapeContainsConditionDefinition
       jsonNode.put("frameName", frameName.getValue());
       jsonNode.put("minPoints", minPoints.getValue());
       jsonNode.put("shapeParentFrameName", shapeParentFrameName.getValue());
-      JSONTools.toJSON(jsonNode, "shapeTransformToParent", shapeTransformToParent.getValueReadOnly());
+      JSONTools.toJSON(jsonNode.putObject("shapeTransformToParent"), shapeTransformToParent.getValueReadOnly());
       jsonNode.put("sphereRadius", sphereRadius.getValue());
    }
 
@@ -63,7 +63,8 @@ public class ShapeContainsConditionDefinition
       frameName.setValue(jsonNode.get("frameName").textValue());
       minPoints.setValue(jsonNode.get("minPoints").asInt());
       shapeParentFrameName.setValue(jsonNode.get("shapeParentFrameName").textValue());
-      JSONTools.toEuclid(jsonNode, "shapeTransformToParent", shapeTransformToParent.getValueAndModify());
+      if (jsonNode.get("shapeTransformToParent") instanceof ObjectNode objectNode)
+         JSONTools.toEuclid(objectNode, shapeTransformToParent.getValueAndModify());
       sphereRadius.setValue(jsonNode.get("sphereRadius").asDouble());
    }
 

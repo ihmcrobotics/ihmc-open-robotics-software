@@ -3,6 +3,7 @@
 
 #include "behavior_msgs/msg/./ActionNodeDefinitionMessage_.idl"
 #include "behavior_msgs/msg/./BehaviorTreeSceneObjectDefinitionMessage_.idl"
+#include "geometry_msgs/msg/./Pose_.idl"
 module behavior_msgs
 {
   module msg
@@ -45,6 +46,10 @@ module behavior_msgs
          * Filter for persistent detection history size
          */
         unsigned short minimum_history_size;
+        /**
+         * The nominal object pose for behavior previewing
+         */
+        geometry_msgs::msg::dds::Pose nominal_object_pose;
         /**
          * YOLO confidence threshold
          */

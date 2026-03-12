@@ -17,6 +17,9 @@ float32 timeout
 # Filter for persistent detection history size
 uint16 minimum_history_size
 
+# The nominal object pose for behavior previewing
+geometry_msgs/Pose nominal_object_pose
+
 # TODO: The following fields are work in progress:
 
 # YOLO confidence threshold

@@ -15,7 +15,7 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "15a0d545152464d21af39667d27079b7c62dbc4d93f580859970bc289a742a37";
+   		return "c10be9b57ef74ca9d5ede01bfee083d1d0fc295e8c02bd27130e7ecf668180e0";
    }
    
    @Override
@@ -62,6 +62,8 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
 
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
+      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -106,6 +108,8 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
 
+      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getNominalObjectPose(), current_alignment);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
@@ -148,6 +152,7 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
 
       cdr.write_type_3(data.getMinimumHistorySize());
 
+      geometry_msgs.msg.dds.PosePubSubType.write(data.getNominalObjectPose(), cdr);
       cdr.write_type_5(data.getYoloConfidenceThreshold());
 
       cdr.write_type_5(data.getYoloMaskThreshold());
@@ -182,6 +187,7 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
       	
       data.setMinimumHistorySize(cdr.read_type_3());
       	
+      geometry_msgs.msg.dds.PosePubSubType.read(data.getNominalObjectPose(), cdr);	
       data.setYoloConfidenceThreshold(cdr.read_type_5());
       	
       data.setYoloMaskThreshold(cdr.read_type_5());
@@ -208,6 +214,8 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
 
       ser.write_type_5("timeout", data.getTimeout());
       ser.write_type_3("minimum_history_size", data.getMinimumHistorySize());
+      ser.write_type_a("nominal_object_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getNominalObjectPose());
+
       ser.write_type_5("yolo_confidence_threshold", data.getYoloConfidenceThreshold());
       ser.write_type_5("yolo_mask_threshold", data.getYoloMaskThreshold());
       ser.write_type_3("segmentation_mask_erosion_radius", data.getSegmentationMaskErosionRadius());
@@ -228,6 +236,8 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
 
       data.setTimeout(ser.read_type_5("timeout"));
       data.setMinimumHistorySize(ser.read_type_3("minimum_history_size"));
+      ser.read_type_a("nominal_object_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getNominalObjectPose());
+
       data.setYoloConfidenceThreshold(ser.read_type_5("yolo_confidence_threshold"));
       data.setYoloMaskThreshold(ser.read_type_5("yolo_mask_threshold"));
       data.setSegmentationMaskErosionRadius(ser.read_type_3("segmentation_mask_erosion_radius"));
