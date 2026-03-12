@@ -21,7 +21,7 @@ import java.util.List;
 public class YoPerceptionVisualizer implements SCS2YoGraphicHolder
 {
    private static final int NUMBER_OF_HEIGHT_MAP_POINTS_TO_VISUALIZE = 5000;
-   private static final int NUMBER_OF_PLANAR_REGIONS_TO_VISUALIZE = 10;
+   private static final int NUMBER_OF_PLANAR_REGIONS_TO_VISUALIZE = 2;
 
    private final List<YoFramePoint3D> heights = new ArrayList<>();
    private final List<YoFramePose3D> planarRegionPoses = new ArrayList<>();
@@ -29,15 +29,15 @@ public class YoPerceptionVisualizer implements SCS2YoGraphicHolder
 
    public YoPerceptionVisualizer(YoRegistry registry)
    {
-      for (int i = 0; i < NUMBER_OF_HEIGHT_MAP_POINTS_TO_VISUALIZE; i++)
-      {
-         heights.add(new YoFramePoint3D("height" + i, ReferenceFrame.getWorldFrame(), registry));
-      }
+//      for (int i = 0; i < NUMBER_OF_HEIGHT_MAP_POINTS_TO_VISUALIZE; i++)
+//      {
+//         heights.add(new YoFramePoint3D("height" + i, ReferenceFrame.getWorldFrame(), registry));
+//      }
 
       for (int i = 0; i < NUMBER_OF_PLANAR_REGIONS_TO_VISUALIZE; i++)
       {
          planarRegionPoses.add(new YoFramePose3D("pose" + i, ReferenceFrame.getWorldFrame(), registry));
-         planarRegionPolygons.add(new YoFrameConvexPolygon2D("region" + i, ReferenceFrame.getWorldFrame(), 12, registry));
+         planarRegionPolygons.add(new YoFrameConvexPolygon2D("region" + i, ReferenceFrame.getWorldFrame(), 35, registry));
       }
    }
 
@@ -79,7 +79,7 @@ public class YoPerceptionVisualizer implements SCS2YoGraphicHolder
    public YoGraphicGroupDefinition getSCS2YoGraphics()
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
-      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPointcloud3D("HeightMap", heights, 0.006, ColorDefinitions.DarkBlue()));
+//      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPointcloud3D("HeightMap", heights, 0.006, ColorDefinitions.DarkBlue()));
 
       for (int i = 0; i < NUMBER_OF_PLANAR_REGIONS_TO_VISUALIZE; i++)
       {

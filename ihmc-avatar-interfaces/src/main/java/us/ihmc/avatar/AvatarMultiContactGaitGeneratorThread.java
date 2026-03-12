@@ -54,8 +54,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerThreadInterface
 {
-   private static final boolean VISUALIZE_PERCEPTION_DATA = false;
-   private static final double CAPTURE_POINT_ERROR_THRESHOLD_FOR_HAND_CONTACT = 0.04;
+   private static final boolean VISUALIZE_PERCEPTION_DATA = true;
+   private static final double CAPTURE_POINT_ERROR_THRESHOLD_FOR_HAND_CONTACT = 0.02;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -72,7 +72,8 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
    private final CommandInputManager walkingCommandInputManager;
    private final StatusMessageOutputManager walkingOutputManager;
 
-   private final AvatarBipedalGaitGenerator bipedalGaitGenerator;
+//   private final AvatarBipedalGaitGenerator bipedalGaitGenerator;
+   private final YoBoolean hasReceivedPlanarRegions = new YoBoolean("hasReceivedPlanarRegions", registry);
 
    private final YoBoolean isHandRecoveryContactEnabled = new YoBoolean("isHandRecoveryContactEnabled", registry);
    private final YoBoolean isFalling = new YoBoolean("isFalling", registry);
@@ -152,14 +153,14 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
       humanoidRobotContextData.setControllerRan(false);
       humanoidRobotContextData.setEstimatorRan(false);
 
-      bipedalGaitGenerator = new AvatarBipedalGaitGenerator(commandInputManager,
-                                                            statusOutputManager,
-                                                            robotModel,
-                                                            fullRobotModel,
-                                                            humanoidReferenceFrames,
-                                                            walkingCommandInputManager,
-                                                            walkingOutputManager,
-                                                            registry);
+//      bipedalGaitGenerator = new AvatarBipedalGaitGenerator(commandInputManager,
+//                                                            statusOutputManager,
+//                                                            robotModel,
+//                                                            fullRobotModel,
+//                                                            humanoidReferenceFrames,
+//                                                            walkingCommandInputManager,
+//                                                            walkingOutputManager,
+//                                                            registry);
 
       walkingOutputManager.attachStatusMessageListener(CapturabilityBasedStatus.class, capturabilityBasedStatus::set);
 
@@ -182,19 +183,37 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
 //      numberOfInferenceCallsForTest.set(1);
    }
 
+   private boolean hasPrintedException = false;
+
    @Override
    public void run()
    {
       if (!humanoidRobotContextData.getEstimatorRan())
          return;
 
-//      if (triggerInferenceCall.getValue())
-//      {
-//         for (int i = 0; i < numberOfInferenceCallsForTest.getValue(); i++)
-//         {
-//            planner.triggerDiagnosticInference();
-//         }
-//      }
+      try
+      {
+         runInternal();
+      }
+      catch (Exception e)
+      {
+         if (!hasPrintedException)
+         {
+            LogTools.error(e);
+            hasPrintedException = true;
+         }
+      }
+   }
+
+   private void runInternal()
+   {
+      //      if (triggerInferenceCall.getValue())
+      //      {
+      //         for (int i = 0; i < numberOfInferenceCallsForTest.getValue(); i++)
+      //         {
+      //            planner.triggerDiagnosticInference();
+      //         }
+      //      }
 
       // Update capture point preview trajectory
       RecyclingArrayList<FramePoint2D> capturePointPositionWaypoints = centerOfPressureDataHolder.getCapturePointPositionWaypoints();
@@ -213,7 +232,7 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
       centerOfMassJacobian.reset();
 
       // Update bipedal gait generator
-//      bipedalGaitGenerator.update();
+      //      bipedalGaitGenerator.update();
 
       // Update capturability status
       CapturabilityBasedStatus capturabilityBasedStatus = this.capturabilityBasedStatus.get();
@@ -236,11 +255,12 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
          planner.setPlanarRegions(planarRegionsListCommand);
          if (VISUALIZE_PERCEPTION_DATA)
             perceptionVisualizer.visualizePlanarRegions(planarRegionsListCommand);
+         hasReceivedPlanarRegions.set(true);
       }
       if (commandInputManager.isNewCommandAvailable(TerrainMapCommand.class))
       {
          TerrainMapCommand terrainMapCommand = commandInputManager.pollNewestCommand(TerrainMapCommand.class);
-         bipedalGaitGenerator.setTerrainMapCommand(terrainMapCommand);
+//         bipedalGaitGenerator.setTerrainMapCommand(terrainMapCommand);
          if (VISUALIZE_PERCEPTION_DATA)
             perceptionVisualizer.visualizeHeightMap(terrainMapCommand);
       }

@@ -1,12 +1,20 @@
 package us.ihmc.perception.rapidRegions;
 
 import org.bytedeco.opencv.opencv_core.GpuMat;
+import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
+import perception_msgs.msg.dds.HeightMapMessageForController;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.commons.thread.RepeatingTaskThread;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.communication.controllerAPI.ControllerAPI;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.RawImage;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.sensors.CameraIntrinsics;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.tools.PerceptionMessageTools;
@@ -32,6 +40,7 @@ public class RapidPlanarRegionsExtractionThread extends RepeatingTaskThread
    private RapidPlanarRegionsExtractor extractor;
    private final FramePlanarRegionsList framePlanarRegions = new FramePlanarRegionsList();
    private final ROS2StoredPropertySetGroup ros2StoredPropertySetGroup;
+   private final ROS2Publisher<PlanarRegionsListMessage> controllerPlanarRegionsPublisher;
 
    private RapidRegionsExtractorParameters rapidRegionsExtractorParameters;
    private PolygonizerParameters polygonizerParameters;
@@ -39,7 +48,7 @@ public class RapidPlanarRegionsExtractionThread extends RepeatingTaskThread
 
    private final List<Consumer<FramePlanarRegionsList>> consumers = new ArrayList<>();
 
-   public RapidPlanarRegionsExtractionThread(ROS2Node ros2Node, BlockingQueue<RawImage> rawImageCollection)
+   public RapidPlanarRegionsExtractionThread(String name, ROS2Node ros2Node, BlockingQueue<RawImage> rawImageCollection)
    {
       super(RapidPlanarRegionsExtractionThread.class.getSimpleName());
       setFrequencyLimit(UPDATE_FREQUENCY);
@@ -48,6 +57,8 @@ public class RapidPlanarRegionsExtractionThread extends RepeatingTaskThread
       this.ros2StoredPropertySetGroup = new ROS2StoredPropertySetGroup(ros2Node);
       this.ros2Helper = new ROS2Helper(ros2Node);
       this.sensorFrame = new MutableReferenceFrame("PlanarRegionExtractionSensorFrame", ReferenceFrame.getWorldFrame());
+
+      controllerPlanarRegionsPublisher = ros2Node.createPublisher(ControllerAPI.getTopic(HumanoidControllerAPI.getInputTopic(name), PlanarRegionsListMessage.class));
    }
 
    public void addPlanarRegionsConsumer(Consumer<FramePlanarRegionsList> planarRegionsConsumer)
@@ -82,7 +93,12 @@ public class RapidPlanarRegionsExtractionThread extends RepeatingTaskThread
             consumer.accept(framePlanarRegions.copy());
 
          // Publish the frame planar regions
-         PerceptionMessageTools.publishFramePlanarRegionsList(framePlanarRegions, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, ros2Helper);
+         FramePlanarRegionsListMessage framePlanarRegionsListMessage = PlanarRegionMessageConverter.convertToFramePlanarRegionsListMessage(framePlanarRegions);
+         PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsListInWorld(framePlanarRegionsListMessage);
+         PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList);
+
+         ros2Helper.publish(PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, framePlanarRegionsListMessage);
+         controllerPlanarRegionsPublisher.publish(planarRegionsListMessage);
 
          depthImage.release();
       }
@@ -111,6 +127,7 @@ public class RapidPlanarRegionsExtractionThread extends RepeatingTaskThread
    {
       super.kill();
 
+      controllerPlanarRegionsPublisher.remove();
       if (extractor != null)
       {
          extractor.destroy();

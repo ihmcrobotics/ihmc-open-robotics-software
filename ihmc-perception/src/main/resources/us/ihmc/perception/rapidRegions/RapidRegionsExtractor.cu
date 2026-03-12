@@ -90,7 +90,7 @@ __device__ bool isConnected(float3 pointA, float3 normalA, float3 pointB, float3
    bool isCloseOrthogonal = perpDist < params[MERGE_ORTHOGONAL_THRESHOLD]; // both points lie near the plane defined by the neighbor
    bool isClosePerspective = distanceAtoB < distThreshold * params[MERGE_DISTANCE_THRESHOLD];  // ensures the separation is geometrically plausible under perspective
    bool isCloseAngular = normalDotProduct > params[MERGE_ANGULAR_THRESHOLD]; // both points have similar normals
-   bool isNotTooCloseToCamera = distanceToNearPoint > 0.5f; // nearest point is not too close to the camera
+   bool isNotTooCloseToCamera = distanceToNearPoint > 0.25f; // nearest point is not too close to the camera
 
    // TODO remove or increase this threshold before merging
    bool isNotTooFarFromCamera = distanceToFarPoint < 1.6f; // nearest point is not too far away (do not consider planar regions very far away)
