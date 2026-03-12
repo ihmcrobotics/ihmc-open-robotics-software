@@ -219,14 +219,14 @@ public class RDXHardwareControlStateManager
    {
       HighLevelStateMessage highLevelStateMessage = new HighLevelStateMessage();
       highLevelStateMessage.setHighLevelControllerName(HighLevelControllerName.RL_TRANSITION_STATE.toByte());
-      communicationHelper.publishToController(highLevelStateMessage);
+      controllerHelper.publishToController(highLevelStateMessage);
    }
 
    public void sendExitRLRequest()
    {
       HighLevelStateMessage highLevelStateMessage = new HighLevelStateMessage();
       highLevelStateMessage.setHighLevelControllerName(HighLevelControllerName.EXIT_RL.toByte());
-      communicationHelper.publishToController(highLevelStateMessage);
+      controllerHelper.publishToController(highLevelStateMessage);
    }
 
    public void sendStandPrepRequest()
