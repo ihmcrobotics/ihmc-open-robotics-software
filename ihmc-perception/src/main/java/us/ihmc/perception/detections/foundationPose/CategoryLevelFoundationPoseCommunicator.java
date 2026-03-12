@@ -50,7 +50,7 @@ public class CategoryLevelFoundationPoseCommunicator implements AutoCloseable
    private final ROS2Subscription<Detection3DArray> poseEstimationResultSubscription;
    private final ROS2Subscription<Detection3DArray> trackingResultSubscription;
 
-   private final SyncedIsaacROSFoundationPoseParameters parameters;
+   private final SyncedCategoryLevelFoundationPoseParameters parameters;
    private final ROS2MutableFrame sensorFrame;
 
    private final CategoryLevelFoundationPoseTarget target;
@@ -81,10 +81,11 @@ public class CategoryLevelFoundationPoseCommunicator implements AutoCloseable
       poseEstimationResultSubscription = ros2Node.createSubscription2(topics.poseEstimationOutput(), this::updateLatestResult);
       trackingResultSubscription = ros2Node.createSubscription2(topics.trackingOutput(), this::updateLatestResult);
 
-      parameters = new SyncedIsaacROSFoundationPoseParameters(ros2Node,
-                                                              crdtInfo,
-                                                              "FoundationPose " + target.category() + "/" + target.instance() + " Parameters",
-                                                              topics.ihmcParameters());
+      CategoryLevelFoundationPoseObject object =
+            CategoryLevelFoundationPoseObject.fromCategoryAndInstance(target.category(), target.instance());
+
+      parameters = new SyncedCategoryLevelFoundationPoseParameters(ros2Node, crdtInfo, object);
+
       parameters.getEnabled().setValue(false);
 
       sensorFrame = new ROS2MutableFrame(target.instance() + "_ImageFrame", ReferenceFrame.getWorldFrame());
@@ -130,6 +131,8 @@ public class CategoryLevelFoundationPoseCommunicator implements AutoCloseable
       latestResult = new CategoryLevelFoundationPoseInstantDetection(target,
                                                                      new Box3D(poseInWorld, result.getBbox().getSize()),
                                                                      Instant.now());
+
+      LogTools.info("Received FoundationPose result for {}/{}", target.category(), target.instance());
 
       Box3DMessage resultRelayMessage = new Box3DMessage();
       resultRelayMessage.getPose().set(poseInWorld);
@@ -178,7 +181,28 @@ public class CategoryLevelFoundationPoseCommunicator implements AutoCloseable
       }
 
       if (!wasEnabled)
+      {
+         LogTools.info("Initial reset for {}/{}", target.category(), target.instance());
          resetTracking();
+      }
+
+      if (newTargetPoint.poll())
+         targetPoint.set(newTargetPoint.read());
+      else if (latestResult != null)
+         targetPoint.set(latestResult.getPose().getPosition());
+      else
+         targetPoint.set(sensorFrame.getTransformToRoot().getTranslation());
+
+      double resetDistance = parameters.getResetDistance().getValue();
+
+      if (parameters.getAutoResetEnabled().getValue()
+          && latestResult != null
+          && yoloDetection.getPose().getPosition().distanceSquared(latestResult.getPose().getPosition()) > resetDistance * resetDistance)
+      {
+         LogTools.info("Auto reset triggered for {}/{}: YOLO detection too far from latest FP result. resetDistance={}",
+                       target.category(), target.instance(), resetDistance);
+         resetTracking();
+      }
 
       updatePoseEstimation(yoloDetection.getColorImage(), yoloDetection.getDepthImage(), yoloDetection.getObjectMask());
       wasEnabled = true;
@@ -225,6 +249,7 @@ public class CategoryLevelFoundationPoseCommunicator implements AutoCloseable
 
    public void resetTracking()
    {
+      LogTools.info("Publishing reset for {}/{} on {}", target.category(), target.instance(), topics.reset());
       resetRequestPublisher.publish(new Empty());
    }
 
@@ -263,7 +288,7 @@ public class CategoryLevelFoundationPoseCommunicator implements AutoCloseable
       newTargetPoint.set(targetPoint);
    }
 
-   public SyncedIsaacROSFoundationPoseParameters getParameters()
+   public SyncedCategoryLevelFoundationPoseParameters getParameters()
    {
       return parameters;
    }

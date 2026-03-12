@@ -38,6 +38,17 @@ public enum CategoryLevelFoundationPoseObject
       this.topics = CategoryLevelFoundationPoseAPI.topics(category, instance);
    }
 
+   public static CategoryLevelFoundationPoseObject fromCategoryAndInstance(String category, String instance)
+   {
+      for (CategoryLevelFoundationPoseObject object : VALUES)
+      {
+         if (object.category.equals(category) && object.instance.equals(instance))
+            return object;
+      }
+
+      throw new IllegalArgumentException("No CategoryLevelFoundationPoseObject for " + category + "/" + instance);
+   }
+
    public String key()
    {
       return category + "/" + instance;

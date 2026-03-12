@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import ihmc_common_msgs.msg.dds.Box3DMessage;
 import imgui.ImGui;
+import imgui.ImGuiStyle;
 import imgui.flag.ImGuiTableColumnFlags;
 import imgui.flag.ImGuiTableFlags;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
@@ -22,40 +23,78 @@ import us.ihmc.ros2.ROS2Subscription;
 import us.ihmc.ros2.ROS2Topic;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
 public class RDXCategoryLevelFoundationPoseVisualizer extends RDXROS2MultiTopicVisualizer
 {
-   private static final int TABLE_COLUMN_COUNT = 4;
+   private static final int TABLE_COLUMN_COUNT = 5;
 
    private final ROS2Node ros2Node;
    private final List<ROS2Topic<?>> resultTopics;
 
-   private final Map<CategoryLevelFoundationPoseObject, Boolean> visibleMap;
+   private final Map<CategoryLevelFoundationPoseObject, RDXCategoryLevelFoundationPoseSettings> settingsMap;
    private final Map<CategoryLevelFoundationPoseObject, CategoryLevelFoundationPoseResultVisualizer> resultVisualizers;
+   private final Map<String, List<CategoryLevelFoundationPoseObject>> objectsByCategory;
+   private final Set<String> selectedCategories;
 
    public RDXCategoryLevelFoundationPoseVisualizer(String title,
                                                    ROS2Node ros2Node,
                                                    ROS2PeerClockOffsetEstimator ros2ClockOffsetEstimator)
    {
+      this(title, ros2Node, ros2ClockOffsetEstimator, Collections.emptySet());
+   }
+
+   public RDXCategoryLevelFoundationPoseVisualizer(String title,
+                                                   ROS2Node ros2Node,
+                                                   ROS2PeerClockOffsetEstimator ros2ClockOffsetEstimator,
+                                                   Set<String> selectedCategories)
+   {
       super(title);
 
       this.ros2Node = ros2Node;
 
-      resultTopics = new ArrayList<>(CategoryLevelFoundationPoseObject.VALUES.length);
-      visibleMap = new LinkedHashMap<>();
+      if (selectedCategories == null)
+         this.selectedCategories = Collections.emptySet();
+      else
+      {
+         this.selectedCategories = new LinkedHashSet<>();
+         for (String category : selectedCategories)
+         {
+            if (category != null && !category.isBlank())
+               this.selectedCategories.add(category.trim().toLowerCase(Locale.ROOT));
+         }
+      }
+
+      resultTopics = new ArrayList<>();
+      settingsMap = new LinkedHashMap<>();
       resultVisualizers = new LinkedHashMap<>();
+      objectsByCategory = new LinkedHashMap<>();
 
       for (CategoryLevelFoundationPoseObject object : CategoryLevelFoundationPoseObject.VALUES)
       {
+         if (!shouldIncludeCategory(object.category))
+            continue;
+
          resultTopics.add(object.topics.ihmcResult());
-         visibleMap.put(object, true);
+         settingsMap.put(object, new RDXCategoryLevelFoundationPoseSettings(ros2Node, ros2ClockOffsetEstimator, object));
+         objectsByCategory.computeIfAbsent(object.category, key -> new ArrayList<>()).add(object);
       }
 
       setSceneLevels(RDXSceneLevel.VIRTUAL);
+   }
+
+   private boolean shouldIncludeCategory(String category)
+   {
+      if (selectedCategories.isEmpty())
+         return true;
+
+      return selectedCategories.contains(category.toLowerCase(Locale.ROOT));
    }
 
    @Override
@@ -63,7 +102,7 @@ public class RDXCategoryLevelFoundationPoseVisualizer extends RDXROS2MultiTopicV
    {
       super.create();
 
-      for (CategoryLevelFoundationPoseObject object : CategoryLevelFoundationPoseObject.VALUES)
+      for (CategoryLevelFoundationPoseObject object : settingsMap.keySet())
       {
          resultVisualizers.put(object,
                                new CategoryLevelFoundationPoseResultVisualizer(ros2Node,
@@ -83,6 +122,9 @@ public class RDXCategoryLevelFoundationPoseVisualizer extends RDXROS2MultiTopicV
    {
       super.update();
 
+      for (RDXCategoryLevelFoundationPoseSettings settings : settingsMap.values())
+         settings.update();
+
       for (CategoryLevelFoundationPoseResultVisualizer visualizer : resultVisualizers.values())
          visualizer.update();
    }
@@ -90,36 +132,47 @@ public class RDXCategoryLevelFoundationPoseVisualizer extends RDXROS2MultiTopicV
    @Override
    public void renderImGuiWidgets()
    {
-      int tableFlags = ImGuiTableFlags.BordersV | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.RowBg;
+      final ImGuiStyle style = new ImGuiStyle();
+      int tableFlags = ImGuiTableFlags.BordersV
+                       | ImGuiTableFlags.BordersOuterH
+                       | ImGuiTableFlags.NoKeepColumnsVisible
+                       | ImGuiTableFlags.RowBg;
 
-      if (ImGui.beginTable(labels.getHidden("CategoryLevelFoundationPoseTable"), TABLE_COLUMN_COUNT, tableFlags))
+      float resetButtonWidth = ImGui.calcTextSize("Reset").x + (2.0f * style.getItemInnerSpacingX()) + 1.0f;
+      float distanceWidgetWidth = Math.max(110.0f, resetButtonWidth);
+
+      for (Map.Entry<String, List<CategoryLevelFoundationPoseObject>> entry : objectsByCategory.entrySet())
       {
-         ImGui.tableSetupColumn(labels.get("Show"), ImGuiTableColumnFlags.WidthFixed);
-         ImGui.tableSetupColumn(labels.get("Name"), ImGuiTableColumnFlags.WidthStretch);
-         ImGui.tableSetupColumn(labels.get("Category"), ImGuiTableColumnFlags.WidthStretch);
-         ImGui.tableSetupColumn(labels.get("Instance"), ImGuiTableColumnFlags.WidthStretch);
-         ImGui.tableHeadersRow();
+         String category = entry.getKey();
+         List<CategoryLevelFoundationPoseObject> categoryObjects = entry.getValue();
 
-         for (CategoryLevelFoundationPoseObject object : CategoryLevelFoundationPoseObject.VALUES)
+         if (ImGui.treeNode(labels.get(category)))
          {
-            ImGui.tableNextRow();
+            String tableName = "CategoryLevelFoundationPoseTable_" + category;
 
-            ImGui.tableSetColumnIndex(0);
-            boolean visible = visibleMap.get(object);
-            if (ImGui.checkbox(labels.get("show_" + object.name()), visible))
-               visibleMap.put(object, !visible);
+            if (ImGui.beginTable(labels.getHidden(tableName), TABLE_COLUMN_COUNT, tableFlags))
+            {
+               ImGui.tableSetupColumn(labels.get("Enable"), ImGuiTableColumnFlags.WidthFixed | ImGuiTableColumnFlags.NoHeaderWidth);
+               ImGui.tableSetupColumn(labels.get("Instance"), ImGuiTableColumnFlags.WidthStretch);
+               ImGui.tableSetupColumn(labels.get("Reset"), ImGuiTableColumnFlags.WidthFixed, resetButtonWidth);
+               ImGui.tableSetupColumn(labels.get("Enable Auto Reset"), ImGuiTableColumnFlags.WidthFixed | ImGuiTableColumnFlags.NoHeaderWidth);
+               ImGui.tableSetupColumn(labels.get("Auto Reset Distance"), ImGuiTableColumnFlags.WidthFixed, distanceWidgetWidth);
 
-            ImGui.tableSetColumnIndex(1);
-            ImGui.text(object.titleCaseName);
+               ImGui.tableHeadersRow();
+               ImGui.setItemAllowOverlap();
 
-            ImGui.tableSetColumnIndex(2);
-            ImGui.text(object.category);
+               for (CategoryLevelFoundationPoseObject object : categoryObjects)
+               {
+                  RDXCategoryLevelFoundationPoseSettings settings = settingsMap.get(object);
+                  if (settings != null)
+                     settings.renderAsTableRow();
+               }
 
-            ImGui.tableSetColumnIndex(3);
-            ImGui.text(object.instance);
+               ImGui.endTable();
+            }
+
+            ImGui.treePop();
          }
-
-         ImGui.endTable();
       }
    }
 
@@ -129,9 +182,10 @@ public class RDXCategoryLevelFoundationPoseVisualizer extends RDXROS2MultiTopicV
       if (!sceneLevelCheck(sceneLevels))
          return;
 
-      for (CategoryLevelFoundationPoseObject object : CategoryLevelFoundationPoseObject.VALUES)
+      for (CategoryLevelFoundationPoseObject object : settingsMap.keySet())
       {
-         if (Boolean.TRUE.equals(visibleMap.get(object)))
+         RDXCategoryLevelFoundationPoseSettings settings = settingsMap.get(object);
+         if (settings != null && settings.getParameters().getEnabled().getValue())
          {
             CategoryLevelFoundationPoseResultVisualizer visualizer = resultVisualizers.get(object);
             if (visualizer != null)
@@ -143,6 +197,9 @@ public class RDXCategoryLevelFoundationPoseVisualizer extends RDXROS2MultiTopicV
    @Override
    public void destroy()
    {
+      for (RDXCategoryLevelFoundationPoseSettings settings : settingsMap.values())
+         settings.destroy();
+
       for (CategoryLevelFoundationPoseResultVisualizer visualizer : resultVisualizers.values())
          visualizer.dispose();
    }
