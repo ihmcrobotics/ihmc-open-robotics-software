@@ -27,7 +27,7 @@ public abstract class BehaviorTreeSceneState
 {
    protected final CRDTInfo crdtInfo;
    protected final LongSupplier idSupplier;
-   protected final ROS2SyncedRobotModel syncedRobot;
+   protected ROS2SyncedRobotModel syncedRobot;
 
    private final List<Pair<String, ReferenceFrame>> robotFrames = new ArrayList<>();
    private final Map<String, ReferenceFrame> robotFrameMap = new HashMap<>();
@@ -44,6 +44,30 @@ public abstract class BehaviorTreeSceneState
       objectsModifiable = new LatestTimestampModifiable(crdtInfo);
       objectsModifiable.setModifierName("Scene objects");
 
+      rebuildRobotFrames(syncedRobot);
+   }
+
+   private void add(String name, ReferenceFrame referenceFrame)
+   {
+      robotFrames.add(Pair.of(name, referenceFrame));
+      robotFrameMap.put(name, referenceFrame);
+   }
+
+   public void setSyncedRobot(ROS2SyncedRobotModel syncedRobot)
+   {
+      if (this.syncedRobot == syncedRobot)
+         return;
+
+      this.syncedRobot = syncedRobot;
+
+      rebuildRobotFrames(syncedRobot);
+   }
+
+   private void rebuildRobotFrames(ROS2SyncedRobotModel syncedRobot)
+   {
+      robotFrames.clear();
+      robotFrameMap.clear();
+
       add("Chest", syncedRobot.getReferenceFrames().getChestFrame());
       add("Pelvis", syncedRobot.getReferenceFrames().getPelvisFrame());
       add("Walking", syncedRobot.getReferenceFrames().getMidFeetUnderPelvisFrame());
@@ -53,12 +77,6 @@ public abstract class BehaviorTreeSceneState
             add(side.getPascalCaseName() + " Hand", syncedRobot.getReferenceFrames().getHandFrame(side));
          add(side.getPascalCaseName() + " Foot Sole", syncedRobot.getReferenceFrames().getSoleFrame(side));
       }
-   }
-
-   private void add(String name, ReferenceFrame referenceFrame)
-   {
-      robotFrames.add(Pair.of(name, referenceFrame));
-      robotFrameMap.put(name, referenceFrame);
    }
 
    public boolean containsFrame(String referenceFrameName)

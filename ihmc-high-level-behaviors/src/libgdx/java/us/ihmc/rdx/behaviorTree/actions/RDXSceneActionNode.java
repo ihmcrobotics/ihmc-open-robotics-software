@@ -97,6 +97,8 @@ public class RDXSceneActionNode extends RDXActionNode<SceneActionNodeState, Scen
    {
       super.update();
 
+      nominalObjectPoseGizmo.getPoseGizmo().setParentFrame(scene.findFrameByName("Walking"));
+
       RDXCRDTTools.syncGizmoWithBidirectionalField(nominalObjectPoseGizmo.getPoseGizmo(), definition.getNominalObjectPose(), definition);
    }
 

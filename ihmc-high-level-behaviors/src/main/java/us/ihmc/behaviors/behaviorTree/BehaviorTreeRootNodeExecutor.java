@@ -107,8 +107,6 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
    {
       super.update();
 
-      scene.update();
-
       if (state.getPreviewModeEnabled())
       {
          if (previewSimulation == null)
@@ -136,6 +134,9 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       }
       else
          previewNeedsReset = true;
+
+      scene.setSyncedRobot(state.getPreviewModeEnabled() ? previewSyncedRobot : realSyncedRobot);
+      scene.update();
 
       BehaviorTreeTools.runForSubtreeNodes(this, node ->
       {
