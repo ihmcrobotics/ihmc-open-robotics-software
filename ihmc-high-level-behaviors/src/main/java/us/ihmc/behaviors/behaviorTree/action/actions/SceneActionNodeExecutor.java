@@ -11,7 +11,6 @@ import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectState;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectType;
 import us.ihmc.commons.thread.Throttler;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -113,14 +112,37 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
          {
             state.getLogger().info("Preview mode enabled. Adding nominal object pose for: {}", definition.getSceneObjectDefinition().getName());
 
-            BehaviorTreeSceneObjectDefinitionMessage message = new BehaviorTreeSceneObjectDefinitionMessage();
-            definition.getSceneObjectDefinition().toMessage(message);
-            BehaviorTreeSceneObjectState targetSceneObject = scene.createObject(message);
-            RigidBodyTransform transformToWorld = new RigidBodyTransform();
-            transformToWorld.set(scene.findFrameByName("Walking").getTransformToRoot());
-            transformToWorld.multiply(definition.getNominalObjectPose().getValueReadOnly());
-            targetSceneObject.setTransformToWorld(transformToWorld);
-            scene.addObject(targetSceneObject);
+            BehaviorTreeSceneObjectState existingObject = null;
+            for (BehaviorTreeSceneObjectState object : scene.getObjects())
+               if (object.getObjectType() == definition.getSceneObjectDefinition().getObjectType())
+               {
+                  boolean match = definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.YOLO_ONLY
+                                  && object.getYoloClassName().equals(definition.getSceneObjectDefinition().getYoloClassName());
+                  match |= definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.FOUNDATION_POSE
+                           && object.getFoundationPoseObjectType() == definition.getSceneObjectDefinition().getFoundationPoseObjectType();
+                  match |= definition.getSceneObjectDefinition().getObjectType() != BehaviorTreeSceneObjectType.YOLO_ONLY
+                           && definition.getSceneObjectDefinition().getObjectType() != BehaviorTreeSceneObjectType.FOUNDATION_POSE;
+                  if (match)
+                  {
+                     existingObject = object;
+                     break;
+                  }
+               }
+
+            RigidBodyTransform nominalWorldPose = new RigidBodyTransform();
+            nominalWorldPose.set(scene.findFrameByName("Walking").getTransformToRoot());
+            nominalWorldPose.multiply(definition.getNominalObjectPose().getValueReadOnly());
+
+            if (existingObject != null)
+               existingObject.setTransformToWorld(nominalWorldPose);
+            else
+            {
+               BehaviorTreeSceneObjectDefinitionMessage message = new BehaviorTreeSceneObjectDefinitionMessage();
+               definition.getSceneObjectDefinition().toMessage(message);
+               BehaviorTreeSceneObjectState nominalObject = scene.createObject(message);
+               nominalObject.setTransformToWorld(nominalWorldPose);
+               scene.addObject(nominalObject);
+            }
             state.setIsExecuting(false);
             return;
          }
