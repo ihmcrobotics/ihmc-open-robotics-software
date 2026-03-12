@@ -71,6 +71,7 @@ public class OrderedLogicalSequence
       started = false;
       finished = false;
       currentLogicalElement = 0;
+      lastLogicalElementRun = -1;
    }
 
    /**
@@ -88,11 +89,12 @@ public class OrderedLogicalSequence
       {
          logicalElements.get(currentLogicalElement).run();
          lastLogicalElementRun = currentLogicalElement;
-
-         // If the completion condition has been met for this element, increment to the next element
-         if (completionConditions.get(currentLogicalElement) == null || completionConditions.get(currentLogicalElement).getValue())
-            currentLogicalElement++;
       }
+
+      // If the completion condition has been met for this element, increment to the next element
+      if ((lastLogicalElementRun == currentLogicalElement) &&
+          (completionConditions.get(currentLogicalElement) == null || completionConditions.get(currentLogicalElement).getValue()))
+         currentLogicalElement++;
 
       // If we have incremented to the end of the list of elements, we are finished
       if (currentLogicalElement >= logicalElements.size())

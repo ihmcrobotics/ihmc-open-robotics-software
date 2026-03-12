@@ -9,11 +9,14 @@ import us.ihmc.behaviors.behaviorTree.action.actions.ChestOrientationActionDefin
 import us.ihmc.behaviors.behaviorTree.action.actions.ChestOrientationActionState;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeRootNode;
 import us.ihmc.rdx.behaviorTree.RDXCRDTTools;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
+import us.ihmc.rdx.imgui.ImGuiLabelledWidgetAligner;
 import us.ihmc.rdx.imgui.ImGuiReferenceFrameLibraryCombo;
+import us.ihmc.rdx.imgui.ImGuiSliderDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -22,8 +25,10 @@ import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.affordances.RDXInteractableHighlightModel;
 import us.ihmc.rdx.ui.affordances.RDXInteractableTools;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
+import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.interaction.MouseCollidable;
+import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.scs2.simulation.collision.Collidable;
 
@@ -34,11 +39,16 @@ public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationAct
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBooleanWrapper holdPoseInWorldLaterWrapper;
+   private final ImBooleanWrapper jointspaceOnlyWrapper;
    private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
    private final ImDoubleWrapper yawWidget;
    private final ImDoubleWrapper pitchWidget;
    private final ImDoubleWrapper rollWidget;
    private final ImDoubleWrapper trajectoryDurationWidget;
+   private final ImGuiSliderDoubleWrapper[] jointAngleWidgets;
+   private final SpineJointName[] spineJointNames;
+   private final double[] jointUpperLimits;
+   private final double[] jointLowerLimits;
    /** Gizmo is control frame */
    private final RDXSelectablePose3DGizmo poseGizmo;
    private final MutableReferenceFrame graphicFrame = new MutableReferenceFrame();
@@ -56,10 +66,19 @@ public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationAct
       poseGizmo = new RDXSelectablePose3DGizmo();
       poseGizmo.create(panel3D);
 
-      // TODO: Can all this be condensed?
       holdPoseInWorldLaterWrapper = new ImBooleanWrapper(definition::getHoldPoseInWorldLater,
                                                          definition::setHoldPoseInWorldLater,
                                                          imBoolean -> ImGui.checkbox(labels.get("Hold pose in world later"), imBoolean));
+      jointspaceOnlyWrapper = new ImBooleanWrapper(definition::getJointspaceOnly,
+                                                   definition::setJointspaceOnly,
+                                                   imBoolean ->
+                                                   {
+                                                      if (ImGui.radioButton(labels.get("Taskspace"), !imBoolean.get()))
+                                                         imBoolean.set(false);
+                                                      ImGui.sameLine();
+                                                      if (ImGui.radioButton(labels.get("Jointspace Only"), imBoolean.get()))
+                                                         imBoolean.set(true);
+                                                   });
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
                                                                 scene::getAllFrameNames,
                                                                 definition::getParentFrameName,
@@ -73,6 +92,27 @@ public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationAct
       trajectoryDurationWidget = new ImDoubleWrapper(definition::getTrajectoryDuration,
                                                      definition::setTrajectoryDuration,
                                                      imDouble -> ImGuiTools.volatileInputDouble(labels.get("Trajectory duration"), imDouble));
+
+      spineJointNames = syncedRobot.getRobotModel().getJointMap().getSpineJointNames();
+      int jointCount = Math.min(spineJointNames.length, definition.getJointAngles().getLength());
+      jointUpperLimits = new double[jointCount];
+      jointLowerLimits = new double[jointCount];
+      jointAngleWidgets = new ImGuiSliderDoubleWrapper[jointCount];
+      ImGuiLabelledWidgetAligner jointWidgetAligner = new ImGuiLabelledWidgetAligner();
+      for (int i = 0; i < jointCount; i++)
+      {
+         OneDoFJointBasics spineJoint = syncedRobot.getFullRobotModel().getSpineJoint(spineJointNames[i]);
+         jointUpperLimits[i] = spineJoint.getJointLimitUpper();
+         jointLowerLimits[i] = spineJoint.getJointLimitLower();
+         int jointIndex = i;
+         jointAngleWidgets[i] = new ImGuiSliderDoubleWrapper(spineJointNames[i].toString(),
+                                                             "%.0f" + EuclidCoreMissingTools.DEGREE_SYMBOL,
+                                                             Math.toDegrees(jointLowerLimits[i]),
+                                                             Math.toDegrees(jointUpperLimits[i]),
+                                                             () -> Math.toDegrees(definition.getJointAngles().getValueReadOnly(jointIndex)),
+                                                             jointAngle -> definition.getJointAngles().setValue(jointIndex, Math.toRadians(jointAngle)));
+         jointAngleWidgets[i].addWidgetAligner(jointWidgetAligner);
+      }
 
       String chestBodyName = syncedRobot.getFullRobotModel().getChest().getName();
       String modelFileName = RDXInteractableTools.getModelFileName(robotModel.getRobotDefinition().getRigidBodyDefinition(chestBodyName));
@@ -128,16 +168,28 @@ public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationAct
    protected void renderImGuiWidgetsInternal()
    {
       ImGui.checkbox(labels.get("Adjust Goal Pose"), poseGizmo.getSelected());
-      holdPoseInWorldLaterWrapper.renderImGuiWidget();
+      jointspaceOnlyWrapper.renderImGuiWidget();
       parentFrameComboBox.render();
-      ImGui.pushItemWidth(80.0f);
-      yawWidget.renderImGuiWidget();
-      ImGui.sameLine();
-      pitchWidget.renderImGuiWidget();
-      ImGui.sameLine();
-      rollWidget.renderImGuiWidget();
+      if (!definition.getJointspaceOnly())
+         holdPoseInWorldLaterWrapper.renderImGuiWidget();
+      if (definition.getJointspaceOnly())
+      {
+         for (ImGuiSliderDoubleWrapper jointAngleWidget : jointAngleWidgets)
+         {
+            jointAngleWidget.renderImGuiWidget();
+         }
+      }
+      else
+      {
+         ImGui.pushItemWidth(80.0f);
+         yawWidget.renderImGuiWidget();
+         ImGui.sameLine();
+         pitchWidget.renderImGuiWidget();
+         ImGui.sameLine();
+         rollWidget.renderImGuiWidget();
+         ImGui.popItemWidth();
+      }
       trajectoryDurationWidget.renderImGuiWidget();
-      ImGui.popItemWidth();
    }
 
    public void render3DPanelImGuiOverlays()
