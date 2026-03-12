@@ -24,7 +24,7 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
    private final ROS2Topic<KinematicsToolboxOutputStatus> kstOutputTopic;
    private ROS2LogRecord ros2LogRecord = null;
    private final KinematicsToolboxOutputStatus status = new KinematicsToolboxOutputStatus();
-   private final RigidBodyTransform initialPelvisPose = new RigidBodyTransform();
+   private final RigidBodyTransform initialWalkingPose = new RigidBodyTransform();
    private final RigidBodyTransform relativePelvisPose = new RigidBodyTransform();
 
    public DoorTraversalExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
@@ -45,7 +45,8 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
             status.setSequenceId(rcd.getSequenceId());
 
             relativePelvisPose.set(rcd.getRootOrientation(), rcd.getRootPosition());
-            initialPelvisPose.inverseTransform(relativePelvisPose);
+            initialWalkingPose.inverseTransform(relativePelvisPose);
+
             status.getDesiredRootPosition().set(relativePelvisPose.getTranslation());
             status.getDesiredRootOrientation().set(relativePelvisPose.getRotation());
             status.getDesiredRootLinearVelocity().set(rcd.getPelvisLinearVelocity());
@@ -79,7 +80,7 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
 
       if (executing && ros2LogRecord == null)
       {
-         initialPelvisPose.set(syncedRobot.getReferenceFrames().getPelvisFrame().getTransformToRoot());
+         initialWalkingPose.set(syncedRobot.getReferenceFrames().getMidFeetUnderPelvisFrame().getTransformToRoot());
          ros2LogRecord = new ROS2LogRecord(robotModel.getSimpleRobotName(), List.of(kstOutputTopic), ROS2LogTimeSource.SYSTEM, ROS2LogSerialization.JSON);
          ros2LogRecord.start();
       }
