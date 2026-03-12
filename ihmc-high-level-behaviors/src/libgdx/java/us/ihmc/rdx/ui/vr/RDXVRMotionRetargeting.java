@@ -82,7 +82,7 @@ public class RDXVRMotionRetargeting
    private boolean controllingFeet = false;
 
    private static final double COM_ALPHA = 0.9;
-   private static final double PELVIS_ALPHA = 0.5;
+   private static final double PELVIS_ALPHA = 0.9;
    private final FramePose3D filteredPelvisFramePose = new FramePose3D(); // low-pass state
 
    // Foot height blending
