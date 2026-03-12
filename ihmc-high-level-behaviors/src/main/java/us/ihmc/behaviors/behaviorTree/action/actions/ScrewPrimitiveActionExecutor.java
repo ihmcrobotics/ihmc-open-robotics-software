@@ -13,7 +13,7 @@ import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
-import us.ihmc.behaviors.behaviorTree.action.TaskspaceTrajectoryTrackingErrorCalculator;
+import us.ihmc.behaviors.behaviorTree.action.TrajectoryTrackingErrorCalculator;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.packets.MessageTools;
@@ -41,7 +41,7 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
 {
    private final FramePose3D desiredHandControlPose = new FramePose3D();
    private final FramePose3D syncedHandControlPose = new FramePose3D();
-   private final TaskspaceTrajectoryTrackingErrorCalculator trackingCalculator = new TaskspaceTrajectoryTrackingErrorCalculator();
+   private final TrajectoryTrackingErrorCalculator trackingCalculator = new TrajectoryTrackingErrorCalculator();
    private final FramePose3D workPose = new FramePose3D();
    private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
    private final MultipleWaypointsPoseTrajectoryGenerator poseTrajectoryGenerator
@@ -87,9 +87,10 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
 
       trackingCalculator.update(Conversions.nanosecondsToSeconds(syncedRobot.getTimestamp()));
 
-      state.setCanExecute(state.getScrewFrame().isChildOfWorld());
+      boolean definitionInvalid = definition.getRotation() == 0.0 && definition.getTranslation() == 0.0;
+      state.setCanExecute(state.getScrewFrame().isChildOfWorld() && !definitionInvalid);
 
-      if (state.getScrewFrame().isChildOfWorld())
+      if (state.getScrewFrame().isChildOfWorld() && !definitionInvalid)
       {
          BehaviorTreeRootNodeState actionSequence = rootNode.getState();
          if (actionSequence.getExecutionNextIndex() <= state.getLeafIndex())
@@ -283,7 +284,8 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
 
       // Fail if invalid
       if (Double.isNaN(state.getPreviewTrajectoryLinearVelocity().getValue())
-       || Double.isNaN(state.getPreviewTrajectoryAngularVelocity().getValue()))
+       || Double.isNaN(state.getPreviewTrajectoryAngularVelocity().getValue())
+       || (definition.getRotation() == 0.0 && definition.getTranslation() == 0.0))
       {
          state.setFailed(true);
          state.getLogger().error("Cannot execute screw primitive with velocities:   Velocity %.2f m/s  %.2f %s/s"

@@ -40,6 +40,7 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.RobotController;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -66,7 +67,7 @@ public class CrossFourBarOneDoFJointWBCController implements RobotController
 
    private final OneDoFJointBasics[] oneDoFJoints;
 
-   public CrossFourBarOneDoFJointWBCController(CrossFourBarLinkageRobotDefinition robotDescription, Robot robot, double controlDT)
+   public CrossFourBarOneDoFJointWBCController(CrossFourBarLinkageRobotDefinition robotDescription, Robot robot, DoubleProvider controlDT)
    {
       rootBody = toInverseDynamicsRobot("elbow",
                                         robotDescription,

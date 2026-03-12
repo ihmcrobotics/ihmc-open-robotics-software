@@ -79,6 +79,8 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
    private final YoBoolean doPrepareForLocomotion;
    private boolean hasContactStateChanged = false;
 
+   private final double controlDT;
+
    public RigidBodyControlManager(RigidBodyBasics bodyToControl,
                                   RigidBodyBasics baseBody,
                                   RigidBodyBasics elevator,
@@ -101,6 +103,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                   YoRegistry parentRegistry)
    {
       this.bodyToControl = bodyToControl;
+      this.controlDT = controlDT;
       bodyName = bodyToControl.getName();
       String namePrefix = bodyName + "Manager";
       registry = new YoRegistry(namePrefix);
@@ -419,7 +422,10 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
    public void prepareForLocomotion()
    {
       if (doPrepareForLocomotion.getValue())
+      {
+         LogTools.info("Preparing %s for locomotion by holding current desired.".formatted(bodyName));
          holdCurrentDesired();
+      }
    }
 
    public void holdInJointspace()
@@ -729,6 +735,11 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
       boolean hasContactStateChanged = this.hasContactStateChanged;
       this.hasContactStateChanged = false;
       return hasContactStateChanged;
+   }
+
+   public double getControlDT()
+   {
+      return controlDT;
    }
 
    @Override

@@ -2,7 +2,6 @@
   "title": "HeightMapParameters",
   "Drift offset filter": true,
   "Flying points filter": false,
-  "Enable chunked map": false,
   "Log height map": false,
   "Min Depth To Accept": {
     "value": 0.88,
@@ -59,7 +58,12 @@
     "lowerBound": 0.01,
     "upperBound": 0.06
   },
-  "Width in meters": {
+  "Local width in meters": {
+    "value": 4.0,
+    "lowerBound": 1.0,
+    "upperBound": 4.5
+  },
+  "Global width in meters": {
     "value": 4.0,
     "lowerBound": 1.0,
     "upperBound": 4.5

@@ -29,6 +29,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 /**
  * A multiline, colored outline graphic of the foot, typically the 100% support polygon.
@@ -120,6 +121,12 @@ public class RDXFootstepGraphic implements RenderableProvider
    public void setHighlighted(boolean hightlighted)
    {
       RDXMeshDataInterpreter.repositionMeshVertices(meshDataHolder, modelInstance.model.meshes.get(0), hightlighted ? highlightColor : color);
+   }
+
+   public void setPose(Consumer<RigidBodyTransform> setter)
+   {
+      setter.accept(tempTransform);
+      LibGDXTools.toLibGDX(tempTransform, modelInstance.transform);
    }
 
    public void setPose(Pose3DReadOnly pose)

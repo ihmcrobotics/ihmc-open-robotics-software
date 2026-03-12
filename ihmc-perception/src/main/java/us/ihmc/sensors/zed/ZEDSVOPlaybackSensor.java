@@ -10,7 +10,7 @@ import static us.ihmc.zed.global.zed.*;
 public class ZEDSVOPlaybackSensor extends ZEDImageSensor
 {
    private final int cameraID;
-   private final String svoFileName;
+   protected final String svoFileName;
 
    public ZEDSVOPlaybackSensor(int cameraID, ZEDModelData zedModel, int slDepthMode, String svoFileName)
    {

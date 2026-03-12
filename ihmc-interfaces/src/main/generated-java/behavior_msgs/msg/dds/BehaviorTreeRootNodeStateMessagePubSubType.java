@@ -15,7 +15,7 @@ public class BehaviorTreeRootNodeStateMessagePubSubType implements us.ihmc.pubsu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "adbe5c134262c52228806a1a8aa9a5fd96b295814df1e3470fea2f2f2d4a4e26";
+   		return "01596f3c3a947b335b35c7b6746d0719100b1fcced71fe917e46431c71a556f4";
    }
    
    @Override
@@ -66,6 +66,8 @@ public class BehaviorTreeRootNodeStateMessagePubSubType implements us.ihmc.pubsu
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -98,6 +100,9 @@ public class BehaviorTreeRootNodeStateMessagePubSubType implements us.ihmc.pubsu
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -113,6 +118,8 @@ public class BehaviorTreeRootNodeStateMessagePubSubType implements us.ihmc.pubsu
       cdr.write_type_7(data.getManualExecutionRequested());
 
       cdr.write_type_7(data.getConcurrencyEnabled());
+
+      cdr.write_type_7(data.getPreviewModeEnabled());
 
       cdr.write_type_7(data.getFailureResetRequested());
 
@@ -130,6 +137,8 @@ public class BehaviorTreeRootNodeStateMessagePubSubType implements us.ihmc.pubsu
       	
       data.setConcurrencyEnabled(cdr.read_type_7());
       	
+      data.setPreviewModeEnabled(cdr.read_type_7());
+      	
       data.setFailureResetRequested(cdr.read_type_7());
       	
 
@@ -146,6 +155,7 @@ public class BehaviorTreeRootNodeStateMessagePubSubType implements us.ihmc.pubsu
       ser.write_type_3("execution_next_index", data.getExecutionNextIndex());
       ser.write_type_7("manual_execution_requested", data.getManualExecutionRequested());
       ser.write_type_7("concurrency_enabled", data.getConcurrencyEnabled());
+      ser.write_type_7("preview_mode_enabled", data.getPreviewModeEnabled());
       ser.write_type_7("failure_reset_requested", data.getFailureResetRequested());
    }
 
@@ -160,6 +170,7 @@ public class BehaviorTreeRootNodeStateMessagePubSubType implements us.ihmc.pubsu
       data.setExecutionNextIndex(ser.read_type_3("execution_next_index"));
       data.setManualExecutionRequested(ser.read_type_7("manual_execution_requested"));
       data.setConcurrencyEnabled(ser.read_type_7("concurrency_enabled"));
+      data.setPreviewModeEnabled(ser.read_type_7("preview_mode_enabled"));
       data.setFailureResetRequested(ser.read_type_7("failure_reset_requested"));
    }
 

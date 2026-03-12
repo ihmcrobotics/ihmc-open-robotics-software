@@ -173,7 +173,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
                                              StatusMessageOutputManager statusOutputManager,
                                              HighLevelControlManagerFactory managerFactory,
                                              WalkingControllerParameters walkingControllerParameters,
-                                             HighLevelHumanoidControllerToolbox controllerToolbox)
+                                             HighLevelHumanoidControllerToolbox controllerToolbox,
+                                             double controlDT)
    {
       this.managerFactory = managerFactory;
 
@@ -187,8 +188,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       allOneDoFjoints = MultiBodySystemTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJointBasics.class);
 
       this.pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
-      this.naturalPostureManager = managerFactory.getOrCreateNaturalPostureManager();
-      this.feetManager = managerFactory.getOrCreateFeetManager();
+      this.naturalPostureManager = managerFactory.getOrCreateNaturalPostureManager(controlDT);
+      this.feetManager = managerFactory.getOrCreateFeetManager(controlDT);
 
       RigidBodyBasics head = fullRobotModel.getHead();
       RigidBodyBasics chest = fullRobotModel.getChest();
@@ -204,14 +205,14 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       if (chest != null)
       {
          chestBodyFrame = chest.getBodyFixedFrame();
-         RigidBodyControlManager chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis, chestBodyFrame, pelvisZUpFrame);
+         RigidBodyControlManager chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis, chestBodyFrame, pelvisZUpFrame, controlDT);
          bodyManagers.add(chestManager);
       }
 
       if (head != null)
       {
          ReferenceFrame headBodyFrame = head.getBodyFixedFrame();
-         RigidBodyControlManager headManager = managerFactory.getOrCreateRigidBodyManager(head, chest, headBodyFrame, chestBodyFrame);
+         RigidBodyControlManager headManager = managerFactory.getOrCreateRigidBodyManager(head, chest, headBodyFrame, chestBodyFrame, controlDT);
          bodyManagers.add(headManager);
       }
 
@@ -220,7 +221,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
          ReferenceFrame handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
          RigidBodyBasics handBaseBody = chest != null ? chest : pelvis;
-         RigidBodyControlManager handManager = managerFactory.getOrCreateRigidBodyManager(hand, handBaseBody, handControlFrame, chestBodyFrame);
+         RigidBodyControlManager handManager = managerFactory.getOrCreateRigidBodyManager(hand, handBaseBody, handControlFrame, chestBodyFrame, controlDT);
          bodyManagers.add(handManager);
       }
 
@@ -244,8 +245,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       this.walkingControllerParameters = walkingControllerParameters;
 
-      balanceManager = managerFactory.getOrCreateBalanceManager();
-      comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
+      balanceManager = managerFactory.getOrCreateBalanceManager(controlDT);
+      comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager(controlDT);
 
       this.commandInputManager = commandInputManager;
       this.statusOutputManager = statusOutputManager;
@@ -262,10 +263,11 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
                                                    controllerToolbox,
                                                    managerFactory,
                                                    walkingControllerParameters,
+                                                   controlDT,
                                                    registry);
 
       touchdownErrorCompensator = new TouchdownErrorCompensator(walkingMessageHandler, controllerToolbox.getContactableFeet(), registry);
-      stateMachine = setupStateMachine();
+      stateMachine = setupStateMachine(controlDT);
 
       double highCoPDampingDuration = walkingControllerParameters.getHighCoPDampingDurationToPreventFootShakies();
       double coPErrorThreshold = walkingControllerParameters.getCoPErrorThresholdForHighCoPDamping();
@@ -304,7 +306,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       controllerCoreOptimizationSettings = new ParameterizedControllerCoreOptimizationSettings(defaultControllerCoreOptimizationSettings, registry);
    }
 
-   private StateMachine<WalkingStateEnum, WalkingState> setupStateMachine()
+   private StateMachine<WalkingStateEnum, WalkingState> setupStateMachine(double controlDT)
    {
       StateMachineFactory<WalkingStateEnum, WalkingState> factory = new StateMachineFactory<>(WalkingStateEnum.class);
       factory.setNamePrefix("walking").setRegistry(registry).buildYoClock(yoTime);
@@ -315,13 +317,14 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
                                                       controllerToolbox,
                                                       managerFactory,
                                                       failureDetectionControlModule,
-                                                      walkingControllerParameters,
+                                                      controlDT,
                                                       registry);
       TransferToStandingState toStandingState = new TransferToStandingState(walkingMessageHandler,
                                                                             touchdownErrorCompensator,
                                                                             controllerToolbox,
                                                                             managerFactory,
                                                                             failureDetectionControlModule,
+                                                                            controlDT,
                                                                             registry);
       factory.addState(WalkingStateEnum.TO_STANDING, toStandingState);
       factory.addState(WalkingStateEnum.STANDING, standingState);
@@ -343,6 +346,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
                                                                                                      minimumTransferTime,
                                                                                                      unloadFraction,
                                                                                                      rhoMin,
+                                                                                                     controlDT,
                                                                                                      registry);
          walkingTransferStates.put(transferToSide, transferState);
          factory.addState(stateEnum, transferState);
@@ -360,6 +364,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
                                                                                       managerFactory,
                                                                                       walkingControllerParameters,
                                                                                       failureDetectionControlModule,
+                                                                                      controlDT,
                                                                                       registry);
          walkingSingleSupportStates.put(supportSide, singleSupportState);
          factory.addState(stateEnum, singleSupportState);
@@ -377,6 +382,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
                                                                                          failureDetectionControlModule,
                                                                                          null,
                                                                                          rhoMin,
+                                                                                         controlDT,
                                                                                          registry);
          flamingoTransferStates.put(transferToSide, transferState);
          factory.addState(stateEnum, transferState);
@@ -393,6 +399,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
                                                                           controllerToolbox,
                                                                           managerFactory,
                                                                           failureDetectionControlModule,
+                                                                          controlDT,
                                                                           registry);
          flamingoSingleSupportStates.put(supportSide, singleSupportState);
          factory.addState(stateEnum, singleSupportState);

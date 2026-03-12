@@ -5,14 +5,13 @@ import org.bytedeco.opencv.opencv_core.GpuMat;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.sensors.CameraIntrinsics;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.sensors.ImageSensor;
@@ -83,6 +82,7 @@ public class ZEDImageSensor extends ImageSensor
 
    private boolean positionalTrackingEnabled = false;
    private final MutableReferenceFrame trackedSensorFrame;
+   private final RigidBodyTransform trackedPoseOffset = new RigidBodyTransform();
    private final SL_Quaternion sensorRotation = new SL_Quaternion();
    private final SL_Vector3 sensorTranslation = new SL_Vector3();
 
@@ -128,7 +128,7 @@ public class ZEDImageSensor extends ImageSensor
       // Set runtime parameters to default values
       zedRuntimeParameters.reference_frame(SL_REFERENCE_FRAME_CAMERA);
       zedRuntimeParameters.enable_depth(slDepthMode != SL_DEPTH_MODE_NONE);
-      zedRuntimeParameters.confidence_threshold(70);
+      zedRuntimeParameters.confidence_threshold(50);
       zedRuntimeParameters.texture_confidence_threshold(100);
       zedRuntimeParameters.remove_saturated_areas(true);
       zedRuntimeParameters.enable_fill_mode(false);
@@ -143,6 +143,11 @@ public class ZEDImageSensor extends ImageSensor
 
       this.remoteStreamingAddress = remoteStreamingAddress;
       this.remoteStreamingPort = remoteStreamingPort;
+   }
+
+   public void setTrackedPoseOffset(RigidBodyTransformReadOnly offset)
+   {
+      trackedPoseOffset.set(offset);
    }
 
    private void updateReferenceFrames()
@@ -285,6 +290,9 @@ public class ZEDImageSensor extends ImageSensor
       {
          // Grab images now
          returnCode = sl_grab(cameraID, zedRuntimeParameters);
+         RigidBodyTransform leftSensorTransformAtGrab = leftSensorFrame.getTransformToWorldFrame();
+         RigidBodyTransform rightSensorTransformAtGrab = rightSensorFrame.getTransformToWorldFrame();
+         Instant grabTime = Instant.now();
          if (returnCode == SL_ERROR_CODE_END_OF_SVOFILE_REACHED)
          {
             sl_set_svo_position(0, 0);
@@ -301,14 +309,14 @@ public class ZEDImageSensor extends ImageSensor
                sensorTranslation.z(0.0f);
 
                sl_reset_positional_tracking(cameraID, sensorRotation, sensorTranslation);
-               trackedSensorFrame.update(RigidBodyTransformBasics::setToZero);
+               trackedSensorFrame.update(transform -> transform.set(trackedPoseOffset));
             }
 
             return false;
          }
 
          throwOnError(returnCode);
-         lastGrabTime = Instant.now();
+         lastGrabTime = grabTime;
          ++grabSequenceNumber;
 
          lastGrabTimestamp = sl_get_current_timestamp(cameraID);
@@ -321,7 +329,12 @@ public class ZEDImageSensor extends ImageSensor
             Quaternion euclidRotation = new Quaternion(sensorRotation.x(), sensorRotation.y(), sensorRotation.z(), sensorRotation.w());
             Vector3D euclidTranslation = new Vector3D(sensorTranslation.x(), sensorTranslation.y(), sensorTranslation.z());
             if (!euclidRotation.containsNaN() && !euclidTranslation.containsNaN())
-               trackedSensorFrame.update(transformToWorld -> transformToWorld.set(euclidRotation, euclidTranslation));
+               trackedSensorFrame.update(transformToWorld ->
+                                         {
+                                            transformToWorld.set(euclidRotation, euclidTranslation);
+                                            transformToWorld.prependOrientation(trackedPoseOffset.getRotation());
+                                            transformToWorld.prependTranslation(trackedPoseOffset.getTranslation());
+                                         });
          }
 
          // Retrieve the grabbed depth image
@@ -343,21 +356,18 @@ public class ZEDImageSensor extends ImageSensor
          {  // Create RawImages from the grabbed retrieved slMats
             if (grabbedImages[LEFT_COLOR_IMAGE_KEY] != null)
                grabbedImages[LEFT_COLOR_IMAGE_KEY].release();
-            grabbedImages[LEFT_COLOR_IMAGE_KEY] = slMatToRawImage(leftColorImagePointer,
-                                                                  PixelFormat.BGRA8,
-                                                                  leftSensorIntrinsics,
-                                                                  leftSensorFrame.getTransformToRoot());
+            grabbedImages[LEFT_COLOR_IMAGE_KEY] = slMatToRawImage(leftColorImagePointer, PixelFormat.BGRA8, leftSensorIntrinsics, leftSensorTransformAtGrab);
 
             if (grabbedImages[RIGHT_COLOR_IMAGE_KEY] != null)
                grabbedImages[RIGHT_COLOR_IMAGE_KEY].release();
             grabbedImages[RIGHT_COLOR_IMAGE_KEY] = slMatToRawImage(rightColorImagePointer,
                                                                    PixelFormat.BGRA8,
                                                                    rightSensorIntrinsics,
-                                                                   rightSensorFrame.getTransformToRoot());
+                                                                   rightSensorTransformAtGrab);
 
             if (grabbedImages[DEPTH_IMAGE_KEY] != null)
                grabbedImages[DEPTH_IMAGE_KEY].release();
-            grabbedImages[DEPTH_IMAGE_KEY] = slMatToRawImage(depthImagePointer, PixelFormat.GRAY16, leftSensorIntrinsics, leftSensorFrame.getTransformToRoot());
+            grabbedImages[DEPTH_IMAGE_KEY] = slMatToRawImage(depthImagePointer, PixelFormat.GRAY16, leftSensorIntrinsics, leftSensorTransformAtGrab);
          }
       }
       catch (ZEDException exception)

@@ -18,13 +18,13 @@ import org.bytedeco.opencv.opencv_dnn.Net;
 import org.yaml.snakeyaml.Yaml;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDANonMaximumSuppression;
 import us.ihmc.perception.cuda.CUDAProgram;
 import us.ihmc.perception.cuda.CUDAStreamManager;
 import us.ihmc.perception.cuda.CUDATools;
 import us.ihmc.perception.imageMessage.PixelFormat;
+import us.ihmc.sensors.CameraIntrinsics;
 
 import java.io.File;
 import java.io.IOException;
@@ -206,7 +206,7 @@ public class YOLOv8Model
     */
    public void setIgnoredClasses(boolean[] ignoredClasses)
    {
-      ignoredObjectClasses.put(ignoredClasses);
+      ignoredObjectClasses.put(ignoredClasses, 0, getDetectableObjectCount());
    }
 
    /**
@@ -248,7 +248,7 @@ public class YOLOv8Model
     */
    public void setConfidenceThresholds(float[] objectClassConfidenceThresholds)
    {
-      confidenceThresholds.put(objectClassConfidenceThresholds);
+      confidenceThresholds.put(objectClassConfidenceThresholds, 0, getDetectableObjectCount());
    }
 
    /**
@@ -376,7 +376,10 @@ public class YOLOv8Model
          // Ensure that we have valid detections
          int filteredDetectionCount = filteredDetectionCountPointer.get();
          if (filteredDetectionCount == 0)
+         {
+            bgrInputImage.release();
             return result;
+         }
 
          // Copy boxes into separate memory to run NMS
          cudaMemcpy2DAsync(boxes,
@@ -394,7 +397,11 @@ public class YOLOv8Model
 
          // Ensure we still have detections
          if (remainingDetectionCount == 0)
+         {
+            includedRows.close();
+            bgrInputImage.release();
             return result;
+         }
 
          // Upload prototype masks to GPU
          long totalMaskFloats = (long) output1Blob.size(1) * output1Blob.size(2) * output1Blob.size(3);

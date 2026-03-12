@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.Pool;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import imgui.ImGui;
+import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiMouseButton;
 import imgui.flag.ImGuiMouseCursor;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -58,7 +59,7 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
       scene = new RDXBehaviorTreeScene(crdtInfo, this::getAndIncrementNextID, syncedRobot, baseUI, panel);
       setScene(scene);
 
-      ((RDXBehaviorTreeNodeBuilder) getNodeBuilder()).initialize(crdtInfo,
+      ((RDXBehaviorTreeNodeBuilder) getNodeBuilder()).initialize(this,
                                                                  saveFileDirectory,
                                                                  syncedRobot,
                                                                  scene,
@@ -222,23 +223,84 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
 
          if (rootNode != null && anyNodeSelected) // It can become null above
          {
-            if (ImGuiTools.isItemHovered(ImGui.getColumnWidth(), ImGui.getTextLineHeight()) || draggingDivider)
+            float dividerHeight = ImGui.getFrameHeight();
+            float closeOffsetY = ImGui.getCursorScreenPosY();
+            float closeOffsetX = ImGui.getCursorScreenPosX() + ImGui.getColumnWidth() - dividerHeight;
+            boolean closeHovered = false;
+
+            if (ImGuiTools.isItemHovered(ImGui.getColumnWidth(), dividerHeight) || draggingDivider)
             {
                if (!draggingDivider || ImGui.isMouseDown(ImGuiMouseButton.Left))
                {
-                  ImGui.setMouseCursor(ImGuiMouseCursor.ResizeNS);
-                  if (ImGui.isMouseDragging(ImGuiMouseButton.Left, 0.1f)) // default threshold 0.3f is too much
+                  boolean dragging = ImGui.isMouseDragging(ImGuiMouseButton.Left, 0.1f);
+                  if (dragging) // default threshold 0.3f is too much
                   {
                      treeExplorerPercentage += ImGui.getIO().getMouseDeltaY() / remainingHeight;
                      treeExplorerPercentage = (float) MathTools.clamp(treeExplorerPercentage, 0.05f, 0.95f);
                      SETTINGS.setTreeExplorerHeightPercentage(treeExplorerPercentage);
                      draggingDivider = true;
                   }
+
+                  float mouseX = ImGui.getMousePosX();
+                  float mouseY = ImGui.getMousePosY();
+                  closeHovered = mouseX >= closeOffsetX && mouseX <= closeOffsetX + dividerHeight && mouseY >= closeOffsetY && mouseY <= closeOffsetY + dividerHeight;
+
+                  if (dragging || !closeHovered)
+                  {
+                     ImGui.setMouseCursor(ImGuiMouseCursor.ResizeNS);
+                     closeHovered = false;
+                  }
                }
                else
                   draggingDivider = false;
             }
-            ImGuiTools.separatorText("Node Settings > \"%s\"".formatted(selectedNode.getDefinition().getName()));
+
+            // Draw separator with text
+            ImGui.dummy(0.0f, ImGui.getFrameHeight()); // Make the lines as tall as when they have and input box
+            ImGui.sameLine(0.0f, 0.0f);
+            ImGui.alignTextToFramePadding(); // Centers the node descriptions vertically in the frame height area
+            float cursorScreenPosX = ImGui.getCursorScreenPosX();
+            float cursorScreenPosY = ImGui.getCursorScreenPosY();
+            int fontSize = ImGui.getFontSize();
+            float itemSpacingX = ImGui.getStyle().getItemSpacingX();
+            float lineThickness = fontSize * 0.2f;
+            float lineY = ImGui.getFrameHeight() / 2.0f + (lineThickness / 2.0f);
+            float initialLineWidth = fontSize * 1.5f;
+            int separatorColor = ImGui.getColorU32(ImGuiCol.Separator);
+            ImGui.getWindowDrawList().addLine(cursorScreenPosX, cursorScreenPosY + lineY,
+                                              cursorScreenPosX + initialLineWidth, cursorScreenPosY + lineY,
+                                              separatorColor, lineThickness);
+            ImGui.setCursorPosX(ImGui.getCursorPosX() + initialLineWidth + itemSpacingX);
+            ImGui.text("Node Settings > \"%s\"".formatted(selectedNode.getDefinition().getName()));
+            ImGui.sameLine();
+            cursorScreenPosX = ImGui.getCursorScreenPosX();
+            ImGui.getWindowDrawList()
+                 .addLine(cursorScreenPosX + itemSpacingX, cursorScreenPosY + lineY, closeOffsetX, cursorScreenPosY + lineY, separatorColor, lineThickness);
+
+            if (closeHovered) // Draw circle on hover
+            {
+               float circleRadius = dividerHeight * 0.43f;
+               float circleCenterX = closeOffsetX + dividerHeight / 2.0f;
+               float circleCenterY = closeOffsetY + dividerHeight / 2.0f;
+               int circleColor = ImGui.getColorU32(ImGuiCol.ButtonHovered);
+               ImGui.getWindowDrawList().addCircleFilled(circleCenterX, circleCenterY, circleRadius, circleColor);
+
+               if (ImGuiTools.mouseReleasedWithoutDrag(ImGuiMouseButton.Left, 1.0f))
+                  RDXBehaviorTreeTools.runForEntireTree(rootNode, RDXBehaviorTreeNode::clearSelections);
+            }
+
+            // Draw close X
+            float xSize = dividerHeight * 0.46f;
+            float xOffset = (dividerHeight - xSize) / 2.0f;
+            int xColor = ImGui.getColorU32(closeHovered ? ImGuiCol.Text : ImGuiCol.TextDisabled);
+            float xThickness = 1.0f;
+            ImGui.getWindowDrawList().addLine(closeOffsetX + xOffset, closeOffsetY + xOffset,
+                                              closeOffsetX + xOffset + xSize, closeOffsetY + xOffset + xSize,
+                                              xColor, xThickness);
+            ImGui.getWindowDrawList().addLine(closeOffsetX + xOffset, closeOffsetY + xOffset + xSize,
+                                              closeOffsetX + xOffset + xSize, closeOffsetY + xOffset,
+                                              xColor, xThickness);
+            ImGui.dummy(0.0f, dividerHeight);
 
             ImGui.beginChild(labels.get("Node Settings Scroll Area"), 0.0f, ImGui.getContentRegionAvailY());
             renderSelectedNodeSettingsWidgets(rootNode);

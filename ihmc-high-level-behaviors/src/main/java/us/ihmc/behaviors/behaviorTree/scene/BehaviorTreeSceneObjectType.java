@@ -4,7 +4,8 @@ public enum BehaviorTreeSceneObjectType
 {
    YOLO_ONLY,
    FOUNDATION_POSE,
-   DOOR_PANEL;
+   DOOR_PANEL,
+   DOOR_FRAME;
 
    public static final BehaviorTreeSceneObjectType[] values = values();
 }

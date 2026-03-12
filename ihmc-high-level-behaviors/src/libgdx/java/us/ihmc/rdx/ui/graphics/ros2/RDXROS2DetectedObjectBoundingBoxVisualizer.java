@@ -12,7 +12,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import perception_msgs.msg.dds.DetectedObjectPacket;
-import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
+import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -53,7 +53,7 @@ public class RDXROS2DetectedObjectBoundingBoxVisualizer extends RDXROS2SingleTop
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
    public RDXROS2DetectedObjectBoundingBoxVisualizer(String title,
-                                                     ROS2PublishSubscribeAPI ros2Helper,
+                                                     ROS2Helper ros2Helper,
                                                      ReferenceFrame sensorFrame,
                                                      ROS2Topic<DetectedObjectPacket> topic,
                                                      RDXFocusBasedCamera camera)

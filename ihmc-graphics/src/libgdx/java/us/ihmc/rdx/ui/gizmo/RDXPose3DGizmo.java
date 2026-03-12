@@ -231,9 +231,9 @@ public class RDXPose3DGizmo implements RenderableProvider
    {
       create(panel3D);
       pickCalculator = this::calculate3DViewPick;
-      panel3D.addImGui3DViewPickCalculator(pickCalculator);
+      panel3D.addImGui3DViewPickCalculator(pickCalculator, pickCalculator);
       inputProcessor = this::process3DViewInput;
-      panel3D.addImGui3DViewInputProcessor(inputProcessor);
+      panel3D.addImGui3DViewInputProcessor(inputProcessor, inputProcessor);
       renderableAdapter = panel3D.getScene().addRenderableProvider(this, RDXSceneLevel.VIRTUAL);
    }
 
@@ -779,6 +779,15 @@ public class RDXPose3DGizmo implements RenderableProvider
       this.resizeAutomatically.set(resizeAutomatically);
    }
 
+   public void setTorusRadius(double radius)
+   {
+      if (!EuclidCoreTools.epsilonEquals(radius, torusRadius.get(), 1e-5))
+      {
+         torusRadius.set((float) radius);
+         recreateGraphics();
+      }
+   }
+
    ClockFaceRotation3DMouseDragAlgorithm getClockFaceDragAlgorithm()
    {
       return clockFaceDragAlgorithm;
@@ -792,6 +801,12 @@ public class RDXPose3DGizmo implements RenderableProvider
    public boolean isBeingManipulated()
    {
       return isBeingManipulated;
+   }
+
+   public void setCenterSphereToTorusRatio(float centerSphereToTorusRatio)
+   {
+      this.centerSphereToTorusRatio.set(centerSphereToTorusRatio);
+      recreateGraphics();
    }
 
    public ImFloat getCenterSphereToTorusRatio()

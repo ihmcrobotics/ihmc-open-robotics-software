@@ -19,8 +19,13 @@ public class FBRateLimitedVector3D extends RateLimitedYoMutableFrameVector3D imp
    private final SpaceData3D space;
    private int commandId;
 
-   public FBRateLimitedVector3D(String namePrefix, Type type, SpaceData3D space, DoubleProvider maximumRate, double dt, FrameVector3DReadOnly rawVector,
-                                  YoRegistry registry)
+   public FBRateLimitedVector3D(String namePrefix,
+                                Type type,
+                                SpaceData3D space,
+                                DoubleProvider maximumRate,
+                                DoubleProvider dt,
+                                FrameVector3DReadOnly rawVector,
+                                YoRegistry registry)
    {
       super(FeedbackControllerData.createNamePrefix(namePrefix + "RateLimited", type, space), "", registry, maximumRate, dt, rawVector);
 

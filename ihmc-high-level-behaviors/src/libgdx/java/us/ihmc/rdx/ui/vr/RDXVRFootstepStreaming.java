@@ -44,7 +44,7 @@ public class RDXVRFootstepStreaming
       this.retargetingParameters = retargetingParameters;
       this.vrContext = vrContext;
 
-      this.controllerStatusTracker = new ControllerStatusTracker(new LogToolsLogger(), ros2ControllerHelper.getROS2Node(), syncedRobot.getRobotModel().getSimpleRobotName());
+      this.controllerStatusTracker = new ControllerStatusTracker(new LogToolsLogger(), ros2ControllerHelper.getROS2Node(), syncedRobot);
       this.swingFootTracker = new SwingFootTracker(syncedRobot, controllerStatusTracker);
 
       processor = new RDXVRFootstepStreamingProcessor(syncedRobot, ros2ControllerHelper, footstepPlacer, swingFootTracker, ENABLE_YO_VARIABLE_TOOLBOX_SERVER);

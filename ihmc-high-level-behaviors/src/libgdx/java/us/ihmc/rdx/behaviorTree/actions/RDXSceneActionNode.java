@@ -4,6 +4,7 @@ import imgui.ImGui;
 import imgui.type.ImInt;
 import org.yaml.snakeyaml.Yaml;
 import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionNodeDefinition.SceneActionNodeType;
 import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionNodeState;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectDefinition;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectType;
@@ -14,6 +15,7 @@ import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeRootNode;
 import us.ihmc.rdx.imgui.ImFloatWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImIntegerWrapper;
+import us.ihmc.rdx.ui.widgets.ImGuiSceneActionWidget;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,6 +28,7 @@ import java.util.regex.Pattern;
 public class RDXSceneActionNode extends RDXActionNode<SceneActionNodeState, SceneActionNodeDefinition>
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final ImGuiSceneActionWidget widget = new ImGuiSceneActionWidget();
    private final ImInt imYOLOModel = new ImInt(0);
    private final ImInt imYOLOClass = new ImInt(0);
    private final ImInt imFPType = new ImInt(0);
@@ -79,8 +82,29 @@ public class RDXSceneActionNode extends RDXActionNode<SceneActionNodeState, Scen
    }
 
    @Override
+   public void renderTreeViewRow()
+   {
+      super.renderRowBeginning();
+      super.renderEditableName();
+      ImGui.sameLine();
+      widget.render();
+      renderRowEnd();
+   }
+
+   @Override
    protected void renderImGuiWidgetsInternal()
    {
+      SceneActionNodeType currentActionType = definition.getSceneActionType().getValue();
+      if (ImGui.beginCombo(labels.get("Action Type"), currentActionType.name()))
+      {
+         for (SceneActionNodeType value : SceneActionNodeType.values)
+         {
+            if (ImGui.selectable(value.name(), value == currentActionType))
+               definition.getSceneActionType().setValue(value);
+         }
+         ImGui.endCombo();
+      }
+
       BehaviorTreeSceneObjectDefinition objectDefinition = definition.getSceneObjectDefinition();
 
       ImGui.text("Setup Object Type:");

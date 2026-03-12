@@ -1,6 +1,9 @@
 package us.ihmc.behaviors.behaviorTree;
 
+import org.apache.commons.lang3.function.TriFunction;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulation;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.action.actions.AbilityHandActionComms;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneExecutor;
@@ -10,10 +13,14 @@ import us.ihmc.behaviors.tools.interfaces.LogToolsLogger;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseCommunicatorMap;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
 import us.ihmc.perception.gpuMapping.TerrainMapData;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.sensors.ImageSensor;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -25,12 +32,15 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeRootNodeExecu
    private final BehaviorTreeSceneExecutor scene;
    private final SideDependentList<AbilityHandActionComms> abilityHandComms = new SideDependentList<>();
 
-   public BehaviorTreeExecutor(ROS2SyncedRobotModel syncedRobot,
-                               ROS2PeerClockOffsetEstimator peerClockEstimator,
-                               ROS2ControllerHelper ros2ControllerHelper,
-                               YOLOv8DetectionExecutor yolo,
-                               IsaacROSFoundationPoseCommunicatorMap foundationPose,
-                               TerrainMapData terrainMapData)
+   public BehaviorTreeExecutor(
+         ROS2SyncedRobotModel syncedRobot,
+         ROS2PeerClockOffsetEstimator peerClockEstimator,
+         ROS2ControllerHelper ros2ControllerHelper,
+         TriFunction<DRCRobotModel, ROS2NodeBuilder, RigidBodyTransformReadOnly, HumanoidKinematicsSimulation> kinematicsSimulationBuilder,
+         ImageSensor imageSensor,
+         YOLOv8DetectionExecutor yolo,
+         IsaacROSFoundationPoseCommunicatorMap foundationPose,
+         TerrainMapData terrainMapData)
    {
       super(syncedRobot,
             ROS2ActorDesignation.ROBOT,
@@ -38,20 +48,20 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeRootNodeExecu
             new WorkspaceResourceDirectory(BehaviorTreeExecutor.class, "/behaviorTrees"),
             new BehaviorTreeExecutorNodeBuilder());
 
-      controllerStatusTracker = new ControllerStatusTracker(new LogToolsLogger(), ros2ControllerHelper.getROS2Node(), robotModel.getSimpleRobotName());
+      controllerStatusTracker = new ControllerStatusTracker(new LogToolsLogger(), ros2ControllerHelper.getROS2Node(), syncedRobot);
       for (RobotSide robotSide : RobotSide.values)
          abilityHandComms.put(robotSide, new AbilityHandActionComms(robotSide, ros2ControllerHelper.getROS2Node()));
-      scene = new BehaviorTreeSceneExecutor(crdtInfo, this::getAndIncrementNextID, syncedRobot, yolo, foundationPose);
+      scene = new BehaviorTreeSceneExecutor(crdtInfo, this::getAndIncrementNextID, syncedRobot, imageSensor, yolo, foundationPose, terrainMapData);
       setScene(scene);
 
-      ((BehaviorTreeExecutorNodeBuilder) getNodeBuilder()).initialize(crdtInfo,
+      ((BehaviorTreeExecutorNodeBuilder) getNodeBuilder()).initialize(this,
                                                                       saveFileDirectory,
                                                                       ros2ControllerHelper,
+                                                                      kinematicsSimulationBuilder,
                                                                       syncedRobot,
                                                                       controllerStatusTracker,
                                                                       abilityHandComms,
-                                                                      scene,
-                                                                      terrainMapData);
+                                                                      scene);
    }
 
    public void update()
@@ -94,7 +104,7 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeRootNodeExecu
       {
          modifyTreeTopology(topologyOperationQueue ->
          {
-            if (this.rootNode == null)
+            if (rootNode == null)
                topologyOperationQueue.queueDestroyEntireTree();
 
             BehaviorTreeRootNodeExecutor rootNode = (BehaviorTreeRootNodeExecutor) getNodeBuilder().createRootNode(getAndIncrementNextID());
@@ -112,5 +122,10 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeRootNodeExecu
       {
          LogTools.error("Cannot load behavior: {}", jsonFileName);
       }
+   }
+
+   public BehaviorTreeSceneExecutor getScene()
+   {
+      return scene;
    }
 }

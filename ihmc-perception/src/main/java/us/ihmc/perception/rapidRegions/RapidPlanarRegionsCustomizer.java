@@ -9,9 +9,12 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotEnvironmentAwareness.geometry.*;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerTools;
+import us.ihmc.perception.geometry.ConcaveHull;
+import us.ihmc.perception.geometry.ConcaveHullCollection;
+import us.ihmc.perception.geometry.ConcaveHullDecomposition;
+import us.ihmc.perception.geometry.ConcaveHullFactoryParameters;
+import us.ihmc.perception.geometry.SimpleConcaveHullFactory;
+import us.ihmc.perception.tools.PolygonizerTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 

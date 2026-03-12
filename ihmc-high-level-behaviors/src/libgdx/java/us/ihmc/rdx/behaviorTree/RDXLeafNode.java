@@ -2,6 +2,7 @@ package us.ihmc.rdx.behaviorTree;
 
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.LeafNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.LeafNodeState;
 import us.ihmc.log.LogTools;
@@ -25,6 +26,7 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
    private final ImGuiFlashingText flashingDescriptionColor = new ImGuiFlashingText(ImGuiTools.RED);
 
    private float lineStartX = Float.NaN;
+   private boolean wasExecuting = false;
 
    public RDXLeafNode(S state, RDXBehaviorTreeRootNode rootNode)
    {
@@ -49,6 +51,15 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
    public void renderRowBeginning()
    {
       super.renderRowBeginning();
+
+      float normalizedVisiblePosY = (ImGui.getCursorPosY() - ImGui.getScrollY()) / ImGui.getWindowHeight();
+      if (wasExecuting != state.getIsExecuting())
+      {
+         wasExecuting = state.getIsExecuting();
+
+         if (normalizedVisiblePosY > 0.6)
+            ImGui.setScrollHereY(0.6f);
+      }
 
       // Give the arrow a little space to the left, like the other icons
       ImGui.setCursorPosX(ImGui.getCursorPosX() + ImGui.getStyle().getItemSpacingX());
@@ -119,29 +130,23 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
 
       // Validate state in case something earlier in this UI tick messed with things.
       // This happens with the Undo non-topological changes button.
-      state.validateDefinition(rootNode.getState().getOrderedLeaves());
+      state.validateDefinition(rootNode.getState().getOrderedNodes());
 
       if (ImGui.beginCombo(labels.get("Execute after"), definition.getExecuteAfterLeafName()))
       {
          if (ImGui.selectable(labels.get("Previous"), definition.getExecuteAfterPrevious()))
-         {
             definition.setExecuteAfterPrevious();
-         }
          if (ImGui.selectable(labels.get("Beginning"), definition.getExecuteAfterBeginning()))
-         {
             definition.setExecuteAfterBeginning();
-         }
 
-         for (LeafNodeState<?> leafNode : rootNode.getState().getOrderedLeaves())
-         {
-            if (leafNode.getLeafIndex() < state.getLeafIndex())
-            {
-               if (ImGui.selectable(labels.get(leafNode.getDefinition().getName()), definition.getExecuteAfterNodeID() == leafNode.getID()))
-               {
-                  definition.setExecuteAfterLeaf(leafNode.getID(), leafNode.getDefinition().getName());
-               }
-            }
-         }
+         for (BehaviorTreeNodeState<?> node : rootNode.getState().getOrderedNodes())
+            if (node.getDepthFirstIndex() < state.getDepthFirstIndex())
+               if (ImGui.selectable(labels.get(node.getDefinition().getName(), node.getDepthFirstIndex()),
+                                    definition.getExecuteAfterNodeID() == node.getID()))
+                  definition.setExecuteAfterLeaf(node.getID(), node.getDefinition().getName());
+
+         if (ImGui.isWindowAppearing())
+            ImGui.setScrollHereY(1.0f);
 
          ImGui.endCombo();
       }
@@ -178,18 +183,14 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
       return flashingDescriptionColor.getTextColor(state.getFailed());
    }
 
-
-
    /** @return the leaf to execute after as part of the concurrency system */
-   public RDXLeafNode getExecuteAfterLeaf()
+   public RDXBehaviorTreeNode<?, ?> getExecuteAfterLeaf()
    {
-      if (rootNode.getIDToNodeMap().get(definition.getExecuteAfterNodeID()) instanceof RDXLeafNode executeAfterNode)
-      {
-         return executeAfterNode;
-      }
+      RDXBehaviorTreeNode<?, ?> executeAfterNode = rootNode.getIDToNodeMap().get(definition.getExecuteAfterNodeID());
 
-      LogTools.error("Node ID not found: {}", definition.getExecuteAfterNodeID());
+      if (executeAfterNode == null)
+         LogTools.error("Node ID not found: {}", definition.getExecuteAfterNodeID());
 
-      return null;
+      return executeAfterNode;
    }
 }

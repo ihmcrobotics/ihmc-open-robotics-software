@@ -10,6 +10,8 @@ public interface AvatarControllerThreadInterface extends SCS2YoGraphicHolder
 {
    void run();
 
+   double getCurrentDT();
+
    YoRegistry getYoVariableRegistry();
 
    FullHumanoidRobotModel getFullRobotModel();
@@ -18,4 +20,8 @@ public interface AvatarControllerThreadInterface extends SCS2YoGraphicHolder
 
    @Override
    YoGraphicGroupDefinition getSCS2YoGraphics();
+
+   default void destroy()
+   {
+   }
 }

@@ -72,7 +72,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
 
    protected final DRCRobotModel robotModel;
    protected final RDXBehaviorTreeScene scene;
-   protected final ROS2SyncedRobotModel syncedRobot;
+   protected ROS2SyncedRobotModel syncedRobot;
    protected final RobotCollisionModel selectionCollisionModel;
    protected final RDXBaseUI baseUI;
    protected final RDX3DPanel panel3D;
@@ -266,8 +266,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       if (!isRootNode() && textHovered && ImGui.isMouseDoubleClicked(ImGuiMouseButton.Left))
       {
          anySpecificWidgetOnLineClicked = true;
-         RDXBehaviorTreeTools.clearOtherNodeSelections(this);
-         selected.set(true);
+         setSelected();
          isNameBeingEdited = true;
          imNodeNameText.set(definition.getName());
       }
@@ -287,20 +286,16 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
 
       if (mouseHoveringNodeLine && !isNameBeingEdited && ImGui.isMouseClicked(ImGuiMouseButton.Right))
       {
-         RDXBehaviorTreeTools.clearOtherNodeSelections(this);
-         selected.set(true);
+         setSelected();
          ImGui.openPopup(nodePopupID);
       }
 
       // We try to make anywhere on the row clickable to select the node,
       // execpt for specific interactions. We use release without drag to prevent interference
       // with the drag and drop functionality
-      if (!anySpecificWidgetOnLineClicked && mouseHoveringNodeLine && ImGuiTools.mouseReleasedWithoutDrag(ImGuiMouseButton.Left) && !isNameBeingEdited)
-      {
-         boolean desiredValue = !selected.get();
-         RDXBehaviorTreeTools.clearOtherNodeSelections(this);
-         selected.set(desiredValue);
-      }
+      if (!anySpecificWidgetOnLineClicked && mouseHoveringNodeLine
+          && ImGuiTools.mouseReleasedWithoutDrag(ImGuiMouseButton.Left) && !isNameBeingEdited && !selected.get())
+         setSelected();
    }
 
    public void renderContextMenuItems()
@@ -388,6 +383,12 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    public boolean getSelected()
    {
       return selected.get();
+   }
+
+   public void setSelected()
+   {
+      RDXBehaviorTreeTools.clearOtherNodeSelections(this);
+      this.selected.set(true);
    }
 
    public void setNameBeingEdited(boolean nameBeingEdited)

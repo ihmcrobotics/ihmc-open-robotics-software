@@ -1,7 +1,7 @@
 # Status of a persistent detection
 
-# Last 4 digits of UUID as a string
-string id
+# This persistent detection's ID
+int32 id
 
 # Instant detection simple class name (e.g. YOLO, FoundationPose)
 string detection_type

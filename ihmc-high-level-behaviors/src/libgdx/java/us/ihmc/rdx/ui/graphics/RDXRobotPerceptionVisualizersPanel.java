@@ -4,12 +4,12 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.graphics.ros2.RDXDetectionManagerSettings;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2FramePlanarRegionsVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2HeightMapVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2KSTRobotVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2RobotVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.foundationPose.RDXIsaacROSFoundationPoseVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2ColoredPointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.yolo.RDXROS2YOLOv8Visualizer;
 import us.ihmc.ros2.ROS2Node;
@@ -35,9 +35,9 @@ public abstract class RDXRobotPerceptionVisualizersPanel extends RDXPerceptionVi
    protected RDXROS2ImageMessageVisualizer steppingCameraRightColorImageVisualizer;
    protected RDXROS2ImageMessageVisualizer steppingCameraDepthImageVisualizer;
    protected RDXROS2YOLOv8Visualizer yoloVisualizer;
+   protected RDXIsaacROSFoundationPoseVisualizer foundationPoseVisualizer;
    protected RDXROS2HeightMapVisualizer heightMapVisualizer;
    protected RDXROS2HeightMapVisualizer yoloMapVisualizer;
-   protected RDXDetectionManagerSettings detectionManagerSettings;
    protected RDXROS2FramePlanarRegionsVisualizer planarRegionsVisualizer;
 
    protected RDXRobotPerceptionVisualizersPanel(ROS2Node ros2Node, ROS2SyncedRobotModel syncedRobot, ROS2PeerClockOffsetEstimator peerClockOffsetEstimator)
@@ -137,6 +137,11 @@ public abstract class RDXRobotPerceptionVisualizersPanel extends RDXPerceptionVi
    public RDXROS2YOLOv8Visualizer getYoloVisualizer()
    {
       return yoloVisualizer;
+   }
+
+   public RDXIsaacROSFoundationPoseVisualizer getFoundationPoseVisualizer()
+   {
+      return foundationPoseVisualizer;
    }
 
    public RDXROS2HeightMapVisualizer getHeightMapVisualizer()

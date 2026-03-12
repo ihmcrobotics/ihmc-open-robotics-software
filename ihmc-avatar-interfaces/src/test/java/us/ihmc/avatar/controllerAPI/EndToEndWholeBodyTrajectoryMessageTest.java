@@ -161,7 +161,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
 
       simulationTestHelper.publishToController(wholeBodyTrajectoryMessage);
 
-      success = simulationTestHelper.simulateNow(getRobotModel().getControllerDT()); // Trick to get frames synchronized with the controller.
+      success = simulationTestHelper.simulateNow(simulationTestHelper.getCurrentControlDT()); // Trick to get frames synchronized with the controller.
       assertTrue(success);
 
       humanoidReferenceFrames.updateFrames();
@@ -286,7 +286,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       simulationTestHelper.createSubscriberFromController(MessageCollectionNotification.class, messageCollectionMessenger::receivedNotification);
       messageCollectionMessenger.sendMessageCollectionSafe(simulationTestHelper::publishToController, false);
 
-      success = simulationTestHelper.simulateNow(getRobotModel().getControllerDT()); // Trick to get frames synchronized with the controller.
+      success = simulationTestHelper.simulateNow(simulationTestHelper.getCurrentControlDT()); // Trick to get frames synchronized with the controller.
       assertTrue(success);
 
       humanoidReferenceFrames.updateFrames();
@@ -412,7 +412,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       simulationTestHelper.createSubscriberFromController(MessageCollectionNotification.class, messageCollectionMessenger::receivedNotification);
       messageCollectionMessenger.sendMessageCollectionSafe(simulationTestHelper::publishToController, false);
 
-      success = simulationTestHelper.simulateNow(getRobotModel().getControllerDT()); // Trick to get frames synchronized with the controller.
+      success = simulationTestHelper.simulateNow(simulationTestHelper.getCurrentControlDT()); // Trick to get frames synchronized with the controller.
       assertTrue(success);
 
       humanoidReferenceFrames.updateFrames();

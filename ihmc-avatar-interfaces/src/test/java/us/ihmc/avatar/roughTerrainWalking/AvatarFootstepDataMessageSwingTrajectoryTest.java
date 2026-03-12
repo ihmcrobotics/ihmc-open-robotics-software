@@ -258,7 +258,7 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
 
       footstepDataList.getFootstepDataList().add().set(footstep);
       simulationTestHelper.publishToController(footstepDataList);
-      assertTrue(simulationTestHelper.simulateNow(initialTransferTime + getRobotModel().getControllerDT() * 4.0));
+      assertTrue(simulationTestHelper.simulateNow(initialTransferTime + simulationTestHelper.getCurrentControlDT() * 4.0));
 
       String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
       String format = EuclidCoreIOTools.getStringFormat(6, 4);

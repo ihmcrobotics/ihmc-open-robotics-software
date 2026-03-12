@@ -11,6 +11,15 @@ module behavior_msgs
   {
     module dds
     {
+      const octet DOOR_TYPE_UNKNOWN =
+      0;
+
+      const octet DOOR_TYPE_PUSH =
+      1;
+
+      const octet DOOR_TYPE_PULL =
+      2;
+
 
       /**
        * A behavior tree scene object
@@ -35,6 +44,34 @@ module behavior_msgs
          * Transform of the object frame to world frame
          */
         controller_msgs::msg::dds::RigidBodyTransformMessage transform_to_world;
+        /**
+         * Used only for door panel
+         */
+        behavior_msgs::msg::dds::PersistentDetectionStatusMessage door_panel_detection;
+        /**
+         * Number of points in the latch post detection capsule
+         */
+        unsigned long latch_post_points;
+        /**
+         * Number of points in the hinge side recess detection capsule
+         */
+        unsigned long hinge_recess_points;
+        /**
+         * The open angle of the door hinge (0 = closed, Zup yaw)
+         */
+        float door_open_angle;
+        /**
+         * Door type as defined above
+         */
+        octet door_type;
+        /**
+         * Hinge side from the view of the robot
+         */
+        octet hinge_side;
+        /**
+         * Whether the object is frozen
+         */
+        boolean frozen;
       };
     };
   };

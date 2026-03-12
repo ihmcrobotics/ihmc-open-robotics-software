@@ -30,11 +30,6 @@ mainDependencies {
    api("org.bytedeco:cuda:$cudaVersion:linux-arm64")
    api("org.bytedeco:cuda:$cudaVersion:linux-x86_64")
    api("org.bytedeco:cuda:$cudaVersion:windows-x86_64")
-   val openclVersion = "3.0-1.5.11"
-   api("org.bytedeco:opencl:$openclVersion")
-   api("org.bytedeco:opencl:$openclVersion:linux-arm64")
-   api("org.bytedeco:opencl:$openclVersion:linux-x86_64")
-   api("org.bytedeco:opencl:$openclVersion:windows-x86_64")
    val librealsense2Version = "2.53.1-1.5.11-ihmc-3" // https://robotlabfiles.ihmc.us/repository/us/ihmc/librealsense2/2.53.1-1.5.11-ihmc-3/
    api("us.ihmc:librealsense2:$librealsense2Version")
    api("us.ihmc:librealsense2:$librealsense2Version:linux-arm64")
@@ -42,7 +37,12 @@ mainDependencies {
    api("us.ihmc:librealsense2:$librealsense2Version:windows-x86_64")
 
    api("us.ihmc:ihmc-humanoid-robotics:source")
-   api("us.ihmc:robot-environment-awareness:source")
+
+   api("com.vividsolutions:jts:1.13") // TODO Update to https://github.com/locationtech/jts
+
+   api("us.ihmc:joctomap:1.12.7")
+   api("us.ihmc:ihmc-graphics-javafx:source")
+   api("us.ihmc:ihmc-robot-data-logger:0.37.1")
 
    // Previously used for HeightMapAutoencoder and FootstepPredictor
    // This is a very large dependency, only uncomment for testing purposes

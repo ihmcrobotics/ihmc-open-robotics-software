@@ -823,10 +823,14 @@ public class RDXVRWholeBodyKinematicStreaming
                for (int i = 0; i < ghostOneDoFJointsExcludingHands.length; i++)
                {
                   ghostOneDoFJointsExcludingHands[i].setQ(latestStatus.getDesiredJointAngles().get(i));
-                  miniGhostKST.setJoint(i, latestStatus.getDesiredJointAngles().get(i));
-                  OneDoFJointBasics realJoint = syncedRobot.getFullRobotModel().getOneDoFJoints()[i];
-                  double realQ = realJoint.getQ();
-                  miniGhostReal.setJoint(i, realQ);
+                  if (miniGhostEnabled)
+                  {
+                     miniGhostKST.setJoint(i, latestStatus.getDesiredJointAngles().get(i));
+                     OneDoFJointBasics realJoint = syncedRobot.getFullRobotModel().getOneDoFJoints()[i];
+                     double realQ = realJoint.getQ();
+                     miniGhostReal.setJoint(i, realQ);
+                  }
+
                }
                ghostFullRobotModel.getElevator().updateFramesRecursively();
             }

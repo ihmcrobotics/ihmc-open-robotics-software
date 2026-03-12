@@ -1,9 +1,9 @@
 package us.ihmc.behaviors.behaviorTree.ros2;
 
 import behavior_msgs.msg.dds.*;
+import us.ihmc.behaviors.behaviorTree.*;
+import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
 import us.ihmc.behaviors.behaviorTree.control.ai2r.AI2RNodeState;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.control.buildingExploration.BuildingExplorationState;
 import us.ihmc.behaviors.behaviorTree.control.door.DoorTraversalState;
 import us.ihmc.behaviors.behaviorTree.action.actions.CheckPointNodeState;
@@ -12,8 +12,12 @@ import us.ihmc.behaviors.behaviorTree.control.GotoNodeState;
 import us.ihmc.behaviors.behaviorTree.control.ActionSequenceState;
 import us.ihmc.behaviors.behaviorTree.control.FallbackNodeState;
 import us.ihmc.behaviors.behaviorTree.action.actions.*;
+import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneExecutor;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTStatusSE3Trajectory;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 /**
  * All the stuff that for packing/unpacking the specific types goes in here
@@ -38,6 +42,7 @@ public class ROS2BehaviorTreeMessageTools
       treeStateMessage.getAi2rNodes().clear();
       treeStateMessage.getDoorTraversals().clear();
       treeStateMessage.getBuildingExplorations().clear();
+      treeStateMessage.getNeckActions().clear();
       treeStateMessage.getChestOrientationActions().clear();
       treeStateMessage.getFootstepPlanActions().clear();
       treeStateMessage.getHandPoseActions().clear();
@@ -123,6 +128,12 @@ public class ROS2BehaviorTreeMessageTools
             treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.BUILDING_EXPLORATION);
             treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getDoorTraversals().size());
             buildingExplorationState.toMessage(treeStateMessage.getBuildingExplorations().add());
+         }
+         else if (nodeState instanceof NeckActionState neckActionState)
+         {
+            treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.NECK_ACTION);
+            treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getNeckActions().size());
+            neckActionState.toMessage(treeStateMessage.getNeckActions().add());
          }
          else if (nodeState instanceof ChestOrientationActionState chestOrientationActionState)
          {
@@ -244,6 +255,10 @@ public class ROS2BehaviorTreeMessageTools
       else if (nodeState instanceof BuildingExplorationState buildingExplorationState)
       {
          buildingExplorationState.fromMessage(subscriptionNode.getBuildingExplorationStateMessage());
+      }
+      else if (nodeState instanceof NeckActionState neckActionState)
+      {
+         neckActionState.fromMessage(subscriptionNode.getNeckActionStateMessage());
       }
       else if (nodeState instanceof ChestOrientationActionState chestOrientationActionState)
       {
@@ -386,6 +401,15 @@ public class ROS2BehaviorTreeMessageTools
             subscriptionNode.setBehaviorTreeNodeStateMessage(buildingExplorationStateMessage.getState());
             subscriptionNode.setBehaviorTreeNodeDefinitionMessage(buildingExplorationStateMessage.getDefinition().getDefinition());
          }
+         case BehaviorTreeStateMessage.NECK_ACTION ->
+         {
+            NeckActionStateMessage neckActionStateMessage = treeStateMessage.getNeckActions().get(indexInTypesList);
+            subscriptionNode.setNeckActionStateMessage(neckActionStateMessage);
+            subscriptionNode.setActionNodeStateMessage(neckActionStateMessage.getState());
+            subscriptionNode.setLeafNodeStateMessage(neckActionStateMessage.getState().getState());
+            subscriptionNode.setBehaviorTreeNodeStateMessage(neckActionStateMessage.getState().getState().getState());
+            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(neckActionStateMessage.getDefinition().getDefinition().getDefinition().getDefinition());
+         }
          case BehaviorTreeStateMessage.CHEST_ORIENTATION_ACTION ->
          {
             ChestOrientationActionStateMessage chestOrientationActionStateMessage = treeStateMessage.getChestOrientationActions().get(indexInTypesList);
@@ -475,6 +499,64 @@ public class ROS2BehaviorTreeMessageTools
             subscriptionNode.setLeafNodeStateMessage(footPoseActionStateMessage.getState().getState());
             subscriptionNode.setBehaviorTreeNodeStateMessage(footPoseActionStateMessage.getState().getState().getState());
             subscriptionNode.setBehaviorTreeNodeDefinitionMessage(footPoseActionStateMessage.getDefinition().getDefinition().getDefinition().getDefinition());
+         }
+      }
+   }
+
+   public static void packYoData(BehaviorTreeExecutor tree, BehaviorTreeYoDataMessage yoDataMessage)
+   {
+      BehaviorTreeSceneExecutor scene = tree.getScene();
+
+      yoDataMessage.setNumberOfPersistentDetections((byte) scene.getPersistentDetections().size());
+      yoDataMessage.setNumberOfSceneObjects((byte) scene.getObjects().size());
+
+      for (int i = 0; i < yoDataMessage.getSceneObjectPose().length; i++)
+      {
+         if (scene.getObjects().size() > i)
+            yoDataMessage.getSceneObjectPose()[i].set(scene.getObjects().get(i).getTransformToWorld());
+         else
+            yoDataMessage.getSceneObjectPose()[i].setToNaN();
+      }
+
+      BehaviorTreeRootNodeExecutor rootNode = tree.getRootNode();
+      if (rootNode != null)
+      {
+         yoDataMessage.setAutomaticExecution(rootNode.getState().getAutomaticExecution());
+         yoDataMessage.setExecutionNextIndex((byte) rootNode.getState().getExecutionNextIndex());
+         yoDataMessage.setConcurrencyEnabled(rootNode.getState().getConcurrencyEnabled());
+         yoDataMessage.setNumberOfExecutingActions((byte) rootNode.getCurrentlyExecutingLeaves().size());
+         yoDataMessage.setNumberOfFailedActions((byte) rootNode.getFailedLeaves().size());
+
+         for (int i = 0; i < yoDataMessage.getExecutingActionType().length; i++)
+         {
+            if (rootNode.getCurrentlyExecutingLeaves().size() > i)
+            {
+               yoDataMessage.getExecutingActionType()[i]
+                     = BehaviorTreeDefinitionRegistry.getMessageByte(rootNode.getCurrentlyExecutingLeaves().get(i).getDefinition().getClass());
+               yoDataMessage.getExecutingActionId()[i] = (short) rootNode.getCurrentlyExecutingLeaves().get(i).getState().getID();
+               if (rootNode.getCurrentlyExecutingLeaves().get(i).getState() instanceof ActionNodeState<?> actionState)
+                  yoDataMessage.getElapsedExecutionTime()[i] = (float) actionState.getElapsedExecutionTime();
+            }
+            else
+            {
+               yoDataMessage.getExecutingActionType()[i] = -1;
+               yoDataMessage.getExecutingActionId()[i] = -1;
+               yoDataMessage.getElapsedExecutionTime()[i] = Float.NaN;
+            }
+         }
+
+         SideDependentList<HandPoseActionExecutor> lastHandPoseActions = new SideDependentList<>();
+         for (LeafNodeExecutor<?, ?> leaf : rootNode.getCurrentlyExecutingLeaves())
+            if (leaf instanceof HandPoseActionExecutor handPoseAction)
+               lastHandPoseActions.put(handPoseAction.getDefinition().getSide(), handPoseAction);
+         for (RobotSide side : lastHandPoseActions.sides())
+         {
+            HandPoseActionExecutor action = lastHandPoseActions.get(side);
+            yoDataMessage.getCurrentHandPose()[side.ordinal()].set(action.getState().getCurrentPose().getValueReadOnly());
+            CRDTStatusSE3Trajectory commandedTrajectory = action.getState().getCommandedTrajectory();
+            if (!commandedTrajectory.isEmpty())
+               yoDataMessage.getGoalHandPose()[side.ordinal()].set(commandedTrajectory.getLastValueReadOnly().getOrientation(),
+                                                                   commandedTrajectory.getLastValueReadOnly().getPosition());
          }
       }
    }

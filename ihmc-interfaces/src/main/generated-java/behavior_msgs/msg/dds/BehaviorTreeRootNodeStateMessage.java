@@ -33,6 +33,10 @@ public class BehaviorTreeRootNodeStateMessage extends Packet<BehaviorTreeRootNod
             */
    public boolean concurrency_enabled_;
    /**
+            * Preview mode enabled
+            */
+   public boolean preview_mode_enabled_;
+   /**
             * Request failures reset
             */
    public boolean failure_reset_requested_;
@@ -60,6 +64,8 @@ public class BehaviorTreeRootNodeStateMessage extends Packet<BehaviorTreeRootNod
       manual_execution_requested_ = other.manual_execution_requested_;
 
       concurrency_enabled_ = other.concurrency_enabled_;
+
+      preview_mode_enabled_ = other.preview_mode_enabled_;
 
       failure_reset_requested_ = other.failure_reset_requested_;
 
@@ -144,6 +150,21 @@ public class BehaviorTreeRootNodeStateMessage extends Packet<BehaviorTreeRootNod
    }
 
    /**
+            * Preview mode enabled
+            */
+   public void setPreviewModeEnabled(boolean preview_mode_enabled)
+   {
+      preview_mode_enabled_ = preview_mode_enabled;
+   }
+   /**
+            * Preview mode enabled
+            */
+   public boolean getPreviewModeEnabled()
+   {
+      return preview_mode_enabled_;
+   }
+
+   /**
             * Request failures reset
             */
    public void setFailureResetRequested(boolean failure_reset_requested)
@@ -186,6 +207,8 @@ public class BehaviorTreeRootNodeStateMessage extends Packet<BehaviorTreeRootNod
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.concurrency_enabled_, other.concurrency_enabled_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.preview_mode_enabled_, other.preview_mode_enabled_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.failure_reset_requested_, other.failure_reset_requested_, epsilon)) return false;
 
 
@@ -211,6 +234,8 @@ public class BehaviorTreeRootNodeStateMessage extends Packet<BehaviorTreeRootNod
 
       if(this.concurrency_enabled_ != otherMyClass.concurrency_enabled_) return false;
 
+      if(this.preview_mode_enabled_ != otherMyClass.preview_mode_enabled_) return false;
+
       if(this.failure_reset_requested_ != otherMyClass.failure_reset_requested_) return false;
 
 
@@ -235,6 +260,8 @@ public class BehaviorTreeRootNodeStateMessage extends Packet<BehaviorTreeRootNod
       builder.append(this.manual_execution_requested_);      builder.append(", ");
       builder.append("concurrency_enabled=");
       builder.append(this.concurrency_enabled_);      builder.append(", ");
+      builder.append("preview_mode_enabled=");
+      builder.append(this.preview_mode_enabled_);      builder.append(", ");
       builder.append("failure_reset_requested=");
       builder.append(this.failure_reset_requested_);
       builder.append("}");

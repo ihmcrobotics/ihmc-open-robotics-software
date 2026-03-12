@@ -13,8 +13,8 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.imageMessage.PixelFormat;
+import us.ihmc.sensors.CameraIntrinsics;
 
 import java.time.Instant;
 import java.util.Random;
@@ -189,6 +189,53 @@ public class RawImageTest
       assertFalse(sensorTransform.geometricallyEquals(image.getTransformToWorld(), 1E-7));
 
       image.release();
+   }
+
+   @Test // @RepeatedTest(10)
+   public void testReadBandwidth() throws InterruptedException
+   {
+      RawImage testImage = createRawImage(mat8UC1);
+
+      int numThreads = 300;
+      int readsPerThread = 30000;
+      Thread[] threads = new Thread[numThreads];
+
+      // Make sure the image is initialized once so first-use overhead is gone
+      assertNotNull(testImage.getCpuImageMat());
+      assertNotNull(testImage.getGpuImageMat());
+
+      long startNanos = System.nanoTime();
+
+      for (int i = 0; i < numThreads; ++i)
+      {
+         threads[i] = new Thread(() ->
+         {
+            // Each thread repeatedly reads the image
+            for (int j = 0; j < readsPerThread; j++)
+            {
+               Mat cpu = testImage.getCpuImageMat();
+               GpuMat gpu = testImage.getGpuImageMat();
+
+               // Touch something so JIT cannot trivially dead‑code eliminate
+               assertTrue(cpu != null && !cpu.isNull());
+               assertTrue(gpu != null && !gpu.isNull());
+            }
+         }, "RawImageReader-" + i);
+
+         threads[i].start();
+      }
+
+      for (int i = 0; i < numThreads; ++i)
+         threads[i].join();
+
+      long endNanos = System.nanoTime();
+      long totalReads = (long) numThreads * readsPerThread;
+      double seconds = (endNanos - startNanos) / 1e9;
+      double readsPerSecond = totalReads / seconds;
+
+      System.out.printf("Read bandwidth: %.2f Mops/s (%d reads in %.3f s with %d threads)%n", readsPerSecond / 1e6, totalReads, seconds, numThreads);
+
+      testImage.release();
    }
 
    private boolean dataEquals(BytePointer dataA, BytePointer dataB)

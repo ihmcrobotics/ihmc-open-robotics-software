@@ -19,6 +19,7 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
+import us.ihmc.yoVariables.filters.AlphaFilterTools;
 import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.filters.FilteredFiniteDifferenceYoVariable;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -94,18 +95,19 @@ public class NaturalPostureController implements SCS2YoGraphicHolder
 
    public NaturalPostureController(NaturalPostureParameters parameters,
                                    HighLevelHumanoidControllerToolbox controllerToolbox,
+                                   double controlDT,
                                    YoRegistry parentRegistry)
    {
-      controlDT = controllerToolbox.getControlDT();
+      this.controlDT = controlDT;
       robotNaturalPosture = parameters.getNaturalPosture(controllerToolbox.getFullRobotModel());
       this.parameters = parameters;
 
       if (robotNaturalPosture.getRegistry() != null)
          registry.addChild(robotNaturalPosture.getRegistry());
 
-      velocityBreakFrequency.addListener(v -> velocityAlpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(velocityBreakFrequency.getDoubleValue(),
-                                                                                                                                controlDT), false));
-      velocityAlpha.addListener(v -> velocityBreakFrequency.set(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(velocityAlpha.getDoubleValue(),
+      velocityBreakFrequency.addListener(v -> velocityAlpha.set(AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(velocityBreakFrequency.getDoubleValue(),
+                                                                                                                         controlDT), false));
+      velocityAlpha.addListener(v -> velocityBreakFrequency.set(AlphaFilterTools.computeBreakFrequencyGivenAlpha(velocityAlpha.getDoubleValue(),
                                                                                                                         controlDT), false));
       velocityBreakFrequency.set(parameters.getVelocityBreakFrequency());  //50
 
@@ -137,6 +139,11 @@ public class NaturalPostureController implements SCS2YoGraphicHolder
       }
 
       parentRegistry.addChild(registry);
+   }
+
+   public double getControlDT()
+   {
+      return controlDT;
    }
 
    public void compute()

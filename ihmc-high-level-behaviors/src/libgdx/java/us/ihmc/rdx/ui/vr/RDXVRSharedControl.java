@@ -11,7 +11,7 @@ import us.ihmc.behaviors.sharedControl.TeleoperationAssistant;
 import us.ihmc.ros2.ROS2Input;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
+import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -37,7 +37,7 @@ import java.util.Map;
 
 public class RDXVRSharedControl implements TeleoperationAssistant
 {
-   private final ROS2PublishSubscribeAPI ros2;
+   private final ROS2Helper ros2;
 //   private final ROS2Input<SceneGraphMessage> sceneGraphSubscription;
    private final ImBoolean enabledReplay;
    private final ImBoolean enabledIKStreaming;
@@ -60,7 +60,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    private int replayPreviewCounter = 0;
    private int speedSplineAdjustmentFactor = 1;
 
-   public RDXVRSharedControl(DRCRobotModel robotModel, ROS2PublishSubscribeAPI ros2, ImBoolean enabledIKStreaming, ImBoolean enabledReplay)
+   public RDXVRSharedControl(DRCRobotModel robotModel, ROS2Helper ros2, ImBoolean enabledIKStreaming, ImBoolean enabledReplay)
    {
       this.ros2 = ros2;
       this.enabledIKStreaming = enabledIKStreaming;
@@ -218,16 +218,6 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    @Override
    public void processFrameInformation(Pose3DReadOnly observedPose, String bodyPart)
    {
-//      if (sceneGraphSubscription.getMessageNotification().poll() && !proMPAssistant.startedProcessing())
-//      {
-//         DetectableSceneNodesMessage detectableSceneNodeMessage = sceneGraphSubscription.getMessageNotification().read();
-//         DetectableSceneNodeMessage selectedObject = null; // TODO: Search for desired object
-//         objectName = selectedObject.getNameAsString();
-//
-//         MessageTools.toEuclid(selectedObject.getTransformToWorld(), objectTransformToWorld);
-//         objectFrame.update();
-//      }
-
       if (proMPAssistant.startedProcessing())
       {
          enableStdDeviationVisualization(bodyPart);

@@ -25,12 +25,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import static us.ihmc.communication.ros2.tf2.ROS2FrameTools.CAMERA_TO_OPTICAL_TRANSFORM;
+
 public class ImageSensorPublishThread extends RepeatingTaskThread
 {
-   // Read about optical frames here: https://ros.org/reps/rep-0103.html
-   private static final RigidBodyTransformReadOnly CAMERA_TO_OPTICAL_TRANSFORM = new RigidBodyTransform(new YawPitchRoll(-0.5 * Math.PI, 0.0, -0.5 * Math.PI),
-                                                                                                        new Vector3D());
-
    private final ROS2Node ros2Node;
 
    private final Map<AsyncImagePublisher, Integer> publisherMap = new HashMap<>();
@@ -149,13 +147,13 @@ public class ImageSensorPublishThread extends RepeatingTaskThread
       // Ensure we've added these frames
       if (cameraFrame == null)
       {
-         cameraFrame = new ROS2FollowingFrame(ros2Node, "ros2_" + imageFrame.getName(), imageSensor.getSensorFrame(), imageFrame);
+         cameraFrame = new ROS2FollowingFrame("ros2_" + imageFrame.getName(), imageSensor.getSensorFrame(), imageFrame);
          ros2CameraFrames.put(imageKey, cameraFrame);
       }
 
       if (opticalFrame == null)
       {
-         opticalFrame = new ROS2StaticFrame(ros2Node, cameraFrame.getFrameId() + "_optical", cameraFrame, CAMERA_TO_OPTICAL_TRANSFORM);
+         opticalFrame = new ROS2StaticFrame(cameraFrame.getFrameId() + "_optical", cameraFrame, CAMERA_TO_OPTICAL_TRANSFORM);
          ros2OpticalFrames.put(imageKey, opticalFrame);
       }
 
@@ -165,8 +163,8 @@ public class ImageSensorPublishThread extends RepeatingTaskThread
          cameraFrame.remove();
          opticalFrame.remove();
 
-         cameraFrame = new ROS2FollowingFrame(ros2Node, "ros2_" + imageFrame.getName(), imageSensor.getSensorFrame(), imageFrame);
-         opticalFrame = new ROS2StaticFrame(ros2Node, cameraFrame.getFrameId() + "_optical", cameraFrame, CAMERA_TO_OPTICAL_TRANSFORM);
+         cameraFrame = new ROS2FollowingFrame("ros2_" + imageFrame.getName(), imageSensor.getSensorFrame(), imageFrame);
+         opticalFrame = new ROS2StaticFrame(cameraFrame.getFrameId() + "_optical", cameraFrame, CAMERA_TO_OPTICAL_TRANSFORM);
 
          ros2CameraFrames.replace(imageKey, cameraFrame);
          ros2OpticalFrames.replace(imageKey, opticalFrame);

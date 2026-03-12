@@ -170,12 +170,11 @@ public class SupportState extends AbstractFootControlState
       }
 
       MovingReferenceFrame soleFrame = fullRobotModel.getSoleFrame(robotSide);
-      double dt = controllerToolbox.getControlDT();
       footRotationCalculationModule = new FootholdCroppingModule(robotSide,
                                                                  soleFrame,
                                                                  footControlHelper.getContactableFoot().getContactPoints2D(),
                                                                  footControlHelper.getFootholdRotationParameters(),
-                                                                 dt,
+                                                                 footControlHelper.getControlDT(),
                                                                  registry);
 
       String feetManagerName = FeetManager.class.getSimpleName();

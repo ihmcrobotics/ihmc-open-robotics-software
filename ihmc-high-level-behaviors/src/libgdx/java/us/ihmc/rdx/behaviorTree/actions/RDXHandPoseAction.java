@@ -210,9 +210,27 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
                                                             definition::setJointspaceWeight);
       jointspaceWeightWidget.addButton("Use Default Weights", () -> definition.setJointspaceWeight(-1.0));
       jointspaceWeightWidget.addWidgetAligner(widgetAligner);
-      positionErrorToleranceInput = new ImDoubleWrapper(definition::getPositionErrorTolerance,
-                                                        definition::setPositionErrorTolerance,
-                                                        imDouble -> ImGui.inputDouble(labels.get("Position Error Tolerance"), imDouble));
+      positionErrorToleranceInput = new ImDoubleWrapper(() ->
+                                                        {
+                                                           if (getDefinition().getUsePredefinedJointAngles())
+                                                              return Math.toDegrees(definition.getPositionErrorTolerance());
+                                                           else
+                                                              return definition.getPositionErrorTolerance();
+                                                        },
+                                                        positionErrorTolerance ->
+                                                        {
+                                                           if (definition.getUsePredefinedJointAngles())
+                                                              definition.setPositionErrorTolerance(Math.toRadians(positionErrorTolerance));
+                                                           else
+                                                              definition.setPositionErrorTolerance(positionErrorTolerance);
+                                                        },
+                                                        imDouble ->
+                                                        {
+                                                           if (definition.getUsePredefinedJointAngles())
+                                                              ImGui.inputDouble(labels.get("Position Error Tolerance (%s)".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL)), imDouble);
+                                                           else
+                                                              ImGui.inputDouble(labels.get("Position Error Tolerance"), imDouble);
+                                                        });
       orientationErrorToleranceDegreesInput = new ImDoubleWrapper(
             () -> Math.toDegrees(definition.getOrientationErrorTolerance()),
             orientationErrorToleranceDegrees -> definition.setOrientationErrorTolerance(Math.toRadians(orientationErrorToleranceDegrees)),
@@ -384,10 +402,8 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
 
       ImGui.sameLine();
       boolean gizmoWasSelected = poseGizmo.getSelected().get();
-      if (armIconWidget.render(definition.getSide(), gizmoWasSelected))
-      {
+      if (armIconWidget.render(definition.getSide(), gizmoWasSelected, definition.getUsePredefinedJointAngles()))
          poseGizmo.setSelected(!gizmoWasSelected);
-      }
 
       renderRowEnd();
    }
@@ -427,8 +443,9 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
             }
          }
          jointspaceWeightWidget.renderImGuiWidget();
+         ImGui.pushItemWidth(ImGui.getFontSize() * 10.0f);
          positionErrorToleranceInput.renderImGuiWidget();
-         orientationErrorToleranceDegreesInput.renderImGuiWidget();
+         ImGui.popItemWidth();
       }
       else
       {
@@ -447,8 +464,10 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
          if (definition.getJointspaceOnly())
             ImGui.endDisabled();
          jointspaceWeightWidget.renderImGuiWidget();
+         ImGui.pushItemWidth(ImGui.getFontSize() * 10.0f);
          positionErrorToleranceInput.renderImGuiWidget();
          orientationErrorToleranceDegreesInput.renderImGuiWidget();
+         ImGui.popItemWidth();
          ImGui.text("IK Solution Quality: %.2f".formatted(state.getSolutionQuality()));
          ImGui.sameLine();
          if (ImGui.button(labels.get("Set Pose to Synced Hand")))
@@ -482,7 +501,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
    @Override
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
-      if (state.getPalmFrame().isChildOfWorld())
+      if (getSelected() && state.getPalmFrame().isChildOfWorld())
       {
          poseGizmo.calculate3DViewPick(input);
 
@@ -504,7 +523,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
    @Override
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      if (state.getPalmFrame().isChildOfWorld())
+      if (getSelected() && state.getPalmFrame().isChildOfWorld())
       {
          isMouseHovering = input.getClosestPick() == pickResult;
 
@@ -523,13 +542,13 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (state.getPalmFrame().isChildOfWorld())
+      if ((state.getIsNextForExecution() || getSelected() || state.getIsExecuting()) && state.getPalmFrame().isChildOfWorld())
       {
          if (!definition.getUsePredefinedJointAngles() && (getSelected() || poseGizmo.isSelected() || armIconWidget.getIsHovered()))
             highlightModels.get(definition.getSide()).getRenderables(renderables, pool);
          poseGizmo.getVirtualRenderables(renderables, pool);
 
-         if (state.getIsNextForExecution())
+         if (state.getIsNextForExecution() || state.getIsExecuting())
          {
             armMultiBodyGraphics.get(definition.getSide()).getRootBody().getVisualRenderables(renderables, pool);
             if (showAbilityHand && abilityHands.containsKey(definition.getSide()))

@@ -12,7 +12,6 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.ROS2Node;
 
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -35,8 +34,6 @@ public class ROS2HumanoidFrames
 {
    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
    private static final SideDependentList<String> SIDE_PREFIXES = new SideDependentList<>("l_", "r_");
-
-   private final ROS2Node ros2Node;
 
    private final HumanoidReferenceFrames humanoidFrames;
    private final FullHumanoidRobotModel fullRobotModel;
@@ -61,32 +58,31 @@ public class ROS2HumanoidFrames
    // Set of all ROS2Frames made in this class
    private final Set<ROS2Frame> allROS2Frames = new LinkedHashSet<>();
 
-   public ROS2HumanoidFrames(ROS2Node ros2Node, ROS2SyncedRobotModel syncedRobotModel)
+   public ROS2HumanoidFrames(ROS2SyncedRobotModel syncedRobotModel)
    {
-      this.ros2Node = ros2Node;
       humanoidFrames = syncedRobotModel.getReferenceFrames();
       fullRobotModel = syncedRobotModel.getFullRobotModel();
       robotVersion = syncedRobotModel.getRobotModel().getRobotVersion();
 
       // Map is the local base frame in which the robot should not drift, but the robot's pose need not be continuous
-      mapFrame = new ROS2StaticFrame(ros2Node, "map", ReferenceFrameTools.getWorldFrame(), new RigidBodyTransform(), true, true);
+      mapFrame = new ROS2StaticFrame("map", ReferenceFrameTools.getWorldFrame(), new RigidBodyTransform(), true, true);
       allROS2Frames.add(mapFrame);
 
       // Odom is the local base frame in which the robot's pose is continuous, and may be subject to drift
-      odomFrame = new ROS2MutableFrame(ros2Node, "odom", mapFrame, new RigidBodyTransform(), true);
+      odomFrame = new ROS2MutableFrame("odom", mapFrame, new RigidBodyTransform(), true);
       allROS2Frames.add(odomFrame);
 
       // Fill reference frame tree with robot frames
       fillTree(fullRobotModel.getRootJoint().getFrameAfterJoint());
 
       // Add base_footprint frame
-      baseFootprintFrame = new ROS2MutableFrame(ros2Node, "base_footprint", baseLinkFrame, computeBaseFootprintToBaseLinkTransform(new RigidBodyTransform()));
+      baseFootprintFrame = new ROS2MutableFrame("base_footprint", baseLinkFrame, computeBaseFootprintToBaseLinkTransform(new RigidBodyTransform()));
       allROS2Frames.add(baseFootprintFrame);
 
       // Add toe frames
       for (RobotSide side : RobotSide.values)
       {
-         ROS2Frame toeFrame = new ROS2StaticFrame(ros2Node, SIDE_PREFIXES.get(side) + "toe", ankleFrames.get(side), new RigidBodyTransform());
+         ROS2Frame toeFrame = new ROS2StaticFrame(SIDE_PREFIXES.get(side) + "toe", ankleFrames.get(side), new RigidBodyTransform());
          toeFrames.put(side, toeFrame);
          allROS2Frames.add(toeFrame);
       }
@@ -190,9 +186,9 @@ public class ROS2HumanoidFrames
    private ROS2Frame createFrameCopy(ReferenceFrame frameToCopy, String id, ROS2Frame parentFrame)
    {
       if (frameToCopy.isFixedInParent() && parentFrame.equals(ros2FrameCopyMap.get(frameToCopy.getParent())))
-         return new ROS2StaticFrame(ros2Node, id, parentFrame, frameToCopy.getTransformToParent());
+         return new ROS2StaticFrame(id, parentFrame, frameToCopy.getTransformToParent());
       else
-         return new ROS2FollowingFrame(ros2Node, id, parentFrame, frameToCopy);
+         return new ROS2FollowingFrame(id, parentFrame, frameToCopy);
    }
 
    private RigidBodyTransform computeBaseFootprintToBaseLinkTransform(RigidBodyTransform transformToPack)

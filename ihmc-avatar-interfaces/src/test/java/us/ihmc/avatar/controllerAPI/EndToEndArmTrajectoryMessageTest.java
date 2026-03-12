@@ -141,7 +141,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
                                                             0.0,
                                                             armJointNames,
                                                             startedStatus,
-                                                            getRobotModel().getControllerDT());
+                                                            simulationTestHelper.getCurrentControlDT());
          EndToEndTestTools.assertJointspaceTrajectoryStatus(sequenceID,
                                                             TrajectoryExecutionStatus.COMPLETED,
                                                             trajectoryTime,
@@ -149,7 +149,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
                                                             armJointNames,
                                                             completedStatus,
                                                             1.0e-12,
-                                                            getRobotModel().getControllerDT());
+                                                            simulationTestHelper.getCurrentControlDT());
       }
 
       // TODO GITHUB WORKFLOWS
@@ -235,7 +235,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
                                                             0.0,
                                                             armJointNames,
                                                             startedStatus,
-                                                            getRobotModel().getControllerDT());
+                                                            simulationTestHelper.getCurrentControlDT());
          EndToEndTestTools.assertJointspaceTrajectoryStatus(sequenceID,
                                                             TrajectoryExecutionStatus.COMPLETED,
                                                             trajectoryTime,
@@ -243,7 +243,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
                                                             armJointNames,
                                                             completedStatus,
                                                             1.0e-12,
-                                                            getRobotModel().getControllerDT());
+                                                            simulationTestHelper.getCurrentControlDT());
       }
       // TODO GITHUB WORKFLOWS
 //      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
@@ -262,7 +262,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
 
       List<JointspaceTrajectoryStatusMessage> statusMessages = new ArrayList<>();
       simulationTestHelper.createSubscriberFromController(JointspaceTrajectoryStatusMessage.class, statusMessages::add);
-      double controllerDT = getRobotModel().getControllerDT();
+      double controllerDT = simulationTestHelper.getCurrentControlDT();
 
       ThreadTools.sleep(1000);
       boolean success = simulationTestHelper.simulateNow(0.1 + getTransferToStandingDuration());
@@ -389,7 +389,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
 
       List<JointspaceTrajectoryStatusMessage> statusMessages = new ArrayList<>();
       simulationTestHelper.createSubscriberFromController(JointspaceTrajectoryStatusMessage.class, statusMessages::add);
-      double controllerDT = getRobotModel().getControllerDT();
+      double controllerDT = simulationTestHelper.getCurrentControlDT();
 
       ThreadTools.sleep(1000);
       boolean success = simulationTestHelper.simulateNow(0.1 + getTransferToStandingDuration());
@@ -476,7 +476,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       simulationTestHelper.start();
       List<JointspaceTrajectoryStatusMessage> statusMessages = new ArrayList<>();
       simulationTestHelper.createSubscriberFromController(JointspaceTrajectoryStatusMessage.class, statusMessages::add);
-      double controllerDT = getRobotModel().getControllerDT();
+      double controllerDT = simulationTestHelper.getCurrentControlDT();
 
       ThreadTools.sleep(1000);
       boolean success = simulationTestHelper.simulateNow(0.1 + getTransferToStandingDuration());
@@ -645,7 +645,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       createSimulationTestHelper();
       simulationTestHelper.start();
 
-      double controllerDT = getRobotModel().getControllerDT();
+      double controllerDT = simulationTestHelper.getCurrentControlDT();
 
       ThreadTools.sleep(1000);
       boolean success = simulationTestHelper.simulateNow(0.1 + getTransferToStandingDuration());
@@ -829,7 +829,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
             }
             simulationTestHelper.publishToController(armTrajectoryMessage);
 
-            success = simulationTestHelper.simulateNow(getRobotModel().getControllerDT());
+            success = simulationTestHelper.simulateNow(simulationTestHelper.getCurrentControlDT());
             assertTrue(success);
          }
       }
@@ -851,7 +851,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
          overridingMessages.put(robotSide, armTrajectoryMessage);
       }
 
-      success = simulationTestHelper.simulateNow(2.0 * getRobotModel().getControllerDT());
+      success = simulationTestHelper.simulateNow(2.0 * simulationTestHelper.getCurrentControlDT());
       assertTrue(success);
 
       for (RobotSide robotSide : RobotSide.values)
@@ -930,7 +930,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
 
          // publish the message and simulate for one control dt
          simulationTestHelper.publishToController(new StopAllTrajectoryMessage());
-         int simulationTicks = (int) (getRobotModel().getControllerDT() / getRobotModel().getSimulateDT());
+         int simulationTicks = (int) (simulationTestHelper.getCurrentControlDT() / getRobotModel().getSimulateDT());
          simulationTestHelper.simulateNow(simulationTicks);
 
          double[] expectedControllerDesiredJointVelocities = new double[numberOfJoints];
@@ -1093,7 +1093,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
          for (int i = 0; i < armJoints.length; i++)
          {
             double qDDes = desiredArmJointVelocities.get(robotSide)[i].getValue();
-            double qDes = desiredArmJointAngles.get(robotSide)[i].getValue() - getRobotModel().getControllerDT() * qDDes; // Hack to approx the previous desired. The last computed desired has not been processed yet.
+            double qDes = desiredArmJointAngles.get(robotSide)[i].getValue() - simulationTestHelper.getCurrentControlDT() * qDDes; // Hack to approx the previous desired. The last computed desired has not been processed yet.
 
             assertEquals(qDes,
                          controllerDesiredPositions[i],

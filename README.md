@@ -35,134 +35,101 @@ To get set up, use our public Confluence pages:
 https://ihmcrobotics.atlassian.net/wiki/spaces/PUBLIC/overview
 
 ## Other IHMC Libraries
-IHMC Open Robotics Software both depends on and is depended on by many other IHMC Robotics Libraries. 
-A sampling of our other software depended on by this repository includes
 
-Simulation Construction Set 2, our own simulation environment with 
-built-in analysis tools: https://github.com/ihmcrobotics/simulation-construction-set-2 
+*IHMC Open Robotics Software* both depends on, and is depended on by, a large ecosystem of IHMC robotics libraries. Below is a representative (but not exhaustive) list of related projects used by this repository.
 
-![scs2](https://maven-badges.herokuapp.com/maven-central/us.ihmc/scs2-definition/badge.svg?style=plastic)
-![buildstatus](https://github.com/ihmcrobotics/simulation-construction-set-2/actions/workflows/main-gradleCI-build.yml/badge.svg)
+### Simulation & Visualization
+- **Simulation Construction Set 2 (SCS2)**  
+  Modern simulation environment with built-in analysis tools  
+  https://github.com/ihmcrobotics/simulation-construction-set-2  
+  ![buildstatus](https://github.com/ihmcrobotics/simulation-construction-set-2/actions/workflows/main-gradleCI-build.yml/badge.svg)
 
-Simulation Construction Set, a deprecated simulation engine that's still used for base visualization
+- **Simulation Construction Set (legacy)**  
+  Deprecated simulation engine still used for base visualization
 
-![scs2](https://maven-badges.herokuapp.com/maven-central/us.ihmc/simlation-construction-set/badge.svg?style=plastic)
-![buildstatus](https://github.com/ihmcrobotics/simulation-construction-set/actions/workflows/main-gradleCI-build.yml/badge.svg)
+### Math, Geometry, & Dynamics
+- **Euclid**  
+  Java vector and geometry library with common 3D structures  
+  https://github.com/ihmcrobotics/euclid  
+  ![buildstatus](https://github.com/ihmcrobotics/euclid/actions/workflows/gradle-test.yml/badge.svg)
 
+- **Mecano**  
+  Rigid-body dynamics library built on Euclid and EJML  
+  https://github.com/ihmcrobotics/mecano  
+  ![buildstatus](https://github.com/ihmcrobotics/mecano/actions/workflows/gradle-test.yml/badge.svg)
 
-Euclid, an alternative vector/geometry library for Java with support for additional structures 
-common in 3D geometry without needing vecmath or Java3D: https://github.com/ihmcrobotics/euclid
+- **IHMC Matrix Library**  
+  ![buildstatus](https://github.com/ihmcrobotics/ihmc-matrix-library/actions/workflows/gradle-test.yml/badge.svg)
 
-![euclid](https://maven-badges.herokuapp.com/maven-central/us.ihmc/euclid/badge.svg?style=plastic)
-![buildstatus](https://github.com/ihmcrobotics/euclid/actions/workflows/gradle-test.yml/badge.svg)
+- **IHMC Convex Optimization**  
+  Collection of algorithms for solving convex optimization problems  
+  ![buildstatus](https://github.com/ihmcrobotics/ihmc-convex-optimization/actions/workflows/gradle-test.yml/badge.svg)
 
-Mecano, a rigid-body dynamics library built on top of Euclid and EJML: https://github.com/ihmcrobotics/mecano
+### Data, Logging, & Analysis
+- **IHMC YoVariables**  
+  Core data structures for time-series tracing and SCS analysis  
+  https://github.com/ihmcrobotics/ihmc-yovariables  
+  ![buildstatus](https://github.com/ihmcrobotics/ihmc-yovariables/actions/workflows/gradle-test.yml/badge.svg)
 
-![mecano](https://maven-badges.herokuapp.com/maven-central/us.ihmc/mecano/badge.svg?style=plastic)
-![buildstatus](https://github.com/ihmcrobotics/mecano/actions/workflows/gradle-test.yml/badge.svg)
+- **IHMC Robot Data Logger**  
+  Application for logging YoVariables  
+  ![buildstatus](https://github.com/ihmcrobotics/ihmc-robot-data-logger/actions/workflows/gradle-test.yml/badge.svg)
 
-IHMC YoVariables, our core data structures tools that enable the time-series tracing 
-and analysis of Simulation Construction Set: https://github.com/ihmcrobotics/ihmc-yovariables
+- **IHMC Log Tools**  
+  ![buildstatus](https://github.com/ihmcrobotics/log-tools/actions/workflows/gradle-test.yml/badge.svg)
 
-[ ![ihmc-yovariables](https://maven-badges.herokuapp.com/maven-central/us.ihmc/ihmc-yovariables/badge.svg?style=plastic)](https://maven-badges.herokuapp.com/maven-central/us.ihmc/ihmc-yovariables)
-![buildstatus](https://github.com/ihmcrobotics/ihmc-yovariables/actions/workflows/gradle-test.yml/badge.svg)
+### Perception & State Estimation
+- **JOctoMap**  
+  Java implementation of OctoMap  
+  https://github.com/ihmcrobotics/joctomap  
+  ![buildstatus](https://github.com/ihmcrobotics/joctomap/actions/workflows/gradle-test.yml/badge.svg)
 
-JOctoMap, a Java implementation of OctoMap: https://github.com/ihmcrobotics/joctomap
+- **IHMC EKF**  
+  ![buildstatus](https://github.com/ihmcrobotics/ekf/actions/workflows/gradle-test.yml/badge.svg)
 
-![joctomap](https://maven-badges.herokuapp.com/maven-central/us.ihmc/joctomap/badge.svg?style=plastic)
-![buildstatus](https://github.com/ihmcrobotics/joctomap/actions/workflows/gradle-test.yml/badge.svg)
+### Real-Time, Communication, & Middleware
+- **IHMC Realtime**  
+  Soft real-time Java threading on Linux using RT_PREEMPT  
+  https://github.com/ihmcrobotics/ihmc-realtime  
+  ![buildstatus](https://github.com/ihmcrobotics/ihmc-realtime/actions/workflows/gradle-test.yml/badge.svg)
 
-IHMC Realtime, a library for enabling soft real-time threading for Java on Linux using the 
-RT_PREEMPT patches: https://github.com/ihmcrobotics/ihmc-realtime
+- **IHMC EtherCAT Master**  
+  Java EtherCAT master built on IHMC Realtime and SOEM  
+  https://github.com/ihmcrobotics/ihmc-ethercat-master  
+  ![buildstatus](https://github.com/ihmcrobotics/ihmc-ethercat-master/actions/workflows/gradle-test.yml/badge.svg)
 
-![realtime](https://maven-badges.herokuapp.com/maven-central/us.ihmc/ihmc-realtime/badge.svg?style=plastic)
-![buildstatus](https://github.com/ihmcrobotics/ihmc-realtime/actions/workflows/gradle-test.yml/badge.svg)
+- **IHMC ROS 2 Library**  
+  Lightweight Java implementation of the ROS 2 communication protocol  
+  ![buildstatus](https://github.com/ihmcrobotics/ihmc-java-ros2-communication/actions/workflows/gradle.yml/badge.svg)
 
-IHMC EtherCAT Master, a Java library using IHMC Realtime and Simple Open EtherCAT Master (SOEM) 
-that makes it simple to start a software EtherCAT Master and pure Java data structures that map to 
-EtherCAT Slave defintions: https://github.com/ihmcrobotics/ihmc-ethercat-master
+- **IHMC PubSub**  
+  ![buildstatus](https://github.com/ihmcrobotics/ihmc-pub-sub-group/actions/workflows/build-natives.yml/badge.svg)  
+  ![buildstatus](https://github.com/ihmcrobotics/ihmc-pub-sub-group/actions/workflows/run-gradle-test-all-platforms.yml/badge.svg)  
+  ![buildstatus](https://github.com/ihmcrobotics/ihmc-pub-sub-group/actions/workflows/run-gradle-test-linux-self-hosted.yml/badge.svg)
 
-![realtime](https://maven-badges.herokuapp.com/maven-central/us.ihmc/ihmc-ethercat-master/badge.svg?style=plastic)
-![buildstatus](https://github.com/ihmcrobotics/ihmc-ethercat-master/actions/workflows/gradle-test.yml/badge.svg)
+### UI, Graphics, & Media
+- **IHMC JavaFX Toolkit**  
+  ![buildstatus](https://github.com/ihmcrobotics/ihmc-javafx-toolkit/actions/workflows/gradle-test.yml/badge.svg)
 
-IHMC Robot Data Logger, an application for logging yo variables.
+- **IHMC Graphics Description**  
+  ![buildstatus](https://github.com/ihmcrobotics/ihmc-graphics-description/actions/workflows/gradle-test.yml/badge.svg)
 
-![realtime](https://maven-badges.herokuapp.com/maven-central/us.ihmc/ihmc-robot-data-logger/badge.svg?style=plastic)
-![buildstatus](https://github.com/ihmcrobotics/ihmc-robot-data-logger/actions/workflows/gradle-test.yml/badge.svg)
+- **IHMC Video Codecs**  
+  ![buildstatus](https://github.com/ihmcrobotics/ihmc-video-codecs/actions/workflows/gradle-test.yml/badge.svg)
 
-IHMC Matrix Library
+### Utilities
+- **IHMC Commons**  
+  ![buildstatus](https://github.com/ihmcrobotics/ihmc-commons/actions/workflows/gradle-test.yml/badge.svg)
 
-![realtime](https://maven-badges.herokuapp.com/maven-central/us.ihmc/ihmc-matrix-library/badge.svg?style=plastic)
-![buildstatus](https://github.com/ihmcrobotics/ihmc-matrix-library/actions/workflows/gradle-test.yml/badge.svg)
+- **IHMC Native Library Loader**  
+  ![buildstatus](https://github.com/ihmcrobotics/ihmc-native-library-loader/actions/workflows/gradle-test.yml/badge.svg)
 
-IHMC Convex Optimization, an implementation of a number of algorithms for solving convex optimization problems.
-
-![realtime](https://maven-badges.herokuapp.com/maven-central/us.ihmc/ihmc-convex-optimization/badge.svg?style=plastic)
-![buildstatus](https://github.com/ihmcrobotics/ihmc-convex-optimization/actions/workflows/gradle-test.yml/badge.svg)
-
-IHMC EKF
-
-![realtime](https://maven-badges.herokuapp.com/maven-central/us.ihmc/ekf/badge.svg?style=plastic)
-![buildstatus](https://github.com/ihmcrobotics/ekf/actions/workflows/gradle-test.yml/badge.svg)
-
-
-IHMC ROS2 Library, a lightweight implementation of the ROS2 communication protocol.
-
-![realtime](https://maven-badges.herokuapp.com/maven-central/us.ihmc/ihmc-ros2-library/badge.svg?style=plastic)
-![buildstatus](https://github.com/ihmcrobotics/ihmc-java-ros2-communication/actions/workflows/gradle.yml/badge.svg)
-
-IHMC PubSub
-
-![realtime](https://maven-badges.herokuapp.com/maven-central/us.ihmc/ihmc-pub-sub/badge.svg?style=plastic)
-![buildstatus](https://github.com/ihmcrobotics/ihmc-pub-sub-group/actions/workflows/build-natives.yml/badge.svg)
-![buildstatus](https://github.com/ihmcrobotics/ihmc-pub-sub-group/actions/workflows/run-gradle-test-all-platforms.yml/badge.svg)
-![buildstatus](https://github.com/ihmcrobotics/ihmc-pub-sub-group/actions/workflows/run-gradle-test-linux-self-hosted.yml/badge.svg)
-
-IHMC Messager Kryo
-
-![realtime](https://maven-badges.herokuapp.com/maven-central/us.ihmc/ihmc-messager-kryo/badge.svg?style=plastic)
-![buildstatus](https://github.com/ihmcrobotics/ihmc-messager-kryo/actions/workflows/gradle-test.yml/badge.svg)
-
-IHMC Video Codecs
-
-![realtime](https://maven-badges.herokuapp.com/maven-central/us.ihmc/ihmc-video-codecs/badge.svg?style=plastic)
-![buildstatus](https://github.com/ihmcrobotics/ihmc-video-codecs/actions/workflows/gradle-test.yml/badge.svg)
-
-IHMC JavaFX Toolkit
-
-![realtime](https://maven-badges.herokuapp.com/maven-central/us.ihmc/ihmc-javafx-toolkit/badge.svg?style=plastic)
-![buildstatus](https://github.com/ihmcrobotics/ihmc-javafx-toolkit/actions/workflows/gradle-test.yml/badge.svg)
-
-IHMC Graphics Description
-
-![realtime](https://maven-badges.herokuapp.com/maven-central/us.ihmc/ihmc-graphics-description/badge.svg?style=plastic)
-![buildstatus](https://github.com/ihmcrobotics/ihmc-graphics-description/actions/workflows/gradle-test.yml/badge.svg)
-
-IHMC Commons
-
-![realtime](https://maven-badges.herokuapp.com/maven-central/us.ihmc/ihmc-commons/badge.svg?style=plastic)
-![buildstatus](https://github.com/ihmcrobotics/ihmc-commons/actions/workflows/gradle-test.yml/badge.svg)
-
-IHMC Native Library Loader
-
-![realtime](https://maven-badges.herokuapp.com/maven-central/us.ihmc/ihmc-native-library-loader/badge.svg?style=plastic)
-![buildstatus](https://github.com/ihmcrobotics/ihmc-native-library-loader/actions/workflows/gradle-test.yml/badge.svg)
-
-IHMC Log Tools
-
-![realtime](https://maven-badges.herokuapp.com/maven-central/us.ihmc/log-tools/badge.svg?style=plastic)
-![buildstatus](https://github.com/ihmcrobotics/log-tools/actions/workflows/gradle-test.yml/badge.svg)
-
-
-You can find all of our other repositories as well as the ones above at https://github.com/ihmcrobotics
+You can find these and many other IHMC projects at:  
+https://github.com/ihmcrobotics
 
 ## ROS APIs
 We provide a ROS 2 API for many of the core components in our software stack. 
 You can find the .msg definitions for use in your own projects in this project's ihmc-interfaces folder.
-
-We have ROS 1 support via the ROS 2 `ros1_bridge` package. 
-You can find the ROS 1 message definitions and instructions on using the 
-ROS 1 Bridge here: https://github.com/ihmcrobotics/ihmc_msgs
 
 ## Building .jars
 *IHMC Open Robotics Software* is pre-configured for generating Maven publications. 

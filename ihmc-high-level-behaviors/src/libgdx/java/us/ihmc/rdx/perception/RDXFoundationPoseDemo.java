@@ -143,7 +143,7 @@ public class RDXFoundationPoseDemo
       colorMessage = new ImageMessage();
       depthMessage = new ImageMessage();
 
-      yoloThread = new YOLOv8DetectionThread(robotClockOffsetEstimator, () -> true);
+      yoloThread = new YOLOv8DetectionThread(ros2Node, robotClockOffsetEstimator, () -> true);
       yoloThread.setImageSensor(zed, ZEDImageSensor.LEFT_COLOR_IMAGE_KEY, ZEDImageSensor.DEPTH_IMAGE_KEY);
       yoloThread.addDetectionConsumerCallback(this::publishRequest);
 

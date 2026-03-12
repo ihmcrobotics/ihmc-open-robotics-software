@@ -214,7 +214,7 @@ public abstract class EndToEndNeckTrajectoryMessageTest implements MultiRobotTes
       for (int i = 0; i < neckJoints.length; i++)
       {
          double qDDes = desiredNeckJointVelocities[i].getValue();
-         double qDes = desiredNeckJointAngles[i].getValue() - getRobotModel().getControllerDT() * qDDes; // Hack to approx the previous desired. The last computed desired has not been processed yet.
+         double qDes = desiredNeckJointAngles[i].getValue() - simulationTestHelper.getCurrentControlDT() * qDDes; // Hack to approx the previous desired. The last computed desired has not been processed yet.
 
          assertEquals(qDes,
                       controllerDesiredPositions[i],

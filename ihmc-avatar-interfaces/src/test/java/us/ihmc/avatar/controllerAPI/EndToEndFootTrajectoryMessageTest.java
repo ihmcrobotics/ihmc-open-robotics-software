@@ -208,7 +208,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
                                                         0.0,
                                                         foot.getName(),
                                                         statusMessages.remove(0),
-                                                        getRobotModel().getControllerDT());
+                                                        simulationTestHelper.getCurrentControlDT());
       EndToEndTestTools.assertTaskspaceTrajectoryStatus(footTrajectoryMessage.getSequenceId(),
                                                         TrajectoryExecutionStatus.COMPLETED,
                                                         trajectoryTime,
@@ -216,7 +216,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
                                                         foot.getName(),
                                                         statusMessages.remove(0),
                                                         1.0e-12,
-                                                        getRobotModel().getControllerDT());
+                                                        simulationTestHelper.getCurrentControlDT());
 
       EndToEndHandTrajectoryMessageTest.assertSingleWaypointExecuted(bodyName, desiredRandomFootPose, scs);
    }
@@ -341,7 +341,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       simulationTestHelper.setCamera(new Point3D(0.0, 0.0, 0.5), new Point3D(6.0, 2.0, 2.0));
 
       Random random = new Random(546547);
-      double controllerDT = getRobotModel().getControllerDT();
+      double controllerDT = simulationTestHelper.getCurrentControlDT();
 
       ThreadTools.sleep(1000);
       boolean success = simulationTestHelper.simulateNow(0.5);
@@ -519,7 +519,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
                                                                                             simulationTestingParameters);
       simulationTestHelper.start();
       simulationTestHelper.setCamera(new Point3D(0.0, 0.0, 0.5), new Point3D(6.0, 2.0, 2.0));
-      double controllerDT = getRobotModel().getControllerDT();
+      double controllerDT = simulationTestHelper.getCurrentControlDT();
 
       Random random = new Random(18721);
 
@@ -730,11 +730,11 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
          messagesToPack.add(footTrajectoryMessage);
          simulationTestHelper.publishToController(footTrajectoryMessage);
-         boolean success = simulationTestHelper.simulateNow(getRobotModel().getControllerDT());
+         boolean success = simulationTestHelper.simulateNow(simulationTestHelper.getCurrentControlDT());
          assertTrue(success);
       }
 
-      boolean success = simulationTestHelper.simulateNow(2.0 * getRobotModel().getControllerDT());
+      boolean success = simulationTestHelper.simulateNow(2.0 * simulationTestHelper.getCurrentControlDT());
       assertTrue(success);
       return footTrajectoryPoints;
    }
@@ -796,7 +796,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
                                  .set(HumanoidMessageTools.createSE3TrajectoryPointMessage(i, new Point3D(), new Quaternion(), new Vector3D(), new Vector3D()));
          }
          simulationTestHelper.publishToController(footTrajectoryMessage);
-         success = simulationTestHelper.simulateNow(getRobotModel().getControllerDT());
+         success = simulationTestHelper.simulateNow(simulationTestHelper.getCurrentControlDT());
          assertTrue(success);
 
          String bodyName = fullRobotModel.getFoot(robotSide).getName();
@@ -1053,7 +1053,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
                                                                                trajectoryTime);
          sendFootTrajectoryMessages(random, simulationTestHelper, robotSide, numberOfMessages, trajectoryPoints);
 
-         success = simulationTestHelper.simulateNow(getRobotModel().getControllerDT());
+         success = simulationTestHelper.simulateNow(simulationTestHelper.getCurrentControlDT());
          assertTrue(success);
 
          //send a single trajectory point message in override mode

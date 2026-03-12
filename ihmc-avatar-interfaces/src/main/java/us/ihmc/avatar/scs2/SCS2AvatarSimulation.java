@@ -336,6 +336,12 @@ public class SCS2AvatarSimulation
       return hasBeenDestroyed;
    }
 
+   public double getCurrentControlDT()
+   {
+      return controllerThread.getCurrentDT();
+   }
+
+
    public SimulationConstructionSet2 getSimulationConstructionSet()
    {
       return simulationConstructionSet;

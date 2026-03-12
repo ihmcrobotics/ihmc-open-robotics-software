@@ -32,6 +32,7 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.screwTheory.RigidBodyTwistCalculator;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -114,7 +115,7 @@ public class InverseKinematicsOptimizationControlModule implements SCS2YoGraphic
       else
          activeSetQPSolver = optimizationSettings.getActiveSetQPSolver();
 
-      double controlDT = toolbox.getControlDT();
+      DoubleProvider controlDT = toolbox.getControlDT();
       qpSolver = new InverseKinematicsQPSolver(activeSetQPSolver, numberOfDoFs, controlDT, registry);
 
       if (optimizationSettings != null)
@@ -207,7 +208,7 @@ public class InverseKinematicsOptimizationControlModule implements SCS2YoGraphic
       boolean success = motionQPInputCalculator.computeGravityCompensationMinimization(qpInput,
                                                                                        toolbox.getJointTorqueMinimizationWeightCalculator(),
                                                                                        true,
-                                                                                       toolbox.getControlDT());
+                                                                                       toolbox.getControlDT().getValue());
       if (success)
          qpSolver.addMotionInput(qpInput);
    }

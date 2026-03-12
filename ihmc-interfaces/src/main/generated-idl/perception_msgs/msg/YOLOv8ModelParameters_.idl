@@ -18,7 +18,6 @@ module perception_msgs
       struct YOLOv8ModelParameters
       {
         ihmc_common_msgs::msg::dds::LatestModificationMessage latest_timestamp_modifiable;
-        string model_name;
         /**
          * A boolean for each object class, whether its detections should be ignored
          */

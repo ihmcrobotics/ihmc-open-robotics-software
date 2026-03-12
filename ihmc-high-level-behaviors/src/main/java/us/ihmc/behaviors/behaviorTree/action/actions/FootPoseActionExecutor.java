@@ -3,7 +3,7 @@ package us.ihmc.behaviors.behaviorTree.action.actions;
 import controller_msgs.msg.dds.FootTrajectoryMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
-import us.ihmc.behaviors.behaviorTree.action.TaskspaceTrajectoryTrackingErrorCalculator;
+import us.ihmc.behaviors.behaviorTree.action.TrajectoryTrackingErrorCalculator;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -14,7 +14,7 @@ public class FootPoseActionExecutor extends ActionNodeExecutor<FootPoseActionSta
 {
    private final FramePose3D desiredFootPose = new FramePose3D();
    private final FramePose3D syncedFootPose = new FramePose3D();
-   private final TaskspaceTrajectoryTrackingErrorCalculator trackingCalculator = new TaskspaceTrajectoryTrackingErrorCalculator();
+   private final TrajectoryTrackingErrorCalculator trackingCalculator = new TrajectoryTrackingErrorCalculator();
 
    public FootPoseActionExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
    {

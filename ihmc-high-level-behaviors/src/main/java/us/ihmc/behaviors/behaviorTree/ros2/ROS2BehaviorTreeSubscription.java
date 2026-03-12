@@ -7,8 +7,10 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
+import us.ihmc.commons.Conversions;
+import us.ihmc.commons.UnitConversions;
 import us.ihmc.communication.AutonomyAPI;
-import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
+import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2Topic;
@@ -28,6 +30,7 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNode<T, ?, ?>>
    private long previousSequenceID = -1;
    private long messageDropCount = 0;
    private long outOfOrderCount = 0;
+   private long sequenceId;
    private int numberOfOnRobotNodes = 0;
    private final ConcurrentRingBuffer<BehaviorTreeStateMessage> behaviorTreeStateMessageQueue;
    private final ROS2BehaviorTreeSubscriptionNode subscriptionRootNode = new ROS2BehaviorTreeSubscriptionNode();
@@ -35,7 +38,7 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNode<T, ?, ?>>
    private final MutableInt subscriptionNodeDepthFirstIndex = new MutableInt();
    private final HashMap<Long, T> idToLocalNodesMap = new HashMap<>();
 
-   public ROS2BehaviorTreeSubscription(BehaviorTree<?, T> behaviorTree, ROS2PublishSubscribeAPI ros2PublishSubscribeAPI)
+   public ROS2BehaviorTreeSubscription(BehaviorTree<?, T> behaviorTree, ROS2Helper ros2PublishSubscribeAPI)
    {
       this.behaviorTree = behaviorTree;
 
@@ -78,6 +81,7 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNode<T, ?, ?>>
       {
          BehaviorTreeStateMessage behaviorTreeStateMessage = behaviorTreeStateMessageQueue.read();
 
+         sequenceId = behaviorTreeStateMessage.getSequenceId();
          numberOfOnRobotNodes = behaviorTreeStateMessage.getBehaviorTreeIndices().size();
 
          subscriptionRootNode.clear();
@@ -136,6 +140,20 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNode<T, ?, ?>>
                                                           BehaviorTreeTopologyOperationQueue<T> topologyOperationQueue)
    {
       boolean existsMatchingSubscriptionNode = subscriptionNode != null && subscriptionNode.getDefinitionClass() != null;
+      if (existsMatchingSubscriptionNode && sequenceId != subscriptionNode.getSequenceId())
+      {
+         LogTools.error(("Sequence ID %d != subscriptionNode.sequenceId %d. We took too long in this update and the queue wrapped around.")
+                              .formatted(sequenceId, subscriptionNode.getSequenceId()));
+      }
+      if (existsMatchingSubscriptionNode && subscriptionNode.getBehaviorTreeNodeStateMessage().getId() != localNode.getState().getID())
+      {
+         LogTools.error("ID mismatch: Subscription node: %s:%d  Local node: %s:%d  Skipping update."
+                              .formatted(subscriptionNode.getBehaviorTreeNodeDefinitionMessage().getName(),
+                                         subscriptionNode.getBehaviorTreeNodeStateMessage().getId(),
+                                         localNode.getDefinition().getName(),
+                                         localNode.getState().getID()));
+         existsMatchingSubscriptionNode = false;
+      }
 
       // Update the node first, to detect incoming modifications
       if (existsMatchingSubscriptionNode)
@@ -202,12 +220,16 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNode<T, ?, ?>>
                subscriptionNode.getPackedType(),
                subscriptionNode.getDefinitionClass().getSimpleName(),
                behaviorTree.getCRDTInfo().getActorDesignation().name()));
+         long before = System.nanoTime();
          if (rootNode == null)
             localNode = (T) behaviorTree.getNodeBuilder().createRootNode(nodeID);
          else
             localNode = behaviorTree.getNodeBuilder().createNode(subscriptionNode.getDefinitionClass(),
                                                                  nodeID,
                                                                  rootNode);
+         if (Conversions.nanosecondsToSeconds(System.nanoTime() - before) > UnitConversions.hertzToSeconds(ROS2BehaviorTree.SYNC_FREQUENCY))
+            LogTools.warn(("Node took a long time to create. %s:%d"
+                + "It should take significantly less than one tick.").formatted(localNode.getDefinition().getName(), localNode.getState().getID()));
          if (subscriptionNode.getPackedType() == BehaviorTreeStateMessage.PARTIAL_DATA)
          {
             LogTools.debug("Cannot replicate node fully from partial data!");

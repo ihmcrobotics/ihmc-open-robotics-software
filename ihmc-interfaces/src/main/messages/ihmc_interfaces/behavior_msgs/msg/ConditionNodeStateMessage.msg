@@ -24,3 +24,9 @@ bool frame_a_is_present
 
 # Whether frame B is present
 bool frame_b_is_present
+
+# SHAPE CONTAINS TYPE
+
+uint32 number_of_points_contained
+
+bool frame_is_contained

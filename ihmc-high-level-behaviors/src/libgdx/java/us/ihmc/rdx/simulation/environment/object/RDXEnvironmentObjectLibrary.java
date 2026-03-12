@@ -20,6 +20,7 @@ public class RDXEnvironmentObjectLibrary
       objectFactories.add(RDXPointLightObject.FACTORY);
       objectFactories.add(RDXPersonObject.FACTORY);
       objectFactories.add(RDXDoorPanelObject.FACTORY);
+      objectFactories.add(RDXDoorLeverObject.FACTORY);
       objectFactories.add(RDXDirectionalLightObject.FACTORY);
       objectFactories.add(RDXL515SensorObject.FACTORY);
       objectFactories.add(RDXRightJerseyBarrierObject.FACTORY);
@@ -37,6 +38,7 @@ public class RDXEnvironmentObjectLibrary
       objectFactories.add(RDXCanObject.FACTORY);
       objectFactories.add(RDX2x4Object.FACTORY);
       objectFactories.add(RDXCerealBoxObject.FACTORY);
+      objectFactories.add(RDXBottleObject.FACTORY);
    }
 
    public static ArrayList<RDXEnvironmentObjectFactory> getObjectFactories()

@@ -5,6 +5,7 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler.TaskOverrunBehavior;
+import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.Task;
 import us.ihmc.robotics.time.ThreadTimer;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -77,6 +78,9 @@ public class BarrierScheduledRobotController implements DisposableRobotControlle
    @Override
    public void dispose()
    {
+      for (int i = 0; i < tasks.size(); i++)
+         tasks.get(i).cleanup();
+      
       barrierScheduler.shutdown();
    }
 

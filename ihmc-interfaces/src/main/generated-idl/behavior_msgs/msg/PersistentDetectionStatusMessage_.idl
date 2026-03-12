@@ -16,9 +16,9 @@ module behavior_msgs
       struct PersistentDetectionStatusMessage
       {
         /**
-         * Last 4 digits of UUID as a string
+         * This persistent detection's ID
          */
-        string id;
+        long id;
         /**
          * Instant detection simple class name (e.g. YOLO, FoundationPose)
          */

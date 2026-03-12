@@ -67,7 +67,7 @@ public class RDXNeckPitchSlider
                //         MathTools.checkIntervalContains(percent, 0.0, 1.0);
                //         double jointAngle = neckJointJointLimitLower + percent * neckJointRange;
                //         LogTools.info("Commanding neck trajectory: slider: {} angle: {}", neckPitchSliderValue[0], jointAngle);
-               //         communicationHelper.publishToController(HumanoidMessageTools.createNeckTrajectoryMessage(3.0, new double[] {jointAngle}));
+               //         controllerHelper.publishToController(HumanoidMessageTools.createNeckTrajectoryMessage(3.0, new double[] {jointAngle}));
                //      }
             }
          }

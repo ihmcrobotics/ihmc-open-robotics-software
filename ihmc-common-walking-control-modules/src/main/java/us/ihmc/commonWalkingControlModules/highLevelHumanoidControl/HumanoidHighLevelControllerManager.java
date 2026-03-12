@@ -49,6 +49,7 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.parameters.IntegerParameter;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -79,6 +80,7 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
    private final HighLevelStateChangeStatusMessage highLevelStateChangeStatusMessage = new HighLevelStateChangeStatusMessage();
 
    private final ExecutionTimer highLevelControllerTimer = new ExecutionTimer("activeHighLevelControllerTimer", 1.0, registry);
+   private final DoubleProvider controlDT;
 
    private final RobotDesiredConfigurationData robotDesiredConfigurationData = new RobotDesiredConfigurationData();
    private final IntegerParameter jointDesiredOutputBroadcastFrequency = new IntegerParameter("jointDesiredOutputBroadcastFrequency", registry, 10);
@@ -99,7 +101,8 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
                                              HighLevelHumanoidControllerToolbox controllerToolbox,
                                              CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
                                              ForceSensorDataHolderReadOnly forceSensorDataHolder,
-                                             JointDesiredOutputListBasics lowLevelControllerOutput)
+                                             JointDesiredOutputListBasics lowLevelControllerOutput,
+                                             DoubleProvider controlDT)
    {
       this.commandInputManager = commandInputManager;
       this.statusMessageOutputManager = statusMessageOutputManager;
@@ -107,6 +110,7 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
       this.requestedHighLevelControllerState = requestedHighLevelControllerState;
       this.centerOfPressureDataHolderForEstimator = centerOfPressureDataHolderForEstimator;
       this.lowLevelControllerOutput = lowLevelControllerOutput;
+      this.controlDT = controlDT;
 
       this.requestedHighLevelControllerState.set(initialControllerState);
       registry.addChild(controllerToolbox.getYoVariableRegistry());
@@ -138,7 +142,10 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
 
       pluginFactories.forEach(this::addControllerPluginFactory);
 
-      inertialParameterManager = managerFactory.getOrCreateInertialParameterManager();
+      //
+
+
+      inertialParameterManager = managerFactory.getOrCreateInertialParameterManager(controlDT);
    }
 
    /**
@@ -153,7 +160,7 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
     */
    public void addControllerPluginFactory(HighLevelHumanoidControllerPluginFactory pluginFactory)
    {
-      addControllerPlugin(pluginFactory.buildPlugin(controllerFactoryHelper));
+      addControllerPlugin(pluginFactory.buildPlugin(controllerFactoryHelper, controlDT));
    }
 
    /**
@@ -185,6 +192,11 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
    public void setListenToHighLevelStatePackets(boolean isListening)
    {
       isListeningToHighLevelStateMessage.set(isListening);
+   }
+
+   public double getCurrentControlDT()
+   {
+      return controlDT.getValue();
    }
 
    @Override

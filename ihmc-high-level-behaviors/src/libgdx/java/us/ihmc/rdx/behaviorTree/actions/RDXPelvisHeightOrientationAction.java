@@ -157,7 +157,7 @@ public class RDXPelvisHeightOrientationAction extends RDXActionNode<PelvisHeight
    @Override
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
-      if (state.getPelvisFrame().isChildOfWorld())
+      if (getSelected() && state.getPelvisFrame().isChildOfWorld())
       {
          poseGizmo.calculate3DViewPick(input);
 
@@ -176,7 +176,7 @@ public class RDXPelvisHeightOrientationAction extends RDXActionNode<PelvisHeight
    @Override
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      if (state.getPelvisFrame().isChildOfWorld())
+      if (getSelected() && state.getPelvisFrame().isChildOfWorld())
       {
          isMouseHovering = input.getClosestPick() == pickResult;
 
@@ -195,7 +195,7 @@ public class RDXPelvisHeightOrientationAction extends RDXActionNode<PelvisHeight
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (state.getPelvisFrame().isChildOfWorld() && (state.getIsNextForExecution() || getSelected()))
+      if ((state.getIsNextForExecution() || getSelected() || state.getIsExecuting()) && state.getPelvisFrame().isChildOfWorld())
       {
          highlightModel.getRenderables(renderables, pool);
          poseGizmo.getVirtualRenderables(renderables, pool);

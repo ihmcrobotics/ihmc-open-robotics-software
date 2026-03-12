@@ -463,7 +463,15 @@ public class ImGuiTools
     */
    public static boolean mouseReleasedWithoutDrag(int button)
    {
-      return ImGui.getMouseDragDeltaX(button) == 0.0f && ImGui.getMouseDragDeltaY(button) == 0.0f && ImGui.isMouseReleased(button);
+      return mouseReleasedWithoutDrag(button, 0.0);
+   }
+
+   /**
+    * This is a better way to detect a singular mouse click than any of the provided methods.
+    */
+   public static boolean mouseReleasedWithoutDrag(int button, double allowableDrag)
+   {
+      return ImGui.getMouseDragDeltaX(button) <= allowableDrag && ImGui.getMouseDragDeltaY(button) <= allowableDrag && ImGui.isMouseReleased(button);
    }
 
    /**

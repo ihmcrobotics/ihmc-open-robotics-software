@@ -13,7 +13,9 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
+import us.ihmc.yoVariables.filters.AlphaFilterTools;
 import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -43,9 +45,9 @@ public class JointAccelerationIntegrationCalculator
    
    private final YoJointAccelerationIntegrationParameters[] yoJointAccelerationIntegrationParametersList;
 
-   private final double controlDT;
+   private final DoubleProvider controlDT;
 
-   public JointAccelerationIntegrationCalculator(RigidBodyBasics rootBody, double controlDT, YoRegistry parentRegistry)
+   public JointAccelerationIntegrationCalculator(RigidBodyBasics rootBody, DoubleProvider controlDT, YoRegistry parentRegistry)
    {
       this.controlDT = controlDT;
       defaultPositionBreakFrequency.set(DEFAULT_POSITION_BREAK_FREQUENCY);
@@ -96,8 +98,8 @@ public class JointAccelerationIntegrationCalculator
          if (lowLevelJointData == null || !lowLevelJointData.hasDesiredAcceleration() || !parameters.isEnabled())
             continue;
 
-         double alphaPosition = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getPositionBreakFrequency(), controlDT);
-         double alphaVelocity = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getVelocityBreakFrequency(), controlDT);
+         double alphaPosition = AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(parameters.getPositionBreakFrequency(), controlDT.getValue());
+         double alphaVelocity = AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(parameters.getVelocityBreakFrequency(), controlDT.getValue());
          double maxPositionError = parameters.getMaxPositionError();
          double maxVelocityError = parameters.getMaxVelocityError();
          double velocityReferenceAlpha = parameters.getVelocityReferenceAlpha();
@@ -142,7 +144,7 @@ public class JointAccelerationIntegrationCalculator
 
          // Decay desiredVelocity towards the velocityReference and then predict the desired velocity.
          desiredVelocity = desiredVelocity * alphaVelocity + (1.0 - alphaVelocity) * velocityReference;
-         desiredVelocity += desiredAcceleration * controlDT;
+         desiredVelocity += desiredAcceleration * controlDT.getValue();
          //save unclamped desiredVelocity for debugging purposes
          yoJointAccelerationIntegrationParametersList[jointIndex].setDesiredVelocityNotClamped(desiredVelocity);
          
@@ -151,7 +153,7 @@ public class JointAccelerationIntegrationCalculator
          
          // Decay desiredPosition towards the positionReference and then predict the desired position.
          desiredPosition = desiredPosition * alphaPosition + (1.0 - alphaPosition) * positionReference;
-         desiredPosition += desiredVelocity * controlDT;
+         desiredPosition += desiredVelocity * controlDT.getValue();
          yoJointAccelerationIntegrationParametersList[jointIndex].setDesiredPositionNotClamped(desiredPosition);
          desiredPosition = MathTools.clamp(desiredPosition, positionReference - maxPositionError, positionReference + maxPositionError);
          yoJointAccelerationIntegrationParametersList[jointIndex].setDesiredPositionClamped(desiredPosition);
@@ -169,8 +171,8 @@ public class JointAccelerationIntegrationCalculator
 
    public static void main(String[] args)
    {
-      System.out.println(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(0.016, 3e-3));
-      System.out.println(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(2.7, 3e-3));
+      System.out.println(AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(0.016, 3e-3));
+      System.out.println(AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(2.7, 3e-3));
    }
 
    private enum JointIntegratorState

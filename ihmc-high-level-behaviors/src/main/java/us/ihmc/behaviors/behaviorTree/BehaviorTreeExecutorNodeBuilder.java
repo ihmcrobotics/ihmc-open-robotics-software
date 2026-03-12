@@ -1,6 +1,9 @@
 package us.ihmc.behaviors.behaviorTree;
 
+import org.apache.commons.lang3.function.TriFunction;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulation;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.action.actions.*;
 import us.ihmc.behaviors.behaviorTree.condition.*;
@@ -10,10 +13,9 @@ import us.ihmc.behaviors.behaviorTree.control.buildingExploration.*;
 import us.ihmc.behaviors.behaviorTree.control.door.*;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneExecutor;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
-import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.perception.detections.yolo.YOLOTerrainMapIntegrator;
-import us.ihmc.perception.gpuMapping.TerrainMapData;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.util.HashMap;
@@ -35,6 +37,7 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
       REGISTRY.put(AI2RNodeDefinition.class, AI2RNodeExecutor::new);
       REGISTRY.put(DoorTraversalDefinition.class, DoorTraversalExecutor::new);
       REGISTRY.put(BuildingExplorationDefinition.class, BuildingExplorationExecutor::new);
+      REGISTRY.put(NeckActionDefinition.class, NeckActionExecutor::new);
       REGISTRY.put(ChestOrientationActionDefinition.class, ChestOrientationActionExecutor::new);
       REGISTRY.put(FootstepPlanActionDefinition.class, FootstepPlanActionExecutor::new);
       REGISTRY.put(HandPoseActionDefinition.class, HandPoseActionExecutor::new);
@@ -47,46 +50,46 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
       REGISTRY.put(FootPoseActionDefinition.class, FootPoseActionExecutor::new);
    }
 
-   private CRDTInfo crdtInfo;
+   private BehaviorTreeExecutor tree;
    private WorkspaceResourceDirectory saveFileDirectory;
    private ROS2ControllerHelper ros2ControllerHelper;
+   private TriFunction<DRCRobotModel, ROS2NodeBuilder, RigidBodyTransformReadOnly, HumanoidKinematicsSimulation> kinematicsSimulationBuilder;
    private ROS2SyncedRobotModel syncedRobot;
    private ControllerStatusTracker controllerStatusTracker;
    private SideDependentList<AbilityHandActionComms> abilityHandComms;
    private BehaviorTreeSceneExecutor scene;
-   private TerrainMapData terrainMapData;
 
-   public void initialize(CRDTInfo crdtInfo,
+   public void initialize(BehaviorTreeExecutor tree,
                           WorkspaceResourceDirectory saveFileDirectory,
                           ROS2ControllerHelper ros2ControllerHelper,
+                          TriFunction<DRCRobotModel, ROS2NodeBuilder, RigidBodyTransformReadOnly, HumanoidKinematicsSimulation> kinematicsSimulationBuilder,
                           ROS2SyncedRobotModel syncedRobot,
                           ControllerStatusTracker controllerStatusTracker,
                           SideDependentList<AbilityHandActionComms> abilityHandComms,
-                          BehaviorTreeSceneExecutor scene,
-                          TerrainMapData terrainMapData)
+                          BehaviorTreeSceneExecutor scene)
    {
-      this.crdtInfo = crdtInfo;
+      this.tree = tree;
       this.saveFileDirectory = saveFileDirectory;
       this.ros2ControllerHelper = ros2ControllerHelper;
+      this.kinematicsSimulationBuilder = kinematicsSimulationBuilder;
       this.syncedRobot = syncedRobot;
       this.controllerStatusTracker = controllerStatusTracker;
       this.abilityHandComms = abilityHandComms;
       this.scene = scene;
-      this.terrainMapData = terrainMapData;
    }
 
    @Override
    public BehaviorTreeRootNodeExecutor createRootNode(long id)
    {
       return new BehaviorTreeRootNodeExecutor(id,
-                                              crdtInfo,
+                                              tree,
                                               saveFileDirectory,
                                               ros2ControllerHelper,
+                                              kinematicsSimulationBuilder,
                                               syncedRobot,
                                               controllerStatusTracker,
                                               abilityHandComms,
-                                              scene,
-                                              terrainMapData);
+                                              scene);
    }
 
    @Override

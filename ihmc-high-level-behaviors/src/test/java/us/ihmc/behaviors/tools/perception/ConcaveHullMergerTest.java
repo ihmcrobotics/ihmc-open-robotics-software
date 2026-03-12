@@ -1,16 +1,9 @@
 package us.ihmc.behaviors.tools.perception;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-
-import org.apache.commons.lang3.tuple.Pair;
-import org.junit.jupiter.api.Test;
-
 import javafx.application.Platform;
 import javafx.stage.Stage;
+import org.apache.commons.lang3.tuple.Pair;
+import org.junit.jupiter.api.Test;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -21,14 +14,20 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javaFXToolkit.applicationCreator.JavaFXApplicationCreator;
+import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
-import us.ihmc.robotEnvironmentAwareness.tools.ConcaveHullMerger;
-import us.ihmc.robotEnvironmentAwareness.tools.ConcaveHullMergerListener;
+import us.ihmc.perception.geometry.ConcaveHullMerger;
+import us.ihmc.perception.geometry.ConcaveHullMergerListener;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ConcaveHullMergerTest
 {

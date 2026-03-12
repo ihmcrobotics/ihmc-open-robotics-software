@@ -2,6 +2,7 @@ package us.ihmc.rdx.behaviorTree.actions;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
@@ -21,16 +22,20 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.graphSearch.parameters.InitialStanceSide;
 import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeRootNode;
 import us.ihmc.rdx.behaviorTree.RDXCRDTTools;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
+import us.ihmc.rdx.imgui.ImIntegerWrapper;
 import us.ihmc.rdx.imgui.ImGuiReferenceFrameLibraryCombo;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.mesh.RDXMutableArrowModel;
+import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
@@ -38,22 +43,36 @@ import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.rdx.ui.widgets.ImGuiFootstepsWidget;
 import us.ihmc.rdx.vr.RDXVRContext;
+import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
+
+import static behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessage.*;
 
 public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState, FootstepPlanActionDefinition>
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
    private final ImBoolean editManuallyPlacedSteps = new ImBoolean();
+   private final ImBoolean editWaypoints = new ImBoolean();
    private final ImBooleanWrapper manuallyPlaceStepsWrapper;
    private final ImDoubleWrapper swingDurationWidget;
    private final ImDoubleWrapper transferDurationWidget;
-   private final ImBooleanWrapper performAStarSearchWidget;
    private final ImBooleanWrapper walkWithGoalOrientationWidget;
    private final ImBooleanWrapper planWithBodyPathWidget;
+   private final ImBooleanWrapper quickWaypointOnlyWidget;
+   private final ImIntegerWrapper quickHipWidthWidget;
+   private final ImIntegerWrapper quickStepLengthWidget;
+   private final ImIntegerWrapper quickNextPelvisYawLimitWidget;
+   private final ImIntegerWrapper quickInwardLimitWidget;
+   private final ImIntegerWrapper quickOutwardLimitWidget;
+   private final ImIntegerWrapper quickStepAngleLimitWidget;
+   private final ImIntegerWrapper quickSwingTimeDistanceLowerWidget;
+   private final ImIntegerWrapper quickSwingTimeDistanceUpperWidget;
+   private final ImDoubleWrapper quickMinSwingTimeWidget;
+   private final ImDoubleWrapper quickMaxSwingTimeWidget;
    private final RDXStoredPropertySetTuner plannerParametersWidgets;
    private int numberOfAllocatedFootsteps = 0;
    private final RecyclingArrayList<RDXFootstepPlanActionFootstep> manuallyPlacedFootsteps;
@@ -65,6 +84,15 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    private final RDXSelectablePose3DGizmo goalStancePointGizmo = new RDXSelectablePose3DGizmo();
    private final RDXSelectablePose3DGizmo goalFocalPointGizmo = new RDXSelectablePose3DGizmo();
    private final SideDependentList<RDXFootstepPlanActionGoalFootstep> goalFeet = new SideDependentList<>();
+   private final FramePose3D waypointFramePose = new FramePose3D();
+   private final RigidBodyTransform waypointTransform = new RigidBodyTransform();
+   private final ArrayList<RDXPose3DGizmo> waypointGizmos = new ArrayList<>();
+   private final RecyclingArrayList<ModelInstance> waypointGraphics = new RecyclingArrayList<>(() ->
+         RDXModelBuilder.buildModelInstance(meshBuilder ->
+         {
+            meshBuilder.addSphere(0.015f, Color.WHITE);
+            meshBuilder.addLine(0.0, 0.0, 0.0, 0.05, 0.0, 0.0, 0.01, Color.WHITE);
+         }));
    private final RDX3DPanelTooltip tooltip;
    private final ImGuiFootstepsWidget footstepsWidget = new ImGuiFootstepsWidget();
    private final RDXFootstepPlanGraphic previewFootstepPlan;
@@ -120,15 +148,45 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
       transferDurationWidget = new ImDoubleWrapper(definition::getTransferDuration,
                                                    definition::setTransferDuration,
                                                    imDouble -> ImGui.inputDouble(labels.get("Transfer duration"), imDouble));
-      performAStarSearchWidget = new ImBooleanWrapper(definition.getPlannerPerformAStarSearch()::getValue,
-                                                      definition.getPlannerPerformAStarSearch()::setValue,
-                                                      imBoolean -> ImGui.checkbox(labels.get("Perform A* search"), imBoolean));
       walkWithGoalOrientationWidget = new ImBooleanWrapper(definition.getPlannerWalkWithGoalOrientation()::getValue,
                                                            definition.getPlannerWalkWithGoalOrientation()::setValue,
                                                            imBoolean -> ImGui.checkbox(labels.get("Walk with goal orientation"), imBoolean));
       planWithBodyPathWidget = new ImBooleanWrapper(definition.getPlannerPlanWithBodyPath()::getValue,
                                                     definition.getPlannerPlanWithBodyPath()::setValue,
                                                     imBoolean -> ImGui.checkbox(labels.get("Plan with body path"), imBoolean));
+      quickWaypointOnlyWidget = new ImBooleanWrapper(definition.getQuickWaypointOnly()::getValue,
+                                                     definition.getQuickWaypointOnly()::setValue,
+                                                     imBoolean -> ImGui.checkbox(labels.get("Quick waypoint only"), imBoolean));
+      quickHipWidthWidget = new ImIntegerWrapper(() -> (int) Math.round(definition.getQuickHipWidth().getValue() * 100.0),
+                                                 value -> definition.getQuickHipWidth().setValue(value / 100.0),
+                                                 imInt -> ImGui.inputInt(labels.get("Quick hip width (cm)"), imInt, 1, 5));
+      quickStepLengthWidget = new ImIntegerWrapper(() -> (int) Math.round(definition.getQuickStepLength().getValue() * 100.0),
+                                                   value -> definition.getQuickStepLength().setValue(value / 100.0),
+                                                   imInt -> ImGui.inputInt(labels.get("Quick step length (cm)"), imInt, 1, 5));
+      quickNextPelvisYawLimitWidget = new ImIntegerWrapper(() -> (int) Math.round(Math.toDegrees(definition.getQuickNextPelvisYawLimit().getValue())),
+                                                           value -> definition.getQuickNextPelvisYawLimit().setValue(Math.toRadians(value)),
+                                                           imInt -> ImGui.inputInt(labels.get("Quick next pelvis yaw limit (%s)".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL)), imInt, 1, 5));
+      quickInwardLimitWidget = new ImIntegerWrapper(() -> (int) Math.round(Math.toDegrees(definition.getQuickInwardLimit().getValue())),
+                                                    value -> definition.getQuickInwardLimit().setValue(Math.toRadians(value)),
+                                                    imInt -> ImGui.inputInt(labels.get("Quick inward limit (%s)".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL)), imInt, 1, 5));
+      quickOutwardLimitWidget = new ImIntegerWrapper(() -> (int) Math.round(Math.toDegrees(definition.getQuickOutwardLimit().getValue())),
+                                                     value -> definition.getQuickOutwardLimit().setValue(Math.toRadians(value)),
+                                                     imInt -> ImGui.inputInt(labels.get("Quick outward limit (%s)".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL)), imInt, 1, 5));
+      quickStepAngleLimitWidget = new ImIntegerWrapper(() -> (int) Math.round(Math.toDegrees(definition.getQuickStepAngleLimit().getValue())),
+                                                       value -> definition.getQuickStepAngleLimit().setValue(Math.toRadians(value)),
+                                                       imInt -> ImGui.inputInt(labels.get("Quick step angle limit (%s)".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL)), imInt, 1, 5));
+      quickSwingTimeDistanceLowerWidget = new ImIntegerWrapper(() -> (int) Math.round(definition.getQuickSwingTimeDistanceLower().getValue() * 100.0),
+                                                               value -> definition.getQuickSwingTimeDistanceLower().setValue(value / 100.0),
+                                                               imInt -> ImGui.inputInt(labels.get("Quick swing time distance lower (cm)"), imInt, 1, 5));
+      quickSwingTimeDistanceUpperWidget = new ImIntegerWrapper(() -> (int) Math.round(definition.getQuickSwingTimeDistanceUpper().getValue() * 100.0),
+                                                               value -> definition.getQuickSwingTimeDistanceUpper().setValue(value / 100.0),
+                                                               imInt -> ImGui.inputInt(labels.get("Quick swing time distance upper (cm)"), imInt, 1, 5));
+      quickMinSwingTimeWidget = new ImDoubleWrapper(definition.getQuickMinSwingTime()::getValue,
+                                                    definition.getQuickMinSwingTime()::setValue,
+                                                    imDouble -> ImGui.inputDouble(labels.get("Quick min swing time (s)"), imDouble, 0.05, 0.2, "%.3f", 0));
+      quickMaxSwingTimeWidget = new ImDoubleWrapper(definition.getQuickMaxSwingTime()::getValue,
+                                                    definition.getQuickMaxSwingTime()::setValue,
+                                                    imDouble -> ImGui.inputDouble(labels.get("Quick max swing time (s)"), imDouble, 0.05, 0.2, "%.3f", 0));
       plannerParametersWidgets = new RDXStoredPropertySetTuner("Planner Parameters");
       plannerParametersWidgets.create(definition.getPlannerParametersUnsafe(), false);
 
@@ -214,6 +272,37 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
          for (RobotSide side : RobotSide.values)
             goalFeet.get(side).setParentFrame();
 
+         if (!definition.getIsManuallyPlaced() && definition.getPlannerType().getValue() == QUICK)
+         {
+            while (waypointGizmos.size() < definition.getWaypoints().getSize())
+            {
+               RDXPose3DGizmo gizmo = new RDXPose3DGizmo();
+               gizmo.create(baseUI.getPrimary3DPanel());
+               gizmo.setResizeAutomatically(false);
+               gizmo.setCenterSphereToTorusRatio(0.8f);
+               waypointGizmos.add(gizmo);
+               waypointGraphics.add();
+            }
+
+            for (int i = 0; i < definition.getWaypoints().getSize(); i++)
+            {
+               Pose3D waypoint = definition.getWaypoints().getValueReadOnly(i);
+               RDXPose3DGizmo gizmo = waypointGizmos.get(i);
+               gizmo.setParentFrame(parentFrame);
+
+               if (gizmo.getGizmoModifiedByUser().poll())
+                  definition.getWaypoints().getValueAndModify().get(i).set(gizmo.getTransformToParent());
+               else if (!gizmo.isBeingManipulated())
+                  gizmo.getTransformToParent().set(waypoint);
+
+               gizmo.update();
+
+               waypointFramePose.setMatchingFrame(parentFrame, waypoint);
+               waypointFramePose.get(waypointTransform);
+               LibGDXTools.toLibGDX(waypointTransform, waypointGraphics.get(i).transform);
+            }
+         }
+
          RDXCRDTTools.syncGizmoWithBidirectionalField(goalStancePointGizmo.getPoseGizmo(), definition.getGoalStancePoint(), definition);
          RDXCRDTTools.syncGizmoWithBidirectionalField(goalFocalPointGizmo.getPoseGizmo(), definition.getGoalFocalPoint(), definition);
 
@@ -285,7 +374,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    @Override
    public void calculateVRPick(RDXVRContext vrContext)
    {
-      if (state.areFramesInWorld())
+      if (getSelected() && state.areFramesInWorld())
       {
          // TODO: VR support for Pose3DGizmo
       }
@@ -294,7 +383,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    @Override
    public void processVRInput(RDXVRContext vrContext)
    {
-      if (state.areFramesInWorld())
+      if (getSelected() && state.areFramesInWorld())
       {
          if (!definition.getIsManuallyPlaced())
          {
@@ -306,7 +395,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    @Override
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
-      if (state.areFramesInWorld())
+      if (getSelected() && state.areFramesInWorld())
       {
          if (definition.getIsManuallyPlaced())
          {
@@ -321,6 +410,12 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
             goalFocalPointGizmo.calculate3DViewPick(input);
             for (RobotSide side : RobotSide.values)
                goalFeet.get(side).calculate3DViewPick(input);
+            if (definition.getPlannerType().getValue() == QUICK && editWaypoints.get())
+            {
+               int waypointCount = Math.min(waypointGizmos.size(), definition.getWaypoints().getSize());
+               for (int i = 0; i < waypointCount; i++)
+                  waypointGizmos.get(i).calculate3DViewPick(input);
+            }
          }
       }
    }
@@ -328,7 +423,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    @Override
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      if (state.areFramesInWorld())
+      if (getSelected() && state.areFramesInWorld())
       {
          if (definition.getIsManuallyPlaced())
          {
@@ -344,6 +439,12 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
             tooltip.setInput(input);
             for (RobotSide side : RobotSide.values)
                goalFeet.get(side).process3DViewInput(input);
+            if (definition.getPlannerType().getValue() == QUICK && editWaypoints.get())
+            {
+               int waypointCount = Math.min(waypointGizmos.size(), definition.getWaypoints().getSize());
+               for (int i = 0; i < waypointCount; i++)
+                  waypointGizmos.get(i).process3DViewInput(input);
+            }
          }
       }
    }
@@ -371,7 +472,9 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
       {
          if (definition.getIsManuallyPlaced())
          {
-            ImGui.checkbox(labels.get("Edit Manually Placed Steps"), editManuallyPlacedSteps);
+            if (ImGui.checkbox(labels.get("Edit Manually Placed Steps"), editManuallyPlacedSteps))
+               for (RDXFootstepPlanActionFootstep manuallyPlacedFootstep : manuallyPlacedFootsteps)
+                  manuallyPlacedFootstep.updateGizmo();
 
             ImGui.sameLine();
             if (editManuallyPlacedSteps.get() && ImGui.button("Select All Footsteps"))
@@ -400,12 +503,15 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
          else
          {
             ImGui.text("Planning goal gizmo adjustment:");
-            ImGui.checkbox(labels.get("Stance Point"), goalStancePointGizmo.getSelected());
+            if (ImGui.checkbox(labels.get("Stance Point"), goalStancePointGizmo.getSelected()))
+               goalStancePointGizmo.getPoseGizmo().getTransformToParent().getTranslation().set(definition.getGoalStancePoint().getValueReadOnly());
             ImGui.sameLine();
-            ImGui.checkbox(labels.get("Focal Point"), goalFocalPointGizmo.getSelected());
+            if (ImGui.checkbox(labels.get("Focal Point"), goalFocalPointGizmo.getSelected()))
+               goalFocalPointGizmo.getPoseGizmo().getTransformToParent().getTranslation().set(definition.getGoalFocalPoint().getValueReadOnly());
             for (RobotSide side : RobotSide.values)
             {
-               ImGui.checkbox(labels.get(side.getPascalCaseName() + " Foot to Goal"), goalFeet.get(side).getGizmo().getSelected());
+               if (ImGui.checkbox(labels.get(side.getPascalCaseName() + " Foot to Goal"), goalFeet.get(side).getGizmo().getSelected()))
+                  state.copyDefinitionToGoalFootstepToGoalTransform(side);
                if (side == RobotSide.LEFT)
                   ImGui.sameLine();
             }
@@ -417,19 +523,72 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
                   definition.getPlannerInitialStanceSide().setValue(initialStanceSide);
             }
 
-            performAStarSearchWidget.renderImGuiWidget();
+            if (ImGui.radioButton(labels.get("Quick"), definition.getPlannerType().getValue() == QUICK))
+               definition.getPlannerType().setValue(QUICK);
+            ImGui.sameLine();
+            if (ImGui.radioButton(labels.get("Turn walk turn"), definition.getPlannerType().getValue() == TURN_WALK_TURN))
+               definition.getPlannerType().setValue(TURN_WALK_TURN);
+            ImGui.sameLine();
+            if (ImGui.radioButton(labels.get("A*"), definition.getPlannerType().getValue() == A_STAR))
+               definition.getPlannerType().setValue(A_STAR);
 
-            ImGui.beginDisabled(!definition.getPlannerPerformAStarSearch().getValue());
+            ImGui.beginDisabled(definition.getPlannerType().getValue() == QUICK);
             walkWithGoalOrientationWidget.renderImGuiWidget();
             ImGui.endDisabled();
 
             planWithBodyPathWidget.renderImGuiWidget();
 
+            if (definition.getPlannerType().getValue() == QUICK)
+            {
+               ImGui.text("Waypoints: %d".formatted(definition.getWaypoints().getSize()));
+               ImGui.sameLine();
+               if (ImGui.button(labels.get("Add", "Waypoint")))
+               {
+                  Pose3D waypoint = definition.getWaypoints().getValueAndModify().add();
+                  if (definition.getWaypoints().getSize() > 1)
+                  {
+                     waypoint.set(definition.getWaypoints().getValueReadOnly(definition.getWaypoints().getSize() - 2));
+                     waypoint.appendTranslation(0.1, 0.0, 0.0);
+                  }
+                  else
+                  {
+                     waypoint.getPosition().set(definition.getGoalStancePoint().getValueReadOnly());
+                  }
+               }
+               if (definition.getWaypoints().getSize() > 0)
+               {
+                  ImGui.sameLine();
+                  if (ImGui.button(labels.get("Remove", "Waypoint")))
+                     RecyclingArrayListTools.removeLast(definition.getWaypoints().getValueAndModify());
+               }
+               ImGui.sameLine();
+               ImGui.checkbox(labels.get("Edit"), editWaypoints);
+            }
+
             ImGui.text("Preview steps: %d".formatted(state.getPreviewFootsteps().getSize()));
 
             if (ImGui.collapsingHeader(labels.get("Planner Parameters")))
-               if (plannerParametersWidgets.renderImGuiWidgetsSimple())
-                  definition.getAndModifyPlannerParameters();
+            {
+               ImGui.pushItemWidth(ImGui.getFontSize() * 8.0f);
+               if (definition.getPlannerType().getValue() == QUICK)
+               {
+                  quickWaypointOnlyWidget.renderImGuiWidget();
+                  quickHipWidthWidget.renderImGuiWidget();
+                  quickStepLengthWidget.renderImGuiWidget();
+                  quickNextPelvisYawLimitWidget.renderImGuiWidget();
+                  quickInwardLimitWidget.renderImGuiWidget();
+                  quickOutwardLimitWidget.renderImGuiWidget();
+                  quickStepAngleLimitWidget.renderImGuiWidget();
+                  quickSwingTimeDistanceLowerWidget.renderImGuiWidget();
+                  quickSwingTimeDistanceUpperWidget.renderImGuiWidget();
+                  quickMinSwingTimeWidget.renderImGuiWidget();
+                  quickMaxSwingTimeWidget.renderImGuiWidget();
+               }
+               else
+                  if (plannerParametersWidgets.renderImGuiWidgetsSimple())
+                     definition.getAndModifyPlannerParameters();
+               ImGui.popItemWidth();
+            }
          }
       }
    }
@@ -458,18 +617,14 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (state.getIsNextForExecution())
+      if ((state.getIsNextForExecution() || getSelected() || state.getIsExecuting()) && state.areFramesInWorld())
       {
-         if (state.areFramesInWorld())
+         if (definition.getIsManuallyPlaced())
+            for (RDXFootstepPlanActionFootstep footstep : manuallyPlacedFootsteps)
+               footstep.getVirtualRenderables(renderables, pool);
+         else
          {
-            if (definition.getIsManuallyPlaced())
-            {
-               for (RDXFootstepPlanActionFootstep footstep : manuallyPlacedFootsteps)
-               {
-                  footstep.getVirtualRenderables(renderables, pool);
-               }
-            }
-            else
+            if (!state.getIsExecuting())
             {
                goalArrowGraphic.getRenderables(renderables, pool);
 
@@ -477,10 +632,21 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
                goalFocalPointGizmo.getVirtualRenderables(renderables, pool);
                for (RobotSide side : RobotSide.values)
                   goalFeet.get(side).getRenderables(renderables, pool, footstepsWidget.getIsHovered().get(side));
-
-               if (state.getIsNextForExecution())
-                  previewFootstepPlan.getRenderables(renderables, pool);
+               if (definition.getPlannerType().getValue() == QUICK)
+               {
+                  int waypointCount = Math.min(waypointGraphics.size(), definition.getWaypoints().getSize());
+                  for (int i = 0; i < waypointCount; i++)
+                     waypointGraphics.get(i).getRenderables(renderables, pool);
+                  if (editWaypoints.get())
+                  {
+                     for (int i = 0; i < Math.min(waypointGizmos.size(), definition.getWaypoints().getSize()); i++)
+                        waypointGizmos.get(i).getRenderables(renderables, pool);
+                  }
+               }
             }
+
+            if (state.getIsNextForExecution() || state.getIsExecuting())
+               previewFootstepPlan.getRenderables(renderables, pool);
          }
       }
    }
@@ -514,6 +680,19 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
          frameFocalPoint = new FramePoint3D(newParent, definition.getGoalFocalPoint().getValueReadOnly());
       }
 
+      if (newParent.getRootFrame() == state.getParentFrame().getRootFrame())
+      {
+         for (int i = 0; i < definition.getWaypoints().getSize(); i++)
+         {
+            Pose3D waypoint = definition.getWaypoints().getValueReadOnly(i);
+            FramePose3D frameWaypoint = new FramePose3D(state.getParentFrame());
+            frameWaypoint.getPosition().set(waypoint.getPosition());
+            frameWaypoint.getOrientation().set(waypoint.getOrientation());
+            frameWaypoint.changeFrame(newParent);
+            definition.getWaypoints().getValueAndModify().get(i).set(frameWaypoint);
+         }
+      }
+
       definition.getGoalStancePoint().getValueAndModify().set(frameStancePoint);
       definition.getGoalFocalPoint().getValueAndModify().set(frameFocalPoint);
       goalStancePointGizmo.getPoseGizmo().setParentFrame(newParent);
@@ -533,6 +712,8 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    public void destroy()
    {
       super.destroy();
+      for (ModelInstance waypointGraphic : waypointGraphics)
+         waypointGraphic.model.dispose();
       previewFootstepPlan.destroy(); // It is important to destroy this because its thread needs to be shutdown
    }
 

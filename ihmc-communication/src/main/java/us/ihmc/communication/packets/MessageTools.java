@@ -1,5 +1,6 @@
 package us.ihmc.communication.packets;
 
+import builtin_interfaces.msg.dds.Time;
 import controller_msgs.msg.dds.BoundingBoxesPacket;
 import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
 import controller_msgs.msg.dds.InvalidPacketNotificationPacket;
@@ -1504,6 +1505,16 @@ public class MessageTools
          return Level.TRACE;
       else
          return Level.INFO;
+   }
+
+   public static int compareTime(Time a, Time b)
+   {
+      if (a.getSec() == b.getSec() && a.getNanosec() == b.getNanosec())
+         return 0;
+      else if (a.getSec() > b.getSec() || (a.getSec() == b.getSec() && a.getNanosec() > b.getNanosec()))
+         return 1;
+
+      return -1;
    }
 
    /**

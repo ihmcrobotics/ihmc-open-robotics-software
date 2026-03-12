@@ -9,10 +9,11 @@ import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.parameterEstimation.ExtendedKalmanFilter;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.yoVariables.filters.AlphaFilteredYoMatrix;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
+import us.ihmc.yoVariables.filters.AlphaFilterTools;
+import us.ihmc.yoVariables.filters.AlphaFilteredYoMatrix;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.Set;
@@ -47,7 +48,7 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter implements Online
 
    private final AlphaFilteredYoMatrix filteredResidual;
 
-   public InertialKalmanFilter(FullRobotModel model, InertialEstimationParameters parameters, double dt, YoRegistry parentRegistry)
+   public InertialKalmanFilter(FullRobotModel model, InertialEstimationParameters parameters, DoubleProvider dt, YoRegistry parentRegistry)
    {
       super(parameters.getURDFParameters(parameters.getBasisSets()),
             CommonOps_DDRM.identity(parameters.getNumberOfParameters()),
@@ -76,7 +77,7 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter implements Online
 
       measurement = new DMatrixRMaj(nDoFs, 1);
 
-      double postProcessingAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForPostProcessing(), dt);
+      DoubleProvider postProcessingAlpha = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForPostProcessing(), dt.getValue());
       filteredResidual = new AlphaFilteredYoMatrix("filteredResidual_", postProcessingAlpha, nDoFs, 1, parameters.getMeasurementNames(), null, registry);
 
       setNormalizedInnovationThreshold(parameters.getNormalizedInnovationThreshold());

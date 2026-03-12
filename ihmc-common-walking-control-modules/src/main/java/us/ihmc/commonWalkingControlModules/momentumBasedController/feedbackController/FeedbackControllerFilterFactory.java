@@ -10,6 +10,7 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoMutableFrameVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoMutableFrameVector3D;
+import us.ihmc.yoVariables.filters.AlphaFilterTools;
 import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -28,7 +29,7 @@ public class FeedbackControllerFilterFactory
     * @param registry       the registry to which the filter variables are to be added.
     * @return the low-pass filter to apply to the error velocity.
     */
-   public static FilterDouble1D createVelocity1DErrorLPFFilter(String jointName, DoubleProvider breakFrequency, double dt, YoRegistry registry)
+   public static FilterDouble1D createVelocity1DErrorLPFFilter(String jointName, DoubleProvider breakFrequency, DoubleProvider dt, YoRegistry registry)
    {
       return new YoLPFilterDouble1D(jointName + "VelocityErrorLPF", breakFrequency, dt, registry);
    }
@@ -42,7 +43,7 @@ public class FeedbackControllerFilterFactory
     * @param registry        the registry to which the filter variables are to be added.
     * @return the low-pass filter to apply to the error velocity.
     */
-   public static FilterVector3D createAngularVelocityErrorLPFFilter(String endEffectorName, DoubleProvider breakFrequency, double dt, YoRegistry registry)
+   public static FilterVector3D createAngularVelocityErrorLPFFilter(String endEffectorName, DoubleProvider breakFrequency, DoubleProvider dt, YoRegistry registry)
    {
       return new YoLPFilterVector3D(endEffectorName + "AngularVelocityErrorLPF", breakFrequency, dt, registry);
    }
@@ -56,7 +57,7 @@ public class FeedbackControllerFilterFactory
     * @param registry        the registry to which the filter variables are to be added.
     * @return the low-pass filter to apply to the error velocity.
     */
-   public static FilterVector3D createLinearVelocityErrorLPFFilter(String endEffectorName, DoubleProvider breakFrequency, double dt, YoRegistry registry)
+   public static FilterVector3D createLinearVelocityErrorLPFFilter(String endEffectorName, DoubleProvider breakFrequency, DoubleProvider dt, YoRegistry registry)
    {
       return new YoLPFilterVector3D(endEffectorName + "LinearVelocityErrorLPF", breakFrequency, dt, registry);
    }
@@ -73,7 +74,7 @@ public class FeedbackControllerFilterFactory
     * @param registry   the registry to which the filter variables are to be added.
     * @return the HPRL filter to apply to the error velocity.
     */
-   public static FilterDouble1D createVelocity1DErrorHPRLFilter(String jointName, YoHPRLParameters parameters, double dt, YoRegistry registry)
+   public static FilterDouble1D createVelocity1DErrorHPRLFilter(String jointName, YoHPRLParameters parameters, DoubleProvider dt, YoRegistry registry)
    {
       parameters.setRegistryLazy(registry);
       return new YoHPRLFilterDouble1D(jointName + "VelocityErrorHPRL", parameters, dt, registry);
@@ -91,7 +92,7 @@ public class FeedbackControllerFilterFactory
     * @param registry        the registry to which the filter variables are to be added.
     * @return the HPRL filter to apply to the error velocity.
     */
-   public static FilterVector3D createAngularVelocityErrorHPRLFilter(String endEffectorName, YoHPRLParameters parameters, double dt, YoRegistry registry)
+   public static FilterVector3D createAngularVelocityErrorHPRLFilter(String endEffectorName, YoHPRLParameters parameters, DoubleProvider dt, YoRegistry registry)
    {
       parameters.setRegistryLazy(registry);
       return new YoHPRLFilterVector3D(endEffectorName + "AngularVelocityErrorHPRL", parameters, dt, registry);
@@ -109,7 +110,7 @@ public class FeedbackControllerFilterFactory
     * @param registry        the registry to which the filter variables are to be added.
     * @return the HPRL filter to apply to the error velocity.
     */
-   public static FilterVector3D createLinearVelocityErrorHPRLFilter(String endEffectorName, YoHPRLParameters parameters, double dt, YoRegistry registry)
+   public static FilterVector3D createLinearVelocityErrorHPRLFilter(String endEffectorName, YoHPRLParameters parameters, DoubleProvider dt, YoRegistry registry)
    {
       parameters.setRegistryLazy(registry);
       return new YoHPRLFilterVector3D(endEffectorName + "LinearVelocityErrorHPRL", parameters, dt, registry);
@@ -127,7 +128,7 @@ public class FeedbackControllerFilterFactory
     * @param registry   the registry to which the filter variables are to be added.
     * @return the PIO filter to apply to the error velocity.
     */
-   public static FilterDouble1D createVelocity1DErrorPIOFilter(String jointName, YoPIOParameters parameters, double dt, YoRegistry registry)
+   public static FilterDouble1D createVelocity1DErrorPIOFilter(String jointName, YoPIOParameters parameters, DoubleProvider dt, YoRegistry registry)
    {
       parameters.setRegistryLazy(registry);
       return new YoPIOFilterDouble1D(jointName + "VelocityErrorPIO", parameters, dt, registry);
@@ -145,7 +146,7 @@ public class FeedbackControllerFilterFactory
     * @param registry        the registry to which the filter variables are to be added.
     * @return the PIO filter to apply to the error velocity.
     */
-   public static FilterVector3D createAngularVelocityErrorPIOFilter(String endEffectorName, YoPIOParameters parameters, double dt, YoRegistry registry)
+   public static FilterVector3D createAngularVelocityErrorPIOFilter(String endEffectorName, YoPIOParameters parameters, DoubleProvider dt, YoRegistry registry)
    {
       parameters.setRegistryLazy(registry);
       return new YoPIOFilterVector3D(endEffectorName + "AngularVelocityErrorPIO", parameters, dt, registry);
@@ -163,7 +164,7 @@ public class FeedbackControllerFilterFactory
     * @param registry        the registry to which the filter variables are to be added.
     * @return the PIO filter to apply to the error velocity.
     */
-   public static FilterVector3D createLinearVelocityErrorPIOFilter(String endEffectorName, YoPIOParameters parameters, double dt, YoRegistry registry)
+   public static FilterVector3D createLinearVelocityErrorPIOFilter(String endEffectorName, YoPIOParameters parameters, DoubleProvider dt, YoRegistry registry)
    {
       parameters.setRegistryLazy(registry);
       return new YoPIOFilterVector3D(endEffectorName + "LinearVelocityErrorPIO", parameters, dt, registry);
@@ -335,9 +336,9 @@ public class FeedbackControllerFilterFactory
    {
       private final AlphaFilteredYoVariable output;
 
-      public YoLPFilterDouble1D(String namePrefix, DoubleProvider breakFrequency, double dt, YoRegistry registry)
+      public YoLPFilterDouble1D(String namePrefix, DoubleProvider breakFrequency, DoubleProvider dt, YoRegistry registry)
       {
-         DoubleProvider alpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(breakFrequency.getValue(), dt);
+         DoubleProvider alpha = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(breakFrequency.getValue(), dt.getValue());
          output = new AlphaFilteredYoVariable(namePrefix + "Output", registry, alpha);
       }
 
@@ -369,9 +370,9 @@ public class FeedbackControllerFilterFactory
       private final DoubleProvider maxOutputRate;
       private final DoubleProvider updateReferenceRatio;
 
-      private final double dt;
+      private final DoubleProvider dt;
 
-      public YoHPRLFilterDouble1D(String namePrefix, YoHPRLParameters parameters, double dt, YoRegistry registry)
+      public YoHPRLFilterDouble1D(String namePrefix, YoHPRLParameters parameters, DoubleProvider dt, YoRegistry registry)
       {
          this(namePrefix, parameters.enableFilter, parameters.breakFrequency, parameters.maxOutputRate, parameters.updateReferenceRatio, dt, registry);
       }
@@ -381,7 +382,7 @@ public class FeedbackControllerFilterFactory
                                   DoubleProvider breakFrequency,
                                   DoubleProvider maxOutputRate,
                                   DoubleProvider updateReferenceRatio,
-                                  double dt,
+                                  DoubleProvider dt,
                                   YoRegistry registry)
       {
          this.enableFilter = enableFilter;
@@ -415,7 +416,7 @@ public class FeedbackControllerFilterFactory
             initialize.set(false);
          }
 
-         double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(breakFrequency.getValue(), dt);
+         double alpha = AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(breakFrequency.getValue(), dt.getValue());
          inputLPF.set(EuclidCoreTools.interpolate(rawInput, inputLPF.getValue(), alpha));
          inputLPF2.set(EuclidCoreTools.interpolate(inputLPF.getValue(), inputLPF2.getValue(), alpha));
          double inputHPFPrevious = inputHPF.getValue();
@@ -423,7 +424,7 @@ public class FeedbackControllerFilterFactory
 
          double reference = EuclidCoreTools.interpolate(inputHPFPrevious, inputHPRL.getValue(), MathTools.clamp(updateReferenceRatio.getValue(), 0.0, 1.0));
          double update = inputHPF.getValue() - reference;
-         inputHPRL.add(MathTools.clamp(update, maxOutputRate.getValue() * dt));
+         inputHPRL.add(MathTools.clamp(update, maxOutputRate.getValue() * dt.getValue()));
          output.set(inputLPF2.getValue() + inputHPRL.getValue());
 
          // Checking at the end allows to visualize the filter state when disabled.
@@ -455,9 +456,9 @@ public class FeedbackControllerFilterFactory
       private final DoubleProvider lagFreq;
       private final DoubleProvider updateStepBreakFrequency;
       private final DoubleProvider maxOutputRate;
-      private final double dt;
+      private final DoubleProvider dt;
 
-      public YoPIOFilterDouble1D(String namePrefix, YoPIOParameters parameters, double dt, YoRegistry registry)
+      public YoPIOFilterDouble1D(String namePrefix, YoPIOParameters parameters, DoubleProvider dt, YoRegistry registry)
       {
          this(namePrefix,
               parameters.enableFilter,
@@ -479,7 +480,7 @@ public class FeedbackControllerFilterFactory
                                  DoubleProvider lagFreq,
                                  DoubleProvider updateStepBreakFrequency,
                                  DoubleProvider maxOutputRate,
-                                 double dt,
+                                 DoubleProvider dt,
                                  YoRegistry registry)
       {
          this.enableFilter = enableFilter;
@@ -547,7 +548,7 @@ public class FeedbackControllerFilterFactory
          if (rateLimitedInput != null)
          {
             // First, rate limit pass. maxInputRate is set pretty high and is tuned for the PIO
-            rateLimitedInput.set(computeRateLimit(rateLimitedInput.getValue(), rawInput, maxInputRate.getValue(), dt));
+            rateLimitedInput.set(computeRateLimit(rateLimitedInput.getValue(), rawInput, maxInputRate.getValue(), dt.getValue()));
             processedInput = rateLimitedInput.getValue();
          }
 
@@ -568,8 +569,8 @@ public class FeedbackControllerFilterFactory
          double q1 = updateStepLeadLag_q1.getValue();
          double q2 = updateStepLeadLag_q2.getValue();
 
-         q1 = q1 + dt * q2;
-         q2 = q2 + dt * (pioDiff - alpha2_lag * q1 - 2.0 * alpha_lag * q2);
+         q1 = q1 + dt.getValue() * q2;
+         q2 = q2 + dt.getValue() * (pioDiff - alpha2_lag * q1 - 2.0 * alpha_lag * q2);
          double pioDiffLeadLagOutput = (alpha2_lead - alpha2_lag) * q1 + 2.0 * (alpha_lead - alpha_lag) * q2 + pioDiff;
          updateStepLeadLagOutput.set(pioDiffLeadLagOutput);
 
@@ -580,7 +581,7 @@ public class FeedbackControllerFilterFactory
 
          if (updateStepLPF != null)
          { // Low Pass Filter:
-            double diffLPFAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(updateStepBreakFrequency.getValue(), dt);
+            double diffLPFAlpha = AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(updateStepBreakFrequency.getValue(), dt.getValue());
             updateStepLPF.set(EuclidCoreTools.interpolate(pioDiffLeadLagOutput, updateStepLPF.getValue(), diffLPFAlpha));
             preprocessedOutput = updateStepLPF.getValue() + output.getValue();
          }
@@ -592,7 +593,7 @@ public class FeedbackControllerFilterFactory
          if (outputPreRateLimit != null)
          { // PIO Rate Limit:
             outputPreRateLimit.set(preprocessedOutput);
-            output.set(computeRateLimit(output.getValue(), outputPreRateLimit.getValue(), maxOutputRate.getValue(), dt));
+            output.set(computeRateLimit(output.getValue(), outputPreRateLimit.getValue(), maxOutputRate.getValue(), dt.getValue()));
          }
          else
          {
@@ -611,9 +612,9 @@ public class FeedbackControllerFilterFactory
    {
       private final AlphaFilteredYoMutableFrameVector3D output;
 
-      public YoLPFilterVector3D(String namePrefix, DoubleProvider breakFrequency, double dt, YoRegistry registry)
+      public YoLPFilterVector3D(String namePrefix, DoubleProvider breakFrequency, DoubleProvider dt, YoRegistry registry)
       {
-         DoubleProvider alpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(breakFrequency.getValue(), dt);
+         DoubleProvider alpha = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(breakFrequency.getValue(), dt.getValue());
          output = new AlphaFilteredYoMutableFrameVector3D(namePrefix + "Output", "", registry, alpha, ReferenceFrame.getWorldFrame());
       }
 
@@ -651,9 +652,9 @@ public class FeedbackControllerFilterFactory
       private final DoubleProvider maxOutputRate;
       private final DoubleProvider updateReferenceRatio;
 
-      private final double dt;
+      private final DoubleProvider dt;
 
-      public YoHPRLFilterVector3D(String namePrefix, YoHPRLParameters parameters, double dt, YoRegistry registry)
+      public YoHPRLFilterVector3D(String namePrefix, YoHPRLParameters parameters, DoubleProvider dt, YoRegistry registry)
       {
          this(namePrefix, parameters.enableFilter, parameters.breakFrequency, parameters.maxOutputRate, parameters.updateReferenceRatio, dt, registry);
       }
@@ -663,7 +664,7 @@ public class FeedbackControllerFilterFactory
                                   DoubleProvider breakFrequency,
                                   DoubleProvider maxOutputRate,
                                   DoubleProvider updateReferenceRatio,
-                                  double dt,
+                                  DoubleProvider dt,
                                   YoRegistry registry)
       {
          this.enableFilter = enableFilter;
@@ -701,7 +702,7 @@ public class FeedbackControllerFilterFactory
             initialize.set(false);
          }
 
-         double alpha = MathTools.clamp(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(breakFrequency.getValue(), dt), 0.0, 1.0);
+         double alpha = MathTools.clamp(AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(breakFrequency.getValue(), dt.getValue()), 0.0, 1.0);
          inputLPF.interpolate(rawInput, inputLPF, alpha);
          inputLPF2.interpolate(inputLPF, inputLPF2, alpha);
          inputHPFPrevious.set(inputHPF);
@@ -709,7 +710,7 @@ public class FeedbackControllerFilterFactory
 
          reference.interpolate(inputHPFPrevious, inputHPRL, MathTools.clamp(updateReferenceRatio.getValue(), 0.0, 1.0));
          update.sub(inputHPF, reference);
-         update.clipToMaxNorm(maxOutputRate.getValue() * dt);
+         update.clipToMaxNorm(maxOutputRate.getValue() * dt.getValue());
          inputHPRL.add(update);
 
          output.add(inputLPF2, inputHPRL);
@@ -741,9 +742,9 @@ public class FeedbackControllerFilterFactory
       private final DoubleProvider lagFreq;
       private final DoubleProvider updateStepBreakFrequency;
       private final DoubleProvider maxOutputRate;
-      private final double dt;
+      private final DoubleProvider dt;
 
-      public YoPIOFilterVector3D(String namePrefix, YoPIOParameters parameters, double dt, YoRegistry registry)
+      public YoPIOFilterVector3D(String namePrefix, YoPIOParameters parameters, DoubleProvider dt, YoRegistry registry)
       {
          this(namePrefix,
               parameters.enableFilter,
@@ -765,7 +766,7 @@ public class FeedbackControllerFilterFactory
                                  DoubleProvider lagFreq,
                                  DoubleProvider updateStepBreakFrequency,
                                  DoubleProvider maxOutputRate,
-                                 double dt,
+                                 DoubleProvider dt,
                                  YoRegistry registry)
       {
          this.enableFilter = enableFilter;
@@ -851,7 +852,7 @@ public class FeedbackControllerFilterFactory
          {
             // First, rate limit pass. maxInputRate is set pretty high and is tuned for the PIO
             rateLimitTemp.sub(rawInput, rateLimitedInput);
-            rateLimitTemp.clipToMaxNorm(maxInputRate.getValue() * dt);
+            rateLimitTemp.clipToMaxNorm(maxInputRate.getValue() * dt.getValue());
             rateLimitedInput.add(rateLimitTemp);
             processedInput = rateLimitedInput;
          }
@@ -873,12 +874,12 @@ public class FeedbackControllerFilterFactory
          double alpha2_lag = MathTools.square(alpha_lag);
 
          // q1 = q1 + dt * q2
-         q1.scaleAdd(dt, q2, updateStepLeadLag_q1);
+         q1.scaleAdd(dt.getValue(), q2, updateStepLeadLag_q1);
          // q2 = q2 + dt * (pioDiff - alpha2_lag * q1 - 2.0 * alpha_lag * q2)
          q2.setAndScale(-2.0 * alpha_lag, updateStepLeadLag_q2);
          q2.scaleAdd(-alpha2_lag, q1, q2);
          q2.add(pioDiff);
-         q2.scaleAdd(dt, updateStepLeadLag_q2);
+         q2.scaleAdd(dt.getValue(), updateStepLeadLag_q2);
          // pioDiffLeadLagOutput = (alpha2_lead - alpha2_lag) * q1 + 2.0 * (alpha_lead - alpha_lag) * q2 + pioDiff;
          updateStepLeadLagOutput.setAndScale(alpha2_lead - alpha2_lag, q1);
          updateStepLeadLagOutput.scaleAdd(2.0 * (alpha_lead - alpha_lag), q2, updateStepLeadLagOutput);
@@ -889,7 +890,7 @@ public class FeedbackControllerFilterFactory
 
          if (updateStepLPF != null)
          { // Low Pass Filter:
-            double diffLPFAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(updateStepBreakFrequency.getValue(), dt);
+            double diffLPFAlpha = AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(updateStepBreakFrequency.getValue(), dt.getValue());
             updateStepLPF.interpolate(updateStepLeadLagOutput, updateStepLPF, diffLPFAlpha);
             preprocessedOutput.add(updateStepLPF, output);
          }
@@ -902,7 +903,7 @@ public class FeedbackControllerFilterFactory
          { // PIO Rate Limit:
             outputPreRateLimit.set(preprocessedOutput);
             rateLimitTemp.sub(outputPreRateLimit, output);
-            rateLimitTemp.clipToMaxNorm(maxOutputRate.getValue() * dt);
+            rateLimitTemp.clipToMaxNorm(maxOutputRate.getValue() * dt.getValue());
             output.add(rateLimitTemp);
          }
          else

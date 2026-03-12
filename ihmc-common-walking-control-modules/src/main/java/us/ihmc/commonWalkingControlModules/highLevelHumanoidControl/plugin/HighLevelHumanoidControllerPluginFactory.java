@@ -1,8 +1,9 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public interface HighLevelHumanoidControllerPluginFactory
 {
-   HighLevelHumanoidControllerPlugin buildPlugin(HighLevelControllerFactoryHelper controllerFactoryHelper);
+   HighLevelHumanoidControllerPlugin buildPlugin(HighLevelControllerFactoryHelper controllerFactoryHelper, DoubleProvider updateDT);
 }

@@ -1,17 +1,25 @@
 package us.ihmc.behaviors.behaviorTree;
 
+import gnu.trove.map.TObjectDoubleMap;
+import gnu.trove.map.hash.TObjectDoubleHashMap;
+import org.apache.commons.lang3.function.TriFunction;
 import org.apache.logging.log4j.Level;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulation;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
 import us.ihmc.behaviors.behaviorTree.action.actions.AbilityHandActionComms;
 import us.ihmc.behaviors.behaviorTree.control.FallbackNodeExecutor;
+import us.ihmc.behaviors.behaviorTree.control.GotoNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneExecutor;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
-import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.perception.gpuMapping.TerrainMapData;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.util.ArrayList;
@@ -20,6 +28,8 @@ import java.util.List;
 public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<BehaviorTreeRootNodeState, BehaviorTreeRootNodeDefinition>
       implements BehaviorTreeRootNode<BehaviorTreeNodeExecutor<?, ?>>
 {
+   private final BehaviorTreeExecutor tree;
+   private final TriFunction<DRCRobotModel, ROS2NodeBuilder, RigidBodyTransformReadOnly, HumanoidKinematicsSimulation> kinematicsSimulationBuilder;
    private final List<LeafNodeExecutor<?, ?>> orderedLeaves = new ArrayList<>();
    private final List<ActionNodeExecutor<?, ?>> orderedActions = new ArrayList<>();
    private final List<FallbackNodeExecutor> fallbackNodes = new ArrayList<>();
@@ -27,23 +37,36 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
    private final List<LeafNodeExecutor<?, ?>> failedLeaves = new ArrayList<>();
    private final List<LeafNodeExecutor<?, ?>> successfulLeaves = new ArrayList<>();
 
+   private ROS2Node previewROS2Node;
+   private ROS2ControllerHelper realROS2ControllerHelper;
+   private ROS2SyncedRobotModel realSyncedRobot;
+   private ROS2ControllerHelper previewROS2ControllerHelper;
+   private ROS2SyncedRobotModel previewSyncedRobot;
+   private boolean previewNeedsReset = false;
+   private final TObjectDoubleMap<String> resetJointAngles = new TObjectDoubleHashMap<>();
+   private HumanoidKinematicsSimulation previewSimulation;
+
    public BehaviorTreeRootNodeExecutor(long id,
-                                       CRDTInfo crdtInfo,
+                                       BehaviorTreeExecutor tree,
                                        WorkspaceResourceDirectory saveFileDirectory,
                                        ROS2ControllerHelper ros2ControllerHelper,
+                                       TriFunction<DRCRobotModel, ROS2NodeBuilder, RigidBodyTransformReadOnly, HumanoidKinematicsSimulation> kinematicsSimulationBuilder,
                                        ROS2SyncedRobotModel syncedRobot,
                                        ControllerStatusTracker controllerStatusTracker,
                                        SideDependentList<AbilityHandActionComms> abilityHandComms,
-                                       BehaviorTreeSceneExecutor scene,
-                                       TerrainMapData terrainMapData)
+                                       BehaviorTreeSceneExecutor scene)
    {
-      super(new BehaviorTreeRootNodeState(id, crdtInfo, saveFileDirectory, syncedRobot.getRobotModel(), scene),
+      super(new BehaviorTreeRootNodeState(id, tree.getCRDTInfo(), saveFileDirectory, syncedRobot.getRobotModel(), scene),
             ros2ControllerHelper,
             syncedRobot,
             controllerStatusTracker,
             abilityHandComms,
-            scene,
-            terrainMapData);
+            scene);
+
+      this.tree = tree;
+      this.kinematicsSimulationBuilder = kinematicsSimulationBuilder;
+      this.realROS2ControllerHelper = ros2ControllerHelper;
+      this.realSyncedRobot = syncedRobot;
    }
 
    @Override
@@ -82,6 +105,40 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
    {
       super.update();
 
+      if (state.getPreviewModeEnabled())
+      {
+         if (previewSimulation == null)
+         {
+            // Put preview simulation on a different domain ID
+            ROS2NodeBuilder ros2NodeBuilder = new ROS2NodeBuilder().domainId(165); // TODO: Decide what domain is better
+            previewROS2Node = ros2NodeBuilder.build("behavior_preview");
+            previewROS2ControllerHelper = new ROS2ControllerHelper(previewROS2Node, robotModel.getSimpleRobotName());
+            previewSyncedRobot = new ROS2SyncedRobotModel(rootNode.robotModel, previewROS2Node);
+            for (OneDoFJointBasics oneDoFJoint : previewSyncedRobot.getFullRobotModel().getOneDoFJoints())
+                resetJointAngles.put(oneDoFJoint.getName(), oneDoFJoint.getQ());
+            RigidBodyTransformReadOnly walkingFrame = syncedRobot.getReferenceFrames().getMidFeetUnderPelvisFrame().getTransformToWorldFrame();
+            previewSimulation = kinematicsSimulationBuilder.apply(robotModel, ros2NodeBuilder, walkingFrame);
+         }
+
+         previewSyncedRobot.update();
+
+         if (previewNeedsReset)
+         {
+            previewNeedsReset = false;
+            for (OneDoFJointBasics oneDoFJoint : realSyncedRobot.getFullRobotModel().getOneDoFJoints())
+               resetJointAngles.put(oneDoFJoint.getName(), oneDoFJoint.getQ());
+            previewSimulation.reinitialize(realSyncedRobot.getReferenceFrames().getPelvisFrame().getTransformToRoot(), resetJointAngles);
+         }
+      }
+      else
+         previewNeedsReset = true;
+
+      BehaviorTreeTools.runForSubtreeNodes(this, node ->
+      {
+         node.ros2ControllerHelper = state.getPreviewModeEnabled() ? previewROS2ControllerHelper : realROS2ControllerHelper;
+         node.syncedRobot = state.getPreviewModeEnabled() ? previewSyncedRobot : realSyncedRobot;
+      });
+
       orderedLeaves.clear();
       orderedActions.clear();
       fallbackNodes.clear();
@@ -91,7 +148,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       updateNodeListsRecursive(this);
 
       for (LeafNodeExecutor<?, ?> leaf : orderedLeaves)
-         leaf.getState().validateDefinition(state.getOrderedLeaves());
+         leaf.getState().validateDefinition(state.getOrderedNodes());
 
       // Determine the concurrent group
       int next = state.getExecutionNextIndex();
@@ -131,10 +188,10 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
          for (FallbackNodeExecutor fallbackNode : fallbackNodes)
             if (fallbackNode.tryLeafIsBlocking(leafToExecute))
                break executionLoop;
-         // Break if anything earlier than effective after execute is still going
-         for (int i = effectiveExecuteAfterLeafIndex(leafToExecute); i >= 0; i--)
-            if (state.getOrderedLeaves().get(i).getIsExecuting())
-               break executionLoop;
+         // Break if the action to execute after is still executing
+         int after = effectiveExecuteAfterLeafIndex(leafToExecute);
+         if (after >= 0 && orderedLeaves.get(after).getState().getIsExecuting())
+            break;
 
          leafToExecute.update(); // Make sure can execute is up to date
          if (leafToExecute.getState().getCanExecute())
@@ -143,7 +200,8 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
                                                                           leafToExecute.getDefinition().getName(),
                                                                           leafToExecute.getClass().getSimpleName()));
             leafToExecute.triggerExecution();
-            state.stepForwardNextExecutionIndex();
+            if (!(leafToExecute instanceof GotoNodeExecutor))
+               state.stepForwardNextExecutionIndex();
             if (!leafToExecute.getState().getIsExecuting()) // Handle immediately ceased execution
             {
                boolean isTryLeaf = leafCeasedExecution(leafToExecute);
@@ -215,14 +273,24 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
 
       int after = leaf.getState().getExecuteAfterLeafIndex();
 
-      for (int j = after + 1; j < i; j++) // Might have to wait on nearer leaves
-         after = Math.max(after, state.getOrderedLeaves().get(j).getExecuteAfterLeafIndex());
-
       for (FallbackNodeExecutor fallbackNode : fallbackNodes) // catch group can't execute with anything above catch
          if (fallbackNode.getCatchLeaves().contains(leaf))
             after = Math.max(after, fallbackNode.getCatchLeaves().get(0).getState().getLeafIndex() - 1);
 
       return after;
+   }
+
+   @Override
+   public void destroy()
+   {
+      super.destroy();
+
+      if (previewROS2Node != null)
+         previewROS2Node.destroy();
+      if (previewSyncedRobot != null)
+         previewSyncedRobot.destroy();
+      if (previewSimulation != null)
+         previewSimulation.destroy();
    }
 
    public boolean isEndOfSequence()
@@ -257,6 +325,11 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
 
    // Getters are in here so there's not getters in base node for root stuff
 
+   public BehaviorTreeExecutor getTree()
+   {
+      return tree;
+   }
+
    public ROS2ControllerHelper getRos2ControllerHelper()
    {
       return ros2ControllerHelper;
@@ -280,10 +353,5 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
    public BehaviorTreeSceneExecutor getScene()
    {
       return scene;
-   }
-
-   public TerrainMapData getTerrainMap()
-   {
-      return terrainMapData;
    }
 }
