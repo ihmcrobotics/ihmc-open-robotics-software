@@ -54,8 +54,9 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
    {
       state.setElapsedExecutionTime(timer.getElapsedTime());
 
-      if (definition.getSceneActionType().getValue() == SceneActionNodeType.FREEZE_OBJECT
-       || definition.getSceneActionType().getValue() == SceneActionNodeType.DELETE_OBJECT)
+      boolean isFreeze = definition.getSceneActionType().getValue() == SceneActionNodeType.FREEZE_OBJECT;
+      boolean isDelete = definition.getSceneActionType().getValue() == SceneActionNodeType.DELETE_OBJECT;
+      if (isFreeze || isDelete)
       {
          BehaviorTreeSceneObjectState matchedObject = null;
          for (BehaviorTreeSceneObjectState object : scene.getObjects())
@@ -82,14 +83,14 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
 
          if (matchedObject == null)
          {
-            if (definition.getSceneActionType().getValue() == SceneActionNodeType.FREEZE_OBJECT)
+            if (isFreeze)
                state.getLogger().error("Failed to find a suitable object to freeze: %s".formatted(definition.getSceneObjectDefinition().getName()));
             else
                state.getLogger().error("Failed to find a suitable object to delete: %s".formatted(definition.getSceneObjectDefinition().getName()));
          }
          else
          {
-            if (definition.getSceneActionType().getValue() == SceneActionNodeType.FREEZE_OBJECT)
+            if (isFreeze)
             {
                state.getLogger().info("Freezing object: %s".formatted(matchedObject.getName()));
                matchedObject.freeze();
@@ -100,7 +101,8 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
                scene.removeObject(matchedObject);
             }
          }
-         state.setFailed(matchedObject == null);
+
+         state.setFailed(isFreeze && matchedObject == null); // Don't fail if deleting and object was not found
          state.setIsExecuting(false);
       }
       else // Setup object
