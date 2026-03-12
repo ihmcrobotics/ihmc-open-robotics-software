@@ -26,7 +26,6 @@ import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
 import us.ihmc.rdx.RDX3DSituatedText;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
@@ -42,7 +41,6 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
 {
    private final RDXBaseUI baseUI;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final RDXPanel panel = new RDXPanel("Scene", this::renderImGuiWidgets);
 
    private final List<RDXBehaviorTreeSceneObject> objects;
    private final ImBoolean showDetections = new ImBoolean(true);
@@ -57,7 +55,7 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
    private boolean needToInitializePlacementHeight = false;
    private RDXBehaviorTreeSceneObject beingPlaced;
 
-   public RDXBehaviorTreeScene(CRDTInfo crdtInfo, LongSupplier idSupplier, ROS2SyncedRobotModel syncedRobot, RDXBaseUI baseUI, RDXPanel parentPanel)
+   public RDXBehaviorTreeScene(CRDTInfo crdtInfo, LongSupplier idSupplier, ROS2SyncedRobotModel syncedRobot, RDXBaseUI baseUI)
    {
       super(crdtInfo, idSupplier, syncedRobot);
 
@@ -66,8 +64,6 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
       this.objects = (List) super.objects;
 
       persistentDetections = new RecyclingArrayList<>(() -> new RDXBehaviorTreeSceneDetection(baseUI));
-
-      parentPanel.addChild(panel);
 
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::processImGui3DViewInput);
       baseUI.getPrimary3DPanel().getScene().addRenderableProvider(this::getRenderables);
@@ -99,7 +95,7 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
       }
    }
 
-   private void renderImGuiWidgets()
+   public void renderImGuiWidgets()
    {
       ImGuiTools.smallCheckbox(labels.get("Show camera frame"), showCameraFrame);
       ImGui.sameLine();

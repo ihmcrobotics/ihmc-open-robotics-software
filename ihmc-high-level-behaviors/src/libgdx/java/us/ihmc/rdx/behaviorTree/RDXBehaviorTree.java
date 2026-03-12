@@ -37,6 +37,7 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
     */
    private transient final TLongObjectMap<RDXBehaviorTreeNode<?, ?>> idToNodeMap = new TLongObjectHashMap<>();
    private final RDXPanel panel = new RDXPanel("Behavior Tree", this::renderImGuiWidgets, false, true);
+   private final RDXPanel scenePanel = new RDXPanel("Scene", this::renderScenePanel);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final RDXBehaviorTreeNodeCreationMenu nodeCreationMenu;
    private final RDXBehaviorTreeWidgetsVerticalLayout treeWidgetsVerticalLayout;
@@ -63,6 +64,7 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
 
       nodeCreationMenu = new RDXBehaviorTreeNodeCreationMenu(this, treeFilesDirectory);
       treeWidgetsVerticalLayout = new RDXBehaviorTreeWidgetsVerticalLayout(this);
+      panel.addChild(scenePanel);
       baseUI.getImGuiPanelManager().addPanel(panel);
    }
 
@@ -316,6 +318,17 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
       }
    }
 
+   private void renderScenePanel()
+   {
+      if (rootNode == null)
+      {
+         ImGui.text("Root node is null. No scene.");
+         return;
+      }
+
+      rootNode.getScene().renderImGuiWidgets();
+   }
+
    private void renderSelectedNodeSettingsWidgets(RDXBehaviorTreeNode<?, ?> node)
    {
       if (node.getSelected())
@@ -387,10 +400,5 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
    public RDXBehaviorTreeNodeCreationMenu getNodeCreationMenu()
    {
       return nodeCreationMenu;
-   }
-
-   public RDXPanel getPanel()
-   {
-      return panel;
    }
 }

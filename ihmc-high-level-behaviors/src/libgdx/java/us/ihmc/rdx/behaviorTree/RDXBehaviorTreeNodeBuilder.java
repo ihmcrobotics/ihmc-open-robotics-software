@@ -80,8 +80,7 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeBuilder<RDXBe
       RDXBehaviorTreeScene scene = new RDXBehaviorTreeScene(tree.getCRDTInfo(),
                                                             tree::getAndIncrementNextID,
                                                             syncedRobot,
-                                                            baseUI,
-                                                            tree.getPanel());
+                                                            baseUI);
       return new RDXBehaviorTreeRootNode(id,
                                          tree,
                                          saveFileDirectory,
