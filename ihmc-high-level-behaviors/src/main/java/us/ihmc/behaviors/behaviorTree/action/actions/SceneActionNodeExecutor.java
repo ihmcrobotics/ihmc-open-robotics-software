@@ -11,6 +11,8 @@ import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectState;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectType;
 import us.ihmc.commons.thread.Throttler;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -107,6 +109,22 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
       }
       else // Setup object
       {
+         if (rootNode.getState().getPreviewModeEnabled())
+         {
+            state.getLogger().info("Preview mode enabled. Adding nominal object pose for: {}", definition.getSceneObjectDefinition().getName());
+
+            BehaviorTreeSceneObjectDefinitionMessage message = new BehaviorTreeSceneObjectDefinitionMessage();
+            definition.getSceneObjectDefinition().toMessage(message);
+            BehaviorTreeSceneObjectState targetSceneObject = scene.createObject(message);
+            RigidBodyTransform transformToWorld = new RigidBodyTransform();
+            transformToWorld.set(scene.findFrameByName("Walking").getTransformToRoot());
+            transformToWorld.multiply(definition.getNominalObjectPose().getValueReadOnly());
+            targetSceneObject.setTransformToWorld(transformToWorld);
+            scene.addObject(targetSceneObject);
+            state.setIsExecuting(false);
+            return;
+         }
+
          double timeout = definition.getTimeout();
          if (!timer.isRunning(timeout))
          {
