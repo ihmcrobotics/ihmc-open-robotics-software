@@ -44,6 +44,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
@@ -99,8 +100,9 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
    // TODO convert to time-based, or somehow check if a hand is in recovery
    private final YoBoolean hasSentRecoveryMessage = new YoBoolean("hasSentRecoveryMessage", registry);
 
-   private final YoBoolean triggerInferenceCall = new YoBoolean("triggerInferenceCall", registry);
-   private final YoInteger numberOfInferenceCallsForTest = new YoInteger("numberOfInferenceCallsForTest", registry);
+   private final YoEnum<RobotSide> diagnosticBracingSide = new YoEnum<>("diagnosticBracingSide", registry, RobotSide.class, true);
+//   private final YoBoolean triggerInferenceCall = new YoBoolean("triggerInferenceCall", registry);
+//   private final YoInteger numberOfInferenceCallsForTest = new YoInteger("numberOfInferenceCallsForTest", registry);
 
    public AvatarMultiContactGaitGeneratorThread(DRCRobotModel robotModel,
                                                 ROS2Node ros2Node,
@@ -175,8 +177,9 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
          perceptionVisualizer = null;
       }
 
-      triggerInferenceCall.set(true);
-      numberOfInferenceCallsForTest.set(1);
+      diagnosticBracingSide.set(RobotSide.LEFT);
+//      triggerInferenceCall.set(true);
+//      numberOfInferenceCallsForTest.set(1);
    }
 
    @Override
@@ -185,13 +188,13 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
       if (!humanoidRobotContextData.getEstimatorRan())
          return;
 
-      if (triggerInferenceCall.getValue())
-      {
-         for (int i = 0; i < numberOfInferenceCallsForTest.getValue(); i++)
-         {
-            planner.triggerDiagnosticInference();
-         }
-      }
+//      if (triggerInferenceCall.getValue())
+//      {
+//         for (int i = 0; i < numberOfInferenceCallsForTest.getValue(); i++)
+//         {
+//            planner.triggerDiagnosticInference();
+//         }
+//      }
 
       // Update capture point preview trajectory
       RecyclingArrayList<FramePoint2D> capturePointPositionWaypoints = centerOfPressureDataHolder.getCapturePointPositionWaypoints();
@@ -224,7 +227,6 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
       currentCapturePoint.setY(centerOfMassPosition.getY() + centerOfMassVelocity.getY() / ReducedOrderRobotModel.OMEGA);
 
       capturePointError.sub(currentCapturePoint, desiredCapturePoint);
-
       isFalling.set(capturePointError.norm() > CAPTURE_POINT_ERROR_THRESHOLD_FOR_HAND_CONTACT);
 
       if (commandInputManager.isNewCommandAvailable(PlanarRegionsListCommand.class))
@@ -254,9 +256,12 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
          plannedHandContacts.clear();
          planner.plan(reducedOrderRobotModel, plannedFootSteps, plannedHandContacts);
 
-//         for (RobotSide robotSide : RobotSide.values)
+         for (RobotSide robotSide : RobotSide.values)
          {
-            HandContactCommand handContactCommand = plannedHandContacts.get(RobotSide.LEFT);
+            if (diagnosticBracingSide.getValue() != null && robotSide != diagnosticBracingSide.getValue())
+               continue;
+
+            HandContactCommand handContactCommand = plannedHandContacts.get(robotSide);
             if (handContactCommand != null)
             {
 //               LogTools.info("Sending " + robotSide + " hand bracing command!");

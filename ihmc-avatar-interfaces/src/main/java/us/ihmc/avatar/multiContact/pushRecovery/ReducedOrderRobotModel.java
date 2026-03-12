@@ -44,8 +44,11 @@ import java.util.ArrayList;
  */
 public class ReducedOrderRobotModel
 {
-   // plan with slower acceleration
+   // Plan with slower acceleration
    public static final double MAX_HAND_ACCELERATION = 8.0; // 15.0;
+
+   // Scale down feet contact points in order to check stability conditions
+   private static final double FOOT_SCALE_FACTOR = 0.6;
 
    /* Nominal offset in mid-feet zup frame from CoM to shoulder position, taken at default standing home pose */
    private static final double SHOULDER_COM_OFFSET_X = -0.005;
@@ -57,7 +60,7 @@ public class ReducedOrderRobotModel
    public static final double REACHABILITY_RADIUS_MAX = 0.72;
 
    /* Maximum inward reaching distance, to prevent too much cross-over */
-   public static final double MAX_INWARD_DISTANCE = 0.15;
+   public static final double MAX_INWARD_DISTANCE = SHOULDER_COM_OFFSET_Y * 0.9;
 
    public static final double NOMINAL_COM_HEIGHT = 0.9;
    public static final double OMEGA = Math.sqrt(9.81 / NOMINAL_COM_HEIGHT);
@@ -103,11 +106,14 @@ public class ReducedOrderRobotModel
 
          defaultFootPolygons.put(robotSide, new YoFrameConvexPolygon2D(sidePrefix + "FootPolygon", ReferenceFrame.getWorldFrame(), 4, registry));
          ArrayList<Point2D> contactPoints = footContactPoints.get(robotSide);
+
          for (int i = 0; i < contactPoints.size(); i++)
          {
             defaultFootPolygons.get(robotSide).addVertex(contactPoints.get(i));
          }
+
          defaultFootPolygons.get(robotSide).update();
+         defaultFootPolygons.get(robotSide).scale(FOOT_SCALE_FACTOR);
       }
    }
 

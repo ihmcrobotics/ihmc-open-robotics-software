@@ -63,7 +63,6 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
    private static final boolean ENABLE_ZERO_ACCELERATION = true;
    private static final boolean ENABLE_POINT_FEEDBACK = true;
    private static final boolean ENABLE_ORIENTATION_FEEDBACK = true;
-   private static final double RHO_WEIGHT_INITIAL = 1.5;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final FrameVector3D zeroWorld = new FrameVector3D();
@@ -295,9 +294,6 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
       desiredContactPoseWorld.getPosition().setMatchingFrame(this.contactPointInBody);
       EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.Z, contactNormal, desiredContactPoseWorld.getOrientation());
       desiredContactFrameFixedInWorld.setPoseAndUpdate(desiredContactPoseWorld);
-
-      FramePoint3D actualPoint = new FramePoint3D(contactPointInBody);
-      actualPoint.changeFrame(ReferenceFrame.getWorldFrame());
 
       // Update yovariables
       yoDesiredContactPosition.set(desiredContactPoseWorld.getPosition());

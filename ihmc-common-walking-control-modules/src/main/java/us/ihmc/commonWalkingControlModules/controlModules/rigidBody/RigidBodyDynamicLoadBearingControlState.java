@@ -29,7 +29,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class RigidBodyDynamicLoadBearingControlState extends RigidBodyControlState
 {
-   private static final double MINIMUM_TIME_IN_CONTACT = 0.4;
+   private static final double MINIMUM_TIME_IN_CONTACT = 1.0;
    private static final double CAPTURE_POINT_ERROR_THRESHOLD_TO_REMAIN_IN_STATE = 0.025;
 
    private final StateMachine<DynamicLoadBearingStateEnum, DynamicLoadBearingState> stateMachine;
