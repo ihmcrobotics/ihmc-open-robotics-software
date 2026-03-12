@@ -277,6 +277,7 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
    public void destroy()
    {
       super.destroy();
+      scene.destroy();
 
       if (previewROS2Node != null)
          previewROS2Node.destroy();

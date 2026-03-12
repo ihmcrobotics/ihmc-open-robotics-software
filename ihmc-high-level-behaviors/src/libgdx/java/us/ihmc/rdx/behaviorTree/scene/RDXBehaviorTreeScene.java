@@ -28,6 +28,7 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.sceneManager.RDXRenderableAdapter;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -46,6 +47,7 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
    private final ImBoolean showDetections = new ImBoolean(true);
    private final ImBoolean createFoundationPose = new ImBoolean(false);
    private final RecyclingArrayList<RDXBehaviorTreeSceneDetection> persistentDetections;
+   private final RDXRenderableAdapter renderableAdapter;
 
    private final ImBoolean showCameraFrame = new ImBoolean(false);
    private final RigidBodyTransform cameraGraphicTransform = new RigidBodyTransform();
@@ -65,8 +67,8 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
 
       persistentDetections = new RecyclingArrayList<>(() -> new RDXBehaviorTreeSceneDetection(baseUI));
 
-      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::processImGui3DViewInput);
-      baseUI.getPrimary3DPanel().getScene().addRenderableProvider(this::getRenderables);
+      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this, this::processImGui3DViewInput);
+      renderableAdapter = baseUI.getPrimary3DPanel().getScene().addRenderableProvider(this::getRenderables);
    }
 
    public void update()
@@ -235,5 +237,14 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
       persistentDetections.clear();
       for (int i = 0; i < message.getPersistentDetections().size(); i++)
          persistentDetections.add().update(message.getPersistentDetections().get(i));
+   }
+
+   public void destroy()
+   {
+      baseUI.getPrimary3DPanel().removeImGui3DViewInputProcessor(this);
+      baseUI.getPrimary3DPanel().getScene().removeRenderableAdapter(renderableAdapter);
+
+      for (RDXBehaviorTreeSceneObject object : objects)
+         object.destroy();
    }
 }
