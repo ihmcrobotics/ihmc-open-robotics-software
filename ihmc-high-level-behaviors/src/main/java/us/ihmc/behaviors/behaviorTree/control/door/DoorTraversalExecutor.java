@@ -10,6 +10,8 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ros2log.ROS2LogRecord;
 import us.ihmc.communication.ros2log.ROS2LogSerialization;
 import us.ihmc.communication.ros2log.ROS2LogTimeSource;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 
@@ -22,12 +24,17 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
    private final ROS2Topic<KinematicsToolboxOutputStatus> kstOutputTopic;
    private ROS2LogRecord ros2LogRecord = null;
    private final KinematicsToolboxOutputStatus status = new KinematicsToolboxOutputStatus();
+   private final RigidBodyTransform initialPelvisPose = new RigidBodyTransform();
+   private final RigidBodyTransform relativePelvisPose = new RigidBodyTransform();
 
    public DoorTraversalExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
    {
       super(new DoorTraversalState(id, rootNode.getState()), rootNode);
 
       kstOutputTopic = KinematicsStreamingToolboxModule.getOutputStatusTopic(robotModel.getSimpleRobotName());
+
+      List<Integer> nonFingerIndices = FullRobotModelUtils.getAllJointsExcludingHandsIndices(syncedRobot.getFullRobotModel());
+      float[] nonFingerValues = new float[nonFingerIndices.size()];
 
       ROS2Publisher<KinematicsToolboxOutputStatus> publisher = ros2ControllerHelper.getROS2Node().createPublisher(kstOutputTopic);
       syncedRobot.addRobotConfigurationDataReceivedCallback(() ->
@@ -36,12 +43,23 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
          {
             RobotConfigurationData rcd = syncedRobot.getLatestRobotConfigurationData();
             status.setSequenceId(rcd.getSequenceId());
-            status.getDesiredJointAngles().set(rcd.getJointAngles());
-            status.getDesiredRootPosition().set(rcd.getRootPosition());
-            status.getDesiredRootOrientation().set(rcd.getRootOrientation());
-            status.getDesiredJointVelocities().set(rcd.getJointVelocities());
+
+            relativePelvisPose.set(rcd.getRootOrientation(), rcd.getRootPosition());
+            initialPelvisPose.inverseTransform(relativePelvisPose);
+            status.getDesiredRootPosition().set(relativePelvisPose.getTranslation());
+            status.getDesiredRootOrientation().set(relativePelvisPose.getRotation());
             status.getDesiredRootLinearVelocity().set(rcd.getPelvisLinearVelocity());
             status.getDesiredRootAngularVelocity().set(rcd.getPelvisAngularVelocity());
+
+            for (int i = 0; i < nonFingerValues.length; i++)
+               nonFingerValues[i] = rcd.getJointAngles().get(nonFingerIndices.get(i));
+            status.getDesiredJointAngles().clear();
+            status.getDesiredJointAngles().add(nonFingerValues);
+            for (int i = 0; i < nonFingerValues.length; i++)
+               nonFingerValues[i] = rcd.getJointVelocities().get(nonFingerIndices.get(i));
+            status.getDesiredJointVelocities().clear();
+            status.getDesiredJointVelocities().add(nonFingerValues);
+
             publisher.publish(status);
          }
       });
@@ -61,6 +79,7 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
 
       if (executing && ros2LogRecord == null)
       {
+         initialPelvisPose.set(syncedRobot.getReferenceFrames().getPelvisFrame().getTransformToRoot());
          ros2LogRecord = new ROS2LogRecord(robotModel.getSimpleRobotName(), List.of(kstOutputTopic), ROS2LogTimeSource.SYSTEM, ROS2LogSerialization.JSON);
          ros2LogRecord.start();
       }
