@@ -6,7 +6,6 @@
 #include "behavior_msgs/msg/./ActionSequenceStateMessage_.idl"
 #include "behavior_msgs/msg/./BasicNodeStateMessage_.idl"
 #include "behavior_msgs/msg/./BehaviorTreeRootNodeStateMessage_.idl"
-#include "behavior_msgs/msg/./BehaviorTreeSceneStateMessage_.idl"
 #include "behavior_msgs/msg/./BuildingExplorationStateMessage_.idl"
 #include "behavior_msgs/msg/./CheckPointNodeStateMessage_.idl"
 #include "behavior_msgs/msg/./ChestOrientationActionStateMessage_.idl"
@@ -130,10 +129,6 @@ module behavior_msgs
          * The timestamp and modifier ID of the latest modification of the tree data fields
          */
         ihmc_common_msgs::msg::dds::LatestModificationMessage latest_modification_to_data;
-        /**
-         * Scene
-         */
-        behavior_msgs::msg::dds::BehaviorTreeSceneStateMessage scene;
         /**
          * A depth first ordered list of types.
          */

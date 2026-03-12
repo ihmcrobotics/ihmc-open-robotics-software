@@ -5,7 +5,6 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeMessageTools;
-import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneState;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.LatestTimestampModifiable;
@@ -35,7 +34,6 @@ public abstract class BehaviorTree<R extends BehaviorTreeRootNode<T>, T extends 
    private final BehaviorTreeNodeBuilder<T> nodeBuilder;
    private final BehaviorTreeTopologyOperationQueue<T> topologyChangeQueue;
    protected R rootNode;
-   private BehaviorTreeSceneState scene;
 
    public BehaviorTree(ROS2SyncedRobotModel syncedRobot,
                        ROS2ActorDesignation actor,
@@ -108,7 +106,6 @@ public abstract class BehaviorTree<R extends BehaviorTreeRootNode<T>, T extends 
       message.setNextId(nextID.longValue());
       rootReferenceModification.toMessage(message.getLatestModificationToRootReference());
       dataModification.toMessage(message.getLatestModificationToData());
-      scene.toMessage(message.getScene());
       ROS2BehaviorTreeMessageTools.clearLists(message);
       if (rootNode != null)
          toMessage(message, rootNode.getState());
@@ -127,15 +124,9 @@ public abstract class BehaviorTree<R extends BehaviorTreeRootNode<T>, T extends 
    {
       rootReferenceModification.fromMessage(message.getLatestModificationToRootReference());
       dataModification.fromMessage(message.getLatestModificationToData());
-      scene.fromMessage(message.getScene());
 
       if (dataModification.isModificationIncoming())
          nextID.setValue(message.getNextId());
-   }
-
-   public void setScene(BehaviorTreeSceneState scene)
-   {
-      this.scene = scene;
    }
 
    public void setRootNode(R rootNode)

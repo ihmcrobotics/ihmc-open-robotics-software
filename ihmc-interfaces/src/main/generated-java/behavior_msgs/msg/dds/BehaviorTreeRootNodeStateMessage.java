@@ -17,6 +17,10 @@ public class BehaviorTreeRootNodeStateMessage extends Packet<BehaviorTreeRootNod
             */
    public behavior_msgs.msg.dds.BehaviorTreeRootNodeDefinitionMessage definition_;
    /**
+            * Scene
+            */
+   public behavior_msgs.msg.dds.BehaviorTreeSceneStateMessage scene_;
+   /**
             * If the sequence is currently set to proceed automatically
             */
    public boolean automatic_execution_;
@@ -45,6 +49,7 @@ public class BehaviorTreeRootNodeStateMessage extends Packet<BehaviorTreeRootNod
    {
       state_ = new behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage();
       definition_ = new behavior_msgs.msg.dds.BehaviorTreeRootNodeDefinitionMessage();
+      scene_ = new behavior_msgs.msg.dds.BehaviorTreeSceneStateMessage();
    }
 
    public BehaviorTreeRootNodeStateMessage(BehaviorTreeRootNodeStateMessage other)
@@ -57,6 +62,7 @@ public class BehaviorTreeRootNodeStateMessage extends Packet<BehaviorTreeRootNod
    {
       behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType.staticCopy(other.state_, state_);
       behavior_msgs.msg.dds.BehaviorTreeRootNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
+      behavior_msgs.msg.dds.BehaviorTreeSceneStateMessagePubSubType.staticCopy(other.scene_, scene_);
       automatic_execution_ = other.automatic_execution_;
 
       execution_next_index_ = other.execution_next_index_;
@@ -87,6 +93,15 @@ public class BehaviorTreeRootNodeStateMessage extends Packet<BehaviorTreeRootNod
    public behavior_msgs.msg.dds.BehaviorTreeRootNodeDefinitionMessage getDefinition()
    {
       return definition_;
+   }
+
+
+   /**
+            * Scene
+            */
+   public behavior_msgs.msg.dds.BehaviorTreeSceneStateMessage getScene()
+   {
+      return scene_;
    }
 
    /**
@@ -199,6 +214,7 @@ public class BehaviorTreeRootNodeStateMessage extends Packet<BehaviorTreeRootNod
 
       if (!this.state_.epsilonEquals(other.state_, epsilon)) return false;
       if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
+      if (!this.scene_.epsilonEquals(other.scene_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.automatic_execution_, other.automatic_execution_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.execution_next_index_, other.execution_next_index_, epsilon)) return false;
@@ -226,6 +242,7 @@ public class BehaviorTreeRootNodeStateMessage extends Packet<BehaviorTreeRootNod
 
       if (!this.state_.equals(otherMyClass.state_)) return false;
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
+      if (!this.scene_.equals(otherMyClass.scene_)) return false;
       if(this.automatic_execution_ != otherMyClass.automatic_execution_) return false;
 
       if(this.execution_next_index_ != otherMyClass.execution_next_index_) return false;
@@ -252,6 +269,8 @@ public class BehaviorTreeRootNodeStateMessage extends Packet<BehaviorTreeRootNod
       builder.append(this.state_);      builder.append(", ");
       builder.append("definition=");
       builder.append(this.definition_);      builder.append(", ");
+      builder.append("scene=");
+      builder.append(this.scene_);      builder.append(", ");
       builder.append("automatic_execution=");
       builder.append(this.automatic_execution_);      builder.append(", ");
       builder.append("execution_next_index=");

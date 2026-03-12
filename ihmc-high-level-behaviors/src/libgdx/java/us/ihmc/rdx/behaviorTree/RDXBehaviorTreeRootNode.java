@@ -93,6 +93,8 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
    {
       super.update();
 
+      scene.update();
+
       if (state.getPreviewModeEnabled())
       {
          if (previewRobot == null)

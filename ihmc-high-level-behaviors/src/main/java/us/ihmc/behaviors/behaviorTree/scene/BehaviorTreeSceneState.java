@@ -202,4 +202,9 @@ public abstract class BehaviorTreeSceneState
    {
       return objects;
    }
+
+   public boolean pollHasStatus()
+   {
+      return true;
+   }
 }
