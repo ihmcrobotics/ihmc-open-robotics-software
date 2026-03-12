@@ -71,6 +71,7 @@ public class OrderedLogicalSequence
       started = false;
       finished = false;
       currentLogicalElement = 0;
+      lastLogicalElementRun = -1;
    }
 
    /**
