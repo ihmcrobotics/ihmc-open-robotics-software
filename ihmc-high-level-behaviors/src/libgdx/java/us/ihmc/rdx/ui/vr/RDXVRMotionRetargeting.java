@@ -1,6 +1,5 @@
 package us.ihmc.rdx.ui.vr;
 
-import org.jfree.util.Log;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -11,7 +10,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.log.LogTools;
 import us.ihmc.motionRetargeting.RetargetingParameters;
 import us.ihmc.motionRetargeting.VRTrackedSegmentType;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
@@ -83,20 +81,22 @@ public class RDXVRMotionRetargeting
    private final SideDependentList<Boolean> isFootInContact = new SideDependentList<>();
    private boolean controllingFeet = false;
 
-   private static final double COM_ALPHA = 0.15;
-   private static final double PELVIS_ALPHA = 0.05;
+   private static final double COM_ALPHA = 0.9;
+   private static final double PELVIS_ALPHA = 0.5;
    private final FramePose3D filteredPelvisFramePose = new FramePose3D(); // low-pass state
 
    // Foot height blending
-   private final SideDependentList<Double> swingTargetFootHeight = new SideDependentList<>();
-   private final SideDependentList<Double> blendedFootHeight = new SideDependentList<>();
-   private final SideDependentList<Boolean> wasFootInContact = new SideDependentList<>();
-   private final SideDependentList<Boolean> hasReachedMinSwing = new SideDependentList<>();
+   private static final boolean ENABLE_FOOT_Z_RETARGETING = false;
    private static final double MIN_SWING_LIFT = 0.15; // above initial height
    private static final double SWING_TARGET_CATCHUP_ALPHA = 0.2; // how fast swing target chases tracker
    private static final double SWING_Z_BLEND_ALPHA = 0.2;        // how fast blended Z chases swing target
    private static final double LANDING_Z_BLEND_ALPHA = 0.2;      // how fast blended Z chases tracker during landing
    private static final double CONTACT_Z_BLEND_ALPHA = 0.2;
+   private final SideDependentList<Double> swingTargetFootHeight = new SideDependentList<>();
+   private final SideDependentList<Double> blendedFootHeight = new SideDependentList<>();
+   private final SideDependentList<Boolean> wasFootInContact = new SideDependentList<>();
+   private final SideDependentList<Boolean> hasReachedMinSwing = new SideDependentList<>();
+
 
    /**
     * Constructor for the motion retargeting class.
@@ -420,85 +420,86 @@ public class RDXVRMotionRetargeting
             constrainedFootPose.getRotation().setYawPitchRoll(newFootFramePoses.get(side).getRotation().getYaw(), 0.0,0.0);
             constrainedFootPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-            // --- Z retargeting logic ---
-            // Current contact state from stepping tracker
-            boolean inContact = steppingTracker.isFootInContact(side);
-            boolean wasInContact = wasFootInContact.get(side);
-            wasFootInContact.put(side, inContact);
-            double initialHeight = initialFootTransformsToWorld.get(side).getTranslationZ();
-            double trackerHeight = footTrackerTransform.getTranslationZ();
+            if (ENABLE_FOOT_Z_RETARGETING)
+            {
+               // Current contact state from stepping tracker
+               boolean inContact = steppingTracker.isFootInContact(side);
+               boolean wasInContact = wasFootInContact.get(side);
+               wasFootInContact.put(side, inContact);
+               double initialHeight = initialFootTransformsToWorld.get(side).getTranslationZ();
+               double trackerHeight = footTrackerTransform.getTranslationZ();
 
-            // Initialize blended height once
-            if (initialFootFrames.get(side) != null && blendedFootHeight.get(side) == 0.0)
-            {
-               blendedFootHeight.put(side, initialHeight);
-               swingTargetFootHeight.put(side, initialHeight + MIN_SWING_LIFT);
-            }
-
-            double currentBlendedHeight = blendedFootHeight.get(side);
-            double currentSwingTarget = swingTargetFootHeight.get(side);
-            // 1) Contact -> Swing transition: set minimum swing target
-            if (wasInContact && !inContact)
-            {
-               // start swing at at least MIN_SWING_LIFT
-               double minSwing = initialHeight + MIN_SWING_LIFT;
-               currentSwingTarget = Math.max(trackerHeight, minSwing);
-               isFootInContact.put(side, false);
-            }
-
-            double minSwingThreshold = initialHeight + MIN_SWING_LIFT;
-            // 2) High swing: let target chase tracker if tracker goes higher
-            if (!inContact && trackerHeight > minSwingThreshold)
-            {
-               // smooth catch-up of swing target to tracker
-               currentSwingTarget = currentSwingTarget + SWING_TARGET_CATCHUP_ALPHA * (trackerHeight - currentSwingTarget);
-               isFootInContact.put(side, false);
-            }
-
-            // 3) Landing: blend Z towards tracker when landing is detected
-            if (steppingTracker.isFootLanding(side) && hasReachedMinSwing.get(side))
-            {
-               currentBlendedHeight = currentBlendedHeight
-                                      + LANDING_Z_BLEND_ALPHA * (trackerHeight - currentBlendedHeight);
-               isFootInContact.put(side, false);
-            }
-            else if (!inContact)
-            {
-               // Swing phase, blend towards swing target
-               currentBlendedHeight = currentBlendedHeight
-                                      + SWING_Z_BLEND_ALPHA * (currentSwingTarget - currentBlendedHeight);
-               steppingTracker.setIsSwinging(side, true);
-               isFootInContact.put(side, false);
-               // Mark that we are high enough to allow landing
-               if (!hasReachedMinSwing.get(side) && currentBlendedHeight >= minSwingThreshold - 0.01)
-                  hasReachedMinSwing.put(side, true);
-            }
-            else
-            {
-               // Contact phase: keep blending until we're close enough, then lock
-               double heightError = trackerHeight - currentBlendedHeight;
-               double heightErrorAbs = Math.abs(heightError);
-               double lockEpsilon = 0.02; // 2 cm, tune as needed
-
-               if (heightErrorAbs > lockEpsilon)
+               // Initialize blended height once
+               if (initialFootFrames.get(side) != null && blendedFootHeight.get(side) == 0.0)
                {
-                  currentBlendedHeight = currentBlendedHeight
-                                         + CONTACT_Z_BLEND_ALPHA * heightError;
+                  blendedFootHeight.put(side, initialHeight);
+                  swingTargetFootHeight.put(side, initialHeight + MIN_SWING_LIFT);
+               }
+
+               double currentBlendedHeight = blendedFootHeight.get(side);
+               double currentSwingTarget = swingTargetFootHeight.get(side);
+               // Contact -> Swing transition: set minimum swing target
+               if (wasInContact && !inContact)
+               {
+                  // start swing at at least MIN_SWING_LIFT
+                  double minSwing = initialHeight + MIN_SWING_LIFT;
+                  currentSwingTarget = Math.max(trackerHeight, minSwing);
                   isFootInContact.put(side, false);
+               }
+
+               double minSwingThreshold = initialHeight + MIN_SWING_LIFT;
+               // High swing: let target chase tracker if tracker goes higher
+               if (!inContact && trackerHeight > minSwingThreshold)
+               {
+                  // smooth catch-up of swing target to tracker
+                  currentSwingTarget = currentSwingTarget + SWING_TARGET_CATCHUP_ALPHA * (trackerHeight - currentSwingTarget);
+                  isFootInContact.put(side, false);
+               }
+
+               // Landing: blend Z towards tracker when landing is detected
+               if (steppingTracker.isFootLanding(side) && hasReachedMinSwing.get(side))
+               {
+                  currentBlendedHeight = currentBlendedHeight + LANDING_Z_BLEND_ALPHA * (trackerHeight - currentBlendedHeight);
+                  isFootInContact.put(side, false);
+               }
+               else if (!inContact)
+               {
+                  // Swing phase, blend towards swing target
+                  currentBlendedHeight = currentBlendedHeight + SWING_Z_BLEND_ALPHA * (currentSwingTarget - currentBlendedHeight);
+                  steppingTracker.setIsSwinging(side, true);
+                  isFootInContact.put(side, false);
+                  // Mark that we are high enough to allow landing
+                  if (!hasReachedMinSwing.get(side) && currentBlendedHeight >= minSwingThreshold - 0.01)
+                     hasReachedMinSwing.put(side, true);
                }
                else
                {
-                  currentBlendedHeight = trackerHeight;
-                  isFootInContact.put(side, true);
-                  hasReachedMinSwing.put(side, false);
+                  // Contact phase: keep blending until we're close enough, then lock
+                  double heightError = trackerHeight - currentBlendedHeight;
+                  double heightErrorAbs = Math.abs(heightError);
+                  double lockEpsilon = 0.02; // 2 cm, tune as needed
+
+                  if (heightErrorAbs > lockEpsilon)
+                  {
+                     currentBlendedHeight = currentBlendedHeight + CONTACT_Z_BLEND_ALPHA * heightError;
+                     isFootInContact.put(side, false);
+                  }
+                  else
+                  {
+                     currentBlendedHeight = trackerHeight;
+                     isFootInContact.put(side, true);
+                     hasReachedMinSwing.put(side, false);
+                  }
+                  steppingTracker.setIsSwinging(side, false);
                }
-               steppingTracker.setIsSwinging(side, false);
+               swingTargetFootHeight.put(side, currentSwingTarget);
+               blendedFootHeight.put(side, currentBlendedHeight);
+
+               newFootFramePoses.get(side).getPosition().set(constrainedFootPose.getPosition());
+               newFootFramePoses.get(side).getPosition().setZ(currentBlendedHeight);
             }
-            swingTargetFootHeight.put(side, currentSwingTarget);
-            blendedFootHeight.put(side, currentBlendedHeight);
-            // Apply blended Z back to pose (keep X/Y from constrained pose)
-            newFootFramePoses.get(side).getPosition().set(constrainedFootPose.getPosition());
-            newFootFramePoses.get(side).getPosition().setZ(currentBlendedHeight);
+            else
+               newFootFramePoses.get(side).getPosition().set(constrainedFootPose.getPosition());
 
             double alpha = steppingTracker.getCloseToGroundBlendFactor(side);
             if (alpha > 0.0)
@@ -517,6 +518,8 @@ public class RDXVRMotionRetargeting
             }
             constrainedFootFrames.get(side).update();
 
+            if (!ENABLE_FOOT_Z_RETARGETING)
+               isFootInContact.put(side, steppingTracker.isFootInContact(side));
             if (!steppingTracker.isFootInContact(side))
             {
                retargetedFrames.put(side == RobotSide.LEFT ? LEFT_ANKLE : RIGHT_ANKLE, constrainedFootFrames.get(side));
