@@ -3,14 +3,11 @@ package us.ihmc.rdx.csg;
 import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.ControllerListener;
 import com.badlogic.gdx.controllers.Controllers;
-import controller_msgs.msg.dds.ContinuousStepGeneratorInputMessage;
-import controller_msgs.msg.dds.ContinuousStepGeneratorParametersMessage;
-import controller_msgs.msg.dds.ContinuousStepGeneratorStatusMessage;
-import controller_msgs.msg.dds.DirectionalControlInputMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.avatar.joystickBasedLocomotion.AbstractJoystickLocomotionPlugin;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.CSGROS2CommunicationHelper;
 import us.ihmc.commons.DeadbandTools;
+import us.ihmc.commons.thread.Throttler;
 import us.ihmc.ros2.ROS2Node;
 
 /**
@@ -18,59 +15,38 @@ import us.ihmc.ros2.ROS2Node;
  * {@link us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGenerator}
  * via the {@link us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition}
  * This requires no instantiation or direct interaction with the ContinuousStepGenerator, all communication is done
- * through ROS2. Additionally, this can be attached to any program or application with an update loop. Just make
- * sure the Xbox controller is physically connected to the computer running the application
+ * through ROS2. This is intended to be attached to an RDX application and updated every tick in some sort of update
+ * loop. Make sure the Xbox controller is physically connected to the computer running the RDX application.
  *
  * @author Stefan Fasano
  */
-public class RDXXboxOnePlugin
+public class XBoxOneRDXLocomotionPlugin extends AbstractJoystickLocomotionPlugin
 {
    public static final double DEFAULT_PARAMETER_INCREMENT = 0.01;
    private static final boolean DEFAULT_USE_DEADMAN_SWITCH = true;
 
    // Stuff related to the Xbox controller itself
    private Controller currentController;
-   private final ControllerListener controllerListener;
+   private final ControllerListener xboxOneControllerListener;
    private boolean currentControllerConnected = false;
    private boolean controllerListenerHasBeenAdded = false;
    private boolean publishNewCommand = false;
 
-   // CSG thread ROS communication helper
-   private final CSGROS2CommunicationHelper csgROS2ControllerHelper;
+   // Throttler on publishers, so we limit network traffic
+   private final Throttler publisherThrottler = new Throttler();
 
-   // Controller thread ROS communication helper
-   private final ROS2ControllerHelper controllerROS2ControllerHelper;
-
-   // CSG thread command and status messages
-   private final ContinuousStepGeneratorInputMessage csgInputCommand;
-   private final ContinuousStepGeneratorParametersMessage csgParametersCommand;
-   private final ContinuousStepGeneratorStatusMessage csgStatusMessage;
-
-   // Controller thread walking speed and heading command
-   private final DirectionalControlInputMessage directionalControlInputMessage;
-
-   public RDXXboxOnePlugin(DRCRobotModel robotModel, ROS2Node ros2Node)
+   public XBoxOneRDXLocomotionPlugin(DRCRobotModel robotModel, ROS2Node ros2Node)
    {
-      this(new CSGROS2CommunicationHelper(robotModel.getSimpleRobotName(), ros2Node, robotModel.getWalkingControllerParameters()), new ROS2ControllerHelper(ros2Node, robotModel));
+      this(robotModel, ros2Node, DEFAULT_PARAMETER_INCREMENT, DEFAULT_USE_DEADMAN_SWITCH);
    }
 
-   public RDXXboxOnePlugin(CSGROS2CommunicationHelper csgROS2ControllerHelper, ROS2ControllerHelper controllerROS2ControllerHelper)
+   public XBoxOneRDXLocomotionPlugin(DRCRobotModel robotModel, ROS2Node ros2Node, double parameterIncrement, boolean useDeadmanSwitch)
    {
-      this(csgROS2ControllerHelper, controllerROS2ControllerHelper, DEFAULT_PARAMETER_INCREMENT, DEFAULT_USE_DEADMAN_SWITCH);
-   }
+      super(robotModel, ros2Node);
 
-   public RDXXboxOnePlugin(CSGROS2CommunicationHelper csgROS2ControllerHelper, ROS2ControllerHelper controllerROS2ControllerHelper, double parameterIncrement, boolean useDeadmanSwitch)
-   {
-      this.csgROS2ControllerHelper = csgROS2ControllerHelper;
-      this.controllerROS2ControllerHelper = controllerROS2ControllerHelper;
+      publisherThrottler.setPeriod(robotModel.getStepGeneratorDT() * 2); // Publish at half the rate of CSG thread
 
-      csgInputCommand = csgROS2ControllerHelper.getCSGInputCommand();
-      csgParametersCommand = csgROS2ControllerHelper.getCSGParametersCommand();
-      csgStatusMessage = csgROS2ControllerHelper.getCSGStatusMessage();
-
-      directionalControlInputMessage = new DirectionalControlInputMessage();
-
-      controllerListener = new ControllerListener()
+      xboxOneControllerListener = new ControllerListener()
       {
          @Override
          public void connected(Controller controller)
@@ -105,7 +81,7 @@ public class RDXXboxOnePlugin
                else if (buttonCode == controller.getMapping().buttonDpadUp)
                   csgParametersCommand.setSwingHeight(csgStatusMessage.getCurrentSwingHeight() + parameterIncrement);
 
-               csgROS2ControllerHelper.publish(csgParametersCommand);
+               csgROS2CommunicationHelper.publish(csgParametersCommand);
             }
             return false;
          }
@@ -137,18 +113,16 @@ public class RDXXboxOnePlugin
       };
    }
 
-   public void updateAndPublish()
+   @Override
+   public void update()
    {
-      update(csgInputCommand, directionalControlInputMessage);
+      updateCommandsFromRC();
 
-      if (publishNewCommand)
-      {
-         csgROS2ControllerHelper.publishAtThrottledRate(csgInputCommand);
-         controllerROS2ControllerHelper.publishToController(directionalControlInputMessage);
-      }
+      if (publishNewCommand && publisherThrottler.run())
+         publish();
    }
 
-   public void update(ContinuousStepGeneratorInputMessage csgInputCommandToPack, DirectionalControlInputMessage directionalControlInputMessageToPack)
+   private void updateCommandsFromRC()
    {
       boolean newControllerConnected = false;
       if (currentController != null && currentController != Controllers.getCurrent())
@@ -159,7 +133,7 @@ public class RDXXboxOnePlugin
 
       if ((!controllerListenerHasBeenAdded || newControllerConnected) && currentControllerConnected)
       {
-         currentController.addListener(controllerListener);
+         currentController.addListener(xboxOneControllerListener);
          controllerListenerHasBeenAdded = true;
       }
 
@@ -179,44 +153,12 @@ public class RDXXboxOnePlugin
          turningJoystickValue = DeadbandTools.applyDeadband(deadband, -currentController.getAxis(currentController.getMapping().axisRightX));
       }
 
-      csgInputCommandToPack.setWalk(requestWalking);
-      csgInputCommandToPack.setUnitVelocities(false);
-      csgInputCommandToPack.setForwardVelocity(forwardJoystickValue);
-      csgInputCommandToPack.setLateralVelocity(lateralJoystickValue);
-      csgInputCommandToPack.setTurnVelocity(turningJoystickValue);
-
-      directionalControlInputMessageToPack.setWalk(requestWalking);
-      directionalControlInputMessageToPack.setUnitVelocities(false);
-      directionalControlInputMessageToPack.setForward(forwardJoystickValue);
-      directionalControlInputMessageToPack.setRight(-lateralJoystickValue);
-      directionalControlInputMessageToPack.setClockwise(-turningJoystickValue);
+      // Pack messages with desired walking commands
+      setDesiredWalkingCommands(requestWalking, forwardJoystickValue, lateralJoystickValue, turningJoystickValue);
    }
 
-   public void sendStopWalkingCommands()
+   public CSGROS2CommunicationHelper getCSGROS2CommunicationHelper()
    {
-      csgInputCommand.setWalk(false);
-      csgInputCommand.setForwardVelocity(0.0);
-      csgInputCommand.setLateralVelocity(0.0);
-      csgInputCommand.setTurnVelocity(0.0);
-
-      csgROS2ControllerHelper.publish(csgInputCommand);
-      controllerROS2ControllerHelper.publishToController(directionalControlInputMessage);
-   }
-
-   public void shutDownXboxJoystick()
-   {
-      sendStopWalkingCommands();
-
-      csgROS2ControllerHelper.destroy();
-   }
-
-   public CSGROS2CommunicationHelper getCsgROS2ControllerHelper()
-   {
-      return csgROS2ControllerHelper;
-   }
-
-   public ROS2ControllerHelper getControllerROS2ControllerHelper()
-   {
-      return controllerROS2ControllerHelper;
+      return csgROS2CommunicationHelper;
    }
 }
