@@ -2,6 +2,7 @@ package us.ihmc.rdx;
 
 import imgui.ImGui;
 import imgui.type.ImFloat;
+import imgui.type.ImInt;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.perception.RawImage;
 import us.ihmc.rdx.perception.RDXRealSenseBagPlayerPanel;
@@ -14,17 +15,20 @@ import us.ihmc.sensors.realsense.RealSenseConfiguration;
 import us.ihmc.sensors.realsense.RealSenseImageSensor;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 
 public class RDXRealSenseBagPlaybackDemo
 {
-   private static final String BAG_FILE = "/opt/ihmc/LogData/UserFolders/DexFolder/20260122_093002.bag";
+   private static final String BAG_FILE = "/home/rgriffin/Documents/SeaHunterData/20260224-150047-realsense.bag";
    private static final RealSenseConfiguration CONFIGURATION = RealSenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ;
 
    private final RDXImageVisualizer colorVisualizer;
    private final RDXImageVisualizer depthVisualizer;
-   private RDXRawImagePointCloudVisualizer pointCloudVisualizer;
+   private final List<RDXRawImagePointCloudVisualizer> pointCloudVisualizers = new ArrayList<>();
+   private final ImInt ringBufferCapacity = new ImInt(10);
 
    private final RealSenseBagPlaybackSensor realsenseSensor;
    private final RepeatingTaskThread grabThread;
@@ -61,8 +65,7 @@ public class RDXRealSenseBagPlaybackDemo
             depthVisualizer.setActive(true);
             baseUI.getImGuiPanelManager().addPanel(depthVisualizer.getPanel());
 
-            pointCloudVisualizer = new RDXRawImagePointCloudVisualizer("RealSense Point Cloud");
-            baseUI.getPrimaryScene().addRenderableProvider(pointCloudVisualizer);
+            updatePointCloudVisualizers(baseUI);
 
             bagPlayerPanel = new RDXRealSenseBagPlayerPanel(realsenseSensor, CONFIGURATION);
             baseUI.getPrimary3DPanel().addOverlayPanel(bagPlayerPanel.getPanelName(), bagPlayerPanel::render);
@@ -79,7 +82,11 @@ public class RDXRealSenseBagPlaybackDemo
          {
             colorVisualizer.update();
             depthVisualizer.update();
-            pointCloudVisualizer.update();
+            synchronized (pointCloudVisualizers)
+            {
+               for (RDXRawImagePointCloudVisualizer pointCloudVisualizer : pointCloudVisualizers)
+                  pointCloudVisualizer.update();
+            }
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
@@ -87,7 +94,19 @@ public class RDXRealSenseBagPlaybackDemo
 
          private void renderOptions()
          {
-            pointCloudVisualizer.renderImGuiWidgets();
+            if (ImGui.sliderInt("Ring Buffer Capacity", ringBufferCapacity.getData(), 1, 100))
+            {
+               updatePointCloudVisualizers(baseUI);
+            }
+
+            synchronized (pointCloudVisualizers)
+            {
+               for (int i = 0; i < pointCloudVisualizers.size(); i++)
+               {
+                  if (ImGui.collapsingHeader("Point Cloud " + i))
+                     pointCloudVisualizers.get(i).renderImGuiWidgets();
+               }
+            }
 
             ImGui.separator();
 
@@ -102,11 +121,34 @@ public class RDXRealSenseBagPlaybackDemo
             baseUI.dispose();
             colorVisualizer.destroy();
             depthVisualizer.destroy();
-            pointCloudVisualizer.destroy();
+            synchronized (pointCloudVisualizers)
+            {
+               for (RDXRawImagePointCloudVisualizer pointCloudVisualizer : pointCloudVisualizers)
+                  pointCloudVisualizer.destroy();
+            }
             colorImageQueue.forEach(RawImage::release);
             depthImageQueue.forEach(RawImage::release);
          }
       });
+   }
+
+   private void updatePointCloudVisualizers(RDXBaseUI baseUI)
+   {
+      synchronized (pointCloudVisualizers)
+      {
+         while (pointCloudVisualizers.size() < ringBufferCapacity.get())
+         {
+            RDXRawImagePointCloudVisualizer visualizer = new RDXRawImagePointCloudVisualizer("RealSense Point Cloud " + pointCloudVisualizers.size());
+            pointCloudVisualizers.add(visualizer);
+            baseUI.getPrimaryScene().addRenderableProvider(visualizer, visualizer);
+         }
+         while (pointCloudVisualizers.size() > ringBufferCapacity.get())
+         {
+            RDXRawImagePointCloudVisualizer visualizer = pointCloudVisualizers.remove(pointCloudVisualizers.size() - 1);
+            baseUI.getPrimaryScene().removeRenderable(visualizer);
+            visualizer.destroy();
+         }
+      }
    }
 
    private void grabThread() throws InterruptedException
@@ -127,20 +169,31 @@ public class RDXRealSenseBagPlaybackDemo
 
       Instant now = Instant.now();
 
-      RawImage oldestColorImage = colorImageQueue.peek();
-      while (oldestColorImage != null && TimeTools.secondsBetween(oldestColorImage.getAcquisitionTime(), now) > colorImageDelay.get())
+      synchronized (pointCloudVisualizers)
       {
-         pointCloudVisualizer.setColorImage(oldestColorImage);
-         colorImageQueue.remove().release();
-         oldestColorImage = colorImageQueue.peek();
-      }
+         RawImage oldestColorImage = colorImageQueue.peek();
+         while (oldestColorImage != null && TimeTools.secondsBetween(oldestColorImage.getAcquisitionTime(), now) > colorImageDelay.get())
+         {
+            if (!pointCloudVisualizers.isEmpty())
+            {
+               int visualizerIndex = (int) (oldestColorImage.getSequenceNumber() % pointCloudVisualizers.size());
+               pointCloudVisualizers.get(visualizerIndex).setColorImage(oldestColorImage);
+            }
+            colorImageQueue.remove().release();
+            oldestColorImage = colorImageQueue.peek();
+         }
 
-      RawImage oldestDepthImage = depthImageQueue.peek();
-      while (oldestDepthImage != null && TimeTools.secondsBetween(oldestDepthImage.getAcquisitionTime(), now) > depthImageDelay.get())
-      {
-         pointCloudVisualizer.setDepthImage(oldestDepthImage);
-         depthImageQueue.remove().release();
-         oldestDepthImage = depthImageQueue.peek();
+         RawImage oldestDepthImage = depthImageQueue.peek();
+         while (oldestDepthImage != null && TimeTools.secondsBetween(oldestDepthImage.getAcquisitionTime(), now) > depthImageDelay.get())
+         {
+            if (!pointCloudVisualizers.isEmpty())
+            {
+               int visualizerIndex = (int) (oldestDepthImage.getSequenceNumber() % pointCloudVisualizers.size());
+               pointCloudVisualizers.get(visualizerIndex).setDepthImage(oldestDepthImage);
+            }
+            depthImageQueue.remove().release();
+            oldestDepthImage = depthImageQueue.peek();
+         }
       }
    }
 

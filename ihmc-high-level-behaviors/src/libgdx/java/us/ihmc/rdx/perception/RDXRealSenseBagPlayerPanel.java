@@ -43,8 +43,8 @@ public class RDXRealSenseBagPlayerPanel
       double durationSeconds = durationNanoseconds / (double) NANOSECONDS_PER_SECOND;
       double currentPositionSeconds = currentPositionNanoseconds / (double) NANOSECONDS_PER_SECOND;
 
-      int totalFrames = (int) (durationSeconds * fps);
-      int currentFrame = (int) (currentPositionSeconds * fps);
+      int totalFrames = (int) Math.round(durationSeconds * fps);
+      int currentFrame = (int) Math.round(currentPositionSeconds * fps);
 
       if (!holdingOnToTheSlider)
          requestedFrameNumber.set(currentFrame);
@@ -56,6 +56,7 @@ public class RDXRealSenseBagPlayerPanel
          if (requestThrottler.run())
          {
             seekToRequestedFrame();
+            bagPlaybackSensor.grabAndNotify();
          }
       }
 
@@ -64,8 +65,24 @@ public class RDXRealSenseBagPlayerPanel
       {
          holdingOnToTheSlider = false;
          seekToRequestedFrame();
+         bagPlaybackSensor.grabAndNotify();
       }
 
+      ImGui.sameLine();
+
+      if (ImGui.button(labels.get("<")))
+      {
+         requestedFrameNumber.set(Math.max(requestedFrameNumber.get() - 1, 0));
+         seekToRequestedFrame();
+         bagPlaybackSensor.grabAndNotify();
+      }
+      ImGui.sameLine();
+      if (ImGui.button(labels.get(">")))
+      {
+         requestedFrameNumber.set(Math.min(requestedFrameNumber.get() + 1, totalFrames));
+         seekToRequestedFrame();
+         bagPlaybackSensor.grabAndNotify();
+      }
       ImGui.sameLine();
 
       if (ImGui.button(labels.get(paused ? "Play" : "Pause")))
@@ -88,7 +105,8 @@ public class RDXRealSenseBagPlayerPanel
    {
       int fps = configuration.getDepthFPS();
       double frameTimeSeconds = requestedFrameNumber.get() / (double) fps;
-      long positionNanoseconds = (long) (frameTimeSeconds * NANOSECONDS_PER_SECOND);
+      // Adding a small epsilon to ensure we land inside the intended frame and not right on the boundary or slightly before it
+      long positionNanoseconds = (long) (frameTimeSeconds * NANOSECONDS_PER_SECOND) + 1000;
       bagPlaybackSensor.setCurrentPosition(positionNanoseconds);
    }
 

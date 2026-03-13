@@ -94,6 +94,11 @@ public class RealSenseImageSensor extends ImageSensor
    {
       grabThrottler.waitAndRun();
 
+      return grabWithoutThrottling();
+   }
+
+   public boolean grabWithoutThrottling()
+   {
       // Read grabbed images
       if (!realsense.readFrameData())
       {
