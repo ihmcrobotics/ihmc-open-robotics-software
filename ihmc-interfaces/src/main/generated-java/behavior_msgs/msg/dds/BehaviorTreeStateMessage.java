@@ -58,10 +58,6 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
             */
    public ihmc_common_msgs.msg.dds.LatestModificationMessage latest_modification_to_data_;
    /**
-            * Scene
-            */
-   public behavior_msgs.msg.dds.BehaviorTreeSceneStateMessage scene_;
-   /**
             * A depth first ordered list of types.
             */
    public us.ihmc.idl.IDLSequence.Byte  behavior_tree_types_;
@@ -99,7 +95,6 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
    {
       latest_modification_to_root_reference_ = new ihmc_common_msgs.msg.dds.LatestModificationMessage();
       latest_modification_to_data_ = new ihmc_common_msgs.msg.dds.LatestModificationMessage();
-      scene_ = new behavior_msgs.msg.dds.BehaviorTreeSceneStateMessage();
       behavior_tree_types_ = new us.ihmc.idl.IDLSequence.Byte (1000, "type_9");
 
       behavior_tree_indices_ = new us.ihmc.idl.IDLSequence.Long (1000, "type_4");
@@ -144,7 +139,6 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
 
       ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.staticCopy(other.latest_modification_to_root_reference_, latest_modification_to_root_reference_);
       ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.staticCopy(other.latest_modification_to_data_, latest_modification_to_data_);
-      behavior_msgs.msg.dds.BehaviorTreeSceneStateMessagePubSubType.staticCopy(other.scene_, scene_);
       behavior_tree_types_.set(other.behavior_tree_types_);
       behavior_tree_indices_.set(other.behavior_tree_indices_);
       partial_data_nodes_.set(other.partial_data_nodes_);
@@ -218,15 +212,6 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
    public ihmc_common_msgs.msg.dds.LatestModificationMessage getLatestModificationToData()
    {
       return latest_modification_to_data_;
-   }
-
-
-   /**
-            * Scene
-            */
-   public behavior_msgs.msg.dds.BehaviorTreeSceneStateMessage getScene()
-   {
-      return scene_;
    }
 
 
@@ -411,7 +396,6 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
 
       if (!this.latest_modification_to_root_reference_.epsilonEquals(other.latest_modification_to_root_reference_, epsilon)) return false;
       if (!this.latest_modification_to_data_.epsilonEquals(other.latest_modification_to_data_, epsilon)) return false;
-      if (!this.scene_.epsilonEquals(other.scene_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.behavior_tree_types_, other.behavior_tree_types_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsLongSequence(this.behavior_tree_indices_, other.behavior_tree_indices_, epsilon)) return false;
@@ -596,7 +580,6 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
 
       if (!this.latest_modification_to_root_reference_.equals(otherMyClass.latest_modification_to_root_reference_)) return false;
       if (!this.latest_modification_to_data_.equals(otherMyClass.latest_modification_to_data_)) return false;
-      if (!this.scene_.equals(otherMyClass.scene_)) return false;
       if (!this.behavior_tree_types_.equals(otherMyClass.behavior_tree_types_)) return false;
       if (!this.behavior_tree_indices_.equals(otherMyClass.behavior_tree_indices_)) return false;
       if (!this.partial_data_nodes_.equals(otherMyClass.partial_data_nodes_)) return false;
@@ -640,8 +623,6 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       builder.append(this.latest_modification_to_root_reference_);      builder.append(", ");
       builder.append("latest_modification_to_data=");
       builder.append(this.latest_modification_to_data_);      builder.append(", ");
-      builder.append("scene=");
-      builder.append(this.scene_);      builder.append(", ");
       builder.append("behavior_tree_types=");
       builder.append(this.behavior_tree_types_);      builder.append(", ");
       builder.append("behavior_tree_indices=");

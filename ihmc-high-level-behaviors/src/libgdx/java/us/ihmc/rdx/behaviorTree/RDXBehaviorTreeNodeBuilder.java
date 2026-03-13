@@ -55,7 +55,6 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeBuilder<RDXBe
    private RDXBehaviorTree tree;
    private WorkspaceResourceDirectory saveFileDirectory;
    private ROS2SyncedRobotModel syncedRobot;
-   private RDXBehaviorTreeScene scene;
    private RobotCollisionModel selectionCollisionModel;
    private RDXBaseUI baseUI;
    private RDX3DPanel panel3D;
@@ -63,7 +62,6 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeBuilder<RDXBe
    public void initialize(RDXBehaviorTree tree,
                           WorkspaceResourceDirectory saveFileDirectory,
                           ROS2SyncedRobotModel syncedRobot,
-                          RDXBehaviorTreeScene scene,
                           RobotCollisionModel selectionCollisionModel,
                           RDXBaseUI baseUI,
                           RDX3DPanel panel3D)
@@ -71,7 +69,6 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeBuilder<RDXBe
       this.tree = tree;
       this.saveFileDirectory = saveFileDirectory;
       this.syncedRobot = syncedRobot;
-      this.scene = scene;
       this.selectionCollisionModel = selectionCollisionModel;
       this.baseUI = baseUI;
       this.panel3D = panel3D;
@@ -80,6 +77,10 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeBuilder<RDXBe
    @Override
    public BehaviorTreeRootNode<RDXBehaviorTreeNode<?, ?>> createRootNode(long id)
    {
+      RDXBehaviorTreeScene scene = new RDXBehaviorTreeScene(tree.getCRDTInfo(),
+                                                            tree::getAndIncrementNextID,
+                                                            syncedRobot,
+                                                            baseUI);
       return new RDXBehaviorTreeRootNode(id,
                                          tree,
                                          saveFileDirectory,

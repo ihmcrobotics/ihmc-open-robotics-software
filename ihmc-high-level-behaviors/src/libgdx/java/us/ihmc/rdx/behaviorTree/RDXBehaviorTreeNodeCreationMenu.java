@@ -17,7 +17,6 @@ import us.ihmc.behaviors.behaviorTree.control.ActionSequenceDefinition;
 import us.ihmc.behaviors.behaviorTree.control.FallbackNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.action.actions.*;
 import us.ihmc.behaviors.behaviorTree.action.actions.PelvisHeightOrientationActionDefinition;
-import us.ihmc.rdx.behaviorTree.scene.RDXBehaviorTreeScene;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.behaviorTree.actions.RDXActionNode;
 import us.ihmc.rdx.ui.widgets.ImGuiArmIconWidget;
@@ -53,13 +52,13 @@ public class RDXBehaviorTreeNodeCreationMenu
    private final ImGuiHandWidget handIcon = new ImGuiHandWidget();
    private final ImGuiGripperWidget gripperIcon = new ImGuiGripperWidget();
 
-   public RDXBehaviorTreeNodeCreationMenu(RDXBehaviorTree behaviorTree, WorkspaceResourceDirectory treeFilesDirectory, RDXBehaviorTreeScene scene)
+   public RDXBehaviorTreeNodeCreationMenu(RDXBehaviorTree behaviorTree, WorkspaceResourceDirectory treeFilesDirectory)
    {
       this.behaviorTree = behaviorTree;
 
       topologyOperationQueue = behaviorTree.getTopologyChangeQueue();
 
-      behaviorTreesDirectory = new RDXAvailableBehaviorTreeDirectory(treeFilesDirectory, behaviorTree, topologyOperationQueue, scene, this::complete);
+      behaviorTreesDirectory = new RDXAvailableBehaviorTreeDirectory(treeFilesDirectory, behaviorTree, topologyOperationQueue, this::complete);
       behaviorTreesDirectory.reindexDirectory();
    }
 

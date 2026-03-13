@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class BehaviorTreeTools
 {
@@ -93,6 +94,37 @@ public class BehaviorTreeTools
          node = node.getParent();
       }
       return depth;
+   }
+
+   public static BehaviorTreeNodeExecutor<?, ?> searchDFSFirstMatch(BehaviorTreeNodeExecutor<?, ?> node,
+                                                                    Function<BehaviorTreeNodeExecutor<?, ?>, Boolean> predicate)
+   {
+      if (predicate.apply(node))
+         return node;
+
+      for (BehaviorTreeNodeExecutor<?, ?> child : node.getChildren())
+      {
+         BehaviorTreeNodeExecutor<?, ?> result = searchDFSFirstMatch(child, predicate);
+         if (result != null)
+            return result;
+      }
+
+      return null;
+   }
+
+   public static BehaviorTreeNodeExecutor<?, ?> searchDFSFirstMatch(BehaviorTreeNodeExecutor<?, ?> node, String name)
+   {
+      if (node.getDefinition().getName().equals(name))
+         return node;
+
+      for (BehaviorTreeNodeExecutor<?, ?> child : node.getChildren())
+      {
+         BehaviorTreeNodeExecutor<?, ?> result = searchDFSFirstMatch(child, name);
+         if (result != null)
+            return result;
+      }
+
+      return null;
    }
 
    public static <T extends BehaviorTreeNode<T, ?, ?>> int getNodeIndexDFS(T node)

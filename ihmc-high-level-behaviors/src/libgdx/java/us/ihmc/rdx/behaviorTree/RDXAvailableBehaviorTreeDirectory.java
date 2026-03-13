@@ -1,13 +1,11 @@
 package us.ihmc.rdx.behaviorTree;
 
 import imgui.ImGui;
-import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiMouseButton;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionDefinition;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.log.LogTools;
-import us.ihmc.rdx.behaviorTree.scene.RDXBehaviorTreeScene;
 import us.ihmc.rdx.imgui.ImGuiExpandCollapseRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -23,7 +21,6 @@ public class RDXAvailableBehaviorTreeDirectory
    private final WorkspaceResourceDirectory treeFilesDirectory;
    private final RDXBehaviorTree behaviorTree;
    private final BehaviorTreeTopologyOperationQueue<RDXBehaviorTreeNode<?, ?>> topologyOperationQueue;
-   private final RDXBehaviorTreeScene scene;
    private final Consumer<BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>>> complete;
 
    private final ImGuiExpandCollapseRenderer expandCollapseRenderer = new ImGuiExpandCollapseRenderer();
@@ -34,13 +31,11 @@ public class RDXAvailableBehaviorTreeDirectory
    public RDXAvailableBehaviorTreeDirectory(WorkspaceResourceDirectory treeFilesDirectory,
                                             RDXBehaviorTree behaviorTree,
                                             BehaviorTreeTopologyOperationQueue<RDXBehaviorTreeNode<?, ?>> topologyOperationQueue,
-                                            RDXBehaviorTreeScene scene,
                                             Consumer<BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>>> complete)
    {
       this.treeFilesDirectory = treeFilesDirectory;
       this.behaviorTree = behaviorTree;
       this.topologyOperationQueue = topologyOperationQueue;
-      this.scene = scene;
       this.complete = complete;
    }
 
@@ -58,7 +53,7 @@ public class RDXAvailableBehaviorTreeDirectory
             }
             else
             {
-               RDXAvailableBehaviorTreeFile treeFile = new RDXAvailableBehaviorTreeFile(queryContainedFile, scene);
+               RDXAvailableBehaviorTreeFile treeFile = new RDXAvailableBehaviorTreeFile(queryContainedFile);
                if (treeFile.getName() != null && treeFile.getNotes() != null)
                {
                   indexedTreeFiles.add(treeFile);
@@ -75,7 +70,6 @@ public class RDXAvailableBehaviorTreeDirectory
          RDXAvailableBehaviorTreeDirectory subtreeDirectory = new RDXAvailableBehaviorTreeDirectory(subdirectory,
                                                                                                     behaviorTree,
                                                                                                     topologyOperationQueue,
-                                                                                                    scene,
                                                                                                     complete);
          subtreeDirectory.reindexDirectory();
          indexedTreeDirectories.add(subtreeDirectory);
@@ -87,10 +81,6 @@ public class RDXAvailableBehaviorTreeDirectory
       if (indexedTreeDirectories.isEmpty() && indexedTreeFiles.isEmpty())
          return;
 
-      for (RDXAvailableBehaviorTreeFile indexedTreeFile : indexedTreeFiles)
-      {
-         indexedTreeFile.update();
-      }
       indexedTreeFiles.sort(Comparator.comparing(treeFile -> treeFile.getTreeFile().getFilesystemFile()));
 
       if (isRoot)
@@ -155,36 +145,10 @@ public class RDXAvailableBehaviorTreeDirectory
                }
             }
 
-            if (ImGui.isItemHovered())
+            if (ImGui.isItemHovered() && !indexedTreeFile.getNotes().isEmpty())
             {
                ImGui.beginTooltip();
-
-               if (!indexedTreeFile.getNotes().isEmpty())
-               {
-                  ImGui.text(indexedTreeFile.getNotes());
-                  ImGui.spacing();
-               }
-
-               ImGui.text("Reference frames:");
-
-               if (indexedTreeFile.getReferenceFrameNames().isEmpty())
-               {
-                  ImGui.pushStyleColor(ImGuiCol.Text, ImGui.getColorU32(ImGuiCol.TextDisabled));
-                  ImGui.text("\t(Contains no reference frames.)");
-                  ImGui.popStyleColor();
-               }
-
-               for (String referenceFrameName : indexedTreeFile.getReferenceFrameNames())
-               {
-                  if (!indexedTreeFile.getReferenceFramesInWorld().contains(referenceFrameName))
-                     ImGui.pushStyleColor(ImGuiCol.Text, ImGui.getColorU32(ImGuiCol.TextDisabled));
-
-                  ImGui.text("\t" + referenceFrameName);
-
-                  if (!indexedTreeFile.getReferenceFramesInWorld().contains(referenceFrameName))
-                     ImGui.popStyleColor();
-               }
-
+               ImGui.text(indexedTreeFile.getNotes());
                ImGui.endTooltip();
             }
          }

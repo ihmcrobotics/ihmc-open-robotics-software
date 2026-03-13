@@ -16,7 +16,11 @@ import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.sensors.ImageSensor;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
+import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseCommunicatorMap;
+import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -57,7 +61,10 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
    private ROS2SyncedRobotModel syncedRobot;
    private ControllerStatusTracker controllerStatusTracker;
    private SideDependentList<AbilityHandActionComms> abilityHandComms;
-   private BehaviorTreeSceneExecutor scene;
+   private ImageSensor imageSensor;
+   private YOLOv8DetectionExecutor yolo;
+   private IsaacROSFoundationPoseCommunicatorMap foundationPose;
+   private TerrainMapData terrainMapData;
 
    public void initialize(BehaviorTreeExecutor tree,
                           WorkspaceResourceDirectory saveFileDirectory,
@@ -66,7 +73,10 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
                           ROS2SyncedRobotModel syncedRobot,
                           ControllerStatusTracker controllerStatusTracker,
                           SideDependentList<AbilityHandActionComms> abilityHandComms,
-                          BehaviorTreeSceneExecutor scene)
+                          ImageSensor imageSensor,
+                          YOLOv8DetectionExecutor yolo,
+                          IsaacROSFoundationPoseCommunicatorMap foundationPose,
+                          TerrainMapData terrainMapData)
    {
       this.tree = tree;
       this.saveFileDirectory = saveFileDirectory;
@@ -75,12 +85,22 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
       this.syncedRobot = syncedRobot;
       this.controllerStatusTracker = controllerStatusTracker;
       this.abilityHandComms = abilityHandComms;
-      this.scene = scene;
+      this.imageSensor = imageSensor;
+      this.yolo = yolo;
+      this.foundationPose = foundationPose;
+      this.terrainMapData = terrainMapData;
    }
 
    @Override
    public BehaviorTreeRootNodeExecutor createRootNode(long id)
    {
+      BehaviorTreeSceneExecutor scene = new BehaviorTreeSceneExecutor(tree.getCRDTInfo(),
+                                                                      tree::getAndIncrementNextID,
+                                                                      syncedRobot,
+                                                                      imageSensor,
+                                                                      yolo,
+                                                                      foundationPose,
+                                                                      terrainMapData);
       return new BehaviorTreeRootNodeExecutor(id,
                                               tree,
                                               saveFileDirectory,

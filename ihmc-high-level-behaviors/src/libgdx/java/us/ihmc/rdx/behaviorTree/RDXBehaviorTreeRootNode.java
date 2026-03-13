@@ -117,6 +117,9 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
          previewRobot.update();
       }
 
+      scene.setSyncedRobot(state.getPreviewModeEnabled() ? previewSyncedRobot : realSyncedRobot);
+      scene.update();
+
       BehaviorTreeTools.runForSubtreeNodes(this, node -> node.syncedRobot = state.getPreviewModeEnabled() ? previewSyncedRobot : realSyncedRobot);
 
       idToNodeMap.clear();
@@ -274,6 +277,7 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
    public void destroy()
    {
       super.destroy();
+      scene.destroy();
 
       if (previewROS2Node != null)
          previewROS2Node.destroy();

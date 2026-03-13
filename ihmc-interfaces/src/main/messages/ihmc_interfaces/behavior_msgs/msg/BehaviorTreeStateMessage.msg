@@ -43,9 +43,6 @@ ihmc_common_msgs/LatestModificationMessage latest_modification_to_root_reference
 # The timestamp and modifier ID of the latest modification of the tree data fields
 ihmc_common_msgs/LatestModificationMessage latest_modification_to_data
 
-# Scene
-behavior_msgs/BehaviorTreeSceneStateMessage scene
-
 # A depth first ordered list of types.
 byte[<=1000] behavior_tree_types
 

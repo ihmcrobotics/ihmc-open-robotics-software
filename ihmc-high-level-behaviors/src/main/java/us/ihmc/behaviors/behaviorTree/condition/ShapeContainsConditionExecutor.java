@@ -1,5 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.condition;
 
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.behaviorTree.condition.ShapeContainsConditionDefinition.ContainsType;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneExecutor;
 import us.ihmc.commons.thread.RepeatingTaskThread;
@@ -119,15 +120,24 @@ public class ShapeContainsConditionExecutor
       }
       else
       {
-         if (pointsInSphereCUDAOutput >= 0)
+         if (BehaviorTreeTools.findRootNode(state).getPreviewModeEnabled())
+         {
+            state.getLogger().info("Succeeding blindly in preview mode");
+            state.setIsExecuting(false);
+         }
+         else if (pointsInSphereCUDAOutput >= 0)
          {
             shapeState.setNumberOfPointsContained(pointsInSphereCUDAOutput);
-            boolean success = shapeState.getNumberOfPointsContained() >= shapeDefinition.getMinPoints();
+            boolean success = shapeState.getNumberOfPointsContained() >= shapeDefinition.getMinPoints()
+                           && shapeState.getNumberOfPointsContained() <= shapeDefinition.getMaxPoints();
             if (success)
-               state.getLogger().info("Points contained: %d >= %d".formatted(shapeState.getNumberOfPointsContained(), shapeDefinition.getMinPoints()));
+               state.getLogger().info("Points contained: %d >= %d <= %d".formatted(shapeDefinition.getMinPoints(),
+                                                                                   shapeState.getNumberOfPointsContained(),
+                                                                                   shapeDefinition.getMaxPoints()));
             else
-               state.getLogger().error("Points contained not in range: %d < %d".formatted(shapeState.getNumberOfPointsContained(),
-                                                                                          shapeDefinition.getMinPoints()));
+               state.getLogger().error("Points contained not in range: %d >= %d <= %d".formatted(shapeDefinition.getMinPoints(),
+                                                                                                 shapeState.getNumberOfPointsContained(),
+                                                                                                 shapeDefinition.getMaxPoints()));
             state.setFailed(!success);
             state.setIsExecuting(false);
          }

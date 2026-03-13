@@ -52,7 +52,7 @@ public class ChestOrientationActionDefinition extends ActionNodeDefinition
       jsonNode.put("jointspaceOnly", jointspaceOnly.getValue());
       if (jointspaceOnly.getValue())
          for (int i = 0; i < jointAngles.getLength(); i++)
-            jsonNode.put("j" + i, (float) MathTools.roundToPrecision(Math.toDegrees(jointAngles.getValueReadOnly(i)), 0.02));
+            jsonNode.put("j" + i, JSONTools.toJsonRadians(jointAngles.getValueReadOnly(i)));
       else
       {
          JSONTools.toJSON(jsonNode, chestToParentTransform.getValueReadOnly());

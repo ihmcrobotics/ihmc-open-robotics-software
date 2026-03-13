@@ -505,22 +505,21 @@ public class ROS2BehaviorTreeMessageTools
 
    public static void packYoData(BehaviorTreeExecutor tree, BehaviorTreeYoDataMessage yoDataMessage)
    {
-      BehaviorTreeSceneExecutor scene = tree.getScene();
-
-      yoDataMessage.setNumberOfPersistentDetections((byte) scene.getPersistentDetections().size());
-      yoDataMessage.setNumberOfSceneObjects((byte) scene.getObjects().size());
-
-      for (int i = 0; i < yoDataMessage.getSceneObjectPose().length; i++)
-      {
-         if (scene.getObjects().size() > i)
-            yoDataMessage.getSceneObjectPose()[i].set(scene.getObjects().get(i).getTransformToWorld());
-         else
-            yoDataMessage.getSceneObjectPose()[i].setToNaN();
-      }
-
       BehaviorTreeRootNodeExecutor rootNode = tree.getRootNode();
       if (rootNode != null)
       {
+         BehaviorTreeSceneExecutor scene = rootNode.getScene();
+         yoDataMessage.setNumberOfPersistentDetections((byte) scene.getPersistentDetections().size());
+         yoDataMessage.setNumberOfSceneObjects((byte) scene.getObjects().size());
+
+         for (int i = 0; i < yoDataMessage.getSceneObjectPose().length; i++)
+         {
+            if (scene.getObjects().size() > i)
+               yoDataMessage.getSceneObjectPose()[i].set(scene.getObjects().get(i).getTransformToWorld());
+            else
+               yoDataMessage.getSceneObjectPose()[i].setToNaN();
+         }
+
          yoDataMessage.setAutomaticExecution(rootNode.getState().getAutomaticExecution());
          yoDataMessage.setExecutionNextIndex((byte) rootNode.getState().getExecutionNextIndex());
          yoDataMessage.setConcurrencyEnabled(rootNode.getState().getConcurrencyEnabled());
