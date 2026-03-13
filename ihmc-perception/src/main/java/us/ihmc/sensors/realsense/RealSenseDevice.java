@@ -41,6 +41,8 @@ import static org.bytedeco.librealsense2.global.realsense2.rs2_release_frame;
 
 public class RealSenseDevice
 {
+   private static final boolean IMU_ENABLED = false;
+
    protected final int depthWidth;
    protected final int depthHeight;
    protected final int fps;
@@ -74,8 +76,12 @@ public class RealSenseDevice
    protected rs2_frame syncedFrames = new rs2_frame();
    protected MutableBytePointer depthFrameData = new MutableBytePointer();
    protected MutableBytePointer colorFrameData = new MutableBytePointer();
+   protected MutableBytePointer gyroFrameData = new MutableBytePointer();
+   protected MutableBytePointer accelFrameData = new MutableBytePointer();
    private int depthFrameDataSize;
    private int colorFrameDataSize;
+   private int gyroFrameDataSize;
+   private int accelFrameDataSize;
    private rs2_processing_block colorAlignProcessingBlock;
    private rs2_frame_queue colorFrameQueue;
    private long depthFrameDataAddress;
@@ -86,6 +92,10 @@ public class RealSenseDevice
    private int detectedColorFormat = -1; // Will be set from bag file or defaults to BGR8 for live
    private CameraIntrinsics depthCameraIntrinsics;
    private CameraIntrinsics colorCameraIntrinsics;
+   private long accelFrameDataAddress;
+   private long gyroFrameDataAddress;
+   private final float[] accelValues = new float[3];
+   private final float[] gyroValues = new float[3];
 
    public RealSenseDevice(rs2_context context, rs2_device device, int depthWidth, int depthHeight, int fps)
    {
@@ -282,9 +292,13 @@ public class RealSenseDevice
 
       if (frameAvailable)
       {
+
+
          rs2_frame alignedFrames = syncedFrames;
          rs2_frame extractedDepthFrame = null;
          rs2_frame extractedColorFrame = null;
+         rs2_frame extractedGyroFrame = null;
+         rs2_frame extractedAccelFrame = null;
 
          if (colorEnabled)
          {
@@ -312,12 +326,16 @@ public class RealSenseDevice
             extractedDepthFrame = realsense2.rs2_extract_frame(alignedFrames, 0, error);
             extractedColorFrame = realsense2.rs2_extract_frame(alignedFrames, 1, error);
 
-            if (extractedDepthFrame == null || extractedDepthFrame.isNull() || extractedColorFrame == null || extractedColorFrame.isNull())
+
+
+            boolean missedDepthFrame = extractedDepthFrame == null || extractedDepthFrame.isNull();
+            boolean missedColorFrame = extractedColorFrame == null || extractedColorFrame.isNull();
+            if (missedDepthFrame || missedColorFrame)
             {
                // Failed to extract frames, cleanup and skip
-               if (extractedDepthFrame != null && !extractedDepthFrame.isNull())
+               if (!missedDepthFrame)
                   rs2_release_frame(extractedDepthFrame);
-               if (extractedColorFrame != null && !extractedColorFrame.isNull())
+               if (!missedColorFrame)
                   rs2_release_frame(extractedColorFrame);
                if (alignedFrames != syncedFrames)
                   rs2_release_frame(alignedFrames);
@@ -351,6 +369,75 @@ public class RealSenseDevice
          {
             depthFrameDataSize = realsense2.rs2_get_frame_data_size(syncedFrames, error);
             checkError("");
+         }
+
+         if (IMU_ENABLED)
+         {
+            int start = colorEnabled ? 2 : 1;
+            int frameCount = realsense2.rs2_embedded_frames_count(syncedFrames, error);
+            for (int i = start; i < frameCount; i++)
+            {
+               rs2_frame frame = realsense2.rs2_extract_frame(syncedFrames, i, error);
+               rs2_stream_profile profile = realsense2.rs2_get_frame_stream_profile(frame, error);
+               IntPointer streamType = new IntPointer(1);
+               realsense2.rs2_get_stream_profile_data(profile, streamType, null, null, null, null, error);
+
+               if (streamType.get() == realsense2.RS2_STREAM_ACCEL)
+               {
+                  extractedAccelFrame = frame;
+               }
+               else if (streamType.get() == realsense2.RS2_STREAM_GYRO)
+               {
+                  extractedGyroFrame = frame;
+               }
+            }
+
+            boolean missedDepthFrame = extractedDepthFrame == null || extractedDepthFrame.isNull();
+            boolean missedColorFrame = extractedColorFrame == null || extractedColorFrame.isNull();
+            boolean missedGyroFrame = extractedGyroFrame == null || extractedGyroFrame.isNull();
+            boolean missedAccelerometerFrame = extractedAccelFrame == null || extractedAccelFrame.isNull();
+            if (missedDepthFrame || missedColorFrame || missedGyroFrame || missedAccelerometerFrame)
+            {
+               // Failed to extract frames, cleanup and skip
+               if (!missedDepthFrame)
+                  rs2_release_frame(extractedDepthFrame);
+               if (!missedColorFrame)
+                  rs2_release_frame(extractedColorFrame);
+               if (!missedGyroFrame)
+                  rs2_release_frame(extractedGyroFrame);
+               if (!missedAccelerometerFrame)
+                  rs2_release_frame(extractedAccelFrame);
+               if (alignedFrames != syncedFrames)
+                  rs2_release_frame(alignedFrames);
+               rs2_release_frame(syncedFrames);
+               return false;
+            }
+
+            gyroFrameDataSize = realsense2.rs2_get_frame_data_size(extractedGyroFrame, error);
+            if (!error.isNull() || gyroFrameDataSize <= 0)
+            {
+               rs2_release_frame(extractedDepthFrame);
+               rs2_release_frame(extractedColorFrame);
+               rs2_release_frame(extractedGyroFrame);
+               rs2_release_frame(extractedAccelFrame);
+               if (alignedFrames != syncedFrames)
+                  rs2_release_frame(alignedFrames);
+               rs2_release_frame(syncedFrames);
+               return false;
+            }
+
+            accelFrameDataSize = realsense2.rs2_get_frame_data_size(extractedAccelFrame, error);
+            if (!error.isNull() || accelFrameDataSize <= 0)
+            {
+               rs2_release_frame(extractedDepthFrame);
+               rs2_release_frame(extractedColorFrame);
+               rs2_release_frame(extractedGyroFrame);
+               rs2_release_frame(extractedAccelFrame);
+               if (alignedFrames != syncedFrames)
+                  rs2_release_frame(alignedFrames);
+               rs2_release_frame(syncedFrames);
+               return false;
+            }
          }
 
          if (depthFrameDataSize > 0)
@@ -461,6 +548,21 @@ public class RealSenseDevice
                }
             }
 
+            if (IMU_ENABLED)
+            {
+                  accelFrameDataAddress = realsense2.rs2_get_frame_data_address(extractedAccelFrame, error);
+                  FloatPointer accelerometerValues = new FloatPointer(accelFrameDataAddress);
+                  accelValues[0] = accelerometerValues.get(0);
+                  accelValues[1] = accelerometerValues.get(1);
+                  accelValues[2] = accelerometerValues.get(2);
+
+                  gyroFrameDataAddress = realsense2.rs2_get_frame_data_address(extractedGyroFrame, error);
+                  FloatPointer gyroscopeValues = new FloatPointer(gyroFrameDataAddress);
+                  gyroValues[0] = gyroscopeValues.get(0);
+                  gyroValues[1] = gyroscopeValues.get(1);
+                  gyroValues[2] = gyroscopeValues.get(2);
+            }
+
             dataWasRead = true;
          }
 
@@ -471,6 +573,24 @@ public class RealSenseDevice
                rs2_release_frame(extractedDepthFrame);
             if (extractedColorFrame != null)
                rs2_release_frame(extractedColorFrame);
+            if (IMU_ENABLED)
+            {
+               if (extractedAccelFrame != null)
+                  rs2_release_frame(extractedAccelFrame);
+               if (extractedGyroFrame != null)
+                  rs2_release_frame(extractedGyroFrame);
+            }
+            if (alignedFrames != null && alignedFrames != syncedFrames)
+               rs2_release_frame(alignedFrames);
+         }
+         else if (IMU_ENABLED)
+         {
+            if (extractedDepthFrame != null)
+               rs2_release_frame(extractedDepthFrame);
+            if (extractedAccelFrame != null)
+               rs2_release_frame(extractedAccelFrame);
+            if (extractedGyroFrame != null)
+               rs2_release_frame(extractedGyroFrame);
             if (alignedFrames != null && alignedFrames != syncedFrames)
                rs2_release_frame(alignedFrames);
          }
@@ -496,7 +616,20 @@ public class RealSenseDevice
             colorFrameData.deallocate();
             colorFrameData.setAddress(colorFrameDataAddress);
          }
+
+         if (gyroFrameDataAddress > 0)
+         {
+            gyroFrameData.deallocate();
+            gyroFrameData.setAddress(gyroFrameDataAddress);
+         }
+
+         if (accelFrameDataAddress > 0)
+         {
+            accelFrameData.deallocate();
+            accelFrameData.setAddress(accelFrameDataAddress);
+         }
       }
+
    }
 
    public void setLaserPower(float laserPower)
@@ -743,5 +876,15 @@ public class RealSenseDevice
    public int getDetectedColorFormat()
    {
       return detectedColorFormat;
+   }
+
+   public float[] getAccelValues()
+   {
+      return accelValues;
+   }
+
+   public float[] getGyroValues()
+   {
+      return gyroValues;
    }
 }
