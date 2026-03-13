@@ -54,7 +54,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerThreadInterface
 {
-   private static final boolean VISUALIZE_PERCEPTION_DATA = true;
    private static final double CAPTURE_POINT_ERROR_THRESHOLD_FOR_HAND_CONTACT = 0.02;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
@@ -81,6 +80,8 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
    private final YoBoolean triggerUnload = new YoBoolean("triggerUnload", registry);
    private final YoBoolean sendHandContactMessage = new YoBoolean("sendHandContactMessage", registry);
    private final ReactiveBracingPlanner planner;
+
+   private final YoBoolean acceptPlanarRegions = new YoBoolean("acceptPlanarRegions", registry);
 
    private final FramePoint3D centerOfMassPosition = new FramePoint3D();
    private final FrameVector3D centerOfMassVelocity = new FrameVector3D();
@@ -152,6 +153,7 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
 
       humanoidRobotContextData.setControllerRan(false);
       humanoidRobotContextData.setEstimatorRan(false);
+      acceptPlanarRegions.set(true);
 
 //      bipedalGaitGenerator = new AvatarBipedalGaitGenerator(commandInputManager,
 //                                                            statusOutputManager,
@@ -169,15 +171,7 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
          yoCapturePointWaypoints[i] = new YoFramePoint2D("capturePointWP" + i, ReferenceFrame.getWorldFrame(), registry);
       }
 
-      if (VISUALIZE_PERCEPTION_DATA)
-      {
-         perceptionVisualizer = new YoPerceptionVisualizer(registry);
-      }
-      else
-      {
-         perceptionVisualizer = null;
-      }
-
+      perceptionVisualizer = new YoPerceptionVisualizer(registry);
       diagnosticBracingSide.set(RobotSide.LEFT);
 //      triggerInferenceCall.set(true);
 //      numberOfInferenceCallsForTest.set(1);
@@ -248,21 +242,24 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
       capturePointError.sub(currentCapturePoint, desiredCapturePoint);
       isFalling.set(capturePointError.norm() > CAPTURE_POINT_ERROR_THRESHOLD_FOR_HAND_CONTACT);
 
-      if (commandInputManager.isNewCommandAvailable(PlanarRegionsListCommand.class))
+      if (!acceptPlanarRegions.getValue())
+      {
+         commandInputManager.clearCommands(PlanarRegionsListCommand.class);
+      }
+      else if (commandInputManager.isNewCommandAvailable(PlanarRegionsListCommand.class))
       {
          PlanarRegionsListCommand planarRegionsListCommand = commandInputManager.pollNewestCommand(PlanarRegionsListCommand.class);
 //         LogTools.info("Received planar regions command! number of regions: " + planarRegionsListCommand.getNumberOfPlanarRegions());
          planner.setPlanarRegions(planarRegionsListCommand);
-         if (VISUALIZE_PERCEPTION_DATA)
-            perceptionVisualizer.visualizePlanarRegions(planarRegionsListCommand);
+         perceptionVisualizer.visualizePlanarRegions(planarRegionsListCommand);
          hasReceivedPlanarRegions.set(true);
       }
+
       if (commandInputManager.isNewCommandAvailable(TerrainMapCommand.class))
       {
          TerrainMapCommand terrainMapCommand = commandInputManager.pollNewestCommand(TerrainMapCommand.class);
 //         bipedalGaitGenerator.setTerrainMapCommand(terrainMapCommand);
-         if (VISUALIZE_PERCEPTION_DATA)
-            perceptionVisualizer.visualizeHeightMap(terrainMapCommand);
+         perceptionVisualizer.visualizeHeightMap(terrainMapCommand);
       }
 
       if (triggerFall.getValue() || (isFalling.getValue() && !hasSentRecoveryMessage.getValue() && isHandRecoveryContactEnabled.getValue()))
@@ -368,10 +365,7 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
          group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D("capturePointWP" + i, yoCapturePointWaypoints[i], 0.003, ColorDefinitions.DarkBlue(), DefaultPoint2DGraphic.PLUS));
       }
 
-      if (VISUALIZE_PERCEPTION_DATA)
-      {
-         group.addChild(perceptionVisualizer.getSCS2YoGraphics());
-      }
+      group.addChild(perceptionVisualizer.getSCS2YoGraphics());
 
       return group;
    }
