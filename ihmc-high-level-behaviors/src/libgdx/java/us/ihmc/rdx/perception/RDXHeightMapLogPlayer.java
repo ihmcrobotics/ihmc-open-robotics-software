@@ -1,5 +1,7 @@
 package us.ihmc.rdx.perception;
 
+import imgui.ImGui;
+import imgui.type.ImInt;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.HeightMapMessage;
@@ -19,6 +21,7 @@ import us.ihmc.perception.gpuMapping.HeightMapParameters;
 import us.ihmc.perception.gpuMapping.worldModel.ChunkedMapManager;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.graphics.RDXImageVisualizer;
 import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2HeightMapVisualizer;
@@ -32,6 +35,8 @@ import us.ihmc.sensors.zed.ZEDImageSensor;
 import us.ihmc.sensors.zed.ZEDModelData;
 import us.ihmc.zed.global.zed;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -45,9 +50,11 @@ public class RDXHeightMapLogPlayer
 
    private final ROS2ZEDSVOPlaybackSensor zedPlaybackSensor;
    private final RDXZEDSVORecorderPanel zedSVOPanel;
+   private final RDXImageVisualizer zedColorVisualizer = new RDXImageVisualizer("ZED Color", "Color Panel", false);
+   private final RDXImageVisualizer zedDepthVisualizer = new RDXImageVisualizer("ZED Depth", "Depth Panel", false);
    private RDXReferenceFrameGraphic zedFrameGraphic;
-
-   private final RDXRawImagePointCloudVisualizer zedPointCloudVisualizer = new RDXRawImagePointCloudVisualizer("ZED Point Cloud", true);
+   private final List<RDXRawImagePointCloudVisualizer> pointCloudVisualizers = new ArrayList<>();
+   private final ImInt pointCloudBufferCapacity = new ImInt(1);
    private final RDXROS2HeightMapVisualizer heightMapVisualizer;
 
    private final ChunkedMapManager chunkedMapManager;
@@ -89,8 +96,14 @@ public class RDXHeightMapLogPlayer
          public void create()
          {
             baseUI.create();
-            zedPointCloudVisualizer.create();
-            zedPointCloudVisualizer.setActive(true);
+
+            zedColorVisualizer.create();
+            zedColorVisualizer.setActive(true);
+            zedDepthVisualizer.create();
+            zedDepthVisualizer.setActive(true);
+
+            updatePointCloudVisualizers(baseUI);
+
             heightMapVisualizer.create();
             heightMapVisualizer.setActive(true);
             zedFrameGraphic = new RDXReferenceFrameGraphic(0.2);
@@ -98,19 +111,43 @@ public class RDXHeightMapLogPlayer
             zedPlaybackSensor.run(true);
 
             baseUI.getImGuiPanelManager().addPanel("ZED SVO", zedSVOPanel::render);
-            baseUI.getImGuiPanelManager().addPanel("ZED Point Cloud", zedPointCloudVisualizer::renderImGuiWidgets);
+            baseUI.getImGuiPanelManager().addPanel(zedColorVisualizer.getPanel());
+            baseUI.getImGuiPanelManager().addPanel(zedDepthVisualizer.getPanel());
+            baseUI.getImGuiPanelManager().addPanel("Options", this::renderOptions);
             baseUI.getImGuiPanelManager().addPanel("Height Map Renderer", heightMapVisualizer::renderImGuiWidgets);
 
-            baseUI.getPrimaryScene().addRenderableProvider(zedPointCloudVisualizer);
             baseUI.getPrimaryScene().addRenderableProvider(heightMapVisualizer);
             baseUI.getPrimaryScene().addRenderableProvider(zedFrameGraphic);
+         }
+
+         private void renderOptions()
+         {
+            if (ImGui.sliderInt("Point Cloud Buffer Capacity", pointCloudBufferCapacity.getData(), 1, 100))
+            {
+               updatePointCloudVisualizers(baseUI);
+            }
+
+            synchronized (pointCloudVisualizers)
+            {
+               for (int i = 0; i < pointCloudVisualizers.size(); i++)
+               {
+                  if (ImGui.collapsingHeader("Point Cloud " + i))
+                     pointCloudVisualizers.get(i).renderImGuiWidgets();
+               }
+            }
          }
 
          @Override
          public void render()
          {
             zedSVOPanel.update();
-            zedPointCloudVisualizer.update();
+            zedColorVisualizer.update();
+            zedDepthVisualizer.update();
+            synchronized (pointCloudVisualizers)
+            {
+               for (RDXRawImagePointCloudVisualizer pointCloudVisualizer : pointCloudVisualizers)
+                  pointCloudVisualizer.update();
+            }
             heightMapVisualizer.update();
 
             baseUI.renderBeforeOnScreenUI();
@@ -122,12 +159,40 @@ public class RDXHeightMapLogPlayer
          {
             heightMapVisualizer.destroy();
             zedPlaybackSensor.close();
+            zedColorVisualizer.destroy();
+            zedDepthVisualizer.destroy();
+            synchronized (pointCloudVisualizers)
+            {
+               for (RDXRawImagePointCloudVisualizer pointCloudVisualizer : pointCloudVisualizers)
+                  pointCloudVisualizer.destroy();
+            }
             zedFrameGraphic.dispose();
 
             ros2Node.destroy();
             baseUI.dispose();
          }
       });
+   }
+
+   private void updatePointCloudVisualizers(RDXBaseUI baseUI)
+   {
+      synchronized (pointCloudVisualizers)
+      {
+         while (pointCloudVisualizers.size() < pointCloudBufferCapacity.get())
+         {
+            RDXRawImagePointCloudVisualizer visualizer = new RDXRawImagePointCloudVisualizer("ZED Point Cloud " + pointCloudVisualizers.size(), true);
+            visualizer.create();
+            visualizer.setActive(true);
+            pointCloudVisualizers.add(visualizer);
+            baseUI.getPrimaryScene().addRenderableProvider(visualizer);
+         }
+         while (pointCloudVisualizers.size() > pointCloudBufferCapacity.get())
+         {
+            RDXRawImagePointCloudVisualizer visualizer = pointCloudVisualizers.remove(pointCloudVisualizers.size() - 1);
+            baseUI.getPrimaryScene().removeRenderable(visualizer);
+            visualizer.destroy();
+         }
+      }
    }
 
    private void runMethod()
@@ -139,8 +204,19 @@ public class RDXHeightMapLogPlayer
          RawImage colorImageLeft = zedPlaybackSensor.getImage(ZEDImageSensor.LEFT_COLOR_IMAGE_KEY);
          RawImage colorImageRight = zedPlaybackSensor.getImage(ZEDImageSensor.RIGHT_COLOR_IMAGE_KEY);
 
-         zedPointCloudVisualizer.setColorImage(colorImageLeft);
-         zedPointCloudVisualizer.setDepthImage(depthImage);
+         synchronized (pointCloudVisualizers)
+         {
+            if (!pointCloudVisualizers.isEmpty())
+            {
+               int visualizerIndex = (int) (depthImage.getSequenceNumber() % pointCloudVisualizers.size());
+               RDXRawImagePointCloudVisualizer visualizer = pointCloudVisualizers.get(visualizerIndex);
+               visualizer.setColorImage(colorImageLeft);
+               visualizer.setDepthImage(depthImage);
+            }
+         }
+
+         zedColorVisualizer.setImage(colorImageLeft.get());
+         zedDepthVisualizer.setImage(depthImage.get());
 
          zedFrameGraphic.setToReferenceFrame(zedPlaybackSensor.getSensorFrame());
 
