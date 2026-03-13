@@ -55,9 +55,15 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
    {
       state.setElapsedExecutionTime(timer.getElapsedTime());
 
+      boolean isClearScene = definition.getSceneActionType().getValue() == SceneActionNodeType.CLEAR_SCENE;
       boolean isFreeze = definition.getSceneActionType().getValue() == SceneActionNodeType.FREEZE_OBJECT;
       boolean isDelete = definition.getSceneActionType().getValue() == SceneActionNodeType.DELETE_OBJECT;
-      if (isFreeze || isDelete)
+      if (isClearScene)
+      {
+         scene.removeAllObjects();
+         state.setIsExecuting(false);
+      }
+      else if (isFreeze || isDelete)
       {
          BehaviorTreeSceneObjectState matchedObject = null;
          for (BehaviorTreeSceneObjectState object : scene.getObjects())

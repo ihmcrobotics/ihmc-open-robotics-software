@@ -19,6 +19,9 @@ module behavior_msgs
       const octet DELETE_OBJECT =
       2;
 
+      const octet CLEAR_SCENE =
+      3;
+
 
       /**
        * TODO: The following fields are work in progress:

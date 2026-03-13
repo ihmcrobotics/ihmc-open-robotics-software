@@ -4,6 +4,7 @@ behavior_msgs/ActionNodeDefinitionMessage definition
 byte SETUP_OBJECT = 0
 byte FREEZE_OBJECT = 1
 byte DELETE_OBJECT = 2
+byte CLEAR_SCENE = 3
 
 # The type of action as defined above
 byte scene_action_type

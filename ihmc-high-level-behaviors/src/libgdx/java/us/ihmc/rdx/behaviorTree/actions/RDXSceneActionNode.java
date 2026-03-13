@@ -12,7 +12,6 @@ import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionNodeState;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectDefinition;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectType;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseObject;
 import us.ihmc.perception.detections.yolo.YOLOv8Tools;
 import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeRootNode;
@@ -126,47 +125,50 @@ public class RDXSceneActionNode extends RDXActionNode<SceneActionNodeState, Scen
          ImGui.endCombo();
       }
 
-      BehaviorTreeSceneObjectDefinition objectDefinition = definition.getSceneObjectDefinition();
-
-      ImGui.text("Setup Object Type:");
-      for (BehaviorTreeSceneObjectType type : BehaviorTreeSceneObjectType.values)
-         if (ImGui.radioButton(type.name(), objectDefinition.getObjectType() == type))
-            objectDefinition.setObjectType(type);
-
-      ImGui.pushItemWidth(200.0f);
-      imYOLOModel.set(-1);
-      for (int i = 0; i < availableYOLOModelNames.length; i++)
-         if (availableYOLOModelNames[i].equals(objectDefinition.getYoloModelName()))
-            imYOLOModel.set(i);
-      if (ImGui.combo(labels.get("YOLO Model"), imYOLOModel, availableYOLOModelNames))
-         objectDefinition.setYoloModelName(availableYOLOModelNames[imYOLOModel.get()]);
-      ImGui.popItemWidth();
-
-      if (objectDefinition.getObjectType() == BehaviorTreeSceneObjectType.YOLO_ONLY)
+      if (definition.getSceneActionType().getValue() != SceneActionNodeType.CLEAR_SCENE)
       {
+         BehaviorTreeSceneObjectDefinition objectDefinition = definition.getSceneObjectDefinition();
+
+         ImGui.text("Setup Object Type:");
+         for (BehaviorTreeSceneObjectType type : BehaviorTreeSceneObjectType.values)
+            if (ImGui.radioButton(type.name(), objectDefinition.getObjectType() == type))
+               objectDefinition.setObjectType(type);
+
          ImGui.pushItemWidth(200.0f);
-         imYOLOClass.set(-1);
-         for (int i = 0; i < availableYOLOClasses[imYOLOModel.get()].length; i++)
-            if (availableYOLOClasses[imYOLOModel.get()][i].equals(objectDefinition.getYoloClassName()))
-               imYOLOClass.set(i);
-         if (ImGui.combo(labels.get("YOLO Class"), imYOLOClass, availableYOLOClasses[imYOLOModel.get()]))
-            objectDefinition.setYoloClassName(availableYOLOClasses[imYOLOModel.get()][imYOLOClass.get()]);
+         imYOLOModel.set(-1);
+         for (int i = 0; i < availableYOLOModelNames.length; i++)
+            if (availableYOLOModelNames[i].equals(objectDefinition.getYoloModelName()))
+               imYOLOModel.set(i);
+         if (ImGui.combo(labels.get("YOLO Model"), imYOLOModel, availableYOLOModelNames))
+            objectDefinition.setYoloModelName(availableYOLOModelNames[imYOLOModel.get()]);
+         ImGui.popItemWidth();
+
+         if (objectDefinition.getObjectType() == BehaviorTreeSceneObjectType.YOLO_ONLY)
+         {
+            ImGui.pushItemWidth(200.0f);
+            imYOLOClass.set(-1);
+            for (int i = 0; i < availableYOLOClasses[imYOLOModel.get()].length; i++)
+               if (availableYOLOClasses[imYOLOModel.get()][i].equals(objectDefinition.getYoloClassName()))
+                  imYOLOClass.set(i);
+            if (ImGui.combo(labels.get("YOLO Class"), imYOLOClass, availableYOLOClasses[imYOLOModel.get()]))
+               objectDefinition.setYoloClassName(availableYOLOClasses[imYOLOModel.get()][imYOLOClass.get()]);
+            ImGui.popItemWidth();
+         }
+         else if (objectDefinition.getObjectType() == BehaviorTreeSceneObjectType.FOUNDATION_POSE)
+         {
+            ImGui.pushItemWidth(200.0f);
+            imFPType.set(objectDefinition.getFoundationPoseObjectType().ordinal());
+            if (ImGui.combo(labels.get("FoundationPose Type"), imFPType, fpTypeNames))
+               objectDefinition.setFoundationPoseObjectType(IsaacROSFoundationPoseObject.values()[imFPType.get()]);
+            ImGui.popItemWidth();
+         }
+
+         ImGui.pushItemWidth(100.0f);
+         timeoutWidget.renderImGuiWidget();
+         minHistorySizeWidget.renderImGuiWidget();
+         ImGui.checkbox(labels.get("Adjust Nominal Object Pose"), nominalObjectPoseGizmo.getSelected());
          ImGui.popItemWidth();
       }
-      else if (objectDefinition.getObjectType() == BehaviorTreeSceneObjectType.FOUNDATION_POSE)
-      {
-         ImGui.pushItemWidth(200.0f);
-         imFPType.set(objectDefinition.getFoundationPoseObjectType().ordinal());
-         if (ImGui.combo(labels.get("FoundationPose Type"), imFPType, fpTypeNames))
-            objectDefinition.setFoundationPoseObjectType(IsaacROSFoundationPoseObject.values()[imFPType.get()]);
-         ImGui.popItemWidth();
-      }
-
-      ImGui.pushItemWidth(100.0f);
-      timeoutWidget.renderImGuiWidget();
-      minHistorySizeWidget.renderImGuiWidget();
-      ImGui.checkbox(labels.get("Adjust Nominal Object Pose"), nominalObjectPoseGizmo.getSelected());
-      ImGui.popItemWidth();
    }
 
    @Override

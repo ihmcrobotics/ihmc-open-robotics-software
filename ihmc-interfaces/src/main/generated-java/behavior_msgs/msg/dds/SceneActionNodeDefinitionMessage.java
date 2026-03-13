@@ -14,6 +14,7 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
    public static final byte SETUP_OBJECT = (byte) 0;
    public static final byte FREEZE_OBJECT = (byte) 1;
    public static final byte DELETE_OBJECT = (byte) 2;
+   public static final byte CLEAR_SCENE = (byte) 3;
    /**
             * Parent definition fields
             */
