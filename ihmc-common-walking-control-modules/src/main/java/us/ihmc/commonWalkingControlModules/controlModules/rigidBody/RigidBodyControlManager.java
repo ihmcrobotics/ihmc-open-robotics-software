@@ -85,7 +85,8 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
    private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
    private final YoBoolean stateSwitched;
    private final YoBoolean doPrepareForLocomotion;
-   private final MutableBoolean hasContactStateChanged = new MutableBoolean();
+   private final MutableBoolean hasAddedContacts = new MutableBoolean();
+   private final MutableBoolean hasRemovedContacts = new MutableBoolean();
 
    private final double controlDT;
 
@@ -223,7 +224,8 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                                                                       controlFrame,
                                                                                       nominalRhoWeight,
                                                                                       capturePointErrorProvider,
-                                                                                      hasContactStateChanged,
+                                                                                      hasAddedContacts,
+                                                                                      hasRemovedContacts,
                                                                                       registry);
       }
       else
@@ -776,11 +778,18 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
          dynamicLoadBearingControlState.setControllerCoreOutput(controllerCoreOutput);
    }
 
-   public boolean pollContactHasChangedNotification()
+   public boolean pollContactHasAddedNotification()
    {
-      boolean hasContactStateChanged = this.hasContactStateChanged.getValue();
-      this.hasContactStateChanged.setValue(false);
-      return hasContactStateChanged;
+      boolean hasAddedContacts = this.hasAddedContacts.getValue();
+      this.hasAddedContacts.setValue(false);
+      return hasAddedContacts;
+   }
+
+   public boolean pollContactHasRemovedNotification()
+   {
+      boolean hasRemovedContacts = this.hasRemovedContacts.getValue();
+      this.hasRemovedContacts.setValue(false);
+      return hasRemovedContacts;
    }
 
    public double getControlDT()

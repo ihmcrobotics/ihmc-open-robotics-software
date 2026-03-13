@@ -51,7 +51,8 @@ public class RigidBodyDynamicLoadBearingControlState extends RigidBodyControlSta
                                                   ReferenceFrame controlFrame,
                                                   double nominalRhoWeight,
                                                   DoubleProvider capturePointErrorProvider,
-                                                  MutableBoolean hasContactChanged,
+                                                  MutableBoolean hasAddedContacts,
+                                                  MutableBoolean hasRemovedContacts,
                                                   YoRegistry parentRegistry)
    {
       super(RigidBodyControlMode.DYNAMIC_LOADBEARING, bodyToControl.getName(), yoTime, parentRegistry);
@@ -68,7 +69,8 @@ public class RigidBodyDynamicLoadBearingControlState extends RigidBodyControlSta
                                                                 orientationControlHelper,
                                                                 loadBearingParameters,
                                                                 nominalRhoWeight,
-                                                                hasContactChanged,
+                                                                hasAddedContacts,
+                                                                hasRemovedContacts,
                                                                 registry);
 
       stateMachine = setupStateMachine(namePrefix, yoTime);

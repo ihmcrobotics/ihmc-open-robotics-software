@@ -993,12 +993,13 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       return walkingMessageHandler;
    }
 
-   public void onWholeBodyContactsChanged()
+   public void onWholeBodyContactsChanged(boolean contactsRemoved)
    {
       if (!enableUpperBodyLoadBearing())
          return;
       wholeBodyContactsChanged.set(true);
-      multiContactStabilityRegionCalculator.clear();
+      if (contactsRemoved)
+         multiContactStabilityRegionCalculator.clear();
    }
 
    public WholeBodyContactState getWholeBodyContactState()
@@ -1011,7 +1012,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       return multiContactStabilityRegionCalculator;
    }
 
-   public void updateMultiContactCoMRegion()
+   public void updateMultiContactStabilityRegion()
    {
       if (!enableUpperBodyLoadBearing())
          return;

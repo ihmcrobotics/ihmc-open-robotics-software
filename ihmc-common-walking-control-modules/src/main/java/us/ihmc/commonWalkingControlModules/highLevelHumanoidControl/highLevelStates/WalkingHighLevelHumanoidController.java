@@ -816,7 +816,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       if (isUpperBodyLoadBearing)
       {
          updateWholeBodyContactState();
-         controllerToolbox.updateMultiContactCoMRegion();
+         controllerToolbox.updateMultiContactStabilityRegion();
          useMultiContactStabilityRegion = multiContactRegionCalculator.hasSolvedWholeRegion();
       }
       else if (multiContactRegionCalculator != null)
@@ -847,10 +847,13 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
    private void updateWholeBodyContactState()
    {
-//      if (!hasContactStateChanged())
-//      {
-//         return;
-//      }
+      boolean contactsAdded = haveContactsAdded();
+      boolean contactsRemoved = haveContactsRemoved();
+
+      if (!contactsAdded && !contactsRemoved)
+      {
+         return;
+      }
 
       WholeBodyContactState wholeBodyContactState = controllerToolbox.getWholeBodyContactState();
       wholeBodyContactState.clear();
@@ -866,7 +869,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       wholeBodyContactState.updateContactPoints();
       wholeBodyContactState.updateJointIndices();
 
-      controllerToolbox.onWholeBodyContactsChanged();
+      controllerToolbox.onWholeBodyContactsChanged(contactsRemoved);
    }
 
    private void packHandLoadBearingStatuses(CapturabilityBasedStatus capturabilityBasedStatus)
@@ -891,23 +894,47 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       }
    }
 
-   private boolean hasContactStateChanged()
+   private boolean haveContactsAdded()
    {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         // peek because other parts of the controller (WalkingSingleSupportState#handleChangeInContactState) use the notification.
-         // it is polled in this class at the end of doAction
-         if (controllerToolbox.getFootContactState(robotSide).peekContactHasChangedNotification())
-            return true;
-      }
       for (int i = 0; i < bodyManagers.size(); i++)
       {
          // poll because this is the only class that listens to the notification
-         if (bodyManagers.get(i).pollContactHasChangedNotification())
+         if (bodyManagers.get(i).pollContactHasAddedNotification())
             return true;
       }
+
       return false;
    }
+
+   private boolean haveContactsRemoved()
+   {
+      for (int i = 0; i < bodyManagers.size(); i++)
+      {
+         // poll because this is the only class that listens to the notification
+         if (bodyManagers.get(i).pollContactHasRemovedNotification())
+            return true;
+      }
+
+      return false;
+   }
+
+//   private boolean hasContactStateChanged()
+//   {
+//      for (RobotSide robotSide : RobotSide.values)
+//      {
+//         // peek because other parts of the controller (WalkingSingleSupportState#handleChangeInContactState) use the notification.
+//         // it is polled in this class at the end of doAction
+//         if (controllerToolbox.getFootContactState(robotSide).peekContactHasChangedNotification())
+//            return true;
+//      }
+//      for (int i = 0; i < bodyManagers.size(); i++)
+//      {
+//         // poll because this is the only class that listens to the notification
+//         if (bodyManagers.get(i).pollContactHasChangedNotification())
+//            return true;
+//      }
+//      return false;
+//   }
 
    private void reportStatusMessages()
    {

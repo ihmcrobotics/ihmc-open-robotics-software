@@ -115,7 +115,8 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
    private final YoFrameVector3D yoPositionError;
 
    /* Flag for notifying contact change */
-   private final MutableBoolean hasContactStateChanged;
+   private final MutableBoolean hasAddedContacts;
+   private final MutableBoolean hasRemovedContacts;
 
    public DynamicLoadBearingPostContactState(RigidBodyBasics bodyToControl,
                                              RigidBodyBasics baseBody,
@@ -125,7 +126,8 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
                                              RigidBodyOrientationControlHelper orientationControlHelper,
                                              LoadBearingParameters loadBearingParameters,
                                              double nominalRhoWeight,
-                                             MutableBoolean hasContactStateChanged,
+                                             MutableBoolean hasAddedContacts,
+                                             MutableBoolean hasRemovedContacts,
                                              YoRegistry registry)
    {
       this.bodyToControl = bodyToControl;
@@ -133,7 +135,8 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
       this.elevatorFrame = elevator.getBodyFixedFrame();
       this.loadBearingParameters = loadBearingParameters;
       this.nominalRhoWeight = nominalRhoWeight;
-      this.hasContactStateChanged = hasContactStateChanged;
+      this.hasAddedContacts = hasAddedContacts;
+      this.hasRemovedContacts = hasRemovedContacts;
 
       String bodyName = bodyToControl.getName();
 
@@ -286,8 +289,6 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
       // Reset orientation trajectory
       orientationControlHelper.holdCurrent();
 
-      hasContactStateChanged.setValue(true);
-
       // Compute desired contact pose, which is static in world, has an origin at the contact point and has Z pointing parallel to the contact normal
       desiredContactPoseWorld.setReferenceFrame(ReferenceFrame.getWorldFrame());
       desiredContactPoseWorld.getPosition().setMatchingFrame(this.contactPointInBody);
@@ -297,6 +298,8 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
       // Update yovariables
       yoDesiredContactPosition.set(desiredContactPoseWorld.getPosition());
       yoDesiredContactOrientation.set(desiredContactPoseWorld.getOrientation());
+
+      hasAddedContacts.setTrue();
    }
 
    @Override
@@ -311,6 +314,8 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
       positionControlHelper.getYoCurrentPosition().setToNaN();
 
       orientationControlHelper.clear();
+
+      hasRemovedContacts.setTrue();
    }
 
    @Override
