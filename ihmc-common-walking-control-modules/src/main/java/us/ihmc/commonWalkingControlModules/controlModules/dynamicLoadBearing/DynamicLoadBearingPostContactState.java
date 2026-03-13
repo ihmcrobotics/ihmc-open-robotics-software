@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.controlModules.dynamicLoadBearing;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.LoadBearingParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyJointControlHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyOrientationControlHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyPositionControlHelper;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
@@ -24,7 +23,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -53,7 +51,6 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.filters.GlitchFilteredYoBoolean;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class DynamicLoadBearingPostContactState implements DynamicLoadBearingState
 {
@@ -114,7 +111,8 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
    private final SpatialAcceleration bodyAcceleration;
 
    /* Error measurement to detect slipping */
-   private final YoFrameVector3D positionError;
+   private final FrameVector3D positionError = new FrameVector3D();
+   private final YoFrameVector3D yoPositionError;
 
    /* Flag for notifying contact change */
    private final MutableBoolean hasContactStateChanged;
@@ -159,7 +157,7 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
       bodyBarelyLoaded = new GlitchFilteredYoBoolean(bodyName + "BarelyLoaded", registry, 20);
       yoControllerDesiredForce = new YoFrameVector3D(bodyName + "DesiredForce", ReferenceFrame.getWorldFrame(), registry);
 
-      positionError = new YoFrameVector3D(bodyName + "PositionError", ReferenceFrame.getWorldFrame(), registry);
+      yoPositionError = new YoFrameVector3D(bodyName + "PositionError", desiredContactFrameFixedInWorld, registry);
 
       planeContactStateCommand.setContactingRigidBody(bodyToControl);
 
@@ -249,6 +247,7 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
 
       // record contact point tracking error
       positionError.sub(currentContactPointInWorld, desiredContactPoseWorld.getPosition());
+      yoPositionError.setMatchingFrame(positionError);
 
       // assemble spatial feedback command
       if (bodyBarelyLoaded.getValue())
@@ -382,9 +381,9 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
    @Override
    public boolean isDone(double time)
    {
-      double positionErrorSquared = EuclidCoreTools.normSquared(positionError.getX(), positionError.getY(), positionError.getZ());
+      double positionErrorXYSquared = EuclidCoreTools.normSquared(yoPositionError.getX(), yoPositionError.getY());
       double linearTrackingSlipThresholdSquared = EuclidCoreTools.square(loadBearingParameters.getLinearTrackingSlipThreshold());
-      if (positionErrorSquared > linearTrackingSlipThresholdSquared)
+      if (positionErrorXYSquared > linearTrackingSlipThresholdSquared)
          return true;
 
       // Check if near reachability limit

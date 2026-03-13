@@ -199,7 +199,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
 
       userControlState = new RigidBodyUserControlState(bodyName, jointsToControl, yoTime, registry);
 
-      if (contactableBody != null)
+      if (contactableBody != null && contactableBody.getRigidBody().getName().contains("ELBOW"))
       {
 //         loadBearingControlState = new RigidBodyLoadBearingControlState(bodyToControl,
 //                                                                        baseBody,

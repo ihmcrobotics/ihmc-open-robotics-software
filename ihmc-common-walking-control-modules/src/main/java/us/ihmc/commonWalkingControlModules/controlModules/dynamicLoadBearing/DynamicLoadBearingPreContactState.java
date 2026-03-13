@@ -12,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EuclideanTrajectoryControllerCommand;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.GainCalculator;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
@@ -21,6 +22,7 @@ import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
+import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFrameVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -29,8 +31,9 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class DynamicLoadBearingPreContactState implements DynamicLoadBearingState
 {
-   private static final double terminalHandSpeed = 1.2;
+   private static final double MAX_TERMINAL_HAND_SPEED = 1.0;
 
+   private final MovingReferenceFrame controlFrame;
    private final RigidBodyPositionControlHelper positionControlHelper;
 
    private final FramePoint3D desiredPosition = new FramePoint3D();
@@ -52,6 +55,15 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
    private final YoFramePose3D yoControlFrame;
    private final FramePose3D controlFramePose = new FramePose3D();
 
+   private final FrameVector3D previousHandVelocity = new FrameVector3D();
+   private final FrameVector3D handVelocity = new FrameVector3D();
+   private final FrameVector3D handAcceleration = new FrameVector3D();
+   private final AlphaFilteredYoFrameVector3D filteredHandAcceleration;
+   private final YoDouble handSpeed;
+
+   private final FramePoint3D currentPosition = new FramePoint3D();
+   private final FrameVector3D tempVector = new FrameVector3D();
+
    private final EuclideanTrajectoryControllerCommand trajectoryCommand = new EuclideanTrajectoryControllerCommand();
 
    public DynamicLoadBearingPreContactState(RigidBodyBasics bodyToControl,
@@ -62,6 +74,7 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
       this.positionControlHelper = positionControlHelper;
 
       trajectoryDuration = new YoDouble("trajectoryDuration", registry);
+      handSpeed = new YoDouble("handSpeed", registry);
 
       bracingPositionWeights = new YoFrameVector3D("bracingPositionWeights", ReferenceFrame.getWorldFrame(), registry);
       bracingOrientationWeights = new YoFrameVector3D("bracingOrientationWeights", ReferenceFrame.getWorldFrame(), registry);
@@ -84,6 +97,9 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
       yoControlFrame = new YoFramePose3D(bodyToControl.getName() + "ControlFrame", ReferenceFrame.getWorldFrame(), registry);
 
       controlFramePose.setToZero(controlFrame);
+      this.controlFrame = (MovingReferenceFrame) controlFrame;
+
+      filteredHandAcceleration = new AlphaFilteredYoFrameVector3D("filteredHandAcceleration", "", registry, 0.5, ReferenceFrame.getWorldFrame());
    }
 
    public void setBracingPoint(Point3DReadOnly bracingPoint, Vector3DReadOnly bracingNormal, double trajectoryDuration)
@@ -99,9 +115,19 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
    @Override
    public void onEntry()
    {
-      terminalVelocity.setAndScale(-terminalHandSpeed, bracingPlane.getNormal());
+      currentPosition.setToZero(controlFrame);
+      currentPosition.changeFrame(ReferenceFrame.getWorldFrame());
+      tempVector.sub(currentPosition, desiredPosition);
+      tempVector.normalize();
+      double terminalSpeed = tempVector.dot(bracingPlane.getNormal()) * MAX_TERMINAL_HAND_SPEED;
+
+      terminalVelocity.setAndScale(-terminalSpeed, bracingPlane.getNormal());
+
+      handVelocity.setIncludingFrame(controlFrame.getTwistOfFrame().getLinearPart());
+      handVelocity.changeFrame(ReferenceFrame.getWorldFrame());
 
       trajectoryCommand.getTrajectoryPointList().clear();
+      trajectoryCommand.addTrajectoryPoint(0.0, currentPosition, handVelocity);
       trajectoryCommand.addTrajectoryPoint(trajectoryDuration.getValue(), desiredPosition, terminalVelocity);
       positionControlHelper.handleTrajectoryCommand(trajectoryCommand, null);
       positionControlHelper.doAction(0.0);
@@ -111,6 +137,9 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
       positionControlHelper.setWeights(bracingPositionWeights);
 
       positionControlHelper.setGains(bracingFeedbackGains.getPositionGains());
+
+      previousHandVelocity.setIncludingFrame(handVelocity);
+      filteredHandAcceleration.set(handAcceleration);
    }
 
    @Override
@@ -118,6 +147,8 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
    {
       positionControlHelper.doAction(timeInState);
       yoControlFrame.setMatchingFrame(controlFramePose);
+
+      handSpeed.set(controlFrame.getTwistOfFrame().getLinearPart().norm());
    }
 
    @Override
@@ -134,14 +165,21 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
    @Override
    public boolean isDone(double timeInState)
    {
-      // sim (control frame and contact point are off for unknown reason, though this does help in adding model noise that can be helpful)
-      double epsilon = 0.012;
-
-      // real robot TODO tune up
-//      double epsilon = 0.02;
-
+//      double epsilonCloseToWall = 0.012; // sim
+      double epsilonCloseToWall = 0.02; // real robot
       distanceToPlane.set(bracingPlane.distance(positionControlHelper.getYoCurrentPosition()));
-      return distanceToPlane.getValue() < epsilon;
+      boolean isCloseToWall = distanceToPlane.getValue() < epsilonCloseToWall;
+
+      handVelocity.setIncludingFrame(controlFrame.getTwistOfFrame().getLinearPart());
+      handVelocity.changeFrame(ReferenceFrame.getWorldFrame());
+      handAcceleration.sub(handVelocity, previousHandVelocity);
+      handAcceleration.scale(1.0 / 3.0e-3); // bad
+      filteredHandAcceleration.update(handAcceleration);
+      boolean isHandAccelerationHighEnough = filteredHandAcceleration.norm() > 5.0;
+
+      previousHandVelocity.set(handVelocity);
+
+      return isCloseToWall;
    }
 
    private void configureGains()

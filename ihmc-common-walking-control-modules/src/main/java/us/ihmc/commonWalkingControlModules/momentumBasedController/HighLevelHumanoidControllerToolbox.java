@@ -1033,8 +1033,13 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       multiContactRegionLPSolveTimer.startMeasurement();
 
       // Query new direction until initial region has been constructed
-      //      multiContactStabilityRegionCalculator.performUpdateForNextVertex();
-      multiContactStabilityRegionCalculator.performFullRegionUpdate();
+      int updatesPerTick = 1;
+      for (int i = 0; i < updatesPerTick; i++)
+      {
+         multiContactStabilityRegionCalculator.performUpdateForNextVertex();
+      }
+
+//      multiContactStabilityRegionCalculator.performFullRegionUpdate();
 
       multiContactRegionLPSolveTimer.stopMeasurement();
 
