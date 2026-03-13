@@ -68,7 +68,8 @@ public class ShapeContainsConditionDefinition
    {
       containsType.setValue(ContainsType.valueOf(jsonNode.get("containsType").textValue()));
       frameName.setValue(jsonNode.get("frameName").textValue());
-      minPoints.setValue(jsonNode.get("minPoints").asInt());
+      if (jsonNode.get("minPoints") instanceof IntNode intNode)
+         minPoints.setValue(intNode.asInt());
       if (jsonNode.get("maxPoints") instanceof IntNode intNode)
          maxPoints.setValue(intNode.asInt());
       shapeParentFrameName.setValue(jsonNode.get("shapeParentFrameName").textValue());
