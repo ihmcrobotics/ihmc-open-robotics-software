@@ -26,12 +26,14 @@ import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFrameVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.filters.GlitchFilteredYoBoolean;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class DynamicLoadBearingPreContactState implements DynamicLoadBearingState
 {
-   private static final double MAX_TERMINAL_HAND_SPEED = 1.0;
+   private static final double MIN_TERMINAL_HAND_SPEED = 0.8;
+   private static final double MAX_TERMINAL_HAND_SPEED = 1.6;
 
    private final MovingReferenceFrame controlFrame;
    private final RigidBodyPositionControlHelper positionControlHelper;
@@ -57,9 +59,9 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
 
    private final FrameVector3D previousHandVelocity = new FrameVector3D();
    private final FrameVector3D handVelocity = new FrameVector3D();
-   private final FrameVector3D handAcceleration = new FrameVector3D();
-   private final AlphaFilteredYoFrameVector3D filteredHandAcceleration;
    private final YoDouble handSpeed;
+   private final YoDouble terminalHandSpeed;
+   private final GlitchFilteredYoBoolean hasHandTouchedDown;
 
    private final FramePoint3D currentPosition = new FramePoint3D();
    private final FrameVector3D tempVector = new FrameVector3D();
@@ -75,6 +77,8 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
 
       trajectoryDuration = new YoDouble("trajectoryDuration", registry);
       handSpeed = new YoDouble("handSpeed", registry);
+      terminalHandSpeed = new YoDouble("terminalHandSpeed", registry);
+      hasHandTouchedDown = new GlitchFilteredYoBoolean("", registry, 4);
 
       bracingPositionWeights = new YoFrameVector3D("bracingPositionWeights", ReferenceFrame.getWorldFrame(), registry);
       bracingOrientationWeights = new YoFrameVector3D("bracingOrientationWeights", ReferenceFrame.getWorldFrame(), registry);
@@ -98,8 +102,6 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
 
       controlFramePose.setToZero(controlFrame);
       this.controlFrame = (MovingReferenceFrame) controlFrame;
-
-      filteredHandAcceleration = new AlphaFilteredYoFrameVector3D("filteredHandAcceleration", "", registry, 0.5, ReferenceFrame.getWorldFrame());
    }
 
    public void setBracingPoint(Point3DReadOnly bracingPoint, Vector3DReadOnly bracingNormal, double trajectoryDuration)
@@ -119,9 +121,11 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
       currentPosition.changeFrame(ReferenceFrame.getWorldFrame());
       tempVector.sub(currentPosition, desiredPosition);
       tempVector.normalize();
-      double terminalSpeed = tempVector.dot(bracingPlane.getNormal()) * MAX_TERMINAL_HAND_SPEED;
+      terminalHandSpeed.set(tempVector.dot(bracingPlane.getNormal()) * MAX_TERMINAL_HAND_SPEED);
+      if (terminalHandSpeed.getValue() < MIN_TERMINAL_HAND_SPEED)
+         terminalHandSpeed.set(MIN_TERMINAL_HAND_SPEED);
 
-      terminalVelocity.setAndScale(-terminalSpeed, bracingPlane.getNormal());
+      terminalVelocity.setAndScale(-terminalHandSpeed.getDoubleValue(), bracingPlane.getNormal());
 
       handVelocity.setIncludingFrame(controlFrame.getTwistOfFrame().getLinearPart());
       handVelocity.changeFrame(ReferenceFrame.getWorldFrame());
@@ -137,9 +141,7 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
       positionControlHelper.setWeights(bracingPositionWeights);
 
       positionControlHelper.setGains(bracingFeedbackGains.getPositionGains());
-
-      previousHandVelocity.setIncludingFrame(handVelocity);
-      filteredHandAcceleration.set(handAcceleration);
+      hasHandTouchedDown.set(false);
    }
 
    @Override
@@ -147,8 +149,6 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
    {
       positionControlHelper.doAction(timeInState);
       yoControlFrame.setMatchingFrame(controlFramePose);
-
-      handSpeed.set(controlFrame.getTwistOfFrame().getLinearPart().norm());
    }
 
    @Override
@@ -170,16 +170,11 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
       distanceToPlane.set(bracingPlane.distance(positionControlHelper.getYoCurrentPosition()));
       boolean isCloseToWall = distanceToPlane.getValue() < epsilonCloseToWall;
 
-      handVelocity.setIncludingFrame(controlFrame.getTwistOfFrame().getLinearPart());
-      handVelocity.changeFrame(ReferenceFrame.getWorldFrame());
-      handAcceleration.sub(handVelocity, previousHandVelocity);
-      handAcceleration.scale(1.0 / 3.0e-3); // bad
-      filteredHandAcceleration.update(handAcceleration);
-      boolean isHandAccelerationHighEnough = filteredHandAcceleration.norm() > 5.0;
+      handSpeed.set(controlFrame.getTwistOfFrame().getLinearPart().norm());
+      boolean hasLowHandSpeed = handSpeed.getValue() < 0.2;
 
-      previousHandVelocity.set(handVelocity);
-
-      return isCloseToWall;
+      hasHandTouchedDown.update(isCloseToWall && hasLowHandSpeed);
+      return hasHandTouchedDown.getValue();
    }
 
    private void configureGains()
