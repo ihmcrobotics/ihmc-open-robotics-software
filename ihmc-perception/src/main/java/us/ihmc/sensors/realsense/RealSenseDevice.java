@@ -19,6 +19,7 @@ import org.bytedeco.librealsense2.rs2_processing_block;
 import org.bytedeco.librealsense2.rs2_sensor;
 import org.bytedeco.librealsense2.rs2_sensor_list;
 import org.bytedeco.librealsense2.rs2_stream_profile;
+import org.bytedeco.librealsense2.rs2_stream_profile_list;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -41,7 +42,7 @@ import static org.bytedeco.librealsense2.global.realsense2.rs2_release_frame;
 
 public class RealSenseDevice
 {
-   private static final boolean IMU_ENABLED = false;
+   private static final boolean IMU_ENABLED = true;
 
    protected final int depthWidth;
    protected final int depthHeight;
@@ -292,13 +293,12 @@ public class RealSenseDevice
 
       if (frameAvailable)
       {
-
-
          rs2_frame alignedFrames = syncedFrames;
          rs2_frame extractedDepthFrame = null;
          rs2_frame extractedColorFrame = null;
          rs2_frame extractedGyroFrame = null;
          rs2_frame extractedAccelFrame = null;
+         boolean foundAccel = false, foundGyro = false;
 
          if (colorEnabled)
          {
@@ -325,8 +325,6 @@ public class RealSenseDevice
             // Extract depth and color from aligned frameset
             extractedDepthFrame = realsense2.rs2_extract_frame(alignedFrames, 0, error);
             extractedColorFrame = realsense2.rs2_extract_frame(alignedFrames, 1, error);
-
-
 
             boolean missedDepthFrame = extractedDepthFrame == null || extractedDepthFrame.isNull();
             boolean missedColorFrame = extractedColorFrame == null || extractedColorFrame.isNull();
@@ -373,70 +371,83 @@ public class RealSenseDevice
 
          if (IMU_ENABLED)
          {
-            int start = colorEnabled ? 2 : 1;
-            int frameCount = realsense2.rs2_embedded_frames_count(syncedFrames, error);
-            for (int i = start; i < frameCount; i++)
+            rs2_stream_profile_list streamProfiles = realsense2.rs2_get_stream_profiles(depthSensor, error);
+            if (!error.isNull())
             {
-               rs2_frame frame = realsense2.rs2_extract_frame(syncedFrames, i, error);
-               rs2_stream_profile profile = realsense2.rs2_get_frame_stream_profile(frame, error);
+               checkError("Failed to get stream profiles");
+               rs2_release_frame(syncedFrames);
+            }
+            int profiles = realsense2.rs2_get_stream_profiles_count(streamProfiles, error);
+            if (!error.isNull())
+            {
+               checkError("Failed to get number of stream profiles");
+               rs2_release_frame(syncedFrames);
+            }
+            int accelIndex = -1, gyroIndex = -1;
+            for (int i = 0; i < profiles; i++)
+            {
+               rs2_stream_profile streamProfile = realsense2.rs2_get_stream_profile(streamProfiles, i, error);
+               if (!error.isNull())
+               {
+                  checkError("Failed to get stream profile");
+                  rs2_release_frame(syncedFrames);
+               }
                IntPointer streamType = new IntPointer(1);
-               realsense2.rs2_get_stream_profile_data(profile, streamType, null, null, null, null, error);
+               IntPointer format = new IntPointer(1);
+               IntPointer index = new IntPointer(1);
+               IntPointer uid = new IntPointer(1);
+               IntPointer framerate = new IntPointer(1);
 
+               realsense2.rs2_get_stream_profile_data(streamProfile, streamType, format, index, uid, framerate, error);
+               if (!error.isNull())
+               {
+                  checkError("Failed to get stream profile data.");
+                  rs2_release_frame(syncedFrames);
+               }
                if (streamType.get() == realsense2.RS2_STREAM_ACCEL)
                {
-                  extractedAccelFrame = frame;
+                  foundAccel = true;
+                  accelIndex = i;
                }
                else if (streamType.get() == realsense2.RS2_STREAM_GYRO)
                {
-                  extractedGyroFrame = frame;
+                  foundGyro = true;
+                  gyroIndex = i;
                }
             }
+            if (foundGyro)
+               extractedGyroFrame = realsense2.rs2_extract_frame(alignedFrames, gyroIndex, error);
+            if (foundAccel)
+               extractedAccelFrame = realsense2.rs2_extract_frame(alignedFrames, accelIndex, error);
 
-            boolean missedDepthFrame = extractedDepthFrame == null || extractedDepthFrame.isNull();
-            boolean missedColorFrame = extractedColorFrame == null || extractedColorFrame.isNull();
-            boolean missedGyroFrame = extractedGyroFrame == null || extractedGyroFrame.isNull();
-            boolean missedAccelerometerFrame = extractedAccelFrame == null || extractedAccelFrame.isNull();
-            if (missedDepthFrame || missedColorFrame || missedGyroFrame || missedAccelerometerFrame)
+            if (foundGyro && extractedGyroFrame.isNull())
             {
-               // Failed to extract frames, cleanup and skip
-               if (!missedDepthFrame)
-                  rs2_release_frame(extractedDepthFrame);
-               if (!missedColorFrame)
-                  rs2_release_frame(extractedColorFrame);
-               if (!missedGyroFrame)
+               rs2_release_frame(extractedGyroFrame);
+               foundGyro = false;
+            }
+            if (foundAccel && extractedAccelFrame.isNull())
+            {
+               rs2_release_frame(extractedAccelFrame);
+               foundAccel = false;
+            }
+
+            if (foundGyro)
+            {
+               gyroFrameDataSize = realsense2.rs2_get_frame_data_size(extractedGyroFrame, error);
+               if (!error.isNull() || gyroFrameDataSize <= 0)
+               {
                   rs2_release_frame(extractedGyroFrame);
-               if (!missedAccelerometerFrame)
+                  foundGyro = false;
+               }
+            }
+            if (foundAccel)
+            {
+               accelFrameDataSize = realsense2.rs2_get_frame_data_size(extractedAccelFrame, error);
+               if (!error.isNull() || accelFrameDataSize <= 0)
+               {
                   rs2_release_frame(extractedAccelFrame);
-               if (alignedFrames != syncedFrames)
-                  rs2_release_frame(alignedFrames);
-               rs2_release_frame(syncedFrames);
-               return false;
-            }
-
-            gyroFrameDataSize = realsense2.rs2_get_frame_data_size(extractedGyroFrame, error);
-            if (!error.isNull() || gyroFrameDataSize <= 0)
-            {
-               rs2_release_frame(extractedDepthFrame);
-               rs2_release_frame(extractedColorFrame);
-               rs2_release_frame(extractedGyroFrame);
-               rs2_release_frame(extractedAccelFrame);
-               if (alignedFrames != syncedFrames)
-                  rs2_release_frame(alignedFrames);
-               rs2_release_frame(syncedFrames);
-               return false;
-            }
-
-            accelFrameDataSize = realsense2.rs2_get_frame_data_size(extractedAccelFrame, error);
-            if (!error.isNull() || accelFrameDataSize <= 0)
-            {
-               rs2_release_frame(extractedDepthFrame);
-               rs2_release_frame(extractedColorFrame);
-               rs2_release_frame(extractedGyroFrame);
-               rs2_release_frame(extractedAccelFrame);
-               if (alignedFrames != syncedFrames)
-                  rs2_release_frame(alignedFrames);
-               rs2_release_frame(syncedFrames);
-               return false;
+                  foundAccel = false;
+               }
             }
          }
 
@@ -548,19 +559,21 @@ public class RealSenseDevice
                }
             }
 
-            if (IMU_ENABLED)
+            if (foundAccel)
             {
-                  accelFrameDataAddress = realsense2.rs2_get_frame_data_address(extractedAccelFrame, error);
-                  FloatPointer accelerometerValues = new FloatPointer(accelFrameDataAddress);
-                  accelValues[0] = accelerometerValues.get(0);
-                  accelValues[1] = accelerometerValues.get(1);
-                  accelValues[2] = accelerometerValues.get(2);
-
-                  gyroFrameDataAddress = realsense2.rs2_get_frame_data_address(extractedGyroFrame, error);
-                  FloatPointer gyroscopeValues = new FloatPointer(gyroFrameDataAddress);
-                  gyroValues[0] = gyroscopeValues.get(0);
-                  gyroValues[1] = gyroscopeValues.get(1);
-                  gyroValues[2] = gyroscopeValues.get(2);
+               accelFrameDataAddress = realsense2.rs2_get_frame_data_address(extractedAccelFrame, error);
+               FloatPointer accelerometerValues = new FloatPointer(accelFrameDataAddress);
+               accelValues[0] = accelerometerValues.get(0);
+               accelValues[1] = accelerometerValues.get(1);
+               accelValues[2] = accelerometerValues.get(2);
+            }
+            if (foundGyro)
+            {
+               gyroFrameDataAddress = realsense2.rs2_get_frame_data_address(extractedGyroFrame, error);
+               FloatPointer gyroscopeValues = new FloatPointer(gyroFrameDataAddress);
+               gyroValues[0] = gyroscopeValues.get(0);
+               gyroValues[1] = gyroscopeValues.get(1);
+               gyroValues[2] = gyroscopeValues.get(2);
             }
 
             dataWasRead = true;
@@ -573,27 +586,13 @@ public class RealSenseDevice
                rs2_release_frame(extractedDepthFrame);
             if (extractedColorFrame != null)
                rs2_release_frame(extractedColorFrame);
-            if (IMU_ENABLED)
-            {
-               if (extractedAccelFrame != null)
-                  rs2_release_frame(extractedAccelFrame);
-               if (extractedGyroFrame != null)
-                  rs2_release_frame(extractedGyroFrame);
-            }
             if (alignedFrames != null && alignedFrames != syncedFrames)
                rs2_release_frame(alignedFrames);
          }
-         else if (IMU_ENABLED)
-         {
-            if (extractedDepthFrame != null)
-               rs2_release_frame(extractedDepthFrame);
-            if (extractedAccelFrame != null)
-               rs2_release_frame(extractedAccelFrame);
-            if (extractedGyroFrame != null)
-               rs2_release_frame(extractedGyroFrame);
-            if (alignedFrames != null && alignedFrames != syncedFrames)
-               rs2_release_frame(alignedFrames);
-         }
+         if (foundAccel)
+            rs2_release_frame(extractedAccelFrame);
+         if (foundGyro)
+            rs2_release_frame(extractedGyroFrame);
 
          rs2_release_frame(syncedFrames);
       }
