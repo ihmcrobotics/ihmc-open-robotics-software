@@ -7,9 +7,9 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionNodeState;
 import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeState;
-import us.ihmc.behaviors.behaviorTree.action.actions.FootstepPlanActionDefinition;
-import us.ihmc.behaviors.behaviorTree.action.actions.FootstepPlanActionFootstepState;
-import us.ihmc.behaviors.behaviorTree.action.actions.FootstepPlanActionState;
+import us.ihmc.behaviors.behaviorTree.action.actions.WalkActionDefinition;
+import us.ihmc.behaviors.behaviorTree.action.actions.WalkActionFootstepState;
+import us.ihmc.behaviors.behaviorTree.action.actions.WalkActionState;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -133,7 +133,7 @@ public class AI2RSkillEditor
       {
          for (var leaf : state.getActionSequence().getOrderedLeaves())
          {
-            if (leaf.getDefinition().getName().toLowerCase().contains("go to action") && leaf instanceof FootstepPlanActionState gotoActionState)
+            if (leaf.getDefinition().getName().toLowerCase().contains("go to action") && leaf instanceof WalkActionState gotoActionState)
             {
                AI2RNavigationMessage navigationMessage = message.getNavigation();
                String referenceFrameName = navigationMessage.getTargetObjectAsString();
@@ -222,7 +222,7 @@ public class AI2RSkillEditor
       }
    }
 
-   private void changeParentFrameGoToNode(FootstepPlanActionDefinition definition, FootstepPlanActionState state, String newParentFrameName)
+   private void changeParentFrameGoToNode(WalkActionDefinition definition, WalkActionState state, String newParentFrameName)
    {
       definition.setParentFrameName(newParentFrameName);
       // Timestamp modification to prevent the frame from glitching when changing frames
@@ -248,7 +248,7 @@ public class AI2RSkillEditor
       definition.getGoalStancePoint().getValueAndModify().set(frameStancePoint);
       definition.getGoalFocalPoint().getValueAndModify().set(frameFocalPoint);
 
-      for (FootstepPlanActionFootstepState footstepState : state.getManuallyPlacedFootsteps())
+      for (WalkActionFootstepState footstepState : state.getManuallyPlacedFootsteps())
       {
          footstepState.getSoleFrame().changeFrame(newParentFrameName);
       }

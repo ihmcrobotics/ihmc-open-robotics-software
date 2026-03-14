@@ -55,7 +55,7 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
    private final RecyclingArrayList<FrameVector3D> linearVelocities = new RecyclingArrayList<>(FrameVector3D::new);
    private final RecyclingArrayList<FrameVector3D> angularVelocities = new RecyclingArrayList<>(FrameVector3D::new);
    private final TDoubleArrayList trajectoryTimes = new TDoubleArrayList();
-   private final int numberOfJoints = HandPoseActionDefinition.MAX_NUMBER_OF_JOINTS;
+   private final int numberOfJoints = ArmActionDefinition.MAX_NUMBER_OF_JOINTS;
    private final ScrewTrajectoryData trajectoryData = new ScrewTrajectoryData();
 
    private static final class ScrewTrajectoryData
@@ -121,7 +121,7 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
       if (state.getIsNextForExecution())
          return syncedRobot.getReferenceFrames().getHandFrame(definition.getSide());
 
-      HandPoseActionState previousHandPose = actionSequence.findNextPreviousLeaf(HandPoseActionState.class, state.getLeafIndex(), definition.getSide());
+      ArmActionState previousHandPose = actionSequence.findNextPreviousLeaf(ArmActionState.class, state.getLeafIndex(), definition.getSide());
       if (previousHandPose != null && previousHandPose.getPalmFrame().isChildOfWorld())
          return previousHandPose.getPalmFrame().getReferenceFrame();
 

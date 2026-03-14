@@ -5,12 +5,12 @@ import org.jfree.svg.SVGGraphics2D;
 import us.ihmc.behaviors.behaviorTree.control.door.DoorTraversalDefinition;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
 import us.ihmc.behaviors.behaviorTree.control.ActionSequenceDefinition;
-import us.ihmc.behaviors.behaviorTree.action.actions.ChestOrientationActionDefinition;
-import us.ihmc.behaviors.behaviorTree.action.actions.ChestOrientationActionState;
-import us.ihmc.behaviors.behaviorTree.action.actions.FootstepPlanActionDefinition;
-import us.ihmc.behaviors.behaviorTree.action.actions.FootstepPlanActionState;
-import us.ihmc.behaviors.behaviorTree.action.actions.HandPoseActionDefinition;
-import us.ihmc.behaviors.behaviorTree.action.actions.HandPoseActionState;
+import us.ihmc.behaviors.behaviorTree.action.actions.SpineActionDefinition;
+import us.ihmc.behaviors.behaviorTree.action.actions.SpineActionState;
+import us.ihmc.behaviors.behaviorTree.action.actions.WalkActionDefinition;
+import us.ihmc.behaviors.behaviorTree.action.actions.WalkActionState;
+import us.ihmc.behaviors.behaviorTree.action.actions.ArmActionDefinition;
+import us.ihmc.behaviors.behaviorTree.action.actions.ArmActionState;
 import us.ihmc.behaviors.behaviorTree.action.actions.SakeHandCommandActionDefinition;
 import us.ihmc.behaviors.behaviorTree.action.actions.SakeHandCommandActionState;
 import us.ihmc.behaviors.behaviorTree.action.actions.ScrewPrimitiveActionDefinition;
@@ -109,15 +109,15 @@ public class BehaviorTreeSVGNode
       {
          duration = action.getDefinition().getWaitDuration();
       }
-      else if (node instanceof HandPoseActionState action)
+      else if (node instanceof ArmActionState action)
       {
          duration = action.getDefinition().getTrajectoryDuration();
       }
-      else if (node instanceof ChestOrientationActionState action)
+      else if (node instanceof SpineActionState action)
       {
          duration = action.getDefinition().getTrajectoryDuration();
       }
-      else if (node instanceof FootstepPlanActionState action)
+      else if (node instanceof WalkActionState action)
       {
          duration = 10.0; // TODO
       }
@@ -207,12 +207,12 @@ public class BehaviorTreeSVGNode
          return "Action Sequence";
       if (node instanceof WaitDurationActionDefinition)
          return "Wait Action";
-      if (node instanceof HandPoseActionDefinition)
-         return "Hand Pose Action";
-      if (node instanceof FootstepPlanActionDefinition)
+      if (node instanceof ArmActionDefinition)
+         return "Arm Action";
+      if (node instanceof WalkActionDefinition)
          return "Walk Action";
-      if (node instanceof ChestOrientationActionDefinition)
-         return "Chest Trajectory Action";
+      if (node instanceof SpineActionDefinition)
+         return "Spine Action";
       if (node instanceof SakeHandCommandActionDefinition)
          return "Finger Trajectory Action";
       if (node instanceof ScrewPrimitiveActionDefinition)
