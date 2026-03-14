@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
-import behavior_msgs.msg.dds.ChestOrientationActionStateMessage;
+import behavior_msgs.msg.dds.SpineActionStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
 import us.ihmc.communication.crdt.CRDTDetachableReferenceFrame;
@@ -9,7 +9,7 @@ import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
-public class ChestOrientationActionState extends ActionNodeState<ChestOrientationActionDefinition>
+public class SpineActionState extends ActionNodeState<SpineActionDefinition>
 {
    private final CRDTDetachableReferenceFrame chestFrame;
    /**
@@ -20,9 +20,9 @@ public class ChestOrientationActionState extends ActionNodeState<ChestOrientatio
    private final CRDTStatusRigidBodyTransform goalPelvisToWorldTransform;
    private final ReferenceFrame goalPelvisFrame;
 
-   public ChestOrientationActionState(long id, BehaviorTreeRootNodeState rootNode)
+   public SpineActionState(long id, BehaviorTreeRootNodeState rootNode)
    {
-      super(id, new ChestOrientationActionDefinition(rootNode.getDefinition()), rootNode);
+      super(id, new SpineActionDefinition(rootNode.getDefinition()), rootNode);
 
       chestFrame = new CRDTDetachableReferenceFrame(scene::findFrameByName,
                                                     definition.getCRDTParentFrameName(),
@@ -46,7 +46,7 @@ public class ChestOrientationActionState extends ActionNodeState<ChestOrientatio
       return hasStatus;
    }
 
-   public void toMessage(ChestOrientationActionStateMessage message)
+   public void toMessage(SpineActionStateMessage message)
    {
       definition.toMessage(message.getDefinition());
 
@@ -55,7 +55,7 @@ public class ChestOrientationActionState extends ActionNodeState<ChestOrientatio
       goalPelvisToWorldTransform.toMessage(message.getGoalPelvisTransformToWorld());
    }
 
-   public void fromMessage(ChestOrientationActionStateMessage message)
+   public void fromMessage(SpineActionStateMessage message)
    {
       definition.fromMessage(message.getDefinition());
 

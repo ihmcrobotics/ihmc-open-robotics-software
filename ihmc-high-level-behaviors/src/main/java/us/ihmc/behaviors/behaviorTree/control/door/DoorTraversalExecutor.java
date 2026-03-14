@@ -5,7 +5,7 @@ import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
-import us.ihmc.behaviors.behaviorTree.action.actions.FootstepPlanActionExecutor;
+import us.ihmc.behaviors.behaviorTree.action.actions.WalkActionExecutor;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ros2log.ROS2LogRecord;
 import us.ihmc.communication.ros2log.ROS2LogSerialization;
@@ -72,10 +72,10 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
       super.update();
 
       boolean executing = false;
-      if (searchDFSFirstMatch(this, "Walk through push door") instanceof FootstepPlanActionExecutor walkThroughPushDoor)
+      if (searchDFSFirstMatch(this, "Walk through push door") instanceof WalkActionExecutor walkThroughPushDoor)
          executing |= walkThroughPushDoor.getState().getIsExecuting();
 
-      if (searchDFSFirstMatch(this, "Walk through") instanceof FootstepPlanActionExecutor walkThroughPullDoor)
+      if (searchDFSFirstMatch(this, "Walk through") instanceof WalkActionExecutor walkThroughPullDoor)
          executing |= walkThroughPullDoor.getState().getIsExecuting();
 
       if (executing && ros2LogRecord == null)

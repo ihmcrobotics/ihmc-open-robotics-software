@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
-import behavior_msgs.msg.dds.HandPoseActionDefinitionMessage;
+import behavior_msgs.msg.dds.ArmActionDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.avatar.arm.PresetArmConfiguration;
@@ -15,7 +15,7 @@ import us.ihmc.tools.io.JSONTools;
 
 import javax.annotation.Nullable;
 
-public class HandPoseActionDefinition extends ActionNodeDefinition implements SidedObject
+public class ArmActionDefinition extends ActionNodeDefinition implements SidedObject
 {
    public static final double DEFAULT_TRAJECTORY_DURATION = 4.0;
    public static final boolean DEFAULT_IS_JOINTSPACE_MODE = true;
@@ -61,7 +61,7 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
    private double onDiskPositionErrorTolerance;
    private double onDiskOrientationErrorTolerance;
 
-   public HandPoseActionDefinition(BehaviorTreeRootNodeDefinition rootNode)
+   public ArmActionDefinition(BehaviorTreeRootNodeDefinition rootNode)
    {
       super(rootNode);
 
@@ -233,7 +233,7 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
       return !unchanged;
    }
 
-   public void toMessage(HandPoseActionDefinitionMessage message)
+   public void toMessage(ArmActionDefinitionMessage message)
    {
       super.toMessage(message.getDefinition());
 
@@ -253,7 +253,7 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
       message.setOrientationErrorTolerance(orientationErrorTolerance.toMessage());
    }
 
-   public void fromMessage(HandPoseActionDefinitionMessage message)
+   public void fromMessage(ArmActionDefinitionMessage message)
    {
       super.fromMessage(message.getDefinition());
 

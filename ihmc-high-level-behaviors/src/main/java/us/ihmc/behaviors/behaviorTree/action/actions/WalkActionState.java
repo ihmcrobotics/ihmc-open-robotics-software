@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
-import behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessage;
-import behavior_msgs.msg.dds.FootstepPlanActionStateMessage;
+import behavior_msgs.msg.dds.WalkActionFootstepStateMessage;
+import behavior_msgs.msg.dds.WalkActionStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -20,11 +20,11 @@ import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionDefinition>
+public class WalkActionState extends ActionNodeState<WalkActionDefinition>
 {
    private final LatestTimestampModifiable stateDataSynchronizer;
    private int numberOfAllocatedFootsteps = 0;
-   private final RecyclingArrayList<FootstepPlanActionFootstepState> manuallyPlacedFootsteps;
+   private final RecyclingArrayList<WalkActionFootstepState> manuallyPlacedFootsteps;
    private final CRDTBidirectionalRigidBodyTransform goalToParentTransform;
    private final SideDependentList<RigidBodyTransform> goalFootstepToGoalTransforms = new SideDependentList<>(() -> new RigidBodyTransform());
    private final DetachableReferenceFrame goalFrame;
@@ -33,12 +33,12 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
    private final CRDTStatusInteger numberOfIncompleteFootsteps;
    private final SideDependentList<CRDTStatusSE3Trajectory> desiredFootPoses = new SideDependentList<>();
    private final SideDependentList<CRDTStatusPose3D> currentFootPoses = new SideDependentList<>();
-   private final CRDTStatusEnumField<FootstepPlanActionExecutionState> executionState;
+   private final CRDTStatusEnumField<WalkActionExecutionState> executionState;
    private final CRDTStatusFootstepList previewFootsteps;
 
-   public FootstepPlanActionState(long id, BehaviorTreeRootNodeState rootNode)
+   public WalkActionState(long id, BehaviorTreeRootNodeState rootNode)
    {
-      super(id, new FootstepPlanActionDefinition(rootNode.getDefinition()), rootNode);
+      super(id, new WalkActionDefinition(rootNode.getDefinition()), rootNode);
 
       // Prevents feedback loop where UI modifies definition fields and robot side updates state fields
       stateDataSynchronizer = new LatestTimestampModifiable(definition.getCRDTInfo());
@@ -47,7 +47,7 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
       goalToParentTransform = new CRDTBidirectionalRigidBodyTransform(stateDataSynchronizer);
       goalFrame = new DetachableReferenceFrame(scene::findFrameByName, goalToParentTransform.getValueReadOnly());
       manuallyPlacedFootsteps = new RecyclingArrayList<>(() ->
-         new FootstepPlanActionFootstepState(scene,
+         new WalkActionFootstepState(scene,
                                              definition.getCRDTParentFrameName(),
                                              RecyclingArrayListTools.getUnsafe(definition.getManuallyPlacedFootsteps().getValueUnsafe(), numberOfAllocatedFootsteps++)));
       totalNumberOfFootsteps = new CRDTStatusInteger(ROS2ActorDesignation.ROBOT, crdtInfo, 0);
@@ -57,7 +57,7 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
          desiredFootPoses.set(side, new CRDTStatusSE3Trajectory(ROS2ActorDesignation.ROBOT, crdtInfo));
          currentFootPoses.set(side, new CRDTStatusPose3D(ROS2ActorDesignation.ROBOT, crdtInfo));
       }
-      executionState = new CRDTStatusEnumField<>(ROS2ActorDesignation.ROBOT, crdtInfo, FootstepPlanActionExecutionState.PLANNING_SUCCEEDED);
+      executionState = new CRDTStatusEnumField<>(ROS2ActorDesignation.ROBOT, crdtInfo, WalkActionExecutionState.PLANNING_SUCCEEDED);
       previewFootsteps = new CRDTStatusFootstepList(ROS2ActorDesignation.ROBOT, crdtInfo);
    }
 
@@ -115,7 +115,7 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
       return hasStatus;
    }
 
-   public void toMessage(FootstepPlanActionStateMessage message)
+   public void toMessage(WalkActionStateMessage message)
    {
       definition.toMessage(message.getDefinition());
 
@@ -131,7 +131,7 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
       currentFootPoses.get(RobotSide.RIGHT).toMessage(message.getCurrentRightFootPose());
 
       message.getFootsteps().clear();
-      for (FootstepPlanActionFootstepState footstep : manuallyPlacedFootsteps)
+      for (WalkActionFootstepState footstep : manuallyPlacedFootsteps)
       {
          footstep.toMessage(message.getFootsteps().add());
       }
@@ -140,7 +140,7 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
       previewFootsteps.toMessage(message.getPreviewFootsteps());
    }
 
-   public void fromMessage(FootstepPlanActionStateMessage message)
+   public void fromMessage(WalkActionStateMessage message)
    {
       definition.fromMessage(message.getDefinition());
 
@@ -156,12 +156,12 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
       currentFootPoses.get(RobotSide.RIGHT).fromMessage(message.getCurrentRightFootPose());
 
       manuallyPlacedFootsteps.clear();
-      for (FootstepPlanActionFootstepStateMessage footstep : message.getFootsteps())
+      for (WalkActionFootstepStateMessage footstep : message.getFootsteps())
       {
          manuallyPlacedFootsteps.add().fromMessage(footstep);
       }
 
-      executionState.fromMessage(FootstepPlanActionExecutionState.fromByte(message.getExecutionState()));
+      executionState.fromMessage(WalkActionExecutionState.fromByte(message.getExecutionState()));
       previewFootsteps.fromMessage(message.getPreviewFootsteps());
    }
 
@@ -190,7 +190,7 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
       return goalFrame;
    }
 
-   public RecyclingArrayList<FootstepPlanActionFootstepState> getManuallyPlacedFootsteps()
+   public RecyclingArrayList<WalkActionFootstepState> getManuallyPlacedFootsteps()
    {
       return manuallyPlacedFootsteps;
    }
@@ -225,7 +225,7 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
       return currentFootPoses;
    }
 
-   public CRDTStatusEnumField<FootstepPlanActionExecutionState> getExecutionState()
+   public CRDTStatusEnumField<WalkActionExecutionState> getExecutionState()
    {
       return executionState;
    }

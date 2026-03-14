@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
-import behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessage;
+import behavior_msgs.msg.dds.WalkActionFootstepDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.communication.crdt.CRDTBidirectionalEnumField;
@@ -11,7 +11,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SidedObject;
 import us.ihmc.tools.io.JSONTools;
 
-public class FootstepPlanActionFootstepDefinition implements SidedObject
+public class WalkActionFootstepDefinition implements SidedObject
 {
    private final CRDTBidirectionalEnumField<RobotSide> side;
    private final CRDTBidirectionalRigidBodyTransform soleToPlanFrameTransform;
@@ -20,7 +20,7 @@ public class FootstepPlanActionFootstepDefinition implements SidedObject
    private RobotSide onDiskSide;
    private final RigidBodyTransform onDiskSoleToPlanFrameTransform = new RigidBodyTransform();
 
-   public FootstepPlanActionFootstepDefinition(LatestTimestampModifiable latestTimestampModifiable)
+   public WalkActionFootstepDefinition(LatestTimestampModifiable latestTimestampModifiable)
    {
       side = new CRDTBidirectionalEnumField<>(latestTimestampModifiable, RobotSide.LEFT);
       soleToPlanFrameTransform = new CRDTBidirectionalRigidBodyTransform(latestTimestampModifiable);
@@ -79,13 +79,13 @@ public class FootstepPlanActionFootstepDefinition implements SidedObject
       return !unchanged;
    }
 
-   public void toMessage(FootstepPlanActionFootstepDefinitionMessage message)
+   public void toMessage(WalkActionFootstepDefinitionMessage message)
    {
       message.setRobotSide(side.toMessage().toByte());
       soleToPlanFrameTransform.toMessage(message.getSolePose());
    }
 
-   public void fromMessage(FootstepPlanActionFootstepDefinitionMessage message)
+   public void fromMessage(WalkActionFootstepDefinitionMessage message)
    {
       side.fromMessage(RobotSide.fromByte(message.getRobotSide()));
       soleToPlanFrameTransform.fromMessage(message.getSolePose());

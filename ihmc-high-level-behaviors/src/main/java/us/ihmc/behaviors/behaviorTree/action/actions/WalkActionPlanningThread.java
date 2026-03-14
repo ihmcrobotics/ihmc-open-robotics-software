@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
-import behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessage;
+import behavior_msgs.msg.dds.WalkActionDefinitionMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -20,11 +20,11 @@ import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class FootstepPlanActionPlanningThread
+public class WalkActionPlanningThread
 {
    private final boolean isPreviewPlanner;
-   private final FootstepPlanActionState state;
-   private final FootstepPlanActionDefinition definition;
+   private final WalkActionState state;
+   private final WalkActionDefinition definition;
    private long started = 0;
    private long completed = 0;
    private final FootstepPlanningModule footstepPlanner;
@@ -37,7 +37,7 @@ public class FootstepPlanActionPlanningThread
    private final TypedNotification<FootstepPlan> resultNotification = new TypedNotification<>();
    private final TerrainMapData terrainMapData;
 
-   public FootstepPlanActionPlanningThread(boolean isPreviewPlanner, FootstepPlanActionState state, FootstepPlanActionDefinition definition, TerrainMapData terrainMapData)
+   public WalkActionPlanningThread(boolean isPreviewPlanner, WalkActionState state, WalkActionDefinition definition, TerrainMapData terrainMapData)
    {
       this.isPreviewPlanner = isPreviewPlanner;
       this.state = state;
@@ -107,7 +107,7 @@ public class FootstepPlanActionPlanningThread
          footstepPlannerRequest.setRequestedInitialStanceSide(leftStartToGoal < rightStartToGoal ? RobotSide.LEFT : RobotSide.RIGHT);
       }
 
-      footstepPlannerRequest.setPerformAStarSearch(definition.getPlannerType().getValue() == FootstepPlanActionDefinitionMessage.A_STAR);
+      footstepPlannerRequest.setPerformAStarSearch(definition.getPlannerType().getValue() == WalkActionDefinitionMessage.A_STAR);
       footstepPlanner.getFootstepPlannerParameters().set(definition.getPlannerParametersReadOnly());
       boolean planWithBodyPath = definition.getPlannerPlanWithBodyPath().getValue();
       footstepPlannerRequest.setPlanBodyPath(planWithBodyPath);

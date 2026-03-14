@@ -10,7 +10,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 
-public class PelvisHeightOrientationActionExecutor extends ActionNodeExecutor<PelvisHeightOrientationActionState, PelvisHeightOrientationActionDefinition>
+public class PelvisActionExecutor extends ActionNodeExecutor<PelvisActionState, PelvisActionDefinition>
 {
    public static final double POSITION_TOLERANCE = 0.15;
 
@@ -18,9 +18,9 @@ public class PelvisHeightOrientationActionExecutor extends ActionNodeExecutor<Pe
    private final FramePose3D syncedPelvisPose = new FramePose3D();
    private final TrajectoryTrackingErrorCalculator trackingCalculator = new TrajectoryTrackingErrorCalculator();
 
-   public PelvisHeightOrientationActionExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
+   public PelvisActionExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
    {
-      super(new PelvisHeightOrientationActionState(id, rootNode.getState()), rootNode);
+      super(new PelvisActionState(id, rootNode.getState()), rootNode);
    }
 
    @Override

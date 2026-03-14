@@ -10,8 +10,8 @@ import org.apache.commons.lang3.mutable.MutableObject;
 import us.ihmc.avatar.arm.PresetArmConfiguration;
 import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
 import us.ihmc.behaviors.behaviorTree.action.actions.AbilityHandActionState;
-import us.ihmc.behaviors.behaviorTree.action.actions.HandPoseActionDefinition;
-import us.ihmc.behaviors.behaviorTree.action.actions.HandPoseActionState;
+import us.ihmc.behaviors.behaviorTree.action.actions.ArmActionDefinition;
+import us.ihmc.behaviors.behaviorTree.action.actions.ArmActionState;
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.crdt.CRDTBidirectionalRigidBodyTransform;
 import us.ihmc.communication.crdt.CRDTDetachableReferenceFrame;
@@ -53,9 +53,9 @@ import us.ihmc.wholeBodyController.HandTransformTools;
 import java.util.ArrayList;
 import java.util.List;
 
-import static us.ihmc.behaviors.behaviorTree.action.actions.HandPoseActionDefinition.MAX_NUMBER_OF_JOINTS;
+import static us.ihmc.behaviors.behaviorTree.action.actions.ArmActionDefinition.MAX_NUMBER_OF_JOINTS;
 
-public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPoseActionDefinition>
+public class RDXArmAction extends RDXActionNode<ArmActionState, ArmActionDefinition>
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiArmIconWidget armIconWidget = new ImGuiArmIconWidget();
@@ -91,9 +91,9 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
    private final Throttler lowQualityRenderThrottler = new Throttler();
    private final RDX3DPanelTooltip tooltip;
 
-   public RDXHandPoseAction(long id, RDXBehaviorTreeRootNode rootNode)
+   public RDXArmAction(long id, RDXBehaviorTreeRootNode rootNode)
    {
-      super(new HandPoseActionState(id, rootNode.getState()), rootNode);
+      super(new ArmActionState(id, rootNode.getState()), rootNode);
 
       poseGizmo = new RDXSelectablePose3DGizmo();
       poseGizmo.create(panel3D);
@@ -102,7 +102,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
                                                      definition::setTrajectoryDuration,
                                                      imDouble -> ImGui.inputDouble(labels.get("Trajectory duration"), imDouble));
       int configurationIndex = 0;
-      configurations[configurationIndex++] = HandPoseActionDefinition.CUSTOM_ANGLES_NAME;
+      configurations[configurationIndex++] = ArmActionDefinition.CUSTOM_ANGLES_NAME;
       for (PresetArmConfiguration preset : PresetArmConfiguration.values())
       {
          configurations[configurationIndex++] = preset.name();
@@ -560,7 +560,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
    @Override
    public String getLeafTypeTitle()
    {
-      return definition.getSide().getPascalCaseName() + " Hand Pose";
+      return definition.getSide().getPascalCaseName() + " Arm";
    }
 
    public ReferenceFrame getReferenceFrame()

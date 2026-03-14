@@ -5,7 +5,7 @@ import imgui.extension.implot.flag.ImPlotFlags;
 import imgui.flag.ImGuiCond;
 import imgui.ImGui;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
-import us.ihmc.behaviors.behaviorTree.action.actions.FootstepPlanActionState;
+import us.ihmc.behaviors.behaviorTree.action.actions.WalkActionState;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.crdt.CRDTStatusVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -334,7 +334,7 @@ public class RDXActionProgressWidgets
    public void renderHandForce(float dividedBarWidth, boolean renderAsPlots, boolean timeOnly)
    {
       CRDTStatusVector3D forceCRDT = null;
-      if (action instanceof RDXHandPoseAction handPoseAction)
+      if (action instanceof RDXArmAction handPoseAction)
          forceCRDT = handPoseAction.getState().getForce();
       else if (action instanceof RDXScrewPrimitiveAction screwPrimitiveAction)
          forceCRDT = screwPrimitiveAction.getState().getForce();
@@ -371,7 +371,7 @@ public class RDXActionProgressWidgets
    public void renderHandTorque(float dividedBarWidth, boolean renderAsPlots, boolean timeOnly)
    {
       CRDTStatusVector3D torqueCRDT = null;
-      if (action instanceof RDXHandPoseAction handPoseAction)
+      if (action instanceof RDXArmAction handPoseAction)
          torqueCRDT = handPoseAction.getState().getTorque();
       else if (action instanceof RDXScrewPrimitiveAction screwPrimitiveAction)
          torqueCRDT = screwPrimitiveAction.getState().getTorque();
@@ -407,9 +407,9 @@ public class RDXActionProgressWidgets
 
    public void renderFootstepCompletion(float dividedBarWidth, boolean renderAsPlots, boolean timeOnly)
    {
-      if (action instanceof RDXFootstepPlanAction footstepPlanAction && footstepPlanAction.getState().getTotalNumberOfFootsteps() > 0)
+      if (action instanceof RDXWalkAction footstepPlanAction && footstepPlanAction.getState().getTotalNumberOfFootsteps() > 0)
       {
-         FootstepPlanActionState footstepPlanActionState = footstepPlanAction.getState();
+         WalkActionState footstepPlanActionState = footstepPlanAction.getState();
          double percentLeft = footstepPlanActionState.getNumberOfIncompleteFootsteps() / (double) footstepPlanActionState.getTotalNumberOfFootsteps();
          String overlay = "%d / %d".formatted(footstepPlanActionState.getNumberOfIncompleteFootsteps(), footstepPlanActionState.getTotalNumberOfFootsteps());
 
@@ -443,10 +443,10 @@ public class RDXActionProgressWidgets
 
       for (RobotSide side : RobotSide.values)
       {
-         if (action instanceof RDXFootstepPlanAction footstepPlanAction
+         if (action instanceof RDXWalkAction footstepPlanAction
              && !footstepPlanAction.getState().getDesiredFootPoses().get(side).isEmpty())
          {
-            FootstepPlanActionState footstepPlanActionState = footstepPlanAction.getState();
+            WalkActionState footstepPlanActionState = footstepPlanAction.getState();
             int i = 0;
             SE3TrajectoryPointReadOnly nextDesiredPoint = footstepPlanActionState.getDesiredFootPoses().get(side).getValueReadOnly(i++);
             while (i < footstepPlanActionState.getDesiredFootPoses().get(side).getSize()
@@ -511,10 +511,10 @@ public class RDXActionProgressWidgets
 
       for (RobotSide side : RobotSide.values)
       {
-         if (action instanceof RDXFootstepPlanAction footstepPlanAction
+         if (action instanceof RDXWalkAction footstepPlanAction
              && !footstepPlanAction.getState().getDesiredFootPoses().get(side).isEmpty())
          {
-            FootstepPlanActionState footstepPlanActionState = footstepPlanAction.getState();
+            WalkActionState footstepPlanActionState = footstepPlanAction.getState();
             int i = 0;
             SE3TrajectoryPointReadOnly nextDesiredPoint = footstepPlanActionState.getDesiredFootPoses().get(side).getValueReadOnly(i++);
             while (i < footstepPlanActionState.getDesiredFootPoses().get(side).getSize()

@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
-import behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessage;
-import behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessage;
+import behavior_msgs.msg.dds.WalkActionDefinitionMessage;
+import behavior_msgs.msg.dds.WalkActionFootstepDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.BooleanNode;
@@ -25,9 +25,9 @@ import us.ihmc.tools.io.JSONTools;
 
 import java.util.ArrayList;
 
-import static behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessage.*;
+import static behavior_msgs.msg.dds.WalkActionDefinitionMessage.*;
 
-public class FootstepPlanActionDefinition extends ActionNodeDefinition
+public class WalkActionDefinition extends ActionNodeDefinition
 {
    private final CRDTBidirectionalDouble swingDuration;
    private final CRDTBidirectionalDouble transferDuration;
@@ -35,7 +35,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
    private final CRDTBidirectionalString parentFrameName;
    private final CRDTBidirectionalBoolean isManuallyPlaced;
    private final CRDTBidirectionalRecyclingArrayList<Pose3D> waypoints;
-   private final CRDTBidirectionalRecyclingArrayList<FootstepPlanActionFootstepDefinition> manuallyPlacedFootsteps;
+   private final CRDTBidirectionalRecyclingArrayList<WalkActionFootstepDefinition> manuallyPlacedFootsteps;
    private final CRDTBidirectionalPoint3D goalStancePoint;
    private final CRDTBidirectionalPoint3D goalFocalPoint;
    private final SideDependentList<CRDTBidirectionalDouble> goalFootstepToGoalXs;
@@ -87,7 +87,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
    private double onDiskQuickMinSwingTime;
    private double onDiskQuickMaxSwingTime;
 
-   public FootstepPlanActionDefinition(BehaviorTreeRootNodeDefinition rootNode)
+   public WalkActionDefinition(BehaviorTreeRootNodeDefinition rootNode)
    {
       super(rootNode);
 
@@ -97,7 +97,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       parentFrameName = new CRDTBidirectionalString(this, "Walking");
       isManuallyPlaced = new CRDTBidirectionalBoolean(this, false);
       waypoints = new CRDTBidirectionalRecyclingArrayList<>(this, new RecyclingArrayList<>(Pose3D::new));
-      manuallyPlacedFootsteps = new CRDTBidirectionalRecyclingArrayList<>(this, new RecyclingArrayList<>(() -> new FootstepPlanActionFootstepDefinition(this)));
+      manuallyPlacedFootsteps = new CRDTBidirectionalRecyclingArrayList<>(this, new RecyclingArrayList<>(() -> new WalkActionFootstepDefinition(this)));
       goalStancePoint = new CRDTBidirectionalPoint3D(this);
       goalFocalPoint = new CRDTBidirectionalPoint3D(this);
       goalFootstepToGoalXs = new SideDependentList<>(() -> new CRDTBidirectionalDouble(this, 0.0));
@@ -426,7 +426,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       return !unchanged;
    }
 
-   public void toMessage(FootstepPlanActionDefinitionMessage message)
+   public void toMessage(WalkActionDefinitionMessage message)
    {
       super.toMessage(message.getDefinition());
 
@@ -468,7 +468,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       message.setQuickMaxSwingTime(quickMaxSwingTime.toMessage());
    }
 
-   public void fromMessage(FootstepPlanActionDefinitionMessage message)
+   public void fromMessage(WalkActionDefinitionMessage message)
    {
       super.fromMessage(message.getDefinition());
 
@@ -487,7 +487,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       manuallyPlacedFootsteps.fromMessage(writableList ->
       {
          writableList.clear();
-         for (FootstepPlanActionFootstepDefinitionMessage footstepMessage : message.getFootsteps())
+         for (WalkActionFootstepDefinitionMessage footstepMessage : message.getFootsteps())
             writableList.add().fromMessage(footstepMessage);
       });
       goalStancePoint.fromMessage(message.getGoalStancePoint());
@@ -566,7 +566,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       return parentFrameName;
    }
 
-   public CRDTBidirectionalRecyclingArrayList<FootstepPlanActionFootstepDefinition> getManuallyPlacedFootsteps()
+   public CRDTBidirectionalRecyclingArrayList<WalkActionFootstepDefinition> getManuallyPlacedFootsteps()
    {
       return manuallyPlacedFootsteps;
    }

@@ -4,8 +4,8 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.behaviors.behaviorTree.action.actions.FootstepPlanActionFootstepDefinition;
-import us.ihmc.behaviors.behaviorTree.action.actions.FootstepPlanActionFootstepState;
+import us.ihmc.behaviors.behaviorTree.action.actions.WalkActionFootstepDefinition;
+import us.ihmc.behaviors.behaviorTree.action.actions.WalkActionFootstepState;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableFootstep;
@@ -16,21 +16,21 @@ import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 /**
  * This class is a fully mutable and transitive interactable representation of FootstepActionDefinition.
  */
-public class RDXFootstepPlanActionFootstep
+public class RDXWalkActionFootstep
 {
-   private final RDXFootstepPlanAction footstepPlan;
+   private final RDXWalkAction footstepPlan;
    private final RDXBaseUI baseUI;
    private final DRCRobotModel robotModel;
-   private final FootstepPlanActionFootstepState state;
-   private final FootstepPlanActionFootstepDefinition definition;
+   private final WalkActionFootstepState state;
+   private final WalkActionFootstepDefinition definition;
    private RDXInteractableFootstep interactableFootstep;
    private RDXPose3DGizmo gizmo;
    private RDXFootstepGraphic flatFootstepGraphic;
 
-   public RDXFootstepPlanActionFootstep(RDXBaseUI baseUI,
+   public RDXWalkActionFootstep(RDXBaseUI baseUI,
                                         DRCRobotModel robotModel,
-                                        RDXFootstepPlanAction footstepPlan,
-                                        FootstepPlanActionFootstepState state)
+                                        RDXWalkAction footstepPlan,
+                                        WalkActionFootstepState state)
    {
       this.footstepPlan = footstepPlan;
       this.baseUI = baseUI;
@@ -109,12 +109,12 @@ public class RDXFootstepPlanActionFootstep
       return interactableFootstep;
    }
 
-   public FootstepPlanActionFootstepDefinition getDefinition()
+   public WalkActionFootstepDefinition getDefinition()
    {
       return definition;
    }
 
-   public FootstepPlanActionFootstepState getState()
+   public WalkActionFootstepState getState()
    {
       return state;
    }

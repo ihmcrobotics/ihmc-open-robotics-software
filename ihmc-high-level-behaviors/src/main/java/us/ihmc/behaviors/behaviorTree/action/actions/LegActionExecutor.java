@@ -10,15 +10,15 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 
-public class FootPoseActionExecutor extends ActionNodeExecutor<FootPoseActionState, FootPoseActionDefinition>
+public class LegActionExecutor extends ActionNodeExecutor<LegActionState, LegActionDefinition>
 {
    private final FramePose3D desiredFootPose = new FramePose3D();
    private final FramePose3D syncedFootPose = new FramePose3D();
    private final TrajectoryTrackingErrorCalculator trackingCalculator = new TrajectoryTrackingErrorCalculator();
 
-   public FootPoseActionExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
+   public LegActionExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
    {
-      super(new FootPoseActionState(id, rootNode.getState()), rootNode);
+      super(new LegActionState(id, rootNode.getState()), rootNode);
    }
 
    @Override

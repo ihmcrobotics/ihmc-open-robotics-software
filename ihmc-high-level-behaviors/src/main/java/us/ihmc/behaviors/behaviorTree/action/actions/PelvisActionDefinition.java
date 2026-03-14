@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
-import behavior_msgs.msg.dds.PelvisHeightOrientationActionDefinitionMessage;
+import behavior_msgs.msg.dds.PelvisActionDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
@@ -14,7 +14,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.tools.io.JSONTools;
 
-public class PelvisHeightOrientationActionDefinition extends ActionNodeDefinition
+public class PelvisActionDefinition extends ActionNodeDefinition
 {
    private final CRDTBidirectionalDouble trajectoryDuration;
    private final CRDTBidirectionalString parentFrameName;
@@ -25,7 +25,7 @@ public class PelvisHeightOrientationActionDefinition extends ActionNodeDefinitio
    private String onDiskParentFrameName;
    private final RigidBodyTransform onDiskPelvisToParentTransform = new RigidBodyTransform();
 
-   public PelvisHeightOrientationActionDefinition(BehaviorTreeRootNodeDefinition rootNode)
+   public PelvisActionDefinition(BehaviorTreeRootNodeDefinition rootNode)
    {
       super(rootNode);
 
@@ -89,7 +89,7 @@ public class PelvisHeightOrientationActionDefinition extends ActionNodeDefinitio
       return !unchanged;
    }
 
-   public void toMessage(PelvisHeightOrientationActionDefinitionMessage message)
+   public void toMessage(PelvisActionDefinitionMessage message)
    {
       super.toMessage(message.getDefinition());
 
@@ -98,7 +98,7 @@ public class PelvisHeightOrientationActionDefinition extends ActionNodeDefinitio
       pelvisToParentTransform.toMessage(message.getPelvisTransformToParent());
    }
 
-   public void fromMessage(PelvisHeightOrientationActionDefinitionMessage message)
+   public void fromMessage(PelvisActionDefinitionMessage message)
    {
       super.fromMessage(message.getDefinition());
 

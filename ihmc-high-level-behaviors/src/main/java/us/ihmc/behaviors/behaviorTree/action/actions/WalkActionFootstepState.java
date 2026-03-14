@@ -1,20 +1,20 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
-import behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessage;
+import behavior_msgs.msg.dds.WalkActionFootstepStateMessage;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneState;
 import us.ihmc.communication.crdt.CRDTDetachableReferenceFrame;
 import us.ihmc.communication.crdt.CRDTBidirectionalString;
 
-public class FootstepPlanActionFootstepState
+public class WalkActionFootstepState
 {
-   private final FootstepPlanActionFootstepDefinition definition;
+   private final WalkActionFootstepDefinition definition;
    private final CRDTDetachableReferenceFrame soleFrame;
    /** The index is not CRDT synced because it's a simple local calculation. */
    private int index = -1;
 
-   public FootstepPlanActionFootstepState(BehaviorTreeSceneState scene,
+   public WalkActionFootstepState(BehaviorTreeSceneState scene,
                                           CRDTBidirectionalString parentFrameName,
-                                          FootstepPlanActionFootstepDefinition definition)
+                                          WalkActionFootstepDefinition definition)
    {
       this.definition = definition;
 
@@ -26,17 +26,17 @@ public class FootstepPlanActionFootstepState
       soleFrame.update();
    }
 
-   public void toMessage(FootstepPlanActionFootstepStateMessage message)
+   public void toMessage(WalkActionFootstepStateMessage message)
    {
 
    }
 
-   public void fromMessage(FootstepPlanActionFootstepStateMessage message)
+   public void fromMessage(WalkActionFootstepStateMessage message)
    {
 
    }
 
-   public FootstepPlanActionFootstepDefinition getDefinition()
+   public WalkActionFootstepDefinition getDefinition()
    {
       return definition;
    }

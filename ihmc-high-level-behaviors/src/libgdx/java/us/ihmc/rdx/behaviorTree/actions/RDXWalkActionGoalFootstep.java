@@ -4,8 +4,8 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.behaviors.behaviorTree.action.actions.FootstepPlanActionDefinition;
-import us.ihmc.behaviors.behaviorTree.action.actions.FootstepPlanActionState;
+import us.ihmc.behaviors.behaviorTree.action.actions.WalkActionDefinition;
+import us.ihmc.behaviors.behaviorTree.action.actions.WalkActionState;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -14,19 +14,19 @@ import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 /** UI for the behavior footstep plan action's modifiable goal footstep, used by the footstep planner. */
-public class RDXFootstepPlanActionGoalFootstep
+public class RDXWalkActionGoalFootstep
 {
    private final RobotSide side;
-   private final FootstepPlanActionDefinition definition;
-   private final FootstepPlanActionState state;
+   private final WalkActionDefinition definition;
+   private final WalkActionState state;
 
    private final RDXSelectablePose3DGizmo gizmo;
    private final RDXFootstepGraphic graphic;
 
-   public RDXFootstepPlanActionGoalFootstep(RDXBaseUI baseUI,
+   public RDXWalkActionGoalFootstep(RDXBaseUI baseUI,
                                             RobotSide side,
-                                            FootstepPlanActionDefinition definition,
-                                            FootstepPlanActionState state,
+                                            WalkActionDefinition definition,
+                                            WalkActionState state,
                                             DRCRobotModel robotModel)
    {
       this.side = side;

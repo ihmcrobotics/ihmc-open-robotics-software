@@ -43,16 +43,16 @@ public class ROS2BehaviorTreeMessageTools
       treeStateMessage.getDoorTraversals().clear();
       treeStateMessage.getBuildingExplorations().clear();
       treeStateMessage.getNeckActions().clear();
-      treeStateMessage.getChestOrientationActions().clear();
-      treeStateMessage.getFootstepPlanActions().clear();
-      treeStateMessage.getHandPoseActions().clear();
+      treeStateMessage.getSpineActions().clear();
+      treeStateMessage.getWalkActions().clear();
+      treeStateMessage.getArmActions().clear();
       treeStateMessage.getHandWrenchActions().clear();
       treeStateMessage.getScrewPrimitiveActions().clear();
-      treeStateMessage.getPelvisHeightActions().clear();
+      treeStateMessage.getPelvisActions().clear();
       treeStateMessage.getAbilityHandActions().clear();
       treeStateMessage.getSakeHandCommandActions().clear();
       treeStateMessage.getWaitDurationActions().clear();
-      treeStateMessage.getFootPoseActions().clear();
+      treeStateMessage.getLegActions().clear();
    }
 
    public static void packMessage(CRDTInfo crdtInfo, BehaviorTreeNodeState<?> nodeState, BehaviorTreeStateMessage treeStateMessage)
@@ -135,17 +135,17 @@ public class ROS2BehaviorTreeMessageTools
             treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getNeckActions().size());
             neckActionState.toMessage(treeStateMessage.getNeckActions().add());
          }
-         else if (nodeState instanceof ChestOrientationActionState chestOrientationActionState)
+         else if (nodeState instanceof SpineActionState chestOrientationActionState)
          {
-            treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.CHEST_ORIENTATION_ACTION);
-            treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getChestOrientationActions().size());
-            chestOrientationActionState.toMessage(treeStateMessage.getChestOrientationActions().add());
+            treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.SPINE_ACTION);
+            treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getSpineActions().size());
+            chestOrientationActionState.toMessage(treeStateMessage.getSpineActions().add());
          }
-         else if (nodeState instanceof FootstepPlanActionState footstepPlanActionState)
+         else if (nodeState instanceof WalkActionState footstepPlanActionState)
          {
-            treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.FOOTSTEP_PLAN_ACTION);
-            treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getFootstepPlanActions().size());
-            footstepPlanActionState.toMessage(treeStateMessage.getFootstepPlanActions().add());
+            treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.WALK_ACTION);
+            treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getWalkActions().size());
+            footstepPlanActionState.toMessage(treeStateMessage.getWalkActions().add());
          }
          else if (nodeState instanceof AbilityHandActionState abilityHandActionState)
          {
@@ -159,11 +159,11 @@ public class ROS2BehaviorTreeMessageTools
             treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getSakeHandCommandActions().size());
             sakeHandCommandActionState.toMessage(treeStateMessage.getSakeHandCommandActions().add());
          }
-         else if (nodeState instanceof HandPoseActionState handPoseActionState)
+         else if (nodeState instanceof ArmActionState handPoseActionState)
          {
-            treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.HAND_POSE_ACTION);
-            treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getHandPoseActions().size());
-            handPoseActionState.toMessage(treeStateMessage.getHandPoseActions().add());
+            treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.ARM_ACTION);
+            treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getArmActions().size());
+            handPoseActionState.toMessage(treeStateMessage.getArmActions().add());
          }
          else if (nodeState instanceof HandWrenchActionState handWrenchActionState)
          {
@@ -177,11 +177,11 @@ public class ROS2BehaviorTreeMessageTools
             treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getScrewPrimitiveActions().size());
             screwPrimitiveActionState.toMessage(treeStateMessage.getScrewPrimitiveActions().add());
          }
-         else if (nodeState instanceof PelvisHeightOrientationActionState pelvisHeightActionState)
+         else if (nodeState instanceof PelvisActionState pelvisHeightActionState)
          {
-            treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.PELVIS_HEIGHT_ORIENTATION_ACTION);
-            treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getPelvisHeightActions().size());
-            pelvisHeightActionState.toMessage(treeStateMessage.getPelvisHeightActions().add());
+            treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.PELVIS_ACTION);
+            treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getPelvisActions().size());
+            pelvisHeightActionState.toMessage(treeStateMessage.getPelvisActions().add());
          }
          else if (nodeState instanceof WaitDurationActionState waitDurationActionState)
          {
@@ -189,11 +189,11 @@ public class ROS2BehaviorTreeMessageTools
             treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getWaitDurationActions().size());
             waitDurationActionState.toMessage(treeStateMessage.getWaitDurationActions().add());
          }
-         else if (nodeState instanceof FootPoseActionState footPoseActionState)
+         else if (nodeState instanceof LegActionState footPoseActionState)
          {
-            treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.FOOT_POSE_ACTION);
-            treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getFootPoseActions().size());
-            footPoseActionState.toMessage(treeStateMessage.getFootPoseActions().add());
+            treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.LEG_ACTION);
+            treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getLegActions().size());
+            footPoseActionState.toMessage(treeStateMessage.getLegActions().add());
          }
          else
          {
@@ -260,13 +260,13 @@ public class ROS2BehaviorTreeMessageTools
       {
          neckActionState.fromMessage(subscriptionNode.getNeckActionStateMessage());
       }
-      else if (nodeState instanceof ChestOrientationActionState chestOrientationActionState)
+      else if (nodeState instanceof SpineActionState chestOrientationActionState)
       {
-         chestOrientationActionState.fromMessage(subscriptionNode.getChestOrientationActionStateMessage());
+         chestOrientationActionState.fromMessage(subscriptionNode.getSpineActionStateMessage());
       }
-      else if (nodeState instanceof FootstepPlanActionState footstepPlanActionState)
+      else if (nodeState instanceof WalkActionState footstepPlanActionState)
       {
-         footstepPlanActionState.fromMessage(subscriptionNode.getFootstepPlanActionStateMessage());
+         footstepPlanActionState.fromMessage(subscriptionNode.getWalkActionStateMessage());
       }
       else if (nodeState instanceof AbilityHandActionState abilityHandActionState)
       {
@@ -276,9 +276,9 @@ public class ROS2BehaviorTreeMessageTools
       {
          sakeHandCommandActionState.fromMessage(subscriptionNode.getSakeHandCommandActionStateMessage());
       }
-      else if (nodeState instanceof HandPoseActionState handPoseActionState)
+      else if (nodeState instanceof ArmActionState handPoseActionState)
       {
-         handPoseActionState.fromMessage(subscriptionNode.getHandPoseActionStateMessage());
+         handPoseActionState.fromMessage(subscriptionNode.getArmActionStateMessage());
       }
       else if (nodeState instanceof HandWrenchActionState handWrenchActionState)
       {
@@ -288,17 +288,17 @@ public class ROS2BehaviorTreeMessageTools
       {
          screwPrimitiveActionState.fromMessage(subscriptionNode.getScrewPrimitiveActionStateMessage());
       }
-      else if (nodeState instanceof PelvisHeightOrientationActionState pelvisHeightActionState)
+      else if (nodeState instanceof PelvisActionState pelvisHeightActionState)
       {
-         pelvisHeightActionState.fromMessage(subscriptionNode.getPelvisHeightOrientationActionStateMessage());
+         pelvisHeightActionState.fromMessage(subscriptionNode.getPelvisActionStateMessage());
       }
       else if (nodeState instanceof WaitDurationActionState waitDurationActionState)
       {
          waitDurationActionState.fromMessage(subscriptionNode.getWaitDurationActionStateMessage());
       }
-      else if (nodeState instanceof FootPoseActionState footPoseActionState)
+      else if (nodeState instanceof LegActionState footPoseActionState)
       {
-         footPoseActionState.fromMessage(subscriptionNode.getFootPoseActionStateMessage());
+         footPoseActionState.fromMessage(subscriptionNode.getLegActionStateMessage());
       }
       else // Basic node
       {
@@ -410,28 +410,28 @@ public class ROS2BehaviorTreeMessageTools
             subscriptionNode.setBehaviorTreeNodeStateMessage(neckActionStateMessage.getState().getState().getState());
             subscriptionNode.setBehaviorTreeNodeDefinitionMessage(neckActionStateMessage.getDefinition().getDefinition().getDefinition().getDefinition());
          }
-         case BehaviorTreeStateMessage.CHEST_ORIENTATION_ACTION ->
+         case BehaviorTreeStateMessage.SPINE_ACTION ->
          {
-            ChestOrientationActionStateMessage chestOrientationActionStateMessage = treeStateMessage.getChestOrientationActions().get(indexInTypesList);
-            subscriptionNode.setChestOrientationActionStateMessage(chestOrientationActionStateMessage);
+            SpineActionStateMessage chestOrientationActionStateMessage = treeStateMessage.getSpineActions().get(indexInTypesList);
+            subscriptionNode.setSpineActionStateMessage(chestOrientationActionStateMessage);
             subscriptionNode.setActionNodeStateMessage(chestOrientationActionStateMessage.getState());
             subscriptionNode.setLeafNodeStateMessage(chestOrientationActionStateMessage.getState().getState());
             subscriptionNode.setBehaviorTreeNodeStateMessage(chestOrientationActionStateMessage.getState().getState().getState());
             subscriptionNode.setBehaviorTreeNodeDefinitionMessage(chestOrientationActionStateMessage.getDefinition().getDefinition().getDefinition().getDefinition());
          }
-         case BehaviorTreeStateMessage.FOOTSTEP_PLAN_ACTION ->
+         case BehaviorTreeStateMessage.WALK_ACTION ->
          {
-            FootstepPlanActionStateMessage footstepPlanActionStateMessage = treeStateMessage.getFootstepPlanActions().get(indexInTypesList);
-            subscriptionNode.setFootstepPlanActionStateMessage(footstepPlanActionStateMessage);
+            WalkActionStateMessage footstepPlanActionStateMessage = treeStateMessage.getWalkActions().get(indexInTypesList);
+            subscriptionNode.setWalkActionStateMessage(footstepPlanActionStateMessage);
             subscriptionNode.setActionNodeStateMessage(footstepPlanActionStateMessage.getState());
             subscriptionNode.setLeafNodeStateMessage(footstepPlanActionStateMessage.getState().getState());
             subscriptionNode.setBehaviorTreeNodeStateMessage(footstepPlanActionStateMessage.getState().getState().getState());
             subscriptionNode.setBehaviorTreeNodeDefinitionMessage(footstepPlanActionStateMessage.getDefinition().getDefinition().getDefinition().getDefinition());
          }
-         case BehaviorTreeStateMessage.HAND_POSE_ACTION ->
+         case BehaviorTreeStateMessage.ARM_ACTION ->
          {
-            HandPoseActionStateMessage handPoseActionStateMessage = treeStateMessage.getHandPoseActions().get(indexInTypesList);
-            subscriptionNode.setHandPoseActionStateMessage(handPoseActionStateMessage);
+            ArmActionStateMessage handPoseActionStateMessage = treeStateMessage.getArmActions().get(indexInTypesList);
+            subscriptionNode.setArmActionStateMessage(handPoseActionStateMessage);
             subscriptionNode.setActionNodeStateMessage(handPoseActionStateMessage.getState());
             subscriptionNode.setLeafNodeStateMessage(handPoseActionStateMessage.getState().getState());
             subscriptionNode.setBehaviorTreeNodeStateMessage(handPoseActionStateMessage.getState().getState().getState());
@@ -455,10 +455,10 @@ public class ROS2BehaviorTreeMessageTools
             subscriptionNode.setBehaviorTreeNodeStateMessage(screwPrimitiveActionStateMessage.getState().getState().getState());
             subscriptionNode.setBehaviorTreeNodeDefinitionMessage(screwPrimitiveActionStateMessage.getDefinition().getDefinition().getDefinition().getDefinition());
          }
-         case BehaviorTreeStateMessage.PELVIS_HEIGHT_ORIENTATION_ACTION ->
+         case BehaviorTreeStateMessage.PELVIS_ACTION ->
          {
-            PelvisHeightOrientationActionStateMessage pelvisHeightOrientationActionStateMessage = treeStateMessage.getPelvisHeightActions().get(indexInTypesList);
-            subscriptionNode.setPelvisHeightOrientationActionStateMessage(pelvisHeightOrientationActionStateMessage);
+            PelvisActionStateMessage pelvisHeightOrientationActionStateMessage = treeStateMessage.getPelvisActions().get(indexInTypesList);
+            subscriptionNode.setPelvisActionStateMessage(pelvisHeightOrientationActionStateMessage);
             subscriptionNode.setActionNodeStateMessage(pelvisHeightOrientationActionStateMessage.getState());
             subscriptionNode.setLeafNodeStateMessage(pelvisHeightOrientationActionStateMessage.getState().getState());
             subscriptionNode.setBehaviorTreeNodeStateMessage(pelvisHeightOrientationActionStateMessage.getState().getState().getState());
@@ -491,10 +491,10 @@ public class ROS2BehaviorTreeMessageTools
             subscriptionNode.setBehaviorTreeNodeStateMessage(waitDurationActionStateMessage.getState().getState().getState());
             subscriptionNode.setBehaviorTreeNodeDefinitionMessage(waitDurationActionStateMessage.getDefinition().getDefinition().getDefinition().getDefinition());
          }
-         case BehaviorTreeStateMessage.FOOT_POSE_ACTION ->
+         case BehaviorTreeStateMessage.LEG_ACTION ->
          {
-            FootPoseActionStateMessage footPoseActionStateMessage = treeStateMessage.getFootPoseActions().get(indexInTypesList);
-            subscriptionNode.setFootPoseActionStateMessage(footPoseActionStateMessage);
+            LegActionStateMessage footPoseActionStateMessage = treeStateMessage.getLegActions().get(indexInTypesList);
+            subscriptionNode.setLegActionStateMessage(footPoseActionStateMessage);
             subscriptionNode.setActionNodeStateMessage(footPoseActionStateMessage.getState());
             subscriptionNode.setLeafNodeStateMessage(footPoseActionStateMessage.getState().getState());
             subscriptionNode.setBehaviorTreeNodeStateMessage(footPoseActionStateMessage.getState().getState().getState());
@@ -544,13 +544,13 @@ public class ROS2BehaviorTreeMessageTools
             }
          }
 
-         SideDependentList<HandPoseActionExecutor> lastHandPoseActions = new SideDependentList<>();
+         SideDependentList<ArmActionExecutor> lastArmActions = new SideDependentList<>();
          for (LeafNodeExecutor<?, ?> leaf : rootNode.getCurrentlyExecutingLeaves())
-            if (leaf instanceof HandPoseActionExecutor handPoseAction)
-               lastHandPoseActions.put(handPoseAction.getDefinition().getSide(), handPoseAction);
-         for (RobotSide side : lastHandPoseActions.sides())
+            if (leaf instanceof ArmActionExecutor handPoseAction)
+               lastArmActions.put(handPoseAction.getDefinition().getSide(), handPoseAction);
+         for (RobotSide side : lastArmActions.sides())
          {
-            HandPoseActionExecutor action = lastHandPoseActions.get(side);
+            ArmActionExecutor action = lastArmActions.get(side);
             yoDataMessage.getCurrentHandPose()[side.ordinal()].set(action.getState().getCurrentPose().getValueReadOnly());
             CRDTStatusSE3Trajectory commandedTrajectory = action.getState().getCommandedTrajectory();
             if (!commandedTrajectory.isEmpty())

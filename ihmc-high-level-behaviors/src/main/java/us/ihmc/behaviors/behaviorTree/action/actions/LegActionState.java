@@ -1,17 +1,17 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
-import behavior_msgs.msg.dds.FootPoseActionStateMessage;
+import behavior_msgs.msg.dds.LegActionStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
 import us.ihmc.communication.crdt.CRDTDetachableReferenceFrame;
 
-public class FootPoseActionState extends ActionNodeState<FootPoseActionDefinition>
+public class LegActionState extends ActionNodeState<LegActionDefinition>
 {
    private final CRDTDetachableReferenceFrame footFrame;
 
-   public FootPoseActionState(long id, BehaviorTreeRootNodeState rootNode)
+   public LegActionState(long id, BehaviorTreeRootNodeState rootNode)
    {
-      super(id, new FootPoseActionDefinition(rootNode.getDefinition()), rootNode);
+      super(id, new LegActionDefinition(rootNode.getDefinition()), rootNode);
 
       footFrame = new CRDTDetachableReferenceFrame(scene::findFrameByName,
                                                    definition.getCRDTParentFrameName(),
@@ -24,14 +24,14 @@ public class FootPoseActionState extends ActionNodeState<FootPoseActionDefinitio
       footFrame.update();
    }
 
-   public void toMessage(FootPoseActionStateMessage message)
+   public void toMessage(LegActionStateMessage message)
    {
       definition.toMessage(message.getDefinition());
 
       super.toMessage(message.getState());
    }
 
-   public void fromMessage(FootPoseActionStateMessage message)
+   public void fromMessage(LegActionStateMessage message)
    {
       definition.fromMessage(message.getDefinition());
 

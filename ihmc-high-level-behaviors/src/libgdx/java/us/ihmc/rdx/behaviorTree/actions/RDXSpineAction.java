@@ -5,8 +5,8 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
-import us.ihmc.behaviors.behaviorTree.action.actions.ChestOrientationActionDefinition;
-import us.ihmc.behaviors.behaviorTree.action.actions.ChestOrientationActionState;
+import us.ihmc.behaviors.behaviorTree.action.actions.SpineActionDefinition;
+import us.ihmc.behaviors.behaviorTree.action.actions.SpineActionState;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -35,7 +35,7 @@ import us.ihmc.scs2.simulation.collision.Collidable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationActionState, ChestOrientationActionDefinition>
+public class RDXSpineAction extends RDXActionNode<SpineActionState, SpineActionDefinition>
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBooleanWrapper holdPoseInWorldLaterWrapper;
@@ -59,9 +59,9 @@ public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationAct
    private final RDXInteractableHighlightModel highlightModel;
    private final RDX3DPanelTooltip tooltip;
 
-   public RDXChestOrientationAction(long id, RDXBehaviorTreeRootNode rootNode)
+   public RDXSpineAction(long id, RDXBehaviorTreeRootNode rootNode)
    {
-      super(new ChestOrientationActionState(id, rootNode.getState()), rootNode);
+      super(new SpineActionState(id, rootNode.getState()), rootNode);
 
       poseGizmo = new RDXSelectablePose3DGizmo();
       poseGizmo.create(panel3D);
@@ -256,6 +256,6 @@ public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationAct
    @Override
    public String getLeafTypeTitle()
    {
-      return "Chest Orientation";
+      return "Spine";
    }
 }

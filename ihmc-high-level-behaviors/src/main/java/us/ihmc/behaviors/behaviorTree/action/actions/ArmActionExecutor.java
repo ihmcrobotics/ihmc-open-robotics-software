@@ -22,7 +22,7 @@ import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionState, HandPoseActionDefinition>
+public class ArmActionExecutor extends ActionNodeExecutor<ArmActionState, ArmActionDefinition>
 {
    private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
    private final FramePose3D desiredHandControlPose = new FramePose3D();
@@ -34,9 +34,9 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
    private final double[] desiredJointAngles;
    private final ArmJointName[] armJointNames;
 
-   public HandPoseActionExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
+   public ArmActionExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
    {
-      super(new HandPoseActionState(id, rootNode.getState()), rootNode);
+      super(new ArmActionState(id, rootNode.getState()), rootNode);
 
       desiredJointAngles = new double[state.getNumberOfJoints()];
       armJointNames = robotModel.getJointMap().getArmJointNames(definition.getSide());
@@ -59,35 +59,35 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
 
       if (state.getIsNextForExecution())
       {
-         ChestOrientationActionState concurrentChestOrientationAction = null;
-         PelvisHeightOrientationActionState concurrentPelvisHeightPitchAction = null;
+         SpineActionState concurrentSpineAction = null;
+         PelvisActionState concurrentPelvisHeightPitchAction = null;
 
          for (int i = state.getExecuteAfterLeafIndex() + 1; i < state.getLeafIndex(); i++)
          {
-            if (rootNode.getState().getOrderedLeaves().get(i) instanceof ChestOrientationActionState chestOrientationAction)
-               concurrentChestOrientationAction = chestOrientationAction;
-            if (rootNode.getState().getOrderedLeaves().get(i) instanceof PelvisHeightOrientationActionState pelvisHeightPitchAction)
+            if (rootNode.getState().getOrderedLeaves().get(i) instanceof SpineActionState chestOrientationAction)
+               concurrentSpineAction = chestOrientationAction;
+            if (rootNode.getState().getOrderedLeaves().get(i) instanceof PelvisActionState pelvisHeightPitchAction)
                concurrentPelvisHeightPitchAction = pelvisHeightPitchAction;
          }
 
          for (LeafNodeExecutor<?, ?> currentlyExecutingLeaf : rootNode.getCurrentlyExecutingLeaves())
          {
-            if (currentlyExecutingLeaf.getState() instanceof ChestOrientationActionState chestOrientationAction)
-               concurrentChestOrientationAction = chestOrientationAction;
-            if (currentlyExecutingLeaf.getState() instanceof PelvisHeightOrientationActionState pelvisHeightPitchAction)
+            if (currentlyExecutingLeaf.getState() instanceof SpineActionState chestOrientationAction)
+               concurrentSpineAction = chestOrientationAction;
+            if (currentlyExecutingLeaf.getState() instanceof PelvisActionState pelvisHeightPitchAction)
                concurrentPelvisHeightPitchAction = pelvisHeightPitchAction;
          }
 
-         if (concurrentChestOrientationAction == null && concurrentPelvisHeightPitchAction == null)
+         if (concurrentSpineAction == null && concurrentPelvisHeightPitchAction == null)
          {
             state.getGoalChestToWorldTransform().accessValue().set(syncedRobot.getReferenceFrames().getChestFrame().getTransformToRoot());
          }
          else if (concurrentPelvisHeightPitchAction == null)
          {
-            concurrentChestOrientationAction.update(); // Ensure state's frames are initialized
-            state.getGoalChestToWorldTransform().accessValue().set(concurrentChestOrientationAction.getChestFrame().getReferenceFrame().getTransformToRoot());
+            concurrentSpineAction.update(); // Ensure state's frames are initialized
+            state.getGoalChestToWorldTransform().accessValue().set(concurrentSpineAction.getChestFrame().getReferenceFrame().getTransformToRoot());
          }
-         else if (concurrentChestOrientationAction == null)
+         else if (concurrentSpineAction == null)
          {
             // FIXME We are ignoring this case for now, just add a pelvis pose to get the desired result
             //   We need to switch to a proper whole body action node
@@ -95,10 +95,10 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
          }
          else // Combined case
          {
-            concurrentChestOrientationAction.update(); // Ensure state's frames are initialized
+            concurrentSpineAction.update(); // Ensure state's frames are initialized
             concurrentPelvisHeightPitchAction.update(); // Ensure state's frames are initialized
 
-            ReferenceFrame chestActionFrame = concurrentChestOrientationAction.getChestFrame().getReferenceFrame();
+            ReferenceFrame chestActionFrame = concurrentSpineAction.getChestFrame().getReferenceFrame();
             ReferenceFrame pelvisActionFrame = concurrentPelvisHeightPitchAction.getPelvisFrame().getReferenceFrame();
 
             chestInPelvis.setToZero(chestActionFrame);

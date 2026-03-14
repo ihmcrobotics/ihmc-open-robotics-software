@@ -30,16 +30,16 @@ public class BehaviorTreeDefinitionBuilder
       MAP.put(DoorTraversalDefinition.class, DoorTraversalDefinition::new);
       MAP.put(BuildingExplorationDefinition.class, BuildingExplorationDefinition::new);
       MAP.put(NeckActionDefinition.class, NeckActionDefinition::new);
-      MAP.put(ChestOrientationActionDefinition.class, ChestOrientationActionDefinition::new);
-      MAP.put(FootstepPlanActionDefinition.class, FootstepPlanActionDefinition::new);
-      MAP.put(HandPoseActionDefinition.class, HandPoseActionDefinition::new);
+      MAP.put(SpineActionDefinition.class, SpineActionDefinition::new);
+      MAP.put(WalkActionDefinition.class, WalkActionDefinition::new);
+      MAP.put(ArmActionDefinition.class, ArmActionDefinition::new);
       MAP.put(HandWrenchActionDefinition.class, HandWrenchActionDefinition::new);
-      MAP.put(PelvisHeightOrientationActionDefinition.class, PelvisHeightOrientationActionDefinition::new);
+      MAP.put(PelvisActionDefinition.class, PelvisActionDefinition::new);
       MAP.put(AbilityHandActionDefinition.class, AbilityHandActionDefinition::new);
       MAP.put(SakeHandCommandActionDefinition.class, SakeHandCommandActionDefinition::new);
       MAP.put(ScrewPrimitiveActionDefinition.class, ScrewPrimitiveActionDefinition::new);
       MAP.put(WaitDurationActionDefinition.class, WaitDurationActionDefinition::new);
-      MAP.put(FootPoseActionDefinition.class, FootPoseActionDefinition::new);
+      MAP.put(LegActionDefinition.class, LegActionDefinition::new);
    }
 
    public static BehaviorTreeRootNodeDefinition createRootNode(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, DRCRobotModel robotModel)

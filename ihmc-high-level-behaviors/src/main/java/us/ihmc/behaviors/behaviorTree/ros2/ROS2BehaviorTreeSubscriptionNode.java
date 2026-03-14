@@ -26,16 +26,16 @@ public class ROS2BehaviorTreeSubscriptionNode
    private LeafNodeStateMessage leafNodeStateMessage;
    private ActionNodeStateMessage actionNodeStateMessage;
    private NeckActionStateMessage neckActionStateMessage;
-   private ChestOrientationActionStateMessage chestOrientationActionStateMessage;
-   private FootstepPlanActionStateMessage footstepPlanActionStateMessage;
+   private SpineActionStateMessage chestOrientationActionStateMessage;
+   private WalkActionStateMessage footstepPlanActionStateMessage;
    private AbilityHandActionStateMessage abilityHandActionStateMessage;
    private SakeHandCommandActionStateMessage sakeHandCommandActionStateMessage;
-   private HandPoseActionStateMessage handPoseActionStateMessage;
+   private ArmActionStateMessage handPoseActionStateMessage;
    private HandWrenchActionStateMessage handWrenchActionStateMessage;
    private ScrewPrimitiveActionStateMessage screwPrimitiveActionStateMessage;
-   private PelvisHeightOrientationActionStateMessage pelvisHeightOrientationActionStateMessage;
+   private PelvisActionStateMessage pelvisHeightOrientationActionStateMessage;
    private WaitDurationActionStateMessage waitDurationActionStateMessage;
-   private FootPoseActionStateMessage footPoseActionStateMessage;
+   private LegActionStateMessage footPoseActionStateMessage;
    private final List<ROS2BehaviorTreeSubscriptionNode> children = new ArrayList<>();
 
    public void clear()
@@ -247,22 +247,22 @@ public class ROS2BehaviorTreeSubscriptionNode
       this.neckActionStateMessage = neckActionStateMessage;
    }
 
-   public ChestOrientationActionStateMessage getChestOrientationActionStateMessage()
+   public SpineActionStateMessage getSpineActionStateMessage()
    {
       return chestOrientationActionStateMessage;
    }
 
-   public void setChestOrientationActionStateMessage(ChestOrientationActionStateMessage chestOrientationActionStateMessage)
+   public void setSpineActionStateMessage(SpineActionStateMessage chestOrientationActionStateMessage)
    {
       this.chestOrientationActionStateMessage = chestOrientationActionStateMessage;
    }
 
-   public FootstepPlanActionStateMessage getFootstepPlanActionStateMessage()
+   public WalkActionStateMessage getWalkActionStateMessage()
    {
       return footstepPlanActionStateMessage;
    }
 
-   public void setFootstepPlanActionStateMessage(FootstepPlanActionStateMessage footstepPlanActionStateMessage)
+   public void setWalkActionStateMessage(WalkActionStateMessage footstepPlanActionStateMessage)
    {
       this.footstepPlanActionStateMessage = footstepPlanActionStateMessage;
    }
@@ -287,12 +287,12 @@ public class ROS2BehaviorTreeSubscriptionNode
       this.sakeHandCommandActionStateMessage = sakeHandCommandActionStateMessage;
    }
 
-   public HandPoseActionStateMessage getHandPoseActionStateMessage()
+   public ArmActionStateMessage getArmActionStateMessage()
    {
       return handPoseActionStateMessage;
    }
 
-   public void setHandPoseActionStateMessage(HandPoseActionStateMessage handPoseActionStateMessage)
+   public void setArmActionStateMessage(ArmActionStateMessage handPoseActionStateMessage)
    {
       this.handPoseActionStateMessage = handPoseActionStateMessage;
    }
@@ -317,12 +317,12 @@ public class ROS2BehaviorTreeSubscriptionNode
       this.screwPrimitiveActionStateMessage = screwPrimitiveActionStateMessage;
    }
 
-   public PelvisHeightOrientationActionStateMessage getPelvisHeightOrientationActionStateMessage()
+   public PelvisActionStateMessage getPelvisActionStateMessage()
    {
       return pelvisHeightOrientationActionStateMessage;
    }
 
-   public void setPelvisHeightOrientationActionStateMessage(PelvisHeightOrientationActionStateMessage pelvisHeightOrientationActionStateMessage)
+   public void setPelvisActionStateMessage(PelvisActionStateMessage pelvisHeightOrientationActionStateMessage)
    {
       this.pelvisHeightOrientationActionStateMessage = pelvisHeightOrientationActionStateMessage;
    }
@@ -337,12 +337,12 @@ public class ROS2BehaviorTreeSubscriptionNode
       this.waitDurationActionStateMessage = waitDurationActionStateMessage;
    }
 
-   public FootPoseActionStateMessage getFootPoseActionStateMessage()
+   public LegActionStateMessage getLegActionStateMessage()
    {
       return footPoseActionStateMessage;
    }
 
-   public void setFootPoseActionStateMessage(FootPoseActionStateMessage footPoseActionStateMessage)
+   public void setLegActionStateMessage(LegActionStateMessage footPoseActionStateMessage)
    {
       this.footPoseActionStateMessage = footPoseActionStateMessage;
    }

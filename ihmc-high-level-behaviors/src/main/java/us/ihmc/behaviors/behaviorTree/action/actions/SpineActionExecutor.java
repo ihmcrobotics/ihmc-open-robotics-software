@@ -14,7 +14,7 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.partNames.SpineJointName;
 
-public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrientationActionState, ChestOrientationActionDefinition>
+public class SpineActionExecutor extends ActionNodeExecutor<SpineActionState, SpineActionDefinition>
 {
    public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
 
@@ -23,9 +23,9 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
    private final TrajectoryTrackingErrorCalculator trackingCalculator = new TrajectoryTrackingErrorCalculator();
    private final SpineJointName[] spineJointNames;
 
-   public ChestOrientationActionExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
+   public SpineActionExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
    {
-      super(new ChestOrientationActionState(id, rootNode.getState()), rootNode);
+      super(new SpineActionState(id, rootNode.getState()), rootNode);
 
       spineJointNames = syncedRobot.getRobotModel().getJointMap().getSpineJointNames();
    }

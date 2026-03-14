@@ -5,8 +5,8 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
-import us.ihmc.behaviors.behaviorTree.action.actions.PelvisHeightOrientationActionDefinition;
-import us.ihmc.behaviors.behaviorTree.action.actions.PelvisHeightOrientationActionState;
+import us.ihmc.behaviors.behaviorTree.action.actions.PelvisActionDefinition;
+import us.ihmc.behaviors.behaviorTree.action.actions.PelvisActionState;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -28,7 +28,7 @@ import us.ihmc.scs2.simulation.collision.Collidable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RDXPelvisHeightOrientationAction extends RDXActionNode<PelvisHeightOrientationActionState, PelvisHeightOrientationActionDefinition>
+public class RDXPelvisAction extends RDXActionNode<PelvisActionState, PelvisActionDefinition>
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImDoubleWrapper heightWidget;
@@ -47,9 +47,9 @@ public class RDXPelvisHeightOrientationAction extends RDXActionNode<PelvisHeight
    private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
    private final RDX3DPanelTooltip tooltip;
 
-   public RDXPelvisHeightOrientationAction(long id, RDXBehaviorTreeRootNode rootNode)
+   public RDXPelvisAction(long id, RDXBehaviorTreeRootNode rootNode)
    {
-      super(new PelvisHeightOrientationActionState(id, rootNode.getState()), rootNode);
+      super(new PelvisActionState(id, rootNode.getState()), rootNode);
 
       poseGizmo = new RDXSelectablePose3DGizmo();
       poseGizmo.create(panel3D);
@@ -210,6 +210,6 @@ public class RDXPelvisHeightOrientationAction extends RDXActionNode<PelvisHeight
    @Override
    public String getLeafTypeTitle()
    {
-      return "Pelvis Height and Orientation";
+      return "Pelvis";
    }
 }

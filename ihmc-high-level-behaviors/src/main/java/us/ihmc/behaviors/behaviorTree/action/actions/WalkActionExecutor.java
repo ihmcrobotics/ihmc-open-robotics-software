@@ -31,10 +31,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessage.*;
+import static behavior_msgs.msg.dds.WalkActionDefinitionMessage.*;
 import static us.ihmc.footstepPlanning.simplePlanners.QuickFootstepPlanner.Footstep;
 
-public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanActionState, FootstepPlanActionDefinition>
+public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, WalkActionDefinition>
 {
    public static final double POSITION_TOLERANCE = 0.15;
    public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
@@ -50,18 +50,18 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
    private final FootstepPlan footstepPlanToExecute = new FootstepPlan();
    private final Throttler previewPlanningThrottler = new Throttler().setPeriod(1.0);
    private final QuickFootstepPlanner quickFootstepPlanner = new QuickFootstepPlanner();
-   private final FootstepPlanActionPlanningThread previewFootstepPlanningThread;
-   private final FootstepPlanActionPlanningThread executionFootstepPlanningThread;
+   private final WalkActionPlanningThread previewFootstepPlanningThread;
+   private final WalkActionPlanningThread executionFootstepPlanningThread;
    private final SideDependentList<FramePose3D> liveGoalFeetPoses = new SideDependentList<>(() -> new FramePose3D());
 
-   public FootstepPlanActionExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
+   public WalkActionExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
    {
-      super(new FootstepPlanActionState(id, rootNode.getState()), rootNode);
+      super(new WalkActionState(id, rootNode.getState()), rootNode);
 
       walkingControllerParameters = robotModel.getWalkingControllerParameters();
 
-      previewFootstepPlanningThread = new FootstepPlanActionPlanningThread(true, state, definition, scene.getTerrainMap());
-      executionFootstepPlanningThread = new FootstepPlanActionPlanningThread(false, state, definition, scene.getTerrainMap());
+      previewFootstepPlanningThread = new WalkActionPlanningThread(true, state, definition, scene.getTerrainMap());
+      executionFootstepPlanningThread = new WalkActionPlanningThread(false, state, definition, scene.getTerrainMap());
 
    }
 
@@ -219,12 +219,12 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
          {
             if (state.getManuallyPlacedFootsteps().isEmpty())
             {
-               state.getExecutionState().setValue(FootstepPlanActionExecutionState.PLANNING_FAILED);
+               state.getExecutionState().setValue(WalkActionExecutionState.PLANNING_FAILED);
             }
             else
             {
                packManuallyPlacedFootstepsIntoPlan();
-               state.getExecutionState().setValue(FootstepPlanActionExecutionState.PLANNING_SUCCEEDED);
+               state.getExecutionState().setValue(WalkActionExecutionState.PLANNING_SUCCEEDED);
             }
          }
          else if (definition.getPlannerType().getValue() == QUICK)
@@ -249,12 +249,12 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
                simpleFootstep.setSwingDuration(time);
                footstepPlanToExecute.addFootstep(simpleFootstep);
             }
-            state.getExecutionState().setValue(FootstepPlanActionExecutionState.PLANNING_SUCCEEDED);
+            state.getExecutionState().setValue(WalkActionExecutionState.PLANNING_SUCCEEDED);
          }
          else
          {
             executionFootstepPlanningThread.triggerPlan(syncedRobot, liveGoalFeetPoses);
-            state.getExecutionState().setValue(FootstepPlanActionExecutionState.FOOTSTEP_PLANNING);
+            state.getExecutionState().setValue(WalkActionExecutionState.FOOTSTEP_PLANNING);
          }
       }
       else
@@ -278,11 +278,11 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
                footstepPlanToExecute.set(executionFootstepPlanningThread.getResult());
                if (footstepPlanToExecute.isEmpty())
                {
-                  state.getExecutionState().setValue(FootstepPlanActionExecutionState.PLANNING_FAILED);
+                  state.getExecutionState().setValue(WalkActionExecutionState.PLANNING_FAILED);
                }
                else
                {
-                  state.getExecutionState().setValue(FootstepPlanActionExecutionState.PLANNING_SUCCEEDED);
+                  state.getExecutionState().setValue(WalkActionExecutionState.PLANNING_SUCCEEDED);
                }
             }
          }
@@ -296,7 +296,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
          {
             state.setIsExecuting(true);
             buildAndSendCommandAndSetDesiredState();
-            state.getExecutionState().setValue(FootstepPlanActionExecutionState.PLAN_COMMANDED);
+            state.getExecutionState().setValue(WalkActionExecutionState.PLAN_COMMANDED);
          }
          case PLAN_COMMANDED ->
          {
@@ -308,7 +308,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
    private void packManuallyPlacedFootstepsIntoPlan()
    {
       footstepPlanToExecute.clear();
-      for (FootstepPlanActionFootstepState footstep : state.getManuallyPlacedFootsteps())
+      for (WalkActionFootstepState footstep : state.getManuallyPlacedFootsteps())
       {
          solePose.setIncludingFrame(footstep.getSoleFrame().getReferenceFrame().getParent(),
                                     footstep.getDefinition().getSoleToPlanFrameTransform().getValueReadOnly());

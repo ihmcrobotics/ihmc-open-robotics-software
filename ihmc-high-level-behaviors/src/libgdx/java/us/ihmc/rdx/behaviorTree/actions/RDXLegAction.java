@@ -5,8 +5,8 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
-import us.ihmc.behaviors.behaviorTree.action.actions.FootPoseActionDefinition;
-import us.ihmc.behaviors.behaviorTree.action.actions.FootPoseActionState;
+import us.ihmc.behaviors.behaviorTree.action.actions.LegActionDefinition;
+import us.ihmc.behaviors.behaviorTree.action.actions.LegActionState;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeRootNode;
@@ -31,7 +31,7 @@ import us.ihmc.scs2.simulation.collision.Collidable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RDXFootPoseAction extends RDXActionNode<FootPoseActionState, FootPoseActionDefinition>
+public class RDXLegAction extends RDXActionNode<LegActionState, LegActionDefinition>
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
@@ -46,9 +46,9 @@ public class RDXFootPoseAction extends RDXActionNode<FootPoseActionState, FootPo
    private final SideDependentList<RDXInteractableHighlightModel> highlightModels = new SideDependentList<>();
    private final RDX3DPanelTooltip tooltip;
 
-   public RDXFootPoseAction(long id, RDXBehaviorTreeRootNode rootNode)
+   public RDXLegAction(long id, RDXBehaviorTreeRootNode rootNode)
    {
-      super(new FootPoseActionState(id, rootNode.getState()), rootNode);
+      super(new LegActionState(id, rootNode.getState()), rootNode);
 
       poseGizmo = new RDXSelectablePose3DGizmo();
       poseGizmo.create(panel3D);
@@ -186,6 +186,6 @@ public class RDXFootPoseAction extends RDXActionNode<FootPoseActionState, FootPo
    @Override
    public String getLeafTypeTitle()
    {
-      return definition.getSide().getPascalCaseName() + " Foot Pose";
+      return definition.getSide().getPascalCaseName() + " Leg";
    }
 }

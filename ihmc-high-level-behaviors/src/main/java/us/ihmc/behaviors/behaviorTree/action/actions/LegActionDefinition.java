@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
-import behavior_msgs.msg.dds.FootPoseActionDefinitionMessage;
+import behavior_msgs.msg.dds.LegActionDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
@@ -13,7 +13,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SidedObject;
 import us.ihmc.tools.io.JSONTools;
 
-public class FootPoseActionDefinition extends ActionNodeDefinition implements SidedObject
+public class LegActionDefinition extends ActionNodeDefinition implements SidedObject
 {
    private final CRDTBidirectionalEnumField<RobotSide> side;
    private final CRDTBidirectionalDouble trajectoryDuration;
@@ -26,7 +26,7 @@ public class FootPoseActionDefinition extends ActionNodeDefinition implements Si
    private String onDiskParentFrameName;
    private final RigidBodyTransform onDiskFootToParentTransform = new RigidBodyTransform();
 
-   public FootPoseActionDefinition(BehaviorTreeRootNodeDefinition rootNode)
+   public LegActionDefinition(BehaviorTreeRootNodeDefinition rootNode)
    {
       super(rootNode);
 
@@ -96,7 +96,7 @@ public class FootPoseActionDefinition extends ActionNodeDefinition implements Si
       return !unchanged;
    }
 
-   public void toMessage(FootPoseActionDefinitionMessage message)
+   public void toMessage(LegActionDefinitionMessage message)
    {
       super.toMessage(message.getDefinition());
 
@@ -106,7 +106,7 @@ public class FootPoseActionDefinition extends ActionNodeDefinition implements Si
       message.setTrajectoryDuration(trajectoryDuration.toMessage());
    }
 
-   public void fromMessage(FootPoseActionDefinitionMessage message)
+   public void fromMessage(LegActionDefinitionMessage message)
    {
       super.fromMessage(message.getDefinition());
 

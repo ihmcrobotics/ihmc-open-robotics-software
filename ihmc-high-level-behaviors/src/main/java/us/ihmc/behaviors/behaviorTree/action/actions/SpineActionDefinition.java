@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
-import behavior_msgs.msg.dds.ChestOrientationActionDefinitionMessage;
+import behavior_msgs.msg.dds.SpineActionDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.BooleanNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -13,7 +13,7 @@ import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.tools.io.JSONTools;
 
-public class ChestOrientationActionDefinition extends ActionNodeDefinition
+public class SpineActionDefinition extends ActionNodeDefinition
 {
    private final CRDTBidirectionalString parentFrameName;
    private final CRDTBidirectionalDouble trajectoryDuration;
@@ -30,7 +30,7 @@ public class ChestOrientationActionDefinition extends ActionNodeDefinition
    private final RigidBodyTransform onDiskChestToParentTransform = new RigidBodyTransform();
    private boolean onDiskHoldPoseInWorldLater;
 
-   public ChestOrientationActionDefinition(BehaviorTreeRootNodeDefinition rootNode)
+   public SpineActionDefinition(BehaviorTreeRootNodeDefinition rootNode)
    {
       super(rootNode);
 
@@ -127,7 +127,7 @@ public class ChestOrientationActionDefinition extends ActionNodeDefinition
       return !unchanged;
    }
 
-   public void toMessage(ChestOrientationActionDefinitionMessage message)
+   public void toMessage(SpineActionDefinitionMessage message)
    {
       super.toMessage(message.getDefinition());
 
@@ -139,7 +139,7 @@ public class ChestOrientationActionDefinition extends ActionNodeDefinition
       message.setHoldPoseInWorld(holdPoseInWorldLater.toMessage());
    }
 
-   public void fromMessage(ChestOrientationActionDefinitionMessage message)
+   public void fromMessage(SpineActionDefinitionMessage message)
    {
       super.fromMessage(message.getDefinition());
 

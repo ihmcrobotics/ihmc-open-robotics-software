@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
-import behavior_msgs.msg.dds.HandPoseActionStateMessage;
+import behavior_msgs.msg.dds.ArmActionStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
 import us.ihmc.communication.crdt.*;
@@ -10,9 +10,9 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-import static us.ihmc.behaviors.behaviorTree.action.actions.HandPoseActionDefinition.MAX_NUMBER_OF_JOINTS;
+import static us.ihmc.behaviors.behaviorTree.action.actions.ArmActionDefinition.MAX_NUMBER_OF_JOINTS;
 
-public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinition>
+public class ArmActionState extends ActionNodeState<ArmActionDefinition>
 {
    private final CRDTDetachableReferenceFrame palmFrame;
    /**
@@ -28,9 +28,9 @@ public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinitio
    private final CRDTStatusDouble solutionQuality;
    private final SideDependentList<Integer> numberOfJoints = new SideDependentList<>();
 
-   public HandPoseActionState(long id, BehaviorTreeRootNodeState rootNode)
+   public ArmActionState(long id, BehaviorTreeRootNodeState rootNode)
    {
-      super(id, new HandPoseActionDefinition(rootNode.getDefinition()), rootNode);
+      super(id, new ArmActionDefinition(rootNode.getDefinition()), rootNode);
 
       palmFrame = new CRDTDetachableReferenceFrame(scene::findFrameByName,
                                                    definition.getCRDTPalmParentFrameName(),
@@ -65,7 +65,7 @@ public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinitio
       return hasStatus;
    }
 
-   public void toMessage(HandPoseActionStateMessage message)
+   public void toMessage(ArmActionStateMessage message)
    {
       definition.toMessage(message.getDefinition());
 
@@ -81,7 +81,7 @@ public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinitio
       message.setSolutionQuality(solutionQuality.toMessage());
    }
 
-   public void fromMessage(HandPoseActionStateMessage message)
+   public void fromMessage(ArmActionStateMessage message)
    {
       definition.fromMessage(message.getDefinition());
 
