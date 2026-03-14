@@ -26,16 +26,16 @@ public class ROS2BehaviorTreeSubscriptionNode
    private LeafNodeStateMessage leafNodeStateMessage;
    private ActionNodeStateMessage actionNodeStateMessage;
    private NeckActionStateMessage neckActionStateMessage;
-   private SpineActionStateMessage chestOrientationActionStateMessage;
-   private WalkActionStateMessage footstepPlanActionStateMessage;
+   private SpineActionStateMessage spineActionStateMessage;
+   private WalkActionStateMessage walkActionStateMessage;
    private AbilityHandActionStateMessage abilityHandActionStateMessage;
    private SakeHandCommandActionStateMessage sakeHandCommandActionStateMessage;
-   private ArmActionStateMessage handPoseActionStateMessage;
+   private ArmActionStateMessage armActionStateMessage;
    private HandWrenchActionStateMessage handWrenchActionStateMessage;
    private ScrewPrimitiveActionStateMessage screwPrimitiveActionStateMessage;
-   private PelvisActionStateMessage pelvisHeightOrientationActionStateMessage;
+   private PelvisActionStateMessage pelvisActionStateMessage;
    private WaitDurationActionStateMessage waitDurationActionStateMessage;
-   private LegActionStateMessage footPoseActionStateMessage;
+   private LegActionStateMessage legActionStateMessage;
    private final List<ROS2BehaviorTreeSubscriptionNode> children = new ArrayList<>();
 
    public void clear()
@@ -58,16 +58,16 @@ public class ROS2BehaviorTreeSubscriptionNode
       leafNodeStateMessage = null;
       actionNodeStateMessage = null;
       neckActionStateMessage = null;
-      chestOrientationActionStateMessage = null;
-      footstepPlanActionStateMessage = null;
+      spineActionStateMessage = null;
+      walkActionStateMessage = null;
       abilityHandActionStateMessage = null;
       sakeHandCommandActionStateMessage = null;
-      handPoseActionStateMessage = null;
+      armActionStateMessage = null;
       handWrenchActionStateMessage = null;
       screwPrimitiveActionStateMessage = null;
-      pelvisHeightOrientationActionStateMessage = null;
+      pelvisActionStateMessage = null;
       waitDurationActionStateMessage = null;
-      footPoseActionStateMessage = null;
+      legActionStateMessage = null;
       children.clear();
    }
 
@@ -249,22 +249,22 @@ public class ROS2BehaviorTreeSubscriptionNode
 
    public SpineActionStateMessage getSpineActionStateMessage()
    {
-      return chestOrientationActionStateMessage;
+      return spineActionStateMessage;
    }
 
-   public void setSpineActionStateMessage(SpineActionStateMessage chestOrientationActionStateMessage)
+   public void setSpineActionStateMessage(SpineActionStateMessage spineActionStateMessage)
    {
-      this.chestOrientationActionStateMessage = chestOrientationActionStateMessage;
+      this.spineActionStateMessage = spineActionStateMessage;
    }
 
    public WalkActionStateMessage getWalkActionStateMessage()
    {
-      return footstepPlanActionStateMessage;
+      return walkActionStateMessage;
    }
 
-   public void setWalkActionStateMessage(WalkActionStateMessage footstepPlanActionStateMessage)
+   public void setWalkActionStateMessage(WalkActionStateMessage walkActionStateMessage)
    {
-      this.footstepPlanActionStateMessage = footstepPlanActionStateMessage;
+      this.walkActionStateMessage = walkActionStateMessage;
    }
 
    public AbilityHandActionStateMessage getAbilityHandActionStateMessage()
@@ -289,12 +289,12 @@ public class ROS2BehaviorTreeSubscriptionNode
 
    public ArmActionStateMessage getArmActionStateMessage()
    {
-      return handPoseActionStateMessage;
+      return armActionStateMessage;
    }
 
-   public void setArmActionStateMessage(ArmActionStateMessage handPoseActionStateMessage)
+   public void setArmActionStateMessage(ArmActionStateMessage armActionStateMessage)
    {
-      this.handPoseActionStateMessage = handPoseActionStateMessage;
+      this.armActionStateMessage = armActionStateMessage;
    }
 
    public HandWrenchActionStateMessage getHandWrenchActionStateMessage()
@@ -319,12 +319,12 @@ public class ROS2BehaviorTreeSubscriptionNode
 
    public PelvisActionStateMessage getPelvisActionStateMessage()
    {
-      return pelvisHeightOrientationActionStateMessage;
+      return pelvisActionStateMessage;
    }
 
-   public void setPelvisActionStateMessage(PelvisActionStateMessage pelvisHeightOrientationActionStateMessage)
+   public void setPelvisActionStateMessage(PelvisActionStateMessage pelvisActionStateMessage)
    {
-      this.pelvisHeightOrientationActionStateMessage = pelvisHeightOrientationActionStateMessage;
+      this.pelvisActionStateMessage = pelvisActionStateMessage;
    }
 
    public WaitDurationActionStateMessage getWaitDurationActionStateMessage()
@@ -339,12 +339,12 @@ public class ROS2BehaviorTreeSubscriptionNode
 
    public LegActionStateMessage getLegActionStateMessage()
    {
-      return footPoseActionStateMessage;
+      return legActionStateMessage;
    }
 
-   public void setLegActionStateMessage(LegActionStateMessage footPoseActionStateMessage)
+   public void setLegActionStateMessage(LegActionStateMessage legActionStateMessage)
    {
-      this.footPoseActionStateMessage = footPoseActionStateMessage;
+      this.legActionStateMessage = legActionStateMessage;
    }
 
    public List<ROS2BehaviorTreeSubscriptionNode> getChildren()

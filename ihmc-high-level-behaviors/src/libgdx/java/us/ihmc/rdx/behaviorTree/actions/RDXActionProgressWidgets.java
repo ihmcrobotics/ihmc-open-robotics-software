@@ -334,8 +334,8 @@ public class RDXActionProgressWidgets
    public void renderHandForce(float dividedBarWidth, boolean renderAsPlots, boolean timeOnly)
    {
       CRDTStatusVector3D forceCRDT = null;
-      if (action instanceof RDXArmAction handPoseAction)
-         forceCRDT = handPoseAction.getState().getForce();
+      if (action instanceof RDXArmAction armAction)
+         forceCRDT = armAction.getState().getForce();
       else if (action instanceof RDXScrewPrimitiveAction screwPrimitiveAction)
          forceCRDT = screwPrimitiveAction.getState().getForce();
 
@@ -371,8 +371,8 @@ public class RDXActionProgressWidgets
    public void renderHandTorque(float dividedBarWidth, boolean renderAsPlots, boolean timeOnly)
    {
       CRDTStatusVector3D torqueCRDT = null;
-      if (action instanceof RDXArmAction handPoseAction)
-         torqueCRDT = handPoseAction.getState().getTorque();
+      if (action instanceof RDXArmAction armAction)
+         torqueCRDT = armAction.getState().getTorque();
       else if (action instanceof RDXScrewPrimitiveAction screwPrimitiveAction)
          torqueCRDT = screwPrimitiveAction.getState().getTorque();
 
@@ -407,15 +407,15 @@ public class RDXActionProgressWidgets
 
    public void renderFootstepCompletion(float dividedBarWidth, boolean renderAsPlots, boolean timeOnly)
    {
-      if (action instanceof RDXWalkAction footstepPlanAction && footstepPlanAction.getState().getTotalNumberOfFootsteps() > 0)
+      if (action instanceof RDXWalkAction walkAction && walkAction.getState().getTotalNumberOfFootsteps() > 0)
       {
-         WalkActionState footstepPlanActionState = footstepPlanAction.getState();
-         double percentLeft = footstepPlanActionState.getNumberOfIncompleteFootsteps() / (double) footstepPlanActionState.getTotalNumberOfFootsteps();
-         String overlay = "%d / %d".formatted(footstepPlanActionState.getNumberOfIncompleteFootsteps(), footstepPlanActionState.getTotalNumberOfFootsteps());
+         WalkActionState walkActionState = walkAction.getState();
+         double percentLeft = walkActionState.getNumberOfIncompleteFootsteps() / (double) walkActionState.getTotalNumberOfFootsteps();
+         String overlay = "%d / %d".formatted(walkActionState.getNumberOfIncompleteFootsteps(), walkActionState.getTotalNumberOfFootsteps());
 
          if (action.getState().getIsExecuting())
          {
-            footstepsRemainingPlotLine.addValue(footstepPlanActionState.getNumberOfIncompleteFootsteps());
+            footstepsRemainingPlotLine.addValue(walkActionState.getNumberOfIncompleteFootsteps());
          }
          if (timeOnly)
             return;
@@ -443,19 +443,19 @@ public class RDXActionProgressWidgets
 
       for (RobotSide side : RobotSide.values)
       {
-         if (action instanceof RDXWalkAction footstepPlanAction
-             && !footstepPlanAction.getState().getDesiredFootPoses().get(side).isEmpty())
+         if (action instanceof RDXWalkAction walkAction
+             && !walkAction.getState().getDesiredFootPoses().get(side).isEmpty())
          {
-            WalkActionState footstepPlanActionState = footstepPlanAction.getState();
+            WalkActionState walkActionState = walkAction.getState();
             int i = 0;
-            SE3TrajectoryPointReadOnly nextDesiredPoint = footstepPlanActionState.getDesiredFootPoses().get(side).getValueReadOnly(i++);
-            while (i < footstepPlanActionState.getDesiredFootPoses().get(side).getSize()
+            SE3TrajectoryPointReadOnly nextDesiredPoint = walkActionState.getDesiredFootPoses().get(side).getValueReadOnly(i++);
+            while (i < walkActionState.getDesiredFootPoses().get(side).getSize()
                 && nextDesiredPoint.getTime() < elapsedExecutionTime)
-               nextDesiredPoint = footstepPlanActionState.getDesiredFootPoses().get(side).getValueReadOnly(i++);
+               nextDesiredPoint = walkActionState.getDesiredFootPoses().get(side).getValueReadOnly(i++);
 
-            Point3DReadOnly initialPosition = footstepPlanActionState.getDesiredFootPoses().get(side).getFirstValueReadOnly().getPosition();
-            Point3DReadOnly endPosition = footstepPlanActionState.getDesiredFootPoses().get(side).getLastValueReadOnly().getPosition();
-            Point3DReadOnly currentPosition = footstepPlanActionState.getCurrentFootPoses().get(side).getValueReadOnly().getPosition();
+            Point3DReadOnly initialPosition = walkActionState.getDesiredFootPoses().get(side).getFirstValueReadOnly().getPosition();
+            Point3DReadOnly endPosition = walkActionState.getDesiredFootPoses().get(side).getLastValueReadOnly().getPosition();
+            Point3DReadOnly currentPosition = walkActionState.getCurrentFootPoses().get(side).getValueReadOnly().getPosition();
             Point3DReadOnly desiredPosition = nextDesiredPoint.getPosition();
 
             double initialToEnd = initialPosition.differenceNorm(endPosition);
@@ -511,19 +511,19 @@ public class RDXActionProgressWidgets
 
       for (RobotSide side : RobotSide.values)
       {
-         if (action instanceof RDXWalkAction footstepPlanAction
-             && !footstepPlanAction.getState().getDesiredFootPoses().get(side).isEmpty())
+         if (action instanceof RDXWalkAction walkAction
+             && !walkAction.getState().getDesiredFootPoses().get(side).isEmpty())
          {
-            WalkActionState footstepPlanActionState = footstepPlanAction.getState();
+            WalkActionState walkActionState = walkAction.getState();
             int i = 0;
-            SE3TrajectoryPointReadOnly nextDesiredPoint = footstepPlanActionState.getDesiredFootPoses().get(side).getValueReadOnly(i++);
-            while (i < footstepPlanActionState.getDesiredFootPoses().get(side).getSize()
+            SE3TrajectoryPointReadOnly nextDesiredPoint = walkActionState.getDesiredFootPoses().get(side).getValueReadOnly(i++);
+            while (i < walkActionState.getDesiredFootPoses().get(side).getSize()
                    && nextDesiredPoint.getTime() < elapsedExecutionTime)
-               nextDesiredPoint = footstepPlanActionState.getDesiredFootPoses().get(side).getValueReadOnly(i++);
+               nextDesiredPoint = walkActionState.getDesiredFootPoses().get(side).getValueReadOnly(i++);
 
-            QuaternionReadOnly initialOrientation = footstepPlanActionState.getDesiredFootPoses().get(side).getFirstValueReadOnly().getOrientation();
-            QuaternionReadOnly endOrientation = footstepPlanActionState.getDesiredFootPoses().get(side).getLastValueReadOnly().getOrientation();
-            QuaternionReadOnly currentOrientation = footstepPlanActionState.getCurrentFootPoses().get(side).getValueReadOnly().getOrientation();
+            QuaternionReadOnly initialOrientation = walkActionState.getDesiredFootPoses().get(side).getFirstValueReadOnly().getOrientation();
+            QuaternionReadOnly endOrientation = walkActionState.getDesiredFootPoses().get(side).getLastValueReadOnly().getOrientation();
+            QuaternionReadOnly currentOrientation = walkActionState.getCurrentFootPoses().get(side).getValueReadOnly().getOrientation();
             QuaternionReadOnly desiredOrientation = nextDesiredPoint.getOrientation();
 
             double initialToEnd = initialOrientation.distance(endOrientation, true);

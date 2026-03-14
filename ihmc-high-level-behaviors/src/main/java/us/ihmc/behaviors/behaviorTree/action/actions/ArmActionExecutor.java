@@ -60,29 +60,29 @@ public class ArmActionExecutor extends ActionNodeExecutor<ArmActionState, ArmAct
       if (state.getIsNextForExecution())
       {
          SpineActionState concurrentSpineAction = null;
-         PelvisActionState concurrentPelvisHeightPitchAction = null;
+         PelvisActionState concurrentPelvisAction = null;
 
          for (int i = state.getExecuteAfterLeafIndex() + 1; i < state.getLeafIndex(); i++)
          {
-            if (rootNode.getState().getOrderedLeaves().get(i) instanceof SpineActionState chestOrientationAction)
-               concurrentSpineAction = chestOrientationAction;
-            if (rootNode.getState().getOrderedLeaves().get(i) instanceof PelvisActionState pelvisHeightPitchAction)
-               concurrentPelvisHeightPitchAction = pelvisHeightPitchAction;
+            if (rootNode.getState().getOrderedLeaves().get(i) instanceof SpineActionState spineAction)
+               concurrentSpineAction = spineAction;
+            if (rootNode.getState().getOrderedLeaves().get(i) instanceof PelvisActionState pelvisAction)
+               concurrentPelvisAction = pelvisAction;
          }
 
          for (LeafNodeExecutor<?, ?> currentlyExecutingLeaf : rootNode.getCurrentlyExecutingLeaves())
          {
-            if (currentlyExecutingLeaf.getState() instanceof SpineActionState chestOrientationAction)
-               concurrentSpineAction = chestOrientationAction;
-            if (currentlyExecutingLeaf.getState() instanceof PelvisActionState pelvisHeightPitchAction)
-               concurrentPelvisHeightPitchAction = pelvisHeightPitchAction;
+            if (currentlyExecutingLeaf.getState() instanceof SpineActionState spineAction)
+               concurrentSpineAction = spineAction;
+            if (currentlyExecutingLeaf.getState() instanceof PelvisActionState pelvisAction)
+               concurrentPelvisAction = pelvisAction;
          }
 
-         if (concurrentSpineAction == null && concurrentPelvisHeightPitchAction == null)
+         if (concurrentSpineAction == null && concurrentPelvisAction == null)
          {
             state.getGoalChestToWorldTransform().accessValue().set(syncedRobot.getReferenceFrames().getChestFrame().getTransformToRoot());
          }
-         else if (concurrentPelvisHeightPitchAction == null)
+         else if (concurrentPelvisAction == null)
          {
             concurrentSpineAction.update(); // Ensure state's frames are initialized
             state.getGoalChestToWorldTransform().accessValue().set(concurrentSpineAction.getChestFrame().getReferenceFrame().getTransformToRoot());
@@ -96,10 +96,10 @@ public class ArmActionExecutor extends ActionNodeExecutor<ArmActionState, ArmAct
          else // Combined case
          {
             concurrentSpineAction.update(); // Ensure state's frames are initialized
-            concurrentPelvisHeightPitchAction.update(); // Ensure state's frames are initialized
+            concurrentPelvisAction.update(); // Ensure state's frames are initialized
 
             ReferenceFrame chestActionFrame = concurrentSpineAction.getChestFrame().getReferenceFrame();
-            ReferenceFrame pelvisActionFrame = concurrentPelvisHeightPitchAction.getPelvisFrame().getReferenceFrame();
+            ReferenceFrame pelvisActionFrame = concurrentPelvisAction.getPelvisFrame().getReferenceFrame();
 
             chestInPelvis.setToZero(chestActionFrame);
             chestInPelvis.changeFrame(pelvisActionFrame);
