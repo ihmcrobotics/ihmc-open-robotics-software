@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import controller_msgs.msg.dds.ManipulationAbortedStatus;
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
@@ -14,10 +15,12 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Hi
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingState;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
 import us.ihmc.humanoidRobotics.communication.directionalControlToolboxAPI.DirectionalControlInputCommand;
 import us.ihmc.humanoidRobotics.communication.fastWalkingAPI.FastWalkingGaitParametersCommand;
@@ -63,6 +66,8 @@ public class WalkingCommandConsumer
 
    private final ManipulationAbortedStatus manipulationAbortedStatus = new ManipulationAbortedStatus();
    private final StopAllTrajectoryCommand stopAllTrajectoryCommandFromYoVariable = new StopAllTrajectoryCommand();
+
+   private Consumer<HandContactCommand> onHandContactReceived = c -> {};
 
    public WalkingCommandConsumer(CommandInputManager commandInputManager,
                                  StatusMessageOutputManager statusMessageOutputManager,
@@ -187,6 +192,11 @@ public class WalkingCommandConsumer
       allowManipulationAbortAfterThisTime.set(Double.NEGATIVE_INFINITY);
 
       parentRegistry.addChild(registry);
+   }
+
+   public SideDependentList<RigidBodyControlManager> getHandManagers()
+   {
+      return handManagers;
    }
 
    public void avoidManipulationAbortForDuration(double durationToAvoidAbort)
@@ -452,6 +462,7 @@ public class WalkingCommandConsumer
             if (command.load())
             {
                handManager.handleHandContactCommand(command.getBracingPoint(), command.getBracingNormal(), command.getTrajectoryDuration());
+               onHandContactReceived.accept(command);
             }
             else
             {
@@ -618,6 +629,11 @@ public class WalkingCommandConsumer
       if (!commandConsumerWithDelayBuffers.isNewCommandAvailable(AbortWalkingCommand.class))
          return;
       abortWalkingRequested.set(commandConsumerWithDelayBuffers.pollNewestCommand(AbortWalkingCommand.class).isAbortWalkingRequested());
+   }
+
+   public void setOnHandContactReceived(Consumer<HandContactCommand> onHandContactReceived)
+   {
+      this.onHandContactReceived = onHandContactReceived;
    }
 
    public void consumePrepareForLocomotionCommands()

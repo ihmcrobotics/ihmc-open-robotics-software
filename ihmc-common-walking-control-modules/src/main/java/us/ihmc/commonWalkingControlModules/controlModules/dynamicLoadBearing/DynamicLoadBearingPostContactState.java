@@ -118,6 +118,8 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
    private final MutableBoolean hasAddedContacts;
    private final MutableBoolean hasRemovedContacts;
 
+   private Runnable onTouchdownCallback = () -> {};
+
    public DynamicLoadBearingPostContactState(RigidBodyBasics bodyToControl,
                                              RigidBodyBasics baseBody,
                                              RigidBodyBasics elevator,
@@ -300,6 +302,8 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
       yoDesiredContactOrientation.set(desiredContactPoseWorld.getOrientation());
 
       hasAddedContacts.setTrue();
+
+      onTouchdownCallback.run();
    }
 
    @Override
@@ -406,6 +410,11 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
       }
 
       return false;
+   }
+
+   public void setOnTouchdownCallback(Runnable onTouchdownCallback)
+   {
+      this.onTouchdownCallback = onTouchdownCallback;
    }
 
    private static boolean jointIsNearLimit(OneDoFJointBasics joint)

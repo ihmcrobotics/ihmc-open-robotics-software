@@ -3,6 +3,7 @@
 
 #include "geometry_msgs/msg/./Point_.idl"
 #include "geometry_msgs/msg/./Vector3_.idl"
+#include "ihmc_common_msgs/msg/./Point2DMessage_.idl"
 module controller_msgs
 {
   module msg
@@ -48,6 +49,10 @@ module controller_msgs
          * Specifies the normal vector of the bracing surface
          */
         geometry_msgs::msg::dds::Vector3 bracing_normal;
+        /**
+         * Initial support polygon in mid-feet zup frame, to warm start region
+         */
+        sequence<ihmc_common_msgs::msg::dds::Point2DMessage, 18> support_region_in_mid_feet_frame;
       };
     };
   };

@@ -38,11 +38,17 @@ public class HandContactMessage extends Packet<HandContactMessage> implements Se
             * Specifies the normal vector of the bracing surface
             */
    public us.ihmc.euclid.tuple3D.Vector3D bracing_normal_;
+   /**
+            * Initial support polygon in mid-feet zup frame, to warm start region
+            */
+   public us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.Point2DMessage>  support_region_in_mid_feet_frame_;
 
    public HandContactMessage()
    {
       bracing_point_ = new us.ihmc.euclid.tuple3D.Point3D();
       bracing_normal_ = new us.ihmc.euclid.tuple3D.Vector3D();
+      support_region_in_mid_feet_frame_ = new us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.Point2DMessage> (18, new ihmc_common_msgs.msg.dds.Point2DMessagePubSubType());
+
    }
 
    public HandContactMessage(HandContactMessage other)
@@ -63,6 +69,7 @@ public class HandContactMessage extends Packet<HandContactMessage> implements Se
 
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.bracing_point_, bracing_point_);
       geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.bracing_normal_, bracing_normal_);
+      support_region_in_mid_feet_frame_.set(other.support_region_in_mid_feet_frame_);
    }
 
    /**
@@ -144,6 +151,15 @@ public class HandContactMessage extends Packet<HandContactMessage> implements Se
    }
 
 
+   /**
+            * Initial support polygon in mid-feet zup frame, to warm start region
+            */
+   public us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.Point2DMessage>  getSupportRegionInMidFeetFrame()
+   {
+      return support_region_in_mid_feet_frame_;
+   }
+
+
    public static Supplier<HandContactMessagePubSubType> getPubSubType()
    {
       return HandContactMessagePubSubType::new;
@@ -171,6 +187,13 @@ public class HandContactMessage extends Packet<HandContactMessage> implements Se
 
       if (!this.bracing_point_.epsilonEquals(other.bracing_point_, epsilon)) return false;
       if (!this.bracing_normal_.epsilonEquals(other.bracing_normal_, epsilon)) return false;
+      if (this.support_region_in_mid_feet_frame_.size() != other.support_region_in_mid_feet_frame_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.support_region_in_mid_feet_frame_.size(); i++)
+         {  if (!this.support_region_in_mid_feet_frame_.get(i).epsilonEquals(other.support_region_in_mid_feet_frame_.get(i), epsilon)) return false; }
+      }
+
 
       return true;
    }
@@ -194,6 +217,7 @@ public class HandContactMessage extends Packet<HandContactMessage> implements Se
 
       if (!this.bracing_point_.equals(otherMyClass.bracing_point_)) return false;
       if (!this.bracing_normal_.equals(otherMyClass.bracing_normal_)) return false;
+      if (!this.support_region_in_mid_feet_frame_.equals(otherMyClass.support_region_in_mid_feet_frame_)) return false;
 
       return true;
    }
@@ -215,7 +239,9 @@ public class HandContactMessage extends Packet<HandContactMessage> implements Se
       builder.append("bracing_point=");
       builder.append(this.bracing_point_);      builder.append(", ");
       builder.append("bracing_normal=");
-      builder.append(this.bracing_normal_);
+      builder.append(this.bracing_normal_);      builder.append(", ");
+      builder.append("support_region_in_mid_feet_frame=");
+      builder.append(this.support_region_in_mid_feet_frame_);
       builder.append("}");
       return builder.toString();
    }

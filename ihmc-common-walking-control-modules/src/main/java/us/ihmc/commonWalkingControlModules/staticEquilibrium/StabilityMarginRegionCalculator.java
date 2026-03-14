@@ -3,12 +3,15 @@ package us.ihmc.commonWalkingControlModules.staticEquilibrium;
 import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.convexOptimization.linearProgram.LinearProgramSolver;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
@@ -332,17 +335,17 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
          return;
 
       // Update index correspondence map
-      Arrays.fill(fromEuclidPolygonIndexMap, NULL_INDEX);
-
-      for (int euclid_idx = 0; euclid_idx < feasibleRegion.getNumberOfVertices(); euclid_idx++)
-      {
-         int enumerated_idx = findVertexIndex(optimizedVertices, feasibleRegion.getVertex(euclid_idx));
-
-         if (enumerated_idx != NULL_INDEX)
-         {
-            fromEuclidPolygonIndexMap[euclid_idx] = enumerated_idx;
-         }
-      }
+//      Arrays.fill(fromEuclidPolygonIndexMap, NULL_INDEX);
+//
+//      for (int euclid_idx = 0; euclid_idx < feasibleRegion.getNumberOfVertices(); euclid_idx++)
+//      {
+//         int enumerated_idx = findVertexIndex(optimizedVertices, feasibleRegion.getVertex(euclid_idx));
+//
+//         if (enumerated_idx != NULL_INDEX)
+//         {
+//            fromEuclidPolygonIndexMap[euclid_idx] = enumerated_idx;
+//         }
+//      }
 
       updateMinimumMarginEdge();
    }
@@ -606,6 +609,35 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
    public void setShowNearestSupportEdgeGraphic(boolean showNearestSupportEdgeGraphic)
    {
       this.showNearestSupportEdgeGraphic = showNearestSupportEdgeGraphic;
+   }
+
+   private final FramePoint2D tempPointA = new FramePoint2D();
+   private final FramePoint2D tempPointB = new FramePoint2D();
+
+   public void initializeRegion(ReferenceFrame midFeetZUpFrame, RecyclingArrayList<Point2D> vertices)
+   {
+      for (int i = 0; i < DIRECTIONS_TO_OPTIMIZE; i++)
+      {
+         double queryX = QUERY_X[i];
+         double queryY = QUERY_Y[i];
+
+         double maxValue = Double.NEGATIVE_INFINITY;
+         for (int j = 0; j < vertices.size(); j++)
+         {
+            tempPointA.setIncludingFrame(midFeetZUpFrame, vertices.get(j));
+            tempPointA.changeFrame(ReferenceFrame.getWorldFrame());
+            double value = tempPointA.getX() * queryX + tempPointA.getY() * queryY;
+            if (value > maxValue)
+            {
+               maxValue = value;
+               tempPointB.setIncludingFrame(tempPointA);
+            }
+         }
+
+         optimizedVertices[i].set(tempPointB);
+      }
+
+      updateFeasibleRegion();
    }
 
    @Override

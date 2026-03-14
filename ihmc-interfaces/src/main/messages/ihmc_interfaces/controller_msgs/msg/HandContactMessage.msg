@@ -21,3 +21,6 @@ geometry_msgs/Point bracing_point
 
 # Specifies the normal vector of the bracing surface
 geometry_msgs/Vector3 bracing_normal
+
+# Initial support polygon in mid-feet zup frame on contact, to warm start region solved through LP
+ihmc_common_msgs/Point2DMessage[<=18] support_region_in_mid_feet_frame

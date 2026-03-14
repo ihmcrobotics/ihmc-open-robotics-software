@@ -273,17 +273,16 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
          plannedHandContacts.clear();
          planner.plan(reducedOrderRobotModel, plannedFootSteps, plannedHandContacts);
 
+         // Just use single side if requested
+         if (diagnosticBracingSide.getValue() != null)
+            plannedHandContacts.put(diagnosticBracingSide.getValue().getOppositeSide(), null);
+
+         // Dispatch commands
          for (RobotSide robotSide : RobotSide.values)
          {
-            if (diagnosticBracingSide.getValue() != null && robotSide != diagnosticBracingSide.getValue())
-               continue;
-
             HandContactCommand handContactCommand = plannedHandContacts.get(robotSide);
             if (handContactCommand != null)
-            {
-//               LogTools.info("Sending " + robotSide + " hand bracing command!");
                walkingCommandInputManager.submitCommand(handContactCommand);
-            }
          }
       }
 

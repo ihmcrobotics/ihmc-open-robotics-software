@@ -121,19 +121,23 @@ public class RigidBodyDynamicLoadBearingControlState extends RigidBodyControlSta
    @Override
    public boolean isDone(double timeInState)
    {
-      // Do not exit while in pre-contact phase
-      if (stateMachine.getCurrentStateKey() != DynamicLoadBearingStateEnum.POST_CONTACT)
-         return false;
+      if (stateMachine.getCurrentStateKey() == DynamicLoadBearingStateEnum.PRE_CONTACT)
+      {
+         // Only return if the arm is stuck, which is likely because it's extended
+         return preContactState.isStuck(stateMachine.getTimeInCurrentState());
+      }
+      else
+      {
+         // If the hand is slipping or the arm is straightened, exit this state
+         boolean isSlippingOrAtSingularity = stateMachine.getCurrentState().isDone(stateMachine.getTimeInCurrentState());
+         if (isSlippingOrAtSingularity)
+            return true;
 
-      // If the has is slipping or the arm is straightened, exit this state
-      boolean isSlippingOrAtSingularity = stateMachine.getCurrentState().isDone(stateMachine.getTimeInCurrentState());
-      if (isSlippingOrAtSingularity)
-         return true;
-
-      // If the robot has reached a high level of stability, exit this state
-      boolean isRecovered = capturePointErrorProvider.getValue() < CAPTURE_POINT_ERROR_THRESHOLD_TO_REMAIN_IN_STATE;
-      boolean hasSpentSufficientTimeInContact = stateMachine.getTimeInCurrentState() > MINIMUM_TIME_IN_CONTACT;
-      return isRecovered && hasSpentSufficientTimeInContact;
+         // If the robot has reached a high level of stability, exit this state
+         boolean isRecovered = capturePointErrorProvider.getValue() < CAPTURE_POINT_ERROR_THRESHOLD_TO_REMAIN_IN_STATE;
+         boolean hasSpentSufficientTimeInContact = stateMachine.getTimeInCurrentState() > MINIMUM_TIME_IN_CONTACT;
+         return isRecovered && hasSpentSufficientTimeInContact;
+      }
    }
 
    @Override
@@ -148,6 +152,11 @@ public class RigidBodyDynamicLoadBearingControlState extends RigidBodyControlSta
    {
       // this control mode does not support command queuing
       return 0.0;
+   }
+
+   public void setOnTouchdownCallback(Runnable runnable)
+   {
+      postContactState.setOnTouchdownCallback(runnable);
    }
 
    public boolean isLoadBearing()

@@ -57,12 +57,15 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandContactCommand;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -274,6 +277,17 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       boolean enableHighCoPDamping = highCoPDampingDuration > 0.0 && !Double.isInfinite(coPErrorThreshold);
       footShakiesEstimator.setHighCoPDampingParameters(enableHighCoPDamping, highCoPDampingDuration, coPErrorThreshold);
 
+      SideDependentList<RigidBodyControlManager> handManagers = commandConsumer.getHandManagers();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RigidBodyControlManager handManager = handManagers.get(robotSide);
+         if (handManager != null)
+         {
+            handManager.setOnTouchdownCallback(this::onTouchdownCallback);
+         }
+      }
+      commandConsumer.setOnHandContactReceived(this::onHandContactReceived);
+
       String[] jointNamesRestrictiveLimits = walkingControllerParameters.getJointsWithRestrictiveLimits();
       OneDoFJointBasics[] jointsWithRestrictiveLimit = MultiBodySystemTools.filterJoints(ScrewTools.findJointsWithNames(allOneDoFjoints,
                                                                                                                         jointNamesRestrictiveLimits),
@@ -304,6 +318,24 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       ControllerCoreOptimizationSettings defaultControllerCoreOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
       controllerCoreOptimizationSettings = new ParameterizedControllerCoreOptimizationSettings(defaultControllerCoreOptimizationSettings, registry);
+   }
+
+   private final RecyclingArrayList<Point2D> supportRegion = new RecyclingArrayList<>(Point2D.class);
+
+   private void onHandContactReceived(HandContactCommand handContactCommand)
+   {
+//      supportRegion.clear();
+//      for (int i = 0; i < handContactCommand.getSupportRegionsPointsInMidFeetZUp().size(); i++)
+//      {
+//         supportRegion.add().set(handContactCommand.getSupportRegionsPointsInMidFeetZUp().get(i));
+//      }
+   }
+
+   private void onTouchdownCallback()
+   {
+//      StabilityMarginRegionCalculator multiContactStabilityRegionCalculator = controllerToolbox.getMultiContactStabilityRegionCalculator();
+//      MovingReferenceFrame midFeetZUpFrame = controllerToolbox.getReferenceFrames().getMidFeetZUpFrame();
+//      multiContactStabilityRegionCalculator.initializeRegion(midFeetZUpFrame, supportRegion);
    }
 
    private StateMachine<WalkingStateEnum, WalkingState> setupStateMachine(double controlDT)
@@ -822,6 +854,9 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       else if (multiContactRegionCalculator != null)
       {
          multiContactRegionCalculator.clear();
+
+         // clear notifications
+         haveContactsRemoved();
       }
 
       FrameConvexPolygon2DReadOnly multiContactStabilityRegion = useMultiContactStabilityRegion ? multiContactRegionCalculator.getFeasibleRegion() : zeroRegion;

@@ -75,6 +75,8 @@ public class ReducedOrderRobotModel
    private final YoFramePoint2D capturePointPosition;
    private final YoFramePose3D centroidalPose;
    private final PoseReferenceFrame centroidalFrame = new PoseReferenceFrame("centroidalFrame", ReferenceFrame.getWorldFrame());
+   private final PoseReferenceFrame midFeetZUpFrame = new PoseReferenceFrame("midFeetZUpFrame", ReferenceFrame.getWorldFrame());
+   private final FramePose3D midFeetZUpPose = new FramePose3D();
 
    // Hand and reachability data
    private final SideDependentList<YoFramePoint3D> handPositions = new SideDependentList<>();
@@ -131,6 +133,9 @@ public class ReducedOrderRobotModel
       centroidalPose.set(other.centroidalPose);
       centroidalFrame.setPoseAndUpdate(centroidalPose);
 
+      midFeetZUpPose.set(other.midFeetZUpPose);
+      midFeetZUpFrame.setPoseAndUpdate(midFeetZUpPose);
+
       updateCapturePoint();
    }
 
@@ -144,6 +149,10 @@ public class ReducedOrderRobotModel
 
       centroidalPose.set(tempPoint, tempOrientation);
       centroidalFrame.setPoseAndUpdate(centroidalPose);
+
+      midFeetZUpPose.setToZero(referenceFrames.getMidFeetZUpFrame());
+      midFeetZUpPose.changeFrame(ReferenceFrame.getWorldFrame());
+      midFeetZUpFrame.setPoseAndUpdate(midFeetZUpPose);
    }
 
    private void updateSupportPolygon(SideDependentList<? extends ReferenceFrame> soleFrames)
@@ -198,6 +207,11 @@ public class ReducedOrderRobotModel
    public ReferenceFrame getCentroidalFrame()
    {
       return centroidalFrame;
+   }
+
+   public PoseReferenceFrame getMidFeetZUpFrame()
+   {
+      return midFeetZUpFrame;
    }
 
    public FrameConvexPolygon2DReadOnly getNominalFootPolygon()

@@ -15,7 +15,7 @@ public class HandContactMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "ceabe84670f982966a2408e20b5184f31a1595c844ae23cf9577277b2bb3a44c";
+   		return "ba1a9390e6fbf25ab7df705f81b0ae813a775669089302bfef510d7418bc3fe9";
    }
    
    @Override
@@ -64,6 +64,9 @@ public class HandContactMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
 
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 18; ++i0)
+      {
+          current_alignment += ihmc_common_msgs.msg.dds.Point2DMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
 
       return current_alignment - initial_alignment;
    }
@@ -93,6 +96,11 @@ public class HandContactMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
 
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getBracingNormal(), current_alignment);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getSupportRegionInMidFeetFrame().size(); ++i0)
+      {
+          current_alignment += ihmc_common_msgs.msg.dds.Point2DMessagePubSubType.getCdrSerializedSize(data.getSupportRegionInMidFeetFrame().get(i0), current_alignment);}
+
 
       return current_alignment - initial_alignment;
    }
@@ -109,6 +117,10 @@ public class HandContactMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
 
       geometry_msgs.msg.dds.PointPubSubType.write(data.getBracingPoint(), cdr);
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getBracingNormal(), cdr);
+      if(data.getSupportRegionInMidFeetFrame().size() <= 18)
+      cdr.write_type_e(data.getSupportRegionInMidFeetFrame());else
+          throw new RuntimeException("support_region_in_mid_feet_frame field exceeds the maximum length: %d > %d".formatted(data.getSupportRegionInMidFeetFrame().size(), 18));
+
    }
 
    public static void read(controller_msgs.msg.dds.HandContactMessage data, us.ihmc.idl.CDR cdr)
@@ -123,6 +135,7 @@ public class HandContactMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
       	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getBracingPoint(), cdr);	
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getBracingNormal(), cdr);	
+      cdr.read_type_e(data.getSupportRegionInMidFeetFrame());	
 
    }
 
@@ -137,6 +150,7 @@ public class HandContactMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
 
       ser.write_type_a("bracing_normal", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getBracingNormal());
 
+      ser.write_type_e("support_region_in_mid_feet_frame", data.getSupportRegionInMidFeetFrame());
    }
 
    @Override
@@ -150,6 +164,7 @@ public class HandContactMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
 
       ser.read_type_a("bracing_normal", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getBracingNormal());
 
+      ser.read_type_e("support_region_in_mid_feet_frame", data.getSupportRegionInMidFeetFrame());
    }
 
    public static void staticCopy(controller_msgs.msg.dds.HandContactMessage src, controller_msgs.msg.dds.HandContactMessage dest)

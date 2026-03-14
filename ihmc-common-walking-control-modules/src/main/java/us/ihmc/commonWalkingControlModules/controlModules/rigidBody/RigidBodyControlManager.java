@@ -718,6 +718,14 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
       return inverseDynamicsCommandList;
    }
 
+   public void setOnTouchdownCallback(Runnable runnable)
+   {
+      if (dynamicLoadBearingControlState != null)
+      {
+         dynamicLoadBearingControlState.setOnTouchdownCallback(runnable);
+      }
+   }
+
    public JointDesiredOutputListReadOnly getJointDesiredData()
    {
       return stateMachine.getCurrentState().getJointDesiredData();
