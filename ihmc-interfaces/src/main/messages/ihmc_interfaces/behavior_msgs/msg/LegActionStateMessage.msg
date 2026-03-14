@@ -2,4 +2,4 @@
 behavior_msgs/ActionNodeStateMessage state
 
 # Definition
-behavior_msgs/PelvisHeightOrientationActionDefinitionMessage definition
+behavior_msgs/LegActionDefinitionMessage definition

@@ -20,7 +20,7 @@ bool is_manually_placed
 geometry_msgs/Pose[<=40] waypoints
 
 # The footsteps, with a maximum of 50
-behavior_msgs/FootstepPlanActionFootstepDefinitionMessage[<=50] footsteps
+behavior_msgs/WalkActionFootstepDefinitionMessage[<=50] footsteps
 
 # The position to which the goal stance is aligned
 geometry_msgs/Point goal_stance_point

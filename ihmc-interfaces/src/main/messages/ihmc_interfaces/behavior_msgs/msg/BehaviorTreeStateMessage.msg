@@ -20,16 +20,16 @@ byte DOOR_TRAVERSAL = 10
 byte BUILDING_EXPLORATION = 11
 
 byte NECK_ACTION = 12
-byte CHEST_ORIENTATION_ACTION = 13
-byte FOOTSTEP_PLAN_ACTION = 14
+byte SPINE_ACTION = 13
+byte WALK_ACTION = 14
 byte SAKE_HAND_COMMAND_ACTION = 15
 byte ABILITY_HAND_ACTION = 16
-byte HAND_POSE_ACTION = 17
+byte ARM_ACTION = 17
 byte HAND_WRENCH_ACTION = 18
 byte SCREW_PRIMITIVE_ACTION = 19
-byte PELVIS_HEIGHT_ORIENTATION_ACTION = 20
+byte PELVIS_ACTION = 20
 byte WAIT_DURATION_ACTION = 21
-byte FOOT_POSE_ACTION = 22
+byte LEG_ACTION = 22
 
 # Monotonically increasing message ID that matches the CRDTInfo update number
 uint64 sequence_id
@@ -77,22 +77,22 @@ behavior_msgs/BuildingExplorationStateMessage[<=120] building_explorations
 
 behavior_msgs/NeckActionStateMessage[<=120] neck_actions
 
-behavior_msgs/ChestOrientationActionStateMessage[<=120] chest_orientation_actions
+behavior_msgs/SpineActionStateMessage[<=120] spine_actions
 
-behavior_msgs/FootstepPlanActionStateMessage[<=120] footstep_plan_actions
+behavior_msgs/WalkActionStateMessage[<=120] walk_actions
 
 behavior_msgs/SakeHandCommandActionStateMessage[<=120] sake_hand_command_actions
 
 behavior_msgs/AbilityHandActionStateMessage[<=120] ability_hand_actions
 
-behavior_msgs/HandPoseActionStateMessage[<=120] hand_pose_actions
+behavior_msgs/ArmActionStateMessage[<=120] arm_actions
 
 behavior_msgs/HandWrenchActionStateMessage[<=120] hand_wrench_actions
 
 behavior_msgs/ScrewPrimitiveActionStateMessage[<=120] screw_primitive_actions
 
-behavior_msgs/PelvisHeightOrientationActionStateMessage[<=120] pelvis_height_actions
+behavior_msgs/PelvisActionStateMessage[<=120] pelvis_actions
 
 behavior_msgs/WaitDurationActionStateMessage[<=120] wait_duration_actions
 
-behavior_msgs/FootPoseActionStateMessage[<=120] foot_pose_actions
+behavior_msgs/LegActionStateMessage[<=120] leg_actions

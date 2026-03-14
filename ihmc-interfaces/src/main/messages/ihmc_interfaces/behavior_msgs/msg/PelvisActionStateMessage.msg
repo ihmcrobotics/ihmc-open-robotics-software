@@ -2,4 +2,4 @@
 behavior_msgs/ActionNodeStateMessage state
 
 # Definition
-behavior_msgs/FootPoseActionDefinitionMessage definition
+behavior_msgs/PelvisActionDefinitionMessage definition

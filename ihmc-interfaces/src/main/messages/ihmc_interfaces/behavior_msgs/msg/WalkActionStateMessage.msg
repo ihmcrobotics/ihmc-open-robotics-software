@@ -7,13 +7,13 @@ byte PLAN_COMMANDED = 3
 behavior_msgs/ActionNodeStateMessage state
 
 # Definition
-behavior_msgs/FootstepPlanActionDefinitionMessage definition
+behavior_msgs/WalkActionDefinitionMessage definition
 
 # Additional synchronization mechanism to avoid feedback loop
 ihmc_common_msgs/LatestModificationMessage latest_modification_state_data
 
 # The footsteps, with a maximum of 50
-behavior_msgs/FootstepPlanActionFootstepStateMessage[<=50] footsteps
+behavior_msgs/WalkActionFootstepStateMessage[<=50] footsteps
 
 # Transform from the planning goal to the action's parent frame
 controller_msgs/RigidBodyTransformMessage goal_transform_to_parent
@@ -40,4 +40,4 @@ geometry_msgs/Pose current_left_foot_pose
 geometry_msgs/Pose current_right_foot_pose
 
 # Preview footstep plan, with a maximum of 50
-behavior_msgs/FootstepPlanActionFootstepDefinitionMessage[<=50] preview_footsteps
+behavior_msgs/WalkActionFootstepDefinitionMessage[<=50] preview_footsteps

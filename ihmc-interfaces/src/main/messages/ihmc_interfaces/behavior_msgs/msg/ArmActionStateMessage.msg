@@ -2,7 +2,7 @@
 behavior_msgs/ActionNodeStateMessage state
 
 # Definition
-behavior_msgs/HandPoseActionDefinitionMessage definition
+behavior_msgs/ArmActionDefinitionMessage definition
 
 # This is the estimated goal chest frame as the robot executes a potential whole body action.
 controller_msgs/RigidBodyTransformMessage goal_chest_transform_to_world
