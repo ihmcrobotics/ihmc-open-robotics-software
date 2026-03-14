@@ -39,6 +39,7 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
    private final RigidBodyPositionControlHelper positionControlHelper;
 
    private final FramePoint3D desiredPosition = new FramePoint3D();
+   private final FramePoint3D waypointPosition = new FramePoint3D();
    private final FrameVector3D terminalVelocity = new FrameVector3D();
    private final Plane3D bracingPlane = new Plane3D();
 
@@ -129,6 +130,10 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
 
       handVelocity.setIncludingFrame(controlFrame.getTwistOfFrame().getLinearPart());
       handVelocity.changeFrame(ReferenceFrame.getWorldFrame());
+
+//      double waypointOffset = 0.1;
+//      waypointPosition.set(yoBracingNormal);
+//      waypointPosition.scale(waypointOffset);
 
       trajectoryCommand.getTrajectoryPointList().clear();
       trajectoryCommand.addTrajectoryPoint(0.0, currentPosition, handVelocity);

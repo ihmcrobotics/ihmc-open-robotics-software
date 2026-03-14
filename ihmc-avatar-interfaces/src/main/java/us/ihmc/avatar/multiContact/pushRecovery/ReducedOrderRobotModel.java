@@ -45,7 +45,7 @@ import java.util.ArrayList;
 public class ReducedOrderRobotModel
 {
    // Plan with slower acceleration
-   public static final double MAX_HAND_ACCELERATION = 8.0; // 15.0;
+   public static final double MAX_HAND_ACCELERATION = 7.0; // 15.0;
 
    // Scale down feet contact points in order to check stability conditions
    private static final double FOOT_SCALE_FACTOR = 0.6;

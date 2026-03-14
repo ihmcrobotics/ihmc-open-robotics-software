@@ -54,7 +54,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerThreadInterface
 {
-   private static final double CAPTURE_POINT_ERROR_THRESHOLD_FOR_HAND_CONTACT = 0.02;
+   private static final double CAPTURE_POINT_ERROR_THRESHOLD_FOR_HAND_CONTACT = 0.04;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -172,7 +172,7 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
       }
 
       perceptionVisualizer = new YoPerceptionVisualizer(registry);
-      diagnosticBracingSide.set(RobotSide.LEFT);
+      diagnosticBracingSide.set(RobotSide.RIGHT);
 //      triggerInferenceCall.set(true);
 //      numberOfInferenceCallsForTest.set(1);
    }
@@ -260,6 +260,12 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
          TerrainMapCommand terrainMapCommand = commandInputManager.pollNewestCommand(TerrainMapCommand.class);
 //         bipedalGaitGenerator.setTerrainMapCommand(terrainMapCommand);
          perceptionVisualizer.visualizeHeightMap(terrainMapCommand);
+      }
+
+      if (triggerFall.getValue())
+      {
+         centerOfMassVelocity.setIncludingFrame(humanoidReferenceFrames.getMidFeetZUpFrame(), 0.03, 0.0, 0.0);
+         centerOfMassVelocity.changeFrame(ReferenceFrame.getWorldFrame());
       }
 
       if (triggerFall.getValue() || (isFalling.getValue() && !hasSentRecoveryMessage.getValue() && isHandRecoveryContactEnabled.getValue()))
