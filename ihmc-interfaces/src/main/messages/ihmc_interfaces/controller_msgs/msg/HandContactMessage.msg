@@ -24,3 +24,7 @@ geometry_msgs/Vector3 bracing_normal
 
 # Initial support polygon in mid-feet zup frame on contact, to warm start region solved through LP
 ihmc_common_msgs/Point2DMessage[<=18] support_region_in_mid_feet_frame
+
+geometry_msgs/Point region_origin
+geometry_msgs/Quaternion region_orientation
+ihmc_common_msgs/Point2DMessage[<=50] scaled_convex_hull

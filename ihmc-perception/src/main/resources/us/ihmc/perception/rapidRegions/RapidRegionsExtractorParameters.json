@@ -69,7 +69,7 @@
     "upperBound" : 3000
   },
   "Boundary min patches" : {
-    "value" : 150,
+    "value" : 120,
     "lowerBound" : 1,
     "upperBound" : 1000
   },
