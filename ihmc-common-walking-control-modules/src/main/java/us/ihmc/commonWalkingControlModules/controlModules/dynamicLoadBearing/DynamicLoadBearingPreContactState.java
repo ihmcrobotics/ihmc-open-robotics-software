@@ -4,14 +4,17 @@ import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyPos
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EuclideanTrajectoryControllerCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandContactCommand;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.GainCalculator;
@@ -22,7 +25,6 @@ import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
-import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFrameVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -66,8 +68,13 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
 
    private final FramePoint3D currentPosition = new FramePoint3D();
    private final FrameVector3D tempVector = new FrameVector3D();
+   private final FramePoint3D tempPoint = new FramePoint3D();
+   private final FramePoint2D tempPoint2d = new FramePoint2D();
 
    private final EuclideanTrajectoryControllerCommand trajectoryCommand = new EuclideanTrajectoryControllerCommand();
+
+   private final RigidBodyTransform transformFromWorld = new RigidBodyTransform();
+   private final ConvexPolygon2D regionPolygon = new ConvexPolygon2D();
 
    public DynamicLoadBearingPreContactState(RigidBodyBasics bodyToControl,
                                             RigidBodyPositionControlHelper positionControlHelper,
@@ -105,14 +112,17 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
       this.controlFrame = (MovingReferenceFrame) controlFrame;
    }
 
-   public void setBracingPoint(Point3DReadOnly bracingPoint, Vector3DReadOnly bracingNormal, double trajectoryDuration)
+   public void setBracingData(HandContactCommand command)
    {
-      this.desiredPosition.set(bracingPoint);
-      this.bracingPlane.set(bracingPoint, bracingNormal);
-      this.trajectoryDuration.set(trajectoryDuration);
+      this.desiredPosition.set(command.getBracingPoint());
+      this.bracingPlane.set(command.getBracingPoint(), command.getBracingNormal());
+      this.trajectoryDuration.set(command.getTrajectoryDuration());
 
-      yoBracingPoint.set(bracingPoint);
-      yoBracingNormal.set(bracingNormal);
+      yoBracingPoint.set(command.getBracingPoint());
+      yoBracingNormal.set(command.getBracingNormal());
+
+      transformFromWorld.set(command.getRegionTransformFromWorld());
+      regionPolygon.set(command.getConvexPolygon());
    }
 
    @Override
@@ -178,7 +188,14 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
       handSpeed.set(controlFrame.getTwistOfFrame().getLinearPart().norm());
       boolean hasLowHandSpeed = handSpeed.getValue() < 0.2;
 
-      hasHandTouchedDown.update(isCloseToWall && hasLowHandSpeed);
+      tempPoint.set(positionControlHelper.getYoCurrentPosition());
+      transformFromWorld.transform(tempPoint);
+      tempPoint2d.set(tempPoint);
+
+      double distanceFromRegion = regionPolygon.signedDistance(tempPoint2d);
+      boolean isInsideRegion = distanceFromRegion < 0.01;
+
+      hasHandTouchedDown.update(isCloseToWall && hasLowHandSpeed && isInsideRegion);
       return hasHandTouchedDown.getValue();
    }
 

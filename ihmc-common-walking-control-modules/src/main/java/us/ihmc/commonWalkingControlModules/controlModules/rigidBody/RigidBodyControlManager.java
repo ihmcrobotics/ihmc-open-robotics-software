@@ -20,6 +20,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.DesiredAccelerationsCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandContactCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
@@ -441,11 +442,11 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
       }
    }
 
-   public void handleHandContactCommand(FramePoint3DReadOnly bracingPoint, FrameVector3DReadOnly bracingNormal, double trajectoryDuration)
+   public void handleHandContactCommand(HandContactCommand handContactCommand)
    {
       if (dynamicLoadBearingControlState != null)
       {
-         dynamicLoadBearingControlState.setBracingSurface(bracingPoint, bracingNormal, trajectoryDuration);
+         dynamicLoadBearingControlState.setBracingSurface(handContactCommand);
          requestState(dynamicLoadBearingControlState.getControlMode());
       }
    }

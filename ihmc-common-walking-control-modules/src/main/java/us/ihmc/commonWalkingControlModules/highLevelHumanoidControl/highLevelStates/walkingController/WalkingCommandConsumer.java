@@ -461,7 +461,7 @@ public class WalkingCommandConsumer
          {
             if (command.load())
             {
-               handManager.handleHandContactCommand(command.getBracingPoint(), command.getBracingNormal(), command.getTrajectoryDuration());
+               handManager.handleHandContactCommand(command);
                onHandContactReceived.accept(command);
             }
             else

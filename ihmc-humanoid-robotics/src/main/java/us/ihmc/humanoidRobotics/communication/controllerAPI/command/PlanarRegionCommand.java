@@ -5,7 +5,6 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -24,7 +23,8 @@ public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarR
    private final RigidBodyTransform fromWorldToLocalTransform = new RigidBodyTransform();
 
    private final ConvexPolygon2D convexHull = new ConvexPolygon2D();
-   private final ConvexPolygon2D scaledConvexHull = new ConvexPolygon2D();
+   private final ConvexPolygon2D scaledConvexHullForPlanning = new ConvexPolygon2D();
+   private final ConvexPolygon2D scaledConvexHullForController = new ConvexPolygon2D();
    private final RecyclingArrayList<Point2D> concaveHullsVertices = new RecyclingArrayList<Point2D>(20, Point2D.class);
    private final RecyclingArrayList<ConvexPolygon2D> convexPolygons = new RecyclingArrayList<ConvexPolygon2D>(10, ConvexPolygon2D.class);
 
@@ -188,9 +188,14 @@ public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarR
       return convexHull;
    }
 
-   public ConvexPolygon2D getScaledConvexHull()
+   public ConvexPolygon2D getScaledConvexHullForPlanning()
    {
-      return scaledConvexHull;
+      return scaledConvexHullForPlanning;
+   }
+
+   public ConvexPolygon2D getScaledConvexHullForController()
+   {
+      return scaledConvexHullForController;
    }
 
    public RecyclingArrayList<Point2D> getConcaveHullsVertices()
@@ -208,9 +213,14 @@ public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarR
       planarRegionToPack.set(fromLocalToWorldTransform, convexPolygons, concaveHullsVertices, regionId);
    }
 
-   public void updateScaledConvexHull(ConvexPolygonScaler scaler, double distance)
+   public void updateScaledConvexHullForPlanner(ConvexPolygonScaler scaler, double distance)
    {
-      scaler.scaleConvexPolygon(convexHull, distance, scaledConvexHull);
+      scaler.scaleConvexPolygon(convexHull, distance, scaledConvexHullForPlanning);
+   }
+
+   public void updateScaledConvexHullForController(ConvexPolygonScaler scaler, double distance)
+   {
+      scaler.scaleConvexPolygon(convexHull, distance, scaledConvexHullForController);
    }
 
    @Override

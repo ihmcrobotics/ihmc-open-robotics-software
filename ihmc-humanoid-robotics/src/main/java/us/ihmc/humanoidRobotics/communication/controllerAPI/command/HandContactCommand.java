@@ -4,11 +4,14 @@ import controller_msgs.msg.dds.HandContactMessage;
 import ihmc_common_msgs.msg.dds.Point2DMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -22,6 +25,9 @@ public class HandContactCommand implements Command<HandContactCommand, HandConta
    private final FrameVector3D bracingNormal = new FrameVector3D();
    private final RecyclingArrayList<Point2D> supportRegionsPointsInMidFeetZUp = new RecyclingArrayList<>(Point2D.class);
 
+   private final RigidBodyTransform regionTransformFromWorld = new RigidBodyTransform();
+   private final ConvexPolygon2D convexPolygon = new ConvexPolygon2D();
+
    @Override
    public void clear()
    {
@@ -31,6 +37,9 @@ public class HandContactCommand implements Command<HandContactCommand, HandConta
       bracingPoint.setToNaN();
       bracingNormal.setToNaN();
       supportRegionsPointsInMidFeetZUp.clear();
+
+      regionTransformFromWorld.setToNaN();
+      convexPolygon.clear();
    }
 
    @Override
@@ -48,6 +57,15 @@ public class HandContactCommand implements Command<HandContactCommand, HandConta
          Point2DMessage vertexMessage = message.getSupportRegionInMidFeetFrame().get(i);
          supportRegionsPointsInMidFeetZUp.add().set(vertexMessage.getX(), vertexMessage.getY());
       }
+
+      MessageTools.toEuclid(message.getRegionTransform(), regionTransformFromWorld);
+
+      for (int i = 0; i < message.getScaledConvexHull().size(); i++)
+      {
+         Point2DMessage vertex = message.getScaledConvexHull().get(i);
+         convexPolygon.addVertex(vertex.getX(), vertex.getY());
+      }
+      convexPolygon.update();
    }
 
    @Override
@@ -82,6 +100,9 @@ public class HandContactCommand implements Command<HandContactCommand, HandConta
       {
          supportRegionsPointsInMidFeetZUp.add().set(other.supportRegionsPointsInMidFeetZUp.get(i));
       }
+
+      regionTransformFromWorld.set(other.regionTransformFromWorld);
+      convexPolygon.set(other.convexPolygon);
    }
 
    public void setLoad(boolean load)
@@ -132,5 +153,15 @@ public class HandContactCommand implements Command<HandContactCommand, HandConta
    public RecyclingArrayList<Point2D> getSupportRegionsPointsInMidFeetZUp()
    {
       return supportRegionsPointsInMidFeetZUp;
+   }
+
+   public RigidBodyTransform getRegionTransformFromWorld()
+   {
+      return regionTransformFromWorld;
+   }
+
+   public ConvexPolygon2D getConvexPolygon()
+   {
+      return convexPolygon;
    }
 }

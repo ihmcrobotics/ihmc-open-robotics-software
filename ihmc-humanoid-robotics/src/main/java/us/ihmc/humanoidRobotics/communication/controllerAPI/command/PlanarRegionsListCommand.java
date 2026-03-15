@@ -114,7 +114,7 @@ public class PlanarRegionsListCommand implements Command<PlanarRegionsListComman
    {
       for (int i = 0; i < planarRegions.size(); i++)
       {
-         planarRegions.get(i).updateScaledConvexHull(scaler, distance);
+         planarRegions.get(i).updateScaledConvexHullForPlanner(scaler, distance);
       }
    }
 

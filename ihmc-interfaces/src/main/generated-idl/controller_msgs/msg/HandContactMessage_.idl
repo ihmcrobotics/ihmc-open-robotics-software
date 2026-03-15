@@ -1,6 +1,7 @@
 #ifndef __controller_msgs__msg__HandContactMessage__idl__
 #define __controller_msgs__msg__HandContactMessage__idl__
 
+#include "controller_msgs/msg/./RigidBodyTransformMessage_.idl"
 #include "geometry_msgs/msg/./Point_.idl"
 #include "geometry_msgs/msg/./Vector3_.idl"
 #include "ihmc_common_msgs/msg/./Point2DMessage_.idl"
@@ -50,9 +51,11 @@ module controller_msgs
          */
         geometry_msgs::msg::dds::Vector3 bracing_normal;
         /**
-         * Initial support polygon in mid-feet zup frame, to warm start region
+         * Initial support polygon in mid-feet zup frame on contact, to warm start region solved through LP
          */
         sequence<ihmc_common_msgs::msg::dds::Point2DMessage, 18> support_region_in_mid_feet_frame;
+        controller_msgs::msg::dds::RigidBodyTransformMessage region_transform;
+        sequence<ihmc_common_msgs::msg::dds::Point2DMessage, 50> scaled_convex_hull;
       };
     };
   };
