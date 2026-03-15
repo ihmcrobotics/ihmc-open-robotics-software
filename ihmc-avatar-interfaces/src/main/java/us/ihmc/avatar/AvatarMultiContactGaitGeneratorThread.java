@@ -13,10 +13,8 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetwork
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.BipedTimedStep;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MultiContactGaitGeneratorAPI;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -28,15 +26,13 @@ import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.scs2.definition.visual.ColorDefinitions;
-import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
-import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.DefaultPoint2DGraphic;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
@@ -44,8 +40,8 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -54,7 +50,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerThreadInterface
 {
-   private static final double CAPTURE_POINT_ERROR_THRESHOLD_FOR_HAND_CONTACT = 0.04;
+   private static final double CAPTURE_POINT_ERROR_THRESHOLD_FOR_HAND_CONTACT = 0.03;
+   public static final double DEFAULT_CONTACT_SAFETY_FACTOR = 0.07;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -73,6 +70,8 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
 
 //   private final AvatarBipedalGaitGenerator bipedalGaitGenerator;
    private final YoBoolean hasReceivedPlanarRegions = new YoBoolean("hasReceivedPlanarRegions", registry);
+
+   private final YoDouble contactSafetyFactor = new YoDouble("contactSafetyFactor", registry);
 
    private final YoBoolean isHandRecoveryContactEnabled = new YoBoolean("isHandRecoveryContactEnabled", registry);
    private final YoBoolean isFalling = new YoBoolean("isFalling", registry);
@@ -96,7 +95,7 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
    private final ReducedOrderRobotModel reducedOrderRobotModel;
    private final AtomicReference<CapturabilityBasedStatus> capturabilityBasedStatus = new AtomicReference<>();
 
-   private final YoFramePoint2D[] yoCapturePointWaypoints = new YoFramePoint2D[25];
+//   private final YoFramePoint2D[] yoCapturePointWaypoints = new YoFramePoint2D[25];
    private final YoPerceptionVisualizer perceptionVisualizer;
 
    // TODO convert to time-based, or somehow check if a hand is in recovery
@@ -105,6 +104,8 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
    private final YoEnum<RobotSide> diagnosticBracingSide = new YoEnum<>("diagnosticBracingSide", registry, RobotSide.class, true);
 //   private final YoBoolean triggerInferenceCall = new YoBoolean("triggerInferenceCall", registry);
 //   private final YoInteger numberOfInferenceCallsForTest = new YoInteger("numberOfInferenceCallsForTest", registry);
+
+   private final ConvexPolygonScaler convexPolygonScaler = new ConvexPolygonScaler();
 
    public AvatarMultiContactGaitGeneratorThread(DRCRobotModel robotModel,
                                                 ROS2Node ros2Node,
@@ -121,6 +122,7 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
 
       planner = robotModel.getReactiveBracingPlanner();
       registry.addChild(planner.getRegistry());
+      contactSafetyFactor.set(DEFAULT_CONTACT_SAFETY_FACTOR);
 
       reducedOrderRobotModel = new ReducedOrderRobotModel(robotModel.getContactPointParameters(), registry);
 
@@ -166,10 +168,10 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
 
       walkingOutputManager.attachStatusMessageListener(CapturabilityBasedStatus.class, capturabilityBasedStatus::set);
 
-      for (int i = 0; i < yoCapturePointWaypoints.length; i++)
-      {
-         yoCapturePointWaypoints[i] = new YoFramePoint2D("capturePointWP" + i, ReferenceFrame.getWorldFrame(), registry);
-      }
+//      for (int i = 0; i < yoCapturePointWaypoints.length; i++)
+//      {
+//         yoCapturePointWaypoints[i] = new YoFramePoint2D("capturePointWP" + i, ReferenceFrame.getWorldFrame(), registry);
+//      }
 
       perceptionVisualizer = new YoPerceptionVisualizer(registry);
       diagnosticBracingSide.set(RobotSide.RIGHT);
@@ -210,15 +212,15 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
       //      }
 
       // Update capture point preview trajectory
-      RecyclingArrayList<FramePoint2D> capturePointPositionWaypoints = centerOfPressureDataHolder.getCapturePointPositionWaypoints();
-      for (int i = 0; i < yoCapturePointWaypoints.length; i++)
-      {
-         yoCapturePointWaypoints[i].setToNaN();
-      }
-      for (int i = 0; i < capturePointPositionWaypoints.size(); i++)
-      {
-         yoCapturePointWaypoints[i].set(capturePointPositionWaypoints.get(i));
-      }
+//      RecyclingArrayList<FramePoint2D> capturePointPositionWaypoints = centerOfPressureDataHolder.getCapturePointPositionWaypoints();
+//      for (int i = 0; i < yoCapturePointWaypoints.length; i++)
+//      {
+//         yoCapturePointWaypoints[i].setToNaN();
+//      }
+//      for (int i = 0; i < capturePointPositionWaypoints.size(); i++)
+//      {
+//         yoCapturePointWaypoints[i].set(capturePointPositionWaypoints.get(i));
+//      }
 
       // Update robot model
       HumanoidRobotContextTools.updateRobot(fullRobotModel, humanoidRobotContextData.getProcessedJointData());
@@ -249,6 +251,8 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
       else if (commandInputManager.isNewCommandAvailable(PlanarRegionsListCommand.class))
       {
          PlanarRegionsListCommand planarRegionsListCommand = commandInputManager.pollNewestCommand(PlanarRegionsListCommand.class);
+         planarRegionsListCommand.updateScaledConvexHulls(convexPolygonScaler, DEFAULT_CONTACT_SAFETY_FACTOR);
+
 //         LogTools.info("Received planar regions command! number of regions: " + planarRegionsListCommand.getNumberOfPlanarRegions());
          planner.setPlanarRegions(planarRegionsListCommand);
          perceptionVisualizer.visualizePlanarRegions(planarRegionsListCommand);
@@ -365,11 +369,12 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
 
-      for (int i = 0; i < yoCapturePointWaypoints.length; i++)
-      {
-         group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D("capturePointWP" + i, yoCapturePointWaypoints[i], 0.003, ColorDefinitions.DarkBlue(), DefaultPoint2DGraphic.PLUS));
-      }
+//      for (int i = 0; i < yoCapturePointWaypoints.length; i++)
+//      {
+//         group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D("capturePointWP" + i, yoCapturePointWaypoints[i], 0.003, ColorDefinitions.DarkBlue(), DefaultPoint2DGraphic.PLUS));
+//      }
 
+      group.addChild(planner.getSCS2YoGraphics());
       group.addChild(perceptionVisualizer.getSCS2YoGraphics());
 
       return group;

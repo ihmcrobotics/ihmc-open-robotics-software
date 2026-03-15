@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.BipedTi
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandContactCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.List;
@@ -29,4 +30,9 @@ public interface ReactiveBracingPlanner
    {
       // do nothing
    }
+
+   /**
+    * SCS 2 YoGraphics
+    */
+   YoGraphicDefinition getSCS2YoGraphics();
 }

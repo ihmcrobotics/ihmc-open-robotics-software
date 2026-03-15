@@ -324,7 +324,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       {
          wholeBodyContactState = new WholeBodyContactState(controlledOneDoFJoints, fullRobotModel.getRootJoint());
          multiContactStabilityRegionCalculator = StabilityMarginRegionCalculator.createForCoPStabilityMargin("cop_", totalMass.getValue(), centerOfMassFrame, referenceFrames.getMidFeetZUpFrame(), registry, null);
-         //         multiContactStabilityRegionCalculator = StabilityMarginRegionCalculator.createForCoMStabilityMargin("cop_", totalMass.getValue(), registry, yoGraphicsListRegistry);
+//                  multiContactStabilityRegionCalculator = StabilityMarginRegionCalculator.createForCoMStabilityMargin("cop_", totalMass.getValue(), registry, null);
 //         multiContactStabilityRegionCalculator.setupForStabilityMarginCalculation(centerOfMassStateProvider::getCenterOfMassPosition);
          multiContactStabilityRegionCalculator.setupForStabilityMarginCalculation(() -> yoCapturePoint);
       }
@@ -1034,13 +1034,13 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       multiContactRegionLPSolveTimer.startMeasurement();
 
       // Query new direction until initial region has been constructed
-      int updatesPerTick = 1;
-      for (int i = 0; i < updatesPerTick; i++)
-      {
-         multiContactStabilityRegionCalculator.performUpdateForNextVertex();
-      }
+//      int updatesPerTick = 1;
+//      for (int i = 0; i < updatesPerTick; i++)
+//      {
+//         multiContactStabilityRegionCalculator.performUpdateForNextVertex();
+//      }
 
-//      multiContactStabilityRegionCalculator.performFullRegionUpdate();
+      multiContactStabilityRegionCalculator.performFullRegionUpdate();
 
       multiContactRegionLPSolveTimer.stopMeasurement();
 
