@@ -6,7 +6,6 @@ import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.Kinemati
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.actions.WaitDurationActionExecutor;
-import us.ihmc.behaviors.behaviorTree.action.actions.WalkActionExecutor;
 import us.ihmc.behaviors.behaviorTree.control.GotoNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneDoorFrameExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectType;
@@ -15,7 +14,6 @@ import us.ihmc.communication.ros2log.ROS2LogRecord;
 import us.ihmc.communication.ros2log.ROS2LogSerialization;
 import us.ihmc.communication.ros2log.ROS2LogTimeSource;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
@@ -23,12 +21,11 @@ import us.ihmc.ros2.ROS2Topic;
 import java.util.List;
 
 import static behavior_msgs.msg.dds.BehaviorTreeSceneObjectStateMessage.*;
-import static us.ihmc.behaviors.behaviorTree.BehaviorTreeTools.searchDFSFirstMatch;
+import static us.ihmc.behaviors.behaviorTree.BehaviorTreeTools.*;
 
 public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversalState, DoorTraversalDefinition>
 {
    private final ROS2Topic<KinematicsToolboxOutputStatus> kstOutputTopic;
-   private ROS2LogRecord ros2LogRecord = null;
    private final KinematicsToolboxOutputStatus status = new KinematicsToolboxOutputStatus();
    private final RigidBodyTransform initialWalkingPose = new RigidBodyTransform();
    private final RigidBodyTransform relativePelvisPose = new RigidBodyTransform();
@@ -77,6 +74,12 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
    {
       super.update();
 
+      doorBehaviorSelection();
+      mimicJsonLogManagement();
+   }
+
+   private void doorBehaviorSelection()
+   {
       if (searchDFSFirstMatch(this, "Decide door behavior type") instanceof WaitDurationActionExecutor waitAction
        && searchDFSFirstMatch(this, "Goto correct door behavior") instanceof GotoNodeExecutor gotoDoor)
       {
@@ -101,21 +104,26 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
                state.getLogger().error("Could not find node to goto: {}", gotoNodeName);
          }
       }
+   }
 
-      boolean executing = false;
-      if (searchDFSFirstMatch(this, "Walk through push door") instanceof WalkActionExecutor walkThroughPushDoor)
-         executing |= walkThroughPushDoor.getState().getIsExecuting();
+   private ROS2LogRecord ros2LogRecord = null;
+   private boolean awaitingCompletion;
 
-      if (searchDFSFirstMatch(this, "Walk through") instanceof WalkActionExecutor walkThroughPullDoor)
-         executing |= walkThroughPullDoor.getState().getIsExecuting();
-
-      if (executing && ros2LogRecord == null)
+   private void mimicJsonLogManagement()
+   {
+      if (ros2LogRecord == null)
       {
-         initialWalkingPose.set(syncedRobot.getReferenceFrames().getMidFeetUnderPelvisFrame().getTransformToRoot());
-         ros2LogRecord = new ROS2LogRecord(robotModel.getSimpleRobotName(), List.of(kstOutputTopic), ROS2LogTimeSource.SYSTEM, ROS2LogSerialization.JSON);
-         ros2LogRecord.start();
+         if (isExecuting(this, "Wait before push door walk") || isExecuting(this, "Wait before walk through pull door"))
+         {
+            initialWalkingPose.set(syncedRobot.getReferenceFrames().getMidFeetUnderPelvisFrame().getTransformToRoot());
+            ros2LogRecord = new ROS2LogRecord(robotModel.getSimpleRobotName(), List.of(kstOutputTopic), ROS2LogTimeSource.SYSTEM, ROS2LogSerialization.JSON);
+            ros2LogRecord.start();
+            awaitingCompletion = false;
+         }
       }
-      if (!executing && ros2LogRecord != null)
+      else if (isExecuting(this, "Wait after push door walk") || isExecuting(this, "Wait after walk through pull door"))
+         awaitingCompletion = true;
+      else if (awaitingCompletion)
       {
          ROS2LogRecord ros2LogRecordLocal = ros2LogRecord;
          ThreadTools.startAThread(() ->
