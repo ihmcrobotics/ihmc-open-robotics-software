@@ -206,10 +206,10 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
    private void configureGains()
    {
       double kpXYPosition = 100.0;
-      double kpZPosition = loadBearingParameters.getNormalPositionTrackingStiffness();
+      double kpZPosition = 0.0;
       double zetaXYPosition = 1.0;
       double kdXYPosition = GainCalculator.computeDerivativeGain(kpXYPosition, zetaXYPosition);
-      double kdZ = GainCalculator.computeDerivativeGain(kpZPosition, loadBearingParameters.getNormalPositionTrackingDampingRatio());
+      double kdZ = 0.0;
       double maxLinearAcceleration = Double.POSITIVE_INFINITY;
       double maxLinearJerk = Double.POSITIVE_INFINITY;
       feedbackGains.setPositionProportionalGains(kpXYPosition, kpXYPosition, kpZPosition);
