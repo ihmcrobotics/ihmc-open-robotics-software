@@ -2,4 +2,4 @@
 behavior_msgs/LeafNodeStateMessage state
 
 # Definition
-behavior_msgs/CheckPointNodeDefinitionMessage definition
+behavior_msgs/CheckpointNodeDefinitionMessage definition

@@ -22,13 +22,13 @@ byte BUILDING_EXPLORATION = 11
 byte NECK_ACTION = 12
 byte SPINE_ACTION = 13
 byte WALK_ACTION = 14
-byte SAKE_HAND_COMMAND_ACTION = 15
+byte EZGRIPPER_ACTION = 15
 byte ABILITY_HAND_ACTION = 16
 byte ARM_ACTION = 17
 byte HAND_WRENCH_ACTION = 18
 byte SCREW_PRIMITIVE_ACTION = 19
 byte PELVIS_ACTION = 20
-byte WAIT_DURATION_ACTION = 21
+byte WAIT_ACTION = 21
 byte LEG_ACTION = 22
 
 # Monotonically increasing message ID that matches the CRDTInfo update number
@@ -65,7 +65,7 @@ behavior_msgs/ConditionNodeStateMessage[<=120] condition_nodes
 
 behavior_msgs/GotoNodeStateMessage[<=120] goto_nodes
 
-behavior_msgs/CheckPointNodeStateMessage[<=120] checkpoint_nodes
+behavior_msgs/CheckpointNodeStateMessage[<=120] checkpoint_nodes
 
 behavior_msgs/SceneActionNodeStateMessage[<=120] scene_actions
 
@@ -81,7 +81,7 @@ behavior_msgs/SpineActionStateMessage[<=120] spine_actions
 
 behavior_msgs/WalkActionStateMessage[<=120] walk_actions
 
-behavior_msgs/SakeHandCommandActionStateMessage[<=120] sake_hand_command_actions
+behavior_msgs/EZGripperActionStateMessage[<=120] ez_gripper_actions
 
 behavior_msgs/AbilityHandActionStateMessage[<=120] ability_hand_actions
 
@@ -93,6 +93,6 @@ behavior_msgs/ScrewPrimitiveActionStateMessage[<=120] screw_primitive_actions
 
 behavior_msgs/PelvisActionStateMessage[<=120] pelvis_actions
 
-behavior_msgs/WaitDurationActionStateMessage[<=120] wait_duration_actions
+behavior_msgs/WaitActionStateMessage[<=120] wait_actions
 
 behavior_msgs/LegActionStateMessage[<=120] leg_actions
