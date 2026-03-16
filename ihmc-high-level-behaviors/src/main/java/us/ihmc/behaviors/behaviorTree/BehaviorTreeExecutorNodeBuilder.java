@@ -42,16 +42,16 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
       REGISTRY.put(DoorTraversalDefinition.class, DoorTraversalExecutor::new);
       REGISTRY.put(BuildingExplorationDefinition.class, BuildingExplorationExecutor::new);
       REGISTRY.put(NeckActionDefinition.class, NeckActionExecutor::new);
-      REGISTRY.put(ChestOrientationActionDefinition.class, ChestOrientationActionExecutor::new);
-      REGISTRY.put(FootstepPlanActionDefinition.class, FootstepPlanActionExecutor::new);
-      REGISTRY.put(HandPoseActionDefinition.class, HandPoseActionExecutor::new);
+      REGISTRY.put(SpineActionDefinition.class, SpineActionExecutor::new);
+      REGISTRY.put(WalkActionDefinition.class, WalkActionExecutor::new);
+      REGISTRY.put(ArmActionDefinition.class, ArmActionExecutor::new);
       REGISTRY.put(HandWrenchActionDefinition.class, HandWrenchActionExecutor::new);
       REGISTRY.put(ScrewPrimitiveActionDefinition.class, ScrewPrimitiveActionExecutor::new);
-      REGISTRY.put(PelvisHeightOrientationActionDefinition.class, PelvisHeightOrientationActionExecutor::new);
+      REGISTRY.put(PelvisActionDefinition.class, PelvisActionExecutor::new);
       REGISTRY.put(AbilityHandActionDefinition.class, AbilityHandActionExecutor::new);
       REGISTRY.put(SakeHandCommandActionDefinition.class, SakeHandCommandActionExecutor::new);
       REGISTRY.put(WaitDurationActionDefinition.class, WaitDurationActionExecutor::new);
-      REGISTRY.put(FootPoseActionDefinition.class, FootPoseActionExecutor::new);
+      REGISTRY.put(LegActionDefinition.class, LegActionExecutor::new);
    }
 
    private BehaviorTreeExecutor tree;

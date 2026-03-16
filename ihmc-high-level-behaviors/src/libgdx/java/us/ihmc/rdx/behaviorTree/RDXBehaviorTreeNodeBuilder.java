@@ -40,16 +40,16 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeBuilder<RDXBe
       REGISTRY.put(DoorTraversalDefinition.class, RDXDoorTraversal::new);
       REGISTRY.put(BuildingExplorationDefinition.class, RDXBuildingExploration::new);
       REGISTRY.put(NeckActionDefinition.class, RDXNeckAction::new);
-      REGISTRY.put(ChestOrientationActionDefinition.class, RDXChestOrientationAction::new);
-      REGISTRY.put(FootstepPlanActionDefinition.class, RDXFootstepPlanAction::new);
-      REGISTRY.put(HandPoseActionDefinition.class, RDXHandPoseAction::new);
+      REGISTRY.put(SpineActionDefinition.class, RDXSpineAction::new);
+      REGISTRY.put(WalkActionDefinition.class, RDXWalkAction::new);
+      REGISTRY.put(ArmActionDefinition.class, RDXArmAction::new);
       REGISTRY.put(HandWrenchActionDefinition.class, RDXHandWrenchAction::new);
       REGISTRY.put(ScrewPrimitiveActionDefinition.class, RDXScrewPrimitiveAction::new);
-      REGISTRY.put(PelvisHeightOrientationActionDefinition.class, RDXPelvisHeightOrientationAction::new);
+      REGISTRY.put(PelvisActionDefinition.class, RDXPelvisAction::new);
       REGISTRY.put(AbilityHandActionDefinition.class, RDXAbilityHandAction::new);
       REGISTRY.put(SakeHandCommandActionDefinition.class, RDXSakeHandCommandAction::new);
       REGISTRY.put(WaitDurationActionDefinition.class, RDXWaitDurationAction::new);
-      REGISTRY.put(FootPoseActionDefinition.class, RDXFootPoseAction::new);
+      REGISTRY.put(LegActionDefinition.class, RDXLegAction::new);
    }
 
    private RDXBehaviorTree tree;
