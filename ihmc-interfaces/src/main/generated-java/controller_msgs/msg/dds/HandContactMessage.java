@@ -38,11 +38,29 @@ public class HandContactMessage extends Packet<HandContactMessage> implements Se
             * Specifies the normal vector of the bracing surface
             */
    public us.ihmc.euclid.tuple3D.Vector3D bracing_normal_;
+   /**
+            * Initial support polygon in mid-feet zup frame on contact, to warm start region solved through LP
+            */
+   public us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.Point2DMessage>  support_region_in_mid_feet_frame_;
+   public controller_msgs.msg.dds.RigidBodyTransformMessage region_transform_;
+   public us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.Point2DMessage>  scaled_convex_hull_;
+   /**
+            * Direction the robot is falling in the x direction
+            */
+   public double fall_direction_x_;
+   /**
+            * Direction the robot is falling in the y direction
+            */
+   public double fall_direction_y_;
 
    public HandContactMessage()
    {
       bracing_point_ = new us.ihmc.euclid.tuple3D.Point3D();
       bracing_normal_ = new us.ihmc.euclid.tuple3D.Vector3D();
+      support_region_in_mid_feet_frame_ = new us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.Point2DMessage> (18, new ihmc_common_msgs.msg.dds.Point2DMessagePubSubType());
+      region_transform_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
+      scaled_convex_hull_ = new us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.Point2DMessage> (50, new ihmc_common_msgs.msg.dds.Point2DMessagePubSubType());
+
    }
 
    public HandContactMessage(HandContactMessage other)
@@ -63,6 +81,13 @@ public class HandContactMessage extends Packet<HandContactMessage> implements Se
 
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.bracing_point_, bracing_point_);
       geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.bracing_normal_, bracing_normal_);
+      support_region_in_mid_feet_frame_.set(other.support_region_in_mid_feet_frame_);
+      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.region_transform_, region_transform_);
+      scaled_convex_hull_.set(other.scaled_convex_hull_);
+      fall_direction_x_ = other.fall_direction_x_;
+
+      fall_direction_y_ = other.fall_direction_y_;
+
    }
 
    /**
@@ -144,6 +169,57 @@ public class HandContactMessage extends Packet<HandContactMessage> implements Se
    }
 
 
+   /**
+            * Initial support polygon in mid-feet zup frame on contact, to warm start region solved through LP
+            */
+   public us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.Point2DMessage>  getSupportRegionInMidFeetFrame()
+   {
+      return support_region_in_mid_feet_frame_;
+   }
+
+
+   public controller_msgs.msg.dds.RigidBodyTransformMessage getRegionTransform()
+   {
+      return region_transform_;
+   }
+
+
+   public us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.Point2DMessage>  getScaledConvexHull()
+   {
+      return scaled_convex_hull_;
+   }
+
+   /**
+            * Direction the robot is falling in the x direction
+            */
+   public void setFallDirectionX(double fall_direction_x)
+   {
+      fall_direction_x_ = fall_direction_x;
+   }
+   /**
+            * Direction the robot is falling in the x direction
+            */
+   public double getFallDirectionX()
+   {
+      return fall_direction_x_;
+   }
+
+   /**
+            * Direction the robot is falling in the y direction
+            */
+   public void setFallDirectionY(double fall_direction_y)
+   {
+      fall_direction_y_ = fall_direction_y;
+   }
+   /**
+            * Direction the robot is falling in the y direction
+            */
+   public double getFallDirectionY()
+   {
+      return fall_direction_y_;
+   }
+
+
    public static Supplier<HandContactMessagePubSubType> getPubSubType()
    {
       return HandContactMessagePubSubType::new;
@@ -171,6 +247,25 @@ public class HandContactMessage extends Packet<HandContactMessage> implements Se
 
       if (!this.bracing_point_.epsilonEquals(other.bracing_point_, epsilon)) return false;
       if (!this.bracing_normal_.epsilonEquals(other.bracing_normal_, epsilon)) return false;
+      if (this.support_region_in_mid_feet_frame_.size() != other.support_region_in_mid_feet_frame_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.support_region_in_mid_feet_frame_.size(); i++)
+         {  if (!this.support_region_in_mid_feet_frame_.get(i).epsilonEquals(other.support_region_in_mid_feet_frame_.get(i), epsilon)) return false; }
+      }
+
+      if (!this.region_transform_.epsilonEquals(other.region_transform_, epsilon)) return false;
+      if (this.scaled_convex_hull_.size() != other.scaled_convex_hull_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.scaled_convex_hull_.size(); i++)
+         {  if (!this.scaled_convex_hull_.get(i).epsilonEquals(other.scaled_convex_hull_.get(i), epsilon)) return false; }
+      }
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.fall_direction_x_, other.fall_direction_x_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.fall_direction_y_, other.fall_direction_y_, epsilon)) return false;
+
 
       return true;
    }
@@ -194,6 +289,13 @@ public class HandContactMessage extends Packet<HandContactMessage> implements Se
 
       if (!this.bracing_point_.equals(otherMyClass.bracing_point_)) return false;
       if (!this.bracing_normal_.equals(otherMyClass.bracing_normal_)) return false;
+      if (!this.support_region_in_mid_feet_frame_.equals(otherMyClass.support_region_in_mid_feet_frame_)) return false;
+      if (!this.region_transform_.equals(otherMyClass.region_transform_)) return false;
+      if (!this.scaled_convex_hull_.equals(otherMyClass.scaled_convex_hull_)) return false;
+      if(this.fall_direction_x_ != otherMyClass.fall_direction_x_) return false;
+
+      if(this.fall_direction_y_ != otherMyClass.fall_direction_y_) return false;
+
 
       return true;
    }
@@ -215,7 +317,17 @@ public class HandContactMessage extends Packet<HandContactMessage> implements Se
       builder.append("bracing_point=");
       builder.append(this.bracing_point_);      builder.append(", ");
       builder.append("bracing_normal=");
-      builder.append(this.bracing_normal_);
+      builder.append(this.bracing_normal_);      builder.append(", ");
+      builder.append("support_region_in_mid_feet_frame=");
+      builder.append(this.support_region_in_mid_feet_frame_);      builder.append(", ");
+      builder.append("region_transform=");
+      builder.append(this.region_transform_);      builder.append(", ");
+      builder.append("scaled_convex_hull=");
+      builder.append(this.scaled_convex_hull_);      builder.append(", ");
+      builder.append("fall_direction_x=");
+      builder.append(this.fall_direction_x_);      builder.append(", ");
+      builder.append("fall_direction_y=");
+      builder.append(this.fall_direction_y_);
       builder.append("}");
       return builder.toString();
    }
