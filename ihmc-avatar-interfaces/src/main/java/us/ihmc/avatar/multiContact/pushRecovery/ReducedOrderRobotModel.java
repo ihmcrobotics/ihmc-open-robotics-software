@@ -45,7 +45,7 @@ import java.util.ArrayList;
 public class ReducedOrderRobotModel
 {
    // Plan with slower acceleration
-   public static final double MAX_HAND_ACCELERATION = 7.0; // 15.0;
+   public static final double MAX_HAND_ACCELERATION = 6.5; // 15.0;
 
    // Scale down feet contact points in order to check stability conditions
    private static final double FOOT_SCALE_FACTOR = 0.6;
@@ -57,7 +57,7 @@ public class ReducedOrderRobotModel
 
    /* Minimum and maximum allowed reachablity distance from shoulder to hand */
    public static final double REACHABILITY_RADIUS_MIN = 0.32;
-   public static final double REACHABILITY_RADIUS_MAX = 0.72;
+   public static final double REACHABILITY_RADIUS_MAX = 0.73;
 
    /* Maximum inward reaching distance, to prevent too much cross-over */
    public static final double MAX_INWARD_DISTANCE = SHOULDER_COM_OFFSET_Y * 0.9;

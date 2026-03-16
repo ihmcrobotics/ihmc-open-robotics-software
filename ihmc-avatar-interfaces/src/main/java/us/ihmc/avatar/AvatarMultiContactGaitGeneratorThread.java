@@ -212,15 +212,15 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
       //      }
 
       // Update capture point preview trajectory
-//      RecyclingArrayList<FramePoint2D> capturePointPositionWaypoints = centerOfPressureDataHolder.getCapturePointPositionWaypoints();
-//      for (int i = 0; i < yoCapturePointWaypoints.length; i++)
-//      {
-//         yoCapturePointWaypoints[i].setToNaN();
-//      }
-//      for (int i = 0; i < capturePointPositionWaypoints.size(); i++)
-//      {
-//         yoCapturePointWaypoints[i].set(capturePointPositionWaypoints.get(i));
-//      }
+      //      RecyclingArrayList<FramePoint2D> capturePointPositionWaypoints = centerOfPressureDataHolder.getCapturePointPositionWaypoints();
+      //      for (int i = 0; i < yoCapturePointWaypoints.length; i++)
+      //      {
+      //         yoCapturePointWaypoints[i].setToNaN();
+      //      }
+      //      for (int i = 0; i < capturePointPositionWaypoints.size(); i++)
+      //      {
+      //         yoCapturePointWaypoints[i].set(capturePointPositionWaypoints.get(i));
+      //      }
 
       // Update robot model
       HumanoidRobotContextTools.updateRobot(fullRobotModel, humanoidRobotContextData.getProcessedJointData());
@@ -253,7 +253,7 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
          PlanarRegionsListCommand planarRegionsListCommand = commandInputManager.pollNewestCommand(PlanarRegionsListCommand.class);
          planarRegionsListCommand.updateScaledConvexHulls(convexPolygonScaler, DEFAULT_CONTACT_SAFETY_FACTOR);
 
-//         LogTools.info("Received planar regions command! number of regions: " + planarRegionsListCommand.getNumberOfPlanarRegions());
+         //         LogTools.info("Received planar regions command! number of regions: " + planarRegionsListCommand.getNumberOfPlanarRegions());
          planner.setPlanarRegions(planarRegionsListCommand);
          perceptionVisualizer.visualizePlanarRegions(planarRegionsListCommand);
          hasReceivedPlanarRegions.set(true);
@@ -262,13 +262,13 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
       if (commandInputManager.isNewCommandAvailable(TerrainMapCommand.class))
       {
          TerrainMapCommand terrainMapCommand = commandInputManager.pollNewestCommand(TerrainMapCommand.class);
-//         bipedalGaitGenerator.setTerrainMapCommand(terrainMapCommand);
+         //         bipedalGaitGenerator.setTerrainMapCommand(terrainMapCommand);
          perceptionVisualizer.visualizeHeightMap(terrainMapCommand);
       }
 
       if (triggerFall.getValue())
       {
-         centerOfMassVelocity.setIncludingFrame(humanoidReferenceFrames.getMidFeetZUpFrame(), 0.03, 0.0, 0.0);
+         centerOfMassVelocity.setIncludingFrame(humanoidReferenceFrames.getMidFeetZUpFrame(), 0.2, 0.0, 0.0);
          centerOfMassVelocity.changeFrame(ReferenceFrame.getWorldFrame());
       }
 

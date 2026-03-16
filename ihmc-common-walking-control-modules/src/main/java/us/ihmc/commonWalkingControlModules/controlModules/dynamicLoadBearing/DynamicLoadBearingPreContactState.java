@@ -86,7 +86,7 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
       trajectoryDuration = new YoDouble("trajectoryDuration", registry);
       handSpeed = new YoDouble("handSpeed", registry);
       terminalHandSpeed = new YoDouble("terminalHandSpeed", registry);
-      hasHandTouchedDown = new GlitchFilteredYoBoolean("", registry, 4);
+      hasHandTouchedDown = new GlitchFilteredYoBoolean("hasHandTouchedDown", registry, 2);
 
       bracingPositionWeights = new YoFrameVector3D("bracingPositionWeights", ReferenceFrame.getWorldFrame(), registry);
       bracingOrientationWeights = new YoFrameVector3D("bracingOrientationWeights", ReferenceFrame.getWorldFrame(), registry);
@@ -181,21 +181,21 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
    public boolean isDone(double timeInState)
    {
 //      double epsilonCloseToWall = 0.012; // sim
-      double epsilonCloseToWall = 0.02; // real robot
+      double epsilonCloseToWall = 0.04; // real robot
       distanceToPlane.set(bracingPlane.distance(positionControlHelper.getYoCurrentPosition()));
       boolean isCloseToWall = distanceToPlane.getValue() < epsilonCloseToWall;
 
-      handSpeed.set(controlFrame.getTwistOfFrame().getLinearPart().norm());
-      boolean hasLowHandSpeed = handSpeed.getValue() < 0.2;
+      handSpeed.set(controlFrame.getTwistOfFrame().getLinearPart().dot(yoBracingNormal));
+      boolean hasLowHandSpeed = handSpeed.getValue() < 0.1;
 
-      tempPoint.set(positionControlHelper.getYoCurrentPosition());
-      transformFromWorld.transform(tempPoint);
-      tempPoint2d.set(tempPoint);
+//      tempPoint.set(positionControlHelper.getYoCurrentPosition());
+//      transformFromWorld.transform(tempPoint);
+//      tempPoint2d.set(tempPoint);
 
-      double distanceFromRegion = regionPolygon.signedDistance(tempPoint2d);
-      boolean isInsideRegion = distanceFromRegion < 0.01;
+//      double distanceFromRegion = regionPolygon.signedDistance(tempPoint2d);
+//      boolean isInsideRegion = distanceFromRegion < 0.01;
 
-      hasHandTouchedDown.update(isCloseToWall && hasLowHandSpeed && isInsideRegion);
+      hasHandTouchedDown.update(isCloseToWall && hasLowHandSpeed);
       return hasHandTouchedDown.getValue();
    }
 
@@ -207,7 +207,7 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
    private void configureGains()
    {
       double kpPosition = 100.0;
-      double zetaPosition = 0.7;
+      double zetaPosition = 0.4;
       double maxLinearAcceleration = Double.POSITIVE_INFINITY;
       double maxLinearJerk = Double.POSITIVE_INFINITY;
       bracingFeedbackGains.setPositionProportionalGains(kpPosition);
@@ -215,7 +215,7 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
       bracingFeedbackGains.setPositionMaxFeedbackAndFeedbackRate(maxLinearAcceleration, maxLinearJerk);
 
       double kpOrientation = 0.0;
-      double kdOrientation = 12.0;
+      double kdOrientation = 0.0;
       double maxAngularAcceleration = Double.POSITIVE_INFINITY;
       double maxAngularJerk = Double.POSITIVE_INFINITY;
       bracingFeedbackGains.setOrientationProportionalGains(kpOrientation);

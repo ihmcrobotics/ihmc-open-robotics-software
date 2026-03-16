@@ -240,7 +240,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
          this.updatables.addAll(updatables);
       }
 
-      double coefficientOfFriction = 1.0; // TODO: magic number...
+      double coefficientOfFriction = 0.65; // TODO: magic number...
 
       for (RobotSide robotSide : RobotSide.values)
       {
