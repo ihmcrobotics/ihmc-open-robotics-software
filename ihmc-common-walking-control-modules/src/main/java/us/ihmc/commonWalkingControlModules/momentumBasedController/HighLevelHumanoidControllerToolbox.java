@@ -240,7 +240,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
          this.updatables.addAll(updatables);
       }
 
-      double coefficientOfFriction = 1.0; // TODO: magic number...
+      double coefficientOfFriction = 0.7; // TODO: magic number...
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -324,7 +324,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       {
          wholeBodyContactState = new WholeBodyContactState(controlledOneDoFJoints, fullRobotModel.getRootJoint());
          multiContactStabilityRegionCalculator = StabilityMarginRegionCalculator.createForCoPStabilityMargin("cop_", totalMass.getValue(), centerOfMassFrame, referenceFrames.getMidFeetZUpFrame(), registry, null);
-         //         multiContactStabilityRegionCalculator = StabilityMarginRegionCalculator.createForCoMStabilityMargin("cop_", totalMass.getValue(), registry, yoGraphicsListRegistry);
+//                  multiContactStabilityRegionCalculator = StabilityMarginRegionCalculator.createForCoMStabilityMargin("cop_", totalMass.getValue(), registry, null);
 //         multiContactStabilityRegionCalculator.setupForStabilityMarginCalculation(centerOfMassStateProvider::getCenterOfMassPosition);
          multiContactStabilityRegionCalculator.setupForStabilityMarginCalculation(() -> yoCapturePoint);
       }
@@ -993,12 +993,13 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       return walkingMessageHandler;
    }
 
-   public void onWholeBodyContactsChanged()
+   public void onWholeBodyContactsChanged(boolean contactsRemoved)
    {
       if (!enableUpperBodyLoadBearing())
          return;
       wholeBodyContactsChanged.set(true);
-      multiContactStabilityRegionCalculator.clear();
+      if (contactsRemoved)
+         multiContactStabilityRegionCalculator.clear();
    }
 
    public WholeBodyContactState getWholeBodyContactState()
@@ -1011,7 +1012,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       return multiContactStabilityRegionCalculator;
    }
 
-   public void updateMultiContactCoMRegion()
+   public void updateMultiContactStabilityRegion()
    {
       if (!enableUpperBodyLoadBearing())
          return;
@@ -1033,8 +1034,13 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       multiContactRegionLPSolveTimer.startMeasurement();
 
       // Query new direction until initial region has been constructed
-      //      multiContactStabilityRegionCalculator.performUpdateForNextVertex();
-      multiContactStabilityRegionCalculator.performFullRegionUpdate();
+      int updatesPerTick = 1;
+      for (int i = 0; i < updatesPerTick; i++)
+      {
+         multiContactStabilityRegionCalculator.performUpdateForNextVertex();
+      }
+
+//      multiContactStabilityRegionCalculator.performFullRegionUpdate();
 
       multiContactRegionLPSolveTimer.stopMeasurement();
 

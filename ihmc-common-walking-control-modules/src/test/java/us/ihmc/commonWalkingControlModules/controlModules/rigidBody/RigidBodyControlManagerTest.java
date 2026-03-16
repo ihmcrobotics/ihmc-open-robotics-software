@@ -522,6 +522,7 @@ public class RigidBodyControlManagerTest
                                                                     nominalRhoWeight,
                                                                     WholeBodyPostureAdjustmentProvider.createZeroPostureAdjustmentProvider(),
                                                                     () -> 0.0,
+                                                                    () -> {},
                                                                     yoTime,
                                                                     0.0,
                                                                     testRegistry);

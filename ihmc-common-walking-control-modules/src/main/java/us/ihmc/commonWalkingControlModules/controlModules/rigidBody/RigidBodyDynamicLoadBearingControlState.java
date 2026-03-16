@@ -13,15 +13,12 @@ import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactSta
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandContactCommand;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
-import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
-import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -29,7 +26,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class RigidBodyDynamicLoadBearingControlState extends RigidBodyControlState
 {
-   private static final double MINIMUM_TIME_IN_CONTACT = 0.4;
+   private static final double MINIMUM_TIME_IN_CONTACT = 1.0;
    private static final double CAPTURE_POINT_ERROR_THRESHOLD_TO_REMAIN_IN_STATE = 0.025;
 
    private final StateMachine<DynamicLoadBearingStateEnum, DynamicLoadBearingState> stateMachine;
@@ -51,7 +48,8 @@ public class RigidBodyDynamicLoadBearingControlState extends RigidBodyControlSta
                                                   ReferenceFrame controlFrame,
                                                   double nominalRhoWeight,
                                                   DoubleProvider capturePointErrorProvider,
-                                                  MutableBoolean hasContactChanged,
+                                                  MutableBoolean hasAddedContacts,
+                                                  MutableBoolean hasRemovedContacts,
                                                   YoRegistry parentRegistry)
    {
       super(RigidBodyControlMode.DYNAMIC_LOADBEARING, bodyToControl.getName(), yoTime, parentRegistry);
@@ -68,7 +66,8 @@ public class RigidBodyDynamicLoadBearingControlState extends RigidBodyControlSta
                                                                 orientationControlHelper,
                                                                 loadBearingParameters,
                                                                 nominalRhoWeight,
-                                                                hasContactChanged,
+                                                                hasAddedContacts,
+                                                                hasRemovedContacts,
                                                                 registry);
 
       stateMachine = setupStateMachine(namePrefix, yoTime);
@@ -91,10 +90,10 @@ public class RigidBodyDynamicLoadBearingControlState extends RigidBodyControlSta
       return factory.build(DynamicLoadBearingStateEnum.PRE_CONTACT);
    }
 
-   public void setBracingSurface(Point3DReadOnly bracingPoint, Vector3DReadOnly bracingNormal, double trajectoryDuration)
+   public void setBracingSurface(HandContactCommand command)
    {
-      preContactState.setBracingPoint(bracingPoint, bracingNormal, trajectoryDuration);
-      postContactState.setBracingSurface(bracingNormal);
+      preContactState.setBracingData(command);
+      postContactState.setBracingSurface(command.getBracingNormal());
    }
 
    @Override
@@ -119,19 +118,23 @@ public class RigidBodyDynamicLoadBearingControlState extends RigidBodyControlSta
    @Override
    public boolean isDone(double timeInState)
    {
-      // Do not exit while in pre-contact phase
-      if (stateMachine.getCurrentStateKey() != DynamicLoadBearingStateEnum.POST_CONTACT)
-         return false;
+      if (stateMachine.getCurrentStateKey() == DynamicLoadBearingStateEnum.PRE_CONTACT)
+      {
+         // Only return if the arm is stuck, which is likely because it's extended
+         return preContactState.isStuck(stateMachine.getTimeInCurrentState());
+      }
+      else
+      {
+         // If the hand is slipping or the arm is straightened, exit this state
+         boolean isSlippingOrAtSingularity = stateMachine.getCurrentState().isDone(stateMachine.getTimeInCurrentState());
+         if (isSlippingOrAtSingularity)
+            return true;
 
-      // If the has is slipping or the arm is straightened, exit this state
-      boolean isSlippingOrAtSingularity = stateMachine.getCurrentState().isDone(stateMachine.getTimeInCurrentState());
-      if (isSlippingOrAtSingularity)
-         return true;
-
-      // If the robot has reached a high level of stability, exit this state
-      boolean isRecovered = capturePointErrorProvider.getValue() < CAPTURE_POINT_ERROR_THRESHOLD_TO_REMAIN_IN_STATE;
-      boolean hasSpentSufficientTimeInContact = stateMachine.getTimeInCurrentState() > MINIMUM_TIME_IN_CONTACT;
-      return isRecovered && hasSpentSufficientTimeInContact;
+         // If the robot has reached a high level of stability, exit this state
+         boolean isRecovered = capturePointErrorProvider.getValue() < CAPTURE_POINT_ERROR_THRESHOLD_TO_REMAIN_IN_STATE;
+         boolean hasSpentSufficientTimeInContact = stateMachine.getTimeInCurrentState() > MINIMUM_TIME_IN_CONTACT;
+         return isRecovered && hasSpentSufficientTimeInContact;
+      }
    }
 
    @Override
@@ -146,6 +149,11 @@ public class RigidBodyDynamicLoadBearingControlState extends RigidBodyControlSta
    {
       // this control mode does not support command queuing
       return 0.0;
+   }
+
+   public void setOnTouchdownCallback(Runnable runnable)
+   {
+      postContactState.setOnTouchdownCallback(runnable);
    }
 
    public boolean isLoadBearing()

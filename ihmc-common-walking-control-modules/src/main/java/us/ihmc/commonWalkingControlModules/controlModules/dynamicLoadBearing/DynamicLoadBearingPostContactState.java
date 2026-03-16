@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.controlModules.dynamicLoadBearing;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.LoadBearingParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyJointControlHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyOrientationControlHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyPositionControlHelper;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
@@ -24,7 +23,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -53,7 +51,6 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.filters.GlitchFilteredYoBoolean;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class DynamicLoadBearingPostContactState implements DynamicLoadBearingState
 {
@@ -63,7 +60,6 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
    private static final boolean ENABLE_ZERO_ACCELERATION = true;
    private static final boolean ENABLE_POINT_FEEDBACK = true;
    private static final boolean ENABLE_ORIENTATION_FEEDBACK = true;
-   private static final double RHO_WEIGHT_INITIAL = 1.5;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final FrameVector3D zeroWorld = new FrameVector3D();
@@ -115,10 +111,14 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
    private final SpatialAcceleration bodyAcceleration;
 
    /* Error measurement to detect slipping */
-   private final YoFrameVector3D positionError;
+   private final FrameVector3D positionError = new FrameVector3D();
+   private final YoFrameVector3D yoPositionError;
 
    /* Flag for notifying contact change */
-   private final MutableBoolean hasContactStateChanged;
+   private final MutableBoolean hasAddedContacts;
+   private final MutableBoolean hasRemovedContacts;
+
+   private Runnable onTouchdownCallback = () -> {};
 
    public DynamicLoadBearingPostContactState(RigidBodyBasics bodyToControl,
                                              RigidBodyBasics baseBody,
@@ -128,7 +128,8 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
                                              RigidBodyOrientationControlHelper orientationControlHelper,
                                              LoadBearingParameters loadBearingParameters,
                                              double nominalRhoWeight,
-                                             MutableBoolean hasContactStateChanged,
+                                             MutableBoolean hasAddedContacts,
+                                             MutableBoolean hasRemovedContacts,
                                              YoRegistry registry)
    {
       this.bodyToControl = bodyToControl;
@@ -136,7 +137,8 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
       this.elevatorFrame = elevator.getBodyFixedFrame();
       this.loadBearingParameters = loadBearingParameters;
       this.nominalRhoWeight = nominalRhoWeight;
-      this.hasContactStateChanged = hasContactStateChanged;
+      this.hasAddedContacts = hasAddedContacts;
+      this.hasRemovedContacts = hasRemovedContacts;
 
       String bodyName = bodyToControl.getName();
 
@@ -160,7 +162,7 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
       bodyBarelyLoaded = new GlitchFilteredYoBoolean(bodyName + "BarelyLoaded", registry, 20);
       yoControllerDesiredForce = new YoFrameVector3D(bodyName + "DesiredForce", ReferenceFrame.getWorldFrame(), registry);
 
-      positionError = new YoFrameVector3D(bodyName + "PositionError", ReferenceFrame.getWorldFrame(), registry);
+      yoPositionError = new YoFrameVector3D(bodyName + "PositionError", desiredContactFrameFixedInWorld, registry);
 
       planeContactStateCommand.setContactingRigidBody(bodyToControl);
 
@@ -250,6 +252,7 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
 
       // record contact point tracking error
       positionError.sub(currentContactPointInWorld, desiredContactPoseWorld.getPosition());
+      yoPositionError.setMatchingFrame(positionError);
 
       // assemble spatial feedback command
       if (bodyBarelyLoaded.getValue())
@@ -288,20 +291,19 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
       // Reset orientation trajectory
       orientationControlHelper.holdCurrent();
 
-      hasContactStateChanged.setValue(true);
-
       // Compute desired contact pose, which is static in world, has an origin at the contact point and has Z pointing parallel to the contact normal
       desiredContactPoseWorld.setReferenceFrame(ReferenceFrame.getWorldFrame());
       desiredContactPoseWorld.getPosition().setMatchingFrame(this.contactPointInBody);
       EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.Z, contactNormal, desiredContactPoseWorld.getOrientation());
       desiredContactFrameFixedInWorld.setPoseAndUpdate(desiredContactPoseWorld);
 
-      FramePoint3D actualPoint = new FramePoint3D(contactPointInBody);
-      actualPoint.changeFrame(ReferenceFrame.getWorldFrame());
-
       // Update yovariables
       yoDesiredContactPosition.set(desiredContactPoseWorld.getPosition());
       yoDesiredContactOrientation.set(desiredContactPoseWorld.getOrientation());
+
+      hasAddedContacts.setTrue();
+
+      onTouchdownCallback.run();
    }
 
    @Override
@@ -316,6 +318,8 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
       positionControlHelper.getYoCurrentPosition().setToNaN();
 
       orientationControlHelper.clear();
+
+      hasRemovedContacts.setTrue();
    }
 
    @Override
@@ -386,9 +390,9 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
    @Override
    public boolean isDone(double time)
    {
-      double positionErrorSquared = EuclidCoreTools.normSquared(positionError.getX(), positionError.getY(), positionError.getZ());
+      double positionErrorXYSquared = EuclidCoreTools.normSquared(yoPositionError.getX(), yoPositionError.getY());
       double linearTrackingSlipThresholdSquared = EuclidCoreTools.square(loadBearingParameters.getLinearTrackingSlipThreshold());
-      if (positionErrorSquared > linearTrackingSlipThresholdSquared)
+      if (positionErrorXYSquared > linearTrackingSlipThresholdSquared)
          return true;
 
       // Check if near reachability limit
@@ -406,6 +410,11 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
       }
 
       return false;
+   }
+
+   public void setOnTouchdownCallback(Runnable onTouchdownCallback)
+   {
+      this.onTouchdownCallback = onTouchdownCallback;
    }
 
    private static boolean jointIsNearLimit(OneDoFJointBasics joint)
