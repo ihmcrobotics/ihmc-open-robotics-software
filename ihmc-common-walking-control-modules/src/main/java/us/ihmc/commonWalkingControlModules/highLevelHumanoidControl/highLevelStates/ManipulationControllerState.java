@@ -257,6 +257,7 @@ public class ManipulationControllerState extends HighLevelControllerState
                                                                     momentumOptimizationSettings.getRhoWeight(),
                                                                     WholeBodyPostureAdjustmentProvider.createZeroPostureAdjustmentProvider(),
                                                                     () -> 0.0,
+                                                                    null,
                                                                     yoTime,
                                                                     gravityZ,
                                                                     registry);

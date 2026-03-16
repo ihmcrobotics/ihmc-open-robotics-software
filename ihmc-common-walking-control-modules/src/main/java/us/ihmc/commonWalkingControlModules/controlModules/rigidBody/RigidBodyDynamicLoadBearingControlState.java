@@ -16,6 +16,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandContactCommand;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
@@ -23,6 +24,8 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.function.Supplier;
 
 public class RigidBodyDynamicLoadBearingControlState extends RigidBodyControlState
 {
@@ -48,6 +51,7 @@ public class RigidBodyDynamicLoadBearingControlState extends RigidBodyControlSta
                                                   ReferenceFrame controlFrame,
                                                   double nominalRhoWeight,
                                                   DoubleProvider capturePointErrorProvider,
+                                                  Supplier<SpatialVectorReadOnly> estimatedExternalWrenchSupplier,
                                                   MutableBoolean hasAddedContacts,
                                                   MutableBoolean hasRemovedContacts,
                                                   YoRegistry parentRegistry)
@@ -66,6 +70,7 @@ public class RigidBodyDynamicLoadBearingControlState extends RigidBodyControlSta
                                                                 orientationControlHelper,
                                                                 loadBearingParameters,
                                                                 nominalRhoWeight,
+                                                                estimatedExternalWrenchSupplier,
                                                                 hasAddedContacts,
                                                                 hasRemovedContacts,
                                                                 registry);

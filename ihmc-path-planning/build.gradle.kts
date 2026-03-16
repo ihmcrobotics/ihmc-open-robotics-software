@@ -13,7 +13,7 @@ ihmc {
 mainDependencies {
    api("org.jgrapht:jgrapht-core:0.9.0")
 
-   api("us.ihmc:ihmc-convex-optimization:0.17.23")
+   api("us.ihmc:ihmc-convex-optimization:0.18.0")
    api("us.ihmc:ihmc-perception:source")
 }
 

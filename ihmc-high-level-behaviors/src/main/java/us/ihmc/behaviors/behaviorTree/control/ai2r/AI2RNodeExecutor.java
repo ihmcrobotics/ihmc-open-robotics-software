@@ -11,9 +11,9 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.LeafNodeState;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
-import us.ihmc.behaviors.behaviorTree.action.actions.ChestOrientationActionState;
-import us.ihmc.behaviors.behaviorTree.action.actions.FootstepPlanActionState;
-import us.ihmc.behaviors.behaviorTree.action.actions.HandPoseActionState;
+import us.ihmc.behaviors.behaviorTree.action.actions.SpineActionState;
+import us.ihmc.behaviors.behaviorTree.action.actions.WalkActionState;
+import us.ihmc.behaviors.behaviorTree.action.actions.ArmActionState;
 import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionNodeState;
 import us.ihmc.behaviors.behaviorTree.action.actions.WaitDurationActionState;
 import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeDefinition.ConditionNodeType;
@@ -234,7 +234,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
                   {
                      AI2RActionFailureMessage failureMessage = statusMessage.getFailure();
                      failureMessage.setActionName(action.getDefinition().getName());
-                     if (action instanceof FootstepPlanActionState walkAction)
+                     if (action instanceof WalkActionState walkAction)
                      {
                         failureMessage.setActionFrame(walkAction.getDefinition().getParentFrameName());
                         if (navigationFailureForObstacle)
@@ -245,15 +245,15 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
                         failureMessage.setMissingFrame(actionFailureMissingFrame);
                         failureMessage.setActionType(walkAction.getDefinition().getClass().getSimpleName());
                      }
-                     else if (action instanceof HandPoseActionState handPoseAction)
+                     else if (action instanceof ArmActionState armAction)
                      {
                         failureMessage.setOrientationTolerance(action.getOrientationDistanceToGoalTolerance());
                         failureMessage.setPositionTolerance(action.getPositionDistanceToGoalTolerance());
 
-                        if (!handPoseAction.getCommandedTrajectory().isEmpty())
+                        if (!armAction.getCommandedTrajectory().isEmpty())
                         {
-                           var desiredValue = handPoseAction.getCommandedTrajectory().getLastValueReadOnly();
-                           var actualValue = handPoseAction.getCurrentPose().getValueReadOnly();
+                           var desiredValue = armAction.getCommandedTrajectory().getLastValueReadOnly();
+                           var actualValue = armAction.getCurrentPose().getValueReadOnly();
 
                            Quaternion errorOrientation = new Quaternion(actualValue.getOrientation());
                            errorOrientation.multiply(desiredValue.getOrientation());
@@ -264,11 +264,11 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
                            failureMessage.getPositionError().set(errorPosition);
                         }
 
-                        failureMessage.setActionFrame(handPoseAction.getDefinition().getPalmParentFrameName());
-                        failureMessage.setActionType(handPoseAction.getDefinition().getClass().getSimpleName());
+                        failureMessage.setActionFrame(armAction.getDefinition().getPalmParentFrameName());
+                        failureMessage.setActionType(armAction.getDefinition().getClass().getSimpleName());
                      }
 
-                     if (action instanceof ChestOrientationActionState chestAction)
+                     if (action instanceof SpineActionState chestAction)
                      {
                         failureMessage.setActionFrame(chestAction.getDefinition().getParentFrameName());
                         failureMessage.setActionType(chestAction.getDefinition().getClass().getSimpleName());
@@ -317,7 +317,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
          // Check if Goto action is executing and if next steps are colliding with objects in the scene
          if (CHECK_COLLISION_WITH_OBJECTS)
          {
-            if (leaf.getDefinition().getName().contains("Go to Action") && leaf instanceof FootstepPlanActionState gotoActionState)
+            if (leaf.getDefinition().getName().contains("Go to Action") && leaf instanceof WalkActionState gotoActionState)
             {
                if (gotoActionState.getIsExecuting())
                {

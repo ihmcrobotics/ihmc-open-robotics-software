@@ -1,6 +1,6 @@
 package us.ihmc.communication.crdt;
 
-import behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessage;
+import behavior_msgs.msg.dds.WalkActionFootstepDefinitionMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -12,11 +12,11 @@ import us.ihmc.robotics.robotSide.RobotSide;
  * and read-only for the others. The internal writeable instance is kept protected
  * from unchecked modifications.
  */
-public class CRDTStatusFootstepList extends CRDTStatusMutableField<RecyclingArrayList<FootstepPlanActionFootstepDefinitionMessage>>
+public class CRDTStatusFootstepList extends CRDTStatusMutableField<RecyclingArrayList<WalkActionFootstepDefinitionMessage>>
 {
    public CRDTStatusFootstepList(ROS2ActorDesignation sideThatCanModify, CRDTInfo crdtInfo)
    {
-      super(sideThatCanModify, crdtInfo, () -> new RecyclingArrayList<>(FootstepPlanActionFootstepDefinitionMessage::new));
+      super(sideThatCanModify, crdtInfo, () -> new RecyclingArrayList<>(WalkActionFootstepDefinitionMessage::new));
    }
 
    public Pose3DReadOnly getPoseReadOnly(int index)
@@ -34,23 +34,23 @@ public class CRDTStatusFootstepList extends CRDTStatusMutableField<RecyclingArra
       return getValueInternal().size();
    }
 
-   public void toMessage(IDLSequence.Object<FootstepPlanActionFootstepDefinitionMessage> message)
+   public void toMessage(IDLSequence.Object<WalkActionFootstepDefinitionMessage> message)
    {
       message.clear();
 
-      for (FootstepPlanActionFootstepDefinitionMessage footstep : getValueInternal())
+      for (WalkActionFootstepDefinitionMessage footstep : getValueInternal())
       {
          message.add().set(footstep);
       }
    }
 
-   public void fromMessage(IDLSequence.Object<FootstepPlanActionFootstepDefinitionMessage> message)
+   public void fromMessage(IDLSequence.Object<WalkActionFootstepDefinitionMessage> message)
    {
       if (isModificationDisallowed()) // Ignore updates if we are the only side that can modify
       {
          getValueInternal().clear();
 
-         for (FootstepPlanActionFootstepDefinitionMessage footstep : message)
+         for (WalkActionFootstepDefinitionMessage footstep : message)
          {
             getValueInternal().add().set(footstep);
          }

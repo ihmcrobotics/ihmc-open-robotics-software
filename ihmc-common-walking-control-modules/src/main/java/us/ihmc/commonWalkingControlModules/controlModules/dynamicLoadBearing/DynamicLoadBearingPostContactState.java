@@ -35,6 +35,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.controllers.pidGains.GainCalculator;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
@@ -50,7 +51,11 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.filters.GlitchFilteredYoBoolean;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.function.Supplier;
 
 public class DynamicLoadBearingPostContactState implements DynamicLoadBearingState
 {
@@ -62,8 +67,6 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
    private static final boolean ENABLE_ORIENTATION_FEEDBACK = true;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final FrameVector3D zeroWorld = new FrameVector3D();
-
    /* Controller Commands */
    private final RigidBodyBasics bodyToControl;
    private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
@@ -74,6 +77,7 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
 
    /* Control gains, weights and axis selection */
    private final LoadBearingParameters loadBearingParameters;
+   private final BooleanProvider useImpedanceControl;
    private final Vector3DReadOnly linearWeight = new Vector3D(50.0, 50.0, 50.0);
    private final Vector3DReadOnly angularWeight = new Vector3D(5.0, 5.0, 5.0);
    private final DefaultYoPIDSE3Gains feedbackGains;
@@ -84,9 +88,18 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
    /* Hand load status */
    private final GlitchFilteredYoBoolean bodyBarelyLoaded;
    private ControllerCoreOutputReadOnly controllerCoreOutput;
+   private final Supplier<SpatialVectorReadOnly> estimatedExternalWrenchSupplier;
    private final Wrench controllerDesiredWrench = new Wrench();
    private final FrameVector3D controllerDesiredForce = new FrameVector3D();
    private final YoFrameVector3D yoControllerDesiredForce;
+   private final FrameVector3D estimatedExternalForce = new FrameVector3D();
+   private final FrameVector3D estimatedExternalForceInContactFrame = new FrameVector3D();
+   private final YoFrameVector3D yoEstimatedExternalForce;
+   private final YoDouble yoEstimatedNormalForce;
+   private final YoDouble yoDesiredNormalForce;
+   private final YoDouble yoNormalForceError;
+   private final YoDouble yoNormalPositionOffset;
+   private final YoDouble yoNormalVelocityCommand;
 
    /* Reference frames and contact data */
    private final ReferenceFrame bodyFrame;
@@ -113,6 +126,10 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
    /* Error measurement to detect slipping */
    private final FrameVector3D positionError = new FrameVector3D();
    private final YoFrameVector3D yoPositionError;
+   private final FramePoint3D pointFeedbackDesiredPosition = new FramePoint3D();
+   private final FrameVector3D pointFeedbackDesiredVelocity = new FrameVector3D();
+   private final FrameVector3D pointFeedbackOffset = new FrameVector3D();
+   private double lastTimeInState = 0.0;
 
    /* Flag for notifying contact change */
    private final MutableBoolean hasAddedContacts;
@@ -128,6 +145,7 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
                                              RigidBodyOrientationControlHelper orientationControlHelper,
                                              LoadBearingParameters loadBearingParameters,
                                              double nominalRhoWeight,
+                                             Supplier<SpatialVectorReadOnly> estimatedExternalWrenchSupplier,
                                              MutableBoolean hasAddedContacts,
                                              MutableBoolean hasRemovedContacts,
                                              YoRegistry registry)
@@ -136,6 +154,8 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
       this.bodyFrame = bodyToControl.getBodyFixedFrame();
       this.elevatorFrame = elevator.getBodyFixedFrame();
       this.loadBearingParameters = loadBearingParameters;
+      this.useImpedanceControl = loadBearingParameters.getUseImpedanceControl();
+      this.estimatedExternalWrenchSupplier = estimatedExternalWrenchSupplier;
       this.nominalRhoWeight = nominalRhoWeight;
       this.hasAddedContacts = hasAddedContacts;
       this.hasRemovedContacts = hasRemovedContacts;
@@ -161,6 +181,12 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
 
       bodyBarelyLoaded = new GlitchFilteredYoBoolean(bodyName + "BarelyLoaded", registry, 20);
       yoControllerDesiredForce = new YoFrameVector3D(bodyName + "DesiredForce", ReferenceFrame.getWorldFrame(), registry);
+      yoEstimatedExternalForce = new YoFrameVector3D(bodyName + "EstimatedExternalForce", ReferenceFrame.getWorldFrame(), registry);
+      yoEstimatedNormalForce = new YoDouble(bodyName + "EstimatedNormalForce", registry);
+      yoDesiredNormalForce = new YoDouble(bodyName + "DesiredNormalForce", registry);
+      yoNormalForceError = new YoDouble(bodyName + "NormalForceError", registry);
+      yoNormalPositionOffset = new YoDouble(bodyName + "NormalPositionOffset", registry);
+      yoNormalVelocityCommand = new YoDouble(bodyName + "NormalVelocityCommand", registry);
 
       yoPositionError = new YoFrameVector3D(bodyName + "PositionError", desiredContactFrameFixedInWorld, registry);
 
@@ -210,17 +236,30 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
    {
       currentContactPointInWorld.setMatchingFrame(contactPointInBody);
 
-      if (controllerCoreOutput.getDesiredExternalWrench(controllerDesiredWrench, bodyToControl))
-      { // Determine load status from controller core desired, assume it tracks
-         double desiredForceLoadMagnitudeSquared = controllerDesiredWrench.getLinearPart().normSquared();
-         bodyBarelyLoaded.update(desiredForceLoadMagnitudeSquared < MathTools.square(loadBearingParameters.getNormalForceThresholdForLoaded()));
-
+      if (controllerCoreOutput != null && controllerCoreOutput.getDesiredExternalWrench(controllerDesiredWrench, bodyToControl))
+      {
          controllerDesiredForce.setIncludingFrame(controllerDesiredWrench.getReferenceFrame(), controllerDesiredWrench.getLinearPart());
          controllerDesiredForce.changeFrame(ReferenceFrame.getWorldFrame());
          yoControllerDesiredForce.set(controllerDesiredForce);
       }
       else
-      { // If no desired wrench, set to barely loaded
+      {
+         controllerDesiredForce.setToZero(worldFrame);
+         yoControllerDesiredForce.setToNaN();
+      }
+
+      double normalForceEstimate = updateEstimatedNormalForce();
+      if (useImpedanceControl.getValue())
+      {
+         bodyBarelyLoaded.update(Math.abs(normalForceEstimate) < loadBearingParameters.getNormalForceThresholdForLoaded());
+      }
+      else if (controllerCoreOutput != null && controllerCoreOutput.getDesiredExternalWrench(controllerDesiredWrench, bodyToControl))
+      {
+         double desiredForceLoadMagnitudeSquared = controllerDesiredWrench.getLinearPart().normSquared();
+         bodyBarelyLoaded.update(desiredForceLoadMagnitudeSquared < MathTools.square(loadBearingParameters.getNormalForceThresholdForLoaded()));
+      }
+      else
+      {
          bodyBarelyLoaded.set(true);
       }
 
@@ -246,7 +285,7 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
       spatialAccelerationSelectionMatrix.getAngularPart().clearSelection();
       spatialAccelerationSelectionMatrix.getLinearPart().selectAxis(Axis3D.X.ordinal(), !bodyBarelyLoaded.getValue());
       spatialAccelerationSelectionMatrix.getLinearPart().selectAxis(Axis3D.Y.ordinal(), !bodyBarelyLoaded.getValue());
-      spatialAccelerationSelectionMatrix.getLinearPart().selectAxis(Axis3D.Z.ordinal(), true);
+      spatialAccelerationSelectionMatrix.getLinearPart().selectAxis(Axis3D.Z.ordinal(), !useImpedanceControl.getValue());
       spatialAccelerationCommand.setSelectionMatrix(spatialAccelerationSelectionMatrix);
       spatialAccelerationCommand.getWeightMatrix().getLinearPart().setWeights(linearWeight);
 
@@ -255,23 +294,7 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
       yoPositionError.setMatchingFrame(positionError);
 
       // assemble spatial feedback command
-      if (bodyBarelyLoaded.getValue())
-      {
-         pointFeedbackControlCommand.setBodyFixedPointToControl(contactPointInBody);
-         pointFeedbackControlCommand.setGainsFrame(desiredContactFrameFixedInWorld);
-         pointFeedbackControlCommand.setInverseDynamics(desiredContactPoseWorld.getPosition(), zeroWorld, zeroWorld);
-         pointFeedbackControlCommand.setWeightsForSolver(linearWeight);
-
-         double kp = loadBearingParameters.getHoldPositionStiffness();
-         double zeta = loadBearingParameters.getHoldPositionDampingRatio();
-         double kd = GainCalculator.computeDerivativeGain(kp, zeta);
-         pointFeedbackControlCommand.getGains().setProportialAndDerivativeGains(kp, kd);
-
-         positionFeedbackSelectionMatrix.selectAxis(Axis3D.X.ordinal(), true);
-         positionFeedbackSelectionMatrix.selectAxis(Axis3D.Y.ordinal(), true);
-         positionFeedbackSelectionMatrix.selectAxis(Axis3D.Z.ordinal(), false);
-         pointFeedbackControlCommand.setSelectionMatrix(positionFeedbackSelectionMatrix);
-      }
+      updatePointFeedbackCommand(timeInState, normalForceEstimate);
 
       orientationControlHelper.doAction(timeInState);
    }
@@ -287,6 +310,13 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
    {
       // Set to barely loaded during first tick
       bodyBarelyLoaded.set(true);
+      lastTimeInState = 0.0;
+      yoEstimatedExternalForce.setToNaN();
+      yoEstimatedNormalForce.set(0.0);
+      yoDesiredNormalForce.set(loadBearingParameters.getDesiredNormalForce());
+      yoNormalForceError.set(0.0);
+      yoNormalPositionOffset.set(0.0);
+      yoNormalVelocityCommand.set(0.0);
 
       // Reset orientation trajectory
       orientationControlHelper.holdCurrent();
@@ -312,6 +342,12 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
       yoDesiredContactPosition.setToNaN();
       yoDesiredContactOrientation.setToNaN();
       currentContactPointInWorld.setToNaN();
+      yoEstimatedExternalForce.setToNaN();
+      yoEstimatedNormalForce.setToNaN();
+      yoDesiredNormalForce.setToNaN();
+      yoNormalForceError.setToNaN();
+      yoNormalPositionOffset.setToNaN();
+      yoNormalVelocityCommand.setToNaN();
 
       // hide graphics from taskspace controller
       positionControlHelper.getYoDesiredPosition().setToNaN();
@@ -344,9 +380,8 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
    {
       feedbackControlCommandList.clear();
 
-      if (ENABLE_POINT_FEEDBACK && bodyBarelyLoaded.getValue())
+      if (ENABLE_POINT_FEEDBACK && (bodyBarelyLoaded.getValue() || useImpedanceControl.getValue()))
       {
-         pointFeedbackControlCommand.setGains(feedbackGains.getPositionGains());
          pointFeedbackControlCommand.setControlMode(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
          feedbackControlCommandList.addCommand(pointFeedbackControlCommand);
       }
@@ -417,6 +452,108 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
       this.onTouchdownCallback = onTouchdownCallback;
    }
 
+   private void updatePointFeedbackCommand(double timeInState, double normalForceEstimate)
+   {
+      pointFeedbackDesiredPosition.setIncludingFrame(desiredContactPoseWorld.getPosition());
+      pointFeedbackDesiredVelocity.setToZero(worldFrame);
+
+      if (useImpedanceControl.getValue())
+      {
+         updateNormalAxisImpedanceReference(timeInState, normalForceEstimate);
+      }
+      else
+      {
+         yoDesiredNormalForce.set(loadBearingParameters.getDesiredNormalForce());
+         yoNormalForceError.set(0.0);
+         yoNormalVelocityCommand.set(0.0);
+         yoNormalPositionOffset.set(0.0);
+         lastTimeInState = timeInState;
+      }
+
+      pointFeedbackControlCommand.setBodyFixedPointToControl(contactPointInBody);
+      pointFeedbackControlCommand.setGainsFrame(desiredContactFrameFixedInWorld);
+      pointFeedbackControlCommand.setInverseDynamics(pointFeedbackDesiredPosition, pointFeedbackDesiredVelocity, null);
+      pointFeedbackControlCommand.setWeightsForSolver(linearWeight);
+
+      double xyKp = bodyBarelyLoaded.getValue() ? loadBearingParameters.getHoldPositionStiffness() : 0.0;
+      double xyKd = GainCalculator.computeDerivativeGain(xyKp, loadBearingParameters.getHoldPositionDampingRatio());
+      double zKp = useImpedanceControl.getValue() ? loadBearingParameters.getNormalPositionTrackingStiffness() : 0.0;
+      double zKd = GainCalculator.computeDerivativeGain(zKp, loadBearingParameters.getNormalPositionTrackingDampingRatio());
+      pointFeedbackControlCommand.getGains().setProportionalGains(xyKp, xyKp, zKp);
+      pointFeedbackControlCommand.getGains().setDerivativeGains(xyKd, xyKd, zKd);
+
+      positionFeedbackSelectionMatrix.clearSelection();
+      positionFeedbackSelectionMatrix.selectAxis(Axis3D.X.ordinal(), bodyBarelyLoaded.getValue());
+      positionFeedbackSelectionMatrix.selectAxis(Axis3D.Y.ordinal(), bodyBarelyLoaded.getValue());
+      positionFeedbackSelectionMatrix.selectAxis(Axis3D.Z.ordinal(), useImpedanceControl.getValue());
+      pointFeedbackControlCommand.setSelectionMatrix(positionFeedbackSelectionMatrix);
+   }
+
+   private void updateNormalAxisImpedanceReference(double timeInState, double normalForceEstimate)
+   {
+      double dt = Math.max(0.0, timeInState - lastTimeInState);
+      lastTimeInState = timeInState;
+
+      double desiredNormalForce = loadBearingParameters.getDesiredNormalForce();
+      double normalForceError = desiredNormalForce - normalForceEstimate;
+      double normalVelocityCommand = -loadBearingParameters.getNormalForceAdmittanceGain() * normalForceError
+                                    - loadBearingParameters.getNormalForcePositionLeakRate() * yoNormalPositionOffset.getDoubleValue();
+      normalVelocityCommand = MathTools.clamp(normalVelocityCommand, -loadBearingParameters.getMaxNormalVelocity(), loadBearingParameters.getMaxNormalVelocity());
+
+      double normalPositionOffset = yoNormalPositionOffset.getDoubleValue() + dt * normalVelocityCommand;
+      normalPositionOffset = MathTools.clamp(normalPositionOffset,
+                                             -loadBearingParameters.getMaxNormalPositionOffset(),
+                                             loadBearingParameters.getMaxNormalPositionOffset());
+
+      yoDesiredNormalForce.set(desiredNormalForce);
+      yoNormalForceError.set(normalForceError);
+      yoNormalVelocityCommand.set(normalVelocityCommand);
+      yoNormalPositionOffset.set(normalPositionOffset);
+
+      pointFeedbackOffset.setIncludingFrame(contactNormal);
+      pointFeedbackOffset.scale(normalPositionOffset);
+      pointFeedbackDesiredPosition.add(pointFeedbackOffset);
+
+      pointFeedbackDesiredVelocity.setIncludingFrame(contactNormal);
+      pointFeedbackDesiredVelocity.scale(normalVelocityCommand);
+   }
+
+   private double updateEstimatedNormalForce()
+   {
+      double controllerDesiredNormalForce = 0.0;
+      if (!yoControllerDesiredForce.containsNaN())
+      {
+         estimatedExternalForceInContactFrame.setIncludingFrame(controllerDesiredForce);
+         estimatedExternalForceInContactFrame.changeFrame(desiredContactFrameFixedInWorld);
+         controllerDesiredNormalForce = estimatedExternalForceInContactFrame.getZ();
+      }
+
+      if (estimatedExternalWrenchSupplier == null)
+      {
+         yoEstimatedExternalForce.setToNaN();
+         yoEstimatedNormalForce.set(controllerDesiredNormalForce);
+         return controllerDesiredNormalForce;
+      }
+
+      SpatialVectorReadOnly estimatedExternalWrench = estimatedExternalWrenchSupplier.get();
+      if (estimatedExternalWrench == null)
+      {
+         yoEstimatedExternalForce.setToNaN();
+         yoEstimatedNormalForce.set(controllerDesiredNormalForce);
+         return controllerDesiredNormalForce;
+      }
+
+      estimatedExternalForce.setIncludingFrame(estimatedExternalWrench.getLinearPart());
+      estimatedExternalForce.changeFrame(worldFrame);
+      yoEstimatedExternalForce.set(estimatedExternalForce);
+
+      estimatedExternalForceInContactFrame.setIncludingFrame(estimatedExternalForce);
+      estimatedExternalForceInContactFrame.changeFrame(desiredContactFrameFixedInWorld);
+      double estimatedNormalForce = estimatedExternalForceInContactFrame.getZ();
+      yoEstimatedNormalForce.set(estimatedNormalForce);
+      return estimatedNormalForce;
+   }
+
    private static boolean jointIsNearLimit(OneDoFJointBasics joint)
    {
       double q = joint.getQ();
@@ -441,6 +578,11 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
                                                                     yoControllerDesiredForce,
                                                                     0.0075,
                                                                     ColorDefinitions.Red()));
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicArrow3D(bodyToControl.getName() + "EstimatedExternalForce",
+                                                                    currentContactPointInWorld,
+                                                                    yoEstimatedExternalForce,
+                                                                    0.0075,
+                                                                    ColorDefinitions.Blue()));
       group.addChild(YoGraphicDefinitionFactory.newYoGraphicCoordinateSystem3D(bodyToControl.getName() + "ContactControlFrame", yoDesiredContactPosition,
                                                                                yoDesiredContactOrientation,
                                                                                0.12,
