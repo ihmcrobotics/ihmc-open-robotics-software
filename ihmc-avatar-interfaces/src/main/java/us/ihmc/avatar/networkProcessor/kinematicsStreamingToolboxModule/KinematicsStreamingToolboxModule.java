@@ -16,6 +16,7 @@ import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.communication.ToolboxAPIs;
 import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.communication.ros2log.ROS2LogRecord;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxContactConfigurationCommand;
@@ -50,6 +51,7 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
    protected final KinematicsStreamingToolboxController controller;
    private ROS2Publisher<WholeBodyTrajectoryMessage> trajectoryMessagePublisher;
    private ROS2Publisher<WholeBodyStreamingMessage> streamingMessagePublisher;
+   private ROS2LogRecord ros2LogRecord;
 
    RobotConfigurationDataBasedUpdater robotStateUpdater = new RobotConfigurationDataBasedUpdater();
 
@@ -115,6 +117,16 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
          jvmStatisticsGenerator.start();
       }
       controller.setCenterOfMassOffset(parameters.getCenterOfMassOffset());
+
+      if (parameters.getRecordKSTOutput())
+      {
+         List<ROS2Topic<?>> topicsToLog = new ArrayList<>();
+         topicsToLog.add(getOutputStatusTopic(robotModel.getSimpleRobotName()));
+         ros2LogRecord = new ROS2LogRecord(robotModel.getSimpleRobotName(),
+                                           topicsToLog,
+                                           parameters.getLogTimeSource(),
+                                           parameters.getLogSerialization());
+      }
    }
 
    private static Map<String, Double> fromStandPrep(DRCRobotModel robotModel)
@@ -259,5 +271,17 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
    public static ROS2Topic<ControllerCrashNotificationPacket> getOutputCrashNotificationTopic(String robotName)
    {
       return ControllerAPI.getTopic(getOutputTopic(robotName), ControllerCrashNotificationPacket.class);
+   }
+
+   @Override
+   public void destroy()
+   {
+      super.destroy();
+
+      if (ros2LogRecord != null)
+      {
+         ros2LogRecord.destroy();
+         ros2LogRecord = null;
+      }
    }
 }

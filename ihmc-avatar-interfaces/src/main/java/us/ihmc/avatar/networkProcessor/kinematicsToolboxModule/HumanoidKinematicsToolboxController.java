@@ -35,6 +35,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.HumanoidKinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -93,6 +94,10 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    private final TIntObjectHashMap<OneDoFJointBasics> jointHashCodeMap = new TIntObjectHashMap<>();
 
    private final Map<RigidBodyBasics, RigidBodyBasics> endEffectorToPrimaryBaseMap = new HashMap<>();
+   private final double[] previousPublishedJointPositions;
+   private final Point3D previousPublishedRootPosition = new Point3D();
+   private final Quaternion previousPublishedRootOrientation = new Quaternion();
+   private double previousPublishedSolutionTime = Double.NaN;
 
    private final YoBoolean enableAutoSupportPolygon = new YoBoolean("enableAutoSupportPolygon", registry);
    /**
@@ -225,6 +230,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
       this.desiredFullRobotModel = desiredFullRobotModel;
       desiredReferenceFrames = new HumanoidReferenceFrames(desiredFullRobotModel, centerOfMassFrame, null);
+      previousPublishedJointPositions = new double[desiredOneDoFJoints.length];
 
       desiredFullRobotModel.getElevator().subtreeStream().forEach(rigidBody -> rigidBodyHashCodeMap.put(rigidBody.hashCode(), rigidBody));
       Arrays.stream(desiredOneDoFJoints).forEach(joint -> jointHashCodeMap.put(joint.hashCode(), joint));
@@ -273,17 +279,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       }
 
       populateDefaultJointLimitReductionFactors();
-
-      RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(desiredFullRobotModel.getElevator());
-      for (RigidBodyBasics rigidBody : rootBody.subtreeIterable())
-      {
-         rigidBodiesList.add(rigidBody);
-         getSolution().getRigidBodyNames().add(rigidBody.getName());
-         getSolution().getRigidBodyPositions().add().setToZero();
-         getSolution().getRigidBodyOrientations().add().setToZero();
-         getSolution().getRigidBodyLinearVelocities().add().setToZero();
-         getSolution().getRigidBodyAngularVelocities().add().setToZero();
-      }
    }
 
    /**
@@ -373,6 +368,10 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    public boolean initialize()
    {
       firstTick = true;
+      previousPublishedSolutionTime = Double.NaN;
+      Arrays.fill(previousPublishedJointPositions, Double.NaN);
+      previousPublishedRootPosition.setToNaN();
+      previousPublishedRootOrientation.setToNaN();
       KinematicsToolboxOutputStatus status = new KinematicsToolboxOutputStatus();
       status.setJointNameHash(-1);
       status.setSolutionQuality(Double.NaN);
@@ -549,23 +548,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       MovingReferenceFrame chestFrame = desiredFullRobotModel.getChest().getParentJoint().getFrameAfterJoint();
       getSolution().getDesiredTorsoPosition().set(chestFrame.getTransformToRoot().getTranslation());
       getSolution().getDesiredTorsoOrientation().set(chestFrame.getTransformToRoot().getRotation());
-      MovingReferenceFrame chestFrameCoM = desiredFullRobotModel.getChest().getBodyFixedFrame();
-      getSolution().getDesiredTorsoLinearVelocity().set(chestFrameCoM.getTwistOfFrame().getLinearPart());
-      getSolution().getDesiredTorsoAngularVelocity().set(chestFrameCoM.getTwistOfFrame().getAngularPart());
-      
-      // Update rigid body pose - only needed for status message
-      for (int i = 0; i < rigidBodiesList.size(); i++)
-      {
-         if (!rigidBodiesList.get(i).equals(rootBody))
-         {
-            MovingReferenceFrame bodyFrame = rigidBodiesList.get(i).getParentJoint().getFrameAfterJoint();
-            getSolution().getRigidBodyPositions().get(i).set(bodyFrame.getTransformToRoot().getTranslation());
-            getSolution().getRigidBodyOrientations().get(i).set(bodyFrame.getTransformToRoot().getRotation());
-            MovingReferenceFrame bodyFrameCoM = rigidBodiesList.get(i).getBodyFixedFrame();
-            getSolution().getRigidBodyLinearVelocities().get(i).set(bodyFrameCoM.getTwistOfFrame().getLinearPart());
-            getSolution().getRigidBodyAngularVelocities().get(i).set(bodyFrameCoM.getTwistOfFrame().getAngularPart());
-         }
-      }
+
       // Com offset - only needed for status message
       getSolution().setComOffset(computeCenterOfMassOffset());
 
@@ -593,6 +576,79 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       }
 
       executionTimer.stopMeasurement();
+   }
+
+   @Override
+   protected void updateStatusMessageBeforePublish(double currentTime, boolean isPublishing)
+   {
+      if (!isPublishing)
+         return;
+
+      KinematicsToolboxOutputStatus solution = getSolution();
+      solution.getDesiredJointVelocitiesPublishingPeriod().reset();
+
+      double dt = currentTime - previousPublishedSolutionTime;
+      boolean hasPreviousPublishedSolution = Double.isFinite(previousPublishedSolutionTime) && dt > 1.0e-6;
+
+      if (hasPreviousPublishedSolution)
+      {
+         for (int jointIdx = 0; jointIdx < desiredOneDoFJoints.length; jointIdx++)
+         {
+            double currentJointPosition = solution.getDesiredJointAngles().get(jointIdx);
+            double qdPublishingPeriod = (currentJointPosition - previousPublishedJointPositions[jointIdx]) / dt;
+            solution.getDesiredJointVelocitiesPublishingPeriod().add((float) qdPublishingPeriod);
+         }
+
+         solution.getDesiredRootLinearVelocityPublishingPeriod().sub(solution.getDesiredRootPosition(), previousPublishedRootPosition);
+         solution.getDesiredRootLinearVelocityPublishingPeriod().scale(1.0 / dt);
+         solution.getDesiredRootOrientation().inverseTransform(solution.getDesiredRootLinearVelocityPublishingPeriod());
+
+         computeAngularVelocityLocalByFiniteDifference(dt,
+                                                       previousPublishedRootOrientation,
+                                                       solution.getDesiredRootOrientation(),
+                                                       solution.getDesiredRootAngularVelocityPublishingPeriod());
+      }
+      else
+      {
+         for (int jointIdx = 0; jointIdx < solution.getDesiredJointVelocities().size(); jointIdx++)
+         {
+            solution.getDesiredJointVelocitiesPublishingPeriod().add(solution.getDesiredJointVelocities().get(jointIdx));
+         }
+         solution.getDesiredRootLinearVelocityPublishingPeriod().set(solution.getDesiredRootLinearVelocity());
+         solution.getDesiredRootAngularVelocityPublishingPeriod().set(solution.getDesiredRootAngularVelocity());
+      }
+
+      for (int jointIdx = 0; jointIdx < desiredOneDoFJoints.length; jointIdx++)
+      {
+         previousPublishedJointPositions[jointIdx] = solution.getDesiredJointAngles().get(jointIdx);
+      }
+
+      previousPublishedRootPosition.set(solution.getDesiredRootPosition());
+      previousPublishedRootOrientation.set(solution.getDesiredRootOrientation());
+      previousPublishedSolutionTime = currentTime;
+   }
+
+   private static void computeAngularVelocityLocalByFiniteDifference(double dt,
+                                                                     Quaternion previousOrientation,
+                                                                     Quaternion currentOrientation,
+                                                                     Vector3DBasics angularVelocityToPack)
+   {
+      double qDotX = currentOrientation.getX() - previousOrientation.getX();
+      double qDotY = currentOrientation.getY() - previousOrientation.getY();
+      double qDotZ = currentOrientation.getZ() - previousOrientation.getZ();
+      double qDotS = currentOrientation.getS() - previousOrientation.getS();
+
+      double qx = -currentOrientation.getX();
+      double qy = -currentOrientation.getY();
+      double qz = -currentOrientation.getZ();
+      double qs = currentOrientation.getS();
+
+      double wx = qs * qDotX + qx * qDotS + qy * qDotZ - qz * qDotY;
+      double wy = qs * qDotY - qx * qDotZ + qy * qDotS + qz * qDotX;
+      double wz = qs * qDotZ + qx * qDotY - qy * qDotX + qz * qDotS;
+
+      angularVelocityToPack.set(wx, wy, wz);
+      angularVelocityToPack.scale(2.0 / dt);
    }
 
    @Override

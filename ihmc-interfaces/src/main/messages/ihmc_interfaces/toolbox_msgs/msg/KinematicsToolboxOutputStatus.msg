@@ -38,16 +38,15 @@ geometry_msgs/Vector3 desired_root_angular_velocity
 # Support region used by the toolbox
 geometry_msgs/Point[<=32] support_region
 
+# Desired joint velocities derived from finite difference from positions at publishing period.
+float32[] desired_joint_velocities_publishing_period
+# Desired linear velocity of the root joint expressed in local frame, derived from finite difference from positions at publishing period.
+geometry_msgs/Vector3 desired_root_linear_velocity_publishing_period
+# Desired angular velocity of the root joint expressed in local frame, derived from finite difference from positions at publishing period.
+geometry_msgs/Vector3 desired_root_angular_velocity_publishing_period
+
 geometry_msgs/Point desired_torso_position
 geometry_msgs/Quaternion desired_torso_orientation
-geometry_msgs/Vector3 desired_torso_linear_velocity
-geometry_msgs/Vector3 desired_torso_angular_velocity
-
-string[] rigid_body_names
-geometry_msgs/Point[] rigid_body_positions
-geometry_msgs/Quaternion[] rigid_body_orientations
-geometry_msgs/Vector3[] rigid_body_linear_velocities
-geometry_msgs/Vector3[] rigid_body_angular_velocities
 
 float32 com_offset
 

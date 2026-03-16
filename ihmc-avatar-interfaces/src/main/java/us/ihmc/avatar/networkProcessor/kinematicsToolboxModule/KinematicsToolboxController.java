@@ -949,8 +949,11 @@ public class KinematicsToolboxController extends ToolboxController implements SC
       computeCollisions();
 
       double currentTime = Conversions.nanosecondsToSeconds(System.nanoTime());
+      boolean isPublishing = timeLastSolutionPublished.getValue() == 0.0
+            || currentTime - timeLastSolutionPublished.getValue() >= publishSolutionPeriod.getValue();
+      updateStatusMessageBeforePublish(currentTime, isPublishing);
 
-      if (timeLastSolutionPublished.getValue() == 0.0 || currentTime - timeLastSolutionPublished.getValue() >= publishSolutionPeriod.getValue())
+      if (isPublishing)
       {
          reportMessage(inverseKinematicsSolution);
          timeLastSolutionPublished.set(currentTime);
@@ -958,6 +961,16 @@ public class KinematicsToolboxController extends ToolboxController implements SC
 
       firstTick = false;
       threadTimer.stop();
+   }
+
+   /**
+    * Hook for subclasses to update extra fields of {@link #inverseKinematicsSolution} right before publishing.
+    *
+    * @param currentTime  current wall-clock time in seconds.
+    * @param isPublishing whether the current tick will publish the status message.
+    */
+   protected void updateStatusMessageBeforePublish(double currentTime, boolean isPublishing)
+   {
    }
 
    /**
