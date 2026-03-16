@@ -519,13 +519,13 @@ public class RigidBodyControlManagerTest
                                                                     null,
                                                                     null,
                                                                     false,
-                                                                    nominalRhoWeight,
-                                                                    WholeBodyPostureAdjustmentProvider.createZeroPostureAdjustmentProvider(),
-                                                                    () -> 0.0,
-                                                                    () -> {},
-                                                                    yoTime,
-                                                                    0.0,
-                                                                    testRegistry);
+                                                                     nominalRhoWeight,
+                                                                     WholeBodyPostureAdjustmentProvider.createZeroPostureAdjustmentProvider(),
+                                                                     () -> 0.0,
+                                                                     null,
+                                                                     yoTime,
+                                                                     0.0,
+                                                                     testRegistry);
       manager.setGains(jointspaceGains);
       manager.setWeights(jointspaceWeights, userModeWeights);
 
