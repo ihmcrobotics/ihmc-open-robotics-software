@@ -94,6 +94,16 @@ public class ForcePolytopeCalculator
       svdProjectionSolver = new SVDProjectionForcePolytopeSolver(joints.length);
    }
 
+   public void setSingularValueThreshold(double singularValueThreshold)
+   {
+      svdProjectionSolver.setSingularValueThreshold(singularValueThreshold);
+   }
+
+   public double[] getSingularValues()
+   {
+      return svdProjectionSolver.getSingularValues();
+   }
+
    public void update()
    {
       rootBody.updateFramesRecursively();
@@ -184,5 +194,15 @@ public class ForcePolytopeCalculator
    public SVDVertexIterationForcePolytopeSolver getSvdIterativeSolver()
    {
       return svdIterativeSolver;
+   }
+
+   public SVDProjectionForcePolytopeSolver getSvdProjectionSolver()
+   {
+      return svdProjectionSolver;
+   }
+
+   public DMatrixRMaj getJacobianTranspose()
+   {
+      return jacobianTranspose;
    }
 }
