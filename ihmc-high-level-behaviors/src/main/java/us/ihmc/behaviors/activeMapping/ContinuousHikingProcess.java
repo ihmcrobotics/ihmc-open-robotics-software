@@ -74,7 +74,7 @@ public class ContinuousHikingProcess
                                                  controllerFootstepQueueMonitor,
                                                  activeMappingParameterToolBox);
 
-         rapidPlanarRegionsExtractionThread = new RapidPlanarRegionsExtractionThread(ros2Node, rawImageCollectionHeadCamera);
+         rapidPlanarRegionsExtractionThread = new RapidPlanarRegionsExtractionThread(robotModel.getSimpleRobotName(), ros2Node, rawImageCollectionHeadCamera);
 
          continuousPlanningStateMachine = new ContinuousPlanningStateMachine(robotModel,
                                                                              ros2Node,

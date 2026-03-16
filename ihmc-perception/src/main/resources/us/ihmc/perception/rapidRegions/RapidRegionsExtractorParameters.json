@@ -64,12 +64,12 @@
     "upperBound" : 15000
   },
   "Region min patches" : {
-    "value" : 72,
+    "value" : 200,
     "lowerBound" : 1,
     "upperBound" : 3000
   },
   "Boundary min patches" : {
-    "value" : 50,
+    "value" : 115,
     "lowerBound" : 1,
     "upperBound" : 1000
   },
