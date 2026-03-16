@@ -30,6 +30,7 @@ import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -78,6 +79,7 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoLong;
 
 import java.util.ArrayList;
@@ -91,6 +93,7 @@ import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.*;
 public class BalanceManager implements SCS2YoGraphicHolder
 {
    private static final boolean INCLUDE_GRAPHICS = false;
+   private static final boolean PACK_ICP_PREVIEW = false;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final boolean viewCoPHistory = false;
@@ -287,7 +290,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
       if (walkingMessageHandler != null)
       {
          CenterOfMassTrajectoryHandler comTrajectoryHandler = walkingMessageHandler.getComTrajectoryHandler();
-         precomputedICPPlanner = new PrecomputedICPPlanner(controlDT, comTrajectoryHandler, momentumTrajectoryHandler, registry);
+         precomputedICPPlanner = new PrecomputedICPPlanner(controllerToolbox, controlDT, comTrajectoryHandler, momentumTrajectoryHandler, registry);
          precomputedICPPlanner.setOmega0(controllerToolbox.getOmega0());
          precomputedICPPlanner.setMass(totalMass);
          precomputedICPPlanner.setGravity(gravityZ);
@@ -296,7 +299,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
       {
          precomputedICPPlanner = null;
       }
-      blendICPTrajectories.set(true);
+      blendICPTrajectories.set(false);
 
       distanceToShrinkSupportPolygonWhenHoldingCurrent.set(0.08);
 
@@ -544,6 +547,8 @@ public class BalanceManager implements SCS2YoGraphicHolder
 
    public void compute(RobotSide supportLeg, FeedbackControlCommand<?> heightControlCommand, FrameConvexPolygon2DReadOnly multiContactStabilityRegion, boolean controlHeightWithMomentum)
    {
+      precomputedICPPlanner.updateForPush();
+
       desiredCapturePoint2d.set(comTrajectoryPlanner.getDesiredDCMPosition());
       desiredCapturePointVelocity2d.set(comTrajectoryPlanner.getDesiredDCMVelocity());
 
@@ -1214,6 +1219,9 @@ public class BalanceManager implements SCS2YoGraphicHolder
                                                    RecyclingArrayList<FramePoint2D> capturePointPositions,
                                                    RecyclingArrayList<FrameVector2D> capturePointVelocities)
    {
+      if (!PACK_ICP_PREVIEW)
+         return;
+
       times.clear();
       capturePointPositions.clear();
       capturePointVelocities.clear();

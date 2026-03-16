@@ -3,9 +3,6 @@ package us.ihmc.commonWalkingControlModules.capturePoint;
 import static us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools.computeCenterOfMassAcceleration;
 import static us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools.computeCenterOfMassVelocity;
 import static us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools.computeCentroidalMomentumPivot;
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.Black;
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.BlueViolet;
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.Yellow;
 import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicPoint2D;
 import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.DefaultPoint2DGraphic.CIRCLE;
 import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.DefaultPoint2DGraphic.CIRCLE_CROSS;
@@ -13,8 +10,10 @@ import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.Defau
 
 import us.ihmc.commonWalkingControlModules.messageHandlers.CenterOfMassTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.messageHandlers.MomentumTrajectoryHandler;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -25,22 +24,16 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DBasics;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.CenterOfMassTrajectoryCommand;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.math.filters.AlphaFilteredTuple2D;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
-import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFramePoint2D;
-import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFrameVector2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.filters.AlphaFilterTools;
-import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -65,6 +58,12 @@ public class PrecomputedICPPlanner implements SCS2YoGraphicHolder
 
    private final YoDouble omega0 = new YoDouble(name + "Omega0", registry);
 
+   private final HighLevelHumanoidControllerToolbox controllerToolbox;
+
+   // Push variables
+   private final YoFrameVector2D yoPushDirection = new YoFrameVector2D("pushDirection", ReferenceFrame.getWorldFrame(), registry);
+   private final YoBoolean requestPush = new YoBoolean("requestPush", registry);
+
    private final FramePoint3D desiredCoPPosition = new FramePoint3D();
    private final FramePoint3D desiredCMPPosition = new FramePoint3D();
    private final FramePoint3D desiredCoMPosition = new FramePoint3D();
@@ -76,6 +75,8 @@ public class PrecomputedICPPlanner implements SCS2YoGraphicHolder
 
    private final FrameVector3D desiredAngularMomentum = new FrameVector3D();
    private final FrameVector3D desiredAngularMomentumRate = new FrameVector3D();
+
+   private final CenterOfMassTrajectoryCommand pushCoMTrajectory = new CenterOfMassTrajectoryCommand();
 
    private final CenterOfMassTrajectoryHandler centerOfMassTrajectoryHandler;
    private final MomentumTrajectoryHandler momentumTrajectoryHandler;
@@ -90,21 +91,24 @@ public class PrecomputedICPPlanner implements SCS2YoGraphicHolder
    private final FramePoint2D tempICPPosition = new FramePoint2D();
    private final FramePoint2D tempCoPPosition = new FramePoint2D();
 
-   public PrecomputedICPPlanner(CenterOfMassTrajectoryHandler centerOfMassTrajectoryHandler,
-                                MomentumTrajectoryHandler momentumTrajectoryHandler,
-                                YoRegistry parentRegistry)
-   {
-      this(Double.NaN, centerOfMassTrajectoryHandler, momentumTrajectoryHandler, parentRegistry);
-   }
-
-   public PrecomputedICPPlanner(double dt,
+   public PrecomputedICPPlanner(HighLevelHumanoidControllerToolbox controllerToolbox,
+                                double dt,
                                 CenterOfMassTrajectoryHandler centerOfMassTrajectoryHandler,
                                 MomentumTrajectoryHandler momentumTrajectoryHandler,
                                 YoRegistry parentRegistry)
    {
+      this.controllerToolbox = controllerToolbox;
+
       this.centerOfMassTrajectoryHandler = centerOfMassTrajectoryHandler;
       this.momentumTrajectoryHandler = momentumTrajectoryHandler;
-      blendingDuration.set(0.5);
+
+//      blendingDuration.set(0.5);
+      blendingDuration.set(0.05);
+
+      // Default values for self-pushing
+      pushDuration.set(0.25);
+      pushDirectionInMidFeet.set(Axis3D.X);
+      pushCoMOffsetMagnitude.set(0.05);
 
       if (!Double.isNaN(dt))
       {
@@ -127,6 +131,43 @@ public class PrecomputedICPPlanner implements SCS2YoGraphicHolder
       parentRegistry.addChild(registry);
 
       hideViz();
+   }
+
+   private final YoDouble pushDuration = new YoDouble("pushDuration", registry);
+   private final YoFrameVector2D pushDirectionInMidFeet = new YoFrameVector2D("pushDirectionInMidFeet", ReferenceFrame.getWorldFrame(), registry);
+   private final YoDouble pushCoMOffsetMagnitude = new YoDouble("pushCoMOffsetMagnitude", registry);
+
+   private final FrameVector3D comOffset = new FrameVector3D();
+   private final FramePoint3D pushCoMWaypoint0 = new FramePoint3D();
+   private final FramePoint3D pushCoMWaypoint1 = new FramePoint3D();
+   private final FrameVector3D pushCoMVelocity0 = new FrameVector3D();
+   private final FrameVector3D pushCoMVelocity1 = new FrameVector3D();
+
+   public void updateForPush()
+   {
+      if (requestPush.getValue())
+      {
+         comOffset.setIncludingFrame(controllerToolbox.getReferenceFrames().getMidFeetZUpFrame(), pushDirectionInMidFeet.getX(), pushDirectionInMidFeet.getY(), 0.0);
+         comOffset.changeFrame(ReferenceFrame.getWorldFrame());
+         comOffset.scale(pushCoMOffsetMagnitude.getValue());
+
+         pushCoMVelocity1.setAndScale(1.0 / pushDuration.getValue(), comOffset);
+
+         pushCoMWaypoint0.setToZero(controllerToolbox.getReferenceFrames().getCenterOfMassFrame());
+         pushCoMWaypoint1.setToZero(controllerToolbox.getReferenceFrames().getCenterOfMassFrame());
+         pushCoMWaypoint0.changeFrame(ReferenceFrame.getWorldFrame());
+         pushCoMWaypoint1.changeFrame(ReferenceFrame.getWorldFrame());
+         pushCoMWaypoint1.add(comOffset);
+
+         pushCoMTrajectory.clear();
+         pushCoMTrajectory.getEuclideanTrajectory().addTrajectoryPoint(0.0, pushCoMWaypoint0, pushCoMVelocity0);
+         pushCoMTrajectory.getEuclideanTrajectory().addTrajectoryPoint(pushDuration.getValue(), pushCoMWaypoint1, pushCoMVelocity1);
+
+         centerOfMassTrajectoryHandler.clear();
+         centerOfMassTrajectoryHandler.handleComTrajectory(pushCoMTrajectory);
+
+         requestPush.set(false);
+      }
    }
 
    private void compute(double time)
