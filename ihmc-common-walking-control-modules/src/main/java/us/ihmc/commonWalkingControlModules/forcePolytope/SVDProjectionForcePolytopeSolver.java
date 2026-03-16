@@ -5,9 +5,8 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.linsol.svd.SolvePseudoInverseSvd_DDRM;
 import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 
-class SVDProjectionForcePolytopeSolver implements ForcePolytopeSolver
+public class SVDProjectionForcePolytopeSolver implements ForcePolytopeSolver
 {
    private final int dofs;
    private final DMatrixRMaj jacobianTranspose = new DMatrixRMaj(0);
@@ -21,8 +20,23 @@ class SVDProjectionForcePolytopeSolver implements ForcePolytopeSolver
       this.dofs = dofs;
       jacobianTranspose.reshape(dofs, 3);
       jacobianTransposeInv.reshape(3, dofs);
-      psuedoInverseSolver.setThreshold(singularValueThreshold);
+      psuedoInverseSolver.setThreshold(DEFAULT_SINGULAR_VALUE_THRESHOLD);
       tau.reshape(dofs, 1);
+   }
+
+   public void setSingularValueThreshold(double singularValueThreshold)
+   {
+      psuedoInverseSolver.setThreshold(singularValueThreshold);
+   }
+
+   public double[] getSingularValues()
+   {
+      return psuedoInverseSolver.getDecomposition().getSingularValues();
+   }
+
+   public SolvePseudoInverseSvd_DDRM getPsuedoInverseSolver()
+   {
+      return psuedoInverseSolver;
    }
 
    @Override
