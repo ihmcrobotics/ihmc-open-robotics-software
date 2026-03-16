@@ -110,11 +110,19 @@ public class PlanarRegionsListCommand implements Command<PlanarRegionsListComman
       this.planarRegions.add().set(command);
    }
 
-   public void updateScaledConvexHulls(ConvexPolygonScaler scaler, double distance)
+   public void updateScaledConvexHullsForPlanner(ConvexPolygonScaler scaler, double distance)
    {
       for (int i = 0; i < planarRegions.size(); i++)
       {
          planarRegions.get(i).updateScaledConvexHullForPlanner(scaler, distance);
+      }
+   }
+
+   public void updateScaledConvexHullsForController(ConvexPolygonScaler scaler, double distance)
+   {
+      for (int i = 0; i < planarRegions.size(); i++)
+      {
+         planarRegions.get(i).updateScaledConvexHullForController(scaler, distance);
       }
    }
 
