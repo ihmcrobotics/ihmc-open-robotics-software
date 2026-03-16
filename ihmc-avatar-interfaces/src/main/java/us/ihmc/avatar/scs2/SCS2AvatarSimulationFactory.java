@@ -598,12 +598,11 @@ public class SCS2AvatarSimulationFactory
 
       HumanoidRobotContextDataFactory contextDataFactory = new HumanoidRobotContextDataFactory();
 
-      multiContactGaitGeneratorThread = new AvatarMultiContactGaitGeneratorThread(robotModel.get().getMultiContactPlannerDT(),
+      multiContactGaitGeneratorThread = new AvatarMultiContactGaitGeneratorThread(robotModel.get(),
                                                                                   realtimeROS2Node.get(),
-                                                                                  robotModel.get(),
                                                                                   contextDataFactory,
-                                                                                  highLevelHumanoidControllerFactory.get().getStatusOutputManager(),
-                                                                                  highLevelHumanoidControllerFactory.get().getCommandInputManager());
+                                                                                  highLevelHumanoidControllerFactory.get().getCommandInputManager(),
+                                                                                  highLevelHumanoidControllerFactory.get().getStatusOutputManager());
       simulationConstructionSet.addYoGraphic(multiContactGaitGeneratorThread.getSCS2YoGraphics());
    }
 
@@ -644,8 +643,8 @@ public class SCS2AvatarSimulationFactory
       if (createMultiContactGaitGenerator.get())
          multiContactGaitGeneratorTask = new MultiContactGaitGeneratorTask("MCGG",
                                                                            multiContactGaitGeneratorThread,
-                                                                           simulationDT.get(),
-                                                                           masterFullRobotModel);
+                                                                           multiContactPlannerDivisor,
+                                                                           simulationDT.get());
 
       SimulatedHandControlTask handControlTask = null;
       AvatarSimulatedHandControlThread handControlThread = null;
