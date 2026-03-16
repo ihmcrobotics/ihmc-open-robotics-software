@@ -5,18 +5,24 @@ import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
+import us.ihmc.behaviors.behaviorTree.action.actions.WaitDurationActionExecutor;
 import us.ihmc.behaviors.behaviorTree.action.actions.WalkActionExecutor;
+import us.ihmc.behaviors.behaviorTree.control.GotoNodeExecutor;
+import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneDoorFrameExecutor;
+import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectType;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ros2log.ROS2LogRecord;
 import us.ihmc.communication.ros2log.ROS2LogSerialization;
 import us.ihmc.communication.ros2log.ROS2LogTimeSource;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 
 import java.util.List;
 
+import static behavior_msgs.msg.dds.BehaviorTreeSceneObjectStateMessage.*;
 import static us.ihmc.behaviors.behaviorTree.BehaviorTreeTools.searchDFSFirstMatch;
 
 public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversalState, DoorTraversalDefinition>
@@ -70,6 +76,31 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
    public void update()
    {
       super.update();
+
+      if (searchDFSFirstMatch(this, "Decide door behavior type") instanceof WaitDurationActionExecutor waitAction
+       && searchDFSFirstMatch(this, "Goto correct door behavior") instanceof GotoNodeExecutor gotoDoor)
+      {
+         if (waitAction.getState().getIsExecuting())
+         {
+            String gotoNodeName = "End";
+
+            if (scene.getObject(BehaviorTreeSceneObjectType.DOOR_FRAME) instanceof BehaviorTreeSceneDoorFrameExecutor doorFrameExecutor)
+               switch (doorFrameExecutor.getDoorType())
+               {
+                  case DOOR_TYPE_PUSH -> gotoNodeName = "Left Push Door";
+                  case DOOR_TYPE_PULL -> gotoNodeName = "Right Pull Door";
+               }
+
+            BehaviorTreeNodeExecutor<?, ?> gotoNode = searchDFSFirstMatch(this, gotoNodeName);
+            if (gotoNode != null)
+            {
+               state.getLogger().info("Going to {}", gotoNodeName);
+               gotoDoor.getDefinition().setNodeToGoto(gotoNode.getState().getID(), gotoNode.getDefinition().getName());
+            }
+            else
+               state.getLogger().error("Could not find node to goto: {}", gotoNodeName);
+         }
+      }
 
       boolean executing = false;
       if (searchDFSFirstMatch(this, "Walk through push door") instanceof WalkActionExecutor walkThroughPushDoor)

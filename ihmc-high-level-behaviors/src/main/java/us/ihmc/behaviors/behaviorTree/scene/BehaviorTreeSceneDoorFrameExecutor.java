@@ -154,4 +154,19 @@ public class BehaviorTreeSceneDoorFrameExecutor extends BehaviorTreeSceneObjectE
       if (pointCounter != null)
          pointCounter.close();
    }
+
+   public byte getDoorType()
+   {
+      return doorType;
+   }
+
+   public RobotSide getHingeSide()
+   {
+      return hingeSide;
+   }
+
+   public float getDoorOpenAngle()
+   {
+      return doorOpenAngle;
+   }
 }
