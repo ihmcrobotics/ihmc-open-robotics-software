@@ -1,20 +1,20 @@
 package us.ihmc.rdx.behaviorTree.actions;
 
 import imgui.ImGui;
-import us.ihmc.behaviors.behaviorTree.action.actions.WaitDurationActionDefinition;
-import us.ihmc.behaviors.behaviorTree.action.actions.WaitDurationActionState;
+import us.ihmc.behaviors.behaviorTree.action.actions.WaitActionDefinition;
+import us.ihmc.behaviors.behaviorTree.action.actions.WaitActionState;
 import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeRootNode;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 
-public class RDXWaitDurationAction extends RDXActionNode<WaitDurationActionState, WaitDurationActionDefinition>
+public class RDXWaitAction extends RDXActionNode<WaitActionState, WaitActionDefinition>
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImDoubleWrapper waitDurationWidget;
 
-   public RDXWaitDurationAction(long id, RDXBehaviorTreeRootNode rootNode)
+   public RDXWaitAction(long id, RDXBehaviorTreeRootNode rootNode)
    {
-      super(new WaitDurationActionState(id, rootNode.getState()), rootNode);
+      super(new WaitActionState(id, rootNode.getState()), rootNode);
 
       waitDurationWidget = new ImDoubleWrapper(definition::getWaitDuration,
                                                definition::setWaitDuration,

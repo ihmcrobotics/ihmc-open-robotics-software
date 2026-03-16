@@ -5,7 +5,7 @@ import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
-import us.ihmc.behaviors.behaviorTree.action.actions.WaitDurationActionExecutor;
+import us.ihmc.behaviors.behaviorTree.action.actions.WaitActionExecutor;
 import us.ihmc.behaviors.behaviorTree.control.GotoNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneDoorFrameExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectType;
@@ -80,7 +80,7 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
 
    private void doorBehaviorSelection()
    {
-      if (searchDFSFirstMatch(this, "Decide door behavior type") instanceof WaitDurationActionExecutor waitAction
+      if (searchDFSFirstMatch(this, "Decide door behavior type") instanceof WaitActionExecutor waitAction
        && searchDFSFirstMatch(this, "Goto correct door behavior") instanceof GotoNodeExecutor gotoDoor)
       {
          if (waitAction.getState().getIsExecuting())

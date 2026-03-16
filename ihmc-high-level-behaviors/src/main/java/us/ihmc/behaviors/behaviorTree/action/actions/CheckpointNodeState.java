@@ -1,14 +1,14 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
-import behavior_msgs.msg.dds.CheckPointNodeStateMessage;
+import behavior_msgs.msg.dds.CheckpointNodeStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.LeafNodeState;
 
-public class CheckPointNodeState extends LeafNodeState<CheckPointNodeDefinition>
+public class CheckpointNodeState extends LeafNodeState<CheckpointNodeDefinition>
 {
-   public CheckPointNodeState(long id, BehaviorTreeRootNodeState rootNode)
+   public CheckpointNodeState(long id, BehaviorTreeRootNodeState rootNode)
    {
-      super(id, new CheckPointNodeDefinition(rootNode.getDefinition()), rootNode);
+      super(id, new CheckpointNodeDefinition(rootNode.getDefinition()), rootNode);
    }
 
    @Override
@@ -17,14 +17,14 @@ public class CheckPointNodeState extends LeafNodeState<CheckPointNodeDefinition>
       super.update();
    }
 
-   public void toMessage(CheckPointNodeStateMessage message)
+   public void toMessage(CheckpointNodeStateMessage message)
    {
       definition.toMessage(message.getDefinition());
 
       super.toMessage(message.getState());
    }
 
-   public void fromMessage(CheckPointNodeStateMessage message)
+   public void fromMessage(CheckpointNodeStateMessage message)
    {
       super.fromMessage(message.getState());
 

@@ -1,20 +1,20 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
-import behavior_msgs.msg.dds.WaitDurationActionDefinitionMessage;
+import behavior_msgs.msg.dds.WaitActionDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeDefinition;
 import us.ihmc.communication.crdt.CRDTBidirectionalDouble;
 
-public class WaitDurationActionDefinition extends ActionNodeDefinition
+public class WaitActionDefinition extends ActionNodeDefinition
 {
    private final CRDTBidirectionalDouble waitDuration;
 
    // On disk fields
    private double onDiskWaitDuration;
 
-   public WaitDurationActionDefinition(BehaviorTreeRootNodeDefinition rootNode)
+   public WaitActionDefinition(BehaviorTreeRootNodeDefinition rootNode)
    {
       super(rootNode);
 
@@ -66,14 +66,14 @@ public class WaitDurationActionDefinition extends ActionNodeDefinition
       return !unchanged;
    }
 
-   public void toMessage(WaitDurationActionDefinitionMessage message)
+   public void toMessage(WaitActionDefinitionMessage message)
    {
       super.toMessage(message.getDefinition());
 
       message.setWaitDuration(waitDuration.toMessage());
    }
 
-   public void fromMessage(WaitDurationActionDefinitionMessage message)
+   public void fromMessage(WaitActionDefinitionMessage message)
    {
       super.fromMessage(message.getDefinition());
 

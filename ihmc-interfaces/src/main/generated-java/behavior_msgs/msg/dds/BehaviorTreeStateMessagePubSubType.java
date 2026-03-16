@@ -15,7 +15,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "0be453b2d7859e324a51b4bb46af0099fc4686f0237855223216e9af8057a17b";
+   		return "723af6c7b2283034fde074a784cb4652b1c3769ee6f2abd34ba55916daf5a20c";
    }
    
    @Override
@@ -87,7 +87,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
           current_alignment += behavior_msgs.msg.dds.GotoNodeStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 120; ++i0)
       {
-          current_alignment += behavior_msgs.msg.dds.CheckPointNodeStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+          current_alignment += behavior_msgs.msg.dds.CheckpointNodeStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 120; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.SceneActionNodeStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
@@ -111,7 +111,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
           current_alignment += behavior_msgs.msg.dds.WalkActionStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 120; ++i0)
       {
-          current_alignment += behavior_msgs.msg.dds.SakeHandCommandActionStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+          current_alignment += behavior_msgs.msg.dds.EZGripperActionStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 120; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.AbilityHandActionStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
@@ -129,7 +129,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
           current_alignment += behavior_msgs.msg.dds.PelvisActionStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 120; ++i0)
       {
-          current_alignment += behavior_msgs.msg.dds.WaitDurationActionStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+          current_alignment += behavior_msgs.msg.dds.WaitActionStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 120; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.LegActionStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
@@ -202,7 +202,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getCheckpointNodes().size(); ++i0)
       {
-          current_alignment += behavior_msgs.msg.dds.CheckPointNodeStateMessagePubSubType.getCdrSerializedSize(data.getCheckpointNodes().get(i0), current_alignment);}
+          current_alignment += behavior_msgs.msg.dds.CheckpointNodeStateMessagePubSubType.getCdrSerializedSize(data.getCheckpointNodes().get(i0), current_alignment);}
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getSceneActions().size(); ++i0)
@@ -240,9 +240,9 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
           current_alignment += behavior_msgs.msg.dds.WalkActionStateMessagePubSubType.getCdrSerializedSize(data.getWalkActions().get(i0), current_alignment);}
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for(int i0 = 0; i0 < data.getSakeHandCommandActions().size(); ++i0)
+      for(int i0 = 0; i0 < data.getEzGripperActions().size(); ++i0)
       {
-          current_alignment += behavior_msgs.msg.dds.SakeHandCommandActionStateMessagePubSubType.getCdrSerializedSize(data.getSakeHandCommandActions().get(i0), current_alignment);}
+          current_alignment += behavior_msgs.msg.dds.EZGripperActionStateMessagePubSubType.getCdrSerializedSize(data.getEzGripperActions().get(i0), current_alignment);}
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getAbilityHandActions().size(); ++i0)
@@ -270,9 +270,9 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
           current_alignment += behavior_msgs.msg.dds.PelvisActionStateMessagePubSubType.getCdrSerializedSize(data.getPelvisActions().get(i0), current_alignment);}
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for(int i0 = 0; i0 < data.getWaitDurationActions().size(); ++i0)
+      for(int i0 = 0; i0 < data.getWaitActions().size(); ++i0)
       {
-          current_alignment += behavior_msgs.msg.dds.WaitDurationActionStateMessagePubSubType.getCdrSerializedSize(data.getWaitDurationActions().get(i0), current_alignment);}
+          current_alignment += behavior_msgs.msg.dds.WaitActionStateMessagePubSubType.getCdrSerializedSize(data.getWaitActions().get(i0), current_alignment);}
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getLegActions().size(); ++i0)
@@ -359,9 +359,9 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       cdr.write_type_e(data.getWalkActions());else
           throw new RuntimeException("walk_actions field exceeds the maximum length: %d > %d".formatted(data.getWalkActions().size(), 120));
 
-      if(data.getSakeHandCommandActions().size() <= 120)
-      cdr.write_type_e(data.getSakeHandCommandActions());else
-          throw new RuntimeException("sake_hand_command_actions field exceeds the maximum length: %d > %d".formatted(data.getSakeHandCommandActions().size(), 120));
+      if(data.getEzGripperActions().size() <= 120)
+      cdr.write_type_e(data.getEzGripperActions());else
+          throw new RuntimeException("ez_gripper_actions field exceeds the maximum length: %d > %d".formatted(data.getEzGripperActions().size(), 120));
 
       if(data.getAbilityHandActions().size() <= 120)
       cdr.write_type_e(data.getAbilityHandActions());else
@@ -383,9 +383,9 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       cdr.write_type_e(data.getPelvisActions());else
           throw new RuntimeException("pelvis_actions field exceeds the maximum length: %d > %d".formatted(data.getPelvisActions().size(), 120));
 
-      if(data.getWaitDurationActions().size() <= 120)
-      cdr.write_type_e(data.getWaitDurationActions());else
-          throw new RuntimeException("wait_duration_actions field exceeds the maximum length: %d > %d".formatted(data.getWaitDurationActions().size(), 120));
+      if(data.getWaitActions().size() <= 120)
+      cdr.write_type_e(data.getWaitActions());else
+          throw new RuntimeException("wait_actions field exceeds the maximum length: %d > %d".formatted(data.getWaitActions().size(), 120));
 
       if(data.getLegActions().size() <= 120)
       cdr.write_type_e(data.getLegActions());else
@@ -418,13 +418,13 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       cdr.read_type_e(data.getNeckActions());	
       cdr.read_type_e(data.getSpineActions());	
       cdr.read_type_e(data.getWalkActions());	
-      cdr.read_type_e(data.getSakeHandCommandActions());	
+      cdr.read_type_e(data.getEzGripperActions());	
       cdr.read_type_e(data.getAbilityHandActions());	
       cdr.read_type_e(data.getArmActions());	
       cdr.read_type_e(data.getHandWrenchActions());	
       cdr.read_type_e(data.getScrewPrimitiveActions());	
       cdr.read_type_e(data.getPelvisActions());	
-      cdr.read_type_e(data.getWaitDurationActions());	
+      cdr.read_type_e(data.getWaitActions());	
       cdr.read_type_e(data.getLegActions());	
 
    }
@@ -455,13 +455,13 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       ser.write_type_e("neck_actions", data.getNeckActions());
       ser.write_type_e("spine_actions", data.getSpineActions());
       ser.write_type_e("walk_actions", data.getWalkActions());
-      ser.write_type_e("sake_hand_command_actions", data.getSakeHandCommandActions());
+      ser.write_type_e("ez_gripper_actions", data.getEzGripperActions());
       ser.write_type_e("ability_hand_actions", data.getAbilityHandActions());
       ser.write_type_e("arm_actions", data.getArmActions());
       ser.write_type_e("hand_wrench_actions", data.getHandWrenchActions());
       ser.write_type_e("screw_primitive_actions", data.getScrewPrimitiveActions());
       ser.write_type_e("pelvis_actions", data.getPelvisActions());
-      ser.write_type_e("wait_duration_actions", data.getWaitDurationActions());
+      ser.write_type_e("wait_actions", data.getWaitActions());
       ser.write_type_e("leg_actions", data.getLegActions());
    }
 
@@ -491,13 +491,13 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       ser.read_type_e("neck_actions", data.getNeckActions());
       ser.read_type_e("spine_actions", data.getSpineActions());
       ser.read_type_e("walk_actions", data.getWalkActions());
-      ser.read_type_e("sake_hand_command_actions", data.getSakeHandCommandActions());
+      ser.read_type_e("ez_gripper_actions", data.getEzGripperActions());
       ser.read_type_e("ability_hand_actions", data.getAbilityHandActions());
       ser.read_type_e("arm_actions", data.getArmActions());
       ser.read_type_e("hand_wrench_actions", data.getHandWrenchActions());
       ser.read_type_e("screw_primitive_actions", data.getScrewPrimitiveActions());
       ser.read_type_e("pelvis_actions", data.getPelvisActions());
-      ser.read_type_e("wait_duration_actions", data.getWaitDurationActions());
+      ser.read_type_e("wait_actions", data.getWaitActions());
       ser.read_type_e("leg_actions", data.getLegActions());
    }
 

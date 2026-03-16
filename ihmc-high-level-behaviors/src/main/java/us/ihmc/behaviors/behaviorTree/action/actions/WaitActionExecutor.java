@@ -5,13 +5,13 @@ import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
 import us.ihmc.commons.Conversions;
 import us.ihmc.tools.NonWallTimer;
 
-public class WaitDurationActionExecutor extends ActionNodeExecutor<WaitDurationActionState, WaitDurationActionDefinition>
+public class WaitActionExecutor extends ActionNodeExecutor<WaitActionState, WaitActionDefinition>
 {
    private final NonWallTimer executionTimer = new NonWallTimer();
 
-   public WaitDurationActionExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
+   public WaitActionExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
    {
-      super(new WaitDurationActionState(id, rootNode.getState()), rootNode);
+      super(new WaitActionState(id, rootNode.getState()), rootNode);
    }
 
    @Override

@@ -6,25 +6,25 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
-public class CheckPointNodeDefinitionMessage extends Packet<CheckPointNodeDefinitionMessage> implements Settable<CheckPointNodeDefinitionMessage>, EpsilonComparable<CheckPointNodeDefinitionMessage>
+public class CheckpointNodeDefinitionMessage extends Packet<CheckpointNodeDefinitionMessage> implements Settable<CheckpointNodeDefinitionMessage>, EpsilonComparable<CheckpointNodeDefinitionMessage>
 {
    /**
             * Parent definition fields
             */
    public behavior_msgs.msg.dds.LeafNodeDefinitionMessage definition_;
 
-   public CheckPointNodeDefinitionMessage()
+   public CheckpointNodeDefinitionMessage()
    {
       definition_ = new behavior_msgs.msg.dds.LeafNodeDefinitionMessage();
    }
 
-   public CheckPointNodeDefinitionMessage(CheckPointNodeDefinitionMessage other)
+   public CheckpointNodeDefinitionMessage(CheckpointNodeDefinitionMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(CheckPointNodeDefinitionMessage other)
+   public void set(CheckpointNodeDefinitionMessage other)
    {
       behavior_msgs.msg.dds.LeafNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);   }
 
@@ -38,19 +38,19 @@ public class CheckPointNodeDefinitionMessage extends Packet<CheckPointNodeDefini
    }
 
 
-   public static Supplier<CheckPointNodeDefinitionMessagePubSubType> getPubSubType()
+   public static Supplier<CheckpointNodeDefinitionMessagePubSubType> getPubSubType()
    {
-      return CheckPointNodeDefinitionMessagePubSubType::new;
+      return CheckpointNodeDefinitionMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return CheckPointNodeDefinitionMessagePubSubType::new;
+      return CheckpointNodeDefinitionMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(CheckPointNodeDefinitionMessage other, double epsilon)
+   public boolean epsilonEquals(CheckpointNodeDefinitionMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -65,9 +65,9 @@ public class CheckPointNodeDefinitionMessage extends Packet<CheckPointNodeDefini
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof CheckPointNodeDefinitionMessage)) return false;
+      if(!(other instanceof CheckpointNodeDefinitionMessage)) return false;
 
-      CheckPointNodeDefinitionMessage otherMyClass = (CheckPointNodeDefinitionMessage) other;
+      CheckpointNodeDefinitionMessage otherMyClass = (CheckpointNodeDefinitionMessage) other;
 
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
 
@@ -79,7 +79,7 @@ public class CheckPointNodeDefinitionMessage extends Packet<CheckPointNodeDefini
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("CheckPointNodeDefinitionMessage {");
+      builder.append("CheckpointNodeDefinitionMessage {");
       builder.append("definition=");
       builder.append(this.definition_);
       builder.append("}");

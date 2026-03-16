@@ -13,7 +13,7 @@ import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCommandActionState, SakeHandCommandActionDefinition>
+public class EZGripperActionExecutor extends ActionNodeExecutor<EZGripperActionState, EZGripperActionDefinition>
 {
    /**
     * This is the typically how long the basic OPEN and CLOSE commands take on the real robot.
@@ -28,9 +28,9 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
    private final SideDependentList<RevoluteJoint> x2KnuckleJoints = new SideDependentList<>();
    private final SakeHandDesiredCommandMessage sakeHandDesiredCommandMessage = new SakeHandDesiredCommandMessage();
 
-   public SakeHandCommandActionExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
+   public EZGripperActionExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
    {
-      super(new SakeHandCommandActionState(id, rootNode.getState()), rootNode);
+      super(new EZGripperActionState(id, rootNode.getState()), rootNode);
 
       for (RobotSide side : RobotSide.values)
       {

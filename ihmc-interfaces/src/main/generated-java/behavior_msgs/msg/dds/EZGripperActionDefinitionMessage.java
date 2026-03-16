@@ -6,7 +6,7 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
-public class SakeHandCommandActionDefinitionMessage extends Packet<SakeHandCommandActionDefinitionMessage> implements Settable<SakeHandCommandActionDefinitionMessage>, EpsilonComparable<SakeHandCommandActionDefinitionMessage>
+public class EZGripperActionDefinitionMessage extends Packet<EZGripperActionDefinitionMessage> implements Settable<EZGripperActionDefinitionMessage>, EpsilonComparable<EZGripperActionDefinitionMessage>
 {
    /**
             * Parent definition fields
@@ -33,18 +33,18 @@ public class SakeHandCommandActionDefinitionMessage extends Packet<SakeHandComma
             */
    public double fingertip_grip_force_limit_;
 
-   public SakeHandCommandActionDefinitionMessage()
+   public EZGripperActionDefinitionMessage()
    {
       definition_ = new behavior_msgs.msg.dds.ActionNodeDefinitionMessage();
    }
 
-   public SakeHandCommandActionDefinitionMessage(SakeHandCommandActionDefinitionMessage other)
+   public EZGripperActionDefinitionMessage(EZGripperActionDefinitionMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(SakeHandCommandActionDefinitionMessage other)
+   public void set(EZGripperActionDefinitionMessage other)
    {
       behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
       robot_side_ = other.robot_side_;
@@ -144,19 +144,19 @@ public class SakeHandCommandActionDefinitionMessage extends Packet<SakeHandComma
    }
 
 
-   public static Supplier<SakeHandCommandActionDefinitionMessagePubSubType> getPubSubType()
+   public static Supplier<EZGripperActionDefinitionMessagePubSubType> getPubSubType()
    {
-      return SakeHandCommandActionDefinitionMessagePubSubType::new;
+      return EZGripperActionDefinitionMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return SakeHandCommandActionDefinitionMessagePubSubType::new;
+      return EZGripperActionDefinitionMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(SakeHandCommandActionDefinitionMessage other, double epsilon)
+   public boolean epsilonEquals(EZGripperActionDefinitionMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -181,9 +181,9 @@ public class SakeHandCommandActionDefinitionMessage extends Packet<SakeHandComma
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof SakeHandCommandActionDefinitionMessage)) return false;
+      if(!(other instanceof EZGripperActionDefinitionMessage)) return false;
 
-      SakeHandCommandActionDefinitionMessage otherMyClass = (SakeHandCommandActionDefinitionMessage) other;
+      EZGripperActionDefinitionMessage otherMyClass = (EZGripperActionDefinitionMessage) other;
 
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
       if(this.robot_side_ != otherMyClass.robot_side_) return false;
@@ -205,7 +205,7 @@ public class SakeHandCommandActionDefinitionMessage extends Packet<SakeHandComma
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("SakeHandCommandActionDefinitionMessage {");
+      builder.append("EZGripperActionDefinitionMessage {");
       builder.append("definition=");
       builder.append(this.definition_);      builder.append(", ");
       builder.append("robot_side=");

@@ -2,20 +2,20 @@ package behavior_msgs.msg.dds;
 
 /**
 * 
-* Topic data type of the struct "SakeHandCommandActionDefinitionMessage" defined in "SakeHandCommandActionDefinitionMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+* Topic data type of the struct "EZGripperActionDefinitionMessage" defined in "EZGripperActionDefinitionMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
 *
-* This file was automatically generated from SakeHandCommandActionDefinitionMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit SakeHandCommandActionDefinitionMessage_.idl instead.
+* This file was automatically generated from EZGripperActionDefinitionMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit EZGripperActionDefinitionMessage_.idl instead.
 *
 */
-public class SakeHandCommandActionDefinitionMessagePubSubType implements us.ihmc.pubsub.TopicDataType<behavior_msgs.msg.dds.SakeHandCommandActionDefinitionMessage>
+public class EZGripperActionDefinitionMessagePubSubType implements us.ihmc.pubsub.TopicDataType<behavior_msgs.msg.dds.EZGripperActionDefinitionMessage>
 {
-   public static final java.lang.String name = "behavior_msgs::msg::dds_::SakeHandCommandActionDefinitionMessage_";
+   public static final java.lang.String name = "behavior_msgs::msg::dds_::EZGripperActionDefinitionMessage_";
    
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "48edf4c6d2e6d5322d5d8924a2655f20f7e726c373d6bc675ed28f08afd305dd";
+   		return "1060dbddcdb027cacafbf4c9ddd23eb1b85078501f8caf640a4db5371e57ddee";
    }
    
    @Override
@@ -28,7 +28,7 @@ public class SakeHandCommandActionDefinitionMessagePubSubType implements us.ihmc
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(behavior_msgs.msg.dds.SakeHandCommandActionDefinitionMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
+   public void serialize(behavior_msgs.msg.dds.EZGripperActionDefinitionMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -36,7 +36,7 @@ public class SakeHandCommandActionDefinitionMessagePubSubType implements us.ihmc
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, behavior_msgs.msg.dds.SakeHandCommandActionDefinitionMessage data) throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, behavior_msgs.msg.dds.EZGripperActionDefinitionMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -68,12 +68,12 @@ public class SakeHandCommandActionDefinitionMessagePubSubType implements us.ihmc
       return current_alignment - initial_alignment;
    }
 
-   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.SakeHandCommandActionDefinitionMessage data)
+   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.EZGripperActionDefinitionMessage data)
    {
       return getCdrSerializedSize(data, 0);
    }
 
-   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.SakeHandCommandActionDefinitionMessage data, int current_alignment)
+   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.EZGripperActionDefinitionMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
 
@@ -98,7 +98,7 @@ public class SakeHandCommandActionDefinitionMessagePubSubType implements us.ihmc
       return current_alignment - initial_alignment;
    }
 
-   public static void write(behavior_msgs.msg.dds.SakeHandCommandActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
+   public static void write(behavior_msgs.msg.dds.EZGripperActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
       cdr.write_type_9(data.getRobotSide());
@@ -113,7 +113,7 @@ public class SakeHandCommandActionDefinitionMessagePubSubType implements us.ihmc
 
    }
 
-   public static void read(behavior_msgs.msg.dds.SakeHandCommandActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
+   public static void read(behavior_msgs.msg.dds.EZGripperActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
       data.setRobotSide(cdr.read_type_9());
@@ -130,7 +130,7 @@ public class SakeHandCommandActionDefinitionMessagePubSubType implements us.ihmc
    }
 
    @Override
-   public final void serialize(behavior_msgs.msg.dds.SakeHandCommandActionDefinitionMessage data, us.ihmc.idl.InterchangeSerializer ser)
+   public final void serialize(behavior_msgs.msg.dds.EZGripperActionDefinitionMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_a("definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getDefinition());
 
@@ -142,7 +142,7 @@ public class SakeHandCommandActionDefinitionMessagePubSubType implements us.ihmc
    }
 
    @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.SakeHandCommandActionDefinitionMessage data)
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.EZGripperActionDefinitionMessage data)
    {
       ser.read_type_a("definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getDefinition());
 
@@ -153,15 +153,15 @@ public class SakeHandCommandActionDefinitionMessagePubSubType implements us.ihmc
       data.setFingertipGripForceLimit(ser.read_type_6("fingertip_grip_force_limit"));
    }
 
-   public static void staticCopy(behavior_msgs.msg.dds.SakeHandCommandActionDefinitionMessage src, behavior_msgs.msg.dds.SakeHandCommandActionDefinitionMessage dest)
+   public static void staticCopy(behavior_msgs.msg.dds.EZGripperActionDefinitionMessage src, behavior_msgs.msg.dds.EZGripperActionDefinitionMessage dest)
    {
       dest.set(src);
    }
 
    @Override
-   public behavior_msgs.msg.dds.SakeHandCommandActionDefinitionMessage createData()
+   public behavior_msgs.msg.dds.EZGripperActionDefinitionMessage createData()
    {
-      return new behavior_msgs.msg.dds.SakeHandCommandActionDefinitionMessage();
+      return new behavior_msgs.msg.dds.EZGripperActionDefinitionMessage();
    }
    @Override
    public int getTypeSize()
@@ -175,24 +175,24 @@ public class SakeHandCommandActionDefinitionMessagePubSubType implements us.ihmc
       return name;
    }
    
-   public void serialize(behavior_msgs.msg.dds.SakeHandCommandActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
+   public void serialize(behavior_msgs.msg.dds.EZGripperActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
    }
 
-   public void deserialize(behavior_msgs.msg.dds.SakeHandCommandActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
+   public void deserialize(behavior_msgs.msg.dds.EZGripperActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
       read(data, cdr);
    }
    
-   public void copy(behavior_msgs.msg.dds.SakeHandCommandActionDefinitionMessage src, behavior_msgs.msg.dds.SakeHandCommandActionDefinitionMessage dest)
+   public void copy(behavior_msgs.msg.dds.EZGripperActionDefinitionMessage src, behavior_msgs.msg.dds.EZGripperActionDefinitionMessage dest)
    {
       staticCopy(src, dest);
    }
 
    @Override
-   public SakeHandCommandActionDefinitionMessagePubSubType newInstance()
+   public EZGripperActionDefinitionMessagePubSubType newInstance()
    {
-      return new SakeHandCommandActionDefinitionMessagePubSubType();
+      return new EZGripperActionDefinitionMessagePubSubType();
    }
 }

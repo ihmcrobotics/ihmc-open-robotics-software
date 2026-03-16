@@ -6,40 +6,40 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
-public class CheckPointNodeStateMessage extends Packet<CheckPointNodeStateMessage> implements Settable<CheckPointNodeStateMessage>, EpsilonComparable<CheckPointNodeStateMessage>
+public class WaitActionStateMessage extends Packet<WaitActionStateMessage> implements Settable<WaitActionStateMessage>, EpsilonComparable<WaitActionStateMessage>
 {
    /**
             * Parent state fields
             */
-   public behavior_msgs.msg.dds.LeafNodeStateMessage state_;
+   public behavior_msgs.msg.dds.ActionNodeStateMessage state_;
    /**
             * Definition
             */
-   public behavior_msgs.msg.dds.CheckPointNodeDefinitionMessage definition_;
+   public behavior_msgs.msg.dds.WaitActionDefinitionMessage definition_;
 
-   public CheckPointNodeStateMessage()
+   public WaitActionStateMessage()
    {
-      state_ = new behavior_msgs.msg.dds.LeafNodeStateMessage();
-      definition_ = new behavior_msgs.msg.dds.CheckPointNodeDefinitionMessage();
+      state_ = new behavior_msgs.msg.dds.ActionNodeStateMessage();
+      definition_ = new behavior_msgs.msg.dds.WaitActionDefinitionMessage();
    }
 
-   public CheckPointNodeStateMessage(CheckPointNodeStateMessage other)
+   public WaitActionStateMessage(WaitActionStateMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(CheckPointNodeStateMessage other)
+   public void set(WaitActionStateMessage other)
    {
-      behavior_msgs.msg.dds.LeafNodeStateMessagePubSubType.staticCopy(other.state_, state_);
-      behavior_msgs.msg.dds.CheckPointNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
+      behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.staticCopy(other.state_, state_);
+      behavior_msgs.msg.dds.WaitActionDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
    }
 
 
    /**
             * Parent state fields
             */
-   public behavior_msgs.msg.dds.LeafNodeStateMessage getState()
+   public behavior_msgs.msg.dds.ActionNodeStateMessage getState()
    {
       return state_;
    }
@@ -48,25 +48,25 @@ public class CheckPointNodeStateMessage extends Packet<CheckPointNodeStateMessag
    /**
             * Definition
             */
-   public behavior_msgs.msg.dds.CheckPointNodeDefinitionMessage getDefinition()
+   public behavior_msgs.msg.dds.WaitActionDefinitionMessage getDefinition()
    {
       return definition_;
    }
 
 
-   public static Supplier<CheckPointNodeStateMessagePubSubType> getPubSubType()
+   public static Supplier<WaitActionStateMessagePubSubType> getPubSubType()
    {
-      return CheckPointNodeStateMessagePubSubType::new;
+      return WaitActionStateMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return CheckPointNodeStateMessagePubSubType::new;
+      return WaitActionStateMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(CheckPointNodeStateMessage other, double epsilon)
+   public boolean epsilonEquals(WaitActionStateMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -82,9 +82,9 @@ public class CheckPointNodeStateMessage extends Packet<CheckPointNodeStateMessag
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof CheckPointNodeStateMessage)) return false;
+      if(!(other instanceof WaitActionStateMessage)) return false;
 
-      CheckPointNodeStateMessage otherMyClass = (CheckPointNodeStateMessage) other;
+      WaitActionStateMessage otherMyClass = (WaitActionStateMessage) other;
 
       if (!this.state_.equals(otherMyClass.state_)) return false;
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
@@ -97,7 +97,7 @@ public class CheckPointNodeStateMessage extends Packet<CheckPointNodeStateMessag
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("CheckPointNodeStateMessage {");
+      builder.append("WaitActionStateMessage {");
       builder.append("state=");
       builder.append(this.state_);      builder.append(", ");
       builder.append("definition=");

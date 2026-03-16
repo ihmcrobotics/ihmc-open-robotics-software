@@ -1,0 +1,29 @@
+#ifndef __behavior_msgs__msg__CheckpointNodeStateMessage__idl__
+#define __behavior_msgs__msg__CheckpointNodeStateMessage__idl__
+
+#include "behavior_msgs/msg/./CheckpointNodeDefinitionMessage_.idl"
+#include "behavior_msgs/msg/./LeafNodeStateMessage_.idl"
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="behavior_msgs::msg::dds_::CheckpointNodeStateMessage_")
+      struct CheckpointNodeStateMessage
+      {
+        /**
+         * Parent state fields
+         */
+        behavior_msgs::msg::dds::LeafNodeStateMessage state;
+        /**
+         * Definition
+         */
+        behavior_msgs::msg::dds::CheckpointNodeDefinitionMessage definition;
+      };
+    };
+  };
+};
+
+#endif

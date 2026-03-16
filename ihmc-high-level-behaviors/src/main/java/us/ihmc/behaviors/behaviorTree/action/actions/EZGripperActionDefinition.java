@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
-import behavior_msgs.msg.dds.SakeHandCommandActionDefinitionMessage;
+import behavior_msgs.msg.dds.EZGripperActionDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.avatar.sakeGripper.SakeHandParameters;
@@ -11,7 +11,7 @@ import us.ihmc.communication.crdt.CRDTBidirectionalDouble;
 import us.ihmc.communication.crdt.CRDTBidirectionalEnumField;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class SakeHandCommandActionDefinition extends ActionNodeDefinition
+public class EZGripperActionDefinition extends ActionNodeDefinition
 {
    /** If it's already within this amount to the goal, we will skip and mark as success. */
    public static final double DEFAULT_HAND_ANGLE_INITIAL_SATISFACTION_TOLERANCE = Math.toRadians(5.0);
@@ -31,7 +31,7 @@ public class SakeHandCommandActionDefinition extends ActionNodeDefinition
    private double onDiskCompletionHandAngleTolerance;
    private double onDiskFingertipGripForceLimit;
 
-   public SakeHandCommandActionDefinition(BehaviorTreeRootNodeDefinition rootNode)
+   public EZGripperActionDefinition(BehaviorTreeRootNodeDefinition rootNode)
    {
       super(rootNode);
 
@@ -108,7 +108,7 @@ public class SakeHandCommandActionDefinition extends ActionNodeDefinition
       return !unchanged;
    }
 
-   public void toMessage(SakeHandCommandActionDefinitionMessage message)
+   public void toMessage(EZGripperActionDefinitionMessage message)
    {
       super.toMessage(message.getDefinition());
 
@@ -119,7 +119,7 @@ public class SakeHandCommandActionDefinition extends ActionNodeDefinition
       message.setFingertipGripForceLimit(fingertipGripForceLimit.toMessage());
    }
 
-   public void fromMessage(SakeHandCommandActionDefinitionMessage message)
+   public void fromMessage(EZGripperActionDefinitionMessage message)
    {
       super.fromMessage(message.getDefinition());
 

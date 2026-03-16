@@ -10,7 +10,7 @@ import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.behaviors.behaviorTree.control.buildingExploration.BuildingExplorationDefinition;
 import us.ihmc.behaviors.behaviorTree.control.door.DoorTraversalDefinition;
-import us.ihmc.behaviors.behaviorTree.action.actions.CheckPointNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.action.actions.CheckpointNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.control.GotoNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.control.ActionSequenceDefinition;
@@ -109,7 +109,7 @@ public class RDXBehaviorTreeNodeCreationMenu
          checkpointIcon.render();
          ImGui.sameLine();
          ImGui.setCursorPosX(align);
-         renderNodeCreationClickable(relativeNode, insertionType, "Check Point Node", CheckPointNodeDefinition.class, null);
+         renderNodeCreationClickable(relativeNode, insertionType, "Checkpoint Node", CheckpointNodeDefinition.class, null);
          ImGui.setCursorPosX(ImGui.getCursorPosX() + ImGui.getFontSize() * 0.3f);
          sceneActionIcon.render();
          ImGui.sameLine();
@@ -170,11 +170,11 @@ public class RDXBehaviorTreeNodeCreationMenu
          gripperIcon.render(RobotSide.LEFT, ImGui.getTextLineHeight());
          ImGui.sameLine();
          ImGui.setCursorPosX(align);
-         ImGui.text("Sake Hand Command: ");
+         ImGui.text("EZGripper: ");
          for (RobotSide side : RobotSide.values)
          {
             ImGui.sameLine();
-            renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), SakeHandCommandActionDefinition.class, side);
+            renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), EZGripperActionDefinition.class, side);
          }
          ImGui.setCursorPosX(align);
          renderNodeCreationClickable(relativeNode, insertionType, "Neck", NeckActionDefinition.class, null);
@@ -183,7 +183,7 @@ public class RDXBehaviorTreeNodeCreationMenu
          ImGui.setCursorPosX(align);
          renderNodeCreationClickable(relativeNode, insertionType, "Pelvis", PelvisActionDefinition.class, null);
          ImGui.setCursorPosX(align);
-         renderNodeCreationClickable(relativeNode, insertionType, "Wait", WaitDurationActionDefinition.class, null);
+         renderNodeCreationClickable(relativeNode, insertionType, "Wait", WaitActionDefinition.class, null);
          ImGui.setCursorPosX(align);
          ImGui.text("Screw Primitive: ");
          for (RobotSide side : RobotSide.values)

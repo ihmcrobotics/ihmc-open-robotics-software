@@ -18,7 +18,7 @@ public class ROS2BehaviorTreeSubscriptionNode
    private FallbackNodeStateMessage fallbackNodeStateMessage;
    private ConditionNodeStateMessage conditionNodeStateMessage;
    private GotoNodeStateMessage gotoNodeStateMessage;
-   private CheckPointNodeStateMessage checkPointNodeStateMessage;
+   private CheckpointNodeStateMessage checkpointNodeStateMessage;
    private SceneActionNodeStateMessage sceneActionNodeStateMessage;
    private AI2RNodeStateMessage ai2rNodeStateMessage;
    private DoorTraversalStateMessage doorTraversalStateMessage;
@@ -29,12 +29,12 @@ public class ROS2BehaviorTreeSubscriptionNode
    private SpineActionStateMessage spineActionStateMessage;
    private WalkActionStateMessage walkActionStateMessage;
    private AbilityHandActionStateMessage abilityHandActionStateMessage;
-   private SakeHandCommandActionStateMessage sakeHandCommandActionStateMessage;
+   private EZGripperActionStateMessage ezGripperActionStateMessage;
    private ArmActionStateMessage armActionStateMessage;
    private HandWrenchActionStateMessage handWrenchActionStateMessage;
    private ScrewPrimitiveActionStateMessage screwPrimitiveActionStateMessage;
    private PelvisActionStateMessage pelvisActionStateMessage;
-   private WaitDurationActionStateMessage waitDurationActionStateMessage;
+   private WaitActionStateMessage waitActionStateMessage;
    private LegActionStateMessage legActionStateMessage;
    private final List<ROS2BehaviorTreeSubscriptionNode> children = new ArrayList<>();
 
@@ -50,7 +50,7 @@ public class ROS2BehaviorTreeSubscriptionNode
       fallbackNodeStateMessage = null;
       conditionNodeStateMessage = null;
       gotoNodeStateMessage = null;
-      checkPointNodeStateMessage = null;
+      checkpointNodeStateMessage = null;
       sceneActionNodeStateMessage = null;
       ai2rNodeStateMessage = null;
       doorTraversalStateMessage = null;
@@ -61,12 +61,12 @@ public class ROS2BehaviorTreeSubscriptionNode
       spineActionStateMessage = null;
       walkActionStateMessage = null;
       abilityHandActionStateMessage = null;
-      sakeHandCommandActionStateMessage = null;
+      ezGripperActionStateMessage = null;
       armActionStateMessage = null;
       handWrenchActionStateMessage = null;
       screwPrimitiveActionStateMessage = null;
       pelvisActionStateMessage = null;
-      waitDurationActionStateMessage = null;
+      waitActionStateMessage = null;
       legActionStateMessage = null;
       children.clear();
    }
@@ -187,14 +187,14 @@ public class ROS2BehaviorTreeSubscriptionNode
       this.gotoNodeStateMessage = gotoNodeStateMessage;
    }
 
-   public CheckPointNodeStateMessage getCheckPointNodeStateMessage()
+   public CheckpointNodeStateMessage getCheckpointNodeStateMessage()
    {
-      return checkPointNodeStateMessage;
+      return checkpointNodeStateMessage;
    }
 
-   public void setCheckPointNodeStateMessage(CheckPointNodeStateMessage checkPointNodeStateMessage)
+   public void setCheckpointNodeStateMessage(CheckpointNodeStateMessage checkpointNodeStateMessage)
    {
-      this.checkPointNodeStateMessage = checkPointNodeStateMessage;
+      this.checkpointNodeStateMessage = checkpointNodeStateMessage;
    }
 
    public SceneActionNodeStateMessage getSceneActionNodeStateMessage()
@@ -277,14 +277,14 @@ public class ROS2BehaviorTreeSubscriptionNode
       this.abilityHandActionStateMessage = abilityHandActionStateMessage;
    }
 
-   public SakeHandCommandActionStateMessage getSakeHandCommandActionStateMessage()
+   public EZGripperActionStateMessage getEZGripperActionStateMessage()
    {
-      return sakeHandCommandActionStateMessage;
+      return ezGripperActionStateMessage;
    }
 
-   public void setSakeHandCommandActionStateMessage(SakeHandCommandActionStateMessage sakeHandCommandActionStateMessage)
+   public void setEZGripperActionStateMessage(EZGripperActionStateMessage ezGripperActionStateMessage)
    {
-      this.sakeHandCommandActionStateMessage = sakeHandCommandActionStateMessage;
+      this.ezGripperActionStateMessage = ezGripperActionStateMessage;
    }
 
    public ArmActionStateMessage getArmActionStateMessage()
@@ -327,14 +327,14 @@ public class ROS2BehaviorTreeSubscriptionNode
       this.pelvisActionStateMessage = pelvisActionStateMessage;
    }
 
-   public WaitDurationActionStateMessage getWaitDurationActionStateMessage()
+   public WaitActionStateMessage getWaitActionStateMessage()
    {
-      return waitDurationActionStateMessage;
+      return waitActionStateMessage;
    }
 
-   public void setWaitDurationActionStateMessage(WaitDurationActionStateMessage waitDurationActionStateMessage)
+   public void setWaitActionStateMessage(WaitActionStateMessage waitActionStateMessage)
    {
-      this.waitDurationActionStateMessage = waitDurationActionStateMessage;
+      this.waitActionStateMessage = waitActionStateMessage;
    }
 
    public LegActionStateMessage getLegActionStateMessage()

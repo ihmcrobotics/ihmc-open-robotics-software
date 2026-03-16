@@ -1,5 +1,5 @@
-#ifndef __behavior_msgs__msg__SakeHandCommandActionDefinitionMessage__idl__
-#define __behavior_msgs__msg__SakeHandCommandActionDefinitionMessage__idl__
+#ifndef __behavior_msgs__msg__EZGripperActionDefinitionMessage__idl__
+#define __behavior_msgs__msg__EZGripperActionDefinitionMessage__idl__
 
 #include "behavior_msgs/msg/./ActionNodeDefinitionMessage_.idl"
 module behavior_msgs
@@ -9,8 +9,8 @@ module behavior_msgs
     module dds
     {
 
-      @TypeCode(type="behavior_msgs::msg::dds_::SakeHandCommandActionDefinitionMessage_")
-      struct SakeHandCommandActionDefinitionMessage
+      @TypeCode(type="behavior_msgs::msg::dds_::EZGripperActionDefinitionMessage_")
+      struct EZGripperActionDefinitionMessage
       {
         /**
          * Parent definition fields

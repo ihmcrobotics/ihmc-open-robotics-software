@@ -3,11 +3,11 @@ package us.ihmc.behaviors.behaviorTree.action.actions;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.LeafNodeExecutor;
 
-public class CheckPointNodeExecutor extends LeafNodeExecutor<CheckPointNodeState, CheckPointNodeDefinition>
+public class CheckpointNodeExecutor extends LeafNodeExecutor<CheckpointNodeState, CheckpointNodeDefinition>
 {
-   public CheckPointNodeExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
+   public CheckpointNodeExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
    {
-      super(new CheckPointNodeState(id, rootNode.getState()), rootNode);
+      super(new CheckpointNodeState(id, rootNode.getState()), rootNode);
    }
 
    @Override

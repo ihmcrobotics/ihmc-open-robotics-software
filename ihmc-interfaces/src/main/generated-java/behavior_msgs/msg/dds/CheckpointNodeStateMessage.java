@@ -6,40 +6,40 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
-public class SakeHandCommandActionStateMessage extends Packet<SakeHandCommandActionStateMessage> implements Settable<SakeHandCommandActionStateMessage>, EpsilonComparable<SakeHandCommandActionStateMessage>
+public class CheckpointNodeStateMessage extends Packet<CheckpointNodeStateMessage> implements Settable<CheckpointNodeStateMessage>, EpsilonComparable<CheckpointNodeStateMessage>
 {
    /**
             * Parent state fields
             */
-   public behavior_msgs.msg.dds.ActionNodeStateMessage state_;
+   public behavior_msgs.msg.dds.LeafNodeStateMessage state_;
    /**
             * Definition
             */
-   public behavior_msgs.msg.dds.SakeHandCommandActionDefinitionMessage definition_;
+   public behavior_msgs.msg.dds.CheckpointNodeDefinitionMessage definition_;
 
-   public SakeHandCommandActionStateMessage()
+   public CheckpointNodeStateMessage()
    {
-      state_ = new behavior_msgs.msg.dds.ActionNodeStateMessage();
-      definition_ = new behavior_msgs.msg.dds.SakeHandCommandActionDefinitionMessage();
+      state_ = new behavior_msgs.msg.dds.LeafNodeStateMessage();
+      definition_ = new behavior_msgs.msg.dds.CheckpointNodeDefinitionMessage();
    }
 
-   public SakeHandCommandActionStateMessage(SakeHandCommandActionStateMessage other)
+   public CheckpointNodeStateMessage(CheckpointNodeStateMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(SakeHandCommandActionStateMessage other)
+   public void set(CheckpointNodeStateMessage other)
    {
-      behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.staticCopy(other.state_, state_);
-      behavior_msgs.msg.dds.SakeHandCommandActionDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
+      behavior_msgs.msg.dds.LeafNodeStateMessagePubSubType.staticCopy(other.state_, state_);
+      behavior_msgs.msg.dds.CheckpointNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
    }
 
 
    /**
             * Parent state fields
             */
-   public behavior_msgs.msg.dds.ActionNodeStateMessage getState()
+   public behavior_msgs.msg.dds.LeafNodeStateMessage getState()
    {
       return state_;
    }
@@ -48,25 +48,25 @@ public class SakeHandCommandActionStateMessage extends Packet<SakeHandCommandAct
    /**
             * Definition
             */
-   public behavior_msgs.msg.dds.SakeHandCommandActionDefinitionMessage getDefinition()
+   public behavior_msgs.msg.dds.CheckpointNodeDefinitionMessage getDefinition()
    {
       return definition_;
    }
 
 
-   public static Supplier<SakeHandCommandActionStateMessagePubSubType> getPubSubType()
+   public static Supplier<CheckpointNodeStateMessagePubSubType> getPubSubType()
    {
-      return SakeHandCommandActionStateMessagePubSubType::new;
+      return CheckpointNodeStateMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return SakeHandCommandActionStateMessagePubSubType::new;
+      return CheckpointNodeStateMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(SakeHandCommandActionStateMessage other, double epsilon)
+   public boolean epsilonEquals(CheckpointNodeStateMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -82,9 +82,9 @@ public class SakeHandCommandActionStateMessage extends Packet<SakeHandCommandAct
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof SakeHandCommandActionStateMessage)) return false;
+      if(!(other instanceof CheckpointNodeStateMessage)) return false;
 
-      SakeHandCommandActionStateMessage otherMyClass = (SakeHandCommandActionStateMessage) other;
+      CheckpointNodeStateMessage otherMyClass = (CheckpointNodeStateMessage) other;
 
       if (!this.state_.equals(otherMyClass.state_)) return false;
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
@@ -97,7 +97,7 @@ public class SakeHandCommandActionStateMessage extends Packet<SakeHandCommandAct
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("SakeHandCommandActionStateMessage {");
+      builder.append("CheckpointNodeStateMessage {");
       builder.append("state=");
       builder.append(this.state_);      builder.append(", ");
       builder.append("definition=");

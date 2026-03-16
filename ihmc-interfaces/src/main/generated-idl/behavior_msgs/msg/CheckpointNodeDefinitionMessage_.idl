@@ -1,5 +1,5 @@
-#ifndef __behavior_msgs__msg__CheckPointNodeDefinitionMessage__idl__
-#define __behavior_msgs__msg__CheckPointNodeDefinitionMessage__idl__
+#ifndef __behavior_msgs__msg__CheckpointNodeDefinitionMessage__idl__
+#define __behavior_msgs__msg__CheckpointNodeDefinitionMessage__idl__
 
 #include "behavior_msgs/msg/./LeafNodeDefinitionMessage_.idl"
 module behavior_msgs
@@ -9,8 +9,8 @@ module behavior_msgs
     module dds
     {
 
-      @TypeCode(type="behavior_msgs::msg::dds_::CheckPointNodeDefinitionMessage_")
-      struct CheckPointNodeDefinitionMessage
+      @TypeCode(type="behavior_msgs::msg::dds_::CheckpointNodeDefinitionMessage_")
+      struct CheckpointNodeDefinitionMessage
       {
         /**
          * Parent definition fields

@@ -4,7 +4,7 @@ import behavior_msgs.msg.dds.BehaviorTreeStateMessage;
 import us.ihmc.behaviors.behaviorTree.control.ai2r.AI2RNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.control.buildingExploration.BuildingExplorationDefinition;
 import us.ihmc.behaviors.behaviorTree.control.door.DoorTraversalDefinition;
-import us.ihmc.behaviors.behaviorTree.action.actions.CheckPointNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.action.actions.CheckpointNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.control.GotoNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.control.ActionSequenceDefinition;
@@ -24,7 +24,7 @@ public class BehaviorTreeDefinitionRegistry
       new DefinitionMapping(FallbackNodeDefinition.class, BehaviorTreeStateMessage.FALLBACK_NODE),
       new DefinitionMapping(ConditionNodeDefinition.class, BehaviorTreeStateMessage.CONDITION_NODE),
       new DefinitionMapping(GotoNodeDefinition.class, BehaviorTreeStateMessage.GOTO_NODE),
-      new DefinitionMapping(CheckPointNodeDefinition.class, BehaviorTreeStateMessage.CHECKPOINT_NODE),
+      new DefinitionMapping(CheckpointNodeDefinition.class, BehaviorTreeStateMessage.CHECKPOINT_NODE),
       new DefinitionMapping(SceneActionNodeDefinition.class, BehaviorTreeStateMessage.SCENE_ACTION),
       new DefinitionMapping(AI2RNodeDefinition.class, BehaviorTreeStateMessage.AI2R_NODE),
       new DefinitionMapping(DoorTraversalDefinition.class, BehaviorTreeStateMessage.DOOR_TRAVERSAL),
@@ -38,8 +38,8 @@ public class BehaviorTreeDefinitionRegistry
       new DefinitionMapping(ScrewPrimitiveActionDefinition.class, BehaviorTreeStateMessage.SCREW_PRIMITIVE_ACTION),
       new DefinitionMapping(PelvisActionDefinition.class, BehaviorTreeStateMessage.PELVIS_ACTION),
       new DefinitionMapping(AbilityHandActionDefinition.class, BehaviorTreeStateMessage.ABILITY_HAND_ACTION),
-      new DefinitionMapping(SakeHandCommandActionDefinition.class, BehaviorTreeStateMessage.SAKE_HAND_COMMAND_ACTION),
-      new DefinitionMapping(WaitDurationActionDefinition.class, BehaviorTreeStateMessage.WAIT_DURATION_ACTION),
+      new DefinitionMapping(EZGripperActionDefinition.class, BehaviorTreeStateMessage.EZGRIPPER_ACTION),
+      new DefinitionMapping(WaitActionDefinition.class, BehaviorTreeStateMessage.WAIT_ACTION),
       new DefinitionMapping(LegActionDefinition.class, BehaviorTreeStateMessage.LEG_ACTION),
    };
    private static final Map<Class<?>, DefinitionMapping> REGISTRY_MAP = new HashMap<>();

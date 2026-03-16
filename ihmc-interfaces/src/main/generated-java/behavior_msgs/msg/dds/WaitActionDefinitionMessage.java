@@ -6,7 +6,7 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
-public class WaitDurationActionDefinitionMessage extends Packet<WaitDurationActionDefinitionMessage> implements Settable<WaitDurationActionDefinitionMessage>, EpsilonComparable<WaitDurationActionDefinitionMessage>
+public class WaitActionDefinitionMessage extends Packet<WaitActionDefinitionMessage> implements Settable<WaitActionDefinitionMessage>, EpsilonComparable<WaitActionDefinitionMessage>
 {
    /**
             * Parent definition fields
@@ -17,18 +17,18 @@ public class WaitDurationActionDefinitionMessage extends Packet<WaitDurationActi
             */
    public double wait_duration_;
 
-   public WaitDurationActionDefinitionMessage()
+   public WaitActionDefinitionMessage()
    {
       definition_ = new behavior_msgs.msg.dds.ActionNodeDefinitionMessage();
    }
 
-   public WaitDurationActionDefinitionMessage(WaitDurationActionDefinitionMessage other)
+   public WaitActionDefinitionMessage(WaitActionDefinitionMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(WaitDurationActionDefinitionMessage other)
+   public void set(WaitActionDefinitionMessage other)
    {
       behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
       wait_duration_ = other.wait_duration_;
@@ -60,19 +60,19 @@ public class WaitDurationActionDefinitionMessage extends Packet<WaitDurationActi
    }
 
 
-   public static Supplier<WaitDurationActionDefinitionMessagePubSubType> getPubSubType()
+   public static Supplier<WaitActionDefinitionMessagePubSubType> getPubSubType()
    {
-      return WaitDurationActionDefinitionMessagePubSubType::new;
+      return WaitActionDefinitionMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return WaitDurationActionDefinitionMessagePubSubType::new;
+      return WaitActionDefinitionMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(WaitDurationActionDefinitionMessage other, double epsilon)
+   public boolean epsilonEquals(WaitActionDefinitionMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -89,9 +89,9 @@ public class WaitDurationActionDefinitionMessage extends Packet<WaitDurationActi
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof WaitDurationActionDefinitionMessage)) return false;
+      if(!(other instanceof WaitActionDefinitionMessage)) return false;
 
-      WaitDurationActionDefinitionMessage otherMyClass = (WaitDurationActionDefinitionMessage) other;
+      WaitActionDefinitionMessage otherMyClass = (WaitActionDefinitionMessage) other;
 
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
       if(this.wait_duration_ != otherMyClass.wait_duration_) return false;
@@ -105,7 +105,7 @@ public class WaitDurationActionDefinitionMessage extends Packet<WaitDurationActi
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("WaitDurationActionDefinitionMessage {");
+      builder.append("WaitActionDefinitionMessage {");
       builder.append("definition=");
       builder.append(this.definition_);      builder.append(", ");
       builder.append("wait_duration=");

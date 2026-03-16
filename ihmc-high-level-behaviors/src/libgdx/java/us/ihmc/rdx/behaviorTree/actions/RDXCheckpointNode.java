@@ -1,19 +1,19 @@
 package us.ihmc.rdx.behaviorTree.actions;
 
 import imgui.ImGui;
-import us.ihmc.behaviors.behaviorTree.action.actions.CheckPointNodeDefinition;
-import us.ihmc.behaviors.behaviorTree.action.actions.CheckPointNodeState;
+import us.ihmc.behaviors.behaviorTree.action.actions.CheckpointNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.action.actions.CheckpointNodeState;
 import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeRootNode;
 import us.ihmc.rdx.behaviorTree.RDXLeafNode;
 import us.ihmc.rdx.ui.widgets.ImGuiCheckpointNodeWidget;
 
-public class RDXCheckPointNode extends RDXLeafNode<CheckPointNodeState, CheckPointNodeDefinition>
+public class RDXCheckpointNode extends RDXLeafNode<CheckpointNodeState, CheckpointNodeDefinition>
 {
    private final ImGuiCheckpointNodeWidget checkpointNodeWidget = new ImGuiCheckpointNodeWidget();
 
-   public RDXCheckPointNode(long id, RDXBehaviorTreeRootNode rootNode)
+   public RDXCheckpointNode(long id, RDXBehaviorTreeRootNode rootNode)
    {
-      super(new CheckPointNodeState(id, rootNode.getState()), rootNode);
+      super(new CheckpointNodeState(id, rootNode.getState()), rootNode);
    }
 
    @Override
@@ -31,6 +31,6 @@ public class RDXCheckPointNode extends RDXLeafNode<CheckPointNodeState, CheckPoi
    @Override
    public String getLeafTypeTitle()
    {
-      return "Check point";
+      return "Checkpoint";
    }
 }
