@@ -43,7 +43,7 @@ public class RDXRapidPlanarRegionsHardwareDemo
       BlockingQueue<RawImage> rapidRegionsDepthQueue = new LinkedBlockingQueue<>(ImageSensor.DEFAULT_IMAGE_QUEUE_CAPACITY);
       zedImageSensor.registerImageQueue(rapidRegionsDepthQueue, ZEDImageSensor.DEPTH_IMAGE_KEY);
 
-      rapidPlanarRegionsExtractionThread = new RapidPlanarRegionsExtractionThread(ros2Node, rapidRegionsDepthQueue);
+      rapidPlanarRegionsExtractionThread = new RapidPlanarRegionsExtractionThread("Alex", ros2Node, rapidRegionsDepthQueue);
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
