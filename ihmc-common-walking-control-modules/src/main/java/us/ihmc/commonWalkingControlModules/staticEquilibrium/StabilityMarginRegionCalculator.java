@@ -344,14 +344,17 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
             tempPolygon.addVertex(optimizedVertices[vertex_idx]);
       }
 
-      for (int i = 0; i < contactState.getNumberOfContactPoints(); i++)
+      if (contactState != null)
       {
-         ContactPoint contactPoint = contactState.getContactPoint(i);
-         if (contactPoint.isFoot())
+         for (int i = 0; i < contactState.getNumberOfContactPoints(); i++)
          {
-            tempPointA.setToZero(contactState.getContactFrame(i));
-            tempPointA.changeFrame(ReferenceFrame.getWorldFrame());
-            tempPolygon.addVertex(tempPointA);
+            ContactPoint contactPoint = contactState.getContactPoint(i);
+            if (contactPoint.isFoot())
+            {
+               tempPointA.setToZero(contactState.getContactFrame(i));
+               tempPointA.changeFrame(ReferenceFrame.getWorldFrame());
+               tempPolygon.addVertex(tempPointA);
+            }
          }
       }
 
