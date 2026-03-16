@@ -45,6 +45,7 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -101,7 +102,7 @@ public class WrenchMatrixCalculator implements SCS2YoGraphicHolder
    private final List<FramePoint3D> basisVectorsOrigin = new ArrayList<>();
    private final List<FrameVector3D> basisVectors = new ArrayList<>();
 
-   private final double dtSquaredInv;
+   private final DoubleProvider dt;
 
    private final DMatrixRMaj bodyWrenchJacobian = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj fullWrenchJacobian = new DMatrixRMaj(0, 0);
@@ -119,11 +120,11 @@ public class WrenchMatrixCalculator implements SCS2YoGraphicHolder
    public WrenchMatrixCalculator(ReferenceFrame centerOfMassFrame,
                                  List<? extends ContactablePlaneBody> contactablePlaneBodies,
                                  ControllerCoreOptimizationSettings optimizationSettings,
-                                 double dt,
+                                 DoubleProvider dt,
                                  YoRegistry parentRegistry)
    {
       this.centerOfMassFrame = centerOfMassFrame;
-      this.dtSquaredInv = 1.0 / (dt * dt);
+      this.dt = dt;
       this.nContactableBodies = optimizationSettings.getNumberOfContactableBodies();
       this.maxNumberOfContactPoints = optimizationSettings.getNumberOfContactPointsPerContactableBody();
       this.numberOfBasisVectorsPerContactPoint = optimizationSettings.getNumberOfBasisVectorsPerContactPoint();
@@ -442,6 +443,8 @@ public class WrenchMatrixCalculator implements SCS2YoGraphicHolder
          rhoStartIndex += helper.getRhoSize();
          copStartIndex += 2;
       }
+
+      double dtSquaredInv = 1.0 / (dt.getValue() * dt.getValue());
 
       CommonOps_DDRM.scale(dtSquaredInv, rhoRateWeightMatrix);
       CommonOps_DDRM.scale(dtSquaredInv, copRateRegularizationWeight);

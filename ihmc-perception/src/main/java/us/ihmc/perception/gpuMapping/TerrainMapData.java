@@ -80,6 +80,11 @@ public class TerrainMapData
       this.snapNormalZMap = Arrays.copyOf(other.snapNormalZMap, size);
    }
 
+   public void initializeHeight(double height)
+   {
+      Arrays.fill(heightMap, (float) height);
+   }
+
    public void checkHeightMapSize(double cellSize, double mapSize)
    {
       if (this.cellSize != cellSize)

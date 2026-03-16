@@ -2,18 +2,23 @@ package us.ihmc.behaviors.behaviorTree.control.ai2r;
 
 import behavior_msgs.msg.dds.AI2RCommandMessage;
 import behavior_msgs.msg.dds.AI2RNavigationMessage;
-import behavior_msgs.msg.dds.AI2RPickUpObjectMessage;
 import behavior_msgs.msg.dds.AI2RReceiveObjectMessage;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
+import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionNodeState;
 import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeState;
-import us.ihmc.behaviors.behaviorTree.action.actions.FootstepPlanActionDefinition;
-import us.ihmc.behaviors.behaviorTree.action.actions.FootstepPlanActionFootstepState;
-import us.ihmc.behaviors.behaviorTree.action.actions.FootstepPlanActionState;
-import us.ihmc.behaviors.behaviorTree.action.actions.HandPoseActionState;
+import us.ihmc.behaviors.behaviorTree.action.actions.WalkActionDefinition;
+import us.ihmc.behaviors.behaviorTree.action.actions.WalkActionFootstepState;
+import us.ihmc.behaviors.behaviorTree.action.actions.WalkActionState;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.idl.IDLSequence.StringBuilderHolder;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * AI2RSkillEditor is responsible for adapting and updating skill behaviors in the AI2R framework.
@@ -53,17 +58,73 @@ public class AI2RSkillEditor
 
       public static final AI2RSkillEditor.SpatialRelationType[] values = values();
    }
-   private String objectGrasped = "";
-   private RobotSide graspSide = RobotSide.RIGHT;
-   private int commandedBehaviorIndex;
+   private final BehaviorTreeRootNodeExecutor rootNode;
+   private final BehaviorTreeNodeExecutor parentNode;
 
-   public void adaptSkills(String behaviorToExecuteName, AI2RNodeState state, AI2RCommandMessage message, int commandedBehaviorIndex)
+   public AI2RSkillEditor(BehaviorTreeNodeExecutor parentNode, BehaviorTreeRootNodeExecutor rootNode)
    {
-      this.commandedBehaviorIndex = commandedBehaviorIndex;
+      this.rootNode = rootNode;
+      this.parentNode = parentNode;
+   }
+
+   public void adaptSkills(String behaviorToExecuteName, AI2RNodeState state, AI2RCommandMessage message)
+   {
+      updateScan(behaviorToExecuteName, state, message);
       updateGoTo(behaviorToExecuteName, state, message);
-      updateReceiveObject(behaviorToExecuteName, state, message);
-      updatePickUpObject(behaviorToExecuteName, state, message);
-//      updatePickAndPlace(behaviorToExecuteName, state, message);
+   }
+
+   private void updateScan(String behaviorToExecuteName, AI2RNodeState state, AI2RCommandMessage message)
+   { // TODO Support list of objects to set up in scene action node
+      if (!behaviorToExecuteName.contains("SCAN") || !message.getAdaptingBehavior())
+         return;
+
+      StringBuilderHolder objectsToScan = message.getScan().getObjectNames();
+
+      // Collect all existing "Setup object" SceneActions
+      List<SceneActionNodeState> allSetupActions = new ArrayList<>();
+      for (var leaf : state.getActionSequence().getOrderedLeaves())
+      {
+         if (leaf instanceof SceneActionNodeState sceneActionState)
+         {
+            String nameLower = leaf.getDefinition().getName().toLowerCase();
+
+            if (nameLower.contains("setup object") ||
+                nameLower.contains("freeze object"))
+            {
+               allSetupActions.add(sceneActionState);
+            }
+         }
+      }
+      if (allSetupActions.isEmpty())
+         return;
+
+      // For each object i, try to update its left/right/front if they exist
+      for (int i = 0; i < objectsToScan.size(); i++)
+      {
+         String objectName = objectsToScan.getString(i);
+         String idToken = Integer.toString(i + 1); // "1", "2", ...
+
+         SceneActionNodeState left  = null;
+         SceneActionNodeState right = null;
+         SceneActionNodeState front = null;
+
+         for (SceneActionNodeState s : allSetupActions)
+         {
+            String nameLower = s.getDefinition().getName().toLowerCase();
+            if (nameLower.contains("setup object" + idToken) || nameLower.contains("freeze object" + idToken))
+            {
+               if (nameLower.contains("left"))
+                  left = s;
+               else if (nameLower.contains("right"))
+                  right = s;
+               else if (nameLower.contains("front"))
+                  front = s;
+            }
+            if (left  != null) left.getDefinition().getSceneObjectDefinition().setYoloClassName(objectName);
+            if (right != null) right.getDefinition().getSceneObjectDefinition().setYoloClassName(objectName);
+            if (front != null) front.getDefinition().getSceneObjectDefinition().setYoloClassName(objectName);
+         }
+      }
    }
 
    private void updateGoTo(String behaviorToExecuteName, AI2RNodeState state, AI2RCommandMessage message)
@@ -72,7 +133,7 @@ public class AI2RSkillEditor
       {
          for (var leaf : state.getActionSequence().getOrderedLeaves())
          {
-            if (leaf.getDefinition().getName().toLowerCase().contains("go to action") && leaf instanceof FootstepPlanActionState gotoActionState)
+            if (leaf.getDefinition().getName().toLowerCase().contains("go to action") && leaf instanceof WalkActionState gotoActionState)
             {
                AI2RNavigationMessage navigationMessage = message.getNavigation();
                String referenceFrameName = navigationMessage.getTargetObjectAsString();
@@ -161,54 +222,7 @@ public class AI2RSkillEditor
       }
    }
 
-   private void updateReceiveObject(String behaviorToExecuteName, AI2RNodeState state, AI2RCommandMessage message)
-   {
-      if (behaviorToExecuteName.contains("RECEIVE") && message.getAdaptingBehavior())
-      {
-         AI2RReceiveObjectMessage receiveMessage = message.getReceiveObject();
-         String receiveObject = receiveMessage.getObjectNameAsString();
-         if (!receiveObject.isEmpty())
-         {
-            objectGrasped = receiveObject;
-         }
-         for (var leaf : state.getActionSequence().getOrderedLeaves())
-         {
-            if (leaf instanceof ConditionNodeState conditionNodeState)
-            {
-               if (conditionNodeState.getParent().getDefinition().getName().contains("ReceiveObject"))
-               {
-                  conditionNodeState.getDefinition().getProximityCheck().setFrameNameA(objectGrasped);
-                  conditionNodeState.getDefinition().getProximityCheck().setFrameNameB(RobotSide.fromByte(receiveMessage.getSide()) == RobotSide.LEFT ? "leftHandZUp" : "rightHandZUp");
-               }
-            }
-         }
-      }
-   }
-
-   private void updatePickUpObject(String behaviorToExecuteName, AI2RNodeState state, AI2RCommandMessage message)
-   {
-      if (behaviorToExecuteName.contains("PICK") && message.getAdaptingBehavior())
-      {
-         AI2RPickUpObjectMessage pickUpMessage = message.getPickupObject();
-         String targetObject = pickUpMessage.getObjectNameAsString();
-         if (!targetObject.isEmpty())
-         {
-            objectGrasped = targetObject;
-         }
-         for (var leaf : state.getActionSequence().getOrderedLeaves())
-         {
-            if (leaf instanceof HandPoseActionState handPoseActionStateNodeState)
-            {
-               if (handPoseActionStateNodeState.getDefinition().getName().contains("Grasp"))
-               {
-                  handPoseActionStateNodeState.getDefinition().setPalmParentFrameName(targetObject);
-               }
-            }
-         }
-      }
-   }
-
-   private void changeParentFrameGoToNode(FootstepPlanActionDefinition definition, FootstepPlanActionState state, String newParentFrameName)
+   private void changeParentFrameGoToNode(WalkActionDefinition definition, WalkActionState state, String newParentFrameName)
    {
       definition.setParentFrameName(newParentFrameName);
       // Timestamp modification to prevent the frame from glitching when changing frames
@@ -234,44 +248,9 @@ public class AI2RSkillEditor
       definition.getGoalStancePoint().getValueAndModify().set(frameStancePoint);
       definition.getGoalFocalPoint().getValueAndModify().set(frameFocalPoint);
 
-      for (FootstepPlanActionFootstepState footstepState : state.getManuallyPlacedFootsteps())
+      for (WalkActionFootstepState footstepState : state.getManuallyPlacedFootsteps())
       {
          footstepState.getSoleFrame().changeFrame(newParentFrameName);
       }
-   }
-
-//   private void updatePickAndPlace(String behaviorToExecuteName, AI2RNodeState state, AI2RCommandMessage message)
-//   {
-//      if (behaviorToExecuteName.contains("PICKUP") || behaviorToExecuteName.contains("PLACE") && message.getAdaptingBehavior())
-//      {
-//         AI2RHandPoseAdaptationMessage handMessage = message.getHandPoseAdaptation();
-//         for (var leaf : state.getActionSequence().getOrderedLeaves())
-//         {
-//            if (leaf.getLeafIndex() > commandedBehaviorIndex &&
-//                leaf.getDefinition().getName().contains(handMessage.getActionName()) &&
-//                leaf instanceof HandPoseActionState handPoseActionState)
-//            {
-//               handPoseActionState.getDefinition().setPalmParentFrameName(handMessage.getReferenceFrameNameAsString());
-//               RigidBodyTransform adaptedPose = new RigidBodyTransform(handMessage.getNewOrientation(), handMessage.getNewPosition());
-//               handPoseActionState.getDefinition().getPalmTransformToParent().setValue(adaptedPose ,1e-5);
-//               break;
-//            }
-//         }
-//      }
-//   }
-
-   public String getObjectGrasped()
-   {
-      return objectGrasped;
-   }
-
-   public RobotSide getGraspSide()
-   {
-      return graspSide;
-   }
-
-   public int getCommandedBehaviorIndex()
-   {
-      return commandedBehaviorIndex;
    }
 }

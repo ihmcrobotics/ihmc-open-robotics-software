@@ -3,6 +3,7 @@
 
 #include "behavior_msgs/msg/./BehaviorTreeNodeStateMessage_.idl"
 #include "behavior_msgs/msg/./BehaviorTreeRootNodeDefinitionMessage_.idl"
+#include "behavior_msgs/msg/./BehaviorTreeSceneStateMessage_.idl"
 module behavior_msgs
 {
   module msg
@@ -22,6 +23,10 @@ module behavior_msgs
          */
         behavior_msgs::msg::dds::BehaviorTreeRootNodeDefinitionMessage definition;
         /**
+         * Scene
+         */
+        behavior_msgs::msg::dds::BehaviorTreeSceneStateMessage scene;
+        /**
          * If the sequence is currently set to proceed automatically
          */
         boolean automatic_execution;
@@ -37,6 +42,10 @@ module behavior_msgs
          * Allows the operator to disable concurrency during authoring
          */
         boolean concurrency_enabled;
+        /**
+         * Preview mode enabled
+         */
+        boolean preview_mode_enabled;
         /**
          * Request failures reset
          */

@@ -7,10 +7,7 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import org.apache.commons.lang3.function.TriFunction;
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.bytedeco.opencv.opencv_core.GpuMat;
-import std_msgs.msg.dds.Empty;
-import std_msgs.msg.dds.Int32;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulation;
@@ -50,7 +47,6 @@ import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2NodeBuilder.SpecialTransportMode;
-import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.scs2.simulation.collision.CollidableHelper;
 import us.ihmc.sensors.zed.ZEDImageSensor;
 import us.ihmc.sensors.zed.ZEDModelData;
@@ -70,11 +66,6 @@ public class RDXBehaviorTestFacilitator
    /** Disable perception if CUDA 12.9.1 is not installed or not working */
    private final boolean runPerception = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() && CUDATools.hasNVJPEG();
    private final String svoFile;
-   /** Enables advanced mode where FoundationPose and this program to be running on a Jetson.
-    *  Must run deployJetsonTestbed and run this process also on the Jetson. */
-   private final boolean foundationPose = Boolean.parseBoolean(System.getProperty("foundationpose", "false"));
-   /** If FOUNDATION_POSE mode is true, this boolean is true for the process on the Jetson and false for the local one. */
-   private final boolean jetson = Boolean.parseBoolean(System.getProperty("jetson", "false"));
    private final Supplier<DRCRobotModel> robotModelBuilder;
    private final TriFunction<DRCRobotModel, ROS2NodeBuilder, RigidBodyTransformReadOnly, HumanoidKinematicsSimulation> kinematicsSimulationBuilder;
    private final Supplier<RDXBaseUI> baseUIBuilder;
@@ -86,11 +77,6 @@ public class RDXBehaviorTestFacilitator
    private final Notification robotReady = new Notification();
 
    private ZEDSVOPlaybackSensor zedSensor;
-   private final ROS2Topic<Empty> ZED_PLAY = new ROS2Topic<>().withType(Empty.class).withSuffix("bt/zed/play");
-   private final ROS2Topic<Empty> ZED_PAUSE = new ROS2Topic<>().withType(Empty.class).withSuffix("bt/zed/pause");
-   private final ROS2Topic<Int32> ZED_SEEK = new ROS2Topic<>().withType(Int32.class).withSuffix("bt/zed/seek");
-   private final ROS2Topic<Int32> ZED_POSITION = new ROS2Topic<>().withType(Int32.class).withSuffix("bt/zed/position");
-   private final ROS2Topic<Int32> ZED_LENGTH = new ROS2Topic<>().withType(Int32.class).withSuffix("bt/zed/length");
 
    private ROS2BehaviorTreeExecutor behaviorTree;
    private Function<ROS2BehaviorTreeExecutor, Notification> behaviorTreeAccessorOneTime = null;
@@ -129,14 +115,10 @@ public class RDXBehaviorTestFacilitator
             return new ROS2NodeBuilder().specialTransportMode(SpecialTransportMode.INTRAPROCESS_ONLY);
       };
 
-      if (!this.runPerception || !this.foundationPose || !this.jetson)
-      {
-         ThreadTools.startAThread(this::startSimulation, "StartSimulation");
-         if (!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
-            ThreadTools.startAThread(() -> ExceptionTools.handle(this::launchRDXUI, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE), "RDX");
-      }
-      if (!this.runPerception || !this.foundationPose || this.jetson)
-         ThreadTools.startAThread(this::startBehaviorTree, "StartBehaviorTree");
+      ThreadTools.startAThread(this::startSimulation, "StartSimulation");
+      if (!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
+         ThreadTools.startAThread(() -> ExceptionTools.handle(this::launchRDXUI, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE), "RDX");
+      ThreadTools.startAThread(this::startBehaviorTree, "StartBehaviorTree");
 
       ros2ControllerHelper = new ROS2ControllerHelper(ros2NodeBuilder.get().build("facilitator"), robotName);
    }
@@ -177,18 +159,11 @@ public class RDXBehaviorTestFacilitator
          zedSensor = new ZEDSVOPlaybackSensor(0, ZEDModelData.ZED_2I, zed.SL_DEPTH_MODE_NEURAL_LIGHT, svoFile);
          zedSensor.setSensorFrame(syncedRobot.getReferenceFrames().getExperimentalCameraFrame());
          zedSensor.startSensor();
-         ros2Node.createSubscription2(ZED_PLAY, empty -> zedSensor.play());
-         ros2Node.createSubscription2(ZED_PAUSE, empty -> zedSensor.pause());
-         ros2Node.createSubscription2(ZED_SEEK, int32 ->
-         {
-            zedSensor.setCurrentPosition(int32.getData() + zedSensor.getFps());
-            zedSensor.grabAndNotify();
-         });
 
          foundationPose = new IsaacROSFoundationPoseCommunicatorMap(peerClockEstimator);
 
          yolo = new YOLOv8DetectionExecutor(ros2Node, peerClockEstimator, () -> true);
-         yolo.enableModel("best_multi_01_16_2026");
+         yolo.enableModel("best_multi_02_17_2026");
          yolo.addDetectionConsumerCallback(foundationPose::updatePoseEstimations);
       }
       else
@@ -197,7 +172,7 @@ public class RDXBehaviorTestFacilitator
          yolo = null;
       }
 
-      behaviorTree = new ROS2BehaviorTreeExecutor(ros2, syncedRobot, zedSensor, yolo, foundationPose, null, peerClockEstimator);
+      behaviorTree = new ROS2BehaviorTreeExecutor(ros2, syncedRobot, kinematicsSimulationBuilder, zedSensor, yolo, foundationPose, null, peerClockEstimator);
 
       RepeatingTaskThread yoloThread = new RepeatingTaskThread("yolo", () ->
       {
@@ -229,12 +204,6 @@ public class RDXBehaviorTestFacilitator
 
       RepeatingTaskThread thread = new RepeatingTaskThread("behavior_tree", () ->
       {
-         if (zedSensor != null)
-         {
-            ros2.publish(ZED_POSITION, zedSensor.getCurrentPosition());
-            ros2.publish(ZED_LENGTH, zedSensor.getLength());
-         }
-
          syncedRobot.update();
 
          if (behaviorTreeAccessorOneTime != null)
@@ -323,10 +292,6 @@ public class RDXBehaviorTestFacilitator
 
             ImBoolean play = new ImBoolean(false);
             ImInt requestedPosition = new ImInt();
-            MutableInt currentPosition = new MutableInt();
-            MutableInt zedLength = new MutableInt();
-            ros2Node.createSubscription2(ZED_POSITION, int32 -> currentPosition.setValue(int32.getData()));
-            ros2Node.createSubscription2(ZED_LENGTH, int32 -> zedLength.setValue(int32.getData()));
             ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
             baseUI.getImGuiPanelManager().addPanel("Facilitator", () ->
             {
@@ -337,20 +302,28 @@ public class RDXBehaviorTestFacilitator
                   startSimulation();
                }
                ImGui.endDisabled();
-               ImGui.sameLine();
-               if (ImGui.checkbox(labels.get("ZED Playback"), play))
+               if (zedSensor != null)
                {
+                  ImGui.sameLine();
+                  if (ImGui.checkbox(labels.get("ZED Playback"), play) && zedSensor != null)
+                  {
+                     if (play.get())
+                        zedSensor.play();
+                     else
+                        zedSensor.pause();
+                  }
+                  ImGui.beginDisabled(play.get());
+                  int currentPosition = zedSensor.getCurrentPosition();
+                  int zedLength = zedSensor.getLength();
                   if (play.get())
-                     ros2.publish(ZED_PLAY);
-                  else
-                     ros2.publish(ZED_PAUSE);
+                     requestedPosition.set(currentPosition);
+                  if (ImGuiTools.sliderInt(labels.get("Position"), requestedPosition, 0, Math.max(zedLength, 0)))
+                  {
+                     zedSensor.setCurrentPosition(requestedPosition.get() + zedSensor.getFps());
+                     zedSensor.grabAndNotify();
+                  }
+                  ImGui.endDisabled();
                }
-               ImGui.beginDisabled(play.get());
-               if (play.get())
-                  requestedPosition.set(currentPosition.getValue());
-               if (ImGuiTools.sliderInt(labels.get("Position"), requestedPosition, 0, Math.max(zedLength.getValue(), 0)))
-                  ros2.publish(ZED_SEEK, requestedPosition.get());
-               ImGui.endDisabled();
             });
 
             RobotCollisionModel selectionCollisionModel = selectionCollisionModelBuilder.apply(robotModel);
@@ -363,7 +336,6 @@ public class RDXBehaviorTestFacilitator
                                                      baseUI.getPrimary3DPanel(),
                                                      ros2);
             behaviorTreeUI.createAndSetupDefault(baseUI);
-            RDXBehaviorTreeNode.logNotifications = runPerception && foundationPose; // Prevent duplicate entries
          }
 
          @Override

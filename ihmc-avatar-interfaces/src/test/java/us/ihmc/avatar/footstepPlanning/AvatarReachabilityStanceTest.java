@@ -150,7 +150,7 @@ public abstract class AvatarReachabilityStanceTest implements MultiRobotTestInte
          simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
          simulationTestHelper.start();
 
-         simulationTestHelper.simulateNow(2 * robotModel.getControllerDT());
+         simulationTestHelper.simulateNow(2 * simulationTestHelper.getCurrentControlDT());
          holdCurrentPosition(simulationTestHelper, fullRobotModel);
          boolean success = simulationTestHelper.simulateNow(simulationTime);
 

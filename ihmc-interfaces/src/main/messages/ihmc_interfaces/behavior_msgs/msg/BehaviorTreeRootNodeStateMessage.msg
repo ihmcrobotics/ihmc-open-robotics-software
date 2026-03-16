@@ -4,6 +4,9 @@ behavior_msgs/BehaviorTreeNodeStateMessage state
 # Definition
 behavior_msgs/BehaviorTreeRootNodeDefinitionMessage definition
 
+# Scene
+behavior_msgs/BehaviorTreeSceneStateMessage scene
+
 # If the sequence is currently set to proceed automatically
 bool automatic_execution
 
@@ -15,6 +18,9 @@ bool manual_execution_requested
 
 # Allows the operator to disable concurrency during authoring
 bool concurrency_enabled
+
+# Preview mode enabled
+bool preview_mode_enabled
 
 # Request failures reset
 bool failure_reset_requested

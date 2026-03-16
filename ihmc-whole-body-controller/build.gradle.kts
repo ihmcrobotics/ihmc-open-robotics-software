@@ -14,7 +14,7 @@ ihmc {
 mainDependencies {
    api("us.ihmc:ihmc-common-walking-control-modules:source")
    api("us.ihmc:simulation-construction-set-tools:source")
-   api("us.ihmc:ihmc-robot-data-logger:0.37.0")
+   api("us.ihmc:ihmc-robot-data-logger:0.37.1")
 }
 
 benchmarksDependencies {
@@ -22,5 +22,5 @@ benchmarksDependencies {
 }
 
 testDependencies {
-   api("us.ihmc:ihmc-convex-optimization:0.17.23")
+   api("us.ihmc:ihmc-convex-optimization:0.18.0")
 }

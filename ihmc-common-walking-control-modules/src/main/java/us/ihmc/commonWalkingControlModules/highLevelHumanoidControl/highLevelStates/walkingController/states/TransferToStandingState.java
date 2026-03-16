@@ -41,17 +41,18 @@ public class TransferToStandingState extends WalkingState
                                   HighLevelHumanoidControllerToolbox controllerToolbox,
                                   HighLevelControlManagerFactory managerFactory,
                                   WalkingFailureDetectionControlModule failureDetectionControlModule,
+                                  double controlDT,
                                   YoRegistry parentRegistry)
    {
-      super(WalkingStateEnum.TO_STANDING, managerFactory, controllerToolbox, parentRegistry);
+      super(WalkingStateEnum.TO_STANDING, managerFactory, controllerToolbox, controlDT, parentRegistry);
       maxICPErrorToSwitchToStanding.set(0.025);
 
       this.walkingMessageHandler = walkingMessageHandler;
       this.touchdownErrorCompensator = touchdownErrorCompensator;
       this.failureDetectionControlModule = failureDetectionControlModule;
 
-      comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
-      feetManager = managerFactory.getOrCreateFeetManager();
+      comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager(controlDT);
+      feetManager = managerFactory.getOrCreateFeetManager(controlDT);
 
       doFootExplorationInTransferToStanding.set(false);
    }

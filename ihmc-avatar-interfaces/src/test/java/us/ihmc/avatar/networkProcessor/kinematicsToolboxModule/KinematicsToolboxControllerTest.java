@@ -105,6 +105,7 @@ public final class KinematicsToolboxControllerTest
                                                           desiredFullRobotModel.getRootJoint(),
                                                           desiredFullRobotModel.getOneDoFJoints(),
                                                           null,
+                                                          null,
                                                           updateDT,
                                                           mainRegistry);
 

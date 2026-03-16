@@ -3,8 +3,8 @@
 
 #include "behavior_msgs/msg/./AI2RHandPoseAdaptationMessage_.idl"
 #include "behavior_msgs/msg/./AI2RNavigationMessage_.idl"
-#include "behavior_msgs/msg/./AI2RPickUpObjectMessage_.idl"
 #include "behavior_msgs/msg/./AI2RReceiveObjectMessage_.idl"
+#include "behavior_msgs/msg/./AI2RScanMessage_.idl"
 module behavior_msgs
 {
   module msg
@@ -23,7 +23,7 @@ module behavior_msgs
         behavior_msgs::msg::dds::AI2RHandPoseAdaptationMessage hand_pose_adaptation;
         behavior_msgs::msg::dds::AI2RNavigationMessage navigation;
         behavior_msgs::msg::dds::AI2RReceiveObjectMessage receive_object;
-        behavior_msgs::msg::dds::AI2RPickUpObjectMessage pickup_object;
+        behavior_msgs::msg::dds::AI2RScanMessage scan;
       };
     };
   };

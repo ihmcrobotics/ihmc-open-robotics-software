@@ -117,7 +117,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
       List<TaskspaceTrajectoryStatusMessage> statusMessages = new ArrayList<>();
       simulationTestHelper.createSubscriberFromController(TaskspaceTrajectoryStatusMessage.class, statusMessages::add);
-      double controllerDT = getRobotModel().getControllerDT();
+      double controllerDT = simulationTestHelper.getCurrentControlDT();
 
       ThreadTools.sleep(1000);
       boolean success = simulationTestHelper.simulateNow(1.5);
@@ -274,7 +274,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
       simulationTestHelper.publishToController(pelvisTrajectoryMessage);
 
-      success = simulationTestHelper.simulateNow(4.0 * robotModel.getControllerDT());
+      success = simulationTestHelper.simulateNow(4.0 * simulationTestHelper.getCurrentControlDT());
       assertTrue(success);
 
       RigidBodyTransform fromWorldToMidFeetZUpTransform = new RigidBodyTransform();
@@ -369,7 +369,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
       for (int i = 0; i < 30; i++)
       {
-         simulationTestHelper.simulateNow(robotModel.getControllerDT());
+         simulationTestHelper.simulateNow(simulationTestHelper.getCurrentControlDT());
 
          FrameVector2D icpOffsetDelta = new FrameVector2D();
          icpOffsetDelta.sub(previousICPOffset, desiredICPOffset);
@@ -381,7 +381,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
       for (int i = 0; i < 30; i++)
       {
-         simulationTestHelper.simulateNow(robotModel.getControllerDT());
+         simulationTestHelper.simulateNow(simulationTestHelper.getCurrentControlDT());
 
          FrameVector2D icpOffsetDelta = new FrameVector2D();
          icpOffsetDelta.sub(previousICPOffset, desiredICPOffset);
@@ -422,7 +422,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
       List<TaskspaceTrajectoryStatusMessage> statusMessages = new ArrayList<>();
       simulationTestHelper.createSubscriberFromController(TaskspaceTrajectoryStatusMessage.class, statusMessages::add);
-      double controllerDT = getRobotModel().getControllerDT();
+      double controllerDT = simulationTestHelper.getCurrentControlDT();
 
       ThreadTools.sleep(200);
       boolean success = simulationTestHelper.simulateNow(0.5);
@@ -693,7 +693,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
       simulationTestHelper.publishToController(pelvisTrajectoryMessage);
 
-      success = simulationTestHelper.simulateNow(3.0 * robotModel.getControllerDT());
+      success = simulationTestHelper.simulateNow(3.0 * simulationTestHelper.getCurrentControlDT());
       assertTrue(success);
 
       assertCenterOfMassHeightManagerIsInState(simulationTestHelper, PelvisHeightControlMode.USER);
@@ -824,7 +824,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
       simulationTestHelper.publishToController(pelvisTrajectoryMessage);
 
-      success = simulationTestHelper.simulateNow(3.0 * robotModel.getControllerDT());
+      success = simulationTestHelper.simulateNow(3.0 * simulationTestHelper.getCurrentControlDT());
       assertTrue(success);
 
       assertCenterOfMassHeightManagerIsInState(simulationTestHelper, PelvisHeightControlMode.USER);
@@ -994,7 +994,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       PelvisTrajectoryMessage pelvisTrajectoryMessage = generateHoolaHoopTrajectory(midFeetFrame, pelvisPosition, radius);
       simulationTestHelper.publishToController(pelvisTrajectoryMessage);
 
-      success = simulationTestHelper.simulateNow(4.0 * getRobotModel().getControllerDT());
+      success = simulationTestHelper.simulateNow(4.0 * simulationTestHelper.getCurrentControlDT());
       assertTrue(success);
 
       int numberOfTrajectoryPoints = pelvisTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().size();
@@ -1045,7 +1045,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       simulationTestHelper.start();
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateNow(0.5);
+      boolean success = simulationTestHelper.simulateNow(1.0);
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
@@ -1101,14 +1101,14 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       simulationTestHelper.publishToController(pelvisTrajectoryMessage);
       ThreadTools.sleep(10);
 
-      success = simulationTestHelper.simulateNow(getRobotModel().getControllerDT());
+      success = simulationTestHelper.simulateNow(simulationTestHelper.getCurrentControlDT());
       assertTrue(success);
 
       CommonHumanoidReferenceFrames referenceFrames = simulationTestHelper.getControllerReferenceFrames();
       MovingReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
       RigidBodyTransform fromWorldToMidFeetZUpTransform = new RigidBodyTransform();
 
-      success = simulationTestHelper.simulateNow(2.0 * getRobotModel().getControllerDT());
+      success = simulationTestHelper.simulateNow(2.0 * simulationTestHelper.getCurrentControlDT());
       assertTrue(success);
 
       assertNumberOfWaypoints(numberOfTrajectoryPoints + 1, simulationTestHelper);

@@ -103,6 +103,7 @@ public class WalkingCommandConsumer
                                  HighLevelHumanoidControllerToolbox controllerToolbox,
                                  HighLevelControlManagerFactory managerFactory,
                                  WalkingControllerParameters walkingControllerParameters,
+                                 double controlDT,
                                  YoRegistry parentRegistry)
    {
       this(commandInputManager,
@@ -113,6 +114,7 @@ public class WalkingCommandConsumer
            controllerToolbox.getPelvisZUpFrame(),
            managerFactory,
            walkingControllerParameters,
+           controlDT,
            parentRegistry);
    }
 
@@ -124,6 +126,7 @@ public class WalkingCommandConsumer
                                  ReferenceFrame pelvisZUpFrame,
                                  HighLevelControlManagerFactory managerFactory,
                                  WalkingControllerParameters walkingControllerParameters,
+                                 double controlDT,
                                  YoRegistry parentRegistry)
    {
       this.walkingMessageHandler = walkingMessageHandler;
@@ -174,8 +177,8 @@ public class WalkingCommandConsumer
       if (chest != null)
       {
          chestBodyFrame = chest.getBodyFixedFrame();
-         chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis, chestBodyFrame, pelvisZUpFrame);
-         chestManager.setDoPrepareForLocomotion(walkingControllerParameters.doPrepareManipulationForLocomotion());
+         chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis, chestBodyFrame, pelvisZUpFrame, controlDT);
+         chestManager.setDoPrepareForLocomotion(walkingControllerParameters.doPrepareChestForLocomotion());
       }
       else
       {
@@ -185,7 +188,7 @@ public class WalkingCommandConsumer
       if (head != null)
       {
          ReferenceFrame headBodyFrame = head.getBodyFixedFrame();
-         this.headManager = managerFactory.getOrCreateRigidBodyManager(head, chest, headBodyFrame, chestBodyFrame);
+         this.headManager = managerFactory.getOrCreateRigidBodyManager(head, chest, headBodyFrame, chestBodyFrame, controlDT);
       }
       else
       {
@@ -198,16 +201,16 @@ public class WalkingCommandConsumer
          if (hand != null)
          {
             ReferenceFrame handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
-            RigidBodyControlManager handManager = managerFactory.getOrCreateRigidBodyManager(hand, chest, handControlFrame, chestBodyFrame);
-            handManager.setDoPrepareForLocomotion(walkingControllerParameters.doPrepareManipulationForLocomotion());
+            RigidBodyControlManager handManager = managerFactory.getOrCreateRigidBodyManager(hand, chest, handControlFrame, chestBodyFrame, controlDT);
+            handManager.setDoPrepareForLocomotion(walkingControllerParameters.doPrepareHandsForLocomotion());
             handManagers.put(robotSide, handManager);
          }
       }
 
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
-      feetManager = managerFactory.getOrCreateFeetManager();
-      balanceManager = managerFactory.getOrCreateBalanceManager();
-      comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
+      feetManager = managerFactory.getOrCreateFeetManager(controlDT);
+      balanceManager = managerFactory.getOrCreateBalanceManager(controlDT);
+      comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager(controlDT);
 
       isAutomaticManipulationAbortEnabled.set(walkingControllerParameters.allowAutomaticManipulationAbort());
       icpErrorThresholdToAbortManipulation.set(walkingControllerParameters.getICPErrorThresholdForManipulationAbort());

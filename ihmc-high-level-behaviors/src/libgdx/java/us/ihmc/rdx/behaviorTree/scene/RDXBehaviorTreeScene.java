@@ -8,7 +8,6 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
-import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiMouseButton;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -27,9 +26,9 @@ import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
 import us.ihmc.rdx.RDX3DSituatedText;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.sceneManager.RDXRenderableAdapter;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -43,11 +42,12 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
 {
    private final RDXBaseUI baseUI;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final RDXPanel panel = new RDXPanel("Scene", this::renderImGuiWidgets);
 
    private final List<RDXBehaviorTreeSceneObject> objects;
    private final ImBoolean showDetections = new ImBoolean(true);
+   private final ImBoolean createFoundationPose = new ImBoolean(false);
    private final RecyclingArrayList<RDXBehaviorTreeSceneDetection> persistentDetections;
+   private final RDXRenderableAdapter renderableAdapter;
 
    private final ImBoolean showCameraFrame = new ImBoolean(false);
    private final RigidBodyTransform cameraGraphicTransform = new RigidBodyTransform();
@@ -57,7 +57,7 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
    private boolean needToInitializePlacementHeight = false;
    private RDXBehaviorTreeSceneObject beingPlaced;
 
-   public RDXBehaviorTreeScene(CRDTInfo crdtInfo, LongSupplier idSupplier, ROS2SyncedRobotModel syncedRobot, RDXBaseUI baseUI, RDXPanel parentPanel)
+   public RDXBehaviorTreeScene(CRDTInfo crdtInfo, LongSupplier idSupplier, ROS2SyncedRobotModel syncedRobot, RDXBaseUI baseUI)
    {
       super(crdtInfo, idSupplier, syncedRobot);
 
@@ -67,10 +67,8 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
 
       persistentDetections = new RecyclingArrayList<>(() -> new RDXBehaviorTreeSceneDetection(baseUI));
 
-      parentPanel.addChild(panel);
-
-      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::processImGui3DViewInput);
-      baseUI.getPrimary3DPanel().getScene().addRenderableProvider(this::getRenderables);
+      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this, this::processImGui3DViewInput);
+      renderableAdapter = baseUI.getPrimary3DPanel().getScene().addRenderableProvider(this::getRenderables);
    }
 
    public void update()
@@ -99,26 +97,44 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
       }
    }
 
-   private void renderImGuiWidgets()
+   public void renderImGuiWidgets()
    {
       ImGuiTools.smallCheckbox(labels.get("Show camera frame"), showCameraFrame);
       ImGui.sameLine();
       ImGuiTools.smallCheckbox(labels.get("Show detections"), showDetections);
       ImGui.separator();
       ImGui.text("Add virtual:");
+      ImGui.sameLine();
+      ImGuiTools.smallCheckbox(labels.get("FoundationPose"), createFoundationPose);
       ImGui.indent();
+      BehaviorTreeSceneObjectDefinitionMessage objectDefinition = null;
       for (IsaacROSFoundationPoseObject objectType : IsaacROSFoundationPoseObject.values())
       {
          if (ImGuiTools.textWithUnderlineOnHover(objectType.titleCaseName) && ImGui.isMouseClicked(ImGuiMouseButton.Left))
          {
-            BehaviorTreeSceneObjectDefinitionMessage message = new BehaviorTreeSceneObjectDefinitionMessage();
-            message.setObjectType((byte) BehaviorTreeSceneObjectType.FOUNDATION_POSE.ordinal());
-            message.setFoundationPoseObjectType((byte) objectType.ordinal());
-            beingPlaced = (RDXBehaviorTreeSceneObject) createObject(message);
-            objects.add(beingPlaced);
-            objectsModifiable.modify();
-            needToInitializePlacementHeight = true;
+            objectDefinition = new BehaviorTreeSceneObjectDefinitionMessage();
+            if (createFoundationPose.get())
+            {
+               objectDefinition.setObjectType((byte) BehaviorTreeSceneObjectType.FOUNDATION_POSE.ordinal());
+               objectDefinition.setFoundationPoseObjectType((byte) objectType.ordinal());
+            }
+            else
+               objectDefinition.setObjectType((byte) BehaviorTreeSceneObjectType.YOLO_ONLY.ordinal());
+            objectDefinition.setYoloClassName(objectType.yoloClass);
          }
+      }
+      if (ImGuiTools.textWithUnderlineOnHover("Person") && ImGui.isMouseClicked(ImGuiMouseButton.Left))
+      {
+         objectDefinition = new BehaviorTreeSceneObjectDefinitionMessage();
+         objectDefinition.setObjectType((byte) BehaviorTreeSceneObjectType.YOLO_ONLY.ordinal());
+         objectDefinition.setYoloClassName("person");
+      }
+      if (objectDefinition != null)
+      {
+         beingPlaced = (RDXBehaviorTreeSceneObject) createObject(objectDefinition);
+         objects.add(beingPlaced);
+         objectsModifiable.modify();
+         needToInitializePlacementHeight = true;
       }
       ImGui.unindent();
       ImGui.separator();
@@ -150,6 +166,9 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
 
    static void renderPersistentDetection(PersistentDetectionStatusMessage message)
    {
+      if (message.getDetectionTypeAsString().isEmpty())
+         return;
+
       String type = "(?)";
       if (message.getDetectionTypeAsString().equals(IsaacROSFoundationPoseInstantDetection.class.getSimpleName()))
          type = "(FoundationPose)";
@@ -218,5 +237,14 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
       persistentDetections.clear();
       for (int i = 0; i < message.getPersistentDetections().size(); i++)
          persistentDetections.add().update(message.getPersistentDetections().get(i));
+   }
+
+   public void destroy()
+   {
+      baseUI.getPrimary3DPanel().removeImGui3DViewInputProcessor(this);
+      baseUI.getPrimary3DPanel().getScene().removeRenderableAdapter(renderableAdapter);
+
+      for (RDXBehaviorTreeSceneObject object : objects)
+         object.destroy();
    }
 }

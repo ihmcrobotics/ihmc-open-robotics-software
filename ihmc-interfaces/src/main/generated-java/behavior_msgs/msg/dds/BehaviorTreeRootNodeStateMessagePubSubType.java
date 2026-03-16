@@ -15,7 +15,7 @@ public class BehaviorTreeRootNodeStateMessagePubSubType implements us.ihmc.pubsu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "adbe5c134262c52228806a1a8aa9a5fd96b295814df1e3470fea2f2f2d4a4e26";
+   		return "e655c12ed8fd16a6253a71d74f79b3c6ab01d7a11a922a9a14dff8a928e826b9";
    }
    
    @Override
@@ -56,9 +56,13 @@ public class BehaviorTreeRootNodeStateMessagePubSubType implements us.ihmc.pubsu
 
       current_alignment += behavior_msgs.msg.dds.BehaviorTreeRootNodeDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += behavior_msgs.msg.dds.BehaviorTreeSceneStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -83,10 +87,15 @@ public class BehaviorTreeRootNodeStateMessagePubSubType implements us.ihmc.pubsu
 
       current_alignment += behavior_msgs.msg.dds.BehaviorTreeRootNodeDefinitionMessagePubSubType.getCdrSerializedSize(data.getDefinition(), current_alignment);
 
+      current_alignment += behavior_msgs.msg.dds.BehaviorTreeSceneStateMessagePubSubType.getCdrSerializedSize(data.getScene(), current_alignment);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -106,6 +115,7 @@ public class BehaviorTreeRootNodeStateMessagePubSubType implements us.ihmc.pubsu
    {
       behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType.write(data.getState(), cdr);
       behavior_msgs.msg.dds.BehaviorTreeRootNodeDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
+      behavior_msgs.msg.dds.BehaviorTreeSceneStateMessagePubSubType.write(data.getScene(), cdr);
       cdr.write_type_7(data.getAutomaticExecution());
 
       cdr.write_type_3(data.getExecutionNextIndex());
@@ -113,6 +123,8 @@ public class BehaviorTreeRootNodeStateMessagePubSubType implements us.ihmc.pubsu
       cdr.write_type_7(data.getManualExecutionRequested());
 
       cdr.write_type_7(data.getConcurrencyEnabled());
+
+      cdr.write_type_7(data.getPreviewModeEnabled());
 
       cdr.write_type_7(data.getFailureResetRequested());
 
@@ -122,6 +134,7 @@ public class BehaviorTreeRootNodeStateMessagePubSubType implements us.ihmc.pubsu
    {
       behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType.read(data.getState(), cdr);	
       behavior_msgs.msg.dds.BehaviorTreeRootNodeDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
+      behavior_msgs.msg.dds.BehaviorTreeSceneStateMessagePubSubType.read(data.getScene(), cdr);	
       data.setAutomaticExecution(cdr.read_type_7());
       	
       data.setExecutionNextIndex(cdr.read_type_3());
@@ -129,6 +142,8 @@ public class BehaviorTreeRootNodeStateMessagePubSubType implements us.ihmc.pubsu
       data.setManualExecutionRequested(cdr.read_type_7());
       	
       data.setConcurrencyEnabled(cdr.read_type_7());
+      	
+      data.setPreviewModeEnabled(cdr.read_type_7());
       	
       data.setFailureResetRequested(cdr.read_type_7());
       	
@@ -142,10 +157,13 @@ public class BehaviorTreeRootNodeStateMessagePubSubType implements us.ihmc.pubsu
 
       ser.write_type_a("definition", new behavior_msgs.msg.dds.BehaviorTreeRootNodeDefinitionMessagePubSubType(), data.getDefinition());
 
+      ser.write_type_a("scene", new behavior_msgs.msg.dds.BehaviorTreeSceneStateMessagePubSubType(), data.getScene());
+
       ser.write_type_7("automatic_execution", data.getAutomaticExecution());
       ser.write_type_3("execution_next_index", data.getExecutionNextIndex());
       ser.write_type_7("manual_execution_requested", data.getManualExecutionRequested());
       ser.write_type_7("concurrency_enabled", data.getConcurrencyEnabled());
+      ser.write_type_7("preview_mode_enabled", data.getPreviewModeEnabled());
       ser.write_type_7("failure_reset_requested", data.getFailureResetRequested());
    }
 
@@ -156,10 +174,13 @@ public class BehaviorTreeRootNodeStateMessagePubSubType implements us.ihmc.pubsu
 
       ser.read_type_a("definition", new behavior_msgs.msg.dds.BehaviorTreeRootNodeDefinitionMessagePubSubType(), data.getDefinition());
 
+      ser.read_type_a("scene", new behavior_msgs.msg.dds.BehaviorTreeSceneStateMessagePubSubType(), data.getScene());
+
       data.setAutomaticExecution(ser.read_type_7("automatic_execution"));
       data.setExecutionNextIndex(ser.read_type_3("execution_next_index"));
       data.setManualExecutionRequested(ser.read_type_7("manual_execution_requested"));
       data.setConcurrencyEnabled(ser.read_type_7("concurrency_enabled"));
+      data.setPreviewModeEnabled(ser.read_type_7("preview_mode_enabled"));
       data.setFailureResetRequested(ser.read_type_7("failure_reset_requested"));
    }
 

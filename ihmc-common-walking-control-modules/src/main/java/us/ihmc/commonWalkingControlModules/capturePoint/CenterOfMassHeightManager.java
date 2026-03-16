@@ -64,6 +64,7 @@ public class CenterOfMassHeightManager implements SCS2YoGraphicHolder
 
    public CenterOfMassHeightManager(HighLevelHumanoidControllerToolbox controllerToolbox,
                                     WalkingControllerParameters walkingControllerParameters,
+                                    double controlDT,
                                     YoRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
@@ -75,9 +76,14 @@ public class CenterOfMassHeightManager implements SCS2YoGraphicHolder
       YoDouble yoTime = controllerToolbox.getYoTime();
       String namePrefix = getClass().getSimpleName();
       requestedState = new YoEnum<>(namePrefix + "RequestedControlMode", registry, PelvisHeightControlMode.class, true);
-      centerOfMassHeightControlState = new CenterOfMassHeightControlState(controllerToolbox, walkingControllerParameters, registry);
-      heightControlThroughKneesState = new HeightThroughKneeControlState(controllerToolbox, walkingControllerParameters, registry);
+      centerOfMassHeightControlState = new CenterOfMassHeightControlState(controllerToolbox, walkingControllerParameters, controlDT, registry);
+      heightControlThroughKneesState = new HeightThroughKneeControlState(controllerToolbox, registry);
       stateMachine = setupStateMachine(namePrefix, yoTime);
+   }
+
+   public double getControlDT()
+   {
+      return centerOfMassHeightControlState.getControlDT();
    }
 
    private StateMachine<PelvisHeightControlMode, PelvisAndCenterOfMassHeightControlState> setupStateMachine(String namePrefix, DoubleProvider timeProvider)

@@ -3,112 +3,18 @@ package us.ihmc.behaviors.behaviorTree.control.door;
 import behavior_msgs.msg.dds.DoorTraversalStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
-import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
-import us.ihmc.behaviors.behaviorTree.action.actions.ScrewPrimitiveActionState;
-import us.ihmc.behaviors.behaviorTree.action.actions.WaitDurationActionState;
-import us.ihmc.communication.crdt.CRDTStatusDouble;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
-
-import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
 
 public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefinition>
 {
-   public static final String SET_STATIC_FOR_APPROACH = "Set static for approach";
-   public static final String SET_STATIC_FOR_GRASP = "Set static for grasp";
-   public static final String WAIT_TO_OPEN_RIGHT_HAND = "Wait to open right hand";
-   public static final String PULL_SCREW_PRIMITIVE = "Pull Screw primitive";
-   public static final String POST_PULL_DOOR = "Post pull door evaluation";
-   public static final String POST_GRASP_HANDLE = "Evaluate grasp";
-
-   private final BehaviorTreeRootNodeState actionSequence;
-   private final List<WaitDurationActionState> setStaticForApproachActions = new ArrayList<>();
-   private final List<WaitDurationActionState> setStaticForGraspActions = new ArrayList<>();
-   private WaitDurationActionState waitToOpenRightHandAction;
-   private ScrewPrimitiveActionState pullScrewPrimitiveAction;
-   private WaitDurationActionState postGraspEvaluationAction;
-   private WaitDurationActionState postPullDoorEvaluationAction;
-
-   private final CRDTStatusDouble doorHingeJointAngle;
-   private final CRDTStatusDouble doorHandleDistanceFromStart;
-
    public DoorTraversalState(long id, BehaviorTreeRootNodeState rootNode)
    {
       super(id, new DoorTraversalDefinition(rootNode.getDefinition()), rootNode);
-
-      actionSequence = rootNode;
-
-      doorHingeJointAngle = new CRDTStatusDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
-      doorHandleDistanceFromStart = new CRDTStatusDouble(ROS2ActorDesignation.ROBOT, crdtInfo, 0.0);
    }
 
    @Override
    public void update()
    {
       super.update();
-
-      updateSubtree(this);
-   }
-
-   public void updateSubtree(BehaviorTreeNodeState<?> node)
-   {
-      setStaticForApproachActions.clear();
-      setStaticForGraspActions.clear();
-      waitToOpenRightHandAction = null;
-      pullScrewPrimitiveAction = null;
-      postGraspEvaluationAction = null;
-      postPullDoorEvaluationAction = null;
-
-      for (BehaviorTreeNodeState<?> child : node.getChildren())
-      {
-         if (child instanceof ActionNodeState<?> actionNode)
-         {
-            if (actionNode instanceof WaitDurationActionState waitDurationAction
-                && waitDurationAction.getDefinition().getName().equals(SET_STATIC_FOR_APPROACH))
-            {
-               setStaticForApproachActions.add(waitDurationAction);
-            }
-            if (actionNode instanceof WaitDurationActionState waitDurationAction
-                && waitDurationAction.getDefinition().getName().equals(SET_STATIC_FOR_GRASP))
-            {
-               setStaticForGraspActions.add(waitDurationAction);
-            }
-            if (actionNode instanceof WaitDurationActionState waitDurationAction
-                && waitDurationAction.getDefinition().getName().equals(WAIT_TO_OPEN_RIGHT_HAND))
-            {
-               waitToOpenRightHandAction = waitDurationAction;
-            }
-            if (actionNode instanceof ScrewPrimitiveActionState screwPrimitiveAction
-                && screwPrimitiveAction.getDefinition().getName().equals(PULL_SCREW_PRIMITIVE))
-            {
-               pullScrewPrimitiveAction = screwPrimitiveAction;
-            }
-            if (actionNode instanceof WaitDurationActionState waitDurationAction
-                && waitDurationAction.getDefinition().getName().equals(POST_GRASP_HANDLE))
-            {
-               postGraspEvaluationAction = waitDurationAction;
-            }
-            if (actionNode instanceof WaitDurationActionState waitDurationAction
-                && waitDurationAction.getDefinition().getName().equals(POST_PULL_DOOR))
-            {
-               postPullDoorEvaluationAction = waitDurationAction;
-            }
-         }
-         else
-         {
-            updateSubtree(child);
-         }
-      }
-   }
-
-   @Override
-   public boolean hasStatus()
-   {
-      boolean hasStatus = false;
-      hasStatus |= doorHingeJointAngle.pollHasStatus();
-      hasStatus |= doorHandleDistanceFromStart.pollHasStatus();
-      return hasStatus;
    }
 
    public void toMessage(DoorTraversalStateMessage message)
@@ -116,9 +22,6 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
       definition.toMessage(message.getDefinition());
 
       super.toMessage(message.getState());
-
-      message.setDoorHingeJointAngle(doorHingeJointAngle.toMessage());
-      message.setDoorHandleDistanceFromStart(doorHandleDistanceFromStart.toMessage());
    }
 
    public void fromMessage(DoorTraversalStateMessage message)
@@ -126,63 +29,5 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
       definition.fromMessage(message.getDefinition());
 
       super.fromMessage(message.getState());
-
-      doorHingeJointAngle.fromMessage(message.getDoorHingeJointAngle());
-      doorHandleDistanceFromStart.fromMessage(message.getDoorHandleDistanceFromStart());
-   }
-
-   public boolean arePullRetryNodesPresent()
-   {
-      boolean isValid = actionSequence != null;
-      isValid &= waitToOpenRightHandAction != null;
-      isValid &= pullScrewPrimitiveAction != null;
-      isValid &= postGraspEvaluationAction != null;
-      isValid &= postPullDoorEvaluationAction != null;
-      return isValid;
-   }
-
-   public BehaviorTreeRootNodeState getActionSequence()
-   {
-      return actionSequence;
-   }
-
-   public List<WaitDurationActionState> getSetStaticForApproachActions()
-   {
-      return setStaticForApproachActions;
-   }
-
-   public List<WaitDurationActionState> getSetStaticForGraspActions()
-   {
-      return setStaticForGraspActions;
-   }
-
-   public WaitDurationActionState getWaitToOpenRightHandAction()
-   {
-      return waitToOpenRightHandAction;
-   }
-
-   public ScrewPrimitiveActionState getPullScrewPrimitiveAction()
-   {
-      return pullScrewPrimitiveAction;
-   }
-
-   public WaitDurationActionState getPostGraspEvaluationAction()
-   {
-      return postGraspEvaluationAction;
-   }
-
-   public WaitDurationActionState getPostPullDoorEvaluationAction()
-   {
-      return postPullDoorEvaluationAction;
-   }
-
-   public CRDTStatusDouble getDoorHingeJointAngle()
-   {
-      return doorHingeJointAngle;
-   }
-
-   public CRDTStatusDouble getDoorHandleDistanceFromStart()
-   {
-      return doorHandleDistanceFromStart;
    }
 }

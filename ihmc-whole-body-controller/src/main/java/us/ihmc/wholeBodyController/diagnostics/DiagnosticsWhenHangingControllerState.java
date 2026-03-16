@@ -41,7 +41,9 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.wholeBodyController.JointTorqueOffsetProcessor;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.filters.AlphaFilterTools;
 import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -95,7 +97,7 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
    private final SideDependentList<FootSwitchInterface> footSwitches;
    private final SideDependentList<YoFrameVector3D> footForcesRaw = new SideDependentList<>();
    private final SideDependentList<YoFrameVector3D> footTorquesRaw = new SideDependentList<>();
-   private final YoDouble alphaFootForce = new YoDouble("alphaDiagFootForce", registry);
+   private final DoubleProvider alphaFootForce;
    private final SideDependentList<AlphaFilteredYoFrameVector3D> footForcesRawFiltered = new SideDependentList<>();
    private final SideDependentList<AlphaFilteredYoFrameVector3D> footTorquesRawFiltered = new SideDependentList<>();
 
@@ -111,7 +113,8 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
 
    public DiagnosticsWhenHangingControllerState(HumanoidJointPoseList humanoidJointPoseList, boolean useArms, boolean robotIsHanging,
                                                 HighLevelHumanoidControllerToolbox controllerToolbox,
-                                                HighLevelControllerParameters highLevelControllerParameters, TorqueOffsetPrinter torqueOffsetPrinter)
+                                                HighLevelControllerParameters highLevelControllerParameters, TorqueOffsetPrinter torqueOffsetPrinter,
+                                                double controlDT)
    {
       super(controllerState, highLevelControllerParameters, controllerToolbox.getControlledOneDoFJoints());
 
@@ -187,7 +190,7 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
 
       // Foot force sensors tarring stuff
       footSwitches = controllerToolbox.getFootSwitches();
-      alphaFootForce.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(0.1, controllerToolbox.getControlDT()));
+      alphaFootForce = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(0.1, controlDT);
       updateFootForceSensorOffsets.set(true);
 
       for (RobotSide robotSide : RobotSide.values)

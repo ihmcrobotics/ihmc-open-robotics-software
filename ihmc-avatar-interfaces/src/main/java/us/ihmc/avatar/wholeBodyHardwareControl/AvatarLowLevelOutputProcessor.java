@@ -195,7 +195,8 @@ public class AvatarLowLevelOutputProcessor
    {
       //TODO Figure out how to make the interp work without having to reduce duration
       double ratio = (yoTime.getValue() - interpolationStartTime.getValueAsDouble()) / (interpolateDuration.getValueAsDouble() - updateDt);
-      interpolationRatio.set(MathTools.clamp(ratio, 0.0, 1.0));
+      ratio = MathTools.clamp(ratio, 0.0, 1.0);
+      interpolationRatio.set(ratio);
       if (ratio <= 1.0)
       {
          for (int i = 0; i < processedDesireds.getNumberOfJointsWithDesiredOutput(); i++)

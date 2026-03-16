@@ -23,11 +23,7 @@ public class ImGuiSVGWidgetNormalizer
    {
       // Paste SVG path n here
       String pathDString = """
-                  M 99.303402,65.896674
-                  V 63.783598
-                  L 95.971674,63.727697 94.741843,62.911534 94.663579,61.122686
-                  H 96.262363
-                  L 96.273542,60.284163 93.444927,56.494044 90.593951,60.317705 90.616311,61.077966 92.192733,61.122686 92.103291,62.531405 92.46106,64.532679 94.071023,65.773691 96.620133,65.941394 Z
+                  M 51.144162,108.02267 20.922612,108.02267 30.841479,108.02267 30.22155,19.527771 51.764091,19.372789 51.764091,26.346992 37.970666,26.19201 38.435612,107.86769 Z
             """;
 
       String[] commands = pathDString.split("\\s+");
@@ -128,12 +124,12 @@ public class ImGuiSVGWidgetNormalizer
          vertex.scale(1.0 / maxDimension);
       }
 
-      System.out.println("private final ArrayList<Point2D32> vertices = new ArrayList<>();\n{");
+      System.out.println("private final ImVec2[] polygon = new ImVec2[]\n{");
       for (FramePoint2D vertex : vertices)
       {
          System.out.printf("   new ImVec2(%.3ff, %.3ff),%n", vertex.getX(), vertex.getY());
       }
-      System.out.println("}");
+      System.out.println("};");
    }
 
    public static void main(String[] args)

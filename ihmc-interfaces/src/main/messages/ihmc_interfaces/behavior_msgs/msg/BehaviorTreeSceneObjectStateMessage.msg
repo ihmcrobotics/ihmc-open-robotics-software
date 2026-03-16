@@ -17,8 +17,24 @@ controller_msgs/RigidBodyTransformMessage transform_to_world
 # Used only for door panel
 behavior_msgs/PersistentDetectionStatusMessage door_panel_detection
 
-# Used only for door frame
-uint32 points_in_capsule
+# Number of points in the latch post detection capsule
+uint32 latch_post_points
+
+# Number of points in the hinge side recess detection capsule
+uint32 hinge_recess_points
+
+# The open angle of the door hinge (0 = closed, Zup yaw)
+float32 door_open_angle
+
+byte DOOR_TYPE_UNKNOWN = 0
+byte DOOR_TYPE_PUSH = 1
+byte DOOR_TYPE_PULL = 2
+
+# Door type as defined above
+byte door_type
+
+# Hinge side from the view of the robot
+byte hinge_side
 
 # Whether the object is frozen
 bool frozen

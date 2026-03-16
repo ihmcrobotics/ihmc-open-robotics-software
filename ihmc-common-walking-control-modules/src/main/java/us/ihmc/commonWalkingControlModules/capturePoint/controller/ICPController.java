@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.ParameterizedICPControlGains;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -132,8 +133,7 @@ public class ICPController implements ICPControllerInterface
    private final ICPControllerParameters parameters;
    private final YoBoolean usingHighCoPDamping = new YoBoolean("usingHighCopDamping", registry);
 
-   private final double controlDT;
-   private final double controlDTSquare;
+   private final DoubleProvider controlDT;
 
    private boolean ignoreRateLimitThisTick = false;
 
@@ -142,7 +142,7 @@ public class ICPController implements ICPControllerInterface
    public ICPController(WalkingControllerParameters walkingControllerParameters,
                         ICPControlPolygons icpControlPolygons,
                         SideDependentList<? extends ContactablePlaneBody> contactableFeet,
-                        double controlDT,
+                        DoubleProvider controlDT,
                         YoRegistry parentRegistry)
    {
       this(walkingControllerParameters,
@@ -157,12 +157,11 @@ public class ICPController implements ICPControllerInterface
                         ICPControllerParameters icpOptimizationParameters,
                         ICPControlPolygons icpControlPolygons,
                         SideDependentList<? extends ContactablePlaneBody> contactableFeet,
-                        double controlDT,
+                        DoubleProvider controlDT,
                         YoRegistry parentRegistry)
    {
       this.parameters = icpOptimizationParameters;
       this.controlDT = controlDT;
-      this.controlDTSquare = controlDT * controlDT;
 
       useCMPFeedback = new BooleanParameter(yoNamePrefix + "UseCMPFeedback", registry, icpOptimizationParameters.useCMPFeedback());
       useAngularMomentum = new BooleanParameter(yoNamePrefix + "UseAngularMomentum", registry, icpOptimizationParameters.useAngularMomentum());
@@ -399,7 +398,7 @@ public class ICPController implements ICPControllerInterface
                                                feedbackGains.getFeedbackPartMaxValueOrthogonalToMotion());
          }
 
-         solver.setMaximumFeedbackRate(feedbackGains.getFeedbackPartMaxRate(), controlDT);
+         solver.setMaximumFeedbackRate(feedbackGains.getFeedbackPartMaxRate(), controlDT.getValue());
       }
       else
       {
@@ -409,6 +408,7 @@ public class ICPController implements ICPControllerInterface
       ignoreRateLimitThisTick = false;
 
       double feedbackRateWeight = usingHighCoPDamping.getValue() ? highlyDampedFeedbackRateWeight.getValue() : this.feedbackRateWeight.getValue();
+      double controlDTSquare = MathTools.square(controlDT.getValue());
       solver.setFeedbackRateWeight(copCMPFeedbackRateWeight.getValue() / controlDTSquare, feedbackRateWeight / controlDTSquare);
 
       if (useCMPFeedback.getValue())

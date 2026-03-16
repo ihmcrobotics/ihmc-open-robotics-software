@@ -24,6 +24,32 @@ public class FullRobotModelUtils
       return joints.toArray(new OneDoFJointBasics[joints.size()]);
    }
 
+   public static List<Integer> getAllJointsExcludingHandsIndices(FullHumanoidRobotModel model)
+   {
+      // Get the full ordered joint array once
+      OneDoFJointBasics[] allJoints = model.getOneDoFJoints();
+
+      // Collect the actual joint objects that we want to exclude
+      List<OneDoFJointBasics> jointsExcludingHands = new ArrayList<>();
+      getAllJointsExcludingHands(jointsExcludingHands, model);
+
+      // Map from joint to index in the full array
+      List<Integer> indices = new ArrayList<>(jointsExcludingHands.size());
+      for (OneDoFJointBasics joint : jointsExcludingHands)
+      {
+         for (int i = 0; i < allJoints.length; i++)
+         {
+            if (allJoints[i] == joint)
+            {
+               indices.add(i);
+               break;
+            }
+         }
+      }
+
+      return indices;
+   }
+
    public static void getAllJointsExcludingHands(List<OneDoFJointBasics> jointsToPack, FullHumanoidRobotModel model)
    {
       model.getOneDoFJoints(jointsToPack);

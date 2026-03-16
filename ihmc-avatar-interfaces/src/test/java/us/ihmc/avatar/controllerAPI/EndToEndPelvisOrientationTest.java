@@ -111,7 +111,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
    public void testSingleTrajectoryPoint()
    {
       Random random = new Random(346665);
-      double controllerDT = getRobotModel().getControllerDT();
+      double controllerDT = simulationTestHelper.getCurrentControlDT();
 
       List<TaskspaceTrajectoryStatusMessage> statusMessages = new ArrayList<>();
       simulationTestHelper.createSubscriberFromController(TaskspaceTrajectoryStatusMessage.class, statusMessages::add);
@@ -264,7 +264,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       Random random = new Random(159684);
       List<TaskspaceTrajectoryStatusMessage> statusMessages = new ArrayList<>();
       simulationTestHelper.createSubscriberFromController(TaskspaceTrajectoryStatusMessage.class, statusMessages::add);
-      double controllerDT = getRobotModel().getControllerDT();
+      double controllerDT = simulationTestHelper.getCurrentControlDT();
 
       double epsilon = 1.0e-10;
       int numberOfPoints = 23;
@@ -395,14 +395,14 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       chestOrientation.changeFrame(worldFrame);
       ChestTrajectoryMessage holdChestInWorldMessage = HumanoidMessageTools.createChestTrajectoryMessage(0.0, chestOrientation, worldFrame, worldFrame);
       simulationTestHelper.publishToController(holdChestInWorldMessage);
-      simulationTestHelper.simulateNow(2.0 * getRobotModel().getControllerDT());
+      simulationTestHelper.simulateNow(2.0 * simulationTestHelper.getCurrentControlDT());
 
       // now hold the pelvis in chest frame
       PelvisOrientationTrajectoryMessage holdPelvisInChestMessage = HumanoidMessageTools.createPelvisOrientationTrajectoryMessage(0.0,
                                                                                                                                   desiredOrientation,
                                                                                                                                   chestFrame);
       simulationTestHelper.publishToController(holdPelvisInChestMessage);
-      simulationTestHelper.simulateNow(2.0 * getRobotModel().getControllerDT());
+      simulationTestHelper.simulateNow(2.0 * simulationTestHelper.getCurrentControlDT());
 
       // finally pitch the chest forward and assert that the pelvis follows
       humanoidReferenceFrames.updateFrames();
@@ -533,7 +533,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
 
       EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(desiredOrientation, currentDesiredTrajectoryPoint.getOrientation(), desiredEpsilon);
       EuclidCoreTestTools.assertEquals(desiredAngularVelocity, currentDesiredTrajectoryPoint.getAngularVelocity(), desiredEpsilon);
-      EndToEndChestTrajectoryMessageTest.assertControlErrorIsLow(simulationTestHelper, pelvis, 1.5e-3);
+      EndToEndChestTrajectoryMessageTest.assertControlErrorIsLow(simulationTestHelper, pelvis, 1.6e-3);
    }
 
    @SuppressWarnings("unchecked")

@@ -13,16 +13,13 @@ ihmc {
 mainDependencies {
    api("org.jgrapht:jgrapht-core:0.9.0")
 
-   api("us.ihmc:ihmc-convex-optimization:0.17.23")
-   api("us.ihmc:robot-environment-awareness:source")
+   api("us.ihmc:ihmc-convex-optimization:0.18.0")
    api("us.ihmc:ihmc-perception:source")
 }
 
 visualizersDependencies {
    api(ihmc.sourceSetProject("main"))
    api(ihmc.sourceSetProject("data-sets"))
-
-   api("us.ihmc:robot-environment-awareness-application:source")
 }
 
 testDependencies {

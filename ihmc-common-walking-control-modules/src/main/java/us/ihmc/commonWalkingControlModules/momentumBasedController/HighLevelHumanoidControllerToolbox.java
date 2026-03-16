@@ -4,7 +4,6 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointVisualizer;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.contact.HandWrenchCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.FootShakiesEstimator;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
@@ -30,9 +29,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
@@ -49,7 +45,6 @@ import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
-import us.ihmc.robotics.filters.TimeWindowVelocityEstimator3D;
 import us.ihmc.robotics.lists.FrameTuple2dArrayList;
 import us.ihmc.robotics.screwTheory.WholeBodyAngularVelocityCalculator;
 import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFrameVector3D;
@@ -72,12 +67,12 @@ import us.ihmc.yoVariables.euclid.filters.FilteredFiniteDifferenceYoFrameVector3
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
-import us.ihmc.yoVariables.filters.AlphaBasedOnBreakFrequencyProvider;
+import us.ihmc.yoVariables.filters.AlphaFilterTools;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -112,7 +107,6 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
    private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
    private final YoDouble yoTime;
-   private final double controlDT;
    private final double gravity;
    private final boolean kinematicsSimulation;
 
@@ -150,10 +144,8 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    private final SideDependentList<FrameTuple2dArrayList<FramePoint2D>> previousFootContactPoints = new SideDependentList<>(createFramePoint2dArrayList(),
                                                                                                                             createFramePoint2dArrayList());
 
-   private final TimeWindowVelocityEstimator3D windowedCoMVelocityEstimate;
    protected final YoFramePoint3D yoCapturePoint = new YoFramePoint3D("capturePoint", worldFrame, registry);
    protected final YoFramePoint3D yoAngularCapturePoint = new YoFramePoint3D("angularCapturePoint", worldFrame, registry);
-   protected final YoFramePoint3D yoAngularCapturePointFromWindow = new YoFramePoint3D("angularCapturePointFromWindow", worldFrame, registry);
 
    private final YoDouble omega0 = new YoDouble("omega0", registry);
 
@@ -193,7 +185,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
                                              double gravityZ,
                                              double omega0,
                                              SideDependentList<ContactableFoot> feet,
-                                             double controlDT,
+                                             DoubleProvider controlDT,
                                              boolean kinematicsSimulation, // Whether to create for non-physical motion generation only
                                              List<Updatable> updatables,
                                              List<ContactablePlaneBody> contactableBodies,
@@ -218,13 +210,11 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
       this.fullRobotModel = fullRobotModel;
       this.referenceFrames = referenceFrames;
-      this.controlDT = controlDT;
       this.gravity = gravityZ;
       this.kinematicsSimulation = kinematicsSimulation;
       this.yoTime = yoTime;
       this.omega0.set(omega0);
 
-      windowedCoMVelocityEstimate = new TimeWindowVelocityEstimator3D("windowCoMVelocityEstimate", worldFrame, 0.25, controlDT, registry);
       referenceFramesVisualizer = new CommonHumanoidReferenceFramesVisualizer(referenceFrames, null, registry);
 
       // Initialize the contactable bodies
@@ -356,7 +346,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       YoDouble momentumBreakFrequency = new YoDouble("momentumBreakFrequency", registry);
       // Move value out of hard coding
       momentumBreakFrequency.set(20.0);
-      AlphaBasedOnBreakFrequencyProvider momentumAlpha = new AlphaBasedOnBreakFrequencyProvider(momentumBreakFrequency, controlDT);
+      DoubleProvider momentumAlpha = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(momentumBreakFrequency.getDoubleValue(), controlDT.getValue());
       filteredYoAngularMomentum = new AlphaFilteredYoFrameVector3D("filteredAngularMomentum", "", registry, momentumAlpha, yoAngularMomentum);
       filteredYoLinearMomentum = new AlphaFilteredYoFrameVector3D("filteredLinearMomentum", "", registry, momentumAlpha, yoLinearMomentum);
 
@@ -481,14 +471,6 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
       yoAngularCapturePoint.addX(1.0 / wmh * filteredYoAngularMomentum.getY());
       yoAngularCapturePoint.addY(-1.0 / wmh * filteredYoAngularMomentum.getX());
-
-      windowedCoMVelocityEstimate.update(centerOfMassStateProvider.getCenterOfMassPosition());
-      CapturePointTools.computeCapturePointPosition(centerOfMassStateProvider.getCenterOfMassPosition(),
-                                                    windowedCoMVelocityEstimate,
-                                                    omega0.getDoubleValue(),
-                                                    yoAngularCapturePointFromWindow);
-      yoAngularCapturePointFromWindow.addX(1.0 / wmh * filteredYoAngularMomentum.getY());
-      yoAngularCapturePointFromWindow.addY(-1.0 / wmh * filteredYoAngularMomentum.getX());
    }
 
    @Override
@@ -550,11 +532,6 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    public FramePoint3DReadOnly getAngularCapturePoint()
    {
       return yoAngularCapturePoint;
-   }
-
-   public FramePoint3DReadOnly getWindowBasedAngularCapturePoint()
-   {
-      return yoAngularCapturePointFromWindow;
    }
 
    public void getAngularCapturePoint(FixedFramePoint3DBasics angularCapturePointToPack)
@@ -772,11 +749,6 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    public double getGravityZ()
    {
       return gravity;
-   }
-
-   public double getControlDT()
-   {
-      return controlDT;
    }
 
    /** If the controller is created in a non-physics nominal motion previewing only mode. */

@@ -67,6 +67,8 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
@@ -101,6 +103,7 @@ import java.util.Map;
 import java.util.Random;
 
 import static toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus.*;
+import static us.ihmc.robotModels.FullRobotModelUtils.getAllJointsExcludingHands;
 import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicCoordinateSystem3D;
 import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicPoint3D;
 
@@ -141,6 +144,7 @@ public class KinematicsToolboxController extends ToolboxController implements SC
     * joints that are not handled by this solver.
     */
    protected final OneDoFJointBasics[] desiredOneDoFJoints;
+   protected final List<Integer> desiredOneDoFJointIndices;
    private final List<? extends RigidBodyBasics> controllableRigidBodies;
 
    /**
@@ -434,24 +438,27 @@ public class KinematicsToolboxController extends ToolboxController implements SC
    private final MomentumCommand momentumCommandForRateMinimization = new MomentumCommand();
 
    /**
-    * @param commandInputManager     the message/command barrier used by this controller. Submit
-    *                                messages or commands to be processed to the
-    *                                {@code commandInputManager} from outside the controller.
-    * @param statusOutputManager     the output interface used by this controller.
-    * @param rootJoint               the underactuated floating root joint of the multi-body system.
-    *                                Can be {@code null} in the case all the joints are actuated.
-    * @param desiredOneDoFJoints     the actuated joints of the system. The inverse kinematics will
-    *                                only use these joints during the optimization.
-    * @param controllableRigidBodies the sublist of rigid-bodies that can be controlled by the user.
-    *                                Can be {@code null} in the case all rigid-body should be
-    *                                controllable.
-    * @param updateDT                the period of one optimization tick.
-    * @param parentRegistry          registry to attach {@code YoVariable}s to.
+    * @param commandInputManager        the message/command barrier used by this controller. Submit
+    *                                   messages or commands to be processed to the
+    *                                   {@code commandInputManager} from outside the controller.
+    * @param statusOutputManager        the output interface used by this controller.
+    * @param rootJoint                  the underactuated floating root joint of the multi-body system.
+    *                                   Can be {@code null} in the case all the joints are actuated.
+    * @param desiredOneDoFJoints        the actuated joints of the system. The inverse kinematics will
+    *                                   only use these joints during the optimization.
+    * @param desiredOneDoFJointIndices  the indices of the actuated joints of the system.
+    *                                                             Can pass null if there are no fingers in the robot model.
+    * @param controllableRigidBodies    the sublist of rigid-bodies that can be controlled by the user.
+    *                                   Can be {@code null} in the case all rigid-body should be
+    *                                   controllable.
+    * @param updateDT                   the period of one optimization tick.
+    * @param parentRegistry             registry to attach {@code YoVariable}s to.
     */
    public KinematicsToolboxController(CommandInputManager commandInputManager,
                                       StatusMessageOutputManager statusOutputManager,
                                       FloatingJointBasics rootJoint,
                                       OneDoFJointBasics[] desiredOneDoFJoints,
+                                      List<Integer> desiredOneDoFJointIndices,
                                       Collection<? extends RigidBodyBasics> controllableRigidBodies,
                                       double updateDT,
                                       YoRegistry parentRegistry)
@@ -460,6 +467,7 @@ public class KinematicsToolboxController extends ToolboxController implements SC
       this.commandInputManager = commandInputManager;
       this.rootJoint = rootJoint;
       this.desiredOneDoFJoints = desiredOneDoFJoints;
+      this.desiredOneDoFJointIndices = desiredOneDoFJointIndices;
       this.controllableRigidBodies = controllableRigidBodies == null ? null : new ArrayList<>(controllableRigidBodies);
       this.updateDT = updateDT;
 
@@ -725,7 +733,7 @@ public class KinematicsToolboxController extends ToolboxController implements SC
       {
          controlledJoints = desiredOneDoFJoints;
       }
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(updateDT,
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(() -> updateDT,
                                                                             GRAVITY,
                                                                             rootJoint,
                                                                             controlledJoints,
@@ -804,7 +812,7 @@ public class KinematicsToolboxController extends ToolboxController implements SC
       controllerCore.initialize();
       resetInternalData();
 
-      boolean wasRobotUpdated = desiredRobotStateUpdater.updateRobotConfiguration(rootJoint, desiredOneDoFJoints);
+      boolean wasRobotUpdated = desiredRobotStateUpdater.updateRobotConfiguration(rootJoint, desiredOneDoFJoints, desiredOneDoFJointIndices);
       if (!wasRobotUpdated)
       {
          commandInputManager.clearAllCommands();
@@ -1875,6 +1883,11 @@ public class KinematicsToolboxController extends ToolboxController implements SC
       return centerOfMassSafeMargin;
    }
 
+   public FramePoint3DReadOnly getCenterOfMass()
+   {
+      return centerOfMass;
+   }
+
    public TObjectDoubleHashMap<OneDoFJointBasics> getInitialRobotConfigurationMap()
    {
       return initialRobotConfigurationMap;
@@ -1889,7 +1902,7 @@ public class KinematicsToolboxController extends ToolboxController implements SC
        * @param oneDoFJoints the 1-DoF of the robot.
        * @return {@code true} if the configuration was updated, {@code false} otherwise.
        */
-      boolean updateRobotConfiguration(FloatingJointBasics rootJoint, OneDoFJointBasics[] oneDoFJoints);
+      boolean updateRobotConfiguration(FloatingJointBasics rootJoint, OneDoFJointBasics[] oneDoFJoints, List<Integer> oneDoFJointIndices);
 
       /**
        * Wraps a single robot configuration data to be used to update the IK internal robot.
@@ -1900,9 +1913,9 @@ public class KinematicsToolboxController extends ToolboxController implements SC
        */
       static IKRobotStateUpdater wrap(RobotConfigurationData robotConfigurationData)
       {
-         return (rootJoint, oneDoFJoints) ->
+         return (rootJoint, oneDoFJoints, oneDoFJointIndices) ->
          {
-            KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(robotConfigurationData, rootJoint, oneDoFJoints);
+            KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(robotConfigurationData, rootJoint, oneDoFJoints, oneDoFJointIndices);
             return true;
          };
       }
@@ -1922,7 +1935,7 @@ public class KinematicsToolboxController extends ToolboxController implements SC
       }
 
       @Override
-      public boolean updateRobotConfiguration(FloatingJointBasics rootJoint, OneDoFJointBasics[] oneDoFJoints)
+      public boolean updateRobotConfiguration(FloatingJointBasics rootJoint, OneDoFJointBasics[] oneDoFJoints, List<Integer> oneDofJointsIndices)
       {
          RobotConfigurationData robotConfigurationData = concurrentRobotConfigurationDataCopier.getCopyForReading();
 
@@ -1931,7 +1944,7 @@ public class KinematicsToolboxController extends ToolboxController implements SC
 
          robotConfigurationDataInternal.set(robotConfigurationData);
          // Initializes this desired robot to the most recent robot configuration data received from the walking controller.
-         KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(robotConfigurationDataInternal, rootJoint, oneDoFJoints);
+         KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(robotConfigurationDataInternal, rootJoint, oneDoFJoints, oneDofJointsIndices);
          return true;
       }
 

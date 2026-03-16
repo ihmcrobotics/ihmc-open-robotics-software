@@ -2,7 +2,7 @@
   "type" : "BehaviorTreeNodeDefinition",
   "description" : "PickUpBox",
   "children" : [ {
-    "type" : "HandPoseActionDefinition",
+    "type" : "ArmActionDefinition",
     "description" : "Pre-grasp Left Hand Pose",
     "children" : [ ],
     "executeWithNextAction" : true,
@@ -21,7 +21,7 @@
     "angularPositionWeight" : 50.0,
     "jointspaceWeight" : -1.0
   }, {
-    "type" : "HandPoseActionDefinition",
+    "type" : "ArmActionDefinition",
     "description" : "Pre-grasp Right Hand Pose",
     "children" : [ ],
     "executeWithNextAction" : false,
@@ -40,7 +40,7 @@
     "angularPositionWeight" : 50.0,
     "jointspaceWeight" : -1.0
   }, {
-    "type" : "HandPoseActionDefinition",
+    "type" : "ArmActionDefinition",
     "description" : "Pre-grasp Left Hand Pose",
     "children" : [ ],
     "executeWithNextAction" : true,
@@ -59,7 +59,7 @@
     "angularPositionWeight" : 50.0,
     "jointspaceWeight" : -1.0
   }, {
-    "type" : "HandPoseActionDefinition",
+    "type" : "ArmActionDefinition",
     "description" : "Pre-grasp Right Hand Pose",
     "children" : [ ],
     "executeWithNextAction" : false,
@@ -78,7 +78,7 @@
     "angularPositionWeight" : 50.0,
     "jointspaceWeight" : -1.0
   }, {
-    "type" : "HandPoseActionDefinition",
+    "type" : "ArmActionDefinition",
     "description" : "Grasp Left Hand Pose",
     "children" : [ ],
     "executeWithNextAction" : true,
@@ -97,7 +97,7 @@
     "angularPositionWeight" : 50.0,
     "jointspaceWeight" : -1.0
   }, {
-    "type" : "HandPoseActionDefinition",
+    "type" : "ArmActionDefinition",
     "description" : "Grasp Right Hand Pose",
     "children" : [ ],
     "executeWithNextAction" : false,
@@ -116,7 +116,7 @@
     "angularPositionWeight" : 50.0,
     "jointspaceWeight" : -1.0
   }, {
-    "type" : "HandPoseActionDefinition",
+    "type" : "ArmActionDefinition",
     "description" : "Post-grasp Left Hand Pose",
     "children" : [ ],
     "executeWithNextAction" : true,
@@ -135,7 +135,7 @@
     "angularPositionWeight" : 50.0,
     "jointspaceWeight" : -1.0
   }, {
-    "type" : "HandPoseActionDefinition",
+    "type" : "ArmActionDefinition",
     "description" : "Post-grasp Right Hand Pose",
     "children" : [ ],
     "executeWithNextAction" : false,
@@ -154,7 +154,7 @@
     "angularPositionWeight" : 50.0,
     "jointspaceWeight" : -1.0
   }, {
-    "type" : "HandPoseActionDefinition",
+    "type" : "ArmActionDefinition",
     "description" : "Post-grasp Left Hand Pose",
     "children" : [ ],
     "executeWithNextAction" : true,
@@ -173,7 +173,7 @@
     "angularPositionWeight" : 50.0,
     "jointspaceWeight" : -1.0
   }, {
-    "type" : "HandPoseActionDefinition",
+    "type" : "ArmActionDefinition",
     "description" : "Post-grasp Right Hand Pose",
     "children" : [ ],
     "executeWithNextAction" : false,

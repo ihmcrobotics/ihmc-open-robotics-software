@@ -4,8 +4,8 @@ import javafx.fxml.FXML;
 import javafx.stage.Window;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
+import us.ihmc.footstepPlanning.ui.components.PlanarRegionDataImporter;
 import us.ihmc.messager.Messager;
-import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataImporter;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class FootstepPlannerMenuUIController

@@ -72,6 +72,11 @@ public class ROS2BehaviorTree<T extends BehaviorTreeNode<T, ? ,?>>
       behaviorTreeSubscription.destroy();
    }
 
+   public BehaviorTree<?, ?> getBehaviorTree()
+   {
+      return behaviorTree;
+   }
+
    public ROS2BehaviorTreeSubscription<T> getBehaviorTreeSubscription()
    {
       return behaviorTreeSubscription;

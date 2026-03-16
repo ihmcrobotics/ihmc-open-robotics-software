@@ -1,6 +1,6 @@
 package us.ihmc.perception.mapping;
 
-import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMTools;
+import us.ihmc.perception.tools.PlanarRegionSLAMTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 

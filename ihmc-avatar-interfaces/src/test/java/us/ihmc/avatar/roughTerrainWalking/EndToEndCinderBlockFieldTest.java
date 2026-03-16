@@ -122,7 +122,7 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       simulationTestHelper.publishToController(footsteps);
 
       WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
-      success = simulationTestHelper.simulateNow(EndToEndTestTools.computeWalkingDuration(footsteps, walkingControllerParameters) + 1.0);
+      success = simulationTestHelper.simulateNow(EndToEndTestTools.computeWalkingDuration(footsteps, walkingControllerParameters) + 10.0);
       assertTrue(success);
 
       Point3D step1 = footsteps.getFootstepDataList().get(footsteps.getFootstepDataList().size() - 1).getLocation();

@@ -11,6 +11,7 @@ import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectState;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectType;
 import us.ihmc.commons.thread.Throttler;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -54,8 +55,15 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
    {
       state.setElapsedExecutionTime(timer.getElapsedTime());
 
-      if (definition.getSceneActionType().getValue() == SceneActionNodeType.FREEZE_OBJECT
-       || definition.getSceneActionType().getValue() == SceneActionNodeType.DELETE_OBJECT)
+      boolean isClearScene = definition.getSceneActionType().getValue() == SceneActionNodeType.CLEAR_SCENE;
+      boolean isFreeze = definition.getSceneActionType().getValue() == SceneActionNodeType.FREEZE_OBJECT;
+      boolean isDelete = definition.getSceneActionType().getValue() == SceneActionNodeType.DELETE_OBJECT;
+      if (isClearScene)
+      {
+         scene.removeAllObjects();
+         state.setIsExecuting(false);
+      }
+      else if (isFreeze || isDelete)
       {
          BehaviorTreeSceneObjectState matchedObject = null;
          for (BehaviorTreeSceneObjectState object : scene.getObjects())
@@ -82,14 +90,14 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
 
          if (matchedObject == null)
          {
-            if (definition.getSceneActionType().getValue() == SceneActionNodeType.FREEZE_OBJECT)
+            if (isFreeze)
                state.getLogger().error("Failed to find a suitable object to freeze: %s".formatted(definition.getSceneObjectDefinition().getName()));
             else
                state.getLogger().error("Failed to find a suitable object to delete: %s".formatted(definition.getSceneObjectDefinition().getName()));
          }
          else
          {
-            if (definition.getSceneActionType().getValue() == SceneActionNodeType.FREEZE_OBJECT)
+            if (isFreeze)
             {
                state.getLogger().info("Freezing object: %s".formatted(matchedObject.getName()));
                matchedObject.freeze();
@@ -100,11 +108,51 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
                scene.removeObject(matchedObject);
             }
          }
-         state.setFailed(matchedObject == null);
+
+         state.setFailed(isFreeze && matchedObject == null); // Don't fail if deleting and object was not found
          state.setIsExecuting(false);
       }
       else // Setup object
       {
+         if (rootNode.getState().getPreviewModeEnabled())
+         {
+            state.getLogger().info("Preview mode enabled. Adding nominal object pose for: {}", definition.getSceneObjectDefinition().getName());
+
+            BehaviorTreeSceneObjectState existingObject = null;
+            for (BehaviorTreeSceneObjectState object : scene.getObjects())
+               if (object.getObjectType() == definition.getSceneObjectDefinition().getObjectType())
+               {
+                  boolean match = definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.YOLO_ONLY
+                                  && object.getYoloClassName().equals(definition.getSceneObjectDefinition().getYoloClassName());
+                  match |= definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.FOUNDATION_POSE
+                           && object.getFoundationPoseObjectType() == definition.getSceneObjectDefinition().getFoundationPoseObjectType();
+                  match |= definition.getSceneObjectDefinition().getObjectType() != BehaviorTreeSceneObjectType.YOLO_ONLY
+                           && definition.getSceneObjectDefinition().getObjectType() != BehaviorTreeSceneObjectType.FOUNDATION_POSE;
+                  if (match)
+                  {
+                     existingObject = object;
+                     break;
+                  }
+               }
+
+            RigidBodyTransform nominalWorldPose = new RigidBodyTransform();
+            nominalWorldPose.set(scene.findFrameByName("Walking").getTransformToRoot());
+            nominalWorldPose.multiply(definition.getNominalObjectPose().getValueReadOnly());
+
+            if (existingObject != null)
+               existingObject.setTransformToWorld(nominalWorldPose);
+            else
+            {
+               BehaviorTreeSceneObjectDefinitionMessage message = new BehaviorTreeSceneObjectDefinitionMessage();
+               definition.getSceneObjectDefinition().toMessage(message);
+               BehaviorTreeSceneObjectState nominalObject = scene.createObject(message);
+               nominalObject.setTransformToWorld(nominalWorldPose);
+               scene.addObject(nominalObject);
+            }
+            state.setIsExecuting(false);
+            return;
+         }
+
          double timeout = definition.getTimeout();
          if (!timer.isRunning(timeout))
          {

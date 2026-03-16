@@ -86,4 +86,10 @@ public class BehaviorTreeSceneObjectState extends BehaviorTreeSceneObjectDefinit
    {
       return transform.getValueReadOnly();
    }
+
+   public void setTransformToWorld(RigidBodyTransformReadOnly transformToWorld)
+   {
+      transform.getValueAndModify().set(transformToWorld);
+      referenceFrame.update();
+   }
 }

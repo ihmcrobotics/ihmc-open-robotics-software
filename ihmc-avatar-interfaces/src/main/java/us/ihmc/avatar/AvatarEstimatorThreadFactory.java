@@ -478,7 +478,7 @@ public class AvatarEstimatorThreadFactory
       estimatorFactory.setCenterOfPressureDataHolderFromController(getCenterOfPressureDataHolderFromController());
       estimatorFactory.setRobotMotionStatusFromController(getRobotMotionStatusFromController());
       estimatorFactory.setExternalPelvisCorrectorSubscriber(getExternalPelvisPoseSubscriberField());
-      DRCKinematicsBasedStateEstimator stateEstimator = estimatorFactory.createStateEstimator(getEstimatorRegistry());
+      DRCKinematicsBasedStateEstimator stateEstimator = estimatorFactory.createStateEstimator(getEstimatorRegistry(), getStateEstimatorParameters()::getEstimatorDT);
 
       if (realtimeROS2NodeField.hasValue())
       {

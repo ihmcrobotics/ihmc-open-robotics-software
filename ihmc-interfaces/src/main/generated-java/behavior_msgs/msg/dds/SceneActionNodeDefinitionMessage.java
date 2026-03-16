@@ -14,6 +14,7 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
    public static final byte SETUP_OBJECT = (byte) 0;
    public static final byte FREEZE_OBJECT = (byte) 1;
    public static final byte DELETE_OBJECT = (byte) 2;
+   public static final byte CLEAR_SCENE = (byte) 3;
    /**
             * Parent definition fields
             */
@@ -34,6 +35,10 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
             * Filter for persistent detection history size
             */
    public int minimum_history_size_;
+   /**
+            * The nominal object pose for behavior previewing
+            */
+   public controller_msgs.msg.dds.RigidBodyTransformMessage nominal_object_pose_;
    /**
             * YOLO confidence threshold
             */
@@ -71,6 +76,7 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
    {
       definition_ = new behavior_msgs.msg.dds.ActionNodeDefinitionMessage();
       scene_object_definition_ = new behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage();
+      nominal_object_pose_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
       enabled_yolo_models_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (10, "type_d");
       ignored_yolo_class_indices_ = new us.ihmc.idl.IDLSequence.Byte (256, "type_9");
 
@@ -94,6 +100,7 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
 
       minimum_history_size_ = other.minimum_history_size_;
 
+      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.nominal_object_pose_, nominal_object_pose_);
       yolo_confidence_threshold_ = other.yolo_confidence_threshold_;
 
       yolo_mask_threshold_ = other.yolo_mask_threshold_;
@@ -170,6 +177,15 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
    public int getMinimumHistorySize()
    {
       return minimum_history_size_;
+   }
+
+
+   /**
+            * The nominal object pose for behavior previewing
+            */
+   public controller_msgs.msg.dds.RigidBodyTransformMessage getNominalObjectPose()
+   {
+      return nominal_object_pose_;
    }
 
    /**
@@ -300,6 +316,7 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_history_size_, other.minimum_history_size_, epsilon)) return false;
 
+      if (!this.nominal_object_pose_.epsilonEquals(other.nominal_object_pose_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.yolo_confidence_threshold_, other.yolo_confidence_threshold_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.yolo_mask_threshold_, other.yolo_mask_threshold_, epsilon)) return false;
@@ -337,6 +354,7 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
 
       if(this.minimum_history_size_ != otherMyClass.minimum_history_size_) return false;
 
+      if (!this.nominal_object_pose_.equals(otherMyClass.nominal_object_pose_)) return false;
       if(this.yolo_confidence_threshold_ != otherMyClass.yolo_confidence_threshold_) return false;
 
       if(this.yolo_mask_threshold_ != otherMyClass.yolo_mask_threshold_) return false;
@@ -370,6 +388,8 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
       builder.append(this.timeout_);      builder.append(", ");
       builder.append("minimum_history_size=");
       builder.append(this.minimum_history_size_);      builder.append(", ");
+      builder.append("nominal_object_pose=");
+      builder.append(this.nominal_object_pose_);      builder.append(", ");
       builder.append("yolo_confidence_threshold=");
       builder.append(this.yolo_confidence_threshold_);      builder.append(", ");
       builder.append("yolo_mask_threshold=");

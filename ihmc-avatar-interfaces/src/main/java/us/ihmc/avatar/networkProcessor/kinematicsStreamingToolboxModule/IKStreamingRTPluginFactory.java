@@ -294,6 +294,12 @@ public class IKStreamingRTPluginFactory
       private long initialTime = -1L;
 
       @Override
+      public double getCurrentDT()
+      {
+         return kinematicsStreamingToolboxController.getDT();
+      }
+
+      @Override
       public void run()
       {
          ToolboxState newToolboxStateRequested = newToolboxStateRequestedRef.getAndSet(null);
@@ -393,7 +399,7 @@ public class IKStreamingRTPluginFactory
       }
 
       @Override
-      public boolean updateRobotConfiguration(FloatingJointBasics rootJoint, OneDoFJointBasics[] oneDoFJoints)
+      public boolean updateRobotConfiguration(FloatingJointBasics rootJoint, OneDoFJointBasics[] oneDoFJoints, List<Integer> oneDoFJointIndices)
       {
          if (!contextData.getEstimatorRan())
             return false;

@@ -186,54 +186,48 @@ public class RDXModelLoader
 
    private String useABetterFormatIfAvailable(String modelFileName)
    {
-      boolean foundOne = false;
+      String modelFileNameWithoutExtension = modelFileName.substring(0, modelFileName.lastIndexOf("."));
 
       // Most preferable first
-
-      if (!foundOne && !modelFileName.endsWith(".glb"))
+      if ((modelFileName.endsWith(".glb") || modelFileName.endsWith(".gltf")) && Gdx.files.internal(modelFileName).exists())
+         return modelFileName;
+      else
       {
-         String modelFileNameWithoutExtension = modelFileName.substring(0, modelFileName.lastIndexOf("."));
          FileHandle potentialFileHandle = Gdx.files.internal(modelFileNameWithoutExtension + ".glb");
          if (potentialFileHandle.exists())
          {
             LogTools.debug("Found GLB file as an alternative for {}", modelFileName);
             modelFileName = modelFileNameWithoutExtension + ".glb";
-            foundOne = true;
+            return modelFileName;
          }
-      }
 
-      if (!foundOne && !modelFileName.endsWith(".gltf"))
-      {
-         String modelFileNameWithoutExtension = modelFileName.substring(0, modelFileName.lastIndexOf("."));
-         FileHandle potentialFileHandle = Gdx.files.internal(modelFileNameWithoutExtension + ".gltf");
+         potentialFileHandle = Gdx.files.internal(modelFileNameWithoutExtension + ".gltf");
          if (potentialFileHandle.exists())
          {
             LogTools.debug("Found GLTF file as an alternative for {}", modelFileName);
             modelFileName = modelFileNameWithoutExtension + ".gltf";
-            foundOne = true;
+            return modelFileName;
          }
       }
 
-      if (!foundOne && !modelFileName.endsWith(".g3db"))
+      if ((modelFileName.endsWith(".g3db") || modelFileName.endsWith(".g3dj")) && Gdx.files.internal(modelFileName).exists())
+         return modelFileName;
+      else
       {
-         String modelFileNameWithoutExtension = modelFileName.substring(0, modelFileName.lastIndexOf("."));
          FileHandle potentialFileHandle = Gdx.files.internal(modelFileNameWithoutExtension + ".g3db");
          if (potentialFileHandle.exists())
          {
             LogTools.debug("Found G3DB file as an alternative for {}", modelFileName);
             modelFileName = modelFileNameWithoutExtension + ".g3db";
-            foundOne = true;
+            return modelFileName;
          }
-      }
 
-      if (!foundOne && !modelFileName.endsWith(".g3dj"))
-      {
-         String modelFileNameWithoutExtension = modelFileName.substring(0, modelFileName.lastIndexOf("."));
-         FileHandle potentialFileHandle = Gdx.files.internal(modelFileNameWithoutExtension + ".g3dj");
+         potentialFileHandle = Gdx.files.internal(modelFileNameWithoutExtension + ".g3dj");
          if (potentialFileHandle.exists())
          {
             LogTools.debug("Found G3DJ file as an alternative for {}", modelFileName);
             modelFileName = modelFileNameWithoutExtension + ".g3dj";
+            return modelFileName;
          }
       }
 

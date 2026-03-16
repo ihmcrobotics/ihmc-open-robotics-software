@@ -40,11 +40,18 @@ import java.util.List;
 public class JointTorqueBasedFootSwitch implements FootSwitchInterface
 {
    private static final double GRAVITY_Z = -9.81;
+   private static final int FORCE_THRESHOLD_WINDOW_SIZE = 2;
+   private static final int COP_THRESHOLD_WINDOW_SIZE = 3;
+   private static final int MINIMUM_WINDOW_SIZE = Math.min(FORCE_THRESHOLD_WINDOW_SIZE, COP_THRESHOLD_WINDOW_SIZE);
    private final YoRegistry registry;
 
    private final BooleanProvider useJacobianTranspose;
    private final JointTorqueBasedTouchdownDetector touchdownDetector;
    private final JacobianBasedBasedTouchdownDetector wrenchDetector;
+
+   private final YoInteger contactThresholdWindowSize;
+   private final YoDouble contactThresholdWindowDuration;
+   private final DoubleProvider switchDT;
 
    private final MovingReferenceFrame soleFrame;
 
@@ -57,7 +64,8 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
                                      DoubleProvider contactForceThresholdLow,
                                      DoubleProvider contactForceThresholdHigh,
                                      DoubleProvider contactCoPThreshold,
-                                     YoInteger contactThresholdWindowSize,
+                                     double contactWindowDuration,
+                                     DoubleProvider switchDT,
                                      BooleanProvider compensateGravity,
                                      DoubleProvider horizontalVelocityThreshold,
                                      DoubleProvider verticalVelocityThreshold,
@@ -95,6 +103,14 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
       }
 
       registry = new YoRegistry(jointToRead.getName() + getClass().getSimpleName());
+
+      this.switchDT = switchDT;
+
+      contactThresholdWindowDuration = new YoDouble(namePrefix + "ContactThresholdWindowDuration", registry);
+      contactThresholdWindowDuration.set(contactWindowDuration);
+      contactThresholdWindowSize = new YoInteger(namePrefix + "ContactThresholdWindowSize", registry);
+      contactThresholdWindowSize.set(Math.max(MINIMUM_WINDOW_SIZE, (int) Math.ceil(contactWindowDuration / switchDT.getValue())));
+
       touchdownDetector = new JointTorqueBasedTouchdownDetector(namePrefix,
                                                                 jointToRead,
                                                                 true,
@@ -131,6 +147,9 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
    @Override
    public void update()
    {
+      // Account for any changes in the DT by updating the window size to maintain a consistent time window for contact detection.
+      contactThresholdWindowSize.set(Math.max(MINIMUM_WINDOW_SIZE, (int) Math.ceil(contactThresholdWindowDuration.getDoubleValue() / switchDT.getValue())));
+
       touchdownDetector.update();
 
       wrenchDetector.calculate();
@@ -391,10 +410,12 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
          verticalVelocity = new YoDouble(namePrefix + "VerticalVelocity", registry);
 
          isPastForceThresholdLow = new YoBoolean(namePrefix + "IsPastForceThresholdLow", registry);
-         isPastForceThresholdLowFiltered = new GlitchFilteredYoBoolean(namePrefix + "IsPastForceThresholdLowFiltered", registry, isPastForceThresholdLow, 2);
+         isPastForceThresholdLowFiltered = new GlitchFilteredYoBoolean(namePrefix + "IsPastForceThresholdLowFiltered", registry, isPastForceThresholdLow,
+                                                                       FORCE_THRESHOLD_WINDOW_SIZE);
          isPastForceThresholdHigh = new YoBoolean(namePrefix + "IsPastForceThresholdHigh", registry);
          isPastCoPThreshold = new YoBoolean(namePrefix + "IsPastCoPThreshold", registry);
-         isPastCoPThresholdFiltered = new GlitchFilteredYoBoolean(namePrefix + "IsPastCoPThresholdFiltered", registry, isPastCoPThreshold, 3);
+         isPastCoPThresholdFiltered = new GlitchFilteredYoBoolean(namePrefix + "IsPastCoPThresholdFiltered", registry, isPastCoPThreshold,
+                                                                  COP_THRESHOLD_WINDOW_SIZE);
 
          footForceMagnitude = new YoDouble(namePrefix + "FootForceMag", registry);
          copDistance = new YoDouble(namePrefix + "CoPDistance", registry);

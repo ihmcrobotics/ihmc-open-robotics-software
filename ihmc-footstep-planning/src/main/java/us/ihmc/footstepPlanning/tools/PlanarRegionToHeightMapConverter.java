@@ -29,10 +29,18 @@ public class PlanarRegionToHeightMapConverter
 
    public static TerrainMapMessage convertFromPlanarRegionsToHeightMap(PlanarRegionsList planarRegionsList, double resolutionXY)
    {
-      return convertFromPlanarRegionsToHeightMap(planarRegionsList.getPlanarRegionsAsList(), resolutionXY);
+      return convertFromPlanarRegionsToHeightMap(planarRegionsList, resolutionXY, true);
+   }
+   public static TerrainMapMessage convertFromPlanarRegionsToHeightMap(PlanarRegionsList planarRegionsList, double resolutionXY, boolean includeNormal)
+   {
+      return convertFromPlanarRegionsToHeightMap(planarRegionsList.getPlanarRegionsAsList(), resolutionXY, includeNormal);
    }
 
    public static TerrainMapMessage convertFromPlanarRegionsToHeightMap(List<PlanarRegion> planarRegionList, double resolutionXY)
+   {
+      return convertFromPlanarRegionsToHeightMap(planarRegionList, resolutionXY, true);
+   }
+   public static TerrainMapMessage convertFromPlanarRegionsToHeightMap(List<PlanarRegion> planarRegionList, double resolutionXY, boolean includeNormal)
    {
       BoundingBox2D occupiedArea = new BoundingBox2D();
       planarRegionList.forEach(planarRegion ->
@@ -78,25 +86,33 @@ public class PlanarRegionToHeightMapConverter
                message.getHeightMap().add((float) projectedPoint.getZ());
                message.getTraversabilityScore().add(1.0f);
                message.getTraversabilityClass().add(SnapResult.VALID.toByte());
-               UnitVector3DReadOnly normal = intersectingRegions.get(0).getNormal();
-               if (normal.getZ() < 0.0)
+
+               if (includeNormal)
                {
-                  UnitVector3D flippedNormal = new UnitVector3D(normal);
-                  flippedNormal.negate();
-                  normal = flippedNormal;
+                  UnitVector3DReadOnly normal = intersectingRegions.get(0).getNormal();
+                  if (normal.getZ() < 0.0)
+                  {
+                     UnitVector3D flippedNormal = new UnitVector3D(normal);
+                     flippedNormal.negate();
+                     normal = flippedNormal;
+                  }
+
+                  message.getSnappedNormalXData().add(TerrainMapData.packFloatAsByte(normal.getX32(), -NORMAL_MIN_MAX_XY, NORMAL_MIN_MAX_XY));
+                  message.getSnappedNormalYData().add(TerrainMapData.packFloatAsByte(normal.getY32(), -NORMAL_MIN_MAX_XY, NORMAL_MIN_MAX_XY));
+                  message.getSnappedNormalZData().add(TerrainMapData.packFloatAsByte(normal.getZ32(), NORMAL_MIN_Z, NORMAL_MAX_Z));
                }
-               message.getSnappedNormalXData().add(TerrainMapData.packFloatAsByte(normal.getX32(), -NORMAL_MIN_MAX_XY, NORMAL_MIN_MAX_XY));
-               message.getSnappedNormalYData().add(TerrainMapData.packFloatAsByte(normal.getY32(), -NORMAL_MIN_MAX_XY, NORMAL_MIN_MAX_XY));
-               message.getSnappedNormalZData().add(TerrainMapData.packFloatAsByte(normal.getZ32(), NORMAL_MIN_Z, NORMAL_MAX_Z));
             }
             else
             {
                message.getHeightMap().add(Float.NaN);
                message.getTraversabilityScore().add(0.0f);
                message.getTraversabilityClass().add(SnapResult.SNAP_FAILED.toByte());
-               message.getSnappedNormalXData().add((byte) 0);
-               message.getSnappedNormalYData().add((byte) 0);
-               message.getSnappedNormalZData().add((byte) 0);
+               if (includeNormal)
+               {
+                  message.getSnappedNormalXData().add((byte) 0);
+                  message.getSnappedNormalYData().add((byte) 0);
+                  message.getSnappedNormalZData().add((byte) 0);
+               }
             }
          }
       }

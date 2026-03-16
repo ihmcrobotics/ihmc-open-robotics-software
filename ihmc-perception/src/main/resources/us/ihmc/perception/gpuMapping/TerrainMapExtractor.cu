@@ -192,7 +192,7 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
 
         // Roughness check
         float squaredErrorThreshold = params[SQUARED_ERROR_THRESHOLD];
-        squared_error_traversability = clamp((1.0f - squared_error) / squaredErrorThreshold, 0.0f, 1.0f);
+        squared_error_traversability = clamp(1.0f - squared_error / squaredErrorThreshold, 0.0f, 1.0f);
         if (squared_error > squaredErrorThreshold)
         {
             traversability_result = SQUARED_ERROR;

@@ -53,7 +53,7 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
       super(rootNode);
 
       side = new CRDTBidirectionalEnumField<>(this, RobotSide.LEFT);
-      objectFrameName = new CRDTBidirectionalString(this, ReferenceFrame.getWorldFrame().getName());
+      objectFrameName = new CRDTBidirectionalString(this, "Chest");
       screwAxisPoseInObjectFrame = new CRDTBidirectionalRigidBodyTransform(this);
       translation = new CRDTBidirectionalDouble(this, 0.1);
       rotation = new CRDTBidirectionalDouble(this, 0.0);
@@ -74,7 +74,7 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
 
       jsonNode.put("side", side.getValue().getLowerCaseName());
       jsonNode.put("objectFrame", objectFrameName.getValue());
-      JSONTools.toJSON(jsonNode, "screwAxisPose", screwAxisPoseInObjectFrame.getValueReadOnly());
+      JSONTools.toJSON(jsonNode.putObject("screwAxisPose"), screwAxisPoseInObjectFrame.getValueReadOnly());
       jsonNode.put("translation", translation.getValue());
       jsonNode.put("rotation", rotation.getValue());
       jsonNode.put("maxLinearVelocity", maxLinearVelocity.getValue());
@@ -94,7 +94,8 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
 
       side.setValue(RobotSide.getSideFromString(jsonNode.get("side").asText()));
       objectFrameName.setValue(jsonNode.get("objectFrame").textValue());
-      JSONTools.toEuclid(jsonNode, "screwAxisPose", screwAxisPoseInObjectFrame.getValueAndModify());
+      if (jsonNode.get("screwAxisPose") instanceof ObjectNode objectNode)
+         JSONTools.toEuclid(objectNode, screwAxisPoseInObjectFrame.getValueAndModify());
       translation.setValue(jsonNode.get("translation").asDouble());
       rotation.setValue(jsonNode.get("rotation").asDouble());
       maxLinearVelocity.setValue(jsonNode.get("maxLinearVelocity").asDouble());

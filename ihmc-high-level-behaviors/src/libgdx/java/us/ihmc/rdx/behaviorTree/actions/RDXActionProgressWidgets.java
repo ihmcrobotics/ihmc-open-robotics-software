@@ -5,7 +5,7 @@ import imgui.extension.implot.flag.ImPlotFlags;
 import imgui.flag.ImGuiCond;
 import imgui.ImGui;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
-import us.ihmc.behaviors.behaviorTree.action.actions.FootstepPlanActionState;
+import us.ihmc.behaviors.behaviorTree.action.actions.WalkActionState;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.crdt.CRDTStatusVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -151,7 +151,7 @@ public class RDXActionProgressWidgets
       ImGui.progressBar((float) percentLeft, dividedBarWidth, progressBarHeight(), "%.2f / %.2f".formatted(elapsedExecutionTime, nominalDuration));
    }
 
-   public void renderPositionError(float dividedBarWidth, boolean renderAsPlots)
+   public void renderPositionError(float dividedBarWidth, boolean renderAsPlots, boolean timeOnly)
    {
       if (!action.getState().getCommandedTrajectory().isEmpty() && positionTrajectoryGenerator != null)
       {
@@ -185,6 +185,8 @@ public class RDXActionProgressWidgets
             desiredPositionErrorPlotLine.setDataColor(ImGuiTools.GRAY);
             desiredPositionErrorPlotLine.addValue(desiredToEnd);
          }
+         if (timeOnly)
+            return;
          if (renderAsPlots)
          {
             positionErrorPlot.render(dividedBarWidth, PLOT_HEIGHT);
@@ -204,11 +206,12 @@ public class RDXActionProgressWidgets
       }
       else
       {
-         renderBlankProgress(dividedBarWidth, renderAsPlots, true);
+         if (!timeOnly)
+            renderBlankProgress(dividedBarWidth, renderAsPlots, true);
       }
    }
 
-   public void renderOrientationError(float dividedBarWidth, boolean renderAsPlots)
+   public void renderOrientationError(float dividedBarWidth, boolean renderAsPlots, boolean timeOnly)
    {
       if (!action.getState().getCommandedTrajectory().isEmpty() && orientationTrajectoryGenerator != null)
       {
@@ -242,6 +245,8 @@ public class RDXActionProgressWidgets
             desiredOrientationPlotLine.setDataColor(ImGuiTools.GRAY);
             desiredOrientationPlotLine.addValue(Math.toDegrees(desiredToEnd));
          }
+         if (timeOnly)
+            return;
          if (renderAsPlots)
          {
             orientationErrorPlot.render(dividedBarWidth, PLOT_HEIGHT);
@@ -261,11 +266,12 @@ public class RDXActionProgressWidgets
       }
       else
       {
-         renderBlankProgress(dividedBarWidth, renderAsPlots, true);
+         if (!timeOnly)
+            renderBlankProgress(dividedBarWidth, renderAsPlots, true);
       }
    }
 
-   public void renderJointspacePositionError(int jointIndex, float dividedBarWidth, boolean renderAsPlots)
+   public void renderJointspacePositionError(int jointIndex, float dividedBarWidth, boolean renderAsPlots, boolean timeOnly)
    {
       if (action.getState().getCommandedJointTrajectories().getNumberOfJoints() > jointIndex && jointspaceTrajectoryGenerator != null)
       {
@@ -299,6 +305,8 @@ public class RDXActionProgressWidgets
             desiredJointspacePositionErrorPlotLine[jointIndex].setDataColor(ImGuiTools.GRAY);
             desiredJointspacePositionErrorPlotLine[jointIndex].addValue(Math.toDegrees(desiredToEnd));
          }
+         if (timeOnly)
+            return;
          if (renderAsPlots)
          {
             jointspacePositionErrorPlot[jointIndex].render(dividedBarWidth, PLOT_HEIGHT);
@@ -318,15 +326,16 @@ public class RDXActionProgressWidgets
       }
       else
       {
-         renderBlankProgress(dividedBarWidth, renderAsPlots, true);
+         if (!timeOnly)
+            renderBlankProgress(dividedBarWidth, renderAsPlots, true);
       }
    }
 
-   public void renderHandForce(float dividedBarWidth, boolean renderAsPlots)
+   public void renderHandForce(float dividedBarWidth, boolean renderAsPlots, boolean timeOnly)
    {
       CRDTStatusVector3D forceCRDT = null;
-      if (action instanceof RDXHandPoseAction handPoseAction)
-         forceCRDT = handPoseAction.getState().getForce();
+      if (action instanceof RDXArmAction armAction)
+         forceCRDT = armAction.getState().getForce();
       else if (action instanceof RDXScrewPrimitiveAction screwPrimitiveAction)
          forceCRDT = screwPrimitiveAction.getState().getForce();
 
@@ -341,6 +350,8 @@ public class RDXActionProgressWidgets
             handForcePlotLine.setDataColor(dataColor);
             handForcePlotLine.addValue(force);
          }
+         if (timeOnly)
+            return;
          if (renderAsPlots)
          {
             handForcePlot.render(dividedBarWidth, PLOT_HEIGHT);
@@ -352,15 +363,16 @@ public class RDXActionProgressWidgets
       }
       else
       {
-         renderBlankProgress(dividedBarWidth, renderAsPlots, true);
+         if (!timeOnly)
+            renderBlankProgress(dividedBarWidth, renderAsPlots, true);
       }
    }
 
-   public void renderHandTorque(float dividedBarWidth, boolean renderAsPlots)
+   public void renderHandTorque(float dividedBarWidth, boolean renderAsPlots, boolean timeOnly)
    {
       CRDTStatusVector3D torqueCRDT = null;
-      if (action instanceof RDXHandPoseAction handPoseAction)
-         torqueCRDT = handPoseAction.getState().getTorque();
+      if (action instanceof RDXArmAction armAction)
+         torqueCRDT = armAction.getState().getTorque();
       else if (action instanceof RDXScrewPrimitiveAction screwPrimitiveAction)
          torqueCRDT = screwPrimitiveAction.getState().getTorque();
 
@@ -375,6 +387,8 @@ public class RDXActionProgressWidgets
             handTorquePlotLine.setDataColor(dataColor);
             handTorquePlotLine.addValue(torque);
          }
+         if (timeOnly)
+            return;
          if (renderAsPlots)
          {
             handTorquePlot.render(dividedBarWidth, PLOT_HEIGHT);
@@ -386,22 +400,25 @@ public class RDXActionProgressWidgets
       }
       else
       {
-         renderBlankProgress(dividedBarWidth, renderAsPlots, true);
+         if (!timeOnly)
+            renderBlankProgress(dividedBarWidth, renderAsPlots, true);
       }
    }
 
-   public void renderFootstepCompletion(float dividedBarWidth, boolean renderAsPlots)
+   public void renderFootstepCompletion(float dividedBarWidth, boolean renderAsPlots, boolean timeOnly)
    {
-      if (action instanceof RDXFootstepPlanAction footstepPlanAction && footstepPlanAction.getState().getTotalNumberOfFootsteps() > 0)
+      if (action instanceof RDXWalkAction walkAction && walkAction.getState().getTotalNumberOfFootsteps() > 0)
       {
-         FootstepPlanActionState footstepPlanActionState = footstepPlanAction.getState();
-         double percentLeft = footstepPlanActionState.getNumberOfIncompleteFootsteps() / (double) footstepPlanActionState.getTotalNumberOfFootsteps();
-         String overlay = "%d / %d".formatted(footstepPlanActionState.getNumberOfIncompleteFootsteps(), footstepPlanActionState.getTotalNumberOfFootsteps());
+         WalkActionState walkActionState = walkAction.getState();
+         double percentLeft = walkActionState.getNumberOfIncompleteFootsteps() / (double) walkActionState.getTotalNumberOfFootsteps();
+         String overlay = "%d / %d".formatted(walkActionState.getNumberOfIncompleteFootsteps(), walkActionState.getTotalNumberOfFootsteps());
 
          if (action.getState().getIsExecuting())
          {
-            footstepsRemainingPlotLine.addValue(footstepPlanActionState.getNumberOfIncompleteFootsteps());
+            footstepsRemainingPlotLine.addValue(walkActionState.getNumberOfIncompleteFootsteps());
          }
+         if (timeOnly)
+            return;
          if (renderAsPlots)
          {
             footstepsRemainingPlot.render(dividedBarWidth, PLOT_HEIGHT);
@@ -413,29 +430,32 @@ public class RDXActionProgressWidgets
       }
       else
       {
-         renderBlankProgress(dividedBarWidth, renderAsPlots, true);
+         if (!timeOnly)
+            renderBlankProgress(dividedBarWidth, renderAsPlots, true);
       }
    }
 
-   public void renderFootPositions(float dividedBarWidth, boolean renderAsPlots)
+   public void renderFootPositions(float dividedBarWidth, boolean renderAsPlots, boolean timeOnly)
    {
-      float halfDividedBarWidth = dividedBarWidth / 2.0f - ImGui.getStyle().getItemSpacingX() / 2.0f;
+      float halfDividedBarWidth = dividedBarWidth;
+      if (!timeOnly)
+         halfDividedBarWidth = dividedBarWidth / 2.0f - ImGui.getStyle().getItemSpacingX() / 2.0f;
 
       for (RobotSide side : RobotSide.values)
       {
-         if (action instanceof RDXFootstepPlanAction footstepPlanAction
-             && !footstepPlanAction.getState().getDesiredFootPoses().get(side).isEmpty())
+         if (action instanceof RDXWalkAction walkAction
+             && !walkAction.getState().getDesiredFootPoses().get(side).isEmpty())
          {
-            FootstepPlanActionState footstepPlanActionState = footstepPlanAction.getState();
+            WalkActionState walkActionState = walkAction.getState();
             int i = 0;
-            SE3TrajectoryPointReadOnly nextDesiredPoint = footstepPlanActionState.getDesiredFootPoses().get(side).getValueReadOnly(i++);
-            while (i < footstepPlanActionState.getDesiredFootPoses().get(side).getSize()
+            SE3TrajectoryPointReadOnly nextDesiredPoint = walkActionState.getDesiredFootPoses().get(side).getValueReadOnly(i++);
+            while (i < walkActionState.getDesiredFootPoses().get(side).getSize()
                 && nextDesiredPoint.getTime() < elapsedExecutionTime)
-               nextDesiredPoint = footstepPlanActionState.getDesiredFootPoses().get(side).getValueReadOnly(i++);
+               nextDesiredPoint = walkActionState.getDesiredFootPoses().get(side).getValueReadOnly(i++);
 
-            Point3DReadOnly initialPosition = footstepPlanActionState.getDesiredFootPoses().get(side).getFirstValueReadOnly().getPosition();
-            Point3DReadOnly endPosition = footstepPlanActionState.getDesiredFootPoses().get(side).getLastValueReadOnly().getPosition();
-            Point3DReadOnly currentPosition = footstepPlanActionState.getCurrentFootPoses().get(side).getValueReadOnly().getPosition();
+            Point3DReadOnly initialPosition = walkActionState.getDesiredFootPoses().get(side).getFirstValueReadOnly().getPosition();
+            Point3DReadOnly endPosition = walkActionState.getDesiredFootPoses().get(side).getLastValueReadOnly().getPosition();
+            Point3DReadOnly currentPosition = walkActionState.getCurrentFootPoses().get(side).getValueReadOnly().getPosition();
             Point3DReadOnly desiredPosition = nextDesiredPoint.getPosition();
 
             double initialToEnd = initialPosition.differenceNorm(endPosition);
@@ -452,52 +472,58 @@ public class RDXActionProgressWidgets
                desiredFootPositionErrorPlotLines.get(side).setDataColor(ImGuiTools.GRAY);
                desiredFootPositionErrorPlotLines.get(side).addValue(desiredToEnd);
             }
-            if (renderAsPlots)
+            if (!timeOnly)
             {
-               footPositionErrors.get(side).render(halfDividedBarWidth, PLOT_HEIGHT);
-            }
-            else
-            {
-               double barEndValue = Math.max(Math.min(initialToEnd, currentToEnd), 2.0 * tolerance);
-               double toleranceMarkPercent = tolerance / barEndValue;
-               double percentLeft = currentToEnd / barEndValue;
-               ImGuiTools.markedProgressBar(progressBarHeight(),
-                                            halfDividedBarWidth,
-                                            dataColor,
-                                            percentLeft,
-                                            toleranceMarkPercent,
-                                            "%.2f / %.2f".formatted(currentToEnd, initialToEnd));
+               if (renderAsPlots)
+               {
+                  footPositionErrors.get(side).render(halfDividedBarWidth, PLOT_HEIGHT);
+               }
+               else
+               {
+                  double barEndValue = Math.max(Math.min(initialToEnd, currentToEnd), 2.0 * tolerance);
+                  double toleranceMarkPercent = tolerance / barEndValue;
+                  double percentLeft = currentToEnd / barEndValue;
+                  ImGuiTools.markedProgressBar(progressBarHeight(),
+                                               halfDividedBarWidth,
+                                               dataColor,
+                                               percentLeft,
+                                               toleranceMarkPercent,
+                                               "%.2f / %.2f".formatted(currentToEnd, initialToEnd));
+               }
             }
          }
          else
          {
-            renderBlankProgress(dividedBarWidth, renderAsPlots, true);
+            if (!timeOnly)
+               renderBlankProgress(dividedBarWidth, renderAsPlots, true);
          }
 
-         if (side == RobotSide.LEFT)
+         if (!timeOnly && side == RobotSide.LEFT)
             ImGui.sameLine();
       }
    }
 
-   public void renderFootOrientations(float dividedBarWidth, boolean renderAsPlots)
+   public void renderFootOrientations(float dividedBarWidth, boolean renderAsPlots, boolean timeOnly)
    {
-      float halfDividedBarWidth = dividedBarWidth / 2.0f - ImGui.getStyle().getItemSpacingX() / 2.0f;
+      float halfDividedBarWidth = dividedBarWidth;
+      if (!timeOnly)
+         halfDividedBarWidth = dividedBarWidth / 2.0f - ImGui.getStyle().getItemSpacingX() / 2.0f;
 
       for (RobotSide side : RobotSide.values)
       {
-         if (action instanceof RDXFootstepPlanAction footstepPlanAction
-             && !footstepPlanAction.getState().getDesiredFootPoses().get(side).isEmpty())
+         if (action instanceof RDXWalkAction walkAction
+             && !walkAction.getState().getDesiredFootPoses().get(side).isEmpty())
          {
-            FootstepPlanActionState footstepPlanActionState = footstepPlanAction.getState();
+            WalkActionState walkActionState = walkAction.getState();
             int i = 0;
-            SE3TrajectoryPointReadOnly nextDesiredPoint = footstepPlanActionState.getDesiredFootPoses().get(side).getValueReadOnly(i++);
-            while (i < footstepPlanActionState.getDesiredFootPoses().get(side).getSize()
+            SE3TrajectoryPointReadOnly nextDesiredPoint = walkActionState.getDesiredFootPoses().get(side).getValueReadOnly(i++);
+            while (i < walkActionState.getDesiredFootPoses().get(side).getSize()
                    && nextDesiredPoint.getTime() < elapsedExecutionTime)
-               nextDesiredPoint = footstepPlanActionState.getDesiredFootPoses().get(side).getValueReadOnly(i++);
+               nextDesiredPoint = walkActionState.getDesiredFootPoses().get(side).getValueReadOnly(i++);
 
-            QuaternionReadOnly initialOrientation = footstepPlanActionState.getDesiredFootPoses().get(side).getFirstValueReadOnly().getOrientation();
-            QuaternionReadOnly endOrientation = footstepPlanActionState.getDesiredFootPoses().get(side).getLastValueReadOnly().getOrientation();
-            QuaternionReadOnly currentOrientation = footstepPlanActionState.getCurrentFootPoses().get(side).getValueReadOnly().getOrientation();
+            QuaternionReadOnly initialOrientation = walkActionState.getDesiredFootPoses().get(side).getFirstValueReadOnly().getOrientation();
+            QuaternionReadOnly endOrientation = walkActionState.getDesiredFootPoses().get(side).getLastValueReadOnly().getOrientation();
+            QuaternionReadOnly currentOrientation = walkActionState.getCurrentFootPoses().get(side).getValueReadOnly().getOrientation();
             QuaternionReadOnly desiredOrientation = nextDesiredPoint.getOrientation();
 
             double initialToEnd = initialOrientation.distance(endOrientation, true);
@@ -514,29 +540,33 @@ public class RDXActionProgressWidgets
                desiredFootOrientationErrorPlotLines.get(side).setDataColor(ImGuiTools.GRAY);
                desiredFootOrientationErrorPlotLines.get(side).addValue(desiredToEnd);
             }
-            if (renderAsPlots)
+            if (!timeOnly)
             {
-               footOrientationErrors.get(side).render(halfDividedBarWidth, PLOT_HEIGHT);
-            }
-            else
-            {
-               double barEndValue = Math.max(Math.min(initialToEnd, currentToEnd), 2.0 * tolerance);
-               double toleranceMarkPercent = tolerance / barEndValue;
-               double percentLeft = currentToEnd / barEndValue;
-               ImGuiTools.markedProgressBar(progressBarHeight(),
-                                            halfDividedBarWidth,
-                                            dataColor,
-                                            percentLeft,
-                                            toleranceMarkPercent,
-                                            "%.2f / %.2f".formatted(currentToEnd, initialToEnd));
+               if (renderAsPlots)
+               {
+                  footOrientationErrors.get(side).render(halfDividedBarWidth, PLOT_HEIGHT);
+               }
+               else
+               {
+                  double barEndValue = Math.max(Math.min(initialToEnd, currentToEnd), 2.0 * tolerance);
+                  double toleranceMarkPercent = tolerance / barEndValue;
+                  double percentLeft = currentToEnd / barEndValue;
+                  ImGuiTools.markedProgressBar(progressBarHeight(),
+                                               halfDividedBarWidth,
+                                               dataColor,
+                                               percentLeft,
+                                               toleranceMarkPercent,
+                                               "%.2f / %.2f".formatted(currentToEnd, initialToEnd));
+               }
             }
          }
          else
          {
-            renderBlankProgress(dividedBarWidth, renderAsPlots, true);
+            if (!timeOnly)
+               renderBlankProgress(dividedBarWidth, renderAsPlots, true);
          }
 
-         if (side == RobotSide.LEFT)
+         if (!timeOnly && side == RobotSide.LEFT)
             ImGui.sameLine();
       }
    }
