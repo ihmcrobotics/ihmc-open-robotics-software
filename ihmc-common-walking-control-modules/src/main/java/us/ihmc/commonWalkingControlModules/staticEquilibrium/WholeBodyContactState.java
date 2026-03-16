@@ -150,14 +150,24 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
 
    public void addContactPoints(PlaneContactState planeContactState)
    {
+      addContactPoints(planeContactState, false);
+   }
+
+   public void addContactPoints(PlaneContactState planeContactState, boolean isFoot)
+   {
       if (!planeContactState.inContact())
          return;
 
       planeContactState.getPlaneContactStateCommand(tempPlaneContactStateCommand);
-      addContactPoints(tempPlaneContactStateCommand);
+      addContactPoints(tempPlaneContactStateCommand, isFoot);
    }
 
    public void addContactPoints(PlaneContactStateCommand contactStateCommand)
+   {
+      addContactPoints(contactStateCommand, false);
+   }
+
+   public void addContactPoints(PlaneContactStateCommand contactStateCommand, boolean isFoot)
    {
       RigidBodyBasics contactingRigidBody = contactStateCommand.getContactingRigidBody();
       FrameVector3DBasics contactNormal = contactStateCommand.getContactNormal();
@@ -166,13 +176,16 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
       {
          FramePoint3DBasics contactPoint = contactStateCommand.getContactPoint(contactIdx);
          double coefficientOfFriction = contactStateCommand.getCoefficientOfFriction();
-         addContactPoint(contactingRigidBody, contactPoint, contactNormal, coefficientOfFriction);
+         ContactPoint point = addContactPoint(contactingRigidBody, contactPoint, contactNormal, coefficientOfFriction);
+         point.setFoot(isFoot);
       }
    }
 
-   public void addContactPoint(RigidBodyBasics contactingBody, FrameTuple3DReadOnly contactPoint, FrameVector3DReadOnly surfaceNormal, double coefficientOfFriction)
+   public ContactPoint addContactPoint(RigidBodyBasics contactingBody, FrameTuple3DReadOnly contactPoint, FrameVector3DReadOnly surfaceNormal, double coefficientOfFriction)
    {
-      contactPoints.add().set(contactingBody, contactPoint, surfaceNormal, coefficientOfFriction);
+      ContactPoint point = contactPoints.add();
+      point.set(contactingBody, contactPoint, surfaceNormal, coefficientOfFriction);
+      return point;
    }
 
    public void update()
@@ -374,13 +387,14 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
       return min / max;
    }
 
-   private static class ContactPoint
+   public static class ContactPoint
    {
       private RigidBodyBasics contactingBody;
       private final FramePose3D contactPose = new FramePose3D();
       private final PoseReferenceFrame contactFrame;
       private double coefficientOfFriction;
       private double[] singularValues;
+      private boolean isFoot = false;
 
       ContactPoint(int index)
       {
@@ -394,6 +408,7 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
          contactPose.setToNaN();
          coefficientOfFriction = Double.NaN;
          singularValues = null;
+         isFoot = false;
       }
 
       void set(RigidBodyBasics contactingBody, FrameTuple3DReadOnly contactPoint, FrameVector3DReadOnly surfaceNormal, double coefficientOfFriction)
@@ -408,6 +423,8 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
 
          // Set position
          contactPose.getPosition().setMatchingFrame(contactPoint);
+
+         isFoot = false;
       }
 
       void update()
@@ -425,10 +442,25 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
          }
       }
 
+      public void setFoot(boolean foot)
+      {
+         isFoot = foot;
+      }
+
+      public boolean isFoot()
+      {
+         return isFoot;
+      }
+
       public double[] getSingularValues()
       {
          return singularValues;
       }
+   }
+
+   public ContactPoint getContactPoint(int index)
+   {
+      return contactPoints.get(index);
    }
 
    @Override

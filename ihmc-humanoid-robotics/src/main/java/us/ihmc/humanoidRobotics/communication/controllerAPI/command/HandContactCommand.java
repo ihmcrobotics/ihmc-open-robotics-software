@@ -13,6 +13,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class HandContactCommand implements Command<HandContactCommand, HandContactMessage>
@@ -27,6 +28,7 @@ public class HandContactCommand implements Command<HandContactCommand, HandConta
 
    private final RigidBodyTransform regionTransformFromWorld = new RigidBodyTransform();
    private final ConvexPolygon2D convexPolygon = new ConvexPolygon2D();
+   private final Vector2D fallDirection = new Vector2D();
 
    @Override
    public void clear()
@@ -40,6 +42,7 @@ public class HandContactCommand implements Command<HandContactCommand, HandConta
 
       regionTransformFromWorld.setToNaN();
       convexPolygon.clear();
+      fallDirection.setToNaN();
    }
 
    @Override
@@ -66,6 +69,7 @@ public class HandContactCommand implements Command<HandContactCommand, HandConta
          convexPolygon.addVertex(vertex.getX(), vertex.getY());
       }
       convexPolygon.update();
+      fallDirection.set(message.getFallDirectionX(), message.getFallDirectionY());
    }
 
    @Override
@@ -103,6 +107,7 @@ public class HandContactCommand implements Command<HandContactCommand, HandConta
 
       regionTransformFromWorld.set(other.regionTransformFromWorld);
       convexPolygon.set(other.convexPolygon);
+      fallDirection.set(other.fallDirection);
    }
 
    public void setLoad(boolean load)
@@ -163,5 +168,10 @@ public class HandContactCommand implements Command<HandContactCommand, HandConta
    public ConvexPolygon2D getConvexPolygon()
    {
       return convexPolygon;
+   }
+
+   public Vector2D getFallDirection()
+   {
+      return fallDirection;
    }
 }

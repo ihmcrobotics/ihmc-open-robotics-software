@@ -3,15 +3,19 @@ package us.ihmc.commonWalkingControlModules.staticEquilibrium;
 import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState.ContactPoint;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.convexOptimization.linearProgram.LinearProgramSolver;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
@@ -139,7 +143,7 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
          dualSolutions[vertex_idx] = new DMatrixRMaj(0);
       }
 
-      feasibleRegion = new YoFrameConvexPolygon2D(namePrefix + "StabilityMarginPolygon", ReferenceFrame.getWorldFrame(), DIRECTIONS_TO_OPTIMIZE, registry);
+      feasibleRegion = new YoFrameConvexPolygon2D(namePrefix + "StabilityMarginPolygon", ReferenceFrame.getWorldFrame(), DIRECTIONS_TO_OPTIMIZE + 8, registry);
 
       lowestMarginEdgeIndex = new YoInteger("lowestMarginEdgeIndex", registry);
       stabilityMargin = new YoDouble(namePrefix + "StabilityMargin", registry);
@@ -211,10 +215,15 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
       }
 
       hasSolvedWholeRegion.set(false);
-      queryCounter.set(0);
-
       lowestMarginEdgeIndex.set(NULL_INDEX);
       stabilityMargin.set(Double.POSITIVE_INFINITY);
+   }
+
+   public void setQueryCounter(Vector2D fallDirection)
+   {
+      double yaw = Math.atan2(fallDirection.getY(), fallDirection.getX());
+      double gridSizeYaw = 2.0 * Math.PI / DIRECTIONS_TO_OPTIMIZE;
+      queryCounter.set(Math.floorMod((int) (Math.round((yaw) / gridSizeYaw)), DIRECTIONS_TO_OPTIMIZE));
    }
 
    public void setupForStabilityMarginCalculation(Supplier<FramePoint3DReadOnly> stabilityReference)
@@ -222,8 +231,11 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
       this.stabilityReference = stabilityReference;
    }
 
-   public void updateContactState(WholeBodyContactStateInterface contactState, boolean contactPointsHaveChanged)
+   private WholeBodyContactState contactState;
+
+   public void updateContactState(WholeBodyContactState contactState, boolean contactPointsHaveChanged)
    {
+      this.contactState = contactState;
       optimizationModule.updateContactState(contactState, contactPointsHaveChanged);
    }
 
@@ -241,7 +253,7 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
       }
 
       updateFeasibleRegion();
-      updateMinimumMarginEdge();
+//      updateMinimumMarginEdge();
 
       return true;
    }
@@ -316,25 +328,42 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
       return success;
    }
 
+   private final ConvexPolygon2D tempPolygon = new ConvexPolygon2D();
+
    private void updateFeasibleRegion()
    {
       // Update ConvexPolygon2D object
 
-      feasibleRegion.clear();
+      tempPolygon.clear();
       boolean hasNaNVertex = false;
       for (int vertex_idx = 0; vertex_idx < DIRECTIONS_TO_OPTIMIZE; vertex_idx++)
       {
          if (optimizedVertices[vertex_idx].containsNaN())
             hasNaNVertex = true;
          else
-            feasibleRegion.addVertex(optimizedVertices[vertex_idx]);
+            tempPolygon.addVertex(optimizedVertices[vertex_idx]);
       }
 
-      feasibleRegion.update();
-      hasSolvedWholeRegion.set(!hasNaNVertex);
+      for (int i = 0; i < contactState.getNumberOfContactPoints(); i++)
+      {
+         ContactPoint contactPoint = contactState.getContactPoint(i);
+         if (contactPoint.isFoot())
+         {
+            tempPointA.setToZero(contactState.getContactFrame(i));
+            tempPointA.changeFrame(ReferenceFrame.getWorldFrame());
+            tempPolygon.addVertex(tempPointA);
+         }
+      }
 
-      if (!hasSolvedWholeRegion.getValue())
-         return;
+      tempPolygon.update();
+      feasibleRegion.set(tempPolygon);
+
+      hasSolvedWholeRegion.set(true);
+
+//      hasSolvedWholeRegion.set(!hasNaNVertex);
+
+//      if (!hasSolvedWholeRegion.getValue())
+//         return;
 
       // Update index correspondence map
 //      Arrays.fill(fromEuclidPolygonIndexMap, NULL_INDEX);
@@ -349,7 +378,7 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
 //         }
 //      }
 
-      updateMinimumMarginEdge();
+//      updateMinimumMarginEdge();
    }
 
    private static int findVertexIndex(Tuple2DReadOnly[] candidateVertices, Tuple2DReadOnly vertex)

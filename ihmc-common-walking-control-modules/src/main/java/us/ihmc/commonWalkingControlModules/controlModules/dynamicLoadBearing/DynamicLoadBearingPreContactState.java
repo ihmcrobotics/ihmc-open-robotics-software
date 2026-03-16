@@ -185,7 +185,9 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
       distanceToPlane.set(bracingPlane.distance(positionControlHelper.getYoCurrentPosition()));
       boolean isCloseToWall = distanceToPlane.getValue() < epsilonCloseToWall;
 
-      handSpeed.set(controlFrame.getTwistOfFrame().getLinearPart().dot(yoBracingNormal));
+      tempVector.setIncludingFrame(controlFrame.getTwistOfFrame().getLinearPart());
+      tempVector.changeFrame(ReferenceFrame.getWorldFrame());
+      handSpeed.set(Math.abs(tempVector.dot(yoBracingNormal)));
       boolean hasLowHandSpeed = handSpeed.getValue() < 0.1;
 
 //      tempPoint.set(positionControlHelper.getYoCurrentPosition());
@@ -195,7 +197,7 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
 //      double distanceFromRegion = regionPolygon.signedDistance(tempPoint2d);
 //      boolean isInsideRegion = distanceFromRegion < 0.01;
 
-      hasHandTouchedDown.update(isCloseToWall && hasLowHandSpeed);
+      hasHandTouchedDown.update(isCloseToWall && hasLowHandSpeed && timeInState > 0.5 * trajectoryDuration.getValue());
       return hasHandTouchedDown.getValue();
    }
 

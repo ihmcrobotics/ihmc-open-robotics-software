@@ -58,6 +58,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -321,9 +322,11 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    }
 
    private final RecyclingArrayList<Point2D> supportRegion = new RecyclingArrayList<>(Point2D.class);
+   private final Vector2D fallDirection = new Vector2D();
 
    private void onHandContactReceived(HandContactCommand handContactCommand)
    {
+      fallDirection.set(handContactCommand.getFallDirection());
 //      supportRegion.clear();
 //      for (int i = 0; i < handContactCommand.getSupportRegionsPointsInMidFeetZUp().size(); i++)
 //      {
@@ -333,6 +336,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
    private void onTouchdownCallback()
    {
+//      controllerToolbox.getMultiContactStabilityRegionCalculator().setQueryCounter(fallDirection);
+
 //      StabilityMarginRegionCalculator multiContactStabilityRegionCalculator = controllerToolbox.getMultiContactStabilityRegionCalculator();
 //      MovingReferenceFrame midFeetZUpFrame = controllerToolbox.getReferenceFrames().getMidFeetZUpFrame();
 //      multiContactStabilityRegionCalculator.initializeRegion(midFeetZUpFrame, supportRegion);
@@ -895,7 +900,9 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       // Set feet contact points
       for (RobotSide robotSide : RobotSide.values)
-         wholeBodyContactState.addContactPoints(controllerToolbox.getFootContactState(robotSide));
+      {
+         wholeBodyContactState.addContactPoints(controllerToolbox.getFootContactState(robotSide), true);
+      }
 
       // Set upper body contact points
       for (int i = 0; i < bodyManagers.size(); i++)
