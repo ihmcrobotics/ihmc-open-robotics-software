@@ -21,3 +21,14 @@ geometry_msgs/Point bracing_point
 
 # Specifies the normal vector of the bracing surface
 geometry_msgs/Vector3 bracing_normal
+
+# Initial support polygon in mid-feet zup frame on contact, to warm start region solved through LP
+ihmc_common_msgs/Point2DMessage[<=18] support_region_in_mid_feet_frame
+
+controller_msgs/RigidBodyTransformMessage region_transform
+ihmc_common_msgs/Point2DMessage[<=50] scaled_convex_hull
+
+# Direction the robot is falling in the x direction
+float64 fall_direction_x
+# Direction the robot is falling in the y direction
+float64 fall_direction_y
