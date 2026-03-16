@@ -26,6 +26,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
@@ -48,6 +49,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
 {
@@ -263,6 +265,7 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
       RigidBodyControlMode defaultControlMode = walkingControllerParameters.getDefaultControlModesForRigidBodies().get(bodyName);
       boolean enableFunctionGenerators = walkingControllerParameters.enableFunctionGeneratorMode(bodyName);
       DoubleProvider capturePointErrorProvider = this::getICPErrorMagnitude;
+      Supplier<SpatialVectorReadOnly> estimatedExternalWrenchSupplier = createEstimatedExternalWrenchSupplier(bodyToControl, contactableBody);
 
       RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl,
                                                                     baseBody,
@@ -282,6 +285,7 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
                                                                     momentumOptimizationSettings.getRhoWeight(),
                                                                     controllerToolbox.getPostureAdjustmentProvider(),
                                                                     capturePointErrorProvider,
+                                                                    estimatedExternalWrenchSupplier,
                                                                     yoTime,
                                                                     controlDT,
                                                                     registry);
@@ -290,6 +294,21 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
 
       rigidBodyManagerMapByBodyName.put(bodyName, manager);
       return manager;
+   }
+
+   private Supplier<SpatialVectorReadOnly> createEstimatedExternalWrenchSupplier(RigidBodyBasics bodyToControl, ContactablePlaneBody contactableBody)
+   {
+      if (contactableBody == null || !contactableBody.getRigidBody().getName().contains("ELBOW"))
+         return null;
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RigidBodyBasics hand = controllerToolbox.getFullRobotModel().getHand(robotSide);
+         if (hand != null && hand.getName().equals(bodyToControl.getName()))
+            return () -> controllerToolbox.getEstimatedExternalHandWrench(robotSide);
+      }
+
+      return null;
    }
 
    private double getICPErrorMagnitude()

@@ -29,6 +29,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.WrenchTrajec
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
@@ -47,6 +48,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * Manages a rigid body as part of a high level controller.
@@ -109,6 +111,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                   double nominalRhoWeight,
                                   WholeBodyPostureAdjustmentProvider postureAdjustmentProvider,
                                   DoubleProvider capturePointErrorProvider,
+                                  Supplier<SpatialVectorReadOnly> estimatedExternalWrenchSupplier,
                                   YoDouble yoTime,
                                   double controlDT,
                                   YoRegistry parentRegistry)
@@ -225,6 +228,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                                                                       controlFrame,
                                                                                       nominalRhoWeight,
                                                                                       capturePointErrorProvider,
+                                                                                      estimatedExternalWrenchSupplier,
                                                                                       hasAddedContacts,
                                                                                       hasRemovedContacts,
                                                                                       registry);
