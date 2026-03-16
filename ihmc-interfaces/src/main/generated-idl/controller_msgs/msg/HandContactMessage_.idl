@@ -56,6 +56,14 @@ module controller_msgs
         sequence<ihmc_common_msgs::msg::dds::Point2DMessage, 18> support_region_in_mid_feet_frame;
         controller_msgs::msg::dds::RigidBodyTransformMessage region_transform;
         sequence<ihmc_common_msgs::msg::dds::Point2DMessage, 50> scaled_convex_hull;
+        /**
+         * Direction the robot is falling in the x direction
+         */
+        double fall_direction_x;
+        /**
+         * Direction the robot is falling in the y direction
+         */
+        double fall_direction_y;
       };
     };
   };

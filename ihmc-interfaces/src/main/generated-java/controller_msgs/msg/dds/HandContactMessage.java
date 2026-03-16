@@ -44,6 +44,14 @@ public class HandContactMessage extends Packet<HandContactMessage> implements Se
    public us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.Point2DMessage>  support_region_in_mid_feet_frame_;
    public controller_msgs.msg.dds.RigidBodyTransformMessage region_transform_;
    public us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.Point2DMessage>  scaled_convex_hull_;
+   /**
+            * Direction the robot is falling in the x direction
+            */
+   public double fall_direction_x_;
+   /**
+            * Direction the robot is falling in the y direction
+            */
+   public double fall_direction_y_;
 
    public HandContactMessage()
    {
@@ -76,6 +84,10 @@ public class HandContactMessage extends Packet<HandContactMessage> implements Se
       support_region_in_mid_feet_frame_.set(other.support_region_in_mid_feet_frame_);
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.region_transform_, region_transform_);
       scaled_convex_hull_.set(other.scaled_convex_hull_);
+      fall_direction_x_ = other.fall_direction_x_;
+
+      fall_direction_y_ = other.fall_direction_y_;
+
    }
 
    /**
@@ -177,6 +189,36 @@ public class HandContactMessage extends Packet<HandContactMessage> implements Se
       return scaled_convex_hull_;
    }
 
+   /**
+            * Direction the robot is falling in the x direction
+            */
+   public void setFallDirectionX(double fall_direction_x)
+   {
+      fall_direction_x_ = fall_direction_x;
+   }
+   /**
+            * Direction the robot is falling in the x direction
+            */
+   public double getFallDirectionX()
+   {
+      return fall_direction_x_;
+   }
+
+   /**
+            * Direction the robot is falling in the y direction
+            */
+   public void setFallDirectionY(double fall_direction_y)
+   {
+      fall_direction_y_ = fall_direction_y;
+   }
+   /**
+            * Direction the robot is falling in the y direction
+            */
+   public double getFallDirectionY()
+   {
+      return fall_direction_y_;
+   }
+
 
    public static Supplier<HandContactMessagePubSubType> getPubSubType()
    {
@@ -220,6 +262,10 @@ public class HandContactMessage extends Packet<HandContactMessage> implements Se
          {  if (!this.scaled_convex_hull_.get(i).epsilonEquals(other.scaled_convex_hull_.get(i), epsilon)) return false; }
       }
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.fall_direction_x_, other.fall_direction_x_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.fall_direction_y_, other.fall_direction_y_, epsilon)) return false;
+
 
       return true;
    }
@@ -246,6 +292,10 @@ public class HandContactMessage extends Packet<HandContactMessage> implements Se
       if (!this.support_region_in_mid_feet_frame_.equals(otherMyClass.support_region_in_mid_feet_frame_)) return false;
       if (!this.region_transform_.equals(otherMyClass.region_transform_)) return false;
       if (!this.scaled_convex_hull_.equals(otherMyClass.scaled_convex_hull_)) return false;
+      if(this.fall_direction_x_ != otherMyClass.fall_direction_x_) return false;
+
+      if(this.fall_direction_y_ != otherMyClass.fall_direction_y_) return false;
+
 
       return true;
    }
@@ -273,7 +323,11 @@ public class HandContactMessage extends Packet<HandContactMessage> implements Se
       builder.append("region_transform=");
       builder.append(this.region_transform_);      builder.append(", ");
       builder.append("scaled_convex_hull=");
-      builder.append(this.scaled_convex_hull_);
+      builder.append(this.scaled_convex_hull_);      builder.append(", ");
+      builder.append("fall_direction_x=");
+      builder.append(this.fall_direction_x_);      builder.append(", ");
+      builder.append("fall_direction_y=");
+      builder.append(this.fall_direction_y_);
       builder.append("}");
       return builder.toString();
    }

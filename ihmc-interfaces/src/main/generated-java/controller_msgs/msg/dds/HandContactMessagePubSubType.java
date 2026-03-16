@@ -15,7 +15,7 @@ public class HandContactMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "c5ef303de185678cf0bd6dcbbcfca3ba30b74f9634e35903535ad59d275a5649";
+   		return "78883f15b6d4bd2f04741e399052e609e2f6bfeddbf395df605df3b3ad689e04";
    }
    
    @Override
@@ -72,6 +72,10 @@ public class HandContactMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
       {
           current_alignment += ihmc_common_msgs.msg.dds.Point2DMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -113,6 +117,12 @@ public class HandContactMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
       {
           current_alignment += ihmc_common_msgs.msg.dds.Point2DMessagePubSubType.getCdrSerializedSize(data.getScaledConvexHull().get(i0), current_alignment);}
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -138,6 +148,10 @@ public class HandContactMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
       cdr.write_type_e(data.getScaledConvexHull());else
           throw new RuntimeException("scaled_convex_hull field exceeds the maximum length: %d > %d".formatted(data.getScaledConvexHull().size(), 50));
 
+      cdr.write_type_6(data.getFallDirectionX());
+
+      cdr.write_type_6(data.getFallDirectionY());
+
    }
 
    public static void read(controller_msgs.msg.dds.HandContactMessage data, us.ihmc.idl.CDR cdr)
@@ -155,6 +169,10 @@ public class HandContactMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
       cdr.read_type_e(data.getSupportRegionInMidFeetFrame());	
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getRegionTransform(), cdr);	
       cdr.read_type_e(data.getScaledConvexHull());	
+      data.setFallDirectionX(cdr.read_type_6());
+      	
+      data.setFallDirectionY(cdr.read_type_6());
+      	
 
    }
 
@@ -173,6 +191,8 @@ public class HandContactMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
       ser.write_type_a("region_transform", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getRegionTransform());
 
       ser.write_type_e("scaled_convex_hull", data.getScaledConvexHull());
+      ser.write_type_6("fall_direction_x", data.getFallDirectionX());
+      ser.write_type_6("fall_direction_y", data.getFallDirectionY());
    }
 
    @Override
@@ -190,6 +210,8 @@ public class HandContactMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
       ser.read_type_a("region_transform", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getRegionTransform());
 
       ser.read_type_e("scaled_convex_hull", data.getScaledConvexHull());
+      data.setFallDirectionX(ser.read_type_6("fall_direction_x"));
+      data.setFallDirectionY(ser.read_type_6("fall_direction_y"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.HandContactMessage src, controller_msgs.msg.dds.HandContactMessage dest)
