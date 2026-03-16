@@ -122,6 +122,7 @@ public class AvatarMultiThreadingFactory
 
    // Step Generator
    private final OptionalFactoryField<AvatarStepGeneratorThread> avatarStepGenerator = new OptionalFactoryField<>("AvatarStepGeneratorThread");
+   private final OptionalFactoryField<AvatarMultiContactGaitGeneratorThread> multiContactPlanningThread = new OptionalFactoryField<>("AvatarMultiContactGaitGeneratorThread");
 
    // IK Streaming
    private final OptionalFactoryField<IKStreamingRTPluginFactory.IKStreamingRTThread> avatarIKStreaming = new OptionalFactoryField<>("AvatarIKStreamingThread");
@@ -343,6 +344,23 @@ public class AvatarMultiThreadingFactory
    }
 
    /**
+    * An externally-facing API for creating the Multi-Contact planning thread and for adding it to the multi-threaded setup
+    */
+   public void createAndAddMultiContactPlanningThread()
+   {
+      AvatarMultiContactGaitGeneratorThread multiContactPlanningThread = new AvatarMultiContactGaitGeneratorThread(masterRobotModel,
+                                                                                                                   controllerRealtimeROS2Node,
+                                                                                                                   controllerContextFactory,
+                                                                                                                   avatarControllerFactory.getCommandInputManager(),
+                                                                                                                   avatarControllerFactory.getStatusOutputManager());
+
+      this.multiContactPlanningThread.set(multiContactPlanningThread);
+      yoVariableServer.addRegistry(multiContactPlanningThread.getYoVariableRegistry(), multiContactPlanningThread.getSCS2YoGraphics());
+
+      setupMultiContactPlanningTaskAndThread(masterRobotModel, multiContactPlanningThread, yoVariableServer);
+   }
+
+   /**
     * An externally-facing API for creating the IK Streaming module and thread, and for adding it to the multi-threaded setup
     */
    public IKStreamingRTPluginFactory.IKStreamingRTThread createAndAddIKStreamingThread(KinematicsStreamingToolboxParameters ikStreamingParameters)
@@ -534,6 +552,46 @@ public class AvatarMultiThreadingFactory
       createAndAddThread(stepGeneratorTask.getClass().getSimpleName(), stepGeneratorTask, affinity.getStepGeneratorThreadProcessor(), affinity.getStepGeneratorThreadPriority());
 
       return stepGeneratorTask;
+   }
+
+   /**
+    * Sets up the actual thread and thread task for the step generator module
+    */
+   private HumanoidRobotControlTask setupMultiContactPlanningTaskAndThread(DRCRobotModel robotModel,
+                                                                           AvatarMultiContactGaitGeneratorThread multiContactPlanningThread,
+                                                                           YoVariableServer yoVariableServer)
+   {
+      // Set up Step Generator Task
+      int multiContactPlanningDivisor = (int) Math.round(robotModel.getMultiContactPlannerDT() / masterThreadDt);
+      if (!Precision.equals(robotModel.getMultiContactPlannerDT() / masterThreadDt, multiContactPlanningDivisor))
+         throw new RuntimeException("Multi-contact planning DT must be multiple of master thread DT.");
+
+      MultiContactGaitGeneratorTask multiContactGaitGeneratorTask = new MultiContactGaitGeneratorTask("MCGG",
+                                                                                                      multiContactPlanningThread,
+                                                                                                      multiContactPlanningDivisor,
+                                                                                                      masterThreadDt);
+
+      // Add post-step generator callback to update YoVariable server with step generator registry
+      if (yoVariableServer != null)
+         multiContactGaitGeneratorTask.addCallbackPostTask(() -> yoVariableServer.update(multiContactPlanningThread.getHumanoidRobotContextData().getTimestamp(),
+                                                                                         multiContactPlanningThread.getYoVariableRegistry()));
+
+      // Add post-step generator callback to update the thread frequency calculator and YoVariable (Hz)
+      YoDouble multiContactPlanningUpdateRate = new YoDouble("multiContactPlanningUpdateRate", rootRegistry);
+      FrequencyCalculator multiContactPlanningThreadFrequencyCalculator = new FrequencyCalculator(false);
+      multiContactGaitGeneratorTask.addCallbackPostTask(()->
+                                            {
+                                               multiContactPlanningThreadFrequencyCalculator.ping();
+                                               multiContactPlanningUpdateRate.set(multiContactPlanningThreadFrequencyCalculator.getFrequency());
+                                            });
+
+      // Add callback on cleanup to close and destroy things
+      multiContactGaitGeneratorTask.addRunnableOnCleanup(this.multiContactPlanningThread.get()::destroy);
+
+      // Set up and add multi-contact planner, borrow affinity for step generator
+      createAndAddThread(multiContactGaitGeneratorTask.getClass().getSimpleName(), multiContactGaitGeneratorTask, affinity.getStepGeneratorThreadProcessor(), affinity.getStepGeneratorThreadPriority());
+
+      return multiContactGaitGeneratorTask;
    }
 
    /**
