@@ -20,8 +20,11 @@ import java.util.List;
 
 public class YoPerceptionVisualizer implements SCS2YoGraphicHolder
 {
+   public static boolean VISUALIZE_HEIGHT_MAP = false;
+   public static boolean VISUALIZE_PLANAR_REGIONS = true;
+
    private static final int NUMBER_OF_HEIGHT_MAP_POINTS_TO_VISUALIZE = 5000;
-   private static final int NUMBER_OF_PLANAR_REGIONS_TO_VISUALIZE = 10;
+   private static final int NUMBER_OF_PLANAR_REGIONS_TO_VISUALIZE = 2;
 
    private final List<YoFramePoint3D> heights = new ArrayList<>();
    private final List<YoFramePose3D> planarRegionPoses = new ArrayList<>();
@@ -29,20 +32,29 @@ public class YoPerceptionVisualizer implements SCS2YoGraphicHolder
 
    public YoPerceptionVisualizer(YoRegistry registry)
    {
-      for (int i = 0; i < NUMBER_OF_HEIGHT_MAP_POINTS_TO_VISUALIZE; i++)
+      if (VISUALIZE_HEIGHT_MAP)
       {
-         heights.add(new YoFramePoint3D("height" + i, ReferenceFrame.getWorldFrame(), registry));
+         for (int i = 0; i < NUMBER_OF_HEIGHT_MAP_POINTS_TO_VISUALIZE; i++)
+         {
+            heights.add(new YoFramePoint3D("height" + i, ReferenceFrame.getWorldFrame(), registry));
+         }
       }
 
-      for (int i = 0; i < NUMBER_OF_PLANAR_REGIONS_TO_VISUALIZE; i++)
+      if (VISUALIZE_PLANAR_REGIONS)
       {
-         planarRegionPoses.add(new YoFramePose3D("pose" + i, ReferenceFrame.getWorldFrame(), registry));
-         planarRegionPolygons.add(new YoFrameConvexPolygon2D("region" + i, ReferenceFrame.getWorldFrame(), 12, registry));
+         for (int i = 0; i < NUMBER_OF_PLANAR_REGIONS_TO_VISUALIZE; i++)
+         {
+            planarRegionPoses.add(new YoFramePose3D("pose" + i, ReferenceFrame.getWorldFrame(), registry));
+            planarRegionPolygons.add(new YoFrameConvexPolygon2D("region" + i, ReferenceFrame.getWorldFrame(), 35, registry));
+         }
       }
    }
 
    public void visualizeHeightMap(TerrainMapCommand terrainMapCommand)
    {
+      if (!VISUALIZE_HEIGHT_MAP)
+         return;
+
       Point2DReadOnly gridCenter = terrainMapCommand.getGridCenter();
       double cellSize = terrainMapCommand.getCellSize();
       double gridWidth = terrainMapCommand.getGridWidth();
@@ -63,6 +75,9 @@ public class YoPerceptionVisualizer implements SCS2YoGraphicHolder
 
    public void visualizePlanarRegions(PlanarRegionsListCommand planarRegionsListCommand)
    {
+      if (!VISUALIZE_PLANAR_REGIONS)
+         return;
+
       for (int i = 0; i < NUMBER_OF_PLANAR_REGIONS_TO_VISUALIZE; i++)
       {
          planarRegionPoses.get(i).setToNaN();
@@ -79,15 +94,22 @@ public class YoPerceptionVisualizer implements SCS2YoGraphicHolder
    public YoGraphicGroupDefinition getSCS2YoGraphics()
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
-      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPointcloud3D("HeightMap", heights, 0.006, ColorDefinitions.DarkBlue()));
 
-      for (int i = 0; i < NUMBER_OF_PLANAR_REGIONS_TO_VISUALIZE; i++)
+      if (VISUALIZE_HEIGHT_MAP)
       {
-         group.addChild(YoGraphicDefinitionFactory.newYoGraphicPolygonExtruded3DDefinition("region" + i,
-                                                                                           planarRegionPoses.get(i),
-                                                                                           planarRegionPolygons.get(i),
-                                                                                           0.01,
-                                                                                           REGIONS_COLORS[i % REGIONS_COLORS.length]));
+         group.addChild(YoGraphicDefinitionFactory.newYoGraphicPointcloud3D("HeightMap", heights, 0.006, ColorDefinitions.DarkBlue()));
+      }
+
+      if (VISUALIZE_PLANAR_REGIONS)
+      {
+         for (int i = 0; i < NUMBER_OF_PLANAR_REGIONS_TO_VISUALIZE; i++)
+         {
+            group.addChild(YoGraphicDefinitionFactory.newYoGraphicPolygonExtruded3DDefinition("region" + i,
+                                                                                              planarRegionPoses.get(i),
+                                                                                              planarRegionPolygons.get(i),
+                                                                                              0.01,
+                                                                                              REGIONS_COLORS[i % REGIONS_COLORS.length]));
+         }
       }
 
       return group;
