@@ -140,6 +140,10 @@ module behavior_msgs
          * Minimum number of points in the shape
          */
         unsigned long min_points;
+        /**
+         * Maximum number of points in the shape
+         */
+        unsigned long max_points;
       };
     };
   };

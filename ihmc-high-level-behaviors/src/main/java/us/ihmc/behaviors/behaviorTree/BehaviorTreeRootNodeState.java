@@ -64,6 +64,14 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
       updateSubtree(this, depthFirstIndexAssignment, leafIndexAssignment);
    }
 
+   @Override
+   public boolean hasStatus()
+   {
+      boolean hasStatus = super.hasStatus();
+      hasStatus |= scene.pollHasStatus();
+      return hasStatus;
+   }
+
    public void updateSubtree(BehaviorTreeNodeState<?> node, MutableInt depthFirstIndex, MutableInt leafIndex)
    {
       idToNodeMap.put(node.getID(), node);
@@ -88,9 +96,8 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
    public void toMessage(BehaviorTreeRootNodeStateMessage message)
    {
       definition.toMessage(message.getDefinition());
-
       super.toMessage(message.getState());
-
+      scene.toMessage(message.getScene());
       message.setAutomaticExecution(automaticExecution.toMessage());
       message.setExecutionNextIndex(executionNextIndex.toMessage());
       message.setManualExecutionRequested(manualExecutionRequested.toMessage());
@@ -102,9 +109,8 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
    public void fromMessage(BehaviorTreeRootNodeStateMessage message)
    {
       definition.fromMessage(message.getDefinition());
-
       super.fromMessage(message.getState());
-
+      scene.fromMessage(message.getScene());
       automaticExecution.fromMessage(message.getAutomaticExecution());
       executionNextIndex.fromMessage(message.getExecutionNextIndex());
       manualExecutionRequested.fromMessage(message.getManualExecutionRequested());

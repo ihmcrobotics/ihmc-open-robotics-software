@@ -150,7 +150,7 @@ public class WalkingCommandConsumer
       {
          chestBodyFrame = chest.getBodyFixedFrame();
          chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis, chestBodyFrame, pelvisZUpFrame, controlDT);
-         chestManager.setDoPrepareForLocomotion(walkingControllerParameters.doPrepareManipulationForLocomotion());
+         chestManager.setDoPrepareForLocomotion(walkingControllerParameters.doPrepareChestForLocomotion());
       }
       else
       {
@@ -174,7 +174,7 @@ public class WalkingCommandConsumer
          {
             ReferenceFrame handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
             RigidBodyControlManager handManager = managerFactory.getOrCreateRigidBodyManager(hand, chest, handControlFrame, chestBodyFrame, controlDT);
-            handManager.setDoPrepareForLocomotion(walkingControllerParameters.doPrepareManipulationForLocomotion());
+            handManager.setDoPrepareForLocomotion(walkingControllerParameters.doPrepareHandsForLocomotion());
             handManagers.put(robotSide, handManager);
          }
       }

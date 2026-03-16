@@ -1,5 +1,8 @@
 package us.ihmc.rdx.behaviorTree.actions;
 
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImInt;
 import org.yaml.snakeyaml.Yaml;
@@ -12,10 +15,13 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseObject;
 import us.ihmc.perception.detections.yolo.YOLOv8Tools;
 import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeRootNode;
+import us.ihmc.rdx.behaviorTree.RDXCRDTTools;
 import us.ihmc.rdx.imgui.ImFloatWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImIntegerWrapper;
+import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.widgets.ImGuiSceneActionWidget;
+import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,10 +43,14 @@ public class RDXSceneActionNode extends RDXActionNode<SceneActionNodeState, Scen
    private final String[][] availableYOLOClasses;
    private final ImFloatWrapper timeoutWidget;
    private final ImIntegerWrapper minHistorySizeWidget;
+   private final RDXSelectablePose3DGizmo nominalObjectPoseGizmo;
 
    public RDXSceneActionNode(long id, RDXBehaviorTreeRootNode rootNode)
    {
       super(new SceneActionNodeState(id, rootNode.getState()), rootNode);
+
+      nominalObjectPoseGizmo = new RDXSelectablePose3DGizmo(definition.getNominalObjectPose().getValueUnsafe(), scene.findFrameByName("Walking"));
+      nominalObjectPoseGizmo.create(panel3D);
 
       IsaacROSFoundationPoseObject[] values = IsaacROSFoundationPoseObject.values();
       fpTypeNames = new String[values.length];
@@ -82,6 +92,16 @@ public class RDXSceneActionNode extends RDXActionNode<SceneActionNodeState, Scen
    }
 
    @Override
+   public void update()
+   {
+      super.update();
+
+      nominalObjectPoseGizmo.getPoseGizmo().setParentFrame(scene.findFrameByName("Walking"));
+
+      RDXCRDTTools.syncGizmoWithBidirectionalField(nominalObjectPoseGizmo.getPoseGizmo(), definition.getNominalObjectPose(), definition);
+   }
+
+   @Override
    public void renderTreeViewRow()
    {
       super.renderRowBeginning();
@@ -105,46 +125,79 @@ public class RDXSceneActionNode extends RDXActionNode<SceneActionNodeState, Scen
          ImGui.endCombo();
       }
 
-      BehaviorTreeSceneObjectDefinition objectDefinition = definition.getSceneObjectDefinition();
-
-      ImGui.text("Setup Object Type:");
-      for (BehaviorTreeSceneObjectType type : BehaviorTreeSceneObjectType.values)
-         if (ImGui.radioButton(type.name(), objectDefinition.getObjectType() == type))
-            objectDefinition.setObjectType(type);
-
-      ImGui.pushItemWidth(200.0f);
-      imYOLOModel.set(-1);
-      for (int i = 0; i < availableYOLOModelNames.length; i++)
-         if (availableYOLOModelNames[i].equals(objectDefinition.getYoloModelName()))
-            imYOLOModel.set(i);
-      if (ImGui.combo(labels.get("YOLO Model"), imYOLOModel, availableYOLOModelNames))
-         objectDefinition.setYoloModelName(availableYOLOModelNames[imYOLOModel.get()]);
-      ImGui.popItemWidth();
-
-      if (objectDefinition.getObjectType() == BehaviorTreeSceneObjectType.YOLO_ONLY)
+      if (definition.getSceneActionType().getValue() != SceneActionNodeType.CLEAR_SCENE)
       {
+         BehaviorTreeSceneObjectDefinition objectDefinition = definition.getSceneObjectDefinition();
+
+         ImGui.text("Setup Object Type:");
+         for (BehaviorTreeSceneObjectType type : BehaviorTreeSceneObjectType.values)
+            if (ImGui.radioButton(type.name(), objectDefinition.getObjectType() == type))
+               objectDefinition.setObjectType(type);
+
          ImGui.pushItemWidth(200.0f);
-         imYOLOClass.set(-1);
-         for (int i = 0; i < availableYOLOClasses[imYOLOModel.get()].length; i++)
-            if (availableYOLOClasses[imYOLOModel.get()][i].equals(objectDefinition.getYoloClassName()))
-               imYOLOClass.set(i);
-         if (ImGui.combo(labels.get("YOLO Class"), imYOLOClass, availableYOLOClasses[imYOLOModel.get()]))
-            objectDefinition.setYoloClassName(availableYOLOClasses[imYOLOModel.get()][imYOLOClass.get()]);
+         imYOLOModel.set(-1);
+         for (int i = 0; i < availableYOLOModelNames.length; i++)
+            if (availableYOLOModelNames[i].equals(objectDefinition.getYoloModelName()))
+               imYOLOModel.set(i);
+         if (ImGui.combo(labels.get("YOLO Model"), imYOLOModel, availableYOLOModelNames))
+            objectDefinition.setYoloModelName(availableYOLOModelNames[imYOLOModel.get()]);
+         ImGui.popItemWidth();
+
+         if (objectDefinition.getObjectType() == BehaviorTreeSceneObjectType.YOLO_ONLY)
+         {
+            ImGui.pushItemWidth(200.0f);
+            imYOLOClass.set(-1);
+            for (int i = 0; i < availableYOLOClasses[imYOLOModel.get()].length; i++)
+               if (availableYOLOClasses[imYOLOModel.get()][i].equals(objectDefinition.getYoloClassName()))
+                  imYOLOClass.set(i);
+            if (ImGui.combo(labels.get("YOLO Class"), imYOLOClass, availableYOLOClasses[imYOLOModel.get()]))
+               objectDefinition.setYoloClassName(availableYOLOClasses[imYOLOModel.get()][imYOLOClass.get()]);
+            ImGui.popItemWidth();
+         }
+         else if (objectDefinition.getObjectType() == BehaviorTreeSceneObjectType.FOUNDATION_POSE)
+         {
+            ImGui.pushItemWidth(200.0f);
+            imFPType.set(objectDefinition.getFoundationPoseObjectType().ordinal());
+            if (ImGui.combo(labels.get("FoundationPose Type"), imFPType, fpTypeNames))
+               objectDefinition.setFoundationPoseObjectType(IsaacROSFoundationPoseObject.values()[imFPType.get()]);
+            ImGui.popItemWidth();
+         }
+
+         ImGui.pushItemWidth(100.0f);
+         timeoutWidget.renderImGuiWidget();
+         minHistorySizeWidget.renderImGuiWidget();
+         ImGui.checkbox(labels.get("Adjust Nominal Object Pose"), nominalObjectPoseGizmo.getSelected());
          ImGui.popItemWidth();
       }
-      else if (objectDefinition.getObjectType() == BehaviorTreeSceneObjectType.FOUNDATION_POSE)
-      {
-         ImGui.pushItemWidth(200.0f);
-         imFPType.set(objectDefinition.getFoundationPoseObjectType().ordinal());
-         if (ImGui.combo(labels.get("FoundationPose Type"), imFPType, fpTypeNames))
-            objectDefinition.setFoundationPoseObjectType(IsaacROSFoundationPoseObject.values()[imFPType.get()]);
-         ImGui.popItemWidth();
-      }
+   }
 
-      ImGui.pushItemWidth(100.0f);
-      timeoutWidget.renderImGuiWidget();
-      minHistorySizeWidget.renderImGuiWidget();
-      ImGui.popItemWidth();
+   @Override
+   public void deselectGizmos()
+   {
+      nominalObjectPoseGizmo.setSelected(false);
+   }
+
+   @Override
+   public void calculate3DViewPick(ImGui3DViewInput input)
+   {
+      if (getSelected())
+         nominalObjectPoseGizmo.calculate3DViewPick(input);
+   }
+
+   @Override
+   public void process3DViewInput(ImGui3DViewInput input)
+   {
+      if (getSelected())
+         nominalObjectPoseGizmo.process3DViewInput(input);
+   }
+
+   @Override
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+      if (getSelected())
+      {
+         nominalObjectPoseGizmo.getVirtualRenderables(renderables, pool);
+      }
    }
 
    @Override

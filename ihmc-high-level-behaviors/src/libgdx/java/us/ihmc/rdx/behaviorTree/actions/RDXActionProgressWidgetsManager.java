@@ -54,9 +54,9 @@ public class RDXActionProgressWidgetsManager
       {
          action.getProgressWidgets().update();
 
-         if (action instanceof RDXFootstepPlanAction)
+         if (action instanceof RDXWalkAction)
             containsFootsteps = true;
-         if (action instanceof RDXHandPoseAction || action instanceof RDXScrewPrimitiveAction)
+         if (action instanceof RDXArmAction || action instanceof RDXScrewPrimitiveAction)
             containsHandMovements = true;
          if (action instanceof RDXSakeHandCommandAction)
             containsSakeHandConfiguration = true;
@@ -104,7 +104,7 @@ public class RDXActionProgressWidgetsManager
          handleRenderingBlankBar(true, timeOnly);
          for (int i = 0; i < actionNodesToRender.size(); i++)
          {
-            if (actionNodesToRender.get(i) instanceof RDXFootstepPlanAction)
+            if (actionNodesToRender.get(i) instanceof RDXWalkAction)
                actionNodesToRender.get(i).getProgressWidgets().renderFootPositions(dividedBarWidth, renderAsPlots, timeOnly);
             else
                actionNodesToRender.get(i).getProgressWidgets().renderPositionError(dividedBarWidth, renderAsPlots, timeOnly);
@@ -122,7 +122,7 @@ public class RDXActionProgressWidgetsManager
          handleRenderingBlankBar(true, timeOnly);
          for (int i = 0; i < actionNodesToRender.size(); i++)
          {
-            if (actionNodesToRender.get(i) instanceof RDXFootstepPlanAction)
+            if (actionNodesToRender.get(i) instanceof RDXWalkAction)
                actionNodesToRender.get(i).getProgressWidgets().renderFootOrientations(dividedBarWidth, renderAsPlots, timeOnly);
             else
                actionNodesToRender.get(i).getProgressWidgets().renderOrientationError(dividedBarWidth, renderAsPlots, timeOnly);

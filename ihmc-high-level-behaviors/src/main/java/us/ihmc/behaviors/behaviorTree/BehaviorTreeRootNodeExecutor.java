@@ -46,15 +46,17 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
    private final TObjectDoubleMap<String> resetJointAngles = new TObjectDoubleHashMap<>();
    private HumanoidKinematicsSimulation previewSimulation;
 
-   public BehaviorTreeRootNodeExecutor(long id,
-                                       BehaviorTreeExecutor tree,
-                                       WorkspaceResourceDirectory saveFileDirectory,
-                                       ROS2ControllerHelper ros2ControllerHelper,
-                                       TriFunction<DRCRobotModel, ROS2NodeBuilder, RigidBodyTransformReadOnly, HumanoidKinematicsSimulation> kinematicsSimulationBuilder,
-                                       ROS2SyncedRobotModel syncedRobot,
-                                       ControllerStatusTracker controllerStatusTracker,
-                                       SideDependentList<AbilityHandActionComms> abilityHandComms,
-                                       BehaviorTreeSceneExecutor scene)
+   public BehaviorTreeRootNodeExecutor(
+         long id,
+         BehaviorTreeExecutor tree,
+         WorkspaceResourceDirectory saveFileDirectory,
+         ROS2ControllerHelper ros2ControllerHelper,
+         TriFunction<DRCRobotModel, ROS2NodeBuilder, RigidBodyTransformReadOnly, HumanoidKinematicsSimulation> kinematicsSimulationBuilder,
+         ROS2SyncedRobotModel syncedRobot,
+         ControllerStatusTracker controllerStatusTracker,
+         SideDependentList<AbilityHandActionComms> abilityHandComms,
+         BehaviorTreeSceneExecutor scene
+   )
    {
       super(new BehaviorTreeRootNodeState(id, tree.getCRDTInfo(), saveFileDirectory, syncedRobot.getRobotModel(), scene),
             ros2ControllerHelper,
@@ -132,6 +134,9 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       }
       else
          previewNeedsReset = true;
+
+      scene.setSyncedRobot(state.getPreviewModeEnabled() ? previewSyncedRobot : realSyncedRobot);
+      scene.update();
 
       BehaviorTreeTools.runForSubtreeNodes(this, node ->
       {

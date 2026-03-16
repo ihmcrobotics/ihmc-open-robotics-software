@@ -85,3 +85,6 @@ string frame_name
 
 # Minimum number of points in the shape
 uint32 min_points
+
+# Maximum number of points in the shape
+uint32 max_points

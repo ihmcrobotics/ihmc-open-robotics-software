@@ -13,24 +13,18 @@ import java.util.function.Consumer;
 
 public class JSONTools
 {
-   /**
-    * {@link #toJSON(ObjectNode, RigidBodyTransformReadOnly)} but embedded in a named object.
-    */
-   public static void toJSON(ObjectNode jsonNode, String name, RigidBodyTransformReadOnly rigidBodyTransform)
+   /** Round to half a millimeter, cast to float, otherwise you get numbers like 0.0200000001 showing up in the JSON */
+   public static float toJsonMeters(double meters)
    {
-      ObjectNode transformObject = jsonNode.putObject(name);
-      toJSON(transformObject, rigidBodyTransform);
+      return (float) MathTools.roundToPrecision(meters, 0.0005);
    }
 
-   /**
-    * {@link #toEuclid(JsonNode, RigidBodyTransformBasics)} but embedded in a named object.
-    */
-   public static void toEuclid(JsonNode jsonNode, String name, RigidBodyTransformBasics rigidBodyTransform)
+   /** Convert and round to 1/50th of a degree */
+   public static float toJsonRadians(double radians)
    {
-      ObjectNode transformObject = (ObjectNode) jsonNode.get(name);
-      toEuclid(transformObject, rigidBodyTransform);
+      return (float) MathTools.roundToPrecision(Math.toDegrees(radians), 0.02);
    }
-   
+
    /**
     * When saving we reduce the precision of the numbers so that infintesimal changes
     * do not show up as changes to the actions. We choose half a millimeter as the smallest
@@ -41,15 +35,12 @@ public class JSONTools
     */
    public static void toJSON(ObjectNode jsonNode, RigidBodyTransformReadOnly rigidBodyTransform)
    {
-      // Round to half a millimeter
-      // Cast to float, otherwise you get numbers like 0.0200000001 showing up in the JSON
-      jsonNode.put("x", (float) MathTools.roundToPrecision(rigidBodyTransform.getTranslation().getX(), 0.0005));
-      jsonNode.put("y", (float) MathTools.roundToPrecision(rigidBodyTransform.getTranslation().getY(), 0.0005));
-      jsonNode.put("z", (float) MathTools.roundToPrecision(rigidBodyTransform.getTranslation().getZ(), 0.0005));
-      // Round to 1/50th of a degree
-      jsonNode.put("rollInDegrees", (float) MathTools.roundToPrecision(Math.toDegrees(rigidBodyTransform.getRotation().getRoll()), 0.02));
-      jsonNode.put("pitchInDegrees", (float) MathTools.roundToPrecision(Math.toDegrees(rigidBodyTransform.getRotation().getPitch()), 0.02));
-      jsonNode.put("yawInDegrees", (float) MathTools.roundToPrecision(Math.toDegrees(rigidBodyTransform.getRotation().getYaw()), 0.02));
+      jsonNode.put("x", toJsonMeters(rigidBodyTransform.getTranslation().getX()));
+      jsonNode.put("y", toJsonMeters(rigidBodyTransform.getTranslation().getY()));
+      jsonNode.put("z", toJsonMeters(rigidBodyTransform.getTranslation().getZ()));
+      jsonNode.put("rollInDegrees", toJsonRadians(rigidBodyTransform.getRotation().getRoll()));
+      jsonNode.put("pitchInDegrees", toJsonRadians(rigidBodyTransform.getRotation().getPitch()));
+      jsonNode.put("yawInDegrees", toJsonRadians(rigidBodyTransform.getRotation().getYaw()));
    }
 
    public static void toEuclid(JsonNode jsonNode, RigidBodyTransformBasics rigidBodyTransform)
@@ -62,25 +53,6 @@ public class JSONTools
                                                        Math.toRadians(jsonNode.get("rollInDegrees").asDouble()));
    }
 
-
-   /**
-    * {@link #toJSON(ObjectNode, Tuple3DReadOnly)} but embedded in a named object.
-    */
-   public static void toJSON(ObjectNode jsonNode, String name, Tuple3DReadOnly tuple3D)
-   {
-      ObjectNode transformObject = jsonNode.putObject(name);
-      toJSON(transformObject, tuple3D);
-   }
-
-   /**
-    * {@link #toEuclid(JsonNode, Tuple3DBasics)} but embedded in a named object.
-    */
-   public static void toEuclid(JsonNode jsonNode, String name, Tuple3DBasics tuple3D)
-   {
-      ObjectNode transformObject = (ObjectNode) jsonNode.get(name);
-      toEuclid(transformObject, tuple3D);
-   }
-
    /**
     * When saving we reduce the precision of the numbers so that infintesimal changes
     * do not show up as changes to the actions. We choose half a millimeter as the smallest
@@ -88,11 +60,9 @@ public class JSONTools
     */
    public static void toJSON(ObjectNode jsonNode, Tuple3DReadOnly tuple3D)
    {
-      // Round to half a millimeter
-      // Cast to float, otherwise you get numbers like 0.0200000001 showing up in the JSON
-      jsonNode.put("x", (float) MathTools.roundToPrecision(tuple3D.getX(), 0.0005));
-      jsonNode.put("y", (float) MathTools.roundToPrecision(tuple3D.getY(), 0.0005));
-      jsonNode.put("z", (float) MathTools.roundToPrecision(tuple3D.getZ(), 0.0005));
+      jsonNode.put("x", toJsonMeters(tuple3D.getX()));
+      jsonNode.put("y", toJsonMeters(tuple3D.getY()));
+      jsonNode.put("z", toJsonMeters(tuple3D.getZ()));
    }
 
    public static void toEuclid(JsonNode jsonNode, Tuple3DBasics tuple3D)

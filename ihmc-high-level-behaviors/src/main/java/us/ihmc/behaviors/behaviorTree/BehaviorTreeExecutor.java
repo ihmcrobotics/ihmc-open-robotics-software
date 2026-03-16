@@ -6,7 +6,6 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulation;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.action.actions.AbilityHandActionComms;
-import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneExecutor;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.behaviors.behaviorTree.condition.LLMConditionExecutor;
 import us.ihmc.behaviors.tools.interfaces.LogToolsLogger;
@@ -29,7 +28,6 @@ import us.ihmc.tools.io.WorkspaceResourceFile;
 public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeRootNodeExecutor, BehaviorTreeNodeExecutor<?, ?>>
 {
    private final ControllerStatusTracker controllerStatusTracker;
-   private final BehaviorTreeSceneExecutor scene;
    private final SideDependentList<AbilityHandActionComms> abilityHandComms = new SideDependentList<>();
 
    public BehaviorTreeExecutor(
@@ -51,8 +49,6 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeRootNodeExecu
       controllerStatusTracker = new ControllerStatusTracker(new LogToolsLogger(), ros2ControllerHelper.getROS2Node(), syncedRobot);
       for (RobotSide robotSide : RobotSide.values)
          abilityHandComms.put(robotSide, new AbilityHandActionComms(robotSide, ros2ControllerHelper.getROS2Node()));
-      scene = new BehaviorTreeSceneExecutor(crdtInfo, this::getAndIncrementNextID, syncedRobot, imageSensor, yolo, foundationPose, terrainMapData);
-      setScene(scene);
 
       ((BehaviorTreeExecutorNodeBuilder) getNodeBuilder()).initialize(this,
                                                                       saveFileDirectory,
@@ -61,15 +57,16 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeRootNodeExecu
                                                                       syncedRobot,
                                                                       controllerStatusTracker,
                                                                       abilityHandComms,
-                                                                      scene);
+                                                                      imageSensor,
+                                                                      yolo,
+                                                                      foundationPose,
+                                                                      terrainMapData);
    }
 
    public void update()
    {
       for (RobotSide side : abilityHandComms.sides())
          abilityHandComms.get(side).update();
-
-      scene.update();
 
       if (rootNode != null)
       {
@@ -124,8 +121,4 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeRootNodeExecu
       }
    }
 
-   public BehaviorTreeSceneExecutor getScene()
-   {
-      return scene;
-   }
 }
