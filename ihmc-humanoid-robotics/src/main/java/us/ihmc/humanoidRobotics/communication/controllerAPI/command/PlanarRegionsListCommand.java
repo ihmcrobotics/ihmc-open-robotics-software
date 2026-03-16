@@ -8,6 +8,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.idl.IDLSequence.Object;
+import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 
 public class PlanarRegionsListCommand implements Command<PlanarRegionsListCommand, PlanarRegionsListMessage>
 {
@@ -107,6 +108,14 @@ public class PlanarRegionsListCommand implements Command<PlanarRegionsListComman
    public void addPlanarRegionCommand(PlanarRegionCommand command)
    {
       this.planarRegions.add().set(command);
+   }
+
+   public void updateScaledConvexHulls(ConvexPolygonScaler scaler, double distance)
+   {
+      for (int i = 0; i < planarRegions.size(); i++)
+      {
+         planarRegions.get(i).updateScaledConvexHullForPlanner(scaler, distance);
+      }
    }
 
    @Override

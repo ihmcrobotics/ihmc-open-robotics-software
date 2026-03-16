@@ -5,12 +5,12 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
 public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarRegionMessage>
@@ -23,6 +23,8 @@ public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarR
    private final RigidBodyTransform fromWorldToLocalTransform = new RigidBodyTransform();
 
    private final ConvexPolygon2D convexHull = new ConvexPolygon2D();
+   private final ConvexPolygon2D scaledConvexHullForPlanning = new ConvexPolygon2D();
+   private final ConvexPolygon2D scaledConvexHullForController = new ConvexPolygon2D();
    private final RecyclingArrayList<Point2D> concaveHullsVertices = new RecyclingArrayList<Point2D>(20, Point2D.class);
    private final RecyclingArrayList<ConvexPolygon2D> convexPolygons = new RecyclingArrayList<ConvexPolygon2D>(10, ConvexPolygon2D.class);
 
@@ -186,6 +188,16 @@ public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarR
       return convexHull;
    }
 
+   public ConvexPolygon2D getScaledConvexHullForPlanning()
+   {
+      return scaledConvexHullForPlanning;
+   }
+
+   public ConvexPolygon2D getScaledConvexHullForController()
+   {
+      return scaledConvexHullForController;
+   }
+
    public RecyclingArrayList<Point2D> getConcaveHullsVertices()
    {
       return concaveHullsVertices;
@@ -199,6 +211,16 @@ public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarR
    public void getPlanarRegion(PlanarRegion planarRegionToPack)
    {
       planarRegionToPack.set(fromLocalToWorldTransform, convexPolygons, concaveHullsVertices, regionId);
+   }
+
+   public void updateScaledConvexHullForPlanner(ConvexPolygonScaler scaler, double distance)
+   {
+      scaler.scaleConvexPolygon(convexHull, distance, scaledConvexHullForPlanning);
+   }
+
+   public void updateScaledConvexHullForController(ConvexPolygonScaler scaler, double distance)
+   {
+      scaler.scaleConvexPolygon(convexHull, distance, scaledConvexHullForController);
    }
 
    @Override
