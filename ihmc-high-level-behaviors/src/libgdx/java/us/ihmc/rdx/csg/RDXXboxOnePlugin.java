@@ -199,6 +199,11 @@ public class RDXXboxOnePlugin
       csgInputCommand.setLateralVelocity(0.0);
       csgInputCommand.setTurnVelocity(0.0);
 
+      directionalControlInputMessage.setWalk(false);
+      directionalControlInputMessage.setForward(0.0);
+      directionalControlInputMessage.setRight(0.0);
+      directionalControlInputMessage.setClockwise(0.0);
+
       csgROS2ControllerHelper.publish(csgInputCommand);
       controllerROS2ControllerHelper.publishToController(directionalControlInputMessage);
    }
