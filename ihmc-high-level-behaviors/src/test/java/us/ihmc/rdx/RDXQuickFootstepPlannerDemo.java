@@ -60,6 +60,7 @@ public class RDXQuickFootstepPlannerDemo
    private final int[] inwardLimitDeg = {10};
    private final int[] outwardLimitDeg = {50};
    private final int[] stepAngleLimitDeg = {115};
+   private double plannerPlanDurationMs = 0.0;
 
    public RDXQuickFootstepPlannerDemo()
    {
@@ -219,6 +220,7 @@ public class RDXQuickFootstepPlannerDemo
             ImGui.text("Goal distance: %.3f".formatted(goalGizmos.get(RobotSide.LEFT).getPose().getPosition()
                                                              .distance(goalGizmos.get(RobotSide.RIGHT).getPose().getPosition())));
 
+            ImGui.text("Plan duration: %.3f ms".formatted(plannerPlanDurationMs));
             ImGui.text("Planned Footsteps: " + footstepPlan.size());
             for (int i = 0; i < footstepPlan.size(); i++)
                ImGui.text("Step " + i + ": " + footstepPlan.get(i).swingSide() + " to " + footstepPlan.get(i).swingEnd().getPosition()
@@ -375,7 +377,9 @@ public class RDXQuickFootstepPlannerDemo
             List<Pose3D> waypoints = new ArrayList<>();
             for (int i = 0; i < numberOfWaypoints[0]; i++)
                waypoints.add(new Pose3D(waypointGizmos.get(i).getGizmoFrame().getTransformToRoot()));
+            long planStartNs = System.nanoTime();
             footstepPlan = planner.plan(stances, waypoints, includeGoalSteps.get() ? goals : null);
+            plannerPlanDurationMs = (System.nanoTime() - planStartNs) / 1_000_000.0;
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
