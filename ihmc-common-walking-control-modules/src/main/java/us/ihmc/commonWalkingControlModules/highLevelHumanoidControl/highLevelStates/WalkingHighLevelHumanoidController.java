@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
@@ -936,12 +937,25 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       }
    }
 
+   private final SideDependentList<MutableBoolean> wasFootInContact = new SideDependentList<>(new MutableBoolean(), new MutableBoolean());
+
    private boolean haveContactsAdded()
    {
       for (int i = 0; i < bodyManagers.size(); i++)
       {
          // poll because this is the only class that listens to the notification
          if (bodyManagers.get(i).pollContactHasAddedNotification())
+            return true;
+      }
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         boolean isFootInContact = controllerToolbox.getFootContactState(robotSide).inContact();
+         boolean wasFootInContact = this.wasFootInContact.get(robotSide).getValue();
+         this.wasFootInContact.get(robotSide).setValue(isFootInContact);
+
+         // Just one check needed, we ain't hoppin round
+         if (!wasFootInContact && isFootInContact)
             return true;
       }
 
@@ -954,6 +968,17 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       {
          // poll because this is the only class that listens to the notification
          if (bodyManagers.get(i).pollContactHasRemovedNotification())
+            return true;
+      }
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         boolean isFootInContact = controllerToolbox.getFootContactState(robotSide).inContact();
+         boolean wasFootInContact = this.wasFootInContact.get(robotSide).getValue();
+         this.wasFootInContact.get(robotSide).setValue(isFootInContact);
+
+         // Just one check needed, we ain't hoppin round
+         if (wasFootInContact && !isFootInContact)
             return true;
       }
 
