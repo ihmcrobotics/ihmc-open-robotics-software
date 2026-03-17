@@ -1,5 +1,11 @@
 # A message for allowing operator to observe the status of various startup/shutdown variables often required for robot operation
 
+# Current startup status
+bool startup_in_progress
+bool shutdown_in_progress
+bool startup_complete
+bool shutdown_complete
+
 # Current SOFT-E-STOP value
 bool is_estopped
 

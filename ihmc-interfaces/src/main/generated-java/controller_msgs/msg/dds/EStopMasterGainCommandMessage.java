@@ -12,6 +12,12 @@ import us.ihmc.pubsub.TopicDataType;
 public class EStopMasterGainCommandMessage extends Packet<EStopMasterGainCommandMessage> implements Settable<EStopMasterGainCommandMessage>, EpsilonComparable<EStopMasterGainCommandMessage>
 {
    /**
+            * Auto startup and shutdown
+            */
+   public boolean request_startup_;
+   public boolean request_shutdown_;
+   public boolean execute_startup_shutdown_;
+   /**
             * SOFT-E-STOP to set
             */
    public boolean estop_;
@@ -65,6 +71,12 @@ public class EStopMasterGainCommandMessage extends Packet<EStopMasterGainCommand
 
    public void set(EStopMasterGainCommandMessage other)
    {
+      request_startup_ = other.request_startup_;
+
+      request_shutdown_ = other.request_shutdown_;
+
+      execute_startup_shutdown_ = other.execute_startup_shutdown_;
+
       estop_ = other.estop_;
 
       execute_estop_ = other.execute_estop_;
@@ -97,6 +109,39 @@ public class EStopMasterGainCommandMessage extends Packet<EStopMasterGainCommand
 
       execute_enable_actuators_ = other.execute_enable_actuators_;
 
+   }
+
+   /**
+            * Auto startup and shutdown
+            */
+   public void setRequestStartup(boolean request_startup)
+   {
+      request_startup_ = request_startup;
+   }
+   /**
+            * Auto startup and shutdown
+            */
+   public boolean getRequestStartup()
+   {
+      return request_startup_;
+   }
+
+   public void setRequestShutdown(boolean request_shutdown)
+   {
+      request_shutdown_ = request_shutdown;
+   }
+   public boolean getRequestShutdown()
+   {
+      return request_shutdown_;
+   }
+
+   public void setExecuteStartupShutdown(boolean execute_startup_shutdown)
+   {
+      execute_startup_shutdown_ = execute_startup_shutdown;
+   }
+   public boolean getExecuteStartupShutdown()
+   {
+      return execute_startup_shutdown_;
    }
 
    /**
@@ -311,6 +356,12 @@ public class EStopMasterGainCommandMessage extends Packet<EStopMasterGainCommand
       if(other == null) return false;
       if(other == this) return true;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.request_startup_, other.request_startup_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.request_shutdown_, other.request_shutdown_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.execute_startup_shutdown_, other.execute_startup_shutdown_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.estop_, other.estop_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.execute_estop_, other.execute_estop_, epsilon)) return false;
@@ -356,6 +407,12 @@ public class EStopMasterGainCommandMessage extends Packet<EStopMasterGainCommand
 
       EStopMasterGainCommandMessage otherMyClass = (EStopMasterGainCommandMessage) other;
 
+      if(this.request_startup_ != otherMyClass.request_startup_) return false;
+
+      if(this.request_shutdown_ != otherMyClass.request_shutdown_) return false;
+
+      if(this.execute_startup_shutdown_ != otherMyClass.execute_startup_shutdown_) return false;
+
       if(this.estop_ != otherMyClass.estop_) return false;
 
       if(this.execute_estop_ != otherMyClass.execute_estop_) return false;
@@ -398,6 +455,12 @@ public class EStopMasterGainCommandMessage extends Packet<EStopMasterGainCommand
       StringBuilder builder = new StringBuilder();
 
       builder.append("EStopMasterGainCommandMessage {");
+      builder.append("request_startup=");
+      builder.append(this.request_startup_);      builder.append(", ");
+      builder.append("request_shutdown=");
+      builder.append(this.request_shutdown_);      builder.append(", ");
+      builder.append("execute_startup_shutdown=");
+      builder.append(this.execute_startup_shutdown_);      builder.append(", ");
       builder.append("estop=");
       builder.append(this.estop_);      builder.append(", ");
       builder.append("execute_estop=");
