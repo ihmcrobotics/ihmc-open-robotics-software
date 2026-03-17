@@ -114,7 +114,7 @@ public class RDXBehaviorTreeNodeCreationMenu
          sceneActionIcon.render();
          ImGui.sameLine();
          ImGui.setCursorPosX(align);
-         renderNodeCreationClickable(relativeNode, insertionType, "Scene Action", SceneActionNodeDefinition.class, null);
+         renderNodeCreationClickable(relativeNode, insertionType, "Scene Action", SceneActionDefinition.class, null);
          ImGui.setCursorPosX(align);
          renderNodeCreationClickable(relativeNode, insertionType, "AI2R Node", AI2RNodeDefinition.class, null);
          ImGui.setCursorPosX(ImGui.getCursorPosX() + ImGui.getFontSize() * 0.3f);

@@ -6,7 +6,7 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
-public class SceneActionNodeStateMessage extends Packet<SceneActionNodeStateMessage> implements Settable<SceneActionNodeStateMessage>, EpsilonComparable<SceneActionNodeStateMessage>
+public class SceneActionStateMessage extends Packet<SceneActionStateMessage> implements Settable<SceneActionStateMessage>, EpsilonComparable<SceneActionStateMessage>
 {
    /**
             * Parent state fields
@@ -15,24 +15,24 @@ public class SceneActionNodeStateMessage extends Packet<SceneActionNodeStateMess
    /**
             * Definition
             */
-   public behavior_msgs.msg.dds.SceneActionNodeDefinitionMessage definition_;
+   public behavior_msgs.msg.dds.SceneActionDefinitionMessage definition_;
 
-   public SceneActionNodeStateMessage()
+   public SceneActionStateMessage()
    {
       state_ = new behavior_msgs.msg.dds.ActionNodeStateMessage();
-      definition_ = new behavior_msgs.msg.dds.SceneActionNodeDefinitionMessage();
+      definition_ = new behavior_msgs.msg.dds.SceneActionDefinitionMessage();
    }
 
-   public SceneActionNodeStateMessage(SceneActionNodeStateMessage other)
+   public SceneActionStateMessage(SceneActionStateMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(SceneActionNodeStateMessage other)
+   public void set(SceneActionStateMessage other)
    {
       behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.staticCopy(other.state_, state_);
-      behavior_msgs.msg.dds.SceneActionNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
+      behavior_msgs.msg.dds.SceneActionDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
    }
 
 
@@ -48,25 +48,25 @@ public class SceneActionNodeStateMessage extends Packet<SceneActionNodeStateMess
    /**
             * Definition
             */
-   public behavior_msgs.msg.dds.SceneActionNodeDefinitionMessage getDefinition()
+   public behavior_msgs.msg.dds.SceneActionDefinitionMessage getDefinition()
    {
       return definition_;
    }
 
 
-   public static Supplier<SceneActionNodeStateMessagePubSubType> getPubSubType()
+   public static Supplier<SceneActionStateMessagePubSubType> getPubSubType()
    {
-      return SceneActionNodeStateMessagePubSubType::new;
+      return SceneActionStateMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return SceneActionNodeStateMessagePubSubType::new;
+      return SceneActionStateMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(SceneActionNodeStateMessage other, double epsilon)
+   public boolean epsilonEquals(SceneActionStateMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -82,9 +82,9 @@ public class SceneActionNodeStateMessage extends Packet<SceneActionNodeStateMess
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof SceneActionNodeStateMessage)) return false;
+      if(!(other instanceof SceneActionStateMessage)) return false;
 
-      SceneActionNodeStateMessage otherMyClass = (SceneActionNodeStateMessage) other;
+      SceneActionStateMessage otherMyClass = (SceneActionStateMessage) other;
 
       if (!this.state_.equals(otherMyClass.state_)) return false;
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
@@ -97,7 +97,7 @@ public class SceneActionNodeStateMessage extends Packet<SceneActionNodeStateMess
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("SceneActionNodeStateMessage {");
+      builder.append("SceneActionStateMessage {");
       builder.append("state=");
       builder.append(this.state_);      builder.append(", ");
       builder.append("definition=");

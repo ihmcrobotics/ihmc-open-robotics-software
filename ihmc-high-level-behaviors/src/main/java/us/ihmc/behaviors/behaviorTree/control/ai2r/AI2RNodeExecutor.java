@@ -14,7 +14,7 @@ import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
 import us.ihmc.behaviors.behaviorTree.action.actions.SpineActionState;
 import us.ihmc.behaviors.behaviorTree.action.actions.WalkActionState;
 import us.ihmc.behaviors.behaviorTree.action.actions.ArmActionState;
-import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionNodeState;
+import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionState;
 import us.ihmc.behaviors.behaviorTree.action.actions.WaitActionState;
 import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeDefinition.ConditionNodeType;
 import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeState;
@@ -374,7 +374,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
             {
                for (var leaf : actionSequence.getOrderedLeaves())
                {
-                  if (leaf.getFailed() && leaf instanceof SceneActionNodeState)
+                  if (leaf.getFailed() && leaf instanceof SceneActionState)
                   {
                      leaf.setFailed(false);
                   }

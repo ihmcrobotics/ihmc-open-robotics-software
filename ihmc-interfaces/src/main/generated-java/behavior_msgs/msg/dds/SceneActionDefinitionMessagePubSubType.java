@@ -2,20 +2,20 @@ package behavior_msgs.msg.dds;
 
 /**
 * 
-* Topic data type of the struct "SceneActionNodeDefinitionMessage" defined in "SceneActionNodeDefinitionMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+* Topic data type of the struct "SceneActionDefinitionMessage" defined in "SceneActionDefinitionMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
 *
-* This file was automatically generated from SceneActionNodeDefinitionMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit SceneActionNodeDefinitionMessage_.idl instead.
+* This file was automatically generated from SceneActionDefinitionMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit SceneActionDefinitionMessage_.idl instead.
 *
 */
-public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.TopicDataType<behavior_msgs.msg.dds.SceneActionNodeDefinitionMessage>
+public class SceneActionDefinitionMessagePubSubType implements us.ihmc.pubsub.TopicDataType<behavior_msgs.msg.dds.SceneActionDefinitionMessage>
 {
-   public static final java.lang.String name = "behavior_msgs::msg::dds_::SceneActionNodeDefinitionMessage_";
+   public static final java.lang.String name = "behavior_msgs::msg::dds_::SceneActionDefinitionMessage_";
    
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "b87821bd87d1d44d4b1de4680918d62c5de7a038fdcb4e3d007598d23fb9c9d5";
+   		return "e333c15bdf33bc3c0365d47d16d3be911539a96dd518173eaa5ebcca3284350b";
    }
    
    @Override
@@ -28,7 +28,7 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(behavior_msgs.msg.dds.SceneActionNodeDefinitionMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
+   public void serialize(behavior_msgs.msg.dds.SceneActionDefinitionMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -36,7 +36,7 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, behavior_msgs.msg.dds.SceneActionNodeDefinitionMessage data) throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, behavior_msgs.msg.dds.SceneActionDefinitionMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -86,12 +86,12 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
       return current_alignment - initial_alignment;
    }
 
-   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.SceneActionNodeDefinitionMessage data)
+   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.SceneActionDefinitionMessage data)
    {
       return getCdrSerializedSize(data, 0);
    }
 
-   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.SceneActionNodeDefinitionMessage data, int current_alignment)
+   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.SceneActionDefinitionMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
 
@@ -142,7 +142,7 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
       return current_alignment - initial_alignment;
    }
 
-   public static void write(behavior_msgs.msg.dds.SceneActionNodeDefinitionMessage data, us.ihmc.idl.CDR cdr)
+   public static void write(behavior_msgs.msg.dds.SceneActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
       cdr.write_type_9(data.getSceneActionType());
@@ -177,7 +177,7 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
 
    }
 
-   public static void read(behavior_msgs.msg.dds.SceneActionNodeDefinitionMessage data, us.ihmc.idl.CDR cdr)
+   public static void read(behavior_msgs.msg.dds.SceneActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
       data.setSceneActionType(cdr.read_type_9());
@@ -205,7 +205,7 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
    }
 
    @Override
-   public final void serialize(behavior_msgs.msg.dds.SceneActionNodeDefinitionMessage data, us.ihmc.idl.InterchangeSerializer ser)
+   public final void serialize(behavior_msgs.msg.dds.SceneActionDefinitionMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_a("definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getDefinition());
 
@@ -227,7 +227,7 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
    }
 
    @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.SceneActionNodeDefinitionMessage data)
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.SceneActionDefinitionMessage data)
    {
       ser.read_type_a("definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getDefinition());
 
@@ -248,15 +248,15 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
       ser.read_type_e("enabled_foundation_pose_models", data.getEnabledFoundationPoseModels());
    }
 
-   public static void staticCopy(behavior_msgs.msg.dds.SceneActionNodeDefinitionMessage src, behavior_msgs.msg.dds.SceneActionNodeDefinitionMessage dest)
+   public static void staticCopy(behavior_msgs.msg.dds.SceneActionDefinitionMessage src, behavior_msgs.msg.dds.SceneActionDefinitionMessage dest)
    {
       dest.set(src);
    }
 
    @Override
-   public behavior_msgs.msg.dds.SceneActionNodeDefinitionMessage createData()
+   public behavior_msgs.msg.dds.SceneActionDefinitionMessage createData()
    {
-      return new behavior_msgs.msg.dds.SceneActionNodeDefinitionMessage();
+      return new behavior_msgs.msg.dds.SceneActionDefinitionMessage();
    }
    @Override
    public int getTypeSize()
@@ -270,24 +270,24 @@ public class SceneActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsu
       return name;
    }
    
-   public void serialize(behavior_msgs.msg.dds.SceneActionNodeDefinitionMessage data, us.ihmc.idl.CDR cdr)
+   public void serialize(behavior_msgs.msg.dds.SceneActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
    }
 
-   public void deserialize(behavior_msgs.msg.dds.SceneActionNodeDefinitionMessage data, us.ihmc.idl.CDR cdr)
+   public void deserialize(behavior_msgs.msg.dds.SceneActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
       read(data, cdr);
    }
    
-   public void copy(behavior_msgs.msg.dds.SceneActionNodeDefinitionMessage src, behavior_msgs.msg.dds.SceneActionNodeDefinitionMessage dest)
+   public void copy(behavior_msgs.msg.dds.SceneActionDefinitionMessage src, behavior_msgs.msg.dds.SceneActionDefinitionMessage dest)
    {
       staticCopy(src, dest);
    }
 
    @Override
-   public SceneActionNodeDefinitionMessagePubSubType newInstance()
+   public SceneActionDefinitionMessagePubSubType newInstance()
    {
-      return new SceneActionNodeDefinitionMessagePubSubType();
+      return new SceneActionDefinitionMessagePubSubType();
    }
 }

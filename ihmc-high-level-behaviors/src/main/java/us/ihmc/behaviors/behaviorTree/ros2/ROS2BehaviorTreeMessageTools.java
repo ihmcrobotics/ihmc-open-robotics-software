@@ -105,11 +105,11 @@ public class ROS2BehaviorTreeMessageTools
             treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getCheckpointNodes().size());
             checkpointNodeState.toMessage(treeStateMessage.getCheckpointNodes().add());
          }
-         else if (nodeState instanceof SceneActionNodeState sceneActionNodeState)
+         else if (nodeState instanceof SceneActionState sceneActionState)
          {
             treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.SCENE_ACTION);
             treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getSceneActions().size());
-            sceneActionNodeState.toMessage(treeStateMessage.getSceneActions().add());
+            sceneActionState.toMessage(treeStateMessage.getSceneActions().add());
          }
          else if (nodeState instanceof AI2RNodeState ai2rNodeState)
          {
@@ -240,9 +240,9 @@ public class ROS2BehaviorTreeMessageTools
       {
          checkpointNodeState.fromMessage(subscriptionNode.getCheckpointNodeStateMessage());
       }
-      else if (nodeState instanceof SceneActionNodeState sceneActionNodeState)
+      else if (nodeState instanceof SceneActionState sceneActionState)
       {
-         sceneActionNodeState.fromMessage(subscriptionNode.getSceneActionNodeStateMessage());
+         sceneActionState.fromMessage(subscriptionNode.getSceneActionStateMessage());
       }
       else if (nodeState instanceof AI2RNodeState ai2rNodeState)
       {
@@ -373,12 +373,12 @@ public class ROS2BehaviorTreeMessageTools
          }
          case BehaviorTreeStateMessage.SCENE_ACTION ->
          {
-            SceneActionNodeStateMessage sceneActionNodeStateMessage = treeStateMessage.getSceneActions().get(indexInTypesList);
-            subscriptionNode.setSceneActionNodeStateMessage(sceneActionNodeStateMessage);
-            subscriptionNode.setActionNodeStateMessage(sceneActionNodeStateMessage.getState());
-            subscriptionNode.setLeafNodeStateMessage(sceneActionNodeStateMessage.getState().getState());
-            subscriptionNode.setBehaviorTreeNodeStateMessage(sceneActionNodeStateMessage.getState().getState().getState());
-            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(sceneActionNodeStateMessage.getDefinition().getDefinition().getDefinition().getDefinition());
+            SceneActionStateMessage sceneActionStateMessage = treeStateMessage.getSceneActions().get(indexInTypesList);
+            subscriptionNode.setSceneActionStateMessage(sceneActionStateMessage);
+            subscriptionNode.setActionNodeStateMessage(sceneActionStateMessage.getState());
+            subscriptionNode.setLeafNodeStateMessage(sceneActionStateMessage.getState().getState());
+            subscriptionNode.setBehaviorTreeNodeStateMessage(sceneActionStateMessage.getState().getState().getState());
+            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(sceneActionStateMessage.getDefinition().getDefinition().getDefinition().getDefinition());
          }
          case BehaviorTreeStateMessage.AI2R_NODE ->
          {

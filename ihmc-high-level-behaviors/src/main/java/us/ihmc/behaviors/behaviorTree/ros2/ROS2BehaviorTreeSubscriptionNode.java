@@ -19,7 +19,7 @@ public class ROS2BehaviorTreeSubscriptionNode
    private ConditionNodeStateMessage conditionNodeStateMessage;
    private GotoNodeStateMessage gotoNodeStateMessage;
    private CheckpointNodeStateMessage checkpointNodeStateMessage;
-   private SceneActionNodeStateMessage sceneActionNodeStateMessage;
+   private SceneActionStateMessage sceneActionStateMessage;
    private AI2RNodeStateMessage ai2rNodeStateMessage;
    private DoorTraversalStateMessage doorTraversalStateMessage;
    private BuildingExplorationStateMessage buildingExplorationStateMessage;
@@ -51,7 +51,7 @@ public class ROS2BehaviorTreeSubscriptionNode
       conditionNodeStateMessage = null;
       gotoNodeStateMessage = null;
       checkpointNodeStateMessage = null;
-      sceneActionNodeStateMessage = null;
+      sceneActionStateMessage = null;
       ai2rNodeStateMessage = null;
       doorTraversalStateMessage = null;
       buildingExplorationStateMessage = null;
@@ -197,14 +197,14 @@ public class ROS2BehaviorTreeSubscriptionNode
       this.checkpointNodeStateMessage = checkpointNodeStateMessage;
    }
 
-   public SceneActionNodeStateMessage getSceneActionNodeStateMessage()
+   public SceneActionStateMessage getSceneActionStateMessage()
    {
-      return sceneActionNodeStateMessage;
+      return sceneActionStateMessage;
    }
 
-   public void setSceneActionNodeStateMessage(SceneActionNodeStateMessage sceneActionNodeStateMessage)
+   public void setSceneActionStateMessage(SceneActionStateMessage sceneActionStateMessage)
    {
-      this.sceneActionNodeStateMessage = sceneActionNodeStateMessage;
+      this.sceneActionStateMessage = sceneActionStateMessage;
    }
 
    public AI2RNodeStateMessage getAI2RNodeStateMessage()

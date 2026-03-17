@@ -18,7 +18,7 @@
 #include "behavior_msgs/msg/./LegActionStateMessage_.idl"
 #include "behavior_msgs/msg/./NeckActionStateMessage_.idl"
 #include "behavior_msgs/msg/./PelvisActionStateMessage_.idl"
-#include "behavior_msgs/msg/./SceneActionNodeStateMessage_.idl"
+#include "behavior_msgs/msg/./SceneActionStateMessage_.idl"
 #include "behavior_msgs/msg/./ScrewPrimitiveActionStateMessage_.idl"
 #include "behavior_msgs/msg/./SpineActionStateMessage_.idl"
 #include "behavior_msgs/msg/./WaitActionStateMessage_.idl"
@@ -147,7 +147,7 @@ module behavior_msgs
         sequence<behavior_msgs::msg::dds::ConditionNodeStateMessage, 120> condition_nodes;
         sequence<behavior_msgs::msg::dds::GotoNodeStateMessage, 120> goto_nodes;
         sequence<behavior_msgs::msg::dds::CheckpointNodeStateMessage, 120> checkpoint_nodes;
-        sequence<behavior_msgs::msg::dds::SceneActionNodeStateMessage, 120> scene_actions;
+        sequence<behavior_msgs::msg::dds::SceneActionStateMessage, 120> scene_actions;
         sequence<behavior_msgs::msg::dds::AI2RNodeStateMessage, 1> ai2r_nodes;
         sequence<behavior_msgs::msg::dds::DoorTraversalStateMessage, 120> door_traversals;
         sequence<behavior_msgs::msg::dds::BuildingExplorationStateMessage, 120> building_explorations;

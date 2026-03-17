@@ -1,5 +1,5 @@
-#ifndef __behavior_msgs__msg__SceneActionNodeDefinitionMessage__idl__
-#define __behavior_msgs__msg__SceneActionNodeDefinitionMessage__idl__
+#ifndef __behavior_msgs__msg__SceneActionDefinitionMessage__idl__
+#define __behavior_msgs__msg__SceneActionDefinitionMessage__idl__
 
 #include "behavior_msgs/msg/./ActionNodeDefinitionMessage_.idl"
 #include "behavior_msgs/msg/./BehaviorTreeSceneObjectDefinitionMessage_.idl"
@@ -26,8 +26,8 @@ module behavior_msgs
       /**
        * TODO: The following fields are work in progress:
        */
-      @TypeCode(type="behavior_msgs::msg::dds_::SceneActionNodeDefinitionMessage_")
-      struct SceneActionNodeDefinitionMessage
+      @TypeCode(type="behavior_msgs::msg::dds_::SceneActionDefinitionMessage_")
+      struct SceneActionDefinitionMessage
       {
         /**
          * Parent definition fields

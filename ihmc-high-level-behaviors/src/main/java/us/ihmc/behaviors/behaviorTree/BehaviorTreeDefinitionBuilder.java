@@ -25,7 +25,7 @@ public class BehaviorTreeDefinitionBuilder
       MAP.put(ConditionNodeDefinition.class, ConditionNodeDefinition::new);
       MAP.put(GotoNodeDefinition.class, GotoNodeDefinition::new);
       MAP.put(CheckpointNodeDefinition.class, CheckpointNodeDefinition::new);
-      MAP.put(SceneActionNodeDefinition.class, SceneActionNodeDefinition::new);
+      MAP.put(SceneActionDefinition.class, SceneActionDefinition::new);
       MAP.put(AI2RNodeDefinition.class, AI2RNodeDefinition::new);
       MAP.put(DoorTraversalDefinition.class, DoorTraversalDefinition::new);
       MAP.put(BuildingExplorationDefinition.class, BuildingExplorationDefinition::new);

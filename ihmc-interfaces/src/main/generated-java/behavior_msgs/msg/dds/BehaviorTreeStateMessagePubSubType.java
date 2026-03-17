@@ -15,7 +15,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "723af6c7b2283034fde074a784cb4652b1c3769ee6f2abd34ba55916daf5a20c";
+   		return "e380c38d601e4da5453fc367ee081d7a01d619a608b5f335f57ef2e17c045586";
    }
    
    @Override
@@ -90,7 +90,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
           current_alignment += behavior_msgs.msg.dds.CheckpointNodeStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 120; ++i0)
       {
-          current_alignment += behavior_msgs.msg.dds.SceneActionNodeStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+          current_alignment += behavior_msgs.msg.dds.SceneActionStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 1; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.AI2RNodeStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
@@ -207,7 +207,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getSceneActions().size(); ++i0)
       {
-          current_alignment += behavior_msgs.msg.dds.SceneActionNodeStateMessagePubSubType.getCdrSerializedSize(data.getSceneActions().get(i0), current_alignment);}
+          current_alignment += behavior_msgs.msg.dds.SceneActionStateMessagePubSubType.getCdrSerializedSize(data.getSceneActions().get(i0), current_alignment);}
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getAi2rNodes().size(); ++i0)

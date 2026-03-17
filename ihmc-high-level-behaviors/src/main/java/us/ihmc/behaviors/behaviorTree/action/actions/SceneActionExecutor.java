@@ -3,7 +3,7 @@ package us.ihmc.behaviors.behaviorTree.action.actions;
 import behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
-import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionNodeDefinition.SceneActionNodeType;
+import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionDefinition.SceneActionType;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneDoorFrameExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneDoorPanelExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectDefinition;
@@ -21,7 +21,7 @@ import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseObject
 import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
 import us.ihmc.tools.Timer;
 
-public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeState, SceneActionNodeDefinition>
+public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, SceneActionDefinition>
 {
    private final Timer timer = new Timer();
    private final Throttler throttler = new Throttler().setFrequency(1.0);
@@ -29,9 +29,9 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
    private final Vector3D detectionToCamera = new Vector3D();
    private boolean printDebug = false;
 
-   public SceneActionNodeExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
+   public SceneActionExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
    {
-      super(new SceneActionNodeState(id, rootNode.getState()), rootNode);
+      super(new SceneActionState(id, rootNode.getState()), rootNode);
    }
 
    @Override
@@ -55,9 +55,9 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
    {
       state.setElapsedExecutionTime(timer.getElapsedTime());
 
-      boolean isClearScene = definition.getSceneActionType().getValue() == SceneActionNodeType.CLEAR_SCENE;
-      boolean isFreeze = definition.getSceneActionType().getValue() == SceneActionNodeType.FREEZE_OBJECT;
-      boolean isDelete = definition.getSceneActionType().getValue() == SceneActionNodeType.DELETE_OBJECT;
+      boolean isClearScene = definition.getSceneActionType().getValue() == SceneActionType.CLEAR_SCENE;
+      boolean isFreeze = definition.getSceneActionType().getValue() == SceneActionType.FREEZE_OBJECT;
+      boolean isDelete = definition.getSceneActionType().getValue() == SceneActionType.DELETE_OBJECT;
       if (isClearScene)
       {
          scene.removeAllObjects();

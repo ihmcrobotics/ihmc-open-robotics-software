@@ -6,9 +6,9 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImInt;
 import org.yaml.snakeyaml.Yaml;
-import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionNodeDefinition;
-import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionNodeDefinition.SceneActionNodeType;
-import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionNodeState;
+import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionDefinition;
+import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionDefinition.SceneActionType;
+import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionState;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectDefinition;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectType;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-public class RDXSceneActionNode extends RDXActionNode<SceneActionNodeState, SceneActionNodeDefinition>
+public class RDXSceneAction extends RDXActionNode<SceneActionState, SceneActionDefinition>
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiSceneActionWidget widget = new ImGuiSceneActionWidget();
@@ -45,9 +45,9 @@ public class RDXSceneActionNode extends RDXActionNode<SceneActionNodeState, Scen
    private final ImIntegerWrapper minHistorySizeWidget;
    private final RDXSelectablePose3DGizmo nominalObjectPoseGizmo;
 
-   public RDXSceneActionNode(long id, RDXBehaviorTreeRootNode rootNode)
+   public RDXSceneAction(long id, RDXBehaviorTreeRootNode rootNode)
    {
-      super(new SceneActionNodeState(id, rootNode.getState()), rootNode);
+      super(new SceneActionState(id, rootNode.getState()), rootNode);
 
       nominalObjectPoseGizmo = new RDXSelectablePose3DGizmo(definition.getNominalObjectPose().getValueUnsafe(), scene.findFrameByName("Walking"));
       nominalObjectPoseGizmo.create(panel3D);
@@ -114,10 +114,10 @@ public class RDXSceneActionNode extends RDXActionNode<SceneActionNodeState, Scen
    @Override
    protected void renderImGuiWidgetsInternal()
    {
-      SceneActionNodeType currentActionType = definition.getSceneActionType().getValue();
+      SceneActionType currentActionType = definition.getSceneActionType().getValue();
       if (ImGui.beginCombo(labels.get("Action Type"), currentActionType.name()))
       {
-         for (SceneActionNodeType value : SceneActionNodeType.values)
+         for (SceneActionType value : SceneActionType.values)
          {
             if (ImGui.selectable(value.name(), value == currentActionType))
                definition.getSceneActionType().setValue(value);
@@ -125,7 +125,7 @@ public class RDXSceneActionNode extends RDXActionNode<SceneActionNodeState, Scen
          ImGui.endCombo();
       }
 
-      if (definition.getSceneActionType().getValue() != SceneActionNodeType.CLEAR_SCENE)
+      if (definition.getSceneActionType().getValue() != SceneActionType.CLEAR_SCENE)
       {
          BehaviorTreeSceneObjectDefinition objectDefinition = definition.getSceneObjectDefinition();
 

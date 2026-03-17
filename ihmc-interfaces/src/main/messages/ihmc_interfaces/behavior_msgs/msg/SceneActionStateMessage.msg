@@ -2,4 +2,4 @@
 behavior_msgs/ActionNodeStateMessage state
 
 # Definition
-behavior_msgs/SceneActionNodeDefinitionMessage definition
+behavior_msgs/SceneActionDefinitionMessage definition

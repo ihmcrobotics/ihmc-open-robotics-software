@@ -5,7 +5,7 @@ import behavior_msgs.msg.dds.AI2RNavigationMessage;
 import behavior_msgs.msg.dds.AI2RReceiveObjectMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
-import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionNodeState;
+import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionState;
 import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeState;
 import us.ihmc.behaviors.behaviorTree.action.actions.WalkActionDefinition;
 import us.ihmc.behaviors.behaviorTree.action.actions.WalkActionFootstepState;
@@ -81,10 +81,10 @@ public class AI2RSkillEditor
       StringBuilderHolder objectsToScan = message.getScan().getObjectNames();
 
       // Collect all existing "Setup object" SceneActions
-      List<SceneActionNodeState> allSetupActions = new ArrayList<>();
+      List<SceneActionState> allSetupActions = new ArrayList<>();
       for (var leaf : state.getActionSequence().getOrderedLeaves())
       {
-         if (leaf instanceof SceneActionNodeState sceneActionState)
+         if (leaf instanceof SceneActionState sceneActionState)
          {
             String nameLower = leaf.getDefinition().getName().toLowerCase();
 
@@ -104,11 +104,11 @@ public class AI2RSkillEditor
          String objectName = objectsToScan.getString(i);
          String idToken = Integer.toString(i + 1); // "1", "2", ...
 
-         SceneActionNodeState left  = null;
-         SceneActionNodeState right = null;
-         SceneActionNodeState front = null;
+         SceneActionState left  = null;
+         SceneActionState right = null;
+         SceneActionState front = null;
 
-         for (SceneActionNodeState s : allSetupActions)
+         for (SceneActionState s : allSetupActions)
          {
             String nameLower = s.getDefinition().getName().toLowerCase();
             if (nameLower.contains("setup object" + idToken) || nameLower.contains("freeze object" + idToken))

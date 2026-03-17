@@ -9,7 +9,7 @@ import us.ihmc.pubsub.TopicDataType;
 /**
        * TODO: The following fields are work in progress:
        */
-public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefinitionMessage> implements Settable<SceneActionNodeDefinitionMessage>, EpsilonComparable<SceneActionNodeDefinitionMessage>
+public class SceneActionDefinitionMessage extends Packet<SceneActionDefinitionMessage> implements Settable<SceneActionDefinitionMessage>, EpsilonComparable<SceneActionDefinitionMessage>
 {
    public static final byte SETUP_OBJECT = (byte) 0;
    public static final byte FREEZE_OBJECT = (byte) 1;
@@ -72,7 +72,7 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
             */
    public us.ihmc.idl.IDLSequence.Byte  enabled_foundation_pose_models_;
 
-   public SceneActionNodeDefinitionMessage()
+   public SceneActionDefinitionMessage()
    {
       definition_ = new behavior_msgs.msg.dds.ActionNodeDefinitionMessage();
       scene_object_definition_ = new behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage();
@@ -84,13 +84,13 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
 
    }
 
-   public SceneActionNodeDefinitionMessage(SceneActionNodeDefinitionMessage other)
+   public SceneActionDefinitionMessage(SceneActionDefinitionMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(SceneActionNodeDefinitionMessage other)
+   public void set(SceneActionDefinitionMessage other)
    {
       behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
       scene_action_type_ = other.scene_action_type_;
@@ -291,19 +291,19 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
    }
 
 
-   public static Supplier<SceneActionNodeDefinitionMessagePubSubType> getPubSubType()
+   public static Supplier<SceneActionDefinitionMessagePubSubType> getPubSubType()
    {
-      return SceneActionNodeDefinitionMessagePubSubType::new;
+      return SceneActionDefinitionMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return SceneActionNodeDefinitionMessagePubSubType::new;
+      return SceneActionDefinitionMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(SceneActionNodeDefinitionMessage other, double epsilon)
+   public boolean epsilonEquals(SceneActionDefinitionMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -342,9 +342,9 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof SceneActionNodeDefinitionMessage)) return false;
+      if(!(other instanceof SceneActionDefinitionMessage)) return false;
 
-      SceneActionNodeDefinitionMessage otherMyClass = (SceneActionNodeDefinitionMessage) other;
+      SceneActionDefinitionMessage otherMyClass = (SceneActionDefinitionMessage) other;
 
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
       if(this.scene_action_type_ != otherMyClass.scene_action_type_) return false;
@@ -377,7 +377,7 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("SceneActionNodeDefinitionMessage {");
+      builder.append("SceneActionDefinitionMessage {");
       builder.append("definition=");
       builder.append(this.definition_);      builder.append(", ");
       builder.append("scene_action_type=");

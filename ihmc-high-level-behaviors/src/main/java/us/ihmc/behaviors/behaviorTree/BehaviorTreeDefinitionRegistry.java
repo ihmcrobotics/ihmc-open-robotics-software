@@ -25,7 +25,7 @@ public class BehaviorTreeDefinitionRegistry
       new DefinitionMapping(ConditionNodeDefinition.class, BehaviorTreeStateMessage.CONDITION_NODE),
       new DefinitionMapping(GotoNodeDefinition.class, BehaviorTreeStateMessage.GOTO_NODE),
       new DefinitionMapping(CheckpointNodeDefinition.class, BehaviorTreeStateMessage.CHECKPOINT_NODE),
-      new DefinitionMapping(SceneActionNodeDefinition.class, BehaviorTreeStateMessage.SCENE_ACTION),
+      new DefinitionMapping(SceneActionDefinition.class, BehaviorTreeStateMessage.SCENE_ACTION),
       new DefinitionMapping(AI2RNodeDefinition.class, BehaviorTreeStateMessage.AI2R_NODE),
       new DefinitionMapping(DoorTraversalDefinition.class, BehaviorTreeStateMessage.DOOR_TRAVERSAL),
       new DefinitionMapping(BuildingExplorationDefinition.class, BehaviorTreeStateMessage.BUILDING_EXPLORATION),

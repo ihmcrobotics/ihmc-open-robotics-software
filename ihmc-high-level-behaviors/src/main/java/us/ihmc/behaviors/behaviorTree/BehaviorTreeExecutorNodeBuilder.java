@@ -37,7 +37,7 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
       REGISTRY.put(ConditionNodeDefinition.class, ConditionNodeExecutor::new);
       REGISTRY.put(GotoNodeDefinition.class, GotoNodeExecutor::new);
       REGISTRY.put(CheckpointNodeDefinition.class, CheckpointNodeExecutor::new);
-      REGISTRY.put(SceneActionNodeDefinition.class, SceneActionNodeExecutor::new);
+      REGISTRY.put(SceneActionDefinition.class, SceneActionExecutor::new);
       REGISTRY.put(AI2RNodeDefinition.class, AI2RNodeExecutor::new);
       REGISTRY.put(DoorTraversalDefinition.class, DoorTraversalExecutor::new);
       REGISTRY.put(BuildingExplorationDefinition.class, BuildingExplorationExecutor::new);

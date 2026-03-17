@@ -75,7 +75,7 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ConditionNodeStateMessage>  condition_nodes_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.GotoNodeStateMessage>  goto_nodes_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.CheckpointNodeStateMessage>  checkpoint_nodes_;
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.SceneActionNodeStateMessage>  scene_actions_;
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.SceneActionStateMessage>  scene_actions_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.AI2RNodeStateMessage>  ai2r_nodes_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.DoorTraversalStateMessage>  door_traversals_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BuildingExplorationStateMessage>  building_explorations_;
@@ -107,7 +107,7 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       condition_nodes_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ConditionNodeStateMessage> (120, new behavior_msgs.msg.dds.ConditionNodeStateMessagePubSubType());
       goto_nodes_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.GotoNodeStateMessage> (120, new behavior_msgs.msg.dds.GotoNodeStateMessagePubSubType());
       checkpoint_nodes_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.CheckpointNodeStateMessage> (120, new behavior_msgs.msg.dds.CheckpointNodeStateMessagePubSubType());
-      scene_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.SceneActionNodeStateMessage> (120, new behavior_msgs.msg.dds.SceneActionNodeStateMessagePubSubType());
+      scene_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.SceneActionStateMessage> (120, new behavior_msgs.msg.dds.SceneActionStateMessagePubSubType());
       ai2r_nodes_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.AI2RNodeStateMessage> (1, new behavior_msgs.msg.dds.AI2RNodeStateMessagePubSubType());
       door_traversals_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.DoorTraversalStateMessage> (120, new behavior_msgs.msg.dds.DoorTraversalStateMessagePubSubType());
       building_explorations_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BuildingExplorationStateMessage> (120, new behavior_msgs.msg.dds.BuildingExplorationStateMessagePubSubType());
@@ -283,7 +283,7 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
    }
 
 
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.SceneActionNodeStateMessage>  getSceneActions()
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.SceneActionStateMessage>  getSceneActions()
    {
       return scene_actions_;
    }

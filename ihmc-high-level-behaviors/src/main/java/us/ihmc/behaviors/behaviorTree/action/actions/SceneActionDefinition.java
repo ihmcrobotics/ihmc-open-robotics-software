@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
-import behavior_msgs.msg.dds.SceneActionNodeDefinitionMessage;
+import behavior_msgs.msg.dds.SceneActionDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -20,19 +20,19 @@ import us.ihmc.tools.io.JSONTools;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SceneActionNodeDefinition extends ActionNodeDefinition
+public class SceneActionDefinition extends ActionNodeDefinition
 {
-   public enum SceneActionNodeType
+   public enum SceneActionType
    {
       SETUP_OBJECT,
       FREEZE_OBJECT,
       DELETE_OBJECT,
       CLEAR_SCENE;
 
-      public static final SceneActionNodeType[] values = values();
+      public static final SceneActionType[] values = values();
    }
 
-   private final CRDTBidirectionalEnumField<SceneActionNodeType> sceneActionType;
+   private final CRDTBidirectionalEnumField<SceneActionType> sceneActionType;
    private final BehaviorTreeSceneObjectDefinition sceneObjectDefinition;
    private final CRDTBidirectionalFloat timeout;
    private final CRDTBidirectionalInteger minimumHistorySize;
@@ -45,7 +45,7 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
    private final CRDTBidirectionalIntegerList ignoredYoloClassIndices;
    private final CRDTBidirectionalIntegerList enabledFoundationPoseModels;
 
-   private SceneActionNodeType onDiskSceneActionType;
+   private SceneActionType onDiskSceneActionType;
    private float onDiskTimeout;
    private int onDiskMinimumHistorySize;
    private final RigidBodyTransform onDiskNominalObjectPose = new RigidBodyTransform();
@@ -57,11 +57,11 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
    private final TIntArrayList onDiskIgnoredYoloClassIndices = new TIntArrayList();
    private final TIntArrayList onDiskEnabledFoundationPoseModels = new TIntArrayList();
 
-   public SceneActionNodeDefinition(BehaviorTreeRootNodeDefinition rootNode)
+   public SceneActionDefinition(BehaviorTreeRootNodeDefinition rootNode)
    {
       super(rootNode);
 
-      sceneActionType = new CRDTBidirectionalEnumField<>(this, SceneActionNodeType.SETUP_OBJECT);
+      sceneActionType = new CRDTBidirectionalEnumField<>(this, SceneActionType.SETUP_OBJECT);
       sceneObjectDefinition = new BehaviorTreeSceneObjectDefinition(this);
       timeout = new CRDTBidirectionalFloat(this, 5.0f);
       minimumHistorySize = new CRDTBidirectionalInteger(this, 5);
@@ -81,7 +81,7 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
       super.saveToFile(jsonNode);
 
       jsonNode.put("sceneActionType", sceneActionType.getValue().name());
-      if (sceneActionType.getValue() != SceneActionNodeType.CLEAR_SCENE)
+      if (sceneActionType.getValue() != SceneActionType.CLEAR_SCENE)
       {
          ObjectNode sceneObjectNode = jsonNode.putObject("sceneObjectDefinition");
          sceneObjectDefinition.saveToFile(sceneObjectNode);
@@ -112,8 +112,8 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
    {
       super.loadFromFile(jsonNode);
 
-      sceneActionType.setValue(SceneActionNodeType.valueOf(jsonNode.get("sceneActionType").textValue()));
-      if (sceneActionType.getValue() != SceneActionNodeType.CLEAR_SCENE)
+      sceneActionType.setValue(SceneActionType.valueOf(jsonNode.get("sceneActionType").textValue()));
+      if (sceneActionType.getValue() != SceneActionType.CLEAR_SCENE)
       {
          sceneObjectDefinition.loadFromFile(jsonNode.get("sceneObjectDefinition"));
          timeout.setValue((float) jsonNode.get("timeout").asDouble());
@@ -225,7 +225,7 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
       return !unchanged;
    }
 
-   public void toMessage(SceneActionNodeDefinitionMessage message)
+   public void toMessage(SceneActionDefinitionMessage message)
    {
       super.toMessage(message.getDefinition());
 
@@ -243,11 +243,11 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
       enabledFoundationPoseModels.toMessage(message.getEnabledFoundationPoseModels());
    }
 
-   public void fromMessage(SceneActionNodeDefinitionMessage message)
+   public void fromMessage(SceneActionDefinitionMessage message)
    {
       super.fromMessage(message.getDefinition());
 
-      sceneActionType.fromMessageOrdinal(message.getSceneActionType(), SceneActionNodeType.values);
+      sceneActionType.fromMessageOrdinal(message.getSceneActionType(), SceneActionType.values);
       sceneObjectDefinition.fromMessage(message.getSceneObjectDefinition());
       timeout.fromMessage(message.getTimeout());
       minimumHistorySize.fromMessage(message.getMinimumHistorySize());
@@ -266,7 +266,7 @@ public class SceneActionNodeDefinition extends ActionNodeDefinition
       return sceneObjectDefinition;
    }
 
-   public CRDTBidirectionalEnumField<SceneActionNodeType> getSceneActionType()
+   public CRDTBidirectionalEnumField<SceneActionType> getSceneActionType()
    {
       return sceneActionType;
    }

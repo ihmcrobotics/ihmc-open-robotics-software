@@ -67,7 +67,7 @@ behavior_msgs/GotoNodeStateMessage[<=120] goto_nodes
 
 behavior_msgs/CheckpointNodeStateMessage[<=120] checkpoint_nodes
 
-behavior_msgs/SceneActionNodeStateMessage[<=120] scene_actions
+behavior_msgs/SceneActionStateMessage[<=120] scene_actions
 
 behavior_msgs/AI2RNodeStateMessage[<=1] ai2r_nodes
 
