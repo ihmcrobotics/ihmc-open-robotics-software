@@ -1,0 +1,36 @@
+#ifndef __perception_msgs__msg__MeshSelectorInput__idl__
+#define __perception_msgs__msg__MeshSelectorInput__idl__
+
+#include "sensor_msgs/msg/./Image_.idl"
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="perception_msgs::msg::dds_::MeshSelectorInput_")
+      struct MeshSelectorInput
+      {
+        /**
+         * Category / class label from the detector
+         */
+        string category;
+        /**
+         * Tracking ID assigned by the detection tracker
+         */
+        long track_id;
+        /**
+         * RGB image corresponding to the detection
+         */
+        sensor_msgs::msg::dds::Image rgb_image;
+        /**
+         * Binary segmentation mask for the detected object
+         */
+        sensor_msgs::msg::dds::Image mask_image;
+      };
+    };
+  };
+};
+
+#endif

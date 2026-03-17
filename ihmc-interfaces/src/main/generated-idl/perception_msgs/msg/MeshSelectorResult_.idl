@@ -1,0 +1,35 @@
+#ifndef __perception_msgs__msg__MeshSelectorResult__idl__
+#define __perception_msgs__msg__MeshSelectorResult__idl__
+
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="perception_msgs::msg::dds_::MeshSelectorResult_")
+      struct MeshSelectorResult
+      {
+        /**
+         * Object category from the detector
+         */
+        string category;
+        /**
+         * Tracking ID of the object instance
+         */
+        long track_id;
+        /**
+         * Selected CAD mesh instance name
+         */
+        string selected_instance;
+        /**
+         * Similarity score between query descriptor and selected mesh descriptor
+         */
+        float score;
+      };
+    };
+  };
+};
+
+#endif

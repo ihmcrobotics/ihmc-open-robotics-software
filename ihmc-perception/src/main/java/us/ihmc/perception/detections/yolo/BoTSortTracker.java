@@ -824,9 +824,9 @@ public class BoTSortTracker
          float cx = x1 + 0.5f * w;
          float cy = y1 + 0.5f * h;
 
-         LogTools.info(String.format(
-               "TRACKER INPUT: x1=%.3f y1=%.3f x2=%.3f y2=%.3f -> cx=%.3f cy=%.3f",
-               x1, y1, x2, y2, cx, cy));
+//         LogTools.info(String.format(
+//               "TRACKER INPUT: x1=%.3f y1=%.3f x2=%.3f y2=%.3f -> cx=%.3f cy=%.3f",
+//               x1, y1, x2, y2, cx, cy));
 
 
          return new float[] {cx, cy, w, h};
