@@ -2,20 +2,20 @@ package perception_msgs.msg.dds;
 
 /**
 * 
-* Topic data type of the struct "MeshSelectorResult" defined in "MeshSelectorResult_.idl". Use this class to provide the TopicDataType to a Participant. 
+* Topic data type of the struct "MeshSelectorBatchResultItem" defined in "MeshSelectorBatchResultItem_.idl". Use this class to provide the TopicDataType to a Participant. 
 *
-* This file was automatically generated from MeshSelectorResult_.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit MeshSelectorResult_.idl instead.
+* This file was automatically generated from MeshSelectorBatchResultItem_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit MeshSelectorBatchResultItem_.idl instead.
 *
 */
-public class MeshSelectorResultPubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.MeshSelectorResult>
+public class MeshSelectorBatchResultItemPubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.MeshSelectorBatchResultItem>
 {
-   public static final java.lang.String name = "perception_msgs::msg::dds_::MeshSelectorResult_";
+   public static final java.lang.String name = "perception_msgs::msg::dds_::MeshSelectorBatchResultItem_";
    
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "81c4305d79d17e1b5e94b653b6fc69ac0a890b4dc8836445424499129d89d2ee";
+   		return "34960271b7625493760791e4eba53637ef2cca03885f32171a16524d668d3bf3";
    }
    
    @Override
@@ -28,7 +28,7 @@ public class MeshSelectorResultPubSubType implements us.ihmc.pubsub.TopicDataTyp
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(perception_msgs.msg.dds.MeshSelectorResult data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
+   public void serialize(perception_msgs.msg.dds.MeshSelectorBatchResultItem data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -36,7 +36,7 @@ public class MeshSelectorResultPubSubType implements us.ihmc.pubsub.TopicDataTyp
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, perception_msgs.msg.dds.MeshSelectorResult data) throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, perception_msgs.msg.dds.MeshSelectorBatchResultItem data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -62,12 +62,12 @@ public class MeshSelectorResultPubSubType implements us.ihmc.pubsub.TopicDataTyp
       return current_alignment - initial_alignment;
    }
 
-   public final static int getCdrSerializedSize(perception_msgs.msg.dds.MeshSelectorResult data)
+   public final static int getCdrSerializedSize(perception_msgs.msg.dds.MeshSelectorBatchResultItem data)
    {
       return getCdrSerializedSize(data, 0);
    }
 
-   public final static int getCdrSerializedSize(perception_msgs.msg.dds.MeshSelectorResult data, int current_alignment)
+   public final static int getCdrSerializedSize(perception_msgs.msg.dds.MeshSelectorBatchResultItem data, int current_alignment)
    {
       int initial_alignment = current_alignment;
 
@@ -85,7 +85,7 @@ public class MeshSelectorResultPubSubType implements us.ihmc.pubsub.TopicDataTyp
       return current_alignment - initial_alignment;
    }
 
-   public static void write(perception_msgs.msg.dds.MeshSelectorResult data, us.ihmc.idl.CDR cdr)
+   public static void write(perception_msgs.msg.dds.MeshSelectorBatchResultItem data, us.ihmc.idl.CDR cdr)
    {
       if(data.getCategory().length() <= 255)
       cdr.write_type_d(data.getCategory());else
@@ -101,7 +101,7 @@ public class MeshSelectorResultPubSubType implements us.ihmc.pubsub.TopicDataTyp
 
    }
 
-   public static void read(perception_msgs.msg.dds.MeshSelectorResult data, us.ihmc.idl.CDR cdr)
+   public static void read(perception_msgs.msg.dds.MeshSelectorBatchResultItem data, us.ihmc.idl.CDR cdr)
    {
       cdr.read_type_d(data.getCategory());	
       data.setTrackId(cdr.read_type_2());
@@ -113,7 +113,7 @@ public class MeshSelectorResultPubSubType implements us.ihmc.pubsub.TopicDataTyp
    }
 
    @Override
-   public final void serialize(perception_msgs.msg.dds.MeshSelectorResult data, us.ihmc.idl.InterchangeSerializer ser)
+   public final void serialize(perception_msgs.msg.dds.MeshSelectorBatchResultItem data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_d("category", data.getCategory());
       ser.write_type_2("track_id", data.getTrackId());
@@ -122,7 +122,7 @@ public class MeshSelectorResultPubSubType implements us.ihmc.pubsub.TopicDataTyp
    }
 
    @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.MeshSelectorResult data)
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.MeshSelectorBatchResultItem data)
    {
       ser.read_type_d("category", data.getCategory());
       data.setTrackId(ser.read_type_2("track_id"));
@@ -130,15 +130,15 @@ public class MeshSelectorResultPubSubType implements us.ihmc.pubsub.TopicDataTyp
       data.setScore(ser.read_type_5("score"));
    }
 
-   public static void staticCopy(perception_msgs.msg.dds.MeshSelectorResult src, perception_msgs.msg.dds.MeshSelectorResult dest)
+   public static void staticCopy(perception_msgs.msg.dds.MeshSelectorBatchResultItem src, perception_msgs.msg.dds.MeshSelectorBatchResultItem dest)
    {
       dest.set(src);
    }
 
    @Override
-   public perception_msgs.msg.dds.MeshSelectorResult createData()
+   public perception_msgs.msg.dds.MeshSelectorBatchResultItem createData()
    {
-      return new perception_msgs.msg.dds.MeshSelectorResult();
+      return new perception_msgs.msg.dds.MeshSelectorBatchResultItem();
    }
    @Override
    public int getTypeSize()
@@ -152,24 +152,24 @@ public class MeshSelectorResultPubSubType implements us.ihmc.pubsub.TopicDataTyp
       return name;
    }
    
-   public void serialize(perception_msgs.msg.dds.MeshSelectorResult data, us.ihmc.idl.CDR cdr)
+   public void serialize(perception_msgs.msg.dds.MeshSelectorBatchResultItem data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
    }
 
-   public void deserialize(perception_msgs.msg.dds.MeshSelectorResult data, us.ihmc.idl.CDR cdr)
+   public void deserialize(perception_msgs.msg.dds.MeshSelectorBatchResultItem data, us.ihmc.idl.CDR cdr)
    {
       read(data, cdr);
    }
    
-   public void copy(perception_msgs.msg.dds.MeshSelectorResult src, perception_msgs.msg.dds.MeshSelectorResult dest)
+   public void copy(perception_msgs.msg.dds.MeshSelectorBatchResultItem src, perception_msgs.msg.dds.MeshSelectorBatchResultItem dest)
    {
       staticCopy(src, dest);
    }
 
    @Override
-   public MeshSelectorResultPubSubType newInstance()
+   public MeshSelectorBatchResultItemPubSubType newInstance()
    {
-      return new MeshSelectorResultPubSubType();
+      return new MeshSelectorBatchResultItemPubSubType();
    }
 }

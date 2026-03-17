@@ -240,24 +240,77 @@ public class YOLOv8Tools
    {
       for (AnnotatedTarget2D t : targets)
       {
-         if (t.bbox == null) continue;
+         if (t.bbox == null)
+            continue;
 
          int x1 = Math.round(t.bbox[0]);
          int y1 = Math.round(t.bbox[1]);
          int x2 = Math.round(t.bbox[2]);
          int y2 = Math.round(t.bbox[3]);
 
-         Scalar color = colorForId(t.targetId); // nice stable per targetId
+         Scalar color = colorForId(t.targetId);
 
-         opencv_imgproc.rectangle(image, new Point(x1, y1), new Point(x2, y2), color, 2, LINE_TYPE, 0);
+         // ---- draw mask tint first ----
+         if (t.mask != null)
+         {
+            Mat maskMat = t.mask.getCpuImageMat();
+            if (maskMat != null && !maskMat.isNull())
+            {
+               Mat maskAligned = maskMat;
+               Mat resizedMask = null;
 
-         String label = "T" + t.targetId + " (trk " + t.trackId + ") " +
-                        String.format("%.2f", t.score) + " " + t.name;
+               if (maskMat.cols() != image.cols() || maskMat.rows() != image.rows())
+               {
+                  resizedMask = new Mat();
+                  opencv_imgproc.resize(maskMat,
+                                        resizedMask,
+                                        image.size(),
+                                        0, 0,
+                                        opencv_imgproc.INTER_NEAREST);
+                  maskAligned = resizedMask;
+               }
 
-         opencv_imgproc.putText(image, label,
-                                new Point(x1, Math.max(0, y1 - 5)),
-                                FONT, 0.8, WHITE, 2, LINE_TYPE, false);
+               Mat colorMat = new Mat(image.rows(), image.cols(), image.type(), color);
+               opencv_core.add(image, colorMat, image, maskAligned, -1);
+
+               colorMat.release();
+               if (resizedMask != null)
+                  resizedMask.release();
+            }
+         }
+
+         // ---- bbox ----
+         opencv_imgproc.rectangle(image, new Point(x1, y1), new Point(x2, y2), color, 4, LINE_TYPE, 0);
+
+         // ---- label format: ID:1 0.83 Bottle ----
+         String objectName = (t.name == null || t.name.isBlank()) ? "Object" : prettifyName(t.name);
+         String label = String.format(Locale.US, "ID:%d %.2f %s", t.targetId, t.score, objectName);
+
+         Size textSize = opencv_imgproc.getTextSize(label, FONT, FONT_SCALE, FONT_THICKNESS, new IntPointer());
+
+         int textBoxClampedX = MathTools.clamp(x1, 0, image.cols() - textSize.width());
+         int textBoxClampedY = MathTools.clamp(y1 - textSize.height(), 0, image.rows() - textSize.height());
+
+         Rect textBox = new Rect(textBoxClampedX, textBoxClampedY, textSize.width(), textSize.height());
+         opencv_imgproc.rectangle(image, textBox, color, opencv_imgproc.FILLED, LINE_TYPE, 0);
+
+         Point textLocation = new Point(textBoxClampedX, textBoxClampedY + textSize.height());
+         opencv_imgproc.putText(image, label, textLocation, FONT, FONT_SCALE, WHITE, FONT_THICKNESS, LINE_TYPE, false);
+
+         textBox.close();
       }
+   }
+
+   private static String prettifyName(String rawName)
+   {
+      if (rawName == null || rawName.isBlank())
+         return "Object";
+
+      String cleaned = rawName.replace('_', ' ').trim().toLowerCase(Locale.US);
+      if (cleaned.isEmpty())
+         return "Object";
+
+      return Character.toUpperCase(cleaned.charAt(0)) + cleaned.substring(1);
    }
 
    public static List<URL> getYOLOModelDirectories(URL baseModelsDirectory)

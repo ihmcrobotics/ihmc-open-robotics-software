@@ -6,7 +6,7 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
-public class MeshSelectorResult extends Packet<MeshSelectorResult> implements Settable<MeshSelectorResult>, EpsilonComparable<MeshSelectorResult>
+public class MeshSelectorBatchResultItem extends Packet<MeshSelectorBatchResultItem> implements Settable<MeshSelectorBatchResultItem>, EpsilonComparable<MeshSelectorBatchResultItem>
 {
    /**
             * Object category from the detector
@@ -25,19 +25,19 @@ public class MeshSelectorResult extends Packet<MeshSelectorResult> implements Se
             */
    public float score_;
 
-   public MeshSelectorResult()
+   public MeshSelectorBatchResultItem()
    {
       category_ = new java.lang.StringBuilder(255);
       selected_instance_ = new java.lang.StringBuilder(255);
    }
 
-   public MeshSelectorResult(MeshSelectorResult other)
+   public MeshSelectorBatchResultItem(MeshSelectorBatchResultItem other)
    {
       this();
       set(other);
    }
 
-   public void set(MeshSelectorResult other)
+   public void set(MeshSelectorBatchResultItem other)
    {
       category_.setLength(0);
       category_.append(other.category_);
@@ -130,19 +130,19 @@ public class MeshSelectorResult extends Packet<MeshSelectorResult> implements Se
    }
 
 
-   public static Supplier<MeshSelectorResultPubSubType> getPubSubType()
+   public static Supplier<MeshSelectorBatchResultItemPubSubType> getPubSubType()
    {
-      return MeshSelectorResultPubSubType::new;
+      return MeshSelectorBatchResultItemPubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return MeshSelectorResultPubSubType::new;
+      return MeshSelectorBatchResultItemPubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(MeshSelectorResult other, double epsilon)
+   public boolean epsilonEquals(MeshSelectorBatchResultItem other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -164,9 +164,9 @@ public class MeshSelectorResult extends Packet<MeshSelectorResult> implements Se
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof MeshSelectorResult)) return false;
+      if(!(other instanceof MeshSelectorBatchResultItem)) return false;
 
-      MeshSelectorResult otherMyClass = (MeshSelectorResult) other;
+      MeshSelectorBatchResultItem otherMyClass = (MeshSelectorBatchResultItem) other;
 
       if (!us.ihmc.idl.IDLTools.equals(this.category_, otherMyClass.category_)) return false;
 
@@ -185,7 +185,7 @@ public class MeshSelectorResult extends Packet<MeshSelectorResult> implements Se
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("MeshSelectorResult {");
+      builder.append("MeshSelectorBatchResultItem {");
       builder.append("category=");
       builder.append(this.category_);      builder.append(", ");
       builder.append("track_id=");

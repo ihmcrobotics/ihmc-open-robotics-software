@@ -531,10 +531,7 @@ public class YOLOv8DetectionExecutor
 
          try
          {
-            synchronized (annotatedDetectionsLock)
-            {
-               YOLOv8Tools.annotateImage(src, resultMat, annotatedImageDetections);
-            }
+            src.copyTo(resultMat);
 
             synchronized (annotatedTargetsLock)
             {
@@ -551,7 +548,7 @@ public class YOLOv8DetectionExecutor
          finally
          {
             if (annotatedImagePointer != null)
-               annotatedImagePointer.deallocate(); // or close()
+               annotatedImagePointer.deallocate();
 
             resultMat.close();
          }

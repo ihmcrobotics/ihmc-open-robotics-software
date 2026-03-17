@@ -6,7 +6,7 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
-public class MeshSelectorInput extends Packet<MeshSelectorInput> implements Settable<MeshSelectorInput>, EpsilonComparable<MeshSelectorInput>
+public class MeshSelectorBatchItem extends Packet<MeshSelectorBatchItem> implements Settable<MeshSelectorBatchItem>, EpsilonComparable<MeshSelectorBatchItem>
 {
    /**
             * Category / class label from the detector
@@ -17,36 +17,30 @@ public class MeshSelectorInput extends Packet<MeshSelectorInput> implements Sett
             */
    public int track_id_;
    /**
-            * RGB image corresponding to the detection
+            * Segmented RGB image corresponding to the detection
             */
-   public sensor_msgs.msg.dds.Image rgb_image_;
-   /**
-            * Binary segmentation mask for the detected object
-            */
-   public sensor_msgs.msg.dds.Image mask_image_;
+   public sensor_msgs.msg.dds.Image segmented_rgb_;
 
-   public MeshSelectorInput()
+   public MeshSelectorBatchItem()
    {
       category_ = new java.lang.StringBuilder(255);
-      rgb_image_ = new sensor_msgs.msg.dds.Image();
-      mask_image_ = new sensor_msgs.msg.dds.Image();
+      segmented_rgb_ = new sensor_msgs.msg.dds.Image();
    }
 
-   public MeshSelectorInput(MeshSelectorInput other)
+   public MeshSelectorBatchItem(MeshSelectorBatchItem other)
    {
       this();
       set(other);
    }
 
-   public void set(MeshSelectorInput other)
+   public void set(MeshSelectorBatchItem other)
    {
       category_.setLength(0);
       category_.append(other.category_);
 
       track_id_ = other.track_id_;
 
-      sensor_msgs.msg.dds.ImagePubSubType.staticCopy(other.rgb_image_, rgb_image_);
-      sensor_msgs.msg.dds.ImagePubSubType.staticCopy(other.mask_image_, mask_image_);
+      sensor_msgs.msg.dds.ImagePubSubType.staticCopy(other.segmented_rgb_, segmented_rgb_);
    }
 
    /**
@@ -90,36 +84,27 @@ public class MeshSelectorInput extends Packet<MeshSelectorInput> implements Sett
 
 
    /**
-            * RGB image corresponding to the detection
+            * Segmented RGB image corresponding to the detection
             */
-   public sensor_msgs.msg.dds.Image getRgbImage()
+   public sensor_msgs.msg.dds.Image getSegmentedRgb()
    {
-      return rgb_image_;
+      return segmented_rgb_;
    }
 
 
-   /**
-            * Binary segmentation mask for the detected object
-            */
-   public sensor_msgs.msg.dds.Image getMaskImage()
+   public static Supplier<MeshSelectorBatchItemPubSubType> getPubSubType()
    {
-      return mask_image_;
-   }
-
-
-   public static Supplier<MeshSelectorInputPubSubType> getPubSubType()
-   {
-      return MeshSelectorInputPubSubType::new;
+      return MeshSelectorBatchItemPubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return MeshSelectorInputPubSubType::new;
+      return MeshSelectorBatchItemPubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(MeshSelectorInput other, double epsilon)
+   public boolean epsilonEquals(MeshSelectorBatchItem other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -128,8 +113,7 @@ public class MeshSelectorInput extends Packet<MeshSelectorInput> implements Sett
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.track_id_, other.track_id_, epsilon)) return false;
 
-      if (!this.rgb_image_.epsilonEquals(other.rgb_image_, epsilon)) return false;
-      if (!this.mask_image_.epsilonEquals(other.mask_image_, epsilon)) return false;
+      if (!this.segmented_rgb_.epsilonEquals(other.segmented_rgb_, epsilon)) return false;
 
       return true;
    }
@@ -139,16 +123,15 @@ public class MeshSelectorInput extends Packet<MeshSelectorInput> implements Sett
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof MeshSelectorInput)) return false;
+      if(!(other instanceof MeshSelectorBatchItem)) return false;
 
-      MeshSelectorInput otherMyClass = (MeshSelectorInput) other;
+      MeshSelectorBatchItem otherMyClass = (MeshSelectorBatchItem) other;
 
       if (!us.ihmc.idl.IDLTools.equals(this.category_, otherMyClass.category_)) return false;
 
       if(this.track_id_ != otherMyClass.track_id_) return false;
 
-      if (!this.rgb_image_.equals(otherMyClass.rgb_image_)) return false;
-      if (!this.mask_image_.equals(otherMyClass.mask_image_)) return false;
+      if (!this.segmented_rgb_.equals(otherMyClass.segmented_rgb_)) return false;
 
       return true;
    }
@@ -158,15 +141,13 @@ public class MeshSelectorInput extends Packet<MeshSelectorInput> implements Sett
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("MeshSelectorInput {");
+      builder.append("MeshSelectorBatchItem {");
       builder.append("category=");
       builder.append(this.category_);      builder.append(", ");
       builder.append("track_id=");
       builder.append(this.track_id_);      builder.append(", ");
-      builder.append("rgb_image=");
-      builder.append(this.rgb_image_);      builder.append(", ");
-      builder.append("mask_image=");
-      builder.append(this.mask_image_);
+      builder.append("segmented_rgb=");
+      builder.append(this.segmented_rgb_);
       builder.append("}");
       return builder.toString();
    }

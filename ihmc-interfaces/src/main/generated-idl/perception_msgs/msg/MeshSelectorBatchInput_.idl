@@ -1,0 +1,28 @@
+#ifndef __perception_msgs__msg__MeshSelectorBatchInput__idl__
+#define __perception_msgs__msg__MeshSelectorBatchInput__idl__
+
+#include "perception_msgs/msg/./MeshSelectorBatchItem_.idl"
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="perception_msgs::msg::dds_::MeshSelectorBatchInput_")
+      struct MeshSelectorBatchInput
+      {
+        /**
+         * Frame ID of the image
+         */
+        long long frame_id;
+        /**
+         * Array of Mesh Selector Batch Items
+         */
+        sequence<perception_msgs::msg::dds::MeshSelectorBatchItem> items;
+      };
+    };
+  };
+};
+
+#endif
