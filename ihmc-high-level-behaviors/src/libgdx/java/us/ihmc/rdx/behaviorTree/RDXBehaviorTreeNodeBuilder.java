@@ -34,8 +34,8 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeBuilder<RDXBe
       REGISTRY.put(FallbackNodeDefinition.class, RDXFallbackNode::new);
       REGISTRY.put(ConditionNodeDefinition.class, RDXConditionNode::new);
       REGISTRY.put(GotoNodeDefinition.class, RDXGotoNode::new);
-      REGISTRY.put(CheckPointNodeDefinition.class, RDXCheckPointNode::new);
-      REGISTRY.put(SceneActionNodeDefinition.class, RDXSceneActionNode::new);
+      REGISTRY.put(CheckpointNodeDefinition.class, RDXCheckpointNode::new);
+      REGISTRY.put(SceneActionDefinition.class, RDXSceneAction::new);
       REGISTRY.put(AI2RNodeDefinition.class, RDXAI2RNode::new);
       REGISTRY.put(DoorTraversalDefinition.class, RDXDoorTraversal::new);
       REGISTRY.put(BuildingExplorationDefinition.class, RDXBuildingExploration::new);
@@ -47,8 +47,8 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeBuilder<RDXBe
       REGISTRY.put(ScrewPrimitiveActionDefinition.class, RDXScrewPrimitiveAction::new);
       REGISTRY.put(PelvisActionDefinition.class, RDXPelvisAction::new);
       REGISTRY.put(AbilityHandActionDefinition.class, RDXAbilityHandAction::new);
-      REGISTRY.put(SakeHandCommandActionDefinition.class, RDXSakeHandCommandAction::new);
-      REGISTRY.put(WaitDurationActionDefinition.class, RDXWaitDurationAction::new);
+      REGISTRY.put(EZGripperActionDefinition.class, RDXEZGripperAction::new);
+      REGISTRY.put(WaitActionDefinition.class, RDXWaitAction::new);
       REGISTRY.put(LegActionDefinition.class, RDXLegAction::new);
    }
 
