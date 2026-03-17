@@ -10,6 +10,7 @@ import us.ihmc.behaviors.behaviorTree.control.GotoNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneDoorFrameExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectType;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.ros2log.ROS2LogRecord;
 import us.ihmc.communication.ros2log.ROS2LogSerialization;
 import us.ihmc.communication.ros2log.ROS2LogTimeSource;
@@ -26,6 +27,7 @@ import static us.ihmc.behaviors.behaviorTree.BehaviorTreeTools.*;
 public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversalState, DoorTraversalDefinition>
 {
    private final ROS2Topic<KinematicsToolboxOutputStatus> kstOutputTopic;
+   private final Throttler statusThrottler = new Throttler().setFrequency(50.0);
    private final KinematicsToolboxOutputStatus status = new KinematicsToolboxOutputStatus();
    private final RigidBodyTransform initialWalkingPose = new RigidBodyTransform();
    private final RigidBodyTransform relativePelvisPose = new RigidBodyTransform();
@@ -42,7 +44,7 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
       ROS2Publisher<KinematicsToolboxOutputStatus> publisher = ros2ControllerHelper.getROS2Node().createPublisher(kstOutputTopic);
       syncedRobot.addRobotConfigurationDataReceivedCallback(() ->
       {
-         if (ros2LogRecord != null)
+         if (ros2LogRecord != null && statusThrottler.run())
          {
             RobotConfigurationData rcd = syncedRobot.getLatestRobotConfigurationData();
             status.setSequenceId(rcd.getSequenceId());
