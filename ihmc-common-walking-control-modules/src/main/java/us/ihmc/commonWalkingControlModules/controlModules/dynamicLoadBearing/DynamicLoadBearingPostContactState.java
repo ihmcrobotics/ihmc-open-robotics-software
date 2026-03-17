@@ -26,7 +26,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
@@ -49,12 +48,11 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.filters.GlitchFilteredYoBoolean;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class DynamicLoadBearingPostContactState implements DynamicLoadBearingState
 {
    // Debug variables for toggling various objectives
-   private static final double COEFFICIENT_OF_FRICTION = 0.5;
    private static final boolean ENABLE_CONTACT = true;
    private static final boolean ENABLE_ZERO_ACCELERATION = true;
    private static final boolean ENABLE_POINT_FEEDBACK = true;
@@ -192,7 +190,7 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
 
       // assemble contact command
       planeContactStateCommand.clearContactPoints();
-      planeContactStateCommand.setCoefficientOfFriction(COEFFICIENT_OF_FRICTION);
+      planeContactStateCommand.setCoefficientOfFriction(loadBearingParameters.getCoefficientOfFriction());
       planeContactStateCommand.setContactNormal(contactNormal);
       planeContactStateCommand.addPointInContact(contactPointInBody);
       planeContactStateCommand.setHasContactStateChanged(false);

@@ -246,7 +246,7 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
       currentCapturePoint.setY(centerOfMassPosition.getY() + centerOfMassVelocity.getY() / ReducedOrderRobotModel.OMEGA);
 
       capturePointError.sub(currentCapturePoint, desiredCapturePoint);
-      isFalling.set(capturePointError.norm() > DEFAULT_CAPTURE_POINT_ERROR_THRESHOLD_FOR_HAND_CONTACT);
+      isFalling.set(capturePointError.norm() > capturePointErrorThresholdForHandContact.getValue());
 
       if (!acceptPlanarRegions.getValue())
       {
