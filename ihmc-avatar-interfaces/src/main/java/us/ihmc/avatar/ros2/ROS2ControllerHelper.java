@@ -63,6 +63,11 @@ public class ROS2ControllerHelper extends ROS2Helper
       return subscribe(HumanoidControllerAPI.getTopic(messageClass, simpleRobotName));
    }
 
+   public <T> ROS2Input<T> subscribeToControllerLowFrequency(Class<T> messageClass)
+   {
+      return subscribe(HumanoidControllerAPI.getLowFrequencyTopic(messageClass, simpleRobotName));
+   }
+
    public ROS2Input<RobotConfigurationData> subscribeToRobotConfigurationData()
    {
       return subscribe(StateEstimatorAPI.getRobotConfigurationDataTopic(getRobotName()));

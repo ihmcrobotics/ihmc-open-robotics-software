@@ -18,6 +18,7 @@ import us.ihmc.ros2.ROS2Subscription;
 import java.util.ArrayList;
 import java.util.List;
 
+import static us.ihmc.communication.HumanoidControllerAPI.getLowFrequencyTopic;
 import static us.ihmc.communication.HumanoidControllerAPI.getTopic;
 import static us.ihmc.tools.string.StringTools.format;
 
@@ -48,7 +49,7 @@ public class WalkingFootstepTracker
                                                                 this::interceptFootstepDataListMessage);
       footstepStatusSubscriber = ros2Node.createSubscription2(getTopic(FootstepStatusMessage.class, robotName),
                                                               this::acceptFootstepStatusMessage);
-      footstepQueueStatusSubscriber = ros2Node.createSubscription2(getTopic(FootstepQueueStatusMessage.class, robotName),
+      footstepQueueStatusSubscriber = ros2Node.createSubscription2(getLowFrequencyTopic(FootstepQueueStatusMessage.class, robotName),
                                                                    this::acceptFootstepQueueStatusMessage);
    }
 

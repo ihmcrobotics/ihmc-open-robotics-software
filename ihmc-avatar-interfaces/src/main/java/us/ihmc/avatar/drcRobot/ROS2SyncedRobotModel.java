@@ -47,7 +47,7 @@ public class ROS2SyncedRobotModel extends CommunicationsSyncedRobotModel
       robotConfigurationDataInput.addCallback(message -> resetDataReceptionTimer());
       capturabilityBasedStatusInput = new ROS2Input<>(ros2Node,
                                                       CapturabilityBasedStatus.class,
-                                                      HumanoidControllerAPI.getTopic(CapturabilityBasedStatus.class, robotModel.getSimpleRobotName()));
+                                                      HumanoidControllerAPI.getLowFrequencyTopic(CapturabilityBasedStatus.class, robotModel.getSimpleRobotName()));
 
       for (RobotSide robotSide : RobotSide.values)
       {
