@@ -32,4 +32,9 @@ public final class HumanoidControllerAPI
    {
       return ControllerAPI.getTopic(getBaseTopic(robotName), messageClass);
    }
+
+   public static <T> ROS2Topic<T> getLowFrequencyTopic(Class<T> messageClass, String robotName)
+   {
+      return ControllerAPI.getLowFrequencyTopic(getBaseTopic(robotName), messageClass);
+   }
 }
