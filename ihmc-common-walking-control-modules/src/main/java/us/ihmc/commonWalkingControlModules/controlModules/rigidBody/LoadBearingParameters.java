@@ -11,9 +11,12 @@ import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.SupportStateParameters;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class LoadBearingParameters
 {
+   private static final double DEFAULT_COEFFICIENT_OF_FRICTION = 0.5;
+
    /**
     * Threshold [Nm] below which the hand has a non-slip feedback objective. Analogous to {@link SupportStateParameters#getFootLoadThreshold}
     */
@@ -54,6 +57,8 @@ public class LoadBearingParameters
    private final YoFrameVector3D postContactPositionWeights;
    private final YoFrameVector3D postContactOrientationWeights;
 
+   private final YoDouble coefficientOfFriction;
+
    private final YoBoolean doSmoothLoading;
 
    public LoadBearingParameters(YoRegistry registry)
@@ -84,6 +89,9 @@ public class LoadBearingParameters
 
       doSmoothLoading = new YoBoolean("doSmoothLoading", registry);
       doSmoothLoading.set(true);
+
+      coefficientOfFriction = new YoDouble("coefficientOfFriction", registry);
+      coefficientOfFriction.set(DEFAULT_COEFFICIENT_OF_FRICTION);
    }
 
    public double getNormalForceThresholdForLoaded()
@@ -208,4 +216,10 @@ public class LoadBearingParameters
    {
       return doSmoothLoading.getValue();
    }
+
+   public double getCoefficientOfFriction()
+   {
+      return coefficientOfFriction.getValue();
+   }
+
 }
