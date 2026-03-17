@@ -2,12 +2,12 @@ package us.ihmc.behaviors.behaviorTree.action.actions;
 
 import behavior_msgs.msg.dds.ArmActionDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.NumericNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.avatar.arm.PresetArmConfiguration;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeDefinition;
 import us.ihmc.communication.crdt.*;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SidedObject;
@@ -95,12 +95,8 @@ public class ArmActionDefinition extends ActionNodeDefinition implements SidedOb
       {
          jsonNode.put("preset", preset.getValue() == null ? CUSTOM_ANGLES_NAME : preset.getValue().name());
          if (preset.getValue() == null)
-         {
             for (int i = 0; i < MAX_NUMBER_OF_JOINTS; i++)
-            {
-               jsonNode.put("j" + i, jointAngles.getValueReadOnly(i));
-            }
-         }
+               jsonNode.put("j" + i + "Degrees", JSONTools.toJsonRadians(jointAngles.getValueReadOnly(i)));
       }
       else
       {
@@ -131,12 +127,8 @@ public class ArmActionDefinition extends ActionNodeDefinition implements SidedOb
          String presetName = jsonNode.get("preset").textValue();
          preset.setValue(presetName.equals(CUSTOM_ANGLES_NAME) ? null : PresetArmConfiguration.valueOf(presetName));
          if (preset.getValue() == null)
-         {
             for (int i = 0; i < MAX_NUMBER_OF_JOINTS; i++)
-            {
-               jointAngles.setValue(i, jsonNode.get("j" + i).asDouble());
-            }
-         }
+               jointAngles.setValue(i, Math.toRadians(jsonNode.get("j" + i + "Degrees").asDouble()));
       }
       else
       {
@@ -149,7 +141,8 @@ public class ArmActionDefinition extends ActionNodeDefinition implements SidedOb
          orientationErrorTolerance.setValue(Math.toRadians(jsonNode.get("orientationErrorToleranceDegrees").asDouble()));
       }
 
-      positionErrorTolerance.setValue(jsonNode.get("positionErrorTolerance").asDouble());
+      if (jsonNode.get("positionErrorTolerance") instanceof NumericNode node)
+         positionErrorTolerance.setValue(node.asDouble());
       jointspaceWeight.setValue(jsonNode.get("jointspaceWeight").asDouble());
    }
 
