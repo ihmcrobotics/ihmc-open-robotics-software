@@ -68,7 +68,7 @@ public class WalkingFailureDetectionControlModule
       isFallDetectionActivated.set(true);
 
       // TODO tune depending on expected failure conditions
-      icpDistanceFromFootPolygonThreshold = new DoubleParameter("icpDistanceFromFootPolygonThreshold", registry, 0.25);
+      icpDistanceFromFootPolygonThreshold = new DoubleParameter("icpDistanceFromFootPolygonThreshold", registry, 0.22);
       icpDistanceFromFootPolygon = new YoDouble("icpDistanceFromFootPolygon", registry);
       isRobotFalling = new YoBoolean("isRobotFalling", registry);
 

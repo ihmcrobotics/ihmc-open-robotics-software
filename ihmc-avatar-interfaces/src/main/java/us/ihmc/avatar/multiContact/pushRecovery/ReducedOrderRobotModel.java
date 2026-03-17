@@ -1,6 +1,5 @@
 package us.ihmc.avatar.multiContact.pushRecovery;
 
-import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGenerator;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -21,7 +20,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
@@ -34,9 +32,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
 
-import java.awt.*;
 import java.util.ArrayList;
 
 /**
@@ -44,9 +40,6 @@ import java.util.ArrayList;
  */
 public class ReducedOrderRobotModel
 {
-   // Plan with slower acceleration
-   public static final double MAX_HAND_ACCELERATION = 6.5; // 15.0;
-
    // Scale down feet contact points in order to check stability conditions
    private static final double FOOT_SCALE_FACTOR = 0.6;
 

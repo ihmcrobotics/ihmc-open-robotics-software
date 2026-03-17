@@ -57,7 +57,7 @@ public class RigidBodyDynamicLoadBearingControlState extends RigidBodyControlSta
       String bodyName = bodyToControl.getName();
       String namePrefix = bodyName + "Bracing";
 
-      preContactState = new DynamicLoadBearingPreContactState(bodyToControl, positionControlHelper, controlFrame, registry);
+      preContactState = new DynamicLoadBearingPreContactState(bodyToControl, positionControlHelper, controlFrame, loadBearingParameters, registry);
       postContactState = new DynamicLoadBearingPostContactState(bodyToControl,
                                                                 baseBody,
                                                                 elevator,

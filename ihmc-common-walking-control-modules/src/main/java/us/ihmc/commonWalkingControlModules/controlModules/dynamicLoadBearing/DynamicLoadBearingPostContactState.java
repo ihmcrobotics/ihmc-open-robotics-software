@@ -37,8 +37,6 @@ import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.controllers.pidGains.GainCalculator;
-import us.ihmc.robotics.controllers.pidGains.GainCoupling;
-import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPIDSE3Gains;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
@@ -51,6 +49,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.filters.GlitchFilteredYoBoolean;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class DynamicLoadBearingPostContactState implements DynamicLoadBearingState
 {
@@ -74,9 +73,6 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
 
    /* Control gains, weights and axis selection */
    private final LoadBearingParameters loadBearingParameters;
-   private final Vector3DReadOnly linearWeight = new Vector3D(50.0, 50.0, 50.0);
-   private final Vector3DReadOnly angularWeight = new Vector3D(5.0, 5.0, 5.0);
-   private final DefaultYoPIDSE3Gains feedbackGains;
    private final SelectionMatrix3D positionFeedbackSelectionMatrix = new SelectionMatrix3D();
    private final SelectionMatrix6D spatialAccelerationSelectionMatrix = new SelectionMatrix6D();
    private final double nominalRhoWeight;
@@ -142,6 +138,7 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
 
       String bodyName = bodyToControl.getName();
 
+
       desiredContactFrameFixedInWorld = new PoseReferenceFrame("desiredContactFrame" + bodyName, ReferenceFrame.getWorldFrame());
       bodyAcceleration = new SpatialAcceleration(desiredContactFrameFixedInWorld, elevatorFrame, desiredContactFrameFixedInWorld);
 
@@ -150,9 +147,6 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
 
       spatialAccelerationCommand.set(elevator, bodyToControl);
       spatialAccelerationCommand.setPrimaryBase(baseBody);
-
-      feedbackGains = new DefaultYoPIDSE3Gains("LoadBearing", GainCoupling.XY, false, registry);
-      configureGains();
 
       contactNormal = new YoFrameVector3D(bodyName + "ContactNormal", worldFrame, registry);
       currentContactPointInWorld = new YoFramePoint3D(bodyName + "currentContactPoint", worldFrame, registry);
@@ -175,34 +169,6 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
 
       contactPointInBody.setToZero(controlFrame);
       contactPointInBody.changeFrame(bodyToControl.getBodyFixedFrame());
-   }
-
-   private void configureGains()
-   {
-      double kpXYPosition = 100.0;
-      double kpZPosition = 0.0;
-      double zetaXYPosition = 1.0;
-      double kdXYPosition = GainCalculator.computeDerivativeGain(kpXYPosition, zetaXYPosition);
-      double kdZ = 0.0;
-      double maxLinearAcceleration = Double.POSITIVE_INFINITY;
-      double maxLinearJerk = Double.POSITIVE_INFINITY;
-      feedbackGains.setPositionProportionalGains(kpXYPosition, kpXYPosition, kpZPosition);
-      feedbackGains.setPositionDerivativeGains(kdXYPosition, kdXYPosition, kdZ);
-      feedbackGains.setPositionMaxFeedbackAndFeedbackRate(maxLinearAcceleration, maxLinearJerk);
-
-      double kpXYOrientation = 100.0;
-      double kpZOrientation = 200.0;
-      double zetaOrientation = 1.0;
-      double kdOrientationXY = GainCalculator.computeDerivativeGain(kpXYOrientation, zetaOrientation);
-      double kdOrientationZ = GainCalculator.computeDerivativeGain(kpZOrientation, zetaOrientation);
-      double maxAngularAcceleration = Double.POSITIVE_INFINITY;
-      double maxAngularJerk = Double.POSITIVE_INFINITY;
-      feedbackGains.setOrientationProportionalGains(kpXYOrientation, kpXYOrientation, kpZOrientation);
-      feedbackGains.setOrientationDerivativeGains(kdOrientationXY, kdOrientationXY, kdOrientationZ);
-      feedbackGains.setOrientationMaxFeedbackAndFeedbackRate(maxAngularAcceleration, maxAngularJerk);
-
-      // bias towards nominal, but heavily limit feedback
-      feedbackGains.getOrientationGains().setMaxProportionalError(Math.toRadians(12.0));
    }
 
    @Override
@@ -231,13 +197,18 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
       planeContactStateCommand.addPointInContact(contactPointInBody);
       planeContactStateCommand.setHasContactStateChanged(false);
 
-//      double alphaLoaded = EuclidCoreTools.clamp(timeInState / loadBearingParameters.getHandLoadDuration(), 0.0, 1.0);
-//      double rhoWeightInterpolated = EuclidCoreTools.interpolate(RHO_WEIGHT_INITIAL, nominalRhoWeight, alphaLoaded);
+      if (loadBearingParameters.doSmoothLoading())
+      {
+         double alphaLoaded = EuclidCoreTools.clamp(timeInState / loadBearingParameters.getHandLoadDuration(), 0.0, 1.0);
+         double rhoWeightInterpolated = EuclidCoreTools.interpolate(loadBearingParameters.getRhoWeightInitial(), nominalRhoWeight, alphaLoaded);
 
-//      for (int i = 0; i < planeContactStateCommand.getNumberOfContactPoints(); i++)
-//      {
-//         planeContactStateCommand.setRhoWeight(i, rhoWeightInterpolated);
-//      }
+         for (int i = 0; i < planeContactStateCommand.getNumberOfContactPoints(); i++)
+         {
+            planeContactStateCommand.setRhoWeight(i, rhoWeightInterpolated);
+         }
+
+         // TODO add max normal force????
+      }
 
       // assemble zero acceleration command
       bodyAcceleration.setToZero(desiredContactFrameFixedInWorld, elevatorFrame, desiredContactFrameFixedInWorld);
@@ -248,7 +219,7 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
       spatialAccelerationSelectionMatrix.getLinearPart().selectAxis(Axis3D.Y.ordinal(), !bodyBarelyLoaded.getValue());
       spatialAccelerationSelectionMatrix.getLinearPart().selectAxis(Axis3D.Z.ordinal(), true);
       spatialAccelerationCommand.setSelectionMatrix(spatialAccelerationSelectionMatrix);
-      spatialAccelerationCommand.getWeightMatrix().getLinearPart().setWeights(linearWeight);
+      spatialAccelerationCommand.getWeightMatrix().getLinearPart().setWeights(loadBearingParameters.getPostContactPositionWeights());
 
       // record contact point tracking error
       positionError.sub(currentContactPointInWorld, desiredContactPoseWorld.getPosition());
@@ -260,7 +231,7 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
          pointFeedbackControlCommand.setBodyFixedPointToControl(contactPointInBody);
          pointFeedbackControlCommand.setGainsFrame(desiredContactFrameFixedInWorld);
          pointFeedbackControlCommand.setInverseDynamics(desiredContactPoseWorld.getPosition(), zeroWorld, zeroWorld);
-         pointFeedbackControlCommand.setWeightsForSolver(linearWeight);
+         pointFeedbackControlCommand.setWeightsForSolver(loadBearingParameters.getPostContactPositionWeights());
 
          double kp = loadBearingParameters.getHoldPositionStiffness();
          double zeta = loadBearingParameters.getHoldPositionDampingRatio();
@@ -346,15 +317,15 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
 
       if (ENABLE_POINT_FEEDBACK && bodyBarelyLoaded.getValue())
       {
-         pointFeedbackControlCommand.setGains(feedbackGains.getPositionGains());
+         pointFeedbackControlCommand.setGains(loadBearingParameters.getPostContactFeedbackGains().getPositionGains());
          pointFeedbackControlCommand.setControlMode(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
          feedbackControlCommandList.addCommand(pointFeedbackControlCommand);
       }
       if (ENABLE_ORIENTATION_FEEDBACK)
       {
          OrientationFeedbackControlCommand orientationFeedbackCommand = orientationControlHelper.getFeedbackControlCommand();
-         orientationFeedbackCommand.setWeightsForSolver(angularWeight);
-         orientationFeedbackCommand.setGains(feedbackGains.getOrientationGains());
+         orientationFeedbackCommand.setWeightsForSolver(loadBearingParameters.getPostContactOrientationWeights());
+         orientationFeedbackCommand.setGains(loadBearingParameters.getPostContactFeedbackGains().getOrientationGains());
          orientationFeedbackCommand.setControlMode(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
          feedbackControlCommandList.addCommand(orientationFeedbackCommand);
       }

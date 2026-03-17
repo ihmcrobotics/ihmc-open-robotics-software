@@ -83,7 +83,7 @@ public class YoPerceptionVisualizer implements SCS2YoGraphicHolder
          planarRegionPoses.get(i).setToNaN();
          planarRegionPolygons.get(i).clear();
       }
-      for (int i = 0; i < planarRegionsListCommand.getNumberOfPlanarRegions(); i++)
+      for (int i = 0; i < Math.min(planarRegionsListCommand.getNumberOfPlanarRegions(), NUMBER_OF_PLANAR_REGIONS_TO_VISUALIZE); i++)
       {
          planarRegionPoses.get(i).set(planarRegionsListCommand.getPlanarRegionCommand(i).getTransformToWorld());
          planarRegionPolygons.get(i).set(planarRegionsListCommand.getPlanarRegionCommand(i).getConvexHull());
