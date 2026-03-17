@@ -165,6 +165,18 @@ public class RDXSpineAction extends RDXActionNode<SpineActionState, SpineActionD
    }
 
    @Override
+   public void renderTreeViewRow()
+   {
+      super.renderRowBeginning();
+      super.renderEditableName();
+
+      ImGui.sameLine();
+      ImGui.textDisabled("Spine");
+
+      renderRowEnd();
+   }
+
+   @Override
    protected void renderImGuiWidgetsInternal()
    {
       ImGui.checkbox(labels.get("Adjust Goal Pose"), poseGizmo.getSelected());
