@@ -104,7 +104,7 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
       trajectoryCommand.setTrajectoryFrame(ReferenceFrame.getWorldFrame());
       controlFrame.getTransformToDesiredFrame(trajectoryCommand.getControlFramePose(), bodyToControl.getBodyFixedFrame());
 
-      terminalHandSpeed.set(0.6);
+      terminalHandSpeed.set(0.9);
 
       yoBracingPoint = new YoFramePoint3D(bodyToControl.getName() + "BracingPoint", ReferenceFrame.getWorldFrame(), registry);
       yoBracingNormal = new YoFrameVector3D(bodyToControl.getName() + "BracingNormal", ReferenceFrame.getWorldFrame(), registry);
@@ -132,8 +132,8 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
    {
       currentPosition.setToZero(controlFrame);
       currentPosition.changeFrame(ReferenceFrame.getWorldFrame());
-      tempVector.sub(currentPosition, desiredPosition);
-      tempVector.normalize();
+//      tempVector.sub(currentPosition, desiredPosition);
+//      tempVector.normalize();
 //      terminalHandSpeed.set(tempVector.dot(bracingPlane.getNormal()) * MAX_TERMINAL_HAND_SPEED);
 //      if (terminalHandSpeed.getValue() < MIN_TERMINAL_HAND_SPEED)
 //         terminalHandSpeed.set(MIN_TERMINAL_HAND_SPEED);
@@ -147,9 +147,15 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
 //      waypointPosition.set(yoBracingNormal);
 //      waypointPosition.scale(waypointOffset);
 
+      double lookAheadDt = 0.2;
+      waypointPosition.setIncludingFrame(desiredPosition);
+      tempVector.setAndScale(lookAheadDt, terminalVelocity);
+      waypointPosition.add(tempVector);
+
       trajectoryCommand.getTrajectoryPointList().clear();
       trajectoryCommand.addTrajectoryPoint(0.0, currentPosition, handVelocity);
       trajectoryCommand.addTrajectoryPoint(trajectoryDuration.getValue(), desiredPosition, terminalVelocity);
+      trajectoryCommand.addTrajectoryPoint(trajectoryDuration.getValue() + lookAheadDt, waypointPosition, terminalVelocity);
       positionControlHelper.handleTrajectoryCommand(trajectoryCommand, null);
       positionControlHelper.doAction(0.0);
 
