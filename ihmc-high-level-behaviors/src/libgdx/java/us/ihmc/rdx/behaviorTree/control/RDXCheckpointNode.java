@@ -1,8 +1,8 @@
-package us.ihmc.rdx.behaviorTree.actions;
+package us.ihmc.rdx.behaviorTree.control;
 
 import imgui.ImGui;
-import us.ihmc.behaviors.behaviorTree.action.actions.CheckpointNodeDefinition;
-import us.ihmc.behaviors.behaviorTree.action.actions.CheckpointNodeState;
+import us.ihmc.behaviors.behaviorTree.control.CheckpointNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.control.CheckpointNodeState;
 import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeRootNode;
 import us.ihmc.rdx.behaviorTree.RDXLeafNode;
 import us.ihmc.rdx.ui.widgets.ImGuiCheckpointNodeWidget;

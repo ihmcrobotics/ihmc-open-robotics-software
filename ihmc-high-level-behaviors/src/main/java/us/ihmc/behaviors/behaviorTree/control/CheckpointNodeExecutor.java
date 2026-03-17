@@ -1,4 +1,4 @@
-package us.ihmc.behaviors.behaviorTree.action.actions;
+package us.ihmc.behaviors.behaviorTree.control;
 
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.LeafNodeExecutor;
