@@ -292,6 +292,9 @@ public class YOLOv8DetectionExecutor
          YOLOv8Tools.annotateImage(colorImage.getCpuImageMat(), resultMat, detectionsToAnnotate);
       }
 
+      Size size = new Size();
+      opencv_imgproc.resize(resultMat, resultMat, size, 0.25, 0.25, opencv_imgproc.INTER_AREA);
+
       BytePointer annotatedImagePointer = new BytePointer();
       opencv_imgcodecs.imencode(".jpg", resultMat, annotatedImagePointer); // for some reason using CUDAImageEncoder broke YOLO's CUDNN
 
@@ -301,6 +304,7 @@ public class YOLOv8DetectionExecutor
 
       for (YOLOv8InstantDetection detection : detectionsToAnnotate)
          detection.destroy();
+      size.close();
       resultMat.close();
       colorImage.release();
    }
