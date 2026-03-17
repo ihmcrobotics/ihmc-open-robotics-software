@@ -23,7 +23,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegion
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.TerrainMapCommand;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
@@ -50,7 +49,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerThreadInterface
 {
-   private static final double CAPTURE_POINT_ERROR_THRESHOLD_FOR_HAND_CONTACT = 0.03;
+   private static final double DEFAULT_CAPTURE_POINT_ERROR_THRESHOLD_FOR_HAND_CONTACT = 0.03;
    public static final double DEFAULT_CONTACT_SAFETY_FACTOR = 0.07;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
@@ -72,6 +71,7 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
    private final YoBoolean hasReceivedPlanarRegions = new YoBoolean("hasReceivedPlanarRegions", registry);
 
    private final YoDouble contactSafetyFactor = new YoDouble("contactSafetyFactor", registry);
+   private final YoDouble capturePointErrorThresholdForHandContact = new YoDouble("capturePointErrorThresholdForHandContact", registry);
 
    private final YoBoolean isHandRecoveryContactEnabled = new YoBoolean("isHandRecoveryContactEnabled", registry);
    private final YoBoolean isFalling = new YoBoolean("isFalling", registry);
@@ -125,7 +125,8 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
       registry.addChild(planner.getRegistry());
       contactSafetyFactor.set(DEFAULT_CONTACT_SAFETY_FACTOR);
       additionalSafetyDistance.set(0.07);
-
+      capturePointErrorThresholdForHandContact.set(DEFAULT_CAPTURE_POINT_ERROR_THRESHOLD_FOR_HAND_CONTACT);
+      
       reducedOrderRobotModel = new ReducedOrderRobotModel(robotModel.getContactPointParameters(), registry);
 
       this.commandInputManager = new CommandInputManager(MultiContactGaitGeneratorAPI.getSupportedCommands());
@@ -176,7 +177,8 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
 //      }
 
       perceptionVisualizer = new YoPerceptionVisualizer(registry);
-      diagnosticBracingSide.set(RobotSide.RIGHT);
+      diagnosticBracingSide.set(null);
+
 //      triggerInferenceCall.set(true);
 //      numberOfInferenceCallsForTest.set(1);
    }
@@ -197,7 +199,7 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
       {
          if (!hasPrintedException)
          {
-            LogTools.error(e);
+            e.printStackTrace();
             hasPrintedException = true;
          }
       }
@@ -230,7 +232,7 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
       centerOfMassJacobian.reset();
 
       // Update bipedal gait generator
-      //      bipedalGaitGenerator.update();
+//            bipedalGaitGenerator.update();
 
       // Update capturability status
       CapturabilityBasedStatus capturabilityBasedStatus = this.capturabilityBasedStatus.get();
@@ -244,7 +246,7 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
       currentCapturePoint.setY(centerOfMassPosition.getY() + centerOfMassVelocity.getY() / ReducedOrderRobotModel.OMEGA);
 
       capturePointError.sub(currentCapturePoint, desiredCapturePoint);
-      isFalling.set(capturePointError.norm() > CAPTURE_POINT_ERROR_THRESHOLD_FOR_HAND_CONTACT);
+      isFalling.set(capturePointError.norm() > DEFAULT_CAPTURE_POINT_ERROR_THRESHOLD_FOR_HAND_CONTACT);
 
       if (!acceptPlanarRegions.getValue())
       {

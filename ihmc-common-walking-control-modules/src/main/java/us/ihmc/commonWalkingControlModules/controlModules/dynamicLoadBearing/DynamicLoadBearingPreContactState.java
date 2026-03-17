@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.dynamicLoadBearing;
 
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.LoadBearingParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyPositionControlHelper;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
@@ -18,9 +19,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandContactC
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.GainCalculator;
-import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
-import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPIDSE3Gains;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
@@ -34,9 +33,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class DynamicLoadBearingPreContactState implements DynamicLoadBearingState
 {
-   private static final double MIN_TERMINAL_HAND_SPEED = 0.8;
-   private static final double MAX_TERMINAL_HAND_SPEED = 1.6;
-
    private final MovingReferenceFrame controlFrame;
    private final RigidBodyPositionControlHelper positionControlHelper;
 
@@ -46,13 +42,6 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
    private final Plane3D bracingPlane = new Plane3D();
 
    private final YoDouble trajectoryDuration;
-
-   private final DefaultYoPIDSE3Gains bracingFeedbackGains;
-   private final YoFrameVector3D bracingPositionWeights;
-   private final YoFrameVector3D bracingOrientationWeights;
-
-   private PID3DGainsReadOnly defaultPositionGains = null;
-   private Vector3DReadOnly defaultPositionWeights = null;
    private final YoDouble distanceToPlane;
 
    private final YoFramePoint3D yoBracingPoint;
@@ -63,8 +52,8 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
    private final FrameVector3D previousHandVelocity = new FrameVector3D();
    private final FrameVector3D handVelocity = new FrameVector3D();
    private final YoDouble handSpeed;
-   private final YoDouble terminalHandSpeed;
    private final GlitchFilteredYoBoolean hasHandTouchedDown;
+   private final LoadBearingParameters loadBearingParameters;
 
    private final FramePoint3D currentPosition = new FramePoint3D();
    private final FrameVector3D tempVector = new FrameVector3D();
@@ -79,23 +68,15 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
    public DynamicLoadBearingPreContactState(RigidBodyBasics bodyToControl,
                                             RigidBodyPositionControlHelper positionControlHelper,
                                             ReferenceFrame controlFrame,
+                                            LoadBearingParameters loadBearingParameters,
                                             YoRegistry registry)
    {
       this.positionControlHelper = positionControlHelper;
+      this.loadBearingParameters = loadBearingParameters;
 
       trajectoryDuration = new YoDouble("trajectoryDuration", registry);
       handSpeed = new YoDouble("handSpeed", registry);
-      terminalHandSpeed = new YoDouble("terminalHandSpeed", registry);
       hasHandTouchedDown = new GlitchFilteredYoBoolean("hasHandTouchedDown", registry, 2);
-
-      bracingPositionWeights = new YoFrameVector3D("bracingPositionWeights", ReferenceFrame.getWorldFrame(), registry);
-      bracingOrientationWeights = new YoFrameVector3D("bracingOrientationWeights", ReferenceFrame.getWorldFrame(), registry);
-
-      bracingPositionWeights.set(10.0, 10.0, 10.0);
-      bracingOrientationWeights.set(0.0, 0.0, 0.0);
-
-      bracingFeedbackGains = new DefaultYoPIDSE3Gains("PosDynamicLoadBearing", GainCoupling.XYZ, false, registry);
-      configureGains();
 
       distanceToPlane = new YoDouble("distanceToPlane", registry);
 
@@ -103,8 +84,6 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
       trajectoryCommand.setUseCustomControlFrame(true);
       trajectoryCommand.setTrajectoryFrame(ReferenceFrame.getWorldFrame());
       controlFrame.getTransformToDesiredFrame(trajectoryCommand.getControlFramePose(), bodyToControl.getBodyFixedFrame());
-
-      terminalHandSpeed.set(0.9);
 
       yoBracingPoint = new YoFramePoint3D(bodyToControl.getName() + "BracingPoint", ReferenceFrame.getWorldFrame(), registry);
       yoBracingNormal = new YoFrameVector3D(bodyToControl.getName() + "BracingNormal", ReferenceFrame.getWorldFrame(), registry);
@@ -138,7 +117,7 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
 //      if (terminalHandSpeed.getValue() < MIN_TERMINAL_HAND_SPEED)
 //         terminalHandSpeed.set(MIN_TERMINAL_HAND_SPEED);
 
-      terminalVelocity.setAndScale(-terminalHandSpeed.getDoubleValue(), bracingPlane.getNormal());
+      terminalVelocity.setAndScale(-loadBearingParameters.getTerminalHandSpeed(), bracingPlane.getNormal());
 
       handVelocity.setIncludingFrame(controlFrame.getTwistOfFrame().getLinearPart());
       handVelocity.changeFrame(ReferenceFrame.getWorldFrame());
@@ -159,11 +138,9 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
       positionControlHelper.handleTrajectoryCommand(trajectoryCommand, null);
       positionControlHelper.doAction(0.0);
 
-      defaultPositionGains = positionControlHelper.getGains();
-      defaultPositionWeights = positionControlHelper.getDefaultWeight();
-      positionControlHelper.setWeights(bracingPositionWeights);
+      positionControlHelper.setWeights(loadBearingParameters.getPreContactPositionWeights());
+      positionControlHelper.setGains(loadBearingParameters.getPreContactFeedbackGains().getPositionGains());
 
-      positionControlHelper.setGains(bracingFeedbackGains.getPositionGains());
       hasHandTouchedDown.set(false);
    }
 
@@ -177,9 +154,6 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
    @Override
    public void onExit(double timeInState)
    {
-      positionControlHelper.setGains(defaultPositionGains);
-      positionControlHelper.setWeights(defaultPositionWeights);
-
       yoBracingPoint.setToNaN();
       yoBracingNormal.setToNaN();
       yoControlFrame.setToNaN();
@@ -212,25 +186,6 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
    public boolean isStuck(double timeInState)
    {
       return timeInState > trajectoryDuration.getValue() + 0.5;
-   }
-
-   private void configureGains()
-   {
-      double kpPosition = 100.0;
-      double zetaPosition = 0.4;
-      double maxLinearAcceleration = Double.POSITIVE_INFINITY;
-      double maxLinearJerk = Double.POSITIVE_INFINITY;
-      bracingFeedbackGains.setPositionProportionalGains(kpPosition);
-      bracingFeedbackGains.setPositionDerivativeGains(GainCalculator.computeDerivativeGain(kpPosition, zetaPosition));
-      bracingFeedbackGains.setPositionMaxFeedbackAndFeedbackRate(maxLinearAcceleration, maxLinearJerk);
-
-      double kpOrientation = 0.0;
-      double kdOrientation = 0.0;
-      double maxAngularAcceleration = Double.POSITIVE_INFINITY;
-      double maxAngularJerk = Double.POSITIVE_INFINITY;
-      bracingFeedbackGains.setOrientationProportionalGains(kpOrientation);
-      bracingFeedbackGains.setOrientationDerivativeGains(kdOrientation);
-      bracingFeedbackGains.setOrientationMaxFeedbackAndFeedbackRate(maxAngularAcceleration, maxAngularJerk);
    }
 
    @Override
