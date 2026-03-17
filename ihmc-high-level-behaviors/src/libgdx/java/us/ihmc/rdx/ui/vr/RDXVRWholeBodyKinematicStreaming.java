@@ -839,10 +839,6 @@ public class RDXVRWholeBodyKinematicStreaming
             if (miniGhostEnabled)
             {
                miniGhostKST.updateOpacity(latestStatus.getLeftFootInContact(), latestStatus.getRightFootInContact());
-               miniGhostKST.updatePose();
-               miniGhostReal.updateRootOffset(ghostFullRobotModel.getPelvis().getBodyFixedFrame().getTransformToRoot(),
-                                              syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame().getTransformToRoot());
-               miniGhostReal.updatePose();
             }
             if (ghostRobotGraphic.isActive())
             {
@@ -855,8 +851,18 @@ public class RDXVRWholeBodyKinematicStreaming
                                                  latestStatus.getLeftFootInContact() ? 1.0 : 0.3);
                ghostRobotGraphic.setOpacityForBody(ghostFullRobotModel.getFoot(RobotSide.RIGHT).getName(),
                                                  latestStatus.getRightFootInContact() ? 1.0 : 0.3);
-               ghostRobotGraphic.update();
             }
+         }
+         if (miniGhostEnabled)
+         {
+            miniGhostKST.updatePose();
+            miniGhostReal.updateRootOffset(ghostFullRobotModel.getPelvis().getBodyFixedFrame().getTransformToRoot(),
+                    syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame().getTransformToRoot());
+            miniGhostReal.updatePose();
+         }
+         if (ghostRobotGraphic.isActive())
+         {
+            ghostRobotGraphic.update();
          }
 
          if (recordRequest && recordingGraphics != null)
