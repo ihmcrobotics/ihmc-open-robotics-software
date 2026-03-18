@@ -4,6 +4,8 @@ import com.badlogic.gdx.graphics.Mesh;
 import us.ihmc.graphicsDescription.MeshDataBuilder;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 
+import java.util.List;
+
 public class RDXMeshBuilder extends MeshDataBuilder
 {
    public void addArcTorus(double startAngle, double endAngle, double majorRadius, double minorRadius)
@@ -19,5 +21,10 @@ public class RDXMeshBuilder extends MeshDataBuilder
    public Mesh generateMesh()
    {
       return RDXMeshDataInterpreter.interpretMeshData(generateMeshDataHolder());
+   }
+
+   public List<Mesh> generateMeshes()
+   {
+      return RDXMeshDataInterpreter.interpretMeshDataToMeshes(generateMeshDataHolder());
    }
 }

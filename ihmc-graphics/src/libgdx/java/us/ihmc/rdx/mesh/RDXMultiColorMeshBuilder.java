@@ -1084,6 +1084,11 @@ public class RDXMultiColorMeshBuilder
       return meshBuilder.generateMesh();
    }
 
+   public List<Mesh> generateMeshes()
+   {
+      return meshBuilder.generateMeshes();
+   }
+
    public MeshDataHolder generateMeshDataHolder()
    {
       return meshBuilder.generateMeshDataHolder();
