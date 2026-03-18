@@ -4,9 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
-import imgui.type.ImInt;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.pathPlanning.rrt.RRTStarPathPlanner;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -78,6 +76,8 @@ public class RDXRRTStarPathPlannerDemo
             ImGui.text("Goal: " + goalGizmo.getTransformToParent().getTranslation());
             ImGui.text("Path points: " + plannedPath.size());
             ImGui.text("Plan duration: %.3f ms".formatted(planDurationMs));
+            ImGui.text("Iterations: %d".formatted(planner.getIterationCount()));
+            ImGui.text("Tree size: %d".formatted(planner.getTreeSize()));
          }
 
          @Override
@@ -114,6 +114,27 @@ public class RDXRRTStarPathPlannerDemo
 
            pathModel = RDXModelBuilder.buildModelInstance(builder ->
            {
+               double radius = planner.getSearchRadius();
+               if (radius > 0.0)
+               {
+                  Point3D center = planner.getCenter();
+                  int segments = 64;
+                  double angleStep = 2.0 * Math.PI / segments;
+                  double centerX = center.getX();
+                  double centerY = center.getY();
+
+                  Point3D previous = new Point3D(centerX + radius, centerY, 0.0);
+                  for (int i = 1; i <= segments; i++)
+                  {
+                     double angle = i * angleStep;
+                     Point3D current = new Point3D(centerX + radius * Math.cos(angle),
+                                                   centerY + radius * Math.sin(angle),
+                                                   0.0);
+                     builder.addLine(previous, current, 0.004, Color.DARK_GRAY);
+                     previous = current;
+                  }
+               }
+
                RRTStarPathPlanner.Node rootNode = planner.getRootNode();
                if (rootNode != null)
                {
@@ -125,7 +146,7 @@ public class RDXRRTStarPathPlannerDemo
                      for (RRTStarPathPlanner.Node child : node.children())
                      {
                         builder.addLine(node.position(), child.position(), 0.005, Color.ORANGE);
-                        builder.addMesh(MeshDataGenerator.Sphere(0.02, 5, 5), child.position(), Color.WHITE);
+                        builder.addCube(0.02, child.position(), Color.WHITE);
                         stack.push(child);
                      }
                   }
@@ -134,7 +155,7 @@ public class RDXRRTStarPathPlannerDemo
                Point3D previous = null;
                for (Point3D point : plannedPath)
                {
-                  builder.addSphere(0.02, point, Color.WHITE);
+                  builder.addCube(0.02, point, Color.WHITE);
                   if (previous != null)
                      builder.addLine(previous, point, 0.01, Color.CYAN);
                   previous = point;
