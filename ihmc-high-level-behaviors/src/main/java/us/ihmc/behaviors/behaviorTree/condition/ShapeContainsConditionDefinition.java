@@ -61,7 +61,7 @@ public class ShapeContainsConditionDefinition
       }
       jsonNode.put("shapeParentFrameName", shapeParentFrameName.getValue());
       JSONTools.toJSON(jsonNode.putObject("shapeTransformToParent"), shapeTransformToParent.getValueReadOnly());
-      jsonNode.put("sphereRadius", sphereRadius.getValue());
+      jsonNode.put("sphereRadius", JSONTools.toJsonMeters(sphereRadius.getValue()));
    }
 
    public void loadFromFile(JsonNode jsonNode)

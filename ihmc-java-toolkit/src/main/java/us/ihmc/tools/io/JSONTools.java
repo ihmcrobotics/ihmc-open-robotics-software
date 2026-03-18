@@ -1,6 +1,7 @@
 package us.ihmc.tools.io;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
@@ -23,6 +24,13 @@ public class JSONTools
    public static float toJsonRadians(double radians)
    {
       return (float) MathTools.roundToPrecision(Math.toDegrees(radians), 0.02);
+   }
+
+   public static void putArrayRound(ObjectNode jsonNode, String name, float[] values)
+   {
+      ArrayNode arrayNode = jsonNode.putArray(name);
+      for (int i = 0; i < values.length; i++)
+         arrayNode.add((float) MathTools.roundToPrecision(values[i], 0.02));
    }
 
    /**
