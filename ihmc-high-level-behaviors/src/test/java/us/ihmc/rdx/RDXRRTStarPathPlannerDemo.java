@@ -10,6 +10,7 @@ import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -106,10 +107,24 @@ public class RDXRRTStarPathPlannerDemo
             if (pathModel != null)
                pathModel.model.dispose();
 
-            pathModel = RDXModelBuilder.buildModelInstance(builder ->
-            {
-               builder.addSphere(0.03, startGizmo.getTransformToParent().getTranslation(), Color.GREEN);
-               builder.addSphere(0.03, goalGizmo.getTransformToParent().getTranslation(), Color.RED);
+           pathModel = RDXModelBuilder.buildModelInstance(builder ->
+           {
+               RRTStarPathPlanner.Node rootNode = planner.getRootNode();
+               if (rootNode != null)
+               {
+                  ArrayDeque<RRTStarPathPlanner.Node> stack = new ArrayDeque<>();
+                  stack.push(rootNode);
+                  while (!stack.isEmpty())
+                  {
+                     RRTStarPathPlanner.Node node = stack.pop();
+                     for (RRTStarPathPlanner.Node child : node.children())
+                     {
+                        builder.addLine(node.position(), child.position(), 0.005, Color.ORANGE);
+                        builder.addSphere(0.02, child.position(), Color.WHITE);
+                        stack.push(child);
+                     }
+                  }
+               }
 
                Point3D previous = null;
                for (Point3D point : plannedPath)
