@@ -97,7 +97,7 @@ public class YoPerceptionVisualizer implements SCS2YoGraphicHolder
             yoConvexHull.addVertex(convexHull.getVertex(j));
          }
 
-         yoConvexHull.set(convexHull);
+         yoConvexHull.update();
       }
    }
 
