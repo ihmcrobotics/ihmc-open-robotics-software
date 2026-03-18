@@ -32,6 +32,7 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -121,6 +122,11 @@ public class AvatarStepGeneratorThread implements SCS2YoGraphicHolder
       }
 
       ParameterLoaderHelper.loadParameters(this, drcRobotModel, csgRegistry);
+   }
+
+   public DoubleProvider getYoTime()
+   {
+      return csgTime;
    }
 
    public void initialize()

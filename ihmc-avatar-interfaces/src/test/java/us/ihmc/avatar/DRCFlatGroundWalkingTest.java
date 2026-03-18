@@ -186,7 +186,11 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
 
    private void simulateAndAssertGoodWalking(SCS2AvatarTestingSimulation simulationTestHelper, boolean doPelvisYawWarmup)
    {
+      // This value gets overridden by the script.
       YoBoolean walk = (YoBoolean) simulationTestHelper.findVariable("walkCSG");
+      // This value turns off the heartbeat, which is checking for an externally provided ros message. We're writing directly to it from a script, so we have to
+      // set this to false
+      YoBoolean overrideHeartbeat = (YoBoolean) simulationTestHelper.findVariable("overrideHeartbeat_StepGeneratorCommandInputManager");
       YoDouble comError = (YoDouble) simulationTestHelper.findVariable("positionError_comHeight");
       if (comError == null)
       {
@@ -202,6 +206,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       assertTrue(simulationTestHelper.simulateNow(standingTimeDuration), "Simulation has failed");
 
       walk.set(false);
+      overrideHeartbeat.set(false);
 
       if (doPelvisYawWarmup)
       {
@@ -234,6 +239,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       }
 
       walk.set(true);
+      overrideHeartbeat.set(true);
 
       double timeIncrement = 1.0;
 

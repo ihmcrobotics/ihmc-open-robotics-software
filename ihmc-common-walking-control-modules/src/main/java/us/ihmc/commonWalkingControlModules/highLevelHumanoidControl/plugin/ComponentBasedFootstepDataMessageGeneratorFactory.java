@@ -28,8 +28,6 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 public class ComponentBasedFootstepDataMessageGeneratorFactory implements HumanoidSteppingPluginFactory
 {
    private final OptionalFactoryField<YoRegistry> registryField = new OptionalFactoryField<>("registry");
-   private final OptionalFactoryField<Boolean> useHeadingAndVelocityScriptField = new OptionalFactoryField<>("useHeadingAndVelocityScript", false);
-   private final OptionalFactoryField<HeadingAndVelocityEvaluationScriptParameters> headingAndVelocityEvaluationScriptParametersField = new OptionalFactoryField<>("headingAndVelocityEvaluationScriptParameters");
    private final OptionalFactoryField<StepGeneratorCommandInputManager> csgCommandInputManagerField = new OptionalFactoryField<>("csgCommandInputManagerField");
    private final OptionalFactoryField<StatusMessageOutputManager> csgStatusMessageOutputManagerField = new OptionalFactoryField<>("csgStatusMessageOutputManagerField");
    private final OptionalFactoryField<Boolean> createSupportFootBasedFootstepAdjustment = new OptionalFactoryField<>("csgCreateSupportFootBasedFootstepAdjustment");
@@ -85,16 +83,6 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
    public void addSecondaryFootStepAdjustment(FootstepAdjustment footStepAdjustment)
    {
       secondaryFootstepAdjusters.add(footStepAdjustment);
-   }
-
-   public void setUseHeadingAndVelocityScript(boolean useHeadingAndVelocityScript)
-   {
-      useHeadingAndVelocityScriptField.set(useHeadingAndVelocityScript);
-   }
-
-   public void setHeadingAndVelocityEvaluationScriptParameters(HeadingAndVelocityEvaluationScriptParameters headingAndVelocityEvaluationScriptParameters)
-   {
-      this.headingAndVelocityEvaluationScriptParametersField.set(headingAndVelocityEvaluationScriptParameters);
    }
 
    public StepGeneratorCommandInputManager setStepGeneratorCommandInputManager()
@@ -193,16 +181,7 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
       if (contactableFeet != null)
          continuousStepGenerator.setupVisualization(contactableFeet);
 
-      if (useHeadingAndVelocityScriptField.get())
-      {
-         HeadingAndVelocityEvaluationScriptParameters parameters = headingAndVelocityEvaluationScriptParametersField.hasValue() ? headingAndVelocityEvaluationScriptParametersField.get()
-                                                                                                                                : null;
-         HeadingAndVelocityEvaluationScript script = new HeadingAndVelocityEvaluationScript(updateDT, timeProvider, parameters, registryField.get());
-         continuousStepGenerator.setDesiredTurningVelocityProvider(script.getDesiredTurningVelocityProvider());
-         continuousStepGenerator.setDesiredVelocityProvider(script.getDesiredVelocityProvider());
-         updatables.add(script);
-      }
-      else if (csgCommandInputManagerField.hasValue())
+      if (csgCommandInputManagerField.hasValue())
       {
          StepGeneratorCommandInputManager commandInputManager = csgCommandInputManagerField.get();
          for (Consumer<HeightMapCommand> heightMapCommandConsumer : heightMapCommandConsumers)
