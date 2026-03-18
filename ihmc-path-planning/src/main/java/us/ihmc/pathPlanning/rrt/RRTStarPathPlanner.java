@@ -13,22 +13,33 @@ import java.util.function.Function;
 public class RRTStarPathPlanner
 {
    private int maxIterations = 20;
+   private Function<Point3D, Boolean> collider;
    private final Point3D start = new Point3D();
    private final Point3D goal = new Point3D();
    private final Point3D center = new Point3D();
    private final Point3D sample = new Point3D();
    private final Vector3D direction = new Vector3D();
    private final Random random = new Random();
-   public record Node(Point3D position, List<Node> children) { }
-   public Node rootNode;
 
-   public List<Point3D> plan(Tuple3DReadOnly start, Tuple3DReadOnly goal, Function<Point3D, Boolean> collision)
+   public record Node(Point3D position, Node parent, List<Node> children) { }
+   public Node rootNode;
+   public final ArrayList<Point3D> path = new ArrayList<>();
+
+   public List<Point3D> plan(Tuple3DReadOnly start, Tuple3DReadOnly goal, Function<Point3D, Boolean> collider)
    {
       this.start.set(start);
       this.goal.set(goal);
+      this.collider = collider;
+      plan();
+      return path;
+   }
+
+   private void plan()
+   {
+      path.clear();
       center.interpolate(start, goal, 0.5);
 
-      rootNode = new Node(this.start, new ArrayList<>());
+      rootNode = new Node(start, null, new ArrayList<>());
 
       for (int i = 0; i < maxIterations; i++)
       {
@@ -55,15 +66,27 @@ public class RRTStarPathPlanner
 
          Point3D newPosition = new Point3D(closestNode.position);
          newPosition.add(direction);
-         if (!collision.apply(newPosition))
-            closestNode.children.add(new Node(newPosition, new ArrayList<>()));
 
+         boolean atGoal = newPosition.distance(goal) < 0.1;
+         if (atGoal || !collider.apply(newPosition))
+         {
+            Node newNode = new Node(newPosition, closestNode, new ArrayList<>());
+            closestNode.children.add(newNode);
+
+            if (atGoal)
+            {
+               path.clear();
+               Node node = newNode;
+               while (node.parent != null)
+               {
+                  path.add(0, node.position);
+                  node = node.parent;
+               }
+               path.add(0, node.position);
+               return;
+            }
+         }
       }
-
-
-      ArrayList<Point3D> path = new ArrayList<>();
-
-      return path;
    }
 
    private void sample()
