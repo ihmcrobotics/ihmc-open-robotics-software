@@ -282,6 +282,8 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
                                                                     momentumOptimizationSettings.getRhoWeight(),
                                                                     controllerToolbox.getPostureAdjustmentProvider(),
                                                                     capturePointErrorProvider,
+                                                                    controllerToolbox.getBipedSupportPolygons(),
+                                                                    controllerToolbox.getCapturePoint(),
                                                                     yoTime,
                                                                     controlDT,
                                                                     registry);

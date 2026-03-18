@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.dynamicLoadBearing;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.LoadBearingParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyOrientationControlHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyPositionControlHelper;
@@ -23,6 +24,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -368,7 +370,7 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
       shoulderPointInWorld.setToZero(jointPath[1].getFrameBeforeJoint());
       shoulderPointInWorld.changeFrame(ReferenceFrame.getWorldFrame());
       double distanceThreshold = 0.7;
-      if (shoulderPointInWorld.distanceSquared(currentContactPointInWorld) > distanceThreshold * distanceThreshold)
+      if (shoulderPointInWorld.distanceSquared(desiredContactPoseWorld.getPosition()) > distanceThreshold * distanceThreshold)
          return true;
 
       // Check if joints are near a joint limit

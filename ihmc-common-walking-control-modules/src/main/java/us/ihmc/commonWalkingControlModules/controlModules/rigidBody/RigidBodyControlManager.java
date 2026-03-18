@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import org.apache.commons.lang3.mutable.MutableBoolean;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModules.multiContact.WholeBodyPostureAdjustmentProvider;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
@@ -109,6 +110,8 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                   double nominalRhoWeight,
                                   WholeBodyPostureAdjustmentProvider postureAdjustmentProvider,
                                   DoubleProvider capturePointErrorProvider,
+                                  BipedSupportPolygons bipedSupportPolygons,
+                                  FramePoint3DReadOnly capturePoint,
                                   YoDouble yoTime,
                                   double controlDT,
                                   YoRegistry parentRegistry)
@@ -227,6 +230,8 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                                                                       capturePointErrorProvider,
                                                                                       hasAddedContacts,
                                                                                       hasRemovedContacts,
+                                                                                      bipedSupportPolygons,
+                                                                                      capturePoint,
                                                                                       registry);
       }
       else

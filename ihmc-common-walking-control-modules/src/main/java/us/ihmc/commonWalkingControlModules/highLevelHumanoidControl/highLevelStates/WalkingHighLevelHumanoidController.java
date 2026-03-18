@@ -888,13 +888,13 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
    private void updateWholeBodyContactState()
    {
-      boolean contactsAdded = haveContactsAdded();
-      boolean contactsRemoved = haveContactsRemoved();
+//      boolean contactsAdded = haveContactsAdded();
+//      boolean contactsRemoved = haveContactsRemoved();
 
-      if (!contactsAdded && !contactsRemoved)
-      {
-         return;
-      }
+//      if (!contactsAdded && !contactsRemoved)
+//      {
+//         return;
+//      }
 
       WholeBodyContactState wholeBodyContactState = controllerToolbox.getWholeBodyContactState();
       wholeBodyContactState.clear();
@@ -912,7 +912,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       wholeBodyContactState.updateContactPoints();
       wholeBodyContactState.updateJointIndices();
 
-      controllerToolbox.onWholeBodyContactsChanged(contactsRemoved);
+      controllerToolbox.onWholeBodyContactsChanged(true);
    }
 
    private void packHandLoadBearingStatuses(CapturabilityBasedStatus capturabilityBasedStatus)

@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModules.dynamicLoadBearing.DynamicLoadBearingPostContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.dynamicLoadBearing.DynamicLoadBearingPreContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.dynamicLoadBearing.DynamicLoadBearingState;
@@ -11,7 +12,9 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandContactCommand;
@@ -26,8 +29,9 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class RigidBodyDynamicLoadBearingControlState extends RigidBodyControlState
 {
-   private static final double MINIMUM_TIME_IN_CONTACT = 1.0;
+   private static final double MINIMUM_TIME_IN_CONTACT = 0.05; // 1.0; //
    private static final double CAPTURE_POINT_ERROR_THRESHOLD_TO_REMAIN_IN_STATE = 0.025;
+   private static final double CAPTURE_POINT_DISTANCE_INSIDE_NOMINAL_SUPPORT_THRESHOLD = 0.04;
 
    private final StateMachine<DynamicLoadBearingStateEnum, DynamicLoadBearingState> stateMachine;
    private final DynamicLoadBearingPreContactState preContactState;
@@ -35,6 +39,8 @@ public class RigidBodyDynamicLoadBearingControlState extends RigidBodyControlSta
    private final RigidBodyJointControlHelper jointControlHelper;
    private final Runnable onExitRunnable;
    private final DoubleProvider capturePointErrorProvider;
+   private final BipedSupportPolygons bipedSupportPolygons;
+   private final FramePoint3DReadOnly capturePoint;
 
    public RigidBodyDynamicLoadBearingControlState(RigidBodyBasics bodyToControl,
                                                   RigidBodyBasics baseBody,
@@ -50,6 +56,8 @@ public class RigidBodyDynamicLoadBearingControlState extends RigidBodyControlSta
                                                   DoubleProvider capturePointErrorProvider,
                                                   MutableBoolean hasAddedContacts,
                                                   MutableBoolean hasRemovedContacts,
+                                                  BipedSupportPolygons bipedSupportPolygons,
+                                                  FramePoint3DReadOnly capturePoint,
                                                   YoRegistry parentRegistry)
    {
       super(RigidBodyControlMode.DYNAMIC_LOADBEARING, bodyToControl.getName(), yoTime, parentRegistry);
@@ -75,6 +83,8 @@ public class RigidBodyDynamicLoadBearingControlState extends RigidBodyControlSta
       this.onExitRunnable = onExitRunnable;
       this.jointControlHelper = jointControlHelper;
       this.capturePointErrorProvider = capturePointErrorProvider;
+      this.bipedSupportPolygons = bipedSupportPolygons;
+      this.capturePoint = capturePoint;
    }
 
    private StateMachine<DynamicLoadBearingStateEnum, DynamicLoadBearingState> setupStateMachine(String namePrefix, DoubleProvider timeProvider)
@@ -115,6 +125,8 @@ public class RigidBodyDynamicLoadBearingControlState extends RigidBodyControlSta
       postContactState.onExit(0.0);
    }
 
+   private final FramePoint2D tempPoint = new FramePoint2D();
+
    @Override
    public boolean isDone(double timeInState)
    {
@@ -131,9 +143,21 @@ public class RigidBodyDynamicLoadBearingControlState extends RigidBodyControlSta
             return true;
 
          // If the robot has reached a high level of stability, exit this state
-         boolean isRecovered = capturePointErrorProvider.getValue() < CAPTURE_POINT_ERROR_THRESHOLD_TO_REMAIN_IN_STATE;
-         boolean hasSpentSufficientTimeInContact = stateMachine.getTimeInCurrentState() > MINIMUM_TIME_IN_CONTACT;
-         return isRecovered && hasSpentSufficientTimeInContact;
+         boolean hasLowTrackingError = capturePointErrorProvider.getValue() < CAPTURE_POINT_ERROR_THRESHOLD_TO_REMAIN_IN_STATE;
+         if (hasLowTrackingError)
+            return true;
+
+         // Check if has spent minimum time in state (maybe remove)
+//         boolean hasSpentSufficientTimeInContact = stateMachine.getTimeInCurrentState() > MINIMUM_TIME_IN_CONTACT;
+//         if (!hasSpentSufficientTimeInContact)
+//            return false;
+
+         tempPoint.setIncludingFrame(capturePoint);
+         boolean isCapturePointInSupportPolygon = bipedSupportPolygons.getSupportPolygonInWorld().signedDistance(tempPoint) < -CAPTURE_POINT_DISTANCE_INSIDE_NOMINAL_SUPPORT_THRESHOLD;
+         if (isCapturePointInSupportPolygon)
+            return true;
+
+         return false;
       }
    }
 
