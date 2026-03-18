@@ -1,7 +1,9 @@
 package us.ihmc.perception.detections.yolo;
 
 import org.apache.commons.lang3.mutable.MutableObject;
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.IntPointer;
+import org.bytedeco.javacpp.indexer.IntIndexer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -265,6 +267,80 @@ public class YOLOv8Tools
 
          resizedMask.close();
       }
+   }
+
+   public static Point2D[][] extractMaskPolygons(Mat mask, Size detectionImageSize, double precision)
+   {
+      Mat resizedMask = new Mat();
+      resizeWithCrop(mask, resizedMask, detectionImageSize);
+
+      MatVector contours = new MatVector();
+      Mat hierarchy = new Mat();
+      opencv_imgproc.findContours(resizedMask, contours, hierarchy, opencv_imgproc.RETR_TREE, opencv_imgproc.CHAIN_APPROX_SIMPLE);
+
+      Point2D[][] polygons = new Point2D[(int) contours.size()][];
+      for (int i = 0; i < contours.size(); ++i)
+      {
+         Mat contour = contours.get(i);
+
+         double contourPerimeter = opencv_imgproc.arcLength(contour, true);
+
+         Mat polygonApproximation = new Mat();
+         opencv_imgproc.approxPolyDP(contour, polygonApproximation, precision, true);
+
+         int[] polygonPoints = new int[2 * polygonApproximation.rows()];
+         new IntPointer(polygonApproximation.data()).get(polygonPoints);
+
+         polygons[i] = new Point2D[polygonApproximation.rows()];
+         for (int j = 0; j < polygonApproximation.rows(); ++j)
+            polygons[i][j] = new Point2D(polygonPoints[2 * j], polygonPoints[2 * j + 1]);
+
+         polygonApproximation.close();
+      }
+
+      resizedMask.close();
+      contours.close();
+      hierarchy.close();
+
+      return polygons;
+   }
+
+   public static void drawPolygons(Mat inputImage, Point2D[][] polygons, Mat outputImage)
+   {
+      inputImage.copyTo(outputImage);
+
+      if (polygons.length == 0)
+         return;
+
+      MatVector polygonsVector = new MatVector(polygons.length);
+
+      for (int i = 0; i < polygons.length; ++i)
+      {
+         Point2D[] polygon = polygons[i];
+
+         int[] polygonPoints = new int[2 * polygon.length];
+         for (int j = 0; j < polygon.length; ++j)
+         {
+            polygonPoints[2 * j] = (int) polygon[j].getX();
+            polygonPoints[2 * j + 1] = (int) polygon[j].getY();
+         }
+
+         IntPointer polygonPointsPointer = new IntPointer(polygonPoints);
+
+         Mat polygonMat = new Mat(polygon.length, 1, opencv_core.CV_32SC2);
+         polygonMat.data().put(new BytePointer(polygonPointsPointer));
+
+         polygonsVector.put(i, polygonMat);
+
+         polygonPointsPointer.close();
+      }
+
+      opencv_imgproc.fillPoly(outputImage, polygonsVector, GREEN);
+//      opencv_imgproc.polylines(outputImage, polygonsVector, true, GREEN, 1, opencv_imgproc.LINE_8, 0);
+
+      for (int i = 0; i < polygons.length; ++i)
+         polygonsVector.get(i).close();
+      polygonsVector.close();
    }
 
    public static List<URL> getYOLOModelDirectories(URL baseModelsDirectory)

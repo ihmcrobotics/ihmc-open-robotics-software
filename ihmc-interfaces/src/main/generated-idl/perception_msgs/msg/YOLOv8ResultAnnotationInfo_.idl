@@ -1,0 +1,24 @@
+#ifndef __perception_msgs__msg__YOLOv8ResultAnnotationInfo__idl__
+#define __perception_msgs__msg__YOLOv8ResultAnnotationInfo__idl__
+
+#include "perception_msgs/msg/./YOLOv8DetectionAnnotationInfo_.idl"
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="perception_msgs::msg::dds_::YOLOv8ResultAnnotationInfo_")
+      struct YOLOv8ResultAnnotationInfo
+      {
+        /**
+         * Information used for annotating YOLOv8 results that may contain multiple detections.
+         */
+        sequence<perception_msgs::msg::dds::YOLOv8DetectionAnnotationInfo> detection_annotation_infos;
+      };
+    };
+  };
+};
+
+#endif
