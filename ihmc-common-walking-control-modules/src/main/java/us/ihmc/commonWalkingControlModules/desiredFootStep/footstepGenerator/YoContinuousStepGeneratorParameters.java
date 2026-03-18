@@ -16,10 +16,8 @@ public class YoContinuousStepGeneratorParameters implements ContinuousStepGenera
    private final YoDouble inPlaceWidth, minStepWidth, maxStepWidth;
    private final YoDouble turnMaxAngleInward, turnMaxAngleOutward;
    private final YoBoolean stepsAreAdjustable;
-   private final YoBoolean requestSnapToHeightmap;
    private final YoBoolean accountForGroundDrift;
    private final YoBoolean shiftUpcomingStepsWithTouchdown;
-   private final YoInteger ticksToUpdateTheEnvironment;
 
    public YoContinuousStepGeneratorParameters(String nameSuffix, YoRegistry registry)
    {
@@ -36,22 +34,14 @@ public class YoContinuousStepGeneratorParameters implements ContinuousStepGenera
       turnMaxAngleOutward = new YoDouble("maxAngleTurnOutwards" + nameSuffix, registry);
       turnMaxAngleInward = new YoDouble("maxAngleTurnInwards" + nameSuffix, registry);
       stepsAreAdjustable = new YoBoolean("stepsAreAdjustable" + nameSuffix, registry);
-      requestSnapToHeightmap = new YoBoolean("requestSnapToHeightmap" + nameSuffix, registry);
       accountForGroundDrift = new YoBoolean("accountForGroundDrift" + nameSuffix, registry);
       shiftUpcomingStepsWithTouchdown = new YoBoolean("shiftUpcomingStepsWithTouchdown" + nameSuffix, registry);
-      ticksToUpdateTheEnvironment = new YoInteger("ticksToUpdateTheEnvironment" + nameSuffix, registry);
    }
 
    @Override
    public void setStepsAreAdjustable(boolean stepsAreAdjustable)
    {
       this.stepsAreAdjustable.set(stepsAreAdjustable);
-   }
-
-   @Override
-   public void setRequestSnapToHeightmap(boolean requestSnapToHeightmap)
-   {
-      this.requestSnapToHeightmap.set(requestSnapToHeightmap);
    }
 
    @Override
@@ -76,12 +66,6 @@ public class YoContinuousStepGeneratorParameters implements ContinuousStepGenera
    public void setNumberOfFixedFootsteps(int numberOfFixedFootsteps)
    {
       this.numberOfFixedFootsteps.set(numberOfFixedFootsteps);
-   }
-
-   @Override
-   public void setTicksToUpdateTheEnvironment(int ticksToUpdateTheEnvironment)
-   {
-      this.ticksToUpdateTheEnvironment.set(ticksToUpdateTheEnvironment);
    }
 
    @Override
@@ -157,12 +141,6 @@ public class YoContinuousStepGeneratorParameters implements ContinuousStepGenera
    }
 
    @Override
-   public int getTicksToUpdateTheEnvironment()
-   {
-      return ticksToUpdateTheEnvironment.getIntegerValue();
-   }
-
-   @Override
    public double getSwingHeight()
    {
       return swingHeight.getValue();
@@ -226,12 +204,6 @@ public class YoContinuousStepGeneratorParameters implements ContinuousStepGenera
    public boolean getStepsAreAdjustable()
    {
       return stepsAreAdjustable.getBooleanValue();
-   }
-
-   @Override
-   public boolean getRequestSnapToHeightmap()
-   {
-      return requestSnapToHeightmap.getBooleanValue();
    }
 
    @Override

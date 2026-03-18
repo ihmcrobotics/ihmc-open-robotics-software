@@ -48,12 +48,10 @@ public class StepGeneratorCommandInputManager implements Updatable
    private final YoDouble swingHeight;
    private final YoBoolean isUnitVelocities;
    private final YoBoolean overrideHeartbeat;
-   private int ticksToUpdateTheEnvironment = Integer.MAX_VALUE;
    private HighLevelControllerName currentController;
    private ContinuousStepGenerator continuousStepGenerator;
 
    private final List<Consumer<HeightMapCommand>> heightMapCommandConsumers = new ArrayList<>();
-   private final List<Consumer<ContinuousStepGeneratorParametersBasics>> csgParametersConsumers = new ArrayList<>();
    private final AtomicReference<FootstepStatus> latestFootstepStatusReceived = new AtomicReference<>(null);
    private final AtomicReference<FootstepStatus> previousFootstepStatusReceived = new AtomicReference<>(null);
    private final AtomicReference<HeightMapCommand> latestHeightMap = new AtomicReference<>(null);
@@ -95,11 +93,6 @@ public class StepGeneratorCommandInputManager implements Updatable
       heightMapCommandConsumers.add(heightMapCommandConsumer);
    }
 
-   public void addCSGParametersCommandConsumer(Consumer<ContinuousStepGeneratorParametersBasics> csgParametersConsumer)
-   {
-      csgParametersConsumers.add(csgParametersConsumer);
-   }
-
    public CommandInputManager getCommandInputManager()
    {
       return commandInputManager;
@@ -118,11 +111,6 @@ public class StepGeneratorCommandInputManager implements Updatable
    public void setWalkingStatus(WalkingStatusMessage message)
    {
       latestWalkingStatus.set(WalkingStatus.fromByte(message.getWalkingStatus()));
-   }
-
-   public void setFootstepStatusListener(StatusMessageOutputManager statusMessageOutputManager)
-   {
-      statusMessageOutputManager.attachStatusMessageListener(FootstepStatusMessage.class, this::consumeFootstepStatus);
    }
 
    public void consumeFootstepStatus(FootstepStatusMessage statusMessage)
@@ -182,7 +170,6 @@ public class StepGeneratorCommandInputManager implements Updatable
          ContinuousStepGeneratorParametersCommand command = commandInputManager.pollNewestCommand(ContinuousStepGeneratorParametersCommand.class);
          ContinuousStepGeneratorParameters parameters = command.getParameters();
 
-         ticksToUpdateTheEnvironment = parameters.getTicksToUpdateTheEnvironment();
          swingHeight.set(parameters.getSwingHeight());
 
          if (continuousStepGenerator != null)
@@ -193,7 +180,6 @@ public class StepGeneratorCommandInputManager implements Updatable
             continuousStepGenerator.setStepWidths(parameters.getDefaultStepWidth(), parameters.getMinStepWidth(), parameters.getMaxStepWidth());
             continuousStepGenerator.setMaxStepLengthForwards(parameters.getMaxStepLengthForwards());
             continuousStepGenerator.setMaxStepLengthBackwards(parameters.getMaxStepLengthBackwards());
-            continuousStepGenerator.getCSGParameters().setRequestSnapToHeightmap(parameters.getRequestSnapToHeightmap());
             continuousStepGenerator.getCSGParameters().setAccountForGroundDrift(parameters.getAccountForGroundDrift());
          }
       }
@@ -206,19 +192,12 @@ public class StepGeneratorCommandInputManager implements Updatable
       }
       commandInputManager.clearCommands(HeightMapCommand.class);
 
-      if (continuousStepGenerator != null)
-         ticksToUpdateTheEnvironment = continuousStepGenerator.getCSGParameters().getTicksToUpdateTheEnvironment();
-
       // if the robot is standing, or we just finished a step, we should submit the newest regions
       if (latestWalkingStatus.get() == WalkingStatus.COMPLETED || latestFootstepStatusReceived.get() == FootstepStatus.COMPLETED)
          shouldSubmitNewRegions.set(true);
 
       // if the contact state just changed, we should submit the newest regions
       if (latestFootstepStatusReceived.get() != previousFootstepStatusReceived.get())
-         shouldSubmitNewRegions.set(true);
-
-      // If the regions are old, update them
-      if (ticksSinceUpdatingTheEnvironment.get() > ticksToUpdateTheEnvironment)
          shouldSubmitNewRegions.set(true);
 
       // submit the new planar regions
@@ -233,12 +212,6 @@ public class StepGeneratorCommandInputManager implements Updatable
 
             ticksSinceUpdatingTheEnvironment.set(0);
          }
-      }
-
-      if (continuousStepGenerator != null)
-      {
-         for (int i = 0; i < csgParametersConsumers.size(); i++)
-            csgParametersConsumers.get(i).accept(continuousStepGenerator.getCSGParameters());
       }
 
       ticksSinceUpdatingTheEnvironment.incrementAndGet();

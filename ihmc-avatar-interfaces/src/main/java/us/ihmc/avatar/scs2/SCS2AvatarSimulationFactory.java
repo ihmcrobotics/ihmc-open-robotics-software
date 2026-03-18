@@ -10,7 +10,6 @@ import us.ihmc.avatar.AvatarSimulatedHandControlThread;
 import us.ihmc.avatar.AvatarStepGeneratorThread;
 import us.ihmc.avatar.ControllerTask;
 import us.ihmc.avatar.EstimatorTask;
-import us.ihmc.avatar.HumanoidSteppingPluginEnvironmentalConstraints;
 import us.ihmc.avatar.StepGeneratorTask;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
@@ -43,12 +42,10 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Ex
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StandReadyControllerStateFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HumanoidSteppingPluginFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.JoystickBasedSteppingPluginFactory;
 import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler.TaskOverrunBehavior;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.HeightMap;
-import us.ihmc.graphicsDescription.conversion.YoGraphicConversionTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
@@ -535,10 +532,10 @@ public class SCS2AvatarSimulationFactory
       if (headingAndVelocityEvaluationScriptParameters.hasValue())
          parameters = headingAndVelocityEvaluationScriptParameters.get();
 
-      FootstepAdjustment footstepAdjustment;
+      FootstepAdjustment footstepAdjustment = null;
       if (heightMapForFootstepZ.hasValue() && heightMapForFootstepZ.get() != null)
       {
-         footstepAdjustment = new HeightMapBasedFootstepAdjustment(heightMapForFootstepZ.get()));
+         footstepAdjustment = new HeightMapBasedFootstepAdjustment(heightMapForFootstepZ.get());
       }
 
       RealtimeROS2Node ros2Node = null;

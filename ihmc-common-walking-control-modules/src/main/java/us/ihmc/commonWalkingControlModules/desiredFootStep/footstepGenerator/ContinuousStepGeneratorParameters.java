@@ -6,7 +6,6 @@ public class ContinuousStepGeneratorParameters implements ContinuousStepGenerato
 {
    private int numberOfFootstepsToPlan = DEFAULT_NUMBER_OF_FOOTSTEPS_TO_PLAN;
    private int numberOfFixedFootsteps = DEFAULT_NUMBER_OF_FIXED_FOOTSTEPS;
-   private int ticksToUpdateTheEnvironment = DEFAULT_TICKS_TO_UPDATE_ENVIRONMENT;
    private double swingHeight;
    private double swingDuration, transferDuration;
    private double maxStepLengthForwards;
@@ -14,7 +13,6 @@ public class ContinuousStepGeneratorParameters implements ContinuousStepGenerato
    private double defaultStepWidth, minStepWidth, maxStepWidth;
    private double turnMaxAngleInward, turnMaxAngleOutward;
    private boolean stepsAreAdjustable = DEFAULT_STEPS_ARE_ADJUSTABLE;
-   private boolean requestSnapToHeightMap = DEFAULT_REQUEST_SNAP_TO_HEIGHTMAP;
    private boolean accountForGroundDrift = DEFAULT_ACCOUNT_FOR_GROUND_DRIFT;
    private boolean shiftUpcomingStepsWithTouchdown = DEFAULT_SHIFT_UPCOMING_STEPS_WITH_TOUCHDOWN;
 
@@ -54,12 +52,6 @@ public class ContinuousStepGeneratorParameters implements ContinuousStepGenerato
    public void setNumberOfFixedFootsteps(int numberOfFixedFootsteps)
    {
       this.numberOfFixedFootsteps = numberOfFixedFootsteps;
-   }
-
-   @Override
-   public void setTicksToUpdateTheEnvironment(int ticksToUpdateTheEnvironment)
-   {
-      this.ticksToUpdateTheEnvironment = ticksToUpdateTheEnvironment;
    }
 
    @Override
@@ -123,12 +115,6 @@ public class ContinuousStepGeneratorParameters implements ContinuousStepGenerato
    }
 
    @Override
-   public void setRequestSnapToHeightmap(boolean requestSnapToHeightMap)
-   {
-      this.requestSnapToHeightMap = requestSnapToHeightMap;
-   }
-
-   @Override
    public void setAccountForGroundDrift(boolean accountForGroundDrift)
    {
       this.accountForGroundDrift = accountForGroundDrift;
@@ -144,12 +130,6 @@ public class ContinuousStepGeneratorParameters implements ContinuousStepGenerato
    public int getNumberOfFixedFootsteps()
    {
       return numberOfFixedFootsteps;
-   }
-
-   @Override
-   public int getTicksToUpdateTheEnvironment()
-   {
-      return ticksToUpdateTheEnvironment;
    }
 
    @Override
@@ -219,12 +199,6 @@ public class ContinuousStepGeneratorParameters implements ContinuousStepGenerato
    }
 
    @Override
-   public boolean getRequestSnapToHeightmap()
-   {
-      return requestSnapToHeightMap;
-   }
-
-   @Override
    public boolean getAccountForGroundDrift()
    {
       return accountForGroundDrift;
@@ -240,7 +214,7 @@ public class ContinuousStepGeneratorParameters implements ContinuousStepGenerato
    public String toString()
    {
       return "number of footsteps to plan: " + numberOfFootstepsToPlan + ", number of fixed footsteps: " + numberOfFixedFootsteps
-             + "ticks to update the environment: " + ticksToUpdateTheEnvironment + ", swing height: " + swingHeight + ", swing duration: " + swingDuration
+             + ", swing height: " + swingHeight + ", swing duration: " + swingDuration
              + ", transfer duration: " + transferDuration + ", max step length (forwards): " + maxStepLengthForwards + ", max step length (backwards): "
              + maxStepLengthBackwards + ", default step width: " + defaultStepWidth + ", min step width: " + minStepWidth + ", max step width: " + maxStepWidth
              + ", turn max angle inward: " + turnMaxAngleInward + ", turn max angle outward: " + turnMaxAngleOutward;

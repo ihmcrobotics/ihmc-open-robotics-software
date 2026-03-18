@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.*;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.yoVariables.euclid.YoVector2D;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -15,7 +16,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.List;
 
-public class VelocityBasedSteppingPlugin implements HumanoidSteppingPlugin
+public class VelocityBasedSteppingPlugin implements Updatable
 {
    private final static Vector2DReadOnly zero2D = new Vector2D();
 
@@ -42,19 +43,11 @@ public class VelocityBasedSteppingPlugin implements HumanoidSteppingPlugin
    private BooleanProvider walkInputProvider;
    private DoubleProvider swingHeightInputProvider;
 
-   private final List<Updatable> updatables;
-
-   public VelocityBasedSteppingPlugin(List<Updatable> updatables)
-   {
-      this.updatables = updatables;
-   }
-
    public void setInputParameters(VelocityBasedSteppingParameters parameters)
    {
       inputParameters.set(parameters);
    }
 
-   @Override
    public YoRegistry getRegistry()
    {
       return registry;
@@ -65,11 +58,6 @@ public class VelocityBasedSteppingPlugin implements HumanoidSteppingPlugin
    @Override
    public void update(double time)
    {
-      for (int i = 0; i < updatables.size(); i++)
-      {
-         updatables.get(i).update(time);
-      }
-
       if (!ignoreWalkInputProvider.getBooleanValue() && walkInputProvider != null)
          walk.set(walkInputProvider.getValue());
 
@@ -140,11 +128,6 @@ public class VelocityBasedSteppingPlugin implements HumanoidSteppingPlugin
       }
 
       walkPreviousValue.set(walk.getBooleanValue());
-   }
-
-   @Override
-   public void setFootstepAdjustment(FootstepAdjustment footstepAdjustment)
-   {
    }
 
    /**
