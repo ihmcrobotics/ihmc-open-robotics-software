@@ -48,7 +48,7 @@ public class RDXActionProgressWidgetsManager
 
       boolean containsFootsteps = false;
       boolean containsHandMovements = false;
-      boolean containsSakeHandConfiguration = false;
+      boolean containsEzGripperConfiguration = false;
       boolean containsAbilityHandConfiguration = false;
       for (RDXActionNode<?, ?> action : actionNodesToRender)
       {
@@ -58,8 +58,8 @@ public class RDXActionProgressWidgetsManager
             containsFootsteps = true;
          if (action instanceof RDXArmAction || action instanceof RDXScrewPrimitiveAction)
             containsHandMovements = true;
-         if (action instanceof RDXSakeHandCommandAction)
-            containsSakeHandConfiguration = true;
+         if (action instanceof RDXEZGripperAction)
+            containsEzGripperConfiguration = true;
          if (action instanceof RDXAbilityHandAction)
             containsAbilityHandConfiguration = true;
       }
@@ -169,7 +169,7 @@ public class RDXActionProgressWidgetsManager
          }
       }
 
-      if (containsSakeHandConfiguration)
+      if (containsEzGripperConfiguration)
       {
          if (!timeOnly)
             widgetAligner.text("Knuckle X1 (%s):".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL));

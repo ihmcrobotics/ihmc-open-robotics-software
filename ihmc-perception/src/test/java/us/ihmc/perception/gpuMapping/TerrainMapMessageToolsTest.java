@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import perception_msgs.msg.dds.TerrainMapMessage;
 import us.ihmc.euclid.tuple3D.Point3D;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TerrainMapMessageToolsTest
 {
@@ -24,46 +24,47 @@ public class TerrainMapMessageToolsTest
 
       TerrainMapData terrainMapData = new TerrainMapData(cellResolution, gridSizeXY, 0.0, 0.0);
 
-      Mat heightMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(0));
-      Mat snapNormalXMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(1));
-      Mat snapNormalYMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(2));
-      Mat snapNormalZMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(3));
-      Mat traversabilityMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1, new Scalar(4));
-      Mat traversabilityClassMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(5));
-
-      TerrainMapTools.convertToTerrainMapData(heightMap,
-                                              snapNormalXMap,
-                                              snapNormalYMap,
-                                              snapNormalZMap,
-                                              traversabilityMap,
-                                              traversabilityClassMap,
-                                              new Point3D(0.0, 0.0, 0.0),
-                                              terrainMapData);
-
-      TerrainMapMessage message = new TerrainMapMessage();
-      TerrainMapMessageTools.toMessage(terrainMapData, message);
-
-      TerrainMapData resultingData = TerrainMapMessageTools.unpackMessage(message);
-
-      // Check results match the input
-      byte[] snapNormalXMapResult = resultingData.getSnapNormalXMap();
-      byte[] snapNormalYMapResult = resultingData.getSnapNormalYMap();
-      byte[] snapNormalZMapResult = resultingData.getSnapNormalZMap();
-      float[] traversabilityMapResult = resultingData.getTraversabilityScoreMap();
-      byte[] traversabilityClassMapResult = resultingData.getTraversabilityClassMap();
-
-      int totalCells = cellsPerAxis * cellsPerAxis;
-
-      for (int i = 0; i < totalCells; i++)
+      try (Mat heightMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1, new Scalar(0));
+           Mat snapNormalXMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(1));
+           Mat snapNormalYMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(2));
+           Mat snapNormalZMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(3));
+           Mat traversabilityMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1, new Scalar(4));
+           Mat traversabilityClassMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(5)))
       {
-         int x = i % cellsPerAxis;
-         int y = i / cellsPerAxis;
+         TerrainMapTools.convertToTerrainMapData(heightMap,
+                                                 snapNormalXMap,
+                                                 snapNormalYMap,
+                                                 snapNormalZMap,
+                                                 traversabilityMap,
+                                                 traversabilityClassMap,
+                                                 new Point3D(0.0, 0.0, 0.0),
+                                                 terrainMapData);
 
-         assertEquals(snapNormalXMapResult[i], snapNormalXMap.ptr(x).get());
-         assertEquals(snapNormalYMapResult[i], snapNormalYMap.ptr(x).get());
-         assertEquals(snapNormalZMapResult[i], snapNormalZMap.ptr(x).get());
-         assertEquals(traversabilityMapResult[i], traversabilityMap.ptr(x).getFloat());
-         assertEquals(traversabilityClassMapResult[i], traversabilityClassMap.ptr(x).get());
+         TerrainMapMessage message = new TerrainMapMessage();
+         TerrainMapMessageTools.toMessage(terrainMapData, message);
+
+         TerrainMapData resultingData = TerrainMapMessageTools.unpackMessage(message);
+
+         // Check results match the input
+         byte[] snapNormalXMapResult = resultingData.getSnapNormalXMap();
+         byte[] snapNormalYMapResult = resultingData.getSnapNormalYMap();
+         byte[] snapNormalZMapResult = resultingData.getSnapNormalZMap();
+         float[] traversabilityMapResult = resultingData.getTraversabilityScoreMap();
+         byte[] traversabilityClassMapResult = resultingData.getTraversabilityClassMap();
+
+         int totalCells = cellsPerAxis * cellsPerAxis;
+
+         for (int i = 0; i < totalCells; i++)
+         {
+            int x = i % cellsPerAxis;
+            int y = i / cellsPerAxis;
+
+            assertEquals(snapNormalXMapResult[i], snapNormalXMap.ptr(x).get());
+            assertEquals(snapNormalYMapResult[i], snapNormalYMap.ptr(x).get());
+            assertEquals(snapNormalZMapResult[i], snapNormalZMap.ptr(x).get());
+            assertEquals(traversabilityMapResult[i], traversabilityMap.ptr(x).getFloat());
+            assertEquals(traversabilityClassMapResult[i], traversabilityClassMap.ptr(x).get());
+         }
       }
    }
 
@@ -76,21 +77,22 @@ public class TerrainMapMessageToolsTest
       TerrainMapData terrainMapData = new TerrainMapData(cellResolution, widthInMeters, 0.0, 0.0);
       int cellsPerAxis = terrainMapData.getCellsPerAxis();
 
-      Mat heightMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(0));
-      Mat snapNormalXMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(1));
-      Mat snapNormalYMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(2));
-      Mat snapNormalZMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(3));
-      Mat traversabilityMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1, new Scalar(4));
-      Mat traversabilityClassMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(5));
-
-      TerrainMapTools.convertToTerrainMapData(heightMap,
-                                              snapNormalXMap,
-                                              snapNormalYMap,
-                                              snapNormalZMap,
-                                              traversabilityMap,
-                                              traversabilityClassMap,
-                                              new Point3D(0.0, 0.0, 0.0),
-                                              terrainMapData);
+      try (Mat heightMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1, new Scalar(0));
+           Mat snapNormalXMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(1));
+           Mat snapNormalYMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(2));
+           Mat snapNormalZMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(3));
+           Mat traversabilityMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1, new Scalar(4));
+           Mat traversabilityClassMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(5)))
+      {
+         TerrainMapTools.convertToTerrainMapData(heightMap,
+                                                 snapNormalXMap,
+                                                 snapNormalYMap,
+                                                 snapNormalZMap,
+                                                 traversabilityMap,
+                                                 traversabilityClassMap,
+                                                 new Point3D(0.0, 0.0, 0.0),
+                                                 terrainMapData);
+      }
 
       TerrainMapMessage message = new TerrainMapMessage();
 
@@ -122,22 +124,22 @@ public class TerrainMapMessageToolsTest
       TerrainMapData terrainMapData = new TerrainMapData(cellResolution, widthInMeters, 0.0, 0.0);
       int cellsPerAxis = terrainMapData.getCellsPerAxis();
 
-      Mat heightMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(0));
-      Mat snapNormalXMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(1));
-      Mat snapNormalYMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(2));
-      Mat snapNormalZMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(3));
-      Mat traversabilityMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1, new Scalar(4));
-      Mat traversabilityClassMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(5));
-
-      TerrainMapTools.convertToTerrainMapData(heightMap,
-                                              snapNormalXMap,
-                                              snapNormalYMap,
-                                              snapNormalZMap,
-                                              traversabilityMap,
-                                              traversabilityClassMap,
-                                              new Point3D(0.0, 0.0, 0.0),
-                                              terrainMapData);
-
+      try (Mat heightMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1, new Scalar(0));
+           Mat snapNormalXMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(1));
+           Mat snapNormalYMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(2));
+           Mat snapNormalZMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(3));
+           Mat traversabilityMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1, new Scalar(4));
+           Mat traversabilityClassMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(5)))
+      {
+         TerrainMapTools.convertToTerrainMapData(heightMap,
+                                                 snapNormalXMap,
+                                                 snapNormalYMap,
+                                                 snapNormalZMap,
+                                                 traversabilityMap,
+                                                 traversabilityClassMap,
+                                                 new Point3D(0.0, 0.0, 0.0),
+                                                 terrainMapData);
+      }
 
       TerrainMapMessage message = new TerrainMapMessage();
       TerrainMapMessageTools.toMessage(terrainMapData, message);

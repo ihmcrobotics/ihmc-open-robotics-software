@@ -11,12 +11,12 @@ import us.ihmc.behaviors.behaviorTree.action.actions.WalkActionDefinition;
 import us.ihmc.behaviors.behaviorTree.action.actions.WalkActionState;
 import us.ihmc.behaviors.behaviorTree.action.actions.ArmActionDefinition;
 import us.ihmc.behaviors.behaviorTree.action.actions.ArmActionState;
-import us.ihmc.behaviors.behaviorTree.action.actions.SakeHandCommandActionDefinition;
-import us.ihmc.behaviors.behaviorTree.action.actions.SakeHandCommandActionState;
+import us.ihmc.behaviors.behaviorTree.action.actions.EZGripperActionDefinition;
+import us.ihmc.behaviors.behaviorTree.action.actions.EZGripperActionState;
 import us.ihmc.behaviors.behaviorTree.action.actions.ScrewPrimitiveActionDefinition;
 import us.ihmc.behaviors.behaviorTree.action.actions.ScrewPrimitiveActionState;
-import us.ihmc.behaviors.behaviorTree.action.actions.WaitDurationActionDefinition;
-import us.ihmc.behaviors.behaviorTree.action.actions.WaitDurationActionState;
+import us.ihmc.behaviors.behaviorTree.action.actions.WaitActionDefinition;
+import us.ihmc.behaviors.behaviorTree.action.actions.WaitActionState;
 
 import java.awt.*;
 import java.util.Random;
@@ -105,7 +105,7 @@ public class BehaviorTreeSVGNode
 
       double secondsToPixels = 15.0;
       double duration = 0.0f;
-      if (node instanceof WaitDurationActionState action)
+      if (node instanceof WaitActionState action)
       {
          duration = action.getDefinition().getWaitDuration();
       }
@@ -121,7 +121,7 @@ public class BehaviorTreeSVGNode
       {
          duration = 10.0; // TODO
       }
-      else if (node instanceof SakeHandCommandActionState action)
+      else if (node instanceof EZGripperActionState action)
       {
          duration = 0.5; // TODO
       }
@@ -179,7 +179,9 @@ public class BehaviorTreeSVGNode
    {
       String name = node.getDefinition().getName();
 
-      if (name.startsWith("CHECK POINT "))
+      if (name.startsWith("CHECKPOINT "))
+         name = name.substring("CHECKPOINT ".length());
+      else if (name.startsWith("CHECK POINT "))
          name = name.substring("CHECK POINT ".length());
       if (name.startsWith("RASVideo_"))
          name = name.substring("RASVideo_".length());
@@ -196,7 +198,7 @@ public class BehaviorTreeSVGNode
 
    private String getTypeName(BehaviorTreeNodeDefinition node)
    {
-      if (node.getName().contains("CHECK POINT"))
+      if (node.getName().contains("CHECKPOINT") || node.getName().contains("CHECK POINT"))
          return "Checkpoint Node";
 
       if (node instanceof BehaviorTreeRootNodeDefinition)
@@ -205,7 +207,7 @@ public class BehaviorTreeSVGNode
          return "Door Traversal Coordinator";
       if (node instanceof ActionSequenceDefinition)
          return "Action Sequence";
-      if (node instanceof WaitDurationActionDefinition)
+      if (node instanceof WaitActionDefinition)
          return "Wait Action";
       if (node instanceof ArmActionDefinition)
          return "Arm Action";
@@ -213,7 +215,7 @@ public class BehaviorTreeSVGNode
          return "Walk Action";
       if (node instanceof SpineActionDefinition)
          return "Spine Action";
-      if (node instanceof SakeHandCommandActionDefinition)
+      if (node instanceof EZGripperActionDefinition)
          return "Finger Trajectory Action";
       if (node instanceof ScrewPrimitiveActionDefinition)
          return "Screw Trajectory Action";

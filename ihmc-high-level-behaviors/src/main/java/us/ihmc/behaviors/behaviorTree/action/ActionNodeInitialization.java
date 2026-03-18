@@ -139,9 +139,9 @@ public class ActionNodeInitialization
       {
          abilityHandActionState.getDefinition().setSide(sideOfNewAction);
       }
-      else if (newAction instanceof SakeHandCommandActionState sakeHandCommandActionState)
+      else if (newAction instanceof EZGripperActionState ezGripperActionState)
       {
-         sakeHandCommandActionState.getDefinition().setSide(sideOfNewAction);
+         ezGripperActionState.getDefinition().setSide(sideOfNewAction);
       }
    }
 
