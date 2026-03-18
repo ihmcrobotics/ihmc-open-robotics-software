@@ -73,7 +73,7 @@ public class RDXModelBuilder
 
    public static Model buildModelFromMesh(ModelBuilder modelBuilder, RDXMultiColorMeshBuilder meshBuilder)
    {
-      return buildModelFromMesh(modelBuilder, meshBuilder.generateMesh());
+      return buildModelFromMesh(modelBuilder, meshBuilder.generateMeshes());
    }
 
    public static Model buildModelFromMesh(ModelBuilder modelBuilder, Mesh mesh)
@@ -90,22 +90,57 @@ public class RDXModelBuilder
       return modelBuilder.end();
    }
 
-   public static void rebuildMesh(Node node, Consumer<RDXMultiColorMeshBuilder> buildModel)
+   public static Model buildModelFromMesh(ModelBuilder modelBuilder, List<Mesh> meshes)
    {
-      NodePart oldNodePart = node.parts.removeIndex(0);
-      oldNodePart.meshPart.mesh.dispose();
+      modelBuilder.begin();
 
-      RDXMultiColorMeshBuilder meshBuilder = new RDXMultiColorMeshBuilder();
-      buildModel.accept(meshBuilder);
-      Mesh mesh = meshBuilder.generateMesh();
-
-      MeshPart meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL41.GL_TRIANGLES);
       Material material = new Material();
       Texture paletteTexture = RDXMultiColorMeshBuilder.loadPaletteTexture();
       material.set(PBRTextureAttribute.createBaseColorTexture(paletteTexture));
       material.set(PBRColorAttribute.createBaseColorFactor(Color.WHITE));
 
-      node.parts.add(new NodePart(meshPart, material));
+      int partIndex = 0;
+      for (Mesh mesh : meshes)
+      {
+         if (mesh.getNumIndices() == 0)
+            continue;
+
+         MeshPart meshPart = new MeshPart("xyz-" + partIndex, mesh, 0, mesh.getNumIndices(), GL41.GL_TRIANGLES);
+         modelBuilder.part(meshPart, material);
+         partIndex++;
+      }
+
+      return modelBuilder.end();
+   }
+
+   public static void rebuildMesh(Node node, Consumer<RDXMultiColorMeshBuilder> buildModel)
+   {
+      for (int i = 0; i < node.parts.size; i++)
+      {
+         NodePart oldNodePart = node.parts.get(i);
+         oldNodePart.meshPart.mesh.dispose();
+      }
+      node.parts.clear();
+
+      RDXMultiColorMeshBuilder meshBuilder = new RDXMultiColorMeshBuilder();
+      buildModel.accept(meshBuilder);
+      List<Mesh> meshes = meshBuilder.generateMeshes();
+
+      Material material = new Material();
+      Texture paletteTexture = RDXMultiColorMeshBuilder.loadPaletteTexture();
+      material.set(PBRTextureAttribute.createBaseColorTexture(paletteTexture));
+      material.set(PBRColorAttribute.createBaseColorFactor(Color.WHITE));
+
+      int partIndex = 0;
+      for (Mesh mesh : meshes)
+      {
+         if (mesh.getNumIndices() == 0)
+            continue;
+
+         MeshPart meshPart = new MeshPart("xyz-" + partIndex, mesh, 0, mesh.getNumIndices(), GL41.GL_TRIANGLES);
+         node.parts.add(new NodePart(meshPart, material));
+         partIndex++;
+      }
    }
 
    public static Model createCoordinateFrame(double length)
