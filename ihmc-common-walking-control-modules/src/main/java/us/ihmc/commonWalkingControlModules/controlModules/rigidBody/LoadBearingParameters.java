@@ -15,7 +15,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class LoadBearingParameters
 {
-   private static final double DEFAULT_COEFFICIENT_OF_FRICTION = 0.5;
+   private static final double DEFAULT_COEFFICIENT_OF_FRICTION = 0.3;
 
    /**
     * Threshold [Nm] below which the hand has a non-slip feedback objective. Analogous to {@link SupportStateParameters#getFootLoadThreshold}
@@ -64,7 +64,7 @@ public class LoadBearingParameters
    public LoadBearingParameters(YoRegistry registry)
    {
       normalForceThresholdForLoaded = new DoubleParameter("handLoadedForceThreshold", registry, 12.0);
-      linearSlippingThreshold = new DoubleParameter("loadBearingLinearTrackingSlipThreshold", registry, 0.06);
+      linearSlippingThreshold = new DoubleParameter("loadBearingLinearTrackingSlipThreshold", registry, 0.09);
 
       holdPositionStiffness = new DoubleParameter("kpXYHandLoadBearingPosition", registry, 100.0);
       holdPositionDampingRatio = new DoubleParameter("zetaXYHandLoadBearingPosition", registry, 0.65);
@@ -88,7 +88,7 @@ public class LoadBearingParameters
       postContactOrientationWeights.set(0.3, 0.3, 0.3);
 
       doSmoothLoading = new YoBoolean("doSmoothLoading", registry);
-      doSmoothLoading.set(true);
+      doSmoothLoading.set(false);
 
       coefficientOfFriction = new YoDouble("coefficientOfFriction", registry);
       coefficientOfFriction.set(DEFAULT_COEFFICIENT_OF_FRICTION);
