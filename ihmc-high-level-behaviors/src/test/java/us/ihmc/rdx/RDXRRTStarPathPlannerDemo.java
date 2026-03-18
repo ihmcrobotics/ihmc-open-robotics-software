@@ -143,10 +143,10 @@ public class RDXRRTStarPathPlannerDemo
                   while (!stack.isEmpty())
                   {
                      RRTStarPathPlanner.Node node = stack.pop();
-                     for (RRTStarPathPlanner.Node child : node.children())
+                     for (RRTStarPathPlanner.Node child : node.children)
                      {
-                        builder.addLine(node.position(), child.position(), 0.005, Color.ORANGE);
-                        builder.addCube(0.02, child.position(), Color.WHITE);
+                        builder.addLine(node.position, child.position, 0.005, Color.ORANGE);
+                        builder.addCube(0.02, child.position, Color.WHITE);
                         stack.push(child);
                      }
                   }

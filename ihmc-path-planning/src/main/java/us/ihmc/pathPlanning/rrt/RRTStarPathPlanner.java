@@ -22,13 +22,28 @@ public class RRTStarPathPlanner
    private final Vector3D direction = new Vector3D();
    private final Point3D newPosition = new Point3D();
    private final Random random = new Random();
-   public record Node(Point3D position, double cost, Node parent, List<Node> children) { }
+   public static class Node
+   {
+      public Point3D position;
+      public double cost;
+      public Node parent;
+      public List<Node> children;
+
+      Node(Point3D position, double cost, Node parent, ArrayList<Node> children)
+      {
+         this.position = position;
+         this.cost = cost;
+         this.parent = parent;
+         this.children = children;
+      }
+   }
    public Node rootNode;
    private int i;
    private int size;
    private final ArrayDeque<Node> stack = new ArrayDeque<>();
    private final ArrayList<Node> neighbors = new ArrayList<>();
    public final ArrayList<Point3D> path = new ArrayList<>();
+   public Node bestGoalNode;
 
    public List<Point3D> plan(Tuple3DReadOnly start, Tuple3DReadOnly goal, Function<Point3D, Boolean> collider)
    {
@@ -42,7 +57,8 @@ public class RRTStarPathPlanner
    private void plan()
    {
       path.clear();
-      searchRadius = 2.0 * start.distance(goal);
+      bestGoalNode = null;
+      searchRadius = 1.5 * start.distance(goal);
       center.interpolate(start, goal, 0.5);
 
       rootNode = new Node(start, 0.0, null, new ArrayList<>());
@@ -53,7 +69,7 @@ public class RRTStarPathPlanner
 
          Node closestNode = rootNode;
          double closestDistance = rootNode.position.distance(sample);
-         size = 0;
+         size = 1;
          stack.clear();
          stack.addAll(rootNode.children);
          while (!stack.isEmpty()) // Find closest node to sample
@@ -71,12 +87,16 @@ public class RRTStarPathPlanner
 
          direction.sub(sample, closestNode.position); // Steer
          direction.normalize();
-         direction.scale(0.2);
+         direction.scale(Math.min(0.2, sample.distance(closestNode.position)));
          newPosition.add(closestNode.position, direction);
 
          boolean atGoal = newPosition.distance(goal) < 0.1;
          if (atGoal || !collider.apply(newPosition)) // TODO: Check edge for collisions
          {
+            double rMax = 0.125 * searchRadius;
+            double gamma = 2.6944 * searchRadius;
+            double dynamicRadius = size <= 1 ? rMax : Math.min(rMax, gamma * Math.sqrt(Math.log(size) / size)); // Avoid O(n^2)
+
             neighbors.clear();
             Node cheapestNeighbor = closestNode;
             double lowestCost = closestNode.cost + newPosition.distance(closestNode.position);
@@ -86,11 +106,6 @@ public class RRTStarPathPlanner
             {
                Node node = stack.pop();
                double distance = node.position.distance(newPosition);
-
-               double rMax = 0.125 * searchRadius; // Avoid O(n^2)
-               double gamma = 2.6944 * searchRadius;
-               double dynamicRadius = gamma * Math.sqrt(Math.log(size) / size);
-               dynamicRadius = size <= 1 ? rMax : Math.min(rMax, dynamicRadius);
 
                if (distance < dynamicRadius)
                {
@@ -110,22 +125,43 @@ public class RRTStarPathPlanner
 
             for (Node neighbor : neighbors) // Rewire
             {
-
-            }
-
-            if (atGoal)
-            {
-               path.clear();
-               Node node = newNode;
-               while (node.parent != null)
+               double cost = newNode.cost + newNode.position.distance(neighbor.position);
+               if (neighbor.parent != null && cost < neighbor.cost) // TODO: Check edge for collisions
                {
-                  path.add(0, node.position);
-                  node = node.parent;
+                  neighbor.parent.children.remove(neighbor);
+                  neighbor.parent = newNode;
+                  neighbor.cost = cost;
+                  newNode.children.add(neighbor);
+
+                  stack.clear();
+                  stack.add(neighbor);
+                  while (!stack.isEmpty())
+                  {
+                     Node node = stack.pop();
+                     for (Node child : node.children)
+                     {
+                        child.cost = node.cost + node.position.distance(child.position);
+                        stack.add(child);
+                     }
+                  }
                }
-               path.add(0, node.position);
-               return;
             }
+
+            if (atGoal && (bestGoalNode == null || newNode.cost < bestGoalNode.cost))
+               bestGoalNode = newNode;
          }
+      }
+
+      if (bestGoalNode != null)
+      {
+         path.clear();
+         Node node = bestGoalNode;
+         while (node.parent != null)
+         {
+            path.add(0, node.position);
+            node = node.parent;
+         }
+         path.add(0, node.position);
       }
    }
 
