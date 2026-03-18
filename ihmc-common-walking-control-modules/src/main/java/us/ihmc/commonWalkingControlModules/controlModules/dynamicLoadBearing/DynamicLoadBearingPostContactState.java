@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCor
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OneDoFJointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
@@ -19,6 +20,7 @@ import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactSta
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.geometry.interfaces.Plane3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -28,6 +30,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
@@ -39,6 +42,7 @@ import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.controllers.pidGains.GainCalculator;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
@@ -50,6 +54,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.filters.GlitchFilteredYoBoolean;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class DynamicLoadBearingPostContactState implements DynamicLoadBearingState
@@ -70,6 +75,20 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
    private final PointFeedbackControlCommand pointFeedbackControlCommand = new PointFeedbackControlCommand();
    private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
    private final PlaneContactStateCommand planeContactStateCommand = new PlaneContactStateCommand();
+
+   /* Elbow collisions */
+   private final PointFeedbackControlCommand collisionAvoidanceCommand = new PointFeedbackControlCommand();
+   private final RigidBodyBasics bodyToAvoidCollisions;
+   private final FramePoint3D collisionAvoidancePointInBody = new FramePoint3D();
+   private final FramePoint3D desiredCollisionAvoidancePointInWorld = new FramePoint3D();
+   private final FrameVector3D deltaCollisionDistance = new FrameVector3D();
+   private final YoBoolean isCollisionAvoidanceActivated;
+   private final YoDouble elbowToWallDistance;
+   private final YoDouble alphaCollisionActivation;
+   private final FramePoint3D elbowPoint = new FramePoint3D();
+   private final Vector3D collisionWeight = new Vector3D();
+   private final Vector3D defaultCollisionWeight = new Vector3D(0.0, 0.0, 3.5);
+//   private final OneDoFJointFeedbackControlCommand jointFeedbackControlCommand = new OneDoFJointFeedbackControlCommand();
 
    /* Control gains, weights and axis selection */
    private final LoadBearingParameters loadBearingParameters;
@@ -92,6 +111,7 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
    private final PoseReferenceFrame desiredContactFrameFixedInWorld;
    private final OneDoFJointBasics[] jointPath;
    private final FramePoint3D shoulderPointInWorld = new FramePoint3D();
+   private final Plane3DReadOnly bracingPlane;
 
    /* Yo-Contact frame components */
    private final YoFrameVector3D contactNormal;
@@ -126,6 +146,7 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
                                              double nominalRhoWeight,
                                              MutableBoolean hasAddedContacts,
                                              MutableBoolean hasRemovedContacts,
+                                             Plane3DReadOnly bracingPlane,
                                              YoRegistry registry)
    {
       this.bodyToControl = bodyToControl;
@@ -135,9 +156,9 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
       this.nominalRhoWeight = nominalRhoWeight;
       this.hasAddedContacts = hasAddedContacts;
       this.hasRemovedContacts = hasRemovedContacts;
+      this.bracingPlane = bracingPlane;
 
       String bodyName = bodyToControl.getName();
-
 
       desiredContactFrameFixedInWorld = new PoseReferenceFrame("desiredContactFrame" + bodyName, ReferenceFrame.getWorldFrame());
       bodyAcceleration = new SpatialAcceleration(desiredContactFrameFixedInWorld, elevatorFrame, desiredContactFrameFixedInWorld);
@@ -164,11 +185,28 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
       this.orientationControlHelper = orientationControlHelper;
 
       String prefix = bodyToControl.getParentJoint().getName().split("_")[0];
-      JointBasics shoulderJoint = MultiBodySystemTools.findJoint(baseBody, prefix + "_SHOULDER_Y");
-      jointPath = MultiBodySystemTools.createOneDoFJointPath(shoulderJoint.getPredecessor(), bodyToControl);
+      JointBasics shoulderYJoint = MultiBodySystemTools.findJoint(baseBody, prefix + "_SHOULDER_Y");
+      jointPath = MultiBodySystemTools.createOneDoFJointPath(shoulderYJoint.getPredecessor(), bodyToControl);
 
       contactPointInBody.setToZero(controlFrame);
       contactPointInBody.changeFrame(bodyToControl.getBodyFixedFrame());
+
+      alphaCollisionActivation = new YoDouble(bodyName + "_alphaCollision", registry);
+      elbowToWallDistance = new YoDouble(bodyName + "_CollisionDistance", registry);
+
+      // Collision avoidance
+      bodyToAvoidCollisions = bodyToControl.getParentJoint().getPredecessor();
+      collisionAvoidancePointInBody.setToZero(bodyToControl.getParentJoint().getFrameAfterJoint());
+      collisionAvoidancePointInBody.changeFrame(bodyToAvoidCollisions.getBodyFixedFrame());
+      isCollisionAvoidanceActivated = new YoBoolean("isCollisionAvoidanceActivated", registry);
+      collisionAvoidanceCommand.set(elevator, bodyToAvoidCollisions);
+      collisionAvoidanceCommand.setPrimaryBase(baseBody);
+
+//      RobotSide robotSide = prefix.contains("LEFT") ? RobotSide.LEFT : RobotSide.RIGHT;
+//      OneDoFJointBasics shoulderXJoint = jointPath[1];
+//      jointFeedbackControlCommand.setControlMode(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
+//      jointFeedbackControlCommand.setJoint(shoulderXJoint);
+//      jointFeedbackControlCommand.setInverseDynamics(robotSide.negateIfRightSide(0.2), 0.0, 0.0);
    }
 
    @Override
@@ -245,6 +283,39 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
       }
 
       orientationControlHelper.doAction(timeInState);
+
+      elbowPoint.setToZero(bodyToControl.getParentJoint().getFrameAfterJoint());
+      elbowPoint.changeFrame(ReferenceFrame.getWorldFrame());
+
+      elbowToWallDistance.set(bracingPlane.distance(elbowPoint));
+      double maxActivationDistance = 0.17;
+      double minActivationDistance = 0.09;
+      boolean isCollisionAvoidanceActivated = elbowToWallDistance.getValue() < maxActivationDistance;
+      alphaCollisionActivation.set(1.0 - (elbowToWallDistance.getValue() - minActivationDistance) / (maxActivationDistance - minActivationDistance));
+      alphaCollisionActivation.set(EuclidCoreTools.clamp(alphaCollisionActivation.getValue(), 0.0, 1.0));
+
+      if (alphaCollisionActivation.getValue() > 0.0)
+      { // compute setpoint
+         collisionAvoidanceCommand.setBodyFixedPointToControl(collisionAvoidancePointInBody);
+         collisionAvoidanceCommand.setGainsFrame(desiredContactFrameFixedInWorld);
+
+         desiredCollisionAvoidancePointInWorld.setMatchingFrame(collisionAvoidancePointInBody);
+         deltaCollisionDistance.set(bracingPlane.getNormal());
+         deltaCollisionDistance.scale(alphaCollisionActivation.getValue() * (maxActivationDistance - minActivationDistance));
+         desiredCollisionAvoidancePointInWorld.add(deltaCollisionDistance);
+
+         collisionAvoidanceCommand.setInverseDynamics(desiredCollisionAvoidancePointInWorld, zeroWorld, zeroWorld);
+         collisionAvoidanceCommand.setGains(loadBearingParameters.getCollisionGains());
+
+         collisionWeight.set(defaultCollisionWeight);
+         collisionWeight.scale(Math.max(alphaCollisionActivation.getValue(), 0.5));
+         collisionAvoidanceCommand.setWeightsForSolver(collisionWeight);
+
+//         double maxWeight = 2.5;
+//         jointFeedbackControlCommand.setWeightForSolver(Math.max(0.1, alphaCollisionActivation.getValue() * maxWeight));
+      }
+
+      this.isCollisionAvoidanceActivated.set(isCollisionAvoidanceActivated && loadBearingParameters.enableCollisionAvoidance());
    }
 
    public void setBracingSurface(Vector3DReadOnly contactNormalInWorldFrame)
@@ -275,6 +346,7 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
       hasAddedContacts.setTrue();
 
       onTouchdownCallback.run();
+      isCollisionAvoidanceActivated.set(false);
    }
 
    @Override
@@ -321,13 +393,20 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
          pointFeedbackControlCommand.setControlMode(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
          feedbackControlCommandList.addCommand(pointFeedbackControlCommand);
       }
-      if (ENABLE_ORIENTATION_FEEDBACK)
+      if (ENABLE_ORIENTATION_FEEDBACK && !isCollisionAvoidanceActivated.getValue())
       {
          OrientationFeedbackControlCommand orientationFeedbackCommand = orientationControlHelper.getFeedbackControlCommand();
          orientationFeedbackCommand.setWeightsForSolver(loadBearingParameters.getPostContactOrientationWeights());
          orientationFeedbackCommand.setGains(loadBearingParameters.getPostContactFeedbackGains().getOrientationGains());
          orientationFeedbackCommand.setControlMode(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
          feedbackControlCommandList.addCommand(orientationFeedbackCommand);
+      }
+
+      if (isCollisionAvoidanceActivated.getValue())
+      {
+         collisionAvoidanceCommand.setControlMode(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
+         feedbackControlCommandList.addCommand(collisionAvoidanceCommand);
+//         feedbackControlCommandList.addCommand(jointFeedbackControlCommand);
       }
 
       return feedbackControlCommandList;
@@ -346,6 +425,9 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
       {
          feedbackControlCommandList.addCommand(orientationControlHelper.getFeedbackControlCommand());
       }
+
+      feedbackControlCommandList.addCommand(collisionAvoidanceCommand);
+//      feedbackControlCommandList.addCommand(jointFeedbackControlCommand);
 
       return feedbackControlCommandList;
    }
