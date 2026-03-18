@@ -124,8 +124,6 @@ public class AvatarMultiThreadingFactory
 
    // Step Generator
    private final OptionalFactoryField<AvatarStepGeneratorThread> avatarStepGenerator = new OptionalFactoryField<>("AvatarStepGeneratorThread");
-   private final HumanoidSteppingPluginEnvironmentalConstraints environmentalConstraints;
-   private final HumanoidSteppingPluginFactory humanoidSteppingPluginFactory;
 
    // IK Streaming
    private final OptionalFactoryField<IKStreamingRTPluginFactory.IKStreamingRTThread> avatarIKStreaming = new OptionalFactoryField<>("AvatarIKStreamingThread");
@@ -209,11 +207,6 @@ public class AvatarMultiThreadingFactory
                                                                  standPrepStateFactory,
                                                                  freezeStateFactory);
       avatarControllerFactory.setListenToHighLevelStatePackets(true);
-
-      // Some extra stuff for the step generator
-      humanoidSteppingPluginFactory = new JoystickBasedSteppingPluginFactory();
-      environmentalConstraints = new HumanoidSteppingPluginEnvironmentalConstraints(masterRobotModel.getContactPointParameters(),
-                                                                                    masterRobotModel.getWalkingControllerParameters().getSteppingParametersForStepGeneration());
 
       // Set the root registry as the YoVariableServer's main registry
       yoVariableServer.setMainRegistry(rootRegistry,
@@ -307,28 +300,6 @@ public class AvatarMultiThreadingFactory
          avatarEstimator.setupHighLevelControllerCallback(avatarControllerFactory, stateModeMap);
       }
 
-      // Set up this stuff
-      if (!avatarStepGenerator.hasValue())
-      {
-         // Sets up the environmental constraint manager as a height map consumer in the input manager
-         humanoidSteppingPluginFactory.addHeightMapCommandConsumer(environmentalConstraints);
-
-         // Adds functions that adjust the footholds based on the environment.
-         humanoidSteppingPluginFactory.setFootStepAdjustment(environmentalConstraints.getFootstepAdjustment());
-
-         // Adds checkers for footholds based on the environment
-         for (FootstepValidityIndicator footstepValidityIndicator : environmentalConstraints.getFootstepValidityIndicators())
-            humanoidSteppingPluginFactory.addFootstepValidityIndicator(footstepValidityIndicator);
-
-         // Clear the environment at the beginning of every update
-         humanoidSteppingPluginFactory.addUpdatable(environmentalConstraints);
-
-         // Create the callback listeners for the planar regions in the stepping plugin
-         humanoidSteppingPluginFactory.createStepGeneratorNetworkSubscriber(masterRobotModel.getSimpleRobotName().toLowerCase(), controllerRealtimeROS2Node);
-
-         avatarControllerFactory.addControllerPlugin(humanoidSteppingPluginFactory);
-      }
-
       // Create the high-level controller
       AvatarControllerThread avatarController = new AvatarControllerThread(masterRobotModel.getSimpleRobotName().toLowerCase(),
                                                                                  masterRobotModel,
@@ -344,9 +315,6 @@ public class AvatarMultiThreadingFactory
       // Add controller registry directly to the YoVariableServer (since it is in a separate thread)
       yoVariableServer.addRegistry(avatarController.getYoVariableRegistry(), avatarController.getSCS2YoGraphics());
 
-      if (!avatarStepGenerator.hasValue())
-         avatarController.getYoVariableRegistry().addChild(environmentalConstraints.getRegistry());
-
       // Set up the task and thread for the controller
       setupControllerTaskAndThread(avatarController, masterFullRobotModel, yoVariableServer);
 
@@ -358,13 +326,12 @@ public class AvatarMultiThreadingFactory
     */
    public AvatarStepGeneratorThread createAndAddStepGeneratorThread()
    {
-      AvatarStepGeneratorThread stepGenerator = new AvatarStepGeneratorThread(humanoidSteppingPluginFactory,
-                                                                                    controllerContextFactory,
-                                                                                    avatarControllerFactory.getStatusOutputManager(),
-                                                                                    avatarControllerFactory.getCommandInputManager(),
-                                                                                    masterRobotModel,
-                                                                                    environmentalConstraints,
-                                                                                    controllerRealtimeROS2Node);
+      AvatarStepGeneratorThread stepGenerator = new AvatarStepGeneratorThread(controllerContextFactory,
+                                                                              avatarControllerFactory.getStatusOutputManager(),
+                                                                              avatarControllerFactory.getCommandInputManager(),
+                                                                              masterRobotModel,
+                                                                              null,
+                                                                              controllerRealtimeROS2Node);
 
       avatarStepGenerator.set(stepGenerator);
 
