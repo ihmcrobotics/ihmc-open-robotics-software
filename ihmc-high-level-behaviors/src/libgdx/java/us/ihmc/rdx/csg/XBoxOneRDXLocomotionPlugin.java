@@ -7,7 +7,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.joystickBasedLocomotion.AbstractJoystickLocomotionPlugin;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.CSGROS2CommunicationHelper;
 import us.ihmc.commons.DeadbandTools;
-import us.ihmc.commons.thread.Throttler;
 import us.ihmc.ros2.ROS2Node;
 
 /**
@@ -32,8 +31,7 @@ public class XBoxOneRDXLocomotionPlugin extends AbstractJoystickLocomotionPlugin
    private boolean controllerListenerHasBeenAdded = false;
    private boolean publishNewCommand = false;
 
-   // Throttler on publishers, so we limit network traffic
-   private final Throttler publisherThrottler = new Throttler();
+
 
    public XBoxOneRDXLocomotionPlugin(DRCRobotModel robotModel, ROS2Node ros2Node)
    {
@@ -43,8 +41,6 @@ public class XBoxOneRDXLocomotionPlugin extends AbstractJoystickLocomotionPlugin
    public XBoxOneRDXLocomotionPlugin(DRCRobotModel robotModel, ROS2Node ros2Node, double parameterIncrement, boolean useDeadmanSwitch)
    {
       super(robotModel, ros2Node);
-
-      publisherThrottler.setPeriod(robotModel.getStepGeneratorDT() * 2); // Publish at half the rate of CSG thread
 
       xboxOneControllerListener = new ControllerListener()
       {
@@ -95,19 +91,6 @@ public class XBoxOneRDXLocomotionPlugin extends AbstractJoystickLocomotionPlugin
          @Override
          public boolean axisMoved(Controller controller, int axisCode, float value)
          {
-            if (controller != null)
-            {
-               if (axisCode == 4.0 && controller.getAxis(4) == 1.0)
-               {
-                  publishNewCommand = true;
-               }
-               else if (axisCode == 4.0 && controller.getAxis(4) != 1.0 && publishNewCommand)
-               {
-                  sendStopWalkingCommands();
-                  publishNewCommand = false;
-               }
-            }
-
             return false;
          }
       };
@@ -118,15 +101,13 @@ public class XBoxOneRDXLocomotionPlugin extends AbstractJoystickLocomotionPlugin
    {
       updateCommandsFromRC();
 
-      if (publishNewCommand && publisherThrottler.run())
+      if (publisherThrottler.run() && !heartBeat.isExpired(1.0))
          publish();
    }
 
    private void updateCommandsFromRC()
    {
-      boolean newControllerConnected = false;
-      if (currentController != null && currentController != Controllers.getCurrent())
-         newControllerConnected = true;
+      boolean newControllerConnected = currentController != null && currentController != Controllers.getCurrent();
 
       currentController = Controllers.getCurrent();
       currentControllerConnected = currentController != null;
@@ -148,9 +129,13 @@ public class XBoxOneRDXLocomotionPlugin extends AbstractJoystickLocomotionPlugin
       if (currentControllerConnected)
       {
          requestWalking = currentController.getAxis(4) == 1.0; // This is the left trigger value (1.0 = pressed in)
-         forwardJoystickValue = DeadbandTools.applyDeadband(deadband, -currentController.getAxis(currentController.getMapping().axisLeftY));
-         lateralJoystickValue = DeadbandTools.applyDeadband(deadband, -currentController.getAxis(currentController.getMapping().axisLeftX));
-         turningJoystickValue = DeadbandTools.applyDeadband(deadband, -currentController.getAxis(currentController.getMapping().axisRightX));
+         if (requestWalking)
+         {
+            forwardJoystickValue = DeadbandTools.applyDeadband(deadband, -currentController.getAxis(currentController.getMapping().axisLeftY));
+            lateralJoystickValue = DeadbandTools.applyDeadband(deadband, -currentController.getAxis(currentController.getMapping().axisLeftX));
+            turningJoystickValue = DeadbandTools.applyDeadband(deadband, -currentController.getAxis(currentController.getMapping().axisRightX));
+            heartBeat.reset();
+         }
       }
 
       // Pack messages with desired walking commands

@@ -6,9 +6,11 @@ import controller_msgs.msg.dds.ContinuousStepGeneratorStatusMessage;
 import controller_msgs.msg.dds.DirectionalControlInputMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.CSGROS2CommunicationHelper;
+import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
+import us.ihmc.tools.Timer;
 
 public abstract class AbstractJoystickLocomotionPlugin
 {
@@ -18,13 +20,17 @@ public abstract class AbstractJoystickLocomotionPlugin
    // Publisher for DirectionalControlInputMessage (going into the controller thread)
    protected final ROS2Publisher<DirectionalControlInputMessage> directionalControlInputMessagePublisher;
 
+   // Stuff to limit how often we publish
+   protected final Throttler publisherThrottler = new Throttler();
+   protected final Timer heartBeat = new Timer();
+
    // CSG thread command and status messages
    protected final ContinuousStepGeneratorInputMessage csgInputCommand;
    protected final ContinuousStepGeneratorParametersMessage csgParametersCommand;
    protected final ContinuousStepGeneratorStatusMessage csgStatusMessage;
 
    // Controller thread walking message
-   private final DirectionalControlInputMessage directionalControlInputMessage;
+   protected final DirectionalControlInputMessage directionalControlInputMessage;
 
    public AbstractJoystickLocomotionPlugin(DRCRobotModel robotModel, ROS2Node ros2Node)
    {
@@ -36,6 +42,8 @@ public abstract class AbstractJoystickLocomotionPlugin
       csgStatusMessage = csgROS2CommunicationHelper.getCSGStatusMessage();
 
       directionalControlInputMessage = new DirectionalControlInputMessage();
+
+      publisherThrottler.setPeriod(robotModel.getStepGeneratorDT() * 2); // Publish at half the rate of CSG thread
    }
 
    public abstract void update();
@@ -70,6 +78,9 @@ public abstract class AbstractJoystickLocomotionPlugin
       directionalControlInputMessage.setForward(forwardVelocity);
       directionalControlInputMessage.setRight(-lateralVelocity);
       directionalControlInputMessage.setClockwise(-turnVelocity);
+
+      if (requestWalking)
+         heartBeat.reset();
    }
 
    protected void setDesiredWalkingParameters(double swingDuration, double transferDuration, double swingHeight)
