@@ -117,6 +117,8 @@ public class SupportState extends AbstractFootControlState
    private final YoDouble pitchTrajectoryEndTime;
    private final YoDouble desiredPitch;
 
+   public static boolean isUpperBodyLoadBearing = false;
+
    public SupportState(FootControlHelper footControlHelper, PIDSE3GainsReadOnly holdPositionGains, YoRegistry parentRegistry)
    {
       super(footControlHelper);
@@ -384,9 +386,11 @@ public class SupportState extends AbstractFootControlState
       desiredPosition.changeFrame(soleZUpFrame);
       desiredOrientation.changeFrame(soleZUpFrame);
 
+      boolean copOnEdge = this.copOnEdge.getBooleanValue(); // && !isUpperBodyLoadBearing;
+
       // The z component is always updated as it is never held in place
       if (footBarelyLoaded.getBooleanValue()
-          && copOnEdge.getBooleanValue()) // => Holding X-Y-Yaw-Components (cuz barely loaded) and Pitch-Roll-Components (cuz CoP on edge)
+          && copOnEdge) // => Holding X-Y-Yaw-Components (cuz barely loaded) and Pitch-Roll-Components (cuz CoP on edge)
       { // Only the z component is not held
          desiredPosition.setZ(footPosition.getZ());
       }
@@ -395,7 +399,7 @@ public class SupportState extends AbstractFootControlState
          desiredPosition.setZ(footPosition.getZ());
          desiredOrientation.setYawPitchRoll(desiredOrientation.getYaw(), footOrientation.getPitch(), footOrientation.getRoll());
       }
-      else if (copOnEdge.getBooleanValue()) // => Holding Pitch-Roll-Components (cuz CoP on edge)
+      else if (copOnEdge) // => Holding Pitch-Roll-Components (cuz CoP on edge)
       { // Update X-Y-Z and yaw for next time the foot will be barely loaded
          desiredPosition.set(footPosition);
          desiredOrientation.setYawPitchRoll(footOrientation.getYaw(), desiredOrientation.getPitch(), desiredOrientation.getRoll());

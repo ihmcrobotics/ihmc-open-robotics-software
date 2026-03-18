@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.geometry.interfaces.Plane3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -39,11 +40,11 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
    private final FramePoint3D desiredPosition = new FramePoint3D();
    private final FramePoint3D waypointPosition = new FramePoint3D();
    private final FrameVector3D terminalVelocity = new FrameVector3D();
-   private final Plane3D bracingPlane = new Plane3D();
 
    private final YoDouble trajectoryDuration;
    private final YoDouble distanceToPlane;
 
+   private final Plane3DReadOnly bracingPlane;
    private final YoFramePoint3D yoBracingPoint;
    private final YoFrameVector3D yoBracingNormal;
    private final YoFramePose3D yoControlFrame;
@@ -69,6 +70,7 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
                                             RigidBodyPositionControlHelper positionControlHelper,
                                             ReferenceFrame controlFrame,
                                             LoadBearingParameters loadBearingParameters,
+                                            Plane3DReadOnly bracingPlane,
                                             YoRegistry registry)
    {
       this.positionControlHelper = positionControlHelper;
@@ -91,12 +93,13 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
 
       controlFramePose.setToZero(controlFrame);
       this.controlFrame = (MovingReferenceFrame) controlFrame;
+
+      this.bracingPlane = bracingPlane;
    }
 
    public void setBracingData(HandContactCommand command)
    {
       this.desiredPosition.set(command.getBracingPoint());
-      this.bracingPlane.set(command.getBracingPoint(), command.getBracingNormal());
       this.trajectoryDuration.set(command.getTrajectoryDuration());
 
       yoBracingPoint.set(command.getBracingPoint());

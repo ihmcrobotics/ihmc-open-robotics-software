@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
@@ -41,6 +42,7 @@ public class RigidBodyDynamicLoadBearingControlState extends RigidBodyControlSta
    private final DoubleProvider capturePointErrorProvider;
    private final BipedSupportPolygons bipedSupportPolygons;
    private final FramePoint3DReadOnly capturePoint;
+   private final Plane3D bracingPlane = new Plane3D();
 
    public RigidBodyDynamicLoadBearingControlState(RigidBodyBasics bodyToControl,
                                                   RigidBodyBasics baseBody,
@@ -65,7 +67,7 @@ public class RigidBodyDynamicLoadBearingControlState extends RigidBodyControlSta
       String bodyName = bodyToControl.getName();
       String namePrefix = bodyName + "Bracing";
 
-      preContactState = new DynamicLoadBearingPreContactState(bodyToControl, positionControlHelper, controlFrame, loadBearingParameters, registry);
+      preContactState = new DynamicLoadBearingPreContactState(bodyToControl, positionControlHelper, controlFrame, loadBearingParameters, bracingPlane, registry);
       postContactState = new DynamicLoadBearingPostContactState(bodyToControl,
                                                                 baseBody,
                                                                 elevator,
@@ -76,6 +78,7 @@ public class RigidBodyDynamicLoadBearingControlState extends RigidBodyControlSta
                                                                 nominalRhoWeight,
                                                                 hasAddedContacts,
                                                                 hasRemovedContacts,
+                                                                bracingPlane,
                                                                 registry);
 
       stateMachine = setupStateMachine(namePrefix, yoTime);
@@ -102,6 +105,7 @@ public class RigidBodyDynamicLoadBearingControlState extends RigidBodyControlSta
 
    public void setBracingSurface(HandContactCommand command)
    {
+      bracingPlane.set(command.getBracingPoint(), command.getBracingNormal());
       preContactState.setBracingData(command);
       postContactState.setBracingSurface(command.getBracingNormal());
    }

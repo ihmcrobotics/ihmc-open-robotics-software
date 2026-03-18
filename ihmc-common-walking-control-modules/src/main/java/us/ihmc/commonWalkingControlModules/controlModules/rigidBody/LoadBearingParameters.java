@@ -5,6 +5,8 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.controllers.pidGains.GainCalculator;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
+import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPIDSE3Gains;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
@@ -56,10 +58,12 @@ public class LoadBearingParameters
 
    private final YoFrameVector3D postContactPositionWeights;
    private final YoFrameVector3D postContactOrientationWeights;
+   private final DefaultPID3DGains collisionGains = new DefaultPID3DGains();
 
    private final YoDouble coefficientOfFriction;
 
    private final YoBoolean doSmoothLoading;
+   private final YoBoolean enableCollisionAvoidance;
 
    public LoadBearingParameters(YoRegistry registry)
    {
@@ -92,6 +96,12 @@ public class LoadBearingParameters
 
       coefficientOfFriction = new YoDouble("coefficientOfFriction", registry);
       coefficientOfFriction.set(DEFAULT_COEFFICIENT_OF_FRICTION);
+
+      collisionGains.setProportionalGains(0.0, 0.0, 100.0);
+      collisionGains.setDampingRatios(0.0, 0.0, 0.25);
+
+      enableCollisionAvoidance = new YoBoolean("enableCollisionAvoidance", registry);
+      enableCollisionAvoidance.set(true);
    }
 
    public double getNormalForceThresholdForLoaded()
@@ -222,4 +232,13 @@ public class LoadBearingParameters
       return coefficientOfFriction.getValue();
    }
 
+   public DefaultPID3DGains getCollisionGains()
+   {
+      return collisionGains;
+   }
+
+   public boolean enableCollisionAvoidance()
+   {
+      return enableCollisionAvoidance.getValue();
+   }
 }

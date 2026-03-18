@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.FootShakiesEstimator;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.SupportState;
 import us.ihmc.commonWalkingControlModules.controlModules.naturalPosture.NaturalPostureManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
@@ -848,6 +849,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       }
 
       this.isUpperBodyLoadBearing.set(isUpperBodyLoadBearing);
+      SupportState.isUpperBodyLoadBearing = isUpperBodyLoadBearing;
+
       StabilityMarginRegionCalculator multiContactRegionCalculator = controllerToolbox.getMultiContactStabilityRegionCalculator();
       boolean useMultiContactStabilityRegion = false;
 
