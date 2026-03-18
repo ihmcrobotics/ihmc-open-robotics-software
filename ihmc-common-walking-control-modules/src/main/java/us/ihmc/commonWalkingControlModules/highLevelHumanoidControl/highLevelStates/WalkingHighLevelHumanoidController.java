@@ -912,7 +912,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       wholeBodyContactState.updateContactPoints();
       wholeBodyContactState.updateJointIndices();
 
-      controllerToolbox.onWholeBodyContactsChanged(true);
+//      controllerToolbox.onWholeBodyContactsChanged(true);
    }
 
    private void packHandLoadBearingStatuses(CapturabilityBasedStatus capturabilityBasedStatus)
