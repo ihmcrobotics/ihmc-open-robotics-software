@@ -132,7 +132,6 @@ public class AvatarLowLevelOutputProcessor
                                        isServoing.set(false);
                                        isUnservoing.set(false);
                                        masterGain.set(0.0);
-                                       unservoQuickly.set(false, false);
                                     }
                                  });
 
@@ -178,6 +177,8 @@ public class AvatarLowLevelOutputProcessor
          jointDesiredOutput.setDesiredPosition(jointDesiredOutput.getDesiredPosition() + getJointPositionOffset(controlledJoint));
          jointDesiredOutput.setDesiredVelocity(jointDesiredOutput.getDesiredVelocity() + getJointVelocityOffset(controlledJoint));
       }
+      if (unservoQuickly.getBooleanValue())
+         unservoQuickly.set(false, false);
    }
 
    public void enableInterpolation(boolean enable)
