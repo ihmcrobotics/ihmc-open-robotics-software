@@ -4,7 +4,9 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
+import imgui.type.ImInt;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.pathPlanning.rrt.RRTStarPathPlanner;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -24,6 +26,7 @@ public class RDXRRTStarPathPlannerDemo
    private ModelInstance pathModel;
    private double planDurationMs = 0.0;
    private final ImBoolean autoPlan = new ImBoolean(true);
+   private final int[] maxIterations = new int[] {20};
    private boolean planRequested = true;
    private RDX3DSituatedText startText;
    private RDX3DSituatedText goalText;
@@ -68,6 +71,8 @@ public class RDXRRTStarPathPlannerDemo
                planRequested = true;
             ImGui.sameLine();
             ImGui.checkbox("Plan each frame", autoPlan);
+            if (ImGui.sliderInt("Max iterations", maxIterations, 0, 100))
+               planner.setMaxIterations(maxIterations[0]);
 
             ImGui.text("Start: " + startGizmo.getTransformToParent().getTranslation());
             ImGui.text("Goal: " + goalGizmo.getTransformToParent().getTranslation());
@@ -120,7 +125,7 @@ public class RDXRRTStarPathPlannerDemo
                      for (RRTStarPathPlanner.Node child : node.children())
                      {
                         builder.addLine(node.position(), child.position(), 0.005, Color.ORANGE);
-                        builder.addSphere(0.02, child.position(), Color.WHITE);
+                        builder.addMesh(MeshDataGenerator.Sphere(0.02, 5, 5), child.position(), Color.WHITE);
                         stack.push(child);
                      }
                   }

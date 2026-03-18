@@ -1,6 +1,5 @@
 package us.ihmc.pathPlanning.rrt;
 
-import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
@@ -13,8 +12,11 @@ import java.util.function.Function;
 
 public class RRTStarPathPlanner
 {
+   private int maxIterations = 20;
    private final Point3D start = new Point3D();
    private final Point3D goal = new Point3D();
+   private final Point3D center = new Point3D();
+   private final Point3D sample = new Point3D();
    private final Vector3D direction = new Vector3D();
    private final Random random = new Random();
    public record Node(Point3D position, List<Node> children) { }
@@ -24,12 +26,13 @@ public class RRTStarPathPlanner
    {
       this.start.set(start);
       this.goal.set(goal);
+      center.interpolate(start, goal, 0.5);
 
       rootNode = new Node(this.start, new ArrayList<>());
 
-      for (int i = 0; i < 20; i++)
+      for (int i = 0; i < maxIterations; i++)
       {
-         Point3D sample = sample();
+         sample();
 
          Node closestNode = rootNode;
          double closestDistance = rootNode.position.distance(sample);
@@ -63,16 +66,24 @@ public class RRTStarPathPlanner
       return path;
    }
 
-   private Point3D sample()
+   private void sample()
    {
-      double maxDistance = 2.0 * start.distance(goal);
-      return EuclidCoreRandomTools.nextPoint3D(random, start.getX() - maxDistance, start.getX() + maxDistance,
-                                                       start.getY() - maxDistance, start.getY() + maxDistance,
-                                                       0.0, 0.0);
+      double radius = 2.0 * start.distance(goal);
+
+      double r = radius * random.nextDouble();
+      double theta = 2.0 * Math.PI * random.nextDouble();
+
+      direction.set(r * Math.cos(theta), r * Math.sin(theta), 0.0);
+      sample.add(center, direction);
    }
 
    public Node getRootNode()
    {
       return rootNode;
+   }
+
+   public void setMaxIterations(int maxIterations)
+   {
+      this.maxIterations = maxIterations;
    }
 }
