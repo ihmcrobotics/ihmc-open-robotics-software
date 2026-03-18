@@ -1,5 +1,6 @@
 package us.ihmc.avatar.visualization;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
@@ -25,6 +26,7 @@ public class YoPerceptionVisualizer implements SCS2YoGraphicHolder
 
    private static final int NUMBER_OF_HEIGHT_MAP_POINTS_TO_VISUALIZE = 5000;
    private static final int NUMBER_OF_PLANAR_REGIONS_TO_VISUALIZE = 2;
+   private static final int NUMBER_OF_PLANAR_REGION_VERTICES = 40;
 
    private final List<YoFramePoint3D> heights = new ArrayList<>();
    private final List<YoFramePose3D> planarRegionPoses = new ArrayList<>();
@@ -45,7 +47,7 @@ public class YoPerceptionVisualizer implements SCS2YoGraphicHolder
          for (int i = 0; i < NUMBER_OF_PLANAR_REGIONS_TO_VISUALIZE; i++)
          {
             planarRegionPoses.add(new YoFramePose3D("pose" + i, ReferenceFrame.getWorldFrame(), registry));
-            planarRegionPolygons.add(new YoFrameConvexPolygon2D("region" + i, ReferenceFrame.getWorldFrame(), 35, registry));
+            planarRegionPolygons.add(new YoFrameConvexPolygon2D("region" + i, ReferenceFrame.getWorldFrame(), NUMBER_OF_PLANAR_REGION_VERTICES, registry));
          }
       }
    }
@@ -86,7 +88,16 @@ public class YoPerceptionVisualizer implements SCS2YoGraphicHolder
       for (int i = 0; i < Math.min(planarRegionsListCommand.getNumberOfPlanarRegions(), NUMBER_OF_PLANAR_REGIONS_TO_VISUALIZE); i++)
       {
          planarRegionPoses.get(i).set(planarRegionsListCommand.getPlanarRegionCommand(i).getTransformToWorld());
-         planarRegionPolygons.get(i).set(planarRegionsListCommand.getPlanarRegionCommand(i).getConvexHull());
+
+         ConvexPolygon2D convexHull = planarRegionsListCommand.getPlanarRegionCommand(i).getConvexHull();
+         YoFrameConvexPolygon2D yoConvexHull = planarRegionPolygons.get(i);
+
+         for (int j = 0; j < Math.min(convexHull.getNumberOfVertices(), NUMBER_OF_PLANAR_REGION_VERTICES); j++)
+         {
+            yoConvexHull.addVertex(convexHull.getVertex(j));
+         }
+
+         yoConvexHull.set(convexHull);
       }
    }
 
