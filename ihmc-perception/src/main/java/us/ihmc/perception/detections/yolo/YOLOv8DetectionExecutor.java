@@ -2,7 +2,6 @@ package us.ihmc.perception.detections.yolo;
 
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.opencv_core.Point;
-import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.GpuMat;
@@ -73,7 +72,7 @@ public class YOLOv8DetectionExecutor
    private final RepeatingTaskThread annotatedImagePublishedThread;
    private final TypedNotification<RawImage> newestColorImage = new TypedNotification<>();
 
-   private final BoTSortTracker botSortTracker = new BoTSortTracker();
+   private final BoTSORTTracker botSortTracker = new BoTSORTTracker();
 
    private final Target2DTracker target2DTracker = new Target2DTracker(
          80,

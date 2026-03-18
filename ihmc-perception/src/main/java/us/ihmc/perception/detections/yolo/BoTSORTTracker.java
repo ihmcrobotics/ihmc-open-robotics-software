@@ -3,10 +3,9 @@ package us.ihmc.perception.detections.yolo;
 import java.util.*;
 import static java.lang.Math.*;
 import org.bytedeco.opencv.opencv_core.Mat;
-import us.ihmc.log.LogTools;
 
 /**
- * Minimal BoT-SORT / ByteTrack-style tracker (NO ReID, NO GMC).
+ * BoT-SORT
  *
  * Key behaviors matched to the common BoT-SORT/ByteTrack pipeline:
  *  - Split detections into HIGH and LOW confidence sets.
@@ -29,9 +28,9 @@ import us.ihmc.log.LogTools;
  *      methods: initiate(xywh), predict(), update(xywh), getMean()
  */
 
-public class BoTSortTracker
+public class BoTSORTTracker
 {
-   // ---------------- Tunables (ByteTrack / BoT-SORT style) ----------------
+   // ---------------- BoT-SORT Tunables ----------------
    /** Detections >= trackHighThresh go to first association. */
    public float trackHighThresh = 0.4f;
 

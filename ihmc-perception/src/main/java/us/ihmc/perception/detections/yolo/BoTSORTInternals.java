@@ -1,36 +1,43 @@
 package us.ihmc.perception.detections.yolo;
 
-/**
- *
- * State (8D): [x, y, w, h, vx, vy, vw, vh]
- * Meas  (4D): [x, y, w, h]
- *
- * x,y are center coordinates.
- *
- * Noise scaling matches the reference:
- *   std_weight_position = 1/20
- *   std_weight_velocity = 1/160
- *
- * initiate():
- *   std = [
- *     2*pos*w, 2*pos*h, 2*pos*w, 2*pos*h,
- *     10*vel*w, 10*vel*h, 10*vel*w, 10*vel*h
- *   ]
- *
- * predict():
- *   motion_cov diag uses:
- *     [pos*w, pos*h, pos*w, pos*h, vel*w, vel*h, vel*w, vel*h]^2
- *
- * project():
- *   innovation_cov diag uses:
- *     [pos*w, pos*h, pos*w, pos*h]^2
- *
- * update():
- *   uses Cholesky solve implicitly (we implement a stable-ish 4x4 inverse with pivoting).
- *   If EJML available, we should use it instead for S^-1 / solves.
- */
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Size;
+import org.bytedeco.opencv.opencv_core.Point2f;
+import org.bytedeco.opencv.opencv_core.Point2fVector;
+import org.bytedeco.javacpp.indexer.FloatIndexer;
+import org.bytedeco.javacpp.indexer.UByteIndexer;
 
-public class KalmanFilter
+import static org.bytedeco.opencv.global.opencv_core.CV_32FC2;
+import static org.bytedeco.opencv.global.opencv_core.CV_64F;
+import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_BGR2GRAY;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvtColor;
+import static org.bytedeco.opencv.global.opencv_imgproc.resize;
+import static org.bytedeco.opencv.global.opencv_video.calcOpticalFlowPyrLK;
+import static org.bytedeco.opencv.global.opencv_imgproc.goodFeaturesToTrack;
+import static org.bytedeco.opencv.global.opencv_calib3d.RANSAC;
+import static org.bytedeco.opencv.global.opencv_calib3d.estimateAffinePartial2D;
+
+interface TrackableDetection
+{
+   String getObjectClass();
+
+   double getConfidence();
+
+   float getX1();
+   float getY1();
+   float getX2();
+   float getY2();
+
+   boolean has3D();
+   float getCx();
+   float getCy();
+   float getCz();
+
+   void setTrackId(int id);
+   int getTrackId();
+}
+
+class KalmanFilter
 {
    private static final int dimX = 8;
    private static final int dimZ = 4;
@@ -46,22 +53,18 @@ public class KalmanFilter
 
    public KalmanFilter()
    {
-      // F: constant velocity, dt=1
       for (int i = 0; i < dimX; i++)
          F[i][i] = 1f;
       for (int i = 0; i < 4; i++)
          F[i][i + 4] = 1f;
 
-      // H: observe [x, y, w, h]
       for (int i = 0; i < dimZ; i++)
          H[i][i] = 1f;
 
-      // initialize cov to identity-ish
       for (int i = 0; i < dimX; i++)
          cov[i][i] = 1f;
    }
 
-   /** measurement z = [x, y, w, h] */
    public void initiate(float[] z)
    {
       mean[0] = z[0];
@@ -91,11 +94,9 @@ public class KalmanFilter
 
    public void predict()
    {
-      // mean = F * mean
       float[] newMean = mul(F, mean);
       System.arraycopy(newMean, 0, mean, 0, dimX);
 
-      // motion_cov diag: [pos*w, pos*h, pos*w, pos*h, vel*w, vel*h, vel*w, vel*h]^2
       float w = Math.max(1f, mean[2]);
       float h = Math.max(1f, mean[3]);
 
@@ -126,14 +127,9 @@ public class KalmanFilter
       addInPlace(FCFt, Q, cov);
    }
 
-   /** update with measurement z = [x, y, w, h] */
    public void update(float[] z)
    {
-      // project
-      // projected_mean = H*mean
       float[] projectedMean = mul(H, mean);
-
-      // projected_cov = H*cov*H^T + innovation_cov
       float[][] projectedCov = mul(mul(H, cov), transpose(H));
 
       float w = Math.max(1f, mean[2]);
@@ -152,23 +148,17 @@ public class KalmanFilter
       innovationCov[2][2] = std[2] * std[2];
       innovationCov[3][3] = std[3] * std[3];
 
-      float[][] S = add(projectedCov, innovationCov); // 4x4
-
-      // K = cov*H^T * S^-1
-      float[][] covHt = mul(cov, transpose(H)); // 8x4
+      float[][] S = add(projectedCov, innovationCov);
+      float[][] covHt = mul(cov, transpose(H));
       float[][] Sinv = inv4(S);
-      float[][] K = mul(covHt, Sinv); // 8x4
+      float[][] K = mul(covHt, Sinv);
 
-      // innovation = z - projectedMean
       float[] y = subVec(z, projectedMean);
-
-      // mean = mean + K*y
       float[] Ky = mul(K, y);
       for (int i = 0; i < dimX; i++)
          mean[i] += Ky[i];
 
-      // cov = cov - K*S*K^T   (cov - K*projected_cov*K^T ; here S is projected_cov+innov)
-      float[][] KSKt = mul(mul(K, S), transpose(K)); // 8x8
+      float[][] KSKt = mul(mul(K, S), transpose(K));
       float[][] newCov = sub(cov, KSKt);
       copy(newCov, cov);
    }
@@ -185,8 +175,6 @@ public class KalmanFilter
       mean[0] = cx;
       mean[1] = cy;
    }
-
-   // ---------------- helpers ----------------
 
    private static float[] subVec(float[] a, float[] b)
    {
@@ -268,15 +256,14 @@ public class KalmanFilter
             dst[i][j] = A[i][j] + B[i][j];
    }
 
-   // 4x4 inverse with partial pivoting
    private static float[][] inv4(float[][] A)
    {
       int n = 4;
-      float[][] aug = new float[n][2*n];
+      float[][] aug = new float[n][2 * n];
       for (int i = 0; i < n; i++)
       {
          for (int j = 0; j < n; j++) aug[i][j] = A[i][j];
-         aug[i][n+i] = 1f;
+         aug[i][n + i] = 1f;
       }
 
       for (int col = 0; col < n; col++)
@@ -299,14 +286,14 @@ public class KalmanFilter
          if (Math.abs(pivot) < 1e-9f)
             pivot = (pivot >= 0f ? 1e-9f : -1e-9f);
 
-         for (int j = 0; j < 2*n; j++) aug[col][j] /= pivot;
+         for (int j = 0; j < 2 * n; j++) aug[col][j] /= pivot;
 
          for (int r = 0; r < n; r++)
          {
             if (r == col) continue;
             float f = aug[r][col];
             if (f == 0f) continue;
-            for (int j = 0; j < 2*n; j++) aug[r][j] -= f * aug[col][j];
+            for (int j = 0; j < 2 * n; j++) aug[r][j] -= f * aug[col][j];
          }
       }
 
@@ -314,5 +301,184 @@ public class KalmanFilter
       for (int i = 0; i < n; i++)
          System.arraycopy(aug[i], n, inv[i], 0, n);
       return inv;
+   }
+}
+
+class GMC
+{
+   public enum Method { sparseOptFlow, none }
+
+   private final Method method;
+   private final int downscale;
+
+   private final int maxCorners = 1000;
+   private final double qualityLevel = 0.01;
+   private final double minDistance = 1.0;
+
+   private Mat prevFrameGray = null;
+   private Mat prevKeypoints = null;
+   private boolean initializedFirstFrame = false;
+
+   public GMC(Method method, int downscale)
+   {
+      this.method = method == null ? Method.sparseOptFlow : method;
+      this.downscale = Math.max(1, downscale);
+   }
+
+   public Mat apply(Mat bgrFrame)
+   {
+      if (method == Method.none || bgrFrame == null || bgrFrame.empty())
+         return eye23();
+
+      return applySparseOptFlow(bgrFrame);
+   }
+
+   private Mat applySparseOptFlow(Mat rawBgr)
+   {
+      Mat H = eye23();
+
+      Mat gray = new Mat();
+      cvtColor(rawBgr, gray, COLOR_BGR2GRAY);
+
+      Mat graySmall = gray;
+      Mat grayTmp = null;
+      if (downscale > 1)
+      {
+         grayTmp = new Mat();
+         resize(gray, grayTmp, new Size(gray.cols() / downscale, gray.rows() / downscale));
+         graySmall = grayTmp;
+      }
+
+      Mat keypoints = new Mat();
+      goodFeaturesToTrack(graySmall, keypoints, maxCorners, qualityLevel, minDistance);
+
+      if (!initializedFirstFrame)
+      {
+         prevFrameGray = graySmall.clone();
+         prevKeypoints = keypoints.clone();
+         initializedFirstFrame = true;
+
+         keypoints.release();
+         gray.release();
+         if (grayTmp != null) grayTmp.release();
+
+         return H;
+      }
+
+      if (prevKeypoints == null || prevKeypoints.empty() || keypoints.empty())
+      {
+         if (prevFrameGray != null) prevFrameGray.release();
+         prevFrameGray = graySmall.clone();
+
+         if (prevKeypoints != null) prevKeypoints.release();
+         prevKeypoints = keypoints.clone();
+
+         keypoints.release();
+         gray.release();
+         if (grayTmp != null) grayTmp.release();
+
+         return H;
+      }
+
+      Mat nextPts = new Mat();
+      Mat status = new Mat();
+      Mat err = new Mat();
+      calcOpticalFlowPyrLK(prevFrameGray, graySmall, prevKeypoints, nextPts, status, err);
+
+      Point2fVector prevGood = new Point2fVector();
+      Point2fVector currGood = new Point2fVector();
+
+      UByteIndexer st = status.createIndexer();
+      FloatIndexer pIdx = prevKeypoints.createIndexer();
+      FloatIndexer nIdx = nextPts.createIndexer();
+
+      long n = status.rows();
+      for (int i = 0; i < n; i++)
+      {
+         int ok = st.get(i, 0) & 0xFF;
+         if (ok != 0)
+         {
+            float px = pIdx.get(i, 0, 0);
+            float py = pIdx.get(i, 0, 1);
+            float cx = nIdx.get(i, 0, 0);
+            float cy = nIdx.get(i, 0, 1);
+            prevGood.push_back(new Point2f(px, py));
+            currGood.push_back(new Point2f(cx, cy));
+         }
+      }
+
+      st.release();
+      pIdx.release();
+      nIdx.release();
+
+      int goodCount = (int) prevGood.size();
+      if (goodCount >= 5)
+      {
+         Mat prevMat = new Mat(goodCount, 1, CV_32FC2);
+         Mat currMat = new Mat(goodCount, 1, CV_32FC2);
+
+         FloatIndexer prevOut = prevMat.createIndexer();
+         FloatIndexer currOut = currMat.createIndexer();
+
+         for (int i = 0; i < goodCount; i++)
+         {
+            Point2f p = prevGood.get(i);
+            Point2f q = currGood.get(i);
+            prevOut.put(i, 0, 0, p.x());
+            prevOut.put(i, 0, 1, p.y());
+            currOut.put(i, 0, 0, q.x());
+            currOut.put(i, 0, 1, q.y());
+         }
+
+         prevOut.release();
+         currOut.release();
+
+         Mat inliers = new Mat();
+         Mat Hsmall = estimateAffinePartial2D(prevMat, currMat, inliers, RANSAC, 3.0, 2000, 0.99, 10);
+
+         if (Hsmall != null && !Hsmall.empty())
+         {
+            if (downscale > 1)
+            {
+               Hsmall.ptr(0, 2).putDouble(Hsmall.ptr(0, 2).getDouble() * downscale);
+               Hsmall.ptr(1, 2).putDouble(Hsmall.ptr(1, 2).getDouble() * downscale);
+            }
+
+            H.release();
+            H = Hsmall.clone();
+         }
+
+         if (Hsmall != null) Hsmall.release();
+         inliers.release();
+         prevMat.release();
+         currMat.release();
+      }
+
+      if (prevFrameGray != null) prevFrameGray.release();
+      prevFrameGray = graySmall.clone();
+
+      if (prevKeypoints != null) prevKeypoints.release();
+      prevKeypoints = keypoints.clone();
+
+      keypoints.release();
+      gray.release();
+      if (grayTmp != null) grayTmp.release();
+      nextPts.release();
+      status.release();
+      err.release();
+
+      return H;
+   }
+
+   private static Mat eye23()
+   {
+      return Mat.eye(2, 3, CV_64F).asMat().clone();
+   }
+
+   public void reset()
+   {
+      initializedFirstFrame = false;
+      if (prevFrameGray != null) { prevFrameGray.release(); prevFrameGray = null; }
+      if (prevKeypoints != null) { prevKeypoints.release(); prevKeypoints = null; }
    }
 }
