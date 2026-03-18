@@ -8,6 +8,44 @@ import java.util.*;
 
 import static java.lang.Math.*;
 
+/**
+ * Lightweight 2D target manager built on top of per-frame observations and
+ * optional BoT-SORT track IDs.
+ *
+ * Pipeline:
+ *  - Associate each observation to an existing target, preferring BoT-SORT trackId
+ *    when available and otherwise falling back to bbox IoU matching.
+ *  - Create a new target when no suitable existing target is found.
+ *  - Mark unmatched targets as missed and remove stale targets that exceed
+ *    maxMissedFrames.
+ *
+ * Scoring / publishing:
+ *  - Each target maintains short history buffers for detection probability,
+ *    texture, and observation persistence.
+ *  - A composite score is computed from:
+ *      detection confidence,
+ *      temporal stability,
+ *      texture quality,
+ *      distance from image border,
+ *      and bbox size relative to the frame.
+ *  - Targets are published only if they are stable enough:
+ *      score >= scoreStart,
+ *      seen for at least minFrameCount frames,
+ *      and not missed recently.
+ *  - Targets whose score falls below scoreStop are removed.
+ *
+ * Identity handling:
+ *  - trackIdToTargetId provides a fast mapping from BoT-SORT track IDs to
+ *    persistent Target2D instances.
+ *  - If no valid track ID is available, identity is recovered using bbox IoU.
+ *
+ * Notes:
+ *  - This tracker is not a motion-model tracker by itself; it is a higher-level
+ *    persistence/filtering layer over detector / tracker observations.
+ *  - Masks are optional and retained per target for downstream use.
+ */
+
+
 public class Target2DTracker
 {
    public static class Weights

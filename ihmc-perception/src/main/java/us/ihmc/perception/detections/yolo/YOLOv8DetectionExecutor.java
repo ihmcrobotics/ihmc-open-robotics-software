@@ -302,7 +302,7 @@ public class YOLOv8DetectionExecutor
                              {
                                 Point3D32 centroid = YOLOv8Tools.computeCentroidOfPointCloud(filteredPoints, 128);
 
-                                // One instance for tracker + callbacks (may be destroyed by consumers)
+                                // One instance for tracker + callbacks (destroyed by consumers)
                                 YOLOv8InstantDetection detForTrackingAndCallbacks =
                                       new YOLOv8InstantDetection(detection.objectClass(),
                                                                  detection.confidence(),
@@ -428,7 +428,7 @@ public class YOLOv8DetectionExecutor
                                 at.destroy();
                           }
 
-                          // Callbacks exactly once (FoundationPose, etc.)
+                          // Callbacks exactly once (FoundationPose)
                           detectionConsumerCallbacks.forEach(cb -> cb.accept(yoloInstantDetections));
 
                           // Swap annotated detections list (destroy previous)

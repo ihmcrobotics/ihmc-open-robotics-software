@@ -5,27 +5,34 @@ import static java.lang.Math.*;
 import org.bytedeco.opencv.opencv_core.Mat;
 
 /**
- * BoT-SORT
+ * BoT-SORT multi-object tracker (MOT)
+ * two-stage association, and global motion compensation (GMC).
  *
- * Key behaviors matched to the common BoT-SORT/ByteTrack pipeline:
- *  - Split detections into HIGH and LOW confidence sets.
- *  - Predict all tracks with a KF.
- *  - First association: (Tracked + Lost)  <-> HIGH detections  (IoU cost + optional score fusion)
- *  - Second association: remaining TRACKED <-> LOW detections (IoU only, looser threshold)
- *  - Unconfirmed handling: tracks seen only once get matched separately; otherwise removed.
- *  - New track init from remaining HIGH detections (>= newTrackThresh)
- *  - Lost tracks are kept up to trackBuffer frames, then removed.
+ * Pipeline:
+ *  - Split detections into HIGH (>= trackHighThresh) and LOW (>= trackLowThresh) sets.
+ *  - Predict all tracks (tracked, unconfirmed, lost) using a Kalman filter.
+ *  - Optionally apply GMC to compensate for camera motion before matching.
  *
- * IMPORTANT:
- *  - matchThresh in the python code is a COST threshold (for 1-IoU), not an IoU threshold.
- *    Here we follow that convention:
- *       cost = 1 - IoU
- *       accept match if cost <= matchThresh
+ * Association:
+ *  - Stage 1: (confirmed tracked + lost) tracks are matched with HIGH detections
+ *             using IoU-based cost (optionally fused with detection score).
+ *  - Stage 2: remaining TRACKED tracks are matched with LOW detections (IoU only).
+ *  - Unconfirmed tracks are matched separately with remaining HIGH detections;
+ *    unmatched ones are removed.
  *
- * Dependencies/assumptions:
- *  - KalmanFilter is your xywh KF:
- *      state: [cx, cy, w, h, vcx, vcy, vw, vh]
- *      methods: initiate(xywh), predict(), update(xywh), getMean()
+ * Track management:
+ *  - New tracks are initialized from unmatched HIGH detections (>= newTrackThresh).
+ *  - Unmatched tracked tracks become LOST.
+ *  - LOST tracks are retained up to trackBuffer frames before being removed.
+ *  - Duplicate tracks between tracked and lost sets are pruned based on IoU and age.
+ *
+ * Cost definition:
+ *  - Matching is performed in cost space: cost = 1 - IoU
+ *    (or 1 - IoU * score if score fusion is enabled).
+ *  - A match is accepted if cost <= threshold (Hungarian assignment with cost limit).
+ *
+ * Assumes a KalmanFilter in xywh state:
+ *   [cx, cy, w, h, vcx, vcy, vw, vh]
  */
 
 public class BoTSORTTracker
