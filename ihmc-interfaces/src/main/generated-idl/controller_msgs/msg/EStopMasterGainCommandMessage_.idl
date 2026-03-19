@@ -15,6 +15,12 @@ module controller_msgs
       struct EStopMasterGainCommandMessage
       {
         /**
+         * Auto startup and shutdown
+         */
+        boolean request_startup;
+        boolean request_shutdown;
+        boolean execute_startup_shutdown;
+        /**
          * SOFT-E-STOP to set
          */
         boolean estop;

@@ -1,5 +1,10 @@
 # A message for sending necessary startup, shutdown, and high-level operational command variables to the robot
 
+# Auto startup and shutdown
+bool request_startup
+bool request_shutdown
+bool execute_startup_shutdown
+
 # SOFT-E-STOP to set
 bool estop
 bool execute_estop
