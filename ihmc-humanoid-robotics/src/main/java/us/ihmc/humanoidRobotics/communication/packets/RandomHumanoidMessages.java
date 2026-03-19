@@ -8,8 +8,6 @@ import controller_msgs.msg.dds.*;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import ihmc_common_msgs.msg.dds.*;
 import perception_msgs.msg.dds.*;
-import toolbox_msgs.msg.dds.BehaviorControlModeResponsePacket;
-import toolbox_msgs.msg.dds.HumanoidBehaviorTypePacket;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -17,19 +15,11 @@ import us.ihmc.communication.packets.ExecutionTiming;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D32;
-import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
-import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
@@ -397,13 +387,6 @@ public final class RandomHumanoidMessages
       return next;
    }
 
-   public static HumanoidBehaviorTypePacket nextHumanoidBehaviorTypePacket(Random random)
-   {
-      HumanoidBehaviorTypePacket next = new HumanoidBehaviorTypePacket();
-      next.setHumanoidBehaviorType(RandomNumbers.nextEnum(random, HumanoidBehaviorType.class).toByte());
-      return next;
-   }
-
    public static IMUPacket nextIMUPacket(Random random)
    {
       IMUPacket next = new IMUPacket();
@@ -473,33 +456,10 @@ public final class RandomHumanoidMessages
       return next;
    }
 
-   public static BoundingBoxesPacket nextBoundingBoxesPacket(Random random)
-   {
-      BoundingBoxesPacket next = new BoundingBoxesPacket();
-      int boxesToGenerate = random.nextInt(20);
-
-      for (int i = 0; i < boxesToGenerate; i++)
-      {
-         next.getLabels().add().append(Integer.toHexString(random.nextInt()));
-         next.getBoundingBoxesXCoordinates().add(RandomNumbers.nextInt(random, -1000, 1000));
-         next.getBoundingBoxesYCoordinates().add(RandomNumbers.nextInt(random, -1000, 1000));
-         next.getBoundingBoxesWidths().add(RandomNumbers.nextInt(random, 0, 1000));
-         next.getBoundingBoxesHeights().add(RandomNumbers.nextInt(random, 0, 1000));
-      }
-      return next;
-   }
-
    public static PauseWalkingMessage nextPauseWalkingMessage(Random random)
    {
       PauseWalkingMessage next = new PauseWalkingMessage();
       next.setPause(random.nextBoolean());
-      return next;
-   }
-
-   public static BehaviorControlModeResponsePacket nextBehaviorControlModeResponsePacket(Random random)
-   {
-      BehaviorControlModeResponsePacket next = new BehaviorControlModeResponsePacket();
-      next.setBehaviorControlModeEnumRequest(RandomNumbers.nextEnum(random, BehaviorControlModeEnum.class).toByte());
       return next;
    }
 
@@ -588,14 +548,6 @@ public final class RandomHumanoidMessages
       IntStream.range(0, HumanoidMessageTools.CAPTURABILITY_BASED_STATUS_MAXIMUM_NUMBER_OF_VERTICES).mapToObj(i -> EuclidCoreRandomTools.nextPoint2D(random)).forEach(next.getLeftFootSupportPolygon3d().add()::set);
       IntStream.range(0, HumanoidMessageTools.CAPTURABILITY_BASED_STATUS_MAXIMUM_NUMBER_OF_VERTICES).mapToObj(i -> EuclidCoreRandomTools.nextPoint2D(random)).forEach(next.getRightFootSupportPolygon3d().add()::set);
 
-      return next;
-   }
-
-   public static HandDesiredConfigurationMessage nextHandDesiredConfigurationMessage(Random random)
-   {
-      HandDesiredConfigurationMessage next = new HandDesiredConfigurationMessage();
-      next.setRobotSide(RandomNumbers.nextEnum(random, RobotSide.class).toByte());
-      next.setDesiredHandConfiguration(RandomNumbers.nextEnum(random, HandConfiguration.class).toByte());
       return next;
    }
 
@@ -722,22 +674,6 @@ public final class RandomHumanoidMessages
       next.getDesiredFootOrientationInWorld().set(EuclidCoreRandomTools.nextQuaternion(random));
       next.getActualFootPositionInWorld().set(EuclidCoreRandomTools.nextPoint3D(random, 1.0, 1.0, 1.0));
       next.getActualFootOrientationInWorld().set(EuclidCoreRandomTools.nextQuaternion(random));
-      return next;
-   }
-
-   public static ObjectWeightPacket nextObjectWeightPacket(Random random)
-   {
-      ObjectWeightPacket next = new ObjectWeightPacket();
-      next.setWeight(random.nextDouble());
-      next.setRobotSide(random.nextBoolean() ? RobotSide.LEFT.toByte() : RobotSide.RIGHT.toByte());
-      return next;
-   }
-
-   public static LegCompliancePacket nextLegCompliancePacket(Random random)
-   {
-      LegCompliancePacket next = new LegCompliancePacket();
-      next.setRobotSide(RandomNumbers.nextEnum(random, RobotSide.class).toByte());
-      next.getMaxVelocityDeltas().add(RandomNumbers.nextFloatArray(random, random.nextInt(1000), 1.0f));
       return next;
    }
 

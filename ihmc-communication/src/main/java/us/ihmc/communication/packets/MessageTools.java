@@ -1,12 +1,10 @@
 package us.ihmc.communication.packets;
 
 import builtin_interfaces.msg.dds.Time;
-import controller_msgs.msg.dds.BoundingBoxesPacket;
 import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
 import controller_msgs.msg.dds.InvalidPacketNotificationPacket;
 import controller_msgs.msg.dds.RigidBodyTransformMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import gnu.trove.list.array.TByteArrayList;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TFloatArrayList;
@@ -427,22 +425,6 @@ public class MessageTools
                       .set(interpolateMessages(previewFrames.get(firstInputFrameIndex), previewFrames.get(secondInputFrameIndex), alpha));
             }
          }
-      }
-      return message;
-   }
-
-   public static BoundingBoxesPacket createBoundingBoxesPacket(int[] packedBoxes, String[] labels)
-   {
-      BoundingBoxesPacket message = new BoundingBoxesPacket();
-      MessageTools.copyData(labels, message.getLabels());
-      int n = packedBoxes.length / 4;
-
-      for (int i = 0; i < n; i++)
-      {
-         message.getBoundingBoxesXCoordinates().add(packedBoxes[i * 4]);
-         message.getBoundingBoxesYCoordinates().add(packedBoxes[i * 4 + 1]);
-         message.getBoundingBoxesWidths().add(packedBoxes[i * 4 + 2]);
-         message.getBoundingBoxesHeights().add(packedBoxes[i * 4 + 3]);
       }
       return message;
    }
@@ -1075,11 +1057,6 @@ public class MessageTools
       message.getInitialJointHashCodes().add(jointHashCodes);
       message.getInitialJointAngles().reset();
       message.getInitialJointAngles().add(jointAngles);
-   }
-
-   public static RigidBodyTransform unpackSensorPose(StereoVisionPointCloudMessage stereoVisionPointCloudMessage)
-   {
-      return new RigidBodyTransform(stereoVisionPointCloudMessage.getSensorOrientation(), stereoVisionPointCloudMessage.getSensorPosition());
    }
 
    /*

@@ -14,17 +14,12 @@ import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
 import perception_msgs.msg.dds.DetectedObjectPacket;
 import perception_msgs.msg.dds.IntrinsicParametersMessage;
-import toolbox_msgs.msg.dds.BehaviorControlModePacket;
-import toolbox_msgs.msg.dds.BehaviorControlModeResponsePacket;
-import toolbox_msgs.msg.dds.HeightQuadTreeToolboxRequestMessage;
-import toolbox_msgs.msg.dds.HumanoidBehaviorTypePacket;
 import toolbox_msgs.msg.dds.KinematicsPlanningToolboxCenterOfMassMessage;
 import toolbox_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
 import toolbox_msgs.msg.dds.KinematicsPlanningToolboxRigidBodyMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import toolbox_msgs.msg.dds.ReachingManifoldMessage;
 import toolbox_msgs.msg.dds.RigidBodyExplorationConfigurationMessage;
-import toolbox_msgs.msg.dds.SimpleCoactiveBehaviorDataPacket;
 import toolbox_msgs.msg.dds.WaypointBasedTrajectoryMessage;
 import toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage;
@@ -56,11 +51,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxMessageFactory;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.CurrentBehaviorStatus;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.WalkToGoalAction;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessageTools;
@@ -417,14 +407,6 @@ public class HumanoidMessageTools
       message.getExplorationRangeUpperLimits().add(explorationRangeUpperLimits);
       message.getExplorationRangeLowerLimits().add(explorationRangeLowerLimits);
 
-      return message;
-   }
-
-   public static ObjectWeightPacket createObjectWeightPacket(RobotSide robotSide, double weight)
-   {
-      ObjectWeightPacket message = new ObjectWeightPacket();
-      message.setRobotSide(robotSide.toByte());
-      message.setWeight(weight);
       return message;
    }
 
@@ -1128,13 +1110,6 @@ public class HumanoidMessageTools
       return MessageTools.createKinematicsToolboxOutputStatus(fullRobotModel.getRootJoint(), FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel));
    }
 
-   public static HumanoidBehaviorTypePacket createHumanoidBehaviorTypePacket(HumanoidBehaviorType behaviorType)
-   {
-      HumanoidBehaviorTypePacket message = new HumanoidBehaviorTypePacket();
-      message.setHumanoidBehaviorType(behaviorType.toByte());
-      return message;
-   }
-
    public static FootstepDataListMessage createFootstepDataListMessage(List<FootstepDataMessage> footstepDataList, double finalTransferDuration)
    {
       return createFootstepDataListMessage(footstepDataList, 0.0, 0.0, finalTransferDuration, ExecutionMode.OVERRIDE);
@@ -1166,6 +1141,7 @@ public class HumanoidMessageTools
    }
 
    /**
+    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     *
     * @param footstepDataList
@@ -1217,21 +1193,6 @@ public class HumanoidMessageTools
       message.setDefaultSwingDuration(defaultSwingDuration);
       message.setDefaultTransferDuration(defaultTransferDuration);
       message.setFinalTransferDuration(finalTransferDuration);
-      return message;
-   }
-
-   /**
-    * Creates a message with the desired grasp to be performed. Set the id of the message to
-    * {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
-    *
-    * @param robotSide                refers to which hand will perform the grasp.
-    * @param handDesiredConfiguration refers to the desired grasp.
-    */
-   public static HandDesiredConfigurationMessage createHandDesiredConfigurationMessage(RobotSide robotSide, HandConfiguration handDesiredConfiguration)
-   {
-      HandDesiredConfigurationMessage message = new HandDesiredConfigurationMessage();
-      message.setRobotSide(robotSide.toByte());
-      message.setDesiredHandConfiguration(handDesiredConfiguration.toByte());
       return message;
    }
 
@@ -2124,14 +2085,6 @@ public class HumanoidMessageTools
       PrepareForLocomotionMessage message = new PrepareForLocomotionMessage();
       message.setPrepareManipulation(prepareManipulation);
       message.setPreparePelvis(preparePelvis);
-      return message;
-   }
-
-   public static WalkOverTerrainGoalPacket createWalkOverTerrainGoalPacket(Point3D position, Quaternion orientation)
-   {
-      WalkOverTerrainGoalPacket message = new WalkOverTerrainGoalPacket();
-      message.getPosition().set(position);
-      message.getOrientation().set(orientation);
       return message;
    }
 
