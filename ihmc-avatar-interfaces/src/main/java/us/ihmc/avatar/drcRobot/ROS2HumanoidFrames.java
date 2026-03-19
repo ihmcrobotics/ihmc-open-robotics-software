@@ -37,7 +37,6 @@ public class ROS2HumanoidFrames
 
    private final HumanoidReferenceFrames humanoidFrames;
    private final FullHumanoidRobotModel fullRobotModel;
-   private final RobotVersion robotVersion;
 
    // Standard ROS 2 humanoid robot frames
    private final ROS2Frame mapFrame;
@@ -52,7 +51,7 @@ public class ROS2HumanoidFrames
    private final SideDependentList<ROS2Frame> soleFrames = new SideDependentList<>();
    private final SideDependentList<ROS2Frame> toeFrames = new SideDependentList<>();
 
-   // Map of all reference frame for which ROS2Frame copies were made
+   // Map of all reference frames for which ROS2Frame copies were made
    private final Map<ReferenceFrame, ROS2Frame> ros2FrameCopyMap = new HashMap<>();
 
    // Set of all ROS2Frames made in this class
@@ -60,19 +59,23 @@ public class ROS2HumanoidFrames
 
    public ROS2HumanoidFrames(ROS2SyncedRobotModel syncedRobotModel)
    {
-      humanoidFrames = syncedRobotModel.getReferenceFrames();
-      fullRobotModel = syncedRobotModel.getFullRobotModel();
-      robotVersion = syncedRobotModel.getRobotModel().getRobotVersion();
+      this(syncedRobotModel.getReferenceFrames(), syncedRobotModel.getFullRobotModel());
+   }
+
+   public ROS2HumanoidFrames(HumanoidReferenceFrames humanoidFrames, FullHumanoidRobotModel fullRobotModel)
+   {
+      this.humanoidFrames = humanoidFrames;
+      this.fullRobotModel = fullRobotModel;
 
       // Map is the local base frame in which the robot should not drift, but the robot's pose need not be continuous
       mapFrame = new ROS2StaticFrame("map", ReferenceFrameTools.getWorldFrame(), new RigidBodyTransform(), true, true);
       allROS2Frames.add(mapFrame);
 
-      // Odom is the local base frame in which the robot's pose is continuous, and may be subject to drift
+      // Odom is the local base frame in which the robot's pose is continuous and may be subject to drift
       odomFrame = new ROS2MutableFrame("odom", mapFrame, new RigidBodyTransform(), true);
       allROS2Frames.add(odomFrame);
 
-      // Fill reference frame tree with robot frames
+      // Fill the reference frame tree with robot frames
       fillTree(fullRobotModel.getRootJoint().getFrameAfterJoint());
 
       // Add base_footprint frame
@@ -137,32 +140,28 @@ public class ROS2HumanoidFrames
 
             String sidePrefix = SIDE_PREFIXES.get(side);
 
-            if (robotVersion.hasArm(side))
-            {
-               if (frameToCopy.equals(fullRobotModel.getHand(side).getParentJoint().getFrameAfterJoint()))
-               {  // wrist == parent joint frame of hand
-                  ROS2Frame parentFrame = ros2FrameCopyMap.getOrDefault(frameToCopy.getParent(), torsoFrame);
-                  ROS2Frame wristFrame = createFrameCopy(frameToCopy, sidePrefix + "wrist", parentFrame);
-                  wristFrames.put(side, wristFrame);
-                  ros2FrameCopy = wristFrame;
-               }
-               else if (frameToCopy.equals(fullRobotModel.getHandControlFrame(side)))
-               {  // gripper == hand control frame
-                  ROS2Frame parentFrame = ros2FrameCopyMap.getOrDefault(frameToCopy.getParent(), wristFrames.get(side));
-                  ROS2Frame gripperFrame = createFrameCopy(frameToCopy, sidePrefix + "gripper", parentFrame);
-                  gripperFrames.put(side, gripperFrame);
-                  ros2FrameCopy = gripperFrame;
-               }
+            if (fullRobotModel.getHand(side) != null && frameToCopy.equals(fullRobotModel.getHand(side).getParentJoint().getFrameAfterJoint()))
+            {  // wrist == parent joint frame of hand
+               ROS2Frame parentFrame = ros2FrameCopyMap.getOrDefault(frameToCopy.getParent(), torsoFrame);
+               ROS2Frame wristFrame = createFrameCopy(frameToCopy, sidePrefix + "wrist", parentFrame);
+               wristFrames.put(side, wristFrame);
+               ros2FrameCopy = wristFrame;
             }
-
-            if (frameToCopy.equals(humanoidFrames.getFootFrame(side)))
+            else if (fullRobotModel.getHandControlFrame(side) != null && frameToCopy.equals(fullRobotModel.getHandControlFrame(side)))
+            {  // gripper == hand control frame
+               ROS2Frame parentFrame = ros2FrameCopyMap.getOrDefault(frameToCopy.getParent(), wristFrames.get(side));
+               ROS2Frame gripperFrame = createFrameCopy(frameToCopy, sidePrefix + "gripper", parentFrame);
+               gripperFrames.put(side, gripperFrame);
+               ros2FrameCopy = gripperFrame;
+            }
+            else if (humanoidFrames.getFootFrame(side) != null && frameToCopy.equals(humanoidFrames.getFootFrame(side)))
             {  // ankle == foot frame
                ROS2Frame parentFrame = ros2FrameCopyMap.getOrDefault(frameToCopy.getParent(), baseLinkFrame);
                ROS2Frame ankleFrame = createFrameCopy(frameToCopy, sidePrefix + "ankle", parentFrame);
                ankleFrames.put(side, ankleFrame);
                ros2FrameCopy = ankleFrame;
             }
-            else if (frameToCopy.equals(humanoidFrames.getSoleFrame(side)))
+            else if (humanoidFrames.getSoleFrame(side) != null && frameToCopy.equals(humanoidFrames.getSoleFrame(side)))
             {  // sole == sole
                ROS2Frame parentFrame = ros2FrameCopyMap.getOrDefault(frameToCopy.getParent(), ankleFrames.get(side));
                ROS2Frame soleFrame = createFrameCopy(frameToCopy, sidePrefix + "sole", parentFrame);
@@ -195,7 +194,7 @@ public class ROS2HumanoidFrames
    {
       humanoidFrames.getMidFootZUpGroundFrame().getTransformToDesiredFrame(transformToPack, baseLinkFrame);
       Orientation3DBasics rotation = transformToPack.getRotation();
-      rotation.setYawPitchRoll(0.0, rotation.getPitch(), rotation.getRoll());
+      rotation.setYawPitchRoll(0.0, -baseLinkFrame.getTransformToRoot().getRotation().getPitch(), -baseLinkFrame.getTransformToRoot().getRotation().getRoll());
       return transformToPack;
    }
 
