@@ -23,7 +23,6 @@ import us.ihmc.yoVariables.euclid.YoVector2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
-import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -58,8 +57,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
    private static final double DEFAULT_DISTANCE_TO_MATCH_GOAL_ANGLE = 0.5;
    private static final double DEFAULT_DISTANCE_TO_FACE_GOAL = 1.5;
 
-
-   private final RecyclingArrayList<FramePose2D> goalPoses = new RecyclingArrayList<>(FramePose2D::new);
+   private final RecyclingArrayList<GoalWaypoint> goalPoses = new RecyclingArrayList<>(GoalWaypoint::new);
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoFramePose3D currentGoalPose = new YoFramePose3D("goalPose", ReferenceFrame.getWorldFrame(), registry);
@@ -75,6 +73,8 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
    private final YoDouble maxRadialAcceleration = new YoDouble("maxRadialAcceleration", registry);
    private final YoDouble maxHeadingRate = new YoDouble("maxHeadingRate", registry);
    private double computedDt;
+
+   private final YoDouble desiredCruisingSpeedScalar = new YoDouble("desiredCruisingSpeedScalar", registry);
 
    private final YoDouble maxForwardSpeed = new YoDouble("maxForwardSpeed", registry);
    private final YoDouble maxLateralSpeed = new YoDouble("maxLateralSpeed", registry);
@@ -95,7 +95,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
 
    private final YoVector2D vectorToGoalInPelvisFrame = new YoVector2D("vectorToGoalInPelvisFrame", registry);
    private final YoDouble angleToHeading = new YoDouble("angleToHeading", registry);
-   private final YoDouble limitedAngleToHeading = new YoDouble("limitedAngleToHeading", registry);
+   private final YoDouble rateLimitedAngleToHeading = new YoDouble("rateLimitedAngleToHeading", registry);
 
    private final YoBoolean hasGoal = new YoBoolean("hasGoal", registry);
    private final YoBoolean shouldHoldGoal = new YoBoolean("shouldHoldGoal", registry);
@@ -103,7 +103,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
 
    // Feedback terms
    private final YoDouble normalizedRadialSpeed;
-   private final YoDouble limitedNormalizedRadialSpeed;
+   private final YoDouble rateLimitedNormalizedRadialSpeed;
    // CLF terms
    private final YoFramePoint3D basePosition = new YoFramePoint3D("basePosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoVector2D desiredVelocity = new YoVector2D("desiredVelocity", registry);
@@ -129,7 +129,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       this.statusMessageOutputManager = statusMessageOutputManager;
 
       normalizedRadialSpeed = new YoDouble("normalizedRadialSpeed", registry);
-      limitedNormalizedRadialSpeed = new YoDouble("limitedNormalizedRadialSpeed", registry);
+      rateLimitedNormalizedRadialSpeed = new YoDouble("rateLimitedNormalizedRadialSpeed", registry);
 
       maxRadialAcceleration.set(DEFAULT_MAX_RADIAL_ACCELERATION);
       maxHeadingRate.set(DEFAULT_MAX_HEADING_RATE);
@@ -149,11 +149,28 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       parentRegistry.addChild(registry);
    }
 
+   private final FramePose2D previousGoalPose = new FramePose2D();
+
    public void consumeNewWaypoint(ControllerWalkToGoalCommand command)
    {
-      goalPoses.add().set(currentGoalPose);
+      if (hasReachedGoal.getBooleanValue() && goalPoses.size() == 1)
+      {  // we were holding the previous pose, based on the command. remove it, and add the next one.
+         goalPoses.clear();
+      }
+      // Update the previous goal pose, if we have one. If not, grab the current root pose.
+      if (!goalPoses.isEmpty())
+      {
+         previousGoalPose.set(goalPoses.getLast().getGoalPose());
+      }
+      else
+      {
+         previousGoalPose.setFromReferenceFrame(frameOfTheBase);
+      }
+      // Add the new goal pose.
+      goalPoses.add().set(command, previousGoalPose, maxForwardSpeed.getValue());
       hasGoal.set(true);
       shouldHoldGoal.set(command.getShouldHoldPosition());
+
       distanceToGoalThresholdToStop.set(command.getPositionProximity());
       angleToGoalThresholdToStop.set(command.getOrientationProximity());
    }
@@ -166,11 +183,6 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
          shouldHoldGoal.set(false);
          hasGoal.set(false);
       }
-   }
-
-   private void setCurrentGoalPoseInternal(FramePose2DReadOnly currentGoalPose)
-   {
-
    }
 
    private final ControllerWalkToGoalStatusMessage statusMessage = new ControllerWalkToGoalStatusMessage();
@@ -204,7 +216,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
          currentPose.getOrientation().transform(currentDirection);
 
          updateDistanceAndAngleErrorForFeedback(currentGoalPose);
-         computePDNormalizedFeedbackVelocities(distanceToGoal.getValue(), limitedAngleToHeading.getDoubleValue());
+         computePDNormalizedFeedbackVelocities(distanceToGoal.getValue(), rateLimitedAngleToHeading.getDoubleValue());
          updateOutputMessage();
       }
 
@@ -244,7 +256,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       boolean reachedGoal = true;
       while (!goalPoses.isEmpty() && reachedGoal)
       {
-         reachedGoal = reachedGoal(goalPoses.getFirst());
+         reachedGoal = reachedGoal(goalPoses.getFirst().getGoalPose());
          if (reachedGoal)
          {
             if (goalPoses.size() > 1)
@@ -258,11 +270,17 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
 
       hasGoal.set(!goalPoses.isEmpty());
       hasReachedGoal.set(reachedGoal);
-      if (goalPoses.size() > 0)
+      if (hasGoal.getBooleanValue())
       {
-         this.currentGoalPose.checkReferenceFrameMatch(goalPoses.getFirst().getReferenceFrame());
-         this.currentGoalPose.getPosition().set(goalPoses.getFirst().getPosition(), GOAL_POSITION_Z_OFFSET_FOR_VISUALIZATION);
-         this.currentGoalPose.getOrientation().setToYawOrientation(goalPoses.getFirst().getYaw());
+         GoalWaypoint waypoint = goalPoses.getFirst();
+
+         currentGoalPose.checkReferenceFrameMatch(waypoint.getGoalPose().getReferenceFrame());
+         currentGoalPose.getPosition().set(waypoint.getGoalPose().getPosition(), GOAL_POSITION_Z_OFFSET_FOR_VISUALIZATION);
+         currentGoalPose.getOrientation().setToYawOrientation(waypoint.getGoalPose().getYaw());
+
+         distanceToGoalThresholdToStop.set(waypoint.getProximityToReachGoal());
+         angleToGoalThresholdToStop.set(waypoint.getAngleToReachGoal());
+         desiredCruisingSpeedScalar.set(waypoint.getCruisingSpeedScaler());
       }
       else
       {
@@ -300,17 +318,17 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       currentPose.getOrientation().transform(forwardVector, currentHeadingInPelvisFrame);
 
       angleToHeading.set(AngleTools.angleMinusPiToPi(objectiveHeadingInPelvisFrame, forwardVector));
-      double angleChangeFromPrevious = AngleTools.computeAngleDifferenceMinusPiToPi(angleToHeading.getDoubleValue(), limitedAngleToHeading.getDoubleValue());
+      double angleChangeFromPrevious = AngleTools.computeAngleDifferenceMinusPiToPi(angleToHeading.getDoubleValue(), rateLimitedAngleToHeading.getDoubleValue());
       angleChangeFromPrevious = MathTools.clamp(angleChangeFromPrevious, maxHeadingRate.getValue() * computedDt);
-      limitedAngleToHeading.set(AngleTools.trimAngleMinusPiToPi(angleToHeading.getDoubleValue() + angleChangeFromPrevious));
+      rateLimitedAngleToHeading.set(AngleTools.trimAngleMinusPiToPi(angleToHeading.getDoubleValue() + angleChangeFromPrevious));
    }
 
 
    private void computePDNormalizedFeedbackVelocities(double distanceToGoal, double angleToGoalHeading)
    {
       normalizedRadialSpeed.set(MathTools.clamp(kRadius.getValue() * distanceToGoal, 0.0, 1.0));
-      double maxSpeed = limitedNormalizedRadialSpeed.getDoubleValue() + computedDt * maxRadialAcceleration.getValue();
-      limitedNormalizedRadialSpeed.set(MathTools.clamp(normalizedRadialSpeed.getValue(), 0.0, maxSpeed));
+      double maxSpeed = rateLimitedNormalizedRadialSpeed.getDoubleValue() + computedDt * maxRadialAcceleration.getValue();
+      rateLimitedNormalizedRadialSpeed.set(MathTools.clamp(normalizedRadialSpeed.getValue(), 0.0, maxSpeed));
 
       double turningVelocity = -kDelta.getValue() * angleToGoalHeading;
       desiredAngularVelocity.set(0.0, 0.0, turningVelocity);
@@ -318,8 +336,8 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       // Get the angle the desired direction is pointing
       double localHeadingAngle = AngleTools.angleMinusPiToPi(vectorToGoalInPelvisFrame, forwardVector);
 
-      double cosDelta = limitedNormalizedRadialSpeed.getDoubleValue() * Math.cos(-localHeadingAngle);
-      double sinDelta = limitedNormalizedRadialSpeed.getDoubleValue() * Math.sin(-localHeadingAngle);
+      double cosDelta = rateLimitedNormalizedRadialSpeed.getDoubleValue() * desiredCruisingSpeedScalar.getValue() * Math.cos(-localHeadingAngle);
+      double sinDelta = rateLimitedNormalizedRadialSpeed.getDoubleValue() * desiredCruisingSpeedScalar.getValue() * Math.sin(-localHeadingAngle);
 
       double xSpeed = vectorToGoalInPelvisFrame.getX() > 0 ? maxForwardSpeed.getDoubleValue() : maxBackwardSpeed.getDoubleValue();
       double vx = cosDelta * xSpeed;
@@ -337,6 +355,52 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       outputMessage.setForward(desiredVelocity.getX());
       outputMessage.setRight(-desiredVelocity.getY());
       outputMessage.setClockwise(-desiredAngularVelocity.getZ());
+   }
+
+   private static class GoalWaypoint
+   {
+      private final FramePose2D goalPose = new FramePose2D();
+      private double proximityToReachGoal;
+      private double angleToReachGoal;
+      private double cruisingSpeedScaler;
+
+      public void set(ControllerWalkToGoalCommand command, FramePose2DReadOnly previousPose, double maxSpeed)
+      {
+         goalPose.set(command.getGoalPose());
+         angleToReachGoal = command.getOrientationProximity();
+         proximityToReachGoal = command.getPositionProximity();
+
+         double distance = command.getGoalPose().getPositionDistance(previousPose.getPosition());
+         if (command.getTimeToReachGoal() > 0.0)
+         {
+            double speed = distance / command.getTimeToReachGoal();
+            cruisingSpeedScaler = Math.min(1.0, speed / maxSpeed);
+         }
+         else
+         {
+            cruisingSpeedScaler = 1.0;
+         }
+      }
+
+      public FramePose2DReadOnly getGoalPose()
+      {
+         return goalPose;
+      }
+
+      public double getProximityToReachGoal()
+      {
+         return proximityToReachGoal;
+      }
+
+      public double getAngleToReachGoal()
+      {
+         return angleToReachGoal;
+      }
+
+      public double getCruisingSpeedScaler()
+      {
+         return cruisingSpeedScaler;
+      }
    }
 
    @Override

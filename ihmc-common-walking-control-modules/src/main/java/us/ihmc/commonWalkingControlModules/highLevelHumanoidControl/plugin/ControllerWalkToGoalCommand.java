@@ -109,6 +109,11 @@ public class ControllerWalkToGoalCommand implements Command<ControllerWalkToGoal
       return orientationProximity;
    }
 
+   public double getTimeToReachGoal()
+   {
+      return timeToReachGoal;
+   }
+
    public void setPositionProximity(double positionProximity)
    {
       this.positionProximity = positionProximity;
