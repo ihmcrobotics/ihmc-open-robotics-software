@@ -7,9 +7,6 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.CrocoddylControlCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.CrocoddylSolverTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.CrocoddylStateCommand;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.spatial.Twist;
@@ -213,51 +210,5 @@ public class WholeBodyConfigurationManager
    private void populateFeedForwardTorqueVector(int currentIndex)
    {
       feedForwardTorqueVector.set(feedForwardTorqueValues.get(currentIndex));
-   }
-
-   public void handleCrocoddylSolverTrajectoryCommand(CrocoddylSolverTrajectoryCommand command)
-   {
-      timeAtWholeBodyCommand.set(time.getValue());
-
-      for (int jointIndex = 0; jointIndex < jointTrajectories.length; jointIndex++)
-         jointTrajectories[jointIndex].clear();
-      basePoseTrajectory.clear(ReferenceFrame.getWorldFrame());
-      feedbackGainMatrices.clear();
-      feedForwardTorqueValues.clear();
-
-      double currentTime = 0.0;
-      for (int knot = 0; knot < command.getNumberOfKnots(); knot++)
-      {
-         double duration = command.getTimeInterval(knot).getDuration();
-         CrocoddylStateCommand state = command.getState(knot);
-         DMatrixRMaj jointPositions = state.getJointPositions();
-         DMatrixRMaj jointVelocities = state.getJointVelocities();
-
-         for (int jointIndex = 0; jointIndex < jointTrajectories.length; jointIndex++)
-            jointTrajectories[jointIndex].appendWaypoint(currentTime, jointPositions.get(jointIndex, 0), jointVelocities.get(jointIndex, 0));
-
-         tempDesiredPelvisFrame.setPoseAndUpdate(state.getBasePoseInWorld());
-         pelvisTwist.setToZero(tempDesiredPelvisFrame);
-         pelvisTwist.getLinearPart().set(state.getBaseLinearRateInBaseFrame());
-         pelvisTwist.getAngularPart().set(state.getBaseAngularRateInBaseFrame());
-         pelvisTwist.changeFrame(ReferenceFrame.getWorldFrame());
-
-
-         desiredPelvisPose.set(state.getBasePoseInWorld());
-         desiredAngularRate.setIncludingFrame(pelvisTwist.getAngularPart());
-         desiredLinearRate.setIncludingFrame(pelvisTwist.getLinearPart());
-
-         basePoseTrajectory.appendPoseWaypoint(currentTime, desiredPelvisPose, desiredLinearRate, desiredAngularRate);
-
-         CrocoddylControlCommand control = command.getControl(knot);
-         feedForwardTorqueValues.add().set(control.getControl());
-         feedbackGainMatrices.add().set(control.getFeedbackGainCommand().getGainMatrix());
-
-         currentTime += duration;
-      }
-
-      for (MultipleWaypointsTrajectoryGenerator jointTrajectory : jointTrajectories)
-         jointTrajectory.initialize();
-      basePoseTrajectory.initialize();
    }
 }

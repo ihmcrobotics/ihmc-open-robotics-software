@@ -1,12 +1,10 @@
 package us.ihmc.communication.packets;
 
 import builtin_interfaces.msg.dds.Time;
-import controller_msgs.msg.dds.BoundingBoxesPacket;
 import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
 import controller_msgs.msg.dds.InvalidPacketNotificationPacket;
 import controller_msgs.msg.dds.RigidBodyTransformMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import gnu.trove.list.array.TByteArrayList;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TFloatArrayList;
@@ -29,10 +27,7 @@ import ihmc_common_msgs.msg.dds.UUIDMessage;
 import ihmc_common_msgs.msg.dds.WeightMatrix3DMessage;
 import ihmc_common_msgs.msg.dds.YoRegistryMessage;
 import org.apache.logging.log4j.Level;
-import perception_msgs.msg.dds.HeatMapPacket;
 import perception_msgs.msg.dds.ImageMessage;
-import perception_msgs.msg.dds.LidarScanMessage;
-import perception_msgs.msg.dds.ObjectDetectorResultPacket;
 import std_msgs.msg.dds.Bool;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInitialConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
@@ -126,14 +121,6 @@ public class MessageTools
       InvalidPacketNotificationPacket message = new InvalidPacketNotificationPacket();
       message.setPacketClassSimpleName(packetClass.getSimpleName());
       message.setErrorMessage(errorMessage);
-      return message;
-   }
-
-   public static ObjectDetectorResultPacket createObjectDetectorResultPacket(HeatMapPacket heatMap, BoundingBoxesPacket boundingBoxes)
-   {
-      ObjectDetectorResultPacket message = new ObjectDetectorResultPacket();
-      message.getHeatMap().set(heatMap);
-      message.getBoundingBoxes().set(boundingBoxes);
       return message;
    }
 
@@ -438,22 +425,6 @@ public class MessageTools
                       .set(interpolateMessages(previewFrames.get(firstInputFrameIndex), previewFrames.get(secondInputFrameIndex), alpha));
             }
          }
-      }
-      return message;
-   }
-
-   public static BoundingBoxesPacket createBoundingBoxesPacket(int[] packedBoxes, String[] labels)
-   {
-      BoundingBoxesPacket message = new BoundingBoxesPacket();
-      MessageTools.copyData(labels, message.getLabels());
-      int n = packedBoxes.length / 4;
-
-      for (int i = 0; i < n; i++)
-      {
-         message.getBoundingBoxesXCoordinates().add(packedBoxes[i * 4]);
-         message.getBoundingBoxesYCoordinates().add(packedBoxes[i * 4 + 1]);
-         message.getBoundingBoxesWidths().add(packedBoxes[i * 4 + 2]);
-         message.getBoundingBoxesHeights().add(packedBoxes[i * 4 + 3]);
       }
       return message;
    }
@@ -1086,11 +1057,6 @@ public class MessageTools
       message.getInitialJointHashCodes().add(jointHashCodes);
       message.getInitialJointAngles().reset();
       message.getInitialJointAngles().add(jointAngles);
-   }
-
-   public static RigidBodyTransform unpackSensorPose(StereoVisionPointCloudMessage stereoVisionPointCloudMessage)
-   {
-      return new RigidBodyTransform(stereoVisionPointCloudMessage.getSensorOrientation(), stereoVisionPointCloudMessage.getSensorPosition());
    }
 
    /*
