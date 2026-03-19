@@ -127,6 +127,13 @@ public class BehaviorTreeTools
       return null;
    }
 
+   public static boolean isExecuting(BehaviorTreeNodeExecutor<?, ?> node, String name)
+   {
+      if (searchDFSFirstMatch(node, name) instanceof LeafNodeExecutor<?, ?> leaf)
+         return leaf.getState().getIsExecuting();
+      return false;
+   }
+
    public static <T extends BehaviorTreeNode<T, ?, ?>> int getNodeIndexDFS(T node)
    {
       Deque<T> stack = new ArrayDeque<>();

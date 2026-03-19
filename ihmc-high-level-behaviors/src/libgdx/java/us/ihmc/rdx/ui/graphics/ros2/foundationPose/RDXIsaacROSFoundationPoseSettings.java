@@ -100,5 +100,6 @@ public class RDXIsaacROSFoundationPoseSettings
    public void destroy()
    {
       resetRequestPublisher.remove();
+      parameters.close();
    }
 }

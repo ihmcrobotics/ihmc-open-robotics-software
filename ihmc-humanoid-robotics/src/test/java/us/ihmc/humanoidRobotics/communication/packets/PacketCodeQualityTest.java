@@ -611,7 +611,6 @@ public class PacketCodeQualityTest
       Set<Class<? extends Packet>> packetTypesWithByteFieldNameNotMatchingEnum = new HashSet<>();
 
       Set<Field> fieldsToIngore = new HashSet<>();
-      fieldsToIngore.add(SnapFootstepPacket.class.getField("flag_"));
 
       for (Class<? extends Packet> packetType : allPacketTypes)
       {
@@ -681,7 +680,6 @@ public class PacketCodeQualityTest
       Set<Class<? extends Packet>> packetTypesWithByteFieldNameNotMatchingEnum = new HashSet<>();
 
       Set<Field> fieldsToIngore = new HashSet<>();
-      fieldsToIngore.add(SnapFootstepPacket.class.getField("flag_"));
       fieldsToIngore.add(FootstepPlannerStatusMessage.class.getField("footstep_planner_status_")); // In footstep planner land
 
       for (Class<? extends Packet> packetType : allPacketTypes)
