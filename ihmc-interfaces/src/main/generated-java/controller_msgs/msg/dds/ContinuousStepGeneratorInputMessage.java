@@ -15,11 +15,21 @@ public class ContinuousStepGeneratorInputMessage extends Packet<ContinuousStepGe
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
+   /**
+            * If true, start stepping. If false, stand in place
+            */
    public boolean walk_;
+   /**
+            * Desired velocity setpoints
+            */
    public double forward_velocity_;
    public double lateral_velocity_;
    public double turn_velocity_;
-   public boolean unit_velocities_;
+   /**
+            * If true, desired velocity setpoints are normalized from a range of [-1.0, 1.0]
+            * If false, desired velocity setpoints are sent in m/s
+            */
+   public boolean are_velocities_normalized_;
 
    public ContinuousStepGeneratorInputMessage()
    {
@@ -43,7 +53,7 @@ public class ContinuousStepGeneratorInputMessage extends Packet<ContinuousStepGe
 
       turn_velocity_ = other.turn_velocity_;
 
-      unit_velocities_ = other.unit_velocities_;
+      are_velocities_normalized_ = other.are_velocities_normalized_;
 
    }
 
@@ -62,19 +72,31 @@ public class ContinuousStepGeneratorInputMessage extends Packet<ContinuousStepGe
       return sequence_id_;
    }
 
+   /**
+            * If true, start stepping. If false, stand in place
+            */
    public void setWalk(boolean walk)
    {
       walk_ = walk;
    }
+   /**
+            * If true, start stepping. If false, stand in place
+            */
    public boolean getWalk()
    {
       return walk_;
    }
 
+   /**
+            * Desired velocity setpoints
+            */
    public void setForwardVelocity(double forward_velocity)
    {
       forward_velocity_ = forward_velocity;
    }
+   /**
+            * Desired velocity setpoints
+            */
    public double getForwardVelocity()
    {
       return forward_velocity_;
@@ -98,13 +120,21 @@ public class ContinuousStepGeneratorInputMessage extends Packet<ContinuousStepGe
       return turn_velocity_;
    }
 
-   public void setUnitVelocities(boolean unit_velocities)
+   /**
+            * If true, desired velocity setpoints are normalized from a range of [-1.0, 1.0]
+            * If false, desired velocity setpoints are sent in m/s
+            */
+   public void setAreVelocitiesNormalized(boolean are_velocities_normalized)
    {
-      unit_velocities_ = unit_velocities;
+      are_velocities_normalized_ = are_velocities_normalized;
    }
-   public boolean getUnitVelocities()
+   /**
+            * If true, desired velocity setpoints are normalized from a range of [-1.0, 1.0]
+            * If false, desired velocity setpoints are sent in m/s
+            */
+   public boolean getAreVelocitiesNormalized()
    {
-      return unit_velocities_;
+      return are_velocities_normalized_;
    }
 
 
@@ -135,7 +165,7 @@ public class ContinuousStepGeneratorInputMessage extends Packet<ContinuousStepGe
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.turn_velocity_, other.turn_velocity_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.unit_velocities_, other.unit_velocities_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.are_velocities_normalized_, other.are_velocities_normalized_, epsilon)) return false;
 
 
       return true;
@@ -160,7 +190,7 @@ public class ContinuousStepGeneratorInputMessage extends Packet<ContinuousStepGe
 
       if(this.turn_velocity_ != otherMyClass.turn_velocity_) return false;
 
-      if(this.unit_velocities_ != otherMyClass.unit_velocities_) return false;
+      if(this.are_velocities_normalized_ != otherMyClass.are_velocities_normalized_) return false;
 
 
       return true;
@@ -182,8 +212,8 @@ public class ContinuousStepGeneratorInputMessage extends Packet<ContinuousStepGe
       builder.append(this.lateral_velocity_);      builder.append(", ");
       builder.append("turn_velocity=");
       builder.append(this.turn_velocity_);      builder.append(", ");
-      builder.append("unit_velocities=");
-      builder.append(this.unit_velocities_);
+      builder.append("are_velocities_normalized=");
+      builder.append(this.are_velocities_normalized_);
       builder.append("}");
       return builder.toString();
    }

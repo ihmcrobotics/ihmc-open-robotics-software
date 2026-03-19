@@ -68,7 +68,7 @@ public class RDXCSGPanel extends RDXPanel
 
       if (PUBLISH_IN_VELOCITY_UNITS)
       {
-         csgInputCommand.setUnitVelocities(true);
+         csgInputCommand.setAreVelocitiesNormalized(false);
 
          double currentStepTime = csgStatusMessage.getCurrentSwingDuration() + csgStatusMessage.getCurrentTransferDuration();
          double currentMaxStepLengthForwards = csgStatusMessage.getCurrentMaxStepLengthForwards();
@@ -86,7 +86,7 @@ public class RDXCSGPanel extends RDXPanel
       }
       else
       {
-         csgInputCommand.setUnitVelocities(false);
+         csgInputCommand.setAreVelocitiesNormalized(true);
 
          maxVelocityX = 1.0;
          minVelocityX = -1.0;

@@ -31,7 +31,7 @@ import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
-import us.ihmc.humanoidRobotics.communication.directionalControlToolboxAPI.DirectionalControlInputCommand;
+import us.ihmc.humanoidRobotics.communication.velocityBasedWalkingAPI.VelocityBasedWalkingInputCommand;
 import us.ihmc.humanoidRobotics.communication.fastWalkingAPI.FastWalkingGaitParametersCommand;
 
 /**
@@ -82,7 +82,7 @@ public class ControllerAPIDefinition
       commands.add(BipedTimedStepListCommand.class);
 
       /** Commands supported by the fast-walking controller, not in this repo */
-      commands.add(DirectionalControlInputCommand.class);
+      commands.add(VelocityBasedWalkingInputCommand.class);
       commands.add(FastWalkingGaitParametersCommand.class);
 
       /** Commands supported by multi-contact controller, not in this repo */

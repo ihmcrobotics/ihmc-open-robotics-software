@@ -3,7 +3,7 @@ package us.ihmc.avatar.joystickBasedLocomotion;
 import controller_msgs.msg.dds.ContinuousStepGeneratorInputMessage;
 import controller_msgs.msg.dds.ContinuousStepGeneratorParametersMessage;
 import controller_msgs.msg.dds.ContinuousStepGeneratorStatusMessage;
-import controller_msgs.msg.dds.DirectionalControlInputMessage;
+import controller_msgs.msg.dds.VelocityBasedWalkingInputMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.CSGROS2CommunicationHelper;
 import us.ihmc.commons.thread.Throttler;
@@ -18,7 +18,7 @@ public abstract class AbstractJoystickLocomotionPlugin
    protected final CSGROS2CommunicationHelper csgROS2CommunicationHelper;
 
    // Publisher for DirectionalControlInputMessage (going into the controller thread)
-   protected final ROS2Publisher<DirectionalControlInputMessage> directionalControlInputMessagePublisher;
+   protected final ROS2Publisher<VelocityBasedWalkingInputMessage> directionalControlInputMessagePublisher;
 
    // Stuff to limit how often we publish
    protected final Throttler publisherThrottler = new Throttler();
@@ -30,18 +30,18 @@ public abstract class AbstractJoystickLocomotionPlugin
    protected final ContinuousStepGeneratorStatusMessage csgStatusMessage;
 
    // Controller thread walking message
-   protected final DirectionalControlInputMessage directionalControlInputMessage;
+   protected final VelocityBasedWalkingInputMessage directionalControlInputMessage;
 
    public AbstractJoystickLocomotionPlugin(DRCRobotModel robotModel, ROS2Node ros2Node)
    {
       csgROS2CommunicationHelper = new CSGROS2CommunicationHelper(robotModel.getSimpleRobotName(), ros2Node, robotModel.getWalkingControllerParameters());
-      directionalControlInputMessagePublisher = ros2Node.createPublisher(HumanoidControllerAPI.getTopic(DirectionalControlInputMessage.class, robotModel.getSimpleRobotName()));
+      directionalControlInputMessagePublisher = ros2Node.createPublisher(HumanoidControllerAPI.getTopic(VelocityBasedWalkingInputMessage.class, robotModel.getSimpleRobotName()));
 
       csgInputCommand = csgROS2CommunicationHelper.getCSGInputCommand();
       csgParametersCommand = csgROS2CommunicationHelper.getCSGParametersCommand();
       csgStatusMessage = csgROS2CommunicationHelper.getCSGStatusMessage();
 
-      directionalControlInputMessage = new DirectionalControlInputMessage();
+      directionalControlInputMessage = new VelocityBasedWalkingInputMessage();
 
       publisherThrottler.setPeriod(robotModel.getStepGeneratorDT() * 2); // Publish at half the rate of CSG thread
    }
@@ -67,17 +67,17 @@ public abstract class AbstractJoystickLocomotionPlugin
    {
       // Populate CSG input command
       csgInputCommand.setWalk(requestWalking);
-      csgInputCommand.setUnitVelocities(false);
+      csgInputCommand.setAreVelocitiesNormalized(false);
       csgInputCommand.setForwardVelocity(forwardVelocity);
       csgInputCommand.setLateralVelocity(lateralVelocity);
       csgInputCommand.setTurnVelocity(turnVelocity);
 
       // Populate directional control input command
       directionalControlInputMessage.setWalk(requestWalking);
-      directionalControlInputMessage.setUnitVelocities(false);
-      directionalControlInputMessage.setForward(forwardVelocity);
-      directionalControlInputMessage.setRight(-lateralVelocity);
-      directionalControlInputMessage.setClockwise(-turnVelocity);
+      directionalControlInputMessage.setAreVelocitiesNormalized(false);
+      directionalControlInputMessage.setForwardVelocity(forwardVelocity);
+      directionalControlInputMessage.setLateralVelocity(lateralVelocity);
+      directionalControlInputMessage.setTurnVelocity(turnVelocity);
 
       if (requestWalking)
          heartBeat.reset();

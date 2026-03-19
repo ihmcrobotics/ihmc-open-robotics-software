@@ -153,7 +153,7 @@ public class CSGROS2CommunicationHelper
 
       // CSG status message
       csgStatusMessage.setIsWalking(false);
-      csgStatusMessage.setIsInUnitVelocities(false);
+      csgStatusMessage.setAreVelocitiesNormalized(true);
       csgStatusMessage.setCurrentForwardVelocity(0.0);
       csgStatusMessage.setCurrentLateralVelocity(0.0);
       csgStatusMessage.setCurrentTurnVelocity(0.0);

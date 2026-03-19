@@ -15,7 +15,7 @@ public class ContinuousStepGeneratorInputMessagePubSubType implements us.ihmc.pu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "562d09ec9cd6770d7886d802d367c8b23b6a71dedd98b12d36d0764199738509";
+   		return "60c4f0058d8149d1b4c72924ddb38b54b33f583ad2105745da9e8838b9466439";
    }
    
    @Override
@@ -111,7 +111,7 @@ public class ContinuousStepGeneratorInputMessagePubSubType implements us.ihmc.pu
 
       cdr.write_type_6(data.getTurnVelocity());
 
-      cdr.write_type_7(data.getUnitVelocities());
+      cdr.write_type_7(data.getAreVelocitiesNormalized());
 
    }
 
@@ -127,7 +127,7 @@ public class ContinuousStepGeneratorInputMessagePubSubType implements us.ihmc.pu
       	
       data.setTurnVelocity(cdr.read_type_6());
       	
-      data.setUnitVelocities(cdr.read_type_7());
+      data.setAreVelocitiesNormalized(cdr.read_type_7());
       	
 
    }
@@ -140,7 +140,7 @@ public class ContinuousStepGeneratorInputMessagePubSubType implements us.ihmc.pu
       ser.write_type_6("forward_velocity", data.getForwardVelocity());
       ser.write_type_6("lateral_velocity", data.getLateralVelocity());
       ser.write_type_6("turn_velocity", data.getTurnVelocity());
-      ser.write_type_7("unit_velocities", data.getUnitVelocities());
+      ser.write_type_7("are_velocities_normalized", data.getAreVelocitiesNormalized());
    }
 
    @Override
@@ -151,7 +151,7 @@ public class ContinuousStepGeneratorInputMessagePubSubType implements us.ihmc.pu
       data.setForwardVelocity(ser.read_type_6("forward_velocity"));
       data.setLateralVelocity(ser.read_type_6("lateral_velocity"));
       data.setTurnVelocity(ser.read_type_6("turn_velocity"));
-      data.setUnitVelocities(ser.read_type_7("unit_velocities"));
+      data.setAreVelocitiesNormalized(ser.read_type_7("are_velocities_normalized"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.ContinuousStepGeneratorInputMessage src, controller_msgs.msg.dds.ContinuousStepGeneratorInputMessage dest)

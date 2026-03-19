@@ -155,7 +155,7 @@ public class StepGeneratorCommandInputManager implements Updatable
    @Override
    public void update(double time)
    {
-      isOpen = currentController == HighLevelControllerName.WALKING || currentController == HighLevelControllerName.QUICKSTER;
+      isOpen = true;
       commandInputManager.setEnabled(isOpen);
 
       if (!overrideHeartbeat.getValue() && !heartbeatMonitor.isAlive())
@@ -172,8 +172,8 @@ public class StepGeneratorCommandInputManager implements Updatable
          desiredVelocity.setX(command.getForwardVelocity());
          desiredVelocity.setY(command.getLateralVelocity());
          turningVelocity.set(command.getTurnVelocity());
-         isUnitVelocities.set(command.isUnitVelocities());
-         walk.set(command.isWalk());
+         isUnitVelocities.set(command.getAreVelocitiesNormalized());
+         walk.set(command.getWalk());
       }
       commandInputManager.clearCommands(ContinuousStepGeneratorInputCommand.class);
 
@@ -269,7 +269,7 @@ public class StepGeneratorCommandInputManager implements Updatable
          }
 
          @Override
-         public boolean isUnitVelocity()
+         public boolean areVelocitiesNormalized()
          {
             return isUnitVelocities.getBooleanValue();
          }

@@ -299,7 +299,7 @@ public class XBoxOneJavaFXController
       XBoxOneJavaFXController joystickInput = new XBoxOneJavaFXController(messager);
 
       ContinuousStepGeneratorInputCommand inputCommand = new ContinuousStepGeneratorInputCommand();
-      inputCommand.setUnitVelocities(true);
+      inputCommand.setAreVelocitiesNormalized(true);
       messager.addTopicListener(ButtonRightBumperState, state ->
       {
          if (state == ButtonState.PRESSED)
