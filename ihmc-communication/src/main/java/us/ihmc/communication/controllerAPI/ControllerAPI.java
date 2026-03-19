@@ -75,9 +75,6 @@ public final class ControllerAPI
       inputMessageClasses.add(MultiContactBalanceStatus.class);
       inputMessageClasses.add(MultiContactTimedContactSequenceMessage.class);
 
-      // Commands supported by the Crocoddyl control state
-      inputMessageClasses.add(CrocoddylSolverTrajectoryMessage.class);
-
       // Command supported by the joint-space controller JointspacePositionControllerState
       inputMessageClasses.add(WholeBodyJointspaceTrajectoryMessage.class);
 
