@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLe
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidHighLevelControllerManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
+import us.ihmc.commonWalkingControlModules.stabilityLearning.StabilityRegionInference;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaEllipsoidsVisualizer;
 import us.ihmc.commonWalkingControlModules.visualizer.InverseDynamicsMechanismReferenceFrameVisualizer;
 import us.ihmc.commons.Conversions;
@@ -153,6 +154,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
                                                   centerOfPressureDataHolderForEstimator,
                                                   sensorInformation,
                                                   desiredJointDataHolder,
+                                                  robotModel.getStabilityRegionInference(),
                                                   registry,
                                                   kinematicsSimulation,
                                                   arrayOfJointsToIgnore);
@@ -232,6 +234,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
                                                             CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
                                                             HumanoidRobotSensorInformation sensorInformation,
                                                             JointDesiredOutputListBasics lowLevelControllerOutput,
+                                                            StabilityRegionInference stabilityRegionInference,
                                                             YoRegistry registry,
                                                             boolean kinematicsSimulation,
                                                             JointBasics... jointsToIgnore)
@@ -261,6 +264,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
                                                         centerOfMassDataHolderForController,
                                                         centerOfPressureDataHolderForEstimator,
                                                         lowLevelControllerOutput,
+                                                          stabilityRegionInference,
                                                         jointsToIgnore);
       scs2YoGraphicHolders.add(controllerManager::getSCS2YoGraphics);
 

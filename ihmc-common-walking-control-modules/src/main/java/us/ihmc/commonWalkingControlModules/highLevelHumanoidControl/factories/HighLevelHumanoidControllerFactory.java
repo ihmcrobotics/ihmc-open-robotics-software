@@ -28,6 +28,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HighL
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.SettableFootSwitch;
+import us.ihmc.commonWalkingControlModules.stabilityLearning.StabilityRegionInference;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools;
@@ -417,6 +418,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                            CenterOfMassDataHolderReadOnly centerOfMassDataHolderForController,
                                                            CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
                                                            JointDesiredOutputListBasics lowLevelControllerOutput,
+                                                           StabilityRegionInference stabilityRegionInference,
                                                            JointBasics... jointsToIgnore)
    {
       YoDouble controlDT = new YoDouble("controlDT", registry);
@@ -500,6 +502,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                  kinematicsSimulation,
                                                                  updatables,
                                                                  contactablePlaneBodies,
+                                                                 stabilityRegionInference,
                                                                  jointsToIgnore);
       controllerToolbox.attachControllerStateChangedListeners(controllerStateChangedListenersToAttach);
       attachControllerFailureListeners(controllerFailureListenersToAttach);

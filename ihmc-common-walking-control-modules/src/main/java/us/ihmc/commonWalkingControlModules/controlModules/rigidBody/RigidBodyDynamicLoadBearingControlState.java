@@ -255,35 +255,37 @@ public class RigidBodyDynamicLoadBearingControlState extends RigidBodyControlSta
    @Override
    public boolean isDone(double timeInState)
    {
+      return false;
+
       // If the robot has reached a high level of stability, exit this state
-      boolean hasLowTrackingError = capturePointErrorProvider.getValue() < CAPTURE_POINT_ERROR_THRESHOLD_TO_REMAIN_IN_STATE;
-      if (hasLowTrackingError)
-         return true;
-
-      // Check if has spent minimum time in state (maybe remove)
-      //         boolean hasSpentSufficientTimeInContact = stateMachine.getTimeInCurrentState() > MINIMUM_TIME_IN_CONTACT;
-      //         if (!hasSpentSufficientTimeInContact)
-      //            return false;
-
-      tempPoint.setIncludingFrame(capturePoint);
-      boolean isCapturePointInSupportPolygon = bipedSupportPolygons.getSupportPolygonInWorld().signedDistance(tempPoint) < -CAPTURE_POINT_DISTANCE_INSIDE_NOMINAL_SUPPORT_THRESHOLD;
-      if (isCapturePointInSupportPolygon)
-         return true;
-
-      if (stateMachine.getCurrentStateKey() == DynamicLoadBearingStateEnum.PRE_CONTACT)
-      {
-         // Only return if the arm is stuck, which is likely because it's extended
-         return preContactState.isStuck(stateMachine.getTimeInCurrentState());
-      }
-      else
-      {
-         // If the hand is slipping or the arm is straightened, exit this state
-         boolean isSlippingOrAtSingularity = stateMachine.getCurrentState().isDone(stateMachine.getTimeInCurrentState());
-         if (isSlippingOrAtSingularity)
-            return true;
-
-         return false;
-      }
+//      boolean hasLowTrackingError = capturePointErrorProvider.getValue() < CAPTURE_POINT_ERROR_THRESHOLD_TO_REMAIN_IN_STATE;
+//      if (hasLowTrackingError)
+//         return true;
+//
+//      // Check if has spent minimum time in state (maybe remove)
+//      //         boolean hasSpentSufficientTimeInContact = stateMachine.getTimeInCurrentState() > MINIMUM_TIME_IN_CONTACT;
+//      //         if (!hasSpentSufficientTimeInContact)
+//      //            return false;
+//
+//      tempPoint.setIncludingFrame(capturePoint);
+//      boolean isCapturePointInSupportPolygon = bipedSupportPolygons.getSupportPolygonInWorld().signedDistance(tempPoint) < -CAPTURE_POINT_DISTANCE_INSIDE_NOMINAL_SUPPORT_THRESHOLD;
+//      if (isCapturePointInSupportPolygon)
+//         return true;
+//
+//      if (stateMachine.getCurrentStateKey() == DynamicLoadBearingStateEnum.PRE_CONTACT)
+//      {
+//         // Only return if the arm is stuck, which is likely because it's extended
+//         return preContactState.isStuck(stateMachine.getTimeInCurrentState());
+//      }
+//      else
+//      {
+//         // If the hand is slipping or the arm is straightened, exit this state
+//         boolean isSlippingOrAtSingularity = stateMachine.getCurrentState().isDone(stateMachine.getTimeInCurrentState());
+//         if (isSlippingOrAtSingularity)
+//            return true;
+//
+//         return false;
+//      }
    }
 
    @Override

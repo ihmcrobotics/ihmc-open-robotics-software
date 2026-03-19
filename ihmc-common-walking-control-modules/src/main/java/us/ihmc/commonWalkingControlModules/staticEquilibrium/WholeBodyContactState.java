@@ -14,6 +14,7 @@ import us.ihmc.convexOptimization.linearProgram.LinearProgramSolver;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
@@ -194,6 +195,11 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
       updateJointIndices();
       updateActuationConstraintVector();
       updateActuationConstraintMatrix();
+   }
+
+   public void removeContact(int index)
+   {
+      contactPoints.remove(index);
    }
 
    public void updateContactPoints()
@@ -530,6 +536,17 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
             return true;
       }
       return false;
+   }
+
+   public void packNormalData(RigidBodyBasics rigidBody, FrameVector3D contactNormalToPack)
+   {
+      for (int i = 0; i < contactPoints.size(); i++)
+      {
+         if (contactPoints.get(i).contactingBody == rigidBody)
+         {
+            contactNormalToPack.setIncludingFrame(contactPoints.get(i).contactFrame, Axis3D.Z);
+         }
+      }
    }
 
    public OneDoFJointBasics[] getOneDoFJoints()

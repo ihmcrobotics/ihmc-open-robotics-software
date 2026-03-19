@@ -60,6 +60,7 @@ public class UpdatableHighLevelHumanoidControllerToolbox extends HighLevelHumano
             false,
             updatables,
             contactableBodies,
+            null,
             jointsToIgnore);
 
       if (UPDATE_CAPTURE_POINT_FROM_SCS)

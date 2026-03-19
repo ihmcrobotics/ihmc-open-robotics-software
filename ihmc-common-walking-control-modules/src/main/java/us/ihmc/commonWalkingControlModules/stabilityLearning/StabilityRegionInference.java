@@ -1,0 +1,10 @@
+package us.ihmc.commonWalkingControlModules.stabilityLearning;
+
+import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
+
+public interface StabilityRegionInference
+{
+   void computeStabilityRegion(FrameConvexPolygon2D polygonToPack, HighLevelHumanoidControllerToolbox toolbox, WholeBodyContactState wholeBodyContactState);
+}

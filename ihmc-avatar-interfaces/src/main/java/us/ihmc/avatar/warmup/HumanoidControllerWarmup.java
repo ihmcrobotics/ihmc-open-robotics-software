@@ -284,6 +284,7 @@ public abstract class HumanoidControllerWarmup
                                                                  false,
                                                                  null,
                                                                  contactableBodies,
+                                                                 null,
                                                                  jointsToIgnore);
 
       double defaultTransferTime = walkingControllerParameters.getDefaultTransferTime();

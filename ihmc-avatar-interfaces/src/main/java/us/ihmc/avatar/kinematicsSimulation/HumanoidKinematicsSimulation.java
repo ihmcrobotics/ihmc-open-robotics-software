@@ -231,6 +231,7 @@ public class HumanoidKinematicsSimulation
                                                                  false,
                                                                  Collections.emptyList(),
                                                                  allContactableBodies,
+                                                                 null,
                                                                  jointsToIgnore);
       humanoidHighLevelControllerManagerRegistry.addChild(controllerToolbox.getYoVariableRegistry());
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
