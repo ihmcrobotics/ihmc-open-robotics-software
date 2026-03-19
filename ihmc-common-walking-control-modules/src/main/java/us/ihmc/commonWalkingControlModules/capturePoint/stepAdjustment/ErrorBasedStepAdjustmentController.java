@@ -45,7 +45,7 @@ public class ErrorBasedStepAdjustmentController
    private static final double AREA_TO_CONSIDER_SWITCHING = 0.05;
 
    private static final boolean VISUALIZE = true;
-   private static final boolean CONTINUOUSLY_UPDATE_DESIRED_POSITION = false;
+   private static final boolean CONTINUOUSLY_UPDATE_DESIRED_POSITION = true;
    private static final int minTicksIntoStep = 5;
 
    private static final String yoNamePrefix = "controller";
