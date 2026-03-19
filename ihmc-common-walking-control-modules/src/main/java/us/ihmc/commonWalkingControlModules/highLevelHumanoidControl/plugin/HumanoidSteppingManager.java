@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin;
 
+import controller_msgs.msg.dds.DirectionalControlInputMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.PauseWalkingMessage;
@@ -23,8 +24,8 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -40,6 +41,9 @@ public class HumanoidSteppingManager implements Updatable, SCS2YoGraphicHolder
                                                                                                 HighLevelControllerName.class);
 
    private final ContinuousStepGenerator stepGenerator;
+   private final PDVelocityBasedGoalReacher goalReacher;
+
+   private final CommandInputManager controllerCommandInputManager;
 
    private final StepGeneratorCommandInputManager commandInputManager = new StepGeneratorCommandInputManager();
    private final StatusMessageOutputManager statusMessageOutputManager = new StatusMessageOutputManager(StepGeneratorAPIDefinition.getStepGeneratorSupportedStatusMessages());
@@ -55,6 +59,7 @@ public class HumanoidSteppingManager implements Updatable, SCS2YoGraphicHolder
                                   SideDependentList<? extends ContactableBody> contactableFeet,
                                   DoubleProvider timeProvider)
    {
+      this.controllerCommandInputManager = controllerCommandInputManager;
       registry.addChild(commandInputManager.getRegistry());
 
       // Set up listeners for the status messages, and pass them into the step generator command input manager.
@@ -103,6 +108,10 @@ public class HumanoidSteppingManager implements Updatable, SCS2YoGraphicHolder
       controllerStatusMessageOutputManager.attachStatusMessageListener(HighLevelStateChangeStatusMessage.class,
                                                                        (statusMessage) -> latestHighLevelControllerStatus.set(HighLevelControllerName.fromByte(
                                                                              statusMessage.getEndHighLevelControllerName())));
+
+      goalReacher = new PDVelocityBasedGoalReacher(referenceFrames.getPelvisZUpFrame(), statusMessageOutputManager, registry);
+      commandInputManager.addControllerWalkToGoalCommandConsumer(goalReacher::consumeNewWaypoint);
+      commandInputManager.addControllerReleaseGoalCommand(goalReacher::consumeReleaseGoalCommand);
    }
 
 
@@ -140,12 +149,21 @@ public class HumanoidSteppingManager implements Updatable, SCS2YoGraphicHolder
    @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
-      return stepGenerator.getSCS2YoGraphics();
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(goalReacher.getSCS2YoGraphics());
+      group.addChild(stepGenerator.getSCS2YoGraphics());
+
+      return group;
    }
 
    public StepGeneratorCommandInputManager getStepGeneratorCommandInputManager()
    {
       return commandInputManager;
+   }
+
+   public StatusMessageOutputManager getStatusMessageOutputManager()
+   {
+      return statusMessageOutputManager;
    }
 
    @Override
@@ -158,6 +176,14 @@ public class HumanoidSteppingManager implements Updatable, SCS2YoGraphicHolder
 
       if (latestHighLevelControllerStatus.getValue() == HighLevelControllerName.WALKING)
          stepGenerator.update(time);
+
+      if (latestHighLevelControllerStatus.getValue() == HighLevelControllerName.RL_CONTROL)
+      {
+         goalReacher.update(time);
+         DirectionalControlInputMessage message = goalReacher.getOutputMessage();
+         if (message != null)
+            controllerCommandInputManager.submitMessage(goalReacher.getOutputMessage());
+      }
    }
 
    private static StopWalkingMessenger createStopWalkingMessenger(CommandInputManager walkingCommandInputManager)

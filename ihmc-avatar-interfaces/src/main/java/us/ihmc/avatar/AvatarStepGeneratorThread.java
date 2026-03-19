@@ -48,6 +48,7 @@ public class AvatarStepGeneratorThread implements SCS2YoGraphicHolder
    private final YoBoolean runCSG = new YoBoolean("RunCSG", csgRegistry);
 
    private final StepGeneratorCommandInputManager csgCommandInputManager;
+   private final StatusMessageOutputManager statusMessageOutputManager;
    private final HumanoidSteppingPluginEnvironmentalConstraints environmentalConstraints;
 
    public AvatarStepGeneratorThread(HumanoidRobotContextDataFactory contextDataFactory,
@@ -84,6 +85,7 @@ public class AvatarStepGeneratorThread implements SCS2YoGraphicHolder
                                                     null,
                                                     csgTime);
       csgCommandInputManager = steppingManager.getStepGeneratorCommandInputManager();
+      statusMessageOutputManager = steppingManager.getStatusMessageOutputManager();
 
       // create the callback listeners for the planar regions in the stepping plugin
       if (ros2Node != null)
@@ -203,6 +205,11 @@ public class AvatarStepGeneratorThread implements SCS2YoGraphicHolder
    public StepGeneratorCommandInputManager getCsgCommandInputManager()
    {
       return csgCommandInputManager;
+   }
+
+   public StatusMessageOutputManager getStatusOutputManager()
+   {
+      return statusMessageOutputManager;
    }
 
    public void destroy()

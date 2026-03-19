@@ -1,0 +1,47 @@
+#ifndef __controller_msgs__msg__ControllerWalkToGoalMessage__idl__
+#define __controller_msgs__msg__ControllerWalkToGoalMessage__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * Input message for the PDVelocityBasedGoalReacher.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::ControllerWalkToGoalMessage_")
+      struct ControllerWalkToGoalMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long long sequence_id;
+        /**
+         * Goal pose for the robot to reach.
+         */
+        double x_position;
+        double y_position;
+        double yaw;
+        /**
+         * Goal time to reach the pose. 0.0 means as quickly as possible.
+         */
+        double time_to_reach;
+        /**
+         * Whether to maintain this position after reaching it.
+         */
+        boolean hold_position;
+        /**
+         * Proximity to the goal.
+         */
+        @defaultValue(value=0.02)
+        double position_proximity;
+        @defaultValue(value=0.1)
+        double orientation_proximity;
+      };
+    };
+  };
+};
+
+#endif

@@ -52,6 +52,8 @@ public class StepGeneratorCommandInputManager implements Updatable
 
    private final List<Consumer<HeightMapCommand>> heightMapCommandConsumers = new ArrayList<>();
    private final List<Consumer<ContinuousStepGeneratorParametersCommand>> csgParametersCommandConsumers = new ArrayList<>();
+   private final List<Consumer<ControllerWalkToGoalCommand>> controllerWalkToGoalCommandConsumers = new ArrayList<>();
+   private final List<Consumer<ControllerReleaseGoalCommand>> controllerReleaseGoalCommandConsumers = new ArrayList<>();
 
    private final AtomicReference<FootstepStatus> latestFootstepStatusReceived = new AtomicReference<>(null);
    private final AtomicReference<FootstepStatus> previousFootstepStatusReceived = new AtomicReference<>(null);
@@ -92,6 +94,16 @@ public class StepGeneratorCommandInputManager implements Updatable
    public void addContinuousStepGeneratorParametersCommandConsumer(Consumer<ContinuousStepGeneratorParametersCommand> csgParametersCommandConsumer)
    {
       csgParametersCommandConsumers.add(csgParametersCommandConsumer);
+   }
+
+   public void addControllerWalkToGoalCommandConsumer(Consumer<ControllerWalkToGoalCommand> controllerWalToGoalCommandConsumer)
+   {
+      controllerWalkToGoalCommandConsumers.add(controllerWalToGoalCommandConsumer);
+   }
+
+   public void addControllerReleaseGoalCommand(Consumer<ControllerReleaseGoalCommand> controllerReleaseGoalCommandConsumer)
+   {
+      controllerReleaseGoalCommandConsumers.add(controllerReleaseGoalCommandConsumer);
    }
 
    public CommandInputManager getCommandInputManager()
@@ -144,7 +156,7 @@ public class StepGeneratorCommandInputManager implements Updatable
    @Override
    public void update(double time)
    {
-      isOpen = currentController == HighLevelControllerName.WALKING || currentController == HighLevelControllerName.QUICKSTER;
+      isOpen = currentController == HighLevelControllerName.WALKING || currentController == HighLevelControllerName.QUICKSTER || currentController == HighLevelControllerName.RL_CONTROL;
       commandInputManager.setEnabled(isOpen);
 
       if (!overrideHeartbeat.getValue() && !heartbeatMonitor.isAlive())
@@ -164,7 +176,17 @@ public class StepGeneratorCommandInputManager implements Updatable
          isUnitVelocities.set(command.isUnitVelocities());
          walk.set(command.isWalk());
       }
+      else if (commandInputManager.isNewCommandAvailable(ControllerWalkToGoalCommand.class))
+      {
+         ControllerWalkToGoalCommand command = commandInputManager.pollNewestCommand(ControllerWalkToGoalCommand.class);
+         for (int i = 0; i < controllerWalkToGoalCommandConsumers.size(); i++)
+         {
+            controllerWalkToGoalCommandConsumers.get(i).accept(command);
+         }
+         walk.set(true);
+      }
       commandInputManager.clearCommands(ContinuousStepGeneratorInputCommand.class);
+      commandInputManager.clearCommands(ControllerWalkToGoalCommand.class);
 
       if (commandInputManager.isNewCommandAvailable(ContinuousStepGeneratorParametersCommand.class))
       {
