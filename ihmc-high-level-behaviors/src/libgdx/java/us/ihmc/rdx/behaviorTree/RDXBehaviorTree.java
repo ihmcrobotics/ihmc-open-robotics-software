@@ -27,6 +27,9 @@ import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
+
 public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBehaviorTreeNode<?, ?>>
 {
    public static final RDXBehaviorTreeSettings SETTINGS = new RDXBehaviorTreeSettings();
@@ -45,6 +48,7 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
    private RDXBehaviorTreeNode<?, ?> selectedNode;
    private boolean draggingDivider;
    private boolean shouldSave = false;
+   private final Deque<Runnable> preUpdateOperationQueue = new ArrayDeque<>();
 
    public RDXBehaviorTree(WorkspaceResourceDirectory treeFilesDirectory,
                           ROS2SyncedRobotModel syncedRobot,
@@ -82,6 +86,9 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
 
    public void update()
    {
+      while (!preUpdateOperationQueue.isEmpty())
+         preUpdateOperationQueue.poll().run();
+
       idToNodeMap.clear();
 
       if (rootNode != null)
@@ -96,9 +103,7 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
       idToNodeMap.put(node.getState().getID(), node);
 
       for (RDXBehaviorTreeNode<?, ?> child : node.getChildren())
-      {
          updateCaches(child);
-      }
    }
 
    private void update(RDXBehaviorTreeNode<?, ?> node)
@@ -106,9 +111,7 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
       node.update();
 
       for (RDXBehaviorTreeNode<?, ?> child : node.getChildren())
-      {
          update(child);
-      }
    }
 
    private void calculateVRPick(RDXVRContext vrContext)
@@ -122,9 +125,7 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
       node.calculateVRPick(vrContext);
 
       for (RDXBehaviorTreeNode<?, ?> child : node.getChildren())
-      {
          calculateVRPick(vrContext, child);
-      }
    }
 
    private void processVRInput(RDXVRContext vrContext)
@@ -138,9 +139,7 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
       node.processVRInput(vrContext);
 
       for (RDXBehaviorTreeNode<?, ?> child : node.getChildren())
-      {
          processVRInput(vrContext, child);
-      }
    }
 
    public void renderImGuiWidgets()
@@ -338,9 +337,7 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
          node.renderNodeSettingsWidgets();
 
       for (RDXBehaviorTreeNode<?, ?> child : node.getChildren())
-      {
          renderSelectedNodeSettingsWidgets(child);
-      }
    }
 
    private void calculate3DViewPick(ImGui3DViewInput input)
@@ -354,9 +351,7 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
       node.calculate3DViewPick(input);
 
       for (RDXBehaviorTreeNode<?, ?> child : node.getChildren())
-      {
          calculate3DViewPick(input, child);
-      }
    }
 
    private void process3DViewInput(ImGui3DViewInput input)
@@ -370,9 +365,7 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
       node.process3DViewInput(input);
 
       for (RDXBehaviorTreeNode<?, ?> child : node.getChildren())
-      {
          process3DViewInput(input, child);
-      }
    }
 
    private void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
@@ -386,9 +379,7 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
       node.getRenderables(renderables, pool);
 
       for (RDXBehaviorTreeNode<?, ?> child : node.getChildren())
-      {
          getRenderables(renderables, pool, child);
-      }
    }
 
    public void destroy()
@@ -403,5 +394,10 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
    public RDXBehaviorTreeNodeCreationMenu getNodeCreationMenu()
    {
       return nodeCreationMenu;
+   }
+
+   public void addPreUpdateOperation(Runnable runnable)
+   {
+      preUpdateOperationQueue.add(runnable);
    }
 }

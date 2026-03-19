@@ -5,6 +5,7 @@ import imgui.flag.ImGuiMouseButton;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionDefinition;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiExpandCollapseRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -121,27 +122,29 @@ public class RDXAvailableBehaviorTreeDirectory
                   else
                      rootNode = behaviorTree.getRootNode();
 
-                  RDXBehaviorTreeNode<?, ?> loadedNode
-                        = behaviorTree.getFileLoader().loadFromFile(rootNode, indexedTreeFile.getTreeFile(), topologyOperationQueue);
-
-                  if (loadedNode != null)
+                  ThreadTools.startAsDaemon(() -> // Avoid overunning dt for large trees
                   {
-                     RDXBehaviorTreeNode<?, ?> nodeToInsert;
-                     if (relativeNode == null) // Add as child of root node if we made one
-                     {
-                        nodeToInsert = rootNode;
-                        rootNode.getDefinition().modify();
-                        topologyOperationQueue.queueAppendChildModify(rootNode, loadedNode);
-                     }
-                     else
-                     {
-                        nodeToInsert = loadedNode;
-                     }
+                     RDXBehaviorTreeNode<?, ?> loadedNode
+                           = behaviorTree.getFileLoader().loadFromFile(rootNode, indexedTreeFile.getTreeFile(), topologyOperationQueue);
 
-                     BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>> insertionDefinition
-                           = new BehaviorTreeNodeInsertionDefinition<>(insertionType, nodeToInsert, relativeNode);
-                     complete.accept(insertionDefinition);
-                  }
+                     if (loadedNode != null)
+                        behaviorTree.addPreUpdateOperation(() ->
+                        {
+                           RDXBehaviorTreeNode<?, ?> nodeToInsert;
+                           if (relativeNode == null) // Add as child of root node if we made one
+                           {
+                              nodeToInsert = rootNode;
+                              rootNode.getDefinition().modify();
+                              topologyOperationQueue.queueAppendChildModify(rootNode, loadedNode);
+                           }
+                           else
+                              nodeToInsert = loadedNode;
+
+                           BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>> insertionDefinition
+                                 = new BehaviorTreeNodeInsertionDefinition<>(insertionType, nodeToInsert, relativeNode);
+                           complete.accept(insertionDefinition);
+                        });
+                  }, "LoadSubtree");
                }
             }
 
