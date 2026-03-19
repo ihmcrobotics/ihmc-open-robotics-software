@@ -29,10 +29,7 @@ import ihmc_common_msgs.msg.dds.UUIDMessage;
 import ihmc_common_msgs.msg.dds.WeightMatrix3DMessage;
 import ihmc_common_msgs.msg.dds.YoRegistryMessage;
 import org.apache.logging.log4j.Level;
-import perception_msgs.msg.dds.HeatMapPacket;
 import perception_msgs.msg.dds.ImageMessage;
-import perception_msgs.msg.dds.LidarScanMessage;
-import perception_msgs.msg.dds.ObjectDetectorResultPacket;
 import std_msgs.msg.dds.Bool;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInitialConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
@@ -126,14 +123,6 @@ public class MessageTools
       InvalidPacketNotificationPacket message = new InvalidPacketNotificationPacket();
       message.setPacketClassSimpleName(packetClass.getSimpleName());
       message.setErrorMessage(errorMessage);
-      return message;
-   }
-
-   public static ObjectDetectorResultPacket createObjectDetectorResultPacket(HeatMapPacket heatMap, BoundingBoxesPacket boundingBoxes)
-   {
-      ObjectDetectorResultPacket message = new ObjectDetectorResultPacket();
-      message.getHeatMap().set(heatMap);
-      message.getBoundingBoxes().set(boundingBoxes);
       return message;
    }
 

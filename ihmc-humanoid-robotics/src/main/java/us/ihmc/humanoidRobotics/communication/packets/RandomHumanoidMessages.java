@@ -8,7 +8,6 @@ import controller_msgs.msg.dds.*;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import ihmc_common_msgs.msg.dds.*;
 import perception_msgs.msg.dds.*;
-import toolbox_msgs.msg.dds.BehaviorControlModePacket;
 import toolbox_msgs.msg.dds.BehaviorControlModeResponsePacket;
 import toolbox_msgs.msg.dds.HumanoidBehaviorTypePacket;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
@@ -474,16 +473,6 @@ public final class RandomHumanoidMessages
       return next;
    }
 
-   public static HeatMapPacket nextHeatMapPacket(Random random)
-   {
-      HeatMapPacket next = new HeatMapPacket();
-      next.setHeight(RandomNumbers.nextInt(random, -100, 100));
-      next.setWidth(RandomNumbers.nextInt(random, -100, 100));
-      next.getData().add(RandomNumbers.nextFloatArray(random, next.getHeight() * next.getWidth(), 1.0f));
-      next.setName(Integer.toHexString(random.nextInt()));
-      return next;
-   }
-
    public static BoundingBoxesPacket nextBoundingBoxesPacket(Random random)
    {
       BoundingBoxesPacket next = new BoundingBoxesPacket();
@@ -497,14 +486,6 @@ public final class RandomHumanoidMessages
          next.getBoundingBoxesWidths().add(RandomNumbers.nextInt(random, 0, 1000));
          next.getBoundingBoxesHeights().add(RandomNumbers.nextInt(random, 0, 1000));
       }
-      return next;
-   }
-
-   public static ObjectDetectorResultPacket nextObjectDetectorResultPacket(Random random)
-   {
-      ObjectDetectorResultPacket next = new ObjectDetectorResultPacket();
-      next.getHeatMap().set(nextHeatMapPacket(random));
-      next.getBoundingBoxes().set(nextBoundingBoxesPacket(random));
       return next;
    }
 
@@ -622,52 +603,6 @@ public final class RandomHumanoidMessages
    {
       WalkingStatusMessage next = new WalkingStatusMessage();
       next.setWalkingStatus(RandomNumbers.nextEnum(random, WalkingStatus.class).toByte());
-      return next;
-   }
-
-   public static SnapFootstepPacket nextSnapFootstepPacket(Random random)
-   {
-      SnapFootstepPacket next = new SnapFootstepPacket();
-      // Number of footsteps
-      int numberOfFootsteps = random.nextInt(255);
-
-      // create random footsteps
-      int[] footstepOrder = new int[numberOfFootsteps];
-      byte[] flag = new byte[numberOfFootsteps];
-      ArrayList<FootstepDataMessage> footsteps = new ArrayList<FootstepDataMessage>();
-      RigidBodyTransform previousFootstep = new RigidBodyTransform();
-
-      double[] XYZ_MAX = {2.0, 2.0, 2.0};
-      double[] XYZ_MIN = {-2.0, -2.0, -3.0};
-
-      double xMax = 0.90 * Math.min(Math.abs(XYZ_MAX[0]), Math.abs(XYZ_MIN[0]));
-      double yMax = 0.90 * Math.min(Math.abs(XYZ_MAX[1]), Math.abs(XYZ_MIN[1]));
-      double zMax = 0.90 * Math.min(Math.abs(XYZ_MAX[2]), Math.abs(XYZ_MIN[2]));
-
-      for (int footstepNumber = 0; footstepNumber < numberOfFootsteps; footstepNumber++)
-      {
-         footstepOrder[footstepNumber] = footstepNumber;
-         flag[footstepNumber] = (byte) random.nextInt(3);
-         RobotSide robotSide = (footstepNumber % 2 == 0) ? RobotSide.RIGHT : RobotSide.LEFT;
-
-         Point3D position = EuclidCoreRandomTools.nextPoint3D(random, xMax, yMax, zMax);
-
-         Quaternion orientation = new Quaternion();
-         orientation.set(EuclidCoreRandomTools.nextAxisAngle(random));
-
-         previousFootstep.transform(position);
-
-         previousFootstep.getTranslation().set(new Vector3D32(position));
-         previousFootstep.getRotation().set(orientation);
-
-         FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(robotSide, new Point3D(position), orientation);
-
-         footsteps.add(footstepData);
-      }
-
-      MessageTools.copyData(footsteps, next.getFootstepData());
-      next.getFootstepOrder().add(footstepOrder);
-      next.getFlag().add(flag);
       return next;
    }
 
@@ -816,39 +751,10 @@ public final class RandomHumanoidMessages
       return next;
    }
 
-   public static BehaviorControlModePacket nextBehaviorControlModePacket(Random random)
-   {
-      BehaviorControlModePacket next = new BehaviorControlModePacket();
-      next.setBehaviorControlModeEnumRequest(RandomNumbers.nextEnum(random, BehaviorControlModeEnum.class).toByte());
-      return next;
-   }
-
    public static HighLevelStateMessage nextHighLevelStateMessage(Random random)
    {
       HighLevelStateMessage next = new HighLevelStateMessage();
       next.setHighLevelControllerName(RandomNumbers.nextEnum(random, HighLevelControllerName.class).toByte());
-      return next;
-   }
-
-   public static SCSListenerPacket nextSCSListenerPacket(Random random)
-   {
-      SCSListenerPacket next = new SCSListenerPacket();
-      next.setIsStopped(random.nextBoolean());
-      return next;
-   }
-
-
-   public static ManualHandControlPacket nextManualHandControlPacket(Random random)
-   {
-      ManualHandControlPacket next = new ManualHandControlPacket();
-      next.setRobotSide(RobotSide.generateRandomRobotSide(random).toByte());
-      double[] angles = RandomNumbers.nextDoubleArray(random, 4, 0, 1);
-
-      next.setIndex(angles[0]);
-      next.setMiddle(angles[1]);
-      next.setThumb(angles[2]);
-      next.setSpread(angles[3]);
-      next.setControlType(0);
       return next;
    }
 
