@@ -113,12 +113,10 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
          {
             String gotoNodeName = "End";
 
-            if (scene.getObject(BehaviorTreeSceneObjectType.DOOR_FRAME) instanceof BehaviorTreeSceneDoorFrameExecutor doorFrameExecutor)
-               switch (doorFrameExecutor.getDoorType())
-               {
-                  case DOOR_TYPE_PUSH -> gotoNodeName = "Left Push Door";
-                  case DOOR_TYPE_PULL -> gotoNodeName = "Right Pull Door";
-               }
+            if (scene.getObject(BehaviorTreeSceneObjectType.DOOR_FRAME) instanceof BehaviorTreeSceneDoorFrameExecutor doorFrameExecutor
+              && doorFrameExecutor.getDoorType() != DOOR_TYPE_UNKNOWN)
+               gotoNodeName = "door/%s%sDoor.json".formatted(doorFrameExecutor.getHingeSide().getOppositeSide().getPascalCaseName(),
+                                                             doorFrameExecutor.getDoorType() == DOOR_TYPE_PUSH ? "Push" : "Pull");
 
             BehaviorTreeNodeExecutor<?, ?> gotoNode = searchDFSFirstMatch(this, gotoNodeName);
             if (gotoNode != null)
