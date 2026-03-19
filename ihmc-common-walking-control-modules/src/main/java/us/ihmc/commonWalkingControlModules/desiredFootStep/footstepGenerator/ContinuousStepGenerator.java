@@ -362,7 +362,7 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
          desiredVelocityY = MathTools.clamp(desiredVelocityY, minMaxVelocityY);
       }
 
-      if (desiredTurningVelocityProvider.isUnitVelocity())
+      if (desiredTurningVelocityProvider.areVelocitiesNormalized())
          turningVelocity = MathTools.clamp(turningVelocity, minMaxVelocityTurn);
       else
          turningVelocity = minMaxVelocityTurn * MathTools.clamp(turningVelocity, 1.0);

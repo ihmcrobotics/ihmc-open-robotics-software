@@ -35,10 +35,10 @@ public interface DesiredVelocityProvider
     * by the maximum step length and the step duration.
     * </ul>
     * 
-    * @return whether this provider uses normalized velocities or not. Default value is {@code false}.
+    * @return whether this provider uses normalized velocities or not. Default value is {@code true}.
     */
    default boolean areVelocitiesNormalized()
    {
-      return false;
+      return true;
    }
 }

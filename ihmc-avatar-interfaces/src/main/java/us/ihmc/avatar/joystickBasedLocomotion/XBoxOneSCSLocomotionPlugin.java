@@ -1,5 +1,7 @@
 package us.ihmc.avatar.joystickBasedLocomotion;
 
+import us.ihmc.avatar.AvatarControllerThread;
+import us.ihmc.avatar.AvatarStepGeneratorThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.joystickBasedJavaFXController.ButtonState;
 import us.ihmc.avatar.joystickBasedJavaFXController.XBoxOneJavaFXController;
@@ -9,22 +11,22 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.inputDevices.joystick.exceptions.JoystickNotFoundException;
 
 /**
- * Plugin for using an xbox controller to send commands and receive status info to/from the
- * {@link us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGenerator}
- * via the {@link us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition}
- * This requires no instantiation or direct interaction with the ContinuousStepGenerator, all communication is done
- * through ROS2. Additionally, this can be attached to any program or application with an update loop. Just make
- * sure the Xbox controller is physically connected to the computer running the application
+ * This is a plugin for an SCS application. It can convert inputs coming from an Xbox One
+ * handheld controller into messages that get sent to the {@link AvatarControllerThread} and
+ * {@link AvatarStepGeneratorThread} in order to enact and control walking movements.
+ * <p>
+ * For this plugin to work, ensure the Xbox controller is connected to the computer running
+ * the SCS application via cable or wireless receiver dongle. Also make sure that the
+ * {@link #update} method is called regularly every tick. It is additionally recommenced to
+ * call {@link #shutdown()} upon SCS application termination.
  *
  * @author Stefan Fasano
  */
 public class XBoxOneSCSLocomotionPlugin extends AbstractJoystickLocomotionPlugin
 {
    public static final double DEFAULT_PARAMETER_INCREMENT = 0.01;
-   private static final boolean DEFAULT_USE_DEADMAN_SWITCH = true;
 
    private final double parameterIncrement;
-   private final boolean useDeadmanSwitch;
 
    private final SharedMemoryMessager xboxJoystickMessager;
    private final XBoxOneJavaFXController xboxController;
@@ -36,14 +38,13 @@ public class XBoxOneSCSLocomotionPlugin extends AbstractJoystickLocomotionPlugin
 
    public XBoxOneSCSLocomotionPlugin(DRCRobotModel robotModel, ROS2Node ros2Node) throws JoystickNotFoundException
    {
-      this(robotModel, ros2Node, DEFAULT_PARAMETER_INCREMENT, DEFAULT_USE_DEADMAN_SWITCH);
+      this(robotModel, ros2Node, DEFAULT_PARAMETER_INCREMENT);
    }
 
-   public XBoxOneSCSLocomotionPlugin(DRCRobotModel robotModel, ROS2Node ros2Node, double parameterIncrement, boolean useDeadmanSwitch) throws JoystickNotFoundException
+   public XBoxOneSCSLocomotionPlugin(DRCRobotModel robotModel, ROS2Node ros2Node, double parameterIncrement) throws JoystickNotFoundException
    {
       super(robotModel, ros2Node);
       this.parameterIncrement = parameterIncrement;
-      this.useDeadmanSwitch = useDeadmanSwitch;
 
       xboxJoystickMessager = new SharedMemoryMessager(XBoxOneJavaFXController.XBoxOneControllerAPI);
       xboxController = new XBoxOneJavaFXController(xboxJoystickMessager);
@@ -55,10 +56,11 @@ public class XBoxOneSCSLocomotionPlugin extends AbstractJoystickLocomotionPlugin
    public void update()
    {
       // Pack the messages with the desired walking commands
-      setDesiredWalkingCommands(walk, forwardVelocity, lateralVelocity, turningVelocity);
+      setDesiredWalkingCommands(walk, forwardVelocity, lateralVelocity, turningVelocity, true);
 
       // Publish the messages
-      publish();
+      if (publisherThrottler.run() && !heartBeat.isExpired(PUBLISHER_HEARTBEAT_DURATION))
+         publish();
 
       // Reset everything to false and zero to be safe
       walk = false;
@@ -91,18 +93,7 @@ public class XBoxOneSCSLocomotionPlugin extends AbstractJoystickLocomotionPlugin
    private void setupXboxJoystickControls()
    {
       // Toggles between walking and standing
-      if (useDeadmanSwitch)
-      {
-         xboxJoystickMessager.addTopicListener(XBoxOneJavaFXController.LeftTriggerAxis, state -> walk = state == -1.0);
-      }
-      else
-      {
-         xboxJoystickMessager.addTopicListener(XBoxOneJavaFXController.ButtonAState, state ->
-         {
-            if (state == ButtonState.PRESSED)
-               walk = !csgStatusMessage.getIsWalking();
-         });
-      }
+      xboxJoystickMessager.addTopicListener(XBoxOneJavaFXController.LeftTriggerAxis, state -> walk = state == -1.0);
 
       // Controls forwards walking
       xboxJoystickMessager.addTopicListener(XBoxOneJavaFXController.LeftStickYAxis, state -> forwardVelocity = state);

@@ -1,8 +1,10 @@
-package us.ihmc.rdx.csg;
+package us.ihmc.rdx.velocityBasedLocomotion;
 
 import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.ControllerListener;
 import com.badlogic.gdx.controllers.Controllers;
+import us.ihmc.avatar.AvatarControllerThread;
+import us.ihmc.avatar.AvatarStepGeneratorThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.joystickBasedLocomotion.AbstractJoystickLocomotionPlugin;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.CSGROS2CommunicationHelper;
@@ -10,35 +12,33 @@ import us.ihmc.commons.DeadbandTools;
 import us.ihmc.ros2.ROS2Node;
 
 /**
- * Plugin for using an xbox controller to send commands and receive status info to/from the
- * {@link us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGenerator}
- * via the {@link us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition}
- * This requires no instantiation or direct interaction with the ContinuousStepGenerator, all communication is done
- * through ROS2. This is intended to be attached to an RDX application and updated every tick in some sort of update
- * loop. Make sure the Xbox controller is physically connected to the computer running the RDX application.
+ * This is a plugin for an RDX application. It can convert inputs coming from an Xbox One
+ * handheld controller into messages that get sent to the {@link AvatarControllerThread} and
+ * {@link AvatarStepGeneratorThread} in order to enact and control walking movements.
+ * <p>
+ * For this plugin to work, ensure the Xbox controller is connected to the computer running
+ * the RDX application via cable or wireless receiver dongle. Also make sure that the
+ * {@link #update} method is called regularly every tick. It is additionally recommenced to
+ * call {@link #shutdown()} upon RDX application termination.
  *
  * @author Stefan Fasano
  */
 public class XBoxOneRDXLocomotionPlugin extends AbstractJoystickLocomotionPlugin
 {
    public static final double DEFAULT_PARAMETER_INCREMENT = 0.01;
-   private static final boolean DEFAULT_USE_DEADMAN_SWITCH = true;
 
    // Stuff related to the Xbox controller itself
    private Controller currentController;
    private final ControllerListener xboxOneControllerListener;
    private boolean currentControllerConnected = false;
    private boolean controllerListenerHasBeenAdded = false;
-   private boolean publishNewCommand = false;
-
-
 
    public XBoxOneRDXLocomotionPlugin(DRCRobotModel robotModel, ROS2Node ros2Node)
    {
-      this(robotModel, ros2Node, DEFAULT_PARAMETER_INCREMENT, DEFAULT_USE_DEADMAN_SWITCH);
+      this(robotModel, ros2Node, DEFAULT_PARAMETER_INCREMENT);
    }
 
-   public XBoxOneRDXLocomotionPlugin(DRCRobotModel robotModel, ROS2Node ros2Node, double parameterIncrement, boolean useDeadmanSwitch)
+   public XBoxOneRDXLocomotionPlugin(DRCRobotModel robotModel, ROS2Node ros2Node, double parameterIncrement)
    {
       super(robotModel, ros2Node);
 
@@ -101,7 +101,7 @@ public class XBoxOneRDXLocomotionPlugin extends AbstractJoystickLocomotionPlugin
    {
       updateCommandsFromRC();
 
-      if (publisherThrottler.run() && !heartBeat.isExpired(1.0))
+      if (publisherThrottler.run() && !heartBeat.isExpired(PUBLISHER_HEARTBEAT_DURATION))
          publish();
    }
 
@@ -134,12 +134,11 @@ public class XBoxOneRDXLocomotionPlugin extends AbstractJoystickLocomotionPlugin
             forwardJoystickValue = DeadbandTools.applyDeadband(deadband, -currentController.getAxis(currentController.getMapping().axisLeftY));
             lateralJoystickValue = DeadbandTools.applyDeadband(deadband, -currentController.getAxis(currentController.getMapping().axisLeftX));
             turningJoystickValue = DeadbandTools.applyDeadband(deadband, -currentController.getAxis(currentController.getMapping().axisRightX));
-            heartBeat.reset();
          }
       }
 
       // Pack messages with desired walking commands
-      setDesiredWalkingCommands(requestWalking, forwardJoystickValue, lateralJoystickValue, turningJoystickValue);
+      setDesiredWalkingCommands(requestWalking, forwardJoystickValue, lateralJoystickValue, turningJoystickValue, true);
    }
 
    public CSGROS2CommunicationHelper getCSGROS2CommunicationHelper()
