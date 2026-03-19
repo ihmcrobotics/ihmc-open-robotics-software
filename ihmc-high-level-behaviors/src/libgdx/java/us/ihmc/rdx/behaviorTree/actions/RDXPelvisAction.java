@@ -131,6 +131,18 @@ public class RDXPelvisAction extends RDXActionNode<PelvisActionState, PelvisActi
    }
 
    @Override
+   public void renderTreeViewRow()
+   {
+      super.renderRowBeginning();
+      super.renderEditableName();
+
+      ImGui.sameLine();
+      ImGui.textDisabled("Pelvis");
+
+      renderRowEnd();
+   }
+
+   @Override
    protected void renderImGuiWidgetsInternal()
    {
       ImGui.checkbox(labels.get("Adjust Goal Pose"), poseGizmo.getSelected());

@@ -100,7 +100,7 @@ public class BehaviorTreeSceneDoorFrameExecutor extends BehaviorTreeSceneObjectE
             latchPostPoints = Math.max(latchPostPoints, pointCounter.countPointsInCapsule(depthImage, capsuleBottom, capsuleTop, 0.05f));
             if (latchPostPoints > MIN_POST_POINTS)
             {
-               doorOpenAngle = (float) angle;
+               doorOpenAngle = (float) -angle; // Invert so it's latch post relative
                RigidBodyTransform frameTransform = transform.getValueAndModify();
                frameTransform.getTranslation().set(hingePoint);
                EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.X, searchHingeToLatchPost, frameTransform.getRotation());
