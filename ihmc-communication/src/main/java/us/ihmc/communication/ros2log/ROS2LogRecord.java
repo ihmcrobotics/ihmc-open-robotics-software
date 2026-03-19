@@ -1,7 +1,6 @@
 package us.ihmc.communication.ros2log;
 
 import toolbox_msgs.msg.dds.ROS2LogMessage;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2Node;
@@ -25,12 +24,22 @@ public class ROS2LogRecord
    private final List<RecordTopicManager<?>> topicManagers = new ArrayList<>();
    private final AtomicBoolean stopRequested = new AtomicBoolean();
    private final ROS2LogSerialization serialization;
+   private final LongSupplier timestampProvider;
 
    private Runnable runnable = null;
    private ScheduledThreadPoolExecutor executorService;
    private final AtomicLong lastReceivedTimestamp = new AtomicLong();
 
    public ROS2LogRecord(String robotName, List<ROS2Topic<?>> topicsToLog, ROS2LogTimeSource timeSource, ROS2LogSerialization serialization)
+   {
+      this(robotName, topicsToLog, timeSource, serialization, true);
+   }
+
+   public ROS2LogRecord(String robotName,
+                        List<ROS2Topic<?>> topicsToLog,
+                        ROS2LogTimeSource timeSource,
+                        ROS2LogSerialization serialization,
+                        boolean subscribeToTopics)
    {
       ros2Node = new ROS2NodeBuilder().build("ihmc_ros2_logger");
       this.serialization = serialization;
@@ -43,13 +52,25 @@ public class ROS2LogRecord
          else if (requestedState == ROS2LoggerRequestedState.FINISH)
             stopRequested.set(true);
       });
-      LongSupplier timestampProvider = timeSource.createTimestampProvider(robotName, ros2Node);
+      timestampProvider = timeSource.createTimestampProvider(robotName, ros2Node);
 
       for (int i = 0; i < topicsToLog.size(); i++)
       {
          ROS2Topic<?> ros2Topic = topicsToLog.get(i);
-         topicManagers.add(new RecordTopicManager<>(ros2Topic, ros2Node, timestampProvider));
+         topicManagers.add(new RecordTopicManager<>(ros2Topic, ros2Node, timestampProvider, subscribeToTopics));
       }
+   }
+
+   public <T> void setData(ROS2Topic<T> topic, T data)
+   {
+      RecordTopicManager<T> topicManager = getTopicManager(topic);
+      if (topicManager == null)
+      {
+         LogTools.warn("Skipping data for unregistered ROS 2 log topic: {}", topic.getName());
+         return;
+      }
+
+      topicManager.setData(timestampProvider.getAsLong(), data);
    }
 
    public void start()
@@ -111,5 +132,17 @@ public class ROS2LogRecord
    public static ROS2Topic<ROS2LogMessage> getROS2LogTopic()
    {
       return ROS2Tools.IHMC_ROOT.withModule(MODULE_NAME).withTypeName(ROS2LogMessage.class);
+   }
+
+   @SuppressWarnings("unchecked")
+   private <T> RecordTopicManager<T> getTopicManager(ROS2Topic<T> topic)
+   {
+      for (int i = 0; i < topicManagers.size(); i++)
+      {
+         RecordTopicManager<?> manager = topicManagers.get(i);
+         if (manager.getTopic().equals(topic))
+            return (RecordTopicManager<T>) manager;
+      }
+      return null;
    }
 }
