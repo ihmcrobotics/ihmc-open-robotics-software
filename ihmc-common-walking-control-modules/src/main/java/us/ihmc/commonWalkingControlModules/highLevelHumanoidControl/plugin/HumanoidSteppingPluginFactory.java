@@ -97,7 +97,6 @@ public class HumanoidSteppingPluginFactory
       StopWalkingMessenger stopWalkingMessenger = createStopWalkingMessenger(controllerCommandInputManager);
       StartWalkingMessenger startWalkingMessenger = createStartWalkingMessenger(controllerCommandInputManager);
       FootstepMessenger footstepMessenger = controllerCommandInputManager::submitMessage;
-      DirectionalControlMessenger directionalControlMessenger = createDirectionalControlMessenger(controllerCommandInputManager);
 
 
       // Set up listeners for the status messages, and pass them into the step generator command input manager.
@@ -135,27 +134,13 @@ public class HumanoidSteppingPluginFactory
       if (contactableFeet != null)
          continuousStepGenerator.setupVisualization(contactableFeet);
 
-
       // FIXME move towards some kind of consumer. this is probably not the way the class was intended to be modified.
       commandInputManager.setCSG(continuousStepGenerator);
       continuousStepGenerator.setYoComponentProviders();
 
-      VelocityBasedSteppingPlugin velocityBasedSteppingPlugin = new VelocityBasedSteppingPlugin();
-
-      // Set the inputs to the velocity plugin.
-      velocityBasedSteppingPlugin.setDesiredVelocityProvider(desiredVelocityProvider);
-      velocityBasedSteppingPlugin.setDesiredTurningVelocityProvider(desiredTurningVelocityProvider);
-      velocityBasedSteppingPlugin.setWalkInputProvider(walkingInputProvider);
-      velocityBasedSteppingPlugin.setSwingHeightInputProvider(commandInputManager.createSwingHeightProvider());
-
-      // Set the outputs from the velocity plugin.
-      velocityBasedSteppingPlugin.setDirectionalControlMessenger(directionalControlMessenger);
-      velocityBasedSteppingPlugin.setStopWalkingMessenger(stopWalkingMessenger);
-      velocityBasedSteppingPlugin.setStartWalkingMessenger(startWalkingMessenger);
-
       updatables.add(commandInputManager);
 
-      HumanoidSteppingPlugin joystickBasedSteppingPlugin = new HumanoidSteppingPlugin(continuousStepGenerator, velocityBasedSteppingPlugin, updatables);
+      HumanoidSteppingPlugin joystickBasedSteppingPlugin = new HumanoidSteppingPlugin(continuousStepGenerator, updatables);
       joystickBasedSteppingPlugin.setHighLevelStateChangeStatusListener(controllerStatusMessageOutputManager);
 
       return joystickBasedSteppingPlugin;
@@ -186,35 +171,6 @@ public class HumanoidSteppingPluginFactory
          public void submitStartWalkingRequest()
          {
             controllerCommandInputManager.submitMessage(message);
-         }
-      };
-   }
-
-   private static DirectionalControlMessenger createDirectionalControlMessenger(CommandInputManager controllerCommandInputManager)
-   {
-      return new DirectionalControlMessenger()
-      {
-         private final DirectionalControlInputMessage message = new DirectionalControlInputMessage();
-         private final FastWalkingGaitParametersMessage gaitParameters = new FastWalkingGaitParametersMessage();
-
-         @Override
-         public void submitDirectionalControlRequest(double desiredXVelocity, double desiredYVelocity, double desiredTurningSpeed)
-         {
-            message.setForward(desiredXVelocity);
-            message.setRight(-desiredYVelocity);
-            message.setClockwise(-desiredTurningSpeed);
-
-            controllerCommandInputManager.submitMessage(message);
-         }
-
-         @Override
-         public void submitGaitParameters(double swingHeight, double swingDuration, double doubleSupportFraction)
-         {
-            gaitParameters.setSwingHeight(swingHeight);
-            gaitParameters.setSwingDuration(swingDuration);
-            gaitParameters.setDoubleSupportFraction(doubleSupportFraction);
-
-            controllerCommandInputManager.submitMessage(gaitParameters);
          }
       };
    }

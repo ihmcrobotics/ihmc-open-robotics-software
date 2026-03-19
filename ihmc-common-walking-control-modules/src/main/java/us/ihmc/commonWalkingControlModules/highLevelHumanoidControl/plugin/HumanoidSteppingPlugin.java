@@ -17,19 +17,15 @@ public class HumanoidSteppingPlugin implements HighLevelHumanoidControllerPlugin
    private final YoEnum<HighLevelControllerName> latestHighLevelControllerStatus = new YoEnum<>("LatestHighLevelControllerStatePlugin", registry, HighLevelControllerName.class);
 
    private final ContinuousStepGenerator stepGenerator;
-   private final VelocityBasedSteppingPlugin fastWalkingJoystickPlugin;
 
    private final List<Updatable> updatables;
 
    public HumanoidSteppingPlugin(ContinuousStepGenerator stepGenerator,
-                                 VelocityBasedSteppingPlugin fastWalkingStepGenerator,
                                  List<Updatable> updatables)
    {
       this.stepGenerator = stepGenerator;
-      this.fastWalkingJoystickPlugin = fastWalkingStepGenerator;
       this.updatables = updatables;
       registry.addChild(stepGenerator.getRegistry());
-      registry.addChild(fastWalkingStepGenerator.getRegistry());
    }
 
    @Override
@@ -44,9 +40,7 @@ public class HumanoidSteppingPlugin implements HighLevelHumanoidControllerPlugin
       for (int i = 0; i < updatables.size(); i++)
          updatables.get(i).update(time);
 
-      if (latestHighLevelControllerStatus.getValue() == HighLevelControllerName.QUICKSTER)
-         fastWalkingJoystickPlugin.update(time);
-      else if (latestHighLevelControllerStatus.getValue() == HighLevelControllerName.WALKING)
+      if (latestHighLevelControllerStatus.getValue() == HighLevelControllerName.WALKING)
          stepGenerator.update(time);
    }
 
