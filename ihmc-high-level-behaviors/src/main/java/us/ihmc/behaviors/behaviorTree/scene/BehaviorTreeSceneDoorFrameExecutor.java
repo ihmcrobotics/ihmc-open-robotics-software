@@ -57,6 +57,9 @@ public class BehaviorTreeSceneDoorFrameExecutor extends BehaviorTreeSceneObjectE
    {
       RawImage depthImage;
 
+      if (doorPanel == null)
+         return;
+
       if (!frozen.getValue() && pointCounter != null
        && (depthImage = scene.getImageSensor().getImage(ZEDImageSensor.DEPTH_IMAGE_KEY)) != null)
       {
@@ -150,5 +153,20 @@ public class BehaviorTreeSceneDoorFrameExecutor extends BehaviorTreeSceneObjectE
 
       if (pointCounter != null)
          pointCounter.close();
+   }
+
+   public byte getDoorType()
+   {
+      return doorType;
+   }
+
+   public RobotSide getHingeSide()
+   {
+      return hingeSide;
+   }
+
+   public float getDoorOpenAngle()
+   {
+      return doorOpenAngle;
    }
 }

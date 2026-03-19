@@ -330,6 +330,34 @@ public abstract class WalkingControllerParameters
    }
 
    /**
+    * Specifies if the chest orientation controller should be initialized before starting to walk.
+    * <p>
+    * The default behavior is to mirror {@link #doPrepareManipulationForLocomotion()} for backward
+    * compatibility.
+    * </p>
+    *
+    * @return whether the chest orientation control should get prepared for walking.
+    */
+   public boolean doPrepareChestForLocomotion()
+   {
+      return doPrepareManipulationForLocomotion();
+   }
+
+   /**
+    * Specifies if the hand controllers should be initialized before starting to walk.
+    * <p>
+    * The default behavior is to mirror {@link #doPrepareManipulationForLocomotion()} for backward
+    * compatibility.
+    * </p>
+    *
+    * @return whether the hand controllers should get prepared for walking.
+    */
+   public boolean doPrepareHandsForLocomotion()
+   {
+      return doPrepareManipulationForLocomotion();
+   }
+
+   /**
     * Specifies if the pelvis orientation controller should be initialized before starting to walk.
     * When the controller is initialized, the pelvis will smoothly cancel out the user orientation
     * offset on the first transfer of a walking sequence.

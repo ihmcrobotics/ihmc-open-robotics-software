@@ -139,7 +139,6 @@ public abstract class CommunicationsSyncedRobotModel
    {
       try
       {
-         fullRobotModel.getElevator().updateFramesRecursively();
          referenceFrames.updateFrames();
       }
       catch (NotARotationMatrixException e)

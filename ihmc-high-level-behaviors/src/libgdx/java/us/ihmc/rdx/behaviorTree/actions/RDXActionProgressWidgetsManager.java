@@ -48,18 +48,18 @@ public class RDXActionProgressWidgetsManager
 
       boolean containsFootsteps = false;
       boolean containsHandMovements = false;
-      boolean containsSakeHandConfiguration = false;
+      boolean containsEzGripperConfiguration = false;
       boolean containsAbilityHandConfiguration = false;
       for (RDXActionNode<?, ?> action : actionNodesToRender)
       {
          action.getProgressWidgets().update();
 
-         if (action instanceof RDXFootstepPlanAction)
+         if (action instanceof RDXWalkAction)
             containsFootsteps = true;
-         if (action instanceof RDXHandPoseAction || action instanceof RDXScrewPrimitiveAction)
+         if (action instanceof RDXArmAction || action instanceof RDXScrewPrimitiveAction)
             containsHandMovements = true;
-         if (action instanceof RDXSakeHandCommandAction)
-            containsSakeHandConfiguration = true;
+         if (action instanceof RDXEZGripperAction)
+            containsEzGripperConfiguration = true;
          if (action instanceof RDXAbilityHandAction)
             containsAbilityHandConfiguration = true;
       }
@@ -104,7 +104,7 @@ public class RDXActionProgressWidgetsManager
          handleRenderingBlankBar(true, timeOnly);
          for (int i = 0; i < actionNodesToRender.size(); i++)
          {
-            if (actionNodesToRender.get(i) instanceof RDXFootstepPlanAction)
+            if (actionNodesToRender.get(i) instanceof RDXWalkAction)
                actionNodesToRender.get(i).getProgressWidgets().renderFootPositions(dividedBarWidth, renderAsPlots, timeOnly);
             else
                actionNodesToRender.get(i).getProgressWidgets().renderPositionError(dividedBarWidth, renderAsPlots, timeOnly);
@@ -122,7 +122,7 @@ public class RDXActionProgressWidgetsManager
          handleRenderingBlankBar(true, timeOnly);
          for (int i = 0; i < actionNodesToRender.size(); i++)
          {
-            if (actionNodesToRender.get(i) instanceof RDXFootstepPlanAction)
+            if (actionNodesToRender.get(i) instanceof RDXWalkAction)
                actionNodesToRender.get(i).getProgressWidgets().renderFootOrientations(dividedBarWidth, renderAsPlots, timeOnly);
             else
                actionNodesToRender.get(i).getProgressWidgets().renderOrientationError(dividedBarWidth, renderAsPlots, timeOnly);
@@ -169,7 +169,7 @@ public class RDXActionProgressWidgetsManager
          }
       }
 
-      if (containsSakeHandConfiguration)
+      if (containsEzGripperConfiguration)
       {
          if (!timeOnly)
             widgetAligner.text("Knuckle X1 (%s):".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL));

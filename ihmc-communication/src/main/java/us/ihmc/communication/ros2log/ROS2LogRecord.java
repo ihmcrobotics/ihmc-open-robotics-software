@@ -87,6 +87,11 @@ public class ROS2LogRecord
       lastReceivedTimestamp.set(System.currentTimeMillis());
    }
 
+   public void stop()
+   {
+      stopRequested.set(true);
+   }
+
    public void update()
    {
       if (runnable == null)

@@ -15,7 +15,7 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "a7d9cba0e32a2c67170710d415c828f8d72d9b6e27ed9542f04cbcd4c5f5ebb5";
+   		return "9dd4c9a042e2ae78915182a7947d5667c0fccc0f3547fc9c66b806e53ff04ec6";
    }
    
    @Override
@@ -89,6 +89,8 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       return current_alignment - initial_alignment;
    }
@@ -159,6 +161,9 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -221,6 +226,8 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
 
       cdr.write_type_4(data.getMinPoints());
 
+      cdr.write_type_4(data.getMaxPoints());
+
    }
 
    public static void read(behavior_msgs.msg.dds.ConditionNodeDefinitionMessage data, us.ihmc.idl.CDR cdr)
@@ -260,6 +267,8 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
       cdr.read_type_d(data.getFrameName());	
       data.setMinPoints(cdr.read_type_4());
       	
+      data.setMaxPoints(cdr.read_type_4());
+      	
 
    }
 
@@ -290,6 +299,7 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
       ser.write_type_5("sphere_radius", data.getSphereRadius());
       ser.write_type_d("frame_name", data.getFrameName());
       ser.write_type_4("min_points", data.getMinPoints());
+      ser.write_type_4("max_points", data.getMaxPoints());
    }
 
    @Override
@@ -319,6 +329,7 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
       data.setSphereRadius(ser.read_type_5("sphere_radius"));
       ser.read_type_d("frame_name", data.getFrameName());
       data.setMinPoints(ser.read_type_4("min_points"));
+      data.setMaxPoints(ser.read_type_4("max_points"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.ConditionNodeDefinitionMessage src, behavior_msgs.msg.dds.ConditionNodeDefinitionMessage dest)

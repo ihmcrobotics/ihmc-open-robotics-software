@@ -34,28 +34,27 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeBuilder<RDXBe
       REGISTRY.put(FallbackNodeDefinition.class, RDXFallbackNode::new);
       REGISTRY.put(ConditionNodeDefinition.class, RDXConditionNode::new);
       REGISTRY.put(GotoNodeDefinition.class, RDXGotoNode::new);
-      REGISTRY.put(CheckPointNodeDefinition.class, RDXCheckPointNode::new);
-      REGISTRY.put(SceneActionNodeDefinition.class, RDXSceneActionNode::new);
+      REGISTRY.put(CheckpointNodeDefinition.class, RDXCheckpointNode::new);
+      REGISTRY.put(SceneActionDefinition.class, RDXSceneAction::new);
       REGISTRY.put(AI2RNodeDefinition.class, RDXAI2RNode::new);
       REGISTRY.put(DoorTraversalDefinition.class, RDXDoorTraversal::new);
       REGISTRY.put(BuildingExplorationDefinition.class, RDXBuildingExploration::new);
       REGISTRY.put(NeckActionDefinition.class, RDXNeckAction::new);
-      REGISTRY.put(ChestOrientationActionDefinition.class, RDXChestOrientationAction::new);
-      REGISTRY.put(FootstepPlanActionDefinition.class, RDXFootstepPlanAction::new);
-      REGISTRY.put(HandPoseActionDefinition.class, RDXHandPoseAction::new);
+      REGISTRY.put(SpineActionDefinition.class, RDXSpineAction::new);
+      REGISTRY.put(WalkActionDefinition.class, RDXWalkAction::new);
+      REGISTRY.put(ArmActionDefinition.class, RDXArmAction::new);
       REGISTRY.put(HandWrenchActionDefinition.class, RDXHandWrenchAction::new);
       REGISTRY.put(ScrewPrimitiveActionDefinition.class, RDXScrewPrimitiveAction::new);
-      REGISTRY.put(PelvisHeightOrientationActionDefinition.class, RDXPelvisHeightOrientationAction::new);
+      REGISTRY.put(PelvisActionDefinition.class, RDXPelvisAction::new);
       REGISTRY.put(AbilityHandActionDefinition.class, RDXAbilityHandAction::new);
-      REGISTRY.put(SakeHandCommandActionDefinition.class, RDXSakeHandCommandAction::new);
-      REGISTRY.put(WaitDurationActionDefinition.class, RDXWaitDurationAction::new);
-      REGISTRY.put(FootPoseActionDefinition.class, RDXFootPoseAction::new);
+      REGISTRY.put(EZGripperActionDefinition.class, RDXEZGripperAction::new);
+      REGISTRY.put(WaitActionDefinition.class, RDXWaitAction::new);
+      REGISTRY.put(LegActionDefinition.class, RDXLegAction::new);
    }
 
    private RDXBehaviorTree tree;
    private WorkspaceResourceDirectory saveFileDirectory;
    private ROS2SyncedRobotModel syncedRobot;
-   private RDXBehaviorTreeScene scene;
    private RobotCollisionModel selectionCollisionModel;
    private RDXBaseUI baseUI;
    private RDX3DPanel panel3D;
@@ -63,7 +62,6 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeBuilder<RDXBe
    public void initialize(RDXBehaviorTree tree,
                           WorkspaceResourceDirectory saveFileDirectory,
                           ROS2SyncedRobotModel syncedRobot,
-                          RDXBehaviorTreeScene scene,
                           RobotCollisionModel selectionCollisionModel,
                           RDXBaseUI baseUI,
                           RDX3DPanel panel3D)
@@ -71,7 +69,6 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeBuilder<RDXBe
       this.tree = tree;
       this.saveFileDirectory = saveFileDirectory;
       this.syncedRobot = syncedRobot;
-      this.scene = scene;
       this.selectionCollisionModel = selectionCollisionModel;
       this.baseUI = baseUI;
       this.panel3D = panel3D;
@@ -80,6 +77,10 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeBuilder<RDXBe
    @Override
    public BehaviorTreeRootNode<RDXBehaviorTreeNode<?, ?>> createRootNode(long id)
    {
+      RDXBehaviorTreeScene scene = new RDXBehaviorTreeScene(tree.getCRDTInfo(),
+                                                            tree::getAndIncrementNextID,
+                                                            syncedRobot,
+                                                            baseUI);
       return new RDXBehaviorTreeRootNode(id,
                                          tree,
                                          saveFileDirectory,

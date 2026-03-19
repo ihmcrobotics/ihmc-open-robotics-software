@@ -13,6 +13,7 @@ import us.ihmc.handsros2.abilityHand.AbilityHandControlMode;
 import us.ihmc.handsros2.abilityHand.AbilityHandGrip;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SidedObject;
+import us.ihmc.tools.io.JSONTools;
 
 public class AbilityHandActionDefinition extends ActionNodeDefinition implements SidedObject
 {
@@ -83,8 +84,8 @@ public class AbilityHandActionDefinition extends ActionNodeDefinition implements
       jsonNode.put("side", side.getValue().getLowerCaseName());
       jsonNode.put("controlMode", controlMode.getValue().name());
       jsonNode.put("grip", grip.getValue().name());
-      jsonNode.putPOJO("goalPositions", goalPositions.getValue());
-      jsonNode.putPOJO("goalVelocities", goalVelocities.getValue());
+      JSONTools.putArrayRound(jsonNode, "goalPositions", goalPositions.getValue());
+      JSONTools.putArrayRound(jsonNode, "goalVelocities", goalVelocities.getValue());
       jsonNode.put("successCriteria", successCriteria.getValue().name());
       switch (successCriteria.getValue())
       {

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeDefinition;
 import us.ihmc.communication.crdt.*;
+import us.ihmc.tools.io.JSONTools;
 
 public class NeckActionDefinition extends ActionNodeDefinition
 {
@@ -32,8 +33,8 @@ public class NeckActionDefinition extends ActionNodeDefinition
    {
       super.saveToFile(jsonNode);
 
-      jsonNode.put("pitchInDegrees", Math.toDegrees(pitch.getValue()));
-      jsonNode.put("yawInDegrees", Math.toDegrees(yaw.getValue()));
+      jsonNode.put("pitchInDegrees", JSONTools.toJsonRadians(pitch.getValue()));
+      jsonNode.put("yawInDegrees", JSONTools.toJsonRadians(yaw.getValue()));
       jsonNode.put("trajectoryDuration", trajectoryDuration.getValue());
    }
 

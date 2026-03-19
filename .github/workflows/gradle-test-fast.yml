@@ -12,56 +12,56 @@ permissions:
   contents: read
 
 jobs:
-  alex:
+  zulu:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     secrets:
       ROSIE_PERSONAL_ACCESS_TOKEN: ${{ secrets.ROSIE_PERSONAL_ACCESS_TOKEN }}
     with:
       subproject: 'zulu'
       test-category: 'fast'
-  alex-controller-api:
+  zulu-controller-api:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     secrets:
       ROSIE_PERSONAL_ACCESS_TOKEN: ${{ secrets.ROSIE_PERSONAL_ACCESS_TOKEN }}
     with:
       subproject: 'zulu'
       test-category: 'controller-api'
-  alex-controller-api-2:
+  zulu-controller-api-2:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     secrets:
       ROSIE_PERSONAL_ACCESS_TOKEN: ${{ secrets.ROSIE_PERSONAL_ACCESS_TOKEN }}
     with:
       subproject: 'zulu'
       test-category: 'controller-api-2'
-  alex-humanoid-behaviors:
+  zulu-humanoid-behaviors:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     secrets:
       ROSIE_PERSONAL_ACCESS_TOKEN: ${{ secrets.ROSIE_PERSONAL_ACCESS_TOKEN }}
     with:
       subproject: 'zulu'
       test-category: 'humanoid-behaviors'
-  alex-humanoid-flat-ground:
+  zulu-humanoid-flat-ground:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     secrets:
       ROSIE_PERSONAL_ACCESS_TOKEN: ${{ secrets.ROSIE_PERSONAL_ACCESS_TOKEN }}
     with:
       subproject: 'zulu'
       test-category: 'humanoid-flat-ground'
-  alex-humanoid-flat-ground-bullet:
+  zulu-humanoid-flat-ground-bullet:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     secrets:
       ROSIE_PERSONAL_ACCESS_TOKEN: ${{ secrets.ROSIE_PERSONAL_ACCESS_TOKEN }}
     with:
       subproject: 'zulu'
       test-category: 'humanoid-flat-ground-bullet'
-  alex-humanoid-obstacle:
+  zulu-humanoid-obstacle:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     secrets:
       ROSIE_PERSONAL_ACCESS_TOKEN: ${{ secrets.ROSIE_PERSONAL_ACCESS_TOKEN }}
     with:
       subproject: 'zulu'
       test-category: 'humanoid-obstacle'
-  alex-humanoid-obstacle-2:
+  zulu-humanoid-obstacle-2:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     secrets:
       ROSIE_PERSONAL_ACCESS_TOKEN: ${{ secrets.ROSIE_PERSONAL_ACCESS_TOKEN }}
@@ -69,21 +69,21 @@ jobs:
       subproject: 'zulu'
       test-category: 'humanoid-obstacle-2'
       requires-self-hosted: true
-  alex-humanoid-push-recovery:
+  zulu-humanoid-push-recovery:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     secrets:
       ROSIE_PERSONAL_ACCESS_TOKEN: ${{ secrets.ROSIE_PERSONAL_ACCESS_TOKEN }}
     with:
       subproject: 'zulu'
       test-category: 'humanoid-push-recovery'
-  alex-humanoid-rough-terrain:
+  zulu-humanoid-rough-terrain:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     secrets:
       ROSIE_PERSONAL_ACCESS_TOKEN: ${{ secrets.ROSIE_PERSONAL_ACCESS_TOKEN }}
     with:
       subproject: 'zulu'
       test-category: 'humanoid-rough-terrain'
-  alex-humanoid-toolbox:
+  zulu-humanoid-toolbox:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     secrets:
       ROSIE_PERSONAL_ACCESS_TOKEN: ${{ secrets.ROSIE_PERSONAL_ACCESS_TOKEN }}

@@ -1,8 +1,5 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static us.ihmc.robotics.Assert.assertArrayEquals;
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.Random;
 
@@ -31,11 +28,18 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.registry.YoVariableHolder;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 public abstract class EndToEndArmDesiredAccelerationsMessageTest implements MultiRobotTestInterface
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
+   protected static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
    private SCS2AvatarTestingSimulation simulationTestHelper;
+
+   protected SCS2AvatarTestingSimulation createAvatarTestingSimulation()
+   {
+      return SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), simulationTestingParameters);
+   }
 
    @Test
    public void testSimpleCommands() throws Exception
@@ -44,11 +48,12 @@ public abstract class EndToEndArmDesiredAccelerationsMessageTest implements Mult
 
       Random random = new Random(564654L);
 
-      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), simulationTestingParameters);
+      simulationTestHelper = createAvatarTestingSimulation();
       simulationTestHelper.start();
+      simulationTestHelper.setKeepSCSUp(true);
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateNow(0.5);
+      boolean success = simulationTestHelper.simulateNow(simulationTestHelper.getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime() + 0.5);
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();

@@ -4,6 +4,9 @@ behavior_msgs/BehaviorTreeNodeStateMessage state
 # Definition
 behavior_msgs/BehaviorTreeRootNodeDefinitionMessage definition
 
+# Scene
+behavior_msgs/BehaviorTreeSceneStateMessage scene
+
 # If the sequence is currently set to proceed automatically
 bool automatic_execution
 

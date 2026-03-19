@@ -5,11 +5,11 @@ import behavior_msgs.msg.dds.AI2RNavigationMessage;
 import behavior_msgs.msg.dds.AI2RReceiveObjectMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
-import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionNodeState;
+import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionState;
 import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeState;
-import us.ihmc.behaviors.behaviorTree.action.actions.FootstepPlanActionDefinition;
-import us.ihmc.behaviors.behaviorTree.action.actions.FootstepPlanActionFootstepState;
-import us.ihmc.behaviors.behaviorTree.action.actions.FootstepPlanActionState;
+import us.ihmc.behaviors.behaviorTree.action.actions.WalkActionDefinition;
+import us.ihmc.behaviors.behaviorTree.action.actions.WalkActionFootstepState;
+import us.ihmc.behaviors.behaviorTree.action.actions.WalkActionState;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -81,10 +81,10 @@ public class AI2RSkillEditor
       StringBuilderHolder objectsToScan = message.getScan().getObjectNames();
 
       // Collect all existing "Setup object" SceneActions
-      List<SceneActionNodeState> allSetupActions = new ArrayList<>();
+      List<SceneActionState> allSetupActions = new ArrayList<>();
       for (var leaf : state.getActionSequence().getOrderedLeaves())
       {
-         if (leaf instanceof SceneActionNodeState sceneActionState)
+         if (leaf instanceof SceneActionState sceneActionState)
          {
             String nameLower = leaf.getDefinition().getName().toLowerCase();
 
@@ -104,11 +104,11 @@ public class AI2RSkillEditor
          String objectName = objectsToScan.getString(i);
          String idToken = Integer.toString(i + 1); // "1", "2", ...
 
-         SceneActionNodeState left  = null;
-         SceneActionNodeState right = null;
-         SceneActionNodeState front = null;
+         SceneActionState left  = null;
+         SceneActionState right = null;
+         SceneActionState front = null;
 
-         for (SceneActionNodeState s : allSetupActions)
+         for (SceneActionState s : allSetupActions)
          {
             String nameLower = s.getDefinition().getName().toLowerCase();
             if (nameLower.contains("setup object" + idToken) || nameLower.contains("freeze object" + idToken))
@@ -133,7 +133,7 @@ public class AI2RSkillEditor
       {
          for (var leaf : state.getActionSequence().getOrderedLeaves())
          {
-            if (leaf.getDefinition().getName().toLowerCase().contains("go to action") && leaf instanceof FootstepPlanActionState gotoActionState)
+            if (leaf.getDefinition().getName().toLowerCase().contains("go to action") && leaf instanceof WalkActionState gotoActionState)
             {
                AI2RNavigationMessage navigationMessage = message.getNavigation();
                String referenceFrameName = navigationMessage.getTargetObjectAsString();
@@ -222,7 +222,7 @@ public class AI2RSkillEditor
       }
    }
 
-   private void changeParentFrameGoToNode(FootstepPlanActionDefinition definition, FootstepPlanActionState state, String newParentFrameName)
+   private void changeParentFrameGoToNode(WalkActionDefinition definition, WalkActionState state, String newParentFrameName)
    {
       definition.setParentFrameName(newParentFrameName);
       // Timestamp modification to prevent the frame from glitching when changing frames
@@ -248,7 +248,7 @@ public class AI2RSkillEditor
       definition.getGoalStancePoint().getValueAndModify().set(frameStancePoint);
       definition.getGoalFocalPoint().getValueAndModify().set(frameFocalPoint);
 
-      for (FootstepPlanActionFootstepState footstepState : state.getManuallyPlacedFootsteps())
+      for (WalkActionFootstepState footstepState : state.getManuallyPlacedFootsteps())
       {
          footstepState.getSoleFrame().changeFrame(newParentFrameName);
       }
