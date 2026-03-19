@@ -49,9 +49,10 @@ public class StepGeneratorCommandInputManager implements Updatable
    private final YoBoolean isUnitVelocities;
    private final YoBoolean overrideHeartbeat;
    private HighLevelControllerName currentController;
-   private ContinuousStepGenerator continuousStepGenerator;
 
    private final List<Consumer<HeightMapCommand>> heightMapCommandConsumers = new ArrayList<>();
+   private final List<Consumer<ContinuousStepGeneratorParametersCommand>> csgParametersCommandConsumers = new ArrayList<>();
+
    private final AtomicReference<FootstepStatus> latestFootstepStatusReceived = new AtomicReference<>(null);
    private final AtomicReference<FootstepStatus> previousFootstepStatusReceived = new AtomicReference<>(null);
    private final AtomicReference<HeightMapCommand> latestHeightMap = new AtomicReference<>(null);
@@ -83,14 +84,14 @@ public class StepGeneratorCommandInputManager implements Updatable
       heartbeatMonitor = new ROS2HeartbeatMonitor(ros2Node, CSGROS2CommunicationHelper.CSG_HEARTBEAT_TOPIC);
    }
 
-   public void setCSG(ContinuousStepGenerator continuousStepGenerator)
-   {
-      this.continuousStepGenerator = continuousStepGenerator;
-   }
-
    public void addHeightMapCommandConsumer(Consumer<HeightMapCommand> heightMapCommandConsumer)
    {
       heightMapCommandConsumers.add(heightMapCommandConsumer);
+   }
+
+   public void addContinuousStepGeneratorParametersCommandConsumer(Consumer<ContinuousStepGeneratorParametersCommand> csgParametersCommandConsumer)
+   {
+      csgParametersCommandConsumers.add(csgParametersCommandConsumer);
    }
 
    public CommandInputManager getCommandInputManager()
@@ -172,16 +173,8 @@ public class StepGeneratorCommandInputManager implements Updatable
 
          swingHeight.set(parameters.getSwingHeight());
 
-         if (continuousStepGenerator != null)
-         {
-            continuousStepGenerator.setFootstepTiming(parameters.getSwingDuration(), parameters.getTransferDuration());
-            continuousStepGenerator.setSwingHeight(swingHeight.getDoubleValue());
-            continuousStepGenerator.setFootstepsAreAdjustable(parameters.getStepsAreAdjustable());
-            continuousStepGenerator.setStepWidths(parameters.getDefaultStepWidth(), parameters.getMinStepWidth(), parameters.getMaxStepWidth());
-            continuousStepGenerator.setMaxStepLengthForwards(parameters.getMaxStepLengthForwards());
-            continuousStepGenerator.setMaxStepLengthBackwards(parameters.getMaxStepLengthBackwards());
-            continuousStepGenerator.getCSGParameters().setAccountForGroundDrift(parameters.getAccountForGroundDrift());
-         }
+         for (int i = 0; i < csgParametersCommandConsumers.size(); i++)
+            csgParametersCommandConsumers.get(i).accept(command);
       }
       commandInputManager.clearCommands(ContinuousStepGeneratorParametersCommand.class);
 
@@ -270,11 +263,6 @@ public class StepGeneratorCommandInputManager implements Updatable
    public BooleanProvider createWalkInputProvider()
    {
       return walk::getBooleanValue;
-   }
-
-   public DoubleProvider createSwingHeightProvider()
-   {
-      return swingHeight::getDoubleValue;
    }
 
    public YoRegistry getRegistry()

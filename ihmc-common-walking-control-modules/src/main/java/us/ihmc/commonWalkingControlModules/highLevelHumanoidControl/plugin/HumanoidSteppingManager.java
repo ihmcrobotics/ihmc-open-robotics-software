@@ -17,6 +17,7 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactableBody;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Topic;
@@ -31,10 +32,12 @@ import us.ihmc.yoVariables.variable.YoEnum;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HumanoidSteppingManager
+public class HumanoidSteppingManager implements Updatable, SCS2YoGraphicHolder
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-   private final YoEnum<HighLevelControllerName> latestHighLevelControllerStatus = new YoEnum<>("LatestHighLevelControllerStatePlugin", registry, HighLevelControllerName.class);
+   private final YoEnum<HighLevelControllerName> latestHighLevelControllerStatus = new YoEnum<>("LatestHighLevelControllerState",
+                                                                                                registry,
+                                                                                                HighLevelControllerName.class);
 
    private final ContinuousStepGenerator stepGenerator;
 
@@ -54,18 +57,9 @@ public class HumanoidSteppingManager
    {
       registry.addChild(commandInputManager.getRegistry());
 
-      // Configure the inputs to the modules from the command input manager
-      DesiredVelocityProvider desiredVelocityProvider = commandInputManager.createDesiredVelocityProvider();
-      DesiredTurningVelocityProvider desiredTurningVelocityProvider = commandInputManager.createDesiredTurningVelocityProvider();
-      BooleanProvider walkingInputProvider = commandInputManager.createWalkInputProvider();
-
-      // Configure the outputs from the modules;
-      StopWalkingMessenger stopWalkingMessenger = createStopWalkingMessenger(controllerCommandInputManager);
-      StartWalkingMessenger startWalkingMessenger = createStartWalkingMessenger(controllerCommandInputManager);
-      FootstepMessenger footstepMessenger = controllerCommandInputManager::submitMessage;
-
       // Set up listeners for the status messages, and pass them into the step generator command input manager.
-      controllerStatusMessageOutputManager.attachStatusMessageListener(HighLevelStateChangeStatusMessage.class, commandInputManager::setHighLevelStateChangeStatusMessage);
+      controllerStatusMessageOutputManager.attachStatusMessageListener(HighLevelStateChangeStatusMessage.class,
+                                                                       commandInputManager::setHighLevelStateChangeStatusMessage);
       controllerStatusMessageOutputManager.attachStatusMessageListener(WalkingStatusMessage.class, commandInputManager::setWalkingStatus);
       controllerStatusMessageOutputManager.attachStatusMessageListener(FootstepStatusMessage.class, commandInputManager::consumeFootstepStatus);
 
@@ -78,57 +72,39 @@ public class HumanoidSteppingManager
       stepGenerator.configureWith(walkingControllerParameters);
 
       // Set the inputs to the step generator.
-      stepGenerator.setDesiredVelocityProvider(desiredVelocityProvider);
-      stepGenerator.setDesiredTurningVelocityProvider(desiredTurningVelocityProvider);
-      stepGenerator.setWalkInputProvider(walkingInputProvider);
+      stepGenerator.setDesiredVelocityProvider(commandInputManager.createDesiredVelocityProvider());
+      stepGenerator.setDesiredTurningVelocityProvider(commandInputManager.createDesiredTurningVelocityProvider());
+      stepGenerator.setWalkInputProvider(commandInputManager.createWalkInputProvider());
       // Set the outputs from the step generator.
-      stepGenerator.setStopWalkingMessenger(stopWalkingMessenger);
-      stepGenerator.setStartWalkingMessenger(startWalkingMessenger);
-      stepGenerator.setFootstepMessenger(footstepMessenger);
+      stepGenerator.setStopWalkingMessenger(createStopWalkingMessenger(controllerCommandInputManager));
+      stepGenerator.setStartWalkingMessenger(createStartWalkingMessenger(controllerCommandInputManager));
+      stepGenerator.setFootstepMessenger(controllerCommandInputManager::submitMessage);
 
       if (contactableFeet != null)
          stepGenerator.setupVisualization(contactableFeet);
 
-      // FIXME move towards some kind of consumer. this is probably not the way the class was intended to be modified.
-      commandInputManager.setCSG(stepGenerator);
+      commandInputManager.addContinuousStepGeneratorParametersCommandConsumer(command ->
+                                                                              {
+                                                                                 ContinuousStepGeneratorParameters parameters = command.getParameters();
+                                                                                 stepGenerator.setFootstepTiming(parameters.getSwingDuration(),
+                                                                                                                 parameters.getTransferDuration());
+                                                                                 stepGenerator.setSwingHeight(parameters.getSwingHeight());
+                                                                                 stepGenerator.setFootstepsAreAdjustable(parameters.getStepsAreAdjustable());
+                                                                                 stepGenerator.setStepWidths(parameters.getDefaultStepWidth(),
+                                                                                                             parameters.getMinStepWidth(),
+                                                                                                             parameters.getMaxStepWidth());
+                                                                                 stepGenerator.setMaxStepLengthForwards(parameters.getMaxStepLengthForwards());
+                                                                                 stepGenerator.setMaxStepLengthBackwards(parameters.getMaxStepLengthBackwards());
+                                                                                 stepGenerator.getCSGParameters()
+                                                                                              .setAccountForGroundDrift(parameters.getAccountForGroundDrift());
+                                                                              });
       stepGenerator.setYoComponentProviders();
 
-      controllerStatusMessageOutputManager.attachStatusMessageListener(HighLevelStateChangeStatusMessage.class, this::consumeHighLevelStateChangeStatus);
+      controllerStatusMessageOutputManager.attachStatusMessageListener(HighLevelStateChangeStatusMessage.class,
+                                                                       (statusMessage) -> latestHighLevelControllerStatus.set(HighLevelControllerName.fromByte(
+                                                                             statusMessage.getEndHighLevelControllerName())));
    }
 
-   public StepGeneratorCommandInputManager getStepGeneratorCommandInputManager()
-   {
-      return commandInputManager;
-   }
-
-   public void createStepGeneratorNetworkSubscriber(String robotName, RealtimeROS2Node realtimeROS2Node)
-   {
-      ROS2Topic<?> baseTopic = ControllerAPI.getBaseTopic(HumanoidControllerAPI.HUMANOID_CONTROL_MODULE_NAME, robotName);
-      StepGeneratorNetworkSubscriber stepGeneratorNetworkSubscriber = new StepGeneratorNetworkSubscriber(baseTopic,
-                                                                                                         commandInputManager.getCommandInputManager(),
-                                                                                                         statusMessageOutputManager,
-                                                                                                         realtimeROS2Node);
-
-      stepGeneratorNetworkSubscriber.addMessageValidator(ControllerAPIDefinition.createDefaultMessageValidation());
-   }
-
-   @Override
-   public YoRegistry getRegistry()
-   {
-      return registry;
-   }
-
-   @Override
-   public void update(double time)
-   {
-      commandInputManager.update(time);
-
-      for (int i = 0; i < updatables.size(); i++)
-         updatables.get(i).update(time);
-
-      if (latestHighLevelControllerStatus.getValue() == HighLevelControllerName.WALKING)
-         stepGenerator.update(time);
-   }
 
    public void setFootstepAdjustment(FootstepAdjustment footstepAdjustment)
    {
@@ -145,15 +121,43 @@ public class HumanoidSteppingManager
       this.updatables.add(updatable);
    }
 
+   public void createStepGeneratorNetworkSubscriber(String robotName, RealtimeROS2Node realtimeROS2Node)
+   {
+      ROS2Topic<?> baseTopic = ControllerAPI.getBaseTopic(HumanoidControllerAPI.HUMANOID_CONTROL_MODULE_NAME, robotName);
+      StepGeneratorNetworkSubscriber stepGeneratorNetworkSubscriber = new StepGeneratorNetworkSubscriber(baseTopic,
+                                                                                                         commandInputManager.getCommandInputManager(),
+                                                                                                         statusMessageOutputManager,
+                                                                                                         realtimeROS2Node);
+
+      stepGeneratorNetworkSubscriber.addMessageValidator(ControllerAPIDefinition.createDefaultMessageValidation());
+   }
+
+   public YoRegistry getRegistry()
+   {
+      return registry;
+   }
+
    @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
       return stepGenerator.getSCS2YoGraphics();
    }
 
-   private void consumeHighLevelStateChangeStatus(HighLevelStateChangeStatusMessage statusMessage)
+   public StepGeneratorCommandInputManager getStepGeneratorCommandInputManager()
    {
-      latestHighLevelControllerStatus.set(HighLevelControllerName.fromByte(statusMessage.getEndHighLevelControllerName()));
+      return commandInputManager;
+   }
+
+   @Override
+   public void update(double time)
+   {
+      commandInputManager.update(time);
+
+      for (int i = 0; i < updatables.size(); i++)
+         updatables.get(i).update(time);
+
+      if (latestHighLevelControllerStatus.getValue() == HighLevelControllerName.WALKING)
+         stepGenerator.update(time);
    }
 
    private static StopWalkingMessenger createStopWalkingMessenger(CommandInputManager walkingCommandInputManager)
