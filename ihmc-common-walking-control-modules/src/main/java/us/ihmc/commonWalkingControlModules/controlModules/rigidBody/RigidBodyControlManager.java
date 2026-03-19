@@ -221,7 +221,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                                                                       elevator,
                                                                                       loadBearingParameters,
                                                                                       yoTime,
-                                                                                      () -> jointspaceControlState.goHomeFromCurrent(1.5),
+                                                                                      () -> jointspaceControlState.goHomeFromCurrent(0.75),
                                                                                       jointControlHelper,
                                                                                       taskspaceControlState.getPositionControlHelper(),
                                                                                       taskspaceControlState.getOrientationControlHelper(),

@@ -53,6 +53,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.filters.GlitchFilteredYoBoolean;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -63,7 +64,7 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
    private static final boolean ENABLE_CONTACT = true;
    private static final boolean ENABLE_ZERO_ACCELERATION = true;
    private static final boolean ENABLE_POINT_FEEDBACK = true;
-   private static final boolean ENABLE_ORIENTATION_FEEDBACK = true;
+   private static final boolean ENABLE_ORIENTATION_FEEDBACK = false;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final FrameVector3D zeroWorld = new FrameVector3D();
@@ -75,20 +76,6 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
    private final PointFeedbackControlCommand pointFeedbackControlCommand = new PointFeedbackControlCommand();
    private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
    private final PlaneContactStateCommand planeContactStateCommand = new PlaneContactStateCommand();
-
-   /* Elbow collisions */
-   private final PointFeedbackControlCommand collisionAvoidanceCommand = new PointFeedbackControlCommand();
-   private final RigidBodyBasics bodyToAvoidCollisions;
-   private final FramePoint3D collisionAvoidancePointInBody = new FramePoint3D();
-   private final FramePoint3D desiredCollisionAvoidancePointInWorld = new FramePoint3D();
-   private final FrameVector3D deltaCollisionDistance = new FrameVector3D();
-   private final YoBoolean isCollisionAvoidanceActivated;
-   private final YoDouble elbowToWallDistance;
-   private final YoDouble alphaCollisionActivation;
-   private final FramePoint3D elbowPoint = new FramePoint3D();
-   private final Vector3D collisionWeight = new Vector3D();
-   private final Vector3D defaultCollisionWeight = new Vector3D(0.0, 0.0, 3.5);
-//   private final OneDoFJointFeedbackControlCommand jointFeedbackControlCommand = new OneDoFJointFeedbackControlCommand();
 
    /* Control gains, weights and axis selection */
    private final LoadBearingParameters loadBearingParameters;
@@ -190,23 +177,6 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
 
       contactPointInBody.setToZero(controlFrame);
       contactPointInBody.changeFrame(bodyToControl.getBodyFixedFrame());
-
-      alphaCollisionActivation = new YoDouble(bodyName + "_alphaCollision", registry);
-      elbowToWallDistance = new YoDouble(bodyName + "_CollisionDistance", registry);
-
-      // Collision avoidance
-      bodyToAvoidCollisions = bodyToControl.getParentJoint().getPredecessor();
-      collisionAvoidancePointInBody.setToZero(bodyToControl.getParentJoint().getFrameAfterJoint());
-      collisionAvoidancePointInBody.changeFrame(bodyToAvoidCollisions.getBodyFixedFrame());
-      isCollisionAvoidanceActivated = new YoBoolean("isCollisionAvoidanceActivated", registry);
-      collisionAvoidanceCommand.set(elevator, bodyToAvoidCollisions);
-      collisionAvoidanceCommand.setPrimaryBase(baseBody);
-
-//      RobotSide robotSide = prefix.contains("LEFT") ? RobotSide.LEFT : RobotSide.RIGHT;
-//      OneDoFJointBasics shoulderXJoint = jointPath[1];
-//      jointFeedbackControlCommand.setControlMode(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
-//      jointFeedbackControlCommand.setJoint(shoulderXJoint);
-//      jointFeedbackControlCommand.setInverseDynamics(robotSide.negateIfRightSide(0.2), 0.0, 0.0);
    }
 
    @Override
@@ -283,39 +253,6 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
       }
 
       orientationControlHelper.doAction(timeInState);
-
-      elbowPoint.setToZero(bodyToControl.getParentJoint().getFrameAfterJoint());
-      elbowPoint.changeFrame(ReferenceFrame.getWorldFrame());
-
-      elbowToWallDistance.set(bracingPlane.distance(elbowPoint));
-      double maxActivationDistance = 0.17;
-      double minActivationDistance = 0.09;
-      boolean isCollisionAvoidanceActivated = elbowToWallDistance.getValue() < maxActivationDistance;
-      alphaCollisionActivation.set(1.0 - (elbowToWallDistance.getValue() - minActivationDistance) / (maxActivationDistance - minActivationDistance));
-      alphaCollisionActivation.set(EuclidCoreTools.clamp(alphaCollisionActivation.getValue(), 0.0, 1.0));
-
-      if (alphaCollisionActivation.getValue() > 0.0)
-      { // compute setpoint
-         collisionAvoidanceCommand.setBodyFixedPointToControl(collisionAvoidancePointInBody);
-         collisionAvoidanceCommand.setGainsFrame(desiredContactFrameFixedInWorld);
-
-         desiredCollisionAvoidancePointInWorld.setMatchingFrame(collisionAvoidancePointInBody);
-         deltaCollisionDistance.set(bracingPlane.getNormal());
-         deltaCollisionDistance.scale(alphaCollisionActivation.getValue() * (maxActivationDistance - minActivationDistance));
-         desiredCollisionAvoidancePointInWorld.add(deltaCollisionDistance);
-
-         collisionAvoidanceCommand.setInverseDynamics(desiredCollisionAvoidancePointInWorld, zeroWorld, zeroWorld);
-         collisionAvoidanceCommand.setGains(loadBearingParameters.getCollisionGains());
-
-         collisionWeight.set(defaultCollisionWeight);
-         collisionWeight.scale(Math.max(alphaCollisionActivation.getValue(), 0.5));
-         collisionAvoidanceCommand.setWeightsForSolver(collisionWeight);
-
-//         double maxWeight = 2.5;
-//         jointFeedbackControlCommand.setWeightForSolver(Math.max(0.1, alphaCollisionActivation.getValue() * maxWeight));
-      }
-
-      this.isCollisionAvoidanceActivated.set(isCollisionAvoidanceActivated && loadBearingParameters.enableCollisionAvoidance());
    }
 
    public void setBracingSurface(Vector3DReadOnly contactNormalInWorldFrame)
@@ -346,7 +283,6 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
       hasAddedContacts.setTrue();
 
       onTouchdownCallback.run();
-      isCollisionAvoidanceActivated.set(false);
    }
 
    @Override
@@ -393,20 +329,13 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
          pointFeedbackControlCommand.setControlMode(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
          feedbackControlCommandList.addCommand(pointFeedbackControlCommand);
       }
-      if (ENABLE_ORIENTATION_FEEDBACK && !isCollisionAvoidanceActivated.getValue())
+      if (ENABLE_ORIENTATION_FEEDBACK)
       {
          OrientationFeedbackControlCommand orientationFeedbackCommand = orientationControlHelper.getFeedbackControlCommand();
          orientationFeedbackCommand.setWeightsForSolver(loadBearingParameters.getPostContactOrientationWeights());
          orientationFeedbackCommand.setGains(loadBearingParameters.getPostContactFeedbackGains().getOrientationGains());
          orientationFeedbackCommand.setControlMode(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
          feedbackControlCommandList.addCommand(orientationFeedbackCommand);
-      }
-
-      if (isCollisionAvoidanceActivated.getValue())
-      {
-         collisionAvoidanceCommand.setControlMode(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
-         feedbackControlCommandList.addCommand(collisionAvoidanceCommand);
-//         feedbackControlCommandList.addCommand(jointFeedbackControlCommand);
       }
 
       return feedbackControlCommandList;
@@ -425,9 +354,6 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
       {
          feedbackControlCommandList.addCommand(orientationControlHelper.getFeedbackControlCommand());
       }
-
-      feedbackControlCommandList.addCommand(collisionAvoidanceCommand);
-//      feedbackControlCommandList.addCommand(jointFeedbackControlCommand);
 
       return feedbackControlCommandList;
    }
