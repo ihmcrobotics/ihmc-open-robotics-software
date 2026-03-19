@@ -511,10 +511,43 @@ public class RDXVRWholeBodyKinematicStreaming
 
          if (!armScaling.get())
          {
+            double alpha = 0.9;
+            FramePose3D filteredPose = filteredDesiredPoses.get(segmentType);
+            if (filteredPose == null)
+            {
+               filteredPose = new FramePose3D(desiredPose);
+               filteredDesiredPoses.put(segmentType, filteredPose);
+            }
+            else
+            {
+               filteredPose.getPosition().interpolate(filteredPose.getPosition(), desiredPose.getPosition(), alpha);
+               filteredPose.getOrientation().interpolate(filteredPose.getOrientation(), desiredPose.getOrientation(), alpha);
+            }
+            FrameVector3D filteredAngularVel = filteredDesiredAngularVelocities.get(segmentType);
+            if (filteredAngularVel == null)
+            {
+               filteredAngularVel = new FrameVector3D(desiredAngularVelocity);
+               filteredDesiredAngularVelocities.put(segmentType, filteredAngularVel);
+            }
+            else
+            {
+               filteredAngularVel.interpolate(filteredAngularVel, desiredAngularVelocity, alpha);
+            }
+            FrameVector3D filteredLinearVel = filteredDesiredLinearVelocities.get(segmentType);
+            if (filteredLinearVel == null)
+            {
+               filteredLinearVel = new FrameVector3D(desiredLinearVelocity);
+               filteredDesiredLinearVelocities.put(segmentType, filteredLinearVel);
+            }
+            else
+            {
+               filteredLinearVel.interpolate(filteredLinearVel, desiredLinearVelocity, alpha);
+            }
+
             KinematicsToolboxRigidBodyMessage message = createRigidBodyMessage(hand,
-                                                                               desiredPose,
-                                                                               desiredAngularVelocity,
-                                                                               desiredLinearVelocity,
+                                                                               filteredPose,
+                                                                               filteredAngularVel,
+                                                                               filteredLinearVel,
                                                                                positionWeight,
                                                                                orientationWeight,
                                                                                linearRateLimitation,
