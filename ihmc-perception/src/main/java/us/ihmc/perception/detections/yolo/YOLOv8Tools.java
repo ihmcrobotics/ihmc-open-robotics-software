@@ -3,7 +3,6 @@ package us.ihmc.perception.detections.yolo;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.IntPointer;
-import org.bytedeco.javacpp.indexer.IntIndexer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -163,6 +162,36 @@ public class YOLOv8Tools
       Rect roi = new Rect(horizontalCrop, verticalCrop, desiredWidth, desiredHeight);
       resizedMat.apply(roi).copyTo(outputImage);
       resizedMat.close();
+   }
+
+   public static int[][] getMaskAsPolygons(Mat mask, float precision)
+   {
+      MatVector contours = new MatVector();
+      Mat hierarchy = new Mat();
+      opencv_imgproc.findContours(mask, contours, hierarchy, opencv_imgproc.RETR_TREE, opencv_imgproc.CHAIN_APPROX_SIMPLE);
+
+      // Get lower resolution maskPolygons for each contour
+      int[][] polygons = new int[(int) contours.size()][];
+      for (int i = 0; i < contours.size(); ++i)
+      {
+         Mat contour = contours.get(i);
+
+         double contourPerimeter = opencv_imgproc.arcLength(contour, true);
+
+         Mat polygonApproximation = new Mat();
+         opencv_imgproc.approxPolyDP(contour, polygonApproximation, precision * contourPerimeter, true);
+
+         polygons[i] = new int[2 * polygonApproximation.rows()];
+         new IntPointer(polygonApproximation.data()).get(polygons[i]);
+
+         polygonApproximation.close();
+         contour.close();
+      }
+
+      hierarchy.close();
+      contours.close();
+
+      return polygons;
    }
 
    /**

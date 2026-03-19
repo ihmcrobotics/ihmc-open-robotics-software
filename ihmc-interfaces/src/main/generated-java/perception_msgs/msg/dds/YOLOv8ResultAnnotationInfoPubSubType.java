@@ -15,7 +15,7 @@ public class YOLOv8ResultAnnotationInfoPubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "eb6eb5cbb2644b64e7aebfba1881e33bc5735840fddc845f5ec5cad4648678e4";
+   		return "0f5ffa7e3c40c371ff397a9a0f207048b2650eec58261c8dad73fd302efdbf75";
    }
    
    @Override
@@ -52,9 +52,12 @@ public class YOLOv8ResultAnnotationInfoPubSubType implements us.ihmc.pubsub.Topi
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += ihmc_common_msgs.msg.dds.InstantMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
       {
-          current_alignment += perception_msgs.msg.dds.YOLOv8DetectionAnnotationInfoPubSubType.getMaxCdrSerializedSize(current_alignment);}
+          current_alignment += perception_msgs.msg.dds.YOLOv8AnnotationRecordMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+
       return current_alignment - initial_alignment;
    }
 
@@ -67,38 +70,47 @@ public class YOLOv8ResultAnnotationInfoPubSubType implements us.ihmc.pubsub.Topi
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += ihmc_common_msgs.msg.dds.InstantMessagePubSubType.getCdrSerializedSize(data.getDetectionInstant(), current_alignment);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for(int i0 = 0; i0 < data.getDetectionAnnotationInfos().size(); ++i0)
+      for(int i0 = 0; i0 < data.getAnnotationRecords().size(); ++i0)
       {
-          current_alignment += perception_msgs.msg.dds.YOLOv8DetectionAnnotationInfoPubSubType.getCdrSerializedSize(data.getDetectionAnnotationInfos().get(i0), current_alignment);}
+          current_alignment += perception_msgs.msg.dds.YOLOv8AnnotationRecordMessagePubSubType.getCdrSerializedSize(data.getAnnotationRecords().get(i0), current_alignment);}
+
 
       return current_alignment - initial_alignment;
    }
 
    public static void write(perception_msgs.msg.dds.YOLOv8ResultAnnotationInfo data, us.ihmc.idl.CDR cdr)
    {
-      if(data.getDetectionAnnotationInfos().size() <= 100)
-      cdr.write_type_e(data.getDetectionAnnotationInfos());else
-          throw new RuntimeException("detection_annotation_infos field exceeds the maximum length: %d > %d".formatted(data.getDetectionAnnotationInfos().size(), 100));
+      ihmc_common_msgs.msg.dds.InstantMessagePubSubType.write(data.getDetectionInstant(), cdr);
+      if(data.getAnnotationRecords().size() <= 100)
+      cdr.write_type_e(data.getAnnotationRecords());else
+          throw new RuntimeException("annotation_records field exceeds the maximum length: %d > %d".formatted(data.getAnnotationRecords().size(), 100));
 
    }
 
    public static void read(perception_msgs.msg.dds.YOLOv8ResultAnnotationInfo data, us.ihmc.idl.CDR cdr)
    {
-      cdr.read_type_e(data.getDetectionAnnotationInfos());	
+      ihmc_common_msgs.msg.dds.InstantMessagePubSubType.read(data.getDetectionInstant(), cdr);	
+      cdr.read_type_e(data.getAnnotationRecords());	
 
    }
 
    @Override
    public final void serialize(perception_msgs.msg.dds.YOLOv8ResultAnnotationInfo data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_e("detection_annotation_infos", data.getDetectionAnnotationInfos());
+      ser.write_type_a("detection_instant", new ihmc_common_msgs.msg.dds.InstantMessagePubSubType(), data.getDetectionInstant());
+
+      ser.write_type_e("annotation_records", data.getAnnotationRecords());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.YOLOv8ResultAnnotationInfo data)
    {
-      ser.read_type_e("detection_annotation_infos", data.getDetectionAnnotationInfos());
+      ser.read_type_a("detection_instant", new ihmc_common_msgs.msg.dds.InstantMessagePubSubType(), data.getDetectionInstant());
+
+      ser.read_type_e("annotation_records", data.getAnnotationRecords());
    }
 
    public static void staticCopy(perception_msgs.msg.dds.YOLOv8ResultAnnotationInfo src, perception_msgs.msg.dds.YOLOv8ResultAnnotationInfo dest)

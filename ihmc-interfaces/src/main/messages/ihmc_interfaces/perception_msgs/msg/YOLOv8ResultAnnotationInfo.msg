@@ -1,2 +1,7 @@
 # Information used for annotating YOLOv8 results that may contain multiple detections.
-YOLOv8DetectionAnnotationInfo[] detection_annotation_infos
+
+# Time the detections were made
+ihmc_common_msgs/InstantMessage detection_instant
+
+# Detection annotation records
+YOLOv8AnnotationRecordMessage[] annotation_records

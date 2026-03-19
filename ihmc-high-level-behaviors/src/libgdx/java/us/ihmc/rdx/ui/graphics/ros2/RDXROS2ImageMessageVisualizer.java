@@ -5,6 +5,7 @@ import org.jetbrains.annotations.Nullable;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.perception.imageMessage.ImageMessageDecoder;
 import us.ihmc.perception.imageMessage.PixelFormat;
+import us.ihmc.rdx.ui.graphics.RDXImageVisualizer;
 import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
 import us.ihmc.rdx.ui.graphics.RDXSequenceDiscontinuityPlot;
 import us.ihmc.ros2.ROS2Node;
@@ -84,10 +85,15 @@ public class RDXROS2ImageMessageVisualizer extends RDXROS2ImageVisualizer<ImageM
             PixelFormat pixelFormat = decoder.getDecodedImagePixelFormat();
 
             // Update the visualized image
-            imageVisualizer.setImage(decompressedImage, pixelFormat);
+            updateVisualizer(imageVisualizer, decompressedImage, pixelFormat);
             hasRenderedOne = true;
          }
       });
+   }
+
+   protected void updateVisualizer(RDXImageVisualizer imageVisualizer, Mat image, PixelFormat pixelFormat)
+   {
+      imageVisualizer.setImage(decompressedImage, pixelFormat);
    }
 
    @Override

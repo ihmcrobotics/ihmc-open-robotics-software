@@ -16,12 +16,12 @@ import org.bytedeco.opencv.opencv_core.Size;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.cuda.CUDADepthImageSegmenter;
 import us.ihmc.perception.cuda.CUDAPointCloudExtractor;
+import us.ihmc.perception.detections.yolo.YOLOv8AnnotationRecord;
 import us.ihmc.perception.detections.yolo.YOLOv8Detection;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionList;
 import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
@@ -335,8 +335,8 @@ public class RDXYOLOv8PipelineDemo
 
       // Get the polygon mask image
       polygonMaskImage = bgrImage.replaceImage(new Mat(bgrImage.getCpuImageMat().size(), bgrImage.getOpenCVType()));
-      Point2D[][] polygons = YOLOv8Tools.extractMaskPolygons(erodedMat, bgrImage.getCpuImageMat().size(), 1);
-      YOLOv8Tools.drawPolygons(bgrImage.getCpuImageMat(), polygons, polygonMaskImage.getCpuImageMat());
+      YOLOv8AnnotationRecord annotationRecord = YOLOv8AnnotationRecord.fromYOLOv8Detection(detection, bgrImage.getCpuImageMat().size(), 0.001f);
+      annotationRecord.drawMask(bgrImage.getCpuImageMat(), polygonMaskImage.getCpuImageMat(), false, 1.0);
 
       // Find the centroid of the segmented depth
       centroid.set(findCentroid(segmentedDepth));

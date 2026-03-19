@@ -6,16 +6,24 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
+/**
+       * Information used for annotating YOLOv8 results that may contain multiple detections.
+       */
 public class YOLOv8ResultAnnotationInfo extends Packet<YOLOv8ResultAnnotationInfo> implements Settable<YOLOv8ResultAnnotationInfo>, EpsilonComparable<YOLOv8ResultAnnotationInfo>
 {
    /**
-            * Information used for annotating YOLOv8 results that may contain multiple detections.
+            * Time the detections were made
             */
-   public us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.YOLOv8DetectionAnnotationInfo>  detection_annotation_infos_;
+   public ihmc_common_msgs.msg.dds.InstantMessage detection_instant_;
+   /**
+            * Detection annotation records
+            */
+   public us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.YOLOv8AnnotationRecordMessage>  annotation_records_;
 
    public YOLOv8ResultAnnotationInfo()
    {
-      detection_annotation_infos_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.YOLOv8DetectionAnnotationInfo> (100, new perception_msgs.msg.dds.YOLOv8DetectionAnnotationInfoPubSubType());
+      detection_instant_ = new ihmc_common_msgs.msg.dds.InstantMessage();
+      annotation_records_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.YOLOv8AnnotationRecordMessage> (100, new perception_msgs.msg.dds.YOLOv8AnnotationRecordMessagePubSubType());
 
    }
 
@@ -27,16 +35,26 @@ public class YOLOv8ResultAnnotationInfo extends Packet<YOLOv8ResultAnnotationInf
 
    public void set(YOLOv8ResultAnnotationInfo other)
    {
-      detection_annotation_infos_.set(other.detection_annotation_infos_);
+      ihmc_common_msgs.msg.dds.InstantMessagePubSubType.staticCopy(other.detection_instant_, detection_instant_);
+      annotation_records_.set(other.annotation_records_);
    }
 
 
    /**
-            * Information used for annotating YOLOv8 results that may contain multiple detections.
+            * Time the detections were made
             */
-   public us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.YOLOv8DetectionAnnotationInfo>  getDetectionAnnotationInfos()
+   public ihmc_common_msgs.msg.dds.InstantMessage getDetectionInstant()
    {
-      return detection_annotation_infos_;
+      return detection_instant_;
+   }
+
+
+   /**
+            * Detection annotation records
+            */
+   public us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.YOLOv8AnnotationRecordMessage>  getAnnotationRecords()
+   {
+      return annotation_records_;
    }
 
 
@@ -57,12 +75,14 @@ public class YOLOv8ResultAnnotationInfo extends Packet<YOLOv8ResultAnnotationInf
       if(other == null) return false;
       if(other == this) return true;
 
-      if (this.detection_annotation_infos_.size() != other.detection_annotation_infos_.size()) { return false; }
+      if (!this.detection_instant_.epsilonEquals(other.detection_instant_, epsilon)) return false;
+      if (this.annotation_records_.size() != other.annotation_records_.size()) { return false; }
       else
       {
-         for (int i = 0; i < this.detection_annotation_infos_.size(); i++)
-         {  if (!this.detection_annotation_infos_.get(i).epsilonEquals(other.detection_annotation_infos_.get(i), epsilon)) return false; }
+         for (int i = 0; i < this.annotation_records_.size(); i++)
+         {  if (!this.annotation_records_.get(i).epsilonEquals(other.annotation_records_.get(i), epsilon)) return false; }
       }
+
 
       return true;
    }
@@ -76,7 +96,8 @@ public class YOLOv8ResultAnnotationInfo extends Packet<YOLOv8ResultAnnotationInf
 
       YOLOv8ResultAnnotationInfo otherMyClass = (YOLOv8ResultAnnotationInfo) other;
 
-      if (!this.detection_annotation_infos_.equals(otherMyClass.detection_annotation_infos_)) return false;
+      if (!this.detection_instant_.equals(otherMyClass.detection_instant_)) return false;
+      if (!this.annotation_records_.equals(otherMyClass.annotation_records_)) return false;
 
       return true;
    }
@@ -87,8 +108,10 @@ public class YOLOv8ResultAnnotationInfo extends Packet<YOLOv8ResultAnnotationInf
       StringBuilder builder = new StringBuilder();
 
       builder.append("YOLOv8ResultAnnotationInfo {");
-      builder.append("detection_annotation_infos=");
-      builder.append(this.detection_annotation_infos_);
+      builder.append("detection_instant=");
+      builder.append(this.detection_instant_);      builder.append(", ");
+      builder.append("annotation_records=");
+      builder.append(this.annotation_records_);
       builder.append("}");
       return builder.toString();
    }

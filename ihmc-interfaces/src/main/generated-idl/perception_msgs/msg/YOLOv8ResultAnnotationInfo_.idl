@@ -1,7 +1,8 @@
 #ifndef __perception_msgs__msg__YOLOv8ResultAnnotationInfo__idl__
 #define __perception_msgs__msg__YOLOv8ResultAnnotationInfo__idl__
 
-#include "perception_msgs/msg/./YOLOv8DetectionAnnotationInfo_.idl"
+#include "ihmc_common_msgs/msg/./InstantMessage_.idl"
+#include "perception_msgs/msg/./YOLOv8AnnotationRecordMessage_.idl"
 module perception_msgs
 {
   module msg
@@ -9,13 +10,20 @@ module perception_msgs
     module dds
     {
 
+      /**
+       * Information used for annotating YOLOv8 results that may contain multiple detections.
+       */
       @TypeCode(type="perception_msgs::msg::dds_::YOLOv8ResultAnnotationInfo_")
       struct YOLOv8ResultAnnotationInfo
       {
         /**
-         * Information used for annotating YOLOv8 results that may contain multiple detections.
+         * Time the detections were made
          */
-        sequence<perception_msgs::msg::dds::YOLOv8DetectionAnnotationInfo> detection_annotation_infos;
+        ihmc_common_msgs::msg::dds::InstantMessage detection_instant;
+        /**
+         * Detection annotation records
+         */
+        sequence<perception_msgs::msg::dds::YOLOv8AnnotationRecordMessage> annotation_records;
       };
     };
   };

@@ -9,12 +9,12 @@ import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import perception_msgs.msg.dds.TerrainMapMessage;
 import perception_msgs.msg.dds.YOLOv8ExecutorParameters;
+import perception_msgs.msg.dds.YOLOv8ResultAnnotationInfo;
 import perception_msgs.msg.dds.ZEDSVOCurrentFileMessage;
 import sensor_msgs.msg.dds.CameraInfo;
 import sensor_msgs.msg.dds.Image;
 import std_msgs.msg.dds.Empty;
 import std_msgs.msg.dds.Int64;
-import us.ihmc.communication.property.StoredPropertySetROS2TopicPair;
 import us.ihmc.communication.ros2.ROS2IOTopicPair;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -47,9 +47,9 @@ public final class PerceptionAPI
    /*
     * YOLO
     */
-   public static final ROS2Topic<ImageMessage> YOLO_ANNOTATED_IMAGE = PERCEPTION_MODULE.withModule("yolo")
-                                                                                       .withType(ImageMessage.class)
-                                                                                       .withSuffix("annotated_image");
+   public static final ROS2Topic<YOLOv8ResultAnnotationInfo> YOLO_ANNOTATION_INFO = PERCEPTION_MODULE.withModule("yolo")
+                                                                                                     .withType(YOLOv8ResultAnnotationInfo.class)
+                                                                                                     .withSuffix("annotation_info");
    public static final ROS2Topic<YOLOv8ExecutorParameters> YOLO_PARAMETERS = IHMC_ROOT.withModule("yolo")
                                                                                       .withSuffix("settings")
                                                                                       .withType(YOLOv8ExecutorParameters.class);

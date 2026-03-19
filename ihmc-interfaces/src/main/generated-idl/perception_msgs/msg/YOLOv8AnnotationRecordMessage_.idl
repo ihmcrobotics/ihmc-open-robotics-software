@@ -1,0 +1,40 @@
+#ifndef __perception_msgs__msg__YOLOv8AnnotationRecordMessage__idl__
+#define __perception_msgs__msg__YOLOv8AnnotationRecordMessage__idl__
+
+#include "perception_msgs/msg/./UInt16MultiArrayHack_.idl"
+#include "vision_msgs/msg/./BoundingBox2D_.idl"
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * Information used for annotating a single YOLOv8 detection
+       */
+      @TypeCode(type="perception_msgs::msg::dds_::YOLOv8AnnotationRecordMessage_")
+      struct YOLOv8AnnotationRecordMessage
+      {
+        /**
+         * Class of the detected object
+         */
+        string object_class;
+        /**
+         * Confidence of the detection
+         */
+        float confidence;
+        /**
+         * Bounding box of the detection
+         */
+        vision_msgs::msg::dds::BoundingBox2D bounding_box;
+        /**
+         * Polygons representing the mask of the detection
+         */
+        perception_msgs::msg::dds::UInt16MultiArrayHack mask_polygons;
+      };
+    };
+  };
+};
+
+#endif
