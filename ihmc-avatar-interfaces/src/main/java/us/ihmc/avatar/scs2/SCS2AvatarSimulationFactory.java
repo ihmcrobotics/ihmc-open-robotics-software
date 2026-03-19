@@ -41,7 +41,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Ex
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ExternalTransitionControllerStateFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StandReadyControllerStateFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HumanoidSteppingPluginFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HumanoidSteppingManager;
 import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler.TaskOverrunBehavior;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -550,13 +550,13 @@ public class SCS2AvatarSimulationFactory
       // TODO move this inside the step generator thread?
       if (useHeadingAndVelocityScript || parameters != null)
       {
-         HumanoidSteppingPluginFactory pluginFactory = stepGeneratorThread.getPluginFactory();
+         HumanoidSteppingManager steppingPlugin = stepGeneratorThread.getSteppingManager();
          HeadingAndVelocityEvaluationScript script = new HeadingAndVelocityEvaluationScript(robotModel.get()::getStepGeneratorDT,
                                                                                             stepGeneratorThread.getYoTime(),
                                                                                             parameters,
-                                                                                            pluginFactory.getStepGeneratorCommandInputManager().getCommandInputManager(),
+                                                                                            steppingPlugin.getStepGeneratorCommandInputManager().getCommandInputManager(),
                                                                                             stepGeneratorThread.getYoVariableRegistry());
-         pluginFactory.addUpdatable(script);
+         steppingPlugin.addUpdatable(script);
       }
       simulationConstructionSet.addYoGraphic(stepGeneratorThread.getSCS2YoGraphics());
    }

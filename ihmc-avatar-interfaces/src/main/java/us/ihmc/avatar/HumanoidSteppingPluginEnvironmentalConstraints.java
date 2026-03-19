@@ -6,7 +6,7 @@ import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepValidityIndicator;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HumanoidSteppingPluginFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HumanoidSteppingManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.StepGeneratorCommandInputManager;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
@@ -29,7 +29,7 @@ import java.util.function.Consumer;
 /**
  * This is designed to work alongside the plugins. It must be added as a Height Map Consumer to the {@link StepGeneratorCommandInputManager} and as an
  * Updatable to clear the graphics to the
- * {@link HumanoidSteppingPluginFactory#addUpdatable(Updatable)}
+ * {@link HumanoidSteppingManager#addUpdatable(Updatable)}
  */
 public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<HeightMapCommand>, Updatable, SCS2YoGraphicHolder
 {
