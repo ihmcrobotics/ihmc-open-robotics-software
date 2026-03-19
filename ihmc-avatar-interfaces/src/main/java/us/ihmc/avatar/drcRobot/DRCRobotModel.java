@@ -5,6 +5,7 @@ import us.ihmc.avatar.arm.PresetArmConfiguration;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.multiContact.pushRecovery.ReactiveBracingPlanner;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
+import us.ihmc.commonWalkingControlModules.stabilityLearning.StabilityRegionInference;
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -241,6 +242,11 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    }
 
    default ReactiveBracingPlanner getReactiveBracingPlanner()
+   {
+      return null;
+   }
+
+   default StabilityRegionInference getStabilityRegionInference()
    {
       return null;
    }

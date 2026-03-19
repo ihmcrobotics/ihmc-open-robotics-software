@@ -238,6 +238,7 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
                                                     false,
                                                     Collections.emptyList(),
                                                     allContactableBodies,
+                                                    null,
                                                     jointsToIgnore);
    }
 

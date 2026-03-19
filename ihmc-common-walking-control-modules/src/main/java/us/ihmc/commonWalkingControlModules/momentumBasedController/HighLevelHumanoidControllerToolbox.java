@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonHumanoidReferenceFramesVisualizer;
 import us.ihmc.commonWalkingControlModules.referenceFrames.WalkingTrajectoryPath;
+import us.ihmc.commonWalkingControlModules.stabilityLearning.StabilityRegionInference;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMarginRegionCalculator;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
 import us.ihmc.commons.MathTools;
@@ -23,6 +24,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
@@ -47,6 +49,7 @@ import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
 import us.ihmc.robotics.lists.FrameTuple2dArrayList;
 import us.ihmc.robotics.screwTheory.WholeBodyAngularVelocityCalculator;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicPolygon2DDefinition;
 import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFrameVector3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -64,6 +67,7 @@ import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
 import us.ihmc.yoVariables.euclid.filters.FilteredFiniteDifferenceYoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -82,6 +86,7 @@ import static us.ihmc.robotics.lists.FrameTuple2dArrayList.createFramePoint2dArr
 
 public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProvider, SCS2YoGraphicHolder
 {
+   private static final boolean USE_INFERENCE_STABILITY_REGION = true;
    protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final String name = getClass().getSimpleName();
@@ -164,12 +169,16 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    private final WalkingTrajectoryPath walkingTrajectoryPath;
 
    private final StabilityMarginRegionCalculator multiContactStabilityRegionCalculator;
+   private final StabilityRegionInference stabilityRegionInference;
+   private final FrameConvexPolygon2D inferenceStabilityRegion = new FrameConvexPolygon2D();
+   private final YoFrameConvexPolygon2D yoInferenceStabilityRegion;
 
    private final YoBoolean wholeBodyContactsChanged = new YoBoolean("wholeBodyContactsChanged", registry);
    private final WholeBodyContactState wholeBodyContactState;
 
    private WholeBodyPostureAdjustmentProvider postureAdjustmentProvider = WholeBodyPostureAdjustmentProvider.createZeroPostureAdjustmentProvider();
 
+   private final ExecutionTimer multiContactInferenceTimer = new ExecutionTimer("multiContactInferenceTimer", registry);
    private final ExecutionTimer multiContactStabilityTimer = new ExecutionTimer("multiContactStabilityTimer", registry);
    private final ExecutionTimer contactStateUpdateTimer = new ExecutionTimer("contactStateUpdateTimer", registry);
    private final ExecutionTimer multiContactRegionLPUpdateTimer = new ExecutionTimer("multiContactRegionLPUpdateTimer", registry);
@@ -190,10 +199,12 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
                                              boolean kinematicsSimulation, // Whether to create for non-physical motion generation only
                                              List<Updatable> updatables,
                                              List<ContactablePlaneBody> contactableBodies,
+                                             StabilityRegionInference stabilityRegionInference,
                                              JointBasics... jointsToIgnore)
    {
       this.centerOfMassStateProvider = centerOfMassStateProvider;
       this.controlDT = controlDT;
+      this.stabilityRegionInference = stabilityRegionInference;
 
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
 
@@ -356,6 +367,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       failureDetectionControlModule = new WalkingFailureDetectionControlModule(getContactableFeet(), registry);
 
       attachControllerFailureListener(fallingDirection -> controllerFailed.set(true));
+      yoInferenceStabilityRegion = new YoFrameConvexPolygon2D("inferenceStabilityRegion", ReferenceFrame.getWorldFrame(), 26, registry);
    }
 
    public static JointBasics[] computeJointsToOptimizeFor(FullHumanoidRobotModel fullRobotModel, JointBasics... jointsToRemove)
@@ -1012,39 +1024,53 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       return multiContactStabilityRegionCalculator;
    }
 
-   public void updateMultiContactStabilityRegion()
+   private final FrameConvexPolygon2D zeroRegion = new FrameConvexPolygon2D();
+
+   public FrameConvexPolygon2DReadOnly updateMultiContactStabilityRegion()
    {
       if (!enableUpperBodyLoadBearing())
-         return;
-
-      multiContactStabilityTimer.startMeasurement();
-
-      // Update basis vector transforms and actuation constraints
-      contactStateUpdateTimer.startMeasurement();
-      wholeBodyContactState.updateActuationConstraintVector();
-      wholeBodyContactState.updateActuationConstraintMatrix();
-      contactStateUpdateTimer.stopMeasurement();
-
-      // Update LP solver constraints based on contact state
-      multiContactRegionLPUpdateTimer.startMeasurement();
-      multiContactStabilityRegionCalculator.updateContactState(wholeBodyContactState, true);
-      wholeBodyContactsChanged.set(false);
-      multiContactRegionLPUpdateTimer.stopMeasurement();
-
-      multiContactRegionLPSolveTimer.startMeasurement();
-
-      // Query new direction until initial region has been constructed
-      int updatesPerTick = 3;
-      for (int i = 0; i < updatesPerTick; i++)
       {
-         multiContactStabilityRegionCalculator.performUpdateForNextVertex();
+         return null;
       }
 
-//      multiContactStabilityRegionCalculator.performFullRegionUpdate();
+      if (USE_INFERENCE_STABILITY_REGION)
+      {
+         multiContactInferenceTimer.startMeasurement();
+         stabilityRegionInference.computeStabilityRegion(inferenceStabilityRegion, this, wholeBodyContactState);
+         multiContactInferenceTimer.stopMeasurement();
+         yoInferenceStabilityRegion.set(inferenceStabilityRegion);
+         return inferenceStabilityRegion;
+      }
+      else
+      {
+         multiContactStabilityTimer.startMeasurement();
 
-      multiContactRegionLPSolveTimer.stopMeasurement();
+         // Update basis vector transforms and actuation constraints
+         contactStateUpdateTimer.startMeasurement();
+         wholeBodyContactState.updateActuationConstraintVector();
+         wholeBodyContactState.updateActuationConstraintMatrix();
+         contactStateUpdateTimer.stopMeasurement();
 
-      multiContactStabilityTimer.stopMeasurement();
+         // Update LP solver constraints based on contact state
+         multiContactRegionLPUpdateTimer.startMeasurement();
+         multiContactStabilityRegionCalculator.updateContactState(wholeBodyContactState, true);
+         wholeBodyContactsChanged.set(false);
+         multiContactRegionLPUpdateTimer.stopMeasurement();
+
+         multiContactRegionLPSolveTimer.startMeasurement();
+
+         // Query new direction until initial region has been constructed
+         int updatesPerTick = 3;
+         for (int i = 0; i < updatesPerTick; i++)
+         {
+            multiContactStabilityRegionCalculator.performUpdateForNextVertex();
+         }
+
+         multiContactRegionLPSolveTimer.stopMeasurement();
+         multiContactStabilityTimer.stopMeasurement();
+
+         return multiContactStabilityRegionCalculator.hasSolvedWholeRegion() ? multiContactStabilityRegionCalculator.getFeasibleRegion() : zeroRegion;
+      }
    }
 
    /**
@@ -1082,6 +1108,11 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
                                                                     DefaultPoint2DGraphic.DIAMOND));
       if (multiContactStabilityRegionCalculator != null)
          group.addChild(multiContactStabilityRegionCalculator.getSCS2YoGraphics());
+
+      YoGraphicPolygon2DDefinition regionGraphic = YoGraphicDefinitionFactory.newYoGraphicPolygon2D("Inference stability region",
+                                                                                                    yoInferenceStabilityRegion,
+                                                                                                    ColorDefinitions.Red());
+      group.addChild(regionGraphic);
 
       return group;
    }
