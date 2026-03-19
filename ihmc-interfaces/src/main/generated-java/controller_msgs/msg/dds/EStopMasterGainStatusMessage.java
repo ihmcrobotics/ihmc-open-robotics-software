@@ -12,6 +12,11 @@ import us.ihmc.pubsub.TopicDataType;
 public class EStopMasterGainStatusMessage extends Packet<EStopMasterGainStatusMessage> implements Settable<EStopMasterGainStatusMessage>, EpsilonComparable<EStopMasterGainStatusMessage>
 {
    /**
+            * Current startup status
+            */
+   public boolean startup_complete_;
+   public boolean shutdown_complete_;
+   /**
             * Current SOFT-E-STOP value
             */
    public boolean is_estopped_;
@@ -52,6 +57,10 @@ public class EStopMasterGainStatusMessage extends Packet<EStopMasterGainStatusMe
 
    public void set(EStopMasterGainStatusMessage other)
    {
+      startup_complete_ = other.startup_complete_;
+
+      shutdown_complete_ = other.shutdown_complete_;
+
       is_estopped_ = other.is_estopped_;
 
       robot_is_faulted_ = other.robot_is_faulted_;
@@ -66,6 +75,30 @@ public class EStopMasterGainStatusMessage extends Packet<EStopMasterGainStatusMe
 
       current_master_gain_ = other.current_master_gain_;
 
+   }
+
+   /**
+            * Current startup status
+            */
+   public void setStartupComplete(boolean startup_complete)
+   {
+      startup_complete_ = startup_complete;
+   }
+   /**
+            * Current startup status
+            */
+   public boolean getStartupComplete()
+   {
+      return startup_complete_;
+   }
+
+   public void setShutdownComplete(boolean shutdown_complete)
+   {
+      shutdown_complete_ = shutdown_complete;
+   }
+   public boolean getShutdownComplete()
+   {
+      return shutdown_complete_;
    }
 
    /**
@@ -191,6 +224,10 @@ public class EStopMasterGainStatusMessage extends Packet<EStopMasterGainStatusMe
       if(other == null) return false;
       if(other == this) return true;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.startup_complete_, other.startup_complete_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.shutdown_complete_, other.shutdown_complete_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_estopped_, other.is_estopped_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.robot_is_faulted_, other.robot_is_faulted_, epsilon)) return false;
@@ -218,6 +255,10 @@ public class EStopMasterGainStatusMessage extends Packet<EStopMasterGainStatusMe
 
       EStopMasterGainStatusMessage otherMyClass = (EStopMasterGainStatusMessage) other;
 
+      if(this.startup_complete_ != otherMyClass.startup_complete_) return false;
+
+      if(this.shutdown_complete_ != otherMyClass.shutdown_complete_) return false;
+
       if(this.is_estopped_ != otherMyClass.is_estopped_) return false;
 
       if(this.robot_is_faulted_ != otherMyClass.robot_is_faulted_) return false;
@@ -242,6 +283,10 @@ public class EStopMasterGainStatusMessage extends Packet<EStopMasterGainStatusMe
       StringBuilder builder = new StringBuilder();
 
       builder.append("EStopMasterGainStatusMessage {");
+      builder.append("startup_complete=");
+      builder.append(this.startup_complete_);      builder.append(", ");
+      builder.append("shutdown_complete=");
+      builder.append(this.shutdown_complete_);      builder.append(", ");
       builder.append("is_estopped=");
       builder.append(this.is_estopped_);      builder.append(", ");
       builder.append("robot_is_faulted=");

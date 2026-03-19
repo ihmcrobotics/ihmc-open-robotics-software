@@ -15,6 +15,11 @@ module controller_msgs
       struct EStopMasterGainStatusMessage
       {
         /**
+         * Current startup status
+         */
+        boolean startup_complete;
+        boolean shutdown_complete;
+        /**
          * Current SOFT-E-STOP value
          */
         boolean is_estopped;
