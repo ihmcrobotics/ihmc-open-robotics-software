@@ -73,6 +73,7 @@ public abstract class AbstractJoystickLocomotionPlugin
       directionalControlInputMessage = new VelocityBasedWalkingInputMessage();
 
       publisherThrottler.setPeriod(robotModel.getStepGeneratorDT() * 3.0); // Publish at 1/3 the rate of CSG thread
+      heartBeat.reset();
    }
 
    public abstract void update();
