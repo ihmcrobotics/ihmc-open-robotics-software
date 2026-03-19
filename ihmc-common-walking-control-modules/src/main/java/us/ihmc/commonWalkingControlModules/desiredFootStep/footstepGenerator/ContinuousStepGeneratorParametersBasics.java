@@ -9,6 +9,7 @@ public interface ContinuousStepGeneratorParametersBasics
    public static final int DEFAULT_NUMBER_OF_FIXED_FOOTSTEPS = 0;
    public static final boolean DEFAULT_STEPS_ARE_ADJUSTABLE = true;
    public static final boolean DEFAULT_SHIFT_UPCOMING_STEPS_WITH_TOUCHDOWN = true;
+   public static final boolean DEFAULT_REQUEST_SNAP_TO_HEIGHTMAP = false;
    public static final boolean DEFAULT_ACCOUNT_FOR_GROUND_DRIFT = false;
 
    default void clear()
@@ -24,6 +25,7 @@ public interface ContinuousStepGeneratorParametersBasics
       setTurnMaxAngleInward(-Math.PI / 2.0);
       setStepsAreAdjustable(DEFAULT_STEPS_ARE_ADJUSTABLE);
       setShiftUpcomingStepsWithTouchdown(DEFAULT_SHIFT_UPCOMING_STEPS_WITH_TOUCHDOWN);
+      setRequestSnapToHeightmap(DEFAULT_REQUEST_SNAP_TO_HEIGHTMAP);
       setAccountForGroundDrift(DEFAULT_ACCOUNT_FOR_GROUND_DRIFT);
    }
 
@@ -43,6 +45,7 @@ public interface ContinuousStepGeneratorParametersBasics
       setTurnMaxAngleOutward(other.getTurnMaxAngleOutward());
       setStepsAreAdjustable(other.getStepsAreAdjustable());
       setShiftUpcomingStepsWithTouchdown(other.getShiftUpcomingStepsWithTouchdown());
+      setRequestSnapToHeightmap(other.getRequestSnapToHeightmap());
       setAccountForGroundDrift(other.getAccountForGroundDrift());
    }
 
@@ -52,6 +55,7 @@ public interface ContinuousStepGeneratorParametersBasics
       setNumberOfFixedFootsteps(DEFAULT_NUMBER_OF_FIXED_FOOTSTEPS);
       setStepsAreAdjustable(DEFAULT_STEPS_ARE_ADJUSTABLE);
       setShiftUpcomingStepsWithTouchdown(DEFAULT_SHIFT_UPCOMING_STEPS_WITH_TOUCHDOWN);
+      setRequestSnapToHeightmap(DEFAULT_REQUEST_SNAP_TO_HEIGHTMAP);
       setAccountForGroundDrift(DEFAULT_ACCOUNT_FOR_GROUND_DRIFT);
       setSwingDuration(walkingControllerParameters.getDefaultSwingTime());
       setTransferDuration(walkingControllerParameters.getDefaultTransferTime());
@@ -95,6 +99,8 @@ public interface ContinuousStepGeneratorParametersBasics
 
    void setTurnMaxAngleOutward(double turnMaxAngleOutward);
 
+   void setRequestSnapToHeightmap(boolean requestSnapToHeightmap);
+
    void setAccountForGroundDrift(boolean accountForGroundDrift);
 
    int getNumberOfFootstepsToPlan();
@@ -122,6 +128,8 @@ public interface ContinuousStepGeneratorParametersBasics
    double getTurnMaxAngleOutward();
 
    boolean getStepsAreAdjustable();
+
+   boolean getRequestSnapToHeightmap();
 
    boolean getAccountForGroundDrift();
 

@@ -16,6 +16,7 @@ public class YoContinuousStepGeneratorParameters implements ContinuousStepGenera
    private final YoDouble inPlaceWidth, minStepWidth, maxStepWidth;
    private final YoDouble turnMaxAngleInward, turnMaxAngleOutward;
    private final YoBoolean stepsAreAdjustable;
+   private final YoBoolean requestSnapToHeightmap;
    private final YoBoolean accountForGroundDrift;
    private final YoBoolean shiftUpcomingStepsWithTouchdown;
 
@@ -34,6 +35,7 @@ public class YoContinuousStepGeneratorParameters implements ContinuousStepGenera
       turnMaxAngleOutward = new YoDouble("maxAngleTurnOutwards" + nameSuffix, registry);
       turnMaxAngleInward = new YoDouble("maxAngleTurnInwards" + nameSuffix, registry);
       stepsAreAdjustable = new YoBoolean("stepsAreAdjustable" + nameSuffix, registry);
+      requestSnapToHeightmap = new YoBoolean("requestSnapToHeightmap" + nameSuffix, registry);
       accountForGroundDrift = new YoBoolean("accountForGroundDrift" + nameSuffix, registry);
       shiftUpcomingStepsWithTouchdown = new YoBoolean("shiftUpcomingStepsWithTouchdown" + nameSuffix, registry);
    }
@@ -42,6 +44,12 @@ public class YoContinuousStepGeneratorParameters implements ContinuousStepGenera
    public void setStepsAreAdjustable(boolean stepsAreAdjustable)
    {
       this.stepsAreAdjustable.set(stepsAreAdjustable);
+   }
+
+   @Override
+   public void setRequestSnapToHeightmap(boolean requestSnapToHeightmap)
+   {
+      this.requestSnapToHeightmap.set(requestSnapToHeightmap);
    }
 
    @Override
@@ -210,6 +218,12 @@ public class YoContinuousStepGeneratorParameters implements ContinuousStepGenera
    public boolean getAccountForGroundDrift()
    {
       return accountForGroundDrift.getBooleanValue();
+   }
+
+   @Override
+   public boolean getRequestSnapToHeightmap()
+   {
+      return requestSnapToHeightmap.getBooleanValue();
    }
 
    @Override
