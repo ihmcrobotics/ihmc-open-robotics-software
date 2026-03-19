@@ -6,8 +6,6 @@ import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.output.KSTFBOutputProcessor;
-import us.ihmc.communication.ros2log.ROS2LogSerialization;
-import us.ihmc.communication.ros2log.ROS2LogTimeSource;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -275,9 +273,6 @@ public class KinematicsStreamingToolboxParameters
    protected double publishingPeriod;
 
    protected InputStateEstimatorType inputStateEstimatorType;
-   protected boolean recordKSTOutput;
-   protected ROS2LogTimeSource logTimeSource;
-   protected ROS2LogSerialization logSerialization;
 
    /**
     * Map from joint name to initial 1-DoF joint position.
@@ -366,9 +361,6 @@ public class KinematicsStreamingToolboxParameters
       outputFeedbackGain = 500.0;
       outputFeedbackDampingRatio = 1.0;
       outputLPFBreakFrequency = 10.0;
-      recordKSTOutput = false;
-      logTimeSource = ROS2LogTimeSource.SYSTEM;
-      logSerialization = ROS2LogSerialization.JSON;
 
       defaultConfiguration.setLockPelvis(false);
       defaultConfiguration.setLockChest(false);
@@ -678,21 +670,6 @@ public class KinematicsStreamingToolboxParameters
    public InputStateEstimatorType getInputStateEstimatorType()
    {
       return inputStateEstimatorType;
-   }
-
-   public boolean getRecordKSTOutput()
-   {
-      return recordKSTOutput;
-   }
-
-   public ROS2LogTimeSource getLogTimeSource()
-   {
-      return logTimeSource;
-   }
-
-   public ROS2LogSerialization getLogSerialization()
-   {
-      return logSerialization;
    }
 
    public Map<String, Double> getJointCustomPositionUpperLimits()
@@ -1092,21 +1069,6 @@ public class KinematicsStreamingToolboxParameters
    public void setInputStateEstimatorType(InputStateEstimatorType inputStateEstimatorType)
    {
       this.inputStateEstimatorType = inputStateEstimatorType;
-   }
-
-   public void setRecordKSTOutput(boolean recordKSTOutput)
-   {
-      this.recordKSTOutput = recordKSTOutput;
-   }
-
-   public void setLogTimeSource(ROS2LogTimeSource logTimeSource)
-   {
-      this.logTimeSource = logTimeSource;
-   }
-
-   public void setLogSerialization(ROS2LogSerialization logSerialization)
-   {
-      this.logSerialization = logSerialization;
    }
 
    public void setJointCustomPositionUpperLimits(Map<String, Double> jointCustomPositionUpperLimits)
