@@ -34,8 +34,8 @@ public class BehaviorTreeNodeExecutor<S extends BehaviorTreeNodeState<D>,
    protected final DRCRobotModel robotModel;
    protected ROS2ControllerHelper ros2ControllerHelper;
    protected ROS2SyncedRobotModel syncedRobot;
-   protected final ControllerStatusTracker controllerStatusTracker;
-   protected final SideDependentList<AbilityHandActionComms> abilityHandComms;
+   protected ControllerStatusTracker controllerStatusTracker;
+   protected SideDependentList<AbilityHandActionComms> abilityHandComms;
    protected final BehaviorTreeSceneExecutor scene;
 
    /** For creating a basic node. */ // TODO: Should not exist???
