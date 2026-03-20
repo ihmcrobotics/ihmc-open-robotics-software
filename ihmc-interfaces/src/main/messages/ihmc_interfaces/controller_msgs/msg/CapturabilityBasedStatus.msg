@@ -20,6 +20,8 @@ geometry_msgs/Point[<=8] left_foot_support_polygon_3d
 # List of the active contact points used for the right foot. The coordinates are in world frame.
 geometry_msgs/Point[<=8] right_foot_support_polygon_3d
 
+geometry_msgs/Point[<=30] multi_contact_region
+
 # List of the active contact points for the left hand, empty if there is no hand contact point. The coordinates are in the hand body-fixed frame.
 geometry_msgs/Point[<=1] left_hand_contact_points
 # List of the active contact points for the right hand, empty is there is no hand contact point. The coordinates are in the hand body-fixed frame.
