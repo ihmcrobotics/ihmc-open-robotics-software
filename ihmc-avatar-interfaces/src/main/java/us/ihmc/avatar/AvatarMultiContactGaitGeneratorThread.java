@@ -56,7 +56,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerThreadInterface
 {
-   private static final double DEFAULT_CAPTURE_POINT_ERROR_THRESHOLD_FOR_HAND_CONTACT_STANDING = 0.025;
+   private static final double DEFAULT_CAPTURE_POINT_ERROR_THRESHOLD_FOR_HAND_CONTACT_STANDING = 0.03;
    private static final double DEFAULT_CAPTURE_POINT_ERROR_THRESHOLD_FOR_HAND_CONTACT_WALKING = 0.045;
    public static final double DEFAULT_CONTACT_SAFETY_FACTOR = 0.07;
 
@@ -241,6 +241,7 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
       //         }
       //      }
 
+      // Update capture point preview trajectory
       // Update capture point preview trajectory
       //      RecyclingArrayList<FramePoint2D> capturePointPositionWaypoints = centerOfPressureDataHolder.getCapturePointPositionWaypoints();
       //      for (int i = 0; i < yoCapturePointWaypoints.length; i++)
