@@ -101,7 +101,7 @@ public class LoadBearingParameters
       collisionGains.setDampingRatios(0.0, 0.0, 0.25);
 
       enableCollisionAvoidance = new YoBoolean("enableCollisionAvoidance", registry);
-      enableCollisionAvoidance.set(true);
+      enableCollisionAvoidance.set(false);
    }
 
    public double getNormalForceThresholdForLoaded()

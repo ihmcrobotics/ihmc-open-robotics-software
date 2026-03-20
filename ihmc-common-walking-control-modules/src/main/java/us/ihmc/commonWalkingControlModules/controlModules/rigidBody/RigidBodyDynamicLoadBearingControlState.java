@@ -52,7 +52,7 @@ public class RigidBodyDynamicLoadBearingControlState extends RigidBodyControlSta
 
    private static final double MINIMUM_TIME_IN_CONTACT = 0.05; // 1.0; //
    private static final double CAPTURE_POINT_ERROR_THRESHOLD_TO_REMAIN_IN_STATE = 0.025;
-   private static final double CAPTURE_POINT_DISTANCE_INSIDE_NOMINAL_SUPPORT_THRESHOLD = 0.045;
+   private static final double CAPTURE_POINT_DISTANCE_INSIDE_NOMINAL_SUPPORT_THRESHOLD = 0.055;
 
    private final StateMachine<DynamicLoadBearingStateEnum, DynamicLoadBearingState> stateMachine;
    private final DynamicLoadBearingPreContactState preContactState;
@@ -240,7 +240,7 @@ public class RigidBodyDynamicLoadBearingControlState extends RigidBodyControlSta
       double desiredQ = currentQ + EuclidCoreTools.clamp(desiredJointPositionForCollisionAvoidance - currentQ, maxDelta);
       jointFeedbackControlCommand.setInverseDynamics(desiredQ, 0.0, 0.0);
 
-      this.isCollisionAvoidanceActivated.set(isCollisionAvoidanceActivated && loadBearingParameters.enableCollisionAvoidance());
+      this.isCollisionAvoidanceActivated.set(isCollisionAvoidanceActivated);
    }
 
    @Override
@@ -356,12 +356,8 @@ public class RigidBodyDynamicLoadBearingControlState extends RigidBodyControlSta
       feedbackControlCommandList.clear();
 
       feedbackControlCommandList.addCommand(stateMachine.getCurrentState().getFeedbackControlCommand());
-
-//      if (isCollisionAvoidanceActivated.getValue())
-//      {
-////         feedbackControlCommandList.addCommand(collisionAvoidanceCommand);
-//      }
-      feedbackControlCommandList.addCommand(jointFeedbackControlCommand);
+      if (loadBearingParameters.enableCollisionAvoidance())
+         feedbackControlCommandList.addCommand(jointFeedbackControlCommand);
 
       return feedbackControlCommandList;
    }
