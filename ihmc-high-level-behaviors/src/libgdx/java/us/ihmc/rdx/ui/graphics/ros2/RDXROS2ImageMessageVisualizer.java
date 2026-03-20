@@ -85,15 +85,16 @@ public class RDXROS2ImageMessageVisualizer extends RDXROS2ImageVisualizer<ImageM
             PixelFormat pixelFormat = decoder.getDecodedImagePixelFormat();
 
             // Update the visualized image
-            updateVisualizer(imageVisualizer, decompressedImage, pixelFormat);
+            setImage(imageVisualizer, decompressedImage, pixelFormat);
             hasRenderedOne = true;
          }
       });
    }
 
-   protected void updateVisualizer(RDXImageVisualizer imageVisualizer, Mat image, PixelFormat pixelFormat)
+   // Protected so child classes can override this method to modify the displayed image
+   protected void setImage(RDXImageVisualizer imageVisualizer, Mat image, PixelFormat pixelFormat)
    {
-      imageVisualizer.setImage(decompressedImage, pixelFormat);
+      imageVisualizer.setImage(image, pixelFormat);
    }
 
    @Override

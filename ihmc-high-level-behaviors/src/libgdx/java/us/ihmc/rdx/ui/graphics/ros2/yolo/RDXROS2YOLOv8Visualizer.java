@@ -8,14 +8,21 @@ import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.perception.detections.yolo.YOLOv8AnnotationRecord;
 import us.ihmc.perception.imageMessage.PixelFormat;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.ui.graphics.RDXImageVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.RDXROS2MultiTopicVisualizer;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Subscription;
 import us.ihmc.ros2.ROS2Topic;
 
-public class RDXROS2YOLOv8Visualizer extends RDXROS2ImageMessageVisualizer
+import java.util.List;
+
+public class RDXROS2YOLOv8Visualizer extends RDXROS2MultiTopicVisualizer
 {
+   private final ROS2Topic<ImageMessage> colorImageTopic;
+   private final RDXROS2ImageMessageVisualizer imageMessageVisualizer;
+
    private final YOLOv8ResultAnnotationInfo latestAnnotationInfo;
    private final ROS2Subscription<YOLOv8ResultAnnotationInfo> annotationInfoSubscription;
 
@@ -28,7 +35,19 @@ public class RDXROS2YOLOv8Visualizer extends RDXROS2ImageMessageVisualizer
                                   ROS2PeerClockOffsetEstimator ros2ClockOffsetEstimator,
                                   ROS2Topic<ImageMessage> colorImageTopic)
    {
-      super(title, ros2Node, colorImageTopic);
+      super(title);
+
+      this.colorImageTopic = colorImageTopic;
+      imageMessageVisualizer = new RDXROS2ImageMessageVisualizer(title, ros2Node, colorImageTopic)
+      {
+         @Override
+         protected void setImage(RDXImageVisualizer imageVisualizer, Mat image, PixelFormat pixelFormat)
+         {
+            RDXROS2YOLOv8Visualizer.this.getFrequency(colorImageTopic).ping();
+            annotateImage(image);
+            super.setImage(imageVisualizer, image, pixelFormat);
+         }
+      };
 
       latestAnnotationInfo = new YOLOv8ResultAnnotationInfo();
       annotationInfoSubscription = ros2Node.createSubscription2(PerceptionAPI.YOLO_ANNOTATION_INFO, this::setLatestAnnotationInfo);
@@ -39,9 +58,17 @@ public class RDXROS2YOLOv8Visualizer extends RDXROS2ImageMessageVisualizer
    }
 
    @Override
+   public void update()
+   {
+      super.update();
+      imageMessageVisualizer.update();
+   }
+
+   @Override
    public void updateHeartbeat()
    {
       super.updateHeartbeat();
+      imageMessageVisualizer.setActive(isActive());
       demandYOLO.setAlive(isActive());
       settings.update();
    }
@@ -50,20 +77,26 @@ public class RDXROS2YOLOv8Visualizer extends RDXROS2ImageMessageVisualizer
    public void renderImGuiWidgets()
    {
       settings.renderSettings();
-      super.renderImGuiWidgets();
+      imageMessageVisualizer.renderImGuiWidgets();
+   }
+
+   @Override
+   public RDXPanel getPanel()
+   {
+      return imageMessageVisualizer.getPanel();
    }
 
    @Override
    public void destroy()
    {
       super.destroy();
+      imageMessageVisualizer.destroy();
       annotationInfoSubscription.remove();
       settings.destroy();
       demandYOLO.destroy();
    }
 
-   @Override
-   protected void updateVisualizer(RDXImageVisualizer imageVisualizer, Mat image, PixelFormat pixelFormat)
+   private void annotateImage(Mat image)
    {
       synchronized (latestAnnotationInfo)
       {
@@ -77,15 +110,20 @@ public class RDXROS2YOLOv8Visualizer extends RDXROS2ImageMessageVisualizer
          for (YOLOv8AnnotationRecord annotationRecord : annotationRecords)
             annotationRecord.drawText(image, image, true, false);
       }
-
-      super.updateVisualizer(imageVisualizer, image, pixelFormat);
    }
 
    private void setLatestAnnotationInfo(YOLOv8ResultAnnotationInfo annotationInfo)
    {
+      getFrequency(PerceptionAPI.YOLO_ANNOTATION_INFO).ping();
       synchronized (latestAnnotationInfo)
       {
          latestAnnotationInfo.set(annotationInfo);
       }
+   }
+
+   @Override
+   public List<ROS2Topic<?>> getTopics()
+   {
+      return List.of(PerceptionAPI.YOLO_ANNOTATION_INFO, colorImageTopic);
    }
 }

@@ -253,7 +253,7 @@ public class YOLOv8DetectionExecutor
             if (detectionTime == null)
                detectionTime = yoloInstantDetection.getDetectionTime();
 
-            YOLOv8AnnotationRecord.fromYOLOv8InstantDetection(yoloInstantDetection, 0.01f).toMessage(annotationInfo.getAnnotationRecords().add());
+            YOLOv8AnnotationRecord.fromYOLOv8InstantDetection(yoloInstantDetection, 0.005f).toMessage(annotationInfo.getAnnotationRecords().add());
          }
       }
 
