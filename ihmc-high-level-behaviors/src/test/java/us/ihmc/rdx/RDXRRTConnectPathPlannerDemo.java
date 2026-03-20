@@ -16,6 +16,7 @@ import java.util.List;
 
 public class RDXRRTConnectPathPlannerDemo
 {
+   private static final double OBSTACLE_RADIUS = 0.5;
    private final RDXBaseUI baseUI = new RDXBaseUI("RRT-Connect Path Planner Demo");
    private final RDXPose3DGizmo startGizmo = new RDXPose3DGizmo();
    private final RDXPose3DGizmo goalGizmo = new RDXPose3DGizmo();
@@ -119,12 +120,12 @@ public class RDXRRTConnectPathPlannerDemo
                long planStartNs = System.nanoTime();
                List<Point3D> result = planner.plan(startGizmo.getTransformToParent().getTranslation(),
                                                    goalGizmo.getTransformToParent().getTranslation(),
-                                                   point ->
+                                                   segment ->
                                                    {
                                                       for (int i = 0; i < numberOfObstacles[0]; i++)
                                                       {
                                                          collisionQuery.set(obstacleGizmos.get(i).getTransformToParent().getTranslation());
-                                                         if (collisionQuery.distance(point) <= 0.5)
+                                                         if (segment.distance(collisionQuery) <= OBSTACLE_RADIUS)
                                                             return true;
                                                       }
                                                       return false;
@@ -172,19 +173,18 @@ public class RDXRRTConnectPathPlannerDemo
                {
                   int segments = 64;
                   double angleStep = 2.0 * Math.PI / segments;
-                  double obstacleRadius = 0.5;
                   for (int obstacleIndex = 0; obstacleIndex < numberOfObstacles[0]; obstacleIndex++)
                   {
                      Point3D obstacleCenter = new Point3D(obstacleGizmos.get(obstacleIndex).getTransformToParent().getTranslation());
                      double centerX = obstacleCenter.getX();
                      double centerY = obstacleCenter.getY();
 
-                     Point3D previous = new Point3D(centerX + obstacleRadius, centerY, 0.0);
+                     Point3D previous = new Point3D(centerX + OBSTACLE_RADIUS, centerY, 0.0);
                      for (int i = 1; i <= segments; i++)
                      {
                         double angle = i * angleStep;
-                        Point3D current = new Point3D(centerX + obstacleRadius * Math.cos(angle),
-                                                      centerY + obstacleRadius * Math.sin(angle),
+                        Point3D current = new Point3D(centerX + OBSTACLE_RADIUS * Math.cos(angle),
+                                                      centerY + OBSTACLE_RADIUS * Math.sin(angle),
                                                       0.0);
                         builder.addLine(previous, current, 0.004, Color.RED);
                         previous = current;

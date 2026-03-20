@@ -1,5 +1,6 @@
 package us.ihmc.pathPlanning.rrt;
 
+import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
@@ -14,18 +15,17 @@ public class RRTConnectPathPlanner
 {
    private int maxIterations = 1000;
    private double searchRadius;
-   private Function<Point3D, Boolean> collider;
+   private Function<LineSegment3D, Boolean> collider;
    private double stepSize = 0.2;
    private double goalTolerance = 0.1;
    private int shortcutIterations = 150;
-   private double collisionCheckStep = 0.05;
    private final Point3D start = new Point3D();
    private final Point3D goal = new Point3D();
    private final Point3D center = new Point3D();
    private final Point3D sample = new Point3D();
    private final Vector3D direction = new Vector3D();
    private final Point3D newPosition = new Point3D();
-   private final Point3D lineCheckPosition = new Point3D();
+   private final LineSegment3D collisionSegment = new LineSegment3D();
    private final Random random = new Random();
    public static class Node
    {
@@ -43,14 +43,13 @@ public class RRTConnectPathPlanner
    public Node rootNodeA;
    public Node rootNodeB;
    private int i;
-   private int size;
    private int treeASize;
    private int treeBSize;
    private boolean treeAIsStart;
    private final ArrayDeque<Node> stack = new ArrayDeque<>();
    public final ArrayList<Point3D> path = new ArrayList<>();
 
-   public List<Point3D> plan(Tuple3DReadOnly start, Tuple3DReadOnly goal, Function<Point3D, Boolean> collider)
+   public List<Point3D> plan(Tuple3DReadOnly start, Tuple3DReadOnly goal, Function<LineSegment3D, Boolean> collider)
    {
       this.start.set(start);
       this.goal.set(goal);
@@ -69,16 +68,15 @@ public class RRTConnectPathPlanner
       rootNodeB = new Node(new Point3D(goal), null, new ArrayList<>());
       treeASize = 1;
       treeBSize = 1;
-      size = treeASize + treeBSize;
       treeAIsStart = true;
 
       for (i = 0; i < maxIterations; i++)
       {
          sample();
-         Node newNodeA = extend(rootNodeA, sample, true);
+         Node newNodeA = extend(rootNodeA, sample);
          if (newNodeA != null)
          {
-            Node newNodeB = connect(rootNodeB, newNodeA.position, false);
+            Node newNodeB = connect(rootNodeB, newNodeA.position);
             if (newNodeB != null && newNodeB.position.distance(newNodeA.position) <= goalTolerance)
             {
                buildPath(newNodeA, newNodeB, treeAIsStart);
@@ -102,36 +100,31 @@ public class RRTConnectPathPlanner
       treeBSize = tempSize;
 
       treeAIsStart = !treeAIsStart;
-      size = treeASize + treeBSize;
    }
 
-   private Node extend(Node rootNode, Point3D target, boolean treeA)
+   private Node extend(Node rootNode, Point3D target)
    {
       Node closestNode = findClosestNode(rootNode, target);
       if (closestNode == null)
          return null;
 
       direction.sub(target, closestNode.position);
-      double distance = direction.length();
+      double distance = direction.norm();
       if (distance < 1.0e-9)
          return null;
       direction.scale(Math.min(stepSize, distance) / distance);
       newPosition.add(closestNode.position, direction);
 
-      if (collider.apply(newPosition))
+      if (!isLineCollisionFree(closestNode.position, newPosition))
          return null;
 
       Node newNode = new Node(new Point3D(newPosition), closestNode, new ArrayList<>());
       closestNode.children.add(newNode);
-      if (treeA)
-         treeASize++;
-      else
-         treeBSize++;
-      size = treeASize + treeBSize;
+      treeASize++;
       return newNode;
    }
 
-   private Node connect(Node rootNode, Point3D target, boolean treeA)
+   private Node connect(Node rootNode, Point3D target)
    {
       Node currentNode = findClosestNode(rootNode, target);
       if (currentNode == null)
@@ -140,23 +133,19 @@ public class RRTConnectPathPlanner
       while (true)
       {
          direction.sub(target, currentNode.position);
-         double distance = direction.length();
+         double distance = direction.norm();
          if (distance < 1.0e-9)
             return currentNode;
          direction.scale(Math.min(stepSize, distance) / distance);
          newPosition.add(currentNode.position, direction);
 
-         if (collider.apply(newPosition))
+         if (!isLineCollisionFree(currentNode.position, newPosition))
             return null;
 
          Node newNode = new Node(new Point3D(newPosition), currentNode, new ArrayList<>());
          currentNode.children.add(newNode);
          currentNode = newNode;
-         if (treeA)
-            treeASize++;
-         else
-            treeBSize++;
-         size = treeASize + treeBSize;
+         treeBSize++;
 
          if (currentNode.position.distance(target) <= goalTolerance)
             return currentNode;
@@ -271,18 +260,8 @@ public class RRTConnectPathPlanner
 
    private boolean isLineCollisionFree(Point3D startPoint, Point3D endPoint)
    {
-      if (collider.apply(startPoint) || collider.apply(endPoint))
-         return false;
-      double distance = startPoint.distance(endPoint);
-      int steps = Math.max(1, (int) Math.ceil(distance / collisionCheckStep));
-      for (int step = 1; step < steps; step++)
-      {
-         double alpha = (double) step / (double) steps;
-         lineCheckPosition.interpolate(startPoint, endPoint, alpha);
-         if (collider.apply(lineCheckPosition))
-            return false;
-      }
-      return true;
+      collisionSegment.set(startPoint, endPoint);
+      return !collider.apply(collisionSegment);
    }
 
    private void sample() // TODO: Informed sampling. Start with entire config space, then go to ellipse with C_best
