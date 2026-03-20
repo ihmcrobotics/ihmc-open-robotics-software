@@ -229,6 +229,7 @@ public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, Walk
             else
             {
                packManuallyPlacedFootstepsIntoPlan();
+               updatePreviewFootstepsFromPlan(footstepPlanToExecute);
                state.getExecutionState().setValue(WalkActionExecutionState.PLANNING_SUCCEEDED);
             }
          }
@@ -254,6 +255,7 @@ public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, Walk
                simpleFootstep.setSwingDuration(time);
                footstepPlanToExecute.addFootstep(simpleFootstep);
             }
+            updatePreviewFootstepsFromPlan(footstepPlanToExecute);
             state.getExecutionState().setValue(WalkActionExecutionState.PLANNING_SUCCEEDED);
          }
          else
@@ -287,6 +289,7 @@ public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, Walk
                }
                else
                {
+                  updatePreviewFootstepsFromPlan(footstepPlanToExecute);
                   state.getExecutionState().setValue(WalkActionExecutionState.PLANNING_SUCCEEDED);
                }
             }
@@ -379,6 +382,18 @@ public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, Walk
                                                                                   walkingControllerParameters.getDefaultFinalTransferTime(),
                                                                                   i + 1);
          state.getDesiredFootPoses().get(footstep.getRobotSide()).addTrajectoryPoint(footstep.getFootstepPose(), stepCompletionTime);
+      }
+   }
+
+   private void updatePreviewFootstepsFromPlan(FootstepPlan plan)
+   {
+      var footstepsMessage = state.getPreviewFootsteps().accessValue();
+      footstepsMessage.clear();
+      for (int i = 0; i < plan.getNumberOfSteps(); i++)
+      {
+         var messageFootstep = footstepsMessage.add();
+         messageFootstep.setRobotSide(plan.getFootstep(i).getRobotSide().toByte());
+         messageFootstep.getSolePose().set(plan.getFootstep(i).getFootstepPose());
       }
    }
 
