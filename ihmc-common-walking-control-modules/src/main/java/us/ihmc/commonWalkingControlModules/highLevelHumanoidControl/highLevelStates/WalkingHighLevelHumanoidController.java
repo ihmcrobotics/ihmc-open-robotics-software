@@ -773,7 +773,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       updateAndPublishFootstepQueueStatus();
 
       CapturabilityBasedStatus capturabilityBasedStatus = balanceManager.updateAndReturnCapturabilityBasedStatus();
-      packHandLoadBearingStatuses(capturabilityBasedStatus);
+//      packHandLoadBearingStatuses(capturabilityBasedStatus);
       statusOutputManager.reportStatusMessage(capturabilityBasedStatus);
 
       if (ENABLE_LEG_ELASTICITY_DEBUGGATOR)

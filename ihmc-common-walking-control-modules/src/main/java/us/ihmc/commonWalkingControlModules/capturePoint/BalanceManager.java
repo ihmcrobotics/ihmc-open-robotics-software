@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.capturePoint;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
-import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
@@ -29,8 +28,6 @@ import us.ihmc.commonWalkingControlModules.messageHandlers.MomentumTrajectoryHan
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -79,8 +76,6 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.yoVariables.variable.YoLong;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -93,7 +88,6 @@ import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.*;
 public class BalanceManager implements SCS2YoGraphicHolder
 {
    private static final boolean INCLUDE_GRAPHICS = false;
-   private static final boolean PACK_ICP_PREVIEW = false;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final boolean viewCoPHistory = false;
@@ -1182,6 +1176,11 @@ public class BalanceManager implements SCS2YoGraphicHolder
       return capturabilityBasedStatus;
    }
 
+   public BipedSupportPolygons getBipedSupportPolygons()
+   {
+      return bipedSupportPolygons;
+   }
+
    public void updateSwingTimeRemaining(double timeRemainingInSwing)
    {
       swingSpeedUpForStepAdjustment.set(contactStateManager.getTimeRemainingInCurrentSupportSequence() - timeRemainingInSwing);
@@ -1215,30 +1214,9 @@ public class BalanceManager implements SCS2YoGraphicHolder
       return pelvisICPBasedTranslationManager.pollStatusToReport();
    }
 
-   public void packCapturePointTrajectoryWaypoints(TDoubleArrayList times,
-                                                   RecyclingArrayList<FramePoint2D> capturePointPositions,
-                                                   RecyclingArrayList<FrameVector2D> capturePointVelocities)
+   public void packPerfectCoP(FramePoint2D centerOfPressureToPack)
    {
-      if (!PACK_ICP_PREVIEW)
-         return;
-
-      times.clear();
-      capturePointPositions.clear();
-      capturePointVelocities.clear();
-
-      double t0 = 0.0; // contactStateManager.getCurrentStateDuration();
-      double dt = 0.15;
-      int n = 25;
-
-      for (int i = 0; i < n; i++)
-      {
-         double tPreview = i * dt;
-         comTrajectoryPlanner.compute(t0 + tPreview);
-
-         times.add(tPreview);
-         capturePointPositions.add().set(comTrajectoryPlanner.getDesiredDCMPosition());
-         capturePointVelocities.add().set(comTrajectoryPlanner.getDesiredDCMVelocity());
-      }
+      centerOfPressureToPack.set(perfectCMP2d);
    }
 
    @Override
