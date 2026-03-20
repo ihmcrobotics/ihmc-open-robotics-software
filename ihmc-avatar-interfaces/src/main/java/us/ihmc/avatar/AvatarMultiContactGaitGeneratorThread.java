@@ -266,7 +266,7 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
       {
          desiredCapturePoint.set(capturabilityBasedStatus.getDesiredCapturePoint2d());
          areFeetInContact.get(RobotSide.LEFT).setValue(!capturabilityBasedStatus.getLeftFootSupportPolygon3d().isEmpty());
-         areFeetInContact.get(RobotSide.RIGHT).setValue(!capturabilityBasedStatus.getLeftFootSupportPolygon3d().isEmpty());
+         areFeetInContact.get(RobotSide.RIGHT).setValue(!capturabilityBasedStatus.getRightFootSupportPolygon3d().isEmpty());
       }
       updateCentroidalValues();
 
