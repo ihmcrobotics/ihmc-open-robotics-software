@@ -14,6 +14,7 @@ import java.util.function.Function;
 public class RRTConnectPathPlanner
 {
    private int maxIterations = 1000;
+   private int multiRestartIterations = 25;
    private double searchRadius;
    private Function<LineSegment3D, Boolean> collider;
    private double stepSize = 0.2;
@@ -54,11 +55,51 @@ public class RRTConnectPathPlanner
       this.start.set(start);
       this.goal.set(goal);
       this.collider = collider;
-      plan();
+      ArrayList<Point3D> bestPath = new ArrayList<>();
+      double bestPathLength = Double.POSITIVE_INFINITY;
+      Node bestRootNodeA = null;
+      Node bestRootNodeB = null;
+      int bestTreeASize = 0;
+      int bestTreeBSize = 0;
+      boolean bestTreeAIsStart = true;
+      int bestIterationCount = 0;
+
+      for (int run = 0; run < multiRestartIterations; run++)
+      {
+         planSingleRun();
+         if (path.isEmpty())
+            continue;
+
+         double currentLength = calculatePathLength(path);
+         if (currentLength < bestPathLength)
+         {
+            bestPathLength = currentLength;
+            bestPath.clear();
+            bestPath.addAll(path);
+            bestRootNodeA = rootNodeA;
+            bestRootNodeB = rootNodeB;
+            bestTreeASize = treeASize;
+            bestTreeBSize = treeBSize;
+            bestTreeAIsStart = treeAIsStart;
+            bestIterationCount = i;
+         }
+      }
+
+      if (!bestPath.isEmpty())
+      {
+         path.clear();
+         path.addAll(bestPath);
+         rootNodeA = bestRootNodeA;
+         rootNodeB = bestRootNodeB;
+         treeASize = bestTreeASize;
+         treeBSize = bestTreeBSize;
+         treeAIsStart = bestTreeAIsStart;
+         i = bestIterationCount;
+      }
       return path;
    }
 
-   private void plan()
+   private void planSingleRun()
    {
       path.clear();
       searchRadius = 1.5 * start.distance(goal);
@@ -264,6 +305,14 @@ public class RRTConnectPathPlanner
       return !collider.apply(collisionSegment);
    }
 
+   private double calculatePathLength(List<Point3D> currentPath)
+   {
+      double length = 0.0;
+      for (int index = 0; index < currentPath.size() - 1; index++)
+         length += currentPath.get(index).distance(currentPath.get(index + 1));
+      return length;
+   }
+
    private void sample() // TODO: Informed sampling. Start with entire config space, then go to ellipse with C_best
    {
       double r = searchRadius * Math.sqrt(random.nextDouble());
@@ -290,6 +339,11 @@ public class RRTConnectPathPlanner
    public void setMaxIterations(int maxIterations)
    {
       this.maxIterations = maxIterations;
+   }
+
+   public void setMultiRestartIterations(int multiRestartIterations)
+   {
+      this.multiRestartIterations = Math.max(1, multiRestartIterations);
    }
 
    public int getIterationCount()
