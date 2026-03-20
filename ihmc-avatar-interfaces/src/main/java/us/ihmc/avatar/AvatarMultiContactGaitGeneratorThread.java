@@ -1,6 +1,8 @@
 package us.ihmc.avatar;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.FootstepStatusMessage;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.multiContact.pushRecovery.ReactiveBracingPlanner;
 import us.ihmc.avatar.multiContact.pushRecovery.ReducedOrderRobotModel;
@@ -13,9 +15,15 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetwork
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.BipedTimedStep;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MultiContactGaitGeneratorAPI;
+import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandContactCommand;
@@ -45,6 +53,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Vector;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerThreadInterface
@@ -73,6 +82,9 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
    private final YoDouble contactSafetyFactor = new YoDouble("contactSafetyFactor", registry);
    private final YoDouble capturePointErrorThresholdForHandContact = new YoDouble("capturePointErrorThresholdForHandContact", registry);
 
+   private final AtomicReference<FootstepStatusMessage> footstepStatusMessage = new AtomicReference<>();
+   private final SideDependentList<MutableBoolean> areFeetInContact = new SideDependentList<>(new MutableBoolean(), new MutableBoolean());
+
    private final YoBoolean isHandRecoveryContactEnabled = new YoBoolean("isHandRecoveryContactEnabled", registry);
    private final YoBoolean isFalling = new YoBoolean("isFalling", registry);
    private final YoBoolean triggerFall = new YoBoolean("triggerFall", registry);
@@ -93,7 +105,6 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
 
    private final List<BipedTimedStep> plannedFootSteps = new ArrayList<>();
    private final SideDependentList<HandContactCommand> plannedHandContacts = new SideDependentList<>();
-   private final ReducedOrderRobotModel reducedOrderRobotModel;
    private final AtomicReference<CapturabilityBasedStatus> capturabilityBasedStatus = new AtomicReference<>();
 
 //   private final YoFramePoint2D[] yoCapturePointWaypoints = new YoFramePoint2D[25];
@@ -107,6 +118,13 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
 //   private final YoInteger numberOfInferenceCallsForTest = new YoInteger("numberOfInferenceCallsForTest", registry);
 
    private final ConvexPolygonScaler convexPolygonScaler = new ConvexPolygonScaler();
+   private final YoDouble contactStateUpdateTimer = new YoDouble("handContactPlanTimer", registry);
+
+   private final FrameVector2D desiredToCurrentCapturePoint = new FrameVector2D();
+   private final FrameConvexPolygon2D supportPolygon = new FrameConvexPolygon2D();
+   private final SideDependentList<FramePoint3D> handPositions = new SideDependentList<>(new FramePoint3D(), new FramePoint3D());
+   private final FramePoint3D leftFoot = new FramePoint3D();
+   private final FramePoint3D rightFoot = new FramePoint3D();
 
    public AvatarMultiContactGaitGeneratorThread(DRCRobotModel robotModel,
                                                 ROS2Node ros2Node,
@@ -127,7 +145,7 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
       additionalSafetyDistance.set(0.07);
       capturePointErrorThresholdForHandContact.set(DEFAULT_CAPTURE_POINT_ERROR_THRESHOLD_FOR_HAND_CONTACT);
       
-      reducedOrderRobotModel = new ReducedOrderRobotModel(robotModel.getContactPointParameters(), registry);
+      walkingOutputManager.attachStatusMessageListener(FootstepStatusMessage.class, footstepStatusMessage::set);
 
       this.commandInputManager = new CommandInputManager(MultiContactGaitGeneratorAPI.getSupportedCommands());
       this.statusOutputManager = new StatusMessageOutputManager(MultiContactGaitGeneratorAPI.getSupportedStatusMessages());
@@ -159,6 +177,11 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
       humanoidRobotContextData.setControllerRan(false);
       humanoidRobotContextData.setEstimatorRan(false);
       acceptPlanarRegions.set(true);
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         areFeetInContact.get(robotSide).setTrue();
+      }
 
 //      bipedalGaitGenerator = new AvatarBipedalGaitGenerator(commandInputManager,
 //                                                            statusOutputManager,
@@ -237,9 +260,11 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
       // Update capturability status
       CapturabilityBasedStatus capturabilityBasedStatus = this.capturabilityBasedStatus.get();
       if (capturabilityBasedStatus != null)
+      {
          desiredCapturePoint.set(capturabilityBasedStatus.getDesiredCapturePoint2d());
-      else
-         desiredCapturePoint.setToNaN();
+         areFeetInContact.get(RobotSide.LEFT).setValue(!capturabilityBasedStatus.getLeftFootSupportPolygon3d().isEmpty());
+         areFeetInContact.get(RobotSide.RIGHT).setValue(!capturabilityBasedStatus.getLeftFootSupportPolygon3d().isEmpty());
+      }
       updateCentroidalValues();
 
       currentCapturePoint.setX(centerOfMassPosition.getX() + centerOfMassVelocity.getX() / ReducedOrderRobotModel.OMEGA);
@@ -279,14 +304,29 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
 
       if (triggerFall.getValue() || (isFalling.getValue() && !hasSentRecoveryMessage.getValue() && isHandRecoveryContactEnabled.getValue()))
       {
+         long startTime = System.nanoTime();
+
          hasSentRecoveryMessage.set(true);
          triggerFall.set(false);
          sendHandContactMessage.set(false);
 
-         reducedOrderRobotModel.initialize(fullRobotModel, humanoidReferenceFrames, centerOfMassVelocity);
+         desiredToCurrentCapturePoint.sub(currentCapturePoint, desiredCapturePoint);
+         supportPolygon.set(centerOfPressureDataHolder.getSupportPolygon());
+
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            handPositions.get(robotSide).setToZero(fullRobotModel.getHandControlFrame(robotSide));
+            handPositions.get(robotSide).changeFrame(ReferenceFrame.getWorldFrame());
+         }
+
+         leftFoot.setToZero(fullRobotModel.getSoleFrame(RobotSide.LEFT));
+         rightFoot.setToZero(fullRobotModel.getSoleFrame(RobotSide.RIGHT));
+         leftFoot.changeFrame(ReferenceFrame.getWorldFrame());
+         rightFoot.changeFrame(ReferenceFrame.getWorldFrame());
+         double stanceWidth = leftFoot.distance(rightFoot);
 
          plannedHandContacts.clear();
-         planner.plan(reducedOrderRobotModel, plannedFootSteps, plannedHandContacts);
+         planner.plan(desiredToCurrentCapturePoint, centerOfMassPosition, supportPolygon, handPositions, areFeetInContact, getMidFeetZUpFrame(), plannedHandContacts, stanceWidth);
 
          // Just use single side if requested
          if (diagnosticBracingSide.getValue() != null)
@@ -297,8 +337,14 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
          {
             HandContactCommand handContactCommand = plannedHandContacts.get(robotSide);
             if (handContactCommand != null)
+            {
+               handContactCommand.setLoad(true);
                walkingCommandInputManager.submitCommand(handContactCommand);
+            }
          }
+
+         long stopTime = System.nanoTime();
+         contactStateUpdateTimer.set(Conversions.nanosecondsToSeconds(stopTime - startTime));
       }
 
       if (triggerUnload.getValue())
@@ -314,6 +360,22 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
                walkingCommandInputManager.submitCommand(handContactCommand);
             }
          }
+      }
+   }
+
+   private ReferenceFrame getMidFeetZUpFrame()
+   {
+      if (areFeetInContact.get(RobotSide.LEFT).getValue() && areFeetInContact.get(RobotSide.RIGHT).getValue())
+      {
+         return humanoidReferenceFrames.getMidFeetZUpFrame();
+      }
+      else if (areFeetInContact.get(RobotSide.LEFT).getValue())
+      {
+         return humanoidReferenceFrames.getSoleZUpFrame(RobotSide.LEFT);
+      }
+      else
+      {
+         return humanoidReferenceFrames.getSoleZUpFrame(RobotSide.RIGHT);
       }
    }
 

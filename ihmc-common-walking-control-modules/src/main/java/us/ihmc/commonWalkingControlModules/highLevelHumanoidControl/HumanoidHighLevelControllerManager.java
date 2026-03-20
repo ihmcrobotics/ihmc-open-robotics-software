@@ -346,13 +346,10 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
 
       if (stateMachine.getCurrentStateKey() == HighLevelControllerName.WALKING)
       {
-         TDoubleArrayList capturePointWaypointTimes = centerOfPressureDataHolderForEstimator.getCapturePointWaypointTimes();
-         RecyclingArrayList<FramePoint2D> capturePointPositionWaypoints = centerOfPressureDataHolderForEstimator.getCapturePointPositionWaypoints();
-         RecyclingArrayList<FrameVector2D> capturePointVelocityWaypoints = centerOfPressureDataHolderForEstimator.getCapturePointVelocityWaypoints();
-
          WalkingHighLevelHumanoidController walkingController = ((WalkingControllerState) stateMachine.getCurrentState()).getWalkingController();
          BalanceManager balanceManager = walkingController.getBalanceManager();
-         balanceManager.packCapturePointTrajectoryWaypoints(capturePointWaypointTimes, capturePointPositionWaypoints, capturePointVelocityWaypoints);
+         balanceManager.packPerfectCoP(centerOfPressureDataHolderForEstimator.getPerfectCenterOfPressure());
+         centerOfPressureDataHolderForEstimator.setSupportPolygon(balanceManager.getBipedSupportPolygons().getSupportPolygonInWorld());
       }
    }
 
@@ -383,21 +380,21 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
 
    private void reportRobotDesiredConfigurationData()
    {
-      if (++jointDesiredOutputBroadcastCounter < jointDesiredOutputBroadcastFrequency.getValue())
-         return;
-      jointDesiredOutputBroadcastCounter = 0;
-
-      lowLevelControllerOutput.copyToMessage(robotDesiredConfigurationData);
-
-      HighLevelControllerState currentState = stateMachine.getCurrentState();
-      if (currentState == null || currentState.getOutputForRootJoint() == null)
-         return;
-
-      currentState.getOutputForRootJoint().copyToMessage(robotDesiredConfigurationData);
-
-      robotDesiredConfigurationData.setWallTime(System.nanoTime());
-      // TODO use or remove joint name hash
-      statusMessageOutputManager.reportStatusMessage(robotDesiredConfigurationData);
+//      if (++jointDesiredOutputBroadcastCounter < jointDesiredOutputBroadcastFrequency.getValue())
+//         return;
+//      jointDesiredOutputBroadcastCounter = 0;
+//
+//      lowLevelControllerOutput.copyToMessage(robotDesiredConfigurationData);
+//
+//      HighLevelControllerState currentState = stateMachine.getCurrentState();
+//      if (currentState == null || currentState.getOutputForRootJoint() == null)
+//         return;
+//
+//      currentState.getOutputForRootJoint().copyToMessage(robotDesiredConfigurationData);
+//
+//      robotDesiredConfigurationData.setWallTime(System.nanoTime());
+//      // TODO use or remove joint name hash
+//      statusMessageOutputManager.reportStatusMessage(robotDesiredConfigurationData);
    }
 
    public HighLevelControllerName getCurrentHighLevelControlState()

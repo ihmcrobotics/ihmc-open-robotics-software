@@ -39,6 +39,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelCo
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -147,24 +148,10 @@ public class CrossRobotCommandResolver
 
    public void resolveCapturabilityData(CenterOfPressureDataHolder in, CenterOfPressureDataHolder out)
    {
-      TDoubleArrayList inputTimes = in.getCapturePointWaypointTimes();
-      RecyclingArrayList<FramePoint2D> inputPositions = in.getCapturePointPositionWaypoints();
-      RecyclingArrayList<FrameVector2D> inputVelocities = in.getCapturePointVelocityWaypoints();
+      ConvexPolygon2D supportPolygonIn = in.getSupportPolygon();
+      ConvexPolygon2D supportPolygonOut = out.getSupportPolygon();
 
-      TDoubleArrayList outputTimes = out.getCapturePointWaypointTimes();
-      RecyclingArrayList<FramePoint2D> outputPositions = out.getCapturePointPositionWaypoints();
-      RecyclingArrayList<FrameVector2D> outputVelocities = out.getCapturePointVelocityWaypoints();
-
-      outputTimes.reset();
-      outputPositions.clear();
-      outputVelocities.clear();
-
-      for (int i = 0; i < inputTimes.size(); i++)
-      {
-         outputTimes.add(inputTimes.get(i));
-         resolveFrameTuple2D(inputPositions.get(i), outputPositions.add());
-         resolveFrameTuple2D(inputVelocities.get(i), outputVelocities.add());
-      }
+      supportPolygonOut.set(supportPolygonIn);
    }
 
    public void resolveDesiredExternalWrenchHolder(DesiredExternalWrenchHolder in, DesiredExternalWrenchHolder out)

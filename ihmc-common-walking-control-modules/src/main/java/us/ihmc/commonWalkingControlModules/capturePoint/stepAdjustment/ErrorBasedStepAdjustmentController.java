@@ -12,6 +12,8 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -84,6 +86,10 @@ public class ErrorBasedStepAdjustmentController
    private final YoFramePoint3D previousFootstepSolution = new YoFramePoint3D(yoNamePrefix + "PreviousFootstepSolutionLocation", worldFrame, registry);
    private final YoFramePose3D footstepSolution = new YoFramePose3D(yoNamePrefix + "FootstepSolutionLocation", worldFrame, registry);
    private final YoFramePoint2D adjustedSolution = new YoFramePoint2D(yoNamePrefix + "AdjustedSolution", worldFrame, registry);
+
+   private final FrameVector3D offset = new FrameVector3D();
+   private final FramePose3D initialFootstepSolution = new FramePose3D();
+   private final YoDouble maxStepAdjustment = new YoDouble(yoNamePrefix + "MaxStepAdjustment", registry);
 
    private final YoBoolean isInSwing = new YoBoolean(yoNamePrefix + "IsInSwing", registry);
    private final YoDouble initialTime = new YoDouble(yoNamePrefix + "InitialTime", registry);
@@ -225,7 +231,7 @@ public class ErrorBasedStepAdjustmentController
       }
 
       swingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
-
+      maxStepAdjustment.set(0.05);
 
       parentRegistry.addChild(registry);
    }
@@ -272,6 +278,7 @@ public class ErrorBasedStepAdjustmentController
          referenceFootstepPosition.set(footstepPose.getPosition());
          footstepSolution.set(footstepPose);
          previousFootstepSolution.set(footstepSolution.getPosition());
+         initialFootstepSolution.set(footstepPose);
 
          this.swingDuration.set(swingDuration);
 
@@ -388,30 +395,40 @@ public class ErrorBasedStepAdjustmentController
       projectAdjustedStepIntoCaptureRegion(pointToProject);
       boolean wasAdjusted = deadbandAndApplyStepAdjustment();
 
-      environmentConstraintProvider.setReachabilityRegion(reachabilityConstraintHandler.getReachabilityConstraint());
-      environmentConstraintProvider.updateActiveConstraintRegionToUse(footstepSolution, multiStepCaptureRegionCalculator.getCaptureRegion());
+//      environmentConstraintProvider.setReachabilityRegion(reachabilityConstraintHandler.getReachabilityConstraint());
+//      environmentConstraintProvider.updateActiveConstraintRegionToUse(footstepSolution, multiStepCaptureRegionCalculator.getCaptureRegion());
+//
+//      if (environmentConstraintProvider.hasStepConstraintRegion() && (wasAdjusted || !hasPlanarRegionBeenAssigned.getBooleanValue()))
+//      {
+//         if (environmentConstraintProvider.validateConvexityOfPlanarRegion())
+//         {
+//            boolean environmentallyConstrained = environmentConstraintProvider.applyEnvironmentConstraintToFootstep(upcomingFootstepSide.getEnumValue(),
+//                                                                                                                    footstepSolution,
+//                                                                                                                    upcomingFootstepContactPoints);
+//            wasAdjusted |= environmentallyConstrained;
+//            hasPlanarRegionBeenAssigned.set(environmentConstraintProvider.foundSolution());
+//
+//            // ok, force it back to be reachable
+//            if (environmentallyConstrained)
+//            {
+//               tempPoint2D.set(footstepSolution.getPosition());
+//               computeBestReachabilityConstraintToUseWhenNotIntersecting();
+//               FrameConvexPolygon2DReadOnly reachability = getSelectedReachableRegion();
+//               if (!reachability.isPointInside(tempPoint2D))
+//                  reachability.orthogonalProjection(tempPoint2D);
+//               footstepSolution.getPosition().set(tempPoint2D);
+//            }
+//         }
+//      }
 
-      if (environmentConstraintProvider.hasStepConstraintRegion() && (wasAdjusted || !hasPlanarRegionBeenAssigned.getBooleanValue()))
+      offset.sub(footstepSolution.getPosition(), initialFootstepSolution.getPosition());
+      offset.setZ(0.0);
+
+      double offsetLength = offset.norm();
+      if (offsetLength > maxStepAdjustment.getValue())
       {
-         if (environmentConstraintProvider.validateConvexityOfPlanarRegion())
-         {
-            boolean environmentallyConstrained = environmentConstraintProvider.applyEnvironmentConstraintToFootstep(upcomingFootstepSide.getEnumValue(),
-                                                                                                                    footstepSolution,
-                                                                                                                    upcomingFootstepContactPoints);
-            wasAdjusted |= environmentallyConstrained;
-            hasPlanarRegionBeenAssigned.set(environmentConstraintProvider.foundSolution());
-
-            // ok, force it back to be reachable
-            if (environmentallyConstrained)
-            {
-               tempPoint2D.set(footstepSolution.getPosition());
-               computeBestReachabilityConstraintToUseWhenNotIntersecting();
-               FrameConvexPolygon2DReadOnly reachability = getSelectedReachableRegion();
-               if (!reachability.isPointInside(tempPoint2D))
-                  reachability.orthogonalProjection(tempPoint2D);
-               footstepSolution.getPosition().set(tempPoint2D);
-            }
-         }
+         offset.scale(maxStepAdjustment.getValue() / offsetLength);
+         footstepSolution.getPosition().add(initialFootstepSolution.getPosition(), offset);
       }
 
       footstepWasAdjusted.set(wasAdjusted || previousFootstepSolution.distance(footstepSolution.getPosition()) > 1e-3);

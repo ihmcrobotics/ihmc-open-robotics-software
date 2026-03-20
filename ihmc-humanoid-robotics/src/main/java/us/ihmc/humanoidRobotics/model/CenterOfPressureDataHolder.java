@@ -8,6 +8,8 @@ import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -15,6 +17,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -26,9 +29,8 @@ public class CenterOfPressureDataHolder implements Settable<CenterOfPressureData
    private final RecyclingArrayList<FramePoint2D> centerOfPressures = new RecyclingArrayList<>(FramePoint2D.class);
 
    // can replace with full trajectory data (backing data for CoMTrajectorySegment and VRP waypoints)
-   private final TDoubleArrayList capturePointWaypointTimes = new TDoubleArrayList();
-   private final RecyclingArrayList<FramePoint2D> capturePointPositionWaypoints = new RecyclingArrayList<>(FramePoint2D.class);
-   private final RecyclingArrayList<FrameVector2D> capturePointVelocityWaypoints = new RecyclingArrayList<>(FrameVector2D.class);
+   private final FramePoint2D perfectCenterOfPressure = new FramePoint2D();
+   private final ConvexPolygon2D supportPolygon = new ConvexPolygon2D();
 
    /**
     * This is used for lookups only and is populated from the {@link #centerOfPressures}. It should not be modified
@@ -58,10 +60,8 @@ public class CenterOfPressureDataHolder implements Settable<CenterOfPressureData
       bodiesWithCenterOfPressures.clear();
       centerOfPressures.clear();
       centerOfPressureMap.clear();
-
-      capturePointWaypointTimes.reset();
-      capturePointPositionWaypoints.clear();
-      capturePointVelocityWaypoints.clear();
+      perfectCenterOfPressure.setToNaN();
+      supportPolygon.clear();
    }
 
    public void registerRigidBody(RigidBodyBasics rigidBody)
@@ -126,33 +126,19 @@ public class CenterOfPressureDataHolder implements Settable<CenterOfPressureData
       return centerOfPressures.get(bodyIndex);
    }
 
-   public void clearCapturePointWaypoints()
+   public FramePoint2D getPerfectCenterOfPressure()
    {
-      capturePointWaypointTimes.reset();
-      capturePointPositionWaypoints.clear();
-      capturePointVelocityWaypoints.clear();
+      return perfectCenterOfPressure;
    }
 
-   public void addCapturePointWaypoint(double t, FramePoint2DReadOnly position, FrameVector2DReadOnly velocity)
+   public void setSupportPolygon(ConvexPolygon2DReadOnly supportPolygon)
    {
-      capturePointWaypointTimes.add(t);
-      capturePointPositionWaypoints.add().set(position);
-      capturePointVelocityWaypoints.add().set(velocity);
+      this.supportPolygon.set(supportPolygon);
    }
 
-   public TDoubleArrayList getCapturePointWaypointTimes()
+   public ConvexPolygon2D getSupportPolygon()
    {
-      return capturePointWaypointTimes;
-   }
-
-   public RecyclingArrayList<FramePoint2D> getCapturePointPositionWaypoints()
-   {
-      return capturePointPositionWaypoints;
-   }
-
-   public RecyclingArrayList<FrameVector2D> getCapturePointVelocityWaypoints()
-   {
-      return capturePointVelocityWaypoints;
+      return supportPolygon;
    }
 
    @Override
@@ -164,12 +150,8 @@ public class CenterOfPressureDataHolder implements Settable<CenterOfPressureData
          RigidBodyBasics rigidBody = other.getRigidBody(i);
          registerRigidBody(rigidBody, other.getCenterOfPressure(i));
       }
-      for (int i = 0; i < other.capturePointWaypointTimes.size(); i++)
-      {
-         capturePointWaypointTimes.add(other.capturePointWaypointTimes.get(i));
-         capturePointPositionWaypoints.add().set(other.capturePointPositionWaypoints.get(i));
-         capturePointVelocityWaypoints.add().set(other.capturePointVelocityWaypoints.get(i));
-      }
+      perfectCenterOfPressure.set(other.perfectCenterOfPressure);
+      this.supportPolygon.set(other.supportPolygon);
    }
 
    @Override
@@ -190,27 +172,10 @@ public class CenterOfPressureDataHolder implements Settable<CenterOfPressureData
             if (!getCenterOfPressure(i).equals(other.getCenterOfPressure(rigidBody)))
                return false;
          }
-         if (capturePointWaypointTimes.size() != other.capturePointWaypointTimes.size())
+         if (!perfectCenterOfPressure.equals(other.perfectCenterOfPressure))
             return false;
-         if (capturePointPositionWaypoints.size() != other.capturePointPositionWaypoints.size())
+         if (!supportPolygon.equals(other.supportPolygon))
             return false;
-         if (capturePointVelocityWaypoints.size() != other.capturePointVelocityWaypoints.size())
-            return false;
-         for (int i = 0; i < capturePointWaypointTimes.size(); i++)
-         {
-            if (capturePointWaypointTimes.get(i) != other.capturePointWaypointTimes.get(i))
-               return false;
-         }
-         for (int i = 0; i < capturePointPositionWaypoints.size(); i++)
-         {
-            if (capturePointPositionWaypoints.get(i).equals(other.capturePointPositionWaypoints.get(i)))
-               return false;
-         }
-         for (int i = 0; i < capturePointVelocityWaypoints.size(); i++)
-         {
-            if (capturePointVelocityWaypoints.get(i).equals(other.capturePointVelocityWaypoints.get(i)))
-               return false;
-         }
          return true;
       }
       else
