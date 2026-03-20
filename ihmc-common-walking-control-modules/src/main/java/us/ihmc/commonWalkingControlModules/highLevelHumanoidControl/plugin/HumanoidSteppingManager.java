@@ -110,10 +110,10 @@ public class HumanoidSteppingManager implements Updatable, SCS2YoGraphicHolder
                                                                              statusMessage.getEndHighLevelControllerName())));
 
       goalReacher = new PDVelocityBasedGoalReacher(referenceFrames.getPelvisZUpFrame(), statusMessageOutputManager, registry);
-      commandInputManager.addControllerWalkToGoalCommandConsumer(goalReacher::consumeNewWaypoint);
+      commandInputManager.addControllerWaypointGoalCommandConsumer(goalReacher::consumeNewWaypoint);
+      commandInputManager.addControllerWaypointGoalListCommandConsumer(goalReacher::consumeNewWaypointList);
       commandInputManager.addControllerReleaseGoalCommand(goalReacher::consumeReleaseGoalCommand);
    }
-
 
    public void setFootstepAdjustment(FootstepAdjustment footstepAdjustment)
    {

@@ -1,5 +1,5 @@
-#ifndef __controller_msgs__msg__ControllerWalkToGoalMessage__idl__
-#define __controller_msgs__msg__ControllerWalkToGoalMessage__idl__
+#ifndef __controller_msgs__msg__ControllerWaypointGoalMessage__idl__
+#define __controller_msgs__msg__ControllerWaypointGoalMessage__idl__
 
 module controller_msgs
 {
@@ -11,8 +11,8 @@ module controller_msgs
       /**
        * Input message for the PDVelocityBasedGoalReacher.
        */
-      @TypeCode(type="controller_msgs::msg::dds_::ControllerWalkToGoalMessage_")
-      struct ControllerWalkToGoalMessage
+      @TypeCode(type="controller_msgs::msg::dds_::ControllerWaypointGoalMessage_")
+      struct ControllerWaypointGoalMessage
       {
         /**
          * Unique ID used to identify this message, should preferably be consecutively increasing.

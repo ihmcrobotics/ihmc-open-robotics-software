@@ -2,10 +2,12 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
 import controller_msgs.msg.dds.ContinuousStepGeneratorStatusMessage;
 import controller_msgs.msg.dds.ControllerWalkToGoalStatusMessage;
+import controller_msgs.msg.dds.ControllerWaypointStatusMessage;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ContinuousStepGeneratorInputCommand;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ContinuousStepGeneratorParametersCommand;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ControllerReleaseGoalCommand;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ControllerWalkToGoalCommand;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ControllerWaypointGoalCommand;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ControllerWaypointGoalListCommand;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
@@ -32,7 +34,8 @@ public class StepGeneratorAPIDefinition
 
       commands.add(ContinuousStepGeneratorParametersCommand.class);
       commands.add(ContinuousStepGeneratorInputCommand.class);
-      commands.add(ControllerWalkToGoalCommand.class);
+      commands.add(ControllerWaypointGoalCommand.class);
+      commands.add(ControllerWaypointGoalListCommand.class);
       commands.add(ControllerReleaseGoalCommand.class);
       commands.add(PlanarRegionsListCommand.class);
       commands.add(HeightMapCommand.class);
@@ -43,6 +46,7 @@ public class StepGeneratorAPIDefinition
       List<Class<? extends Settable<?>>> statusMessages = new ArrayList<>();
       statusMessages.add(ContinuousStepGeneratorStatusMessage.class);
       statusMessages.add(ControllerWalkToGoalStatusMessage.class);
+      statusMessages.add(ControllerWaypointStatusMessage.class);
 
       stepGeneratorSupportedStatusMessages = Collections.unmodifiableList(statusMessages);
       outputMessageClasses.addAll(stepGeneratorSupportedStatusMessages);

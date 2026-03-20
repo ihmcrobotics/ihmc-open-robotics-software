@@ -1,13 +1,13 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin;
 
-import controller_msgs.msg.dds.ControllerWalkToGoalMessage;
+import controller_msgs.msg.dds.ControllerWaypointGoalMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.interfaces.Pose2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
 
-public class ControllerWalkToGoalCommand implements Command<ControllerWalkToGoalCommand, ControllerWalkToGoalMessage>
+public class ControllerWaypointGoalCommand implements Command<ControllerWaypointGoalCommand, ControllerWaypointGoalMessage>
 {
    private long sequenceId;
    private final FramePose2D goalPose = new FramePose2D();
@@ -17,7 +17,7 @@ public class ControllerWalkToGoalCommand implements Command<ControllerWalkToGoal
    private double positionProximity = 0.02;
    private double orientationProximity = 0.1;
 
-   public ControllerWalkToGoalCommand()
+   public ControllerWaypointGoalCommand()
    {
    }
 
@@ -33,7 +33,7 @@ public class ControllerWalkToGoalCommand implements Command<ControllerWalkToGoal
    }
 
    @Override
-   public void setFromMessage(ControllerWalkToGoalMessage message)
+   public void setFromMessage(ControllerWaypointGoalMessage message)
    {
       goalPose.setX(message.getXPosition());
       goalPose.setY(message.getYPosition());
@@ -46,9 +46,9 @@ public class ControllerWalkToGoalCommand implements Command<ControllerWalkToGoal
    }
 
    @Override
-   public Class<ControllerWalkToGoalMessage> getMessageClass()
+   public Class<ControllerWaypointGoalMessage> getMessageClass()
    {
-      return ControllerWalkToGoalMessage.class;
+      return ControllerWaypointGoalMessage.class;
    }
 
    @Override
@@ -64,7 +64,7 @@ public class ControllerWalkToGoalCommand implements Command<ControllerWalkToGoal
    }
 
    @Override
-   public void set(ControllerWalkToGoalCommand other)
+   public void set(ControllerWaypointGoalCommand other)
    {
       sequenceId = other.sequenceId;
       goalPose.set(other.goalPose);

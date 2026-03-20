@@ -1,10 +1,12 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator;
 
 import controller_msgs.msg.dds.ControllerWalkToGoalStatusMessage;
+import controller_msgs.msg.dds.ControllerWaypointStatusMessage;
 import controller_msgs.msg.dds.DirectionalControlInputMessage;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ControllerReleaseGoalCommand;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ControllerWalkToGoalCommand;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ControllerWaypointGoalCommand;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ControllerWaypointGoalListCommand;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -153,7 +155,16 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
 
    private final FramePose2D previousGoalPose = new FramePose2D();
 
-   public void consumeNewWaypoint(ControllerWalkToGoalCommand command)
+   public void consumeNewWaypointList(ControllerWaypointGoalListCommand command)
+   {
+      goalPoses.clear();
+      for (int i = 0; i < command.getNumberOfWaypoints(); i++)
+      {
+         consumeNewWaypoint(command.getWaypoint(i));
+      }
+   }
+
+   public void consumeNewWaypoint(ControllerWaypointGoalCommand command)
    {
       if (hasReachedGoal.getBooleanValue() && goalPoses.size() == 1)
       {  // we were holding the previous pose, based on the command. remove it, and add the next one.
@@ -170,6 +181,8 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       }
       // Add the new goal pose.
       goalPoses.add().set(command, previousGoalPose, maxForwardSpeed.getValue());
+      if (goalPoses.size() == 1)
+         publishWaypointStatus(goalPoses.getFirst().getGoalPose(), 0, true);
       hasGoal.set(true);
       shouldHoldGoal.set(command.getShouldHoldPosition());
 
@@ -188,6 +201,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
    }
 
    private final ControllerWalkToGoalStatusMessage statusMessage = new ControllerWalkToGoalStatusMessage();
+   private final ControllerWaypointStatusMessage waypointReachedMessage = new ControllerWaypointStatusMessage();
 
    @Override
    public void update(double time)
@@ -263,8 +277,12 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
          reachedGoal = reachedGoal(goalPoses.getFirst().getGoalPose());
          if (reachedGoal)
          {
+            publishWaypointStatus(goalPoses.getFirst().getGoalPose(), goalPoses.size() - 1, false);
             if (goalPoses.size() > 1)
+            {
                goalPoses.remove(0);
+               publishWaypointStatus(goalPoses.getFirst().getGoalPose(), goalPoses.size() - 1, true);
+            }
             else if (goalPoses.size() == 1 && !shouldHoldGoal.getBooleanValue())
                goalPoses.remove(0);
             else if (shouldHoldGoal.getBooleanValue())
@@ -290,6 +308,16 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       {
          currentGoalPose.setToNaN();
       }
+   }
+
+   private void publishWaypointStatus(FramePose2DReadOnly pose, int waypointsRemaining, boolean isStarted)
+   {
+      waypointReachedMessage.setGoalXPosition(pose.getX());
+      waypointReachedMessage.setGoalYPosition(pose.getY());
+      waypointReachedMessage.setGoalYaw(pose.getYaw());
+      waypointReachedMessage.setWaypointsRemaining(waypointsRemaining);
+      waypointReachedMessage.setIsStarted(isStarted);
+      statusMessageOutputManager.reportStatusMessage(waypointReachedMessage);
    }
 
    private boolean reachedGoal(FramePose2DReadOnly currentGoalPose)
@@ -369,7 +397,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       private double angleToReachGoal;
       private double cruisingSpeedScaler;
 
-      public void set(ControllerWalkToGoalCommand command, FramePose2DReadOnly previousPose, double maxSpeed)
+      public void set(ControllerWaypointGoalCommand command, FramePose2DReadOnly previousPose, double maxSpeed)
       {
          goalPose.set(command.getGoalPose());
          angleToReachGoal = command.getOrientationProximity();

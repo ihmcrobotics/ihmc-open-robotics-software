@@ -2,20 +2,20 @@ package controller_msgs.msg.dds;
 
 /**
 * 
-* Topic data type of the struct "ControllerWalkToGoalMessage" defined in "ControllerWalkToGoalMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+* Topic data type of the struct "ControllerWaypointGoalMessage" defined in "ControllerWaypointGoalMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
 *
-* This file was automatically generated from ControllerWalkToGoalMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit ControllerWalkToGoalMessage_.idl instead.
+* This file was automatically generated from ControllerWaypointGoalMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit ControllerWaypointGoalMessage_.idl instead.
 *
 */
-public class ControllerWalkToGoalMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.ControllerWalkToGoalMessage>
+public class ControllerWaypointGoalMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.ControllerWaypointGoalMessage>
 {
-   public static final java.lang.String name = "controller_msgs::msg::dds_::ControllerWalkToGoalMessage_";
+   public static final java.lang.String name = "controller_msgs::msg::dds_::ControllerWaypointGoalMessage_";
    
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "e7addf2665fb568ef5a909eb57613f05dad4849ddd09d2fa9c0068a3e59fbe58";
+   		return "fc0d93beef8087638b435ebb8903e6b45ef1bcea1b736423cdef71be1b2bc2c0";
    }
    
    @Override
@@ -28,7 +28,7 @@ public class ControllerWalkToGoalMessagePubSubType implements us.ihmc.pubsub.Top
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(controller_msgs.msg.dds.ControllerWalkToGoalMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
+   public void serialize(controller_msgs.msg.dds.ControllerWaypointGoalMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -36,7 +36,7 @@ public class ControllerWalkToGoalMessagePubSubType implements us.ihmc.pubsub.Top
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.ControllerWalkToGoalMessage data) throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.ControllerWaypointGoalMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -72,12 +72,12 @@ public class ControllerWalkToGoalMessagePubSubType implements us.ihmc.pubsub.Top
       return current_alignment - initial_alignment;
    }
 
-   public final static int getCdrSerializedSize(controller_msgs.msg.dds.ControllerWalkToGoalMessage data)
+   public final static int getCdrSerializedSize(controller_msgs.msg.dds.ControllerWaypointGoalMessage data)
    {
       return getCdrSerializedSize(data, 0);
    }
 
-   public final static int getCdrSerializedSize(controller_msgs.msg.dds.ControllerWalkToGoalMessage data, int current_alignment)
+   public final static int getCdrSerializedSize(controller_msgs.msg.dds.ControllerWaypointGoalMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
 
@@ -109,7 +109,7 @@ public class ControllerWalkToGoalMessagePubSubType implements us.ihmc.pubsub.Top
       return current_alignment - initial_alignment;
    }
 
-   public static void write(controller_msgs.msg.dds.ControllerWalkToGoalMessage data, us.ihmc.idl.CDR cdr)
+   public static void write(controller_msgs.msg.dds.ControllerWaypointGoalMessage data, us.ihmc.idl.CDR cdr)
    {
       cdr.write_type_12(data.getSequenceId());
 
@@ -129,7 +129,7 @@ public class ControllerWalkToGoalMessagePubSubType implements us.ihmc.pubsub.Top
 
    }
 
-   public static void read(controller_msgs.msg.dds.ControllerWalkToGoalMessage data, us.ihmc.idl.CDR cdr)
+   public static void read(controller_msgs.msg.dds.ControllerWaypointGoalMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_12());
       	
@@ -151,7 +151,7 @@ public class ControllerWalkToGoalMessagePubSubType implements us.ihmc.pubsub.Top
    }
 
    @Override
-   public final void serialize(controller_msgs.msg.dds.ControllerWalkToGoalMessage data, us.ihmc.idl.InterchangeSerializer ser)
+   public final void serialize(controller_msgs.msg.dds.ControllerWaypointGoalMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_6("x_position", data.getXPosition());
@@ -164,7 +164,7 @@ public class ControllerWalkToGoalMessagePubSubType implements us.ihmc.pubsub.Top
    }
 
    @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.ControllerWalkToGoalMessage data)
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.ControllerWaypointGoalMessage data)
    {
       data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setXPosition(ser.read_type_6("x_position"));
@@ -176,15 +176,15 @@ public class ControllerWalkToGoalMessagePubSubType implements us.ihmc.pubsub.Top
       data.setOrientationProximity(ser.read_type_6("orientation_proximity"));
    }
 
-   public static void staticCopy(controller_msgs.msg.dds.ControllerWalkToGoalMessage src, controller_msgs.msg.dds.ControllerWalkToGoalMessage dest)
+   public static void staticCopy(controller_msgs.msg.dds.ControllerWaypointGoalMessage src, controller_msgs.msg.dds.ControllerWaypointGoalMessage dest)
    {
       dest.set(src);
    }
 
    @Override
-   public controller_msgs.msg.dds.ControllerWalkToGoalMessage createData()
+   public controller_msgs.msg.dds.ControllerWaypointGoalMessage createData()
    {
-      return new controller_msgs.msg.dds.ControllerWalkToGoalMessage();
+      return new controller_msgs.msg.dds.ControllerWaypointGoalMessage();
    }
    @Override
    public int getTypeSize()
@@ -198,24 +198,24 @@ public class ControllerWalkToGoalMessagePubSubType implements us.ihmc.pubsub.Top
       return name;
    }
    
-   public void serialize(controller_msgs.msg.dds.ControllerWalkToGoalMessage data, us.ihmc.idl.CDR cdr)
+   public void serialize(controller_msgs.msg.dds.ControllerWaypointGoalMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
    }
 
-   public void deserialize(controller_msgs.msg.dds.ControllerWalkToGoalMessage data, us.ihmc.idl.CDR cdr)
+   public void deserialize(controller_msgs.msg.dds.ControllerWaypointGoalMessage data, us.ihmc.idl.CDR cdr)
    {
       read(data, cdr);
    }
    
-   public void copy(controller_msgs.msg.dds.ControllerWalkToGoalMessage src, controller_msgs.msg.dds.ControllerWalkToGoalMessage dest)
+   public void copy(controller_msgs.msg.dds.ControllerWaypointGoalMessage src, controller_msgs.msg.dds.ControllerWaypointGoalMessage dest)
    {
       staticCopy(src, dest);
    }
 
    @Override
-   public ControllerWalkToGoalMessagePubSubType newInstance()
+   public ControllerWaypointGoalMessagePubSubType newInstance()
    {
-      return new ControllerWalkToGoalMessagePubSubType();
+      return new ControllerWaypointGoalMessagePubSubType();
    }
 }

@@ -4,14 +4,11 @@ import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGenerator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGeneratorParameters;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGeneratorParametersBasics;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.DesiredTurningVelocityProvider;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.DesiredVelocityProvider;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
-import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.ros2.ROS2HeartbeatMonitor;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
@@ -24,7 +21,6 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.yoVariables.euclid.YoVector2D;
 import us.ihmc.yoVariables.providers.BooleanProvider;
-import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -52,7 +48,8 @@ public class StepGeneratorCommandInputManager implements Updatable
 
    private final List<Consumer<HeightMapCommand>> heightMapCommandConsumers = new ArrayList<>();
    private final List<Consumer<ContinuousStepGeneratorParametersCommand>> csgParametersCommandConsumers = new ArrayList<>();
-   private final List<Consumer<ControllerWalkToGoalCommand>> controllerWalkToGoalCommandConsumers = new ArrayList<>();
+   private final List<Consumer<ControllerWaypointGoalListCommand>> controllerWaypointGoalListCommandConsumer = new ArrayList<>();
+   private final List<Consumer<ControllerWaypointGoalCommand>> controllerWaypointGoalCommandConsumer = new ArrayList<>();
    private final List<Consumer<ControllerReleaseGoalCommand>> controllerReleaseGoalCommandConsumers = new ArrayList<>();
 
    private final AtomicReference<FootstepStatus> latestFootstepStatusReceived = new AtomicReference<>(null);
@@ -96,9 +93,14 @@ public class StepGeneratorCommandInputManager implements Updatable
       csgParametersCommandConsumers.add(csgParametersCommandConsumer);
    }
 
-   public void addControllerWalkToGoalCommandConsumer(Consumer<ControllerWalkToGoalCommand> controllerWalToGoalCommandConsumer)
+   public void addControllerWaypointGoalListCommandConsumer(Consumer<ControllerWaypointGoalListCommand> controllerWaypointGoalListCommandConsumer)
    {
-      controllerWalkToGoalCommandConsumers.add(controllerWalToGoalCommandConsumer);
+      this.controllerWaypointGoalListCommandConsumer.add(controllerWaypointGoalListCommandConsumer);
+   }
+
+   public void addControllerWaypointGoalCommandConsumer(Consumer<ControllerWaypointGoalCommand> controllerWaypointGoalCommandConsumer)
+   {
+      this.controllerWaypointGoalCommandConsumer.add(controllerWaypointGoalCommandConsumer);
    }
 
    public void addControllerReleaseGoalCommand(Consumer<ControllerReleaseGoalCommand> controllerReleaseGoalCommandConsumer)
@@ -176,17 +178,31 @@ public class StepGeneratorCommandInputManager implements Updatable
          isUnitVelocities.set(command.isUnitVelocities());
          walk.set(command.isWalk());
       }
-      else if (commandInputManager.isNewCommandAvailable(ControllerWalkToGoalCommand.class))
+      else if (commandInputManager.isNewCommandAvailable(ControllerWaypointGoalCommand.class))
       {
-         ControllerWalkToGoalCommand command = commandInputManager.pollNewestCommand(ControllerWalkToGoalCommand.class);
-         for (int i = 0; i < controllerWalkToGoalCommandConsumers.size(); i++)
+         ControllerWaypointGoalCommand command = commandInputManager.pollNewestCommand(ControllerWaypointGoalCommand.class);
+         for (int i = 0; i < controllerWaypointGoalCommandConsumer.size(); i++)
          {
-            controllerWalkToGoalCommandConsumers.get(i).accept(command);
+            controllerWaypointGoalCommandConsumer.get(i).accept(command);
+         }
+         walk.set(true);
+      }
+      else if (commandInputManager.isNewCommandAvailable(ControllerWaypointGoalListCommand.class))
+      {
+         ControllerWaypointGoalListCommand listCommand = commandInputManager.pollNewestCommand(ControllerWaypointGoalListCommand.class);
+         for (int w = 0; w < listCommand.getNumberOfWaypoints(); w++)
+         {
+            ControllerWaypointGoalCommand waypoint = listCommand.getWaypoint(w);
+            for (int i = 0; i < controllerWaypointGoalCommandConsumer.size(); i++)
+            {
+               controllerWaypointGoalCommandConsumer.get(i).accept(waypoint);
+            }
          }
          walk.set(true);
       }
       commandInputManager.clearCommands(ContinuousStepGeneratorInputCommand.class);
-      commandInputManager.clearCommands(ControllerWalkToGoalCommand.class);
+      commandInputManager.clearCommands(ControllerWaypointGoalCommand.class);
+      commandInputManager.clearCommands(ControllerWaypointGoalListCommand.class);
 
       if (commandInputManager.isNewCommandAvailable(ContinuousStepGeneratorParametersCommand.class))
       {

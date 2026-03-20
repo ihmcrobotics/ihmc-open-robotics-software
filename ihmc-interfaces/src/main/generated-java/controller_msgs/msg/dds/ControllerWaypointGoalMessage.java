@@ -9,7 +9,7 @@ import us.ihmc.pubsub.TopicDataType;
 /**
        * Input message for the PDVelocityBasedGoalReacher.
        */
-public class ControllerWalkToGoalMessage extends Packet<ControllerWalkToGoalMessage> implements Settable<ControllerWalkToGoalMessage>, EpsilonComparable<ControllerWalkToGoalMessage>
+public class ControllerWaypointGoalMessage extends Packet<ControllerWaypointGoalMessage> implements Settable<ControllerWaypointGoalMessage>, EpsilonComparable<ControllerWaypointGoalMessage>
 {
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -35,17 +35,17 @@ public class ControllerWalkToGoalMessage extends Packet<ControllerWalkToGoalMess
    public double position_proximity_ = 0.02;
    public double orientation_proximity_ = 0.1;
 
-   public ControllerWalkToGoalMessage()
+   public ControllerWaypointGoalMessage()
    {
    }
 
-   public ControllerWalkToGoalMessage(ControllerWalkToGoalMessage other)
+   public ControllerWaypointGoalMessage(ControllerWaypointGoalMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(ControllerWalkToGoalMessage other)
+   public void set(ControllerWaypointGoalMessage other)
    {
       sequence_id_ = other.sequence_id_;
 
@@ -168,19 +168,19 @@ public class ControllerWalkToGoalMessage extends Packet<ControllerWalkToGoalMess
    }
 
 
-   public static Supplier<ControllerWalkToGoalMessagePubSubType> getPubSubType()
+   public static Supplier<ControllerWaypointGoalMessagePubSubType> getPubSubType()
    {
-      return ControllerWalkToGoalMessagePubSubType::new;
+      return ControllerWaypointGoalMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return ControllerWalkToGoalMessagePubSubType::new;
+      return ControllerWaypointGoalMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(ControllerWalkToGoalMessage other, double epsilon)
+   public boolean epsilonEquals(ControllerWaypointGoalMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -210,9 +210,9 @@ public class ControllerWalkToGoalMessage extends Packet<ControllerWalkToGoalMess
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof ControllerWalkToGoalMessage)) return false;
+      if(!(other instanceof ControllerWaypointGoalMessage)) return false;
 
-      ControllerWalkToGoalMessage otherMyClass = (ControllerWalkToGoalMessage) other;
+      ControllerWaypointGoalMessage otherMyClass = (ControllerWaypointGoalMessage) other;
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
@@ -239,7 +239,7 @@ public class ControllerWalkToGoalMessage extends Packet<ControllerWalkToGoalMess
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("ControllerWalkToGoalMessage {");
+      builder.append("ControllerWaypointGoalMessage {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("x_position=");
