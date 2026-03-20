@@ -39,10 +39,6 @@ public class XBoxOneSCSLocomotionPlugin extends AbstractJoystickLocomotionPlugin
    private final AtomicReference<Double> leftJoystickXAxisValue = new AtomicReference<>();
    private final AtomicReference<Double> leftJoystickYAxisValue = new AtomicReference<>();
    private final AtomicReference<Double> rightJoystickXAxisValue = new AtomicReference<>();
-   private boolean walk = false;
-   private double forwardVelocity = 0;
-   private double lateralVelocity = 0;
-   private double turningVelocity = 0;
 
    public XBoxOneSCSLocomotionPlugin(DRCRobotModel robotModel, ROS2Node ros2Node) throws JoystickNotFoundException
    {
@@ -64,10 +60,10 @@ public class XBoxOneSCSLocomotionPlugin extends AbstractJoystickLocomotionPlugin
    public void update()
    {
       // Reset everything to false and zero to be safe
-      walk = false;
-      forwardVelocity = 0;
-      lateralVelocity = 0;
-      turningVelocity = 0;
+      boolean walk = false;
+      double forwardVelocity = 0;
+      double lateralVelocity = 0;
+      double turningVelocity = 0;
 
       // Check value of left trigger to determine whether to start stepping
       if (leftTriggerValue.get() != null)
