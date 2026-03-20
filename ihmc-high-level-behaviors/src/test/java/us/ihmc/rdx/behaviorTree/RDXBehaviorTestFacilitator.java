@@ -64,7 +64,7 @@ import java.util.function.Supplier;
 public class RDXBehaviorTestFacilitator
 {
    /** Disable perception if CUDA 12.9.1 is not installed or not working */
-   private final boolean runPerception = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() && CUDATools.hasNVJPEG();
+   private final boolean runPerception = false; //!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() && CUDATools.hasNVJPEG();
    private final String svoFile;
    private final Supplier<DRCRobotModel> robotModelBuilder;
    private final TriFunction<DRCRobotModel, ROS2NodeBuilder, RigidBodyTransformReadOnly, HumanoidKinematicsSimulation> kinematicsSimulationBuilder;

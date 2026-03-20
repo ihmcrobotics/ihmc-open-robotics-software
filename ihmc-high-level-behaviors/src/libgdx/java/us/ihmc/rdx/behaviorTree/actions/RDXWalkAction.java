@@ -476,6 +476,12 @@ public class RDXWalkAction extends RDXActionNode<WalkActionState, WalkActionDefi
                for (RDXWalkActionFootstep manuallyPlacedFootstep : manuallyPlacedFootsteps)
                   manuallyPlacedFootstep.updateGizmo();
 
+            if (editManuallyPlacedSteps.get())
+            {
+               if (ImGui.button(labels.get("Reset footstep height")))
+                  resetManualFootstepHeightsInWalkingFrame();
+            }
+
             ImGui.sameLine();
             if (editManuallyPlacedSteps.get() && ImGui.button("Select All Footsteps"))
                for (RDXWalkActionFootstep manuallyPlacedFootstep : manuallyPlacedFootsteps)
@@ -705,6 +711,24 @@ public class RDXWalkAction extends RDXActionNode<WalkActionState, WalkActionDefi
       for (WalkActionFootstepState footstepState : state.getManuallyPlacedFootsteps())
       {
          footstepState.getSoleFrame().changeFrame(newParentFrameName);
+      }
+   }
+
+   private void resetManualFootstepHeightsInWalkingFrame()
+   {
+      ReferenceFrame walkingFrame = state.getFrameByName("Walking");
+      if (walkingFrame == null)
+         return;
+
+      FramePose3D footstepPose = new FramePose3D();
+      for (WalkActionFootstepState footstepState : state.getManuallyPlacedFootsteps())
+      {
+         ReferenceFrame soleFrame = footstepState.getSoleFrame().getReferenceFrame();
+         footstepPose.setFromReferenceFrame(soleFrame);
+         footstepPose.changeFrame(walkingFrame);
+         footstepPose.getPosition().setZ(0.0);
+         footstepPose.changeFrame(soleFrame.getParent());
+         footstepState.getDefinition().getSoleToPlanFrameTransform().getValueAndModify().set(footstepPose);
       }
    }
 
