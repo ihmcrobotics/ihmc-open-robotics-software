@@ -63,6 +63,7 @@ public class RDXWalkAction extends RDXActionNode<WalkActionState, WalkActionDefi
    private final ImBooleanWrapper walkWithGoalOrientationWidget;
    private final ImBooleanWrapper planWithBodyPathWidget;
    private final ImBooleanWrapper quickWaypointOnlyWidget;
+   private final ImBooleanWrapper useRRTPathPlannerWidget;
    private final ImIntegerWrapper quickHipWidthWidget;
    private final ImIntegerWrapper quickStepLengthWidget;
    private final ImIntegerWrapper quickNextPelvisYawLimitWidget;
@@ -156,7 +157,10 @@ public class RDXWalkAction extends RDXActionNode<WalkActionState, WalkActionDefi
                                                     imBoolean -> ImGui.checkbox(labels.get("Plan with body path"), imBoolean));
       quickWaypointOnlyWidget = new ImBooleanWrapper(definition.getQuickWaypointOnly()::getValue,
                                                      definition.getQuickWaypointOnly()::setValue,
-                                                     imBoolean -> ImGui.checkbox(labels.get("Quick waypoint only"), imBoolean));
+                                                     imBoolean -> ImGui.checkbox(labels.get("Plan to waypoint only"), imBoolean));
+      useRRTPathPlannerWidget = new ImBooleanWrapper(definition.getUseRRTPathPlanner()::getValue,
+                                                     definition.getUseRRTPathPlanner()::setValue,
+                                                     imBoolean -> ImGui.checkbox(labels.get("Use RRT path planner"), imBoolean));
       quickHipWidthWidget = new ImIntegerWrapper(() -> (int) Math.round(definition.getQuickHipWidth().getValue() * 100.0),
                                                  value -> definition.getQuickHipWidth().setValue(value / 100.0),
                                                  imInt -> ImGui.inputInt(labels.get("Quick hip width (cm)"), imInt, 1, 5));
@@ -521,13 +525,6 @@ public class RDXWalkAction extends RDXActionNode<WalkActionState, WalkActionDefi
                if (side == RobotSide.LEFT)
                   ImGui.sameLine();
             }
-            ImGui.text("Initial stance side:");
-            for (InitialStanceSide initialStanceSide : InitialStanceSide.values)
-            {
-               ImGui.sameLine();
-               if (ImGui.radioButton(labels.get(initialStanceSide.name()), definition.getPlannerInitialStanceSide().getValue() == initialStanceSide))
-                  definition.getPlannerInitialStanceSide().setValue(initialStanceSide);
-            }
 
             if (ImGui.radioButton(labels.get("Quick"), definition.getPlannerType().getValue() == QUICK))
                definition.getPlannerType().setValue(QUICK);
@@ -538,14 +535,10 @@ public class RDXWalkAction extends RDXActionNode<WalkActionState, WalkActionDefi
             if (ImGui.radioButton(labels.get("A*"), definition.getPlannerType().getValue() == A_STAR))
                definition.getPlannerType().setValue(A_STAR);
 
-            ImGui.beginDisabled(definition.getPlannerType().getValue() == QUICK);
-            walkWithGoalOrientationWidget.renderImGuiWidget();
-            ImGui.endDisabled();
-
-            planWithBodyPathWidget.renderImGuiWidget();
-
             if (definition.getPlannerType().getValue() == QUICK)
             {
+               quickWaypointOnlyWidget.renderImGuiWidget();
+               useRRTPathPlannerWidget.renderImGuiWidget();
                ImGui.text("Waypoints: %d".formatted(definition.getWaypoints().getSize()));
                ImGui.sameLine();
                if (ImGui.button(labels.get("Add", "Waypoint")))
@@ -570,6 +563,18 @@ public class RDXWalkAction extends RDXActionNode<WalkActionState, WalkActionDefi
                ImGui.sameLine();
                ImGui.checkbox(labels.get("Edit"), editWaypoints);
             }
+            else
+            {
+               ImGui.text("Initial stance side:");
+               for (InitialStanceSide initialStanceSide : InitialStanceSide.values)
+               {
+                  ImGui.sameLine();
+                  if (ImGui.radioButton(labels.get(initialStanceSide.name()), definition.getPlannerInitialStanceSide().getValue() == initialStanceSide))
+                     definition.getPlannerInitialStanceSide().setValue(initialStanceSide);
+               }
+               walkWithGoalOrientationWidget.renderImGuiWidget();
+               planWithBodyPathWidget.renderImGuiWidget();
+            }
 
             ImGui.text("Preview steps: %d".formatted(state.getPreviewFootsteps().getSize()));
 
@@ -578,7 +583,6 @@ public class RDXWalkAction extends RDXActionNode<WalkActionState, WalkActionDefi
                ImGui.pushItemWidth(ImGui.getFontSize() * 8.0f);
                if (definition.getPlannerType().getValue() == QUICK)
                {
-                  quickWaypointOnlyWidget.renderImGuiWidget();
                   quickHipWidthWidget.renderImGuiWidget();
                   quickStepLengthWidget.renderImGuiWidget();
                   quickNextPelvisYawLimitWidget.renderImGuiWidget();

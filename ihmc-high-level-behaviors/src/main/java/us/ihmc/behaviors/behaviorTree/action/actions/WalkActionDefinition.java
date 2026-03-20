@@ -47,6 +47,7 @@ public class WalkActionDefinition extends ActionNodeDefinition
    private final CRDTBidirectionalBoolean plannerPlanWithBodyPath;
    private final BehaviorStoredPropertySetDefinition plannerParameters;
    private final CRDTBidirectionalBoolean quickWaypointOnly;
+   private final CRDTBidirectionalBoolean useRRTPathPlanner;
    private final CRDTBidirectionalDouble quickHipWidth;
    private final CRDTBidirectionalDouble quickStepLength;
    private final CRDTBidirectionalDouble quickNextPelvisYawLimit;
@@ -76,6 +77,7 @@ public class WalkActionDefinition extends ActionNodeDefinition
    private boolean onDiskPlannerWalkWithGoalOrientation;
    private boolean onDiskPlannerPlanWithBodyPath;
    private boolean onDiskQuickWaypointOnly;
+   private boolean onDiskUseRRTPathPlanner;
    private double onDiskQuickHipWidth;
    private double onDiskQuickStepLength;
    private double onDiskQuickNextPelvisYawLimit;
@@ -109,6 +111,7 @@ public class WalkActionDefinition extends ActionNodeDefinition
       plannerPlanWithBodyPath = new CRDTBidirectionalBoolean(this, false);
       plannerParameters = new BehaviorStoredPropertySetDefinition(this, "plannerParameters", robotModel.getFootstepPlannerParameters());
       quickWaypointOnly = new CRDTBidirectionalBoolean(this, false);
+      useRRTPathPlanner = new CRDTBidirectionalBoolean(this, false);
       quickHipWidth = new CRDTBidirectionalDouble(this, 0.12);
       quickStepLength = new CRDTBidirectionalDouble(this, 0.28);
       quickNextPelvisYawLimit = new CRDTBidirectionalDouble(this, Math.toRadians(35.0));
@@ -152,16 +155,12 @@ public class WalkActionDefinition extends ActionNodeDefinition
             goalFootNode.put("y", JSONTools.toJsonMeters(goalFootstepToGoalYs.get(side).getValue()));
             goalFootNode.put("yawInDegrees", JSONTools.toJsonRadians(goalFootstepToGoalYaws.get(side).getValue()));
          }
-         jsonNode.put("plannerInitialStanceSide", plannerInitialStanceSide.getValue().name());
          jsonNode.put("planner", switch (plannerType.getValue())
          {
             case TURN_WALK_TURN -> "TURN_WALK_TURN";
             case A_STAR -> "A_STAR";
             default -> "QUICK";
          });
-         if (plannerType.getValue() == A_STAR)
-            jsonNode.put("plannerWalkWithGoalOrientation", plannerWalkWithGoalOrientation.getValue());
-         jsonNode.put("plannerPlanWithBodyPath", plannerPlanWithBodyPath.getValue());
          if (plannerType.getValue() == QUICK)
          {
             if (waypoints.getSize() > 0)
@@ -172,6 +171,8 @@ public class WalkActionDefinition extends ActionNodeDefinition
             }
             if (quickWaypointOnly.getValue())
                jsonNode.put("quickWaypointOnly", true);
+            if (useRRTPathPlanner.getValue())
+               jsonNode.put("useRrtPathPlanner", true);
             if (Math.abs(quickHipWidth.getValue() - 0.12) > 0.005)
                jsonNode.put("quickHipWidth", quickHipWidth.getValue());
             if (Math.abs(quickStepLength.getValue() - 0.28) > 0.005)
@@ -192,6 +193,12 @@ public class WalkActionDefinition extends ActionNodeDefinition
                jsonNode.put("quickMinSwingTime", quickMinSwingTime.getValue());
             if (Math.abs(quickMaxSwingTime.getValue() - 1.2) > 1.0e-3)
                jsonNode.put("quickMaxSwingTime", quickMaxSwingTime.getValue());
+         }
+         else
+         {
+            jsonNode.put("plannerInitialStanceSide", plannerInitialStanceSide.getValue().name());
+            jsonNode.put("plannerWalkWithGoalOrientation", plannerWalkWithGoalOrientation.getValue());
+            jsonNode.put("plannerPlanWithBodyPath", plannerPlanWithBodyPath.getValue());
          }
          plannerParameters.toJSON(jsonNode);
       }
@@ -257,6 +264,8 @@ public class WalkActionDefinition extends ActionNodeDefinition
          {
             if (jsonNode.get("quickWaypointOnly") != null)
                quickWaypointOnly.setValue(jsonNode.get("quickWaypointOnly").asBoolean());
+            if (jsonNode.get("useRrtPathPlanner") != null)
+               useRRTPathPlanner.setValue(jsonNode.get("useRrtPathPlanner").asBoolean());
             if (jsonNode.get("quickHipWidth") != null)
                quickHipWidth.setValue(jsonNode.get("quickHipWidth").asDouble());
             if (jsonNode.get("quickStepLength") != null)
@@ -312,6 +321,7 @@ public class WalkActionDefinition extends ActionNodeDefinition
       onDiskPlannerWalkWithGoalOrientation = plannerWalkWithGoalOrientation.getValue();
       onDiskPlannerPlanWithBodyPath = plannerPlanWithBodyPath.getValue();
       onDiskQuickWaypointOnly = quickWaypointOnly.getValue();
+      onDiskUseRRTPathPlanner = useRRTPathPlanner.getValue();
       onDiskQuickHipWidth = quickHipWidth.getValue();
       onDiskQuickStepLength = quickStepLength.getValue();
       onDiskQuickNextPelvisYawLimit = quickNextPelvisYawLimit.getValue();
@@ -359,6 +369,7 @@ public class WalkActionDefinition extends ActionNodeDefinition
          plannerWalkWithGoalOrientation.setValue(onDiskPlannerWalkWithGoalOrientation);
          plannerPlanWithBodyPath.setValue(onDiskPlannerPlanWithBodyPath);
          quickWaypointOnly.setValue(onDiskQuickWaypointOnly);
+         useRRTPathPlanner.setValue(onDiskUseRRTPathPlanner);
          quickHipWidth.setValue(onDiskQuickHipWidth);
          quickStepLength.setValue(onDiskQuickStepLength);
          quickNextPelvisYawLimit.setValue(onDiskQuickNextPelvisYawLimit);
@@ -411,6 +422,7 @@ public class WalkActionDefinition extends ActionNodeDefinition
       unchanged &= plannerWalkWithGoalOrientation.getValue() == onDiskPlannerWalkWithGoalOrientation;
       unchanged &= plannerPlanWithBodyPath.getValue() == onDiskPlannerPlanWithBodyPath;
       unchanged &= quickWaypointOnly.getValue() == onDiskQuickWaypointOnly;
+      unchanged &= useRRTPathPlanner.getValue() == onDiskUseRRTPathPlanner;
       unchanged &= quickHipWidth.getValue() == onDiskQuickHipWidth;
       unchanged &= quickStepLength.getValue() == onDiskQuickStepLength;
       unchanged &= quickNextPelvisYawLimit.getValue() == onDiskQuickNextPelvisYawLimit;
@@ -456,6 +468,7 @@ public class WalkActionDefinition extends ActionNodeDefinition
       message.setPlannerPlanWithBodyPath(plannerPlanWithBodyPath.toMessage());
       plannerParameters.toMessage(message.getPlannerParameters());
       message.setQuickWaypointOnly(quickWaypointOnly.toMessage());
+      message.setUseRrtPathPlanner(useRRTPathPlanner.toMessage());
       message.setQuickHipWidth(quickHipWidth.toMessage());
       message.setQuickStepLength(quickStepLength.toMessage());
       message.setQuickNextPelvisYawLimit(quickNextPelvisYawLimit.toMessage());
@@ -504,6 +517,7 @@ public class WalkActionDefinition extends ActionNodeDefinition
       plannerPlanWithBodyPath.fromMessage(message.getPlannerPlanWithBodyPath());
       plannerParameters.fromMessage(message.getPlannerParameters());
       quickWaypointOnly.fromMessage(message.getQuickWaypointOnly());
+      useRRTPathPlanner.fromMessage(message.getUseRrtPathPlanner());
       quickHipWidth.fromMessage(message.getQuickHipWidth());
       quickStepLength.fromMessage(message.getQuickStepLength());
       quickNextPelvisYawLimit.fromMessage(message.getQuickNextPelvisYawLimit());
@@ -639,6 +653,11 @@ public class WalkActionDefinition extends ActionNodeDefinition
    public CRDTBidirectionalBoolean getQuickWaypointOnly()
    {
       return quickWaypointOnly;
+   }
+
+   public CRDTBidirectionalBoolean getUseRRTPathPlanner()
+   {
+      return useRRTPathPlanner;
    }
 
    public CRDTBidirectionalDouble getQuickHipWidth()

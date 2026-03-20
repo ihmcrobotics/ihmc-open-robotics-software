@@ -70,6 +70,7 @@ ihmc_common_msgs/PrimitiveDataVectorMessage planner_parameters
 
 # Quick footstep planner parameters
 bool quick_waypoint_only
+bool use_rrt_path_planner
 float64 quick_hip_width
 float64 quick_step_length
 float64 quick_next_pelvis_yaw_limit
