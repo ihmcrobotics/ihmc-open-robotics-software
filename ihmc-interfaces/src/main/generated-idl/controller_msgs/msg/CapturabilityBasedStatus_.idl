@@ -47,6 +47,7 @@ module controller_msgs
          * List of the active contact points used for the right foot. The coordinates are in world frame.
          */
         sequence<geometry_msgs::msg::dds::Point, 8> right_foot_support_polygon_3d;
+        sequence<geometry_msgs::msg::dds::Point, 30> multi_contact_region;
         /**
          * List of the active contact points for the left hand, empty if there is no hand contact point. The coordinates are in the hand body-fixed frame.
          */

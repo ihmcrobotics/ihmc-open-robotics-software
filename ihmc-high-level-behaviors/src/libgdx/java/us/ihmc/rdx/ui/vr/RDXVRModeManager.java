@@ -29,13 +29,13 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.RDXJoystickBasedStepping;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
+import us.ihmc.rdx.ui.graphics.RDXStabilityRegionGraphic;
 import us.ihmc.rdx.ui.graphics.RDXRobotPerceptionVisualizersPanel;
 import us.ihmc.rdx.ui.hands.RDXHandManager;
 import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationManager;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRManager;
 import us.ihmc.rdx.vr.RDXVRTracker;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -70,6 +70,7 @@ public class RDXVRModeManager
 
    private RDXVRFootstepPlacement footstepPlacer;
    private RDXHandManager handManager;
+   private RDXStabilityRegionGraphic multiContactRegionGraphic;
 
    @Nullable
    private RDXVRWholeBodyKinematicStreaming kinematicsStreaming;
@@ -186,6 +187,8 @@ public class RDXVRModeManager
             }
          }
       }
+
+      multiContactRegionGraphic = new RDXStabilityRegionGraphic(syncedRobot.getFullRobotModel());
    }
 
    private void calculateVRPick(RDXVRContext vrContext)
@@ -249,6 +252,7 @@ public class RDXVRModeManager
       for (RDXVRTracker tracker : vrManager.getContext().getTrackers().values())
          tracker.setOpacity(opacity);
 
+      multiContactRegionGraphic.update(syncedRobot.getLatestCapturabilityBasedStatus());
       switch (mode)
       {
          case WHOLE_BODY_IK_STREAMING ->
@@ -411,6 +415,8 @@ public class RDXVRModeManager
          if (vrModeControls.getRenderOnLeftHand().get())
             vrModeControls3DPanel.getRenderables(renderables, pool);
       }
+
+      multiContactRegionGraphic.getRenderables(renderables, pool);
    }
 
    public void destroy()

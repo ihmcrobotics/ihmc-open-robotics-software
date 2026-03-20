@@ -68,7 +68,6 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandContactCommand;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -774,6 +773,17 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       CapturabilityBasedStatus capturabilityBasedStatus = balanceManager.updateAndReturnCapturabilityBasedStatus();
 //      packHandLoadBearingStatuses(capturabilityBasedStatus);
+      FrameConvexPolygon2DReadOnly feasibleRegion = controllerToolbox.getMultiContactStabilityRegionCalculator().getFeasibleRegion();
+      RecyclingArrayList<Point3D> multiContactRegion = capturabilityBasedStatus.getMultiContactRegion();
+      multiContactRegion.clear();
+      if (feasibleRegion != null && !feasibleRegion.isEmpty())
+      {
+         for (int i = 0; i < Math.min(30, feasibleRegion.getNumberOfVertices()); i++)
+         {
+            multiContactRegion.add().set(feasibleRegion.getVertex(i));
+         }
+      }
+
       statusOutputManager.reportStatusMessage(capturabilityBasedStatus);
 
       if (ENABLE_LEG_ELASTICITY_DEBUGGATOR)

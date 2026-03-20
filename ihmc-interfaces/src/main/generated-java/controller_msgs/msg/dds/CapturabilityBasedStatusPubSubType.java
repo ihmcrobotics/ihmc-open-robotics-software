@@ -15,7 +15,7 @@ public class CapturabilityBasedStatusPubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "a061802451efb379a0b1ec500434173b27b6a5a63c646ccb2a7eeeaa96384a74";
+   		return "9a80a1e55996456b9d6048c2915779dd4a0186480a18bcdabda06915cba3bddf";
    }
    
    @Override
@@ -68,6 +68,9 @@ public class CapturabilityBasedStatusPubSubType implements us.ihmc.pubsub.TopicD
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 8; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 30; ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 1; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
@@ -114,6 +117,11 @@ public class CapturabilityBasedStatusPubSubType implements us.ihmc.pubsub.TopicD
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getRightFootSupportPolygon3d().get(i0), current_alignment);}
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getMultiContactRegion().size(); ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getMultiContactRegion().get(i0), current_alignment);}
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getLeftHandContactPoints().size(); ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getLeftHandContactPoints().get(i0), current_alignment);}
@@ -148,6 +156,10 @@ public class CapturabilityBasedStatusPubSubType implements us.ihmc.pubsub.TopicD
       cdr.write_type_e(data.getRightFootSupportPolygon3d());else
           throw new RuntimeException("right_foot_support_polygon_3d field exceeds the maximum length: %d > %d".formatted(data.getRightFootSupportPolygon3d().size(), 8));
 
+      if(data.getMultiContactRegion().size() <= 30)
+      cdr.write_type_e(data.getMultiContactRegion());else
+          throw new RuntimeException("multi_contact_region field exceeds the maximum length: %d > %d".formatted(data.getMultiContactRegion().size(), 30));
+
       if(data.getLeftHandContactPoints().size() <= 1)
       cdr.write_type_e(data.getLeftHandContactPoints());else
           throw new RuntimeException("left_hand_contact_points field exceeds the maximum length: %d > %d".formatted(data.getLeftHandContactPoints().size(), 1));
@@ -171,6 +183,7 @@ public class CapturabilityBasedStatusPubSubType implements us.ihmc.pubsub.TopicD
       geometry_msgs.msg.dds.PointPubSubType.read(data.getCenterOfMass3d(), cdr);	
       cdr.read_type_e(data.getLeftFootSupportPolygon3d());	
       cdr.read_type_e(data.getRightFootSupportPolygon3d());	
+      cdr.read_type_e(data.getMultiContactRegion());	
       cdr.read_type_e(data.getLeftHandContactPoints());	
       cdr.read_type_e(data.getRightHandContactPoints());	
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getLeftHandContactNormal(), cdr);	
@@ -191,6 +204,7 @@ public class CapturabilityBasedStatusPubSubType implements us.ihmc.pubsub.TopicD
 
       ser.write_type_e("left_foot_support_polygon_3d", data.getLeftFootSupportPolygon3d());
       ser.write_type_e("right_foot_support_polygon_3d", data.getRightFootSupportPolygon3d());
+      ser.write_type_e("multi_contact_region", data.getMultiContactRegion());
       ser.write_type_e("left_hand_contact_points", data.getLeftHandContactPoints());
       ser.write_type_e("right_hand_contact_points", data.getRightHandContactPoints());
       ser.write_type_a("left_hand_contact_normal", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getLeftHandContactNormal());
@@ -212,6 +226,7 @@ public class CapturabilityBasedStatusPubSubType implements us.ihmc.pubsub.TopicD
 
       ser.read_type_e("left_foot_support_polygon_3d", data.getLeftFootSupportPolygon3d());
       ser.read_type_e("right_foot_support_polygon_3d", data.getRightFootSupportPolygon3d());
+      ser.read_type_e("multi_contact_region", data.getMultiContactRegion());
       ser.read_type_e("left_hand_contact_points", data.getLeftHandContactPoints());
       ser.read_type_e("right_hand_contact_points", data.getRightHandContactPoints());
       ser.read_type_a("left_hand_contact_normal", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getLeftHandContactNormal());

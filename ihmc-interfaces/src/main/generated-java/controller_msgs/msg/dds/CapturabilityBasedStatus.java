@@ -42,6 +42,7 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus> i
             * List of the active contact points used for the right foot. The coordinates are in world frame.
             */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  right_foot_support_polygon_3d_;
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  multi_contact_region_;
    /**
             * List of the active contact points for the left hand, empty if there is no hand contact point. The coordinates are in the hand body-fixed frame.
             */
@@ -66,6 +67,7 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus> i
       center_of_mass_3d_ = new us.ihmc.euclid.tuple3D.Point3D();
       left_foot_support_polygon_3d_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (8, new geometry_msgs.msg.dds.PointPubSubType());
       right_foot_support_polygon_3d_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (8, new geometry_msgs.msg.dds.PointPubSubType());
+      multi_contact_region_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (30, new geometry_msgs.msg.dds.PointPubSubType());
       left_hand_contact_points_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (1, new geometry_msgs.msg.dds.PointPubSubType());
       right_hand_contact_points_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (1, new geometry_msgs.msg.dds.PointPubSubType());
       left_hand_contact_normal_ = new us.ihmc.euclid.tuple3D.Vector3D();
@@ -90,6 +92,7 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus> i
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.center_of_mass_3d_, center_of_mass_3d_);
       left_foot_support_polygon_3d_.set(other.left_foot_support_polygon_3d_);
       right_foot_support_polygon_3d_.set(other.right_foot_support_polygon_3d_);
+      multi_contact_region_.set(other.multi_contact_region_);
       left_hand_contact_points_.set(other.left_hand_contact_points_);
       right_hand_contact_points_.set(other.right_hand_contact_points_);
       geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.left_hand_contact_normal_, left_hand_contact_normal_);
@@ -172,6 +175,12 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus> i
    }
 
 
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  getMultiContactRegion()
+   {
+      return multi_contact_region_;
+   }
+
+
    /**
             * List of the active contact points for the left hand, empty if there is no hand contact point. The coordinates are in the hand body-fixed frame.
             */
@@ -246,6 +255,13 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus> i
          {  if (!this.right_foot_support_polygon_3d_.get(i).epsilonEquals(other.right_foot_support_polygon_3d_.get(i), epsilon)) return false; }
       }
 
+      if (this.multi_contact_region_.size() != other.multi_contact_region_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.multi_contact_region_.size(); i++)
+         {  if (!this.multi_contact_region_.get(i).epsilonEquals(other.multi_contact_region_.get(i), epsilon)) return false; }
+      }
+
       if (this.left_hand_contact_points_.size() != other.left_hand_contact_points_.size()) { return false; }
       else
       {
@@ -284,6 +300,7 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus> i
       if (!this.center_of_mass_3d_.equals(otherMyClass.center_of_mass_3d_)) return false;
       if (!this.left_foot_support_polygon_3d_.equals(otherMyClass.left_foot_support_polygon_3d_)) return false;
       if (!this.right_foot_support_polygon_3d_.equals(otherMyClass.right_foot_support_polygon_3d_)) return false;
+      if (!this.multi_contact_region_.equals(otherMyClass.multi_contact_region_)) return false;
       if (!this.left_hand_contact_points_.equals(otherMyClass.left_hand_contact_points_)) return false;
       if (!this.right_hand_contact_points_.equals(otherMyClass.right_hand_contact_points_)) return false;
       if (!this.left_hand_contact_normal_.equals(otherMyClass.left_hand_contact_normal_)) return false;
@@ -312,6 +329,8 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus> i
       builder.append(this.left_foot_support_polygon_3d_);      builder.append(", ");
       builder.append("right_foot_support_polygon_3d=");
       builder.append(this.right_foot_support_polygon_3d_);      builder.append(", ");
+      builder.append("multi_contact_region=");
+      builder.append(this.multi_contact_region_);      builder.append(", ");
       builder.append("left_hand_contact_points=");
       builder.append(this.left_hand_contact_points_);      builder.append(", ");
       builder.append("right_hand_contact_points=");
