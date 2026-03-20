@@ -1024,6 +1024,11 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       return multiContactStabilityRegionCalculator;
    }
 
+   public YoFrameConvexPolygon2D getYoInferenceStabilityRegion()
+   {
+      return yoInferenceStabilityRegion;
+   }
+
    private final FrameConvexPolygon2D zeroRegion = new FrameConvexPolygon2D();
 
    public FrameConvexPolygon2DReadOnly updateMultiContactStabilityRegion()

@@ -773,7 +773,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       CapturabilityBasedStatus capturabilityBasedStatus = balanceManager.updateAndReturnCapturabilityBasedStatus();
 //      packHandLoadBearingStatuses(capturabilityBasedStatus);
-      FrameConvexPolygon2DReadOnly feasibleRegion = controllerToolbox.getMultiContactStabilityRegionCalculator().getFeasibleRegion();
+      FrameConvexPolygon2DReadOnly feasibleRegion = controllerToolbox.getYoInferenceStabilityRegion();
       RecyclingArrayList<Point3D> multiContactRegion = capturabilityBasedStatus.getMultiContactRegion();
       multiContactRegion.clear();
       if (feasibleRegion != null && !feasibleRegion.isEmpty())
