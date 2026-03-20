@@ -2,6 +2,7 @@ package us.ihmc.avatar;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.WalkingStatusMessage;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.multiContact.pushRecovery.ReactiveBracingPlanner;
@@ -18,10 +19,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Mu
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -29,6 +27,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandContactCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.TerrainMapCommand;
+import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
@@ -53,12 +52,12 @@ import us.ihmc.yoVariables.variable.YoEnum;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Vector;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerThreadInterface
 {
-   private static final double DEFAULT_CAPTURE_POINT_ERROR_THRESHOLD_FOR_HAND_CONTACT = 0.03;
+   private static final double DEFAULT_CAPTURE_POINT_ERROR_THRESHOLD_FOR_HAND_CONTACT_STANDING = 0.025;
+   private static final double DEFAULT_CAPTURE_POINT_ERROR_THRESHOLD_FOR_HAND_CONTACT_WALKING = 0.045;
    public static final double DEFAULT_CONTACT_SAFETY_FACTOR = 0.07;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
@@ -80,9 +79,11 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
    private final YoBoolean hasReceivedPlanarRegions = new YoBoolean("hasReceivedPlanarRegions", registry);
 
    private final YoDouble contactSafetyFactor = new YoDouble("contactSafetyFactor", registry);
-   private final YoDouble capturePointErrorThresholdForHandContact = new YoDouble("capturePointErrorThresholdForHandContact", registry);
+   private final YoDouble capturePointErrorThresholdForHandContactWhileStanding = new YoDouble("icpErrorThresholdForHandContactStanding", registry);
+   private final YoDouble capturePointErrorThresholdForHandContactWhileWalking = new YoDouble("icpErrorThresholdForHandContactWalking", registry);
 
    private final AtomicReference<FootstepStatusMessage> footstepStatusMessage = new AtomicReference<>();
+   private final AtomicReference<WalkingStatusMessage> walkingStatusMessage = new AtomicReference<>();
    private final SideDependentList<MutableBoolean> areFeetInContact = new SideDependentList<>(new MutableBoolean(), new MutableBoolean());
 
    private final YoBoolean isHandRecoveryContactEnabled = new YoBoolean("isHandRecoveryContactEnabled", registry);
@@ -143,9 +144,11 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
       registry.addChild(planner.getRegistry());
       contactSafetyFactor.set(DEFAULT_CONTACT_SAFETY_FACTOR);
       additionalSafetyDistance.set(0.07);
-      capturePointErrorThresholdForHandContact.set(DEFAULT_CAPTURE_POINT_ERROR_THRESHOLD_FOR_HAND_CONTACT);
-      
+      capturePointErrorThresholdForHandContactWhileStanding.set(DEFAULT_CAPTURE_POINT_ERROR_THRESHOLD_FOR_HAND_CONTACT_STANDING);
+      capturePointErrorThresholdForHandContactWhileWalking.set(DEFAULT_CAPTURE_POINT_ERROR_THRESHOLD_FOR_HAND_CONTACT_WALKING);
+
       walkingOutputManager.attachStatusMessageListener(FootstepStatusMessage.class, footstepStatusMessage::set);
+      walkingOutputManager.attachStatusMessageListener(WalkingStatusMessage.class, walkingStatusMessage::set);
 
       this.commandInputManager = new CommandInputManager(MultiContactGaitGeneratorAPI.getSupportedCommands());
       this.statusOutputManager = new StatusMessageOutputManager(MultiContactGaitGeneratorAPI.getSupportedStatusMessages());
@@ -271,7 +274,9 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
       currentCapturePoint.setY(centerOfMassPosition.getY() + centerOfMassVelocity.getY() / ReducedOrderRobotModel.OMEGA);
 
       capturePointError.sub(currentCapturePoint, desiredCapturePoint);
-      isFalling.set(capturePointError.norm() > capturePointErrorThresholdForHandContact.getValue());
+
+      double threshold = isWalking() ? capturePointErrorThresholdForHandContactWhileWalking.getValue() : capturePointErrorThresholdForHandContactWhileStanding.getValue();
+      isFalling.set(capturePointError.norm() > threshold);
 
       if (!acceptPlanarRegions.getValue())
       {
@@ -361,6 +366,15 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
             }
          }
       }
+   }
+
+   private boolean isWalking()
+   {
+      WalkingStatusMessage walkingStatusMessage = this.walkingStatusMessage.get();
+      if (walkingStatusMessage == null)
+         return false;
+      WalkingStatus walkingStatus = WalkingStatus.fromByte(walkingStatusMessage.getWalkingStatus());
+      return walkingStatus == WalkingStatus.STARTED || walkingStatus == WalkingStatus.RESUMED;
    }
 
    private ReferenceFrame getMidFeetZUpFrame()
