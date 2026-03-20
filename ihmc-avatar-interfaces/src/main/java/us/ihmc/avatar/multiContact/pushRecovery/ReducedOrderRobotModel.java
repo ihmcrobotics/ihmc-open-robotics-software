@@ -17,7 +17,7 @@ public class ReducedOrderRobotModel
 
    /* Minimum and maximum allowed reachablity distance from shoulder to hand */
    public static final double REACHABILITY_RADIUS_MIN = 0.32;
-   public static final double REACHABILITY_RADIUS_MAX = 0.73;
+   public static final double REACHABILITY_RADIUS_MAX = 0.74;
 
    /* Maximum inward reaching distance, to prevent too much cross-over */
    public static final double MAX_INWARD_DISTANCE = SHOULDER_COM_OFFSET_Y * 0.9;
