@@ -41,14 +41,14 @@ public class RRTConnectPathPlanner
          this.children = children;
       }
    }
-   public Node rootNodeA;
-   public Node rootNodeB;
+   private Node rootNodeA;
+   private Node rootNodeB;
    private int i;
    private int treeASize;
    private int treeBSize;
    private boolean treeAIsStart;
    private final ArrayDeque<Node> stack = new ArrayDeque<>();
-   public final ArrayList<Point3D> path = new ArrayList<>();
+   private final ArrayList<Point3D> path = new ArrayList<>();
 
    public List<Point3D> plan(Tuple3DReadOnly start, Tuple3DReadOnly goal, Function<LineSegment3D, Boolean> collider)
    {

@@ -4,6 +4,8 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.TrajectoryTrackingErrorCalculator;
+import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectState;
+import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectType;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.Throttler;
@@ -15,6 +17,7 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
@@ -24,6 +27,7 @@ import us.ihmc.footstepPlanning.simplePlanners.QuickFootstepPlanner;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
+import us.ihmc.pathPlanning.rrt.RRTConnectPathPlanner;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -50,6 +54,7 @@ public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, Walk
    private final FootstepPlan footstepPlanToExecute = new FootstepPlan();
    private final Throttler previewPlanningThrottler = new Throttler().setPeriod(1.0);
    private final QuickFootstepPlanner quickFootstepPlanner = new QuickFootstepPlanner();
+   private final RRTConnectPathPlanner rrtConnectPathPlanner = new RRTConnectPathPlanner();
    private final WalkActionPlanningThread previewFootstepPlanningThread;
    private final WalkActionPlanningThread executionFootstepPlanningThread;
    private final SideDependentList<FramePose3D> liveGoalFeetPoses = new SideDependentList<>(() -> new FramePose3D());
@@ -426,14 +431,52 @@ public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, Walk
       quickFootstepPlanner.setOutwardLimit(definition.getQuickOutwardLimit().getValue());
       quickFootstepPlanner.setStepAngleLimit(definition.getQuickStepAngleLimit().getValue());
       ArrayList<Pose3D> waypoints = new ArrayList<>();
-      for (int i = 0; i < definition.getWaypoints().getSize(); i++)
+      Pose3D midGoal = new Pose3D();
+      midGoal.interpolate(liveGoalFeetPoses.get(RobotSide.LEFT), liveGoalFeetPoses.get(RobotSide.RIGHT), 0.5);
+      if (definition.getUseRRTPathPlanner().getValue())
       {
-         FramePose3D framePose = new FramePose3D(state.getParentFrame(), definition.getWaypoints().getValueReadOnly(i));
-         framePose.changeFrame(ReferenceFrame.getWorldFrame());
-         waypoints.add(new Pose3D(framePose));
+         Point3D midStance = new Point3D();
+         midStance.interpolate(syncedFeetPoses.get(RobotSide.LEFT).getPosition(), syncedFeetPoses.get(RobotSide.RIGHT).getPosition(), 0.5);
+         Point3D yoloPosition = new Point3D();
+         List<Point3D> path = rrtConnectPathPlanner.plan(midStance, midGoal.getPosition(), segment ->
+         {
+            for (BehaviorTreeSceneObjectState object : scene.getObjects())
+               if (object.getObjectType() == BehaviorTreeSceneObjectType.YOLO_ONLY)
+               {
+                  yoloPosition.set(object.getTransformToWorld().getTranslation());
+                  yoloPosition.setZ(segment.getFirstEndpointZ());
+                  if (segment.distance(yoloPosition) < 0.5)
+                     return true;
+               }
+            return false;
+         });
+
+         double segmentLength = 0.0;
+         for (int i = 1; i < path.size(); i++)
+         {
+            segmentLength += path.get(i - 1).distance(path.get(i));
+            if (segmentLength >= 0.4 && path.get(i).distance(midGoal.getPosition()) > 0.2) // Don't add a waypoint too close to goal
+            {
+               double yaw = Math.atan2(path.get(i).getY() - path.get(i - 1).getY(), path.get(i).getX() - path.get(i - 1).getX());
+               Pose3D waypoint = new Pose3D();
+               waypoint.getPosition().set(path.get(i));
+               waypoint.getOrientation().setToYawOrientation(yaw);
+               waypoints.add(waypoint);
+               segmentLength = 0.0;
+            }
+         }
+      }
+      else
+      {
+         for (int i = 0; i < definition.getWaypoints().getSize(); i++)
+         {
+            FramePose3D framePose = new FramePose3D(state.getParentFrame(), definition.getWaypoints().getValueReadOnly(i));
+            framePose.changeFrame(ReferenceFrame.getWorldFrame());
+            waypoints.add(new Pose3D(framePose));
+         }
       }
       if (definition.getQuickWaypointOnly().getValue())
-         waypoints.add(new Pose3D(state.getGoalFrame().getReferenceFrame().getTransformToWorldFrame()));
+         waypoints.add(midGoal);
       return quickFootstepPlanner.plan(new SideDependentList<>(side -> new Pose3D(syncedFeetPoses.get(side))),
                                        waypoints,
                                        definition.getQuickWaypointOnly().getValue() ? null

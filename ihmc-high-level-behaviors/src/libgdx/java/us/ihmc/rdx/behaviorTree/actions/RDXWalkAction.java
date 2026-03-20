@@ -539,29 +539,37 @@ public class RDXWalkAction extends RDXActionNode<WalkActionState, WalkActionDefi
             {
                quickWaypointOnlyWidget.renderImGuiWidget();
                useRRTPathPlannerWidget.renderImGuiWidget();
-               ImGui.text("Waypoints: %d".formatted(definition.getWaypoints().getSize()));
-               ImGui.sameLine();
-               if (ImGui.button(labels.get("Add", "Waypoint")))
+               if (definition.getUseRRTPathPlanner().getValue())
                {
-                  Pose3D waypoint = definition.getWaypoints().getValueAndModify().add();
-                  if (definition.getWaypoints().getSize() > 1)
-                  {
-                     waypoint.set(definition.getWaypoints().getValueReadOnly(definition.getWaypoints().getSize() - 2));
-                     waypoint.appendTranslation(0.1, 0.0, 0.0);
-                  }
-                  else
-                  {
-                     waypoint.getPosition().set(definition.getGoalStancePoint().getValueReadOnly());
-                  }
+                  if (definition.getWaypoints().getSize() > 0)
+                     definition.getWaypoints().getValueAndModify().clear();
                }
-               if (definition.getWaypoints().getSize() > 0)
+               else
                {
+                  ImGui.text("Waypoints: %d".formatted(definition.getWaypoints().getSize()));
                   ImGui.sameLine();
-                  if (ImGui.button(labels.get("Remove", "Waypoint")))
-                     RecyclingArrayListTools.removeLast(definition.getWaypoints().getValueAndModify());
+                  if (ImGui.button(labels.get("Add", "Waypoint")))
+                  {
+                     Pose3D waypoint = definition.getWaypoints().getValueAndModify().add();
+                     if (definition.getWaypoints().getSize() > 1)
+                     {
+                        waypoint.set(definition.getWaypoints().getValueReadOnly(definition.getWaypoints().getSize() - 2));
+                        waypoint.appendTranslation(0.1, 0.0, 0.0);
+                     }
+                     else
+                     {
+                        waypoint.getPosition().set(definition.getGoalStancePoint().getValueReadOnly());
+                     }
+                  }
+                  if (definition.getWaypoints().getSize() > 0)
+                  {
+                     ImGui.sameLine();
+                     if (ImGui.button(labels.get("Remove", "Waypoint")))
+                        RecyclingArrayListTools.removeLast(definition.getWaypoints().getValueAndModify());
+                  }
+                  ImGui.sameLine();
+                  ImGui.checkbox(labels.get("Edit"), editWaypoints);
                }
-               ImGui.sameLine();
-               ImGui.checkbox(labels.get("Edit"), editWaypoints);
             }
             else
             {
