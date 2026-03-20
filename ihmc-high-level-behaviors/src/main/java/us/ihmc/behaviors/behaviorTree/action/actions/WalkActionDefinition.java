@@ -334,13 +334,13 @@ public class WalkActionDefinition extends ActionNodeDefinition
       {
          swingDuration.setValue(onDiskSwingDuration);
          transferDuration.setValue(onDiskTransferDuration);
-         executionMode.setValue(onDiskExecutionMode);
-         parentFrameName.setValue(onDiskParentFrameName);
-         isManuallyPlaced.setValue(onDiskIsManuallyPlaced);
+        executionMode.setValue(onDiskExecutionMode);
+        parentFrameName.setValue(onDiskParentFrameName);
+        isManuallyPlaced.setValue(onDiskIsManuallyPlaced);
          waypoints.getValueAndModify().clear();
          for (Pose3D waypoint : onDiskWaypoints)
             waypoints.getValueAndModify().add().set(waypoint);
-         manuallyPlacedFootsteps.getValueAndModify().clear();
+        manuallyPlacedFootsteps.getValueAndModify().clear();
          for (int i = 0; i < onDiskNumberOfFootsteps; i++)
             manuallyPlacedFootsteps.getValueAndModify().add();
          goalStancePoint.getValueAndModify().set(onDiskGoalStancePoint);
