@@ -186,9 +186,14 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
       return hasHandTouchedDown.getValue();
    }
 
+   public double getTrajectoryDuration()
+   {
+      return trajectoryDuration.getValue();
+   }
+
    public boolean isStuck(double timeInState)
    {
-      return timeInState > trajectoryDuration.getValue() + 0.5;
+      return timeInState > trajectoryDuration.getValue() + 0.6;
    }
 
    @Override

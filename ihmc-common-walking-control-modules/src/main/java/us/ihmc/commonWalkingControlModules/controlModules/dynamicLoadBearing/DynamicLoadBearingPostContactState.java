@@ -382,11 +382,11 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
          return true;
 
       // Check if joints are near a joint limit
-      for (int i = 0; i < jointPath.length; i++)
-      {
-         if (jointIsNearLimit(jointPath[i]))
-            return true;
-      }
+//      for (int i = 0; i < jointPath.length; i++)
+//      {
+//         if (jointIsNearLimit(jointPath[i]))
+//            return true;
+//      }
 
       return false;
    }
