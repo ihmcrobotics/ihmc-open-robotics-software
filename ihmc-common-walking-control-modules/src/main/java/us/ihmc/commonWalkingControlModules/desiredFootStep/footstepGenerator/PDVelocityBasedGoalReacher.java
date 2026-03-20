@@ -59,6 +59,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
 
    private final RecyclingArrayList<GoalWaypoint> goalPoses = new RecyclingArrayList<>(GoalWaypoint::new);
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+   private final GoalReacherWaypointVisualizer waypointVisualizer;
 
    private final YoFramePose3D currentGoalPose = new YoFramePose3D("goalPose", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D currentGoalDirection = new YoFrameVector3D("goalDirection", ReferenceFrame.getWorldFrame(), registry);
@@ -147,6 +148,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       distanceToFaceGoal.set(DEFAULT_DISTANCE_TO_FACE_GOAL);
 
       parentRegistry.addChild(registry);
+      waypointVisualizer = new GoalReacherWaypointVisualizer(registry);
    }
 
    private final FramePose2D previousGoalPose = new FramePose2D();
@@ -197,6 +199,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
 
       // We want to hold onto this from the beginning, so that if we reach it we can publish the status.
       boolean hasGoal = this.hasGoal.getBooleanValue();
+      boolean hasReachedGoal = this.hasReachedGoal.getBooleanValue();
       if (Double.isNaN(lastTickTime))
          computedDt = 0.0;
       else
@@ -204,6 +207,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       lastTickTime = time;
 
       updateGoalPose();
+      waypointVisualizer.update(goalPoses.size(), i -> goalPoses.get(i).getGoalPose());
 
       if (this.hasGoal.getBooleanValue())
       {
@@ -220,14 +224,14 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
          updateOutputMessage();
       }
 
-      if (hasGoal || this.hasGoal.getBooleanValue())
+      if (hasGoal || this.hasGoal.getBooleanValue() || (hasReachedGoal != this.hasReachedGoal.getValue()))
       {
          // Send status.
          statusMessage.getCurrentPosition().set(currentPose.getPosition());
          statusMessage.setCurrentGoalXPosition(currentGoalPose.getX());
          statusMessage.setCurrentGoalYPosition(currentGoalPose.getY());
          statusMessage.setCurrentGoalYaw(currentGoalPose.getYaw());
-         statusMessage.setIsReached(hasReachedGoal.getBooleanValue());
+         statusMessage.setIsReached(this.hasReachedGoal.getBooleanValue());
       }
 
       statusMessageOutputManager.reportStatusMessage(statusMessage);
@@ -235,7 +239,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
 
    public DirectionalControlInputMessage getOutputMessage()
    {
-      if (hasReachedGoal.getBooleanValue())
+      if (!hasGoal.getBooleanValue() || hasReachedGoal.getBooleanValue())
          return null;
 
       return outputMessage;
@@ -355,6 +359,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       outputMessage.setForward(desiredVelocity.getX());
       outputMessage.setRight(-desiredVelocity.getY());
       outputMessage.setClockwise(-desiredAngularVelocity.getZ());
+      outputMessage.setWalk(!hasReachedGoal.getBooleanValue());
    }
 
    private static class GoalWaypoint
@@ -414,6 +419,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
 
       group.addChild(newYoGraphicPoint3D("Current Position", currentPose.getPosition(), 0.1, ColorDefinitions.Orange()));
       group.addChild(newYoGraphicArrow3D("Current Heading", currentPose.getPosition(), currentDirection, 0.5, ColorDefinitions.Orange()));
+      group.addChild(waypointVisualizer.getSCS2YoGraphics());
 
       return group;
    }
