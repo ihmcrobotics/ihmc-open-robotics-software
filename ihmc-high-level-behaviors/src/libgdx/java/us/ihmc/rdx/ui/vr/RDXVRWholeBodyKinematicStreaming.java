@@ -102,7 +102,7 @@ public class RDXVRWholeBodyKinematicStreaming
 {
    public static final boolean ENABLE_YO_VARIABLE_TOOLBOX_SERVER = false;
    public static final double FRAME_AXIS_GRAPHICS_LENGTH = 0.2;
-   private static final double HEAD_GHOST_HIDE_DISTANCE = 0.25;
+   private static final double HEAD_HIDE_DISTANCE = 0.25;
 
    private final RDXVRMultiContact multiContact;
    private final RDXVRHandControl handControl;
@@ -122,6 +122,7 @@ public class RDXVRWholeBodyKinematicStreaming
    private final FullHumanoidRobotModel ghostFullRobotModel;
    private final OneDoFJointBasics[] ghostOneDoFJointsExcludingHands;
    private boolean hideGhostHead = false;
+   private boolean hideRealHead = false;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final RetargetingParameters retargetingParameters;
    private final ImBoolean isKSTEnabled = new ImBoolean(false);
@@ -607,7 +608,10 @@ public class RDXVRWholeBodyKinematicStreaming
             Point3D headsetInWorld = new Point3D(headset.getXForwardZUpHeadsetFrame().getTransformToRoot().getTranslation());
             Point3D headInWorld = new Point3D(ghostFullRobotModel.getHead().getBodyFixedFrame().getTransformToWorldFrame().getTranslation());
             double distance = headsetInWorld.distance(headInWorld);
-            hideGhostHead = distance < HEAD_GHOST_HIDE_DISTANCE;
+            hideGhostHead = distance < HEAD_HIDE_DISTANCE;
+            headInWorld = new Point3D(syncedRobot.getFullRobotModel().getHead().getBodyFixedFrame().getTransformToWorldFrame().getTranslation());
+            distance = headsetInWorld.distance(headInWorld);
+            hideRealHead = distance < HEAD_HIDE_DISTANCE;
          }
       });
    }
@@ -855,13 +859,18 @@ public class RDXVRWholeBodyKinematicStreaming
                   ghostRobotGraphic.getMultiBody().getRigidBodiesToHide().add(ghostHeadName);
                else
                   ghostRobotGraphic.getMultiBody().getRigidBodiesToHide().remove(ghostHeadName);
-
                ghostRobotGraphic.setOpacityForBody(ghostFullRobotModel.getFoot(RobotSide.LEFT).getName(),
                                                  latestStatus.getLeftFootInContact() ? 1.0 : 0.3);
                ghostRobotGraphic.setOpacityForBody(ghostFullRobotModel.getFoot(RobotSide.RIGHT).getName(),
                                                  latestStatus.getRightFootInContact() ? 1.0 : 0.3);
             }
+            String headName = syncedRobot.getFullRobotModel().getHead().getName();
+            if (hideRealHead)
+               robotVisualizer.getMultiBodyGraphic().getMultiBody().getRigidBodiesToHide().add(headName);
+            else
+               robotVisualizer.getMultiBodyGraphic().getMultiBody().getRigidBodiesToHide().remove(headName);
          }
+
          if (miniGhostEnabled)
          {
             miniGhostKST.updatePose();
@@ -870,9 +879,8 @@ public class RDXVRWholeBodyKinematicStreaming
             miniGhostReal.updatePose();
          }
          if (ghostRobotGraphic.isActive())
-         {
             ghostRobotGraphic.update();
-         }
+
 
          if (recordRequest && recordingGraphics != null)
          {
