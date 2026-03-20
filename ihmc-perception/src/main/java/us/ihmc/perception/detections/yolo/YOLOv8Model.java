@@ -14,6 +14,7 @@ import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_core.Size;
 import org.bytedeco.opencv.opencv_core.StringVector;
+import org.bytedeco.opencv.opencv_dnn.Image2BlobParams;
 import org.bytedeco.opencv.opencv_dnn.Net;
 import org.yaml.snakeyaml.Yaml;
 import us.ihmc.perception.CameraModel;
@@ -41,8 +42,15 @@ import static org.bytedeco.cuda.global.cudart.*;
 
 public class YOLOv8Model
 {
-   private static final double SCALE_FACTOR = 1.0 / 255.0;
    private static final Size DETECTION_SIZE = new Size(1280, 736);
+   private static final Image2BlobParams IMAGE_TO_BLOB_PARAMS = new Image2BlobParams(Scalar.all(1.0 / 255.0),
+                                                                                     DETECTION_SIZE,
+                                                                                     new Scalar(),
+                                                                                     true,
+                                                                                     opencv_core.CV_32F,
+                                                                                     opencv_dnn.DNN_LAYOUT_NCHW,
+                                                                                     opencv_dnn.DNN_PMODE_LETTERBOX,
+                                                                                     new Scalar());
 
    private static final int FILTERED_FLOATS_PER_ROW = 38;
    private static final int FLOATS_PER_BOX = 5;
@@ -91,8 +99,7 @@ public class YOLOv8Model
       URL classNamesFileURL = YOLOv8Tools.getClassNamesFile(modelBaseDirectory);
       URL onnxFileURL = YOLOv8Tools.getONNXFile(modelBaseDirectory);
 
-      try (InputStream classNamesFile = classNamesFileURL.openStream();
-           InputStream onnxFile = onnxFileURL.openStream())
+      try (InputStream classNamesFile = classNamesFileURL.openStream(); InputStream onnxFile = onnxFileURL.openStream())
       {
          // Parse class_names.yaml
          Yaml yaml = new Yaml();
@@ -289,7 +296,7 @@ public class YOLOv8Model
       }
 
       // Run the net
-      Mat blob = opencv_dnn.blobFromImage(bgrInputImage.getCpuImageMat(), SCALE_FACTOR, DETECTION_SIZE, new Scalar(), true, true, opencv_core.CV_32F);
+      Mat blob = opencv_dnn.blobFromImageWithParams(bgrInputImage.getCpuImageMat(), IMAGE_TO_BLOB_PARAMS);
       yoloNet.setInput(blob);
       yoloNet.forward(outputBlobs, outputNames);
       blob.close();
@@ -336,11 +343,9 @@ public class YOLOv8Model
        * mskWht32 |   |   |   |   |   |   |   |   |   | . |   |
        *          +------------------------------------ . ----+
        */
-      try (Mat output0Blob = outputBlobs.get(0);
-           Mat output1Blob = outputBlobs.get(1);
+      try (Mat output0Blob = outputBlobs.get(0); Mat output1Blob = outputBlobs.get(1);
 
-           dim3 blockDims = new dim3();
-           dim3 gridDims = new dim3())
+           dim3 blockDims = new dim3(); dim3 gridDims = new dim3())
       {
          updateCUDAMemoryAllocation(output0Blob, output1Blob);
 
@@ -415,7 +420,7 @@ public class YOLOv8Model
          CameraIntrinsics maskIntrinsics = computeMaskIntrinsics(bgrInputImage);
          float widthScale = (float) bgrInputImage.getWidth() / DETECTION_SIZE.width();
          float heightScale = (float) bgrInputImage.getHeight() / DETECTION_SIZE.height();
-         float scaleFactor = Math.min(widthScale, heightScale);
+         float scaleFactor = Math.max(widthScale, heightScale);
          float scaledDetectionWidth = DETECTION_SIZE.width() * scaleFactor;
          float scaledDetectionHeight = DETECTION_SIZE.height() * scaleFactor;
          float offsetX = 0.5f * (bgrInputImage.getWidth() - scaledDetectionWidth);
@@ -455,7 +460,7 @@ public class YOLOv8Model
       int maskHeight = outputBlobs.get(1).size(2);
       int maskWidth = outputBlobs.get(1).size(3);
 
-      float scaleFactor = Math.max((float) maskWidth / bgrInputImage.getWidth(), (float) maskHeight / bgrInputImage.getHeight());
+      float scaleFactor = Math.min((float) maskWidth / bgrInputImage.getWidth(), (float) maskHeight / bgrInputImage.getHeight());
 
       float offsetX = 0.5f * (maskWidth - scaleFactor * bgrInputImage.getWidth());
       float offsetY = 0.5f * (maskHeight - scaleFactor * bgrInputImage.getHeight());
