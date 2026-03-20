@@ -56,7 +56,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerThreadInterface
 {
-   private static final double DEFAULT_CAPTURE_POINT_ERROR_THRESHOLD_FOR_HAND_CONTACT_STANDING = 0.03;
+   private static final double DEFAULT_CAPTURE_POINT_ERROR_THRESHOLD_FOR_HAND_CONTACT_STANDING = 0.045;
    private static final double DEFAULT_CAPTURE_POINT_ERROR_THRESHOLD_FOR_HAND_CONTACT_WALKING = 0.045;
    public static final double DEFAULT_CONTACT_SAFETY_FACTOR = 0.07;
 
@@ -113,6 +113,7 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
 
    // TODO convert to time-based, or somehow check if a hand is in recovery
    private final YoBoolean hasSentRecoveryMessage = new YoBoolean("hasSentRecoveryMessage", registry);
+   private long lastRecoveryMessageSentTime = -1;
 
    private final YoEnum<RobotSide> diagnosticBracingSide = new YoEnum<>("diagnosticBracingSide", registry, RobotSide.class, true);
 //   private final YoBoolean triggerInferenceCall = new YoBoolean("triggerInferenceCall", registry);
@@ -312,7 +313,6 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
       {
          long startTime = System.nanoTime();
 
-         hasSentRecoveryMessage.set(true);
          triggerFall.set(false);
          sendHandContactMessage.set(false);
 
@@ -346,8 +346,16 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
             {
                handContactCommand.setLoad(true);
                walkingCommandInputManager.submitCommand(handContactCommand);
+               hasSentRecoveryMessage.set(true);
+               lastRecoveryMessageSentTime = System.nanoTime();
             }
          }
+
+         double timeSinceLastSend = Conversions.nanosecondsToSeconds(System.nanoTime() - lastRecoveryMessageSentTime);
+         if (timeSinceLastSend > 3.0)
+            hasSentRecoveryMessage.set(false);
+         if (capturePointError.norm() < 0.02)
+            hasSentRecoveryMessage.set(false);
 
          long stopTime = System.nanoTime();
          contactStateUpdateTimer.set(Conversions.nanosecondsToSeconds(stopTime - startTime));

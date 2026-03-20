@@ -231,7 +231,7 @@ public class ErrorBasedStepAdjustmentController
       }
 
       swingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
-      maxStepAdjustment.set(0.05);
+      maxStepAdjustment.set(0.095);
 
       parentRegistry.addChild(registry);
    }
