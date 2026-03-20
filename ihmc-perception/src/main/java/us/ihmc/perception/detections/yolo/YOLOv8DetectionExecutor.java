@@ -156,11 +156,13 @@ public class YOLOv8DetectionExecutor
       List<InstantDetection> yoloInstantDetections = new ArrayList<>();
       List<YOLOv8InstantDetection> annotatedImageDetections = new ArrayList<>();
 
+      // Get the image in BGR for annotation and running YOLO
+      RawImage bgrImage = RawImageTools.convertColor(colorImage, PixelFormat.BGR8);
+
       YOLOv8Model yoloModel = availableModels.get(parameters.getModelToRun().getValue());
       if (yoloModel != null)
       {
          // Run YOLO to get results
-         RawImage bgrImage = RawImageTools.convertColor(colorImage, PixelFormat.BGR8);
          YOLOv8DetectionList yoloResults = yoloModel.run(bgrImage);
 
          SyncedYOLOv8ModelParameters modelParameters = parameters.getModelParameters();
@@ -216,7 +218,6 @@ public class YOLOv8DetectionExecutor
          }
 
          yoloResults.destroy();
-         bgrImage.release();
       }
 
       // Process callbacks
@@ -226,8 +227,9 @@ public class YOLOv8DetectionExecutor
       // Set new annotation notification
       if (annotationNotification.poll())
          annotationNotification.read().close();
-      annotationNotification.set(new YOLOv8AnnotationRecord(colorImage, annotatedImageDetections));
+      annotationNotification.set(new YOLOv8AnnotationRecord(bgrImage, annotatedImageDetections));
 
+      bgrImage.release();
       colorImage.release();
       depthImage.release();
    }
