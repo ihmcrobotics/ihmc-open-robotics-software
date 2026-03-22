@@ -14,6 +14,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.*;
 import us.ihmc.behaviors.behaviorTree.log.BehaviorTreeNodeMessageLogger.LogMessage;
 import us.ihmc.rdx.behaviorTree.scene.RDXBehaviorTreeScene;
+import us.ihmc.rdx.behaviorTree.svg.RDXBehaviorTreeSVGWriter;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -342,7 +343,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
 
       if (ImGui.menuItem(labels.get("Draw to SVG")))
       {
-         state.drawToSVG();
+         new RDXBehaviorTreeSVGWriter(this);
       }
    }
 
