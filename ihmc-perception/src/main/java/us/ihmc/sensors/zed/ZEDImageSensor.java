@@ -55,7 +55,7 @@ public class ZEDImageSensor extends ImageSensor
 
    // sl_open_camera parameters
    private final SL_InitParameters zedInitParameters = new SL_InitParameters();
-   private int serialNumber = 0;
+   private int gmslPort = -1;
    private String svoFilePath = "";
    private String remoteStreamingAddress = "";
    private int remoteStreamingPort = 0;
@@ -157,18 +157,18 @@ public class ZEDImageSensor extends ImageSensor
     * </ul>
     *
     * @param cameraID     ID assigned to this camera when opening.
-    * @param serialNumber Serial number of camera to open.
+    * @param gmslPort     GMSL port of camera to open.
     * @param zedModel     Model of the ZED camera.
     * @param slInputType  Either {@link us.ihmc.zed.global.zed#SL_INPUT_TYPE_USB} or {@link us.ihmc.zed.global.zed#SL_INPUT_TYPE_GMSL}.
     * @param slDepthMode  One of {@code SL_DEPTH_MODE_*} from {@link us.ihmc.zed.global.zed}.
     * @param resolution   One of {@code SL_RESOLUTION_*} from {@link us.ihmc.zed.global.zed}.
     * @param fps          Frame rate to run the camera at,
     */
-   public ZEDImageSensor(int cameraID, int serialNumber, ZEDModelData zedModel, int slInputType, int slDepthMode, int resolution, int fps)
+   public ZEDImageSensor(int cameraID, int gmslPort, ZEDModelData zedModel, int slInputType, int slDepthMode, int resolution, int fps)
    {
       this(cameraID, zedModel, slInputType);
 
-      this.serialNumber = serialNumber;
+      this.gmslPort = gmslPort;
       this.fps = fps;
 
       // Set some more runtime and init parameters
@@ -323,7 +323,7 @@ public class ZEDImageSensor extends ImageSensor
 
    protected int openCamera()
    {
-      return sl_open_camera(cameraID, zedInitParameters, serialNumber, svoFilePath, remoteStreamingAddress, remoteStreamingPort, "", "", "");
+      return sl_open_camera(cameraID, zedInitParameters, 0, svoFilePath, remoteStreamingAddress, remoteStreamingPort, gmslPort, "", "", "");
    }
 
    @Override
