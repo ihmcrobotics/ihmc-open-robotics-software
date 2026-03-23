@@ -48,6 +48,7 @@ public class WalkActionDefinition extends ActionNodeDefinition
    private final BehaviorStoredPropertySetDefinition plannerParameters;
    private final CRDTBidirectionalBoolean quickWaypointOnly;
    private final CRDTBidirectionalBoolean useRRTPathPlanner;
+   private final CRDTBidirectionalDouble obstacleClearanceRadius;
    private final CRDTBidirectionalDouble quickHipWidth;
    private final CRDTBidirectionalDouble quickStepLength;
    private final CRDTBidirectionalDouble quickNextPelvisYawLimit;
@@ -78,6 +79,7 @@ public class WalkActionDefinition extends ActionNodeDefinition
    private boolean onDiskPlannerPlanWithBodyPath;
    private boolean onDiskQuickWaypointOnly;
    private boolean onDiskUseRRTPathPlanner;
+   private double onDiskObstacleClearanceRadius;
    private double onDiskQuickHipWidth;
    private double onDiskQuickStepLength;
    private double onDiskQuickNextPelvisYawLimit;
@@ -112,6 +114,7 @@ public class WalkActionDefinition extends ActionNodeDefinition
       plannerParameters = new BehaviorStoredPropertySetDefinition(this, "plannerParameters", robotModel.getFootstepPlannerParameters());
       quickWaypointOnly = new CRDTBidirectionalBoolean(this, false);
       useRRTPathPlanner = new CRDTBidirectionalBoolean(this, false);
+      obstacleClearanceRadius = new CRDTBidirectionalDouble(this, 0.5);
       quickHipWidth = new CRDTBidirectionalDouble(this, 0.12);
       quickStepLength = new CRDTBidirectionalDouble(this, 0.28);
       quickNextPelvisYawLimit = new CRDTBidirectionalDouble(this, Math.toRadians(35.0));
@@ -172,7 +175,11 @@ public class WalkActionDefinition extends ActionNodeDefinition
             if (quickWaypointOnly.getValue())
                jsonNode.put("quickWaypointOnly", true);
             if (useRRTPathPlanner.getValue())
+            {
                jsonNode.put("useRrtPathPlanner", true);
+               if (Math.abs(obstacleClearanceRadius.getValue() - 0.5) > 0.005)
+                  jsonNode.put("obstacleClearanceRadius", obstacleClearanceRadius.getValue());
+            }
             if (Math.abs(quickHipWidth.getValue() - 0.12) > 0.005)
                jsonNode.put("quickHipWidth", quickHipWidth.getValue());
             if (Math.abs(quickStepLength.getValue() - 0.28) > 0.005)
@@ -266,6 +273,8 @@ public class WalkActionDefinition extends ActionNodeDefinition
                quickWaypointOnly.setValue(jsonNode.get("quickWaypointOnly").asBoolean());
             if (jsonNode.get("useRrtPathPlanner") != null)
                useRRTPathPlanner.setValue(jsonNode.get("useRrtPathPlanner").asBoolean());
+            if (jsonNode.get("obstacleClearanceRadius") != null)
+               obstacleClearanceRadius.setValue(jsonNode.get("obstacleClearanceRadius").asDouble());
             if (jsonNode.get("quickHipWidth") != null)
                quickHipWidth.setValue(jsonNode.get("quickHipWidth").asDouble());
             if (jsonNode.get("quickStepLength") != null)
@@ -322,6 +331,7 @@ public class WalkActionDefinition extends ActionNodeDefinition
       onDiskPlannerPlanWithBodyPath = plannerPlanWithBodyPath.getValue();
       onDiskQuickWaypointOnly = quickWaypointOnly.getValue();
       onDiskUseRRTPathPlanner = useRRTPathPlanner.getValue();
+      onDiskObstacleClearanceRadius = obstacleClearanceRadius.getValue();
       onDiskQuickHipWidth = quickHipWidth.getValue();
       onDiskQuickStepLength = quickStepLength.getValue();
       onDiskQuickNextPelvisYawLimit = quickNextPelvisYawLimit.getValue();
@@ -370,6 +380,7 @@ public class WalkActionDefinition extends ActionNodeDefinition
          plannerPlanWithBodyPath.setValue(onDiskPlannerPlanWithBodyPath);
          quickWaypointOnly.setValue(onDiskQuickWaypointOnly);
          useRRTPathPlanner.setValue(onDiskUseRRTPathPlanner);
+         obstacleClearanceRadius.setValue(onDiskObstacleClearanceRadius);
          quickHipWidth.setValue(onDiskQuickHipWidth);
          quickStepLength.setValue(onDiskQuickStepLength);
          quickNextPelvisYawLimit.setValue(onDiskQuickNextPelvisYawLimit);
@@ -423,6 +434,7 @@ public class WalkActionDefinition extends ActionNodeDefinition
       unchanged &= plannerPlanWithBodyPath.getValue() == onDiskPlannerPlanWithBodyPath;
       unchanged &= quickWaypointOnly.getValue() == onDiskQuickWaypointOnly;
       unchanged &= useRRTPathPlanner.getValue() == onDiskUseRRTPathPlanner;
+      unchanged &= obstacleClearanceRadius.getValue() == onDiskObstacleClearanceRadius;
       unchanged &= quickHipWidth.getValue() == onDiskQuickHipWidth;
       unchanged &= quickStepLength.getValue() == onDiskQuickStepLength;
       unchanged &= quickNextPelvisYawLimit.getValue() == onDiskQuickNextPelvisYawLimit;
@@ -469,6 +481,7 @@ public class WalkActionDefinition extends ActionNodeDefinition
       plannerParameters.toMessage(message.getPlannerParameters());
       message.setQuickWaypointOnly(quickWaypointOnly.toMessage());
       message.setUseRrtPathPlanner(useRRTPathPlanner.toMessage());
+      message.setObstacleClearanceRadius(obstacleClearanceRadius.toMessage());
       message.setQuickHipWidth(quickHipWidth.toMessage());
       message.setQuickStepLength(quickStepLength.toMessage());
       message.setQuickNextPelvisYawLimit(quickNextPelvisYawLimit.toMessage());
@@ -518,6 +531,7 @@ public class WalkActionDefinition extends ActionNodeDefinition
       plannerParameters.fromMessage(message.getPlannerParameters());
       quickWaypointOnly.fromMessage(message.getQuickWaypointOnly());
       useRRTPathPlanner.fromMessage(message.getUseRrtPathPlanner());
+      obstacleClearanceRadius.fromMessage(message.getObstacleClearanceRadius());
       quickHipWidth.fromMessage(message.getQuickHipWidth());
       quickStepLength.fromMessage(message.getQuickStepLength());
       quickNextPelvisYawLimit.fromMessage(message.getQuickNextPelvisYawLimit());
@@ -658,6 +672,11 @@ public class WalkActionDefinition extends ActionNodeDefinition
    public CRDTBidirectionalBoolean getUseRRTPathPlanner()
    {
       return useRRTPathPlanner;
+   }
+
+   public CRDTBidirectionalDouble getObstacleClearanceRadius()
+   {
+      return obstacleClearanceRadius;
    }
 
    public CRDTBidirectionalDouble getQuickHipWidth()

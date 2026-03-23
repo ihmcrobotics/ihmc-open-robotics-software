@@ -460,7 +460,7 @@ public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, Walk
                {
                   yoloPosition.set(object.getTransformToWorld().getTranslation());
                   yoloPosition.setZ(segment.getFirstEndpointZ());
-                  if (segment.distance(yoloPosition) < 0.5)
+                  if (segment.distance(yoloPosition) < definition.getObstacleClearanceRadius().getValue())
                      return true;
                }
             return false;

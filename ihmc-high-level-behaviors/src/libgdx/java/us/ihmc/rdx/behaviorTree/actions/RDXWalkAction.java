@@ -64,6 +64,7 @@ public class RDXWalkAction extends RDXActionNode<WalkActionState, WalkActionDefi
    private final ImBooleanWrapper planWithBodyPathWidget;
    private final ImBooleanWrapper quickWaypointOnlyWidget;
    private final ImBooleanWrapper useRRTPathPlannerWidget;
+   private final ImDoubleWrapper obstacleClearanceRadiusWidget;
    private final ImIntegerWrapper quickHipWidthWidget;
    private final ImIntegerWrapper quickStepLengthWidget;
    private final ImIntegerWrapper quickNextPelvisYawLimitWidget;
@@ -161,6 +162,9 @@ public class RDXWalkAction extends RDXActionNode<WalkActionState, WalkActionDefi
       useRRTPathPlannerWidget = new ImBooleanWrapper(definition.getUseRRTPathPlanner()::getValue,
                                                      definition.getUseRRTPathPlanner()::setValue,
                                                      imBoolean -> ImGui.checkbox(labels.get("Use RRT path planner"), imBoolean));
+      obstacleClearanceRadiusWidget = new ImDoubleWrapper(definition.getObstacleClearanceRadius()::getValue,
+                                                          definition.getObstacleClearanceRadius()::setValue,
+                                                          imDouble -> ImGui.inputDouble(labels.get("Obstacle clearance radius (m)"), imDouble, 0.01, 0.05, "%.3f", 0));
       quickHipWidthWidget = new ImIntegerWrapper(() -> (int) Math.round(definition.getQuickHipWidth().getValue() * 100.0),
                                                  value -> definition.getQuickHipWidth().setValue(value / 100.0),
                                                  imInt -> ImGui.inputInt(labels.get("Quick hip width (cm)"), imInt, 1, 5));
@@ -541,6 +545,9 @@ public class RDXWalkAction extends RDXActionNode<WalkActionState, WalkActionDefi
                useRRTPathPlannerWidget.renderImGuiWidget();
                if (definition.getUseRRTPathPlanner().getValue())
                {
+                  ImGui.pushItemWidth(ImGui.getFontSize() * 8.0f);
+                  obstacleClearanceRadiusWidget.renderImGuiWidget();
+                  ImGui.popItemWidth();
                   if (definition.getWaypoints().getSize() > 0)
                      definition.getWaypoints().getValueAndModify().clear();
                }

@@ -15,7 +15,7 @@ public class WalkActionDefinitionMessagePubSubType implements us.ihmc.pubsub.Top
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "72522f15f7d471fbd92e107da7332eefccf5ac82d5537e435fd6b260d55fc524";
+   		return "447068b181bee1828c39bea4858ce0ede858fccbe54207c60a87907f360f6afc";
    }
    
    @Override
@@ -98,6 +98,8 @@ public class WalkActionDefinitionMessagePubSubType implements us.ihmc.pubsub.Top
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -230,6 +232,9 @@ public class WalkActionDefinitionMessagePubSubType implements us.ihmc.pubsub.Top
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -283,6 +288,8 @@ public class WalkActionDefinitionMessagePubSubType implements us.ihmc.pubsub.Top
       cdr.write_type_7(data.getQuickWaypointOnly());
 
       cdr.write_type_7(data.getUseRrtPathPlanner());
+
+      cdr.write_type_6(data.getObstacleClearanceRadius());
 
       cdr.write_type_6(data.getQuickHipWidth());
 
@@ -347,6 +354,8 @@ public class WalkActionDefinitionMessagePubSubType implements us.ihmc.pubsub.Top
       	
       data.setUseRrtPathPlanner(cdr.read_type_7());
       	
+      data.setObstacleClearanceRadius(cdr.read_type_6());
+      	
       data.setQuickHipWidth(cdr.read_type_6());
       	
       data.setQuickStepLength(cdr.read_type_6());
@@ -400,6 +409,7 @@ public class WalkActionDefinitionMessagePubSubType implements us.ihmc.pubsub.Top
 
       ser.write_type_7("quick_waypoint_only", data.getQuickWaypointOnly());
       ser.write_type_7("use_rrt_path_planner", data.getUseRrtPathPlanner());
+      ser.write_type_6("obstacle_clearance_radius", data.getObstacleClearanceRadius());
       ser.write_type_6("quick_hip_width", data.getQuickHipWidth());
       ser.write_type_6("quick_step_length", data.getQuickStepLength());
       ser.write_type_6("quick_next_pelvis_yaw_limit", data.getQuickNextPelvisYawLimit());
@@ -442,6 +452,7 @@ public class WalkActionDefinitionMessagePubSubType implements us.ihmc.pubsub.Top
 
       data.setQuickWaypointOnly(ser.read_type_7("quick_waypoint_only"));
       data.setUseRrtPathPlanner(ser.read_type_7("use_rrt_path_planner"));
+      data.setObstacleClearanceRadius(ser.read_type_6("obstacle_clearance_radius"));
       data.setQuickHipWidth(ser.read_type_6("quick_hip_width"));
       data.setQuickStepLength(ser.read_type_6("quick_step_length"));
       data.setQuickNextPelvisYawLimit(ser.read_type_6("quick_next_pelvis_yaw_limit"));

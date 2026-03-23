@@ -123,6 +123,7 @@ module behavior_msgs
          */
         boolean quick_waypoint_only;
         boolean use_rrt_path_planner;
+        double obstacle_clearance_radius;
         double quick_hip_width;
         double quick_step_length;
         double quick_next_pelvis_yaw_limit;

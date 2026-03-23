@@ -109,6 +109,7 @@ public class WalkActionDefinitionMessage extends Packet<WalkActionDefinitionMess
             */
    public boolean quick_waypoint_only_;
    public boolean use_rrt_path_planner_;
+   public double obstacle_clearance_radius_;
    public double quick_hip_width_;
    public double quick_step_length_;
    public double quick_next_pelvis_yaw_limit_;
@@ -180,6 +181,8 @@ public class WalkActionDefinitionMessage extends Packet<WalkActionDefinitionMess
       quick_waypoint_only_ = other.quick_waypoint_only_;
 
       use_rrt_path_planner_ = other.use_rrt_path_planner_;
+
+      obstacle_clearance_radius_ = other.obstacle_clearance_radius_;
 
       quick_hip_width_ = other.quick_hip_width_;
 
@@ -515,6 +518,15 @@ public class WalkActionDefinitionMessage extends Packet<WalkActionDefinitionMess
       return use_rrt_path_planner_;
    }
 
+   public void setObstacleClearanceRadius(double obstacle_clearance_radius)
+   {
+      obstacle_clearance_radius_ = obstacle_clearance_radius;
+   }
+   public double getObstacleClearanceRadius()
+   {
+      return obstacle_clearance_radius_;
+   }
+
    public void setQuickHipWidth(double quick_hip_width)
    {
       quick_hip_width_ = quick_hip_width;
@@ -675,6 +687,8 @@ public class WalkActionDefinitionMessage extends Packet<WalkActionDefinitionMess
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.use_rrt_path_planner_, other.use_rrt_path_planner_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.obstacle_clearance_radius_, other.obstacle_clearance_radius_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.quick_hip_width_, other.quick_hip_width_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.quick_step_length_, other.quick_step_length_, epsilon)) return false;
@@ -747,6 +761,8 @@ public class WalkActionDefinitionMessage extends Packet<WalkActionDefinitionMess
       if(this.quick_waypoint_only_ != otherMyClass.quick_waypoint_only_) return false;
 
       if(this.use_rrt_path_planner_ != otherMyClass.use_rrt_path_planner_) return false;
+
+      if(this.obstacle_clearance_radius_ != otherMyClass.obstacle_clearance_radius_) return false;
 
       if(this.quick_hip_width_ != otherMyClass.quick_hip_width_) return false;
 
@@ -824,6 +840,8 @@ public class WalkActionDefinitionMessage extends Packet<WalkActionDefinitionMess
       builder.append(this.quick_waypoint_only_);      builder.append(", ");
       builder.append("use_rrt_path_planner=");
       builder.append(this.use_rrt_path_planner_);      builder.append(", ");
+      builder.append("obstacle_clearance_radius=");
+      builder.append(this.obstacle_clearance_radius_);      builder.append(", ");
       builder.append("quick_hip_width=");
       builder.append(this.quick_hip_width_);      builder.append(", ");
       builder.append("quick_step_length=");
