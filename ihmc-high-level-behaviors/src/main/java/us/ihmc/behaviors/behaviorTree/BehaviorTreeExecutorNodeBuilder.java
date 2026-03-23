@@ -16,7 +16,11 @@ import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.sensors.ImageSensor;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
+import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseCommunicatorMap;
+import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,22 +36,22 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
       REGISTRY.put(FallbackNodeDefinition.class, FallbackNodeExecutor::new);
       REGISTRY.put(ConditionNodeDefinition.class, ConditionNodeExecutor::new);
       REGISTRY.put(GotoNodeDefinition.class, GotoNodeExecutor::new);
-      REGISTRY.put(CheckPointNodeDefinition.class, CheckPointNodeExecutor::new);
-      REGISTRY.put(SceneActionNodeDefinition.class, SceneActionNodeExecutor::new);
+      REGISTRY.put(CheckpointNodeDefinition.class, CheckpointNodeExecutor::new);
+      REGISTRY.put(SceneActionDefinition.class, SceneActionExecutor::new);
       REGISTRY.put(AI2RNodeDefinition.class, AI2RNodeExecutor::new);
       REGISTRY.put(DoorTraversalDefinition.class, DoorTraversalExecutor::new);
       REGISTRY.put(BuildingExplorationDefinition.class, BuildingExplorationExecutor::new);
       REGISTRY.put(NeckActionDefinition.class, NeckActionExecutor::new);
-      REGISTRY.put(ChestOrientationActionDefinition.class, ChestOrientationActionExecutor::new);
-      REGISTRY.put(FootstepPlanActionDefinition.class, FootstepPlanActionExecutor::new);
-      REGISTRY.put(HandPoseActionDefinition.class, HandPoseActionExecutor::new);
+      REGISTRY.put(SpineActionDefinition.class, SpineActionExecutor::new);
+      REGISTRY.put(WalkActionDefinition.class, WalkActionExecutor::new);
+      REGISTRY.put(ArmActionDefinition.class, ArmActionExecutor::new);
       REGISTRY.put(HandWrenchActionDefinition.class, HandWrenchActionExecutor::new);
       REGISTRY.put(ScrewPrimitiveActionDefinition.class, ScrewPrimitiveActionExecutor::new);
-      REGISTRY.put(PelvisHeightOrientationActionDefinition.class, PelvisHeightOrientationActionExecutor::new);
+      REGISTRY.put(PelvisActionDefinition.class, PelvisActionExecutor::new);
       REGISTRY.put(AbilityHandActionDefinition.class, AbilityHandActionExecutor::new);
-      REGISTRY.put(SakeHandCommandActionDefinition.class, SakeHandCommandActionExecutor::new);
-      REGISTRY.put(WaitDurationActionDefinition.class, WaitDurationActionExecutor::new);
-      REGISTRY.put(FootPoseActionDefinition.class, FootPoseActionExecutor::new);
+      REGISTRY.put(EZGripperActionDefinition.class, EZGripperActionExecutor::new);
+      REGISTRY.put(WaitActionDefinition.class, WaitActionExecutor::new);
+      REGISTRY.put(LegActionDefinition.class, LegActionExecutor::new);
    }
 
    private BehaviorTreeExecutor tree;
@@ -57,7 +61,10 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
    private ROS2SyncedRobotModel syncedRobot;
    private ControllerStatusTracker controllerStatusTracker;
    private SideDependentList<AbilityHandActionComms> abilityHandComms;
-   private BehaviorTreeSceneExecutor scene;
+   private ImageSensor imageSensor;
+   private YOLOv8DetectionExecutor yolo;
+   private IsaacROSFoundationPoseCommunicatorMap foundationPose;
+   private TerrainMapData terrainMapData;
 
    public void initialize(BehaviorTreeExecutor tree,
                           WorkspaceResourceDirectory saveFileDirectory,
@@ -66,7 +73,10 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
                           ROS2SyncedRobotModel syncedRobot,
                           ControllerStatusTracker controllerStatusTracker,
                           SideDependentList<AbilityHandActionComms> abilityHandComms,
-                          BehaviorTreeSceneExecutor scene)
+                          ImageSensor imageSensor,
+                          YOLOv8DetectionExecutor yolo,
+                          IsaacROSFoundationPoseCommunicatorMap foundationPose,
+                          TerrainMapData terrainMapData)
    {
       this.tree = tree;
       this.saveFileDirectory = saveFileDirectory;
@@ -75,12 +85,22 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
       this.syncedRobot = syncedRobot;
       this.controllerStatusTracker = controllerStatusTracker;
       this.abilityHandComms = abilityHandComms;
-      this.scene = scene;
+      this.imageSensor = imageSensor;
+      this.yolo = yolo;
+      this.foundationPose = foundationPose;
+      this.terrainMapData = terrainMapData;
    }
 
    @Override
    public BehaviorTreeRootNodeExecutor createRootNode(long id)
    {
+      BehaviorTreeSceneExecutor scene = new BehaviorTreeSceneExecutor(tree.getCRDTInfo(),
+                                                                      tree::getAndIncrementNextID,
+                                                                      syncedRobot,
+                                                                      imageSensor,
+                                                                      yolo,
+                                                                      foundationPose,
+                                                                      terrainMapData);
       return new BehaviorTreeRootNodeExecutor(id,
                                               tree,
                                               saveFileDirectory,

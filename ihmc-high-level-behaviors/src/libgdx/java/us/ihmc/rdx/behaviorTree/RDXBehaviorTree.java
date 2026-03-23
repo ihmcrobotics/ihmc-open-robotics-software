@@ -15,7 +15,6 @@ import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
-import us.ihmc.rdx.behaviorTree.scene.RDXBehaviorTreeScene;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
@@ -38,10 +37,10 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
     */
    private transient final TLongObjectMap<RDXBehaviorTreeNode<?, ?>> idToNodeMap = new TLongObjectHashMap<>();
    private final RDXPanel panel = new RDXPanel("Behavior Tree", this::renderImGuiWidgets, false, true);
+   private final RDXPanel scenePanel = new RDXPanel("Scene", this::renderScenePanel);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final RDXBehaviorTreeNodeCreationMenu nodeCreationMenu;
    private final RDXBehaviorTreeWidgetsVerticalLayout treeWidgetsVerticalLayout;
-   private final RDXBehaviorTreeScene scene;
    private boolean anyNodeSelected;
    private RDXBehaviorTreeNode<?, ?> selectedNode;
    private boolean draggingDivider;
@@ -56,19 +55,16 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
    {
       super(syncedRobot, ROS2ActorDesignation.OPERATOR, peerClockEstimator, treeFilesDirectory, new RDXBehaviorTreeNodeBuilder());
 
-      scene = new RDXBehaviorTreeScene(crdtInfo, this::getAndIncrementNextID, syncedRobot, baseUI, panel);
-      setScene(scene);
-
       ((RDXBehaviorTreeNodeBuilder) getNodeBuilder()).initialize(this,
                                                                  saveFileDirectory,
                                                                  syncedRobot,
-                                                                 scene,
                                                                  selectionCollisionModel,
                                                                  baseUI,
                                                                  panel3D);
 
-      nodeCreationMenu = new RDXBehaviorTreeNodeCreationMenu(this, treeFilesDirectory, scene);
+      nodeCreationMenu = new RDXBehaviorTreeNodeCreationMenu(this, treeFilesDirectory);
       treeWidgetsVerticalLayout = new RDXBehaviorTreeWidgetsVerticalLayout(this);
+      panel.addChild(scenePanel);
       baseUI.getImGuiPanelManager().addPanel(panel);
    }
 
@@ -83,7 +79,6 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
 
    public void update()
    {
-      scene.update();
       idToNodeMap.clear();
 
       if (rootNode != null)
@@ -321,6 +316,17 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
          RDXBaseUI.pushNotification("Saving %s".formatted(rootNode.getDefinition().getName()));
          rootNode.getDefinition().saveToFile();
       }
+   }
+
+   private void renderScenePanel()
+   {
+      if (rootNode == null)
+      {
+         ImGui.text("Root node is null. No scene.");
+         return;
+      }
+
+      rootNode.getScene().renderImGuiWidgets();
    }
 
    private void renderSelectedNodeSettingsWidgets(RDXBehaviorTreeNode<?, ?> node)

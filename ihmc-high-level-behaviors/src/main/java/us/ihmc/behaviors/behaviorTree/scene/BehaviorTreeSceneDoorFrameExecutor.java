@@ -57,6 +57,9 @@ public class BehaviorTreeSceneDoorFrameExecutor extends BehaviorTreeSceneObjectE
    {
       RawImage depthImage;
 
+      if (doorPanel == null)
+         return;
+
       if (!frozen.getValue() && pointCounter != null
        && (depthImage = scene.getImageSensor().getImage(ZEDImageSensor.DEPTH_IMAGE_KEY)) != null)
       {
@@ -97,7 +100,7 @@ public class BehaviorTreeSceneDoorFrameExecutor extends BehaviorTreeSceneObjectE
             latchPostPoints = Math.max(latchPostPoints, pointCounter.countPointsInCapsule(depthImage, capsuleBottom, capsuleTop, 0.05f));
             if (latchPostPoints > MIN_POST_POINTS)
             {
-               doorOpenAngle = (float) angle;
+               doorOpenAngle = (float) -angle; // Invert so it's latch post relative
                RigidBodyTransform frameTransform = transform.getValueAndModify();
                frameTransform.getTranslation().set(hingePoint);
                EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.X, searchHingeToLatchPost, frameTransform.getRotation());
@@ -150,5 +153,20 @@ public class BehaviorTreeSceneDoorFrameExecutor extends BehaviorTreeSceneObjectE
 
       if (pointCounter != null)
          pointCounter.close();
+   }
+
+   public byte getDoorType()
+   {
+      return doorType;
+   }
+
+   public RobotSide getHingeSide()
+   {
+      return hingeSide;
+   }
+
+   public float getDoorOpenAngle()
+   {
+      return doorOpenAngle;
    }
 }

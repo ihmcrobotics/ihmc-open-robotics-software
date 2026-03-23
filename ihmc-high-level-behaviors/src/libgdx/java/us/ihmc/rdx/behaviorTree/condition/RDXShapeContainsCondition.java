@@ -38,6 +38,7 @@ public class RDXShapeContainsCondition
    private final ImGuiReferenceFrameLibraryCombo shapeParentFrameComboBox;
    private final ImDoubleWrapper sphereRadiusWidget;
    private final ImIntegerWrapper minPointsWidget;
+   private final ImIntegerWrapper maxPointsWidget;
    private ModelInstance sphereModel;
    private double lastSphereRadius = Double.NaN;
 
@@ -68,6 +69,9 @@ public class RDXShapeContainsCondition
       minPointsWidget = new ImIntegerWrapper(shapeDefinition::getMinPoints,
                                              shapeDefinition::setMinPoints,
                                              imInt -> ImGuiTools.volatileInputInt(labels.get("Min Points"), imInt));
+      maxPointsWidget = new ImIntegerWrapper(shapeDefinition::getMaxPoints,
+                                             shapeDefinition::setMaxPoints,
+                                             imInt -> ImGuiTools.volatileInputInt(labels.get("Max Points"), imInt));
    }
 
    public void update()
@@ -128,6 +132,7 @@ public class RDXShapeContainsCondition
       else
       {
          minPointsWidget.renderImGuiWidget();
+         maxPointsWidget.renderImGuiWidget();
          ImGui.text("Points contained: " + shapeState.getNumberOfPointsContained());
       }
    }

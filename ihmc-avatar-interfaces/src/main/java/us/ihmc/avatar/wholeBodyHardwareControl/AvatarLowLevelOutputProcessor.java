@@ -18,6 +18,7 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 import java.util.LinkedHashMap;
 
@@ -131,7 +132,6 @@ public class AvatarLowLevelOutputProcessor
                                        isServoing.set(false);
                                        isUnservoing.set(false);
                                        masterGain.set(0.0);
-                                       unservoQuickly.set(false, false);
                                     }
                                  });
 
@@ -177,6 +177,8 @@ public class AvatarLowLevelOutputProcessor
          jointDesiredOutput.setDesiredPosition(jointDesiredOutput.getDesiredPosition() + getJointPositionOffset(controlledJoint));
          jointDesiredOutput.setDesiredVelocity(jointDesiredOutput.getDesiredVelocity() + getJointVelocityOffset(controlledJoint));
       }
+      if (unservoQuickly.getBooleanValue())
+         unservoQuickly.set(false, false);
    }
 
    public void enableInterpolation(boolean enable)
@@ -270,6 +272,11 @@ public class AvatarLowLevelOutputProcessor
    public void addServoListener(YoVariableChangedListener listener)
    {
       servo.addListener(listener);
+   }
+
+   public void addUnservoQuicklyListener(YoVariableChangedListener listener)
+   {
+      unservoQuickly.addListener(listener);
    }
 
    public void addMasterGainListener(YoVariableChangedListener listener)

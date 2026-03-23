@@ -1,5 +1,6 @@
 package us.ihmc.rdx.behaviorTree.actions;
 
+import imgui.ImGui;
 import us.ihmc.behaviors.behaviorTree.action.actions.NeckActionDefinition;
 import us.ihmc.behaviors.behaviorTree.action.actions.NeckActionState;
 import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeRootNode;
@@ -43,6 +44,18 @@ public class RDXNeckAction extends RDXActionNode<NeckActionState, NeckActionDefi
    public void update()
    {
       super.update();
+   }
+
+   @Override
+   public void renderTreeViewRow()
+   {
+      super.renderRowBeginning();
+      super.renderEditableName();
+
+      ImGui.sameLine();
+      ImGui.textDisabled("Neck");
+
+      renderRowEnd();
    }
 
    @Override

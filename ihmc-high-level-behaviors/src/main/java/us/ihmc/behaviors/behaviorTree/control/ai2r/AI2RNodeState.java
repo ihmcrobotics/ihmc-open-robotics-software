@@ -3,14 +3,14 @@ package us.ihmc.behaviors.behaviorTree.control.ai2r;
 import behavior_msgs.msg.dds.AI2RNodeStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
-import us.ihmc.behaviors.behaviorTree.action.actions.CheckPointNodeState;
+import us.ihmc.behaviors.behaviorTree.control.CheckpointNodeState;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class AI2RNodeState extends BehaviorTreeNodeState<AI2RNodeDefinition>
 {
-   private final List<CheckPointNodeState> checkPoints = new ArrayList<>();
+   private final List<CheckpointNodeState> checkPoints = new ArrayList<>();
 
    public AI2RNodeState(long id, BehaviorTreeRootNodeState rootNode)
    {
@@ -30,7 +30,7 @@ public class AI2RNodeState extends BehaviorTreeNodeState<AI2RNodeDefinition>
    {
       for (BehaviorTreeNodeState<?> child : node.getChildren())
       {
-         if (child instanceof CheckPointNodeState checkPoint)
+         if (child instanceof CheckpointNodeState checkPoint)
          {
             checkPoints.add(checkPoint);
          }
@@ -39,7 +39,7 @@ public class AI2RNodeState extends BehaviorTreeNodeState<AI2RNodeDefinition>
       }
    }
 
-   public List<CheckPointNodeState> getCheckPoints()
+   public List<CheckpointNodeState> getCheckpoints()
    {
       return checkPoints;
    }

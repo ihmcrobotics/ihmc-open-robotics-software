@@ -10,14 +10,13 @@ import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.behaviors.behaviorTree.control.buildingExploration.BuildingExplorationDefinition;
 import us.ihmc.behaviors.behaviorTree.control.door.DoorTraversalDefinition;
-import us.ihmc.behaviors.behaviorTree.action.actions.CheckPointNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.control.CheckpointNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.control.GotoNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.control.ActionSequenceDefinition;
 import us.ihmc.behaviors.behaviorTree.control.FallbackNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.action.actions.*;
-import us.ihmc.behaviors.behaviorTree.action.actions.PelvisHeightOrientationActionDefinition;
-import us.ihmc.rdx.behaviorTree.scene.RDXBehaviorTreeScene;
+import us.ihmc.behaviors.behaviorTree.action.actions.PelvisActionDefinition;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.behaviorTree.actions.RDXActionNode;
 import us.ihmc.rdx.ui.widgets.ImGuiArmIconWidget;
@@ -53,13 +52,13 @@ public class RDXBehaviorTreeNodeCreationMenu
    private final ImGuiHandWidget handIcon = new ImGuiHandWidget();
    private final ImGuiGripperWidget gripperIcon = new ImGuiGripperWidget();
 
-   public RDXBehaviorTreeNodeCreationMenu(RDXBehaviorTree behaviorTree, WorkspaceResourceDirectory treeFilesDirectory, RDXBehaviorTreeScene scene)
+   public RDXBehaviorTreeNodeCreationMenu(RDXBehaviorTree behaviorTree, WorkspaceResourceDirectory treeFilesDirectory)
    {
       this.behaviorTree = behaviorTree;
 
       topologyOperationQueue = behaviorTree.getTopologyChangeQueue();
 
-      behaviorTreesDirectory = new RDXAvailableBehaviorTreeDirectory(treeFilesDirectory, behaviorTree, topologyOperationQueue, scene, this::complete);
+      behaviorTreesDirectory = new RDXAvailableBehaviorTreeDirectory(treeFilesDirectory, behaviorTree, topologyOperationQueue, this::complete);
       behaviorTreesDirectory.reindexDirectory();
    }
 
@@ -110,12 +109,12 @@ public class RDXBehaviorTreeNodeCreationMenu
          checkpointIcon.render();
          ImGui.sameLine();
          ImGui.setCursorPosX(align);
-         renderNodeCreationClickable(relativeNode, insertionType, "Check Point Node", CheckPointNodeDefinition.class, null);
+         renderNodeCreationClickable(relativeNode, insertionType, "Checkpoint Node", CheckpointNodeDefinition.class, null);
          ImGui.setCursorPosX(ImGui.getCursorPosX() + ImGui.getFontSize() * 0.3f);
          sceneActionIcon.render();
          ImGui.sameLine();
          ImGui.setCursorPosX(align);
-         renderNodeCreationClickable(relativeNode, insertionType, "Scene Action", SceneActionNodeDefinition.class, null);
+         renderNodeCreationClickable(relativeNode, insertionType, "Scene Action", SceneActionDefinition.class, null);
          ImGui.setCursorPosX(align);
          renderNodeCreationClickable(relativeNode, insertionType, "AI2R Node", AI2RNodeDefinition.class, null);
          ImGui.setCursorPosX(ImGui.getCursorPosX() + ImGui.getFontSize() * 0.3f);
@@ -139,23 +138,23 @@ public class RDXBehaviorTreeNodeCreationMenu
          footstepsIcon.render(ImGui.getTextLineHeight());
          ImGui.sameLine();
          ImGui.setCursorPosX(align);
-         renderNodeCreationClickable(relativeNode, insertionType, "Footstep Plan", FootstepPlanActionDefinition.class, null);
+         renderNodeCreationClickable(relativeNode, insertionType, "Walk", WalkActionDefinition.class, null);
          ImGui.setCursorPosX(align);
-         ImGui.text("Foot Pose: ");
+         ImGui.text("Leg: ");
          for (RobotSide side : RobotSide.values)
          {
             ImGui.sameLine();
-            renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), FootPoseActionDefinition.class, side);
+            renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), LegActionDefinition.class, side);
          }
          ImGui.setCursorPosX(ImGui.getCursorPosX() + ImGui.getFontSize() * 0.3f);
          armIcon.render(RobotSide.LEFT, false, false);
          ImGui.sameLine();
          ImGui.setCursorPosX(align);
-         ImGui.text("Hand Pose: ");
+         ImGui.text("Arm: ");
          for (RobotSide side : RobotSide.values)
          {
             ImGui.sameLine();
-            renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), HandPoseActionDefinition.class, side);
+            renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), ArmActionDefinition.class, side);
          }
          ImGui.setCursorPosX(ImGui.getCursorPosX() + ImGui.getFontSize() * 0.3f);
          handIcon.render(RobotSide.LEFT, ImGui.getTextLineHeight(), false);
@@ -171,20 +170,20 @@ public class RDXBehaviorTreeNodeCreationMenu
          gripperIcon.render(RobotSide.LEFT, ImGui.getTextLineHeight());
          ImGui.sameLine();
          ImGui.setCursorPosX(align);
-         ImGui.text("Sake Hand Command: ");
+         ImGui.text("EZGripper: ");
          for (RobotSide side : RobotSide.values)
          {
             ImGui.sameLine();
-            renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), SakeHandCommandActionDefinition.class, side);
+            renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), EZGripperActionDefinition.class, side);
          }
          ImGui.setCursorPosX(align);
          renderNodeCreationClickable(relativeNode, insertionType, "Neck", NeckActionDefinition.class, null);
          ImGui.setCursorPosX(align);
-         renderNodeCreationClickable(relativeNode, insertionType, "Chest Orientation", ChestOrientationActionDefinition.class, null);
+         renderNodeCreationClickable(relativeNode, insertionType, "Spine", SpineActionDefinition.class, null);
          ImGui.setCursorPosX(align);
-         renderNodeCreationClickable(relativeNode, insertionType, "Pelvis Height", PelvisHeightOrientationActionDefinition.class, null);
+         renderNodeCreationClickable(relativeNode, insertionType, "Pelvis", PelvisActionDefinition.class, null);
          ImGui.setCursorPosX(align);
-         renderNodeCreationClickable(relativeNode, insertionType, "Wait", WaitDurationActionDefinition.class, null);
+         renderNodeCreationClickable(relativeNode, insertionType, "Wait", WaitActionDefinition.class, null);
          ImGui.setCursorPosX(align);
          ImGui.text("Screw Primitive: ");
          for (RobotSide side : RobotSide.values)

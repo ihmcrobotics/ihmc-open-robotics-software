@@ -4,26 +4,25 @@
 #include "behavior_msgs/msg/./AI2RNodeStateMessage_.idl"
 #include "behavior_msgs/msg/./AbilityHandActionStateMessage_.idl"
 #include "behavior_msgs/msg/./ActionSequenceStateMessage_.idl"
+#include "behavior_msgs/msg/./ArmActionStateMessage_.idl"
 #include "behavior_msgs/msg/./BasicNodeStateMessage_.idl"
 #include "behavior_msgs/msg/./BehaviorTreeRootNodeStateMessage_.idl"
-#include "behavior_msgs/msg/./BehaviorTreeSceneStateMessage_.idl"
 #include "behavior_msgs/msg/./BuildingExplorationStateMessage_.idl"
-#include "behavior_msgs/msg/./CheckPointNodeStateMessage_.idl"
-#include "behavior_msgs/msg/./ChestOrientationActionStateMessage_.idl"
+#include "behavior_msgs/msg/./CheckpointNodeStateMessage_.idl"
 #include "behavior_msgs/msg/./ConditionNodeStateMessage_.idl"
 #include "behavior_msgs/msg/./DoorTraversalStateMessage_.idl"
+#include "behavior_msgs/msg/./EZGripperActionStateMessage_.idl"
 #include "behavior_msgs/msg/./FallbackNodeStateMessage_.idl"
-#include "behavior_msgs/msg/./FootPoseActionStateMessage_.idl"
-#include "behavior_msgs/msg/./FootstepPlanActionStateMessage_.idl"
 #include "behavior_msgs/msg/./GotoNodeStateMessage_.idl"
-#include "behavior_msgs/msg/./HandPoseActionStateMessage_.idl"
 #include "behavior_msgs/msg/./HandWrenchActionStateMessage_.idl"
+#include "behavior_msgs/msg/./LegActionStateMessage_.idl"
 #include "behavior_msgs/msg/./NeckActionStateMessage_.idl"
-#include "behavior_msgs/msg/./PelvisHeightOrientationActionStateMessage_.idl"
-#include "behavior_msgs/msg/./SakeHandCommandActionStateMessage_.idl"
-#include "behavior_msgs/msg/./SceneActionNodeStateMessage_.idl"
+#include "behavior_msgs/msg/./PelvisActionStateMessage_.idl"
+#include "behavior_msgs/msg/./SceneActionStateMessage_.idl"
 #include "behavior_msgs/msg/./ScrewPrimitiveActionStateMessage_.idl"
-#include "behavior_msgs/msg/./WaitDurationActionStateMessage_.idl"
+#include "behavior_msgs/msg/./SpineActionStateMessage_.idl"
+#include "behavior_msgs/msg/./WaitActionStateMessage_.idl"
+#include "behavior_msgs/msg/./WalkActionStateMessage_.idl"
 #include "ihmc_common_msgs/msg/./LatestModificationMessage_.idl"
 module behavior_msgs
 {
@@ -74,19 +73,19 @@ module behavior_msgs
       const octet NECK_ACTION =
       12;
 
-      const octet CHEST_ORIENTATION_ACTION =
+      const octet SPINE_ACTION =
       13;
 
-      const octet FOOTSTEP_PLAN_ACTION =
+      const octet WALK_ACTION =
       14;
 
-      const octet SAKE_HAND_COMMAND_ACTION =
+      const octet EZGRIPPER_ACTION =
       15;
 
       const octet ABILITY_HAND_ACTION =
       16;
 
-      const octet HAND_POSE_ACTION =
+      const octet ARM_ACTION =
       17;
 
       const octet HAND_WRENCH_ACTION =
@@ -95,13 +94,13 @@ module behavior_msgs
       const octet SCREW_PRIMITIVE_ACTION =
       19;
 
-      const octet PELVIS_HEIGHT_ORIENTATION_ACTION =
+      const octet PELVIS_ACTION =
       20;
 
-      const octet WAIT_DURATION_ACTION =
+      const octet WAIT_ACTION =
       21;
 
-      const octet FOOT_POSE_ACTION =
+      const octet LEG_ACTION =
       22;
 
 
@@ -131,10 +130,6 @@ module behavior_msgs
          */
         ihmc_common_msgs::msg::dds::LatestModificationMessage latest_modification_to_data;
         /**
-         * Scene
-         */
-        behavior_msgs::msg::dds::BehaviorTreeSceneStateMessage scene;
-        /**
          * A depth first ordered list of types.
          */
         sequence<octet, 1000> behavior_tree_types;
@@ -151,22 +146,22 @@ module behavior_msgs
         sequence<behavior_msgs::msg::dds::FallbackNodeStateMessage, 120> fallback_nodes;
         sequence<behavior_msgs::msg::dds::ConditionNodeStateMessage, 120> condition_nodes;
         sequence<behavior_msgs::msg::dds::GotoNodeStateMessage, 120> goto_nodes;
-        sequence<behavior_msgs::msg::dds::CheckPointNodeStateMessage, 120> checkpoint_nodes;
-        sequence<behavior_msgs::msg::dds::SceneActionNodeStateMessage, 120> scene_actions;
+        sequence<behavior_msgs::msg::dds::CheckpointNodeStateMessage, 120> checkpoint_nodes;
+        sequence<behavior_msgs::msg::dds::SceneActionStateMessage, 120> scene_actions;
         sequence<behavior_msgs::msg::dds::AI2RNodeStateMessage, 1> ai2r_nodes;
         sequence<behavior_msgs::msg::dds::DoorTraversalStateMessage, 120> door_traversals;
         sequence<behavior_msgs::msg::dds::BuildingExplorationStateMessage, 120> building_explorations;
         sequence<behavior_msgs::msg::dds::NeckActionStateMessage, 120> neck_actions;
-        sequence<behavior_msgs::msg::dds::ChestOrientationActionStateMessage, 120> chest_orientation_actions;
-        sequence<behavior_msgs::msg::dds::FootstepPlanActionStateMessage, 120> footstep_plan_actions;
-        sequence<behavior_msgs::msg::dds::SakeHandCommandActionStateMessage, 120> sake_hand_command_actions;
+        sequence<behavior_msgs::msg::dds::SpineActionStateMessage, 120> spine_actions;
+        sequence<behavior_msgs::msg::dds::WalkActionStateMessage, 120> walk_actions;
+        sequence<behavior_msgs::msg::dds::EZGripperActionStateMessage, 120> ez_gripper_actions;
         sequence<behavior_msgs::msg::dds::AbilityHandActionStateMessage, 120> ability_hand_actions;
-        sequence<behavior_msgs::msg::dds::HandPoseActionStateMessage, 120> hand_pose_actions;
+        sequence<behavior_msgs::msg::dds::ArmActionStateMessage, 120> arm_actions;
         sequence<behavior_msgs::msg::dds::HandWrenchActionStateMessage, 120> hand_wrench_actions;
         sequence<behavior_msgs::msg::dds::ScrewPrimitiveActionStateMessage, 120> screw_primitive_actions;
-        sequence<behavior_msgs::msg::dds::PelvisHeightOrientationActionStateMessage, 120> pelvis_height_actions;
-        sequence<behavior_msgs::msg::dds::WaitDurationActionStateMessage, 120> wait_duration_actions;
-        sequence<behavior_msgs::msg::dds::FootPoseActionStateMessage, 120> foot_pose_actions;
+        sequence<behavior_msgs::msg::dds::PelvisActionStateMessage, 120> pelvis_actions;
+        sequence<behavior_msgs::msg::dds::WaitActionStateMessage, 120> wait_actions;
+        sequence<behavior_msgs::msg::dds::LegActionStateMessage, 120> leg_actions;
       };
     };
   };

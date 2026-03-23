@@ -14,19 +14,12 @@ import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
 import perception_msgs.msg.dds.DetectedObjectPacket;
 import perception_msgs.msg.dds.IntrinsicParametersMessage;
-import toolbox_msgs.msg.dds.BehaviorControlModePacket;
-import toolbox_msgs.msg.dds.BehaviorControlModeResponsePacket;
-import toolbox_msgs.msg.dds.BehaviorStatusPacket;
-import toolbox_msgs.msg.dds.HeightQuadTreeToolboxRequestMessage;
-import toolbox_msgs.msg.dds.HumanoidBehaviorTypePacket;
 import toolbox_msgs.msg.dds.KinematicsPlanningToolboxCenterOfMassMessage;
 import toolbox_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
 import toolbox_msgs.msg.dds.KinematicsPlanningToolboxRigidBodyMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import toolbox_msgs.msg.dds.ReachingManifoldMessage;
 import toolbox_msgs.msg.dds.RigidBodyExplorationConfigurationMessage;
-import toolbox_msgs.msg.dds.SimpleCoactiveBehaviorDataPacket;
-import toolbox_msgs.msg.dds.WalkToGoalBehaviorPacket;
 import toolbox_msgs.msg.dds.WaypointBasedTrajectoryMessage;
 import toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage;
@@ -58,11 +51,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxMessageFactory;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.CurrentBehaviorStatus;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.WalkToGoalAction;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessageTools;
@@ -321,38 +309,6 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static BehaviorStatusPacket createBehaviorStatusPacket(CurrentBehaviorStatus requestedControl, HumanoidBehaviorType behavior)
-   {
-      BehaviorStatusPacket message = new BehaviorStatusPacket();
-      message.setCurrentBehaviorStatus(requestedControl.toByte());
-      message.setHumanoidBehaviorType(behavior.toByte());
-      return message;
-   }
-
-   public static LegCompliancePacket createLegCompliancePacket(float[] maxVelocityDeltas, RobotSide robotSide)
-   {
-      LegCompliancePacket message = new LegCompliancePacket();
-      message.getMaxVelocityDeltas().add(maxVelocityDeltas);
-      message.setRobotSide(robotSide.toByte());
-      return message;
-   }
-
-   public static SnapFootstepPacket createSnapFootstepPacket(List<FootstepDataMessage> data, int[] footstepOrder, byte[] flag)
-   {
-      SnapFootstepPacket message = new SnapFootstepPacket();
-      MessageTools.copyData(data, message.getFootstepData());
-      message.getFootstepOrder().add(footstepOrder);
-      message.getFlag().add(flag);
-      return message;
-   }
-
-   public static BehaviorControlModePacket createBehaviorControlModePacket(BehaviorControlModeEnum requestedControl)
-   {
-      BehaviorControlModePacket message = new BehaviorControlModePacket();
-      message.setBehaviorControlModeEnumRequest(requestedControl.toByte());
-      return message;
-   }
-
    /**
     * Create a message to request one end-effector to switch to load bearing. Set the id of the message
     * to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
@@ -364,24 +320,6 @@ public class HumanoidMessageTools
       FootLoadBearingMessage message = new FootLoadBearingMessage();
       message.setRobotSide(robotSide.toByte());
       message.setLoadBearingRequest(request.toByte());
-      return message;
-   }
-
-   // joint values should be in the range [0,1]
-   public static ManualHandControlPacket createManualHandControlPacket(RobotSide robotSide,
-                                                                       double index,
-                                                                       double middle,
-                                                                       double thumb,
-                                                                       double spread,
-                                                                       int controlType)
-   {
-      ManualHandControlPacket message = new ManualHandControlPacket();
-      message.setRobotSide(robotSide.toByte());
-      message.setIndex(index);
-      message.setMiddle(middle);
-      message.setThumb(thumb);
-      message.setSpread(spread);
-      message.setControlType(controlType);
       return message;
    }
 
@@ -469,14 +407,6 @@ public class HumanoidMessageTools
       message.getExplorationRangeUpperLimits().add(explorationRangeUpperLimits);
       message.getExplorationRangeLowerLimits().add(explorationRangeLowerLimits);
 
-      return message;
-   }
-
-   public static ObjectWeightPacket createObjectWeightPacket(RobotSide robotSide, double weight)
-   {
-      ObjectWeightPacket message = new ObjectWeightPacket();
-      message.setRobotSide(robotSide.toByte());
-      message.setWeight(weight);
       return message;
    }
 
@@ -1150,13 +1080,6 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static BehaviorControlModeResponsePacket createBehaviorControlModeResponsePacket(BehaviorControlModeEnum requestedControl)
-   {
-      BehaviorControlModeResponsePacket message = new BehaviorControlModeResponsePacket();
-      message.setBehaviorControlModeEnumRequest(requestedControl.toByte());
-      return message;
-   }
-
    public static TrajectoryPoint1DMessage createTrajectoryPoint1DMessage(OneDoFTrajectoryPointBasics trajectoryPoint)
    {
       TrajectoryPoint1DMessage message = new TrajectoryPoint1DMessage();
@@ -1185,13 +1108,6 @@ public class HumanoidMessageTools
    public static KinematicsToolboxOutputStatus createKinematicsToolboxOutputStatus(FullHumanoidRobotModel fullRobotModel)
    {
       return MessageTools.createKinematicsToolboxOutputStatus(fullRobotModel.getRootJoint(), FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel));
-   }
-
-   public static HumanoidBehaviorTypePacket createHumanoidBehaviorTypePacket(HumanoidBehaviorType behaviorType)
-   {
-      HumanoidBehaviorTypePacket message = new HumanoidBehaviorTypePacket();
-      message.setHumanoidBehaviorType(behaviorType.toByte());
-      return message;
    }
 
    public static FootstepDataListMessage createFootstepDataListMessage(List<FootstepDataMessage> footstepDataList, double finalTransferDuration)
@@ -1225,6 +1141,7 @@ public class HumanoidMessageTools
    }
 
    /**
+    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     *
     * @param footstepDataList
@@ -1276,21 +1193,6 @@ public class HumanoidMessageTools
       message.setDefaultSwingDuration(defaultSwingDuration);
       message.setDefaultTransferDuration(defaultTransferDuration);
       message.setFinalTransferDuration(finalTransferDuration);
-      return message;
-   }
-
-   /**
-    * Creates a message with the desired grasp to be performed. Set the id of the message to
-    * {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
-    *
-    * @param robotSide                refers to which hand will perform the grasp.
-    * @param handDesiredConfiguration refers to the desired grasp.
-    */
-   public static HandDesiredConfigurationMessage createHandDesiredConfigurationMessage(RobotSide robotSide, HandConfiguration handDesiredConfiguration)
-   {
-      HandDesiredConfigurationMessage message = new HandDesiredConfigurationMessage();
-      message.setRobotSide(robotSide.toByte());
-      message.setDesiredHandConfiguration(handDesiredConfiguration.toByte());
       return message;
    }
 
@@ -1460,14 +1362,6 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static SimpleCoactiveBehaviorDataPacket createSimpleCoactiveBehaviorDataPacket(String key, double value)
-   {
-      SimpleCoactiveBehaviorDataPacket message = new SimpleCoactiveBehaviorDataPacket();
-      message.setKey(key);
-      message.setValue(value);
-      return message;
-   }
-
    public static OneDoFJointTrajectoryMessage createOneDoFJointTrajectoryMessage(OneDoFTrajectoryPointList trajectoryData)
    {
       OneDoFJointTrajectoryMessage message = new OneDoFJointTrajectoryMessage();
@@ -1529,24 +1423,6 @@ public class HumanoidMessageTools
       message.setTime(time);
       message.getPosition().set(new Point3D(position));
       message.getLinearVelocity().set(new Vector3D(linearVelocity));
-      return message;
-   }
-
-   public static WalkToGoalBehaviorPacket createWalkToGoalBehaviorPacket(WalkToGoalAction action)
-   {
-      WalkToGoalBehaviorPacket message = new WalkToGoalBehaviorPacket();
-      message.setWalkToGoalAction(action.toByte());
-      return message;
-   }
-
-   public static WalkToGoalBehaviorPacket createWalkToGoalBehaviorPacket(double xGoal, double yGoal, double thetaGoal, RobotSide goalSide)
-   {
-      WalkToGoalBehaviorPacket message = new WalkToGoalBehaviorPacket();
-      message.setWalkToGoalAction(WalkToGoalAction.FIND_PATH.toByte());
-      message.setXGoal(xGoal);
-      message.setYGoal(yGoal);
-      message.setThetaGoal(thetaGoal);
-      message.setGoalRobotSide(goalSide.toByte());
       return message;
    }
 
@@ -2212,14 +2088,6 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static WalkOverTerrainGoalPacket createWalkOverTerrainGoalPacket(Point3D position, Quaternion orientation)
-   {
-      WalkOverTerrainGoalPacket message = new WalkOverTerrainGoalPacket();
-      message.getPosition().set(position);
-      message.getOrientation().set(orientation);
-      return message;
-   }
-
    public static void checkRobotSide(HumanoidBodyPart bodyPart)
    {
       if (bodyPart.isRobotSideNeeded())
@@ -2287,24 +2155,6 @@ public class HumanoidMessageTools
       return message.getPredictedContactPoints2d().stream().map(Point2D::new).collect(Collectors.toList());
    }
 
-
-   public static HeightQuadTreeToolboxRequestMessage clearRequest(PacketDestination destination)
-   {
-      HeightQuadTreeToolboxRequestMessage clearMessage = new HeightQuadTreeToolboxRequestMessage();
-      clearMessage.setDestination(destination.ordinal());
-      clearMessage.setRequestClearQuadTree(true);
-      clearMessage.setRequestQuadTreeUpdate(false);
-      return clearMessage;
-   }
-
-   public static HeightQuadTreeToolboxRequestMessage requestQuadTreeUpdate(PacketDestination destination)
-   {
-      HeightQuadTreeToolboxRequestMessage requestMessage = new HeightQuadTreeToolboxRequestMessage();
-      requestMessage.setDestination(destination.ordinal());
-      requestMessage.setRequestClearQuadTree(false);
-      requestMessage.setRequestQuadTreeUpdate(true);
-      return requestMessage;
-   }
 
    public static void checkIfDataFrameIdsMatch(FrameInformation frameInformation, ReferenceFrame referenceFrame)
    {

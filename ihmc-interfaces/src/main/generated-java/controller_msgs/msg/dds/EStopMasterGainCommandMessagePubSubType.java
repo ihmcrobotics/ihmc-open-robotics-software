@@ -15,7 +15,7 @@ public class EStopMasterGainCommandMessagePubSubType implements us.ihmc.pubsub.T
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "fd8b21b2edd236245629837baa09bf5372ef641ace2e0b4387619263bc622611";
+   		return "3ff4a3efb9fdec1e342ce4846121a6cd467dc3f6d26e337ea90b75990a7fe41b";
    }
    
    @Override
@@ -51,6 +51,12 @@ public class EStopMasterGainCommandMessagePubSubType implements us.ihmc.pubsub.T
    public static int getMaxCdrSerializedSize(int current_alignment)
    {
       int initial_alignment = current_alignment;
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -96,6 +102,15 @@ public class EStopMasterGainCommandMessagePubSubType implements us.ihmc.pubsub.T
    public final static int getCdrSerializedSize(controller_msgs.msg.dds.EStopMasterGainCommandMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -151,6 +166,12 @@ public class EStopMasterGainCommandMessagePubSubType implements us.ihmc.pubsub.T
 
    public static void write(controller_msgs.msg.dds.EStopMasterGainCommandMessage data, us.ihmc.idl.CDR cdr)
    {
+      cdr.write_type_7(data.getRequestStartup());
+
+      cdr.write_type_7(data.getRequestShutdown());
+
+      cdr.write_type_7(data.getExecuteStartupShutdown());
+
       cdr.write_type_7(data.getEstop());
 
       cdr.write_type_7(data.getExecuteEstop());
@@ -187,6 +208,12 @@ public class EStopMasterGainCommandMessagePubSubType implements us.ihmc.pubsub.T
 
    public static void read(controller_msgs.msg.dds.EStopMasterGainCommandMessage data, us.ihmc.idl.CDR cdr)
    {
+      data.setRequestStartup(cdr.read_type_7());
+      	
+      data.setRequestShutdown(cdr.read_type_7());
+      	
+      data.setExecuteStartupShutdown(cdr.read_type_7());
+      	
       data.setEstop(cdr.read_type_7());
       	
       data.setExecuteEstop(cdr.read_type_7());
@@ -225,6 +252,9 @@ public class EStopMasterGainCommandMessagePubSubType implements us.ihmc.pubsub.T
    @Override
    public final void serialize(controller_msgs.msg.dds.EStopMasterGainCommandMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+      ser.write_type_7("request_startup", data.getRequestStartup());
+      ser.write_type_7("request_shutdown", data.getRequestShutdown());
+      ser.write_type_7("execute_startup_shutdown", data.getExecuteStartupShutdown());
       ser.write_type_7("estop", data.getEstop());
       ser.write_type_7("execute_estop", data.getExecuteEstop());
       ser.write_type_6("desired_master_gain", data.getDesiredMasterGain());
@@ -246,6 +276,9 @@ public class EStopMasterGainCommandMessagePubSubType implements us.ihmc.pubsub.T
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.EStopMasterGainCommandMessage data)
    {
+      data.setRequestStartup(ser.read_type_7("request_startup"));
+      data.setRequestShutdown(ser.read_type_7("request_shutdown"));
+      data.setExecuteStartupShutdown(ser.read_type_7("execute_startup_shutdown"));
       data.setEstop(ser.read_type_7("estop"));
       data.setExecuteEstop(ser.read_type_7("execute_estop"));
       data.setDesiredMasterGain(ser.read_type_6("desired_master_gain"));

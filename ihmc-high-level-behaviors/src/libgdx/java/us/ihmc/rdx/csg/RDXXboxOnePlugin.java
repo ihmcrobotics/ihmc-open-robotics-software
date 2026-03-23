@@ -11,7 +11,10 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.CSGROS2CommunicationHelper;
 import us.ihmc.commons.DeadbandTools;
+import us.ihmc.commons.thread.Throttler;
+import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.tools.Timer;
 
 /**
  * Plugin for using an xbox controller to send commands and receive status info to/from the
@@ -34,6 +37,10 @@ public class RDXXboxOnePlugin
    private boolean currentControllerConnected = false;
    private boolean controllerListenerHasBeenAdded = false;
    private boolean publishNewCommand = false;
+
+   // Stuff to limit how often we publish
+   private final Throttler publisherThrottler = new Throttler();
+   private final Timer heartBeat = new Timer();
 
    // CSG thread ROS communication helper
    private final CSGROS2CommunicationHelper csgROS2ControllerHelper;
@@ -69,6 +76,9 @@ public class RDXXboxOnePlugin
       csgStatusMessage = csgROS2ControllerHelper.getCSGStatusMessage();
 
       directionalControlInputMessage = new DirectionalControlInputMessage();
+
+      publisherThrottler.setFrequency(11.0);
+      heartBeat.reset();
 
       controllerListener = new ControllerListener()
       {
@@ -119,19 +129,6 @@ public class RDXXboxOnePlugin
          @Override
          public boolean axisMoved(Controller controller, int axisCode, float value)
          {
-            if (controller != null)
-            {
-               if (axisCode == 4.0 && controller.getAxis(4) == 1.0)
-               {
-                  publishNewCommand = true;
-               }
-               else if (axisCode == 4.0 && controller.getAxis(4) != 1.0 && publishNewCommand)
-               {
-                  sendStopWalkingCommands();
-                  publishNewCommand = false;
-               }
-            }
-
             return false;
          }
       };
@@ -141,18 +138,16 @@ public class RDXXboxOnePlugin
    {
       update(csgInputCommand, directionalControlInputMessage);
 
-      if (publishNewCommand)
+      if (publisherThrottler.run() && !heartBeat.isExpired(1.0))
       {
-         csgROS2ControllerHelper.publishAtThrottledRate(csgInputCommand);
+         csgROS2ControllerHelper.publish(csgInputCommand);
          controllerROS2ControllerHelper.publishToController(directionalControlInputMessage);
       }
    }
 
    public void update(ContinuousStepGeneratorInputMessage csgInputCommandToPack, DirectionalControlInputMessage directionalControlInputMessageToPack)
    {
-      boolean newControllerConnected = false;
-      if (currentController != null && currentController != Controllers.getCurrent())
-         newControllerConnected = true;
+      boolean newControllerConnected = currentController != null && currentController != Controllers.getCurrent();
 
       currentController = Controllers.getCurrent();
       currentControllerConnected = currentController != null;
@@ -174,9 +169,13 @@ public class RDXXboxOnePlugin
       if (currentControllerConnected)
       {
          requestWalking = currentController.getAxis(4) == 1.0; // This is the left trigger value (1.0 = pressed in)
-         forwardJoystickValue = DeadbandTools.applyDeadband(deadband, -currentController.getAxis(currentController.getMapping().axisLeftY));
-         lateralJoystickValue = DeadbandTools.applyDeadband(deadband, -currentController.getAxis(currentController.getMapping().axisLeftX));
-         turningJoystickValue = DeadbandTools.applyDeadband(deadband, -currentController.getAxis(currentController.getMapping().axisRightX));
+         if (requestWalking)
+         {
+            forwardJoystickValue = DeadbandTools.applyDeadband(deadband, -currentController.getAxis(currentController.getMapping().axisLeftY));
+            lateralJoystickValue = DeadbandTools.applyDeadband(deadband, -currentController.getAxis(currentController.getMapping().axisLeftX));
+            turningJoystickValue = DeadbandTools.applyDeadband(deadband, -currentController.getAxis(currentController.getMapping().axisRightX));
+            heartBeat.reset();
+         }
       }
 
       csgInputCommandToPack.setWalk(requestWalking);
@@ -198,6 +197,11 @@ public class RDXXboxOnePlugin
       csgInputCommand.setForwardVelocity(0.0);
       csgInputCommand.setLateralVelocity(0.0);
       csgInputCommand.setTurnVelocity(0.0);
+
+      directionalControlInputMessage.setWalk(false);
+      directionalControlInputMessage.setForward(0.0);
+      directionalControlInputMessage.setRight(0.0);
+      directionalControlInputMessage.setClockwise(0.0);
 
       csgROS2ControllerHelper.publish(csgInputCommand);
       controllerROS2ControllerHelper.publishToController(directionalControlInputMessage);

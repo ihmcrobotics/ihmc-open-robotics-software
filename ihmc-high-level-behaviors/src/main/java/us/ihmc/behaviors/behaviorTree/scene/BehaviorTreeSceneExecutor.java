@@ -75,6 +75,15 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
          object.update();
    }
 
+   @Override
+   public void setSyncedRobot(ROS2SyncedRobotModel syncedRobot)
+   {
+      super.setSyncedRobot(syncedRobot);
+
+      for (BehaviorTreeSceneObjectExecutor object : objects)
+         object.setSyncedRobot(syncedRobot);
+   }
+
    private void triageInstantDetections(List<InstantDetection> newInstantDetections)
    {
       matchedThisTick.clear();

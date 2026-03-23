@@ -31,16 +31,16 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
    public static final byte DOOR_TRAVERSAL = (byte) 10;
    public static final byte BUILDING_EXPLORATION = (byte) 11;
    public static final byte NECK_ACTION = (byte) 12;
-   public static final byte CHEST_ORIENTATION_ACTION = (byte) 13;
-   public static final byte FOOTSTEP_PLAN_ACTION = (byte) 14;
-   public static final byte SAKE_HAND_COMMAND_ACTION = (byte) 15;
+   public static final byte SPINE_ACTION = (byte) 13;
+   public static final byte WALK_ACTION = (byte) 14;
+   public static final byte EZGRIPPER_ACTION = (byte) 15;
    public static final byte ABILITY_HAND_ACTION = (byte) 16;
-   public static final byte HAND_POSE_ACTION = (byte) 17;
+   public static final byte ARM_ACTION = (byte) 17;
    public static final byte HAND_WRENCH_ACTION = (byte) 18;
    public static final byte SCREW_PRIMITIVE_ACTION = (byte) 19;
-   public static final byte PELVIS_HEIGHT_ORIENTATION_ACTION = (byte) 20;
-   public static final byte WAIT_DURATION_ACTION = (byte) 21;
-   public static final byte FOOT_POSE_ACTION = (byte) 22;
+   public static final byte PELVIS_ACTION = (byte) 20;
+   public static final byte WAIT_ACTION = (byte) 21;
+   public static final byte LEG_ACTION = (byte) 22;
    /**
             * Monotonically increasing message ID that matches the CRDTInfo update number
             */
@@ -58,10 +58,6 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
             */
    public ihmc_common_msgs.msg.dds.LatestModificationMessage latest_modification_to_data_;
    /**
-            * Scene
-            */
-   public behavior_msgs.msg.dds.BehaviorTreeSceneStateMessage scene_;
-   /**
             * A depth first ordered list of types.
             */
    public us.ihmc.idl.IDLSequence.Byte  behavior_tree_types_;
@@ -78,28 +74,27 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FallbackNodeStateMessage>  fallback_nodes_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ConditionNodeStateMessage>  condition_nodes_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.GotoNodeStateMessage>  goto_nodes_;
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.CheckPointNodeStateMessage>  checkpoint_nodes_;
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.SceneActionNodeStateMessage>  scene_actions_;
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.CheckpointNodeStateMessage>  checkpoint_nodes_;
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.SceneActionStateMessage>  scene_actions_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.AI2RNodeStateMessage>  ai2r_nodes_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.DoorTraversalStateMessage>  door_traversals_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BuildingExplorationStateMessage>  building_explorations_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.NeckActionStateMessage>  neck_actions_;
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ChestOrientationActionStateMessage>  chest_orientation_actions_;
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepPlanActionStateMessage>  footstep_plan_actions_;
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.SakeHandCommandActionStateMessage>  sake_hand_command_actions_;
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.SpineActionStateMessage>  spine_actions_;
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.WalkActionStateMessage>  walk_actions_;
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.EZGripperActionStateMessage>  ez_gripper_actions_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.AbilityHandActionStateMessage>  ability_hand_actions_;
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.HandPoseActionStateMessage>  hand_pose_actions_;
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ArmActionStateMessage>  arm_actions_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.HandWrenchActionStateMessage>  hand_wrench_actions_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ScrewPrimitiveActionStateMessage>  screw_primitive_actions_;
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.PelvisHeightOrientationActionStateMessage>  pelvis_height_actions_;
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.WaitDurationActionStateMessage>  wait_duration_actions_;
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootPoseActionStateMessage>  foot_pose_actions_;
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.PelvisActionStateMessage>  pelvis_actions_;
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.WaitActionStateMessage>  wait_actions_;
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.LegActionStateMessage>  leg_actions_;
 
    public BehaviorTreeStateMessage()
    {
       latest_modification_to_root_reference_ = new ihmc_common_msgs.msg.dds.LatestModificationMessage();
       latest_modification_to_data_ = new ihmc_common_msgs.msg.dds.LatestModificationMessage();
-      scene_ = new behavior_msgs.msg.dds.BehaviorTreeSceneStateMessage();
       behavior_tree_types_ = new us.ihmc.idl.IDLSequence.Byte (1000, "type_9");
 
       behavior_tree_indices_ = new us.ihmc.idl.IDLSequence.Long (1000, "type_4");
@@ -111,22 +106,22 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       fallback_nodes_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FallbackNodeStateMessage> (120, new behavior_msgs.msg.dds.FallbackNodeStateMessagePubSubType());
       condition_nodes_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ConditionNodeStateMessage> (120, new behavior_msgs.msg.dds.ConditionNodeStateMessagePubSubType());
       goto_nodes_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.GotoNodeStateMessage> (120, new behavior_msgs.msg.dds.GotoNodeStateMessagePubSubType());
-      checkpoint_nodes_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.CheckPointNodeStateMessage> (120, new behavior_msgs.msg.dds.CheckPointNodeStateMessagePubSubType());
-      scene_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.SceneActionNodeStateMessage> (120, new behavior_msgs.msg.dds.SceneActionNodeStateMessagePubSubType());
+      checkpoint_nodes_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.CheckpointNodeStateMessage> (120, new behavior_msgs.msg.dds.CheckpointNodeStateMessagePubSubType());
+      scene_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.SceneActionStateMessage> (120, new behavior_msgs.msg.dds.SceneActionStateMessagePubSubType());
       ai2r_nodes_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.AI2RNodeStateMessage> (1, new behavior_msgs.msg.dds.AI2RNodeStateMessagePubSubType());
       door_traversals_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.DoorTraversalStateMessage> (120, new behavior_msgs.msg.dds.DoorTraversalStateMessagePubSubType());
       building_explorations_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BuildingExplorationStateMessage> (120, new behavior_msgs.msg.dds.BuildingExplorationStateMessagePubSubType());
       neck_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.NeckActionStateMessage> (120, new behavior_msgs.msg.dds.NeckActionStateMessagePubSubType());
-      chest_orientation_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ChestOrientationActionStateMessage> (120, new behavior_msgs.msg.dds.ChestOrientationActionStateMessagePubSubType());
-      footstep_plan_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepPlanActionStateMessage> (120, new behavior_msgs.msg.dds.FootstepPlanActionStateMessagePubSubType());
-      sake_hand_command_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.SakeHandCommandActionStateMessage> (120, new behavior_msgs.msg.dds.SakeHandCommandActionStateMessagePubSubType());
+      spine_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.SpineActionStateMessage> (120, new behavior_msgs.msg.dds.SpineActionStateMessagePubSubType());
+      walk_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.WalkActionStateMessage> (120, new behavior_msgs.msg.dds.WalkActionStateMessagePubSubType());
+      ez_gripper_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.EZGripperActionStateMessage> (120, new behavior_msgs.msg.dds.EZGripperActionStateMessagePubSubType());
       ability_hand_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.AbilityHandActionStateMessage> (120, new behavior_msgs.msg.dds.AbilityHandActionStateMessagePubSubType());
-      hand_pose_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.HandPoseActionStateMessage> (120, new behavior_msgs.msg.dds.HandPoseActionStateMessagePubSubType());
+      arm_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ArmActionStateMessage> (120, new behavior_msgs.msg.dds.ArmActionStateMessagePubSubType());
       hand_wrench_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.HandWrenchActionStateMessage> (120, new behavior_msgs.msg.dds.HandWrenchActionStateMessagePubSubType());
       screw_primitive_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ScrewPrimitiveActionStateMessage> (120, new behavior_msgs.msg.dds.ScrewPrimitiveActionStateMessagePubSubType());
-      pelvis_height_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.PelvisHeightOrientationActionStateMessage> (120, new behavior_msgs.msg.dds.PelvisHeightOrientationActionStateMessagePubSubType());
-      wait_duration_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.WaitDurationActionStateMessage> (120, new behavior_msgs.msg.dds.WaitDurationActionStateMessagePubSubType());
-      foot_pose_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootPoseActionStateMessage> (120, new behavior_msgs.msg.dds.FootPoseActionStateMessagePubSubType());
+      pelvis_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.PelvisActionStateMessage> (120, new behavior_msgs.msg.dds.PelvisActionStateMessagePubSubType());
+      wait_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.WaitActionStateMessage> (120, new behavior_msgs.msg.dds.WaitActionStateMessagePubSubType());
+      leg_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.LegActionStateMessage> (120, new behavior_msgs.msg.dds.LegActionStateMessagePubSubType());
 
    }
 
@@ -144,7 +139,6 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
 
       ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.staticCopy(other.latest_modification_to_root_reference_, latest_modification_to_root_reference_);
       ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.staticCopy(other.latest_modification_to_data_, latest_modification_to_data_);
-      behavior_msgs.msg.dds.BehaviorTreeSceneStateMessagePubSubType.staticCopy(other.scene_, scene_);
       behavior_tree_types_.set(other.behavior_tree_types_);
       behavior_tree_indices_.set(other.behavior_tree_indices_);
       partial_data_nodes_.set(other.partial_data_nodes_);
@@ -160,16 +154,16 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       door_traversals_.set(other.door_traversals_);
       building_explorations_.set(other.building_explorations_);
       neck_actions_.set(other.neck_actions_);
-      chest_orientation_actions_.set(other.chest_orientation_actions_);
-      footstep_plan_actions_.set(other.footstep_plan_actions_);
-      sake_hand_command_actions_.set(other.sake_hand_command_actions_);
+      spine_actions_.set(other.spine_actions_);
+      walk_actions_.set(other.walk_actions_);
+      ez_gripper_actions_.set(other.ez_gripper_actions_);
       ability_hand_actions_.set(other.ability_hand_actions_);
-      hand_pose_actions_.set(other.hand_pose_actions_);
+      arm_actions_.set(other.arm_actions_);
       hand_wrench_actions_.set(other.hand_wrench_actions_);
       screw_primitive_actions_.set(other.screw_primitive_actions_);
-      pelvis_height_actions_.set(other.pelvis_height_actions_);
-      wait_duration_actions_.set(other.wait_duration_actions_);
-      foot_pose_actions_.set(other.foot_pose_actions_);
+      pelvis_actions_.set(other.pelvis_actions_);
+      wait_actions_.set(other.wait_actions_);
+      leg_actions_.set(other.leg_actions_);
    }
 
    /**
@@ -218,15 +212,6 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
    public ihmc_common_msgs.msg.dds.LatestModificationMessage getLatestModificationToData()
    {
       return latest_modification_to_data_;
-   }
-
-
-   /**
-            * Scene
-            */
-   public behavior_msgs.msg.dds.BehaviorTreeSceneStateMessage getScene()
-   {
-      return scene_;
    }
 
 
@@ -292,13 +277,13 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
    }
 
 
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.CheckPointNodeStateMessage>  getCheckpointNodes()
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.CheckpointNodeStateMessage>  getCheckpointNodes()
    {
       return checkpoint_nodes_;
    }
 
 
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.SceneActionNodeStateMessage>  getSceneActions()
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.SceneActionStateMessage>  getSceneActions()
    {
       return scene_actions_;
    }
@@ -328,21 +313,21 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
    }
 
 
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ChestOrientationActionStateMessage>  getChestOrientationActions()
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.SpineActionStateMessage>  getSpineActions()
    {
-      return chest_orientation_actions_;
+      return spine_actions_;
    }
 
 
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepPlanActionStateMessage>  getFootstepPlanActions()
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.WalkActionStateMessage>  getWalkActions()
    {
-      return footstep_plan_actions_;
+      return walk_actions_;
    }
 
 
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.SakeHandCommandActionStateMessage>  getSakeHandCommandActions()
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.EZGripperActionStateMessage>  getEzGripperActions()
    {
-      return sake_hand_command_actions_;
+      return ez_gripper_actions_;
    }
 
 
@@ -352,9 +337,9 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
    }
 
 
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.HandPoseActionStateMessage>  getHandPoseActions()
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ArmActionStateMessage>  getArmActions()
    {
-      return hand_pose_actions_;
+      return arm_actions_;
    }
 
 
@@ -370,21 +355,21 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
    }
 
 
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.PelvisHeightOrientationActionStateMessage>  getPelvisHeightActions()
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.PelvisActionStateMessage>  getPelvisActions()
    {
-      return pelvis_height_actions_;
+      return pelvis_actions_;
    }
 
 
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.WaitDurationActionStateMessage>  getWaitDurationActions()
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.WaitActionStateMessage>  getWaitActions()
    {
-      return wait_duration_actions_;
+      return wait_actions_;
    }
 
 
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootPoseActionStateMessage>  getFootPoseActions()
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.LegActionStateMessage>  getLegActions()
    {
-      return foot_pose_actions_;
+      return leg_actions_;
    }
 
 
@@ -411,7 +396,6 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
 
       if (!this.latest_modification_to_root_reference_.epsilonEquals(other.latest_modification_to_root_reference_, epsilon)) return false;
       if (!this.latest_modification_to_data_.epsilonEquals(other.latest_modification_to_data_, epsilon)) return false;
-      if (!this.scene_.epsilonEquals(other.scene_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.behavior_tree_types_, other.behavior_tree_types_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsLongSequence(this.behavior_tree_indices_, other.behavior_tree_indices_, epsilon)) return false;
@@ -507,25 +491,25 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
          {  if (!this.neck_actions_.get(i).epsilonEquals(other.neck_actions_.get(i), epsilon)) return false; }
       }
 
-      if (this.chest_orientation_actions_.size() != other.chest_orientation_actions_.size()) { return false; }
+      if (this.spine_actions_.size() != other.spine_actions_.size()) { return false; }
       else
       {
-         for (int i = 0; i < this.chest_orientation_actions_.size(); i++)
-         {  if (!this.chest_orientation_actions_.get(i).epsilonEquals(other.chest_orientation_actions_.get(i), epsilon)) return false; }
+         for (int i = 0; i < this.spine_actions_.size(); i++)
+         {  if (!this.spine_actions_.get(i).epsilonEquals(other.spine_actions_.get(i), epsilon)) return false; }
       }
 
-      if (this.footstep_plan_actions_.size() != other.footstep_plan_actions_.size()) { return false; }
+      if (this.walk_actions_.size() != other.walk_actions_.size()) { return false; }
       else
       {
-         for (int i = 0; i < this.footstep_plan_actions_.size(); i++)
-         {  if (!this.footstep_plan_actions_.get(i).epsilonEquals(other.footstep_plan_actions_.get(i), epsilon)) return false; }
+         for (int i = 0; i < this.walk_actions_.size(); i++)
+         {  if (!this.walk_actions_.get(i).epsilonEquals(other.walk_actions_.get(i), epsilon)) return false; }
       }
 
-      if (this.sake_hand_command_actions_.size() != other.sake_hand_command_actions_.size()) { return false; }
+      if (this.ez_gripper_actions_.size() != other.ez_gripper_actions_.size()) { return false; }
       else
       {
-         for (int i = 0; i < this.sake_hand_command_actions_.size(); i++)
-         {  if (!this.sake_hand_command_actions_.get(i).epsilonEquals(other.sake_hand_command_actions_.get(i), epsilon)) return false; }
+         for (int i = 0; i < this.ez_gripper_actions_.size(); i++)
+         {  if (!this.ez_gripper_actions_.get(i).epsilonEquals(other.ez_gripper_actions_.get(i), epsilon)) return false; }
       }
 
       if (this.ability_hand_actions_.size() != other.ability_hand_actions_.size()) { return false; }
@@ -535,11 +519,11 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
          {  if (!this.ability_hand_actions_.get(i).epsilonEquals(other.ability_hand_actions_.get(i), epsilon)) return false; }
       }
 
-      if (this.hand_pose_actions_.size() != other.hand_pose_actions_.size()) { return false; }
+      if (this.arm_actions_.size() != other.arm_actions_.size()) { return false; }
       else
       {
-         for (int i = 0; i < this.hand_pose_actions_.size(); i++)
-         {  if (!this.hand_pose_actions_.get(i).epsilonEquals(other.hand_pose_actions_.get(i), epsilon)) return false; }
+         for (int i = 0; i < this.arm_actions_.size(); i++)
+         {  if (!this.arm_actions_.get(i).epsilonEquals(other.arm_actions_.get(i), epsilon)) return false; }
       }
 
       if (this.hand_wrench_actions_.size() != other.hand_wrench_actions_.size()) { return false; }
@@ -556,25 +540,25 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
          {  if (!this.screw_primitive_actions_.get(i).epsilonEquals(other.screw_primitive_actions_.get(i), epsilon)) return false; }
       }
 
-      if (this.pelvis_height_actions_.size() != other.pelvis_height_actions_.size()) { return false; }
+      if (this.pelvis_actions_.size() != other.pelvis_actions_.size()) { return false; }
       else
       {
-         for (int i = 0; i < this.pelvis_height_actions_.size(); i++)
-         {  if (!this.pelvis_height_actions_.get(i).epsilonEquals(other.pelvis_height_actions_.get(i), epsilon)) return false; }
+         for (int i = 0; i < this.pelvis_actions_.size(); i++)
+         {  if (!this.pelvis_actions_.get(i).epsilonEquals(other.pelvis_actions_.get(i), epsilon)) return false; }
       }
 
-      if (this.wait_duration_actions_.size() != other.wait_duration_actions_.size()) { return false; }
+      if (this.wait_actions_.size() != other.wait_actions_.size()) { return false; }
       else
       {
-         for (int i = 0; i < this.wait_duration_actions_.size(); i++)
-         {  if (!this.wait_duration_actions_.get(i).epsilonEquals(other.wait_duration_actions_.get(i), epsilon)) return false; }
+         for (int i = 0; i < this.wait_actions_.size(); i++)
+         {  if (!this.wait_actions_.get(i).epsilonEquals(other.wait_actions_.get(i), epsilon)) return false; }
       }
 
-      if (this.foot_pose_actions_.size() != other.foot_pose_actions_.size()) { return false; }
+      if (this.leg_actions_.size() != other.leg_actions_.size()) { return false; }
       else
       {
-         for (int i = 0; i < this.foot_pose_actions_.size(); i++)
-         {  if (!this.foot_pose_actions_.get(i).epsilonEquals(other.foot_pose_actions_.get(i), epsilon)) return false; }
+         for (int i = 0; i < this.leg_actions_.size(); i++)
+         {  if (!this.leg_actions_.get(i).epsilonEquals(other.leg_actions_.get(i), epsilon)) return false; }
       }
 
 
@@ -596,7 +580,6 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
 
       if (!this.latest_modification_to_root_reference_.equals(otherMyClass.latest_modification_to_root_reference_)) return false;
       if (!this.latest_modification_to_data_.equals(otherMyClass.latest_modification_to_data_)) return false;
-      if (!this.scene_.equals(otherMyClass.scene_)) return false;
       if (!this.behavior_tree_types_.equals(otherMyClass.behavior_tree_types_)) return false;
       if (!this.behavior_tree_indices_.equals(otherMyClass.behavior_tree_indices_)) return false;
       if (!this.partial_data_nodes_.equals(otherMyClass.partial_data_nodes_)) return false;
@@ -612,16 +595,16 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       if (!this.door_traversals_.equals(otherMyClass.door_traversals_)) return false;
       if (!this.building_explorations_.equals(otherMyClass.building_explorations_)) return false;
       if (!this.neck_actions_.equals(otherMyClass.neck_actions_)) return false;
-      if (!this.chest_orientation_actions_.equals(otherMyClass.chest_orientation_actions_)) return false;
-      if (!this.footstep_plan_actions_.equals(otherMyClass.footstep_plan_actions_)) return false;
-      if (!this.sake_hand_command_actions_.equals(otherMyClass.sake_hand_command_actions_)) return false;
+      if (!this.spine_actions_.equals(otherMyClass.spine_actions_)) return false;
+      if (!this.walk_actions_.equals(otherMyClass.walk_actions_)) return false;
+      if (!this.ez_gripper_actions_.equals(otherMyClass.ez_gripper_actions_)) return false;
       if (!this.ability_hand_actions_.equals(otherMyClass.ability_hand_actions_)) return false;
-      if (!this.hand_pose_actions_.equals(otherMyClass.hand_pose_actions_)) return false;
+      if (!this.arm_actions_.equals(otherMyClass.arm_actions_)) return false;
       if (!this.hand_wrench_actions_.equals(otherMyClass.hand_wrench_actions_)) return false;
       if (!this.screw_primitive_actions_.equals(otherMyClass.screw_primitive_actions_)) return false;
-      if (!this.pelvis_height_actions_.equals(otherMyClass.pelvis_height_actions_)) return false;
-      if (!this.wait_duration_actions_.equals(otherMyClass.wait_duration_actions_)) return false;
-      if (!this.foot_pose_actions_.equals(otherMyClass.foot_pose_actions_)) return false;
+      if (!this.pelvis_actions_.equals(otherMyClass.pelvis_actions_)) return false;
+      if (!this.wait_actions_.equals(otherMyClass.wait_actions_)) return false;
+      if (!this.leg_actions_.equals(otherMyClass.leg_actions_)) return false;
 
       return true;
    }
@@ -640,8 +623,6 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       builder.append(this.latest_modification_to_root_reference_);      builder.append(", ");
       builder.append("latest_modification_to_data=");
       builder.append(this.latest_modification_to_data_);      builder.append(", ");
-      builder.append("scene=");
-      builder.append(this.scene_);      builder.append(", ");
       builder.append("behavior_tree_types=");
       builder.append(this.behavior_tree_types_);      builder.append(", ");
       builder.append("behavior_tree_indices=");
@@ -672,26 +653,26 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       builder.append(this.building_explorations_);      builder.append(", ");
       builder.append("neck_actions=");
       builder.append(this.neck_actions_);      builder.append(", ");
-      builder.append("chest_orientation_actions=");
-      builder.append(this.chest_orientation_actions_);      builder.append(", ");
-      builder.append("footstep_plan_actions=");
-      builder.append(this.footstep_plan_actions_);      builder.append(", ");
-      builder.append("sake_hand_command_actions=");
-      builder.append(this.sake_hand_command_actions_);      builder.append(", ");
+      builder.append("spine_actions=");
+      builder.append(this.spine_actions_);      builder.append(", ");
+      builder.append("walk_actions=");
+      builder.append(this.walk_actions_);      builder.append(", ");
+      builder.append("ez_gripper_actions=");
+      builder.append(this.ez_gripper_actions_);      builder.append(", ");
       builder.append("ability_hand_actions=");
       builder.append(this.ability_hand_actions_);      builder.append(", ");
-      builder.append("hand_pose_actions=");
-      builder.append(this.hand_pose_actions_);      builder.append(", ");
+      builder.append("arm_actions=");
+      builder.append(this.arm_actions_);      builder.append(", ");
       builder.append("hand_wrench_actions=");
       builder.append(this.hand_wrench_actions_);      builder.append(", ");
       builder.append("screw_primitive_actions=");
       builder.append(this.screw_primitive_actions_);      builder.append(", ");
-      builder.append("pelvis_height_actions=");
-      builder.append(this.pelvis_height_actions_);      builder.append(", ");
-      builder.append("wait_duration_actions=");
-      builder.append(this.wait_duration_actions_);      builder.append(", ");
-      builder.append("foot_pose_actions=");
-      builder.append(this.foot_pose_actions_);
+      builder.append("pelvis_actions=");
+      builder.append(this.pelvis_actions_);      builder.append(", ");
+      builder.append("wait_actions=");
+      builder.append(this.wait_actions_);      builder.append(", ");
+      builder.append("leg_actions=");
+      builder.append(this.leg_actions_);
       builder.append("}");
       return builder.toString();
    }

@@ -55,6 +55,7 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.zed.global.zed;
+import us.ihmc.zed.library.ZEDJavaAPINativeLibrary;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -64,7 +65,7 @@ import java.util.function.Supplier;
 public class RDXBehaviorTestFacilitator
 {
    /** Disable perception if CUDA 12.9.1 is not installed or not working */
-   private final boolean runPerception = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() && CUDATools.hasNVJPEG();
+   private final boolean runPerception = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() && CUDATools.hasNVJPEG() && ZEDJavaAPINativeLibrary.load();
    private final String svoFile;
    private final Supplier<DRCRobotModel> robotModelBuilder;
    private final TriFunction<DRCRobotModel, ROS2NodeBuilder, RigidBodyTransformReadOnly, HumanoidKinematicsSimulation> kinematicsSimulationBuilder;

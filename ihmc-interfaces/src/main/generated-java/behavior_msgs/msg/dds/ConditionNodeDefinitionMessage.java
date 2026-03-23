@@ -113,6 +113,10 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
             * Minimum number of points in the shape
             */
    public long min_points_;
+   /**
+            * Maximum number of points in the shape
+            */
+   public long max_points_;
 
    public ConditionNodeDefinitionMessage()
    {
@@ -183,6 +187,8 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
       frame_name_.append(other.frame_name_);
 
       min_points_ = other.min_points_;
+
+      max_points_ = other.max_points_;
 
    }
 
@@ -567,6 +573,21 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
       return min_points_;
    }
 
+   /**
+            * Maximum number of points in the shape
+            */
+   public void setMaxPoints(long max_points)
+   {
+      max_points_ = max_points;
+   }
+   /**
+            * Maximum number of points in the shape
+            */
+   public long getMaxPoints()
+   {
+      return max_points_;
+   }
+
 
    public static Supplier<ConditionNodeDefinitionMessagePubSubType> getPubSubType()
    {
@@ -627,6 +648,8 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.min_points_, other.min_points_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.max_points_, other.max_points_, epsilon)) return false;
+
 
       return true;
    }
@@ -682,6 +705,8 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
 
       if(this.min_points_ != otherMyClass.min_points_) return false;
 
+      if(this.max_points_ != otherMyClass.max_points_) return false;
+
 
       return true;
    }
@@ -735,7 +760,9 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
       builder.append("frame_name=");
       builder.append(this.frame_name_);      builder.append(", ");
       builder.append("min_points=");
-      builder.append(this.min_points_);
+      builder.append(this.min_points_);      builder.append(", ");
+      builder.append("max_points=");
+      builder.append(this.max_points_);
       builder.append("}");
       return builder.toString();
    }

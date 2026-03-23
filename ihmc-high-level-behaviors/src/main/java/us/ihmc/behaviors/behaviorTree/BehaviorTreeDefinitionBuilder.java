@@ -24,22 +24,22 @@ public class BehaviorTreeDefinitionBuilder
       MAP.put(FallbackNodeDefinition.class, FallbackNodeDefinition::new);
       MAP.put(ConditionNodeDefinition.class, ConditionNodeDefinition::new);
       MAP.put(GotoNodeDefinition.class, GotoNodeDefinition::new);
-      MAP.put(CheckPointNodeDefinition.class, CheckPointNodeDefinition::new);
-      MAP.put(SceneActionNodeDefinition.class, SceneActionNodeDefinition::new);
+      MAP.put(CheckpointNodeDefinition.class, CheckpointNodeDefinition::new);
+      MAP.put(SceneActionDefinition.class, SceneActionDefinition::new);
       MAP.put(AI2RNodeDefinition.class, AI2RNodeDefinition::new);
       MAP.put(DoorTraversalDefinition.class, DoorTraversalDefinition::new);
       MAP.put(BuildingExplorationDefinition.class, BuildingExplorationDefinition::new);
       MAP.put(NeckActionDefinition.class, NeckActionDefinition::new);
-      MAP.put(ChestOrientationActionDefinition.class, ChestOrientationActionDefinition::new);
-      MAP.put(FootstepPlanActionDefinition.class, FootstepPlanActionDefinition::new);
-      MAP.put(HandPoseActionDefinition.class, HandPoseActionDefinition::new);
+      MAP.put(SpineActionDefinition.class, SpineActionDefinition::new);
+      MAP.put(WalkActionDefinition.class, WalkActionDefinition::new);
+      MAP.put(ArmActionDefinition.class, ArmActionDefinition::new);
       MAP.put(HandWrenchActionDefinition.class, HandWrenchActionDefinition::new);
-      MAP.put(PelvisHeightOrientationActionDefinition.class, PelvisHeightOrientationActionDefinition::new);
+      MAP.put(PelvisActionDefinition.class, PelvisActionDefinition::new);
       MAP.put(AbilityHandActionDefinition.class, AbilityHandActionDefinition::new);
-      MAP.put(SakeHandCommandActionDefinition.class, SakeHandCommandActionDefinition::new);
+      MAP.put(EZGripperActionDefinition.class, EZGripperActionDefinition::new);
       MAP.put(ScrewPrimitiveActionDefinition.class, ScrewPrimitiveActionDefinition::new);
-      MAP.put(WaitDurationActionDefinition.class, WaitDurationActionDefinition::new);
-      MAP.put(FootPoseActionDefinition.class, FootPoseActionDefinition::new);
+      MAP.put(WaitActionDefinition.class, WaitActionDefinition::new);
+      MAP.put(LegActionDefinition.class, LegActionDefinition::new);
    }
 
    public static BehaviorTreeRootNodeDefinition createRootNode(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, DRCRobotModel robotModel)

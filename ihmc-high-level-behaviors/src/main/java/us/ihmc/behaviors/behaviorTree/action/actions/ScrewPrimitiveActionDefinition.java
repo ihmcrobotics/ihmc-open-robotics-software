@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeDefinition;
 import us.ihmc.communication.crdt.*;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SidedObject;
@@ -74,7 +73,7 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
 
       jsonNode.put("side", side.getValue().getLowerCaseName());
       jsonNode.put("objectFrame", objectFrameName.getValue());
-      JSONTools.toJSON(jsonNode, "screwAxisPose", screwAxisPoseInObjectFrame.getValueReadOnly());
+      JSONTools.toJSON(jsonNode.putObject("screwAxisPose"), screwAxisPoseInObjectFrame.getValueReadOnly());
       jsonNode.put("translation", translation.getValue());
       jsonNode.put("rotation", rotation.getValue());
       jsonNode.put("maxLinearVelocity", maxLinearVelocity.getValue());
@@ -94,7 +93,8 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
 
       side.setValue(RobotSide.getSideFromString(jsonNode.get("side").asText()));
       objectFrameName.setValue(jsonNode.get("objectFrame").textValue());
-      JSONTools.toEuclid(jsonNode, "screwAxisPose", screwAxisPoseInObjectFrame.getValueAndModify());
+      if (jsonNode.get("screwAxisPose") instanceof ObjectNode objectNode)
+         JSONTools.toEuclid(objectNode, screwAxisPoseInObjectFrame.getValueAndModify());
       translation.setValue(jsonNode.get("translation").asDouble());
       rotation.setValue(jsonNode.get("rotation").asDouble());
       maxLinearVelocity.setValue(jsonNode.get("maxLinearVelocity").asDouble());
