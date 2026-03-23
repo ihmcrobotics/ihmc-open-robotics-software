@@ -21,6 +21,7 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseCommunicatorMap;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
 import us.ihmc.perception.gpuMapping.TerrainMapData;
+import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractionThread;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -64,6 +65,7 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
    private ImageSensor imageSensor;
    private YOLOv8DetectionExecutor yolo;
    private IsaacROSFoundationPoseCommunicatorMap foundationPose;
+   private RapidPlanarRegionsExtractionThread planarRegions;
    private TerrainMapData terrainMapData;
 
    public void initialize(BehaviorTreeExecutor tree,
@@ -76,6 +78,7 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
                           ImageSensor imageSensor,
                           YOLOv8DetectionExecutor yolo,
                           IsaacROSFoundationPoseCommunicatorMap foundationPose,
+                          RapidPlanarRegionsExtractionThread planarRegions,
                           TerrainMapData terrainMapData)
    {
       this.tree = tree;
@@ -88,6 +91,7 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
       this.imageSensor = imageSensor;
       this.yolo = yolo;
       this.foundationPose = foundationPose;
+      this.planarRegions = planarRegions;
       this.terrainMapData = terrainMapData;
    }
 
@@ -100,6 +104,7 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
                                                                       imageSensor,
                                                                       yolo,
                                                                       foundationPose,
+                                                                      planarRegions,
                                                                       terrainMapData);
       return new BehaviorTreeRootNodeExecutor(id,
                                               tree,

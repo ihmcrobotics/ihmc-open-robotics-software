@@ -11,6 +11,7 @@ import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseCommun
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseObject;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
 import us.ihmc.perception.gpuMapping.TerrainMapData;
+import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractionThread;
 import us.ihmc.sensors.ImageSensor;
 
 import java.time.Instant;
@@ -26,6 +27,7 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
    private final ImageSensor imageSensor;
    private final YOLOv8DetectionExecutor yolo;
    private final IsaacROSFoundationPoseCommunicatorMap foundationPose;
+   private final RapidPlanarRegionsExtractionThread planarRegions;
    private final TerrainMapData terrainMapData;
 
    private final List<BehaviorTreeSceneObjectExecutor> objects;
@@ -42,6 +44,7 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
                                     ImageSensor imageSensor,
                                     YOLOv8DetectionExecutor yolo,
                                     IsaacROSFoundationPoseCommunicatorMap foundationPose,
+                                    RapidPlanarRegionsExtractionThread planarRegions,
                                     TerrainMapData terrainMapData)
    {
       super(crdtInfo, idSupplier, syncedRobot);
@@ -49,6 +52,7 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
       this.imageSensor = imageSensor;
       this.yolo = yolo;
       this.foundationPose = foundationPose;
+      this.planarRegions = planarRegions;
       this.terrainMapData = terrainMapData;
 
       objects = (List) super.objects;

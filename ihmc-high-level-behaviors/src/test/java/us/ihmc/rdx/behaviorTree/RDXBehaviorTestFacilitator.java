@@ -158,8 +158,8 @@ public class RDXBehaviorTestFacilitator
       ROS2SyncedRobotModel syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
       ROS2PeerClockOffsetEstimator peerClockEstimator = new ROS2PeerClockOffsetEstimator(ros2Node);
 
-      IsaacROSFoundationPoseCommunicatorMap foundationPose;
       YOLOv8DetectionExecutor yolo;
+      IsaacROSFoundationPoseCommunicatorMap foundationPose;
       RapidPlanarRegionsExtractionThread planarRegions;
       if (runPerception)
       {
@@ -167,10 +167,10 @@ public class RDXBehaviorTestFacilitator
          zedSensor.setSensorFrame(syncedRobot.getReferenceFrames().getExperimentalCameraFrame());
          zedSensor.startSensor();
 
-         foundationPose = new IsaacROSFoundationPoseCommunicatorMap(peerClockEstimator);
-
          yolo = new YOLOv8DetectionExecutor(ros2Node, peerClockEstimator, () -> true);
          yolo.enableModel("best_multi_02_17_2026");
+
+         foundationPose = new IsaacROSFoundationPoseCommunicatorMap(peerClockEstimator);
          yolo.addDetectionConsumerCallback(foundationPose::updatePoseEstimations);
 
          BlockingQueue<RawImage> rapidRegionsDepthQueue = new LinkedBlockingQueue<>(ImageSensor.DEFAULT_IMAGE_QUEUE_CAPACITY);
@@ -185,7 +185,7 @@ public class RDXBehaviorTestFacilitator
          planarRegions = null;
       }
 
-      behaviorTree = new ROS2BehaviorTreeExecutor(ros2, syncedRobot, kinematicsSimulationBuilder, zedSensor, yolo, foundationPose, null, peerClockEstimator);
+      behaviorTree = new ROS2BehaviorTreeExecutor(ros2, syncedRobot, kinematicsSimulationBuilder, zedSensor, yolo, foundationPose, planarRegions, null, peerClockEstimator);
 
       RepeatingTaskThread yoloThread = new RepeatingTaskThread("yolo", () ->
       {
@@ -240,14 +240,14 @@ public class RDXBehaviorTestFacilitator
       {
          try
          {
-            if (foundationPose != null)
-               foundationPose.closeCommunicators();
             if (yolo != null)
             {
                yoloThread.kill();
                yoloThread.interrupt();
                yolo.destroy();
             }
+            if (foundationPose != null)
+               foundationPose.closeCommunicators();
             if (planarRegions != null)
                planarRegions.kill();
             if (zedSensor != null)

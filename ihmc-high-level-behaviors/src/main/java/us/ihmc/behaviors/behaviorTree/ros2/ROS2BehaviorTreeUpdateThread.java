@@ -11,6 +11,7 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseCommunicatorMap;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
 import us.ihmc.perception.gpuMapping.TerrainMapData;
+import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractionThread;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.sensors.ImageSensor;
@@ -28,6 +29,7 @@ public class ROS2BehaviorTreeUpdateThread extends RepeatingTaskThread
          ImageSensor imageSensor,
          YOLOv8DetectionExecutor yolo,
          IsaacROSFoundationPoseCommunicatorMap foundationPose,
+         RapidPlanarRegionsExtractionThread planarRegions,
          TerrainMapData terrainMapData)
    {
       super(ROS2BehaviorTreeUpdateThread.class.getSimpleName());
@@ -42,6 +44,7 @@ public class ROS2BehaviorTreeUpdateThread extends RepeatingTaskThread
                                               imageSensor,
                                               yolo,
                                               foundationPose,
+                                              planarRegions,
                                               terrainMapData,
                                               peerClockOffsetEstimator);
    }

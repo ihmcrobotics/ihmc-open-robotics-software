@@ -13,6 +13,7 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseCommunicatorMap;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
 import us.ihmc.perception.gpuMapping.TerrainMapData;
+import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractionThread;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.sensors.ImageSensor;
@@ -34,10 +35,11 @@ public class ROS2BehaviorTreeExecutor extends BehaviorTreeExecutor
          ImageSensor imageSensor,
          YOLOv8DetectionExecutor yolo,
          IsaacROSFoundationPoseCommunicatorMap foundationPose,
+         RapidPlanarRegionsExtractionThread planarRegions,
          TerrainMapData terrainMapData,
          ROS2PeerClockOffsetEstimator peerClockEstimator)
    {
-      super(syncedRobot, peerClockEstimator, ros2ControllerHelper, kinematicsSimulationBuilder, imageSensor, yolo, foundationPose, terrainMapData);
+      super(syncedRobot, peerClockEstimator, ros2ControllerHelper, kinematicsSimulationBuilder, imageSensor, yolo, foundationPose, planarRegions, terrainMapData);
 
       ros2BehaviorTree = new ROS2BehaviorTree<>((BehaviorTree) this, ros2ControllerHelper);
 
