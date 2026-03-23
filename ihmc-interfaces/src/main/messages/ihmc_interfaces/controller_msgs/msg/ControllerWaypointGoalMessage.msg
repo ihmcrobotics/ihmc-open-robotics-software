@@ -17,3 +17,7 @@ bool hold_position false
 # Proximity to the goal.
 float64 position_proximity 0.02
 float64 orientation_proximity 0.1
+
+# Whether the goal yaw matters. If false, the robot will always face toward the goal
+# position rather than blending to match the goal orientation as it approaches.
+bool goal_orientation_matters true

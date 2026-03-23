@@ -39,6 +39,12 @@ module controller_msgs
         double position_proximity;
         @defaultValue(value=0.1)
         double orientation_proximity;
+        /**
+         * Whether the goal yaw matters. If false, the robot will always face toward the goal
+         * position rather than blending to match the goal orientation as it approaches.
+         */
+        @defaultValue(value=true)
+        boolean goal_orientation_matters;
       };
     };
   };

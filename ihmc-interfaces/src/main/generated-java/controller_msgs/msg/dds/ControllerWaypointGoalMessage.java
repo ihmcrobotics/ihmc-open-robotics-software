@@ -34,6 +34,11 @@ public class ControllerWaypointGoalMessage extends Packet<ControllerWaypointGoal
             */
    public double position_proximity_ = 0.02;
    public double orientation_proximity_ = 0.1;
+   /**
+            * Whether the goal yaw matters. If false, the robot will always face toward the goal
+            * position rather than blending to match the goal orientation as it approaches.
+            */
+   public boolean goal_orientation_matters_ = true;
 
    public ControllerWaypointGoalMessage()
    {
@@ -62,6 +67,8 @@ public class ControllerWaypointGoalMessage extends Packet<ControllerWaypointGoal
       position_proximity_ = other.position_proximity_;
 
       orientation_proximity_ = other.orientation_proximity_;
+
+      goal_orientation_matters_ = other.goal_orientation_matters_;
 
    }
 
@@ -167,6 +174,23 @@ public class ControllerWaypointGoalMessage extends Packet<ControllerWaypointGoal
       return orientation_proximity_;
    }
 
+   /**
+            * Whether the goal yaw matters. If false, the robot will always face toward the goal
+            * position rather than blending to match the goal orientation as it approaches.
+            */
+   public void setGoalOrientationMatters(boolean goal_orientation_matters)
+   {
+      goal_orientation_matters_ = goal_orientation_matters;
+   }
+   /**
+            * Whether the goal yaw matters. If false, the robot will always face toward the goal
+            * position rather than blending to match the goal orientation as it approaches.
+            */
+   public boolean getGoalOrientationMatters()
+   {
+      return goal_orientation_matters_;
+   }
+
 
    public static Supplier<ControllerWaypointGoalMessagePubSubType> getPubSubType()
    {
@@ -201,6 +225,8 @@ public class ControllerWaypointGoalMessage extends Packet<ControllerWaypointGoal
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.orientation_proximity_, other.orientation_proximity_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.goal_orientation_matters_, other.goal_orientation_matters_, epsilon)) return false;
+
 
       return true;
    }
@@ -230,6 +256,8 @@ public class ControllerWaypointGoalMessage extends Packet<ControllerWaypointGoal
 
       if(this.orientation_proximity_ != otherMyClass.orientation_proximity_) return false;
 
+      if(this.goal_orientation_matters_ != otherMyClass.goal_orientation_matters_) return false;
+
 
       return true;
    }
@@ -255,7 +283,9 @@ public class ControllerWaypointGoalMessage extends Packet<ControllerWaypointGoal
       builder.append("position_proximity=");
       builder.append(this.position_proximity_);      builder.append(", ");
       builder.append("orientation_proximity=");
-      builder.append(this.orientation_proximity_);
+      builder.append(this.orientation_proximity_);      builder.append(", ");
+      builder.append("goal_orientation_matters=");
+      builder.append(this.goal_orientation_matters_);
       builder.append("}");
       return builder.toString();
    }

@@ -68,6 +68,8 @@ public class ControllerWaypointGoalMessagePubSubType implements us.ihmc.pubsub.T
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -105,6 +107,9 @@ public class ControllerWaypointGoalMessagePubSubType implements us.ihmc.pubsub.T
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -127,6 +132,8 @@ public class ControllerWaypointGoalMessagePubSubType implements us.ihmc.pubsub.T
 
       cdr.write_type_6(data.getOrientationProximity());
 
+      cdr.write_type_7(data.getGoalOrientationMatters());
+
    }
 
    public static void read(controller_msgs.msg.dds.ControllerWaypointGoalMessage data, us.ihmc.idl.CDR cdr)
@@ -144,9 +151,11 @@ public class ControllerWaypointGoalMessagePubSubType implements us.ihmc.pubsub.T
       data.setHoldPosition(cdr.read_type_7());
       	
       data.setPositionProximity(cdr.read_type_6());
-      	
+
       data.setOrientationProximity(cdr.read_type_6());
-      	
+
+      data.setGoalOrientationMatters(cdr.read_type_7());
+
 
    }
 
@@ -161,6 +170,7 @@ public class ControllerWaypointGoalMessagePubSubType implements us.ihmc.pubsub.T
       ser.write_type_7("hold_position", data.getHoldPosition());
       ser.write_type_6("position_proximity", data.getPositionProximity());
       ser.write_type_6("orientation_proximity", data.getOrientationProximity());
+      ser.write_type_7("goal_orientation_matters", data.getGoalOrientationMatters());
    }
 
    @Override
@@ -174,6 +184,7 @@ public class ControllerWaypointGoalMessagePubSubType implements us.ihmc.pubsub.T
       data.setHoldPosition(ser.read_type_7("hold_position"));
       data.setPositionProximity(ser.read_type_6("position_proximity"));
       data.setOrientationProximity(ser.read_type_6("orientation_proximity"));
+      data.setGoalOrientationMatters(ser.read_type_7("goal_orientation_matters"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.ControllerWaypointGoalMessage src, controller_msgs.msg.dds.ControllerWaypointGoalMessage dest)
