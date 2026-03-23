@@ -2,7 +2,7 @@ package us.ihmc.rdx.ui;
 
 import imgui.ImGui;
 import imgui.type.ImInt;
-import us.ihmc.avatar.logging.IntraprocessYoVariableLogger;
+import us.ihmc.avatar.logging.IntraprocessYoVariableLoggerOld;
 import us.ihmc.avatar.logging.PlanarRegionsListLogger;
 import us.ihmc.avatar.logging.PlanarRegionsReplayBuffer;
 import us.ihmc.commons.time.Stopwatch;
@@ -36,7 +36,7 @@ public class RDXLoggingDevelopmentUI
 
    private Stopwatch stopwatch;
 
-   private IntraprocessYoVariableLogger yoLogger;
+   private IntraprocessYoVariableLoggerOld yoLogger;
    private YoBuffer yoBuffer;
 
    private PlanarRegionsReplayBuffer planarRegionsReplayBuffer;
@@ -66,7 +66,7 @@ public class RDXLoggingDevelopmentUI
 
       registry = new YoRegistry("registry");
 
-      yoLogger = new IntraprocessYoVariableLogger(List.of(new RegistrySendBufferBuilder(registry)), 1, getClass().getSimpleName());
+      yoLogger = new IntraprocessYoVariableLoggerOld(List.of(new RegistrySendBufferBuilder(registry)), 1, getClass().getSimpleName());
 
       planarRegionsListLogger = new PlanarRegionsListLogger(getClass().getSimpleName(), MAX_TICK_LENGTH);
 

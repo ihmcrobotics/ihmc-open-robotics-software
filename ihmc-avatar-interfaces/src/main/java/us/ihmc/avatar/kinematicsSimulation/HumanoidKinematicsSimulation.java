@@ -10,7 +10,7 @@ import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.AvatarControllerThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
-import us.ihmc.avatar.logging.IntraprocessYoVariableLogger;
+import us.ihmc.avatar.logging.IntraprocessYoVariableLoggerOld;
 import us.ihmc.avatar.scs2.SCS2AvatarSimulationFactory;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModule;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -144,7 +144,7 @@ public class HumanoidKinematicsSimulation
    private SideDependentList<KinematicsSimulationContactStateHolder> contactStateHolders = new SideDependentList<>();
    private InverseDynamicsCommandList inverseDynamicsContactHolderCommandList = new InverseDynamicsCommandList();
    private YoVariableServer yoVariableServer = null;
-   private IntraprocessYoVariableLogger intraprocessYoVariableLogger;
+   private IntraprocessYoVariableLoggerOld intraprocessYoVariableLogger;
    private JointDesiredOutputListReadOnly jointDesiredOutputList;
    private final SideDependentList<AbilityHandKinematicsSimulation> abilityHands = new SideDependentList<>();
 
@@ -348,9 +348,9 @@ public class HumanoidKinematicsSimulation
       if (kinematicsSimulationParameters.getLogToFile())
       {
          YoGraphicGroupDefinition definitions = new YoGraphicGroupDefinition("SCS1Graphics", YoGraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry));
-         intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(List.of(new RegistrySendBufferBuilder(registry, fullRobotModel.getElevator(), definitions)),
-                                                                         0.01,
-                                                                         getClass().getSimpleName());
+         intraprocessYoVariableLogger = new IntraprocessYoVariableLoggerOld(List.of(new RegistrySendBufferBuilder(registry, fullRobotModel.getElevator(), definitions)),
+                                                                            0.01,
+                                                                            getClass().getSimpleName());
          if (intraprocessYoVariableLogger.create())
             LogTools.info("[Logging] Logging locally to disk");
          else

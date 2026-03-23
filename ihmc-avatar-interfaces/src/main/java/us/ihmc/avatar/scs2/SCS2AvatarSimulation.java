@@ -8,7 +8,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.avatar.factory.DisposableRobotController;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
-import us.ihmc.avatar.logging.IntraprocessYoVariableLogger;
+import us.ihmc.avatar.logging.IntraprocessYoVariableLoggerOld;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.IKStreamingRTPluginFactory.IKStreamingRTThread;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
@@ -43,7 +43,7 @@ public class SCS2AvatarSimulation
    private SimulationConstructionSet2 simulationConstructionSet;
    private HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory;
    private YoVariableServer yoVariableServer;
-   private IntraprocessYoVariableLogger intraprocessYoVariableLogger;
+   private IntraprocessYoVariableLoggerOld intraprocessYoVariableLogger;
    private DisposableRobotController robotController;
    private HumanoidRobotContextData masterContext;
    private AvatarEstimatorThread estimatorThread;
@@ -400,7 +400,7 @@ public class SCS2AvatarSimulation
       this.yoVariableServer = yoVariableServer;
    }
 
-   public void setIntraprocessYoVariableLogger(IntraprocessYoVariableLogger intraprocessYoVariableLogger)
+   public void setIntraprocessYoVariableLogger(IntraprocessYoVariableLoggerOld intraprocessYoVariableLogger)
    {
       this.intraprocessYoVariableLogger = intraprocessYoVariableLogger;
    }

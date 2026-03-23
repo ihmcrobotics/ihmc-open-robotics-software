@@ -35,7 +35,11 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-public class IntraprocessYoVariableLogger
+/**
+ * Meant to be deleted once logger is released with the correct IntraprocessYoVariableLogger
+ */
+@Deprecated
+public class IntraprocessYoVariableLoggerOld
 {
    private static final String INTRAPROCESS_LOG_POSTFIX = "_IntraprocessLogger";
    public static final String PROPERTY_FILE = "robotData.log";
@@ -72,15 +76,15 @@ public class IntraprocessYoVariableLogger
    private FileChannel dataChannel;
    private FileChannel indexChannel;
 
-   public IntraprocessYoVariableLogger(List<RegistrySendBufferBuilder> registrySendBufferBuilders, double dt, String logName)
+   public IntraprocessYoVariableLoggerOld(List<RegistrySendBufferBuilder> registrySendBufferBuilders, double dt, String logName)
    {
       this(registrySendBufferBuilders, dt, logName, null);
    }
 
-   public IntraprocessYoVariableLogger(List<RegistrySendBufferBuilder> registrySendBufferBuilders,
-                                       double dt,
-                                       String logName,
-                                       @Nullable LogModelProvider logModelProvider)
+   public IntraprocessYoVariableLoggerOld(List<RegistrySendBufferBuilder> registrySendBufferBuilders,
+                                          double dt,
+                                          String logName,
+                                          @Nullable LogModelProvider logModelProvider)
    {
       this.registrySendBufferBuilders = registrySendBufferBuilders;
       this.dt = dt;

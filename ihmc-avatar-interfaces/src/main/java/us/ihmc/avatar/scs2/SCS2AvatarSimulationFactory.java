@@ -23,7 +23,7 @@ import us.ihmc.avatar.factory.SimulatedHandSensorReader;
 import us.ihmc.avatar.factory.SingleThreadedRobotController;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
-import us.ihmc.avatar.logging.IntraprocessYoVariableLogger;
+import us.ihmc.avatar.logging.IntraprocessYoVariableLoggerOld;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.IKStreamingRTPluginFactory;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.IKStreamingRTPluginFactory.IKStreamingRTThread;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
@@ -47,7 +47,6 @@ import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler.TaskOverrunBehavior;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.HeightMap;
-import us.ihmc.graphicsDescription.conversion.YoGraphicConversionTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
@@ -206,7 +205,7 @@ public class SCS2AvatarSimulationFactory
    protected RobotDefinition robotDefinition;
    protected Robot robot;
    protected YoVariableServer yoVariableServer;
-   protected IntraprocessYoVariableLogger intraprocessYoVariableLogger;
+   protected IntraprocessYoVariableLoggerOld intraprocessYoVariableLogger;
    protected SimulationConstructionSet2 simulationConstructionSet;
    protected JointDesiredOutputWriter simulationOutputWriter;
    protected SimulationThreadOutputWriter simulationThreadOutputWriter;
@@ -737,7 +736,7 @@ public class SCS2AvatarSimulationFactory
          {
             builders.add(new RegistrySendBufferBuilder(ikStreamingRTThread.getYoVariableRegistry(), ikStreamingRTThread.getSCS2YoGraphics()));
          }
-         intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(builders, robotModel.getEstimatorDT(), getClass().getSimpleName());
+         intraprocessYoVariableLogger = new IntraprocessYoVariableLoggerOld(builders, robotModel.getEstimatorDT(), getClass().getSimpleName());
 
          if (intraprocessYoVariableLogger.create())
          {
