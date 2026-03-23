@@ -22,6 +22,18 @@ public class RDXWaitAction extends RDXActionNode<WaitActionState, WaitActionDefi
    }
 
    @Override
+   public void renderTreeViewRow()
+   {
+      super.renderRowBeginning();
+      super.renderEditableName();
+
+      ImGui.sameLine();
+      ImGui.textDisabled("Wait");
+
+      renderRowEnd();
+   }
+
+   @Override
    protected void renderImGuiWidgetsInternal()
    {
       ImGui.pushItemWidth(80.0f);

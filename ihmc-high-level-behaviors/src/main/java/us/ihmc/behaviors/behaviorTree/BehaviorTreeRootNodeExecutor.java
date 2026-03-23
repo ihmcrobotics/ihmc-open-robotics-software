@@ -14,9 +14,11 @@ import us.ihmc.behaviors.behaviorTree.action.actions.AbilityHandActionComms;
 import us.ihmc.behaviors.behaviorTree.control.FallbackNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.control.GotoNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneExecutor;
+import us.ihmc.behaviors.tools.interfaces.LogToolsLogger;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
@@ -38,10 +40,14 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
    private final List<LeafNodeExecutor<?, ?>> successfulLeaves = new ArrayList<>();
 
    private ROS2Node previewROS2Node;
-   private ROS2ControllerHelper realROS2ControllerHelper;
-   private ROS2SyncedRobotModel realSyncedRobot;
+   private final ROS2ControllerHelper realROS2ControllerHelper;
+   private final ROS2SyncedRobotModel realSyncedRobot;
+   private final ControllerStatusTracker realControllerStatusTracker;
+   private final SideDependentList<AbilityHandActionComms> realAbilityHandComms;
    private ROS2ControllerHelper previewROS2ControllerHelper;
    private ROS2SyncedRobotModel previewSyncedRobot;
+   private ControllerStatusTracker previewControllerStatusTracker;
+   private final SideDependentList<AbilityHandActionComms> previewAbilityHandComms = new SideDependentList<>();
    private boolean previewNeedsReset = false;
    private final TObjectDoubleMap<String> resetJointAngles = new TObjectDoubleHashMap<>();
    private HumanoidKinematicsSimulation previewSimulation;
@@ -69,6 +75,8 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       this.kinematicsSimulationBuilder = kinematicsSimulationBuilder;
       this.realROS2ControllerHelper = ros2ControllerHelper;
       this.realSyncedRobot = syncedRobot;
+      this.realControllerStatusTracker = controllerStatusTracker;
+      this.realAbilityHandComms = abilityHandComms;
    }
 
    @Override
@@ -107,7 +115,8 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
    {
       super.update();
 
-      if (state.getPreviewModeEnabled())
+      boolean previewMode = state.getPreviewModeEnabled();
+      if (previewMode)
       {
          if (previewSimulation == null)
          {
@@ -116,13 +125,18 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
             previewROS2Node = ros2NodeBuilder.build("behavior_preview");
             previewROS2ControllerHelper = new ROS2ControllerHelper(previewROS2Node, robotModel.getSimpleRobotName());
             previewSyncedRobot = new ROS2SyncedRobotModel(rootNode.robotModel, previewROS2Node);
+            previewControllerStatusTracker = new ControllerStatusTracker(new LogToolsLogger(), previewROS2ControllerHelper.getROS2Node(), previewSyncedRobot);
+            for (RobotSide robotSide : RobotSide.values)
+               previewAbilityHandComms.put(robotSide, new AbilityHandActionComms(robotSide, previewROS2ControllerHelper.getROS2Node()));
             for (OneDoFJointBasics oneDoFJoint : previewSyncedRobot.getFullRobotModel().getOneDoFJoints())
-                resetJointAngles.put(oneDoFJoint.getName(), oneDoFJoint.getQ());
+               resetJointAngles.put(oneDoFJoint.getName(), oneDoFJoint.getQ());
             RigidBodyTransformReadOnly walkingFrame = syncedRobot.getReferenceFrames().getMidFeetUnderPelvisFrame().getTransformToWorldFrame();
             previewSimulation = kinematicsSimulationBuilder.apply(robotModel, ros2NodeBuilder, walkingFrame);
          }
 
          previewSyncedRobot.update();
+         for (RobotSide side : previewAbilityHandComms.sides())
+            previewAbilityHandComms.get(side).update();
 
          if (previewNeedsReset)
          {
@@ -135,13 +149,15 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       else
          previewNeedsReset = true;
 
-      scene.setSyncedRobot(state.getPreviewModeEnabled() ? previewSyncedRobot : realSyncedRobot);
+      scene.setSyncedRobot(previewMode ? previewSyncedRobot : realSyncedRobot);
       scene.update();
 
       BehaviorTreeTools.runForSubtreeNodes(this, node ->
       {
-         node.ros2ControllerHelper = state.getPreviewModeEnabled() ? previewROS2ControllerHelper : realROS2ControllerHelper;
-         node.syncedRobot = state.getPreviewModeEnabled() ? previewSyncedRobot : realSyncedRobot;
+         node.ros2ControllerHelper = previewMode ? previewROS2ControllerHelper : realROS2ControllerHelper;
+         node.syncedRobot = previewMode ? previewSyncedRobot : realSyncedRobot;
+         node.controllerStatusTracker = previewMode ? previewControllerStatusTracker : realControllerStatusTracker;
+         node.abilityHandComms = previewMode ? previewAbilityHandComms : realAbilityHandComms;
       });
 
       orderedLeaves.clear();

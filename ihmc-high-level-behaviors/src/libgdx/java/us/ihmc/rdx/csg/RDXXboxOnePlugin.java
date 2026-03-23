@@ -78,6 +78,7 @@ public class RDXXboxOnePlugin
       directionalControlInputMessage = new DirectionalControlInputMessage();
 
       publisherThrottler.setFrequency(11.0);
+      heartBeat.reset();
 
       controllerListener = new ControllerListener()
       {

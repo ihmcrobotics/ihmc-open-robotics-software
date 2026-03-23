@@ -189,7 +189,8 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
       RDXBehaviorTreeNode<?, ?> executeAfterNode = rootNode.getIDToNodeMap().get(definition.getExecuteAfterNodeID());
 
       if (executeAfterNode == null)
-         LogTools.error("Node ID not found: {}", definition.getExecuteAfterNodeID());
+         LogTools.error("Problem with node: {}: executeAfter not found: ID = {}, Name = {}",
+                        definition.getName(), definition.getExecuteAfterNodeID(), definition.getExecuteAfterLeafName());
 
       return executeAfterNode;
    }
