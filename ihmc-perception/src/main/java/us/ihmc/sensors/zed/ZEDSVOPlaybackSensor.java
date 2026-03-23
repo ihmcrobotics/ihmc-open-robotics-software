@@ -55,7 +55,7 @@ public class ZEDSVOPlaybackSensor extends ZEDImageSensor
    @Override
    protected int openCamera()
    {
-      return sl_open_camera(getCameraID(), zedInitParameters, 0, svoFileName, "", 0, "", "", "");
+      return sl_open_camera_from_svo_file(getCameraID(), zedInitParameters, svoFileName, "", "", "");
    }
 
    @Override
