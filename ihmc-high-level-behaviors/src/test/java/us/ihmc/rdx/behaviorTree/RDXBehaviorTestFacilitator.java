@@ -32,6 +32,7 @@ import us.ihmc.perception.cuda.CUDATools;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseCommunicatorMap;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
 import us.ihmc.perception.imageMessage.PixelFormat;
+import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractionThread;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -39,6 +40,7 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
 import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.RDXROS2FramePlanarRegionsVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2RobotVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.foundationPose.RDXIsaacROSFoundationPoseVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.yolo.RDXROS2YOLOv8Visualizer;
@@ -48,6 +50,7 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2NodeBuilder.SpecialTransportMode;
 import us.ihmc.scs2.simulation.collision.CollidableHelper;
+import us.ihmc.sensors.ImageSensor;
 import us.ihmc.sensors.zed.ZEDImageSensor;
 import us.ihmc.sensors.zed.ZEDModelData;
 import us.ihmc.sensors.zed.ZEDSVOPlaybackSensor;
@@ -60,6 +63,8 @@ import us.ihmc.zed.library.ZEDJavaAPINativeLibrary;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /** Includes RDX UI, RDX operated kinematics sim, SVO playback, no physics. */
 public class RDXBehaviorTestFacilitator
@@ -155,6 +160,7 @@ public class RDXBehaviorTestFacilitator
 
       IsaacROSFoundationPoseCommunicatorMap foundationPose;
       YOLOv8DetectionExecutor yolo;
+      RapidPlanarRegionsExtractionThread planarRegions;
       if (runPerception)
       {
          zedSensor = new ZEDSVOPlaybackSensor(0, ZEDModelData.ZED_2I, zed.SL_DEPTH_MODE_NEURAL_LIGHT, svoFile);
@@ -166,11 +172,17 @@ public class RDXBehaviorTestFacilitator
          yolo = new YOLOv8DetectionExecutor(ros2Node, peerClockEstimator, () -> true);
          yolo.enableModel("best_multi_02_17_2026");
          yolo.addDetectionConsumerCallback(foundationPose::updatePoseEstimations);
+
+         BlockingQueue<RawImage> rapidRegionsDepthQueue = new LinkedBlockingQueue<>(ImageSensor.DEFAULT_IMAGE_QUEUE_CAPACITY);
+         zedSensor.registerImageQueue(rapidRegionsDepthQueue, ZEDImageSensor.DEPTH_IMAGE_KEY);
+         planarRegions = new RapidPlanarRegionsExtractionThread(ros2Node, rapidRegionsDepthQueue);
+         planarRegions.startRepeating();
       }
       else
       {
          foundationPose = null;
          yolo = null;
+         planarRegions = null;
       }
 
       behaviorTree = new ROS2BehaviorTreeExecutor(ros2, syncedRobot, kinematicsSimulationBuilder, zedSensor, yolo, foundationPose, null, peerClockEstimator);
@@ -236,6 +248,8 @@ public class RDXBehaviorTestFacilitator
                yoloThread.interrupt();
                yolo.destroy();
             }
+            if (planarRegions != null)
+               planarRegions.kill();
             if (zedSensor != null)
                zedSensor.close();
             kinematicsSimulation.destroy();
@@ -288,6 +302,10 @@ public class RDXBehaviorTestFacilitator
             pointCloudVisualizer = new RDXRawImagePointCloudVisualizer("ZED Point Cloud");
             pointCloudVisualizer.setActive(true);
             visualizersPanel.addVisualizer(pointCloudVisualizer);
+            var planarRegionsVisualizer = new RDXROS2FramePlanarRegionsVisualizer("Planar Regions", ros2Node, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS);
+            planarRegionsVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_PLANAR_REGIONS);
+            planarRegionsVisualizer.setActive(false);
+            visualizersPanel.addVisualizer(planarRegionsVisualizer);
             visualizersPanel.create(baseUI);
             baseUI.getImGuiPanelManager().addPanel(visualizersPanel);
 
