@@ -1,90 +1,140 @@
 package us.ihmc.rdx.ui.interactable;
 
-import controller_msgs.msg.dds.RobotConfigurationData;
 import imgui.internal.ImGui;
+import imgui.type.ImInt;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationParameters;
+import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.commons.UnitConversions;
 import us.ihmc.commons.thread.Throttler;
+import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationParameters;
 
 public class RDXNeckPitchSlider
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ROS2SyncedRobotModel syncedRobot;
-   private final ROS2ControllerHelper ros2ControllerHelper;
-   private final String sliderName;
-   private final RDXTeleoperationParameters teleoperationParameters;
-   private final float[] sliderValue = new float[1];
-   private double robotDataExpirationDuration = 1.0;
-   private double minHeight = -Math.toRadians(5.0);
-   private double maxHeight = Math.toRadians(5.0);
-   private volatile double valueFromRobot = Double.NaN;
-   private final Throttler updateThrottler = new Throttler();
-   private double updatePeriod = UnitConversions.hertzToSeconds(10.0);
+   private ROS2SyncedRobotModel syncedRobot;
+   private ROS2ControllerHelper ros2ControllerHelper;
+   private String sliderName;
+   private final ImInt sliderValue = new ImInt();
+   private double trajectoryTimeSeconds;
+   private int minPitchDeg = -30;
+   private int maxPitchDeg = 30;
    private final Throttler sendThrottler = new Throttler();
-   private double sendPeriod = UnitConversions.hertzToSeconds(5.0);
+   private final double sendPeriod = UnitConversions.hertzToSeconds(5.0);
+   private NeckJointName[] neckJointNamesArray;
+   private boolean[] neckJointIsPitch;
+   private boolean hasPitchJoint;
 
    public RDXNeckPitchSlider(ROS2SyncedRobotModel syncedRobot,
                              ROS2ControllerHelper ros2ControllerHelper,
                              RDXTeleoperationParameters teleoperationParameters)
    {
-      this.syncedRobot = syncedRobot;
-      this.ros2ControllerHelper = ros2ControllerHelper;
-      this.teleoperationParameters = teleoperationParameters;
-      sliderName = "Neck pitch";
-
-      syncedRobot.addRobotConfigurationDataReceivedCallback(this::receiveRobotConfigurationData);
+      initialize(syncedRobot, ros2ControllerHelper, teleoperationParameters.getTrajectoryTime());
    }
 
-   private void receiveRobotConfigurationData(RobotConfigurationData robotConfigurationData)
+   public RDXNeckPitchSlider(ROS2SyncedRobotModel syncedRobot,
+                             ROS2ControllerHelper ros2ControllerHelper)
    {
-      if (updateThrottler.run(updatePeriod))
+      initialize(syncedRobot, ros2ControllerHelper, 1.0);
+   }
+
+   private void initialize(ROS2SyncedRobotModel syncedRobot,
+                           ROS2ControllerHelper ros2ControllerHelper,
+                           double trajectoryTimeSeconds)
+   {
+      this.syncedRobot = syncedRobot;
+      this.ros2ControllerHelper = ros2ControllerHelper;
+      this.trajectoryTimeSeconds = trajectoryTimeSeconds;
+      sliderName = "Neck pitch";
+
+      if (syncedRobot.getRobotModel().getRobotVersion().hasHead())
       {
-         //      neckJoint = fullRobotModel.getNeckJoint(NeckJointName.PROXIMAL_NECK_PITCH);
-         //      if (neckJoint != null)
-         //      {
-         //         double neckJointLimitUpper = neckJoint.getJointLimitUpper();
-         //         neckJointJointLimitLower = neckJoint.getJointLimitLower();
-         //         neckJointRange = neckJointLimitUpper - neckJointJointLimitLower;
-         //      }
+         neckJointNamesArray = syncedRobot.getRobotModel().getJointMap().getNeckJointNames();
+         neckJointIsPitch = new boolean[neckJointNamesArray.length];
+         boolean pitchJointFound = false;
+         for (int i = 0; i < neckJointNamesArray.length; i++)
+         {
+            neckJointIsPitch[i] = neckJointNamesArray[i] == NeckJointName.DISTAL_NECK_PITCH
+                                  || neckJointNamesArray[i] == NeckJointName.PROXIMAL_NECK_PITCH;
+            pitchJointFound |= neckJointIsPitch[i];
+         }
+         hasPitchJoint = pitchJointFound;
+         initializePitchLimits();
+      }
+      else
+      {
+         neckJointNamesArray = new NeckJointName[0];
+         neckJointIsPitch = new boolean[0];
+         hasPitchJoint = false;
       }
    }
 
    public void renderImGuiWidgets()
    {
-      if (renderImGuiSliderAndReturnChanged())
+      if (!hasPitchJoint)
+         return;
+
+      int currentPitchDeg = getCurrentPitchDeg();
+      ImGui.beginDisabled(!syncedRobot.getDataReceptionTimerSnapshot().isRunning(1.0));
+      boolean changed = ImGui.sliderInt(labels.get(sliderName), sliderValue.getData(), minPitchDeg, maxPitchDeg);
+      if (!changed && !ImGui.isItemActive())
+         sliderValue.set(currentPitchDeg);
+      ImGui.endDisabled();
+      if (changed && sendThrottler.run(sendPeriod))
       {
-         if (sendThrottler.run(sendPeriod))
+         NeckJointName[] neckJointNames = syncedRobot.getRobotModel().getJointMap().getNeckJointNames();
+         double desiredPitchRad = Math.toRadians(sliderValue.get());
+         double[] desiredNeckJointValues = new double[neckJointNames.length];
+         for (int i = 0; i < neckJointNames.length; i++)
          {
-            if (syncedRobot.getDataReceptionTimerSnapshot().isRunning(robotDataExpirationDuration))
-            {
-               //      if (neckJoint != null && imGuiSlider("Neck Pitch", neckPitchSliderValue))
-               //      {
-               //         double percent = neckPitchSliderValue[0] / 100.0;
-               //         percent = 1.0 - percent;
-               //         MathTools.checkIntervalContains(percent, 0.0, 1.0);
-               //         double jointAngle = neckJointJointLimitLower + percent * neckJointRange;
-               //         LogTools.info("Commanding neck trajectory: slider: {} angle: {}", neckPitchSliderValue[0], jointAngle);
-               //         controllerHelper.publishToController(HumanoidMessageTools.createNeckTrajectoryMessage(3.0, new double[] {jointAngle}));
-               //      }
-            }
+            OneDoFJointBasics neckJoint = syncedRobot.getFullRobotModel().getNeckJoint(neckJointNames[i]);
+            desiredNeckJointValues[i] = neckJoint != null ? neckJoint.getQ() : 0.0;
+            if (neckJointNames[i] == NeckJointName.DISTAL_NECK_PITCH || neckJointNames[i] == NeckJointName.PROXIMAL_NECK_PITCH)
+               desiredNeckJointValues[i] = desiredPitchRad;
          }
-      }
-      else
-      {
-         sliderValue[0] = (float) valueFromRobot;
+
+         ros2ControllerHelper.publishToController(HumanoidMessageTools.createHeadJointspaceTaskspaceTrajectoryMessage(syncedRobot.getReferenceFrames(),
+                                                                                                                      neckJointNames,
+                                                                                                                      desiredNeckJointValues,
+                                                                                                                      trajectoryTimeSeconds));
       }
    }
 
-   private boolean renderImGuiSliderAndReturnChanged()
+   private int getCurrentPitchDeg()
    {
-      minHeight = teleoperationParameters.getPelvisMinimumHeight();
-      maxHeight = teleoperationParameters.getPelvisMaximumHeight();
-      float previousValue = sliderValue[0];
-      ImGui.sliderFloat(labels.get(sliderName), sliderValue, (float) minHeight, (float) maxHeight);
-      float currentValue = sliderValue[0];
-      return !Double.isNaN(sliderValue[0]) && currentValue != previousValue;
+      double pitchSum = 0.0;
+      int pitchCount = 0;
+      for (int i = 0; i < neckJointNamesArray.length; i++)
+      {
+         if (!neckJointIsPitch[i])
+            continue;
+         OneDoFJointBasics neckJoint = syncedRobot.getFullRobotModel().getNeckJoint(neckJointNamesArray[i]);
+         if (neckJoint == null)
+            continue;
+         pitchSum += neckJoint.getQ();
+         pitchCount++;
+      }
+      if (pitchCount == 0)
+         return 0;
+      return (int) Math.round(Math.toDegrees(pitchSum / pitchCount));
+   }
+
+   private void initializePitchLimits()
+   {
+      for (int i = 0; i < neckJointNamesArray.length; i++)
+      {
+         if (!neckJointIsPitch[i])
+            continue;
+         OneDoFJointBasics neckJoint = syncedRobot.getFullRobotModel().getNeckJoint(neckJointNamesArray[i]);
+         if (neckJoint != null)
+         {
+            minPitchDeg = (int) Math.round(Math.toDegrees(neckJoint.getJointLimitLower()));
+            maxPitchDeg = (int) Math.round(Math.toDegrees(neckJoint.getJointLimitUpper()));
+            return;
+         }
+      }
    }
 }

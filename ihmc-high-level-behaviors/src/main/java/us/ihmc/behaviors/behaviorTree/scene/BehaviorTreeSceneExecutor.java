@@ -195,4 +195,9 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
    {
       return terrainMapData;
    }
+
+   public RapidPlanarRegionsExtractionThread getPlanarRegions()
+   {
+      return planarRegions;
+   }
 }

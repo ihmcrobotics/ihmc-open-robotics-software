@@ -44,6 +44,7 @@ import us.ihmc.rdx.ui.graphics.ros2.RDXROS2FramePlanarRegionsVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2RobotVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.foundationPose.RDXIsaacROSFoundationPoseVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.yolo.RDXROS2YOLOv8Visualizer;
+import us.ihmc.rdx.ui.interactable.RDXNeckPitchSlider;
 import us.ihmc.rdx.ui.tools.RDXROS2StatsPanel;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.ros2.ROS2Node;
@@ -138,12 +139,8 @@ public class RDXBehaviorTestFacilitator
       {
          YoRegistry registry = kinematicsSimulation.getYoRegistry();
          if (registry.findVariable("time") instanceof YoDouble time)
-         {
             while (time.getValue() < 0.02)
-            {
                ThreadTools.park(0.1);
-            }
-         }
          ThreadTools.park(1.0);
          robotReady.set();
          LogTools.info("Robot ready");
@@ -304,7 +301,7 @@ public class RDXBehaviorTestFacilitator
             visualizersPanel.addVisualizer(pointCloudVisualizer);
             var planarRegionsVisualizer = new RDXROS2FramePlanarRegionsVisualizer("Planar Regions", ros2Node, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS);
             planarRegionsVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_PLANAR_REGIONS);
-            planarRegionsVisualizer.setActive(false);
+            planarRegionsVisualizer.setActive(true);
             visualizersPanel.addVisualizer(planarRegionsVisualizer);
             visualizersPanel.create(baseUI);
             baseUI.getImGuiPanelManager().addPanel(visualizersPanel);
@@ -312,6 +309,7 @@ public class RDXBehaviorTestFacilitator
             ImBoolean play = new ImBoolean(false);
             ImInt requestedPosition = new ImInt();
             ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+            RDXNeckPitchSlider neckPitchSlider = new RDXNeckPitchSlider(syncedRobot, ros2);
             baseUI.getImGuiPanelManager().addPanel("Facilitator", () ->
             {
                ImGui.beginDisabled(kinematicsSimulation == null);
@@ -343,6 +341,8 @@ public class RDXBehaviorTestFacilitator
                   }
                   ImGui.endDisabled();
                }
+
+               neckPitchSlider.renderImGuiWidgets();
             });
 
             RobotCollisionModel selectionCollisionModel = selectionCollisionModelBuilder.apply(robotModel);
