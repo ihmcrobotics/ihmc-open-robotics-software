@@ -56,6 +56,8 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
    private static final double DEFAULT_DISTANCE_TO_GOAL_THRESHOLD_TO_STOP = 0.02;
    private static final double DEFAULT_ANGLE_TO_GOAL_THRESHOLD_TO_STOP = Math.toRadians(5.0);
 
+   private static final double DEFAULT_RAMP_DOWN_SPEED_THRESHOLD = 0.05;
+
    private static final double DEFAULT_DISTANCE_TO_MATCH_GOAL_ANGLE = 0.5;
    private static final double DEFAULT_DISTANCE_TO_FACE_GOAL = 1.5;
 
@@ -119,6 +121,10 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
    private final YoBoolean wasGoalReached = new YoBoolean("wasGoalReached", registry);
    private final YoBoolean justReachedGoal = new YoBoolean("justReachedGoal", registry);
    private final YoBoolean goalOrientationMatters = new YoBoolean("goalOrientationMatters", registry);
+   private final YoBoolean isRampingDownAfterGoal = new YoBoolean("isRampingDownAfterGoal", registry);
+   private final YoDouble rampDownSpeedThreshold = new YoDouble("rampDownSpeedThreshold", registry);
+   private final YoBoolean pendingWaypointReachedPublication = new YoBoolean("pendingWaypointReachedPublication", registry);
+   private final FramePose2D pendingWaypointReachedPose = new FramePose2D();
 
    // Feedback terms
    private final YoDouble normalizedRadialSpeed;
@@ -163,6 +169,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
 
       distanceToMatchGoalAngle.set(DEFAULT_DISTANCE_TO_MATCH_GOAL_ANGLE);
       distanceToFaceGoal.set(DEFAULT_DISTANCE_TO_FACE_GOAL);
+      rampDownSpeedThreshold.set(DEFAULT_RAMP_DOWN_SPEED_THRESHOLD);
 
       parentRegistry.addChild(registry);
       waypointVisualizer = new GoalReacherWaypointVisualizer(registry);
@@ -205,6 +212,8 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       hasGoal.set(true);
       hasReachedGoal.set(false); // We want to set this to false to force it to evaluate the new goal points
       shouldHoldGoal.set(command.getShouldHoldPosition());
+      isRampingDownAfterGoal.set(false);
+      pendingWaypointReachedPublication.set(false);
 
       distanceToGoalThresholdToStop.set(command.getPositionProximity());
       angleToGoalThresholdToStop.set(command.getOrientationProximity());
@@ -217,6 +226,8 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
          goalPoses.clear();
          shouldHoldGoal.set(false);
          hasGoal.set(false);
+         isRampingDownAfterGoal.set(false);
+         pendingWaypointReachedPublication.set(false);
       }
    }
 
@@ -269,18 +280,39 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       }
       else if (justReachedGoal.getBooleanValue())
       {
-         // Goal reached this tick: send one stop command to halt the robot.
-         outputMessage.setForward(0.0);
+         // Goal reached this tick: begin ramping down velocity instead of stopping immediately.
+         isRampingDownAfterGoal.set(true);
+      }
+
+      if (isRampingDownAfterGoal.getBooleanValue())
+      {
+         // Decrease speed at the same rate as the acceleration limit to avoid a step change to zero.
+         double rampedSpeed = Math.max(0.0, rateLimitedNormalizedRadialSpeed.getDoubleValue() - computedDt * maxRadialAcceleration.getValue());
+         rateLimitedNormalizedRadialSpeed.set(rampedSpeed);
+         normalizedRadialSpeed.set(0.0);
+
+         double forwardSpeed = rampedSpeed * desiredCruisingSpeedScalar.getValue() * maxForwardSpeed.getValue();
+         outputMessage.setForward(forwardSpeed);
          outputMessage.setRight(0.0);
          outputMessage.setClockwise(0.0);
-         outputMessage.setWalk(false);
+         outputMessage.setWalk(rampedSpeed > rampDownSpeedThreshold.getValue());
+
+         if (rampedSpeed <= rampDownSpeedThreshold.getValue())
+         {
+            isRampingDownAfterGoal.set(false);
+            if (pendingWaypointReachedPublication.getBooleanValue())
+            {
+               publishWaypointStatus(pendingWaypointReachedPose, 0, false);
+               pendingWaypointReachedPublication.set(false);
+            }
+         }
       }
       else if (!this.hasGoal.getBooleanValue())
       {
          startDirection.setToNaN();
          startToGoalVector.setToNaN();
       }
-      // else: holding at goal on a subsequent tick — stop command already sent, nothing to do.
+      // else: holding at goal after ramp-down — nothing to do.
 
       if (hasGoal || this.hasGoal.getBooleanValue() || (hasReachedGoal != this.hasReachedGoal.getValue()))
       {
@@ -289,7 +321,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
          statusMessage.setCurrentGoalXPosition(currentGoalPose.getX());
          statusMessage.setCurrentGoalYPosition(currentGoalPose.getY());
          statusMessage.setCurrentGoalYaw(currentGoalPose.getYaw());
-         statusMessage.setIsReached(this.hasReachedGoal.getBooleanValue());
+         statusMessage.setIsReached(this.hasReachedGoal.getBooleanValue() && !isRampingDownAfterGoal.getBooleanValue());
          reportWalkToGoalStatus();
       }
    }
@@ -301,15 +333,12 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
 
    public DirectionalControlInputMessage getOutputMessage()
    {
-      // Pass through the stop command on the exact tick the goal is reached.
-      if (justReachedGoal.getBooleanValue())
+      // Deliver the command while actively pursuing a goal or ramping down after reaching one.
+      if (hasGoal.getBooleanValue() && !hasReachedGoal.getBooleanValue())
          return outputMessage;
-
-      // Normal walking: deliver the command only while actively pursuing a goal.
-      if (!hasGoal.getBooleanValue() || hasReachedGoal.getBooleanValue())
-         return null;
-
-      return outputMessage;
+      if (isRampingDownAfterGoal.getBooleanValue())
+         return outputMessage;
+      return null;
    }
 
    private void updateGoalPose()
@@ -342,8 +371,9 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
             }
             else if (goalPoses.size() == 1 && !shouldHoldGoal.getBooleanValue())
             {
-               // Completed the final waypoint and we're not holding; discard it and stop.
-               publishWaypointStatus(goalPoses.getFirst().getGoalPose(), goalPoses.size() - 1, false);
+               // Completed the final waypoint and we're not holding; defer "reached" until ramp-down finishes.
+               pendingWaypointReachedPose.set(goalPoses.getFirst().getGoalPose());
+               pendingWaypointReachedPublication.set(true);
                goalPoses.remove(0);
                wasGoalReached.set(false);
             }
@@ -357,11 +387,13 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
 
       hasGoal.set(!goalPoses.isEmpty());
 
-      // Publish "waypoint reached" exactly once when the final (held) goal is first met.
-      // wasGoalReached persists across ticks so we don't re-publish every tick while holding.
+      // Defer "waypoint reached" until ramp-down finishes so the status message is not
+      // published while the robot is still decelerating toward a stop.
+      // wasGoalReached persists across ticks so we only arm the deferred publication once.
       if (reachedGoal && !wasGoalReached.getBooleanValue() && !goalPoses.isEmpty())
       {
-         publishWaypointStatus(goalPoses.getFirst().getGoalPose(), goalPoses.size() - 1, false);
+         pendingWaypointReachedPose.set(goalPoses.getFirst().getGoalPose());
+         pendingWaypointReachedPublication.set(true);
       }
 
       hasReachedGoal.set(reachedGoal);
