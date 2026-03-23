@@ -84,6 +84,13 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
    private double computedDt;
 
    private final YoDouble desiredCruisingSpeedScalar = new YoDouble("desiredCruisingSpeedScalar", registry);
+   /**
+    * Minimum normalized speed (0–1) the robot may travel through the current intermediate waypoint.
+    * Derived from the dot product of the incoming and outgoing leg directions: 1.0 means the robot
+    * can pass through at full speed (legs are collinear); 0.0 means the robot must stop (turn ≥ 90°
+    * or this is the terminal waypoint).
+    */
+   private final YoDouble waypointThroughputSpeedScalar = new YoDouble("waypointThroughputSpeedScalar", registry);
 
    private final YoDouble maxForwardSpeed = new YoDouble("maxForwardSpeed", registry);
    private final YoDouble maxLateralSpeed = new YoDouble("maxLateralSpeed", registry);
@@ -321,7 +328,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       boolean reachedGoal = true;
       while (!goalPoses.isEmpty() && reachedGoal)
       {
-         reachedGoal = reachedGoal(goalPoses.getFirst().getGoalPose());
+         reachedGoal = reachedGoal(goalPoses.getFirst().getGoalPose(), goalPoses.getFirst().getGoalOrientationMatters());
          if (reachedGoal)
          {
             if (goalPoses.size() > 1)
@@ -372,6 +379,32 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
          angleToGoalThresholdToStop.set(waypoint.getAngleToReachGoal());
          desiredCruisingSpeedScalar.set(waypoint.getCruisingSpeedScaler());
          goalOrientationMatters.set(waypoint.getGoalOrientationMatters());
+
+         // Compute how fast the robot may pass through this waypoint without stopping.
+         // Dot product of the incoming leg direction with the outgoing leg direction gives
+         // cos(turn angle): 1 = straight, 0 = 90° turn, −1 = U-turn.
+         // Clamp to [0, 1]: turns ≥ 90° require a full stop; smaller turns allow proportionally
+         // higher throughput speed. Terminal waypoints always use 0 (robot must stop).
+         if (goalPoses.size() >= 2)
+         {
+            GoalWaypoint nextWaypoint = goalPoses.get(1);
+            double outX = nextWaypoint.getGoalPose().getX() - waypoint.getGoalPose().getX();
+            double outY = nextWaypoint.getGoalPose().getY() - waypoint.getGoalPose().getY();
+            double outLen = Math.sqrt(outX * outX + outY * outY);
+            if (outLen > 1e-6)
+            {
+               double dot = waypoint.getIncomingDirX() * (outX / outLen) + waypoint.getIncomingDirY() * (outY / outLen);
+               waypointThroughputSpeedScalar.set(Math.max(0.0, dot));
+            }
+            else
+            {
+               waypointThroughputSpeedScalar.set(0.0);
+            }
+         }
+         else
+         {
+            waypointThroughputSpeedScalar.set(0.0);
+         }
       }
       else
       {
@@ -395,12 +428,14 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       statusMessageOutputManager.reportStatusMessage(waypointReachedMessage);
    }
 
-   private boolean reachedGoal(FramePose2DReadOnly currentGoalPose)
+   private boolean reachedGoal(FramePose2DReadOnly goalPose, boolean orientationMatters)
    {
-      distanceToGoal.set(currentPose.getPosition().distanceXY(currentGoalPose.getPosition()));
-      angleToGoal.set(AngleTools.computeAngleDifferenceMinusPiToPi(currentPose.getYaw(), currentGoalPose.getYaw()));
+      distanceToGoal.set(currentPose.getPosition().distanceXY(goalPose.getPosition()));
+      angleToGoal.set(AngleTools.computeAngleDifferenceMinusPiToPi(currentPose.getYaw(), goalPose.getYaw()));
 
-      return distanceToGoal.getDoubleValue() < distanceToGoalThresholdToStop.getValue() && Math.abs(angleToGoal.getValue()) < angleToGoalThresholdToStop.getValue();
+      boolean positionReached = distanceToGoal.getDoubleValue() < distanceToGoalThresholdToStop.getValue();
+      boolean orientationReached = !orientationMatters || Math.abs(angleToGoal.getValue()) < angleToGoalThresholdToStop.getValue();
+      return positionReached && orientationReached;
    }
 
    /**
@@ -451,8 +486,12 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
 
    private void computePDNormalizedFeedbackVelocities(double distanceToGoal, double angleToGoalHeading)
    {
-      // P-controller on distance: normalize forward speed to [0, 1]
-      normalizedRadialSpeed.set(MathTools.clamp(kRadius.getValue() * distanceToGoal, 0.0, 1.0));
+      // P-controller on distance: normalize forward speed.
+      // The lower bound is waypointThroughputSpeedScalar so the robot doesn't slow below the
+      // speed needed to smoothly pass through an intermediate waypoint whose next leg is roughly
+      // collinear. For the terminal waypoint (or sharp turns) this scalar is 0, so the robot
+      // still decelerates to a stop as usual.
+      normalizedRadialSpeed.set(MathTools.clamp(kRadius.getValue() * distanceToGoal, waypointThroughputSpeedScalar.getValue(), 1.0));
       // Acceleration-limit the ramp-up so speed increases gradually
       double maxAllowedSpeed = rateLimitedNormalizedRadialSpeed.getDoubleValue() + computedDt * maxRadialAcceleration.getValue();
       rateLimitedNormalizedRadialSpeed.set(MathTools.clamp(normalizedRadialSpeed.getValue(), 0.0, maxAllowedSpeed));
@@ -496,6 +535,9 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       private double angleToReachGoal;
       private double cruisingSpeedScaler;
       private boolean goalOrientationMatters;
+      /** Unit vector of the leg that arrives at this waypoint (from previousPose to goalPose). */
+      private double incomingDirX;
+      private double incomingDirY;
 
       public void set(ControllerWaypointGoalCommand command, FramePose2DReadOnly previousPose, double maxSpeed)
       {
@@ -504,7 +546,20 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
          proximityToReachGoal = command.getPositionProximity();
          goalOrientationMatters = command.getGoalOrientationMatters();
 
-         double distance = command.getGoalPose().getPositionDistance(previousPose.getPosition());
+         double dx = goalPose.getX() - previousPose.getX();
+         double dy = goalPose.getY() - previousPose.getY();
+         double distance = Math.sqrt(dx * dx + dy * dy);
+         if (distance > 1e-6)
+         {
+            incomingDirX = dx / distance;
+            incomingDirY = dy / distance;
+         }
+         else
+         {
+            incomingDirX = 1.0;
+            incomingDirY = 0.0;
+         }
+
          if (command.getTimeToReachGoal() > 0.0)
          {
             double speed = distance / command.getTimeToReachGoal();
@@ -539,6 +594,16 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       public boolean getGoalOrientationMatters()
       {
          return goalOrientationMatters;
+      }
+
+      public double getIncomingDirX()
+      {
+         return incomingDirX;
+      }
+
+      public double getIncomingDirY()
+      {
+         return incomingDirY;
       }
    }
 
