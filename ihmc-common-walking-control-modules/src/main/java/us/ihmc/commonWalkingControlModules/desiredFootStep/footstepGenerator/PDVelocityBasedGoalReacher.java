@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator;
 
 import controller_msgs.msg.dds.ControllerWalkToGoalStatusMessage;
 import controller_msgs.msg.dds.ControllerWaypointStatusMessage;
-import controller_msgs.msg.dds.DirectionalControlInputMessage;
+import controller_msgs.msg.dds.VelocityBasedWalkingInputMessage;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ControllerReleaseGoalCommand;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ControllerWaypointGoalCommand;
@@ -141,7 +141,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
    private final YoFrameVector3D desiredLinearVelocity = new YoFrameVector3D("desiredLinearVelocity", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D desiredAngularVelocity = new YoFrameVector3D("desiredAngularVelocity", ReferenceFrame.getWorldFrame(), registry);
 
-   private final DirectionalControlInputMessage outputMessage = new DirectionalControlInputMessage();
+   private final VelocityBasedWalkingInputMessage outputMessage = new VelocityBasedWalkingInputMessage();
 
    // Temp Variables
    private final Vector2D finalHeadingInBodyFrame = new Vector2D();     // goal's final heading direction, in robot body frame
@@ -331,7 +331,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       statusMessageOutputManager.reportStatusMessage(statusMessage);
    }
 
-   public DirectionalControlInputMessage getOutputMessage()
+   public VelocityBasedWalkingInputMessage getOutputMessage()
    {
       // Deliver the command while actively pursuing a goal or ramping down after reaching one.
       if (hasGoal.getBooleanValue() && (!hasReachedGoal.getBooleanValue() || wasGoalReached.getBooleanValue()))
@@ -568,9 +568,9 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
 
    private void updateOutputMessage()
    {
-      outputMessage.setForward(desiredVelocity.getX());
-      outputMessage.setRight(-desiredVelocity.getY());
-      outputMessage.setClockwise(-desiredAngularVelocity.getZ());
+      outputMessage.setForwardVelocity(desiredVelocity.getX());
+      outputMessage.setLateralVelocity(desiredVelocity.getY());
+      outputMessage.setTurnVelocity(desiredAngularVelocity.getZ());
       outputMessage.setWalk(!hasReachedGoal.getBooleanValue());
    }
 
