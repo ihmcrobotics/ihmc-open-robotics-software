@@ -44,20 +44,22 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
    private static final double GOAL_POSITION_Z_OFFSET_FOR_VISUALIZATION = 0.1;
 
    // TODO extract these in to a parameter file.
-   private static final double DEFAULT_MAX_RADIAL_ACCELERATION = 1.5;
+   private static final double DEFAULT_MAX_RADIAL_ACCELERATION = 0.5;
    private static final double DEFAULT_MAX_HEADING_RATE = 2.0 * Math.PI / 3.0;
 
    private static final double DEFAULT_MAX_FORWARD_SPEED = 0.7;
    private static final double DEFAULT_MAX_BACKWARD_SPEED = 0.4;
    private static final double DEFAULT_MAX_LATERAL_SPEED = 0.6;
+   private static final double DEFAULT_MAX_TURNING_SPEED = 0.75;
 
    private static final double DEFAULT_K_RADIUS = 2.0;
-   private static final double DEFAULT_K_DELTA = 1.5;
+   private static final double DEFAULT_K_DELTA = 0.75;
 
    private static final double DEFAULT_DISTANCE_TO_GOAL_THRESHOLD_TO_STOP = 0.02;
    private static final double DEFAULT_ANGLE_TO_GOAL_THRESHOLD_TO_STOP = Math.toRadians(5.0);
 
    private static final double DEFAULT_RAMP_DOWN_SPEED_THRESHOLD = 0.05;
+   private static final double DEFAULT_RAMP_DOWN_DECAY_RATE = 0.95;
 
    private static final double DEFAULT_DISTANCE_TO_MATCH_GOAL_ANGLE = 0.5;
    private static final double DEFAULT_DISTANCE_TO_FACE_GOAL = 1.5;
@@ -98,9 +100,10 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
    private final YoDouble maxForwardSpeed = new YoDouble("maxForwardSpeed", registry);
    private final YoDouble maxLateralSpeed = new YoDouble("maxLateralSpeed", registry);
    private final YoDouble maxBackwardSpeed = new YoDouble("maxBackwardSpeed", registry);
+   private final YoDouble maxTurningSpeed = new YoDouble("maxTurningSpeed", registry);
 
    private final YoDouble kDistance = new YoDouble("kRadius", registry);
-   private final YoDouble kAngle = new YoDouble("kDelta", registry);
+   private final YoDouble kAngle = new YoDouble("kAngle", registry);
    private final YoDouble distanceToMatchGoalAngle = new YoDouble("distanceToMatchGoalAngle", registry);
    private final YoDouble distanceToFaceGoal = new YoDouble("distanceToFaceGoal", registry);
 
@@ -163,6 +166,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       maxForwardSpeed.set(DEFAULT_MAX_FORWARD_SPEED);
       maxBackwardSpeed.set(DEFAULT_MAX_BACKWARD_SPEED);
       maxLateralSpeed.set(DEFAULT_MAX_LATERAL_SPEED);
+      maxTurningSpeed.set(DEFAULT_MAX_TURNING_SPEED);
       kDistance.set(DEFAULT_K_RADIUS);
       kAngle.set(DEFAULT_K_DELTA);
 
@@ -173,7 +177,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       distanceToFaceGoal.set(DEFAULT_DISTANCE_TO_FACE_GOAL);
       rampDownSpeedThreshold.set(DEFAULT_RAMP_DOWN_SPEED_THRESHOLD);
 
-      rampDownDecayRate.set(0.95);
+      rampDownDecayRate.set(DEFAULT_RAMP_DOWN_DECAY_RATE);
 
       parentRegistry.addChild(registry);
       waypointVisualizer = new GoalReacherWaypointVisualizer(registry);
@@ -286,8 +290,9 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
          normalizedRadialSpeed.set(0.0);
 
          desiredVelocity.scale(rampDownDecay.getDoubleValue());
+         desiredAngularVelocity.scale(rampDownDecay.getDoubleValue());
 
-         if (desiredVelocity.norm() <= rampDownSpeedThreshold.getValue())
+         if (desiredVelocity.norm() <= rampDownSpeedThreshold.getValue() && desiredAngularVelocity.norm() <= rampDownSpeedThreshold.getValue())
          {
             isRampingDownAfterGoal.set(false);
             this.hasReachedGoal.set(true);
@@ -536,6 +541,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
 
       // P-controller on heading: angular velocity proportional to heading error
       double turningVelocity = -kAngle.getValue() * angleToGoalHeading;
+      turningVelocity = MathTools.clamp(turningVelocity, maxTurningSpeed.getDoubleValue());
       desiredAngularVelocity.set(0.0, 0.0, turningVelocity);
 
       // Angle from the robot's forward axis to the goal direction, measured in the robot's body frame
@@ -548,8 +554,9 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
 
       // Scale by per-axis speed limits; forward and backward limits are asymmetric
       double xSpeedLimit = vectorToGoalInPelvisFrame.getX() > 0 ? maxForwardSpeed.getDoubleValue() : maxBackwardSpeed.getDoubleValue();
-      double vx = goalDirectionX * xSpeedLimit;
-      double vy = goalDirectionY * maxLateralSpeed.getValue();
+      double turningScalar = 1.0 - MathTools.square(turningVelocity / maxTurningSpeed.getDoubleValue());
+      double vx = goalDirectionX * xSpeedLimit * turningScalar;
+      double vy = goalDirectionY * maxLateralSpeed.getValue() * turningScalar;
 
       desiredVelocity.set(vx, vy);
       desiredSpeed.set(desiredVelocity.norm());
