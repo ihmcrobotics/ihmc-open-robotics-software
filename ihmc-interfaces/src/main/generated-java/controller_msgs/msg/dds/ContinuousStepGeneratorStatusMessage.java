@@ -12,7 +12,7 @@ import us.ihmc.pubsub.TopicDataType;
 public class ContinuousStepGeneratorStatusMessage extends Packet<ContinuousStepGeneratorStatusMessage> implements Settable<ContinuousStepGeneratorStatusMessage>, EpsilonComparable<ContinuousStepGeneratorStatusMessage>
 {
    public boolean is_walking_;
-   public boolean is_in_unit_velocities_;
+   public boolean are_velocities_normalized_;
    public double current_forward_velocity_;
    public double current_lateral_velocity_;
    public double current_turn_velocity_;
@@ -44,7 +44,7 @@ public class ContinuousStepGeneratorStatusMessage extends Packet<ContinuousStepG
    {
       is_walking_ = other.is_walking_;
 
-      is_in_unit_velocities_ = other.is_in_unit_velocities_;
+      are_velocities_normalized_ = other.are_velocities_normalized_;
 
       current_forward_velocity_ = other.current_forward_velocity_;
 
@@ -89,13 +89,13 @@ public class ContinuousStepGeneratorStatusMessage extends Packet<ContinuousStepG
       return is_walking_;
    }
 
-   public void setIsInUnitVelocities(boolean is_in_unit_velocities)
+   public void setAreVelocitiesNormalized(boolean are_velocities_normalized)
    {
-      is_in_unit_velocities_ = is_in_unit_velocities;
+      are_velocities_normalized_ = are_velocities_normalized;
    }
-   public boolean getIsInUnitVelocities()
+   public boolean getAreVelocitiesNormalized()
    {
-      return is_in_unit_velocities_;
+      return are_velocities_normalized_;
    }
 
    public void setCurrentForwardVelocity(double current_forward_velocity)
@@ -262,7 +262,7 @@ public class ContinuousStepGeneratorStatusMessage extends Packet<ContinuousStepG
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_walking_, other.is_walking_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_in_unit_velocities_, other.is_in_unit_velocities_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.are_velocities_normalized_, other.are_velocities_normalized_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.current_forward_velocity_, other.current_forward_velocity_, epsilon)) return false;
 
@@ -311,7 +311,7 @@ public class ContinuousStepGeneratorStatusMessage extends Packet<ContinuousStepG
 
       if(this.is_walking_ != otherMyClass.is_walking_) return false;
 
-      if(this.is_in_unit_velocities_ != otherMyClass.is_in_unit_velocities_) return false;
+      if(this.are_velocities_normalized_ != otherMyClass.are_velocities_normalized_) return false;
 
       if(this.current_forward_velocity_ != otherMyClass.current_forward_velocity_) return false;
 
@@ -357,8 +357,8 @@ public class ContinuousStepGeneratorStatusMessage extends Packet<ContinuousStepG
       builder.append("ContinuousStepGeneratorStatusMessage {");
       builder.append("is_walking=");
       builder.append(this.is_walking_);      builder.append(", ");
-      builder.append("is_in_unit_velocities=");
-      builder.append(this.is_in_unit_velocities_);      builder.append(", ");
+      builder.append("are_velocities_normalized=");
+      builder.append(this.are_velocities_normalized_);      builder.append(", ");
       builder.append("current_forward_velocity=");
       builder.append(this.current_forward_velocity_);      builder.append(", ");
       builder.append("current_lateral_velocity=");

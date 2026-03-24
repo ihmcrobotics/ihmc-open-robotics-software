@@ -123,15 +123,15 @@ public class VelocityBasedSteppingPluginFactory implements HumanoidSteppingPlugi
 
       fastWalkingJoystickPlugin.setDirectionalControlMessenger(new DirectionalControlMessenger()
       {
-         private final DirectionalControlInputMessage message = new DirectionalControlInputMessage();
+         private final VelocityBasedWalkingInputMessage message = new VelocityBasedWalkingInputMessage();
          private final FastWalkingGaitParametersMessage gaitParameters = new FastWalkingGaitParametersMessage();
 
          @Override
          public void submitDirectionalControlRequest(double desiredXVelocity, double desiredYVelocity, double desiredTurningSpeed)
          {
-            message.setForward(desiredXVelocity);
-            message.setRight(-desiredYVelocity);
-            message.setClockwise(-desiredTurningSpeed);
+            message.setForwardVelocity(desiredXVelocity);
+            message.setLateralVelocity(desiredYVelocity);
+            message.setTurnVelocity(desiredTurningSpeed);
 
             walkingCommandInputManager.submitMessage(message);
          }

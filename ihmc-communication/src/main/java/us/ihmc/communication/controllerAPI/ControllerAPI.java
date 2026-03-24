@@ -66,7 +66,7 @@ public final class ControllerAPI
       inputMessageClasses.add(HandWrenchTrajectoryMessage.class);
 
       // Commands supported by the fast-walking controller, not in this repo
-      inputMessageClasses.add(DirectionalControlInputMessage.class);
+      inputMessageClasses.add(VelocityBasedWalkingInputMessage.class);
       inputMessageClasses.add(FastWalkingGaitParametersMessage.class);
 
       // Commands supported by multi-contact controller, not in this repo

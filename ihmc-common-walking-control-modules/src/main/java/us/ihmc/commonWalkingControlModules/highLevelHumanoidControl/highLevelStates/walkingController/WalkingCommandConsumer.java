@@ -53,7 +53,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineDesired
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.WrenchTrajectoryControllerCommand;
-import us.ihmc.humanoidRobotics.communication.directionalControlToolboxAPI.DirectionalControlInputCommand;
+import us.ihmc.humanoidRobotics.communication.velocityBasedWalkingAPI.VelocityBasedWalkingInputCommand;
 import us.ihmc.humanoidRobotics.communication.fastWalkingAPI.FastWalkingGaitParametersCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.log.LogTools;
@@ -163,7 +163,7 @@ public class WalkingCommandConsumer
       commandsToRegister.add(CenterOfMassTrajectoryCommand.class);
       commandsToRegister.add(AbortWalkingCommand.class);
       commandsToRegister.add(PrepareForLocomotionCommand.class);
-      commandsToRegister.add(DirectionalControlInputCommand.class);
+      commandsToRegister.add(VelocityBasedWalkingInputCommand.class);
       commandsToRegister.add(FastWalkingGaitParametersCommand.class);
       commandsToRegister.add(ClearDelayQueueCommand.class);
 
@@ -622,7 +622,7 @@ public class WalkingCommandConsumer
       }
 
       // clear the velocity commands since they aren't used anymore.
-      commandConsumerWithDelayBuffers.clearCommands(DirectionalControlInputCommand.class);
+      commandConsumerWithDelayBuffers.clearCommands(VelocityBasedWalkingInputCommand.class);
       commandConsumerWithDelayBuffers.clearCommands(FastWalkingGaitParametersCommand.class);
    }
 

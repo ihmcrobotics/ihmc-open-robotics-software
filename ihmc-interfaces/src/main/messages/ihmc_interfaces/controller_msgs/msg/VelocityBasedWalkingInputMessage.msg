@@ -1,4 +1,5 @@
-# Input message for the ContinuousStepGenerator.
+# Message responsible for sending desired velocity setpoints (forward, lateral, and turning) to walking
+# controllers that take this form of input
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint64 sequence_id

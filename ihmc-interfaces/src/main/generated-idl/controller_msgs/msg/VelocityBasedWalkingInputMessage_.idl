@@ -1,5 +1,5 @@
-#ifndef __controller_msgs__msg__ContinuousStepGeneratorInputMessage__idl__
-#define __controller_msgs__msg__ContinuousStepGeneratorInputMessage__idl__
+#ifndef __controller_msgs__msg__VelocityBasedWalkingInputMessage__idl__
+#define __controller_msgs__msg__VelocityBasedWalkingInputMessage__idl__
 
 module controller_msgs
 {
@@ -9,10 +9,11 @@ module controller_msgs
     {
 
       /**
-       * Input message for the ContinuousStepGenerator.
+       * Message responsible for sending desired velocity setpoints (forward, lateral, and turning) to walking
+       * controllers that take this form of input
        */
-      @TypeCode(type="controller_msgs::msg::dds_::ContinuousStepGeneratorInputMessage_")
-      struct ContinuousStepGeneratorInputMessage
+      @TypeCode(type="controller_msgs::msg::dds_::VelocityBasedWalkingInputMessage_")
+      struct VelocityBasedWalkingInputMessage
       {
         /**
          * Unique ID used to identify this message, should preferably be consecutively increasing.
