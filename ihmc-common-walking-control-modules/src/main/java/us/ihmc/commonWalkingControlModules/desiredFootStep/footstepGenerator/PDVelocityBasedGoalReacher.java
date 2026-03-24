@@ -45,15 +45,15 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
 
    // TODO extract these in to a parameter file.
    private static final double DEFAULT_MAX_RADIAL_ACCELERATION = 0.5;
-   private static final double DEFAULT_MAX_HEADING_RATE = 2.0 * Math.PI / 3.0;
+   private static final double DEFAULT_MAX_HEADING_RATE = Math.PI / 2.0;
 
    private static final double DEFAULT_MAX_FORWARD_SPEED = 0.7;
    private static final double DEFAULT_MAX_BACKWARD_SPEED = 0.4;
    private static final double DEFAULT_MAX_LATERAL_SPEED = 0.6;
-   private static final double DEFAULT_MAX_TURNING_SPEED = 0.75;
+   private static final double DEFAULT_MAX_TURNING_SPEED = 1.0;
 
    private static final double DEFAULT_K_RADIUS = 2.0;
-   private static final double DEFAULT_K_DELTA = 0.75;
+   private static final double DEFAULT_K_ANGLE = 1.5;
 
    private static final double DEFAULT_DISTANCE_TO_GOAL_THRESHOLD_TO_STOP = 0.02;
    private static final double DEFAULT_ANGLE_TO_GOAL_THRESHOLD_TO_STOP = Math.toRadians(5.0);
@@ -61,7 +61,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
    private static final double DEFAULT_RAMP_DOWN_SPEED_THRESHOLD = 0.05;
    private static final double DEFAULT_RAMP_DOWN_DECAY_RATE = 0.95;
 
-   private static final double DEFAULT_DISTANCE_TO_MATCH_GOAL_ANGLE = 0.5;
+   private static final double DEFAULT_DISTANCE_TO_MATCH_GOAL_ANGLE = 0.3;
    private static final double DEFAULT_DISTANCE_TO_FACE_GOAL = 1.5;
 
    private final RecyclingArrayList<GoalWaypoint> goalPoses = new RecyclingArrayList<>(GoalWaypoint::new);
@@ -168,7 +168,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       maxLateralSpeed.set(DEFAULT_MAX_LATERAL_SPEED);
       maxTurningSpeed.set(DEFAULT_MAX_TURNING_SPEED);
       kDistance.set(DEFAULT_K_RADIUS);
-      kAngle.set(DEFAULT_K_DELTA);
+      kAngle.set(DEFAULT_K_ANGLE);
 
       distanceToGoalThresholdToStop.set(DEFAULT_DISTANCE_TO_GOAL_THRESHOLD_TO_STOP);
       angleToGoalThresholdToStop.set(DEFAULT_ANGLE_TO_GOAL_THRESHOLD_TO_STOP);
@@ -554,7 +554,8 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
 
       // Scale by per-axis speed limits; forward and backward limits are asymmetric
       double xSpeedLimit = vectorToGoalInPelvisFrame.getX() > 0 ? maxForwardSpeed.getDoubleValue() : maxBackwardSpeed.getDoubleValue();
-      double turningScalar = 1.0 - MathTools.square(turningVelocity / maxTurningSpeed.getDoubleValue());
+      double alpha = Math.max(0.1, Math.abs(turningVelocity) / maxTurningSpeed.getDoubleValue());
+      double turningScalar = 1.0 - MathTools.square(alpha);
       double vx = goalDirectionX * xSpeedLimit * turningScalar;
       double vy = goalDirectionY * maxLateralSpeed.getValue() * turningScalar;
 
