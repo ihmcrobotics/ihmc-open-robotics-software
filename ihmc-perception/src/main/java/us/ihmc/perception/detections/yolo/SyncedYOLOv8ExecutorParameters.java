@@ -2,6 +2,7 @@ package us.ihmc.perception.detections.yolo;
 
 import perception_msgs.msg.dds.YOLOv8ExecutorParameters;
 import perception_msgs.msg.dds.YOLOv8ModelInfo;
+import us.ihmc.commons.thread.Throttler;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.crdt.CRDTBidirectionalString;
@@ -28,7 +29,7 @@ public class SyncedYOLOv8ExecutorParameters extends LatestTimestampModifiable
    private final ROS2Subscription<YOLOv8ExecutorParameters> subscription;
    private final TypedNotification<YOLOv8ExecutorParameters> newMessageNotification;
 
-   private boolean firstUpdate = true;
+   private final Throttler publishThrottler;
 
    public SyncedYOLOv8ExecutorParameters(ROS2Node ros2Node, CRDTInfo crdtInfo)
    {
@@ -44,7 +45,7 @@ public class SyncedYOLOv8ExecutorParameters extends LatestTimestampModifiable
       subscription = ros2Node.createSubscription2(PerceptionAPI.YOLO_PARAMETERS, newMessageNotification::set);
       publisher = ros2Node.createPublisher(PerceptionAPI.YOLO_PARAMETERS);
 
-      requestSendFullData();
+      publishThrottler = new Throttler().setFrequency(5.0);
    }
 
    public void checkModifiedAndUpdate()
@@ -54,13 +55,11 @@ public class SyncedYOLOv8ExecutorParameters extends LatestTimestampModifiable
       if (newMessageNotification.poll())
          fromMessage(newMessageNotification.read());
 
-      if (pollNeedSendFullData() || getModelParameters().pollNeedSendFullData() || firstUpdate)
+      if (publishThrottler.run() || pollNeedSendFullData() || getModelParameters().pollNeedSendFullData())
       {
          toMessage(message);
          publisher.publish(message);
       }
-
-      firstUpdate = false;
    }
 
    public synchronized void setAvailableModels(Collection<YOLOv8Model> models)
@@ -106,6 +105,10 @@ public class SyncedYOLOv8ExecutorParameters extends LatestTimestampModifiable
    private void fromMessage(YOLOv8ExecutorParameters message)
    {
       fromMessage(message.getLatestTimestampModifiable());
+
+      // If the message asks for full data, we don't want to take their data
+      if (message.getLatestTimestampModifiable().getFullDataNeeded())
+         return;
 
       availableModels.fromMessage(models ->
       {
