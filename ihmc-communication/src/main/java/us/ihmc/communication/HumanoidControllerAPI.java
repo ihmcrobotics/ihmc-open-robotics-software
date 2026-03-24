@@ -10,22 +10,31 @@ public final class HumanoidControllerAPI
    public static final String HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME = "kinematics_ihmc_controller";
    public static final String HUMANOID_CONTROL_MODULE_NAME = "humanoid_control";
 
-   public static final ROS2Topic<?> HUMANOID_CONTROLLER = ROS2Tools.IHMC_ROOT.withModule(HUMANOID_CONTROL_MODULE_NAME);
    public static final ROS2Topic<TextToSpeechPacket> TEXT_STATUS = ROS2Tools.IHMC_ROOT.withTypeName(TextToSpeechPacket.class);
+
+   public static ROS2Topic<?> getBaseTopic(String robotName)
+   {
+      return ControllerAPI.getBaseTopic(HUMANOID_CONTROL_MODULE_NAME, robotName);
+   }
 
    public static ROS2Topic<?> getOutputTopic(String robotName)
    {
-      return HUMANOID_CONTROLLER.withRobot(robotName).withOutput();
+      return getBaseTopic(robotName).withOutput();
    }
 
    public static ROS2Topic<?> getInputTopic(String robotName)
    {
-      return HUMANOID_CONTROLLER.withRobot(robotName).withInput();
+      return getBaseTopic(robotName).withInput();
    }
 
    /** Applies only for the humanoid controller. */
    public static <T> ROS2Topic<T> getTopic(Class<T> messageClass, String robotName)
    {
-      return ControllerAPI.getTopic(ControllerAPI.getBaseTopic(HUMANOID_CONTROL_MODULE_NAME, robotName), messageClass);
+      return ControllerAPI.getTopic(getBaseTopic(robotName), messageClass);
+   }
+
+   public static <T> ROS2Topic<T> getLowFrequencyTopic(Class<T> messageClass, String robotName)
+   {
+      return ControllerAPI.getLowFrequencyTopic(getBaseTopic(robotName), messageClass);
    }
 }
