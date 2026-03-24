@@ -5,7 +5,7 @@ import us.ihmc.affinity.Processor;
 import us.ihmc.avatar.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.factory.HumanoidRobotControlTask;
-import us.ihmc.avatar.logging.IntraprocessYoVariableLogger;
+import us.ihmc.avatar.logging.IntraprocessYoVariableLoggerOld;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.IKStreamingRTPluginFactory;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
@@ -773,8 +773,8 @@ public class AvatarMultiThreadingFactory
          //         builders.add(new RegistrySendBufferBuilder(jvmStatisticsGenerator.getYoRegistry(), null));
 
          // Logging locally on the robot
-         IntraprocessYoVariableLogger intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(builders,
-                                                                                                      masterRobotModel.getEstimatorDT(),
+         IntraprocessYoVariableLoggerOld intraprocessYoVariableLogger = new IntraprocessYoVariableLoggerOld(builders,
+                                                                                                            masterRobotModel.getEstimatorDT(),
                                                                                                       masterRobotModel.getSimpleRobotName().toLowerCase() + getClass().getSimpleName(), masterRobotModel.getLogModelProvider());
 
          if (intraprocessYoVariableLogger.create())

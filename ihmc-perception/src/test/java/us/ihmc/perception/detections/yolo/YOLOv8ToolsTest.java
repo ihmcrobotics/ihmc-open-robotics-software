@@ -1,5 +1,8 @@
 package us.ihmc.perception.detections.yolo;
 
+import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Size;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import us.ihmc.tools.IHMCCommonPaths;
@@ -83,5 +86,63 @@ public class YOLOv8ToolsTest
       // Getting class names file
       assertEquals(validClassNameFile.toURI().toURL(), YOLOv8Tools.getClassNamesFile(goodYoloModelDirectory.toURI().toURL()));
       assertThrows(IllegalArgumentException.class, () -> YOLOv8Tools.getClassNamesFile(badYoloModelDirectory.toURI().toURL()));
+   }
+
+   @Test
+   public void testResizeWithCropDownscaleCenterCrop()
+   {
+      Mat input = new Mat(100, 200, opencv_core.CV_8UC1);
+      Mat output = new Mat();
+
+      for (int y = 0; y < input.rows(); y++)
+      {
+         for (int x = 0; x < input.cols(); x++)
+            input.ptr(y, x).put((byte) x);
+      }
+
+      YOLOv8Tools.resizeWithCrop(input, output, new Size(100, 100));
+
+      assertEquals(100, output.cols());
+      assertEquals(100, output.rows());
+      assertEquals(50, getUnsignedByte(output, 50, 0));
+      assertEquals(100, getUnsignedByte(output, 50, 50));
+      assertEquals(149, getUnsignedByte(output, 50, 99));
+
+      input.close();
+      output.close();
+   }
+
+   @Test
+   public void testResizeWithCropUpscaleCenterCrop()
+   {
+      Mat input = new Mat(100, 50, opencv_core.CV_8UC1);
+      Mat output = new Mat();
+
+      for (int y = 0; y < input.rows(); y++)
+      {
+         for (int x = 0; x < input.cols(); x++)
+            input.ptr(y, x).put((byte) y);
+      }
+
+      YOLOv8Tools.resizeWithCrop(input, output, new Size(200, 200));
+
+      assertEquals(200, output.cols());
+      assertEquals(200, output.rows());
+
+      int topSample = getUnsignedByte(output, 0, 100);
+      int centerSample = getUnsignedByte(output, 100, 100);
+      int bottomSample = getUnsignedByte(output, 199, 100);
+
+      assertTrue(topSample < centerSample);
+      assertTrue(centerSample < bottomSample);
+      assertTrue(centerSample >= 49 && centerSample <= 51);
+
+      input.close();
+      output.close();
+   }
+
+   private static int getUnsignedByte(Mat mat, int row, int col)
+   {
+      return mat.ptr(row, col).get() & 0xFF;
    }
 }

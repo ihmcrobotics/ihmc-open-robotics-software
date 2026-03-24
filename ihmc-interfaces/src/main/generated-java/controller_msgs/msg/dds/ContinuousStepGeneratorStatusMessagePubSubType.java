@@ -15,7 +15,7 @@ public class ContinuousStepGeneratorStatusMessagePubSubType implements us.ihmc.p
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "866695640f461c37882c4b65734666d23122e0a9a91b74884f16fb16a84ac076";
+   		return "caccc80331694cf0767824e092cb3a54b86efad2942d3b6a12ef4e51254a0127";
    }
    
    @Override
@@ -163,7 +163,7 @@ public class ContinuousStepGeneratorStatusMessagePubSubType implements us.ihmc.p
    {
       cdr.write_type_7(data.getIsWalking());
 
-      cdr.write_type_7(data.getIsInUnitVelocities());
+      cdr.write_type_7(data.getAreVelocitiesNormalized());
 
       cdr.write_type_6(data.getCurrentForwardVelocity());
 
@@ -203,7 +203,7 @@ public class ContinuousStepGeneratorStatusMessagePubSubType implements us.ihmc.p
    {
       data.setIsWalking(cdr.read_type_7());
       	
-      data.setIsInUnitVelocities(cdr.read_type_7());
+      data.setAreVelocitiesNormalized(cdr.read_type_7());
       	
       data.setCurrentForwardVelocity(cdr.read_type_6());
       	
@@ -244,7 +244,7 @@ public class ContinuousStepGeneratorStatusMessagePubSubType implements us.ihmc.p
    public final void serialize(controller_msgs.msg.dds.ContinuousStepGeneratorStatusMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_7("is_walking", data.getIsWalking());
-      ser.write_type_7("is_in_unit_velocities", data.getIsInUnitVelocities());
+      ser.write_type_7("are_velocities_normalized", data.getAreVelocitiesNormalized());
       ser.write_type_6("current_forward_velocity", data.getCurrentForwardVelocity());
       ser.write_type_6("current_lateral_velocity", data.getCurrentLateralVelocity());
       ser.write_type_6("current_turn_velocity", data.getCurrentTurnVelocity());
@@ -267,7 +267,7 @@ public class ContinuousStepGeneratorStatusMessagePubSubType implements us.ihmc.p
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.ContinuousStepGeneratorStatusMessage data)
    {
       data.setIsWalking(ser.read_type_7("is_walking"));
-      data.setIsInUnitVelocities(ser.read_type_7("is_in_unit_velocities"));
+      data.setAreVelocitiesNormalized(ser.read_type_7("are_velocities_normalized"));
       data.setCurrentForwardVelocity(ser.read_type_6("current_forward_velocity"));
       data.setCurrentLateralVelocity(ser.read_type_6("current_lateral_velocity"));
       data.setCurrentTurnVelocity(ser.read_type_6("current_turn_velocity"));

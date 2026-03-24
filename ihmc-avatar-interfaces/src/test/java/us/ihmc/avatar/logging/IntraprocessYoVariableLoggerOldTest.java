@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 
-public class IntraprocessYoVariableLoggerTest
+public class IntraprocessYoVariableLoggerOldTest
 {
    public static final int TICKS = 10000;
 
@@ -33,7 +33,7 @@ public class IntraprocessYoVariableLoggerTest
       List<RegistrySendBufferBuilder> bufferBuilders = new ArrayList<>();
       bufferBuilders.add(new RegistrySendBufferBuilder(mainRegistry));
 
-      IntraprocessYoVariableLogger intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(bufferBuilders, dt, getClass().getSimpleName());
+      IntraprocessYoVariableLoggerOld intraprocessYoVariableLogger = new IntraprocessYoVariableLoggerOld(bufferBuilders, dt, getClass().getSimpleName());
       intraprocessYoVariableLogger.create();
 
       long logDurationTotal = 0;

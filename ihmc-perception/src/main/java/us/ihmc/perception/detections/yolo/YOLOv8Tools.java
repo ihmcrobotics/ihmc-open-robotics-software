@@ -8,7 +8,6 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
 import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Rect;
-import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_core.Size;
 import perception_msgs.msg.dds.YOLOv8ModelInfo;
 import us.ihmc.commons.MathTools;
@@ -143,6 +142,27 @@ public class YOLOv8Tools
       return centroid;
    }
 
+   public static void resizeWithCrop(Mat inputImage, Mat outputImage, Size desiredSize)
+   {
+      Mat resizedMat = new Mat();
+
+      int desiredWidth = desiredSize.width();
+      int desiredHeight = desiredSize.height();
+      double scaleFactor = Math.max((double) desiredWidth / inputImage.cols(), (double) desiredHeight / inputImage.rows());
+
+      // Use explicit target dimensions so the resized image always fully covers desiredSize
+      int resizedWidth = (int) Math.ceil(inputImage.cols() * scaleFactor);
+      int resizedHeight = (int) Math.ceil(inputImage.rows() * scaleFactor);
+      opencv_imgproc.resize(inputImage, resizedMat, new Size(resizedWidth, resizedHeight), 0.0, 0.0, opencv_imgproc.INTER_LINEAR);
+
+      int horizontalCrop = Math.max(resizedWidth - desiredWidth, 0) / 2;
+      int verticalCrop = Math.max(resizedHeight - desiredHeight, 0) / 2;
+
+      Rect roi = new Rect(horizontalCrop, verticalCrop, desiredWidth, desiredHeight);
+      resizedMat.apply(roi).copyTo(outputImage);
+      resizedMat.close();
+   }
+
    /**
     * Annotates the {@code inputImage} using the {@code detections} and puts the result in {@code annotatedImage}.
     *
@@ -186,26 +206,12 @@ public class YOLOv8Tools
          RawImage mask = detection.getObjectMask();
          Mat maskMat = mask.getCpuImageMat();
 
-         // Account for aspect ratio by scaling to match annotatedImage width
-         Size scaleSize = annotatedImage.rows() > maskMat.rows() ?
-               new Size(annotatedImage.cols(), maskMat.rows() * annotatedImage.cols() / maskMat.cols()) :
-               new Size(maskMat.cols() * annotatedImage.rows() / maskMat.rows(), annotatedImage.rows());
-         Mat scaledMask = new Mat(scaleSize, maskMat.type());
-         opencv_imgproc.resize(maskMat, scaledMask, scaleSize);
-         Scalar scalar = new Scalar(0);
-         Mat paddedMask = new Mat(annotatedImage.rows(), annotatedImage.cols(), maskMat.type(), scalar);
-         Rect roi = annotatedImage.rows() > maskMat.rows() ?
-               new Rect(0, (annotatedImage.rows() - scaledMask.rows()) / 2, scaledMask.cols(), scaledMask.rows()) :
-               new Rect((annotatedImage.cols() - scaledMask.cols()) / 2, 0, scaledMask.cols(), scaledMask.rows());
-         Mat paddedMaskCenter = new Mat(paddedMask, roi);
-         scaledMask.copyTo(paddedMaskCenter);
-         scaleSize.close();
-         paddedMaskCenter.close();
-         scalar.close();
-         roi.close();
+         // Scaling to match annotatedImage and crop away the letter box lines added to the mask during YOLO processing to match aspect ratio
+         Mat resizedMask = new Mat();
+         resizeWithCrop(maskMat, resizedMask, annotatedImage.size());
 
-         opencv_core.add(annotatedImage, greenMat, annotatedImage, paddedMask, -1);
-         paddedMask.close();
+         opencv_core.add(annotatedImage, greenMat, annotatedImage, resizedMask, -1);
+         resizedMask.close();
 
          boundingBox.close();
          textBox.close();
@@ -248,30 +254,16 @@ public class YOLOv8Tools
          RawImage mask = detection.getObjectMask();
          Mat maskMat = mask.getCpuImageMat();
 
-         // Account for aspect ratio by scaling to match annotatedImage width
-         Size scaleSize = annotatedImage.rows() > maskMat.rows() ?
-               new Size(annotatedImage.cols(), maskMat.rows() * annotatedImage.cols() / maskMat.cols()) :
-               new Size(maskMat.cols() * annotatedImage.rows() / maskMat.rows(), annotatedImage.rows());
-         Mat scaledMask = new Mat(scaleSize, maskMat.type());
-         opencv_imgproc.resize(maskMat, scaledMask, scaleSize);
-         Scalar scalar = new Scalar(0);
-         Mat paddedMask = new Mat(annotatedImage.rows(), annotatedImage.cols(), maskMat.type(), scalar);
-         Rect roi = annotatedImage.rows() > maskMat.rows() ?
-               new Rect(0, (annotatedImage.rows() - scaledMask.rows()) / 2, scaledMask.cols(), scaledMask.rows()) :
-               new Rect((annotatedImage.cols() - scaledMask.cols()) / 2, 0, scaledMask.cols(), scaledMask.rows());
-         Mat paddedMaskCenter = new Mat(paddedMask, roi);
-         scaledMask.copyTo(paddedMaskCenter);
-         scaleSize.close();
-         paddedMaskCenter.close();
-         scalar.close();
-         roi.close();
+         // Scaling to match annotatedImage and crop away the letter box lines added to the mask during YOLO processing to match aspect ratio
+         Mat resizedMask = new Mat();
+         resizeWithCrop(maskMat, resizedMask, annotatedImage.size());
 
          MatVector contours = new MatVector();
          Mat hierarchy = new Mat();
-         opencv_imgproc.findContours(paddedMask, contours, hierarchy, opencv_imgproc.RETR_TREE, opencv_imgproc.CHAIN_APPROX_SIMPLE);
+         opencv_imgproc.findContours(resizedMask, contours, hierarchy, opencv_imgproc.RETR_TREE, opencv_imgproc.CHAIN_APPROX_SIMPLE);
          opencv_imgproc.drawContours(annotatedImage, contours, -1, GREEN, 4, LINE_TYPE, hierarchy, Integer.MAX_VALUE, new Point());
 
-         paddedMask.close();
+         resizedMask.close();
       }
    }
 

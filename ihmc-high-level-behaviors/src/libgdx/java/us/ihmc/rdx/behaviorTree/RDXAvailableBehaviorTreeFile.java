@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.WorkspaceResourceFile;
 
+import java.nio.file.Files;
+
 public class RDXAvailableBehaviorTreeFile
 {
    private final WorkspaceResourceFile treeFile;
@@ -14,7 +16,8 @@ public class RDXAvailableBehaviorTreeFile
    {
       this.treeFile = treeFile;
 
-      JSONFileTools.load(treeFile.getFilesystemFile(), this::loadFromFile);
+      if (treeFile.getFilesystemFile() != null && Files.exists(treeFile.getFilesystemFile()))
+         JSONFileTools.load(treeFile.getFilesystemFile(), this::loadFromFile);
    }
 
    private void loadFromFile(JsonNode jsonNode)

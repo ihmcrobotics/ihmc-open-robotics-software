@@ -42,7 +42,7 @@ public class StepGeneratorCommandInputManager implements Updatable
    private final YoVector2D desiredVelocity;
    private final YoDouble turningVelocity;
    private final YoDouble swingHeight;
-   private final YoBoolean isUnitVelocities;
+   private final YoBoolean areVelocitiesNormalized;
    private final YoBoolean overrideHeartbeat;
    private HighLevelControllerName currentController;
 
@@ -71,8 +71,8 @@ public class StepGeneratorCommandInputManager implements Updatable
       desiredVelocity = new YoVector2D("desiredVelocity_" + suffix, registry);
       turningVelocity = new YoDouble("desiredTurningVelocity_" + suffix, registry);
       swingHeight = new YoDouble("desiredSwingHeight_" + suffix, registry);
-      isUnitVelocities = new YoBoolean("isUnitVelocities_" + suffix, registry);
-      isUnitVelocities.set(false);
+      areVelocitiesNormalized = new YoBoolean("areVelocitiesNormalized_" + suffix, registry);
+      areVelocitiesNormalized.set(true);
       overrideHeartbeat = new YoBoolean("overrideHeartbeat_" + suffix, registry);
       overrideHeartbeat.set(false);
 
@@ -158,7 +158,7 @@ public class StepGeneratorCommandInputManager implements Updatable
    @Override
    public void update(double time)
    {
-      isOpen = currentController == HighLevelControllerName.WALKING || currentController == HighLevelControllerName.QUICKSTER || currentController == HighLevelControllerName.RL_CONTROL;
+      isOpen = true;
       commandInputManager.setEnabled(isOpen);
 
       if (!overrideHeartbeat.getValue() && !heartbeatMonitor.isAlive())
@@ -166,7 +166,7 @@ public class StepGeneratorCommandInputManager implements Updatable
          desiredVelocity.setX(0.0);
          desiredVelocity.setY(0.0);
          turningVelocity.set(0.0);
-         isUnitVelocities.set(false);
+         areVelocitiesNormalized.set(true);
          walk.set(false);
       }
       else if (commandInputManager.isNewCommandAvailable(ContinuousStepGeneratorInputCommand.class))
@@ -174,9 +174,9 @@ public class StepGeneratorCommandInputManager implements Updatable
          ContinuousStepGeneratorInputCommand command = commandInputManager.pollNewestCommand(ContinuousStepGeneratorInputCommand.class);
          desiredVelocity.setX(command.getForwardVelocity());
          desiredVelocity.setY(command.getLateralVelocity());
-         turningVelocity.set(command.getTurnVelocity());
-         isUnitVelocities.set(command.isUnitVelocities());
-         walk.set(command.isWalk());
+         turningVelocity.set(command.getTurnVelocity());https://github.com/ihmcrobotics/ihmc-crocoddyl-wrapper/pull/434
+         areVelocitiesNormalized.set(command.getAreVelocitiesNormalized());
+         walk.set(command.getWalk());
       }
       else if (commandInputManager.isNewCommandAvailable(ControllerWaypointGoalCommand.class))
       {
@@ -273,9 +273,9 @@ public class StepGeneratorCommandInputManager implements Updatable
          }
 
          @Override
-         public boolean isUnitVelocity()
+         public boolean areVelocitiesNormalized()
          {
-            return isUnitVelocities.getBooleanValue();
+            return areVelocitiesNormalized.getBooleanValue();
          }
       };
    }
@@ -291,9 +291,9 @@ public class StepGeneratorCommandInputManager implements Updatable
          }
 
          @Override
-         public boolean isUnitVelocity()
+         public boolean areVelocitiesNormalized()
          {
-            return isUnitVelocities.getBooleanValue();
+            return areVelocitiesNormalized.getBooleanValue();
          }
       };
    }

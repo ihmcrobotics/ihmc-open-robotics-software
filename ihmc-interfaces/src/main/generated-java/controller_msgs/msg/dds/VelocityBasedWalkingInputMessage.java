@@ -7,9 +7,10 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * Input message for the ContinuousStepGenerator.
+       * Message responsible for sending desired velocity setpoints (forward, lateral, and turning) to walking
+       * controllers that take this form of input
        */
-public class ContinuousStepGeneratorInputMessage extends Packet<ContinuousStepGeneratorInputMessage> implements Settable<ContinuousStepGeneratorInputMessage>, EpsilonComparable<ContinuousStepGeneratorInputMessage>
+public class VelocityBasedWalkingInputMessage extends Packet<VelocityBasedWalkingInputMessage> implements Settable<VelocityBasedWalkingInputMessage>, EpsilonComparable<VelocityBasedWalkingInputMessage>
 {
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -31,17 +32,17 @@ public class ContinuousStepGeneratorInputMessage extends Packet<ContinuousStepGe
             */
    public boolean are_velocities_normalized_;
 
-   public ContinuousStepGeneratorInputMessage()
+   public VelocityBasedWalkingInputMessage()
    {
    }
 
-   public ContinuousStepGeneratorInputMessage(ContinuousStepGeneratorInputMessage other)
+   public VelocityBasedWalkingInputMessage(VelocityBasedWalkingInputMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(ContinuousStepGeneratorInputMessage other)
+   public void set(VelocityBasedWalkingInputMessage other)
    {
       sequence_id_ = other.sequence_id_;
 
@@ -138,19 +139,19 @@ public class ContinuousStepGeneratorInputMessage extends Packet<ContinuousStepGe
    }
 
 
-   public static Supplier<ContinuousStepGeneratorInputMessagePubSubType> getPubSubType()
+   public static Supplier<VelocityBasedWalkingInputMessagePubSubType> getPubSubType()
    {
-      return ContinuousStepGeneratorInputMessagePubSubType::new;
+      return VelocityBasedWalkingInputMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return ContinuousStepGeneratorInputMessagePubSubType::new;
+      return VelocityBasedWalkingInputMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(ContinuousStepGeneratorInputMessage other, double epsilon)
+   public boolean epsilonEquals(VelocityBasedWalkingInputMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -176,9 +177,9 @@ public class ContinuousStepGeneratorInputMessage extends Packet<ContinuousStepGe
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof ContinuousStepGeneratorInputMessage)) return false;
+      if(!(other instanceof VelocityBasedWalkingInputMessage)) return false;
 
-      ContinuousStepGeneratorInputMessage otherMyClass = (ContinuousStepGeneratorInputMessage) other;
+      VelocityBasedWalkingInputMessage otherMyClass = (VelocityBasedWalkingInputMessage) other;
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
@@ -201,7 +202,7 @@ public class ContinuousStepGeneratorInputMessage extends Packet<ContinuousStepGe
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("ContinuousStepGeneratorInputMessage {");
+      builder.append("VelocityBasedWalkingInputMessage {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("walk=");

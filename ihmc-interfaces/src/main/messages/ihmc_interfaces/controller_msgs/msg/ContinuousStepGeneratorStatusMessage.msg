@@ -1,7 +1,7 @@
 # Current status of various CSG parameters
 
 bool is_walking
-bool is_in_unit_velocities
+bool are_velocities_normalized
 
 float64 current_forward_velocity
 float64 current_lateral_velocity

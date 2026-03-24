@@ -347,12 +347,7 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
       double minMaxVelocityY = maxStepWidth / stepTime.getValue();
       double minMaxVelocityTurn = (turnMaxAngleOutward - turnMaxAngleInward) / stepTime.getValue();
 
-      if (desiredVelocityProvider.isUnitVelocity())
-      {
-         desiredVelocityX = MathTools.clamp(desiredVelocityX, minVelocityX, maxVelocityX);
-         desiredVelocityY = MathTools.clamp(desiredVelocityY, minMaxVelocityY);
-      }
-      else
+      if (desiredVelocityProvider.areVelocitiesNormalized())
       {
          if (desiredVelocityX >= 0.0)
             desiredVelocityX = maxVelocityX * MathTools.clamp(desiredVelocityX, 1.0);
@@ -361,8 +356,13 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
 
          desiredVelocityY = minMaxVelocityY * MathTools.clamp(desiredVelocityY, 1.0);
       }
+      else
+      {
+         desiredVelocityX = MathTools.clamp(desiredVelocityX, minVelocityX, maxVelocityX);
+         desiredVelocityY = MathTools.clamp(desiredVelocityY, minMaxVelocityY);
+      }
 
-      if (desiredTurningVelocityProvider.isUnitVelocity())
+      if (desiredTurningVelocityProvider.areVelocitiesNormalized())
          turningVelocity = MathTools.clamp(turningVelocity, minMaxVelocityTurn);
       else
          turningVelocity = minMaxVelocityTurn * MathTools.clamp(turningVelocity, 1.0);
@@ -542,7 +542,7 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    {
       // Some general CSG params
       csgStatusMessage.setIsWalking(isWalking.getBooleanValue());
-      csgStatusMessage.setIsInUnitVelocities(desiredVelocityProvider.isUnitVelocity());
+      csgStatusMessage.setAreVelocitiesNormalized(desiredVelocityProvider.areVelocitiesNormalized());
 
       // Current walking speed values (in velocity units)
       csgStatusMessage.setCurrentForwardVelocity(desiredVelocity.getX());
