@@ -211,15 +211,15 @@ public record YOLOv8AnnotationRecord(String objectClass, float confidence, Bound
       RawImage maskImage = detection.mask();
       Mat mask = maskImage.getCpuImageMat();
 
-      Mat paddedMask = new Mat(detectionImageSize, mask.type());
-      YOLOv8Tools.fixMaskAspectRatio(mask, paddedMask);
+      Mat resizedMask = new Mat();
+      YOLOv8Tools.resizeWithCrop(mask, resizedMask, detectionImageSize);
 
       YOLOv8AnnotationRecord record = new YOLOv8AnnotationRecord(detection.objectClass(),
                                                                  detection.confidence(),
                                                                  detection.boundingBox(),
-                                                                 YOLOv8Tools.getMaskAsPolygons(paddedMask, precision));
+                                                                 YOLOv8Tools.getMaskAsPolygons(resizedMask, precision));
 
-      paddedMask.close();
+      resizedMask.close();
       maskImage.release();
 
       return record;
@@ -231,15 +231,15 @@ public record YOLOv8AnnotationRecord(String objectClass, float confidence, Bound
       RawImage colorImage = detection.getColorImage().get();
       Mat mask = maskImage.getCpuImageMat();
 
-      Mat paddedMask = new Mat(colorImage.getCpuImageMat().size(), mask.type());
-      YOLOv8Tools.fixMaskAspectRatio(mask, paddedMask);
+      Mat resizedMask = new Mat();
+      YOLOv8Tools.resizeWithCrop(mask, resizedMask, colorImage.getCpuImageMat().size());
 
       YOLOv8AnnotationRecord record = new YOLOv8AnnotationRecord(detection.getDetectedObjectClass(),
                                                                  (float) detection.getConfidence(),
                                                                  detection.getBoundingBox(),
-                                                                 YOLOv8Tools.getMaskAsPolygons(paddedMask, precision));
+                                                                 YOLOv8Tools.getMaskAsPolygons(resizedMask, precision));
 
-      paddedMask.close();
+      resizedMask.close();
       colorImage.release();
       maskImage.release();
 
