@@ -66,6 +66,11 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
    private IsaacROSFoundationPoseCommunicatorMap foundationPose;
    private TerrainMapData terrainMapData;
 
+   public void setImageSensor(ImageSensor imageSensor)
+   {
+      this.imageSensor = imageSensor;
+   }
+
    public void initialize(BehaviorTreeExecutor tree,
                           WorkspaceResourceDirectory saveFileDirectory,
                           ROS2ControllerHelper ros2ControllerHelper,

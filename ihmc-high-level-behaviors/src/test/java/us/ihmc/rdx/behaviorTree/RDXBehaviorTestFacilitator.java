@@ -14,6 +14,7 @@ import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulation;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTree;
 import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeExecutor;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeExecutorNodeBuilder;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
@@ -51,22 +52,32 @@ import us.ihmc.scs2.simulation.collision.CollidableHelper;
 import us.ihmc.sensors.zed.ZEDImageSensor;
 import us.ihmc.sensors.zed.ZEDModelData;
 import us.ihmc.sensors.zed.ZEDSVOPlaybackSensor;
+import us.ihmc.sensors.ImageSensor;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.zed.global.zed;
 import us.ihmc.zed.library.ZEDJavaAPINativeLibrary;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /** Includes RDX UI, RDX operated kinematics sim, SVO playback, no physics. */
 public class RDXBehaviorTestFacilitator
 {
    /** Disable perception if CUDA 12.9.1 is not installed or not working */
    private final boolean runPerception = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() && CUDATools.hasNVJPEG() && ZEDJavaAPINativeLibrary.load();
-   private final String svoFile;
+   private static final Path DOWNLOADS_DIRECTORY = Paths.get(System.getProperty("user.home"), "Downloads");
    private final Supplier<DRCRobotModel> robotModelBuilder;
    private final TriFunction<DRCRobotModel, ROS2NodeBuilder, RigidBodyTransformReadOnly, HumanoidKinematicsSimulation> kinematicsSimulationBuilder;
    private final Supplier<RDXBaseUI> baseUIBuilder;
@@ -77,7 +88,17 @@ public class RDXBehaviorTestFacilitator
    private HumanoidKinematicsSimulation kinematicsSimulation;
    private final Notification robotReady = new Notification();
 
+   private final Object zedSensorLock = new Object();
+   private final Object svoFileListLock = new Object();
+   private final List<Path> availableSvoFiles = new ArrayList<>();
+   private String[] availableSvoFileNames = new String[0];
+   private volatile String requestedSvoFile;
+   private volatile String activeSvoFile;
+   private volatile boolean zedPlaybackEnabled;
+
    private ZEDSVOPlaybackSensor zedSensor;
+   private RepeatingTaskThread yoloThread;
+   private ROS2SyncedRobotModel behaviorTreeSyncedRobot;
 
    private ROS2BehaviorTreeExecutor behaviorTree;
    private Function<ROS2BehaviorTreeExecutor, Notification> behaviorTreeAccessorOneTime = null;
@@ -92,7 +113,6 @@ public class RDXBehaviorTestFacilitator
    private final ROS2ControllerHelper ros2ControllerHelper;
 
    public RDXBehaviorTestFacilitator(
-         String svoFile,
          String robotName,
          Supplier<DRCRobotModel> robotModelBuilder,
          TriFunction<DRCRobotModel, ROS2NodeBuilder, RigidBodyTransformReadOnly, HumanoidKinematicsSimulation> kinematicsSimulationBuilder,
@@ -101,12 +121,15 @@ public class RDXBehaviorTestFacilitator
          Function<DRCRobotModel, RobotCollisionModel> selectionCollisionModelBuilder
    )
    {
-      this.svoFile = svoFile;
       this.robotModelBuilder = robotModelBuilder;
       this.kinematicsSimulationBuilder = kinematicsSimulationBuilder;
       this.baseUIBuilder = baseUIBuilder;
       this.treeFilesDirectory = treeFilesDirectory;
       this.selectionCollisionModelBuilder = selectionCollisionModelBuilder;
+
+      refreshSvoFiles();
+      if (!availableSvoFiles.isEmpty())
+         requestedSvoFile = availableSvoFiles.get(0).toString();
 
       ros2NodeBuilder = () ->
       {
@@ -152,14 +175,25 @@ public class RDXBehaviorTestFacilitator
       ROS2ControllerHelper ros2 = new ROS2ControllerHelper(ros2Node, robotModel.getSimpleRobotName());
       ROS2SyncedRobotModel syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
       ROS2PeerClockOffsetEstimator peerClockEstimator = new ROS2PeerClockOffsetEstimator(ros2Node);
+      behaviorTreeSyncedRobot = syncedRobot;
 
       IsaacROSFoundationPoseCommunicatorMap foundationPose;
       YOLOv8DetectionExecutor yolo;
       if (runPerception)
       {
-         zedSensor = new ZEDSVOPlaybackSensor(0, ZEDModelData.ZED_2I, zed.SL_DEPTH_MODE_NEURAL_LIGHT, svoFile);
-         zedSensor.setSensorFrame(syncedRobot.getReferenceFrames().getExperimentalCameraFrame());
-         zedSensor.startSensor();
+         String initialSvoFile = requestedSvoFile;
+         if (initialSvoFile != null)
+         {
+            try
+            {
+               zedSensor = createZedSensor(initialSvoFile);
+               activeSvoFile = initialSvoFile;
+            }
+            catch (Exception e)
+            {
+               LogTools.error("Failed to open initial SVO file: {}", initialSvoFile, e);
+            }
+         }
 
          foundationPose = new IsaacROSFoundationPoseCommunicatorMap(peerClockEstimator);
 
@@ -175,37 +209,58 @@ public class RDXBehaviorTestFacilitator
 
       behaviorTree = new ROS2BehaviorTreeExecutor(ros2, syncedRobot, kinematicsSimulationBuilder, zedSensor, yolo, foundationPose, null, peerClockEstimator);
 
-      RepeatingTaskThread yoloThread = new RepeatingTaskThread("yolo", () ->
-      {
-         try
-         {
-            zedSensor.waitForGrab();
-            RawImage colorImage = zedSensor.getImage(ZEDImageSensor.LEFT_COLOR_IMAGE_KEY);
-            RawImage depthImage = zedSensor.getImage(ZEDImageSensor.DEPTH_IMAGE_KEY);
-            if (colorImage.getPixelFormat() != PixelFormat.BGR8)
-            {
-               GpuMat bgrMat = new GpuMat();
-               colorImage.getPixelFormat().convertToPixelFormat(colorImage.getGpuImageMat(), bgrMat, PixelFormat.BGR8);
-               colorImage.release();
-               colorImage = colorImage.replaceImage(bgrMat, PixelFormat.BGR8);
-            }
-            yolo.runModel(colorImage, depthImage);
-            foundationPose.updateCommunicators();
-            if (pointCloudVisualizer != null)
-            {
-               pointCloudVisualizer.setColorImage(colorImage);
-               pointCloudVisualizer.setDepthImage(depthImage);
-            }
-            colorImage.release();
-            depthImage.release();
-         } catch (InterruptedException ignored) {}
-      });
       if (yolo != null)
+      {
+         yoloThread = new RepeatingTaskThread("yolo", () ->
+         {
+            try
+            {
+               ZEDSVOPlaybackSensor localZedSensor = getZedSensorSnapshot();
+               if (localZedSensor == null)
+               {
+                  ThreadTools.park(0.1);
+                  return;
+               }
+               localZedSensor.waitForGrab();
+               RawImage colorImage = localZedSensor.getImage(ZEDImageSensor.LEFT_COLOR_IMAGE_KEY);
+               RawImage depthImage = localZedSensor.getImage(ZEDImageSensor.DEPTH_IMAGE_KEY);
+               if (colorImage == null || depthImage == null)
+               {
+                  if (colorImage != null)
+                     colorImage.release();
+                  if (depthImage != null)
+                     depthImage.release();
+                  return;
+               }
+               if (colorImage.getPixelFormat() != PixelFormat.BGR8)
+               {
+                  GpuMat bgrMat = new GpuMat();
+                  colorImage.getPixelFormat().convertToPixelFormat(colorImage.getGpuImageMat(), bgrMat, PixelFormat.BGR8);
+                  colorImage.release();
+                  colorImage = colorImage.replaceImage(bgrMat, PixelFormat.BGR8);
+               }
+               yolo.runModel(colorImage, depthImage);
+               foundationPose.updateCommunicators();
+               if (pointCloudVisualizer != null)
+               {
+                  pointCloudVisualizer.setColorImage(colorImage);
+                  pointCloudVisualizer.setDepthImage(depthImage);
+               }
+               colorImage.release();
+               depthImage.release();
+            } catch (InterruptedException ignored) {}
+         });
          yoloThread.startRepeating();
+      }
+      else
+      {
+         yoloThread = null;
+      }
 
       RepeatingTaskThread thread = new RepeatingTaskThread("behavior_tree", () ->
       {
          syncedRobot.update();
+         performPendingSvoSwitchIfRequested();
 
          if (behaviorTreeAccessorOneTime != null)
          {
@@ -236,8 +291,7 @@ public class RDXBehaviorTestFacilitator
                yoloThread.interrupt();
                yolo.destroy();
             }
-            if (zedSensor != null)
-               zedSensor.close();
+            closeZedSensor();
             kinematicsSimulation.destroy();
             thread.blockingKill();
             ros2Node.destroy();
@@ -249,6 +303,199 @@ public class RDXBehaviorTestFacilitator
             e.printStackTrace();
          }
       };
+   }
+
+   private void performPendingSvoSwitchIfRequested()
+   {
+      if (!runPerception)
+         return;
+
+      String requested = requestedSvoFile;
+      if (requested == null)
+         return;
+
+      if (requested.equals(activeSvoFile))
+      {
+         requestedSvoFile = null;
+         return;
+      }
+
+      if (!Files.exists(Paths.get(requested)))
+      {
+         LogTools.error("Requested SVO file does not exist: {}", requested);
+         requestedSvoFile = null;
+         return;
+      }
+
+      switchZedSensor(requested);
+      requestedSvoFile = null;
+   }
+
+   private boolean switchZedSensor(String newSvoFile)
+   {
+      LogTools.info("Switching ZED SVO to {}", newSvoFile);
+      if (yoloThread != null)
+         yoloThread.interrupt();
+
+      closeZedSensor();
+
+      ZEDSVOPlaybackSensor newSensor;
+      try
+      {
+         newSensor = createZedSensor(newSvoFile);
+      }
+      catch (Exception e)
+      {
+         LogTools.error("Failed to open SVO file: {}", newSvoFile, e);
+         return false;
+      }
+
+      synchronized (zedSensorLock)
+      {
+         zedSensor = newSensor;
+      }
+      activeSvoFile = newSvoFile;
+      updateBehaviorTreeImageSensor(newSensor);
+      return true;
+   }
+
+   private void updateBehaviorTreeImageSensor(ImageSensor newSensor)
+   {
+      if (behaviorTree == null)
+         return;
+
+      if (behaviorTree.getRootNode() != null)
+         behaviorTree.getRootNode().getScene().setImageSensor(newSensor);
+
+      if (behaviorTree.getNodeBuilder() instanceof BehaviorTreeExecutorNodeBuilder nodeBuilder)
+         nodeBuilder.setImageSensor(newSensor);
+   }
+
+   private ZEDSVOPlaybackSensor createZedSensor(String svoFile)
+   {
+      ZEDSVOPlaybackSensor newSensor = new ZEDSVOPlaybackSensor(0, ZEDModelData.ZED_X_MINI, zed.SL_DEPTH_MODE_NEURAL_LIGHT, svoFile);
+      if (behaviorTreeSyncedRobot != null)
+         newSensor.setSensorFrame(behaviorTreeSyncedRobot.getReferenceFrames().getExperimentalCameraFrame());
+      newSensor.startSensor();
+      if (zedPlaybackEnabled)
+         newSensor.play();
+      return newSensor;
+   }
+
+   private void closeZedSensor()
+   {
+      ZEDSVOPlaybackSensor toClose;
+      synchronized (zedSensorLock)
+      {
+         toClose = zedSensor;
+         zedSensor = null;
+      }
+      activeSvoFile = null;
+      updateBehaviorTreeImageSensor(null);
+      if (toClose != null)
+         toClose.close();
+   }
+
+   private ZEDSVOPlaybackSensor getZedSensorSnapshot()
+   {
+      synchronized (zedSensorLock)
+      {
+         return zedSensor;
+      }
+   }
+
+   private void requestSvoSwitch(String newSvoFile)
+   {
+      if (newSvoFile == null || newSvoFile.isBlank())
+         return;
+
+      requestedSvoFile = newSvoFile;
+   }
+
+   private void refreshSvoFiles()
+   {
+      List<Path> files = findSvoFilesInDownloads();
+      synchronized (svoFileListLock)
+      {
+         availableSvoFiles.clear();
+         availableSvoFiles.addAll(files);
+         availableSvoFileNames = files.stream()
+                                      .map(path -> path.getFileName().toString())
+                                      .toArray(String[]::new);
+      }
+   }
+
+   private List<Path> findSvoFilesInDownloads()
+   {
+      if (!Files.isDirectory(DOWNLOADS_DIRECTORY))
+         return Collections.emptyList();
+
+      try (java.util.stream.Stream<Path> stream = Files.list(DOWNLOADS_DIRECTORY))
+      {
+         return stream.filter(Files::isRegularFile)
+                      .filter(path -> path.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(".svo2"))
+                      .sorted(Comparator.comparing(path -> path.getFileName().toString().toLowerCase(Locale.ROOT)))
+                      .collect(Collectors.toList());
+      }
+      catch (Exception e)
+      {
+         LogTools.error("Failed to list .svo2 files in {}", DOWNLOADS_DIRECTORY, e);
+         return Collections.emptyList();
+      }
+   }
+
+   private String[] getAvailableSvoFileNamesSnapshot()
+   {
+      synchronized (svoFileListLock)
+      {
+         return availableSvoFileNames.clone();
+      }
+   }
+
+   private Path getAvailableSvoFileAt(int index)
+   {
+      synchronized (svoFileListLock)
+      {
+         if (index < 0 || index >= availableSvoFiles.size())
+            return null;
+         return availableSvoFiles.get(index);
+      }
+   }
+
+   private void syncSelectedSvoIndex(ImInt selectedSvoIndex)
+   {
+      String target = activeSvoFile != null ? activeSvoFile : requestedSvoFile;
+      if (target != null)
+      {
+         int index = getIndexForSvoFile(target);
+         if (index >= 0)
+         {
+            selectedSvoIndex.set(index);
+            return;
+         }
+      }
+
+      if (availableSvoFileNames.length == 0)
+      {
+         selectedSvoIndex.set(-1);
+         return;
+      }
+
+      if (selectedSvoIndex.get() < 0 || selectedSvoIndex.get() >= availableSvoFileNames.length)
+         selectedSvoIndex.set(0);
+   }
+
+   private int getIndexForSvoFile(String filePath)
+   {
+      synchronized (svoFileListLock)
+      {
+         for (int i = 0; i < availableSvoFiles.size(); i++)
+         {
+            if (availableSvoFiles.get(i).toString().equals(filePath))
+               return i;
+         }
+      }
+      return -1;
    }
 
    private void launchRDXUI()
@@ -293,6 +540,8 @@ public class RDXBehaviorTestFacilitator
 
             ImBoolean play = new ImBoolean(false);
             ImInt requestedPosition = new ImInt();
+            ImInt selectedSvoIndex = new ImInt(-1);
+            Throttler svoFileRefreshThrottler = new Throttler().setFrequency(1.0);
             ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
             baseUI.getImGuiPanelManager().addPanel("Facilitator", () ->
             {
@@ -303,28 +552,74 @@ public class RDXBehaviorTestFacilitator
                   startSimulation();
                }
                ImGui.endDisabled();
-               if (zedSensor != null)
+               if (svoFileRefreshThrottler.run())
+                  refreshSvoFiles();
+
+               if (!runPerception)
                {
-                  ImGui.sameLine();
-                  if (ImGui.checkbox(labels.get("ZED Playback"), play) && zedSensor != null)
+                  ImGui.text("Perception disabled (CUDA/ZED not available).");
+                  return;
+               }
+
+               String[] availableSvoNames = getAvailableSvoFileNamesSnapshot();
+               syncSelectedSvoIndex(selectedSvoIndex);
+               if (availableSvoNames.length == 0)
+               {
+                  ImGui.text("No .svo2 files found in Downloads.");
+               }
+               else
+               {
+                  if (ImGui.combo(labels.get("SVO File"), selectedSvoIndex, availableSvoNames))
                   {
-                     if (play.get())
-                        zedSensor.play();
-                     else
-                        zedSensor.pause();
+                     Path selectedPath = getAvailableSvoFileAt(selectedSvoIndex.get());
+                     if (selectedPath != null)
+                     {
+                        requestSvoSwitch(selectedPath.toString());
+                        requestedPosition.set(0);
+                     }
                   }
-                  ImGui.beginDisabled(play.get());
-                  int currentPosition = zedSensor.getCurrentPosition();
-                  int zedLength = zedSensor.getLength();
+                  Path selectedPath = getAvailableSvoFileAt(selectedSvoIndex.get());
+                  if (selectedPath != null && ImGui.isItemHovered())
+                     ImGui.setTooltip(selectedPath.toString());
+               }
+
+               String activeSvoSnapshot = activeSvoFile;
+               if (activeSvoSnapshot != null)
+                  ImGui.text("Active: " + Paths.get(activeSvoSnapshot).getFileName());
+
+               String pendingSvoSnapshot = requestedSvoFile;
+               if (pendingSvoSnapshot != null && !pendingSvoSnapshot.equals(activeSvoSnapshot))
+                  ImGui.text("Pending: " + Paths.get(pendingSvoSnapshot).getFileName());
+
+               ZEDSVOPlaybackSensor localZedSensor = getZedSensorSnapshot();
+               ImGui.beginDisabled(localZedSensor == null);
+               play.set(zedPlaybackEnabled);
+               if (ImGui.checkbox(labels.get("ZED Playback"), play))
+               {
+                  zedPlaybackEnabled = play.get();
+                  if (localZedSensor != null)
+                  {
+                     if (zedPlaybackEnabled)
+                        localZedSensor.play();
+                     else
+                        localZedSensor.pause();
+                  }
+               }
+               ImGui.beginDisabled(play.get());
+               if (localZedSensor != null)
+               {
+                  int currentPosition = localZedSensor.getCurrentPosition();
+                  int zedLength = localZedSensor.getLength();
                   if (play.get())
                      requestedPosition.set(currentPosition);
                   if (ImGuiTools.sliderInt(labels.get("Position"), requestedPosition, 0, Math.max(zedLength, 0)))
                   {
-                     zedSensor.setCurrentPosition(requestedPosition.get() + zedSensor.getFps());
-                     zedSensor.grabAndNotify();
+                     localZedSensor.setCurrentPosition(requestedPosition.get() + localZedSensor.getFps());
+                     localZedSensor.grabAndNotify();
                   }
-                  ImGui.endDisabled();
                }
+               ImGui.endDisabled();
+               ImGui.endDisabled();
             });
 
             RobotCollisionModel selectionCollisionModel = selectionCollisionModelBuilder.apply(robotModel);
