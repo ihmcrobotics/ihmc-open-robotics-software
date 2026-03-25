@@ -9,12 +9,16 @@ import us.ihmc.behaviors.behaviorTree.action.actions.WaitActionExecutor;
 import us.ihmc.behaviors.behaviorTree.control.GotoNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneDoorFrameExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectType;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.ros2log.ROS2LogRecord;
 import us.ihmc.communication.ros2log.ROS2LogSerialization;
 import us.ihmc.communication.ros2log.ROS2LogTimeSource;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
@@ -42,6 +46,9 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
       float[] nonFingerValues = new float[nonFingerIndices.size()];
 
       ROS2Publisher<KinematicsToolboxOutputStatus> publisher = ros2ControllerHelper.getROS2Node().createPublisher(kstOutputTopic);
+      FullHumanoidRobotModel fullRobotModel = syncedRobot.getRobotModel().createFullRobotModel();
+      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel,
+                                                                            syncedRobot.getRobotModel().getSensorInformation());
       syncedRobot.addRobotConfigurationDataReceivedCallback(() ->
       {
          if (ros2LogRecord != null && statusThrottler.run())
@@ -66,7 +73,24 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
             status.getDesiredJointVelocities().clear();
             status.getDesiredJointVelocities().add(nonFingerValues);
 
-            publisher.publish(status);
+            fullRobotModel.getRootJoint().setJointPosition(relativePelvisPose.getTranslation());
+            fullRobotModel.getRootJoint().setJointOrientation(relativePelvisPose.getRotation());
+
+            for (int i = 0; i < rcd.getJointAngles().size(); i++)
+            {
+               fullRobotModel.getOneDoFJoints()[i].setQ(rcd.getJointAngles().get(i));
+               fullRobotModel.getOneDoFJoints()[i].setQd(rcd.getJointVelocities().get(i));
+               fullRobotModel.getOneDoFJoints()[i].setTau(rcd.getJointTorques().get(i));
+            }
+
+            ThreadTools.startAsDaemon(() ->
+            {
+               ExceptionTools.handle(referenceFrames::updateFrames, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+               RigidBodyTransform torsoPose = referenceFrames.getChestFrame().getTransformToRoot();
+               status.getDesiredTorsoPosition().set(torsoPose.getTranslation());
+               status.getDesiredTorsoOrientation().set(torsoPose.getRotation());
+               publisher.publish(status);
+            }, "ForwardKinematicsAndPublish");
          }
       });
    }
