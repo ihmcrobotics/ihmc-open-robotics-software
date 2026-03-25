@@ -124,7 +124,7 @@ public class RDXJoystickBasedStepping
    {
       this.controllerHelper = controllerHelper;
       this.syncedRobot = syncedRobot;
-      capturabilityBasedStatusInput = controllerHelper.subscribeToController(CapturabilityBasedStatus.class);
+      capturabilityBasedStatusInput = controllerHelper.subscribeToControllerLowFrequency(CapturabilityBasedStatus.class);
       controllerHelper.subscribeToControllerViaCallback(FootstepStatusMessage.class, footstepStatus ->
       {
          queuedTasksToProcess.add(() ->

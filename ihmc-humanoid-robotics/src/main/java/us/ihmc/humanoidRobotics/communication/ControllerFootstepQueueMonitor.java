@@ -8,7 +8,6 @@ import controller_msgs.msg.dds.QueuedFootstepStatusMessage;
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import ihmc_common_msgs.msg.dds.QueueableMessage;
-import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
@@ -20,6 +19,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static us.ihmc.communication.HumanoidControllerAPI.getLowFrequencyTopic;
 import static us.ihmc.communication.HumanoidControllerAPI.getTopic;
 
 public class ControllerFootstepQueueMonitor
@@ -37,9 +37,9 @@ public class ControllerFootstepQueueMonitor
 
    public ControllerFootstepQueueMonitor(ROS2Node ros2Node, String simpleRobotName)
    {
-      ros2Node.createSubscription2(HumanoidControllerAPI.getTopic(FootstepQueueStatusMessage.class, simpleRobotName), this::footstepQueueStatusReceived);
-      ros2Node.createSubscription2(HumanoidControllerAPI.getTopic(FootstepStatusMessage.class, simpleRobotName), this::footstepStatusReceived);
-      ros2Node.createSubscription2(getTopic(PlanOffsetStatus.class, simpleRobotName), this::acceptPlanOffsetStatus);
+      ros2Node.createSubscription2(getLowFrequencyTopic(FootstepQueueStatusMessage.class, simpleRobotName), this::footstepQueueStatusReceived);
+      ros2Node.createSubscription2(getTopic(FootstepStatusMessage.class, simpleRobotName), this::footstepStatusReceived);
+      ros2Node.createSubscription2(getLowFrequencyTopic(PlanOffsetStatus.class, simpleRobotName), this::acceptPlanOffsetStatus);
       ros2Node.createSubscription2(getTopic(WalkingStatusMessage.class, simpleRobotName), this::acceptWalkingStatusMessage);
       ros2Node.createSubscription2(getTopic(WalkingControllerFailureStatusMessage.class, simpleRobotName), this::acceptWalkingControllerFailureStatusMessage);
       ros2Node.createSubscription2(getTopic(FootstepDataListMessage.class, simpleRobotName), this::interceptFootstepDataListMessage);

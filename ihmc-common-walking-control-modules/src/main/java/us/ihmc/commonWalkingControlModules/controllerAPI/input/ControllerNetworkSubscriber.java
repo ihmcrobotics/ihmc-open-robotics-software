@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.InvalidPacketNotificationPacket;
 import ihmc_common_msgs.msg.dds.MessageCollection;
 import ihmc_common_msgs.msg.dds.MessageCollectionNotification;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector.MessageIDExtractor;
+import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools.MessageUnpacker;
@@ -34,6 +35,7 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class ControllerNetworkSubscriber
 {
+   private static final double LOW_FREQUENCY_PUBLISH_RATE = 50.0;
    private static final boolean DEBUG = false;
 
    /** The input API to which the received messages should be submitted. */
@@ -58,6 +60,7 @@ public class ControllerNetworkSubscriber
     * communication thread.
     */
    private final Map<Class<? extends Settable<?>>, ROS2Publisher<?>> statusMessagePublisherMap = new HashMap<>();
+   private final Map<Class<? extends Settable<?>>, ThrottledROS2Publisher<?>> lowFrequencyStatusMessagePublisherMap = new HashMap<>();
 
    private final ROS2Node ros2Node;
 
@@ -204,6 +207,7 @@ public class ControllerNetworkSubscriber
       {
          Class<T> messageClass = (Class<T>) listOfSupportedStatusMessages.get(i);
          statusMessagePublisherMap.put(messageClass, createPublisher(messageClass));
+         lowFrequencyStatusMessagePublisherMap.put(messageClass, createLowFrequencyPublisher(messageClass));
       }
 
       for (int i = 0; i < listOfSupportedControlMessages.size(); i++)
@@ -222,6 +226,11 @@ public class ControllerNetworkSubscriber
    private <T extends Settable<T>> ROS2Publisher<T> createPublisher(Class<T> messageClass)
    {
       return ros2Node.createPublisher(ControllerAPI.getTopic(outputTopic, messageClass));
+   }
+
+   private <T extends Settable<T>> ThrottledROS2Publisher<T> createLowFrequencyPublisher(Class<T> messageClass)
+   {
+      return new ThrottledROS2Publisher<>(ros2Node.createPublisher(ControllerAPI.getLowFrequencyTopic(outputTopic, messageClass)), LOW_FREQUENCY_PUBLISH_RATE);
    }
 
    @SuppressWarnings("unchecked")
@@ -295,6 +304,9 @@ public class ControllerNetworkSubscriber
    {
       ROS2Publisher<T> publisher = (ROS2Publisher<T>) statusMessagePublisherMap.get(message.getClass());
       publisher.publish(message);
+
+      ThrottledROS2Publisher<T> throttledPublisher = (ThrottledROS2Publisher<T>) lowFrequencyStatusMessagePublisherMap.get(message.getClass());
+      throttledPublisher.publish(message);
    }
 
    public static interface MessageFilter
@@ -305,5 +317,23 @@ public class ControllerNetworkSubscriber
    public static interface MessageValidator
    {
       String validate(Object message);
+   }
+
+   private static class ThrottledROS2Publisher<T>
+   {
+      private final ROS2Publisher<T> publisher;
+      private final Throttler throttler = new Throttler();
+
+      public ThrottledROS2Publisher(ROS2Publisher<T> publisher, double maxPublishFrequency)
+      {
+         this.publisher = publisher;
+         throttler.setFrequency(maxPublishFrequency);
+      }
+
+      public void publish(T message)
+      {
+         if (throttler.run())
+            publisher.publish(message);
+      }
    }
 }

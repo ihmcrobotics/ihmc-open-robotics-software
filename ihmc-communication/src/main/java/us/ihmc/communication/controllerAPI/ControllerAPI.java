@@ -163,6 +163,11 @@ public final class ControllerAPI
          return baseTopic.withTypeName(messageClass).withQoS(getQoS(messageClass));
    }
 
+   public static <T> ROS2Topic<T> getLowFrequencyTopic(ROS2Topic<?> baseTopic, Class<T> messageClass)
+   {
+      return getTopic(baseTopic, messageClass).withSuffix("lf");
+   }
+
    public static ROS2QosProfile getQoS(Class<?> messageClass)
    {
       if (inputMessageClasses.contains(messageClass))
