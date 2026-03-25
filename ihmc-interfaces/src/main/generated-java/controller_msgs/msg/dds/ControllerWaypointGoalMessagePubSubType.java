@@ -15,7 +15,7 @@ public class ControllerWaypointGoalMessagePubSubType implements us.ihmc.pubsub.T
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "fc0d93beef8087638b435ebb8903e6b45ef1bcea1b736423cdef71be1b2bc2c0";
+   		return "260d0e700c78612e57373d4a7e7109f7d414d5f84cb753a7ec772955664d30d4";
    }
    
    @Override
@@ -151,11 +151,11 @@ public class ControllerWaypointGoalMessagePubSubType implements us.ihmc.pubsub.T
       data.setHoldPosition(cdr.read_type_7());
       	
       data.setPositionProximity(cdr.read_type_6());
-
+      	
       data.setOrientationProximity(cdr.read_type_6());
-
+      	
       data.setGoalOrientationMatters(cdr.read_type_7());
-
+      	
 
    }
 

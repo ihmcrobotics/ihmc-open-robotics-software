@@ -15,7 +15,7 @@ public class ControllerWaypointGoalListMessagePubSubType implements us.ihmc.pubs
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "a006923c1cdb422ba18c595a1554f5636b68889e503cf45ee87ea7853b5e8e96";
+   		return "37b62c13a5a55c99b8057dfd3675ced12661566eb9a2219a4772b8fedfea253d";
    }
    
    @Override
