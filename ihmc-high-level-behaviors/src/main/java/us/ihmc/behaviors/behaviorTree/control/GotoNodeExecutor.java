@@ -37,13 +37,13 @@ public class GotoNodeExecutor extends LeafNodeExecutor<GotoNodeState, GotoNodeDe
             }
             else
             {
-               state.getLogger().error("Cannot goto node %s. Reach end of tree.", nodeToGoto.getDefinition().getName());
+               state.getLogger().error("Cannot goto node %s. Reach end of tree.".formatted(nodeToGoto.getDefinition().getName()));
                failed = true;
             }
          }
          else
          {
-            state.getLogger().error("Cannot goto node %s. It does not exist.", definition.getNodeToGotoName());
+            state.getLogger().error("Cannot goto node %s. It does not exist.".formatted(definition.getNodeToGotoName()));
             failed = true;
          }
       }
