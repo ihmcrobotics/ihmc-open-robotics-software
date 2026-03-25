@@ -90,9 +90,9 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
 
    private final YoDouble desiredCruisingSpeedScalar = new YoDouble("desiredCruisingSpeedScalar", registry);
    /**
-    * Minimum normalized speed (0–1) the robot may travel through the current intermediate waypoint.
+    * Minimum normalized speed the robot may travel through the current intermediate waypoint.
     * Derived from the dot product of the incoming and outgoing leg directions: 1.0 means the robot
-    * can pass through at full speed (legs are collinear); 0.0 means the robot must stop (turn ≥ 90°
+    * can pass through at full speed (legs are collinear); 0.0 means the robot must stop (turn >= 90°
     * or this is the terminal waypoint).
     */
    private final YoDouble waypointThroughputSpeedScalar = new YoDouble("waypointThroughputSpeedScalar", registry);
@@ -309,7 +309,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
          startDirection.setToNaN();
          startToGoalVector.setToNaN();
       }
-      // else: holding at goal after ramp-down — nothing to do.
+      // else: holding at goal after ramp-down - nothing to do.
 
       if (!isRampingDownAfterGoal.getBooleanValue())
          rampDownDecay.set(1.0);
@@ -425,8 +425,8 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
 
          // Compute how fast the robot may pass through this waypoint without stopping.
          // Dot product of the incoming leg direction with the outgoing leg direction gives
-         // cos(turn angle): 1 = straight, 0 = 90° turn, −1 = U-turn.
-         // Clamp to [0, 1]: turns ≥ 90° require a full stop; smaller turns allow proportionally
+         // cos(turn angle): 1 = straight, 0 = 90 degree turn, −1 = U-turn.
+         // Clamp to [0, 1]: turns >= 90° require a full stop; smaller turns allow proportionally
          // higher throughput speed. Terminal waypoints always use 0 (robot must stop).
          if (goalPoses.size() >= 2)
          {
@@ -503,7 +503,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
          finalHeadingInBodyFrame.set(currentGoalDirection);
          currentPose.getOrientation().inverseTransform(finalHeadingInBodyFrame, finalHeadingInBodyFrame);
 
-         // 1 = far from goal → face the goal position; 0 = near goal → match the goal's final heading
+         // 1 = far from goal - face the goal position; 0 = near goal → match the goal's final heading
          double faceGoalBlendFraction = MathTools.clamp(
                (vectorToGoal.norm() - distanceToMatchGoalAngle.getValue()) / (distanceToFaceGoal.getDoubleValue() - distanceToMatchGoalAngle.getDoubleValue()),
                0.0, 1.0);
