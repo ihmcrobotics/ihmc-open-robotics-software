@@ -179,21 +179,17 @@ public class RDXSpineAction extends RDXActionNode<SpineActionState, SpineActionD
    @Override
    protected void renderImGuiWidgetsInternal()
    {
-      ImGui.checkbox(labels.get("Adjust Goal Pose"), poseGizmo.getSelected());
+      trajectoryDurationWidget.renderImGuiWidget();
       jointspaceOnlyWrapper.renderImGuiWidget();
-      parentFrameComboBox.render();
-      if (!definition.getJointspaceOnly())
-         holdPoseInWorldLaterWrapper.renderImGuiWidget();
       if (definition.getJointspaceOnly())
-      {
          for (ImGuiSliderDoubleWrapper jointAngleWidget : jointAngleWidgets)
-         {
             jointAngleWidget.renderImGuiWidget();
-         }
-      }
       else
       {
-         ImGui.pushItemWidth(80.0f);
+         parentFrameComboBox.render();
+         ImGui.checkbox(labels.get("Adjust Goal Pose"), poseGizmo.getSelected());
+         holdPoseInWorldLaterWrapper.renderImGuiWidget();
+         ImGui.pushItemWidth(ImGui.getFontSize() * 5.0f);
          yawWidget.renderImGuiWidget();
          ImGui.sameLine();
          pitchWidget.renderImGuiWidget();
@@ -201,7 +197,6 @@ public class RDXSpineAction extends RDXActionNode<SpineActionState, SpineActionD
          rollWidget.renderImGuiWidget();
          ImGui.popItemWidth();
       }
-      trajectoryDurationWidget.renderImGuiWidget();
    }
 
    public void render3DPanelImGuiOverlays()
