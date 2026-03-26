@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.behaviorTree.action.actions.ArmActionDefinition;
+import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.rdx.behaviorTree.actions.RDXAbilityHandAction;
@@ -21,10 +22,12 @@ import static us.ihmc.behaviors.behaviorTree.BehaviorTreeDefinitionRegistry.getC
 public class RDXBehaviorNodeDuplication
 {
    private final RDXBehaviorTree behaviorTree;
+   private final BehaviorTreeTopologyOperationQueue<RDXBehaviorTreeNode<?, ?>> topologyOperationQueue;
 
    public RDXBehaviorNodeDuplication(RDXBehaviorTree behaviorTree)
    {
       this.behaviorTree = behaviorTree;
+      topologyOperationQueue = behaviorTree.getTopologyChangeQueue();
    }
 
    public boolean supportsInvariantMirroring(RDXBehaviorTreeNode<?, ?> node)
@@ -125,9 +128,22 @@ public class RDXBehaviorNodeDuplication
       return jsonNode;
    }
 
-   public RDXLeafNode<?, ?> duplicateLeaf(RDXLeafNode<?, ?> leaf)
+   public RDXBehaviorTreeNode<?, ?> duplicateNode(RDXBehaviorTreeNode<?, ?> node)
    {
-      return (RDXLeafNode<?, ?>) jsonToNode(nodeToJSON(leaf));
+      return jsonToNode(nodeToJSON(node));
+   }
+
+   public RDXBehaviorTreeNode<?, ?> duplicateSubtree(RDXBehaviorTreeNode<?, ?> node, RDXBehaviorTreeNode<?, ?> duplicateParent)
+   {
+      RDXBehaviorTreeNode<?, ?> duplicate = duplicateNode(node);
+
+      if (duplicateParent != null)
+         topologyOperationQueue.queueAppendChildModify(duplicateParent, duplicate);
+
+      for (RDXBehaviorTreeNode<?, ?> child : node.getChildren())
+         duplicateSubtree(child, duplicate);
+
+      return duplicate;
    }
 
    private RDXBehaviorTreeNode<?, ?> jsonToNode(ObjectNode jsonNode)
@@ -135,6 +151,7 @@ public class RDXBehaviorNodeDuplication
       RDXBehaviorTreeNode<?, ?> newNode = behaviorTree.getNodeBuilder().createNode(getClassFromTypeName(jsonNode.get("type").asText()),
                                                                                    behaviorTree.getAndIncrementNextID(),
                                                                                    behaviorTree.getRootNode());
+      newNode.getDefinition().modify();
       newNode.getDefinition().loadFromFile(jsonNode);
       return newNode;
    }

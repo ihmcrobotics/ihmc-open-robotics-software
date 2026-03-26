@@ -1,7 +1,5 @@
 package us.ihmc.rdx.behaviorTree;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiMouseButton;
@@ -10,8 +8,6 @@ import imgui.flag.ImGuiWindowFlags;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionDefinition;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
-import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -83,20 +79,26 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
                queuePopupModal.set(() -> popNodeCreationModalDialog(node, BehaviorTreeNodeInsertionType.INSERT_BEFORE));
             if (ImGui.menuItem(labels.get("Insert Node After...")))
                queuePopupModal.set(() -> popNodeCreationModalDialog(node, BehaviorTreeNodeInsertionType.INSERT_AFTER));
+            ImGui.separator();
             if (node instanceof RDXLeafNode<?, ?> leaf && ImGui.menuItem(labels.get("Duplicate Node")))
-            {
-               RDXLeafNode<?, ?> newNode = duplication.duplicateLeaf(leaf);
-               topologyOperationQueue.queueInsertNodeModify(new BehaviorTreeNodeInsertionDefinition<>(BehaviorTreeNodeInsertionType.INSERT_AFTER, newNode, leaf));
-            }
+               topologyOperationQueue.queueInsertNodeModify(
+                     new BehaviorTreeNodeInsertionDefinition<>(BehaviorTreeNodeInsertionType.INSERT_AFTER, duplication.duplicateNode(leaf), leaf));
             if (duplication.supportsInvariantMirroring(node) && ImGui.menuItem(labels.get("Mirror Node")))
-            {
-               RDXBehaviorTreeNode<?, ?> newNode = duplication.mirrorNode(node);
-               topologyOperationQueue.queueInsertNodeModify(new BehaviorTreeNodeInsertionDefinition<>(BehaviorTreeNodeInsertionType.INSERT_AFTER, newNode, node));
-            }
+               topologyOperationQueue.queueInsertNodeModify(
+                     new BehaviorTreeNodeInsertionDefinition<>(BehaviorTreeNodeInsertionType.INSERT_AFTER, duplication.mirrorNode(node), node));
             if (duplication.supportsDoorSpecificMirroring(node) && ImGui.menuItem(labels.get("Mirror Node (Door Specific)")))
+               topologyOperationQueue.queueInsertNodeModify(
+                     new BehaviorTreeNodeInsertionDefinition<>(BehaviorTreeNodeInsertionType.INSERT_AFTER, duplication.mirrorNodeDoorSpecific(node), node));
+            if (!(node instanceof RDXLeafNode<?, ?>) && ImGui.menuItem(labels.get("Duplicate Subtree")))
+               topologyOperationQueue.queueInsertNodeModify(
+                     new BehaviorTreeNodeInsertionDefinition<>(BehaviorTreeNodeInsertionType.INSERT_AFTER, duplication.duplicateSubtree(node, null), node));
+            if (!(node instanceof RDXLeafNode<?, ?>) && ImGui.menuItem(labels.get("Mirror Subtree")))
             {
-               RDXBehaviorTreeNode<?, ?> newNode = duplication.mirrorNodeDoorSpecific(node);
-               topologyOperationQueue.queueInsertNodeModify(new BehaviorTreeNodeInsertionDefinition<>(BehaviorTreeNodeInsertionType.INSERT_AFTER, newNode, node));
+
+            }
+            if (!(node instanceof RDXLeafNode<?, ?>) && ImGui.menuItem(labels.get("Mirror Subtree (Door Specific)")))
+            {
+
             }
          }
          if (!(node instanceof RDXActionNode<?, ?>))
