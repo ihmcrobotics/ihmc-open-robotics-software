@@ -96,7 +96,7 @@ public class GotoNodeDefinition extends LeafNodeDefinition
       return nodeToGotoID.getValue() == GOTO_NEXT_ID;
    }
 
-   private void setNodeToGotoNameUnknownID(String name)
+   public void setNodeToGotoNameUnknownID(String name)
    {
       switch (name)
       {

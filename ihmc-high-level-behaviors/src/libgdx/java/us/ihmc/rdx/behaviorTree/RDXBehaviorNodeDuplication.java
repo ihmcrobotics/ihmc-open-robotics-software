@@ -50,6 +50,10 @@ public class RDXBehaviorNodeDuplication
          jsonNode.put("executeAfterAction", StringUtils.replaceEach(jsonNode.get("executeAfterAction").asText(),
                                                                     new String[]{"Left", "Right", "left", "right", "LEFT", "RIGHT"},
                                                                     new String[]{"Right", "Left", "right", "left", "RIGHT", "LEFT"}));
+      if (jsonNode.has("nodeToGoto"))
+         jsonNode.put("nodeToGoto", StringUtils.replaceEach(jsonNode.get("nodeToGoto").asText(),
+                                                            new String[]{"Left", "Right", "left", "right", "LEFT", "RIGHT"},
+                                                            new String[]{"Right", "Left", "right", "left", "RIGHT", "LEFT"}));
 
       applyFrameInvariantMirroring(node, jsonNode);
       if (node instanceof RDXConditionNode)
