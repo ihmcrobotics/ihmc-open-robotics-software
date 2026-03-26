@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.HighLevelStateMessage;
+import controller_msgs.msg.dds.ReinitializeStateEstimatorMessage;
 import ihmc_common_msgs.msg.dds.SelectionMatrix3DMessage;
 import ihmc_common_msgs.msg.dds.WeightMatrix3DMessage;
 import imgui.ImGui;
@@ -995,6 +996,29 @@ public class RDXVRWholeBodyKinematicStreaming
       {
          reinitializeToolboxRobotConfiguration();
       }
+      if (ImGui.button(labels.get("Reinitialize State Estimator")))
+      {
+         reinitializeStateEstimator();
+      }
+      if (ImGui.button(labels.get("Stand Prep")))
+      {
+         sendStandPrepRequest();
+      }
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Freeze")))
+      {
+         sendFreezeRequest();
+      }
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("RL Transition")))
+      {
+         sendRLStateTransitionRequest(true);
+      }
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Exit RL")))
+      {
+         sendRLStateTransitionRequest(false);
+      }
       if (ImGui.checkbox(labels.get("Demonstration Mode"), demonstrationMode))
       {
          demonstrationTaskIndex = 0;
@@ -1113,6 +1137,27 @@ public class RDXVRWholeBodyKinematicStreaming
          highLevelStateMessage.setHighLevelControllerName(HighLevelControllerName.EXIT_RL.toByte());
       }
       ros2ControllerHelper.publishToController(highLevelStateMessage);
+   }
+
+   private void sendStandPrepRequest()
+   {
+      HighLevelStateMessage highLevelStateMessage = new HighLevelStateMessage();
+      highLevelStateMessage.setHighLevelControllerName(HighLevelControllerName.STAND_PREP_STATE.toByte());
+      ros2ControllerHelper.publishToController(highLevelStateMessage);
+   }
+
+   private void sendFreezeRequest()
+   {
+      HighLevelStateMessage highLevelStateMessage = new HighLevelStateMessage();
+      highLevelStateMessage.setHighLevelControllerName(HighLevelControllerName.FREEZE_STATE.toByte());
+      ros2ControllerHelper.publishToController(highLevelStateMessage);
+   }
+
+   private void reinitializeStateEstimator()
+   {
+      ReinitializeStateEstimatorMessage message = new ReinitializeStateEstimatorMessage();
+      message.setRequestReinitialize(true);
+      ros2ControllerHelper.publishToController(message);
    }
 
    private void reinitializeToolboxRobotConfiguration()

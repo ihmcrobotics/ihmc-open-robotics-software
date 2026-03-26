@@ -55,6 +55,7 @@ public final class ControllerAPI
       inputMessageClasses.add(AbortWalkingMessage.class);
       inputMessageClasses.add(PrepareForLocomotionMessage.class);
       inputMessageClasses.add(PauseWalkingMessage.class);
+      inputMessageClasses.add(ReinitializeStateEstimatorMessage.class);
       inputMessageClasses.add(SpineDesiredAccelerationsMessage.class);
       inputMessageClasses.add(HandLoadBearingMessage.class);
       inputMessageClasses.add(HandHybridJointspaceTaskspaceTrajectoryMessage.class);
