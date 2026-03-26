@@ -93,6 +93,11 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
                RDXBehaviorTreeNode<?, ?> newNode = duplication.mirrorNode(node);
                topologyOperationQueue.queueInsertNodeModify(new BehaviorTreeNodeInsertionDefinition<>(BehaviorTreeNodeInsertionType.INSERT_AFTER, newNode, node));
             }
+            if (duplication.supportsDoorSpecificMirroring(node) && ImGui.menuItem(labels.get("Mirror Node (Door Specific)")))
+            {
+               RDXBehaviorTreeNode<?, ?> newNode = duplication.mirrorNodeDoorSpecific(node);
+               topologyOperationQueue.queueInsertNodeModify(new BehaviorTreeNodeInsertionDefinition<>(BehaviorTreeNodeInsertionType.INSERT_AFTER, newNode, node));
+            }
          }
          if (!(node instanceof RDXActionNode<?, ?>))
          {

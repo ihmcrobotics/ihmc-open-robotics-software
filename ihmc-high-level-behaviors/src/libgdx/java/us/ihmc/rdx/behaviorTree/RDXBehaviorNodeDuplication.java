@@ -1,5 +1,6 @@
 package us.ihmc.rdx.behaviorTree;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.behaviorTree.action.actions.ArmActionDefinition;
@@ -10,6 +11,7 @@ import us.ihmc.rdx.behaviorTree.actions.RDXArmAction;
 import us.ihmc.rdx.behaviorTree.actions.RDXEZGripperAction;
 import us.ihmc.rdx.behaviorTree.actions.RDXNeckAction;
 import us.ihmc.rdx.behaviorTree.actions.RDXSpineAction;
+import us.ihmc.rdx.behaviorTree.actions.RDXWalkAction;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -36,15 +38,56 @@ public class RDXBehaviorNodeDuplication
       return supports;
    }
 
+   public boolean supportsDoorSpecificMirroring(RDXBehaviorTreeNode<?, ?> node)
+   {
+      boolean supports = false;
+      supports |= node instanceof RDXWalkAction;
+      supports |= node instanceof RDXArmAction;
+      return supports;
+   }
+
+   public RDXBehaviorTreeNode<?, ?> mirrorNodeDoorSpecific(RDXBehaviorTreeNode<?, ?> node)
+   {
+      ObjectNode jsonNode = nodeToJSONMirror(node);
+
+      if (node instanceof RDXWalkAction)
+      {
+         if (jsonNode.has("goalStancePoint"))
+         {
+            if (jsonNode.get("goalStancePoint") instanceof ObjectNode goalStancePoint)
+               goalStancePoint.put("y", -goalStancePoint.get("y").asDouble());
+            if (jsonNode.get("goalFocalPoint") instanceof ObjectNode goalFocalPoint)
+               goalFocalPoint.put("y", -goalFocalPoint.get("y").asDouble());
+            if (jsonNode.get("leftGoalFootToGoal") instanceof ObjectNode leftGoalFootToGoal
+             && jsonNode.get("rightGoalFootToGoal") instanceof ObjectNode rightGoalFootToGoal)
+            {
+               JsonNode leftX = leftGoalFootToGoal.get("x");
+               JsonNode leftY = leftGoalFootToGoal.get("y");
+               JsonNode rightX = rightGoalFootToGoal.get("x");
+               JsonNode rightY = rightGoalFootToGoal.get("y");
+               leftGoalFootToGoal.put("x", rightX.asDouble());
+               rightGoalFootToGoal.put("x", leftX.asDouble());
+               leftGoalFootToGoal.put("y", -rightY.asDouble());
+               rightGoalFootToGoal.put("y", -leftY.asDouble());
+            }
+         }
+         else if (jsonNode.has("footsteps"))
+         {
+
+         }
+      }
+      else if (node instanceof RDXArmAction)
+      {
+
+      }
+
+      return jsonToNode(jsonNode);
+   }
+
    public RDXBehaviorTreeNode<?, ?> mirrorNode(RDXBehaviorTreeNode<?, ?> node)
    {
-      ObjectNode jsonNode = nodeToJSON(node);
+      ObjectNode jsonNode = nodeToJSONMirror(node);
 
-      RobotSide originalSide = RobotSide.getSideFromString(jsonNode.get("side").asText());
-      RobotSide mirrorSide = originalSide.getOppositeSide();
-      jsonNode.put("side", mirrorSide.getLowerCaseName());
-
-      // Mirror
       if (node instanceof RDXArmAction && jsonNode.get("preset").asText().equals(ArmActionDefinition.CUSTOM_ANGLES_NAME))
       {
          ArmJointName[] armJointNames = behaviorTree.getRootNode().getSyncedRobot().getRobotModel().getJointMap().getArmJointNames();
@@ -63,6 +106,23 @@ public class RDXBehaviorNodeDuplication
       }
 
       return jsonToNode(jsonNode);
+   }
+
+   private ObjectNode nodeToJSONMirror(RDXBehaviorTreeNode<?, ?> node)
+   {
+      ObjectNode jsonNode = nodeToJSON(node);
+
+      String originalName = jsonNode.get("name").asText();
+      jsonNode.put("name", originalName.replace("Left", "Right").replace("left", "right").replace("LEFT", "RIGHT"));
+
+      if (jsonNode.has("side"))
+      {
+         RobotSide originalSide = RobotSide.getSideFromString(jsonNode.get("side").asText());
+         RobotSide mirrorSide = originalSide.getOppositeSide();
+         jsonNode.put("side", mirrorSide.getLowerCaseName());
+      }
+
+      return jsonNode;
    }
 
    public RDXLeafNode<?, ?> duplicateLeaf(RDXLeafNode<?, ?> leaf)
