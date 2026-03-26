@@ -3,16 +3,18 @@ package us.ihmc.rdx.behaviorTree;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import us.ihmc.behaviors.behaviorTree.action.actions.ArmActionDefinition;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
-import us.ihmc.rdx.behaviorTree.actions.RDXAbilityHandAction;
 import us.ihmc.rdx.behaviorTree.actions.RDXArmAction;
-import us.ihmc.rdx.behaviorTree.actions.RDXEZGripperAction;
 import us.ihmc.rdx.behaviorTree.actions.RDXNeckAction;
+import us.ihmc.rdx.behaviorTree.actions.RDXSceneAction;
+import us.ihmc.rdx.behaviorTree.actions.RDXScrewPrimitiveAction;
 import us.ihmc.rdx.behaviorTree.actions.RDXSpineAction;
 import us.ihmc.rdx.behaviorTree.actions.RDXWalkAction;
+import us.ihmc.rdx.behaviorTree.condition.RDXConditionNode;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -30,17 +32,6 @@ public class RDXBehaviorNodeDuplication
       topologyOperationQueue = behaviorTree.getTopologyChangeQueue();
    }
 
-   public boolean supportsInvariantMirroring(RDXBehaviorTreeNode<?, ?> node)
-   {
-      boolean supports = false;
-      supports |= node instanceof RDXArmAction armAction && armAction.getDefinition().getUsePredefinedJointAngles();
-      supports |= node instanceof RDXAbilityHandAction;
-      supports |= node instanceof RDXEZGripperAction;
-      supports |= node instanceof RDXNeckAction;
-      supports |= node instanceof RDXSpineAction spineAction && spineAction.getDefinition().getJointspaceOnly();
-      return supports;
-   }
-
    public boolean supportsDoorSpecificMirroring(RDXBehaviorTreeNode<?, ?> node)
    {
       boolean supports = false;
@@ -53,7 +44,51 @@ public class RDXBehaviorNodeDuplication
    {
       ObjectNode jsonNode = nodeToJSONMirror(node);
 
-      if (node instanceof RDXWalkAction)
+      applyFrameInvariantMirroring(node, jsonNode);
+      if (node instanceof RDXConditionNode)
+      {
+         String[] fieldNames = new String[] { "frameName", "frameNameA", "frameNameB" };
+         for (String fieldName : fieldNames)
+            if (jsonNode.get(fieldName) instanceof TextNode textNode)
+            {
+               if (textNode.asText().contains("Left"))
+                  jsonNode.put(fieldName, textNode.asText().replace("Left", "Right"));
+               else if (textNode.asText().contains("Right"))
+                  jsonNode.put(fieldName, textNode.asText().replace("Right", "Left"));
+            }
+         if (jsonNode.get("shapeTransformToParent") instanceof ObjectNode shapeTransformToParent)
+         {
+            shapeTransformToParent.put("y", -shapeTransformToParent.get("y").asDouble());
+            shapeTransformToParent.put("rollInDegrees", -shapeTransformToParent.get("rollInDegrees").asDouble());
+            shapeTransformToParent.put("yawInDegrees", -shapeTransformToParent.get("yawInDegrees").asDouble());
+         }
+      }
+      else if (node instanceof RDXSceneAction)
+      {
+         if (jsonNode.get("nominalObjectPose") instanceof ObjectNode nominalObjectPose)
+         {
+            nominalObjectPose.put("y", -nominalObjectPose.get("y").asDouble());
+            nominalObjectPose.put("rollInDegrees", -nominalObjectPose.get("rollInDegrees").asDouble());
+            nominalObjectPose.put("yawInDegrees", -nominalObjectPose.get("yawInDegrees").asDouble());
+         }
+      }
+      else if (node instanceof RDXArmAction armAction && !armAction.getDefinition().getUsePredefinedJointAngles())
+      {
+         jsonNode.put("y", -jsonNode.get("y").asDouble()); // TODO: This is specific to the door lever object pose
+         jsonNode.put("rollInDegrees", -jsonNode.get("rollInDegrees").asDouble());
+         jsonNode.put("yawInDegrees", -jsonNode.get("yawInDegrees").asDouble());
+      }
+      else if (node instanceof RDXScrewPrimitiveAction)
+      {
+         if (jsonNode.get("screwAxisPose") instanceof ObjectNode screwAxisPose)
+         {
+            screwAxisPose.put("y", -screwAxisPose.get("y").asDouble());
+            screwAxisPose.put("rollInDegrees", -screwAxisPose.get("rollInDegrees").asDouble());
+            screwAxisPose.put("yawInDegrees", -screwAxisPose.get("yawInDegrees").asDouble());
+         }
+         jsonNode.put("rotation", -jsonNode.get("rotation").asDouble());
+      }
+      else if (node instanceof RDXWalkAction)
       {
          if (jsonNode.has("goalStancePoint"))
          {
@@ -64,7 +99,7 @@ public class RDXBehaviorNodeDuplication
             if (jsonNode.get("leftGoalFootToGoal") instanceof ObjectNode leftGoalFootToGoal
              && jsonNode.get("rightGoalFootToGoal") instanceof ObjectNode rightGoalFootToGoal)
             {
-               JsonNode leftX = leftGoalFootToGoal.get("x");
+               JsonNode leftX = leftGoalFootToGoal.get("x"); // TODO: This is specific to the door panel object pose
                JsonNode leftY = leftGoalFootToGoal.get("y");
                JsonNode rightX = rightGoalFootToGoal.get("x");
                JsonNode rightY = rightGoalFootToGoal.get("y");
@@ -79,10 +114,6 @@ public class RDXBehaviorNodeDuplication
 
          }
       }
-      else if (node instanceof RDXArmAction)
-      {
-
-      }
 
       return jsonToNode(jsonNode);
    }
@@ -90,8 +121,15 @@ public class RDXBehaviorNodeDuplication
    public RDXBehaviorTreeNode<?, ?> mirrorNode(RDXBehaviorTreeNode<?, ?> node)
    {
       ObjectNode jsonNode = nodeToJSONMirror(node);
+      applyFrameInvariantMirroring(node, jsonNode);
+      return jsonToNode(jsonNode);
+   }
 
-      if (node instanceof RDXArmAction && jsonNode.get("preset").asText().equals(ArmActionDefinition.CUSTOM_ANGLES_NAME))
+   private void applyFrameInvariantMirroring(RDXBehaviorTreeNode<?, ?> node, ObjectNode jsonNode)
+   {
+      if (node instanceof RDXArmAction armAction
+          && armAction.getDefinition().getUsePredefinedJointAngles()
+          && jsonNode.get("preset").asText().equals(ArmActionDefinition.CUSTOM_ANGLES_NAME))
       {
          ArmJointName[] armJointNames = behaviorTree.getRootNode().getSyncedRobot().getRobotModel().getJointMap().getArmJointNames();
          for (int i = 0; i < armJointNames.length; i++)
@@ -100,15 +138,13 @@ public class RDXBehaviorNodeDuplication
       }
       else if (node instanceof RDXNeckAction)
          jsonNode.put("yawInDegrees", -jsonNode.get("yawInDegrees").asDouble());
-      else if (node instanceof RDXSpineAction)
+      else if (node instanceof RDXSpineAction spineAction && spineAction.getDefinition().getJointspaceOnly())
       {
          SpineJointName[] spineJointNames = behaviorTree.getRootNode().getSyncedRobot().getRobotModel().getJointMap().getSpineJointNames();
          for (int i = 0; i < spineJointNames.length; i++)
             if (!spineJointNames[i].name().contains("PITCH"))
                jsonNode.put("j" + i, -jsonNode.get("j" + i).asDouble());
       }
-
-      return jsonToNode(jsonNode);
    }
 
    private ObjectNode nodeToJSONMirror(RDXBehaviorTreeNode<?, ?> node)
@@ -136,13 +172,30 @@ public class RDXBehaviorNodeDuplication
    public RDXBehaviorTreeNode<?, ?> duplicateSubtree(RDXBehaviorTreeNode<?, ?> node, RDXBehaviorTreeNode<?, ?> duplicateParent)
    {
       RDXBehaviorTreeNode<?, ?> duplicate = duplicateNode(node);
-
       if (duplicateParent != null)
          topologyOperationQueue.queueAppendChildModify(duplicateParent, duplicate);
-
       for (RDXBehaviorTreeNode<?, ?> child : node.getChildren())
          duplicateSubtree(child, duplicate);
+      return duplicate;
+   }
 
+   public RDXBehaviorTreeNode<?, ?> mirrorSubtree(RDXBehaviorTreeNode<?, ?> node, RDXBehaviorTreeNode<?, ?> duplicateParent)
+   {
+      RDXBehaviorTreeNode<?, ?> duplicate = mirrorNode(node);
+      if (duplicateParent != null)
+         topologyOperationQueue.queueAppendChildModify(duplicateParent, duplicate);
+      for (RDXBehaviorTreeNode<?, ?> child : node.getChildren())
+         mirrorSubtree(child, duplicate);
+      return duplicate;
+   }
+
+   public RDXBehaviorTreeNode<?, ?> mirrorSubtreeDoorSpecific(RDXBehaviorTreeNode<?, ?> node, RDXBehaviorTreeNode<?, ?> duplicateParent)
+   {
+      RDXBehaviorTreeNode<?, ?> duplicate = mirrorNodeDoorSpecific(node);
+      if (duplicateParent != null)
+         topologyOperationQueue.queueAppendChildModify(duplicateParent, duplicate);
+      for (RDXBehaviorTreeNode<?, ?> child : node.getChildren())
+         mirrorSubtreeDoorSpecific(child, duplicate);
       return duplicate;
    }
 
