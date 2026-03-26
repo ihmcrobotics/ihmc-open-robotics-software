@@ -2,8 +2,10 @@ package us.ihmc.rdx.behaviorTree;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
+import org.apache.commons.lang3.StringUtils;
 import us.ihmc.behaviors.behaviorTree.action.actions.ArmActionDefinition;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
@@ -43,6 +45,11 @@ public class RDXBehaviorNodeDuplication
    public RDXBehaviorTreeNode<?, ?> mirrorNodeDoorSpecific(RDXBehaviorTreeNode<?, ?> node)
    {
       ObjectNode jsonNode = nodeToJSONMirror(node);
+
+      if (jsonNode.has("executeAfterAction"))
+         jsonNode.put("executeAfterAction", StringUtils.replaceEach(jsonNode.get("executeAfterAction").asText(),
+                                                                    new String[]{"Left", "Right", "left", "right", "LEFT", "RIGHT"},
+                                                                    new String[]{"Right", "Left", "right", "left", "RIGHT", "LEFT"}));
 
       applyFrameInvariantMirroring(node, jsonNode);
       if (node instanceof RDXConditionNode)
@@ -109,9 +116,18 @@ public class RDXBehaviorNodeDuplication
                rightGoalFootToGoal.put("y", -leftY.asDouble());
             }
          }
-         else if (jsonNode.has("footsteps"))
+         else if (jsonNode.get("footsteps") instanceof ArrayNode footsteps)
          {
-
+            for (int i = 0; i < footsteps.size(); i++)
+            {
+               if (footsteps.get(i) instanceof ObjectNode footstep)
+               {
+                  footstep.put("side", footstep.get("side").asText().contains("left") ? "right" : "left");
+                  footstep.put("y", -footstep.get("y").asDouble());
+                  footstep.put("rollInDegrees", -footstep.get("rollInDegrees").asDouble());
+                  footstep.put("yawInDegrees", -footstep.get("yawInDegrees").asDouble());
+               }
+            }
          }
       }
 
@@ -151,8 +167,9 @@ public class RDXBehaviorNodeDuplication
    {
       ObjectNode jsonNode = nodeToJSON(node);
 
-      String originalName = jsonNode.get("name").asText();
-      jsonNode.put("name", originalName.replace("Left", "Right").replace("left", "right").replace("LEFT", "RIGHT"));
+      jsonNode.put("name", StringUtils.replaceEach(jsonNode.get("name").asText(),
+                                                   new String[]{"Left", "Right", "left", "right", "LEFT", "RIGHT"},
+                                                   new String[]{"Right", "Left", "right", "left", "RIGHT", "LEFT"}));
 
       if (jsonNode.has("side"))
       {
