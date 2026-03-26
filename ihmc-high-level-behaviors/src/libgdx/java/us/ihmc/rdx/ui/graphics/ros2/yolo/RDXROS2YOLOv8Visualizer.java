@@ -35,10 +35,19 @@ public class RDXROS2YOLOv8Visualizer extends RDXROS2MultiTopicVisualizer
                                   ROS2PeerClockOffsetEstimator ros2ClockOffsetEstimator,
                                   ROS2Topic<ImageMessage> colorImageTopic)
    {
+      this(title, ros2Node, ros2Node, ros2ClockOffsetEstimator, colorImageTopic);
+   }
+
+   public RDXROS2YOLOv8Visualizer(String title,
+                                  ROS2Node ros2Node,
+                                  ROS2Node intraProcessNode,
+                                  ROS2PeerClockOffsetEstimator ros2ClockOffsetEstimator,
+                                  ROS2Topic<ImageMessage> colorImageTopic)
+   {
       super(title);
 
       this.colorImageTopic = colorImageTopic;
-      imageMessageVisualizer = new RDXROS2ImageMessageVisualizer(title, ros2Node, colorImageTopic)
+      imageMessageVisualizer = new RDXROS2ImageMessageVisualizer(title, intraProcessNode, colorImageTopic)
       {
          @Override
          protected void setImage(RDXImageVisualizer imageVisualizer, Mat image, PixelFormat pixelFormat)

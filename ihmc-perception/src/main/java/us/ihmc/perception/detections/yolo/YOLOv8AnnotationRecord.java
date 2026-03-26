@@ -18,9 +18,6 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.perception.RawImage;
 
-import static org.bytedeco.opencv.opencv_core.AbstractScalar.GREEN;
-import static org.bytedeco.opencv.opencv_core.AbstractScalar.WHITE;
-
 /**
  * Representation of a single YOLOv8 detection for annotation.
  * Does not contain any images to avoid high bandwidth usage
@@ -39,6 +36,9 @@ public record YOLOv8AnnotationRecord(String objectClass, float confidence, Bound
    private static final double FONT_SCALE = 1.5;
    private static final int LINE_TYPE = opencv_imgproc.LINE_4;
    private static final int TEXT_LINE_TYPE = opencv_imgproc.LINE_AA;
+
+   private static final Scalar GREEN = new Scalar(0.0, 255.0, 0.0, 255.0).retainReference();
+   private static final Scalar WHITE = new Scalar(255.0, 255.0, 255.0, 255.0).retainReference();
 
    /**
     * Draws the mask of the detection on the input image.
@@ -151,7 +151,7 @@ public record YOLOv8AnnotationRecord(String objectClass, float confidence, Bound
       }
 
       // Draw the text
-      Scalar textColor = inlay ? GREEN : WHITE;
+      Scalar textColor = drawTextBox ? WHITE : GREEN;
       Point textLocation = new Point(textBoxClampedX, textBoxClampedY + textSize.height());
       opencv_imgproc.putText(outputImage, text, textLocation, FONT, FONT_SCALE, textColor, FONT_THICKNESS, TEXT_LINE_TYPE, false);
    }
