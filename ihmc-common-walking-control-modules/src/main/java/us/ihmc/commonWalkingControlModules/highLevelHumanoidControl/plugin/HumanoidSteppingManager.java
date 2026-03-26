@@ -104,6 +104,7 @@ public class HumanoidSteppingManager implements Updatable, SCS2YoGraphicHolder
                                                                                  stepGenerator.setStepWidths(parameters.getDefaultStepWidth(),
                                                                                                              parameters.getMinStepWidth(),
                                                                                                              parameters.getMaxStepWidth());
+                                                                                 stepGenerator.setSnapToHeightmap(parameters.getRequestSnapToHeightmap());
                                                                                  stepGenerator.setMaxStepLengthForwards(parameters.getMaxStepLengthForwards());
                                                                                  stepGenerator.setMaxStepLengthBackwards(parameters.getMaxStepLengthBackwards());
                                                                                  stepGenerator.getCSGParameters()
