@@ -174,7 +174,7 @@ public class StepGeneratorCommandInputManager implements Updatable
          ContinuousStepGeneratorInputCommand command = commandInputManager.pollNewestCommand(ContinuousStepGeneratorInputCommand.class);
          desiredVelocity.setX(command.getForwardVelocity());
          desiredVelocity.setY(command.getLateralVelocity());
-         turningVelocity.set(command.getTurnVelocity());https://github.com/ihmcrobotics/ihmc-crocoddyl-wrapper/pull/434
+         turningVelocity.set(command.getTurnVelocity());
          areVelocitiesNormalized.set(command.getAreVelocitiesNormalized());
          walk.set(command.getWalk());
       }
@@ -190,13 +190,9 @@ public class StepGeneratorCommandInputManager implements Updatable
       else if (commandInputManager.isNewCommandAvailable(ControllerWaypointGoalListCommand.class))
       {
          ControllerWaypointGoalListCommand listCommand = commandInputManager.pollNewestCommand(ControllerWaypointGoalListCommand.class);
-         for (int w = 0; w < listCommand.getNumberOfWaypoints(); w++)
+         for (int i = 0; i < controllerWaypointGoalListCommandConsumer.size(); i++)
          {
-            ControllerWaypointGoalCommand waypoint = listCommand.getWaypoint(w);
-            for (int i = 0; i < controllerWaypointGoalCommandConsumer.size(); i++)
-            {
-               controllerWaypointGoalCommandConsumer.get(i).accept(waypoint);
-            }
+            controllerWaypointGoalListCommandConsumer.get(i).accept(listCommand);
          }
          walk.set(true);
       }
