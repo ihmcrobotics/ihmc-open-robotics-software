@@ -2,20 +2,20 @@ package perception_msgs.msg.dds;
 
 /**
 * 
-* Topic data type of the struct "YOLOv8AnnotationRecordMessage" defined in "YOLOv8AnnotationRecordMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+* Topic data type of the struct "YOLOv8AnnotationInfoMessage" defined in "YOLOv8AnnotationInfoMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
 *
-* This file was automatically generated from YOLOv8AnnotationRecordMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit YOLOv8AnnotationRecordMessage_.idl instead.
+* This file was automatically generated from YOLOv8AnnotationInfoMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit YOLOv8AnnotationInfoMessage_.idl instead.
 *
 */
-public class YOLOv8AnnotationRecordMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.YOLOv8AnnotationRecordMessage>
+public class YOLOv8AnnotationInfoMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.YOLOv8AnnotationInfoMessage>
 {
-   public static final java.lang.String name = "perception_msgs::msg::dds_::YOLOv8AnnotationRecordMessage_";
+   public static final java.lang.String name = "perception_msgs::msg::dds_::YOLOv8AnnotationInfoMessage_";
    
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "674919271136978bf4cc4f888cafd2971ea31e734a17dfe2c539e7d21057e0aa";
+   		return "edcb13cc9c0e4b24d7601e0df3edad3c3ce3a5dcc3f3994284ab3c3fad3a9ee9";
    }
    
    @Override
@@ -28,7 +28,7 @@ public class YOLOv8AnnotationRecordMessagePubSubType implements us.ihmc.pubsub.T
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(perception_msgs.msg.dds.YOLOv8AnnotationRecordMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
+   public void serialize(perception_msgs.msg.dds.YOLOv8AnnotationInfoMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -36,7 +36,7 @@ public class YOLOv8AnnotationRecordMessagePubSubType implements us.ihmc.pubsub.T
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, perception_msgs.msg.dds.YOLOv8AnnotationRecordMessage data) throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, perception_msgs.msg.dds.YOLOv8AnnotationInfoMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -63,12 +63,12 @@ public class YOLOv8AnnotationRecordMessagePubSubType implements us.ihmc.pubsub.T
       return current_alignment - initial_alignment;
    }
 
-   public final static int getCdrSerializedSize(perception_msgs.msg.dds.YOLOv8AnnotationRecordMessage data)
+   public final static int getCdrSerializedSize(perception_msgs.msg.dds.YOLOv8AnnotationInfoMessage data)
    {
       return getCdrSerializedSize(data, 0);
    }
 
-   public final static int getCdrSerializedSize(perception_msgs.msg.dds.YOLOv8AnnotationRecordMessage data, int current_alignment)
+   public final static int getCdrSerializedSize(perception_msgs.msg.dds.YOLOv8AnnotationInfoMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
 
@@ -85,7 +85,7 @@ public class YOLOv8AnnotationRecordMessagePubSubType implements us.ihmc.pubsub.T
       return current_alignment - initial_alignment;
    }
 
-   public static void write(perception_msgs.msg.dds.YOLOv8AnnotationRecordMessage data, us.ihmc.idl.CDR cdr)
+   public static void write(perception_msgs.msg.dds.YOLOv8AnnotationInfoMessage data, us.ihmc.idl.CDR cdr)
    {
       if(data.getObjectClass().length() <= 255)
       cdr.write_type_d(data.getObjectClass());else
@@ -97,7 +97,7 @@ public class YOLOv8AnnotationRecordMessagePubSubType implements us.ihmc.pubsub.T
       perception_msgs.msg.dds.UInt16MultiArrayHackPubSubType.write(data.getMaskPolygons(), cdr);
    }
 
-   public static void read(perception_msgs.msg.dds.YOLOv8AnnotationRecordMessage data, us.ihmc.idl.CDR cdr)
+   public static void read(perception_msgs.msg.dds.YOLOv8AnnotationInfoMessage data, us.ihmc.idl.CDR cdr)
    {
       cdr.read_type_d(data.getObjectClass());	
       data.setConfidence(cdr.read_type_5());
@@ -108,7 +108,7 @@ public class YOLOv8AnnotationRecordMessagePubSubType implements us.ihmc.pubsub.T
    }
 
    @Override
-   public final void serialize(perception_msgs.msg.dds.YOLOv8AnnotationRecordMessage data, us.ihmc.idl.InterchangeSerializer ser)
+   public final void serialize(perception_msgs.msg.dds.YOLOv8AnnotationInfoMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_d("object_class", data.getObjectClass());
       ser.write_type_5("confidence", data.getConfidence());
@@ -119,7 +119,7 @@ public class YOLOv8AnnotationRecordMessagePubSubType implements us.ihmc.pubsub.T
    }
 
    @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.YOLOv8AnnotationRecordMessage data)
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.YOLOv8AnnotationInfoMessage data)
    {
       ser.read_type_d("object_class", data.getObjectClass());
       data.setConfidence(ser.read_type_5("confidence"));
@@ -129,15 +129,15 @@ public class YOLOv8AnnotationRecordMessagePubSubType implements us.ihmc.pubsub.T
 
    }
 
-   public static void staticCopy(perception_msgs.msg.dds.YOLOv8AnnotationRecordMessage src, perception_msgs.msg.dds.YOLOv8AnnotationRecordMessage dest)
+   public static void staticCopy(perception_msgs.msg.dds.YOLOv8AnnotationInfoMessage src, perception_msgs.msg.dds.YOLOv8AnnotationInfoMessage dest)
    {
       dest.set(src);
    }
 
    @Override
-   public perception_msgs.msg.dds.YOLOv8AnnotationRecordMessage createData()
+   public perception_msgs.msg.dds.YOLOv8AnnotationInfoMessage createData()
    {
-      return new perception_msgs.msg.dds.YOLOv8AnnotationRecordMessage();
+      return new perception_msgs.msg.dds.YOLOv8AnnotationInfoMessage();
    }
    @Override
    public int getTypeSize()
@@ -151,24 +151,24 @@ public class YOLOv8AnnotationRecordMessagePubSubType implements us.ihmc.pubsub.T
       return name;
    }
    
-   public void serialize(perception_msgs.msg.dds.YOLOv8AnnotationRecordMessage data, us.ihmc.idl.CDR cdr)
+   public void serialize(perception_msgs.msg.dds.YOLOv8AnnotationInfoMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
    }
 
-   public void deserialize(perception_msgs.msg.dds.YOLOv8AnnotationRecordMessage data, us.ihmc.idl.CDR cdr)
+   public void deserialize(perception_msgs.msg.dds.YOLOv8AnnotationInfoMessage data, us.ihmc.idl.CDR cdr)
    {
       read(data, cdr);
    }
    
-   public void copy(perception_msgs.msg.dds.YOLOv8AnnotationRecordMessage src, perception_msgs.msg.dds.YOLOv8AnnotationRecordMessage dest)
+   public void copy(perception_msgs.msg.dds.YOLOv8AnnotationInfoMessage src, perception_msgs.msg.dds.YOLOv8AnnotationInfoMessage dest)
    {
       staticCopy(src, dest);
    }
 
    @Override
-   public YOLOv8AnnotationRecordMessagePubSubType newInstance()
+   public YOLOv8AnnotationInfoMessagePubSubType newInstance()
    {
-      return new YOLOv8AnnotationRecordMessagePubSubType();
+      return new YOLOv8AnnotationInfoMessagePubSubType();
    }
 }

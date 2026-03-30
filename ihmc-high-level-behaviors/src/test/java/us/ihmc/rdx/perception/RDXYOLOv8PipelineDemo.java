@@ -21,7 +21,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.cuda.CUDADepthImageSegmenter;
 import us.ihmc.perception.cuda.CUDAPointCloudExtractor;
-import us.ihmc.perception.detections.yolo.YOLOv8AnnotationRecord;
+import us.ihmc.perception.detections.yolo.YOLOv8AnnotationInfo;
 import us.ihmc.perception.detections.yolo.YOLOv8Detection;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionList;
 import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
@@ -35,9 +35,9 @@ import us.ihmc.rdx.ui.graphics.RDXImageVisualizer;
 import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudVisualizer;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.sensors.zed.ROS2ZEDSVOPlaybackSensor;
 import us.ihmc.sensors.zed.ZEDImageSensor;
 import us.ihmc.sensors.zed.ZEDModelData;
-import us.ihmc.sensors.zed.ROS2ZEDSVOPlaybackSensor;
 import us.ihmc.zed.global.zed;
 
 import java.io.File;
@@ -335,8 +335,8 @@ public class RDXYOLOv8PipelineDemo
 
       // Get the Object Outline image
       objectOutlineImage = bgrImage.replaceImage(new Mat(bgrImage.getCpuImageMat().size(), bgrImage.getOpenCVType()));
-      YOLOv8AnnotationRecord annotationRecord = YOLOv8AnnotationRecord.fromYOLOv8Detection(detection, bgrImage.getCpuImageMat().size(), 0.005f);
-      annotationRecord.drawMask(bgrImage.getCpuImageMat(), objectOutlineImage.getCpuImageMat(), false, 1.0);
+      YOLOv8AnnotationInfo annotationInfo = YOLOv8AnnotationInfo.fromYOLOv8Detection(detection, bgrImage.getCpuImageMat().size(), 0.005f);
+      annotationInfo.drawMask(bgrImage.getCpuImageMat(), objectOutlineImage.getCpuImageMat(), false, 1.0);
 
       // Find the centroid of the segmented depth
       centroid.set(findCentroid(segmentedDepth));

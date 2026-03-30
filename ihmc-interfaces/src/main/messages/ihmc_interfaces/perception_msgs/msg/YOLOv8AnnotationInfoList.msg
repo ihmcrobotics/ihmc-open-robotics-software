@@ -4,4 +4,4 @@
 ihmc_common_msgs/InstantMessage detection_instant
 
 # Detection annotation records
-YOLOv8AnnotationRecordMessage[] annotation_records
+YOLOv8AnnotationInfoMessage[] annotation_infos

@@ -9,7 +9,7 @@ import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import perception_msgs.msg.dds.TerrainMapMessage;
 import perception_msgs.msg.dds.YOLOv8ExecutorParameters;
-import perception_msgs.msg.dds.YOLOv8ResultAnnotationInfo;
+import perception_msgs.msg.dds.YOLOv8AnnotationInfoList;
 import perception_msgs.msg.dds.ZEDSVOCurrentFileMessage;
 import sensor_msgs.msg.dds.CameraInfo;
 import sensor_msgs.msg.dds.Image;
@@ -47,9 +47,9 @@ public final class PerceptionAPI
    /*
     * YOLO
     */
-   public static final ROS2Topic<YOLOv8ResultAnnotationInfo> YOLO_ANNOTATION_INFO = PERCEPTION_MODULE.withModule("yolo")
-                                                                                                     .withType(YOLOv8ResultAnnotationInfo.class)
-                                                                                                     .withSuffix("annotation_info");
+   public static final ROS2Topic<YOLOv8AnnotationInfoList> YOLO_ANNOTATION_INFO = PERCEPTION_MODULE.withModule("yolo")
+                                                                                                   .withType(YOLOv8AnnotationInfoList.class)
+                                                                                                   .withSuffix("annotation_info_list");
    public static final ROS2Topic<YOLOv8ExecutorParameters> YOLO_PARAMETERS = IHMC_ROOT.withModule("yolo")
                                                                                       .withSuffix("settings")
                                                                                       .withType(YOLOv8ExecutorParameters.class);

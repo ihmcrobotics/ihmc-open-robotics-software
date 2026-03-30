@@ -9,7 +9,7 @@ import us.ihmc.pubsub.TopicDataType;
 /**
        * Information used for annotating a single YOLOv8 detection
        */
-public class YOLOv8AnnotationRecordMessage extends Packet<YOLOv8AnnotationRecordMessage> implements Settable<YOLOv8AnnotationRecordMessage>, EpsilonComparable<YOLOv8AnnotationRecordMessage>
+public class YOLOv8AnnotationInfoMessage extends Packet<YOLOv8AnnotationInfoMessage> implements Settable<YOLOv8AnnotationInfoMessage>, EpsilonComparable<YOLOv8AnnotationInfoMessage>
 {
    /**
             * Class of the detected object
@@ -28,20 +28,20 @@ public class YOLOv8AnnotationRecordMessage extends Packet<YOLOv8AnnotationRecord
             */
    public perception_msgs.msg.dds.UInt16MultiArrayHack mask_polygons_;
 
-   public YOLOv8AnnotationRecordMessage()
+   public YOLOv8AnnotationInfoMessage()
    {
       object_class_ = new java.lang.StringBuilder(255);
       bounding_box_ = new vision_msgs.msg.dds.BoundingBox2D();
       mask_polygons_ = new perception_msgs.msg.dds.UInt16MultiArrayHack();
    }
 
-   public YOLOv8AnnotationRecordMessage(YOLOv8AnnotationRecordMessage other)
+   public YOLOv8AnnotationInfoMessage(YOLOv8AnnotationInfoMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(YOLOv8AnnotationRecordMessage other)
+   public void set(YOLOv8AnnotationInfoMessage other)
    {
       object_class_.setLength(0);
       object_class_.append(other.object_class_);
@@ -110,19 +110,19 @@ public class YOLOv8AnnotationRecordMessage extends Packet<YOLOv8AnnotationRecord
    }
 
 
-   public static Supplier<YOLOv8AnnotationRecordMessagePubSubType> getPubSubType()
+   public static Supplier<YOLOv8AnnotationInfoMessagePubSubType> getPubSubType()
    {
-      return YOLOv8AnnotationRecordMessagePubSubType::new;
+      return YOLOv8AnnotationInfoMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return YOLOv8AnnotationRecordMessagePubSubType::new;
+      return YOLOv8AnnotationInfoMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(YOLOv8AnnotationRecordMessage other, double epsilon)
+   public boolean epsilonEquals(YOLOv8AnnotationInfoMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -142,9 +142,9 @@ public class YOLOv8AnnotationRecordMessage extends Packet<YOLOv8AnnotationRecord
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof YOLOv8AnnotationRecordMessage)) return false;
+      if(!(other instanceof YOLOv8AnnotationInfoMessage)) return false;
 
-      YOLOv8AnnotationRecordMessage otherMyClass = (YOLOv8AnnotationRecordMessage) other;
+      YOLOv8AnnotationInfoMessage otherMyClass = (YOLOv8AnnotationInfoMessage) other;
 
       if (!us.ihmc.idl.IDLTools.equals(this.object_class_, otherMyClass.object_class_)) return false;
 
@@ -161,7 +161,7 @@ public class YOLOv8AnnotationRecordMessage extends Packet<YOLOv8AnnotationRecord
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("YOLOv8AnnotationRecordMessage {");
+      builder.append("YOLOv8AnnotationInfoMessage {");
       builder.append("object_class=");
       builder.append(this.object_class_);      builder.append(", ");
       builder.append("confidence=");

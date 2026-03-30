@@ -4,9 +4,8 @@ import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Size;
-import perception_msgs.msg.dds.YOLOv8ResultAnnotationInfo;
+import perception_msgs.msg.dds.YOLOv8AnnotationInfoList;
 import us.ihmc.commons.thread.RepeatingTaskThread;
-import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.packets.MessageTools;
@@ -42,12 +41,11 @@ public class YOLOv8DetectionExecutor
    private final Map<String, YOLOv8Model> availableModels = new LinkedHashMap<>();
    private final SyncedYOLOv8ExecutorParameters parameters;
 
-   private final ROS2Publisher<YOLOv8ResultAnnotationInfo> annotationInfoPublisher;
+   private final ROS2Publisher<YOLOv8AnnotationInfoList> annotationInfoPublisher;
    private final BooleanSupplier annotationInfoDemanded;
 
    private final RepeatingTaskThread updateThread;
 
-   private final TypedNotification<YOLOv8AnnotationRecord> annotationNotification = new TypedNotification<>();
    private final List<Consumer<List<InstantDetection>>> detectionConsumerCallbacks = new ArrayList<>();
 
    public void addDetectionConsumerCallback(Consumer<List<InstantDetection>> callback)
@@ -204,9 +202,9 @@ public class YOLOv8DetectionExecutor
       if (!yoloInstantDetections.isEmpty())
          detectionConsumerCallbacks.forEach(callback -> callback.accept(yoloInstantDetections));
 
-      // Publish annotation records
+      // Publish annotation information
       if (annotationInfoDemanded.getAsBoolean())
-         publishAnnotationRecords(yoloInstantDetections);
+         publishAnnotationInfo(yoloInstantDetections);
 
       colorImage.release();
       depthImage.release();
@@ -241,9 +239,9 @@ public class YOLOv8DetectionExecutor
       return objectMask.replaceImage(erodedMask);
    }
 
-   private void publishAnnotationRecords(List<InstantDetection> detections)
+   private void publishAnnotationInfo(List<InstantDetection> detections)
    {
-      YOLOv8ResultAnnotationInfo annotationInfo = new YOLOv8ResultAnnotationInfo();
+      YOLOv8AnnotationInfoList annotationInfo = new YOLOv8AnnotationInfoList();
       Instant detectionTime = null;
 
       for (InstantDetection detection : detections)
@@ -253,7 +251,7 @@ public class YOLOv8DetectionExecutor
             if (detectionTime == null)
                detectionTime = yoloInstantDetection.getDetectionTime();
 
-            YOLOv8AnnotationRecord.fromYOLOv8InstantDetection(yoloInstantDetection, 0.005f).toMessage(annotationInfo.getAnnotationRecords().add());
+            YOLOv8AnnotationInfo.fromYOLOv8InstantDetection(yoloInstantDetection, 0.005f).toMessage(annotationInfo.getAnnotationInfos().add());
          }
       }
 

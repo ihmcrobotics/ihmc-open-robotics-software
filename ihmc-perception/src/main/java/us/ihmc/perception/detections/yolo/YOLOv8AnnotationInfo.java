@@ -9,7 +9,7 @@ import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_core.Size;
-import perception_msgs.msg.dds.YOLOv8AnnotationRecordMessage;
+import perception_msgs.msg.dds.YOLOv8AnnotationInfoMessage;
 import std_msgs.msg.dds.MultiArrayDimension;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.BoundingBox2D;
@@ -29,7 +29,7 @@ import us.ihmc.perception.RawImage;
  * @param maskPolygons Array of polygons representing the mask of the detection.
  *                     Each polygon is an integer array containing [x1, y1, x2, y2, ...].
  */
-public record YOLOv8AnnotationRecord(String objectClass, float confidence, BoundingBox2DReadOnly boundingBox, int[][] maskPolygons)
+public record YOLOv8AnnotationInfo(String objectClass, float confidence, BoundingBox2DReadOnly boundingBox, int[][] maskPolygons)
 {
    private static final int FONT = opencv_imgproc.FONT_HERSHEY_DUPLEX;
    private static final int FONT_THICKNESS = 2;
@@ -156,7 +156,7 @@ public record YOLOv8AnnotationRecord(String objectClass, float confidence, Bound
       opencv_imgproc.putText(outputImage, text, textLocation, FONT, FONT_SCALE, textColor, FONT_THICKNESS, TEXT_LINE_TYPE, false);
    }
 
-   public void toMessage(YOLOv8AnnotationRecordMessage message)
+   public void toMessage(YOLOv8AnnotationInfoMessage message)
    {
       message.setObjectClass(objectClass);
       message.setConfidence(confidence);
@@ -183,7 +183,7 @@ public record YOLOv8AnnotationRecord(String objectClass, float confidence, Bound
       message.getMaskPolygons().getLayout().setDataOffset(0);
    }
 
-   public static YOLOv8AnnotationRecord fromMessage(YOLOv8AnnotationRecordMessage message)
+   public static YOLOv8AnnotationInfo fromMessage(YOLOv8AnnotationInfoMessage message)
    {
       double halfSizeX = 0.5 * message.getBoundingBox().getSizeX();
       double halfSizeY = 0.5 * message.getBoundingBox().getSizeY();
@@ -203,10 +203,10 @@ public record YOLOv8AnnotationRecord(String objectClass, float confidence, Bound
          offset += maskPolygons[i].length;
       }
 
-      return new YOLOv8AnnotationRecord(message.getObjectClassAsString(), message.getConfidence(), boundingBox, maskPolygons);
+      return new YOLOv8AnnotationInfo(message.getObjectClassAsString(), message.getConfidence(), boundingBox, maskPolygons);
    }
 
-   public static YOLOv8AnnotationRecord fromYOLOv8Detection(YOLOv8Detection detection, Size detectionImageSize, float precision)
+   public static YOLOv8AnnotationInfo fromYOLOv8Detection(YOLOv8Detection detection, Size detectionImageSize, float precision)
    {
       RawImage maskImage = detection.mask();
       Mat mask = maskImage.getCpuImageMat();
@@ -214,18 +214,18 @@ public record YOLOv8AnnotationRecord(String objectClass, float confidence, Bound
       Mat resizedMask = new Mat();
       YOLOv8Tools.resizeWithCrop(mask, resizedMask, detectionImageSize);
 
-      YOLOv8AnnotationRecord record = new YOLOv8AnnotationRecord(detection.objectClass(),
-                                                                 detection.confidence(),
-                                                                 detection.boundingBox(),
-                                                                 YOLOv8Tools.getMaskAsPolygons(resizedMask, precision));
+      YOLOv8AnnotationInfo info = new YOLOv8AnnotationInfo(detection.objectClass(),
+                                                             detection.confidence(),
+                                                             detection.boundingBox(),
+                                                             YOLOv8Tools.getMaskAsPolygons(resizedMask, precision));
 
       resizedMask.close();
       maskImage.release();
 
-      return record;
+      return info;
    }
 
-   public static YOLOv8AnnotationRecord fromYOLOv8InstantDetection(YOLOv8InstantDetection detection, float precision)
+   public static YOLOv8AnnotationInfo fromYOLOv8InstantDetection(YOLOv8InstantDetection detection, float precision)
    {
       RawImage maskImage = detection.getObjectMask().get();
       RawImage colorImage = detection.getColorImage().get();
@@ -234,15 +234,15 @@ public record YOLOv8AnnotationRecord(String objectClass, float confidence, Bound
       Mat resizedMask = new Mat();
       YOLOv8Tools.resizeWithCrop(mask, resizedMask, colorImage.getCpuImageMat().size());
 
-      YOLOv8AnnotationRecord record = new YOLOv8AnnotationRecord(detection.getDetectedObjectClass(),
-                                                                 (float) detection.getConfidence(),
-                                                                 detection.getBoundingBox(),
-                                                                 YOLOv8Tools.getMaskAsPolygons(resizedMask, precision));
+      YOLOv8AnnotationInfo info = new YOLOv8AnnotationInfo(detection.getDetectedObjectClass(),
+                                                             (float) detection.getConfidence(),
+                                                             detection.getBoundingBox(),
+                                                             YOLOv8Tools.getMaskAsPolygons(resizedMask, precision));
 
       resizedMask.close();
       colorImage.release();
       maskImage.release();
 
-      return record;
+      return info;
    }
 }
