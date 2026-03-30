@@ -1,5 +1,8 @@
 package us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.output;
 
+/**
+ * Processing stage for transforming raw IK output into controller-ready setpoints.
+ */
 public interface KSTOutputProcessor
 {
    void initialize();

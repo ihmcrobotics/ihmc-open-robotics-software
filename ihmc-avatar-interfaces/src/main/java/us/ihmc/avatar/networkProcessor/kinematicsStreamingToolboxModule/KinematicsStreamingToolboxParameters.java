@@ -22,6 +22,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Configurable parameter set for {@link KinematicsStreamingToolboxModule} and its controller pipeline.
+ * Includes timing, solver weights, filtering, output shaping, and default joint/task-space behavior.
+ */
 public class KinematicsStreamingToolboxParameters
 {
    public enum InputStateEstimatorType
