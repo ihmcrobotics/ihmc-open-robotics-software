@@ -783,8 +783,12 @@ public class AvatarMultiThreadingFactory
       {
          // Setup logger
          ArrayList<RegistrySendBufferBuilder> builders = new ArrayList<>();
+
          builders.add(new RegistrySendBufferBuilder(rootRegistry,
-                                                    masterFullRobotModel.getRootJoint().subtreeList(),
+                                                    (YoGraphicGroupDefinition) null));
+
+         builders.add(new RegistrySendBufferBuilder(avatarEstimator.getYoRegistry(),
+                                                    avatarEstimator.getFullRobotModel().getRootJoint().subtreeList(),
                                                     avatarEstimator.getSCS2YoGraphics()));
 
          if (avatarController != null)
@@ -825,7 +829,6 @@ public class AvatarMultiThreadingFactory
             LogTools.error("[Logging] Unable to log locally to disk");
          }
 
-         LogTools.info("[Logging] Logging locally to disk");
       }
       else
       {
