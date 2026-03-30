@@ -110,7 +110,6 @@ public class HumanoidSteppingManager implements Updatable, SCS2YoGraphicHolder
                                                                                  stepGenerator.getCSGParameters()
                                                                                               .setAccountForGroundDrift(parameters.getAccountForGroundDrift());
                                                                               });
-      stepGenerator.setYoComponentProviders();
 
       controllerStatusMessageOutputManager.attachStatusMessageListener(HighLevelStateChangeStatusMessage.class,
                                                                        (statusMessage) -> latestHighLevelControllerStatus.set(HighLevelControllerName.fromByte(
