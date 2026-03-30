@@ -44,6 +44,7 @@ import us.ihmc.rdx.ui.graphics.ros2.foundationPose.RDXIsaacROSFoundationPoseVisu
 import us.ihmc.rdx.ui.graphics.ros2.yolo.RDXROS2YOLOv8Visualizer;
 import us.ihmc.rdx.ui.tools.RDXROS2StatsPanel;
 import us.ihmc.robotics.physics.RobotCollisionModel;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2NodeBuilder.SpecialTransportMode;
@@ -279,7 +280,7 @@ public class RDXBehaviorTestFacilitator
 
             baseUI.getImGuiPanelManager().addPanel(new RDXROS2StatsPanel());
 
-            var yoloVis = new RDXROS2YOLOv8Visualizer("YOLOv8", ros2Node, peerClockEstimator, PerceptionAPI.YOLO_ANNOTATED_IMAGE);
+            var yoloVis = new RDXROS2YOLOv8Visualizer("YOLOv8", ros2Node, peerClockEstimator, PerceptionAPI.EXPERIMENTAL_ZED_COLOR.get(RobotSide.LEFT));
             yoloVis.setActive(true);
             visualizersPanel.addVisualizer(yoloVis);
             var fpVis = new RDXIsaacROSFoundationPoseVisualizer("FoundationPose", ros2Node, peerClockEstimator);
