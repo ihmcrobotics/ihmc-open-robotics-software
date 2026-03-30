@@ -86,18 +86,18 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
             if (ImGui.menuItem(labels.get("Mirror Node")))
                topologyOperationQueue.queueInsertNodeModify(
                      new BehaviorTreeNodeInsertionDefinition<>(BehaviorTreeNodeInsertionType.INSERT_AFTER, duplication.mirrorNode(node), node));
-            if (duplication.supportsDoorSpecificMirroring(node) && ImGui.menuItem(labels.get("Mirror Node (Door Specific)")))
+            if (duplication.supportsDoorMirroring(node) && ImGui.menuItem(labels.get("Mirror Node (Door)")))
                topologyOperationQueue.queueInsertNodeModify(
-                     new BehaviorTreeNodeInsertionDefinition<>(BehaviorTreeNodeInsertionType.INSERT_AFTER, duplication.mirrorNodeDoorSpecific(node), node));
+                     new BehaviorTreeNodeInsertionDefinition<>(BehaviorTreeNodeInsertionType.INSERT_AFTER, duplication.mirrorNodeDoor(node), node));
             if (!(node instanceof RDXLeafNode<?, ?>) && ImGui.menuItem(labels.get("Duplicate Subtree")))
                topologyOperationQueue.queueInsertNodeModify(
                      new BehaviorTreeNodeInsertionDefinition<>(BehaviorTreeNodeInsertionType.INSERT_AFTER, duplication.duplicateSubtree(node, null), node));
             if (!(node instanceof RDXLeafNode<?, ?>) && ImGui.menuItem(labels.get("Mirror Subtree")))
                topologyOperationQueue.queueInsertNodeModify(
                      new BehaviorTreeNodeInsertionDefinition<>(BehaviorTreeNodeInsertionType.INSERT_AFTER, duplication.mirrorSubtree(node, null), node));
-            if (!(node instanceof RDXLeafNode<?, ?>) && ImGui.menuItem(labels.get("Mirror Subtree (Door Specific)")))
+            if (!(node instanceof RDXLeafNode<?, ?>) && ImGui.menuItem(labels.get("Mirror Subtree (Door)")))
                topologyOperationQueue.queueInsertNodeModify(
-                     new BehaviorTreeNodeInsertionDefinition<>(BehaviorTreeNodeInsertionType.INSERT_AFTER, duplication.mirrorSubtreeDoorSpecific(node, null), node));
+                     new BehaviorTreeNodeInsertionDefinition<>(BehaviorTreeNodeInsertionType.INSERT_AFTER, duplication.mirrorSubtreeDoor(node, null), node));
          }
          if (!(node instanceof RDXActionNode<?, ?>))
          {

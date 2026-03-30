@@ -34,7 +34,7 @@ public class RDXBehaviorNodeDuplication
       topologyOperationQueue = behaviorTree.getTopologyChangeQueue();
    }
 
-   public boolean supportsDoorSpecificMirroring(RDXBehaviorTreeNode<?, ?> node)
+   public boolean supportsDoorMirroring(RDXBehaviorTreeNode<?, ?> node)
    {
       boolean supports = false;
       supports |= node instanceof RDXWalkAction;
@@ -42,7 +42,7 @@ public class RDXBehaviorNodeDuplication
       return supports;
    }
 
-   public RDXBehaviorTreeNode<?, ?> mirrorNodeDoorSpecific(RDXBehaviorTreeNode<?, ?> node)
+   public RDXBehaviorTreeNode<?, ?> mirrorNodeDoor(RDXBehaviorTreeNode<?, ?> node)
    {
       ObjectNode jsonNode = nodeToJSONMirror(node);
 
@@ -210,13 +210,13 @@ public class RDXBehaviorNodeDuplication
       return duplicate;
    }
 
-   public RDXBehaviorTreeNode<?, ?> mirrorSubtreeDoorSpecific(RDXBehaviorTreeNode<?, ?> node, RDXBehaviorTreeNode<?, ?> duplicateParent)
+   public RDXBehaviorTreeNode<?, ?> mirrorSubtreeDoor(RDXBehaviorTreeNode<?, ?> node, RDXBehaviorTreeNode<?, ?> duplicateParent)
    {
-      RDXBehaviorTreeNode<?, ?> duplicate = mirrorNodeDoorSpecific(node);
+      RDXBehaviorTreeNode<?, ?> duplicate = mirrorNodeDoor(node);
       if (duplicateParent != null)
          topologyOperationQueue.queueAppendChildModify(duplicateParent, duplicate);
       for (RDXBehaviorTreeNode<?, ?> child : node.getChildren())
-         mirrorSubtreeDoorSpecific(child, duplicate);
+         mirrorSubtreeDoor(child, duplicate);
       return duplicate;
    }
 
