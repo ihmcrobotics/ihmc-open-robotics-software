@@ -286,7 +286,6 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
 
       if (mouseHoveringNodeLine && !isNameBeingEdited && ImGui.isMouseClicked(ImGuiMouseButton.Right))
       {
-         setSelected();
          ImGui.openPopup(nodePopupID);
       }
 
