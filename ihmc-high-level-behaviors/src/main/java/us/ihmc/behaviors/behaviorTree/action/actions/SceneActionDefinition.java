@@ -296,7 +296,7 @@ public class SceneActionDefinition extends ActionNodeDefinition
       return nominalObjectPose;
    }
 
-   public double getYoloConfidenceThreshold()
+   public float getYoloConfidenceThreshold()
    {
       return yoloConfidenceThreshold.getValue();
    }
