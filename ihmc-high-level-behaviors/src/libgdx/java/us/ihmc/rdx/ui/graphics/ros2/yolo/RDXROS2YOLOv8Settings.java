@@ -1,24 +1,25 @@
 package us.ihmc.rdx.ui.graphics.ros2.yolo;
 
 import imgui.ImGui;
-import imgui.type.ImInt;
+import imgui.ImGuiStyle;
+import perception_msgs.msg.dds.YOLOv8ModelInfo;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.perception.detections.yolo.SyncedYOLOv8ExecutorParameters;
+import us.ihmc.rdx.imgui.ImGuiTools;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.ros2.ROS2Node;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public class RDXROS2YOLOv8Settings
 {
    private final SyncedYOLOv8ExecutorParameters parameters;
 
-   private String[] availableModels = new String[]{"None"};
-   private final ImInt selectedModel = new ImInt();
-
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final List<RDXROS2YOLOv8ModelSettings> rdxModelSettings = new ArrayList<>();
 
    public RDXROS2YOLOv8Settings(ROS2Node ros2Node, ROS2PeerClockOffsetEstimator ros2ClockOffsetEstimator)
@@ -31,49 +32,69 @@ public class RDXROS2YOLOv8Settings
    {
       parameters.checkModifiedAndUpdate();
 
-      if (rdxModelSettings.size() != parameters.getAvailableModels().getSize())
+      if (rdxModelSettings.size() != parameters.getModelParameters().size())
       {
          rdxModelSettings.clear();
-         availableModels = new String[parameters.getAvailableModels().getSize() + 1];
-         availableModels[0] = "None";
-
-         AtomicInteger counter = new AtomicInteger(1);
-         parameters.getAvailableModels().getReadOnly().forEach(modelInfo ->
-         {
-            availableModels[counter.getAndIncrement()] = modelInfo.getModelNameAsString();
-            rdxModelSettings.add(new RDXROS2YOLOv8ModelSettings(modelInfo, parameters.getModelParameters()));
-         });
+         parameters.getModelParameters().values().forEach(modelParameters -> rdxModelSettings.add(new RDXROS2YOLOv8ModelSettings(modelParameters)));
       }
 
-      if (parameters.isModified())
-      {
-         int index = 0;
-         for (int i = 0; i < availableModels.length; ++i)
-         {
-            if (availableModels[i].equals(parameters.getModelToRun().getValue()))
-            {
-               index = i;
-               break;
-            }
-         }
-         selectedModel.set(index);
-      }
-
-      if (selectedModel.get() != 0)
-         rdxModelSettings.get(selectedModel.get() - 1).update();
+      rdxModelSettings.forEach(modelSettings -> modelSettings.update(parameters));
    }
+
 
    public void renderSettings()
    {
-      if (ImGui.combo("Model to run", selectedModel, availableModels))
-         parameters.getModelToRun().setValue(selectedModel.get() == 0 ? null : availableModels[selectedModel.get()]);
+      ImGui.beginDisabled(rdxModelSettings.isEmpty());
 
-      if (selectedModel.get() != 0)
+      ImGuiStyle style = new ImGuiStyle();
+      float indent = ImGui.getFrameHeight() + style.getItemInnerSpacingX() + 1.0f;
+
+      // Render each model's settings
+      for (int i = 0; i < rdxModelSettings.size(); ++i)
       {
-         // Render the selected model's settings
-         RDXROS2YOLOv8ModelSettings settings = rdxModelSettings.get(selectedModel.get() - 1);
-         settings.renderSettings();
+         RDXROS2YOLOv8ModelSettings settings = rdxModelSettings.get(i);
+         String modelName = settings.getModelName();
+         boolean enabled = parameters.getModelsToRun().getValue().contains(modelName);
+
+         // Render checkbox for enabling/disabling the model
+         if (ImGui.checkbox(labels.getHidden("enable" + i), enabled))
+         {
+            if (enabled)
+               parameters.getModelsToRun().remove(modelName);
+            else
+               parameters.getModelsToRun().add(modelName);
+         }
+
+         ImGuiTools.previousWidgetTooltip("Enable/Disable");
+         ImGui.sameLine();
+
+         // Render the model's settings
+         if (ImGui.collapsingHeader(modelName))
+         {
+            ImGui.indent(indent);
+            settings.renderSettings();
+            ImGui.unindent(indent);
+         }
       }
+
+      ImGui.endDisabled();
+   }
+
+
+   public boolean anyModelEnabled()
+   {
+      return !parameters.getModelsToRun().getValue().isEmpty();
+   }
+
+   public void enableAllModels()
+   {
+      parameters.getModelsToRun()
+                .addAll(parameters.getAvailableModels().getReadOnly().stream().map(YOLOv8ModelInfo::getModelNameAsString).collect(Collectors.toSet()));
+   }
+
+   public void disableAllModels()
+   {
+      parameters.getModelsToRun().getValueAndModify().clear();
    }
 
    public void destroy()

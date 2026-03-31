@@ -25,11 +25,11 @@ module perception_msgs
         /**
          * List of models to run
          */
-        string model_to_run;
+        sequence<string, 16> models_to_run;
         /**
          * Settings for each model
          */
-        perception_msgs::msg::dds::YOLOv8ModelParameters model_settings;
+        sequence<perception_msgs::msg::dds::YOLOv8ModelParameters, 16> model_settings;
       };
     };
   };

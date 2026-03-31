@@ -1,5 +1,6 @@
 package us.ihmc.rdx.ui.graphics.ros2.yolo;
 
+import imgui.ImGui;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.YOLOv8AnnotationInfoList;
@@ -85,6 +86,12 @@ public class RDXROS2YOLOv8Visualizer extends RDXROS2MultiTopicVisualizer
    @Override
    public void renderImGuiWidgets()
    {
+      if (ImGui.button(labels.get("Enable All")))
+         settings.enableAllModels();
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Disable All")))
+         settings.disableAllModels();
+
       settings.renderSettings();
       imageMessageVisualizer.renderImGuiWidgets();
    }
