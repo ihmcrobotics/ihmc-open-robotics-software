@@ -67,7 +67,6 @@ public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, Walk
 
       previewFootstepPlanningThread = new WalkActionPlanningThread(true, state, definition, scene.getTerrainMap());
       executionFootstepPlanningThread = new WalkActionPlanningThread(false, state, definition, scene.getTerrainMap());
-
    }
 
    @Override

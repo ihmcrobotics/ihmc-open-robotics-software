@@ -1,6 +1,7 @@
 package us.ihmc.rdx.behaviorTree;
 
 import imgui.ImGui;
+import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiMouseButton;
 import us.ihmc.behaviors.behaviorTree.control.ai2r.AI2RNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
@@ -85,8 +86,6 @@ public class RDXBehaviorTreeNodeCreationMenu
          ImGui.indent();
 
          float align = ImGui.getCursorPosX() + ImGui.getFontSize() * 2.0f;
-         ImGui.setCursorPosX(align);
-         renderNodeCreationClickable(relativeNode, insertionType, "Basic Node", BehaviorTreeNodeDefinition.class, null);
          sequenceIcon.render(ImGui.getTextLineHeight());
          ImGui.sameLine();
          renderNodeCreationClickable(relativeNode, insertionType, "Action Sequence", ActionSequenceDefinition.class, null);
@@ -124,6 +123,10 @@ public class RDXBehaviorTreeNodeCreationMenu
          renderNodeCreationClickable(relativeNode, insertionType, "Door Traversal", DoorTraversalDefinition.class, null);
          ImGui.setCursorPosX(align);
          renderNodeCreationClickable(relativeNode, insertionType, "Building Exploration", BuildingExplorationDefinition.class, null);
+         ImGui.setCursorPosX(align);
+         ImGui.pushStyleColor(ImGuiCol.Text, ImGui.getColorU32(ImGuiCol.TextDisabled));
+         renderNodeCreationClickable(relativeNode, insertionType, "Basic Node", BehaviorTreeNodeDefinition.class, null);
+         ImGui.popStyleColor();
 
          ImGui.unindent();
 
@@ -134,70 +137,52 @@ public class RDXBehaviorTreeNodeCreationMenu
          ImGui.popFont();
          ImGui.indent();
 
+         ImGui.setCursorPosX(align);
+         renderNodeCreationClickable(relativeNode, insertionType, "Wait", WaitActionDefinition.class, null);
+         ImGui.setCursorPosX(align);
+         renderNodeCreationClickable(relativeNode, insertionType, "Neck", NeckActionDefinition.class, null);
+         ImGui.setCursorPosX(ImGui.getCursorPosX() + ImGui.getFontSize() * 0.3f);
+         armIcon.render(RobotSide.LEFT, false, false);
+         ImGui.sameLine();
+         ImGui.setCursorPosX(align);
+         for (RobotSide side : RobotSide.values)
+            renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), ArmActionDefinition.class, side);
+         ImGui.text("Arm");
+         ImGui.setCursorPosX(align);
+         for (RobotSide side : RobotSide.values)
+            renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), ScrewPrimitiveActionDefinition.class, side);
+         ImGui.text("Screw Primitive");
+         ImGui.setCursorPosX(ImGui.getCursorPosX() + ImGui.getFontSize() * 0.3f);
+         handIcon.render(RobotSide.LEFT, ImGui.getTextLineHeight(), false);
+         ImGui.sameLine();
+         ImGui.setCursorPosX(align);
+         for (RobotSide side : RobotSide.values)
+            renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), AbilityHandActionDefinition.class, side);
+         ImGui.text("Ability Hand");
+         ImGui.setCursorPosX(ImGui.getCursorPosX() + ImGui.getFontSize() * 0.3f);
+         gripperIcon.render(RobotSide.LEFT, ImGui.getTextLineHeight());
+         ImGui.sameLine();
+         ImGui.setCursorPosX(align);
+         for (RobotSide side : RobotSide.values)
+            renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), EZGripperActionDefinition.class, side);
+         ImGui.text("EZGripper");
+         ImGui.setCursorPosX(align);
+         renderNodeCreationClickable(relativeNode, insertionType, "Spine", SpineActionDefinition.class, null);
+         ImGui.setCursorPosX(align);
+         renderNodeCreationClickable(relativeNode, insertionType, "Pelvis", PelvisActionDefinition.class, null);
          ImGui.setCursorPosX(ImGui.getCursorPosX() + ImGui.getFontSize() * 0.3f);
          footstepsIcon.render(ImGui.getTextLineHeight());
          ImGui.sameLine();
          ImGui.setCursorPosX(align);
          renderNodeCreationClickable(relativeNode, insertionType, "Walk", WalkActionDefinition.class, null);
          ImGui.setCursorPosX(align);
-         ImGui.text("Leg: ");
          for (RobotSide side : RobotSide.values)
-         {
-            ImGui.sameLine();
             renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), LegActionDefinition.class, side);
-         }
-         ImGui.setCursorPosX(ImGui.getCursorPosX() + ImGui.getFontSize() * 0.3f);
-         armIcon.render(RobotSide.LEFT, false, false);
-         ImGui.sameLine();
+         ImGui.text("Leg");
          ImGui.setCursorPosX(align);
-         ImGui.text("Arm: ");
          for (RobotSide side : RobotSide.values)
-         {
-            ImGui.sameLine();
-            renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), ArmActionDefinition.class, side);
-         }
-         ImGui.setCursorPosX(ImGui.getCursorPosX() + ImGui.getFontSize() * 0.3f);
-         handIcon.render(RobotSide.LEFT, ImGui.getTextLineHeight(), false);
-         ImGui.sameLine();
-         ImGui.setCursorPosX(align);
-         ImGui.text("Ability Hand: ");
-         for (RobotSide side : RobotSide.values)
-         {
-            ImGui.sameLine();
-            renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), AbilityHandActionDefinition.class, side);
-         }
-         ImGui.setCursorPosX(ImGui.getCursorPosX() + ImGui.getFontSize() * 0.3f);
-         gripperIcon.render(RobotSide.LEFT, ImGui.getTextLineHeight());
-         ImGui.sameLine();
-         ImGui.setCursorPosX(align);
-         ImGui.text("EZGripper: ");
-         for (RobotSide side : RobotSide.values)
-         {
-            ImGui.sameLine();
-            renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), EZGripperActionDefinition.class, side);
-         }
-         ImGui.setCursorPosX(align);
-         renderNodeCreationClickable(relativeNode, insertionType, "Neck", NeckActionDefinition.class, null);
-         ImGui.setCursorPosX(align);
-         renderNodeCreationClickable(relativeNode, insertionType, "Spine", SpineActionDefinition.class, null);
-         ImGui.setCursorPosX(align);
-         renderNodeCreationClickable(relativeNode, insertionType, "Pelvis", PelvisActionDefinition.class, null);
-         ImGui.setCursorPosX(align);
-         renderNodeCreationClickable(relativeNode, insertionType, "Wait", WaitActionDefinition.class, null);
-         ImGui.setCursorPosX(align);
-         ImGui.text("Screw Primitive: ");
-         for (RobotSide side : RobotSide.values)
-         {
-            ImGui.sameLine();
-            renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), ScrewPrimitiveActionDefinition.class, side);
-         }
-         ImGui.setCursorPosX(align);
-         ImGui.textDisabled("Hand Wrench: ");
-         for (RobotSide side : RobotSide.values)
-         {
-            ImGui.sameLine();
             renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), HandWrenchActionDefinition.class, side);
-         }
+         ImGui.textDisabled("Hand Wrench");
       }
       ImGui.unindent();
       ImGui.spacing();
@@ -242,6 +227,8 @@ public class RDXBehaviorTreeNodeCreationMenu
             complete(insertionDefinition);
          }
       }
+      if (side != null)
+         ImGui.sameLine();
    }
 
    private void complete(BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>> insertionDefinition)

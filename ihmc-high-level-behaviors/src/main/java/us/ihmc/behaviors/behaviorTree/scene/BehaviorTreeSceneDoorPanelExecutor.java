@@ -34,7 +34,7 @@ public class BehaviorTreeSceneDoorPanelExecutor extends BehaviorTreeSceneObjectE
       {
          Vector3DBasics mechanismPosition = mechanismDetection.getFilteredTransform().getTranslation();
 
-         // Set orientation to Z-up, then yaw so Y axis points from mechanism to panel
+         // Set orientation to Z-up, then yaw so X axis points from mechanism to panel
          mechanismToPanel.set(panelDetection.getFilteredTransform().getTranslation());
          mechanismToPanel.sub(mechanismPosition);
          double yaw = Math.atan2(mechanismToPanel.getY(), mechanismToPanel.getX());

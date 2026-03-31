@@ -8,6 +8,8 @@ import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import org.apache.commons.lang3.function.TriFunction;
 import org.bytedeco.opencv.opencv_core.GpuMat;
+import org.bytedeco.opencv.opencv_core.Mat;
+import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulation;
@@ -22,6 +24,7 @@ import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -31,7 +34,10 @@ import us.ihmc.perception.RawImage;
 import us.ihmc.perception.cuda.CUDATools;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseCommunicatorMap;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
+import us.ihmc.perception.imageMessage.CompressionType;
 import us.ihmc.perception.imageMessage.PixelFormat;
+import us.ihmc.perception.opencv.OpenCVTools;
+import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -44,9 +50,11 @@ import us.ihmc.rdx.ui.graphics.ros2.foundationPose.RDXIsaacROSFoundationPoseVisu
 import us.ihmc.rdx.ui.graphics.ros2.yolo.RDXROS2YOLOv8Visualizer;
 import us.ihmc.rdx.ui.tools.RDXROS2StatsPanel;
 import us.ihmc.robotics.physics.RobotCollisionModel;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2NodeBuilder.SpecialTransportMode;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.scs2.simulation.collision.CollidableHelper;
 import us.ihmc.sensors.zed.ZEDImageSensor;
 import us.ihmc.sensors.zed.ZEDModelData;
@@ -57,6 +65,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.zed.global.zed;
 import us.ihmc.zed.library.ZEDJavaAPINativeLibrary;
 
+import java.time.Instant;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -78,6 +87,7 @@ public class RDXBehaviorTestFacilitator
    private final Notification robotReady = new Notification();
 
    private ZEDSVOPlaybackSensor zedSensor;
+   private final ROS2Node relayNode = new ROS2NodeBuilder().specialTransportMode(SpecialTransportMode.INTRAPROCESS_ONLY).build("facilitator_relay");
 
    private ROS2BehaviorTreeExecutor behaviorTree;
    private Function<ROS2BehaviorTreeExecutor, Notification> behaviorTreeAccessorOneTime = null;
@@ -175,6 +185,8 @@ public class RDXBehaviorTestFacilitator
 
       behaviorTree = new ROS2BehaviorTreeExecutor(ros2, syncedRobot, kinematicsSimulationBuilder, zedSensor, yolo, foundationPose, null, peerClockEstimator);
 
+      ImageMessage relayMessage = new ImageMessage();
+      ROS2Publisher<ImageMessage> relayPublisher = relayNode.createPublisher(PerceptionAPI.EXPERIMENTAL_ZED_COLOR.get(RobotSide.LEFT));
       RepeatingTaskThread yoloThread = new RepeatingTaskThread("yolo", () ->
       {
          try
@@ -182,6 +194,14 @@ public class RDXBehaviorTestFacilitator
             zedSensor.waitForGrab();
             RawImage colorImage = zedSensor.getImage(ZEDImageSensor.LEFT_COLOR_IMAGE_KEY);
             RawImage depthImage = zedSensor.getImage(ZEDImageSensor.DEPTH_IMAGE_KEY);
+
+            MessageTools.toMessage(Instant.now(), relayMessage.getAcquisitionTime());
+            Mat frameMat = colorImage.getCpuImageMat();
+            PerceptionMessageTools.packImageMessageData(relayMessage, frameMat.data().limit(OpenCVTools.dataSize(frameMat)));
+            PerceptionMessageTools.packImageMessageMetadata(relayMessage, colorImage);
+            relayMessage.setCompressionType(CompressionType.UNCOMPRESSED.toByte());
+            relayPublisher.publish(relayMessage);
+
             if (colorImage.getPixelFormat() != PixelFormat.BGR8)
             {
                GpuMat bgrMat = new GpuMat();
@@ -279,7 +299,7 @@ public class RDXBehaviorTestFacilitator
 
             baseUI.getImGuiPanelManager().addPanel(new RDXROS2StatsPanel());
 
-            var yoloVis = new RDXROS2YOLOv8Visualizer("YOLOv8", ros2Node, peerClockEstimator, PerceptionAPI.YOLO_ANNOTATED_IMAGE);
+            var yoloVis = new RDXROS2YOLOv8Visualizer("YOLOv8", ros2Node, relayNode, peerClockEstimator, PerceptionAPI.EXPERIMENTAL_ZED_COLOR.get(RobotSide.LEFT));
             yoloVis.setActive(true);
             visualizersPanel.addVisualizer(yoloVis);
             var fpVis = new RDXIsaacROSFoundationPoseVisualizer("FoundationPose", ros2Node, peerClockEstimator);
