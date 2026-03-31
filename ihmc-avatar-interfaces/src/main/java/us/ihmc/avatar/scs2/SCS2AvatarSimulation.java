@@ -64,6 +64,7 @@ public class SCS2AvatarSimulation
    private boolean showGUI;
    private boolean automaticallyStartSimulation;
    private RealtimeROS2Node realtimeROS2Node;
+   private ROS2Heartbeat heartbeat;
 
    private boolean systemExitOnDestroy = true;
    private boolean javaFXThreadImplicitExit = true;
@@ -139,6 +140,12 @@ public class SCS2AvatarSimulation
       {
          simulationConstructionSet.shutdownSession();
          simulationConstructionSet = null;
+      }
+
+      if (heartbeat != null)
+      {
+         heartbeat.destroy();
+         heartbeat = null;
       }
 
       if (systemExitOnDestroy)
@@ -618,7 +625,8 @@ public class SCS2AvatarSimulation
       if (realtimeROS2Node == null)
          return;
 
-      ROS2Heartbeat heartbeat = new ROS2Heartbeat(realtimeROS2Node, CSG_HEARTBEAT_TOPIC);
+      if (heartbeat == null)
+         heartbeat = new ROS2Heartbeat(realtimeROS2Node, CSG_HEARTBEAT_TOPIC);
       heartbeat.setAlive(true);
    }
 

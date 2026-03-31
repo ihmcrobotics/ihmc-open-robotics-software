@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ControllerReleaseGoalCommand;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ControllerWaypointGoalCommand;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ControllerWaypointGoalListCommand;
+import us.ihmc.commons.DeadbandTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -51,9 +52,12 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
    private static final double DEFAULT_MAX_BACKWARD_SPEED = 0.4;
    private static final double DEFAULT_MAX_LATERAL_SPEED = 0.6;
    private static final double DEFAULT_MAX_TURNING_SPEED = 1.0;
+   private static final double DEFAULT_MIN_SPEED = 0.25;
+   private static final double DEFAULT_MIN_TURNING_SPEED = 0.1;
 
    private static final double DEFAULT_K_RADIUS = 2.0;
    private static final double DEFAULT_K_ANGLE = 1.5;
+   private static final double DEFAULT_ANGLE_DEADBAND = Math.toRadians(3.0);
 
    private static final double DEFAULT_DISTANCE_TO_GOAL_THRESHOLD_TO_STOP = 0.02;
    private static final double DEFAULT_ANGLE_TO_GOAL_THRESHOLD_TO_STOP = Math.toRadians(5.0);
@@ -101,9 +105,12 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
    private final YoDouble maxLateralSpeed = new YoDouble("maxLateralSpeed", registry);
    private final YoDouble maxBackwardSpeed = new YoDouble("maxBackwardSpeed", registry);
    private final YoDouble maxTurningSpeed = new YoDouble("maxTurningSpeed", registry);
+   private final YoDouble minSpeed = new YoDouble("minSpeed", registry);
+   private final YoDouble minTurningSpeed = new YoDouble("minTurningSpeed", registry);
 
    private final YoDouble kDistance = new YoDouble("kRadius", registry);
    private final YoDouble kAngle = new YoDouble("kAngle", registry);
+   private final YoDouble angleDeadband = new YoDouble("angleDeadband", registry);
    private final YoDouble distanceToMatchGoalAngle = new YoDouble("distanceToMatchGoalAngle", registry);
    private final YoDouble distanceToFaceGoal = new YoDouble("distanceToFaceGoal", registry);
 
@@ -167,8 +174,12 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       maxBackwardSpeed.set(DEFAULT_MAX_BACKWARD_SPEED);
       maxLateralSpeed.set(DEFAULT_MAX_LATERAL_SPEED);
       maxTurningSpeed.set(DEFAULT_MAX_TURNING_SPEED);
+      minSpeed.set(DEFAULT_MIN_SPEED);
+      minTurningSpeed.set(DEFAULT_MIN_TURNING_SPEED);
+
       kDistance.set(DEFAULT_K_RADIUS);
       kAngle.set(DEFAULT_K_ANGLE);
+      angleDeadband.set(DEFAULT_ANGLE_DEADBAND);
 
       distanceToGoalThresholdToStop.set(DEFAULT_DISTANCE_TO_GOAL_THRESHOLD_TO_STOP);
       angleToGoalThresholdToStop.set(DEFAULT_ANGLE_TO_GOAL_THRESHOLD_TO_STOP);
@@ -540,8 +551,10 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       rateLimitedNormalizedRadialSpeed.set(MathTools.clamp(normalizedRadialSpeed.getValue(), 0.0, maxAllowedSpeed));
 
       // P-controller on heading: angular velocity proportional to heading error
-      double turningVelocity = -kAngle.getValue() * angleToGoalHeading;
+      double turningVelocity = -kAngle.getValue() * DeadbandTools.applyDeadband(angleDeadband.getDoubleValue(), angleToGoalHeading);
       turningVelocity = MathTools.clamp(turningVelocity, maxTurningSpeed.getDoubleValue());
+      if (Math.abs(turningVelocity) > 0.0 && Math.abs(turningVelocity) < minTurningSpeed.getValue())
+         turningVelocity = Math.signum(turningVelocity) * minTurningSpeed.getValue();
       desiredAngularVelocity.set(0.0, 0.0, turningVelocity);
 
       // Angle from the robot's forward axis to the goal direction, measured in the robot's body frame
@@ -559,8 +572,15 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       double vx = goalDirectionX * xSpeedLimit * turningScalar;
       double vy = goalDirectionY * maxLateralSpeed.getValue() * turningScalar;
 
+
       desiredVelocity.set(vx, vy);
-      desiredSpeed.set(desiredVelocity.norm());
+      double desiredSpeed = desiredVelocity.norm();
+      if (desiredSpeed < minSpeed.getValue() && desiredSpeed > 1e-3)
+      {
+         desiredVelocity.scale(minSpeed.getValue() / desiredSpeed);
+         desiredSpeed = minSpeed.getDoubleValue();
+      }
+      this.desiredSpeed.set(desiredSpeed);
 
       desiredLinearVelocity.set(desiredVelocity);
       currentPose.getOrientation().transform(desiredLinearVelocity);
