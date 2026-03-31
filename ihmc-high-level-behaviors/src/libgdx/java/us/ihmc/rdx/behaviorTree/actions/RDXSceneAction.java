@@ -42,6 +42,7 @@ public class RDXSceneAction extends RDXActionNode<SceneActionState, SceneActionD
    private final String[] availableYOLOModelNames;
    private final String[][] availableYOLOClasses;
    private final ImFloatWrapper timeoutWidget;
+   private final ImFloatWrapper yoloConfidenceWidget;
    private final ImIntegerWrapper minHistorySizeWidget;
    private final RDXSelectablePose3DGizmo nominalObjectPoseGizmo;
 
@@ -86,6 +87,9 @@ public class RDXSceneAction extends RDXActionNode<SceneActionState, SceneActionD
       timeoutWidget = new ImFloatWrapper(definition::getTimeout,
                                          definition::setTimeout,
                                          imFloat -> ImGui.inputFloat(labels.get("Timeout"), imFloat));
+      yoloConfidenceWidget = new ImFloatWrapper(definition::getYoloConfidenceThreshold,
+                                                definition::setYoloConfidenceThreshold,
+                                                imFloat -> ImGui.inputFloat(labels.get("Min Confidence"), imFloat));
       minHistorySizeWidget = new ImIntegerWrapper(definition::getMinimumHistorySize,
                                                   definition::setMinimumHistorySize,
                                                   imInteger -> ImGui.inputInt(labels.get("Minimum History Size"), imInteger));
@@ -165,6 +169,7 @@ public class RDXSceneAction extends RDXActionNode<SceneActionState, SceneActionD
 
          ImGui.pushItemWidth(100.0f);
          timeoutWidget.renderImGuiWidget();
+         yoloConfidenceWidget.renderImGuiWidget();
          minHistorySizeWidget.renderImGuiWidget();
          ImGui.checkbox(labels.get("Adjust Nominal Object Pose"), nominalObjectPoseGizmo.getSelected());
          ImGui.popItemWidth();
