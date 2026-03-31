@@ -25,7 +25,6 @@ public class RDXROS2YOLOv8Settings
    {
       CRDTInfo crdtInfo = new CRDTInfo(ROS2ActorDesignation.OPERATOR, ros2ClockOffsetEstimator);
       parameters = new SyncedYOLOv8ExecutorParameters(ros2Node, crdtInfo);
-      parameters.requestSendFullData();
    }
 
    public void update()
