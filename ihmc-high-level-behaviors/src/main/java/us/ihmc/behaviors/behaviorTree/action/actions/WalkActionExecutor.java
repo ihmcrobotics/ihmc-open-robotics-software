@@ -8,6 +8,7 @@ import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectState;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectType;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Plane3D;
@@ -56,8 +57,9 @@ public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, Walk
    private final Throttler previewPlanningThrottler = new Throttler().setPeriod(1.0);
    private final QuickFootstepPlanner quickFootstepPlanner = new QuickFootstepPlanner();
    private final RRTConnectPathPlanner rrtConnectPathPlanner = new RRTConnectPathPlanner();
-   private final WalkActionPlanningThread previewFootstepPlanningThread;
-   private final WalkActionPlanningThread executionFootstepPlanningThread;
+   private boolean startedCreatingPlanners = false;
+   private WalkActionPlanningThread previewFootstepPlanningThread;
+   private WalkActionPlanningThread executionFootstepPlanningThread;
    private final SideDependentList<FramePose3D> liveGoalFeetPoses = new SideDependentList<>(() -> new FramePose3D());
 
    public WalkActionExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
@@ -65,9 +67,6 @@ public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, Walk
       super(new WalkActionState(id, rootNode.getState()), rootNode);
 
       walkingControllerParameters = robotModel.getWalkingControllerParameters();
-
-      previewFootstepPlanningThread = new WalkActionPlanningThread(true, state, definition, scene.getTerrainMap());
-      executionFootstepPlanningThread = new WalkActionPlanningThread(false, state, definition, scene.getTerrainMap());
    }
 
    @Override
@@ -77,9 +76,25 @@ public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, Walk
 
       Point3DReadOnly definitionGoalStancePoint = definition.getGoalStancePoint().getValueReadOnly();
       Point3DReadOnly definitionGoalFocalPoint = definition.getGoalFocalPoint().getValueReadOnly();
-      boolean stanceEqualsGoal = definitionGoalStancePoint.geometricallyEquals(definitionGoalFocalPoint, 1e-4);
+      boolean stanceEqualsFocal = definitionGoalStancePoint.geometricallyEquals(definitionGoalFocalPoint, 1e-4);
 
-      state.setCanExecute(state.areFramesInWorld() && !stanceEqualsGoal);
+      if (definition.getPlannerType().getValue() != QUICK && !startedCreatingPlanners)
+      {
+         startedCreatingPlanners = true;
+         ThreadTools.startAsDaemon(() ->
+         {
+            WalkActionPlanningThread previewFootstepPlanningThread = new WalkActionPlanningThread(true, state, definition, scene.getTerrainMap());
+            WalkActionPlanningThread executionFootstepPlanningThread = new WalkActionPlanningThread(false, state, definition, scene.getTerrainMap());
+            this.executionFootstepPlanningThread = executionFootstepPlanningThread;
+            this.previewFootstepPlanningThread = previewFootstepPlanningThread; // Set this last because it's the check that it's complete
+         }, "CreatePlanners");
+      }
+
+      boolean canExecute = state.areFramesInWorld();
+      canExecute &= !stanceEqualsFocal;
+      boolean plannersReady = definition.getPlannerType().getValue() == QUICK || previewFootstepPlanningThread != null;
+      canExecute &= plannersReady;
+      state.setCanExecute(canExecute);
       if (state.getCanExecute() && !definition.getIsManuallyPlaced())
       {
          FramePoint3D frameStancePoint = new FramePoint3D();
@@ -158,12 +173,10 @@ public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, Walk
                   }
                }
             }
-            else
+            else if (previewFootstepPlanningThread != null)
             {
                if (previewPlanningThrottler.run())
-               {
                   previewFootstepPlanningThread.triggerPlan(syncedRobot, liveGoalFeetPoses);
-               }
 
                if (previewFootstepPlanningThread.getResultNotification().poll())
                {
@@ -191,8 +204,10 @@ public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, Walk
             cantExecuteMessage += "definition.getParentFrameName() = %s\n".formatted(definition.getParentFrameName());
             cantExecuteMessage += "state.getGoalFrame().isChildOfWorld() = %b\n".formatted(state.getGoalFrame().isChildOfWorld());
          }
-         if (!stanceEqualsGoal)
-            cantExecuteMessage += "stanceEqualsGoal = false\n";
+         if (!stanceEqualsFocal)
+            cantExecuteMessage += "stanceEqualsFocal = false\n";
+         if (!plannersReady)
+            cantExecuteMessage += "planners still initializing\n";
       }
 
       for (RobotSide side : RobotSide.values)
@@ -218,7 +233,8 @@ public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, Walk
       state.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
       state.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
 
-      if (state.areFramesInWorld())
+      boolean plannersReady = definition.getPlannerType().getValue() == QUICK || previewFootstepPlanningThread != null;
+      if (state.areFramesInWorld() && plannersReady)
       {
          if (definition.getIsManuallyPlaced())
          {
