@@ -11,9 +11,9 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
-import us.ihmc.sensors.CameraIntrinsics;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
+import us.ihmc.sensors.CameraIntrinsics;
 import us.ihmc.sensors.ImageSensor;
 import us.ihmc.zed.SL_CalibrationParameters;
 import us.ihmc.zed.SL_InitParameters;
@@ -24,6 +24,8 @@ import us.ihmc.zed.SL_Vector3;
 import us.ihmc.zed.ZEDException;
 import us.ihmc.zed.library.ZEDJavaAPINativeLibrary;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Instant;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -45,21 +47,21 @@ public class ZEDImageSensor extends ImageSensor
 
    public static final int OUTPUT_IMAGE_COUNT = 3;
 
-   private static final int DEFAULT_RESOLUTION = SL_RESOLUTION_HD720;
-   private static final int DEFAULT_FPS = 15;
    private static final float MILLIMETER_TO_METERS = 0.001f;
 
    private final int cameraID;
-   private final int serialNumber;
-   private final ZEDModelData zedModel;
-   private final int slInputType;
-   private final int slDepthMode;
-   private final int resolution;
-   private int fps;
+
+   // sl_open_camera parameters
+   private final SL_InitParameters zedInitParameters = new SL_InitParameters();
+   private int serialNumber = 0;
+   private String svoPath = "";
+   private String remoteStreamingAddress = "";
+   private int remoteStreamingPort = 0;
+
+   // sl_enable_streaming related
    private int bitrate;
-   private String remoteStreamingAddress;
-   private int remoteStreamingPort;
    private final int localStreamingPort = nextStreamingPort.getAndAdd(2);
+   private int fps;
 
    private final RawImage[] grabbedImages = new RawImage[OUTPUT_IMAGE_COUNT];
    private final Pointer[] slMatPointers = new Pointer[OUTPUT_IMAGE_COUNT];
@@ -77,8 +79,7 @@ public class ZEDImageSensor extends ImageSensor
    private boolean lastGrabFailed = false;
    private long lastGrabTimestamp;
 
-   protected final SL_InitParameters zedInitParameters = new SL_InitParameters();
-   protected final SL_RuntimeParameters zedRuntimeParameters = new SL_RuntimeParameters();
+   private final SL_RuntimeParameters zedRuntimeParameters = new SL_RuntimeParameters();
 
    private boolean positionalTrackingEnabled = false;
    private final MutableReferenceFrame trackedSensorFrame;
@@ -86,68 +87,140 @@ public class ZEDImageSensor extends ImageSensor
    private final SL_Quaternion sensorRotation = new SL_Quaternion();
    private final SL_Vector3 sensorTranslation = new SL_Vector3();
 
-   public ZEDImageSensor(int cameraID, ZEDModelData zedModel, int slInputType, int slDepthMode)
-   {
-      this(cameraID, zedModel, slInputType, slDepthMode, DEFAULT_RESOLUTION, DEFAULT_FPS);
-   }
-
-   public ZEDImageSensor(int cameraID, ZEDModelData zedModel, int slInputType, int slDepthMode, int resolution, int fps)
-   {
-      this(cameraID, 0, zedModel, slInputType, slDepthMode, resolution, fps);
-   }
-
    /**
-    * See the documentation for the available resolutions and frame rates:
-    * <ul>
-    *    <li>{@link us.ihmc.zed.global.zed#SL_RESOLUTION_QHDPLUS}</li>
-    *    <li>{@link us.ihmc.zed.global.zed#SL_RESOLUTION_HD2K}</li>
-    *    <li>{@link us.ihmc.zed.global.zed#SL_RESOLUTION_HD1080}</li>
-    *    <li>{@link us.ihmc.zed.global.zed#SL_RESOLUTION_HD1200}</li>
-    *    <li>{@link us.ihmc.zed.global.zed#SL_RESOLUTION_HD720}</li>
-    *    <li>{@link us.ihmc.zed.global.zed#SL_RESOLUTION_SVGA}</li>
-    *    <li>{@link us.ihmc.zed.global.zed#SL_RESOLUTION_VGA}</li>
-    * </ul>
+    * The most basic constructor that sets parameters to some default value.
+    *
+    * @param cameraID    ID assigned to this camera when opening.
+    * @param zedModel    Model of the ZED camera.
+    * @param slInputType One of {@code SL_INPUT_TYPE_*} from {@link us.ihmc.zed.global.zed}.
     */
-   public ZEDImageSensor(int cameraID, int serialNumber, ZEDModelData zedModel, int slInputType, int slDepthMode, int resolution, int fps)
+   public ZEDImageSensor(int cameraID, ZEDModelData zedModel, int slInputType)
    {
       super(zedModel.name());
 
       this.cameraID = cameraID;
-      this.serialNumber = serialNumber;
-      this.zedModel = zedModel;
-      this.slInputType = slInputType;
-      this.slDepthMode = slDepthMode;
-      this.resolution = resolution;
-      this.fps = fps;
 
       trackedSensorFrame = new MutableReferenceFrame(getSensorName() + "_tracked", ReferenceFrameTools.getWorldFrame());
 
       sensorCenterToCameraDistanceY = (float) zedModel.getCenterToCameraDistance();
       updateReferenceFrames();
 
-      // Set runtime parameters to default values
+      // Set runtime parameters
       zedRuntimeParameters.reference_frame(SL_REFERENCE_FRAME_CAMERA);
-      zedRuntimeParameters.enable_depth(slDepthMode != SL_DEPTH_MODE_NONE);
+      zedRuntimeParameters.enable_depth(true);
+      zedRuntimeParameters.enable_fill_mode(false);
       zedRuntimeParameters.confidence_threshold(50);
       zedRuntimeParameters.texture_confidence_threshold(100);
       zedRuntimeParameters.remove_saturated_areas(true);
-      zedRuntimeParameters.enable_fill_mode(false);
+
+      // Set init parameters
+      zedInitParameters.camera_device_id(cameraID);
+      zedInitParameters.input_type(slInputType);
+      zedInitParameters.resolution(SL_RESOLUTION_AUTO);
+      zedInitParameters.camera_fps(30);
+      zedInitParameters.depth_mode(SL_DEPTH_MODE_NEURAL);
+      zedInitParameters.depth_stabilization(1);
+      zedInitParameters.coordinate_unit(SL_UNIT_METER);
+      zedInitParameters.coordinate_system(SL_COORDINATE_SYSTEM_RIGHT_HANDED_Z_UP_X_FWD);
+      zedInitParameters.sdk_verbose(0); // false
+      zedInitParameters.camera_disable_self_calib(false);
+      zedInitParameters.camera_image_flip(SL_FLIP_MODE_OFF);
+      zedInitParameters.enable_right_side_measure(false);
+      zedInitParameters.sensors_required(true);
+      zedInitParameters.enable_image_enhancement(true);
+      zedInitParameters.open_timeout_sec(5.0f);
+      zedInitParameters.async_grab_camera_recovery(false);
+      zedInitParameters.enable_image_validity_check(false);
    }
 
    /**
-    * Constructor to connect to a remote ZED SDK instance
+    * Constructor used to open a camera via physical connection.
+    * <p>
+    * See the documentation for the available resolutions and frame rates:
+    * <ul>
+    *    <li>{@link us.ihmc.zed.global.zed#SL_RESOLUTION_HD4K}</li>
+    *    <li>{@link us.ihmc.zed.global.zed#SL_RESOLUTION_QHDPLUS}</li>
+    *    <li>{@link us.ihmc.zed.global.zed#SL_RESOLUTION_HD2K}</li>
+    *    <li>{@link us.ihmc.zed.global.zed#SL_RESOLUTION_HD1536}</li>
+    *    <li>{@link us.ihmc.zed.global.zed#SL_RESOLUTION_HD1080}</li>
+    *    <li>{@link us.ihmc.zed.global.zed#SL_RESOLUTION_HD1200}</li>
+    *    <li>{@link us.ihmc.zed.global.zed#SL_RESOLUTION_HD720}</li>
+    *    <li>{@link us.ihmc.zed.global.zed#SL_RESOLUTION_SVGA}</li>
+    *    <li>{@link us.ihmc.zed.global.zed#SL_RESOLUTION_VGA}</li>
+    *    <li>{@link us.ihmc.zed.global.zed#SL_RESOLUTION_AUTO}</li>
+    * </ul>
+    *
+    * @param cameraID     ID assigned to this camera when opening.
+    * @param serialNumber Serial number of camera to open.
+    * @param zedModel     Model of the ZED camera.
+    * @param slInputType  Either {@link us.ihmc.zed.global.zed#SL_INPUT_TYPE_USB} or {@link us.ihmc.zed.global.zed#SL_INPUT_TYPE_GMSL}.
+    * @param slDepthMode  One of {@code SL_DEPTH_MODE_*} from {@link us.ihmc.zed.global.zed}.
+    * @param resolution   One of {@code SL_RESOLUTION_*} from {@link us.ihmc.zed.global.zed}.
+    * @param fps          Frame rate to run the camera at,
+    */
+   public ZEDImageSensor(int cameraID, int serialNumber, ZEDModelData zedModel, int slInputType, int slDepthMode, int resolution, int fps)
+   {
+      this(cameraID, zedModel, slInputType);
+
+      this.serialNumber = serialNumber;
+      this.fps = fps;
+
+      // Set some more runtime and init parameters
+      zedRuntimeParameters.enable_depth(slDepthMode != SL_DEPTH_MODE_NONE);
+      zedInitParameters.resolution(resolution);
+      zedInitParameters.camera_fps(fps);
+      zedInitParameters.depth_mode(slDepthMode);
+   }
+
+   /**
+    * Constructor to connect to a remote ZED SDK stream.
+    *
+    * @param cameraID               ID assigned to this camera when opening.
+    * @param zedModel               Model of the ZED camera.
+    * @param slDepthMode            One of {@code SL_DEPTH_MODE_*} from {@link us.ihmc.zed.global.zed}.
+    * @param remoteStreamingAddress Address of the remote ZED SDK stream.
+    * @param remoteStreamingPort    Port of the remote ZED SDK stream.
     */
    public ZEDImageSensor(int cameraID, ZEDModelData zedModel, int slDepthMode, String remoteStreamingAddress, int remoteStreamingPort)
    {
-      this(cameraID, zedModel, SL_INPUT_TYPE_STREAM, slDepthMode);
+      this(cameraID, zedModel, SL_INPUT_TYPE_STREAM);
 
       this.remoteStreamingAddress = remoteStreamingAddress;
       this.remoteStreamingPort = remoteStreamingPort;
+
+      // Set some more runtime and init parameters
+      zedRuntimeParameters.enable_depth(slDepthMode != SL_DEPTH_MODE_NONE);
+      zedInitParameters.depth_mode(slDepthMode);
+   }
+
+   protected ZEDImageSensor(int cameraID, ZEDModelData zedModel, int slDepthMode, String svoPath)
+   {
+      this(cameraID, zedModel, SL_INPUT_TYPE_SVO);
+
+      if (!Files.exists(Path.of(svoPath)))
+         throw new RuntimeException("SVO file does not exist");
+
+      this.svoPath = svoPath;
+
+      // Set some more runtime and init parameters
+      zedRuntimeParameters.enable_depth(slDepthMode != SL_DEPTH_MODE_NONE);
+      zedInitParameters.depth_mode(slDepthMode);
+      zedInitParameters.svo_real_time_mode(true);
    }
 
    public void setTrackedPoseOffset(RigidBodyTransformReadOnly offset)
    {
       trackedPoseOffset.set(offset);
+   }
+
+   public SL_InitParameters getInitParameters()
+   {
+      return zedInitParameters;
+   }
+
+   public SL_RuntimeParameters getRuntimeParameters()
+   {
+      return zedRuntimeParameters;
    }
 
    private void updateReferenceFrames()
@@ -179,8 +252,8 @@ public class ZEDImageSensor extends ImageSensor
 
          sl_create_camera(cameraID);
 
-         // Set the initialization parameters
-         setInitParameters(zedInitParameters);
+         if (zedInitParameters.depth_mode() == SL_DEPTH_MODE_NEURAL || zedInitParameters.depth_mode() == SL_DEPTH_MODE_NEURAL_PLUS)
+            LogTools.info("ZED SDK will use neural depth mode. This uses significant GPU resources.");
 
          // Open the camera
          int returnCode = openCamera();
@@ -199,12 +272,12 @@ public class ZEDImageSensor extends ImageSensor
          fps = (int) sl_get_camera_fps(cameraID);
          bitrate = calculateBitrate(imageWidth, imageHeight, fps);
 
-         if (slInputType != SL_INPUT_TYPE_STREAM)
+         if (zedInitParameters.input_type() != SL_INPUT_TYPE_STREAM)
          {
-            int gopSize = -1;
-            int adaptativeBitrate = 0;
+            int defaultGOPSize = -1;
+            int disableAdaptiveBitrate = 0;
             int chunkSize = 16084;
-            sl_enable_streaming(cameraID, SL_STREAMING_CODEC_H264, bitrate, (short) localStreamingPort, gopSize, adaptativeBitrate, chunkSize, fps);
+            sl_enable_streaming(cameraID, SL_STREAMING_CODEC_H265, bitrate, (short) localStreamingPort, defaultGOPSize, disableAdaptiveBitrate, chunkSize, fps);
          }
 
          leftSensorIntrinsics.setWidth(imageWidth);
@@ -242,35 +315,13 @@ public class ZEDImageSensor extends ImageSensor
       return true;
    }
 
-   protected void setInitParameters(SL_InitParameters parametersToSet)
-   {
-      parametersToSet.camera_fps(fps);
-      parametersToSet.resolution(resolution);
-      parametersToSet.input_type(slInputType);
-      parametersToSet.camera_device_id(cameraID);
-      parametersToSet.camera_image_flip(SL_FLIP_MODE_OFF);
-      parametersToSet.camera_disable_self_calib(false);
-      parametersToSet.enable_image_enhancement(true);
-      if (slDepthMode == SL_DEPTH_MODE_NEURAL || slDepthMode == SL_DEPTH_MODE_NEURAL_PLUS)
-         LogTools.info("ZED SDK will use neural depth mode. This uses significant GPU resources.");
-      parametersToSet.depth_mode(slDepthMode);
-      parametersToSet.depth_stabilization(1);
-      parametersToSet.depth_maximum_distance(zedModel.getMaximumDepthDistance());
-      parametersToSet.depth_minimum_distance(zedModel.getMinimumDepthDistance());
-      parametersToSet.coordinate_unit(SL_UNIT_METER);
-      parametersToSet.coordinate_system(SL_COORDINATE_SYSTEM_RIGHT_HANDED_Z_UP_X_FWD);
-      parametersToSet.sdk_gpu_id(-1); // Will find and use the best available GPU
-      parametersToSet.sdk_verbose(0); // false
-      parametersToSet.sensors_required(true);
-      parametersToSet.enable_right_side_measure(false);
-      parametersToSet.open_timeout_sec(5.0f);
-      parametersToSet.async_grab_camera_recovery(false);
-   }
-
    protected int openCamera()
    {
-      if (slInputType == SL_INPUT_TYPE_STREAM)
-         return sl_open_camera(cameraID, zedInitParameters, serialNumber, "", remoteStreamingAddress, remoteStreamingPort, "", "", "");
+      int inputType = zedInitParameters.input_type();
+      if (inputType == SL_INPUT_TYPE_SVO)
+         return sl_open_camera(cameraID, zedInitParameters, 0, svoPath, "", 0, "", "", "");
+      else if (inputType == SL_INPUT_TYPE_STREAM)
+         return sl_open_camera(cameraID, zedInitParameters, 0, "", remoteStreamingAddress, remoteStreamingPort, "", "", "");
       else
          return sl_open_camera(cameraID, zedInitParameters, serialNumber, "", "", 0, "", "", "");
    }
