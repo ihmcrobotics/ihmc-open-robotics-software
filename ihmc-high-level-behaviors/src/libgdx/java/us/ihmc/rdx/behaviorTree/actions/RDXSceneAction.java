@@ -129,7 +129,8 @@ public class RDXSceneAction extends RDXActionNode<SceneActionState, SceneActionD
          ImGui.endCombo();
       }
 
-      if (definition.getSceneActionType().getValue() != SceneActionType.CLEAR_SCENE)
+      if (definition.getSceneActionType().getValue() != SceneActionType.CLEAR_SCENE
+       && definition.getSceneActionType().getValue() != SceneActionType.FREEZE_SCENE)
       {
          BehaviorTreeSceneObjectDefinition objectDefinition = definition.getSceneObjectDefinition();
 

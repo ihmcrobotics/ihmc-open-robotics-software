@@ -27,7 +27,8 @@ public class SceneActionDefinition extends ActionNodeDefinition
       SETUP_OBJECT,
       FREEZE_OBJECT,
       DELETE_OBJECT,
-      CLEAR_SCENE;
+      CLEAR_SCENE,
+      FREEZE_SCENE;
 
       public static final SceneActionType[] values = values();
    }
@@ -81,7 +82,8 @@ public class SceneActionDefinition extends ActionNodeDefinition
       super.saveToFile(jsonNode);
 
       jsonNode.put("sceneActionType", sceneActionType.getValue().name());
-      if (sceneActionType.getValue() != SceneActionType.CLEAR_SCENE)
+      if (sceneActionType.getValue() != SceneActionType.CLEAR_SCENE
+       && sceneActionType.getValue() != SceneActionType.FREEZE_SCENE)
       {
          ObjectNode sceneObjectNode = jsonNode.putObject("sceneObjectDefinition");
          sceneObjectDefinition.saveToFile(sceneObjectNode);
@@ -113,7 +115,8 @@ public class SceneActionDefinition extends ActionNodeDefinition
       super.loadFromFile(jsonNode);
 
       sceneActionType.setValue(SceneActionType.valueOf(jsonNode.get("sceneActionType").textValue()));
-      if (sceneActionType.getValue() != SceneActionType.CLEAR_SCENE)
+      if (sceneActionType.getValue() != SceneActionType.CLEAR_SCENE
+       && sceneActionType.getValue() != SceneActionType.FREEZE_SCENE)
       {
          sceneObjectDefinition.loadFromFile(jsonNode.get("sceneObjectDefinition"));
          timeout.setValue((float) jsonNode.get("timeout").asDouble());

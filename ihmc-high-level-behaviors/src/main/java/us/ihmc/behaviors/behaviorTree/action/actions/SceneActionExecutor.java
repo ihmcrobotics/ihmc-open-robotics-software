@@ -55,11 +55,18 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
       state.setElapsedExecutionTime(timer.getElapsedTime());
 
       boolean isClearScene = definition.getSceneActionType().getValue() == SceneActionType.CLEAR_SCENE;
+      boolean isFreezeScene = definition.getSceneActionType().getValue() == SceneActionType.FREEZE_SCENE;
       boolean isFreeze = definition.getSceneActionType().getValue() == SceneActionType.FREEZE_OBJECT;
       boolean isDelete = definition.getSceneActionType().getValue() == SceneActionType.DELETE_OBJECT;
       if (isClearScene)
       {
          scene.removeAllObjects();
+         state.setIsExecuting(false);
+      }
+      else if (isFreezeScene)
+      {
+         for (BehaviorTreeSceneObjectState object : scene.getObjects())
+            object.freeze();
          state.setIsExecuting(false);
       }
       else if (isFreeze || isDelete)
@@ -69,20 +76,17 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
          {
             if (definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.DOOR_PANEL
              && object instanceof BehaviorTreeSceneDoorPanelExecutor)
-            {
                matchedObject = object;
-            }
+            else if (definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.DOOR_FRAME
+                  && object instanceof BehaviorTreeSceneDoorFrameExecutor)
+               matchedObject = object;
             else if (definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.FOUNDATION_POSE
                   && object.getObjectType() == BehaviorTreeSceneObjectType.FOUNDATION_POSE
                   && object.getFoundationPoseObjectType() == definition.getSceneObjectDefinition().getFoundationPoseObjectType())
-            {
                matchedObject = object;
-            }
             else if (definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.YOLO_ONLY
                   && object.getYoloClassName().equals(definition.getSceneObjectDefinition().getYoloClassName()))
-            {
                matchedObject = object;
-            }
          }
 
          if (matchedObject == null)
