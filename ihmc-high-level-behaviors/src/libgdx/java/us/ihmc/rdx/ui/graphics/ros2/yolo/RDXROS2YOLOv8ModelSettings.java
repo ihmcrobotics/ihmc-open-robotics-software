@@ -10,9 +10,8 @@ import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import imgui.type.ImString;
-import perception_msgs.msg.dds.YOLOv8ModelInfo;
 import us.ihmc.commons.MathTools;
-import us.ihmc.idl.IDLSequence.StringBuilderHolder;
+import us.ihmc.communication.crdt.LatestTimestampModifiable;
 import us.ihmc.perception.detections.yolo.SyncedYOLOv8ModelParameters;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -24,8 +23,6 @@ public class RDXROS2YOLOv8ModelSettings
 {
    private static final int TABLE_COLUMN_COUNT = 6;
    private static final float MAX_TABLE_HEIGHT = 200.0f;
-
-   private final SyncedYOLOv8ModelParameters syncedParameters;
 
    private final String modelName;
    private final int detectableObjectClassCount;
@@ -44,18 +41,17 @@ public class RDXROS2YOLOv8ModelSettings
    // Adjustors for individual object classes
    private final RDXYOLOv8ModelClassSettings[] classSettings;
 
-   public RDXROS2YOLOv8ModelSettings(YOLOv8ModelInfo modelInfo, SyncedYOLOv8ModelParameters syncedParameters)
+   public RDXROS2YOLOv8ModelSettings(SyncedYOLOv8ModelParameters syncedParameters)
    {
-      this.modelName = modelInfo.getModelNameAsString();
-      this.syncedParameters = syncedParameters;
+      this.modelName = syncedParameters.getModelName();
 
-      StringBuilderHolder detectableClasses = modelInfo.getDetectableObjectClasses();
-      detectableObjectClassCount = detectableClasses.size();
+      String[] detectableClasses = syncedParameters.getDetectableObjectClasses();
+      detectableObjectClassCount = detectableClasses.length;
 
       // Initialize parameters
       classSettings = new RDXYOLOv8ModelClassSettings[detectableObjectClassCount];
       for (int i = 0; i < detectableObjectClassCount; ++i)
-         classSettings[i] = new RDXYOLOv8ModelClassSettings(i, detectableClasses.getString(i), syncedParameters);
+         classSettings[i] = new RDXYOLOv8ModelClassSettings(i, detectableClasses[i], syncedParameters);
 
       Arrays.sort(classSettings, Comparator.comparing(settings -> settings.className));
    }
@@ -65,11 +61,10 @@ public class RDXROS2YOLOv8ModelSettings
       return modelName;
    }
 
-   public void update()
+   public void update(LatestTimestampModifiable latestTimestampModifiable)
    {
-      syncedParameters.checkModified();
       for (RDXYOLOv8ModelClassSettings classSetting : classSettings)
-         classSetting.update();
+         classSetting.update(latestTimestampModifiable);
    }
 
    public void renderSettings()
@@ -219,9 +214,9 @@ public class RDXROS2YOLOv8ModelSettings
          outlierThreshold = new ImFloat(2.0f);
       }
 
-      public void update()
+      public void update(LatestTimestampModifiable latestTimestampModifiable)
       {
-         if (modelParameters.isModified())
+         if (latestTimestampModifiable.isModified())
          {
             enable.set(!modelParameters.getIgnoredObjectClasses().getValueReadOnly(classIndex));
             confidenceThreshold.set(modelParameters.getConfidenceThresholds().getValueReadOnly(classIndex));

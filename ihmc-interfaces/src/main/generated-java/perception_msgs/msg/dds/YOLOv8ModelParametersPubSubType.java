@@ -15,7 +15,7 @@ public class YOLOv8ModelParametersPubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "0ca92c67a3b490dc24aa7ce736d76f7ada86bab351a12bf5742b446c72136058";
+   		return "8b2e39292064cb9541915ce4b1c4506fa442921aec6c1ce007c92aae144b6554";
    }
    
    @Override
@@ -54,6 +54,7 @@ public class YOLOv8ModelParametersPubSubType implements us.ihmc.pubsub.TopicData
 
       current_alignment += ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (96 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (96 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -80,6 +81,8 @@ public class YOLOv8ModelParametersPubSubType implements us.ihmc.pubsub.TopicData
       int initial_alignment = current_alignment;
 
       current_alignment += ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.getCdrSerializedSize(data.getLatestTimestampModifiable(), current_alignment);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getModelName().length() + 1;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getIgnoredObjectClasses().size() * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -111,6 +114,10 @@ public class YOLOv8ModelParametersPubSubType implements us.ihmc.pubsub.TopicData
    public static void write(perception_msgs.msg.dds.YOLOv8ModelParameters data, us.ihmc.idl.CDR cdr)
    {
       ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.write(data.getLatestTimestampModifiable(), cdr);
+      if(data.getModelName().length() <= 255)
+      cdr.write_type_d(data.getModelName());else
+          throw new RuntimeException("model_name field exceeds the maximum length: %d > %d".formatted(data.getModelName().length(), 255));
+
       if(data.getIgnoredObjectClasses().size() <= 96)
       cdr.write_type_e(data.getIgnoredObjectClasses());else
           throw new RuntimeException("ignored_object_classes field exceeds the maximum length: %d > %d".formatted(data.getIgnoredObjectClasses().size(), 96));
@@ -138,6 +145,7 @@ public class YOLOv8ModelParametersPubSubType implements us.ihmc.pubsub.TopicData
    public static void read(perception_msgs.msg.dds.YOLOv8ModelParameters data, us.ihmc.idl.CDR cdr)
    {
       ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.read(data.getLatestTimestampModifiable(), cdr);	
+      cdr.read_type_d(data.getModelName());	
       cdr.read_type_e(data.getIgnoredObjectClasses());	
       cdr.read_type_e(data.getConfidenceThresholds());	
       cdr.read_type_e(data.getMaskThresholds());	
@@ -153,6 +161,7 @@ public class YOLOv8ModelParametersPubSubType implements us.ihmc.pubsub.TopicData
    {
       ser.write_type_a("latest_timestamp_modifiable", new ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType(), data.getLatestTimestampModifiable());
 
+      ser.write_type_d("model_name", data.getModelName());
       ser.write_type_e("ignored_object_classes", data.getIgnoredObjectClasses());
       ser.write_type_e("confidence_thresholds", data.getConfidenceThresholds());
       ser.write_type_e("mask_thresholds", data.getMaskThresholds());
@@ -166,6 +175,7 @@ public class YOLOv8ModelParametersPubSubType implements us.ihmc.pubsub.TopicData
    {
       ser.read_type_a("latest_timestamp_modifiable", new ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType(), data.getLatestTimestampModifiable());
 
+      ser.read_type_d("model_name", data.getModelName());
       ser.read_type_e("ignored_object_classes", data.getIgnoredObjectClasses());
       ser.read_type_e("confidence_thresholds", data.getConfidenceThresholds());
       ser.read_type_e("mask_thresholds", data.getMaskThresholds());

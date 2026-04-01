@@ -209,7 +209,7 @@ public class RDXBehaviorTestFacilitator
                colorImage.release();
                colorImage = colorImage.replaceImage(bgrMat, PixelFormat.BGR8);
             }
-            yolo.runModel(colorImage, depthImage);
+            yolo.runNextModel(colorImage, depthImage);
             foundationPose.updateCommunicators();
             if (pointCloudVisualizer != null)
             {
