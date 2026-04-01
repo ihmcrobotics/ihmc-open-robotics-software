@@ -6,7 +6,9 @@ import controller_msgs.msg.dds.ContinuousStepGeneratorStatusMessage;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGenerator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGeneratorParametersBasics;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition;
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ROS2Tools;
@@ -15,15 +17,22 @@ import us.ihmc.ros2.QueuedROS2Subscription;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
-
 import java.util.function.Consumer;
 
+/**
+ * This helper facilitates communication with the {@link ContinuousStepGenerator} in the AvatarStepGeneratorThread
+ * via the {@link StepGeneratorAPIDefinition} and {@link StepGeneratorNetworkSubscriber}. It can send walking inputs using
+ * {@link ContinuousStepGeneratorInputMessage}, and walking parameters using {@link ContinuousStepGeneratorParametersCommand}.
+ * Large discrete jumps in CSG parameters are prevented, since the {@link ContinuousStepGeneratorParametersCommand} is regularly
+ * reset to current parameter values which are provided via a subscription to {@link ContinuousStepGeneratorStatusMessage}.
+ * Additionally, both message types can optionally be published at a lower, throttled rate in order to decrease network traffic.
+ *
+ * @author Stefan Fasano
+ */
 public class CSGROS2CommunicationHelper
 {
-   /**
-    * This defines the update thread rate for information being sent over ROS2. The reason this is a very low frequency is because
-    * we only have a limited amount of networking bandwidth when using WIFI.
-    */
+   // This defines the update thread rate for information being sent over ROS2. The reason this is a very low frequency is that
+   // we only have a limited amount of networking bandwidth when using WIFI.
    private static final double THROTTLER_THREAD_HERTZ = 11.0;
 
    public static final ROS2Topic<Empty> CSG_HEARTBEAT_TOPIC = new ROS2Topic<>().withPrefix("ihmc")
@@ -153,7 +162,7 @@ public class CSGROS2CommunicationHelper
 
       // CSG status message
       csgStatusMessage.setIsWalking(false);
-      csgStatusMessage.setIsInUnitVelocities(false);
+      csgStatusMessage.setAreVelocitiesNormalized(true);
       csgStatusMessage.setCurrentForwardVelocity(0.0);
       csgStatusMessage.setCurrentLateralVelocity(0.0);
       csgStatusMessage.setCurrentTurnVelocity(0.0);

@@ -98,7 +98,7 @@ public class VelocityBasedSteppingPlugin implements HumanoidSteppingPlugin
       double desiredVelocityY = desiredVelocity.getY();
       double turningVelocity = desiredTurningVelocityProvider.getTurningVelocity();
 
-      if (!desiredVelocityProvider.isUnitVelocity())
+      if (!desiredVelocityProvider.areVelocitiesNormalized())
       {
          if (desiredVelocityX > 0)
             desiredVelocityX = inputParameters.getMaxDesiredForwardVelocity() * MathTools.clamp(desiredVelocityX, 1.0);
@@ -113,7 +113,7 @@ public class VelocityBasedSteppingPlugin implements HumanoidSteppingPlugin
          desiredVelocityY = MathTools.clamp(desiredVelocityY, inputParameters.getMaxDesiredLateralVelocity());
       }
 
-      if (desiredTurningVelocityProvider.isUnitVelocity())
+      if (desiredTurningVelocityProvider.areVelocitiesNormalized())
       {
          turningVelocity = inputParameters.getMaxDesiredTurningVelocity() * MathTools.clamp(turningVelocity, 1.0);
       }

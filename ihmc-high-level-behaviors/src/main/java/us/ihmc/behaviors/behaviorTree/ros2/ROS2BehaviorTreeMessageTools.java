@@ -126,7 +126,7 @@ public class ROS2BehaviorTreeMessageTools
          else if (nodeState instanceof BuildingExplorationState buildingExplorationState)
          {
             treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.BUILDING_EXPLORATION);
-            treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getDoorTraversals().size());
+            treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getBuildingExplorations().size());
             buildingExplorationState.toMessage(treeStateMessage.getBuildingExplorations().add());
          }
          else if (nodeState instanceof NeckActionState neckActionState)

@@ -187,6 +187,11 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
       return imageSensor;
    }
 
+   public YOLOv8DetectionExecutor getYOLO()
+   {
+      return yolo;
+   }
+
    public TerrainMapData getTerrainMap()
    {
       return terrainMapData;

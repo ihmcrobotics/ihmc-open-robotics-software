@@ -10,7 +10,7 @@ public class ContinuousStepGeneratorInputCommand implements Command<ContinuousSt
    private double forwardVelocity;
    private double lateralVelocity;
    private double turnVelocity;
-   private boolean unitVelocities;
+   private boolean areVelocitiesNormalized;
 
    @Override
    public void clear()
@@ -30,7 +30,7 @@ public class ContinuousStepGeneratorInputCommand implements Command<ContinuousSt
       forwardVelocity = other.forwardVelocity;
       lateralVelocity = other.lateralVelocity;
       turnVelocity = other.turnVelocity;
-      unitVelocities = other.unitVelocities;
+      areVelocitiesNormalized = other.areVelocitiesNormalized;
    }
 
    @Override
@@ -41,7 +41,7 @@ public class ContinuousStepGeneratorInputCommand implements Command<ContinuousSt
       forwardVelocity = message.getForwardVelocity();
       lateralVelocity = message.getLateralVelocity();
       turnVelocity = message.getTurnVelocity();
-      unitVelocities = message.getUnitVelocities();
+      areVelocitiesNormalized = message.getAreVelocitiesNormalized();
    }
 
    @Override
@@ -76,9 +76,9 @@ public class ContinuousStepGeneratorInputCommand implements Command<ContinuousSt
       this.turnVelocity = turnVelocity;
    }
 
-   public void setUnitVelocities(boolean unitVelocities)
+   public void setAreVelocitiesNormalized(boolean areVelocitiesNormalized)
    {
-      this.unitVelocities = unitVelocities;
+      this.areVelocitiesNormalized = areVelocitiesNormalized;
    }
 
    @Override
@@ -87,7 +87,7 @@ public class ContinuousStepGeneratorInputCommand implements Command<ContinuousSt
       return sequenceId;
    }
 
-   public boolean isWalk()
+   public boolean getWalk()
    {
       return walk;
    }
@@ -107,8 +107,8 @@ public class ContinuousStepGeneratorInputCommand implements Command<ContinuousSt
       return turnVelocity;
    }
 
-   public boolean isUnitVelocities()
+   public boolean getAreVelocitiesNormalized()
    {
-      return unitVelocities;
+      return areVelocitiesNormalized;
    }
 }

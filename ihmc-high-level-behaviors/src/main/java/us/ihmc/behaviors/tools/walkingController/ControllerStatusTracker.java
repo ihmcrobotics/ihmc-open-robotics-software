@@ -21,6 +21,7 @@ import us.ihmc.tools.Timer;
 import java.util.ArrayList;
 import java.util.List;
 
+import static us.ihmc.communication.HumanoidControllerAPI.getLowFrequencyTopic;
 import static us.ihmc.communication.HumanoidControllerAPI.getTopic;
 
 /**
@@ -60,9 +61,9 @@ public class ControllerStatusTracker
       robotModel.addRobotConfigurationDataReceivedCallback(this::acceptRobotConfigurationData);
       ros2Node.createSubscription2(getTopic(HighLevelStateChangeStatusMessage.class, robotName), this::acceptHighLevelStateChangeStatusMessage);
       ros2Node.createSubscription2(getTopic(WalkingControllerFailureStatusMessage.class, robotName), this::acceptWalkingControllerFailureStatusMessage);
-      ros2Node.createSubscription2(getTopic(PlanOffsetStatus.class, robotName), this::acceptPlanOffsetStatus);
+      ros2Node.createSubscription2(getLowFrequencyTopic(PlanOffsetStatus.class, robotName), this::acceptPlanOffsetStatus);
       ros2Node.createSubscription2(getTopic(ControllerCrashNotificationPacket.class, robotName), this::acceptControllerCrashNotificationPacket);
-      ros2Node.createSubscription2(getTopic(CapturabilityBasedStatus.class, robotName), this::acceptCapturabilityBasedStatus);
+      ros2Node.createSubscription2(getLowFrequencyTopic(CapturabilityBasedStatus.class, robotName), this::acceptCapturabilityBasedStatus);
       ros2Node.createSubscription2(getTopic(WalkingStatusMessage.class, robotName), this::acceptWalkingStatusMessage);
    }
 

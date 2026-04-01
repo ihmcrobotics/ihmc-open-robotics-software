@@ -21,19 +21,19 @@ public interface DesiredTurningVelocityProvider
    double getTurningVelocity();
 
    /**
-    * Whether this velocity provider provides unit velocity or actual velocity in [m/s].
+    * Whether this velocity provider provides normalized velocities (from [-1.0, 1.0]) or actual velocities in [m/s].
     * <ul>
     * <li>if {@code false}, it is assumed that {@link #getTurningVelocity()} provides a desired
     * velocity in [m/s].
     * <li>if {@code true}, it is assumed that {@link #getTurningVelocity()} provides a desired velocity
-    * contained in [-1, 1], which is then to be scaled by the min/max velocity achievable given the
+    * contained in [-1.0, 1.0], which is then to be scaled by the min/max velocity achievable given the
     * stepping parameters.
     * </ul>
-    * 
-    * @return whether this provider uses unit velocity or not. Default value is {@code false}.
+    *
+    * @return whether this provider uses normalized velocities or not. Default value is {@code true}.
     */
-   default boolean isUnitVelocity()
+   default boolean areVelocitiesNormalized()
    {
-      return false;
+      return true;
    }
 }

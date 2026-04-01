@@ -1,4 +1,4 @@
-package us.ihmc.rdx.csg;
+package us.ihmc.rdx.velocityBasedLocomotion;
 
 import controller_msgs.msg.dds.ContinuousStepGeneratorInputMessage;
 import controller_msgs.msg.dds.ContinuousStepGeneratorParametersMessage;
@@ -7,12 +7,10 @@ import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.CSGROS2CommunicationHelper;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
-import us.ihmc.ros2.ROS2Node;
 
 public class RDXCSGPanel extends RDXPanel
 {
@@ -68,7 +66,7 @@ public class RDXCSGPanel extends RDXPanel
 
       if (PUBLISH_IN_VELOCITY_UNITS)
       {
-         csgInputCommand.setUnitVelocities(true);
+         csgInputCommand.setAreVelocitiesNormalized(false);
 
          double currentStepTime = csgStatusMessage.getCurrentSwingDuration() + csgStatusMessage.getCurrentTransferDuration();
          double currentMaxStepLengthForwards = csgStatusMessage.getCurrentMaxStepLengthForwards();
@@ -86,7 +84,7 @@ public class RDXCSGPanel extends RDXPanel
       }
       else
       {
-         csgInputCommand.setUnitVelocities(false);
+         csgInputCommand.setAreVelocitiesNormalized(true);
 
          maxVelocityX = 1.0;
          minVelocityX = -1.0;

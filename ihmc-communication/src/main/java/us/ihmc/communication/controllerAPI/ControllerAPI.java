@@ -67,7 +67,7 @@ public final class ControllerAPI
       inputMessageClasses.add(HandWrenchTrajectoryMessage.class);
 
       // Commands supported by the fast-walking controller, not in this repo
-      inputMessageClasses.add(DirectionalControlInputMessage.class);
+      inputMessageClasses.add(VelocityBasedWalkingInputMessage.class);
       inputMessageClasses.add(FastWalkingGaitParametersMessage.class);
 
       // Commands supported by multi-contact controller, not in this repo
@@ -162,6 +162,11 @@ public final class ControllerAPI
          return baseTopic.withOutput().withTypeName(messageClass).withQoS(getQoS(messageClass));
       else
          return baseTopic.withTypeName(messageClass).withQoS(getQoS(messageClass));
+   }
+
+   public static <T> ROS2Topic<T> getLowFrequencyTopic(ROS2Topic<?> baseTopic, Class<T> messageClass)
+   {
+      return getTopic(baseTopic, messageClass).withSuffix("lf");
    }
 
    public static ROS2QosProfile getQoS(Class<?> messageClass)

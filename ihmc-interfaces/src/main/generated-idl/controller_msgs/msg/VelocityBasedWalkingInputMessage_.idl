@@ -1,0 +1,42 @@
+#ifndef __controller_msgs__msg__VelocityBasedWalkingInputMessage__idl__
+#define __controller_msgs__msg__VelocityBasedWalkingInputMessage__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * Message responsible for sending desired velocity setpoints (forward, lateral, and turning) to walking
+       * controllers that take this form of input
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::VelocityBasedWalkingInputMessage_")
+      struct VelocityBasedWalkingInputMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long long sequence_id;
+        /**
+         * If true, start stepping. If false, stand in place
+         */
+        boolean walk;
+        /**
+         * Desired velocity setpoints
+         */
+        double forward_velocity;
+        double lateral_velocity;
+        double turn_velocity;
+        /**
+         * If true, desired velocity setpoints are normalized from a range of [-1.0, 1.0]
+         * If false, desired velocity setpoints are sent in m/s
+         */
+        boolean are_velocities_normalized;
+      };
+    };
+  };
+};
+
+#endif

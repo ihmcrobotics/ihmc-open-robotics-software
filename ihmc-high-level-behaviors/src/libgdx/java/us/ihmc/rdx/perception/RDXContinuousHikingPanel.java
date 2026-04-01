@@ -66,6 +66,7 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 
+import static us.ihmc.communication.HumanoidControllerAPI.getLowFrequencyTopic;
 import static us.ihmc.communication.HumanoidControllerAPI.getTopic;
 
 public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProvider
@@ -131,7 +132,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       footstepStatusMessagePublisher = ros2Node.createPublisher(getTopic(FootstepStatusMessage.class, robotModel.getSimpleRobotName()));
       walkingControllerFailureStatusPublisher = ros2Node.createPublisher(getTopic(WalkingControllerFailureStatusMessage.class,
                                                                                   robotModel.getSimpleRobotName()));
-      planOffsetStatusPublisher = ros2Node.createPublisher(getTopic(PlanOffsetStatus.class, robotModel.getSimpleRobotName()));
+      planOffsetStatusPublisher = ros2Node.createPublisher(getLowFrequencyTopic(PlanOffsetStatus.class, robotModel.getSimpleRobotName()));
       clearGoalFootstepsPublisher = ros2Node.createPublisher(ContinuousHikingAPI.CLEAR_GOAL_FOOTSTEPS);
       resetStateMachinePublisher = ros2Node.createPublisher(ContinuousHikingAPI.RESET_STATE_MACHINE);
 

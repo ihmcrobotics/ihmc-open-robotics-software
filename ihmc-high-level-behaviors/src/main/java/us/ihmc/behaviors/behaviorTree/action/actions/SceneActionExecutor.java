@@ -6,7 +6,6 @@ import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionDefinition.SceneActionType;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneDoorFrameExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneDoorPanelExecutor;
-import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectDefinition;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectState;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectType;
@@ -68,8 +67,6 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
          BehaviorTreeSceneObjectState matchedObject = null;
          for (BehaviorTreeSceneObjectState object : scene.getObjects())
          {
-            BehaviorTreeSceneObjectDefinition sceneObjectDefinition = definition.getSceneObjectDefinition();
-
             if (definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.DOOR_PANEL
              && object instanceof BehaviorTreeSceneDoorPanelExecutor)
             {
@@ -164,6 +161,8 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
 
          printDebug = throttler.run();
          cameraPosition.set(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getExperimentalCameraFrame).getTranslation());
+
+         scene.getYOLO().enableModel(definition.getSceneObjectDefinition().getYoloModelName());
 
          boolean success = switch (definition.getSceneObjectDefinition().getObjectType())
          {

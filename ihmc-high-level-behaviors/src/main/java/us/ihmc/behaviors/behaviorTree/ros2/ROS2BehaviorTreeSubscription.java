@@ -227,9 +227,11 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNode<T, ?, ?>>
             localNode = behaviorTree.getNodeBuilder().createNode(subscriptionNode.getDefinitionClass(),
                                                                  nodeID,
                                                                  rootNode);
-         if (Conversions.nanosecondsToSeconds(System.nanoTime() - before) > UnitConversions.hertzToSeconds(ROS2BehaviorTree.SYNC_FREQUENCY))
-            LogTools.warn(("Node took a long time to create. %s:%d"
-                + "It should take significantly less than one tick.").formatted(localNode.getDefinition().getName(), localNode.getState().getID()));
+         double time = Conversions.nanosecondsToSeconds(System.nanoTime() - before);
+         double dt = UnitConversions.hertzToSeconds(ROS2BehaviorTree.SYNC_FREQUENCY);
+         if (time > dt)
+            LogTools.warn(("Node %s:%d took a long time to create: %.2f > dt %.3f. "
+                + "It should take significantly less than one tick.").formatted(localNode.getDefinition().getName(), localNode.getState().getID(), time, dt));
          if (subscriptionNode.getPackedType() == BehaviorTreeStateMessage.PARTIAL_DATA)
          {
             LogTools.debug("Cannot replicate node fully from partial data!");
