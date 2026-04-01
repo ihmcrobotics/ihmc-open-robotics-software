@@ -75,10 +75,6 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
          for (String yoloModelName : definition.getEnabledYoloModels().getValue())
             yolo.enableModel(yoloModelName);
       }
-      else if (definition.getSceneActionType().getValue() == SceneActionType.CREATE_FRAME)
-      {
-
-      }
       else if (isFreeze || isDelete)
          freezeOrDelete(isFreeze);
       else // Setup object

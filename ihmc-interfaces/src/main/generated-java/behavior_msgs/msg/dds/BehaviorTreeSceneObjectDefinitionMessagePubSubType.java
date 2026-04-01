@@ -15,7 +15,7 @@ public class BehaviorTreeSceneObjectDefinitionMessagePubSubType implements us.ih
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "7c1983818b53fce29567d1c4dff45029c9d3995870aff9798c9069f0faef6048";
+   		return "9496a88687c7e65c4902ccb4cb13901b33495dc13975ccf3a4b55002e7e01f18";
    }
    
    @Override
@@ -58,6 +58,15 @@ public class BehaviorTreeSceneObjectDefinitionMessagePubSubType implements us.ih
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+
+      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       return current_alignment - initial_alignment;
    }
@@ -81,6 +90,21 @@ public class BehaviorTreeSceneObjectDefinitionMessagePubSubType implements us.ih
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+
+
+      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getCustomFrameName().length() + 1;
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getFrameA().length() + 1;
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getFrameB().length() + 1;
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -99,6 +123,24 @@ public class BehaviorTreeSceneObjectDefinitionMessagePubSubType implements us.ih
 
       cdr.write_type_9(data.getFoundationPoseObjectType());
 
+      cdr.write_type_3(data.getMinPostPoints());
+
+      cdr.write_type_3(data.getMinRecessPoints());
+
+      if(data.getCustomFrameName().length() <= 255)
+      cdr.write_type_d(data.getCustomFrameName());else
+          throw new RuntimeException("custom_frame_name field exceeds the maximum length: %d > %d".formatted(data.getCustomFrameName().length(), 255));
+
+      if(data.getFrameA().length() <= 255)
+      cdr.write_type_d(data.getFrameA());else
+          throw new RuntimeException("frame_a field exceeds the maximum length: %d > %d".formatted(data.getFrameA().length(), 255));
+
+      if(data.getFrameB().length() <= 255)
+      cdr.write_type_d(data.getFrameB());else
+          throw new RuntimeException("frame_b field exceeds the maximum length: %d > %d".formatted(data.getFrameB().length(), 255));
+
+      cdr.write_type_5(data.getDistance());
+
    }
 
    public static void read(behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage data, us.ihmc.idl.CDR cdr)
@@ -108,6 +150,15 @@ public class BehaviorTreeSceneObjectDefinitionMessagePubSubType implements us.ih
       cdr.read_type_d(data.getYoloModelName());	
       cdr.read_type_d(data.getYoloClassName());	
       data.setFoundationPoseObjectType(cdr.read_type_9());
+      	
+      data.setMinPostPoints(cdr.read_type_3());
+      	
+      data.setMinRecessPoints(cdr.read_type_3());
+      	
+      cdr.read_type_d(data.getCustomFrameName());	
+      cdr.read_type_d(data.getFrameA());	
+      cdr.read_type_d(data.getFrameB());	
+      data.setDistance(cdr.read_type_5());
       	
 
    }
@@ -119,6 +170,12 @@ public class BehaviorTreeSceneObjectDefinitionMessagePubSubType implements us.ih
       ser.write_type_d("yolo_model_name", data.getYoloModelName());
       ser.write_type_d("yolo_class_name", data.getYoloClassName());
       ser.write_type_9("foundation_pose_object_type", data.getFoundationPoseObjectType());
+      ser.write_type_3("min_post_points", data.getMinPostPoints());
+      ser.write_type_3("min_recess_points", data.getMinRecessPoints());
+      ser.write_type_d("custom_frame_name", data.getCustomFrameName());
+      ser.write_type_d("frame_a", data.getFrameA());
+      ser.write_type_d("frame_b", data.getFrameB());
+      ser.write_type_5("distance", data.getDistance());
    }
 
    @Override
@@ -128,6 +185,12 @@ public class BehaviorTreeSceneObjectDefinitionMessagePubSubType implements us.ih
       ser.read_type_d("yolo_model_name", data.getYoloModelName());
       ser.read_type_d("yolo_class_name", data.getYoloClassName());
       data.setFoundationPoseObjectType(ser.read_type_9("foundation_pose_object_type"));
+      data.setMinPostPoints(ser.read_type_3("min_post_points"));
+      data.setMinRecessPoints(ser.read_type_3("min_recess_points"));
+      ser.read_type_d("custom_frame_name", data.getCustomFrameName());
+      ser.read_type_d("frame_a", data.getFrameA());
+      ser.read_type_d("frame_b", data.getFrameB());
+      data.setDistance(ser.read_type_5("distance"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage src, behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage dest)

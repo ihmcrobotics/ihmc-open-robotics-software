@@ -10,7 +10,6 @@ import us.ihmc.pubsub.TopicDataType;
        * Setup, freeze, delete object:
        * Configure YOLO: TODO: The following fields are work in progress:
        * Configure FoundationPose:
-       * CREATE_FRAME: Creates a Z-up from where X points to frame B from frame A and is some distance from frame B
        */
 public class SceneActionDefinitionMessage extends Packet<SceneActionDefinitionMessage> implements Settable<SceneActionDefinitionMessage>, EpsilonComparable<SceneActionDefinitionMessage>
 {
@@ -20,8 +19,7 @@ public class SceneActionDefinitionMessage extends Packet<SceneActionDefinitionMe
    public static final byte CLEAR_SCENE = (byte) 3;
    public static final byte FREEZE_SCENE = (byte) 4;
    public static final byte CONFIGURE_YOLO = (byte) 5;
-   public static final byte CONFIGURE_FOUNDATION_POSE = (byte) 5;
-   public static final byte CREATE_FRAME = (byte) 7;
+   public static final byte CONFIGURE_FOUNDATION_POSE = (byte) 6;
    /**
             * Parent definition fields
             */
@@ -74,22 +72,6 @@ public class SceneActionDefinitionMessage extends Packet<SceneActionDefinitionMe
             * FoundationPose models that should be enabled at this point
             */
    public us.ihmc.idl.IDLSequence.Byte  enabled_foundation_pose_models_;
-   /**
-            * The name of the frame to create
-            */
-   public java.lang.StringBuilder frame_name_;
-   /**
-            * The name of frame A
-            */
-   public java.lang.StringBuilder frame_a_;
-   /**
-            * The name of frame B
-            */
-   public java.lang.StringBuilder frame_b_;
-   /**
-            * Distance from frame B
-            */
-   public float distance_;
 
    public SceneActionDefinitionMessage()
    {
@@ -101,9 +83,6 @@ public class SceneActionDefinitionMessage extends Packet<SceneActionDefinitionMe
 
       enabled_foundation_pose_models_ = new us.ihmc.idl.IDLSequence.Byte (10, "type_9");
 
-      frame_name_ = new java.lang.StringBuilder(255);
-      frame_a_ = new java.lang.StringBuilder(255);
-      frame_b_ = new java.lang.StringBuilder(255);
    }
 
    public SceneActionDefinitionMessage(SceneActionDefinitionMessage other)
@@ -134,17 +113,6 @@ public class SceneActionDefinitionMessage extends Packet<SceneActionDefinitionMe
       enabled_yolo_models_.set(other.enabled_yolo_models_);
       ignored_yolo_class_indices_.set(other.ignored_yolo_class_indices_);
       enabled_foundation_pose_models_.set(other.enabled_foundation_pose_models_);
-      frame_name_.setLength(0);
-      frame_name_.append(other.frame_name_);
-
-      frame_a_.setLength(0);
-      frame_a_.append(other.frame_a_);
-
-      frame_b_.setLength(0);
-      frame_b_.append(other.frame_b_);
-
-      distance_ = other.distance_;
-
    }
 
 
@@ -306,93 +274,6 @@ public class SceneActionDefinitionMessage extends Packet<SceneActionDefinitionMe
       return enabled_foundation_pose_models_;
    }
 
-   /**
-            * The name of the frame to create
-            */
-   public void setFrameName(java.lang.String frame_name)
-   {
-      frame_name_.setLength(0);
-      frame_name_.append(frame_name);
-   }
-
-   /**
-            * The name of the frame to create
-            */
-   public java.lang.String getFrameNameAsString()
-   {
-      return getFrameName().toString();
-   }
-   /**
-            * The name of the frame to create
-            */
-   public java.lang.StringBuilder getFrameName()
-   {
-      return frame_name_;
-   }
-
-   /**
-            * The name of frame A
-            */
-   public void setFrameA(java.lang.String frame_a)
-   {
-      frame_a_.setLength(0);
-      frame_a_.append(frame_a);
-   }
-
-   /**
-            * The name of frame A
-            */
-   public java.lang.String getFrameAAsString()
-   {
-      return getFrameA().toString();
-   }
-   /**
-            * The name of frame A
-            */
-   public java.lang.StringBuilder getFrameA()
-   {
-      return frame_a_;
-   }
-
-   /**
-            * The name of frame B
-            */
-   public void setFrameB(java.lang.String frame_b)
-   {
-      frame_b_.setLength(0);
-      frame_b_.append(frame_b);
-   }
-
-   /**
-            * The name of frame B
-            */
-   public java.lang.String getFrameBAsString()
-   {
-      return getFrameB().toString();
-   }
-   /**
-            * The name of frame B
-            */
-   public java.lang.StringBuilder getFrameB()
-   {
-      return frame_b_;
-   }
-
-   /**
-            * Distance from frame B
-            */
-   public void setDistance(float distance)
-   {
-      distance_ = distance;
-   }
-   /**
-            * Distance from frame B
-            */
-   public float getDistance()
-   {
-      return distance_;
-   }
-
 
    public static Supplier<SceneActionDefinitionMessagePubSubType> getPubSubType()
    {
@@ -434,14 +315,6 @@ public class SceneActionDefinitionMessage extends Packet<SceneActionDefinitionMe
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.enabled_foundation_pose_models_, other.enabled_foundation_pose_models_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.frame_name_, other.frame_name_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.frame_a_, other.frame_a_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.frame_b_, other.frame_b_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.distance_, other.distance_, epsilon)) return false;
-
 
       return true;
    }
@@ -475,14 +348,6 @@ public class SceneActionDefinitionMessage extends Packet<SceneActionDefinitionMe
       if (!this.enabled_yolo_models_.equals(otherMyClass.enabled_yolo_models_)) return false;
       if (!this.ignored_yolo_class_indices_.equals(otherMyClass.ignored_yolo_class_indices_)) return false;
       if (!this.enabled_foundation_pose_models_.equals(otherMyClass.enabled_foundation_pose_models_)) return false;
-      if (!us.ihmc.idl.IDLTools.equals(this.frame_name_, otherMyClass.frame_name_)) return false;
-
-      if (!us.ihmc.idl.IDLTools.equals(this.frame_a_, otherMyClass.frame_a_)) return false;
-
-      if (!us.ihmc.idl.IDLTools.equals(this.frame_b_, otherMyClass.frame_b_)) return false;
-
-      if(this.distance_ != otherMyClass.distance_) return false;
-
 
       return true;
    }
@@ -518,15 +383,7 @@ public class SceneActionDefinitionMessage extends Packet<SceneActionDefinitionMe
       builder.append("ignored_yolo_class_indices=");
       builder.append(this.ignored_yolo_class_indices_);      builder.append(", ");
       builder.append("enabled_foundation_pose_models=");
-      builder.append(this.enabled_foundation_pose_models_);      builder.append(", ");
-      builder.append("frame_name=");
-      builder.append(this.frame_name_);      builder.append(", ");
-      builder.append("frame_a=");
-      builder.append(this.frame_a_);      builder.append(", ");
-      builder.append("frame_b=");
-      builder.append(this.frame_b_);      builder.append(", ");
-      builder.append("distance=");
-      builder.append(this.distance_);
+      builder.append(this.enabled_foundation_pose_models_);
       builder.append("}");
       return builder.toString();
    }

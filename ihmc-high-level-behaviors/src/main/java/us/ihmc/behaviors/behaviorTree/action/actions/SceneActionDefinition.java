@@ -13,7 +13,6 @@ import us.ihmc.communication.crdt.CRDTBidirectionalFloat;
 import us.ihmc.communication.crdt.CRDTBidirectionalInteger;
 import us.ihmc.communication.crdt.CRDTBidirectionalIntegerList;
 import us.ihmc.communication.crdt.CRDTBidirectionalRigidBodyTransform;
-import us.ihmc.communication.crdt.CRDTBidirectionalString;
 import us.ihmc.communication.crdt.CRDTBidirectionalStringList;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.tools.io.JSONTools;
@@ -31,8 +30,7 @@ public class SceneActionDefinition extends ActionNodeDefinition
       CLEAR_SCENE,
       FREEZE_SCENE,
       CONFIGURE_YOLO,
-      CONFIGURE_FOUNDATION_POSE,
-      CREATE_FRAME;
+      CONFIGURE_FOUNDATION_POSE;
 
       public static final SceneActionType[] values = values();
    }
@@ -49,10 +47,6 @@ public class SceneActionDefinition extends ActionNodeDefinition
    private final CRDTBidirectionalStringList enabledYoloModels;
    private final CRDTBidirectionalIntegerList ignoredYoloClassIndices;
    private final CRDTBidirectionalIntegerList enabledFoundationPoseModels;
-   private final CRDTBidirectionalString frameName;
-   private final CRDTBidirectionalString frameA;
-   private final CRDTBidirectionalString frameB;
-   private final CRDTBidirectionalFloat distance;
 
    private SceneActionType onDiskSceneActionType;
    private float onDiskTimeout;
@@ -64,12 +58,7 @@ public class SceneActionDefinition extends ActionNodeDefinition
    private float onDiskOutlierThreshold;
    private final List<String> onDiskEnabledYoloModels = new ArrayList<>();
    private final TIntArrayList onDiskIgnoredYoloClassIndices = new TIntArrayList();
-   private int onDiskFoundationPoseObjectType;
    private final TIntArrayList onDiskEnabledFoundationPoseModels = new TIntArrayList();
-   private String onDiskFrameName;
-   private String onDiskFrameA;
-   private String onDiskFrameB;
-   private float onDiskDistance;
 
    public SceneActionDefinition(BehaviorTreeRootNodeDefinition rootNode)
    {
@@ -87,10 +76,6 @@ public class SceneActionDefinition extends ActionNodeDefinition
       enabledYoloModels = new CRDTBidirectionalStringList(this);
       ignoredYoloClassIndices = new CRDTBidirectionalIntegerList(this);
       enabledFoundationPoseModels = new CRDTBidirectionalIntegerList(this);
-      frameName = new CRDTBidirectionalString(this, "");
-      frameA = new CRDTBidirectionalString(this, "");
-      frameB = new CRDTBidirectionalString(this, "");
-      distance = new CRDTBidirectionalFloat(this, 0.0f);
    }
 
    @Override
@@ -130,13 +115,6 @@ public class SceneActionDefinition extends ActionNodeDefinition
             ArrayNode enabledFoundationPoseModelsArray = jsonNode.putArray("enabledFoundationPoseModels");
             for (int i = 0; i < enabledFoundationPoseModels.getSize(); i++)
                enabledFoundationPoseModelsArray.add(enabledFoundationPoseModels.getValueReadOnly(i));
-         }
-         case CREATE_FRAME ->
-         {
-            jsonNode.put("frameName", frameName.getValue());
-            jsonNode.put("frameA", frameA.getValue());
-            jsonNode.put("frameB", frameB.getValue());
-            jsonNode.put("distance", distance.getValue());
          }
       }
    }
@@ -182,13 +160,6 @@ public class SceneActionDefinition extends ActionNodeDefinition
             for (int i = 0; i < enabledFoundationPoseModelsArray.size(); i++)
                enabledFoundationPoseModels.setValue(i, enabledFoundationPoseModelsArray.get(i).asInt());
          }
-         case CREATE_FRAME ->
-         {
-            frameName.setValue(jsonNode.has("frameName") ? jsonNode.get("frameName").asText() : "");
-            frameA.setValue(jsonNode.has("frameA") ? jsonNode.get("frameA").asText() : "");
-            frameB.setValue(jsonNode.has("frameB") ? jsonNode.get("frameB").asText() : "");
-            distance.setValue(jsonNode.has("distance") ? (float) jsonNode.get("distance").asDouble() : 0.0f);
-         }
       }
    }
 
@@ -215,10 +186,6 @@ public class SceneActionDefinition extends ActionNodeDefinition
 
       onDiskEnabledFoundationPoseModels.clear();
       onDiskEnabledFoundationPoseModels.addAll(enabledFoundationPoseModels.getValue());
-      onDiskFrameName = frameName.getValue();
-      onDiskFrameA = frameA.getValue();
-      onDiskFrameB = frameB.getValue();
-      onDiskDistance = distance.getValue();
    }
 
    @Override
@@ -246,10 +213,6 @@ public class SceneActionDefinition extends ActionNodeDefinition
 
          enabledFoundationPoseModels.clear();
          enabledFoundationPoseModels.getValue().addAll(onDiskEnabledFoundationPoseModels);
-         frameName.setValue(onDiskFrameName);
-         frameA.setValue(onDiskFrameA);
-         frameB.setValue(onDiskFrameB);
-         distance.setValue(onDiskDistance);
       }
    }
 
@@ -279,10 +242,6 @@ public class SceneActionDefinition extends ActionNodeDefinition
       unchanged &= enabledFoundationPoseModels.getSize() == onDiskEnabledFoundationPoseModels.size();
       for (int i = 0; unchanged && i < enabledFoundationPoseModels.getSize(); i++)
          unchanged = enabledFoundationPoseModels.getValueReadOnly(i) == onDiskEnabledFoundationPoseModels.get(i);
-      unchanged &= frameName.getValue().equals(onDiskFrameName);
-      unchanged &= frameA.getValue().equals(onDiskFrameA);
-      unchanged &= frameB.getValue().equals(onDiskFrameB);
-      unchanged &= distance.getValue() == onDiskDistance;
 
       return !unchanged;
    }
@@ -303,10 +262,6 @@ public class SceneActionDefinition extends ActionNodeDefinition
       enabledYoloModels.toMessage(message.getEnabledYoloModels());
       ignoredYoloClassIndices.toMessage(message.getIgnoredYoloClassIndices());
       enabledFoundationPoseModels.toMessage(message.getEnabledFoundationPoseModels());
-      message.setFrameName(frameName.toMessage());
-      message.setFrameA(frameA.toMessage());
-      message.setFrameB(frameB.toMessage());
-      message.setDistance(distance.toMessage());
    }
 
    public void fromMessage(SceneActionDefinitionMessage message)
@@ -325,10 +280,6 @@ public class SceneActionDefinition extends ActionNodeDefinition
       enabledYoloModels.fromMessage(message.getEnabledYoloModels());
       ignoredYoloClassIndices.fromMessage(message.getIgnoredYoloClassIndices());
       enabledFoundationPoseModels.fromMessage(message.getEnabledFoundationPoseModels());
-      frameName.fromMessage(message.getFrameNameAsString());
-      frameA.fromMessage(message.getFrameAAsString());
-      frameB.fromMessage(message.getFrameBAsString());
-      distance.fromMessage(message.getDistance());
    }
 
    public BehaviorTreeSceneObjectDefinition getSceneObjectDefinition()
@@ -419,45 +370,5 @@ public class SceneActionDefinition extends ActionNodeDefinition
    public CRDTBidirectionalIntegerList getEnabledFoundationPoseModels()
    {
       return enabledFoundationPoseModels;
-   }
-
-   public String getFrameName()
-   {
-      return frameName.getValue();
-   }
-
-   public void setFrameName(String frameName)
-   {
-      this.frameName.setValue(frameName);
-   }
-
-   public String getFrameA()
-   {
-      return frameA.getValue();
-   }
-
-   public void setFrameA(String frameA)
-   {
-      this.frameA.setValue(frameA);
-   }
-
-   public String getFrameB()
-   {
-      return frameB.getValue();
-   }
-
-   public void setFrameB(String frameB)
-   {
-      this.frameB.setValue(frameB);
-   }
-
-   public float getDistance()
-   {
-      return distance.getValue();
-   }
-
-   public void setDistance(float distance)
-   {
-      this.distance.setValue(distance);
    }
 }
