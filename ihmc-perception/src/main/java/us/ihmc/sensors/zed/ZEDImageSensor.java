@@ -50,7 +50,7 @@ public class ZEDImageSensor extends ImageSensor
    private static final float MILLIMETER_TO_METERS = 0.001f;
 
    private final int cameraID;
-   private final int serialNumber;
+   private final int gmslPort;
    private final ZEDModelData zedModel;
    private final int slInputType;
    private final int slDepthMode;
@@ -108,12 +108,12 @@ public class ZEDImageSensor extends ImageSensor
     *    <li>{@link us.ihmc.zed.global.zed#SL_RESOLUTION_VGA}</li>
     * </ul>
     */
-   public ZEDImageSensor(int cameraID, int serialNumber, ZEDModelData zedModel, int slInputType, int slDepthMode, int resolution, int fps)
+   public ZEDImageSensor(int cameraID, int gmslPort, ZEDModelData zedModel, int slInputType, int slDepthMode, int resolution, int fps)
    {
       super(zedModel.name());
 
       this.cameraID = cameraID;
-      this.serialNumber = serialNumber;
+      this.gmslPort = gmslPort;
       this.zedModel = zedModel;
       this.slInputType = slInputType;
       this.slDepthMode = slDepthMode;
@@ -270,9 +270,9 @@ public class ZEDImageSensor extends ImageSensor
    protected int openCamera()
    {
       if (slInputType == SL_INPUT_TYPE_STREAM)
-         return sl_open_camera(cameraID, zedInitParameters, serialNumber, "", remoteStreamingAddress, remoteStreamingPort, "", "", "");
+         return sl_open_camera_from_stream(cameraID, zedInitParameters, remoteStreamingAddress, remoteStreamingPort, "", "", "");
       else
-         return sl_open_camera(cameraID, zedInitParameters, serialNumber, "", "", 0, "", "", "");
+         return sl_open_camera(cameraID, zedInitParameters, 0, "", "", 0, gmslPort, "", "", "");
    }
 
    @Override
