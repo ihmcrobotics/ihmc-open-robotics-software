@@ -4,7 +4,7 @@ import behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionDefinition.SceneActionType;
-import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneCustomFrameExecutor;
+import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneCompositeFrameExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneDoorFrameExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneDoorPanelExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectExecutor;
@@ -183,7 +183,7 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
 
       boolean success = switch (definition.getSceneObjectDefinition().getObjectType())
       {
-         case CUSTOM_FRAME -> setupCustomFrameDetection();
+         case COMPOSITE_FRAME -> setupCompositeFrameDetection();
          case DOOR_PANEL -> setupDoorPanelDetection();
          case DOOR_FRAME -> setupDoorFrameDetection();
          default -> setupSinglePersistentDetection();
@@ -193,46 +193,47 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
          state.setIsExecuting(false);
    }
 
-   private boolean setupCustomFrameDetection()
+   private boolean setupCompositeFrameDetection()
    {
-      ReferenceFrame frameA = scene.findFrameByName(definition.getSceneObjectDefinition().getFrameA());
-      ReferenceFrame frameB = scene.findFrameByName(definition.getSceneObjectDefinition().getFrameB());
+      ReferenceFrame frameA = scene.findFrameByName(definition.getSceneObjectDefinition().getCompositeFrameA());
+      ReferenceFrame frameB = scene.findFrameByName(definition.getSceneObjectDefinition().getCompositeFrameB());
       if (frameA == null || frameB == null)
       {
          if (printDebug)
             state.getLogger()
                  .warn("Failed to find frames: %s = %s and %s = %s".formatted(
-                       definition.getSceneObjectDefinition().getFrameA(), frameA,
-                       definition.getSceneObjectDefinition().getFrameB(), frameB));
+                       definition.getSceneObjectDefinition().getCompositeFrameA(), frameA,
+                       definition.getSceneObjectDefinition().getCompositeFrameB(), frameB));
          return false;
       }
 
-      BehaviorTreeSceneCustomFrameExecutor target = null;
+      BehaviorTreeSceneCompositeFrameExecutor target = null;
       for (BehaviorTreeSceneObjectState object : scene.getObjects())
       {
-         if (object instanceof BehaviorTreeSceneCustomFrameExecutor customFrame
-          && customFrame.getCustomFrameName().equals(definition.getSceneObjectDefinition().getCustomFrameName()))
+         if (object instanceof BehaviorTreeSceneCompositeFrameExecutor compositeFrame
+          && compositeFrame.getCompositeFrameName().equals(definition.getSceneObjectDefinition().getCompositeFrameName()))
          {
-            target = customFrame;
+            target = compositeFrame;
             break;
          }
       }
 
       if (target != null)
       {
-         state.getLogger().info("Updating existing custom frame: {}", definition.getSceneObjectDefinition().getCustomFrameName());
-         target.setFrameA(definition.getSceneObjectDefinition().getFrameA());
-         target.setFrameB(definition.getSceneObjectDefinition().getFrameB());
-         target.setDistance(definition.getSceneObjectDefinition().getDistance());
+         state.getLogger().info("Updating existing composite frame: {}", definition.getSceneObjectDefinition().getCompositeFrameName());
+         target.setCompositeFrameA(definition.getSceneObjectDefinition().getCompositeFrameA());
+         target.setCompositeFrameB(definition.getSceneObjectDefinition().getCompositeFrameB());
+         target.setCompositeFrameType(definition.getSceneObjectDefinition().getCompositeFrameType());
+         target.setCompositeDistance(definition.getSceneObjectDefinition().getCompositeDistance());
          target.unfreeze();
       }
       else
       {
-         state.getLogger().info("Creating new custom frame: {}", definition.getSceneObjectDefinition().getCustomFrameName());
+         state.getLogger().info("Creating new composite frame: {}", definition.getSceneObjectDefinition().getCompositeFrameName());
 
          BehaviorTreeSceneObjectDefinitionMessage message = new BehaviorTreeSceneObjectDefinitionMessage();
          definition.getSceneObjectDefinition().toMessage(message);
-         target = (BehaviorTreeSceneCustomFrameExecutor) scene.createObject(message);
+         target = (BehaviorTreeSceneCompositeFrameExecutor) scene.createObject(message);
          target.update();
          scene.addObject(target);
       }

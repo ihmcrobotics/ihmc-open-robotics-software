@@ -7,12 +7,21 @@ module behavior_msgs
   {
     module dds
     {
+      /**
+       * From A towards, backed up by X distance, Zup
+       */
+      const octet COMPOSITE_FRAME_APPROACH =
+      0;
+
+      const octet COMPOSITE_FRAME_HYBRID =
+      1;
+
 
       /**
        * YOLO:
        * FoundationPose:
        * Door Frame
-       * Custom Reference Frame: Creates a Z-up from where X points to frame B from frame A and is some distance from frame B
+       * Composite Reference Frame:
        */
       @TypeCode(type="behavior_msgs::msg::dds_::BehaviorTreeSceneObjectDefinitionMessage_")
       struct BehaviorTreeSceneObjectDefinitionMessage
@@ -42,21 +51,25 @@ module behavior_msgs
          */
         unsigned short min_recess_points;
         /**
-         * Custom frame name
+         * Composite frame name
          */
-        string custom_frame_name;
+        string composite_frame_name;
         /**
          * The name of frame A
          */
-        string frame_a;
+        string composite_frame_a;
         /**
          * The name of frame B
          */
-        string frame_b;
+        string composite_frame_b;
+        /**
+         * The type of composite frame
+         */
+        octet composite_frame_type;
         /**
          * Distance from frame B
          */
-        float distance;
+        float composite_distance;
       };
     };
   };

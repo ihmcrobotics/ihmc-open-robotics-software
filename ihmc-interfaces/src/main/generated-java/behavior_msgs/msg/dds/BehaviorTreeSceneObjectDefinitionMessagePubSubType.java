@@ -15,7 +15,7 @@ public class BehaviorTreeSceneObjectDefinitionMessagePubSubType implements us.ih
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "9496a88687c7e65c4902ccb4cb13901b33495dc13975ccf3a4b55002e7e01f18";
+   		return "85ead7d8bc80118edae9a9833f313394e04eebeed1c79f71c7e4939d055a6901";
    }
    
    @Override
@@ -65,6 +65,8 @@ public class BehaviorTreeSceneObjectDefinitionMessagePubSubType implements us.ih
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
@@ -96,11 +98,14 @@ public class BehaviorTreeSceneObjectDefinitionMessagePubSubType implements us.ih
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getCustomFrameName().length() + 1;
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getCompositeFrameName().length() + 1;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getFrameA().length() + 1;
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getCompositeFrameA().length() + 1;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getFrameB().length() + 1;
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getCompositeFrameB().length() + 1;
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -127,19 +132,21 @@ public class BehaviorTreeSceneObjectDefinitionMessagePubSubType implements us.ih
 
       cdr.write_type_3(data.getMinRecessPoints());
 
-      if(data.getCustomFrameName().length() <= 255)
-      cdr.write_type_d(data.getCustomFrameName());else
-          throw new RuntimeException("custom_frame_name field exceeds the maximum length: %d > %d".formatted(data.getCustomFrameName().length(), 255));
+      if(data.getCompositeFrameName().length() <= 255)
+      cdr.write_type_d(data.getCompositeFrameName());else
+          throw new RuntimeException("composite_frame_name field exceeds the maximum length: %d > %d".formatted(data.getCompositeFrameName().length(), 255));
 
-      if(data.getFrameA().length() <= 255)
-      cdr.write_type_d(data.getFrameA());else
-          throw new RuntimeException("frame_a field exceeds the maximum length: %d > %d".formatted(data.getFrameA().length(), 255));
+      if(data.getCompositeFrameA().length() <= 255)
+      cdr.write_type_d(data.getCompositeFrameA());else
+          throw new RuntimeException("composite_frame_a field exceeds the maximum length: %d > %d".formatted(data.getCompositeFrameA().length(), 255));
 
-      if(data.getFrameB().length() <= 255)
-      cdr.write_type_d(data.getFrameB());else
-          throw new RuntimeException("frame_b field exceeds the maximum length: %d > %d".formatted(data.getFrameB().length(), 255));
+      if(data.getCompositeFrameB().length() <= 255)
+      cdr.write_type_d(data.getCompositeFrameB());else
+          throw new RuntimeException("composite_frame_b field exceeds the maximum length: %d > %d".formatted(data.getCompositeFrameB().length(), 255));
 
-      cdr.write_type_5(data.getDistance());
+      cdr.write_type_9(data.getCompositeFrameType());
+
+      cdr.write_type_5(data.getCompositeDistance());
 
    }
 
@@ -155,10 +162,12 @@ public class BehaviorTreeSceneObjectDefinitionMessagePubSubType implements us.ih
       	
       data.setMinRecessPoints(cdr.read_type_3());
       	
-      cdr.read_type_d(data.getCustomFrameName());	
-      cdr.read_type_d(data.getFrameA());	
-      cdr.read_type_d(data.getFrameB());	
-      data.setDistance(cdr.read_type_5());
+      cdr.read_type_d(data.getCompositeFrameName());	
+      cdr.read_type_d(data.getCompositeFrameA());	
+      cdr.read_type_d(data.getCompositeFrameB());	
+      data.setCompositeFrameType(cdr.read_type_9());
+      	
+      data.setCompositeDistance(cdr.read_type_5());
       	
 
    }
@@ -172,10 +181,11 @@ public class BehaviorTreeSceneObjectDefinitionMessagePubSubType implements us.ih
       ser.write_type_9("foundation_pose_object_type", data.getFoundationPoseObjectType());
       ser.write_type_3("min_post_points", data.getMinPostPoints());
       ser.write_type_3("min_recess_points", data.getMinRecessPoints());
-      ser.write_type_d("custom_frame_name", data.getCustomFrameName());
-      ser.write_type_d("frame_a", data.getFrameA());
-      ser.write_type_d("frame_b", data.getFrameB());
-      ser.write_type_5("distance", data.getDistance());
+      ser.write_type_d("composite_frame_name", data.getCompositeFrameName());
+      ser.write_type_d("composite_frame_a", data.getCompositeFrameA());
+      ser.write_type_d("composite_frame_b", data.getCompositeFrameB());
+      ser.write_type_9("composite_frame_type", data.getCompositeFrameType());
+      ser.write_type_5("composite_distance", data.getCompositeDistance());
    }
 
    @Override
@@ -187,10 +197,11 @@ public class BehaviorTreeSceneObjectDefinitionMessagePubSubType implements us.ih
       data.setFoundationPoseObjectType(ser.read_type_9("foundation_pose_object_type"));
       data.setMinPostPoints(ser.read_type_3("min_post_points"));
       data.setMinRecessPoints(ser.read_type_3("min_recess_points"));
-      ser.read_type_d("custom_frame_name", data.getCustomFrameName());
-      ser.read_type_d("frame_a", data.getFrameA());
-      ser.read_type_d("frame_b", data.getFrameB());
-      data.setDistance(ser.read_type_5("distance"));
+      ser.read_type_d("composite_frame_name", data.getCompositeFrameName());
+      ser.read_type_d("composite_frame_a", data.getCompositeFrameA());
+      ser.read_type_d("composite_frame_b", data.getCompositeFrameB());
+      data.setCompositeFrameType(ser.read_type_9("composite_frame_type"));
+      data.setCompositeDistance(ser.read_type_5("composite_distance"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage src, behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage dest)
