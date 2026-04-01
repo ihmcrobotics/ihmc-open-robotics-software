@@ -38,10 +38,12 @@ public class RDXSceneAction extends RDXActionNode<SceneActionState, SceneActionD
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiSceneActionWidget widget = new ImGuiSceneActionWidget();
+   private final ImInt imObjectType = new ImInt(0);
    private final ImInt imYOLOModel = new ImInt(0);
    private final ImInt imYOLOClass = new ImInt(0);
    private final ImInt imFPType = new ImInt(0);
    private final ImInt imCompositeFrameType = new ImInt(0);
+   private final String[] sceneObjectTypeNames;
    private final String[] fpTypeNames;
    private final String[] compositeFrameTypeNames;
    private final String[] availableYOLOModelNames;
@@ -63,6 +65,11 @@ public class RDXSceneAction extends RDXActionNode<SceneActionState, SceneActionD
 
       nominalObjectPoseGizmo = new RDXSelectablePose3DGizmo(definition.getNominalObjectPose().getValueUnsafe(), scene.findFrameByName("Walking"));
       nominalObjectPoseGizmo.create(panel3D);
+
+      BehaviorTreeSceneObjectType[] sceneObjectTypes = BehaviorTreeSceneObjectType.values;
+      sceneObjectTypeNames = new String[sceneObjectTypes.length];
+      for (int i = 0; i < sceneObjectTypes.length; i++)
+         sceneObjectTypeNames[i] = sceneObjectTypes[i].name();
 
       IsaacROSFoundationPoseObject[] values = IsaacROSFoundationPoseObject.values();
       fpTypeNames = new String[values.length];
@@ -168,10 +175,11 @@ public class RDXSceneAction extends RDXActionNode<SceneActionState, SceneActionD
       {
          BehaviorTreeSceneObjectDefinition objectDefinition = definition.getSceneObjectDefinition();
 
-         ImGui.text("Setup Object Type:");
-         for (BehaviorTreeSceneObjectType type : BehaviorTreeSceneObjectType.values)
-            if (ImGui.radioButton(type.name(), objectDefinition.getObjectType() == type))
-               objectDefinition.setObjectType(type);
+         ImGui.pushItemWidth(200.0f);
+         imObjectType.set(objectDefinition.getObjectType().ordinal());
+         if (ImGui.combo(labels.get("Setup Object Type"), imObjectType, sceneObjectTypeNames))
+            objectDefinition.setObjectType(BehaviorTreeSceneObjectType.values[imObjectType.get()]);
+         ImGui.popItemWidth();
 
          ImGui.pushItemWidth(200.0f);
          imYOLOModel.set(-1);
