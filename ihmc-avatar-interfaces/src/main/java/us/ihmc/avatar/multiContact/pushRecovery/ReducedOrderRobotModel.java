@@ -25,10 +25,10 @@ public class ReducedOrderRobotModel
    public static final double NOMINAL_COM_HEIGHT = 0.9;
    public static final double OMEGA = Math.sqrt(9.81 / NOMINAL_COM_HEIGHT);
 
-   public static boolean isReachable(RobotSide robotSide, FramePoint3DReadOnly contactPoint, ReferenceFrame centroidalFrame, FramePoint3D shoulderToContactPoint)
+   public static boolean isReachable(RobotSide robotSide, FramePoint3DReadOnly queryPoint, ReferenceFrame centroidalFrame, FramePoint3D shoulderToContactPoint)
    {
       shoulderToContactPoint.setToZero(centroidalFrame);
-      shoulderToContactPoint.setMatchingFrame(contactPoint);
+      shoulderToContactPoint.setMatchingFrame(queryPoint);
       shoulderToContactPoint.sub(SHOULDER_COM_OFFSET_X, robotSide.negateIfRightSide(SHOULDER_COM_OFFSET_Y), SHOULDER_COM_OFFSET_Z);
 
       double shoulderToContactPointNorm = shoulderToContactPoint.norm();

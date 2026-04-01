@@ -2,13 +2,11 @@ package us.ihmc.commonWalkingControlModules.staticEquilibrium;
 
 import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DMatrixRMaj;
-import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState.ContactPoint;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.convexOptimization.linearProgram.LinearProgramSolver;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
@@ -33,15 +31,16 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicLine2DDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicPoint2DDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicPolygon2DDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicPolygonExtruded3DDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.awt.*;
-import java.util.Arrays;
 import java.util.function.Supplier;
 
 import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.*;
@@ -108,6 +107,8 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
    private Supplier<FramePoint3DReadOnly> stabilityReference = null;
    private boolean showNearestSupportEdgeGraphic = true;
 
+   private final YoFramePose3D yoWorldPoseAtMidFootHeight;
+
    public StabilityMarginRegionCalculator(StabilityMarginOptimizationModule optimizationModule, YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       this("", optimizationModule, parentRegistry, graphicsListRegistry);
@@ -144,6 +145,7 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
       }
 
       feasibleRegion = new YoFrameConvexPolygon2D(namePrefix + "StabilityMarginPolygon", ReferenceFrame.getWorldFrame(), DIRECTIONS_TO_OPTIMIZE + 8, registry);
+      yoWorldPoseAtMidFootHeight = new YoFramePose3D(namePrefix + "PolygonPose", ReferenceFrame.getWorldFrame(), registry);
 
       lowestMarginEdgeIndex = new YoInteger("lowestMarginEdgeIndex", registry);
       stabilityMargin = new YoDouble(namePrefix + "StabilityMargin", registry);
@@ -254,6 +256,8 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
 
       updateFeasibleRegion();
 //      updateMinimumMarginEdge();
+
+//      yoWorldPoseAtMidFootHeight.setZ(((CenterOfPressureStabilityMarginOptimizationModule) optimizationModule).getMidFootPoint().getZ());
 
       return true;
    }
@@ -679,11 +683,18 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
 
-      YoGraphicPolygon2DDefinition regionGraphic = YoGraphicDefinitionFactory.newYoGraphicPolygon2D(namePrefix + "Multi-Contact CoM Region", feasibleRegion,
+      YoGraphicPolygon2DDefinition regionGraphic = YoGraphicDefinitionFactory.newYoGraphicPolygon2D(namePrefix + "Multi-Contact CoM Region",
+                                                                                                    feasibleRegion,
                                                                                                     polygonGraphicColor,
                                                                                                     false);
       regionGraphic.setStrokeWidth(1.5);
       group.addChild(regionGraphic);
+
+      YoGraphicPolygonExtruded3DDefinition regionGraphic3d = YoGraphicDefinitionFactory.newYoGraphicPolygonExtruded3DDefinition(namePrefix + "Multi-Contact CoM Region 3d",
+                                                                                                                                yoWorldPoseAtMidFootHeight, feasibleRegion, 0.005, new ColorDefinition(177.0 / 255.0, 0.0, 0.0));
+      regionGraphic3d.setThickness(0.005);
+      group.addChild(regionGraphic3d);
+
 
       if (showNearestSupportEdgeGraphic)
       {
