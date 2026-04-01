@@ -110,7 +110,7 @@ public class RDXImGuiWindowAndDockSystem
       io.setIniFilename(null); // We don't want to save .ini file
 //               io.addConfigFlags(ImGuiConfigFlags.NavEnableKeyboard);
       io.addConfigFlags(ImGuiConfigFlags.DockingEnable);
-      io.addConfigFlags(ImGuiConfigFlags.ViewportsEnable);
+//      io.addConfigFlags(ImGuiConfigFlags.ViewportsEnable);  // disabled: crashes glfwDestroyWindow on NVIDIA+xrdp
       io.setConfigViewportsNoTaskBarIcon(true);
       io.setConfigWindowsMoveFromTitleBarOnly(true);
       io.setConfigViewportsNoDecoration(false);

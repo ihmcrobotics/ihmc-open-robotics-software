@@ -78,6 +78,8 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
 
    private final FullHumanoidRobotModel controllerFullRobotModel;
    private final FullRobotModelCorruptor fullRobotModelCorruptor;
+   private int controllerDebugCount = 0;
+   private int controllerNonHomeCount = 0;
 
    private final List<Supplier<YoGraphicDefinition>> scs2YoGraphicHolders = new ArrayList<>();
 
@@ -327,6 +329,24 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       try
       {
          HumanoidRobotContextTools.updateRobot(controllerFullRobotModel, humanoidRobotContextData.getProcessedJointData());
+
+         // Debug: check controllerFullRobotModel after updateRobot
+         if (controllerDebugCount < 50)
+         {
+            us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics hipY = controllerFullRobotModel.getOneDoFJointByName("LEFT_HIP_Y");
+            if (hipY != null)
+            {
+               double q = hipY.getQ();
+               if (Math.abs(q - (-0.35)) > 0.001 || controllerNonHomeCount > 0)
+               {
+                  System.out.printf("%tT.%<tL [ControllerThread non-home %02d] LEFT_HIP_Y q=%.4f%n", System.currentTimeMillis(), controllerDebugCount, q);
+                  System.out.flush();
+                  controllerDebugCount++;
+                  controllerNonHomeCount++;
+               }
+            }
+         }
+
          timestamp.set(humanoidRobotContextData.getTimestamp());
          if (firstTick.getValue())
          {

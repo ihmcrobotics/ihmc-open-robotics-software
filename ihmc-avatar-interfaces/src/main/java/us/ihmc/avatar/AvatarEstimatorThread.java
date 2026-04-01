@@ -39,6 +39,8 @@ public class AvatarEstimatorThread extends ModularRobotController implements SCS
 
    private final SensorReader sensorReader;
    private final FullHumanoidRobotModel estimatorFullRobotModel;
+   private int estimatorDebugCount = 0;
+   private int estimatorNonHomeCount = 0;
    private final StateEstimatorController mainStateEstimator;
    private final PairList<BooleanSupplier, StateEstimatorController> secondaryStateEstimators;
 
@@ -110,6 +112,23 @@ public class AvatarEstimatorThread extends ModularRobotController implements SCS
          }
 
          doControl();
+
+         // Debug: check if estimatorFullRobotModel is updated by state estimator
+         if (estimatorDebugCount < 50)
+         {
+            us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics hipY = estimatorFullRobotModel.getOneDoFJointByName("LEFT_HIP_Y");
+            if (hipY != null)
+            {
+               double q = hipY.getQ();
+               if (Math.abs(q - (-0.35)) > 0.001 || estimatorNonHomeCount > 0)
+               {
+                  System.out.printf("%tT.%<tL [EstimatorThread non-home %02d] LEFT_HIP_Y q=%.4f%n", System.currentTimeMillis(), estimatorDebugCount, q);
+                  System.out.flush();
+                  estimatorDebugCount++;
+                  estimatorNonHomeCount++;
+               }
+            }
+         }
 
          for (int i = 0; i < runnables.size(); i++)
          {
