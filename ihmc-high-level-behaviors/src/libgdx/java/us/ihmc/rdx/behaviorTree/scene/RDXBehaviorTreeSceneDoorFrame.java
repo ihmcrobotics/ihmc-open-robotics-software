@@ -14,7 +14,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 
 import static behavior_msgs.msg.dds.BehaviorTreeSceneObjectStateMessage.*;
-import static us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneDoorFrameExecutor.*;
 
 public class RDXBehaviorTreeSceneDoorFrame extends RDXBehaviorTreeSceneObject
 {
@@ -41,7 +40,7 @@ public class RDXBehaviorTreeSceneDoorFrame extends RDXBehaviorTreeSceneObject
    @Override
    public void update()
    {
-      if (model == null && latchPostPoints > MIN_POST_POINTS) // Don't show until valid
+      if (model == null && latchPostPoints > getMinPostPoints()) // Don't show until valid
       {
          model = RDXModelBuilder.buildModel(modelBuilder ->
          {
@@ -67,10 +66,10 @@ public class RDXBehaviorTreeSceneDoorFrame extends RDXBehaviorTreeSceneObject
       ImGui.text("Hinge side: %s".formatted(hingeSide == null ? "null" : hingeSide.getPascalCaseName()));
       ImGui.text("Door type: %s".formatted(doorType));
       ImGui.text("Door open angle: %.2f%s".formatted(Math.toDegrees(doorOpenAngle), UnitConversions.DEGREE_SYMBOL));
-      ImGui.text("Latch post points: %d / %d".formatted(latchPostPoints, MIN_POST_POINTS));
+      ImGui.text("Latch post points: %d / %d".formatted(latchPostPoints, getMinPostPoints()));
       ImGui.endDisabled();
-      ImGui.beginDisabled(hingeRecessPoints <= MIN_RECESS_POINTS);
-      ImGui.text("Hinge recess points: %d / %d".formatted(hingeRecessPoints, MIN_RECESS_POINTS));
+      ImGui.beginDisabled(hingeRecessPoints <= getMinRecessPoints());
+      ImGui.text("Hinge recess points: %d / %d".formatted(hingeRecessPoints, getMinRecessPoints()));
       ImGui.endDisabled();
    }
 

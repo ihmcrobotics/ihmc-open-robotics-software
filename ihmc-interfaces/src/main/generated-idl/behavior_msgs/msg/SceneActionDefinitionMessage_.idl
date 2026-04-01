@@ -29,17 +29,13 @@ module behavior_msgs
       5;
 
       const octet CONFIGURE_FOUNDATION_POSE =
-      5;
-
-      const octet CREATE_FRAME =
-      7;
+      6;
 
 
       /**
        * Setup, freeze, delete object:
        * Configure YOLO: TODO: The following fields are work in progress:
        * Configure FoundationPose:
-       * CREATE_FRAME: Creates a Z-up from where X points to frame B from frame A and is some distance from frame B
        */
       @TypeCode(type="behavior_msgs::msg::dds_::SceneActionDefinitionMessage_")
       struct SceneActionDefinitionMessage
@@ -96,22 +92,6 @@ module behavior_msgs
          * FoundationPose models that should be enabled at this point
          */
         sequence<octet, 10> enabled_foundation_pose_models;
-        /**
-         * The name of the frame to create
-         */
-        string frame_name;
-        /**
-         * The name of frame A
-         */
-        string frame_a;
-        /**
-         * The name of frame B
-         */
-        string frame_b;
-        /**
-         * Distance from frame B
-         */
-        float distance;
       };
     };
   };

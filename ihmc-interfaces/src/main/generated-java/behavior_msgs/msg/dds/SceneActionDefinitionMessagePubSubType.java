@@ -15,7 +15,7 @@ public class SceneActionDefinitionMessagePubSubType implements us.ihmc.pubsub.To
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "a4c0ebf2bcc48e36df961a972617e9a2a76b83a94a4106c481541938e2f6271f";
+   		return "ce03dfcc8d631d6f99307280426cbb4f9d174235aa4e52fd503904e598188b7d";
    }
    
    @Override
@@ -80,11 +80,6 @@ public class SceneActionDefinitionMessagePubSubType implements us.ihmc.pubsub.To
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (10 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
 
       return current_alignment - initial_alignment;
    }
@@ -138,15 +133,6 @@ public class SceneActionDefinitionMessagePubSubType implements us.ihmc.pubsub.To
       current_alignment += (data.getEnabledFoundationPoseModels().size() * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getFrameName().length() + 1;
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getFrameA().length() + 1;
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getFrameB().length() + 1;
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-
 
       return current_alignment - initial_alignment;
    }
@@ -182,20 +168,6 @@ public class SceneActionDefinitionMessagePubSubType implements us.ihmc.pubsub.To
       cdr.write_type_e(data.getEnabledFoundationPoseModels());else
           throw new RuntimeException("enabled_foundation_pose_models field exceeds the maximum length: %d > %d".formatted(data.getEnabledFoundationPoseModels().size(), 10));
 
-      if(data.getFrameName().length() <= 255)
-      cdr.write_type_d(data.getFrameName());else
-          throw new RuntimeException("frame_name field exceeds the maximum length: %d > %d".formatted(data.getFrameName().length(), 255));
-
-      if(data.getFrameA().length() <= 255)
-      cdr.write_type_d(data.getFrameA());else
-          throw new RuntimeException("frame_a field exceeds the maximum length: %d > %d".formatted(data.getFrameA().length(), 255));
-
-      if(data.getFrameB().length() <= 255)
-      cdr.write_type_d(data.getFrameB());else
-          throw new RuntimeException("frame_b field exceeds the maximum length: %d > %d".formatted(data.getFrameB().length(), 255));
-
-      cdr.write_type_5(data.getDistance());
-
    }
 
    public static void read(behavior_msgs.msg.dds.SceneActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
@@ -220,11 +192,6 @@ public class SceneActionDefinitionMessagePubSubType implements us.ihmc.pubsub.To
       cdr.read_type_e(data.getEnabledYoloModels());	
       cdr.read_type_e(data.getIgnoredYoloClassIndices());	
       cdr.read_type_e(data.getEnabledFoundationPoseModels());	
-      cdr.read_type_d(data.getFrameName());	
-      cdr.read_type_d(data.getFrameA());	
-      cdr.read_type_d(data.getFrameB());	
-      data.setDistance(cdr.read_type_5());
-      	
 
    }
 
@@ -247,10 +214,6 @@ public class SceneActionDefinitionMessagePubSubType implements us.ihmc.pubsub.To
       ser.write_type_e("enabled_yolo_models", data.getEnabledYoloModels());
       ser.write_type_e("ignored_yolo_class_indices", data.getIgnoredYoloClassIndices());
       ser.write_type_e("enabled_foundation_pose_models", data.getEnabledFoundationPoseModels());
-      ser.write_type_d("frame_name", data.getFrameName());
-      ser.write_type_d("frame_a", data.getFrameA());
-      ser.write_type_d("frame_b", data.getFrameB());
-      ser.write_type_5("distance", data.getDistance());
    }
 
    @Override
@@ -272,10 +235,6 @@ public class SceneActionDefinitionMessagePubSubType implements us.ihmc.pubsub.To
       ser.read_type_e("enabled_yolo_models", data.getEnabledYoloModels());
       ser.read_type_e("ignored_yolo_class_indices", data.getIgnoredYoloClassIndices());
       ser.read_type_e("enabled_foundation_pose_models", data.getEnabledFoundationPoseModels());
-      ser.read_type_d("frame_name", data.getFrameName());
-      ser.read_type_d("frame_a", data.getFrameA());
-      ser.read_type_d("frame_b", data.getFrameB());
-      data.setDistance(ser.read_type_5("distance"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.SceneActionDefinitionMessage src, behavior_msgs.msg.dds.SceneActionDefinitionMessage dest)

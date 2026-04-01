@@ -44,6 +44,8 @@ public class RDXSceneAction extends RDXActionNode<SceneActionState, SceneActionD
    private final ImFloatWrapper timeoutWidget;
    private final ImFloatWrapper yoloConfidenceWidget;
    private final ImIntegerWrapper minHistorySizeWidget;
+   private final ImIntegerWrapper minPostPointsWidget;
+   private final ImIntegerWrapper minRecessPointsWidget;
    private final RDXSelectablePose3DGizmo nominalObjectPoseGizmo;
 
    public RDXSceneAction(long id, RDXBehaviorTreeRootNode rootNode)
@@ -93,6 +95,12 @@ public class RDXSceneAction extends RDXActionNode<SceneActionState, SceneActionD
       minHistorySizeWidget = new ImIntegerWrapper(definition::getMinimumHistorySize,
                                                   definition::setMinimumHistorySize,
                                                   imInteger -> ImGui.inputInt(labels.get("Minimum History Size"), imInteger));
+      minPostPointsWidget = new ImIntegerWrapper(() -> definition.getSceneObjectDefinition().getMinPostPoints(),
+                                                 value -> definition.getSceneObjectDefinition().setMinPostPoints(value),
+                                                 imInteger -> ImGui.inputInt(labels.get("Min Post Points"), imInteger));
+      minRecessPointsWidget = new ImIntegerWrapper(() -> definition.getSceneObjectDefinition().getMinRecessPoints(),
+                                                   value -> definition.getSceneObjectDefinition().setMinRecessPoints(value),
+                                                   imInteger -> ImGui.inputInt(labels.get("Min Recess Points"), imInteger));
    }
 
    @Override
@@ -165,6 +173,13 @@ public class RDXSceneAction extends RDXActionNode<SceneActionState, SceneActionD
             imFPType.set(objectDefinition.getFoundationPoseObjectType().ordinal());
             if (ImGui.combo(labels.get("FoundationPose Type"), imFPType, fpTypeNames))
                objectDefinition.setFoundationPoseObjectType(IsaacROSFoundationPoseObject.values()[imFPType.get()]);
+            ImGui.popItemWidth();
+         }
+         else if (objectDefinition.getObjectType() == BehaviorTreeSceneObjectType.DOOR_FRAME)
+         {
+            ImGui.pushItemWidth(100.0f);
+            minPostPointsWidget.renderImGuiWidget();
+            minRecessPointsWidget.renderImGuiWidget();
             ImGui.popItemWidth();
          }
 

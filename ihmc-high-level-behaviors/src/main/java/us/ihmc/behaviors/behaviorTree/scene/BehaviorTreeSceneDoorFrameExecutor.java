@@ -20,9 +20,6 @@ import static behavior_msgs.msg.dds.BehaviorTreeSceneObjectStateMessage.*;
 
 public class BehaviorTreeSceneDoorFrameExecutor extends BehaviorTreeSceneObjectExecutor
 {
-   public static final long MIN_POST_POINTS = 400;
-   public static final long MIN_RECESS_POINTS = 3000;
-
    private final BehaviorTreeSceneExecutor scene;
    private volatile CUDAShapePointCounter pointCounter = null;
 
@@ -98,7 +95,7 @@ public class BehaviorTreeSceneDoorFrameExecutor extends BehaviorTreeSceneObjectE
             capsuleTop.addZ(0.3);
 
             latchPostPoints = Math.max(latchPostPoints, pointCounter.countPointsInCapsule(depthImage, capsuleBottom, capsuleTop, 0.05f));
-            if (latchPostPoints > MIN_POST_POINTS)
+            if (latchPostPoints > getMinPostPoints())
             {
                doorOpenAngle = (float) -angle; // Invert so it's latch post relative
                RigidBodyTransform frameTransform = transform.getValueAndModify();
@@ -121,7 +118,7 @@ public class BehaviorTreeSceneDoorFrameExecutor extends BehaviorTreeSceneObjectE
          if (Math.abs(doorOpenAngle) > Math.toRadians(7.0))
             doorType = (hingeSide == RobotSide.LEFT ? doorOpenAngle > 0 : doorOpenAngle < 0) ? DOOR_TYPE_PUSH : DOOR_TYPE_PULL;
          else
-            doorType = hingeRecessPoints > MIN_RECESS_POINTS ? DOOR_TYPE_PUSH : DOOR_TYPE_PULL;
+            doorType = hingeRecessPoints > getMinRecessPoints() ? DOOR_TYPE_PUSH : DOOR_TYPE_PULL;
 
          depthImage.release();
       }
@@ -130,7 +127,7 @@ public class BehaviorTreeSceneDoorFrameExecutor extends BehaviorTreeSceneObjectE
    @Override
    public boolean isStable()
    {
-      return latchPostPoints > MIN_POST_POINTS; // TODO: Filter points in capsule for stable check
+      return latchPostPoints > getMinPostPoints(); // TODO: Filter points in capsule for stable check
    }
 
    @Override
