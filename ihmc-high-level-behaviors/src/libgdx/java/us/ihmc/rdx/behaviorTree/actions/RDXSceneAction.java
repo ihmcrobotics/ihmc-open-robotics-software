@@ -17,8 +17,10 @@ import us.ihmc.perception.detections.yolo.YOLOv8Tools;
 import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeRootNode;
 import us.ihmc.rdx.behaviorTree.RDXCRDTTools;
 import us.ihmc.rdx.imgui.ImFloatWrapper;
+import us.ihmc.rdx.imgui.ImGuiReferenceFrameLibraryCombo;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImIntegerWrapper;
+import us.ihmc.rdx.imgui.ImStringWrapper;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.widgets.ImGuiSceneActionWidget;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
@@ -46,6 +48,10 @@ public class RDXSceneAction extends RDXActionNode<SceneActionState, SceneActionD
    private final ImIntegerWrapper minHistorySizeWidget;
    private final ImIntegerWrapper minPostPointsWidget;
    private final ImIntegerWrapper minRecessPointsWidget;
+   private final ImStringWrapper customFrameNameWidget;
+   private final ImGuiReferenceFrameLibraryCombo frameAComboBox;
+   private final ImGuiReferenceFrameLibraryCombo frameBComboBox;
+   private final ImFloatWrapper customFrameDistanceWidget;
    private final RDXSelectablePose3DGizmo nominalObjectPoseGizmo;
 
    public RDXSceneAction(long id, RDXBehaviorTreeRootNode rootNode)
@@ -101,6 +107,20 @@ public class RDXSceneAction extends RDXActionNode<SceneActionState, SceneActionD
       minRecessPointsWidget = new ImIntegerWrapper(() -> definition.getSceneObjectDefinition().getMinRecessPoints(),
                                                    value -> definition.getSceneObjectDefinition().setMinRecessPoints(value),
                                                    imInteger -> ImGui.inputInt(labels.get("Min Recess Points"), imInteger));
+      customFrameNameWidget = new ImStringWrapper(() -> definition.getSceneObjectDefinition().getCustomFrameName(),
+                                                  value -> definition.getSceneObjectDefinition().setCustomFrameName(value),
+                                                  imString -> ImGui.inputText(labels.get("Custom Frame Name"), imString));
+      frameAComboBox = new ImGuiReferenceFrameLibraryCombo("Frame A",
+                                                           scene::getAllFrameNames,
+                                                           () -> definition.getSceneObjectDefinition().getFrameA(),
+                                                           value -> definition.getSceneObjectDefinition().setFrameA(value));
+      frameBComboBox = new ImGuiReferenceFrameLibraryCombo("Frame B",
+                                                           scene::getAllFrameNames,
+                                                           () -> definition.getSceneObjectDefinition().getFrameB(),
+                                                           value -> definition.getSceneObjectDefinition().setFrameB(value));
+      customFrameDistanceWidget = new ImFloatWrapper(() -> definition.getSceneObjectDefinition().getDistance(),
+                                                     value -> definition.getSceneObjectDefinition().setDistance(value),
+                                                     imFloat -> ImGui.inputFloat(labels.get("Distance"), imFloat));
    }
 
    @Override
@@ -180,6 +200,18 @@ public class RDXSceneAction extends RDXActionNode<SceneActionState, SceneActionD
             ImGui.pushItemWidth(100.0f);
             minPostPointsWidget.renderImGuiWidget();
             minRecessPointsWidget.renderImGuiWidget();
+            ImGui.popItemWidth();
+         }
+         else if (objectDefinition.getObjectType() == BehaviorTreeSceneObjectType.CUSTOM_FRAME)
+         {
+            ImGui.pushItemWidth(200.0f);
+            customFrameNameWidget.renderImGuiWidget();
+            ImGui.popItemWidth();
+            frameAComboBox.render();
+            frameBComboBox.render();
+
+            ImGui.pushItemWidth(100.0f);
+            customFrameDistanceWidget.renderImGuiWidget();
             ImGui.popItemWidth();
          }
 

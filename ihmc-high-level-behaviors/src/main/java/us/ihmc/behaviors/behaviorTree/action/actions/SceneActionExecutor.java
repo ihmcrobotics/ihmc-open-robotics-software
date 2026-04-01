@@ -4,12 +4,14 @@ import behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionDefinition.SceneActionType;
+import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneCustomFrameExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneDoorFrameExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneDoorPanelExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectState;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectType;
 import us.ihmc.commons.thread.Throttler;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -181,6 +183,7 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
 
       boolean success = switch (definition.getSceneObjectDefinition().getObjectType())
       {
+         case CUSTOM_FRAME -> setupCustomFrameDetection();
          case DOOR_PANEL -> setupDoorPanelDetection();
          case DOOR_FRAME -> setupDoorFrameDetection();
          default -> setupSinglePersistentDetection();
@@ -188,6 +191,53 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
 
       if (success)
          state.setIsExecuting(false);
+   }
+
+   private boolean setupCustomFrameDetection()
+   {
+      ReferenceFrame frameA = scene.findFrameByName(definition.getSceneObjectDefinition().getFrameA());
+      ReferenceFrame frameB = scene.findFrameByName(definition.getSceneObjectDefinition().getFrameB());
+      if (frameA == null || frameB == null)
+      {
+         if (printDebug)
+            state.getLogger()
+                 .warn("Failed to find frames: %s = %s and %s = %s".formatted(
+                       definition.getSceneObjectDefinition().getFrameA(), frameA,
+                       definition.getSceneObjectDefinition().getFrameB(), frameB));
+         return false;
+      }
+
+      BehaviorTreeSceneCustomFrameExecutor target = null;
+      for (BehaviorTreeSceneObjectState object : scene.getObjects())
+      {
+         if (object instanceof BehaviorTreeSceneCustomFrameExecutor customFrame
+          && customFrame.getCustomFrameName().equals(definition.getSceneObjectDefinition().getCustomFrameName()))
+         {
+            target = customFrame;
+            break;
+         }
+      }
+
+      if (target != null)
+      {
+         state.getLogger().info("Updating existing custom frame: {}", definition.getSceneObjectDefinition().getCustomFrameName());
+         target.setFrameA(definition.getSceneObjectDefinition().getFrameA());
+         target.setFrameB(definition.getSceneObjectDefinition().getFrameB());
+         target.setDistance(definition.getSceneObjectDefinition().getDistance());
+         target.unfreeze();
+      }
+      else
+      {
+         state.getLogger().info("Creating new custom frame: {}", definition.getSceneObjectDefinition().getCustomFrameName());
+
+         BehaviorTreeSceneObjectDefinitionMessage message = new BehaviorTreeSceneObjectDefinitionMessage();
+         definition.getSceneObjectDefinition().toMessage(message);
+         target = (BehaviorTreeSceneCustomFrameExecutor) scene.createObject(message);
+         target.update();
+         scene.addObject(target);
+      }
+
+      return true;
    }
 
    private boolean setupDoorPanelDetection()
@@ -313,9 +363,9 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
       if (targetSceneObject != null)
       {
          state.getLogger().info("Updating existing door panel scene object");
-         targetSceneObject.unfreeze();
          targetSceneObject.setPersistentDetection(openingMechanismDetection);
          targetSceneObject.setDoorPanelPersistentDetection(doorPanelDetection);
+         targetSceneObject.unfreeze();
       }
       else
       {
@@ -370,8 +420,10 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
       if (frameSceneObject != null)
       {
          state.getLogger().info("Updating existing door frame scene object");
-         frameSceneObject.unfreeze();
          frameSceneObject.setPersistentDetection(doorPanelSceneObject.getDoorPanelPersistentDetection());
+         frameSceneObject.setMinPostPoints(definition.getSceneObjectDefinition().getMinPostPoints());
+         frameSceneObject.setMinRecessPoints(definition.getSceneObjectDefinition().getMinRecessPoints());
+         frameSceneObject.unfreeze();
       }
       else
       {
