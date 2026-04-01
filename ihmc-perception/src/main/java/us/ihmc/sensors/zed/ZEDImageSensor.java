@@ -323,13 +323,7 @@ public class ZEDImageSensor extends ImageSensor
 
    protected int openCamera()
    {
-      int inputType = zedInitParameters.input_type();
-      if (inputType == SL_INPUT_TYPE_SVO)
-         return sl_open_camera(cameraID, zedInitParameters, 0, svoPath, "", 0, "", "", "");
-      else if (inputType == SL_INPUT_TYPE_STREAM)
-         return sl_open_camera(cameraID, zedInitParameters, 0, "", remoteStreamingAddress, remoteStreamingPort, "", "", "");
-      else
-         return sl_open_camera(cameraID, zedInitParameters, serialNumber, "", "", 0, "", "", "");
+      return sl_open_camera(cameraID, zedInitParameters, serialNumber, svoPath, remoteStreamingAddress, remoteStreamingPort, "", "", "");
    }
 
    @Override
