@@ -6,7 +6,7 @@ public enum BehaviorTreeSceneObjectType
    FOUNDATION_POSE,
    DOOR_PANEL,
    DOOR_FRAME,
-   CUSTOM_FRAME;
+   COMPOSITE_FRAME;
 
    public static final BehaviorTreeSceneObjectType[] values = values();
 }

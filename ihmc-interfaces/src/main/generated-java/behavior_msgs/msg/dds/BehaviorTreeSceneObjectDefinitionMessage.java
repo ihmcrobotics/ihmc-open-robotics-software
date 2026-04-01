@@ -10,10 +10,15 @@ import us.ihmc.pubsub.TopicDataType;
        * YOLO:
        * FoundationPose:
        * Door Frame
-       * Custom Reference Frame: Creates a Z-up from where X points to frame B from frame A and is some distance from frame B
+       * Composite Reference Frame:
        */
 public class BehaviorTreeSceneObjectDefinitionMessage extends Packet<BehaviorTreeSceneObjectDefinitionMessage> implements Settable<BehaviorTreeSceneObjectDefinitionMessage>, EpsilonComparable<BehaviorTreeSceneObjectDefinitionMessage>
 {
+   /**
+          * From A towards, backed up by X distance, Zup
+          */
+   public static final byte COMPOSITE_FRAME_APPROACH = (byte) 0;
+   public static final byte COMPOSITE_FRAME_HYBRID = (byte) 1;
    /**
             * Object type: YOLO only, FoundationPose, custom frame, or specific heurustic
             */
@@ -39,29 +44,33 @@ public class BehaviorTreeSceneObjectDefinitionMessage extends Packet<BehaviorTre
             */
    public int min_recess_points_;
    /**
-            * Custom frame name
+            * Composite frame name
             */
-   public java.lang.StringBuilder custom_frame_name_;
+   public java.lang.StringBuilder composite_frame_name_;
    /**
             * The name of frame A
             */
-   public java.lang.StringBuilder frame_a_;
+   public java.lang.StringBuilder composite_frame_a_;
    /**
             * The name of frame B
             */
-   public java.lang.StringBuilder frame_b_;
+   public java.lang.StringBuilder composite_frame_b_;
+   /**
+            * The type of composite frame
+            */
+   public byte composite_frame_type_;
    /**
             * Distance from frame B
             */
-   public float distance_;
+   public float composite_distance_;
 
    public BehaviorTreeSceneObjectDefinitionMessage()
    {
       yolo_model_name_ = new java.lang.StringBuilder(255);
       yolo_class_name_ = new java.lang.StringBuilder(255);
-      custom_frame_name_ = new java.lang.StringBuilder(255);
-      frame_a_ = new java.lang.StringBuilder(255);
-      frame_b_ = new java.lang.StringBuilder(255);
+      composite_frame_name_ = new java.lang.StringBuilder(255);
+      composite_frame_a_ = new java.lang.StringBuilder(255);
+      composite_frame_b_ = new java.lang.StringBuilder(255);
    }
 
    public BehaviorTreeSceneObjectDefinitionMessage(BehaviorTreeSceneObjectDefinitionMessage other)
@@ -86,16 +95,18 @@ public class BehaviorTreeSceneObjectDefinitionMessage extends Packet<BehaviorTre
 
       min_recess_points_ = other.min_recess_points_;
 
-      custom_frame_name_.setLength(0);
-      custom_frame_name_.append(other.custom_frame_name_);
+      composite_frame_name_.setLength(0);
+      composite_frame_name_.append(other.composite_frame_name_);
 
-      frame_a_.setLength(0);
-      frame_a_.append(other.frame_a_);
+      composite_frame_a_.setLength(0);
+      composite_frame_a_.append(other.composite_frame_a_);
 
-      frame_b_.setLength(0);
-      frame_b_.append(other.frame_b_);
+      composite_frame_b_.setLength(0);
+      composite_frame_b_.append(other.composite_frame_b_);
 
-      distance_ = other.distance_;
+      composite_frame_type_ = other.composite_frame_type_;
+
+      composite_distance_ = other.composite_distance_;
 
    }
 
@@ -208,90 +219,105 @@ public class BehaviorTreeSceneObjectDefinitionMessage extends Packet<BehaviorTre
    }
 
    /**
-            * Custom frame name
+            * Composite frame name
             */
-   public void setCustomFrameName(java.lang.String custom_frame_name)
+   public void setCompositeFrameName(java.lang.String composite_frame_name)
    {
-      custom_frame_name_.setLength(0);
-      custom_frame_name_.append(custom_frame_name);
+      composite_frame_name_.setLength(0);
+      composite_frame_name_.append(composite_frame_name);
    }
 
    /**
-            * Custom frame name
+            * Composite frame name
             */
-   public java.lang.String getCustomFrameNameAsString()
+   public java.lang.String getCompositeFrameNameAsString()
    {
-      return getCustomFrameName().toString();
+      return getCompositeFrameName().toString();
    }
    /**
-            * Custom frame name
+            * Composite frame name
             */
-   public java.lang.StringBuilder getCustomFrameName()
+   public java.lang.StringBuilder getCompositeFrameName()
    {
-      return custom_frame_name_;
-   }
-
-   /**
-            * The name of frame A
-            */
-   public void setFrameA(java.lang.String frame_a)
-   {
-      frame_a_.setLength(0);
-      frame_a_.append(frame_a);
+      return composite_frame_name_;
    }
 
    /**
             * The name of frame A
             */
-   public java.lang.String getFrameAAsString()
+   public void setCompositeFrameA(java.lang.String composite_frame_a)
    {
-      return getFrameA().toString();
+      composite_frame_a_.setLength(0);
+      composite_frame_a_.append(composite_frame_a);
+   }
+
+   /**
+            * The name of frame A
+            */
+   public java.lang.String getCompositeFrameAAsString()
+   {
+      return getCompositeFrameA().toString();
    }
    /**
             * The name of frame A
             */
-   public java.lang.StringBuilder getFrameA()
+   public java.lang.StringBuilder getCompositeFrameA()
    {
-      return frame_a_;
+      return composite_frame_a_;
    }
 
    /**
             * The name of frame B
             */
-   public void setFrameB(java.lang.String frame_b)
+   public void setCompositeFrameB(java.lang.String composite_frame_b)
    {
-      frame_b_.setLength(0);
-      frame_b_.append(frame_b);
+      composite_frame_b_.setLength(0);
+      composite_frame_b_.append(composite_frame_b);
    }
 
    /**
             * The name of frame B
             */
-   public java.lang.String getFrameBAsString()
+   public java.lang.String getCompositeFrameBAsString()
    {
-      return getFrameB().toString();
+      return getCompositeFrameB().toString();
    }
    /**
             * The name of frame B
             */
-   public java.lang.StringBuilder getFrameB()
+   public java.lang.StringBuilder getCompositeFrameB()
    {
-      return frame_b_;
+      return composite_frame_b_;
+   }
+
+   /**
+            * The type of composite frame
+            */
+   public void setCompositeFrameType(byte composite_frame_type)
+   {
+      composite_frame_type_ = composite_frame_type;
+   }
+   /**
+            * The type of composite frame
+            */
+   public byte getCompositeFrameType()
+   {
+      return composite_frame_type_;
    }
 
    /**
             * Distance from frame B
             */
-   public void setDistance(float distance)
+   public void setCompositeDistance(float composite_distance)
    {
-      distance_ = distance;
+      composite_distance_ = composite_distance;
    }
    /**
             * Distance from frame B
             */
-   public float getDistance()
+   public float getCompositeDistance()
    {
-      return distance_;
+      return composite_distance_;
    }
 
 
@@ -324,13 +350,15 @@ public class BehaviorTreeSceneObjectDefinitionMessage extends Packet<BehaviorTre
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.min_recess_points_, other.min_recess_points_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.custom_frame_name_, other.custom_frame_name_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.composite_frame_name_, other.composite_frame_name_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.frame_a_, other.frame_a_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.composite_frame_a_, other.composite_frame_a_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.frame_b_, other.frame_b_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.composite_frame_b_, other.composite_frame_b_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.distance_, other.distance_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.composite_frame_type_, other.composite_frame_type_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.composite_distance_, other.composite_distance_, epsilon)) return false;
 
 
       return true;
@@ -357,13 +385,15 @@ public class BehaviorTreeSceneObjectDefinitionMessage extends Packet<BehaviorTre
 
       if(this.min_recess_points_ != otherMyClass.min_recess_points_) return false;
 
-      if (!us.ihmc.idl.IDLTools.equals(this.custom_frame_name_, otherMyClass.custom_frame_name_)) return false;
+      if (!us.ihmc.idl.IDLTools.equals(this.composite_frame_name_, otherMyClass.composite_frame_name_)) return false;
 
-      if (!us.ihmc.idl.IDLTools.equals(this.frame_a_, otherMyClass.frame_a_)) return false;
+      if (!us.ihmc.idl.IDLTools.equals(this.composite_frame_a_, otherMyClass.composite_frame_a_)) return false;
 
-      if (!us.ihmc.idl.IDLTools.equals(this.frame_b_, otherMyClass.frame_b_)) return false;
+      if (!us.ihmc.idl.IDLTools.equals(this.composite_frame_b_, otherMyClass.composite_frame_b_)) return false;
 
-      if(this.distance_ != otherMyClass.distance_) return false;
+      if(this.composite_frame_type_ != otherMyClass.composite_frame_type_) return false;
+
+      if(this.composite_distance_ != otherMyClass.composite_distance_) return false;
 
 
       return true;
@@ -387,14 +417,16 @@ public class BehaviorTreeSceneObjectDefinitionMessage extends Packet<BehaviorTre
       builder.append(this.min_post_points_);      builder.append(", ");
       builder.append("min_recess_points=");
       builder.append(this.min_recess_points_);      builder.append(", ");
-      builder.append("custom_frame_name=");
-      builder.append(this.custom_frame_name_);      builder.append(", ");
-      builder.append("frame_a=");
-      builder.append(this.frame_a_);      builder.append(", ");
-      builder.append("frame_b=");
-      builder.append(this.frame_b_);      builder.append(", ");
-      builder.append("distance=");
-      builder.append(this.distance_);
+      builder.append("composite_frame_name=");
+      builder.append(this.composite_frame_name_);      builder.append(", ");
+      builder.append("composite_frame_a=");
+      builder.append(this.composite_frame_a_);      builder.append(", ");
+      builder.append("composite_frame_b=");
+      builder.append(this.composite_frame_b_);      builder.append(", ");
+      builder.append("composite_frame_type=");
+      builder.append(this.composite_frame_type_);      builder.append(", ");
+      builder.append("composite_distance=");
+      builder.append(this.composite_distance_);
       builder.append("}");
       return builder.toString();
    }

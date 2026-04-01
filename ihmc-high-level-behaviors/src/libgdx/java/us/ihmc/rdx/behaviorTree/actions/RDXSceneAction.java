@@ -9,6 +9,7 @@ import org.yaml.snakeyaml.Yaml;
 import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionDefinition;
 import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionDefinition.SceneActionType;
 import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionState;
+import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectDefinition.CompositeFrameType;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectDefinition;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectType;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
@@ -40,7 +41,9 @@ public class RDXSceneAction extends RDXActionNode<SceneActionState, SceneActionD
    private final ImInt imYOLOModel = new ImInt(0);
    private final ImInt imYOLOClass = new ImInt(0);
    private final ImInt imFPType = new ImInt(0);
+   private final ImInt imCompositeFrameType = new ImInt(0);
    private final String[] fpTypeNames;
+   private final String[] compositeFrameTypeNames;
    private final String[] availableYOLOModelNames;
    private final String[][] availableYOLOClasses;
    private final ImFloatWrapper timeoutWidget;
@@ -48,10 +51,10 @@ public class RDXSceneAction extends RDXActionNode<SceneActionState, SceneActionD
    private final ImIntegerWrapper minHistorySizeWidget;
    private final ImIntegerWrapper minPostPointsWidget;
    private final ImIntegerWrapper minRecessPointsWidget;
-   private final ImStringWrapper customFrameNameWidget;
-   private final ImGuiReferenceFrameLibraryCombo frameAComboBox;
-   private final ImGuiReferenceFrameLibraryCombo frameBComboBox;
-   private final ImFloatWrapper customFrameDistanceWidget;
+   private final ImStringWrapper compositeFrameNameWidget;
+   private final ImGuiReferenceFrameLibraryCombo compositeFrameAComboBox;
+   private final ImGuiReferenceFrameLibraryCombo compositeFrameBComboBox;
+   private final ImFloatWrapper compositeFrameDistanceWidget;
    private final RDXSelectablePose3DGizmo nominalObjectPoseGizmo;
 
    public RDXSceneAction(long id, RDXBehaviorTreeRootNode rootNode)
@@ -65,6 +68,9 @@ public class RDXSceneAction extends RDXActionNode<SceneActionState, SceneActionD
       fpTypeNames = new String[values.length];
       for (int i = 0; i < values.length; i++)
          fpTypeNames[i] = values[i].titleCaseName;
+      compositeFrameTypeNames = new String[CompositeFrameType.values.length];
+      for (int i = 0; i < CompositeFrameType.values.length; i++)
+         compositeFrameTypeNames[i] = CompositeFrameType.values[i].name();
 
       List<URL> yoloModelDirectories = YOLOv8Tools.getYOLOModelDirectories();
       availableYOLOModelNames = new String[yoloModelDirectories.size()];
@@ -107,20 +113,20 @@ public class RDXSceneAction extends RDXActionNode<SceneActionState, SceneActionD
       minRecessPointsWidget = new ImIntegerWrapper(() -> definition.getSceneObjectDefinition().getMinRecessPoints(),
                                                    value -> definition.getSceneObjectDefinition().setMinRecessPoints(value),
                                                    imInteger -> ImGui.inputInt(labels.get("Min Recess Points"), imInteger));
-      customFrameNameWidget = new ImStringWrapper(() -> definition.getSceneObjectDefinition().getCustomFrameName(),
-                                                  value -> definition.getSceneObjectDefinition().setCustomFrameName(value),
-                                                  imString -> ImGui.inputText(labels.get("Custom Frame Name"), imString));
-      frameAComboBox = new ImGuiReferenceFrameLibraryCombo("Frame A",
-                                                           scene::getAllFrameNames,
-                                                           () -> definition.getSceneObjectDefinition().getFrameA(),
-                                                           value -> definition.getSceneObjectDefinition().setFrameA(value));
-      frameBComboBox = new ImGuiReferenceFrameLibraryCombo("Frame B",
-                                                           scene::getAllFrameNames,
-                                                           () -> definition.getSceneObjectDefinition().getFrameB(),
-                                                           value -> definition.getSceneObjectDefinition().setFrameB(value));
-      customFrameDistanceWidget = new ImFloatWrapper(() -> definition.getSceneObjectDefinition().getDistance(),
-                                                     value -> definition.getSceneObjectDefinition().setDistance(value),
-                                                     imFloat -> ImGui.inputFloat(labels.get("Distance"), imFloat));
+      compositeFrameNameWidget = new ImStringWrapper(() -> definition.getSceneObjectDefinition().getCompositeFrameName(),
+                                                     value -> definition.getSceneObjectDefinition().setCompositeFrameName(value),
+                                                     imString -> ImGui.inputText(labels.get("Composite Frame Name"), imString));
+      compositeFrameAComboBox = new ImGuiReferenceFrameLibraryCombo("Frame A",
+                                                                    scene::getAllFrameNames,
+                                                                    () -> definition.getSceneObjectDefinition().getCompositeFrameA(),
+                                                                    value -> definition.getSceneObjectDefinition().setCompositeFrameA(value));
+      compositeFrameBComboBox = new ImGuiReferenceFrameLibraryCombo("Frame B",
+                                                                    scene::getAllFrameNames,
+                                                                    () -> definition.getSceneObjectDefinition().getCompositeFrameB(),
+                                                                    value -> definition.getSceneObjectDefinition().setCompositeFrameB(value));
+      compositeFrameDistanceWidget = new ImFloatWrapper(() -> definition.getSceneObjectDefinition().getCompositeDistance(),
+                                                        value -> definition.getSceneObjectDefinition().setCompositeDistance(value),
+                                                        imFloat -> ImGui.inputFloat(labels.get("Distance"), imFloat));
    }
 
    @Override
@@ -202,16 +208,28 @@ public class RDXSceneAction extends RDXActionNode<SceneActionState, SceneActionD
             minRecessPointsWidget.renderImGuiWidget();
             ImGui.popItemWidth();
          }
-         else if (objectDefinition.getObjectType() == BehaviorTreeSceneObjectType.CUSTOM_FRAME)
+         else if (objectDefinition.getObjectType() == BehaviorTreeSceneObjectType.COMPOSITE_FRAME)
          {
             ImGui.pushItemWidth(200.0f);
-            customFrameNameWidget.renderImGuiWidget();
+            imCompositeFrameType.set(objectDefinition.getCompositeFrameType().ordinal());
+            if (ImGui.combo(labels.get("Composite Frame Type"), imCompositeFrameType, compositeFrameTypeNames))
+               objectDefinition.setCompositeFrameType(CompositeFrameType.values[imCompositeFrameType.get()]);
+            compositeFrameNameWidget.renderImGuiWidget();
             ImGui.popItemWidth();
-            frameAComboBox.render();
-            frameBComboBox.render();
+            if (objectDefinition.getCompositeFrameType() == CompositeFrameType.APPROACH)
+               ImGui.text("From:");
+            if (objectDefinition.getCompositeFrameType() == CompositeFrameType.HYBRID)
+               ImGui.text("Position:");
+            compositeFrameAComboBox.render();
+            if (objectDefinition.getCompositeFrameType() == CompositeFrameType.APPROACH)
+               ImGui.text("To:");
+            if (objectDefinition.getCompositeFrameType() == CompositeFrameType.HYBRID)
+               ImGui.text("Orientation:");
+            compositeFrameBComboBox.render();
 
             ImGui.pushItemWidth(100.0f);
-            customFrameDistanceWidget.renderImGuiWidget();
+            if (objectDefinition.getCompositeFrameType() == CompositeFrameType.APPROACH)
+               compositeFrameDistanceWidget.renderImGuiWidget();
             ImGui.popItemWidth();
          }
 

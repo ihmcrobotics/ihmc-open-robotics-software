@@ -13,16 +13,25 @@ import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseObject
 
 public class BehaviorTreeSceneObjectDefinition extends LatestTimestampModifiable
 {
+   public enum CompositeFrameType
+   {
+      APPROACH,
+      HYBRID;
+
+      public static final CompositeFrameType[] values = values();
+   }
+
    private final CRDTBidirectionalEnumField<BehaviorTreeSceneObjectType> objectType;
    private final CRDTBidirectionalString yoloModelName;
    private final CRDTBidirectionalString yoloClassName;
    private final CRDTBidirectionalEnumField<IsaacROSFoundationPoseObject> foundationPoseObjectType;
    private final CRDTBidirectionalInteger minPostPoints;
    private final CRDTBidirectionalInteger minRecessPoints;
-   private final CRDTBidirectionalString customFrameName;
-   private final CRDTBidirectionalString frameA;
-   private final CRDTBidirectionalString frameB;
-   private final CRDTBidirectionalFloat distance;
+   private final CRDTBidirectionalString compositeFrameName;
+   private final CRDTBidirectionalString compositeFrameA;
+   private final CRDTBidirectionalString compositeFrameB;
+   private final CRDTBidirectionalEnumField<CompositeFrameType> compositeFrameType;
+   private final CRDTBidirectionalFloat compositeDistance;
 
    private BehaviorTreeSceneObjectType onDiskObjectType;
    private String onDiskYoloModelName;
@@ -30,10 +39,11 @@ public class BehaviorTreeSceneObjectDefinition extends LatestTimestampModifiable
    private IsaacROSFoundationPoseObject onDiskFoundationPoseObjectType;
    private int onDiskMinPostPoints;
    private int onDiskMinRecessPoints;
-   private String onDiskCustomFrameName;
-   private String onDiskFrameA;
-   private String onDiskFrameB;
-   private float onDiskDistance;
+   private String onDiskCompositeFrameName;
+   private String onDiskCompositeFrameA;
+   private String onDiskCompositeFrameB;
+   private CompositeFrameType onDiskCompositeFrameType;
+   private float onDiskCompositeDistance;
 
    /** Used when a scene object state extends this. */
    public BehaviorTreeSceneObjectDefinition(CRDTInfo crdtInfo, BehaviorTreeSceneObjectDefinitionMessage definition)
@@ -46,10 +56,11 @@ public class BehaviorTreeSceneObjectDefinition extends LatestTimestampModifiable
       foundationPoseObjectType = new CRDTBidirectionalEnumField<>(this, IsaacROSFoundationPoseObject.values[definition.getFoundationPoseObjectType()]);
       minPostPoints = new CRDTBidirectionalInteger(this, definition.getMinPostPoints());
       minRecessPoints = new CRDTBidirectionalInteger(this, definition.getMinRecessPoints());
-      customFrameName = new CRDTBidirectionalString(this, definition.getCustomFrameNameAsString());
-      frameA = new CRDTBidirectionalString(this, definition.getFrameAAsString());
-      frameB = new CRDTBidirectionalString(this, definition.getFrameBAsString());
-      distance = new CRDTBidirectionalFloat(this, definition.getDistance());
+      compositeFrameName = new CRDTBidirectionalString(this, definition.getCompositeFrameNameAsString());
+      compositeFrameA = new CRDTBidirectionalString(this, definition.getCompositeFrameAAsString());
+      compositeFrameB = new CRDTBidirectionalString(this, definition.getCompositeFrameBAsString());
+      compositeFrameType = new CRDTBidirectionalEnumField<>(this, compositeFrameTypeFromOrdinal(definition.getCompositeFrameType()));
+      compositeDistance = new CRDTBidirectionalFloat(this, definition.getCompositeDistance());
       setModifierName(getName());
    }
 
@@ -64,10 +75,11 @@ public class BehaviorTreeSceneObjectDefinition extends LatestTimestampModifiable
       foundationPoseObjectType = new CRDTBidirectionalEnumField<>(latestTimestampModifiable, IsaacROSFoundationPoseObject.MUSTARD);
       minPostPoints = new CRDTBidirectionalInteger(latestTimestampModifiable, 1000);
       minRecessPoints = new CRDTBidirectionalInteger(latestTimestampModifiable, 3000);
-      customFrameName = new CRDTBidirectionalString(latestTimestampModifiable, "");
-      frameA = new CRDTBidirectionalString(latestTimestampModifiable, "");
-      frameB = new CRDTBidirectionalString(latestTimestampModifiable, "");
-      distance = new CRDTBidirectionalFloat(latestTimestampModifiable, 0.0f);
+      compositeFrameName = new CRDTBidirectionalString(latestTimestampModifiable, "");
+      compositeFrameA = new CRDTBidirectionalString(latestTimestampModifiable, "");
+      compositeFrameB = new CRDTBidirectionalString(latestTimestampModifiable, "");
+      compositeFrameType = new CRDTBidirectionalEnumField<>(latestTimestampModifiable, CompositeFrameType.APPROACH);
+      compositeDistance = new CRDTBidirectionalFloat(latestTimestampModifiable, 0.0f);
       setModifierName(getName());
    }
 
@@ -89,12 +101,14 @@ public class BehaviorTreeSceneObjectDefinition extends LatestTimestampModifiable
             jsonNode.put("minPostPoints", minPostPoints.getValue());
             jsonNode.put("minRecessPoints", minRecessPoints.getValue());
          }
-         case CUSTOM_FRAME ->
+         case COMPOSITE_FRAME ->
          {
-            jsonNode.put("customFrameName", customFrameName.getValue());
-            jsonNode.put("frameA", frameA.getValue());
-            jsonNode.put("frameB", frameB.getValue());
-            jsonNode.put("distance", distance.getValue());
+            jsonNode.put("compositeFrameName", compositeFrameName.getValue());
+            jsonNode.put("compositeFrameA", compositeFrameA.getValue());
+            jsonNode.put("compositeFrameB", compositeFrameB.getValue());
+            jsonNode.put("compositeFrameType", compositeFrameType.getValue().name());
+            if (compositeFrameType.getValue() == CompositeFrameType.APPROACH)
+               jsonNode.put("compositeDistance", compositeDistance.getValue());
          }
       }
    }
@@ -117,12 +131,15 @@ public class BehaviorTreeSceneObjectDefinition extends LatestTimestampModifiable
             minPostPoints.setValue(jsonNode.has("minPostPoints") ? jsonNode.get("minPostPoints").asInt() : 400);
             minRecessPoints.setValue(jsonNode.has("minRecessPoints") ? jsonNode.get("minRecessPoints").asInt() : 3000);
          }
-         case CUSTOM_FRAME ->
+         case COMPOSITE_FRAME ->
          {
-            customFrameName.setValue(jsonNode.has("customFrameName") ? jsonNode.get("customFrameName").asText() : "");
-            frameA.setValue(jsonNode.has("frameA") ? jsonNode.get("frameA").asText() : "");
-            frameB.setValue(jsonNode.has("frameB") ? jsonNode.get("frameB").asText() : "");
-            distance.setValue(jsonNode.has("distance") ? (float) jsonNode.get("distance").asDouble() : 0.0f);
+            compositeFrameName.setValue(jsonNode.has("compositeFrameName") ? jsonNode.get("compositeFrameName").asText() : "");
+            compositeFrameA.setValue(jsonNode.has("compositeFrameA") ? jsonNode.get("compositeFrameA").asText() : "");
+            compositeFrameB.setValue(jsonNode.has("compositeFrameB") ? jsonNode.get("compositeFrameB").asText() : "");
+            if (jsonNode.has("compositeFrameType"))
+               compositeFrameType.setValue(CompositeFrameType.valueOf(jsonNode.get("compositeFrameType").asText()));
+            if (compositeFrameType.getValue() == CompositeFrameType.APPROACH)
+               compositeDistance.setValue(jsonNode.has("compositeDistance") ? (float) jsonNode.get("compositeDistance").asDouble() : 0.0f);
          }
       }
    }
@@ -135,10 +152,11 @@ public class BehaviorTreeSceneObjectDefinition extends LatestTimestampModifiable
       onDiskFoundationPoseObjectType = foundationPoseObjectType.getValue();
       onDiskMinPostPoints = minPostPoints.getValue();
       onDiskMinRecessPoints = minRecessPoints.getValue();
-      onDiskCustomFrameName = customFrameName.getValue();
-      onDiskFrameA = frameA.getValue();
-      onDiskFrameB = frameB.getValue();
-      onDiskDistance = distance.getValue();
+      onDiskCompositeFrameName = compositeFrameName.getValue();
+      onDiskCompositeFrameA = compositeFrameA.getValue();
+      onDiskCompositeFrameB = compositeFrameB.getValue();
+      onDiskCompositeFrameType = compositeFrameType.getValue();
+      onDiskCompositeDistance = compositeDistance.getValue();
    }
 
    public void undoAllNontopologicalChanges()
@@ -151,10 +169,11 @@ public class BehaviorTreeSceneObjectDefinition extends LatestTimestampModifiable
          foundationPoseObjectType.setValue(onDiskFoundationPoseObjectType);
          minPostPoints.setValue(onDiskMinPostPoints);
          minRecessPoints.setValue(onDiskMinRecessPoints);
-         customFrameName.setValue(onDiskCustomFrameName);
-         frameA.setValue(onDiskFrameA);
-         frameB.setValue(onDiskFrameB);
-         distance.setValue(onDiskDistance);
+         compositeFrameName.setValue(onDiskCompositeFrameName);
+         compositeFrameA.setValue(onDiskCompositeFrameA);
+         compositeFrameB.setValue(onDiskCompositeFrameB);
+         compositeFrameType.setValue(onDiskCompositeFrameType);
+         compositeDistance.setValue(onDiskCompositeDistance);
       }
    }
 
@@ -168,10 +187,11 @@ public class BehaviorTreeSceneObjectDefinition extends LatestTimestampModifiable
       unchanged &= foundationPoseObjectType.getValue() == onDiskFoundationPoseObjectType;
       unchanged &= minPostPoints.getValue() == onDiskMinPostPoints;
       unchanged &= minRecessPoints.getValue() == onDiskMinRecessPoints;
-      unchanged &= customFrameName.getValue().equals(onDiskCustomFrameName);
-      unchanged &= frameA.getValue().equals(onDiskFrameA);
-      unchanged &= frameB.getValue().equals(onDiskFrameB);
-      unchanged &= distance.getValue() == onDiskDistance;
+      unchanged &= compositeFrameName.getValue().equals(onDiskCompositeFrameName);
+      unchanged &= compositeFrameA.getValue().equals(onDiskCompositeFrameA);
+      unchanged &= compositeFrameB.getValue().equals(onDiskCompositeFrameB);
+      unchanged &= compositeFrameType.getValue() == onDiskCompositeFrameType;
+      unchanged &= compositeDistance.getValue() == onDiskCompositeDistance;
 
       return !unchanged;
    }
@@ -184,10 +204,11 @@ public class BehaviorTreeSceneObjectDefinition extends LatestTimestampModifiable
       message.setFoundationPoseObjectType(foundationPoseObjectType.toMessageOrdinal());
       message.setMinPostPoints(minPostPoints.toMessage());
       message.setMinRecessPoints(minRecessPoints.toMessage());
-      message.setCustomFrameName(customFrameName.toMessage());
-      message.setFrameA(frameA.toMessage());
-      message.setFrameB(frameB.toMessage());
-      message.setDistance(distance.toMessage());
+      message.setCompositeFrameName(compositeFrameName.toMessage());
+      message.setCompositeFrameA(compositeFrameA.toMessage());
+      message.setCompositeFrameB(compositeFrameB.toMessage());
+      message.setCompositeFrameType(compositeFrameType.toMessageOrdinal());
+      message.setCompositeDistance(compositeDistance.toMessage());
    }
 
    public void fromMessage(BehaviorTreeSceneObjectDefinitionMessage message)
@@ -198,10 +219,11 @@ public class BehaviorTreeSceneObjectDefinition extends LatestTimestampModifiable
       foundationPoseObjectType.fromMessageOrdinal(message.getFoundationPoseObjectType(), IsaacROSFoundationPoseObject.values);
       minPostPoints.fromMessage(message.getMinPostPoints());
       minRecessPoints.fromMessage(message.getMinRecessPoints());
-      customFrameName.fromMessage(message.getCustomFrameNameAsString());
-      frameA.fromMessage(message.getFrameAAsString());
-      frameB.fromMessage(message.getFrameBAsString());
-      distance.fromMessage(message.getDistance());
+      compositeFrameName.fromMessage(message.getCompositeFrameNameAsString());
+      compositeFrameA.fromMessage(message.getCompositeFrameAAsString());
+      compositeFrameB.fromMessage(message.getCompositeFrameBAsString());
+      compositeFrameType.fromMessageOrdinal(message.getCompositeFrameType(), CompositeFrameType.values);
+      compositeDistance.fromMessage(message.getCompositeDistance());
    }
 
    public String getName()
@@ -209,7 +231,7 @@ public class BehaviorTreeSceneObjectDefinition extends LatestTimestampModifiable
       return switch (objectType.getValue())
       {
          case YOLO_ONLY -> yoloClassName.getValue();
-         case CUSTOM_FRAME -> customFrameName.getValue();
+         case COMPOSITE_FRAME -> compositeFrameName.getValue();
          case FOUNDATION_POSE -> foundationPoseObjectType.getValue().titleCaseName;
          case DOOR_PANEL -> "Door Panel";
          case DOOR_FRAME -> "Door Frame";
@@ -276,48 +298,63 @@ public class BehaviorTreeSceneObjectDefinition extends LatestTimestampModifiable
       this.minRecessPoints.setValue(minRecessPoints);
    }
 
-   public String getCustomFrameName()
+   public String getCompositeFrameName()
    {
-      return customFrameName.getValue();
+      return compositeFrameName.getValue();
    }
 
-   public void setCustomFrameName(String customFrameName)
+   public void setCompositeFrameName(String compositeFrameName)
    {
-      this.customFrameName.setValue(customFrameName);
+      this.compositeFrameName.setValue(compositeFrameName);
    }
 
-   public String getFrameA()
+   public String getCompositeFrameA()
    {
-      return frameA.getValue();
+      return compositeFrameA.getValue();
    }
 
-   public void setFrameA(String frameA)
+   public void setCompositeFrameA(String compositeFrameA)
    {
-      this.frameA.setValue(frameA);
+      this.compositeFrameA.setValue(compositeFrameA);
    }
 
-   public String getFrameB()
+   public String getCompositeFrameB()
    {
-      return frameB.getValue();
+      return compositeFrameB.getValue();
    }
 
-   public void setFrameB(String frameB)
+   public void setCompositeFrameB(String compositeFrameB)
    {
-      this.frameB.setValue(frameB);
+      this.compositeFrameB.setValue(compositeFrameB);
    }
 
-   public float getDistance()
+   public CompositeFrameType getCompositeFrameType()
    {
-      return distance.getValue();
+      return compositeFrameType.getValue();
    }
 
-   public void setDistance(float distance)
+   public void setCompositeFrameType(CompositeFrameType compositeFrameType)
    {
-      this.distance.setValue(distance);
+      this.compositeFrameType.setValue(compositeFrameType);
+   }
+
+   public float getCompositeDistance()
+   {
+      return compositeDistance.getValue();
+   }
+
+   public void setCompositeDistance(float compositeDistance)
+   {
+      this.compositeDistance.setValue(compositeDistance);
    }
 
    protected boolean isUndoAvailable()
    {
       return onDiskObjectType != null;
+   }
+
+   private static CompositeFrameType compositeFrameTypeFromOrdinal(byte ordinal)
+   {
+      return ordinal >= 0 && ordinal < CompositeFrameType.values.length ? CompositeFrameType.values[ordinal] : CompositeFrameType.APPROACH;
    }
 }

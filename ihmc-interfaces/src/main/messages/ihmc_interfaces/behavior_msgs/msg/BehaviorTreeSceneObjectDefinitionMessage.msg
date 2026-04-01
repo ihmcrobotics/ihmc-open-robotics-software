@@ -22,16 +22,23 @@ uint16 min_post_points
 # Minimum number of point to detect the door recess
 uint16 min_recess_points
 
-# Custom Reference Frame: Creates a Z-up from where X points to frame B from frame A and is some distance from frame B
+# Composite Reference Frame:
 
-# Custom frame name
-string custom_frame_name
+# Composite frame name
+string composite_frame_name
 
 # The name of frame A
-string frame_a
+string composite_frame_a
 
 # The name of frame B
-string frame_b
+string composite_frame_b
+
+# From A towards, backed up by X distance, Zup
+byte COMPOSITE_FRAME_APPROACH = 0
+byte COMPOSITE_FRAME_HYBRID = 1
+
+# The type of composite frame
+byte composite_frame_type
 
 # Distance from frame B
-float32 distance
+float32 composite_distance
