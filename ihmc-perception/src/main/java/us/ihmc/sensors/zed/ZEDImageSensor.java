@@ -1,5 +1,6 @@
 package us.ihmc.sensors.zed;
 
+import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -11,6 +12,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
+import us.ihmc.perception.cuda.CUDAStreamManager;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.sensors.CameraIntrinsics;
@@ -63,6 +65,8 @@ public class ZEDImageSensor extends ImageSensor
    private final int localStreamingPort = nextStreamingPort.getAndAdd(2);
    private int fps;
 
+   private final SL_RuntimeParameters zedRuntimeParameters = new SL_RuntimeParameters();
+
    private final RawImage[] grabbedImages = new RawImage[OUTPUT_IMAGE_COUNT];
    private final Pointer[] slMatPointers = new Pointer[OUTPUT_IMAGE_COUNT];
    private final CameraIntrinsics leftSensorIntrinsics = new CameraIntrinsics();
@@ -79,13 +83,13 @@ public class ZEDImageSensor extends ImageSensor
    private boolean lastGrabFailed = false;
    private long lastGrabTimestamp;
 
-   private final SL_RuntimeParameters zedRuntimeParameters = new SL_RuntimeParameters();
-
    private boolean positionalTrackingEnabled = false;
    private final MutableReferenceFrame trackedSensorFrame;
    private final RigidBodyTransform trackedPoseOffset = new RigidBodyTransform();
    private final SL_Quaternion sensorRotation = new SL_Quaternion();
    private final SL_Vector3 sensorTranslation = new SL_Vector3();
+
+   private final CUstream_st cudaStream;
 
    /**
     * The most basic constructor that sets parameters to some default value.
@@ -101,6 +105,8 @@ public class ZEDImageSensor extends ImageSensor
       this.cameraID = cameraID;
 
       trackedSensorFrame = new MutableReferenceFrame(getSensorName() + "_tracked", ReferenceFrameTools.getWorldFrame());
+
+      cudaStream = CUDAStreamManager.getStream();
 
       sensorCenterToCameraDistanceY = (float) zedModel.getCenterToCameraDistance();
       updateReferenceFrames();
@@ -390,17 +396,17 @@ public class ZEDImageSensor extends ImageSensor
 
          // Retrieve the grabbed depth image
          Pointer depthImagePointer = slMatPointers[DEPTH_IMAGE_KEY];
-         returnCode = sl_retrieve_measure(cameraID, depthImagePointer, SL_MEASURE_DEPTH_U16_MM, SL_MEM_GPU, imageWidth, imageHeight, null); // TODO: Pass custream
+         returnCode = sl_retrieve_measure(cameraID, depthImagePointer, SL_MEASURE_DEPTH_U16_MM, SL_MEM_GPU, imageWidth, imageHeight, cudaStream);
          throwOnError(returnCode);
 
          // Retrieve the grabbed left color image
          Pointer leftColorImagePointer = slMatPointers[LEFT_COLOR_IMAGE_KEY];
-         returnCode = sl_retrieve_image(cameraID, leftColorImagePointer, SL_VIEW_LEFT, SL_MEM_GPU, imageWidth, imageHeight, null); // TODO: Pass custream
+         returnCode = sl_retrieve_image(cameraID, leftColorImagePointer, SL_VIEW_LEFT, SL_MEM_GPU, imageWidth, imageHeight, cudaStream);
          throwOnError(returnCode);
 
          // Retrieve the grabbed right color image
          Pointer rightColorImagePointer = slMatPointers[RIGHT_COLOR_IMAGE_KEY];
-         returnCode = sl_retrieve_image(cameraID, rightColorImagePointer, SL_VIEW_RIGHT, SL_MEM_GPU, imageWidth, imageHeight, null); // TODO: Pass custream
+         returnCode = sl_retrieve_image(cameraID, rightColorImagePointer, SL_VIEW_RIGHT, SL_MEM_GPU, imageWidth, imageHeight, cudaStream);
          throwOnError(returnCode);
 
          synchronized (grabbedImages)
@@ -531,6 +537,8 @@ public class ZEDImageSensor extends ImageSensor
       }
 
       sl_close_camera(cameraID);
+
+      CUDAStreamManager.releaseStream(cudaStream);
 
       System.out.println("Closed " + getClass().getSimpleName());
    }
