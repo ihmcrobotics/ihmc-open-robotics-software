@@ -166,4 +166,9 @@ public class CenterOfPressureStabilityMarginOptimizationModule extends Stability
    {
       return forceToCoPOffsetMultiplier;
    }
+
+   public FramePoint3D getMidFootPoint()
+   {
+      return midFootPoint;
+   }
 }

@@ -9,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandContactCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
@@ -25,6 +26,7 @@ public interface ReactiveBracingPlanner
     */
    void plan(FrameVector2DReadOnly desiredToCurrentCapturePoint,
                     FramePoint3DReadOnly centerOfMassPosition,
+                    FrameVector3DReadOnly centerOfMassVelocity,
                     FrameConvexPolygon2DReadOnly supportPolygon,
                     SideDependentList<? extends FramePoint3DReadOnly> handPositions,
                     SideDependentList<MutableBoolean> areFeetInContact,

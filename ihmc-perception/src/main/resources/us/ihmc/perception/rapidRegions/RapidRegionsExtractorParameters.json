@@ -21,7 +21,7 @@
     "upperBound" : 2.0
   },
   "Merge angular threshold" : {
-    "value" : 0.889163,
+    "value" : 0.96,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
@@ -64,12 +64,12 @@
     "upperBound" : 15000
   },
   "Region min patches" : {
-    "value" : 200,
+    "value" : 72,
     "lowerBound" : 1,
     "upperBound" : 3000
   },
   "Boundary min patches" : {
-    "value" : 115,
+    "value" : 50,
     "lowerBound" : 1,
     "upperBound" : 1000
   },

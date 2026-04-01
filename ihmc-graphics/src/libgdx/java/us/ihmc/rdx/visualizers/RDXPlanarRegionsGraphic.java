@@ -22,6 +22,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -40,6 +41,7 @@ import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
 
 public class RDXPlanarRegionsGraphic implements RenderableProvider
@@ -135,16 +137,17 @@ public class RDXPlanarRegionsGraphic implements RenderableProvider
       RigidBodyTransform transformToWorld = planarRegion.getTransformToWorldCopy();
       Color color = colorFunction.apply(planarRegion.getRegionId());
 
-      meshBuilder.addMultiLine(transformToWorld, planarRegion.getConcaveHull(), 0.01, color, true);
+      ConvexPolygon2D convexHull = planarRegion.getConvexHull();
+      convexHull.update();
 
-      int vertexCount = 0;
-      int maxVertices = 14000;
-      for (ConvexPolygon2D convexPolygon : planarRegion.getConvexPolygons())
+      List<Point2D> pointsToRender = new ArrayList<>();
+      for (int i = 0; i < convexHull.getNumberOfVertices(); i++)
       {
-         vertexCount += convexPolygon.getNumberOfVertices();
-         if (vertexCount < maxVertices)
-            meshBuilder.addPolygon(transformToWorld, convexPolygon, color);
+         pointsToRender.add(new Point2D(convexHull.getVertex(i)));
       }
+
+      meshBuilder.addMultiLine(transformToWorld, pointsToRender, 0.01, color, true);
+      meshBuilder.addPolygon(transformToWorld, convexHull, color);
 
 //      LabelGraphic sizeLabel = null;
 //      if (drawAreaText)

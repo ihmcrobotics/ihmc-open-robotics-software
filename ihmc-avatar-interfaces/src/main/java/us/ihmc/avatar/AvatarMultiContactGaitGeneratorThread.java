@@ -143,7 +143,7 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
       planner = robotModel.getReactiveBracingPlanner();
       registry.addChild(planner.getRegistry());
       contactSafetyFactor.set(DEFAULT_CONTACT_SAFETY_FACTOR);
-      additionalSafetyDistance.set(0.07);
+      additionalSafetyDistance.set(0.15);
       capturePointErrorThresholdForHandContactWhileStanding.set(DEFAULT_CAPTURE_POINT_ERROR_THRESHOLD_FOR_HAND_CONTACT_STANDING);
       capturePointErrorThresholdForHandContactWhileWalking.set(DEFAULT_CAPTURE_POINT_ERROR_THRESHOLD_FOR_HAND_CONTACT_WALKING);
 
@@ -332,7 +332,15 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
          double stanceWidth = leftFoot.distance(rightFoot);
 
          plannedHandContacts.clear();
-         planner.plan(desiredToCurrentCapturePoint, centerOfMassPosition, supportPolygon, handPositions, areFeetInContact, getMidFeetZUpFrame(), plannedHandContacts, stanceWidth);
+         planner.plan(desiredToCurrentCapturePoint,
+                      centerOfMassPosition,
+                      centerOfMassVelocity,
+                      supportPolygon,
+                      handPositions,
+                      areFeetInContact,
+                      getMidFeetZUpFrame(),
+                      plannedHandContacts,
+                      stanceWidth);
 
          // Just use single side if requested
          if (diagnosticBracingSide.getValue() != null)
