@@ -6,9 +6,14 @@ byte FREEZE_OBJECT = 1
 byte DELETE_OBJECT = 2
 byte CLEAR_SCENE = 3
 byte FREEZE_SCENE = 4
+byte CONFIGURE_YOLO = 5
+byte CONFIGURE_FOUNDATION_POSE = 5
+byte CREATE_FRAME = 7
 
 # The type of action as defined above
 byte scene_action_type
+
+# Setup, freeze, delete object:
 
 # Definition of the object to setup
 behavior_msgs/BehaviorTreeSceneObjectDefinitionMessage scene_object_definition
@@ -22,7 +27,7 @@ uint16 minimum_history_size
 # The nominal object pose for behavior previewing
 controller_msgs/RigidBodyTransformMessage nominal_object_pose
 
-# TODO: The following fields are work in progress:
+# Configure YOLO: TODO: The following fields are work in progress:
 
 # YOLO confidence threshold
 float32 yolo_confidence_threshold
@@ -42,8 +47,21 @@ string[<=10] enabled_yolo_models
 # YOLO classes to ignore
 byte[<=256] ignored_yolo_class_indices
 
-# FoundationPose object type (enum ordinal)
-byte foundation_pose_object_type
+# Configure FoundationPose:
 
 # FoundationPose models that should be enabled at this point
 byte[<=10] enabled_foundation_pose_models
+
+# CREATE_FRAME: Creates a Z-up from where X points to frame B from frame A and is some distance from frame B
+
+# The name of the frame to create
+string frame_name
+
+# The name of frame A
+string frame_a
+
+# The name of frame B
+string frame_b
+
+# Distance from frame B
+float32 distance
