@@ -73,7 +73,7 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
       else if (definition.getSceneActionType().getValue() == SceneActionType.CONFIGURE_YOLO)
       {
          YOLOv8DetectionExecutor yolo = scene.getYOLO();
-         yolo.disableModel();
+         yolo.disableAllModels();
          for (String yoloModelName : definition.getEnabledYoloModels().getValue())
             yolo.enableModel(yoloModelName);
       }
