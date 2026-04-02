@@ -21,6 +21,7 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImIntegerWrapper;
 import us.ihmc.rdx.imgui.ImStringWrapper;
 import us.ihmc.rdx.input.ImGui3DViewInput;
+import us.ihmc.rdx.ui.graphics.ros2.yolo.RDXROS2YOLOv8ModelSettings;
 import us.ihmc.rdx.ui.widgets.ImGuiSceneActionWidget;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 
@@ -37,6 +38,7 @@ public class RDXSceneAction extends RDXActionNode<SceneActionState, SceneActionD
    private final String[] fpTypeNames;
    private final String[] compositeFrameTypeNames;
    private final String[] availableYOLOModelNames;
+   private final RDXROS2YOLOv8ModelSettings[] yoloModelSettings;
    private final String[][] availableYOLOClasses;
    private final ImFloatWrapper timeoutWidget;
    private final ImIntegerWrapper minHistorySizeWidget;
@@ -70,10 +72,12 @@ public class RDXSceneAction extends RDXActionNode<SceneActionState, SceneActionD
 
       SyncedYOLOv8ModelParameters[] syncableParameters = definition.getSyncableYOLOModelParameters();
       availableYOLOModelNames = new String[syncableParameters.length];
+      yoloModelSettings = new RDXROS2YOLOv8ModelSettings[syncableParameters.length];
       availableYOLOClasses = new String[availableYOLOModelNames.length][];
       for (int i = 0; i < syncableParameters.length; i++)
       {
          availableYOLOModelNames[i] = syncableParameters[i].getModelName();
+         yoloModelSettings[i] = new RDXROS2YOLOv8ModelSettings(syncableParameters[i]);
          String[] detectableObjectClasses = syncableParameters[i].getDetectableObjectClasses();
          availableYOLOClasses[i] = new String[detectableObjectClasses.length];
          for (int j = 0; j < detectableObjectClasses.length; j++)
@@ -116,6 +120,9 @@ public class RDXSceneAction extends RDXActionNode<SceneActionState, SceneActionD
       nominalObjectPoseGizmo.getPoseGizmo().setParentFrame(scene.findFrameByName("Walking"));
 
       RDXCRDTTools.syncGizmoWithBidirectionalField(nominalObjectPoseGizmo.getPoseGizmo(), definition.getNominalObjectPose(), definition);
+
+      for (RDXROS2YOLOv8ModelSettings settings : yoloModelSettings)
+         settings.update(definition);
    }
 
    @Override
@@ -223,26 +230,36 @@ public class RDXSceneAction extends RDXActionNode<SceneActionState, SceneActionD
          }
          case CONFIGURE_YOLO ->
          {
-            if (imYOLOModel.get() < 0 || imYOLOModel.get() >= availableYOLOModelNames.length)
-               imYOLOModel.set(0);
-
-            ImGui.pushItemWidth(200.0f);
-            ImGui.combo(labels.get("YOLO Model"), imYOLOModel, availableYOLOModelNames);
-            ImGui.popItemWidth();
-            ImGui.sameLine();
-            if (ImGui.button(labels.get("Add")))
+            if (availableYOLOModelNames.length > 0)
             {
-               int selectedModelIndex = imYOLOModel.get();
-               boolean alreadyEnabled = false;
-               for (int i = 0; i < definition.getEnabledYoloModels().getSize(); i++)
-                  if (definition.getEnabledYoloModels().getValueReadOnly(i) == selectedModelIndex)
-                  {
-                     alreadyEnabled = true;
-                     break;
-                  }
+               if (imYOLOModel.get() < 0 || imYOLOModel.get() >= availableYOLOModelNames.length)
+                  imYOLOModel.set(0);
 
-               if (!alreadyEnabled)
-                  definition.getEnabledYoloModels().add(selectedModelIndex);
+               ImGui.pushItemWidth(200.0f);
+               ImGui.combo(labels.get("YOLO Model"), imYOLOModel, availableYOLOModelNames);
+               ImGui.popItemWidth();
+               ImGui.sameLine();
+               if (ImGui.button(labels.get("Add")))
+               {
+                  int selectedModelIndex = imYOLOModel.get();
+                  boolean alreadyEnabled = false;
+                  for (int i = 0; i < definition.getEnabledYoloModels().getSize(); i++)
+                     if (definition.getEnabledYoloModels().getValueReadOnly(i) == selectedModelIndex)
+                     {
+                        alreadyEnabled = true;
+                        break;
+                     }
+
+                  if (!alreadyEnabled)
+                  {
+                     definition.getEnabledYoloModels().add(selectedModelIndex);
+                     definition.getSyncableYOLOModelParameters()[selectedModelIndex].setToDefaults();
+                  }
+               }
+            }
+            else
+            {
+               ImGui.text("No YOLO models available.");
             }
 
             ImGui.text("Enabled YOLO Models:");
@@ -250,7 +267,27 @@ public class RDXSceneAction extends RDXActionNode<SceneActionState, SceneActionD
             {
                int modelIndex = definition.getEnabledYoloModels().getValueReadOnly(i);
                if (modelIndex >= 0 && modelIndex < availableYOLOModelNames.length)
-                  ImGui.text("- " + availableYOLOModelNames[modelIndex]);
+               {
+                  ImGui.pushID(i);
+                  boolean open = ImGui.treeNode(availableYOLOModelNames[modelIndex]);
+                  ImGui.sameLine();
+                  if (ImGui.button(labels.get("Remove", i)))
+                  {
+                     if (open)
+                        ImGui.treePop();
+                     definition.getEnabledYoloModels().remove(i);
+                     ImGui.popID();
+                     i--;
+                     continue;
+                  }
+
+                  if (open)
+                  {
+                     yoloModelSettings[modelIndex].renderSettings();
+                     ImGui.treePop();
+                  }
+                  ImGui.popID();
+               }
             }
          }
          case CONFIGURE_FOUNDATION_POSE ->
