@@ -72,6 +72,12 @@ public class RDXZEDShapePointCounterWithColorDemo
 
    private RawImage latestDepth = null;
    private RawImage latestColor = null;
+   private int lastComputedSVOPosition = Integer.MIN_VALUE;
+   private int lastComputedShapeType = -1;
+   private float lastComputedRadius = Float.NaN;
+   private float lastComputedLength = Float.NaN;
+   private final Pose3D lastComputedShapePose = new Pose3D();
+   private boolean hasLastComputedShapePose = false;
 
    public RDXZEDShapePointCounterWithColorDemo()
    {
@@ -199,6 +205,28 @@ public class RDXZEDShapePointCounterWithColorDemo
    private void updateShape()
    {
       long count = 0;
+      int currentSVOPosition = zedSensor.getCurrentPosition();
+      Pose3D currentShapePose = new Pose3D(shapePoseGizmo.getTransformToParent());
+      boolean shapeChanged = shape.get() != lastComputedShapeType
+                             || Math.abs(shapeRadius.get() - lastComputedRadius) > 1.0e-6f
+                             || Math.abs(shapeLength.get() - lastComputedLength) > 1.0e-6f
+                             || !hasLastComputedShapePose
+                             || !currentShapePose.epsilonEquals(lastComputedShapePose, 1.0e-6);
+      boolean frameChanged = currentSVOPosition != lastComputedSVOPosition;
+      boolean shouldRecompute = frameChanged || shapeChanged;
+
+      if (!shouldRecompute)
+      {
+         count = pointsInShape.get();
+         averageRedPlotLine.addValue(averageRed);
+         averageGreenPlotLine.addValue(averageGreen);
+         averageBluePlotLine.addValue(averageBlue);
+
+         float t = Math.min(Math.max(count / 20000.0f, 0.0f), 1.0f);
+         shapeColor.set(t, 0.0f, 1.0f - t, 0.5f);
+         LibGDXTools.setDiffuseColor(shapeModel, shapeColor);
+         return;
+      }
 
       if (latestDepth != null && latestColor != null)
       {
@@ -221,6 +249,12 @@ public class RDXZEDShapePointCounterWithColorDemo
          averageRed = shapePointCounter.getAverageRed();
          averageGreen = shapePointCounter.getAverageGreen();
          averageBlue = shapePointCounter.getAverageBlue();
+         lastComputedSVOPosition = currentSVOPosition;
+         lastComputedShapeType = shape.get();
+         lastComputedRadius = shapeRadius.get();
+         lastComputedLength = shapeLength.get();
+         lastComputedShapePose.set(currentShapePose);
+         hasLastComputedShapePose = true;
       }
       else
       {
@@ -228,6 +262,12 @@ public class RDXZEDShapePointCounterWithColorDemo
          averageRed = 0.0f;
          averageGreen = 0.0f;
          averageBlue = 0.0f;
+         lastComputedSVOPosition = currentSVOPosition;
+         lastComputedShapeType = shape.get();
+         lastComputedRadius = shapeRadius.get();
+         lastComputedLength = shapeLength.get();
+         lastComputedShapePose.set(currentShapePose);
+         hasLastComputedShapePose = true;
       }
 
       averageRedPlotLine.addValue(averageRed);
