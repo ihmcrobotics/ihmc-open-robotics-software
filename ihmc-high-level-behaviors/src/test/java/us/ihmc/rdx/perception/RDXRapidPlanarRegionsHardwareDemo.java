@@ -37,7 +37,7 @@ public class RDXRapidPlanarRegionsHardwareDemo
 
    public RDXRapidPlanarRegionsHardwareDemo()
    {
-      zedImageSensor = new ZEDImageSensor(0, ZEDModelData.ZED_2, zed.SL_INPUT_TYPE_USB, zed.SL_DEPTH_MODE_NEURAL);
+      zedImageSensor = new ZEDImageSensor(0, ZEDModelData.ZED_2, zed.SL_INPUT_TYPE_USB);
       zedImageSensor.run(true);
 
       BlockingQueue<RawImage> rapidRegionsDepthQueue = new LinkedBlockingQueue<>(ImageSensor.DEFAULT_IMAGE_QUEUE_CAPACITY);
