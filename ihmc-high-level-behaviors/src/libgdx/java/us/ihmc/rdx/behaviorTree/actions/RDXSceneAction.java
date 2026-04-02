@@ -5,16 +5,14 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImInt;
-import org.yaml.snakeyaml.Yaml;
 import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionDefinition;
 import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionDefinition.SceneActionType;
 import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionState;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectDefinition.CompositeFrameType;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectDefinition;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectType;
-import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseObject;
-import us.ihmc.perception.detections.yolo.YOLOv8Tools;
+import us.ihmc.perception.detections.yolo.SyncedYOLOv8ModelParameters;
 import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeRootNode;
 import us.ihmc.rdx.behaviorTree.RDXCRDTTools;
 import us.ihmc.rdx.imgui.ImFloatWrapper;
@@ -25,14 +23,6 @@ import us.ihmc.rdx.imgui.ImStringWrapper;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.widgets.ImGuiSceneActionWidget;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
 
 public class RDXSceneAction extends RDXActionNode<SceneActionState, SceneActionDefinition>
 {
@@ -79,30 +69,16 @@ public class RDXSceneAction extends RDXActionNode<SceneActionState, SceneActionD
       for (int i = 0; i < CompositeFrameType.values.length; i++)
          compositeFrameTypeNames[i] = CompositeFrameType.values[i].name();
 
-      List<URL> yoloModelDirectories = YOLOv8Tools.getYOLOModelDirectories();
-      availableYOLOModelNames = new String[yoloModelDirectories.size()];
-      for (int i = 0; i < yoloModelDirectories.size(); i++)
-      {
-         String[] path = yoloModelDirectories.get(i).getPath().split(Pattern.quote(File.separator));
-         availableYOLOModelNames[i] = path[path.length - 1];
-      }
-
+      SyncedYOLOv8ModelParameters[] syncableParameters = definition.getSyncableYOLOModelParameters();
+      availableYOLOModelNames = new String[syncableParameters.length];
       availableYOLOClasses = new String[availableYOLOModelNames.length][];
-      for (int i = 0; i < availableYOLOModelNames.length; i++)
+      for (int i = 0; i < syncableParameters.length; i++)
       {
-         try (InputStream classNamesFile = YOLOv8Tools.getClassNamesFile(yoloModelDirectories.get(i)).openStream())
-         {
-            Yaml yaml = new Yaml();
-            Map<String, List<Object>> classNamesData = yaml.load(classNamesFile);
-            List<Object> names = classNamesData.get("names");
-            availableYOLOClasses[i] = new String[names.size()];
-            for (int j = 0; j < names.size(); j++)
-               availableYOLOClasses[i][j] = names.get(j).toString();
-         }
-         catch (IOException e)
-         {
-            DefaultExceptionHandler.MESSAGE_AND_STACKTRACE.handleException(e);
-         }
+         availableYOLOModelNames[i] = syncableParameters[i].getModelName();
+         String[] detectableObjectClasses = syncableParameters[i].getDetectableObjectClasses();
+         availableYOLOClasses[i] = new String[detectableObjectClasses.length];
+         for (int j = 0; j < detectableObjectClasses.length; j++)
+            availableYOLOClasses[i][j] = detectableObjectClasses[j];
       }
 
       timeoutWidget = new ImFloatWrapper(definition::getTimeout,

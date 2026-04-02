@@ -8,7 +8,7 @@ import us.ihmc.pubsub.TopicDataType;
 
 /**
        * Setup, freeze, delete object:
-       * Configure YOLO: TODO: The following fields are work in progress:
+       * Configure YOLO:
        * Configure FoundationPose:
        */
 public class SceneActionDefinitionMessage extends Packet<SceneActionDefinitionMessage> implements Settable<SceneActionDefinitionMessage>, EpsilonComparable<SceneActionDefinitionMessage>
@@ -45,29 +45,13 @@ public class SceneActionDefinitionMessage extends Packet<SceneActionDefinitionMe
             */
    public controller_msgs.msg.dds.RigidBodyTransformMessage nominal_object_pose_;
    /**
-            * YOLO confidence threshold
+            * YOLO models that should be enabled at this point (by available index)
             */
-   public float yolo_confidence_threshold_;
+   public us.ihmc.idl.IDLSequence.Integer  enabled_yolo_models_;
    /**
-            * YOLO mask threshold
+            * Pararmeters of the enabled YOLO models
             */
-   public float yolo_mask_threshold_;
-   /**
-            * Segmentation mask erosion radius
-            */
-   public int segmentation_mask_erosion_radius_;
-   /**
-            * Threshold for removing outlier points of segmented point cloud
-            */
-   public float outlier_threshold_;
-   /**
-            * YOLO models that should be enabled at this point
-            */
-   public us.ihmc.idl.IDLSequence.StringBuilderHolder  enabled_yolo_models_;
-   /**
-            * YOLO classes to ignore
-            */
-   public us.ihmc.idl.IDLSequence.Byte  ignored_yolo_class_indices_;
+   public us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.YOLOv8ModelParameters>  yolo_model_parameters_;
    /**
             * FoundationPose models that should be enabled at this point
             */
@@ -78,10 +62,11 @@ public class SceneActionDefinitionMessage extends Packet<SceneActionDefinitionMe
       definition_ = new behavior_msgs.msg.dds.ActionNodeDefinitionMessage();
       scene_object_definition_ = new behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage();
       nominal_object_pose_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
-      enabled_yolo_models_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (10, "type_d");
-      ignored_yolo_class_indices_ = new us.ihmc.idl.IDLSequence.Byte (256, "type_9");
+      enabled_yolo_models_ = new us.ihmc.idl.IDLSequence.Integer (10, "type_3");
 
+      yolo_model_parameters_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.YOLOv8ModelParameters> (10, new perception_msgs.msg.dds.YOLOv8ModelParametersPubSubType());
       enabled_foundation_pose_models_ = new us.ihmc.idl.IDLSequence.Byte (10, "type_9");
+
 
    }
 
@@ -102,16 +87,8 @@ public class SceneActionDefinitionMessage extends Packet<SceneActionDefinitionMe
       minimum_history_size_ = other.minimum_history_size_;
 
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.nominal_object_pose_, nominal_object_pose_);
-      yolo_confidence_threshold_ = other.yolo_confidence_threshold_;
-
-      yolo_mask_threshold_ = other.yolo_mask_threshold_;
-
-      segmentation_mask_erosion_radius_ = other.segmentation_mask_erosion_radius_;
-
-      outlier_threshold_ = other.outlier_threshold_;
-
       enabled_yolo_models_.set(other.enabled_yolo_models_);
-      ignored_yolo_class_indices_.set(other.ignored_yolo_class_indices_);
+      yolo_model_parameters_.set(other.yolo_model_parameters_);
       enabled_foundation_pose_models_.set(other.enabled_foundation_pose_models_);
    }
 
@@ -187,82 +164,22 @@ public class SceneActionDefinitionMessage extends Packet<SceneActionDefinitionMe
       return nominal_object_pose_;
    }
 
-   /**
-            * YOLO confidence threshold
-            */
-   public void setYoloConfidenceThreshold(float yolo_confidence_threshold)
-   {
-      yolo_confidence_threshold_ = yolo_confidence_threshold;
-   }
-   /**
-            * YOLO confidence threshold
-            */
-   public float getYoloConfidenceThreshold()
-   {
-      return yolo_confidence_threshold_;
-   }
 
    /**
-            * YOLO mask threshold
+            * YOLO models that should be enabled at this point (by available index)
             */
-   public void setYoloMaskThreshold(float yolo_mask_threshold)
-   {
-      yolo_mask_threshold_ = yolo_mask_threshold;
-   }
-   /**
-            * YOLO mask threshold
-            */
-   public float getYoloMaskThreshold()
-   {
-      return yolo_mask_threshold_;
-   }
-
-   /**
-            * Segmentation mask erosion radius
-            */
-   public void setSegmentationMaskErosionRadius(int segmentation_mask_erosion_radius)
-   {
-      segmentation_mask_erosion_radius_ = segmentation_mask_erosion_radius;
-   }
-   /**
-            * Segmentation mask erosion radius
-            */
-   public int getSegmentationMaskErosionRadius()
-   {
-      return segmentation_mask_erosion_radius_;
-   }
-
-   /**
-            * Threshold for removing outlier points of segmented point cloud
-            */
-   public void setOutlierThreshold(float outlier_threshold)
-   {
-      outlier_threshold_ = outlier_threshold;
-   }
-   /**
-            * Threshold for removing outlier points of segmented point cloud
-            */
-   public float getOutlierThreshold()
-   {
-      return outlier_threshold_;
-   }
-
-
-   /**
-            * YOLO models that should be enabled at this point
-            */
-   public us.ihmc.idl.IDLSequence.StringBuilderHolder  getEnabledYoloModels()
+   public us.ihmc.idl.IDLSequence.Integer  getEnabledYoloModels()
    {
       return enabled_yolo_models_;
    }
 
 
    /**
-            * YOLO classes to ignore
+            * Pararmeters of the enabled YOLO models
             */
-   public us.ihmc.idl.IDLSequence.Byte  getIgnoredYoloClassIndices()
+   public us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.YOLOv8ModelParameters>  getYoloModelParameters()
    {
-      return ignored_yolo_class_indices_;
+      return yolo_model_parameters_;
    }
 
 
@@ -301,17 +218,14 @@ public class SceneActionDefinitionMessage extends Packet<SceneActionDefinitionMe
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_history_size_, other.minimum_history_size_, epsilon)) return false;
 
       if (!this.nominal_object_pose_.epsilonEquals(other.nominal_object_pose_, epsilon)) return false;
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.yolo_confidence_threshold_, other.yolo_confidence_threshold_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.enabled_yolo_models_, other.enabled_yolo_models_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.yolo_mask_threshold_, other.yolo_mask_threshold_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.segmentation_mask_erosion_radius_, other.segmentation_mask_erosion_radius_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.outlier_threshold_, other.outlier_threshold_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilderSequence(this.enabled_yolo_models_, other.enabled_yolo_models_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.ignored_yolo_class_indices_, other.ignored_yolo_class_indices_, epsilon)) return false;
+      if (this.yolo_model_parameters_.size() != other.yolo_model_parameters_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.yolo_model_parameters_.size(); i++)
+         {  if (!this.yolo_model_parameters_.get(i).epsilonEquals(other.yolo_model_parameters_.get(i), epsilon)) return false; }
+      }
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.enabled_foundation_pose_models_, other.enabled_foundation_pose_models_, epsilon)) return false;
 
@@ -337,16 +251,8 @@ public class SceneActionDefinitionMessage extends Packet<SceneActionDefinitionMe
       if(this.minimum_history_size_ != otherMyClass.minimum_history_size_) return false;
 
       if (!this.nominal_object_pose_.equals(otherMyClass.nominal_object_pose_)) return false;
-      if(this.yolo_confidence_threshold_ != otherMyClass.yolo_confidence_threshold_) return false;
-
-      if(this.yolo_mask_threshold_ != otherMyClass.yolo_mask_threshold_) return false;
-
-      if(this.segmentation_mask_erosion_radius_ != otherMyClass.segmentation_mask_erosion_radius_) return false;
-
-      if(this.outlier_threshold_ != otherMyClass.outlier_threshold_) return false;
-
       if (!this.enabled_yolo_models_.equals(otherMyClass.enabled_yolo_models_)) return false;
-      if (!this.ignored_yolo_class_indices_.equals(otherMyClass.ignored_yolo_class_indices_)) return false;
+      if (!this.yolo_model_parameters_.equals(otherMyClass.yolo_model_parameters_)) return false;
       if (!this.enabled_foundation_pose_models_.equals(otherMyClass.enabled_foundation_pose_models_)) return false;
 
       return true;
@@ -370,18 +276,10 @@ public class SceneActionDefinitionMessage extends Packet<SceneActionDefinitionMe
       builder.append(this.minimum_history_size_);      builder.append(", ");
       builder.append("nominal_object_pose=");
       builder.append(this.nominal_object_pose_);      builder.append(", ");
-      builder.append("yolo_confidence_threshold=");
-      builder.append(this.yolo_confidence_threshold_);      builder.append(", ");
-      builder.append("yolo_mask_threshold=");
-      builder.append(this.yolo_mask_threshold_);      builder.append(", ");
-      builder.append("segmentation_mask_erosion_radius=");
-      builder.append(this.segmentation_mask_erosion_radius_);      builder.append(", ");
-      builder.append("outlier_threshold=");
-      builder.append(this.outlier_threshold_);      builder.append(", ");
       builder.append("enabled_yolo_models=");
       builder.append(this.enabled_yolo_models_);      builder.append(", ");
-      builder.append("ignored_yolo_class_indices=");
-      builder.append(this.ignored_yolo_class_indices_);      builder.append(", ");
+      builder.append("yolo_model_parameters=");
+      builder.append(this.yolo_model_parameters_);      builder.append(", ");
       builder.append("enabled_foundation_pose_models=");
       builder.append(this.enabled_foundation_pose_models_);
       builder.append("}");
