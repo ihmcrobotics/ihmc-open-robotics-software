@@ -4,13 +4,13 @@ import static us.ihmc.zed.global.zed.*;
 
 public class ZEDSVOPlaybackSensor extends ZEDImageSensor
 {
-   protected final String svoPath;
+   protected final String svoFilePath;
 
-   public ZEDSVOPlaybackSensor(int cameraID, ZEDModelData zedModel, int slDepthMode, String svoPath)
+   public ZEDSVOPlaybackSensor(int cameraID, ZEDModelData zedModel, int slDepthMode, String svoFilePath)
    {
-      super(cameraID, zedModel, slDepthMode, svoPath);
+      super(cameraID, zedModel, slDepthMode, svoFilePath);
 
-      this.svoPath = svoPath;
+      this.svoFilePath = svoFilePath;
    }
 
    @Override
@@ -51,8 +51,8 @@ public class ZEDSVOPlaybackSensor extends ZEDImageSensor
       sl_set_svo_position(getCameraID(), position);
    }
 
-   public String getSVOPath()
+   public String getSVOFilePath()
    {
-      return svoPath;
+      return svoFilePath;
    }
 }

@@ -56,7 +56,7 @@ public class ZEDImageSensor extends ImageSensor
    // sl_open_camera parameters
    private final SL_InitParameters zedInitParameters = new SL_InitParameters();
    private int serialNumber = 0;
-   private String svoPath = "";
+   private String svoFilePath = "";
    private String remoteStreamingAddress = "";
    private int remoteStreamingPort = 0;
 
@@ -199,14 +199,14 @@ public class ZEDImageSensor extends ImageSensor
       zedInitParameters.depth_mode(slDepthMode);
    }
 
-   protected ZEDImageSensor(int cameraID, ZEDModelData zedModel, int slDepthMode, String svoPath)
+   protected ZEDImageSensor(int cameraID, ZEDModelData zedModel, int slDepthMode, String svoFilePath)
    {
       this(cameraID, zedModel, SL_INPUT_TYPE_SVO);
 
-      if (!Files.exists(Path.of(svoPath)))
+      if (!Files.exists(Path.of(svoFilePath)))
          throw new RuntimeException("SVO file does not exist");
 
-      this.svoPath = svoPath;
+      this.svoFilePath = svoFilePath;
 
       // Set some more runtime and init parameters
       zedRuntimeParameters.enable_depth(slDepthMode != SL_DEPTH_MODE_NONE);
@@ -323,7 +323,7 @@ public class ZEDImageSensor extends ImageSensor
 
    protected int openCamera()
    {
-      return sl_open_camera(cameraID, zedInitParameters, serialNumber, svoPath, remoteStreamingAddress, remoteStreamingPort, "", "", "");
+      return sl_open_camera(cameraID, zedInitParameters, serialNumber, svoFilePath, remoteStreamingAddress, remoteStreamingPort, "", "", "");
    }
 
    @Override
