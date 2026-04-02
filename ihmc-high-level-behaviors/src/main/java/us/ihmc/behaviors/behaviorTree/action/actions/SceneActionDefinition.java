@@ -44,7 +44,7 @@ public class SceneActionDefinition extends ActionNodeDefinition
       public static final SceneActionType[] values = values();
    }
 
-   private final SyncedYOLOv8ModelParameters[] syncableYOLOModelParameters;
+   private final YOLOv8ModelParametersDefinition[] syncableYOLOModelParameters;
 
    private final CRDTBidirectionalEnumField<SceneActionType> sceneActionType;
    private final BehaviorTreeSceneObjectDefinition sceneObjectDefinition;
@@ -88,9 +88,9 @@ public class SceneActionDefinition extends ActionNodeDefinition
             DefaultExceptionHandler.MESSAGE_AND_STACKTRACE.handleException(e);
          }
       }
-      syncableYOLOModelParameters = new SyncedYOLOv8ModelParameters[availableYOLOModels.length];
+      syncableYOLOModelParameters = new YOLOv8ModelParametersDefinition[availableYOLOModels.length];
       for (int i = 0; i < availableYOLOModels.length; i++)
-         syncableYOLOModelParameters[i] = new SyncedYOLOv8ModelParameters(this, availableYOLOModels[i]);
+         syncableYOLOModelParameters[i] = new YOLOv8ModelParametersDefinition(this, availableYOLOModels[i]);
 
       sceneActionType = new CRDTBidirectionalEnumField<>(this, SceneActionType.SETUP_OBJECT);
       sceneObjectDefinition = new BehaviorTreeSceneObjectDefinition(this);
@@ -122,7 +122,11 @@ public class SceneActionDefinition extends ActionNodeDefinition
          {
             ArrayNode enabledYoloModelsArray = jsonNode.putArray("enabledYoloModels");
             for (int i = 0; i < enabledYoloModels.getSize(); i++)
-               enabledYoloModelsArray.add(enabledYoloModels.getValueReadOnly(i));
+            {
+               ObjectNode enabledYoloModelsNode = enabledYoloModelsArray.addObject();
+               enabledYoloModelsNode.put("name", syncableYOLOModelParameters[enabledYoloModels.getValueReadOnly(i)].getModelName());
+               syncableYOLOModelParameters[enabledYoloModels.getValueReadOnly(i)].saveToFile(enabledYoloModelsNode.putObject("parameters"));
+            }
          }
          case CONFIGURE_FOUNDATION_POSE ->
          {
@@ -152,10 +156,27 @@ public class SceneActionDefinition extends ActionNodeDefinition
          }
          case CONFIGURE_YOLO ->
          {
-            ArrayNode enabledYoloModelsArray = (ArrayNode) jsonNode.get("enabledYoloModels");
             enabledYoloModels.clear();
-            for (int i = 0; i < enabledYoloModelsArray.size(); i++)
-               enabledYoloModels.add(enabledYoloModelsArray.get(i).asInt());
+            if (jsonNode.get("enabledYoloModels") instanceof ArrayNode enabledYoloModelsArray)
+            {
+               for (int i = 0; i < enabledYoloModelsArray.size(); i++)
+               {
+                  if (!(enabledYoloModelsArray.get(i) instanceof ObjectNode enabledYoloModelsNode))
+                     continue;
+
+                  String modelName = enabledYoloModelsNode.path("name").asText("");
+                  for (int j = 0; j < syncableYOLOModelParameters.length; j++)
+                  {
+                     if (syncableYOLOModelParameters[j].getModelName().equals(modelName))
+                     {
+                        enabledYoloModels.add(j);
+                        if (enabledYoloModelsNode.get("parameters") instanceof ObjectNode parametersNode)
+                           syncableYOLOModelParameters[j].loadFromFile(parametersNode);
+                        break;
+                     }
+                  }
+               }
+            }
          }
          case CONFIGURE_FOUNDATION_POSE ->
          {
@@ -180,6 +201,8 @@ public class SceneActionDefinition extends ActionNodeDefinition
 
       onDiskEnabledYoloModels.clear();
       onDiskEnabledYoloModels.addAll(enabledYoloModels.getValue());
+      for (int i = 0; i < syncableYOLOModelParameters.length; i++)
+         syncableYOLOModelParameters[i].setOnDiskFields();
 
       onDiskEnabledFoundationPoseModels.clear();
       onDiskEnabledFoundationPoseModels.addAll(enabledFoundationPoseModels.getValue());
@@ -200,6 +223,8 @@ public class SceneActionDefinition extends ActionNodeDefinition
 
          enabledYoloModels.clear();
          enabledYoloModels.getValue().addAll(onDiskEnabledYoloModels);
+         for (int i = 0; i < syncableYOLOModelParameters.length; i++)
+            syncableYOLOModelParameters[i].undoAllNontopologicalChanges();
 
          enabledFoundationPoseModels.clear();
          enabledFoundationPoseModels.getValue().addAll(onDiskEnabledFoundationPoseModels);
@@ -220,6 +245,8 @@ public class SceneActionDefinition extends ActionNodeDefinition
       unchanged &= enabledYoloModels.getSize() == onDiskEnabledYoloModels.size();
       for (int i = 0; unchanged && i < enabledYoloModels.getSize(); i++)
          unchanged = enabledYoloModels.getValueReadOnly(i) == onDiskEnabledYoloModels.get(i);
+      for (int i = 0; unchanged && i < syncableYOLOModelParameters.length; i++)
+         unchanged = !syncableYOLOModelParameters[i].hasChanges();
 
       unchanged &= enabledFoundationPoseModels.getSize() == onDiskEnabledFoundationPoseModels.size();
       for (int i = 0; unchanged && i < enabledFoundationPoseModels.getSize(); i++)
@@ -258,7 +285,7 @@ public class SceneActionDefinition extends ActionNodeDefinition
       nominalObjectPose.fromMessage(message.getNominalObjectPose());
 
       enabledYoloModels.fromMessage(message.getEnabledYoloModels());
-      for (int i = 0; i < enabledYoloModels.getSize(); i++)
+      for (int i = 0; i < enabledYoloModels.getSize() && i < message.getYoloModelParameters().size(); i++)
          syncableYOLOModelParameters[enabledYoloModels.getValueReadOnly(i)].fromMessage(message.getYoloModelParameters().get(i));
 
       enabledFoundationPoseModels.fromMessage(message.getEnabledFoundationPoseModels());
