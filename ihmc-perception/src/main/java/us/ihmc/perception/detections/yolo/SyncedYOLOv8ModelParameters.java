@@ -43,6 +43,16 @@ public class SyncedYOLOv8ModelParameters
       Arrays.fill(outlierThresholds.getValue(), 2.0f);
    }
 
+   public void setToDefaults()
+   {
+      nmsThreshold.setValue(0.1f);
+      Arrays.fill(ignoredObjectClasses.getValueAndModify(), false);
+      Arrays.fill(confidenceThresholds.getValueAndModify(), 0.7f);
+      Arrays.fill(maskThresholds.getValueAndModify(), 0.0f);
+      Arrays.fill(erosionKernelRadii.getValueAndModify(), 1);
+      Arrays.fill(outlierThresholds.getValueAndModify(), 2.0f);
+   }
+
    /**
     * Applies the current parameter values to the passed in model.
     * The past in model must match the model info used to construct the parameters.
