@@ -12,17 +12,17 @@ import java.util.Arrays;
 
 public class SyncedYOLOv8ModelParameters
 {
-   private final YOLOv8ModelInfo modelInfo;
+   protected final YOLOv8ModelInfo modelInfo;
 
    // YOLO model parameters
-   private final CRDTBidirectionalBooleanArray ignoredObjectClasses;
-   private final CRDTBidirectionalFloatArray confidenceThresholds;
-   private final CRDTBidirectionalFloatArray maskThresholds;
-   private final CRDTBidirectionalFloat nmsThreshold;
+   protected final CRDTBidirectionalBooleanArray ignoredObjectClasses;
+   protected final CRDTBidirectionalFloatArray confidenceThresholds;
+   protected final CRDTBidirectionalFloatArray maskThresholds;
+   protected final CRDTBidirectionalFloat nmsThreshold;
 
    // Output processing parameters
-   private final CRDTBidirectionalIntegerArray erosionKernelRadii;
-   private final CRDTBidirectionalFloatArray outlierThresholds;
+   protected final CRDTBidirectionalIntegerArray erosionKernelRadii;
+   protected final CRDTBidirectionalFloatArray outlierThresholds;
 
    public SyncedYOLOv8ModelParameters(LatestTimestampModifiable executorParameters, YOLOv8ModelInfo modelInfo)
    {
