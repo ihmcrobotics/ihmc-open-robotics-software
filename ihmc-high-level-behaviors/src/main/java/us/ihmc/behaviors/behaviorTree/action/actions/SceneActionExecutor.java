@@ -74,8 +74,12 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
       {
          YOLOv8DetectionExecutor yolo = scene.getYOLO();
          yolo.disableAllModels();
-         for (String yoloModelName : definition.getEnabledYoloModels().getValue())
-            yolo.enableModel(yoloModelName);
+         for (int i = 0; i < definition.getEnabledYoloModels().getSize(); i++)
+         {
+            int yoloModelIndex = definition.getEnabledYoloModels().getValueReadOnly(i);
+            if (yoloModelIndex >= 0 && yoloModelIndex < definition.getSyncableYOLOModelParameters().length)
+               yolo.enableModel(definition.getSyncableYOLOModelParameters()[yoloModelIndex].getModelName());
+         }
       }
       else if (isFreeze || isDelete)
          freezeOrDelete(isFreeze);

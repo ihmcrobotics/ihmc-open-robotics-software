@@ -16,7 +16,6 @@ import us.ihmc.communication.crdt.CRDTBidirectionalFloat;
 import us.ihmc.communication.crdt.CRDTBidirectionalInteger;
 import us.ihmc.communication.crdt.CRDTBidirectionalIntegerList;
 import us.ihmc.communication.crdt.CRDTBidirectionalRigidBodyTransform;
-import us.ihmc.communication.crdt.CRDTBidirectionalStringList;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.detections.yolo.SyncedYOLOv8ModelParameters;
 import us.ihmc.perception.detections.yolo.YOLOv8Tools;
@@ -26,7 +25,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -53,24 +51,14 @@ public class SceneActionDefinition extends ActionNodeDefinition
    private final CRDTBidirectionalFloat timeout;
    private final CRDTBidirectionalInteger minimumHistorySize;
    private final CRDTBidirectionalRigidBodyTransform nominalObjectPose;
-   private final CRDTBidirectionalFloat yoloConfidenceThreshold;
-   private final CRDTBidirectionalFloat yoloMaskThreshold;
-   private final CRDTBidirectionalInteger segmentationMaskErosionRadius;
-   private final CRDTBidirectionalFloat outlierThreshold;
-   private final CRDTBidirectionalStringList enabledYoloModels;
-   private final CRDTBidirectionalIntegerList ignoredYoloClassIndices;
+   private final CRDTBidirectionalIntegerList enabledYoloModels;
    private final CRDTBidirectionalIntegerList enabledFoundationPoseModels;
 
    private SceneActionType onDiskSceneActionType;
    private float onDiskTimeout;
    private int onDiskMinimumHistorySize;
    private final RigidBodyTransform onDiskNominalObjectPose = new RigidBodyTransform();
-   private float onDiskYoloConfidenceThreshold;
-   private float onDiskYoloMaskThreshold;
-   private int onDiskSegmentationMaskErosionRadius;
-   private float onDiskOutlierThreshold;
-   private final List<String> onDiskEnabledYoloModels = new ArrayList<>();
-   private final TIntArrayList onDiskIgnoredYoloClassIndices = new TIntArrayList();
+   private final TIntArrayList onDiskEnabledYoloModels = new TIntArrayList();
    private final TIntArrayList onDiskEnabledFoundationPoseModels = new TIntArrayList();
 
    public SceneActionDefinition(BehaviorTreeRootNodeDefinition rootNode)
@@ -109,12 +97,7 @@ public class SceneActionDefinition extends ActionNodeDefinition
       timeout = new CRDTBidirectionalFloat(this, 5.0f);
       minimumHistorySize = new CRDTBidirectionalInteger(this, 5);
       nominalObjectPose = new CRDTBidirectionalRigidBodyTransform(this);
-      yoloConfidenceThreshold = new CRDTBidirectionalFloat(this, 0.7f);
-      yoloMaskThreshold = new CRDTBidirectionalFloat(this, 0.0f);
-      segmentationMaskErosionRadius = new CRDTBidirectionalInteger(this, 1);
-      outlierThreshold = new CRDTBidirectionalFloat(this, 2.0f);
-      enabledYoloModels = new CRDTBidirectionalStringList(this);
-      ignoredYoloClassIndices = new CRDTBidirectionalIntegerList(this);
+      enabledYoloModels = new CRDTBidirectionalIntegerList(this);
       enabledFoundationPoseModels = new CRDTBidirectionalIntegerList(this);
    }
 
@@ -137,18 +120,9 @@ public class SceneActionDefinition extends ActionNodeDefinition
          }
          case CONFIGURE_YOLO ->
          {
-            jsonNode.put("yoloConfidenceThreshold", yoloConfidenceThreshold.getValue());
-            jsonNode.put("yoloMaskThreshold", yoloMaskThreshold.getValue());
-            jsonNode.put("segmentationMaskErosionRadius", segmentationMaskErosionRadius.getValue());
-            jsonNode.put("outlierThreshold", outlierThreshold.getValue());
-
             ArrayNode enabledYoloModelsArray = jsonNode.putArray("enabledYoloModels");
             for (int i = 0; i < enabledYoloModels.getSize(); i++)
                enabledYoloModelsArray.add(enabledYoloModels.getValueReadOnly(i));
-
-            ArrayNode ignoredYoloClassesArray = jsonNode.putArray("ignoredYoloClassIndices");
-            for (int i = 0; i < ignoredYoloClassIndices.getSize(); i++)
-               ignoredYoloClassesArray.add(ignoredYoloClassIndices.getValueReadOnly(i));
          }
          case CONFIGURE_FOUNDATION_POSE ->
          {
@@ -178,20 +152,10 @@ public class SceneActionDefinition extends ActionNodeDefinition
          }
          case CONFIGURE_YOLO ->
          {
-            yoloConfidenceThreshold.setValue((float) jsonNode.get("yoloConfidenceThreshold").asDouble());
-            yoloMaskThreshold.setValue((float) jsonNode.get("yoloMaskThreshold").asDouble());
-            segmentationMaskErosionRadius.setValue(jsonNode.get("segmentationMaskErosionRadius").asInt());
-            outlierThreshold.setValue((float) jsonNode.get("outlierThreshold").asDouble());
-
             ArrayNode enabledYoloModelsArray = (ArrayNode) jsonNode.get("enabledYoloModels");
             enabledYoloModels.clear();
             for (int i = 0; i < enabledYoloModelsArray.size(); i++)
-               enabledYoloModels.setValue(i, enabledYoloModelsArray.get(i).asText());
-
-            ArrayNode ignoredYoloClassesArray = (ArrayNode) jsonNode.get("ignoredYoloClassIndices");
-            ignoredYoloClassIndices.clear();
-            for (int i = 0; i < ignoredYoloClassesArray.size(); i++)
-               ignoredYoloClassIndices.setValue(i, ignoredYoloClassesArray.get(i).asInt());
+               enabledYoloModels.add(enabledYoloModelsArray.get(i).asInt());
          }
          case CONFIGURE_FOUNDATION_POSE ->
          {
@@ -213,16 +177,9 @@ public class SceneActionDefinition extends ActionNodeDefinition
       onDiskTimeout = timeout.getValue();
       onDiskMinimumHistorySize = minimumHistorySize.getValue();
       onDiskNominalObjectPose.set(nominalObjectPose.getValueReadOnly());
-      onDiskYoloConfidenceThreshold = yoloConfidenceThreshold.getValue();
-      onDiskYoloMaskThreshold = yoloMaskThreshold.getValue();
-      onDiskSegmentationMaskErosionRadius = segmentationMaskErosionRadius.getValue();
-      onDiskOutlierThreshold = outlierThreshold.getValue();
 
       onDiskEnabledYoloModels.clear();
       onDiskEnabledYoloModels.addAll(enabledYoloModels.getValue());
-
-      onDiskIgnoredYoloClassIndices.clear();
-      onDiskIgnoredYoloClassIndices.addAll(ignoredYoloClassIndices.getValue());
 
       onDiskEnabledFoundationPoseModels.clear();
       onDiskEnabledFoundationPoseModels.addAll(enabledFoundationPoseModels.getValue());
@@ -240,16 +197,9 @@ public class SceneActionDefinition extends ActionNodeDefinition
          timeout.setValue(onDiskTimeout);
          minimumHistorySize.setValue(onDiskMinimumHistorySize);
          nominalObjectPose.getValueAndModify().set(onDiskNominalObjectPose);
-         yoloConfidenceThreshold.setValue(onDiskYoloConfidenceThreshold);
-         yoloMaskThreshold.setValue(onDiskYoloMaskThreshold);
-         segmentationMaskErosionRadius.setValue(onDiskSegmentationMaskErosionRadius);
-         outlierThreshold.setValue(onDiskOutlierThreshold);
 
          enabledYoloModels.clear();
          enabledYoloModels.getValue().addAll(onDiskEnabledYoloModels);
-
-         ignoredYoloClassIndices.clear();
-         ignoredYoloClassIndices.getValue().addAll(onDiskIgnoredYoloClassIndices);
 
          enabledFoundationPoseModels.clear();
          enabledFoundationPoseModels.getValue().addAll(onDiskEnabledFoundationPoseModels);
@@ -266,18 +216,10 @@ public class SceneActionDefinition extends ActionNodeDefinition
       unchanged &= timeout.getValue() == onDiskTimeout;
       unchanged &= minimumHistorySize.getValue() == onDiskMinimumHistorySize;
       unchanged &= nominalObjectPose.getValueReadOnly().equals(onDiskNominalObjectPose);
-      unchanged &= yoloConfidenceThreshold.getValue() == onDiskYoloConfidenceThreshold;
-      unchanged &= yoloMaskThreshold.getValue() == onDiskYoloMaskThreshold;
-      unchanged &= segmentationMaskErosionRadius.getValue() == onDiskSegmentationMaskErosionRadius;
-      unchanged &= outlierThreshold.getValue() == onDiskOutlierThreshold;
 
       unchanged &= enabledYoloModels.getSize() == onDiskEnabledYoloModels.size();
       for (int i = 0; unchanged && i < enabledYoloModels.getSize(); i++)
-         unchanged = enabledYoloModels.getValueReadOnly(i).equals(onDiskEnabledYoloModels.get(i));
-
-      unchanged &= ignoredYoloClassIndices.getSize() == onDiskIgnoredYoloClassIndices.size();
-      for (int i = 0; unchanged && i < ignoredYoloClassIndices.getSize(); i++)
-         unchanged = ignoredYoloClassIndices.getValueReadOnly(i) == onDiskIgnoredYoloClassIndices.get(i);
+         unchanged = enabledYoloModels.getValueReadOnly(i) == onDiskEnabledYoloModels.get(i);
 
       unchanged &= enabledFoundationPoseModels.getSize() == onDiskEnabledFoundationPoseModels.size();
       for (int i = 0; unchanged && i < enabledFoundationPoseModels.getSize(); i++)
@@ -295,12 +237,13 @@ public class SceneActionDefinition extends ActionNodeDefinition
       message.setTimeout(timeout.toMessage());
       message.setMinimumHistorySize(minimumHistorySize.toMessage());
       nominalObjectPose.toMessage(message.getNominalObjectPose());
-      message.setYoloConfidenceThreshold(yoloConfidenceThreshold.toMessage());
-      message.setYoloMaskThreshold(yoloMaskThreshold.toMessage());
-      message.setSegmentationMaskErosionRadius(segmentationMaskErosionRadius.toMessage());
-      message.setOutlierThreshold(outlierThreshold.toMessage());
+
       enabledYoloModels.toMessage(message.getEnabledYoloModels());
-      ignoredYoloClassIndices.toMessage(message.getIgnoredYoloClassIndices());
+
+      message.getYoloModelParameters().clear();
+      for (int i = 0; i < enabledYoloModels.getSize(); i++)
+         syncableYOLOModelParameters[enabledYoloModels.getValueReadOnly(i)].toMessage(message.getYoloModelParameters().add());
+
       enabledFoundationPoseModels.toMessage(message.getEnabledFoundationPoseModels());
    }
 
@@ -313,12 +256,11 @@ public class SceneActionDefinition extends ActionNodeDefinition
       timeout.fromMessage(message.getTimeout());
       minimumHistorySize.fromMessage(message.getMinimumHistorySize());
       nominalObjectPose.fromMessage(message.getNominalObjectPose());
-      yoloConfidenceThreshold.fromMessage(message.getYoloConfidenceThreshold());
-      yoloMaskThreshold.fromMessage(message.getYoloMaskThreshold());
-      segmentationMaskErosionRadius.fromMessage(message.getSegmentationMaskErosionRadius());
-      outlierThreshold.fromMessage(message.getOutlierThreshold());
+
       enabledYoloModels.fromMessage(message.getEnabledYoloModels());
-      ignoredYoloClassIndices.fromMessage(message.getIgnoredYoloClassIndices());
+      for (int i = 0; i < enabledYoloModels.getSize(); i++)
+         syncableYOLOModelParameters[enabledYoloModels.getValueReadOnly(i)].fromMessage(message.getYoloModelParameters().get(i));
+
       enabledFoundationPoseModels.fromMessage(message.getEnabledFoundationPoseModels());
    }
 
@@ -362,54 +304,9 @@ public class SceneActionDefinition extends ActionNodeDefinition
       return nominalObjectPose;
    }
 
-   public float getYoloConfidenceThreshold()
-   {
-      return yoloConfidenceThreshold.getValue();
-   }
-
-   public void setYoloConfidenceThreshold(float yoloConfidenceThreshold)
-   {
-      this.yoloConfidenceThreshold.setValue(yoloConfidenceThreshold);
-   }
-
-   public double getYoloMaskThreshold()
-   {
-      return yoloMaskThreshold.getValue();
-   }
-
-   public void setYoloMaskThreshold(float yoloMaskThreshold)
-   {
-      this.yoloMaskThreshold.setValue(yoloMaskThreshold);
-   }
-
-   public int getSegmentationMaskErosionRadius()
-   {
-      return segmentationMaskErosionRadius.getValue();
-   }
-
-   public void setSegmentationMaskErosionRadius(int segmentationMaskErosionRadius)
-   {
-      this.segmentationMaskErosionRadius.setValue(segmentationMaskErosionRadius);
-   }
-
-   public float getOutlierThreshold()
-   {
-      return outlierThreshold.getValue();
-   }
-
-   public void setOutlierThreshold(float outlierThreshold)
-   {
-      this.outlierThreshold.setValue(outlierThreshold);
-   }
-
-   public CRDTBidirectionalStringList getEnabledYoloModels()
+   public CRDTBidirectionalIntegerList getEnabledYoloModels()
    {
       return enabledYoloModels;
-   }
-
-   public CRDTBidirectionalIntegerList getIgnoredYoloClasses()
-   {
-      return ignoredYoloClassIndices;
    }
 
    public CRDTBidirectionalIntegerList getEnabledFoundationPoseModels()
