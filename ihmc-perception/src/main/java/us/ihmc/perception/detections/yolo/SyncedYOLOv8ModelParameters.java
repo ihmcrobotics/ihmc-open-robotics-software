@@ -6,7 +6,6 @@ import us.ihmc.communication.crdt.CRDTBidirectionalBooleanArray;
 import us.ihmc.communication.crdt.CRDTBidirectionalFloat;
 import us.ihmc.communication.crdt.CRDTBidirectionalFloatArray;
 import us.ihmc.communication.crdt.CRDTBidirectionalIntegerArray;
-import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.LatestTimestampModifiable;
 
 import java.util.Arrays;

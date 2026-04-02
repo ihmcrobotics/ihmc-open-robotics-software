@@ -5,9 +5,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import gnu.trove.list.array.TIntArrayList;
+import org.yaml.snakeyaml.Yaml;
+import perception_msgs.msg.dds.YOLOv8ModelInfo;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectDefinition;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.communication.crdt.CRDTBidirectionalEnumField;
 import us.ihmc.communication.crdt.CRDTBidirectionalFloat;
 import us.ihmc.communication.crdt.CRDTBidirectionalInteger;
@@ -15,10 +18,18 @@ import us.ihmc.communication.crdt.CRDTBidirectionalIntegerList;
 import us.ihmc.communication.crdt.CRDTBidirectionalRigidBodyTransform;
 import us.ihmc.communication.crdt.CRDTBidirectionalStringList;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.perception.detections.yolo.SyncedYOLOv8ModelParameters;
+import us.ihmc.perception.detections.yolo.YOLOv8Tools;
 import us.ihmc.tools.io.JSONTools;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 public class SceneActionDefinition extends ActionNodeDefinition
 {
@@ -34,6 +45,8 @@ public class SceneActionDefinition extends ActionNodeDefinition
 
       public static final SceneActionType[] values = values();
    }
+
+   private final SyncedYOLOv8ModelParameters[] syncableYOLOModelParameters;
 
    private final CRDTBidirectionalEnumField<SceneActionType> sceneActionType;
    private final BehaviorTreeSceneObjectDefinition sceneObjectDefinition;
@@ -63,6 +76,33 @@ public class SceneActionDefinition extends ActionNodeDefinition
    public SceneActionDefinition(BehaviorTreeRootNodeDefinition rootNode)
    {
       super(rootNode);
+
+      List<URL> yoloModelDirectories = YOLOv8Tools.getYOLOModelDirectories();
+      YOLOv8ModelInfo[] availableYOLOModels = new YOLOv8ModelInfo[yoloModelDirectories.size()];
+      for (int i = 0; i < yoloModelDirectories.size(); i++)
+      {
+         String[] path = yoloModelDirectories.get(i).getPath().split(Pattern.quote(File.separator));
+         availableYOLOModels[i] = new YOLOv8ModelInfo();
+         availableYOLOModels[i].setModelName(path[path.length - 1]);
+      }
+      for (int i = 0; i < availableYOLOModels.length; i++)
+      {
+         try (InputStream classNamesFile = YOLOv8Tools.getClassNamesFile(yoloModelDirectories.get(i)).openStream())
+         {
+            Yaml yaml = new Yaml();
+            Map<String, List<Object>> classNamesData = yaml.load(classNamesFile);
+            List<Object> names = classNamesData.get("names");
+            for (Object name : names)
+               availableYOLOModels[i].getDetectableObjectClasses().add(name.toString());
+         }
+         catch (IOException e)
+         {
+            DefaultExceptionHandler.MESSAGE_AND_STACKTRACE.handleException(e);
+         }
+      }
+      syncableYOLOModelParameters = new SyncedYOLOv8ModelParameters[availableYOLOModels.length];
+      for (int i = 0; i < availableYOLOModels.length; i++)
+         syncableYOLOModelParameters[i] = new SyncedYOLOv8ModelParameters(this, availableYOLOModels[i]);
 
       sceneActionType = new CRDTBidirectionalEnumField<>(this, SceneActionType.SETUP_OBJECT);
       sceneObjectDefinition = new BehaviorTreeSceneObjectDefinition(this);
@@ -280,6 +320,11 @@ public class SceneActionDefinition extends ActionNodeDefinition
       enabledYoloModels.fromMessage(message.getEnabledYoloModels());
       ignoredYoloClassIndices.fromMessage(message.getIgnoredYoloClassIndices());
       enabledFoundationPoseModels.fromMessage(message.getEnabledFoundationPoseModels());
+   }
+
+   public SyncedYOLOv8ModelParameters[] getSyncableYOLOModelParameters()
+   {
+      return syncableYOLOModelParameters;
    }
 
    public BehaviorTreeSceneObjectDefinition getSceneObjectDefinition()

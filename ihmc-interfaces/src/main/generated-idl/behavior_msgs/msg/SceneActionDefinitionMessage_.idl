@@ -4,6 +4,7 @@
 #include "behavior_msgs/msg/./ActionNodeDefinitionMessage_.idl"
 #include "behavior_msgs/msg/./BehaviorTreeSceneObjectDefinitionMessage_.idl"
 #include "controller_msgs/msg/./RigidBodyTransformMessage_.idl"
+#include "perception_msgs/msg/./YOLOv8ModelParameters_.idl"
 module behavior_msgs
 {
   module msg
@@ -34,7 +35,7 @@ module behavior_msgs
 
       /**
        * Setup, freeze, delete object:
-       * Configure YOLO: TODO: The following fields are work in progress:
+       * Configure YOLO:
        * Configure FoundationPose:
        */
       @TypeCode(type="behavior_msgs::msg::dds_::SceneActionDefinitionMessage_")
@@ -65,29 +66,13 @@ module behavior_msgs
          */
         controller_msgs::msg::dds::RigidBodyTransformMessage nominal_object_pose;
         /**
-         * YOLO confidence threshold
+         * YOLO models that should be enabled at this point (by available index)
          */
-        float yolo_confidence_threshold;
+        sequence<unsigned short, 10> enabled_yolo_models;
         /**
-         * YOLO mask threshold
+         * Pararmeters of the enabled YOLO models
          */
-        float yolo_mask_threshold;
-        /**
-         * Segmentation mask erosion radius
-         */
-        unsigned short segmentation_mask_erosion_radius;
-        /**
-         * Threshold for removing outlier points of segmented point cloud
-         */
-        float outlier_threshold;
-        /**
-         * YOLO models that should be enabled at this point
-         */
-        sequence<string, 10> enabled_yolo_models;
-        /**
-         * YOLO classes to ignore
-         */
-        sequence<octet, 256> ignored_yolo_class_indices;
+        sequence<perception_msgs::msg::dds::YOLOv8ModelParameters, 10> yolo_model_parameters;
         /**
          * FoundationPose models that should be enabled at this point
          */
