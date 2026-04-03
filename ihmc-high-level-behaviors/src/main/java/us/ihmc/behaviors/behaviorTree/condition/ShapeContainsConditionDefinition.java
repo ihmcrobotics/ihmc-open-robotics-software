@@ -81,12 +81,15 @@ public class ShapeContainsConditionDefinition
          jsonNode.put("minPoints", minPoints.getValue());
          jsonNode.put("maxPoints", maxPoints.getValue());
          jsonNode.put("checkColor", checkColor.getValue());
-         jsonNode.put("hueMin", hueMin.getValue());
-         jsonNode.put("hueMax", hueMax.getValue());
-         jsonNode.put("saturationMin", saturationMin.getValue());
-         jsonNode.put("saturationMax", saturationMax.getValue());
-         jsonNode.put("valueMin", valueMin.getValue());
-         jsonNode.put("valueMax", valueMax.getValue());
+         if (checkColor.getValue())
+         {
+            jsonNode.put("hueMin", hueMin.getValue());
+            jsonNode.put("hueMax", hueMax.getValue());
+            jsonNode.put("saturationMin", saturationMin.getValue());
+            jsonNode.put("saturationMax", saturationMax.getValue());
+            jsonNode.put("valueMin", valueMin.getValue());
+            jsonNode.put("valueMax", valueMax.getValue());
+         }
       }
       jsonNode.put("shapeParentFrameName", shapeParentFrameName.getValue());
       JSONTools.toJSON(jsonNode.putObject("shapeTransformToParent"), shapeTransformToParent.getValueReadOnly());
@@ -103,18 +106,21 @@ public class ShapeContainsConditionDefinition
          maxPoints.setValue(intNode.asInt());
       if (jsonNode.get("checkColor") != null)
          checkColor.setValue(jsonNode.get("checkColor").booleanValue());
-      if (jsonNode.get("hueMin") instanceof IntNode intNode)
-         hueMin.setValue(intNode.asInt());
-      if (jsonNode.get("hueMax") instanceof IntNode intNode)
-         hueMax.setValue(intNode.asInt());
-      if (jsonNode.get("saturationMin") instanceof IntNode intNode)
-         saturationMin.setValue(intNode.asInt());
-      if (jsonNode.get("saturationMax") instanceof IntNode intNode)
-         saturationMax.setValue(intNode.asInt());
-      if (jsonNode.get("valueMin") instanceof IntNode intNode)
-         valueMin.setValue(intNode.asInt());
-      if (jsonNode.get("valueMax") instanceof IntNode intNode)
-         valueMax.setValue(intNode.asInt());
+      if (checkColor.getValue())
+      {
+         if (jsonNode.get("hueMin") instanceof IntNode intNode)
+            hueMin.setValue(intNode.asInt());
+         if (jsonNode.get("hueMax") instanceof IntNode intNode)
+            hueMax.setValue(intNode.asInt());
+         if (jsonNode.get("saturationMin") instanceof IntNode intNode)
+            saturationMin.setValue(intNode.asInt());
+         if (jsonNode.get("saturationMax") instanceof IntNode intNode)
+            saturationMax.setValue(intNode.asInt());
+         if (jsonNode.get("valueMin") instanceof IntNode intNode)
+            valueMin.setValue(intNode.asInt());
+         if (jsonNode.get("valueMax") instanceof IntNode intNode)
+            valueMax.setValue(intNode.asInt());
+      }
       shapeParentFrameName.setValue(jsonNode.get("shapeParentFrameName").textValue());
       if (jsonNode.get("shapeTransformToParent") instanceof ObjectNode objectNode)
          JSONTools.toEuclid(objectNode, shapeTransformToParent.getValueAndModify());

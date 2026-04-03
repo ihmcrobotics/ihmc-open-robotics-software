@@ -19,6 +19,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseInstantDetection;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseObject;
+import us.ihmc.perception.detections.yolo.SyncedYOLOv8ModelParameters;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
 import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
 import us.ihmc.tools.Timer;
@@ -76,10 +77,14 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
          yolo.disableAllModels();
          for (int i = 0; i < definition.getEnabledYoloModels().getSize(); i++)
          {
-            int yoloModelIndex = definition.getEnabledYoloModels().getValueReadOnly(i);
-            if (yoloModelIndex >= 0 && yoloModelIndex < definition.getSyncableYOLOModelParameters().length)
-               yolo.enableModel(definition.getSyncableYOLOModelParameters()[yoloModelIndex].getModelName());
+            SyncedYOLOv8ModelParameters definitionParameters
+                  = definition.getSyncableYOLOModelParameters()[definition.getEnabledYoloModels().getValueReadOnly(i)];
+            yolo.enableModel(definitionParameters.getModelName());
+            definitionParameters.applyToModel(yolo.getAvailableModels().get(definitionParameters.getModelName()));
+            yolo.getParameters().getModelParameters().get(definitionParameters.getModelName()).set(definitionParameters);
+            yolo.getParameters().modify();
          }
+         state.setIsExecuting(false);
       }
       else if (isFreeze || isDelete)
          freezeOrDelete(isFreeze);

@@ -99,6 +99,16 @@ public class YOLOv8DetectionExecutor
       annotationInfoPublisher = ros2Node.createPublisher(PerceptionAPI.YOLO_ANNOTATION_INFO);
    }
 
+   public Map<String, YOLOv8Model> getAvailableModels()
+   {
+      return availableModels;
+   }
+
+   public SyncedYOLOv8ExecutorParameters getParameters()
+   {
+      return parameters;
+   }
+
    /**
     * Returns the names of all YOLOv8 models that are currently available to this executor.
     *
