@@ -6,6 +6,7 @@ import imgui.ImGui;
 import imgui.extension.implot.ImPlot;
 import imgui.extension.implot.flag.ImPlotAxisFlags;
 import imgui.flag.ImGuiCond;
+import imgui.flag.ImGuiColorEditFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
@@ -36,7 +37,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class RDXZEDShapePointCounterWithColorDemo
 {
-   private static final String SVO_FILE = "/home/duncan/Downloads/20260331_165223_AlexTennisBallPickAndPlace2.svo2";
+   private static final String SVO_FILE = "/home/duncan/Downloads/20260220_105325_AlexPushPullDoorDataCloser.svo2";
 
    private static final String[] SHAPES = new String[] {"Sphere", "Capsule"};
    private static final Color DEFAULT_COLOR = new Color(0.45f, 0.75f, 1.0f, 1.0f);
@@ -58,6 +59,10 @@ public class RDXZEDShapePointCounterWithColorDemo
    private float averageRed = 0.0f;
    private float averageGreen = 0.0f;
    private float averageBlue = 0.0f;
+   private float averageHue = 0.0f;
+   private float averageSaturation = 0.0f;
+   private float averageValue = 0.0f;
+   private final float[] averageHSVColor = new float[3];
 
    private final ImGuiMovingPlot pointsPlot = new ImGuiMovingPlot("Points in Sphere", 1000, 300, 200);
    private final ImPlotPlot averageRGBPlot = new ImPlotPlot(140);
@@ -140,6 +145,16 @@ public class RDXZEDShapePointCounterWithColorDemo
       ImGui.text("Points in shape: " + pointsInShape.get());
       ImGui.popFont();
       ImGui.text(String.format("Average RGB: %.1f, %.1f, %.1f", averageRed, averageGreen, averageBlue));
+      ImGui.text(String.format("Average HSV: %.1f deg, %.3f, %.3f", averageHue, averageSaturation, averageValue));
+      averageHSVColor[0] = averageHue / 360.0f;
+      averageHSVColor[1] = averageSaturation;
+      averageHSVColor[2] = averageValue;
+      ImGui.beginDisabled();
+      ImGui.setNextItemWidth(180.0f);
+      ImGui.colorPicker3(labels.get("Average HSV"),
+                         averageHSVColor,
+                         ImGuiColorEditFlags.InputHSV | ImGuiColorEditFlags.DisplayHSV | ImGuiColorEditFlags.NoLabel | ImGuiColorEditFlags.NoSidePreview);
+      ImGui.endDisabled();
       pointsPlot.calculate(pointsInShape.get());
       averageRGBPlot.render();
       ImGui.separator();
@@ -249,6 +264,9 @@ public class RDXZEDShapePointCounterWithColorDemo
          averageRed = shapePointCounter.getAverageRed();
          averageGreen = shapePointCounter.getAverageGreen();
          averageBlue = shapePointCounter.getAverageBlue();
+         averageHue = shapePointCounter.getAverageHue();
+         averageSaturation = shapePointCounter.getAverageSaturation();
+         averageValue = shapePointCounter.getAverageValue();
          lastComputedSVOPosition = currentSVOPosition;
          lastComputedShapeType = shape.get();
          lastComputedRadius = shapeRadius.get();
@@ -262,6 +280,9 @@ public class RDXZEDShapePointCounterWithColorDemo
          averageRed = 0.0f;
          averageGreen = 0.0f;
          averageBlue = 0.0f;
+         averageHue = 0.0f;
+         averageSaturation = 0.0f;
+         averageValue = 0.0f;
          lastComputedSVOPosition = currentSVOPosition;
          lastComputedShapeType = shape.get();
          lastComputedRadius = shapeRadius.get();
