@@ -114,9 +114,12 @@ public class SceneActionDefinition extends ActionNodeDefinition
          {
             ObjectNode sceneObjectNode = jsonNode.putObject("sceneObjectDefinition");
             sceneObjectDefinition.saveToFile(sceneObjectNode);
-            jsonNode.put("timeout", timeout.getValue());
-            jsonNode.put("minimumHistorySize", minimumHistorySize.getValue());
-            JSONTools.toJSON(jsonNode.putObject("nominalObjectPose"), nominalObjectPose.getValueReadOnly());
+            if (sceneActionType.getValue() == SceneActionType.SETUP_OBJECT)
+            {
+               jsonNode.put("timeout", timeout.getValue());
+               jsonNode.put("minimumHistorySize", minimumHistorySize.getValue());
+               JSONTools.toJSON(jsonNode.putObject("nominalObjectPose"), nominalObjectPose.getValueReadOnly());
+            }
          }
          case CONFIGURE_YOLO ->
          {
@@ -149,10 +152,13 @@ public class SceneActionDefinition extends ActionNodeDefinition
          case SETUP_OBJECT, FREEZE_OBJECT, DELETE_OBJECT ->
          {
             sceneObjectDefinition.loadFromFile(jsonNode.get("sceneObjectDefinition"));
-            timeout.setValue((float) jsonNode.get("timeout").asDouble());
-            minimumHistorySize.setValue(jsonNode.get("minimumHistorySize").asInt());
-            if (jsonNode.get("nominalObjectPose") instanceof ObjectNode nominalObjectPoseNode)
-               JSONTools.toEuclid(nominalObjectPoseNode, nominalObjectPose.getValueAndModify());
+            if (sceneActionType.getValue() == SceneActionType.SETUP_OBJECT)
+            {
+               timeout.setValue((float) jsonNode.get("timeout").asDouble());
+               minimumHistorySize.setValue(jsonNode.get("minimumHistorySize").asInt());
+               if (jsonNode.get("nominalObjectPose") instanceof ObjectNode nominalObjectPoseNode)
+                  JSONTools.toEuclid(nominalObjectPoseNode, nominalObjectPose.getValueAndModify());
+            }
          }
          case CONFIGURE_YOLO ->
          {
