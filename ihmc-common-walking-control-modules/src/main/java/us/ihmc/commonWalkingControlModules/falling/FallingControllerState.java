@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -18,10 +19,31 @@ public class FallingControllerState extends HighLevelControllerState
 
    private final double[] capturedJointPositions;
    private final double[] capturedJointVelocities;
+   private final WholeBodySetpointParameters fallingSetpoints;
 
-   public FallingControllerState(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
-                                 HighLevelControlManagerFactory managerFactory, HighLevelHumanoidControllerToolbox controllerToolbox,
-                                 HighLevelControllerParameters highLevelControllerParameters, WalkingControllerParameters walkingControllerParameters)
+   public FallingControllerState(CommandInputManager commandInputManager,
+                                 StatusMessageOutputManager statusOutputManager,
+                                 HighLevelControlManagerFactory managerFactory,
+                                 HighLevelHumanoidControllerToolbox controllerToolbox,
+                                 HighLevelControllerParameters highLevelControllerParameters,
+                                 WalkingControllerParameters walkingControllerParameters)
+   {
+      this(commandInputManager,
+           statusOutputManager,
+           managerFactory,
+           controllerToolbox,
+           highLevelControllerParameters,
+           walkingControllerParameters,
+           highLevelControllerParameters.getFallingControllerParameters());
+   }
+
+   public FallingControllerState(CommandInputManager commandInputManager,
+                                 StatusMessageOutputManager statusOutputManager,
+                                 HighLevelControlManagerFactory managerFactory,
+                                 HighLevelHumanoidControllerToolbox controllerToolbox,
+                                 HighLevelControllerParameters highLevelControllerParameters,
+                                 WalkingControllerParameters walkingControllerParameters,
+                                 WholeBodySetpointParameters fallingSetpoints)
    {
       super(controllerState, highLevelControllerParameters, controllerToolbox.getControlledOneDoFJoints());
       lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder(controlledJoints.length);
@@ -29,6 +51,7 @@ public class FallingControllerState extends HighLevelControllerState
 
       capturedJointPositions = new double[controlledJoints.length];
       capturedJointVelocities = new double[controlledJoints.length];
+      this.fallingSetpoints = fallingSetpoints;
    }
 
    @Override
@@ -51,8 +74,16 @@ public class FallingControllerState extends HighLevelControllerState
    {
       for (int i = 0; i < controlledJoints.length; i++)
       {
-         capturedJointPositions[i] = controlledJoints[i].getQ();
-         capturedJointVelocities[i] = controlledJoints[i].getQd();
+         if (fallingSetpoints != null)
+         {
+            capturedJointPositions[i] = fallingSetpoints.getSetpoint(controlledJoints[i].getName());
+            capturedJointVelocities[i] = 0.0;
+         }
+         else
+         {
+            capturedJointPositions[i] = controlledJoints[i].getQ();
+            capturedJointVelocities[i] = controlledJoints[i].getQd();
+         }
       }
    }
 

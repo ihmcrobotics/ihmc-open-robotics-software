@@ -15,18 +15,28 @@ public interface HighLevelControllerParameters
 
    WholeBodySetpointParameters getStandPrepParameters();
 
+   default WholeBodySetpointParameters getFallingControllerParameters()
+   {
+      return null;
+   }
+
    HighLevelControllerName getDefaultInitialControllerState();
+
    HighLevelControllerName getFallbackControllerState();
 
    boolean automaticallyTransitionToWalkingWhenReady();
 
    double getTimeToMoveInStandPrep();
+
    double getMinimumTimeInStandReady();
+
    double getTimeInStandTransition();
+
    default double getTimeInStandTransition(HighLevelControllerName controllerName)
    {
       return getTimeInStandTransition();
    }
+
    double getCalibrationDuration();
 
    /**
@@ -44,6 +54,7 @@ public interface HighLevelControllerParameters
     * the parameters defined here can be overwritten (this is optional) by defining integration parameters
     * in {@link #getDesiredJointBehaviorsLoaded()}.
     * </p>
+    *
     * @return list containing joint behavior parameters and the corresponding joint groups
     */
    public default List<GroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviors(HighLevelControllerName state)
@@ -79,6 +90,7 @@ public interface HighLevelControllerParameters
     * the parameters defined here can be overwritten (this is optional) by defining integration parameters
     * in {@link #getJointAccelerationIntegrationParametersUnderLoad()}.
     * </p>
+    *
     * @return list containing acceleration integration parameters and the corresponding joint groups
     */
    public default List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParameters(HighLevelControllerName state)
@@ -94,7 +106,8 @@ public interface HighLevelControllerParameters
     *
     * @return list containing acceleration integration parameters to be used if a joint is loaded
     */
-   public default List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParametersUnderLoad(HighLevelControllerName state)
+   public default List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParametersUnderLoad(
+         HighLevelControllerName state)
    {
       return null;
    }
@@ -114,7 +127,8 @@ public interface HighLevelControllerParameters
    /**
     * If a torque offset calibration controller is used, this defines the max torque offset that can be applied from each execution
     * See {@link JointTorqueOffsetEstimatorController} for implementation details
-    * @return the max torque offset that can be applied in Nm. 
+    *
+    * @return the max torque offset that can be applied in Nm.
     */
    public default double getCalibrationMaxTorqueOffset()
    {
