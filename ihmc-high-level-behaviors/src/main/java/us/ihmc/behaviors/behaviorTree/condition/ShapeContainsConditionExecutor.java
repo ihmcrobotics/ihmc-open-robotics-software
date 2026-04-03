@@ -128,16 +128,59 @@ public class ShapeContainsConditionExecutor
          else if (pointsInSphereCUDAOutput >= 0)
          {
             shapeState.setNumberOfPointsContained(pointsInSphereCUDAOutput);
-            boolean success = shapeState.getNumberOfPointsContained() >= shapeDefinition.getMinPoints()
-                           && shapeState.getNumberOfPointsContained() <= shapeDefinition.getMaxPoints();
+            boolean pointsInRange = shapeState.getNumberOfPointsContained() >= shapeDefinition.getMinPoints()
+                                && shapeState.getNumberOfPointsContained() <= shapeDefinition.getMaxPoints();
+            boolean success = pointsInRange;
+            String pointsCheckSummary = "Points %d in [%d, %d] (%s)".formatted(shapeState.getNumberOfPointsContained(),
+                                                                                shapeDefinition.getMinPoints(),
+                                                                                shapeDefinition.getMaxPoints(),
+                                                                                pointsInRange ? "pass" : "fail");
+            String colorCheckSummary = "";
+            if (shapeDefinition.getCheckColor())
+            {
+               float hue360 = shapeState.getAverageHue();
+               float sat01 = shapeState.getAverageSaturation();
+               float val01 = shapeState.getAverageValue();
+               float hue255 = hue360 * (255.0f / 360.0f);
+               float sat255 = sat01 * 255.0f;
+               float val255 = val01 * 255.0f;
+
+               boolean hueInRange;
+               if (shapeDefinition.getHueMin() <= shapeDefinition.getHueMax())
+                  hueInRange = hue255 >= shapeDefinition.getHueMin() && hue255 <= shapeDefinition.getHueMax();
+               else // wrap-around (red crossing)
+                  hueInRange = hue255 >= shapeDefinition.getHueMin() || hue255 <= shapeDefinition.getHueMax();
+
+               boolean saturationInRange = sat255 >= shapeDefinition.getSaturationMin() && sat255 <= shapeDefinition.getSaturationMax();
+               boolean valueInRange = val255 >= shapeDefinition.getValueMin() && val255 <= shapeDefinition.getValueMax();
+               success &= hueInRange;
+               success &= saturationInRange;
+               success &= valueInRange;
+
+               String hueRangeDescription = shapeDefinition.getHueMin() <= shapeDefinition.getHueMax()
+                     ? "[%d, %d]".formatted(shapeDefinition.getHueMin(), shapeDefinition.getHueMax())
+                     : "[%d, 255] U [0, %d]".formatted(shapeDefinition.getHueMin(), shapeDefinition.getHueMax());
+               colorCheckSummary = ("%nColor checks:%n"
+                     + "H  %.0f in %s (%s)%n"
+                     + "S %.0f in [%d, %d] (%s)%n"
+                     + "V %.0f in [%d, %d] (%s)").formatted(
+                     hue255,
+                     hueRangeDescription,
+                     hueInRange ? "pass" : "fail",
+                     sat255,
+                     shapeDefinition.getSaturationMin(),
+                     shapeDefinition.getSaturationMax(),
+                     saturationInRange ? "pass" : "fail",
+                     val255,
+                     shapeDefinition.getValueMin(),
+                     shapeDefinition.getValueMax(),
+                     valueInRange ? "pass" : "fail");
+            }
+
             if (success)
-               state.getLogger().info("Points contained: %d >= %d <= %d".formatted(shapeDefinition.getMinPoints(),
-                                                                                   shapeState.getNumberOfPointsContained(),
-                                                                                   shapeDefinition.getMaxPoints()));
+               state.getLogger().info(pointsCheckSummary + colorCheckSummary);
             else
-               state.getLogger().error("Points contained not in range: %d >= %d <= %d".formatted(shapeDefinition.getMinPoints(),
-                                                                                                 shapeState.getNumberOfPointsContained(),
-                                                                                                 shapeDefinition.getMaxPoints()));
+               state.getLogger().error(pointsCheckSummary + colorCheckSummary);
             state.setFailed(!success);
             state.setIsExecuting(false);
          }

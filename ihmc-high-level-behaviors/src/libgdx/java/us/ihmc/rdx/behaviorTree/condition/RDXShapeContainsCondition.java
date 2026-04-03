@@ -43,6 +43,8 @@ public class RDXShapeContainsCondition
    private final ImIntegerWrapper maxPointsWidget;
    private final ImBooleanWrapper checkColorWidget;
    private final float[] averageHSVColor = new float[3];
+   private final float[] minHSVColor = new float[3];
+   private final float[] maxHSVColor = new float[3];
    private ModelInstance sphereModel;
    private double lastSphereRadius = Double.NaN;
 
@@ -153,8 +155,38 @@ public class RDXShapeContainsCondition
                                averageHSVColor,
                                ImGuiColorEditFlags.InputHSV | ImGuiColorEditFlags.DisplayHSV | ImGuiColorEditFlags.NoLabel | ImGuiColorEditFlags.NoSidePreview);
             ImGui.endDisabled();
+
+            minHSVColor[0] = shapeDefinition.getHueMin() / 255.0f;
+            minHSVColor[1] = shapeDefinition.getSaturationMin() / 255.0f;
+            minHSVColor[2] = shapeDefinition.getValueMin() / 255.0f;
+            ImGui.text("Min:");
+            ImGui.sameLine();
+            ImGui.setNextItemWidth(180.0f);
+            if (ImGui.colorPicker3(labels.get("Min HSV"),
+                                   minHSVColor,
+                                   ImGuiColorEditFlags.InputHSV | ImGuiColorEditFlags.DisplayHSV | ImGuiColorEditFlags.NoLabel | ImGuiColorEditFlags.NoSidePreview))
+            {
+               shapeDefinition.setHueMin(Math.round(minHSVColor[0] * 255.0f));
+               shapeDefinition.setSaturationMin(Math.round(minHSVColor[1] * 255.0f));
+               shapeDefinition.setValueMin(Math.round(minHSVColor[2] * 255.0f));
+            }
+
+            maxHSVColor[0] = shapeDefinition.getHueMax() / 255.0f;
+            maxHSVColor[1] = shapeDefinition.getSaturationMax() / 255.0f;
+            maxHSVColor[2] = shapeDefinition.getValueMax() / 255.0f;
+            ImGui.sameLine();
+            ImGui.text("Max:");
+            ImGui.sameLine();
+            ImGui.setNextItemWidth(180.0f);
+            if (ImGui.colorPicker3(labels.get("Max HSV"),
+                                   maxHSVColor,
+                                   ImGuiColorEditFlags.InputHSV | ImGuiColorEditFlags.DisplayHSV | ImGuiColorEditFlags.NoLabel | ImGuiColorEditFlags.NoSidePreview))
+            {
+               shapeDefinition.setHueMax(Math.round(maxHSVColor[0] * 255.0f));
+               shapeDefinition.setSaturationMax(Math.round(maxHSVColor[1] * 255.0f));
+               shapeDefinition.setValueMax(Math.round(maxHSVColor[2] * 255.0f));
+            }
          }
-         
       }
    }
 

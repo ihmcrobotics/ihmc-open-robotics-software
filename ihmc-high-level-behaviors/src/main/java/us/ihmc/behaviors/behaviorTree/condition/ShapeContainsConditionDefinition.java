@@ -64,12 +64,12 @@ public class ShapeContainsConditionDefinition
       shapeTransformToParent = new CRDTBidirectionalRigidBodyTransform(latestTimestampModifiable);
       sphereRadius = new CRDTBidirectionalDouble(latestTimestampModifiable, 0.5);
       checkColor = new CRDTBidirectionalBoolean(latestTimestampModifiable, false);
-      hueMin = new CRDTBidirectionalInteger(latestTimestampModifiable, 0);
-      hueMax = new CRDTBidirectionalInteger(latestTimestampModifiable, 65535);
-      saturationMin = new CRDTBidirectionalInteger(latestTimestampModifiable, 0);
-      saturationMax = new CRDTBidirectionalInteger(latestTimestampModifiable, 65535);
-      valueMin = new CRDTBidirectionalInteger(latestTimestampModifiable, 0);
-      valueMax = new CRDTBidirectionalInteger(latestTimestampModifiable, 65535);
+      hueMin = new CRDTBidirectionalInteger(latestTimestampModifiable, 30);
+      hueMax = new CRDTBidirectionalInteger(latestTimestampModifiable, 40);
+      saturationMin = new CRDTBidirectionalInteger(latestTimestampModifiable, 20);
+      saturationMax = new CRDTBidirectionalInteger(latestTimestampModifiable, 255);
+      valueMin = new CRDTBidirectionalInteger(latestTimestampModifiable, 80);
+      valueMax = new CRDTBidirectionalInteger(latestTimestampModifiable, 255);
    }
 
    public void saveToFile(ObjectNode jsonNode)
