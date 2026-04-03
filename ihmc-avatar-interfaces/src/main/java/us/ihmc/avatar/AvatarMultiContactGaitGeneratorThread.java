@@ -20,6 +20,7 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -120,6 +121,7 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
 
    private final ConvexPolygonScaler convexPolygonScaler = new ConvexPolygonScaler();
    private final YoDouble contactStateUpdateTimer = new YoDouble("handContactPlanTimer", registry);
+   private final FramePoint2D centerOfPressure = new FramePoint2D();
 
    private final FrameVector2D desiredToCurrentCapturePoint = new FrameVector2D();
    private final FrameConvexPolygon2D supportPolygon = new FrameConvexPolygon2D();
@@ -331,10 +333,14 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
          rightFoot.changeFrame(ReferenceFrame.getWorldFrame());
          double stanceWidth = leftFoot.distance(rightFoot);
 
+         centerOfPressure.setToZero(getMidFeetZUpFrame());
+         centerOfPressure.changeFrame(ReferenceFrame.getWorldFrame());
+
          plannedHandContacts.clear();
          planner.plan(desiredToCurrentCapturePoint,
                       centerOfMassPosition,
                       centerOfMassVelocity,
+                      centerOfPressure,
                       supportPolygon,
                       handPositions,
                       areFeetInContact,

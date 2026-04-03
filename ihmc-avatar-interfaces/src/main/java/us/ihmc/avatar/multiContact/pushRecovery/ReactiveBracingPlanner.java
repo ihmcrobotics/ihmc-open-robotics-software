@@ -27,6 +27,7 @@ public interface ReactiveBracingPlanner
    void plan(FrameVector2DReadOnly desiredToCurrentCapturePoint,
                     FramePoint3DReadOnly centerOfMassPosition,
                     FrameVector3DReadOnly centerOfMassVelocity,
+                    FramePoint2DReadOnly centerOfPressure,
                     FrameConvexPolygon2DReadOnly supportPolygon,
                     SideDependentList<? extends FramePoint3DReadOnly> handPositions,
                     SideDependentList<MutableBoolean> areFeetInContact,
