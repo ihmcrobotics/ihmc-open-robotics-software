@@ -8,7 +8,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.cuda.CUDAShapePointCounter;
+import us.ihmc.perception.cuda.CUDAShapePointCounterWithColor;
 import us.ihmc.sensors.ImageSensor;
 import us.ihmc.sensors.zed.ZEDImageSensor;
 
@@ -23,7 +23,7 @@ public class ShapeContainsConditionExecutor
    private ReferenceFrame frame;
    private final FramePoint3D spherePose = new FramePoint3D();
    private final FramePoint3D framePose = new FramePoint3D();
-   private CUDAShapePointCounter spherePointCounter;
+   private CUDAShapePointCounterWithColor spherePointCounter;
    private RepeatingTaskThread zedGrabThread;
    private int pointsInSphereCUDAOutput = -1;
 
@@ -34,7 +34,7 @@ public class ShapeContainsConditionExecutor
       shapeDefinition = state.getDefinition().getShapeContains();
       shapeState = state.getShapeContains();
 
-      ThreadTools.startAsDaemon(() -> spherePointCounter = new CUDAShapePointCounter(), "CreateShapePointCounter");
+      ThreadTools.startAsDaemon(() -> spherePointCounter = new CUDAShapePointCounterWithColor(), "CreateShapePointCounter");
    }
 
    public void update()
@@ -150,14 +150,19 @@ public class ShapeContainsConditionExecutor
       zedSensor.waitForGrab();
 
       RawImage depthImage = zedSensor.getImage(ZEDImageSensor.DEPTH_IMAGE_KEY);
+      RawImage colorImage = zedSensor.getImage(ZEDImageSensor.LEFT_COLOR_IMAGE_KEY);
 
-      if (depthImage != null)
+      if (depthImage != null && colorImage != null)
       {
          synchronized (this)
          {
-            pointsInSphereCUDAOutput = (int) spherePointCounter.countPointsInSphere(depthImage, spherePose, (float) shapeDefinition.getSphereRadius());
+            pointsInSphereCUDAOutput = (int) spherePointCounter.countPointsInSphere(depthImage, colorImage, spherePose, (float) shapeDefinition.getSphereRadius());
+            state.getShapeContains().setAverageHue(spherePointCounter.getAverageHue());
+            state.getShapeContains().setAverageSaturation(spherePointCounter.getAverageSaturation());
+            state.getShapeContains().setAverageValue(spherePointCounter.getAverageValue());
          }
          depthImage.release();
+         colorImage.release();
       }
    }
 }

@@ -53,6 +53,21 @@ public class SyncedYOLOv8ModelParameters
       Arrays.fill(outlierThresholds.getValueAndModify(), 2.0f);
    }
 
+   public void set(SyncedYOLOv8ModelParameters other)
+   {
+      for (int i = 0; i < ignoredObjectClasses.getLength(); i++)
+         ignoredObjectClasses.setValue(i, other.ignoredObjectClasses.getValueReadOnly(i));
+      for (int i = 0; i < confidenceThresholds.getLength(); i++)
+         confidenceThresholds.setValue(i, other.confidenceThresholds.getValueReadOnly(i));
+      for (int i = 0; i < maskThresholds.getLength(); i++)
+         maskThresholds.setValue(i, other.maskThresholds.getValueReadOnly(i));
+      nmsThreshold.setValue(other.nmsThreshold.getValue());
+      for (int i = 0; i < erosionKernelRadii.getLength(); i++)
+         erosionKernelRadii.setValue(i, other.erosionKernelRadii.getValueReadOnly(i));
+      for (int i = 0; i < outlierThresholds.getLength(); i++)
+         outlierThresholds.setValue(i, other.outlierThresholds.getValueReadOnly(i));
+   }
+
    /**
     * Applies the current parameter values to the passed in model.
     * The past in model must match the model info used to construct the parameters.

@@ -27,6 +27,12 @@ bool frame_b_is_present
 
 # SHAPE CONTAINS TYPE
 
+bool frame_is_contained
+
 uint32 number_of_points_contained
 
-bool frame_is_contained
+float32 average_hue
+
+float32 average_saturation
+
+float32 average_value
