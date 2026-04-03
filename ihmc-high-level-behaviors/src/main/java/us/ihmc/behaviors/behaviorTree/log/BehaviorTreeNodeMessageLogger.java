@@ -49,7 +49,7 @@ public class BehaviorTreeNodeMessageLogger extends CRDTStatusField implements Lo
       {
          // Clear old message from sync
          Instant fiveSecondsAgo = Instant.now().minus(5, ChronoUnit.SECONDS);
-         while (!recentMessages.isEmpty() && recentMessages.peek().instant().isBefore(fiveSecondsAgo))
+         while (!recentMessages.isEmpty() && (recentMessages.size() > 50 || recentMessages.peek().instant().isBefore(fiveSecondsAgo)))
          {
             recentMessages.poll();
          }
