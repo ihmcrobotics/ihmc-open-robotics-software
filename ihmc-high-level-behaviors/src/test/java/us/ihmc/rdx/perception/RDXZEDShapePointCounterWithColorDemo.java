@@ -147,7 +147,7 @@ public class RDXZEDShapePointCounterWithColorDemo
       currentPosition.set(zedSensor.getCurrentPosition());
       zedLength.set(zedSensor.getLength());
 
-      ImGui.text("SVO: " + zedSensor.getSVOFileName());
+      ImGui.text("SVO: " + zedSensor.getSVOFilePath());
       if (ImGui.checkbox(labels.get("ZED Playback"), play))
       {
          if (play.get())
