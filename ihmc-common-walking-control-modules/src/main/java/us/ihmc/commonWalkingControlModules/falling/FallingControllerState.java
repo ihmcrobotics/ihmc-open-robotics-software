@@ -11,8 +11,10 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.robotics.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class FallingControllerState extends HighLevelControllerState
 {
@@ -21,6 +23,8 @@ public class FallingControllerState extends HighLevelControllerState
 
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder;
    private final YoPolynomial trajectory = new YoPolynomial("fallingTrajectory", 4, registry);
+   private final YoBoolean enableFallingDampingMode = new YoBoolean("enableFallingDampingMode", registry);
+   private final YoBoolean fallingDampingModeActive = new YoBoolean("fallingDampingModeActive", registry);
 
    private final double[] initialJointPositions;
    private final double[] capturedJointPositions;
@@ -65,6 +69,8 @@ public class FallingControllerState extends HighLevelControllerState
    public void doAction(double timeInState)
    {
       double timeInTrajectory = MathTools.clamp(timeInState, 0.0, fallTransitionDuration);
+      boolean useDampingMode = enableFallingDampingMode.getBooleanValue() && timeInState >= fallTransitionDuration;
+      fallingDampingModeActive.set(useDampingMode);
       trajectory.compute(timeInTrajectory);
       double alphaPosition = trajectory.getValue();
       double alphaVelocity = trajectory.getVelocity();
@@ -72,14 +78,22 @@ public class FallingControllerState extends HighLevelControllerState
       for (int i = 0; i < controlledJoints.length; i++)
       {
          controlledJoints[i].setTau(0.0);
-         lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(controlledJoints[i]).clear();
-         lowLevelOneDoFJointDesiredDataHolder.setDesiredJointTorque(controlledJoints[i], 0.0);
+         JointDesiredOutputBasics lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(controlledJoints[i]);
+         lowLevelJointData.clear();
+         lowLevelJointData.setDesiredTorque(0.0);
 
-         double desiredPosition = (1.0 - alphaPosition) * initialJointPositions[i] + alphaPosition * capturedJointPositions[i];
-         double desiredVelocity = alphaVelocity * (capturedJointPositions[i] - initialJointPositions[i]);
+         if (useDampingMode)
+         {
+            lowLevelJointData.setDesiredVelocity(0.0);
+         }
+         else
+         {
+            double desiredPosition = (1.0 - alphaPosition) * initialJointPositions[i] + alphaPosition * capturedJointPositions[i];
+            double desiredVelocity = alphaVelocity * (capturedJointPositions[i] - initialJointPositions[i]);
 
-         lowLevelOneDoFJointDesiredDataHolder.setDesiredJointPosition(controlledJoints[i], desiredPosition);
-         lowLevelOneDoFJointDesiredDataHolder.setDesiredJointVelocity(controlledJoints[i], desiredVelocity);
+            lowLevelJointData.setDesiredPosition(desiredPosition);
+            lowLevelJointData.setDesiredVelocity(desiredVelocity);
+         }
       }
 
       lowLevelOneDoFJointDesiredDataHolder.completeWith(getStateSpecificJointSettings());
@@ -89,6 +103,7 @@ public class FallingControllerState extends HighLevelControllerState
    public void onEntry()
    {
       trajectory.setCubic(0.0, fallTransitionDuration, 0.0, 0.0, 1.0, 0.0);
+      fallingDampingModeActive.set(false);
 
       for (int i = 0; i < controlledJoints.length; i++)
       {
