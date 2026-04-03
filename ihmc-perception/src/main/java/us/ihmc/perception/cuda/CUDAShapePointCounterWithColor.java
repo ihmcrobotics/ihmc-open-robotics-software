@@ -37,6 +37,9 @@ public class CUDAShapePointCounterWithColor implements AutoCloseable
    private float averageRed = 0.0f;
    private float averageGreen = 0.0f;
    private float averageBlue = 0.0f;
+   private float averageHue = 0.0f;
+   private float averageSaturation = 0.0f;
+   private float averageValue = 0.0f;
 
    private int error;
 
@@ -234,6 +237,21 @@ public class CUDAShapePointCounterWithColor implements AutoCloseable
       return averageBlue;
    }
 
+   public float getAverageHue()
+   {
+      return averageHue;
+   }
+
+   public float getAverageSaturation()
+   {
+      return averageSaturation;
+   }
+
+   public float getAverageValue()
+   {
+      return averageValue;
+   }
+
    private void resetSumsAndAverages()
    {
       countPointer.put(0);
@@ -243,6 +261,9 @@ public class CUDAShapePointCounterWithColor implements AutoCloseable
       averageRed = 0.0f;
       averageGreen = 0.0f;
       averageBlue = 0.0f;
+      averageHue = 0.0f;
+      averageSaturation = 0.0f;
+      averageValue = 0.0f;
    }
 
    private void updateAverages(long count)
@@ -253,6 +274,29 @@ public class CUDAShapePointCounterWithColor implements AutoCloseable
       averageRed = (float) (redSumPointer.get() / (double) count);
       averageGreen = (float) (greenSumPointer.get() / (double) count);
       averageBlue = (float) (blueSumPointer.get() / (double) count);
+
+      float red = averageRed / 255.0f;
+      float green = averageGreen / 255.0f;
+      float blue = averageBlue / 255.0f;
+
+      float max = Math.max(red, Math.max(green, blue));
+      float min = Math.min(red, Math.min(green, blue));
+      float delta = max - min;
+
+      averageValue = max;
+      averageSaturation = max == 0.0f ? 0.0f : delta / max;
+
+      if (delta == 0.0f)
+         averageHue = 0.0f;
+      else if (max == red)
+         averageHue = 60.0f * (((green - blue) / delta) % 6.0f);
+      else if (max == green)
+         averageHue = 60.0f * (((blue - red) / delta) + 2.0f);
+      else
+         averageHue = 60.0f * (((red - green) / delta) + 4.0f);
+
+      if (averageHue < 0.0f)
+         averageHue += 360.0f;
    }
 
    private ColorAccessInfo getColorAccessInfo(PixelFormat pixelFormat)
