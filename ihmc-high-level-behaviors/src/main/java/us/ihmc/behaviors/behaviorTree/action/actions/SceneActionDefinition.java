@@ -110,7 +110,7 @@ public class SceneActionDefinition extends ActionNodeDefinition
 
       switch (sceneActionType.getValue())
       {
-         case SETUP_OBJECT ->
+         case SETUP_OBJECT, FREEZE_OBJECT, DELETE_OBJECT ->
          {
             ObjectNode sceneObjectNode = jsonNode.putObject("sceneObjectDefinition");
             sceneObjectDefinition.saveToFile(sceneObjectNode);
@@ -146,7 +146,7 @@ public class SceneActionDefinition extends ActionNodeDefinition
 
       switch (sceneActionType.getValue())
       {
-         case SETUP_OBJECT ->
+         case SETUP_OBJECT, FREEZE_OBJECT, DELETE_OBJECT ->
          {
             sceneObjectDefinition.loadFromFile(jsonNode.get("sceneObjectDefinition"));
             timeout.setValue((float) jsonNode.get("timeout").asDouble());

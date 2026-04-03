@@ -151,7 +151,7 @@ public class RDXSceneAction extends RDXActionNode<SceneActionState, SceneActionD
 
       switch (definition.getSceneActionType().getValue())
       {
-         case SETUP_OBJECT ->
+         case SETUP_OBJECT, FREEZE_OBJECT, DELETE_OBJECT ->
          {
             BehaviorTreeSceneObjectDefinition objectDefinition = definition.getSceneObjectDefinition();
 
