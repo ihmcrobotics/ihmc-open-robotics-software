@@ -46,7 +46,7 @@ public class RDXRawImagePointCloudVisualizerDemo
             baseUI.getPrimaryScene().addRenderableProvider(sensorPoseGizmo);
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(sensorPoseGizmo::calculate3DViewPick);
 
-            zedImageSensor = new ZEDImageSensor(0, ZEDModelData.ZED_2I, zed.SL_INPUT_TYPE_USB, zed.SL_DEPTH_MODE_PERFORMANCE, zed.SL_RESOLUTION_VGA, 100);
+            zedImageSensor = new ZEDImageSensor(0, 0, ZEDModelData.ZED_2I, zed.SL_INPUT_TYPE_USB, zed.SL_DEPTH_MODE_NEURAL_LIGHT, zed.SL_RESOLUTION_VGA, 100);
             zedImageSensor.run(true);
 
             pointCloudVisualizer = new RDXRawImagePointCloudVisualizer("ZED Point Cloud");
