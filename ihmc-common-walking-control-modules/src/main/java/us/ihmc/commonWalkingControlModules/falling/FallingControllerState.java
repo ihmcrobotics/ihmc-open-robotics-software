@@ -9,13 +9,15 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
-import us.ihmc.log.LogTools;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 
 public class FallingControllerState extends HighLevelControllerState
 {
    private static final HighLevelControllerName controllerState = HighLevelControllerName.FALLING_STATE;
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder;
+
+   private final double[] capturedJointPositions;
+   private final double[] capturedJointVelocities;
 
    public FallingControllerState(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
                                  HighLevelControlManagerFactory managerFactory, HighLevelHumanoidControllerToolbox controllerToolbox,
@@ -24,20 +26,21 @@ public class FallingControllerState extends HighLevelControllerState
       super(controllerState, highLevelControllerParameters, controllerToolbox.getControlledOneDoFJoints());
       lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder(controlledJoints.length);
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledJoints);
+
+      capturedJointPositions = new double[controlledJoints.length];
+      capturedJointVelocities = new double[controlledJoints.length];
    }
 
    @Override
    public void doAction(double timeInState)
    {
-      LogTools.info("Falling! Do something!");
-
       for (int i = 0; i < controlledJoints.length; i++)
       {
          controlledJoints[i].setTau(0.0);
          lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(controlledJoints[i]).clear();
          lowLevelOneDoFJointDesiredDataHolder.setDesiredJointTorque(controlledJoints[i], 0.0);
-         lowLevelOneDoFJointDesiredDataHolder.setDesiredJointPosition(controlledJoints[i], controlledJoints[i].getQ());
-         lowLevelOneDoFJointDesiredDataHolder.setDesiredJointVelocity(controlledJoints[i], controlledJoints[i].getQd());
+         lowLevelOneDoFJointDesiredDataHolder.setDesiredJointPosition(controlledJoints[i], capturedJointPositions[i]);
+         lowLevelOneDoFJointDesiredDataHolder.setDesiredJointVelocity(controlledJoints[i], capturedJointVelocities[i]);
       }
 
       lowLevelOneDoFJointDesiredDataHolder.completeWith(getStateSpecificJointSettings());
@@ -46,6 +49,11 @@ public class FallingControllerState extends HighLevelControllerState
    @Override
    public void onEntry()
    {
+      for (int i = 0; i < controlledJoints.length; i++)
+      {
+         capturedJointPositions[i] = controlledJoints[i].getQ();
+         capturedJointVelocities[i] = controlledJoints[i].getQd();
+      }
    }
 
    @Override
