@@ -149,6 +149,11 @@ public class AI2RSkillEditor
                goalStancePoint.setToZero();
                goalStancePoint.changeFrame(ReferenceFrame.getWorldFrame());
                double distanceToReferenceFrame = navigationMessage.getDistanceToObject();
+               if (gotoActionState.getDefinition().getUseRRTPathPlanner().getValue())
+               {
+                  double obstacleClearance = navigationMessage.getObstacleClearance();
+                  gotoActionState.getDefinition().getObstacleClearanceRadius().setValue(obstacleClearance);
+               }
 
                FramePoint3D goalFocalPoint = new FramePoint3D(gotoActionState.getParentFrame());
                goalFocalPoint.changeFrame(secondaryFrame);
