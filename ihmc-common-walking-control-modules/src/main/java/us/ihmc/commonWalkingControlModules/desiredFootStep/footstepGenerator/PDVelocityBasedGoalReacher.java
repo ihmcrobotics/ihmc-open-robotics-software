@@ -250,6 +250,16 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       }
    }
 
+   public void clear()
+   {
+      hasReachedGoal.set(true);
+      hasGoal.set(false);
+      goalPoses.clear();
+      isRampingDownAfterGoal.set(false);
+      pendingWaypointReachedPublication.set(false);
+   }
+
+
    private final ControllerWalkToGoalStatusMessage statusMessage = new ControllerWalkToGoalStatusMessage();
    private final ControllerWaypointStatusMessage waypointReachedMessage = new ControllerWaypointStatusMessage();
 
@@ -508,6 +518,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       vectorToGoal.sub(currentPose.getX(), currentPose.getY());
       currentPose.getOrientation().inverseTransform(vectorToGoal, vectorToGoalInPelvisFrame);
 
+      double distanceToGoal = vectorToGoal.norm() ;
       if (goalOrientationMatters.getValue())
       {
          // Goal's final heading direction rotated into the robot's body frame
@@ -516,16 +527,24 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
 
          // 1 = far from goal - face the goal position; 0 = near goal → match the goal's final heading
          double faceGoalBlendFraction = MathTools.clamp(
-               (vectorToGoal.norm() - distanceToMatchGoalAngle.getValue()) / (distanceToFaceGoal.getDoubleValue() - distanceToMatchGoalAngle.getDoubleValue()),
+               (distanceToGoal - distanceToMatchGoalAngle.getValue()) / (distanceToFaceGoal.getDoubleValue() - distanceToMatchGoalAngle.getDoubleValue()),
                0.0, 1.0);
 
          // Blend between the goal's final heading (alpha=0) and the direction toward the goal (alpha=1)
          desiredHeadingInBodyFrame.interpolate(finalHeadingInBodyFrame, vectorToGoalInPelvisFrame, faceGoalBlendFraction);
       }
-      else
+      else if (distanceToFaceGoal.getDoubleValue() < distanceToGoal)
       {
-         // Orientation doesn't matter: always face toward the goal position
-         desiredHeadingInBodyFrame.set(vectorToGoalInPelvisFrame);
+         // Final heading is just facing forward.
+         finalHeadingInBodyFrame.set(1.0, 0.0);
+
+         // 1 = far from goal - rotate to face the goal; 0 = near goal → don't rotate, just continue to face forward
+         double faceGoalBlendFraction = MathTools.clamp(
+               (distanceToGoal - distanceToMatchGoalAngle.getValue()) / (distanceToFaceGoal.getDoubleValue() - distanceToMatchGoalAngle.getDoubleValue()),
+               0.0, 1.0);
+
+         // Blend between facing forward (alpha=0) and the direction toward the goal (alpha=1)
+         desiredHeadingInBodyFrame.interpolate(finalHeadingInBodyFrame, vectorToGoalInPelvisFrame, faceGoalBlendFraction);
       }
 
       // Signed angle error: how far the robot must rotate to face the desired heading (forward = [1, 0])

@@ -190,6 +190,10 @@ public class HumanoidSteppingManager implements Updatable, SCS2YoGraphicHolder
          if (message != null)
             controllerCommandInputManager.submitMessage(goalReacher.getOutputMessage());
       }
+      else
+      {
+         goalReacher.clear();
+      }
    }
 
    private static StopWalkingMessenger createStopWalkingMessenger(CommandInputManager walkingCommandInputManager)
