@@ -45,27 +45,26 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
    private static final double GOAL_POSITION_Z_OFFSET_FOR_VISUALIZATION = 0.1;
 
    // TODO extract these in to a parameter file.
-   private static final double DEFAULT_MAX_RADIAL_ACCELERATION = 0.5;
+   private static final double DEFAULT_MAX_RADIAL_ACCELERATION = 0.25;
    private static final double DEFAULT_MAX_HEADING_RATE = Math.PI / 2.0;
 
-   private static final double DEFAULT_MAX_FORWARD_SPEED = 0.7;
-   private static final double DEFAULT_MAX_BACKWARD_SPEED = 0.4;
-   private static final double DEFAULT_MAX_LATERAL_SPEED = 0.6;
-   private static final double DEFAULT_MAX_TURNING_SPEED = 1.0;
-   private static final double DEFAULT_MIN_SPEED = 0.25;
-   private static final double DEFAULT_MIN_TURNING_SPEED = 0.1;
+   private static final double DEFAULT_MAX_FORWARD_SPEED = 0.5;
+   private static final double DEFAULT_MAX_BACKWARD_SPEED = 0.3;
+   private static final double DEFAULT_MAX_LATERAL_SPEED = 0.4;
+   private static final double DEFAULT_MAX_TURNING_SPEED = 0.5;
+   private static final double DEFAULT_MIN_SPEED = 0.1;
+   private static final double DEFAULT_MIN_TURNING_SPEED = 0.15;
 
-   private static final double DEFAULT_K_RADIUS = 2.0;
    private static final double DEFAULT_K_ANGLE = 1.5;
    private static final double DEFAULT_ANGLE_DEADBAND = Math.toRadians(3.0);
 
-   private static final double DEFAULT_DISTANCE_TO_GOAL_THRESHOLD_TO_STOP = 0.02;
+   private static final double DEFAULT_DISTANCE_TO_GOAL_THRESHOLD_TO_STOP = 0.1;
    private static final double DEFAULT_ANGLE_TO_GOAL_THRESHOLD_TO_STOP = Math.toRadians(5.0);
 
    private static final double DEFAULT_RAMP_DOWN_SPEED_THRESHOLD = 0.05;
    private static final double DEFAULT_RAMP_DOWN_DECAY_RATE = 0.95;
 
-   private static final double DEFAULT_DISTANCE_TO_MATCH_GOAL_ANGLE = 0.3;
+   private static final double DEFAULT_DISTANCE_TO_MATCH_GOAL_ANGLE = 0.75;
    private static final double DEFAULT_DISTANCE_TO_FACE_GOAL = 1.5;
 
    private final RecyclingArrayList<GoalWaypoint> goalPoses = new RecyclingArrayList<>(GoalWaypoint::new);
@@ -108,7 +107,6 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
    private final YoDouble minSpeed = new YoDouble("minSpeed", registry);
    private final YoDouble minTurningSpeed = new YoDouble("minTurningSpeed", registry);
 
-   private final YoDouble kDistance = new YoDouble("kRadius", registry);
    private final YoDouble kAngle = new YoDouble("kAngle", registry);
    private final YoDouble angleDeadband = new YoDouble("angleDeadband", registry);
    private final YoDouble distanceToMatchGoalAngle = new YoDouble("distanceToMatchGoalAngle", registry);
@@ -147,12 +145,12 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
    private final YoDouble desiredSpeed = new YoDouble("desiredSpeed", registry);
    private final YoFrameVector3D desiredLinearVelocity = new YoFrameVector3D("desiredLinearVelocity", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D desiredAngularVelocity = new YoFrameVector3D("desiredAngularVelocity", ReferenceFrame.getWorldFrame(), registry);
+   private final YoVector2D desiredHeadingInBodyFrame = new YoVector2D("desiredHeadingInBodyFrame", registry);
 
    private final VelocityBasedWalkingInputMessage outputMessage = new VelocityBasedWalkingInputMessage();
 
    // Temp Variables
    private final Vector2D finalHeadingInBodyFrame = new Vector2D();     // goal's final heading direction, in robot body frame
-   private final Vector2D desiredHeadingInBodyFrame = new Vector2D();   // blended desired heading, in robot body frame
    private final Vector2D vectorToGoal = new Vector2D();
 
    private final StatusMessageOutputManager statusMessageOutputManager;
@@ -177,7 +175,6 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       minSpeed.set(DEFAULT_MIN_SPEED);
       minTurningSpeed.set(DEFAULT_MIN_TURNING_SPEED);
 
-      kDistance.set(DEFAULT_K_RADIUS);
       kAngle.set(DEFAULT_K_ANGLE);
       angleDeadband.set(DEFAULT_ANGLE_DEADBAND);
 
@@ -257,6 +254,8 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       goalPoses.clear();
       isRampingDownAfterGoal.set(false);
       pendingWaypointReachedPublication.set(false);
+      rateLimitedNormalizedRadialSpeed.set(0.0);
+      rateLimitedAngleToHeading.set(0.0);
    }
 
 
@@ -315,13 +314,19 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
 
          if (desiredVelocity.norm() <= rampDownSpeedThreshold.getValue() && desiredAngularVelocity.norm() <= rampDownSpeedThreshold.getValue())
          {
-            isRampingDownAfterGoal.set(false);
+            // Don't set this for one more tick. That way, we get this last output message ,and we return the "stop" message once.
+            if (this.hasReachedGoal.getValue())
+               isRampingDownAfterGoal.set(false);
             this.hasReachedGoal.set(true);
             if (pendingWaypointReachedPublication.getBooleanValue())
             {
                publishWaypointStatus(pendingWaypointReachedPose, 0, false);
                pendingWaypointReachedPublication.set(false);
             }
+            rateLimitedAngleToHeading.set(0.0);
+            rateLimitedNormalizedRadialSpeed.set(0.0);
+            desiredVelocity.setToZero();
+            desiredAngularVelocity.setToZero();
          }
          updateOutputMessage();
       }
@@ -373,7 +378,11 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
          currentGoalPose.setToNaN();
          // Don't declare "reached" while still decelerating; the ramp-down block will set it.
          if (!isRampingDownAfterGoal.getBooleanValue())
+         {
             hasReachedGoal.set(true);
+            rateLimitedNormalizedRadialSpeed.set(0.0);
+            rateLimitedAngleToHeading.set(0.0);
+         }
          return;
       }
 
@@ -519,33 +528,25 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       currentPose.getOrientation().inverseTransform(vectorToGoal, vectorToGoalInPelvisFrame);
 
       double distanceToGoal = vectorToGoal.norm() ;
+      // 1 = far from goal - face the goal position; 0 = near goal → match the goal's final heading
+      double faceGoalBlendFraction = MathTools.clamp(
+            (distanceToGoal - distanceToMatchGoalAngle.getValue()) / (distanceToFaceGoal.getDoubleValue() - distanceToMatchGoalAngle.getDoubleValue()),
+            0.0, 1.0);
+
       if (goalOrientationMatters.getValue())
       {
          // Goal's final heading direction rotated into the robot's body frame
          finalHeadingInBodyFrame.set(currentGoalDirection);
-         currentPose.getOrientation().inverseTransform(finalHeadingInBodyFrame, finalHeadingInBodyFrame);
-
-         // 1 = far from goal - face the goal position; 0 = near goal → match the goal's final heading
-         double faceGoalBlendFraction = MathTools.clamp(
-               (distanceToGoal - distanceToMatchGoalAngle.getValue()) / (distanceToFaceGoal.getDoubleValue() - distanceToMatchGoalAngle.getDoubleValue()),
-               0.0, 1.0);
-
-         // Blend between the goal's final heading (alpha=0) and the direction toward the goal (alpha=1)
-         desiredHeadingInBodyFrame.interpolate(finalHeadingInBodyFrame, vectorToGoalInPelvisFrame, faceGoalBlendFraction);
+         currentPose.getOrientation().inverseTransform(finalHeadingInBodyFrame);
       }
-      else if (distanceToFaceGoal.getDoubleValue() < distanceToGoal)
+      else
       {
          // Final heading is just facing forward.
          finalHeadingInBodyFrame.set(1.0, 0.0);
-
-         // 1 = far from goal - rotate to face the goal; 0 = near goal → don't rotate, just continue to face forward
-         double faceGoalBlendFraction = MathTools.clamp(
-               (distanceToGoal - distanceToMatchGoalAngle.getValue()) / (distanceToFaceGoal.getDoubleValue() - distanceToMatchGoalAngle.getDoubleValue()),
-               0.0, 1.0);
-
-         // Blend between facing forward (alpha=0) and the direction toward the goal (alpha=1)
-         desiredHeadingInBodyFrame.interpolate(finalHeadingInBodyFrame, vectorToGoalInPelvisFrame, faceGoalBlendFraction);
       }
+
+      // Blend between facing forward (alpha=0) and the direction toward the goal (alpha=1)
+      desiredHeadingInBodyFrame.interpolate(finalHeadingInBodyFrame, vectorToGoalInPelvisFrame, faceGoalBlendFraction);
 
       // Signed angle error: how far the robot must rotate to face the desired heading (forward = [1, 0])
       angleToHeading.set(AngleTools.angleMinusPiToPi(desiredHeadingInBodyFrame, forwardVector));
@@ -559,12 +560,17 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
 
    private void computePDNormalizedFeedbackVelocities(double distanceToGoal, double angleToGoalHeading)
    {
-      // P-controller on distance: normalize forward speed.
-      // The lower bound is waypointThroughputSpeedScalar so the robot doesn't slow below the
-      // speed needed to smoothly pass through an intermediate waypoint whose next leg is roughly
-      // collinear. For the terminal waypoint (or sharp turns) this scalar is 0, so the robot
-      // still decelerates to a stop as usual.
-      normalizedRadialSpeed.set(MathTools.clamp(kDistance.getValue() * distanceToGoal, waypointThroughputSpeedScalar.getValue(), 1.0));
+      double distanceForMaxSpeed = 0.5 * MathTools.square(maxForwardSpeed.getDoubleValue()) / maxRadialAcceleration.getDoubleValue();
+      // Acceleration limited controller on distance.
+      if (distanceToGoal >= distanceForMaxSpeed)
+      {
+         normalizedRadialSpeed.set(1.0);
+      }
+      else
+      {
+         double speedForDeccel = Math.sqrt(2.0 * maxRadialAcceleration.getDoubleValue() * distanceToGoal);
+         normalizedRadialSpeed.set(Math.max(speedForDeccel / maxForwardSpeed.getDoubleValue(), waypointThroughputSpeedScalar.getDoubleValue()));
+      }
       // Acceleration-limit the ramp-up so speed increases gradually
       double maxAllowedSpeed = rateLimitedNormalizedRadialSpeed.getDoubleValue() + computedDt * maxRadialAcceleration.getValue();
       rateLimitedNormalizedRadialSpeed.set(MathTools.clamp(normalizedRadialSpeed.getValue(), 0.0, maxAllowedSpeed));

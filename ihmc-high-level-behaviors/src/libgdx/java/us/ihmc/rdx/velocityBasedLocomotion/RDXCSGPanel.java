@@ -14,7 +14,9 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.CSGROS2CommunicationHelper;
 import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.euclid.referenceFrame.FrameOrientation2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -214,35 +216,58 @@ public class RDXCSGPanel extends RDXPanel
       if (publishCSGParametersCommand)
          controllerHelper.publishAtThrottledRate(csgParametersCommand);
 
-      boolean publishWalkToGoalMessage;
       boolean walkForward1m = ImGui.button(labels.get("Walk forward 1 meter"));
       boolean walkBackward1m = ImGui.button(labels.get("Walk backward 1 meter"));
       boolean walkRight1m = ImGui.button(labels.get("Walk right 1 meter"));
       boolean walkLeft1m = ImGui.button(labels.get("Walk left 1 meter"));
-//      boolean turnCCW90Deg = ImGui.button(labels.get("Turn CCW 90 degrees"));
-//      boolean turnCW90Deg = ImGui.button(labels.get("Turn CW 90 degrees"));
+      boolean turnLeftDeg = ImGui.button(labels.get("Turn Left 90 degrees"));
+      boolean turnRightDeg = ImGui.button(labels.get("Turn Right 90 degrees"));
 
-      publishWalkToGoalMessage = walkForward1m || walkBackward1m || walkLeft1m || walkRight1m;
+      boolean publishTranslateToGoalMessage = walkForward1m || walkBackward1m || walkLeft1m || walkRight1m;
+      boolean rotateToGoal = turnLeftDeg || turnRightDeg;
 
       goalMessage.setHoldPosition(false);
-      goalMessage.setGoalOrientationMatters(false);
 
-      FramePoint2D midStance = new FramePoint2D(syncedRobotModel.getReferenceFrames().getMidFeetZUpFrame());
-      if (walkForward1m)
-         midStance.setX(1.0);
-      if (walkBackward1m)
-         midStance.setX(-1.0);
-      if (walkRight1m)
-         midStance.setY(-1.0);
-      if (walkLeft1m)
-         midStance.setY(1.0);
+      if (publishTranslateToGoalMessage)
+      {
+         goalMessage.setGoalOrientationMatters(false);
 
-      midStance.changeFrame(ReferenceFrame.getWorldFrame());
-      goalMessage.setXPosition(midStance.getX());
-      goalMessage.setYPosition(midStance.getY());
+         FramePoint2D midStance = new FramePoint2D(syncedRobotModel.getReferenceFrames().getMidFeetZUpFrame());
+         if (walkForward1m)
+            midStance.setX(1.0);
+         if (walkBackward1m)
+            midStance.setX(-1.0);
+         if (walkRight1m)
+            midStance.setY(-1.0);
+         if (walkLeft1m)
+            midStance.setY(1.0);
 
-      if (publishWalkToGoalMessage)
+         midStance.changeFrame(ReferenceFrame.getWorldFrame());
+         goalMessage.setXPosition(midStance.getX());
+         goalMessage.setYPosition(midStance.getY());
+         goalMessage.setPositionProximity(0.1);
+
          goalMessagePublisher.publish(goalMessage);
+      }
+      else if (rotateToGoal)
+      {
+         goalMessage.setGoalOrientationMatters(true);
+
+         FramePose2D midStance = new FramePose2D(syncedRobotModel.getReferenceFrames().getMidFeetZUpFrame());
+         if (turnLeftDeg)
+            midStance.setYaw(Math.toRadians(90.0));
+         if (turnRightDeg)
+            midStance.setYaw(-Math.toRadians(90));
+
+         midStance.changeFrame(ReferenceFrame.getWorldFrame());
+         goalMessage.setXPosition(midStance.getX());
+         goalMessage.setYPosition(midStance.getY());
+         goalMessage.setYaw(midStance.getYaw());
+         goalMessage.setPositionProximity(0.1);
+         goalMessage.setOrientationProximity(Math.toRadians(5.0));
+
+         goalMessagePublisher.publish(goalMessage);
+      }
 
       goalMessage.setXPosition(0.0);
       goalMessage.setYPosition(0.0);
