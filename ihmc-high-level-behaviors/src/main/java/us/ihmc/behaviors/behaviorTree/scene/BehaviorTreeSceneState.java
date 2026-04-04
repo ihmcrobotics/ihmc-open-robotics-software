@@ -5,6 +5,7 @@ import behavior_msgs.msg.dds.BehaviorTreeSceneObjectStateMessage;
 import behavior_msgs.msg.dds.BehaviorTreeSceneStateMessage;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.communication.crdt.CRDTBidirectionalFloat;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.LatestTimestampModifiable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -33,6 +34,10 @@ public abstract class BehaviorTreeSceneState
    private final Map<String, ReferenceFrame> robotFrameMap = new HashMap<>();
 
    protected final LatestTimestampModifiable objectsModifiable;
+   protected final CRDTBidirectionalFloat poseFilterAlpha;
+   protected final CRDTBidirectionalFloat acceptanceConfidence;
+   protected final CRDTBidirectionalFloat stabilityFrequency;
+   protected final CRDTBidirectionalFloat historyDuration;
    protected final List<BehaviorTreeSceneObjectState> objects = new ArrayList<>();
 
    public BehaviorTreeSceneState(CRDTInfo crdtInfo, LongSupplier idSupplier, ROS2SyncedRobotModel syncedRobot)
@@ -43,6 +48,10 @@ public abstract class BehaviorTreeSceneState
 
       objectsModifiable = new LatestTimestampModifiable(crdtInfo);
       objectsModifiable.setModifierName("Scene objects");
+      poseFilterAlpha = new CRDTBidirectionalFloat(objectsModifiable, 0.5f);
+      acceptanceConfidence = new CRDTBidirectionalFloat(objectsModifiable, 0.25f);
+      stabilityFrequency = new CRDTBidirectionalFloat(objectsModifiable, 1.0f);
+      historyDuration = new CRDTBidirectionalFloat(objectsModifiable, 2.0f);
 
       rebuildRobotFrames(syncedRobot);
    }
@@ -125,6 +134,11 @@ public abstract class BehaviorTreeSceneState
       message.getObjects().clear();
       for (BehaviorTreeSceneObjectState object : objects)
          object.toMessage(message.getObjects().add());
+
+      message.setPoseFilterAlpha(poseFilterAlpha.toMessage());
+      message.setAcceptanceConfidence(acceptanceConfidence.toMessage());
+      message.setStabilityFrequency(stabilityFrequency.toMessage());
+      message.setHistoryDuration(historyDuration.toMessage());
    }
 
    public void fromMessage(BehaviorTreeSceneStateMessage message)
@@ -164,6 +178,11 @@ public abstract class BehaviorTreeSceneState
          for (BehaviorTreeSceneObjectState object : objects)
             if (objectMessage.getId() == object.getID())
                object.fromMessage(objectMessage);
+
+      poseFilterAlpha.fromMessage(message.getPoseFilterAlpha());
+      acceptanceConfidence.fromMessage(message.getAcceptanceConfidence());
+      stabilityFrequency.fromMessage(message.getStabilityFrequency());
+      historyDuration.fromMessage(message.getHistoryDuration());
    }
 
    protected abstract BehaviorTreeSceneObjectState buildObject(long id, CRDTInfo crdtInfo, BehaviorTreeSceneObjectDefinitionMessage definition);

@@ -29,6 +29,10 @@ module behavior_msgs
          * Persistent detections tracked in the scene
          */
         sequence<behavior_msgs::msg::dds::PersistentDetectionStatusMessage, 100> persistent_detections;
+        float pose_filter_alpha;
+        float acceptance_confidence;
+        float stability_frequency;
+        float history_duration;
       };
     };
   };

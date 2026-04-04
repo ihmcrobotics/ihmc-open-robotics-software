@@ -125,11 +125,11 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
          }
          else
          {
-            double poseFilterAlpha = 0.5;
-            double acceptanceConfidence = 0.25;
-            double stabilityFrequency = 1.0;
-            double historyDuration = 2.0;
-            persistentDetections.add(new PersistentDetection(newDetection, poseFilterAlpha, acceptanceConfidence, stabilityFrequency, historyDuration));
+            persistentDetections.add(new PersistentDetection(newDetection,
+                                                             poseFilterAlpha.getValue(),
+                                                             acceptanceConfidence.getValue(),
+                                                             stabilityFrequency.getValue(),
+                                                             historyDuration.getValue()));
          }
       }
    }

@@ -24,6 +24,7 @@ import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseInstan
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseObject;
 import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
 import us.ihmc.rdx.RDX3DSituatedText;
+import us.ihmc.rdx.imgui.ImFloatWrapper;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -53,6 +54,10 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
    private final RigidBodyTransform cameraGraphicTransform = new RigidBodyTransform();
    private final ModelInstance cameraFrameGraphic = RDXModelBuilder.createCoordinateFrameInstance(0.2);
    private final RDX3DSituatedText cameraText = new RDX3DSituatedText();
+   private final ImFloatWrapper poseFilterAlphaWidget;
+   private final ImFloatWrapper acceptanceConfidenceWidget;
+   private final ImFloatWrapper stabilityFrequencyWidget;
+   private final ImFloatWrapper historyDurationWidget;
 
    private boolean needToInitializePlacementHeight = false;
    private RDXBehaviorTreeSceneObject beingPlaced;
@@ -64,6 +69,15 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
       this.baseUI = baseUI;
 
       this.objects = (List) super.objects;
+
+      poseFilterAlphaWidget = new ImFloatWrapper(poseFilterAlpha::getValue, poseFilterAlpha::setValue,
+                                                 imFloat -> ImGui.inputFloat(labels.get("Pose filter alpha"), imFloat, 0.01f, 0.1f));
+      acceptanceConfidenceWidget = new ImFloatWrapper(acceptanceConfidence::getValue, acceptanceConfidence::setValue,
+                                                      imFloat -> ImGui.inputFloat(labels.get("Acceptance confidence"), imFloat, 0.01f, 0.1f));
+      stabilityFrequencyWidget = new ImFloatWrapper(stabilityFrequency::getValue, stabilityFrequency::setValue,
+                                                    imFloat -> ImGui.inputFloat(labels.get("Stability frequency"), imFloat, 0.01f, 0.1f));
+      historyDurationWidget = new ImFloatWrapper(historyDuration::getValue, historyDuration::setValue,
+                                                 imFloat -> ImGui.inputFloat(labels.get("History duration"), imFloat, 0.01f, 0.1f));
 
       persistentDetections = new RecyclingArrayList<>(() -> new RDXBehaviorTreeSceneDetection(baseUI));
 
@@ -142,7 +156,6 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
       ImGui.text("Objects:");
       ImGui.indent();
       RDXBehaviorTreeSceneObject remove = null;
-
       Iterator<RDXBehaviorTreeSceneObject> iterator = objects.iterator();
       while (iterator.hasNext())
       {
@@ -159,6 +172,15 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
 
       ImGui.text("Stable Detections:");
       ImGui.indent();
+      if (ImGui.collapsingHeader(labels.get("Tuners")))
+      {
+         ImGui.pushItemWidth(100.0f);
+         poseFilterAlphaWidget.renderImGuiWidget();
+         acceptanceConfidenceWidget.renderImGuiWidget();
+         stabilityFrequencyWidget.renderImGuiWidget();
+         historyDurationWidget.renderImGuiWidget();
+         ImGui.popItemWidth();
+      }
       for (RDXBehaviorTreeSceneDetection persistentDetection : persistentDetections)
          renderPersistentDetection(persistentDetection.getMessage());
       ImGui.unindent();
