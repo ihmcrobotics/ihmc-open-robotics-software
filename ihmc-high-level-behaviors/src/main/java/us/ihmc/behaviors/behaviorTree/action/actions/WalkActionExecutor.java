@@ -29,8 +29,12 @@ import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.rrt.RRTConnectPathPlanner;
+import us.ihmc.perception.RawImage;
+import us.ihmc.perception.cuda.CUDAShapePointCounter;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.sensors.ImageSensor;
+import us.ihmc.sensors.zed.ZEDImageSensor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,6 +60,7 @@ public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, Walk
    private final Throttler previewPlanningThrottler = new Throttler().setPeriod(1.0);
    private final QuickFootstepPlanner quickFootstepPlanner = new QuickFootstepPlanner();
    private final RRTConnectPathPlanner rrtConnectPathPlanner = new RRTConnectPathPlanner();
+   private volatile CUDAShapePointCounter shapePointCounter;
    private boolean startedCreatingPlanners = false;
    private WalkActionPlanningThread previewFootstepPlanningThread;
    private WalkActionPlanningThread executionFootstepPlanningThread;
@@ -66,6 +71,8 @@ public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, Walk
       super(new WalkActionState(id, rootNode.getState()), rootNode);
 
       walkingControllerParameters = robotModel.getWalkingControllerParameters();
+
+      ThreadTools.startAsDaemon(() -> shapePointCounter = new CUDAShapePointCounter(), "CreateShapePointCounter");
    }
 
    @Override
@@ -328,6 +335,15 @@ public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, Walk
       }
    }
 
+   @Override
+   public void destroy()
+   {
+      super.destroy();
+
+      if (shapePointCounter != null)
+         shapePointCounter.close();
+   }
+
    private void packManuallyPlacedFootstepsIntoPlan()
    {
       footstepPlanToExecute.clear();
@@ -467,17 +483,37 @@ public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, Walk
       {
          Point3D midStance = new Point3D();
          midStance.interpolate(syncedFeetPoses.get(RobotSide.LEFT).getPosition(), syncedFeetPoses.get(RobotSide.RIGHT).getPosition(), 0.5);
-         Point3D yoloPosition = new Point3D();
+         Point3D capsuleBottom = new Point3D();
+         Point3D capsuleTop = new Point3D();
          List<Point3D> path = rrtConnectPathPlanner.plan(midStance, midGoal.getPosition(), segment ->
          {
-            for (BehaviorTreeSceneObjectState object : scene.getObjects())
-               if (object.getObjectType() == BehaviorTreeSceneObjectType.YOLO_ONLY)
+            RawImage depthImage;
+            ImageSensor imageSensor = scene.getImageSensor();
+            if (shapePointCounter != null && imageSensor != null && (depthImage = imageSensor.getImage(ZEDImageSensor.DEPTH_IMAGE_KEY)) != null)
+            {
+               capsuleBottom.set(segment.getFirstEndpoint());
+               capsuleBottom.addZ(0.5);
+               capsuleTop.set(capsuleBottom);
+               capsuleTop.addZ(1.0);
+               if (shapePointCounter.countPointsInCapsule(depthImage, capsuleBottom, capsuleTop, (float) definition.getObstacleClearanceRadius().getValue()) > 0)
                {
-                  yoloPosition.set(object.getTransformToWorld().getTranslation());
-                  yoloPosition.setZ(segment.getFirstEndpointZ());
-                  if (segment.distance(yoloPosition) < definition.getObstacleClearanceRadius().getValue())
-                     return true;
+                  depthImage.release();
+                  return true;
                }
+
+               capsuleBottom.set(segment.getSecondEndpoint());
+               capsuleBottom.addZ(0.5);
+               capsuleTop.set(capsuleBottom);
+               capsuleTop.addZ(1.0);
+               if (shapePointCounter.countPointsInCapsule(depthImage, capsuleBottom, capsuleTop, (float) definition.getObstacleClearanceRadius().getValue()) > 0)
+               {
+                  depthImage.release();
+                  return true;
+               }
+
+               depthImage.release();
+            }
+
             return false;
          });
 
