@@ -115,8 +115,12 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
 
             if (scene.getObject(BehaviorTreeSceneObjectType.DOOR_FRAME) instanceof BehaviorTreeSceneDoorFrameExecutor doorFrameExecutor
               && doorFrameExecutor.getDoorType() != DOOR_TYPE_UNKNOWN)
-               gotoNodeName = "door/%s%sDoor.json".formatted(doorFrameExecutor.getHingeSide().getOppositeSide().getPascalCaseName(),
-                                                             doorFrameExecutor.getDoorType() == DOOR_TYPE_PUSH ? "Push" : "Pull");
+            {
+               double doorOpenAngle = Math.abs(Math.toDegrees(doorFrameExecutor.getDoorOpenAngle()));
+               gotoNodeName = "Approach %s %s %s Door".formatted(doorOpenAngle > 5.0 ? doorOpenAngle > 50.0 ? "Open" : "Ajar" : "Closed",
+                                                                 doorFrameExecutor.getHingeSide().getOppositeSide().getPascalCaseName(),
+                                                                 doorFrameExecutor.getDoorType() == DOOR_TYPE_PUSH ? "Push" : "Pull");
+            }
 
             BehaviorTreeNodeExecutor<?, ?> gotoNode = searchDFSFirstMatch(this, gotoNodeName);
             if (gotoNode != null)
@@ -125,7 +129,10 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
                gotoDoor.getDefinition().setNodeToGoto(gotoNode.getState().getID(), gotoNode.getDefinition().getName());
             }
             else
+            {
                state.getLogger().error("Could not find node to goto: {}", gotoNodeName);
+               waitAction.getState().setFailed(true);
+            }
          }
       }
    }
