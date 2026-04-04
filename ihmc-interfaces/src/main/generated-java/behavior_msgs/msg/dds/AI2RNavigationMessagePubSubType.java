@@ -15,7 +15,7 @@ public class AI2RNavigationMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "a7383c10d80df74e26958ff971c55d8d62800a2c2b3b690e6577938c70c7c5d0";
+   		return "874a275519f64f1b5d926444e83d05a1909efebc6871af3be1518a4b1ed7d9e4";
    }
    
    @Override
@@ -58,6 +58,8 @@ public class AI2RNavigationMessagePubSubType implements us.ihmc.pubsub.TopicData
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -81,6 +83,9 @@ public class AI2RNavigationMessagePubSubType implements us.ihmc.pubsub.TopicData
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -99,6 +104,8 @@ public class AI2RNavigationMessagePubSubType implements us.ihmc.pubsub.TopicData
 
       cdr.write_type_6(data.getDistanceToObject());
 
+      cdr.write_type_6(data.getObstacleClearance());
+
    }
 
    public static void read(behavior_msgs.msg.dds.AI2RNavigationMessage data, us.ihmc.idl.CDR cdr)
@@ -108,6 +115,8 @@ public class AI2RNavigationMessagePubSubType implements us.ihmc.pubsub.TopicData
       cdr.read_type_d(data.getPovObject());	
       cdr.read_type_d(data.getTargetObject());	
       data.setDistanceToObject(cdr.read_type_6());
+      	
+      data.setObstacleClearance(cdr.read_type_6());
       	
 
    }
@@ -119,6 +128,7 @@ public class AI2RNavigationMessagePubSubType implements us.ihmc.pubsub.TopicData
       ser.write_type_d("pov_object", data.getPovObject());
       ser.write_type_d("target_object", data.getTargetObject());
       ser.write_type_6("distance_to_object", data.getDistanceToObject());
+      ser.write_type_6("obstacle_clearance", data.getObstacleClearance());
    }
 
    @Override
@@ -128,6 +138,7 @@ public class AI2RNavigationMessagePubSubType implements us.ihmc.pubsub.TopicData
       ser.read_type_d("pov_object", data.getPovObject());
       ser.read_type_d("target_object", data.getTargetObject());
       data.setDistanceToObject(ser.read_type_6("distance_to_object"));
+      data.setObstacleClearance(ser.read_type_6("obstacle_clearance"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.AI2RNavigationMessage src, behavior_msgs.msg.dds.AI2RNavigationMessage dest)
