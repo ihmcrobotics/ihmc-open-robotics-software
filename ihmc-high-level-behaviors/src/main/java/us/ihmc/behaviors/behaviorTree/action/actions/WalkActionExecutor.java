@@ -28,7 +28,6 @@ import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.rrt.RRTConnectPathPlanner;
-import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -455,12 +454,14 @@ public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, Walk
          Point3D yoloPosition = new Point3D();
          List<Point3D> path = rrtConnectPathPlanner.plan(midStance, midGoal.getPosition(), segment ->
          {
-            for (PersistentDetection detection : scene.getPersistentDetections())
-
-                  yoloPosition.set(detection.getFilteredDetectionFrame().getTransformToRoot().getTranslation());
+            for (BehaviorTreeSceneObjectState object : scene.getObjects())
+               if (object.getObjectType() == BehaviorTreeSceneObjectType.YOLO_ONLY)
+               {
+                  yoloPosition.set(object.getTransformToWorld().getTranslation());
                   yoloPosition.setZ(segment.getFirstEndpointZ());
                   if (segment.distance(yoloPosition) < definition.getObstacleClearanceRadius().getValue())
                      return true;
+               }
             return false;
          });
 
