@@ -80,9 +80,7 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
             SyncedYOLOv8ModelParameters definitionParameters
                   = definition.getSyncableYOLOModelParameters()[definition.getEnabledYoloModels().getValueReadOnly(i)];
             yolo.enableModel(definitionParameters.getModelName());
-            definitionParameters.applyToModel(yolo.getAvailableModels().get(definitionParameters.getModelName()));
             yolo.getParameters().getModelParameters().get(definitionParameters.getModelName()).set(definitionParameters);
-            yolo.getParameters().modify();
          }
          state.setIsExecuting(false);
       }
