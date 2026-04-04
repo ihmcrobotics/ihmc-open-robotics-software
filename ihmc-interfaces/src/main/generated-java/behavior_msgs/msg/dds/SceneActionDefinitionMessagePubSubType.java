@@ -15,7 +15,7 @@ public class SceneActionDefinitionMessagePubSubType implements us.ihmc.pubsub.To
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "cfaf5b3a83aa2869320d69e4ed479aab557ae2cba161df0e6767e9f9a90e8460";
+   		return "85eb69a86aac0ba7f8f6728804840414537e8ee9750d79d9e16fc5b4d9a1ff14";
    }
    
    @Override
@@ -64,6 +64,14 @@ public class SceneActionDefinitionMessagePubSubType implements us.ihmc.pubsub.To
 
       current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (10 * 2) + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 10; ++i0)
@@ -100,6 +108,18 @@ public class SceneActionDefinitionMessagePubSubType implements us.ihmc.pubsub.To
       current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getCdrSerializedSize(data.getNominalObjectPose(), current_alignment);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getEnabledYoloModels().size() * 2) + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
 
@@ -127,6 +147,14 @@ public class SceneActionDefinitionMessagePubSubType implements us.ihmc.pubsub.To
       cdr.write_type_3(data.getMinimumHistorySize());
 
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getNominalObjectPose(), cdr);
+      cdr.write_type_5(data.getPoseFilterAlpha());
+
+      cdr.write_type_5(data.getAcceptanceConfidence());
+
+      cdr.write_type_5(data.getStabilityFrequency());
+
+      cdr.write_type_5(data.getHistoryDuration());
+
       if(data.getEnabledYoloModels().size() <= 10)
       cdr.write_type_e(data.getEnabledYoloModels());else
           throw new RuntimeException("enabled_yolo_models field exceeds the maximum length: %d > %d".formatted(data.getEnabledYoloModels().size(), 10));
@@ -152,6 +180,14 @@ public class SceneActionDefinitionMessagePubSubType implements us.ihmc.pubsub.To
       data.setMinimumHistorySize(cdr.read_type_3());
       	
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getNominalObjectPose(), cdr);	
+      data.setPoseFilterAlpha(cdr.read_type_5());
+      	
+      data.setAcceptanceConfidence(cdr.read_type_5());
+      	
+      data.setStabilityFrequency(cdr.read_type_5());
+      	
+      data.setHistoryDuration(cdr.read_type_5());
+      	
       cdr.read_type_e(data.getEnabledYoloModels());	
       cdr.read_type_e(data.getYoloModelParameters());	
       cdr.read_type_e(data.getEnabledFoundationPoseModels());	
@@ -170,6 +206,10 @@ public class SceneActionDefinitionMessagePubSubType implements us.ihmc.pubsub.To
       ser.write_type_3("minimum_history_size", data.getMinimumHistorySize());
       ser.write_type_a("nominal_object_pose", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getNominalObjectPose());
 
+      ser.write_type_5("pose_filter_alpha", data.getPoseFilterAlpha());
+      ser.write_type_5("acceptance_confidence", data.getAcceptanceConfidence());
+      ser.write_type_5("stability_frequency", data.getStabilityFrequency());
+      ser.write_type_5("history_duration", data.getHistoryDuration());
       ser.write_type_e("enabled_yolo_models", data.getEnabledYoloModels());
       ser.write_type_e("yolo_model_parameters", data.getYoloModelParameters());
       ser.write_type_e("enabled_foundation_pose_models", data.getEnabledFoundationPoseModels());
@@ -187,6 +227,10 @@ public class SceneActionDefinitionMessagePubSubType implements us.ihmc.pubsub.To
       data.setMinimumHistorySize(ser.read_type_3("minimum_history_size"));
       ser.read_type_a("nominal_object_pose", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getNominalObjectPose());
 
+      data.setPoseFilterAlpha(ser.read_type_5("pose_filter_alpha"));
+      data.setAcceptanceConfidence(ser.read_type_5("acceptance_confidence"));
+      data.setStabilityFrequency(ser.read_type_5("stability_frequency"));
+      data.setHistoryDuration(ser.read_type_5("history_duration"));
       ser.read_type_e("enabled_yolo_models", data.getEnabledYoloModels());
       ser.read_type_e("yolo_model_parameters", data.getYoloModelParameters());
       ser.read_type_e("enabled_foundation_pose_models", data.getEnabledFoundationPoseModels());

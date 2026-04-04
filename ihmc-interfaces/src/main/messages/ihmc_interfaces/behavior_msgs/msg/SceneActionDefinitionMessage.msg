@@ -6,8 +6,9 @@ byte FREEZE_OBJECT = 1
 byte DELETE_OBJECT = 2
 byte CLEAR_SCENE = 3
 byte FREEZE_SCENE = 4
-byte CONFIGURE_YOLO = 5
-byte CONFIGURE_FOUNDATION_POSE = 6
+byte CONFIGURE_PERSISTENT_DETECTIONS = 5
+byte CONFIGURE_YOLO = 6
+byte CONFIGURE_FOUNDATION_POSE = 7
 
 # The type of action as defined above
 byte scene_action_type
@@ -25,6 +26,13 @@ uint16 minimum_history_size
 
 # The nominal object pose for behavior previewing
 controller_msgs/RigidBodyTransformMessage nominal_object_pose
+
+# Configure persistent detections:
+
+float32 pose_filter_alpha
+float32 acceptance_confidence
+float32 stability_frequency
+float32 history_duration
 
 # Configure YOLO:
 

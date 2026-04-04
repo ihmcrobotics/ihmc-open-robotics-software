@@ -8,6 +8,7 @@ import us.ihmc.pubsub.TopicDataType;
 
 /**
        * Setup, freeze, delete object:
+       * Configure persistent detections:
        * Configure YOLO:
        * Configure FoundationPose:
        */
@@ -18,8 +19,9 @@ public class SceneActionDefinitionMessage extends Packet<SceneActionDefinitionMe
    public static final byte DELETE_OBJECT = (byte) 2;
    public static final byte CLEAR_SCENE = (byte) 3;
    public static final byte FREEZE_SCENE = (byte) 4;
-   public static final byte CONFIGURE_YOLO = (byte) 5;
-   public static final byte CONFIGURE_FOUNDATION_POSE = (byte) 6;
+   public static final byte CONFIGURE_PERSISTENT_DETECTIONS = (byte) 5;
+   public static final byte CONFIGURE_YOLO = (byte) 6;
+   public static final byte CONFIGURE_FOUNDATION_POSE = (byte) 7;
    /**
             * Parent definition fields
             */
@@ -44,6 +46,10 @@ public class SceneActionDefinitionMessage extends Packet<SceneActionDefinitionMe
             * The nominal object pose for behavior previewing
             */
    public controller_msgs.msg.dds.RigidBodyTransformMessage nominal_object_pose_;
+   public float pose_filter_alpha_;
+   public float acceptance_confidence_;
+   public float stability_frequency_;
+   public float history_duration_;
    /**
             * YOLO models that should be enabled at this point (by available index)
             */
@@ -87,6 +93,14 @@ public class SceneActionDefinitionMessage extends Packet<SceneActionDefinitionMe
       minimum_history_size_ = other.minimum_history_size_;
 
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.nominal_object_pose_, nominal_object_pose_);
+      pose_filter_alpha_ = other.pose_filter_alpha_;
+
+      acceptance_confidence_ = other.acceptance_confidence_;
+
+      stability_frequency_ = other.stability_frequency_;
+
+      history_duration_ = other.history_duration_;
+
       enabled_yolo_models_.set(other.enabled_yolo_models_);
       yolo_model_parameters_.set(other.yolo_model_parameters_);
       enabled_foundation_pose_models_.set(other.enabled_foundation_pose_models_);
@@ -164,6 +178,42 @@ public class SceneActionDefinitionMessage extends Packet<SceneActionDefinitionMe
       return nominal_object_pose_;
    }
 
+   public void setPoseFilterAlpha(float pose_filter_alpha)
+   {
+      pose_filter_alpha_ = pose_filter_alpha;
+   }
+   public float getPoseFilterAlpha()
+   {
+      return pose_filter_alpha_;
+   }
+
+   public void setAcceptanceConfidence(float acceptance_confidence)
+   {
+      acceptance_confidence_ = acceptance_confidence;
+   }
+   public float getAcceptanceConfidence()
+   {
+      return acceptance_confidence_;
+   }
+
+   public void setStabilityFrequency(float stability_frequency)
+   {
+      stability_frequency_ = stability_frequency;
+   }
+   public float getStabilityFrequency()
+   {
+      return stability_frequency_;
+   }
+
+   public void setHistoryDuration(float history_duration)
+   {
+      history_duration_ = history_duration;
+   }
+   public float getHistoryDuration()
+   {
+      return history_duration_;
+   }
+
 
    /**
             * YOLO models that should be enabled at this point (by available index)
@@ -218,6 +268,14 @@ public class SceneActionDefinitionMessage extends Packet<SceneActionDefinitionMe
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_history_size_, other.minimum_history_size_, epsilon)) return false;
 
       if (!this.nominal_object_pose_.epsilonEquals(other.nominal_object_pose_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.pose_filter_alpha_, other.pose_filter_alpha_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.acceptance_confidence_, other.acceptance_confidence_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.stability_frequency_, other.stability_frequency_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.history_duration_, other.history_duration_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.enabled_yolo_models_, other.enabled_yolo_models_, epsilon)) return false;
 
       if (this.yolo_model_parameters_.size() != other.yolo_model_parameters_.size()) { return false; }
@@ -251,6 +309,14 @@ public class SceneActionDefinitionMessage extends Packet<SceneActionDefinitionMe
       if(this.minimum_history_size_ != otherMyClass.minimum_history_size_) return false;
 
       if (!this.nominal_object_pose_.equals(otherMyClass.nominal_object_pose_)) return false;
+      if(this.pose_filter_alpha_ != otherMyClass.pose_filter_alpha_) return false;
+
+      if(this.acceptance_confidence_ != otherMyClass.acceptance_confidence_) return false;
+
+      if(this.stability_frequency_ != otherMyClass.stability_frequency_) return false;
+
+      if(this.history_duration_ != otherMyClass.history_duration_) return false;
+
       if (!this.enabled_yolo_models_.equals(otherMyClass.enabled_yolo_models_)) return false;
       if (!this.yolo_model_parameters_.equals(otherMyClass.yolo_model_parameters_)) return false;
       if (!this.enabled_foundation_pose_models_.equals(otherMyClass.enabled_foundation_pose_models_)) return false;
@@ -276,6 +342,14 @@ public class SceneActionDefinitionMessage extends Packet<SceneActionDefinitionMe
       builder.append(this.minimum_history_size_);      builder.append(", ");
       builder.append("nominal_object_pose=");
       builder.append(this.nominal_object_pose_);      builder.append(", ");
+      builder.append("pose_filter_alpha=");
+      builder.append(this.pose_filter_alpha_);      builder.append(", ");
+      builder.append("acceptance_confidence=");
+      builder.append(this.acceptance_confidence_);      builder.append(", ");
+      builder.append("stability_frequency=");
+      builder.append(this.stability_frequency_);      builder.append(", ");
+      builder.append("history_duration=");
+      builder.append(this.history_duration_);      builder.append(", ");
       builder.append("enabled_yolo_models=");
       builder.append(this.enabled_yolo_models_);      builder.append(", ");
       builder.append("yolo_model_parameters=");

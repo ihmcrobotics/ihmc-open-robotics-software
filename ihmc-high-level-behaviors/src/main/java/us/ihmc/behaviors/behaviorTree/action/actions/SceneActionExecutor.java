@@ -71,6 +71,14 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
             object.freeze();
          state.setIsExecuting(false);
       }
+      else if (definition.getSceneActionType().getValue() == SceneActionType.CONFIGURE_PERSISTENT_DETECTIONS)
+      {
+         scene.setPoseFilterAlpha(definition.getPoseFilterAlpha());
+         scene.setAcceptanceConfidence(definition.getAcceptanceConfidence());
+         scene.setStabilityFrequency(definition.getStabilityFrequency());
+         scene.setHistoryDuration(definition.getHistoryDuration());
+         state.setIsExecuting(false);
+      }
       else if (definition.getSceneActionType().getValue() == SceneActionType.CONFIGURE_YOLO)
       {
          YOLOv8DetectionExecutor yolo = scene.getYOLO();

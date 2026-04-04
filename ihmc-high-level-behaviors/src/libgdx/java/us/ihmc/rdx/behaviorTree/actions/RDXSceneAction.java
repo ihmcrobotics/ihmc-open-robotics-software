@@ -42,6 +42,10 @@ public class RDXSceneAction extends RDXActionNode<SceneActionState, SceneActionD
    private final String[][] availableYOLOClasses;
    private final ImFloatWrapper timeoutWidget;
    private final ImIntegerWrapper minHistorySizeWidget;
+   private final ImFloatWrapper poseFilterAlphaWidget;
+   private final ImFloatWrapper acceptanceConfidenceWidget;
+   private final ImFloatWrapper stabilityFrequencyWidget;
+   private final ImFloatWrapper historyDurationWidget;
    private final ImIntegerWrapper minPostPointsWidget;
    private final ImIntegerWrapper minRecessPointsWidget;
    private final ImStringWrapper compositeFrameNameWidget;
@@ -90,6 +94,18 @@ public class RDXSceneAction extends RDXActionNode<SceneActionState, SceneActionD
       minHistorySizeWidget = new ImIntegerWrapper(definition::getMinimumHistorySize,
                                                   definition::setMinimumHistorySize,
                                                   imInteger -> ImGui.inputInt(labels.get("Minimum History Size"), imInteger));
+      poseFilterAlphaWidget = new ImFloatWrapper(definition::getPoseFilterAlpha,
+                                                 definition::setPoseFilterAlpha,
+                                                 imFloat -> ImGui.inputFloat(labels.get("Pose filter alpha"), imFloat, 0.01f, 0.1f));
+      acceptanceConfidenceWidget = new ImFloatWrapper(definition::getAcceptanceConfidence,
+                                                      definition::setAcceptanceConfidence,
+                                                      imFloat -> ImGui.inputFloat(labels.get("Acceptance confidence"), imFloat, 0.01f, 0.1f));
+      stabilityFrequencyWidget = new ImFloatWrapper(definition::getStabilityFrequency,
+                                                    definition::setStabilityFrequency,
+                                                    imFloat -> ImGui.inputFloat(labels.get("Stability frequency"), imFloat, 0.01f, 0.1f));
+      historyDurationWidget = new ImFloatWrapper(definition::getHistoryDuration,
+                                                 definition::setHistoryDuration,
+                                                 imFloat -> ImGui.inputFloat(labels.get("History duration"), imFloat, 0.01f, 0.1f));
       minPostPointsWidget = new ImIntegerWrapper(() -> definition.getSceneObjectDefinition().getMinPostPoints(),
                                                  value -> definition.getSceneObjectDefinition().setMinPostPoints(value),
                                                  imInteger -> ImGui.inputInt(labels.get("Min Post Points"), imInteger));
@@ -227,6 +243,15 @@ public class RDXSceneAction extends RDXActionNode<SceneActionState, SceneActionD
             ImGui.checkbox(labels.get("Adjust Nominal Object Pose"), nominalObjectPoseGizmo.getSelected());
             ImGui.popItemWidth();
 
+         }
+         case CONFIGURE_PERSISTENT_DETECTIONS ->
+         {
+            ImGui.pushItemWidth(100.0f);
+            poseFilterAlphaWidget.renderImGuiWidget();
+            acceptanceConfidenceWidget.renderImGuiWidget();
+            stabilityFrequencyWidget.renderImGuiWidget();
+            historyDurationWidget.renderImGuiWidget();
+            ImGui.popItemWidth();
          }
          case CONFIGURE_YOLO ->
          {

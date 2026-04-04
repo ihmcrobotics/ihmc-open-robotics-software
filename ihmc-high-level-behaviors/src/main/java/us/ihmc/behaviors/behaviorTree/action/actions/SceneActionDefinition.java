@@ -38,6 +38,7 @@ public class SceneActionDefinition extends ActionNodeDefinition
       DELETE_OBJECT,
       CLEAR_SCENE,
       FREEZE_SCENE,
+      CONFIGURE_PERSISTENT_DETECTIONS,
       CONFIGURE_YOLO,
       CONFIGURE_FOUNDATION_POSE;
 
@@ -51,6 +52,10 @@ public class SceneActionDefinition extends ActionNodeDefinition
    private final CRDTBidirectionalFloat timeout;
    private final CRDTBidirectionalInteger minimumHistorySize;
    private final CRDTBidirectionalRigidBodyTransform nominalObjectPose;
+   private final CRDTBidirectionalFloat poseFilterAlpha;
+   private final CRDTBidirectionalFloat acceptanceConfidence;
+   private final CRDTBidirectionalFloat stabilityFrequency;
+   private final CRDTBidirectionalFloat historyDuration;
    private final CRDTBidirectionalIntegerList enabledYoloModels;
    private final CRDTBidirectionalIntegerList enabledFoundationPoseModels;
 
@@ -58,6 +63,10 @@ public class SceneActionDefinition extends ActionNodeDefinition
    private float onDiskTimeout;
    private int onDiskMinimumHistorySize;
    private final RigidBodyTransform onDiskNominalObjectPose = new RigidBodyTransform();
+   private float onDiskPoseFilterAlpha;
+   private float onDiskAcceptanceConfidence;
+   private float onDiskStabilityFrequency;
+   private float onDiskHistoryDuration;
    private final TIntArrayList onDiskEnabledYoloModels = new TIntArrayList();
    private final TIntArrayList onDiskEnabledFoundationPoseModels = new TIntArrayList();
 
@@ -97,6 +106,10 @@ public class SceneActionDefinition extends ActionNodeDefinition
       timeout = new CRDTBidirectionalFloat(this, 5.0f);
       minimumHistorySize = new CRDTBidirectionalInteger(this, 5);
       nominalObjectPose = new CRDTBidirectionalRigidBodyTransform(this);
+      poseFilterAlpha = new CRDTBidirectionalFloat(this, 0.5f);
+      acceptanceConfidence = new CRDTBidirectionalFloat(this, 0.25f);
+      stabilityFrequency = new CRDTBidirectionalFloat(this, 1.0f);
+      historyDuration = new CRDTBidirectionalFloat(this, 2.0f);
       enabledYoloModels = new CRDTBidirectionalIntegerList(this);
       enabledFoundationPoseModels = new CRDTBidirectionalIntegerList(this);
    }
@@ -120,6 +133,13 @@ public class SceneActionDefinition extends ActionNodeDefinition
                jsonNode.put("minimumHistorySize", minimumHistorySize.getValue());
                JSONTools.toJSON(jsonNode.putObject("nominalObjectPose"), nominalObjectPose.getValueReadOnly());
             }
+         }
+         case CONFIGURE_PERSISTENT_DETECTIONS ->
+         {
+            jsonNode.put("poseFilterAlpha", poseFilterAlpha.getValue());
+            jsonNode.put("acceptanceConfidence", acceptanceConfidence.getValue());
+            jsonNode.put("stabilityFrequency", stabilityFrequency.getValue());
+            jsonNode.put("historyDuration", historyDuration.getValue());
          }
          case CONFIGURE_YOLO ->
          {
@@ -159,6 +179,13 @@ public class SceneActionDefinition extends ActionNodeDefinition
                if (jsonNode.get("nominalObjectPose") instanceof ObjectNode nominalObjectPoseNode)
                   JSONTools.toEuclid(nominalObjectPoseNode, nominalObjectPose.getValueAndModify());
             }
+         }
+         case CONFIGURE_PERSISTENT_DETECTIONS ->
+         {
+            poseFilterAlpha.setValue(jsonNode.has("poseFilterAlpha") ? (float) jsonNode.get("poseFilterAlpha").asDouble() : 0.5f);
+            acceptanceConfidence.setValue(jsonNode.has("acceptanceConfidence") ? (float) jsonNode.get("acceptanceConfidence").asDouble() : 0.25f);
+            stabilityFrequency.setValue(jsonNode.has("stabilityFrequency") ? (float) jsonNode.get("stabilityFrequency").asDouble() : 1.0f);
+            historyDuration.setValue(jsonNode.has("historyDuration") ? (float) jsonNode.get("historyDuration").asDouble() : 2.0f);
          }
          case CONFIGURE_YOLO ->
          {
@@ -204,6 +231,10 @@ public class SceneActionDefinition extends ActionNodeDefinition
       onDiskTimeout = timeout.getValue();
       onDiskMinimumHistorySize = minimumHistorySize.getValue();
       onDiskNominalObjectPose.set(nominalObjectPose.getValueReadOnly());
+      onDiskPoseFilterAlpha = poseFilterAlpha.getValue();
+      onDiskAcceptanceConfidence = acceptanceConfidence.getValue();
+      onDiskStabilityFrequency = stabilityFrequency.getValue();
+      onDiskHistoryDuration = historyDuration.getValue();
 
       onDiskEnabledYoloModels.clear();
       onDiskEnabledYoloModels.addAll(enabledYoloModels.getValue());
@@ -226,6 +257,10 @@ public class SceneActionDefinition extends ActionNodeDefinition
          timeout.setValue(onDiskTimeout);
          minimumHistorySize.setValue(onDiskMinimumHistorySize);
          nominalObjectPose.getValueAndModify().set(onDiskNominalObjectPose);
+         poseFilterAlpha.setValue(onDiskPoseFilterAlpha);
+         acceptanceConfidence.setValue(onDiskAcceptanceConfidence);
+         stabilityFrequency.setValue(onDiskStabilityFrequency);
+         historyDuration.setValue(onDiskHistoryDuration);
 
          enabledYoloModels.clear();
          enabledYoloModels.getValue().addAll(onDiskEnabledYoloModels);
@@ -247,6 +282,10 @@ public class SceneActionDefinition extends ActionNodeDefinition
       unchanged &= timeout.getValue() == onDiskTimeout;
       unchanged &= minimumHistorySize.getValue() == onDiskMinimumHistorySize;
       unchanged &= nominalObjectPose.getValueReadOnly().equals(onDiskNominalObjectPose);
+      unchanged &= poseFilterAlpha.getValue() == onDiskPoseFilterAlpha;
+      unchanged &= acceptanceConfidence.getValue() == onDiskAcceptanceConfidence;
+      unchanged &= stabilityFrequency.getValue() == onDiskStabilityFrequency;
+      unchanged &= historyDuration.getValue() == onDiskHistoryDuration;
 
       unchanged &= enabledYoloModels.getSize() == onDiskEnabledYoloModels.size();
       for (int i = 0; unchanged && i < enabledYoloModels.getSize(); i++)
@@ -270,6 +309,10 @@ public class SceneActionDefinition extends ActionNodeDefinition
       message.setTimeout(timeout.toMessage());
       message.setMinimumHistorySize(minimumHistorySize.toMessage());
       nominalObjectPose.toMessage(message.getNominalObjectPose());
+      message.setPoseFilterAlpha(poseFilterAlpha.toMessage());
+      message.setAcceptanceConfidence(acceptanceConfidence.toMessage());
+      message.setStabilityFrequency(stabilityFrequency.toMessage());
+      message.setHistoryDuration(historyDuration.toMessage());
 
       enabledYoloModels.toMessage(message.getEnabledYoloModels());
 
@@ -289,6 +332,10 @@ public class SceneActionDefinition extends ActionNodeDefinition
       timeout.fromMessage(message.getTimeout());
       minimumHistorySize.fromMessage(message.getMinimumHistorySize());
       nominalObjectPose.fromMessage(message.getNominalObjectPose());
+      poseFilterAlpha.fromMessage(message.getPoseFilterAlpha());
+      acceptanceConfidence.fromMessage(message.getAcceptanceConfidence());
+      stabilityFrequency.fromMessage(message.getStabilityFrequency());
+      historyDuration.fromMessage(message.getHistoryDuration());
 
       enabledYoloModels.fromMessage(message.getEnabledYoloModels());
       for (int i = 0; i < enabledYoloModels.getSize() && i < message.getYoloModelParameters().size(); i++)
@@ -335,6 +382,46 @@ public class SceneActionDefinition extends ActionNodeDefinition
    public CRDTBidirectionalRigidBodyTransform getNominalObjectPose()
    {
       return nominalObjectPose;
+   }
+
+   public float getPoseFilterAlpha()
+   {
+      return poseFilterAlpha.getValue();
+   }
+
+   public void setPoseFilterAlpha(float poseFilterAlpha)
+   {
+      this.poseFilterAlpha.setValue(poseFilterAlpha);
+   }
+
+   public float getAcceptanceConfidence()
+   {
+      return acceptanceConfidence.getValue();
+   }
+
+   public void setAcceptanceConfidence(float acceptanceConfidence)
+   {
+      this.acceptanceConfidence.setValue(acceptanceConfidence);
+   }
+
+   public float getStabilityFrequency()
+   {
+      return stabilityFrequency.getValue();
+   }
+
+   public void setStabilityFrequency(float stabilityFrequency)
+   {
+      this.stabilityFrequency.setValue(stabilityFrequency);
+   }
+
+   public float getHistoryDuration()
+   {
+      return historyDuration.getValue();
+   }
+
+   public void setHistoryDuration(float historyDuration)
+   {
+      this.historyDuration.setValue(historyDuration);
    }
 
    public CRDTBidirectionalIntegerList getEnabledYoloModels()

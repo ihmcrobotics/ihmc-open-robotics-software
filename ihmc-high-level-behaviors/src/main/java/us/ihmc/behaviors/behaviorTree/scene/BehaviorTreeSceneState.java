@@ -244,4 +244,44 @@ public abstract class BehaviorTreeSceneState
    {
       return true;
    }
+
+   public float getPoseFilterAlpha()
+   {
+      return poseFilterAlpha.getValue();
+   }
+
+   public void setPoseFilterAlpha(float poseFilterAlpha)
+   {
+      this.poseFilterAlpha.setValue(poseFilterAlpha);
+   }
+
+   public float getAcceptanceConfidence()
+   {
+      return acceptanceConfidence.getValue();
+   }
+
+   public void setAcceptanceConfidence(float acceptanceConfidence)
+   {
+      this.acceptanceConfidence.setValue(acceptanceConfidence);
+   }
+
+   public float getStabilityFrequency()
+   {
+      return stabilityFrequency.getValue();
+   }
+
+   public void setStabilityFrequency(float stabilityFrequency)
+   {
+      this.stabilityFrequency.setValue(stabilityFrequency);
+   }
+
+   public float getHistoryDuration()
+   {
+      return historyDuration.getValue();
+   }
+
+   public void setHistoryDuration(float historyDuration)
+   {
+      this.historyDuration.setValue(historyDuration);
+   }
 }
