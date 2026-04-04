@@ -82,7 +82,7 @@ public class BehaviorTreeSceneDoorFrameExecutor extends BehaviorTreeSceneObjectE
          Point3D capsuleTop = new Point3D();
 
          // Search by looking on the other side of the door panel, then fan out in both directions until we find a post
-         for (double angle = 0.0; angle < Math.PI / 2.0; angle = angle > 0.0 ? -angle : -angle + Math.PI / 2.0 / 32.0)
+         for (double angle = 0.0; angle < Math.PI; angle = angle > 0.0 ? -angle : -angle + Math.PI / 2.0 / 32.0)
          {
             searchAxisAngle.set(Axis3D.Z, angle);
             searchHingeToLatchPost.sub(nominalLatchPostPoint, hingePoint);
