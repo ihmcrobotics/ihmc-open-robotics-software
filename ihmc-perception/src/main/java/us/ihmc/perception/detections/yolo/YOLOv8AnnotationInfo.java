@@ -173,12 +173,15 @@ public record YOLOv8AnnotationInfo(String objectClass, float confidence, Boundin
       for (int i = 0; i < maskPolygons.length; ++i)
       {
          int[] polygon = maskPolygons[i];
-         MultiArrayDimension dimension = message.getMaskPolygons().getLayout().getDim().add();
-         dimension.setLabel("polygon " + i);
-         dimension.setSize(polygon.length);
-         dimension.setStride((long) Integer.BYTES * polygon.length);
+         if (message.getMaskPolygons().getData().size() + polygon.length < message.getMaskPolygons().getData().capacity())
+         {
+            MultiArrayDimension dimension = message.getMaskPolygons().getLayout().getDim().add();
+            dimension.setLabel("polygon " + i);
+            dimension.setSize(polygon.length);
+            dimension.setStride((long) Integer.BYTES * polygon.length);
 
-         message.getMaskPolygons().getData().add(polygon);
+            message.getMaskPolygons().getData().add(polygon);
+         }
       }
       message.getMaskPolygons().getLayout().setDataOffset(0);
    }
