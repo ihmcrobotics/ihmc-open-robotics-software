@@ -55,7 +55,7 @@ public class AI2RPredefinedCommandPublisher
 
    // Order matters: first match wins, same behavior as the Python predefined coordinator.
    private static final List<GotoRule> PREDEFINED_GOTO = List.of(
-         new GotoRule("person", new GotoConfig("person", "DEFAULT", "-", "traffic_barrier", "LEFT", "CLOSE", 1.0, 0.5)),
+         new GotoRule("person", new GotoConfig("person", "DEFAULT", "-", "traffic_barrier", "LEFT", "CLOSE", 1.0, 0.8)),
          new GotoRule("doorpanel", new GotoConfig("door_panel", "FRONT", "-", "-", "-", "CLOSE", 1.0, 0.7)),
          new GotoRule("barrier", new GotoConfig("traffic_barrier", "BEHIND", "door_panel", "-", "-", "CLOSE", 1.5, 0.8)));
 
