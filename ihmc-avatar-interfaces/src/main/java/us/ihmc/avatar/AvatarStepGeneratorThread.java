@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepValidityIndicator;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HumanoidSteppingManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.StepGeneratorCommandInputManager;
 import us.ihmc.commons.Conversions;
@@ -47,8 +48,8 @@ public class AvatarStepGeneratorThread implements SCS2YoGraphicHolder
    private final YoLong timestamp = new YoLong("TimestampCSG", csgRegistry);
    private final YoBoolean runCSG = new YoBoolean("RunCSG", csgRegistry);
 
-   private final StepGeneratorCommandInputManager csgCommandInputManager;
-   private final StatusMessageOutputManager statusMessageOutputManager;
+   private final StepGeneratorCommandInputManager csgCommandInputManager = new StepGeneratorCommandInputManager();
+   private final StatusMessageOutputManager statusMessageOutputManager = new StatusMessageOutputManager(StepGeneratorAPIDefinition.getStepGeneratorSupportedStatusMessages());
    private final HumanoidSteppingPluginEnvironmentalConstraints environmentalConstraints;
 
    public AvatarStepGeneratorThread(HumanoidRobotContextDataFactory contextDataFactory,
@@ -59,6 +60,7 @@ public class AvatarStepGeneratorThread implements SCS2YoGraphicHolder
                                     RealtimeROS2Node ros2Node)
    {
       this.fullRobotModel = drcRobotModel.createFullRobotModel();
+      csgRegistry.addChild(csgCommandInputManager.getRegistry());
 
       HumanoidRobotContextJointData processedJointData = new HumanoidRobotContextJointData(fullRobotModel.getOneDoFJoints().length);
       ForceSensorDataHolder forceSensorDataHolderForController = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
@@ -82,14 +84,17 @@ public class AvatarStepGeneratorThread implements SCS2YoGraphicHolder
                                                     drcRobotModel.getWalkingControllerParameters(),
                                                     controllerOutputManager,
                                                     controllerCommandInputManager,
+                                                    csgCommandInputManager,
+                                                    statusMessageOutputManager,
                                                     null,
                                                     csgTime);
-      csgCommandInputManager = steppingManager.getStepGeneratorCommandInputManager();
-      statusMessageOutputManager = steppingManager.getStatusMessageOutputManager();
 
       // create the callback listeners for the planar regions in the stepping plugin
       if (ros2Node != null)
-         steppingManager.createStepGeneratorNetworkSubscriber(drcRobotModel.getSimpleRobotName(), ros2Node);
+         steppingManager.createStepGeneratorNetworkSubscriber(drcRobotModel.getSimpleRobotName(),
+                                                              ros2Node,
+                                                              csgCommandInputManager.getCommandInputManager(),
+                                                              statusMessageOutputManager);
 
       if (footstepAdjustment != null)
       {
@@ -164,6 +169,7 @@ public class AvatarStepGeneratorThread implements SCS2YoGraphicHolder
             firstTick.set(false);
          }
 
+         csgCommandInputManager.update(csgTime.getValue());
          steppingManager.update(csgTime.getValue());
          humanoidRobotContextData.setPerceptionRan(true);
       }

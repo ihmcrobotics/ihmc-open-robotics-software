@@ -16,7 +16,6 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.Sta
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.StopWalkingMessenger;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.quicksterFootstepProvider.QuicksterFootstepProvider;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.ControllerAPI;
@@ -51,9 +50,6 @@ public class HumanoidSteppingManager implements Updatable, SCS2YoGraphicHolder
 
    private final CommandInputManager controllerCommandInputManager;
 
-   private final StepGeneratorCommandInputManager commandInputManager = new StepGeneratorCommandInputManager();
-   private final StatusMessageOutputManager statusMessageOutputManager = new StatusMessageOutputManager(StepGeneratorAPIDefinition.getStepGeneratorSupportedStatusMessages());
-
    private final List<Updatable> updatables = new ArrayList<>();
 
    public HumanoidSteppingManager(FullHumanoidRobotModel robotModel,
@@ -62,11 +58,12 @@ public class HumanoidSteppingManager implements Updatable, SCS2YoGraphicHolder
                                   WalkingControllerParameters walkingControllerParameters,
                                   StatusMessageOutputManager controllerStatusMessageOutputManager,
                                   CommandInputManager controllerCommandInputManager,
+                                  StepGeneratorCommandInputManager commandInputManager,
+                                  StatusMessageOutputManager statusMessageOutputManager,
                                   SideDependentList<? extends ContactableBody> contactableFeet,
                                   DoubleProvider timeProvider)
    {
       this.controllerCommandInputManager = controllerCommandInputManager;
-      registry.addChild(commandInputManager.getRegistry());
 
       // Set up listeners for the status messages, and pass them into the step generator command input manager.
       controllerStatusMessageOutputManager.attachStatusMessageListener(HighLevelStateChangeStatusMessage.class,
@@ -136,11 +133,14 @@ public class HumanoidSteppingManager implements Updatable, SCS2YoGraphicHolder
       this.updatables.add(updatable);
    }
 
-   public void createStepGeneratorNetworkSubscriber(String robotName, RealtimeROS2Node realtimeROS2Node)
+   public void createStepGeneratorNetworkSubscriber(String robotName,
+                                                    RealtimeROS2Node realtimeROS2Node,
+                                                    CommandInputManager commandInputManager,
+                                                    StatusMessageOutputManager statusMessageOutputManager)
    {
       ROS2Topic<?> baseTopic = ControllerAPI.getBaseTopic(HumanoidControllerAPI.HUMANOID_CONTROL_MODULE_NAME, robotName);
       StepGeneratorNetworkSubscriber stepGeneratorNetworkSubscriber = new StepGeneratorNetworkSubscriber(baseTopic,
-                                                                                                         commandInputManager.getCommandInputManager(),
+                                                                                                         commandInputManager,
                                                                                                          statusMessageOutputManager,
                                                                                                          realtimeROS2Node);
 
@@ -162,21 +162,9 @@ public class HumanoidSteppingManager implements Updatable, SCS2YoGraphicHolder
       return group;
    }
 
-   public StepGeneratorCommandInputManager getStepGeneratorCommandInputManager()
-   {
-      return commandInputManager;
-   }
-
-   public StatusMessageOutputManager getStatusMessageOutputManager()
-   {
-      return statusMessageOutputManager;
-   }
-
    @Override
    public void update(double time)
    {
-      commandInputManager.update(time);
-
       for (int i = 0; i < updatables.size(); i++)
          updatables.get(i).update(time);
 

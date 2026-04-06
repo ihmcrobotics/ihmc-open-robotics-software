@@ -554,7 +554,7 @@ public class SCS2AvatarSimulationFactory
          HeadingAndVelocityEvaluationScript script = new HeadingAndVelocityEvaluationScript(robotModel.get()::getStepGeneratorDT,
                                                                                             stepGeneratorThread.getYoTime(),
                                                                                             parameters,
-                                                                                            steppingPlugin.getStepGeneratorCommandInputManager().getCommandInputManager(),
+                                                                                            stepGeneratorThread.getCsgCommandInputManager().getCommandInputManager(),
                                                                                             stepGeneratorThread.getYoVariableRegistry());
          steppingPlugin.addUpdatable(script);
       }
