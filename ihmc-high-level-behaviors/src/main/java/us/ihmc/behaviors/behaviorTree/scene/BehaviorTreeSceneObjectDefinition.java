@@ -96,11 +96,6 @@ public class BehaviorTreeSceneObjectDefinition extends LatestTimestampModifiable
                jsonNode.put("yoloClassName", yoloClassName.getValue());
          }
          case FOUNDATION_POSE -> jsonNode.put("foundationPoseObjectType", foundationPoseObjectType.getValue().name());
-         case DOOR_FRAME ->
-         {
-            jsonNode.put("minPostPoints", minPostPoints.getValue());
-            jsonNode.put("minRecessPoints", minRecessPoints.getValue());
-         }
          case COMPOSITE_FRAME ->
          {
             jsonNode.put("compositeFrameName", compositeFrameName.getValue());
@@ -109,6 +104,14 @@ public class BehaviorTreeSceneObjectDefinition extends LatestTimestampModifiable
             jsonNode.put("compositeFrameType", compositeFrameType.getValue().name());
             if (compositeFrameType.getValue() == CompositeFrameType.APPROACH)
                jsonNode.put("compositeDistance", compositeDistance.getValue());
+         }
+         case DOOR_PANEL ->
+         {
+         }
+         case DOOR_FRAME ->
+         {
+            jsonNode.put("minPostPoints", minPostPoints.getValue());
+            jsonNode.put("minRecessPoints", minRecessPoints.getValue());
          }
       }
    }
@@ -126,11 +129,6 @@ public class BehaviorTreeSceneObjectDefinition extends LatestTimestampModifiable
                yoloClassName.setValue(jsonNode.get("yoloClassName").asText());
          }
          case FOUNDATION_POSE -> foundationPoseObjectType.setValue(IsaacROSFoundationPoseObject.valueOf(jsonNode.get("foundationPoseObjectType").asText()));
-         case DOOR_FRAME ->
-         {
-            minPostPoints.setValue(jsonNode.has("minPostPoints") ? jsonNode.get("minPostPoints").asInt() : 400);
-            minRecessPoints.setValue(jsonNode.has("minRecessPoints") ? jsonNode.get("minRecessPoints").asInt() : 3000);
-         }
          case COMPOSITE_FRAME ->
          {
             compositeFrameName.setValue(jsonNode.has("compositeFrameName") ? jsonNode.get("compositeFrameName").asText() : "");
@@ -140,6 +138,14 @@ public class BehaviorTreeSceneObjectDefinition extends LatestTimestampModifiable
                compositeFrameType.setValue(CompositeFrameType.valueOf(jsonNode.get("compositeFrameType").asText()));
             if (compositeFrameType.getValue() == CompositeFrameType.APPROACH)
                compositeDistance.setValue(jsonNode.has("compositeDistance") ? (float) jsonNode.get("compositeDistance").asDouble() : 0.0f);
+         }
+         case DOOR_PANEL ->
+         {
+         }
+         case DOOR_FRAME ->
+         {
+            minPostPoints.setValue(jsonNode.has("minPostPoints") ? jsonNode.get("minPostPoints").asInt() : 400);
+            minRecessPoints.setValue(jsonNode.has("minRecessPoints") ? jsonNode.get("minRecessPoints").asInt() : 3000);
          }
       }
    }
@@ -231,8 +237,8 @@ public class BehaviorTreeSceneObjectDefinition extends LatestTimestampModifiable
       return switch (objectType.getValue())
       {
          case YOLO_ONLY -> yoloClassName.getValue();
-         case COMPOSITE_FRAME -> compositeFrameName.getValue();
          case FOUNDATION_POSE -> foundationPoseObjectType.getValue().titleCaseName;
+         case COMPOSITE_FRAME -> compositeFrameName.getValue();
          case DOOR_PANEL -> "Door Panel";
          case DOOR_FRAME -> "Door Frame";
       };

@@ -103,18 +103,18 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
       BehaviorTreeSceneObjectState matchedObject = null;
       for (BehaviorTreeSceneObjectState object : scene.getObjects())
       {
-         if (definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.DOOR_PANEL
-             && object instanceof BehaviorTreeSceneDoorPanelExecutor)
-            matchedObject = object;
-         else if (definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.DOOR_FRAME
-                  && object instanceof BehaviorTreeSceneDoorFrameExecutor)
+         if (definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.YOLO_ONLY
+             && object.getYoloClassName().equals(definition.getSceneObjectDefinition().getYoloClassName()))
             matchedObject = object;
          else if (definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.FOUNDATION_POSE
                   && object.getObjectType() == BehaviorTreeSceneObjectType.FOUNDATION_POSE
                   && object.getFoundationPoseObjectType() == definition.getSceneObjectDefinition().getFoundationPoseObjectType())
             matchedObject = object;
-         else if (definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.YOLO_ONLY
-                  && object.getYoloClassName().equals(definition.getSceneObjectDefinition().getYoloClassName()))
+         else if (definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.DOOR_PANEL
+                  && object instanceof BehaviorTreeSceneDoorPanelExecutor)
+            matchedObject = object;
+         else if (definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.DOOR_FRAME
+                  && object instanceof BehaviorTreeSceneDoorFrameExecutor)
             matchedObject = object;
       }
 
@@ -198,10 +198,10 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
 
       boolean success = switch (definition.getSceneObjectDefinition().getObjectType())
       {
+         case YOLO_ONLY, FOUNDATION_POSE -> setupSinglePersistentDetection();
          case COMPOSITE_FRAME -> setupCompositeFrameDetection();
          case DOOR_PANEL -> setupDoorPanelDetection();
          case DOOR_FRAME -> setupDoorFrameDetection();
-         default -> setupSinglePersistentDetection();
       };
 
       if (success)

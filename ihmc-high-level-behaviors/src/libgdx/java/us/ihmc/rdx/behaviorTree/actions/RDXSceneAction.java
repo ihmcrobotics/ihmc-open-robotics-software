@@ -205,13 +205,6 @@ public class RDXSceneAction extends RDXActionNode<SceneActionState, SceneActionD
                   objectDefinition.setFoundationPoseObjectType(IsaacROSFoundationPoseObject.values()[imFPType.get()]);
                ImGui.popItemWidth();
             }
-            else if (objectDefinition.getObjectType() == BehaviorTreeSceneObjectType.DOOR_FRAME)
-            {
-               ImGui.pushItemWidth(100.0f);
-               minPostPointsWidget.renderImGuiWidget();
-               minRecessPointsWidget.renderImGuiWidget();
-               ImGui.popItemWidth();
-            }
             else if (objectDefinition.getObjectType() == BehaviorTreeSceneObjectType.COMPOSITE_FRAME)
             {
                ImGui.pushItemWidth(200.0f);
@@ -234,6 +227,13 @@ public class RDXSceneAction extends RDXActionNode<SceneActionState, SceneActionD
                ImGui.pushItemWidth(100.0f);
                if (objectDefinition.getCompositeFrameType() == CompositeFrameType.APPROACH)
                   compositeFrameDistanceWidget.renderImGuiWidget();
+               ImGui.popItemWidth();
+            }
+            else if (objectDefinition.getObjectType() == BehaviorTreeSceneObjectType.DOOR_FRAME)
+            {
+               ImGui.pushItemWidth(100.0f);
+               minPostPointsWidget.renderImGuiWidget();
+               minRecessPointsWidget.renderImGuiWidget();
                ImGui.popItemWidth();
             }
 

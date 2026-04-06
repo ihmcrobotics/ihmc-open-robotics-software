@@ -239,6 +239,8 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
    {
       return switch (BehaviorTreeSceneObjectType.values()[definition.getObjectType()])
       {
+         case YOLO_ONLY, FOUNDATION_POSE -> new RDXBehaviorTreeSceneObject(id, crdtInfo, definition, baseUI);
+         case COMPOSITE_FRAME -> new RDXBehaviorTreeSceneCompositeFrame(id, crdtInfo, definition, baseUI);
          case DOOR_PANEL -> new RDXBehaviorTreeSceneDoorPanel(id, crdtInfo, definition, baseUI);
          case DOOR_FRAME ->
          {
@@ -247,8 +249,6 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
             doorFrame.setDoorPanel(doorPanel);
             yield doorFrame;
          }
-         case COMPOSITE_FRAME -> new RDXBehaviorTreeSceneCompositeFrame(id, crdtInfo, definition, baseUI);
-         default -> new RDXBehaviorTreeSceneObject(id, crdtInfo, definition, baseUI);
       };
    }
 
