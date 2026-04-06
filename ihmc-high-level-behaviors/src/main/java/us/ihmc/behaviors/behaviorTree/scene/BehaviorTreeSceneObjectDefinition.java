@@ -113,6 +113,9 @@ public class BehaviorTreeSceneObjectDefinition extends LatestTimestampModifiable
             jsonNode.put("minPostPoints", minPostPoints.getValue());
             jsonNode.put("minRecessPoints", minRecessPoints.getValue());
          }
+         case APPROACH_TABLE ->
+         {
+         }
       }
    }
 
@@ -146,6 +149,9 @@ public class BehaviorTreeSceneObjectDefinition extends LatestTimestampModifiable
          {
             minPostPoints.setValue(jsonNode.has("minPostPoints") ? jsonNode.get("minPostPoints").asInt() : 400);
             minRecessPoints.setValue(jsonNode.has("minRecessPoints") ? jsonNode.get("minRecessPoints").asInt() : 3000);
+         }
+         case APPROACH_TABLE ->
+         {
          }
       }
    }
@@ -241,6 +247,7 @@ public class BehaviorTreeSceneObjectDefinition extends LatestTimestampModifiable
          case COMPOSITE_FRAME -> compositeFrameName.getValue();
          case DOOR_PANEL -> "Door Panel";
          case DOOR_FRAME -> "Door Frame";
+         case APPROACH_TABLE -> "Approach Table";
       };
    }
 

@@ -249,6 +249,7 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
             doorFrame.setDoorPanel(doorPanel);
             yield doorFrame;
          }
+         case APPROACH_TABLE -> new RDXBehaviorTreeSceneApproachTable(id, crdtInfo, definition, baseUI);
       };
    }
 

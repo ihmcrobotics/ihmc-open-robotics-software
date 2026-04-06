@@ -164,6 +164,7 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
          case COMPOSITE_FRAME -> new BehaviorTreeSceneCompositeFrameExecutor(id, crdtInfo, syncedRobot, definition, this);
          case DOOR_PANEL -> new BehaviorTreeSceneDoorPanelExecutor(id, crdtInfo, syncedRobot, definition);
          case DOOR_FRAME -> new BehaviorTreeSceneDoorFrameExecutor(id, crdtInfo, syncedRobot, definition, this);
+         case APPROACH_TABLE -> new BehaviorTreeSceneApproachTableExecutor(id, crdtInfo, syncedRobot, definition, this);
       };
    }
 

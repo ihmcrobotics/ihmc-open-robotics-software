@@ -4,6 +4,7 @@
 #include "behavior_msgs/msg/./BehaviorTreeSceneObjectDefinitionMessage_.idl"
 #include "behavior_msgs/msg/./PersistentDetectionStatusMessage_.idl"
 #include "controller_msgs/msg/./RigidBodyTransformMessage_.idl"
+#include "geometry_msgs/msg/./Point_.idl"
 #include "ihmc_common_msgs/msg/./LatestModificationMessage_.idl"
 module behavior_msgs
 {
@@ -23,6 +24,7 @@ module behavior_msgs
 
       /**
        * A behavior tree scene object
+       * Table approach
        */
       @TypeCode(type="behavior_msgs::msg::dds_::BehaviorTreeSceneObjectStateMessage_")
       struct BehaviorTreeSceneObjectStateMessage
@@ -44,6 +46,10 @@ module behavior_msgs
          * Transform of the object frame to world frame
          */
         controller_msgs::msg::dds::RigidBodyTransformMessage transform_to_world;
+        /**
+         * Whether the object is frozen
+         */
+        boolean frozen;
         /**
          * Used only for door panel
          */
@@ -68,10 +74,10 @@ module behavior_msgs
          * Hinge side from the view of the robot
          */
         octet hinge_side;
-        /**
-         * Whether the object is frozen
-         */
-        boolean frozen;
+        unsigned long left_table_points;
+        unsigned long right_table_points;
+        geometry_msgs::msg::dds::Point left_capsule_center;
+        geometry_msgs::msg::dds::Point right_capsule_center;
       };
     };
   };

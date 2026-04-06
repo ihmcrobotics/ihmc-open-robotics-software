@@ -8,6 +8,7 @@ import us.ihmc.pubsub.TopicDataType;
 
 /**
        * A behavior tree scene object
+       * Table approach
        */
 public class BehaviorTreeSceneObjectStateMessage extends Packet<BehaviorTreeSceneObjectStateMessage> implements Settable<BehaviorTreeSceneObjectStateMessage>, EpsilonComparable<BehaviorTreeSceneObjectStateMessage>
 {
@@ -32,6 +33,10 @@ public class BehaviorTreeSceneObjectStateMessage extends Packet<BehaviorTreeScen
             */
    public controller_msgs.msg.dds.RigidBodyTransformMessage transform_to_world_;
    /**
+            * Whether the object is frozen
+            */
+   public boolean frozen_;
+   /**
             * Used only for door panel
             */
    public behavior_msgs.msg.dds.PersistentDetectionStatusMessage door_panel_detection_;
@@ -55,10 +60,10 @@ public class BehaviorTreeSceneObjectStateMessage extends Packet<BehaviorTreeScen
             * Hinge side from the view of the robot
             */
    public byte hinge_side_;
-   /**
-            * Whether the object is frozen
-            */
-   public boolean frozen_;
+   public long left_table_points_;
+   public long right_table_points_;
+   public us.ihmc.euclid.tuple3D.Point3D left_capsule_center_;
+   public us.ihmc.euclid.tuple3D.Point3D right_capsule_center_;
 
    public BehaviorTreeSceneObjectStateMessage()
    {
@@ -67,6 +72,8 @@ public class BehaviorTreeSceneObjectStateMessage extends Packet<BehaviorTreeScen
       persistent_detection_ = new behavior_msgs.msg.dds.PersistentDetectionStatusMessage();
       transform_to_world_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
       door_panel_detection_ = new behavior_msgs.msg.dds.PersistentDetectionStatusMessage();
+      left_capsule_center_ = new us.ihmc.euclid.tuple3D.Point3D();
+      right_capsule_center_ = new us.ihmc.euclid.tuple3D.Point3D();
    }
 
    public BehaviorTreeSceneObjectStateMessage(BehaviorTreeSceneObjectStateMessage other)
@@ -83,6 +90,8 @@ public class BehaviorTreeSceneObjectStateMessage extends Packet<BehaviorTreeScen
       behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
       behavior_msgs.msg.dds.PersistentDetectionStatusMessagePubSubType.staticCopy(other.persistent_detection_, persistent_detection_);
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.transform_to_world_, transform_to_world_);
+      frozen_ = other.frozen_;
+
       behavior_msgs.msg.dds.PersistentDetectionStatusMessagePubSubType.staticCopy(other.door_panel_detection_, door_panel_detection_);
       latch_post_points_ = other.latch_post_points_;
 
@@ -94,8 +103,12 @@ public class BehaviorTreeSceneObjectStateMessage extends Packet<BehaviorTreeScen
 
       hinge_side_ = other.hinge_side_;
 
-      frozen_ = other.frozen_;
+      left_table_points_ = other.left_table_points_;
 
+      right_table_points_ = other.right_table_points_;
+
+      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.left_capsule_center_, left_capsule_center_);
+      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.right_capsule_center_, right_capsule_center_);
    }
 
 
@@ -144,6 +157,21 @@ public class BehaviorTreeSceneObjectStateMessage extends Packet<BehaviorTreeScen
    public controller_msgs.msg.dds.RigidBodyTransformMessage getTransformToWorld()
    {
       return transform_to_world_;
+   }
+
+   /**
+            * Whether the object is frozen
+            */
+   public void setFrozen(boolean frozen)
+   {
+      frozen_ = frozen;
+   }
+   /**
+            * Whether the object is frozen
+            */
+   public boolean getFrozen()
+   {
+      return frozen_;
    }
 
 
@@ -230,19 +258,34 @@ public class BehaviorTreeSceneObjectStateMessage extends Packet<BehaviorTreeScen
       return hinge_side_;
    }
 
-   /**
-            * Whether the object is frozen
-            */
-   public void setFrozen(boolean frozen)
+   public void setLeftTablePoints(long left_table_points)
    {
-      frozen_ = frozen;
+      left_table_points_ = left_table_points;
    }
-   /**
-            * Whether the object is frozen
-            */
-   public boolean getFrozen()
+   public long getLeftTablePoints()
    {
-      return frozen_;
+      return left_table_points_;
+   }
+
+   public void setRightTablePoints(long right_table_points)
+   {
+      right_table_points_ = right_table_points;
+   }
+   public long getRightTablePoints()
+   {
+      return right_table_points_;
+   }
+
+
+   public us.ihmc.euclid.tuple3D.Point3D getLeftCapsuleCenter()
+   {
+      return left_capsule_center_;
+   }
+
+
+   public us.ihmc.euclid.tuple3D.Point3D getRightCapsuleCenter()
+   {
+      return right_capsule_center_;
    }
 
 
@@ -269,6 +312,8 @@ public class BehaviorTreeSceneObjectStateMessage extends Packet<BehaviorTreeScen
       if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
       if (!this.persistent_detection_.epsilonEquals(other.persistent_detection_, epsilon)) return false;
       if (!this.transform_to_world_.epsilonEquals(other.transform_to_world_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.frozen_, other.frozen_, epsilon)) return false;
+
       if (!this.door_panel_detection_.epsilonEquals(other.door_panel_detection_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.latch_post_points_, other.latch_post_points_, epsilon)) return false;
 
@@ -280,8 +325,12 @@ public class BehaviorTreeSceneObjectStateMessage extends Packet<BehaviorTreeScen
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.hinge_side_, other.hinge_side_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.frozen_, other.frozen_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.left_table_points_, other.left_table_points_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.right_table_points_, other.right_table_points_, epsilon)) return false;
+
+      if (!this.left_capsule_center_.epsilonEquals(other.left_capsule_center_, epsilon)) return false;
+      if (!this.right_capsule_center_.epsilonEquals(other.right_capsule_center_, epsilon)) return false;
 
       return true;
    }
@@ -301,6 +350,8 @@ public class BehaviorTreeSceneObjectStateMessage extends Packet<BehaviorTreeScen
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
       if (!this.persistent_detection_.equals(otherMyClass.persistent_detection_)) return false;
       if (!this.transform_to_world_.equals(otherMyClass.transform_to_world_)) return false;
+      if(this.frozen_ != otherMyClass.frozen_) return false;
+
       if (!this.door_panel_detection_.equals(otherMyClass.door_panel_detection_)) return false;
       if(this.latch_post_points_ != otherMyClass.latch_post_points_) return false;
 
@@ -312,8 +363,12 @@ public class BehaviorTreeSceneObjectStateMessage extends Packet<BehaviorTreeScen
 
       if(this.hinge_side_ != otherMyClass.hinge_side_) return false;
 
-      if(this.frozen_ != otherMyClass.frozen_) return false;
+      if(this.left_table_points_ != otherMyClass.left_table_points_) return false;
 
+      if(this.right_table_points_ != otherMyClass.right_table_points_) return false;
+
+      if (!this.left_capsule_center_.equals(otherMyClass.left_capsule_center_)) return false;
+      if (!this.right_capsule_center_.equals(otherMyClass.right_capsule_center_)) return false;
 
       return true;
    }
@@ -334,6 +389,8 @@ public class BehaviorTreeSceneObjectStateMessage extends Packet<BehaviorTreeScen
       builder.append(this.persistent_detection_);      builder.append(", ");
       builder.append("transform_to_world=");
       builder.append(this.transform_to_world_);      builder.append(", ");
+      builder.append("frozen=");
+      builder.append(this.frozen_);      builder.append(", ");
       builder.append("door_panel_detection=");
       builder.append(this.door_panel_detection_);      builder.append(", ");
       builder.append("latch_post_points=");
@@ -346,8 +403,14 @@ public class BehaviorTreeSceneObjectStateMessage extends Packet<BehaviorTreeScen
       builder.append(this.door_type_);      builder.append(", ");
       builder.append("hinge_side=");
       builder.append(this.hinge_side_);      builder.append(", ");
-      builder.append("frozen=");
-      builder.append(this.frozen_);
+      builder.append("left_table_points=");
+      builder.append(this.left_table_points_);      builder.append(", ");
+      builder.append("right_table_points=");
+      builder.append(this.right_table_points_);      builder.append(", ");
+      builder.append("left_capsule_center=");
+      builder.append(this.left_capsule_center_);      builder.append(", ");
+      builder.append("right_capsule_center=");
+      builder.append(this.right_capsule_center_);
       builder.append("}");
       return builder.toString();
    }
