@@ -10,7 +10,6 @@ import us.ihmc.avatar.AvatarSimulatedHandControlThread;
 import us.ihmc.avatar.AvatarStepGeneratorThread;
 import us.ihmc.avatar.ControllerTask;
 import us.ihmc.avatar.EstimatorTask;
-import us.ihmc.avatar.HumanoidSteppingPluginEnvironmentalConstraints;
 import us.ihmc.avatar.StepGeneratorTask;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
@@ -32,6 +31,8 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScript;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeightMapBasedFootstepAdjustment;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
@@ -40,9 +41,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Ex
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ExternalTransitionControllerStateFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StandReadyControllerStateFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ComponentBasedFootstepDataMessageGeneratorFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HumanoidSteppingPluginFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.JoystickBasedSteppingPluginFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HumanoidSteppingManager;
 import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler.TaskOverrunBehavior;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -526,59 +525,39 @@ public class SCS2AvatarSimulationFactory
    {
       HumanoidRobotContextDataFactory contextDataFactory = new HumanoidRobotContextDataFactory();
 
-      HumanoidSteppingPluginFactory steppingFactory;
-      HumanoidSteppingPluginEnvironmentalConstraints stepSnapperUpdatable = null;
       boolean useHeadingAndVelocityScript = this.useHeadingAndVelocityScript.hasValue() ?
             this.useHeadingAndVelocityScript.get() :
             false;
       HeadingAndVelocityEvaluationScriptParameters parameters = null;
       if (headingAndVelocityEvaluationScriptParameters.hasValue())
          parameters = headingAndVelocityEvaluationScriptParameters.get();
-      if (useHeadingAndVelocityScript || parameters != null)
-      {
-         ComponentBasedFootstepDataMessageGeneratorFactory componentBasedFootstepDataMessageGeneratorFactory = new ComponentBasedFootstepDataMessageGeneratorFactory();
-         componentBasedFootstepDataMessageGeneratorFactory.setRegistry();
-         componentBasedFootstepDataMessageGeneratorFactory.setUseHeadingAndVelocityScript(useHeadingAndVelocityScript);
-         if (parameters != null)
-            componentBasedFootstepDataMessageGeneratorFactory.setHeadingAndVelocityEvaluationScriptParameters(parameters);
-         if (heightMapForFootstepZ.hasValue() && heightMapForFootstepZ.get() != null)
-            componentBasedFootstepDataMessageGeneratorFactory.setFootStepAdjustment(new HeightMapBasedFootstepAdjustment(
-                  heightMapForFootstepZ.get()));
 
-         steppingFactory = componentBasedFootstepDataMessageGeneratorFactory;
-      }
-      else
+      FootstepAdjustment footstepAdjustment = null;
+      if (heightMapForFootstepZ.hasValue() && heightMapForFootstepZ.get() != null)
       {
-         JoystickBasedSteppingPluginFactory joystickPluginFactory = new JoystickBasedSteppingPluginFactory();
-         if (heightMapForFootstepZ.hasValue() && heightMapForFootstepZ.get() != null)
-         {
-            joystickPluginFactory.setFootStepAdjustment(new HeightMapBasedFootstepAdjustment(heightMapForFootstepZ.get()));
-         }
-         else
-         {
-            stepSnapperUpdatable = new HumanoidSteppingPluginEnvironmentalConstraints(robotModel.get()
-                                                                                                .getContactPointParameters(),
-                                                                                      robotModel.get()
-                                                                                                .getWalkingControllerParameters()
-                                                                                                .getSteppingParametersForStepGeneration());
-            stepSnapperUpdatable.setSnapToHeightMap(true);
-         }
-
-         steppingFactory = joystickPluginFactory;
+         footstepAdjustment = new HeightMapBasedFootstepAdjustment(heightMapForFootstepZ.get());
       }
 
       RealtimeROS2Node ros2Node = null;
       if (realtimeROS2Node.hasBeenSet())
          ros2Node = realtimeROS2Node.get();
-      stepGeneratorThread = new AvatarStepGeneratorThread(steppingFactory,
-                                                          contextDataFactory,
-                                                          highLevelHumanoidControllerFactory.get()
-                                                                                            .getStatusOutputManager(),
-                                                          highLevelHumanoidControllerFactory.get()
-                                                                                            .getCommandInputManager(),
+      stepGeneratorThread = new AvatarStepGeneratorThread(contextDataFactory,
+                                                          highLevelHumanoidControllerFactory.get().getStatusOutputManager(),
+                                                          highLevelHumanoidControllerFactory.get().getCommandInputManager(),
                                                           robotModel.get(),
-                                                          stepSnapperUpdatable,
+                                                          footstepAdjustment,
                                                           ros2Node);
+      // TODO move this inside the step generator thread?
+      if (useHeadingAndVelocityScript || parameters != null)
+      {
+         HumanoidSteppingManager steppingPlugin = stepGeneratorThread.getSteppingManager();
+         HeadingAndVelocityEvaluationScript script = new HeadingAndVelocityEvaluationScript(robotModel.get()::getStepGeneratorDT,
+                                                                                            stepGeneratorThread.getYoTime(),
+                                                                                            parameters,
+                                                                                            steppingPlugin.getStepGeneratorCommandInputManager().getCommandInputManager(),
+                                                                                            stepGeneratorThread.getYoVariableRegistry());
+         steppingPlugin.addUpdatable(script);
+      }
       simulationConstructionSet.addYoGraphic(stepGeneratorThread.getSCS2YoGraphics());
    }
 
@@ -986,7 +965,7 @@ public class SCS2AvatarSimulationFactory
          controllerFactory = highLevelHumanoidControllerFactory.get();
       else
          controllerFactory = setDefaultHighLevelHumanoidControllerFactory();
-      setComponentBasedFootstepDataMessageGeneratorParameters(useVelocityAndHeadingScript, walkingScriptParameters);
+      setComponentFootstepGeneratorParameters(useVelocityAndHeadingScript, null, walkingScriptParameters);
       return controllerFactory;
    }
 
@@ -1179,17 +1158,9 @@ public class SCS2AvatarSimulationFactory
       this.secondaryStateEstimatorFactory.set(secondaryStateEstimatorFactory);
    }
 
-   public void setComponentBasedFootstepDataMessageGeneratorParameters(boolean useHeadingAndVelocityScript,
-                                                                       HeadingAndVelocityEvaluationScriptParameters headingAndVelocityEvaluationScriptParameters)
-   {
-      setComponentBasedFootstepDataMessageGeneratorParameters(useHeadingAndVelocityScript,
-                                                              null,
-                                                              headingAndVelocityEvaluationScriptParameters);
-   }
-
-   public void setComponentBasedFootstepDataMessageGeneratorParameters(boolean useHeadingAndVelocityScript,
-                                                                       HeightMap heightMapForFootstepZ,
-                                                                       HeadingAndVelocityEvaluationScriptParameters headingAndVelocityEvaluationScriptParameters)
+   public void setComponentFootstepGeneratorParameters(boolean useHeadingAndVelocityScript,
+                                                       HeightMap heightMapForFootstepZ,
+                                                       HeadingAndVelocityEvaluationScriptParameters headingAndVelocityEvaluationScriptParameters)
    {
       this.useHeadingAndVelocityScript.set(useHeadingAndVelocityScript);
       this.heightMapForFootstepZ.set(heightMapForFootstepZ);
