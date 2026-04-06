@@ -14,6 +14,9 @@ behavior_msgs/PersistentDetectionStatusMessage persistent_detection
 # Transform of the object frame to world frame
 controller_msgs/RigidBodyTransformMessage transform_to_world
 
+# Whether the object is frozen
+bool frozen
+
 # Used only for door panel
 behavior_msgs/PersistentDetectionStatusMessage door_panel_detection
 
@@ -36,5 +39,12 @@ byte door_type
 # Hinge side from the view of the robot
 byte hinge_side
 
-# Whether the object is frozen
-bool frozen
+# Table approach
+
+uint32 left_table_points
+
+uint32 right_table_points
+
+geometry_msgs/Point left_capsule_center
+
+geometry_msgs/Point right_capsule_center
