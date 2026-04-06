@@ -965,7 +965,7 @@ public class SCS2AvatarSimulationFactory
          controllerFactory = highLevelHumanoidControllerFactory.get();
       else
          controllerFactory = setDefaultHighLevelHumanoidControllerFactory();
-      setComponentBasedFootstepDataMessageGeneratorParameters(useVelocityAndHeadingScript, null, walkingScriptParameters);
+      setComponentFootstepGeneratorParameters(useVelocityAndHeadingScript, null, walkingScriptParameters);
       return controllerFactory;
    }
 
@@ -1158,9 +1158,9 @@ public class SCS2AvatarSimulationFactory
       this.secondaryStateEstimatorFactory.set(secondaryStateEstimatorFactory);
    }
 
-   public void setComponentBasedFootstepDataMessageGeneratorParameters(boolean useHeadingAndVelocityScript,
-                                                                       HeightMap heightMapForFootstepZ,
-                                                                       HeadingAndVelocityEvaluationScriptParameters headingAndVelocityEvaluationScriptParameters)
+   public void setComponentFootstepGeneratorParameters(boolean useHeadingAndVelocityScript,
+                                                       HeightMap heightMapForFootstepZ,
+                                                       HeadingAndVelocityEvaluationScriptParameters headingAndVelocityEvaluationScriptParameters)
    {
       this.useHeadingAndVelocityScript.set(useHeadingAndVelocityScript);
       this.heightMapForFootstepZ.set(heightMapForFootstepZ);

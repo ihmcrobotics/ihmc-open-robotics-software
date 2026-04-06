@@ -11,7 +11,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -106,9 +105,9 @@ public abstract class AvatarFlatGroundQuickWalkingTest implements MultiRobotTest
                                                                                                                                              flatGround,
                                                                                                                                              simulationTestingParameters);
 
-      simulationTestHelperFactory.setComponentBasedFootstepDataMessageGeneratorParameters(false,
-                                                                                             flatGround.getTerrainObject3D().getHeightMapIfAvailable(),
-                                                                                             null);
+      simulationTestHelperFactory.setComponentFootstepGeneratorParameters(false,
+                                                                          flatGround.getTerrainObject3D().getHeightMapIfAvailable(),
+                                                                          null);
 
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
 
