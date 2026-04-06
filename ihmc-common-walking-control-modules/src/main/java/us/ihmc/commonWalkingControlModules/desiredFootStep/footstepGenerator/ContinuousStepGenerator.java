@@ -570,7 +570,7 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
          csgStatusMessageOutputManager.reportStatusMessage(csgStatusMessage);
    }
 
-   public void setSnapToHeightmap(boolean snapToHeightmap)
+   public void seIsSnappingToHeightmap(boolean snapToHeightmap)
    {
       csgStatusMessage.setSnappingToHeightmap(snapToHeightmap);
    }

@@ -178,7 +178,8 @@ public class StepGeneratorCommandInputManager implements Updatable
          areVelocitiesNormalized.set(command.getAreVelocitiesNormalized());
          walk.set(command.getWalk());
       }
-      else if (commandInputManager.isNewCommandAvailable(ControllerWaypointGoalCommand.class))
+
+      if (commandInputManager.isNewCommandAvailable(ControllerWaypointGoalCommand.class))
       {
          ControllerWaypointGoalCommand command = commandInputManager.pollNewestCommand(ControllerWaypointGoalCommand.class);
          for (int i = 0; i < controllerWaypointGoalCommandConsumer.size(); i++)
@@ -187,7 +188,8 @@ public class StepGeneratorCommandInputManager implements Updatable
          }
          walk.set(true);
       }
-      else if (commandInputManager.isNewCommandAvailable(ControllerWaypointGoalListCommand.class))
+
+      if (commandInputManager.isNewCommandAvailable(ControllerWaypointGoalListCommand.class))
       {
          ControllerWaypointGoalListCommand listCommand = commandInputManager.pollNewestCommand(ControllerWaypointGoalListCommand.class);
          for (int i = 0; i < controllerWaypointGoalListCommandConsumer.size(); i++)
@@ -195,6 +197,15 @@ public class StepGeneratorCommandInputManager implements Updatable
             controllerWaypointGoalListCommandConsumer.get(i).accept(listCommand);
          }
          walk.set(true);
+      }
+
+      if (commandInputManager.isNewCommandAvailable(ControllerReleaseGoalCommand.class))
+      {
+         ControllerReleaseGoalCommand command = commandInputManager.pollNewestCommand(ControllerReleaseGoalCommand.class);
+         for (int i = 0; i < controllerReleaseGoalCommandConsumers.size(); i++)
+         {
+            controllerReleaseGoalCommandConsumers.get(i).accept(command);
+         }
       }
       commandInputManager.clearCommands(ContinuousStepGeneratorInputCommand.class);
       commandInputManager.clearCommands(ControllerWaypointGoalCommand.class);

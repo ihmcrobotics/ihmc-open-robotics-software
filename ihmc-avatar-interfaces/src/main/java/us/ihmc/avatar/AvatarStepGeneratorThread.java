@@ -49,7 +49,7 @@ public class AvatarStepGeneratorThread implements SCS2YoGraphicHolder
 
    private final StepGeneratorCommandInputManager csgCommandInputManager;
    private final StatusMessageOutputManager statusMessageOutputManager;
-   private final HumanoidSteppingPluginEnvironmentalConstraints environmentalConstraints;
+   private final HumanoidSteppingEnvironmentalConstraints environmentalConstraints;
 
    public AvatarStepGeneratorThread(HumanoidRobotContextDataFactory contextDataFactory,
                                     StatusMessageOutputManager controllerOutputManager,
@@ -98,11 +98,9 @@ public class AvatarStepGeneratorThread implements SCS2YoGraphicHolder
       }
       else
       {
-         environmentalConstraints = new HumanoidSteppingPluginEnvironmentalConstraints(drcRobotModel
-                                                                                             .getContactPointParameters(),
-                                                                                       drcRobotModel
-                                                                                             .getWalkingControllerParameters()
-                                                                                             .getSteppingParametersForStepGeneration());
+         environmentalConstraints = new HumanoidSteppingEnvironmentalConstraints(drcRobotModel.getContactPointParameters(),
+                                                                                 drcRobotModel.getWalkingControllerParameters()
+                                                                                              .getSteppingParametersForStepGeneration());
          environmentalConstraints.setSnapToHeightMap(true);
          // sets up the environmental constraint manager as a planar region consumer in the input manager
          csgCommandInputManager.addHeightMapCommandConsumer(environmentalConstraints);

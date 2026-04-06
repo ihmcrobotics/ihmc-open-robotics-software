@@ -31,7 +31,7 @@ import java.util.function.Consumer;
  * Updatable to clear the graphics to the
  * {@link HumanoidSteppingManager#addUpdatable(Updatable)}
  */
-public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<HeightMapCommand>, Updatable, SCS2YoGraphicHolder
+public class HumanoidSteppingEnvironmentalConstraints implements Consumer<HeightMapCommand>, Updatable, SCS2YoGraphicHolder
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -42,7 +42,7 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
    private final HeightMapFootstepSnapper stepSnapper;
    private final List<FootstepValidityIndicator> footstepValidityIndicators = new ArrayList<>();
 
-   public HumanoidSteppingPluginEnvironmentalConstraints(RobotContactPointParameters<RobotSide> contactPointParameters, SteppingParameters steppingParameters)
+   public HumanoidSteppingEnvironmentalConstraints(RobotContactPointParameters<RobotSide> contactPointParameters, SteppingParameters steppingParameters)
    {
       this.steppingParameters = steppingParameters;
 
