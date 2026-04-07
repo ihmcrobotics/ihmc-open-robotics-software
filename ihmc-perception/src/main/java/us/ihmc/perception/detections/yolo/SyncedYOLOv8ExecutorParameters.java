@@ -11,6 +11,7 @@ import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTStatusSet;
 import us.ihmc.communication.crdt.LatestTimestampModifiable;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Subscription;
@@ -94,7 +95,18 @@ public class SyncedYOLOv8ExecutorParameters extends LatestTimestampModifiable
 
    public Map<String, SyncedYOLOv8ModelParameters> getModelParameters()
    {
-      return modelParameters;
+      synchronized (modelParameters)
+      {
+         return new LinkedHashMap<>(modelParameters);
+      }
+   }
+
+   public SyncedYOLOv8ModelParameters getModelParameters(String modelName)
+   {
+      synchronized (modelParameters)
+      {
+         return modelParameters.get(modelName);
+      }
    }
 
    public void close()
@@ -158,7 +170,13 @@ public class SyncedYOLOv8ExecutorParameters extends LatestTimestampModifiable
       synchronized (modelParameters)
       {
          for (YOLOv8ModelParameters modelSettingsMessage : message.getModelSettings())
-            modelParameters.get(modelSettingsMessage.getModelNameAsString()).fromMessage(modelSettingsMessage);
+         {
+            SyncedYOLOv8ModelParameters settings = modelParameters.get(modelSettingsMessage.getModelNameAsString());
+            if (settings != null)
+               settings.fromMessage(modelSettingsMessage);
+            else
+               LogTools.warn("Ignoring YOLO settings for unknown model: {}", modelSettingsMessage.getModelNameAsString());
+         }
       }
       confirmReceivedFullData();
    }
