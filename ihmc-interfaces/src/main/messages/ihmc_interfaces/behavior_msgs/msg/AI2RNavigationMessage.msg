@@ -16,3 +16,6 @@ string target_object
 
 # The distance to the reference frame (located at the object's centroid)
 float64 distance_to_object
+
+# The minimum distance to the obstacles considered in body path planning
+float64 obstacle_clearance

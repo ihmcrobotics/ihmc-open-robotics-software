@@ -26,8 +26,8 @@ public class ArmActionDefinition extends ActionNodeDefinition implements SidedOb
    public static final double DEFAULT_LINEAR_POSITION_WEIGHT = 50.0;
    public static final double DEFAULT_ANGULAR_POSITION_WEIGHT = 50.0;
    public static final double DEFAULT_JOINTSPACE_WEIGHT = -1.0;
-   public static final double DEFAULT_POSITION_ERROR_TOLERANCE = 0.15;
-   public static final double DEFAULT_ORIENTATION_ERROR_TOLERANCE = Math.toRadians(10.0);
+   public static final double DEFAULT_POSITION_ERROR_TOLERANCE = 0.3;
+   public static final double DEFAULT_ORIENTATION_ERROR_TOLERANCE = Math.toRadians(20.0);
 
    private final CRDTBidirectionalEnumField<RobotSide> side;
    private final CRDTBidirectionalDouble trajectoryDuration;

@@ -25,7 +25,7 @@ public class UInt16MultiArrayHack extends Packet<UInt16MultiArrayHack> implement
    public UInt16MultiArrayHack()
    {
       layout_ = new std_msgs.msg.dds.MultiArrayLayout();
-      data_ = new us.ihmc.idl.IDLSequence.Integer (512, "type_3");
+      data_ = new us.ihmc.idl.IDLSequence.Integer (1024, "type_3");
 
    }
 

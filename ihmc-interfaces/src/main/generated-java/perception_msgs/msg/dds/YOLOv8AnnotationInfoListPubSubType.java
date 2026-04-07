@@ -15,7 +15,7 @@ public class YOLOv8AnnotationInfoListPubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "f8ccd43915a3083ff785894b9d154894a3ea9275b36efacf0dd4ef7df9ffca08";
+   		return "0e31c537c8a0f09810bed7069e84d76f1b6c7450f8363598f192d58e3cb27cf2";
    }
    
    @Override
