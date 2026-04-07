@@ -479,6 +479,8 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
       if (target != null)
       {
          state.getLogger().info("Updating existing approach table scene object");
+         target.setMinCapsulePoints(definition.getSceneObjectDefinition().getMinCapsulePoints());
+         target.setSearchStartX(definition.getSceneObjectDefinition().getSearchStartX());
          target.unfreeze();
          target.update();
       }

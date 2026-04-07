@@ -15,7 +15,7 @@ public class BehaviorTreeSceneObjectDefinitionMessagePubSubType implements us.ih
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "85ead7d8bc80118edae9a9833f313394e04eebeed1c79f71c7e4939d055a6901";
+   		return "142d1a628a21d8c201f3d9a458d4db719ff4d7f0cf04d710155fcfd89ad2e893";
    }
    
    @Override
@@ -69,6 +69,10 @@ public class BehaviorTreeSceneObjectDefinitionMessagePubSubType implements us.ih
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       return current_alignment - initial_alignment;
    }
@@ -105,6 +109,12 @@ public class BehaviorTreeSceneObjectDefinitionMessagePubSubType implements us.ih
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getCompositeFrameB().length() + 1;
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -148,6 +158,10 @@ public class BehaviorTreeSceneObjectDefinitionMessagePubSubType implements us.ih
 
       cdr.write_type_5(data.getCompositeDistance());
 
+      cdr.write_type_3(data.getMinCapsulePoints());
+
+      cdr.write_type_5(data.getSearchStartX());
+
    }
 
    public static void read(behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage data, us.ihmc.idl.CDR cdr)
@@ -169,6 +183,10 @@ public class BehaviorTreeSceneObjectDefinitionMessagePubSubType implements us.ih
       	
       data.setCompositeDistance(cdr.read_type_5());
       	
+      data.setMinCapsulePoints(cdr.read_type_3());
+      	
+      data.setSearchStartX(cdr.read_type_5());
+      	
 
    }
 
@@ -186,6 +204,8 @@ public class BehaviorTreeSceneObjectDefinitionMessagePubSubType implements us.ih
       ser.write_type_d("composite_frame_b", data.getCompositeFrameB());
       ser.write_type_9("composite_frame_type", data.getCompositeFrameType());
       ser.write_type_5("composite_distance", data.getCompositeDistance());
+      ser.write_type_3("min_capsule_points", data.getMinCapsulePoints());
+      ser.write_type_5("search_start_x", data.getSearchStartX());
    }
 
    @Override
@@ -202,6 +222,8 @@ public class BehaviorTreeSceneObjectDefinitionMessagePubSubType implements us.ih
       ser.read_type_d("composite_frame_b", data.getCompositeFrameB());
       data.setCompositeFrameType(ser.read_type_9("composite_frame_type"));
       data.setCompositeDistance(ser.read_type_5("composite_distance"));
+      data.setMinCapsulePoints(ser.read_type_3("min_capsule_points"));
+      data.setSearchStartX(ser.read_type_5("search_start_x"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage src, behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage dest)

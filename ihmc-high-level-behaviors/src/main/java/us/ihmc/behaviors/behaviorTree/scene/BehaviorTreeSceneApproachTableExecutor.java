@@ -55,13 +55,13 @@ public class BehaviorTreeSceneApproachTableExecutor extends BehaviorTreeSceneObj
          for (RobotSide side : RobotSide.values)
          {
             capsuleCenter.get(side).setToZero(syncedRobot.getReferenceFrames().getMidFeetUnderPelvisFrame());
-            capsuleCenter.get(side).addX(0.05);
+            capsuleCenter.get(side).addX(getSearchStartX());
             capsuleCenter.get(side).addY(side.negateIfLeftSide(0.3));
             capsuleCenter.get(side).setZ(0.8);
             tablePoints.put(side, 0L);
          }
 
-         int minPoints = 300;
+         int minPoints = getMinCapsulePoints();
          while ((capsuleCenter.get(RobotSide.LEFT).getX() < 3.0 && capsuleCenter.get(RobotSide.RIGHT).getX() < 3.0)
                 && (tablePoints.get(RobotSide.LEFT) < minPoints || tablePoints.get(RobotSide.RIGHT) < minPoints))
          {
