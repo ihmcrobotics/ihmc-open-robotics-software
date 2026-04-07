@@ -15,7 +15,7 @@ public class BehaviorTreeSceneObjectStateMessagePubSubType implements us.ihmc.pu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "36316615940a2c5b241581c7dbb269f6946f1d750908debf0444aa633d4c71fe";
+   		return "07f96bbd5a8ec970b08224c5b06085af9a03cdf8a4628ec6bca6fbb913180302";
    }
    
    @Override
@@ -61,6 +61,8 @@ public class BehaviorTreeSceneObjectStateMessagePubSubType implements us.ihmc.pu
       current_alignment += behavior_msgs.msg.dds.PersistentDetectionStatusMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -111,6 +113,9 @@ public class BehaviorTreeSceneObjectStateMessagePubSubType implements us.ihmc.pu
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += behavior_msgs.msg.dds.PersistentDetectionStatusMessagePubSubType.getCdrSerializedSize(data.getDoorPanelDetection(), current_alignment);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -150,6 +155,8 @@ public class BehaviorTreeSceneObjectStateMessagePubSubType implements us.ihmc.pu
       behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
       behavior_msgs.msg.dds.PersistentDetectionStatusMessagePubSubType.write(data.getPersistentDetection(), cdr);
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getTransformToWorld(), cdr);
+      cdr.write_type_7(data.getValid());
+
       cdr.write_type_7(data.getFrozen());
 
       behavior_msgs.msg.dds.PersistentDetectionStatusMessagePubSubType.write(data.getDoorPanelDetection(), cdr);
@@ -179,6 +186,8 @@ public class BehaviorTreeSceneObjectStateMessagePubSubType implements us.ihmc.pu
       behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
       behavior_msgs.msg.dds.PersistentDetectionStatusMessagePubSubType.read(data.getPersistentDetection(), cdr);	
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getTransformToWorld(), cdr);	
+      data.setValid(cdr.read_type_7());
+      	
       data.setFrozen(cdr.read_type_7());
       	
       behavior_msgs.msg.dds.PersistentDetectionStatusMessagePubSubType.read(data.getDoorPanelDetection(), cdr);	
@@ -213,6 +222,7 @@ public class BehaviorTreeSceneObjectStateMessagePubSubType implements us.ihmc.pu
 
       ser.write_type_a("transform_to_world", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToWorld());
 
+      ser.write_type_7("valid", data.getValid());
       ser.write_type_7("frozen", data.getFrozen());
       ser.write_type_a("door_panel_detection", new behavior_msgs.msg.dds.PersistentDetectionStatusMessagePubSubType(), data.getDoorPanelDetection());
 
@@ -241,6 +251,7 @@ public class BehaviorTreeSceneObjectStateMessagePubSubType implements us.ihmc.pu
 
       ser.read_type_a("transform_to_world", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToWorld());
 
+      data.setValid(ser.read_type_7("valid"));
       data.setFrozen(ser.read_type_7("frozen"));
       ser.read_type_a("door_panel_detection", new behavior_msgs.msg.dds.PersistentDetectionStatusMessagePubSubType(), data.getDoorPanelDetection());
 
