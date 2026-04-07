@@ -33,6 +33,10 @@ public class BehaviorTreeSceneObjectStateMessage extends Packet<BehaviorTreeScen
             */
    public controller_msgs.msg.dds.RigidBodyTransformMessage transform_to_world_;
    /**
+            * Whether the object is valid
+            */
+   public boolean valid_;
+   /**
             * Whether the object is frozen
             */
    public boolean frozen_;
@@ -90,6 +94,8 @@ public class BehaviorTreeSceneObjectStateMessage extends Packet<BehaviorTreeScen
       behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
       behavior_msgs.msg.dds.PersistentDetectionStatusMessagePubSubType.staticCopy(other.persistent_detection_, persistent_detection_);
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.transform_to_world_, transform_to_world_);
+      valid_ = other.valid_;
+
       frozen_ = other.frozen_;
 
       behavior_msgs.msg.dds.PersistentDetectionStatusMessagePubSubType.staticCopy(other.door_panel_detection_, door_panel_detection_);
@@ -157,6 +163,21 @@ public class BehaviorTreeSceneObjectStateMessage extends Packet<BehaviorTreeScen
    public controller_msgs.msg.dds.RigidBodyTransformMessage getTransformToWorld()
    {
       return transform_to_world_;
+   }
+
+   /**
+            * Whether the object is valid
+            */
+   public void setValid(boolean valid)
+   {
+      valid_ = valid;
+   }
+   /**
+            * Whether the object is valid
+            */
+   public boolean getValid()
+   {
+      return valid_;
    }
 
    /**
@@ -312,6 +333,8 @@ public class BehaviorTreeSceneObjectStateMessage extends Packet<BehaviorTreeScen
       if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
       if (!this.persistent_detection_.epsilonEquals(other.persistent_detection_, epsilon)) return false;
       if (!this.transform_to_world_.epsilonEquals(other.transform_to_world_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.valid_, other.valid_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.frozen_, other.frozen_, epsilon)) return false;
 
       if (!this.door_panel_detection_.epsilonEquals(other.door_panel_detection_, epsilon)) return false;
@@ -350,6 +373,8 @@ public class BehaviorTreeSceneObjectStateMessage extends Packet<BehaviorTreeScen
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
       if (!this.persistent_detection_.equals(otherMyClass.persistent_detection_)) return false;
       if (!this.transform_to_world_.equals(otherMyClass.transform_to_world_)) return false;
+      if(this.valid_ != otherMyClass.valid_) return false;
+
       if(this.frozen_ != otherMyClass.frozen_) return false;
 
       if (!this.door_panel_detection_.equals(otherMyClass.door_panel_detection_)) return false;
@@ -389,6 +414,8 @@ public class BehaviorTreeSceneObjectStateMessage extends Packet<BehaviorTreeScen
       builder.append(this.persistent_detection_);      builder.append(", ");
       builder.append("transform_to_world=");
       builder.append(this.transform_to_world_);      builder.append(", ");
+      builder.append("valid=");
+      builder.append(this.valid_);      builder.append(", ");
       builder.append("frozen=");
       builder.append(this.frozen_);      builder.append(", ");
       builder.append("door_panel_detection=");

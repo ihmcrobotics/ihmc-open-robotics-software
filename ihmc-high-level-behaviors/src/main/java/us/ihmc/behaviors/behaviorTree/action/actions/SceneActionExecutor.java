@@ -32,6 +32,7 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
    private final Point3D cameraPosition = new Point3D();
    private final Vector3D detectionToCamera = new Vector3D();
    private boolean printDebug = false;
+   private BehaviorTreeSceneObjectState setupTarget;
 
    public SceneActionExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
    {
@@ -52,6 +53,7 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
       state.getLogger().info("Executing scene action for object type: {}", definition.getName());
 
       timer.reset();
+      setupTarget = null;
    }
 
    @Override
@@ -149,6 +151,21 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
 
    private void setupObject()
    {
+      double timeout = definition.getTimeout();
+      if (!timer.isRunning(timeout))
+      {
+         state.getLogger().error("Timed out after %.1f s without finding a suitable detection.".formatted(timeout));
+         state.setFailed(true);
+         state.setIsExecuting(false);
+         return;
+      }
+
+      if (setupTarget != null)
+      {
+         state.setIsExecuting(!setupTarget.isValid());
+         return;
+      }
+
       if (rootNode.getState().getPreviewModeEnabled())
       {
          state.getLogger().info("Preview mode enabled. Adding nominal object pose for: {}", definition.getSceneObjectDefinition().getName());
@@ -184,23 +201,14 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
             target.setTransformToWorld(nominalWorldPose);
             scene.addObject(target);
          }
-         state.setIsExecuting(false);
-         return;
-      }
-
-      double timeout = definition.getTimeout();
-      if (!timer.isRunning(timeout))
-      {
-         state.getLogger().error("Timed out after %.1f s without finding a suitable detection.".formatted(timeout));
-         state.setFailed(true);
-         state.setIsExecuting(false);
+         setupTarget = target;
          return;
       }
 
       printDebug = throttler.run();
       cameraPosition.set(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getExperimentalCameraFrame).getTranslation());
 
-      boolean success = switch (definition.getSceneObjectDefinition().getObjectType())
+      switch (definition.getSceneObjectDefinition().getObjectType())
       {
          case YOLO_ONLY, FOUNDATION_POSE -> setupSinglePersistentDetection();
          case COMPOSITE_FRAME -> setupCompositeFrameDetection();
@@ -208,12 +216,9 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
          case DOOR_FRAME -> setupDoorFrameDetection();
          case APPROACH_TABLE -> setupApproachTableDetection();
       };
-
-      if (success)
-         state.setIsExecuting(false);
    }
 
-   private boolean setupCompositeFrameDetection()
+   private void setupCompositeFrameDetection()
    {
       ReferenceFrame frameA = scene.findFrameByName(definition.getSceneObjectDefinition().getCompositeFrameA());
       ReferenceFrame frameB = scene.findFrameByName(definition.getSceneObjectDefinition().getCompositeFrameB());
@@ -224,7 +229,7 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
                  .warn("Failed to find frames: %s = %s and %s = %s".formatted(
                        definition.getSceneObjectDefinition().getCompositeFrameA(), frameA,
                        definition.getSceneObjectDefinition().getCompositeFrameB(), frameB));
-         return false;
+         return;
       }
 
       BehaviorTreeSceneCompositeFrameExecutor target = null;
@@ -241,6 +246,7 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
       if (target != null)
       {
          state.getLogger().info("Updating existing composite frame: {}", definition.getSceneObjectDefinition().getCompositeFrameName());
+         target.setValid(false);
          target.setCompositeFrameA(definition.getSceneObjectDefinition().getCompositeFrameA());
          target.setCompositeFrameB(definition.getSceneObjectDefinition().getCompositeFrameB());
          target.setCompositeFrameType(definition.getSceneObjectDefinition().getCompositeFrameType());
@@ -259,10 +265,10 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
          scene.addObject(target);
       }
 
-      return true;
+      setupTarget = target;
    }
 
-   private boolean setupDoorPanelDetection()
+   private void setupDoorPanelDetection()
    {
       // First, find the closest door opening mechanism (lever, knob, push bar, or pull handle)
       PersistentDetection openingMechanismDetection = null;
@@ -307,7 +313,7 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
       {
          if (printDebug)
             state.getLogger().warn("No suitable door opening mechanism found (door_lever, door_knob, door_push_bar, or door_pull_handle).");
-         return false;
+         return;
       }
 
       state.getLogger().info("Found door opening mechanism: {} with history size: {}",
@@ -355,7 +361,7 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
       {
          if (printDebug)
             state.getLogger().warn("No suitable door_panel found.");
-         return false;
+         return;
       }
 
       // Check that the closest panel is within 2 meters of the opening mechanism
@@ -364,7 +370,7 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
       {
          if (printDebug)
             state.getLogger().warn("Closest door_panel is %.2f m from opening mechanism, must be within 2.0 m".formatted(distanceToMechanism));
-         return false;
+         return;
       }
 
       state.getLogger().info("Found door_panel with history size: %d at distance %.2f m from opening mechanism".formatted(
@@ -385,6 +391,7 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
       if (target != null)
       {
          state.getLogger().info("Updating existing door panel scene object");
+         target.setValid(false);
          target.setPersistentDetection(openingMechanismDetection);
          target.setDoorPanelPersistentDetection(doorPanelDetection);
          target.unfreeze();
@@ -403,10 +410,10 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
          scene.addObject(target);
       }
 
-      return true;
+      setupTarget = target;
    }
 
-   private boolean setupDoorFrameDetection()
+   private void setupDoorFrameDetection()
    {
       // First, find a stable door panel
       BehaviorTreeSceneDoorPanelExecutor doorPanelSceneObject = null;
@@ -423,7 +430,7 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
       {
          if (printDebug)
             state.getLogger().warn("No suitable door panel scene object found.");
-         return false;
+         return;
       }
 
       state.getLogger().info("Found door panel scene object: {} ({})", doorPanelSceneObject.getName(), doorPanelSceneObject.getID());
@@ -443,6 +450,7 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
       if (target != null)
       {
          state.getLogger().info("Updating existing door frame scene object");
+         target.setValid(false);
          target.setPersistentDetection(doorPanelSceneObject.getDoorPanelPersistentDetection());
          target.setMinPostPoints(definition.getSceneObjectDefinition().getMinPostPoints());
          target.setMinRecessPoints(definition.getSceneObjectDefinition().getMinRecessPoints());
@@ -461,10 +469,10 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
          scene.addObject(target);
       }
 
-      return true;
+      setupTarget = target;
    }
 
-   private boolean setupApproachTableDetection()
+   private void setupApproachTableDetection()
    {
       BehaviorTreeSceneApproachTableExecutor target = null;
       for (BehaviorTreeSceneObjectState object : scene.getObjects())
@@ -479,6 +487,7 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
       if (target != null)
       {
          state.getLogger().info("Updating existing approach table scene object");
+         target.setValid(false);
          target.setMinCapsulePoints(definition.getSceneObjectDefinition().getMinCapsulePoints());
          target.setSearchStartX(definition.getSceneObjectDefinition().getSearchStartX());
          target.unfreeze();
@@ -495,10 +504,10 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
          scene.addObject(target);
       }
 
-      return true;
+      setupTarget = target;
    }
 
-   private boolean setupSinglePersistentDetection()
+   private void setupSinglePersistentDetection()
    {
       // Find a close stable detection
       PersistentDetection bestDetection = null;
@@ -573,7 +582,7 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
          if (printDebug)
             state.getLogger().warn("No suitable persistent detection found. There are currently {} persistent detections.",
                                    scene.getPersistentDetections().size());
-         return false;
+         return;
       }
 
       state.getLogger().info("Found persistent detection with history size: {}", bestDetection.getHistorySize());
@@ -599,6 +608,7 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
       if (target != null)
       {
          state.getLogger().info("Updating existing scene object for type: {}", definition.getSceneObjectDefinition().getName());
+         target.setValid(false);
          target.setPersistentDetection(bestDetection);
          target.unfreeze();
          target.update();
@@ -615,6 +625,6 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
          scene.addObject(target);
       }
 
-      return true;
+      setupTarget = target;
    }
 }

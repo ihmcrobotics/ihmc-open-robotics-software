@@ -95,6 +95,7 @@ public class BehaviorTreeSceneApproachTableExecutor extends BehaviorTreeSceneObj
          transform.getValue().getRotation().set(rotationMatrix);
          transform.modify();
          referenceFrame.update();
+         setValid(true);
       }
       finally
       {

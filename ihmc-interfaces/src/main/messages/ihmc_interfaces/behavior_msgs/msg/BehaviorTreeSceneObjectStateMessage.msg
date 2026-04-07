@@ -14,6 +14,9 @@ behavior_msgs/PersistentDetectionStatusMessage persistent_detection
 # Transform of the object frame to world frame
 controller_msgs/RigidBodyTransformMessage transform_to_world
 
+# Whether the object is valid
+bool valid
+
 # Whether the object is frozen
 bool frozen
 
