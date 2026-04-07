@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command;
 
-import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleInput;
@@ -38,10 +37,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelCo
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
@@ -146,12 +142,30 @@ public class CrossRobotCommandResolver
       }
    }
 
-   public void resolveCapturabilityData(CenterOfPressureDataHolder in, CenterOfPressureDataHolder out)
+   public void resolveCentroidalData(CenterOfPressureDataHolder in, CenterOfPressureDataHolder out)
    {
       ConvexPolygon2D supportPolygonIn = in.getSupportPolygon();
       ConvexPolygon2D supportPolygonOut = out.getSupportPolygon();
-
       supportPolygonOut.set(supportPolygonIn);
+
+      out.getComPositionWaypoints().clear();
+      out.getComVelocityWaypoints().clear();
+      out.getCopPositionWaypoints().clear();
+
+      out.setRemainingTimeInContactSequence(in.getRemainingTimeInContactSequence());
+
+      for (int i = 0; i < in.getComPositionWaypoints().size(); i++)
+      {
+         resolveFrameTuple2D(in.getComPositionWaypoints().get(i), out.getComPositionWaypoints().add());
+      }
+      for (int i = 0; i < in.getComVelocityWaypoints().size(); i++)
+      {
+         resolveFrameTuple2D(in.getComVelocityWaypoints().get(i), out.getComVelocityWaypoints().add());
+      }
+      for (int i = 0; i < in.getCopPositionWaypoints().size(); i++)
+      {
+         resolveFrameTuple2D(in.getCopPositionWaypoints().get(i), out.getCopPositionWaypoints().add());
+      }
    }
 
    public void resolveDesiredExternalWrenchHolder(DesiredExternalWrenchHolder in, DesiredExternalWrenchHolder out)
@@ -251,7 +265,7 @@ public class CrossRobotCommandResolver
 
    public void resolveHumanoidRobotContextDataPlanner(HumanoidRobotContextData in, HumanoidRobotContextData out)
    {
-      resolveCapturabilityData(in.getCenterOfPressureDataHolder(), out.getCenterOfPressureDataHolder());
+      resolveCentroidalData(in.getCenterOfPressureDataHolder(), out.getCenterOfPressureDataHolder());
    }
 
    public void resolveSensorDataContext(SensorDataContext in, SensorDataContext out)
