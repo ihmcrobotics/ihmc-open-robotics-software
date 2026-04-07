@@ -1,0 +1,27 @@
+#ifndef __controller_msgs__msg__RLPolicyCommand__idl__
+#define __controller_msgs__msg__RLPolicyCommand__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message represents the command to switch to a desired policy
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::RLPolicyCommand_")
+      struct RLPolicyCommand
+      {
+        /**
+         * Desired model to be used, wrt array position
+         */
+        octet desired_model;
+        boolean execute_desired_model;
+      };
+    };
+  };
+};
+
+#endif
