@@ -12,19 +12,22 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextTools;
+import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.BipedTimedStep;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MultiContactGaitGeneratorAPI;
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandContactCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.TerrainMapCommand;
@@ -40,6 +43,9 @@ import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.DefaultPoint2DGraphic;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
@@ -50,9 +56,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerThreadInterface
@@ -76,7 +80,7 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
    private final CommandInputManager walkingCommandInputManager;
    private final StatusMessageOutputManager walkingOutputManager;
 
-//   private final AvatarBipedalGaitGenerator bipedalGaitGenerator;
+   private final AvatarBipedalGaitGenerator bipedalGaitGenerator;
    private final YoBoolean hasReceivedPlanarRegions = new YoBoolean("hasReceivedPlanarRegions", registry);
 
    private final YoDouble contactSafetyFactor = new YoDouble("contactSafetyFactor", registry);
@@ -105,29 +109,23 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
    private final YoFramePoint2D desiredCapturePoint = new YoFramePoint2D("desiredCapturePointMCGG", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector2D capturePointError = new YoFrameVector2D("capturePointError", ReferenceFrame.getWorldFrame(), registry);
 
-   private final List<BipedTimedStep> plannedFootSteps = new ArrayList<>();
    private final SideDependentList<HandContactCommand> plannedHandContacts = new SideDependentList<>();
    private final AtomicReference<CapturabilityBasedStatus> capturabilityBasedStatus = new AtomicReference<>();
 
-//   private final YoFramePoint2D[] yoCapturePointWaypoints = new YoFramePoint2D[25];
+   private final YoFramePoint2D[] yoCapturePointWaypoints = new YoFramePoint2D[25];
+   private final YoFramePoint2D[] yoCoPWaypoints = new YoFramePoint2D[25];
    private final YoPerceptionVisualizer perceptionVisualizer;
 
    // TODO convert to time-based, or somehow check if a hand is in recovery
    private final YoBoolean hasSentRecoveryMessage = new YoBoolean("hasSentRecoveryMessage", registry);
 
    private final YoEnum<RobotSide> diagnosticBracingSide = new YoEnum<>("diagnosticBracingSide", registry, RobotSide.class, true);
-//   private final YoBoolean triggerInferenceCall = new YoBoolean("triggerInferenceCall", registry);
-//   private final YoInteger numberOfInferenceCallsForTest = new YoInteger("numberOfInferenceCallsForTest", registry);
 
    private final ConvexPolygonScaler convexPolygonScaler = new ConvexPolygonScaler();
-   private final YoDouble contactStateUpdateTimer = new YoDouble("handContactPlanTimer", registry);
-   private final FramePoint2D centerOfPressure = new FramePoint2D();
+   private final YoDouble planTime = new YoDouble("handContactPlanTimer", registry);
 
    private final FrameVector2D desiredToCurrentCapturePoint = new FrameVector2D();
-   private final FrameConvexPolygon2D supportPolygon = new FrameConvexPolygon2D();
    private final SideDependentList<FramePoint3D> handPositions = new SideDependentList<>(new FramePoint3D(), new FramePoint3D());
-   private final FramePoint3D leftFoot = new FramePoint3D();
-   private final FramePoint3D rightFoot = new FramePoint3D();
 
    public AvatarMultiContactGaitGeneratorThread(DRCRobotModel robotModel,
                                                 ROS2Node ros2Node,
@@ -188,27 +186,25 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
          areFeetInContact.get(robotSide).setTrue();
       }
 
-//      bipedalGaitGenerator = new AvatarBipedalGaitGenerator(commandInputManager,
-//                                                            statusOutputManager,
-//                                                            robotModel,
-//                                                            fullRobotModel,
-//                                                            humanoidReferenceFrames,
-//                                                            walkingCommandInputManager,
-//                                                            walkingOutputManager,
-//                                                            registry);
+      bipedalGaitGenerator = new AvatarBipedalGaitGenerator(commandInputManager,
+                                                            statusOutputManager,
+                                                            robotModel,
+                                                            fullRobotModel,
+                                                            humanoidReferenceFrames,
+                                                            walkingCommandInputManager,
+                                                            walkingOutputManager,
+                                                            registry);
 
       walkingOutputManager.attachStatusMessageListener(CapturabilityBasedStatus.class, capturabilityBasedStatus::set);
 
-//      for (int i = 0; i < yoCapturePointWaypoints.length; i++)
-//      {
-//         yoCapturePointWaypoints[i] = new YoFramePoint2D("capturePointWP" + i, ReferenceFrame.getWorldFrame(), registry);
-//      }
+      for (int i = 0; i < yoCapturePointWaypoints.length; i++)
+      {
+         yoCapturePointWaypoints[i] = new YoFramePoint2D("capturePointWP" + i, ReferenceFrame.getWorldFrame(), registry);
+         yoCoPWaypoints[i] = new YoFramePoint2D("copWP" + i, ReferenceFrame.getWorldFrame(), registry);
+      }
 
       perceptionVisualizer = new YoPerceptionVisualizer(registry);
       diagnosticBracingSide.set(null);
-
-//      triggerInferenceCall.set(true);
-//      numberOfInferenceCallsForTest.set(1);
    }
 
    private boolean hasPrintedException = false;
@@ -235,33 +231,13 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
 
    private void runInternal()
    {
-      //      if (triggerInferenceCall.getValue())
-      //      {
-      //         for (int i = 0; i < numberOfInferenceCallsForTest.getValue(); i++)
-      //         {
-      //            planner.triggerDiagnosticInference();
-      //         }
-      //      }
-
-      // Update capture point preview trajectory
-      // Update capture point preview trajectory
-      //      RecyclingArrayList<FramePoint2D> capturePointPositionWaypoints = centerOfPressureDataHolder.getCapturePointPositionWaypoints();
-      //      for (int i = 0; i < yoCapturePointWaypoints.length; i++)
-      //      {
-      //         yoCapturePointWaypoints[i].setToNaN();
-      //      }
-      //      for (int i = 0; i < capturePointPositionWaypoints.size(); i++)
-      //      {
-      //         yoCapturePointWaypoints[i].set(capturePointPositionWaypoints.get(i));
-      //      }
-
       // Update robot model
       HumanoidRobotContextTools.updateRobot(fullRobotModel, humanoidRobotContextData.getProcessedJointData());
       humanoidReferenceFrames.updateFrames();
       centerOfMassJacobian.reset();
 
       // Update bipedal gait generator
-//            bipedalGaitGenerator.update();
+      bipedalGaitGenerator.update();
 
       // Update capturability status
       CapturabilityBasedStatus capturabilityBasedStatus = this.capturabilityBasedStatus.get();
@@ -304,6 +280,13 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
          perceptionVisualizer.visualizeHeightMap(terrainMapCommand);
       }
 
+      for (int i = 0; i < yoCapturePointWaypoints.length; i++)
+      {
+         double dt = 0.05;
+         packDesiredCapturePoint(yoCapturePointWaypoints[i], i * dt);
+         packDesiredCenterOfPressure(yoCoPWaypoints[i], i * dt);
+      }
+
       if (triggerFall.getValue())
       {
          centerOfMassVelocity.setIncludingFrame(humanoidReferenceFrames.getMidFeetZUpFrame(), 0.2, 0.0, 0.0);
@@ -319,7 +302,6 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
          sendHandContactMessage.set(false);
 
          desiredToCurrentCapturePoint.sub(currentCapturePoint, desiredCapturePoint);
-         supportPolygon.set(centerOfPressureDataHolder.getSupportPolygon());
 
          for (RobotSide robotSide : RobotSide.values)
          {
@@ -327,26 +309,18 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
             handPositions.get(robotSide).changeFrame(ReferenceFrame.getWorldFrame());
          }
 
-         leftFoot.setToZero(fullRobotModel.getSoleFrame(RobotSide.LEFT));
-         rightFoot.setToZero(fullRobotModel.getSoleFrame(RobotSide.RIGHT));
-         leftFoot.changeFrame(ReferenceFrame.getWorldFrame());
-         rightFoot.changeFrame(ReferenceFrame.getWorldFrame());
-         double stanceWidth = leftFoot.distance(rightFoot);
-
-         centerOfPressure.setToZero(getMidFeetZUpFrame());
-         centerOfPressure.changeFrame(ReferenceFrame.getWorldFrame());
-
          plannedHandContacts.clear();
-         planner.plan(desiredToCurrentCapturePoint,
-                      centerOfMassPosition,
+         planner.plan(centerOfMassPosition,
                       centerOfMassVelocity,
-                      centerOfPressure,
-                      supportPolygon,
-                      handPositions,
+                      this::packDesiredCapturePoint,
+                      this::packDesiredCenterOfPressure,
+                      isWalking(),
                       areFeetInContact,
-                      getMidFeetZUpFrame(),
-                      plannedHandContacts,
-                      stanceWidth);
+                      centerOfPressureDataHolder.getRemainingTimeInContactSequence(),
+                      humanoidReferenceFrames.getSoleZUpFrames(),
+                      getTouchdownZUpPose(),
+                      handPositions,
+                      plannedHandContacts);
 
          // Just use single side if requested
          if (diagnosticBracingSide.getValue() != null)
@@ -364,7 +338,7 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
          }
 
          long stopTime = System.nanoTime();
-         contactStateUpdateTimer.set(Conversions.nanosecondsToSeconds(stopTime - startTime));
+         planTime.set(Conversions.nanosecondsToSeconds(stopTime - startTime));
       }
 
       if (triggerUnload.getValue())
@@ -392,19 +366,20 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
       return walkingStatus == WalkingStatus.STARTED || walkingStatus == WalkingStatus.RESUMED;
    }
 
-   private ReferenceFrame getMidFeetZUpFrame()
+   private final FramePose3D touchdownZUpPose = new FramePose3D();
+
+   private FramePose3D getTouchdownZUpPose()
    {
-      if (areFeetInContact.get(RobotSide.LEFT).getValue() && areFeetInContact.get(RobotSide.RIGHT).getValue())
+      if (isWalking())
       {
-         return humanoidReferenceFrames.getMidFeetZUpFrame();
-      }
-      else if (areFeetInContact.get(RobotSide.LEFT).getValue())
-      {
-         return humanoidReferenceFrames.getSoleZUpFrame(RobotSide.LEFT);
+         FootstepStatusMessage footstepStatusMessage  = this.footstepStatusMessage.get();
+         touchdownZUpPose.set(footstepStatusMessage.getDesiredFootPositionInWorld(), footstepStatusMessage.getDesiredFootOrientationInWorld());
+         touchdownZUpPose.getOrientation().setToYawOrientation(touchdownZUpPose.getYaw());
+         return touchdownZUpPose;
       }
       else
       {
-         return humanoidReferenceFrames.getSoleZUpFrame(RobotSide.RIGHT);
+         return null;
       }
    }
 
@@ -429,6 +404,67 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
          centerOfMassVelocity.set(centerOfMassJacobian.getCenterOfMassVelocity());
          centerOfMassVelocity.changeFrame(ReferenceFrame.getWorldFrame());
       }
+   }
+
+   private final BipedTimedStep nextStep = new BipedTimedStep();
+
+   private BipedTimedStep getNextStep()
+   {
+      if (isWalking())
+      {
+         // TODO
+         return null;
+      }
+      else
+      {
+         return null;
+      }
+   }
+
+   private final FramePoint2D tempPointA = new FramePoint2D();
+   private final FramePoint2D tempPointB = new FramePoint2D();
+
+   private void packDesiredCapturePoint(Tuple2DBasics capturePointToPack, double t)
+   {
+      double dt = BalanceManager.PREVIEW_DT;
+
+      int indexA = (int) (t / dt);
+      int indexB = indexA + 1;
+      double alpha = (t - indexA * dt) / dt;
+
+      RecyclingArrayList<FramePoint2D> comPositionWaypoints = centerOfPressureDataHolder.getComPositionWaypoints();
+      RecyclingArrayList<FrameVector2D> comVelocityWaypoints = centerOfPressureDataHolder.getComVelocityWaypoints();
+
+      if (comPositionWaypoints.isEmpty() || comVelocityWaypoints.isEmpty() || indexB > comPositionWaypoints.size() || indexB > comVelocityWaypoints.size())
+         return;
+
+      // capture point A
+      tempPointA.setAndScale(1.0 / ReducedOrderRobotModel.OMEGA, comVelocityWaypoints.get(indexA));
+      tempPointA.add(comPositionWaypoints.get(indexA));
+
+      // capture point B
+      tempPointB.setAndScale(1.0 / ReducedOrderRobotModel.OMEGA, comVelocityWaypoints.get(indexB));
+      tempPointB.add(comPositionWaypoints.get(indexB));
+
+      // Interpolated CoP
+      capturePointToPack.interpolate(tempPointA, tempPointB, alpha);
+   }
+
+   private void packDesiredCenterOfPressure(Tuple2DBasics centerOfPressureToPack, double t)
+   {
+      double dt = BalanceManager.PREVIEW_DT;
+
+      int indexA = (int) (t / dt);
+      int indexB = indexA + 1;
+      double alpha = (t - indexA * dt) / dt;
+
+      RecyclingArrayList<FramePoint2D> copPositionWaypoints = centerOfPressureDataHolder.getCopPositionWaypoints();
+      if (copPositionWaypoints.isEmpty() || indexB > copPositionWaypoints.size())
+         return;
+
+      FramePoint2D copA = copPositionWaypoints.get(indexA);
+      FramePoint2D copB = copPositionWaypoints.get(indexB);
+      centerOfPressureToPack.interpolate(copA, copB, alpha);
    }
 
    @Override
@@ -465,10 +501,11 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
 
-//      for (int i = 0; i < yoCapturePointWaypoints.length; i++)
-//      {
-//         group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D("capturePointWP" + i, yoCapturePointWaypoints[i], 0.003, ColorDefinitions.DarkBlue(), DefaultPoint2DGraphic.PLUS));
-//      }
+      for (int i = 0; i < yoCapturePointWaypoints.length; i++)
+      {
+         group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D("capturePointWP" + i, yoCapturePointWaypoints[i], 0.003, ColorDefinitions.DarkBlue(), DefaultPoint2DGraphic.PLUS));
+         group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D("copWP" + i, yoCoPWaypoints[i], 0.003, ColorDefinitions.DarkBlue(), DefaultPoint2DGraphic.CIRCLE));
+      }
 
       group.addChild(planner.getSCS2YoGraphics());
       group.addChild(perceptionVisualizer.getSCS2YoGraphics());

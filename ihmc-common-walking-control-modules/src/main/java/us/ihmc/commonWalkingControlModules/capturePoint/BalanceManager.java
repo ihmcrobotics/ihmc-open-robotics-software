@@ -28,6 +28,7 @@ import us.ihmc.commonWalkingControlModules.messageHandlers.MomentumTrajectoryHan
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -50,6 +51,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
+import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
@@ -541,8 +543,6 @@ public class BalanceManager implements SCS2YoGraphicHolder
 
    public void compute(RobotSide supportLeg, FeedbackControlCommand<?> heightControlCommand, FrameConvexPolygon2DReadOnly multiContactStabilityRegion, boolean controlHeightWithMomentum)
    {
-      precomputedICPPlanner.updateForPush();
-
       desiredCapturePoint2d.set(comTrajectoryPlanner.getDesiredDCMPosition());
       desiredCapturePointVelocity2d.set(comTrajectoryPlanner.getDesiredDCMVelocity());
 
@@ -1214,9 +1214,38 @@ public class BalanceManager implements SCS2YoGraphicHolder
       return pelvisICPBasedTranslationManager.pollStatusToReport();
    }
 
-   public void packPerfectCoP(FramePoint2D centerOfPressureToPack)
+   public static final double PREVIEW_DT = 0.125;
+
+   public void packFootstepAndCentroidalTrajectoryData(CenterOfPressureDataHolder centerOfPressureDataHolder)
    {
+      FramePoint2D centerOfPressureToPack = centerOfPressureDataHolder.getPerfectCenterOfPressure();
+      RecyclingArrayList<FramePoint2D> comPositionWaypoints = centerOfPressureDataHolder.getComPositionWaypoints();
+      RecyclingArrayList<FrameVector2D> comVelocityWaypoints = centerOfPressureDataHolder.getComVelocityWaypoints();
+      RecyclingArrayList<FramePoint2D> copPositionWaypoints = centerOfPressureDataHolder.getCopPositionWaypoints();
+
       centerOfPressureToPack.set(perfectCMP2d);
+
+      // compute n preview points
+      double t0 = contactStateManager.getTimeInSupportSequence();
+      int n = 12;
+
+      comPositionWaypoints.clear();
+      comVelocityWaypoints.clear();
+      copPositionWaypoints.clear();
+
+      for (int i = 0; i < n; i++)
+      {
+         comTrajectoryPlanner.compute(t0 + i * PREVIEW_DT);
+         comPositionWaypoints.add().set(comTrajectoryPlanner.getDesiredCoMPosition());
+         comVelocityWaypoints.add().set(comTrajectoryPlanner.getDesiredCoMVelocity());
+         copPositionWaypoints.add().set(comTrajectoryPlanner.getDesiredECMPPosition());
+      }
+
+      // Reset to previously computed time to not mess up other parts of this class
+      comTrajectoryPlanner.compute(t0);
+
+      // Pack some footstep data
+      centerOfPressureDataHolder.setRemainingTimeInContactSequence(contactStateManager.getTimeRemainingInCurrentSupportSequence());
    }
 
    @Override

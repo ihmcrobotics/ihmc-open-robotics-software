@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -16,8 +16,6 @@ import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -28,9 +26,14 @@ public class CenterOfPressureDataHolder implements Settable<CenterOfPressureData
    private final List<RigidBodyBasics> bodiesWithCenterOfPressures = new ArrayList<>();
    private final RecyclingArrayList<FramePoint2D> centerOfPressures = new RecyclingArrayList<>(FramePoint2D.class);
 
-   // can replace with full trajectory data (backing data for CoMTrajectorySegment and VRP waypoints)
    private final FramePoint2D perfectCenterOfPressure = new FramePoint2D();
+
    private final ConvexPolygon2D supportPolygon = new ConvexPolygon2D();
+   private final RecyclingArrayList<FramePoint2D> comPositionWaypoints = new RecyclingArrayList<>(FramePoint2D.class);
+   private final RecyclingArrayList<FrameVector2D> comVelocityWaypoints = new RecyclingArrayList<>(FrameVector2D.class);
+   private final RecyclingArrayList<FramePoint2D> copPositionWaypoints = new RecyclingArrayList<>(FramePoint2D.class);
+
+   private double remainingTimeInContactSequence;
 
    /**
     * This is used for lookups only and is populated from the {@link #centerOfPressures}. It should not be modified
@@ -62,6 +65,10 @@ public class CenterOfPressureDataHolder implements Settable<CenterOfPressureData
       centerOfPressureMap.clear();
       perfectCenterOfPressure.setToNaN();
       supportPolygon.clear();
+      comPositionWaypoints.clear();
+      comVelocityWaypoints.clear();
+      copPositionWaypoints.clear();
+      remainingTimeInContactSequence = Double.NaN;
    }
 
    public void registerRigidBody(RigidBodyBasics rigidBody)
@@ -139,6 +146,31 @@ public class CenterOfPressureDataHolder implements Settable<CenterOfPressureData
    public ConvexPolygon2D getSupportPolygon()
    {
       return supportPolygon;
+   }
+
+   public RecyclingArrayList<FramePoint2D> getComPositionWaypoints()
+   {
+      return comPositionWaypoints;
+   }
+
+   public RecyclingArrayList<FrameVector2D> getComVelocityWaypoints()
+   {
+      return comVelocityWaypoints;
+   }
+
+   public RecyclingArrayList<FramePoint2D> getCopPositionWaypoints()
+   {
+      return copPositionWaypoints;
+   }
+
+   public double getRemainingTimeInContactSequence()
+   {
+      return remainingTimeInContactSequence;
+   }
+
+   public void setRemainingTimeInContactSequence(double remainingTimeInContactSequence)
+   {
+      this.remainingTimeInContactSequence = remainingTimeInContactSequence;
    }
 
    @Override
