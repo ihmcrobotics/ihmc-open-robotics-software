@@ -1,9 +1,11 @@
 package us.ihmc.rdx.ui.vr;
 
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
+import us.ihmc.euclid.referenceFrame.FixedFrameShape3DPose;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -198,16 +200,13 @@ public class RDXVRMotionRetargeting
                                                           newPelvisFramePose.getRotation().getRoll());
 
          // --- Low-pass filter pelvis pose (position + orientation) ---
-         // Position EMA, but DO NOT filter Z
-         var filteredPos = filteredPelvisFramePose.getPosition();
+         FixedFramePoint3DBasics filteredPos = filteredPelvisFramePose.getPosition();
          var newPos      = newPelvisFramePose.getPosition();
-
          // Filter X/Y
          filteredPos.setX((1.0 - PELVIS_ALPHA) * filteredPos.getX() + PELVIS_ALPHA * newPos.getX());
          filteredPos.setY((1.0 - PELVIS_ALPHA) * filteredPos.getY() + PELVIS_ALPHA * newPos.getY());
          // Pass-through Z (no interpolation)
          filteredPos.setZ(newPos.getZ());
-
          // Orientation EMA (slerp)
          filteredPelvisFramePose.getOrientation().interpolate(filteredPelvisFramePose.getOrientation(),
                                                               newPelvisFramePose.getOrientation(),
