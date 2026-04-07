@@ -42,3 +42,11 @@ byte composite_frame_type
 
 # Distance from frame B
 float32 composite_distance
+
+# Approach table
+
+# Consider the table edge when there are this many points in the capsule
+uint16 min_capsule_points
+
+# Initial capsule distance to start from robot, tunable to avoid detecting self as the table
+float32 search_start_x

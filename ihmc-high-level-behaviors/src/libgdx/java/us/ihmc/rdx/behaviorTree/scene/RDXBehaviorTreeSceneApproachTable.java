@@ -39,8 +39,9 @@ public class RDXBehaviorTreeSceneApproachTable extends RDXBehaviorTreeSceneObjec
    protected void renderDetectionInfo()
    {
       ImGui.beginDisabled(!getPersistentDetection().getIsStable());
-      ImGui.text("Left table points: %d".formatted(leftTablePoints));
-      ImGui.text("Right table points: %d".formatted(rightTablePoints));
+      ImGui.text("Search start X: %.2f".formatted(getSearchStartX()));
+      ImGui.text("Left table points: %d / %d".formatted(leftTablePoints, getMinCapsulePoints()));
+      ImGui.text("Right table points: %d / %d".formatted(rightTablePoints, getMinCapsulePoints()));
       ImGui.endDisabled();
    }
 
