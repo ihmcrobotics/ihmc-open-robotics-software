@@ -62,8 +62,9 @@ public class BehaviorTreeSceneApproachTableExecutor extends BehaviorTreeSceneObj
          }
 
          int minPoints = getMinCapsulePoints();
-         while ((capsuleCenter.get(RobotSide.LEFT).getX() < 3.0 && capsuleCenter.get(RobotSide.RIGHT).getX() < 3.0)
-                && (tablePoints.get(RobotSide.LEFT) < minPoints || tablePoints.get(RobotSide.RIGHT) < minPoints))
+         double search = getSearchStartX();
+         double searchLimit = 2.0;
+         while (search < searchLimit && (tablePoints.get(RobotSide.LEFT) < minPoints || tablePoints.get(RobotSide.RIGHT) < minPoints))
          {
             for (RobotSide side : RobotSide.values)
             {
@@ -80,7 +81,14 @@ public class BehaviorTreeSceneApproachTableExecutor extends BehaviorTreeSceneObj
 
                   tablePoints.put(side, pointCounter.countPointsInCapsule(depthImage, capsuleBottom.get(side), capsuleTop.get(side), 0.05f));
 
-                  capsuleCenter.get(side).addX(0.01);
+                  final double stepAt0Meters = 0.01; // Resolution near start
+                  final double stepAt2Meters = 0.04; // Resolution at limit
+                  final double distanceFromSearchStart = Math.max(0.0, search - getSearchStartX());
+                  final double clampedDistance = Math.min(distanceFromSearchStart, searchLimit);
+                  final double searchStep = stepAt0Meters + (stepAt2Meters - stepAt0Meters) * (clampedDistance / searchLimit);
+                  search += searchStep;
+
+                  capsuleCenter.get(side).setX(search);
                }
             }
          }
