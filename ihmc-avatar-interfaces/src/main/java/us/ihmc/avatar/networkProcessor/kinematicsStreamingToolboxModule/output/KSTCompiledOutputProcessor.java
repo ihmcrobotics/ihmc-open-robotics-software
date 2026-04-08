@@ -8,6 +8,9 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+/**
+ * Top-level output pipeline that chains multiple processors (scaling, feedback, low-pass, blending).
+ */
 public class KSTCompiledOutputProcessor implements KSTOutputProcessor
 {
    private final YoKinematicsToolboxOutputStatus ikRobotState;

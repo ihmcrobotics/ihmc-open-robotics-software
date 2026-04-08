@@ -117,7 +117,25 @@ public class RDXHardwareControlStateManager
          RDXBaseUI.pushNotification("Commanding stand prep transition...");
          sendStandPrepTransitionRequest();
       }
-   
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Exit Walking")))
+      {
+         RDXBaseUI.pushNotification("Commanding EXIT_WALKING...");
+         sendExitWalkingRequest();
+      }
+      ImGui.setCursorPosX(widgetStartX);
+      if (ImGui.button(labels.get("RL Transition")))
+      {
+         RDXBaseUI.pushNotification("Commanding RL transition...");
+         sendRLTransitionRequest();
+      }
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Exit RL")))
+      {
+         RDXBaseUI.pushNotification("Commanding exit RL...");
+         sendExitRLRequest();
+      }
+
       ImGui.text("Command:");
       ImGui.sameLine();
       ImGui.setCursorPosX(widgetStartX);
@@ -195,6 +213,20 @@ public class RDXHardwareControlStateManager
       homeChest.setTrajectoryTime(trajectoryTime);
       controllerHelper.publishToController(homeChest);
       RDXBaseUI.pushNotification("Commanding N-pose...");
+   }
+
+   public void sendRLTransitionRequest()
+   {
+      HighLevelStateMessage highLevelStateMessage = new HighLevelStateMessage();
+      highLevelStateMessage.setHighLevelControllerName(HighLevelControllerName.RL_TRANSITION_STATE.toByte());
+      controllerHelper.publishToController(highLevelStateMessage);
+   }
+
+   public void sendExitRLRequest()
+   {
+      HighLevelStateMessage highLevelStateMessage = new HighLevelStateMessage();
+      highLevelStateMessage.setHighLevelControllerName(HighLevelControllerName.EXIT_RL.toByte());
+      controllerHelper.publishToController(highLevelStateMessage);
    }
 
    public void sendStandPrepRequest()

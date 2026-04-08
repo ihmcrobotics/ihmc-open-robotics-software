@@ -15,7 +15,7 @@ public class AI2RNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "4c707468a89546fd1d37ab03f491200a402727ad2b03402586ec1ae612586d7a";
+   		return "956ca1be3154fbc6ca312bc46ba3b19eab3e41c3995ac29afd7a4859d0211418";
    }
    
    @Override
@@ -54,6 +54,10 @@ public class AI2RNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.Topic
 
       current_alignment += behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       return current_alignment - initial_alignment;
    }
@@ -69,17 +73,32 @@ public class AI2RNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.Topic
 
       current_alignment += behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.getCdrSerializedSize(data.getDefinition(), current_alignment);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
 
       return current_alignment - initial_alignment;
    }
 
    public static void write(behavior_msgs.msg.dds.AI2RNodeDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
-      behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.write(data.getDefinition(), cdr);   }
+      behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
+      cdr.write_type_7(data.getRandomizeGoToAction());
+
+      cdr.write_type_2(data.getNumberOfRandomizations());
+
+   }
 
    public static void read(behavior_msgs.msg.dds.AI2RNodeDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
+      data.setRandomizeGoToAction(cdr.read_type_7());
+      	
+      data.setNumberOfRandomizations(cdr.read_type_2());
+      	
 
    }
 
@@ -88,12 +107,17 @@ public class AI2RNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.Topic
    {
       ser.write_type_a("definition", new behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType(), data.getDefinition());
 
+      ser.write_type_7("randomize_go_to_action", data.getRandomizeGoToAction());
+      ser.write_type_2("number_of_randomizations", data.getNumberOfRandomizations());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.AI2RNodeDefinitionMessage data)
    {
       ser.read_type_a("definition", new behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType(), data.getDefinition());
+
+      data.setRandomizeGoToAction(ser.read_type_7("randomize_go_to_action"));
+      data.setNumberOfRandomizations(ser.read_type_2("number_of_randomizations"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.AI2RNodeDefinitionMessage src, behavior_msgs.msg.dds.AI2RNodeDefinitionMessage dest)

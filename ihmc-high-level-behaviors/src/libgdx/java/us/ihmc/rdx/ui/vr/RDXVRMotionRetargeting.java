@@ -1,9 +1,11 @@
 package us.ihmc.rdx.ui.vr;
 
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
+import us.ihmc.euclid.referenceFrame.FixedFrameShape3DPose;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -81,6 +83,23 @@ public class RDXVRMotionRetargeting
    private final SideDependentList<Boolean> isFootInContact = new SideDependentList<>();
    private boolean controllingFeet = false;
 
+   private static final double COM_ALPHA = 0.9;
+   private static final double PELVIS_ALPHA = 0.9;
+   private final FramePose3D filteredPelvisFramePose = new FramePose3D(); // low-pass state
+
+   // Foot height blending
+   private static final boolean ENABLE_FOOT_Z_RETARGETING = false;
+   private static final double MIN_SWING_LIFT = 0.15; // above initial height
+   private static final double SWING_TARGET_CATCHUP_ALPHA = 0.2; // how fast swing target chases tracker
+   private static final double SWING_Z_BLEND_ALPHA = 0.2;        // how fast blended Z chases swing target
+   private static final double LANDING_Z_BLEND_ALPHA = 0.2;      // how fast blended Z chases tracker during landing
+   private static final double CONTACT_Z_BLEND_ALPHA = 0.2;
+   private final SideDependentList<Double> swingTargetFootHeight = new SideDependentList<>();
+   private final SideDependentList<Double> blendedFootHeight = new SideDependentList<>();
+   private final SideDependentList<Boolean> wasFootInContact = new SideDependentList<>();
+   private final SideDependentList<Boolean> hasReachedMinSwing = new SideDependentList<>();
+
+
    /**
     * Constructor for the motion retargeting class.
     *
@@ -113,6 +132,10 @@ public class RDXVRMotionRetargeting
          initialFootTransformsToWorld.put(side, new RigidBodyTransform());
          newFootFramePoses.put(side, new FramePose3D());
          isFootInContact.put(side, true);
+         swingTargetFootHeight.put(side, 0.0);
+         blendedFootHeight.put(side, 0.0);
+         wasFootInContact.put(side, true);
+         hasReachedMinSwing.put(side, false);
       }
    }
 
@@ -140,31 +163,58 @@ public class RDXVRMotionRetargeting
       {
          if (initialPelvisFrame == null)
          {
-            RigidBodyTransform initialWaistTrackerTransform  = trackerReferenceFrames.get(WAIST.getSegmentName()).getReferenceFrame().getTransformToWorldFrame();
+            RigidBodyTransform initialWaistTrackerTransform = trackerReferenceFrames.get(WAIST.getSegmentName())
+                                                                                    .getReferenceFrame()
+                                                                                    .getTransformToWorldFrame();
             initialPelvisTransformToWorld.set(realRobotModel.getPelvis().getBodyFixedFrame().getTransformToWorldFrame());
             initialPelvisFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(),
                                                                                                           initialPelvisTransformToWorld);
 
-            constrainedPelvisFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(), newPelvisFramePose);
+            constrainedPelvisFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
+                                                                                                            filteredPelvisFramePose);
 
             Vector3D offset = new Vector3D();
             offset.sub(initialWaistTrackerTransform.getTranslation(), initialPelvisTransformToWorld.getTranslation());
             ikControlFrameOffsetPosition.put(WAIST, new Point3D(offset));
+
+            // Initialize filtered pose at current pelvis
+            filteredPelvisFramePose.set(initialPelvisTransformToWorld);
          }
+
          // Calculate the variation of the tracker's frame from its initial value
          RigidBodyTransform waistTrackerTransform = new RigidBodyTransform(trackerReferenceFrames.get(WAIST.getSegmentName())
-                                                                                                                 .getReferenceFrame()
-                                                                                                                 .getTransformToWorldFrame());
+                                                                                                 .getReferenceFrame()
+                                                                                                 .getTransformToWorldFrame());
 
          newPelvisFramePose.set(waistTrackerTransform);
-         // Zero roll and pitch orientation variation as it can lead to very unnatural motions (at least when in double support)
+
+         // Zero roll and pitch orientation variation as it can lead to very unnatural motions
          newPelvisFramePose.changeFrame(initialPelvisFrame);
          newPelvisFramePose.getRotation().setYawPitchRoll(0.0, 0.0, 0.0);
          newPelvisFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-         double midFeetYaw = 0.5 * (ghostRobotModel.getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame().getRotation().getYaw() + ghostRobotModel.getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame().getRotation().getYaw());
-         newPelvisFramePose.getRotation().setYawPitchRoll(midFeetYaw, newPelvisFramePose.getRotation().getPitch(), newPelvisFramePose.getRotation().getRoll());
-         constrainedPelvisFrame.update();
 
+         double midFeetYaw = 0.5 * (ghostRobotModel.getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame().getRotation().getYaw()
+                                    + ghostRobotModel.getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame().getRotation().getYaw());
+         newPelvisFramePose.getRotation().setYawPitchRoll(midFeetYaw,
+                                                          newPelvisFramePose.getRotation().getPitch(),
+                                                          newPelvisFramePose.getRotation().getRoll());
+
+         // --- Low-pass filter pelvis pose (position + orientation) ---
+         FixedFramePoint3DBasics filteredPos = filteredPelvisFramePose.getPosition();
+         var newPos      = newPelvisFramePose.getPosition();
+         // Filter X/Y
+         filteredPos.setX((1.0 - PELVIS_ALPHA) * filteredPos.getX() + PELVIS_ALPHA * newPos.getX());
+         filteredPos.setY((1.0 - PELVIS_ALPHA) * filteredPos.getY() + PELVIS_ALPHA * newPos.getY());
+         // Pass-through Z (no interpolation)
+         filteredPos.setZ(newPos.getZ());
+         // Orientation EMA (slerp)
+         filteredPelvisFramePose.getOrientation().interpolate(filteredPelvisFramePose.getOrientation(),
+                                                              newPelvisFramePose.getOrientation(),
+                                                              PELVIS_ALPHA);
+         // ------------------------------------------------------------
+
+
+         constrainedPelvisFrame.update();
          retargetedFrames.put(WAIST, constrainedPelvisFrame);
       }
    }
@@ -227,22 +277,12 @@ public class RDXVRMotionRetargeting
             {
                normalizedOffset = 0.0;
             }
-            // Filter value
-//            double filteredNormalizedOffset = 0.5 - 0.1 * (Math.log10((1 - normalizedOffset) / normalizedOffset));
-//            if (filteredNormalizedOffset >= 1.0)
-//               filteredNormalizedOffset = 1.0;
-//            else if (filteredNormalizedOffset <= 0.0)
-//            {
-//               filteredNormalizedOffset = 0.0;
-//            }
-//            if (Double.isNaN(filteredNormalizedOffset))
-//            {
-//               filteredNormalizedOffset = previousOffsetValue;
-//            }
-            else
-            {
-               previousOffsetValue = normalizedOffset;
-            }
+            // Apply a low-pass filter to smooth normalized offset fluctuations
+            double filteredNormalizedOffset = previousOffsetValue + COM_ALPHA * (normalizedOffset - previousOffsetValue);
+            // Clamp to [0,1]
+            filteredNormalizedOffset = Math.max(0.0, Math.min(1.0, filteredNormalizedOffset));
+            // Store for next iteration
+            previousOffsetValue = filteredNormalizedOffset;
 
             if (leftFootXYInWorld == null || rightFootXYInWorld == null)
             {
@@ -255,7 +295,7 @@ public class RDXVRMotionRetargeting
             feetVector.sub(rightFootXYInWorld, leftFootXYInWorld);
 
             centerOfMassDesiredXYInWorld.set(feetVector);
-            centerOfMassDesiredXYInWorld.scale(normalizedOffset);
+            centerOfMassDesiredXYInWorld.scale(filteredNormalizedOffset);
             centerOfMassDesiredXYInWorld.add(leftFootXYInWorld);
          }
       }
@@ -379,7 +419,88 @@ public class RDXVRMotionRetargeting
             constrainedFootPose.getRotation().setYawPitchRoll(newFootFramePoses.get(side).getRotation().getYaw(), 0.0,0.0);
             constrainedFootPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-            double alpha = steppingTracker.getLandingBlendFactor(side);
+            if (ENABLE_FOOT_Z_RETARGETING)
+            {
+               // Current contact state from stepping tracker
+               boolean inContact = steppingTracker.isFootInContact(side);
+               boolean wasInContact = wasFootInContact.get(side);
+               wasFootInContact.put(side, inContact);
+               double initialHeight = initialFootTransformsToWorld.get(side).getTranslationZ();
+               double trackerHeight = footTrackerTransform.getTranslationZ();
+
+               // Initialize blended height once
+               if (initialFootFrames.get(side) != null && blendedFootHeight.get(side) == 0.0)
+               {
+                  blendedFootHeight.put(side, initialHeight);
+                  swingTargetFootHeight.put(side, initialHeight + MIN_SWING_LIFT);
+               }
+
+               double currentBlendedHeight = blendedFootHeight.get(side);
+               double currentSwingTarget = swingTargetFootHeight.get(side);
+               // Contact -> Swing transition: set minimum swing target
+               if (wasInContact && !inContact)
+               {
+                  // start swing at at least MIN_SWING_LIFT
+                  double minSwing = initialHeight + MIN_SWING_LIFT;
+                  currentSwingTarget = Math.max(trackerHeight, minSwing);
+                  isFootInContact.put(side, false);
+               }
+
+               double minSwingThreshold = initialHeight + MIN_SWING_LIFT;
+               // High swing: let target chase tracker if tracker goes higher
+               if (!inContact && trackerHeight > minSwingThreshold)
+               {
+                  // smooth catch-up of swing target to tracker
+                  currentSwingTarget = currentSwingTarget + SWING_TARGET_CATCHUP_ALPHA * (trackerHeight - currentSwingTarget);
+                  isFootInContact.put(side, false);
+               }
+
+               // Landing: blend Z towards tracker when landing is detected
+               if (steppingTracker.isFootLanding(side) && hasReachedMinSwing.get(side))
+               {
+                  currentBlendedHeight = currentBlendedHeight + LANDING_Z_BLEND_ALPHA * (trackerHeight - currentBlendedHeight);
+                  isFootInContact.put(side, false);
+               }
+               else if (!inContact)
+               {
+                  // Swing phase, blend towards swing target
+                  currentBlendedHeight = currentBlendedHeight + SWING_Z_BLEND_ALPHA * (currentSwingTarget - currentBlendedHeight);
+                  steppingTracker.setIsSwinging(side, true);
+                  isFootInContact.put(side, false);
+                  // Mark that we are high enough to allow landing
+                  if (!hasReachedMinSwing.get(side) && currentBlendedHeight >= minSwingThreshold - 0.01)
+                     hasReachedMinSwing.put(side, true);
+               }
+               else
+               {
+                  // Contact phase: keep blending until we're close enough, then lock
+                  double heightError = trackerHeight - currentBlendedHeight;
+                  double heightErrorAbs = Math.abs(heightError);
+                  double lockEpsilon = 0.02; // 2 cm, tune as needed
+
+                  if (heightErrorAbs > lockEpsilon)
+                  {
+                     currentBlendedHeight = currentBlendedHeight + CONTACT_Z_BLEND_ALPHA * heightError;
+                     isFootInContact.put(side, false);
+                  }
+                  else
+                  {
+                     currentBlendedHeight = trackerHeight;
+                     isFootInContact.put(side, true);
+                     hasReachedMinSwing.put(side, false);
+                  }
+                  steppingTracker.setIsSwinging(side, false);
+               }
+               swingTargetFootHeight.put(side, currentSwingTarget);
+               blendedFootHeight.put(side, currentBlendedHeight);
+
+               newFootFramePoses.get(side).getPosition().set(constrainedFootPose.getPosition());
+               newFootFramePoses.get(side).getPosition().setZ(currentBlendedHeight);
+            }
+            else
+               newFootFramePoses.get(side).getPosition().set(constrainedFootPose.getPosition());
+
+            double alpha = steppingTracker.getCloseToGroundBlendFactor(side);
             if (alpha > 0.0)
             {
                Quaternion fullQ = new Quaternion();
@@ -396,7 +517,8 @@ public class RDXVRMotionRetargeting
             }
             constrainedFootFrames.get(side).update();
 
-            isFootInContact.put(side, steppingTracker.isFootInContact(side));
+            if (!ENABLE_FOOT_Z_RETARGETING)
+               isFootInContact.put(side, steppingTracker.isFootInContact(side));
             if (!steppingTracker.isFootInContact(side))
             {
                retargetedFrames.put(side == RobotSide.LEFT ? LEFT_ANKLE : RIGHT_ANKLE, constrainedFootFrames.get(side));
@@ -432,6 +554,10 @@ public class RDXVRMotionRetargeting
          initialHandPositionsInWorld.put(side, null);
          initialFootFrames.put(side, null);
          isFootInContact.put(side, true);
+         swingTargetFootHeight.put(side, 0.0);
+         blendedFootHeight.put(side, 0.0);
+         wasFootInContact.put(side, true);
+         hasReachedMinSwing.put(side, false);
       }
       retargetedFrames.clear();
       centerOfMassDesiredXYInWorld = null;

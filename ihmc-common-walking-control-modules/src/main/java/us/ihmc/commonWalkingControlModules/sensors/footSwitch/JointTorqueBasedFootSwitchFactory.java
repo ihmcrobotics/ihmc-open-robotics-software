@@ -138,7 +138,7 @@ public class JointTorqueBasedFootSwitchFactory implements FootSwitchFactory
          verticalVelocityHighThreshold = new DoubleParameter(namePrefix + "VerticalVelocityHighThreshold", registry, defaultVerticalVelocityHighThreshold);
          horizontalVelocityThreshold = new DoubleParameter(namePrefix + "HorizontalVelocityThreshold", registry, defaultHorizontalVelocityThreshold);
          jacobianDeterminantSingularityThreshold = new DoubleParameter(namePrefix + "JacobianDeterminantSingularityThreshold", registry,
-                                                            defaultJacobianDeterminantSingularityThreshold);
+                                                                       defaultJacobianDeterminantSingularityThreshold);
       }
 
       return new JointTorqueBasedFootSwitch(namePrefix,

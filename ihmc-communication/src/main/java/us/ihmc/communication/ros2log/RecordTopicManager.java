@@ -22,13 +22,25 @@ class RecordTopicManager<T>
     */
    RecordTopicManager(ROS2Topic<T> ros2Topic, ROS2Node ros2Node, LongSupplier timestampSupplier)
    {
+      this(ros2Topic, ros2Node, timestampSupplier, true);
+   }
+
+   /**
+    * Record constructor. LongSupplier provides a timestamp in milliseconds and should be thread-safe.
+    * When subscribeToTopic is false, data is expected to be provided via setData(...).
+    */
+   RecordTopicManager(ROS2Topic<T> ros2Topic, ROS2Node ros2Node, LongSupplier timestampSupplier, boolean subscribeToTopic)
+   {
       this.ros2Topic = ros2Topic;
 
-      ros2Node.createSubscription(ros2Topic, s ->
+      if (subscribeToTopic)
       {
-         long timestamp = timestampSupplier.getAsLong();
-         latestData.set(Pair.of(timestamp, s.takeNextData()));
-      });
+         ros2Node.createSubscription(ros2Topic, s ->
+         {
+            long timestamp = timestampSupplier.getAsLong();
+            latestData.set(Pair.of(timestamp, s.takeNextData()));
+         });
+      }
    }
 
    boolean update()
@@ -71,5 +83,10 @@ class RecordTopicManager<T>
    AtomicReference<Pair<Long,T>> getDataReference()
    {
       return latestData;
+   }
+
+   void setData(long timestamp, T data)
+   {
+      latestData.set(Pair.of(timestamp, data));
    }
 }

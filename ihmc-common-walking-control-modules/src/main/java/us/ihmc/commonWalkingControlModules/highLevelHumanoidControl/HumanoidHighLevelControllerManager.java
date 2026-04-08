@@ -216,6 +216,13 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
             requestedHighLevelControllerState.set(commandInputManager.pollNewestCommand(HighLevelControllerStateCommand.class).getHighLevelControllerName());
          }
       }
+      if (getCurrentHighLevelControlState() == HighLevelControllerName.RL_CONTROL)
+      {
+         if (highLevelControllerStates.get(getCurrentHighLevelControlState()).forceExit())
+         {
+            requestedHighLevelControllerState.set(HighLevelControllerName.EXIT_RL);
+         }
+      }
 
       highLevelControllerTimer.startMeasurement();
 

@@ -21,6 +21,9 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.Arrays;
 
+/**
+ * YoVariable-backed implementation of {@link KSTOutputDataBasics} used to store, filter, and blend IK output states.
+ */
 public class YoKinematicsToolboxOutputStatus implements KSTOutputDataBasics
 {
    public static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();

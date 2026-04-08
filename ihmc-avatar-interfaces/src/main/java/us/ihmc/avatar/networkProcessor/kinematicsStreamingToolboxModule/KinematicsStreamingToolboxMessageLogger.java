@@ -34,6 +34,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * Records KST-related ROS2 traffic to a timestamped JSON log for offline debugging and replay.
+ */
 public class KinematicsStreamingToolboxMessageLogger implements CloseableAndDisposable
 {
    private static final long recordPeriodMillis = 5;
