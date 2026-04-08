@@ -15,7 +15,7 @@ public class MimicActionStateMessagePubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "c2b695058be9713e48deaadedd06c6ac7bbbebfbd0bd9bd685b13f8c7ca6b545";
+   		return "02dd93c12fe8e76c52c8d90fb23a99cc0e0e3d6f6ba2ad19dc2ed1849eca8aac";
    }
    
    @Override

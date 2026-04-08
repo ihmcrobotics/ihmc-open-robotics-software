@@ -23,6 +23,10 @@ public class MimicActionDefinitionMessage extends Packet<MimicActionDefinitionMe
             * The name of the mimic file
             */
    public java.lang.StringBuilder mimic_file_name_;
+   /**
+            * Wait time in seconds after the policy has been exited
+            */
+   public double wait_time_exit_policy_;
 
    public MimicActionDefinitionMessage()
    {
@@ -43,6 +47,8 @@ public class MimicActionDefinitionMessage extends Packet<MimicActionDefinitionMe
 
       mimic_file_name_.setLength(0);
       mimic_file_name_.append(other.mimic_file_name_);
+
+      wait_time_exit_policy_ = other.wait_time_exit_policy_;
 
    }
 
@@ -94,6 +100,21 @@ public class MimicActionDefinitionMessage extends Packet<MimicActionDefinitionMe
       return mimic_file_name_;
    }
 
+   /**
+            * Wait time in seconds after the policy has been exited
+            */
+   public void setWaitTimeExitPolicy(double wait_time_exit_policy)
+   {
+      wait_time_exit_policy_ = wait_time_exit_policy;
+   }
+   /**
+            * Wait time in seconds after the policy has been exited
+            */
+   public double getWaitTimeExitPolicy()
+   {
+      return wait_time_exit_policy_;
+   }
+
 
    public static Supplier<MimicActionDefinitionMessagePubSubType> getPubSubType()
    {
@@ -117,6 +138,8 @@ public class MimicActionDefinitionMessage extends Packet<MimicActionDefinitionMe
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.mimic_file_name_, other.mimic_file_name_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.wait_time_exit_policy_, other.wait_time_exit_policy_, epsilon)) return false;
+
 
       return true;
    }
@@ -135,6 +158,8 @@ public class MimicActionDefinitionMessage extends Packet<MimicActionDefinitionMe
 
       if (!us.ihmc.idl.IDLTools.equals(this.mimic_file_name_, otherMyClass.mimic_file_name_)) return false;
 
+      if(this.wait_time_exit_policy_ != otherMyClass.wait_time_exit_policy_) return false;
+
 
       return true;
    }
@@ -150,7 +175,9 @@ public class MimicActionDefinitionMessage extends Packet<MimicActionDefinitionMe
       builder.append("mimic_action_type=");
       builder.append(this.mimic_action_type_);      builder.append(", ");
       builder.append("mimic_file_name=");
-      builder.append(this.mimic_file_name_);
+      builder.append(this.mimic_file_name_);      builder.append(", ");
+      builder.append("wait_time_exit_policy=");
+      builder.append(this.wait_time_exit_policy_);
       builder.append("}");
       return builder.toString();
    }

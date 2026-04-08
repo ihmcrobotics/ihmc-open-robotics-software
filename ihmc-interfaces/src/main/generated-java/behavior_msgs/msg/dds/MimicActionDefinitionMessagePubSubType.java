@@ -15,7 +15,7 @@ public class MimicActionDefinitionMessagePubSubType implements us.ihmc.pubsub.To
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "2d99e403ee43ce8c6dc3aea95cca1366a85fea0c8e9cb6ee3ac4cd1d5d5f1b2c";
+   		return "e1ce9c13cc456063e74c92c73cab3e9b31486b5b13f7a48ecb1edd452834f316";
    }
    
    @Override
@@ -57,6 +57,8 @@ public class MimicActionDefinitionMessagePubSubType implements us.ihmc.pubsub.To
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -77,6 +79,9 @@ public class MimicActionDefinitionMessagePubSubType implements us.ihmc.pubsub.To
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getMimicFileName().length() + 1;
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -90,6 +95,8 @@ public class MimicActionDefinitionMessagePubSubType implements us.ihmc.pubsub.To
       cdr.write_type_d(data.getMimicFileName());else
           throw new RuntimeException("mimic_file_name field exceeds the maximum length: %d > %d".formatted(data.getMimicFileName().length(), 255));
 
+      cdr.write_type_6(data.getWaitTimeExitPolicy());
+
    }
 
    public static void read(behavior_msgs.msg.dds.MimicActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
@@ -98,6 +105,8 @@ public class MimicActionDefinitionMessagePubSubType implements us.ihmc.pubsub.To
       data.setMimicActionType(cdr.read_type_9());
       	
       cdr.read_type_d(data.getMimicFileName());	
+      data.setWaitTimeExitPolicy(cdr.read_type_6());
+      	
 
    }
 
@@ -108,6 +117,7 @@ public class MimicActionDefinitionMessagePubSubType implements us.ihmc.pubsub.To
 
       ser.write_type_9("mimic_action_type", data.getMimicActionType());
       ser.write_type_d("mimic_file_name", data.getMimicFileName());
+      ser.write_type_6("wait_time_exit_policy", data.getWaitTimeExitPolicy());
    }
 
    @Override
@@ -117,6 +127,7 @@ public class MimicActionDefinitionMessagePubSubType implements us.ihmc.pubsub.To
 
       data.setMimicActionType(ser.read_type_9("mimic_action_type"));
       ser.read_type_d("mimic_file_name", data.getMimicFileName());
+      data.setWaitTimeExitPolicy(ser.read_type_6("wait_time_exit_policy"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.MimicActionDefinitionMessage src, behavior_msgs.msg.dds.MimicActionDefinitionMessage dest)

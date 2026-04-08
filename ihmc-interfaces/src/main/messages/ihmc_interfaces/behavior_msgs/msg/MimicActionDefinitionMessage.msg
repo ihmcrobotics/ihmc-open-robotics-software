@@ -10,3 +10,6 @@ byte mimic_action_type
 
 # The name of the mimic file
 string mimic_file_name
+
+# Wait time in seconds after the policy has been exited
+float64 wait_time_exit_policy

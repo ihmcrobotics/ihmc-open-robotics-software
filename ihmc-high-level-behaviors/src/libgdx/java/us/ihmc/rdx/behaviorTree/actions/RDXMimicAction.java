@@ -12,6 +12,7 @@ import us.ihmc.behaviors.behaviorTree.action.actions.MimicActionState;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeRootNode;
 import us.ihmc.rdx.behaviorTree.RDXROS2BehaviorTree;
+import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -33,6 +34,7 @@ public class RDXMimicAction extends RDXActionNode<MimicActionState, MimicActionD
    private static final String DEFAULT_ROS2_LOG_DIRECTORY = System.getProperty("user.home") + "/.ihmc/logs/ros2/";
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final ImDoubleWrapper waitTimeExitPolicyWidget;
    private final ImInt replayFileIndex = new ImInt();
    private final ImString logDirectory = new ImString(DEFAULT_ROS2_LOG_DIRECTORY, 512);
    private final ImString logFileName = new ImString("", 255);
@@ -46,6 +48,9 @@ public class RDXMimicAction extends RDXActionNode<MimicActionState, MimicActionD
    public RDXMimicAction(long id, RDXBehaviorTreeRootNode rootNode)
    {
       super(new MimicActionState(id, rootNode.getState()), rootNode);
+      waitTimeExitPolicyWidget = new ImDoubleWrapper(definition::getWaitTimeExitPolicy,
+                                                     definition::setWaitTimeExitPolicy,
+                                                     imDouble -> ImGui.inputDouble(labels.get("Wait Time Exit Policy"), imDouble));
       logFileName.set(definition.getMimicFileName());
       refreshAvailableLogFiles();
 
@@ -119,6 +124,13 @@ public class RDXMimicAction extends RDXActionNode<MimicActionState, MimicActionD
                definition.getMimicActionType().setValue(value);
          }
          ImGui.endCombo();
+      }
+
+      if (definition.getMimicActionType().getValue() == MimicActionType.EXIT_POLICY)
+      {
+         ImGui.pushItemWidth(80.0f);
+         waitTimeExitPolicyWidget.renderImGuiWidget();
+         ImGui.popItemWidth();
       }
 
       if (definition.getMimicActionType().getValue() == MimicActionType.EXECUTE_POLICY)

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeDefinition;
+import us.ihmc.communication.crdt.CRDTBidirectionalDouble;
 import us.ihmc.communication.crdt.CRDTBidirectionalEnumField;
 import us.ihmc.communication.crdt.CRDTBidirectionalString;
 
@@ -20,9 +21,11 @@ public class MimicActionDefinition extends ActionNodeDefinition
 
    private final CRDTBidirectionalEnumField<MimicActionType> mimicActionType;
    private final CRDTBidirectionalString mimicFileName;
+   private final CRDTBidirectionalDouble waitTimeExitPolicy;
 
    private MimicActionType onDiskMimicActionType;
    private String onDiskMimicFileName;
+   private double onDiskWaitTimeExitPolicy;
 
    public MimicActionDefinition(BehaviorTreeRootNodeDefinition rootNode)
    {
@@ -30,6 +33,7 @@ public class MimicActionDefinition extends ActionNodeDefinition
 
       mimicActionType = new CRDTBidirectionalEnumField<>(this, MimicActionType.EXECUTE_POLICY);
       mimicFileName = new CRDTBidirectionalString(this, "");
+      waitTimeExitPolicy = new CRDTBidirectionalDouble(this, 2.0);
    }
 
    @Override
@@ -39,6 +43,7 @@ public class MimicActionDefinition extends ActionNodeDefinition
 
       jsonNode.put("mimicActionType", mimicActionType.getValue().name());
       jsonNode.put("mimicFileName", mimicFileName.getValue());
+      jsonNode.put("waitTimeExitPolicy", waitTimeExitPolicy.getValue());
    }
 
    @Override
@@ -58,6 +63,15 @@ public class MimicActionDefinition extends ActionNodeDefinition
          mimicFileName.setValue(jsonNode.get("mimicFileName").textValue());
       else
          mimicFileName.setValue("");
+
+      if (jsonNode.has("waitTimeExitPolicy"))
+         waitTimeExitPolicy.setValue(jsonNode.get("waitTimeExitPolicy").asDouble());
+      else if (jsonNode.has("transitionDuration")) // backwards compatibility
+         waitTimeExitPolicy.setValue(jsonNode.get("transitionDuration").asDouble());
+      else if (jsonNode.has("mimicDuration")) // backwards compatibility
+         waitTimeExitPolicy.setValue(jsonNode.get("mimicDuration").asDouble());
+      else
+         waitTimeExitPolicy.setValue(0.0);
    }
 
    @Override
@@ -67,6 +81,7 @@ public class MimicActionDefinition extends ActionNodeDefinition
 
       onDiskMimicActionType = mimicActionType.getValue();
       onDiskMimicFileName = mimicFileName.getValue();
+      onDiskWaitTimeExitPolicy = waitTimeExitPolicy.getValue();
    }
 
    @Override
@@ -78,6 +93,7 @@ public class MimicActionDefinition extends ActionNodeDefinition
       {
          mimicActionType.setValue(onDiskMimicActionType);
          mimicFileName.setValue(onDiskMimicFileName);
+         waitTimeExitPolicy.setValue(onDiskWaitTimeExitPolicy);
       }
    }
 
@@ -88,6 +104,7 @@ public class MimicActionDefinition extends ActionNodeDefinition
 
       unchanged &= mimicActionType.getValue() == onDiskMimicActionType;
       unchanged &= mimicFileName.getValue().equals(onDiskMimicFileName);
+      unchanged &= waitTimeExitPolicy.getValue() == onDiskWaitTimeExitPolicy;
 
       return !unchanged;
    }
@@ -98,6 +115,7 @@ public class MimicActionDefinition extends ActionNodeDefinition
 
       message.setMimicActionType(mimicActionType.toMessageOrdinal());
       message.setMimicFileName(mimicFileName.toMessage());
+      message.setWaitTimeExitPolicy(waitTimeExitPolicy.toMessage());
    }
 
    public void fromMessage(MimicActionDefinitionMessage message)
@@ -106,6 +124,7 @@ public class MimicActionDefinition extends ActionNodeDefinition
 
       mimicActionType.fromMessageOrdinal(message.getMimicActionType(), MimicActionType.values);
       mimicFileName.fromMessage(message.getMimicFileNameAsString());
+      waitTimeExitPolicy.fromMessage(message.getWaitTimeExitPolicy());
    }
 
    public CRDTBidirectionalEnumField<MimicActionType> getMimicActionType()
@@ -121,5 +140,15 @@ public class MimicActionDefinition extends ActionNodeDefinition
    public void setMimicFileName(String mimicFileName)
    {
       this.mimicFileName.setValue(mimicFileName);
+   }
+
+   public double getWaitTimeExitPolicy()
+   {
+      return waitTimeExitPolicy.getValue();
+   }
+
+   public void setWaitTimeExitPolicy(double waitTimeExitPolicy)
+   {
+      this.waitTimeExitPolicy.setValue(waitTimeExitPolicy);
    }
 }

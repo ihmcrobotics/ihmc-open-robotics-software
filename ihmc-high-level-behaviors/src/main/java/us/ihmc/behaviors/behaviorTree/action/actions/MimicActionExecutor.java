@@ -1,15 +1,21 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
 import controller_msgs.msg.dds.HighLevelStateMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.actions.MimicActionDefinition.MimicActionType;
 import us.ihmc.communication.ros2log.ROS2LogReplay;
 import us.ihmc.communication.ros2log.ROS2LogTimeSource;
+import us.ihmc.commons.Conversions;
+import us.ihmc.tools.NonWallTimer;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -20,12 +26,24 @@ public class MimicActionExecutor extends ActionNodeExecutor<MimicActionState, Mi
    private static final File DEFAULT_ROS2_LOG_DIRECTORY = new File(System.getProperty("user.home"), ".ihmc/logs/ros2");
 
    private final ROS2LogReplay ros2Replayer;
+   private final ROS2Topic<KinematicsToolboxOutputStatus> kstOutputTopic;
+   private final NonWallTimer transitionTimer = new NonWallTimer();
    private String loadedMimicFileName = "";
    private volatile boolean replayThreadRunning = false;
    private volatile boolean replayCompleted = false;
    private volatile boolean replayFailed = false;
    private Thread replayThread;
    private boolean transitionRequestSent = false;
+   private final Object replayAlignmentLock = new Object();
+   private boolean replayAlignmentInitialized = false;
+   private final Point2D actionStartPelvisPosition = new Point2D();
+   private final Point2D actionStartTorsoPosition = new Point2D();
+   private double actionStartPelvisYaw = 0.0;
+   private double actionStartTorsoYaw = 0.0;
+   private final Vector2D replayPelvisPositionOffset = new Vector2D();
+   private final Vector2D replayTorsoPositionOffset = new Vector2D();
+   private double replayPelvisYawOffset = 0.0;
+   private double replayTorsoYawOffset = 0.0;
 
    public MimicActionExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
    {
@@ -33,7 +51,8 @@ public class MimicActionExecutor extends ActionNodeExecutor<MimicActionState, Mi
 
       List<ROS2Topic<?>> topics = new ArrayList<>();
       { // KST output
-         topics.add(KinematicsStreamingToolboxModule.getOutputStatusTopic(robotModel.getSimpleRobotName()));
+         kstOutputTopic = KinematicsStreamingToolboxModule.getOutputStatusTopic(robotModel.getSimpleRobotName());
+         topics.add(kstOutputTopic);
       }
       ROS2LogTimeSource timeSource = ROS2LogTimeSource.SYSTEM;
       ros2Replayer = new ROS2LogReplay(robotModel.getSimpleRobotName(), topics, timeSource);
@@ -43,6 +62,7 @@ public class MimicActionExecutor extends ActionNodeExecutor<MimicActionState, Mi
    public void update()
    {
       super.update();
+      transitionTimer.update(Conversions.nanosecondsToSeconds(syncedRobot.getTimestamp()));
 
       if (!state.getIsExecuting())
          stopReplayThread();
@@ -60,6 +80,7 @@ public class MimicActionExecutor extends ActionNodeExecutor<MimicActionState, Mi
 
       if (definition.getMimicActionType().getValue() == MimicActionType.EXECUTE_POLICY)
       {
+         captureActionStartAlignment();
          String mimicFileName = definition.getMimicFileName();
          if (!mimicFileName.equals(loadedMimicFileName))
          {
@@ -67,14 +88,66 @@ public class MimicActionExecutor extends ActionNodeExecutor<MimicActionState, Mi
             loadedMimicFileName = mimicFileName;
             LogTools.info("Loaded mimic file: {}", mimicFileName);
          }
+         if (ros2Replayer.isReady())
+            ros2Replayer.addReplayMutator(kstOutputTopic, (status, timestamp) -> alignReplayStatusToActionStart(status));
          ros2Replayer.reset();
          sendStateTransitionRequest(true);
          transitionRequestSent = true;
       }
       else if (definition.getMimicActionType().getValue() == MimicActionType.EXIT_POLICY)
       {
+         transitionTimer.reset();
          sendStateTransitionRequest(false);
          transitionRequestSent = true;
+      }
+   }
+
+   private void captureActionStartAlignment()
+   {
+      synchronized (replayAlignmentLock)
+      {
+         var pelvisPose = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getPelvisFrame);
+         actionStartPelvisPosition.set(pelvisPose.getPosition().getX(), pelvisPose.getPosition().getY());
+         actionStartPelvisYaw = pelvisPose.getYaw();
+
+         var torsoPose = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getChestFrame);
+         actionStartTorsoPosition.set(torsoPose.getPosition().getX(), torsoPose.getPosition().getY());
+         actionStartTorsoYaw = torsoPose.getYaw();
+
+         replayPelvisPositionOffset.setToZero();
+         replayTorsoPositionOffset.setToZero();
+         replayPelvisYawOffset = 0.0;
+         replayTorsoYawOffset = 0.0;
+         replayAlignmentInitialized = false;
+      }
+   }
+
+   private void alignReplayStatusToActionStart(KinematicsToolboxOutputStatus status)
+   {
+      synchronized (replayAlignmentLock)
+      {
+         if (!replayAlignmentInitialized)
+         {
+            replayPelvisPositionOffset.set(actionStartPelvisPosition.getX() - status.getDesiredRootPosition().getX(),
+                                           actionStartPelvisPosition.getY() - status.getDesiredRootPosition().getY());
+            replayTorsoPositionOffset.set(actionStartTorsoPosition.getX() - status.getDesiredTorsoPosition().getX(),
+                                          actionStartTorsoPosition.getY() - status.getDesiredTorsoPosition().getY());
+            replayPelvisYawOffset = actionStartPelvisYaw - status.getDesiredRootOrientation().getYaw();
+            replayTorsoYawOffset = actionStartTorsoYaw - status.getDesiredTorsoOrientation().getYaw();
+            replayAlignmentInitialized = true;
+         }
+
+         status.getDesiredRootPosition().setX(status.getDesiredRootPosition().getX() + replayPelvisPositionOffset.getX());
+         status.getDesiredRootPosition().setY(status.getDesiredRootPosition().getY() + replayPelvisPositionOffset.getY());
+         status.getDesiredTorsoPosition().setX(status.getDesiredTorsoPosition().getX() + replayTorsoPositionOffset.getX());
+         status.getDesiredTorsoPosition().setY(status.getDesiredTorsoPosition().getY() + replayTorsoPositionOffset.getY());
+
+         status.getDesiredRootOrientation().setYawPitchRoll(status.getDesiredRootOrientation().getYaw() + replayPelvisYawOffset,
+                                                            status.getDesiredRootOrientation().getPitch(),
+                                                            status.getDesiredRootOrientation().getRoll());
+         status.getDesiredTorsoOrientation().setYawPitchRoll(status.getDesiredTorsoOrientation().getYaw() + replayTorsoYawOffset,
+                                                             status.getDesiredTorsoOrientation().getPitch(),
+                                                             status.getDesiredTorsoOrientation().getRoll());
       }
    }
 
@@ -85,6 +158,9 @@ public class MimicActionExecutor extends ActionNodeExecutor<MimicActionState, Mi
       {
          case EXECUTE_POLICY ->
          {
+            state.setNominalExecutionDuration(0.0);
+            state.setElapsedExecutionTime(0.0);
+
             HighLevelControllerName latestControllerState = controllerStatusTracker.getLatestKnownState();
             if (latestControllerState != HighLevelControllerName.RL_CONTROL)
             {
@@ -126,13 +202,20 @@ public class MimicActionExecutor extends ActionNodeExecutor<MimicActionState, Mi
          case EXIT_POLICY ->
          {
             stopReplayThread();
+            state.setNominalExecutionDuration(definition.getWaitTimeExitPolicy());
+            state.setElapsedExecutionTime(transitionTimer.getElapsedTime());
 
             HighLevelControllerName latestControllerState = controllerStatusTracker.getLatestKnownState();
-            if (latestControllerState == HighLevelControllerName.WALKING)
+            boolean reachedWalking = latestControllerState == HighLevelControllerName.WALKING;
+            boolean durationElapsed = !transitionTimer.isRunning(definition.getWaitTimeExitPolicy());
+
+            if (reachedWalking && durationElapsed)
             {
                state.setIsExecuting(false);
                return;
             }
+
+            state.setIsExecuting(true);
 
             if (!transitionRequestSent)
             {
