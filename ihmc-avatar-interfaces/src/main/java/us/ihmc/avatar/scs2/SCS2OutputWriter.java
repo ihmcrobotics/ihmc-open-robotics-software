@@ -318,6 +318,9 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
             if (jointVelocityCorruptor != null)
                qd_d = jointVelocityCorruptor.corruptCommand(qd_d, simOutput);
             velocityError = qd_d - simOutput.getQd();
+
+            if (jointDesiredOutput.hasVelocityScaling())
+               velocityError *= jointDesiredOutput.getVelocityScaling();
          }
          else
          {
@@ -480,6 +483,9 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
             if (jointVelocityCorruptor != null)
                qd_d = jointVelocityCorruptor.corruptCommand(qd_d, localFourBarJoint);
             velocityError = qd_d - localFourBarJoint.getQd();
+
+            if (jointDesiredOutput.hasVelocityScaling())
+               velocityError *= jointDesiredOutput.getVelocityScaling();
          }
          else
          {
