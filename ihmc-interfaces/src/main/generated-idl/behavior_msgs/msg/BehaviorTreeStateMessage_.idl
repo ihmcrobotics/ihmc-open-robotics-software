@@ -16,6 +16,7 @@
 #include "behavior_msgs/msg/./GotoNodeStateMessage_.idl"
 #include "behavior_msgs/msg/./HandWrenchActionStateMessage_.idl"
 #include "behavior_msgs/msg/./LegActionStateMessage_.idl"
+#include "behavior_msgs/msg/./MimicActionStateMessage_.idl"
 #include "behavior_msgs/msg/./NeckActionStateMessage_.idl"
 #include "behavior_msgs/msg/./PelvisActionStateMessage_.idl"
 #include "behavior_msgs/msg/./SceneActionStateMessage_.idl"
@@ -103,6 +104,9 @@ module behavior_msgs
       const octet LEG_ACTION =
       22;
 
+      const octet MIMIC_ACTION =
+      23;
+
 
       /**
        * Gives the current state of the complete collection of behavior tree nodes.
@@ -162,6 +166,7 @@ module behavior_msgs
         sequence<behavior_msgs::msg::dds::PelvisActionStateMessage, 120> pelvis_actions;
         sequence<behavior_msgs::msg::dds::WaitActionStateMessage, 120> wait_actions;
         sequence<behavior_msgs::msg::dds::LegActionStateMessage, 120> leg_actions;
+        sequence<behavior_msgs::msg::dds::MimicActionStateMessage, 120> mimic_actions;
       };
     };
   };
