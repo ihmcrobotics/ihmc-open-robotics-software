@@ -15,11 +15,12 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.robotics.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class FallingControllerState extends HighLevelControllerState
 {
    private static final HighLevelControllerName controllerState = HighLevelControllerName.FALLING_STATE;
-   private static final double fallTransitionDuration = 0.25;
+   private final YoDouble fallTransitionDuration;
 
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder;
    private final YoPolynomial trajectory = new YoPolynomial("fallingTrajectory", 4, registry);
@@ -56,6 +57,8 @@ public class FallingControllerState extends HighLevelControllerState
                                  WholeBodySetpointParameters fallingSetpoints)
    {
       super(controllerState, highLevelControllerParameters, controllerToolbox.getControlledOneDoFJoints());
+      fallTransitionDuration = new YoDouble("fallTransitionDuration", registry);
+      fallTransitionDuration.set(0.5);
       lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder(controlledJoints.length);
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledJoints);
 
@@ -68,8 +71,8 @@ public class FallingControllerState extends HighLevelControllerState
    @Override
    public void doAction(double timeInState)
    {
-      double timeInTrajectory = MathTools.clamp(timeInState, 0.0, fallTransitionDuration);
-      boolean useDampingMode = enableFallingDampingMode.getBooleanValue() && timeInState >= fallTransitionDuration;
+      double timeInTrajectory = MathTools.clamp(timeInState, 0.0, fallTransitionDuration.getDoubleValue());
+      boolean useDampingMode = enableFallingDampingMode.getBooleanValue() && timeInState >= fallTransitionDuration.getDoubleValue();
       fallingDampingModeActive.set(useDampingMode);
       trajectory.compute(timeInTrajectory);
       double alphaPosition = trajectory.getValue();
@@ -102,7 +105,7 @@ public class FallingControllerState extends HighLevelControllerState
    @Override
    public void onEntry()
    {
-      trajectory.setCubic(0.0, fallTransitionDuration, 0.0, 0.0, 1.0, 0.0);
+      trajectory.setCubic(0.0, fallTransitionDuration.getDoubleValue(), 0.0, 0.0, 1.0, 0.0);
       fallingDampingModeActive.set(false);
 
       for (int i = 0; i < controlledJoints.length; i++)
