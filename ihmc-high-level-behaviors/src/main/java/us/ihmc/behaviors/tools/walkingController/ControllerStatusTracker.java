@@ -190,6 +190,11 @@ public class ControllerStatusTracker
       return capturabilityBasedStatusTimer.isRunning(CAPTURABILITY_BASED_STATUS_EXPIRATION_TIME);
    }
 
+   public HighLevelControllerName getLatestKnownState()
+   {
+      return latestKnownState;
+   }
+
    private void triggerNotWalkingStateAnymoreCallbacks()
    {
       if (notWalkingStateAnymoreCallbackThrottler.run(2.0)) // don't call them more than once every few seconds

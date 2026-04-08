@@ -25,6 +25,7 @@ public class MimicActionExecutor extends ActionNodeExecutor<MimicActionState, Mi
    private volatile boolean replayCompleted = false;
    private volatile boolean replayFailed = false;
    private Thread replayThread;
+   private boolean transitionRequestSent = false;
 
    public MimicActionExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
    {
@@ -54,6 +55,7 @@ public class MimicActionExecutor extends ActionNodeExecutor<MimicActionState, Mi
 
       replayCompleted = false;
       replayFailed = false;
+      transitionRequestSent = false;
       stopReplayThread();
 
       if (definition.getMimicActionType().getValue() == MimicActionType.EXECUTE_POLICY)
@@ -66,7 +68,13 @@ public class MimicActionExecutor extends ActionNodeExecutor<MimicActionState, Mi
             LogTools.info("Loaded mimic file: {}", mimicFileName);
          }
          ros2Replayer.reset();
-         startReplayThread();
+         sendStateTransitionRequest(true);
+         transitionRequestSent = true;
+      }
+      else if (definition.getMimicActionType().getValue() == MimicActionType.EXIT_POLICY)
+      {
+         sendStateTransitionRequest(false);
+         transitionRequestSent = true;
       }
    }
 
@@ -75,20 +83,19 @@ public class MimicActionExecutor extends ActionNodeExecutor<MimicActionState, Mi
    {
       switch (definition.getMimicActionType().getValue())
       {
-         case POLICY_TRANSITION ->
-         {
-            stopReplayThread();
-            sendStateTransitionRequest(true);
-            state.setIsExecuting(false);
-         }
-         case EXIT_POLICY ->
-         {
-            stopReplayThread();
-            sendStateTransitionRequest(false);
-            state.setIsExecuting(false);
-         }
          case EXECUTE_POLICY ->
          {
+            HighLevelControllerName latestControllerState = controllerStatusTracker.getLatestKnownState();
+            if (latestControllerState != HighLevelControllerName.RL_CONTROL)
+            {
+               if (!transitionRequestSent)
+               {
+                  sendStateTransitionRequest(true);
+                  transitionRequestSent = true;
+               }
+               return;
+            }
+
             if (!ros2Replayer.isReady())
             {
                state.getLogger().error("Mimic replay is not ready. File: {}", definition.getMimicFileName());
@@ -115,6 +122,23 @@ public class MimicActionExecutor extends ActionNodeExecutor<MimicActionState, Mi
 
             if (!replayThreadRunning)
                startReplayThread();
+         }
+         case EXIT_POLICY ->
+         {
+            stopReplayThread();
+
+            HighLevelControllerName latestControllerState = controllerStatusTracker.getLatestKnownState();
+            if (latestControllerState == HighLevelControllerName.WALKING)
+            {
+               state.setIsExecuting(false);
+               return;
+            }
+
+            if (!transitionRequestSent)
+            {
+               sendStateTransitionRequest(false);
+               transitionRequestSent = true;
+            }
          }
       }
    }

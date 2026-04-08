@@ -12,7 +12,6 @@ public class MimicActionDefinition extends ActionNodeDefinition
 {
    public enum MimicActionType
    {
-      POLICY_TRANSITION,
       EXIT_POLICY,
       EXECUTE_POLICY;
 
@@ -29,7 +28,7 @@ public class MimicActionDefinition extends ActionNodeDefinition
    {
       super(rootNode);
 
-      mimicActionType = new CRDTBidirectionalEnumField<>(this, MimicActionType.POLICY_TRANSITION);
+      mimicActionType = new CRDTBidirectionalEnumField<>(this, MimicActionType.EXECUTE_POLICY);
       mimicFileName = new CRDTBidirectionalString(this, "");
    }
 
@@ -48,9 +47,12 @@ public class MimicActionDefinition extends ActionNodeDefinition
       super.loadFromFile(jsonNode);
 
       if (jsonNode.has("mimicActionType"))
-         mimicActionType.setValue(MimicActionType.valueOf(jsonNode.get("mimicActionType").textValue()));
+      {
+         MimicActionType loadedType = MimicActionType.valueOf(jsonNode.get("mimicActionType").textValue());
+         mimicActionType.setValue(loadedType);
+      }
       else
-         mimicActionType.setValue(MimicActionType.POLICY_TRANSITION);
+         mimicActionType.setValue(MimicActionType.EXECUTE_POLICY);
 
       if (jsonNode.has("mimicFileName"))
          mimicFileName.setValue(jsonNode.get("mimicFileName").textValue());
