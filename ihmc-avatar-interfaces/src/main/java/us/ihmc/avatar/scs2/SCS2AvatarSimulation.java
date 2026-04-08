@@ -13,6 +13,11 @@ import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.IKStream
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
+import us.ihmc.communication.controllerAPI.StatusMessageOutputManager.StatusMessageListener;
+import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.ros2.ROS2Heartbeat;
+import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.tools.RotationMatrixTools;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -32,6 +37,8 @@ import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.Objects;
+
+import static us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.CSGROS2CommunicationHelper.CSG_HEARTBEAT_TOPIC;
 
 public class SCS2AvatarSimulation
 {
@@ -57,6 +64,7 @@ public class SCS2AvatarSimulation
    private boolean showGUI;
    private boolean automaticallyStartSimulation;
    private RealtimeROS2Node realtimeROS2Node;
+   private ROS2Heartbeat heartbeat;
 
    private boolean systemExitOnDestroy = true;
    private boolean javaFXThreadImplicitExit = true;
@@ -132,6 +140,12 @@ public class SCS2AvatarSimulation
       {
          simulationConstructionSet.shutdownSession();
          simulationConstructionSet = null;
+      }
+
+      if (heartbeat != null)
+      {
+         heartbeat.destroy();
+         heartbeat = null;
       }
 
       if (systemExitOnDestroy)
@@ -586,6 +600,16 @@ public class SCS2AvatarSimulation
       getSimulationConstructionSet().stepBufferIndexBackward();
    }
 
+   public <C extends Command<C, ?>> void submitStepGeneratorCommand(C command)
+   {
+      stepGeneratorThread.getCsgCommandInputManager().getCommandInputManager().submitCommand(command);
+   }
+
+   public <S extends Settable<S>> void attachStepGeneratorStatusMessageListener(Class<S> statusMessageClass, StatusMessageListener<S> statusMessageListener)
+   {
+      stepGeneratorThread.getStatusOutputManager().attachStatusMessageListener(statusMessageClass, statusMessageListener);
+   }
+
    public void setAutomaticallyStartSimulation(boolean automaticallyStartSimulation)
    {
       this.automaticallyStartSimulation = automaticallyStartSimulation;
@@ -595,4 +619,15 @@ public class SCS2AvatarSimulation
    {
       this.realtimeROS2Node = realtimeROS2Node;
    }
+
+   public void startStepGeneratorHeartbeat()
+   {
+      if (realtimeROS2Node == null)
+         return;
+
+      if (heartbeat == null)
+         heartbeat = new ROS2Heartbeat(realtimeROS2Node, CSG_HEARTBEAT_TOPIC);
+      heartbeat.setAlive(true);
+   }
+
 }

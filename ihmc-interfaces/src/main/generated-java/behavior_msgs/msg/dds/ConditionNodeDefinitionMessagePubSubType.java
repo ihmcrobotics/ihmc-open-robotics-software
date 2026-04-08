@@ -15,7 +15,7 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "9dd4c9a042e2ae78915182a7947d5667c0fccc0f3547fc9c66b806e53ff04ec6";
+   		return "37185763e56d2d938aa451961f13e3707121cc86a9cdaed169ba804b9377ad7c";
    }
    
    @Override
@@ -91,6 +91,20 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+
+      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+
+      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+
+      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+
+      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+
+      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+
 
       return current_alignment - initial_alignment;
    }
@@ -164,6 +178,27 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+
+
+      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+
+
+      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+
+
+      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+
+
+      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+
+
+      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -228,6 +263,20 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
 
       cdr.write_type_4(data.getMaxPoints());
 
+      cdr.write_type_7(data.getCheckColor());
+
+      cdr.write_type_3(data.getHueMin());
+
+      cdr.write_type_3(data.getHueMax());
+
+      cdr.write_type_3(data.getSaturationMin());
+
+      cdr.write_type_3(data.getSaturationMax());
+
+      cdr.write_type_3(data.getValueMin());
+
+      cdr.write_type_3(data.getValueMax());
+
    }
 
    public static void read(behavior_msgs.msg.dds.ConditionNodeDefinitionMessage data, us.ihmc.idl.CDR cdr)
@@ -269,6 +318,20 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
       	
       data.setMaxPoints(cdr.read_type_4());
       	
+      data.setCheckColor(cdr.read_type_7());
+      	
+      data.setHueMin(cdr.read_type_3());
+      	
+      data.setHueMax(cdr.read_type_3());
+      	
+      data.setSaturationMin(cdr.read_type_3());
+      	
+      data.setSaturationMax(cdr.read_type_3());
+      	
+      data.setValueMin(cdr.read_type_3());
+      	
+      data.setValueMax(cdr.read_type_3());
+      	
 
    }
 
@@ -300,6 +363,13 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
       ser.write_type_d("frame_name", data.getFrameName());
       ser.write_type_4("min_points", data.getMinPoints());
       ser.write_type_4("max_points", data.getMaxPoints());
+      ser.write_type_7("check_color", data.getCheckColor());
+      ser.write_type_3("hue_min", data.getHueMin());
+      ser.write_type_3("hue_max", data.getHueMax());
+      ser.write_type_3("saturation_min", data.getSaturationMin());
+      ser.write_type_3("saturation_max", data.getSaturationMax());
+      ser.write_type_3("value_min", data.getValueMin());
+      ser.write_type_3("value_max", data.getValueMax());
    }
 
    @Override
@@ -330,6 +400,13 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
       ser.read_type_d("frame_name", data.getFrameName());
       data.setMinPoints(ser.read_type_4("min_points"));
       data.setMaxPoints(ser.read_type_4("max_points"));
+      data.setCheckColor(ser.read_type_7("check_color"));
+      data.setHueMin(ser.read_type_3("hue_min"));
+      data.setHueMax(ser.read_type_3("hue_max"));
+      data.setSaturationMin(ser.read_type_3("saturation_min"));
+      data.setSaturationMax(ser.read_type_3("saturation_max"));
+      data.setValueMin(ser.read_type_3("value_min"));
+      data.setValueMax(ser.read_type_3("value_max"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.ConditionNodeDefinitionMessage src, behavior_msgs.msg.dds.ConditionNodeDefinitionMessage dest)

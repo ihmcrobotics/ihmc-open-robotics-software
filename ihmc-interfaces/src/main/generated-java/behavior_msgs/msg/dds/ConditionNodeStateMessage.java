@@ -42,8 +42,11 @@ public class ConditionNodeStateMessage extends Packet<ConditionNodeStateMessage>
             * Whether frame B is present
             */
    public boolean frame_b_is_present_;
-   public long number_of_points_contained_;
    public boolean frame_is_contained_;
+   public long number_of_points_contained_;
+   public float average_hue_;
+   public float average_saturation_;
+   public float average_value_;
 
    public ConditionNodeStateMessage()
    {
@@ -71,9 +74,15 @@ public class ConditionNodeStateMessage extends Packet<ConditionNodeStateMessage>
 
       frame_b_is_present_ = other.frame_b_is_present_;
 
+      frame_is_contained_ = other.frame_is_contained_;
+
       number_of_points_contained_ = other.number_of_points_contained_;
 
-      frame_is_contained_ = other.frame_is_contained_;
+      average_hue_ = other.average_hue_;
+
+      average_saturation_ = other.average_saturation_;
+
+      average_value_ = other.average_value_;
 
    }
 
@@ -164,6 +173,15 @@ public class ConditionNodeStateMessage extends Packet<ConditionNodeStateMessage>
       return frame_b_is_present_;
    }
 
+   public void setFrameIsContained(boolean frame_is_contained)
+   {
+      frame_is_contained_ = frame_is_contained;
+   }
+   public boolean getFrameIsContained()
+   {
+      return frame_is_contained_;
+   }
+
    public void setNumberOfPointsContained(long number_of_points_contained)
    {
       number_of_points_contained_ = number_of_points_contained;
@@ -173,13 +191,31 @@ public class ConditionNodeStateMessage extends Packet<ConditionNodeStateMessage>
       return number_of_points_contained_;
    }
 
-   public void setFrameIsContained(boolean frame_is_contained)
+   public void setAverageHue(float average_hue)
    {
-      frame_is_contained_ = frame_is_contained;
+      average_hue_ = average_hue;
    }
-   public boolean getFrameIsContained()
+   public float getAverageHue()
    {
-      return frame_is_contained_;
+      return average_hue_;
+   }
+
+   public void setAverageSaturation(float average_saturation)
+   {
+      average_saturation_ = average_saturation;
+   }
+   public float getAverageSaturation()
+   {
+      return average_saturation_;
+   }
+
+   public void setAverageValue(float average_value)
+   {
+      average_value_ = average_value;
+   }
+   public float getAverageValue()
+   {
+      return average_value_;
    }
 
 
@@ -211,9 +247,15 @@ public class ConditionNodeStateMessage extends Packet<ConditionNodeStateMessage>
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.frame_b_is_present_, other.frame_b_is_present_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.frame_is_contained_, other.frame_is_contained_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.number_of_points_contained_, other.number_of_points_contained_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.frame_is_contained_, other.frame_is_contained_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.average_hue_, other.average_hue_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.average_saturation_, other.average_saturation_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.average_value_, other.average_value_, epsilon)) return false;
 
 
       return true;
@@ -239,9 +281,15 @@ public class ConditionNodeStateMessage extends Packet<ConditionNodeStateMessage>
 
       if(this.frame_b_is_present_ != otherMyClass.frame_b_is_present_) return false;
 
+      if(this.frame_is_contained_ != otherMyClass.frame_is_contained_) return false;
+
       if(this.number_of_points_contained_ != otherMyClass.number_of_points_contained_) return false;
 
-      if(this.frame_is_contained_ != otherMyClass.frame_is_contained_) return false;
+      if(this.average_hue_ != otherMyClass.average_hue_) return false;
+
+      if(this.average_saturation_ != otherMyClass.average_saturation_) return false;
+
+      if(this.average_value_ != otherMyClass.average_value_) return false;
 
 
       return true;
@@ -267,10 +315,16 @@ public class ConditionNodeStateMessage extends Packet<ConditionNodeStateMessage>
       builder.append(this.frame_a_is_present_);      builder.append(", ");
       builder.append("frame_b_is_present=");
       builder.append(this.frame_b_is_present_);      builder.append(", ");
+      builder.append("frame_is_contained=");
+      builder.append(this.frame_is_contained_);      builder.append(", ");
       builder.append("number_of_points_contained=");
       builder.append(this.number_of_points_contained_);      builder.append(", ");
-      builder.append("frame_is_contained=");
-      builder.append(this.frame_is_contained_);
+      builder.append("average_hue=");
+      builder.append(this.average_hue_);      builder.append(", ");
+      builder.append("average_saturation=");
+      builder.append(this.average_saturation_);      builder.append(", ");
+      builder.append("average_value=");
+      builder.append(this.average_value_);
       builder.append("}");
       return builder.toString();
    }

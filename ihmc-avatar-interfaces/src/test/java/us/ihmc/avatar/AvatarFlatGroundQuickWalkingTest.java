@@ -11,7 +11,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -65,7 +64,7 @@ public abstract class AvatarFlatGroundQuickWalkingTest implements MultiRobotTest
    @Test
    public void testForwardWalking() throws Exception
    {
-      setupSim(getRobotModel(), false, false, null);
+      setupSim(getRobotModel());
       assertTrue(simulationTestHelper.simulateNow(2.0));
 
       ((YoDouble) simulationTestHelper.findVariable("icpDistanceFromFootPolygonThreshold")).set(0.20);
@@ -99,23 +98,16 @@ public abstract class AvatarFlatGroundQuickWalkingTest implements MultiRobotTest
       simulationTestingParameters.setUsePefectSensors(usePerfectSensors);
    }
 
-   private void setupSim(DRCRobotModel robotModel,
-                         boolean useVelocityAndHeadingScript,
-                         boolean cheatWithGroundHeightAtForFootstep,
-                         HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters)
+   private void setupSim(DRCRobotModel robotModel)
    {
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel,
                                                                                                                                              flatGround,
                                                                                                                                              simulationTestingParameters);
 
-      if (cheatWithGroundHeightAtForFootstep)
-         simulationTestHelperFactory.setComponentBasedFootstepDataMessageGeneratorParameters(useVelocityAndHeadingScript,
-                                                                                             walkingScriptParameters);
-      else
-         simulationTestHelperFactory.setComponentBasedFootstepDataMessageGeneratorParameters(useVelocityAndHeadingScript,
-                                                                                             flatGround.getTerrainObject3D().getHeightMapIfAvailable(),
-                                                                                             walkingScriptParameters);
+      simulationTestHelperFactory.setComponentFootstepGeneratorParameters(false,
+                                                                          flatGround.getTerrainObject3D().getHeightMapIfAvailable(),
+                                                                          null);
 
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
 

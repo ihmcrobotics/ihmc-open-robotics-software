@@ -126,7 +126,10 @@ public class RDXROS2YOLOv8ModelSettings
          if (ImGui.checkbox(labels.getHidden("enable universal"), universalEnable))
          {
             for (int i = 0; i < detectableObjectClassCount; ++i)
+            {
                classSettings[i].enable.set(universalEnable);
+               classSettings[i].markDirty();
+            }
          }
          ImGui.setItemAllowOverlap();
       }
@@ -142,7 +145,10 @@ public class RDXROS2YOLOv8ModelSettings
          if (tableInputFloat(universalConfidenceThreshold, 0.0f, 1.0f))
          {
             for (int i = 0; i < detectableObjectClassCount; ++i)
+            {
                classSettings[i].confidenceThreshold.set(universalConfidenceThreshold);
+               classSettings[i].markDirty();
+            }
          }
       }
 
@@ -151,7 +157,10 @@ public class RDXROS2YOLOv8ModelSettings
          if (tableInputFloat(universalMaskThreshold, -10.0f, 10.0f))
          {
             for (int i = 0; i < detectableObjectClassCount; ++i)
+            {
                classSettings[i].maskThreshold.set(universalMaskThreshold);
+               classSettings[i].markDirty();
+            }
          }
       }
 
@@ -160,7 +169,10 @@ public class RDXROS2YOLOv8ModelSettings
          if (tableInputInt(universalErosionKernelRadius, 0, 10))
          {
             for (int i = 0; i < detectableObjectClassCount; ++i)
+            {
                classSettings[i].erosionKernelRadius.set(universalErosionKernelRadius);
+               classSettings[i].markDirty();
+            }
          }
       }
 
@@ -169,7 +181,10 @@ public class RDXROS2YOLOv8ModelSettings
          if (tableInputFloat(universalOutlierThreshold, 0.0f, 5.0f))
          {
             for (int i = 0; i < detectableObjectClassCount; ++i)
+            {
                classSettings[i].outlierThreshold.set(universalOutlierThreshold);
+               classSettings[i].markDirty();
+            }
          }
       }
    }
@@ -199,6 +214,7 @@ public class RDXROS2YOLOv8ModelSettings
       final ImFloat maskThreshold;
       final ImInt erosionKernelRadius;
       final ImFloat outlierThreshold;
+      private boolean dirty = false;
 
       public RDXYOLOv8ModelClassSettings(int classIndex, String className, SyncedYOLOv8ModelParameters modelParameters)
       {
@@ -207,11 +223,11 @@ public class RDXROS2YOLOv8ModelSettings
          this.modelParameters = modelParameters;
 
          labels = new ImGuiUniqueLabelMap(getClass());
-         enable = new ImBoolean(true);
-         confidenceThreshold = new ImFloat(0.7f);
-         maskThreshold = new ImFloat(0.0f);
-         erosionKernelRadius = new ImInt(1);
-         outlierThreshold = new ImFloat(2.0f);
+         enable = new ImBoolean(!modelParameters.getIgnoredObjectClasses().getValueReadOnly(classIndex));
+         confidenceThreshold = new ImFloat(modelParameters.getConfidenceThresholds().getValueReadOnly(classIndex));
+         maskThreshold = new ImFloat(modelParameters.getMaskThresholds().getValueReadOnly(classIndex));
+         erosionKernelRadius = new ImInt(modelParameters.getErosionKernelRadii().getValueReadOnly(classIndex));
+         outlierThreshold = new ImFloat(modelParameters.getOutlierThresholds().getValueReadOnly(classIndex));
       }
 
       public void update(LatestTimestampModifiable latestTimestampModifiable)
@@ -223,13 +239,19 @@ public class RDXROS2YOLOv8ModelSettings
             maskThreshold.set(modelParameters.getMaskThresholds().getValueReadOnly(classIndex));
             erosionKernelRadius.set(modelParameters.getErosionKernelRadii().getValueReadOnly(classIndex));
             outlierThreshold.set(modelParameters.getOutlierThresholds().getValueReadOnly(classIndex));
+            dirty = false;
+            return;
          }
+
+         if (!dirty)
+            return;
 
          modelParameters.getIgnoredObjectClasses().setValue(classIndex, !enable.get());
          modelParameters.getConfidenceThresholds().setValue(classIndex, confidenceThreshold.get());
          modelParameters.getMaskThresholds().setValue(classIndex, maskThreshold.get());
          modelParameters.getErosionKernelRadii().setValue(classIndex, erosionKernelRadius.get());
          modelParameters.getOutlierThresholds().setValue(classIndex, outlierThreshold.get());
+         dirty = false;
       }
 
       public void renderTableRow()
@@ -237,7 +259,8 @@ public class RDXROS2YOLOv8ModelSettings
          if (ImGui.tableNextColumn()) // Enable
          {
             ImGui.setNextItemWidth(-1.0f);
-            ImGui.checkbox(labels.getHidden("enable"), enable);
+            if (ImGui.checkbox(labels.getHidden("enable"), enable))
+               markDirty();
             ImGui.setItemAllowOverlap();
          }
 
@@ -248,16 +271,25 @@ public class RDXROS2YOLOv8ModelSettings
          }
 
          if (ImGui.tableNextColumn()) // Confidence threshold
-            tableInputFloat(confidenceThreshold, 0.0f, 1.0f);
+            if (tableInputFloat(confidenceThreshold, 0.0f, 1.0f))
+               markDirty();
 
          if (ImGui.tableNextColumn()) // Mask threshold
-            tableInputFloat(maskThreshold, -10.0f, 10.0f);
+            if (tableInputFloat(maskThreshold, -10.0f, 10.0f))
+               markDirty();
 
          if (ImGui.tableNextColumn()) // Erosion kernel radius
-            tableInputInt(erosionKernelRadius, 0, 10);
+            if (tableInputInt(erosionKernelRadius, 0, 10))
+               markDirty();
 
          if (ImGui.tableNextColumn()) // Outlier threshold
-            tableInputFloat(outlierThreshold, 0.0f, 5.0f);
+            if (tableInputFloat(outlierThreshold, 0.0f, 5.0f))
+               markDirty();
+      }
+
+      private void markDirty()
+      {
+         dirty = true;
       }
    }
 

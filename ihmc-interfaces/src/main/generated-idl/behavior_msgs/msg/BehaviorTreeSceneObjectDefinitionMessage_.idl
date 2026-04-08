@@ -7,12 +7,27 @@ module behavior_msgs
   {
     module dds
     {
+      /**
+       * From A towards, backed up by X distance, Zup
+       */
+      const octet COMPOSITE_FRAME_APPROACH =
+      0;
 
+      const octet COMPOSITE_FRAME_HYBRID =
+      1;
+
+
+      /**
+       * YOLO:
+       * FoundationPose:
+       * Door Frame
+       * Composite Reference Frame:
+       */
       @TypeCode(type="behavior_msgs::msg::dds_::BehaviorTreeSceneObjectDefinitionMessage_")
       struct BehaviorTreeSceneObjectDefinitionMessage
       {
         /**
-         * Object type: YOLO only, FoundationPose, or specific heurustic
+         * Object type: YOLO only, FoundationPose, custom frame, or specific heurustic
          */
         octet object_type;
         /**
@@ -27,6 +42,34 @@ module behavior_msgs
          * FoundationPose object type (IsaacROSFoundationPoseObject enum ordinal)
          */
         octet foundation_pose_object_type;
+        /**
+         * Minimum number of points to detect the post
+         */
+        unsigned short min_post_points;
+        /**
+         * Minimum number of point to detect the door recess
+         */
+        unsigned short min_recess_points;
+        /**
+         * Composite frame name
+         */
+        string composite_frame_name;
+        /**
+         * The name of frame A
+         */
+        string composite_frame_a;
+        /**
+         * The name of frame B
+         */
+        string composite_frame_b;
+        /**
+         * The type of composite frame
+         */
+        octet composite_frame_type;
+        /**
+         * Distance from frame B
+         */
+        float composite_distance;
       };
     };
   };
