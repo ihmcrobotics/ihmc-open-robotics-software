@@ -107,7 +107,7 @@ public class RDXFoundationPoseDemo
    private final ImageMessage colorMessage;
    private final ImageMessage depthMessage;
 
-   private final ImageSensor zed;
+   private final ZEDImageSensor zed;
    private final YOLOv8DetectionThread yoloThread;
    private final RepeatingTaskThread zedImageConsumerThread;
 
@@ -137,7 +137,8 @@ public class RDXFoundationPoseDemo
       ros2Node.createSubscription2(RESULT_TOPIC, this::receivePose);
 
       boolean enableNeuralMode = CUDATools.hasCUDADeviceOfAtLeast(CUDATools.getDeviceName(0), "RTX 3080");
-      zed = new ZEDImageSensor(0, ZEDModelData.ZED_2, SL_INPUT_TYPE_USB, enableNeuralMode ? SL_DEPTH_MODE_NEURAL : SL_DEPTH_MODE_PERFORMANCE);
+      zed = new ZEDImageSensor(0, ZEDModelData.ZED_2, SL_INPUT_TYPE_USB);
+      zed.getInitParameters().depth_mode(enableNeuralMode ? SL_DEPTH_MODE_NEURAL : SL_DEPTH_MODE_PERFORMANCE);
 
       colorPublisher = ros2Node.createPublisher(COLOR_TOPIC);
       depthPublisher = ros2Node.createPublisher(DEPTH_TOPIC);

@@ -15,7 +15,7 @@ public class ConditionNodeStateMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "59a38919e41d4eda7957580843067d502c5d62dfb07185254f2c33b5bb8ae4f7";
+   		return "45ccb9121f3ab0a947e54ce81ae2b8b0550d1b9f14775716b4fadb78a414b5eb";
    }
    
    @Override
@@ -66,9 +66,15 @@ public class ConditionNodeStateMessagePubSubType implements us.ihmc.pubsub.Topic
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
       return current_alignment - initial_alignment;
@@ -101,10 +107,19 @@ public class ConditionNodeStateMessagePubSubType implements us.ihmc.pubsub.Topic
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
 
@@ -124,9 +139,15 @@ public class ConditionNodeStateMessagePubSubType implements us.ihmc.pubsub.Topic
 
       cdr.write_type_7(data.getFrameBIsPresent());
 
+      cdr.write_type_7(data.getFrameIsContained());
+
       cdr.write_type_4(data.getNumberOfPointsContained());
 
-      cdr.write_type_7(data.getFrameIsContained());
+      cdr.write_type_5(data.getAverageHue());
+
+      cdr.write_type_5(data.getAverageSaturation());
+
+      cdr.write_type_5(data.getAverageValue());
 
    }
 
@@ -143,9 +164,15 @@ public class ConditionNodeStateMessagePubSubType implements us.ihmc.pubsub.Topic
       	
       data.setFrameBIsPresent(cdr.read_type_7());
       	
+      data.setFrameIsContained(cdr.read_type_7());
+      	
       data.setNumberOfPointsContained(cdr.read_type_4());
       	
-      data.setFrameIsContained(cdr.read_type_7());
+      data.setAverageHue(cdr.read_type_5());
+      	
+      data.setAverageSaturation(cdr.read_type_5());
+      	
+      data.setAverageValue(cdr.read_type_5());
       	
 
    }
@@ -163,8 +190,11 @@ public class ConditionNodeStateMessagePubSubType implements us.ihmc.pubsub.Topic
 
       ser.write_type_7("frame_a_is_present", data.getFrameAIsPresent());
       ser.write_type_7("frame_b_is_present", data.getFrameBIsPresent());
-      ser.write_type_4("number_of_points_contained", data.getNumberOfPointsContained());
       ser.write_type_7("frame_is_contained", data.getFrameIsContained());
+      ser.write_type_4("number_of_points_contained", data.getNumberOfPointsContained());
+      ser.write_type_5("average_hue", data.getAverageHue());
+      ser.write_type_5("average_saturation", data.getAverageSaturation());
+      ser.write_type_5("average_value", data.getAverageValue());
    }
 
    @Override
@@ -180,8 +210,11 @@ public class ConditionNodeStateMessagePubSubType implements us.ihmc.pubsub.Topic
 
       data.setFrameAIsPresent(ser.read_type_7("frame_a_is_present"));
       data.setFrameBIsPresent(ser.read_type_7("frame_b_is_present"));
-      data.setNumberOfPointsContained(ser.read_type_4("number_of_points_contained"));
       data.setFrameIsContained(ser.read_type_7("frame_is_contained"));
+      data.setNumberOfPointsContained(ser.read_type_4("number_of_points_contained"));
+      data.setAverageHue(ser.read_type_5("average_hue"));
+      data.setAverageSaturation(ser.read_type_5("average_saturation"));
+      data.setAverageValue(ser.read_type_5("average_value"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.ConditionNodeStateMessage src, behavior_msgs.msg.dds.ConditionNodeStateMessage dest)

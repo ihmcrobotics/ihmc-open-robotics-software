@@ -180,7 +180,7 @@ public class LatestTimestampModifiable
       if (incomingModificationNumber > 0 && !incomingModifierGuid.equals(ourGuid))
       {
          ROS2PeerClockOffsetEstimatorPeer latestModifierPeer = crdtInfo.getPeerClockEstimator().getPeer(incomingModifierGuid);
-         boolean peerTimeAvailable = latestModifierPeer != null;
+         boolean peerTimeAvailable = latestModifierPeer != null && latestModifierPeer.getPeerClockOffset() != null;
          Instant incomingModificationTime;
          if (peerTimeAvailable)
          {

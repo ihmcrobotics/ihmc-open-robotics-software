@@ -1,9 +1,6 @@
 package us.ihmc.avatar;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import java.util.function.Consumer;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
@@ -11,16 +8,13 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextTools;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepValidityIndicator;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ContinuousStepGeneratorParametersCommand;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HumanoidSteppingPlugin;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HumanoidSteppingPluginFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HumanoidSteppingManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.StepGeneratorCommandInputManager;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -32,6 +26,7 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -41,7 +36,7 @@ public class AvatarStepGeneratorThread implements SCS2YoGraphicHolder
 {
    private final YoRegistry csgRegistry = new YoRegistry("csgRegistry");
 
-   private final HumanoidSteppingPlugin continuousStepGeneratorPlugin;
+   private final HumanoidSteppingManager steppingManager;
    private final FullHumanoidRobotModel fullRobotModel;
 
    private final HumanoidRobotContextData humanoidRobotContextData;
@@ -53,18 +48,17 @@ public class AvatarStepGeneratorThread implements SCS2YoGraphicHolder
    private final YoBoolean runCSG = new YoBoolean("RunCSG", csgRegistry);
 
    private final StepGeneratorCommandInputManager csgCommandInputManager;
-   private final HumanoidSteppingPluginEnvironmentalConstraints environmentalConstraints;
+   private final StatusMessageOutputManager statusMessageOutputManager;
+   private final HumanoidSteppingEnvironmentalConstraints environmentalConstraints;
 
-   public AvatarStepGeneratorThread(HumanoidSteppingPluginFactory pluginFactory,
-                                    HumanoidRobotContextDataFactory contextDataFactory,
-                                    StatusMessageOutputManager walkingOutputManager,
-                                    CommandInputManager walkingCommandInputManager,
+   public AvatarStepGeneratorThread(HumanoidRobotContextDataFactory contextDataFactory,
+                                    StatusMessageOutputManager controllerOutputManager,
+                                    CommandInputManager controllerCommandInputManager,
                                     DRCRobotModel drcRobotModel,
-                                    HumanoidSteppingPluginEnvironmentalConstraints environmentalConstraints,
+                                    FootstepAdjustment footstepAdjustment,
                                     RealtimeROS2Node ros2Node)
    {
       this.fullRobotModel = drcRobotModel.createFullRobotModel();
-      this.environmentalConstraints = environmentalConstraints;
 
       HumanoidRobotContextJointData processedJointData = new HumanoidRobotContextJointData(fullRobotModel.getOneDoFJoints().length);
       ForceSensorDataHolder forceSensorDataHolderForController = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
@@ -81,46 +75,53 @@ public class AvatarStepGeneratorThread implements SCS2YoGraphicHolder
       contextDataFactory.setSensorDataContext(new SensorDataContext(fullRobotModel));
       humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
 
-      csgCommandInputManager = pluginFactory.getStepGeneratorCommandInputManager();
-      csgRegistry.addChild(csgCommandInputManager.getRegistry());
-
-      if (environmentalConstraints != null)
-      {
-         // sets up the environmental constraint manager as a planar region consumer in the input manager
-         pluginFactory.addHeightMapCommandConsumer(environmentalConstraints);
-         // Adds functions that adjust the footholds based on the environment.
-         pluginFactory.setFootStepAdjustment(environmentalConstraints.getFootstepAdjustment());
-         // Adds checkers for footholds based on the environment
-         for (FootstepValidityIndicator footstepValidityIndicator : environmentalConstraints.getFootstepValidityIndicators())
-            pluginFactory.addFootstepValidityIndicator(footstepValidityIndicator);
-
-         csgCommandInputManager.addCSGParametersCommandConsumer(csgParameters -> environmentalConstraints.setSnapToHeightMap(csgParameters.getRequestSnapToHeightmap()));
-
-         // clear the environment at the beginning of every update
-         pluginFactory.addUpdatable(environmentalConstraints);
-      }
+      humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      steppingManager = new HumanoidSteppingManager(fullRobotModel,
+                                                    humanoidReferenceFrames,
+                                                    drcRobotModel::getStepGeneratorDT,
+                                                    drcRobotModel.getWalkingControllerParameters(),
+                                                    controllerOutputManager,
+                                                    controllerCommandInputManager,
+                                                    null,
+                                                    csgTime);
+      csgCommandInputManager = steppingManager.getStepGeneratorCommandInputManager();
+      statusMessageOutputManager = steppingManager.getStatusMessageOutputManager();
 
       // create the callback listeners for the planar regions in the stepping plugin
       if (ros2Node != null)
-         pluginFactory.createStepGeneratorNetworkSubscriber(drcRobotModel.getSimpleRobotName(), ros2Node);
+         steppingManager.createStepGeneratorNetworkSubscriber(drcRobotModel.getSimpleRobotName(), ros2Node);
 
-      humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
-      continuousStepGeneratorPlugin = pluginFactory.buildPlugin(fullRobotModel,
-                                                                humanoidReferenceFrames,
-                                                                drcRobotModel::getStepGeneratorDT,
-                                                                drcRobotModel.getWalkingControllerParameters(),
-                                                                walkingOutputManager,
-                                                                walkingCommandInputManager,
-                                                                null,
-                                                                csgTime);
-      csgRegistry.addChild(continuousStepGeneratorPlugin.getRegistry());
-
-      if (environmentalConstraints != null)
+      if (footstepAdjustment != null)
       {
+         steppingManager.setFootstepAdjustment(footstepAdjustment);
+         environmentalConstraints = null;
+      }
+      else
+      {
+         environmentalConstraints = new HumanoidSteppingEnvironmentalConstraints(drcRobotModel.getContactPointParameters(),
+                                                                                 drcRobotModel.getWalkingControllerParameters()
+                                                                                              .getSteppingParametersForStepGeneration());
+         environmentalConstraints.setSnapToHeightMap(true);
+         // sets up the environmental constraint manager as a planar region consumer in the input manager
+         csgCommandInputManager.addHeightMapCommandConsumer(environmentalConstraints);
+         // Adds functions that adjust the footholds based on the environment.
+         steppingManager.setFootstepAdjustment(environmentalConstraints.getFootstepAdjustment());
+         // Adds checkers for footholds based on the environment
+         for (FootstepValidityIndicator footstepValidityIndicator : environmentalConstraints.getFootstepValidityIndicators())
+            steppingManager.addFootstepValidityIndicator(footstepValidityIndicator);
+
+         // clear the environment at the beginning of every update
+         steppingManager.addUpdatable(environmentalConstraints);
          csgRegistry.addChild(environmentalConstraints.getRegistry());
       }
+      csgRegistry.addChild(steppingManager.getRegistry());
 
       ParameterLoaderHelper.loadParameters(this, drcRobotModel, csgRegistry);
+   }
+
+   public DoubleProvider getYoTime()
+   {
+      return csgTime;
    }
 
    public void initialize()
@@ -161,7 +162,7 @@ public class AvatarStepGeneratorThread implements SCS2YoGraphicHolder
             firstTick.set(false);
          }
 
-         continuousStepGeneratorPlugin.update(csgTime.getValue());
+         steppingManager.update(csgTime.getValue());
          humanoidRobotContextData.setPerceptionRan(true);
       }
       catch (Exception e)
@@ -170,9 +171,9 @@ public class AvatarStepGeneratorThread implements SCS2YoGraphicHolder
       }
    }
 
-   public HumanoidSteppingPlugin getContinuousStepGeneratorPlugin()
+   public HumanoidSteppingManager getSteppingManager()
    {
-      return continuousStepGeneratorPlugin;
+      return steppingManager;
    }
 
    public YoRegistry getYoVariableRegistry()
@@ -183,7 +184,7 @@ public class AvatarStepGeneratorThread implements SCS2YoGraphicHolder
    public YoGraphicGroupDefinition getSCS2YoGraphics()
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
-      group.addChild(continuousStepGeneratorPlugin.getSCS2YoGraphics());
+      group.addChild(steppingManager.getSCS2YoGraphics());
       if (environmentalConstraints != null)
          group.addChild(environmentalConstraints.getSCS2YoGraphics());
       return group.isEmpty() ? null : group;
@@ -202,6 +203,11 @@ public class AvatarStepGeneratorThread implements SCS2YoGraphicHolder
    public StepGeneratorCommandInputManager getCsgCommandInputManager()
    {
       return csgCommandInputManager;
+   }
+
+   public StatusMessageOutputManager getStatusOutputManager()
+   {
+      return statusMessageOutputManager;
    }
 
    public void destroy()

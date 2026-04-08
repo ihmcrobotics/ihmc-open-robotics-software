@@ -1,25 +1,16 @@
 package us.ihmc.sensors.zed;
 
-import us.ihmc.zed.SL_InitParameters;
-
-import java.nio.file.Files;
-import java.nio.file.Path;
-
 import static us.ihmc.zed.global.zed.*;
 
 public class ZEDSVOPlaybackSensor extends ZEDImageSensor
 {
-   private final int cameraID;
-   protected final String svoFileName;
+   protected final String svoFilePath;
 
-   public ZEDSVOPlaybackSensor(int cameraID, ZEDModelData zedModel, int slDepthMode, String svoFileName)
+   public ZEDSVOPlaybackSensor(int cameraID, ZEDModelData zedModel, int slDepthMode, String svoFilePath)
    {
-      super(cameraID, zedModel, SL_INPUT_TYPE_SVO, slDepthMode);
-      this.cameraID = cameraID;
-      this.svoFileName = svoFileName;
+      super(cameraID, zedModel, slDepthMode, svoFilePath);
 
-      if (!Files.exists(Path.of(svoFileName)))
-         throw new RuntimeException("SVO file does not exist");
+      this.svoFilePath = svoFilePath;
    }
 
    @Override
@@ -45,25 +36,6 @@ public class ZEDSVOPlaybackSensor extends ZEDImageSensor
          setSensorFrame(getTrackedSensorFrame());
    }
 
-   @Override
-   protected void setInitParameters(SL_InitParameters parametersToSet)
-   {
-      super.setInitParameters(parametersToSet);
-      parametersToSet.svo_real_time_mode(true);
-   }
-
-   @Override
-   protected int openCamera()
-   {
-      return sl_open_camera(getCameraID(), zedInitParameters, 0, svoFileName, "", 0, "", "", "");
-   }
-
-   @Override
-   public boolean isSensorRunning()
-   {
-      return sl_is_opened(cameraID);
-   }
-
    public int getLength()
    {
       return sl_get_svo_number_of_frames(getCameraID());
@@ -79,8 +51,8 @@ public class ZEDSVOPlaybackSensor extends ZEDImageSensor
       sl_set_svo_position(getCameraID(), position);
    }
 
-   public String getSVOFileName()
+   public String getSVOFilePath()
    {
-      return svoFileName;
+      return svoFilePath;
    }
 }

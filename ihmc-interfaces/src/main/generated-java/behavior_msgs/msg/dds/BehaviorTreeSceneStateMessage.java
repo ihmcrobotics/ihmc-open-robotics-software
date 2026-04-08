@@ -23,6 +23,10 @@ public class BehaviorTreeSceneStateMessage extends Packet<BehaviorTreeSceneState
             * Persistent detections tracked in the scene
             */
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.PersistentDetectionStatusMessage>  persistent_detections_;
+   public float pose_filter_alpha_;
+   public float acceptance_confidence_;
+   public float stability_frequency_;
+   public float history_duration_;
 
    public BehaviorTreeSceneStateMessage()
    {
@@ -43,6 +47,14 @@ public class BehaviorTreeSceneStateMessage extends Packet<BehaviorTreeSceneState
       ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.staticCopy(other.latest_modification_to_list_, latest_modification_to_list_);
       objects_.set(other.objects_);
       persistent_detections_.set(other.persistent_detections_);
+      pose_filter_alpha_ = other.pose_filter_alpha_;
+
+      acceptance_confidence_ = other.acceptance_confidence_;
+
+      stability_frequency_ = other.stability_frequency_;
+
+      history_duration_ = other.history_duration_;
+
    }
 
 
@@ -70,6 +82,42 @@ public class BehaviorTreeSceneStateMessage extends Packet<BehaviorTreeSceneState
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.PersistentDetectionStatusMessage>  getPersistentDetections()
    {
       return persistent_detections_;
+   }
+
+   public void setPoseFilterAlpha(float pose_filter_alpha)
+   {
+      pose_filter_alpha_ = pose_filter_alpha;
+   }
+   public float getPoseFilterAlpha()
+   {
+      return pose_filter_alpha_;
+   }
+
+   public void setAcceptanceConfidence(float acceptance_confidence)
+   {
+      acceptance_confidence_ = acceptance_confidence;
+   }
+   public float getAcceptanceConfidence()
+   {
+      return acceptance_confidence_;
+   }
+
+   public void setStabilityFrequency(float stability_frequency)
+   {
+      stability_frequency_ = stability_frequency;
+   }
+   public float getStabilityFrequency()
+   {
+      return stability_frequency_;
+   }
+
+   public void setHistoryDuration(float history_duration)
+   {
+      history_duration_ = history_duration;
+   }
+   public float getHistoryDuration()
+   {
+      return history_duration_;
    }
 
 
@@ -105,6 +153,14 @@ public class BehaviorTreeSceneStateMessage extends Packet<BehaviorTreeSceneState
          {  if (!this.persistent_detections_.get(i).epsilonEquals(other.persistent_detections_.get(i), epsilon)) return false; }
       }
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.pose_filter_alpha_, other.pose_filter_alpha_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.acceptance_confidence_, other.acceptance_confidence_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.stability_frequency_, other.stability_frequency_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.history_duration_, other.history_duration_, epsilon)) return false;
+
 
       return true;
    }
@@ -121,6 +177,14 @@ public class BehaviorTreeSceneStateMessage extends Packet<BehaviorTreeSceneState
       if (!this.latest_modification_to_list_.equals(otherMyClass.latest_modification_to_list_)) return false;
       if (!this.objects_.equals(otherMyClass.objects_)) return false;
       if (!this.persistent_detections_.equals(otherMyClass.persistent_detections_)) return false;
+      if(this.pose_filter_alpha_ != otherMyClass.pose_filter_alpha_) return false;
+
+      if(this.acceptance_confidence_ != otherMyClass.acceptance_confidence_) return false;
+
+      if(this.stability_frequency_ != otherMyClass.stability_frequency_) return false;
+
+      if(this.history_duration_ != otherMyClass.history_duration_) return false;
+
 
       return true;
    }
@@ -136,7 +200,15 @@ public class BehaviorTreeSceneStateMessage extends Packet<BehaviorTreeSceneState
       builder.append("objects=");
       builder.append(this.objects_);      builder.append(", ");
       builder.append("persistent_detections=");
-      builder.append(this.persistent_detections_);
+      builder.append(this.persistent_detections_);      builder.append(", ");
+      builder.append("pose_filter_alpha=");
+      builder.append(this.pose_filter_alpha_);      builder.append(", ");
+      builder.append("acceptance_confidence=");
+      builder.append(this.acceptance_confidence_);      builder.append(", ");
+      builder.append("stability_frequency=");
+      builder.append(this.stability_frequency_);      builder.append(", ");
+      builder.append("history_duration=");
+      builder.append(this.history_duration_);
       builder.append("}");
       return builder.toString();
    }

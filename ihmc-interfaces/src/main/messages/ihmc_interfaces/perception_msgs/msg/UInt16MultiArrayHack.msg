@@ -3,4 +3,4 @@
 # TODO: jros2 Remove this message when we transition to jros2
 
 std_msgs/MultiArrayLayout   layout        # specification of data layout
-uint16[<=512]               data          # array of data
+uint16[<=1024]               data          # array of data

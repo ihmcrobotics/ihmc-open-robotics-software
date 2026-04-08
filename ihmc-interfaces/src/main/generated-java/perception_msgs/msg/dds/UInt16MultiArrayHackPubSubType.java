@@ -15,7 +15,7 @@ public class UInt16MultiArrayHackPubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "bfc3eea1a95dcd023b2f5bbc9197bdabfeafa00366d882a634ca4038ebe1ddb2";
+   		return "3a56cf4c2a2f645c173738e9ef50e8512711b997bc573e8858edae5c768a686b";
    }
    
    @Override
@@ -54,7 +54,7 @@ public class UInt16MultiArrayHackPubSubType implements us.ihmc.pubsub.TopicDataT
 
       current_alignment += std_msgs.msg.dds.MultiArrayLayoutPubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (512 * 2) + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (1024 * 2) + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
 
       return current_alignment - initial_alignment;
@@ -82,9 +82,9 @@ public class UInt16MultiArrayHackPubSubType implements us.ihmc.pubsub.TopicDataT
    public static void write(perception_msgs.msg.dds.UInt16MultiArrayHack data, us.ihmc.idl.CDR cdr)
    {
       std_msgs.msg.dds.MultiArrayLayoutPubSubType.write(data.getLayout(), cdr);
-      if(data.getData().size() <= 512)
+      if(data.getData().size() <= 1024)
       cdr.write_type_e(data.getData());else
-          throw new RuntimeException("data field exceeds the maximum length: %d > %d".formatted(data.getData().size(), 512));
+          throw new RuntimeException("data field exceeds the maximum length: %d > %d".formatted(data.getData().size(), 1024));
 
    }
 

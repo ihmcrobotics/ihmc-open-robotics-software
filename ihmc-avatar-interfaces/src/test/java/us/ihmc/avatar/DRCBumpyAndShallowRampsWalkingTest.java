@@ -108,7 +108,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       {
          testingSimulation.getAvatarSimulation()
                           .getStepGeneratorThread()
-                          .getContinuousStepGeneratorPlugin()
+                          .getSteppingManager()
                           .setFootstepAdjustment(new HeightMapBasedFootstepAdjustment(environment.getTerrainObject3D().getHeightMapIfAvailable()));
       }
       testingSimulation.start();
@@ -191,7 +191,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       {
          testingSimulation.getAvatarSimulation()
                           .getStepGeneratorThread()
-                          .getContinuousStepGeneratorPlugin()
+                          .getSteppingManager()
                           .setFootstepAdjustment(new HeightMapBasedFootstepAdjustment(environment.getTerrainObject3D().getHeightMapIfAvailable()));
       }
       testingSimulation.start();
@@ -327,7 +327,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       {
          testingSimulation.getAvatarSimulation()
                           .getStepGeneratorThread()
-                          .getContinuousStepGeneratorPlugin()
+                          .getSteppingManager()
                           .setFootstepAdjustment(new HeightMapBasedFootstepAdjustment(groundProfile.getHeightMapIfAvailable()));
       }
       testingSimulation.start();

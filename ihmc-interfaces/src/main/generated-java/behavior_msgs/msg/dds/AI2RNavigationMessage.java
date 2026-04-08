@@ -32,6 +32,10 @@ public class AI2RNavigationMessage extends Packet<AI2RNavigationMessage> impleme
             * The distance to the reference frame (located at the object's centroid)
             */
    public double distance_to_object_;
+   /**
+            * The minimum distance to the obstacles considered in body path planning
+            */
+   public double obstacle_clearance_;
 
    public AI2RNavigationMessage()
    {
@@ -56,6 +60,8 @@ public class AI2RNavigationMessage extends Packet<AI2RNavigationMessage> impleme
       target_object_.append(other.target_object_);
 
       distance_to_object_ = other.distance_to_object_;
+
+      obstacle_clearance_ = other.obstacle_clearance_;
 
    }
 
@@ -137,6 +143,21 @@ public class AI2RNavigationMessage extends Packet<AI2RNavigationMessage> impleme
       return distance_to_object_;
    }
 
+   /**
+            * The minimum distance to the obstacles considered in body path planning
+            */
+   public void setObstacleClearance(double obstacle_clearance)
+   {
+      obstacle_clearance_ = obstacle_clearance;
+   }
+   /**
+            * The minimum distance to the obstacles considered in body path planning
+            */
+   public double getObstacleClearance()
+   {
+      return obstacle_clearance_;
+   }
+
 
    public static Supplier<AI2RNavigationMessagePubSubType> getPubSubType()
    {
@@ -163,6 +184,8 @@ public class AI2RNavigationMessage extends Packet<AI2RNavigationMessage> impleme
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.distance_to_object_, other.distance_to_object_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.obstacle_clearance_, other.obstacle_clearance_, epsilon)) return false;
+
 
       return true;
    }
@@ -184,6 +207,8 @@ public class AI2RNavigationMessage extends Packet<AI2RNavigationMessage> impleme
 
       if(this.distance_to_object_ != otherMyClass.distance_to_object_) return false;
 
+      if(this.obstacle_clearance_ != otherMyClass.obstacle_clearance_) return false;
+
 
       return true;
    }
@@ -201,7 +226,9 @@ public class AI2RNavigationMessage extends Packet<AI2RNavigationMessage> impleme
       builder.append("target_object=");
       builder.append(this.target_object_);      builder.append(", ");
       builder.append("distance_to_object=");
-      builder.append(this.distance_to_object_);
+      builder.append(this.distance_to_object_);      builder.append(", ");
+      builder.append("obstacle_clearance=");
+      builder.append(this.obstacle_clearance_);
       builder.append("}");
       return builder.toString();
    }

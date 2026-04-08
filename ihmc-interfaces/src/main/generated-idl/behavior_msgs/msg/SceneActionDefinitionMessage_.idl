@@ -4,6 +4,7 @@
 #include "behavior_msgs/msg/./ActionNodeDefinitionMessage_.idl"
 #include "behavior_msgs/msg/./BehaviorTreeSceneObjectDefinitionMessage_.idl"
 #include "controller_msgs/msg/./RigidBodyTransformMessage_.idl"
+#include "perception_msgs/msg/./YOLOv8ModelParameters_.idl"
 module behavior_msgs
 {
   module msg
@@ -22,9 +23,24 @@ module behavior_msgs
       const octet CLEAR_SCENE =
       3;
 
+      const octet FREEZE_SCENE =
+      4;
+
+      const octet CONFIGURE_PERSISTENT_DETECTIONS =
+      5;
+
+      const octet CONFIGURE_YOLO =
+      6;
+
+      const octet CONFIGURE_FOUNDATION_POSE =
+      7;
+
 
       /**
-       * TODO: The following fields are work in progress:
+       * Setup, freeze, delete object:
+       * Configure persistent detections:
+       * Configure YOLO:
+       * Configure FoundationPose:
        */
       @TypeCode(type="behavior_msgs::msg::dds_::SceneActionDefinitionMessage_")
       struct SceneActionDefinitionMessage
@@ -53,34 +69,18 @@ module behavior_msgs
          * The nominal object pose for behavior previewing
          */
         controller_msgs::msg::dds::RigidBodyTransformMessage nominal_object_pose;
+        float pose_filter_alpha;
+        float acceptance_confidence;
+        float stability_frequency;
+        float history_duration;
         /**
-         * YOLO confidence threshold
+         * YOLO models that should be enabled at this point (by available index)
          */
-        float yolo_confidence_threshold;
+        sequence<unsigned short, 10> enabled_yolo_models;
         /**
-         * YOLO mask threshold
+         * Pararmeters of the enabled YOLO models
          */
-        float yolo_mask_threshold;
-        /**
-         * Segmentation mask erosion radius
-         */
-        unsigned short segmentation_mask_erosion_radius;
-        /**
-         * Threshold for removing outlier points of segmented point cloud
-         */
-        float outlier_threshold;
-        /**
-         * YOLO models that should be enabled at this point
-         */
-        sequence<string, 10> enabled_yolo_models;
-        /**
-         * YOLO classes to ignore
-         */
-        sequence<octet, 256> ignored_yolo_class_indices;
-        /**
-         * FoundationPose object type (enum ordinal)
-         */
-        octet foundation_pose_object_type;
+        sequence<perception_msgs::msg::dds::YOLOv8ModelParameters, 10> yolo_model_parameters;
         /**
          * FoundationPose models that should be enabled at this point
          */

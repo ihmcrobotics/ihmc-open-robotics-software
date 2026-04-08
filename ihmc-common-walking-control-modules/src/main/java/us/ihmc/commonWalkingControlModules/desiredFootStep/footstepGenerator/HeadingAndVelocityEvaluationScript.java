@@ -4,7 +4,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ContinuousStepGeneratorInputCommand;
 import us.ihmc.commons.MathTools;
+import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -43,6 +45,8 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
    private final YoDouble sidestepVelocity = new YoDouble("sidestepVelocity", registry);
 
    private final YoEnum<EvaluationEvent> currentScriptEvent = new YoEnum<>("currentScriptEvent", registry, EvaluationEvent.class);
+
+   private final CommandInputManager commandInputManager;
 
    private final Vector2D desiredVelocityDirection = new Vector2D(1.0, 0.0);
 
@@ -85,10 +89,14 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
     * @param parameters script parameters.
     * @param parentRegistry registry to attach this script {@code YoVariable}s
     */
-   public HeadingAndVelocityEvaluationScript(DoubleProvider controlDT, DoubleProvider timeProvider, HeadingAndVelocityEvaluationScriptParameters parameters,
+   public HeadingAndVelocityEvaluationScript(DoubleProvider controlDT,
+                                             DoubleProvider timeProvider,
+                                             HeadingAndVelocityEvaluationScriptParameters parameters,
+                                             CommandInputManager commandInputManager,
                                              YoRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
+      this.commandInputManager = commandInputManager;
 
       if (parameters == null)
          parameters = new HeadingAndVelocityEvaluationScriptParameters();
@@ -127,6 +135,8 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
       return () -> desiredTurningVelocityRateLimited.getValue();
    }
 
+   private final ContinuousStepGeneratorInputCommand commandInput = new ContinuousStepGeneratorInputCommand();
+
    @Override
    public void update(double time)
    {
@@ -138,6 +148,12 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
       taskExecutor.doControl();
       desiredVelocityRateLimited.update();
       desiredTurningVelocityRateLimited.update();
+
+      commandInput.setWalk(true);
+      commandInput.setForwardVelocity(desiredVelocityRateLimited.getX());
+      commandInput.setLateralVelocity(desiredVelocityRateLimited.getY());
+      commandInput.setTurnVelocity(desiredTurningVelocityRateLimited.getValue());
+      commandInputManager.submitCommand(commandInput);
    }
 
    private abstract class EventTask implements State

@@ -15,7 +15,7 @@ public class SceneActionDefinitionMessagePubSubType implements us.ihmc.pubsub.To
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "e333c15bdf33bc3c0365d47d16d3be911539a96dd518173eaa5ebcca3284350b";
+   		return "85eb69a86aac0ba7f8f6728804840414537e8ee9750d79d9e16fc5b4d9a1ff14";
    }
    
    @Override
@@ -68,18 +68,15 @@ public class SceneActionDefinitionMessagePubSubType implements us.ihmc.pubsub.To
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (10 * 2) + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 10; ++i0)
       {
-        current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
-      }
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (256 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
+          current_alignment += perception_msgs.msg.dds.YOLOv8ModelParametersPubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (10 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -116,23 +113,20 @@ public class SceneActionDefinitionMessagePubSubType implements us.ihmc.pubsub.To
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
-
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for(int i0 = 0; i0 < data.getEnabledYoloModels().size(); ++i0)
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getEnabledYoloModels().size() * 2) + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getYoloModelParameters().size(); ++i0)
       {
-          current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getEnabledYoloModels().get(i0).length() + 1;
-      }
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (data.getIgnoredYoloClassIndices().size() * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
+          current_alignment += perception_msgs.msg.dds.YOLOv8ModelParametersPubSubType.getCdrSerializedSize(data.getYoloModelParameters().get(i0), current_alignment);}
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getEnabledFoundationPoseModels().size() * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -153,23 +147,21 @@ public class SceneActionDefinitionMessagePubSubType implements us.ihmc.pubsub.To
       cdr.write_type_3(data.getMinimumHistorySize());
 
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getNominalObjectPose(), cdr);
-      cdr.write_type_5(data.getYoloConfidenceThreshold());
+      cdr.write_type_5(data.getPoseFilterAlpha());
 
-      cdr.write_type_5(data.getYoloMaskThreshold());
+      cdr.write_type_5(data.getAcceptanceConfidence());
 
-      cdr.write_type_3(data.getSegmentationMaskErosionRadius());
+      cdr.write_type_5(data.getStabilityFrequency());
 
-      cdr.write_type_5(data.getOutlierThreshold());
+      cdr.write_type_5(data.getHistoryDuration());
 
       if(data.getEnabledYoloModels().size() <= 10)
       cdr.write_type_e(data.getEnabledYoloModels());else
           throw new RuntimeException("enabled_yolo_models field exceeds the maximum length: %d > %d".formatted(data.getEnabledYoloModels().size(), 10));
 
-      if(data.getIgnoredYoloClassIndices().size() <= 256)
-      cdr.write_type_e(data.getIgnoredYoloClassIndices());else
-          throw new RuntimeException("ignored_yolo_class_indices field exceeds the maximum length: %d > %d".formatted(data.getIgnoredYoloClassIndices().size(), 256));
-
-      cdr.write_type_9(data.getFoundationPoseObjectType());
+      if(data.getYoloModelParameters().size() <= 10)
+      cdr.write_type_e(data.getYoloModelParameters());else
+          throw new RuntimeException("yolo_model_parameters field exceeds the maximum length: %d > %d".formatted(data.getYoloModelParameters().size(), 10));
 
       if(data.getEnabledFoundationPoseModels().size() <= 10)
       cdr.write_type_e(data.getEnabledFoundationPoseModels());else
@@ -188,18 +180,16 @@ public class SceneActionDefinitionMessagePubSubType implements us.ihmc.pubsub.To
       data.setMinimumHistorySize(cdr.read_type_3());
       	
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getNominalObjectPose(), cdr);	
-      data.setYoloConfidenceThreshold(cdr.read_type_5());
+      data.setPoseFilterAlpha(cdr.read_type_5());
       	
-      data.setYoloMaskThreshold(cdr.read_type_5());
+      data.setAcceptanceConfidence(cdr.read_type_5());
       	
-      data.setSegmentationMaskErosionRadius(cdr.read_type_3());
+      data.setStabilityFrequency(cdr.read_type_5());
       	
-      data.setOutlierThreshold(cdr.read_type_5());
+      data.setHistoryDuration(cdr.read_type_5());
       	
       cdr.read_type_e(data.getEnabledYoloModels());	
-      cdr.read_type_e(data.getIgnoredYoloClassIndices());	
-      data.setFoundationPoseObjectType(cdr.read_type_9());
-      	
+      cdr.read_type_e(data.getYoloModelParameters());	
       cdr.read_type_e(data.getEnabledFoundationPoseModels());	
 
    }
@@ -216,13 +206,12 @@ public class SceneActionDefinitionMessagePubSubType implements us.ihmc.pubsub.To
       ser.write_type_3("minimum_history_size", data.getMinimumHistorySize());
       ser.write_type_a("nominal_object_pose", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getNominalObjectPose());
 
-      ser.write_type_5("yolo_confidence_threshold", data.getYoloConfidenceThreshold());
-      ser.write_type_5("yolo_mask_threshold", data.getYoloMaskThreshold());
-      ser.write_type_3("segmentation_mask_erosion_radius", data.getSegmentationMaskErosionRadius());
-      ser.write_type_5("outlier_threshold", data.getOutlierThreshold());
+      ser.write_type_5("pose_filter_alpha", data.getPoseFilterAlpha());
+      ser.write_type_5("acceptance_confidence", data.getAcceptanceConfidence());
+      ser.write_type_5("stability_frequency", data.getStabilityFrequency());
+      ser.write_type_5("history_duration", data.getHistoryDuration());
       ser.write_type_e("enabled_yolo_models", data.getEnabledYoloModels());
-      ser.write_type_e("ignored_yolo_class_indices", data.getIgnoredYoloClassIndices());
-      ser.write_type_9("foundation_pose_object_type", data.getFoundationPoseObjectType());
+      ser.write_type_e("yolo_model_parameters", data.getYoloModelParameters());
       ser.write_type_e("enabled_foundation_pose_models", data.getEnabledFoundationPoseModels());
    }
 
@@ -238,13 +227,12 @@ public class SceneActionDefinitionMessagePubSubType implements us.ihmc.pubsub.To
       data.setMinimumHistorySize(ser.read_type_3("minimum_history_size"));
       ser.read_type_a("nominal_object_pose", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getNominalObjectPose());
 
-      data.setYoloConfidenceThreshold(ser.read_type_5("yolo_confidence_threshold"));
-      data.setYoloMaskThreshold(ser.read_type_5("yolo_mask_threshold"));
-      data.setSegmentationMaskErosionRadius(ser.read_type_3("segmentation_mask_erosion_radius"));
-      data.setOutlierThreshold(ser.read_type_5("outlier_threshold"));
+      data.setPoseFilterAlpha(ser.read_type_5("pose_filter_alpha"));
+      data.setAcceptanceConfidence(ser.read_type_5("acceptance_confidence"));
+      data.setStabilityFrequency(ser.read_type_5("stability_frequency"));
+      data.setHistoryDuration(ser.read_type_5("history_duration"));
       ser.read_type_e("enabled_yolo_models", data.getEnabledYoloModels());
-      ser.read_type_e("ignored_yolo_class_indices", data.getIgnoredYoloClassIndices());
-      data.setFoundationPoseObjectType(ser.read_type_9("foundation_pose_object_type"));
+      ser.read_type_e("yolo_model_parameters", data.getYoloModelParameters());
       ser.read_type_e("enabled_foundation_pose_models", data.getEnabledFoundationPoseModels());
    }
 

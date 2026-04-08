@@ -1,0 +1,715 @@
+package us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator;
+
+import controller_msgs.msg.dds.ControllerWalkToGoalStatusMessage;
+import controller_msgs.msg.dds.ControllerWaypointStatusMessage;
+import controller_msgs.msg.dds.VelocityBasedWalkingInputMessage;
+import us.ihmc.commonWalkingControlModules.controllers.Updatable;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ControllerReleaseGoalCommand;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ControllerWaypointGoalCommand;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ControllerWaypointGoalListCommand;
+import us.ihmc.commons.DeadbandTools;
+import us.ihmc.commons.MathTools;
+import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.euclid.referenceFrame.FramePose2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
+import us.ihmc.robotics.geometry.AngleTools;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.SCS2YoGraphicHolder;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
+import us.ihmc.yoVariables.euclid.YoVector2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicArrow3D;
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicPoint3D;
+
+/**
+ * Class uses a clamped PD controller that aligns headings to reach a goal.
+ */
+public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolder
+{
+   private static final Vector2DReadOnly forwardVector = new Vector2D(1.0, 0.0);
+
+   private static final double BASE_POSITION_Z_OFFSET_FOR_VISUALIZATION = 0.75;
+   private static final double GOAL_POSITION_Z_OFFSET_FOR_VISUALIZATION = 0.1;
+
+   // TODO extract these in to a parameter file.
+   private static final double DEFAULT_MAX_RADIAL_ACCELERATION = 0.25;
+   private static final double DEFAULT_MAX_HEADING_RATE = Math.PI / 2.0;
+
+   private static final double DEFAULT_MAX_FORWARD_SPEED = 0.5;
+   private static final double DEFAULT_MAX_BACKWARD_SPEED = 0.3;
+   private static final double DEFAULT_MAX_LATERAL_SPEED = 0.4;
+   private static final double DEFAULT_MAX_TURNING_SPEED = 0.5;
+   private static final double DEFAULT_MIN_SPEED = 0.1;
+   private static final double DEFAULT_MIN_TURNING_SPEED = 0.15;
+
+   private static final double DEFAULT_K_ANGLE = 1.5;
+   private static final double DEFAULT_ANGLE_DEADBAND = Math.toRadians(3.0);
+
+   private static final double DEFAULT_DISTANCE_TO_GOAL_THRESHOLD_TO_STOP = 0.1;
+   private static final double DEFAULT_ANGLE_TO_GOAL_THRESHOLD_TO_STOP = Math.toRadians(5.0);
+
+   private static final double DEFAULT_RAMP_DOWN_SPEED_THRESHOLD = 0.05;
+   private static final double DEFAULT_RAMP_DOWN_DECAY_RATE = 0.95;
+
+   private static final double DEFAULT_DISTANCE_TO_MATCH_GOAL_ANGLE = 0.75;
+   private static final double DEFAULT_DISTANCE_TO_FACE_GOAL = 1.5;
+
+   private final RecyclingArrayList<GoalWaypoint> goalPoses = new RecyclingArrayList<>(GoalWaypoint::new);
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+   private final GoalReacherWaypointVisualizer waypointVisualizer;
+
+   private final YoFramePose3D currentGoalPose = new YoFramePose3D("goalPose", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D currentGoalDirection = new YoFrameVector3D("goalDirection", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePose3D currentPose = new YoFramePose3D("currentPose", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D currentDirection = new YoFrameVector3D("currentDirection", ReferenceFrame.getWorldFrame(), registry);
+
+   /** Pose of the robot at the moment it began walking toward the current waypoint. */
+   private final YoFramePose3D startPose = new YoFramePose3D("startPose", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D startDirection = new YoFrameVector3D("startDirection", ReferenceFrame.getWorldFrame(), registry);
+   /** Vector from startPose to the current goal, used to draw the path line. */
+   private final YoFrameVector3D startToGoalVector = new YoFrameVector3D("startToGoalVector", ReferenceFrame.getWorldFrame(), registry);
+
+   // Frame of the root link to track to the goal
+   private final ReferenceFrame frameOfTheBase;
+
+   // control parameters
+   private double lastTickTime = Double.NaN;
+   private final YoDouble maxRadialAcceleration = new YoDouble("maxRadialAcceleration", registry);
+   private final YoDouble maxHeadingRate = new YoDouble("maxHeadingRate", registry);
+   private double computedDt;
+
+   private final YoDouble desiredCruisingSpeedScalar = new YoDouble("desiredCruisingSpeedScalar", registry);
+   /**
+    * Minimum normalized speed the robot may travel through the current intermediate waypoint.
+    * Derived from the dot product of the incoming and outgoing leg directions: 1.0 means the robot
+    * can pass through at full speed (legs are collinear); 0.0 means the robot must stop (turn >= 90°
+    * or this is the terminal waypoint).
+    */
+   private final YoDouble waypointThroughputSpeedScalar = new YoDouble("waypointThroughputSpeedScalar", registry);
+
+   private final YoDouble maxForwardSpeed = new YoDouble("maxForwardSpeed", registry);
+   private final YoDouble maxLateralSpeed = new YoDouble("maxLateralSpeed", registry);
+   private final YoDouble maxBackwardSpeed = new YoDouble("maxBackwardSpeed", registry);
+   private final YoDouble maxTurningSpeed = new YoDouble("maxTurningSpeed", registry);
+   private final YoDouble minSpeed = new YoDouble("minSpeed", registry);
+   private final YoDouble minTurningSpeed = new YoDouble("minTurningSpeed", registry);
+
+   private final YoDouble kAngle = new YoDouble("kAngle", registry);
+   private final YoDouble angleDeadband = new YoDouble("angleDeadband", registry);
+   private final YoDouble distanceToMatchGoalAngle = new YoDouble("distanceToMatchGoalAngle", registry);
+   private final YoDouble distanceToFaceGoal = new YoDouble("distanceToFaceGoal", registry);
+
+   // Termination Conditions
+   private final YoDouble distanceToGoalThresholdToStop = new YoDouble("distanceToGoalThresholdToStop", registry);
+   private final YoDouble angleToGoalThresholdToStop = new YoDouble("angleToGoalThresholdToStop", registry);
+
+   // Measures of error
+   private final YoDouble distanceToGoal = new YoDouble("distanceToGoal", registry);
+   private final YoDouble angleToGoal = new YoDouble("angleToGoal", registry);
+
+   private final YoVector2D vectorToGoalInPelvisFrame = new YoVector2D("vectorToGoalInPelvisFrame", registry);
+   private final YoDouble angleToHeading = new YoDouble("angleToHeading", registry);
+   private final YoDouble rateLimitedAngleToHeading = new YoDouble("rateLimitedAngleToHeading", registry);
+
+   private final YoBoolean hasGoal = new YoBoolean("hasGoal", registry);
+   private final YoBoolean shouldHoldGoal = new YoBoolean("shouldHoldGoal", registry);
+   private final YoBoolean hasReachedGoal = new YoBoolean("hasReachedGoal", registry);
+   private final YoBoolean wasGoalReached = new YoBoolean("wasGoalReached", registry);
+   private final YoBoolean goalOrientationMatters = new YoBoolean("goalOrientationMatters", registry);
+   private final YoBoolean isRampingDownAfterGoal = new YoBoolean("isRampingDownAfterGoal", registry);
+   private final YoDouble rampDownDecayRate = new YoDouble("rampDownDecayRate", registry);
+   private final YoDouble rampDownDecay = new YoDouble("rampDownDecay", registry);
+   private final YoDouble rampDownSpeedThreshold = new YoDouble("rampDownSpeedThreshold", registry);
+   private final YoBoolean pendingWaypointReachedPublication = new YoBoolean("pendingWaypointReachedPublication", registry);
+   private final FramePose2D pendingWaypointReachedPose = new FramePose2D();
+
+   // Feedback terms
+   private final YoDouble normalizedRadialSpeed;
+   private final YoDouble rateLimitedNormalizedRadialSpeed;
+   // CLF terms
+   private final YoFramePoint3D basePosition = new YoFramePoint3D("basePosition", ReferenceFrame.getWorldFrame(), registry);
+   private final YoVector2D desiredVelocity = new YoVector2D("desiredVelocity", registry);
+   private final YoDouble desiredSpeed = new YoDouble("desiredSpeed", registry);
+   private final YoFrameVector3D desiredLinearVelocity = new YoFrameVector3D("desiredLinearVelocity", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D desiredAngularVelocity = new YoFrameVector3D("desiredAngularVelocity", ReferenceFrame.getWorldFrame(), registry);
+   private final YoVector2D desiredHeadingInBodyFrame = new YoVector2D("desiredHeadingInBodyFrame", registry);
+
+   private final VelocityBasedWalkingInputMessage outputMessage = new VelocityBasedWalkingInputMessage();
+
+   // Temp Variables
+   private final Vector2D finalHeadingInBodyFrame = new Vector2D();     // goal's final heading direction, in robot body frame
+   private final Vector2D vectorToGoal = new Vector2D();
+
+   private final StatusMessageOutputManager statusMessageOutputManager;
+
+   public PDVelocityBasedGoalReacher(ReferenceFrame frameOfBase,
+                                     StatusMessageOutputManager statusMessageOutputManager,
+                                     YoRegistry parentRegistry)
+   {
+      this.frameOfTheBase = frameOfBase;
+      this.statusMessageOutputManager = statusMessageOutputManager;
+
+      normalizedRadialSpeed = new YoDouble("normalizedRadialSpeed", registry);
+      rateLimitedNormalizedRadialSpeed = new YoDouble("rateLimitedNormalizedRadialSpeed", registry);
+
+      maxRadialAcceleration.set(DEFAULT_MAX_RADIAL_ACCELERATION);
+      maxHeadingRate.set(DEFAULT_MAX_HEADING_RATE);
+
+      maxForwardSpeed.set(DEFAULT_MAX_FORWARD_SPEED);
+      maxBackwardSpeed.set(DEFAULT_MAX_BACKWARD_SPEED);
+      maxLateralSpeed.set(DEFAULT_MAX_LATERAL_SPEED);
+      maxTurningSpeed.set(DEFAULT_MAX_TURNING_SPEED);
+      minSpeed.set(DEFAULT_MIN_SPEED);
+      minTurningSpeed.set(DEFAULT_MIN_TURNING_SPEED);
+
+      kAngle.set(DEFAULT_K_ANGLE);
+      angleDeadband.set(DEFAULT_ANGLE_DEADBAND);
+
+      distanceToGoalThresholdToStop.set(DEFAULT_DISTANCE_TO_GOAL_THRESHOLD_TO_STOP);
+      angleToGoalThresholdToStop.set(DEFAULT_ANGLE_TO_GOAL_THRESHOLD_TO_STOP);
+
+      distanceToMatchGoalAngle.set(DEFAULT_DISTANCE_TO_MATCH_GOAL_ANGLE);
+      distanceToFaceGoal.set(DEFAULT_DISTANCE_TO_FACE_GOAL);
+      rampDownSpeedThreshold.set(DEFAULT_RAMP_DOWN_SPEED_THRESHOLD);
+
+      rampDownDecayRate.set(DEFAULT_RAMP_DOWN_DECAY_RATE);
+
+      parentRegistry.addChild(registry);
+      waypointVisualizer = new GoalReacherWaypointVisualizer(registry);
+   }
+
+   private final FramePose2D previousGoalPose = new FramePose2D();
+
+   public void consumeNewWaypointList(ControllerWaypointGoalListCommand command)
+   {
+      goalPoses.clear();
+      for (int i = 0; i < command.getNumberOfWaypoints(); i++)
+      {
+         consumeNewWaypoint(command.getWaypoint(i));
+      }
+   }
+
+   public void consumeNewWaypoint(ControllerWaypointGoalCommand command)
+   {
+      if (hasReachedGoal.getBooleanValue() && goalPoses.size() == 1)
+      {  // we were holding the previous pose, based on the command. remove it, and add the next one.
+         goalPoses.clear();
+      }
+      // Update the previous goal pose, if we have one. If not, grab the current root pose.
+      if (!goalPoses.isEmpty())
+      {
+         previousGoalPose.set(goalPoses.getLast().getGoalPose());
+      }
+      else
+      {
+         previousGoalPose.setFromReferenceFrame(frameOfTheBase);
+      }
+      // Add the new goal pose.
+      goalPoses.add().set(command, previousGoalPose, maxForwardSpeed.getValue());
+      if (goalPoses.size() == 1)
+      {
+         publishWaypointStatus(goalPoses.getFirst().getGoalPose(), 0, true);
+         wasGoalReached.set(false);
+         captureStartPose();
+      }
+      hasGoal.set(true);
+      hasReachedGoal.set(false); // We want to set this to false to force it to evaluate the new goal points
+      shouldHoldGoal.set(command.getShouldHoldPosition());
+      isRampingDownAfterGoal.set(false);
+      pendingWaypointReachedPublication.set(false);
+
+      distanceToGoalThresholdToStop.set(command.getPositionProximity());
+      angleToGoalThresholdToStop.set(command.getOrientationProximity());
+   }
+
+   public void consumeReleaseGoalCommand(ControllerReleaseGoalCommand command)
+   {
+      if (command.getReleaseGoal())
+      {
+         goalPoses.clear();
+         shouldHoldGoal.set(false);
+         hasGoal.set(false);
+         isRampingDownAfterGoal.set(false);
+         pendingWaypointReachedPublication.set(false);
+      }
+   }
+
+   public void clear()
+   {
+      hasReachedGoal.set(true);
+      hasGoal.set(false);
+      goalPoses.clear();
+      isRampingDownAfterGoal.set(false);
+      pendingWaypointReachedPublication.set(false);
+      rateLimitedNormalizedRadialSpeed.set(0.0);
+      rateLimitedAngleToHeading.set(0.0);
+   }
+
+
+   private final ControllerWalkToGoalStatusMessage statusMessage = new ControllerWalkToGoalStatusMessage();
+   private final ControllerWaypointStatusMessage waypointReachedMessage = new ControllerWaypointStatusMessage();
+
+   @Override
+   public void update(double time)
+   {
+      currentPose.setFromReferenceFrame(frameOfTheBase);
+
+      basePosition.set(currentPose.getPosition());
+      basePosition.addZ(BASE_POSITION_Z_OFFSET_FOR_VISUALIZATION);
+
+      // Snapshot state before updateGoalPose() so we can detect transitions for status messages.
+      boolean hasGoal = this.hasGoal.getBooleanValue();
+      boolean hasReachedGoal = this.hasReachedGoal.getBooleanValue();
+      if (Double.isNaN(lastTickTime))
+         computedDt = 0.0;
+      else
+         computedDt = time - lastTickTime;
+      lastTickTime = time;
+
+      updateGoalPose();
+      waypointVisualizer.update(goalPoses.size(), i -> goalPoses.get(i).getGoalPose());
+
+      if (this.hasGoal.getBooleanValue() && !this.hasReachedGoal.getBooleanValue())
+      {
+         // Update this value for visualization.
+         currentGoalDirection.set(1.0, 0.0, 0.0);
+         currentGoalPose.getOrientation().transform(currentGoalDirection);
+
+         currentPose.getPosition().setZ(GOAL_POSITION_Z_OFFSET_FOR_VISUALIZATION);
+         currentDirection.set(1.0, 0.0, 0.0);
+         currentPose.getOrientation().transform(currentDirection);
+
+         startDirection.set(1.0, 0.0, 0.0);
+         startPose.getOrientation().transform(startDirection);
+         startToGoalVector.set(currentGoalPose.getX() - startPose.getX(),
+                               currentGoalPose.getY() - startPose.getY(),
+                               currentGoalPose.getZ() - startPose.getZ());
+
+         updateHeadingControl(currentGoalPose);
+         computePDNormalizedFeedbackVelocities(distanceToGoal.getValue(), rateLimitedAngleToHeading.getDoubleValue());
+         updateOutputMessage();
+      }
+
+      if (isRampingDownAfterGoal.getBooleanValue())
+      {
+         rampDownDecay.set(rampDownDecay.getDoubleValue() * rampDownDecayRate.getDoubleValue());
+         // Decrease speed at the same rate as the acceleration limit to avoid a step change to zero.
+         normalizedRadialSpeed.set(0.0);
+
+         desiredVelocity.scale(rampDownDecay.getDoubleValue());
+         desiredAngularVelocity.scale(rampDownDecay.getDoubleValue());
+
+         if (desiredVelocity.norm() <= rampDownSpeedThreshold.getValue() && desiredAngularVelocity.norm() <= rampDownSpeedThreshold.getValue())
+         {
+            // Don't set this for one more tick. That way, we get this last output message ,and we return the "stop" message once.
+            if (this.hasReachedGoal.getValue())
+               isRampingDownAfterGoal.set(false);
+            this.hasReachedGoal.set(true);
+            if (pendingWaypointReachedPublication.getBooleanValue())
+            {
+               publishWaypointStatus(pendingWaypointReachedPose, 0, false);
+               pendingWaypointReachedPublication.set(false);
+            }
+            rateLimitedAngleToHeading.set(0.0);
+            rateLimitedNormalizedRadialSpeed.set(0.0);
+            desiredVelocity.setToZero();
+            desiredAngularVelocity.setToZero();
+         }
+         updateOutputMessage();
+      }
+      else if (!this.hasGoal.getBooleanValue())
+      {
+         startDirection.setToNaN();
+         startToGoalVector.setToNaN();
+      }
+      // else: holding at goal after ramp-down - nothing to do.
+
+      if (!isRampingDownAfterGoal.getBooleanValue())
+         rampDownDecay.set(1.0);
+
+      if (hasGoal || this.hasGoal.getBooleanValue() || (hasReachedGoal != this.hasReachedGoal.getValue()))
+      {
+         // Send status.
+         statusMessage.getCurrentPosition().set(currentPose.getPosition());
+         statusMessage.setCurrentGoalXPosition(currentGoalPose.getX());
+         statusMessage.setCurrentGoalYPosition(currentGoalPose.getY());
+         statusMessage.setCurrentGoalYaw(currentGoalPose.getYaw());
+         statusMessage.setIsReached(this.hasReachedGoal.getBooleanValue() && !isRampingDownAfterGoal.getBooleanValue());
+         reportWalkToGoalStatus();
+      }
+   }
+
+   private void reportWalkToGoalStatus()
+   {
+      statusMessageOutputManager.reportStatusMessage(statusMessage);
+   }
+
+   public VelocityBasedWalkingInputMessage getOutputMessage()
+   {
+      // Deliver the command while actively pursuing a goal or ramping down after reaching one.
+      if (hasGoal.getBooleanValue() && (!hasReachedGoal.getBooleanValue() || wasGoalReached.getBooleanValue()))
+         return outputMessage;
+      if (isRampingDownAfterGoal.getBooleanValue())
+         return outputMessage;
+      return null;
+   }
+
+   private final Vector2D outgoingDirection = new Vector2D();
+
+   private void updateGoalPose()
+   {
+      // If we have no goal poses in queue, don't do anything.
+      if (goalPoses.isEmpty())
+      {
+         hasGoal.set(false);
+         currentGoalPose.setToNaN();
+         // Don't declare "reached" while still decelerating; the ramp-down block will set it.
+         if (!isRampingDownAfterGoal.getBooleanValue())
+         {
+            hasReachedGoal.set(true);
+            rateLimitedNormalizedRadialSpeed.set(0.0);
+            rateLimitedAngleToHeading.set(0.0);
+         }
+         return;
+      }
+
+      // Advance through any waypoints that have already been reached, stopping at the first unmet one.
+      // After the loop, reachedGoal reflects whether the current front waypoint is met.
+      boolean reachedGoal = true;
+      while (!goalPoses.isEmpty() && reachedGoal)
+      {
+         reachedGoal = reachedGoal(goalPoses.getFirst().getGoalPose(), goalPoses.getFirst().getGoalOrientationMatters());
+         if (reachedGoal)
+         {
+            if (goalPoses.size() > 1)
+            {
+               // Completed an intermediate waypoint; publish status and advance to the next one.
+               publishWaypointStatus(goalPoses.getFirst().getGoalPose(), goalPoses.size() - 1, false);
+               goalPoses.remove(0);
+               publishWaypointStatus(goalPoses.getFirst().getGoalPose(), goalPoses.size() - 1, true);
+               wasGoalReached.set(false); // reset so the next waypoint's reached-status can be published
+               captureStartPose();
+            }
+            else if (goalPoses.size() == 1 && !shouldHoldGoal.getBooleanValue())
+            {
+               // Completed the final waypoint and we're not holding; begin ramp-down.
+               // hasReachedGoal will be set true only after the robot has fully stopped.
+               pendingWaypointReachedPose.set(goalPoses.getFirst().getGoalPose());
+               pendingWaypointReachedPublication.set(true);
+               goalPoses.remove(0);
+               wasGoalReached.set(false);
+               isRampingDownAfterGoal.set(true);
+            }
+            else if (shouldHoldGoal.getBooleanValue())
+            {
+               // Holding at the final waypoint; keep it in the list so the robot stays.
+               // Trigger ramp-down only once (first time reaching), not on every subsequent tick.
+               if (!wasGoalReached.getBooleanValue())
+                  isRampingDownAfterGoal.set(true);
+               break;
+            }
+         }
+      }
+
+      hasGoal.set(!goalPoses.isEmpty());
+
+      // Defer "waypoint reached" until ramp-down finishes so the status message is not
+      // published while the robot is still decelerating toward a stop.
+      // wasGoalReached persists across ticks so we only arm the deferred publication once.
+      if (reachedGoal && !wasGoalReached.getBooleanValue() && !goalPoses.isEmpty())
+      {
+         pendingWaypointReachedPose.set(goalPoses.getFirst().getGoalPose());
+         pendingWaypointReachedPublication.set(true);
+      }
+
+      // Don't set hasReachedGoal=true while ramping down to a stop; the ramp-down block sets it.
+      if (!isRampingDownAfterGoal.getBooleanValue())
+         hasReachedGoal.set(reachedGoal);
+      wasGoalReached.set(reachedGoal);
+
+      if (hasGoal.getBooleanValue())
+      {
+         GoalWaypoint waypoint = goalPoses.getFirst();
+
+         currentGoalPose.checkReferenceFrameMatch(waypoint.getGoalPose().getReferenceFrame());
+         currentGoalPose.getPosition().set(waypoint.getGoalPose().getPosition(), GOAL_POSITION_Z_OFFSET_FOR_VISUALIZATION);
+         currentGoalPose.getOrientation().setToYawOrientation(waypoint.getGoalPose().getYaw());
+
+         distanceToGoalThresholdToStop.set(waypoint.getProximityToReachGoal());
+         angleToGoalThresholdToStop.set(waypoint.getAngleToReachGoal());
+         desiredCruisingSpeedScalar.set(waypoint.getCruisingSpeedScaler());
+         goalOrientationMatters.set(waypoint.getGoalOrientationMatters());
+
+         // Compute how fast the robot may pass through this waypoint without stopping.
+         // Dot product of the incoming leg direction with the outgoing leg direction gives
+         // cos(turn angle): 1 = straight, 0 = 90 degree turn, −1 = U-turn.
+         // Clamp to [0, 1]: turns >= 90° require a full stop; smaller turns allow proportionally
+         // higher throughput speed. Terminal waypoints always use 0 (robot must stop).
+         if (goalPoses.size() >= 2)
+         {
+            GoalWaypoint nextWaypoint = goalPoses.get(1);
+            outgoingDirection.sub(nextWaypoint.getGoalPose().getPosition(), waypoint.getGoalPose().getPosition());
+            double length = outgoingDirection.norm();
+            if (length > 1e-6)
+            {
+               outgoingDirection.scale(1.0 / length);
+               double dot = waypoint.getIncomingDirection().dot(outgoingDirection);
+               waypointThroughputSpeedScalar.set(Math.max(0.0, dot));
+            }
+            else
+            {
+               waypointThroughputSpeedScalar.set(0.0);
+            }
+         }
+         else
+         {
+            waypointThroughputSpeedScalar.set(0.0);
+         }
+      }
+      else
+      {
+         currentGoalPose.setToNaN();
+      }
+   }
+
+   private void captureStartPose()
+   {
+      startPose.setFromReferenceFrame(frameOfTheBase);
+      startPose.getPosition().setZ(GOAL_POSITION_Z_OFFSET_FOR_VISUALIZATION);
+   }
+
+   private void publishWaypointStatus(FramePose2DReadOnly pose, int waypointsRemaining, boolean isStarted)
+   {
+      waypointReachedMessage.setGoalXPosition(pose.getX());
+      waypointReachedMessage.setGoalYPosition(pose.getY());
+      waypointReachedMessage.setGoalYaw(pose.getYaw());
+      waypointReachedMessage.setWaypointsRemaining(waypointsRemaining);
+      waypointReachedMessage.setIsStarted(isStarted);
+      statusMessageOutputManager.reportStatusMessage(waypointReachedMessage);
+   }
+
+   private boolean reachedGoal(FramePose2DReadOnly goalPose, boolean orientationMatters)
+   {
+      distanceToGoal.set(currentPose.getPosition().distanceXY(goalPose.getPosition()));
+      angleToGoal.set(AngleTools.computeAngleDifferenceMinusPiToPi(currentPose.getYaw(), goalPose.getYaw()));
+
+      boolean positionReached = distanceToGoal.getDoubleValue() < distanceToGoalThresholdToStop.getValue();
+      boolean orientationReached = !orientationMatters || Math.abs(angleToGoal.getValue()) < angleToGoalThresholdToStop.getValue();
+      return positionReached && orientationReached;
+   }
+
+   /**
+    * Computes the heading error and rate-limits the heading target used by the PD feedback.
+    * <p>
+    * Far from the goal the robot faces toward the goal position; close to the goal it
+    * transitions to matching the goal's final orientation. The blend is governed by
+    * {@code distanceToFaceGoal} (start facing goal) and {@code distanceToMatchGoalAngle} (fully
+    * aligned with final heading).
+    * </p>
+    */
+   private void updateHeadingControl(FramePose3DReadOnly goalPose)
+   {
+      // Vector from the robot to the goal, expressed in the robot's body frame
+      vectorToGoal.set(goalPose.getPosition());
+      vectorToGoal.sub(currentPose.getX(), currentPose.getY());
+      currentPose.getOrientation().inverseTransform(vectorToGoal, vectorToGoalInPelvisFrame);
+
+      double distanceToGoal = vectorToGoal.norm() ;
+      // 1 = far from goal - face the goal position; 0 = near goal → match the goal's final heading
+      double faceGoalBlendFraction = MathTools.clamp(
+            (distanceToGoal - distanceToMatchGoalAngle.getValue()) / (distanceToFaceGoal.getDoubleValue() - distanceToMatchGoalAngle.getDoubleValue()),
+            0.0, 1.0);
+
+      if (goalOrientationMatters.getValue())
+      {
+         // Goal's final heading direction rotated into the robot's body frame
+         finalHeadingInBodyFrame.set(currentGoalDirection);
+         currentPose.getOrientation().inverseTransform(finalHeadingInBodyFrame);
+      }
+      else
+      {
+         // Final heading is just facing forward.
+         finalHeadingInBodyFrame.set(1.0, 0.0);
+      }
+
+      // Blend between facing forward (alpha=0) and the direction toward the goal (alpha=1)
+      desiredHeadingInBodyFrame.interpolate(finalHeadingInBodyFrame, vectorToGoalInPelvisFrame, faceGoalBlendFraction);
+
+      // Signed angle error: how far the robot must rotate to face the desired heading (forward = [1, 0])
+      angleToHeading.set(AngleTools.angleMinusPiToPi(desiredHeadingInBodyFrame, forwardVector));
+
+      // Rate-limit how quickly the heading target can change each tick
+      double angleChangeFromPrevious = AngleTools.computeAngleDifferenceMinusPiToPi(angleToHeading.getDoubleValue(), rateLimitedAngleToHeading.getDoubleValue());
+      angleChangeFromPrevious = MathTools.clamp(angleChangeFromPrevious, maxHeadingRate.getValue() * computedDt);
+      rateLimitedAngleToHeading.set(AngleTools.trimAngleMinusPiToPi(angleToHeading.getDoubleValue() + angleChangeFromPrevious));
+   }
+
+
+   private void computePDNormalizedFeedbackVelocities(double distanceToGoal, double angleToGoalHeading)
+   {
+      double distanceForMaxSpeed = 0.5 * MathTools.square(maxForwardSpeed.getDoubleValue()) / maxRadialAcceleration.getDoubleValue();
+      // Acceleration limited controller on distance.
+      if (distanceToGoal >= distanceForMaxSpeed)
+      {
+         normalizedRadialSpeed.set(1.0);
+      }
+      else
+      {
+         double speedForDeccel = Math.sqrt(2.0 * maxRadialAcceleration.getDoubleValue() * distanceToGoal);
+         normalizedRadialSpeed.set(Math.max(speedForDeccel / maxForwardSpeed.getDoubleValue(), waypointThroughputSpeedScalar.getDoubleValue()));
+      }
+      // Acceleration-limit the ramp-up so speed increases gradually
+      double maxAllowedSpeed = rateLimitedNormalizedRadialSpeed.getDoubleValue() + computedDt * maxRadialAcceleration.getValue();
+      rateLimitedNormalizedRadialSpeed.set(MathTools.clamp(normalizedRadialSpeed.getValue(), 0.0, maxAllowedSpeed));
+
+      // P-controller on heading: angular velocity proportional to heading error
+      double turningVelocity = -kAngle.getValue() * DeadbandTools.applyDeadband(angleDeadband.getDoubleValue(), angleToGoalHeading);
+      turningVelocity = MathTools.clamp(turningVelocity, maxTurningSpeed.getDoubleValue());
+      if (Math.abs(turningVelocity) > 0.0 && Math.abs(turningVelocity) < minTurningSpeed.getValue())
+         turningVelocity = Math.signum(turningVelocity) * minTurningSpeed.getValue();
+      desiredAngularVelocity.set(0.0, 0.0, turningVelocity);
+
+      // Angle from the robot's forward axis to the goal direction, measured in the robot's body frame
+      double angleToGoalInBodyFrame = AngleTools.angleMinusPiToPi(vectorToGoalInPelvisFrame, forwardVector);
+
+      // Unit components of the velocity direction toward the goal, scaled by normalized speed
+      double speed = rateLimitedNormalizedRadialSpeed.getDoubleValue() * desiredCruisingSpeedScalar.getValue();
+      double goalDirectionX = speed * Math.cos(-angleToGoalInBodyFrame);
+      double goalDirectionY = speed * Math.sin(-angleToGoalInBodyFrame);
+
+      // Scale by per-axis speed limits; forward and backward limits are asymmetric
+      double xSpeedLimit = vectorToGoalInPelvisFrame.getX() > 0 ? maxForwardSpeed.getDoubleValue() : maxBackwardSpeed.getDoubleValue();
+      double alpha = Math.max(0.1, Math.abs(turningVelocity) / maxTurningSpeed.getDoubleValue());
+      double turningScalar = 1.0 - MathTools.square(alpha);
+      double vx = goalDirectionX * xSpeedLimit * turningScalar;
+      double vy = goalDirectionY * maxLateralSpeed.getValue() * turningScalar;
+
+
+      desiredVelocity.set(vx, vy);
+      double desiredSpeed = desiredVelocity.norm();
+      if (desiredSpeed < minSpeed.getValue() && desiredSpeed > 1e-3)
+      {
+         desiredVelocity.scale(minSpeed.getValue() / desiredSpeed);
+         desiredSpeed = minSpeed.getDoubleValue();
+      }
+      this.desiredSpeed.set(desiredSpeed);
+
+      desiredLinearVelocity.set(desiredVelocity);
+      currentPose.getOrientation().transform(desiredLinearVelocity);
+   }
+
+   private void updateOutputMessage()
+   {
+      outputMessage.setForwardVelocity(desiredVelocity.getX());
+      outputMessage.setLateralVelocity(desiredVelocity.getY());
+      outputMessage.setTurnVelocity(desiredAngularVelocity.getZ());
+      outputMessage.setWalk(!hasReachedGoal.getBooleanValue());
+   }
+
+   private static class GoalWaypoint
+   {
+      private final FramePose2D goalPose = new FramePose2D();
+      private double proximityToReachGoal;
+      private double angleToReachGoal;
+      private double cruisingSpeedScaler;
+      private boolean goalOrientationMatters;
+      /** Unit vector of the leg that arrives at this waypoint (from previousPose to goalPose). */
+      private final Vector2D incomingDirection = new Vector2D();
+
+      public void set(ControllerWaypointGoalCommand command, FramePose2DReadOnly previousPose, double maxSpeed)
+      {
+         goalPose.set(command.getGoalPose());
+         angleToReachGoal = command.getOrientationProximity();
+         proximityToReachGoal = command.getPositionProximity();
+         goalOrientationMatters = command.getGoalOrientationMatters();
+
+         double dx = goalPose.getX() - previousPose.getX();
+         double dy = goalPose.getY() - previousPose.getY();
+         double distance = EuclidCoreTools.norm(dx, dy);
+         if (distance > 1e-6)
+         {
+            incomingDirection.set(dx, dy);
+            incomingDirection.scale(1.0 / distance);
+         }
+         else
+         {
+            incomingDirection.set(1.0, 0.0);
+         }
+
+         if (command.getTimeToReachGoal() > 0.0)
+         {
+            double speed = distance / command.getTimeToReachGoal();
+            cruisingSpeedScaler = Math.min(1.0, speed / maxSpeed);
+         }
+         else
+         {
+            cruisingSpeedScaler = 1.0;
+         }
+      }
+
+      public FramePose2DReadOnly getGoalPose()
+      {
+         return goalPose;
+      }
+
+      public double getProximityToReachGoal()
+      {
+         return proximityToReachGoal;
+      }
+
+      public double getAngleToReachGoal()
+      {
+         return angleToReachGoal;
+      }
+
+      public double getCruisingSpeedScaler()
+      {
+         return cruisingSpeedScaler;
+      }
+
+      public boolean getGoalOrientationMatters()
+      {
+         return goalOrientationMatters;
+      }
+
+      public Vector2DReadOnly getIncomingDirection()
+      {
+         return incomingDirection;
+      }
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(newYoGraphicArrow3D("Goal Linear Velocity", basePosition, desiredLinearVelocity, 1.0, ColorDefinitions.Yellow()));
+      group.addChild(newYoGraphicArrow3D("Goal Angular Velocity", basePosition, desiredAngularVelocity, 1.0, ColorDefinitions.Orange()));
+      group.addChild(newYoGraphicPoint3D("Current Goal Position", currentGoalPose.getPosition(), 0.1, ColorDefinitions.Red()));
+      group.addChild(newYoGraphicArrow3D("Current Goal Heading", currentGoalPose.getPosition(), currentGoalDirection, 0.5, ColorDefinitions.Red()));
+
+      group.addChild(newYoGraphicPoint3D("Current Position", currentPose.getPosition(), 0.1, ColorDefinitions.Orange()));
+      group.addChild(newYoGraphicArrow3D("Current Heading", currentPose.getPosition(), currentDirection, 0.5, ColorDefinitions.Orange()));
+
+      group.addChild(newYoGraphicPoint3D("Start Position", startPose.getPosition(), 0.1, ColorDefinitions.Green()));
+      group.addChild(newYoGraphicArrow3D("Start Heading", startPose.getPosition(), startDirection, 0.5, ColorDefinitions.Green()));
+      group.addChild(newYoGraphicArrow3D("Start To Goal Path", startPose.getPosition(), startToGoalVector,
+                                         true, 1.0, 0.0, false, 0.01, 0.0, ColorDefinitions.Green()));
+
+      group.addChild(waypointVisualizer.getSCS2YoGraphics());
+
+      return group;
+   }
+}

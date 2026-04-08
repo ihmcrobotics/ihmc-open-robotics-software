@@ -15,7 +15,7 @@ public class BehaviorTreeSceneStateMessagePubSubType implements us.ihmc.pubsub.T
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "a2a474c0b01b4e6b2c52571e16c03688e9fe6eed55f4d7750a0435c9c42cfd4b";
+   		return "def270e37521932ed293ea76965a658db0fcf22876a3b67fdabaf1a6490670cb";
    }
    
    @Override
@@ -60,6 +60,14 @@ public class BehaviorTreeSceneStateMessagePubSubType implements us.ihmc.pubsub.T
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.PersistentDetectionStatusMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       return current_alignment - initial_alignment;
    }
@@ -85,6 +93,18 @@ public class BehaviorTreeSceneStateMessagePubSubType implements us.ihmc.pubsub.T
       {
           current_alignment += behavior_msgs.msg.dds.PersistentDetectionStatusMessagePubSubType.getCdrSerializedSize(data.getPersistentDetections().get(i0), current_alignment);}
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -100,6 +120,14 @@ public class BehaviorTreeSceneStateMessagePubSubType implements us.ihmc.pubsub.T
       cdr.write_type_e(data.getPersistentDetections());else
           throw new RuntimeException("persistent_detections field exceeds the maximum length: %d > %d".formatted(data.getPersistentDetections().size(), 100));
 
+      cdr.write_type_5(data.getPoseFilterAlpha());
+
+      cdr.write_type_5(data.getAcceptanceConfidence());
+
+      cdr.write_type_5(data.getStabilityFrequency());
+
+      cdr.write_type_5(data.getHistoryDuration());
+
    }
 
    public static void read(behavior_msgs.msg.dds.BehaviorTreeSceneStateMessage data, us.ihmc.idl.CDR cdr)
@@ -107,6 +135,14 @@ public class BehaviorTreeSceneStateMessagePubSubType implements us.ihmc.pubsub.T
       ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.read(data.getLatestModificationToList(), cdr);	
       cdr.read_type_e(data.getObjects());	
       cdr.read_type_e(data.getPersistentDetections());	
+      data.setPoseFilterAlpha(cdr.read_type_5());
+      	
+      data.setAcceptanceConfidence(cdr.read_type_5());
+      	
+      data.setStabilityFrequency(cdr.read_type_5());
+      	
+      data.setHistoryDuration(cdr.read_type_5());
+      	
 
    }
 
@@ -117,6 +153,10 @@ public class BehaviorTreeSceneStateMessagePubSubType implements us.ihmc.pubsub.T
 
       ser.write_type_e("objects", data.getObjects());
       ser.write_type_e("persistent_detections", data.getPersistentDetections());
+      ser.write_type_5("pose_filter_alpha", data.getPoseFilterAlpha());
+      ser.write_type_5("acceptance_confidence", data.getAcceptanceConfidence());
+      ser.write_type_5("stability_frequency", data.getStabilityFrequency());
+      ser.write_type_5("history_duration", data.getHistoryDuration());
    }
 
    @Override
@@ -126,6 +166,10 @@ public class BehaviorTreeSceneStateMessagePubSubType implements us.ihmc.pubsub.T
 
       ser.read_type_e("objects", data.getObjects());
       ser.read_type_e("persistent_detections", data.getPersistentDetections());
+      data.setPoseFilterAlpha(ser.read_type_5("pose_filter_alpha"));
+      data.setAcceptanceConfidence(ser.read_type_5("acceptance_confidence"));
+      data.setStabilityFrequency(ser.read_type_5("stability_frequency"));
+      data.setHistoryDuration(ser.read_type_5("history_duration"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.BehaviorTreeSceneStateMessage src, behavior_msgs.msg.dds.BehaviorTreeSceneStateMessage dest)
