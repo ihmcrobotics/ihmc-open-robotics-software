@@ -1,6 +1,7 @@
 package us.ihmc.avatar;
 
 import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
+import controller_msgs.msg.dds.ReinitializeStateEstimatorMessage;
 import controller_msgs.msg.dds.RequestWristForceSensorCalibrationPacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -485,6 +486,12 @@ public class AvatarEstimatorThreadFactory
          ForceSensorStateUpdater forceSensorStateUpdater = stateEstimator.getForceSensorStateUpdater();
          realtimeROS2NodeField.get().createSubscription(inputTopicField.get().withTypeName(RequestWristForceSensorCalibrationPacket.class),
                                      subscriber -> forceSensorStateUpdater.requestWristForceSensorCalibrationAtomic());
+         realtimeROS2NodeField.get().createSubscription(inputTopicField.get().withTypeName(ReinitializeStateEstimatorMessage.class),
+                                     subscriber ->
+                                     {
+                                        if (subscriber.takeNextData().getRequestReinitialize())
+                                           stateEstimator.requestReinitializeEstimator();
+                                     });
       }
 
       return stateEstimator;

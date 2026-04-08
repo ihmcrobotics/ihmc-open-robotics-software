@@ -191,7 +191,7 @@ public class KSTStreamingState implements State
       ikSolverSpatialGains = ikController.getDefaultSpatialGains();
       ikSolverJointGains = ikController.getDefaultJointGains();
       ikController.getCenterOfMassSafeMargin().set(parameters.getCenterOfMassSafeMargin());
-      ikController.setPublishingSolutionPeriod(parameters.getPublishingSolutionPeriod());
+      ikController.setPublishSolutionEveryNTicks(parameters.getPublishSolutionEveryNTicks());
       ikController.getMomentumWeight().set(parameters.getCenterOfMassHoldWeight());
       ikController.minimizeMomentum(parameters.isMinimizeAngularMomentum(), parameters.isMinimizeLinearMomentum());
       ikController.setMomentumWeight(parameters.getAngularMomentumWeight(), parameters.getLinearMomentumWeight());

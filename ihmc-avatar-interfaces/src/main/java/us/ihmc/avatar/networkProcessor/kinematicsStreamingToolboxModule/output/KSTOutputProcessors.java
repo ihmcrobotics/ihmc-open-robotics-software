@@ -3,6 +3,9 @@ package us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.output;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Composite output processor that runs an ordered chain of {@link KSTOutputProcessor} stages.
+ */
 public class KSTOutputProcessors implements KSTOutputProcessor
 {
    private final List<KSTOutputProcessor> outputProcessors = new ArrayList<>();

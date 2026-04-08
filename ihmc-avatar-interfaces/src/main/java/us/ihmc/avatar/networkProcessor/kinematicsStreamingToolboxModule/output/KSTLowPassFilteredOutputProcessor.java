@@ -6,6 +6,9 @@ import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+/**
+ * Applies low-pass filtering to the IK output configuration and derivatives to reduce jitter.
+ */
 public class KSTLowPassFilteredOutputProcessor implements KSTOutputProcessor
 {
    private final YoKinematicsToolboxOutputStatus filteredRobotState;

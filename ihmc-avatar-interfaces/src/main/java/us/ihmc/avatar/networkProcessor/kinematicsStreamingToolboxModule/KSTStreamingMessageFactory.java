@@ -43,6 +43,10 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.function.BiConsumer;
 
+/**
+ * Builds controller-facing {@link WholeBodyStreamingMessage} instances from the current desired robot state.
+ * It packs task-space and joint-space streaming messages for pelvis, chest, hands, limbs, and center of mass.
+ */
 public class KSTStreamingMessageFactory
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();

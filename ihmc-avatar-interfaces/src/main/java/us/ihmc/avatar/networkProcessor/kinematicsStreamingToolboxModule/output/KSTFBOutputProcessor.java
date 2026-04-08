@@ -7,6 +7,9 @@ import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPDGains;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+/**
+ * Adds PD-style feedback on top of IK setpoints to produce smoother velocity/acceleration transitions.
+ */
 public class KSTFBOutputProcessor implements KSTOutputProcessor
 {
    public static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();

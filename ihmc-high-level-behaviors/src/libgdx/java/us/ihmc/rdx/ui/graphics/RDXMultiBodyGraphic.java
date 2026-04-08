@@ -113,6 +113,11 @@ public class RDXMultiBodyGraphic extends RDXVisualizer
       multiBody.setDiffuseColorForBody(name, color);
    }
 
+   public void setOpacityForBody(String name, double opacity)
+   {
+      multiBody.setOpacityForBody(name, opacity);
+   }
+
    public boolean isRobotLoaded()
    {
       return robotLoadedActivator.poll();

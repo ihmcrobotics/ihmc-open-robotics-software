@@ -34,6 +34,9 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * Feedback-style input estimator that combines finite-difference velocity estimates with pose error correction.
+ */
 public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimator
 {
    /**

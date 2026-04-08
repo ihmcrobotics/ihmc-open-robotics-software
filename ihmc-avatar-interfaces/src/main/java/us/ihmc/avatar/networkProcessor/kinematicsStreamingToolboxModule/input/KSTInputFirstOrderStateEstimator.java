@@ -27,6 +27,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Low-pass-filter-based input estimator that smooths incoming poses and derives bounded target velocities.
+ */
 public class KSTInputFirstOrderStateEstimator implements KSTInputStateEstimator
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
