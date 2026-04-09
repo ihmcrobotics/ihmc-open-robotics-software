@@ -88,3 +88,24 @@ uint32 min_points
 
 # Maximum number of points in the shape
 uint32 max_points
+
+# Whether to check the color
+bool check_color
+
+# Min hue
+uint16 hue_min
+
+# Max hue
+uint16 hue_max
+
+# Min saturation
+uint16 saturation_min
+
+# Max saturation
+uint16 saturation_max
+
+# Min value
+uint16 value_min
+
+# Max value
+uint16 value_max

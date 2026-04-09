@@ -8,6 +8,9 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+/**
+ * Blends from the current robot state to streaming output during mode entry to avoid step changes.
+ */
 public class KSTBlendingOutputProcessor implements KSTOutputProcessor
 {
    private final YoKinematicsToolboxOutputStatus initialRobotState;

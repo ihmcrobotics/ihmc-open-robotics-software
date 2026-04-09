@@ -28,7 +28,7 @@ public class RDXWaitAction extends RDXActionNode<WaitActionState, WaitActionDefi
       super.renderEditableName();
 
       ImGui.sameLine();
-      ImGui.textDisabled("Wait");
+      ImGui.textDisabled("Wait %.1f s".formatted(definition.getWaitDuration()));
 
       renderRowEnd();
    }

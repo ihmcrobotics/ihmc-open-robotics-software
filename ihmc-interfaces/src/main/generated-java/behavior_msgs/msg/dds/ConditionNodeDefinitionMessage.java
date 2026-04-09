@@ -117,6 +117,34 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
             * Maximum number of points in the shape
             */
    public long max_points_;
+   /**
+            * Whether to check the color
+            */
+   public boolean check_color_;
+   /**
+            * Min hue
+            */
+   public int hue_min_;
+   /**
+            * Max hue
+            */
+   public int hue_max_;
+   /**
+            * Min saturation
+            */
+   public int saturation_min_;
+   /**
+            * Max saturation
+            */
+   public int saturation_max_;
+   /**
+            * Min value
+            */
+   public int value_min_;
+   /**
+            * Max value
+            */
+   public int value_max_;
 
    public ConditionNodeDefinitionMessage()
    {
@@ -189,6 +217,20 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
       min_points_ = other.min_points_;
 
       max_points_ = other.max_points_;
+
+      check_color_ = other.check_color_;
+
+      hue_min_ = other.hue_min_;
+
+      hue_max_ = other.hue_max_;
+
+      saturation_min_ = other.saturation_min_;
+
+      saturation_max_ = other.saturation_max_;
+
+      value_min_ = other.value_min_;
+
+      value_max_ = other.value_max_;
 
    }
 
@@ -588,6 +630,111 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
       return max_points_;
    }
 
+   /**
+            * Whether to check the color
+            */
+   public void setCheckColor(boolean check_color)
+   {
+      check_color_ = check_color;
+   }
+   /**
+            * Whether to check the color
+            */
+   public boolean getCheckColor()
+   {
+      return check_color_;
+   }
+
+   /**
+            * Min hue
+            */
+   public void setHueMin(int hue_min)
+   {
+      hue_min_ = hue_min;
+   }
+   /**
+            * Min hue
+            */
+   public int getHueMin()
+   {
+      return hue_min_;
+   }
+
+   /**
+            * Max hue
+            */
+   public void setHueMax(int hue_max)
+   {
+      hue_max_ = hue_max;
+   }
+   /**
+            * Max hue
+            */
+   public int getHueMax()
+   {
+      return hue_max_;
+   }
+
+   /**
+            * Min saturation
+            */
+   public void setSaturationMin(int saturation_min)
+   {
+      saturation_min_ = saturation_min;
+   }
+   /**
+            * Min saturation
+            */
+   public int getSaturationMin()
+   {
+      return saturation_min_;
+   }
+
+   /**
+            * Max saturation
+            */
+   public void setSaturationMax(int saturation_max)
+   {
+      saturation_max_ = saturation_max;
+   }
+   /**
+            * Max saturation
+            */
+   public int getSaturationMax()
+   {
+      return saturation_max_;
+   }
+
+   /**
+            * Min value
+            */
+   public void setValueMin(int value_min)
+   {
+      value_min_ = value_min;
+   }
+   /**
+            * Min value
+            */
+   public int getValueMin()
+   {
+      return value_min_;
+   }
+
+   /**
+            * Max value
+            */
+   public void setValueMax(int value_max)
+   {
+      value_max_ = value_max;
+   }
+   /**
+            * Max value
+            */
+   public int getValueMax()
+   {
+      return value_max_;
+   }
+
 
    public static Supplier<ConditionNodeDefinitionMessagePubSubType> getPubSubType()
    {
@@ -650,6 +797,20 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.max_points_, other.max_points_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.check_color_, other.check_color_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.hue_min_, other.hue_min_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.hue_max_, other.hue_max_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.saturation_min_, other.saturation_min_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.saturation_max_, other.saturation_max_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.value_min_, other.value_min_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.value_max_, other.value_max_, epsilon)) return false;
+
 
       return true;
    }
@@ -707,6 +868,20 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
 
       if(this.max_points_ != otherMyClass.max_points_) return false;
 
+      if(this.check_color_ != otherMyClass.check_color_) return false;
+
+      if(this.hue_min_ != otherMyClass.hue_min_) return false;
+
+      if(this.hue_max_ != otherMyClass.hue_max_) return false;
+
+      if(this.saturation_min_ != otherMyClass.saturation_min_) return false;
+
+      if(this.saturation_max_ != otherMyClass.saturation_max_) return false;
+
+      if(this.value_min_ != otherMyClass.value_min_) return false;
+
+      if(this.value_max_ != otherMyClass.value_max_) return false;
+
 
       return true;
    }
@@ -762,7 +937,21 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
       builder.append("min_points=");
       builder.append(this.min_points_);      builder.append(", ");
       builder.append("max_points=");
-      builder.append(this.max_points_);
+      builder.append(this.max_points_);      builder.append(", ");
+      builder.append("check_color=");
+      builder.append(this.check_color_);      builder.append(", ");
+      builder.append("hue_min=");
+      builder.append(this.hue_min_);      builder.append(", ");
+      builder.append("hue_max=");
+      builder.append(this.hue_max_);      builder.append(", ");
+      builder.append("saturation_min=");
+      builder.append(this.saturation_min_);      builder.append(", ");
+      builder.append("saturation_max=");
+      builder.append(this.saturation_max_);      builder.append(", ");
+      builder.append("value_min=");
+      builder.append(this.value_min_);      builder.append(", ");
+      builder.append("value_max=");
+      builder.append(this.value_max_);
       builder.append("}");
       return builder.toString();
    }

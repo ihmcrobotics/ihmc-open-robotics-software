@@ -3,14 +3,26 @@ package us.ihmc.rdx.velocityBasedLocomotion;
 import controller_msgs.msg.dds.ContinuousStepGeneratorInputMessage;
 import controller_msgs.msg.dds.ContinuousStepGeneratorParametersMessage;
 import controller_msgs.msg.dds.ContinuousStepGeneratorStatusMessage;
+import controller_msgs.msg.dds.ControllerWalkToGoalStatusMessage;
+import controller_msgs.msg.dds.ControllerWaypointGoalMessage;
+import controller_msgs.msg.dds.VelocityBasedWalkingInputMessage;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.CSGROS2CommunicationHelper;
+import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.euclid.referenceFrame.FrameOrientation2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePose2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 
 public class RDXCSGPanel extends RDXPanel
 {
@@ -43,16 +55,24 @@ public class RDXCSGPanel extends RDXPanel
    private final ContinuousStepGeneratorParametersMessage csgParametersCommand;
    private final ContinuousStepGeneratorStatusMessage csgStatusMessage;
 
-   public RDXCSGPanel(CSGROS2CommunicationHelper controllerHelper)
+   // Walk to goal message
+   private final ControllerWaypointGoalMessage goalMessage = new ControllerWaypointGoalMessage();
+   private final ROS2Publisher<ControllerWaypointGoalMessage> goalMessagePublisher;
+   private final ROS2SyncedRobotModel syncedRobotModel;
+
+   public RDXCSGPanel(CSGROS2CommunicationHelper controllerHelper, ROS2Node ros2Node, DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobotModel)
    {
       super("CSG Controls");
       super.setRenderMethod(this::renderImGuiWidgets);
 
       this.controllerHelper = controllerHelper;
+      this.syncedRobotModel = syncedRobotModel;
       controllerHelper.addVolatileCSGStatusCallbackSubscription(this::reset);
 
       csgParametersCommand = controllerHelper.getCSGParametersCommand();
       csgStatusMessage = controllerHelper.getCSGStatusMessage();
+
+      goalMessagePublisher = ros2Node.createPublisher(HumanoidControllerAPI.getTopic(ControllerWaypointGoalMessage.class, robotModel.getSimpleRobotName()));
    }
 
    public void renderImGuiWidgets()
@@ -195,6 +215,62 @@ public class RDXCSGPanel extends RDXPanel
 
       if (publishCSGParametersCommand)
          controllerHelper.publishAtThrottledRate(csgParametersCommand);
+
+      boolean walkForward1m = ImGui.button(labels.get("Walk forward 1 meter"));
+      boolean walkBackward1m = ImGui.button(labels.get("Walk backward 1 meter"));
+      boolean walkRight1m = ImGui.button(labels.get("Walk right 1 meter"));
+      boolean walkLeft1m = ImGui.button(labels.get("Walk left 1 meter"));
+      boolean turnLeftDeg = ImGui.button(labels.get("Turn Left 90 degrees"));
+      boolean turnRightDeg = ImGui.button(labels.get("Turn Right 90 degrees"));
+
+      boolean publishTranslateToGoalMessage = walkForward1m || walkBackward1m || walkLeft1m || walkRight1m;
+      boolean rotateToGoal = turnLeftDeg || turnRightDeg;
+
+      goalMessage.setHoldPosition(false);
+
+      if (publishTranslateToGoalMessage)
+      {
+         goalMessage.setGoalOrientationMatters(false);
+
+         FramePoint2D midStance = new FramePoint2D(syncedRobotModel.getReferenceFrames().getMidFeetZUpFrame());
+         if (walkForward1m)
+            midStance.setX(1.0);
+         if (walkBackward1m)
+            midStance.setX(-1.0);
+         if (walkRight1m)
+            midStance.setY(-1.0);
+         if (walkLeft1m)
+            midStance.setY(1.0);
+
+         midStance.changeFrame(ReferenceFrame.getWorldFrame());
+         goalMessage.setXPosition(midStance.getX());
+         goalMessage.setYPosition(midStance.getY());
+         goalMessage.setPositionProximity(0.1);
+
+         goalMessagePublisher.publish(goalMessage);
+      }
+      else if (rotateToGoal)
+      {
+         goalMessage.setGoalOrientationMatters(true);
+
+         FramePose2D midStance = new FramePose2D(syncedRobotModel.getReferenceFrames().getMidFeetZUpFrame());
+         if (turnLeftDeg)
+            midStance.setYaw(Math.toRadians(90.0));
+         if (turnRightDeg)
+            midStance.setYaw(-Math.toRadians(90));
+
+         midStance.changeFrame(ReferenceFrame.getWorldFrame());
+         goalMessage.setXPosition(midStance.getX());
+         goalMessage.setYPosition(midStance.getY());
+         goalMessage.setYaw(midStance.getYaw());
+         goalMessage.setPositionProximity(0.1);
+         goalMessage.setOrientationProximity(Math.toRadians(5.0));
+
+         goalMessagePublisher.publish(goalMessage);
+      }
+
+      goalMessage.setXPosition(0.0);
+      goalMessage.setYPosition(0.0);
    }
 
    private void reset(ContinuousStepGeneratorStatusMessage csgStatusMessage)

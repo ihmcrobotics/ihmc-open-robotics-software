@@ -55,9 +55,9 @@ public class AI2RPredefinedCommandPublisher
 
    // Order matters: first match wins, same behavior as the Python predefined coordinator.
    private static final List<GotoRule> PREDEFINED_GOTO = List.of(
-         new GotoRule("person", new GotoConfig("person", "DEFAULT", "-", "traffic_barrier", "LEFT", "CLOSE")),
-         new GotoRule("doorpanel", new GotoConfig("door_panel", "FRONT", "-", "-", "-", "CLOSE")),
-         new GotoRule("barrier", new GotoConfig("traffic_barrier", "BEHIND", "door_panel", "-", "-", "CLOSE")));
+         new GotoRule("person", new GotoConfig("person", "DEFAULT", "-", "traffic_barrier", "LEFT", "CLOSE", 1.0, 0.8)),
+         new GotoRule("doorpanel", new GotoConfig("door_panel", "FRONT", "-", "-", "-", "CLOSE", 1.0, 0.7)),
+         new GotoRule("barrier", new GotoConfig("traffic_barrier", "BEHIND", "door_panel", "-", "-", "CLOSE", 1.5, 0.8)));
 
    private final ROS2Node ros2Node;
    private final ROS2Publisher<AI2RCommandMessage> commandPublisher;
@@ -244,7 +244,8 @@ public class AI2RPredefinedCommandPublisher
       LogTools.info("GOTO resolved target: {}", target);
 
       command.getNavigation().setTargetObject(target);
-      command.getNavigation().setDistanceToObject(1.0);
+      command.getNavigation().setDistanceToObject(config.distanceToObject);
+      command.getNavigation().setObstacleClearance(config.obstacleClearance);
       command.getNavigation().setSpatialRelation(spatialRelationFromString(config.spatialRelationGoto));
 
       String povObject = config.povObjectGoto;
@@ -476,7 +477,9 @@ public class AI2RPredefinedCommandPublisher
                              String povObjectGoto,
                              String spatiallyRelatedObject,
                              String spatialRelationObject,
-                             String classDiscriminator)
+                             String classDiscriminator,
+                             double distanceToObject,
+                             double obstacleClearance)
    {
    }
 

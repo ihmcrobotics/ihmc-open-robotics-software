@@ -570,6 +570,11 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
          csgStatusMessageOutputManager.reportStatusMessage(csgStatusMessage);
    }
 
+   public void seIsSnappingToHeightmap(boolean snapToHeightmap)
+   {
+      csgStatusMessage.setSnappingToHeightmap(snapToHeightmap);
+   }
+
    private static void calculateNextFootstepPose2D(double stepTime,
                                                    double desiredVelocityX,
                                                    double desiredVelocityY,

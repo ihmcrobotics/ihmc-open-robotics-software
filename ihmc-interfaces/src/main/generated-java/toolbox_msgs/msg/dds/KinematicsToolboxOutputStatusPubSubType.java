@@ -15,7 +15,7 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "f765e87a3802793e3079c4a5a0528b8a8b0fab25786001408e445ff4d52ce3e7";
+   		return "8b6069c1c3faba9b7d6b3e0470d7456ddb008acee16d50e31e72a368ad019f15";
    }
    
    @Override
@@ -73,30 +73,16 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 32; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
+
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
-      {
-        current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
-      }
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
-      {
-          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
-      {
-          current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
-      {
-          current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
-      {
-          current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -148,38 +134,17 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getSupportRegion().get(i0), current_alignment);}
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getDesiredJointVelocitiesPublishingPeriod().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getDesiredRootLinearVelocityPublishingPeriod(), current_alignment);
+
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getDesiredRootAngularVelocityPublishingPeriod(), current_alignment);
+
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getDesiredTorsoPosition(), current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getDesiredTorsoOrientation(), current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getDesiredTorsoLinearVelocity(), current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getDesiredTorsoAngularVelocity(), current_alignment);
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for(int i0 = 0; i0 < data.getRigidBodyNames().size(); ++i0)
-      {
-          current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getRigidBodyNames().get(i0).length() + 1;
-      }
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for(int i0 = 0; i0 < data.getRigidBodyPositions().size(); ++i0)
-      {
-          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getRigidBodyPositions().get(i0), current_alignment);}
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for(int i0 = 0; i0 < data.getRigidBodyOrientations().size(); ++i0)
-      {
-          current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getRigidBodyOrientations().get(i0), current_alignment);}
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for(int i0 = 0; i0 < data.getRigidBodyLinearVelocities().size(); ++i0)
-      {
-          current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getRigidBodyLinearVelocities().get(i0), current_alignment);}
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for(int i0 = 0; i0 < data.getRigidBodyAngularVelocities().size(); ++i0)
-      {
-          current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getRigidBodyAngularVelocities().get(i0), current_alignment);}
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -221,30 +186,14 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       cdr.write_type_e(data.getSupportRegion());else
           throw new RuntimeException("support_region field exceeds the maximum length: %d > %d".formatted(data.getSupportRegion().size(), 32));
 
+      if(data.getDesiredJointVelocitiesPublishingPeriod().size() <= 100)
+      cdr.write_type_e(data.getDesiredJointVelocitiesPublishingPeriod());else
+          throw new RuntimeException("desired_joint_velocities_publishing_period field exceeds the maximum length: %d > %d".formatted(data.getDesiredJointVelocitiesPublishingPeriod().size(), 100));
+
+      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getDesiredRootLinearVelocityPublishingPeriod(), cdr);
+      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getDesiredRootAngularVelocityPublishingPeriod(), cdr);
       geometry_msgs.msg.dds.PointPubSubType.write(data.getDesiredTorsoPosition(), cdr);
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getDesiredTorsoOrientation(), cdr);
-      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getDesiredTorsoLinearVelocity(), cdr);
-      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getDesiredTorsoAngularVelocity(), cdr);
-      if(data.getRigidBodyNames().size() <= 100)
-      cdr.write_type_e(data.getRigidBodyNames());else
-          throw new RuntimeException("rigid_body_names field exceeds the maximum length: %d > %d".formatted(data.getRigidBodyNames().size(), 100));
-
-      if(data.getRigidBodyPositions().size() <= 100)
-      cdr.write_type_e(data.getRigidBodyPositions());else
-          throw new RuntimeException("rigid_body_positions field exceeds the maximum length: %d > %d".formatted(data.getRigidBodyPositions().size(), 100));
-
-      if(data.getRigidBodyOrientations().size() <= 100)
-      cdr.write_type_e(data.getRigidBodyOrientations());else
-          throw new RuntimeException("rigid_body_orientations field exceeds the maximum length: %d > %d".formatted(data.getRigidBodyOrientations().size(), 100));
-
-      if(data.getRigidBodyLinearVelocities().size() <= 100)
-      cdr.write_type_e(data.getRigidBodyLinearVelocities());else
-          throw new RuntimeException("rigid_body_linear_velocities field exceeds the maximum length: %d > %d".formatted(data.getRigidBodyLinearVelocities().size(), 100));
-
-      if(data.getRigidBodyAngularVelocities().size() <= 100)
-      cdr.write_type_e(data.getRigidBodyAngularVelocities());else
-          throw new RuntimeException("rigid_body_angular_velocities field exceeds the maximum length: %d > %d".formatted(data.getRigidBodyAngularVelocities().size(), 100));
-
       cdr.write_type_5(data.getComOffset());
 
       cdr.write_type_7(data.getLeftFootInContact());
@@ -270,15 +219,11 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getDesiredRootLinearVelocity(), cdr);	
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getDesiredRootAngularVelocity(), cdr);	
       cdr.read_type_e(data.getSupportRegion());	
+      cdr.read_type_e(data.getDesiredJointVelocitiesPublishingPeriod());	
+      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getDesiredRootLinearVelocityPublishingPeriod(), cdr);	
+      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getDesiredRootAngularVelocityPublishingPeriod(), cdr);	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getDesiredTorsoPosition(), cdr);	
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getDesiredTorsoOrientation(), cdr);	
-      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getDesiredTorsoLinearVelocity(), cdr);	
-      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getDesiredTorsoAngularVelocity(), cdr);	
-      cdr.read_type_e(data.getRigidBodyNames());	
-      cdr.read_type_e(data.getRigidBodyPositions());	
-      cdr.read_type_e(data.getRigidBodyOrientations());	
-      cdr.read_type_e(data.getRigidBodyLinearVelocities());	
-      cdr.read_type_e(data.getRigidBodyAngularVelocities());	
       data.setComOffset(cdr.read_type_5());
       	
       data.setLeftFootInContact(cdr.read_type_7());
@@ -307,19 +252,15 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       ser.write_type_a("desired_root_angular_velocity", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getDesiredRootAngularVelocity());
 
       ser.write_type_e("support_region", data.getSupportRegion());
+      ser.write_type_e("desired_joint_velocities_publishing_period", data.getDesiredJointVelocitiesPublishingPeriod());
+      ser.write_type_a("desired_root_linear_velocity_publishing_period", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getDesiredRootLinearVelocityPublishingPeriod());
+
+      ser.write_type_a("desired_root_angular_velocity_publishing_period", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getDesiredRootAngularVelocityPublishingPeriod());
+
       ser.write_type_a("desired_torso_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getDesiredTorsoPosition());
 
       ser.write_type_a("desired_torso_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getDesiredTorsoOrientation());
 
-      ser.write_type_a("desired_torso_linear_velocity", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getDesiredTorsoLinearVelocity());
-
-      ser.write_type_a("desired_torso_angular_velocity", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getDesiredTorsoAngularVelocity());
-
-      ser.write_type_e("rigid_body_names", data.getRigidBodyNames());
-      ser.write_type_e("rigid_body_positions", data.getRigidBodyPositions());
-      ser.write_type_e("rigid_body_orientations", data.getRigidBodyOrientations());
-      ser.write_type_e("rigid_body_linear_velocities", data.getRigidBodyLinearVelocities());
-      ser.write_type_e("rigid_body_angular_velocities", data.getRigidBodyAngularVelocities());
       ser.write_type_5("com_offset", data.getComOffset());
       ser.write_type_7("left_foot_in_contact", data.getLeftFootInContact());
       ser.write_type_7("right_foot_in_contact", data.getRightFootInContact());
@@ -343,19 +284,15 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       ser.read_type_a("desired_root_angular_velocity", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getDesiredRootAngularVelocity());
 
       ser.read_type_e("support_region", data.getSupportRegion());
+      ser.read_type_e("desired_joint_velocities_publishing_period", data.getDesiredJointVelocitiesPublishingPeriod());
+      ser.read_type_a("desired_root_linear_velocity_publishing_period", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getDesiredRootLinearVelocityPublishingPeriod());
+
+      ser.read_type_a("desired_root_angular_velocity_publishing_period", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getDesiredRootAngularVelocityPublishingPeriod());
+
       ser.read_type_a("desired_torso_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getDesiredTorsoPosition());
 
       ser.read_type_a("desired_torso_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getDesiredTorsoOrientation());
 
-      ser.read_type_a("desired_torso_linear_velocity", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getDesiredTorsoLinearVelocity());
-
-      ser.read_type_a("desired_torso_angular_velocity", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getDesiredTorsoAngularVelocity());
-
-      ser.read_type_e("rigid_body_names", data.getRigidBodyNames());
-      ser.read_type_e("rigid_body_positions", data.getRigidBodyPositions());
-      ser.read_type_e("rigid_body_orientations", data.getRigidBodyOrientations());
-      ser.read_type_e("rigid_body_linear_velocities", data.getRigidBodyLinearVelocities());
-      ser.read_type_e("rigid_body_angular_velocities", data.getRigidBodyAngularVelocities());
       data.setComOffset(ser.read_type_5("com_offset"));
       data.setLeftFootInContact(ser.read_type_7("left_foot_in_contact"));
       data.setRightFootInContact(ser.read_type_7("right_foot_in_contact"));

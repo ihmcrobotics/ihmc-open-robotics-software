@@ -28,10 +28,12 @@ import java.net.URL;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
@@ -45,6 +47,7 @@ public class YOLOv8DetectionExecutor
    private final SyncedYOLOv8ExecutorParameters parameters;
 
    private final Map<String, List<YOLOv8AnnotationInfo>> activeAnnotationInfos = new HashMap<>();
+   private final Set<String> missingModelParameterWarnings = new HashSet<>();
    private final ROS2Publisher<YOLOv8AnnotationInfoList> annotationInfoPublisher;
    private final BooleanSupplier annotationInfoDemanded;
 
@@ -97,6 +100,16 @@ public class YOLOv8DetectionExecutor
       updateThread.startRepeating();
 
       annotationInfoPublisher = ros2Node.createPublisher(PerceptionAPI.YOLO_ANNOTATION_INFO);
+   }
+
+   public Map<String, YOLOv8Model> getAvailableModels()
+   {
+      return availableModels;
+   }
+
+   public SyncedYOLOv8ExecutorParameters getParameters()
+   {
+      return parameters;
    }
 
    /**
@@ -156,13 +169,20 @@ public class YOLOv8DetectionExecutor
       List<YOLOv8AnnotationInfo> annotationInfos = new ArrayList<>();
 
       YOLOv8Model yoloModel = getNextModelToRun();
-      if (yoloModel != null)
+      SyncedYOLOv8ModelParameters modelParameters = yoloModel == null ? null : parameters.getModelParameters(yoloModel.getName());
+      if (yoloModel != null && modelParameters == null)
       {
+         activeAnnotationInfos.remove(yoloModel.getName());
+         if (missingModelParameterWarnings.add(yoloModel.getName()))
+            LogTools.warn("Skipping YOLO model {} because synced parameters are unavailable.", yoloModel.getName());
+      }
+      if (yoloModel != null && modelParameters != null)
+      {
+         missingModelParameterWarnings.remove(yoloModel.getName());
+
          // Run YOLO to get results
          RawImage bgrImage = RawImageTools.convertColor(colorImage, PixelFormat.BGR8);
          YOLOv8DetectionList yoloResults = yoloModel.run(bgrImage);
-
-         SyncedYOLOv8ModelParameters modelParameters = parameters.getModelParameters().get(yoloModel.getName());
 
          // Create list of instant detections from results
          for (YOLOv8Detection detection : yoloResults)
@@ -300,6 +320,13 @@ public class YOLOv8DetectionExecutor
    {
       parameters.checkModifiedAndUpdate();
       if (parameters.isModified())
-         parameters.getModelParameters().forEach((modelName, modelParameters) -> modelParameters.applyToModel(availableModels.get(modelName)));
+      {
+         parameters.getModelParameters().forEach((modelName, modelParameters) ->
+         {
+            YOLOv8Model model = availableModels.get(modelName);
+            if (model != null)
+               modelParameters.applyToModel(model);
+         });
+      }
    }
 }

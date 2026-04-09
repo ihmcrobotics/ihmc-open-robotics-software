@@ -15,7 +15,7 @@ public class BehaviorTreeSceneObjectDefinitionMessagePubSubType implements us.ih
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "7c1983818b53fce29567d1c4dff45029c9d3995870aff9798c9069f0faef6048";
+   		return "85ead7d8bc80118edae9a9833f313394e04eebeed1c79f71c7e4939d055a6901";
    }
    
    @Override
@@ -58,6 +58,17 @@ public class BehaviorTreeSceneObjectDefinitionMessagePubSubType implements us.ih
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+
+      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       return current_alignment - initial_alignment;
    }
@@ -81,6 +92,24 @@ public class BehaviorTreeSceneObjectDefinitionMessagePubSubType implements us.ih
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+
+
+      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getCompositeFrameName().length() + 1;
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getCompositeFrameA().length() + 1;
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getCompositeFrameB().length() + 1;
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -99,6 +128,26 @@ public class BehaviorTreeSceneObjectDefinitionMessagePubSubType implements us.ih
 
       cdr.write_type_9(data.getFoundationPoseObjectType());
 
+      cdr.write_type_3(data.getMinPostPoints());
+
+      cdr.write_type_3(data.getMinRecessPoints());
+
+      if(data.getCompositeFrameName().length() <= 255)
+      cdr.write_type_d(data.getCompositeFrameName());else
+          throw new RuntimeException("composite_frame_name field exceeds the maximum length: %d > %d".formatted(data.getCompositeFrameName().length(), 255));
+
+      if(data.getCompositeFrameA().length() <= 255)
+      cdr.write_type_d(data.getCompositeFrameA());else
+          throw new RuntimeException("composite_frame_a field exceeds the maximum length: %d > %d".formatted(data.getCompositeFrameA().length(), 255));
+
+      if(data.getCompositeFrameB().length() <= 255)
+      cdr.write_type_d(data.getCompositeFrameB());else
+          throw new RuntimeException("composite_frame_b field exceeds the maximum length: %d > %d".formatted(data.getCompositeFrameB().length(), 255));
+
+      cdr.write_type_9(data.getCompositeFrameType());
+
+      cdr.write_type_5(data.getCompositeDistance());
+
    }
 
    public static void read(behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage data, us.ihmc.idl.CDR cdr)
@@ -108,6 +157,17 @@ public class BehaviorTreeSceneObjectDefinitionMessagePubSubType implements us.ih
       cdr.read_type_d(data.getYoloModelName());	
       cdr.read_type_d(data.getYoloClassName());	
       data.setFoundationPoseObjectType(cdr.read_type_9());
+      	
+      data.setMinPostPoints(cdr.read_type_3());
+      	
+      data.setMinRecessPoints(cdr.read_type_3());
+      	
+      cdr.read_type_d(data.getCompositeFrameName());	
+      cdr.read_type_d(data.getCompositeFrameA());	
+      cdr.read_type_d(data.getCompositeFrameB());	
+      data.setCompositeFrameType(cdr.read_type_9());
+      	
+      data.setCompositeDistance(cdr.read_type_5());
       	
 
    }
@@ -119,6 +179,13 @@ public class BehaviorTreeSceneObjectDefinitionMessagePubSubType implements us.ih
       ser.write_type_d("yolo_model_name", data.getYoloModelName());
       ser.write_type_d("yolo_class_name", data.getYoloClassName());
       ser.write_type_9("foundation_pose_object_type", data.getFoundationPoseObjectType());
+      ser.write_type_3("min_post_points", data.getMinPostPoints());
+      ser.write_type_3("min_recess_points", data.getMinRecessPoints());
+      ser.write_type_d("composite_frame_name", data.getCompositeFrameName());
+      ser.write_type_d("composite_frame_a", data.getCompositeFrameA());
+      ser.write_type_d("composite_frame_b", data.getCompositeFrameB());
+      ser.write_type_9("composite_frame_type", data.getCompositeFrameType());
+      ser.write_type_5("composite_distance", data.getCompositeDistance());
    }
 
    @Override
@@ -128,6 +195,13 @@ public class BehaviorTreeSceneObjectDefinitionMessagePubSubType implements us.ih
       ser.read_type_d("yolo_model_name", data.getYoloModelName());
       ser.read_type_d("yolo_class_name", data.getYoloClassName());
       data.setFoundationPoseObjectType(ser.read_type_9("foundation_pose_object_type"));
+      data.setMinPostPoints(ser.read_type_3("min_post_points"));
+      data.setMinRecessPoints(ser.read_type_3("min_recess_points"));
+      ser.read_type_d("composite_frame_name", data.getCompositeFrameName());
+      ser.read_type_d("composite_frame_a", data.getCompositeFrameA());
+      ser.read_type_d("composite_frame_b", data.getCompositeFrameB());
+      data.setCompositeFrameType(ser.read_type_9("composite_frame_type"));
+      data.setCompositeDistance(ser.read_type_5("composite_distance"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage src, behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage dest)

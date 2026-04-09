@@ -71,6 +71,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+/**
+ * Shared runtime context for KST states.
+ * It owns command/status interfaces, robot models, converters, publishers, input tracking, and helper utilities.
+ */
 public class KSTTools implements SCS2YoGraphicHolder
 {
    private final CommandInputManager commandInputManager;

@@ -5,6 +5,9 @@ import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+/**
+ * Optional processor that computes velocity/acceleration by finite differencing successive IK configurations.
+ */
 public class KSTFiniteDifferenceOutputProcessor implements KSTOutputProcessor
 {
    private final BooleanProvider computeSignal;

@@ -47,6 +47,8 @@ public class BehaviorTreeSceneObjectState extends BehaviorTreeSceneObjectDefinit
       if (id != message.getId())
          LogTools.error("IDs should match! {} != {}", id, message.getId());
 
+      fromMessage(message.getDefinition());
+
       transform.fromMessage(message.getTransformToWorld());
       referenceFrame.update();
       frozen.fromMessage(message.getFrozen());

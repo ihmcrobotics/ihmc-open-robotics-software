@@ -6,24 +6,23 @@ import us.ihmc.communication.crdt.CRDTBidirectionalBooleanArray;
 import us.ihmc.communication.crdt.CRDTBidirectionalFloat;
 import us.ihmc.communication.crdt.CRDTBidirectionalFloatArray;
 import us.ihmc.communication.crdt.CRDTBidirectionalIntegerArray;
-import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.LatestTimestampModifiable;
 
 import java.util.Arrays;
 
 public class SyncedYOLOv8ModelParameters
 {
-   private final YOLOv8ModelInfo modelInfo;
+   protected final YOLOv8ModelInfo modelInfo;
 
    // YOLO model parameters
-   private final CRDTBidirectionalBooleanArray ignoredObjectClasses;
-   private final CRDTBidirectionalFloatArray confidenceThresholds;
-   private final CRDTBidirectionalFloatArray maskThresholds;
-   private final CRDTBidirectionalFloat nmsThreshold;
+   protected final CRDTBidirectionalBooleanArray ignoredObjectClasses;
+   protected final CRDTBidirectionalFloatArray confidenceThresholds;
+   protected final CRDTBidirectionalFloatArray maskThresholds;
+   protected final CRDTBidirectionalFloat nmsThreshold;
 
    // Output processing parameters
-   private final CRDTBidirectionalIntegerArray erosionKernelRadii;
-   private final CRDTBidirectionalFloatArray outlierThresholds;
+   protected final CRDTBidirectionalIntegerArray erosionKernelRadii;
+   protected final CRDTBidirectionalFloatArray outlierThresholds;
 
    public SyncedYOLOv8ModelParameters(LatestTimestampModifiable executorParameters, YOLOv8ModelInfo modelInfo)
    {
@@ -42,6 +41,31 @@ public class SyncedYOLOv8ModelParameters
       Arrays.fill(erosionKernelRadii.getValue(), 1);
       outlierThresholds = new CRDTBidirectionalFloatArray(executorParameters, objectClassCount);
       Arrays.fill(outlierThresholds.getValue(), 2.0f);
+   }
+
+   public void setToDefaults()
+   {
+      nmsThreshold.setValue(0.1f);
+      Arrays.fill(ignoredObjectClasses.getValueAndModify(), false);
+      Arrays.fill(confidenceThresholds.getValueAndModify(), 0.7f);
+      Arrays.fill(maskThresholds.getValueAndModify(), 0.0f);
+      Arrays.fill(erosionKernelRadii.getValueAndModify(), 1);
+      Arrays.fill(outlierThresholds.getValueAndModify(), 2.0f);
+   }
+
+   public void set(SyncedYOLOv8ModelParameters other)
+   {
+      for (int i = 0; i < ignoredObjectClasses.getLength(); i++)
+         ignoredObjectClasses.setValue(i, other.ignoredObjectClasses.getValueReadOnly(i));
+      for (int i = 0; i < confidenceThresholds.getLength(); i++)
+         confidenceThresholds.setValue(i, other.confidenceThresholds.getValueReadOnly(i));
+      for (int i = 0; i < maskThresholds.getLength(); i++)
+         maskThresholds.setValue(i, other.maskThresholds.getValueReadOnly(i));
+      nmsThreshold.setValue(other.nmsThreshold.getValue());
+      for (int i = 0; i < erosionKernelRadii.getLength(); i++)
+         erosionKernelRadii.setValue(i, other.erosionKernelRadii.getValueReadOnly(i));
+      for (int i = 0; i < outlierThresholds.getLength(); i++)
+         outlierThresholds.setValue(i, other.outlierThresholds.getValueReadOnly(i));
    }
 
    /**

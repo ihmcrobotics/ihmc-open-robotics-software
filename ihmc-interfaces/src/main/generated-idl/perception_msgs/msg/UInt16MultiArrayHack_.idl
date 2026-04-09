@@ -24,7 +24,7 @@ module perception_msgs
         /**
          * array of data
          */
-        sequence<unsigned short, 512> data;
+        sequence<unsigned short, 1024> data;
       };
     };
   };
