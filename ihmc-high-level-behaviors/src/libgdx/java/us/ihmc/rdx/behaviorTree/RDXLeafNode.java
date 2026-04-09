@@ -5,7 +5,6 @@ import imgui.flag.ImGuiCol;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.LeafNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.LeafNodeState;
-import us.ihmc.log.LogTools;
 import us.ihmc.rdx.behaviorTree.control.RDXFallbackNode;
 import us.ihmc.rdx.imgui.ImGuiFlashingColors;
 import us.ihmc.rdx.imgui.ImGuiFlashingText;
@@ -90,7 +89,7 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
          }
       }
 
-      if (!definition.getExecuteAfterPrevious())
+      if (!definition.getExecuteAfterPrevious() && !state.getExecuteAfterNodeIsMissing())
       {
          float frameHeight = ImGui.getFrameHeight();
          float executeAfterY = Float.NaN;
@@ -132,7 +131,16 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
       // This happens with the Undo non-topological changes button.
       state.validateDefinition(rootNode.getState().getOrderedNodes());
 
-      if (ImGui.beginCombo(labels.get("Execute after"), definition.getExecuteAfterLeafName()))
+      boolean missing = state.getExecuteAfterNodeIsMissing();
+      if (missing)
+         ImGui.pushStyleColor(ImGuiCol.Text, ImGuiTools.RED);
+
+      boolean executeAfterComboOpen = ImGui.beginCombo(labels.get("Execute after"), definition.getExecuteAfterLeafName());
+
+      if (missing)
+         ImGui.popStyleColor();
+
+      if (executeAfterComboOpen)
       {
          if (ImGui.selectable(labels.get("Previous"), definition.getExecuteAfterPrevious()))
             definition.setExecuteAfterPrevious();
@@ -180,18 +188,15 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
    @Override
    public int getNameColor()
    {
+      if (state.getExecuteAfterNodeIsMissing())
+         return ImGuiTools.RED;
+
       return flashingDescriptionColor.getTextColor(state.getFailed());
    }
 
    /** @return the leaf to execute after as part of the concurrency system */
    public RDXBehaviorTreeNode<?, ?> getExecuteAfterLeaf()
    {
-      RDXBehaviorTreeNode<?, ?> executeAfterNode = rootNode.getIDToNodeMap().get(definition.getExecuteAfterNodeID());
-
-      if (executeAfterNode == null)
-         LogTools.error("Problem with node: {}: executeAfter not found: ID = {}, Name = {}",
-                        definition.getName(), definition.getExecuteAfterNodeID(), definition.getExecuteAfterLeafName());
-
-      return executeAfterNode;
+      return rootNode.getIDToNodeMap().get(definition.getExecuteAfterNodeID());
    }
 }
