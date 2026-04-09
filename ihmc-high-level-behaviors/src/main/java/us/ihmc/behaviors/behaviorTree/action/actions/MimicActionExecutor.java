@@ -42,13 +42,9 @@ public class MimicActionExecutor extends ActionNodeExecutor<MimicActionState, Mi
    private final Object replayAlignmentLock = new Object();
    private boolean replayAlignmentInitialized = false;
    private final Point2D actionStartPelvisPosition = new Point2D();
-   private final Point2D actionStartTorsoPosition = new Point2D();
    private double actionStartPelvisYaw = 0.0;
-   private double actionStartTorsoYaw = 0.0;
    private final Vector2D replayPelvisPositionOffset = new Vector2D();
-   private final Vector2D replayTorsoPositionOffset = new Vector2D();
    private double replayPelvisYawOffset = 0.0;
-   private double replayTorsoYawOffset = 0.0;
    private final Map<KinematicsToolboxOutputStatus, ReplayStatusBaseline> replayStatusBaselines = new IdentityHashMap<>();
 
    public MimicActionExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
@@ -121,14 +117,8 @@ public class MimicActionExecutor extends ActionNodeExecutor<MimicActionState, Mi
          actionStartPelvisPosition.set(pelvisPose.getPosition().getX(), pelvisPose.getPosition().getY());
          actionStartPelvisYaw = pelvisPose.getYaw();
 
-         var torsoPose = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getChestFrame);
-         actionStartTorsoPosition.set(torsoPose.getPosition().getX(), torsoPose.getPosition().getY());
-         actionStartTorsoYaw = torsoPose.getYaw();
-
          replayPelvisPositionOffset.setToZero();
-         replayTorsoPositionOffset.setToZero();
          replayPelvisYawOffset = 0.0;
-         replayTorsoYawOffset = 0.0;
          replayAlignmentInitialized = false;
       }
    }
@@ -148,22 +138,19 @@ public class MimicActionExecutor extends ActionNodeExecutor<MimicActionState, Mi
          {
             replayPelvisPositionOffset.set(actionStartPelvisPosition.getX() - baseline.pelvisX,
                                            actionStartPelvisPosition.getY() - baseline.pelvisY);
-            replayTorsoPositionOffset.set(actionStartTorsoPosition.getX() - baseline.torsoX,
-                                          actionStartTorsoPosition.getY() - baseline.torsoY);
             replayPelvisYawOffset = actionStartPelvisYaw - baseline.pelvisYaw;
-            replayTorsoYawOffset = actionStartTorsoYaw - baseline.torsoYaw;
             replayAlignmentInitialized = true;
          }
 
          status.getDesiredRootPosition().setX(baseline.pelvisX + replayPelvisPositionOffset.getX());
          status.getDesiredRootPosition().setY(baseline.pelvisY + replayPelvisPositionOffset.getY());
-         status.getDesiredTorsoPosition().setX(baseline.torsoX + replayTorsoPositionOffset.getX());
-         status.getDesiredTorsoPosition().setY(baseline.torsoY + replayTorsoPositionOffset.getY());
+         status.getDesiredTorsoPosition().setX(baseline.torsoX + replayPelvisPositionOffset.getX());
+         status.getDesiredTorsoPosition().setY(baseline.torsoY + replayPelvisPositionOffset.getY());
 
          status.getDesiredRootOrientation().setYawPitchRoll(baseline.pelvisYaw + replayPelvisYawOffset,
                                                             status.getDesiredRootOrientation().getPitch(),
                                                             status.getDesiredRootOrientation().getRoll());
-         status.getDesiredTorsoOrientation().setYawPitchRoll(baseline.torsoYaw + replayTorsoYawOffset,
+         status.getDesiredTorsoOrientation().setYawPitchRoll(baseline.torsoYaw + replayPelvisYawOffset,
                                                              status.getDesiredTorsoOrientation().getPitch(),
                                                              status.getDesiredTorsoOrientation().getRoll());
       }
