@@ -16,6 +16,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.tools.IHMCCommonPaths;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -23,7 +24,8 @@ import java.util.List;
 
 public class MimicActionExecutor extends ActionNodeExecutor<MimicActionState, MimicActionDefinition>
 {
-   private static final File DEFAULT_ROS2_LOG_DIRECTORY = new File(System.getProperty("user.home"), ".ihmc/logs/ros2");
+   private static final File DEFAULT_ROS2_LOG_DIRECTORY = IHMCCommonPaths.LOGS_DIRECTORY.resolve("ros2").toFile();
+   private static final String ROS2_LOG_DIRECTORY_MARKER = "/.ihmc/logs/ros2/";
 
    private final ROS2LogReplay ros2Replayer;
    private final ROS2Topic<KinematicsToolboxOutputStatus> kstOutputTopic;
@@ -84,7 +86,7 @@ public class MimicActionExecutor extends ActionNodeExecutor<MimicActionState, Mi
          String mimicFileName = definition.getMimicFileName();
          if (!mimicFileName.equals(loadedMimicFileName))
          {
-            ros2Replayer.load(new File(DEFAULT_ROS2_LOG_DIRECTORY, mimicFileName));
+            ros2Replayer.load(resolveMimicLogFile(mimicFileName));
             loadedMimicFileName = mimicFileName;
             LogTools.info("Loaded mimic file: {}", mimicFileName);
          }
@@ -289,5 +291,22 @@ public class MimicActionExecutor extends ActionNodeExecutor<MimicActionState, Mi
       else
          highLevelStateMessage.setHighLevelControllerName(HighLevelControllerName.WALKING.toByte());
       ros2ControllerHelper.publishToController(highLevelStateMessage);
+   }
+
+   private File resolveMimicLogFile(String storedPath)
+   {
+      File asFile = new File(storedPath);
+      if (!asFile.isAbsolute())
+         return new File(DEFAULT_ROS2_LOG_DIRECTORY, storedPath);
+
+      String normalized = storedPath.replace('\\', '/');
+      int markerIndex = normalized.indexOf(ROS2_LOG_DIRECTORY_MARKER);
+      if (markerIndex >= 0)
+      {
+         String suffix = normalized.substring(markerIndex + ROS2_LOG_DIRECTORY_MARKER.length());
+         return new File(DEFAULT_ROS2_LOG_DIRECTORY, suffix);
+      }
+
+      return asFile;
    }
 }
