@@ -3,6 +3,7 @@ package us.ihmc.behaviors.behaviorTree;
 import behavior_msgs.msg.dds.LeafNodeStateMessage;
 import us.ihmc.communication.crdt.CRDTStatusBoolean;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.log.LogTools;
 
 import java.util.List;
 
@@ -103,10 +104,9 @@ public class LeafNodeState<D extends LeafNodeDefinition> extends BehaviorTreeNod
       return isNextForExecution.getValue();
    }
 
-   /** Set from within {@link LeafNodeExecutor#update} only */
    public void setCanExecute(boolean canExecute)
    {
-      this.canExecute.setValue(canExecute && !getExecuteAfterNodeIsMissing());
+      this.canExecute.setValue(canExecute);
    }
 
    /** @return whether this leaf is valid for execution. This is checked before triggering the leaf.
@@ -145,14 +145,13 @@ public class LeafNodeState<D extends LeafNodeDefinition> extends BehaviorTreeNod
       {
          return -1;
       }
-      else if (getExecuteAfterNodeIsMissing())
-      {
-         return leafIndex - 1; // Previous -- but this shouldn't actually happen, the action will fail first
-      }
       else if (!definition.getExecuteAfterPrevious())
       {
          BehaviorTreeNodeState<?> executeAfterNode = rootNode.getIDToNodeMap().get(definition.getExecuteAfterNodeID());
-         if (executeAfterNode != null)
+         if (executeAfterNode == null)
+            LogTools.error("Node \"%s\" refers to execute after node that doesn't exist: \"%s\"".formatted(definition.getName(),
+                                                                                                           definition.getExecuteAfterLeafName()));
+         else
          {
             if (executeAfterNode instanceof LeafNodeState<?> executeAfterLeaf)
                return executeAfterLeaf.getLeafIndex();
@@ -167,12 +166,5 @@ public class LeafNodeState<D extends LeafNodeDefinition> extends BehaviorTreeNod
       }
 
       return leafIndex - 1; // previous
-   }
-
-   public boolean getExecuteAfterNodeIsMissing()
-   {
-      return !definition.getExecuteAfterPrevious()
-             && !definition.getExecuteAfterBeginning()
-             && rootNode.getIDToNodeMap().get(definition.getExecuteAfterNodeID()) == null;
    }
 }

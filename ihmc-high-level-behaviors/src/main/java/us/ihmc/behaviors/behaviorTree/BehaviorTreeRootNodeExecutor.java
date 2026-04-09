@@ -237,7 +237,6 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
             state.getLogger().error("Cannot execute leaf: %s: %s\n%s".formatted(leafToExecute.getClass().getSimpleName(),
                                                                                 leafToExecute.getDefinition().getName(),
                                                                                 leafToExecute.getCantExecuteMessage()));
-            state.setAutomaticExecution(false);
             tryExecuteNext = false;
          }
       }
