@@ -30,6 +30,7 @@ byte SCREW_PRIMITIVE_ACTION = 19
 byte PELVIS_ACTION = 20
 byte WAIT_ACTION = 21
 byte LEG_ACTION = 22
+byte MIMIC_ACTION = 23
 
 # Monotonically increasing message ID that matches the CRDTInfo update number
 uint64 sequence_id
@@ -96,3 +97,5 @@ behavior_msgs/PelvisActionStateMessage[<=120] pelvis_actions
 behavior_msgs/WaitActionStateMessage[<=120] wait_actions
 
 behavior_msgs/LegActionStateMessage[<=120] leg_actions
+
+behavior_msgs/MimicActionStateMessage[<=120] mimic_actions

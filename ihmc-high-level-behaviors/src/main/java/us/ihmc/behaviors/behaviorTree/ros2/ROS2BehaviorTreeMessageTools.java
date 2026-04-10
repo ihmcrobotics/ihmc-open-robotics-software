@@ -39,6 +39,7 @@ public class ROS2BehaviorTreeMessageTools
       treeStateMessage.getGotoNodes().clear();
       treeStateMessage.getCheckpointNodes().clear();
       treeStateMessage.getSceneActions().clear();
+      treeStateMessage.getMimicActions().clear();
       treeStateMessage.getAi2rNodes().clear();
       treeStateMessage.getDoorTraversals().clear();
       treeStateMessage.getBuildingExplorations().clear();
@@ -110,6 +111,12 @@ public class ROS2BehaviorTreeMessageTools
             treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.SCENE_ACTION);
             treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getSceneActions().size());
             sceneActionState.toMessage(treeStateMessage.getSceneActions().add());
+         }
+         else if (nodeState instanceof MimicActionState mimicActionState)
+         {
+            treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.MIMIC_ACTION);
+            treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getMimicActions().size());
+            mimicActionState.toMessage(treeStateMessage.getMimicActions().add());
          }
          else if (nodeState instanceof AI2RNodeState ai2rNodeState)
          {
@@ -243,6 +250,10 @@ public class ROS2BehaviorTreeMessageTools
       else if (nodeState instanceof SceneActionState sceneActionState)
       {
          sceneActionState.fromMessage(subscriptionNode.getSceneActionStateMessage());
+      }
+      else if (nodeState instanceof MimicActionState mimicActionState)
+      {
+         mimicActionState.fromMessage(subscriptionNode.getMimicActionStateMessage());
       }
       else if (nodeState instanceof AI2RNodeState ai2rNodeState)
       {
@@ -379,6 +390,15 @@ public class ROS2BehaviorTreeMessageTools
             subscriptionNode.setLeafNodeStateMessage(sceneActionStateMessage.getState().getState());
             subscriptionNode.setBehaviorTreeNodeStateMessage(sceneActionStateMessage.getState().getState().getState());
             subscriptionNode.setBehaviorTreeNodeDefinitionMessage(sceneActionStateMessage.getDefinition().getDefinition().getDefinition().getDefinition());
+         }
+         case BehaviorTreeStateMessage.MIMIC_ACTION ->
+         {
+            MimicActionStateMessage mimicActionStateMessage = treeStateMessage.getMimicActions().get(indexInTypesList);
+            subscriptionNode.setMimicActionStateMessage(mimicActionStateMessage);
+            subscriptionNode.setActionNodeStateMessage(mimicActionStateMessage.getState());
+            subscriptionNode.setLeafNodeStateMessage(mimicActionStateMessage.getState().getState());
+            subscriptionNode.setBehaviorTreeNodeStateMessage(mimicActionStateMessage.getState().getState().getState());
+            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(mimicActionStateMessage.getDefinition().getDefinition().getDefinition().getDefinition());
          }
          case BehaviorTreeStateMessage.AI2R_NODE ->
          {

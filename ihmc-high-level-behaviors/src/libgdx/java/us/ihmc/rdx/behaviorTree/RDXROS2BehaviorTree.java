@@ -11,6 +11,7 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.robotics.physics.RobotCollisionModel;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.commons.thread.Throttler;
 
@@ -20,6 +21,7 @@ import us.ihmc.commons.thread.Throttler;
 public class RDXROS2BehaviorTree extends RDXBehaviorTree
 {
    private final ROS2BehaviorTree<RDXBehaviorTreeNode<?, ?>> ros2BehaviorTree;
+   private final ROS2ControllerHelper ros2ControllerHelper;
    /** Reduce the communication update rate. */
    private final Throttler communicationThrottler = new Throttler().setFrequency(ROS2BehaviorTree.SYNC_FREQUENCY);
    private final ImGuiAveragedFrequencyText subscriptionFrequencyText = new ImGuiAveragedFrequencyText();
@@ -35,6 +37,7 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
    {
       super(treeFilesDirectory, syncedRobot, peerClockEstimator, selectionCollisionModel, baseUI, panel3D);
 
+      ros2ControllerHelper = ros2;
       ros2BehaviorTree = new ROS2BehaviorTree<>((BehaviorTree) this, ros2);
 
       ros2BehaviorTree.getBehaviorTreeSubscription().registerMessageReceivedCallback(subscriptionFrequencyText::ping);
@@ -92,5 +95,15 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
       ros2BehaviorTree.destroy();
 
       super.destroy();
+   }
+
+   public ROS2ControllerHelper getROS2ControllerHelper()
+   {
+      return ros2ControllerHelper;
+   }
+
+   public ROS2Node getROS2Node()
+   {
+      return ros2ControllerHelper.getROS2Node();
    }
 }
