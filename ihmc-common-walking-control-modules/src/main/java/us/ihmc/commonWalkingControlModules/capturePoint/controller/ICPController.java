@@ -138,6 +138,7 @@ public class ICPController implements ICPControllerInterface
    private boolean ignoreRateLimitThisTick = false;
 
    private final ICPControllerHelper helper = new ICPControllerHelper();
+   private boolean isInMultiContact = false;
 
    public ICPController(WalkingControllerParameters walkingControllerParameters,
                         ICPControlPolygons icpControlPolygons,
@@ -382,7 +383,7 @@ public class ICPController implements ICPControllerInterface
       solver.setCopSafeDistanceToEdge(safeCoPDistanceToEdge.getValue());
       solver.setDesiredFeedbackDirection(unconstrainedFeedback, feedbackDirectionWeight.getValue());
 
-      boolean addConstraints = !ignoreRateLimitThisTick && hasNotConvergedCounts.getIntegerValue() < 5;
+      boolean addConstraints = !isInMultiContact && !ignoreRateLimitThisTick && hasNotConvergedCounts.getIntegerValue() < 5;
       if (addConstraints)
       {
          if (ICPControllerHelper.isStationary(desiredICPVelocity))
@@ -530,6 +531,7 @@ public class ICPController implements ICPControllerInterface
    public void setMultiContactStabilityRegion(FrameConvexPolygon2DReadOnly multiContactStabilityRegion)
    {
       this.copConstraintHandler.setMultiContactStabilityRegion(multiContactStabilityRegion);
+      isInMultiContact = multiContactStabilityRegion != null && !multiContactStabilityRegion.isEmpty();
    }
 
    @Override

@@ -540,6 +540,9 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
    private void computeICPController()
    {
       FrameConvexPolygon2DReadOnly supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
+      if (multiContactStabilityRegion != null && !multiContactStabilityRegion.isEmpty())
+         supportPolygonInWorld = multiContactStabilityRegion;
+
       if (perfectCoP.containsNaN())
       {
          perfectCMPDelta.setToZero();

@@ -377,7 +377,7 @@ public class DynamicLoadBearingPostContactState implements DynamicLoadBearingSta
       // Check if near reachability limit
       shoulderPointInWorld.setToZero(jointPath[1].getFrameBeforeJoint());
       shoulderPointInWorld.changeFrame(ReferenceFrame.getWorldFrame());
-      double distanceThreshold = 0.7;
+      double distanceThreshold = 0.71;
       if (shoulderPointInWorld.distanceSquared(desiredContactPoseWorld.getPosition()) > distanceThreshold * distanceThreshold)
          return true;
 
