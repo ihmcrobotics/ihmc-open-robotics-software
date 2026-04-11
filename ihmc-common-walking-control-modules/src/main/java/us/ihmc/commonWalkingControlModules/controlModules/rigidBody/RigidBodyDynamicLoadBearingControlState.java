@@ -51,8 +51,8 @@ public class RigidBodyDynamicLoadBearingControlState extends RigidBodyControlSta
    private static final FrameVector3D zeroWorld = new FrameVector3D();
 
    private static final double MINIMUM_TIME_IN_CONTACT = 0.05; // 1.0; //
-   private static final double CAPTURE_POINT_ERROR_THRESHOLD_TO_REMAIN_IN_STATE = 0.025;
-   private static final double CAPTURE_POINT_DISTANCE_INSIDE_NOMINAL_SUPPORT_THRESHOLD = 0.055;
+   private static final double CAPTURE_POINT_ERROR_THRESHOLD_TO_REMAIN_IN_STATE = 0.02;
+   private static final double CAPTURE_POINT_DISTANCE_INSIDE_NOMINAL_SUPPORT_THRESHOLD = 0.04;
 
    private final StateMachine<DynamicLoadBearingStateEnum, DynamicLoadBearingState> stateMachine;
    private final DynamicLoadBearingPreContactState preContactState;
