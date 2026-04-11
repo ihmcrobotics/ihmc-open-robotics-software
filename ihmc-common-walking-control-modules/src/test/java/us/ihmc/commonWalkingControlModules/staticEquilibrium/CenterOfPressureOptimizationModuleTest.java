@@ -41,7 +41,7 @@ public class CenterOfPressureOptimizationModuleTest
       CenterOfPressureStabilityMarginOptimizationModule optimizationModule = new CenterOfPressureStabilityMarginOptimizationModule("",
                                                                                                                                    robotMass,
                                                                                                                                    comFrame,
-                                                                                                                                   feetFrame,
+                                                                                                                                   () -> feetFrame,
                                                                                                                                    new YoRegistry(getClass().getSimpleName()),
                                                                                                                                    new YoGraphicsListRegistry());
 

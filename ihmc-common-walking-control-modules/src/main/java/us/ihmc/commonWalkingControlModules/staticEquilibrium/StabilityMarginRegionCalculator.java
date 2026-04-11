@@ -35,6 +35,7 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicPolygonExtruded3DDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -189,14 +190,14 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
    public static StabilityMarginRegionCalculator createForCoPStabilityMargin(String prefix,
                                                                              double robotMass,
                                                                              ReferenceFrame centerOfMassFrame,
-                                                                             ReferenceFrame midFeetZUpFrame,
+                                                                             Supplier<ReferenceFrame> midFeetZUpFrameSupplier,
                                                                              YoRegistry registry,
                                                                              YoGraphicsListRegistry graphicsListRegistry)
    {
       CenterOfPressureStabilityMarginOptimizationModule stabilityMarginOptimizationModule = new CenterOfPressureStabilityMarginOptimizationModule(prefix,
                                                                                                                                                   robotMass,
                                                                                                                                                   centerOfMassFrame,
-                                                                                                                                                  midFeetZUpFrame,
+                                                                                                                                                  midFeetZUpFrameSupplier,
                                                                                                                                                   registry,
                                                                                                                                                   graphicsListRegistry);
       return new StabilityMarginRegionCalculator(prefix, stabilityMarginOptimizationModule, registry, graphicsListRegistry);
@@ -243,23 +244,27 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
 
    public void updateContactState(WholeBodyContactStateInterface contactState)
    {
+      this.contactState = (WholeBodyContactState) contactState;
       optimizationModule.updateContactState(contactState);
    }
 
    public boolean performFullRegionUpdate()
    {
+      boolean success = true;
       for (int i = 0; i < DIRECTIONS_TO_OPTIMIZE; i++)
       {
-         if (!performUpdateForVertex(i))
-            return false;
+         success = performUpdateForVertex(i) && success;
       }
+
+//      if (!success)
+//         System.out.println();
 
       updateFeasibleRegion();
 //      updateMinimumMarginEdge();
 
 //      yoWorldPoseAtMidFootHeight.setZ(((CenterOfPressureStabilityMarginOptimizationModule) optimizationModule).getMidFootPoint().getZ());
 
-      return true;
+      return success;
    }
 
    public boolean performUpdateForNextVertex()
@@ -309,10 +314,10 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
          primalSolutions[vertexIndex].set(optimizationModule.getSolverSolution());
          dualSolutions[vertexIndex].set(optimizationModule.getLinearProgramSolver().getDualSolution());
       }
-//      else
-//      {
-//         optimizedVertices[vertexIndex].setToNaN();
-//         resolvedForces[vertexIndex].zero();
+      else
+      {
+         optimizedVertices[vertexIndex].setToNaN();
+         resolvedForces[vertexIndex].zero();
 //         saturatedConstraintIndices[vertexIndex].reset();
 //         solutionBasisIndices[vertexIndex].reset();
 //         hasSolvedWholeRegion.set(false);
@@ -321,7 +326,7 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
 //         CommonOps_DDRM.fill(primalSolutions[vertexIndex], Double.NaN);
 //         CommonOps_DDRM.fill(dualSolutions[vertexIndex], Double.NaN);
 //         return false;
-//      }
+      }
 
       if (success)
       {

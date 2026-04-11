@@ -380,15 +380,16 @@ public class WholeBodyControllerCore implements SCS2YoGraphicHolder
    @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
-      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
-      group.addChild(toolbox.getSCS2YoGraphics());
-      group.addChild(feedbackController.getSCS2YoGraphics());
-      if (inverseDynamicsSolver != null)
-         group.addChild(inverseDynamicsSolver.getSCS2YoGraphics());
-      if (inverseKinematicsSolver != null)
-         group.addChild(inverseKinematicsSolver.getSCS2YoGraphics());
-      if (virtualModelControlSolver != null)
-         group.addChild(virtualModelControlSolver.getSCS2YoGraphics());
-      return group;
+//      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+//      group.addChild(toolbox.getSCS2YoGraphics());
+//      group.addChild(feedbackController.getSCS2YoGraphics());
+//      if (inverseDynamicsSolver != null)
+//         group.addChild(inverseDynamicsSolver.getSCS2YoGraphics());
+//      if (inverseKinematicsSolver != null)
+//         group.addChild(inverseKinematicsSolver.getSCS2YoGraphics());
+//      if (virtualModelControlSolver != null)
+//         group.addChild(virtualModelControlSolver.getSCS2YoGraphics());
+//      return group;
+      return null;
    }
 }

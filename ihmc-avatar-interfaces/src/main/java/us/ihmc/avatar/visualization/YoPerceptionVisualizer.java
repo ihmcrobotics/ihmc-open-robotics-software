@@ -22,7 +22,7 @@ import java.util.List;
 public class YoPerceptionVisualizer implements SCS2YoGraphicHolder
 {
    public static boolean VISUALIZE_HEIGHT_MAP = false;
-   public static boolean VISUALIZE_PLANAR_REGIONS = true;
+   public static boolean VISUALIZE_PLANAR_REGIONS = false;
 
    private static final int NUMBER_OF_HEIGHT_MAP_POINTS_TO_VISUALIZE = 5000;
    private static final int NUMBER_OF_PLANAR_REGIONS_TO_VISUALIZE = 2;
@@ -118,7 +118,7 @@ public class YoPerceptionVisualizer implements SCS2YoGraphicHolder
             group.addChild(YoGraphicDefinitionFactory.newYoGraphicPolygonExtruded3DDefinition("region" + i,
                                                                                               planarRegionPoses.get(i),
                                                                                               planarRegionPolygons.get(i),
-                                                                                              0.01,
+                                                                                              0.004,
                                                                                               REGIONS_COLORS[i % REGIONS_COLORS.length]));
          }
       }

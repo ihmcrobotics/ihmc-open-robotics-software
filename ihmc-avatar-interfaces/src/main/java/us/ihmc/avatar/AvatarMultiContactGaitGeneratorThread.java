@@ -5,6 +5,7 @@ import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.multiContact.pushRecovery.BipedalContactState;
 import us.ihmc.avatar.multiContact.pushRecovery.ReactiveBracingPlanner;
 import us.ihmc.avatar.multiContact.pushRecovery.ReducedOrderRobotModel;
 import us.ihmc.avatar.visualization.YoPerceptionVisualizer;
@@ -31,6 +32,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandContactCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.TerrainMapCommand;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
@@ -89,7 +91,6 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
 
    private final AtomicReference<FootstepStatusMessage> footstepStatusMessage = new AtomicReference<>();
    private final AtomicReference<WalkingStatusMessage> walkingStatusMessage = new AtomicReference<>();
-   private final SideDependentList<MutableBoolean> areFeetInContact = new SideDependentList<>(new MutableBoolean(), new MutableBoolean());
 
    private final YoBoolean isHandRecoveryContactEnabled = new YoBoolean("isHandRecoveryContactEnabled", registry);
    private final YoBoolean isFalling = new YoBoolean("isFalling", registry);
@@ -126,6 +127,7 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
 
    private final FrameVector2D desiredToCurrentCapturePoint = new FrameVector2D();
    private final SideDependentList<FramePoint3D> handPositions = new SideDependentList<>(new FramePoint3D(), new FramePoint3D());
+   private final SideDependentList<FramePose3D> soleZUpPoses = new SideDependentList<>(new FramePose3D(), new FramePose3D());
 
    public AvatarMultiContactGaitGeneratorThread(DRCRobotModel robotModel,
                                                 ROS2Node ros2Node,
@@ -180,11 +182,6 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
       humanoidRobotContextData.setControllerRan(false);
       humanoidRobotContextData.setEstimatorRan(false);
       acceptPlanarRegions.set(true);
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         areFeetInContact.get(robotSide).setTrue();
-      }
 
       bipedalGaitGenerator = new AvatarBipedalGaitGenerator(commandInputManager,
                                                             statusOutputManager,
@@ -244,8 +241,6 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
       if (capturabilityBasedStatus != null)
       {
          desiredCapturePoint.set(capturabilityBasedStatus.getDesiredCapturePoint2d());
-         areFeetInContact.get(RobotSide.LEFT).setValue(!capturabilityBasedStatus.getLeftFootSupportPolygon3d().isEmpty());
-         areFeetInContact.get(RobotSide.RIGHT).setValue(!capturabilityBasedStatus.getRightFootSupportPolygon3d().isEmpty());
       }
       updateCentroidalValues();
 
@@ -314,11 +309,8 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
                       centerOfMassVelocity,
                       this::packDesiredCapturePoint,
                       this::packDesiredCenterOfPressure,
+                      this::packBipedalContactState,
                       isWalking(),
-                      areFeetInContact,
-                      centerOfPressureDataHolder.getRemainingTimeInContactSequence(),
-                      humanoidReferenceFrames.getSoleZUpFrames(),
-                      getTouchdownZUpPose(),
                       handPositions,
                       plannedHandContacts);
 
@@ -366,23 +358,6 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
       return walkingStatus == WalkingStatus.STARTED || walkingStatus == WalkingStatus.RESUMED;
    }
 
-   private final FramePose3D touchdownZUpPose = new FramePose3D();
-
-   private FramePose3D getTouchdownZUpPose()
-   {
-      if (isWalking())
-      {
-         FootstepStatusMessage footstepStatusMessage  = this.footstepStatusMessage.get();
-         touchdownZUpPose.set(footstepStatusMessage.getDesiredFootPositionInWorld(), footstepStatusMessage.getDesiredFootOrientationInWorld());
-         touchdownZUpPose.getOrientation().setToYawOrientation(touchdownZUpPose.getYaw());
-         return touchdownZUpPose;
-      }
-      else
-      {
-         return null;
-      }
-   }
-
    private void updateCentroidalValues()
    {
       if (centerOfMassDataHolderForController.hasCenterOfMassPosition())
@@ -403,21 +378,6 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
          centerOfMassJacobian.reset();
          centerOfMassVelocity.set(centerOfMassJacobian.getCenterOfMassVelocity());
          centerOfMassVelocity.changeFrame(ReferenceFrame.getWorldFrame());
-      }
-   }
-
-   private final BipedTimedStep nextStep = new BipedTimedStep();
-
-   private BipedTimedStep getNextStep()
-   {
-      if (isWalking())
-      {
-         // TODO
-         return null;
-      }
-      else
-      {
-         return null;
       }
    }
 
@@ -465,6 +425,59 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
       FramePoint2D copA = copPositionWaypoints.get(indexA);
       FramePoint2D copB = copPositionWaypoints.get(indexB);
       centerOfPressureToPack.interpolate(copA, copB, alpha);
+   }
+
+   private void packBipedalContactState(BipedalContactState contactStateToPack, double t)
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         soleZUpPoses.get(robotSide).setToZero(humanoidReferenceFrames.getSoleZUpFrame(robotSide));
+         soleZUpPoses.get(robotSide).changeFrame(ReferenceFrame.getWorldFrame());
+      }
+
+      if (isWalking())
+      {
+         FootstepStatusMessage footstepStatusMessage = this.footstepStatusMessage.get();
+         FootstepStatus currentStatus = FootstepStatus.fromByte(footstepStatusMessage.getFootstepStatus());
+         boolean inSingleSupport = currentStatus == FootstepStatus.STARTED;
+
+         if (t < centerOfPressureDataHolder.getRemainingTimeInContactSequence())
+         { // Match current state
+            if (inSingleSupport)
+            {
+               RobotSide supportSide = RobotSide.fromByte(footstepStatusMessage.getRobotSide()).getOppositeSide();
+               contactStateToPack.setToSingleSupport(supportSide, soleZUpPoses.get(supportSide));
+            }
+            else
+            {
+               contactStateToPack.setToDoubleSupport(soleZUpPoses.get(RobotSide.LEFT), soleZUpPoses.get(RobotSide.RIGHT));
+            }
+         }
+         else
+         { // Match upcoming state
+            if (inSingleSupport)
+            {
+               RobotSide swingSide = RobotSide.fromByte(footstepStatusMessage.getRobotSide());
+               soleZUpPoses.get(swingSide).set(footstepStatusMessage.getDesiredFootPositionInWorld(), footstepStatusMessage.getDesiredFootOrientationInWorld());
+               toZUp(soleZUpPoses.get(swingSide));
+               contactStateToPack.setToDoubleSupport(soleZUpPoses.get(RobotSide.LEFT), soleZUpPoses.get(RobotSide.RIGHT));
+            }
+            else
+            {
+               RobotSide upcomingSupportSide = RobotSide.fromByte(footstepStatusMessage.getRobotSide());
+               contactStateToPack.setToSingleSupport(upcomingSupportSide, soleZUpPoses.get(upcomingSupportSide));
+            }
+         }
+      }
+      else
+      {
+         contactStateToPack.setToDoubleSupport(soleZUpPoses.get(RobotSide.LEFT), soleZUpPoses.get(RobotSide.RIGHT));
+      }
+   }
+
+   private void toZUp(FramePose3D framePose)
+   {
+      framePose.getOrientation().setToYawOrientation(framePose.getYaw());
    }
 
    @Override

@@ -10,6 +10,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
  */
 public class ReducedOrderRobotModel
 {
+   private static final double EPSILON = 1e-7;
+
    /* Nominal offset in mid-feet zup frame from CoM to shoulder position, taken at default standing home pose */
    public static final double SHOULDER_COM_OFFSET_X = -0.005;
    public static final double SHOULDER_COM_OFFSET_Y = 0.242;
@@ -32,11 +34,11 @@ public class ReducedOrderRobotModel
       shoulderToContactPoint.sub(SHOULDER_COM_OFFSET_X, robotSide.negateIfRightSide(SHOULDER_COM_OFFSET_Y), SHOULDER_COM_OFFSET_Z);
 
       double shoulderToContactPointNorm = shoulderToContactPoint.norm();
-      if (shoulderToContactPointNorm < REACHABILITY_RADIUS_MIN)
+      if (shoulderToContactPointNorm < REACHABILITY_RADIUS_MIN - EPSILON)
          return false;
-      if (shoulderToContactPointNorm > REACHABILITY_RADIUS_MAX)
+      if (shoulderToContactPointNorm > REACHABILITY_RADIUS_MAX + EPSILON)
          return false;
-      if (robotSide.negateIfRightSide(shoulderToContactPoint.getY()) < -MAX_INWARD_DISTANCE)
+      if (robotSide.negateIfRightSide(shoulderToContactPoint.getY()) < -MAX_INWARD_DISTANCE - EPSILON)
          return false;
 
       return true;
