@@ -334,7 +334,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       if (enableUpperBodyLoadBearing())
       {
          wholeBodyContactState = new WholeBodyContactState(controlledOneDoFJoints, fullRobotModel.getRootJoint());
-         multiContactStabilityRegionCalculator = StabilityMarginRegionCalculator.createForCoPStabilityMargin("cop_", totalMass.getValue(), centerOfMassFrame, referenceFrames.getMidFeetZUpFrame(), registry, null);
+         multiContactStabilityRegionCalculator = StabilityMarginRegionCalculator.createForCoPStabilityMargin("cop_", totalMass.getValue(), centerOfMassFrame, this::getStanceZUpFrame, registry, null);
 //                  multiContactStabilityRegionCalculator = StabilityMarginRegionCalculator.createForCoMStabilityMargin("cop_", totalMass.getValue(), registry, null);
 //         multiContactStabilityRegionCalculator.setupForStabilityMarginCalculation(centerOfMassStateProvider::getCenterOfMassPosition);
          multiContactStabilityRegionCalculator.setupForStabilityMarginCalculation(() -> yoCapturePoint);
@@ -368,6 +368,25 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
       attachControllerFailureListener(fallingDirection -> controllerFailed.set(true));
       yoInferenceStabilityRegion = new YoFrameConvexPolygon2D("inferenceStabilityRegion", ReferenceFrame.getWorldFrame(), 26, registry);
+   }
+
+   private ReferenceFrame getStanceZUpFrame()
+   {
+      boolean isLeftFootInContact = footContactStates.get(RobotSide.LEFT).inContact();
+      boolean isRightFootInContact = footContactStates.get(RobotSide.RIGHT).inContact();
+
+      if (isLeftFootInContact && isRightFootInContact)
+      {
+         return referenceFrames.getMidFeetZUpFrame();
+      }
+      else if (isLeftFootInContact)
+      {
+         return referenceFrames.getSoleZUpFrame(RobotSide.LEFT);
+      }
+      else
+      {
+         return referenceFrames.getSoleZUpFrame(RobotSide.RIGHT);
+      }
    }
 
    public static JointBasics[] computeJointsToOptimizeFor(FullHumanoidRobotModel fullRobotModel, JointBasics... jointsToRemove)

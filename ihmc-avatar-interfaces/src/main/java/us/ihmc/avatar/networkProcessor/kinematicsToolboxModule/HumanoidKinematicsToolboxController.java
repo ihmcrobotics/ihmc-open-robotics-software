@@ -176,9 +176,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
    private final ExecutionTimer executionTimer = new ExecutionTimer("ikTotal", registry);
 
-   private final StabilityMarginRegionCalculator multiContactRegionCalculator;
-   private final WholeBodyContactState wholeBodyContactState;
-   private StabilityMarginKinematicsCostCalculator stabilityCostCalculator;
    private final FramePoint3D tempContactPoint = new FramePoint3D();
    private final FrameVector3D tempContactNormal = new FrameVector3D();
    private final List<RigidBodyBasics> rigidBodiesList = new ArrayList<>();
@@ -231,23 +228,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
       supportRigidBodyWeight.set(200.0);
       momentumWeight.set(0.001);
-
-      multiContactRegionCalculator = StabilityMarginRegionCalculator.createForCoPStabilityMargin("", desiredFullRobotModel.getTotalMass(), desiredReferenceFrames.getCenterOfMassFrame(), desiredReferenceFrames.getMidFeetZUpFrame(), registry, null);
-      multiContactRegionCalculator.setupForStabilityMarginCalculation(() -> centerOfMass);
-      wholeBodyContactState = new WholeBodyContactState(desiredOneDoFJoints, rootJoint);
-
-      if (desiredFullRobotModel.getChest() != null && desiredFullRobotModel.getHand(RobotSide.LEFT) != null
-          && desiredFullRobotModel.getHand(RobotSide.RIGHT) != null)
-      {
-         CentroidalMomentumCalculator centroidalMomentumCalculator = controllerCore.getToolbox().getCentroidalMomentumCalculator();
-         stabilityCostCalculator = new StabilityMarginKinematicsCostCalculator(wholeBodyContactState,
-                                                                               multiContactRegionCalculator,
-                                                                               desiredFullRobotModel,
-                                                                               isUpperBodyLoadBearing,
-                                                                               getCenterOfMassSafeMargin(),
-                                                                               centroidalMomentumCalculator,
-                                                                               registry);
-      }
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -520,8 +500,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
          holdCenterOfMassXYPosition.set(command.holdCurrentCenterOfMassXYPosition());
          enableJointLimitReduction.set(command.enableJointLimitReduction());
-         if (stabilityCostCalculator != null)
-            stabilityCostCalculator.setEnabled(command.enableStabilityObjective());
 
          if (command.hasCustomJointRestrictionLimits())
          {
@@ -568,29 +546,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       }
       // Com offset - only needed for status message
       getSolution().setComOffset(computeCenterOfMassOffset());
-
-      if (!isUserProvidingSupportPolygon() && isUpperBodyLoadBearing.getValue())
-      {
-         // Update actuation limits based on current configuration
-         wholeBodyContactState.updateActuationConstraintVector();
-         wholeBodyContactState.updateActuationConstraintMatrix();
-         multiContactRegionCalculator.updateContactState(wholeBodyContactState);
-         multiContactRegionCalculator.performUpdateForNextVertex();
-
-         if (multiContactRegionCalculator.hasSolvedWholeRegion())
-         {
-            activeContactPointPositions.clear();
-            getSolution().getSupportRegion().clear();
-
-            for (int i = 0; i < multiContactRegionCalculator.getNumberOfVertices(); i++)
-            {
-               activeContactPointPositions.add().set(multiContactRegionCalculator.getOptimizedVertex(i));
-               getSolution().getSupportRegion().add().set(multiContactRegionCalculator.getOptimizedVertex(i));
-            }
-
-            updateSupportPolygonConstraint(activeContactPointPositions);
-         }
-      }
 
       executionTimer.stopMeasurement();
    }
@@ -786,11 +741,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       if (isUserProvidingSupportPolygon())
          return;
 
-      if (isUpperBodyLoadBearing.getValue())
-      { // CoM constraint polygon is computed through {@link CenterOfMassStabilityMarginRegionCalculator}
-         initializeWholeBodyContactState();
-      }
-
       activeContactPointPositions.clear();
 
       // CoM constraint polygon is the convex hull of the feet contact points. Even when upper body is load-bearing, initialize to this.
@@ -802,43 +752,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          activeContactPointPositions.add().setIncludingFrame(worldFrame, rightFootSupportPolygon2d.get(i));
 
       updateSupportPolygonConstraint(activeContactPointPositions);
-   }
-
-   private void initializeWholeBodyContactState()
-   {
-      multiContactRegionCalculator.clear();
-      wholeBodyContactState.clear();
-
-      // add feet contacts
-      if (isFootInSupport.get(RobotSide.LEFT).getValue())
-         packFootContactPoints(RobotSide.LEFT, capturabilityBasedStatusInternal.getLeftFootSupportPolygon3d());
-      if (isFootInSupport.get(RobotSide.RIGHT).getValue())
-         packFootContactPoints(RobotSide.RIGHT, capturabilityBasedStatusInternal.getRightFootSupportPolygon3d());
-
-      // add hand contact points
-      if (isHandInSupport.get(RobotSide.LEFT).getValue())
-         packHandContactPoint(RobotSide.LEFT, capturabilityBasedStatusInternal.getLeftHandContactNormal());
-      if (isHandInSupport.get(RobotSide.RIGHT).getValue())
-         packHandContactPoint(RobotSide.RIGHT, capturabilityBasedStatusInternal.getRightHandContactNormal());
-
-      wholeBodyContactState.update();
-      multiContactRegionCalculator.updateContactState(wholeBodyContactState, true);
-   }
-
-   private void packFootContactPoints(RobotSide robotSide, List<Point3D> contactPoints)
-   {
-      for (int i = 0; i < contactPoints.size(); i++)
-      {
-         tempContactPoint.setIncludingFrame(ReferenceFrame.getWorldFrame(), contactPoints.get(i));
-         tempContactNormal.setIncludingFrame(desiredFullRobotModel.getSoleFrame(robotSide), Axis3D.Z);
-         wholeBodyContactState.addContactPoint(desiredFullRobotModel.getFoot(robotSide), tempContactPoint, tempContactNormal, FOOT_COEFFICIENT_OF_FRICTION);
-      }
-   }
-
-   private void packHandContactPoint(RobotSide robotSide, Vector3DBasics contactNormalInWorld)
-   {
-      tempContactNormal.setIncludingFrame(ReferenceFrame.getWorldFrame(), contactNormalInWorld);
-      wholeBodyContactState.addContactPoint(desiredFullRobotModel.getHand(robotSide), handContactPointInBodyFrame.get(robotSide), tempContactNormal, HAND_COEFFICIENT_OF_FRICTION);
    }
 
    @Override
@@ -879,8 +792,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    {
       addHoldSupportEndEffectorCommands(bufferToPack);
       addHoldCenterOfMassXYCommand(bufferToPack);
-      if (stabilityCostCalculator != null)
-         stabilityCostCalculator.addPostureFeedbackCommands(bufferToPack);
    }
 
    @Override
@@ -1021,7 +932,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
       group.addChild(super.getSCS2YoGraphics());
-      group.addChild(multiContactRegionCalculator.getSCS2YoGraphics());
       return group;
    }
 }

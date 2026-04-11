@@ -13,6 +13,8 @@ import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+import java.util.function.Supplier;
+
 public class CenterOfPressureStabilityMarginOptimizationModule extends StabilityMarginOptimizationModule
 {
    static final int NUM_DYNAMICS_CONSTRAINTS = 4;
@@ -21,7 +23,7 @@ public class CenterOfPressureStabilityMarginOptimizationModule extends Stability
    private final Vector3D optimizedLIPMForce = new Vector3D();
 
    private final ReferenceFrame centerOfMassFrame;
-   private final ReferenceFrame midFeetZUpFrame;
+   private final Supplier<ReferenceFrame> midFeetZUpFrameSupplier;
 
    private final FramePoint3D midFootPoint = new FramePoint3D();
    private final FramePoint3D comPoint = new FramePoint3D();
@@ -34,14 +36,14 @@ public class CenterOfPressureStabilityMarginOptimizationModule extends Stability
    public CenterOfPressureStabilityMarginOptimizationModule(String prefix,
                                                             double robotMass,
                                                             ReferenceFrame centerOfMassFrame,
-                                                            ReferenceFrame midFeetZUpFrame,
+                                                            Supplier<ReferenceFrame> midFeetZUpFrameSupplier,
                                                             YoRegistry parentRegistry,
                                                             YoGraphicsListRegistry graphicsListRegistry)
    {
       super(prefix, robotMass, parentRegistry, graphicsListRegistry);
 
       this.centerOfMassFrame = centerOfMassFrame;
-      this.midFeetZUpFrame = midFeetZUpFrame;
+      this.midFeetZUpFrameSupplier = midFeetZUpFrameSupplier;
    }
 
    @Override
@@ -102,7 +104,7 @@ public class CenterOfPressureStabilityMarginOptimizationModule extends Stability
       CommonOps_DDRM.transpose(rewardVectorC);
 
       comPoint.setToZero(centerOfMassFrame);
-      midFootPoint.setToZero(midFeetZUpFrame);
+      midFootPoint.setToZero(midFeetZUpFrameSupplier.get());
 
       comPoint.changeFrame(ReferenceFrame.getWorldFrame());
       midFootPoint.changeFrame(ReferenceFrame.getWorldFrame());

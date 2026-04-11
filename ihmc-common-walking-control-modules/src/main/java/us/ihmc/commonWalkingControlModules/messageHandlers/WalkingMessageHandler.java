@@ -1234,7 +1234,7 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
    public YoGraphicDefinition getSCS2YoGraphics()
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
-      group.addChild(footstepListVisualizer.getSCS2YoGraphics());
+//      group.addChild(footstepListVisualizer.getSCS2YoGraphics());
       return group;
    }
 }

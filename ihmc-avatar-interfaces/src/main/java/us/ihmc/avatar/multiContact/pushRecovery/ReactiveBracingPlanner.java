@@ -15,6 +15,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandContactCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -31,11 +32,8 @@ public interface ReactiveBracingPlanner
              FrameVector3DReadOnly centerOfMassVelocity,
              ObjDoubleConsumer<Tuple2DBasics> capturePointTrajectoryProvider,
              ObjDoubleConsumer<Tuple2DBasics> centerOfPressureTrajectoryProvider,
+             ObjDoubleConsumer<BipedalContactState> bipedalContactStateProvider,
              boolean isWalking,
-             SideDependentList<MutableBoolean> areFeetInContact,
-             double remainingTimeInContactState,
-             SideDependentList<? extends ReferenceFrame> soleZUpFrames,
-             FramePose3D touchdownZUpPose,
              SideDependentList<? extends FramePoint3DReadOnly> handPositions,
              SideDependentList<HandContactCommand> contactCommandsToPack);
 

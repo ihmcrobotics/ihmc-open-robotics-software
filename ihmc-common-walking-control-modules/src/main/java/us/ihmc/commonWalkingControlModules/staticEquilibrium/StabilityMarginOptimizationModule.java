@@ -1,6 +1,13 @@
 package us.ihmc.commonWalkingControlModules.staticEquilibrium;
 
 import gnu.trove.list.array.TIntArrayList;
+import org.apache.commons.math3.optim.MaxIter;
+import org.apache.commons.math3.optim.linear.LinearConstraint;
+import org.apache.commons.math3.optim.linear.LinearConstraintSet;
+import org.apache.commons.math3.optim.linear.LinearObjectiveFunction;
+import org.apache.commons.math3.optim.linear.Relationship;
+import org.apache.commons.math3.optim.linear.SimplexSolver;
+import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.convexOptimization.linearProgram.LinearProgramSolver;
@@ -70,7 +77,7 @@ import java.util.List;
  */
 public abstract class StabilityMarginOptimizationModule implements SCS2YoGraphicHolder
 {
-   public static final boolean DEBUG = false;
+   public static boolean DEBUG = false;
    public static final double GRAVITY = 9.81;
    public static final int NUM_BASIS_VECTORS = 4;
    public static final int MAX_CONTACT_POINTS = 12;
@@ -196,7 +203,7 @@ public abstract class StabilityMarginOptimizationModule implements SCS2YoGraphic
          }
       }
 
-      equalityConstraintEpsilon = new YoDouble("equalityConstraintEpilson", registry);
+      equalityConstraintEpsilon = new YoDouble("equalityConstraintEpsilson", registry);
       equalityConstraintEpsilon.set(0.0);
 
       if (parentRegistry != null)
@@ -353,8 +360,16 @@ public abstract class StabilityMarginOptimizationModule implements SCS2YoGraphic
       packRewardVectorC(rewardVectorC, queryDirectionX, queryDirectionY);
 
       foundSolution = linearProgramSolver.solve(rewardVectorC, Ain_solver, bin, solutionSolver, SolverMethod.SIMPLEX);
+//      double[] apacheCommonsSolution = solveWithApacheCommons(Ain_solver, bin, rewardVectorC);
+//      foundSolution = apacheCommonsSolution != null;
+
       if (foundSolution)
       {
+//         for (int i = 0; i < apacheCommonsSolution.length; i++)
+//         {
+//            solutionSolver.set(i, apacheCommonsSolution[i]);
+//         }
+
          CommonOps_DDRM.mult(solverToNominalTransformation, solutionSolver, solutionNominal);
          packOptimizedStabilityPoint(solutionNominal, optimizedStabilityPoint);
       }
@@ -373,6 +388,42 @@ public abstract class StabilityMarginOptimizationModule implements SCS2YoGraphic
       }
 
       return foundSolution;
+   }
+
+   private static double[] solveWithApacheCommons(DMatrixRMaj inequalityMatrix, DMatrixRMaj inequalityVector, DMatrixRMaj c)
+   {
+      SimplexSolver apacheSolver = new SimplexSolver();
+
+      double[] directionToMaximize = Arrays.copyOf(c.getData(), c.getNumRows());
+      LinearObjectiveFunction objectiveFunction = new LinearObjectiveFunction(directionToMaximize, 0.0);
+
+      List<LinearConstraint> constraintList = new ArrayList<>();
+      for (int i = 0; i < inequalityMatrix.getNumRows(); i++)
+      {
+         double[] constraint = new double[inequalityMatrix.getNumCols()];
+         for (int j = 0; j < inequalityMatrix.getNumCols(); j++)
+         {
+            constraint[j] = inequalityMatrix.get(i, j);
+         }
+
+         constraintList.add(new LinearConstraint(constraint, Relationship.LEQ, inequalityVector.get(i)));
+      }
+
+      for (int i = 0; i < inequalityMatrix.getNumCols(); i++)
+      {
+         double[] nonNegativeConstraint = new double[inequalityMatrix.getNumCols()];
+         nonNegativeConstraint[i] = 1.0;
+         constraintList.add(new LinearConstraint(nonNegativeConstraint, Relationship.GEQ, 0.0));
+      }
+
+      try
+      {
+         return apacheSolver.optimize(new MaxIter(1000), objectiveFunction, new LinearConstraintSet(constraintList), GoalType.MAXIMIZE).getPoint();
+      }
+      catch (Exception e)
+      {
+         return null;
+      }
    }
 
    public Point2D solveForFixedBasis(TIntArrayList basisIndices)
