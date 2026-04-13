@@ -2,12 +2,12 @@ package us.ihmc.commonWalkingControlModules.stabilityLearning;
 
 public enum ContactConfiguration
 {
-   SINGLE_SUPPORT_SAME_SIDE_(false, true, false),
-   SINGLE_SUPPORT_OPPOSITE_SIDE_(false, false, true),
-   SINGLE_SUPPORT_DUAL_HAND_(true, true, false),
+   SINGLE_SUPPORT_SAME_SIDE(false, true, false),
+   SINGLE_SUPPORT_OPPOSITE_SIDE(false, false, true),
+   SINGLE_SUPPORT_DUAL_HAND(true, true, false),
 
-   DOUBLE_SUPPORT_SINGLE_HAND_(false, true, true),
-   DOUBLE_SUPPORT_DUAL_HAND_(true, true, true);
+   DOUBLE_SUPPORT_SINGLE_HAND(false, true, true),
+   DOUBLE_SUPPORT_DUAL_HAND(true, true, true);
 
    private final boolean isOppositeHandInContact;
    private final boolean isSameFootInContact;
