@@ -148,19 +148,17 @@ public final class PerceptionAPI
 
    /*
     * Isaac Sim cameras (alex_isaac_sim_dds.py --enable_cameras)
-    * Topics published as sensor_msgs/Image over CycloneDDS from Python.
-    * Consumed by AlexRDXIsaacSimPerceptionPanel via RDXROS2SensorMsgsImageVisualizer.
+    * Topics published as perception_msgs/ImageMessage over CycloneDDS from Python.
+    * Intrinsics and camera pose are embedded in each ImageMessage (no separate camera_info topic).
+    * Consumed by AlexRDXIsaacSimUI via RDXROS2ColoredPointCloudVisualizer.
     */
    private static final ROS2Topic<?> ISAAC_SIM = new ROS2Topic<>().withPrefix("isaac_sim").withQoS(ROS2QosProfile.BEST_EFFORT());
-   public static final ROS2Topic<Image>      ISAAC_SIM_OVERVIEW_COLOR       = ISAAC_SIM.withSuffix("overview/color").withType(Image.class);
-   public static final ROS2Topic<Image>      ISAAC_SIM_OVERVIEW_DEPTH       = ISAAC_SIM.withSuffix("overview/depth").withType(Image.class);
-   public static final ROS2Topic<CameraInfo> ISAAC_SIM_OVERVIEW_CAMERA_INFO = ISAAC_SIM.withSuffix("overview/camera_info").withType(CameraInfo.class);
-   public static final ROS2Topic<Image>      ISAAC_SIM_FOLLOW_COLOR         = ISAAC_SIM.withSuffix("follow/color").withType(Image.class);
-   public static final ROS2Topic<Image>      ISAAC_SIM_FOLLOW_DEPTH         = ISAAC_SIM.withSuffix("follow/depth").withType(Image.class);
-   public static final ROS2Topic<CameraInfo> ISAAC_SIM_FOLLOW_CAMERA_INFO   = ISAAC_SIM.withSuffix("follow/camera_info").withType(CameraInfo.class);
-   public static final ROS2Topic<Image>      ISAAC_SIM_HEAD_COLOR           = ISAAC_SIM.withSuffix("head/color").withType(Image.class);
-   public static final ROS2Topic<Image>      ISAAC_SIM_HEAD_DEPTH           = ISAAC_SIM.withSuffix("head/depth").withType(Image.class);
-   public static final ROS2Topic<CameraInfo> ISAAC_SIM_HEAD_CAMERA_INFO     = ISAAC_SIM.withSuffix("head/camera_info").withType(CameraInfo.class);
+   public static final ROS2Topic<ImageMessage> ISAAC_SIM_OVERVIEW_COLOR = ISAAC_SIM.withSuffix("overview/color").withType(ImageMessage.class);
+   public static final ROS2Topic<ImageMessage> ISAAC_SIM_OVERVIEW_DEPTH = ISAAC_SIM.withSuffix("overview/depth").withType(ImageMessage.class);
+   public static final ROS2Topic<ImageMessage> ISAAC_SIM_FOLLOW_COLOR   = ISAAC_SIM.withSuffix("follow/color").withType(ImageMessage.class);
+   public static final ROS2Topic<ImageMessage> ISAAC_SIM_FOLLOW_DEPTH   = ISAAC_SIM.withSuffix("follow/depth").withType(ImageMessage.class);
+   public static final ROS2Topic<ImageMessage> ISAAC_SIM_HEAD_COLOR     = ISAAC_SIM.withSuffix("head/color").withType(ImageMessage.class);
+   public static final ROS2Topic<ImageMessage> ISAAC_SIM_HEAD_DEPTH     = ISAAC_SIM.withSuffix("head/depth").withType(ImageMessage.class);
 
    /*
     * Planar regions

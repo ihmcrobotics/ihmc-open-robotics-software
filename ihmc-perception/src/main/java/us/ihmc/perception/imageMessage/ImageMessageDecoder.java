@@ -38,6 +38,15 @@ public class ImageMessageDecoder
       Mat image = new Mat();
       decodeMessage(messageToDecode, image);
 
+      // For UNCOMPRESSED images the Mat points into a reused buffer — clone to own the data.
+      if (CompressionType.fromImageMessage(messageToDecode) == CompressionType.UNCOMPRESSED)
+      {
+         Mat owned = new Mat();
+         image.copyTo(owned);
+         image.close();
+         image = owned;
+      }
+
       CameraIntrinsics intrinsics = new CameraIntrinsics();
       intrinsics.setWidth(messageToDecode.getImageWidth());
       intrinsics.setHeight(messageToDecode.getImageHeight());

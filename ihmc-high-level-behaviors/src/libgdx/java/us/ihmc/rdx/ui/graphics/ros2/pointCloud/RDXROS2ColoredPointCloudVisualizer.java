@@ -37,6 +37,7 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXROS2MultiTopicVisuali
 
    private final RDXRawImagePointCloudVisualizer visualizer;
 
+
    public RDXROS2ColoredPointCloudVisualizer(String title, ROS2Node ros2Node, ROS2Topic<ImageMessage> depthTopic, ROS2Topic<ImageMessage> colorTopic)
    {
       super(title);
