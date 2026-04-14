@@ -156,7 +156,7 @@ public class HumanoidSteppingManager implements Updatable, SCS2YoGraphicHolder
    public YoGraphicDefinition getSCS2YoGraphics()
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
-      group.addChild(goalReacher.getSCS2YoGraphics());
+//      group.addChild(goalReacher.getSCS2YoGraphics());
       group.addChild(stepGenerator.getSCS2YoGraphics());
 
       return group;

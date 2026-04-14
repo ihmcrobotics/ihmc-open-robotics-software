@@ -162,6 +162,10 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       this.frameOfTheBase = frameOfBase;
       this.statusMessageOutputManager = statusMessageOutputManager;
 
+      currentPose.setToNaN();
+      basePosition.setToNaN();
+      startPose.setToNaN();
+
       normalizedRadialSpeed = new YoDouble("normalizedRadialSpeed", registry);
       rateLimitedNormalizedRadialSpeed = new YoDouble("rateLimitedNormalizedRadialSpeed", registry);
 
@@ -187,7 +191,8 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
 
       rampDownDecayRate.set(DEFAULT_RAMP_DOWN_DECAY_RATE);
 
-      parentRegistry.addChild(registry);
+//      parentRegistry.addChild(registry);
+
       waypointVisualizer = new GoalReacherWaypointVisualizer(registry);
    }
 
@@ -708,7 +713,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       group.addChild(newYoGraphicArrow3D("Start To Goal Path", startPose.getPosition(), startToGoalVector,
                                          true, 1.0, 0.0, false, 0.01, 0.0, ColorDefinitions.Green()));
 
-      group.addChild(waypointVisualizer.getSCS2YoGraphics());
+//      group.addChild(waypointVisualizer.getSCS2YoGraphics());
 
       return group;
    }

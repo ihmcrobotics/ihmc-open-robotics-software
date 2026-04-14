@@ -66,7 +66,7 @@ public class GoalReacherWaypointVisualizer implements SCS2YoGraphicHolder
          connectionVectors[i].setToNaN();
       }
 
-      parentRegistry.addChild(registry);
+//      parentRegistry.addChild(registry);
    }
 
    /**
