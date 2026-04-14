@@ -90,7 +90,6 @@ public class ErrorBasedStepAdjustmentController
    private final FrameVector3D offset = new FrameVector3D();
    private final FramePose3D initialFootstepSolution = new FramePose3D();
    private final YoDouble maxStepAdjustment = new YoDouble(yoNamePrefix + "MaxStepAdjustment", registry);
-   private final YoBoolean limitStepAdjustment = new YoBoolean("limitStepAdjustment", registry);
 
    private final YoBoolean isInSwing = new YoBoolean(yoNamePrefix + "IsInSwing", registry);
    private final YoDouble initialTime = new YoDouble(yoNamePrefix + "InitialTime", registry);
@@ -232,8 +231,7 @@ public class ErrorBasedStepAdjustmentController
       }
 
       swingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
-      maxStepAdjustment.set(0.075);
-      limitStepAdjustment.set(true);
+      maxStepAdjustment.set(0.1);
 
       parentRegistry.addChild(registry);
    }
@@ -426,14 +424,11 @@ public class ErrorBasedStepAdjustmentController
       offset.sub(footstepSolution.getPosition(), initialFootstepSolution.getPosition());
       offset.setZ(0.0);
 
-      if (limitStepAdjustment.getValue())
+      double offsetLength = offset.norm();
+      if (offsetLength > maxStepAdjustment.getValue())
       {
-         double offsetLength = offset.norm();
-         if (offsetLength > maxStepAdjustment.getValue())
-         {
-            offset.scale(maxStepAdjustment.getValue() / offsetLength);
-            footstepSolution.getPosition().add(initialFootstepSolution.getPosition(), offset);
-         }
+         offset.scale(maxStepAdjustment.getValue() / offsetLength);
+         footstepSolution.getPosition().add(initialFootstepSolution.getPosition(), offset);
       }
 
       footstepWasAdjusted.set(wasAdjusted || previousFootstepSolution.distance(footstepSolution.getPosition()) > 1e-3);
