@@ -86,7 +86,7 @@ import static us.ihmc.robotics.lists.FrameTuple2dArrayList.createFramePoint2dArr
 
 public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProvider, SCS2YoGraphicHolder
 {
-   private static final boolean USE_INFERENCE_STABILITY_REGION = false;
+   private static final boolean USE_INFERENCE_STABILITY_REGION = true;
    protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final String name = getClass().getSimpleName();

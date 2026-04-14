@@ -30,6 +30,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.filters.GlitchFilteredYoBoolean;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class DynamicLoadBearingPreContactState implements DynamicLoadBearingState
@@ -53,7 +54,7 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
    private final FrameVector3D previousHandVelocity = new FrameVector3D();
    private final FrameVector3D handVelocity = new FrameVector3D();
    private final YoDouble handSpeed;
-   private final GlitchFilteredYoBoolean hasHandTouchedDown;
+   private final YoBoolean hasHandTouchedDown;
    private final LoadBearingParameters loadBearingParameters;
 
    private final FramePoint3D currentPosition = new FramePoint3D();
@@ -78,7 +79,7 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
 
       trajectoryDuration = new YoDouble("trajectoryDuration", registry);
       handSpeed = new YoDouble("handSpeed", registry);
-      hasHandTouchedDown = new GlitchFilteredYoBoolean("hasHandTouchedDown", registry, 2);
+      hasHandTouchedDown = new YoBoolean("hasHandTouchedDown", registry);
 
       distanceToPlane = new YoDouble("distanceToPlane", registry);
 
@@ -188,7 +189,7 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
 //      double distanceFromRegion = regionPolygon.signedDistance(tempPoint2d);
 //      boolean isInsideRegion = distanceFromRegion < 0.01;
 
-      hasHandTouchedDown.update(isCloseToWall && hasReducedHandSpeed && timeInState > 0.65 * trajectoryDuration.getValue());
+      hasHandTouchedDown.set(isCloseToWall && hasReducedHandSpeed && timeInState > 0.65 * trajectoryDuration.getValue());
       return hasHandTouchedDown.getValue();
    }
 
