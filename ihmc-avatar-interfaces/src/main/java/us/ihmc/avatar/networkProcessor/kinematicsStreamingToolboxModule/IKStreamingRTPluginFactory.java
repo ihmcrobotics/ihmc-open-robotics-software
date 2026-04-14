@@ -58,10 +58,16 @@ public class IKStreamingRTPluginFactory
 {
    private IKStreamingRTThread ikStreamingRTThread;
    private IKStreamingRTTask ikStreamingRTTask;
+   private final boolean enableYoVariableServer;
 
    public IKStreamingRTPluginFactory()
    {
+      this(false);
+   }
 
+   public IKStreamingRTPluginFactory(boolean enableYoVariableServer)
+   {
+      this.enableYoVariableServer = enableYoVariableServer;
    }
 
    public IKStreamingRTThread createRTThread(String robotName,
@@ -81,7 +87,8 @@ public class IKStreamingRTPluginFactory
                                                        robotModel,
                                                        contextDataFactory,
                                                        collisionModel,
-                                                       parameters);
+                                                       parameters,
+                                                       enableYoVariableServer);
       return ikStreamingRTThread;
    }
 
@@ -191,6 +198,7 @@ public class IKStreamingRTPluginFactory
       private final AtomicReference<ToolboxState> newToolboxStateRequestedRef = new AtomicReference<>();
       private final YoEnum<ToolboxState> toolboxState = new YoEnum<>("toolboxState", registry, ToolboxState.class);
       private final HumanoidRobotContextData humanoidRobotContextData;
+      private final boolean enableYoVariableServer;
 
       public IKStreamingRTThread(String robotName,
                                  ROS2Node ros2Node,
@@ -199,8 +207,10 @@ public class IKStreamingRTPluginFactory
                                  DRCRobotModel robotModel,
                                  HumanoidRobotContextDataFactory contextDataFactory,
                                  RobotCollisionModel collisionModel,
-                                 KinematicsStreamingToolboxParameters parameters)
+                                 KinematicsStreamingToolboxParameters parameters,
+                                 boolean enableYoVariableServer)
       {
+         this.enableYoVariableServer = enableYoVariableServer;
          timeOfLastInput.set(Double.NEGATIVE_INFINITY);
          timeWithoutInputsBeforeGoingToSleep.set(parameters.getTimeThresholdForSleeping());
 
@@ -376,6 +386,11 @@ public class IKStreamingRTPluginFactory
          YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
          group.addChild(kinematicsStreamingToolboxController.getSCS2YoGraphics());
          return group;
+      }
+
+      public boolean isYoVariableServerEnabled()
+      {
+         return enableYoVariableServer;
       }
    }
 

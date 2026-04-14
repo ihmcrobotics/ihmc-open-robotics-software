@@ -355,7 +355,8 @@ public class AvatarMultiThreadingFactory
                                                                             masterRobotModel.getHumanoidRobotKinematicsCollisionModel(),
                                                                             ikStreamingParameters));
 
-      yoVariableServer.addRegistry(avatarIKStreaming.get().getYoVariableRegistry(), avatarIKStreaming.get().getSCS2YoGraphics());
+      if (yoVariableServer != null && avatarIKStreaming.get().isYoVariableServerEnabled())
+         yoVariableServer.addRegistry(avatarIKStreaming.get().getYoVariableRegistry(), avatarIKStreaming.get().getSCS2YoGraphics());
 
       setupIKStreamingTaskAndThread(avatarIKStreaming.get(), yoVariableServer);
 
@@ -546,7 +547,7 @@ public class AvatarMultiThreadingFactory
       IKStreamingRTPluginFactory.IKStreamingRTTask ikStreamingTask = IKStreamingRTPluginFactory.createIKStreamingRTTask(ikStreamingThread, masterThreadDt);
 
       // Add post-IK streaming callback to update YoVariable server with IK streaming registry
-      if (yoVariableServer != null)
+      if (yoVariableServer != null && ikStreamingThread.isYoVariableServerEnabled())
          ikStreamingTask.addCallbackPostTask(() -> yoVariableServer.update(ikStreamingThread.getHumanoidRobotContextData().getTimestamp(),
                                                                            ikStreamingThread.getYoVariableRegistry()));
 
