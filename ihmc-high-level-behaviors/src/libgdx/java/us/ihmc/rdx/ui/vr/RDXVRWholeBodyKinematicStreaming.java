@@ -107,7 +107,7 @@ public class RDXVRWholeBodyKinematicStreaming
 
    private final RDXVRMultiContact multiContact;
    private final RDXVRHandControl handControl;
-   private final SideDependentList<RDXHandControlMode> handControlModes = new SideDependentList<>(RDXHandControlMode.HAND_CONFIGURATION, RDXHandControlMode.HAND_CONFIGURATION);
+   private final SideDependentList<RDXHandControlMode> handControlModes = new SideDependentList<>(RDXHandControlMode.FINGER_STREAMING, RDXHandControlMode.FINGER_STREAMING);
    private final SideDependentList<Boolean> handHasFingers = new SideDependentList<>(true, true);
    private final ROS2SyncedRobotModel syncedRobot;
    private final ROS2ControllerHelper ros2ControllerHelper;

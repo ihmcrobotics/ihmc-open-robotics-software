@@ -126,7 +126,7 @@ public class RDXVRFootstepStreaming
                controllerStatusTracker.getFinishedWalkingNotification().clear();
             }
          }
-         }
+      }
    }
 
    public void reset()
