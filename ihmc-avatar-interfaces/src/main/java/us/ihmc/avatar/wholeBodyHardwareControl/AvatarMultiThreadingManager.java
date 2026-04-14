@@ -328,8 +328,7 @@ public class AvatarMultiThreadingManager
          // Update all post-estimator thread runnables
          runAll(postMasterThreadRunnables);
 
-         // Write desired commands to robot
-         lowLevelOutputProcessor.update(masterContext.getJointDesiredOutputList());
+         // Write desired commands to robot (low-level output processor is updated by the controller task's scheduler thread runnable)
          hardwareCommunicationInterface.write(lowLevelOutputProcessor.getProcessedDesiredOutput(), lowLevelOutputProcessor.getMasterGain().getValue());
       }
 
