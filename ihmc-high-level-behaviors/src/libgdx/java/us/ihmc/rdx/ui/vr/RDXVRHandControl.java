@@ -23,8 +23,8 @@ public class RDXVRHandControl
    private final SideDependentList<MutableBoolean> handsAreOpen = new SideDependentList<>(new MutableBoolean(false), new MutableBoolean(false));
    private final ImBoolean userIsControllingRobot;
    private static final float CONTROL_JOYSTICK_THRESHOLD = 0.5f;
-   private static final float THUMB_OPPOSITION_JOYSTICK_INCREMENT = 0.005f;
-   private static final float THUMB_CURL_JOYSTICK_INCREMENT = 0.005f;
+   private static final float THUMB_OPPOSITION_JOYSTICK_INCREMENT = 0.01f;
+   private static final float THUMB_CURL_JOYSTICK_INCREMENT = 0.01f;
    private static final float FINGER_CURL_LIMIT_MARGIN = 5.0f;
    private final SideDependentList<Float> thumbOpposition = new SideDependentList<>(0.5f, 0.5f);
    private final SideDependentList<Float> thumbCurl = new SideDependentList<>(0.5f, 0.5f);
@@ -152,11 +152,8 @@ public class RDXVRHandControl
                                  newFingerCurl = Math.max(0.0f, Math.min(newFingerCurl, 1.0f));
                                  thumbCurl.put(side, newFingerCurl);
 
-                                 float fingerCurlAngle = RDXAbilityHand.FINGER_CURL_MAX * thumbCurl.get(side);
-                                 for (int i = 0; i < 4; i++)
-                                 {
-                                    handManager.getHand(side).sendFingerPosition(i, fingerCurlAngle);
-                                 }
+                                 float fingerCurlAngle = RDXAbilityHand.THUMB_CURL_MAX * thumbCurl.get(side);
+                                 handManager.getHand(side).sendFingerPosition(4, fingerCurlAngle);
                               }
 
                               float gripValue = controller.getGripActionData().x();
