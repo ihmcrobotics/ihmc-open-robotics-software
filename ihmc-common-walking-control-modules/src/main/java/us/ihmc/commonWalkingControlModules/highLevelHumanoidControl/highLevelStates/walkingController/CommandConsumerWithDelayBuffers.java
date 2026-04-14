@@ -164,7 +164,7 @@ public class CommandConsumerWithDelayBuffers
       PriorityQueue<Command<?, ?>> priorityQueue = priorityQueues.get(command.getClass());
       if(priorityQueue.size() >= NUMBER_OF_COMMANDS_TO_QUEUE)
       {
-         LogTools.error("Skipping %s because priority queue is full. %d/%d".formatted(command.getClass().getSimpleName(), priorityQueue.size(), NUMBER_OF_COMMANDS_TO_QUEUE));
+//         LogTools.error("Skipping %s because priority queue is full. %d/%d".formatted(command.getClass().getSimpleName(), priorityQueue.size(), NUMBER_OF_COMMANDS_TO_QUEUE));
          return;
       }
       RecyclingArrayList<? extends Command<?, ?>> recyclingArrayList = queuedCommands.get(command.getClass());
