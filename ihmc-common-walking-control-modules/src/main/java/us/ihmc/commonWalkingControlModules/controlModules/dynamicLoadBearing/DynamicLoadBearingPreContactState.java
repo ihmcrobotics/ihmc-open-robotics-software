@@ -112,6 +112,8 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
    @Override
    public void onEntry()
    {
+      maxHandSpeed = 0.0;
+
       currentPosition.setToZero(controlFrame);
       currentPosition.changeFrame(ReferenceFrame.getWorldFrame());
 //      tempVector.sub(currentPosition, desiredPosition);
@@ -162,18 +164,22 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
       yoControlFrame.setToNaN();
    }
 
+   private double maxHandSpeed;
+
    @Override
    public boolean isDone(double timeInState)
    {
 //      double epsilonCloseToWall = 0.012; // sim
-      double epsilonCloseToWall = 0.04; // real robot
+      double epsilonCloseToWall = 0.06; // real robot
       distanceToPlane.set(bracingPlane.distance(positionControlHelper.getYoCurrentPosition()));
       boolean isCloseToWall = distanceToPlane.getValue() < epsilonCloseToWall;
 
       tempVector.setIncludingFrame(controlFrame.getTwistOfFrame().getLinearPart());
       tempVector.changeFrame(ReferenceFrame.getWorldFrame());
       handSpeed.set(Math.abs(tempVector.dot(yoBracingNormal)));
-      boolean hasLowHandSpeed = handSpeed.getValue() < 0.1;
+      maxHandSpeed = Math.max(handSpeed.getValue(), maxHandSpeed);
+
+      boolean hasReducedHandSpeed = handSpeed.getValue() < 0.65 * maxHandSpeed;
 
 //      tempPoint.set(positionControlHelper.getYoCurrentPosition());
 //      transformFromWorld.transform(tempPoint);
@@ -182,7 +188,7 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
 //      double distanceFromRegion = regionPolygon.signedDistance(tempPoint2d);
 //      boolean isInsideRegion = distanceFromRegion < 0.01;
 
-      hasHandTouchedDown.update(isCloseToWall && hasLowHandSpeed && timeInState > 0.5 * trajectoryDuration.getValue());
+      hasHandTouchedDown.update(isCloseToWall && hasReducedHandSpeed && timeInState > 0.65 * trajectoryDuration.getValue());
       return hasHandTouchedDown.getValue();
    }
 
@@ -193,7 +199,7 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
 
    public boolean isStuck(double timeInState)
    {
-      return timeInState > trajectoryDuration.getValue() + 0.6;
+      return timeInState > trajectoryDuration.getValue() + 0.7;
    }
 
    @Override

@@ -22,7 +22,7 @@ import java.util.List;
 public class YoPerceptionVisualizer implements SCS2YoGraphicHolder
 {
    public static boolean VISUALIZE_HEIGHT_MAP = false;
-   public static boolean VISUALIZE_PLANAR_REGIONS = false;
+   public static boolean VISUALIZE_PLANAR_REGIONS = true;
 
    private static final int NUMBER_OF_HEIGHT_MAP_POINTS_TO_VISUALIZE = 5000;
    private static final int NUMBER_OF_PLANAR_REGIONS_TO_VISUALIZE = 2;

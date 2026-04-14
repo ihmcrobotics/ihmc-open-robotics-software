@@ -3,7 +3,6 @@ package us.ihmc.avatar;
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
-import org.apache.commons.lang3.mutable.MutableBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.multiContact.pushRecovery.BipedalContactState;
 import us.ihmc.avatar.multiContact.pushRecovery.ReactiveBracingPlanner;
@@ -16,7 +15,6 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.BipedTimedStep;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MultiContactGaitGeneratorAPI;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -31,7 +29,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandContactCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.TerrainMapCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -66,6 +63,7 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
    private static final double DEFAULT_CAPTURE_POINT_ERROR_THRESHOLD_FOR_HAND_CONTACT_STANDING = 0.03;
    private static final double DEFAULT_CAPTURE_POINT_ERROR_THRESHOLD_FOR_HAND_CONTACT_WALKING = 0.045;
    public static final double DEFAULT_CONTACT_SAFETY_FACTOR = 0.07;
+   private static final boolean ENABLE_BIPEDAL_GAIT_GENERATOR = false;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -85,7 +83,6 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
    private final AvatarBipedalGaitGenerator bipedalGaitGenerator;
    private final YoBoolean hasReceivedPlanarRegions = new YoBoolean("hasReceivedPlanarRegions", registry);
 
-   private final YoDouble contactSafetyFactor = new YoDouble("contactSafetyFactor", registry);
    private final YoDouble capturePointErrorThresholdForHandContactWhileStanding = new YoDouble("icpErrorThresholdForHandContactStanding", registry);
    private final YoDouble capturePointErrorThresholdForHandContactWhileWalking = new YoDouble("icpErrorThresholdForHandContactWalking", registry);
 
@@ -144,7 +141,6 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
 
       planner = robotModel.getReactiveBracingPlanner();
       registry.addChild(planner.getRegistry());
-      contactSafetyFactor.set(DEFAULT_CONTACT_SAFETY_FACTOR);
       additionalSafetyDistance.set(0.15);
       capturePointErrorThresholdForHandContactWhileStanding.set(DEFAULT_CAPTURE_POINT_ERROR_THRESHOLD_FOR_HAND_CONTACT_STANDING);
       capturePointErrorThresholdForHandContactWhileWalking.set(DEFAULT_CAPTURE_POINT_ERROR_THRESHOLD_FOR_HAND_CONTACT_WALKING);
@@ -183,14 +179,21 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
       humanoidRobotContextData.setEstimatorRan(false);
       acceptPlanarRegions.set(true);
 
-      bipedalGaitGenerator = new AvatarBipedalGaitGenerator(commandInputManager,
-                                                            statusOutputManager,
-                                                            robotModel,
-                                                            fullRobotModel,
-                                                            humanoidReferenceFrames,
-                                                            walkingCommandInputManager,
-                                                            walkingOutputManager,
-                                                            registry);
+      if (ENABLE_BIPEDAL_GAIT_GENERATOR)
+      {
+         bipedalGaitGenerator = new AvatarBipedalGaitGenerator(commandInputManager,
+                                                               statusOutputManager,
+                                                               robotModel,
+                                                               fullRobotModel,
+                                                               humanoidReferenceFrames,
+                                                               walkingCommandInputManager,
+                                                               walkingOutputManager,
+                                                               registry);
+      }
+      else
+      {
+         bipedalGaitGenerator = null;
+      }
 
       walkingOutputManager.attachStatusMessageListener(CapturabilityBasedStatus.class, capturabilityBasedStatus::set);
 
@@ -201,7 +204,7 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
       }
 
       perceptionVisualizer = new YoPerceptionVisualizer(registry);
-      diagnosticBracingSide.set(null);
+      diagnosticBracingSide.set(RobotSide.LEFT);
    }
 
    private boolean hasPrintedException = false;
@@ -234,7 +237,8 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
       centerOfMassJacobian.reset();
 
       // Update bipedal gait generator
-      bipedalGaitGenerator.update();
+      if (ENABLE_BIPEDAL_GAIT_GENERATOR)
+         bipedalGaitGenerator.update();
 
       // Update capturability status
       CapturabilityBasedStatus capturabilityBasedStatus = this.capturabilityBasedStatus.get();
@@ -266,13 +270,6 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
          planner.setPlanarRegions(planarRegionsListCommand);
          perceptionVisualizer.visualizePlanarRegions(planarRegionsListCommand);
          hasReceivedPlanarRegions.set(true);
-      }
-
-      if (commandInputManager.isNewCommandAvailable(TerrainMapCommand.class))
-      {
-         TerrainMapCommand terrainMapCommand = commandInputManager.pollNewestCommand(TerrainMapCommand.class);
-         //         bipedalGaitGenerator.setTerrainMapCommand(terrainMapCommand);
-         perceptionVisualizer.visualizeHeightMap(terrainMapCommand);
       }
 
       for (int i = 0; i < yoCapturePointWaypoints.length; i++)
