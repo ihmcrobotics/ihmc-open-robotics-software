@@ -407,7 +407,7 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
       RecyclingArrayList<FramePoint2D> comPositionWaypoints = centerOfPressureDataHolder.getComPositionWaypoints();
       RecyclingArrayList<FrameVector2D> comVelocityWaypoints = centerOfPressureDataHolder.getComVelocityWaypoints();
 
-      if (comPositionWaypoints.isEmpty() || comVelocityWaypoints.isEmpty() || indexB > comPositionWaypoints.size() || indexB > comVelocityWaypoints.size())
+      if (comPositionWaypoints.isEmpty() || comVelocityWaypoints.isEmpty() || indexB >= comPositionWaypoints.size() || indexB >= comVelocityWaypoints.size())
          return;
 
       // capture point A
