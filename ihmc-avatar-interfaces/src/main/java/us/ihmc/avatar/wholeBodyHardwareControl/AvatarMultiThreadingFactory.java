@@ -686,14 +686,7 @@ public class AvatarMultiThreadingFactory
          hardwareCommunicationInterface.addRequestedHighLevelControlStateConsumer(highLevelControllerName -> controllerFactory.getRequestedControlStateEnum().set(highLevelControllerName));
 
          // Listener so that hardware communication interface knows the current high-level controller state
-         controllerFactory.attachHighLevelStateChangedListener(new StateChangedListener<HighLevelControllerName>()
-         {
-            @Override
-            public void stateChanged(HighLevelControllerName from, HighLevelControllerName to)
-            {
-               hardwareCommunicationInterface.setCurrentHighLevelControllerState(to);
-            }
-         });
+         controllerFactory.attachHighLevelStateChangedListener((from, to) -> hardwareCommunicationInterface.setCurrentHighLevelControllerState(to));
       }
 
       controllerFactory.setListenToHighLevelStatePackets(true);

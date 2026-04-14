@@ -5,7 +5,6 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.yoVariables.listener.YoVariableChangedListener;
-
 import java.util.function.Consumer;
 
 /**
