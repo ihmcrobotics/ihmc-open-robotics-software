@@ -66,7 +66,7 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
    private static final double DEFAULT_CAPTURE_POINT_ERROR_THRESHOLD_FOR_HAND_CONTACT_STANDING = 0.03;
    private static final double DEFAULT_CAPTURE_POINT_ERROR_THRESHOLD_FOR_HAND_CONTACT_WALKING = 0.045;
    public static final double DEFAULT_CONTACT_SAFETY_FACTOR = 0.07;
-   private static final boolean ENABLE_BIPEDAL_GAIT_GENERATOR = false;
+   private static final boolean ENABLE_BIPEDAL_GAIT_GENERATOR = SIM;
    public static RobotSide DEFAULT_DIAGNOSTIC_BRACING_SIDE = RobotSide.LEFT;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
