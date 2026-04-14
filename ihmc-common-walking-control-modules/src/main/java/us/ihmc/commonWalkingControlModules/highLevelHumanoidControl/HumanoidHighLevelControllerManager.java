@@ -352,7 +352,16 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
       {
          WalkingHighLevelHumanoidController walkingController = ((WalkingControllerState) stateMachine.getCurrentState()).getWalkingController();
          BalanceManager balanceManager = walkingController.getBalanceManager();
-         balanceManager.packFootstepAndCentroidalTrajectoryData(centerOfPressureDataHolderForEstimator);
+
+         try
+         {
+            balanceManager.packFootstepAndCentroidalTrajectoryData(centerOfPressureDataHolderForEstimator);
+         }
+         catch (Exception e)
+         {
+            // ignore for now...
+         }
+
          centerOfPressureDataHolderForEstimator.setSupportPolygon(balanceManager.getBipedSupportPolygons().getSupportPolygonInWorld());
       }
    }
