@@ -449,17 +449,11 @@ public class AvatarMultiThreadingFactory
       // Set up Controller Task
       ControllerTask controllerTask = new ControllerTask("Controller", controllerThread, masterThreadDt, masterFullRobotModel);
 
-
       // Add pre-task callback to run all externally-set pre-controller runnables
       controllerTask.addCallbackPreTask(() -> runAll(preControllerRunnables));
 
       // Add post-controller callback to interpolate desired setpoints
       controllerTask.addCallbackPostTask(lowLevelOutputProcessor::startDesiredsInterpolation);
-
-      // Add post-controller callback to update YoVariable server with controller registry
-      if (yoVariableServer != null)
-         controllerTask.addCallbackPostTask(() -> yoVariableServer.update(RealtimeThread.getCurrentMonotonicClockTime(),
-                                                                          controllerThread.getYoVariableRegistry()));
 
       // Add post-controller callback to update the thread frequency calculator and YoVariable (Hz)
       YoDouble controllerThreadUpdateRate = new YoDouble("controllerThreadUpdateRate", rootRegistry);
@@ -472,6 +466,12 @@ public class AvatarMultiThreadingFactory
 
       // Add pre-task callback to run all externally-set post-controller runnables
       controllerTask.addCallbackPostTask(() -> runAll(postControllerRunnables));
+
+      // Add post-controller callback to update YoVariable server with controller registry
+      if (yoVariableServer != null)
+         controllerTask.addCallbackPostTask(() -> yoVariableServer.update(RealtimeThread.getCurrentMonotonicClockTime(),
+                                                                          controllerThread.getYoVariableRegistry()));
+
 
       // Add controller startup callback to start spinning node
       controllerTask.addRunnableOnStartup(() ->
