@@ -467,9 +467,11 @@ public class AvatarMultiThreadingFactory
       // Add pre-task callback to run all externally-set post-controller runnables
       controllerTask.addCallbackPostTask(() -> runAll(postControllerRunnables));
 
-      // Run low-level output processor on the scheduler thread immediately after the controller's
-      // output is copied to master context, so ALLOP is always in sync with the current HHLCM tick.
-      controllerTask.addRunnableOnSchedulerThread(() -> lowLevelOutputProcessor.update(masterContext.getJointDesiredOutputList()));
+      // Run low-level output processor as a post-task on the controller thread, immediately after
+      // the controller computes tick N output. This keeps ALLOP in sync with HHLCM: the master
+      // thread's write() call only runs after barrierScheduler.run() returns, which requires the
+      // controller to be sleeping (i.e., this postTask has already completed), so there is no race.
+      controllerTask.addCallbackPostTask(() -> lowLevelOutputProcessor.update(controllerThread.getHumanoidRobotContextData().getJointDesiredOutputList()));
 
       // Add post-controller callback to update YoVariable server with controller registry
       if (yoVariableServer != null)
