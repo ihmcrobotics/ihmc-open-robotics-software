@@ -451,7 +451,7 @@ public class AvatarMultiThreadingFactory
 
       // Add post-controller callback to update YoVariable server with controller registry
       if (yoVariableServer != null)
-         controllerTask.addCallbackPostTask(() -> yoVariableServer.update(controllerThread.getHumanoidRobotContextData().getTimestamp(),
+         controllerTask.addCallbackPostTask(() -> yoVariableServer.update(RealtimeThread.getCurrentMonotonicClockTime(),
                                                                           controllerThread.getYoVariableRegistry()));
 
       // Add pre-task callback to run all externally-set pre-controller runnables
