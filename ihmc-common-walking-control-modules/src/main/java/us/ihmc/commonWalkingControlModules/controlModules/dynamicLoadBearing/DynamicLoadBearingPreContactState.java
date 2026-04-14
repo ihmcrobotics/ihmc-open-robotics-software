@@ -35,6 +35,8 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class DynamicLoadBearingPreContactState implements DynamicLoadBearingState
 {
+   public static final boolean SIM = false;
+
    private final MovingReferenceFrame controlFrame;
    private final RigidBodyPositionControlHelper positionControlHelper;
 
@@ -170,8 +172,8 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
    @Override
    public boolean isDone(double timeInState)
    {
-//      double epsilonCloseToWall = 0.012; // sim
-      double epsilonCloseToWall = 0.06; // real robot
+      double epsilonCloseToWall = SIM ? 0.01 : 0.05;
+
       distanceToPlane.set(bracingPlane.distance(positionControlHelper.getYoCurrentPosition()));
       boolean isCloseToWall = distanceToPlane.getValue() < epsilonCloseToWall;
 
@@ -180,7 +182,7 @@ public class DynamicLoadBearingPreContactState implements DynamicLoadBearingStat
       handSpeed.set(Math.abs(tempVector.dot(yoBracingNormal)));
       maxHandSpeed = Math.max(handSpeed.getValue(), maxHandSpeed);
 
-      boolean hasReducedHandSpeed = handSpeed.getValue() < 0.65 * maxHandSpeed;
+      boolean hasReducedHandSpeed = handSpeed.getValue() < 0.55 * maxHandSpeed;
 
 //      tempPoint.set(positionControlHelper.getYoCurrentPosition());
 //      transformFromWorld.transform(tempPoint);

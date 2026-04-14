@@ -54,9 +54,12 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static us.ihmc.commonWalkingControlModules.controlModules.dynamicLoadBearing.DynamicLoadBearingPreContactState.SIM;
 
 public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerThreadInterface
 {
@@ -64,6 +67,7 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
    private static final double DEFAULT_CAPTURE_POINT_ERROR_THRESHOLD_FOR_HAND_CONTACT_WALKING = 0.045;
    public static final double DEFAULT_CONTACT_SAFETY_FACTOR = 0.07;
    private static final boolean ENABLE_BIPEDAL_GAIT_GENERATOR = false;
+   public static RobotSide DEFAULT_DIAGNOSTIC_BRACING_SIDE = RobotSide.LEFT;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -116,6 +120,8 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
 
    // TODO convert to time-based, or somehow check if a hand is in recovery
    private final YoBoolean hasSentRecoveryMessage = new YoBoolean("hasSentRecoveryMessage", registry);
+   private long timeLastSent;
+   private int planCounter = 0;
 
    private final YoEnum<RobotSide> diagnosticBracingSide = new YoEnum<>("diagnosticBracingSide", registry, RobotSide.class, true);
 
@@ -204,7 +210,7 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
       }
 
       perceptionVisualizer = new YoPerceptionVisualizer(registry);
-      diagnosticBracingSide.set(RobotSide.LEFT);
+      diagnosticBracingSide.set(DEFAULT_DIAGNOSTIC_BRACING_SIDE);
    }
 
    private boolean hasPrintedException = false;
@@ -285,6 +291,13 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
          centerOfMassVelocity.changeFrame(ReferenceFrame.getWorldFrame());
       }
 
+      // for sim, clear initial error when transitioning to walking
+      if (SIM)
+      {
+         if (planCounter == 1 && System.currentTimeMillis() - timeLastSent > 1000)
+            hasSentRecoveryMessage.set(false);
+      }
+
       if (triggerFall.getValue() || (isFalling.getValue() && !hasSentRecoveryMessage.getValue() && isHandRecoveryContactEnabled.getValue()))
       {
          long startTime = System.nanoTime();
@@ -292,6 +305,8 @@ public class AvatarMultiContactGaitGeneratorThread implements AvatarControllerTh
          hasSentRecoveryMessage.set(true);
          triggerFall.set(false);
          sendHandContactMessage.set(false);
+         timeLastSent = System.currentTimeMillis();
+         planCounter++;
 
          desiredToCurrentCapturePoint.sub(currentCapturePoint, desiredCapturePoint);
 

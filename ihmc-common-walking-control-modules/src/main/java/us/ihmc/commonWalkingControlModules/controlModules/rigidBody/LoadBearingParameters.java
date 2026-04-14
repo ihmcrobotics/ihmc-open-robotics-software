@@ -15,6 +15,8 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.SupportStateParam
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+import static us.ihmc.commonWalkingControlModules.controlModules.dynamicLoadBearing.DynamicLoadBearingPreContactState.SIM;
+
 public class LoadBearingParameters
 {
    private static final double DEFAULT_COEFFICIENT_OF_FRICTION = 0.3;
@@ -74,7 +76,7 @@ public class LoadBearingParameters
       holdPositionDampingRatio = new DoubleParameter("zetaXYHandLoadBearingPosition", registry, 0.65);
 
       handLoadDuration = new DoubleParameter("handLoadDuration", registry, 0.8);
-      terminalHandSpeed = new DoubleParameter("terminalHandSpeed", registry, 0.9);
+      terminalHandSpeed = new DoubleParameter("terminalHandSpeed", registry, SIM ? 1.3 : 0.9);
 
       rhoWeightInitial = new DoubleParameter("rhoWeightInitial", registry, 1.5);
       preContactFeedbackGains = new DefaultYoPIDSE3Gains("PreContact", GainCoupling.XYZ, false, registry);
