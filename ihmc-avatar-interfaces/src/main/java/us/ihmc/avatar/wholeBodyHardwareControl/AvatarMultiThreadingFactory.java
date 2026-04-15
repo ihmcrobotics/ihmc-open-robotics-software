@@ -41,6 +41,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 import us.ihmc.robotics.stateMachine.core.StateTransition;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.time.ThreadTimer;
@@ -68,6 +69,7 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import static us.ihmc.avatar.wholeBodyHardwareControl.AvatarMultiThreadingManager.runAll;
 import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.*;
@@ -662,12 +664,29 @@ public class AvatarMultiThreadingFactory
                                                             if (hardwareCommunicationInterface.hasRobotFaulted())
                                                                controllerFactory.getRequestedControlStateEnum().set(DO_NOTHING_BEHAVIOR);
                                                          });
+
+         // Add fault listener to unservo robot quickly in the event of a fault
+         hardwareCommunicationInterface.addFaultListener(change ->
+                                                         {
+                                                            if (hardwareCommunicationInterface.hasRobotFaulted())
+                                                               lowLevelOutputProcessor.unservoRobotQuickly();
+                                                         });
+
+         // Unservo robot if Estopping
+         hardwareCommunicationInterface.addSoftEStopListener(change -> lowLevelOutputProcessor.unservoRobotQuickly());
+
          // Transition to DO_NOTHING when the robot is unservoed
          lowLevelOutputProcessor.addMasterGainListener(change ->
                                                        {
                                                           if (lowLevelOutputProcessor.getMasterGain().getValue() == 0.0)
                                                              controllerFactory.getRequestedControlStateEnum().set(DO_NOTHING_BEHAVIOR);
                                                        });
+
+         // Add a way to control desired high-level controller state from hardware communication interface module
+         hardwareCommunicationInterface.addRequestedHighLevelControlStateConsumer(highLevelControllerName -> controllerFactory.getRequestedControlStateEnum().set(highLevelControllerName));
+
+         // Listener so that hardware communication interface knows the current high-level controller state
+         controllerFactory.attachHighLevelStateChangedListener((from, to) -> hardwareCommunicationInterface.setCurrentHighLevelControllerState(to));
       }
 
       controllerFactory.setListenToHighLevelStatePackets(true);
