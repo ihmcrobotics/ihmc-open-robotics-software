@@ -164,6 +164,14 @@ public class RDXVRMiniGhostPreview
                                             rightFootContact ? Color.RED : color);
    }
 
+   public void updateOpacity(boolean leftFootContact, boolean rightFootContact)
+   {
+      miniGhostRobotGraphic.setOpacityForBody(miniGhostFullRobotModel.getFoot(RobotSide.LEFT).getName(),
+                                            leftFootContact ? 1.0 : opacity);
+      miniGhostRobotGraphic.setOpacityForBody(miniGhostFullRobotModel.getFoot(RobotSide.RIGHT).getName(),
+                                            rightFootContact ? 1.0 : opacity);
+   }
+
    public void setActive(boolean active)
    {
       miniGhostRobotGraphic.setActive(active);

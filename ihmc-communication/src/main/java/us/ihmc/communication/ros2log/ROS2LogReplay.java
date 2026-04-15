@@ -256,6 +256,12 @@ public class ROS2LogReplay
 
    public <T> void addReplayMutator(ROS2Topic<T> topic, ObjLongConsumer<T> mutator)
    {
-      topicManagersMap.get(topic.getName()).setMutator(mutator);
+      ReplayTopicManager<?> topicManager = topicManagersMap.get(topic.getName());
+      if (topicManager == null)
+      {
+         LogTools.warn("Could not set replay mutator. Topic not found in loaded log: {}", topic.getName());
+         return;
+      }
+      topicManager.setMutator(mutator);
    }
 }

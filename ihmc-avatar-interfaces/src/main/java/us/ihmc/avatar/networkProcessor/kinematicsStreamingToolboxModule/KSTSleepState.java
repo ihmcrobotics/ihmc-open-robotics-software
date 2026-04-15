@@ -4,6 +4,10 @@ import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematic
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
 import us.ihmc.robotics.stateMachine.core.State;
 
+/**
+ * Idle state for the streaming toolbox state machine.
+ * It keeps reinitializing the IK controller until it is ready, while dropping queued streaming inputs.
+ */
 public class KSTSleepState implements State
 {
    private final HumanoidKinematicsToolboxController ikController;

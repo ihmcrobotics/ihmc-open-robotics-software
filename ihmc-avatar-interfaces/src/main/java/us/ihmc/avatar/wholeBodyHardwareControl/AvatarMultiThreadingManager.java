@@ -180,15 +180,6 @@ public class AvatarMultiThreadingManager
       jvmStatisticsGenerator = new JVMStatisticsGenerator(yoVariableServer, jvmSchedulerFactory);
       jvmStatisticsGenerator.addVariablesToStatisticsGenerator(yoVariableServer);
 
-      // Add fault listener to unservo robot quickly in the event of a fault
-      hardwareCommunicationInterface.addFaultListener(change ->
-                                                      {
-                                                         if (hardwareCommunicationInterface.hasRobotFaulted())
-                                                            lowLevelOutputProcessor.unservoRobotQuickly();
-                                                      });
-
-      hardwareCommunicationInterface.addSoftEStopListener(change -> lowLevelOutputProcessor.unservoRobotQuickly());
-
       registry.addChild(threadScheduler.getYoRegistry());
       rootRegistry.addChild(registry);
    }

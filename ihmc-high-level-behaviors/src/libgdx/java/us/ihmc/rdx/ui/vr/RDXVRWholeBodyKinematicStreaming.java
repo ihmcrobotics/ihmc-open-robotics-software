@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.HighLevelStateMessage;
+import controller_msgs.msg.dds.ReinitializeStateEstimatorMessage;
 import ihmc_common_msgs.msg.dds.SelectionMatrix3DMessage;
 import ihmc_common_msgs.msg.dds.WeightMatrix3DMessage;
 import imgui.ImGui;
@@ -48,6 +49,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
@@ -101,6 +103,7 @@ public class RDXVRWholeBodyKinematicStreaming
 {
    public static final boolean ENABLE_YO_VARIABLE_TOOLBOX_SERVER = false;
    public static final double FRAME_AXIS_GRAPHICS_LENGTH = 0.2;
+   private static final double HEAD_HIDE_DISTANCE = 0.25;
 
    private final RDXVRMultiContact multiContact;
    private final RDXVRHandControl handControl;
@@ -119,6 +122,8 @@ public class RDXVRWholeBodyKinematicStreaming
    private final ImBoolean showMiniGhost = new ImBoolean(true);
    private final FullHumanoidRobotModel ghostFullRobotModel;
    private final OneDoFJointBasics[] ghostOneDoFJointsExcludingHands;
+   private boolean hideGhostHead = false;
+   private boolean hideRealHead = false;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final RetargetingParameters retargetingParameters;
    private final ImBoolean isKSTEnabled = new ImBoolean(false);
@@ -144,29 +149,34 @@ public class RDXVRWholeBodyKinematicStreaming
    private final ImGuiFrequencyPlot outputFrequencyPlot = new ImGuiFrequencyPlot();
    public long controllerLastPollTimeNanos;
 
-   private final FramePose3D tempFramePose = new FramePose3D();
-   private final MutableReferenceFrame headsetReferenceFrame;
    private final SideDependentList<MutableReferenceFrame> handDesiredControlFrames = new SideDependentList<>();
    private final SideDependentList<RDXReferenceFrameGraphic> controllerFrameGraphics = new SideDependentList<>();
    private final SideDependentList<Pose3D> ikControlFramePoses = new SideDependentList<>();
    private final SideDependentList<RDXReferenceFrameGraphic> handFrameGraphics = new SideDependentList<>();
    private final Map<String, MutableReferenceFrame> trackerReferenceFrames = new HashMap<>();
    private final Map<String, RDXReferenceFrameGraphic> trackerFrameGraphics = new HashMap<>();
+   private final FramePose3D tempFramePose = new FramePose3D();
+   private final MutableReferenceFrame headsetReferenceFrame;
    private final RDXReferenceFrameGraphic chestFrameGraphics = new RDXReferenceFrameGraphic(FRAME_AXIS_GRAPHICS_LENGTH);
    private final SideDependentList<RDXReferenceFrameGraphic> wristFrameGraphics = new SideDependentList<>();
    private final ImBoolean showReferenceFrameGraphics = new ImBoolean(false);
    private final Throttler messageThrottler = new Throttler();
 
+   private ReferenceFrame initialPelvisFrame;
+   private final RigidBodyTransform initialPelvisTransformToWorld = new RigidBodyTransform();
+   private ReferenceFrame initialChestFrame;
+   private final RigidBodyTransform initialChestTransformToWorld = new RigidBodyTransform();
    private final ImBoolean controlArmsOnly = new ImBoolean(false);
    private final ImBoolean lockPelvis = new ImBoolean(false);
    private final ImBoolean armScaling = new ImBoolean(false);
    private final ImBoolean comTracking = new ImBoolean(true);
    private final RDXVRMotionRetargeting motionRetargeting;
 
-   private ReferenceFrame initialPelvisFrame;
-   private final RigidBodyTransform initialPelvisTransformToWorld = new RigidBodyTransform();
-   private ReferenceFrame initialChestFrame;
-   private final RigidBodyTransform initialChestTransformToWorld = new RigidBodyTransform();
+   private final static double ALPHA_CONTROLLER = 0.9;
+   private final static double ALPHA_TRACKER = 0.2;
+   private final Map<VRTrackedSegmentType, FramePose3D> filteredDesiredPoses = new HashMap<>();
+   private final Map<VRTrackedSegmentType, FrameVector3D> filteredDesiredAngularVelocities = new HashMap<>();
+   private final Map<VRTrackedSegmentType, FrameVector3D> filteredDesiredLinearVelocities = new HashMap<>();
 
    private final ImBoolean replayMotion = new ImBoolean(false);
    private final ImBoolean pauseReplay = new ImBoolean(true);
@@ -473,11 +483,6 @@ public class RDXVRWholeBodyKinematicStreaming
    {
       for (VRTrackedSegmentType segmentType : CONTROLLER_TYPES)
       {
-         Vector3D positionWeight = retargetingParameters.getPositionWeight(segmentType);
-         Vector3D orientationWeight = retargetingParameters.getOrientationWeight(segmentType);
-         double linearRateLimitation = retargetingParameters.getLinearRateLimitation(segmentType);
-         double angularRateLimitation = retargetingParameters.getAngularRateLimitation(segmentType);
-
          FramePose3D desiredPose = new FramePose3D();
          FrameVector3D desiredAngularVelocity = new FrameVector3D();
          FrameVector3D desiredLinearVelocity = new FrameVector3D();
@@ -504,14 +509,12 @@ public class RDXVRWholeBodyKinematicStreaming
 
          if (!armScaling.get())
          {
-            KinematicsToolboxRigidBodyMessage message = createRigidBodyMessage(hand,
-                                                                               desiredPose,
-                                                                               desiredAngularVelocity,
-                                                                               desiredLinearVelocity,
-                                                                               positionWeight,
-                                                                               orientationWeight,
-                                                                               linearRateLimitation,
-                                                                               angularRateLimitation);
+            KinematicsToolboxRigidBodyMessage message = createFilteredRigidBodyMessage(segmentType,
+                                                                                        hand,
+                                                                                        desiredPose,
+                                                                                        desiredAngularVelocity,
+                                                                                        desiredLinearVelocity,
+                                                                                        ALPHA_CONTROLLER);
             message.getControlFramePositionInEndEffector().set(ikControlFramePoses.get(segmentType.getSegmentSide()).getPosition());
             message.getControlFrameOrientationInEndEffector().set(ikControlFramePoses.get(segmentType.getSegmentSide()).getOrientation());
             messageToPack.getInputs().add().set(message);
@@ -566,17 +569,16 @@ public class RDXVRWholeBodyKinematicStreaming
 
                if (controlledSegment != null)
                {
-                  KinematicsToolboxRigidBodyMessage message = createRigidBodyMessage(controlledSegment,
-                                                                                     desiredPose,
-                                                                                     desiredAngularVelocity,
-                                                                                     desiredLinearVelocity,
-                                                                                     retargetingParameters.getPositionWeight(segmentType),
-                                                                                     retargetingParameters.getOrientationWeight(segmentType),
-                                                                                     retargetingParameters.getLinearRateLimitation(segmentType),
-                                                                                     retargetingParameters.getAngularRateLimitation(segmentType));
+                  KinematicsToolboxRigidBodyMessage message = createFilteredRigidBodyMessage(segmentType,
+                                                                                              controlledSegment,
+                                                                                              desiredPose,
+                                                                                              desiredAngularVelocity,
+                                                                                              desiredLinearVelocity,
+                                                                                              ALPHA_TRACKER);
                   messageToPack.getInputs().add().set(message);
                }
             }
+
          }
       }
    }
@@ -601,7 +603,99 @@ public class RDXVRWholeBodyKinematicStreaming
                                                                                retargetingParameters.getAngularRateLimitation(HEAD));
             messageToPack.getInputs().add().set(message);
          }
+
+         if (getShowGhosts())
+         {
+            Point3D headsetInWorld = new Point3D(headset.getXForwardZUpHeadsetFrame().getTransformToRoot().getTranslation());
+            Point3D headInWorld = new Point3D(ghostFullRobotModel.getHead().getBodyFixedFrame().getTransformToWorldFrame().getTranslation());
+            double distance = headsetInWorld.distance(headInWorld);
+            hideGhostHead = distance < HEAD_HIDE_DISTANCE;
+            headInWorld = new Point3D(syncedRobot.getFullRobotModel().getHead().getBodyFixedFrame().getTransformToWorldFrame().getTranslation());
+            distance = headsetInWorld.distance(headInWorld);
+            hideRealHead = distance < HEAD_HIDE_DISTANCE;
+         }
       });
+   }
+
+   private KinematicsToolboxRigidBodyMessage createFilteredRigidBodyMessage(VRTrackedSegmentType segmentType,
+                                                                             RigidBodyBasics controlledSegment,
+                                                                             FramePose3D desiredPose,
+                                                                             FrameVector3D desiredAngularVelocity,
+                                                                             FrameVector3D desiredLinearVelocity,
+                                                                             double alpha)
+   {
+      FramePose3D filteredPose = filteredDesiredPoses.get(segmentType);
+      if (filteredPose == null)
+      {
+         filteredPose = new FramePose3D(desiredPose);
+         filteredDesiredPoses.put(segmentType, filteredPose);
+      }
+      else
+      {
+         filteredPose.getPosition().interpolate(filteredPose.getPosition(), desiredPose.getPosition(), alpha);
+         filteredPose.getOrientation().interpolate(filteredPose.getOrientation(), desiredPose.getOrientation(), alpha);
+      }
+      FrameVector3D filteredAngularVel = filteredDesiredAngularVelocities.get(segmentType);
+      if (filteredAngularVel == null)
+      {
+         filteredAngularVel = new FrameVector3D(desiredAngularVelocity);
+         filteredDesiredAngularVelocities.put(segmentType, filteredAngularVel);
+      }
+      else
+      {
+         filteredAngularVel.interpolate(filteredAngularVel, desiredAngularVelocity, alpha);
+      }
+      FrameVector3D filteredLinearVel = filteredDesiredLinearVelocities.get(segmentType);
+      if (filteredLinearVel == null)
+      {
+         filteredLinearVel = new FrameVector3D(desiredLinearVelocity);
+         filteredDesiredLinearVelocities.put(segmentType, filteredLinearVel);
+      }
+      else
+      {
+         filteredLinearVel.interpolate(filteredLinearVel, desiredLinearVelocity, alpha);
+      }
+
+      return createRigidBodyMessage(controlledSegment,
+                                    filteredPose,
+                                    filteredAngularVel,
+                                    filteredLinearVel,
+                                    retargetingParameters.getPositionWeight(segmentType),
+                                    retargetingParameters.getOrientationWeight(segmentType),
+                                    retargetingParameters.getLinearRateLimitation(segmentType),
+                                    retargetingParameters.getAngularRateLimitation(segmentType));
+   }
+
+   private KinematicsToolboxRigidBodyMessage createRigidBodyMessage(RigidBodyBasics segment,
+                                                                    FramePose3DReadOnly desiredPose,
+                                                                    Vector3DReadOnly angularVelocity,
+                                                                    Vector3DReadOnly linearVelocity,
+                                                                    Vector3D positionWeight,
+                                                                    Vector3D orientationWeight,
+                                                                    double linearMomentumLimit,
+                                                                    double angularMomentumLimit)
+   {
+      KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
+      message.setEndEffectorHashCode(segment.hashCode());
+
+      message.getDesiredOrientationInWorld().set(desiredPose.getOrientation());
+      message.getDesiredPositionInWorld().set(desiredPose.getPosition());
+
+      message.setHasDesiredAngularVelocity(angularVelocity != null);
+      message.setHasDesiredLinearVelocity(linearVelocity != null);
+
+      if (message.getHasDesiredAngularVelocity())
+         message.getDesiredAngularVelocityInWorld().set(angularVelocity);
+      if (message.getHasDesiredLinearVelocity())
+         message.getDesiredLinearVelocityInWorld().set(linearVelocity);
+
+      message.setLinearRateLimitation(linearMomentumLimit);
+      message.setAngularRateLimitation(angularMomentumLimit);
+
+      configureWeightAndSelectionMatrices(positionWeight, message.getLinearSelectionMatrix(), message.getLinearWeightMatrix());
+      configureWeightAndSelectionMatrices(orientationWeight, message.getAngularSelectionMatrix(), message.getAngularWeightMatrix());
+
+      return message;
    }
 
    private void retargetMotion(KinematicsStreamingToolboxInputMessage messageToPack)
@@ -688,38 +782,6 @@ public class RDXVRWholeBodyKinematicStreaming
       };
    }
 
-   private KinematicsToolboxRigidBodyMessage createRigidBodyMessage(RigidBodyBasics segment,
-                                                                    FramePose3DReadOnly desiredPose,
-                                                                    Vector3DReadOnly angularVelocity,
-                                                                    Vector3DReadOnly linearVelocity,
-                                                                    Vector3D positionWeight,
-                                                                    Vector3D orientationWeight,
-                                                                    double linearMomentumLimit,
-                                                                    double angularMomentumLimit)
-   {
-      KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
-      message.setEndEffectorHashCode(segment.hashCode());
-
-      message.getDesiredOrientationInWorld().set(desiredPose.getOrientation());
-      message.getDesiredPositionInWorld().set(desiredPose.getPosition());
-
-      message.setHasDesiredAngularVelocity(angularVelocity != null);
-      message.setHasDesiredLinearVelocity(linearVelocity != null);
-
-      if (message.getHasDesiredAngularVelocity())
-         message.getDesiredAngularVelocityInWorld().set(angularVelocity);
-      if (message.getHasDesiredLinearVelocity())
-         message.getDesiredLinearVelocityInWorld().set(linearVelocity);
-
-      message.setLinearRateLimitation(linearMomentumLimit);
-      message.setAngularRateLimitation(angularMomentumLimit);
-
-      configureWeightAndSelectionMatrices(positionWeight, message.getLinearSelectionMatrix(), message.getLinearWeightMatrix());
-      configureWeightAndSelectionMatrices(orientationWeight, message.getAngularSelectionMatrix(), message.getAngularWeightMatrix());
-
-      return message;
-   }
-
    private static void configureWeightAndSelectionMatrices(Vector3D weightVector,
                                                            SelectionMatrix3DMessage selectionMatrixMessage,
                                                            WeightMatrix3DMessage weightMatrixMessage)
@@ -781,6 +843,7 @@ public class RDXVRWholeBodyKinematicStreaming
                      double realQ = realJoint.getQ();
                      miniGhostReal.setJoint(i, realQ);
                   }
+
                }
                ghostFullRobotModel.getElevator().updateFramesRecursively();
             }
@@ -788,16 +851,37 @@ public class RDXVRWholeBodyKinematicStreaming
 
             if (miniGhostEnabled)
             {
-               miniGhostKST.updateColor(latestStatus.getLeftFootInContact(), latestStatus.getRightFootInContact());
-               miniGhostKST.updatePose();
-               miniGhostReal.updateRootOffset(ghostFullRobotModel.getPelvis().getBodyFixedFrame().getTransformToRoot(),
-                                              syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame().getTransformToRoot());
-               miniGhostReal.updatePose();
+               miniGhostKST.updateOpacity(latestStatus.getLeftFootInContact(), latestStatus.getRightFootInContact());
             }
+            if (ghostRobotGraphic.isActive())
+            {
+               String ghostHeadName = ghostFullRobotModel.getHead().getName();
+               if (hideGhostHead)
+                  ghostRobotGraphic.getMultiBody().getRigidBodiesToHide().add(ghostHeadName);
+               else
+                  ghostRobotGraphic.getMultiBody().getRigidBodiesToHide().remove(ghostHeadName);
+               ghostRobotGraphic.setOpacityForBody(ghostFullRobotModel.getFoot(RobotSide.LEFT).getName(),
+                                                 latestStatus.getLeftFootInContact() ? 1.0 : 0.3);
+               ghostRobotGraphic.setOpacityForBody(ghostFullRobotModel.getFoot(RobotSide.RIGHT).getName(),
+                                                 latestStatus.getRightFootInContact() ? 1.0 : 0.3);
+            }
+            String headName = syncedRobot.getFullRobotModel().getHead().getName();
+            if (hideRealHead)
+               robotVisualizer.getMultiBodyGraphic().getMultiBody().getRigidBodiesToHide().add(headName);
+            else
+               robotVisualizer.getMultiBodyGraphic().getMultiBody().getRigidBodiesToHide().remove(headName);
          }
 
+         if (miniGhostEnabled)
+         {
+            miniGhostKST.updatePose();
+            miniGhostReal.updateRootOffset(ghostFullRobotModel.getPelvis().getBodyFixedFrame().getTransformToRoot(),
+                    syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame().getTransformToRoot());
+            miniGhostReal.updatePose();
+         }
          if (ghostRobotGraphic.isActive())
             ghostRobotGraphic.update();
+
 
          if (recordRequest && recordingGraphics != null)
          {
@@ -911,6 +995,29 @@ public class RDXVRWholeBodyKinematicStreaming
       if (ImGui.button(labels.get("Reinitialize Toolbox Configuration")))
       {
          reinitializeToolboxRobotConfiguration();
+      }
+      if (ImGui.button(labels.get("Reinitialize State Estimator")))
+      {
+         reinitializeStateEstimator();
+      }
+      if (ImGui.button(labels.get("Stand Prep")))
+      {
+         sendStandPrepRequest();
+      }
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Freeze")))
+      {
+         sendFreezeRequest();
+      }
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("RL Transition")))
+      {
+         sendRLStateTransitionRequest(true);
+      }
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Exit RL")))
+      {
+         sendRLStateTransitionRequest(false);
       }
       if (ImGui.checkbox(labels.get("Demonstration Mode"), demonstrationMode))
       {
@@ -1030,6 +1137,27 @@ public class RDXVRWholeBodyKinematicStreaming
          highLevelStateMessage.setHighLevelControllerName(HighLevelControllerName.EXIT_RL.toByte());
       }
       ros2ControllerHelper.publishToController(highLevelStateMessage);
+   }
+
+   private void sendStandPrepRequest()
+   {
+      HighLevelStateMessage highLevelStateMessage = new HighLevelStateMessage();
+      highLevelStateMessage.setHighLevelControllerName(HighLevelControllerName.STAND_PREP_STATE.toByte());
+      ros2ControllerHelper.publishToController(highLevelStateMessage);
+   }
+
+   private void sendFreezeRequest()
+   {
+      HighLevelStateMessage highLevelStateMessage = new HighLevelStateMessage();
+      highLevelStateMessage.setHighLevelControllerName(HighLevelControllerName.FREEZE_STATE.toByte());
+      ros2ControllerHelper.publishToController(highLevelStateMessage);
+   }
+
+   private void reinitializeStateEstimator()
+   {
+      ReinitializeStateEstimatorMessage message = new ReinitializeStateEstimatorMessage();
+      message.setRequestReinitialize(true);
+      ros2ControllerHelper.publishToController(message);
    }
 
    private void reinitializeToolboxRobotConfiguration()

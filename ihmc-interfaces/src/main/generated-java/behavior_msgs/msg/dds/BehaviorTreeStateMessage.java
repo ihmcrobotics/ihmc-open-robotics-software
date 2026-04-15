@@ -41,6 +41,7 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
    public static final byte PELVIS_ACTION = (byte) 20;
    public static final byte WAIT_ACTION = (byte) 21;
    public static final byte LEG_ACTION = (byte) 22;
+   public static final byte MIMIC_ACTION = (byte) 23;
    /**
             * Monotonically increasing message ID that matches the CRDTInfo update number
             */
@@ -90,6 +91,7 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.PelvisActionStateMessage>  pelvis_actions_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.WaitActionStateMessage>  wait_actions_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.LegActionStateMessage>  leg_actions_;
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.MimicActionStateMessage>  mimic_actions_;
 
    public BehaviorTreeStateMessage()
    {
@@ -122,6 +124,7 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       pelvis_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.PelvisActionStateMessage> (120, new behavior_msgs.msg.dds.PelvisActionStateMessagePubSubType());
       wait_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.WaitActionStateMessage> (120, new behavior_msgs.msg.dds.WaitActionStateMessagePubSubType());
       leg_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.LegActionStateMessage> (120, new behavior_msgs.msg.dds.LegActionStateMessagePubSubType());
+      mimic_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.MimicActionStateMessage> (120, new behavior_msgs.msg.dds.MimicActionStateMessagePubSubType());
 
    }
 
@@ -164,6 +167,7 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       pelvis_actions_.set(other.pelvis_actions_);
       wait_actions_.set(other.wait_actions_);
       leg_actions_.set(other.leg_actions_);
+      mimic_actions_.set(other.mimic_actions_);
    }
 
    /**
@@ -373,6 +377,12 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
    }
 
 
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.MimicActionStateMessage>  getMimicActions()
+   {
+      return mimic_actions_;
+   }
+
+
    public static Supplier<BehaviorTreeStateMessagePubSubType> getPubSubType()
    {
       return BehaviorTreeStateMessagePubSubType::new;
@@ -561,6 +571,13 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
          {  if (!this.leg_actions_.get(i).epsilonEquals(other.leg_actions_.get(i), epsilon)) return false; }
       }
 
+      if (this.mimic_actions_.size() != other.mimic_actions_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.mimic_actions_.size(); i++)
+         {  if (!this.mimic_actions_.get(i).epsilonEquals(other.mimic_actions_.get(i), epsilon)) return false; }
+      }
+
 
       return true;
    }
@@ -605,6 +622,7 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       if (!this.pelvis_actions_.equals(otherMyClass.pelvis_actions_)) return false;
       if (!this.wait_actions_.equals(otherMyClass.wait_actions_)) return false;
       if (!this.leg_actions_.equals(otherMyClass.leg_actions_)) return false;
+      if (!this.mimic_actions_.equals(otherMyClass.mimic_actions_)) return false;
 
       return true;
    }
@@ -672,7 +690,9 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       builder.append("wait_actions=");
       builder.append(this.wait_actions_);      builder.append(", ");
       builder.append("leg_actions=");
-      builder.append(this.leg_actions_);
+      builder.append(this.leg_actions_);      builder.append(", ");
+      builder.append("mimic_actions=");
+      builder.append(this.mimic_actions_);
       builder.append("}");
       return builder.toString();
    }

@@ -16,6 +16,11 @@ module behavior_msgs
          * Parent definition fields
          */
         behavior_msgs::msg::dds::BehaviorTreeNodeDefinitionMessage definition;
+        /**
+         * Randomized Go-To action controls
+         */
+        boolean randomize_go_to_action;
+        long number_of_randomizations;
       };
     };
   };

@@ -140,6 +140,18 @@ public class RDXRigidBody implements RigidBodyBasics
       }
    }
 
+   public void setOpacityForBody(String name, double opacity)
+   {
+      for (RDXRigidBody rigidBody : subtreeIterable())
+      {
+         if (rigidBody.getName().equals(name))
+         {
+            rigidBody.setOpacity((float) opacity);
+            return;
+         }
+      }
+   }
+
    public void setOpacityRecursive(float opacity)
    {
       for (RDXRigidBody rigidBody : subtreeIterable())

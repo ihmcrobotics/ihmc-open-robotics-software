@@ -13,11 +13,16 @@ public class RDXVRSteppingTracker
 {
     private static final double STEP_THRESHOLD = 0.02;
     private static final double LIFT_THRESHOLD = 0.02;
+   private static final double LANDING_THRESHOLD = 0.04;
     private static final double STABILITY_THRESHOLD = 0.01;
     private static final int STABILITY_ITERATIONS = 3;
 
-   private static final double LANDING_HEIGHT_THRESHOLD = 0.1;
-   private static final double LANDING_BLEND_START_HEIGHT = 0.25;
+   private static final double CLOSE_TO_GROUND_HEIGHT_THRESHOLD = 0.1;
+   private static final double CLOSE_TO_GROUND_BLEND_START_HEIGHT = 0.25;
+
+   private static final double ERROR_RECOVERY_HEIGHT_TOLERANCE = 0.05; // 5 cm
+   private static final int ERROR_RECOVERY_STABILITY_ITERATIONS = 50;
+   private final SideDependentList<Integer> errorRecoveryStableCounts = new SideDependentList<>();
 
     private final SideDependentList<Boolean> isUserStepping = new SideDependentList<>();
     private final SideDependentList<RigidBodyTransform> initialTrackersTransform = new SideDependentList<>();
@@ -25,6 +30,7 @@ public class RDXVRSteppingTracker
     private final SideDependentList<Integer> stableIterationCounts = new SideDependentList<>();
     private final SideDependentList<Notification> landedFoot = new SideDependentList<>();
    private final SideDependentList<Double> currentFootHeight = new SideDependentList<>();
+   private final SideDependentList<Boolean> isSwinging = new SideDependentList<>();
 
     public RDXVRSteppingTracker()
     {
@@ -40,6 +46,8 @@ public class RDXVRSteppingTracker
             previousTrackersTransform.put(side, new RigidBodyTransform());
             initialTrackersTransform.put(side, null);
             landedFoot.put(side, new Notification());
+            errorRecoveryStableCounts.put(side, 0);
+            isSwinging.put(side, false);
         }
     }
 
@@ -67,7 +75,7 @@ public class RDXVRSteppingTracker
                     && translationTracker.getZ() >= LIFT_THRESHOLD)
             {
                 isUserStepping.put(side, true);
-                LogTools.info("User stepping with {}", side);
+                LogTools.debug("User stepping with {}", side);
                 // Avoid false stepping detection when already in swing with one side
                 isUserStepping.put(side.getOppositeSide(), false);
             }
@@ -92,7 +100,7 @@ public class RDXVRSteppingTracker
                     if (stableCount >= STABILITY_ITERATIONS)
                     {
                         resetSide(side, currentTrackerTransform);
-                        LogTools.info("User completed stepping with {}", side);
+                        LogTools.debug("User completed stepping with {}", side);
                         landedFoot.get(side).set();
                     }
                 }
@@ -104,6 +112,43 @@ public class RDXVRSteppingTracker
                 previousTrackersTransform.put(side, new RigidBodyTransform(currentTrackerTransform));
             }
         }
+
+       // -------------------------------
+       // Error recovery / re-sync logic
+       // -------------------------------
+       // If the tracker height is close to the initial height (+/- 5 cm)
+       // and not moving much overall, count stable iterations and then reset.
+       if (initialTrackerTransform != null)
+       {
+          double heightError = Math.abs(currentTrackerTransform.getTranslationZ() - initialTrackerTransform.getTranslationZ());
+
+          // Compare full 3D translation between current and previous poses
+          Vector3D translationFromPreviousPosition = new Vector3D();
+          translationFromPreviousPosition.sub(currentTrackerTransform.getTranslation(),
+                                              previousTrackersTransform.get(side).getTranslation());
+
+          if (heightError <= ERROR_RECOVERY_HEIGHT_TOLERANCE
+              && translationFromPreviousPosition.norm() <= STABILITY_THRESHOLD)
+          {
+             int count = errorRecoveryStableCounts.get(side);
+             count++;
+             errorRecoveryStableCounts.put(side, count);
+
+             if (count >= ERROR_RECOVERY_STABILITY_ITERATIONS)
+             {
+                // Re-sync this tracker as if this pose were the new \"standing\" pose
+                resetSide(side, currentTrackerTransform);
+                LogTools.debug("Error recovery reset for {}", side);
+                // Also clear the error-recovery counter
+                errorRecoveryStableCounts.put(side, 0);
+             }
+          }
+          else
+          {
+             errorRecoveryStableCounts.put(side, 0);
+          }
+       }
+       // -------------------------------
     }
 
     private void resetSide(RobotSide side, RigidBodyTransform currentTrackerTransform)
@@ -120,21 +165,38 @@ public class RDXVRSteppingTracker
 
    public boolean isFootLanding(RobotSide side)
    {
+      // landing = not in contact, was swinging at least once, and now below 5 cm
+      if (!isUserStepping.get(side))
+         return false;
+
+      if (!isSwinging.get(side))
+         return false;
+
+      return currentFootHeight.get(side) <= LANDING_THRESHOLD;
+   }
+
+   public void setIsSwinging(RobotSide side, boolean value)
+   {
+      isSwinging.put(side, value);
+   }
+
+   public boolean isFootCloseToGround(RobotSide side)
+   {
       if (!isUserStepping.get(side))
          return false;
 
       double height = currentFootHeight.get(side);
-      return height <= LANDING_BLEND_START_HEIGHT;
+      return height <= CLOSE_TO_GROUND_BLEND_START_HEIGHT;
    }
 
-   public double getLandingBlendFactor(RobotSide side)
+   public double getCloseToGroundBlendFactor(RobotSide side)
    {
-      if (!isFootLanding(side))
+      if (!isFootCloseToGround(side))
          return 0.0;
 
       double height = currentFootHeight.get(side);
-      double start = LANDING_BLEND_START_HEIGHT;
-      double end = LANDING_HEIGHT_THRESHOLD;
+      double start = CLOSE_TO_GROUND_BLEND_START_HEIGHT;
+      double end = CLOSE_TO_GROUND_HEIGHT_THRESHOLD;
 
       if (height >= start)
          return 0.0;

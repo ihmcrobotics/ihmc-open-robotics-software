@@ -11,6 +11,9 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 
 import java.util.Arrays;
 
+/**
+ * Mutable view of toolbox output state (root joint + 1-DoF joints, optional velocity/acceleration).
+ */
 public interface KSTOutputDataBasics extends KSTOutputDataReadOnly
 {
    @Override

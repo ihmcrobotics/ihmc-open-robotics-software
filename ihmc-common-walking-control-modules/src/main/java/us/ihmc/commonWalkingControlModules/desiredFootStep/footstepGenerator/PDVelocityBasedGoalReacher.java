@@ -45,7 +45,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
    private static final double GOAL_POSITION_Z_OFFSET_FOR_VISUALIZATION = 0.1;
 
    // TODO extract these in to a parameter file.
-   private static final double DEFAULT_MAX_RADIAL_ACCELERATION = 0.25;
+   private static final double DEFAULT_MAX_RADIAL_ACCELERATION = 1.0;
    private static final double DEFAULT_MAX_HEADING_RATE = Math.PI / 2.0;
 
    private static final double DEFAULT_MAX_FORWARD_SPEED = 0.5;

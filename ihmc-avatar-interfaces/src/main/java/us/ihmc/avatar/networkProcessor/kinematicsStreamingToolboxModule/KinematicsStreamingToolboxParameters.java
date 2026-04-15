@@ -11,7 +11,6 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.commons.UnitConversions;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
@@ -23,6 +22,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Configurable parameter set for {@link KinematicsStreamingToolboxModule} and its controller pipeline.
+ * Includes timing, solver weights, filtering, output shaping, and default joint/task-space behavior.
+ */
 public class KinematicsStreamingToolboxParameters
 {
    public enum InputStateEstimatorType
@@ -81,10 +84,10 @@ public class KinematicsStreamingToolboxParameters
    protected double centerOfMassHoldWeight;
    protected double centerOfMassTrackingWeight;
    /**
-    * Period at which the kinematics solution is published to the controller.
-    * The faster, the better, but it also increases the communication load.
+    * Number of toolbox update ticks between two published solutions.
+    * For instance, 10 means the solution is published once every 10 toolbox updates.
     */
-   protected double publishingSolutionPeriod;
+   protected int publishSolutionEveryNTicks;
 
    /**
     * Default weight for holding the arms at the robot initial configuration when no arm message is received.
@@ -315,7 +318,7 @@ public class KinematicsStreamingToolboxParameters
       centerOfMassSafeMargin = 0.01;
       centerOfMassHoldWeight = 0.001;
       centerOfMassTrackingWeight = 0.001;
-      publishingSolutionPeriod = UnitConversions.hertzToSeconds(60.0);
+      publishSolutionEveryNTicks = 6;
 
       lockPelvisWeight = 1000.0;
       lockChestWeight = 1000.0;
@@ -427,9 +430,9 @@ public class KinematicsStreamingToolboxParameters
       return centerOfMassTrackingWeight;
    }
 
-   public double getPublishingSolutionPeriod()
+   public int getPublishSolutionEveryNTicks()
    {
-      return publishingSolutionPeriod;
+      return publishSolutionEveryNTicks;
    }
 
    public double getHoldArmWeight()
@@ -752,9 +755,9 @@ public class KinematicsStreamingToolboxParameters
       this.centerOfMassHoldWeight = centerOfMassHoldWeight;
    }
 
-   public void setPublishingSolutionPeriod(double publishingSolutionPeriod)
+   public void setPublishSolutionEveryNTicks(int publishSolutionEveryNTicks)
    {
-      this.publishingSolutionPeriod = publishingSolutionPeriod;
+      this.publishSolutionEveryNTicks = Math.max(1, publishSolutionEveryNTicks);
    }
 
    public void setHoldArmWeight(double holdArmWeight)

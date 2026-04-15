@@ -19,6 +19,9 @@ import us.ihmc.robotModels.RigidBodyHashCodeResolver;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.sensorProcessing.frames.ReferenceFrames;
 
+/**
+ * Converts KST DDS messages into controller commands while resolving rigid-body, joint, and frame hash IDs.
+ */
 public class KinematicsStreamingToolboxCommandConverter implements CommandConversionInterface
 {
    private final RigidBodyHashCodeResolver desiredRigidBodyHashCodeResolver;
