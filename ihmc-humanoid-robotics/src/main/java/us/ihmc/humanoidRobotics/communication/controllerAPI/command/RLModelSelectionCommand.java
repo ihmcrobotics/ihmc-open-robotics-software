@@ -1,15 +1,15 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import controller_msgs.msg.dds.RLPolicyCommand;
+import controller_msgs.msg.dds.RLModelSelectionMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 
-public class RLPolicyCommandCommand implements Command<RLPolicyCommandCommand, RLPolicyCommand>
+public class RLModelSelectionCommand implements Command<RLModelSelectionCommand, RLModelSelectionMessage>
 {
    private byte desiredModel;
    private boolean executeDesiredModel;
 
    @Override
-   public void set(RLPolicyCommandCommand other)
+   public void set(RLModelSelectionCommand other)
    {
       clear();
       desiredModel = other.desiredModel;
@@ -17,7 +17,7 @@ public class RLPolicyCommandCommand implements Command<RLPolicyCommandCommand, R
    }
 
    @Override
-   public void setFromMessage(RLPolicyCommand message)
+   public void setFromMessage(RLModelSelectionMessage message)
    {
       clear();
       desiredModel = message.getDesiredModel();
@@ -32,9 +32,9 @@ public class RLPolicyCommandCommand implements Command<RLPolicyCommandCommand, R
    }
 
    @Override
-   public Class<RLPolicyCommand> getMessageClass()
+   public Class<RLModelSelectionMessage> getMessageClass()
    {
-      return RLPolicyCommand.class;
+      return RLModelSelectionMessage.class;
    }
 
    @Override

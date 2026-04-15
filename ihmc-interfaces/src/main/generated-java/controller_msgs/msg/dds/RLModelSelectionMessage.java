@@ -7,9 +7,9 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message represents the command to switch to a desired policy
-       */
-public class RLPolicyCommand extends Packet<RLPolicyCommand> implements Settable<RLPolicyCommand>, EpsilonComparable<RLPolicyCommand>
+      * This message is used to select which RL model the controller should run
+      */
+public class RLModelSelectionMessage extends Packet<RLModelSelectionMessage> implements Settable<RLModelSelectionMessage>, EpsilonComparable<RLModelSelectionMessage>
 {
    /**
             * Desired model to be used, wrt array position
@@ -17,17 +17,17 @@ public class RLPolicyCommand extends Packet<RLPolicyCommand> implements Settable
    public byte desired_model_;
    public boolean execute_desired_model_;
 
-   public RLPolicyCommand()
+   public RLModelSelectionMessage()
    {
    }
 
-   public RLPolicyCommand(RLPolicyCommand other)
+   public RLModelSelectionMessage(RLModelSelectionMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(RLPolicyCommand other)
+   public void set(RLModelSelectionMessage other)
    {
       desired_model_ = other.desired_model_;
 
@@ -60,19 +60,19 @@ public class RLPolicyCommand extends Packet<RLPolicyCommand> implements Settable
    }
 
 
-   public static Supplier<RLPolicyCommandPubSubType> getPubSubType()
+   public static Supplier<RLModelSelectionMessagePubSubType> getPubSubType()
    {
-      return RLPolicyCommandPubSubType::new;
+      return RLModelSelectionMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return RLPolicyCommandPubSubType::new;
+      return RLModelSelectionMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(RLPolicyCommand other, double epsilon)
+   public boolean epsilonEquals(RLModelSelectionMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -90,9 +90,9 @@ public class RLPolicyCommand extends Packet<RLPolicyCommand> implements Settable
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof RLPolicyCommand)) return false;
+      if(!(other instanceof RLModelSelectionMessage)) return false;
 
-      RLPolicyCommand otherMyClass = (RLPolicyCommand) other;
+      RLModelSelectionMessage otherMyClass = (RLModelSelectionMessage) other;
 
       if(this.desired_model_ != otherMyClass.desired_model_) return false;
 
@@ -107,7 +107,7 @@ public class RLPolicyCommand extends Packet<RLPolicyCommand> implements Settable
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("RLPolicyCommand {");
+      builder.append("RLModelSelectionMessage {");
       builder.append("desired_model=");
       builder.append(this.desired_model_);      builder.append(", ");
       builder.append("execute_desired_model=");

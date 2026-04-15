@@ -96,7 +96,7 @@ public class ControllerAPIDefinition
 
       /** Commands supported by the RL controller, not in this repo*/
       commands.add(Point2DCommand.class);
-      commands.add(RLPolicyCommandCommand.class);
+      commands.add(RLModelSelectionCommand.class);
 
       controllerSupportedCommands = new ArrayList<>(commands);
 

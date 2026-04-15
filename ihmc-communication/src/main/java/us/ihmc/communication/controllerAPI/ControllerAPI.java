@@ -81,7 +81,7 @@ public final class ControllerAPI
 
       // Commands supported by the RL controller, not in this repo
       inputMessageClasses.add(Point2DMessage.class);
-      inputMessageClasses.add(RLPolicyCommand.class);
+      inputMessageClasses.add(RLModelSelectionMessage.class);
 
       // Toolbox management
       inputMessageClasses.add(ToolboxStateMessage.class);
