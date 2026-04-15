@@ -32,7 +32,10 @@ import java.util.LinkedHashMap;
  */
 public class AvatarLowLevelOutputProcessor
 {
+   private static final boolean INCLUDE_INTERPOLATION_VARS = true;
+
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+   private final YoRegistry interpolationRegistry = new YoRegistry(getClass().getSimpleName());
 
    private static final double DEFAULT_SERVO_DURATION = 2.0; // In units of seconds
    private static final double LOW_MASTER_GAIN = 0.0;
@@ -51,10 +54,10 @@ public class AvatarLowLevelOutputProcessor
    private final YoDouble servoDuration = new YoDouble("servoDuration", registry);
    private final YoDouble servoTime = new YoDouble("servoTime", registry);
    private final YoDouble masterGain = new YoDouble("masterGain", registry);
-   private final YoBoolean interpolateDesireds = new YoBoolean("interpolateDesireds", registry);
-   private final YoDouble interpolateDuration = new YoDouble("interpolateDuration", registry);
-   private final YoDouble interpolationStartTime = new YoDouble("interpolationTime", registry);
-   private final YoDouble interpolationRatio = new YoDouble("interpolationRatio", registry);
+   private final YoBoolean interpolateDesireds = new YoBoolean("interpolateDesireds", interpolationRegistry);
+   private final YoDouble interpolateDuration = new YoDouble("interpolateDuration", interpolationRegistry);
+   private final YoDouble interpolationStartTime = new YoDouble("interpolationTime", interpolationRegistry);
+   private final YoDouble interpolationRatio = new YoDouble("interpolationRatio", interpolationRegistry);
    private final YoBoolean offsetsDesiredsByFilters = new YoBoolean("offsetsDesiredsByFilters", registry);
 
    private final YoDouble timeFromEstimator = new YoDouble("timeFromEstimator", registry);
@@ -93,7 +96,7 @@ public class AvatarLowLevelOutputProcessor
       this.yoTime = yoTime;
 
       unprocessedDesireds = new YoLowLevelOneDoFJointDesiredDataHolder(robotName, controlledJoints, registry);
-      previousDesireds = new YoLowLevelOneDoFJointDesiredDataHolder(robotName + "Previous", controlledJoints, registry);
+      previousDesireds = new YoLowLevelOneDoFJointDesiredDataHolder(robotName + "Previous", controlledJoints, interpolationRegistry);
       processedDesireds = new YoLowLevelOneDoFJointDesiredDataHolder(robotName + "Processed", controlledJoints, registry);
 
       jointControlBlenders = new JointControlBlender[controlledJoints.length];
@@ -150,6 +153,8 @@ public class AvatarLowLevelOutputProcessor
                                       });
 
       parentRegistry.addChild(registry);
+      if (INCLUDE_INTERPOLATION_VARS)
+         parentRegistry.addChild(interpolationRegistry);
    }
 
    public void update(JointDesiredOutputListReadOnly unprocessedDesireds)
