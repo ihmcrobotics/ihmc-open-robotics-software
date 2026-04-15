@@ -5,7 +5,7 @@ import us.ihmc.communication.controllerAPI.command.Command;
 
 public class RLModelSelectionCommand implements Command<RLModelSelectionCommand, RLModelSelectionMessage>
 {
-   private byte desiredModel;
+   private int desiredModel;
    private boolean executeDesiredModel;
 
    @Override
@@ -49,7 +49,7 @@ public class RLModelSelectionCommand implements Command<RLModelSelectionCommand,
       return 0;
    }
 
-   public byte getDesiredModel()
+   public int getDesiredModel()
    {
       return desiredModel;
    }
