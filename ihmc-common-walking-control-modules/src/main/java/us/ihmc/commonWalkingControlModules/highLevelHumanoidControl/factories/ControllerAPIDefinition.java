@@ -94,8 +94,9 @@ public class ControllerAPIDefinition
       /** Command supported by the joint-space controller {@link JointspacePositionControllerState} */
       commands.add(WholeBodyJointspaceTrajectoryCommand.class);
 
-      /** Command supported by the RL controller, not in this repo*/
+      /** Commands supported by the RL controller, not in this repo*/
       commands.add(Point2DCommand.class);
+      commands.add(RLPolicyCommandCommand.class);
 
       controllerSupportedCommands = new ArrayList<>(commands);
 
