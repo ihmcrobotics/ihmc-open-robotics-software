@@ -658,23 +658,6 @@ public class AvatarMultiThreadingFactory
                                                                                controllerFactory,
                                                                                !highLevelControllerParameters.automaticallyTransitionToWalkingWhenReady()));
 
-         // Transition to DO_NOTHING in the event of a fault
-         hardwareCommunicationInterface.addFaultListener(change ->
-                                                         {
-                                                            if (hardwareCommunicationInterface.hasRobotFaulted())
-                                                               controllerFactory.getRequestedControlStateEnum().set(DO_NOTHING_BEHAVIOR);
-                                                         });
-
-         // Add fault listener to unservo robot quickly in the event of a fault
-         hardwareCommunicationInterface.addFaultListener(change ->
-                                                         {
-                                                            if (hardwareCommunicationInterface.hasRobotFaulted())
-                                                               lowLevelOutputProcessor.unservoRobotQuickly();
-                                                         });
-
-         // Unservo robot if Estopping
-         hardwareCommunicationInterface.addSoftEStopListener(change -> lowLevelOutputProcessor.unservoRobotQuickly());
-
          // Transition to DO_NOTHING when the robot is unservoed
          lowLevelOutputProcessor.addMasterGainListener(change ->
                                                        {
