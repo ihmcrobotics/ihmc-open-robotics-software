@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import controller_msgs.msg.dds.GoHomeMessage;
 import controller_msgs.msg.dds.HighLevelStateMessage;
 import controller_msgs.msg.dds.ReinitializeStateEstimatorMessage;
 import ihmc_common_msgs.msg.dds.SelectionMatrix3DMessage;
@@ -1019,6 +1020,20 @@ public class RDXVRWholeBodyKinematicStreaming
       {
          sendRLStateTransitionRequest(false);
       }
+      if (ImGui.button(labels.get("RL Control")))
+      {
+         sendRLControlRequest();
+      }
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Walking")))
+      {
+         sendWalkingRequest();
+      }
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("StandPrep Transition")))
+      {
+         sendStandPrepTransitionRequest();
+      }
       if (ImGui.checkbox(labels.get("Demonstration Mode"), demonstrationMode))
       {
          demonstrationTaskIndex = 0;
@@ -1105,6 +1120,7 @@ public class RDXVRWholeBodyKinematicStreaming
                miniGhostReal.setActive(true);
             }
             performingDemonstration.set(-1);
+            sendRLControlRequest();
          }
 //         sendRLStateTransitionRequest(enabled);
       }
@@ -1139,6 +1155,27 @@ public class RDXVRWholeBodyKinematicStreaming
       ros2ControllerHelper.publishToController(highLevelStateMessage);
    }
 
+   private void sendRLControlRequest()
+   {
+      HighLevelStateMessage highLevelStateMessage = new HighLevelStateMessage();
+      highLevelStateMessage.setHighLevelControllerName(HighLevelControllerName.RL_CONTROL.toByte());
+      ros2ControllerHelper.publishToController(highLevelStateMessage);
+   }
+
+   private void sendWalkingRequest()
+   {
+      HighLevelStateMessage highLevelStateMessage = new HighLevelStateMessage();
+      highLevelStateMessage.setHighLevelControllerName(HighLevelControllerName.WALKING.toByte());
+      ros2ControllerHelper.publishToController(highLevelStateMessage);
+   }
+
+   private void sendStandPrepTransitionRequest()
+   {
+      HighLevelStateMessage highLevelStateMessage = new HighLevelStateMessage();
+      highLevelStateMessage.setHighLevelControllerName(HighLevelControllerName.STAND_TRANSITION_STATE.toByte());
+      ros2ControllerHelper.publishToController(highLevelStateMessage);
+   }
+
    private void sendStandPrepRequest()
    {
       HighLevelStateMessage highLevelStateMessage = new HighLevelStateMessage();
@@ -1151,6 +1188,35 @@ public class RDXVRWholeBodyKinematicStreaming
       HighLevelStateMessage highLevelStateMessage = new HighLevelStateMessage();
       highLevelStateMessage.setHighLevelControllerName(HighLevelControllerName.FREEZE_STATE.toByte());
       ros2ControllerHelper.publishToController(highLevelStateMessage);
+   }
+
+   private void sendHomeRequest()
+   {
+      double trajectoryTime = 3.0;
+
+      GoHomeMessage homeLeftArm = new GoHomeMessage();
+      homeLeftArm.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_ARM);
+      homeLeftArm.setRobotSide(GoHomeMessage.ROBOT_SIDE_LEFT);
+      homeLeftArm.setTrajectoryTime(trajectoryTime);
+      ros2ControllerHelper.publishToController(homeLeftArm);
+
+      GoHomeMessage homeRightArm = new GoHomeMessage();
+      homeRightArm.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_ARM);
+      homeRightArm.setRobotSide(GoHomeMessage.ROBOT_SIDE_RIGHT);
+      homeRightArm.setTrajectoryTime(trajectoryTime);
+      ros2ControllerHelper.publishToController(homeRightArm);
+
+      GoHomeMessage homePelvis = new GoHomeMessage();
+      homePelvis.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_PELVIS);
+      homePelvis.setTrajectoryTime(trajectoryTime);
+      ros2ControllerHelper.publishToController(homePelvis);
+
+      GoHomeMessage homeChest = new GoHomeMessage();
+      homeChest.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_CHEST);
+      homeChest.setTrajectoryTime(trajectoryTime);
+
+      RDXBaseUI.pushNotification("Commanding home pose...");
+      ros2ControllerHelper.publishToController(homeChest);
    }
 
    private void reinitializeStateEstimator()
