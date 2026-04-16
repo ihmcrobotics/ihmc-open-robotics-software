@@ -32,10 +32,10 @@ import java.util.LinkedHashMap;
  */
 public class AvatarLowLevelOutputProcessor
 {
-   private static final boolean INCLUDE_INTERPOLATION_VARS = true;
+   private static final boolean INCLUDE_INTERPOLATION_VARS = false;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-   private final YoRegistry interpolationRegistry = new YoRegistry(getClass().getSimpleName());
+   private final YoRegistry interpolationRegistry = new YoRegistry(getClass().getSimpleName() + "_interpolation");
 
    private static final double DEFAULT_SERVO_DURATION = 2.0; // In units of seconds
    private static final double LOW_MASTER_GAIN = 0.0;
