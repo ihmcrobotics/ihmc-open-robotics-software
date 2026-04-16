@@ -745,7 +745,7 @@ public class SCS2AvatarSimulationFactory
          yoVariableServer.addRegistry(stepGeneratorThread.getYoVariableRegistry(), stepGeneratorThread.getSCS2YoGraphics());
          stepGeneratorTask.addCallbackPostTask(() -> yoVariableServer.update(stepGeneratorThread.getHumanoidRobotContextData().getTimestamp(),
                                                                              stepGeneratorThread.getYoVariableRegistry()));
-         if (ikStreamingRTThread != null)
+         if (ikStreamingRTThread != null && ikStreamingRTThread.isYoVariableServerEnabled())
          {
             yoVariableServer.addRegistry(ikStreamingRTThread.getYoVariableRegistry(), ikStreamingRTThread.getSCS2YoGraphics());
             stepGeneratorTask.addCallbackPostTask(() -> yoVariableServer.update(ikStreamingRTThread.getHumanoidRobotContextData().getTimestamp(),
