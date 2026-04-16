@@ -1,5 +1,6 @@
 package us.ihmc.rdx.ui.affordances;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -31,6 +32,21 @@ public class RDXInteractableTools
          return null;
       }
       return modelFileGeometryDefinition.getFileName();
+   }
+
+   public static RigidBodyTransform getModelGraphicToBodyTransform(RigidBodyDefinition rigidBodyDefinition)
+   {
+      for (VisualDefinition visualDefinition : rigidBodyDefinition.getVisualDefinitions())
+      {
+         if (visualDefinition.getGeometryDefinition() instanceof ModelFileGeometryDefinition)
+         {
+            RigidBodyTransform graphicToBodyTransform = new RigidBodyTransform();
+            graphicToBodyTransform.set(visualDefinition.getOriginPose());
+            return graphicToBodyTransform;
+         }
+      }
+
+      return new RigidBodyTransform();
    }
 
    public static RDXRigidBody loadAbilityHand(RobotDefinition robotDefinition, RobotSide side)
