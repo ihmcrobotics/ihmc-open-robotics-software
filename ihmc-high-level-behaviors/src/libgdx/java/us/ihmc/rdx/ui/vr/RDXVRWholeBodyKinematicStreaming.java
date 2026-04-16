@@ -1120,7 +1120,6 @@ public class RDXVRWholeBodyKinematicStreaming
                miniGhostReal.setActive(true);
             }
             performingDemonstration.set(-1);
-            sendRLControlRequest();
          }
 //         sendRLStateTransitionRequest(enabled);
       }
