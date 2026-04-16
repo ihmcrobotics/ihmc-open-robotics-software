@@ -28,20 +28,16 @@ public class JointControlBlender implements CommandBlender
       this.currentPositionProvider = currentPositionProvider;
       this.currentVelocityProvider = currentVelocityProvider;
 
-      YoRegistry registry = new YoRegistry(namePrefix + nameSuffix + "JointControlBlender");
 
       if (ENABLE_TAU_SCALE)
       {
-         tauScale = new YoDouble("tau_scale_" + namePrefix + nameSuffix, registry);
+         tauScale = new YoDouble("tau_scale_" + namePrefix + nameSuffix, parentRegistry);
          tauScale.set(1.0);
       }
       else
       {
          tauScale = null;
       }
-
-      if (parentRegistry != null)
-         parentRegistry.addChild(registry);
    }
 
    public void initialize(JointDesiredOutputBasics from)
